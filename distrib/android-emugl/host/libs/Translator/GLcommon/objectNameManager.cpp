@@ -17,6 +17,35 @@
 #include <GLcommon/objectNameManager.h>
 #include <GLcommon/GLEScontext.h>
 
+#include <utility>
+
+namespace {
+// A struct serving as a key in a hash table, represents an object name with
+// object type together.
+struct TypedObjectName {
+    ObjectLocalName name;
+    NamedObjectType type;
+
+    TypedObjectName(NamedObjectType type, ObjectLocalName name)
+        : name(name), type(type) {}
+
+    bool operator==(const TypedObjectName& other) const noexcept {
+        return name == other.name && type == other.type;
+    }
+};
+}  // namespace
+
+namespace std {
+template <>
+struct hash<TypedObjectName> {
+    size_t operator()(const TypedObjectName& tn) const noexcept {
+        return hash<int>()(tn.name) ^
+               hash<ObjectLocalName>()(tn.type);
+    }
+};
+}  // namespace std
+
+using ObjectDataMap = std::unordered_map<TypedObjectName, ObjectDataPtr>;
 
 NameSpace::NameSpace(NamedObjectType p_type,
                      GlobalNameSpace *globalNameSpace) :
@@ -28,7 +57,7 @@ NameSpace::~NameSpace()
 {
     for (NamesMap::iterator n = m_localToGlobalMap.begin();
          n != m_localToGlobalMap.end();
-         n++) {
+         ++n) {
         m_globalNameSpace->deleteName(m_type, (*n).second);
     }
 }
@@ -49,6 +78,7 @@ NameSpace::genName(ObjectLocalName p_localName,
     if (genGlobal) {
         unsigned int globalName = m_globalNameSpace->genName(m_type);
         m_localToGlobalMap[localName] = globalName;
+        m_globalToLocalMap[globalName] = localName;
     }
 
     return localName;
@@ -77,14 +107,11 @@ NameSpace::getGlobalName(ObjectLocalName p_localName)
 ObjectLocalName
 NameSpace::getLocalName(unsigned int p_globalName)
 {
-    for(NamesMap::iterator it = m_localToGlobalMap.begin(); it != m_localToGlobalMap.end();it++){
-        if((*it).second == p_globalName){
-            // object found - return its local name
-            return (*it).first;
-        }
+    const auto it = m_globalToLocalMap.find(p_globalName);
+    if (it != m_globalToLocalMap.end()) {
+        return it->second;
     }
 
-    // object does not exist;
     return 0;
 }
 
@@ -94,7 +121,8 @@ NameSpace::deleteName(ObjectLocalName p_localName)
     NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
     if (n != m_localToGlobalMap.end()) {
         m_globalNameSpace->deleteName(m_type, (*n).second);
-        m_localToGlobalMap.erase(p_localName);
+        m_globalToLocalMap.erase(n->second);
+        m_localToGlobalMap.erase(n);
     }
 }
 
@@ -110,7 +138,9 @@ NameSpace::replaceGlobalName(ObjectLocalName p_localName, unsigned int p_globalN
     NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
     if (n != m_localToGlobalMap.end()) {
         m_globalNameSpace->deleteName(m_type, (*n).second);
+        m_globalToLocalMap.erase(n->second);
         (*n).second = p_globalName;
+        m_globalToLocalMap.emplace(p_globalName, p_localName);
     }
 }
 
@@ -150,9 +180,6 @@ void
 GlobalNameSpace::deleteName(NamedObjectType p_type, unsigned int p_name)
 {
 }
-
-typedef std::pair<NamedObjectType, ObjectLocalName> ObjectIDPair;
-typedef std::map<ObjectIDPair, ObjectDataPtr> ObjectDataMap;
 
 ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace) : m_lock() {
     for (int i=0; i < NUM_OBJECT_TYPES; i++) {
@@ -223,7 +250,7 @@ ShareGroup::deleteName(NamedObjectType p_type, ObjectLocalName p_localName)
     m_nameSpace[p_type]->deleteName(p_localName);
     ObjectDataMap *map = (ObjectDataMap *)m_objectsData;
     if (map) {
-        map->erase( ObjectIDPair(p_type, p_localName) );
+        map->erase(TypedObjectName(p_type, p_localName));
     }
 }
 
@@ -262,8 +289,8 @@ ShareGroup::setObjectData(NamedObjectType p_type,
         m_objectsData = map;
     }
 
-    ObjectIDPair id( p_type, p_localName );
-    map->insert( std::pair<ObjectIDPair, ObjectDataPtr>(id, data) );
+    TypedObjectName id(p_type, p_localName);
+    map->emplace(id, std::move(data));
 }
 
 ObjectDataPtr
@@ -279,7 +306,7 @@ ShareGroup::getObjectData(NamedObjectType p_type,
     ObjectDataMap *map = (ObjectDataMap *)m_objectsData;
     if (map) {
         ObjectDataMap::iterator i =
-                map->find( ObjectIDPair(p_type, p_localName) );
+                map->find(TypedObjectName(p_type, p_localName));
         if (i != map->end()) ret = (*i).second;
     }
     return ret;

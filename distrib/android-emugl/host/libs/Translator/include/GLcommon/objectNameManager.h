@@ -50,6 +50,7 @@ private:
 typedef emugl::SmartPtr<ObjectData> ObjectDataPtr;
 typedef unsigned long long ObjectLocalName;
 typedef std::unordered_map<ObjectLocalName, unsigned int> NamesMap;
+typedef std::unordered_map<unsigned int, ObjectLocalName> GlobalToLocalNamesMap;
 
 //
 // Class NameSpace - this class manages allocations and deletions of objects
@@ -116,6 +117,7 @@ private:
 private:
     ObjectLocalName m_nextName;
     NamesMap m_localToGlobalMap;
+    GlobalToLocalNamesMap m_globalToLocalMap;
     const NamedObjectType m_type;
     GlobalNameSpace *m_globalNameSpace;
 };
