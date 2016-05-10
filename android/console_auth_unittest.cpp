@@ -112,19 +112,6 @@ TEST(ConsoleAuth, android_console_auth_get_status) {
     tempfile_close(tf);
     EXPECT_EQ(CONSOLE_AUTH_STATUS_REQUIRED, android_console_auth_get_status());
 
-    std::string auth_token = read_file(temp_auth_token_file);
-    std::string command("auth ");
-    command.append(auth_token);
-    EXPECT_TRUE(
-            android_console_auth_check_authorization_command(command.c_str()));
-    command.append("\r\n");
-    EXPECT_TRUE(
-            android_console_auth_check_authorization_command(command.c_str()));
-    EXPECT_FALSE(android_console_auth_check_authorization_command("auth 1234"));
-    command.assign("auth ");
-    command.append(auth_token.c_str(), 12);  // only the first half
-    EXPECT_FALSE(
-            android_console_auth_check_authorization_command(command.c_str()));
     temp_auth_token_file.assign("/very/bad/path");
     EXPECT_EQ(CONSOLE_AUTH_STATUS_ERROR, android_console_auth_get_status());
 
