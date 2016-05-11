@@ -33,7 +33,7 @@ bool GLESvalidate::pixelType(GLEScontext * ctx, GLenum type) {
 
     if (ctx &&
        (ctx->getCaps()->GL_ARB_HALF_FLOAT_PIXEL || ctx->getCaps()->GL_NV_HALF_FLOAT) &&
-       (type == GL_HALF_FLOAT_OES))
+       (type == GL_HALF_FLOAT_OES || type == GL_HALF_FLOAT))
         return true;
 
     switch(type) {
