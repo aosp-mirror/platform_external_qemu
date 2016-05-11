@@ -496,6 +496,30 @@
     },
     {
       "key": {
+        "uuid": "125a88dd_a8af3d3b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 424,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-11T16:07:35Z",
+      "side": 1,
+      "message": "Hmm, considering the use cases, for GLESv1 I guess I\u0027ll make a trival sync object that is already signaled, to avoid changing the gles1 implementation (GLsyncs themselves cannot be reused, though)",
+      "parentUuid": "125a88dd_cd83ab15",
+      "range": {
+        "startLine": 424,
+        "startChar": 0,
+        "endLine": 424,
+        "endChar": 31
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "125a88dd_94a2b20d",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 8
