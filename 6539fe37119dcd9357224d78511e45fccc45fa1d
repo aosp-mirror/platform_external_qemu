@@ -22,6 +22,30 @@
       "revId": "6539fe37119dcd9357224d78511e45fccc45fa1d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_f37e9257",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-05-11T00:59:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "125a88dd_f3745288",
+      "range": {
+        "startLine": 341,
+        "startChar": 8,
+        "endLine": 341,
+        "endChar": 28
+      },
+      "revId": "6539fe37119dcd9357224d78511e45fccc45fa1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
