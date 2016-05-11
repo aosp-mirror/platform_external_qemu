@@ -86,6 +86,8 @@ LOCAL_SRC_FILES += \
 
 ifeq (arm64,$(QEMU2_TARGET))
 LOCAL_GENERATED_SOURCES += $(QEMU2_AUTO_GENERATED_DIR)/gdbstub-xml-arm64.c
+else ifeq (arm,$(QEMU2_TARGET))
+LOCAL_GENERATED_SOURCES += $(QEMU2_AUTO_GENERATED_DIR)/gdbstub-xml-arm.c
 else
 LOCAL_SRC_FILES += stubs/gdbstub.c
 endif
