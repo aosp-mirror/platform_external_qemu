@@ -41,6 +41,12 @@
 #include "qemu/sockets.h"
 #include "sysemu/kvm.h"
 
+#ifdef CONFIG_USER_ONLY
+#define GDB_ATTACHED "0"
+#else
+#define GDB_ATTACHED "1"
+#endif
+
 static inline int target_memory_rw_debug(CPUState *cpu, target_ulong addr,
                                          uint8_t *buf, int len, bool is_write)
 {
@@ -523,13 +529,20 @@ static const char *get_feature_xml(const char *p, const char **newp,
             GDBRegisterState *r;
             CPUState *cpu = first_cpu;
 
-            snprintf(target_xml, sizeof(target_xml),
-                     "<?xml version=\"1.0\"?>"
-                     "<!DOCTYPE target SYSTEM \"gdb-target.dtd\">"
-                     "<target>"
-                     "<xi:include href=\"%s\"/>",
-                     cc->gdb_core_xml_file);
-
+            pstrcat(target_xml, sizeof(target_xml),
+                    "<?xml version=\"1.0\"?>"
+                    "<!DOCTYPE target SYSTEM \"gdb-target.dtd\">"
+                    "<target>");
+            if (cc->gdb_arch_name) {
+                gchar *arch = cc->gdb_arch_name(cpu);
+                pstrcat(target_xml, sizeof(target_xml), "<architecture>");
+                pstrcat(target_xml, sizeof(target_xml), arch);
+                pstrcat(target_xml, sizeof(target_xml), "</architecture>");
+                g_free(arch);
+            }
+            pstrcat(target_xml, sizeof(target_xml), "<xi:include href=\"");
+            pstrcat(target_xml, sizeof(target_xml), cc->gdb_core_xml_file);
+            pstrcat(target_xml, sizeof(target_xml), "\"/>");
             for (r = cpu->gdb_regs; r; r = r->next) {
                 pstrcat(target_xml, sizeof(target_xml), "<xi:include href=\"");
                 pstrcat(target_xml, sizeof(target_xml), r->xml);
@@ -758,6 +771,14 @@ static CPUState *find_cpu(uint32_t thread_id)
     return NULL;
 }
 
+static int is_query_packet(const char *p, const char *query, char separator)
+{
+    unsigned int query_len = strlen(query);
+
+    return strncmp(p, query, query_len) == 0 &&
+        (p[query_len] == '\0' || p[query_len] == separator);
+}
+
 static int gdb_handle_packet(GDBState *s, const char *line_buf)
 {
     CPUState *cpu;
@@ -936,6 +957,13 @@ static int gdb_handle_packet(GDBState *s, const char *line_buf)
         if (*p == ',')
             p++;
         len = strtoull(p, NULL, 16);
+
+        /* memtohex() doubles the required space */
+        if (len > MAX_PACKET_LENGTH / 2) {
+            put_packet (s, "E22");
+            break;
+        }
+
         if (target_memory_rw_debug(s->g_cpu, addr, mem_buf, len, false) != 0) {
             put_packet (s, "E14");
         } else {
@@ -950,6 +978,12 @@ static int gdb_handle_packet(GDBState *s, const char *line_buf)
         len = strtoull(p, (char **)&p, 16);
         if (*p == ':')
             p++;
+
+        /* hextomem() reads 2*len bytes */
+        if (len > strlen(p) / 2) {
+            put_packet (s, "E22");
+            break;
+        }
         hextomem(mem_buf, p, len);
         if (target_memory_rw_debug(s->g_cpu, addr, mem_buf, len,
                                    true) != 0) {
@@ -1051,7 +1085,7 @@ static int gdb_handle_packet(GDBState *s, const char *line_buf)
                      SSTEP_NOTIMER);
             put_packet(s, buf);
             break;
-        } else if (strncmp(p,"qemu.sstep",10) == 0) {
+        } else if (is_query_packet(p, "qemu.sstep", '=')) {
             /* Display or change the sstep_flags */
             p += 10;
             if (*p != '=') {
@@ -1087,7 +1121,8 @@ static int gdb_handle_packet(GDBState *s, const char *line_buf)
             cpu = find_cpu(thread);
             if (cpu != NULL) {
                 cpu_synchronize_state(cpu);
-                len = snprintf((char *)mem_buf, sizeof(mem_buf),
+                /* memtohex() doubles the required space */
+                len = snprintf((char *)mem_buf, sizeof(buf) / 2,
                                "CPU#%d [%s]", cpu->cpu_index,
                                cpu->halted ? "halted " : "running");
                 memtohex(buf, mem_buf, len);
@@ -1096,7 +1131,7 @@ static int gdb_handle_packet(GDBState *s, const char *line_buf)
             break;
         }
 #ifdef CONFIG_USER_ONLY
-        else if (strncmp(p, "Offsets", 7) == 0) {
+        else if (strcmp(p, "Offsets") == 0) {
             TaskState *ts = s->c_cpu->opaque;
 
             snprintf(buf, sizeof(buf),
@@ -1116,15 +1151,15 @@ static int gdb_handle_packet(GDBState *s, const char *line_buf)
                 put_packet(s, "E01");
                 break;
             }
-            hextomem(mem_buf, p + 5, len);
             len = len / 2;
+            hextomem(mem_buf, p + 5, len);
             mem_buf[len++] = 0;
             qemu_chr_be_write(s->mon_chr, mem_buf, len);
             put_packet(s, "OK");
             break;
         }
 #endif /* !CONFIG_USER_ONLY */
-        if (strncmp(p, "Supported", 9) == 0) {
+        if (is_query_packet(p, "Supported", ':')) {
             snprintf(buf, sizeof(buf), "PacketSize=%x", MAX_PACKET_LENGTH);
             cc = CPU_GET_CLASS(first_cpu);
             if (cc->gdb_core_xml_file != NULL) {
@@ -1174,6 +1209,10 @@ static int gdb_handle_packet(GDBState *s, const char *line_buf)
                 len = memtox(buf + 1, xml + addr, total_len - addr);
             }
             put_packet_binary(s, buf, len + 1);
+            break;
+        }
+        if (is_query_packet(p, "Attached", ':')) {
+            put_packet(s, GDB_ATTACHED);
             break;
         }
         /* Unrecognised 'q' command.  */
@@ -1432,15 +1471,17 @@ void gdb_exit(CPUArchState *env, int code)
   if (gdbserver_fd < 0 || s->fd < 0) {
       return;
   }
+#else
+  if (!s->chr) {
+      return;
+  }
 #endif
 
   snprintf(buf, sizeof(buf), "W%02x", (uint8_t)code);
   put_packet(s, buf);
 
 #ifndef CONFIG_USER_ONLY
-  if (s->chr) {
-      qemu_chr_delete(s->chr);
-  }
+  qemu_chr_delete(s->chr);
 #endif
 }
 
