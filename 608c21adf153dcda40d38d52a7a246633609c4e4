@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "125a88dd_68bf05b9",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-11T15:40:43Z",
+      "side": 1,
+      "message": "just a default argument value of nullptr to get rid of the second ctor?",
+      "range": {
+        "startLine": 31,
+        "startChar": 29,
+        "endLine": 31,
+        "endChar": 38
+      },
+      "revId": "608c21adf153dcda40d38d52a7a246633609c4e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_88c8416a",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-11T15:40:43Z",
+      "side": 1,
+      "message": "please use range for here:\n\nfor (const auto\u0026 pair : mSyncMap) {\n    delete pair.second.rc_sync;\n}",
+      "range": {
+        "startLine": 39,
+        "startChar": 4,
+        "endLine": 39,
+        "endChar": 61
+      },
+      "revId": "608c21adf153dcda40d38d52a7a246633609c4e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_48c24948",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-11T15:40:43Z",
+      "side": 1,
+      "message": "this isn\u0027t needed, we\u0027re already in destructor",
+      "range": {
+        "startLine": 42,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 21
+      },
+      "revId": "608c21adf153dcda40d38d52a7a246633609c4e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_6d75d71d",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-11T15:40:43Z",
+      "side": 1,
+      "message": "please either use map[val] \u003d { a, b } syntax or save a reference first. Now you\u0027re performing two lookups",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 28
+      },
+      "revId": "608c21adf153dcda40d38d52a7a246633609c4e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_28926d5a",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-11T15:40:43Z",
+      "side": 1,
+      "message": "same thing: three lookups",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 60,
+        "endChar": 36
+      },
+      "revId": "608c21adf153dcda40d38d52a7a246633609c4e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_08df711c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-11T15:40:43Z",
+      "side": 1,
+      "message": "please also make the remaining one explicit",
+      "range": {
+        "startLine": 31,
+        "startChar": 4,
+        "endLine": 31,
+        "endChar": 35
+      },
+      "revId": "608c21adf153dcda40d38d52a7a246633609c4e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
