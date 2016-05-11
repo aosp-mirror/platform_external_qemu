@@ -307,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "125a88dd_adaf4f3b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-11T15:26:38Z",
+      "side": 1,
+      "message": "I think that is OK, since there is only one RcSyncInfo and when we call the dtor, the entire opengl engine is tearing down. As long as this dtor doesn\u0027t happen too soon...",
+      "parentUuid": "125a88dd_1431e2f3",
+      "range": {
+        "startLine": 37,
+        "startChar": 2,
+        "endLine": 37,
+        "endChar": 17
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "125a88dd_b4180e71",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
         "patchSetId": 8
@@ -318,6 +342,30 @@
       "writtenOn": "2016-05-10T19:06:48Z",
       "side": 1,
       "message": "please use unordered_map instead - it\u0027s a hash map, and hash maps way faster than the sorted ones",
+      "range": {
+        "startLine": 48,
+        "startChar": 9,
+        "endLine": 48,
+        "endChar": 12
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_6da95735",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-11T15:26:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "125a88dd_b4180e71",
       "range": {
         "startLine": 48,
         "startChar": 9,
@@ -353,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "125a88dd_ad72efcf",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-11T15:26:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "125a88dd_9406320d",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 42
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "125a88dd_749136a8",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 8
@@ -376,6 +448,30 @@
     },
     {
       "key": {
+        "uuid": "125a88dd_4d7fbb99",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 424,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-11T15:26:38Z",
+      "side": 1,
+      "message": "Damn, and this turns out to be essential when using this for the boot animation. I\u0027ll just add the sync function to gles1 as well for now",
+      "parentUuid": "125a88dd_749136a8",
+      "range": {
+        "startLine": 424,
+        "startChar": 0,
+        "endLine": 424,
+        "endChar": 31
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "125a88dd_94a2b20d",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 8
@@ -387,6 +483,30 @@
       "writtenOn": "2016-05-10T19:06:48Z",
       "side": 1,
       "message": "null check?",
+      "range": {
+        "startLine": 441,
+        "startChar": 0,
+        "endLine": 442,
+        "endChar": 18
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_0d2ea335",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-11T15:26:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "125a88dd_94a2b20d",
       "range": {
         "startLine": 441,
         "startChar": 0,
