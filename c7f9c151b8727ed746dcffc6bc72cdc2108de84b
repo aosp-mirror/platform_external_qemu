@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "125a88dd_d306f60d",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 320,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-05-11T00:53:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "125a88dd_332e6aed",
+      "range": {
+        "startLine": 319,
+        "startChar": 0,
+        "endLine": 320,
+        "endChar": 32
+      },
+      "revId": "c7f9c151b8727ed746dcffc6bc72cdc2108de84b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "125a88dd_b3d01a06",
         "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2016-05-11T00:39:54Z",
       "side": 1,
       "message": "I highly doubt it is possible that the map is null and it has some resource to decrease the refcount :)",
+      "range": {
+        "startLine": 334,
+        "startChar": 2,
+        "endLine": 337,
+        "endChar": 5
+      },
+      "revId": "c7f9c151b8727ed746dcffc6bc72cdc2108de84b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_7305c203",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-05-11T00:53:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "125a88dd_b3d01a06",
       "range": {
         "startLine": 334,
         "startChar": 2,
@@ -94,6 +142,54 @@
     },
     {
       "key": {
+        "uuid": "125a88dd_b30b3a1c",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-05-11T00:53:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "125a88dd_33674a41",
+      "range": {
+        "startLine": 338,
+        "startChar": 0,
+        "endLine": 339,
+        "endChar": 32
+      },
+      "revId": "c7f9c151b8727ed746dcffc6bc72cdc2108de84b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_5308c61e",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-05-11T00:53:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "125a88dd_1329eee4",
+      "range": {
+        "startLine": 338,
+        "startChar": 0,
+        "endLine": 339,
+        "endChar": 32
+      },
+      "revId": "c7f9c151b8727ed746dcffc6bc72cdc2108de84b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "125a88dd_f3377239",
         "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
         "patchSetId": 3
@@ -128,6 +224,54 @@
       "writtenOn": "2016-05-11T00:39:54Z",
       "side": 1,
       "message": "do you need to lock here? you\u0027re modifying a map object",
+      "range": {
+        "startLine": 348,
+        "startChar": 0,
+        "endLine": 348,
+        "endChar": 33
+      },
+      "revId": "c7f9c151b8727ed746dcffc6bc72cdc2108de84b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_d3e596b6",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 348,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-05-11T00:53:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "125a88dd_d3091678",
+      "range": {
+        "startLine": 348,
+        "startChar": 0,
+        "endLine": 348,
+        "endChar": 33
+      },
+      "revId": "c7f9c151b8727ed746dcffc6bc72cdc2108de84b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_f318d271",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 348,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-05-11T00:53:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "125a88dd_f3377239",
       "range": {
         "startLine": 348,
         "startChar": 0,
