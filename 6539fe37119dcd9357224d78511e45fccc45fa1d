@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "125a88dd_f3745288",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-11T00:55:25Z",
+      "side": 1,
+      "message": "after this erase val is a dangling reference. you need to return a plain 0 from this if() - because you know it\u0027s zero.\nactually, it\u0027s better to invert if and do\n\nif (val) {\n    return val;\n}\nerase\ndelete\nreturn 0;",
+      "range": {
+        "startLine": 341,
+        "startChar": 8,
+        "endLine": 341,
+        "endChar": 28
+      },
+      "revId": "6539fe37119dcd9357224d78511e45fccc45fa1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
