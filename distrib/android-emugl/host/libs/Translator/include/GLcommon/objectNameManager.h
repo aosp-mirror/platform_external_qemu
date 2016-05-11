@@ -197,13 +197,28 @@ public:
     //
     ObjectDataPtr getObjectData(NamedObjectType p_type, ObjectLocalName p_localName);
 
+    //
+    // Increase the reference counter of a texture by 1
+    // Return the current counter
+    //
+    size_t incTexRefCounter(unsigned int p_globalName);
+
+    //
+    // Decrease the reference counter of a texture by 1
+    // Return the current counter
+    // Release texture if counter reaches 0
+    size_t decTexRefCounterAndReleaseIf0(unsigned int p_globalName);
+
 private:
+    size_t incTexRefCounterNoLock(unsigned int p_globalName);
+
     explicit ShareGroup(GlobalNameSpace *globalNameSpace);
 
 private:
     emugl::Mutex m_lock;
     NameSpace *m_nameSpace[NUM_OBJECT_TYPES];
     void *m_objectsData = nullptr;
+    void *m_globalTextureRefCounter = nullptr;
 };
 
 typedef emugl::SmartPtr<ShareGroup> ShareGroupPtr;
