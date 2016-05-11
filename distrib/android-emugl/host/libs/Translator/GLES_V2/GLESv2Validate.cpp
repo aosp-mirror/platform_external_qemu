@@ -144,18 +144,102 @@ bool GLESv2Validate::arrayIndex(GLEScontext * ctx,GLuint index) {
     return index < (GLuint)ctx->getCaps()->maxVertexAttribs;
 }
 
+#define GL_RED                              0x1903
+#define GL_RG                               0x8227
+#define GL_R8                               0x8229
+#define GL_RG8                              0x822B
+#define GL_R16F                             0x822D
+#define GL_RG16F                            0x822F
+#define GL_RGBA16F                          0x881A
+#define GL_RGB16F                           0x881B
+#define GL_R11F_G11F_B10F                   0x8C3A
+#define GL_UNSIGNED_INT_10F_11F_11F_REV     0x8C3B
+
 bool GLESv2Validate::pixelType(GLEScontext * ctx,GLenum type) {
-    if(type == GL_UNSIGNED_SHORT || type == GL_UNSIGNED_INT)
+    if(type == GL_UNSIGNED_SHORT || type == GL_UNSIGNED_INT
+            || type == GL_UNSIGNED_INT_10F_11F_11F_REV)
         return true;
 
     return GLESvalidate::pixelType(ctx, type);
 }
 
 bool GLESv2Validate::pixelFrmt(GLEScontext* ctx,GLenum format) {
-    if(format == GL_DEPTH_COMPONENT)
+    switch (format) {
+    case GL_DEPTH_COMPONENT:
+    // GLES3 compatible
+    // Required in dEQP
+    case GL_RED:
+    case GL_RG:
         return true;
-
+    }
     return GLESvalidate::pixelFrmt(ctx, format);
+}
+
+bool GLESv2Validate::pixelItnlFrmt(GLEScontext* ctx ,GLenum internalformat) {
+    switch (internalformat) {
+    case GL_R8:
+    case GL_RG8:
+    case GL_R16F:
+    case GL_RG16F:
+    case GL_RGBA16F:
+    case GL_RGB16F:
+    case GL_R11F_G11F_B10F:
+        return true;
+    }
+    return pixelFrmt(ctx, internalformat);
+}
+
+bool GLESv2Validate::pixelSizedFrmt(GLEScontext* ctx, GLenum internalformat,
+                                    GLenum format, GLenum type) {
+    if (internalformat == format) {
+        return true;
+    }
+    switch (format) {
+        case GL_RED:
+            switch (type) {
+                case GL_UNSIGNED_BYTE:
+                    return internalformat == GL_R8;
+                case GL_HALF_FLOAT:
+                case GL_FLOAT:
+                    return internalformat == GL_R16F;
+                default:
+                    return false;
+            }
+            break;
+        case GL_RG:
+            switch (type) {
+                case GL_UNSIGNED_BYTE:
+                    return internalformat == GL_RG8;
+                case GL_HALF_FLOAT:
+                case GL_FLOAT:
+                    return internalformat == GL_RG16F;
+                default:
+                    return false;
+            }
+            break;
+        case GL_RGB:
+            switch (type) {
+                case GL_HALF_FLOAT:
+                case GL_FLOAT:
+                    return internalformat == GL_RGB16F
+                            || internalformat == GL_R11F_G11F_B10F;
+                case GL_UNSIGNED_INT_10F_11F_11F_REV:
+                    return internalformat == GL_R11F_G11F_B10F;
+                default:
+                    return false;
+            }
+            break;
+        case GL_RGBA:
+            switch (type) {
+                case GL_HALF_FLOAT:
+                case GL_FLOAT:
+                    return internalformat == GL_RGBA16F;
+                default:
+                    return false;
+            }
+            break;
+    }
+    return false;
 }
 
 bool GLESv2Validate::attribName(const GLchar* name){
