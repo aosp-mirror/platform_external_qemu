@@ -24,11 +24,12 @@ static const char VertexShaderSource[] = R"(
 
 // Fragment shader
 static const char FragmentShaderSource[] = R"(
+    precision mediump float;
     uniform sampler2D texture;
-    uniform vec2 resolution;
+    uniform highp vec2 resolution;
     void main(void) {
-        vec2 pixel_coord = gl_FragCoord.xy;
-        vec2 inverse_res = 1.0 / resolution;
+        highp vec2 pixel_coord = gl_FragCoord.xy;
+        highp vec2 inverse_res = 1.0 / resolution;
         gl_FragColor = texture2D(texture, inverse_res * pixel_coord);
     }
 )";
