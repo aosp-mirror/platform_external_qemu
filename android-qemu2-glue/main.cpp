@@ -667,6 +667,13 @@ extern "C" int main(int argc, char **argv) {
     std::string ncores;
     if (hw->hw_cpu_ncore > 1) {
         args[n++] = "-smp";
+
+#ifdef _WIN32
+        if (hw->hw_cpu_ncore > 16) {
+            dwarning("HAXM does not support more than 16 cores. Number of cores set to 16");
+            hw->hw_cpu_ncore = 16;
+        }
+#endif
         ncores = StringFormat("cores=%ld", hw->hw_cpu_ncore);
         args[n++] = ncores.c_str();
     }
