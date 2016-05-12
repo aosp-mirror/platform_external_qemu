@@ -24,6 +24,7 @@ static const char VertexShaderSource[] = R"(
 
 // Fragment shader
 static const char FragmentShaderSource[] = R"(
+    precision mediump float;
     uniform sampler2D texture;
     uniform vec2 resolution;
     void main(void) {
