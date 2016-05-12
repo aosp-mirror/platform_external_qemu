@@ -168,6 +168,7 @@ OPT_PARAM( screen, "<mode>", "set emulated screen mode" )
 OPT_FLAG( force_32bit, "always use 32-bit emulator" )
 
 OPT_PARAM(selinux, "<disabled|permissive>", "Set SELinux to either disabled or permissive mode")
+OPT_LIST(unix_pipe, "<path>", "Add <path> to the list of allowed Unix pipes")
 
 #undef CFG_FLAG
 #undef CFG_PARAM

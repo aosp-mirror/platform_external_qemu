@@ -14,6 +14,7 @@
 #include "android/avd/info.h"
 #include "android/avd/util.h"
 #include "android/cpu_accelerator.h"
+#include "android/emulation/android_pipe_unix.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/globals.h"
 #include "android/kernel/kernel_utils.h"
@@ -1457,6 +1458,9 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         str_reset_nocopy(&opts->code_profile, profilePath);
     }
 
+    if (opts->unix_pipe) {
+    }
+
     // Update CPU architecture for HW configs created from build directory.
     if (inAndroidBuild) {
         str_reset(&hw->hw_cpu_arch, targetArch);
@@ -1705,6 +1709,15 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         }
         str_reset(&opts->dns_server, stralloc_cstr(newOption));
         stralloc_reset(newOption);
+    }
+
+    // Unix pipe paths
+    {
+        ParamList* opt = opts->unix_pipe;
+        while (opt) {
+            android_unix_pipes_add_allowed_path(opt->param);
+            opt = opt->next;
+        }
     }
 
     *exit_status = 0;

@@ -1547,6 +1547,19 @@ help_use_system_libs(stralloc_t* out)
 }
 #endif  // __linux__
 
+static void
+help_unix_pipe(stralloc_t* out)
+{
+    PRINTF(
+    "  Guest systems can directly connect to host Unix domain sockets using\n"
+    "  the 'unix:' QEMU pipe protocol. As a security measure, only host path\n"
+    "  values listed through the '-unix-pipe <path>' option can be used\n\n"
+
+    "  One can use the option several times, each use adds a new path to the\n"
+    "  whitelist that will be checked at runtime\n\n"
+    );
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
