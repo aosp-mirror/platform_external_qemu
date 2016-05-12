@@ -22,7 +22,7 @@
 #include <GLES2/gl2.h>
 #include <GLcommon/objectNameManager.h>
 
-class ShaderParser:public ObjectData{
+class ShaderParser : public ObjectData {
 public:
     ShaderParser(GLenum type = 0);
     void           setSrc(const Version& ver,GLsizei count,const GLchar* const* strings,const GLint* length);
@@ -31,34 +31,26 @@ public:
     void           clear();
     GLenum         getType();
 
-    void setInfoLog(GLchar * infoLog);
     // Query whether the shader parsed is valid.
     // Don't trust the value if we did not call setSrc
     bool validShader() const;
+
+    const GLchar* getInfoLog() const;
+    void setInfoLog(GLchar * infoLog);
+
     // If validation fails, add proper error messages
     // to the parser's info log, which is treated
     // as the actual info log from guest POV.
     void setInvalidInfoLog();
-
-    const GLchar* getInfoLog() const;
 
     void setDeleteStatus(bool val) { m_deleteStatus = val; }
     bool getDeleteStatus() const { return m_deleteStatus; }
 
     void setAttachedProgram(GLuint program) { m_program = program; }
     GLuint getAttachedProgram() const { return m_program; }
-private:
-    // For shader validation purposes, analyze keywords like lowp/highp
-    // appearing in variable declarations or function parameters.
-    void validateGLESKeywords(const char* src);
 
-    void parseOriginalSrc();
-    void parseGLSLversion();
-    void parseBuiltinConstants();
-    void parseOmitPrecision();
-    void parseExtendDefaultPrecision();
-    void parseLineNumbers();
-    void clearParsedSrc();
+private:
+    void convertESSLToGLSL();
 
     GLenum      m_type = 0;
     std::string m_originalSrc;
