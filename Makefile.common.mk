@@ -15,6 +15,11 @@ include $(LOCAL_PATH)/distrib/libpng.mk
 include $(LOCAL_PATH)/distrib/mini-glib/sources.make
 include $(LOCAL_PATH)/distrib/googletest/Android.mk
 
+# ANGLE shader translation prebuilts are only for Linux for now.
+ifeq ($(BUILD_TARGET_OS),linux)
+    include $(LOCAL_PATH)/distrib/libANGLEtranslator.mk
+endif
+
 EMULATOR_VERSION_CFLAGS :=
 
 ANDROID_SDK_TOOLS_REVISION := $(strip $(ANDROID_SDK_TOOLS_REVISION))
