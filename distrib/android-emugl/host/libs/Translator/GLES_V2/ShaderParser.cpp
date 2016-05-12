@@ -19,17 +19,41 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef __linux__
+#include "ANGLEShaderParser.h"
+#endif
+
 #include <memory>
 #include <string>
 #include <vector>
 
-ShaderParser::ShaderParser(GLenum type):ObjectData(SHADER_DATA), m_type(type) {}
+ShaderParser::ShaderParser(GLenum type) : ObjectData(SHADER_DATA), m_type(type) {}
 
-void ShaderParser::validateGLESKeywords(const char* src) {
-    m_valid = validate_glsles_keywords(src);
+void ShaderParser::convertESSLToGLSL() {
+#ifdef __linux__
+    std::string infolog;
+    std::string parsedSource;
+    m_valid = ANGLEShaderParser::translate(m_originalSrc.c_str(), m_type, &infolog, &parsedSource);
+
+    if (!m_valid) {
+        unsigned len = infolog.length();
+        GLchar* log = new GLchar[len];
+        memcpy(log, infolog.c_str(), len);
+        setInfoLog(log);
+    } else {
+        m_parsedSrc = parsedSource;
+    }
+#endif
 }
 
-void ShaderParser::setSrc(const Version& ver,GLsizei count,const GLchar* const* strings,const GLint* length){
+void ShaderParser::validateGLESKeywords() {
+    m_valid = validate_glsles_keywords(m_originalSrc.c_str());
+    if (!m_valid) {
+        setInvalidInfoLog();
+    }
+}
+
+void ShaderParser::setSrc(const Version& ver, GLsizei count, const GLchar* const* strings, const GLint* length){
     m_src.clear();
     for(int i = 0;i<count;i++){
         const size_t strLen =
@@ -41,7 +65,10 @@ void ShaderParser::setSrc(const Version& ver,GLsizei count,const GLchar* const* 
     //  std::string in GCC's STL - we need a deep copy here.
     m_originalSrc.assign(m_src.c_str(), m_src.size());
 
-    validateGLESKeywords(m_originalSrc.c_str());
+#ifdef __linux__
+    convertESSLToGLSL();
+#else // Windows and Mac
+    validateGLESKeywords();
 
     clearParsedSrc();
 
@@ -67,6 +94,7 @@ void ShaderParser::setSrc(const Version& ver,GLsizei count,const GLchar* const* 
 #endif
     parseLineNumbers();
     parseOriginalSrc();
+#endif
 }
 const GLchar** ShaderParser::parsedLines() {
       m_parsedLines = (GLchar*)m_parsedSrc.c_str();

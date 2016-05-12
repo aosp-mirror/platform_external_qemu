@@ -8,11 +8,20 @@ host_common_SRC_FILES := \
      ShaderValidator.cpp \
      ProgramData.cpp
 
+# ANGLE shader translation is only supported on Linux for now.
+ifeq ($(BUILD_TARGET_OS), linux)
+    host_common_SRC_FILES += ANGLEShaderParser.cpp
+endif
 
 ### GLES_V2 host implementation (On top of OpenGL) ########################
 $(call emugl-begin-shared-library,lib$(BUILD_TARGET_SUFFIX)GLES_V2_translator)
 $(call emugl-import, libGLcommon)
 
 LOCAL_SRC_FILES := $(host_common_SRC_FILES)
+
+ifeq ($(BUILD_TARGET_OS),linux)
+    LOCAL_C_INCLUDES += $(ANGLE_TRANSLATOR_INCLUDES)
+    LOCAL_STATIC_LIBRARIES += $(ANGLE_TRANSLATOR_STATIC_LIBRARIES)
+endif
 
 $(call emugl-end-module)
