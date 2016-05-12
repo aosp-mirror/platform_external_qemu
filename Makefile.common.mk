@@ -14,6 +14,7 @@ include $(LOCAL_PATH)/distrib/jpeg-6b/libjpeg.mk
 include $(LOCAL_PATH)/distrib/libpng.mk
 include $(LOCAL_PATH)/distrib/mini-glib/sources.make
 include $(LOCAL_PATH)/distrib/googletest/Android.mk
+include $(LOCAL_PATH)/distrib/libANGLEtranslation.mk
 
 EMULATOR_VERSION_CFLAGS :=
 
