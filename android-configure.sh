@@ -697,24 +697,23 @@ case $HOST_OS in
 esac
 
 ###
-### Copy ANGLE if available
+### Copy ANGLE if available (windows only for now)
 ###
-ANGLE_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/ANGLE
-if [ -d $ANGLE_PREBUILTS_DIR ]; then
-    log "Copying ANGLE prebuilt libraries from $ANGLE_PREBUILTS_DIR"
-    ANGLE_PREFIX=lib
-    ANGLE_HOST=$HOST_OS
-    case $ANGLE_HOST in
-        windows)
-            ANGLE_SUFFIX=.dll
-            ;;
-        linux)
-            ANGLE_SUFFIX=.so
-            ;;
-        *)
-    esac
-    # Windows only (for now)
-    if [ "$ANGLE_HOST" = "windows" ]; then
+if [ "$HOST_OS" = "windows" ]; then
+    ANGLE_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/ANGLE
+    if [ -d $ANGLE_PREBUILTS_DIR ]; then
+        log "Copying ANGLE prebuilt libraries from $ANGLE_PREBUILTS_DIR"
+        ANGLE_PREFIX=lib
+        ANGLE_HOST=$HOST_OS
+        case $ANGLE_HOST in
+            windows)
+                ANGLE_SUFFIX=.dll
+                ;;
+            linux)
+                ANGLE_SUFFIX=.so
+                ;;
+            *)
+        esac
         for LIBNAME in EGL GLESv2; do # GLESv2 only for now
             for ANGLE_ARCH in $PREBUILT_ARCHS; do
                 if [ "$ANGLE_ARCH" = "x86" ]; then
