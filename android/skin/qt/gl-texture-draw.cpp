@@ -17,7 +17,7 @@
 
 // Vertex shader for anti-aliasing - doesn't do anything special.
 static const char VertexShaderSource[] = R"(
-    attribute vec2 position;
+    attribute highp vec2 position;
     void main(void) {
         gl_Position = vec4(position.x, position.y, 0.0, 1.0);
     })";
@@ -25,10 +25,10 @@ static const char VertexShaderSource[] = R"(
 // Fragment shader
 static const char FragmentShaderSource[] = R"(
     uniform sampler2D texture;
-    uniform vec2 resolution;
+    uniform highp vec2 resolution;
     void main(void) {
-        vec2 pixel_coord = gl_FragCoord.xy;
-        vec2 inverse_res = 1.0 / resolution;
+        highp vec2 pixel_coord = gl_FragCoord.xy;
+        highp vec2 inverse_res = 1.0 / resolution;
         gl_FragColor = texture2D(texture, inverse_res * pixel_coord);
     }
 )";
