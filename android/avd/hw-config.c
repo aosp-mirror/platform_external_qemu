@@ -10,6 +10,7 @@
 ** GNU General Public License for more details.
 */
 #include "android/avd/hw-config.h"
+#include "android/utils/debug.h"
 #include "android/utils/ini.h"
 #include "android/utils/system.h"
 #include <string.h>
@@ -88,6 +89,21 @@ int androidHwConfig_read(AndroidHwConfig* config, CIniFile* ini) {
 
 #include "android/avd/hw-config-defs.h"
 
+    // Special case for the SD-Card, the AVD Manager can incorrectly create
+    // a new AVD with 'sdcard.size=<size>' and 'hw.sdCard=no'. It's not sure
+    // whether this occurs when updating an AVD settings or not, but it has
+    // been described in:
+    //       https://code.google.com/p/android/issues/detail?id=68429
+    //
+    // 'sdcard.size' is not a hardware property, so look it up directly in
+    // the initFile() here and override a negative hw.sdCard value if it
+    // is strictly positive.
+    if (!config->hw_sdCard) {
+        if (iniFile_getDiskSize(ini, "sdcard.size", "0") > 0) {
+            VERBOSE_PRINT(init, "Overriding hw.sdCard to 'true' due to positive sdcard.size value!");
+            config->hw_sdCard = true;
+        }
+    }
     return 0;
 }
 
