@@ -140,10 +140,6 @@ mingw_build_angle_package() {
     run git clone https://chromium.googlesource.com/external/gyp &&
     export PATH=`pwd`/gyp:"$PATH" &&
 
-    # Setup some extra includes needed by mingw
-    cp mingw-w64/additional-mingw-header/{d3d11sdklayers,dxgi1_2,versionhelpers,d3d10_1,sdkddkver,d3d11,dcomp,dcomptypes,dcompanimation}.h include/ &&
-    cp include/{versionhelpers,VersionHelpers}.h &&
-
     # Provide 32-bit versions of *.def files
     cp mingw-w64/libEGL_mingw32.def src/libEGL/ &&
     cp mingw-w64/libGLESv2_mingw32.def src/libGLESv2/ &&
