@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "5257a0e9_87678cda",
+        "filename": "android/emulation/android_pipe_unix.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 515,
+      "author": {
+        "id": 1018443
+      },
+      "writtenOn": "2016-05-12T18:21:26Z",
+      "side": 1,
+      "message": "can we use args[0] \u003d\u003d \u0027@\u0027 to signify the abstract namespace? if args[0] \u003d\u003d \u0027@\u0027 { \n  args[0] \u003d \u0027\\0\u0027\n}\n\nBackground: unix pipes are limited to 255 char of length. On Forge we may not have a writable temp directory within 255 chars of /. We work around this by placing the pipe file in the working directory of the process and passing the relative path of it thru /dev/qemupipe.\n\nIf we had abstract namespace support, we could just listen on @emulator-PID",
+      "range": {
+        "startLine": 515,
+        "startChar": 24,
+        "endLine": 515,
+        "endChar": 42
+      },
+      "revId": "75862c4e0ded3881c0c759885218a434ca07a36a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5257a0e9_02db8f5e",
         "filename": "android/main-common.c",
         "patchSetId": 1
