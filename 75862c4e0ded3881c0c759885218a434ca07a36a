@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "17f7da48_5d34bb81",
+        "filename": "android/emulation/android_pipe_unix.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 515,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-12T21:00:00Z",
+      "side": 1,
+      "message": "This could be added to sock_address_init_unix, but would only work on Linux, not OS X. Is it acceptable for you?",
+      "parentUuid": "5257a0e9_87678cda",
+      "range": {
+        "startLine": 515,
+        "startChar": 24,
+        "endLine": 515,
+        "endChar": 42
+      },
+      "revId": "75862c4e0ded3881c0c759885218a434ca07a36a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5257a0e9_02db8f5e",
         "filename": "android/main-common.c",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-05-12T18:00:50Z",
       "side": 1,
       "message": "what\u0027s this?",
+      "range": {
+        "startLine": 1461,
+        "startChar": 8,
+        "endLine": 1461,
+        "endChar": 12
+      },
+      "revId": "75862c4e0ded3881c0c759885218a434ca07a36a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "17f7da48_7d2f7731",
+        "filename": "android/main-common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1461,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-12T21:00:00Z",
+      "side": 1,
+      "message": "ah ah, just some left-over from a previous implementation, I\u0027ll remove this.",
+      "parentUuid": "5257a0e9_02db8f5e",
       "range": {
         "startLine": 1461,
         "startChar": 8,
