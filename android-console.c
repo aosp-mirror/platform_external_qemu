@@ -17,6 +17,7 @@
 
 #include "android-console.h"
 
+#include "android/android.h"
 #include "android/console_auth.h"
 #include "monitor/monitor.h"
 #include "qemu/config-file.h"
@@ -1503,6 +1504,20 @@ static const char* gsm_state_to_string(ARegistrationState state) {
     return "<unknown>";
 }
 
+static void gsm_print_all_states(Monitor* mon) {
+    int nn;
+    for (nn = 0;; nn++) {
+        const char* name = _gsm_states[nn].name;
+        const char* display = _gsm_states[nn].display;
+
+        if (!name)
+            break;
+
+        monitor_printf(mon, "  %-15s %s\n", name, display);
+    }
+    monitor_printf(mon, "\n");
+}
+
 static const char* call_state_to_string(ACallState state) {
     switch (state) {
         case A_CALL_ACTIVE:
@@ -1680,41 +1695,79 @@ void android_console_gsm_cancel(Monitor* mon, const QDict* qdict) {
 }
 
 void android_console_gsm_data(Monitor* mon, const QDict* qdict) {
+    char* args = (char*)qdict_get_try_str(qdict, "arg");
+    if (!args) {
+        monitor_printf(mon, "KO: missing argument, try 'gsm data <state>'\n");
+        return;
+    }
+
+    if (!android_modem) {
+        monitor_printf(mon, "KO: modem emulation not running\n");
+        return;
+    }
+
+    // Look up ARegistrationState by name
     int nn;
+    for (nn = 0;; nn++) {
+        const char* name = _gsm_states[nn].name;
+        const ARegistrationState state = _gsm_states[nn].state;
+
+        if (!name)
+            break;
+
+        if (!strcmp(args, name)) {
+            amodem_set_data_registration(android_modem, state);
+            qemu_net_disable = (state != A_REGISTRATION_HOME &&
+                                state != A_REGISTRATION_ROAMING);
+            monitor_printf(mon, "OK\n");
+            return;
+        }
+    }
+
+    // Invalid command, output the help message.
     monitor_printf(mon,
                    "the 'gsm data <state>' allows you to change the state of "
                    "your GPRS connection\n"
                    "valid values for <state> are the following:\n\n");
+    gsm_print_all_states(mon);
+    monitor_printf(mon, "KO\n");
+}
+
+void android_console_gsm_voice(Monitor* mon, const QDict* qdict) {
+    char* args = (char*)qdict_get_try_str(qdict, "arg");
+    if (!args) {
+        monitor_printf(mon, "KO: missing argument, try 'gsm voice state'\n");
+        return;
+    }
+
+    if (!android_modem) {
+        monitor_printf(mon, "KO: modem emulation not running\r\n");
+        return;
+    }
+
+    // Look up ARegistrationState by name
+    int nn;
     for (nn = 0;; nn++) {
         const char* name = _gsm_states[nn].name;
-        const char* display = _gsm_states[nn].display;
+        ARegistrationState state = _gsm_states[nn].state;
 
         if (!name)
             break;
 
-        monitor_printf(mon, "  %-15s %s\n", name, display);
+        if (!strcmp(args, name)) {
+            amodem_set_voice_registration(android_modem, state);
+            monitor_printf(mon, "OK\n");
+            return;
+        }
     }
-    monitor_printf(mon, "\n");
-    monitor_printf(mon, "OK\n");
-}
 
-void android_console_gsm_voice(Monitor* mon, const QDict* qdict) {
-    int nn;
+    // Invalid command, output the help message.
     monitor_printf(mon,
                    "the 'gsm voice <state>' allows you to change the state of "
                    "your GPRS connection\n"
                    "valid values for <state> are the following:\n\n");
-    for (nn = 0;; nn++) {
-        const char* name = _gsm_states[nn].name;
-        const char* display = _gsm_states[nn].display;
-
-        if (!name)
-            break;
-
-        monitor_printf(mon, "  %-15s %s\n", name, display);
-    }
-    monitor_printf(mon, "\n");
-    monitor_printf(mon, "OK\n");
+    gsm_print_all_states(mon);
+    monitor_printf(mon, "KO\n");
 }
 
 void android_console_gsm_status(Monitor* mon, const QDict* qdict) {
