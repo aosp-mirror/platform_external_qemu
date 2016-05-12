@@ -51,6 +51,7 @@
 #include "android/camera/camera-service.h"
 #include "android/console.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/emulation/android_pipe_unix.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/filesystems/partition_config.h"
 #include "android/globals.h"
@@ -2013,6 +2014,7 @@ int main(int argc, char **argv, char **envp)
     /* Initialize boot properties. */
     boot_property_init_service();
     android_hw_control_init();
+    android_unix_pipes_init();
     android_init_opengles_pipe(looper_getForThread());
 
     socket_drainer_start(looper_getForThread());
