@@ -1,3 +1,5 @@
+precision mediump float;
+
 varying vec3 varying_pos;
 varying vec3 varying_normal;
 varying vec2 varying_uv;
@@ -18,11 +20,11 @@ void main() {
     vec3 l = normalize(light_pos - varying_pos);
 
     // Lambertian
-    float lambert = max(dot(l, n), 0);
+    float lambert = max(dot(l, n), 0.0);
 
     // Highlight
-    float specular_value = 0;
-    if (lambert > 0) {
+    float specular_value = 0.0;
+    if (lambert > 0.0) {
         // Direction from point towards viewer.
         vec3 v = normalize(-varying_pos);
 
@@ -32,7 +34,7 @@ void main() {
 
         // Alpha determines the specular hardness/size of highlight.
         float alpha = 255.0 * (texture2D(gloss_map, varying_uv).r);
-        specular_value = pow(max(dot(h, n), 0), alpha);
+        specular_value = pow(max(dot(h, n), 0.0), alpha);
     }
 
     vec4 refl_color = textureCube(env_map, reflect(varying_pos, n));
