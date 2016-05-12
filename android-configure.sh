@@ -557,6 +557,13 @@ probe_prebuilts_dir "Libxml2" LIBXML2_PREBUILTS_DIR common/libxml2
 ###
 probe_prebuilts_dir "LibCURL" LIBCURL_PREBUILTS_DIR curl
 
+###
+###  LibANGLE probe (Linux only currently)
+###
+if [ "$HOST_OS" = "linux" ]; then
+    probe_prebuilts_dir "LibANGLE" ANGLE_PREBUILTS_DIR common/ANGLE
+fi
+
 CACERTS_FILE="$PROGDIR/android/data/ca-bundle.pem"
 if [ ! -f "$CACERTS_FILE" ]; then
     panic "Missing cacerts file: $CACERTS_FILE"
@@ -971,6 +978,9 @@ echo "ZLIB_PREBUILTS_DIR := $ZLIB_PREBUILTS_DIR" >> $config_mk
 echo "LIBPNG_PREBUILTS_DIR := $LIBPNG_PREBUILTS_DIR" >> $config_mk
 echo "LIBXML2_PREBUILTS_DIR := $LIBXML2_PREBUILTS_DIR" >> $config_mk
 echo "LIBCURL_PREBUILTS_DIR := $LIBCURL_PREBUILTS_DIR" >> $config_mk
+if [ "$HOST_OS" = "linux" ]; then
+    echo "ANGLE_PREBUILTS_DIR := $ANGLE_PREBUILTS_DIR" >> $config_mk
+fi
 echo "BREAKPAD_PREBUILTS_DIR := $BREAKPAD_PREBUILTS_DIR" >> $config_mk
 # libuuid is a part of e2fsprogs package
 echo "LIBUUID_PREBUILTS_DIR := $E2FSPROGS_PREBUILTS_DIR" >> $config_mk
