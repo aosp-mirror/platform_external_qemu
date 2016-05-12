@@ -15,6 +15,14 @@ include $(LOCAL_PATH)/distrib/libpng.mk
 include $(LOCAL_PATH)/distrib/mini-glib/sources.make
 include $(LOCAL_PATH)/distrib/googletest/Android.mk
 
+# ANGLE shader translation is not supported on Windows yet.
+ifeq ($(BUILD_TARGET_OS),linux)
+    include $(LOCAL_PATH)/distrib/libANGLEtranslation.mk
+endif
+ifeq ($(BUILD_TARGET_OS),darwin)
+    include $(LOCAL_PATH)/distrib/libANGLEtranslation.mk
+endif
+
 EMULATOR_VERSION_CFLAGS :=
 
 ANDROID_SDK_TOOLS_REVISION := $(strip $(ANDROID_SDK_TOOLS_REVISION))
