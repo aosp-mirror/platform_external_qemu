@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5257a0e9_b1759cbb",
+        "filename": "distrib/android-emugl/host/include/EGL/egl.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1084468
+      },
+      "writtenOn": "2016-05-13T15:14:29Z",
+      "side": 1,
+      "message": "This is an official Khronos API header. Formatting changes are obviously benign, but you may want to avoid making a habit of editing it.\n\nThe latest header can be found here: https://www.khronos.org/registry/egl/ You\u0027ll need it for ES3 support.",
+      "range": {
+        "startLine": 244,
+        "startChar": 0,
+        "endLine": 244,
+        "endChar": 0
+      },
+      "revId": "e515bb0fb21847b39d06b361cc728a90d89aa39d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5257a0e9_f17f2497",
+        "filename": "distrib/android-emugl/host/include/EGL/eglext.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1084468
+      },
+      "writtenOn": "2016-05-13T15:14:29Z",
+      "side": 1,
+      "message": "This entire header is outdated. Get the latest one at https://www.khronos.org/registry/egl/",
+      "range": {
+        "startLine": 232,
+        "startChar": 0,
+        "endLine": 235,
+        "endChar": 6
+      },
+      "revId": "e515bb0fb21847b39d06b361cc728a90d89aa39d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
