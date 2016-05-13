@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5257a0e9_0d80045b",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1106,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-05-13T21:55:37Z",
+      "side": 1,
+      "message": "line too long.",
+      "range": {
+        "startLine": 1106,
+        "startChar": 68,
+        "endLine": 1106,
+        "endChar": 98
+      },
+      "revId": "46d36315c3c766ad8ca8c92f31e35d81950bb233",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
