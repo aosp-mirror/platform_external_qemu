@@ -79,7 +79,12 @@ static LazyInstance<EmulatorQtWindow::Ptr> sInstance = LAZY_INSTANCE_INIT;
 
 // static
 const int EmulatorQtWindow::kPushProgressBarMax = 2000;
-const StringView EmulatorQtWindow::kRemoteDownloadsDir = "/sdcard/Download";
+const StringView EmulatorQtWindow::kRemoteDownloadsDir = "/sdcard/Download/";
+
+// Gingerbread devices download files to the following directory (note the
+// uncapitalized "download").
+const StringView EmulatorQtWindow::kRemoteDownloadsDirApi10 =
+        "/sdcard/download/";
 
 void EmulatorQtWindow::create() {
     sInstance.get() = Ptr(new EmulatorQtWindow());
@@ -1094,11 +1099,16 @@ void EmulatorQtWindow::runAdbPush(const QList<QUrl>& urls) {
         return;
     }
     std::vector<std::pair<std::string, std::string>> file_paths;
+    StringView remoteDownloadsDir = avdInfo_getApiLevel(android_avdInfo) > 10
+                                            ? kRemoteDownloadsDir
+                                            : kRemoteDownloadsDirApi10;
     for (const auto& url : urls) {
+        StringView remoteFile = PathUtils::join(remoteDownloadsDir,
+                                                url.fileName().toStdString());
         file_paths.push_back(
-            std::make_pair(url.toLocalFile().toStdString(),
-                           kRemoteDownloadsDir));
+                std::make_pair(url.toLocalFile().toStdString(), remoteFile));
     }
+
     mFilePusher.pushFiles(
         file_paths.begin(),
         file_paths.end());
