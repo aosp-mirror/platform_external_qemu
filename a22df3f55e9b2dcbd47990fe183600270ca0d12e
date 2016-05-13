@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5257a0e9_40065879",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-05-13T18:55:33Z",
+      "side": 1,
+      "message": "nit: We work with API levels. I\u0027d advise naming it just kRemoteDownloadsApi10 because paltform names often map to more than one API level.",
+      "range": {
+        "startLine": 296,
+        "startChar": 43,
+        "endLine": 296,
+        "endChar": 73
+      },
+      "revId": "a22df3f55e9b2dcbd47990fe183600270ca0d12e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
