@@ -35,7 +35,6 @@
 #include <QFrame>
 #include <QQueue>
 
-#define REMOTE_DOWNLOADS_DIR "/sdcard/Download"
 #define REMOTE_SCREENSHOT_FILE "/data/local/tmp/screen.png"
 
 namespace Ui {
@@ -119,6 +118,9 @@ private:
     bool mIsExtendedWindowActiveOnHide = false;
     QString mDetectedAdbPath;
     SizeTweaker mSizeTweaker;
+
+    static const QString kRemoteDownloadsDir;
+    static const QString kRemoteDownloadsDirApi10;
 
 private slots:
     void on_back_button_pressed();

@@ -41,6 +41,13 @@
 
 using namespace android::base;
 
+// static
+const QString ToolWindow::kRemoteDownloadsDir = "/sdcard/Download/";
+
+// Gingerbread devices download files to the following directory (note the
+// uncapitalized "download").
+const QString ToolWindow::kRemoteDownloadsDirApi10 = "/sdcard/download/";
+
 static ToolWindow *twInstance = NULL;
 
 extern "C" void setUiEmuAgent(const UiEmuAgent *agentPtr) {
@@ -819,8 +826,16 @@ void ToolWindow::slot_pushFinished(int exitStatus)
             return;
         }
         args << "push";
-        args << mFilesToPush.dequeue().toLocalFile();
-        args << REMOTE_DOWNLOADS_DIR;
+
+        QUrl fileToPush = mFilesToPush.dequeue();
+        QString remoteDownloadsDir = avdInfo_getApiLevel(android_avdInfo) > 10
+                                             ? kRemoteDownloadsDir
+                                             : kRemoteDownloadsDirApi10;
+
+        args << fileToPush.toLocalFile();
+        args << QString(PathUtils::join(remoteDownloadsDir.toStdString(),
+                                        fileToPush.fileName().toStdString())
+                                .c_str());
 
         // Keep track of this process
         mPushProcess.start(command, args);
