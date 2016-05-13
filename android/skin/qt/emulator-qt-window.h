@@ -293,6 +293,7 @@ public slots:
 
 private:
     static const android::base::StringView kRemoteDownloadsDir;
+    static const android::base::StringView kRemoteDownloadsDirGingerbread;
 
     // When the main window appears, close the "Starting..."
     // pop-up, if it was displayed.
