@@ -117,5 +117,26 @@ TEST(StringUtils, join) {
                  join(const_cast<const StringVec&>(src), ", ").c_str());
 }
 
+TEST(StringUtils, trim) {
+    struct {
+        const char* before;
+        const char* after;
+    } test_data[] = {
+            {"no change", "no change"},
+            {"", ""},
+            {" left", "left"},
+            {"right ", "right"},
+            {"\nnewline\r", "newline"},
+            {" \r\n\tmulti \t\r\n", "multi"},
+    };
+    size_t TEST_DATA_COUNT = sizeof(test_data) / sizeof(test_data[0]);
+
+    for (size_t i = 0; i < TEST_DATA_COUNT; i++) {
+        std::string before(test_data[i].before);
+        std::string after = trim(before);
+        EXPECT_STREQ(test_data[i].after, after.c_str());
+    }
+}
+
 }  // namespace base
 }  // namespace android
