@@ -16,13 +16,9 @@
 
 ANDROID_BEGIN_HEADER
 
-// returns true if line matches "\s*auth\s+auth_token"
-// auth_token is found in ~/.emulator_console_auth_token
-bool android_console_auth_check_authorization_command(const char* line);
-
 char* android_console_auth_token_path_dup();
 
-bool android_console_auth_get_token(char* buf, size_t buf_len);
+char* android_console_auth_get_token_dup();
 
 #define CONSOLE_AUTH_STATUS_REQUIRED \
     0  // ~/.emulator_console_auth_token contains an auth token
