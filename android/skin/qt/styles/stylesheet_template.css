@@ -69,6 +69,7 @@ QCheckBox::indicator:checked {
 QCheckBox::indicator:unchecked {
     image: url(:/%%PATH%%/check_no)
 }
+QPushButton {outline: none}
 QPushButton:pressed[ToolWindowButton=true], QPushButton:checked[ToolWindowButton=true] {
     border: none;
     background: %%TAB_DARKENED_COLOR%%;
