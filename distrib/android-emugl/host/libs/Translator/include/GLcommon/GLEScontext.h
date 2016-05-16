@@ -142,6 +142,7 @@ public:
     virtual GLSupport*  getCaps(){return &s_glSupport;};
     virtual ~GLEScontext();
     virtual int getMaxTexUnits() = 0;
+    virtual int getMaxCombinedTexUnits() { return getMaxTexUnits(); }
     virtual void drawValidate(void);
 
     void setRenderbufferBinding(GLuint rb) { m_renderbuffer = rb; }

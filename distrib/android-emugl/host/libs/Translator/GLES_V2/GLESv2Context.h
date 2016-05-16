@@ -26,8 +26,8 @@ public:
     virtual void init(GlLibrary* glLib);
     virtual ~GLESv2Context();
     void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct);
-    int  getMaxCombinedTexUnits();
-    int  getMaxTexUnits();
+    int  getMaxCombinedTexUnits() override;
+    int  getMaxTexUnits() override;
 
     // This whole att0 thing is about a incompatibility between GLES and OpenGL.
     // GLES allows a vertex shader attribute to be in location 0 and have a

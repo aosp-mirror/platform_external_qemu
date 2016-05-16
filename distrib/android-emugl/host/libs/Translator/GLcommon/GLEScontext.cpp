@@ -210,13 +210,13 @@ void GLEScontext::init(GlLibrary* glLib) {
         // context implementation, based on the parsing of the host
         // extensions string performed by initCapsLocked(). I.e. it will
         // be populated after calling this ::init() method.
-        s_glExtensions = new std::string("");
+        s_glExtensions = new std::string();
     }
 
     if (!m_initialized) {
         initExtensionString();
 
-        int maxTexUnits = getMaxTexUnits();
+        int maxTexUnits = getMaxCombinedTexUnits();
         m_texState = new textureUnitState[maxTexUnits];
         for (int i=0;i<maxTexUnits;++i) {
             for (int j=0;j<NUM_TEXTURE_TARGETS;++j)
@@ -272,8 +272,8 @@ bool GLEScontext::isArrEnabled(GLenum arr) {
 }
 
 const GLESpointer* GLEScontext::getPointer(GLenum arrType) {
-    if (m_map.find(arrType) != m_map.end()) return m_map[arrType];
-    return NULL;
+    const auto it = m_map.find(arrType);
+    return it != m_map.end() ? it->second : nullptr;
 }
 
 static void convertFixedDirectLoop(const char* dataIn,unsigned int strideIn,void* dataOut,unsigned int nBytes,unsigned int strideOut,int attribSize) {
