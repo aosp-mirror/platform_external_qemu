@@ -92,12 +92,13 @@ public:
 
     void writeDump() override { mHandler->WriteMinidump(); }
 
-    static bool exceptionFilterCallback(void* context,
-                                        EXCEPTION_POINTERS*,
-                                        MDRawAssertionInfo*);
-
 private:
-    std::unique_ptr<google_breakpad::ExceptionHandler> mHandler;
+ static bool exceptionFilterCallback(void* context, EXCEPTION_POINTERS*,
+                                     MDRawAssertionInfo*);
+
+ bool onCrashPlatformSpecific() override;
+
+ std::unique_ptr<google_breakpad::ExceptionHandler> mHandler;
 };
 
 ::android::base::LazyInstance<HostCrashReporter> sCrashReporter =
@@ -141,9 +142,12 @@ static void attachMemoryInfo()
 bool HostCrashReporter::exceptionFilterCallback(void*,
                                                 EXCEPTION_POINTERS*,
                                                 MDRawAssertionInfo*) {
-    attachUptime();
-    attachMemoryInfo();
-    return true;
+  return CrashReporter::get()->onCrash();
+}
+
+bool HostCrashReporter::onCrashPlatformSpecific() {
+  attachMemoryInfo();
+  return true;
 }
 
 }  // namespace anonymous

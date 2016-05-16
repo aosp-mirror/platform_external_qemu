@@ -200,6 +200,16 @@ void CrashReporter::attachUptime() {
     CrashReporter::get()->attachData(fileName, timeStr);
 }
 
+bool CrashReporter::onCrash() {
+  // store the uptime first - as Breakpad doesn't do it sometimes
+  attachUptime();
+
+  for (const auto& callback : CrashReporter::get()->mCrashCallbacks) {
+    callback();
+  }
+  return CrashReporter::get()->onCrashPlatformSpecific();
+}
+
 }  // namespace crashreport
 }  // namespace android
 

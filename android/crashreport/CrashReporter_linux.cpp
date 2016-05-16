@@ -72,19 +72,23 @@ public:
     static bool exceptionFilterCallback(void* context);
 
 private:
-    std::unique_ptr<google_breakpad::ExceptionHandler> mHandler;
+ bool onCrashPlatformSpecific() override;
+
+ std::unique_ptr<google_breakpad::ExceptionHandler> mHandler;
 };
 
 ::android::base::LazyInstance<HostCrashReporter> sCrashReporter =
         LAZY_INSTANCE_INIT;
 
 bool HostCrashReporter::exceptionFilterCallback(void*) {
-    attachUptime();
+  return CrashReporter::get()->onCrash();
+}
 
-    // collect the memory usage at the time of the crash
-    crashhandler_copy_attachment(
-                CrashReporter::kProcessMemoryInfoFileName, "/proc/self/status");
-    return true;
+bool HostCrashReporter::onCrashPlatformSpecific() {
+  // collect the memory usage at the time of the crash
+  crashhandler_copy_attachment(CrashReporter::kProcessMemoryInfoFileName,
+                               "/proc/self/status");
+  return true;
 }
 
 }  // namespace anonymous
