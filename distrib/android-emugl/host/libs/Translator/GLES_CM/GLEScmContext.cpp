@@ -26,6 +26,7 @@ void GLEScmContext::init(GlLibrary* glLib) {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(!m_initialized) {
         s_glDispatch.dispatchFuncs(GLES_1_1, glLib);
+        m_dispatcherInitialized = true;
         GLEScontext::init(glLib);
 
         m_texCoords = new GLESpointer[s_glSupport.maxTexUnits];

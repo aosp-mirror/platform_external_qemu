@@ -86,6 +86,7 @@ void GLESConversionArrays::operator++(){
 }
 
 GLDispatch     GLEScontext::s_glDispatch;
+bool           GLEScontext::m_dispatcherInitialized;
 emugl::Mutex   GLEScontext::s_lock;
 std::string*   GLEScontext::s_glExtensions= NULL;
 std::string    GLEScontext::s_glVendor;

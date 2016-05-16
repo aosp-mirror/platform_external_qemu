@@ -159,6 +159,7 @@ public:
     static bool isAutoMipmapSupported(){return s_glSupport.GL_SGIS_GENERATE_MIPMAP;}
     static TextureTarget GLTextureTargetToLocal(GLenum target);
     static unsigned int findMaxIndex(GLsizei count,GLenum type,const GLvoid* indices);
+    static bool dispatcherInitialized() { return m_dispatcherInitialized; }
 
     virtual bool glGetIntegerv(GLenum pname, GLint *params);
     virtual bool glGetBooleanv(GLenum pname, GLboolean *params);
@@ -177,6 +178,7 @@ protected:
 
     static emugl::Mutex   s_lock;
     static GLDispatch     s_glDispatch;
+    static bool           m_dispatcherInitialized;
     bool                  m_initialized = false;
     unsigned int          m_activeTexture = 0;
     GLint                 m_unpackAlignment = 4;

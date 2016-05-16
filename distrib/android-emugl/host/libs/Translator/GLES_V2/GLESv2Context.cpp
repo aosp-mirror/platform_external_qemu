@@ -22,6 +22,7 @@ void GLESv2Context::init(GlLibrary* glLib) {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(!m_initialized) {
         s_glDispatch.dispatchFuncs(GLES_2_0, glLib);
+        m_dispatcherInitialized = true;
         GLEScontext::init(glLib);
         for(int i=0; i < s_glSupport.maxVertexAttribs;i++){
             m_map[i] = new GLESpointer();
