@@ -19,40 +19,47 @@
 #include <GLES/gl.h>
 #include "GLESbuffer.h"
 
-class GLESpointer
-{
-
+class GLESpointer {
 public:
-    GLESpointer();
-    GLenum        getType() const;
-    GLint         getSize() const;
-    GLsizei       getStride() const;
+    GLenum getType() const;
+    GLint getSize() const;
+    GLsizei getStride() const;
     const GLvoid* getArrayData() const;
-    GLvoid*       getBufferData() const;
-    GLuint        getBufferName() const;
-    GLboolean     getNormalized() const { return m_normalize ? GL_TRUE : GL_FALSE; }
+    GLvoid* getBufferData() const;
+    GLuint getBufferName() const;
+    GLboolean getNormalized() const { return m_normalize ? GL_TRUE : GL_FALSE; }
     const GLvoid* getData() const;
-    unsigned int  getBufferOffset() const;
-    void          redirectPointerData();
-    void          getBufferConversions(const RangeList& rl,RangeList& rlOut);
-    bool          bufferNeedConversion(){ return !m_buffer->fullyConverted();}
-    void          setArray (GLint size,GLenum type,GLsizei stride,const GLvoid* data,bool normalize = false);
-    void          setBuffer(GLint size,GLenum type,GLsizei stride,GLESbuffer* buf,GLuint bufferName,int offset,bool normalize = false);
-    bool          isEnable() const;
-    bool          isNormalize() const;
-    bool          isVBO() const;
-    void          enable(bool b);
+    unsigned int getBufferOffset() const;
+    void redirectPointerData();
+    void getBufferConversions(const RangeList& rl, RangeList& rlOut);
+    bool bufferNeedConversion() { return !m_buffer->fullyConverted(); }
+    void setArray(GLint size,
+                  GLenum type,
+                  GLsizei stride,
+                  const GLvoid* data,
+                  bool normalize = false);
+    void setBuffer(GLint size,
+                   GLenum type,
+                   GLsizei stride,
+                   GLESbuffer* buf,
+                   GLuint bufferName,
+                   int offset,
+                   bool normalize = false);
+    bool isEnable() const;
+    bool isNormalize() const;
+    bool isVBO() const;
+    void enable(bool b);
 
 private:
-    GLint         m_size;
-    GLenum        m_type;
-    GLsizei       m_stride;
-    bool          m_enabled;
-    bool          m_normalize;
-    const GLvoid* m_data;
-    GLESbuffer*   m_buffer;
-    GLuint        m_bufferName;
-    unsigned int  m_buffOffset;
-    bool          m_isVBO;
+    GLint m_size = 4;
+    GLenum m_type = GL_FLOAT;
+    GLsizei m_stride = 0;
+    bool m_enabled = false;
+    bool m_normalize = false;
+    bool m_isVBO = false;
+    const GLvoid* m_data = nullptr;
+    GLESbuffer* m_buffer = nullptr;
+    GLuint m_bufferName = 0;
+    unsigned int m_buffOffset = 0;
 };
 #endif

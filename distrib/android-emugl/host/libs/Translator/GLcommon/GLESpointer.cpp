@@ -16,23 +16,11 @@
 #include <GLcommon/GLESpointer.h>
 #include <stdlib.h>
 
-GLESpointer::GLESpointer():m_size(4),
-                           m_type(GL_FLOAT),
-                           m_stride(0),
-                           m_enabled(false),
-                           m_normalize(false),
-                           m_data(),
-                           m_buffer(),
-                           m_bufferName(0),
-                           m_buffOffset(0),
-                           m_isVBO(false){};
-
-
-GLenum GLESpointer:: getType() const {
+GLenum GLESpointer::getType() const {
     return m_type;
 }
 
-GLint GLESpointer::getSize() const  {
+GLint GLESpointer::getSize() const {
     return m_size;
 }
 
@@ -45,14 +33,17 @@ const GLvoid* GLESpointer::getArrayData() const {
 }
 
 GLvoid* GLESpointer::getBufferData() const {
-    return  m_buffer ? static_cast<unsigned char*>(m_buffer->getData()) + m_buffOffset : NULL;
+    return m_buffer
+                   ? static_cast<unsigned char*>(m_buffer->getData()) +
+                             m_buffOffset
+                   : nullptr;
 }
 
-const GLvoid* GLESpointer::getData() const{
-    return m_isVBO ? getBufferData():getArrayData();
+const GLvoid* GLESpointer::getData() const {
+    return m_isVBO ? getBufferData() : getArrayData();
 }
 
-void GLESpointer::redirectPointerData(){
+void GLESpointer::redirectPointerData() {
     m_data = getBufferData();
 }
 
@@ -61,8 +52,7 @@ GLuint GLESpointer::getBufferName() const {
 }
 
 unsigned int GLESpointer::getBufferOffset() const {
-
-    return  m_buffOffset;
+    return m_buffOffset;
 }
 
 bool GLESpointer::isEnable() const {
@@ -81,22 +71,32 @@ void GLESpointer::enable(bool b) {
     m_enabled = b;
 }
 
-void GLESpointer::setArray(GLint size,GLenum type,GLsizei stride,const GLvoid* data,bool normalize) {
-    m_size   = size;
-    m_type   = type;
+void GLESpointer::setArray(GLint size,
+                           GLenum type,
+                           GLsizei stride,
+                           const GLvoid* data,
+                           bool normalize) {
+    m_size = size;
+    m_type = type;
     m_stride = stride;
-    m_data   = data;
-    m_buffer = NULL;
+    m_data = data;
+    m_buffer = nullptr;
     m_bufferName = 0;
     m_normalize = normalize;
     m_isVBO = false;
 }
 
-void GLESpointer::setBuffer(GLint size,GLenum type,GLsizei stride,GLESbuffer* buf,GLuint bufferName,int offset,bool normalize) {
-    m_size   = size;
-    m_type   = type;
+void GLESpointer::setBuffer(GLint size,
+                            GLenum type,
+                            GLsizei stride,
+                            GLESbuffer* buf,
+                            GLuint bufferName,
+                            int offset,
+                            bool normalize) {
+    m_size = size;
+    m_type = type;
     m_stride = stride;
-    m_data   = NULL;
+    m_data = nullptr;
     m_buffer = buf;
     m_bufferName = bufferName;
     m_buffOffset = offset;
@@ -104,6 +104,6 @@ void GLESpointer::setBuffer(GLint size,GLenum type,GLsizei stride,GLESbuffer* bu
     m_isVBO = true;
 }
 
-void GLESpointer::getBufferConversions(const RangeList& rl,RangeList& rlOut) {
-    m_buffer->getConversions(rl,rlOut);
+void GLESpointer::getBufferConversions(const RangeList& rl, RangeList& rlOut) {
+    m_buffer->getConversions(rl, rlOut);
 }
