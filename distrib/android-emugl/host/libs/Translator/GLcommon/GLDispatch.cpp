@@ -92,6 +92,10 @@ LIST_GLES_FUNCTIONS(GL_DISPATCH_DEFINE_POINTER, GL_DISPATCH_DEFINE_POINTER)
 // Constructor.
 GLDispatch::GLDispatch() : m_isLoaded(false) {}
 
+bool GLDispatch::isInitialized() const {
+    return m_isLoaded;
+}
+
 void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(m_isLoaded)
