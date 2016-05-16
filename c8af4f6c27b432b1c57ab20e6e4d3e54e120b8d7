@@ -22,6 +22,30 @@
       "revId": "c8af4f6c27b432b1c57ab20e6e4d3e54e120b8d7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5257a0e9_0d12adf8",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-16T22:02:27Z",
+      "side": 1,
+      "message": "Wow, that\u0027s a lot more concise :) Done",
+      "parentUuid": "5257a0e9_6a45df05",
+      "range": {
+        "startLine": 344,
+        "startChar": 21,
+        "endLine": 344,
+        "endChar": 42
+      },
+      "revId": "c8af4f6c27b432b1c57ab20e6e4d3e54e120b8d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
