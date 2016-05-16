@@ -44,10 +44,12 @@ AngleInputWidget::AngleInputWidget(QWidget* parent) :
     setMaxValue(180.0);
     mDecimalDegreeValidator.setNotation(QDoubleValidator::StandardNotation);
     mDecimalDegreeValidator.setDecimals(100);
+    mDecimalDegreeValidator.setLocale(QLocale::C);
     mMinValidator.setBottom(0);
     mMinValidator.setTop(59);
     mSecValidator.setBottom(0.0);
     mSecValidator.setTop(59.0);
+    mSecValidator.setLocale(QLocale::C);
 
     // Set up the editors.
     setUpLineEdit(&mDecimalValueEditor, &mDecimalDegreeValidator);
