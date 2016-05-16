@@ -17,6 +17,11 @@
 #include "android/base/StringView.h"
 #include "android/crashreport/CrashSystem.h"
 
+#include <functional>
+#include <vector>
+
+#include <assert.h>
+
 namespace android {
 namespace crashreport {
 
@@ -26,84 +31,92 @@ namespace crashreport {
 // server to start crash communication pipes.
 class CrashReporter {
 public:
-    static const int kWaitExpireMS = 500;
-    static const int kWaitIntervalMS = 20;
+ using CrashCallback = std::function<void()>;
 
-    // Name of the file with the dump message passed from the emulator in
-    // a dump data exchange directory
-    static const char* const kDumpMessageFileName;
+ static const int kWaitExpireMS = 500;
+ static const int kWaitIntervalMS = 20;
 
-    // File with the process memory information
-    static const char* const kProcessMemoryInfoFileName;
+ // Name of the file with the dump message passed from the emulator in
+ // a dump data exchange directory
+ static const char* const kDumpMessageFileName;
 
-    // File to log crashes on exit
-    static const char* const kCrashOnExitFileName;
+ // File with the process memory information
+ static const char* const kProcessMemoryInfoFileName;
 
-    // File to log the process list
-    static const char* const kProcessListFileName;
+ // File to log crashes on exit
+ static const char* const kCrashOnExitFileName;
 
-    // Pattern to check for when detecting crashes on exit
-    static const char* const kCrashOnExitPattern;
+ // File to log the process list
+ static const char* const kProcessListFileName;
 
-    // QSetting key that is saved when crash reporting automatically or not
-    static const char* const kProcessCrashesQuietlyKey;
+ // Pattern to check for when detecting crashes on exit
+ static const char* const kCrashOnExitPattern;
 
-    CrashReporter();
+ // QSetting key that is saved when crash reporting automatically or not
+ static const char* const kProcessCrashesQuietlyKey;
 
-    virtual ~CrashReporter();
+ CrashReporter();
 
-    // Attach platform dependent crash handler.
-    // Returns false if already attached or if attach fails.
-    virtual bool attachCrashHandler(
-            const CrashSystem::CrashPipe& crashpipe) = 0;
+ virtual ~CrashReporter();
 
-    // Waits for a platform dependent pipe to become valid or timeout occurs.
-    // Returns false if timeout occurs.
-    virtual bool waitServicePipeReady(const std::string& pipename,
-                                      int timeout_ms = kWaitExpireMS) = 0;
+ // Attach platform dependent crash handler.
+ // Returns false if already attached or if attach fails.
+ virtual bool attachCrashHandler(const CrashSystem::CrashPipe& crashpipe) = 0;
 
-    // Special config when crash service is in child process
-    virtual void setupChildCrashProcess(int pid) = 0;
+ // Waits for a platform dependent pipe to become valid or timeout occurs.
+ // Returns false if timeout occurs.
+ virtual bool waitServicePipeReady(const std::string& pipename,
+                                   int timeout_ms = kWaitExpireMS) = 0;
 
-    // returns dump dir
-    const std::string& getDumpDir() const;
+ // Special config when crash service is in child process
+ virtual void setupChildCrashProcess(int pid) = 0;
 
-    // returns the directory for data exchange files. All files from this
-    // directory will go to the reporting server together with the crash dump.
-    const std::string& getDataExchangeDir() const;
+ // returns dump dir
+ const std::string& getDumpDir() const;
 
-    // Gets a handle to single instance of crash reporter
-    static CrashReporter* get();
+ // returns the directory for data exchange files. All files from this
+ // directory will go to the reporting server together with the crash dump.
+ const std::string& getDataExchangeDir() const;
 
-    // Pass some data to the crash reporter, so in case of a crash it's uploaded
-    // with the dump
-    // |name| - a generic description of the data being added. Current
-    //          implementation uploads the data in a file named |name|
-    //          if |name| is empty the file gets some default generic name
-    // |data| - a string of data to upload with the crash report
-    // |replace| - replace all the data with the same name instead of appending
-    void attachData(android::base::StringView name,
-                    android::base::StringView data,
-                    bool replace = false);
+ // Gets a handle to single instance of crash reporter
+ static CrashReporter* get();
 
-    // Pass some file to the crash reporter to upload it with the dump
-    bool attachFile(android::base::StringView sourceFullName,
-                    android::base::StringView destBaseName);
+ // Pass some data to the crash reporter, so in case of a crash it's uploaded
+ // with the dump
+ // |name| - a generic description of the data being added. Current
+ //          implementation uploads the data in a file named |name|
+ //          if |name| is empty the file gets some default generic name
+ // |data| - a string of data to upload with the crash report
+ // |replace| - replace all the data with the same name instead of appending
+ void attachData(android::base::StringView name, android::base::StringView data,
+                 bool replace = false);
 
-    // The following two functions write a dump of current process state.
-    // Both pass the |message| to the dump writer, so it is sent together with
-    // the dump file
-    // GenerateDumpAndDie() also doesn't return - it terminates process in a
-    // fastest possible way. The process doesn't show/print any message to the
-    // user with the possible exception of "Segmentation fault".
-    void GenerateDump(const char* message);
-    void GenerateDumpAndDie(const char* message);
+ // Pass some file to the crash reporter to upload it with the dump
+ bool attachFile(android::base::StringView sourceFullName,
+                 android::base::StringView destBaseName);
 
-    void SetExitMode(const char* message);
-    bool isInExitMode() const;
+ // The following two functions write a dump of current process state.
+ // Both pass the |message| to the dump writer, so it is sent together with
+ // the dump file
+ // GenerateDumpAndDie() also doesn't return - it terminates process in a
+ // fastest possible way. The process doesn't show/print any message to the
+ // user with the possible exception of "Segmentation fault".
+ void GenerateDump(const char* message);
+ void GenerateDumpAndDie(const char* message);
+
+ void SetExitMode(const char* message);
+ bool isInExitMode() const;
+
+ void addCrashCallback(CrashCallback cb) {
+   assert(bool(cb));
+   mCrashCallbacks.push_back(std::move(cb));
+ }
+
+ bool onCrash();
 
 protected:
-    static void attachUptime();
+ virtual bool onCrashPlatformSpecific() = 0;
+ static void attachUptime();
 
 private:
     virtual void writeDump() = 0;
@@ -113,6 +126,7 @@ private:
 private:
     DISALLOW_COPY_AND_ASSIGN(CrashReporter);
 
+    std::vector<CrashCallback> mCrashCallbacks;
     const std::string mDumpDir;
     const std::string mDataExchangeDir;
     bool mIsInExitMode = false;
