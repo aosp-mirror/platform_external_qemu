@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "722d8476_1722fe44",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-17T18:32:39Z",
+      "side": 1,
+      "message": "why not .cpp ? that would allow some classes or simpler thread safety etc",
+      "range": {
+        "startLine": 286,
+        "startChar": 28,
+        "endLine": 286,
+        "endChar": 30
+      },
+      "revId": "b5841a823ee4685ff19f93c2db02b95435dff880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "722d8476_77197a0f",
+        "filename": "android/android.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-17T18:32:39Z",
+      "side": 1,
+      "message": "what about this one? another CL ?",
+      "range": {
+        "startLine": 70,
+        "startChar": 0,
+        "endLine": 72,
+        "endChar": 30
+      },
+      "revId": "b5841a823ee4685ff19f93c2db02b95435dff880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
