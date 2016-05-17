@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "722d8476_c266e642",
+        "filename": "android/utils/sockets.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 626,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2016-05-17T18:53:39Z",
+      "side": 1,
+      "message": "Should abstract_len be \"abstract_len - 2\" here? We\u0027ve copied \"@\" already, we have no ending \"0\" in src-\u003esun_path.",
+      "range": {
+        "startLine": 626,
+        "startChar": 24,
+        "endLine": 626,
+        "endChar": 37
+      },
+      "revId": "edc5305dedb94ab91836e0b4b0ce5dda80e214d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "722d8476_c2c266fb",
+        "filename": "android/utils/sockets.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 627,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2016-05-17T18:53:39Z",
+      "side": 1,
+      "message": "This should be abstrace_path[abstrace_len - 1] \u003d \u0027\\0\u0027?\n\nOr we just change the whole thing like this:\n\nsize_t abstract_len \u003d fromlen - sun_path_offset  + 1;\nabstract_path \u003d malloc(abstract_len);\nmemcpy(abstract_path, src-\u003esun_path, abstrace_len -1 );\nabstract_path[0] \u003d \u0027@\u0027;\nabstract_path[abstract_len-1] \u003d \u0027\\0\u0027;",
+      "range": {
+        "startLine": 627,
+        "startChar": 16,
+        "endLine": 627,
+        "endChar": 29
+      },
+      "revId": "edc5305dedb94ab91836e0b4b0ce5dda80e214d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
