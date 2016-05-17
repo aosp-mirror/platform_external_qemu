@@ -27,6 +27,7 @@ public:
 
     virtual void setLogger(emugl_logger_struct logger) override;
     virtual void setCrashReporter(emugl_crash_reporter_t reporter) override;
+    virtual void setFeatureController(emugl_feature_is_enabled_t featureController) override;
 
     virtual RendererPtr initRenderer(int width,
                                      int height,
