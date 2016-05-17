@@ -38,6 +38,7 @@ public:
     // Constructor.
     GLDispatch();
 
+    bool isInitialized() const;
     void dispatchFuncs(GLESVersion version, GlLibrary* glLib);
 
     LIST_GLES_FUNCTIONS(GLES_DECLARE_METHOD, GLES_DECLARE_METHOD)

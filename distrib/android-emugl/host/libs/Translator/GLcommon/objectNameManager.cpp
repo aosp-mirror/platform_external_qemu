@@ -341,7 +341,9 @@ ShareGroup::decTexRefCounterAndReleaseIf0(unsigned int p_globalName) {
         return val;
     }
     map->erase(iterator);
-    GLEScontext::dispatcher().glDeleteTextures(1, &p_globalName);
+    if (GLEScontext::dispatcher().isInitialized()) {
+        GLEScontext::dispatcher().glDeleteTextures(1, &p_globalName);
+    }
     return 0;
 }
 
