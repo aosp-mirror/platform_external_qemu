@@ -49,7 +49,9 @@ extern "C" void setUiEmuAgent(const UiEmuAgent *agentPtr) {
     }
 }
 
-ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
+ToolWindow::ToolWindow(EmulatorQtWindow* window,
+                       QWidget* parent,
+                       ToolWindow::UserActionsCounterPtr user_actions_counter)
     : QFrame(parent),
       emulator_window(window),
       extendedWindow(NULL),
@@ -57,6 +59,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
       toolsUi(new Ui::ToolControls),
       mPushDialog(this),
       mInstallDialog(this),
+      mUserActionsCounter(user_actions_counter),
       mSizeTweaker(this) {
     Q_INIT_RESOURCE(resources);
     twInstance = this;
@@ -706,6 +709,11 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
     extendedWindow->show();
     extendedWindow->showPane(pane);
     extendedWindow->raise();
+
+    if (auto user_actions_counter = mUserActionsCounter.lock()) {
+        user_actions_counter->startCountingForExtendedWindow(extendedWindow);
+    }
+
 }
 
 void ToolWindow::on_more_button_clicked()
@@ -805,7 +813,6 @@ void ToolWindow::slot_pushFinished(int exitStatus)
         QString msg = tr("Unable to copy files. Output:<br/><br/>") + QString(er);
         showErrorDialog(msg, tr("File Copy"));
     }
-
     if (mFilesToPush.isEmpty()) {
         mPushDialog.setMaximum(0); // Reset the dialog for next time.
         mPushDialog.close();

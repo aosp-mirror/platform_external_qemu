@@ -96,7 +96,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
                           " manufacturer to see if there is an updated driver available."),
                        QMessageBox::Ok,
                        this),
-        mFirstShowEvent(true)
+        mFirstShowEvent(true),
+        mUserActionsCounter(
+                new android::qt::UserActionsCounter(&mEventCapturer))
 {
     // Start a timer. If the main window doesn't
     // appear before the timer expires, show a
@@ -111,7 +113,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     mBackingSurface = NULL;
     mBatteryState = NULL;
 
-    mToolWindow = new ToolWindow(this, &mContainer);
+    mToolWindow = new ToolWindow(this, &mContainer, mUserActionsCounter);
 
     this->setAcceptDrops(true);
 
@@ -162,6 +164,21 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     setForwardShortcutsToDevice(shortcutBool ? 1 : 0);
 
     initErrorDialog(this);
+    setObjectName("MainWindow");
+    mUserActionsCounter->startCountingForMainWindow(this);
+    mUserActionsCounter->startCountingForToolWindow(mToolWindow);
+    mUserActionsCounter->startCountingForOverlayWindow(&mOverlay);
+
+    // mUserActionsCounter is a shared pointer, capturing its copy inside a
+    // lambda ensures that it lives on as long as CrashReporter needs it, even
+    // if EmulatorQtWindow is destroyed.
+    auto user_actions = mUserActionsCounter;
+    android::crashreport::CrashReporter::get()->addCrashCallback(
+            [user_actions]() {
+                android::crashreport::CrashReporter::get()->attachData(
+                        "num-user-actions.txt",
+                        std::to_string(user_actions->count()));
+            });
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr()

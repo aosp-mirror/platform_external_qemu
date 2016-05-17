@@ -58,6 +58,9 @@
    <property name="ColorGroup" stdset="0">
     <string>Toggle</string>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QLineEdit" name="set_adbPathBox">
    <property name="enabled">
@@ -155,6 +158,9 @@
    <property name="themeIconName" stdset="0">
     <string notr="true">folder</string>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QCheckBox" name="set_autoFindAdb">
    <property name="geometry">
@@ -176,6 +182,9 @@
    </property>
    <property name="ColorGroup" stdset="0">
     <string>Toggle</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QGroupBox" name="set_onTopTitle">
@@ -244,6 +253,9 @@
    <property name="styleSheet">
     <string notr="true">padding: 3px 3px 3px 3px;</string>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
    <item>
     <property name="text">
      <string>Light</string>
@@ -282,6 +294,9 @@
    </property>
    <property name="themeIconName" stdset="0">
     <string notr="true">folder</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QGroupBox" name="kbdShortcutsTitle">
@@ -353,6 +368,9 @@
    <property name="maxVisibleItems">
     <number>3</number>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
    <item>
     <property name="text">
      <string>Always</string>
@@ -386,6 +404,9 @@
    </property>
    <property name="styleSheet">
     <string notr="true">padding: 3px 3px 3px 3px;</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
    <item>
     <property name="text">
