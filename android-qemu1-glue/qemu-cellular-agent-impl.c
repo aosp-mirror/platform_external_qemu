@@ -14,6 +14,7 @@
 
 #include "android/android.h"
 #include "android/emulation/control/cellular_agent.h"
+#include "android/network/globals.h"
 #include "android/shaper.h"
 #include "android/telephony/modem_driver.h"
 
@@ -64,7 +65,7 @@ static void cellular_setDataStatus(enum CellularStatus dataStatus)
         amodem_set_data_registration(android_modem, state);
     }
 
-    qemu_net_disable = (state != A_REGISTRATION_HOME    &&
+    android_net_disable = (state != A_REGISTRATION_HOME    &&
                         state != A_REGISTRATION_ROAMING );
 }
 
@@ -87,12 +88,12 @@ static void cellular_setStandard(enum CellularStandard cStandard)
     }
 
     // Find this entry in the speed table and set
-    // qemu_net_download_speed and qemu_net_upload_speed
+    // android_net_download_speed and android_net_upload_speed
     android_parse_network_speed(speedName);
 
     // Tell the network shaper the new rates
-    netshaper_set_rate(slirp_shaper_in,  qemu_net_download_speed);
-    netshaper_set_rate(slirp_shaper_out, qemu_net_upload_speed);
+    netshaper_set_rate(android_net_shaper_in,  android_net_download_speed);
+    netshaper_set_rate(android_net_shaper_out, android_net_upload_speed);
 
     if (android_modem) {
         amodem_set_data_network_type(android_modem,

@@ -45,17 +45,6 @@ ANDROID_BEGIN_HEADER
 
 /** in vl.c */
 
-/* emulated network up/down speeds, expressed in bits/seconds */
-extern double   qemu_net_upload_speed;
-extern double   qemu_net_download_speed;
-
-/* emulated network min-max latency, expressed in ms */
-extern int      qemu_net_min_latency;
-extern int      qemu_net_max_latency;
-
-/* global flag, when true, network is disabled */
-extern int      qemu_net_disable;
-
 /* enable/disable interrupt polling mode. the emulator will always use 100%
  * of host CPU time, but will get high-quality time measurments. this is
  * required for the tracing mode unless you can bear 10ms granularities
@@ -82,8 +71,8 @@ extern int   android_base_port;
  * default is 5037 */
 extern int   android_adb_port;
 
-/* parses a network speed parameter and sets qemu_net_upload_speed and
- * qemu_net_download_speed accordingly. returns -1 on failure, 0 on success */
+/* parses a network speed parameter and sets android_net_upload_speed and
+ * android_net_download_speed accordingly. returns -1 on failure, 0 on success */
 extern int   android_parse_network_speed(const char*  speed);
 
 /* parse a network delay parameter and sets qemu_net_min/max_latency

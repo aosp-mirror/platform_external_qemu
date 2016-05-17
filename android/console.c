@@ -29,6 +29,7 @@
 #include "android/hw-events.h"
 #include "android/hw-sensors.h"
 #include "android/network/constants.h"
+#include "android/network/globals.h"
 #include "android/shaper.h"
 #include "android/skin/charmap.h"
 #include "android/skin/keycode-buffer.h"
@@ -743,13 +744,13 @@ do_network_status( ControlClient  client, char*  args )
     control_write( client, "Current network status:\r\n" );
 
     control_write( client, "  download speed:   %8d bits/s (%.1f KB/s)\r\n",
-                   (long)qemu_net_download_speed, qemu_net_download_speed/8192. );
+                   (long)android_net_download_speed, android_net_download_speed/8192. );
 
     control_write( client, "  upload speed:     %8d bits/s (%.1f KB/s)\r\n",
-                   (long)qemu_net_upload_speed, qemu_net_upload_speed/8192. );
+                   (long)android_net_upload_speed, android_net_upload_speed/8192. );
 
-    control_write( client, "  minimum latency:  %ld ms\r\n", qemu_net_min_latency );
-    control_write( client, "  maximum latency:  %ld ms\r\n", qemu_net_max_latency );
+    control_write( client, "  minimum latency:  %ld ms\r\n", android_net_min_latency );
+    control_write( client, "  maximum latency:  %ld ms\r\n", android_net_max_latency );
     return 0;
 }
 
@@ -779,8 +780,8 @@ do_network_speed( ControlClient  client, char*  args )
         return -1;
     }
 
-    netshaper_set_rate( slirp_shaper_in,  qemu_net_download_speed );
-    netshaper_set_rate( slirp_shaper_out, qemu_net_upload_speed );
+    netshaper_set_rate( android_net_shaper_in,  android_net_download_speed );
+    netshaper_set_rate( android_net_shaper_out, android_net_upload_speed );
 
     if (android_modem) {
         amodem_set_data_network_type( android_modem,
@@ -809,7 +810,7 @@ do_network_delay( ControlClient  client, char*  args )
         control_write( client, "KO: invalid <delay> argument, see 'help network delay' for valid values\r\n" );
         return -1;
     }
-    netdelay_set_latency( slirp_delay_in, qemu_net_min_latency, qemu_net_max_latency );
+    netdelay_set_latency( android_net_delay_in, android_net_min_latency, android_net_max_latency );
     return 0;
 }
 
@@ -1257,7 +1258,7 @@ do_gsm_data( ControlClient  client, char*  args )
                 return -1;
             }
             amodem_set_data_registration( android_modem, state );
-            qemu_net_disable = (state != A_REGISTRATION_HOME    &&
+            android_net_disable = (state != A_REGISTRATION_HOME    &&
                                 state != A_REGISTRATION_ROAMING );
             return 0;
         }

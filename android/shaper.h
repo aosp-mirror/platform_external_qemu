@@ -46,11 +46,10 @@ void       netdelay_send( NetDelay  delay, const void*  data, size_t  size );
 void       netdelay_send_aux( NetDelay  delay, const void*  data, size_t  size, void*  opaque );
 void       netdelay_destroy( NetDelay  delay );
 
-/** in vl.c */
 /* network traffic shaper and delayer */
-extern NetShaper   slirp_shaper_in;
-extern NetShaper   slirp_shaper_out;
-extern NetDelay    slirp_delay_in;
+extern NetShaper   android_net_shaper_in;
+extern NetShaper   android_net_shaper_out;
+extern NetDelay    android_net_delay_in;
 
 ANDROID_END_HEADER
 
