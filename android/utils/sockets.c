@@ -364,7 +364,7 @@ format_ip6( char*  buf, char*  end, const uint8_t*  ip6 )
     memset(sa, 0, sizeof(sa));
     sa->sin6_family = AF_INET6;
     memcpy(sa->sin6_addr.s6_addr, ip6, 16);
-    if (getnameinfo(sa, sizeof(sa), buf, end - buf, NULL, 0, NI_NUMERICHOST))
+    if (getnameinfo((const struct sockaddr *)sa, sizeof(sa), buf, end - buf, NULL, 0, NI_NUMERICHOST))
         return buf;
     char* ptr = memchr(buf, 0, end - buf);
     assert(ptr != NULL);
@@ -556,7 +556,14 @@ sock_address_to_bsd( const SockAddress*  a, sockaddr_storage*  paddress, socklen
             memcpy( dst->sun_path, a->u._unix.path, slen );
             dst->sun_path[slen] = 0;
 
-            *psize = (char*)&dst->sun_path[slen+1] - (char*)dst;
+            *psize = (char*)&dst->sun_path[slen + 1] - (char*)dst;
+#ifdef __linux__
+            // Support for Linux abstract socket namespace
+            if (dst->sun_path[0] == '@') {
+                dst->sun_path[0] = '\0';
+                *psize -=1;  // trailing zero is not part of the abstract name.
+            }
+#endif  // __linux__
         }
         break;
 #endif /* HAVE_UNIX_SOCKETS */
@@ -604,19 +611,39 @@ sock_address_from_bsd( SockAddress*  a, const void*  from, size_t  fromlen )
     case AF_LOCAL:
         {
             const struct sockaddr_un*  src = from;
-            char*                end;
-
-            if (fromlen < sizeof(*src))
+            char* end;
+            size_t sun_path_offset = offsetof(struct sockaddr_un, sun_path);
+            if (fromlen < sun_path_offset + 1)
                 return set_errno(EINVAL);
 
-            /* check that the path is zero-terminated */
-            end = memchr(src->sun_path, 0, UNIX_PATH_MAX);
-            if (end == NULL)
-                return set_errno(EINVAL);
+            char* abstract_path = NULL;
+
+#ifdef __linux__
+            if (src->sun_path[0] == '\0') {
+                // The content of sun_path[0] is an initial-zero followed
+                // by a liberal number of bytes (which can be 0 too). Allocate
+                // a heap-allocated block with one more byte, replace the
+                // initial one with '@', and add a trailing zero.
+                size_t abstract_len = fromlen - sun_path_offset;
+                abstract_path = malloc(abstract_len + 1);
+                memcpy(abstract_path, src->sun_path, abstract_len);
+                abstract_path[0] = '@';
+                abstract_path[abstract_len] = '\0';
+            }
+#endif  // __linux__
+
+            if (!abstract_path) {
+                /* check that the path is zero-terminated */
+                end = memchr(src->sun_path, 0, fromlen - sun_path_offset);
+                if (end == NULL)
+                    return set_errno(EINVAL);
+
+                abstract_path = strdup(src->sun_path);
+            }
 
             a->family = SOCKET_UNIX;
             a->u._unix.owner = 1;
-            a->u._unix.path  = strdup(src->sun_path);
+            a->u._unix.path  = abstract_path;
         }
         break;
 #endif
