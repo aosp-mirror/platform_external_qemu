@@ -35,6 +35,7 @@
 #include "android/skin/qt/emulator-overlay.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/tool-window.h"
+#include "android/skin/qt/user-actions-counter.h"
 
 #include <memory>
 
@@ -256,6 +257,9 @@ private:
     QMessageBox mAvdWarningBox;
     QMessageBox mGpuWarningBox;
     bool mFirstShowEvent;
+
+    EventCapturer mEventCapturer;
+    std::shared_ptr<android::qt::UserActionsCounter> mUserActionsCounter;
 };
 
 struct SkinSurface {

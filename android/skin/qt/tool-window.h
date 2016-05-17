@@ -18,6 +18,7 @@
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/set-ui-emu-agent.h"
 #include "android/skin/qt/shortcut-key-store.h"
+#include "android/skin/qt/user-actions-counter.h"
 #include "android/utils/compiler.h"
 
 #include <QDir>
@@ -51,8 +52,13 @@ class ToolWindow : public QFrame
 {
     Q_OBJECT
 
+    using UserActionsCounterPtr =
+            std::weak_ptr<android::qt::UserActionsCounter>;
+
 public:
-    explicit ToolWindow(EmulatorQtWindow *emulatorWindow, QWidget *parent);
+    explicit ToolWindow(EmulatorQtWindow* emulatorWindow,
+                        QWidget* parent,
+                        UserActionsCounterPtr user_actions_counter);
     ~ToolWindow();
 
     void hide();
@@ -118,6 +124,7 @@ private:
     ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
     bool mIsExtendedWindowActiveOnHide = false;
     QString mDetectedAdbPath;
+    UserActionsCounterPtr mUserActionsCounter;
     SizeTweaker mSizeTweaker;
 
 private slots:
