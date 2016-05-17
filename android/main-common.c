@@ -50,6 +50,8 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+const char*  android_skin_net_speed = NULL;
+const char*  android_skin_net_delay = NULL;
 
 /***********************************************************************/
 /***********************************************************************/
@@ -1436,17 +1438,17 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         return false;
     }
 
-    if (!opts->netspeed && skin_network_speed) {
-        D("skin network speed: '%s'", skin_network_speed);
-        if (strcmp(skin_network_speed, NETWORK_SPEED_DEFAULT) != 0) {
-            str_reset(&opts->netspeed, skin_network_speed);
+    if (!opts->netspeed && android_skin_net_speed) {
+        D("skin network speed: '%s'", android_skin_net_speed);
+        if (strcmp(android_skin_net_speed, NETWORK_SPEED_DEFAULT) != 0) {
+            str_reset(&opts->netspeed, android_skin_net_speed);
         }
     }
 
-    if (!opts->netdelay && skin_network_delay) {
-        D("skin network delay: '%s'", skin_network_delay);
-        if (strcmp(skin_network_delay, NETWORK_DELAY_DEFAULT) != 0) {
-            str_reset(&opts->netdelay, skin_network_delay);
+    if (!opts->netdelay && android_skin_net_delay) {
+        D("skin network delay: '%s'", android_skin_net_delay);
+        if (strcmp(android_skin_net_delay, NETWORK_DELAY_DEFAULT) != 0) {
+            str_reset(&opts->netdelay, android_skin_net_delay);
         }
     }
 

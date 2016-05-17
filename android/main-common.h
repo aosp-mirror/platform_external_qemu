@@ -66,8 +66,8 @@ uint64_t convertMBToBytes( unsigned  megaBytes );
 #define NETWORK_SPEED_DEFAULT  "full"
 #define NETWORK_DELAY_DEFAULT  "none"
 
-extern const char*  skin_network_speed;
-extern const char*  skin_network_delay;
+extern const char*  android_skin_net_speed;
+extern const char*  android_skin_net_delay;
 
 typedef enum {
     ACCEL_OFF = 0,
