@@ -17,6 +17,7 @@
 #include "android/curl-support.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/crashreport/CrashReporter.h"
+#include "android/featurecontrol/FeatureControl_c_wrapper.h"
 #include "android/utils/filelock.h"
 #include "android/utils/sockets.h"
 
@@ -28,6 +29,7 @@ using android::base::System;
 // The order of initialization here can be very finicky. Handle with care, and
 // leave hints about any ordering constraints via comments.
 void process_early_setup(int argc, char** argv) {
+    featureControl_init();
     // Initialize sockets first so curl/crash processor can use sockets.
     // Does not create any threads.
     android_socket_init();
