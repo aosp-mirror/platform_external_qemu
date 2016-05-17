@@ -102,9 +102,6 @@ void write_default_keyset( void ) {
 /***********************************************************************/
 /***********************************************************************/
 
-const char*  skin_network_speed = NULL;
-const char*  skin_network_delay = NULL;
-
 static AConfig* s_skinConfig = NULL;
 static char* s_skinPath = NULL;
 
@@ -216,8 +213,8 @@ FOUND_SKIN:
     /* the default network speed and latency can now be specified by the device skin */
     n = aconfig_find(root, "network");
     if (n != NULL) {
-        skin_network_speed = aconfig_str(n, "speed", 0);
-        skin_network_delay = aconfig_str(n, "delay", 0);
+        android_skin_net_speed = aconfig_str(n, "speed", 0);
+        android_skin_net_delay = aconfig_str(n, "delay", 0);
     }
 
     /* extract framebuffer information from the skin.
