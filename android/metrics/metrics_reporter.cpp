@@ -289,6 +289,9 @@ ABool androidMetrics_seal() {
         loopTimer_stop(metrics_timer);
         loopTimer_free(metrics_timer);
         metrics_timer = NULL;
+
+        // Force a last tick so we get the most up-to-date data.
+        androidMetrics_tick();
     }
 
     androidMetrics_init(&metrics);
