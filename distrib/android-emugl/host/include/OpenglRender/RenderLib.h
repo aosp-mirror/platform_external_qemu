@@ -29,6 +29,7 @@ public:
 
     virtual void setLogger(emugl_logger_struct logger) = 0;
     virtual void setCrashReporter(emugl_crash_reporter_t reporter) = 0;
+    virtual void setFeatureController(emugl_feature_is_enabled_t featureController) = 0;
 
     // initRenderer - initialize the OpenGL renderer object.
     //
