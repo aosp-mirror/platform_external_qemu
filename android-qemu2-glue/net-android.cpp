@@ -12,6 +12,7 @@
 #include "net-android.h"
 #include "android/android.h"
 #include "android/network/constants.h"
+#include "android/network/globals.h"
 #include "android/telephony/modem_driver.h"
 #include "android/shaper.h"
 
@@ -19,34 +20,25 @@ extern "C" {
 #include "net/net.h"
 }
 
-double   qemu_net_upload_speed   = 0.;
-double   qemu_net_download_speed = 0.;
-int      qemu_net_min_latency = 0;
-int      qemu_net_max_latency = 0;
-
-NetShaper  slirp_shaper_in;
-NetShaper  slirp_shaper_out;
-NetDelay   slirp_delay_in;
-
 #if defined(CONFIG_SLIRP)
 static void* s_slirp_state = nullptr;
 static void* s_net_client_state = nullptr;
 static Slirp* s_slirp = nullptr;
 
 static void
-slirp_delay_in_cb(void* data, size_t size, void* opaque)
+android_net_delay_in_cb(void* data, size_t size, void* opaque)
 {
     slirp_input(s_slirp, static_cast<const uint8_t*>(data), size);
 }
 
 static void
-slirp_shaper_in_cb(void* data, size_t size, void* opaque)
+android_net_shaper_in_cb(void* data, size_t size, void* opaque)
 {
-    netdelay_send_aux(slirp_delay_in, data, size, opaque);
+    netdelay_send_aux(android_net_delay_in, data, size, opaque);
 }
 
 static void
-slirp_shaper_out_cb(void* data, size_t size, void* opaque)
+android_net_shaper_out_cb(void* data, size_t size, void* opaque)
 {
     qemu_send_packet(static_cast<NetClientState*>(s_net_client_state),
                      static_cast<const uint8_t*>(data),
@@ -59,14 +51,14 @@ slirp_init_shapers(void* slirp_state, void* net_client_state, Slirp* slirp)
     s_slirp_state = slirp_state;
     s_net_client_state = net_client_state;
     s_slirp = slirp;
-    slirp_delay_in = netdelay_create(slirp_delay_in_cb);
-    slirp_shaper_in = netshaper_create(1, slirp_shaper_in_cb);
-    slirp_shaper_out = netshaper_create(1, slirp_shaper_out_cb);
+    android_net_delay_in = netdelay_create(android_net_delay_in_cb);
+    android_net_shaper_in = netshaper_create(1, android_net_shaper_in_cb);
+    android_net_shaper_out = netshaper_create(1, android_net_shaper_out_cb);
 
-    netdelay_set_latency(slirp_delay_in, qemu_net_min_latency,
-                         qemu_net_max_latency);
-    netshaper_set_rate(slirp_shaper_out, qemu_net_download_speed);
-    netshaper_set_rate(slirp_shaper_in, qemu_net_upload_speed);
+    netdelay_set_latency(android_net_delay_in, android_net_min_latency,
+                         android_net_max_latency);
+    netshaper_set_rate(android_net_shaper_out, android_net_download_speed);
+    netshaper_set_rate(android_net_shaper_in, android_net_upload_speed);
 }
 #endif  // CONFIG_SLIRP
 
@@ -78,8 +70,8 @@ android_parse_network_speed(const char*  speed)
         return -1;
     }
 
-    qemu_net_upload_speed = upload;
-    qemu_net_download_speed = download;
+    android_net_upload_speed = upload;
+    android_net_download_speed = download;
 
     return 0;
 }
@@ -92,8 +84,8 @@ android_parse_network_latency(const char*  delay)
     if (!android_network_latency_parse(delay, &min_delay_ms, &max_delay_ms)) {
         return -1;
     }
-    qemu_net_min_latency = (int)min_delay_ms;
-    qemu_net_max_latency = (int)max_delay_ms;
+    android_net_min_latency = (int)min_delay_ms;
+    android_net_max_latency = (int)max_delay_ms;
 
     return 0;
 }

@@ -19,6 +19,7 @@
 
 #include "android/android.h"
 #include "android/console_auth.h"
+#include "android/network/globals.h"
 #include "monitor/monitor.h"
 #include "qemu/config-file.h"
 #include "qemu/option.h"
@@ -1724,7 +1725,7 @@ void android_console_gsm_data(Monitor* mon, const QDict* qdict) {
 
         if (!strcmp(args, name)) {
             amodem_set_data_registration(android_modem, state);
-            qemu_net_disable = (state != A_REGISTRATION_HOME &&
+            android_net_disable = (state != A_REGISTRATION_HOME &&
                                 state != A_REGISTRATION_ROAMING);
             monitor_printf(mon, "OK\n");
             return;

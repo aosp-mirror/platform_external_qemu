@@ -127,6 +127,7 @@
 #include "android/skin/winsys.h"
 #include "android/main-common.h"
 #include "android/multitouch-port.h"
+#include "android/network/globals.h"
 #include "android/opengl/emugl_config.h"
 #include "android/ui-emu-agent.h"
 #include "android/globals.h"
@@ -4276,10 +4277,10 @@ int run_qemu_main(int argc, const char **argv)
     }
 
     if (android_op_netfast) {
-        qemu_net_download_speed = 0;
-        qemu_net_upload_speed = 0;
-        qemu_net_min_latency = 0;
-        qemu_net_max_latency = 0;
+        android_net_download_speed = 0;
+        android_net_upload_speed = 0;
+        android_net_min_latency = 0;
+        android_net_max_latency = 0;
     }
 
     int dns_count = 0;

@@ -107,7 +107,7 @@ static inline void slirp_smb_cleanup(SlirpState *s) { }
 void slirp_output(void *opaque, const uint8_t *pkt, int pkt_len)
 {
 #if defined(CONFIG_ANDROID)
-    netshaper_send(slirp_shaper_out, (void*)pkt, pkt_len);
+    netshaper_send(android_net_shaper_out, (void*)pkt, pkt_len);
 #else
     SlirpState *s = opaque;
 
@@ -118,7 +118,7 @@ void slirp_output(void *opaque, const uint8_t *pkt, int pkt_len)
 static ssize_t net_slirp_receive(NetClientState *nc, const uint8_t *buf, size_t size)
 {
 #if defined(CONFIG_ANDROID)
-    netshaper_send(slirp_shaper_in, (char*)buf, size);
+    netshaper_send(android_net_shaper_in, (char*)buf, size);
 #else
     SlirpState *s = DO_UPCAST(SlirpState, nc, nc);
 
