@@ -68,6 +68,9 @@ namespace {
 // OpenglEsPipe needs to call android_pipe_wake() and, sometimes,
 // android_pipe_close(); these functions set the pipe's IRQ, so they have to
 // comply with all those threading/locking rules on where and how to run.
+// To add more to the complexity, Qemu2's dynamic code recompilation (TCG) is
+// non thread-safe in even scarrier manner: one may not call any related
+// functions from a non-main loop thread, even when holding the lock.
 //
 // Implementaiton:
 // PipeWaker constructor takes a Looper* parameter, and operates based on it:
