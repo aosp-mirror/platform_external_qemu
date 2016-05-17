@@ -13,7 +13,11 @@
 // limitations under the License.
 #pragma once
 
+#include "android/featurecontrol/FeatureControl.h"
+
 typedef void (*emugl_crash_reporter_t)(const char* format, ...);
+
+typedef bool (*emugl_feature_is_enabled_t)(android::featurecontrol::Feature feature);
 
 typedef void (*emugl_logger_t)(const char* fmt, ...);
 typedef struct {
