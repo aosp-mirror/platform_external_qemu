@@ -26,3 +26,25 @@ TEST(String, str_ends_withSuccess) {
     EXPECT_TRUE(str_ends_with("abc", "c"));
     EXPECT_TRUE(str_ends_with("0123", "23"));
 }
+
+#define TEST_SKIP(string, skipped) \
+    EXPECT_EQ(string + skipped, str_skip_white_space_if_any(string))
+TEST(String, str_skip_white_space_if_any) {
+    TEST_SKIP("no change", 0);
+    TEST_SKIP("", 0);
+    TEST_SKIP(" left", 1);
+    TEST_SKIP("right ", 0);
+    TEST_SKIP("\nnewline\r", 1);
+    TEST_SKIP(" \r\n\tmulti \t\r\n", 4);
+}
+
+TEST(String, str_begins_with) {
+    EXPECT_TRUE(str_begins_with("12345678", "1234"));
+    EXPECT_TRUE(str_begins_with("auth", "auth"));
+    EXPECT_TRUE(str_begins_with("", ""));
+    EXPECT_TRUE(str_begins_with("12345678", ""));
+    EXPECT_FALSE(str_begins_with("12345678", "abcd"));
+    EXPECT_FALSE(str_begins_with("12345678", "1234abcd"));
+    EXPECT_FALSE(str_begins_with("1234", "12345678"));
+    EXPECT_FALSE(str_begins_with("", "abcd"));
+}

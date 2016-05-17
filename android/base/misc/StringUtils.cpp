@@ -16,6 +16,7 @@
 
 #include "android/base/memory/QSort.h"
 #include <stdlib.h>
+#include <string>
 
 namespace android {
 namespace base {
@@ -31,6 +32,19 @@ struct StringQSortTraits {
 
 void sortStringArray(String* strings, size_t count) {
     QSort<String, StringQSortTraits>::sort(strings, count);
+}
+
+std::string trim(const std::string& in) {
+    size_t start = 0;
+    while (start < in.size() && isspace(in[start])) {
+        start++;
+    }
+
+    size_t end = in.size();
+    while (end > start && isspace(in[end - 1])) {
+        end--;
+    }
+    return std::string(in.c_str() + start, end - start);
 }
 
 }  // namespace base

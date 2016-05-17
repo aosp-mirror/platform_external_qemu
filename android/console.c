@@ -24,6 +24,7 @@
 #include "android/console.h"
 
 #include "android/android.h"
+#include "android/console_auth.h"
 #include "android/globals.h"
 #include "android/hw-events.h"
 #include "android/hw-sensors.h"
@@ -80,6 +81,7 @@ typedef struct {
 
 
 typedef int Socket;
+typedef const struct CommandDefRec_* CommandDef;
 
 typedef struct ControlClientRec_
 {
@@ -92,7 +94,7 @@ typedef struct ControlClientRec_
     char                       finished;
     char                       buff[ 4096 ];
     int                        buff_len;
-
+    CommandDef                 commands;
 } ControlClientRec;
 
 
@@ -292,6 +294,21 @@ static int control_write_err_cb(void* opaque, const char* str, int strsize) {
 // forward declaration
 static void control_client_read(void* opaque, int fd, unsigned events);
 
+typedef const struct CommandDefRec_* CommandDef;
+
+typedef struct CommandDefRec_ {
+    const char* names;
+    const char* abstract;
+    const char* description;
+    void (*descriptor)(ControlClient client);
+    int (*handler)(ControlClient client, char* args);
+    CommandDef subcommands; /* if handler is NULL */
+
+} CommandDefRec;
+
+static const CommandDefRec main_commands[];         /* forward */
+static const CommandDefRec main_commands_preauth[]; /* forward */
+
 static ControlClient
 control_client_create( Socket         socket,
                        ControlGlobal  global )
@@ -301,6 +318,7 @@ control_client_create( Socket         socket,
     if (client) {
         socket_set_nodelay( socket );
         socket_set_nonblock( socket );
+        client->commands = main_commands_preauth;
         client->finished = 0;
         client->global  = global;
         client->sock    = socket;
@@ -314,20 +332,6 @@ control_client_create( Socket         socket,
     }
     return client;
 }
-
-typedef const struct CommandDefRec_  *CommandDef;
-
-typedef struct CommandDefRec_ {
-    const char*  names;
-    const char*  abstract;
-    const char*  description;
-    void        (*descriptor)( ControlClient  client );
-    int         (*handler)( ControlClient  client, char* args );
-    CommandDef   subcommands;   /* if handler is NULL */
-
-} CommandDefRec;
-
-static const CommandDefRec   main_commands[];  /* forward */
 
 static CommandDef
 find_command( char*  input, CommandDef  commands, char*  *pend, char*  *pargs )
@@ -397,26 +401,34 @@ dump_help( ControlClient  client,
 
 static int do_quit(ControlClient client, char* args);  // forward
 
-static void
-control_client_do_command( ControlClient  client )
-{
+static void control_send_help_prompt(ControlClient client) {
+    control_write(client,
+                  "Android Console: type 'help' for a list of commands\r\n");
+}
+
+static void control_client_do_command(ControlClient client) {
     char*       line     = client->buff;
     char*       args     = NULL;
-    CommandDef  commands = main_commands;
+    CommandDef  commands = client->commands;
     char*       cmdend   = client->buff;
-    CommandDef  cmd      = find_command( line, commands, &cmdend, &args );
+    CommandDef  cmd = NULL;
+
+    // do security checks before executing find_command
+    size_t line_len = strlen(line);
+    if (android_http_is_request_line(line, line_len)) {
+        control_write(client, "KO: Forbidden HTTP request. Aborting\r\n");
+        do_quit(client, NULL);
+        return;
+    } else if (!android_utf8_is_valid(line, line_len)) {
+        control_write(client, "KO: Forbidden binary request. Aborting\r\n");
+        do_quit(client, NULL);
+        return;
+    }
+
+    cmd = find_command(line, commands, &cmdend, &args);
 
     if (cmd == NULL) {
-        size_t line_len = strlen(line);
-        if (android_http_is_request_line(line, line_len)) {
-            control_write( client, "KO: Forbidden HTTP request. Aborting\r\n");
-            do_quit(client, NULL);
-        } else  if (!android_utf8_is_valid(line, line_len)) {
-            control_write( client, "KO: Forbidden binary request. Aborting\r\n");
-            do_quit(client, NULL);
-        } else {
-            control_write( client, "KO: unknown command, try 'help'\r\n" );
-        }
+        control_write(client, "KO: unknown command, try 'help'\r\n");
         return;
     }
 
@@ -462,8 +474,8 @@ do_help( ControlClient  client, char*  args )
 {
     char*       line;
     char*       start = args;
-    char*       end   = start;
-    CommandDef  cmd = main_commands;
+    char*       end = start;
+    CommandDef  cmd = client->commands;
 
     /* without arguments, simply dump all commands */
     if (args == NULL) {
@@ -578,7 +590,6 @@ static void control_client_read(void* opaque, int fd, unsigned events) {
     }
 }
 
-
 /* this function is called on each new client connection */
 static void control_global_accept(void* opaque,
                                   int listen_fd,
@@ -608,9 +619,38 @@ static void control_global_accept(void* opaque,
     D(( "control_global_accept: creating new client\n" ));
     client = control_client_create( fd, global );
     if (client) {
-        D(( "control_global_accept: new client %p\n", client ));
-        control_write( client, "Android Console: type 'help' for a list of commands\r\n" );
-        control_write( client, "OK\r\n" );
+        char* emulator_console_auth_token_path =
+                android_console_auth_token_path_dup();
+
+        int console_auth_status = android_console_auth_get_status();
+        switch (console_auth_status) {
+            case CONSOLE_AUTH_STATUS_DISABLED:
+                client->commands = main_commands;
+                control_send_help_prompt(client);
+                control_write(client, "OK\r\n");
+                D(("control_global_accept: new client %p\n", client));
+                break;
+            case CONSOLE_AUTH_STATUS_REQUIRED:
+                // Note that Studio looks for the first line of this message
+                // /exactly/
+                control_write(client,
+                              "Android Console: Authentication required\r\n");
+                control_write(client,
+                              "Android Console: type 'auth <auth_token>' to "
+                              "authenticate\r\n");
+                control_write(client,
+                              "Android Console: you can find your <auth_token> "
+                              "in \r\n'");
+                control_write(client, emulator_console_auth_token_path);
+                control_write(client, "'\r\nOK\r\n");
+                D(("control_global_accept: auth required %p\n", client));
+                break;
+            case CONSOLE_AUTH_STATUS_ERROR:
+                control_client_destroy(client);
+                D(("control_global_accept: rejected client\n"));
+                break;
+        }
+        free(emulator_console_auth_token_path);
     }
 }
 
@@ -641,6 +681,19 @@ int control_console_start(int control_port,
     COPY_AGENT(global->user_event_agent, user_event_agent);
     COPY_AGENT(global->vm_operations, vm_operations);
     COPY_AGENT(global->net_agent, net_agent);
+
+    int console_auth_status = android_console_auth_get_status();
+    if (console_auth_status == CONSOLE_AUTH_STATUS_ERROR) {
+        // Banners don't get sent reliably in QEMU2 if we disconnect quickly, so
+        // we output the error message on stderr there.  Do the same here.
+        char* emulator_console_auth_token_path =
+                android_console_auth_token_path_dup();
+        fprintf(stderr,
+                "ERROR: Unable to access '%s': emulator console will not "
+                "work\n",
+                emulator_console_auth_token_path);
+        free(emulator_console_auth_token_path);
+    }
 
     fd = socket_create_inet( SOCKET_STREAM );
     if (fd < 0) {
@@ -2589,6 +2642,19 @@ static const CommandDefRec  qemu_commands[] =
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
+#define HELP_COMMAND \
+    { "help|h|?", "print a list of commands", NULL, NULL, do_help, NULL }
+
+#define QUIT_COMMAND \
+    { "quit|exit", "quit control session", NULL, NULL, do_quit, NULL }
+
+#define AVD_COMMAND(sub_commands)                                           \
+    {                                                                       \
+        "avd", "control virtual device execution",                          \
+                "allows you to control (e.g. start/stop) the execution of " \
+                "the virtual device\r\n",                                   \
+                NULL, NULL, sub_commands                                    \
+    }
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -2680,3 +2746,99 @@ static const CommandDefRec   main_commands[] =
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
+
+/********************************************************************************************/
+/********************************************************************************************/
+/*****                                                                                 ******/
+/*****                           A U T H   C O M M A N D S                             ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+static int do_auth(ControlClient client, char* args) {
+    if (!args) {
+        control_write(client, "KO: missing authentication token\r\n");
+        return -1;
+    }
+
+    char* auth_token = android_console_auth_get_token_dup();
+    if (!auth_token) {
+        control_write(client,
+                      "KO: unable to read ~/.emulator_console_auth_token\r\n");
+        return -1;
+    }
+
+    if (0 != strcmp(auth_token, args)) {
+        free(auth_token);
+        control_write(client,
+                      "KO: authentication token does not match "
+                      "~/.emulator_console_auth_token\r\n");
+        return -1;
+    }
+    free(auth_token);
+
+    control_send_help_prompt(client);
+    client->commands = main_commands;
+    return 0;
+}
+
+static const CommandDefRec vm_commands_preauth[] = {
+        {"name",
+         "query virtual device name",
+         "'avd name' will return the name of this virtual device\r\n",
+         NULL,
+         do_avd_name,
+         NULL},
+
+        {NULL, NULL, NULL, NULL, NULL, NULL}};
+
+/* "preauth" commands are the set of commands that are legal before
+ * authentication.  "avd name is special cased here because it is needed by
+ * older versions of Android Studio */
+static const CommandDefRec main_commands_preauth[] = {
+    HELP_COMMAND,
+
+    AVD_COMMAND(vm_commands_preauth),
+
+    {"auth",
+     "user authentication for the emulator console",
+     "use 'auth <auth_token>' to get extended console functionality\r\n",
+     NULL,
+     do_auth,
+     NULL},
+
+    QUIT_COMMAND,
+
+    {NULL, NULL, NULL, NULL, NULL, NULL}};
+
+const char* android_console_auth_banner_get() {
+    static char s_android_monitor_auth_banner[1024];
+    static bool s_ready = false;
+
+    if (!s_ready) {
+        // in QEMU2, banners get \n appended when they are output so no trailing
+        // \n here
+        // Note that Studio looks for the first line of this message /exactly/
+        char* emulator_console_auth_token_path =
+                android_console_auth_token_path_dup();
+        snprintf(s_android_monitor_auth_banner,
+                 sizeof(s_android_monitor_auth_banner),
+                 "Android Console: Authentication required\n"
+                 "Android Console: type 'auth <auth_token>' to authenticate\n"
+                 "Android Console: you can find your <auth_token> in "
+                 "\n'%s'\nOK",
+                 emulator_console_auth_token_path);
+        free(emulator_console_auth_token_path);
+
+        s_ready = true;
+    }
+
+    return s_android_monitor_auth_banner;
+}
+
+const char* android_console_help_banner_get() {
+    // in QEMU2, banners get \n appended when they are output so no trailing \n
+    // here
+    return "Android Console: type 'help' for a list of commands"
+           "\nOK";
+}
