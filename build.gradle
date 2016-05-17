@@ -26,6 +26,8 @@ sdk {
             into 'lib'
             notice null
         }
+        item('android/featurecontrol/advancedFeatures.ini') {
+        }
         item("$buildDefaultEmulator.output/emulator") {
             executable true
             builtBy buildDefaultEmulator
@@ -92,6 +94,8 @@ sdk {
         item('android/avd/hardware-properties.ini') {
             into 'lib'
             notice null
+        }
+        item('android/featurecontrol/advancedFeatures.ini') {
         }
         item("$buildWindowsEmulator.output/emulator.exe") {
             builtBy buildWindowsEmulator
