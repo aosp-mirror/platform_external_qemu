@@ -130,6 +130,7 @@
 
 #if defined(CONFIG_ANDROID)
 #include "android/network/constants.h"
+#include "android/network/globals.h"
 #include "android/shaper.h"
 #endif
 
@@ -681,11 +682,6 @@ static void slirp_smb(const char *exported_dir);
 #endif
 static void slirp_redirection(Monitor *mon, const char *redir_str);
 
-double   qemu_net_upload_speed   = 0.;
-double   qemu_net_download_speed = 0.;
-int      qemu_net_min_latency = 0;
-int      qemu_net_max_latency = 0;
-
 int
 ip_packet_is_internal( const uint8_t*  data, size_t  size )
 {
@@ -709,12 +705,8 @@ ip_packet_is_internal( const uint8_t*  data, size_t  size )
 
 #ifdef CONFIG_ANDROID
 
-NetShaper  slirp_shaper_in;
-NetShaper  slirp_shaper_out;
-NetDelay   slirp_delay_in;
-
 static void
-slirp_delay_in_cb( void*   data,
+android_net_delay_in_cb( void*   data,
                    size_t  size,
                    void*   opaque )
 {
@@ -723,15 +715,15 @@ slirp_delay_in_cb( void*   data,
 }
 
 static void
-slirp_shaper_in_cb( void*   data,
+android_net_shaper_in_cb( void*   data,
                     size_t  size,
                     void*   opaque )
 {
-    netdelay_send_aux( slirp_delay_in, data, size, opaque );
+    netdelay_send_aux( android_net_delay_in, data, size, opaque );
 }
 
 static void
-slirp_shaper_out_cb( void*   data,
+android_net_shaper_out_cb( void*   data,
                      size_t  size,
                      void*   opaque )
 {
@@ -741,13 +733,13 @@ slirp_shaper_out_cb( void*   data,
 void
 slirp_init_shapers( void )
 {
-    slirp_delay_in   = netdelay_create( slirp_delay_in_cb );
-    slirp_shaper_in  = netshaper_create( 1, slirp_shaper_in_cb );
-    slirp_shaper_out = netshaper_create( 1, slirp_shaper_out_cb );
+    android_net_delay_in   = netdelay_create( android_net_delay_in_cb );
+    android_net_shaper_in  = netshaper_create( 1, android_net_shaper_in_cb );
+    android_net_shaper_out = netshaper_create( 1, android_net_shaper_out_cb );
 
-    netdelay_set_latency( slirp_delay_in, qemu_net_min_latency, qemu_net_max_latency );
-    netshaper_set_rate( slirp_shaper_out, qemu_net_download_speed );
-    netshaper_set_rate( slirp_shaper_in,  qemu_net_upload_speed  );
+    netdelay_set_latency( android_net_delay_in, android_net_min_latency, android_net_max_latency );
+    netshaper_set_rate( android_net_shaper_out, android_net_download_speed );
+    netshaper_set_rate( android_net_shaper_in,  android_net_upload_speed  );
 }
 
 #endif /* CONFIG_ANDROID */
@@ -757,7 +749,7 @@ int slirp_can_output(void)
 {
 #ifdef CONFIG_ANDROID
     return !slirp_vc ||
-           ( netshaper_can_send(slirp_shaper_out) &&
+           ( netshaper_can_send(android_net_shaper_out) &&
              qemu_can_send_packet(slirp_vc) );
 #else
     return !slirp_vc || qemu_can_send_packet(slirp_vc);
@@ -777,7 +769,7 @@ void slirp_output(const uint8_t *pkt, int pkt_len)
         return;
 
 #ifdef CONFIG_ANDROID
-    netshaper_send(slirp_shaper_out, (void*)pkt, pkt_len);
+    netshaper_send(android_net_shaper_out, (void*)pkt, pkt_len);
 #else
     qemu_send_packet(slirp_vc, pkt, pkt_len);
 #endif
@@ -798,7 +790,7 @@ static ssize_t slirp_receive(VLANClientState *vc, const uint8_t *buf, size_t siz
         qemu_tcpdump_packet(buf, size);
 
 #ifdef CONFIG_ANDROID
-    netshaper_send(slirp_shaper_in, (char*)buf, size);
+    netshaper_send(android_net_shaper_in, (char*)buf, size);
 #else
     slirp_input(buf, size);
 #endif
@@ -2621,8 +2613,8 @@ android_parse_network_speed(const char*  speed)
     if (!android_network_speed_parse(speed, &upload, &download)) {
         return -1;
     }
-    qemu_net_download_speed = download;
-    qemu_net_upload_speed = upload;
+    android_net_download_speed = download;
+    android_net_upload_speed = upload;
 
     return 0;
 }
@@ -2635,7 +2627,7 @@ android_parse_network_latency(const char*  delay)
     if (!android_network_latency_parse(delay, &min_ms, &max_ms)) {
         return -1;
     }
-    qemu_net_min_latency = (int)min_ms;
-    qemu_net_max_latency = (int)max_ms;
+    android_net_min_latency = (int)min_ms;
+    android_net_max_latency = (int)max_ms;
     return 0;
 }

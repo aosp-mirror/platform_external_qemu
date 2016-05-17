@@ -287,6 +287,7 @@ LOCAL_SRC_FILES := \
     android/multitouch-port.c \
     android/multitouch-screen.c \
     android/network/constants.c \
+    android/network/globals.c \
     android/opengl/EmuglBackendList.cpp \
     android/opengl/EmuglBackendScanner.cpp \
     android/opengl/emugl_config.cpp \

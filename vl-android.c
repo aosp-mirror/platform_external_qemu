@@ -66,6 +66,7 @@
 #include "android/metrics/studio-config.h"
 #include "android/multitouch-port.h"
 #include "android/multitouch-screen.h"
+#include "android/network/globals.h"
 #include "android/opengles.h"
 #include "android/opengles-pipe.h"
 #include "android/opengl/emugl_config.h"
@@ -3005,10 +3006,10 @@ int main(int argc, char **argv, char **envp)
     }
 
     if (android_op_netfast) {
-        qemu_net_download_speed = 0;
-        qemu_net_upload_speed = 0;
-        qemu_net_min_latency = 0;
-        qemu_net_max_latency = 0;
+        android_net_download_speed = 0;
+        android_net_upload_speed = 0;
+        android_net_min_latency = 0;
+        android_net_max_latency = 0;
     }
 
     /* Initialize LCD density */

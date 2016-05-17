@@ -19,6 +19,7 @@
 #include "android/gpu_frame.h"
 #include "android/hw-control.h"
 #include "android/hw-sensors.h"
+#include "android/network/globals.h"
 #include "android/opengles.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/set-ui-emu-agent.h"
@@ -32,8 +33,6 @@
 
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
-
-int qemu_net_disable = 0;
 
 /* EmulatorWindow structure instance. */
 static EmulatorWindow   qemulator[1];
@@ -96,14 +95,14 @@ static void emulator_window_set_device_orientation(SkinRotation rotation) {
 }
 
 static bool emulator_window_network_toggle(void) {
-    qemu_net_disable = !qemu_net_disable;
+    android_net_disable = !android_net_disable;
     if (android_modem) {
         amodem_set_data_registration(
                 android_modem,
-        qemu_net_disable ? A_REGISTRATION_UNREGISTERED
+        android_net_disable ? A_REGISTRATION_UNREGISTERED
             : A_REGISTRATION_HOME);
     }
-    return !qemu_net_disable;
+    return !android_net_disable;
 }
 
 static void emulator_window_framebuffer_invalidate(void) {

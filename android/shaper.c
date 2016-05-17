@@ -18,6 +18,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+NetShaper  android_net_shaper_in;
+NetShaper  android_net_shaper_out;
+NetDelay   android_net_delay_in;
+
 #define  SHAPER_CLOCK        LOOPER_CLOCK_REALTIME
 #define  SHAPER_CLOCK_UNIT   1000.
 
