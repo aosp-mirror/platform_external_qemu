@@ -30,6 +30,8 @@
 */
 #include "hw/misc/android_pipe.h"
 
+#include "android/utils/looper.h"
+
 #include "hw/hw.h"
 #include "hw/sysbus.h"
 #include "qemu-common.h"
@@ -687,7 +689,12 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
     android_zero_pipe_init();
     android_pingpong_init();
     android_throttle_init();
-    android_init_opengles_pipe(NULL);
+
+    // Post the wake messages from the main loop thread if we're running with a
+    // codegen, and use the render thread otherwise.
+    // Codegen is not thread safe and it hangs if we post the wakes from another
+    // thread.
+    android_init_opengles_pipe(tcg_enabled() ? looper_getForThread() : NULL);
 
     android_pipe_set_hw_funcs(&qemu2_android_pipe_hw_funcs);
 
