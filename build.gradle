@@ -26,6 +26,8 @@ sdk {
             into 'lib'
             notice null
         }
+        item('android/featurecontrol/advancedFeatures.ini') {
+        }
         item("$buildDefaultEmulator.output/emulator") {
             executable true
             builtBy buildDefaultEmulator
