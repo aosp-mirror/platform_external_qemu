@@ -80,6 +80,8 @@ void getHardwareStrings(const char** vendor, const char** renderer, const char**
 # always be the same as the ones passed to initOpenGLRenderer().
 void setPostCallback(OnPostFn onPost, void* onPostContext);
 
+void setFeatureController(FeatureControllerFn isEnabled);
+
 # showOpenGLSubwindow -
 #     Create or modify a native subwindow which is a child of 'window'
 #     to be used for framebuffer display. If a subwindow already exists,

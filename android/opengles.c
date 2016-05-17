@@ -17,6 +17,7 @@
 #include "OpenglRender/render_api_functions.h"
 
 #include "android/crashreport/crash-handler.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include <android/utils/debug.h>
 #include <android/utils/path.h>
@@ -156,7 +157,8 @@ android_startOpenglesRenderer(int width, int height)
                             rendererAddress,
                             sizeof(rendererAddress),
                             logfuncs,
-                            crashhandler_die_format)) {
+                            crashhandler_die_format,
+                            featureIsEnabled)) {
         D("Can't start OpenGLES renderer?");
         return -1;
     }

@@ -227,6 +227,9 @@ LOCAL_SRC_FILES := \
     android/emulation/qemud/android_qemud_sink.cpp \
     android/emulation/serial_line.cpp \
     android/emulator-window.c \
+    android/error-messages.cpp \
+    android/featurecontrol/FeatureControl.cpp \
+    android/featurecontrol/FeatureControlImpl.cpp \
     android/filesystems/ext4_resize.cpp \
     android/filesystems/ext4_utils.cpp \
     android/filesystems/fstab_parser.cpp \
