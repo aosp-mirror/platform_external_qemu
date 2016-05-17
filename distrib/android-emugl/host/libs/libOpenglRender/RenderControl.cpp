@@ -20,8 +20,8 @@
 #include "FrameBuffer.h"
 #include "RenderThreadInfo.h"
 #include "ChecksumCalculatorThreadInfo.h"
-
 #include "OpenGLESDispatch/EGLDispatch.h"
+#include "emugl/common/feature_control.h"
 
 static const GLint rendererVersion = 1;
 
@@ -81,8 +81,9 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     }
 
     // We add the maximum supported GL protocol number into GL_EXTENSIONS
+    bool isChecksumEnabled = emugl_feature_is_enabled(android::featurecontrol::GLPipeChecksum);
     const char* glProtocolStr = NULL;
-    if (name == GL_EXTENSIONS) {
+    if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glProtocolStr = ChecksumCalculatorThreadInfo::getMaxVersionString();
         if (len==0) len = 1; // the last byte
         len += strlen(glProtocolStr) + 1;
@@ -92,7 +93,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
         return -len;
     }
 
-    if (name == GL_EXTENSIONS) {
+    if (isChecksumEnabled && name == GL_EXTENSIONS) {
         snprintf((char *)buffer, bufferSize, "%s%s ", str ? str : "", glProtocolStr);
     } else if (str) {
         strcpy((char *)buffer, str);
