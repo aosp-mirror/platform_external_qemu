@@ -52,6 +52,7 @@
 #include "android/console.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/bufprint_config_dirs.h"
+#include "android/featurecontrol/FeatureControl_c_wrapper.h"
 #include "android/filesystems/partition_config.h"
 #include "android/globals.h"
 #include "android/gps.h"
@@ -1953,6 +1954,8 @@ int main(int argc, char **argv, char **envp)
     /* Ensure Looper implementation for this thread is based on the QEMU
      * main loop. */
     qemu_looper_setForThread();
+
+    featureControl_init();
 
     init_clocks();
 
