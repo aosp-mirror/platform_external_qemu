@@ -247,6 +247,7 @@ LOCAL_SRC_FILES := \
     android/emulation/vm_lock.cpp \
     android/emulator-window.c \
     android/error-messages.cpp \
+    android/featurecontrol/FeatureControl.cpp \
     android/filesystems/ext4_resize.cpp \
     android/filesystems/ext4_utils.cpp \
     android/filesystems/fstab_parser.cpp \
