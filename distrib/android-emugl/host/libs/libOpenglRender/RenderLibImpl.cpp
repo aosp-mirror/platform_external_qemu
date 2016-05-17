@@ -16,6 +16,7 @@
 #include "RendererImpl.h"
 
 #include "emugl/common/crash_reporter.h"
+#include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
 
 namespace emugl {
@@ -27,6 +28,10 @@ void RenderLibImpl::setLogger(emugl_logger_struct logger) {
 
 void RenderLibImpl::setCrashReporter(emugl_crash_reporter_t reporter) {
     set_emugl_crash_reporter(reporter);
+}
+
+void RenderLibImpl::setFeatureController(emugl_feature_is_enabled_t featureController) {
+    set_emugl_feature_is_enabled(featureController);
 }
 
 RendererPtr RenderLibImpl::initRenderer(int width, int height,

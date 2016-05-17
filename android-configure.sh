@@ -564,6 +564,13 @@ fi
 mkdir -p $OUT_DIR/lib
 cp -f "$CACERTS_FILE" "$OUT_DIR/lib/"
 
+ADVANCED_FEATURE_FILE="$PROGDIR/android/data/advancedFeatures.ini"
+if [ ! -f "$ADVANCED_FEATURE_FILE" ]; then
+    panic "Missing advanced feature file: $ADVANCED_FEATURE_FILE"
+fi
+mkdir -p $OUT_DIR/lib
+cp -f "$ADVANCED_FEATURE_FILE" "$OUT_DIR/lib/"
+
 ###
 ###  Breakpad probe
 ###

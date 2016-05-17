@@ -13,6 +13,7 @@
 #include "android/opengles.h"
 
 #include "android/crashreport/crash-handler.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/opengl/logger.h"
 #include "android/utils/debug.h"
@@ -132,6 +133,7 @@ android_startOpenglesRenderer(int width, int height)
     android_init_opengl_logger();
 
     sRenderLib->setCrashReporter(&crashhandler_die_format);
+    sRenderLib->setFeatureController(&android::featurecontrol::isEnabled);
 
     emugl_logger_struct logfuncs;
     logfuncs.coarse = android_opengl_logger_write;
