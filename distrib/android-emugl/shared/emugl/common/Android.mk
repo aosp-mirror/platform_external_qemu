@@ -9,6 +9,7 @@ commonSources := \
         crash_reporter.cpp \
         id_to_object_map.cpp \
         lazy_instance.cpp \
+        feature_control.cpp \
         logging.cpp \
         message_channel.cpp \
         pod_vector.cpp \

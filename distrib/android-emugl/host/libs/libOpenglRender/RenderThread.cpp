@@ -110,7 +110,6 @@ intptr_t RenderThread::main() {
         do {
             progress = false;
 
-            m_lock->lock();
             //
             // try to process some of the command buffer using the GLESv1 decoder
             //
@@ -138,8 +137,6 @@ intptr_t RenderThread::main() {
                 readBuf.consume(last);
                 progress = true;
             }
-
-            m_lock->unlock();
 
         } while( progress );
 
