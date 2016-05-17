@@ -216,7 +216,6 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "sysemu/balloon.h"
 
 #include "android/boot-properties.h"
-#include "android/core-init-utils.h"
 #include "android/hw-control.h"
 #include "android/hw-lcd.h"
 #include "android/snaphost-android.h"
@@ -383,11 +382,6 @@ char* android_op_tcpdump = NULL;
 /* -lcd-density option value. */
 char* android_op_lcd_density = NULL;
 
-/* -ui-port option value. This port will be used to report the core
- * initialization completion.
- */
-char* android_op_ui_port = NULL;
-
 /* -ui-settings option value. This value will be passed to the UI when new UI
  * process is attaching to the core.
  */
@@ -416,20 +410,10 @@ const char* drop_log_filename = NULL;
  * Parameters that are passed to this macro are used to format the error
  * mesage using sprintf routine.
  */
-#ifdef CONFIG_ANDROID
-#define  PANIC(...) android_core_init_failure(__VA_ARGS__);
-#else
 #define  PANIC(...) fprintf(stderr, __VA_ARGS__);
-#endif  // CONFIG_ANDROID
 
 /* Exits the core during initialization. */
-#ifdef CONFIG_ANDROID
-#define  QEMU_EXIT(exit_code) do { android_core_init_exit(exit_code); \
-                                   return exit_code; \
-                              } while (0)
-#else
 #define  QEMU_EXIT(exit_code) return exit_code
-#endif  // CONFIG_ANDROID
 
 #define QEMU_CORE_VERSION "qemu1 " QEMU_VERSION
 
@@ -2797,10 +2781,6 @@ int main(int argc, char **argv, char **envp)
                 android_op_lcd_density = (char*)optarg;
                 break;
 
-            case QEMU_OPTION_ui_port:
-                android_op_ui_port = (char*)optarg;
-                break;
-
             case QEMU_OPTION_ui_settings:
                 android_op_ui_settings = (char*)optarg;
                 break;
@@ -3722,11 +3702,6 @@ int main(int argc, char **argv, char **envp)
         vm_start();
 
     os_setup_post();
-
-#ifdef CONFIG_ANDROID
-    // This will notify the UI that the core is successfuly initialized
-    android_core_init_completed();
-#endif  // CONFIG_ANDROID
 
     /* Initialize metrics right before entering main loop.
      * We want to track performance of a running emulator, ignoring any early
