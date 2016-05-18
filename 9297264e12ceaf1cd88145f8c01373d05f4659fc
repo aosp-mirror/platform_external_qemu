@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b727eef3_1b1c41ae",
+        "filename": "android/featurecontrol/FeatureControl.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-05-18T18:59:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b727eef3_b9954b51",
+      "range": {
+        "startLine": 27,
+        "startChar": 22,
+        "endLine": 27,
+        "endChar": 39
+      },
+      "revId": "9297264e12ceaf1cd88145f8c01373d05f4659fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b727eef3_b9226b43",
         "filename": "android/featurecontrol/FeatureControl.h",
         "patchSetId": 4
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "b727eef3_582a3f70",
+        "filename": "android/featurecontrol/FeatureControl.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-05-18T18:59:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b727eef3_b9226b43",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 6
+      },
+      "revId": "9297264e12ceaf1cd88145f8c01373d05f4659fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b727eef3_39d03b3a",
         "filename": "android/featurecontrol/FeatureControl.h",
         "patchSetId": 4
@@ -59,6 +107,30 @@
       "writtenOn": "2016-05-18T18:14:42Z",
       "side": 1,
       "message": "if everything is static, then the class should actually be a namespace instead. You could have a \u0027normal\u0027 non-static class to implement all these features, just don\u0027t make that class public. Let all these namespace-level functions call into a global instance of that class in the .cpp file",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 23
+      },
+      "revId": "9297264e12ceaf1cd88145f8c01373d05f4659fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_b81ffb47",
+        "filename": "android/featurecontrol/FeatureControl.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-05-18T18:59:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b727eef3_39d03b3a",
       "range": {
         "startLine": 39,
         "startChar": 0,
