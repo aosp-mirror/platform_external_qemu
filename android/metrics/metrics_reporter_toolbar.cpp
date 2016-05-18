@@ -94,6 +94,7 @@ int formatToolbarGetUrl(char** ptr,
     static const char host_os_key[] = "os";
 
     static const char wallclock_time_key[] = "wall_time";
+    static const char user_actions_key[] = "user_actions";
     static const char exit_started_key[] = "exit_started";
 
     // Guest GPU information
@@ -123,6 +124,7 @@ int formatToolbarGetUrl(char** ptr,
     url_addi64val(&fullUrl, user_time_key, metrics->user_time);
     url_addintval(&fullUrl, adb_liveness_key, metrics->adb_liveness);
     url_addi64val(&fullUrl, wallclock_time_key, metrics->wallclock_time);
+    url_addi64val(&fullUrl, user_actions_key, metrics->user_actions);
     url_addintval(&fullUrl, exit_started_key, metrics->exit_started ? 1 : 0);
 
     if (metrics->guest_gpu_enabled > 0) {

@@ -80,7 +80,9 @@ public:
    static bool exceptionFilterCallback(void* context);
 
 private:
-    std::unique_ptr<google_breakpad::ExceptionHandler> mHandler;
+ bool onCrashPlatformSpecific() override;
+
+ std::unique_ptr<google_breakpad::ExceptionHandler> mHandler;
 };
 
 ::android::base::LazyInstance<HostCrashReporter> sCrashReporter =
@@ -120,9 +122,12 @@ static void attachMemoryInfo()
 }
 
 bool HostCrashReporter::exceptionFilterCallback(void*) {
-    attachUptime();
-    attachMemoryInfo();
-    return true;    // proceed with handling the crash
+  return CrashReporter::get()->onCrash();
+}
+
+bool HostCrashReporter::onCrashPlatformSpecific() {
+  attachMemoryInfo();
+  return true;  // proceed with handling the crash
 }
 
 }  // namespace anonymous

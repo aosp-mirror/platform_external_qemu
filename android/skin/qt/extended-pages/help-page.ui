@@ -128,6 +128,9 @@
      <property name="ColorGroup" stdset="0">
       <string>Tool</string>
      </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
     </widget>
     <widget class="QPushButton" name="help_fileBug">
      <property name="geometry">
@@ -161,6 +164,9 @@
      <property name="ColorGroup" stdset="0">
       <string>Tool</string>
      </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
     </widget>
     <widget class="QPushButton" name="help_sendFeedback">
      <property name="geometry">
@@ -193,6 +199,9 @@
      </property>
      <property name="ColorGroup" stdset="0">
       <string>Tool</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
      </property>
     </widget>
    </widget>

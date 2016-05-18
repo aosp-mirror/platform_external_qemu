@@ -10,6 +10,7 @@
 ** GNU General Public License for more details.
 */
 #include "android/metrics/metrics_reporter.h"
+#include "android/metrics/metrics_reporter_callbacks.h"
 
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/IniFile.h"
@@ -36,6 +37,7 @@
 #endif
 
 #include <memory>
+#include <string>
 
 #include <assert.h>
 
@@ -64,6 +66,10 @@ static std::shared_ptr<android::metrics::AdbLivenessChecker> sAdbLivenessChecker
 static const char metricsRelativeDir[] = "metrics";
 static const char metricsFilePrefix[] = "metrics";
 static const char metricsFileSuffix[] = "yogibear";
+
+// I will burn in hell for this global.
+// TODO(pprabhu) Replace by a sane object.
+std::vector<android::metrics::TickCallback> sTickCallbacks;
 
 /////////////////////////////////////////////////////////////
 // Regular update timer.
@@ -162,9 +168,11 @@ void androidMetrics_init(AndroidMetrics* androidMetrics) {
  * struct instance.
  */
 #undef METRICS_INT
+#undef METRICS_INT64
 #undef METRICS_STRING
 #undef METRICS_DURATION
 #define METRICS_INT(n, s, d) androidMetrics->n = d;
+#define METRICS_INT64(n, s, d) androidMetrics->n = d;
 #define METRICS_STRING(n, s, d) androidMetrics->n = ASTRDUP(d);
 #define METRICS_DURATION(n, s, d) androidMetrics->n = d;
 
@@ -173,9 +181,11 @@ void androidMetrics_init(AndroidMetrics* androidMetrics) {
 
 void androidMetrics_fini(AndroidMetrics* androidMetrics) {
 #undef METRICS_INT
+#undef METRICS_INT64
 #undef METRICS_STRING
 #undef METRICS_DURATION
 #define METRICS_INT(n, s, d)
+#define METRICS_INT64(n, s, d)
 #define METRICS_STRING(n, s, d) AFREE(androidMetrics->n);
 #define METRICS_DURATION(n, s, d)
 
@@ -191,9 +201,11 @@ ABool androidMetrics_write(const AndroidMetrics* androidMetrics) {
     const AndroidMetrics* am = androidMetrics;
 /* Use magic macros to write all fields to the ini file. */
 #undef METRICS_INT
+#undef METRICS_INT64
 #undef METRICS_STRING
 #undef METRICS_DURATION
 #define METRICS_INT(n, s, d) ini->setInt(s, am->n);
+#define METRICS_INT64(n, s, d) ini->setInt64(s, am->n);
 #define METRICS_STRING(n, s, d) ini->setString(s, am->n ? am->n : "");
 #define METRICS_DURATION(n, s, d) ini->setInt64(s, am->n);
 #include "android/metrics/metrics_fields.h"
@@ -213,6 +225,13 @@ ABool androidMetrics_tick() {
         metrics.user_time = times.userMs;
         metrics.system_time = times.systemMs;
         metrics.wallclock_time = times.wallClockMs;
+
+        // HACK: Call all registered callbacks. This is a hacky way to extend
+        // regular metrics drops for now.
+        // Should be replaced by a proper object that registers callbacks.
+        for (const auto callback : sTickCallbacks) {
+            callback(&metrics);
+        }
 
         metrics.exit_started =
                 android::crashreport::CrashReporter::get()->isInExitMode();
@@ -274,6 +293,9 @@ ABool androidMetrics_seal() {
         loopTimer_stop(metrics_timer);
         loopTimer_free(metrics_timer);
         metrics_timer = NULL;
+
+        // Force a last tick so we get the most up-to-date data.
+        androidMetrics_tick();
     }
 
     androidMetrics_init(&metrics);
@@ -307,6 +329,7 @@ ABool androidMetrics_readPath(AndroidMetrics* androidMetrics,
  * Set to default for the missing fields.
  */
 #undef METRICS_INT
+#undef METRICS_INT64
 #undef METRICS_STRING
 #undef METRICS_DURATION
 #define METRICS_INT(n, s, d) am->n = iniFile_getInteger(ini, s, d);
@@ -314,6 +337,7 @@ ABool androidMetrics_readPath(AndroidMetrics* androidMetrics,
     if (iniFile_hasKey(ini, s)) {                                       \
         ANDROID_METRICS_STRASSIGN(am->n, iniFile_getString(ini, s, d)); \
     }
+#define METRICS_INT64(n, s, d) am->n = iniFile_getInt64(ini, s, d);
 #define METRICS_DURATION(n, s, d) am->n = iniFile_getInt64(ini, s, d);
 
 #include "android/metrics/metrics_fields.h"
@@ -331,9 +355,11 @@ ABool androidMetrics_read(AndroidMetrics* androidMetrics) {
     AndroidMetrics* am = androidMetrics;
 /* Use magic macros to write all fields to the ini file. */
 #undef METRICS_INT
+#undef METRICS_INT64
 #undef METRICS_STRING
 #undef METRICS_DURATION
 #define METRICS_INT(n, s, d) am->n = ini->getInt(s, d);
+#define METRICS_INT64(n, s, d) am->n = ini->getInt64(s, d);
 #define METRICS_STRING(n, s, d) \
     ANDROID_METRICS_STRASSIGN(am->n, ini->getString(s, d).c_str());
 #define METRICS_DURATION(n, s, d) am->n = ini->getInt64(s, d);
@@ -492,3 +518,13 @@ void androidMetrics_populateGpuProps(AndroidMetrics* metrics,
     METRICS_GPUREPORT(metrics, 2, plist);
     METRICS_GPUREPORT(metrics, 3, plist);
 }
+
+namespace android {
+namespace metrics {
+
+void addTickCallback(TickCallback callback) {
+    sTickCallbacks.push_back(std::move(callback));
+}
+
+}  // namespace metrics
+}  // namespace android

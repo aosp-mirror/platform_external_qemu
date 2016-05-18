@@ -39,6 +39,8 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/emulator-overlay.cpp \
     android/skin/qt/emulator-qt-window.cpp \
     android/skin/qt/emulator-qt-no-window.cpp \
+    android/skin/qt/event-capturer.cpp \
+    android/skin/qt/event-subscriber.cpp \
     android/skin/qt/error-dialog.cpp \
     android/skin/qt/gl-widget.cpp \
     android/skin/qt/extended-pages/common.cpp \
@@ -57,6 +59,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/qt-ui-commands.cpp \
     android/skin/qt/stylesheet.cpp \
     android/skin/qt/tool-window.cpp \
+    android/skin/qt/user-actions-counter.cpp \
 
 ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/angle-input-widget.h \
@@ -66,6 +69,8 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/emulator-overlay.h \
     android/skin/qt/emulator-qt-window.h \
     android/skin/qt/emulator-qt-no-window.h \
+    android/skin/qt/event-capturer.h \
+    android/skin/qt/event-subscriber.h \
     android/skin/qt/extended-pages/battery-page.h \
     android/skin/qt/extended-pages/cellular-page.h \
     android/skin/qt/extended-pages/dpad-page.h \
@@ -80,6 +85,7 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/size-tweaker.h \
     android/skin/qt/QtTimerImpl.h \
     android/skin/qt/tool-window.h \
+    android/skin/qt/user-actions-counter.h
 
 ANDROID_SKIN_QT_RESOURCES := \
     android/skin/qt/resources.qrc \
