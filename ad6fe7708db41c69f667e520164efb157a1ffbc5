@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b727eef3_e7942a9d",
+        "filename": "android/featurecontrol/FeatureControl.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T22:37:59Z",
+      "side": 1,
+      "message": "PathUtils::join() ?",
+      "range": {
+        "startLine": 41,
+        "startChar": 33,
+        "endLine": 42,
+        "endChar": 65
+      },
+      "revId": "ad6fe7708db41c69f667e520164efb157a1ffbc5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_a7a2320d",
+        "filename": "android/featurecontrol/FeatureControl.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T22:37:59Z",
+      "side": 1,
+      "message": "set -\u003e reset ?",
+      "range": {
+        "startLine": 34,
+        "startChar": 9,
+        "endLine": 34,
+        "endChar": 28
+      },
+      "revId": "ad6fe7708db41c69f667e520164efb157a1ffbc5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
