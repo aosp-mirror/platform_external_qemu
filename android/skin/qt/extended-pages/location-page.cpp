@@ -39,6 +39,7 @@ LocationPage::LocationPage(QWidget *parent) :
     // We can only send 1 decimal of altitude (in meters).
     mAltitudeValidator.setNotation(QDoubleValidator::StandardNotation);
     mAltitudeValidator.setRange(-1000, 10000, 1);
+    mAltitudeValidator.setLocale(QLocale::C);
     mUi->loc_altitudeInput->setValidator(&mAltitudeValidator);
 
     mUi->loc_latitudeInput->setMinValue(-90.0);
