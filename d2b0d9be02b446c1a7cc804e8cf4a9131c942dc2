@@ -69,6 +69,30 @@
       "revId": "d2b0d9be02b446c1a7cc804e8cf4a9131c942dc2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_fe731bd5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 12
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T20:07:14Z",
+      "side": 1,
+      "message": "I thought I lost the first comment because of a Chrome glitch :)",
+      "parentUuid": "b727eef3_db6749db",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 35
+      },
+      "revId": "d2b0d9be02b446c1a7cc804e8cf4a9131c942dc2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
