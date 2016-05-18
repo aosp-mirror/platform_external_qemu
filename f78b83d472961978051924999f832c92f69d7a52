@@ -1,0 +1,406 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b727eef3_67d31a70",
+        "filename": "android/featurecontrol/FeatureControl.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T22:37:59Z",
+      "side": 1,
+      "message": "please explicitly open/close the namespaces. It\u0027s a bad style to have any \u0027using namespace\u0027 statements in the code - it might add something unexpected later",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 31
+      },
+      "revId": "f78b83d472961978051924999f832c92f69d7a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_e7c6eaac",
+        "filename": "android/featurecontrol/FeatureControl.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T22:37:59Z",
+      "side": 1,
+      "message": "you only check it in this single function. what about an assert() in the rest of them?",
+      "range": {
+        "startLine": 24,
+        "startChar": 4,
+        "endLine": 28,
+        "endChar": 5
+      },
+      "revId": "f78b83d472961978051924999f832c92f69d7a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_27c12293",
+        "filename": "android/featurecontrol/FeatureControlDef.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T22:37:59Z",
+      "side": 1,
+      "message": "please add a comment that this header file is supposed to be included multiple times, so it may not have #pragma once",
+      "revId": "f78b83d472961978051924999f832c92f69d7a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_e7226a44",
+        "filename": "android/featurecontrol/FeatureControlImpl.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T22:37:59Z",
+      "side": 1,
+      "message": "ditto - please use explicit namespaces",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 31
+      },
+      "revId": "f78b83d472961978051924999f832c92f69d7a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_87b8cef3",
+        "filename": "android/featurecontrol/FeatureControlImpl.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T22:37:59Z",
+      "side": 1,
+      "message": "stricmp() here to simplify it for the users?",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 19
+      },
+      "revId": "f78b83d472961978051924999f832c92f69d7a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_b2af128e",
+        "filename": "android/featurecontrol/FeatureControlImpl.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T22:37:59Z",
+      "side": 1,
+      "message": "nit: inline won\u0027t do anything here",
+      "range": {
+        "startLine": 38,
+        "startChar": 7,
+        "endLine": 38,
+        "endChar": 13
+      },
+      "revId": "f78b83d472961978051924999f832c92f69d7a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_92edaed7",
+        "filename": "android/featurecontrol/FeatureControlImpl.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T22:37:59Z",
+      "side": 1,
+      "message": "should we set defaultVal to anything here, e.g. false?",
+      "range": {
+        "startLine": 52,
+        "startChar": 6,
+        "endLine": 53,
+        "endChar": 74
+      },
+      "revId": "f78b83d472961978051924999f832c92f69d7a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_c744860e",
+        "filename": "android/featurecontrol/FeatureControlImpl.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T22:37:59Z",
+      "side": 1,
+      "message": "please clang-format this cl",
+      "revId": "f78b83d472961978051924999f832c92f69d7a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_875c4edc",
+        "filename": "android/featurecontrol/FeatureControlImpl.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T22:37:59Z",
+      "side": 1,
+      "message": "do we require one to only call get() if the feature control is created? if yes, I\u0027d prefer to have a reference here",
+      "range": {
+        "startLine": 30,
+        "startChar": 33,
+        "endLine": 30,
+        "endChar": 34
+      },
+      "revId": "f78b83d472961978051924999f832c92f69d7a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_67067ac3",
+        "filename": "android/featurecontrol/FeatureControlImpl.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T22:37:59Z",
+      "side": 1,
+      "message": "can this struct be private?",
+      "range": {
+        "startLine": 32,
+        "startChar": 15,
+        "endLine": 32,
+        "endChar": 28
+      },
+      "revId": "f78b83d472961978051924999f832c92f69d7a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_a71072f1",
+        "filename": "android/featurecontrol/FeatureControlImpl.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T22:37:59Z",
+      "side": 1,
+      "message": "any default values here?",
+      "range": {
+        "startLine": 33,
+        "startChar": 0,
+        "endLine": 36,
+        "endChar": 30
+      },
+      "revId": "f78b83d472961978051924999f832c92f69d7a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_47341682",
+        "filename": "android/featurecontrol/FeatureControlImpl.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T22:37:59Z",
+      "side": 1,
+      "message": "\u003d {} ?",
+      "range": {
+        "startLine": 39,
+        "startChar": 48,
+        "endLine": 39,
+        "endChar": 49
+      },
+      "revId": "f78b83d472961978051924999f832c92f69d7a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_a7acf2b2",
+        "filename": "android/featurecontrol/FeatureControlImpl.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T22:37:59Z",
+      "side": 1,
+      "message": "\u003d default ?",
+      "range": {
+        "startLine": 40,
+        "startChar": 28,
+        "endLine": 40,
+        "endChar": 29
+      },
+      "revId": "f78b83d472961978051924999f832c92f69d7a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_8743ae05",
+        "filename": "android/featurecontrol/FeatureControlImpl.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T22:37:59Z",
+      "side": 1,
+      "message": "please add the closing comments:\n}  // namespace featurecontrol\n}  // namespace android",
+      "range": {
+        "startLine": 43,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 1
+      },
+      "revId": "f78b83d472961978051924999f832c92f69d7a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_72075a76",
+        "filename": "android/featurecontrol/FeatureControl_c_wrapper.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T22:37:59Z",
+      "side": 1,
+      "message": "ANDROID_BEGIN_HEADER ?",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 6
+      },
+      "revId": "f78b83d472961978051924999f832c92f69d7a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_92376e3c",
+        "filename": "build.gradle",
+        "patchSetId": 15
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T22:37:59Z",
+      "side": 1,
+      "message": "nit: tab",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 1
+      },
+      "revId": "f78b83d472961978051924999f832c92f69d7a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_324682b4",
+        "filename": "build.gradle",
+        "patchSetId": 15
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T22:37:59Z",
+      "side": 1,
+      "message": "should you add it here as well?",
+      "range": {
+        "startLine": 93,
+        "startChar": 3,
+        "endLine": 93,
+        "endChar": 13
+      },
+      "revId": "f78b83d472961978051924999f832c92f69d7a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_321fa2a6",
+        "filename": "vl-android.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 1958,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-18T22:37:59Z",
+      "side": 1,
+      "message": "actually this isn\u0027t the first line of code in the emulator - check glue/main.cpp for both qemu1 and qemu2 directories.\nAlso, Prathmesh has created a process_early_setup() function, and it\u0027s the first thing that\u0027s called in a real main() - that\u0027s where you should put this initialization IMO",
+      "range": {
+        "startLine": 1958,
+        "startChar": 0,
+        "endLine": 1958,
+        "endChar": 26
+      },
+      "revId": "f78b83d472961978051924999f832c92f69d7a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
