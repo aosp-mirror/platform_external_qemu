@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b727eef3_fe9f9b5c",
+        "filename": "android/featurecontrol/FeatureControl.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-05-18T19:44:33Z",
+      "side": 1,
+      "message": "I recommend a single string --\u003e internal enum parsing function here instead of parsing it in multiple places.",
+      "range": {
+        "startLine": 51,
+        "startChar": 7,
+        "endLine": 51,
+        "endChar": 20
+      },
+      "revId": "dd04a08a7943f107d549493a5645a7880008791f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_de9c576b",
+        "filename": "android/featurecontrol/FeatureControl.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-05-18T19:44:33Z",
+      "side": 1,
+      "message": "What\u0027s the difference between auto and default?",
+      "range": {
+        "startLine": 68,
+        "startChar": 56,
+        "endLine": 68,
+        "endChar": 62
+      },
+      "revId": "dd04a08a7943f107d549493a5645a7880008791f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_3eaad382",
+        "filename": "android/featurecontrol/FeatureControl.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-05-18T19:44:33Z",
+      "side": 1,
+      "message": "Not needed.",
+      "range": {
+        "startLine": 78,
+        "startChar": 18,
+        "endLine": 78,
+        "endChar": 23
+      },
+      "revId": "dd04a08a7943f107d549493a5645a7880008791f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_db7bc913",
+        "filename": "android/featurecontrol/FeatureControl.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-05-18T19:44:33Z",
+      "side": 1,
+      "message": "Hard coding disk path inside the object makes unit-testing non hermetic.\nIf you write a unittest that changes the advancedFeatures, you\u0027ll end up changing the developer\u0027s actual file.\n\nInstead, your object should take a path to the disk file (that defaults to this location). That way, unit-tests create a temporary file and use that as the backing file.\n\nExample: crashreporter.\n- The actual implementation should be in the C++ object (as zyy@ requested earlier) https://android.googlesource.com/platform/external/qemu/+/emu-master-dev/android/crashreport/CrashReporter.h\n- A C-friendly header provides free functions to use it from C files. https://android.googlesource.com/platform/external/qemu/+/emu-master-dev/android/crashreport/crash-handler.h\n- C++ code need not go through the free functions (it can, of course). It can use the ::get() function to get the single global instance of the object to be used (as in CrashReporter / android::base::System)\n\nNow, ::get() creates a default instance with the known default path.\nBut, unit-tests create the instances directly (perhaps by making the unittest class a friend of the implementation class) and use a temporary path for the backing file.",
+      "range": {
+        "startLine": 88,
+        "startChar": 0,
+        "endLine": 89,
+        "endChar": 65
+      },
+      "revId": "dd04a08a7943f107d549493a5645a7880008791f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_7eb56bde",
+        "filename": "android/featurecontrol/FeatureControl.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-05-18T19:44:33Z",
+      "side": 1,
+      "message": "Not needed.",
+      "range": {
+        "startLine": 98,
+        "startChar": 38,
+        "endLine": 98,
+        "endChar": 41
+      },
+      "revId": "dd04a08a7943f107d549493a5645a7880008791f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_fec83b69",
+        "filename": "android/featurecontrol/FeatureControl.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-05-18T19:44:33Z",
+      "side": 1,
+      "message": "Same comment here: inject disk path dependency rather than hard coding it.",
+      "range": {
+        "startLine": 100,
+        "startChar": 0,
+        "endLine": 102,
+        "endChar": 56
+      },
+      "revId": "dd04a08a7943f107d549493a5645a7880008791f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b727eef3_3ec3f34c",
+        "filename": "android/featurecontrol/FeatureControl.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-05-18T19:44:33Z",
+      "side": 1,
+      "message": "not needed.",
+      "range": {
+        "startLine": 130,
+        "startChar": 57,
+        "endLine": 130,
+        "endChar": 59
+      },
+      "revId": "dd04a08a7943f107d549493a5645a7880008791f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
