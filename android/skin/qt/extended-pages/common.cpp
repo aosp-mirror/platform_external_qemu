@@ -132,3 +132,25 @@ QIcon getIconForCurrentTheme(const QString& icon_name) {
     QString iconType = Ui::stylesheetValues(getSelectedTheme())[Ui::THEME_PATH_VAR];
     return QIcon(":/" + iconType + "/" + icon_name);
 }
+
+void setFrameOnTop(QFrame* frame, bool onTop) {
+#ifndef __linux__
+    // On Linux, the Qt::WindowStaysOnTopHint only works if X11 window
+    // managment is bypassed (Qt::X11BypassWindowManagerHint). Unfortunately,
+    // this prevents a lot of common operations (like moving or resizing the
+    // window), so the "always on top" feature is disabled for Linux.
+    Qt::WindowFlags flags = frame->windowFlags();
+    const bool isVisible = frame->isVisible();
+
+    if (onTop) {
+        flags |= Qt::WindowStaysOnTopHint;
+    } else {
+        flags &= ~Qt::WindowStaysOnTopHint;
+    }
+    frame->setWindowFlags(flags);
+
+    if (isVisible) {
+        frame->show();
+    }
+#endif
+}

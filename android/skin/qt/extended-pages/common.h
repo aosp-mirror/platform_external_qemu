@@ -10,6 +10,8 @@
 // GNU General Public License for more details.
 
 #include "android/settings-agent.h"
+
+#include <QFrame>
 #include <QIcon>
 #include <QPushButton>
 #include <QString>
@@ -33,3 +35,6 @@ void adjustAllButtonsForTheme(SettingsTheme theme);
 
 // Obtains the given icon for the current theme.
 QIcon getIconForCurrentTheme(const QString& icon_name);
+
+// Set a frame's window flags to be always on top
+void setFrameOnTop(QFrame* frame, bool onTop);
