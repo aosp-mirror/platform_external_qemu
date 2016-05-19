@@ -15,6 +15,7 @@
 #include "android/base/containers/CircularBuffer.h"
 #include "android/skin/event.h"
 #include "android/skin/qt/extended-window-styles.h"
+#include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/set-ui-emu-agent.h"
 #include "android/skin/qt/shortcut-key-store.h"
@@ -104,7 +105,7 @@ private:
     virtual void hideEvent(QHideEvent* event) override;
 
     EmulatorQtWindow* mEmulatorWindow;
-    ExtendedWindow* mExtendedWindow;
+    std::unique_ptr<ExtendedWindow> mExtendedWindow;
     const UiEmuAgent* mUiEmuAgent;
     std::unique_ptr<Ui::ToolControls> mToolsUi;
     bool mStartedAdbStopProcess = false;
