@@ -45,6 +45,30 @@
       "revId": "862e90b21bb800aaef60559245c7769faf43a88f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "17fefabc_59db338a",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 444,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-05-19T18:41:50Z",
+      "side": 1,
+      "message": "We\u0027re deleting the extended window when the whole emulator closes, not when the extended window closes. We WERE doing that before, but I fixed it :)",
+      "parentUuid": "17fefabc_79394fc5",
+      "range": {
+        "startLine": 444,
+        "startChar": 30,
+        "endLine": 444,
+        "endChar": 37
+      },
+      "revId": "862e90b21bb800aaef60559245c7769faf43a88f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
