@@ -69,7 +69,7 @@ QCheckBox::indicator:checked {
 QCheckBox::indicator:unchecked {
     image: url(:/%%PATH%%/check_no)
 }
-QPushButton {outline: 1px dotted black; outline-offset: -3pt;}
+QPushButton {outline: none}
 QPushButton:pressed[ToolWindowButton=true], QPushButton:checked[ToolWindowButton=true] {
     border: none;
     background: %%TAB_DARKENED_COLOR%%;
@@ -130,6 +130,7 @@ QTextBrowser, QTableWidget {
 QTableView::item {
     padding-left: 16;
     padding-right: 16;
+    color: %%TEXT_COLOR%%;
     border: 0;
     border-bottom: 1 solid %%TABLE_BOTTOM_COLOR%%;
 }
