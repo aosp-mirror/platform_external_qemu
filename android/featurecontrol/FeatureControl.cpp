@@ -24,7 +24,7 @@ void setEnabledOverride(Feature feature, bool isEnabled) {
     FeatureControlImpl::get().setEnabledOverride(feature, isEnabled);
 }
 
-void setEnabledToDefault(Feature feature) {
+void resetEnabledToDefault(Feature feature) {
     FeatureControlImpl::get().resetEnabledToDefault(feature);
 }
 
