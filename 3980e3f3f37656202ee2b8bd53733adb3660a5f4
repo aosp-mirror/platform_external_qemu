@@ -120,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "17fefabc_99b76b04",
+        "filename": "android/featurecontrol/FeatureControlImpl.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-05-19T18:55:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "17fefabc_ae709b95",
+      "range": {
+        "startLine": 23,
+        "startChar": 52,
+        "endLine": 23,
+        "endChar": 68
+      },
+      "revId": "3980e3f3f37656202ee2b8bd53733adb3660a5f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b727eef3_e25d3569",
         "filename": "android/featurecontrol/FeatureControlImpl.cpp",
         "patchSetId": 17
@@ -261,6 +285,30 @@
       "side": 1,
       "message": "forward it?\nnamespace android { namespace base { class IniFile; } }",
       "parentUuid": "17fefabc_cb1f4958",
+      "range": {
+        "startLine": 46,
+        "startChar": 7,
+        "endLine": 46,
+        "endChar": 69
+      },
+      "revId": "3980e3f3f37656202ee2b8bd53733adb3660a5f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "17fefabc_79cdcf96",
+        "filename": "android/featurecontrol/FeatureControlImpl.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-05-19T18:55:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "17fefabc_4ea927ee",
       "range": {
         "startLine": 46,
         "startChar": 7,
