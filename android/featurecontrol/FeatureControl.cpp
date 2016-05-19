@@ -17,6 +17,14 @@ bool featureIsEnabled(AndroidFeatureControlFeature feature) {
     return android::featurecontrol::FeatureControlImpl::get().isEnabled(feature);
 }
 
+void setEnabledOverride(AndroidFeatureControlFeature feature, bool isEnabled) {
+    android::featurecontrol::FeatureControlImpl::get().setEnabledOverride(feature, isEnabled);
+}
+
+void resetEnabledToDefault(AndroidFeatureControlFeature feature) {
+    android::featurecontrol::FeatureControlImpl::get().resetEnabledToDefault(feature);
+}
+
 namespace android {
 namespace featurecontrol {
 
@@ -28,7 +36,7 @@ void setEnabledOverride(AndroidFeatureControlFeature feature, bool isEnabled) {
     FeatureControlImpl::get().setEnabledOverride(feature, isEnabled);
 }
 
-void setEnabledToDefault(AndroidFeatureControlFeature feature) {
+void resetEnabledToDefault(AndroidFeatureControlFeature feature) {
     FeatureControlImpl::get().resetEnabledToDefault(feature);
 }
 
