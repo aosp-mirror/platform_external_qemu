@@ -441,7 +441,7 @@ void ToolWindow::on_back_button_released() {
 void ToolWindow::on_close_button_clicked() {
     if (mExtendedWindow) {
         mExtendedWindow->close();
-        delete mExtendedWindow;
+        mExtendedWindow.reset();
     }
     parentWidget()->close();
 }
@@ -541,13 +541,17 @@ void ToolWindow::on_more_button_clicked() {
 }
 
 void ToolWindow::createExtendedWindow() {
-    mExtendedWindow = new ExtendedWindow(mEmulatorWindow, this, mUiEmuAgent,
-                                         &mShortcutKeyStore);
+    mExtendedWindow.reset(
+            new ExtendedWindow(mEmulatorWindow,
+                               this,
+                               mUiEmuAgent,
+                               &mShortcutKeyStore));
     if (auto recorder_ptr = mUIEventRecorder.lock()) {
-        recorder_ptr->startRecording(mExtendedWindow);
+        recorder_ptr->startRecording(mExtendedWindow.get());
     }
     if (auto user_actions_counter = mUserActionsCounter.lock()) {
-        user_actions_counter->startCountingForExtendedWindow(mExtendedWindow);
+        user_actions_counter->startCountingForExtendedWindow(
+            mExtendedWindow.get());
     }
 
     // The extended window is created before the "..." button is pressed, so it

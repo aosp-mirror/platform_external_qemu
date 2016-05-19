@@ -99,15 +99,9 @@ ExtendedWindow::ExtendedWindow(
     }
 }
 
-// std::unique_ptr<T> requires T to be a complete type when compiling
-// code in which its destructor is invoked.  The mExtendedUi field has
-// type std::unique_ptr<Ui::ExtendedControls>.  The referent type
-// Ui::ExtendedControls is incomplete in the .h file -- and including
-// the relevant .h file that defines Ui::ExtendedControls would create
-// an inclusion cycle.  So this definition, while seemingly trivial,
-// must appear here, where that type is complete, rather than in the
-// .h file.
-ExtendedWindow::~ExtendedWindow() = default;
+ExtendedWindow::~ExtendedWindow() {
+    mExtendedUi->location_page->requestStopLoadingGeoData();
+}
 
 void ExtendedWindow::show() {
     QFrame::show();
@@ -156,12 +150,10 @@ void ExtendedWindow::showPane(ExtendedWindowPane pane) {
     adjustTabs(pane);
 }
 
-void ExtendedWindow::closeEvent(QCloseEvent *ce) {
-    if (mExtendedUi->location_page->isLoadingGeoData()) {
-        mExtendedUi->location_page->requestStopLoadingGeoData();
-        connect(mExtendedUi->location_page, SIGNAL(geoDataLoadingFinished()), this, SLOT(close()));
-        ce->ignore();
-    }
+void ExtendedWindow::closeEvent(QCloseEvent *e) {
+    // Merely hide the window the widget is closed, do not destroy state.
+    e->ignore();
+    hide();
 }
 
 void ExtendedWindow::keyPressEvent(QKeyEvent* e) {
