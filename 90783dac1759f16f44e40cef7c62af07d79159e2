@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "17fefabc_4ec487a3",
+        "filename": "android/scripts/package-release.sh",
+        "patchSetId": 19
+      },
+      "lineNbr": 805,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-19T18:15:33Z",
+      "side": 1,
+      "message": "please also update the design doc with the new path and ini file possible values (on/off/...)",
+      "range": {
+        "startLine": 805,
+        "startChar": 11,
+        "endLine": 805,
+        "endChar": 16
+      },
+      "revId": "90783dac1759f16f44e40cef7c62af07d79159e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "17fefabc_eee9f32c",
+        "filename": "build.gradle",
+        "patchSetId": 19
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-19T18:15:33Z",
+      "side": 1,
+      "message": "what about this one?",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 61
+      },
+      "revId": "90783dac1759f16f44e40cef7c62af07d79159e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
