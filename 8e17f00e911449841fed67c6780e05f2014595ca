@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "17fefabc_d4000af6",
+        "filename": "android/skin/qt/styles/stylesheet_template.css",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-05-19T19:12:48Z",
+      "side": 1,
+      "message": "I like that there is an indication when tabbing.\nFor the major tabs (Location, Cellular, ...) the dotted highlight goes away after clicking. I like this. Can we do the same with regular buttons? Dotted highlight for tabbing, but it goes away when clicked.",
+      "revId": "8e17f00e911449841fed67c6780e05f2014595ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
