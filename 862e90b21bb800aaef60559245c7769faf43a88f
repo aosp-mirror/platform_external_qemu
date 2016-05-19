@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "17fefabc_5471bacc",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-19T19:11:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "17fefabc_1917fb35",
+      "range": {
+        "startLine": 105,
+        "startChar": 0,
+        "endLine": 109,
+        "endChar": 11
+      },
+      "revId": "862e90b21bb800aaef60559245c7769faf43a88f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "17fefabc_79394fc5",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 1
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "oh, it\u0027s ToolWindow::on_close() :)",
       "parentUuid": "17fefabc_59db338a",
+      "range": {
+        "startLine": 444,
+        "startChar": 30,
+        "endLine": 444,
+        "endChar": 37
+      },
+      "revId": "862e90b21bb800aaef60559245c7769faf43a88f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "17fefabc_1454620e",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 444,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-19T19:11:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "17fefabc_f9b89ff7",
       "range": {
         "startLine": 444,
         "startChar": 30,
