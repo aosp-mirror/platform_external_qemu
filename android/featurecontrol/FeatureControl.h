@@ -31,9 +31,8 @@
 extern "C" {
 #endif
 bool featureIsEnabled(AndroidFeatureControlFeature feature);
+void setEnabledOverride(AndroidFeatureControlFeature feature, bool isEnabled);
+void resetEnabledToDefault(AndroidFeatureControlFeature feature);
 #ifdef __cplusplus
 }
 #endif
-
-void setEnabledOverride(AndroidFeatureControlFeature feature, bool isEnabled);
-void resetEnabledToDefault(AndroidFeatureControlFeature feature);
