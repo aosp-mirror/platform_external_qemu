@@ -16,6 +16,29 @@
       "revId": "dc1a108eef2ca67d50bbae868b3d8e1769729b75",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "17fefabc_7f424f33",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-19T20:05:38Z",
+      "side": 1,
+      "message": "Can we move these ifndefs inside the function to contain them?",
+      "range": {
+        "startLine": 52,
+        "startChar": 0,
+        "endLine": 52,
+        "endChar": 17
+      },
+      "revId": "dc1a108eef2ca67d50bbae868b3d8e1769729b75",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
