@@ -238,8 +238,18 @@ static ssize_t ne2000_receive(VLANClientState *vc, const uint8_t *buf, size_t si
     printf("NE2000: received len=%d\n", size);
 #endif
 
-    if (s->cmd & E8390_STOP || ne2000_buffer_full(s))
+    if (s->cmd & E8390_STOP)
         return -1;
+
+    if (ne2000_buffer_full(s)) {
+        /* Need to signal so driver has chance to clear buffer.
+         * Otherwise there is a race condition: buffer become full, driver ACK
+         * interrupt and then after that, we will lose rx interrupt forever.
+         */
+        s->isr |= ENISR_RX_ERR;
+        ne2000_update_irq(s);
+        return -1;
+    }
 
     /* XXX: check this */
     if (s->rxcr & 0x10) {
