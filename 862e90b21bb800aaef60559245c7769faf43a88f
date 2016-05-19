@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "17fefabc_1917fb35",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-19T18:37:24Z",
+      "side": 1,
+      "message": "nit: kill this comment please",
+      "range": {
+        "startLine": 105,
+        "startChar": 0,
+        "endLine": 109,
+        "endChar": 11
+      },
+      "revId": "862e90b21bb800aaef60559245c7769faf43a88f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "17fefabc_79394fc5",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 444,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-19T18:37:24Z",
+      "side": 1,
+      "message": "just reset()\nBTW, why are we deleting the extended window on close? it means we actually lose all user-entered data there",
+      "range": {
+        "startLine": 444,
+        "startChar": 30,
+        "endLine": 444,
+        "endChar": 37
+      },
+      "revId": "862e90b21bb800aaef60559245c7769faf43a88f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
