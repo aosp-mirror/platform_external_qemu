@@ -786,6 +786,11 @@ void android_console_event_send(Monitor* mon, const QDict* qdict) {
     }
 
     substr = g_strsplit(arg, ":", 3);
+    if (substr == 0 || g_strv_length(substr) != 3) {
+        monitor_printf(mon,
+                       "KO: Usage: event send <type>:<code>:<value> ...\n");
+        goto out;
+    }
 
     /* The event type can be a symbol or number.  Check that we have a valid
      * type string and get the value depending on its format.
