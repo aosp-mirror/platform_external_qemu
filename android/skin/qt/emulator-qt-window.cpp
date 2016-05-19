@@ -579,28 +579,9 @@ void EmulatorQtWindow::setOnTop(bool onTop) {
     // prevents
     // a lot of common operations (like moving or resizing the window!), so the
     // "always on top" feature is disabled for Linux.
-
-    const bool oldVisible = mContainer.isVisible();
-
     setFrameOnTop(&mContainer, onTop);
     setFrameOnTop(mToolWindow, onTop);
-
-    if (oldVisible) {
-        mContainer.show();
-        mToolWindow->show();
-    }
 #endif
-}
-
-void EmulatorQtWindow::setFrameOnTop(QFrame* frame, bool onTop) {
-    Qt::WindowFlags flags = frame->windowFlags();
-
-    if (onTop) {
-        flags |= Qt::WindowStaysOnTopHint;
-    } else {
-        flags &= ~Qt::WindowStaysOnTopHint;
-    }
-    frame->setWindowFlags(flags);
 }
 
 void EmulatorQtWindow::showMinimized() {

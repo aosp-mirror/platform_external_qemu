@@ -17,6 +17,7 @@
 #include "android/skin/keyset.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
 
@@ -47,6 +48,12 @@ ExtendedWindow::ExtendedWindow(
 #endif
 
     setWindowFlags(flag | Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint);
+
+#ifndef __linux__
+    QSettings settings;
+    bool onTop = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
+    setFrameOnTop(this, onTop);
+#endif
 
     mExtendedUi->setupUi(this);
     mExtendedUi->cellular_page->setCellularAgent(agentPtr->cellular);
@@ -192,7 +199,10 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
 }
 
 void ExtendedWindow::switchOnTop(bool isOnTop) {
+#ifndef __linux__
     mEmulatorWindow->setOnTop(isOnTop);
+    setFrameOnTop(this, isOnTop);
+#endif
 }
 
 void ExtendedWindow::switchToTheme(SettingsTheme theme) {

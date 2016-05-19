@@ -132,3 +132,19 @@ QIcon getIconForCurrentTheme(const QString& icon_name) {
     QString iconType = Ui::stylesheetValues(getSelectedTheme())[Ui::THEME_PATH_VAR];
     return QIcon(":/" + iconType + "/" + icon_name);
 }
+
+void setFrameOnTop(QFrame* frame, bool onTop) {
+    Qt::WindowFlags flags = frame->windowFlags();
+    const bool isVisible = frame->isVisible();
+
+    if (onTop) {
+        flags |= Qt::WindowStaysOnTopHint;
+    } else {
+        flags &= ~Qt::WindowStaysOnTopHint;
+    }
+    frame->setWindowFlags(flags);
+
+    if (isVisible) {
+        frame->show();
+    }
+}

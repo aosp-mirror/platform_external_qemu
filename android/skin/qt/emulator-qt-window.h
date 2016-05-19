@@ -312,7 +312,6 @@ private:
     SkinEvent* createSkinEvent(SkinEventType type);
     void forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event);
     void handleKeyEvent(SkinEventType type, QKeyEvent* event);
-    void setFrameOnTop(QFrame* frame, bool onTop);
 
     std::vector<std::string> getAdbFullPathStd();
     void screenshotDone(android::emulation::ScreenCapturer::Result result);
