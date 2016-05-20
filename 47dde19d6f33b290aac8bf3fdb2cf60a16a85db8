@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "179d1ad4_a17bb8aa",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-20T21:23:25Z",
+      "side": 1,
+      "message": "only if there\u0027s a default second argument. anything that can be called as \"Foo foo(arg)\" should have its constructor explicit. Even if there are 20 arguments, but all of those have default values",
+      "parentUuid": "179d1ad4_bbaac980",
+      "range": {
+        "startLine": 30,
+        "startChar": 4,
+        "endLine": 30,
+        "endChar": 12
+      },
+      "revId": "47dde19d6f33b290aac8bf3fdb2cf60a16a85db8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "179d1ad4_2084e7e5",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 19
