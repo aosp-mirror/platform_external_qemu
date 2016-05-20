@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "179d1ad4_20434761",
+        "filename": "android/opengl/gpuinfo_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 446,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-20T18:10:05Z",
+      "side": 1,
+      "message": "btw, raw string literals allow you to have no \\n-s in the string:\n\nstring s \u003d\nR\"(this is a raw\nstring literal)\";\n\nstring s \u003d R\"()\"; // empty string",
+      "range": {
+        "startLine": 430,
+        "startChar": 0,
+        "endLine": 446,
+        "endChar": 5
+      },
+      "revId": "52d8e383faa59a366d73ee5affb0178d15ce4a89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
