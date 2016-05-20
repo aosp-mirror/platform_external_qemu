@@ -36,6 +36,8 @@
 #include "hmp.h"
 
 #include "android/error-messages.h"
+#include "android/emulator-window.h"
+#include "android/skin/ui.h"
 
 #include "android/globals.h"
 
@@ -1906,35 +1908,11 @@ void android_console_geo(Monitor* mon, const QDict* qdict) {
                    helptext ? "OK" : "KO: missing sub-command");
 }
 
-
 void android_console_rotate_screen(Monitor *mon, const QDict *qdict)
 {
-    static int ranchu_rotation_state = 0;       /* 0-3 */
-
-    ranchu_rotation_state = ((ranchu_rotation_state + 1) % 4);
-
-    goldfish_sensors_set_rotation(ranchu_rotation_state);
-    /* The mapping between QEMU and Android's idea of rotation are
-       reversed */
-    switch (ranchu_rotation_state) {
-    case 0:
-        goldfish_fb_set_rotation(0);
-        graphic_rotate = 0;
-        break;
-    case 1:
-        goldfish_fb_set_rotation(3);
-        graphic_rotate = 90;
-        break;
-    case 2:
-        goldfish_fb_set_rotation(2);
-        graphic_rotate = 180;
-        break;
-    case 3:
-        goldfish_fb_set_rotation(1);
-        graphic_rotate = 270;
-        break;
-    default:
-        g_assert_not_reached();
+    EmulatorWindow* win = emulator_window_get();
+    if (win) {
+        skin_ui_select_next_layout(win->ui);
     }
 }
 
