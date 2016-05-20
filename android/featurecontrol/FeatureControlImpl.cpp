@@ -19,6 +19,7 @@
 #include "android/emulation/ConfigDirs.h"
 #include "android/utils/system.h"
 
+#include <fstream>
 #include <string.h>
 
 namespace {
@@ -103,12 +104,16 @@ void FeatureControlImpl::init(android::base::StringView defaultIniPath,
                      << defaultIniPath;
     }
 
-    base::IniFile userIni(userIniPath);
-    if (userIni.read()) {
+    std::ifstream inFile(userIniPath, std::ios_base::in);
+    if (inFile) {
+        inFile.close();
+        base::IniFile userIni(userIniPath);
+        if (userIni.read()) {
 #define FEATURE_CONTROL_ITEM(item) \
-        loadUserOverrideFeature(userIni, item, #item);
+    loadUserOverrideFeature(userIni, item, #item);
 #include "FeatureControlDef.h"
 #undef FEATURE_CONTROL_ITEM
+        }
     }
 }
 
