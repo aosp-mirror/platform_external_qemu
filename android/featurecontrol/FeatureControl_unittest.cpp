@@ -127,6 +127,24 @@ TEST_F(FeatureControlTest, readDefaultSettings) {
     }
 }
 
+TEST_F(FeatureControlTest, readDefaultSettingsWithNoUserSettings) {
+    writeDefaultIni(mAllOnIni);
+    FeatureControlImpl::get().init(mDefaultIniFilePath, "");
+    for (int i = 0; i < Feature_n_items; i++) {
+        AndroidFeatureControlFeature feature =
+            static_cast<AndroidFeatureControlFeature>(i);
+        EXPECT_EQ(true, featureIsEnabled(feature));
+    }
+
+    writeDefaultIni(mAllOffIni);
+    FeatureControlImpl::get().init(mDefaultIniFilePath, "");
+    for (int i = 0; i < Feature_n_items; i++) {
+        AndroidFeatureControlFeature feature =
+            static_cast<AndroidFeatureControlFeature>(i);
+        EXPECT_EQ(false, featureIsEnabled(feature));
+    }
+}
+
 TEST_F(FeatureControlTest, readUserSettings) {
     writeDefaultIni(mAllOffIni);
 
