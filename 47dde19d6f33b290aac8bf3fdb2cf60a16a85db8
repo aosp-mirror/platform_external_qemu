@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "179d1ad4_bbaac980",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-20T19:45:34Z",
+      "side": 1,
+      "message": "Got it, although: should I keep explicit here since the RcSync constructor implementation has a default second argument? It makes it at least look like it\u0027s a single-argument constructor when using it.",
+      "parentUuid": "179d1ad4_e0065f78",
+      "range": {
+        "startLine": 30,
+        "startChar": 4,
+        "endLine": 30,
+        "endChar": 12
+      },
+      "revId": "47dde19d6f33b290aac8bf3fdb2cf60a16a85db8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "179d1ad4_2084e7e5",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 19
@@ -36,6 +60,30 @@
       "writtenOn": "2016-05-20T18:02:15Z",
       "side": 1,
       "message": "we should not overuse glGetError() - it sometimes causes performance degradation. I\u0027d prefer a debug-only call here",
+      "range": {
+        "startLine": 559,
+        "startChar": 4,
+        "endLine": 559,
+        "endChar": 35
+      },
+      "revId": "47dde19d6f33b290aac8bf3fdb2cf60a16a85db8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "179d1ad4_3b01b95f",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 19
+      },
+      "lineNbr": 559,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-20T19:45:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "179d1ad4_2084e7e5",
       "range": {
         "startLine": 559,
         "startChar": 4,
