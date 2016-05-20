@@ -123,6 +123,22 @@ TEST_F(FeatureControlTest, readDefaultSettings) {
     }
 }
 
+TEST_F(FeatureControlTest, readDefaultSettingsWithNoUserSettings) {
+    writeDefaultIni(mAllOnIni);
+    FeatureControlImpl::get().init(mDefaultIniFilePath, "");
+    for (int i = 0; i < Feature_n_items; i++) {
+        Feature feature = static_cast<Feature>(i);
+        EXPECT_EQ(true, isEnabled(feature));
+    }
+
+    writeDefaultIni(mAllOffIni);
+    FeatureControlImpl::get().init(mDefaultIniFilePath, "");
+    for (int i = 0; i < Feature_n_items; i++) {
+        Feature feature = static_cast<Feature>(i);
+        EXPECT_EQ(false, isEnabled(feature));
+    }
+}
+
 TEST_F(FeatureControlTest, readUserSettings) {
     writeDefaultIni(mAllOffIni);
 
