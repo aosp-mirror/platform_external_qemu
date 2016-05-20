@@ -323,7 +323,7 @@ void android_console_redir_del(Monitor* mon, const QDict* qdict) {
     int is_udp, host_port;
     Slirp* slirp;
     Error* err = NULL;
-    struct in_addr host_addr = {.s_addr = INADDR_ANY};
+    struct in_addr host_addr = {.s_addr = htonl(INADDR_LOOPBACK) };
     RedirRec rr;
     GList* entry;
 
