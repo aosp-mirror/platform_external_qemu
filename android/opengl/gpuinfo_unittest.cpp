@@ -426,6 +426,31 @@ static const char linux_mesadri[] =
 "OpenGL version string: 3.0 Mesa 10.4.2 (git-)\n"
 "\n";
 
+static const char linux_no_glxinfo[] =
+"Rev: 05\n"
+"\n"
+"Device: 04:00.0\n"
+"Class:  VGA compatible controller [0300]\n"
+"Vendor: NVIDIA Corporation [10de]\n"
+"Device: GM107GL [Quadro K2200] [13ba]\n"
+"SVendor:    Hewlett-Packard Company [103c]\n"
+"SDevice:    Device [1097]\n"
+"PhySlot:    2\n"
+"Rev:    a2\n"
+"\n"
+"Device: 04:00.1\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"\n";
+
+static const char linux_no_lspci[] =
+"\n"
+"\n"
+"OpenGL version string: 3.0 Mesa 10.4.2 (git-)\n"
+"\n";
+
 TEST(parse_gpu_info_list_osx, SingleGpu) {
     std::string contents(osx_single_gpu);
 
@@ -571,6 +596,33 @@ TEST(parse_gpu_info_list_windows, DualGpu) {
     EXPECT_STREQ("igd12umd32", intel_info.dlls[7].c_str());
 }
 
+TEST(parse_gpu_info_list_linux, EmptyStr) {
+    std::string contents;
+
+    GpuInfoList gpulist;
+    parse_gpu_info_list_linux(contents, &gpulist);
+
+    EXPECT_TRUE(gpulist.infos.size() == 0);
+}
+
+TEST(parse_gpu_info_list_linux, NoGlxInfo) {
+    std::string contents(linux_no_glxinfo);
+
+    GpuInfoList gpulist;
+    parse_gpu_info_list_linux(contents, &gpulist);
+
+    EXPECT_TRUE(gpulist.infos.size() == 1);
+}
+
+TEST(parse_gpu_info_list_linux, Nolspci) {
+    std::string contents(linux_no_lspci);
+
+    GpuInfoList gpulist;
+    parse_gpu_info_list_linux(contents, &gpulist);
+
+    EXPECT_TRUE(gpulist.infos.size() == 1);
+}
+
 TEST(parse_gpu_info_list_linux, SingleGpu) {
     std::string contents(linux_single_gpu);
 
@@ -588,8 +640,6 @@ TEST(parse_gpu_info_list_linux, SingleGpu) {
     EXPECT_STREQ("OpenGL version string: 4.4.0 NVIDIA 340.96",
             nvidia_info.renderer.c_str());
     EXPECT_TRUE(nvidia_info.dlls.empty());
-
-
 }
 
 TEST(parse_gpu_info_list_linux, MesaDRI) {
@@ -609,7 +659,6 @@ TEST(parse_gpu_info_list_linux, MesaDRI) {
     EXPECT_STREQ("OpenGL version string: 3.0 Mesa 10.4.2 (git-)",
             nvidia_info.renderer.c_str());
     EXPECT_TRUE(nvidia_info.dlls.empty());
-
 }
 
 TEST(gpuinfo_query_blacklist, testBlacklist_Pos) {
