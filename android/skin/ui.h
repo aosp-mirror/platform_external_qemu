@@ -133,4 +133,7 @@ void skin_ui_reset_title(SkinUI* ui);
 // currently emulating it
 bool skin_ui_is_trackball_active(SkinUI* ui);
 
+// Switches to the next skin layout.
+void skin_ui_select_next_layout();
+
 ANDROID_END_HEADER

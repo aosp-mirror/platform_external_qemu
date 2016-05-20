@@ -369,6 +369,10 @@ _skin_ui_handle_key_command(void* opaque, SkinKeyCommand command, int  down)
     }
 }
 
+void skin_ui_select_next_layout(SkinUI* ui) {
+    _skin_ui_handle_key_command(ui, SKIN_KEY_COMMAND_CHANGE_LAYOUT_NEXT, 1);
+}
+
 bool skin_ui_process_events(SkinUI* ui) {
     SkinEvent ev;
 
