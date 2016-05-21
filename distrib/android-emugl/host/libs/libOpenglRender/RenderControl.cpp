@@ -23,10 +23,38 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "emugl/common/feature_control.h"
 
+#include <pthread.h>
+
+#define DEBUG 0
+
+#if DEBUG
+#define DPRINT(...) do { fprintf(stderr, __VA_ARGS__); } while(0)
+#else
+#define DPRINT(...)
+#endif
+
+// WIP HACK:
+// This is to make rcUpdateColorBuffer
+// wait for a rcFlushWindowColorBuffer
+// before doing the update, if there has been one already.
+// Otherwise, we get more OOO frames and choppiness when
+// using the webcam, which writes a color buffer from
+// gralloc, is different from the typical
+// OpenGL -> surfaceflinger path.
+// Reason OOO frames can still occur with this,
+// seems to be that we do not always signal from the correct flush.
+// Finding the right dependencies/ordering is WIP
+
+static pthread_mutex_t rcGrallocCbLock;
+static pthread_cond_t rcGrallocCbRdy;
+static bool rcGrallocCbRdy_b = true;
+
 static const GLint rendererVersion = 1;
 
 static GLint rcGetRendererVersion()
 {
+    pthread_mutex_init(&rcGrallocCbLock, NULL);
+    pthread_cond_init(&rcGrallocCbRdy, NULL);
     return rendererVersion;
 }
 
@@ -258,6 +286,8 @@ static void rcCloseColorBuffer(uint32_t colorbuffer)
 
 static int rcFlushWindowColorBuffer(uint32_t windowSurface)
 {
+    pthread_mutex_lock(&rcGrallocCbLock);
+    DPRINT("%s: %d {\n", __FUNCTION__, windowSurface);
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return -1;
@@ -265,6 +295,10 @@ static int rcFlushWindowColorBuffer(uint32_t windowSurface)
     if (!fb->flushWindowSurfaceColorBuffer(windowSurface)) {
         return -1;
     }
+    DPRINT("%s: %d }\n", __FUNCTION__, windowSurface);
+    rcGrallocCbRdy_b = true;
+    pthread_cond_signal(&rcGrallocCbRdy);
+    pthread_mutex_unlock(&rcGrallocCbLock);
     return 0;
 }
 
@@ -276,6 +310,7 @@ static void rcSetWindowColorBuffer(uint32_t windowSurface,
         return;
     }
     fb->setWindowSurfaceColorBuffer(windowSurface, colorBuffer);
+    DPRINT("%s: %d -> %d\n", __FUNCTION__, windowSurface, colorBuffer);
 }
 
 static EGLint rcMakeCurrent(uint32_t context,
@@ -329,6 +364,7 @@ static void rcBindRenderbuffer(uint32_t colorBuffer)
 static EGLint rcColorBufferCacheFlush(uint32_t colorBuffer,
                                       EGLint postCount, int forRead)
 {
+   DPRINT("%s: %d --------------------\n", __FUNCTION__, colorBuffer);
    // XXX: TBD - should be implemented
    return 0;
 }
@@ -351,12 +387,21 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
                                 GLint width, GLint height,
                                 GLenum format, GLenum type, void* pixels)
 {
+    pthread_mutex_lock(&rcGrallocCbLock);
+    DPRINT("\t%s: %d {\n", __FUNCTION__, colorBuffer);
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return -1;
     }
 
+    // Don't allow too many UpdateColorBuffer's in a row.
+    while(!rcGrallocCbRdy_b) {
+        pthread_cond_wait(&rcGrallocCbRdy, &rcGrallocCbLock);
+    }
+    rcGrallocCbRdy_b = false;
     fb->updateColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
+    DPRINT("\t%s: %d }\n", __FUNCTION__, colorBuffer);
+    pthread_mutex_unlock(&rcGrallocCbLock);
     return 0;
 }
 
