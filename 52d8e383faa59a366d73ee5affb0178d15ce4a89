@@ -22,6 +22,30 @@
       "revId": "52d8e383faa59a366d73ee5affb0178d15ce4a89",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "179d1ad4_9076c42a",
+        "filename": "android/opengl/gpuinfo_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 446,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-21T01:14:12Z",
+      "side": 1,
+      "message": "That\u0027s pretty cool. Thanks for the tip :)",
+      "parentUuid": "179d1ad4_20434761",
+      "range": {
+        "startLine": 430,
+        "startChar": 0,
+        "endLine": 446,
+        "endChar": 5
+      },
+      "revId": "52d8e383faa59a366d73ee5affb0178d15ce4a89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
