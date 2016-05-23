@@ -14,6 +14,7 @@
 #include "android/base/Log.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/StringFormat.h"
+#include "android/base/system/System.h"
 
 #include "android/android.h"
 #include "android/avd/hw-config.h"
@@ -74,6 +75,7 @@ extern bool android_op_wipe_data;
 extern bool android_op_writable_system;
 
 using namespace android::base;
+using android::base::System;
 
 namespace {
 
@@ -614,6 +616,25 @@ extern "C" int main(int argc, char **argv) {
         resizeExt4Partition(android_hw->disk_dataPartition_path,
                             android_hw->disk_dataPartition_size);
     }
+    else {
+        // Resize userdata-qemu.img if the size is smaller than what config.ini
+        // says.
+        // This can happen as user wants a larger data partition without wiping
+        // it.
+        // b.android.com/196926
+        System::FileSize current_data_size;
+        if (System::get()->pathFileSize(hw->disk_dataPartition_path,
+                                        &current_data_size)) {
+            if (current_data_size < android_hw->disk_dataPartition_size) {
+                dwarning("userdata partition is resized from %d M to %d M\n",
+                         current_data_size / (1024 * 1024),
+                         android_hw->disk_dataPartition_size / (1024 * 1024));
+                resizeExt4Partition(android_hw->disk_dataPartition_path,
+                                    android_hw->disk_dataPartition_size);
+            }
+        }
+    }
+
 
     // Create cache partition image if it doesn't exist already.
     if (!path_exists(hw->disk_cachePartition_path)) {
