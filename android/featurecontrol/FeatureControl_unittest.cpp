@@ -81,6 +81,8 @@ protected:
 }  // namespace
 
 TEST_F(FeatureControlTest, overrideSetting) {
+    writeDefaultIni(mAllOffIni);
+    FeatureControlImpl::get().init(mDefaultIniFilePath, mUserIniFilePath);
     using namespace featurecontrol;
     for (int i = 0; i < Feature_n_items; i++) {
         Feature feature = static_cast<Feature>(i);
@@ -92,6 +94,8 @@ TEST_F(FeatureControlTest, overrideSetting) {
 }
 
 TEST_F(FeatureControlTest, resetToDefault) {
+    writeDefaultIni(mAllOffIni);
+    FeatureControlImpl::get().init(mDefaultIniFilePath, mUserIniFilePath);
     using namespace featurecontrol;
     for (int i = 0; i < Feature_n_items; i++) {
         Feature feature = static_cast<Feature>(i);
