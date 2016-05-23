@@ -23,6 +23,7 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 
 #include "android/utils/debug.h"
+#include "android/base/StringView.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
 
@@ -127,6 +128,7 @@ public:
 static ::emugl::LazyInstance<GrallocSync> sGrallocSync = LAZY_INSTANCE_INIT;
 
 static const GLint rendererVersion = 1;
+static android::base::StringView kAsyncSwapStr = "ANDROID_EMU_NATIVE_SYNC";
 
 static GLint rcGetRendererVersion()
 {
@@ -170,9 +172,14 @@ static EGLint rcQueryEGLString(EGLenum name, void* buffer, EGLint bufferSize)
 static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
 {
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
-    const char *str = NULL;
-    int len = 0;
+
+    // whatever we end up returning,
+    // it will have a terminating \0,
+    // so account for it here.
+    std::string glStr;
+
     if (tInfo && tInfo->currContext.get()) {
+        const char *str = nullptr;
         if (tInfo->currContext->isGL2()) {
             str = (const char *)s_gles2.glGetString(name);
         }
@@ -180,34 +187,34 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
             str = (const char *)s_gles1.glGetString(name);
         }
         if (str) {
-            len = strlen(str) + 1;
+            glStr += str;
         }
     }
 
     // We add the maximum supported GL protocol number into GL_EXTENSIONS
-    bool isChecksumEnabled = emugl_feature_is_enabled(android::featurecontrol::GLPipeChecksum);
-    const char* glProtocolStr = NULL;
-    if (isChecksumEnabled && name == GL_EXTENSIONS) {
-        glProtocolStr = ChecksumCalculatorThreadInfo::getMaxVersionString();
-        if (len==0) len = 1; // the last byte
-        len += strlen(glProtocolStr) + 1;
-    }
-
-    if (!buffer || len > bufferSize) {
-        return -len;
-    }
+    bool isChecksumEnabled =
+        emugl_feature_is_enabled(android::featurecontrol::GLPipeChecksum);
+    bool asyncSwapEnabled =
+        emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap);
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
-        snprintf((char *)buffer, bufferSize, "%s%s ", str ? str : "", glProtocolStr);
-    } else if (str) {
-        strcpy((char *)buffer, str);
-    } else {
-        if (bufferSize >= 1) {
-            ((char*)buffer)[0] = '\0';
-        }
-        len = 0;
+        glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
+        glStr += " ";
     }
-    return len;
+
+    if (asyncSwapEnabled && name == GL_EXTENSIONS) {
+        glStr += kAsyncSwapStr;
+        glStr += " ";
+    }
+
+    int nextBufferSize = glStr.size() + 1;
+
+    if (!buffer || nextBufferSize > bufferSize) {
+        return -nextBufferSize;
+    }
+
+    snprintf((char *)buffer, nextBufferSize, "%s", glStr.c_str());
+    return nextBufferSize;
 }
 
 static EGLint rcGetNumConfigs(uint32_t* p_numAttribs)
