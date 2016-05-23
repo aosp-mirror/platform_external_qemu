@@ -81,6 +81,9 @@ protected:
 }  // namespace
 
 TEST_F(FeatureControlTest, overrideSetting) {
+    writeDefaultIni(mAllOffIni);
+    writeUserIni(mAllDefaultIni);
+    FeatureControlImpl::get().init(mDefaultIniFilePath, mUserIniFilePath);
     using namespace featurecontrol;
     for (int i = 0; i < Feature_n_items; i++) {
         AndroidFeatureControlFeature feature =
@@ -93,6 +96,9 @@ TEST_F(FeatureControlTest, overrideSetting) {
 }
 
 TEST_F(FeatureControlTest, resetToDefault) {
+    writeDefaultIni(mAllOffIni);
+    writeUserIni(mAllDefaultIni);
+    FeatureControlImpl::get().init(mDefaultIniFilePath, mUserIniFilePath);
     using namespace featurecontrol;
     for (int i = 0; i < Feature_n_items; i++) {
         AndroidFeatureControlFeature feature =
