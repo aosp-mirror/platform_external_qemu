@@ -11,6 +11,7 @@
 
 #include "android/filesystems/partition_config.h"
 
+#include "android/base/system/System.h"
 #include "android/filesystems/internal/PartitionConfigBackend.h"
 #include "android/utils/debug.h"
 
@@ -21,6 +22,7 @@
 #include <string.h>
 
 using android::internal::PartitionConfigBackend;
+using android::base::System;
 
 // State structure shared by several functions.
 typedef struct {
@@ -393,6 +395,19 @@ bool android_partition_configuration_setup(
         userdata_partition_type == ANDROID_PARTITION_TYPE_EXT4) {
         state->backend->resizeExt4Partition(config->data_partition.path,
                                             config->data_partition.size);
+    } else {
+        // Resize userdata-qemu.img if the size is smaller than what config.ini says.
+        // This can happen as user wants a larger data partition without wiping it.
+        // b.android.com/196926
+        System::FileSize current_data_size;
+        if (System::get()->pathFileSize(config->data_partition.path, &current_data_size)) {
+            if (current_data_size < config->data_partition.size) {
+                VERBOSE_PRINT(init, "userdata partition is resized from %d M to %d M\n",
+                        current_data_size >> 20, config->data_partition.size >> 20);
+                state->backend->resizeExt4Partition(config->data_partition.path,
+                            config->data_partition.size);
+            }
+        }
     }
 
     // Initialize cache partition image, if any. Its type depends on the
