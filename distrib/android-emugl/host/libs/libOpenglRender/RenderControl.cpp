@@ -24,6 +24,7 @@
 #include "emugl/common/feature_control.h"
 
 static const GLint rendererVersion = 1;
+static const char* kAsyncSwapStr = "ANDROID_EMU_ASYNC_SWAP";
 
 static GLint rcGetRendererVersion()
 {
@@ -82,19 +83,27 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
 
     // We add the maximum supported GL protocol number into GL_EXTENSIONS
     bool isChecksumEnabled = emugl_feature_is_enabled(android::featurecontrol::GLPipeChecksum);
-    const char* glProtocolStr = NULL;
+    bool asyncSwapEnabled = emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap);
+    std::string glProtocolStr;
+
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
-        glProtocolStr = ChecksumCalculatorThreadInfo::getMaxVersionString();
-        if (len==0) len = 1; // the last byte
-        len += strlen(glProtocolStr) + 1;
+        glProtocolStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
+        glProtocolStr += " ";
     }
+
+    if (asyncSwapEnabled && name == GL_EXTENSIONS) {
+        glProtocolStr += kAsyncSwapStr;
+        glProtocolStr += " ";
+    }
+
+    len += glProtocolStr.size();
 
     if (!buffer || len > bufferSize) {
         return -len;
     }
 
-    if (isChecksumEnabled && name == GL_EXTENSIONS) {
-        snprintf((char *)buffer, bufferSize, "%s%s ", str ? str : "", glProtocolStr);
+    if (name == GL_EXTENSIONS) {
+        snprintf((char *)buffer, bufferSize, "%s%s ", str ? str : "", glProtocolStr.c_str());
     } else if (str) {
         strcpy((char *)buffer, str);
     } else {
