@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "5c8ed7f0_874e858a",
+        "filename": "android/filesystems/partition_config.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-05-23T20:52:31Z",
+      "side": 1,
+      "message": "iiuc, we no longer support running the same AVD in multiple instances.\n\nBut, we don\u0027t (yet) block an attempt to do so. We should drop a filelock in the avd and not allow a second emulator to use the same AVD.",
+      "parentUuid": "5c8ed7f0_956c6ef7",
+      "range": {
+        "startLine": 326,
+        "startChar": 5,
+        "endLine": 326,
+        "endChar": 42
+      },
+      "revId": "3baa2ea9f71c88950b5a253e0908fb0cb7338e0b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5c8ed7f0_1ae88dec",
         "filename": "android/filesystems/partition_config.cpp",
         "patchSetId": 1
