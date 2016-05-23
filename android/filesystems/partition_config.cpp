@@ -11,6 +11,7 @@
 
 #include "android/filesystems/partition_config.h"
 
+#include "android/base/system/System.h"
 #include "android/filesystems/internal/PartitionConfigBackend.h"
 #include "android/utils/debug.h"
 
@@ -21,6 +22,7 @@
 #include <string.h>
 
 using android::internal::PartitionConfigBackend;
+using android::base::System;
 
 // State structure shared by several functions.
 typedef struct {
@@ -389,8 +391,22 @@ bool android_partition_configuration_setup(
 
     // Extend the userdata-qemu.img to the desired size - resize2fs can only
     // extend partitions to fill available space.
-    if (config->wipe_data &&
+    // Resize userdata-qemu.img if the size is smaller than what config.ini
+    // says.
+    // This can happen as user wants a larger data partition without wiping it.
+    // b.android.com/196926
+    System::FileSize current_data_size(config->data_partition.size);
+    System::get()->pathFileSize(config->data_partition.path,
+                                &current_data_size);
+    if ((config->wipe_data ||
+         current_data_size < config->data_partition.size) &&
         userdata_partition_type == ANDROID_PARTITION_TYPE_EXT4) {
+        if (current_data_size < config->data_partition.size) {
+            VERBOSE_PRINT(init,
+                          "userdata partition is resized from %d M to %d M\n",
+                          current_data_size / (1024 * 1024),
+                          config->data_partition.size / (1024 * 1024));
+        }
         state->backend->resizeExt4Partition(config->data_partition.path,
                                             config->data_partition.size);
     }
