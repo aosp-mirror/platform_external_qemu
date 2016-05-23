@@ -310,14 +310,22 @@ static void sanitizeOptions(AndroidOptions* opts) {
         str_reset(&opts->audio, "none");
     }
 
+    /* without a skin, the emulator cannot know what screen dimensions are
+     * approriate for the virtual device, which can result in improper
+     * rendering. when creating a device through the AVD manager, a "magic"
+     * skin will be created that will indicate what the appropriate screen
+     * dimensions are. skins like this have a name <width>x<height>, indicating
+     * the appropriate framebuffer size for the device.
+     */
+    if (opts->no_skin) {
+        dwarning(
+                "the -no-skin flag is obsolete. to have a non-skinned virtual "
+                "device, create one through the AVD manager");
+    }
+
     /* we don't accept -skindir without -skin now
      * to simplify the autoconfig stuff with virtual devices
      */
-    if (opts->no_skin) {
-        str_reset(&opts->skin, "320x480");
-        str_reset_null(&opts->skindir);
-    }
-
     if (opts->skindir) {
         if (!opts->skin) {
             derror( "the -skindir <path> option requires a -skin <name> option");
