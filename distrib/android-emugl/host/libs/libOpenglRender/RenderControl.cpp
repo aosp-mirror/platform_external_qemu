@@ -23,6 +23,7 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 
 #include "android/utils/debug.h"
+#include "android/base/StringView.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
 
@@ -127,6 +128,7 @@ public:
 static ::emugl::LazyInstance<GrallocSync> sGrallocSync = LAZY_INSTANCE_INIT;
 
 static const GLint rendererVersion = 1;
+static android::base::StringView kAsyncSwapStr = "ANDROID_EMU_ASYNC_SWAP";
 
 static GLint rcGetRendererVersion()
 {
@@ -170,8 +172,13 @@ static EGLint rcQueryEGLString(EGLenum name, void* buffer, EGLint bufferSize)
 static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
 {
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
-    const char *str = NULL;
-    int len = 0;
+    const char *str = nullptr;
+
+    // whatever we end up returning,
+    // it will have a terminating \0,
+    // so account for it here.
+    int nextBufferSize = 1;
+
     if (tInfo && tInfo->currContext.get()) {
         if (tInfo->currContext->isGL2()) {
             str = (const char *)s_gles2.glGetString(name);
@@ -180,34 +187,42 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
             str = (const char *)s_gles1.glGetString(name);
         }
         if (str) {
-            len = strlen(str) + 1;
+            nextBufferSize += strlen(str);
         }
     }
 
     // We add the maximum supported GL protocol number into GL_EXTENSIONS
     bool isChecksumEnabled = emugl_feature_is_enabled(android::featurecontrol::GLPipeChecksum);
-    const char* glProtocolStr = NULL;
-    if (isChecksumEnabled && name == GL_EXTENSIONS) {
-        glProtocolStr = ChecksumCalculatorThreadInfo::getMaxVersionString();
-        if (len==0) len = 1; // the last byte
-        len += strlen(glProtocolStr) + 1;
-    }
-
-    if (!buffer || len > bufferSize) {
-        return -len;
-    }
+    bool asyncSwapEnabled = emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap);
+    std::string glProtocolStr;
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
-        snprintf((char *)buffer, bufferSize, "%s%s ", str ? str : "", glProtocolStr);
+        glProtocolStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
+        glProtocolStr += ' ';
+    }
+
+    if (asyncSwapEnabled && name == GL_EXTENSIONS) {
+        glProtocolStr += kAsyncSwapStr;
+        glProtocolStr += ' ';
+    }
+
+    nextBufferSize += glProtocolStr.size();
+
+    if (!buffer || nextBufferSize > bufferSize) {
+        return -nextBufferSize;
+    }
+
+    if (name == GL_EXTENSIONS) {
+        snprintf((char *)buffer, bufferSize, "%s%s", str ? str : "", glProtocolStr.c_str());
     } else if (str) {
         strcpy((char *)buffer, str);
     } else {
         if (bufferSize >= 1) {
             ((char*)buffer)[0] = '\0';
         }
-        len = 0;
+        nextBufferSize = 1;
     }
-    return len;
+    return nextBufferSize;
 }
 
 static EGLint rcGetNumConfigs(uint32_t* p_numAttribs)
