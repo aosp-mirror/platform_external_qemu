@@ -1,0 +1,234 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5c8ed7f0_d5b9963a",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-23T20:29:01Z",
+      "side": 1,
+      "message": "this doesn\u0027t help - the caller only sees the header file, so \u003d nullptr won\u0027t be applied",
+      "range": {
+        "startLine": 27,
+        "startChar": 38,
+        "endLine": 27,
+        "endChar": 48
+      },
+      "revId": "ea294034f6396c745602ad04437be659a89ad2a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c8ed7f0_3580025b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-23T20:29:01Z",
+      "side": 1,
+      "message": "\u003d default in the header?",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 28
+      },
+      "revId": "ea294034f6396c745602ad04437be659a89ad2a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c8ed7f0_55858669",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-23T20:29:01Z",
+      "side": 1,
+      "message": "if you make it unique_ptr\u003c\u003e then this isn\u0027t needed at all",
+      "range": {
+        "startLine": 33,
+        "startChar": 0,
+        "endLine": 36,
+        "endChar": 5
+      },
+      "revId": "ea294034f6396c745602ad04437be659a89ad2a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c8ed7f0_15de1e81",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-23T20:29:01Z",
+      "side": 1,
+      "message": "you don\u0027t need these in the beginning - actually, that\u0027s the only reason why you have to spell the whole iterator type, you could use auto if you declare it right at the .find() line",
+      "range": {
+        "startLine": 66,
+        "startChar": 0,
+        "endLine": 67,
+        "endChar": 63
+      },
+      "revId": "ea294034f6396c745602ad04437be659a89ad2a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c8ed7f0_556fc6b0",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-23T20:29:01Z",
+      "side": 1,
+      "message": "I don\u0027t see the implementation - please remove",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 13
+      },
+      "revId": "ea294034f6396c745602ad04437be659a89ad2a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c8ed7f0_b55df20c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-23T20:29:01Z",
+      "side": 1,
+      "message": "could you please add the default initializers here?",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 20
+      },
+      "revId": "ea294034f6396c745602ad04437be659a89ad2a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c8ed7f0_759f6aca",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-23T20:29:01Z",
+      "side": 1,
+      "message": "what about std::unique_ptr\u003cRcSync\u003e ?",
+      "range": {
+        "startLine": 37,
+        "startChar": 4,
+        "endLine": 37,
+        "endChar": 11
+      },
+      "revId": "ea294034f6396c745602ad04437be659a89ad2a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c8ed7f0_95a46e16",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-23T20:29:01Z",
+      "side": 1,
+      "message": "\u003d false ?",
+      "range": {
+        "startLine": 38,
+        "startChar": 17,
+        "endLine": 38,
+        "endChar": 18
+      },
+      "revId": "ea294034f6396c745602ad04437be659a89ad2a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c8ed7f0_d5fbd6c8",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 577,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-23T20:29:01Z",
+      "side": 1,
+      "message": "this is two lock operations and two lookups. Is it possible to combine them into some single function which is reasonable enough to exist?",
+      "range": {
+        "startLine": 571,
+        "startChar": 0,
+        "endLine": 577,
+        "endChar": 51
+      },
+      "revId": "ea294034f6396c745602ad04437be659a89ad2a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c8ed7f0_7528ca22",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-23T20:29:01Z",
+      "side": 1,
+      "message": "same thing about #if DEBUG",
+      "range": {
+        "startLine": 593,
+        "startChar": 3,
+        "endLine": 596,
+        "endChar": 5
+      },
+      "revId": "ea294034f6396c745602ad04437be659a89ad2a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
