@@ -95,6 +95,7 @@ TEST_F(FeatureControlTest, resetToDefault) {
     using namespace featurecontrol;
     for (int i = 0; i < Feature_n_items; i++) {
         Feature feature = static_cast<Feature>(i);
+        resetEnabledToDefault(feature);
         bool defaultVal = isEnabled(feature);
         setEnabledOverride(feature, true);
         resetEnabledToDefault(feature);
