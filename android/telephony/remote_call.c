@@ -11,12 +11,14 @@
 */
 #include "android/telephony/remote_call.h"
 
+#include "android/console_auth.h"
 #include "android/telephony/debug.h"
 #include "android/telephony/gsm.h"
 #include "android/telephony/sysdeps.h"
 
 #include "android/utils/bufprint.h"
 
+#include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -102,7 +104,7 @@ typedef struct RemoteCallRec {
     int                     buff_pos;
     int                     buff_len;
     int                     buff_size;
-    char                    buff0[32];
+    char                    buff0[128];
 
 } RemoteCallRec, *RemoteCall;
 
@@ -161,6 +163,19 @@ remote_call_alloc( RemoteCallType  type, int  to_port, int  from_port )
         p   = rcall->buff;
         end = p + rcall->buff_size;
 
+        // check if we need to authenticate first
+        char* auth_token = android_console_auth_get_token_dup();
+        if (auth_token) {
+            if (auth_token[0] != 0) {
+                // there's a token - add an 'auth' command
+                p = bufprint(p, end, "auth %s\n", auth_token);
+            }
+            free(auth_token);
+        } else {
+            D("%s: couldn't read an auth token, "
+              "skipping authentication\n", __func__);
+        }
+
         switch (type) {
             case REMOTE_CALL_DIAL:
                 p = bufprint(p, end, "gsm call " PHONE_PREFIX "%d\n", from_num );
@@ -211,25 +226,31 @@ remote_call_set_sms_pdu( RemoteCall  call,
                          SmsPDU      pdu )
 {
     char  *p, *end;
-    int    msg2len;
+    int    msg2len, buff_msg_len;
 
+    // Append an sms command to whatever is in the buffer already.
+    buff_msg_len = strlen(call->buff);
     msg2len = 32 + smspdu_to_hex( pdu, NULL, 0 );
-    if (msg2len > call->buff_size) {
-        char*  old_buff = call->buff == call->buff0 ? NULL : call->buff;
-        char*  new_buff = realloc( old_buff, msg2len );
+    if (msg2len > call->buff_size - buff_msg_len) {
+        char*  new_buff = malloc(msg2len + call->buff_size);
         if (new_buff == NULL) {
             D("%s: not enough memory to alloc %d bytes", __FUNCTION__, msg2len);
             return -1;
         }
+        memcpy(new_buff, call->buff, buff_msg_len + 1);
         call->buff      = new_buff;
-        call->buff_size = msg2len;
+        call->buff_size = msg2len + call->buff_size;
     }
 
-    p   = call->buff;
-    end = p + call->buff_size;
+    p   = call->buff + buff_msg_len;
+    end = call->buff + call->buff_size;
 
     p  = bufprint(p, end, "sms pdu ");
+    assert(p < end);
+
     p += smspdu_to_hex( pdu, p, end-p );
+    assert(p + 1 < end);
+
     *p++ = '\n';
     *p = 0;
 
