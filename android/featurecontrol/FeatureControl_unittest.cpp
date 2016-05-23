@@ -85,9 +85,9 @@ TEST_F(FeatureControlTest, overrideSetting) {
     for (int i = 0; i < Feature_n_items; i++) {
         Feature feature = static_cast<Feature>(i);
         setEnabledOverride(feature, true);
-        EXPECT_EQ(true, isEnabled(feature));
+        EXPECT_TRUE(isEnabled(feature));
         setEnabledOverride(feature, false);
-        EXPECT_EQ(false, isEnabled(feature));
+        EXPECT_FALSE(isEnabled(feature));
     }
 }
 
@@ -112,14 +112,14 @@ TEST_F(FeatureControlTest, readDefaultSettings) {
     FeatureControlImpl::get().init(mDefaultIniFilePath, mUserIniFilePath);
     for (int i = 0; i < Feature_n_items; i++) {
         Feature feature = static_cast<Feature>(i);
-        EXPECT_EQ(true, isEnabled(feature));
+        EXPECT_TRUE(isEnabled(feature));
     }
 
     writeDefaultIni(mAllOffIni);
     FeatureControlImpl::get().init(mDefaultIniFilePath, mUserIniFilePath);
     for (int i = 0; i < Feature_n_items; i++) {
         Feature feature = static_cast<Feature>(i);
-        EXPECT_EQ(false, isEnabled(feature));
+        EXPECT_FALSE(isEnabled(feature));
     }
 }
 
@@ -128,14 +128,14 @@ TEST_F(FeatureControlTest, readDefaultSettingsWithNoUserSettings) {
     FeatureControlImpl::get().init(mDefaultIniFilePath, "");
     for (int i = 0; i < Feature_n_items; i++) {
         Feature feature = static_cast<Feature>(i);
-        EXPECT_EQ(true, isEnabled(feature));
+        EXPECT_TRUE(isEnabled(feature));
     }
 
     writeDefaultIni(mAllOffIni);
     FeatureControlImpl::get().init(mDefaultIniFilePath, "");
     for (int i = 0; i < Feature_n_items; i++) {
         Feature feature = static_cast<Feature>(i);
-        EXPECT_EQ(false, isEnabled(feature));
+        EXPECT_FALSE(isEnabled(feature));
     }
 }
 
@@ -146,14 +146,14 @@ TEST_F(FeatureControlTest, readUserSettings) {
     FeatureControlImpl::get().init(mDefaultIniFilePath, mUserIniFilePath);
     for (int i = 0; i < Feature_n_items; i++) {
         Feature feature = static_cast<Feature>(i);
-        EXPECT_EQ(true, isEnabled(feature));
+        EXPECT_TRUE(isEnabled(feature));
     }
 
     writeUserIni(mAllOffIni);
     FeatureControlImpl::get().init(mDefaultIniFilePath, mUserIniFilePath);
     for (int i = 0; i < Feature_n_items; i++) {
         Feature feature = static_cast<Feature>(i);
-        EXPECT_EQ(false, isEnabled(feature));
+        EXPECT_FALSE(isEnabled(feature));
     }
 }
 
