@@ -90,7 +90,7 @@ OPT_FLAG ( wipe_data, "reset the user data image (copy it from initdata)" )
 CFG_PARAM( avd, "<name>", "use a specific android virtual device" )
 CFG_PARAM( skindir, "<dir>", "search skins in <dir> (default <system>/skins)" )
 CFG_PARAM( skin, "<name>", "select a given skin" )
-CFG_FLAG ( no_skin, "don't use any emulator skin" )
+CFG_FLAG ( no_skin, "deprecated: create an AVD with no skin instead" )
 CFG_FLAG ( noskin, "same as -no-skin" )
 CFG_PARAM( memory, "<size>", "physical RAM size in MBs" )
 
