@@ -86,9 +86,9 @@ TEST_F(FeatureControlTest, overrideSetting) {
         AndroidFeatureControlFeature feature =
             static_cast<AndroidFeatureControlFeature>(i);
         setEnabledOverride(feature, true);
-        EXPECT_EQ(true, featureIsEnabled(feature));
+        EXPECT_TRUE(featureIsEnabled(feature));
         setEnabledOverride(feature, false);
-        EXPECT_EQ(false, featureIsEnabled(feature));
+        EXPECT_FALSE(featureIsEnabled(feature));
     }
 }
 
@@ -115,7 +115,7 @@ TEST_F(FeatureControlTest, readDefaultSettings) {
     for (int i = 0; i < Feature_n_items; i++) {
         AndroidFeatureControlFeature feature =
             static_cast<AndroidFeatureControlFeature>(i);
-        EXPECT_EQ(true, featureIsEnabled(feature));
+        EXPECT_TRUE(featureIsEnabled(feature));
     }
 
     writeDefaultIni(mAllOffIni);
@@ -123,7 +123,7 @@ TEST_F(FeatureControlTest, readDefaultSettings) {
     for (int i = 0; i < Feature_n_items; i++) {
         AndroidFeatureControlFeature feature =
             static_cast<AndroidFeatureControlFeature>(i);
-        EXPECT_EQ(false, featureIsEnabled(feature));
+        EXPECT_FALSE(featureIsEnabled(feature));
     }
 }
 
@@ -133,7 +133,7 @@ TEST_F(FeatureControlTest, readDefaultSettingsWithNoUserSettings) {
     for (int i = 0; i < Feature_n_items; i++) {
         AndroidFeatureControlFeature feature =
             static_cast<AndroidFeatureControlFeature>(i);
-        EXPECT_EQ(true, featureIsEnabled(feature));
+        EXPECT_TRUE(featureIsEnabled(feature));
     }
 
     writeDefaultIni(mAllOffIni);
@@ -141,7 +141,7 @@ TEST_F(FeatureControlTest, readDefaultSettingsWithNoUserSettings) {
     for (int i = 0; i < Feature_n_items; i++) {
         AndroidFeatureControlFeature feature =
             static_cast<AndroidFeatureControlFeature>(i);
-        EXPECT_EQ(false, featureIsEnabled(feature));
+        EXPECT_FALSE(featureIsEnabled(feature));
     }
 }
 
@@ -153,7 +153,7 @@ TEST_F(FeatureControlTest, readUserSettings) {
     for (int i = 0; i < Feature_n_items; i++) {
         AndroidFeatureControlFeature feature =
             static_cast<AndroidFeatureControlFeature>(i);
-        EXPECT_EQ(true, featureIsEnabled(feature));
+        EXPECT_TRUE(featureIsEnabled(feature));
     }
 
     writeUserIni(mAllOffIni);
@@ -161,7 +161,7 @@ TEST_F(FeatureControlTest, readUserSettings) {
     for (int i = 0; i < Feature_n_items; i++) {
         AndroidFeatureControlFeature feature =
             static_cast<AndroidFeatureControlFeature>(i);
-        EXPECT_EQ(false, featureIsEnabled(feature));
+        EXPECT_FALSE(featureIsEnabled(feature));
     }
 }
 
