@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5c8ed7f0_ec096925",
+        "filename": "android/featurecontrol/FeatureControl_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-05-24T16:49:03Z",
+      "side": 1,
+      "message": "Please also initialize the user ini file\nwriteUserIni(mAllDefaultIni);\nOr you can pass an empty sting to the initialization bellow",
+      "revId": "83e22667e5134ba9741c6dfa11285137a7d2a707",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
