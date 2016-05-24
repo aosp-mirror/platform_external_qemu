@@ -821,13 +821,15 @@ void EmulatorQtWindow::slot_requestClose(QSemaphore* semaphore) {
 
 void EmulatorQtWindow::slot_requestUpdate(const QRect* rect,
                                           QSemaphore* semaphore) {
-    QRect r(rect->x() * mBackingSurface->w / mBackingSurface->original_w,
-            rect->y() * mBackingSurface->h / mBackingSurface->original_h,
-            rect->width() * mBackingSurface->w / mBackingSurface->original_w,
-            rect->height() * mBackingSurface->h / mBackingSurface->original_h);
-    update(r);
-    if (semaphore != NULL)
-        semaphore->release();
+    if (mBackingSurface) {
+        QRect r(rect->x() * mBackingSurface->w / mBackingSurface->original_w,
+                rect->y() * mBackingSurface->h / mBackingSurface->original_h,
+                rect->width() * mBackingSurface->w / mBackingSurface->original_w,
+                rect->height() * mBackingSurface->h / mBackingSurface->original_h);
+        update(r);
+        if (semaphore != NULL)
+            semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_setDeviceGeometry(const QRect* rect,
@@ -1543,20 +1545,20 @@ void EmulatorQtWindow::zoomIn() {
 
 void EmulatorQtWindow::zoomIn(const QPoint& focus,
                               const QPoint& viewportFocus) {
-    saveZoomPoints(focus, viewportFocus);
+    if (mBackingSurface) {
+        saveZoomPoints(focus, viewportFocus);
 
-    // The below scale = x creates a skin equivalent to calling "window scale x"
-    // through the
-    // emulator console. At scale = 1, the device should be at a 1:1 pixel
-    // mapping
-    // with the
-    // monitor. We allow going to twice this size.
-    double scale =
-            ((double)size().width() / (double)mBackingSurface->original_w);
-    double maxZoom = mZoomFactor * 2.0 / scale;
+        // The below scale = x creates a skin equivalent to calling "window
+        // scale x" through the emulator console. At scale = 1, the device
+        // should be at a 1:1 pixel mapping with the monitor. We allow going
+        // to twice this size.
+        double scale =
+                ((double)size().width() / (double)mBackingSurface->original_w);
+        double maxZoom = mZoomFactor * 2.0 / scale;
 
-    if (scale < 2) {
-        simulateSetZoom(std::min(mZoomFactor + .25, maxZoom));
+        if (scale < 2) {
+            simulateSetZoom(std::min(mZoomFactor + .25, maxZoom));
+        }
     }
 }
 
@@ -1578,31 +1580,30 @@ void EmulatorQtWindow::zoomReset() {
 }
 
 void EmulatorQtWindow::zoomTo(const QPoint& focus, const QSize& rectSize) {
-    saveZoomPoints(focus,
-                   QPoint(mContainer.width() / 2, mContainer.height() / 2));
+    if (mBackingSurface) {
+        saveZoomPoints(focus,
+                       QPoint(mContainer.width() / 2,
+                              mContainer.height() / 2));
 
-    // The below scale = x creates a skin equivalent to calling "window scale x"
-    // through the
-    // emulator console. At scale = 1, the device should be at a 1:1 pixel
-    // mapping
-    // with the
-    // monitor. We allow going to twice this size.
-    double scale =
-            ((double)size().width() / (double)mBackingSurface->original_w);
+        // The below scale = x creates a skin equivalent to calling "window
+        // scale x" through the emulator console. At scale = 1, the device
+        // should be at a 1:1 pixel mapping with the monitor. We allow going to
+        // twice this size.
+        double scale =
+                ((double)size().width() / (double)mBackingSurface->original_w);
 
-    // Calculate the "ideal" zoom factor, which would perfectly frame this
-    // rectangle, and the
-    // "maximum" zoom factor, which makes scale = 1, and pick the smaller one.
-    // Adding 20 accounts for the scroll bars potentially cutting off parts of
-    // the
-    // selection
-    double maxZoom = mZoomFactor * 2.0 / scale;
-    double idealWidthZoom = mZoomFactor * (double)mContainer.width() /
-                            (double)(rectSize.width() + 20);
-    double idealHeightZoom = mZoomFactor * (double)mContainer.height() /
-                             (double)(rectSize.height() + 20);
+        // Calculate the "ideal" zoom factor, which would perfectly frame this
+        // rectangle, and the "maximum" zoom factor, which makes scale = 1, and
+        // pick the smaller one. Adding 20 accounts for the scroll bars
+        // potentially cutting off parts of the selection
+        double maxZoom = mZoomFactor * 2.0 / scale;
+        double idealWidthZoom = mZoomFactor * (double)mContainer.width() /
+                                (double)(rectSize.width() + 20);
+        double idealHeightZoom = mZoomFactor * (double)mContainer.height() /
+                                 (double)(rectSize.height() + 20);
 
-    simulateSetZoom(std::min({idealWidthZoom, idealHeightZoom, maxZoom}));
+        simulateSetZoom(std::min({idealWidthZoom, idealHeightZoom, maxZoom}));
+    }
 }
 
 void EmulatorQtWindow::panHorizontal(bool left) {
