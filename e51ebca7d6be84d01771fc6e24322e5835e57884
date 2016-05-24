@@ -34,6 +34,24 @@
       "revId": "e51ebca7d6be84d01771fc6e24322e5835e57884",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1c1b7fb9_da8115a4",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 824,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-05-24T19:08:48Z",
+      "side": 1,
+      "message": "I have done it the way here, because some like to have a single exit point from functions.\n\nOn the other hand, in a change to some System code, a reviewer suggested I use \"(!) return\" to minimize the diff due to indentation changes. And I haven\u0027t seen any Google guidelines recommending a single exit point.\n\nSo I plan to use \"(!) return\" in the future. I\u0027m perfectly OK with either way here.",
+      "parentUuid": "1c1b7fb9_6c866f2a",
+      "revId": "e51ebca7d6be84d01771fc6e24322e5835e57884",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
