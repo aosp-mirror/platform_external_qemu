@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1c1b7fb9_2cd7573a",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 824,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-05-24T18:24:23Z",
+      "side": 1,
+      "message": "When it\u0027s the entire function, you could also\n\nif (!mBackingSurface) return;\n\nBut OK as-is.",
+      "revId": "e51ebca7d6be84d01771fc6e24322e5835e57884",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
