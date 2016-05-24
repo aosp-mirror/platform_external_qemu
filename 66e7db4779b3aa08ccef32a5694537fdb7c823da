@@ -22,6 +22,30 @@
       "revId": "66e7db4779b3aa08ccef32a5694537fdb7c823da",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c8ed7f0_f8f4c7cb",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-24T08:11:28Z",
+      "side": 1,
+      "message": "The \"1\" passed to the creation of the render context should make it a gles2 context. I\u0027ll make this more clear.",
+      "parentUuid": "5c8ed7f0_b5f412cb",
+      "range": {
+        "startLine": 98,
+        "startChar": 28,
+        "endLine": 98,
+        "endChar": 35
+      },
+      "revId": "66e7db4779b3aa08ccef32a5694537fdb7c823da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
