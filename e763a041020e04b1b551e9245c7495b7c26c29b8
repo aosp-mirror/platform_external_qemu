@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5c8ed7f0_b81cff6d",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-24T06:00:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5c8ed7f0_b6dc155d",
+      "range": {
+        "startLine": 31,
+        "startChar": 7,
+        "endLine": 31,
+        "endChar": 29
+      },
+      "revId": "e763a041020e04b1b551e9245c7495b7c26c29b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5c8ed7f0_d1ed23c6",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
         "patchSetId": 24
@@ -36,6 +60,30 @@
       "writtenOn": "2016-05-23T23:59:01Z",
       "side": 1,
       "message": "it looks like you need to return nullptr here - otherwise it-\u003esecond would dereference an invalid iterator",
+      "range": {
+        "startLine": 52,
+        "startChar": 8,
+        "endLine": 52,
+        "endChar": 25
+      },
+      "revId": "e763a041020e04b1b551e9245c7495b7c26c29b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c8ed7f0_7816774c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-24T06:00:54Z",
+      "side": 1,
+      "message": "Thanks :) Done.",
+      "parentUuid": "5c8ed7f0_d1ed23c6",
       "range": {
         "startLine": 52,
         "startChar": 8,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "5c8ed7f0_981b3b72",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-24T06:00:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5c8ed7f0_56b829f2",
+      "range": {
+        "startLine": 55,
+        "startChar": 27,
+        "endLine": 55,
+        "endChar": 31
+      },
+      "revId": "e763a041020e04b1b551e9245c7495b7c26c29b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5c8ed7f0_d1bf63b6",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
         "patchSetId": 24
@@ -82,6 +154,30 @@
       "writtenOn": "2016-05-23T23:59:01Z",
       "side": 1,
       "message": "findNonSignaledSync() ?\nAlso, could you please add a short comment explaining that function returns null if the sync has been signaled already, and sync to wait on if it wasn\u0027t ?",
+      "range": {
+        "startLine": 51,
+        "startChar": 12,
+        "endLine": 51,
+        "endChar": 24
+      },
+      "revId": "e763a041020e04b1b551e9245c7495b7c26c29b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c8ed7f0_380f8f25",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-24T06:00:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5c8ed7f0_d1bf63b6",
       "range": {
         "startLine": 51,
         "startChar": 12,
