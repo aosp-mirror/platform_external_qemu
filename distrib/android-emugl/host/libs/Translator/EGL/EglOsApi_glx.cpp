@@ -256,15 +256,17 @@ public:
                               void* addConfigOpaque) {
         int n;
         GLXFBConfig* frmtList = glXGetFBConfigs(mDisplay, 0, &n);
-        for(int i = 0; i < n; i++) {
-            pixelFormatToConfig(
-                    mDisplay,
-                    renderableType,
-                    frmtList[i],
-                    addConfigFunc,
-                    addConfigOpaque);
+        if (frmtList) {
+            for(int i = 0; i < n; i++) {
+                pixelFormatToConfig(
+                        mDisplay,
+                        renderableType,
+                        frmtList[i],
+                        addConfigFunc,
+                        addConfigOpaque);
+            }
+            XFree(frmtList);
         }
-        XFree(frmtList);
     }
 
     virtual bool isValidNativeWin(EglOS::Surface* win) {
