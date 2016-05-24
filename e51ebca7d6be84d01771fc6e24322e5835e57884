@@ -16,6 +16,24 @@
       "revId": "e51ebca7d6be84d01771fc6e24322e5835e57884",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1c1b7fb9_6c866f2a",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 824,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-05-24T18:27:43Z",
+      "side": 1,
+      "message": "I figured it would be easiest to keep with the convention we have in the other functions. I\u0027d be happy to just make this CL change all of them to do if (!) return.",
+      "parentUuid": "1c1b7fb9_2cd7573a",
+      "revId": "e51ebca7d6be84d01771fc6e24322e5835e57884",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
