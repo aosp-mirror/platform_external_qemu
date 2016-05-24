@@ -2326,6 +2326,20 @@ do_geo_fix( ControlClient  client, char*  args )
         return -1;
     }
 
+    /* check longitude and latitude */
+    {
+        double longitude = params[0];
+        if (longitude < -180.0 || longitude > 180.0) {
+            control_write(client, "KO: invalid longitude value. Should be in [-180,+180] range\r\n");
+            return -1;
+        }
+        double latitude = params[1];
+        if (latitude < -90.0 || latitude > 90.0) {
+            control_write(client, "KO: invalid latitude value. Should be in [-90,+90] range\r\n");
+            return -1;
+        }
+    }
+
     /* check number of satellites, must be integer between 1 and 12 */
     if (top_param >= GEO_SAT) {
         int sat_index = (top_param >= GEO_SAT2) ? GEO_SAT2 : GEO_SAT;
