@@ -821,6 +821,8 @@ void EmulatorQtWindow::slot_requestClose(QSemaphore* semaphore) {
 
 void EmulatorQtWindow::slot_requestUpdate(const QRect* rect,
                                           QSemaphore* semaphore) {
+    if (!mBackingSurface) return;
+
     QRect r(rect->x() * mBackingSurface->w / mBackingSurface->original_w,
             rect->y() * mBackingSurface->h / mBackingSurface->original_h,
             rect->width() * mBackingSurface->w / mBackingSurface->original_w,
@@ -1247,35 +1249,35 @@ SkinEvent* EmulatorQtWindow::createSkinEvent(SkinEventType type) {
 void EmulatorQtWindow::doResize(const QSize& size,
                                 bool isKbdShortcut,
                                 bool flipDimensions) {
-    if (mBackingSurface) {
-        int originalWidth = flipDimensions ? mBackingSurface->original_h
-                                           : mBackingSurface->original_w;
-        int originalHeight = flipDimensions ? mBackingSurface->original_w
-                                            : mBackingSurface->original_h;
+    if (!mBackingSurface) return;
 
-        QSize newSize(originalWidth, originalHeight);
-        newSize.scale(size, Qt::KeepAspectRatio);
+    int originalWidth = flipDimensions ? mBackingSurface->original_h
+                                       : mBackingSurface->original_w;
+    int originalHeight = flipDimensions ? mBackingSurface->original_w
+                                        : mBackingSurface->original_h;
 
-        // Make sure the new size is always a little bit smaller than the
-        // screen to prevent keyboard shortcut scaling from making a window
-        // too large for the screen, which can result in the showing of the
-        // scroll bars. This is not an issue when resizing by dragging the
-        // corner because the OS will prevent too large a window.
-        if (isKbdShortcut) {
-            QRect screenDimensions;
-            slot_getScreenDimensions(&screenDimensions);
+    QSize newSize(originalWidth, originalHeight);
+    newSize.scale(size, Qt::KeepAspectRatio);
 
-            if (newSize.width() > screenDimensions.width() ||
-                newSize.height() > screenDimensions.height()) {
-                newSize.scale(screenDimensions.size(), Qt::KeepAspectRatio);
-            }
+    // Make sure the new size is always a little bit smaller than the
+    // screen to prevent keyboard shortcut scaling from making a window
+    // too large for the screen, which can result in the showing of the
+    // scroll bars. This is not an issue when resizing by dragging the
+    // corner because the OS will prevent too large a window.
+    if (isKbdShortcut) {
+        QRect screenDimensions;
+        slot_getScreenDimensions(&screenDimensions);
+
+        if (newSize.width() > screenDimensions.width() ||
+            newSize.height() > screenDimensions.height()) {
+            newSize.scale(screenDimensions.size(), Qt::KeepAspectRatio);
         }
-
-        double widthScale = (double)newSize.width() / (double)originalWidth;
-        double heightScale = (double)newSize.height() / (double)originalHeight;
-
-        simulateSetScale(std::max(.2, std::min(widthScale, heightScale)));
     }
+
+    double widthScale = (double)newSize.width() / (double)originalWidth;
+    double heightScale = (double)newSize.height() / (double)originalHeight;
+
+    simulateSetScale(std::max(.2, std::min(widthScale, heightScale)));
 }
 
 SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(
@@ -1543,14 +1545,14 @@ void EmulatorQtWindow::zoomIn() {
 
 void EmulatorQtWindow::zoomIn(const QPoint& focus,
                               const QPoint& viewportFocus) {
+    if (!mBackingSurface) return;
+
     saveZoomPoints(focus, viewportFocus);
 
-    // The below scale = x creates a skin equivalent to calling "window scale x"
-    // through the
-    // emulator console. At scale = 1, the device should be at a 1:1 pixel
-    // mapping
-    // with the
-    // monitor. We allow going to twice this size.
+    // The below scale = x creates a skin equivalent to calling "window
+    // scale x" through the emulator console. At scale = 1, the device
+    // should be at a 1:1 pixel mapping with the monitor. We allow going
+    // to twice this size.
     double scale =
             ((double)size().width() / (double)mBackingSurface->original_w);
     double maxZoom = mZoomFactor * 2.0 / scale;
@@ -1578,24 +1580,22 @@ void EmulatorQtWindow::zoomReset() {
 }
 
 void EmulatorQtWindow::zoomTo(const QPoint& focus, const QSize& rectSize) {
+    if (!mBackingSurface) return;
+
     saveZoomPoints(focus,
                    QPoint(mContainer.width() / 2, mContainer.height() / 2));
 
-    // The below scale = x creates a skin equivalent to calling "window scale x"
-    // through the
-    // emulator console. At scale = 1, the device should be at a 1:1 pixel
-    // mapping
-    // with the
-    // monitor. We allow going to twice this size.
+    // The below scale = x creates a skin equivalent to calling "window
+    // scale x" through the emulator console. At scale = 1, the device
+    // should be at a 1:1 pixel mapping with the monitor. We allow going to
+    // twice this size.
     double scale =
             ((double)size().width() / (double)mBackingSurface->original_w);
 
     // Calculate the "ideal" zoom factor, which would perfectly frame this
-    // rectangle, and the
-    // "maximum" zoom factor, which makes scale = 1, and pick the smaller one.
-    // Adding 20 accounts for the scroll bars potentially cutting off parts of
-    // the
-    // selection
+    // rectangle, and the "maximum" zoom factor, which makes scale = 1, and
+    // pick the smaller one. Adding 20 accounts for the scroll bars
+    // potentially cutting off parts of the selection
     double maxZoom = mZoomFactor * 2.0 / scale;
     double idealWidthZoom = mZoomFactor * (double)mContainer.width() /
                             (double)(rectSize.width() + 20);
