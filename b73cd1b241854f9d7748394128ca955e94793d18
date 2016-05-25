@@ -46,6 +46,30 @@
       "revId": "b73cd1b241854f9d7748394128ca955e94793d18",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcfdcbc0_3382cba8",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 473,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-25T22:48:30Z",
+      "side": 1,
+      "message": "e.g.\nError: dropped content didn\u0027t have any files. Emulator only supports drag-and-drop for files to copy them or install a single APK\n?",
+      "parentUuid": "fcfdcbc0_1dd7de39",
+      "range": {
+        "startLine": 473,
+        "startChar": 20,
+        "endLine": 473,
+        "endChar": 72
+      },
+      "revId": "b73cd1b241854f9d7748394128ca955e94793d18",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
