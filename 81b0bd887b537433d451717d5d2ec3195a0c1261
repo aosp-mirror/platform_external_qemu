@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "fcfdcbc0_d6bc84e7",
+        "filename": "android/scripts/gen-android-sdk-toolchain.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-25T23:56:43Z",
+      "side": 1,
+      "message": "actually, it\u0027s wrong to add that to ld and its variants, it breaks the Darwin build, will fix.",
+      "revId": "81b0bd887b537433d451717d5d2ec3195a0c1261",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fcfdcbc0_5a3a01b2",
         "filename": "android/scripts/gen-android-sdk-toolchain.sh",
         "patchSetId": 2
@@ -13,6 +30,30 @@
       "writtenOn": "2016-05-25T18:38:01Z",
       "side": 1,
       "message": "do we need to do anything for mingw?",
+      "range": {
+        "startLine": 211,
+        "startChar": 14,
+        "endLine": 213,
+        "endChar": 22
+      },
+      "revId": "81b0bd887b537433d451717d5d2ec3195a0c1261",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcfdcbc0_b6eb48eb",
+        "filename": "android/scripts/gen-android-sdk-toolchain.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-25T23:56:43Z",
+      "side": 1,
+      "message": "No, adding -fPIC results in the following warning :-)\n\n  warning: -fPIC ignored for target (all code is position independent) [enabled by default]",
+      "parentUuid": "fcfdcbc0_5a3a01b2",
       "range": {
         "startLine": 211,
         "startChar": 14,
