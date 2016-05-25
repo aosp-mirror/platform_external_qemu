@@ -467,11 +467,19 @@ void EmulatorQtWindow::dropEvent(QDropEvent* event) {
         return;
     }
 
+    QList<QUrl> urls = event->mimeData()->urls();
+    if (urls.length() == 0) {
+        showErrorDialog(
+                tr("Dropped content didn't have any files. Emulator only "
+                   "supports drag-and-drop for files to copy them or install "
+                   "a single APK."),
+                tr("Drag and Drop"));
+        return;
+    }
+
     // Get the first url - if it's an APK and the only file, attempt to install
     // it
-    QList<QUrl> urls = event->mimeData()->urls();
     QString url = urls[0].toLocalFile();
-
     if (url.endsWith(".apk") && urls.length() == 1) {
         runAdbInstall(url);
         return;
