@@ -1330,7 +1330,16 @@ static ram_addr_t ram_block_add(RAMBlock *new_block, Error **errp)
                                        new_block->length);
                 if (ret < 0) {
                     fprintf(stderr, "Hax failed to populate ram\n");
+#ifdef CONFIG_ANDROID
+                    if (phys_mem_alloc == qemu_anon_ram_alloc) {
+                        // We can only free the allocated memory if we know how
+                        // it was allocated. Else, we'll leak it :(
+                        qemu_anon_ram_free(new_block->host, new_block->length);
+                    }
+                    new_block->host = NULL;
+#else  // !CONFIG_ANDROID
                     exit(-1);
+#endif  // !CONFIG_ANDROID
                 }
             }
 #endif
