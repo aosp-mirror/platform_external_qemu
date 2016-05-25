@@ -583,9 +583,20 @@ void EmulatorQtWindow::showMinimized() {
 
 void EmulatorQtWindow::startThread(StartFunction f, int argc, char** argv) {
     if (!mMainLoopThread) {
+        // Check for null as arguments to StartFunction, mayybe
+        if (argc && !argv) {
+          D("Empty argv passed to a startThread(), returning early");
+          return;
+        }
+
         // pass the QEMU main thread's arguments into the crash handler
         std::string arguments = "===== QEMU main loop arguments =====\n";
         for (int i = 0; i < argc; ++i) {
+            if (!argv[i]) {
+              D("Internal Error: argv[%d] was null, replaced with empty string",
+                i);
+              argv[i] = "";
+            }
             arguments += argv[i];
             arguments += '\n';
         }
