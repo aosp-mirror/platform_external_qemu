@@ -583,9 +583,22 @@ void EmulatorQtWindow::showMinimized() {
 
 void EmulatorQtWindow::startThread(StartFunction f, int argc, char** argv) {
     if (!mMainLoopThread) {
+        // Check for null as arguments to StartFunction
+        if (argc && !argv) {
+            D("Empty argv passed to a startThread(), returning early");
+            return;
+        }
+
         // pass the QEMU main thread's arguments into the crash handler
         std::string arguments = "===== QEMU main loop arguments =====\n";
         for (int i = 0; i < argc; ++i) {
+            // Check for null in argv
+            if (!argv[i]) {
+                D("Internal Error: argv[%d] was null, replaced with empty "
+                  "string",
+                  i);
+                argv[i] = "";
+            }
             arguments += argv[i];
             arguments += '\n';
         }
@@ -821,7 +834,8 @@ void EmulatorQtWindow::slot_requestClose(QSemaphore* semaphore) {
 
 void EmulatorQtWindow::slot_requestUpdate(const QRect* rect,
                                           QSemaphore* semaphore) {
-    if (!mBackingSurface) return;
+    if (!mBackingSurface)
+        return;
 
     QRect r(rect->x() * mBackingSurface->w / mBackingSurface->original_w,
             rect->y() * mBackingSurface->h / mBackingSurface->original_h,
@@ -957,11 +971,10 @@ void EmulatorQtWindow::screenshot() {
         return;
     }
 
-    mScreenCapturer.capture(
-        savePath.toStdString(),
-        [this](ScreenCapturer::Result result) {
-            EmulatorQtWindow::screenshotDone(result);
-        });
+    mScreenCapturer.capture(savePath.toStdString(),
+                            [this](ScreenCapturer::Result result) {
+                                EmulatorQtWindow::screenshotDone(result);
+                            });
 
     // Display the flash animation immediately as feedback - if it fails, an
     // error dialog will indicate as such.
@@ -1085,9 +1098,7 @@ void EmulatorQtWindow::runAdbPush(const QList<QUrl>& urls) {
                 std::make_pair(url.toLocalFile().toStdString(), remoteFile));
     }
 
-    mFilePusher.pushFiles(
-        file_paths.begin(),
-        file_paths.end());
+    mFilePusher.pushFiles(file_paths.begin(), file_paths.end());
 }
 
 void EmulatorQtWindow::slot_adbPushCanceled() {
@@ -1249,7 +1260,8 @@ SkinEvent* EmulatorQtWindow::createSkinEvent(SkinEventType type) {
 void EmulatorQtWindow::doResize(const QSize& size,
                                 bool isKbdShortcut,
                                 bool flipDimensions) {
-    if (!mBackingSurface) return;
+    if (!mBackingSurface)
+        return;
 
     int originalWidth = flipDimensions ? mBackingSurface->original_h
                                        : mBackingSurface->original_w;
@@ -1545,7 +1557,8 @@ void EmulatorQtWindow::zoomIn() {
 
 void EmulatorQtWindow::zoomIn(const QPoint& focus,
                               const QPoint& viewportFocus) {
-    if (!mBackingSurface) return;
+    if (!mBackingSurface)
+        return;
 
     saveZoomPoints(focus, viewportFocus);
 
@@ -1580,7 +1593,8 @@ void EmulatorQtWindow::zoomReset() {
 }
 
 void EmulatorQtWindow::zoomTo(const QPoint& focus, const QSize& rectSize) {
-    if (!mBackingSurface) return;
+    if (!mBackingSurface)
+        return;
 
     saveZoomPoints(focus,
                    QPoint(mContainer.width() / 2, mContainer.height() / 2));
@@ -1649,11 +1663,13 @@ void EmulatorQtWindow::checkAdbVersionAndWarn() {
     QSettings settings;
     if (!mAdbInterface->isAdbVersionCurrent() &&
         settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool()) {
-        mAdbWarningBox.setText(tr(
-            "The ADB binary found at %1 is obsolete and has serious"
-            "performance problems with the Android Emulator. Please update to "
-            "a newer version to get significantly faster app/file transfer.")
-                .arg(mAdbInterface->detectedAdbPath().c_str()));
+        mAdbWarningBox.setText(
+                tr("The ADB binary found at %1 is obsolete and has serious"
+                   "performance problems with the Android Emulator. Please "
+                   "update to "
+                   "a newer version to get significantly faster app/file "
+                   "transfer.")
+                        .arg(mAdbInterface->detectedAdbPath().c_str()));
         QSettings settings;
         if (settings.value(Ui::Settings::SHOW_ADB_WARNING, true).toBool()) {
             QObject::connect(&mAdbWarningBox,
@@ -1684,9 +1700,9 @@ void EmulatorQtWindow::runAdbShellStopAndQuit() {
     }
     mStartedAdbStopProcess = true;
     mAdbInterface->runAdbCommand(
-        {"shell", "stop"},
-        [this](const android::emulation::OptionalAdbCommandResult&) {
-            queueQuitEvent();
-        },
-        android::base::System::kInfinite);
+            {"shell", "stop"},
+            [this](const android::emulation::OptionalAdbCommandResult&) {
+                queueQuitEvent();
+            },
+            android::base::System::kInfinite);
 }
