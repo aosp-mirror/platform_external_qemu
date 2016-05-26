@@ -26,7 +26,10 @@ LIBCURL_STATIC_LIBRARIES := \
     emulator-libcrypto \
     emulator-zlib
 
-ifneq ($(BUILD_TARGET_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
+    # Believe it or not: libcurl depends on gdi32.dll on Windows!
+    LIBCURL_LDLIBS += -lcrypt32 -lgdi32
+else
     LIBCURL_LDLIBS += -ldl
 endif
 
