@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fcfdcbc0_d2eebec0",
+        "filename": "android/featurecontrol/FeatureControlImpl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-26T22:18:15Z",
+      "side": 1,
+      "message": "please add some quotes here, otherwise spaces could be lost",
+      "range": {
+        "startLine": 65,
+        "startChar": 50,
+        "endLine": 65,
+        "endChar": 51
+      },
+      "revId": "4819917b0bbf1aeacb9531501b17b88277e40966",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcfdcbc0_72694a0d",
+        "filename": "android/featurecontrol/FeatureControlImpl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-26T22:18:15Z",
+      "side": 1,
+      "message": "please clean up the successful code so it doesn\u0027t print it unless some -debug flag is on",
+      "range": {
+        "startLine": 80,
+        "startChar": 0,
+        "endLine": 85,
+        "endChar": 5
+      },
+      "revId": "4819917b0bbf1aeacb9531501b17b88277e40966",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcfdcbc0_d28fdedf",
+        "filename": "android/featurecontrol/FeatureControlImpl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-26T22:18:15Z",
+      "side": 1,
+      "message": "please use {} here, it\u0027s much faster",
+      "range": {
+        "startLine": 196,
+        "startChar": 32,
+        "endLine": 196,
+        "endChar": 37
+      },
+      "revId": "4819917b0bbf1aeacb9531501b17b88277e40966",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcfdcbc0_72deea25",
+        "filename": "android/featurecontrol/FeatureControlImpl.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-26T22:18:15Z",
+      "side": 1,
+      "message": "can you add some extended explanation about the host/guest features, how they are loaded, which files are per-emulator, per-user, per-system image, per-avd etc?",
+      "revId": "4819917b0bbf1aeacb9531501b17b88277e40966",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
