@@ -33,57 +33,103 @@ class FeatureControlTest : public ::testing::Test {
 public:
     void SetUp() override {
         mTempDir.reset(new base::TestTempDir("featurecontroltest"));
-        mDefaultIniFilePath = mTempDir->makeSubPath("defaultSettings.ini").c_str();
-        mUserIniFilePath = mTempDir->makeSubPath("userSettings.ini").c_str();
+        mDefaultIniHostFilePath =
+                mTempDir->makeSubPath("defaultSettingsHost.ini").c_str();
+        mDefaultIniGuestFilePath =
+                mTempDir->makeSubPath("defaultSettingsGuest.ini").c_str();
+        mUserIniHostFilePath =
+                mTempDir->makeSubPath("userSettingsHost.ini").c_str();
+        mUserIniGuestFilePath =
+                mTempDir->makeSubPath("userSettingsGuest.ini").c_str();
 
 #define FEATURE_CONTROL_ITEM(item) \
         #item " = on\n"
         mAllOnIni =
-#include "FeatureControlDef.h"
+#include "FeatureControlDefHost.h"
+#include "FeatureControlDefGuest.h"
         ;
 #undef FEATURE_CONTROL_ITEM
 
-#define FEATURE_CONTROL_ITEM(item) \
-        #item " = off\n"
+#define FEATURE_CONTROL_ITEM(item) #item " = on\n"
+        mAllOnIniGuestOnly =
+#include "FeatureControlDefGuest.h"
+                ;
+#undef FEATURE_CONTROL_ITEM
+
+#define FEATURE_CONTROL_ITEM(item) #item " = off\n"
         mAllOffIni =
-#include "FeatureControlDef.h"
+#include "FeatureControlDefHost.h"
+#include "FeatureControlDefGuest.h"
         ;
 #undef FEATURE_CONTROL_ITEM
 
-#define FEATURE_CONTROL_ITEM(item) \
-        #item " = default\n"
+#define FEATURE_CONTROL_ITEM(item) #item " = off\n"
+        mAllOffIniGuestOnly =
+#include "FeatureControlDefGuest.h"
+                ;
+#undef FEATURE_CONTROL_ITEM
+
+#define FEATURE_CONTROL_ITEM(item) #item " = default\n"
         mAllDefaultIni =
-#include "FeatureControlDef.h"
+#include "FeatureControlDefHost.h"
+#include "FeatureControlDefGuest.h"
         ;
+#undef FEATURE_CONTROL_ITEM
+
+#define FEATURE_CONTROL_ITEM(item) #item " = default\n"
+        mAllDefaultIniGuestOnly =
+#include "FeatureControlDefGuest.h"
+                ;
 #undef FEATURE_CONTROL_ITEM
     }
 protected:
-    void writeDefaultIni(android::base::StringView data) {
-        std::ofstream outFile(mDefaultIniFilePath,
-                              std::ios_base::out | std::ios_base::trunc);
-        ASSERT_TRUE(outFile.good());
-        outFile.write(data.data(), data.size());
+    void writeDefaultIniHost(android::base::StringView data) {
+        writeIni(mDefaultIniHostFilePath, data);
     }
-    void writeUserIni(android::base::StringView data) {
-        std::ofstream outFile(mUserIniFilePath,
-                              std::ios_base::out | std::ios_base::trunc);
-        ASSERT_TRUE(outFile.good());
-        outFile.write(data.data(), data.size());
+    void writeDefaultIniGuest(android::base::StringView data) {
+        writeIni(mDefaultIniGuestFilePath, data);
+    }
+    void writeUserIniHost(android::base::StringView data) {
+        writeIni(mUserIniHostFilePath, data);
+    }
+    void writeUserIniGuest(android::base::StringView data) {
+        writeIni(mUserIniGuestFilePath, data);
+    }
+    void loadAllIni() {
+        FeatureControlImpl::get().init(
+                mDefaultIniHostFilePath, mDefaultIniGuestFilePath,
+                mUserIniHostFilePath, mUserIniGuestFilePath);
     }
     std::unique_ptr<base::TestTempDir> mTempDir;
-    std::string mDefaultIniFilePath;
-    std::string mUserIniFilePath;
+    std::string mDefaultIniHostFilePath;
+    std::string mDefaultIniGuestFilePath;
+    std::string mUserIniHostFilePath;
+    std::string mUserIniGuestFilePath;
     std::string mAllOnIni;
+    std::string mAllOnIniGuestOnly;
     std::string mAllOffIni;
+    std::string mAllOffIniGuestOnly;
     std::string mAllDefaultIni;
+    std::string mAllDefaultIniGuestOnly;
+
+private:
+    void writeIni(android::base::StringView filename,
+                  android::base::StringView data) {
+        std::ofstream outFile(filename,
+                              std::ios_base::out | std::ios_base::trunc);
+        ASSERT_TRUE(outFile.good());
+        outFile.write(data.data(), data.size());
+    }
 };
 
 }  // namespace
 
 TEST_F(FeatureControlTest, overrideSetting) {
-    writeDefaultIni(mAllOffIni);
-    writeUserIni(mAllDefaultIni);
-    FeatureControlImpl::get().init(mDefaultIniFilePath, mUserIniFilePath);
+    writeDefaultIniHost(mAllOffIni);
+    writeDefaultIniGuest(mAllOffIniGuestOnly);
+    writeUserIniHost(mAllDefaultIni);
+    writeUserIniGuest(mAllDefaultIniGuestOnly);
+    loadAllIni();
     using namespace featurecontrol;
     for (int i = 0; i < Feature_n_items; i++) {
         Feature feature = static_cast<Feature>(i);
@@ -95,9 +141,11 @@ TEST_F(FeatureControlTest, overrideSetting) {
 }
 
 TEST_F(FeatureControlTest, resetToDefault) {
-    writeDefaultIni(mAllOffIni);
-    writeUserIni(mAllDefaultIni);
-    FeatureControlImpl::get().init(mDefaultIniFilePath, mUserIniFilePath);
+    writeDefaultIniHost(mAllOffIni);
+    writeDefaultIniGuest(mAllOffIniGuestOnly);
+    writeUserIniHost(mAllDefaultIni);
+    writeUserIniGuest(mAllDefaultIniGuestOnly);
+    loadAllIni();
     using namespace featurecontrol;
     for (int i = 0; i < Feature_n_items; i++) {
         Feature feature = static_cast<Feature>(i);
@@ -112,17 +160,20 @@ TEST_F(FeatureControlTest, resetToDefault) {
 }
 
 TEST_F(FeatureControlTest, readDefaultSettings) {
-    writeUserIni(mAllDefaultIni);
+    writeUserIniHost(mAllDefaultIni);
+    writeUserIniGuest(mAllDefaultIniGuestOnly);
 
-    writeDefaultIni(mAllOnIni);
-    FeatureControlImpl::get().init(mDefaultIniFilePath, mUserIniFilePath);
+    writeDefaultIniHost(mAllOnIni);
+    writeDefaultIniGuest(mAllOnIniGuestOnly);
+    loadAllIni();
     for (int i = 0; i < Feature_n_items; i++) {
         Feature feature = static_cast<Feature>(i);
         EXPECT_TRUE(isEnabled(feature));
     }
 
-    writeDefaultIni(mAllOffIni);
-    FeatureControlImpl::get().init(mDefaultIniFilePath, mUserIniFilePath);
+    writeDefaultIniHost(mAllOffIni);
+    writeDefaultIniGuest(mAllOffIniGuestOnly);
+    loadAllIni();
     for (int i = 0; i < Feature_n_items; i++) {
         Feature feature = static_cast<Feature>(i);
         EXPECT_FALSE(isEnabled(feature));
@@ -130,15 +181,45 @@ TEST_F(FeatureControlTest, readDefaultSettings) {
 }
 
 TEST_F(FeatureControlTest, readDefaultSettingsWithNoUserSettings) {
-    writeDefaultIni(mAllOnIni);
-    FeatureControlImpl::get().init(mDefaultIniFilePath, "");
+    writeDefaultIniHost(mAllOnIni);
+    writeDefaultIniGuest(mAllOnIniGuestOnly);
+    FeatureControlImpl::get().init(mDefaultIniHostFilePath,
+                                   mDefaultIniGuestFilePath, "", "");
     for (int i = 0; i < Feature_n_items; i++) {
         Feature feature = static_cast<Feature>(i);
         EXPECT_TRUE(isEnabled(feature));
     }
 
-    writeDefaultIni(mAllOffIni);
-    FeatureControlImpl::get().init(mDefaultIniFilePath, "");
+    writeDefaultIniHost(mAllOffIni);
+    writeDefaultIniGuest(mAllOffIniGuestOnly);
+    FeatureControlImpl::get().init(mDefaultIniHostFilePath,
+                                   mDefaultIniGuestFilePath, "", "");
+    for (int i = 0; i < Feature_n_items; i++) {
+        Feature feature = static_cast<Feature>(i);
+        EXPECT_FALSE(isEnabled(feature));
+    }
+}
+
+TEST_F(FeatureControlTest, readDefaultSettingsHostGuestDifferent) {
+    writeDefaultIniHost(mAllOnIni);
+    writeDefaultIniGuest(mAllOffIni);
+    FeatureControlImpl::get().init(mDefaultIniHostFilePath,
+                                   mDefaultIniGuestFilePath, "", "");
+
+#define FEATURE_CONTROL_ITEM(item) EXPECT_TRUE(isEnabled(item));
+#include "FeatureControlDefHost.h"
+    ;
+#undef FEATURE_CONTROL_ITEM
+
+#define FEATURE_CONTROL_ITEM(item) EXPECT_FALSE(isEnabled(item));
+#include "FeatureControlDefGuest.h"
+    ;
+#undef FEATURE_CONTROL_ITEM
+
+    writeDefaultIniHost(mAllOffIni);
+    writeDefaultIniGuest(mAllOnIni);
+    FeatureControlImpl::get().init(mDefaultIniHostFilePath,
+                                   mDefaultIniGuestFilePath, "", "");
     for (int i = 0; i < Feature_n_items; i++) {
         Feature feature = static_cast<Feature>(i);
         EXPECT_FALSE(isEnabled(feature));
@@ -146,17 +227,20 @@ TEST_F(FeatureControlTest, readDefaultSettingsWithNoUserSettings) {
 }
 
 TEST_F(FeatureControlTest, readUserSettings) {
-    writeDefaultIni(mAllOffIni);
+    writeDefaultIniHost(mAllOnIni);
+    writeDefaultIniGuest(mAllOnIniGuestOnly);
 
-    writeUserIni(mAllOnIni);
-    FeatureControlImpl::get().init(mDefaultIniFilePath, mUserIniFilePath);
+    writeUserIniHost(mAllOnIni);
+    writeUserIniGuest(mAllOnIniGuestOnly);
+    loadAllIni();
     for (int i = 0; i < Feature_n_items; i++) {
         Feature feature = static_cast<Feature>(i);
         EXPECT_TRUE(isEnabled(feature));
     }
 
-    writeUserIni(mAllOffIni);
-    FeatureControlImpl::get().init(mDefaultIniFilePath, mUserIniFilePath);
+    writeUserIniHost(mAllOffIni);
+    writeUserIniGuest(mAllOffIniGuestOnly);
+    loadAllIni();
     for (int i = 0; i < Feature_n_items; i++) {
         Feature feature = static_cast<Feature>(i);
         EXPECT_FALSE(isEnabled(feature));
