@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fcfdcbc0_92860679",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 586,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-26T21:27:04Z",
+      "side": 1,
+      "message": "nit: typo and ? (what should it mean?)",
+      "range": {
+        "startLine": 586,
+        "startChar": 57,
+        "endLine": 586,
+        "endChar": 63
+      },
+      "revId": "a5c03497d12c85607bf7c4cb3e389591cdae97b0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
