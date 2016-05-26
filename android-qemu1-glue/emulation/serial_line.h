@@ -13,9 +13,14 @@
 
 #include "android/emulation/serial_line.h"
 #include "android/utils/compiler.h"
-#include "qemu-common.h"
 
 ANDROID_BEGIN_HEADER
+
+#include "qemu-common.h"
+
+// Call this during setup to inject QEMU1-specific SerialLine
+// implementation into the process.
+void qemu1_android_serialline_init(void);
 
 // Create a new CSerialLine instance that wraps a CharDriverState |cs|.
 CSerialLine* android_serialline_from_cs(CharDriverState* cs);
