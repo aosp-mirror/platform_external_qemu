@@ -382,6 +382,10 @@ ifeq ($(BUILD_TARGET_OS),windows)
 ANDROID_EMU_LDLIBS += -lvfw32
 # For GetPerformanceInfo in CrashService_windows.cpp
 ANDROID_EMU_LDLIBS += -lpsapi
+# Winsock functions
+ANDROID_EMU_LDLIBS += -lws2_32
+# GetNetworkParams() for android/utils/dns.c
+ANDROID_EMU_LDLIBS += -liphlpapi
 endif
 
 ###############################################################################
