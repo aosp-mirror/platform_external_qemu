@@ -17,6 +17,7 @@
 #include "android/android.h"
 #include "android/console.h"
 #include "android/emulation/vm_lock.h"
+#include "android-qemu1-glue/emulation/serial_line.h"
 #include "android-qemu1-glue/qemu-control-impl.h"
 
 extern "C" {
@@ -35,6 +36,8 @@ bool qemu_android_emulation_setup() {
 
   android_vm_set_lock_funcs(qemu_mutex_lock_iothread,
                             qemu_mutex_unlock_iothread);
+
+  android_serialline_init_qemu();
 
   return android_emulation_setup(&consoleAgents);
 }
