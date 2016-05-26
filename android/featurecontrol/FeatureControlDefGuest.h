@@ -12,11 +12,18 @@
 // This file maintain a list of advanced features that can be switched on/off
 // with feature control.
 //
+// The features in this file depend on system image builds. It needs to be
+// enabled in BOTH system images and emulator to be actually enabled.
+// To add system image independent features, please add them to
+// FeatureControlDefHost.h
+//
 // To add a new item, please add a new line in the following format:
 // FEATURE_CONTROL_ITEM(YOUR_FEATURE_NAME)
+// You will also need to edit its default value in the following two places:
+// android/data/advancedFeatures.ini
+// $(system_image)/development/sys-img/advancedFeatures.ini
 
 // This file is supposed to be included multiple times. It should not have
 // #pragma once here.
 
-FEATURE_CONTROL_ITEM(GLPipeChecksum)
 FEATURE_CONTROL_ITEM(GrallocSync)
