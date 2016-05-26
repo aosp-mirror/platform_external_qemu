@@ -173,7 +173,6 @@ char*  avdInfo_getSnapStoragePath( const AvdInfo* i );
 char*  avdInfo_getCachePath( const AvdInfo*  i );
 char*  avdInfo_getDefaultCachePath( const AvdInfo*  i );
 
-
 /* avdInfo_getSystemImagePath() will return NULL, except if the AVD content
  * directory contains a file named "system-qemu.img".
  */
@@ -186,6 +185,12 @@ char*  avdInfo_getSystemInitImagePath( const AvdInfo*  i );
 
 char*  avdInfo_getDataImagePath( const AvdInfo*  i );
 char*  avdInfo_getDefaultDataImagePath( const AvdInfo*  i );
+
+/* avdInfo_getDefaultSystemFeatureControlPath() returns the path to the
+ * per-system image feature control file
+ */
+char* avdInfo_getDefaultSystemFeatureControlPath(const AvdInfo* i);
+
 char*  avdInfo_getDataInitImagePath( const AvdInfo* i );
 
 /* Return a reference to the boot.prop file for this AVD, if any.

@@ -28,8 +28,10 @@ public:
     bool isEnabled(Feature feature);
     void setEnabledOverride(Feature feature, bool isEnabled);
     void resetEnabledToDefault(Feature feature);
-    void init(android::base::StringView defaultIniPath,
-              android::base::StringView userIniPath);
+    void init(android::base::StringView defaultIniHostPath,
+              android::base::StringView defaultIniGuestPath,
+              android::base::StringView userIniHostPath,
+              android::base::StringView userIniGuestPath);
     static FeatureControlImpl& get();
     FeatureControlImpl();
 private:
@@ -42,8 +44,13 @@ private:
     FeatureOption mFeatures[Feature_n_items] = {};
     void initEnabledDefault(Feature feature, bool isEnabled);
 
-    void initFeatureAndParseDefault(
-        android::base::IniFile& defaultIni,
+    void initHostFeatureAndParseDefault(
+        android::base::IniFile& defaultIniHost,
+        Feature featureName,
+        const char* featureNameStr);
+    void initGuestFeatureAndParseDefault(
+        android::base::IniFile& defaultIniHost,
+        android::base::IniFile& defaultIniGuest,
         Feature featureName,
         const char* featureNameStr);
     void loadUserOverrideFeature(
