@@ -12,6 +12,10 @@
 // This file maintain a list of advanced features that can be switched on/off
 // with feature control.
 //
+// The features in this file should be independent from system image builds.
+// To add system image dependent features, please add them to
+// FeatureControlDefGuest.h
+//
 // To add a new item, please add a new line in the following format:
 // FEATURE_CONTROL_ITEM(YOUR_FEATURE_NAME)
 
@@ -19,4 +23,3 @@
 // #pragma once here.
 
 FEATURE_CONTROL_ITEM(GLPipeChecksum)
-FEATURE_CONTROL_ITEM(GrallocSync)
