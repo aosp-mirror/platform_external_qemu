@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "fcfdcbc0_6616313f",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 588,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-05-26T18:07:54Z",
+      "side": 1,
+      "message": "Also, we don\u0027t like hanging conditions without braces (cf: https://blog.codecentric.de/en/2014/02/curly-braces/)\n\nSo, please use:\n\nif (argc \u0026\u0026 !argv) {\n   return;\n}",
+      "parentUuid": "fcfdcbc0_66a3d150",
+      "range": {
+        "startLine": 588,
+        "startChar": 27,
+        "endLine": 588,
+        "endChar": 33
+      },
+      "revId": "7587c91cbc03302528aa94c8c5215ebf9a4686c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fcfdcbc0_667871de",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -59,6 +83,30 @@
       "writtenOn": "2016-05-26T18:02:42Z",
       "side": 1,
       "message": "what if one of the argv[i] is null?\nI think in that case we should edit the argv[i] to make it \"\"\nalso, there has to be some kind of a warning about an internal error - \"argv[\u003cnumber\u003e] was null, replaced with empty string\"",
+      "range": {
+        "startLine": 593,
+        "startChar": 25,
+        "endLine": 593,
+        "endChar": 32
+      },
+      "revId": "7587c91cbc03302528aa94c8c5215ebf9a4686c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcfdcbc0_c63605d4",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 593,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-05-26T18:07:54Z",
+      "side": 1,
+      "message": "I think in the original bug one of the argv[i] was null.\n\nSo, +1 for this comment.",
+      "parentUuid": "fcfdcbc0_667871de",
       "range": {
         "startLine": 593,
         "startChar": 25,
