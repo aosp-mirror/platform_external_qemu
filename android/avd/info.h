@@ -195,6 +195,13 @@ char*  avdInfo_getDataInitImagePath( const AvdInfo* i );
  */
 const FileData* avdInfo_getBootProperties(const AvdInfo* i);
 
+/* Return a reference to the source.properties file for this AVD, if any.
+ * The file contains additionnal properties to inject at boot time
+ * into the guest system. Note that this never returns NULL, but
+ * the corresponding content can be empty.
+ */
+const FileData* avdInfo_getSourceProperties(const AvdInfo* i);
+
 /* Returns the path to a given AVD image file. This will return NULL if
  * the file cannot be found / does not exist.
  */

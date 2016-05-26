@@ -11,12 +11,15 @@
 
 #include "FeatureControlImpl.h"
 
+#include "android/globals.h"
 #include "android/base/files/IniFile.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
 #include "android/emulation/ConfigDirs.h"
+#include "android/utils/file_data.h"
+#include "android/utils/property_file.h"
 #include "android/utils/system.h"
 
 #include <fstream>
@@ -25,6 +28,8 @@
 namespace {
 enum IniSetting { ON, OFF, DEFAULT, ERR };
 }
+
+static const char* kFeatureControlKeyPrefix = "EmulatorFeatures";
 
 static android::base::LazyInstance<android::featurecontrol::FeatureControlImpl>
         s_featureControl = LAZY_INSTANCE_INIT;
@@ -64,11 +69,10 @@ void FeatureControlImpl::initFeatureAndParseDefault(
     }
 }
 
-void FeatureControlImpl::loadUserOverrideFeature(
-        android::base::IniFile& userIni,
+void FeatureControlImpl::loadOverride(
         android::featurecontrol::Feature featureName,
-        const char* featureNameStr) {
-    std::string val = userIni.getString(featureNameStr, "default");
+        const char* featureNameStr,
+        const std::string& val) {
     switch (ParseIniStr(val)) {
         case ON:
             setEnabledOverride(featureName, true);
@@ -87,6 +91,25 @@ void FeatureControlImpl::loadUserOverrideFeature(
     }
 }
 
+void FeatureControlImpl::loadSysImgOverrideFeature(
+        const std::string& propsKey,
+        const std::string& propsVal,
+        android::featurecontrol::Feature featureName,
+        const char* featureNameStr) {
+    std::string toMatch = std::string(kFeatureControlKeyPrefix) + "." + featureNameStr;
+    if (propsKey == toMatch) {
+        loadOverride(featureName, featureNameStr, propsVal);
+    }
+}
+
+void FeatureControlImpl::loadUserOverrideFeature(
+        android::base::IniFile& userIni,
+        android::featurecontrol::Feature featureName,
+        const char* featureNameStr) {
+    std::string val = userIni.getString(featureNameStr, "default");
+    loadOverride(featureName, featureNameStr, val);
+}
+
 void FeatureControlImpl::init(android::base::StringView defaultIniPath,
                               android::base::StringView userIniPath) {
     base::IniFile defaultIni(defaultIniPath);
@@ -102,6 +125,24 @@ void FeatureControlImpl::init(android::base::StringView defaultIniPath,
 #undef FEATURE_CONTROL_ITEM
         LOG(WARNING) << "Failed to load advanced feature default setting:"
                      << defaultIniPath;
+    }
+
+    if (android_avdInfo) {
+        const FileData* srcProps = avdInfo_getSourceProperties(android_avdInfo);
+        if (srcProps && !fileData_isEmpty(srcProps)) {
+            PropertyFileIterator iter[1];
+            propertyFileIterator_init(iter,
+                    srcProps->data,
+                    srcProps->size);
+            while (propertyFileIterator_next(iter)) {
+                std::string key(iter->name);
+                std::string val(iter->value);
+#define FEATURE_CONTROL_ITEM(item)                                         \
+                loadSysImgOverrideFeature(key, val, item, #item);
+#include "FeatureControlDef.h"
+#undef FEATURE_CONTROL_ITEM
+            }
+        }
     }
 
     std::ifstream inFile(userIniPath, std::ios_base::in);

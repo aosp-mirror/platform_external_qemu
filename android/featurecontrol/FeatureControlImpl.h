@@ -46,6 +46,15 @@ private:
         android::base::IniFile& defaultIni,
         Feature featureName,
         const char* featureNameStr);
+    void loadOverride(
+        android::featurecontrol::Feature featureName,
+        const char* featureNameStr,
+        const std::string& val);
+    void loadSysImgOverrideFeature(
+        const std::string& propsKey,
+        const std::string& propsVal,
+        android::featurecontrol::Feature featureName,
+        const char* featureNameStr);
     void loadUserOverrideFeature(
         android::base::IniFile& defaultIni,
         Feature featureName,

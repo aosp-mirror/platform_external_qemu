@@ -126,6 +126,7 @@ struct AvdInfo {
 
     FileData  buildProperties[1];  /* build.prop file */
     FileData  bootProperties[1];   /* boot.prop file */
+    FileData  sourceProperties[1];   /* source.properties file */
 
     /* image files */
     char*     imagePath [ AVD_IMAGE_MAX ];
@@ -854,6 +855,9 @@ avdInfo_new( const char*  name, AvdInfoParams*  params )
     _avdInfo_getPropertyFile(i, "build.prop", i->buildProperties);
     _avdInfo_getPropertyFile(i, "boot.prop", i->bootProperties);
 
+    // Also parse source.properties.
+    _avdInfo_getPropertyFile(i, "source.properties", i->sourceProperties);
+
     _avdInfo_extractBuildProperties(i);
 
     /* don't need this anymore */
@@ -1434,4 +1438,8 @@ int avdInfo_getSnapshotPresent(const AvdInfo* i)
 
 const FileData* avdInfo_getBootProperties(const AvdInfo* i) {
     return i->bootProperties;
+}
+
+const FileData* avdInfo_getSourceProperties(const AvdInfo* i) {
+    return i->sourceProperties;
 }
