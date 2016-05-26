@@ -79,7 +79,7 @@
        <string>Command</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeft|AlignVCenter</set>
+       <set>AlignLeading|AlignVCenter</set>
       </property>
      </column>
      <column>
@@ -87,7 +87,7 @@
        <string>Key</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeft|AlignVCenter</set>
+       <set>AlignLeading|AlignVCenter</set>
       </property>
      </column>
     </widget>
@@ -209,7 +209,7 @@
     <attribute name="title">
      <string>Licenses</string>
     </attribute>
-    <widget class="QTextBrowser" name="help_licenseText">
+    <widget class="QPlainTextEdit" name="help_licenseText">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -223,6 +223,9 @@
        <family>Roboto</family>
        <pointsize>10</pointsize>
       </font>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
      </property>
     </widget>
    </widget>
