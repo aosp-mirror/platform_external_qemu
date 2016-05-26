@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fcfdcbc0_c62a85c7",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 586,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-26T18:02:42Z",
+      "side": 1,
+      "message": "nit: could you please remove the trailing spaces?",
+      "range": {
+        "startLine": 586,
+        "startChar": 0,
+        "endLine": 586,
+        "endChar": 6
+      },
+      "revId": "7587c91cbc03302528aa94c8c5215ebf9a4686c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcfdcbc0_66a3d150",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 588,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-26T18:02:42Z",
+      "side": 1,
+      "message": "some D() message here? e.g. \"Empty argv passed to a startThread(), returning early\"",
+      "range": {
+        "startLine": 588,
+        "startChar": 27,
+        "endLine": 588,
+        "endChar": 33
+      },
+      "revId": "7587c91cbc03302528aa94c8c5215ebf9a4686c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcfdcbc0_667871de",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 593,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-26T18:02:42Z",
+      "side": 1,
+      "message": "what if one of the argv[i] is null?\nI think in that case we should edit the argv[i] to make it \"\"\nalso, there has to be some kind of a warning about an internal error - \"argv[\u003cnumber\u003e] was null, replaced with empty string\"",
+      "range": {
+        "startLine": 593,
+        "startChar": 25,
+        "endLine": 593,
+        "endChar": 32
+      },
+      "revId": "7587c91cbc03302528aa94c8c5215ebf9a4686c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
