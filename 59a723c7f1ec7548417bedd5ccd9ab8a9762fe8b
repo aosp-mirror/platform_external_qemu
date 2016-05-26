@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fcfdcbc0_41fb1f22",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-05-26T18:37:19Z",
+      "side": 1,
+      "message": "nit: Wrap lines to 80 chars.\n\nUse \u0027git clang-format\u0027 to take care of most style nits.",
+      "range": {
+        "startLine": 596,
+        "startChar": 80,
+        "endLine": 596,
+        "endChar": 84
+      },
+      "revId": "59a723c7f1ec7548417bedd5ccd9ab8a9762fe8b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
