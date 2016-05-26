@@ -13,8 +13,10 @@
 
 #include "android/emulation/SerialLine.h"
 
-static android::SerialLine* asClass(CSerialLine* sl) {
-    return static_cast<android::SerialLine*>(sl);
+using android::SerialLine;
+
+static SerialLine* asClass(CSerialLine* sl) {
+    return static_cast<SerialLine*>(sl);
 }
 
 int android_serialline_write(CSerialLine* sl, const uint8_t* data, int len) {
@@ -25,4 +27,14 @@ void android_serialline_addhandlers(CSerialLine* sl, void* opaque,
                                     SLCanReadHandler* canReadCallback,
                                     SLReadHandler* readCallback) {
     asClass(sl)->addHandlers(opaque, canReadCallback, readCallback);
+}
+
+CSerialLine* android_serialline_buffer_open(CSerialLine* sl) {
+    return SerialLine::Funcs::get()->openBuffer(asClass(sl));
+}
+
+int android_serialline_pipe_open(CSerialLine** p1, CSerialLine** p2) {
+    return android::SerialLine::Funcs::get()->openPipe(
+            reinterpret_cast<SerialLine**>(p1),
+            reinterpret_cast<SerialLine**>(p2)) ? 0 : -1;
 }
