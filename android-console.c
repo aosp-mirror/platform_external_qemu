@@ -1971,6 +1971,24 @@ void android_console_geo_fix(Monitor* mon, const QDict* qdict) {
         return;
     }
 
+    /* check longitude and latitude */
+    {
+        double longitude = params[0];
+        if (longitude < -180.0 || longitude > 180.0) {
+            monitor_printf(
+                    mon,
+                    "KO: invalid longitude value. Should be in [-180,+180] range\n");
+            return;
+        }
+        double latitude = params[1];
+        if (latitude < -90.0 || latitude > 90.0) {
+            monitor_printf(
+                    mon,
+                    "KO: invalid latitude value. Should be in [-90,+90] range\r\n");
+            return;
+        }
+    }
+
     /* check number of satellites, must be integer between 1 and 12 */
     if (top_param >= GEO_SAT) {
         int sat_index = (top_param >= GEO_SAT2) ? GEO_SAT2 : GEO_SAT;
