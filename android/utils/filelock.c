@@ -16,6 +16,7 @@
 #include "android/utils/lock.h"
 #include "android/utils/path.h"
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -80,6 +81,15 @@
  *                        short.
  */
 static CLock* _all_filelocks_tl;
+/* This is set to true during exit.
+ * All accesses of _all_filelocks should strictly follow this scheme:
+ *   android_lock_acquire(_all_filelocks_tl);
+ *   if (!_is_exiting) {
+ *     // Safe to access _all_filelocks now.
+ *   }
+ *   android_lock_release(_all_filelocks_tl);
+ */
+static bool _is_exiting = false;
 
 struct FileLock
 {
@@ -415,12 +425,16 @@ filelock_atexit( void )
   FileLock*  lock;
 
   android_lock_acquire(_all_filelocks_tl);
-  for (lock = _all_filelocks; lock != NULL; lock = lock->next) {
-     filelock_release( lock );
+  if (!_is_exiting) {
+    for (lock = _all_filelocks; lock != NULL; lock = lock->next) {
+        filelock_release( lock );
+    }
   }
+  _is_exiting = true;
   android_lock_release(_all_filelocks_tl);
-
-  android_lock_free(_all_filelocks_tl);
+  // We leak |_all_filelocks_tl| here. We can never guarantee that another
+  // thread isn't trying to use filelock concurrently, so we can not safely
+  // clean up the mutex. See b.android.com/209635
 }
 
 /* create a file lock */
@@ -460,6 +474,11 @@ filelock_create( const char*  file )
     }
 
     android_lock_acquire(_all_filelocks_tl);
+    if (_is_exiting) {
+        android_lock_release(_all_filelocks_tl);
+        return NULL;
+    }
+
     lock->next     = _all_filelocks;
     _all_filelocks = lock;
     android_lock_release(_all_filelocks_tl);
