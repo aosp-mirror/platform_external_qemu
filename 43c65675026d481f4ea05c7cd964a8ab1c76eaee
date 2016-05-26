@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1cac5fb4_218268a8",
+        "filename": "android/adb-server.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2016-05-26T13:00:40Z",
+      "side": 1,
+      "message": "Is there a plan to support ipv6 in qemu2 before switching to AndroidEmu, because this currently creates an issue when trying to run qemu2 \u0026 qemu1 in parallel. If you start qemu2 first then qemu1, they will seemingly occupy the same port (5554 for example), this in turn will prevent the adb server in discovering qemu1.\n\nA workaround would be to have a looser check here and replace AND with OR. But I support a ipv6 support in qemu2 will be cleaner solution.",
+      "range": {
+        "startLine": 442,
+        "startChar": 11,
+        "endLine": 442,
+        "endChar": 55
+      },
+      "revId": "43c65675026d481f4ea05c7cd964a8ab1c76eaee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
