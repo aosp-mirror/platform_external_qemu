@@ -1087,8 +1087,8 @@ void EmulatorQtWindow::runAdbPush(const QList<QUrl>& urls) {
                                             ? kRemoteDownloadsDir
                                             : kRemoteDownloadsDirApi10;
     for (const auto& url : urls) {
-        StringView remoteFile = PathUtils::join(remoteDownloadsDir,
-                                                url.fileName().toStdString());
+        string remoteFile = PathUtils::join(remoteDownloadsDir,
+                                            url.fileName().toStdString());
         file_paths.push_back(
                 std::make_pair(url.toLocalFile().toStdString(), remoteFile));
     }
