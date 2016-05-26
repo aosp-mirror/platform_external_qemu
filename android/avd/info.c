@@ -1109,22 +1109,29 @@ avdInfo_getSystemInitImagePath( AvdInfo*  i )
 }
 
 char*
-avdInfo_getDataImagePath( AvdInfo*  i )
+avdInfo_getDataImagePath(const AvdInfo*  i )
 {
     const char* imageName = _imageFileNames[ AVD_IMAGE_USERDATA ];
     return _avdInfo_getContentFilePath(i, imageName);
 }
 
 char*
-avdInfo_getDefaultDataImagePath( AvdInfo*  i )
+avdInfo_getDefaultDataImagePath(const AvdInfo*  i )
 {
     const char* imageName = _imageFileNames[ AVD_IMAGE_USERDATA ];
     return _getFullFilePath(i->contentPath, imageName);
 }
 
-char*
-avdInfo_getDataInitImagePath( AvdInfo* i )
-{
+char* avdInfo_getDefaultSystemFeatureControlPath(const AvdInfo* i) {
+    char* retVal = _avdInfo_getSdkFilePath(i, "advancedFeatures.ini");
+    if (retVal) {
+        return retVal;
+    } else {
+        return "\0";
+    }
+}
+
+char* avdInfo_getDataInitImagePath(const AvdInfo* i) {
     const char* imageName = _imageFileNames[ AVD_IMAGE_INITDATA ];
     return _avdInfo_getContentOrSdkFilePath(i, imageName);
 }
