@@ -17,9 +17,11 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
 #include "android/emulation/ConfigDirs.h"
+#include "android/globals.h"
 #include "android/utils/system.h"
 
 #include <fstream>
+#include <memory>
 #include <string.h>
 
 namespace {
@@ -44,22 +46,49 @@ static IniSetting ParseIniStr(const std::string& str) {
 namespace android {
 namespace featurecontrol {
 
-void FeatureControlImpl::initFeatureAndParseDefault(
-        android::base::IniFile& defaultIni,
+void FeatureControlImpl::initHostFeatureAndParseDefault(
+        android::base::IniFile& defaultIniHost,
         android::featurecontrol::Feature featureName,
         const char* featureNameStr) {
-    std::string val = defaultIni.getString(featureNameStr, "null");
-    switch (ParseIniStr(val)) {
+    std::string strHost = defaultIniHost.getString(featureNameStr, "null");
+
+    initEnabledDefault(featureName, false);
+    switch (ParseIniStr(strHost)) {
         case ON:
             initEnabledDefault(featureName, true);
             break;
         case OFF:
-            initEnabledDefault(featureName, false);
             break;
         default:
-            LOG(WARNING) << "Loading advanced feature default setting: "
-                         << featureNameStr << ", expect on/off, get: " << val;
-            initEnabledDefault(featureName, false);
+            LOG(WARNING) << "Loading advanced feature host default setting: "
+                         << featureNameStr
+                         << ", expect on/off, get: " << strHost;
+            break;
+    }
+}
+
+void FeatureControlImpl::initGuestFeatureAndParseDefault(
+        android::base::IniFile& defaultIniHost,
+        android::base::IniFile& defaultIniGuest,
+        android::featurecontrol::Feature featureName,
+        const char* featureNameStr) {
+    std::string strHost = defaultIniHost.getString(featureNameStr, "null");
+    IniSetting valHost = ParseIniStr(strHost);
+    IniSetting valGuest = ParseIniStr(
+            defaultIniGuest.getString(featureNameStr, "null"));
+    initEnabledDefault(featureName, false);
+    switch (valHost) {
+        case ON:
+            if (valGuest == ON) {
+                initEnabledDefault(featureName, true);
+            }
+            break;
+        case OFF:
+            break;
+        default:
+            LOG(WARNING) << "Loading advanced feature host default setting: "
+                         << featureNameStr
+                         << ", expect on/off, get: " << strHost;
             break;
     }
 }
@@ -80,51 +109,87 @@ void FeatureControlImpl::loadUserOverrideFeature(
             resetEnabledToDefault(featureName);
             break;
         default:
-            LOG(WARNING) << "Loading advanced feature user setting: "
-                         << featureNameStr
-                         << ", expect on/off/default, get: " << val;
+            LOG(WARNING) << "Loading advanced feature user setting:"
+                         << " " << featureNameStr
+                         << ", expect on/off/default, get:"
+                         << " " << val;
             break;
     }
 }
 
-void FeatureControlImpl::init(android::base::StringView defaultIniPath,
-                              android::base::StringView userIniPath) {
-    base::IniFile defaultIni(defaultIniPath);
-    if (defaultIni.read()) {
-#define FEATURE_CONTROL_ITEM(item)                                         \
-        initFeatureAndParseDefault(defaultIni, item, #item);
-#include "FeatureControlDef.h"
+void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
+                              android::base::StringView defaultIniGuestPath,
+                              android::base::StringView userIniHostPath,
+                              android::base::StringView userIniGuestPath) {
+    base::IniFile defaultIniHost(defaultIniHostPath);
+    if (defaultIniHost.read()) {
+        // Initialize host only features
+#define FEATURE_CONTROL_ITEM(item) \
+    initHostFeatureAndParseDefault(defaultIniHost, item, #item);
+#include "FeatureControlDefHost.h"
 #undef FEATURE_CONTROL_ITEM
+
+        // Initialize guest features
+        // Guest ini read failure is OK and will disable all guest features
+        if (base::System::get()->pathCanRead(defaultIniGuestPath)) {
+            base::IniFile defaultIniGuest(defaultIniGuestPath);
+            if (defaultIniGuest.read()) {
+#define FEATURE_CONTROL_ITEM(item)                                         \
+                initGuestFeatureAndParseDefault(defaultIniHost, defaultIniGuest, item, #item);
+#include "FeatureControlDefGuest.h"
+#undef FEATURE_CONTROL_ITEM
+            }
+        } else {
+#define FEATURE_CONTROL_ITEM(item)                                         \
+            initEnabledDefault(item, false);
+#include "FeatureControlDefGuest.h"
+#undef FEATURE_CONTROL_ITEM
+        }
     } else {
 #define FEATURE_CONTROL_ITEM(item)                                         \
         initEnabledDefault(item, false);
-#include "FeatureControlDef.h"
+#include "FeatureControlDefHost.h"
+#include "FeatureControlDefGuest.h"
 #undef FEATURE_CONTROL_ITEM
         LOG(WARNING) << "Failed to load advanced feature default setting:"
-                     << defaultIniPath;
+                     << defaultIniHostPath;
     }
-
-    std::ifstream inFile(userIniPath, std::ios_base::in);
-    if (inFile) {
-        inFile.close();
-        base::IniFile userIni(userIniPath);
+    if (base::System::get()->pathCanRead(userIniHostPath)) {
+        base::IniFile userIni(userIniHostPath);
         if (userIni.read()) {
 #define FEATURE_CONTROL_ITEM(item) \
-    loadUserOverrideFeature(userIni, item, #item);
-#include "FeatureControlDef.h"
+            loadUserOverrideFeature(userIni, item, #item);
+#include "FeatureControlDefHost.h"
+#include "FeatureControlDefGuest.h"
+#undef FEATURE_CONTROL_ITEM
+        }
+    }
+    if (base::System::get()->pathCanRead(userIniGuestPath)) {
+        base::IniFile userIni(userIniGuestPath);
+        if (userIni.read()) {
+#define FEATURE_CONTROL_ITEM(item) \
+            loadUserOverrideFeature(userIni, item, #item);
+#include "FeatureControlDefGuest.h"
 #undef FEATURE_CONTROL_ITEM
         }
     }
 }
 
 FeatureControlImpl::FeatureControlImpl() {
-    std::string defaultIniName = base::PathUtils::join(
+    std::string defaultIniHostName = base::PathUtils::join(
             base::System::get()->getLauncherDirectory(), "lib",
             "advancedFeatures.ini", base::PathUtils::HOST_TYPE);
-    std::string userIniName = base::PathUtils::join(
+    std::unique_ptr<char[]> defaultIniGuestName;
+    if (android_avdInfo)
+        defaultIniGuestName.reset(
+            avdInfo_getDefaultSystemFeatureControlPath(android_avdInfo));
+    std::string userIniHostName = base::PathUtils::join(
             ConfigDirs::getUserDirectory(), "advancedFeatures.ini",
             base::PathUtils::HOST_TYPE);
-    init(defaultIniName, userIniName);
+    // We don't allow for user guest override until we find a use case for it
+    std::string userIniGuestName = {};
+    init(defaultIniHostName, defaultIniGuestName.get(), userIniHostName,
+         userIniGuestName);
 }
 
 FeatureControlImpl& FeatureControlImpl::get() {

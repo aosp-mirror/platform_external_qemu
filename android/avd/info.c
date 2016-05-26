@@ -1173,9 +1173,12 @@ avdInfo_getDefaultDataImagePath( const AvdInfo*  i )
     return _getFullFilePath(i->contentPath, imageName);
 }
 
-char*
-avdInfo_getDataInitImagePath( const AvdInfo* i )
-{
+char* avdInfo_getDefaultSystemFeatureControlPath(const AvdInfo* i) {
+    char* retVal = _avdInfo_getSdkFilePath(i, "advancedFeatures.ini");
+    return retVal;
+}
+
+char* avdInfo_getDataInitImagePath(const AvdInfo* i) {
     const char* imageName = _imageFileNames[ AVD_IMAGE_INITDATA ];
     return _avdInfo_getContentOrSdkFilePath(i, imageName);
 }
