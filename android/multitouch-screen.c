@@ -181,8 +181,9 @@ _mts_pointer_up(MTSState* mts_state, int slot_index)
     }
 
     /* Send event indicating "pointer up" to the EventHub. */
-    _push_event(EV_ABS, ABS_MT_TRACKING_ID, -1);
     _push_event(EV_ABS, ABS_MT_PRESSURE, 0);
+
+    _push_event(EV_ABS, ABS_MT_TRACKING_ID, -1);
 
     /* Update MTS descriptor, removing the tracked pointer. */
     mts_state->tracked_pointers[slot_index].tracking_id = MTS_POINTER_UP;
