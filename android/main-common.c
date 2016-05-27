@@ -1025,11 +1025,11 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
     }
 
     if (hw->hw_ramSize < minRam) {
-        dwarning("Increasing RAM size to %iMB", minRam);
+        D("Increasing RAM size to %iMB", minRam);
         hw->hw_ramSize = minRam;
     }
     else if (limit_is_4gb && hw->hw_ramSize > 4096) {
-        dwarning("Decreasing RAM size to 4096MB");
+        D("Decreasing RAM size to 4096MB");
         hw->hw_ramSize = 4096;
     }
     else {
@@ -1039,8 +1039,8 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
     int minVmHeapSize =
             androidHwConfig_getMinVmHeapSize(hw, avdInfo_getApiLevel(avd));
     if (hw->vm_heapSize < minVmHeapSize) {
-        dwarning("VM heap size set below hardware specified minimum of %iMB",
-                 minVmHeapSize);
+        D("VM heap size set below hardware specified minimum of %iMB",
+          minVmHeapSize);
 
         int vmHeapSize = hw->hw_ramSize / 4;
 
@@ -1048,14 +1048,14 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
             vmHeapSize = minVmHeapSize;
         }
 
-        dwarning("Setting VM heap size to %iMB", vmHeapSize);
+        D("Setting VM heap size to %iMB", vmHeapSize);
         hw->vm_heapSize = vmHeapSize;
 
         int minRamSize = vmHeapSize * 2;
 
         if (hw->hw_ramSize < minRamSize) {
             hw->hw_ramSize = minRamSize;
-            dwarning("Increasing RAM to %iMB to accomodate min VM heap",
+            D("Increasing RAM to %iMB to accomodate min VM heap",
                      minRamSize);
         }
     }
