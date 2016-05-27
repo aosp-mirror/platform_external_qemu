@@ -215,7 +215,6 @@ LOCAL_SRC_FILES := \
     android/cmdline-option.c \
     android/console.c \
     android/console_auth.cpp \
-    android/core-init-utils.c \
     android/cpu_accelerator.cpp \
     android/crashreport/CrashSystem.cpp \
     android/crashreport/CrashReporter_common.cpp \
@@ -287,6 +286,7 @@ LOCAL_SRC_FILES := \
     android/multitouch-port.c \
     android/multitouch-screen.c \
     android/network/constants.c \
+    android/network/globals.c \
     android/opengl/EmuglBackendList.cpp \
     android/opengl/EmuglBackendScanner.cpp \
     android/opengl/emugl_config.cpp \
