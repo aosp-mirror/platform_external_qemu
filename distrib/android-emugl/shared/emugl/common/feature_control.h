@@ -17,6 +17,7 @@
 #pragma once
 
 #define AndroidFeatureGLPipeChecksum 0
+#define AndroidFeatureGrallocSync 1
 
 typedef bool (*emugl_feature_is_enabled_t)(int feature);
 
