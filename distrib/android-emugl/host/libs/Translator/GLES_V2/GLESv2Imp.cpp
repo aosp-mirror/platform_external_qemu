@@ -1895,7 +1895,7 @@ GL_APICALL void  GL_APIENTRY glStencilOpSeparate(GLenum face, GLenum fail, GLenu
         default:
             SET_ERROR_IF(1, GL_INVALID_ENUM);
     }
-    ctx->dispatcher().glStencilOp(fail,zfail,zpass);
+    ctx->dispatcher().glStencilOpSeparate(face, fail,zfail,zpass);
 }
 
 #define GL_RGBA32F                        0x8814
