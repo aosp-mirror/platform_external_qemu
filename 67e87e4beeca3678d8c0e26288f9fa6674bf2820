@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1ca29f11_02861a28",
+        "filename": "distrib/libcurl.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-27T22:21:12Z",
+      "side": 1,
+      "message": "Here it is:\n\n1. \"... For whatever the reason, Openssl seems to require gdi32\"\n\n2. ... Yep, there at the end it\u0027s gdi32. Those, like me, unfamiliar with OpenSSL, might be asking why a \"toolkit implementing SSL v2/v3 and TLS protocols with full-strength cryptography\" was BitBlting and creating and deleting DCs. I know I did. Which led me to rand_win.c, and its\n\nstatic void readscreen(void)\n\nLooking it up on the web, it apparently uses screen content to generate pseudo-random numbers. I\u0027ve also found some notes about this function not being used, since processes running on a server environment are not likely to have a UI (besides, it is called from RAND_screen(), which is stated as \"function available for backward compatibility\"). Still, being a newbie, even though I\u0027m not likely to need it, I\u0027ve decided to keep it in the build and just link with gdi32 (as we\u0027ll see in a moment, it won\u0027t matter that much, anyway).\n\n----\nthe only reaction I have to this is:\n  .-\u0027---`-.\n,\u0027          `.\n|             \\\n|              \\\n\\           _  \\\n,\\  _    ,\u0027-,/-)\\\n( * \\ \\,\u0027 ,\u0027 ,\u0027-)\n `._,)     -\u0027,-\u0027)\n   \\/         \u0027\u0027/\n    )        / /\n   /       ,\u0027-\u0027",
+      "range": {
+        "startLine": 30,
+        "startChar": 5,
+        "endLine": 30,
+        "endChar": 65
+      },
+      "revId": "67e87e4beeca3678d8c0e26288f9fa6674bf2820",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
