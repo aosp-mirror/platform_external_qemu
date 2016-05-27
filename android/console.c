@@ -2045,30 +2045,17 @@ utf8_next( unsigned char* *pp, unsigned char*  end )
 static int
 do_event_text( ControlClient  client, char*  args )
 {
-    SkinKeycodeBuffer keycodes;
-    unsigned char*  p   = (unsigned char*) args;
-    unsigned char*  end = p + strlen(args);
-    int             textlen;
-    const SkinCharmap* charmap;
-
     if (!args) {
         control_write( client, "KO: argument missing, try 'event text <message>'\r\n" );
         return -1;
     }
 
-    /* Get active charmap. */
-    charmap = skin_charmap_get();
-    if (charmap == NULL) {
-        control_write( client, "KO: no character map active in current device layout/config\r\n" );
-        return -1;
-    }
+    /* un-escape message text into proper utf-8 (conversion happens in-site) */
+    int textlen = strlen(args);
+    unsigned char* p = (unsigned char*) args;
+    unsigned char* end = p + textlen;
 
-    skin_keycode_buffer_init(&keycodes,
-                             client->global->user_event_agent->sendKeyCodes);
-
-    /* un-secape message text into proper utf-8 (conversion happens in-site) */
-    textlen = strlen((char*)p);
-    textlen = sms_utf8_from_message_str( args, textlen, (unsigned char*)p, textlen );
+    textlen = sms_utf8_from_message_str(args, textlen, p, textlen);
     if (textlen < 0) {
         control_write( client, "message must be utf8 and can use the following escapes:\r\n"
                        "    \\n      for a newline\r\n"
@@ -2080,6 +2067,24 @@ do_event_text( ControlClient  client, char*  args )
         return -1;
     }
 
+#if 1
+    if (!client->global->send_event_text(
+            p, textlen, client->global->user_event_agent->sendKeyCodes)) {
+        control_write(client, "KO: no character map active in current device layout/config\r\n");
+        return -1;
+    }
+#else
+    /* Get active charmap. */
+    const SkinCharmap* charmap = skin_charmap_get();
+    if (charmap == NULL) {
+        control_write( client, "KO: no character map active in current device layout/config\r\n" );
+        return -1;
+    }
+
+    SkinKeycodeBuffer keycodes;
+    skin_keycode_buffer_init(&keycodes,
+                             client->global->user_event_agent->sendKeyCodes);
+
     end = p + textlen;
     while (p < end) {
         int  c = utf8_next( &p, end );
@@ -2090,7 +2095,7 @@ do_event_text( ControlClient  client, char*  args )
         skin_charmap_reverse_map_unicode( NULL, (unsigned)c, 0, &keycodes );
         skin_keycode_buffer_flush( &keycodes );
     }
-
+#endif
     return 0;
 }
 
