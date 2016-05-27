@@ -77,8 +77,10 @@ void FeatureControlImpl::initGuestFeatureAndParseDefault(
     IniSetting valGuest = ParseIniStr(
             defaultIniGuest.getString(featureNameStr, "null"));
     initEnabledDefault(featureName, false);
+    fprintf(stderr, "%s: valHost=%d valGuest=%d\n", __FUNCTION__, valHost, valGuest);
     switch (valHost) {
         case ON:
+            fprintf(stderr, "%s: valHost=On, valGuest=%d\n", __FUNCTION__, valGuest);
             if (valGuest == ON) {
                 initEnabledDefault(featureName, true);
             }
