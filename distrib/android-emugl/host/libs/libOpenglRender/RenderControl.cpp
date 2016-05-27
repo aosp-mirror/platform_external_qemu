@@ -29,11 +29,8 @@
 
 #define DEBUG 0
 
-#if DEBUG && !defined(_WIN32)
-#include <unistd.h>
-#include <sys/syscall.h>
-#include <sys/types.h>
-#define DPRINT(...) do { fprintf(stderr, "tid=0x%lx | ", syscall(__NR_gettid)); fprintf(stderr, __VA_ARGS__); } while(0)
+#if DEBUG
+#define DPRINT(...) do { fprintf(stderr, __VA_ARGS__); } while(0)
 #else
 #define DPRINT(...)
 #endif
@@ -54,7 +51,7 @@ class GrallocSync {
 
 private:
     bool mEnabled;
-    // rcGrallocCbLock is to reflect the behavior of
+    // mGrallocCbLock is to reflect the behavior of
     // grallock_lock/gralloc_unlock on the guest.
     // If we don't use this, apps that use gralloc buffers (such as webcam)
     // will have out of order frames,
