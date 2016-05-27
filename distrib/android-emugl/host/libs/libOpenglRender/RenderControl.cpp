@@ -26,16 +26,16 @@
 
 #include <inttypes.h>
 
-using android::base::Lock;
-using android::base::AutoLock;
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <pthread.h>
+#endif
 
 #define DEBUG 0
 
-#if DEBUG && !defined(_WIN32)
-#include <unistd.h>
-#include <sys/syscall.h>
-#include <sys/types.h>
-#define DPRINT(...) do { fprintf(stderr, "tid=0x%lx | ", syscall(__NR_gettid)); fprintf(stderr, __VA_ARGS__); } while(0)
+#if DEBUG
+#define DPRINT(...) do { fprintf(stderr, __VA_ARGS__); } while(0)
 #else
 #define DPRINT(...)
 #endif
@@ -59,18 +59,32 @@ public:
 #endif
         }
     }
-    void lockCb() { if (mEnabled) mGrallocCbLock.lock(); }
-    void unlockCb() { if (mEnabled) mGrallocCbLock.unlock(); }
+
+#ifdef _WIN32
+    void lockCb() { if (mEnabled) EnterCriticalSection(&mGrallocCbLock); }
+#else
+    void lockCb() { if (mEnabled) pthread_mutex_lock(&mGrallocCbLock); }
+#endif
+
+#ifdef _WIN32
+    void unlockCb() { if (mEnabled) LeaveCriticalSection(&mGrallocCbLock); }
+#else
+    void unlockCb() { if (mEnabled) pthread_mutex_unlock(&mGrallocCbLock); }
+#endif
+
 private:
     bool mEnabled;
-    // rcGrallocCbLock is to reflect the behavior of
+    // mGrallocCbLock is to reflect the behavior of
     // grallock_lock/gralloc_unlock on the guest.
     // If we don't use this, apps that use gralloc buffers (such as webcam)
     // will have out of order frames,
     // as GL calls from different threads in the guest
     // are allowed to arrive at the host in any ordering.
-    android::base::Lock mGrallocCbLock;
-    DISALLOW_COPY_ASSIGN_AND_MOVE(GrallocSync);
+#ifdef _WIN32
+    CRITICAL_SECTION mGrallocCbLock;
+#else
+    pthread_mutex_t mGrallocCbLock;
+#endif
 };
 
 static ::emugl::LazyInstance<GrallocSync> sGrallocSync = LAZY_INSTANCE_INIT;
