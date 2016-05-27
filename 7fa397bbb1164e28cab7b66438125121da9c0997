@@ -16,6 +16,24 @@
       "revId": "7fa397bbb1164e28cab7b66438125121da9c0997",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcfdcbc0_574e3363",
+        "filename": "android/data/advancedFeatures.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-05-27T15:26:49Z",
+      "side": 1,
+      "message": "agreed",
+      "parentUuid": "fcfdcbc0_9716eb3b",
+      "revId": "7fa397bbb1164e28cab7b66438125121da9c0997",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
