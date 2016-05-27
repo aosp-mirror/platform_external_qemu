@@ -10,7 +10,6 @@
 ** GNU General Public License for more details.
 */
 
-#include "android-qemu1-glue/qemu-control-impl.h"
 #include "android/android.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/globals.h"
@@ -27,6 +26,8 @@
 #include "android/utils/lineinput.h"
 #include "android/utils/tempfile.h"
 
+#include "android-qemu1-glue/emulation/serial_line.h"
+#include "android-qemu1-glue/qemu-control-impl.h"
 #ifdef __APPLE__
 #include "android-qemu1-glue/skin_qt.h"
 #endif
@@ -210,6 +211,8 @@ int main(int argc, char **argv) {
     if (!qemuParams) {
         return 1;
     }
+
+    qemu1_android_serialline_init();
 
     static UiEmuAgent uiEmuAgent;
     uiEmuAgent.battery = gQAndroidBatteryAgent;

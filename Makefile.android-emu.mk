@@ -243,6 +243,7 @@ LOCAL_SRC_FILES := \
     android/emulation/qemud/android_qemud_service.cpp \
     android/emulation/qemud/android_qemud_sink.cpp \
     android/emulation/serial_line.cpp \
+    android/emulation/SerialLine.cpp \
     android/emulation/SetupParameters.cpp \
     android/emulation/VmLock.cpp \
     android/emulation/vm_lock.cpp \

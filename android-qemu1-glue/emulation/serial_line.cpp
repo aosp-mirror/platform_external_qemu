@@ -15,6 +15,7 @@
 #include "android-qemu1-glue/emulation/CharSerialLine.h"
 
 using android::qemu1::CharSerialLine;
+using android::SerialLine;
 
 CSerialLine* android_serialline_from_cs(CharDriverState* cs) {
     return new CharSerialLine(cs);
@@ -31,22 +32,31 @@ CharDriverState* android_serialline_release_cs(CSerialLine* sl) {
     return result;
 }
 
-CSerialLine* android_serialline_buffer_open(CSerialLine* sl) {
+static SerialLine* qemu_serialline_buffer_open(SerialLine* sl) {
     CharDriverState* cs = static_cast<CharSerialLine*>(sl)->state();
     return new CharSerialLine(qemu_chr_open_buffer(cs));
 }
 
-int android_serialline_pipe_open(CSerialLine** pfirst, CSerialLine** psecond) {
+static bool qemu_serialline_pipe_open(SerialLine** pfirst, SerialLine** psecond) {
     CharDriverState* first_cs = NULL;
     CharDriverState* second_cs = NULL;
 
     if (qemu_chr_open_charpipe(&first_cs, &second_cs)) {
         *pfirst = NULL;
         *psecond = NULL;
-        return -1;
+        return false;
     }
 
     *pfirst = new CharSerialLine(first_cs);
     *psecond = new CharSerialLine(second_cs);
-    return 0;
+    return true;
+}
+
+void qemu1_android_serialline_init() {
+    static const android::SerialLine::Funcs kQemuSerialLineFuncs = {
+        .openBuffer = qemu_serialline_buffer_open,
+        .openPipe = qemu_serialline_pipe_open
+    };
+
+    android::SerialLine::Funcs::reset(&kQemuSerialLineFuncs);
 }
