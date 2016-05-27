@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fcfdcbc0_3716174b",
+        "filename": "android/emulation/SerialLine.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-05-27T16:45:27Z",
+      "side": 1,
+      "message": "nit: instances",
+      "range": {
+        "startLine": 37,
+        "startChar": 7,
+        "endLine": 37,
+        "endChar": 15
+      },
+      "revId": "4275cd73de514ce2241da14ae9a50aacb1c692da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
