@@ -524,7 +524,12 @@ void multitouch_update_pointer(MTESource source,
         /* This is a "pointer down" event */
         _mts_pointer_down(mts_state, tracking_id, x, y, pressure);
     } else if (pressure == 0) {
-        /* This is a "pointer up" event */
+        /* This is a "pointer up" event.
+         * Prior to issuing the "pointer up," move
+         * the touch position to (0,0). This prevents
+         * a lingering "hover" state on Android TV.
+         */
+        _mts_pointer_move(mts_state, slot_index, 0, 0, 0);
         _mts_pointer_up(mts_state, slot_index);
     } else {
         /* This is a "pointer move" event */
