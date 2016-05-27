@@ -199,6 +199,7 @@ LOCAL_SRC_FILES += \
     hw/net/smc91c111.c \
     target-mips/helper.c \
     target-mips/op_helper.c \
+    target-mips/dsp_helper.c \
     target-mips/translate.c \
     target-mips/machine.c \
 

@@ -375,6 +375,7 @@ struct CPUMIPSState {
     int32_t CP0_Config3;
 #define CP0C3_M    31
 #define CP0C3_ISA_ON_EXC 16
+#define CP0C3_DSP2P 11
 #define CP0C3_DSPP 10
 #define CP0C3_LPA  7
 #define CP0C3_VEIC 6
@@ -430,7 +431,7 @@ struct CPUMIPSState {
     int error_code;
     uint32_t hflags;    /* CPU State */
     /* TMASK defines different execution modes */
-#define MIPS_HFLAG_TMASK  0x03FF
+#define MIPS_HFLAG_TMASK  0xC3FF
 #define MIPS_HFLAG_MODE   0x0007 /* execution modes                    */
     /* The KSU flags must be the lowest bits in hflags. The flag order
        must be the same as defined for CP0 Status. This allows to use
@@ -459,6 +460,9 @@ struct CPUMIPSState {
 #define MIPS_HFLAG_BC     0x0800 /* Conditional branch                 */
 #define MIPS_HFLAG_BL     0x0C00 /* Likely branch                      */
 #define MIPS_HFLAG_BR     0x1000 /* branch to register (can't link TB) */
+    /* MIPS DSP resources access. */
+#define MIPS_HFLAG_DSP   0x4000  /* Enable access to MIPS DSP resources. */
+#define MIPS_HFLAG_DSPR2 0x8000  /* Enable access to MIPS DSPR2 resources. */
     target_ulong btarget;        /* Jump / branch target               */
     target_ulong bcond;          /* Branch condition (if needed)       */
 
@@ -640,8 +644,9 @@ enum {
     EXCP_MDMX,
     EXCP_C2E,
     EXCP_CACHE, /* 32 */
+    EXCP_DSPDIS,
 
-    EXCP_LAST = EXCP_CACHE,
+    EXCP_LAST = EXCP_DSPDIS,
 };
 /* Dummy exception for conditional stores.  */
 #define EXCP_SC 0x100
