@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fcfdcbc0_9716eb3b",
+        "filename": "android/data/advancedFeatures.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-27T15:24:01Z",
+      "side": 1,
+      "message": "nit: Can we add comments here detailing exactly what each feature exactly controls (e.g. which bug it relates too, etc). I fear we\u0027re going to accumulate these things and will never be able to get rid of them in the future.",
+      "revId": "7fa397bbb1164e28cab7b66438125121da9c0997",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
