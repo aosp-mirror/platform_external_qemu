@@ -51,6 +51,7 @@ extern "C" {
 }
 
 #include "android/ui-emu-agent.h"
+#include "android-qemu2-glue/emulation/serial_line.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
 
 #ifdef TARGET_AARCH64
@@ -889,6 +890,8 @@ extern "C" int main(int argc, char **argv) {
         }
         printf("\n");
     }
+
+    qemu2_android_serialline_init();
 
     static UiEmuAgent uiEmuAgent;
     uiEmuAgent.battery = gQAndroidBatteryAgent;
