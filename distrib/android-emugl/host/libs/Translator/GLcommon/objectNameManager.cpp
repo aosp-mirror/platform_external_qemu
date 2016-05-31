@@ -268,6 +268,9 @@ ShareGroup::replaceGlobalName(NamedObjectType p_type,
 
     emugl::Mutex::AutoLock _lock(m_lock);
     m_nameSpace[p_type]->replaceGlobalName(p_localName, p_globalName);
+    if (p_type == TEXTURE) {
+        incTexRefCounterNoLock(p_globalName);
+    }
 }
 
 void
@@ -334,6 +337,7 @@ ShareGroup::decTexRefCounterAndReleaseIf0(unsigned int p_globalName) {
     TextureRefCounterMap *map =
             (TextureRefCounterMap *)m_globalTextureRefCounter;
     auto iterator = map->find(p_globalName);
+    assert(iterator != map->end());
     size_t& val = iterator->second;
     assert(val != 0);
     val --;
