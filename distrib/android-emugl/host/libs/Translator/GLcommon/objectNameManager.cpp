@@ -334,6 +334,7 @@ ShareGroup::decTexRefCounterAndReleaseIf0(unsigned int p_globalName) {
     TextureRefCounterMap *map =
             (TextureRefCounterMap *)m_globalTextureRefCounter;
     auto iterator = map->find(p_globalName);
+    assert(iterator != map->end());
     size_t& val = iterator->second;
     assert(val != 0);
     val --;

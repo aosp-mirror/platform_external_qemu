@@ -1941,6 +1941,7 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
                 ctx->shareGroup()->replaceGlobalName(TEXTURE,
                                                      tex,
                                                      texData->oldGlobal);
+                ctx->shareGroup()->incTexRefCounter(texData->oldGlobal);
                 ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, texData->oldGlobal);
                 texData->sourceEGLImage = 0;
                 texData->oldGlobal = 0;
