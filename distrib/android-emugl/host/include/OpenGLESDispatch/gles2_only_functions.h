@@ -8,6 +8,7 @@
   X(void, glBlendColor, (GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha), (red, green, blue, alpha)) \
   X(void, glStencilFuncSeparate, (GLenum face, GLenum func, GLint ref, GLuint mask), (face, func, ref, mask)) \
   X(void, glStencilMaskSeparate, (GLenum face, GLuint mask), (face, mask)) \
+  X(void, glStencilOpSeparate, (GLenum face, GLenum fail, GLenum zfail, GLenum zpass), (face, fail, zfail, zpass)) \
   X(GLboolean, glIsProgram, (GLuint program), (program)) \
   X(GLboolean, glIsShader, (GLuint shader), (shader)) \
   X(void, glVertexAttrib1f, (GLuint indx, GLfloat x), (indx, x)) \
