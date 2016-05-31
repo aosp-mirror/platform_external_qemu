@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3991350e_94a9d29e",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1944,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-31T22:20:20Z",
+      "side": 1,
+      "message": "if it\u0027s a replace, should you decrease a ref counter for the old name?",
+      "range": {
+        "startLine": 1944,
+        "startChar": 16,
+        "endLine": 1944,
+        "endChar": 72
+      },
+      "revId": "063c1da76a5e68f905847e076196ed618cf8d963",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
