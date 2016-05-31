@@ -13,6 +13,7 @@
 typedef const GLubyte* GLconstubyteptr;
 #define LIST_GLES3_ONLY_FUNCTIONS(X) \
   X(GLconstubyteptr, glGetStringi, (GLenum name, GLint index), (name, index)) \
+  X(void, glVertexAttributes, (GLuint* attribarrays, uint32_t num_attribarrays, GLint* firsts, uint32_t num_firsts, GLsizei* counts, uint32_t num_counts, GLuint* bufs, uint32_t num_bufs, GLint* sizes, uint32_t num_sizes, GLenum* types, uint32_t num_types, GLboolean* normalizeds, uint32_t num_normalizeds, GLsizei* strides, uint32_t num_strides, void* ptrs, uint32_t num_ptrs, uint32_t* offsets, uint32_t num_offsets, uint32_t* datalens, uint32_t num_datalens, GLboolean* disables, uint32_t num_disables, GLuint lastBoundVbo), (attribarrays, num_attribarrays, firsts, num_firsts, counts, num_counts, bufs, num_bufs, sizes, num_sizes, types, num_types, normalizeds, num_normalizeds, strides, num_strides, ptrs, num_ptrs, offsets, num_offsets, datalens, num_datalens, disables, num_disables, lastBoundVbo)) \
 
 
 #endif  // GLES3_ONLY_FUNCTIONS_H

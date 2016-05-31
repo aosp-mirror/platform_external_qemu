@@ -44,5 +44,19 @@ private:
     static void gles2_APIENTRY s_glDrawElementsData(void *self, GLenum mode, GLsizei count, GLenum type, void * data, GLuint datalen);
     static void gles2_APIENTRY s_glShaderString(void *self, GLuint shader, const GLchar* string, GLsizei len);
     static int  gles2_APIENTRY s_glFinishRoundTrip(void *self);
+    static void gles2_APIENTRY s_glVertexAttributes(void *self,
+        GLuint* attribarrays, uint32_t num_attribarrays,
+        GLint* firsts, uint32_t num_firsts,
+        GLsizei* counts, uint32_t num_counts,
+        GLuint* bufs, uint32_t num_bufs,
+        GLint* sizes, uint32_t num_sizes,
+        GLenum* types, uint32_t num_types,
+        GLboolean* normalizeds, uint32_t num_normalizeds,
+        GLsizei* strides, uint32_t num_strides,
+        void* _ptrs, uint32_t num_ptrs,
+        uint32_t* offsets, uint32_t num_offsets,
+        uint32_t* datalens, uint32_t num_datalens,
+        GLboolean* disables, uint32_t num_disables,
+        GLuint lastBoundVbo);
 };
 #endif

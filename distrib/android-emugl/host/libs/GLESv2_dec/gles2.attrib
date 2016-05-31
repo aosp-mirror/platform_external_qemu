@@ -593,3 +593,18 @@ glFinishRoundTrip
 	flag custom_decoder
 	flag not_api
 
+glVertexAttributes
+    len attribarrays num_attribarrays
+    len firsts num_firsts
+    len counts num_counts
+    len bufs num_bufs
+    len sizes num_sizes
+    len types num_types
+    len normalizeds num_normalizeds
+    len strides num_strides
+    len ptrs num_ptrs
+    len offsets num_offsets
+    len datalens num_datalens
+    len disables num_disables
+	flag custom_decoder
+	flag not_api
