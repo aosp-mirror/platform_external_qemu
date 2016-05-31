@@ -1938,13 +1938,12 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
                     (*texData->eglImageDetach)(texData->sourceEGLImage);
                 }
                 unsigned int tex = ctx->getBindedTexture(target);
-                ctx->shareGroup()->replaceGlobalName(TEXTURE,
-                                                     tex,
-                                                     texData->oldGlobal);
-                ctx->shareGroup()->incTexRefCounter(texData->oldGlobal);
-                ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, texData->oldGlobal);
+                ctx->shareGroup()->genName(TEXTURE, tex, false);
+                unsigned int globalTextureName =
+                    ctx->shareGroup()->getGlobalName(TEXTURE, tex);
+                ctx->dispatcher().glBindTexture(GL_TEXTURE_2D,
+                                                globalTextureName);
                 texData->sourceEGLImage = 0;
-                texData->oldGlobal = 0;
             }
         }
     }
@@ -2242,7 +2241,6 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             texData->internalFormat = img->internalFormat;
             texData->sourceEGLImage = imagehndl;
             texData->eglImageDetach = s_eglIface->eglDetachEGLImage;
-            texData->oldGlobal = oldGlobal;
         }
     }
 }
