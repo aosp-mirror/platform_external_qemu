@@ -22,6 +22,30 @@
       "revId": "063c1da76a5e68f905847e076196ed618cf8d963",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3991350e_c8dfbee9",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1944,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-05-31T22:29:04Z",
+      "side": 1,
+      "message": "It will go into this code path only when the texture global name was binded through glEGLImageTargetTexture2DOES. But glEGLImageTargetTexture2DOES does not increase the reference counter. So we are safe here.\n\nBut I just notice there is a potential bug with this \"oldGlobal\". Let me try to submit another CL to get rid of it.",
+      "parentUuid": "3991350e_94a9d29e",
+      "range": {
+        "startLine": 1944,
+        "startChar": 16,
+        "endLine": 1944,
+        "endChar": 72
+      },
+      "revId": "063c1da76a5e68f905847e076196ed618cf8d963",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
