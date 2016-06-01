@@ -717,7 +717,9 @@ extern "C" int main(int argc, char **argv) {
     }
 
     uint64_t glesCMA = 0ULL;
-    if (glesMode == kAndroidGlesEmulationGuest) {
+    if ((glesMode == kAndroidGlesEmulationGuest) ||
+        (opts->gpu && !strcmp(opts->gpu, "guest")) ||
+        !hw->hw_gpu_enabled) {
         // Set CMA (continguous memory allocation) to values that depend on
         // the desired resolution.
         // We will assume a double buffered 32-bit framebuffer in the calculation.
