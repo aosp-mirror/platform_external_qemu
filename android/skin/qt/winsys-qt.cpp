@@ -93,6 +93,8 @@ static GlobalState* globalState() {
     return &sGlobalState;
 }
 
+extern "C" void qemu_system_shutdown_request(void);
+
 static void enableSigChild() {
     // The issue only occurs on Darwin so to be safe just do this on Darwin
     // to prevent potential issues. The function exists on all platforms to
@@ -247,6 +249,9 @@ extern void skin_winsys_quit_request()
     auto window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
+        // This can happen when running with -no-window option,
+        // don't just ignore the signal
+        qemu_system_shutdown_request();
         return;
     }
     window->requestClose();
