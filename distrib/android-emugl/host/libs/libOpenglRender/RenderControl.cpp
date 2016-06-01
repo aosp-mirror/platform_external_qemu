@@ -40,29 +40,43 @@ using android::base::AutoLock;
 #define DPRINT(...)
 #endif
 
-class GrallocSync;
-
+// GrallocSync is a class that helps to reflect the behavior of
+// grallock_lock/gralloc_unlock on the guest.
+// If we don't use this, apps that use gralloc buffers (such as webcam)
+// will have out of order frames,
+// as GL calls from different threads in the guest
+// are allowed to arrive at the host in any ordering.
 class GrallocSync {
 public:
-    GrallocSync() : mGrallocCbLock() {
-        // This unlock/lock can lead to a deadlock on the host in many situations
+    GrallocSync() {
+        // Having in-order webcam frames is nice, but not at the cost
+        // of potential deadlocks;
+        // we need to be careful of what situations in which
+        // we actually lock/unlock the gralloc color buffer.
+        //
+        // To avoid deadlock:
+        // we require rcColorBufferCacheFlush to be called
+        // whenever gralloc_lock is called on the guest,
+        // and we require rcUpdateWindowColorBuffer to be called
+        // whenever gralloc_unlock is called on the guest.
+        //
+        // Some versions of the system image optimize out
+        // the call to rcUpdateWindowColorBuffer in the case of zero
+        // width/height, but since we're using that as synchronization,
+        // that lack of calling can lead to a deadlock on the host in many situations
         // (switching camera sides, exiting benchmark apps, etc)
-        // unless the optimization to not call rcUpdateWindowColorBuffer
-        // is removed on the guest side.
-        // So, we put this under the feature control.
+        // So, we put GrallocSync under the feature control.
         mEnabled = emugl_feature_is_enabled(android::featurecontrol::GrallocSync);
     }
-    void lockCb() { if (mEnabled) mGrallocCbLock.lock(); }
-    void unlockCb() { if (mEnabled) mGrallocCbLock.unlock(); }
+    void lockColorBuffer() {
+        if (mEnabled) mGrallocColorBufferLock.lock();
+    }
+    void unlockColorBuffer() {
+        if (mEnabled) mGrallocColorBufferLock.unlock();
+    }
 private:
     bool mEnabled;
-    // rcGrallocCbLock is to reflect the behavior of
-    // grallock_lock/gralloc_unlock on the guest.
-    // If we don't use this, apps that use gralloc buffers (such as webcam)
-    // will have out of order frames,
-    // as GL calls from different threads in the guest
-    // are allowed to arrive at the host in any ordering.
-    android::base::Lock mGrallocCbLock;
+    android::base::Lock mGrallocColorBufferLock;
     DISALLOW_COPY_ASSIGN_AND_MOVE(GrallocSync);
 };
 
@@ -327,7 +341,7 @@ static void rcCloseColorBuffer(uint32_t colorbuffer)
 static int rcFlushWindowColorBuffer(uint32_t windowSurface)
 {
     DPRINT("%s: waiting for gralloc cb lock\n", __FUNCTION__);
-    sGrallocSync->lockCb();
+    sGrallocSync->lockColorBuffer();
     DPRINT("%s: %d lock gralloc cb lock {\n", __FUNCTION__, windowSurface);
 
     FrameBuffer *fb = FrameBuffer::getFB();
@@ -339,7 +353,7 @@ static int rcFlushWindowColorBuffer(uint32_t windowSurface)
     }
 
     DPRINT("%s: %d unlock gralloc cb lock }\n", __FUNCTION__, windowSurface);
-    sGrallocSync->unlockCb();
+    sGrallocSync->unlockColorBuffer();
     return 0;
 }
 
@@ -406,7 +420,7 @@ static EGLint rcColorBufferCacheFlush(uint32_t colorBuffer,
 {
    // gralloc_lock() on the guest calls rcColorBufferCacheFlush
    DPRINT("%s: waiting for gralloc cb lock\n", __FUNCTION__);
-   sGrallocSync->lockCb();
+   sGrallocSync->lockColorBuffer();
    DPRINT("%s: %d lock gralloc cb lock {\n", __FUNCTION__, colorBuffer);
    return 0;
 }
@@ -437,7 +451,7 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
     fb->updateColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
 
     DPRINT("%s: %d unlock gralloc cb lock }\n", __FUNCTION__, colorBuffer);
-    sGrallocSync->unlockCb();
+    sGrallocSync->unlockColorBuffer();
     return 0;
 }
 
