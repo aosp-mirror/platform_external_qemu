@@ -476,8 +476,6 @@ LOCAL_SRC_FILES := \
   android/filesystems/ramdisk_extractor_unittest.cpp \
   android/filesystems/testing/TestSupport.cpp \
   android/gps/GpxParser_unittest.cpp \
-  android/gps/internal/GpxParserInternal_unittest.cpp \
-  android/gps/internal/KmlParserInternal_unittest.cpp \
   android/gps/KmlParser_unittest.cpp \
   android/kernel/kernel_utils_unittest.cpp \
   android/metrics/metrics_reporter_unittest.cpp \
