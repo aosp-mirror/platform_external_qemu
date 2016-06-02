@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f9c5ddcd_eb6ac59f",
+        "filename": "slirp-android/slirp.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1095,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-02T18:45:26Z",
+      "side": 1,
+      "message": "nit: tabs and formatting in general",
+      "range": {
+        "startLine": 1095,
+        "startChar": 0,
+        "endLine": 1095,
+        "endChar": 1
+      },
+      "revId": "b3ed4ac961441121c91973055ec4c161da4008f3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
