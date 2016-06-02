@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f9c5ddcd_48503f52",
+        "filename": "android/gps/GpxParser.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-02T19:42:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "19771110_adc6be5d",
+      "range": {
+        "startLine": 52,
+        "startChar": 8,
+        "endLine": 52,
+        "endChar": 14
+      },
+      "revId": "2a9f6308794794f114047673410a3b1c87b88c9f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "19771110_9b369fd4",
         "filename": "android/gps/GpxParser_unittest.cpp",
         "patchSetId": 3
@@ -36,6 +60,24 @@
       "writtenOn": "2016-06-02T15:23:00Z",
       "side": 1,
       "message": "Interesting. This doesn\u0027t count as \"missing Longitude\"?",
+      "revId": "2a9f6308794794f114047673410a3b1c87b88c9f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f9c5ddcd_a88f33e5",
+        "filename": "android/gps/GpxParser_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-02T19:42:16Z",
+      "side": 1,
+      "message": "It does have longitude (\"lon\" before \"lat\").",
+      "parentUuid": "19771110_9b369fd4",
       "revId": "2a9f6308794794f114047673410a3b1c87b88c9f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -59,6 +101,24 @@
     },
     {
       "key": {
+        "uuid": "f9c5ddcd_28d6a3d9",
+        "filename": "android/gps/KmlParser.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-02T19:42:16Z",
+      "side": 1,
+      "message": "It is, the client code doesn\u0027t assume anything about the content of the fixes array if the parsing fails.",
+      "parentUuid": "19771110_1b48ef54",
+      "revId": "2a9f6308794794f114047673410a3b1c87b88c9f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "19771110_7b700392",
         "filename": "android/gps/KmlParser_unittest.cpp",
         "patchSetId": 3
@@ -76,6 +136,24 @@
     },
     {
       "key": {
+        "uuid": "f9c5ddcd_a828d322",
+        "filename": "android/gps/KmlParser_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-02T19:42:16Z",
+      "side": 1,
+      "message": "ULPs are different from just fractional digits. If two floating point values are 1 ULP apart, there are no other possible floating point values between them. GTest allows them to be 4 ULPs apart, which is enough for practical purposes.",
+      "parentUuid": "19771110_7b700392",
+      "revId": "2a9f6308794794f114047673410a3b1c87b88c9f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "19771110_9bb13f57",
         "filename": "android/gps/KmlParser_unittest.cpp",
         "patchSetId": 3
@@ -87,6 +165,24 @@
       "writtenOn": "2016-06-02T15:23:00Z",
       "side": 1,
       "message": "Perhaps add a comment that this string is invalid because of internal spaces?",
+      "revId": "2a9f6308794794f114047673410a3b1c87b88c9f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f9c5ddcd_88da375e",
+        "filename": "android/gps/KmlParser_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-02T19:42:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "19771110_9bb13f57",
       "revId": "2a9f6308794794f114047673410a3b1c87b88c9f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
