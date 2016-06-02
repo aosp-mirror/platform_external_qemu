@@ -1,0 +1,257 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b9ca8537_ca8a46cf",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-02T17:08:04Z",
+      "side": 1,
+      "message": "nit: this has to be the first include",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 26
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9ca8537_2ab3caa8",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-02T17:08:04Z",
+      "side": 1,
+      "message": ".reset(rcsync)",
+      "range": {
+        "startLine": 36,
+        "startChar": 20,
+        "endLine": 36,
+        "endChar": 22
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9ca8537_8a543e1d",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-02T17:08:04Z",
+      "side": 1,
+      "message": "looks like this can be simplified:\n\nif (it \u003d\u003d mSyncMap.end()) {\n    return nullptr; // no such sync at all, it might has been signaled and removed already (or never existed)\n}\nif (it-\u003esecond.signaled) {\n    return nullptr; // sync is signaled; this function is supposed to return a non-signaled one only\n}\nreturn it-\u003esecond.rc_sync.get();",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 63,
+        "endChar": 36
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9ca8537_4a9f3616",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-02T17:08:04Z",
+      "side": 1,
+      "message": "I\u0027d like to second a request for some comments here: it took me some time to understand how it works and why is it needed. Could you please explain the purpose of these classes?",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 14
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9ca8537_8a951efa",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-02T17:08:04Z",
+      "side": 1,
+      "message": "can we have a getter function to return this value instead of extra member?",
+      "range": {
+        "startLine": 32,
+        "startChar": 8,
+        "endLine": 32,
+        "endChar": 50
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9ca8537_aaf81a56",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-02T17:08:04Z",
+      "side": 1,
+      "message": "nit: \u003d default",
+      "range": {
+        "startLine": 45,
+        "startChar": 17,
+        "endLine": 45,
+        "endChar": 20
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9ca8537_ea62a2f6",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-02T17:08:04Z",
+      "side": 1,
+      "message": "is this really async? it looks like we\u0027re calling the same function syncronously",
+      "range": {
+        "startLine": 321,
+        "startChar": 0,
+        "endLine": 324,
+        "endChar": 1
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9ca8537_6ad55258",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 462,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-02T17:08:04Z",
+      "side": 1,
+      "message": "nit: this is only needed in the if()",
+      "range": {
+        "startLine": 462,
+        "startChar": 1,
+        "endLine": 462,
+        "endChar": 54
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9ca8537_4ad4165a",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 468,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-02T17:08:04Z",
+      "side": 1,
+      "message": "please move this into the first point of use",
+      "range": {
+        "startLine": 468,
+        "startChar": 4,
+        "endLine": 468,
+        "endChar": 16
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9ca8537_ca2ec68f",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 473,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-02T17:08:04Z",
+      "side": 1,
+      "message": "nit: please prefer the standardized \u0027__func__\u0027 instead of \u0027__FUNCTION__\u0027",
+      "range": {
+        "startLine": 473,
+        "startChar": 23,
+        "endLine": 473,
+        "endChar": 35
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9ca8537_2a174a49",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 481,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-02T17:08:04Z",
+      "side": 1,
+      "message": "nit: nullptr",
+      "range": {
+        "startLine": 481,
+        "startChar": 27,
+        "endLine": 481,
+        "endChar": 31
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
