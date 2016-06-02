@@ -11,7 +11,8 @@
 
 
 #include "android/gps/KmlParser.h"
-#include "android/gps/internal/KmlParserInternal.h"
+
+#include <libxml/parser.h>
 
 #include <string>
 #include <utility>
@@ -23,17 +24,17 @@ using std::string;
 
 // Coordinates can be nested arbitrarily deep within a Placemark, depending
 // on the type of object (Point, LineString, Polygon) the Placemark contains
-xmlNode * KmlParserInternal::findCoordinates(xmlNode * current) {
-    for (; current != NULL; current = current->next) {
+static xmlNode* findCoordinates(xmlNode* current) {
+    for (; current != nullptr; current = current->next) {
         if (!strcmp((const char *) current->name, "coordinates")) {
             return current;
         }
         xmlNode * children = findCoordinates(current->xmlChildrenNode);
-        if (children != NULL) {
+        if (children != nullptr) {
             return children;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 // Coordinates have the following format:
@@ -42,56 +43,65 @@ xmlNode * KmlParserInternal::findCoordinates(xmlNode * current) {
 //                -112.2657374587321,36.08646312301303,2357
 //        </coordinates>
 // often entirely contained in a single string, necessitating regex
-bool KmlParserInternal::parseCoordinates(xmlNode * current, GpsFixArray * fixes) {
-    xmlNode * coordinates_node = findCoordinates(current);
-    if (coordinates_node == NULL
-            || coordinates_node->xmlChildrenNode == NULL
-            || coordinates_node->xmlChildrenNode->content == NULL)
+static bool parseCoordinates(xmlNode* current, GpsFixArray* fixes) {
+    xmlNode* coordinates_node = findCoordinates(current);
+    bool result = true;
+    if (coordinates_node == nullptr ||
+        coordinates_node->xmlChildrenNode == nullptr ||
+        coordinates_node->xmlChildrenNode->content == nullptr) {
         return false;
-
-    // strtok modifies the string it's given, so we make a copy to operate on
-    char* coordinates = strdup((const char *) coordinates_node->xmlChildrenNode->content);
-
-    #ifdef _WIN32
-    // in windows, each thread saves its own copy of the static required variables
-    char* split = strtok(coordinates, " \t\n\v\r\f");
-    #else
-    char* saveptr;
-    char* split = strtok_r(coordinates, " \t\n\v\r\f", &saveptr);
-    #endif
-    while (split != NULL) {
-        string triple = string(split);
-        size_t first = triple.find(",");
-        size_t second = triple.find(",", first + 1);
-        if (first != string::npos && second != string::npos) {
-            int ind = fixes->size();
-            fixes->push_back(GpsFix());
-            (*fixes)[ind].longitude = triple.substr(0, first);
-            (*fixes)[ind].latitude  = triple.substr(first + 1, second - first - 1);
-            (*fixes)[ind].elevation = triple.substr(second + 1);
-        } else {
-            return false;
-        }
-
-        #ifdef _WIN32
-        split = strtok(NULL, " \t\n\v\r\f");
-        #else
-        split = strtok_r(NULL, " \t\n\v\r\f", &saveptr);
-        #endif
     }
 
-    free(coordinates);
-    return true;
+    const char* coordinates = (const char*)(coordinates_node->xmlChildrenNode->content);
+    int coordinates_len = strlen(coordinates);
+    int offset = 0, n = 0;
+    GpsFix new_fix;
+    while(3 == sscanf(coordinates + offset,
+                      "%f , %f , %f%n",
+                      &new_fix.longitude,
+                      &new_fix.latitude,
+                      &new_fix.elevation,
+                      &n)) {
+        fixes->push_back(new_fix);
+        offset += n;
+    }
+
+    // Only allow whitespace at the end of the string to remain unconsumed.
+    for (int i = offset; i < coordinates_len && result; ++i) {
+        result = isspace(coordinates[i]);
+    }
+
+    return result;
 }
 
-bool KmlParserInternal::parsePlacemark(xmlNode * current, GpsFixArray * fixes) {
+static bool parseGxTrack(xmlNode* children, GpsFixArray* fixes) {
+    bool result = true;
+    for (xmlNode* current = children; result && current != nullptr; current = current->next) {
+        if (
+            current->ns &&
+            current->ns->prefix &&
+            !strcmp((const char*)current->ns->prefix, "gx") &&
+            !strcmp((const char *)current->name, "coord")) {
+            std::string coordinates{(const char*)current->xmlChildrenNode->content};
+            GpsFix new_fix;
+            result = (3 == sscanf(coordinates.c_str(),
+                                  "%f %f %f",
+                                  &new_fix.longitude,
+                                  &new_fix.latitude,
+                                  &new_fix.elevation));
+            fixes->push_back(new_fix);
+        }
+    }
+    return result;
+}
+
+static bool parsePlacemark(xmlNode* current, GpsFixArray* fixes) {
     string description;
     string name;
     size_t ind = string::npos;
-
     // not worried about case-sensitivity since .kml files
     // are expected to be machine-generated
-    for (; current != NULL; current = current->next) {
+    for (; current != nullptr; current = current->next) {
         const bool hasContent =
                 current->xmlChildrenNode && current->xmlChildrenNode->content;
 
@@ -99,11 +109,21 @@ bool KmlParserInternal::parsePlacemark(xmlNode * current, GpsFixArray * fixes) {
             description = (const char*)current->xmlChildrenNode->content;
         } else if (hasContent && !strcmp((const char*)current->name, "name")) {
             name = (const char *) current->xmlChildrenNode->content;
-        } else if (!strcmp((const char *) current->name, "Point") ||
+        } else if (
+                !strcmp((const char *) current->name, "Point") ||
                 !strcmp((const char *) current->name, "LineString") ||
                 !strcmp((const char *) current->name, "Polygon")) {
-            ind = fixes->size();
+            ind = (ind != string::npos ? ind :fixes->size());
             if (!parseCoordinates(current->xmlChildrenNode, fixes)) {
+                return false;
+            }
+        } else if (
+            current->ns &&
+            current->ns->prefix &&
+            !strcmp((const char*)current->ns->prefix, "gx") &&
+            !strcmp((const char*)current->name, "Track")) {
+            ind = (ind != string::npos ? ind :fixes->size());
+            if (!parseGxTrack(current->xmlChildrenNode, fixes)) {
                 return false;
             }
         }
@@ -122,18 +142,18 @@ bool KmlParserInternal::parsePlacemark(xmlNode * current, GpsFixArray * fixes) {
 }
 
 // Placemarks (aka locations) can be nested arbitrarily deep
-bool KmlParserInternal::traverseSubtree(xmlNode* current,
+static bool traverseSubtree(xmlNode* current,
                                         GpsFixArray* fixes,
                                         string* error) {
     for (; current; current = current->next) {
-        if (current->name != NULL &&
+        if (current->name != nullptr &&
                 !strcmp((const char *) current->name, "Placemark")) {
 
             if (!parsePlacemark(current->xmlChildrenNode, fixes)) {
                 *error = "Location found with missing or malformed coordinates";
                 return false;
             }
-        } else if (current->name != NULL &&
+        } else if (current->name != nullptr &&
                 strcmp((const char *) current->name, "text")) {
 
             // if it's not a Placemark we must go deeper
@@ -151,21 +171,21 @@ bool KmlParser::parseFile(const char * filePath, GpsFixArray * fixes, string * e
     // the version it was compiled for and the actual shared library used.
     LIBXML_TEST_VERSION
 
-    xmlDocPtr doc = xmlReadFile(filePath, NULL, 0);
-    if (doc == NULL) {
+    xmlDocPtr doc = xmlReadFile(filePath, nullptr, 0);
+    if (doc == nullptr) {
         *error = "KML document not parsed successfully.";
         xmlFreeDoc(doc);
         return false;
     }
 
     xmlNodePtr cur = xmlDocGetRootElement(doc);
-    if (cur == NULL) {
+    if (cur == nullptr) {
         *error = "Could not get root element of parsed KML file.";
         xmlFreeDoc(doc);
         xmlCleanupParser();
         return false;
     }
-    bool isWellFormed = KmlParserInternal::traverseSubtree(cur, fixes, error);
+    bool isWellFormed = traverseSubtree(cur, fixes, error);
 
     xmlFreeDoc(doc);
     xmlCleanupParser();

@@ -80,34 +80,34 @@ TEST(GpxParser, ParseFileValid) {
     char text[] =
             "<?xml version=\"1.0\"?>"
             "<gpx>"
-                "<wpt lon=\"\" lat=\"\">"
+                "<wpt lon=\"0\" lat=\"0\">"
                 "<name>Wpt 1</name>"
                 "</wpt>"
-                "<wpt lon=\"\" lat=\"\">"
+                "<wpt lon=\"0\" lat=\"0\">"
                 "<name>Wpt 2</name>"
                 "</wpt>"
             "<rte>"
-                "<rtept lon=\"\" lat=\"\">"
+                "<rtept lon=\"0\" lat=\"0\">"
                 "<name>Rtept 1</name>"
                 "</rtept>"
-                "<rtept lon=\"\" lat=\"\">"
+                "<rtept lon=\"0\" lat=\"0\">"
                 "<name>Rtept 2</name>"
                 "</rtept>"
             "</rte>"
             "<trk>"
             "<trkseg>"
-                "<trkpt lon=\"\" lat=\"\">"
+                "<trkpt lon=\"0\" lat=\"0\">"
                 "<name>Trkpt 1-1</name>"
                 "</trkpt>"
-                "<trkpt lon=\"\" lat=\"\">"
+                "<trkpt lon=\"0\" lat=\"0\">"
                 "<name>Trkpt 1-2</name>"
                 "</trkpt>"
             "</trkseg>"
             "<trkseg>"
-                "<trkpt lon=\"\" lat=\"\">"
+                "<trkpt lon=\"0\" lat=\"0\">"
                 "<name>Trkpt 2-1</name>"
                 "</trkpt>"
-                "<trkpt lon=\"\" lat=\"\">"
+                "<trkpt lon=\"0\" lat=\"0\">"
                 "<name>Trkpt 2-2</name>"
                 "</trkpt>"
             "</trkseg>"
@@ -127,7 +127,7 @@ TEST(GpxParser, ParseFileValid) {
     std::string error;
     bool isOk = GpxParser::parseFile(path.c_str(), &locations, &error);
     EXPECT_TRUE(isOk);
-    EXPECT_EQ(8, locations.size());
+    ASSERT_EQ(8, locations.size());
 
     EXPECT_EQ("Wpt 1", locations[0].name);
     EXPECT_EQ("Wpt 2", locations[1].name);
@@ -144,7 +144,7 @@ TEST(GpxParser, ParseFileNullAttribute) {
     char text[] =
             "<?xml version=\"1.0\"?>"
             "<gpx>"
-                "<wpt lon=\"\" lat=\"\">"
+                "<wpt lon=\"0\" lat=\"0\">"
                     "<name/>"
                 "</wpt>"
             "</gpx>";
@@ -168,6 +168,150 @@ TEST(GpxParser, ParseFileNullAttribute) {
     EXPECT_EQ(1, locations.size());
     EXPECT_STREQ("", locations[0].name.c_str());
     EXPECT_TRUE(error.empty());
+}
+
+
+TEST(GpxParser, ParseLocationMissingLatitude) {
+    char text[] =
+            "<?xml version=\"1.0\"?>"
+            "<gpx>"
+            "<wpt lon=\"9.81\">"
+            "<ele>6.02</ele>"
+            "<name>Name</name>"
+            "<desc>Desc</desc>"
+            "</wpt>"
+            "</gpx>";
+
+    TestTempDir myDir("parse_location_tests");
+    ASSERT_TRUE(myDir.path()); // NULL if error during creation.
+    std::string path = myDir.makeSubPath("test.gpx");
+
+    std::ofstream myfile(path.c_str());
+    myfile << text;
+    myfile.close();
+
+    GpsFixArray locations;
+    std::string error;
+    bool isOk = GpxParser::parseFile(path.c_str(), &locations, &error);
+    EXPECT_FALSE(isOk);
+}
+
+TEST(GpxParser, ParseLocationMissingLongitude) {
+    char text[] =
+            "<?xml version=\"1.0\"?>"
+            "<gpx>"
+            "<wpt lat=\"3.1415\">"
+            "<ele>6.02</ele>"
+            "<name>Name</name>"
+            "<desc>Desc</desc>"
+            "</wpt>"
+            "</gpx>";
+
+    TestTempDir myDir("parse_location_tests");
+    ASSERT_TRUE(myDir.path()); // NULL if error during creation.
+    std::string path = myDir.makeSubPath("test.gpx");
+
+    std::ofstream myfile(path.c_str());
+    myfile << text;
+    myfile.close();
+
+    GpsFixArray locations;
+    std::string error;
+    bool isOk = GpxParser::parseFile(path.c_str(), &locations, &error);
+    EXPECT_FALSE(isOk);
+}
+
+TEST(GpxParser, ParseValidLocation) {
+    char text[] =
+            "<?xml version=\"1.0\"?>"
+            "<gpx>"
+            "<wpt lon=\"9.81\" lat=\"3.1415\">"
+            "<ele>6.02</ele>"
+            "<name>Name</name>"
+            "<desc>Desc</desc>"
+            "</wpt>"
+            "</gpx>";
+    TestTempDir myDir("parse_location_tests");
+    ASSERT_TRUE(myDir.path()); // NULL if error during creation.
+    std::string path = myDir.makeSubPath("test.gpx");
+
+    std::ofstream myfile(path.c_str());
+    myfile << text;
+    myfile.close();
+
+    GpsFixArray locations;
+    std::string error;
+    bool isOk = GpxParser::parseFile(path.c_str(), &locations, &error);
+    EXPECT_TRUE(isOk);
+    EXPECT_EQ(1, locations.size());
+    const GpsFix& wpt = locations[0];
+
+    EXPECT_EQ("Desc", wpt.description);
+    EXPECT_FLOAT_EQ(6.02, wpt.elevation);
+    EXPECT_FLOAT_EQ(3.1415, wpt.latitude);
+    EXPECT_FLOAT_EQ(9.81, wpt.longitude);
+    EXPECT_EQ("Name", wpt.name);
+}
+
+TEST(GpxParser, ParseValidDocument) {
+    char text[] =
+            "<?xml version=\"1.0\"?>"
+            "<gpx>"
+                "<wpt lon=\"0\" lat=\"0\">"
+                "<name>Wpt 1</name>"
+                "</wpt>"
+                "<wpt lon=\"0\" lat=\"0\">"
+                "<name>Wpt 2</name>"
+                "</wpt>"
+            "<rte>"
+                "<rtept lon=\"0\" lat=\"0\">"
+                "<name>Rtept 1</name>"
+                "</rtept>"
+                "<rtept lon=\"0\" lat=\"0\">"
+                "<name>Rtept 2</name>"
+                "</rtept>"
+            "</rte>"
+            "<trk>"
+            "<trkseg>"
+                "<trkpt lon=\"0\" lat=\"0\">"
+                "<name>Trkpt 1-1</name>"
+                "</trkpt>"
+                "<trkpt lon=\"0\" lat=\"0\">"
+                "<name>Trkpt 1-2</name>"
+                "</trkpt>"
+            "</trkseg>"
+            "<trkseg>"
+                "<trkpt lon=\"0\" lat=\"0\">"
+                "<name>Trkpt 2-1</name>"
+                "</trkpt>"
+                "<trkpt lon=\"0\" lat=\"0\">"
+                "<name>Trkpt 2-2</name>"
+                "</trkpt>"
+            "</trkseg>"
+            "</trk>"
+            "</gpx>";
+    TestTempDir myDir("parse_location_tests");
+    ASSERT_TRUE(myDir.path()); // NULL if error during creation.
+    std::string path = myDir.makeSubPath("test.gpx");
+
+    std::ofstream myfile(path.c_str());
+    myfile << text;
+    myfile.close();
+
+    GpsFixArray locations;
+    std::string error;
+    bool isOk = GpxParser::parseFile(path.c_str(), &locations, &error);
+    EXPECT_TRUE(isOk);
+    EXPECT_EQ(8, locations.size());
+
+    EXPECT_EQ("Wpt 1", locations[0].name);
+    EXPECT_EQ("Wpt 2", locations[1].name);
+    EXPECT_EQ("Rtept 1", locations[2].name);
+    EXPECT_EQ("Rtept 2", locations[3].name);
+    EXPECT_EQ("Trkpt 1-1", locations[4].name);
+    EXPECT_EQ("Trkpt 1-2", locations[5].name);
+    EXPECT_EQ("Trkpt 2-1", locations[6].name);
+    EXPECT_EQ("Trkpt 2-2", locations[7].name);
 }
 
 }
