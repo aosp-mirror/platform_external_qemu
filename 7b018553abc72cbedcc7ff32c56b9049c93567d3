@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f9c5ddcd_45b94a38",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-02T19:09:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b9ca8537_ca8a46cf",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 26
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b9ca8537_2ab3caa8",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
         "patchSetId": 27
@@ -36,6 +60,30 @@
       "writtenOn": "2016-06-02T17:08:04Z",
       "side": 1,
       "message": ".reset(rcsync)",
+      "range": {
+        "startLine": 36,
+        "startChar": 20,
+        "endLine": 36,
+        "endChar": 22
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f9c5ddcd_858b4281",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-02T19:09:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b9ca8537_2ab3caa8",
       "range": {
         "startLine": 36,
         "startChar": 20,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "f9c5ddcd_e5ce76c7",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-02T19:09:25Z",
+      "side": 1,
+      "message": "Ah, that\u0027s much better. Thanks!",
+      "parentUuid": "b9ca8537_8a543e1d",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 63,
+        "endChar": 36
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b9ca8537_4a9f3616",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
         "patchSetId": 27
@@ -82,6 +154,30 @@
       "writtenOn": "2016-06-02T17:08:04Z",
       "side": 1,
       "message": "I\u0027d like to second a request for some comments here: it took me some time to understand how it works and why is it needed. Could you please explain the purpose of these classes?",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 14
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f9c5ddcd_cb27094f",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-02T19:09:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b9ca8537_4a9f3616",
       "range": {
         "startLine": 27,
         "startChar": 0,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "f9c5ddcd_8b04f1ba",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-02T19:09:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b9ca8537_8a951efa",
+      "range": {
+        "startLine": 32,
+        "startChar": 8,
+        "endLine": 32,
+        "endChar": 50
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b9ca8537_aaf81a56",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
         "patchSetId": 27
@@ -128,6 +248,30 @@
       "writtenOn": "2016-06-02T17:08:04Z",
       "side": 1,
       "message": "nit: \u003d default",
+      "range": {
+        "startLine": 45,
+        "startChar": 17,
+        "endLine": 45,
+        "endChar": 20
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f9c5ddcd_8b2d1133",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-02T19:09:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b9ca8537_aaf81a56",
       "range": {
         "startLine": 45,
         "startChar": 17,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "f9c5ddcd_4b9f9971",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-02T19:09:25Z",
+      "side": 1,
+      "message": "Since the return type is void, a faster code path will be generated by emugen for rcFlushWindowColorBufferAsync; there will be no pipe traffic sent back to the guest for the return value.\n\nThe other version, rcFlushWindowColorBuffer, would return int, and there would be pipe traffic sent back to the guest. \"Async\" in the function name here refers more to this pipe traffic part than anything else, but is part of the overall design of the GLAsyncSwap feature: a glFinish call in rcFlushWindowColorBuffer + using rcFlushWindowColorBufferAsync still would require fences to make sure everything is properly ordered, while a glFinish call in rcFlushWindowColorBuffer + using rcFlushWindowColorBuffer would be the way things work currently on Windows.\n\nIdeally, one would want to just make rcFlushWindowColorBuffer have void return value when the GLAsyncSwap feature is active, but that would require significant changes to the code generation scripts on both host and guest.",
+      "parentUuid": "b9ca8537_ea62a2f6",
+      "range": {
+        "startLine": 321,
+        "startChar": 0,
+        "endLine": 324,
+        "endChar": 1
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b9ca8537_6ad55258",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 27
@@ -174,6 +342,30 @@
       "writtenOn": "2016-06-02T17:08:04Z",
       "side": 1,
       "message": "nit: this is only needed in the if()",
+      "range": {
+        "startLine": 462,
+        "startChar": 1,
+        "endLine": 462,
+        "endChar": 54
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f9c5ddcd_2e2b4bcc",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 462,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-02T19:09:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b9ca8537_6ad55258",
       "range": {
         "startLine": 462,
         "startChar": 1,
@@ -209,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "f9c5ddcd_8e807fd7",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 468,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-02T19:09:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b9ca8537_4ad4165a",
+      "range": {
+        "startLine": 468,
+        "startChar": 4,
+        "endLine": 468,
+        "endChar": 16
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b9ca8537_ca2ec68f",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 27
@@ -232,6 +448,30 @@
     },
     {
       "key": {
+        "uuid": "f9c5ddcd_ee85b3e5",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 473,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-02T19:09:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b9ca8537_ca2ec68f",
+      "range": {
+        "startLine": 473,
+        "startChar": 23,
+        "endLine": 473,
+        "endChar": 35
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b9ca8537_2a174a49",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 27
@@ -243,6 +483,30 @@
       "writtenOn": "2016-06-02T17:08:04Z",
       "side": 1,
       "message": "nit: nullptr",
+      "range": {
+        "startLine": 481,
+        "startChar": 27,
+        "endLine": 481,
+        "endChar": 31
+      },
+      "revId": "7b018553abc72cbedcc7ff32c56b9049c93567d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f9c5ddcd_4e77a7ee",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 481,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-02T19:09:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b9ca8537_2a174a49",
       "range": {
         "startLine": 481,
         "startChar": 27,
