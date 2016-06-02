@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "19771110_adc6be5d",
+        "filename": "android/gps/GpxParser.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-06-02T15:52:20Z",
+      "side": 1,
+      "message": "Since we\u0027re now checking if these are actually numbers, we might as well check for errors as well?",
+      "range": {
+        "startLine": 52,
+        "startChar": 8,
+        "endLine": 52,
+        "endChar": 14
+      },
+      "revId": "2a9f6308794794f114047673410a3b1c87b88c9f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "19771110_9b369fd4",
         "filename": "android/gps/GpxParser_unittest.cpp",
         "patchSetId": 3
