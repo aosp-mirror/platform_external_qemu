@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "19771110_9b369fd4",
+        "filename": "android/gps/GpxParser_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-06-02T15:23:00Z",
+      "side": 1,
+      "message": "Interesting. This doesn\u0027t count as \"missing Longitude\"?",
+      "revId": "2a9f6308794794f114047673410a3b1c87b88c9f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "19771110_1b48ef54",
+        "filename": "android/gps/KmlParser.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-06-02T15:23:00Z",
+      "side": 1,
+      "message": "Is it OK to push_back an invalid fix as long as we return False?",
+      "revId": "2a9f6308794794f114047673410a3b1c87b88c9f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "19771110_7b700392",
+        "filename": "android/gps/KmlParser_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-06-02T15:23:00Z",
+      "side": 1,
+      "message": "All I found when Googling for EXPECT_FLOAT_EQ is that it \"compares up to a given precision\"--pretty vague.\nThis code seems to assume that the precision is exactly 4 fractional decimal digits.\nI think it would be better to use the full-precision expected value (as in the tests above and below).",
+      "revId": "2a9f6308794794f114047673410a3b1c87b88c9f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "19771110_9bb13f57",
+        "filename": "android/gps/KmlParser_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-06-02T15:23:00Z",
+      "side": 1,
+      "message": "Perhaps add a comment that this string is invalid because of internal spaces?",
+      "revId": "2a9f6308794794f114047673410a3b1c87b88c9f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
