@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "86be3e8f_92847dec",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2199,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-06-03T17:26:36Z",
+      "side": 0,
+      "message": "These two tests are broken! They should use ||.\n(Thanks for eliminating them.)",
+      "range": {
+        "startLine": 2198,
+        "startChar": 4,
+        "endLine": 2199,
+        "endChar": 43
+      },
+      "revId": "555e5f2a72e37a7e8c6db388a54b03f067127c2d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

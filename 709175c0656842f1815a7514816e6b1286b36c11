@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "86be3e8f_031b620f",
+        "filename": "android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1494,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-06-03T17:26:36Z",
+      "side": 1,
+      "message": "I want to change this to \\r\\n for consistency, even\nthough the behavior was identical on my system.",
+      "revId": "709175c0656842f1815a7514816e6b1286b36c11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "86be3e8f_03e60224",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-06-03T17:26:36Z",
+      "side": 1,
+      "message": "Where did these numbers come from?",
+      "revId": "709175c0656842f1815a7514816e6b1286b36c11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "86be3e8f_d28d15eb",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-06-03T17:26:36Z",
+      "side": 1,
+      "message": "Should this be 0?",
+      "range": {
+        "startLine": 239,
+        "startChar": 45,
+        "endLine": 239,
+        "endChar": 48
+      },
+      "revId": "709175c0656842f1815a7514816e6b1286b36c11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "86be3e8f_15287786",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2232,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-06-03T17:26:36Z",
+      "side": 1,
+      "message": "The format string here has 12 \u0027%i\u0027, but there are 13 parameters. (The string on the left has 2+10 parameters.)",
+      "revId": "709175c0656842f1815a7514816e6b1286b36c11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
