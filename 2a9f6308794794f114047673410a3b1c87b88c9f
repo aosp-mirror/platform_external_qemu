@@ -102,6 +102,24 @@
     },
     {
       "key": {
+        "uuid": "f9387db2_938c444b",
+        "filename": "android/gps/GpxParser_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-03T20:09:40Z",
+      "side": 1,
+      "message": "The original code silently ate empty strings... However, it\u0027s no longer the case (updated the test).",
+      "parentUuid": "f9387db2_b31b00c3",
+      "revId": "2a9f6308794794f114047673410a3b1c87b88c9f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "19771110_1b48ef54",
         "filename": "android/gps/KmlParser.cpp",
         "patchSetId": 3
@@ -184,6 +202,24 @@
       "side": 1,
       "message": "4 ULP seems a reasonable tolerance.\nBut how do you know that \"37.42228990140251\" and \"37.4223\" differ by less than that? \nI think the expected value should be given with the full precision. Then the 4 ULP is used only for *unavoidable* rounding errors.",
       "parentUuid": "f9c5ddcd_a828d322",
+      "revId": "2a9f6308794794f114047673410a3b1c87b88c9f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "46ed2637_ff029ffd",
+        "filename": "android/gps/KmlParser_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-03T20:09:40Z",
+      "side": 1,
+      "message": "I see what you mean, I must\u0027ve misunderstood your initial comment.\nChanged.",
+      "parentUuid": "f9387db2_3362b0c7",
       "revId": "2a9f6308794794f114047673410a3b1c87b88c9f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
