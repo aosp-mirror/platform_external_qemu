@@ -670,11 +670,6 @@ skin_part_create_rotated(const SkinPart* src, const SkinSize* layout_size, SkinR
     if (src->display->valid) {
         skin_size_rotate(&(new_part->display->rect.size), &(src->display->rect.size), by);
         new_part->display->rotation = skin_rotation_rotate(new_part->display->rotation, by);
-        new_part->display->framebuffer =
-            new_part->display->framebuffer_funcs->create_framebuffer(
-                new_part->display->rect.size.w,
-                new_part->display->rect.size.h,
-                new_part->display->bpp);
     }
 
     // Rotate each of the part's buttons so that they align with the rotated
