@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "46ed2637_c21f044e",
+        "filename": "android/gps/GpsFix.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-03T20:42:04Z",
+      "side": 1,
+      "message": "nit: member initializers?",
+      "range": {
+        "startLine": 26,
+        "startChar": 14,
+        "endLine": 26,
+        "endChar": 63
+      },
+      "revId": "8419c46a78fa4231c638cf3d244b4a4dd14f69b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "46ed2637_420db42b",
+        "filename": "android/gps/GpxParser.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-03T20:42:04Z",
+      "side": 1,
+      "message": "same question about locales",
+      "range": {
+        "startLine": 53,
+        "startChar": 12,
+        "endLine": 53,
+        "endChar": 18
+      },
+      "revId": "8419c46a78fa4231c638cf3d244b4a4dd14f69b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "46ed2637_e207a80b",
+        "filename": "android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-03T20:42:04Z",
+      "side": 1,
+      "message": "what about the locale here?",
+      "range": {
+        "startLine": 285,
+        "startChar": 68,
+        "endLine": 285,
+        "endChar": 74
+      },
+      "revId": "8419c46a78fa4231c638cf3d244b4a4dd14f69b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
