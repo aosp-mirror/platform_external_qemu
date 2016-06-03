@@ -282,10 +282,9 @@ void LocationPage::populateTable(GpsFixArray* fixes)
             }
 
             mUi->loc_pathTable->setItem(i, 0, itemForTable(QString::number(delay)));
-            mUi->loc_pathTable->setItem(i, 1, itemForTable(QString::fromStdString(fix.latitude)));
-            mUi->loc_pathTable->setItem(i, 2, itemForTable(QString::fromStdString(fix.longitude)));
-            mUi->loc_pathTable->setItem(i, 3, itemForTable(
-                        fix.elevation.empty() ? "0" : QString::fromStdString(fix.elevation)));
+            mUi->loc_pathTable->setItem(i, 1, itemForTable(QString::number(fix.latitude)));
+            mUi->loc_pathTable->setItem(i, 2, itemForTable(QString::number(fix.longitude)));
+            mUi->loc_pathTable->setItem(i, 3, itemForTable(QString::number(fix.elevation)));
             mUi->loc_pathTable->setItem(i, 4, itemForTable(QString::fromStdString(fix.name)));
             mUi->loc_pathTable->setItem(i, 5, itemForTable(QString::fromStdString(fix.description)));
 

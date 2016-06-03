@@ -10,7 +10,8 @@
 // GNU General Public License for more details.
 
 #include "android/gps/GpxParser.h"
-#include "android/gps/internal/GpxParserInternal.h"
+
+#include <libxml/parser.h>
 
 #include <algorithm>
 #include <string.h>
@@ -27,16 +28,16 @@ static string formatError(const char* format, Args&&... args) {
 }
 
 
-void GpxParserInternal::cleanupXmlDoc(xmlDoc *doc)
+static void cleanupXmlDoc(xmlDoc *doc)
 {
     xmlFreeDoc(doc);
     xmlCleanupParser();
 }
 
-bool GpxParserInternal::parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *result, string *error)
+static bool parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *result, string *error)
 {
-    string latitude;
-    string longitude;
+    float latitude;
+    float longitude;
 
     xmlAttrPtr attr;
     xmlChar *tmpStr;
@@ -48,8 +49,12 @@ bool GpxParserInternal::parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *resu
                              ptNode->line);
         return false; // Return error since a point *must* have a latitude
     } else {
-        latitude = reinterpret_cast<const char*>(tmpStr);
+        int read =
+            sscanf(reinterpret_cast<const char*>(tmpStr), "%f", &latitude);
         xmlFree(tmpStr); // Caller-freed
+        if (read != 1) {
+            return false;
+        }
     }
 
     // Check for and get the longitude attribute
@@ -59,8 +64,12 @@ bool GpxParserInternal::parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *resu
                              ptNode->line);
         return false; // Return error since a point *must* have a longitude
     } else {
-        longitude = reinterpret_cast<const char*>(tmpStr);
+        int read =
+            sscanf(reinterpret_cast<const char*>(tmpStr), "%f", &longitude);
         xmlFree(tmpStr); // Caller-freed
+        if (read != 1) {
+            return false;
+        }
     }
 
     // The result will be valid if this point is reached
@@ -100,8 +109,12 @@ bool GpxParserInternal::parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *resu
         }
         else if ( !strcmp((const char *) field->name, "ele") ) {
             if ((tmpStr = xmlNodeListGetString(doc, field->children, 1))) {
-                result->elevation = reinterpret_cast<const char*>(tmpStr);
+                int read =
+                    sscanf(reinterpret_cast<const char*>(tmpStr), "%f", &result->elevation);
                 xmlFree(tmpStr); // Caller-freed
+                if (read != 1) {
+                    return false;
+                }
                 childCount++;
             }
         }
@@ -129,7 +142,7 @@ bool GpxParserInternal::parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *resu
     return true;
 }
 
-bool GpxParserInternal::parse(xmlDoc *doc, GpsFixArray *fixes, string *error)
+static bool parse(xmlDoc *doc, GpsFixArray *fixes, string *error)
 {
     xmlNode *root = xmlDocGetRootElement(doc);
     GpsFix location;
@@ -199,9 +212,9 @@ bool GpxParser::parseFile(const char *filePath, GpsFixArray *fixes, string *erro
 {
     xmlDocPtr doc = xmlReadFile(filePath, nullptr, 0);
     if (doc == nullptr) {
-        GpxParserInternal::cleanupXmlDoc(doc);
+        cleanupXmlDoc(doc);
         *error = "GPX document not parsed successfully.";
         return false;
     }
-    return GpxParserInternal::parse(doc, fixes, error);
+    return parse(doc, fixes, error);
 }

@@ -18,12 +18,10 @@
 struct GpsFix {
     std::string name;
     std::string description;
-    std::string latitude;
-    std::string longitude;
-    std::string elevation;
-    time_t time;
-
-    GpsFix() : time(0) {}
+    float latitude = 0.0;
+    float longitude = 0.0;
+    float elevation = 0.0;
+    time_t time = 0;
 
     bool operator <(const GpsFix &other) const {
         return time < other.time;
