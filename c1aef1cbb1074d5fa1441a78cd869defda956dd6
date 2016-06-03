@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "86be3e8f_55402ffc",
+        "filename": "android/skin/qt/extended-pages/cellular-page.ui",
+        "patchSetId": 2
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-06-03T17:23:30Z",
+      "side": 1,
+      "message": "Would like to add\n   \u003cproperty name\u003d\"currentIndex\"\u003e\n    \u003cnumber\u003e2\u003c/number\u003e\n   \u003c/property\u003e\nto select Moderate by default",
+      "revId": "c1aef1cbb1074d5fa1441a78cd869defda956dd6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
