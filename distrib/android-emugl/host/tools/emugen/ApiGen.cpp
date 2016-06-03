@@ -441,12 +441,22 @@ static void writeVarLargeEncodingExpression(Var& var, FILE* fp)
 
 static void writeEncodingChecksumValidatorOnReturn(const char* funcName, FILE* fp) {
     fprintf(fp, "\tif (useChecksum) {\n"
+                "\t\tunsigned char *checksumBufPtr = NULL;\n"
+                "#if __cplusplus>=201103L\n"
                 "\t\tstd::unique_ptr<unsigned char[]> checksumBuf(new unsigned char[checksumSize]);\n"
-                "\t\tstream->readback(checksumBuf.get(), checksumSize);\n"
-                "\t\tif (!checksumCalculator->validate(checksumBuf.get(), checksumSize)) {\n"
+                "\t\tchecksumBufPtr = checksumBuf.get();\n"
+                "#else // __cplusplus<201103L\n"
+                "\t\tunsigned char *checksumBuf = new unsigned char[checksumSize];\n"
+                "\t\tchecksumBufPtr = checksumBuf;\n"
+                "#endif // __cplusplus\n"
+                "\t\tstream->readback(checksumBufPtr, checksumSize);\n"
+                "\t\tif (!checksumCalculator->validate(checksumBufPtr, checksumSize)) {\n"
                 "\t\t\tALOGE(\"%s: GL communication error, please report this issue to b.android.com.\\n\");\n"
                 "\t\t\tabort();\n"
                 "\t\t}\n"
+                "#if __cplusplus<201103L\n"
+                "\t\tdelete [] checksumBuf;\n"
+                "#endif // __cplusplus<201103L\n"
                 "\t}\n",
             funcName
     );
@@ -462,7 +472,9 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 
     printHeader(fp);
     fprintf(fp, "\n\n");
+    fprintf(fp, "#if __cplusplus>=201103L\n");
     fprintf(fp, "#include <memory>\n");
+    fprintf(fp, "#endif // __cplusplus>=201103L\n");
     fprintf(fp, "#include <string.h>\n");
     fprintf(fp, "#include \"%s_opcodes.h\"\n\n", m_basename.c_str());
     fprintf(fp, "#include \"%s_enc.h\"\n\n\n", m_basename.c_str());
