@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "46ed2637_2584fac5",
+        "filename": "android/gps/GpsFix.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-03T21:06:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "46ed2637_c21f044e",
+      "range": {
+        "startLine": 26,
+        "startChar": 14,
+        "endLine": 26,
+        "endChar": 63
+      },
+      "revId": "8419c46a78fa4231c638cf3d244b4a4dd14f69b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "46ed2637_420db42b",
         "filename": "android/gps/GpxParser.cpp",
         "patchSetId": 5
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "46ed2637_45281ed1",
+        "filename": "android/gps/GpxParser.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-03T21:06:05Z",
+      "side": 1,
+      "message": "At this point, we\u0027re reading an XML file. If the XML file contains numbers formatted with commas and the user\u0027s locale uses commas as decimal separator, this code will succeed. If the user\u0027s locale doesn\u0027t use commas, the code will fail. I think this behavior is consistent.",
+      "parentUuid": "46ed2637_420db42b",
+      "range": {
+        "startLine": 53,
+        "startChar": 12,
+        "endLine": 53,
+        "endChar": 18
+      },
+      "revId": "8419c46a78fa4231c638cf3d244b4a4dd14f69b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "46ed2637_e207a80b",
         "filename": "android/skin/qt/extended-pages/location-page.cpp",
         "patchSetId": 5
@@ -59,6 +107,30 @@
       "writtenOn": "2016-06-03T20:42:04Z",
       "side": 1,
       "message": "what about the locale here?",
+      "range": {
+        "startLine": 285,
+        "startChar": 68,
+        "endLine": 285,
+        "endChar": 74
+      },
+      "revId": "8419c46a78fa4231c638cf3d244b4a4dd14f69b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "46ed2637_85f0669d",
+        "filename": "android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-03T21:06:05Z",
+      "side": 1,
+      "message": "QString::number ignores the system locale (see http://doc.qt.io/qt-5/qstring.html#number-6)",
+      "parentUuid": "46ed2637_e207a80b",
       "range": {
         "startLine": 285,
         "startChar": 68,
