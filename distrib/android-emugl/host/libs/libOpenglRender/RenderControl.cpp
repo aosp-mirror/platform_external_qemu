@@ -24,6 +24,7 @@
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
 
+#include <atomic>
 #include <inttypes.h>
 
 using android::base::Lock;
@@ -63,21 +64,61 @@ public:
         // Some versions of the system image optimize out
         // the call to rcUpdateWindowColorBuffer in the case of zero
         // width/height, but since we're using that as synchronization,
-        // that lack of calling can lead to a deadlock on the host in many situations
+        // that lack of calling can lead to a deadlock on the host
+        // in many situations
         // (switching camera sides, exiting benchmark apps, etc)
         // So, we put GrallocSync under the feature control.
         mEnabled = emugl_feature_is_enabled(android::featurecontrol::GrallocSync);
+
+        // There are two potential tricky situations to handle:
+        // a. Multiple users of gralloc buffers that all want to
+        // call gralloc_lock. This is obeserved to happen on older APIs
+        // (<= 19).
+        // b. The pipe doesn't have to preserve ordering of the
+        // gralloc_lock and gralloc_unlock commands themselves.
+        //
+        // To handle a), notice the situation is one of one type of uses
+        // needing multiple locks that needs to exclude concurrent use
+        // by another type of user. This maps well to a read/write lock,
+        // where gralloc_lock and gralloc_unlock users are readers
+        // and rcFlushWindowColorBuffer is the writer.
+        // From the perspective of the host preparing and posting
+        // buffers, these are indeed read/write operations.
+        //
+        // To handle b), we give up on locking when the state is observed
+        // to be bad. lockState tracks how many color buffer locks there are.
+        // If lockState < 0, it means we definitely have an unlock before lock
+        // sort of situation, and should give up.
+        lockState = 0;
     }
-    void lockColorBuffer() {
-        if (mEnabled) mGrallocColorBufferLock.lock();
+
+    // lockColorBufferPrepare is designed to handle
+    // gralloc_lock/unlock requests, and uses the read lock.
+    // When rcFlushWindowColorBuffer is called (when frames are posted),
+    // we use the write lock (see GrallocSyncPostLock).
+    void lockColorBufferPrepare() {
+        DPRINT("%s: lockState=%d\n", __FUNCTION__, lockState);
+        if (mEnabled && lockState >= 0) mGrallocColorBufferLock.lockRead();
+        else DPRINT("%s: warning: out of order lock commands! giving up on lock\n",
+                      __FUNCTION__);
+        lockState++;
     }
-    void unlockColorBuffer() {
-        if (mEnabled) mGrallocColorBufferLock.unlock();
+    void unlockColorBufferPrepare() {
+        lockState--;
+        DPRINT("%s: lockState=%d\n", __FUNCTION__, lockState);
+        if (mEnabled && lockState >= 0) mGrallocColorBufferLock.unlockRead();
     }
+    android::base::ReadWriteLock mGrallocColorBufferLock;
 private:
     bool mEnabled;
-    android::base::Lock mGrallocColorBufferLock;
+    std::atomic<int> lockState;
     DISALLOW_COPY_ASSIGN_AND_MOVE(GrallocSync);
+};
+
+class GrallocSyncPostLock : public android::base::AutoWriteLock {
+public:
+    GrallocSyncPostLock(GrallocSync& grallocsync) :
+        android::base::AutoWriteLock(grallocsync.mGrallocColorBufferLock) { }
 };
 
 static ::emugl::LazyInstance<GrallocSync> sGrallocSync = LAZY_INSTANCE_INIT;
@@ -340,20 +381,21 @@ static void rcCloseColorBuffer(uint32_t colorbuffer)
 
 static int rcFlushWindowColorBuffer(uint32_t windowSurface)
 {
-    DPRINT("%s: waiting for gralloc cb lock\n", __FUNCTION__);
-    sGrallocSync->lockColorBuffer();
-    DPRINT("%s: %d lock gralloc cb lock {\n", __FUNCTION__, windowSurface);
+    DPRINT("%s: waiting for gralloc cb lock\n", __func__);
+    GrallocSyncPostLock lock(sGrallocSync.get());
+    DPRINT("%s: %d lock gralloc cb lock {\n", __func__, windowSurface);
 
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
+        DPRINT("%s: %d unlock gralloc cb lock }\n", __func__, windowSurface);
         return -1;
     }
     if (!fb->flushWindowSurfaceColorBuffer(windowSurface)) {
+        DPRINT("%s: %d unlock gralloc cb lock }\n", __func__, windowSurface);
         return -1;
     }
 
-    DPRINT("%s: %d unlock gralloc cb lock }\n", __FUNCTION__, windowSurface);
-    sGrallocSync->unlockColorBuffer();
+    DPRINT("%s: %d unlock gralloc cb lock }\n", __func__, windowSurface);
     return 0;
 }
 
@@ -419,9 +461,9 @@ static EGLint rcColorBufferCacheFlush(uint32_t colorBuffer,
                                       EGLint postCount, int forRead)
 {
    // gralloc_lock() on the guest calls rcColorBufferCacheFlush
-   DPRINT("%s: waiting for gralloc cb lock\n", __FUNCTION__);
-   sGrallocSync->lockColorBuffer();
-   DPRINT("%s: %d lock gralloc cb lock {\n", __FUNCTION__, colorBuffer);
+   DPRINT("%s: waiting for gralloc cb lock\n", __func__);
+   sGrallocSync->lockColorBufferPrepare();
+   DPRINT("%s: %d lock gralloc cb lock {\n", __func__, colorBuffer);
    return 0;
 }
 
@@ -445,13 +487,15 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
 {
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
+        DPRINT("%s: %d unlock gralloc cb lock }\n", __func__, colorBuffer);
+        sGrallocSync->unlockColorBufferPrepare();
         return -1;
     }
 
     fb->updateColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
 
-    DPRINT("%s: %d unlock gralloc cb lock }\n", __FUNCTION__, colorBuffer);
-    sGrallocSync->unlockColorBuffer();
+    DPRINT("%s: %d unlock gralloc cb lock }\n", __func__, colorBuffer);
+    sGrallocSync->unlockColorBufferPrepare();
     return 0;
 }
 
