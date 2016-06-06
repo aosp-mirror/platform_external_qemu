@@ -119,8 +119,13 @@ public:
     void unlockRead();
     void unlockWrite();
 private:
+    void setRecursiveLock();
+    void unsetRecursiveLock();
+    bool threadHasLock();
+
     friend class ConditionVariable;
     SRWLockObj mLock;
+    DWORD mTlsIndex;
     // POSIX threads don't allow move,
     // so we don't allow move on Windows as wll,
     // to be consistent.
@@ -130,23 +135,45 @@ private:
 class ReadWriteLock {
 public:
     ReadWriteLock() {
+        pthread_key_create(&mPthreadKey, NULL);
+        unsetRecursiveLock();
         ::pthread_rwlock_init(&mRWLock, NULL);
     }
+    ~ReadWriteLock() {
+        pthread_key_delete(mPthreadKey);
+    }
     void lockRead() {
-        ::pthread_rwlock_rdlock(&mRWLock);
+        if (!threadHasLock()) {
+            ::pthread_rwlock_rdlock(&mRWLock);
+            setRecursiveLock();
+        }
     }
     void unlockRead() {
-        ::pthread_rwlock_unlock(&mRWLock);
+        if (threadHasLock()) {
+            ::pthread_rwlock_unlock(&mRWLock);
+            unsetRecursiveLock();
+        }
     }
     void lockWrite() {
-        ::pthread_rwlock_wrlock(&mRWLock);
+        if (!threadHasLock()) {
+            ::pthread_rwlock_wrlock(&mRWLock);
+            setRecursiveLock();
+        }
     }
     void unlockWrite() {
-        ::pthread_rwlock_unlock(&mRWLock);
+        if (threadHasLock() > 0) {
+            ::pthread_rwlock_unlock(&mRWLock);
+            unsetRecursiveLock();
+        }
     }
 private:
+    void setRecursiveLock() { pthread_setspecific(mPthreadKey, (void*)1); }
+    void unsetRecursiveLock() { pthread_setspecific(mPthreadKey, NULL); }
+    bool threadHasLock() { return pthread_getspecific(mPthreadKey) != NULL; }
+
     friend class ConditionVariable;
     pthread_rwlock_t mRWLock;
+    pthread_key_t mPthreadKey;
     // POSIX threads don't allow move
     // (Undefined behavior for what happens when
     // mutexes are copied)

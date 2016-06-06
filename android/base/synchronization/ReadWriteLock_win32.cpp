@@ -162,17 +162,46 @@ LazyInstance<SRWLockSupportLoader> sLockSupportLoader = LAZY_INSTANCE_INIT;
 ReadWriteLock::ReadWriteLock() {
     if (!sModuleLoaded) { sLockSupportLoader.ptr(); }
     initialize_srw_lock((SRWLock*)&mLock);
+    mTlsIndex = TlsAlloc();
+    unsetRecursiveLock();
 }
 
 ReadWriteLock::~ReadWriteLock() {
     destroy_srw_lock((SRWLock*)&mLock);
+    TlsFree(mTlsIndex);
 }
 
-void ReadWriteLock::lockWrite() { acquire_srw_lock_exclusive((SRWLock*)(&mLock)); }
-void ReadWriteLock::unlockWrite() { release_srw_lock_exclusive((SRWLock*)(&mLock)); }
+void ReadWriteLock::lockWrite() {
+    if (!threadHasLock()) {
+        acquire_srw_lock_exclusive((SRWLock*)(&mLock));
+        setRecursiveLock();
+    }
+}
 
-void ReadWriteLock::lockRead() { acquire_srw_lock_shared((SRWLock*)(&mLock)); }
-void ReadWriteLock::unlockRead() { release_srw_lock_shared((SRWLock*)(&mLock)); }
+void ReadWriteLock::unlockWrite() {
+    if (threadHasLock()) {
+        release_srw_lock_exclusive((SRWLock*)(&mLock));
+        unsetRecursiveLock();
+    }
+}
+
+void ReadWriteLock::lockRead() {
+    if (!threadHasLock()) {
+        acquire_srw_lock_shared((SRWLock*)(&mLock));
+        setRecursiveLock();
+    }
+}
+
+void ReadWriteLock::unlockRead() {
+    if (threadHasLock()) {
+        release_srw_lock_shared((SRWLock*)(&mLock));
+        unsetRecursiveLock();
+    }
+}
+
+void ReadWriteLock::setRecursiveLock() { TlsSetValue(mTlsIndex, (LPVOID)1); }
+void ReadWriteLock::unsetRecursiveLock() { TlsSetValue(mTlsIndex, NULL); }
+bool ReadWriteLock::threadHasLock() { return TlsGetValue(mTlsIndex) != NULL; }
 
 }  // namespace base
 }  // namespace android
