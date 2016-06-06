@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "e34c4c8d_64da4a30",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1102110
+      },
+      "writtenOn": "2016-06-06T09:55:30Z",
+      "side": 1,
+      "message": "I mostly inferred them from the tests in frameworks/base/telephony/java/android/telephony/SignalStrength.java ; I also took 3GPP documents into account.",
+      "parentUuid": "86be3e8f_03e60224",
+      "revId": "709175c0656842f1815a7514816e6b1286b36c11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "86be3e8f_d28d15eb",
         "filename": "android/telephony/modem.c",
         "patchSetId": 2
@@ -59,6 +77,30 @@
     },
     {
       "key": {
+        "uuid": "8339d0d2_b1540046",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1102110
+      },
+      "writtenOn": "2016-06-06T09:55:30Z",
+      "side": 1,
+      "message": "No, but it should be between -200 and -30, thanks for catching it (I missed it because most values in that array are negated once they go through the telephony framework, but this one can actually be positive or negative)",
+      "parentUuid": "86be3e8f_d28d15eb",
+      "range": {
+        "startLine": 239,
+        "startChar": 45,
+        "endLine": 239,
+        "endChar": 48
+      },
+      "revId": "709175c0656842f1815a7514816e6b1286b36c11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "86be3e8f_15287786",
         "filename": "android/telephony/modem.c",
         "patchSetId": 2
@@ -70,6 +112,24 @@
       "writtenOn": "2016-06-03T17:26:36Z",
       "side": 1,
       "message": "The format string here has 12 \u0027%i\u0027, but there are 13 parameters. (The string on the left has 2+10 parameters.)",
+      "revId": "709175c0656842f1815a7514816e6b1286b36c11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a6aee2f7_b2c04011",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2232,
+      "author": {
+        "id": 1102110
+      },
+      "writtenOn": "2016-06-06T09:55:30Z",
+      "side": 1,
+      "message": "Yes, the LTE timing was ignored (which has no consequences in the emulator, but it’s better to send it just in case)",
+      "parentUuid": "86be3e8f_15287786",
       "revId": "709175c0656842f1815a7514816e6b1286b36c11",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
