@@ -45,6 +45,29 @@
       "revId": "a01f3b6221d901e7e3ff5e80651d15b046deb538",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "835c7065_ce34bfcd",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-06T23:47:33Z",
+      "side": 1,
+      "message": "please allow this kind of syntax for a system image build runs",
+      "range": {
+        "startLine": 355,
+        "startChar": 0,
+        "endLine": 360,
+        "endChar": 9
+      },
+      "revId": "a01f3b6221d901e7e3ff5e80651d15b046deb538",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
