@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "835c7065_ce715ffc",
+        "filename": "android/base/synchronization/Lock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-06T23:32:47Z",
+      "side": 1,
+      "message": "do you need a refcount here? to make sure we can acquire it more than once recursively",
+      "range": {
+        "startLine": 147,
+        "startChar": 11,
+        "endLine": 148,
+        "endChar": 31
+      },
+      "revId": "3e159581c1099caba703037cf2cc569813bb9fb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "835c7065_ced31fe6",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-06T23:32:47Z",
+      "side": 1,
+      "message": "in Windows tls slot number per process is _very_ limited\nmsdn:\n\u003eThe constant TLS_MINIMUM_AVAILABLE defines the minimum number of TLS indexes available in each process. This minimum is guaranteed to be at least 64 for all systems. The maximum number of indexes per process is 1,088.\n\nThis means we could easily run out of indices here. What about using a single slot to store a data structure (e.g. map lock -\u003e recursive acquisitions count)\n\nAlso, there\u0027s a class for that in ThreadStore.h:\ntemplate \u003ctypename T\u003e\nclass ThreadStore",
+      "range": {
+        "startLine": 165,
+        "startChar": 4,
+        "endLine": 165,
+        "endChar": 13
+      },
+      "revId": "3e159581c1099caba703037cf2cc569813bb9fb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
