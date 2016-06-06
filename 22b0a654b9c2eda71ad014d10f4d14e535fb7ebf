@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2353c428_6fb101ee",
+        "filename": "android/console.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1584,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-06T16:08:10Z",
+      "side": 1,
+      "message": "4 ?",
+      "range": {
+        "startLine": 1584,
+        "startChar": 25,
+        "endLine": 1584,
+        "endChar": 26
+      },
+      "revId": "22b0a654b9c2eda71ad014d10f4d14e535fb7ebf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2353c428_aca387ba",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 954,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-06T16:08:10Z",
+      "side": 1,
+      "message": "nit: this is a public module interface, do you want to add a bounds check for |quality| here?",
+      "range": {
+        "startLine": 954,
+        "startChar": 0,
+        "endLine": 954,
+        "endChar": 26
+      },
+      "revId": "22b0a654b9c2eda71ad014d10f4d14e535fb7ebf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2353c428_8c79eb18",
+        "filename": "android/telephony/modem.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-06T16:08:10Z",
+      "side": 1,
+      "message": "nit: comment is outdated now",
+      "range": {
+        "startLine": 50,
+        "startChar": 27,
+        "endLine": 50,
+        "endChar": 64
+      },
+      "revId": "22b0a654b9c2eda71ad014d10f4d14e535fb7ebf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
