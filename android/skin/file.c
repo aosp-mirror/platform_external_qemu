@@ -81,7 +81,7 @@ static int skin_background_init_from(SkinBackground* background,
 static void
 skin_display_done(SkinDisplay*  display)
 {
-    if (display->framebuffer_funcs) {
+    if (display->framebuffer_funcs && display->owns_framebuffer) {
         display->framebuffer_funcs->free_framebuffer(display->framebuffer);
     }
 }
@@ -95,6 +95,7 @@ static int skin_display_init_from(SkinDisplay* display,
     display->rect.size.h = aconfig_int(node, "height", 0);
     display->rotation    = aconfig_unsigned(node, "rotation", SKIN_ROTATION_0);
     display->bpp         = aconfig_int(node, "bpp", android_hw->hw_lcd_depth);
+    display->owns_framebuffer = 1;
 
     display->valid = ( display->rect.size.w > 0 && display->rect.size.h > 0 );
     display->framebuffer_funcs = fb_funcs;
@@ -667,9 +668,12 @@ skin_part_create_rotated(const SkinPart* src, const SkinSize* layout_size, SkinR
     }
 
     // If the part has a display, rotate that too
-    if (src->display->valid) {
+    if (new_part->display->valid) {
         skin_size_rotate(&(new_part->display->rect.size), &(src->display->rect.size), by);
         new_part->display->rotation = skin_rotation_rotate(new_part->display->rotation, by);
+
+        // Rotated part shares framebuffer with the original.
+        new_part->display->owns_framebuffer = 0;
     }
 
     // Rotate each of the part's buttons so that they align with the rotated

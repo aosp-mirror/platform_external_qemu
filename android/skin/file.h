@@ -42,6 +42,7 @@ typedef struct SkinDisplay {
     int           bpp;       /* bits per pixel, 32 or 16 */
     char          valid;
     void*         framebuffer;
+    char          owns_framebuffer;
     const SkinFramebufferFuncs* framebuffer_funcs;
 } SkinDisplay;
 
