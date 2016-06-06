@@ -346,7 +346,7 @@ int main(int argc, char** argv)
     } ranchu = RANCHU_AUTODETECT;
 
     bool isSnapshotPresent = false;
-    if (!androidOut) {
+    if (!androidOut && avdName) {
         // only qemu1 can handle snapshoting at this moment
         char* snapShotPresent = path_getAvdSnapshotPresent(avdName);
         if (0 == strcmp(snapShotPresent, "true")) {
