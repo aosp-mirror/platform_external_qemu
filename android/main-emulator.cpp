@@ -128,6 +128,18 @@ static bool isCpuArchSupportedByRanchu(const char* avdArch) {
     return isStringInList(avdArch, kSupported, ARRAY_SIZE(kSupported));
 }
 
+static void listAllAvds() {
+    AvdScanner* scanner = avdScanner_new(NULL);
+    for (;;) {
+        const char* name = avdScanner_next(scanner);
+        if (!name) {
+            break;
+        }
+        printf("%s\n", name);
+    }
+    avdScanner_free(scanner);
+}
+
 /* Main routine */
 int main(int argc, char** argv)
 {
@@ -139,6 +151,13 @@ int main(int argc, char** argv)
     bool force_32bit = false;
     bool no_window = false;
     bool useSystemLibs = false;
+
+    char* newArgv[argc+2];
+    for (int i = 0; i < argc; i++) {
+        newArgv[i] = argv[i];
+    }
+
+    char** childArgv = argv;
 
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
@@ -236,15 +255,7 @@ int main(int argc, char** argv)
 #endif  // __linux__
 
         if (!strcmp(opt,"-list-avds")) {
-            AvdScanner* scanner = avdScanner_new(NULL);
-            for (;;) {
-                const char* name = avdScanner_next(scanner);
-                if (!name) {
-                    break;
-                }
-                printf("%s\n", name);
-            }
-            avdScanner_free(scanner);
+            listAllAvds();
             exit(0);
         }
 
@@ -256,6 +267,24 @@ int main(int argc, char** argv)
                 avdName = opt+1;
             }
         }
+    }
+
+    /* If no AVD was specified, prompt the user to pick one of those returned
+     * by -list-avds.
+     */
+    std::string selection;
+    if (avdName == NULL) {
+        printf("No virtual device selected. Known virtual devices:\n");
+        listAllAvds();
+        printf("Please select your virtual device: ");
+
+        std::getline(std::cin, selection);
+        avdName = selection.c_str();
+
+        // Switch to the new argv with space at the end for new arguments
+        newArgv[argc] = (char *)"-avd";
+        newArgv[argc+1] = (char *)selection.c_str();
+        childArgv = newArgv;
     }
 
     /* If ANDROID_EMULATOR_FORCE_32BIT is set to 'true' or '1' in the
@@ -455,7 +484,7 @@ int main(int argc, char** argv)
     D("Found target-specific %d-bit emulator binary: %s\n", wantedBitness, emulatorPath);
 
     /* Replace it in our command-line */
-    argv[0] = emulatorPath;
+    childArgv[0] = emulatorPath;
 
     /* Setup library paths so that bundled standard shared libraries are picked
      * up by the re-exec'ed emulator
@@ -526,7 +555,7 @@ int main(int argc, char** argv)
     // Launch it with the same set of options !
     // Note that on Windows, the first argument must _not_ be quoted or
     // Windows will fail to find the program.
-    safe_execv(emulatorPath, argv);
+    safe_execv(emulatorPath, childArgv);
 
     /* We could not launch the program ! */
     fprintf(stderr, "Could not launch '%s': %s\n", emulatorPath, strerror(errno));
