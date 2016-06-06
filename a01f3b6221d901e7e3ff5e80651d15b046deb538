@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "835c7065_0e2fd777",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-06-06T23:59:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "835c7065_ee7ee396",
+      "range": {
+        "startLine": 155,
+        "startChar": 4,
+        "endLine": 155,
+        "endChar": 25
+      },
+      "revId": "a01f3b6221d901e7e3ff5e80651d15b046deb538",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "835c7065_0e5b5745",
         "filename": "android/main-emulator.cpp",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "835c7065_6e20138a",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-06-06T23:59:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "835c7065_0e5b5745",
+      "range": {
+        "startLine": 274,
+        "startChar": 7,
+        "endLine": 275,
+        "endChar": 17
+      },
+      "revId": "a01f3b6221d901e7e3ff5e80651d15b046deb538",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "835c7065_ce34bfcd",
         "filename": "android/main-emulator.cpp",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2016-06-06T23:47:33Z",
       "side": 1,
       "message": "please allow this kind of syntax for a system image build runs",
+      "range": {
+        "startLine": 355,
+        "startChar": 0,
+        "endLine": 360,
+        "endChar": 9
+      },
+      "revId": "a01f3b6221d901e7e3ff5e80651d15b046deb538",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "835c7065_eeb6e347",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-06-06T23:59:34Z",
+      "side": 1,
+      "message": "Totally forgot this was possible. Will rework.",
+      "parentUuid": "835c7065_ce34bfcd",
       "range": {
         "startLine": 355,
         "startChar": 0,
