@@ -475,7 +475,7 @@ static int rcDestroyClientImage(uint32_t image)
     return fb->destroyClientImage(image);
 }
 
-static void rcSelectChecksumCalculator(uint32_t protocol, uint32_t reserved) {
+static void rcSelectChecksumHelper(uint32_t protocol, uint32_t reserved) {
     ChecksumCalculatorThreadInfo::setVersion(protocol);
 }
 
@@ -509,5 +509,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcOpenColorBuffer2 = rcOpenColorBuffer2;
     dec->rcCreateClientImage = rcCreateClientImage;
     dec->rcDestroyClientImage = rcDestroyClientImage;
-    dec->rcSelectChecksumCalculator = rcSelectChecksumCalculator;
+    dec->rcSelectChecksumHelper = rcSelectChecksumHelper;
 }
