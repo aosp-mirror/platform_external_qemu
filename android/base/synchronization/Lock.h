@@ -15,6 +15,7 @@
 #pragma once
 
 #include "android/base/Compiler.h"
+#include "android/base/synchronization/ThreadLockMap.h"
 
 #ifdef _WIN32
 #  define WIN32_LEAN_AND_MEAN 1
@@ -108,8 +109,6 @@ private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(Lock);
 };
 
-
-#ifdef _WIN32
 class ReadWriteLock {
 public:
     ReadWriteLock();
@@ -119,40 +118,21 @@ public:
     void unlockRead();
     void unlockWrite();
 private:
+    void setRecursiveLock();
+    void unsetRecursiveLock();
+    bool threadHasLock();
+
     friend class ConditionVariable;
+#ifdef _WIN32
     SRWLockObj mLock;
+#else
+    pthread_rwlock_t mRWLock;
+#endif
     // POSIX threads don't allow move,
     // so we don't allow move on Windows as wll,
     // to be consistent.
     DISALLOW_COPY_ASSIGN_AND_MOVE(ReadWriteLock);
 };
-#else
-class ReadWriteLock {
-public:
-    ReadWriteLock() {
-        ::pthread_rwlock_init(&mRWLock, NULL);
-    }
-    void lockRead() {
-        ::pthread_rwlock_rdlock(&mRWLock);
-    }
-    void unlockRead() {
-        ::pthread_rwlock_unlock(&mRWLock);
-    }
-    void lockWrite() {
-        ::pthread_rwlock_wrlock(&mRWLock);
-    }
-    void unlockWrite() {
-        ::pthread_rwlock_unlock(&mRWLock);
-    }
-private:
-    friend class ConditionVariable;
-    pthread_rwlock_t mRWLock;
-    // POSIX threads don't allow move
-    // (Undefined behavior for what happens when
-    // mutexes are copied)
-    DISALLOW_COPY_ASSIGN_AND_MOVE(ReadWriteLock);
-};
-#endif
 
 // Helper class to lock / unlock a mutex automatically on scope
 // entry and exit.

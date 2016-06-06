@@ -83,6 +83,7 @@ LOCAL_SRC_FILES := \
     android/base/StringView.cpp \
     android/base/sockets/SocketUtils.cpp \
     android/base/sockets/SocketWaiter.cpp \
+    android/base/synchronization/ThreadLockMap.cpp \
     android/base/synchronization/MessageChannel.cpp \
     android/base/Log.cpp \
     android/base/memory/LazyInstance.cpp \
@@ -152,6 +153,7 @@ LOCAL_SRC_FILES += \
 else
 LOCAL_SRC_FILES += \
     android/base/threads/Thread_pthread.cpp \
+    android/base/synchronization/ReadWriteLock.cpp
 
 endif
 
