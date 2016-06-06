@@ -50,6 +50,12 @@ static bool skin_key_code_is_arrow(int code) {
            code == kKeyCodeDpadDown;
 }
 
+static bool skin_key_code_is_function(int code) {
+    return (code >= kKeyCodeF1 && code <= kKeyCodeF10) ||
+            code == kKeyCodeF11 ||
+            code == kKeyCodeF12;
+}
+
 static void
 skin_keyboard_cmd( SkinKeyboard*   keyboard,
                    SkinKeyCommand  command,
@@ -191,11 +197,16 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             code == KEY_CENTER      || code == KEY_REWIND     ||
             code == KEY_ENTER       || code == KEY_VOLUMEDOWN ||
             code == KEY_FASTFORWARD || code == KEY_VOLUMEUP   ||
-            code == KEY_HOME                                     )
+            code == KEY_HOME        || code == KEY_DELETE )
         {
             skin_keyboard_add_key_event(kb, code, down);
             skin_keyboard_flush(kb);
             return;
+        }
+
+        if (skin_key_code_is_function(code)) {
+            skin_keyboard_add_key_event(kb, code, down);
+            skin_keyboard_flush(kb);
         }
         D("ignoring keycode %d", keycode);
     }

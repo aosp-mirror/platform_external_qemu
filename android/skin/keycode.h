@@ -133,6 +133,19 @@ typedef enum {
     kKeyCodeChannelDown             = KEY_CHANNELDOWN,
     kKeyCodeAppSwitch               = KEY_APPSWITCH,
 
+    kKeyCodeF1                      = KEY_F1,
+    kKeyCodeF2                      = KEY_F2,
+    kKeyCodeF3                      = KEY_F3,
+    kKeyCodeF4                      = KEY_F4,
+    kKeyCodeF5                      = KEY_F5,
+    kKeyCodeF6                      = KEY_F6,
+    kKeyCodeF7                      = KEY_F7,
+    kKeyCodeF8                      = KEY_F8,
+    kKeyCodeF9                      = KEY_F9,
+    kKeyCodeF10                     = KEY_F10,
+    kKeyCodeF11                     = KEY_F11,
+    kKeyCodeF12                     = KEY_F12,
+
 } SkinKeyCode;
 
 /* This function is used to rotate D-Pad keycodes, while leaving other ones
