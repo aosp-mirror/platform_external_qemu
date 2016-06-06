@@ -877,33 +877,6 @@ events_clr_bit(GoldfishEvDevState *s, int type, int bit)
     }
 }
 
-/* Keycode mappings to match the classic Android emulator as documented in
- * http://developer.android.com/tools/help/emulator.html
- */
-static const uint16_t hardbutton_map[Q_KEY_CODE_MAX] = {
-    [Q_KEY_CODE_HOME] = LINUX_KEY_HOME,
-    [Q_KEY_CODE_F2] = LINUX_KEY_SOFT1, /* Android menu key */
-    [Q_KEY_CODE_PGUP] = LINUX_KEY_SOFT1,
-    [Q_KEY_CODE_PGDN] = LINUX_KEY_SOFT2,
-    [Q_KEY_CODE_ESC] = LINUX_KEY_BACK,
-    [Q_KEY_CODE_F3] = LINUX_KEY_SEND, /* dial */
-    [Q_KEY_CODE_F4] = LINUX_KEY_END, /* end call */
-    [Q_KEY_CODE_F5] = LINUX_KEY_SEARCH,
-    [Q_KEY_CODE_F7] = LINUX_KEY_POWER,
-    [Q_KEY_CODE_KP_ADD] = LINUX_KEY_VOLUMEUP,
-    [Q_KEY_CODE_KP_SUBTRACT] = LINUX_KEY_VOLUMEDOWN,
-};
-
-static const uint16_t hardbutton_shift_map[Q_KEY_CODE_MAX] = {
-    [Q_KEY_CODE_F2] = LINUX_KEY_SOFT2,
-};
-
-static const uint16_t hardbutton_control_map[Q_KEY_CODE_MAX] = {
-    [Q_KEY_CODE_F5] = LINUX_KEY_VOLUMEUP,
-    [Q_KEY_CODE_F6] = LINUX_KEY_VOLUMEDOWN,
-    /* ctrl-kp5, ctrl-f3 -> LINUX_KEY_CAMERA (if have_camera) */
-};
-
 static const int dpad_map[Q_KEY_CODE_MAX] = {
     [Q_KEY_CODE_KP_4] = LINUX_KEY_LEFT,
     [Q_KEY_CODE_KP_6] = LINUX_KEY_RIGHT,
@@ -955,16 +928,6 @@ static void goldfish_evdev_handle_keyevent(DeviceState *dev, QemuConsole *src,
         } else {
             s->modifier_state &= ~mod;
         }
-    }
-
-    if (s->modifier_state & MODSTATE_ALT) {
-        /* No alt-keys defined currently */
-    } else if (s->modifier_state & MODSTATE_CTRL) {
-        lkey = hardbutton_control_map[qemu2_qcode];
-    } else if (s->modifier_state & MODSTATE_SHIFT) {
-        lkey = hardbutton_shift_map[qemu2_qcode];
-    } else {
-      lkey = hardbutton_map[qemu2_qcode];
     }
 
     if (!lkey && s->have_dpad && s->modifier_state == 0) {
