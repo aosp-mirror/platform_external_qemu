@@ -79,7 +79,7 @@ if [ "$OPT_EMUGEN" ]; then
         fatal "Missing emugen binary: $EMUGEN"
     fi
 else
-    EMUGEN=$PROGDIR/../objs/emugen
+    EMUGEN=$PROGDIR/../objs/build/intermediates64/emugen/emugen
     if [ ! -f "$EMUGEN" ]; then
         fatal "Missing emugen binary: $EMUGEN, please build it or use --emugen=<program>"
     fi
@@ -115,9 +115,26 @@ GLESv1_INPUT_DIR=$DECODER_TOP_DIR/GLESv1_dec
 GLESv2_INPUT_DIR=$DECODER_TOP_DIR/GLESv2_dec
 RENDERCONTROL_INPUT_DIR=$DECODER_TOP_DIR/renderControl_dec
 
-$EMUGEN -i $DECODER_TOP_DIR/GLESv1_dec -E $ENCODER_TOP_DIR/GLESv1_enc gles1
-$EMUGEN -i $DECODER_TOP_DIR/GLESv2_dec -E $ENCODER_TOP_DIR/GLESv2_enc gles2
+# The encoder has prefix GL while decoder has GLES
+cp -f $DECODER_TOP_DIR/GLESv1_dec/gles1.attrib $DECODER_TOP_DIR/GLESv1_dec/gl.attrib
+cp -f $DECODER_TOP_DIR/GLESv1_dec/gles1.in $DECODER_TOP_DIR/GLESv1_dec/gl.in
+cp -f $DECODER_TOP_DIR/GLESv1_dec/gles1.types $DECODER_TOP_DIR/GLESv1_dec/gl.types
+
+cp -f $DECODER_TOP_DIR/GLESv2_dec/gles2.attrib $DECODER_TOP_DIR/GLESv2_dec/gl2.attrib
+cp -f $DECODER_TOP_DIR/GLESv2_dec/gles2.in $DECODER_TOP_DIR/GLESv2_dec/gl2.in
+cp -f $DECODER_TOP_DIR/GLESv2_dec/gles2.types $DECODER_TOP_DIR/GLESv2_dec/gl2.types
+
+$EMUGEN -i $DECODER_TOP_DIR/GLESv1_dec -E $ENCODER_TOP_DIR/GLESv1_enc gl
+$EMUGEN -i $DECODER_TOP_DIR/GLESv2_dec -E $ENCODER_TOP_DIR/GLESv2_enc gl2
 $EMUGEN -i $DECODER_TOP_DIR/renderControl_dec -E $ENCODER_TOP_DIR/renderControl_enc renderControl
+
+rm $DECODER_TOP_DIR/GLESv1_dec/gl.attrib
+rm $DECODER_TOP_DIR/GLESv1_dec/gl.in
+rm $DECODER_TOP_DIR/GLESv1_dec/gl.types
+
+rm $DECODER_TOP_DIR/GLESv2_dec/gl2.attrib
+rm $DECODER_TOP_DIR/GLESv2_dec/gl2.in
+rm $DECODER_TOP_DIR/GLESv2_dec/gl2.types
 
 echo "Done, see $ENCODER_TOP_DIR"
 exit 0
