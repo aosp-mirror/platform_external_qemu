@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "835c7065_ee7ee396",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-06T23:42:16Z",
+      "side": 1,
+      "message": "is this a variable-sized array? It\u0027s not legal C++, can we just use a vector instead?",
+      "range": {
+        "startLine": 155,
+        "startChar": 4,
+        "endLine": 155,
+        "endChar": 25
+      },
+      "revId": "a01f3b6221d901e7e3ff5e80651d15b046deb538",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "835c7065_0e5b5745",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-06T23:42:16Z",
+      "side": 1,
+      "message": "could you please add a \u003cstring\u003e include?",
+      "range": {
+        "startLine": 274,
+        "startChar": 7,
+        "endLine": 275,
+        "endChar": 17
+      },
+      "revId": "a01f3b6221d901e7e3ff5e80651d15b046deb538",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
