@@ -543,7 +543,9 @@ GL_APICALL void  GL_APIENTRY glDeleteTextures(GLsizei n, const GLuint* textures)
                 // texture is not a target of EGLImage.
                 if (!tData || tData->sourceEGLImage == 0) {
                     const GLuint globalTextureName = ctx->shareGroup()->getGlobalName(TEXTURE,textures[i]);
-                    ctx->shareGroup()->decTexRefCounterAndReleaseIf0(globalTextureName);
+                    if(globalTextureName) {
+                        ctx->shareGroup()->decTexRefCounterAndReleaseIf0(globalTextureName);
+                    }
                 }
                 ctx->shareGroup()->deleteName(TEXTURE,textures[i]);
 
