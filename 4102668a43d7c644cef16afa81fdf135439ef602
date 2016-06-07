@@ -22,6 +22,30 @@
       "revId": "4102668a43d7c644cef16afa81fdf135439ef602",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a3989490_d7e37ee6",
+        "filename": ".gitignore",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-07T21:19:52Z",
+      "side": 1,
+      "message": "Sometimes I find it convenient to have multiple versions of dlls stashed somewhere, like when working with Windows---replace libopenglrender or the gles translators quickly instead of transferring the whole set of binaries from build machine over to another one.",
+      "parentUuid": "a3989490_22138e4e",
+      "range": {
+        "startLine": 4,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 5
+      },
+      "revId": "4102668a43d7c644cef16afa81fdf135439ef602",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
