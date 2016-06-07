@@ -165,20 +165,37 @@ static EGLint rcQueryEGLString(EGLenum name, void* buffer, EGLint bufferSize)
     return len;
 }
 
-static RenderContext* create_trivial_context() {
+static RenderContextPtr create_trivial_context() {
     FrameBuffer *fb = FrameBuffer::getFB();
     const FbConfig* cfg = fb->getConfigs()->get(0);
     bool isGL2 = true;
-    RenderContext* cxt = RenderContext::create(fb->getDisplay(),
+
+    RenderContextPtr cxt(RenderContext::create(fb->getDisplay(),
                                                cfg->getEglConfig(),
-                                               EGL_NO_CONTEXT, isGL2);
+                                               EGL_NO_CONTEXT, isGL2));
+    EGLint err = s_egl.eglGetError();
+    if (err != EGL_SUCCESS) {
+        ERR("%s: could not create trivial context. err=0x%x\n", __func__, err);
+        return cxt;
+    }
     static const EGLint pbuf_attribs[] = {
         EGL_WIDTH, 1,
         EGL_HEIGHT, 1,
         EGL_NONE
     };
     EGLSurface surf = s_egl.eglCreatePbufferSurface(fb->getDisplay(), cfg->getEglConfig(), pbuf_attribs);
+    err = s_egl.eglGetError();
+    if (err != EGL_SUCCESS) {
+        ERR("%s: could not create trivial pbuffer surface err=0x%x\n", __func__, err);
+        return cxt;
+    }
+
     s_egl.eglMakeCurrent(fb->getDisplay(), surf, surf, cxt->getEGLContext());
+    err = s_egl.eglGetError();
+    if (err != EGL_SUCCESS) {
+        ERR("%s: could not make context current. err=0x%x\n", __func__, err);
+        return cxt;
+    }
     return cxt;
 }
 
@@ -194,13 +211,13 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
         else {
             str = (const char *)s_gles1.glGetString(name);
         }
-        if (str) {
-            len = strlen(str) + 1;
-        }
     } else {
         // No GL context, create one and associate it just for getting OpenGL strings.
         tInfo->currContext = RenderContextPtr(create_trivial_context());
         str = (const char *)s_gles2.glGetString(name);
+    }
+
+    if (str) {
         len = strlen(str) + 1;
     }
 
