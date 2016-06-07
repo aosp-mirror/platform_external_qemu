@@ -193,6 +193,30 @@
     },
     {
       "key": {
+        "uuid": "a3989490_6299967c",
+        "filename": "android/base/synchronization/Lock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-07T16:32:11Z",
+      "side": 1,
+      "message": "Yeah that\u0027s definitely better to make the special use case, special instead of being in android/base. Also discussed offline with zyy@, same idea.\n\nLooks like the consensus now is to just put this stuff in the GrallocSync class in RenderControl.",
+      "parentUuid": "c3610821_02c5f4a2",
+      "range": {
+        "startLine": 147,
+        "startChar": 11,
+        "endLine": 148,
+        "endChar": 31
+      },
+      "revId": "3e159581c1099caba703037cf2cc569813bb9fb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "835c7065_ced31fe6",
         "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
         "patchSetId": 1
