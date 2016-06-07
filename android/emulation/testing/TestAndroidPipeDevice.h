@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/emulation/android_pipe.h"
+#include "android/emulation/android_pipe_device.h"
 
 namespace android {
 

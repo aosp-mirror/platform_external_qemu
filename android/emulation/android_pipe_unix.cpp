@@ -29,7 +29,7 @@
 
 #include "android/async-utils.h"
 #include "android/base/memory/LazyInstance.h"
-#include "android/emulation/android_pipe.h"
+#include "android/emulation/android_pipe_host.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/looper.h"
 #include "android/utils/sockets.h"

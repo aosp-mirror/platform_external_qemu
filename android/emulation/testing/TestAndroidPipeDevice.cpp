@@ -11,6 +11,7 @@
 
 #include "android/emulation/testing/TestAndroidPipeDevice.h"
 
+#include "android/emulation/android_pipe_host.h"
 #include "android/base/Log.h"
 
 #include <errno.h>
@@ -112,14 +113,12 @@ const AndroidPipeHwFuncs TestAndroidPipeDevice::sHwFuncs = {
 
 // static
 void TestAndroidPipeDevice::closeFromHost(void* hwpipe) {
-    auto guest = reinterpret_cast<TestGuest*>(hwpipe);
-    guest->closeFromHost();
+    static_cast<TestGuest*>(hwpipe)->closeFromHost();
 }
 
 // static
 void TestAndroidPipeDevice::signalWake(void* hwpipe, unsigned wakes) {
-    auto guest = reinterpret_cast<TestGuest*>(hwpipe);
-    guest->signalWake(wakes);
+    static_cast<TestGuest*>(hwpipe)->signalWake(wakes);
 }
 
 // static

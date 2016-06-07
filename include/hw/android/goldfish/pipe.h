@@ -12,7 +12,7 @@
 #ifndef _HW_GOLDFISH_PIPE_H
 #define _HW_GOLDFISH_PIPE_H
 
-#include "android/emulation/android_pipe.h"
+#include "android/emulation/android_pipe_device.h"
 
 /* The following definitions must match those under:
  *
