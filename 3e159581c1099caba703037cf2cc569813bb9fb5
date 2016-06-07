@@ -169,6 +169,30 @@
     },
     {
       "key": {
+        "uuid": "c3610821_02c5f4a2",
+        "filename": "android/base/synchronization/Lock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-06-07T16:29:30Z",
+      "side": 1,
+      "message": "That sounds like a special use case and this code is located in android/base though. I would expect android/base to be general purpose code. Would the code you\u0027re working on break if this was correctly recursive?\n\nIf so I would suggest we create a new recursive lock class and put some warning labels on it. By default I think it would be a better idea to have the basic Lock be non-recursive. That way you can still use recursive locks if you want but the default is safer.",
+      "parentUuid": "835c7065_acf86ef0",
+      "range": {
+        "startLine": 147,
+        "startChar": 11,
+        "endLine": 148,
+        "endChar": 31
+      },
+      "revId": "3e159581c1099caba703037cf2cc569813bb9fb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "835c7065_ced31fe6",
         "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
         "patchSetId": 1
