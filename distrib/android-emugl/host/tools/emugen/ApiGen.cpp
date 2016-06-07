@@ -69,7 +69,6 @@ int ApiGen::genProcTypes(const std::string &filename, SideType side)
     fprintf(fp, "#define __%s_%s_proc_t_h\n", basename, sideString(side));
     fprintf(fp, "\n\n");
     fprintf(fp, "\n#include \"%s_types.h\"\n",basename);
-    fprintf(fp, "\n#include \"emugl/common/logging.h\"\n");
     fprintf(fp, "#ifndef %s_APIENTRY\n",basename);
     fprintf(fp, "#define %s_APIENTRY \n",basename);
     fprintf(fp, "#endif\n");
