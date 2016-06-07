@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "835c7065_6c3656f1",
+        "filename": "android/base/synchronization/Lock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-06-07T15:51:17Z",
+      "side": 1,
+      "message": "Doesn\u0027t this mean that if two threads hold the lock the first thread to exit the lock will unlock it. Thus leaving the second thread inside the locked section but with no lock protecting it anymore?\n\nI would also suggest that we consider if having recursive locks is the right way to go. The Google developer handbook has some pretty compelling arguments for why they should not be used.",
+      "parentUuid": "835c7065_7130f3a2",
+      "range": {
+        "startLine": 147,
+        "startChar": 11,
+        "endLine": 148,
+        "endChar": 31
+      },
+      "revId": "3e159581c1099caba703037cf2cc569813bb9fb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "835c7065_ced31fe6",
         "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
         "patchSetId": 1
