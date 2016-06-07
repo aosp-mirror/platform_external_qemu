@@ -368,7 +368,7 @@ EXIT:
 static int inet_parse(QemuOpts *opts, const char *str)
 {
     const char *optstr, *h;
-    char addr[64];
+    char addr[65];
     char port[33];
     int pos;
 
