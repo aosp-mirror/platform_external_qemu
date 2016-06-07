@@ -26,14 +26,14 @@
 
 // Console control handler has no way of passing data, so let's have
 // a global variable here.
-static HANDLE sChildProcessHandle = nullptr;
+static HANDLE sChildProcessHandle = INVALID_HANDLE_VALUE;
 
 static BOOL WINAPI ctrlHandler(DWORD type)
 {
     fflush(stdout);
     fflush(stderr);
 
-    if (!sChildProcessHandle) {
+    if (sChildProcessHandle == INVALID_HANDLE_VALUE) {
         // Just invoke the next handler - this one has nothing to do.
         return FALSE;
     }
@@ -69,7 +69,7 @@ int safe_execv(const char* path, char* const* argv) {
 
    sChildProcessHandle = (HANDLE)_wspawnv(_P_NOWAIT, program.c_str(),
                                   &argumentPointers[0]);
-   if (sChildProcessHandle == nullptr) {
+   if (sChildProcessHandle == INVALID_HANDLE_VALUE) {
        ::SetConsoleCtrlHandler(ctrlHandler, FALSE);
        return 1;
    }
