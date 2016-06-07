@@ -10,7 +10,8 @@
 ** GNU General Public License for more details.
 */
 
-#include "android/emulation/android_pipe.h"
+#include "android/emulation/android_pipe_device.h"
+#include "android/emulation/android_pipe_host.h"
 
 #include "android/utils/panic.h"
 #include "android/utils/system.h"
@@ -149,12 +150,12 @@ void* android_pipe_new(void* hwpipe) {
     return pipe;
 }
 
-void android_pipe_free(void* pipe_) {
-    if (!pipe_) {
+void android_pipe_free(void* internal_pipe) {
+    if (!internal_pipe) {
         return;
     }
 
-    Pipe* pipe = pipe_;
+    Pipe* pipe = internal_pipe;
     /* Call close callback */
     if (pipe->funcs->close) {
         pipe->funcs->close(pipe->opaque);
@@ -164,8 +165,8 @@ void android_pipe_free(void* pipe_) {
     AFREE(pipe);
 }
 
-void android_pipe_save(void* pipe_, Stream* file) {
-    Pipe* pipe = pipe_;
+void android_pipe_save(void* internal_pipe, Stream* file) {
+    Pipe* pipe = internal_pipe;
     if (pipe->service == NULL) {
         /* pipe->service == NULL means we're still using a PipeConnector */
         /* Write a zero to indicate this condition */
@@ -283,23 +284,26 @@ void* android_pipe_load_legacy(Stream* file,
     return pipe_load_state(file, hwpipe, service, force_close);
 }
 
-unsigned android_pipe_poll(void* pipe_) {
-    Pipe* pipe = pipe_;
+unsigned android_pipe_poll(void* internal_pipe) {
+    Pipe* pipe = internal_pipe;
     return pipe->funcs->poll(pipe->opaque);
 }
 
-int android_pipe_recv(void* pipe_, AndroidPipeBuffer* buffers, int numBuffers) {
-    Pipe* pipe = pipe_;
+int android_pipe_recv(void* internal_pipe, AndroidPipeBuffer* buffers,
+                      int numBuffers) {
+    Pipe* pipe = internal_pipe;
     return pipe->funcs->recvBuffers(pipe->opaque, buffers, numBuffers);
 }
 
-int android_pipe_send(void* pipe_, const AndroidPipeBuffer* buffers, int numBuffers) {
-    Pipe* pipe = pipe_;
+int android_pipe_send(void* internal_pipe,
+                      const AndroidPipeBuffer* buffers,
+                      int numBuffers) {
+    Pipe* pipe = internal_pipe;
     return pipe->funcs->sendBuffers(pipe->opaque, buffers, numBuffers);
 }
 
-void android_pipe_wake_on(void* pipe_, unsigned wakes) {
-    Pipe* pipe = pipe_;
+void android_pipe_wake_on(void* internal_pipe, unsigned wakes) {
+    Pipe* pipe = internal_pipe;
     pipe->funcs->wakeOn(pipe->opaque, wakes);
 }
 

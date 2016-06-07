@@ -12,15 +12,16 @@
 #ifndef _HW_GOLDFISH_PIPE_H
 #define _HW_GOLDFISH_PIPE_H
 
-#include "android/emulation/android_pipe.h"
+#include "android/emulation/android_pipe_device.h"
 
-/* The following definitions must match those under:
+/* The following definitions must match those found at
+ * https://android.googlesource/kernel/goldfish.git
  *
+ * For branch android-goldfish-2.6.xx:
  *    $KERNEL/drivers/misc/qemupipe/qemu_pipe.c
  *
- * Where $KERNEL points to the android-goldfish-2.6.xx branch on:
- *
- *     android.googlesource.com/kernel/goldfish.git.
+ * For branch android-goldfish-3.4 and higher:
+ *    $KERNEL/drivers/platform/goldfish/goldfish_pipe.c
  */
 
 /* pipe device registers */

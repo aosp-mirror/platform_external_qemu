@@ -11,7 +11,7 @@
 #pragma once
 
 #include "android/base/Compiler.h"
-#include "android/emulation/android_pipe.h"
+#include "android/emulation/android_pipe_host.h"
 
 #include "OpenglRender/RenderChannel.h"
 
