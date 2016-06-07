@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a3989490_a99ade80",
+        "filename": "android/utils/exec.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-07T22:11:04Z",
+      "side": 1,
+      "message": "there\u0027s a potential race between this line and the process launch; we need to check for _both_ null and -1 in the control handler",
+      "range": {
+        "startLine": 68,
+        "startChar": 1,
+        "endLine": 68,
+        "endChar": 46
+      },
+      "revId": "87802eae91ef3eb934ff64165217324dc05b7ba1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
