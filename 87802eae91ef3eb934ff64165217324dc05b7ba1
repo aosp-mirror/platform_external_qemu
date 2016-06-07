@@ -46,6 +46,30 @@
       "revId": "87802eae91ef3eb934ff64165217324dc05b7ba1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a3989490_ff077876",
+        "filename": "android/utils/exec.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-07T22:41:50Z",
+      "side": 1,
+      "message": "technically both null and -1 may be either valid or not, depending on the function handle is passed into. E.g., CreateFile uses -1 as \u0027bad return\u0027, while CreateMutex uses 0\nCreateProcess() returns null on error, so spawn() has to convert it to -1; even worse than that, -1 is the current process\u0027 pseudo-handle, so WaitForSingleObject(-1) would block forever",
+      "parentUuid": "a3989490_ac29ccd5",
+      "range": {
+        "startLine": 68,
+        "startChar": 1,
+        "endLine": 68,
+        "endChar": 46
+      },
+      "revId": "87802eae91ef3eb934ff64165217324dc05b7ba1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
