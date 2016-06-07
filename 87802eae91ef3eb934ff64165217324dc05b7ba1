@@ -22,6 +22,30 @@
       "revId": "87802eae91ef3eb934ff64165217324dc05b7ba1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a3989490_ac29ccd5",
+        "filename": "android/utils/exec.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-06-07T22:16:17Z",
+      "side": 1,
+      "message": "Technically null is a valid handle value even though I doubt it\u0027ll ever happen. I\u0027ll change the initializer above to INVALID_HANDLE_VALUE instead. That should take care of it while remaining correct in the presence of an actual null handle.",
+      "parentUuid": "a3989490_a99ade80",
+      "range": {
+        "startLine": 68,
+        "startChar": 1,
+        "endLine": 68,
+        "endChar": 46
+      },
+      "revId": "87802eae91ef3eb934ff64165217324dc05b7ba1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
