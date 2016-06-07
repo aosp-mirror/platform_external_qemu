@@ -23,9 +23,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "android/emulation/android_pipe_host.h"
+
 #include "qemu-common.h"
 #include "qemu/timer.h"
-#include "hw/misc/android_pipe.h"
 #include "hw/misc/android_qemud.h"
 
 /* #define DEBUG_QEMUD */

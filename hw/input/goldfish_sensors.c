@@ -21,14 +21,15 @@
  * GNU General Public License for more details.
  */
 
-#include <math.h>
-#include "sysemu/char.h"
+#include "android/emulation/android_pipe_host.h"
+#include "hw/input/goldfish_sensors.h"
+#include "hw/misc/android_qemud.h"
 #include "qemu/error-report.h"
 #include "qemu/timer.h"
+#include "sysemu/char.h"
 #include "trace.h"
-#include "hw/input/goldfish_sensors.h"
-#include "hw/misc/android_pipe.h"
-#include "hw/misc/android_qemud.h"
+
+#include <math.h>
 
 /* #define DEBUG_SENSORS */
 

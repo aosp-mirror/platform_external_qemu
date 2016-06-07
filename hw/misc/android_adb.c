@@ -31,7 +31,7 @@
 #include "qemu/module.h"
 #include "qemu/sockets.h"
 
-#include "hw/misc/android_pipe.h"
+#include "android/emulation/android_pipe_host.h"
 
 //#define DEBUG_ADB
 

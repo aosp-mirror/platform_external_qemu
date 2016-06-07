@@ -14,7 +14,10 @@
 **
 ** Example uses of Android Pipes.
 */
-#include "hw/misc/android_pipe.h"
+#include "android/emulation/android_pipe_host.h"
+
+#include "qemu-common.h"
+#include "qemu/timer.h"
 
 #define  DEBUG 0
 
