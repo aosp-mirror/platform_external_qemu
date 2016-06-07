@@ -97,16 +97,17 @@ public:
     // When rcFlushWindowColorBuffer is called (when frames are posted),
     // we use the write lock (see GrallocSyncPostLock).
     void lockColorBufferPrepare() {
-        DPRINT("%s: lockState=%d\n", __FUNCTION__, lockState);
-        if (mEnabled && lockState >= 0) mGrallocColorBufferLock.lockRead();
-        else DPRINT("%s: warning: out of order lock commands! giving up on lock\n",
+        int newLockState = ++lockState;
+        if (mEnabled && newLockState == 1) {
+            mGrallocColorBufferLock.lockRead();
+        } else if (mEnabled) {
+            DPRINT("%s: warning: recursive/multiple locks from guest!\n",
                       __FUNCTION__);
-        lockState++;
+        }
     }
     void unlockColorBufferPrepare() {
-        lockState--;
-        DPRINT("%s: lockState=%d\n", __FUNCTION__, lockState);
-        if (mEnabled && lockState >= 0) mGrallocColorBufferLock.unlockRead();
+        int newLockState = --lockState;
+        if (mEnabled && newLockState == 0) mGrallocColorBufferLock.unlockRead();
     }
     android::base::ReadWriteLock mGrallocColorBufferLock;
 private:
