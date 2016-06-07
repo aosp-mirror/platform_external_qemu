@@ -145,6 +145,30 @@
     },
     {
       "key": {
+        "uuid": "835c7065_acf86ef0",
+        "filename": "android/base/synchronization/Lock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-07T16:02:31Z",
+      "side": 1,
+      "message": "That\u0027s right, although it doesn\u0027t affect the behavior of the thing I care about which is that the emulator doesn\u0027t deadlock and webcam frames are still in order",
+      "parentUuid": "835c7065_8cabeae4",
+      "range": {
+        "startLine": 147,
+        "startChar": 11,
+        "endLine": 148,
+        "endChar": 31
+      },
+      "revId": "3e159581c1099caba703037cf2cc569813bb9fb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "835c7065_ced31fe6",
         "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
         "patchSetId": 1
