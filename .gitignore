@@ -1,3 +1,13 @@
 objs/*
 *.*~
 
+*.swp
+*.swn
+*.swo
+
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.lib
