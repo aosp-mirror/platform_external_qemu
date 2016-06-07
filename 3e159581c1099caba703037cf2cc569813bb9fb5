@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "835c7065_2c161e3e",
+        "filename": "android/base/synchronization/Lock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-07T15:55:43Z",
+      "side": 1,
+      "message": "That\u0027s what I meant: we either reference-count recursive locks, or we lock it on the first lock() and unlock it on the first unlock(), even if there were more unlocks later.\n\nI also second the question about recursiveness in general: it\u0027s usually bad, unless there\u0027s a very specific use-case.\nDo you know _why_ do we have it recursive?",
+      "parentUuid": "835c7065_6c3656f1",
+      "range": {
+        "startLine": 147,
+        "startChar": 11,
+        "endLine": 148,
+        "endChar": 31
+      },
+      "revId": "3e159581c1099caba703037cf2cc569813bb9fb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "835c7065_ced31fe6",
         "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
         "patchSetId": 1
