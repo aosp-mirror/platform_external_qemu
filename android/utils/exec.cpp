@@ -33,7 +33,7 @@ static BOOL WINAPI ctrlHandler(DWORD type)
     fflush(stdout);
     fflush(stderr);
 
-    if (!sChildProcessHandle) {
+    if (sChildProcessHandle == INVALID_HANDLE_VALUE) {
         // Just invoke the next handler - this one has nothing to do.
         return FALSE;
     }
@@ -69,7 +69,7 @@ int safe_execv(const char* path, char* const* argv) {
 
    sChildProcessHandle = (HANDLE)_wspawnv(_P_NOWAIT, program.c_str(),
                                   &argumentPointers[0]);
-   if (sChildProcessHandle == nullptr) {
+   if (sChildProcessHandle == INVALID_HANDLE_VALUE) {
        ::SetConsoleCtrlHandler(ctrlHandler, FALSE);
        return 1;
    }
