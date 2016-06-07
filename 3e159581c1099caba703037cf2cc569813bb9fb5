@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "835c7065_8c076a0e",
+        "filename": "android/base/synchronization/Lock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-07T15:56:49Z",
+      "side": 1,
+      "message": "In that case, the second thread would properly wait before entering the locked section. threadHasLock() would return false, and the lock() call would cause blocking. As threadHasLock() is thread-local, it\u0027s not detecting whether it has the lock period, it\u0027s detecting whether it has specifically already acquired it.\n\nI agree with your concerns about having recursive locks, it\u0027s just that all this is to deal with recursive locking that is already there in other apps. We end up getting them from grallock_lock() and gralloc_unlock() from the guest especially when running 3Dmark (webview and camera aren\u0027t completely clear of suspicion either)",
+      "parentUuid": "835c7065_6c3656f1",
+      "range": {
+        "startLine": 147,
+        "startChar": 11,
+        "endLine": 148,
+        "endChar": 31
+      },
+      "revId": "3e159581c1099caba703037cf2cc569813bb9fb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "835c7065_ced31fe6",
         "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
         "patchSetId": 1
