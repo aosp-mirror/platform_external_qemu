@@ -70,6 +70,30 @@
       "revId": "87802eae91ef3eb934ff64165217324dc05b7ba1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a3989490_9f44ec11",
+        "filename": "android/utils/exec.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-06-07T23:05:29Z",
+      "side": 1,
+      "message": "Right, I meant for processes only, but it seems that if -1 is the current process then what I said isn\u0027t really true. CreateProcess returns a BOOL and doesn\u0027t touch the output process handle on failure so I guess they never had to care about if it should be null or -1 for processes and then someone decided on -1 for spawnv.",
+      "parentUuid": "a3989490_ff077876",
+      "range": {
+        "startLine": 68,
+        "startChar": 1,
+        "endLine": 68,
+        "endChar": 46
+      },
+      "revId": "87802eae91ef3eb934ff64165217324dc05b7ba1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
