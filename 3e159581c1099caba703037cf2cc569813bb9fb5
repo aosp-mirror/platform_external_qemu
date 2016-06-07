@@ -121,6 +121,30 @@
     },
     {
       "key": {
+        "uuid": "835c7065_8cabeae4",
+        "filename": "android/base/synchronization/Lock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-06-07T16:00:05Z",
+      "side": 1,
+      "message": "Oops, sorry. I didn\u0027t mean two separate threads, I meant recursive calls. So in this case, if you recurse twice, won\u0027t the first recursion to exit the lock also unlock it? Leaving other parts of the code unprotected further up the stack?",
+      "parentUuid": "835c7065_8c076a0e",
+      "range": {
+        "startLine": 147,
+        "startChar": 11,
+        "endLine": 148,
+        "endChar": 31
+      },
+      "revId": "3e159581c1099caba703037cf2cc569813bb9fb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "835c7065_ced31fe6",
         "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
         "patchSetId": 1
