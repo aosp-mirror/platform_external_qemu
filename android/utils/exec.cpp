@@ -69,7 +69,7 @@ int safe_execv(const char* path, char* const* argv) {
 
    sChildProcessHandle = (HANDLE)_wspawnv(_P_NOWAIT, program.c_str(),
                                   &argumentPointers[0]);
-   if (sChildProcessHandle == nullptr) {
+   if (sChildProcessHandle == INVALID_HANDLE_VALUE) {
        ::SetConsoleCtrlHandler(ctrlHandler, FALSE);
        return 1;
    }
