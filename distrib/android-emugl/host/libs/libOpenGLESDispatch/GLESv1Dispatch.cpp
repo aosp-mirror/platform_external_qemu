@@ -106,6 +106,7 @@ bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
 
         LIST_GLES1_FUNCTIONS(ASSIGN_DUMMY,ASSIGN_DUMMY)
 
+            fprintf(stderr, "%s: assigning dummies because <gles2_only_backend>\n", __FUNCTION__);
             return true;
     } else {
 
@@ -120,12 +121,16 @@ bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
         //
         // init the GLES dispatch table
         //
-#define LOOKUP_SYMBOL(return_type,function_name,signature,callargs) \
+#define LOOKUP_SYMBOL(return_type,function_name,signature,callargs) do { \
+        fprintf(stderr, "%s: loading %s...", __FUNCTION__, #function_name); \
         dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
-                s_gles1_lib->findSymbol(#function_name));
+                s_gles1_lib->findSymbol(#function_name)); \
+        fprintf(stderr, "%p\n", dispatch_table-> function_name); \
+        } while(0);
 
         LIST_GLES1_FUNCTIONS(LOOKUP_SYMBOL,LOOKUP_SYMBOL)
 
+            fprintf(stderr, "%s successful\n", __FUNCTION__);
             return true;
     }
 }

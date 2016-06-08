@@ -277,7 +277,8 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
         // backend. The string "<gles2_only_backend>"
         // is used to tell OpenGLESDispatch to create
         // dummy versions of GLESv1 functions.
-        system->envSet("ANDROID_GLESv1_LIB", "<gles2_only_backend>");
+        system->envSet("ANDROID_GLESv1_LIB", "libGLEStr.dylib");
+        // system->envSet("ANDROID_GLESv1_LIB", "<gles2_only_backend>");
     }
 
     if (sBackendList->getBackendLibPath(
