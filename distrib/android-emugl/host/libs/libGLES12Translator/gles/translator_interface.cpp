@@ -18,9 +18,30 @@
 #include "egl_image.h"
 #include "GLES/glext.h"
 
+#include "translator_interface.h"
+#include "gles/macros.h"
+
+#include "android/base/threads/ThreadStore.h"
+
+#include "GLES12Translator/underlying_apis.h"
+#include "GLES12Translator/angle_gles2.h"
+
 #include <stdio.h>
 
 static GlesContext* the_context = NULL;
+
+// Interface to emulator
+
+class GLES12ThreadInfo {
+public:
+    GLES12ThreadInfo() : context(NULL) { }
+    explicit GLES12ThreadInfo(GlesContext* _cxt) : context(_cxt) { }
+    GlesContext* context;
+};
+
+typedef android::base::ThreadStore<GLES12ThreadInfo*> EmulatedGLES1ThreadInfo;
+
+static EmulatedGLES1ThreadInfo sGLES12ThreadInfo;
 
 GlesContext* CreateGles1Context(GlesContext* share,
                                 const UnderlyingApis* underlying_apis) {
@@ -28,23 +49,30 @@ GlesContext* CreateGles1Context(GlesContext* share,
 }
 
 GlesContext* GetCurrentGlesContext() {
-    return the_context;
+    return ((GLES12ThreadInfo*)sGLES12ThreadInfo.get())->context;
 }
 
-void SetCurrentGlesContext(GlesContext *ctx) {
-    the_context = ctx;
+void SetCurrentGlesContext(GlesContext* cxt_in) {
+    GLES12ThreadInfo* tInfo = (GLES12ThreadInfo*)sGLES12ThreadInfo.get();
+    tInfo->context = cxt_in;
 }
 
-void* create_gles1_context(void* share, const void* underlying_apis) {
+TRANSLATOR_APIENTRY(void*, create_underlying_api) {
+    UnderlyingApis* container = new UnderlyingApis;
+    container->angle = new ANGLE_GLES2;
+    return (void*)container;
+}
+
+TRANSLATOR_APIENTRY(void*, create_gles1_context, void* share, const void* underlying_apis) {
     return (void*)CreateGles1Context((GlesContext*)share, (const UnderlyingApis*)underlying_apis);
 }
 
-void* get_current_gles_context() {
-    return (void*)the_context;
+TRANSLATOR_APIENTRY(void*, get_current_gles_context) {
+    return (void*)((GLES12ThreadInfo*)sGLES12ThreadInfo.get())->context;
 }
 
-void set_current_gles_context(void* ctx) {
-    the_context = (GlesContext*)ctx;
+TRANSLATOR_APIENTRY(void, set_current_gles_context, void* cxt_in) {
+    SetCurrentGlesContext((GlesContext*)cxt_in);
 }
 
 void* MapTexSubImage2DCHROMIUMCall (const GlesContext* c,
