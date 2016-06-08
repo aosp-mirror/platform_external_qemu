@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "6febe063_a4a16cac",
+        "filename": "android/skin/qt/gl-texture-draw.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-08T22:53:53Z",
+      "side": 1,
+      "message": "My other comments in the model\u0027s frag shader apply here as well",
+      "range": {
+        "startLine": 20,
+        "startChar": 14,
+        "endLine": 20,
+        "endChar": 19
+      },
+      "revId": "a8bb2e5c9256b51c042495d246517b23b0571cfe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6febe063_c1cfc284",
         "filename": "android/skin/qt/phone-model/frag.glsl",
         "patchSetId": 12
@@ -89,6 +112,98 @@
         "startChar": 0,
         "endLine": 2,
         "endChar": 34
+      },
+      "revId": "a8bb2e5c9256b51c042495d246517b23b0571cfe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6febe063_040b781c",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ANGLEShaderParser.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-08T22:53:53Z",
+      "side": 1,
+      "message": "I see \"initialize()\" but I don\u0027t see where there resources are freed. I suppose they are supposed to live for the entire lifetime of the program, in that case it maybe fine, but a comment mentioning that would be good..",
+      "range": {
+        "startLine": 21,
+        "startChar": 5,
+        "endLine": 21,
+        "endChar": 36
+      },
+      "revId": "a8bb2e5c9256b51c042495d246517b23b0571cfe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6febe063_043938c8",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ANGLEShaderParser.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-08T22:53:53Z",
+      "side": 1,
+      "message": "We can easily call initialize() here and save the client code one extra function call that they have to make. We can also remember if a previous initialization attempt failed and print an error message and bail only in that case.",
+      "range": {
+        "startLine": 77,
+        "startChar": 2,
+        "endLine": 80,
+        "endChar": 5
+      },
+      "revId": "a8bb2e5c9256b51c042495d246517b23b0571cfe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6febe063_e448949f",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ANGLEShaderParser.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-08T22:53:53Z",
+      "side": 1,
+      "message": "At this point, ANGLEShaderParser is nothing but a namespace. I\u0027d get rid of \"class\", make it a namespace and move the private members to the cpp file.",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 36,
+        "endChar": 2
+      },
+      "revId": "a8bb2e5c9256b51c042495d246517b23b0571cfe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6febe063_e4b8942d",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-08T22:53:53Z",
+      "side": 1,
+      "message": "There\u0027s no reason to do this. You can just do\nm_infoLog \u003d static_cast\u003cconst GLchar*\u003e(infolog.c_str());",
+      "range": {
+        "startLine": 37,
+        "startChar": 8,
+        "endLine": 38,
+        "endChar": 42
       },
       "revId": "a8bb2e5c9256b51c042495d246517b23b0571cfe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
