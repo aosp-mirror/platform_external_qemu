@@ -44,6 +44,14 @@
 #define MAJOR          1
 #define MINOR          4
 
+#define DEBUG 1
+
+#if DEBUG
+#define DPRINT(...) do { fprintf(stderr, __VA_ARGS__); } while(0)
+#else
+#define DPRINT(...)
+#endif
+
 //declarations
 
 EglImage *attachEGLImage(unsigned int imageId);
@@ -654,11 +662,14 @@ EGLAPI EGLContext EGLAPIENTRY eglCreateContext(EGLDisplay display, EGLConfig con
             i+=2;
         }
     }
+    if (version == GLES_1_1) { DPRINT("%s: attempting to get gles1 iface\n", __func__); }
     const GLESiface* iface = g_eglInfo->getIface(version);
     GLEScontext* glesCtx = NULL;
     if(iface) {
+        if (version == GLES_1_1) { DPRINT("%s: attempting to createGLESContext from iface\n", __func__); }
         glesCtx = iface->createGLESContext();
     } else { // there is no interface for this gles version
+        if (version == GLES_1_1) { DPRINT("%s: there is no interface for this gles version...\n", __func__); }
                 RETURN_ERROR(EGL_NO_CONTEXT,EGL_BAD_ATTRIBUTE);
     }
 

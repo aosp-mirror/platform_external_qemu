@@ -26,7 +26,7 @@
 #include <utility>
 
 #define ERR(...)  fprintf(stderr, __VA_ARGS__)
-#define V(...)  VERBOSE_PRINT(gles,__VA_ARGS__)
+#define V(...)
 #define MAX_FACTOR_POWER 4
 
 static const char kCommonShaderSource[] =

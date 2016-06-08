@@ -1,0 +1,4 @@
+#ifndef TRANSLATOR_INTERFACE
+#define TRANSLATOR_INTERFACE
+
+#endif
