@@ -43,6 +43,9 @@ public:
     // Retrieve host EGLContext value.
     EGLContext getEGLContext() const { return mContext; }
 
+    // Retrieve emulated GLES1 context.
+    void* getEmulatedGLES1Context() const { return mEmulatedGLES1Context; }
+
     // Return true iff this is a GLESv2 context.
     bool isGL2() const { return mIsGl2; }
 
@@ -55,12 +58,14 @@ private:
 
     RenderContext(EGLDisplay display,
                   EGLContext context,
-                  bool isGl2);
+                  bool isGl2,
+                  void* emulatedGLES1Context);
 
 private:
     EGLDisplay mDisplay;
     EGLContext mContext;
     bool mIsGl2;
+    void* mEmulatedGLES1Context;
     GLDecoderContextData mContextData;
 };
 

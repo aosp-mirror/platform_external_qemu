@@ -1641,7 +1641,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         // so let's also disable the boot animation.
         const char* gpu_mode = opts->gpu ? opts->gpu : hw->hw_gpu_mode;
         if (gpu_mode && (!strcmp(gpu_mode, "mesa") ||
-                         !strcmp(gpu_mode, "angle"))) {
+                         !strcmp(gpu_mode, "angle")) {
             opts->no_boot_anim = 1;
             D("Starting AVD without boot animation.\n");
         }

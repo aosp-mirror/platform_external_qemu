@@ -32,7 +32,8 @@
 #include "gles/share_group.h"
 #include "gles/state.h"
 #include "gles/texture_data.h"
-#include "gles/underlying_apis.h"
+
+#include "GLES12Translator/underlying_apis.h"
 
 class GlesContext {
  public:
