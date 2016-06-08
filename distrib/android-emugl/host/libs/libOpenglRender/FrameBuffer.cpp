@@ -621,6 +621,10 @@ HandleType FrameBuffer::createColorBuffer(int p_width, int p_height,
 HandleType FrameBuffer::createRenderContext(int p_config, HandleType p_share,
                                             bool p_isGL2)
 {
+    if (!p_isGL2) {
+        fprintf(stderr, "%s: creating a gles1 context!!!\n", __FUNCTION__);
+    }
+
     emugl::Mutex::AutoLock mutex(m_lock);
     HandleType ret = 0;
 
@@ -640,13 +644,22 @@ HandleType FrameBuffer::createRenderContext(int p_config, HandleType p_share,
     EGLContext sharedContext =
             share.get() ? share->getEGLContext() : EGL_NO_CONTEXT;
 
+
     RenderContextPtr rctx(RenderContext::create(
         m_eglDisplay, config->getEglConfig(), sharedContext, p_isGL2));
+
+
     if (rctx.get() != NULL) {
         ret = genHandle();
         m_contexts[ret] = rctx;
         RenderThreadInfo *tinfo = RenderThreadInfo::get();
         tinfo->m_contextSet.insert(ret);
+
+        if (!p_isGL2) {
+            fprintf(stderr, "%s: gles1 context info: have a gles1 context @ %p\n",
+                    __FUNCTION__, rctx.get()->getEmulatedGLES1Context());
+
+        }
     }
     return ret;
 }
@@ -897,6 +910,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
         }
     }
 
+    fprintf(stderr, "%s: call to underlying eglMakeCurrent\n", __FUNCTION__);
     if (!s_egl.eglMakeCurrent(m_eglDisplay,
                               draw ? draw->getEGLSurface() : EGL_NO_SURFACE,
                               read ? read->getEGLSurface() : EGL_NO_SURFACE,
@@ -904,6 +918,15 @@ bool FrameBuffer::bindContext(HandleType p_context,
         ERR("eglMakeCurrent failed\n");
         return false;
     }
+
+    // fprintf(stderr, "%s: querying emulated gles1 context\n", __FUNCTION__);
+    // if (!ctx.get()->getEmulatedGLES1Context()) {
+    //     fprintf(stderr, "%s: either a gles2 or we are not emulating gles1\n", __FUNCTION__);
+    // } else {
+    //     fprintf(stderr, "%s: found emulated gles1 context @ %p\n", __FUNCTION__, ctx.get()->getEmulatedGLES1Context());
+    // }
+
+
 
     //
     // Bind the surface(s) to the context
