@@ -82,6 +82,9 @@ void WindowSurface::bind(RenderContextPtr p_ctx, BindType p_bindType) {
     }
 }
 
+GLuint WindowSurface::getWidth() const { return mWidth; }
+GLuint WindowSurface::getHeight() const { return mHeight; }
+
 bool WindowSurface::flushColorBuffer() {
     if (!mAttachedColorBuffer.get()) {
         return true;

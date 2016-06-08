@@ -74,6 +74,6 @@ class TextureData : public ObjectData {
   TextureData& operator=(TextureData&);
 };
 
-typedef emugl::SmartPtr<TextureData> TextureDataPtr;
+typedef android::sp<TextureData> TextureDataPtr;
 
 #endif  // GRAPHICS_TRANSLATION_GLES_TEXTURE_DATA_H_

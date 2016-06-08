@@ -21,9 +21,8 @@
 #include <map>
 #include <set>
 #include <string>
+#include <utils/RefBase.h>
 #include <vector>
-
-#include "emugl/common/smart_ptr.h"
 
 #include "gles/egl_image.h"
 #include "gles/gles1_shader_generator.h"
@@ -32,7 +31,8 @@
 #include "gles/share_group.h"
 #include "gles/state.h"
 #include "gles/texture_data.h"
-#include "gles/underlying_apis.h"
+
+#include "GLES12Translator/underlying_apis.h"
 
 class GlesContext {
  public:
@@ -42,12 +42,13 @@ class GlesContext {
   };
 
   // Ensures that the bound surface has a buffer ready for drawing.
-  class SurfaceControlCallback {
+  class SurfaceControlCallback : public android::RefBase {
    public:
     virtual void EnsureBufferReady() = 0;
+   protected:
     virtual ~SurfaceControlCallback() {}
   };
-  typedef emugl::SmartPtr<SurfaceControlCallback> SurfaceControlCallbackPtr;
+  typedef android::sp<SurfaceControlCallback> SurfaceControlCallbackPtr;
 
   GlesContext(int32_t id, GlesVersion ver, GlesContext* share,
               void* underlying_context, const UnderlyingApis* underlying_apis);
