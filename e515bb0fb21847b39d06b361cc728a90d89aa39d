@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c3bf4831_2986a9d1",
+        "filename": "distrib/android-emugl/host/include/EGL/egl.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-06-08T19:01:14Z",
+      "side": 1,
+      "message": "Removed changes and updated in CL 223937",
+      "parentUuid": "5257a0e9_b1759cbb",
+      "range": {
+        "startLine": 244,
+        "startChar": 0,
+        "endLine": 244,
+        "endChar": 0
+      },
+      "revId": "e515bb0fb21847b39d06b361cc728a90d89aa39d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5257a0e9_f17f2497",
         "filename": "distrib/android-emugl/host/include/EGL/eglext.h",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2016-05-13T15:14:29Z",
       "side": 1,
       "message": "This entire header is outdated. Get the latest one at https://www.khronos.org/registry/egl/",
+      "range": {
+        "startLine": 232,
+        "startChar": 0,
+        "endLine": 235,
+        "endChar": 6
+      },
+      "revId": "e515bb0fb21847b39d06b361cc728a90d89aa39d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3bf4831_e9b4918e",
+        "filename": "distrib/android-emugl/host/include/EGL/eglext.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-06-08T19:01:14Z",
+      "side": 1,
+      "message": "Removed changes and updated in CL 223937",
+      "parentUuid": "5257a0e9_f17f2497",
       "range": {
         "startLine": 232,
         "startChar": 0,
