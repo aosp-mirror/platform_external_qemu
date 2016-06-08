@@ -404,10 +404,9 @@ TEST(System, runCommandTimeout) {
     std::vector<std::string> cmd = {"sleep", "0.5"};
 #else
     // 2 Attempts give us a delay of 1 second.
-    // 'ping' is not listed as an internal cmd.exe command, but seems to be that
-    // way on recent windows boxes and wine. Safe to assume?
-    std::vector<std::string> cmd = {"cmd.exe", "/C", "ping",
-                                    "-n",      "2",  "127.0.0.1"};
+    // 'ping' is not an internal cmd.exe command, but seems always being shipped
+    // on recent windows boxes and wine.
+    std::vector<std::string> cmd = {"ping", "-n", "2", "127.0.0.1"};
 #endif
 
     EXPECT_FALSE(
