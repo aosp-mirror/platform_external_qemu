@@ -36,6 +36,8 @@
 #include "gles/texture_codecs.h"
 #include "gles/texture_data.h"
 
+#define APITRACE() do { fprintf(stderr, "%s: call\n", __FUNCTION__); } while(0)
+
 typedef GlesContext* ContextPtr;
 
 namespace {
@@ -2640,6 +2642,7 @@ GLES_APIENTRY(void, GetShaderiv, GLuint shader, GLenum pname, GLint* params) {
 
 // Gets string information about the GL implementation.
 GLES_APIENTRY(const GLubyte*, GetString, GLenum name) {
+    APITRACE();
   ContextPtr c = GetCurrentGlesContext();
   if (!c) {
       fprintf(stderr, "%s: cannot get current gles context, quitting\n", __FUNCTION__);
@@ -4960,7 +4963,12 @@ GLES_APIENTRY(void, VertexPointer, GLint size, GLenum type, GLsizei stride,
 }
 
 GLES_APIENTRY(void, VertexPointerBounds, GLint size, GLenum type,
-              GLsizei stride, const GLvoid* pointer, GLsizei count) {
+              GLsizei stride, GLvoid* pointer, GLsizei count) {
+  ContextPtr c = GetCurrentGlesContext();
+  if (!c) {
+    return;
+  }
+    
   glVertexPointer(size, type, stride, pointer);
 }
 
