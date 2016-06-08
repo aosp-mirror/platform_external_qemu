@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6febe063_a4e60ce2",
+        "filename": "android/skin/qt/phone-model/frag.glsl",
+        "patchSetId": 12
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-06-08T22:44:50Z",
+      "side": 1,
+      "message": "Oh the differences between GLSL and ESSL. Done.",
+      "parentUuid": "6febe063_c1cfc284",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 31
+      },
+      "revId": "a8bb2e5c9256b51c042495d246517b23b0571cfe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6febe063_a1a39ec2",
         "filename": "android/skin/qt/phone-model/frag.glsl",
         "patchSetId": 12
@@ -36,6 +60,30 @@
       "writtenOn": "2016-06-08T22:39:10Z",
       "side": 1,
       "message": "Also, did the vertex shader not require similar modifications? that\u0027s odd.",
+      "range": {
+        "startLine": 2,
+        "startChar": 0,
+        "endLine": 2,
+        "endChar": 34
+      },
+      "revId": "a8bb2e5c9256b51c042495d246517b23b0571cfe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6febe063_c4e910b6",
+        "filename": "android/skin/qt/phone-model/frag.glsl",
+        "patchSetId": 12
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-06-08T22:44:50Z",
+      "side": 1,
+      "message": "Nope, it didn\u0027t. Totally weird.",
+      "parentUuid": "6febe063_a1a39ec2",
       "range": {
         "startLine": 2,
         "startChar": 0,
