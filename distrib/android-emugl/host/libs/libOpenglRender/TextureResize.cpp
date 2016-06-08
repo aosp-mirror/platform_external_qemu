@@ -13,9 +13,12 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+
 #include "TextureResize.h"
 
 #include "DispatchTables.h"
+
+#include "android/utils/debug.h"
 
 #include <stdio.h>
 #include <sstream>
@@ -23,6 +26,7 @@
 #include <utility>
 
 #define ERR(...)  fprintf(stderr, __VA_ARGS__)
+#define V(...)  VERBOSE_PRINT(gles,__VA_ARGS__)
 #define MAX_FACTOR_POWER 4
 
 static const char kCommonShaderSource[] =
@@ -264,7 +268,7 @@ GLuint TextureResize::update(GLuint texture) {
     // If there was an error while resizing, just use the unscaled texture.
     GLenum error = s_gles2.glGetError();
     if (error != GL_NO_ERROR) {
-        ERR("GL error while resizing: 0x%x (ignored)\n", error);
+        V("GL error while resizing: 0x%x (ignored)\n", error);
         return texture;
     }
 
