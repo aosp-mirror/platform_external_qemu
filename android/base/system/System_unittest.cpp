@@ -385,7 +385,7 @@ TEST(System, runCommandTrue) {
     std::vector<std::string> cmd = {"ls"};
 #else
     // 'dir' is a builtin command, so all you need is a sane cmd.exe
-    std::vector<std::string> cmd = {"cmd.exe", "/C", "dir"};
+    std::vector<std::string> cmd = {"dir"};
 #endif
 
     EXPECT_TRUE(System::get()->runCommand(cmd));
@@ -406,8 +406,7 @@ TEST(System, runCommandTimeout) {
     // 2 Attempts give us a delay of 1 second.
     // 'ping' is not listed as an internal cmd.exe command, but seems to be that
     // way on recent windows boxes and wine. Safe to assume?
-    std::vector<std::string> cmd = {"cmd.exe", "/C", "ping",
-                                    "-n",      "2",  "127.0.0.1"};
+    std::vector<std::string> cmd = {"ping", "-n", "2", "127.0.0.1"};
 #endif
 
     EXPECT_FALSE(
