@@ -621,6 +621,10 @@ HandleType FrameBuffer::createColorBuffer(int p_width, int p_height,
 HandleType FrameBuffer::createRenderContext(int p_config, HandleType p_share,
                                             bool p_isGL2)
 {
+    if (!p_isGL2) {
+        fprintf(stderr, "%s: creating a gles1 context!!!\n", __FUNCTION__);
+    }
+
     emugl::Mutex::AutoLock mutex(m_lock);
     HandleType ret = 0;
 

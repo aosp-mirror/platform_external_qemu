@@ -27,13 +27,16 @@ GlesContext* GetCurrentGlesContext();
   _return impl##_name(__VA_ARGS__)
 #else
 #define GLES_APIENTRY(_return, _name, ...) \
-  extern "C" _return gl##_name(__VA_ARGS__)
+  extern "C" __attribute__((visibility("default"))) _return gl##_name(__VA_ARGS__)
 #endif
 
 #define STUB_APIENTRY(_return, _name, ...) \
   extern "C" _return gl##_name(__VA_ARGS__) { \
     LOG_ALWAYS_FATAL("Unimplemented: %s", __FUNCTION__); \
   }
+
+#define TRANSLATOR_APIENTRY(_return, _name, ...) \
+  extern "C" __attribute__((visibility("default"))) _return _name(__VA_ARGS__)
 
 
 #define GLES_ERROR(_err, _msg, ...)                                          \
