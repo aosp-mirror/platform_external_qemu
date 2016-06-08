@@ -206,9 +206,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     int len = 0;
     if (tInfo && tInfo->currContext.get()) {
         if (tInfo->currContext->isGL2()) {
+            fprintf(stderr, "%s: glGetString in gles2\n", __FUNCTION__);
             str = (const char *)s_gles2.glGetString(name);
         }
         else {
+            fprintf(stderr, "%s: glGetString in gles1\n", __FUNCTION__);
             str = (const char *)s_gles1.glGetString(name);
         }
     } else {
@@ -218,7 +220,10 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     }
 
     if (str) {
+        fprintf(stderr, "%s: gl ext string = %s\n", __FUNCTION__, str);
         len = strlen(str) + 1;
+    } else {
+        fprintf(stderr, "%s: no gl ext string\n", __FUNCTION__);
     }
 
     // We add the maximum supported GL protocol number into GL_EXTENSIONS
@@ -327,6 +332,7 @@ static uint32_t rcCreateContext(uint32_t config,
     // To make it consistent with the guest, create GLES2 context when GL
     // version==2 or 3
     HandleType ret = fb->createRenderContext(config, share, glVersion == 2 || glVersion == 3);
+    fprintf(stderr, "%s: ret=%d\n", __func__, ret);
     return ret;
 }
 
@@ -524,7 +530,9 @@ static uint32_t rcCreateClientImage(uint32_t context, EGLenum target, GLuint buf
         return 0;
     }
 
-    return fb->createClientImage(context, target, buffer);
+    uint32_t image_ret = fb->createClientImage(context, target, buffer);
+    fprintf(stderr, "%s: ret=0x%x\n", __func__, image_ret);
+    return image_ret;
 }
 
 static int rcDestroyClientImage(uint32_t image)
