@@ -1,0 +1,424 @@
+/*
+ * Copyright (C) 2015 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef GRAPHICS_TRANSLATION_UNDERLYING_APIS_ANGLE_GLES2_H_
+#define GRAPHICS_TRANSLATION_UNDERLYING_APIS_ANGLE_GLES2_H_
+
+#define ANGLE_GLES2_INTERFACE "ANGLE_GLES2"
+
+#ifndef __gl2_h_
+typedef void GLvoid;
+typedef int GLsizei;
+typedef unsigned short GLushort;
+typedef short GLshort;
+typedef unsigned char GLubyte;
+typedef unsigned int GLenum;
+typedef int GLint;
+typedef unsigned char GLboolean;
+typedef unsigned int GLbitfield;
+typedef float GLfloat;
+typedef float GLclampf;
+typedef signed char GLbyte;
+typedef unsigned int GLuint;
+typedef int GLfixed;
+typedef int GLclampx;
+#ifdef _WIN64
+typedef long long int GLintptr;
+typedef long long int GLsizeiptr;
+#else
+typedef long int GLintptr;
+typedef long int GLsizeiptr;
+#endif  // _WIN64
+#endif  // __gl2_h_
+
+struct ANGLE_GLES2 {
+    void (*ActiveTexture)(GLenum texture);
+    void (*AttachShader)(GLuint program, GLuint shader);
+    void (*BindAttribLocation)(GLuint program,
+                               GLuint index,
+                               const char* name);
+    void (*BindBuffer)(GLenum target, GLuint buffer);
+    void (*BindFramebuffer)(GLenum target,
+                            GLuint framebuffer);
+    void (*BindRenderbuffer)(GLenum target,
+                             GLuint renderbuffer);
+    void (*BindTexture)(GLenum target, GLuint texture);
+    void (*BlendColor)(GLclampf red,
+                       GLclampf green,
+                       GLclampf blue,
+                       GLclampf alpha);
+    void (*BlendEquation)(GLenum mode);
+    void (*BlendEquationSeparate)(GLenum modeRGB,
+                                  GLenum modeAlpha);
+    void (*BlendFunc)(GLenum sfactor, GLenum dfactor);
+    void (*BlendFuncSeparate)(GLenum srcRGB,
+                              GLenum dstRGB,
+                              GLenum srcAlpha,
+                              GLenum dstAlpha);
+    void (*BufferData)(GLenum target,
+                       GLsizeiptr size,
+                       const void* data,
+                       GLenum usage);
+    void (*BufferSubData)(GLenum target,
+                          GLintptr offset,
+                          GLsizeiptr size,
+                          const void* data);
+    GLenum (*CheckFramebufferStatus)(GLenum target);
+    void (*Clear)(GLbitfield mask);
+    void (*ClearColor)(GLclampf red,
+                       GLclampf green,
+                       GLclampf blue,
+                       GLclampf alpha);
+    void (*ClearDepthf)(GLclampf depth);
+    void (*ClearStencil)(GLint s);
+    void (*ColorMask)(GLboolean red,
+                      GLboolean green,
+                      GLboolean blue,
+                      GLboolean alpha);
+    void (*CompileShader)(GLuint shader);
+    void (*CompressedTexImage2D)(GLenum target,
+                                 GLint level,
+                                 GLenum internalformat,
+                                 GLsizei width,
+                                 GLsizei height,
+                                 GLint border,
+                                 GLsizei imageSize,
+                                 const void* data);
+    void (*CompressedTexSubImage2D)(GLenum target,
+                                    GLint level,
+                                    GLint xoffset,
+                                    GLint yoffset,
+                                    GLsizei width,
+                                    GLsizei height,
+                                    GLenum format,
+                                    GLsizei imageSize,
+                                    const void* data);
+    void (*CopyTexImage2D)(GLenum target,
+                           GLint level,
+                           GLenum internalformat,
+                           GLint x,
+                           GLint y,
+                           GLsizei width,
+                           GLsizei height,
+                           GLint border);
+    void (*CopyTexSubImage2D)(GLenum target,
+                              GLint level,
+                              GLint xoffset,
+                              GLint yoffset,
+                              GLint x,
+                              GLint y,
+                              GLsizei width,
+                              GLsizei height);
+    GLuint (*CreateProgram)(void);
+    GLuint (*CreateShader)(GLenum type);
+    void (*CullFace)(GLenum mode);
+    void (*DeleteBuffers)(GLsizei n, const GLuint* buffers);
+    void (*DeleteFramebuffers)(GLsizei n,
+                               const GLuint* framebuffers);
+    void (*DeleteProgram)(GLuint program);
+    void (*DeleteRenderbuffers)(GLsizei n,
+                                const GLuint* renderbuffers);
+    void (*DeleteShader)(GLuint shader);
+    void (*DeleteTextures)(GLsizei n,
+                           const GLuint* textures);
+    void (*DepthFunc)(GLenum func);
+    void (*DepthMask)(GLboolean flag);
+    void (*DepthRangef)(GLclampf zNear, GLclampf zFar);
+    void (*DetachShader)(GLuint program, GLuint shader);
+    void (*Disable)(GLenum cap);
+    void (*DisableVertexAttribArray)(GLuint index);
+    void (*DrawArrays)(GLenum mode,
+                       GLint first,
+                       GLsizei count);
+    void (*DrawElements)(GLenum mode,
+                         GLsizei count,
+                         GLenum type,
+                         const void* indices);
+    void (*Enable)(GLenum cap);
+    void (*EnableVertexAttribArray)(GLuint index);
+    void (*Finish)(void);
+    void (*Flush)(void);
+    void (*FramebufferRenderbuffer)(GLenum target,
+                                    GLenum attachment,
+                                    GLenum renderbuffertarget,
+                                    GLuint renderbuffer);
+    void (*FramebufferTexture2D)(GLenum target,
+                                 GLenum attachment,
+                                 GLenum textarget,
+                                 GLuint texture,
+                                 GLint level);
+    void (*FrontFace)(GLenum mode);
+    void (*GenBuffers)(GLsizei n, GLuint* buffers);
+    void (*GenerateMipmap)(GLenum target);
+    void (*GenFramebuffers)(GLsizei n, GLuint* framebuffers);
+    void (*GenRenderbuffers)(GLsizei n,
+                             GLuint* renderbuffers);
+    void (*GenTextures)(GLsizei n, GLuint* textures);
+    void (*GetActiveAttrib)(GLuint program,
+                            GLuint index,
+                            GLsizei bufsize,
+                            GLsizei* length,
+                            GLint* size,
+                            GLenum* type,
+                            char* name);
+    void (*GetActiveUniform)(GLuint program,
+                             GLuint index,
+                             GLsizei bufsize,
+                             GLsizei* length,
+                             GLint* size,
+                             GLenum* type,
+                             char* name);
+    void (*GetAttachedShaders)(GLuint program,
+                               GLsizei maxcount,
+                               GLsizei* count,
+                               GLuint* shaders);
+    GLint (*GetAttribLocation)(GLuint program,
+                               const char* name);
+    void (*GetBooleanv)(GLenum pname, GLboolean* params);
+    void (*GetBufferParameteriv)(GLenum target,
+                                 GLenum pname,
+                                 GLint* params);
+    GLenum (*GetError)();
+    void (*GetFloatv)(GLenum pname, GLfloat* params);
+    void (*GetFramebufferAttachmentParameteriv)(GLenum target,
+                                                GLenum attachment,
+                                                GLenum pname,
+                                                GLint* params);
+    void (*GetIntegerv)(GLenum pname, GLint* params);
+    void (*GetProgramiv)(GLuint program,
+                         GLenum pname,
+                         GLint* params);
+    void (*GetProgramInfoLog)(GLuint program,
+                              GLsizei bufsize,
+                              GLsizei* length,
+                              char* infolog);
+    void (*GetRenderbufferParameteriv)(GLenum target,
+                                       GLenum pname,
+                                       GLint* params);
+    void (*GetShaderiv)(GLuint shader,
+                        GLenum pname,
+                        GLint* params);
+    void (*GetShaderInfoLog)(GLuint shader,
+                             GLsizei bufsize,
+                             GLsizei* length,
+                             char* infolog);
+    void (*GetShaderPrecisionFormat)(GLenum shadertype,
+                                     GLenum precisiontype,
+                                     GLint* range,
+                                     GLint* precision);
+    void (*GetShaderSource)(GLuint shader,
+                            GLsizei bufsize,
+                            GLsizei* length,
+                            char* source);
+    const GLubyte* (*GetString)(GLenum name);
+    void (*GetTexParameterfv)(GLenum target,
+                              GLenum pname,
+                              GLfloat* params);
+    void (*GetTexParameteriv)(GLenum target,
+                              GLenum pname,
+                              GLint* params);
+    void (*GetUniformfv)(GLuint program,
+                         GLint location,
+                         GLfloat* params);
+    void (*GetUniformiv)(GLuint program,
+                         GLint location,
+                         GLint* params);
+    GLint (*GetUniformLocation)(GLuint program,
+                                const char* name);
+    void (*GetVertexAttribfv)(GLuint index,
+                              GLenum pname,
+                              GLfloat* params);
+    void (*GetVertexAttribiv)(GLuint index,
+                              GLenum pname,
+                              GLint* params);
+    void (*GetVertexAttribPointerv)(GLuint index,
+                                    GLenum pname,
+                                    void** pointer);
+    void (*Hint)(GLenum target, GLenum mode);
+    GLboolean (*IsBuffer)(GLuint buffer);
+    GLboolean (*IsEnabled)(GLenum cap);
+    GLboolean (*IsFramebuffer)(GLuint framebuffer);
+    GLboolean (*IsProgram)(GLuint program);
+    GLboolean (*IsRenderbuffer)(GLuint renderbuffer);
+    GLboolean (*IsShader)(GLuint shader);
+    GLboolean (*IsTexture)(GLuint texture);
+    void (*LineWidth)(GLfloat width);
+    void (*LinkProgram)(GLuint program);
+    void (*PixelStorei)(GLenum pname, GLint param);
+    void (*PolygonOffset)(GLfloat factor, GLfloat units);
+    void (*ReadPixels)(GLint x,
+                       GLint y,
+                       GLsizei width,
+                       GLsizei height,
+                       GLenum format,
+                       GLenum type,
+                       void* pixels);
+    void (*ReleaseShaderCompiler)(void);
+    void (*RenderbufferStorage)(GLenum target,
+                                GLenum internalformat,
+                                GLsizei width,
+                                GLsizei height);
+    void (*SampleCoverage)(GLclampf value, GLboolean invert);
+    void (*Scissor)(GLint x,
+                    GLint y,
+                    GLsizei width,
+                    GLsizei height);
+    void (*ShaderBinary)(GLsizei n,
+                         const GLuint* shaders,
+                         GLenum binaryformat,
+                         const void* binary,
+                         GLsizei length);
+    void (*ShaderSource)(GLuint shader,
+                         GLsizei count,
+                         const char** str,
+                         const GLint* length);
+    void (*StencilFunc)(GLenum func, GLint ref, GLuint mask);
+    void (*StencilFuncSeparate)(GLenum face,
+                                GLenum func,
+                                GLint ref,
+                                GLuint mask);
+    void (*StencilMask)(GLuint mask);
+    void (*StencilMaskSeparate)(GLenum face, GLuint mask);
+    void (*StencilOp)(GLenum fail,
+                      GLenum zfail,
+                      GLenum zpass);
+    void (*StencilOpSeparate)(GLenum face,
+                              GLenum fail,
+                              GLenum zfail,
+                              GLenum zpass);
+    void (*TexImage2D)(GLenum target,
+                       GLint level,
+                       GLint internalformat,
+                       GLsizei width,
+                       GLsizei height,
+                       GLint border,
+                       GLenum format,
+                       GLenum type,
+                       const void* pixels);
+    void (*TexParameterf)(GLenum target,
+                          GLenum pname,
+                          GLfloat param);
+    void (*TexParameterfv)(GLenum target,
+                           GLenum pname,
+                           const GLfloat* params);
+    void (*TexParameteri)(GLenum target,
+                          GLenum pname,
+                          GLint param);
+    void (*TexParameteriv)(GLenum target,
+                           GLenum pname,
+                           const GLint* params);
+    void (*TexSubImage2D)(GLenum target,
+                          GLint level,
+                          GLint xoffset,
+                          GLint yoffset,
+                          GLsizei width,
+                          GLsizei height,
+                          GLenum format,
+                          GLenum type,
+                          const void* pixels);
+    void (*Uniform1f)(GLint location, GLfloat x);
+    void (*Uniform1fv)(GLint location,
+                       GLsizei count,
+                       const GLfloat* v);
+    void (*Uniform1i)(GLint location, GLint x);
+    void (*Uniform1iv)(GLint location,
+                       GLsizei count,
+                       const GLint* v);
+    void (*Uniform2f)(GLint location, GLfloat x, GLfloat y);
+    void (*Uniform2fv)(GLint location,
+                       GLsizei count,
+                       const GLfloat* v);
+    void (*Uniform2i)(GLint location, GLint x, GLint y);
+    void (*Uniform2iv)(GLint location,
+                       GLsizei count,
+                       const GLint* v);
+    void (*Uniform3f)(GLint location,
+                      GLfloat x,
+                      GLfloat y,
+                      GLfloat z);
+    void (*Uniform3fv)(GLint location,
+                       GLsizei count,
+                       const GLfloat* v);
+    void (*Uniform3i)(GLint location,
+                      GLint x,
+                      GLint y,
+                      GLint z);
+    void (*Uniform3iv)(GLint location,
+                       GLsizei count,
+                       const GLint* v);
+    void (*Uniform4f)(GLint location,
+                      GLfloat x,
+                      GLfloat y,
+                      GLfloat z,
+                      GLfloat w);
+    void (*Uniform4fv)(GLint location,
+                       GLsizei count,
+                       const GLfloat* v);
+    void (*Uniform4i)(GLint location,
+                      GLint x,
+                      GLint y,
+                      GLint z,
+                      GLint w);
+    void (*Uniform4iv)(GLint location,
+                       GLsizei count,
+                       const GLint* v);
+    void (*UniformMatrix2fv)(GLint location,
+                             GLsizei count,
+                             GLboolean transpose,
+                             const GLfloat* value);
+    void (*UniformMatrix3fv)(GLint location,
+                             GLsizei count,
+                             GLboolean transpose,
+                             const GLfloat* value);
+    void (*UniformMatrix4fv)(GLint location,
+                             GLsizei count,
+                             GLboolean transpose,
+                             const GLfloat* value);
+    void (*UseProgram)(GLuint program);
+    void (*ValidateProgram)(GLuint program);
+    void (*VertexAttrib1f)(GLuint indx, GLfloat x);
+    void (*VertexAttrib1fv)(GLuint indx,
+                            const GLfloat* values);
+    void (*VertexAttrib2f)(GLuint indx,
+                           GLfloat x,
+                           GLfloat y);
+    void (*VertexAttrib2fv)(GLuint indx,
+                            const GLfloat* values);
+    void (*VertexAttrib3f)(GLuint indx,
+                           GLfloat x,
+                           GLfloat y,
+                           GLfloat z);
+    void (*VertexAttrib3fv)(GLuint indx,
+                            const GLfloat* values);
+    void (*VertexAttrib4f)(GLuint indx,
+                           GLfloat x,
+                           GLfloat y,
+                           GLfloat z,
+                           GLfloat w);
+    void (*VertexAttrib4fv)(GLuint indx,
+                            const GLfloat* values);
+    void (*VertexAttribPointer)(GLuint indx,
+                                GLint size,
+                                GLenum type,
+                                GLboolean normalized,
+                                GLsizei stride,
+                                const void* ptr);
+    void (*Viewport)(GLint x,
+                     GLint y,
+                     GLsizei width,
+                     GLsizei height);
+};
+
+#endif  /* GRAPHICS_TRANSLATION_UNDERLYING_APIS_ANGLE_GLES2_H_ */
