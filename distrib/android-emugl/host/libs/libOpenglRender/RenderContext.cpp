@@ -21,13 +21,18 @@ RenderContext* RenderContext::create(EGLDisplay display,
                                      EGLConfig config,
                                      EGLContext sharedContext,
                                      bool isGl2) {
+    if (!isGl2) { fprintf(stderr, "%s: trying to create gles1 context\n",
+                          __func__); }
+            
     const EGLint contextAttribs[] = {
-        EGL_CONTEXT_CLIENT_VERSION, isGl2 ? 2 : 1,
+        // EGL_CONTEXT_CLIENT_VERSION, isGl2 ? 2 : 1,
+        EGL_CONTEXT_CLIENT_VERSION, 2,
         EGL_NONE
     };
     EGLContext context = s_egl.eglCreateContext(
             display, config, sharedContext, contextAttribs);
     if (context == EGL_NO_CONTEXT) {
+        fprintf(stderr, "%s: failed to create context (EGL_NO_CONTEXT result)\n", __func__);
         return NULL;
     }
 

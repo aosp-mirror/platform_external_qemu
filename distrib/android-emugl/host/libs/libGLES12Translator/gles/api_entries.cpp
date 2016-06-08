@@ -4960,7 +4960,12 @@ GLES_APIENTRY(void, VertexPointer, GLint size, GLenum type, GLsizei stride,
 }
 
 GLES_APIENTRY(void, VertexPointerBounds, GLint size, GLenum type,
-              GLsizei stride, const GLvoid* pointer, GLsizei count) {
+              GLsizei stride, GLvoid* pointer, GLsizei count) {
+  ContextPtr c = GetCurrentGlesContext();
+  if (!c) {
+    return;
+  }
+    
   glVertexPointer(size, type, stride, pointer);
 }
 

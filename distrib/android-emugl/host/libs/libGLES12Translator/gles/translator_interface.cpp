@@ -18,6 +18,12 @@
 #include "egl_image.h"
 #include "GLES/glext.h"
 
+#include "translator_interface.h"
+#include "gles/macros.h"
+
+#include "GLES12Translator/underlying_apis.h"
+#include "GLES12Translator/angle_gles2.h"
+
 #include <stdio.h>
 
 static GlesContext* the_context = NULL;
@@ -35,15 +41,23 @@ void SetCurrentGlesContext(GlesContext *ctx) {
     the_context = ctx;
 }
 
-void* create_gles1_context(void* share, const void* underlying_apis) {
+// Interface to emulator
+
+TRANSLATOR_APIENTRY(void*, create_underlying_api) {
+    UnderlyingApis* container = new UnderlyingApis;
+    container->angle = new ANGLE_GLES2;
+    return (void*)container;
+}
+
+TRANSLATOR_APIENTRY(void*, create_gles1_context, void* share, const void* underlying_apis) {
     return (void*)CreateGles1Context((GlesContext*)share, (const UnderlyingApis*)underlying_apis);
 }
 
-void* get_current_gles_context() {
+TRANSLATOR_APIENTRY(void*, get_current_gles_context) {
     return (void*)the_context;
 }
 
-void set_current_gles_context(void* ctx) {
+TRANSLATOR_APIENTRY(void, set_current_gles_context, void* ctx) {
     the_context = (GlesContext*)ctx;
 }
 
