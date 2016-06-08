@@ -191,6 +191,11 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                 NULL);
     }
 
+    // if (cb->m_blitEGLImage) {
+    //     fprintf(stderr, "ColorBuffer::%s: egl image id=0x%x\n", __FUNCTION__, cb->m_blitEGLImage);
+    //     s_gles1.insert_egl_image(cb->m_blitEGLImage);
+    // }
+
     cb->m_resizer = new TextureResize(p_width, p_height);
 
     return cb;
@@ -298,10 +303,14 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
 #endif
     }
     else {
+        fprintf(stderr, "%s: call (gles1 path). m_blitEGLImage=0x%x\n", __FUNCTION__, m_blitEGLImage);
         s_gles1.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
         s_gles1.glGenTextures(1,&tmpTex);
         s_gles1.glBindTexture(GL_TEXTURE_2D, tmpTex);
+        fprintf(stderr, "%s: bound tmpTex=%u\n", __FUNCTION__, tmpTex);
         s_gles1.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
+        // fakely binding the thing we need...
+        // s_gles1.glBindTexture(GL_TEXTURE_2D, m_blitTex);
         s_gles1.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0,
                                  m_width, m_height);
         s_gles1.glDeleteTextures(1, &tmpTex);

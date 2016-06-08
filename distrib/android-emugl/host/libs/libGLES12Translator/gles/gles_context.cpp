@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "common/alog.h"
+#include "common/dlog.h"
 #include "gles/gles_options.h"
 #include "gles/debug.h"
 #include "gles/framebuffer_data.h"
@@ -123,10 +124,12 @@ void GlesContext::Invalidate() {
 
 void GlesContext::Restore() {
   if (initialized_) {
+      DLOG("Context already initialized, go away.");
     return;
   }
 
   const int max_texture_units = UniformContext::kMaxTextureUnits;
+  DLOG("Initialize pointer, texture, and uniform contexts.");
   if (version_ == kGles11) {
     pointer_context_.Init(kNumVertexAttributeKeys);
   } else if (version_ == kGles20) {
@@ -138,13 +141,14 @@ void GlesContext::Restore() {
   uniform_context_.Init(max_texture_units);
 
   if (version_ == kGles11) {
-    GLfloat values[4];
-    PASS_THROUGH(this, VertexAttrib4fv, kColorVertexAttribute,
-                 uniform_context_.GetColor().GetFloatArray(values));
-    PASS_THROUGH(this, VertexAttrib4fv, kNormalVertexAttribute,
-                 uniform_context_.GetNormal().GetFloatArray(values));
-    PASS_THROUGH(this, VertexAttrib1f, kPointSizeVertexAttribute,
-                 uniform_context_.GetPointParameters().current_size);
+      GLfloat values[4];
+      DLOG("Pass through glVertexAttrib4fv");
+      PASS_THROUGH(this, VertexAttrib4fv, kColorVertexAttribute,
+              uniform_context_.GetColor().GetFloatArray(values));
+      PASS_THROUGH(this, VertexAttrib4fv, kNormalVertexAttribute,
+              uniform_context_.GetNormal().GetFloatArray(values));
+      PASS_THROUGH(this, VertexAttrib1f, kPointSizeVertexAttribute,
+              uniform_context_.GetPointParameters().current_size);
   }
 
   initialized_ = true;

@@ -16,9 +16,6 @@
 #ifndef GRAPHICS_TRANSLATION_GLES_SHARE_GROUP_H_
 #define GRAPHICS_TRANSLATION_GLES_SHARE_GROUP_H_
 
-#include <map>
-#include <utility>
-
 #include "gles/buffer_data.h"
 #include "gles/framebuffer_data.h"
 #include "gles/program_data.h"
@@ -28,8 +25,9 @@
 
 #include "android/base/synchronization/Lock.h"
 
-using android::base::Lock;
-using android::base::AutoLock;
+#include <map>
+#include <utility>
+#include <utils/RefBase.h>
 
 class GlesContext;
 class NamespaceImpl;
@@ -44,7 +42,7 @@ class NamespaceImpl;
 // providing functions for a given type (ex. GenBufferName).  This is to
 // allow us to catch problematic usage at compile time rather than asserting
 // at runtime.
-class ShareGroup {
+class ShareGroup : public android::RefBase {
  public:
   explicit ShareGroup(GlesContext* context);
 
@@ -159,6 +157,7 @@ class ShareGroup {
     SetGlobalName(TEXTURE, local_name, global_name);
   }
 
+ protected:
   virtual ~ShareGroup();
 
  private:
@@ -168,9 +167,9 @@ class ShareGroup {
   ObjectDataPtr GetObject(ObjectType type, ObjectLocalName name,
                           bool create_if_needed);
   template <typename T>
-  emugl::SmartPtr<T> GetObjectAs(ObjectType type, ObjectLocalName name,
+  android::sp<T> GetObjectAs(ObjectType type, ObjectLocalName name,
                              bool create_if_needed) {
-    return emugl::SmartPtr<T>(static_cast<T*>(GetObject(type, name, create_if_needed).get()));
+    return static_cast<T*>(GetObject(type, name, create_if_needed).get());
   }
   void DeleteObjects(ObjectType type, int n, const ObjectLocalName* names);
 
@@ -183,7 +182,7 @@ class ShareGroup {
   ObjectID GetObjectID(ObjectType type, ObjectLocalName name) const;
   NamespaceImpl* GetNamespace(ObjectType type);
 
-  Lock lock_;
+  android::base::Lock lock_;
   NamespaceImpl* namespace_[NUM_OBJECT_TYPES];
   ObjectDataMap objects_;
   GlesContext* context_;
@@ -192,6 +191,6 @@ class ShareGroup {
   ShareGroup& operator=(const ShareGroup&);
 };
 
-typedef emugl::SmartPtr<ShareGroup> ShareGroupPtr;
+typedef android::sp<ShareGroup> ShareGroupPtr;
 
 #endif  // GRAPHICS_TRANSLATION_GLES_SHARE_GROUP_H_
