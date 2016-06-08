@@ -268,7 +268,8 @@ EGLAPI const char * EGLAPIENTRY eglQueryString(EGLDisplay display, EGLint name) 
     VALIDATE_DISPLAY(display);
     static const char* vendor     = "Google";
     static const char* version    = "1.4";
-    static const char* extensions = "EGL_KHR_image_base EGL_KHR_gl_texture_2D_image";
+    static const char* extensions = "EGL_KHR_image_base EGL_KHR_gl_texture_2D_image "
+                                    "EGL_ANDROID_recordable ";
     if(!EglValidate::stringName(name)) {
         RETURN_ERROR(NULL,EGL_BAD_PARAMETER);
     }
@@ -335,6 +336,8 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
         //EGLint      sample_buffers_num = 0;
         EGLint      samples_per_pixel  = 0;
         EGLint      stencil_size       = 0;
+
+        EGLBoolean  recordable_android = EGL_FALSE;
 
     if(!EglValidate::noAttribs(attrib_list)) { //there are attribs
         int i = 0 ;
@@ -467,6 +470,9 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
             case EGL_TRANSPARENT_BLUE_VALUE:
                 trans_blue_val = attrib_list[i+1];
                 break;
+            case EGL_RECORDABLE_ANDROID:
+                recordable_android = attrib_list[i+1];
+                break;
             default:
                 RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
             }
@@ -488,8 +494,8 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
     EglConfig dummy(red_size,green_size,blue_size,alpha_size,caveat,config_id,depth_size,
                     frame_buffer_level,0,0,0,native_renderable,renderable_type,0,native_visual_type,
                     samples_per_pixel,stencil_size,surface_type,transparent_type,
-                    trans_red_val,trans_green_val,trans_blue_val,NULL);
-
+                    trans_red_val,trans_green_val,trans_blue_val,recordable_android,
+                    NULL);
     *num_config = dpy->chooseConfigs(dummy,configs,config_size);
 
 
