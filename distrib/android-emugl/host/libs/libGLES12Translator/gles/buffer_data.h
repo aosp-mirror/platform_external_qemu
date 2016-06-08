@@ -17,7 +17,7 @@
 #define GRAPHICS_TRANSLATION_GLES_BUFFER_DATA_H_
 
 #include <GLES/gl.h>
-#include "emugl/common/smart_ptr.h"
+
 #include "gles/object_data.h"
 
 class BufferData : public ObjectData {
@@ -33,6 +33,7 @@ class BufferData : public ObjectData {
   GLenum GetUsage() const { return usage_; }
   const unsigned char* GetData() const { return data_; }
 
+ protected:
   ~BufferData();
 
  private:
@@ -44,6 +45,6 @@ class BufferData : public ObjectData {
   BufferData& operator=(const BufferData&);
 };
 
-typedef emugl::SmartPtr<BufferData> BufferDataPtr;
+typedef android::sp<BufferData> BufferDataPtr;
 
 #endif  // GRAPHICS_TRANSLATION_GLES_BUFFER_DATA_H_
