@@ -16,11 +16,11 @@
 #ifndef GRAPHICS_TRANSLATION_UNDERLYING_APIS_H_
 #define GRAPHICS_TRANSLATION_UNDERLYING_APIS_H_
 
-#include "underlying_apis/angle_gles2.h"
+#include "angle_gles2.h"
 
 // Angle Underlying APIS
 struct UnderlyingApis {
-    const ANGLE_GLES2* angle;
+    ANGLE_GLES2* angle;
     // other entries here could apply to specific extensions, like
     //    const ANGLE_GLES2_ext *angle_ext
     // assuming that is how UndelryingApis implement them

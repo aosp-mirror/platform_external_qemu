@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "common/alog.h"
+#include "common/dlog.h"
 #include "gles/gles_options.h"
 #include "gles/debug.h"
 #include "gles/framebuffer_data.h"
