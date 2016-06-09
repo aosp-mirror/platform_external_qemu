@@ -250,7 +250,7 @@ void GLWidget::showEvent(QShowEvent*) {
     // initialization at all.
     // However, show events may be delivered when the widget
     // isn't visible yet, so we need an additional check.
-    if (isVisible() && !visibleRegion().isNull()) {
+    if (isVisible()) {
         renderFrame();
     }
     connect(window()->windowHandle(), SIGNAL(screenChanged(QScreen*)), this, SLOT(handleScreenChange(QScreen*)));

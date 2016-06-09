@@ -342,6 +342,10 @@ void Accelerometer3DWidget::repaintGL() {
     mGLES2->glDrawElements(GL_TRIANGLES, mElementsCount, GL_UNSIGNED_INT, 0);
 }
 
+static float clamp(float a, float b, float x) {
+    return std::max(a, std::min(b, x));
+}
+
 void Accelerometer3DWidget::mouseMoveEvent(QMouseEvent *event) {
     if (mTracking && mOperationMode == OperationMode::Rotate) {
         int diff_x = event->x() - mPrevMouseX,
@@ -356,6 +360,8 @@ void Accelerometer3DWidget::mouseMoveEvent(QMouseEvent *event) {
     } else if (mTracking && mOperationMode == OperationMode::Move) {
         QVector2D vec = screenToXYPlane(event->x(), event->y());
         mTranslation += vec - mPrevDragOrigin;
+        mTranslation.setX(clamp(-7.0, 7.0, mTranslation.x()));
+        mTranslation.setY(clamp(-4.0, 4.0, mTranslation.y()));
         renderFrame();
         emit(positionChanged());
         mPrevDragOrigin = vec;
