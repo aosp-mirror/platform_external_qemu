@@ -119,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "6febe063_3550dabd",
+        "filename": "android/skin/qt/phone-model/frag.glsl",
+        "patchSetId": 12
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-09T14:33:14Z",
+      "side": 1,
+      "message": "according to various specs out there, vertex shaders are highp by default.",
+      "parentUuid": "6febe063_c4e910b6",
+      "range": {
+        "startLine": 2,
+        "startChar": 0,
+        "endLine": 2,
+        "endChar": 34
+      },
+      "revId": "a8bb2e5c9256b51c042495d246517b23b0571cfe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6febe063_040b781c",
         "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ANGLEShaderParser.cpp",
         "patchSetId": 12
