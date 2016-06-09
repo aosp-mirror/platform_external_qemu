@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6febe063_16396ac8",
+        "filename": "distrib/android-emugl/host/tools/emugen/ApiGen.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 446,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-06-09T00:02:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6febe063_5b74bb71",
+      "range": {
+        "startLine": 446,
+        "startChar": 26,
+        "endLine": 446,
+        "endChar": 36
+      },
+      "revId": "0ed6aeef5976f01db8f4f0b0defc8d231bc295b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6febe063_7be65f53",
         "filename": "distrib/android-emugl/host/tools/emugen/tests/t.001/expected/encoder/foo_enc.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-06-08T23:26:43Z",
       "side": 1,
       "message": "ditto",
+      "range": {
+        "startLine": 81,
+        "startChar": 7,
+        "endLine": 81,
+        "endChar": 17
+      },
+      "revId": "0ed6aeef5976f01db8f4f0b0defc8d231bc295b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6febe063_b63f5eaa",
+        "filename": "distrib/android-emugl/host/tools/emugen/tests/t.001/expected/encoder/foo_enc.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-06-09T00:02:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6febe063_7be65f53",
       "range": {
         "startLine": 81,
         "startChar": 7,
