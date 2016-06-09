@@ -48,7 +48,14 @@ private slots:
         mAccelerationTimer.stop();
     }
 
+private slots:
+    void on_rotateToPortrait_clicked();
+    void on_rotateToLandscape_clicked();
+    void on_rotateToReversePortrait_clicked();
+    void on_rotateToReverseLandscape_clicked();
+
 private:
+    void resetRotation(const QQuaternion&);
     void updateAccelerometerValues();
 
     std::unique_ptr<Ui::VirtualSensorsPage> mUi;
