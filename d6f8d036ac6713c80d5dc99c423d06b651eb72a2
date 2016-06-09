@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6febe063_958a0630",
+        "filename": "android/skin/qt/resources.qrc",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-06-09T15:44:48Z",
+      "side": 1,
+      "message": "Prefer to have this in alphabetical order",
+      "range": {
+        "startLine": 85,
+        "startChar": 0,
+        "endLine": 89,
+        "endChar": 1
+      },
+      "revId": "d6f8d036ac6713c80d5dc99c423d06b651eb72a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6febe063_758f8241",
+        "filename": "android/skin/qt/resources.qrc",
+        "patchSetId": 1
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-06-09T15:44:48Z",
+      "side": 1,
+      "message": "Alphabetical order here, too",
+      "range": {
+        "startLine": 163,
+        "startChar": 0,
+        "endLine": 166,
+        "endChar": 101
+      },
+      "revId": "d6f8d036ac6713c80d5dc99c423d06b651eb72a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
