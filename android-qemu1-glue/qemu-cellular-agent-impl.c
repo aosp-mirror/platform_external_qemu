@@ -14,6 +14,7 @@
 
 #include "android/android.h"
 #include "android/emulation/control/cellular_agent.h"
+#include "android/network/control.h"
 #include "android/network/globals.h"
 #include "android/shaper.h"
 #include "android/telephony/modem_driver.h"
@@ -108,7 +109,7 @@ static void cellular_setStandard(enum CellularStandard cStandard)
 
     // Find this entry in the speed table and set
     // android_net_download_speed and android_net_upload_speed
-    android_parse_network_speed(speedName);
+    android_network_set_speed(speedName);
 
     // Tell the network shaper the new rates
     netshaper_set_rate(android_net_shaper_in,  android_net_download_speed);
