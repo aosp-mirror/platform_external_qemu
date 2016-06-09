@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6febe063_744f8952",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 331,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-09T04:06:16Z",
+      "side": 1,
+      "message": "I think, this one needs to be also called after user has selected an AVD",
+      "range": {
+        "startLine": 331,
+        "startChar": 8,
+        "endLine": 331,
+        "endChar": 49
+      },
+      "revId": "e67537f0bda8e0a5f2251d4123e548bf99fc46f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
