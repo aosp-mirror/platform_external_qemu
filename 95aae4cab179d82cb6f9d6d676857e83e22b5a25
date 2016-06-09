@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6febe063_54480567",
+        "filename": "android/skin/qt/resources.qrc",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-09T03:56:37Z",
+      "side": 0,
+      "message": "comments are gone again",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 3
+      },
+      "revId": "95aae4cab179d82cb6f9d6d676857e83e22b5a25",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
