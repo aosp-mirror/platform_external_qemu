@@ -352,6 +352,30 @@
       "revId": "a8bb2e5c9256b51c042495d246517b23b0571cfe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6febe063_a7c2738e",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-06-09T22:40:35Z",
+      "side": 1,
+      "message": "I think it might be crashing because you\u0027re using setInfoLog which attempts to take ownership of the pointer passed in. Just assigning the pointer directly to m_infoLog like Grigory mentioned should work.",
+      "parentUuid": "6febe063_7b253fb4",
+      "range": {
+        "startLine": 37,
+        "startChar": 8,
+        "endLine": 38,
+        "endChar": 42
+      },
+      "revId": "a8bb2e5c9256b51c042495d246517b23b0571cfe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
