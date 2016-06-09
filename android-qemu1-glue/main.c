@@ -124,6 +124,10 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    // Overide default null SerialLine implementation
+    // before android_kmsg_init()
+    qemu1_android_serialline_init();
+
     if (opts->show_kernel) {
       // Ensure kernel messages are printed to stdout.
       android_kmsg_init(ANDROID_KMSG_PRINT_MESSAGES);
@@ -211,8 +215,6 @@ int main(int argc, char **argv) {
     if (!qemuParams) {
         return 1;
     }
-
-    qemu1_android_serialline_init();
 
     static UiEmuAgent uiEmuAgent;
     uiEmuAgent.battery = gQAndroidBatteryAgent;
