@@ -1,30 +1,15 @@
-<!--Copyright (C) 2015 The Android Open Source Project
-
-    This software is licensed under the terms of the GNU General Public
-    License version 2, as published by the Free Software Foundation, and
-    may be copied, distributed, and modified under those terms.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
--->
 <RCC>
     <qresource prefix="/">
-        <!-- Qt wants an extra 'qt/' in this path name -->
         <file alias="qt/etc/qt.conf">etc/qt.conf</file>
         <file alias="styles/stylesheet_template.css">styles/stylesheet_template.css</file>
         <file alias="styles/fonts_stylesheet_template.css">styles/fonts_stylesheet_template.css</file>
     </qresource>
     <qresource prefix="/lib/fonts">
-         <!-- The names 'Roboto*' are used to load the fonts in
-              android/skin/qt/winsys-qt.cpp -->
         <file alias="Roboto">fonts/Roboto-Regular.ttf</file>
         <file alias="Roboto-Bold">fonts/Roboto-Bold.ttf</file>
         <file alias="Roboto-Medium">fonts/Roboto-Medium.ttf</file>
     </qresource>
     <qresource prefix="/light">
-        <!-- Main list of tool buttons -->
         <file alias="back">images/light/System_Back_678.svg</file>
         <file alias="close">images/light/ic_close_678_48px.svg</file>
         <file alias="help">images/light/ic_help_678_48dp.svg</file>
@@ -40,8 +25,6 @@
         <file alias="volume_down">images/light/ic_volume_down_678_48px.svg</file>
         <file alias="volume_up">images/light/ic_volume_up_678_48px.svg</file>
         <file alias="zoom">images/light/ic_zoom_in_678_48dp.svg</file>
-
-        <!-- Used in the "extended" window -->
         <file alias="add">images/light/ic_add_0BA_48dp.svg</file>
         <file alias="add_disabled">images/light/ic_add_BEE_48dp.svg</file>
         <file alias="battery">images/light/ic_battery_80_678_48dp.svg</file>
@@ -99,9 +82,12 @@
         <file alias="toggle_off">images/light/toggle_off_light.png</file>
         <file alias="toggle_on">images/light/toggle_on.png</file>
         <file alias="virtSensors">images/light/Virtual_Sensors_678.svg</file>
+        <file alias="phone_landscape">images/light/ic_phone_android_landscape.svg</file>
+        <file alias="phone_portrait">images/light/ic_phone_android_portrait.svg</file>
+        <file alias="phone_reverse_landscape">images/light/ic_phone_android_reverse_landscape.svg</file>
+        <file alias="phone_reverse_portrait">images/light/ic_phone_android_reverse_portrait.svg</file>
     </qresource>
     <qresource prefix="/dark">
-        <!-- Main list of tool buttons -->
         <file alias="back">images/dark/System_Back_white.svg</file>
         <file alias="close">images/dark/ic_close_48px.svg</file>
         <file alias="help">images/dark/ic_help_677_48dp.svg</file>
@@ -117,8 +103,6 @@
         <file alias="volume_down">images/dark/ic_volume_down_48px.svg</file>
         <file alias="volume_up">images/dark/ic_volume_up_48px.svg</file>
         <file alias="zoom">images/dark/ic_zoom_in_white_48dp.svg</file>
-
-        <!-- Used in the "extended" window -->
         <file alias="add">images/dark/ic_add_0BA_48dp.svg</file>
         <file alias="add_disabled">images/dark/ic_add_155_48dp.svg</file>
         <file alias="battery">images/dark/ic_battery_80_677_48dp.svg</file>
@@ -176,6 +160,10 @@
         <file alias="toggle_off">images/dark/toggle_off_dark.png</file>
         <file alias="toggle_on">images/dark/toggle_on.png</file>
         <file alias="virtSensors">images/dark/Virtual_Sensors_677.svg</file>
+        <file alias="phone_landscape">images/dark/ic_phone_android_landscape.svg</file>
+        <file alias="phone_portrait">images/dark/ic_phone_android_portrait.svg</file>
+        <file alias="phone_reverse_landscape">images/dark/ic_phone_android_reverse_landscape.svg</file>
+        <file alias="phone_reverse_portrait">images/dark/ic_phone_android_reverse_portrait.svg</file>
     </qresource>
     <qresource prefix="/cursor">
         <file alias="zoom_cursor">images/cursor/zoom_cursor.svg</file>
