@@ -22,6 +22,30 @@
       "revId": "95aae4cab179d82cb6f9d6d676857e83e22b5a25",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6febe063_dea1cbab",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-09T17:29:17Z",
+      "side": 1,
+      "message": "No. \"isVisible()\" is the additional check.",
+      "parentUuid": "6febe063_b42071a6",
+      "range": {
+        "startLine": 251,
+        "startChar": 3,
+        "endLine": 252,
+        "endChar": 56
+      },
+      "revId": "95aae4cab179d82cb6f9d6d676857e83e22b5a25",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
