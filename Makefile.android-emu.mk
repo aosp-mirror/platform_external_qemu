@@ -289,6 +289,7 @@ LOCAL_SRC_FILES := \
     android/misc/Random.cpp \
     android/multitouch-port.c \
     android/multitouch-screen.c \
+    android/network/control.cpp \
     android/network/constants.c \
     android/network/globals.c \
     android/opengl/EmuglBackendList.cpp \
@@ -497,6 +498,7 @@ LOCAL_SRC_FILES := \
   android/metrics/metrics_reporter_toolbar_unittest.cpp \
   android/metrics/StudioConfig_unittest.cpp \
   android/misc/Random_unittest.cpp \
+  android/network/control_unittest.cpp \
   android/network/constants_unittest.cpp \
   android/opengl/EmuglBackendList_unittest.cpp \
   android/opengl/EmuglBackendScanner_unittest.cpp \

@@ -29,6 +29,7 @@
 #include "android/globals.h"
 #include "android/hw-events.h"
 #include "android/hw-sensors.h"
+#include "android/network/control.h"
 #include "android/network/constants.h"
 #include "android/network/globals.h"
 #include "android/shaper.h"
@@ -780,7 +781,7 @@ do_network_speed( ControlClient  client, char*  args )
         control_write( client, "KO: missing <speed> argument, see 'help network speed'\r\n" );
         return -1;
     }
-    if ( android_parse_network_speed( args ) < 0 ) {
+    if (!android_network_set_speed(args)) {
         control_write( client, "KO: invalid <speed> argument, see 'help network speed' for valid values\r\n" );
         return -1;
     }
@@ -811,7 +812,7 @@ do_network_delay( ControlClient  client, char*  args )
         control_write( client, "KO: missing <delay> argument, see 'help network delay'\r\n" );
         return -1;
     }
-    if ( android_parse_network_latency( args ) < 0 ) {
+    if (!android_network_set_latency(args)) {
         control_write( client, "KO: invalid <delay> argument, see 'help network delay' for valid values\r\n" );
         return -1;
     }
