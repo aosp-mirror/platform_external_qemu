@@ -22,6 +22,30 @@
       "revId": "27b8b1c878f5b38dda9dfa3c21e5b4b4e16eec7d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "efec30d0_6ddf9514",
+        "filename": "android/base/system/System_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 409,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2016-06-10T17:33:37Z",
+      "side": 1,
+      "message": "OK. Actually ping is a \"exe\", not an internal command of cmd.exe.\n\nSo what happend here is:\n\nping works on wine while\ncmd.exe /C ping  doesn\u0027t work. (For wine, it needs full path of ping in my default installation of wine)\n\nNow I also did some change at System.cpp.\n\nNow both tests passed.",
+      "parentUuid": "6febe063_d151b01d",
+      "range": {
+        "startLine": 409,
+        "startChar": 37,
+        "endLine": 409,
+        "endChar": 65
+      },
+      "revId": "27b8b1c878f5b38dda9dfa3c21e5b4b4e16eec7d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
