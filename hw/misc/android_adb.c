@@ -89,6 +89,7 @@ typedef struct {
 
 typedef struct {
     GIOChannel *listen_chan;    /* listener/connect socket */
+    GIOChannel *listen_chan_ipv6;
     GIOChannel *chan;           /* actual comms socket */
     /* these cache the read/write state for when wakeon is called */
     gboolean    data_in;        /* have we seen data? */
@@ -96,6 +97,7 @@ typedef struct {
     adb_pipe *adb_pipes[PIPE_QUEUE_LEN];
     adb_pipe *connected_pipe;
     guint       listen_chan_event; /* an event id if we're listening or 0 */
+    guint       listen_chan_event_ipv6;
     QemuMutex*  mutex;
 } adb_backend_state;
 
@@ -205,6 +207,8 @@ static GIOChannel *io_channel_from_socket(int fd)
 static gboolean tcp_adb_accept(GIOChannel *channel, GIOCondition cond,
                                void *opaque);
 
+static gboolean tcp_adb_accept_ipv6(GIOChannel *channel, GIOCondition cond,
+                               void *opaque);
 /* Close a connection to the server.
 **
 ** We need to ensure we clean-up any connection state and re-enable
@@ -214,7 +218,7 @@ static gboolean tcp_adb_accept(GIOChannel *channel, GIOCondition cond,
 */
 static void tcp_adb_server_close(adb_backend_state *bs)
 {
-    g_assert(bs->listen_chan);
+    g_assert(bs->listen_chan || bs->listen_chan_ipv6);
     g_assert(bs->mutex);
 
     qemu_mutex_lock(bs->mutex);
@@ -232,6 +236,14 @@ static void tcp_adb_server_close(adb_backend_state *bs)
         bs->listen_chan_event =
                 g_io_add_watch(bs->listen_chan, G_IO_IN, tcp_adb_accept, bs);
     }
+
+    if (bs->listen_chan_event_ipv6 == 0) {
+        /* wait for new connections */
+        bs->listen_chan_event_ipv6 =
+                g_io_add_watch(bs->listen_chan_ipv6, G_IO_IN,
+                    tcp_adb_accept_ipv6, bs);
+    }
+
     if (bs->chan) {
         /* close down this socket */
         g_io_channel_shutdown(bs->chan, FALSE, NULL);
@@ -399,23 +411,82 @@ static gboolean tcp_adb_accept(GIOChannel *channel, GIOCondition cond,
     return !connected;
 }
 
+static gboolean tcp_adb_accept_ipv6(GIOChannel *channel, GIOCondition cond,
+                               void *opaque)
+{
+    adb_backend_state *bs = opaque;
+    struct sockaddr_in6 saddr;
+    struct sockaddr *addr;
+    socklen_t len;
+    int fd_ipv6;
+
+    for (;;) {
+        len = sizeof(saddr);
+        addr = (struct sockaddr *)&saddr;
+        fd_ipv6 = qemu_accept(g_io_channel_unix_get_fd(bs->listen_chan_ipv6),
+                              addr, &len);
+        if (fd_ipv6 < 0 && errno != EINTR) {
+            DPRINTF("%s: failed to accept %d/%d\n", __func__, fd_ipv6, errno);
+            return TRUE; // couldn't add a connection, let's try again
+        } else if (fd_ipv6 >= 0) {
+            int res = socket_set_nodelay(fd_ipv6);
+            DPRINTF("%s: disabled Nagle algorithm (res = %d (%d))\n",
+                    __func__, res, errno);
+            (void)res; // get rid of the warning.
+            break;
+        }
+    }
+
+    qemu_mutex_lock(bs->mutex);
+    const bool connected = tcp_adb_connect(bs, fd_ipv6);
+    if (connected) {
+        bs->listen_chan_event_ipv6 = 0;
+    }
+    qemu_mutex_unlock(bs->mutex);
+
+    return !connected;
+}
+
 static bool adb_server_listen_incoming(int port)
 {
     adb_backend_state *bs = &adb_state;
     char *host_port;
+    char *host_port_ipv6;
     Error *err = NULL;
     int fd;
+    int fd_ipv6;
 
     host_port = g_strdup_printf("127.0.0.1:%d", port);
     fd = inet_listen(host_port, NULL, 0, SOCK_STREAM, 0, &err);
+
+    host_port_ipv6 = g_strdup_printf("[0:0:0:0:0:0:0:1]:%d", port);
+    fd_ipv6 = inet_listen(host_port_ipv6, NULL, 0, SOCK_STREAM, 0, &err);
+
     g_free(host_port);
-    if (fd < 0) {
+    g_free(host_port_ipv6);
+
+    if (fd < 0 && fd_ipv6 < 0) {
+        DPRINTF("%s: Unable to create ADB server socket: %s",
+                __FUNCTION__, strerror(errno));
         return false;
     }
 
-    bs->listen_chan = io_channel_from_socket(fd);
-    bs->listen_chan_event =
-            g_io_add_watch(bs->listen_chan, G_IO_IN, tcp_adb_accept, bs);
+    if (fd >= 0) {
+        bs->listen_chan = io_channel_from_socket(fd);
+        bs->listen_chan_event =
+                g_io_add_watch(bs->listen_chan, G_IO_IN, tcp_adb_accept, bs);
+    }
+
+    if (fd_ipv6 >= 0) {
+        bs->listen_chan_ipv6 = io_channel_from_socket(fd_ipv6);
+        bs->listen_chan_event_ipv6 =
+                g_io_add_watch(bs->listen_chan_ipv6, G_IO_IN,
+                               tcp_adb_accept_ipv6, bs);
+    }
+
+    DPRINTF("ADB server has been initialized for port %d. "
+            "Socket: ipv4=%d ipv6=%d\n", port, fd, fd_ipv6);
+
     return true;
 }
 
@@ -860,7 +931,9 @@ bool qemu2_adb_server_init(int port)
     if (!pipe_backend_initialized) {
         adb_state.chan = NULL;
         adb_state.listen_chan = NULL;
+        adb_state.listen_chan_ipv6 = NULL;
         adb_state.listen_chan_event = 0;
+        adb_state.listen_chan_event_ipv6 = 0;
         adb_state.data_in = FALSE;
         adb_state.connected_pipe = NULL;
         qemu_mutex_init(&adb_state_mutex);
