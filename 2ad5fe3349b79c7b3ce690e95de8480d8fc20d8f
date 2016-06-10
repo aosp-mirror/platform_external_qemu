@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6febe063_d1065013",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-10T05:58:24Z",
+      "side": 1,
+      "message": "why is it needed? it might be a good idea to expand the comment for the next one who wants to get rid of \u0027extra\u0027 check",
+      "range": {
+        "startLine": 253,
+        "startChar": 20,
+        "endLine": 253,
+        "endChar": 47
+      },
+      "revId": "2ad5fe3349b79c7b3ce690e95de8480d8fc20d8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
