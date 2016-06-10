@@ -31,6 +31,7 @@
 #include "../../../shared/OpenglCodecCommon/ChecksumCalculatorThreadInfo.h"
 
 #include <memory>
+#include <string.h>
 
 #define STREAM_BUFFER_SIZE 4 * 1024 * 1024
 
