@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6febe063_d151b01d",
+        "filename": "android/base/system/System_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 409,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-10T05:50:07Z",
+      "side": 1,
+      "message": "as per Wine docs and sources, ping is supposed to be there. Could you please post the error you\u0027re getting?",
+      "range": {
+        "startLine": 409,
+        "startChar": 37,
+        "endLine": 409,
+        "endChar": 65
+      },
+      "revId": "27b8b1c878f5b38dda9dfa3c21e5b4b4e16eec7d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
