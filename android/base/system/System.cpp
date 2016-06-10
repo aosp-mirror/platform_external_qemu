@@ -124,6 +124,36 @@ static bool isRunningUnderWine() {
     }
     return false;
 }
+
+static bool extractFullPath(std::string* cmd) {
+    if (PathUtils::isAbsolute(*cmd)) {
+        return true;
+    } else {
+        // try searching %PATH% and current directory for the binary
+        const Win32UnicodeString name(*cmd);
+        const Win32UnicodeString extension(PathUtils::kExeNameSuffix);
+        Win32UnicodeString buffer(MAX_PATH);
+
+        DWORD size = ::SearchPathW(nullptr, name.c_str(), extension.c_str(),
+                          buffer.size() + 1, buffer.data(), nullptr);
+        if (size > buffer.size()) {
+            // function may ask for more space
+            buffer.resize(size);
+            size = ::SearchPathW(nullptr, name.c_str(), extension.c_str(),
+                                 buffer.size() + 1, buffer.data(), nullptr);
+        }
+        if (size == 0) {
+            // Couldn't find anything matching the passed name
+            return false;
+        }
+        if (buffer.size() != size) {
+            buffer.resize(size);
+        }
+        *cmd = buffer.toString();
+    }
+    return true;
+}
+
 #endif
 
 namespace {
@@ -578,6 +608,10 @@ public:
         STARTUPINFOW startup = {};
         startup.cb = sizeof(startup);
 
+        if (!extractFullPath(&commandLineCopy[0])) {
+            return false;
+        }
+
         if ((options & RunOptions::ShowOutput) == 0 ||
             ((options & RunOptions::DumpOutputToFile) != 0 &&
              !outputFile.empty())) {
@@ -597,6 +631,10 @@ public:
             std::string comspec = envGet("COMSPEC");
             if (comspec.empty()) {
                 comspec = "cmd.exe";
+            }
+
+            if (!extractFullPath(&comspec)) {
+                return false;
             }
 
             // 2. Now turn the command into the proper cmd command:
@@ -619,45 +657,13 @@ public:
 
         PROCESS_INFORMATION pinfo = {};
 
-        // this will point to either the commandLineCopy[0] or the executable
-        // path found by the system
-        StringView executableRef;
-        // a buffer to store the executable path if we need to search for it
-        std::string executable;
-        if (PathUtils::isAbsolute(commandLineCopy[0])) {
-            executableRef = commandLineCopy[0];
-        } else {
-            // try searching %PATH% and current directory for the binary
-            const Win32UnicodeString name(commandLineCopy[0]);
-            const Win32UnicodeString extension(PathUtils::kExeNameSuffix);
-            Win32UnicodeString buffer(MAX_PATH);
-
-            DWORD size = ::SearchPathW(nullptr, name.c_str(), extension.c_str(),
-                          buffer.size() + 1, buffer.data(), nullptr);
-            if (size > buffer.size()) {
-                // function may ask for more space
-                buffer.resize(size);
-                size = ::SearchPathW(nullptr, name.c_str(), extension.c_str(),
-                                     buffer.size() + 1, buffer.data(), nullptr);
-            }
-            if (size == 0) {
-                // Couldn't find anything matching the passed name
-                return false;
-            }
-            if (buffer.size() != size) {
-                buffer.resize(size);
-            }
-            executable = buffer.toString();
-            executableRef = executable;
-        }
-
-        std::string args = executableRef;
+        std::string args = commandLineCopy[0];
         for (size_t i = 1; i < commandLineCopy.size(); ++i) {
             args += ' ';
             args += android::base::Win32Utils::quoteCommandLine(commandLineCopy[i]);
         }
 
-        Win32UnicodeString commandUnicode(executableRef);
+        Win32UnicodeString commandUnicode(commandLineCopy[0]);
         Win32UnicodeString argsUnicode(args);
 
         if (!::CreateProcessW(commandUnicode.c_str(), // program path
