@@ -53,6 +53,9 @@ private slots:
     void on_rotateToLandscape_clicked();
     void on_rotateToReversePortrait_clicked();
     void on_rotateToReverseLandscape_clicked();
+    void on_helpMagneticField_clicked();
+    void on_helpLight_clicked();
+    void on_helpPressure_clicked();
 
 private:
     void resetRotation(const QQuaternion&);
