@@ -222,52 +222,6 @@ help_disk_images( stralloc_t*  out )
 }
 
 static void
-help_keys(stralloc_t*  out)
-{
-#ifndef NO_SKIN
-    int  pass, maxw = 0;
-
-    stralloc_add_str( out, "  When running the emulator, use the following keypresses:\n\n");
-
-    SkinKeyset* keyset = skin_keyset_get_default();
-    if (!keyset) {
-        keyset = skin_keyset_new_from_text(
-                skin_keyset_get_default_text());
-    }
-    for (pass = 0; pass < 2; pass++) {
-        SkinKeyCommand  cmd;
-
-        for (cmd = SKIN_KEY_COMMAND_NONE+1; cmd < SKIN_KEY_COMMAND_MAX; cmd++)
-        {
-            SkinKeyBinding  bindings[ SKIN_KEY_COMMAND_MAX_BINDINGS ];
-            int             n, count, len;
-            char            temp[32], *p = temp, *end = p + sizeof(temp);
-
-            count = skin_keyset_get_bindings( keyset, cmd, bindings );
-            if (count <= 0)
-                continue;
-
-            for (n = 0; n < count; n++) {
-                p = bufprint(p, end, "%s%s", (n == 0) ? "" : ", ",
-                             skin_key_pair_to_string( bindings[n].sym, bindings[n].mod ) );
-            }
-
-            if (pass == 0) {
-                len = strlen(temp);
-                if (len > maxw)
-                    maxw = len;
-            } else {
-                PRINTF( "    %-*s  %s\n", maxw, temp, skin_key_command_description(cmd) );
-            }
-        }
-    }
-    PRINTF( "\n" );
-    PRINTF( "  note that NumLock must be deactivated for keypad keys to work\n\n" );
-#endif  // !NO_SKIN
-}
-
-
-static void
 help_environment(stralloc_t*  out)
 {
     PRINTF(
@@ -294,79 +248,6 @@ help_environment(stralloc_t*  out)
     "  installation directory.\n\n"
 
     );
-}
-
-
-static void
-help_keyset_file(stralloc_t*  out)
-{
-#ifndef NO_SKIN
-    int           n, count;
-    const char**  strings;
-    char          temp[MAX_PATH];
-
-    PRINTF(
-    "  on startup, the emulator looks for 'keyset' file that contains the\n"
-    "  configuration of key-bindings to use. the default location on this\n"
-    "  system is:\n\n"
-    );
-
-    bufprint_config_file( temp, temp+sizeof(temp), KEYSET_FILE );
-    PRINTF( "    %s\n\n", temp );
-
-    PRINTF(
-    "  if the file doesn't exist, the emulator writes one containing factory\n"
-    "  defaults. you are then free to modify it to suit specific needs.\n\n"
-    "  this file shall contain a list of text lines in the following format:\n\n"
-
-    "    <command> [<modifiers>]<key>\n\n"
-
-    "  where <command> is an emulator-specific command name, i.e. one of:\n\n"
-    );
-
-    count   = SKIN_KEY_COMMAND_MAX-1;
-    strings = calloc( count, sizeof(char*) );
-    for (n = 0; n < count; n++)
-        strings[n] = skin_key_command_to_str(n+1);
-
-    stralloc_tabular( out, strings, count, "    ", 80-8 );
-    free(strings);
-
-    PRINTF(
-    "\n"
-    "  <modifers> is an optional list of <modifier> elements (without separators)\n"
-    "  which can be one of:\n\n"
-
-    "    Ctrl-     Left Control Key\n"
-    "    Shift-    Left Shift Key\n"
-    "    Alt-      Left Alt key\n"
-    "    RCtrl-    Right Control Key\n"
-    "    RShift-   Right Shift Key\n"
-    "    RAlt-     Right Alt key (a.k.a AltGr)\n"
-    "\n"
-    "  finally <key> is a QWERTY-specific keyboard symbol which can be one of:\n\n"
-    );
-    count   = skin_key_code_count();
-    strings = calloc( count, sizeof(char*) );
-    for (n = 0; n < count; n++)
-        strings[n] = skin_key_code_str(n);
-
-    stralloc_tabular( out, strings, count, "    ", 80-8 );
-    free(strings);
-
-    PRINTF(
-    "\n"
-    "  case is not significant, and a single command can be associated to up\n"
-    "  to %d different keys. to bind a command to multiple keys, use commas to\n"
-    "  separate them. here are some examples:\n\n",
-    SKIN_KEY_COMMAND_MAX_BINDINGS );
-
-    PRINTF(
-    "    TOGGLE_NETWORK      F8                # toggle the network on/off\n"
-    "    CHANGE_LAYOUT_PREV  Keypad_7,Ctrl-J   # switch to a previous skin layout\n"
-    "\n"
-    );
-#endif  // !NO_SKIN
 }
 
 
@@ -1094,13 +975,6 @@ help_no_audio(stralloc_t*  out)
 }
 
 static void
-help_raw_keys(stralloc_t*  out)
-{
-    PRINTF(
-    "  the '-raw-keys' option is obsolete and will be ignored\n\n" );
-}
-
-static void
 help_radio(stralloc_t*  out)
 {
     PRINTF(
@@ -1282,46 +1156,6 @@ help_gps(stralloc_t*  out)
     );
 }
 
-
-static void
-help_keyset(stralloc_t*  out)
-{
-    char  temp[256];
-
-    PRINTF(
-    "  use '-keyset <name>' to specify a different keyset file name to use when\n"
-    "  starting the emulator. a keyset file contains a list of key bindings used\n"
-    "  to control the emulator with the host keyboard.\n\n"
-
-    "  by default, the emulator looks for the following file:\n\n"
-    );
-
-    bufprint_config_file(temp, temp+sizeof(temp), KEYSET_FILE);
-    PRINTF(
-    "    %s\n\n", temp );
-
-    bufprint_config_path(temp, temp+sizeof(temp));
-    PRINTF(
-    "  however, if -keyset is used, then the emulator does the following:\n\n"
-
-    "  - first, if <name> doesn't have an extension, then the '.keyset' suffix\n"
-    "    is appended to it (e.g. \"foo\" => \"foo.keyset\"),\n\n"
-
-    "  - then, the emulator searches for a file named <name> in the following\n"
-    "    directories:\n\n"
-
-    "     * the emulator configuration directory: %s\n"
-    "     * the 'keysets' subdirectory of <systemdir>, if any\n"
-    "     * the 'keysets' subdirectory of the program location, if any\n\n",
-    temp );
-
-    PRINTF(
-    "  if no corresponding file is found, a default set of key bindings is used.\n\n"
-    "  use '-help-keys' to list the default key bindings.\n"
-    "  use '-help-keyset-file' to learn more about the format of keyset files.\n"
-    "\n"
-    );
-}
 
 #ifdef CONFIG_NAND_LIMITS
 static void
@@ -1609,11 +1443,9 @@ typedef struct {
 
 static const TopicHelp    topic_help[] = {
     { "disk-images",  "about disk images",      help_disk_images },
-    { "keys",         "supported key bindings", help_keys },
     { "debug-tags",   "debug tags for -debug <tags>", help_debug_tags },
     { "char-devices", "character <device> specification", help_char_devices },
     { "environment",  "environment variables",  help_environment },
-    { "keyset-file",  "key bindings configuration file", help_keyset_file },
     { "virtual-device", "virtual device management", help_virtual_device },
     { "sdk-images",   "about disk images when using the SDK", help_sdk_images },
     { "build-images", "about disk images when building Android", help_build_images },
