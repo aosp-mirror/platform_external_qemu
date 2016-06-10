@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0ffc242a_0cbcb5cd",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-10T17:36:14Z",
+      "side": 1,
+      "message": "nit: please start the name from a lowercase letter",
+      "range": {
+        "startLine": 128,
+        "startChar": 12,
+        "endLine": 128,
+        "endChar": 27
+      },
+      "revId": "4e02294fc239048cb9af96b990065bb3e3d70c0d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ef67d02f_f5035836",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 613,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-10T17:36:14Z",
+      "side": 1,
+      "message": "nit: formatting",
+      "range": {
+        "startLine": 611,
+        "startChar": 0,
+        "endLine": 613,
+        "endChar": 2
+      },
+      "revId": "4e02294fc239048cb9af96b990065bb3e3d70c0d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2f0ba862_af1df9ba",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 638,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-10T17:36:14Z",
+      "side": 1,
+      "message": "nit: formatting",
+      "range": {
+        "startLine": 636,
+        "startChar": 0,
+        "endLine": 638,
+        "endChar": 6
+      },
+      "revId": "4e02294fc239048cb9af96b990065bb3e3d70c0d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
