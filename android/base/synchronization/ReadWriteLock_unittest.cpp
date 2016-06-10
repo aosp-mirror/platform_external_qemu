@@ -15,6 +15,7 @@
 #include "android/base/synchronization/Lock.h"
 
 #include "android/base/testing/TestThread.h"
+#include "android/base/testing/Utils.h"
 
 #include <gtest/gtest.h>
 
@@ -96,6 +97,11 @@ static void* readThreadFunction(void* param) {
 
 // write: just like for Lock
 TEST(ReadWriteLock, SyncWrite) {
+    // SRWlock API are empty stubs on wine version < 1.7.11
+    // Now for Ubuntu/Debian, the default wine version is still 1.6
+    // Skip it now.
+    SKIP_TEST_ON_WINE();
+
     ReadWriteLock rwl;
 
     const size_t kNumWriteThreads = 2000;
@@ -121,6 +127,11 @@ TEST(ReadWriteLock, SyncWrite) {
 // all writes first, all reads first, random)
 
 TEST(ReadWriteLock, SyncReadWrite) {
+    // SRWlock API are empty stubs on wine version < 1.7.11
+    // Now for Ubuntu/Debian, the default wine version is still 1.6
+    // Skip it now.
+    SKIP_TEST_ON_WINE();
+
     const size_t kNumThreads = 1000;
     std::vector<TestThread> write_threads;
     std::vector<TestThread> read_threads;
@@ -190,6 +201,11 @@ TEST(ReadWriteLock, SyncReadWrite) {
 }
 
 TEST(ReadWriteLock, SyncReadWriteRandom) {
+    // SRWlock API are empty stubs on wine version < 1.7.11
+    // Now for Ubuntu/Debian, the default wine version is still 1.6
+    // Skip it now.
+    SKIP_TEST_ON_WINE();
+
     const size_t kTrials = 100;
     const size_t kNumThreadsPerTrial = 100;
     RWThreadParams p;
