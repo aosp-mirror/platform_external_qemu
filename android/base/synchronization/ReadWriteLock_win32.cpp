@@ -15,6 +15,7 @@
 #include "android/base/synchronization/Lock.h"
 
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/system/System.h"
 
 #define DEBUG 0
 
@@ -114,6 +115,30 @@ public:
     SRWLockSupportLoader();
 };
 
+bool isSrwLockAWineStub(initialize_srw_lock_t init,
+                        acquire_srw_lock_exclusive_t lock,
+                        release_srw_lock_exclusive_t unlock) {
+    if (!System::get()->isRunningUnderWine()) {
+        return false;
+    }
+    SRWLock lock1, lock2;
+    memset(&lock1, 0x12, sizeof(lock1));
+    memcpy(&lock2, &lock1, sizeof(lock1));
+    init(&lock1);
+    if (memcmp(&lock1, &lock2, sizeof(lock1))==0) {
+        DPRINT("InitializeSRWLock is a stub\n");
+        return true;
+    }
+    memcpy(&lock2, &lock1, sizeof(lock1));
+    lock(&lock1);
+    if (memcmp(&lock1, &lock2, sizeof(lock1))==0) {
+        DPRINT("AcquireSRWLockExclusive is a stub\n");
+        return true;
+    }
+    unlock(&lock1);
+    return false;
+}
+
 SRWLockSupportLoader::SRWLockSupportLoader() {
     if (sModuleLoaded) return;
 
@@ -135,7 +160,8 @@ SRWLockSupportLoader::SRWLockSupportLoader() {
 
     if (initsrwlock &&
         acqlockex && rellockex &&
-        acqlocksh && rellocksh) {
+        acqlocksh && rellocksh &&
+        !isSrwLockAWineStub(initsrwlock, acqlockex, rellockex)) {
         DPRINT("SRWLOCK supported.\n");
         sSRWSupported = true;
 
