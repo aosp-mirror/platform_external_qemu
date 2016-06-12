@@ -11,14 +11,27 @@
 
 #include "android/windows_installer.h"
 
+#include "android/base/system/System.h"
+
 #include <gtest/gtest.h>
 #include <stdio.h>
 
 namespace android {
 
+namespace {
+
+std::string remindForWine(void) {
+    if (!base::System::get()->isRunningUnderWine()) {
+        return "";
+    }
+    return "Have you ever run android/tests/prepare-registry-for-wine.sh?";
+}
+
+}  // namespace
+
 TEST(WindowsInstaller, getVersion) {
     EXPECT_EQ(WindowsInstaller::kNotInstalled,
-              WindowsInstaller::getVersion("Google Play"));
+              WindowsInstaller::getVersion("Google Play")) << remindForWine();
 
     // I know of no package that can be depended on across all Windows versions
     // especially considering Wine
