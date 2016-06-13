@@ -17,6 +17,8 @@
 #include "trace.h"
 #include "hw/display/goldfish_fb.h"
 
+#include <inttypes.h>
+
 static int s_use_host_gpu = 0;
 static int s_display_bpp = 32;
 
@@ -465,7 +467,8 @@ static void goldfish_fb_write(void *opaque, hwaddr offset, uint64_t val,
             qemu_set_irq(s->irq, s->int_status & s->int_enable);
             break;
         case FB_SET_ROTATION:
-            error_report("%s: use of deprecated FB_SET_ROTATION %ld", __func__, val);
+            error_report("%s: use of deprecated FB_SET_ROTATION %" PRIu64,
+                         __func__, val);
             break;
         case FB_SET_BLANK:
             s->blank = val;
