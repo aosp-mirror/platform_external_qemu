@@ -30,11 +30,11 @@ static ssize_t virtpingpong_have_data(VirtIOSerialPort *port,
     //VirtPingpong *vpp = VIRTIO_PINGPONG(port);
     ssize_t ret;
 
-    printf("virtpingpong_have_data: %ld bytes\n", len);
+    printf("virtpingpong_have_data: %zd bytes\n", len);
 
     ret = virtio_serial_write(port, buf, len);
 
-    printf("virtpingpong_have_data: passed %ld bytes back\n", ret);
+    printf("virtpingpong_have_data: passed %zd bytes back\n", ret);
 
     if (ret < len) {
         /* We didn't manage to send all the data: throttle the
