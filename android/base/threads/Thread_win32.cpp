@@ -138,7 +138,7 @@ void Thread::maskAllSignals() {
 }
 
 unsigned long getCurrentThreadId() {
-    static_cast<unsigned long>(GetCurrentThreadId());
+    return static_cast<unsigned long>(GetCurrentThreadId());
 }
 
 }  // namespace base
