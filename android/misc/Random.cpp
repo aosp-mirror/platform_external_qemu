@@ -30,7 +30,7 @@ bool generateRandomBytes(char* buf, size_t buf_len) {
     HCRYPTPROV hCryptProv;
     DWORD dwFlags = CRYPT_VERIFYCONTEXT | CRYPT_SILENT;
     if (!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, dwFlags)) {
-        if (GetLastError() == NTE_BAD_KEYSET) {
+        if (GetLastError() == (DWORD)NTE_BAD_KEYSET) {
             if (!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL,
                                      dwFlags | CRYPT_NEWKEYSET)) {
                 return false;
