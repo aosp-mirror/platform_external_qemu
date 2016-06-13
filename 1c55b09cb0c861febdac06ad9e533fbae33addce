@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "8f09f4df_0465779a",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-13T18:05:30Z",
+      "side": 1,
+      "message": "I don\u0027t see any use of string -- why was this added?",
+      "range": {
+        "startLine": 30,
+        "startChar": 10,
+        "endLine": 30,
+        "endChar": 16
+      },
+      "revId": "1c55b09cb0c861febdac06ad9e533fbae33addce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8f09f4df_6401d3a9",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-13T18:05:30Z",
+      "side": 1,
+      "message": "Don\u0027t see any uses of \"string\" here either...?",
+      "range": {
+        "startLine": 29,
+        "startChar": 10,
+        "endLine": 29,
+        "endChar": 16
+      },
+      "revId": "1c55b09cb0c861febdac06ad9e533fbae33addce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8f09f4df_0f60f58a",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLDecoderContextData.h",
         "patchSetId": 1
@@ -60,6 +106,30 @@
       "side": 1,
       "message": "That could be a good idea, but I think the situation right now is that kMaxVertexAttributes (64) is \u003e\u003e GL_MAX_VERTEX_ATTRIBS in any situations with existing GPU hardware. So far it looks like it\u0027s just 16 all the time, and most apps really use like 4. These vertex attributes are used to assign different abstract coordinates to vertices like position, color, normal, texture coordinate (there we go, 4). You might be using multiple sets of texture coordinates if you are doing fancy blending work, but never anything close to or above 16 AFAIK.\n\nStrictly speaking, yeah the max vertex attributes could be so high that we\u0027d need to update kMaxVertexAttributes, but that situation hasn\u0027t shown up at all. Plus, we only call the GLDecoderContextData ctor with kMaxVertexAttributes.",
       "parentUuid": "8f09f4df_2fecd9fc",
+      "range": {
+        "startLine": 71,
+        "startChar": 34,
+        "endLine": 71,
+        "endChar": 54
+      },
+      "revId": "1c55b09cb0c861febdac06ad9e533fbae33addce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8f09f4df_84b3474d",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLDecoderContextData.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-13T18:05:30Z",
+      "side": 1,
+      "message": "OK, good to hear that it probably wouldn\u0027t be a bug.\n\nI\u0027m still a little nervous about converting code that would have worked for any value of numLocations into code with a fixed limit.  But if the constructor is only ever called with the default argument (as it must be if eliminating it compiles), then I guess it\u0027s only a theoretical problem.",
+      "parentUuid": "8f09f4df_84018731",
       "range": {
         "startLine": 71,
         "startChar": 34,
