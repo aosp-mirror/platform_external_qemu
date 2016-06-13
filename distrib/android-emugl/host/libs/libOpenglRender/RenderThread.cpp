@@ -194,7 +194,7 @@ intptr_t RenderThread::main() {
 
     FrameBuffer::getFB()->drainRenderContext();
 
-    DBG("Exited a RenderThread\n");
+    DBG("Exited a RenderThread @%p\n", this);
 
     return 0;
 }
