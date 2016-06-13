@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8f09f4df_0f60f58a",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLDecoderContextData.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-13T17:19:54Z",
+      "side": 1,
+      "message": "Here and below, if we\u0027re going to do the cast to/from char*...why not make this type char* data?  Some external constraint?",
+      "range": {
+        "startLine": 48,
+        "startChar": 44,
+        "endLine": 48,
+        "endChar": 54
+      },
+      "revId": "1c55b09cb0c861febdac06ad9e533fbae33addce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8f09f4df_2fecd9fc",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLDecoderContextData.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-13T17:19:54Z",
+      "side": 1,
+      "message": "There may be a bug here.  In the old code, it seems like kMaxVertexAttributes is really kind of misnamed: it\u0027s used as a default, and nothing ever enforces that it\u0027s the max.  You could call the GLDecoderContextData with numLocaions \u003d 128, for example.  Use of the fixed-size std::Array really does make it a max.\n\nSo it seems to me that you either have to go back to the old use of a vector, or convince me that the old code could have asserted in the constructor that numLocations \u003c\u003d kMaxVertexAttributes.",
+      "range": {
+        "startLine": 71,
+        "startChar": 34,
+        "endLine": 71,
+        "endChar": 54
+      },
+      "revId": "1c55b09cb0c861febdac06ad9e533fbae33addce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
