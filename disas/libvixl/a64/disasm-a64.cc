@@ -27,6 +27,19 @@
 #include <cstdlib>
 #include "a64/disasm-a64.h"
 
+#if defined(_WIN32)
+// Redefine PRI<f>64 values to avoid compiler warnings like
+// 'unknown conversion type character 'l' in format'. See:
+// http://stackoverflow.com/questions/10763854/printf-and-llx-in-gcc-under-windows-64x
+#undef PRIx64
+#undef PRIu64
+#undef PRId64
+#define PRIx64 "I64x"
+#define PRIu64 "I64u"
+#define PRId64 "I64d"
+#endif
+
+
 namespace vixl {
 
 Disassembler::Disassembler() {
@@ -1848,9 +1861,22 @@ void Disassembler::AppendToOutput(const char* format, ...) {
 
 
 void PrintDisassembler::ProcessOutput(const Instruction* instr) {
+#if defined(_WIN32)
+  // See http://comments.gmane.org/gmane.comp.web.curl.library/36161
+  // NOTE: snprintf() points to gnu_printf() that doesn't accept PRIx64
+  //       in this context. Yes, this is very confusing :-/
+  char hexInstr[32];
+  snprintf(hexInstr, sizeof(hexInstr), "%016llx",
+           reinterpret_cast<long long>(instr));
+  fprintf(stream_, "0x%s  %08" PRIx32 "\t\t%s\n",
+          hexInstr,
+          instr->InstructionBits(),
+          GetOutput());
+#else
   fprintf(stream_, "0x%016" PRIx64 "  %08" PRIx32 "\t\t%s\n",
           reinterpret_cast<uint64_t>(instr),
           instr->InstructionBits(),
           GetOutput());
+#endif
 }
 }  // namespace vixl
