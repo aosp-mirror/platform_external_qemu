@@ -311,7 +311,9 @@ Slirp *slirp_init(int restricted, struct in_addr vnetwork,
     slirp->opaque = opaque;
 
 #ifdef CONFIG_ANDROID
-    inet_strtoip(SPECIAL_ADDRESS_IP, &special_addr_ip.s_addr);
+    uint32_t special_ip = 0;
+    inet_strtoip(SPECIAL_ADDRESS_IP, &special_ip);
+    special_addr_ip.s_addr = special_ip;
 #endif
 
     register_savevm(NULL, "slirp", 0, 3,
