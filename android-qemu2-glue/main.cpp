@@ -625,10 +625,13 @@ extern "C" int main(int argc, char **argv) {
         System::FileSize current_data_size;
         if (System::get()->pathFileSize(hw->disk_dataPartition_path,
                                         &current_data_size)) {
-            if (current_data_size < android_hw->disk_dataPartition_size) {
+            System::FileSize partition_size = static_cast<System::FileSize>(
+                    android_hw->disk_dataPartition_size);
+            if (android_hw->disk_dataPartition_size > 0 &&
+                    current_data_size < partition_size) {
                 dwarning("userdata partition is resized from %d M to %d M\n",
-                         current_data_size / (1024 * 1024),
-                         android_hw->disk_dataPartition_size / (1024 * 1024));
+                         (int)(current_data_size / (1024 * 1024)),
+                         (int)(partition_size / (1024 * 1024)));
                 resizeExt4Partition(android_hw->disk_dataPartition_path,
                                     android_hw->disk_dataPartition_size);
             }
