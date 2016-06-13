@@ -140,7 +140,23 @@ static int file_pad(struct output_file *out, int64_t len)
 {
 	int ret;
 	struct output_file_normal *outn = to_output_file_normal(out);
-
+#ifdef USE_MINGW
+	/* mingw-w64 does free space check before enlarge file, that check
+	 * doesn't work on wine of Ubuntu 14.04. As a work around, we always
+	 * make sure the actual file size is larger than len so mingw will
+	 * bypass that free space check. */
+	ret = lseek64(outn->fd, len, SEEK_SET);
+	if (ret < 0) {
+		error_errno("lseek64");
+		return -1;
+	}
+	char c = '\0';
+	ret = write(outn->fd, &c, 1);
+	if (ret < 0) {
+		error_errno("write");
+		return -1;
+	}
+#endif
 	ret = ftruncate64(outn->fd, len);
 	if (ret < 0) {
 		return -errno;
