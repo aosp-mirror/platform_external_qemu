@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8f09f4df_64a71323",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-06-13T17:59:31Z",
+      "side": 1,
+      "message": "This should be updated to reflect what this CL actually does now.",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 29
+      },
+      "revId": "15ee2539ef8f238e6d6ed5daad509c7a60eeb7d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8f09f4df_84aea7fa",
+        "filename": "android/emulation/control/cellular_agent.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-06-13T17:59:31Z",
+      "side": 1,
+      "message": "Described as \"Great\" in the commit? Which are we going with?",
+      "range": {
+        "startLine": 26,
+        "startChar": 44,
+        "endLine": 26,
+        "endChar": 69
+      },
+      "revId": "15ee2539ef8f238e6d6ed5daad509c7a60eeb7d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8f09f4df_e479636e",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-06-13T17:59:31Z",
+      "side": 1,
+      "message": "Would be nice to have a comment indicating where these values come from?",
+      "range": {
+        "startLine": 237,
+        "startChar": 0,
+        "endLine": 248,
+        "endChar": 2
+      },
+      "revId": "15ee2539ef8f238e6d6ed5daad509c7a60eeb7d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
