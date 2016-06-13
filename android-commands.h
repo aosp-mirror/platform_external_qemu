@@ -359,6 +359,11 @@ static mon_cmd_t android_gsm_cmds[] = {
     { NULL, NULL, },
 };
 
+#ifdef _WIN32
+// NOTE: HELP_COMMAND is defined by winuser.h which conflicts with this.
+#undef HELP_COMMAND
+#endif
+
 #define HELP_COMMAND                                                  \
     {                                                                 \
         .name = "help|h|?", .args_type = "helptext:S?", .params = "", \
