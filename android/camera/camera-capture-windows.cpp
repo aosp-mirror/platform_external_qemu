@@ -901,7 +901,7 @@ public:
     virtual intptr_t main() override {
         bool running = true;
         while (running) {
-            CameraCommand cmd;
+            CameraCommand cmd = {};
             mInput.receive(&cmd);
             intptr_t result = cmd.process();
             mOutput.send(result);
