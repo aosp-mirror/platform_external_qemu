@@ -153,7 +153,7 @@ int hax_capability(struct hax_state *hax, struct hax_capabilityinfo *cap)
         err = GetLastError();
         if (err == ERROR_INSUFFICIENT_BUFFER || err == ERROR_MORE_DATA)
             fprintf(stderr, "hax capability is too long to hold.\n");
-        fprintf(stderr, "Failed to get Hax capability:%d\n", err);
+        fprintf(stderr, "Failed to get Hax capability:%lu\n", err);
         return -EFAULT;
     } else
         return 0;
@@ -182,7 +182,7 @@ int hax_mod_version(struct hax_state *hax, struct hax_module_version *version)
         err = GetLastError();
         if (err == ERROR_INSUFFICIENT_BUFFER || err == ERROR_MORE_DATA)
             fprintf(stderr, "hax module verion is too long to hold.\n");
-        fprintf(stderr, "Failed to get Hax module version:%d\n", err);
+        fprintf(stderr, "Failed to get Hax module version:%lu\n", err);
         return -EFAULT;
     } else
         return 0;
@@ -242,7 +242,7 @@ int hax_host_create_vm(struct hax_state *hax, int *vmid)
                           NULL, 0, &vm_id, sizeof(vm_id), &dSize,
                           (LPOVERLAPPED) NULL);
     if (!ret) {
-        fprintf(stderr, "Failed to create VM. Error code: %d\n",
+        fprintf(stderr, "Failed to create VM. Error code: %lu\n",
                 GetLastError());
         return -1;
     }
@@ -265,7 +265,7 @@ hax_fd hax_host_open_vm(struct hax_state * hax, int vm_id)
                            GENERIC_READ | GENERIC_WRITE,
                            0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     if (hDeviceVM == INVALID_HANDLE_VALUE)
-        fprintf(stderr, "Open the vm device error:%s, ec:%d\n",
+        fprintf(stderr, "Open the vm device error:%s, ec:%lu\n",
                 vm_name, GetLastError());
 
     g_free(vm_name);
