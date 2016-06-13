@@ -2232,7 +2232,7 @@ static void win_stdio_wait_func(void *opaque)
     BOOL getRet = GetNumberOfConsoleInputEvents(stdio->hStdIn, &eventCount);
     if (!getRet) {
         fprintf(stderr, "GetNumberOfConsoleInputEvents() API call failed,"
-                        " code %d\n", GetLastError());
+                        " code %lu\n", GetLastError());
         return;
     }
     if (eventCount == 0) {
