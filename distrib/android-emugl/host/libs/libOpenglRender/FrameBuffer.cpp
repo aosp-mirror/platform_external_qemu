@@ -410,7 +410,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     fb->m_glRenderer = (const char*)s_gles2.glGetString(GL_RENDERER);
     fb->m_glVersion = (const char*)s_gles2.glGetString(GL_VERSION);
 
-    fb->m_textureDraw = new TextureDraw(fb->m_eglDisplay);
+    fb->m_textureDraw = new TextureDraw();
     if (!fb->m_textureDraw) {
         ERR("Failed: creation of TextureDraw instance\n");
         bind.release();

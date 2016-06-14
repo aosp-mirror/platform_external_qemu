@@ -21,7 +21,7 @@
 // Helper class used to draw a simple texture to the current framebuffer.
 // Usage is pretty simple:
 //
-//   1) Create a TextureDraw instance, passing the current EGLDisplay to it.
+//   1) Create a TextureDraw instance.
 //
 //   2) Each time you want to draw a texture, call draw(texture, rotation),
 //      where |texture| is the name of a GLES 2.x texture object, and
@@ -32,7 +32,7 @@
 class TextureDraw {
 public:
     // Create a new instance.
-    TextureDraw(EGLDisplay display);
+    TextureDraw();
 
     // Destructor
     ~TextureDraw();
@@ -45,7 +45,6 @@ public:
     bool draw(GLuint texture, float rotationDegrees, float dx, float dy);
 
 private:
-    EGLDisplay mDisplay;
     GLuint mVertexShader;
     GLuint mFragmentShader;
     GLuint mProgram;
