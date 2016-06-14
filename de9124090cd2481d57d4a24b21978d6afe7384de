@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "94fe6d6e_5b340f8a",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-14T17:58:59Z",
+      "side": 1,
+      "message": "it\u0027s unsafe to access mThreads not under the lock. Please remove std::move() from line 118 and use |rt| here",
+      "range": {
+        "startLine": 122,
+        "startChar": 72,
+        "endLine": 122,
+        "endChar": 96
+      },
+      "revId": "de9124090cd2481d57d4a24b21978d6afe7384de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
