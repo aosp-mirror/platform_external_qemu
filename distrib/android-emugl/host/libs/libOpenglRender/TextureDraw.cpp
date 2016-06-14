@@ -101,8 +101,7 @@ const GLint kIndicesLen = sizeof(kIndices) / sizeof(kIndices[0]);
 
 }  // namespace
 
-TextureDraw::TextureDraw(EGLDisplay display) :
-        mDisplay(display),
+TextureDraw::TextureDraw() :
         mVertexShader(0),
         mFragmentShader(0),
         mProgram(0),
