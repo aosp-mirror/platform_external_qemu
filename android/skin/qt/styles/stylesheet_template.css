@@ -194,3 +194,20 @@ RaisedMaterialButton {
 RaisedMaterialButton:pressed {
     background: %%TAB_DARKENED_COLOR%%;
 }
+QAbstractSpinBox {
+    border-top: 0px;
+    border-bottom: 1px solid %%EDIT_COLOR%%;
+    padding-bottom: 4;
+}
+QAbstractSpinBox:focus {
+    border-top: 0px;
+    border-bottom: 2px solid %%TOOL_COLOR%%;
+}
+QAbstractSpinBox:up-button {
+    border-image: url(:/%%PATH%%/arrow_drop_up);
+    width: 12;
+}
+QAbstractSpinBox:down-button {
+    border-image: url(:/%%PATH%%/arrow_drop_down);
+    width: 12;
+}

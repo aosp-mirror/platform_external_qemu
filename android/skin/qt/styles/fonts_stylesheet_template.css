@@ -11,7 +11,7 @@
  */
 
 QGroupBox { font-weight: regular; font-size: %%FONT_MEDIUM%%; }
-QComboBox, QLineEdit, QPlainTextEdit, QPushButton, QRadioButton {
+QComboBox, QLineEdit, QPlainTextEdit, QPushButton, QRadioButton, QAbstractSpinBox {
     font-weight: regular;
     font-size: %%FONT_LARGE%%;
 }
