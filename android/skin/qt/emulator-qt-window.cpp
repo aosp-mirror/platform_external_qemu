@@ -808,6 +808,11 @@ void EmulatorQtWindow::queueSkinEvent(SkinEvent* event) {
         // if this event is the first one
         uiAgent->userEvents->onNewUserEvent();
     }
+    if (event->type == kEventLayoutNext) {
+        emit(layoutChanged(true));
+    } else if (event->type == kEventLayoutPrev) {
+        emit(layoutChanged(false));
+    }
 }
 
 void EmulatorQtWindow::slot_releaseBitmap(SkinSurface* s,

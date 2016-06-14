@@ -62,6 +62,7 @@ ExtendedWindow::ExtendedWindow(
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->location_page->setLocationAgent(agentPtr->location);
     mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
+    mExtendedUi->virtualSensorsPage->setLayoutChangeNotifier(eW);
 
     connect(
         mExtendedUi->settingsPage, SIGNAL(onTopChanged(bool)),
