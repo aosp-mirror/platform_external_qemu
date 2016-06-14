@@ -12,6 +12,8 @@
 
 #include "ui_virtual-sensors-page.h"
 
+#include "android/skin/file.h"
+
 #include <QDoubleValidator>
 #include <QTimer>
 #include <QWidget>
@@ -24,9 +26,10 @@ class VirtualSensorsPage : public QWidget
     Q_OBJECT
 
 public:
-    explicit VirtualSensorsPage(QWidget *parent = 0);
+    explicit VirtualSensorsPage(QWidget* parent = 0);
 
     void setSensorsAgent(const QAndroidSensorsAgent* agent);
+    void setLayoutChangeNotifier(QObject* layout_change_notifier);
 
 private slots:
     void on_temperatureSensorValueWidget_valueChanged(double value);
@@ -47,6 +50,7 @@ private slots:
         updateAccelerometerValues();
         mAccelerationTimer.stop();
     }
+    void onSkinLayoutChange(bool next);
 
 private slots:
     void on_rotateToPortrait_clicked();
@@ -58,7 +62,8 @@ private slots:
     void on_helpPressure_clicked();
 
 private:
-    void resetRotation(const QQuaternion&);
+    void resetAccelerometerRotation(const QQuaternion&);
+    void resetAccelerometerRotationFromSkinLayout(const SkinLayout*);
     void updateAccelerometerValues();
 
     std::unique_ptr<Ui::VirtualSensorsPage> mUi;
