@@ -59,18 +59,33 @@ std::string EmuglBackendList::getLibDirPath(const char* name) {
             name);
 }
 
+static const char kLibPrefix[] = "lib";
+
+#ifdef _WIN32
+static const char kLibSuffix[] = ".dll";
+#elif defined(__APPLE__)
+static const char kLibSuffix[] = ".dylib";
+#else
+static const char kLibSuffix[] = ".so";
+#endif
+
+std::string EmuglBackendList::getGLES12TranslatorLibName() {
+
+    std::string res(kLibPrefix);
+
+    if (mProgramBitness == 64) {
+        res += "64";
+    }
+
+    res += kGLES12TranslatorName;
+
+    res += kLibSuffix;
+    return res;
+}
+
 bool EmuglBackendList::getBackendLibPath(const char* name,
                                          Library library,
                                          std::string* libPath) {
-    static const char kLibPrefix[] = "lib";
-
-#ifdef _WIN32
-    static const char kLibSuffix[] = ".dll";
-#elif defined(__APPLE__)
-    static const char kLibSuffix[] = ".dylib";
-#else
-    static const char kLibSuffix[] = ".so";
-#endif
 
     const char* libraryName = NULL;
     if (library == LIBRARY_EGL) {
