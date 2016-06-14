@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "94fe6d6e_7b8bd334",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-14T18:02:00Z",
+      "side": 1,
+      "message": "what about just including curl/curl here, and also hiding the winsock/windows specifics in that header?",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 33
+      },
+      "revId": "9103e8d500255ce1be11e42a09131d0eced44cee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
