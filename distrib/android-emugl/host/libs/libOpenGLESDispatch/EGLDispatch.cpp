@@ -43,7 +43,7 @@ bool init_egl_dispatch()
     emugl::SharedLibrary *lib = emugl::SharedLibrary::open(libName, error, sizeof(error));
     if (!lib) {
         printf("Failed to open %s: [%s]\n", libName, error);
-        return NULL;
+        return false;
     }
     LIST_RENDER_EGL_FUNCTIONS(RENDER_EGL_LOAD_FIELD)
     LIST_RENDER_EGL_EXTENSIONS_FUNCTIONS(RENDER_EGL_LOAD_OPTIONAL_FIELD)
