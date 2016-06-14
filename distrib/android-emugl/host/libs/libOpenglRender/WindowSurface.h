@@ -79,6 +79,9 @@ public:
     // for BIND_READDRAW, it assigns it to both.
     void bind(RenderContextPtr p_ctx, BindType p_bindType);
 
+    GLuint getWidth() const;
+    GLuint getHeight() const;
+
 private:
     WindowSurface(const WindowSurface& other) = delete;
 
