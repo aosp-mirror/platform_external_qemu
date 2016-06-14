@@ -25,6 +25,9 @@
 
 #include <GLES/gl.h>
 
+#include "OpenGLESDispatch/gldefs.h"
+
+
 class GlesContext;
 struct ANGLE_GLES2;
 
@@ -74,6 +77,7 @@ void DisableCall(const GlesContext* c, GLenum cap);
 void DisableVertexAttribArrayCall(const GlesContext* c, GLuint index);
 void DrawArraysCall(const GlesContext* c, GLenum mode, GLint first, GLsizei count);
 void DrawElementsCall(const GlesContext* c, GLenum mode, GLsizei count, GLenum type, const void* indices);
+void EGLImageTargetTexture2DOESCall(const GlesContext* c, GLenum target, GLeglImageOES image);
 void EnableCall(const GlesContext* c, GLenum cap);
 void EnableVertexAttribArrayCall(const GlesContext* c, GLuint index);
 void FinishCall(const GlesContext* c);
