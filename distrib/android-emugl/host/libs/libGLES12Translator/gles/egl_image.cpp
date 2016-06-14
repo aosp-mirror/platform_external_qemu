@@ -18,6 +18,7 @@
 #include <GLES/gl.h>
 
 #include "common/alog.h"
+#include "common/dlog.h"
 #include "gles/gles_context.h"
 #include "gles/texture_data.h"
 
@@ -33,6 +34,7 @@ EglImage::EglImage(GLenum global_texture_target, GLuint global_texture_name,
 }
 
 EglImagePtr EglImage::Create(GLenum global_target, GLuint name) {
+    DLOG("create egl image with name=%u", name);
   GlesContext* c = GetCurrentGlesContext();
   if (!c) {
     return EglImagePtr();
@@ -40,6 +42,12 @@ EglImagePtr EglImage::Create(GLenum global_target, GLuint name) {
 
   ShareGroupPtr sg = c->GetShareGroup();
   TextureDataPtr tex = sg->GetTextureData(name);
+  if (tex == NULL) {
+      DLOG("texture data of %u not present!", name);
+  }
+  if (tex->GetWidth() == 0 || tex->GetHeight() == 0) {
+      DLOG("texture is 0 width/height: %ux%u", tex->GetWidth(), tex->GetHeight());
+  }
   if (tex == NULL || tex->GetWidth() == 0 || tex->GetHeight() == 0) {
     LOG_ALWAYS_FATAL("No such texture: %d", name);
     return EglImagePtr();
