@@ -37,6 +37,7 @@ class ShaderData : public ObjectData {
 
   void Compile();
 
+ protected:
   virtual ~ShaderData();
 
  private:
@@ -46,6 +47,6 @@ class ShaderData : public ObjectData {
   ShaderData& operator=(const ShaderData&);
 };
 
-typedef emugl::SmartPtr<ShaderData> ShaderDataPtr;
+typedef android::sp<ShaderData> ShaderDataPtr;
 
 #endif  // GRAPHICS_TRANSLATION_GLES_SHADER_DATA_H_
