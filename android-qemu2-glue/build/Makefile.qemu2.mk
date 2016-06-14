@@ -80,6 +80,7 @@ QEMU2_CFLAGS := \
     -D_GNU_SOURCE \
     -D_FILE_OFFSET_BITS=64 \
     -DCONFIG_ANDROID \
+    $(call qemu2-if-darwin, -Wno-initializer-overrides) \
 
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
 
