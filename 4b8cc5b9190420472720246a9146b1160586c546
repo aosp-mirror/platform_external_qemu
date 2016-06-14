@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "94fe6d6e_f587d2bb",
+        "filename": "android/base/threads/Thread_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-06-14T16:14:26Z",
+      "side": 1,
+      "message": "I guess this is what you\u0027re working towards but this is why we should have warnings treated as errors. :)",
+      "revId": "4b8cc5b9190420472720246a9146b1160586c546",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
