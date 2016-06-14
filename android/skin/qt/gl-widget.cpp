@@ -110,6 +110,8 @@ GLWidget::GLWidget(QWidget* parent) :
     setAttribute(Qt::WA_OpaquePaintEvent, true);
     setAttribute(Qt::WA_PaintOnScreen, true);
     setAttribute(Qt::WA_NoSystemBackground, true);
+    setAttribute(Qt::WA_DontCreateNativeAncestors, true);
+    setAttribute(Qt::WA_NativeWindow, true);
 }
 
 void GLWidget::handleScreenChange(QScreen*) {
@@ -250,7 +252,7 @@ void GLWidget::showEvent(QShowEvent*) {
     // initialization at all.
     // However, show events may be delivered when the widget
     // isn't visible yet, so we need an additional check.
-    if (isVisible()) {
+    if (isVisible() && !visibleRegion().isNull()) {
         renderFrame();
     }
     connect(window()->windowHandle(), SIGNAL(screenChanged(QScreen*)), this, SLOT(handleScreenChange(QScreen*)));
