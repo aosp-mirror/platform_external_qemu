@@ -285,10 +285,8 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
                         "Using GLESv2 only.\n",
                         config->backend);
         // A GLESv1 lib is optional---we can deal with a GLESv2 only
-        // backend. The string "<gles2_only_backend>"
-        // is used to tell OpenGLESDispatch to create
-        // dummy versions of GLESv1 functions.
-        system->envSet("ANDROID_GLESv1_LIB", "<gles2_only_backend>");
+        // backend by using a GLESv1->GLESv2 emulation library.
+        system->envSet("ANDROID_GLESv1_LIB", sBackendList->getGLES12TranslatorLibName().c_str());
     }
 
     if (sBackendList->getBackendLibPath(

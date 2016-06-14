@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/opengl/emugl_config.h"
+#include "android/opengl/EmuglBackendList.h"
 #include "android/opengl/gpuinfo.h"
 
 #include "android/base/testing/TestSystem.h"
@@ -134,8 +135,9 @@ TEST(EmuglConfig, init) {
         EXPECT_STREQ("GPU emulation enabled using 'vendor' mode",
                      config.status);
         emuglConfig_setupEnv(&config);
-        EXPECT_STREQ("<gles2_only_backend>",
-                     System::get()->envGet("ANDROID_GLESv1_LIB").c_str());
+        EXPECT_TRUE(
+                strstr(System::get()->envGet("ANDROID_GLESv1_LIB").c_str(),
+                       android::opengl::kGLES12TranslatorName) != NULL);
     }
 
     {
@@ -217,8 +219,9 @@ TEST(EmuglConfig, initGLESv2Only) {
         EXPECT_STREQ("GPU emulation enabled using 'angle' mode",
                      config.status);
         emuglConfig_setupEnv(&config);
-        EXPECT_STREQ("<gles2_only_backend>",
-                     System::get()->envGet("ANDROID_GLESv1_LIB").c_str());
+        EXPECT_TRUE(
+                strstr(System::get()->envGet("ANDROID_GLESv1_LIB").c_str(),
+                       android::opengl::kGLES12TranslatorName) != NULL);
     }
 
     makeLibSubFile(myDir, GLESv1LibPath.c_str());
@@ -232,8 +235,9 @@ TEST(EmuglConfig, initGLESv2Only) {
         EXPECT_STREQ("GPU emulation enabled using 'angle' mode",
                      config.status);
         emuglConfig_setupEnv(&config);
-        EXPECT_TRUE(strcmp("<gles2_only_backend>",
-                    System::get()->envGet("ANDROID_GLESv1_LIB").c_str()));
+        EXPECT_FALSE(
+                strstr(System::get()->envGet("ANDROID_GLESv1_LIB").c_str(),
+                       android::opengl::kGLES12TranslatorName) != NULL);
     }
 }
 
