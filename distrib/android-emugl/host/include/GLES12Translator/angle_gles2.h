@@ -18,30 +18,7 @@
 
 #define ANGLE_GLES2_INTERFACE "ANGLE_GLES2"
 
-#ifndef __gl2_h_
-typedef void GLvoid;
-typedef int GLsizei;
-typedef unsigned short GLushort;
-typedef short GLshort;
-typedef unsigned char GLubyte;
-typedef unsigned int GLenum;
-typedef int GLint;
-typedef unsigned char GLboolean;
-typedef unsigned int GLbitfield;
-typedef float GLfloat;
-typedef float GLclampf;
-typedef signed char GLbyte;
-typedef unsigned int GLuint;
-typedef int GLfixed;
-typedef int GLclampx;
-#ifdef _WIN64
-typedef long long int GLintptr;
-typedef long long int GLsizeiptr;
-#else
-typedef long int GLintptr;
-typedef long int GLsizeiptr;
-#endif  // _WIN64
-#endif  // __gl2_h_
+#include "OpenGLESDispatch/gldefs.h"
 
 struct ANGLE_GLES2 {
     void (*ActiveTexture)(GLenum texture);
@@ -81,6 +58,7 @@ struct ANGLE_GLES2 {
                        GLclampf green,
                        GLclampf blue,
                        GLclampf alpha);
+    void (*ClearDepth)(GLclampd depth);
     void (*ClearDepthf)(GLclampf depth);
     void (*ClearStencil)(GLint s);
     void (*ColorMask)(GLboolean red,
@@ -135,6 +113,7 @@ struct ANGLE_GLES2 {
                            const GLuint* textures);
     void (*DepthFunc)(GLenum func);
     void (*DepthMask)(GLboolean flag);
+    void (*DepthRange)(GLclampd zNear, GLclampd zFar);
     void (*DepthRangef)(GLclampf zNear, GLclampf zFar);
     void (*DetachShader)(GLuint program, GLuint shader);
     void (*Disable)(GLenum cap);
@@ -229,6 +208,11 @@ struct ANGLE_GLES2 {
     void (*GetTexParameteriv)(GLenum target,
                               GLenum pname,
                               GLint* params);
+    void (*GetTexLevelParameteriv)(GLenum target,
+                                   GLint level,
+                                   GLenum pname,
+                                   GLint *params);
+
     void (*GetUniformfv)(GLuint program,
                          GLint location,
                          GLfloat* params);
@@ -252,12 +236,64 @@ struct ANGLE_GLES2 {
     GLboolean (*IsFramebuffer)(GLuint framebuffer);
     GLboolean (*IsProgram)(GLuint program);
     GLboolean (*IsRenderbuffer)(GLuint renderbuffer);
+    GLboolean (*IsRenderbufferEXT)(GLuint renderbuffer);
+
+    void (*BindRenderbufferEXT)(GLenum target, GLuint renderbuffer);
+    void (*DeleteRenderbuffersEXT)(GLsizei n, const GLuint *renderbuffers);
+    void (*GenRenderbuffersEXT)(GLsizei n, GLuint *renderbuffers);
+    void (*RenderbufferStorageEXT)(GLenum target,
+                                   GLenum internalformat,
+                                   GLsizei width,
+                                   GLsizei height);
+    void (*GetRenderbufferParameterivEXT)(GLenum target,
+                                          GLenum pname,
+                                          GLint *params);
+    GLboolean (*IsFramebufferEXT)(GLuint framebuffer);
+    void (*BindFramebufferEXT)(GLenum target, GLuint framebuffer);
+    void (*DeleteFramebuffersEXT)(GLsizei n, const GLuint *framebuffers);
+    void (*GenFramebuffersEXT)(GLsizei n, GLuint *framebuffers);
+    GLenum (*CheckFramebufferStatusEXT)(GLenum target);
+    void (*FramebufferTexture1DEXT)(GLenum target,
+                                    GLenum attachment,
+                                    GLenum textarget,
+                                    GLuint texture,
+                                    GLint level);
+    void (*FramebufferTexture2DEXT)(GLenum target,
+                                    GLenum attachment,
+                                    GLenum textarget,
+                                    GLuint texture,
+                                    GLint level);
+    void (*FramebufferTexture3DEXT)(GLenum target,
+                                    GLenum attachment,
+                                    GLenum textarget,
+                                    GLuint texture,
+                                    GLint level,
+                                    GLint zoffset);
+    void (*FramebufferRenderbufferEXT)(GLenum target,
+                                       GLenum attachment,
+                                       GLenum renderbuffertarget,
+                                       GLuint renderbuffer);
+    void (*GetFramebufferAttachmentParameterivEXT)(GLenum target,
+                                                   GLenum attachment,
+                                                   GLenum pname,
+                                                   GLint *params);
+    void (*GenerateMipmapEXT)(GLenum target);
+
+    void (*EGLImageTargetTexture2DOES)(GLenum target, GLeglImageOES image);
+    void (*EGLImageTargetRenderbufferStorageOES)(GLenum target,
+                                                 GLeglImageOES image);
+
     GLboolean (*IsShader)(GLuint shader);
     GLboolean (*IsTexture)(GLuint texture);
     void (*LineWidth)(GLfloat width);
     void (*LinkProgram)(GLuint program);
     void (*PixelStorei)(GLenum pname, GLint param);
     void (*PolygonOffset)(GLfloat factor, GLfloat units);
+    void (*PushAttrib)(GLbitfield mask);
+    void (*PushClientAttrib)( GLbitfield mask );
+    void (*PopAttrib)( void );
+    void (*PopClientAttrib)( void );
+
     void (*ReadPixels)(GLint x,
                        GLint y,
                        GLsizei width,
@@ -282,7 +318,7 @@ struct ANGLE_GLES2 {
                          GLsizei length);
     void (*ShaderSource)(GLuint shader,
                          GLsizei count,
-                         const char** str,
+                         const char *const * str,
                          const GLint* length);
     void (*StencilFunc)(GLenum func, GLint ref, GLuint mask);
     void (*StencilFuncSeparate)(GLenum face,
