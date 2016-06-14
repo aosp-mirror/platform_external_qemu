@@ -2463,8 +2463,9 @@ GLES_APIENTRY(void, GetFramebufferAttachmentParameteriv, GLenum target,
             *params = 0;
             break;
         case GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE:
-            PASS_THROUGH(c, GetFramebufferAttachmentParameteriv, target, attachment,
-                    pname, params);
+            DLOG("UNIMPLEMENTED: GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE");
+            // PASS_THROUGH(c, GetFramebufferAttachmentParameteriv, target, attachment,
+            //         pname, params);
             break;
     }
 }
