@@ -27,12 +27,12 @@ GLES_TR_CPPS=${GLES_TR_DIR}/api_entries.cpp \
              ${GLES_TR_DIR}/vector.cpp \
              ${GLES_TR_DIR}/tmp.cpp \
              ${COMMON_DIR}/log.cpp \
-             ${COMMON_DIR}/etc1.cpp
+             ${COMMON_DIR}/etc1.cpp \
+             ${COMMON_DIR}/RefBase.cpp
 
 $(call emugl-begin-shared-library,lib$(BUILD_TARGET_SUFFIX)GLES12Translator)
 
 $(call emugl-import,libGLESv1_dec libOpenglCodecCommon)
-
 
 LOCAL_SRC_FILES := $(GLES_TR_CPPS)
 $(call emugl-export,C_INCLUDES,$(EMUGL_PATH)/host/include)
