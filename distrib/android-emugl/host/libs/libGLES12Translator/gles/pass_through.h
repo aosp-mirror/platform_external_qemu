@@ -98,7 +98,6 @@ void GetBooleanvCall(const GlesContext* c, GLenum pname, GLboolean* params);
 void GetBufferParameterivCall(const GlesContext* c, GLenum target, GLenum pname, GLint* params);
 GLenum GetErrorCall(const GlesContext* c);
 void GetFloatvCall(const GlesContext* c, GLenum pname, GLfloat* params);
-void GetFramebufferAttachmentParameterivCall(const GlesContext* c, GLenum target, GLenum attachment, GLenum pname, GLint* params);
 void GetIntegervCall(const GlesContext* c, GLenum pname, GLint* params);
 void GetProgramivCall(const GlesContext* c, GLuint program, GLenum pname, GLint* params);
 void GetProgramInfoLogCall(const GlesContext* c, GLuint program, GLsizei bufsize, GLsizei* length, char* infolog);
@@ -119,7 +118,6 @@ void GetVertexAttribPointervCall(const GlesContext* c, GLuint index, GLenum pnam
 void HintCall(const GlesContext* c, GLenum target, GLenum mode);
 GLboolean IsBufferCall(const GlesContext* c, GLuint buffer);
 GLboolean IsEnabledCall(const GlesContext* c, GLenum cap);
-GLboolean IsFramebufferCall(const GlesContext* c, GLuint framebuffer);
 GLboolean IsProgramCall(const GlesContext* c, GLuint program);
 GLboolean IsRenderbufferCall(const GlesContext* c, GLuint renderbuffer);
 GLboolean IsShaderCall(const GlesContext* c, GLuint shader);
