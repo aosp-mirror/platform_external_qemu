@@ -14,7 +14,7 @@
 #include "GLES12Translator/underlying_apis.h"
 #include "GLES12Translator/angle_gles2.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 #if DEBUG
 #define DPRINT(fmt,...) do { \

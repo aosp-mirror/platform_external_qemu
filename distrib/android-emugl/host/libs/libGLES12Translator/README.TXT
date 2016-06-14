@@ -56,8 +56,6 @@ graphics_translattion to have an EGL component.
 =====gles1=====gles1>>>>>Current state of the library>>>>>>gles2=====gles2=====
 
 The state of this library right now is that it only builds. It is not hooked up
-to anything.  In particular, an attempt at minizing ARC-specific dependencies
-was made; RefBase, StrongPointer, and mutex had their usages removed, in favor
-of nothing, emugl smart ptr, and android::base::Lock respectively. Note that
-this does not guarantee that it works, it is only superficially-correct-looking
-in order to get the library to build.
+to anything.  Right now, it seems to need to use ARC's RefBase and
+StrongPointer in order to not crash during use (from smoke tests done by
+experimentally hooking up the library to the emulator).
