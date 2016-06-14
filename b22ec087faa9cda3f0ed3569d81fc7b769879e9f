@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "94fe6d6e_e6b3a64c",
+        "filename": "android/windows_installer_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-14T18:27:02Z",
+      "side": 1,
+      "message": "what about just creating a needed key right here, with \nRegCreateKey() ?\nhttps://msdn.microsoft.com/en-us/library/windows/desktop/ms724842(v\u003dvs.85).aspx",
+      "range": {
+        "startLine": 27,
+        "startChar": 5,
+        "endLine": 27,
+        "endChar": 75
+      },
+      "revId": "b22ec087faa9cda3f0ed3569d81fc7b769879e9f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
