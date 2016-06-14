@@ -18,14 +18,12 @@
 
 #include <GLES/gl.h>
 #include <string>
+#include <utils/RefBase.h>
 
 #include "android/base/synchronization/Lock.h"
 
 #include "gles/dirtiable.h"
 #include "gles/object_data.h"
-
-using android::base::Lock;
-using android::base::AutoLock;
 
 class GlesContext;
 
@@ -36,7 +34,7 @@ class GlesContext;
 // Functions (including destructor) may pass calls to the underlying GL
 // implementation, and so must be called with an active context.
 // A compiled ShaderVariant instance cannot be re-compiled.
-class ShaderVariant {
+class ShaderVariant : public android::RefBase {
  public:
   explicit ShaderVariant(ObjectType object_type);
 
@@ -67,6 +65,7 @@ class ShaderVariant {
 
   void Compile();
 
+ protected:
   virtual ~ShaderVariant();
 
  private:
@@ -85,7 +84,7 @@ class ShaderVariant {
   std::string updated_source_;
   GLenum global_texture_target_;
   bool has_replaced_external_texture_with_2d_;
-  mutable Lock lock_;
+  mutable android::base::Lock lock_;
 
   void EnsureLiveShaderObject(GlesContext* ctx);
   void RewriteSource();
@@ -98,6 +97,6 @@ class ShaderVariant {
   ShaderVariant& operator=(const ShaderVariant&);
 };
 
-typedef emugl::SmartPtr<ShaderVariant> ShaderVariantPtr;
+typedef android::sp<ShaderVariant> ShaderVariantPtr;
 
 #endif  // GRAPHICS_TRANSLATION_GLES_SHADER_VARIANT_H_
