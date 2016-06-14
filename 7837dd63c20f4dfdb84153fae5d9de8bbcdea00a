@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "940f4db1_2ad13f2b",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-06-14T23:48:38Z",
+      "side": 1,
+      "message": "Intended to still be here?",
+      "range": {
+        "startLine": 35,
+        "startChar": 4,
+        "endLine": 40,
+        "endChar": 57
+      },
+      "revId": "7837dd63c20f4dfdb84153fae5d9de8bbcdea00a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
