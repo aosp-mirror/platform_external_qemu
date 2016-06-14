@@ -17,15 +17,15 @@
 #define GRAPHICS_TRANSLATION_GLES_EGL_IMAGE_H_
 
 #include <GLES/gl.h>
-#include "emugl/common/smart_ptr.h"
+#include <utils/RefBase.h>
 
 class EglImage;
-typedef emugl::SmartPtr<EglImage> EglImagePtr;
+typedef android::sp<EglImage> EglImagePtr;
 
 class TextureData;
-typedef emugl::SmartPtr<TextureData> TextureDataPtr;
+typedef android::sp<TextureData> TextureDataPtr;
 
-class EglImage {
+class EglImage : public android::RefBase {
  public:
   static EglImagePtr Create(GLenum target, GLuint texture);
 
