@@ -24,8 +24,7 @@
 VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     QWidget(parent),
     mUi(new Ui::VirtualSensorsPage()),
-    mSensorsAgent(nullptr),
-    mCurrentLayoutId(0)
+    mSensorsAgent(nullptr)
 {
     mUi->setupUi(this);
     mUi->temperatureSensorValueWidget->setRange(-273.1, 100.0);
