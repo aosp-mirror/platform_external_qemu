@@ -68,13 +68,22 @@ GLESv1 context creation calls.
 
 =====gles1=====gles1>>>>>Current state of the library>>>>>>gles2=====gles2=====
 
-The state of this library right now is that it only builds. It is not hooked up
-to anything, but it's close to getting triggered now, because there are new
-code paths added to GLESv1Dispatch. The linking scheme with underlying GLESv2
-is described in the section on "Linking underlying GLESv2".
+The library can now be used. When a custom OpenGL backend (e.g., -gpu angle or
+-gpu swiftshader) is used, if that backend does not provide the libGLES_CM.dll
+in addition to the usual libEGL.dll and libGLESv2.dll, we will automatically
+fall back to GLESv1 emulation using this GLESv1->2 translation library.
 
 =====gles1=====gles1>>>>>Known Issues / WIP Opportunities>>gles2=====gles2=====
 
 Right now, this translation library seems to need to use ARC's RefBase and
 StrongPointer in order to not crash during use (from smoke tests done by
 experimentally hooking up the library to the emulator).
+
+There are various rendering errors:
+
+    - Texture-billboards don't seem to work correctly, as in the boot animation
+      and the GLESv1 API demos such as Sprite Text. The textures simply don't
+      show up.
+
+    - Only GL_SMOOTH is available as a shading parameter, which makes the Kube
+      API demo look funny.
