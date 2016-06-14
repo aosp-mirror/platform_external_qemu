@@ -1754,26 +1754,34 @@ GLES_APIENTRY(void, EGLImageTargetRenderbufferStorageOES, GLenum target,
 
 // Set the specified EGLimage as the texture.
 GLES_APIENTRY(void, EGLImageTargetTexture2DOES, GLenum target,
-              GLeglImageOES buffer) {
-  ContextPtr c = GetCurrentGlesContext();
-  if (!c) {
-    return;
-  }
+        GLeglImageOES buffer) {
 
-  EglImagePtr image = GetEglImageFromNativeBuffer(buffer);
-  if (image == NULL) {
-      GLES_ERROR_INVALID_VALUE_PTR(static_cast<void *>(buffer));
-    return;
-  }
-  if (!IsValidTextureTargetLimited(target)) {
-    GLES_ERROR_INVALID_ENUM(target);
-    return;
-  }
-
-  if (!c->BindImageToTexture(target, image)) {
-    GLES_ERROR(GL_INVALID_OPERATION, "Unable to bind image to texture");
-  }
     APITRACE();
+    ContextPtr c = GetCurrentGlesContext();
+    if (!c) {
+        return;
+    }
+
+    DLOG("call underlying glEGLImageTargetTexture2DOES");
+    PASS_THROUGH(c, EGLImageTargetTexture2DOES, target, buffer);
+    //
+    // DLOG("call GetEglImageFromNativeBuffer");
+    // EglImagePtr image = GetEglImageFromNativeBuffer(buffer);
+    // if (image == NULL) {
+    //     DLOG("image is null");
+    //     GLES_ERROR_INVALID_VALUE_PTR(static_cast<void *>(buffer));
+    //     return;
+    // }
+    // if (!IsValidTextureTargetLimited(target)) {
+    //     DLOG("invalid texture target limited");
+    //     GLES_ERROR_INVALID_ENUM(target);
+    //     return;
+    // }
+
+    DLOG("should bind image to texture @ this point");
+    // if (!c->BindImageToTexture(target, image)) {
+    //     GLES_ERROR(GL_INVALID_OPERATION, "Unable to bind image to texture");
+    // }
 }
 
 // Set server state capabity.
