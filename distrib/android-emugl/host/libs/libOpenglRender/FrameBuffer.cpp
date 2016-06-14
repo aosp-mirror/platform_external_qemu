@@ -898,12 +898,33 @@ bool FrameBuffer::bindContext(HandleType p_context,
         }
     }
 
+    DBG("%s: call to underlying eglMakeCurrent\n", __FUNCTION__);
     if (!s_egl.eglMakeCurrent(m_eglDisplay,
                               draw ? draw->getEGLSurface() : EGL_NO_SURFACE,
                               read ? read->getEGLSurface() : EGL_NO_SURFACE,
                               ctx ? ctx->getEGLContext() : EGL_NO_CONTEXT)) {
         ERR("eglMakeCurrent failed\n");
         return false;
+    }
+
+    if (ctx) {
+        DBG("%s: querying emulated gles1 context\n", __FUNCTION__);
+        if (!ctx.get()->getEmulatedGLES1Context()) {
+            DBG("%s: either a gles2 or we are not emulating gles1\n", __FUNCTION__);
+        } else {
+            DBG("%s: found emulated gles1 context @ %p\n", __FUNCTION__, ctx.get()->getEmulatedGLES1Context());
+            s_gles1.set_current_gles_context(ctx.get()->getEmulatedGLES1Context());
+            DBG("%s: set emulated gles1 context current in thread info\n", __FUNCTION__);
+
+            if (draw.get() == NULL) {
+                DBG("%s: setup make current (null draw surface)\n", __FUNCTION__);
+                s_gles1.make_current_setup(0, 0);
+            } else {
+                DBG("%s: setup make current (draw surface %ux%u)\n", __FUNCTION__, draw->getWidth(), draw->getHeight());
+                s_gles1.make_current_setup(draw->getWidth(), draw->getHeight());
+            }
+            DBG("%s: set up the emulated gles1 context's info\n", __FUNCTION__);
+        }
     }
 
     //
