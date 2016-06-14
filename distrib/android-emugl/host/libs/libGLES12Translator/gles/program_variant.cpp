@@ -23,6 +23,8 @@
 #include "gles/gles_context.h"
 #include "gles/macros.h"
 
+using android::base::AutoLock;
+
 static GlesContext* GetRequiredContext() {
   GlesContext* ctx = GetCurrentGlesContext();
   LOG_ALWAYS_FATAL_IF(!ctx);
