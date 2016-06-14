@@ -281,9 +281,9 @@ void ClearDepthfCall(const GlesContext* c, GLclampf depth) {
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
 #ifdef DEBUG
-  DPRINT("ClearDepthfCall(%p, %f)", c, depth);
+  DPRINT("ClearDepthCall(%p, %f)", c, depth);
 #endif
-  return _api->glClearDepthf(depth);
+  return _api->glClearDepth((GLclampd)depth);
 }
 
 
@@ -547,9 +547,9 @@ void DepthRangefCall(const GlesContext* c, GLclampf zNear, GLclampf zFar) {
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
 #ifdef DEBUG
-  DPRINT("DepthRangefCall(%p, %f, %f)", c, zNear, zFar);
+  DPRINT("DepthRangeCall(%p, %f, %f)", c, zNear, zFar);
 #endif
-  return _api->glDepthRangef(zNear, zFar);
+  return _api->glDepthRange((GLclampd)zNear, (GLclampd)zFar);
 }
 
 
@@ -914,21 +914,6 @@ void GetFloatvCall(const GlesContext* c, GLenum pname, GLfloat* params) {
   return _api->glGetFloatv(pname, params);
 }
 
-
-void GetFramebufferAttachmentParameterivCall(const GlesContext* c, GLenum target, GLenum attachment, GLenum pname, GLint* params) {
-  emugl::ContextGPU* context = static_cast<emugl::ContextGPU*>(c->Impl());
-  ContextAutoLock lock(context);
-  const GraphicsApis* angle_apis =
-      static_cast<const GraphicsApis*>(c->Apis());
-  const ANGLE_GLES2* _api =
-      static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef DEBUG
-  DPRINT("GetFramebufferAttachmentParameterivCall(%p, %s (0x%x), %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(attachment), attachment, GetEnumString(pname), pname, params);
-#endif
-  return _api->glGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
-}
-
-
 void GetIntegervCall(const GlesContext* c, GLenum pname, GLint* params) {
   emugl::ContextGPU* context = static_cast<emugl::ContextGPU*>(c->Impl());
   ContextAutoLock lock(context);
@@ -1207,21 +1192,6 @@ GLboolean IsEnabledCall(const GlesContext* c, GLenum cap) {
 #endif
   return _api->glIsEnabled(cap);
 }
-
-
-GLboolean IsFramebufferCall(const GlesContext* c, GLuint framebuffer) {
-  emugl::ContextGPU* context = static_cast<emugl::ContextGPU*>(c->Impl());
-  ContextAutoLock lock(context);
-  const GraphicsApis* angle_apis =
-      static_cast<const GraphicsApis*>(c->Apis());
-  const ANGLE_GLES2* _api =
-      static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef DEBUG
-  DPRINT("IsFramebufferCall(%p, %u)", c, framebuffer);
-#endif
-  return _api->glIsFramebuffer(framebuffer);
-}
-
 
 GLboolean IsProgramCall(const GlesContext* c, GLuint program) {
   emugl::ContextGPU* context = static_cast<emugl::ContextGPU*>(c->Impl());
