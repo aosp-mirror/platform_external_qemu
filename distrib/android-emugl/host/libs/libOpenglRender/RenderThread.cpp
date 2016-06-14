@@ -35,19 +35,17 @@
 #define STREAM_BUFFER_SIZE 4 * 1024 * 1024
 
 RenderThread::RenderThread(std::weak_ptr<emugl::RendererImpl> renderer,
-                           std::shared_ptr<emugl::RenderChannelImpl> channel,
-                           emugl::Mutex* lock)
-    : m_lock(lock), mChannel(channel), mRenderer(renderer) {}
+                           std::shared_ptr<emugl::RenderChannelImpl> channel)
+    : mChannel(channel), mRenderer(renderer) {}
 
 RenderThread::~RenderThread() = default;
 
 // static
 std::unique_ptr<RenderThread> RenderThread::create(
         std::weak_ptr<emugl::RendererImpl> renderer,
-        std::shared_ptr<emugl::RenderChannelImpl> channel,
-        emugl::Mutex* lock) {
+        std::shared_ptr<emugl::RenderChannelImpl> channel) {
     return std::unique_ptr<RenderThread>(
-            new RenderThread(renderer, channel, lock));
+            new RenderThread(renderer, channel));
 }
 
 intptr_t RenderThread::main() {
@@ -135,11 +133,6 @@ intptr_t RenderThread::main() {
         do {
             progress = false;
 
-            // HACK: Disable render thread locks
-            // This increases FPS for Antutu Garden about 2 FPS on
-            // Linux Quadro K2200.
-            // m_lock->lock();
-            //
             // try to process some of the command buffer using the GLESv1
             // decoder
             //
@@ -171,8 +164,6 @@ intptr_t RenderThread::main() {
                 readBuf.consume(last);
                 progress = true;
             }
-
-            // m_lock->unlock();
 
         } while (progress);
     }

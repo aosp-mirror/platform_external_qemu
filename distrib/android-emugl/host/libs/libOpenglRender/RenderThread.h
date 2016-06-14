@@ -31,12 +31,9 @@ class RendererImpl;
 class RenderThread : public emugl::Thread {
 public:
     // Create a new RenderThread instance.
-    // TODO(digit): Why is this lock needed here? Shouldn't this be handled
-    //              by the decoders themselves or at a lower-level?
     static std::unique_ptr<RenderThread> create(
             std::weak_ptr<emugl::RendererImpl> renderer,
-            std::shared_ptr<emugl::RenderChannelImpl> channel,
-            emugl::Mutex* lock);
+            std::shared_ptr<emugl::RenderChannelImpl> channel);
 
     virtual ~RenderThread();
 
@@ -46,12 +43,10 @@ public:
 
 private:
     RenderThread(std::weak_ptr<emugl::RendererImpl> renderer,
-                 std::shared_ptr<emugl::RenderChannelImpl> channel,
-                 emugl::Mutex* mutex);
+                 std::shared_ptr<emugl::RenderChannelImpl> channel);
 
     virtual intptr_t main();
 
-    emugl::Mutex* m_lock;
     std::shared_ptr<emugl::RenderChannelImpl> mChannel;
     std::weak_ptr<emugl::RendererImpl> mRenderer;
 };
