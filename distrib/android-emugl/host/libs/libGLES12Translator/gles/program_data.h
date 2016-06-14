@@ -21,15 +21,12 @@
 #include <string>
 #include <vector>
 
+#include "android/base/synchronization/Lock.h"
+
 #include "gles/object_data.h"
 #include "gles/shader_data.h"
 #include "gles/program_variant.h"
 #include "gles/uniform_value.h"
-
-#include "android/base/synchronization/Lock.h"
-
-using android::base::Lock;
-using android::base::AutoLock;
 
 class ProgramData : public ObjectData {
  public:
@@ -77,6 +74,7 @@ class ProgramData : public ObjectData {
   void BindAttribLocation(GLuint index, const GLchar* name);
   GLint GetAttribLocation(const GLchar* name);
 
+ protected:
   virtual ~ProgramData();
 
  private:
@@ -175,12 +173,12 @@ class ProgramData : public ObjectData {
   UniformLocationMap uniform_locations_;
   uint64_t uniform_revision_gen_;
   GLint validation_status_;
-  mutable Lock lock_;
+  mutable android::base::Lock lock_;
 
   ProgramData(const ProgramData&);
   ProgramData& operator=(const ProgramData&);
 };
 
-typedef emugl::SmartPtr<ProgramData> ProgramDataPtr;
+typedef android::sp<ProgramData> ProgramDataPtr;
 
 #endif  // GRAPHICS_TRANSLATION_GLES_PROGRAM_DATA_H_
