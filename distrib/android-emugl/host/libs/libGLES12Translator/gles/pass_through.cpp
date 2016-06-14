@@ -7,12 +7,11 @@
 #include "gles/pass_through.h"
 #include "common/alog.h"
 #include "common/rendering_interface.h"
-#include "underlying_apis/angle_gles2.h"
 #include "gles/debug.h"
 #include "gles/gles_context.h"
-#include "gles/mutex.h"
-#include "gles/underlying_apis.h"
 
+#include "GLES12Translator/underlying_apis.h"
+#include "GLES12Translator/angle_gles2.h"
 class ContextAutoLock {
  public:
   ContextAutoLock(emugl::ContextGPU* context) : context_(context) {
