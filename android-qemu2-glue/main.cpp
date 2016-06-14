@@ -271,33 +271,6 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
 }
 
 
-uint64_t _adjustPartitionSize(const char*  description,
-                              uint64_t     imageBytes,
-                              uint64_t     defaultBytes,
-                              int          inAndroidBuild ) {
-    char      temp[64];
-    unsigned  imageMB;
-    unsigned  defaultMB;
-
-    if (imageBytes <= defaultBytes)
-        return defaultBytes;
-
-    imageMB   = convertBytesToMB(imageBytes);
-    defaultMB = convertBytesToMB(defaultBytes);
-
-    if (imageMB > defaultMB) {
-        snprintf(temp, sizeof temp, "(%d MB > %d MB)", imageMB, defaultMB);
-    } else {
-        snprintf(temp, sizeof temp, "(%" PRIu64 "  bytes > %" PRIu64 " bytes)", imageBytes, defaultBytes);
-    }
-
-    if (inAndroidBuild) {
-        dwarning("%s partition size adjusted to match image file %s\n", description, temp);
-    }
-
-    return convertMBToBytes(imageMB);
-}
-
 }  // namespace
 
 
