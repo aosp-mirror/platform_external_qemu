@@ -103,7 +103,6 @@ RenderChannelPtr RendererImpl::createRenderChannel() {
         return nullptr;
     }
 
-    size_t threadCount = 0;
     {
         android::base::AutoLock lock(mThreadVectorLock);
 
@@ -115,12 +114,11 @@ RenderChannelPtr RendererImpl::createRenderChannel() {
                                       }),
                        mThreads.end());
 
-        mThreads.emplace_back(std::move(rt), channel);
+        DBG("Started new RenderThread (total %lu) @%p\n",
+            mThreads.size() + 1, rt.get());
 
-        threadCount = mThreads.size();
+        mThreads.emplace_back(std::move(rt), channel);
     }
-    DBG("Started new RenderThread (total %d)\n", (int)threadCount);
-    (void)threadCount;  // Make compiler happy.
 
     return channel;
 }
