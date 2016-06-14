@@ -17,7 +17,6 @@
 #define GRAPHICS_TRANSLATION_GLES_FRAMEBUFFER_DATA_H_
 
 #include <GLES/gl.h>
-#include "emugl/common/smart_ptr.h"
 
 #include "gles/object_data.h"
 #include "gles/renderbuffer_data.h"
@@ -34,6 +33,7 @@ class FramebufferData : public ObjectData {
   void ClearAttachment(GLenum attachment);
   void ClearAttachment(GLuint name, bool clear_texture);
 
+ protected:
   virtual ~FramebufferData();
 
  private:
@@ -61,6 +61,6 @@ class FramebufferData : public ObjectData {
   FramebufferData& operator=(const FramebufferData&);
 };
 
-typedef emugl::SmartPtr<FramebufferData> FramebufferDataPtr;
+typedef android::sp<FramebufferData> FramebufferDataPtr;
 
 #endif  // GRAPHICS_TRANSLATION_GLES_FRAMEBUFFER_DATA_H_

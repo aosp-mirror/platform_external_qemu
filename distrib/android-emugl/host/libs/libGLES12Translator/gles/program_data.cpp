@@ -25,6 +25,8 @@
 #include "gles/macros.h"
 #include "gles/shader_data.h"
 
+using android::base::AutoLock;
+
 static GlesContext* GetRequiredContext() {
   GlesContext* ctx = GetCurrentGlesContext();
   LOG_ALWAYS_FATAL_IF(!ctx);

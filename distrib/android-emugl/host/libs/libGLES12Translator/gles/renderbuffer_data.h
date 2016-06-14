@@ -40,6 +40,7 @@ class RenderbufferData : public ObjectData {
   GLenum GetAttachment() const { return attach_point_; }
   GLuint GetAttachedFramebuffer() const { return attach_fbo_; }
 
+ protected:
   virtual ~RenderbufferData();
 
  private:
@@ -56,6 +57,6 @@ class RenderbufferData : public ObjectData {
   RenderbufferData& operator=(const RenderbufferData&);
 };
 
-typedef emugl::SmartPtr<RenderbufferData> RenderbufferDataPtr;
+typedef android::sp<RenderbufferData> RenderbufferDataPtr;
 
 #endif  // GRAPHICS_TRANSLATION_GLES_RENDERBUFFER_DATA_H_

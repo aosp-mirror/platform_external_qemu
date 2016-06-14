@@ -19,6 +19,7 @@
 #include <GLES/gl.h>
 #include <map>
 #include <string>
+#include <utils/RefBase.h>
 #include <vector>
 
 #include "android/base/synchronization/Lock.h"
@@ -26,9 +27,6 @@
 #include "gles/dirtiable.h"
 #include "gles/object_data.h"
 #include "gles/shader_variant.h"
-
-using android::base::Lock;
-using android::base::AutoLock;
 
 class GlesContext;
 
@@ -38,7 +36,7 @@ class GlesContext;
 // Functions (including destructor) may pass calls to the underlying GL
 // implementation, and so must be called with an active context.
 // A linked ProgramVariant instance cannot be re-linked.
-class ProgramVariant {
+class ProgramVariant : public android::RefBase {
  public:
   ProgramVariant();
 
@@ -122,6 +120,7 @@ class ProgramVariant {
       const std::string& name, int* array_index) const;
   GLint GetUniformLocation(const std::string& name);
 
+ protected:
   virtual ~ProgramVariant();
 
  private:
@@ -144,12 +143,12 @@ class ProgramVariant {
   bool is_linked_;
   bool is_link_attempted_;
   mutable Dirtiable<std::string> info_log_cache_;
-  mutable Lock lock_;
+  mutable android::base::Lock lock_;
 
   ProgramVariant(const ProgramVariant&);
   ProgramVariant& operator=(const ProgramVariant&);
 };
 
-typedef emugl::SmartPtr<ProgramVariant> ProgramVariantPtr;
+typedef android::sp<ProgramVariant> ProgramVariantPtr;
 
 #endif  // GRAPHICS_TRANSLATION_GLES_PROGRAM_VARIANT_H_
