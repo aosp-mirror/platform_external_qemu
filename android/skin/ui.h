@@ -118,7 +118,9 @@ void skin_ui_update_display(SkinUI* ui, int x, int y, int w, int h);
 void skin_ui_update_gpu_frame(SkinUI* ui, int w, int h, const void* pixels);
 
 // Return the current SkinLayout used by the user interface.
-struct SkinLayout* skin_ui_get_current_layout(SkinUI* ui);
+struct SkinLayout* skin_ui_get_current_layout(const SkinUI* ui);
+struct SkinLayout* skin_ui_get_next_layout(const SkinUI* ui);
+struct SkinLayout* skin_ui_get_prev_layout(const SkinUI* ui);
 
 // Return the current keyset (hotkey bindings) used by the UI.
 struct SkinKeyset* skin_ui_get_current_keyset(SkinUI* ui);
