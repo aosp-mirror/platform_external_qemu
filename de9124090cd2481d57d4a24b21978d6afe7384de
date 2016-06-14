@@ -22,6 +22,30 @@
       "revId": "de9124090cd2481d57d4a24b21978d6afe7384de",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "14e0bddf_de5ae505",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-14T19:22:20Z",
+      "side": 1,
+      "message": "I ended up putting it right before the emplace_back. Had to keep the move since rt was a unique ptr.",
+      "parentUuid": "94fe6d6e_5b340f8a",
+      "range": {
+        "startLine": 122,
+        "startChar": 72,
+        "endLine": 122,
+        "endChar": 96
+      },
+      "revId": "de9124090cd2481d57d4a24b21978d6afe7384de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
