@@ -32,12 +32,9 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget *parent) :
     mUi->humiditySensorValueWidget->setValue(50);
     mUi->proximitySensorValueWidget->setRange(0, 10);
     mUi->proximitySensorValueWidget->setValue(10);
-    mUi->magNorthWidget->setValidator(&mMagFieldValidator);
-    mUi->magNorthWidget->setTextMargins(0, 0, 0, 4);
-    mUi->magEastWidget->setValidator(&mMagFieldValidator);
-    mUi->magEastWidget->setTextMargins(0, 0, 0, 4);
-    mUi->magVerticalWidget->setValidator(&mMagFieldValidator);
-    mUi->magVerticalWidget->setTextMargins(0, 0, 0, 4);
+    mUi->magNorthWidget->setLocale(QLocale::c());
+    mUi->magEastWidget->setLocale(QLocale::c());
+    mUi->magVerticalWidget->setLocale(QLocale::c());
 
     updateAccelerometerValues();
 
@@ -158,9 +155,9 @@ void VirtualSensorsPage::updateAccelerometerValues() {
     // reference.
     QVector3D gravity_vector(0.0, 9.8, 0.0);
     QVector3D magnetic_vector(
-            mUi->magNorthWidget->text().toDouble(),
-            mUi->magEastWidget->text().toDouble(),
-            mUi->magVerticalWidget->text().toDouble());
+            mUi->magNorthWidget->value(),
+            mUi->magEastWidget->value(),
+            mUi->magVerticalWidget->value());
 
     QQuaternion device_rotation_quat = mUi->accelWidget->rotation();
 
