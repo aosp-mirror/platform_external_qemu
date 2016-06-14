@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9483cd1c_0af7bb6a",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-14T19:51:42Z",
+      "side": 1,
+      "message": "now this variable isn\u0027t needed at all; also, you\u0027re printing a 0 now",
+      "range": {
+        "startLine": 124,
+        "startChar": 4,
+        "endLine": 124,
+        "endChar": 47
+      },
+      "revId": "a2b4e4b4354df873bba1e152f20c5a577a4114c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
