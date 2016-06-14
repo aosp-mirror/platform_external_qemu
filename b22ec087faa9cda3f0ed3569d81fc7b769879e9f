@@ -22,6 +22,30 @@
       "revId": "b22ec087faa9cda3f0ed3569d81fc7b769879e9f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "94fe6d6e_26c80e80",
+        "filename": "android/windows_installer_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2016-06-14T18:36:27Z",
+      "side": 1,
+      "message": "That works. But then it looks a little weird for me that a unit test can \"modify\" the status of host system silently.\n\nMy initial plan is just to document this somewhere so people know how can they setup their wine for letting tests passed. Then I think why don\u0027t I just show this when test fails so it could be easily discovered  by people. it\u0027s only a one time thing for running unittests under wine. \n\n\n\nWhat do you think?",
+      "parentUuid": "94fe6d6e_e6b3a64c",
+      "range": {
+        "startLine": 27,
+        "startChar": 5,
+        "endLine": 27,
+        "endChar": 75
+      },
+      "revId": "b22ec087faa9cda3f0ed3569d81fc7b769879e9f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
