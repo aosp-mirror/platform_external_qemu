@@ -504,8 +504,20 @@ void skin_ui_update_gpu_frame(SkinUI* ui, int w, int h, const void* pixels) {
     }
 }
 
-SkinLayout* skin_ui_get_current_layout(SkinUI* ui) {
+SkinLayout* skin_ui_get_current_layout(const SkinUI* ui) {
     return ui->layout;
+}
+
+SkinLayout* skin_ui_get_next_layout(const SkinUI* ui) {
+    return ui->layout->next ? ui->layout->next : ui->layout_file->layouts;
+}
+
+SkinLayout* skin_ui_get_prev_layout(const SkinUI* ui) {
+    SkinLayout* layout = ui->layout_file->layouts;
+    while (layout->next && layout->next != ui->layout) {
+        layout = layout->next;
+    }
+    return layout;
 }
 
 SkinKeyset* skin_ui_get_current_keyset(SkinUI* ui) {
