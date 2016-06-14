@@ -386,7 +386,7 @@ extern "C" int main(int argc, char **argv) {
         long   shared_net_id = strtol(opts->shared_net_id, &end, 0);
         if (end == NULL || *end || shared_net_id < 1 || shared_net_id > 255) {
             fprintf(stderr, "option -shared-net-id must be an integer between 1 and 255\n");
-            exit(1);
+            return 1;
         }
         snprintf(boot_prop_ip, sizeof(boot_prop_ip),
                  "net.shared_net_ip=10.1.2.%ld", shared_net_id);
@@ -560,7 +560,7 @@ extern "C" int main(int argc, char **argv) {
 
         if (!path_exists(opts->charmap)) {
             derror("Charmap file does not exist: %s", opts->charmap);
-            exit(1);
+            return 1;
         }
         /* We need to store the charmap name in the hardware configuration.
          * However, the charmap file itself is only used by the UI component
@@ -602,7 +602,7 @@ extern "C" int main(int argc, char **argv) {
         if (!path_exists(hw->disk_dataPartition_initPath)) {
             derror("Missing initial data partition file: %s",
                    hw->disk_dataPartition_initPath);
-            exit(1);
+            return 1;
         }
         D("Creating: %s\n", hw->disk_dataPartition_path);
 
@@ -610,7 +610,7 @@ extern "C" int main(int argc, char **argv) {
                            hw->disk_dataPartition_initPath) < 0) {
             derror("Could not create %s: %s", hw->disk_dataPartition_path,
                    strerror(errno));
-            exit(1);
+            return 1;
         }
 
         resizeExt4Partition(android_hw->disk_dataPartition_path,
@@ -647,7 +647,7 @@ extern "C" int main(int argc, char **argv) {
         if (ret < 0) {
             derror("Could not create %s: %s", hw->disk_cachePartition_path,
                    strerror(-ret));
-            exit(1);
+            return 1;
         }
     }
 
@@ -663,7 +663,7 @@ extern "C" int main(int argc, char **argv) {
         if (!accel_ok) {
             derror("CPU acceleration is not supported on this machine!");
             derror("Reason: %s", accel_status);
-            exit(1);
+            return 1;
         }
         args[n++] = ASTRDUP(kEnableAccelerator);
     } else {  // ACCEL_AUTO
