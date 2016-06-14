@@ -19,17 +19,22 @@
 #include "OpenGLESDispatch/gles_functions.h"
 #include "KHR/khrplatform.h"
 
+#include "GLES12Translator/underlying_apis.h"
+
 // Define function pointer types.
 #define GLES1_DISPATCH_DEFINE_TYPE(return_type,func_name,signature,callargs) \
     typedef return_type (KHRONOS_APIENTRY * func_name ## _t) signature;
 
 LIST_GLES1_FUNCTIONS(GLES1_DISPATCH_DEFINE_TYPE,GLES1_DISPATCH_DEFINE_TYPE)
+    LIST_GLES12_TR_FUNCTIONS(GLES1_DISPATCH_DEFINE_TYPE)
 
 struct GLESv1Dispatch {
 #define GLES1_DISPATCH_DECLARE_POINTER(return_type,func_name,signature,callargs) \
         func_name ## _t func_name;
     LIST_GLES1_FUNCTIONS(GLES1_DISPATCH_DECLARE_POINTER,
                          GLES1_DISPATCH_DECLARE_POINTER)
+    LIST_GLES12_TR_FUNCTIONS(GLES1_DISPATCH_DECLARE_POINTER)
+    UnderlyingApis* underlying_gles2_api;
 };
 
 #undef GLES1_DISPATCH_DECLARE_POINTER
