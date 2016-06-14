@@ -46,6 +46,30 @@
       "revId": "b22ec087faa9cda3f0ed3569d81fc7b769879e9f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9483cd1c_8a09eb23",
+        "filename": "android/windows_installer_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-14T20:00:37Z",
+      "side": 1,
+      "message": "setUp/tearDown() for the tests then - create the registry key if it didn\u0027t exist, delete it if it was created\nI\u0027d prefer to not have this kind of test in first place, but we do have it, and it actually tests some useful thing",
+      "parentUuid": "94fe6d6e_26c80e80",
+      "range": {
+        "startLine": 27,
+        "startChar": 5,
+        "endLine": 27,
+        "endChar": 75
+      },
+      "revId": "b22ec087faa9cda3f0ed3569d81fc7b769879e9f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
