@@ -92,7 +92,7 @@ RenderChannelPtr RendererImpl::createRenderChannel() {
             std::make_shared<RenderChannelImpl>(shared_from_this());
 
     std::unique_ptr<RenderThread> rt(RenderThread::create(
-            shared_from_this(), channel, &mRenderThreadSharedLock));
+            shared_from_this(), channel));
     if (!rt) {
         fprintf(stderr, "Failed to create RenderThread\n");
         return nullptr;
