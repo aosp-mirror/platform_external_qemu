@@ -16,28 +16,33 @@
 #ifndef GRAPHICS_TRANSLATION_GLES_MACROS_H_
 #define GRAPHICS_TRANSLATION_GLES_MACROS_H_
 
+#include "android/utils/debug.h"
 #include "common/alog.h"
 #include "gles/pass_through.h"
 
 class GlesContext;
 GlesContext* GetCurrentGlesContext();
 
-#if defined(ENABLE_API_LOGGING) || defined(ENABLE_API_TRACING)
-#define GLES_APIENTRY(_return, _name, ...) \
-  _return impl##_name(__VA_ARGS__)
+#ifdef _WIN32
+#define EXPORT_DECL extern "C" __declspec(dllexport)
 #else
-#define GLES_APIENTRY(_return, _name, ...) \
-  extern "C" _return gl##_name(__VA_ARGS__)
+#define EXPORT_DECL extern "C" __attribute__((visibility("default")))
 #endif
 
+#define GLES_APIENTRY(_return, _name, ...) \
+    EXPORT_DECL _return gl##_name(__VA_ARGS__)
+
 #define STUB_APIENTRY(_return, _name, ...) \
-  extern "C" _return gl##_name(__VA_ARGS__) { \
+EXPORT_DECL _return gl##_name(__VA_ARGS__) { \
     LOG_ALWAYS_FATAL("Unimplemented: %s", __FUNCTION__); \
   }
 
+#define TRANSLATOR_APIENTRY(_return, _name, ...) \
+    EXPORT_DECL _return _name(__VA_ARGS__)
 
 #define GLES_ERROR(_err, _msg, ...)                                          \
   do {                                                                       \
+    derror("gles12 ERROR: func=%s err=0x%x msg=", __FUNCTION__, _err); derror(_msg, ##__VA_ARGS__); \
     GlesContext* _context = GetCurrentGlesContext();                         \
     ALOG_ASSERT(_context != NULL);                                           \
     _context->SetGLerror(_err, __FUNCTION__, __LINE__, _msg, ##__VA_ARGS__); \

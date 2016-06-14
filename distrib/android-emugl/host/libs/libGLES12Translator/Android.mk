@@ -25,7 +25,7 @@ GLES_TR_CPPS=${GLES_TR_DIR}/api_entries.cpp \
              ${GLES_TR_DIR}/texture_data.cpp \
              ${GLES_TR_DIR}/uniform_value.cpp \
              ${GLES_TR_DIR}/vector.cpp \
-             ${GLES_TR_DIR}/tmp.cpp \
+             ${GLES_TR_DIR}/translator_interface.cpp \
              ${COMMON_DIR}/log.cpp \
              ${COMMON_DIR}/etc1.cpp \
              ${COMMON_DIR}/RefBase.cpp
