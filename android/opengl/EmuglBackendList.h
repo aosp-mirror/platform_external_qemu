@@ -38,12 +38,15 @@ public:
     // corresponding sub-directory, if it exits, or NULL otherwise.
     std::string getLibDirPath(const char* name);
 
+    std::string getGLES12TranslatorLibName();
+
     // List of supported Emugl shared libraries.
     enum Library {
         LIBRARY_NONE,
         LIBRARY_EGL,
         LIBRARY_GLESv1,
-        LIBRARY_GLESv2
+        LIBRARY_GLESv2,
+        LIBRARY_GLES12TR
     };
 
     // Probe the library directory for Emugl backend |name| and return
