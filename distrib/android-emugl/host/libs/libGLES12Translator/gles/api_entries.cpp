@@ -1756,24 +1756,15 @@ GLES_APIENTRY(void, EGLImageTargetRenderbufferStorageOES, GLenum target,
 GLES_APIENTRY(void, EGLImageTargetTexture2DOES, GLenum target,
               GLeglImageOES buffer) {
     APITRACE();
-  ContextPtr c = GetCurrentGlesContext();
-  if (!c) {
-    return;
-  }
+    ContextPtr c = GetCurrentGlesContext();
+    if (!c) {
+        return;
+    }
 
-  EglImagePtr image = GetEglImageFromNativeBuffer(buffer);
-  if (image == NULL) {
-      GLES_ERROR_INVALID_VALUE_PTR(static_cast<void *>(buffer));
-    return;
-  }
-  if (!IsValidTextureTargetLimited(target)) {
-    GLES_ERROR_INVALID_ENUM(target);
-    return;
-  }
+    DLOG("call underlying glEGLImageTargetTexture2DOES");
+    PASS_THROUGH(c, EGLImageTargetTexture2DOES, target, buffer);
 
-  if (!c->BindImageToTexture(target, image)) {
-    GLES_ERROR(GL_INVALID_OPERATION, "Unable to bind image to texture");
-  }
+    DLOG("should bind image to texture @ this point");
 }
 
 // Set server state capabity.
@@ -4230,7 +4221,9 @@ GLES_APIENTRY(void, ShadeModel, GLenum mode) {
     APITRACE();
     // There is no efficient way to emulate GL_FLAT mode with fragment
     // shaders since they automatically interpolate color values.
-    ALOGW_IF(mode != GL_SMOOTH, "Only GL_SMOOTH shading model supported");
+    // ALOGW_IF(mode != GL_SMOOTH, "Only GL_SMOOTH shading model supported");
+    // We've turned this off for now as it results in spam whenever
+    // we try API demos or apps with flag shading.
 }
 
 // Loads the source code for a shader into a shader object.

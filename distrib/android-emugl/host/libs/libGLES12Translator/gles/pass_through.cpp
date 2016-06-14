@@ -541,6 +541,18 @@ void DrawElementsCall(const GlesContext* c, GLenum mode, GLsizei count, GLenum t
   return _api->glDrawElements(mode, count, type, indices);
 }
 
+void EGLImageTargetTexture2DOESCall(const GlesContext* c, GLenum target, GLeglImageOES buffer) {
+  emugl::ContextGPU* context = static_cast<emugl::ContextGPU*>(c->Impl());
+  ContextAutoLock lock(context);
+  const GraphicsApis* angle_apis =
+      static_cast<const GraphicsApis*>(c->Apis());
+  const ANGLE_GLES2* _api =
+      static_cast<const ANGLE_GLES2*>(angle_apis->angle);
+#ifdef DEBUG
+  DPRINT("EGLImageTargetTexture2DOESCall(%p, %s (0x%x), %p)", c, GetEnumString(target), target, buffer);
+#endif
+  return _api->glEGLImageTargetTexture2DOES(target, buffer);
+}
 
 void EnableCall(const GlesContext* c, GLenum cap) {
   emugl::ContextGPU* context = static_cast<emugl::ContextGPU*>(c->Impl());
