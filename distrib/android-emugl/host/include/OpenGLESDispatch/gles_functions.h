@@ -18,6 +18,7 @@
 #include "OpenGLESDispatch/gles_extensions_functions.h"
 #include "OpenGLESDispatch/gles1_only_functions.h"
 #include "OpenGLESDispatch/gles1_extensions_functions.h"
+#include "OpenGLESDispatch/gles12tr.h"
 #include "OpenGLESDispatch/gles2_only_functions.h"
 #include "OpenGLESDispatch/gles2_extensions_functions.h"
 #include "OpenGLESDispatch/gles3_only_functions.h"
