@@ -16,6 +16,8 @@
 #include "gles/share_group.h"
 #include "gles/macros.h"
 
+using android::base::AutoLock;
+
 namespace {
 
 ObjectGlobalName GenerateGlobalName(GlesContext* c, ObjectType type) {
