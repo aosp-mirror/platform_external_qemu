@@ -97,6 +97,7 @@ typedef struct SkinLayout {
     SkinImage*          onion_image;
     int                 onion_alpha;
     SkinRotation        onion_rotation;
+    SkinRotation        orientation;
 } SkinLayout;
 
 #define  SKIN_LAYOUT_LOOP_LOCS(layout,loc)               \
