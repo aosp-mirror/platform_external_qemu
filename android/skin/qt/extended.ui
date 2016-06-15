@@ -808,7 +808,7 @@ font-family: &quot;Roboto&quot;</string>
     <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
    </property>
    <property name="text">
-    <string>Virtual sensors</string>
+    <string>  Virtual sensors</string>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
