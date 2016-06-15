@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "b47a9131_74305ee4",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-15T16:22:33Z",
+      "side": 1,
+      "message": "Oops!  Sorry, thanks.  Always good to have files include what they use.",
+      "parentUuid": "b47a9131_d4d35210",
+      "range": {
+        "startLine": 30,
+        "startChar": 10,
+        "endLine": 30,
+        "endChar": 16
+      },
+      "revId": "1c55b09cb0c861febdac06ad9e533fbae33addce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8f09f4df_6401d3a9",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 1
@@ -131,6 +155,30 @@
       "side": 1,
       "message": "I agree, the fact that we use an array of chars to store the data is an implementation detail, the API should be more generic than that.",
       "parentUuid": "b47a9131_b4e246db",
+      "range": {
+        "startLine": 48,
+        "startChar": 44,
+        "endLine": 48,
+        "endChar": 54
+      },
+      "revId": "1c55b09cb0c861febdac06ad9e533fbae33addce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b47a9131_540a0218",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLDecoderContextData.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-15T16:22:33Z",
+      "side": 1,
+      "message": "OK, I take it back.  I was arguing to myself that since the len argument gave a byte length, that it was already committed to being considered, in the interface, as an array of bytes, so that the void* wasn\u0027t actually buying you anything.  But I guess it does buy you something: if you had a struct S, and a \"S s;\", then you could call this with\n  storePointerData(loc, \u0026s, sizeof(S))\nwhereas the char* version would require a cast:\n  storePointerData(loc, reinterpret_cast\u003cchar*\u003e(\u0026s), sizeof(S))\nNote that a cast back to S is necessary in the pointerData call that retrieves the value in either case, so it wouldn\u0027t make a difference there.\n\nBut I\u0027ll grant that avoiding a reinterpret_cast on calls is sufficient reason to use void* in the interface, and do the casts to/from char* in the implementation.",
+      "parentUuid": "7468199f_997abb5f",
       "range": {
         "startLine": 48,
         "startChar": 44,
