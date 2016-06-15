@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f417a9f9_26e356e2",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 975,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-06-15T23:07:49Z",
+      "side": 1,
+      "message": "This test does not allow NONE.\nI do not think that is desired.",
+      "range": {
+        "startLine": 975,
+        "startChar": 19,
+        "endLine": 975,
+        "endChar": 23
+      },
+      "revId": "a7ce4e703f968f72dc467089ecf94f2bf6b10598",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
