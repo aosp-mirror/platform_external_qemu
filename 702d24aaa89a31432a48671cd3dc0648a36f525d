@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b47a9131_d40a7272",
+        "filename": "android/console.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1649,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-15T15:38:38Z",
+      "side": 1,
+      "message": "nit: strength",
+      "range": {
+        "startLine": 1649,
+        "startChar": 5,
+        "endLine": 1649,
+        "endChar": 12
+      },
+      "revId": "702d24aaa89a31432a48671cd3dc0648a36f525d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
