@@ -24,13 +24,15 @@
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
 
+#include "android/emulation/goldfish_sync.h"
+
 #include <atomic>
 #include <inttypes.h>
 
 using android::base::Lock;
 using android::base::AutoLock;
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG && !defined(_WIN32)
 #include <unistd.h>
@@ -302,6 +304,10 @@ static EGLint rcGetFBParam(EGLint param)
 static uint32_t rcCreateContext(uint32_t config,
                                 uint32_t share, uint32_t glVersion)
 {
+
+    uint64_t timeline_handle = goldfish_sync_create_timeline();
+    DPRINT("%s: timeline_handel=%" PRIu64 "\n", __FUNCTION__, timeline_handle);
+
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return 0;
