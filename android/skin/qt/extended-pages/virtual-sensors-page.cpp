@@ -75,10 +75,14 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
             this, SLOT(updateLinearAcceleration()));
     mAccelerationTimer.setInterval(100);
     mAccelerationTimer.stop();
+}
 
-    resetAccelerometerRotationFromSkinLayout(
-         skin_ui_get_current_layout(
-            emulator_window_get()->ui));
+void VirtualSensorsPage::showEvent(QShowEvent*) {
+    if (mUi->accelWidget->isValid() && mFirstShow) {
+        resetAccelerometerRotationFromSkinLayout(
+            skin_ui_get_current_layout(emulator_window_get()->ui));
+        mFirstShow = false;
+    }
 }
 
 void VirtualSensorsPage::setLayoutChangeNotifier(QObject* layout_change_notifier) {
