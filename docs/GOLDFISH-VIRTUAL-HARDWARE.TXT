@@ -908,3 +908,31 @@ Device properties:
 
 TODO(digit)
 
+XIV. Goldfish sync device:
+==========================
+
+The Goldfish sync device’s purpose is to provide a simple, kernel-space-only,
+lightweight path to notify the virtual device of host graphics events such as
+GPU command completion. It can be used to synchronize just about anything else
+as well, but the main use case is in graphics. With the goldfish sync device,
+Android sync framework can be used in the guest, allowing more asynchronous
+processing and higher graphics performance without having to use sw_sync_user.
+
+In particular, it’ll be possible to not have to maintain separate rendering
+threads just for sync. Indeed, a separate GL thread is necessary on the host to
+wait on host fence commands, but without needing all the extra stuff that comes
+with a connection to the guest. In fact, we’d expect higher performance because
+of the potential lack of extra GL pipe traffic that would involve returning
+values to the guest; a eglCreateSyncKHR with ANDROID_NATIVE_FENCE_FD would have
+that fd be signaled without any extra calls such as eglClientWaitSyncKHR.
+
+Device properties:
+  Name: goldfish_sync
+  Id: ???
+  IrqCount: 1
+  I/O Registers:
+    0x00...0x04 COMMAND     W: The command to execute
+    0x04...0x08 HANDLE      RW: The timeline (or fence fd) to operate on (low bits)
+    0x08...0x0c HANDLE_HIGH RW: The timeline to operate on (high bits)
+    0x0c...0x10 TIME_ARG    W: Time argument (how much to increment)
+
