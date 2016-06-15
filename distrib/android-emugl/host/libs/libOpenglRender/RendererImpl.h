@@ -63,7 +63,6 @@ private:
 private:
     std::unique_ptr<RenderWindow> mRenderWindow;
 
-    android::base::Lock mRenderThreadSharedLock;
     android::base::Lock mThreadVectorLock;
 
     using ThreadWithChannel = std::pair<std::unique_ptr<RenderThread>,

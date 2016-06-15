@@ -37,8 +37,8 @@
 
 #ifdef _WIN32
 #  define xxWIN32_LEAN_AND_MEAN
-#  include <windows.h>
 #  include <winsock2.h>
+#  include <windows.h>
 #  include <ws2tcpip.h>
 #else /* !_WIN32 */
 #  include <sys/ioctl.h>

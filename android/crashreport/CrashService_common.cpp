@@ -12,6 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifdef _WIN32
+// To avoid a compiler warning that asks to include this before <windows.h>
+// which is included by <curl/curl.h>. This must appear before other includes.
+#include <winsock2.h>
+#endif
+
 #include "android/crashreport/CrashService.h"
 
 #include "android/crashreport/CrashReporter.h"
@@ -41,6 +47,7 @@
 #include "google_breakpad/processor/stack_frame_cpu.h"
 #include "processor/stackwalk_common.h"
 #include "processor/pathname_stripper.h"
+
 #include <curl/curl.h>
 
 #include <algorithm>
