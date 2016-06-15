@@ -37,6 +37,7 @@ public:
     virtual ~GLWidget();
 
     QPaintEngine* paintEngine() const override { return nullptr; }
+    bool isValid() const { return mValid; }
 
 public slots:
     void renderFrame();
@@ -74,7 +75,6 @@ protected:
     int realPixelsWidth() const { return std::ceil(width() * devicePixelRatio()); }
     int realPixelsHeight() const { return std::ceil(height() * devicePixelRatio()); }
     void toggleAA() { mEnableAA = !mEnableAA; }
-    bool isValid() const { return mValid; }
 
 private:
     void paintEvent(QPaintEvent*) override;
