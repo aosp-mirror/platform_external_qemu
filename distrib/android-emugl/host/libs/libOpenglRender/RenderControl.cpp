@@ -23,6 +23,7 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
+#include "emugl/common/sync_device.h"
 
 #include <atomic>
 #include <inttypes.h>
