@@ -23,6 +23,7 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
+#include "emugl/common/sync_device.h"
 
 #include <atomic>
 #include <inttypes.h>
@@ -327,6 +328,8 @@ static EGLint rcGetFBParam(EGLint param)
 static uint32_t rcCreateContext(uint32_t config,
                                 uint32_t share, uint32_t glVersion)
 {
+    fprintf(stderr, "%s: Create timeline\n", __FUNCTION__);
+    emugl_sync_create_timeline();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return 0;
