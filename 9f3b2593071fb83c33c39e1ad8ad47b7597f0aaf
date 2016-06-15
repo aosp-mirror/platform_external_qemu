@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b47a9131_3f5e2f2a",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-06-15T17:17:33Z",
+      "side": 1,
+      "message": "Out of curiosity, is this needed for the latitude/longitude/altitude UI as well?",
+      "range": {
+        "startLine": 35,
+        "startChar": 35,
+        "endLine": 35,
+        "endChar": 47
+      },
+      "revId": "9f3b2593071fb83c33c39e1ad8ad47b7597f0aaf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
