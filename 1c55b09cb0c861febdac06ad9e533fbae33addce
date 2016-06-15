@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b47a9131_d4d35210",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-15T15:34:16Z",
+      "side": 1,
+      "message": "this is string.h, not string - it was previously included in \nGLDecoderContextData.h, but now it isn\u0027t - and strlen, strcpy, strdup etc became undeclared in some places",
+      "parentUuid": "8f09f4df_0465779a",
+      "range": {
+        "startLine": 30,
+        "startChar": 10,
+        "endLine": 30,
+        "endChar": 16
+      },
+      "revId": "1c55b09cb0c861febdac06ad9e533fbae33addce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8f09f4df_6401d3a9",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 1
@@ -59,6 +83,30 @@
       "writtenOn": "2016-06-13T17:19:54Z",
       "side": 1,
       "message": "Here and below, if we\u0027re going to do the cast to/from char*...why not make this type char* data?  Some external constraint?",
+      "range": {
+        "startLine": 48,
+        "startChar": 44,
+        "endLine": 48,
+        "endChar": 54
+      },
+      "revId": "1c55b09cb0c861febdac06ad9e533fbae33addce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b47a9131_b4e246db",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLDecoderContextData.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-15T15:34:16Z",
+      "side": 1,
+      "message": "void* is a universal idea of pointer to anything, while char* is a pointer to raw bytes (IMHO).",
+      "parentUuid": "8f09f4df_0f60f58a",
       "range": {
         "startLine": 48,
         "startChar": 44,
@@ -130,6 +178,30 @@
       "side": 1,
       "message": "OK, good to hear that it probably wouldn\u0027t be a bug.\n\nI\u0027m still a little nervous about converting code that would have worked for any value of numLocations into code with a fixed limit.  But if the constructor is only ever called with the default argument (as it must be if eliminating it compiles), then I guess it\u0027s only a theoretical problem.",
       "parentUuid": "8f09f4df_84018731",
+      "range": {
+        "startLine": 71,
+        "startChar": 34,
+        "endLine": 71,
+        "endChar": 54
+      },
+      "revId": "1c55b09cb0c861febdac06ad9e533fbae33addce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b47a9131_f401ae66",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLDecoderContextData.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-15T15:34:16Z",
+      "side": 1,
+      "message": "One more thing: constructor was never called with anything but the default value of the size, that\u0027s why I decided to replace a dynamic array with a static one\nWe never tried any dynamic size expansion, so it\u0027s OK",
+      "parentUuid": "8f09f4df_84b3474d",
       "range": {
         "startLine": 71,
         "startChar": 34,
