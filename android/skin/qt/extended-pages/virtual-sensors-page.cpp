@@ -11,16 +11,20 @@
 #include "android/skin/qt/extended-pages/virtual-sensors-page.h"
 
 #include "android/emulation/control/sensors_agent.h"
+#include "android/emulator-window.h"
 #include "android/hw-sensors.h"
+#include "android/skin/ui.h"
+
 
 #include <QDesktopServices>
 #include <QQuaternion>
 
-VirtualSensorsPage::VirtualSensorsPage(QWidget *parent) :
+#include <cassert>
+
+VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     QWidget(parent),
     mUi(new Ui::VirtualSensorsPage()),
-    mSensorsAgent(nullptr)
-{
+    mSensorsAgent(nullptr) {
     mUi->setupUi(this);
     mUi->temperatureSensorValueWidget->setRange(-273.1, 100.0);
     mUi->temperatureSensorValueWidget->setValue(25.0);
@@ -67,12 +71,63 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget *parent) :
             this,
             SLOT(onDragStarted()));
 
-    connect(&mAccelerationTimer, SIGNAL(timeout()), this, SLOT(updateLinearAcceleration()));
+    connect(&mAccelerationTimer, SIGNAL(timeout()),
+            this, SLOT(updateLinearAcceleration()));
     mAccelerationTimer.setInterval(100);
     mAccelerationTimer.stop();
+
+    resetAccelerometerRotationFromSkinLayout(
+         skin_ui_get_current_layout(
+            emulator_window_get()->ui));
 }
 
-void VirtualSensorsPage::resetRotation(const QQuaternion& rotation) {
+void VirtualSensorsPage::setLayoutChangeNotifier(QObject* layout_change_notifier) {
+    connect(layout_change_notifier, SIGNAL(layoutChanged(bool)),
+            this, SLOT(onSkinLayoutChange(bool)));
+
+}
+
+void VirtualSensorsPage::onSkinLayoutChange(bool next) {
+    const SkinUI* ui = emulator_window_get()->ui;
+    if (ui) {
+        const SkinLayout* layout =
+            (next ? skin_ui_get_next_layout : skin_ui_get_prev_layout)(ui);
+        resetAccelerometerRotationFromSkinLayout(layout);
+    }
+}
+
+void VirtualSensorsPage::resetAccelerometerRotationFromSkinLayout(
+        const SkinLayout* layout) {
+    if (layout) {
+        float rot = 0.0;
+
+        // NOTE: the "incorrect" angle values
+        // stem from the fact that QQuaternion and SKIN_ROTATION_*
+        // disagree on which direction is "positive" (skin uses
+        // a different coordinate system with origin at top left
+        // and X and Y axis pointing right and down respectively).
+        switch (layout->orientation) {
+        case SKIN_ROTATION_0:
+            rot = 0.0;
+            break;
+        case SKIN_ROTATION_90:
+            rot = -90.0;
+            break;
+        case SKIN_ROTATION_180:
+            rot = 180.0;
+            break;
+        case SKIN_ROTATION_270:
+            rot = 90.0;
+            break;
+        default:
+            assert(0);
+        }
+        resetAccelerometerRotation(
+                QQuaternion::fromAxisAndAngle(
+                    0.0, 0.0, 1.0, rot));
+    }
+}
+void VirtualSensorsPage::resetAccelerometerRotation(const QQuaternion& rotation) {
      mUi->accelWidget->setPosition(QVector2D(0.0, 0.0));
      mUi->accelWidget->setRotation(rotation);
      mUi->accelWidget->renderFrame();
@@ -80,19 +135,19 @@ void VirtualSensorsPage::resetRotation(const QQuaternion& rotation) {
 }
 
 void VirtualSensorsPage::on_rotateToPortrait_clicked() {
-    resetRotation(QQuaternion());
+    resetAccelerometerRotation(QQuaternion());
 }
 
 void VirtualSensorsPage::on_rotateToLandscape_clicked() {
-    resetRotation(QQuaternion::fromAxisAndAngle(0.0, 0.0, 1.0, 90.0));
+    resetAccelerometerRotation(QQuaternion::fromAxisAndAngle(0.0, 0.0, 1.0, 90.0));
 }
 
 void VirtualSensorsPage::on_rotateToReversePortrait_clicked() {
-    resetRotation(QQuaternion::fromAxisAndAngle(0.0, 0.0, 1.0, 180.0));
+    resetAccelerometerRotation(QQuaternion::fromAxisAndAngle(0.0, 0.0, 1.0, 180.0));
 }
 
 void VirtualSensorsPage::on_rotateToReverseLandscape_clicked() {
-    resetRotation(QQuaternion::fromAxisAndAngle(0.0, 0.0, 1.0, -90.0));
+    resetAccelerometerRotation(QQuaternion::fromAxisAndAngle(0.0, 0.0, 1.0, -90.0));
 }
 
 void VirtualSensorsPage::setSensorsAgent(const QAndroidSensorsAgent* agent) {

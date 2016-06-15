@@ -176,6 +176,7 @@ signals:
     void runOnUiThread(SkinGenericFunction* f,
                        void* data,
                        QSemaphore* semaphore = NULL);
+    void layoutChanged(bool next);
 
 public:
     bool isInZoomMode() const;
