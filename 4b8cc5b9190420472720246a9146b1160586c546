@@ -16,6 +16,24 @@
       "revId": "4b8cc5b9190420472720246a9146b1160586c546",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7468199f_d98fd336",
+        "filename": "android/base/threads/Thread_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-15T07:38:41Z",
+      "side": 1,
+      "message": "exactly, I want to use -Werror for all AndroidEmu code asap at a minimum. For QEMU and third-party libraries, it will be more difficult, especially on Darwin.",
+      "parentUuid": "94fe6d6e_f587d2bb",
+      "revId": "4b8cc5b9190420472720246a9146b1160586c546",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
