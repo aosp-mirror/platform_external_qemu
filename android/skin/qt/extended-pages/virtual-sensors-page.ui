@@ -398,7 +398,7 @@
       <rect>
        <x>280</x>
        <y>30</y>
-       <width>170</width>
+       <width>120</width>
        <height>15</height>
       </rect>
      </property>
@@ -487,7 +487,7 @@
       <rect>
        <x>280</x>
        <y>140</y>
-       <width>170</width>
+       <width>60</width>
        <height>15</height>
       </rect>
      </property>
@@ -513,7 +513,7 @@
       <rect>
        <x>20</x>
        <y>260</y>
-       <width>170</width>
+       <width>90</width>
        <height>15</height>
       </rect>
      </property>
@@ -545,6 +545,102 @@
      </property>
      <property name="text">
       <string>Relative humidity (%)</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="helpMagneticField">
+     <property name="geometry">
+      <rect>
+       <x>402</x>
+       <y>30</y>
+       <width>15</width>
+       <height>15</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../resources.qrc">
+       <normaloff>:/light/help_outline</normaloff>:/light/help_outline</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>15</width>
+       <height>15</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>help_outline</string>
+     </property>
+     <property name="helpButton" stdset="0">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="helpLight">
+     <property name="geometry">
+      <rect>
+       <x>342</x>
+       <y>140</y>
+       <width>15</width>
+       <height>15</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../resources.qrc">
+       <normaloff>:/light/help_outline</normaloff>:/light/help_outline</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>15</width>
+       <height>15</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>help_outline</string>
+     </property>
+     <property name="helpButton" stdset="0">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="helpPressure">
+     <property name="geometry">
+      <rect>
+       <x>112</x>
+       <y>260</y>
+       <width>15</width>
+       <height>15</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../resources.qrc">
+       <normaloff>:/light/help_outline</normaloff>:/light/help_outline</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>15</width>
+       <height>15</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>help_outline</string>
+     </property>
+     <property name="helpButton" stdset="0">
+      <bool>true</bool>
      </property>
     </widget>
    </widget>

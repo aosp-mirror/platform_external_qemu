@@ -74,6 +74,10 @@ QPushButton:pressed[ToolWindowButton=true], QPushButton:checked[ToolWindowButton
     background: %%TAB_DARKENED_COLOR%%;
     border-radius: 4px;
 }
+QPushButton:pressed[helpButton=true] {
+    border: none;
+    background: %%TAB_DARKENED_COLOR%%;
+}
 QPushButton[ColorGroup="MajorTab"] {
     border: none;
     text-align: left;

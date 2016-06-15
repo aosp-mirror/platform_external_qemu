@@ -12,6 +12,8 @@
 
 #include "android/emulation/control/sensors_agent.h"
 #include "android/hw-sensors.h"
+
+#include <QDesktopServices>
 #include <QQuaternion>
 
 VirtualSensorsPage::VirtualSensorsPage(QWidget *parent) :
@@ -223,4 +225,19 @@ void VirtualSensorsPage::on_accelModeMove_toggled() {
         mUi->accelWidget->setOperationMode(
             Accelerometer3DWidget::OperationMode::Move);
     }
+}
+
+void VirtualSensorsPage::on_helpMagneticField_clicked() {
+    QDesktopServices::openUrl(QUrl::fromEncoded(
+            "https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_MAGNETIC_FIELD"));
+}
+
+void VirtualSensorsPage::on_helpLight_clicked() {
+    QDesktopServices::openUrl(QUrl::fromEncoded(
+            "https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_LIGHT"));
+}
+
+void VirtualSensorsPage::on_helpPressure_clicked() {
+    QDesktopServices::openUrl(QUrl::fromEncoded(
+            "https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_PRESSURE"));
 }
