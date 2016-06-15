@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "f417a9f9_c6ec229e",
+        "filename": "android/emulation/control/cellular_agent.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-06-15T23:07:49Z",
+      "side": 1,
+      "message": "I changed the code, but didn\u0027t change the comment :(\n\nLet\u0027s go with \u0027Great\u0027 for now.\n\nI\u0027ll discuss it with our UI people. We can change it later if they prefer \u0027Excellent\u0027.",
+      "parentUuid": "7468199f_d97353d2",
+      "range": {
+        "startLine": 26,
+        "startChar": 44,
+        "endLine": 26,
+        "endChar": 69
+      },
+      "revId": "15ee2539ef8f238e6d6ed5daad509c7a60eeb7d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8f09f4df_e479636e",
         "filename": "android/telephony/modem.c",
         "patchSetId": 5
