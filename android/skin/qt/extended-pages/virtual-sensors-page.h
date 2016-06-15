@@ -62,6 +62,8 @@ private slots:
     void on_helpPressure_clicked();
 
 private:
+    void showEvent(QShowEvent*) override;
+
     void resetAccelerometerRotation(const QQuaternion&);
     void resetAccelerometerRotationFromSkinLayout(const SkinLayout*);
     void updateAccelerometerValues();
@@ -73,5 +75,6 @@ private:
     QVector3D mPrevPosition;
     QVector3D mCurrentPosition;
     QTimer mAccelerationTimer;
+    bool mFirstShow = true;
 };
 
