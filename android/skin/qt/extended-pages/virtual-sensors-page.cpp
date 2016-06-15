@@ -70,6 +70,29 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget *parent) :
     mAccelerationTimer.stop();
 }
 
+void VirtualSensorsPage::resetRotation(const QQuaternion& rotation) {
+     mUi->accelWidget->setPosition(QVector2D(0.0, 0.0));
+     mUi->accelWidget->setRotation(rotation);
+     mUi->accelWidget->renderFrame();
+     updateAccelerometerValues();
+}
+
+void VirtualSensorsPage::on_rotateToPortrait_clicked() {
+    resetRotation(QQuaternion());
+}
+
+void VirtualSensorsPage::on_rotateToLandscape_clicked() {
+    resetRotation(QQuaternion::fromAxisAndAngle(0.0, 0.0, 1.0, 90.0));
+}
+
+void VirtualSensorsPage::on_rotateToReversePortrait_clicked() {
+    resetRotation(QQuaternion::fromAxisAndAngle(0.0, 0.0, 1.0, 180.0));
+}
+
+void VirtualSensorsPage::on_rotateToReverseLandscape_clicked() {
+    resetRotation(QQuaternion::fromAxisAndAngle(0.0, 0.0, 1.0, -90.0));
+}
+
 void VirtualSensorsPage::setSensorsAgent(const QAndroidSensorsAgent* agent) {
     mSensorsAgent = agent;
 

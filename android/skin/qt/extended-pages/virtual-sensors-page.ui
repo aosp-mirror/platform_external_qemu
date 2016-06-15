@@ -18,7 +18,7 @@
     <rect>
      <x>0</x>
      <y>20</y>
-     <width>621</width>
+     <width>630</width>
      <height>561</height>
     </rect>
    </property>
@@ -26,7 +26,7 @@
     <string notr="true"/>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -36,7 +36,7 @@
      <property name="geometry">
       <rect>
        <x>150</x>
-       <y>310</y>
+       <y>470</y>
        <width>250</width>
        <height>20</height>
       </rect>
@@ -52,7 +52,7 @@
      <property name="geometry">
       <rect>
        <x>150</x>
-       <y>340</y>
+       <y>500</y>
        <width>250</width>
        <height>20</height>
       </rect>
@@ -68,7 +68,7 @@
      <property name="geometry">
       <rect>
        <x>410</x>
-       <y>310</y>
+       <y>470</y>
        <width>60</width>
        <height>20</height>
       </rect>
@@ -84,7 +84,7 @@
      <property name="geometry">
       <rect>
        <x>480</x>
-       <y>310</y>
+       <y>470</y>
        <width>60</width>
        <height>20</height>
       </rect>
@@ -100,7 +100,7 @@
      <property name="geometry">
       <rect>
        <x>550</x>
-       <y>310</y>
+       <y>470</y>
        <width>60</width>
        <height>20</height>
       </rect>
@@ -116,7 +116,7 @@
      <property name="geometry">
       <rect>
        <x>410</x>
-       <y>340</y>
+       <y>500</y>
        <width>60</width>
        <height>20</height>
       </rect>
@@ -132,7 +132,7 @@
      <property name="geometry">
       <rect>
        <x>480</x>
-       <y>340</y>
+       <y>500</y>
        <width>60</width>
        <height>20</height>
       </rect>
@@ -148,7 +148,7 @@
      <property name="geometry">
       <rect>
        <x>550</x>
-       <y>340</y>
+       <y>500</y>
        <width>60</width>
        <height>20</height>
       </rect>
@@ -177,7 +177,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>310</y>
+       <y>321</y>
        <width>103</width>
        <height>25</height>
       </rect>
@@ -195,8 +195,8 @@
     <widget class="QRadioButton" name="accelModeMove">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>340</y>
+       <x>120</x>
+       <y>321</y>
        <width>103</width>
        <height>25</height>
       </rect>
@@ -206,6 +206,134 @@
      </property>
      <property name="report_metrics" stdset="0">
       <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="RaisedMaterialButton" name="rotateToPortrait">
+     <property name="geometry">
+      <rect>
+       <x>410</x>
+       <y>310</y>
+       <width>48</width>
+       <height>48</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Portrait</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../resources.qrc">
+       <normaloff>:/light/phone_portrait</normaloff>:/light/phone_portrait</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>phone_portrait</string>
+     </property>
+     <property name="colorGroup" stdset="0">
+      <string>Tool</string>
+     </property>
+    </widget>
+    <widget class="RaisedMaterialButton" name="rotateToLandscape">
+     <property name="geometry">
+      <rect>
+       <x>460</x>
+       <y>310</y>
+       <width>48</width>
+       <height>48</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Landscape</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../resources.qrc">
+       <normaloff>:/light/phone_landscape</normaloff>:/light/phone_landscape</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>phone_landscape</string>
+     </property>
+     <property name="colorGroup" stdset="0">
+      <string>Tool</string>
+     </property>
+    </widget>
+    <widget class="RaisedMaterialButton" name="rotateToReversePortrait">
+     <property name="geometry">
+      <rect>
+       <x>510</x>
+       <y>310</y>
+       <width>48</width>
+       <height>48</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Reverse Portrait</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../resources.qrc">
+       <normaloff>:/light/phone_reverse_portrait</normaloff>:/light/phone_reverse_portrait</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>phone_reverse_portrait</string>
+     </property>
+     <property name="colorGroup" stdset="0">
+      <string>Tool</string>
+     </property>
+    </widget>
+    <widget class="RaisedMaterialButton" name="rotateToReverseLandscape">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>310</y>
+       <width>48</width>
+       <height>48</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Reverse Landscape</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../resources.qrc">
+       <normaloff>:/light/phone_reverse_landscape</normaloff>:/light/phone_reverse_landscape</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>phone_reverse_landscape</string>
+     </property>
+     <property name="colorGroup" stdset="0">
+      <string>Tool</string>
      </property>
     </widget>
    </widget>
@@ -435,7 +563,14 @@
    <header>android/skin/qt/accelerometer-3d-widget.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>RaisedMaterialButton</class>
+   <extends>QPushButton</extends>
+   <header>android/skin/qt/raised-material-button.h</header>
+  </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -85,8 +85,12 @@
         <file alias="phone_disabled">images/light/ic_phone_BEE_48dp.svg</file>
         <file alias="phone_in_talk">images/light/ic_phone_in_talk_0BA_48dp.svg</file>
         <file alias="phone_in_talk_disabled">images/light/ic_phone_in_talk_BEE_48dp.svg</file>
+        <file alias="phone_landscape">images/light/ic_phone_android_landscape.svg</file>
         <file alias="phone_paused">images/light/ic_phone_paused_0BA_48dp.svg</file>
         <file alias="phone_paused_disabled">images/light/ic_phone_paused_BEE_48dp.svg</file>
+        <file alias="phone_portrait">images/light/ic_phone_android_portrait.svg</file>
+        <file alias="phone_reverse_landscape">images/light/ic_phone_android_reverse_landscape.svg</file>
+        <file alias="phone_reverse_portrait">images/light/ic_phone_android_reverse_portrait.svg</file>
         <file alias="play_arrow">images/light/ic_play_arrow_0BA_48dp.svg</file>
         <file alias="play_arrow_disabled">images/light/ic_play_arrow_BEE_48dp.svg</file>
         <file alias="radio_off">images/light/ic_radio_button_unchecked_777_24dp.svg</file>
@@ -164,8 +168,12 @@
         <file alias="phone_disabled">images/dark/ic_phone_155_48dp.svg</file>
         <file alias="phone_in_talk">images/dark/ic_phone_in_talk_0BA_48dp.svg</file>
         <file alias="phone_in_talk_disabled">images/dark/ic_phone_in_talk_155_48dp.svg</file>
+        <file alias="phone_landscape">images/dark/ic_phone_android_landscape.svg</file>
         <file alias="phone_paused">images/dark/ic_phone_paused_0BA_48dp.svg</file>
         <file alias="phone_paused_disabled">images/dark/ic_phone_paused_155_48dp.svg</file>
+        <file alias="phone_portrait">images/dark/ic_phone_android_portrait.svg</file>
+        <file alias="phone_reverse_landscape">images/dark/ic_phone_android_reverse_landscape.svg</file>
+        <file alias="phone_reverse_portrait">images/dark/ic_phone_android_reverse_portrait.svg</file>
         <file alias="play_arrow">images/dark/ic_play_arrow_0BA_48dp.svg</file>
         <file alias="play_arrow_disabled">images/dark/ic_play_arrow_155_48dp.svg</file>
         <file alias="radio_off">images/dark/ic_radio_button_unchecked_BCC_24dp.svg</file>
