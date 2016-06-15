@@ -119,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "7468199f_997abb5f",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLDecoderContextData.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-15T15:40:05Z",
+      "side": 1,
+      "message": "I agree, the fact that we use an array of chars to store the data is an implementation detail, the API should be more generic than that.",
+      "parentUuid": "b47a9131_b4e246db",
+      "range": {
+        "startLine": 48,
+        "startChar": 44,
+        "endLine": 48,
+        "endChar": 54
+      },
+      "revId": "1c55b09cb0c861febdac06ad9e533fbae33addce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8f09f4df_2fecd9fc",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLDecoderContextData.h",
         "patchSetId": 1
@@ -202,6 +226,30 @@
       "side": 1,
       "message": "One more thing: constructor was never called with anything but the default value of the size, that\u0027s why I decided to replace a dynamic array with a static one\nWe never tried any dynamic size expansion, so it\u0027s OK",
       "parentUuid": "8f09f4df_84b3474d",
+      "range": {
+        "startLine": 71,
+        "startChar": 34,
+        "endLine": 71,
+        "endChar": 54
+      },
+      "revId": "1c55b09cb0c861febdac06ad9e533fbae33addce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7468199f_b97f7f4e",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLDecoderContextData.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-15T15:40:05Z",
+      "side": 1,
+      "message": "I\u0027m ok with the change, but it would help to have this explanation in the commit message, for clarity / maintenance :)",
+      "parentUuid": "b47a9131_f401ae66",
       "range": {
         "startLine": 71,
         "startChar": 34,
