@@ -22,6 +22,30 @@
       "revId": "9103e8d500255ce1be11e42a09131d0eced44cee",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7468199f_199a2b79",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-15T07:40:14Z",
+      "side": 1,
+      "message": "Because another header could still be included before this one, and would include \u003cwindows.h\u003e first. There really no good solution to this, the Mingw headers are borked, so we\u0027ll have to deal with it :-/",
+      "parentUuid": "94fe6d6e_7b8bd334",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 33
+      },
+      "revId": "9103e8d500255ce1be11e42a09131d0eced44cee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
