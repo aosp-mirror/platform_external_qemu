@@ -70,6 +70,30 @@
       "revId": "b22ec087faa9cda3f0ed3569d81fc7b769879e9f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f417a9f9_789cc783",
+        "filename": "android/windows_installer_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2016-06-16T05:51:10Z",
+      "side": 1,
+      "message": "Hi, I almost begin to sit down to write the test as you suggested, and then I found it\u0027s somewhat complex than I am expected:\nIf you check the code in android/windows_installer.cpp, to access that registry key, we have to check if we are compiling as win32 or win64 bin and then set a different flag for RegOpenKeyEx. \n\nThen lots of code in unit test looks like the code from tested cpp.\n\nMore, to use setup/teardown,  we have to introduce class  ::testing::Test in unit_test.\n\nAll of these are just for letting the test passed under wine and not really fixded any bugs...\n\nActually, we only need people who want to make this test passed on wine setup one single regkey only for once. (If they don\u0027t reinstall their wine)....",
+      "parentUuid": "9483cd1c_8a09eb23",
+      "range": {
+        "startLine": 27,
+        "startChar": 5,
+        "endLine": 27,
+        "endChar": 75
+      },
+      "revId": "b22ec087faa9cda3f0ed3569d81fc7b769879e9f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
