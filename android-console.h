@@ -87,6 +87,7 @@ void android_console_gsm_data(Monitor *mon, const QDict *qdict);
 void android_console_gsm_voice(Monitor *mon, const QDict *qdict);
 void android_console_gsm_status(Monitor *mon, const QDict *qdict);
 void android_console_gsm_signal(Monitor *mon, const QDict *qdict);
+void android_console_gsm_signal_profile(Monitor *mon, const QDict *qdict);
 void android_console_gsm(Monitor *mon, const QDict *qdict);
 
 void android_console_rotate_screen(Monitor *mon, const QDict *qdict);

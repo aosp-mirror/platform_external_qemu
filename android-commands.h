@@ -351,10 +351,19 @@ static mon_cmd_t android_gsm_cmds[] = {
         .args_type = "arg:S?",
         .params = "",
         .help = "sets the rssi and ber"
-            "signal <rssi> [<ber>]' changes the reported strength and error rate on next (15s) update.\n"
-    "rssi range is 0..31 and 99 for unknown\n"
-    "ber range is 0..7 percent and 99 for unknown\n",
+                "signal <rssi> [<ber>]' changes the reported strength and error rate on next (15s) update.\n"
+                "rssi range is 0..31 and 99 for unknown\n"
+                "ber range is 0..7 percent and 99 for unknown\n",
         .mhandler.cmd = android_console_gsm_signal,
+    },
+    {
+        .name = "signal-profile",
+        .args_type = "arg:S?",
+        .params = "",
+        .help = "sets the signal strength profile"
+            "signal-profile <strength>' changes the reported strength on next (15s) update.\n"
+            "strength range is 0..4\n",
+        .mhandler.cmd = android_console_gsm_signal_profile,
     },
     { NULL, NULL, },
 };

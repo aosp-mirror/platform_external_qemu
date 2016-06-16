@@ -30,6 +30,18 @@ static void cellular_setSignalStrength(int zeroTo31)
     }
 }
 
+static void cellular_setSignalStrengthProfile(int zeroTo4)
+{
+    // (See do_gsm_signal_profile() in android-qemu1-glue/console.c)
+
+    if (android_modem) {
+        if (zeroTo4 < 0) zeroTo4 = 0;
+        if (zeroTo4 > 4) zeroTo4 = 4;
+
+        amodem_set_signal_strength_profile(android_modem, zeroTo4);
+    }
+}
+
 static void cellular_setVoiceStatus(enum CellularStatus voiceStatus)
 {
     // (See do_gsm_voice() in android-qemu1-glue/console.c)
@@ -106,6 +118,7 @@ static void cellular_setStandard(enum CellularStandard cStandard)
 
 static const QAndroidCellularAgent sQAndroidCellularAgent = {
     .setSignalStrength = cellular_setSignalStrength,
+    .setSignalStrengthProfile = cellular_setSignalStrengthProfile,
     .setVoiceStatus = cellular_setVoiceStatus,
     .setDataStatus = cellular_setDataStatus,
     .setStandard = cellular_setStandard};
