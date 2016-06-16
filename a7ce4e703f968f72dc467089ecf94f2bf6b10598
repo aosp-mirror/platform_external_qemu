@@ -22,6 +22,30 @@
       "revId": "a7ce4e703f968f72dc467089ecf94f2bf6b10598",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7468199f_3cc51d3e",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 975,
+      "author": {
+        "id": 1102110
+      },
+      "writtenOn": "2016-06-16T08:37:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f417a9f9_26e356e2",
+      "range": {
+        "startLine": 975,
+        "startChar": 19,
+        "endLine": 975,
+        "endChar": 23
+      },
+      "revId": "a7ce4e703f968f72dc467089ecf94f2bf6b10598",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
