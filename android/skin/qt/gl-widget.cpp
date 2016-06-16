@@ -212,9 +212,15 @@ bool GLWidget::ensureInit() {
     return mValid;
 }
 
-void GLWidget::makeContextCurrent() {
-    mEGL->eglMakeCurrent(mEGLState->display, mEGLState->surface,
-                         mEGLState->surface, mEGLState->context);
+bool GLWidget::makeContextCurrent() {
+    if (mEGLState) {
+        return
+            mEGL->eglMakeCurrent(mEGLState->display, mEGLState->surface,
+                                 mEGLState->surface, mEGLState->context) == EGL_TRUE;
+
+    } else {
+        return false;
+    }
 }
 
 void GLWidget::renderFrame() {
