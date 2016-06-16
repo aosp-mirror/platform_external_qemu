@@ -22,10 +22,17 @@ enum CellularStatus { Cellular_Stat_Home,   Cellular_Stat_Roaming, Cellular_Stat
 enum CellularStandard { Cellular_Std_GSM,  Cellular_Std_HSCSD, Cellular_Std_GPRS, Cellular_Std_EDGE,
                         Cellular_Std_UMTS, Cellular_Std_HSDPA, Cellular_Std_full };
 
+enum CellularSignal { Cellular_Signal_None, Cellular_Signal_Poor, Cellular_Signal_Moderate,
+                      Cellular_Signal_Good, Cellular_Signal_Great };
+
 typedef struct QAndroidCellularAgent {
     // Sets the cellular signal strength
     // Input: 0(none) .. 31(very strong)
     void (*setSignalStrength)(int zeroTo31);
+
+    // Sets the cellular signal strength
+    // Input: enum CellularSignal, above
+    void (*setSignalStrengthProfile)(enum CellularSignal);
 
     // Sets the status of the voice connectivity
     // Input: enum CellularStatus, above
