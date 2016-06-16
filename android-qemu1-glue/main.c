@@ -24,6 +24,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/filelock.h"
 #include "android/utils/lineinput.h"
+#include "android/utils/tempfile.h"
 
 #include "android-qemu1-glue/emulation/serial_line.h"
 #include "android-qemu1-glue/qemu-control-impl.h"
@@ -166,10 +167,11 @@ int main(int argc, char **argv) {
         androidHwConfig_write(hw, hwIni);
 
         if (filelock_create(coreHwIniPath) == NULL) {
-            // The AVD is already in use
-            derror("There's another emulator instance running with "
-                   "the current AVD '%s'. Exiting...\n", avdInfo_getName(avd));
-            return 1;
+            /* The AVD is already in use, we still support this as an
+             * experimental feature. Use a temporary hardware-qemu.ini
+             * file though to avoid overwriting the existing one. */
+             TempFile*  tempIni = tempfile_create();
+             coreHwIniPath = tempfile_path(tempIni);
         }
 
         /* While saving HW config, ignore valueless entries. This will not break
