@@ -36,7 +36,18 @@ using android::base::AutoLock;
 #include <unistd.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
-#define DPRINT(...) do { fprintf(stderr, "tid=0x%lx | ", syscall(__NR_gettid)); fprintf(stderr, __VA_ARGS__); } while(0)
+
+#ifdef __APPLE__
+#define SYSCALL_GETTID_ARG SYS_thread_selfid
+#else
+#define SYSCALL_GETTID_ARG __NR_gettid
+#endif
+
+#define DPRINT(...) do { \
+    fprintf(stderr, "tid=0x%lx | ", syscall(SYSCALL_GETTID_ARG)); \
+    fprintf(stderr, __VA_ARGS__); \
+} while(0)
+
 #else
 #define DPRINT(...)
 #endif
