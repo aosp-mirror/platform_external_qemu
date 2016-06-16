@@ -26,14 +26,15 @@ Accelerometer3DWidget::~Accelerometer3DWidget() {
         return;
     }
     if (isValid()) {
-        makeContextCurrent();
-        mGLES2->glDeleteProgram(mProgram);
-        mGLES2->glDeleteBuffers(1, &mVertexDataBuffer);
-        mGLES2->glDeleteBuffers(1, &mVertexIndexBuffer);
-        mGLES2->glDeleteTextures(1, &mGlossMap);
-        mGLES2->glDeleteTextures(1, &mDiffuseMap);
-        mGLES2->glDeleteTextures(1, &mSpecularMap);
-        mGLES2->glDeleteTextures(1, &mEnvMap);
+        if(makeContextCurrent()) {
+            mGLES2->glDeleteProgram(mProgram);
+            mGLES2->glDeleteBuffers(1, &mVertexDataBuffer);
+            mGLES2->glDeleteBuffers(1, &mVertexIndexBuffer);
+            mGLES2->glDeleteTextures(1, &mGlossMap);
+            mGLES2->glDeleteTextures(1, &mDiffuseMap);
+            mGLES2->glDeleteTextures(1, &mSpecularMap);
+            mGLES2->glDeleteTextures(1, &mEnvMap);
+        }
     }
 }
 
