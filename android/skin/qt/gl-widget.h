@@ -40,7 +40,7 @@ public:
 
 public slots:
     void renderFrame();
-    void makeContextCurrent();
+    bool makeContextCurrent();
 
 private slots:
     void handleScreenChange(QScreen*);
