@@ -908,3 +908,126 @@ Device properties:
 
 TODO(digit)
 
+XIV. Goldfish sync device:
+==========================
+
+The Goldfish sync device’s purpose is to provide a simple, kernel-space-only,
+lightweight path to notify the virtual device of host graphics events such as
+GPU command completion. It can be used to synchronize just about anything else
+as well, but the main use case is in graphics. With the goldfish sync device,
+Android sync framework can be used in the guest, allowing more asynchronous
+processing and higher graphics performance without having to use sw_sync_user.
+
+In particular, it’ll be possible to not have to maintain separate rendering
+threads just for sync. Indeed, a separate GL thread is necessary on the host to
+wait on host fence commands, but without needing all the extra stuff that comes
+with a connection to the guest. In fact, we’d expect higher performance because
+of the potential lack of extra GL pipe traffic that would involve returning
+values to the guest; a eglCreateSyncKHR with ANDROID_NATIVE_FENCE_FD would have
+that fd be signaled without any extra calls such as eglClientWaitSyncKHR.
+
+Basic usage
+-----------
+
+Here is an example of how the sync device is used:
+
+1. eglCreateSyncKHR is called in the guest with the "type" argument set to
+EGL_SYNC_NATIVE_FENCE_ANDROID. This will:
+  - Insert a fence command in the OpenGL command stream that serves as a
+    synchronization point. Note that this is also common to eglCreateSyncKHR
+    with the "type" argument set to EGL_SYNC_FENCE_KHR, which is the minimal
+    non-Android-specific implementation.
+  - Use the virtual sync device to provide a native fence object, which may
+    create a fence file descriptor (fence fd) for the Android system to
+    wait on. Like other synchronization objects, the fence object can be
+    in an unsignaled or signaled state. When the OpenGL fence command above
+    completes, the fence object is signaled, and there are pre-existing
+    Android sync framework functions that do the waiting and detect
+    signaled status for fence fd's.
+  - The virtual sync device does the job of determining when that fence
+    object can be considered signaled. It knows about the specific OpenGL
+    fence object that was created, and it can query the host GPU to
+    know when that fence object is signaled (Fence commands / objects
+    correspond).
+2. When the fence object becomes signaled, functions waiting on that fence
+   object can then proceed. The most frequent use case is SurfaceFlinger,
+   on every buffer swap for any OpenGL app:
+   - App calls eglSwapBuffers, which queues a buffer with fence fd to
+     SurfaceFlinger
+   - The buffer is not finished drawing yet, but SurfaceFlinger is now
+     notified that there is something to present along with any other
+     information the buffer object provides, and thus, SurfaceFlinger
+     can do work in parallel, up to the point where the finished buffer
+     is really needed in composition.
+   - The fence fd is signaled, and SurfaceFlinger can start doing operations
+     that depend on the buffer being finished, such as some of
+     the grittier parts of the layer composition process.
+3. Contrast this usage versus without the virtual sync device and fence fd's:
+   a separate OpenGL thread in the guest has to be started for
+   every context that uses sync, just to call eglClientWaitSyncKHR and
+   manually notify SurfaceFlinger. Which was also a reckless understatement
+   because SurfaceFlinger runs in a different process from the OpenGL app.
+
+Implementation of device and driver
+-----------------------------------
+
+The Goldfish sync device communicates with a guest-side kernel driver
+through commands. The implementation of how we determine fence objects
+becoming signaled, is through eglClientWaitSyncKHR calls in the host.
+
+1. Guest->host commands are primarily used to initiate the calls to
+eglClientWaitSyncKHR on the host along with a eglCreateSyncKHR call that
+uses EGL_SYNC_NATIVE_FENCE_ANDROID. The particular command that does this
+is known as a "trigger wait" command. Once the call to eglClientWaitSyncKHR
+on the host completes, we then issue a host->guest command to tell the guest
+that the wait is over (upon which the fence fd is signaled).
+
+Currently, there are no other commands of guest->host type, except perhaps
+in the future, to signal that not all commands have been handled by
+the current IRQ, and to tell the virtual device to continue raising the IRQ,
+in case we want Goldfish sync device IRQs to be short as possible, which
+may decrease CPU usage due to interrupts when on high-refresh-rate displays.
+
+2. Host->guest commands are primarily used to signal guest's fence objects from
+the host when an EGL sync object on the host is signaled. This involves an
+increment of the guest's timeline; the fence object in the guest is considered
+signaled when the timeline in the guest is incremented past the point
+associated with the fence object.
+
+This is known as a "timeline increment" command. Currently, all other commands
+of guest->host type are used only for testing purposes.
+
+The type of data required to process each command include:
+
+1. Guest->host commands:
+    code describing the command to perform (usually, "trigger wait")
+    handle to host EGL sync object
+    handle to host sync thread object
+    handle to guest's timeline object
+
+2. Host->guest commands:
+    code describing the command (usually, "increment timeline")
+    number describing how much to increment the timeline
+    handle to guest's timeline object
+    unique ID for the command itself, so that we can properly wait on replies
+    from guest if needed.
+
+Each of these types of data is packed up in a struct and sent in batches
+using cpu_physical_memory_(read|write). SYNC_REG_BATCH_(GUEST)COMMAND is a register
+used to tell us when the address for batch operation is being written or read.
+
+The particular physical address written to is set up upon initialization
+of the goldfish sync device driver in the kernel, using the registers
+SYNC_REG_BATCH_(GUEST)COMMAND_ADDR(_HIGH). (_HIGH) for 64-bit guests.
+
+Device properties:
+  Name: goldfish_sync
+  Id: ???
+  IrqCount: 1
+  I/O Registers:
+    0x00...0x04 SYNC_REG_BATCH_COMMAND                 R/W: Triggers batch host->guest command
+    0x04...0x08 SYNC_REG_BATCH_GUESTCOMMAND            R/W: Triggers batch guest->host command
+    0x08...0x0c SYNC_REG_BATCH_COMMAND_ADDR            R/W: Physical address where batch host->guest command lives
+    0x0c...0x10 SYNC_REG_BATCH_COMMAND_ADDR_HIGH       R/W: Higher bits if 64-bit
+    0x10...0x14 SYNC_REG_BATCH_GUESTCOMMAND_ADDR       R/W: Physical address where batch guest->host command lives
+    0x14...0x18 SYNC_REG_BATCH_GUESTCOMMAND_ADDR_HIGH  R/W: Higher bits if 64-bit
