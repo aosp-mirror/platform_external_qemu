@@ -181,7 +181,8 @@ extern  void   sleep_ms( int  timeout );
 
 #ifdef _WIN32
 
-#define THREADID_T DWORD
+#define THREADID_T int // cannot include windows yet, here.
+                       // Should be equiv. to DWORD
 
 #else
 
