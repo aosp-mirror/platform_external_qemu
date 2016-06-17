@@ -235,6 +235,8 @@ LOCAL_SRC_FILES := \
     android/emulation/control/TestRunnerSelfTests.cpp \
     android/emulation/control/ScreenCapturer.cpp \
     android/emulation/CpuAccelerator.cpp \
+    android/emulation/goldfish_sync.c \
+    android/emulation/goldfish_sync_tests.cpp \
     android/emulation/nand_limits.c \
     android/emulation/ParameterList.cpp \
     android/emulation/qemud/android_qemud_client.cpp \
