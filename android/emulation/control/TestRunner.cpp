@@ -25,6 +25,7 @@ static std::unordered_map<std::string, test_function_t>
 sTestFunctionMap;
 
 void test_runner_init() {
+    dtidprint("test init!");
     initialized = true;
 }
 

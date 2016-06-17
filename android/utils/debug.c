@@ -10,6 +10,7 @@
 ** GNU General Public License for more details.
 */
 #include "android/utils/debug.h"
+#include "android/utils/system.h"
 
 #include <fcntl.h>
 #include <stdint.h>
@@ -28,6 +29,7 @@ dprint( const char*  format,  ... )
     fprintf( stdout, "\n" );
     va_end( args );
 }
+
 
 void
 dprintn( const char*  format, ... )
@@ -65,6 +67,33 @@ derror( const char*  format, ... )
     dprintn( "emulator: ERROR: " );
     dprintnv( format, args );
     dprintn( "\n" );
+    va_end( args );
+}
+
+void
+dtidpreprint( const char* prefix, const char* format, ... )
+{
+    THREADID_T tid;
+    va_list  args;
+    tid = android_get_thread_id();
+    va_start( args, format );
+    fprintf( stdout, "tid=0x%" THREADID_FMT ": ", tid);
+    fprintf( stdout, "%s: ", prefix);
+    vfprintf( stdout, format, args );
+    fprintf( stdout, "\n" );
+    va_end( args );
+}
+
+void
+dtidprint( const char*  format, ... )
+{
+    THREADID_T tid;
+    va_list  args;
+    tid = android_get_thread_id();
+    va_start( args, format );
+    fprintf( stdout, "tid=0x%" THREADID_FMT ": ", tid);
+    vfprintf( stdout, format, args );
+    fprintf( stdout, "\n" );
     va_end( args );
 }
 
