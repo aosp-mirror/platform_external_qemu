@@ -82,6 +82,22 @@ extern void base_enable_verbose_logs();
 #define  VERBOSE_PRINT(tag,...)  \
     do { if (VERBOSE_CHECK(tag)) dprint(__VA_ARGS__); } while (0)
 
+#define  VERBOSE_DPRINT(tag,...)  \
+    do { if (VERBOSE_CHECK(tag)) { \
+        dprintn(__VA_ARGS__); dprint("\n"); } } while(0)
+
+#define  VERBOSE_TIDPRINT(tag,...)  \
+    do { if (VERBOSE_CHECK(tag)) dtidprint(__VA_ARGS__); } while (0)
+
+#define  VERBOSE_DFPRINT(tag,...)  \
+    do { if (VERBOSE_CHECK(tag)) { \
+        dprintn("%s: ", __FUNCTION__); \
+        dprintn(__VA_ARGS__); dprintn("\n"); } } while(0)
+
+#define  VERBOSE_TIDFPRINT(tag,...)  \
+    do { if (VERBOSE_CHECK(tag)) { \
+        dtidpreprint(__FUNCTION__, __VA_ARGS__); } } while (0)
+
 /** DEBUG TRACE SUPPORT
  **
  ** debug messages can be sent by calling these function
@@ -91,6 +107,8 @@ extern void base_enable_verbose_logs();
  ** 'dprintnv' allows you to use a va_list argument
  ** 'dwarning' prints a warning message, then appends a '\n'
  ** 'derror' prints a severe error message, then appends a '\n'
+ ** 'dtidprint' prints thread id, the message, and finally '\n'
+ ** 'dtidpreprint' prints thread id, a prefix, the message, and finally '\n'
  */
 
 extern void   dprint( const char*  format, ... );
@@ -98,6 +116,8 @@ extern void   dprintn( const char*  format, ... );
 extern void   dprintnv( const char*  format, va_list  args );
 extern void   dwarning( const char*  format, ... );
 extern void   derror( const char*  format, ... );
+extern void   dtidprint( const char*  format, ... );
+extern void   dtidpreprint( const char* prefix, const char*  format, ... );
 
 /** STDOUT/STDERR REDIRECTION
  **
