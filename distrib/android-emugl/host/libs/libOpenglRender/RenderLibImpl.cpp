@@ -18,6 +18,7 @@
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
+#include "emugl/common/sync_device.h"
 
 namespace emugl {
 
@@ -32,6 +33,19 @@ void RenderLibImpl::setCrashReporter(emugl_crash_reporter_t reporter) {
 
 void RenderLibImpl::setFeatureController(emugl_feature_is_enabled_t featureController) {
     set_emugl_feature_is_enabled(featureController);
+}
+
+void RenderLibImpl::setSyncDevice
+    (emugl_sync_create_timeline_t create_timeline,
+     emugl_sync_create_fence_t create_fence,
+     emugl_sync_timeline_inc_t timeline_inc,
+     emugl_sync_destroy_timeline_t destroy_timeline,
+     emugl_sync_register_trigger_wait_t register_trigger_wait) {
+    set_emugl_sync_create_timeline(create_timeline);
+    set_emugl_sync_create_fence(create_fence);
+    set_emugl_sync_timeline_inc(timeline_inc);
+    set_emugl_sync_destroy_timeline(destroy_timeline);
+    set_emugl_sync_register_trigger_wait(register_trigger_wait);
 }
 
 RendererPtr RenderLibImpl::initRenderer(int width, int height,
