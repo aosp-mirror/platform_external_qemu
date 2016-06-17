@@ -31,6 +31,8 @@
 #  include <windows.h>  /* for Sleep */
 #else
 #  include <unistd.h>  /* for usleep */
+#  include <sys/syscall.h> // For getting thread id's
+#  include <sys/types.h>
 #endif
 
 void*
@@ -224,5 +226,20 @@ sleep_ms( int  timeout_ms )
     BEGIN_NOSIGALRM
     usleep( timeout_ms*1000 );
     END_NOSIGALRM
+#endif
+}
+
+THREADID_T
+android_get_thread_id() {
+#ifdef _WIN32
+    return GetCurrentThreadId();
+#else
+
+#ifdef __APPLE__
+    return syscall(SYS_thread_selfid);
+#else
+    return syscall(__NR_gettid);
+#endif
+
 #endif
 }
