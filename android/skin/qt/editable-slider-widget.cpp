@@ -36,6 +36,7 @@ EditableSliderWidget::EditableSliderWidget(QWidget *parent) :
     mMinValueLabel.setProperty("ColorGroup", "SliderLabel");
     mMaxValueLabel.setProperty("ColorGroup", "SliderLabel");
     mLineEditValidator.setDecimals(1);
+    mLineEditValidator.setNotation(QDoubleValidator::StandardNotation);
     mLineEdit.setValidator(&mLineEditValidator);
     mLineEdit.setAlignment(Qt::AlignRight | Qt::AlignTop);
     mLineEdit.setMaximumWidth(50);
