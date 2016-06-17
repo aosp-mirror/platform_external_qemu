@@ -29,8 +29,8 @@ bool qemu_android_emulation_setup() {
 
   static const AndroidConsoleAgents consoleAgents = {
       gQAndroidBatteryAgent,   gQAndroidFingerAgent,    gQAndroidLocationAgent,
-      gQAndroidTelephonyAgent, gQAndroidUserEventAgent, gQAndroidVmOperations,
-      gQAndroidNetAgent,
+      gQAndroidTelephonyAgent, gQAndroidTestAgent,      gQAndroidUserEventAgent,
+      gQAndroidVmOperations, gQAndroidNetAgent,
   };
 
   android_vm_set_lock_funcs(qemu_mutex_lock_iothread,
