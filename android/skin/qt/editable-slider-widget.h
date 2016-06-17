@@ -43,7 +43,7 @@ public:
     // value is greater than the maximum allowed value, the actual value will be
     // set to max.
     // Calling this method will emit the valueChanged signal.
-    void setValue(double value);
+    void setValue(double value, bool emit_signal = true);
 
     // Changes the lower bound of the allowed value range. The current value is
     // clipped to fit into the new range.
@@ -61,6 +61,10 @@ public:
             setMinimum(minimum);
             setMaximum(maximum);
         }
+    }
+
+    bool isSliderDown() const {
+        return mSlider.isSliderDown();
     }
 
 signals:

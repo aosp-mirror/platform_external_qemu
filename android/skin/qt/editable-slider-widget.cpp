@@ -37,6 +37,7 @@ EditableSliderWidget::EditableSliderWidget(QWidget *parent) :
     mMaxValueLabel.setProperty("ColorGroup", "SliderLabel");
     mLineEditValidator.setDecimals(1);
     mLineEditValidator.setNotation(QDoubleValidator::StandardNotation);
+    mLineEditValidator.setLocale(QLocale::c());
     mLineEdit.setValidator(&mLineEditValidator);
     mLineEdit.setAlignment(Qt::AlignRight | Qt::AlignTop);
     mLineEdit.setMaximumWidth(50);
@@ -48,7 +49,7 @@ EditableSliderWidget::EditableSliderWidget(QWidget *parent) :
     connect(&mLineEdit, SIGNAL(editingFinished()), this, SLOT(lineEditValueChanged()));
 }
 
-void EditableSliderWidget::setValue(double value) {
+void EditableSliderWidget::setValue(double value, bool emit_signal) {
     // Clip the value to the allowed range.
     mValue =
         value < mMinimum ? mMinimum : (value > mMaximum ? mMaximum : value);
@@ -58,9 +59,10 @@ void EditableSliderWidget::setValue(double value) {
     mSlider.setValue(static_cast<int>(mValue * 10.0));
     mSlider.blockSignals(false);
     mLineEdit.setText(QString("%1").arg(mValue, 0, 'f', 1, '0'));
-
-    emit valueChanged(mValue);
-    emit valueChanged();
+    if (emit_signal) {
+        emit valueChanged(mValue);
+        emit valueChanged();
+    }
 }
 
 void EditableSliderWidget::setMinimum(double minimum) {
