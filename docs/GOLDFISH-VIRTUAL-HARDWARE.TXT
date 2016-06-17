@@ -908,3 +908,68 @@ Device properties:
 
 TODO(digit)
 
+XIV. Goldfish sync device:
+==========================
+
+The Goldfish sync device’s purpose is to provide a simple, kernel-space-only,
+lightweight path to notify the virtual device of host graphics events such as
+GPU command completion. It can be used to synchronize just about anything else
+as well, but the main use case is in graphics. With the goldfish sync device,
+Android sync framework can be used in the guest, allowing more asynchronous
+processing and higher graphics performance without having to use sw_sync_user.
+
+In particular, it’ll be possible to not have to maintain separate rendering
+threads just for sync. Indeed, a separate GL thread is necessary on the host to
+wait on host fence commands, but without needing all the extra stuff that comes
+with a connection to the guest. In fact, we’d expect higher performance because
+of the potential lack of extra GL pipe traffic that would involve returning
+values to the guest; a eglCreateSyncKHR with ANDROID_NATIVE_FENCE_FD would have
+that fd be signaled without any extra calls such as eglClientWaitSyncKHR.
+
+There are two types of commands that the sync device processes: guest->host
+and host->guest, described below:
+
+1. Guest->host commands are primarily used to initiate the calls to
+eglClientWaitSyncKHR on the host. This is known as a "trigger wait" command.
+Once the call to eglClientWaitSyncKHR on the host completes, we then issue a
+host->guest command to tell the guest that the wait is over. The host->guest
+commands work as follows:
+
+2. Host->guest commands are primarily used to signal guest's fence objects from
+the host when an EGL sync object on the host is signaled. This involves an
+increment of the guest's timeline; the fence object in the guest is considered
+signaled when the timeline in the guest is incremented past the point
+associated with the fence object. This is known as a "timeline increment"
+command.
+
+The type of data required to process each command include:
+
+1. Guest->host commands:
+    code describing the command to perform (usually, "trigger wait")
+    handle to host EGL sync object
+    handle to host sync thread object
+    handle to guest's timeline object
+
+2. Host->guest commands:
+    code describing the command (usually, "increment timeline")
+    number describing how much to increment the timeline
+    handle to guest's timeline object
+    unique ID for the command itself, so that we can properly wait on replies
+    from guest if needed.
+
+Each of these types of data is packed up in a struct and sent in a batch manner
+using cpu_physical_memory_(read|write). The particular physical address written
+to is set up upon initialization of the goldfish sync device driver in the
+kernel.
+
+Device properties:
+  Name: goldfish_sync
+  Id: ???
+  IrqCount: 1
+  I/O Registers:
+    0x00...0x04 SYNC_REG_BATCH_COMMAND                 R/W: Triggers batch host->guest command
+    0x04...0x08 SYNC_REG_BATCH_GUESTCOMMAND            R/W: Triggers batch guest->host command
+    0x08...0x0c SYNC_REG_BATCH_COMMAND_ADDR            R/W: Physical address where batch host->guest command lives
+    0x0c...0x10 SYNC_REG_BATCH_COMMAND_ADDR_HIGH       R/W: Higher bits if 64-bit
+    0x10...0x14 SYNC_REG_BATCH_GUESTCOMMAND_ADDR       R/W: Physical address where batch guest->host command lives
+    0x14...0x18 SYNC_REG_BATCH_GUESTCOMMAND_ADDR_HIGH  R/W: Higher bits if 64-bit
