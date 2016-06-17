@@ -13,12 +13,27 @@
 // limitations under the License.
 #pragma once
 
+// Interface between android-emu non-base libraries and emugl
+
+#include "android/emulation/goldfish_sync.h"
 #include "android/featurecontrol/FeatureControl.h"
 
+// Crash reporter
 typedef void (*emugl_crash_reporter_t)(const char* format, ...);
 
+// Feature control
 typedef bool (*emugl_feature_is_enabled_t)(android::featurecontrol::Feature feature);
 
+// Goldfish sync device
+typedef uint64_t (*emugl_sync_create_timeline_t)();
+typedef int (*emugl_sync_create_fence_t)(uint64_t timeline, uint32_t pt);
+typedef void (*emugl_sync_timeline_inc_t)(uint64_t timeline, uint32_t howmuch);
+typedef void (*emugl_sync_destroy_timeline_t)(uint64_t timeline);
+
+typedef void (*emugl_sync_trigger_wait_t)(uint64_t glsync, uint64_t thread, uint64_t timeline);
+typedef void (*emugl_sync_register_trigger_wait_t)(emugl_sync_trigger_wait_t trigger_fn);
+
+// OpenGL timestamped logger
 typedef void (*emugl_logger_t)(const char* fmt, ...);
 typedef struct {
     emugl_logger_t coarse;
