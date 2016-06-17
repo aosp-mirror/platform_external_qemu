@@ -12,6 +12,7 @@ commonSources := \
         shared_library.cpp \
         stringparsing.cpp \
         sockets.cpp \
+        sync_device.cpp
 
 host_commonSources := $(commonSources)
 
