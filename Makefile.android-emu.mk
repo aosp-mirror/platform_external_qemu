@@ -234,6 +234,8 @@ LOCAL_SRC_FILES := \
     android/emulation/control/ApkInstaller.cpp \
     android/emulation/control/FilePusher.cpp \
     android/emulation/control/LineConsumer.cpp \
+    android/emulation/control/test_runner.cpp \
+    android/emulation/control/TestRunnerSelfTests.cpp \
     android/emulation/control/ScreenCapturer.cpp \
     android/emulation/CpuAccelerator.cpp \
     android/emulation/nand_limits.c \
@@ -467,6 +469,7 @@ LOCAL_SRC_FILES := \
   android/emulation/control/ApkInstaller_unittest.cpp \
   android/emulation/control/FilePusher_unittest.cpp \
   android/emulation/control/ScreenCapturer_unittest.cpp \
+  android/emulation/control/TestRunner_unittest.cpp \
   android/emulation/control/LineConsumer_unittest.cpp \
   android/emulation/CpuAccelerator_unittest.cpp \
   android/emulation/ParameterList_unittest.cpp \
