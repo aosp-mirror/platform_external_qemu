@@ -56,7 +56,10 @@ ANDROID_BEGIN_HEADER
     _VERBOSE_TAG(sdkctlsocket, "Socket tethering to SdkControl server") \
     _VERBOSE_TAG(updater,      "Update checker")  \
     _VERBOSE_TAG(metrics,      "Metrics reporting") \
-    _VERBOSE_TAG(rotation,     "Device rotation debugging")
+    _VERBOSE_TAG(rotation,     "Device rotation debugging") \
+    _VERBOSE_TAG(goldfishsync, "Goldfish Sync Device") \
+    _VERBOSE_TAG(syncthreads,  "HostGPU Sync Threads") \
+
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
 typedef enum {
     VERBOSE_TAG_LIST
