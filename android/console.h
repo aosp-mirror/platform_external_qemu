@@ -19,6 +19,7 @@
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/net_agent.h"
 #include "android/emulation/control/telephony_agent.h"
+#include "android/emulation/control/test_agent.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/utils/compiler.h"
@@ -35,6 +36,7 @@ ANDROID_BEGIN_HEADER
    X(QAndroidFingerAgent, finger) \
    X(QAndroidLocationAgent, location) \
    X(QAndroidTelephonyAgent, telephony) \
+   X(QAndroidTestAgent, test) \
    X(QAndroidUserEventAgent, user_event) \
    X(QAndroidVmOperations, vm) \
    X(QAndroidNetAgent, net)
