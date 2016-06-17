@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "29b2c8f6_91bf6ce4",
+        "filename": "android/utils/system.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-17T21:20:23Z",
+      "side": 1,
+      "message": "on Windows DWORD is \"long unsigned int\" (which is supposed to be 32-bit in mingw)",
+      "range": {
+        "startLine": 184,
+        "startChar": 0,
+        "endLine": 185,
+        "endChar": 51
+      },
+      "revId": "67593927a979232852c3a061153fd68873eca924",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
