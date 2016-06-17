@@ -57,6 +57,7 @@ ANDROID_BEGIN_HEADER
     _VERBOSE_TAG(metrics,      "Metrics reporting") \
     _VERBOSE_TAG(rotation,     "Device rotation debugging") \
     _VERBOSE_TAG(testrunner,   "TestRunner") \
+    _VERBOSE_TAG(goldfishsync, "Goldfish Sync Device") \
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
 typedef enum {
