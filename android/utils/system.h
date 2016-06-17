@@ -175,6 +175,26 @@ extern  void   sleep_ms( int  timeout );
 #  define PRIu64  "llu"
 #endif
 
+// Getting thread id's (cross platform)
+
+#define THREADID_FMT "lx"
+
+#ifdef _WIN32
+
+#define THREADID_T DWORD
+
+#else
+
+#ifdef __APPLE__
+#define THREADID_T int
+#else
+#define THREADID_T long
+#endif
+
+#endif
+
+extern THREADID_T android_get_thread_id();
+
 /** ****************************************************************************
  ** Various system functions exposed from the modern
  ** android/base/system/System.h implementation.
@@ -189,6 +209,5 @@ extern int64_t get_system_time_ms();
 extern char* get_launcher_directory();
 extern char* get_host_os_type();
 extern void add_library_search_dir(const char* dirPath);
-
 
 ANDROID_END_HEADER
