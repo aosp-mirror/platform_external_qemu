@@ -27,6 +27,7 @@
 #include "emugl/common/logging.h"
 
 #include <stdio.h>
+#include <string.h>
 
 namespace {
 

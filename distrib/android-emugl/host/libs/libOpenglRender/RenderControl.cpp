@@ -26,6 +26,7 @@
 
 #include <atomic>
 #include <inttypes.h>
+#include <string.h>
 
 using android::base::Lock;
 using android::base::AutoLock;
