@@ -21,6 +21,8 @@
 #include "RenderThreadInfo.h"
 #include "ChecksumCalculatorThreadInfo.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
+
+#include "android/utils/debug.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
 
@@ -32,22 +34,11 @@ using android::base::AutoLock;
 
 #define DEBUG 0
 
-#if DEBUG && !defined(_WIN32)
-#include <unistd.h>
-#include <sys/syscall.h>
-#include <sys/types.h>
-
-#ifdef __APPLE__
-#define SYSCALL_GETTID_ARG SYS_thread_selfid
-#else
-#define SYSCALL_GETTID_ARG __NR_gettid
-#endif
-
+#if DEBUG
 #define DPRINT(...) do { \
-    fprintf(stderr, "tid=0x%lx | ", syscall(SYSCALL_GETTID_ARG)); \
-    fprintf(stderr, __VA_ARGS__); \
+    if (!VERBOSE_CHECK(gles)) { VERBOSE_ENABLE(gles); } \
+    VERBOSE_TIDFPRINT(gles, __VA_ARGS__); \
 } while(0)
-
 #else
 #define DPRINT(...)
 #endif
@@ -112,8 +103,7 @@ public:
         if (mEnabled && newLockState == 1) {
             mGrallocColorBufferLock.lockRead();
         } else if (mEnabled) {
-            DPRINT("%s: warning: recursive/multiple locks from guest!\n",
-                      __FUNCTION__);
+            DPRINT("warning: recursive/multiple locks from guest!");
         }
     }
     void unlockColorBufferPrepare() {
@@ -393,21 +383,21 @@ static void rcCloseColorBuffer(uint32_t colorbuffer)
 
 static int rcFlushWindowColorBuffer(uint32_t windowSurface)
 {
-    DPRINT("%s: waiting for gralloc cb lock\n", __func__);
+    DPRINT("waiting for gralloc cb lock");
     GrallocSyncPostLock lock(sGrallocSync.get());
-    DPRINT("%s: %d lock gralloc cb lock {\n", __func__, windowSurface);
+    DPRINT("lock gralloc cb lock {");
 
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
-        DPRINT("%s: %d unlock gralloc cb lock }\n", __func__, windowSurface);
+        DPRINT("unlock gralloc cb lock");
         return -1;
     }
     if (!fb->flushWindowSurfaceColorBuffer(windowSurface)) {
-        DPRINT("%s: %d unlock gralloc cb lock }\n", __func__, windowSurface);
+        DPRINT("unlock gralloc cb lock }");
         return -1;
     }
 
-    DPRINT("%s: %d unlock gralloc cb lock }\n", __func__, windowSurface);
+    DPRINT("unlock gralloc cb lock }");
     return 0;
 }
 
@@ -473,9 +463,9 @@ static EGLint rcColorBufferCacheFlush(uint32_t colorBuffer,
                                       EGLint postCount, int forRead)
 {
    // gralloc_lock() on the guest calls rcColorBufferCacheFlush
-   DPRINT("%s: waiting for gralloc cb lock\n", __func__);
+   DPRINT("waiting for gralloc cb lock");
    sGrallocSync->lockColorBufferPrepare();
-   DPRINT("%s: %d lock gralloc cb lock {\n", __func__, colorBuffer);
+   DPRINT("lock gralloc cb lock {");
    return 0;
 }
 
@@ -499,14 +489,14 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
 {
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
-        DPRINT("%s: %d unlock gralloc cb lock }\n", __func__, colorBuffer);
+        DPRINT("unlock gralloc cb lock");
         sGrallocSync->unlockColorBufferPrepare();
         return -1;
     }
 
     fb->updateColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
 
-    DPRINT("%s: %d unlock gralloc cb lock }\n", __func__, colorBuffer);
+    DPRINT("unlock gralloc cb lock");
     sGrallocSync->unlockColorBufferPrepare();
     return 0;
 }
