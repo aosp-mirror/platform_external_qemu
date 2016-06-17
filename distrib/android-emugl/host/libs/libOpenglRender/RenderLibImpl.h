@@ -28,6 +28,11 @@ public:
     virtual void setLogger(emugl_logger_struct logger) override;
     virtual void setCrashReporter(emugl_crash_reporter_t reporter) override;
     virtual void setFeatureController(emugl_feature_is_enabled_t featureController) override;
+    virtual void setSyncDevice(emugl_sync_create_timeline_t,
+                               emugl_sync_create_fence_t,
+                               emugl_sync_timeline_inc_t,
+                               emugl_sync_destroy_timeline_t,
+                               emugl_sync_register_trigger_wait_t) override;
 
     virtual RendererPtr initRenderer(int width,
                                      int height,
