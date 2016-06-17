@@ -256,6 +256,7 @@ static void pc_init1(MachineState *machine,
     sysbus_create_simple("android_pipe", GF_PIPE_IOMEM_BASE, gsi[GF_PIPE_IRQ]);
     sysbus_create_simple("goldfish_fb", GF_FB_IOMEM_BASE, gsi[GF_FB_IRQ]);
     sysbus_create_simple("goldfish_audio", GF_AUDIO_IOMEM_BASE, gsi[GF_AUDIO_IRQ]);
+    sysbus_create_simple("goldfish_sync", GF_SYNC_IOMEM_BASE, gsi[GF_SYNC_IRQ]);
     sysbus_create_simple("goldfish_rtc", GF_RTC_IOMEM_BASE, gsi[GF_RTC_IRQ]);
 #endif  // CONFIG_ANDROID
 

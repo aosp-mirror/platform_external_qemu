@@ -94,6 +94,21 @@ Scope(\_SB) {
         })
     }
 
+    /* Sync */
+    Device(GFSK) {
+        Name(_HID, "GFSH0006")
+        Name(_STR, Unicode("goldfish sync"))
+        Name(_CRS, ResourceTemplate() {
+            Memory32Fixed(ReadWrite,
+                GF_SYNC_IOMEM_BASE,
+                GF_SYNC_IOMEM_SIZE
+                )
+            Interrupt(, Edge, ActiveHigh) {
+                GF_SYNC_IRQ
+                }
+        })
+    }
+
     /* RTC */
     Device(GFRT) {
         Name(_HID, "GFSH0007")

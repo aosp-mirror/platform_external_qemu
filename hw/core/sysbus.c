@@ -119,7 +119,8 @@ bool sysbus_has_mmio(SysBusDevice *dev, unsigned int n)
 static void sysbus_mmio_map_common(SysBusDevice *dev, int n, hwaddr addr,
                                    bool may_overlap, int priority)
 {
-    assert(n >= 0 && n < dev->num_mmio);
+    assert(n >= 0);
+    assert(n < dev->num_mmio);
 
     if (dev->mmio[n].addr == addr) {
         /* ??? region already mapped here.  */
