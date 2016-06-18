@@ -26,18 +26,18 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define  E(...)    derror(__VA_ARGS__)
-#define  W(...)    dwarning(__VA_ARGS__)
-#define  D(...)  VERBOSE_PRINT(sensors,__VA_ARGS__)
-#define  V(...)  VERBOSE_PRINT(init,__VA_ARGS__)
+#define E(...) derror(__VA_ARGS__)
+#define W(...) dwarning(__VA_ARGS__)
+#define D(...) VERBOSE_PRINT(sensors, __VA_ARGS__)
+#define V(...) VERBOSE_PRINT(init, __VA_ARGS__)
 
 /* define T_ACTIVE to 1 to debug transport communications */
-#define  T_ACTIVE  0
+#define T_ACTIVE 0
 
 #if T_ACTIVE
-#define  T(...)  VERBOSE_PRINT(sensors,__VA_ARGS__)
+#define T(...) VERBOSE_PRINT(sensors, __VA_ARGS__)
 #else
-#define  T(...)   ((void)0)
+#define T(...) ((void)0)
 #endif
 
 /* this code supports emulated sensor hardware
@@ -49,31 +49,25 @@
  *
  */
 
-
 static const struct {
-    const char*  name;
-    int          id;
+    const char* name;
+    int id;
 } _sSensors[MAX_SENSORS] = {
-#define SENSOR_(x,y)  { y, ANDROID_SENSOR_##x },
-  SENSORS_LIST
+#define SENSOR_(x, y) {y, ANDROID_SENSOR_##x},
+        SENSORS_LIST
 #undef SENSOR_
 };
 
-
-static int
-_sensorIdFromName( const char*  name )
-{
-    int  nn;
+static int _sensorIdFromName(const char* name) {
+    int nn;
     for (nn = 0; nn < MAX_SENSORS; nn++)
-        if (!strcmp(_sSensors[nn].name,name))
+        if (!strcmp(_sSensors[nn].name, name))
             return _sSensors[nn].id;
     return -1;
 }
 
-static const char*
-_sensorNameFromId( int  id )
-{
-    int  nn;
+static const char* _sensorNameFromId(int id) {
+    int nn;
     for (nn = 0; nn < MAX_SENSORS; nn++)
         if (id == _sSensors[nn].id)
             return _sSensors[nn].name;
@@ -81,61 +75,43 @@ _sensorNameFromId( int  id )
 }
 
 /* For common Sensor Value struct */
-typedef struct {
-    float a, b, c;
-} SensorValues;
+typedef struct { float a, b, c; } SensorValues;
+
+typedef struct { float x, y, z; } Acceleration;
+
+typedef struct { float x, y, z; } MagneticField;
 
 typedef struct {
-    float   x, y, z;
-} Acceleration;
-
-
-typedef struct {
-    float  x, y, z;
-} MagneticField;
-
-
-typedef struct {
-    float  azimuth;
-    float  pitch;
-    float  roll;
+    float azimuth;
+    float pitch;
+    float roll;
 } Orientation;
 
+typedef struct { float celsius; } Temperature;
+
+typedef struct { float value; } Proximity;
+
+typedef struct { float value; } Light;
+
+typedef struct { float value; } Pressure;
+
+typedef struct { float value; } Humidity;
 
 typedef struct {
-    float  celsius;
-} Temperature;
-
-
-typedef struct {
-    float  value;
-} Proximity;
-
-typedef struct {
-    float value;
-} Light;
-
-typedef struct {
-    float value;
-} Pressure;
-
-typedef struct {
-    float value;
-} Humidity;
-
-typedef struct {
-    char       enabled;
+    char enabled;
     union {
-        SensorValues   value;
-        Acceleration   acceleration;
-        MagneticField  magnetic;
-        Orientation    orientation;
-        Temperature    temperature;
-        Proximity      proximity;
-        Light          light;
-        Pressure       pressure;
-        Humidity       humidity;
+        SensorValues value;
+        Acceleration acceleration;
+        MagneticField magnetic;
+        Orientation orientation;
+        Temperature temperature;
+        Proximity proximity;
+        Light light;
+        Pressure pressure;
+        Humidity humidity;
     } u;
+    int serialized_len;
+    char serialized[128];
 } Sensor;
 
 /*
@@ -185,35 +161,33 @@ typedef struct {
  *   emulated system time (using the first sync: to compute an adjustment
  *   offset).
  */
-#define  HEADER_SIZE  4
-#define  BUFFER_SIZE  512
+#define HEADER_SIZE 4
+#define BUFFER_SIZE 512
 
-typedef struct HwSensorClient   HwSensorClient;
+typedef struct HwSensorClient HwSensorClient;
 
 typedef struct {
-    QemudService*       service;
-    Sensor              sensors[MAX_SENSORS];
-    HwSensorClient*     clients;
+    QemudService* service;
+    Sensor sensors[MAX_SENSORS];
+    HwSensorClient* clients;
     AndroidSensorsPort* sensors_port;
 } HwSensors;
 
 struct HwSensorClient {
-    HwSensorClient*  next;
-    HwSensors*       sensors;
-    QemudClient*     client;
-    LoopTimer*       timer;
-    uint32_t         enabledMask;
-    int32_t          delay_ms;
+    HwSensorClient* next;
+    HwSensors* sensors;
+    QemudClient* client;
+    LoopTimer* timer;
+    uint32_t enabledMask;
+    int32_t delay_ms;
 };
 
-static void
-_hwSensorClient_free( HwSensorClient*  cl )
-{
+static void _hwSensorClient_free(HwSensorClient* cl) {
     /* remove from sensors's list */
     if (cl->sensors) {
-        HwSensorClient**  pnode = &cl->sensors->clients;
+        HwSensorClient** pnode = &cl->sensors->clients;
         for (;;) {
-            HwSensorClient*  node = *pnode;
+            HwSensorClient* node = *pnode;
             if (node == NULL)
                 break;
             if (node == cl) {
@@ -222,7 +196,7 @@ _hwSensorClient_free( HwSensorClient*  cl )
             }
             pnode = &node->next;
         }
-        cl->next    = NULL;
+        cl->next = NULL;
         cl->sensors = NULL;
     }
 
@@ -241,24 +215,21 @@ _hwSensorClient_free( HwSensorClient*  cl )
 }
 
 /* forward */
-static void  _hwSensorClient_tick(void* opaque, LoopTimer* timer);
+static void _hwSensorClient_tick(void* opaque, LoopTimer* timer);
 
-
-static HwSensorClient*
-_hwSensorClient_new( HwSensors*  sensors )
-{
-    HwSensorClient*  cl;
+static HwSensorClient* _hwSensorClient_new(HwSensors* sensors) {
+    HwSensorClient* cl;
 
     ANEW0(cl);
 
-    cl->sensors     = sensors;
+    cl->sensors = sensors;
     cl->enabledMask = 0;
-    cl->delay_ms    = 800;
-    cl->timer       = loopTimer_newWithClock(looper_getForThread(),
-                                             _hwSensorClient_tick,
-                                             cl, LOOPER_CLOCK_VIRTUAL);
+    cl->delay_ms = 800;
+    cl->timer =
+            loopTimer_newWithClock(looper_getForThread(), _hwSensorClient_tick,
+                                   cl, LOOPER_CLOCK_VIRTUAL);
 
-    cl->next         = sensors->clients;
+    cl->next = sensors->clients;
     sensors->clients = cl;
 
     return cl;
@@ -266,25 +237,23 @@ _hwSensorClient_new( HwSensors*  sensors )
 
 /* forward */
 
-static void  _hwSensorClient_receive( HwSensorClient*  cl,
-                                      uint8_t*         query,
-                                      int              querylen );
+static void _hwSensorClient_receive(HwSensorClient* cl,
+                                    uint8_t* query,
+                                    int querylen);
 
 /* Qemud service management */
 
-static void
-_hwSensorClient_recv( void*  opaque, uint8_t*  msg, int  msglen,
-                      QemudClient*  client )
-{
-    HwSensorClient*  cl = opaque;
+static void _hwSensorClient_recv(void* opaque,
+                                 uint8_t* msg,
+                                 int msglen,
+                                 QemudClient* client) {
+    HwSensorClient* cl = opaque;
 
     _hwSensorClient_receive(cl, msg, msglen);
 }
 
-static void
-_hwSensorClient_close( void*  opaque )
-{
-    HwSensorClient*  cl = opaque;
+static void _hwSensorClient_close(void* opaque) {
+    HwSensorClient* cl = opaque;
 
     /* the client is already closed here */
     cl->client = NULL;
@@ -292,19 +261,16 @@ _hwSensorClient_close( void*  opaque )
 }
 
 /* send a one-line message to the HAL module through a qemud channel */
-static void
-_hwSensorClient_send( HwSensorClient*  cl, const uint8_t*  msg, int  msglen )
-{
+static void _hwSensorClient_send(HwSensorClient* cl,
+                                 const uint8_t* msg,
+                                 int msglen) {
     D("%s: '%s'", __FUNCTION__, quote_bytes((const void*)msg, msglen));
     qemud_client_send(cl->client, msg, msglen);
 }
 
-static int
-_hwSensorClient_enabled( HwSensorClient*  cl, int  sensorId )
-{
+static int _hwSensorClient_enabled(HwSensorClient* cl, int sensorId) {
     return (cl->enabledMask & (1 << sensorId)) != 0;
 }
-
 
 /* a helper function that replaces commas (,) with points (.).
  * Each sensor string must be processed this way before being
@@ -313,138 +279,131 @@ _hwSensorClient_enabled( HwSensorClient*  cl, int  sensorId )
  * a decimal point, but that would not be parsed correctly
  * within the guest.
  */
-static void
-_hwSensorClient_sanitizeSensorString(char* string, int maxlen) {
+static void _hwSensorClient_sanitizeSensorString(char* string, int maxlen) {
     int i;
-    for (i = 0;  i < maxlen && string[i] != '\0' ; i++) {
+    for (i = 0; i < maxlen && string[i] != '\0'; i++) {
         if (string[i] == ',') {
             string[i] = '.';
         }
     }
 }
 
+// a function to serialize the sensor value based on its type
+static void serializeSensorValue(Sensor* sensor, int type) {
+    switch (type) {
+        case ANDROID_SENSOR_ACCELERATION: {
+            sensor->serialized_len = snprintf(
+                    sensor->serialized, sizeof(sensor->serialized),
+                    "acceleration:%g:%g:%g", sensor->u.acceleration.x,
+                    sensor->u.acceleration.y, sensor->u.acceleration.z);
+
+            // TODO(grigoryj): debug output for investigating rotation
+            // bug
+            static float prev_acceleration[] = {0.0f, 0.0f, 0.0f};
+            if (VERBOSE_CHECK(rotation) &&
+                (prev_acceleration[0] != sensor->u.acceleration.x ||
+                 prev_acceleration[1] != sensor->u.acceleration.y ||
+                 prev_acceleration[2] != sensor->u.acceleration.z)) {
+                fprintf(stderr, "Sent %s to sensors HAL\n", sensor->serialized);
+                prev_acceleration[0] = sensor->u.acceleration.x;
+                prev_acceleration[1] = sensor->u.acceleration.y;
+                prev_acceleration[2] = sensor->u.acceleration.z;
+            }
+            break;
+        }
+        case ANDROID_SENSOR_MAGNETIC_FIELD:
+            /* NOTE: sensors HAL expects "magnetic", not * "magnetic-field"
+             * name here.
+             */
+            sensor->serialized_len =
+                    snprintf(sensor->serialized, sizeof(sensor->serialized),
+                             "magnetic:%g:%g:%g", sensor->u.magnetic.x,
+                             sensor->u.magnetic.y, sensor->u.magnetic.z);
+            break;
+        case ANDROID_SENSOR_ORIENTATION:
+            sensor->serialized_len = snprintf(
+                    sensor->serialized, sizeof(sensor->serialized),
+                    "orientation:%g:%g:%g", sensor->u.orientation.azimuth,
+                    sensor->u.orientation.pitch, sensor->u.orientation.roll);
+            break;
+        case ANDROID_SENSOR_TEMPERATURE:
+            sensor->serialized_len =
+                    snprintf(sensor->serialized, sizeof(sensor->serialized),
+                             "temperature:%g", sensor->u.temperature.celsius);
+            break;
+        case ANDROID_SENSOR_PROXIMITY:
+            sensor->serialized_len =
+                    snprintf(sensor->serialized, sizeof(sensor->serialized),
+                             "proximity:%g", sensor->u.proximity.value);
+            break;
+        case ANDROID_SENSOR_LIGHT:
+            sensor->serialized_len =
+                    snprintf(sensor->serialized, sizeof(sensor->serialized),
+                             "light:%g", sensor->u.light.value);
+            break;
+        case ANDROID_SENSOR_PRESSURE:
+            sensor->serialized_len =
+                    snprintf(sensor->serialized, sizeof(sensor->serialized),
+                             "pressure:%g", sensor->u.pressure.value);
+            break;
+        case ANDROID_SENSOR_HUMIDITY:
+            sensor->serialized_len =
+                    snprintf(sensor->serialized, sizeof(sensor->serialized),
+                             "humidity:%g", sensor->u.humidity.value);
+            break;
+    }
+
+    _hwSensorClient_sanitizeSensorString(sensor->serialized,
+                                         sensor->serialized_len);
+}
+
 /* this function is called periodically to send sensor reports
  * to the HAL module, and re-arm the timer if necessary
  */
-static void
-_hwSensorClient_tick(void* opaque, LoopTimer* unused)
-{
-    HwSensorClient*  cl = opaque;
-    HwSensors*       hw  = cl->sensors;
-    int64_t          delay = cl->delay_ms;
-    uint32_t         mask  = cl->enabledMask;
-    Sensor*          sensor;
-    char             buffer[128];
+static void _hwSensorClient_tick(void* opaque, LoopTimer* unused) {
+    HwSensorClient* cl = opaque;
+    int64_t delay = cl->delay_ms;
+    const uint32_t mask = cl->enabledMask;
 
-    // For debug purposes only.
-    static float     prev_acceleration[] = {0.0f, 0.0f, 0.0f};
-
-    if (_hwSensorClient_enabled(cl, ANDROID_SENSOR_ACCELERATION)) {
-        sensor = &hw->sensors[ANDROID_SENSOR_ACCELERATION];
-        snprintf(buffer, sizeof buffer, "acceleration:%g:%g:%g",
-                 sensor->u.acceleration.x,
-                 sensor->u.acceleration.y,
-                 sensor->u.acceleration.z);
-        _hwSensorClient_sanitizeSensorString(buffer, sizeof buffer);
-        _hwSensorClient_send(cl, (uint8_t*)buffer, strlen(buffer));
-
-        // TODO(grigoryj): debug output for investigating rotation bug
-        if (VERBOSE_CHECK(rotation) &&
-            (prev_acceleration[0] != sensor->u.acceleration.x ||
-             prev_acceleration[1] != sensor->u.acceleration.y ||
-             prev_acceleration[2] != sensor->u.acceleration.z)) {
-            fprintf(stderr, "Sent %s to sensors HAL\n", buffer);
-            prev_acceleration[0] = sensor->u.acceleration.x;
-            prev_acceleration[1] = sensor->u.acceleration.y;
-            prev_acceleration[2] = sensor->u.acceleration.z;
-        }
-    }
-
-    if (_hwSensorClient_enabled(cl, ANDROID_SENSOR_MAGNETIC_FIELD)) {
-        sensor = &hw->sensors[ANDROID_SENSOR_MAGNETIC_FIELD];
-        /* NOTE: sensors HAL expects "magnetic", not "magnetic-field" name here. */
-        snprintf(buffer, sizeof buffer, "magnetic:%g:%g:%g",
-                 sensor->u.magnetic.x,
-                 sensor->u.magnetic.y,
-                 sensor->u.magnetic.z);
-        _hwSensorClient_sanitizeSensorString(buffer, sizeof buffer);
-        _hwSensorClient_send(cl, (uint8_t*)buffer, strlen(buffer));
-    }
-
-    if (_hwSensorClient_enabled(cl, ANDROID_SENSOR_ORIENTATION)) {
-        sensor = &hw->sensors[ANDROID_SENSOR_ORIENTATION];
-        snprintf(buffer, sizeof buffer, "orientation:%g:%g:%g",
-                 sensor->u.orientation.azimuth,
-                 sensor->u.orientation.pitch,
-                 sensor->u.orientation.roll);
-        _hwSensorClient_sanitizeSensorString(buffer, sizeof buffer);
-        _hwSensorClient_send(cl, (uint8_t*)buffer, strlen(buffer));
-    }
-
-    if (_hwSensorClient_enabled(cl, ANDROID_SENSOR_TEMPERATURE)) {
-        sensor = &hw->sensors[ANDROID_SENSOR_TEMPERATURE];
-        snprintf(buffer, sizeof buffer, "temperature:%g",
-                 sensor->u.temperature.celsius);
-        _hwSensorClient_sanitizeSensorString(buffer, sizeof buffer);
-        _hwSensorClient_send(cl, (uint8_t*)buffer, strlen(buffer));
-    }
-
-    if (_hwSensorClient_enabled(cl, ANDROID_SENSOR_PROXIMITY)) {
-        sensor = &hw->sensors[ANDROID_SENSOR_PROXIMITY];
-        snprintf(buffer, sizeof buffer, "proximity:%g",
-                 sensor->u.proximity.value);
-        _hwSensorClient_sanitizeSensorString(buffer, sizeof buffer);
-        _hwSensorClient_send(cl, (uint8_t*) buffer, strlen(buffer));
-    }
-
-    if (_hwSensorClient_enabled(cl, ANDROID_SENSOR_LIGHT)) {
-        sensor = &hw->sensors[ANDROID_SENSOR_LIGHT];
-        snprintf(buffer, sizeof buffer, "light:%g",
-                 sensor->u.light.value);
-        _hwSensorClient_sanitizeSensorString(buffer, sizeof buffer);
-        _hwSensorClient_send(cl, (uint8_t*) buffer, strlen(buffer));
-    }
-
-    if (_hwSensorClient_enabled(cl, ANDROID_SENSOR_PRESSURE)) {
-        sensor = &hw->sensors[ANDROID_SENSOR_PRESSURE];
-        snprintf(buffer, sizeof buffer, "pressure:%g",
-                 sensor->u.pressure.value);
-        _hwSensorClient_sanitizeSensorString(buffer, sizeof buffer);
-        _hwSensorClient_send(cl, (uint8_t*) buffer, strlen(buffer));
-    }
-
-    if (_hwSensorClient_enabled(cl, ANDROID_SENSOR_HUMIDITY)) {
-        sensor = &hw->sensors[ANDROID_SENSOR_HUMIDITY];
-        snprintf(buffer, sizeof buffer, "humidity:%g",
-                 sensor->u.humidity.value);
-        _hwSensorClient_sanitizeSensorString(buffer, sizeof buffer);
-        _hwSensorClient_send(cl, (uint8_t*) buffer, strlen(buffer));
-    }
-
+    // Grab the guest time before sending any sensor data: at least the CTS
+    // requires sync times to be not greater than the time of the sensor event
+    // arrival.
     const DurationNs now_ns =
             looper_nowNsWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
 
-    snprintf(buffer, sizeof buffer, "sync:%" PRId64, now_ns / 1000);
-    _hwSensorClient_sanitizeSensorString(buffer, sizeof buffer);
-    _hwSensorClient_send(cl, (uint8_t*)buffer, strlen(buffer));
+    int i;
+    for (i = 0; i < MAX_SENSORS; ++i) {
+        if (!_hwSensorClient_enabled(cl, i)) {
+            continue;
+        }
 
-    /* rearm timer, use a minimum delay of 8 ms, just to
-     * be safe.
-     */
+        Sensor* sensor = &cl->sensors->sensors[i];
+        if (sensor->serialized_len <= 0) {
+            serializeSensorValue(sensor, i);
+        }
+
+        _hwSensorClient_send(cl, (uint8_t*)sensor->serialized,
+                             sensor->serialized_len);
+    }
+
+    char buffer[64];
+    int buffer_len =
+            snprintf(buffer, sizeof(buffer), "sync:%" PRId64, now_ns / 1000);
+    _hwSensorClient_send(cl, (uint8_t*)buffer, buffer_len);
+
     if (mask == 0)
         return;
 
-    if (delay < 8)
-        delay = 8;
-
-    loopTimer_startRelative(cl->timer, delay);
+    // Rearm the timer to fire a little bit early, so we can sustain the
+    // requested frequency. Also make sure we have at least a minimal delay.
+    loopTimer_startRelative(cl->timer, delay > 1 ? delay - 1 : 1);
 }
 
 /* handle incoming messages from the HAL module */
-static void
-_hwSensorClient_receive( HwSensorClient*  cl, uint8_t*  msg, int  msglen )
-{
-    HwSensors*  hw = cl->sensors;
+static void _hwSensorClient_receive(HwSensorClient* cl,
+                                    uint8_t* msg,
+                                    int msglen) {
+    HwSensors* hw = cl->sensors;
 
     D("%s: '%.*s'", __FUNCTION__, msglen, msg);
 
@@ -453,9 +412,9 @@ _hwSensorClient_receive( HwSensorClient*  cl, uint8_t*  msg, int  msglen )
      * current hardware configuration.
      */
     if (msglen == 12 && !memcmp(msg, "list-sensors", 12)) {
-        char  buff[12];
-        int   mask = 0;
-        int   nn;
+        char buff[12];
+        int mask = 0;
+        int nn;
 
         for (nn = 0; nn < MAX_SENSORS; nn++) {
             if (hw->sensors[nn].enabled)
@@ -479,7 +438,7 @@ _hwSensorClient_receive( HwSensorClient*  cl, uint8_t*  msg, int  msglen )
      * between sensor events
      */
     if (msglen > 10 && !memcmp(msg, "set-delay:", 10)) {
-        cl->delay_ms = atoi((const char*)msg+10);
+        cl->delay_ms = atoi((const char*)msg + 10);
         if (cl->enabledMask != 0)
             _hwSensorClient_tick(cl, cl->timer);
 
@@ -490,11 +449,11 @@ _hwSensorClient_receive( HwSensorClient*  cl, uint8_t*  msg, int  msglen )
      * sensor. <state> must be 0 or 1
      */
     if (msglen > 4 && !memcmp(msg, "set:", 4)) {
-        char*  q;
-        int    id, enabled, oldEnabledMask = cl->enabledMask;
+        char* q;
+        int id, enabled, oldEnabledMask = cl->enabledMask;
         msg += 4;
-        q    = strchr((char*)msg, ':');
-        if (q == NULL) {  /* should not happen */
+        q = strchr((char*)msg, ':');
+        if (q == NULL) { /* should not happen */
             D("%s: ignore bad 'set' command", __FUNCTION__);
             return;
         }
@@ -519,7 +478,7 @@ _hwSensorClient_receive( HwSensorClient*  cl, uint8_t*  msg, int  msglen )
 
         if (cl->enabledMask != (uint32_t)oldEnabledMask) {
             D("%s: %s %s sensor", __FUNCTION__,
-                (cl->enabledMask & (1 << id))  ? "enabling" : "disabling",  msg);
+              (cl->enabledMask & (1 << id)) ? "enabling" : "disabling", msg);
         }
 
         /* If emulating device is connected update sensor state there too. */
@@ -558,19 +517,15 @@ static int _hwSensorClient_load(Stream* f, QemudClient* client, void* opaque) {
     return 0;
 }
 
-static QemudClient*
-_hwSensors_connect( void*  opaque,
-                    QemudService*  service,
-                    int  channel,
-                    const char* client_param )
-{
-    HwSensors*       sensors = opaque;
-    HwSensorClient*  cl      = _hwSensorClient_new(sensors);
-    QemudClient*     client  = qemud_client_new(service, channel, client_param, cl,
-                                                _hwSensorClient_recv,
-                                                _hwSensorClient_close,
-                                                _hwSensorClient_save,
-                                                _hwSensorClient_load );
+static QemudClient* _hwSensors_connect(void* opaque,
+                                       QemudService* service,
+                                       int channel,
+                                       const char* client_param) {
+    HwSensors* sensors = opaque;
+    HwSensorClient* cl = _hwSensorClient_new(sensors);
+    QemudClient* client = qemud_client_new(
+            service, channel, client_param, cl, _hwSensorClient_recv,
+            _hwSensorClient_close, _hwSensorClient_save, _hwSensorClient_load);
     qemud_client_set_framing(client, 1);
     cl->client = client;
 
@@ -578,14 +533,19 @@ _hwSensors_connect( void*  opaque,
 }
 
 /* change the value of the emulated sensor vector */
-static void
-_hwSensors_setSensorValue( HwSensors*  h, int sensor_id, float a, float b, float c )
-{
+static void _hwSensors_setSensorValue(HwSensors* h,
+                                      int sensor_id,
+                                      float a,
+                                      float b,
+                                      float c) {
     Sensor* s = &h->sensors[sensor_id];
 
-    s->u.value.a = a;
-    s->u.value.b = b;
-    s->u.value.c = c;
+    if (s->u.value.a != a || s->u.value.b != b || s->u.value.c != c) {
+        s->u.value.a = a;
+        s->u.value.b = b;
+        s->u.value.c = c;
+        s->serialized_len = 0;
+    }
 }
 
 /* Saves available sensors to allow checking availability when loaded.
@@ -596,7 +556,7 @@ static void _hwSensors_save(Stream* f, QemudService* sv, void* opaque) {
     // number of sensors
     stream_put_be32(f, MAX_SENSORS);
     AndroidSensor i;
-    for (i = 0 ; i < MAX_SENSORS; i++) {
+    for (i = 0; i < MAX_SENSORS; i++) {
         Sensor* s = &h->sensors[i];
         stream_put_be32(f, s->enabled);
 
@@ -604,39 +564,39 @@ static void _hwSensors_save(Stream* f, QemudService* sv, void* opaque) {
          * added and is not added here as well.
          */
         switch (i) {
-        case ANDROID_SENSOR_ACCELERATION:
-            stream_put_float(f, s->u.acceleration.x);
-            stream_put_float(f, s->u.acceleration.y);
-            stream_put_float(f, s->u.acceleration.z);
-            break;
-        case ANDROID_SENSOR_MAGNETIC_FIELD:
-            stream_put_float(f, s->u.magnetic.x);
-            stream_put_float(f, s->u.magnetic.y);
-            stream_put_float(f, s->u.magnetic.z);
-            break;
-        case ANDROID_SENSOR_ORIENTATION:
-            stream_put_float(f, s->u.orientation.azimuth);
-            stream_put_float(f, s->u.orientation.pitch);
-            stream_put_float(f, s->u.orientation.roll);
-            break;
-        case ANDROID_SENSOR_TEMPERATURE:
-            stream_put_float(f, s->u.temperature.celsius);
-            break;
-        case ANDROID_SENSOR_PROXIMITY:
-            stream_put_float(f, s->u.proximity.value);
-            break;
-        case ANDROID_SENSOR_LIGHT:
-            stream_put_float(f, s->u.light.value);
-            break;
-        case ANDROID_SENSOR_PRESSURE:
-            stream_put_float(f, s->u.pressure.value);
-            break;
-        case ANDROID_SENSOR_HUMIDITY:
-            stream_put_float(f, s->u.humidity.value);
-            break;
+            case ANDROID_SENSOR_ACCELERATION:
+                stream_put_float(f, s->u.acceleration.x);
+                stream_put_float(f, s->u.acceleration.y);
+                stream_put_float(f, s->u.acceleration.z);
+                break;
+            case ANDROID_SENSOR_MAGNETIC_FIELD:
+                stream_put_float(f, s->u.magnetic.x);
+                stream_put_float(f, s->u.magnetic.y);
+                stream_put_float(f, s->u.magnetic.z);
+                break;
+            case ANDROID_SENSOR_ORIENTATION:
+                stream_put_float(f, s->u.orientation.azimuth);
+                stream_put_float(f, s->u.orientation.pitch);
+                stream_put_float(f, s->u.orientation.roll);
+                break;
+            case ANDROID_SENSOR_TEMPERATURE:
+                stream_put_float(f, s->u.temperature.celsius);
+                break;
+            case ANDROID_SENSOR_PROXIMITY:
+                stream_put_float(f, s->u.proximity.value);
+                break;
+            case ANDROID_SENSOR_LIGHT:
+                stream_put_float(f, s->u.light.value);
+                break;
+            case ANDROID_SENSOR_PRESSURE:
+                stream_put_float(f, s->u.pressure.value);
+                break;
+            case ANDROID_SENSOR_HUMIDITY:
+                stream_put_float(f, s->u.humidity.value);
+                break;
 
-        case MAX_SENSORS:
-            break;
+            case MAX_SENSORS:
+                break;
         }
     }
 }
@@ -654,7 +614,7 @@ static int _hwSensors_load(Stream* f, QemudService* s, void* opaque) {
 
     /* load sensor state */
     AndroidSensor i;
-    for (i = 0 ; i < (AndroidSensor)num_sensors; i++) {
+    for (i = 0; i < (AndroidSensor)num_sensors; i++) {
         Sensor* s = &h->sensors[i];
         s->enabled = stream_get_be32(f);
 
@@ -662,65 +622,67 @@ static int _hwSensors_load(Stream* f, QemudService* s, void* opaque) {
          * added and is not added here as well.
          */
         switch (i) {
-        case ANDROID_SENSOR_ACCELERATION:
-            s->u.acceleration.x = stream_get_float(f);
-            s->u.acceleration.y = stream_get_float(f);
-            s->u.acceleration.z = stream_get_float(f);
-            break;
-        case ANDROID_SENSOR_MAGNETIC_FIELD:
-            s->u.magnetic.x = stream_get_float(f);
-            s->u.magnetic.y = stream_get_float(f);
-            s->u.magnetic.z = stream_get_float(f);
-            break;
-        case ANDROID_SENSOR_ORIENTATION:
-            s->u.orientation.azimuth = stream_get_float(f);
-            s->u.orientation.pitch = stream_get_float(f);
-            s->u.orientation.roll = stream_get_float(f);
-            break;
-        case ANDROID_SENSOR_TEMPERATURE:
-            s->u.temperature.celsius = stream_get_float(f);
-            break;
-        case ANDROID_SENSOR_PROXIMITY:
-            s->u.proximity.value = stream_get_float(f);
-            break;
-        case ANDROID_SENSOR_LIGHT:
-            s->u.light.value = stream_get_float(f);
-            break;
-        case ANDROID_SENSOR_PRESSURE:
-            s->u.pressure.value = stream_get_float(f);
-            break;
-        case ANDROID_SENSOR_HUMIDITY:
-            s->u.humidity.value = stream_get_float(f);
-            break;
-        case MAX_SENSORS:
-            break;
+            case ANDROID_SENSOR_ACCELERATION:
+                s->u.acceleration.x = stream_get_float(f);
+                s->u.acceleration.y = stream_get_float(f);
+                s->u.acceleration.z = stream_get_float(f);
+                break;
+            case ANDROID_SENSOR_MAGNETIC_FIELD:
+                s->u.magnetic.x = stream_get_float(f);
+                s->u.magnetic.y = stream_get_float(f);
+                s->u.magnetic.z = stream_get_float(f);
+                break;
+            case ANDROID_SENSOR_ORIENTATION:
+                s->u.orientation.azimuth = stream_get_float(f);
+                s->u.orientation.pitch = stream_get_float(f);
+                s->u.orientation.roll = stream_get_float(f);
+                break;
+            case ANDROID_SENSOR_TEMPERATURE:
+                s->u.temperature.celsius = stream_get_float(f);
+                break;
+            case ANDROID_SENSOR_PROXIMITY:
+                s->u.proximity.value = stream_get_float(f);
+                break;
+            case ANDROID_SENSOR_LIGHT:
+                s->u.light.value = stream_get_float(f);
+                break;
+            case ANDROID_SENSOR_PRESSURE:
+                s->u.pressure.value = stream_get_float(f);
+                break;
+            case ANDROID_SENSOR_HUMIDITY:
+                s->u.humidity.value = stream_get_float(f);
+                break;
+            case MAX_SENSORS:
+                break;
         }
+
+        // Make sure we re-serialize it on the next tick.
+        s->serialized_len = 0;
     }
 
     /* The following is necessary when we resume a snaphost
      * created by an older version of the emulator that provided
      * less hardware sensors.
      */
-    for ( ; i < MAX_SENSORS; i++ ) {
+    for (; i < MAX_SENSORS; i++) {
         h->sensors[i].enabled = 0;
     }
 
     return 0;
 }
 
-
 /* change the emulated proximity */
-static void
-_hwSensors_setProximity( HwSensors*  h, float value )
-{
-    Sensor*  s = &h->sensors[ANDROID_SENSOR_PROXIMITY];
-    s->u.proximity.value = value;
+static void _hwSensors_setProximity(HwSensors* h, float value) {
+    Sensor* s = &h->sensors[ANDROID_SENSOR_PROXIMITY];
+    if (s->u.proximity.value != value) {
+        s->u.proximity.value = value;
+        s->serialized_len = 0;
+    }
 }
 
 /* change the coarse orientation (landscape/portrait) of the emulated device */
-static void
-_hwSensors_setCoarseOrientation( HwSensors*  h, AndroidCoarseOrientation  orient )
-{
+static void _hwSensors_setCoarseOrientation(HwSensors* h,
+                                            AndroidCoarseOrientation orient) {
     /* The Android framework computes the orientation by looking at
      * the accelerometer sensor (*not* the orientation sensor !)
      *
@@ -733,54 +695,57 @@ _hwSensors_setCoarseOrientation( HwSensors*  h, AndroidCoarseOrientation  orient
      *
      * If the phone is completely vertical, rotating it will not do anything !
      */
-    const double  g      = 9.81;
-    const double  angle  = 20.0;
-    const double  cos_angle = cos(angle/M_PI);
-    const double  sin_angle = sin(angle/M_PI);
+    const double g = 9.81;
+    const double angle = 20.0;
+    const double cos_angle = cos(angle / M_PI);
+    const double sin_angle = sin(angle / M_PI);
 
     if (VERBOSE_CHECK(rotation)) {
         fprintf(stderr, "setCoarseOrientation - HwSensors %p\n", h);
     }
     switch (orient) {
-    case ANDROID_COARSE_PORTRAIT:
-        if (VERBOSE_CHECK(rotation)) {
-            fprintf(stderr, "Setting coarse orientation to portrait\n");
-        }
-        _hwSensors_setSensorValue( h, ANDROID_SENSOR_ACCELERATION, 0., g*cos_angle, g*sin_angle );
-        break;
+        case ANDROID_COARSE_PORTRAIT:
+            if (VERBOSE_CHECK(rotation)) {
+                fprintf(stderr, "Setting coarse orientation to portrait\n");
+            }
+            _hwSensors_setSensorValue(h, ANDROID_SENSOR_ACCELERATION, 0.,
+                                      g * cos_angle, g * sin_angle);
+            break;
 
-    case ANDROID_COARSE_REVERSE_LANDSCAPE:
-        if (VERBOSE_CHECK(rotation)) {
-            fprintf(stderr, "Setting coarse orientation to reverse landscape\n");
-        }
-        _hwSensors_setSensorValue( h, ANDROID_SENSOR_ACCELERATION, -g*cos_angle, 0., -g*sin_angle );
-        break;
+        case ANDROID_COARSE_REVERSE_LANDSCAPE:
+            if (VERBOSE_CHECK(rotation)) {
+                fprintf(stderr,
+                        "Setting coarse orientation to reverse landscape\n");
+            }
+            _hwSensors_setSensorValue(h, ANDROID_SENSOR_ACCELERATION,
+                                      -g * cos_angle, 0., -g * sin_angle);
+            break;
 
-    case ANDROID_COARSE_REVERSE_PORTRAIT:
-        if (VERBOSE_CHECK(rotation)) {
-            fprintf(stderr, "Setting coarse orientation to reverse portrait\n");
-        }
-        _hwSensors_setSensorValue( h, ANDROID_SENSOR_ACCELERATION, 0., -g*cos_angle, -g*sin_angle );
-        break;
+        case ANDROID_COARSE_REVERSE_PORTRAIT:
+            if (VERBOSE_CHECK(rotation)) {
+                fprintf(stderr,
+                        "Setting coarse orientation to reverse portrait\n");
+            }
+            _hwSensors_setSensorValue(h, ANDROID_SENSOR_ACCELERATION, 0.,
+                                      -g * cos_angle, -g * sin_angle);
+            break;
 
-    case ANDROID_COARSE_LANDSCAPE:
-        if (VERBOSE_CHECK(rotation)) {
-            fprintf(stderr, "Setting coarse orientation to landscape\n");
-        }
-        _hwSensors_setSensorValue( h, ANDROID_SENSOR_ACCELERATION, g*cos_angle, 0., g*sin_angle );
-        break;
-    default:
-        if (VERBOSE_CHECK(rotation)) {
-            fprintf(stderr, "Invalid orientation\n");
-        }
+        case ANDROID_COARSE_LANDSCAPE:
+            if (VERBOSE_CHECK(rotation)) {
+                fprintf(stderr, "Setting coarse orientation to landscape\n");
+            }
+            _hwSensors_setSensorValue(h, ANDROID_SENSOR_ACCELERATION,
+                                      g * cos_angle, 0., g * sin_angle);
+            break;
+        default:
+            if (VERBOSE_CHECK(rotation)) {
+                fprintf(stderr, "Invalid orientation\n");
+            }
     }
 }
 
-
 /* initialize the sensors state */
-static void
-_hwSensors_init( HwSensors*  h )
-{
+static void _hwSensors_init(HwSensors* h) {
     h->sensors_port = NULL;
 
     h->service = qemud_service_register("sensors", 0, h, _hwSensors_connect,
@@ -825,12 +790,10 @@ _hwSensors_init( HwSensors*  h )
     _hwSensors_setProximity(h, 1);
 }
 
-static HwSensors    _sensorsState[1];
+static HwSensors _sensorsState[1] = {};
 
-void
-android_hw_sensors_init( void )
-{
-    HwSensors*  hw = _sensorsState;
+void android_hw_sensors_init(void) {
+    HwSensors* hw = _sensorsState;
 
     if (hw->service == NULL) {
         _hwSensors_init(hw);
@@ -838,8 +801,7 @@ android_hw_sensors_init( void )
     }
 }
 
-void
-android_hw_sensors_init_remote_controller(void) {
+void android_hw_sensors_init_remote_controller(void) {
     HwSensors* hw = _sensorsState;
 
     if (!hw->sensors_port) {
@@ -847,24 +809,22 @@ android_hw_sensors_init_remote_controller(void) {
         * sensor emulation. */
         hw->sensors_port = sensors_port_create(hw);
         if (hw->sensors_port == NULL) {
-            V("Realistic sensor emulation is not available, since the remote controller is not accessible:\n %s",
-            strerror(errno));
+            V("Realistic sensor emulation is not available, since the remote "
+              "controller is not accessible:\n %s",
+              strerror(errno));
         }
     }
 }
 
 /* change the coarse orientation value */
-extern void
-android_sensors_set_coarse_orientation( AndroidCoarseOrientation  orient )
-{
+extern void android_sensors_set_coarse_orientation(
+        AndroidCoarseOrientation orient) {
     android_hw_sensors_init();
     _hwSensors_setCoarseOrientation(_sensorsState, orient);
 }
 
 /* Get sensor name from sensor id */
-extern const char*
-android_sensors_get_name_from_id( int sensor_id )
-{
+extern const char* android_sensors_get_name_from_id(int sensor_id) {
     if (sensor_id < 0 || sensor_id >= MAX_SENSORS)
         return NULL;
 
@@ -872,9 +832,7 @@ android_sensors_get_name_from_id( int sensor_id )
 }
 
 /* Get sensor id from sensor name */
-extern int
-android_sensors_get_id_from_name( char* sensorname )
-{
+extern int android_sensors_get_id_from_name(char* sensorname) {
     HwSensors* hw = _sensorsState;
 
     if (sensorname == NULL)
@@ -886,7 +844,7 @@ android_sensors_get_id_from_name( char* sensorname )
         return SENSOR_STATUS_UNKNOWN;
 
     if (hw->service != NULL) {
-        if (! hw->sensors[id].enabled)
+        if (!hw->sensors[id].enabled)
             return SENSOR_STATUS_DISABLED;
     } else
         return SENSOR_STATUS_NO_SERVICE;
@@ -895,9 +853,7 @@ android_sensors_get_id_from_name( char* sensorname )
 }
 
 /* Interface of reading the data for all sensors */
-extern int
-android_sensors_get( int sensor_id, float* a, float* b, float* c )
-{
+extern int android_sensors_get(int sensor_id, float* a, float* b, float* c) {
     HwSensors* hw = _sensorsState;
 
     *a = 0;
@@ -909,7 +865,7 @@ android_sensors_get( int sensor_id, float* a, float* b, float* c )
 
     Sensor* sensor = &hw->sensors[sensor_id];
     if (hw->service != NULL) {
-        if (! sensor->enabled)
+        if (!sensor->enabled)
             return SENSOR_STATUS_DISABLED;
     } else
         return SENSOR_STATUS_NO_SERVICE;
@@ -922,16 +878,14 @@ android_sensors_get( int sensor_id, float* a, float* b, float* c )
 }
 
 /* Interface of setting the data for all sensors */
-extern int
-android_sensors_set( int sensor_id, float a, float b, float c )
-{
+extern int android_sensors_set(int sensor_id, float a, float b, float c) {
     HwSensors* hw = _sensorsState;
 
     if (sensor_id < 0 || sensor_id >= MAX_SENSORS)
         return SENSOR_STATUS_UNKNOWN;
 
     if (hw->service != NULL) {
-        if (! hw->sensors[sensor_id].enabled)
+        if (!hw->sensors[sensor_id].enabled)
             return SENSOR_STATUS_DISABLED;
     } else
         return SENSOR_STATUS_NO_SERVICE;
@@ -942,9 +896,7 @@ android_sensors_set( int sensor_id, float a, float b, float c )
 }
 
 /* Get Sensor from sensor id */
-extern uint8_t
-android_sensors_get_sensor_status( int sensor_id )
-{
+extern uint8_t android_sensors_get_sensor_status(int sensor_id) {
     HwSensors* hw = _sensorsState;
 
     if (sensor_id < 0 || sensor_id >= MAX_SENSORS)
