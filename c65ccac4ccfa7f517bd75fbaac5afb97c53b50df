@@ -16,6 +16,24 @@
       "revId": "c65ccac4ccfa7f517bd75fbaac5afb97c53b50df",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c9668c36_7ab571fb",
+        "filename": "android/emulation/control/TestRunner.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-20T15:05:08Z",
+      "side": 1,
+      "message": "I was thinking that functions that use this would write out the result in their own way. I guess returning bool couldn\u0027t hurt",
+      "parentUuid": "091b44b9_26c65609",
+      "revId": "c65ccac4ccfa7f517bd75fbaac5afb97c53b50df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
