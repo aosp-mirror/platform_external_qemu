@@ -163,6 +163,29 @@
     },
     {
       "key": {
+        "uuid": "09f42401_def1a508",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-20T22:54:39Z",
+      "side": 1,
+      "message": "One might wonder if \"-1\" is enough here -- naively, you might think that this code should, say, try to get the frequency to run at, say, 110% of what was requested.  I guess the argument is that the extra overhead introduced by the emulator is very likely to consume less than a 1 ms, so the waiting the constant 1 ms is OK.  If this is the right argument (vs. the multiplicative factor idea), then maybe spell this out in the comment.  (It might be nice to change the local var \"delay\" to \"delay_ms\" -- variables specifying their units is always a good convention.)",
+      "range": {
+        "startLine": 397,
+        "startChar": 4,
+        "endLine": 398,
+        "endChar": 76
+      },
+      "revId": "434129b041f6bc2ec5354d10bedc5b80dccceecd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "09f42401_3ef249a3",
         "filename": "android/hw-sensors.c",
         "patchSetId": 1
