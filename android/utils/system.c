@@ -229,17 +229,15 @@ sleep_ms( int  timeout_ms )
 #endif
 }
 
-THREADID_T
+android_thread_id_t
 android_get_thread_id() {
 #ifdef _WIN32
     return GetCurrentThreadId();
-#else
-
-#ifdef __APPLE__
+#elif defined(__APPLE__)
     return syscall(SYS_thread_selfid);
-#else
+#elif defined(__linux__)
     return syscall(__NR_gettid);
-#endif
-
+#else
+#error "Operating system not supported"
 #endif
 }
