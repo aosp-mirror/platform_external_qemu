@@ -71,14 +71,18 @@ derror( const char*  format, ... )
 }
 
 void
-dtidpreprint( const char* prefix, const char* format, ... )
+android_tid_function_print(
+        bool emulator_tag,
+        const char* function,
+        const char* format, ... )
 {
     THREADID_T tid;
     va_list  args;
     tid = android_get_thread_id();
     va_start( args, format );
+    if (emulator_tag) fprintf( stdout, "emulator: ");
     fprintf( stdout, "tid=0x%" THREADID_FMT ": ", tid);
-    fprintf( stdout, "%s: ", prefix);
+    fprintf( stdout, "%s: ", function);
     vfprintf( stdout, format, args );
     fprintf( stdout, "\n" );
     va_end( args );
