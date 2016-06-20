@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "4909bcae_68086359",
+        "filename": "android/emulation/control/TestRunner.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-20T15:05:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "89cc947e_82071a69",
+      "revId": "20384ae203f98fb3ce7db1104ce2643edf337777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c914cc8a_04551609",
         "filename": "android/emulation/control/TestRunner.cpp",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2016-06-20T07:19:53Z",
       "side": 1,
       "message": "nit: Don\u0027t create static global C++ objects unless they are PODs. Use an android::base::LazyInstance\u003c\u003e instead if you need one. This will also remove the need for test_runner_init() / |initialized| since you can use instance.hasInstance() to test for initialization without lazy-creation.",
+      "revId": "20384ae203f98fb3ce7db1104ce2643edf337777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4909bcae_48059f3d",
+        "filename": "android/emulation/control/TestRunner.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-20T15:05:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c914cc8a_04551609",
       "revId": "20384ae203f98fb3ce7db1104ce2643edf337777",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "4909bcae_a8a89b47",
+        "filename": "android/emulation/control/TestRunner.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-20T15:05:08Z",
+      "side": 1,
+      "message": "True, all the users are C right now. (Done)",
+      "parentUuid": "89cc947e_420d128b",
+      "revId": "20384ae203f98fb3ce7db1104ce2643edf337777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c914cc8a_c483feaf",
         "filename": "android/emulation/control/TestRunner.h",
         "patchSetId": 6
@@ -64,6 +118,24 @@
       "writtenOn": "2016-06-20T07:19:53Z",
       "side": 1,
       "message": "nit: use android_ prefix, as in android_test_function_t, android_test_runner_init(), etc..\n\nAlso: Missing documentation!!",
+      "revId": "20384ae203f98fb3ce7db1104ce2643edf337777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4909bcae_88add757",
+        "filename": "android/emulation/control/TestRunner.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-20T15:05:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c914cc8a_c483feaf",
       "revId": "20384ae203f98fb3ce7db1104ce2643edf337777",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "4909bcae_6893c313",
+        "filename": "android/emulation/control/TestRunner.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-20T15:05:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c914cc8a_24501219",
+      "revId": "20384ae203f98fb3ce7db1104ce2643edf337777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "89cc947e_6202165c",
         "filename": "android/emulation/control/TestRunner.h",
         "patchSetId": 6
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "4909bcae_4890ff04",
+        "filename": "android/emulation/control/TestRunner.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-20T15:05:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "89cc947e_6202165c",
+      "revId": "20384ae203f98fb3ce7db1104ce2643edf337777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "29d9e83e_ff3b1f2a",
         "filename": "android/emulation/control/test_agent.h",
         "patchSetId": 6
@@ -115,6 +223,24 @@
       "writtenOn": "2016-06-20T07:19:53Z",
       "side": 1,
       "message": "no documentation, and why isn\u0027t there a function to list all registered tests, you\u0027ll probably need one at some point.",
+      "revId": "20384ae203f98fb3ce7db1104ce2643edf337777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4909bcae_08ffa739",
+        "filename": "android/emulation/control/test_agent.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-20T15:05:08Z",
+      "side": 1,
+      "message": "Ended up putting the documentation in TestRunner.h (Done)",
+      "parentUuid": "29d9e83e_ff3b1f2a",
       "revId": "20384ae203f98fb3ce7db1104ce2643edf337777",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
