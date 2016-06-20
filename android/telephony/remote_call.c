@@ -352,23 +352,6 @@ remote_call_event( void*  opaque, int  events )
 
 static RemoteCall  _the_remote_calls;
 
-#if 0
-static int
-remote_from_number( const char*  from )
-{
-    char*  end;
-    long   num = strtol( from, &end, 10 );
-
-    if (end == NULL || *end)
-        return -1;
-
-    if ((unsigned)(num - REMOTE_NUMBER_BASE) >= REMOTE_NUMBER_MAX)
-        return -1;
-
-    return (int) num;
-}
-#endif
-
 static RemoteCall
 remote_call_generic( RemoteCallType  type, const char*  to_number, int  from_port )
 {
@@ -383,7 +366,8 @@ remote_call_generic( RemoteCallType  type, const char*  to_number, int  from_por
         D("%s: phone number '%s' is not decimal or remote", __FUNCTION__, to_number);
         return NULL;
     }
-    if (to_port == from_port) {
+    /* You _can_ send an SMS to yourself. Didja know? */
+    if (to_port == from_port && type != REMOTE_CALL_SMS) {
         D("%s: trying to call self\n", __FUNCTION__);
         return NULL;
     }
