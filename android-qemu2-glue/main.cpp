@@ -160,19 +160,19 @@ const TargetInfo kTarget = {
     "virtio-net-device",
     {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
     {NULL},
-#elif defined(TARGET_I386)
-    "x86",
-    "i386",
-    "qemu32",
+#elif defined(TARGET_X86_64)
+    "x86_64",
+    "x86_64",
+    "android64",
     "ttyS",
     "virtio-blk-pci",
     "virtio-net-pci",
     {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_SD_CARD},
     {"-vga", "none", NULL},
-#elif defined(TARGET_X86_64)
-    "x86_64",
-    "x86_64",
-    "qemu64",
+#elif defined(TARGET_I386)  // Both i386 and x86_64 targets define this macro
+    "x86",
+    "i386",
+    "android32",
     "ttyS",
     "virtio-blk-pci",
     "virtio-net-pci",
