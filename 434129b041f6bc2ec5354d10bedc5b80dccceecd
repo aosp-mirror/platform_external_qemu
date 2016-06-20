@@ -1,0 +1,211 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8982d44f_e7aa60a1",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-20T22:43:23Z",
+      "side": 1,
+      "message": "Might be good when using this idiom to put some\n#ifdef SENSOR__\nstatic_assert(false, \"msg\") (or non-C++ equivalent)\n#endif\n\nbefore the define of SENSOR_\n\nto check the intended invariant that SENSOR_ is #undef\u0027d after use...",
+      "range": {
+        "startLine": 58,
+        "startChar": 7,
+        "endLine": 58,
+        "endChar": 14
+      },
+      "revId": "434129b041f6bc2ec5354d10bedc5b80dccceecd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8982d44f_19782cdd",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-20T22:43:23Z",
+      "side": 1,
+      "message": "Before this: could you add an assertion that sensor-\u003eserialized_len \u003c sizeof(sensor-\u003eserialized) ?\nAs I understand snprintf, if the string would be larger than n-1, it is truncated to n-1, and a \\0 is added.  So if the return value is n, you can\u0027t tell whether it happened to be exactly n-1, or whether it was truncated.  Best to assert, that we don\u0027t get to this situation, it seems to me.",
+      "range": {
+        "startLine": 356,
+        "startChar": 4,
+        "endLine": 356,
+        "endChar": 40
+      },
+      "revId": "434129b041f6bc2ec5354d10bedc5b80dccceecd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09f42401_fe490178",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-20T22:43:23Z",
+      "side": 1,
+      "message": "\"at least\"?  Is this meant to mean something like \"The CTS tests require this, and perhaps other code also relies on this invariant?\"  (This isn\u0027t suggested wording, just trying to understand what you\u0027re trying to say.)",
+      "range": {
+        "startLine": 368,
+        "startChar": 59,
+        "endLine": 368,
+        "endChar": 67
+      },
+      "revId": "434129b041f6bc2ec5354d10bedc5b80dccceecd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09f42401_de4ec57d",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-20T22:43:23Z",
+      "side": 1,
+      "message": "\"no greater\" would read slightly better.",
+      "range": {
+        "startLine": 369,
+        "startChar": 33,
+        "endLine": 369,
+        "endChar": 44
+      },
+      "revId": "434129b041f6bc2ec5354d10bedc5b80dccceecd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09f42401_5eb115a2",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 372,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-20T22:43:23Z",
+      "side": 1,
+      "message": "Could the CL description, or the associated bug, give examples of the failing assertions, and maybe a little explanation of how the values being tested in the test code correspond to the things you\u0027ve changed here?  In the completing CTS test that Ying did last night (http://chromeos1-row3-rack2-host1.cros.corp.google.com:8200/CTS_Result/Ubuntu_14.04_Quadro_600_CTS/build_0-rev_2988904/testResult.xml#android.hardware) I see nine failures -- my best guess is that the this change might be related to the first of these, but I\u0027m not sure.  Is that right -- or is this \"sync\" issue a failure that didn\u0027t occur in that run?",
+      "range": {
+        "startLine": 371,
+        "startChar": 3,
+        "endLine": 372,
+        "endChar": 79
+      },
+      "revId": "434129b041f6bc2ec5354d10bedc5b80dccceecd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8982d44f_8783541b",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-20T22:43:23Z",
+      "side": 1,
+      "message": "\"i\" seems like a somewhat uninformative name, given that it\u0027s really elements of an enum.  How about something like \"sensor_type\"?",
+      "range": {
+        "startLine": 374,
+        "startChar": 8,
+        "endLine": 374,
+        "endChar": 9
+      },
+      "revId": "434129b041f6bc2ec5354d10bedc5b80dccceecd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09f42401_3e4ec9ad",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-20T22:43:23Z",
+      "side": 1,
+      "message": "See previous comment on an assert that might be useful with the result of an snprintf.",
+      "range": {
+        "startLine": 391,
+        "startChar": 12,
+        "endLine": 391,
+        "endChar": 20
+      },
+      "revId": "434129b041f6bc2ec5354d10bedc5b80dccceecd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09f42401_3ef249a3",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-20T22:43:23Z",
+      "side": 1,
+      "message": "Maybe above this a comment like:\n// The sensor value changed, so invalidate the cached serialization.",
+      "range": {
+        "startLine": 547,
+        "startChar": 11,
+        "endLine": 547,
+        "endChar": 25
+      },
+      "revId": "434129b041f6bc2ec5354d10bedc5b80dccceecd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09f42401_be07796b",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 558,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-20T22:43:23Z",
+      "side": 1,
+      "message": "As before, I\u0027d find something like \"sensor_type\" a better variable name.  (As long as we\u0027re here, and otherwise making changes to the file...)  (For all variables of type AndroidSensor, throughout the file.)",
+      "range": {
+        "startLine": 558,
+        "startChar": 18,
+        "endLine": 558,
+        "endChar": 19
+      },
+      "revId": "434129b041f6bc2ec5354d10bedc5b80dccceecd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
