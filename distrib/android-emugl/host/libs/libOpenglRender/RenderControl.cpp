@@ -38,7 +38,7 @@ using android::base::AutoLock;
 #if DEBUG
 #define DPRINT(...) do { \
     if (!VERBOSE_CHECK(gles)) { VERBOSE_ENABLE(gles); } \
-    VERBOSE_TIDFPRINT(gles, __VA_ARGS__); \
+    VERBOSE_TID_FUNCTION_DPRINT(gles, __VA_ARGS__); \
 } while(0)
 #else
 #define DPRINT(...)

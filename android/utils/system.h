@@ -177,25 +177,30 @@ extern  void   sleep_ms( int  timeout );
 
 // Getting thread id's (cross platform)
 
-#define THREADID_FMT "lx"
 
 #ifdef _WIN32
 
+#define ANDROID_THREADID_FMT "lx"
 // cannot include windows yet, here.
 // Should be equiv. to DWORD
-#define THREADID_T long unsigned int
+#define android_thread_id_t long unsigned int
+
+#elif defined(__APPLE__)
+
+#define ANDROID_THREADID_FMT "x"
+#define android_thread_id_t int
+
+#elif defined(__linux__)
+
+#define ANDROID_THREADID_FMT "lx"
+#define android_thread_id_t long
 
 #else
 
-#ifdef __APPLE__
-#define THREADID_T int
-#else
-#define THREADID_T long
+#error "Operating system not supported"
 #endif
 
-#endif
-
-extern THREADID_T android_get_thread_id();
+extern android_thread_id_t android_get_thread_id();
 
 /** ****************************************************************************
  ** Various system functions exposed from the modern

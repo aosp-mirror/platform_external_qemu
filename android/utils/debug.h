@@ -13,6 +13,7 @@
 #pragma once
 
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "android/utils/compiler.h"
@@ -82,33 +83,54 @@ extern void base_enable_verbose_logs();
 #define  VERBOSE_PRINT(tag,...)  \
     do { if (VERBOSE_CHECK(tag)) dprint(__VA_ARGS__); } while (0)
 
-#define  VERBOSE_DPRINT(tag,...)  \
+// This omits the "emulator: " prefix.
+#define  VERBOSE_DPRINT(tag,format,...)  \
     do { if (VERBOSE_CHECK(tag)) { \
-        dprintn(__VA_ARGS__); dprint("\n"); } } while(0)
+         dprintn(format "\n", \
+                 ##__VA_ARGS__); } } while(0)
 
-#define  VERBOSE_TIDPRINT(tag,...)  \
-    do { if (VERBOSE_CHECK(tag)) dtidprint(__VA_ARGS__); } while (0)
+#define  VERBOSE_FUNCTION_PRINT(tag,format,...)  \
+    do { if (VERBOSE_CHECK(tag)) \
+         dprintn("emulator: %s: " format "\n", \
+                 __func__, ##__VA_ARGS__); } while(0)
 
-#define  VERBOSE_DFPRINT(tag,...)  \
-    do { if (VERBOSE_CHECK(tag)) { \
-        dprintn("%s: ", __FUNCTION__); \
-        dprintn(__VA_ARGS__); dprintn("\n"); } } while(0)
+// This omits the "emulator: " prefix.
+#define  VERBOSE_FUNCTION_DPRINT(tag,format,...)  \
+    do { if (VERBOSE_CHECK(tag)) \
+         dprintn("%s: " format "\n", \
+                 __func__, ##__VA_ARGS__); } while(0)
 
-#define  VERBOSE_TIDFPRINT(tag,...)  \
-    do { if (VERBOSE_CHECK(tag)) { \
-        dtidpreprint(__FUNCTION__, __VA_ARGS__); } } while (0)
+#define  VERBOSE_TID_PRINT(tag,...)  \
+    do { if (VERBOSE_CHECK(tag)) \
+         android_tid_function_print(true, NULL, __VA_ARGS__); \
+    } while (0)
+
+// This omits the "emulator: " prefix.
+#define  VERBOSE_TID_DPRINT(tag,...)  \
+    do { if (VERBOSE_CHECK(tag)) \
+         android_tid_function_print(false, NULL, __VA_ARGS__); } \
+    while (0)
+
+#define  VERBOSE_TID_FUNCTION_PRINT(tag,...) \
+    do { if (VERBOSE_CHECK(tag)) \
+         android_tid_function_print(true, __func__, __VA_ARGS__); } \
+    while (0)
+
+// This omits the "emulator: " prefix.
+#define  VERBOSE_TID_FUNCTION_DPRINT(tag,...) \
+    do { if (VERBOSE_CHECK(tag)) \
+         android_tid_function_print(false, __func__, __VA_ARGS__); } \
+    while (0)
 
 /** DEBUG TRACE SUPPORT
  **
- ** debug messages can be sent by calling these function
+ ** Debug messages can be sent by calling these functions:
  **
- ** 'dprint' prints the message, then appends a '\n\
- ** 'dprintn' simply prints the message as is
- ** 'dprintnv' allows you to use a va_list argument
- ** 'dwarning' prints a warning message, then appends a '\n'
- ** 'derror' prints a severe error message, then appends a '\n'
- ** 'dtidprint' prints thread id, the message, and finally '\n'
- ** 'dtidpreprint' prints thread id, a prefix, the message, and finally '\n'
+ ** 'dprint' prints "emulator: ", the message, then appends a '\n'
+ ** 'dprintn' prints the message as is
+ ** 'dprintnv' is 'dprintn' but allows you to use a va_list argument
+ ** 'dwarning' prints "emulator: WARNING: ", then appends a '\n'
+ ** 'derror' prints "emulator: ERROR: ", then appends a '\n'
  */
 
 extern void   dprint( const char*  format, ... );
@@ -116,8 +138,16 @@ extern void   dprintn( const char*  format, ... );
 extern void   dprintnv( const char*  format, va_list  args );
 extern void   dwarning( const char*  format, ... );
 extern void   derror( const char*  format, ... );
-extern void   dtidprint( const char*  format, ... );
-extern void   dtidpreprint( const char* prefix, const char*  format, ... );
+
+/** MULTITHREADED DEBUG TRACING
+ **
+ ** 'android_tid_function_print' is for tracing in multi-threaded situations.
+ ** It prints "emulator: " or not (depending on |use_emulator_prefix|),
+ ** the thread id, a function name (|function|), the message, and finally '\n'.
+ */
+extern void   android_tid_function_print(bool use_emulator_prefix,
+                                         const char* function,
+                                         const char*  format, ... );
 
 /** STDOUT/STDERR REDIRECTION
  **
