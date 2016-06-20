@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4917fcd8_b8933963",
+        "filename": "android/emulation/control/TestRunner.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T15:47:15Z",
+      "side": 1,
+      "message": "nit: Since it implements a C API, this source file should be called test_runner.cpp\n\nTestRunner.cpp would be used for something that implements a class named TestRunner. This makes sources easier to navigate over time.",
+      "revId": "466b21e2cba8fc3647304bc104866bd4a9049bbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a94cf814_7bbd9fc8",
+        "filename": "android/emulation/control/TestRunner.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T15:47:15Z",
+      "side": 1,
+      "message": "the DPRINT() usage seems a little bit over-the-top, please reduce it, or set this to 0.",
+      "revId": "466b21e2cba8fc3647304bc104866bd4a9049bbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e92b5015_55998c81",
+        "filename": "android/emulation/control/TestRunner.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T15:47:15Z",
+      "side": 1,
+      "message": "nit: Add empty lines to separate methods / members sections, it\u0027s cleaner.",
+      "revId": "466b21e2cba8fc3647304bc104866bd4a9049bbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4917fcd8_5899bd81",
+        "filename": "android/emulation/control/TestRunner.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T15:47:15Z",
+      "side": 1,
+      "message": "Why put this in the result, it\u0027s something that the caller should be responsible for instead.",
+      "revId": "466b21e2cba8fc3647304bc104866bd4a9049bbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a925d844_938e5c3e",
+        "filename": "android/emulation/control/TestRunner.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T15:47:15Z",
+      "side": 1,
+      "message": "nit: Use a range-based loop as in:\n\n  for (const auto\u0026 item : functions) {\n  }",
+      "revId": "466b21e2cba8fc3647304bc104866bd4a9049bbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "291ac803_978e443e",
+        "filename": "android/emulation/control/TestRunnerSelfTests.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T15:47:15Z",
+      "side": 1,
+      "message": "documentation? Why isn\u0027t this in the android:: namespace?",
+      "revId": "466b21e2cba8fc3647304bc104866bd4a9049bbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "891d74f9_7a96f952",
+        "filename": "android/emulation/control/test_agent.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T15:47:15Z",
+      "side": 1,
+      "message": "Either document each individual function, or add a comment explaining that this mirrors the API in test_runner.h",
+      "revId": "466b21e2cba8fc3647304bc104866bd4a9049bbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4917fcd8_18a345b8",
+        "filename": "android/emulation/control/test_runner.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T15:47:15Z",
+      "side": 1,
+      "message": "nit: the block above is probably better located in test_agent.h",
+      "revId": "466b21e2cba8fc3647304bc104866bd4a9049bbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c9512caa_5c99bd81",
+        "filename": "android/emulation/control/test_runner.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T15:47:15Z",
+      "side": 1,
+      "message": "Documentation, please",
+      "revId": "466b21e2cba8fc3647304bc104866bd4a9049bbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c9512caa_7c96f952",
+        "filename": "android/emulation/control/test_runner.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T15:47:15Z",
+      "side": 1,
+      "message": "Please document the expected format, what happens with |*sz| exactly, etc.",
+      "revId": "466b21e2cba8fc3647304bc104866bd4a9049bbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09318482_56999481",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T15:47:15Z",
+      "side": 1,
+      "message": "protip: end the line with \\ followed by an empty line.\n\nThis reduces the amount of change/conflicts during merges.",
+      "revId": "466b21e2cba8fc3647304bc104866bd4a9049bbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
