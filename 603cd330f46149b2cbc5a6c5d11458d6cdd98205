@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8982d44f_9215dc31",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-20T16:32:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8982d44f_f289c838",
+      "range": {
+        "startLine": 93,
+        "startChar": 34,
+        "endLine": 93,
+        "endChar": 46
+      },
+      "revId": "603cd330f46149b2cbc5a6c5d11458d6cdd98205",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8982d44f_d284c421",
         "filename": "android/utils/debug.h",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2016-06-20T15:51:51Z",
       "side": 1,
       "message": "you could try fitting everything into a single printf by separating the first argument (format string) from the rest of them:\n\n#define  VERBOSE_FUNCTION_PRINT(tag, format, ...)  \\\n    dprintn(\"emulator: %s: \" format \"\\n\", __func__, __VA_ARGS__);",
+      "range": {
+        "startLine": 94,
+        "startChar": 16,
+        "endLine": 94,
+        "endChar": 27
+      },
+      "revId": "603cd330f46149b2cbc5a6c5d11458d6cdd98205",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8982d44f_5230d4e1",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-20T16:32:58Z",
+      "side": 1,
+      "message": "That\u0027s pretty cool, thanks! Done",
+      "parentUuid": "8982d44f_d284c421",
       "range": {
         "startLine": 94,
         "startChar": 16,
