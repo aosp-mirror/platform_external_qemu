@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "c9668c36_9a9b2d8a",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-20T13:50:08Z",
+      "side": 1,
+      "message": "Thanks for catching that! Done in new CL. BTW, since I used debug prints a lot with no non-emulator libraries printing at the same time, I use prints without the \"emulator: prefix to save space. So, I\u0027ll split off different versions of the new TID printing functions with/without \"emulator: \".",
+      "parentUuid": "a90f9877_030d0e8c",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "49d61c0e_c0ee7ec0",
         "filename": "android/utils/debug.h",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2016-06-20T07:12:33Z",
       "side": 1,
       "message": "nit: make this a little more explicit, like VERBOSE_FUNCTION_PRINT() instead?",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4909bcae_a88e5b3d",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-20T13:50:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "49d61c0e_c0ee7ec0",
       "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "4909bcae_88939763",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-20T13:50:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "69cf6073_e13e261d",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "49d61c0e_e0eb82ad",
         "filename": "android/utils/debug.h",
         "patchSetId": 8
@@ -64,6 +118,24 @@
       "writtenOn": "2016-06-20T07:12:33Z",
       "side": 1,
       "message": "nit: Similarly, VERBOSE_TID_FUNCTION_PRINT()",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4909bcae_68998382",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-20T13:50:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "49d61c0e_e0eb82ad",
       "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "4909bcae_4896bf52",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-20T13:50:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "091b44b9_868f4ae8",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "29d9e83e_bf31974e",
         "filename": "android/utils/debug.h",
         "patchSetId": 8
@@ -98,6 +188,24 @@
       "writtenOn": "2016-06-20T07:12:33Z",
       "side": 1,
       "message": "it would be more useful if this used an \u0027emulator: tid\u003d\u003ctid\u003e:\" prefix instead.",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4909bcae_28a38bb8",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-20T13:50:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "29d9e83e_bf31974e",
       "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "4909bcae_08a0c7a7",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-20T13:50:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c914cc8a_e486fac1",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a90f9877_6302025c",
         "filename": "android/utils/debug.h",
         "patchSetId": 8
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "4909bcae_a8a53bb7",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-20T13:50:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a90f9877_6302025c",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "69cf6073_01e94ab5",
         "filename": "android/utils/system.c",
         "patchSetId": 8
@@ -149,6 +293,24 @@
       "writtenOn": "2016-06-20T07:12:33Z",
       "side": 1,
       "message": "nit: use #elif, and explicitly recognized Linux, as in:\n\n  #ifdef _WIN32\n  ...\n  #elif defined(__APPLE__)\n  ...\n  #elif defined(__linux__)\n  ...\n  #else\n  #error \"Operating system not supported\"\n  #endif",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4909bcae_68cbc356",
+        "filename": "android/utils/system.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-20T13:50:08Z",
+      "side": 1,
+      "message": "Done (also in header)",
+      "parentUuid": "69cf6073_01e94ab5",
       "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -183,6 +345,24 @@
       "writtenOn": "2016-06-20T07:12:33Z",
       "side": 1,
       "message": "This is not compatible with \"lx\" at all, it looks like this is going to result in runtime errors during \u0027dtidprint\u0027 operations. Either make this a \u0027long\u0027 (and cast the result of the Apple syscall to this type in android_get_thread_id(), or modify the definition of THREADID_FMT for the __APPLE__ case.",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4909bcae_68c06338",
+        "filename": "android/utils/system.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-20T13:50:08Z",
+      "side": 1,
+      "message": "Yeah it worked fine when I tried it, but I guess in general I shouldn\u0027t assume long int / int are both 32-bits :) (Done)",
+      "parentUuid": "09e0a4df_1e5a8d6b",
       "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
