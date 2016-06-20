@@ -33,20 +33,10 @@ using android::base::AutoLock;
 
 #define DEBUG 0
 
-#if DEBUG && !defined(_WIN32)
-#include <unistd.h>
-#include <sys/syscall.h>
-#include <sys/types.h>
-
-#ifdef __APPLE__
-#define SYSCALL_GETTID_ARG SYS_thread_selfid
-#else
-#define SYSCALL_GETTID_ARG __NR_gettid
-#endif
-
+#if DEBUG
 #define DPRINT(...) do { \
-    fprintf(stderr, "tid=0x%lx | ", syscall(SYSCALL_GETTID_ARG)); \
-    fprintf(stderr, __VA_ARGS__); \
+    if (!VERBOSE_CHECK(gles)) { VERBOSE_ENABLE(gles); } \
+    VERBOSE_TID_FUNCTION_DPRINT(gles, __VA_ARGS__); \
 } while(0)
 
 #else
