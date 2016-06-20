@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a90f9877_030d0e8c",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T07:12:33Z",
+      "side": 1,
+      "message": "If I understand correctly, this will print the message as-is, then append \"emulator:\" followed by 2 newlines (\\n). I don\u0027t think that\u0027s what you really want.",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "49d61c0e_c0ee7ec0",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T07:12:33Z",
+      "side": 1,
+      "message": "nit: make this a little more explicit, like VERBOSE_FUNCTION_PRINT() instead?",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69cf6073_e13e261d",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T07:12:33Z",
+      "side": 1,
+      "message": "nit: to preserve the emulator: prefix, use dprint() instead of dprintn() for the first call on line 94.",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "49d61c0e_e0eb82ad",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T07:12:33Z",
+      "side": 1,
+      "message": "nit: Similarly, VERBOSE_TID_FUNCTION_PRINT()",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "091b44b9_868f4ae8",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T07:12:33Z",
+      "side": 1,
+      "message": "this comment is out-dated, dprint() will always print an \"emulator:\" prefix before the message, before appending a \\n, this is done intentionally to recognize emulator log messages on the console.\n\nsimilarly, dwarning() will use an \"emulator: WARNING:\" prefix, and derror() will use \"emulator: ERROR:\"\n\n\u0027dprintn\u0027 will not use the \u0027emulator:\u0027 prefix though, which makes it less useful overall except in rare cases.",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "29d9e83e_bf31974e",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T07:12:33Z",
+      "side": 1,
+      "message": "it would be more useful if this used an \u0027emulator: tid\u003d\u003ctid\u003e:\" prefix instead.",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c914cc8a_e486fac1",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T07:12:33Z",
+      "side": 1,
+      "message": "it\u0027s unclear how the prefix and message are concatenated, from your use on line 99, it suggests some separator being used. May name this android_debug_tid_function_print(const char* function, const char* fmt, ...) instead?",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a90f9877_6302025c",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T07:12:33Z",
+      "side": 1,
+      "message": "nit: the dxxxx() names came from a very old time, a simpler time. Right now, I think we should probably try to prefix all new C functions we introduce with android_ or something similar, and use more explicit names. E.g. what about android_debug_tid_print() instead.",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69cf6073_01e94ab5",
+        "filename": "android/utils/system.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T07:12:33Z",
+      "side": 1,
+      "message": "nit: use #elif, and explicitly recognized Linux, as in:\n\n  #ifdef _WIN32\n  ...\n  #elif defined(__APPLE__)\n  ...\n  #elif defined(__linux__)\n  ...\n  #else\n  #error \"Operating system not supported\"\n  #endif",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "091b44b9_c6994231",
+        "filename": "android/utils/system.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T07:12:33Z",
+      "side": 1,
+      "message": "nit: Use ANDROID_THREAD_ID_FMT instead?",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09e0a4df_1e5a8d6b",
+        "filename": "android/utils/system.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T07:12:33Z",
+      "side": 1,
+      "message": "This is not compatible with \"lx\" at all, it looks like this is going to result in runtime errors during \u0027dtidprint\u0027 operations. Either make this a \u0027long\u0027 (and cast the result of the Apple syscall to this type in android_get_thread_id(), or modify the definition of THREADID_FMT for the __APPLE__ case.",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "49d61c0e_a0f17a9f",
+        "filename": "android/utils/system.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T07:12:33Z",
+      "side": 1,
+      "message": "Please don\u0027t use CAPITALIZED_NAMES for types, these are reserved for C macros per the style guide. Try |android_thread_id_t| instead.",
+      "revId": "7a39a2c1a8e6713dc8c90a01554a9834c9908e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
