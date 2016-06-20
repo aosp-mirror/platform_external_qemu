@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c92a0c14_f4b0d8f6",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T15:36:14Z",
+      "side": 1,
+      "message": "nit: please move this just above the android_tid_function_print() declaration below, it will be clearer. Also |emulator_tag| is ambiguous since a \u0027tag\u0027 is normally an enum describing which component messages belong to, probably renaming this to |use_emulator_prefix| for example.",
+      "revId": "ff3317dda46632db9f0b3d9c8635d455a19cacce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e92b5015_f589b838",
+        "filename": "android/utils/system.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T15:36:14Z",
+      "side": 1,
+      "message": "nit: ANDROID_THREAD_ID_FMT",
+      "revId": "ff3317dda46632db9f0b3d9c8635d455a19cacce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "291ac803_f789c038",
+        "filename": "android/utils/system.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-20T15:36:14Z",
+      "side": 1,
+      "message": "nit: android_thread_id_t",
+      "revId": "ff3317dda46632db9f0b3d9c8635d455a19cacce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
