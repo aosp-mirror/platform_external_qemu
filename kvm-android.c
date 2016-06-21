@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/utsname.h>
+#include "android/emulation/kvm_env.h"
 #include "android/kvm.h"
 #include "android/utils/debug.h"
 

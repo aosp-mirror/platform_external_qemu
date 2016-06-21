@@ -29,6 +29,7 @@
 #include "exec/ram_addr.h"
 #include "sysemu/kvm.h"
 
+#include "android/emulation/kvm_env.h"
 #include "android/crashreport/crash-handler.h"
 
 /* KVM uses PAGE_SIZE in it's definition of COALESCED_MMIO_MAX */
