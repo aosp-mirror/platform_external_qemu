@@ -95,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "09f42401_93b8ae2a",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-21T16:28:45Z",
+      "side": 1,
+      "message": "OK, thanks.  The \"at least\" doesn\u0027t read well; why don\u0027t you take it out, and add a new sentence at the end: \"Since the CTS enforces this property, other code may also rely on it.\"",
+      "parentUuid": "09f42401_01b56cfb",
+      "range": {
+        "startLine": 368,
+        "startChar": 59,
+        "endLine": 368,
+        "endChar": 67
+      },
+      "revId": "434129b041f6bc2ec5354d10bedc5b80dccceecd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "09f42401_de4ec57d",
         "filename": "android/hw-sensors.c",
         "patchSetId": 1
@@ -188,6 +212,30 @@
     },
     {
       "key": {
+        "uuid": "09f42401_b3416af9",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-21T16:28:45Z",
+      "side": 1,
+      "message": "I think you\u0027re misunderstanding my comment.  I\u0027m proposing a global name change for the local variable \"i\", to \"sensor_type\".  For me, \"i\" is fine if it\u0027s just an ordinal index.  But here, the values have other meanings.",
+      "parentUuid": "09f42401_e7e5f0e5",
+      "range": {
+        "startLine": 374,
+        "startChar": 8,
+        "endLine": 374,
+        "endChar": 9
+      },
+      "revId": "434129b041f6bc2ec5354d10bedc5b80dccceecd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "09f42401_3e4ec9ad",
         "filename": "android/hw-sensors.c",
         "patchSetId": 1
@@ -246,6 +294,30 @@
       "side": 1,
       "message": "2c here:\n\nMy mental model of what\u0027s going on is that the sensors thing here needs to account for the delay due to traffic host/guest, which follows a random distribution around some constant delay that doesn\u0027t depend on how often you hammer on the sensors, at least at millisecond scales.",
       "parentUuid": "09f42401_def1a508",
+      "range": {
+        "startLine": 397,
+        "startChar": 4,
+        "endLine": 398,
+        "endChar": 76
+      },
+      "revId": "434129b041f6bc2ec5354d10bedc5b80dccceecd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09f42401_730a42c8",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-21T16:28:45Z",
+      "side": 1,
+      "message": "I agree that this sounds reasonable.  Just asking for this reasoning to be spelled out a little more in the comment.  Maybe there should be a symbolic constant for the value \"1\" -- with a spec comment indicating that it\u0027s the max amount of time expected to be added by this host/guest traffic overhead?\n\nI wonder: if some CTS tests have both upper and lower bounds on their update frequencies, maybe we need some sort of online monitoring and dynamic adjustment of that frequency, to stay within that band (over suitable time windows).  If they have just lower bounds, we can decrease the delay, and increase the frequency, as much as we like and still stay correct.  If there\u0027s an upper bound, we can\u0027t do that too much.  If the frequency was high, so the calculated delay to achieve it was small (8, say), then substracting 1 could increase the frequency significantly (12.5%).  How many of the CTS tests in question have both upper and lower bounds, and how far apart are those bounds?  Are we comfortable that we can aim for the middle and have enough \"headroom\" on the upper bound?",
+      "parentUuid": "09f42401_b83f89cd",
       "range": {
         "startLine": 397,
         "startChar": 4,
