@@ -74,9 +74,11 @@ public:
                                  System::ProcessExitCode* outExitCode,
                                  System::Pid*,
                                  const string&) {
-        EXPECT_GE(command.size(), 2);
+        EXPECT_GE(command.size(), 4);
         EXPECT_EQ("adb", command[0]);
-        EXPECT_EQ("push", command[1]);
+        EXPECT_EQ("-s", command[1]);
+        EXPECT_EQ("emulator-0", command[2]);
+        EXPECT_EQ("push", command[3]);
 
         auto thisPtr = static_cast<FilePusherTest*>(opaque);
         while(thisPtr->mAtomicNumCommands <= 0) {
