@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "09f42401_e577a574",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-21T17:18:25Z",
+      "side": 1,
+      "message": "I had suggested the CL description, or the bug for this (very  useful) information.  I don\u0027t the comments of a source file are really a good place for this sort of \"history\" -- these sort of cross references can easily become stale.  Maybe for a comment in the code, you might just say, after the \"the CTS requires\" sentence, something like \"See the android.hardware CTS tests\" -- being non-specific means it stays accurate.\n\nBut do put this info in the CL description, please.  For my own info, could you tell me where in the tests the \"sync times \u003c\u003d sensor even arrival time\" check is?  I was trying to figure it out, but couldn\u0027t...",
+      "range": {
+        "startLine": 381,
+        "startChar": 1,
+        "endLine": 386,
+        "endChar": 63
+      },
+      "revId": "6af598856b6a1cbcb3b24d6f145b3353f8edee9b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
