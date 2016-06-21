@@ -31,6 +31,7 @@ public:
     virtual const std::string& detectedAdbPath() const override final {
         return mAdbPath;
     }
+    virtual void setEmulatorBasePort(int port) override final {}
 
     void setAdbOptions(android::base::StringView path, bool isVersionCurrent) {
         mIsAdbVersionCurrent = isVersionCurrent;
@@ -50,8 +51,8 @@ public:
         // Just do what the real one did - mLooper is the thing that controls
         // the command execution.
         auto command = std::shared_ptr<AdbCommand>(
-                new AdbCommand(mLooper, mAdbPath, args, want_output, timeout_ms,
-                               result_callback));
+                new AdbCommand(mLooper, mAdbPath, "emulator-0", args, want_output,
+                               timeout_ms, result_callback));
         command->start(1);
         return command;
     }
