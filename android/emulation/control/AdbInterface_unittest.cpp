@@ -29,7 +29,7 @@ using android::base::TestTempDir;
 using android::emulation::AdbInterface;
 
 TEST(AdbInterface, create) {
-    EXPECT_NE(nullptr, AdbInterface::create(nullptr).get());
+    EXPECT_NE(nullptr, AdbInterface::create(nullptr, 0).get());
 }
 
 TEST(AdbInterface, freshAdbVersion) {
@@ -49,7 +49,7 @@ TEST(AdbInterface, freshAdbVersion) {
     ofs.close();
     std::string sdkRoot = PathUtils::join(dir->path(), "Sdk");
     system.envSet("ANDROID_SDK_ROOT", sdkRoot);
-    auto adb = AdbInterface::create(nullptr);
+    auto adb = AdbInterface::create(nullptr, 0);
     EXPECT_TRUE(adb->isAdbVersionCurrent());
     std::string expectedAdbPath =
             PathUtils::join(sdkRoot, "platform-tools", "adb");
@@ -73,7 +73,7 @@ TEST(AdbInterface, freshAdbVersionNoMinor) {
     ofs.close();
     std::string sdkRoot = PathUtils::join(dir->path(), "Sdk");
     system.envSet("ANDROID_SDK_ROOT", sdkRoot);
-    auto adb = AdbInterface::create(nullptr);
+    auto adb = AdbInterface::create(nullptr, 0);
     EXPECT_TRUE(adb->isAdbVersionCurrent());
     std::string expectedAdbPath =
             PathUtils::join(sdkRoot, "platform-tools", "adb");
@@ -97,7 +97,7 @@ TEST(AdbInterface, staleAdbMinorVersion) {
     ofs.close();
     std::string sdkRoot = PathUtils::join(dir->path(), "Sdk");
     system.envSet("ANDROID_SDK_ROOT", sdkRoot);
-    auto adb = AdbInterface::create(nullptr);
+    auto adb = AdbInterface::create(nullptr, 0);
     EXPECT_FALSE(adb->isAdbVersionCurrent());
     std::string expectedAdbPath =
             PathUtils::join(sdkRoot, "platform-tools", "adb");
@@ -121,7 +121,7 @@ TEST(AdbInterface, staleAdbMajorVersion) {
     ofs.close();
     std::string sdkRoot = PathUtils::join(dir->path(), "Sdk");
     system.envSet("ANDROID_SDK_ROOT", sdkRoot);
-    auto adb = AdbInterface::create(nullptr);
+    auto adb = AdbInterface::create(nullptr, 0);
     EXPECT_FALSE(adb->isAdbVersionCurrent());
     std::string expectedAdbPath =
             PathUtils::join(sdkRoot, "platform-tools", "adb");

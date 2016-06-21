@@ -50,7 +50,7 @@ public:
         // Just do what the real one did - mLooper is the thing that controls
         // the command execution.
         auto command = std::shared_ptr<AdbCommand>(
-                new AdbCommand(mLooper, mAdbPath, args, want_output, timeout_ms,
+                new AdbCommand(mLooper, mAdbPath, 0, args, want_output, timeout_ms,
                                result_callback));
         command->start(1);
         return command;

@@ -134,7 +134,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
               &mEventCapturer,
               android::base::CircularBuffer<EventRecord>(1000))),
       mUserActionsCounter(new android::qt::UserActionsCounter(&mEventCapturer)),
-      mAdbInterface(android::emulation::AdbInterface::create(mLooper)),
+      mAdbInterface(android::emulation::AdbInterface::create(mLooper, android_base_port)),
       mApkInstaller(mAdbInterface.get()),
       mFilePusher(mAdbInterface.get(),
                   [this](StringView filePath, FilePusher::Result result) {

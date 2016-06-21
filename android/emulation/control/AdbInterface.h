@@ -72,7 +72,8 @@ public:
             bool want_output = true) = 0;
 
     // Creates a new instance of the AdbInterface.
-    static std::unique_ptr<AdbInterface> create(android::base::Looper* looper);
+    static std::unique_ptr<AdbInterface> create(android::base::Looper* looper,
+                                                int android_port);
 };
 
 class AdbInterfaceImpl;
@@ -96,6 +97,7 @@ public:
 private:
     AdbCommand(android::base::Looper* looper,
                const std::string& adb_path,
+               int android_port,
                const std::vector<std::string>& command,
                bool want_output,
                base::System::Duration timeout,

@@ -32,7 +32,7 @@ namespace emulation {
 
 class AdbInterfaceImpl final : public AdbInterface {
 public:
-    explicit AdbInterfaceImpl(android::base::Looper* looper);
+    explicit AdbInterfaceImpl(android::base::Looper* looper, int android_port);
 
     // Returns true is the ADB version is fresh enough.
     bool isAdbVersionCurrent() const override final { return mAdbVersionCurrent; }
@@ -60,11 +60,12 @@ public:
 private:
     android::base::Looper* mLooper;
     std::string mAdbPath;
+    int mAndroidPort;
     bool mAdbVersionCurrent;
 };
 
-std::unique_ptr<AdbInterface> AdbInterface::create(android::base::Looper* looper) {
-    return std::unique_ptr<AdbInterface>{new AdbInterfaceImpl(looper)};
+std::unique_ptr<AdbInterface> AdbInterface::create(android::base::Looper* looper, int android_port) {
+    return std::unique_ptr<AdbInterface>{new AdbInterfaceImpl(looper, android_port)};
 }
 
 // Helper function, checks if the version of adb in the given SDK is
@@ -102,8 +103,8 @@ static bool checkAdbVersion(const std::string& sdk_root_directory) {
     return false;
 }
 
-AdbInterfaceImpl::AdbInterfaceImpl(android::base::Looper* looper)
-    : mLooper(looper), mAdbVersionCurrent(false) {
+AdbInterfaceImpl::AdbInterfaceImpl(android::base::Looper* looper, int android_port)
+    : mLooper(looper), mAndroidPort(android_port), mAdbVersionCurrent(false) {
     // First try finding ADB by the environment variable.
     auto sdk_root_by_env = android::ConfigDirs::getSdkRootDirectoryByEnv();
     if (!sdk_root_by_env.empty()) {
@@ -151,13 +152,14 @@ AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
         base::System::Duration timeout_ms,
         bool want_output) {
     auto command = std::shared_ptr<AdbCommand>(new AdbCommand(
-            mLooper, mAdbPath, args, want_output, timeout_ms, result_callback));
+            mLooper, mAdbPath, mAndroidPort, args, want_output, timeout_ms, result_callback));
     command->start();
     return command;
 }
 
 AdbCommand::AdbCommand(android::base::Looper* looper,
                        const std::string& adb_path,
+                       int android_port,
                        const std::vector<std::string>& command,
                        bool want_output,
                        base::System::Duration timeout,
@@ -171,6 +173,11 @@ AdbCommand::AdbCommand(android::base::Looper* looper,
       mTimeout(timeout),
       mFinished(false) {
     mCommand.push_back(adb_path);
+    mCommand.push_back("-s");
+
+    char buf[64];
+    sprintf(buf, "emulator-%d", android_port);
+    mCommand.push_back(std::string(buf));
     mCommand.insert(mCommand.end(), command.begin(), command.end());
 }
 
