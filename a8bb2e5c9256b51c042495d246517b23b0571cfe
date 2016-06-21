@@ -376,6 +376,30 @@
       "revId": "a8bb2e5c9256b51c042495d246517b23b0571cfe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "29b2c8f6_6fdcac1e",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-06-21T23:58:02Z",
+      "side": 1,
+      "message": "Fixed.",
+      "parentUuid": "6febe063_a7c2738e",
+      "range": {
+        "startLine": 37,
+        "startChar": 8,
+        "endLine": 38,
+        "endChar": 42
+      },
+      "revId": "a8bb2e5c9256b51c042495d246517b23b0571cfe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
