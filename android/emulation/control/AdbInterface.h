@@ -54,6 +54,9 @@ public:
     // Returns the automatically detected path to adb
     virtual const std::string& detectedAdbPath() const = 0;
 
+    // Setup the emulator base port this interface is connected to
+    virtual void setEmulatorBasePort(int port) = 0;
+
     // Runs an adb command asynchronously.
     // |args| - the arguments to pass to adb, i.e. "shell dumpsys battery"
     // |result_callback| - the callback function that will be invoked on the
@@ -96,6 +99,7 @@ public:
 private:
     AdbCommand(android::base::Looper* looper,
                const std::string& adb_path,
+               const std::string& serial_string,
                const std::vector<std::string>& command,
                bool want_output,
                base::System::Duration timeout,
