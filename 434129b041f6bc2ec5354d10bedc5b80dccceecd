@@ -234,6 +234,30 @@
     },
     {
       "key": {
+        "uuid": "09f42401_b83f89cd",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-21T13:52:10Z",
+      "side": 1,
+      "message": "2c here:\n\nMy mental model of what\u0027s going on is that the sensors thing here needs to account for the delay due to traffic host/guest, which follows a random distribution around some constant delay that doesn\u0027t depend on how often you hammer on the sensors, at least at millisecond scales.",
+      "parentUuid": "09f42401_def1a508",
+      "range": {
+        "startLine": 397,
+        "startChar": 4,
+        "endLine": 398,
+        "endChar": 76
+      },
+      "revId": "434129b041f6bc2ec5354d10bedc5b80dccceecd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "09f42401_3ef249a3",
         "filename": "android/hw-sensors.c",
         "patchSetId": 1
