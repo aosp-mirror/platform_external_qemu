@@ -22,6 +22,30 @@
       "revId": "6af598856b6a1cbcb3b24d6f145b3353f8edee9b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0990a4c9_fee561e5",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-21T17:32:30Z",
+      "side": 1,
+      "message": "$CTS/cts/tests/tests/hardware/src/android/hardware/cts/helpers/sensorverification/EventTimestampSynchronizationVerification.java\n\nThis is the file that checks the event timestamps. In the function verifyTimestampSynchronization():\n\nlong eventTimestampNs \u003d event.timestamp;\nlong receivedTimestampNs \u003d event.receivedTimestamp;\nlong upperThresholdNs \u003d receivedTimestampNs;\nlong lowerThresholdNs \u003d receivedTimestampNs - mMaximumSynchronizationErrorNs\n                    - mExpectedSyncLatencyNs;\nif (eventTimestampNs \u003c lowerThresholdNs || eventTimestampNs \u003e upperThresholdNs) { ... }\n\nas you can see, event\u0027s |received_timestamp| is the _upper_ threshold for the |timestamp| field we set in it\n\n|received_timestamp| is just the guest\u0027s timestamp at the moment of event arrival\n|timestamp| is what emulator sends with a \"sync:%ts%\" message",
+      "parentUuid": "09f42401_e577a574",
+      "range": {
+        "startLine": 381,
+        "startChar": 1,
+        "endLine": 386,
+        "endChar": 63
+      },
+      "revId": "6af598856b6a1cbcb3b24d6f145b3353f8edee9b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
