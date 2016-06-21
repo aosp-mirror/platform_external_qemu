@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0e2a6a7a_b1863a7a",
+        "filename": "android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-21T21:42:18Z",
+      "side": 1,
+      "message": "use std::to_string(port) instead",
+      "range": {
+        "startLine": 45,
+        "startChar": 7,
+        "endLine": 46,
+        "endChar": 42
+      },
+      "revId": "30a3f4de0cd245cff7bc8af7e4071af71fb6c543",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
