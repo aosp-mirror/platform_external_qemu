@@ -40,6 +40,11 @@ public:
     // Returns the automatically detected path to adb
     const std::string& detectedAdbPath() const override final { return mAdbPath; }
 
+    // Setup the emulator base port this interface is connected to
+    virtual void setEmulatorBasePort(int port) override final {
+        mAndroidBasePort = port;
+    }
+
     // Runs an adb command asynchronously.
     // |args| - the arguments to pass to adb, i.e. "shell dumpsys battery"
     // |result_callback| - the callback function that will be invoked on the
@@ -60,6 +65,7 @@ public:
 private:
     android::base::Looper* mLooper;
     std::string mAdbPath;
+    int mAndroidBasePort;
     bool mAdbVersionCurrent;
 };
 
@@ -150,14 +156,16 @@ AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
         std::function<void(const OptionalAdbCommandResult&)> result_callback,
         base::System::Duration timeout_ms,
         bool want_output) {
-    auto command = std::shared_ptr<AdbCommand>(new AdbCommand(
-            mLooper, mAdbPath, args, want_output, timeout_ms, result_callback));
+    auto command = std::shared_ptr<AdbCommand>(
+            new AdbCommand(mLooper, mAdbPath, mAndroidBasePort, args,
+                           want_output, timeout_ms, result_callback));
     command->start();
     return command;
 }
 
 AdbCommand::AdbCommand(android::base::Looper* looper,
                        const std::string& adb_path,
+                       int android_port,
                        const std::vector<std::string>& command,
                        bool want_output,
                        base::System::Duration timeout,
@@ -171,6 +179,11 @@ AdbCommand::AdbCommand(android::base::Looper* looper,
       mTimeout(timeout),
       mFinished(false) {
     mCommand.push_back(adb_path);
+    mCommand.push_back("-s");
+
+    char buf[64];
+    sprintf(buf, "emulator-%d", android_port);
+    mCommand.push_back(std::string(buf));
     mCommand.insert(mCommand.end(), command.begin(), command.end());
 }
 
