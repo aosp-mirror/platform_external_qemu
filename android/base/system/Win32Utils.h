@@ -56,6 +56,12 @@ public:
     // FormatMessage.
     static std::string getErrorString(DWORD error_code);
 
+    // If |path| is the path of a regular file or directory, return a simple
+    // copy. If |path| is the path of a symbolic link or a mount point, return
+    // its target path instead. Return an empty string in case of error
+    // (invalid path).
+    static std::string followLink(StringView path);
+
     // A small handy struct for an automatic HANDLE management
     struct HandleCloser {
         void operator()(HANDLE h) const { ::CloseHandle(h); }
