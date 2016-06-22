@@ -71,11 +71,35 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
             SIGNAL(dragStarted()),
             this,
             SLOT(onDragStarted()));
+    connect(mUi->positionXSlider,
+            SIGNAL(sliderPressed()),
+            this,
+            SLOT(onDragStarted()));
+    connect(mUi->positionXSlider,
+            SIGNAL(sliderReleased()),
+            this,
+            SLOT(onDragStopped()));
+    connect(mUi->positionYSlider,
+            SIGNAL(sliderPressed()),
+            this,
+            SLOT(onDragStarted()));
+    connect(mUi->positionYSlider,
+            SIGNAL(sliderReleased()),
+            this,
+            SLOT(onDragStopped()));
 
     connect(&mAccelerationTimer, SIGNAL(timeout()),
             this, SLOT(updateLinearAcceleration()));
     mAccelerationTimer.setInterval(100);
     mAccelerationTimer.stop();
+
+    mUi->yawSlider->setRange(-180.0, 180.0);
+    mUi->pitchSlider->setRange(-180.0, 180.0);
+    mUi->rollSlider->setRange(-180.0, 180.0);
+    mUi->positionXSlider->setRange(Accelerometer3DWidget::MinX,
+                                   Accelerometer3DWidget::MaxX);
+    mUi->positionYSlider->setRange(Accelerometer3DWidget::MinY,
+                                   Accelerometer3DWidget::MaxY);
 }
 
 void VirtualSensorsPage::showEvent(QShowEvent*) {
@@ -89,7 +113,6 @@ void VirtualSensorsPage::showEvent(QShowEvent*) {
 void VirtualSensorsPage::setLayoutChangeNotifier(QObject* layout_change_notifier) {
     connect(layout_change_notifier, SIGNAL(layoutChanged(bool)),
             this, SLOT(onSkinLayoutChange(bool)));
-
 }
 
 void VirtualSensorsPage::onSkinLayoutChange(bool next) {
@@ -136,7 +159,7 @@ void VirtualSensorsPage::resetAccelerometerRotation(const QQuaternion& rotation)
      mUi->accelWidget->setPosition(QVector2D(0.0, 0.0));
      mUi->accelWidget->setRotation(rotation);
      mUi->accelWidget->renderFrame();
-     updateAccelerometerValues();
+     onPhoneRotationChanged();
 }
 
 void VirtualSensorsPage::on_rotateToPortrait_clicked() {
@@ -202,7 +225,67 @@ void VirtualSensorsPage::onMagVectorChanged() {
 }
 
 void VirtualSensorsPage::onPhoneRotationChanged() {
+    const QQuaternion& rotation = mUi->accelWidget->rotation();
+    // CAVEAT: There is some inconsistency related to the terms "yaw",
+    // "pitch" and "roll" between the QQuaternion docs and how
+    // these terms are defined in the Android docs.
+    // According to android docs:
+    // When the device lies flat, screen-up, the Z
+    // axis comes out of the screen, the Y axis comes
+    // out of the top and the X axis comes out of the right side
+    // of the device. The same coordinate system is used by the
+    // accelerometer control widget.
+    // Android docs define "roll" as the rotation around the Y axis.
+    // However, QQuaternion defines "roll" as the rotation around
+    // the Z axis. Essentially, "yaw" and "roll" are switched.
+    // For consistency, we stick with Android definitions of
+    // yaw, pitch and roll.
+    float x, y, z;
+    rotation.getEulerAngles(&x, &y, &z);
+    mUi->yawSlider->setValue(z, false);
+    mUi->pitchSlider->setValue(x, false);
+    mUi->rollSlider->setValue(y, false);
     updateAccelerometerValues();
+}
+
+void VirtualSensorsPage::setAccelerometerRotationFromSliders() {
+    // WARNING: read the comment in VirtualSensorsPage::onPhoneRotationChanged
+    // before changing the order of these arguments!!
+    mUi->accelWidget->setRotation(
+            QQuaternion::fromEulerAngles(
+                mUi->pitchSlider->getValue(),
+                mUi->rollSlider->getValue(),
+                mUi->yawSlider->getValue()));
+    mUi->accelWidget->renderFrame();
+    updateAccelerometerValues();
+}
+
+void VirtualSensorsPage::on_yawSlider_valueChanged(double) {
+    setAccelerometerRotationFromSliders();
+}
+
+void VirtualSensorsPage::on_pitchSlider_valueChanged(double) {
+    setAccelerometerRotationFromSliders();
+}
+
+void VirtualSensorsPage::on_rollSlider_valueChanged(double) {
+    setAccelerometerRotationFromSliders();
+}
+
+void VirtualSensorsPage::on_positionXSlider_valueChanged(double) {
+  mCurrentPosition = QVector3D(mUi->positionXSlider->getValue(),
+                               mUi->positionYSlider->getValue(),
+                               0.0);
+  mUi->accelWidget->setPosition(mCurrentPosition.toVector2D());
+  mUi->accelWidget->renderFrame();
+}
+
+void VirtualSensorsPage::on_positionYSlider_valueChanged(double) {
+  mCurrentPosition = QVector3D(mUi->positionXSlider->getValue(),
+                               mUi->positionYSlider->getValue(),
+                               0.0);
+  mUi->accelWidget->setPosition(mCurrentPosition.toVector2D());
+  mUi->accelWidget->renderFrame();
 }
 
 // Helper function.
@@ -246,18 +329,48 @@ void VirtualSensorsPage::updateAccelerometerValues() {
                    device_magnetic_vector.y(),
                    device_magnetic_vector.z());
 
+    // Update the "rotation" label according to the simulated gravity vector.
+    QVector3D normalized_gravity = device_gravity_vector.normalized();
+    std::vector<std::pair<QVector3D, QString>> directions {
+      std::make_pair(QVector3D(0, 1, 0), QString("ROTATION_0")),
+      std::make_pair(QVector3D(1, 0, 0), QString("ROTATION_90")),
+      std::make_pair(QVector3D(0, -1, 0), QString("ROTATION_180")),
+      std::make_pair(QVector3D(-1, 0, 0), QString("ROTATION_270"))
+    };
+
+    QString rotation_label;
+    for (const auto v : directions) {
+      if (fabs(QVector3D::dotProduct(normalized_gravity, v.first) - 1.0) < 0.1) {
+        rotation_label = v.second;
+        break;
+      }
+    }
+
     // Update labels with new values.
-    mUi->accelerometerXLabel->setText(formatSensorValue(acceleration.x()));
-    mUi->accelerometerYLabel->setText(formatSensorValue(acceleration.y()));
-    mUi->accelerometerZLabel->setText(formatSensorValue(acceleration.z()));
-    mUi->magnetometerNorthLabel->setText(formatSensorValue(device_magnetic_vector.x()));
-    mUi->magnetometerEastLabel->setText(formatSensorValue(device_magnetic_vector.y()));
-    mUi->magnetometerVerticalLabel->setText(formatSensorValue(device_magnetic_vector.z()));
+    mUi->resultingAccelerometerValues->setText(
+        QString().sprintf(
+                "<table border=\"0\" cellpadding=\"4\" style=\"font-size:8pt\">"
+                "<tr><td>%s:</td><td>%6.2f</td><td>%6.2f</td><td>%6.2f</td></tr>"
+                "<tr><td>%s:</td><td>%6.2f</td><td>%6.2f</td><td>%6.2f</td></tr>"
+                "<tr><td>%s:</td><td colspan = \"3\">%s</td></tr>"
+                "</table>",
+                  tr("Accelerometer (m/s^2)").toStdString().c_str(),
+                  (acceleration.x()),
+                  (acceleration.y()),
+                  (acceleration.z()),
+                  tr("Magnetometer (uT)").toStdString().c_str(),
+                  (device_magnetic_vector.x()),
+                  (device_magnetic_vector.y()),
+                  (device_magnetic_vector.z()),
+                  tr("Rotation").toStdString().c_str(),
+                  rotation_label.toStdString().c_str()));
 }
 
 void VirtualSensorsPage::onPhonePositionChanged() {
     const QVector2D& pos = mUi->accelWidget->position();
     mCurrentPosition = QVector3D(pos.x(), pos.y(), 0.0);
+    mUi->positionXSlider->setValue(pos.x(), false);
+    mUi->positionYSlider->setValue(pos.y(), false);
 }
 
 void VirtualSensorsPage::updateLinearAcceleration() {
@@ -277,6 +390,7 @@ void VirtualSensorsPage::on_accelModeRotate_toggled() {
     if (mUi->accelModeRotate->isChecked()) {
         mUi->accelWidget->setOperationMode(
             Accelerometer3DWidget::OperationMode::Rotate);
+        mUi->accelerometerSliders->setCurrentIndex(0);
     }
 }
 
@@ -284,6 +398,7 @@ void VirtualSensorsPage::on_accelModeMove_toggled() {
     if (mUi->accelModeMove->isChecked()) {
         mUi->accelWidget->setOperationMode(
             Accelerometer3DWidget::OperationMode::Move);
+        mUi->accelerometerSliders->setCurrentIndex(1);
     }
 }
 
