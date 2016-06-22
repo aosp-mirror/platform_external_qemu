@@ -540,7 +540,10 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
                     avdInfo_getRanchuKernelPath(avd) :
                     avdInfo_getKernelPath(avd);
             if (kernelFile == NULL) {
-                derror( "This AVD's configuration is missing a kernel file!!" );
+                derror("This AVD's configuration is missing a kernel file! "
+                       "Please ensure the file \"%s\" is in the same location "
+                       "as your system image.",
+                       is_qemu2 ? "kernel-ranchu" : "kernel-qemu");
                 const char* sdkRootDir = getenv("ANDROID_SDK_ROOT");
                 if (sdkRootDir) {
                     derror( "ANDROID_SDK_ROOT is defined (%s) but cannot find kernel file in "
