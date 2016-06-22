@@ -15,6 +15,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "android/skin/rect.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -34,6 +36,7 @@ typedef enum {
     kEventSetZoom,
     kEventForceRedraw,
     kEventWindowMoved,
+    kEventLayoutRotate,
     kEventScreenChanged,
     kEventZoomedWindowResized
 } SkinEventType;
@@ -65,6 +68,10 @@ typedef struct {
 } SkinEventMouseData;
 
 typedef struct {
+  SkinRotation rotation;
+} SkinEventLayoutRotateData;
+
+typedef struct {
     int x; // Send current window coordinates to maintain window location
     int y;
     int scroll_h; // Height of the horizontal scrollbar, needed for OSX
@@ -87,6 +94,7 @@ typedef struct {
         SkinEventScrollData scroll;
         SkinEventTextInputData text;
         SkinEventWindowData window;
+        SkinEventLayoutRotateData layout_rotation;
     } u;
 } SkinEvent;
 
