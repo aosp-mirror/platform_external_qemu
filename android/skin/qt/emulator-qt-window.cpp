@@ -1703,3 +1703,9 @@ void EmulatorQtWindow::runAdbShellStopAndQuit() {
         },
         android::base::System::kInfinite);
 }
+
+void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
+    SkinEvent* event = createSkinEvent(kEventLayoutRotate);
+    event->u.layout_rotation.rotation = rot;
+    queueSkinEvent(event);
+}
