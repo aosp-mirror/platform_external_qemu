@@ -63,6 +63,16 @@ public:
     template <typename PushItemIt>
     bool pushFiles(PushItemIt start,
                    PushItemIt end) {
+        // A cancelled push will never reset because the pushDone() function
+        // is never called when a push is cancelled. So check here for
+        // cancellation, and if so, reset the object.
+        if (mCurrentPushCommand) {
+            if (!mCurrentPushCommand->inFlight()) {
+                mCurrentPushCommand.reset();
+            } else {
+                return false;
+            }
+        }
         mPushQueue.insert(mPushQueue.end(), start, end);
         mNumQueued += std::distance(start, end);
         if (!mCurrentPushCommand) {

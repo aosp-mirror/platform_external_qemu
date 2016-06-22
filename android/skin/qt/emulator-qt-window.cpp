@@ -1103,9 +1103,11 @@ void EmulatorQtWindow::runAdbPush(const QList<QUrl>& urls) {
                 std::make_pair(url.toLocalFile().toStdString(), remoteFile));
     }
 
-    mFilePusher.pushFiles(
-        file_paths.begin(),
-        file_paths.end());
+    if (!mFilePusher.pushFiles(file_paths.begin(), file_paths.end())) {
+        showErrorDialog(tr("A previously canceled file copy is still "
+                           "shutting down. Please try again later."),
+                        tr("File Copy"));
+    }
 }
 
 void EmulatorQtWindow::slot_adbPushCanceled() {
