@@ -60,12 +60,18 @@ private slots:
     void on_helpMagneticField_clicked();
     void on_helpLight_clicked();
     void on_helpPressure_clicked();
+    void on_yawSlider_valueChanged(double);
+    void on_pitchSlider_valueChanged(double);
+    void on_rollSlider_valueChanged(double);
+    void on_positionXSlider_valueChanged(double);
+    void on_positionYSlider_valueChanged(double);
 
 private:
     void showEvent(QShowEvent*) override;
 
     void resetAccelerometerRotation(const QQuaternion&);
     void resetAccelerometerRotationFromSkinLayout(const SkinLayout*);
+    void setAccelerometerRotationFromSliders();
     void updateAccelerometerValues();
 
     std::unique_ptr<Ui::VirtualSensorsPage> mUi;
