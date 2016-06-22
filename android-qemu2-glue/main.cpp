@@ -332,7 +332,7 @@ extern "C" int main(int argc, char **argv) {
         if (exitStatus == EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER) {
             // Copy all QEMU options to |args|, and set |n| to the number
             // of options in |args| (|argc| must be positive here).
-            for (n = 1; n < argc; ++n) {
+            for (n = 1; n <= argc; ++n) {
                 args[n] = argv[n - 1];
             }
 
