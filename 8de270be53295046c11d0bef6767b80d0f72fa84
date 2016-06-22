@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ceabf2ee_ac1c635e",
+        "filename": "distrib/android-emugl/host/libs/libGLES12Translator/common/dlog.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-06-22T22:37:58Z",
+      "side": 1,
+      "message": "add copyright header ?",
+      "revId": "8de270be53295046c11d0bef6767b80d0f72fa84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
