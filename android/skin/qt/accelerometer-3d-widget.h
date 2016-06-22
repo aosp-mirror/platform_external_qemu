@@ -68,6 +68,11 @@ public:
     // Returns the X and Y coordinates of the model's origin.
     const QVector2D& position() const { return mTranslation; }
 
+    static constexpr float MaxX = 7.0;
+    static constexpr float MinX = -7.0;
+    static constexpr float MaxY = 4.0;
+    static constexpr float MinY = -4.0;
+
 protected:
     // This is called once, after the GL context is created, to do some one-off
     // setup work.

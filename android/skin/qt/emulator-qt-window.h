@@ -215,6 +215,9 @@ public:
     void zoomReset();
     void zoomTo(const QPoint& focus, const QSize& rectSize);
 
+public slots:
+    void rotateSkin(SkinRotation rot);
+
 private slots:
     void slot_adbWarningMessageAccepted();
     void slot_blit(QImage* src,

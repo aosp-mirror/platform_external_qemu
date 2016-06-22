@@ -46,6 +46,8 @@ EditableSliderWidget::EditableSliderWidget(QWidget *parent) :
 
     // Handle child widgets' value changes in our own slots.
     connect(&mSlider, SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged(int)));
+    connect(&mSlider, SIGNAL(sliderPressed()), this, SIGNAL(sliderPressed()));
+    connect(&mSlider, SIGNAL(sliderReleased()), this, SIGNAL(sliderReleased()));
     connect(&mLineEdit, SIGNAL(editingFinished()), this, SLOT(lineEditValueChanged()));
 }
 
