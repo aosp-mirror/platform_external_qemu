@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6eda06ab_292b4d2a",
+        "filename": "distrib/android-emugl/host/libs/libGLES12Translator/gles/api_entries.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-06-22T22:55:48Z",
+      "side": 1,
+      "message": "nit: formatting changes are better separated into a different CL, especially when it is large chunk",
+      "revId": "bbe44ca974543c2b504ebc708b11c68a1fd3a37d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
