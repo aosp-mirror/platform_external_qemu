@@ -1208,18 +1208,18 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
 
 /*
  * Return true if software GPU is used and AVD screen is too large for it.
- * Software GPU can boot 768 X 1280 (Nexus 4) or smaller due to software
- * buffer size. (It may actually boot a slightly larger screen, but we set
- * limit to this commonly seen resolution.)
+ * Software GPU can boot 800 X 1280 (first gen Nexus 7) or smaller due to
+ * software buffer size. (It may actually boot a slightly larger screen,
+ * but we set limit to this commonly seen resolution.)
  */
 static bool use_software_gpu_and_screen_too_large(AndroidHwConfig* hw) {
     const int kMaxWidth = 1280;
-    const int kMaxHeight = 768;
+    const int kMaxHeight = 800;
 
     if (!hw->hw_gpu_enabled &&
             (hw->hw_lcd_width * hw->hw_lcd_height > kMaxWidth * kMaxHeight)) {
         derror("GPU emulation is disabled.\n"
-                   "Only screen size of 768 X 1280 or smaller is supported "
+                   "Only screen size of 800 X 1280 or smaller is supported "
                    "when GPU emulation is disabled.");
         return true;
     }
