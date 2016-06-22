@@ -213,8 +213,11 @@ void AdbCommand::taskDoneFunction(const OptionalAdbCommandResult& result) {
     if (!mCancelled) {
         mResultCallback(result);
     }
-    mTask.reset();
     mFinished = true;
+    // This may invalidate this object and clean it up.
+    // DO NOT reference any internal state from this class after this
+    // point.
+    mTask.reset();
 }
 
 void AdbCommand::taskFunction(OptionalAdbCommandResult* result) {

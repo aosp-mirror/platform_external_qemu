@@ -35,8 +35,10 @@ FilePusher::~FilePusher() {
 void FilePusher::cancel() {
     if (mCurrentPushCommand) {
         mCurrentPushCommand->cancel();
+        mCurrentPushCommand.reset();
     }
     mPushQueue.clear();
+    resetProgress();
 }
 
 void FilePusher::pushNextItem() {
