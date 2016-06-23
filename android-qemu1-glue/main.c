@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
                 // Copy all QEMU options to |args|, and set |n| to the number
                 // of options in |args| (|argc| must be positive here).
                 int n;
-                for (n = 1; n < argc; ++n) {
+                for (n = 1; n <= argc; ++n) {
                     args[n] = argv[n - 1];
                 }
 
