@@ -53,9 +53,28 @@ The idea is that in libOpenglRender on the host, we already have sufficient
 information to tell graphics_translation everything without needing
 graphics_translattion to have an EGL component.
 
+gles12tr.entries in libOpenGLESDispatch contains the extra entry points that
+we need in order to be able to keep the GLESv1 emulator on track.
+
+=====gles1=====gles1>>>>>Linking underlying GLESv2>>>>>>>>>gles2=====gles2=====
+
+In order to emulate GLESv1 on top of GLESv2, this GLESv1->2 translation library
+expects the presence of actual implementation GLESv2 API. When we are using
+GLESv1 emulation, we need to link against GLESv2 functions. The entry point
+create_underlying_api returns a pointer to a struct that will hold the
+necessary GLESv2 functions, which we then link at runtime. The GLESv1 emulation
+library then notices what we linked when we pass a pointer to this struct to
+GLESv1 context creation calls.
+
 =====gles1=====gles1>>>>>Current state of the library>>>>>>gles2=====gles2=====
 
 The state of this library right now is that it only builds. It is not hooked up
-to anything.  Right now, it seems to need to use ARC's RefBase and
+to anything, but it's close to getting triggered now, because there are new
+code paths added to GLESv1Dispatch. The linking scheme with underlying GLESv2
+is described in the section on "Linking underlying GLESv2".
+
+=====gles1=====gles1>>>>>Known Issues / WIP Opportunities>>gles2=====gles2=====
+
+Right now, this translation library seems to need to use ARC's RefBase and
 StrongPointer in order to not crash during use (from smoke tests done by
 experimentally hooking up the library to the emulator).
