@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c3c2ed56_bdd52355",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 967,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-23T22:19:25Z",
+      "side": 0,
+      "message": "how do we react now if there\u0027s no ADB, or the custom location is invalid?",
+      "range": {
+        "startLine": 959,
+        "startChar": 2,
+        "endLine": 967,
+        "endChar": 5
+      },
+      "revId": "1a0cdb6011a895af00ddd042461da7c835e3d50e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
