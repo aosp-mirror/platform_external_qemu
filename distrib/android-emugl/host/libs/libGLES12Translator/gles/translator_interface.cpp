@@ -19,10 +19,12 @@
 #include "egl_image.h"
 #include "GLES/glext.h"
 
-#include "android/base/threads/ThreadStore.h"
 #include "common/dlog.h"
 #include "emugl/common/lazy_instance.h"
 #include "gles/macros.h"
+
+#include "android/base/threads/ThreadStore.h"
+#include "android/utils/debug.h"
 
 #include "GLES12Translator/underlying_apis.h"
 #include "GLES12Translator/angle_gles2.h"
@@ -90,6 +92,9 @@ void SetCurrentGlesContext(GlesContext* cxt_in) {
 // The actual translator interface entries.
 
 TRANSLATOR_APIENTRY(void*, create_underlying_api) {
+#if GLES12TR_DLOG
+    VERBOSE_ENABLE(gles1emu);
+#endif
     UnderlyingApis* container = new UnderlyingApis;
     container->angle = new ANGLE_GLES2;
     return (void*)container;

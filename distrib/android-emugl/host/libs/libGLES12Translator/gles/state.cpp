@@ -21,6 +21,7 @@
 #include <GLES/glext.h>
 
 #include "common/alog.h"
+#include "common/dlog.h"
 #include "gles/gles_options.h"
 #include "gles/buffer_data.h"
 #include "gles/debug.h"
@@ -353,6 +354,8 @@ UniformContext::UniformContext(GlesContext* context)
       ambient_(emugl::Vector(0.2f, 0.2f, 0.2f, 1.f)),
       color_(emugl::Vector(1.f, 1.f, 1.f, 1.f)),
       normal_(emugl::Vector(0.f, 0.f, 1.f, 0.f)) {
+  DLOG("Created uniform context for GLES1 context @ %p", context);
+
   // GL_MODELVIEW is the default matrix mode.
   // es_full_spec.1.1.12.pdf section 2.10.2.
   SetMatrixMode(GL_MODELVIEW);
@@ -364,6 +367,7 @@ UniformContext::UniformContext(GlesContext* context)
 }
 
 void UniformContext::Init(int num_texture_units) {
+  DLOG("Initialized uniform context for GLES1 context @ %p", context_);
   LOG_ALWAYS_FATAL_IF(num_texture_units != kMaxTextureUnits);
 }
 
@@ -686,7 +690,9 @@ UniformContext::GetActiveMatrixStackInternal() const {
 }
 
 ProgramContext::ProgramContext(GlesContext* context, GLuint program)
-    : context_(context), program_object_(program) {}
+    : context_(context), program_object_(program) {
+        DLOG("Created program context for GLES1 context @ %p", context_);
+    }
 
 void ProgramContext::Bind() {
   PASS_THROUGH(context_, UseProgram, program_object_);
@@ -856,12 +862,14 @@ TextureContext::TextureContext(GlesContext* context)
     num_texture_units_(0),
     active_texture_unit_(0),
     client_active_texture_unit_(0) {
+        DLOG("Created texture context for GLES1 context @ %p", context_);
 }
 
 TextureContext::~TextureContext() {
 }
 
 void TextureContext::Init(int max_texture_units, int max_texture_size) {
+        DLOG("Initialized texture context for GLES1 context @ %p", context_);
   ALOG_ASSERT(max_texture_size > 0);
   ALOG_ASSERT((max_texture_size & (max_texture_size - 1)) == 0);
   num_texture_units_ = max_texture_units;
@@ -1113,6 +1121,7 @@ PointerContext::PointerContext(GlesContext* context)
     element_array_buffer_(0),
     element_array_buffer_size_(0),
     disable_gl_fixed_attribs_(emugl::GlesOptions::GLFixedAttribsEnabled()) {
+  DLOG("Created pointer context for GLES1 context @ %p", context);
 }
 
 PointerContext::~PointerContext() {
@@ -1120,6 +1129,7 @@ PointerContext::~PointerContext() {
 }
 
 void PointerContext::Init(int num_pointers) {
+  DLOG("Initialized pointer context for GLES1 context @ %p", context_);
   LOG_ALWAYS_FATAL_IF(array_buffer_ != 0);
 
   pointers_.resize(num_pointers);
