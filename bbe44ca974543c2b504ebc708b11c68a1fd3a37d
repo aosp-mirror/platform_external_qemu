@@ -16,6 +16,24 @@
       "revId": "bbe44ca974543c2b504ebc708b11c68a1fd3a37d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "038165c8_b6cbc853",
+        "filename": "distrib/android-emugl/host/libs/libGLES12Translator/gles/api_entries.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-23T15:00:41Z",
+      "side": 1,
+      "message": "Formatting and debug prints have been split off into:\n\n- https://android-review.googlesource.com/#/c/239121/\n- https://android-review.googlesource.com/#/c/242360/\n\nrespectively.",
+      "parentUuid": "6eda06ab_292b4d2a",
+      "revId": "bbe44ca974543c2b504ebc708b11c68a1fd3a37d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
