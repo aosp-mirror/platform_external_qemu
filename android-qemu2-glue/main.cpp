@@ -703,29 +703,34 @@ extern "C" int main(int argc, char **argv) {
         }
     }
 
-    uint64_t glesCMA = 0ULL;
+    uint64_t glesFramebufferCMA = 0ULL;
     if ((glesMode == kAndroidGlesEmulationGuest) ||
         (opts->gpu && !strcmp(opts->gpu, "guest")) ||
         !hw->hw_gpu_enabled) {
         // Set CMA (continguous memory allocation) to values that depend on
         // the desired resolution.
-        // We will assume a double buffered 32-bit framebuffer in the calculation.
+        // We will assume a double buffered 32-bit framebuffer
+        // in the calculation.
         int framebuffer_width = hw->hw_lcd_width;
         int framebuffer_height = hw->hw_lcd_height;
         uint64_t bytes = framebuffer_width * framebuffer_height * 4;
         const uint64_t one_MB = 1024ULL * 1024;
-        glesCMA = (2 * bytes + one_MB - 1) / one_MB;
-        VERBOSE_PRINT(init, "Adjusting Contiguous Memory Allocation"
-                      "of %dx%d framebuffer for software renderer to %"
-                      PRIu64 "MB.", framebuffer_width, framebuffer_height,
-                      glesCMA);
+        glesFramebufferCMA = (2 * bytes + one_MB - 1) / one_MB;
+        VERBOSE_PRINT(init, "Adjusting Contiguous Memory Allocation "
+                            "of %dx%d framebuffer for software renderer to %"
+                            PRIu64 "MB.", framebuffer_width, framebuffer_height,
+                            glesFramebufferCMA);
+    } else {
+        VERBOSE_PRINT(init, "Using default value for kernel "
+                            "Contiguous Memory Allocation.");
     }
+
 
     int apiLevel = avd ? avdInfo_getApiLevel(avd) : 1000;
 
     char* kernel_parameters = emulator_getKernelParameters(
             opts, kTarget.androidArch, apiLevel, kTarget.ttyPrefix,
-            hw->kernel_parameters, glesMode, glesCMA,
+            hw->kernel_parameters, glesMode, glesFramebufferCMA,
             true  // isQemu2
             );
     if (!kernel_parameters) {
