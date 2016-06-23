@@ -60,7 +60,11 @@ void process_early_setup(int argc, char** argv) {
     // to make sure no other thread could be doing the same
     std::string launcherDir = System::get()->getLauncherDirectory();
     std::string caBundleFile =
+#ifdef CONFIG_CMAKE
+            PathUtils::join(launcherDir, "data", "ca-bundle.pem");
+#else
             PathUtils::join(launcherDir, "lib", "ca-bundle.pem");
+#endif
     if (!System::get()->pathCanRead(caBundleFile)) {
         LOG(VERBOSE) << "Can not read ca-bundle. Curl init skipped.";
     } else {

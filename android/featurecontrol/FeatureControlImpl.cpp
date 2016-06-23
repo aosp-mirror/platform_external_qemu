@@ -177,7 +177,11 @@ void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
 
 FeatureControlImpl::FeatureControlImpl() {
     std::string defaultIniHostName = base::PathUtils::join(
+#ifdef CONFIG_CMAKE
+            base::System::get()->getLauncherDirectory(), "data",
+#else
             base::System::get()->getLauncherDirectory(), "lib",
+#endif
             "advancedFeatures.ini", base::PathUtils::HOST_TYPE);
     std::unique_ptr<char[]> defaultIniGuestName;
     if (android_avdInfo)

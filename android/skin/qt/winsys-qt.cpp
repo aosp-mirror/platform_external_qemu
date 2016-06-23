@@ -329,6 +329,7 @@ extern void skin_winsys_spawn_thread(bool no_window,
     }
 }
 
+#ifndef CONFIG_CMAKE
 void skin_winsys_setup_library_paths() {
     // Make Qt look at the libraries within this installation
     // Despite the fact that we added the plugins directory to the environment
@@ -346,6 +347,7 @@ void skin_winsys_setup_library_paths() {
     D("Qt lib path: %s\n", qtLibPath.c_str());
     D("Qt plugin path: %s\n", qtPluginsPath.c_str());
 }
+#endif
 
 extern void skin_winsys_start(bool no_window) {
     GlobalState* g = globalState();
@@ -355,7 +357,9 @@ extern void skin_winsys_start(bool no_window) {
     // work (confirmed by grepping through Qt code).
     XInitThreads();
 #endif
+#ifndef CONFIG_CMAKE
     skin_winsys_setup_library_paths();
+#endif
 
     if (no_window) {
         g->app = new QCoreApplication(g->argc, g->argv);

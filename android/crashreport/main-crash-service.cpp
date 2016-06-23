@@ -24,7 +24,9 @@
 #include "android/crashreport/CrashService.h"
 #include "android/crashreport/CrashSystem.h"
 #include "android/crashreport/ui/ConfirmDialog.h"
+#ifndef CONFIG_CMAKE
 #include "android/qt/qt_path.h"
+#endif
 #include "android/skin/qt/init-qt.h"
 #include "android/utils/debug.h"
 #include "android/version.h"
