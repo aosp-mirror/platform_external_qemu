@@ -16,6 +16,24 @@
       "revId": "7f2df9d3da0a9181451a4f5cee7a48c451779796",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ae6ddeb5_13668c41",
+        "filename": "android/emulation/control/FilePusher.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-06-23T00:07:48Z",
+      "side": 1,
+      "message": "A call to resetProgress() is needed - I will add that.\n\nI was under the impression that calling mCurrentPushCommand.reset() while an adb command was in-flight was a big no-no. If that\u0027s not true, then yes, the above should suffice.",
+      "parentUuid": "ee735692_b521409e",
+      "revId": "7f2df9d3da0a9181451a4f5cee7a48c451779796",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
