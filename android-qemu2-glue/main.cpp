@@ -40,6 +40,7 @@
 #include "android/utils/filelock.h"
 #include "android/utils/tempfile.h"
 #include "android/utils/stralloc.h"
+#include "android/utils/string.h"
 #include "android/utils/win32_cmdline_quote.h"
 
 #include "android/skin/winsys.h"
@@ -612,9 +613,19 @@ extern "C" int main(int argc, char **argv) {
         }
     }
 
+    bool createEmptyCacheFile = false;
 
-    // Create cache partition image if it doesn't exist already.
-    if (!path_exists(hw->disk_cachePartition_path)) {
+    // Make sure there's a temp cache partition if there wasn't a permanent one
+    if (!hw->disk_cachePartition_path ||
+        strcmp(hw->disk_cachePartition_path, "") == 0) {
+        str_reset(&hw->disk_cachePartition_path,
+                  tempfile_path(tempfile_create()));
+        createEmptyCacheFile = true;
+    }
+
+    createEmptyCacheFile |= !path_exists(hw->disk_cachePartition_path);
+
+    if (createEmptyCacheFile) {
         D("Creating empty ext4 cache partition: %s",
           hw->disk_cachePartition_path);
         int ret = android_createEmptyExt4Image(
