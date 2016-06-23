@@ -35,7 +35,7 @@ void ActiveTextureCall(const GlesContext* c, GLenum texture) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("ActiveTextureCall(%p, %s (0x%x))", c, GetEnumString(texture), texture);
 #endif
-  return _api->ActiveTexture(texture);
+  return _api->glActiveTexture(texture);
 }
 
 
@@ -49,7 +49,7 @@ void AttachShaderCall(const GlesContext* c, GLuint program, GLuint shader) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("AttachShaderCall(%p, %u, %u)", c, program, shader);
 #endif
-  return _api->AttachShader(program, shader);
+  return _api->glAttachShader(program, shader);
 }
 
 
@@ -63,7 +63,7 @@ void BindAttribLocationCall(const GlesContext* c, GLuint program, GLuint index, 
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("BindAttribLocationCall(%p, %u, %u, %p)", c, program, index, name);
 #endif
-  return _api->BindAttribLocation(program, index, name);
+  return _api->glBindAttribLocation(program, index, name);
 }
 
 
@@ -77,7 +77,7 @@ void BindBufferCall(const GlesContext* c, GLenum target, GLuint buffer) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("BindBufferCall(%p, %s (0x%x), %u)", c, GetEnumString(target), target, buffer);
 #endif
-  return _api->BindBuffer(target, buffer);
+  return _api->glBindBuffer(target, buffer);
 }
 
 
@@ -91,7 +91,7 @@ void BindFramebufferCall(const GlesContext* c, GLenum target, GLuint framebuffer
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("BindFramebufferCall(%p, %s (0x%x), %u)", c, GetEnumString(target), target, framebuffer);
 #endif
-  return _api->BindFramebuffer(target, framebuffer);
+  return _api->glBindFramebuffer(target, framebuffer);
 }
 
 
@@ -105,7 +105,7 @@ void BindRenderbufferCall(const GlesContext* c, GLenum target, GLuint renderbuff
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("BindRenderbufferCall(%p, %s (0x%x), %u)", c, GetEnumString(target), target, renderbuffer);
 #endif
-  return _api->BindRenderbuffer(target, renderbuffer);
+  return _api->glBindRenderbuffer(target, renderbuffer);
 }
 
 
@@ -119,7 +119,7 @@ void BindTextureCall(const GlesContext* c, GLenum target, GLuint texture) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("BindTextureCall(%p, %s (0x%x), %u)", c, GetEnumString(target), target, texture);
 #endif
-  return _api->BindTexture(target, texture);
+  return _api->glBindTexture(target, texture);
 }
 
 
@@ -133,7 +133,7 @@ void BlendColorCall(const GlesContext* c, GLclampf red, GLclampf green, GLclampf
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("BlendColorCall(%p, %f, %f, %f, %f)", c, red, green, blue, alpha);
 #endif
-  return _api->BlendColor(red, green, blue, alpha);
+  return _api->glBlendColor(red, green, blue, alpha);
 }
 
 
@@ -147,7 +147,7 @@ void BlendEquationCall(const GlesContext* c, GLenum mode) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("BlendEquationCall(%p, %s (0x%x))", c, GetEnumString(mode), mode);
 #endif
-  return _api->BlendEquation(mode);
+  return _api->glBlendEquation(mode);
 }
 
 
@@ -161,7 +161,7 @@ void BlendEquationSeparateCall(const GlesContext* c, GLenum modeRGB, GLenum mode
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("BlendEquationSeparateCall(%p, %s (0x%x), %s (0x%x))", c, GetEnumString(modeRGB), modeRGB, GetEnumString(modeAlpha), modeAlpha);
 #endif
-  return _api->BlendEquationSeparate(modeRGB, modeAlpha);
+  return _api->glBlendEquationSeparate(modeRGB, modeAlpha);
 }
 
 
@@ -175,7 +175,7 @@ void BlendFuncCall(const GlesContext* c, GLenum sfactor, GLenum dfactor) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("BlendFuncCall(%p, %s (0x%x), %s (0x%x))", c, GetEnumString(sfactor), sfactor, GetEnumString(dfactor), dfactor);
 #endif
-  return _api->BlendFunc(sfactor, dfactor);
+  return _api->glBlendFunc(sfactor, dfactor);
 }
 
 
@@ -189,7 +189,7 @@ void BlendFuncSeparateCall(const GlesContext* c, GLenum srcRGB, GLenum dstRGB, G
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("BlendFuncSeparateCall(%p, %s (0x%x), %s (0x%x), %s (0x%x), %s (0x%x))", c, GetEnumString(srcRGB), srcRGB, GetEnumString(dstRGB), dstRGB, GetEnumString(srcAlpha), srcAlpha, GetEnumString(dstAlpha), dstAlpha);
 #endif
-  return _api->BlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
+  return _api->glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
 }
 
 
@@ -203,7 +203,7 @@ void BufferDataCall(const GlesContext* c, GLenum target, GLsizeiptr size, const 
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("BufferDataCall(%p, %s (0x%x), %ld, %p, %s (0x%x))", c, GetEnumString(target), target, size, data, GetEnumString(usage), usage);
 #endif
-  return _api->BufferData(target, size, data, usage);
+  return _api->glBufferData(target, size, data, usage);
 }
 
 
@@ -217,7 +217,7 @@ void BufferSubDataCall(const GlesContext* c, GLenum target, GLintptr offset, GLs
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("BufferSubDataCall(%p, %s (0x%x), %ld, %ld, %p)", c, GetEnumString(target), target, offset, size, data);
 #endif
-  return _api->BufferSubData(target, offset, size, data);
+  return _api->glBufferSubData(target, offset, size, data);
 }
 
 
@@ -231,7 +231,7 @@ GLenum CheckFramebufferStatusCall(const GlesContext* c, GLenum target) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("CheckFramebufferStatusCall(%p, %s (0x%x))", c, GetEnumString(target), target);
 #endif
-  return _api->CheckFramebufferStatus(target);
+  return _api->glCheckFramebufferStatus(target);
 }
 
 
@@ -245,7 +245,7 @@ void ClearCall(const GlesContext* c, GLbitfield mask) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("ClearCall(%p, 0x%x)", c, mask);
 #endif
-  return _api->Clear(mask);
+  return _api->glClear(mask);
 }
 
 
@@ -259,7 +259,7 @@ void ClearColorCall(const GlesContext* c, GLclampf red, GLclampf green, GLclampf
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("ClearColorCall(%p, %f, %f, %f, %f)", c, red, green, blue, alpha);
 #endif
-  return _api->ClearColor(red, green, blue, alpha);
+  return _api->glClearColor(red, green, blue, alpha);
 }
 
 
@@ -273,7 +273,7 @@ void ClearDepthfCall(const GlesContext* c, GLclampf depth) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("ClearDepthfCall(%p, %f)", c, depth);
 #endif
-  return _api->ClearDepthf(depth);
+  return _api->glClearDepthf(depth);
 }
 
 
@@ -287,7 +287,7 @@ void ClearStencilCall(const GlesContext* c, GLint s) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("ClearStencilCall(%p, %d)", c, s);
 #endif
-  return _api->ClearStencil(s);
+  return _api->glClearStencil(s);
 }
 
 
@@ -301,7 +301,7 @@ void ColorMaskCall(const GlesContext* c, GLboolean red, GLboolean green, GLboole
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("ColorMaskCall(%p, %d, %d, %d, %d)", c, red, green, blue, alpha);
 #endif
-  return _api->ColorMask(red, green, blue, alpha);
+  return _api->glColorMask(red, green, blue, alpha);
 }
 
 
@@ -315,7 +315,7 @@ void CompileShaderCall(const GlesContext* c, GLuint shader) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("CompileShaderCall(%p, %u)", c, shader);
 #endif
-  return _api->CompileShader(shader);
+  return _api->glCompileShader(shader);
 }
 
 
@@ -329,7 +329,7 @@ void CompressedTexImage2DCall(const GlesContext* c, GLenum target, GLint level, 
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("CompressedTexImage2DCall(%p, %s (0x%x), %d, %s (0x%x), %zd, %zd, %d, %zd, %p)", c, GetEnumString(target), target, level, GetEnumString(internalformat), internalformat, width, height, border, imageSize, data);
 #endif
-  return _api->CompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, data);
+  return _api->glCompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, data);
 }
 
 
@@ -343,7 +343,7 @@ void CompressedTexSubImage2DCall(const GlesContext* c, GLenum target, GLint leve
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("CompressedTexSubImage2DCall(%p, %s (0x%x), %d, %d, %d, %zd, %zd, %s (0x%x), %zd, %p)", c, GetEnumString(target), target, level, xoffset, yoffset, width, height, GetEnumString(format), format, imageSize, data);
 #endif
-  return _api->CompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize, data);
+  return _api->glCompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize, data);
 }
 
 
@@ -357,7 +357,7 @@ void CopyTexImage2DCall(const GlesContext* c, GLenum target, GLint level, GLenum
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("CopyTexImage2DCall(%p, %s (0x%x), %d, %s (0x%x), %d, %d, %zd, %zd, %d)", c, GetEnumString(target), target, level, GetEnumString(internalformat), internalformat, x, y, width, height, border);
 #endif
-  return _api->CopyTexImage2D(target, level, internalformat, x, y, width, height, border);
+  return _api->glCopyTexImage2D(target, level, internalformat, x, y, width, height, border);
 }
 
 
@@ -371,7 +371,7 @@ void CopyTexSubImage2DCall(const GlesContext* c, GLenum target, GLint level, GLi
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("CopyTexSubImage2DCall(%p, %s (0x%x), %d, %d, %d, %d, %d, %zd, %zd)", c, GetEnumString(target), target, level, xoffset, yoffset, x, y, width, height);
 #endif
-  return _api->CopyTexSubImage2D(target, level, xoffset, yoffset, x, y, width, height);
+  return _api->glCopyTexSubImage2D(target, level, xoffset, yoffset, x, y, width, height);
 }
 
 
@@ -385,7 +385,7 @@ GLuint CreateProgramCall(const GlesContext* c) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("CreateProgramCall(%p)", c);
 #endif
-  return _api->CreateProgram();
+  return _api->glCreateProgram();
 }
 
 
@@ -399,7 +399,7 @@ GLuint CreateShaderCall(const GlesContext* c, GLenum type) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("CreateShaderCall(%p, %s (0x%x))", c, GetEnumString(type), type);
 #endif
-  return _api->CreateShader(type);
+  return _api->glCreateShader(type);
 }
 
 
@@ -413,7 +413,7 @@ void CullFaceCall(const GlesContext* c, GLenum mode) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("CullFaceCall(%p, %s (0x%x))", c, GetEnumString(mode), mode);
 #endif
-  return _api->CullFace(mode);
+  return _api->glCullFace(mode);
 }
 
 
@@ -427,7 +427,7 @@ void DeleteBuffersCall(const GlesContext* c, GLsizei n, const GLuint* buffers) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("DeleteBuffersCall(%p, %zd, %p)", c, n, buffers);
 #endif
-  return _api->DeleteBuffers(n, buffers);
+  return _api->glDeleteBuffers(n, buffers);
 }
 
 
@@ -441,7 +441,7 @@ void DeleteFramebuffersCall(const GlesContext* c, GLsizei n, const GLuint* frame
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("DeleteFramebuffersCall(%p, %zd, %p)", c, n, framebuffers);
 #endif
-  return _api->DeleteFramebuffers(n, framebuffers);
+  return _api->glDeleteFramebuffers(n, framebuffers);
 }
 
 
@@ -455,7 +455,7 @@ void DeleteProgramCall(const GlesContext* c, GLuint program) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("DeleteProgramCall(%p, %u)", c, program);
 #endif
-  return _api->DeleteProgram(program);
+  return _api->glDeleteProgram(program);
 }
 
 
@@ -469,7 +469,7 @@ void DeleteRenderbuffersCall(const GlesContext* c, GLsizei n, const GLuint* rend
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("DeleteRenderbuffersCall(%p, %zd, %p)", c, n, renderbuffers);
 #endif
-  return _api->DeleteRenderbuffers(n, renderbuffers);
+  return _api->glDeleteRenderbuffers(n, renderbuffers);
 }
 
 
@@ -483,7 +483,7 @@ void DeleteShaderCall(const GlesContext* c, GLuint shader) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("DeleteShaderCall(%p, %u)", c, shader);
 #endif
-  return _api->DeleteShader(shader);
+  return _api->glDeleteShader(shader);
 }
 
 
@@ -497,7 +497,7 @@ void DeleteTexturesCall(const GlesContext* c, GLsizei n, const GLuint* textures)
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("DeleteTexturesCall(%p, %zd, %p)", c, n, textures);
 #endif
-  return _api->DeleteTextures(n, textures);
+  return _api->glDeleteTextures(n, textures);
 }
 
 
@@ -511,7 +511,7 @@ void DepthFuncCall(const GlesContext* c, GLenum func) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("DepthFuncCall(%p, %s (0x%x))", c, GetEnumString(func), func);
 #endif
-  return _api->DepthFunc(func);
+  return _api->glDepthFunc(func);
 }
 
 
@@ -525,7 +525,7 @@ void DepthMaskCall(const GlesContext* c, GLboolean flag) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("DepthMaskCall(%p, %d)", c, flag);
 #endif
-  return _api->DepthMask(flag);
+  return _api->glDepthMask(flag);
 }
 
 
@@ -539,7 +539,7 @@ void DepthRangefCall(const GlesContext* c, GLclampf zNear, GLclampf zFar) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("DepthRangefCall(%p, %f, %f)", c, zNear, zFar);
 #endif
-  return _api->DepthRangef(zNear, zFar);
+  return _api->glDepthRangef(zNear, zFar);
 }
 
 
@@ -553,7 +553,7 @@ void DetachShaderCall(const GlesContext* c, GLuint program, GLuint shader) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("DetachShaderCall(%p, %u, %u)", c, program, shader);
 #endif
-  return _api->DetachShader(program, shader);
+  return _api->glDetachShader(program, shader);
 }
 
 
@@ -567,7 +567,7 @@ void DisableCall(const GlesContext* c, GLenum cap) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("DisableCall(%p, %s (0x%x))", c, GetEnumString(cap), cap);
 #endif
-  return _api->Disable(cap);
+  return _api->glDisable(cap);
 }
 
 
@@ -581,7 +581,7 @@ void DisableVertexAttribArrayCall(const GlesContext* c, GLuint index) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("DisableVertexAttribArrayCall(%p, %u)", c, index);
 #endif
-  return _api->DisableVertexAttribArray(index);
+  return _api->glDisableVertexAttribArray(index);
 }
 
 
@@ -595,7 +595,7 @@ void DrawArraysCall(const GlesContext* c, GLenum mode, GLint first, GLsizei coun
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("DrawArraysCall(%p, %s (0x%x), %d, %zd)", c, GetEnumString(mode), mode, first, count);
 #endif
-  return _api->DrawArrays(mode, first, count);
+  return _api->glDrawArrays(mode, first, count);
 }
 
 
@@ -609,7 +609,7 @@ void DrawElementsCall(const GlesContext* c, GLenum mode, GLsizei count, GLenum t
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("DrawElementsCall(%p, %s (0x%x), %zd, %s (0x%x), %p)", c, GetEnumString(mode), mode, count, GetEnumString(type), type, indices);
 #endif
-  return _api->DrawElements(mode, count, type, indices);
+  return _api->glDrawElements(mode, count, type, indices);
 }
 
 
@@ -623,7 +623,7 @@ void EnableCall(const GlesContext* c, GLenum cap) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("EnableCall(%p, %s (0x%x))", c, GetEnumString(cap), cap);
 #endif
-  return _api->Enable(cap);
+  return _api->glEnable(cap);
 }
 
 
@@ -637,7 +637,7 @@ void EnableVertexAttribArrayCall(const GlesContext* c, GLuint index) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("EnableVertexAttribArrayCall(%p, %u)", c, index);
 #endif
-  return _api->EnableVertexAttribArray(index);
+  return _api->glEnableVertexAttribArray(index);
 }
 
 
@@ -651,7 +651,7 @@ void FinishCall(const GlesContext* c) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("FinishCall(%p)", c);
 #endif
-  return _api->Finish();
+  return _api->glFinish();
 }
 
 
@@ -665,7 +665,7 @@ void FlushCall(const GlesContext* c) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("FlushCall(%p)", c);
 #endif
-  return _api->Flush();
+  return _api->glFlush();
 }
 
 
@@ -679,7 +679,7 @@ void FramebufferRenderbufferCall(const GlesContext* c, GLenum target, GLenum att
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("FramebufferRenderbufferCall(%p, %s (0x%x), %s (0x%x), %s (0x%x), %u)", c, GetEnumString(target), target, GetEnumString(attachment), attachment, GetEnumString(renderbuffertarget), renderbuffertarget, renderbuffer);
 #endif
-  return _api->FramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer);
+  return _api->glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer);
 }
 
 
@@ -693,7 +693,7 @@ void FramebufferTexture2DCall(const GlesContext* c, GLenum target, GLenum attach
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("FramebufferTexture2DCall(%p, %s (0x%x), %s (0x%x), %s (0x%x), %u, %d)", c, GetEnumString(target), target, GetEnumString(attachment), attachment, GetEnumString(textarget), textarget, texture, level);
 #endif
-  return _api->FramebufferTexture2D(target, attachment, textarget, texture, level);
+  return _api->glFramebufferTexture2D(target, attachment, textarget, texture, level);
 }
 
 
@@ -707,7 +707,7 @@ void FrontFaceCall(const GlesContext* c, GLenum mode) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("FrontFaceCall(%p, %s (0x%x))", c, GetEnumString(mode), mode);
 #endif
-  return _api->FrontFace(mode);
+  return _api->glFrontFace(mode);
 }
 
 
@@ -721,7 +721,7 @@ void GenBuffersCall(const GlesContext* c, GLsizei n, GLuint* buffers) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GenBuffersCall(%p, %zd, %p)", c, n, buffers);
 #endif
-  return _api->GenBuffers(n, buffers);
+  return _api->glGenBuffers(n, buffers);
 }
 
 
@@ -735,7 +735,7 @@ void GenerateMipmapCall(const GlesContext* c, GLenum target) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GenerateMipmapCall(%p, %s (0x%x))", c, GetEnumString(target), target);
 #endif
-  return _api->GenerateMipmap(target);
+  return _api->glGenerateMipmap(target);
 }
 
 
@@ -749,7 +749,7 @@ void GenFramebuffersCall(const GlesContext* c, GLsizei n, GLuint* framebuffers) 
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GenFramebuffersCall(%p, %zd, %p)", c, n, framebuffers);
 #endif
-  return _api->GenFramebuffers(n, framebuffers);
+  return _api->glGenFramebuffers(n, framebuffers);
 }
 
 
@@ -763,7 +763,7 @@ void GenRenderbuffersCall(const GlesContext* c, GLsizei n, GLuint* renderbuffers
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GenRenderbuffersCall(%p, %zd, %p)", c, n, renderbuffers);
 #endif
-  return _api->GenRenderbuffers(n, renderbuffers);
+  return _api->glGenRenderbuffers(n, renderbuffers);
 }
 
 
@@ -777,7 +777,7 @@ void GenTexturesCall(const GlesContext* c, GLsizei n, GLuint* textures) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GenTexturesCall(%p, %zd, %p)", c, n, textures);
 #endif
-  return _api->GenTextures(n, textures);
+  return _api->glGenTextures(n, textures);
 }
 
 
@@ -791,7 +791,7 @@ void GetActiveAttribCall(const GlesContext* c, GLuint program, GLuint index, GLs
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetActiveAttribCall(%p, %u, %u, %zd, %p, %p, %p, %p)", c, program, index, bufsize, length, size, type, name);
 #endif
-  return _api->GetActiveAttrib(program, index, bufsize, length, size, type, name);
+  return _api->glGetActiveAttrib(program, index, bufsize, length, size, type, name);
 }
 
 
@@ -805,7 +805,7 @@ void GetActiveUniformCall(const GlesContext* c, GLuint program, GLuint index, GL
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetActiveUniformCall(%p, %u, %u, %zd, %p, %p, %p, %p)", c, program, index, bufsize, length, size, type, name);
 #endif
-  return _api->GetActiveUniform(program, index, bufsize, length, size, type, name);
+  return _api->glGetActiveUniform(program, index, bufsize, length, size, type, name);
 }
 
 
@@ -819,7 +819,7 @@ void GetAttachedShadersCall(const GlesContext* c, GLuint program, GLsizei maxcou
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetAttachedShadersCall(%p, %u, %zd, %p, %p)", c, program, maxcount, count, shaders);
 #endif
-  return _api->GetAttachedShaders(program, maxcount, count, shaders);
+  return _api->glGetAttachedShaders(program, maxcount, count, shaders);
 }
 
 
@@ -833,7 +833,7 @@ GLint GetAttribLocationCall(const GlesContext* c, GLuint program, const char* na
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetAttribLocationCall(%p, %u, %p)", c, program, name);
 #endif
-  return _api->GetAttribLocation(program, name);
+  return _api->glGetAttribLocation(program, name);
 }
 
 
@@ -847,7 +847,7 @@ void GetBooleanvCall(const GlesContext* c, GLenum pname, GLboolean* params) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetBooleanvCall(%p, %s (0x%x), %p)", c, GetEnumString(pname), pname, params);
 #endif
-  return _api->GetBooleanv(pname, params);
+  return _api->glGetBooleanv(pname, params);
 }
 
 
@@ -861,7 +861,7 @@ void GetBufferParameterivCall(const GlesContext* c, GLenum target, GLenum pname,
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetBufferParameterivCall(%p, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(pname), pname, params);
 #endif
-  return _api->GetBufferParameteriv(target, pname, params);
+  return _api->glGetBufferParameteriv(target, pname, params);
 }
 
 
@@ -875,7 +875,7 @@ GLenum GetErrorCall(const GlesContext* c) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetErrorCall(%p)", c);
 #endif
-  return _api->GetError();
+  return _api->glGetError();
 }
 
 
@@ -889,7 +889,7 @@ void GetFloatvCall(const GlesContext* c, GLenum pname, GLfloat* params) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetFloatvCall(%p, %s (0x%x), %p)", c, GetEnumString(pname), pname, params);
 #endif
-  return _api->GetFloatv(pname, params);
+  return _api->glGetFloatv(pname, params);
 }
 
 
@@ -903,7 +903,7 @@ void GetFramebufferAttachmentParameterivCall(const GlesContext* c, GLenum target
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetFramebufferAttachmentParameterivCall(%p, %s (0x%x), %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(attachment), attachment, GetEnumString(pname), pname, params);
 #endif
-  return _api->GetFramebufferAttachmentParameteriv(target, attachment, pname, params);
+  return _api->glGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
 }
 
 
@@ -917,7 +917,7 @@ void GetIntegervCall(const GlesContext* c, GLenum pname, GLint* params) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetIntegervCall(%p, %s (0x%x), %p)", c, GetEnumString(pname), pname, params);
 #endif
-  return _api->GetIntegerv(pname, params);
+  return _api->glGetIntegerv(pname, params);
 }
 
 
@@ -931,7 +931,7 @@ void GetProgramivCall(const GlesContext* c, GLuint program, GLenum pname, GLint*
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetProgramivCall(%p, %u, %s (0x%x), %p)", c, program, GetEnumString(pname), pname, params);
 #endif
-  return _api->GetProgramiv(program, pname, params);
+  return _api->glGetProgramiv(program, pname, params);
 }
 
 
@@ -945,7 +945,7 @@ void GetProgramInfoLogCall(const GlesContext* c, GLuint program, GLsizei bufsize
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetProgramInfoLogCall(%p, %u, %zd, %p, %p)", c, program, bufsize, length, infolog);
 #endif
-  return _api->GetProgramInfoLog(program, bufsize, length, infolog);
+  return _api->glGetProgramInfoLog(program, bufsize, length, infolog);
 }
 
 
@@ -959,7 +959,7 @@ void GetRenderbufferParameterivCall(const GlesContext* c, GLenum target, GLenum 
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetRenderbufferParameterivCall(%p, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(pname), pname, params);
 #endif
-  return _api->GetRenderbufferParameteriv(target, pname, params);
+  return _api->glGetRenderbufferParameteriv(target, pname, params);
 }
 
 
@@ -973,7 +973,7 @@ void GetShaderivCall(const GlesContext* c, GLuint shader, GLenum pname, GLint* p
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetShaderivCall(%p, %u, %s (0x%x), %p)", c, shader, GetEnumString(pname), pname, params);
 #endif
-  return _api->GetShaderiv(shader, pname, params);
+  return _api->glGetShaderiv(shader, pname, params);
 }
 
 
@@ -987,7 +987,7 @@ void GetShaderInfoLogCall(const GlesContext* c, GLuint shader, GLsizei bufsize, 
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetShaderInfoLogCall(%p, %u, %zd, %p, %p)", c, shader, bufsize, length, infolog);
 #endif
-  return _api->GetShaderInfoLog(shader, bufsize, length, infolog);
+  return _api->glGetShaderInfoLog(shader, bufsize, length, infolog);
 }
 
 
@@ -1001,7 +1001,7 @@ void GetShaderPrecisionFormatCall(const GlesContext* c, GLenum shadertype, GLenu
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetShaderPrecisionFormatCall(%p, %s (0x%x), %s (0x%x), %p, %p)", c, GetEnumString(shadertype), shadertype, GetEnumString(precisiontype), precisiontype, range, precision);
 #endif
-  return _api->GetShaderPrecisionFormat(shadertype, precisiontype, range, precision);
+  return _api->glGetShaderPrecisionFormat(shadertype, precisiontype, range, precision);
 }
 
 
@@ -1015,7 +1015,7 @@ void GetShaderSourceCall(const GlesContext* c, GLuint shader, GLsizei bufsize, G
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetShaderSourceCall(%p, %u, %zd, %p, %p)", c, shader, bufsize, length, source);
 #endif
-  return _api->GetShaderSource(shader, bufsize, length, source);
+  return _api->glGetShaderSource(shader, bufsize, length, source);
 }
 
 
@@ -1029,7 +1029,7 @@ const GLubyte* GetStringCall(const GlesContext* c, GLenum name) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetStringCall(%p, %s (0x%x))", c, GetEnumString(name), name);
 #endif
-  return _api->GetString(name);
+  return _api->glGetString(name);
 }
 
 
@@ -1043,7 +1043,7 @@ void GetTexParameterfvCall(const GlesContext* c, GLenum target, GLenum pname, GL
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetTexParameterfvCall(%p, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(pname), pname, params);
 #endif
-  return _api->GetTexParameterfv(target, pname, params);
+  return _api->glGetTexParameterfv(target, pname, params);
 }
 
 
@@ -1057,7 +1057,7 @@ void GetTexParameterivCall(const GlesContext* c, GLenum target, GLenum pname, GL
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetTexParameterivCall(%p, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(pname), pname, params);
 #endif
-  return _api->GetTexParameteriv(target, pname, params);
+  return _api->glGetTexParameteriv(target, pname, params);
 }
 
 
@@ -1071,7 +1071,7 @@ void GetUniformfvCall(const GlesContext* c, GLuint program, GLint location, GLfl
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetUniformfvCall(%p, %u, %d, %p)", c, program, location, params);
 #endif
-  return _api->GetUniformfv(program, location, params);
+  return _api->glGetUniformfv(program, location, params);
 }
 
 
@@ -1085,7 +1085,7 @@ void GetUniformivCall(const GlesContext* c, GLuint program, GLint location, GLin
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetUniformivCall(%p, %u, %d, %p)", c, program, location, params);
 #endif
-  return _api->GetUniformiv(program, location, params);
+  return _api->glGetUniformiv(program, location, params);
 }
 
 
@@ -1099,7 +1099,7 @@ GLint GetUniformLocationCall(const GlesContext* c, GLuint program, const char* n
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetUniformLocationCall(%p, %u, %p)", c, program, name);
 #endif
-  return _api->GetUniformLocation(program, name);
+  return _api->glGetUniformLocation(program, name);
 }
 
 
@@ -1113,7 +1113,7 @@ void GetVertexAttribfvCall(const GlesContext* c, GLuint index, GLenum pname, GLf
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetVertexAttribfvCall(%p, %u, %s (0x%x), %p)", c, index, GetEnumString(pname), pname, params);
 #endif
-  return _api->GetVertexAttribfv(index, pname, params);
+  return _api->glGetVertexAttribfv(index, pname, params);
 }
 
 
@@ -1127,7 +1127,7 @@ void GetVertexAttribivCall(const GlesContext* c, GLuint index, GLenum pname, GLi
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetVertexAttribivCall(%p, %u, %s (0x%x), %p)", c, index, GetEnumString(pname), pname, params);
 #endif
-  return _api->GetVertexAttribiv(index, pname, params);
+  return _api->glGetVertexAttribiv(index, pname, params);
 }
 
 
@@ -1141,7 +1141,7 @@ void GetVertexAttribPointervCall(const GlesContext* c, GLuint index, GLenum pnam
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("GetVertexAttribPointervCall(%p, %u, %s (0x%x), %p)", c, index, GetEnumString(pname), pname, pointer);
 #endif
-  return _api->GetVertexAttribPointerv(index, pname, pointer);
+  return _api->glGetVertexAttribPointerv(index, pname, pointer);
 }
 
 
@@ -1155,7 +1155,7 @@ void HintCall(const GlesContext* c, GLenum target, GLenum mode) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("HintCall(%p, %s (0x%x), %s (0x%x))", c, GetEnumString(target), target, GetEnumString(mode), mode);
 #endif
-  return _api->Hint(target, mode);
+  return _api->glHint(target, mode);
 }
 
 
@@ -1169,7 +1169,7 @@ GLboolean IsBufferCall(const GlesContext* c, GLuint buffer) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("IsBufferCall(%p, %u)", c, buffer);
 #endif
-  return _api->IsBuffer(buffer);
+  return _api->glIsBuffer(buffer);
 }
 
 
@@ -1183,7 +1183,7 @@ GLboolean IsEnabledCall(const GlesContext* c, GLenum cap) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("IsEnabledCall(%p, %s (0x%x))", c, GetEnumString(cap), cap);
 #endif
-  return _api->IsEnabled(cap);
+  return _api->glIsEnabled(cap);
 }
 
 
@@ -1197,7 +1197,7 @@ GLboolean IsFramebufferCall(const GlesContext* c, GLuint framebuffer) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("IsFramebufferCall(%p, %u)", c, framebuffer);
 #endif
-  return _api->IsFramebuffer(framebuffer);
+  return _api->glIsFramebuffer(framebuffer);
 }
 
 
@@ -1211,7 +1211,7 @@ GLboolean IsProgramCall(const GlesContext* c, GLuint program) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("IsProgramCall(%p, %u)", c, program);
 #endif
-  return _api->IsProgram(program);
+  return _api->glIsProgram(program);
 }
 
 
@@ -1225,7 +1225,7 @@ GLboolean IsRenderbufferCall(const GlesContext* c, GLuint renderbuffer) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("IsRenderbufferCall(%p, %u)", c, renderbuffer);
 #endif
-  return _api->IsRenderbuffer(renderbuffer);
+  return _api->glIsRenderbuffer(renderbuffer);
 }
 
 
@@ -1239,7 +1239,7 @@ GLboolean IsShaderCall(const GlesContext* c, GLuint shader) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("IsShaderCall(%p, %u)", c, shader);
 #endif
-  return _api->IsShader(shader);
+  return _api->glIsShader(shader);
 }
 
 
@@ -1253,7 +1253,7 @@ GLboolean IsTextureCall(const GlesContext* c, GLuint texture) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("IsTextureCall(%p, %u)", c, texture);
 #endif
-  return _api->IsTexture(texture);
+  return _api->glIsTexture(texture);
 }
 
 
@@ -1267,7 +1267,7 @@ void LineWidthCall(const GlesContext* c, GLfloat width) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("LineWidthCall(%p, %f)", c, width);
 #endif
-  return _api->LineWidth(width);
+  return _api->glLineWidth(width);
 }
 
 
@@ -1281,7 +1281,7 @@ void LinkProgramCall(const GlesContext* c, GLuint program) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("LinkProgramCall(%p, %u)", c, program);
 #endif
-  return _api->LinkProgram(program);
+  return _api->glLinkProgram(program);
 }
 
 
@@ -1295,7 +1295,7 @@ void PixelStoreiCall(const GlesContext* c, GLenum pname, GLint param) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("PixelStoreiCall(%p, %s (0x%x), %d)", c, GetEnumString(pname), pname, param);
 #endif
-  return _api->PixelStorei(pname, param);
+  return _api->glPixelStorei(pname, param);
 }
 
 
@@ -1309,7 +1309,7 @@ void PolygonOffsetCall(const GlesContext* c, GLfloat factor, GLfloat units) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("PolygonOffsetCall(%p, %f, %f)", c, factor, units);
 #endif
-  return _api->PolygonOffset(factor, units);
+  return _api->glPolygonOffset(factor, units);
 }
 
 
@@ -1323,7 +1323,7 @@ void ReadPixelsCall(const GlesContext* c, GLint x, GLint y, GLsizei width, GLsiz
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("ReadPixelsCall(%p, %d, %d, %zd, %zd, %s (0x%x), %s (0x%x), %p)", c, x, y, width, height, GetEnumString(format), format, GetEnumString(type), type, pixels);
 #endif
-  return _api->ReadPixels(x, y, width, height, format, type, pixels);
+  return _api->glReadPixels(x, y, width, height, format, type, pixels);
 }
 
 
@@ -1337,7 +1337,7 @@ void ReleaseShaderCompilerCall(const GlesContext* c) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("ReleaseShaderCompilerCall(%p)", c);
 #endif
-  return _api->ReleaseShaderCompiler();
+  return _api->glReleaseShaderCompiler();
 }
 
 
@@ -1351,7 +1351,7 @@ void RenderbufferStorageCall(const GlesContext* c, GLenum target, GLenum interna
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("RenderbufferStorageCall(%p, %s (0x%x), %s (0x%x), %zd, %zd)", c, GetEnumString(target), target, GetEnumString(internalformat), internalformat, width, height);
 #endif
-  return _api->RenderbufferStorage(target, internalformat, width, height);
+  return _api->glRenderbufferStorage(target, internalformat, width, height);
 }
 
 
@@ -1365,7 +1365,7 @@ void SampleCoverageCall(const GlesContext* c, GLclampf value, GLboolean invert) 
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("SampleCoverageCall(%p, %f, %d)", c, value, invert);
 #endif
-  return _api->SampleCoverage(value, invert);
+  return _api->glSampleCoverage(value, invert);
 }
 
 
@@ -1379,7 +1379,7 @@ void ScissorCall(const GlesContext* c, GLint x, GLint y, GLsizei width, GLsizei 
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("ScissorCall(%p, %d, %d, %zd, %zd)", c, x, y, width, height);
 #endif
-  return _api->Scissor(x, y, width, height);
+  return _api->glScissor(x, y, width, height);
 }
 
 
@@ -1393,7 +1393,7 @@ void ShaderBinaryCall(const GlesContext* c, GLsizei n, const GLuint* shaders, GL
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("ShaderBinaryCall(%p, %zd, %p, %s (0x%x), %p, %zd)", c, n, shaders, GetEnumString(binaryformat), binaryformat, binary, length);
 #endif
-  return _api->ShaderBinary(n, shaders, binaryformat, binary, length);
+  return _api->glShaderBinary(n, shaders, binaryformat, binary, length);
 }
 
 
@@ -1407,7 +1407,7 @@ void ShaderSourceCall(const GlesContext* c, GLuint shader, GLsizei count, const 
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("ShaderSourceCall(%p, %u, %zd, %p, %p)", c, shader, count, str, length);
 #endif
-  return _api->ShaderSource(shader, count, str, length);
+  return _api->glShaderSource(shader, count, str, length);
 }
 
 
@@ -1421,7 +1421,7 @@ void StencilFuncCall(const GlesContext* c, GLenum func, GLint ref, GLuint mask) 
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("StencilFuncCall(%p, %s (0x%x), %d, %u)", c, GetEnumString(func), func, ref, mask);
 #endif
-  return _api->StencilFunc(func, ref, mask);
+  return _api->glStencilFunc(func, ref, mask);
 }
 
 
@@ -1435,7 +1435,7 @@ void StencilFuncSeparateCall(const GlesContext* c, GLenum face, GLenum func, GLi
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("StencilFuncSeparateCall(%p, %s (0x%x), %s (0x%x), %d, %u)", c, GetEnumString(face), face, GetEnumString(func), func, ref, mask);
 #endif
-  return _api->StencilFuncSeparate(face, func, ref, mask);
+  return _api->glStencilFuncSeparate(face, func, ref, mask);
 }
 
 
@@ -1449,7 +1449,7 @@ void StencilMaskCall(const GlesContext* c, GLuint mask) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("StencilMaskCall(%p, %u)", c, mask);
 #endif
-  return _api->StencilMask(mask);
+  return _api->glStencilMask(mask);
 }
 
 
@@ -1463,7 +1463,7 @@ void StencilMaskSeparateCall(const GlesContext* c, GLenum face, GLuint mask) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("StencilMaskSeparateCall(%p, %s (0x%x), %u)", c, GetEnumString(face), face, mask);
 #endif
-  return _api->StencilMaskSeparate(face, mask);
+  return _api->glStencilMaskSeparate(face, mask);
 }
 
 
@@ -1477,7 +1477,7 @@ void StencilOpCall(const GlesContext* c, GLenum fail, GLenum zfail, GLenum zpass
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("StencilOpCall(%p, %s (0x%x), %s (0x%x), %s (0x%x))", c, GetEnumString(fail), fail, GetEnumString(zfail), zfail, GetEnumString(zpass), zpass);
 #endif
-  return _api->StencilOp(fail, zfail, zpass);
+  return _api->glStencilOp(fail, zfail, zpass);
 }
 
 
@@ -1491,7 +1491,7 @@ void StencilOpSeparateCall(const GlesContext* c, GLenum face, GLenum fail, GLenu
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("StencilOpSeparateCall(%p, %s (0x%x), %s (0x%x), %s (0x%x), %s (0x%x))", c, GetEnumString(face), face, GetEnumString(fail), fail, GetEnumString(zfail), zfail, GetEnumString(zpass), zpass);
 #endif
-  return _api->StencilOpSeparate(face, fail, zfail, zpass);
+  return _api->glStencilOpSeparate(face, fail, zfail, zpass);
 }
 
 
@@ -1505,7 +1505,7 @@ void TexImage2DCall(const GlesContext* c, GLenum target, GLint level, GLint inte
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("TexImage2DCall(%p, %s (0x%x), %d, %d, %zd, %zd, %d, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, level, internalformat, width, height, border, GetEnumString(format), format, GetEnumString(type), type, pixels);
 #endif
-  return _api->TexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+  return _api->glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
 }
 
 
@@ -1519,7 +1519,7 @@ void TexParameterfCall(const GlesContext* c, GLenum target, GLenum pname, GLfloa
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("TexParameterfCall(%p, %s (0x%x), %s (0x%x), %f)", c, GetEnumString(target), target, GetEnumString(pname), pname, param);
 #endif
-  return _api->TexParameterf(target, pname, param);
+  return _api->glTexParameterf(target, pname, param);
 }
 
 
@@ -1533,7 +1533,7 @@ void TexParameterfvCall(const GlesContext* c, GLenum target, GLenum pname, const
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("TexParameterfvCall(%p, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(pname), pname, params);
 #endif
-  return _api->TexParameterfv(target, pname, params);
+  return _api->glTexParameterfv(target, pname, params);
 }
 
 
@@ -1547,7 +1547,7 @@ void TexParameteriCall(const GlesContext* c, GLenum target, GLenum pname, GLint 
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("TexParameteriCall(%p, %s (0x%x), %s (0x%x), %d)", c, GetEnumString(target), target, GetEnumString(pname), pname, param);
 #endif
-  return _api->TexParameteri(target, pname, param);
+  return _api->glTexParameteri(target, pname, param);
 }
 
 
@@ -1561,7 +1561,7 @@ void TexParameterivCall(const GlesContext* c, GLenum target, GLenum pname, const
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("TexParameterivCall(%p, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(pname), pname, params);
 #endif
-  return _api->TexParameteriv(target, pname, params);
+  return _api->glTexParameteriv(target, pname, params);
 }
 
 
@@ -1575,7 +1575,7 @@ void TexSubImage2DCall(const GlesContext* c, GLenum target, GLint level, GLint x
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("TexSubImage2DCall(%p, %s (0x%x), %d, %d, %d, %zd, %zd, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, level, xoffset, yoffset, width, height, GetEnumString(format), format, GetEnumString(type), type, pixels);
 #endif
-  return _api->TexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
+  return _api->glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
 }
 
 
@@ -1589,7 +1589,7 @@ void Uniform1fCall(const GlesContext* c, GLint location, GLfloat x) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("Uniform1fCall(%p, %d, %f)", c, location, x);
 #endif
-  return _api->Uniform1f(location, x);
+  return _api->glUniform1f(location, x);
 }
 
 
@@ -1603,7 +1603,7 @@ void Uniform1fvCall(const GlesContext* c, GLint location, GLsizei count, const G
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("Uniform1fvCall(%p, %d, %zd, %p)", c, location, count, v);
 #endif
-  return _api->Uniform1fv(location, count, v);
+  return _api->glUniform1fv(location, count, v);
 }
 
 
@@ -1617,7 +1617,7 @@ void Uniform1iCall(const GlesContext* c, GLint location, GLint x) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("Uniform1iCall(%p, %d, %d)", c, location, x);
 #endif
-  return _api->Uniform1i(location, x);
+  return _api->glUniform1i(location, x);
 }
 
 
@@ -1631,7 +1631,7 @@ void Uniform1ivCall(const GlesContext* c, GLint location, GLsizei count, const G
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("Uniform1ivCall(%p, %d, %zd, %p)", c, location, count, v);
 #endif
-  return _api->Uniform1iv(location, count, v);
+  return _api->glUniform1iv(location, count, v);
 }
 
 
@@ -1645,7 +1645,7 @@ void Uniform2fCall(const GlesContext* c, GLint location, GLfloat x, GLfloat y) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("Uniform2fCall(%p, %d, %f, %f)", c, location, x, y);
 #endif
-  return _api->Uniform2f(location, x, y);
+  return _api->glUniform2f(location, x, y);
 }
 
 
@@ -1659,7 +1659,7 @@ void Uniform2fvCall(const GlesContext* c, GLint location, GLsizei count, const G
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("Uniform2fvCall(%p, %d, %zd, %p)", c, location, count, v);
 #endif
-  return _api->Uniform2fv(location, count, v);
+  return _api->glUniform2fv(location, count, v);
 }
 
 
@@ -1673,7 +1673,7 @@ void Uniform2iCall(const GlesContext* c, GLint location, GLint x, GLint y) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("Uniform2iCall(%p, %d, %d, %d)", c, location, x, y);
 #endif
-  return _api->Uniform2i(location, x, y);
+  return _api->glUniform2i(location, x, y);
 }
 
 
@@ -1687,7 +1687,7 @@ void Uniform2ivCall(const GlesContext* c, GLint location, GLsizei count, const G
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("Uniform2ivCall(%p, %d, %zd, %p)", c, location, count, v);
 #endif
-  return _api->Uniform2iv(location, count, v);
+  return _api->glUniform2iv(location, count, v);
 }
 
 
@@ -1701,7 +1701,7 @@ void Uniform3fCall(const GlesContext* c, GLint location, GLfloat x, GLfloat y, G
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("Uniform3fCall(%p, %d, %f, %f, %f)", c, location, x, y, z);
 #endif
-  return _api->Uniform3f(location, x, y, z);
+  return _api->glUniform3f(location, x, y, z);
 }
 
 
@@ -1715,7 +1715,7 @@ void Uniform3fvCall(const GlesContext* c, GLint location, GLsizei count, const G
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("Uniform3fvCall(%p, %d, %zd, %p)", c, location, count, v);
 #endif
-  return _api->Uniform3fv(location, count, v);
+  return _api->glUniform3fv(location, count, v);
 }
 
 
@@ -1729,7 +1729,7 @@ void Uniform3iCall(const GlesContext* c, GLint location, GLint x, GLint y, GLint
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("Uniform3iCall(%p, %d, %d, %d, %d)", c, location, x, y, z);
 #endif
-  return _api->Uniform3i(location, x, y, z);
+  return _api->glUniform3i(location, x, y, z);
 }
 
 
@@ -1743,7 +1743,7 @@ void Uniform3ivCall(const GlesContext* c, GLint location, GLsizei count, const G
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("Uniform3ivCall(%p, %d, %zd, %p)", c, location, count, v);
 #endif
-  return _api->Uniform3iv(location, count, v);
+  return _api->glUniform3iv(location, count, v);
 }
 
 
@@ -1757,7 +1757,7 @@ void Uniform4fCall(const GlesContext* c, GLint location, GLfloat x, GLfloat y, G
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("Uniform4fCall(%p, %d, %f, %f, %f, %f)", c, location, x, y, z, w);
 #endif
-  return _api->Uniform4f(location, x, y, z, w);
+  return _api->glUniform4f(location, x, y, z, w);
 }
 
 
@@ -1771,7 +1771,7 @@ void Uniform4fvCall(const GlesContext* c, GLint location, GLsizei count, const G
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("Uniform4fvCall(%p, %d, %zd, %p)", c, location, count, v);
 #endif
-  return _api->Uniform4fv(location, count, v);
+  return _api->glUniform4fv(location, count, v);
 }
 
 
@@ -1785,7 +1785,7 @@ void Uniform4iCall(const GlesContext* c, GLint location, GLint x, GLint y, GLint
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("Uniform4iCall(%p, %d, %d, %d, %d, %d)", c, location, x, y, z, w);
 #endif
-  return _api->Uniform4i(location, x, y, z, w);
+  return _api->glUniform4i(location, x, y, z, w);
 }
 
 
@@ -1799,7 +1799,7 @@ void Uniform4ivCall(const GlesContext* c, GLint location, GLsizei count, const G
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("Uniform4ivCall(%p, %d, %zd, %p)", c, location, count, v);
 #endif
-  return _api->Uniform4iv(location, count, v);
+  return _api->glUniform4iv(location, count, v);
 }
 
 
@@ -1813,7 +1813,7 @@ void UniformMatrix2fvCall(const GlesContext* c, GLint location, GLsizei count, G
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("UniformMatrix2fvCall(%p, %d, %zd, %d, %p)", c, location, count, transpose, value);
 #endif
-  return _api->UniformMatrix2fv(location, count, transpose, value);
+  return _api->glUniformMatrix2fv(location, count, transpose, value);
 }
 
 
@@ -1827,7 +1827,7 @@ void UniformMatrix3fvCall(const GlesContext* c, GLint location, GLsizei count, G
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("UniformMatrix3fvCall(%p, %d, %zd, %d, %p)", c, location, count, transpose, value);
 #endif
-  return _api->UniformMatrix3fv(location, count, transpose, value);
+  return _api->glUniformMatrix3fv(location, count, transpose, value);
 }
 
 
@@ -1841,7 +1841,7 @@ void UniformMatrix4fvCall(const GlesContext* c, GLint location, GLsizei count, G
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("UniformMatrix4fvCall(%p, %d, %zd, %d, %p)", c, location, count, transpose, value);
 #endif
-  return _api->UniformMatrix4fv(location, count, transpose, value);
+  return _api->glUniformMatrix4fv(location, count, transpose, value);
 }
 
 
@@ -1855,7 +1855,7 @@ void UseProgramCall(const GlesContext* c, GLuint program) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("UseProgramCall(%p, %u)", c, program);
 #endif
-  return _api->UseProgram(program);
+  return _api->glUseProgram(program);
 }
 
 
@@ -1869,7 +1869,7 @@ void ValidateProgramCall(const GlesContext* c, GLuint program) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("ValidateProgramCall(%p, %u)", c, program);
 #endif
-  return _api->ValidateProgram(program);
+  return _api->glValidateProgram(program);
 }
 
 
@@ -1883,7 +1883,7 @@ void VertexAttrib1fCall(const GlesContext* c, GLuint indx, GLfloat x) {
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("VertexAttrib1fCall(%p, %u, %f)", c, indx, x);
 #endif
-  return _api->VertexAttrib1f(indx, x);
+  return _api->glVertexAttrib1f(indx, x);
 }
 
 
@@ -1897,7 +1897,7 @@ void VertexAttrib1fvCall(const GlesContext* c, GLuint indx, const GLfloat* value
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("VertexAttrib1fvCall(%p, %u, %p)", c, indx, values);
 #endif
-  return _api->VertexAttrib1fv(indx, values);
+  return _api->glVertexAttrib1fv(indx, values);
 }
 
 
@@ -1911,7 +1911,7 @@ void VertexAttrib2fCall(const GlesContext* c, GLuint indx, GLfloat x, GLfloat y)
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("VertexAttrib2fCall(%p, %u, %f, %f)", c, indx, x, y);
 #endif
-  return _api->VertexAttrib2f(indx, x, y);
+  return _api->glVertexAttrib2f(indx, x, y);
 }
 
 
@@ -1925,7 +1925,7 @@ void VertexAttrib2fvCall(const GlesContext* c, GLuint indx, const GLfloat* value
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("VertexAttrib2fvCall(%p, %u, %p)", c, indx, values);
 #endif
-  return _api->VertexAttrib2fv(indx, values);
+  return _api->glVertexAttrib2fv(indx, values);
 }
 
 
@@ -1939,7 +1939,7 @@ void VertexAttrib3fCall(const GlesContext* c, GLuint indx, GLfloat x, GLfloat y,
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("VertexAttrib3fCall(%p, %u, %f, %f, %f)", c, indx, x, y, z);
 #endif
-  return _api->VertexAttrib3f(indx, x, y, z);
+  return _api->glVertexAttrib3f(indx, x, y, z);
 }
 
 
@@ -1953,7 +1953,7 @@ void VertexAttrib3fvCall(const GlesContext* c, GLuint indx, const GLfloat* value
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("VertexAttrib3fvCall(%p, %u, %p)", c, indx, values);
 #endif
-  return _api->VertexAttrib3fv(indx, values);
+  return _api->glVertexAttrib3fv(indx, values);
 }
 
 
@@ -1967,7 +1967,7 @@ void VertexAttrib4fCall(const GlesContext* c, GLuint indx, GLfloat x, GLfloat y,
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("VertexAttrib4fCall(%p, %u, %f, %f, %f, %f)", c, indx, x, y, z, w);
 #endif
-  return _api->VertexAttrib4f(indx, x, y, z, w);
+  return _api->glVertexAttrib4f(indx, x, y, z, w);
 }
 
 
@@ -1981,7 +1981,7 @@ void VertexAttrib4fvCall(const GlesContext* c, GLuint indx, const GLfloat* value
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("VertexAttrib4fvCall(%p, %u, %p)", c, indx, values);
 #endif
-  return _api->VertexAttrib4fv(indx, values);
+  return _api->glVertexAttrib4fv(indx, values);
 }
 
 
@@ -1995,7 +1995,7 @@ void VertexAttribPointerCall(const GlesContext* c, GLuint indx, GLint size, GLen
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("VertexAttribPointerCall(%p, %u, %d, %s (0x%x), %d, %zd, %p)", c, indx, size, GetEnumString(type), type, normalized, stride, ptr);
 #endif
-  return _api->VertexAttribPointer(indx, size, type, normalized, stride, ptr);
+  return _api->glVertexAttribPointer(indx, size, type, normalized, stride, ptr);
 }
 
 
@@ -2009,6 +2009,6 @@ void ViewportCall(const GlesContext* c, GLint x, GLint y, GLsizei width, GLsizei
 #ifdef ENABLE_PASSTHROUGH_LOGGING
   ALOGI("ViewportCall(%p, %d, %d, %zd, %zd)", c, x, y, width, height);
 #endif
-  return _api->Viewport(x, y, width, height);
+  return _api->glViewport(x, y, width, height);
 }
 
