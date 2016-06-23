@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ee735692_b521409e",
+        "filename": "android/emulation/control/FilePusher.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-06-23T00:03:16Z",
+      "side": 1,
+      "message": "Isn\u0027t it better to add \n\nresetProgress();\nmCurrentPushCommand.reset();\n\nto cancel()?\n\nThe logic for resetting state for |cancel| is best kept in its implementation.",
+      "revId": "7f2df9d3da0a9181451a4f5cee7a48c451779796",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
