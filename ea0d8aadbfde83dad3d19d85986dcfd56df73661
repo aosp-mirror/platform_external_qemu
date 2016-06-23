@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c3c2ed56_2309f4da",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-06-23T23:46:09Z",
+      "side": 1,
+      "message": "Your choice sounds good to me.\nIf I envision that the \"base\" orientation as laying flat on a table, then I can pretend the AVD is an airplane that I\u0027m looking down on. In this framework, the names match what I\u0027d expect.",
+      "revId": "ea0d8aadbfde83dad3d19d85986dcfd56df73661",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
