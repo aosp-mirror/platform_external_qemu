@@ -29,6 +29,7 @@ static void setElidedText(QLineEdit* line_edit, const QString& text) {
 
 SettingsPage::SettingsPage(QWidget *parent) :
     QWidget(parent),
+    mEW(nullptr),
     mUi(new Ui::SettingsPage())
 {
     mUi->setupUi(this);
@@ -103,6 +104,10 @@ SettingsPage::SettingsPage(QWidget *parent) :
         default:
             break;
     }
+}
+
+void SettingsPage::setEmulatorWindow(EmulatorQtWindow* eW) {
+    mEW = eW;
 }
 
 bool SettingsPage::eventFilter(QObject* object, QEvent* event)
@@ -202,6 +207,9 @@ void SettingsPage::on_set_adbPathButton_clicked() {
 
             adbPath = QDir::toNativeSeparators(adbPath);
             setElidedText(mUi->set_adbPathBox, adbPath);
+            if (mEW) {
+                mEW->setCustomAdbPath(adbPath.toStdString());
+            }
         } else {
             // The path is not good. Force the user to cancel or try again.
             QString errStr = tr("This path does not point to "
@@ -246,6 +254,14 @@ void SettingsPage::on_set_onTop_toggled(bool checked) {
 void SettingsPage::on_set_autoFindAdb_toggled(bool checked) {
     QSettings settings;
     settings.setValue(Ui::Settings::AUTO_FIND_ADB, checked);
+
+    if (mEW) {
+        if (checked) {
+            mEW->setCustomAdbPath(std::string());
+        } else {
+            mEW->setCustomAdbPath(settings.value(Ui::Settings::ADB_PATH, "").toString().toStdString());
+        }
+    }
 
     mUi->set_adbPathBox->setHidden(checked);
     mUi->set_adbPathButton->setHidden(checked);
