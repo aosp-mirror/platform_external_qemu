@@ -489,8 +489,11 @@ GL_API void GL_APIENTRY  glDeleteBuffers( GLsizei n, const GLuint *buffers) {
     SET_ERROR_IF(n<0,GL_INVALID_VALUE);
     if(ctx->shareGroup().get()) {
         for(int i=0; i < n; i++){
-           ctx->shareGroup()->deleteName(VERTEXBUFFER,buffers[i]);
-           ctx->unbindBuffer(buffers[i]);
+            const GLuint globalBufferName = ctx->shareGroup()->getGlobalName(
+                VERTEXBUFFER, buffers[i]);
+            ctx->shareGroup()->deleteName(VERTEXBUFFER,buffers[i]);
+            ctx->unbindBuffer(buffers[i]);
+            ctx->dispatcher().glDeleteBuffers(1, &globalBufferName);
         }
     }
 }
