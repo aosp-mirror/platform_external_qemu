@@ -70,14 +70,19 @@ typedef enum {
     A_REGISTRATION_ROAMING
 } ARegistrationState;
 
+// The values in ADataNetworkType can be sent to the System in an
+// 'AT+CREG' message to indicate 'networkType'. These values match enum
+// RIL_RadioTechnology in the System's hardware/ril/include/telephony/ril.h
 typedef enum {
-    A_DATA_NETWORK_UNKNOWN = 0,
-    A_DATA_NETWORK_GPRS,
-    A_DATA_NETWORK_EDGE,
-    A_DATA_NETWORK_UMTS,
-    A_DATA_NETWORK_LTE,
-    A_DATA_NETWORK_CDMA1X,
-    A_DATA_NETWORK_EVDO, // TODO: Should REV0, REVA and REVB be added?
+    A_DATA_NETWORK_UNKNOWN = 0,    // RADIO_TECH_UNKNOWN
+    A_DATA_NETWORK_GPRS,           // RADIO_TECH_GPRS
+    A_DATA_NETWORK_EDGE,           // RADIO_TECH_EDGE
+    A_DATA_NETWORK_UMTS,           // RADIO_TECH_UMTS
+    A_DATA_NETWORK_UNUSED,         // RADIO_TECH_IS95A
+    A_DATA_NETWORK_CDMA1X,         // RADIO_TECH_1xRTT
+    A_DATA_NETWORK_EVDO,           // RADIO_TECH_EVDO_0
+                                   //  ...
+    A_DATA_NETWORK_LTE = 14,       // RADIO_TECH_LTE
 } ADataNetworkType;
 // TODO: Merge the usage of these two structs and rename ADataNetworkType
 typedef enum {

@@ -129,7 +129,7 @@ android_parse_network_type( const char*  speed )
         { "edge",  A_DATA_NETWORK_EDGE },
         { "umts",  A_DATA_NETWORK_UMTS },
         { "hsdpa", A_DATA_NETWORK_UMTS },  /* not handled yet by Android GSM framework */
-        { "full",  A_DATA_NETWORK_UMTS },
+        { "full",  A_DATA_NETWORK_LTE },
         { "lte",   A_DATA_NETWORK_LTE },
         { "cdma",  A_DATA_NETWORK_CDMA1X },
         { "evdo",  A_DATA_NETWORK_EVDO },
@@ -537,7 +537,7 @@ amodem_reset( AModem  modem )
     modem->voice_state  = A_REGISTRATION_HOME;
     modem->data_mode    = A_REGISTRATION_UNSOL_ENABLED_FULL;
     modem->data_state   = A_REGISTRATION_HOME;
-    modem->data_network = A_DATA_NETWORK_UMTS;
+    modem->data_network = A_DATA_NETWORK_LTE;
 
     tmp = amodem_nvram_get_str( modem, NV_MODEM_TECHNOLOGY, "gsm" );
     modem->technology = android_parse_modem_tech( tmp );
@@ -752,6 +752,7 @@ tech_from_network_type( ADataNetworkType type )
         case A_DATA_NETWORK_CDMA1X:
         case A_DATA_NETWORK_EVDO:
             return A_TECH_CDMA;
+        case A_DATA_NETWORK_UNUSED:
         case A_DATA_NETWORK_UNKNOWN:
             return A_TECH_UNKNOWN;
     }
@@ -1089,7 +1090,7 @@ static const char*
 _amodem_switch_technology( AModem modem, AModemTech newtech, int32_t newpreferred )
 {
     D("_amodem_switch_technology: oldtech: %d, newtech %d, preferred: %d. newpreferred: %d\n",
-                      modem->technology, newtech, modem->preferred_mask,newpreferred);
+                      modem->technology, newtech, modem->preferred_mask, newpreferred);
     const char *ret = "+CTEC: DONE";
     assert( modem );
 
