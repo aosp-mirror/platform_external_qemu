@@ -185,6 +185,8 @@ public:
     QSize containerSize() const;
     QRect deviceGeometry() const;
 
+    void setCustomAdbPath(const std::string& path);
+
     void doResize(const QSize& size,
                   bool isKbdShortcut = false,
                   bool flipDimensions = false);
@@ -314,7 +316,6 @@ private:
     void forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event);
     void handleKeyEvent(SkinEventType type, QKeyEvent* event);
 
-    std::vector<std::string> getAdbFullPathStd();
     void screenshotDone(android::emulation::ScreenCapturer::Result result);
 
     void runAdbInstall(const QString& path);
