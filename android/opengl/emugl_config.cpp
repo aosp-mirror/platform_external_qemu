@@ -126,11 +126,18 @@ bool emuglConfig_init(EmuglConfig* config,
                    !strcmp(gpu_option, "guest")) {
             gpu_enabled = false;
         } else if (!strcmp(gpu_option, "auto")) {
-            // Nothing to do
+            // Nothing to do, use gpu_mode set from
+            // hardware properties instead.
         } else {
             gpu_enabled = true;
             gpu_mode = gpu_option;
         }
+    }
+
+    if (gpu_mode &&
+        (!strcmp(gpu_mode, "guest") ||
+         !strcmp(gpu_mode, "off"))) {
+        gpu_enabled = false;
     }
 
     if (!gpu_enabled) {
@@ -215,7 +222,11 @@ bool emuglConfig_init(EmuglConfig* config,
             return false;
         }
     }
-    config->enabled = true;
+
+    if (strcmp(gpu_mode, "guest")) {
+        config->enabled = true;
+    }
+
     snprintf(config->backend, sizeof(config->backend), "%s", gpu_mode);
     snprintf(config->status, sizeof(config->status),
              "GPU emulation enabled using '%s' mode", gpu_mode);
