@@ -51,6 +51,9 @@ public:
     // Returns true is the ADB version is fresh enough.
     virtual bool isAdbVersionCurrent() const = 0;
 
+    // Setup a custom adb path.
+    virtual void setCustomAdbPath(const std::string& path) = 0;
+
     // Returns the automatically detected path to adb
     virtual const std::string& detectedAdbPath() const = 0;
 

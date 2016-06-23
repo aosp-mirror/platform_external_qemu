@@ -28,6 +28,7 @@ public:
     virtual bool isAdbVersionCurrent() const override final {
         return mIsAdbVersionCurrent;
     }
+    void setCustomAdbPath(const std::string& path) override final {}
     virtual const std::string& detectedAdbPath() const override final {
         return mAdbPath;
     }
