@@ -314,6 +314,7 @@ private:
     void forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event);
     void handleKeyEvent(SkinEventType type, QKeyEvent* event);
 
+    bool checkAndSetupCustomAdbPath();
     std::vector<std::string> getAdbFullPathStd();
     void screenshotDone(android::emulation::ScreenCapturer::Result result);
 

@@ -956,8 +956,7 @@ void EmulatorQtWindow::screenshot() {
         return;
     }
 
-    auto args = getAdbFullPathStd();
-    if (args.empty()) {
+    if (!checkAndSetupCustomAdbPath()) {
         showErrorDialog(
                 tr("Could not locate 'adb'<br/>"
                    "Check settings to verify that your chosen adb path is "
@@ -1032,6 +1031,15 @@ void EmulatorQtWindow::runAdbInstall(const QString& path) {
         return;
     }
 
+    if (!checkAndSetupCustomAdbPath()) {
+        showErrorDialog(
+                tr("Could not locate 'adb'<br/>"
+                   "Check settings to verify that your chosen adb path is "
+                   "valid."),
+                tr("APK Install"));
+        return;
+    }
+
     // Show a dialog so the user knows something is happening
     mInstallDialog.show();
 
@@ -1083,8 +1091,7 @@ void EmulatorQtWindow::installDone(ApkInstaller::Result result,
 }
 
 void EmulatorQtWindow::runAdbPush(const QList<QUrl>& urls) {
-    auto adbCommandArgs = getAdbFullPathStd();
-    if (adbCommandArgs.empty()) {
+    if (!checkAndSetupCustomAdbPath()) {
         showErrorDialog(
                 tr("Could not locate 'adb'<br/>"
                    "Check settings to verify that your chosen adb path is "
@@ -1144,29 +1151,24 @@ void EmulatorQtWindow::adbPushDone(StringView filePath,
     showErrorDialog(msg, tr("File Copy"));
 }
 
-vector<string> EmulatorQtWindow::getAdbFullPathStd() {
-    std::string adbPath;
+bool EmulatorQtWindow::checkAndSetupCustomAdbPath() {
     QSettings settings;
     if (settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool()) {
+        mAdbInterface->setCustomAdbPath("");
         if (!mAdbInterface->detectedAdbPath().empty()) {
-            adbPath = mAdbInterface->detectedAdbPath();
+            return true;
         } else {
             showErrorDialog(tr("Could not automatically find ADB.<br>"
                                "Please use the settings page to manually set "
                                "an ADB path."),
                             tr("ADB"));
-            return {};
+            return false;
         }
-    } else {
-        adbPath = settings.value(Ui::Settings::ADB_PATH, "")
-                          .toString()
-                          .toStdString();
     }
 
-    vector<string> args{
-            adbPath, "-s",
-            android::base::StringFormat("emulator-%d", android_base_port)};
-    return args;
+    QString adbPath = settings.value(Ui::Settings::ADB_PATH, "").toString();
+    mAdbInterface->setCustomAdbPath(adbPath.toStdString());
+    return !adbPath.isEmpty();
 }
 
 // Convert a Qt::Key_XXX code into the corresponding Linux keycode value.
