@@ -16,6 +16,24 @@
       "revId": "0ff01674aa17e4e664d3ed358803066c8e6ff183",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "03988532_9e1b3dc7",
+        "filename": "distrib/android-emugl/host/libs/libGLES12Translator/gles/translator_interface.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-23T14:58:51Z",
+      "side": 1,
+      "message": "hmm, that\u0027s difficult, since it\u0027s not strictly true that GlesContext must belong to only one thread.\n\ngraphics_translation used to do it from the egl/ component, so I guess we\u0027ll analogously delete and set to NULL the GlesContext from the host libOpenglRender\u0027s RenderContext where the glesv1 contexts currently live, as the dtor is called.\n\n(Done here and the other parts are done in patch set 7-\u003e8 of https://android-review.googlesource.com/#/c/239124/ and 8-\u003e9 of https://android-review.googlesource.com/#/c/239125/)",
+      "parentUuid": "aea6be25_0b60fdba",
+      "revId": "0ff01674aa17e4e664d3ed358803066c8e6ff183",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
