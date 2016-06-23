@@ -31,6 +31,9 @@
 #define D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
 #define DD(...) VERBOSE_PRINT(gles,__VA_ARGS__)
 
+#ifdef CONFIG_CMAKE
+#define RENDERER_LIB_NAME "libOpenglRender"
+#else
 /* Name of the GLES rendering library we're going to use */
 #if UINTPTR_MAX == UINT32_MAX
 #define RENDERER_LIB_NAME  "libOpenglRender"
@@ -38,6 +41,7 @@
 #define RENDERER_LIB_NAME  "lib64OpenglRender"
 #else
 #error Unknown UINTPTR_MAX
+#endif
 #endif
 
 /* Declared in "android/globals.h" */

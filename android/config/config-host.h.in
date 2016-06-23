@@ -1,0 +1,29 @@
+/* Only edit this file if it's named 'config-host.h.in' */
+
+#define CONFIG_QEMU_SHAREDIR   "/usr/local/share/qemu"
+#define CONFIG_SLIRP    1
+#define CONFIG_SKINS    1
+#define CONFIG_TRACE    1
+#define CONFIG_QT       1
+#undef CONFIG_SDL
+#define CONFIG_ANDROID  1
+#define QEMU_VERSION    "0.10.50"
+#define QEMU_PKGVERSION "Android"
+
+#cmakedefine CONFIG_BYTESWAP_H      1
+#cmakedefine CONFIG_MACHINE_BSWAP_H 1
+#cmakedefine CONFIG_FNMATCH         1
+#cmakedefine CONFIG_GDBSTUB         1
+#cmakedefine CONFIG_WIN32           1
+#cmakedefine CONFIG_POSIX           1
+#cmakedefine CONFIG_LINUX           1
+#cmakedefine CONFIG_BSD             1
+#cmakedefine CONFIG_DARWIN          1
+#cmakedefine CONFIG_KVM_GS_RESTORE  1
+#cmakedefine CONFIG_FDATASYNC       1
+#cmakedefine CONFIG_MADVISE         1
+#cmakedefine CONFIG_NAND_LIMITS     1
+#cmakedefine CONFIG_IOVEC           1
+#cmakedefine CONFIG_SIGNALFD        1
+#cmakedefine O_LARGEFILE            0
+#cmakedefine MAP_ANONYMOUS          MAP_ANON

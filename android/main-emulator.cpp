@@ -36,7 +36,9 @@
 #include "android/base/system/System.h"
 #include "android/main-emugl.h"
 #include "android/opengl/emugl_config.h"
+#ifndef CONFIG_CMAKE
 #include "android/qt/qt_setup.h"
+#endif
 #include "android/utils/compiler.h"
 #include "android/utils/debug.h"
 #include "android/utils/exec.h"
@@ -66,10 +68,6 @@ using android::base::RunOptions;
 #else
 #  define DLL_EXTENSION  ".so"
 #endif
-
-// Name of GPU emulation main library for (32-bit and 64-bit versions)
-#define GLES_EMULATION_LIB    "libOpenglRender" DLL_EXTENSION
-#define GLES_EMULATION_LIB64  "lib64OpenglRender" DLL_EXTENSION
 
 /* Forward declarations */
 static char* getClassicEmulatorPath(const char* progDir,
@@ -486,8 +484,10 @@ int main(int argc, char** argv)
 
     emuglConfig_setupEnv(&config);
 
+#ifndef CONFIG_CMAKE
     /* Add <lib>/qt/ to the library search path. */
     androidQtSetupEnv(wantedBitness);
+#endif
 
 #ifdef _WIN32
     // Take care of quoting all parameters before sending them to execv().
@@ -564,8 +564,13 @@ static char* probeTargetEmulatorPath(const char* progDir,
     char path[PATH_MAX], *pathEnd = path + sizeof(path), *p;
 
     static const char kEmulatorPrefix[] = "emulator-";
+#if defined(CONFIG_CMAKE) && defined(CONFIG_WIN32)
+    static const char kEmulator64Prefix[] = "64\\emulator-";
+#else
     static const char kEmulator64Prefix[] = "emulator64-";
+#endif
 
+#ifdef CONFIG_WIN32
     // First search for the 64-bit emulator binary.
     if (*wantedBitness == 64) {
         p = bufprint_emulatorName(path,
@@ -578,6 +583,8 @@ static char* probeTargetEmulatorPath(const char* progDir,
             return strdup(path);
         }
     }
+#endif
+
 
     // Then for the 32-bit one.
     p = bufprint_emulatorName(path,
@@ -660,20 +667,48 @@ static char* getQemuExecutablePath(const char* progDir,
         APANIC("QEMU2 emulator does not support %s CPU architecture", avdArch);
     }
 
+#ifdef CONFIG_CMAKE
+    const char* emulatorSubfolder = "";
+#if defined(CONFIG_WIN32) && !defined(__x86_64__)
+    // this is a 32 bit launcher on Windows, we need to look in the "64/" subfolder
+    // for the 64 bit binary
+    if (wantedBitness == 64) {
+        emulatorSubfolder = "64/";
+    }
+#endif
+#endif
+
     char fullPath[PATH_MAX];
     char* fullPathEnd = fullPath + sizeof(fullPath);
     char* tail = bufprint(fullPath,
                           fullPathEnd,
+#ifdef CONFIG_CMAKE
+                          "%s/%sqemu-system-%s%s",
+#else
                           "%s/qemu/%s-%s/qemu-system-%s%s",
+#endif
                           progDir,
+#ifdef CONFIG_CMAKE
+                          emulatorSubfolder,
+#else
                           kHostOs,
                           hostArch,
+#endif
                           qemuArch,
                           kExeExtension);
     if (tail >= fullPathEnd) {
         APANIC("QEMU executable path too long (clipped) [%s]. "
                "Can not use QEMU2 emulator. ", fullPath);
     }
+
+#if defined(CONFIG_CMAKE) && defined(CONFIG_WIN32) && !defined(__x86_64__)
+    // this is a 32 bit launcher on Windows
+    if (wantedBitness == 64 && !PathFileExists(fullPath)) {
+        // the 64 bit binary doesn't exist, we're probably testing a 32 bit build
+        return getQemuExecutablePath(progDir, avdArch, 32);
+    }
+#endif
+
     return strdup(fullPath);
 }
 

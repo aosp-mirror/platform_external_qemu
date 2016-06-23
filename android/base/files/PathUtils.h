@@ -213,6 +213,10 @@ public:
     // Note that it is not possible to simplify initial instances of
     // '..', i.e. "foo/../../bar" -> "../bar"
     static void simplifyComponents(std::vector<std::string>* components);
+
+    // Removes |elementsToRemove| path elements from the end of |path|
+    static std::string getNthParentDir(StringView path, size_t elementsToRemove);
+
 };
 
 // Useful shortcuts to avoid too much typing.
