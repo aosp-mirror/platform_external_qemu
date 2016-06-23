@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c3c2ed56_577f8ec3",
+        "filename": "android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-06-23T20:50:12Z",
+      "side": 1,
+      "message": "Updated this message to point the user to the settings page.",
+      "parentUuid": "c3c2ed56_74a9e88a",
+      "range": {
+        "startLine": 159,
+        "startChar": 18,
+        "endLine": 159,
+        "endChar": 46
+      },
+      "revId": "979a561052803edef734c86ed698146c826f9386",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c3c2ed56_f7b41ae3",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-06-23T20:44:10Z",
       "side": 1,
       "message": "do we really need to do it every time, not just once?",
+      "range": {
+        "startLine": 1094,
+        "startChar": 9,
+        "endLine": 1094,
+        "endChar": 35
+      },
+      "revId": "979a561052803edef734c86ed698146c826f9386",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3c2ed56_b74c62b7",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1094,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-06-23T20:50:12Z",
+      "side": 1,
+      "message": "Yes, because the user could change the setting at any time.\n\nThe alternative is give the Settings page a shared_ptr to AdbInterface and updating it directly from there. Would you prefer that?",
+      "parentUuid": "c3c2ed56_f7b41ae3",
       "range": {
         "startLine": 1094,
         "startChar": 9,
