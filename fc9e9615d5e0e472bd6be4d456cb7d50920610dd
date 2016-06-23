@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c3666d36_d7373eec",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-23T19:02:58Z",
+      "side": 1,
+      "message": "Qt docs:\n\n\u003eWarning: We do not recommend using QString::sprintf() in new Qt code. Instead, consider using QTextStream or arg(), both of which support Unicode strings seamlessly and are type-safe.",
+      "range": {
+        "startLine": 359,
+        "startChar": 18,
+        "endLine": 359,
+        "endChar": 25
+      },
+      "revId": "fc9e9615d5e0e472bd6be4d456cb7d50920610dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
