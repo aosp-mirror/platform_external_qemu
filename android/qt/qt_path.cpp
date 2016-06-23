@@ -21,6 +21,11 @@ using namespace android::base;
 
 // Get the base directory for libraries and plugins.
 static std::string androidQtGetBaseDir(int bitness) {
+#ifdef CONFIG_CMAKE
+    // TEMP DEBUG
+    System* system = System::get();
+    return system->getLauncherDirectory();
+#else
     if (!bitness) {
         bitness = System::getProgramBitness();
     }
@@ -34,12 +39,15 @@ static std::string androidQtGetBaseDir(int bitness) {
     std::string qtDir = PathUtils::recompose(subDirVector);
 
     return qtDir;
+#endif
 }
 
 std::string androidQtGetLibraryDir(int bitness) {
     std::vector<std::string> subDirVector;
     subDirVector.push_back(androidQtGetBaseDir(bitness));
+#ifndef CONFIG_CMAKE
     subDirVector.push_back(std::string("lib"));
+#endif
     std::string qtLibDir = PathUtils::recompose(subDirVector);
 
     return qtLibDir;

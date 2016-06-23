@@ -280,7 +280,11 @@ public:
                 }
             }
 
+#ifdef CONFIG_CMAKE
+            mLauncherDir.assign(programDir); // TEMP DEBUG
+#else
             mLauncherDir.assign("<unknown-launcher-dir>");
+#endif
         }
         return mLauncherDir;
     }

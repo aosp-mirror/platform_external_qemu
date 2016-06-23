@@ -88,6 +88,9 @@ private:
     HandleType mLib;
 };
 
+#ifdef CONFIG_CMAKE
+#define EMUGL_LIBNAME(name) "lib" name
+#else
 // Macro to compose emugl shared library name under various OS and bitness
 // eg.
 //     on x86_64, EMUGL_LIBNAME("foo") --> "lib64foo"
@@ -98,6 +101,7 @@ private:
 #  define EMUGL_LIBNAME(name) "lib" name
 #else
 /* This header is included by target w/o using EMUGL_LIBNAME().  Don't #error, leave it undefined */
+#endif
 #endif
 
 }  // namespace emugl
