@@ -116,6 +116,30 @@
       "revId": "979a561052803edef734c86ed698146c826f9386",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3c2ed56_3742124e",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1157,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-06-23T21:15:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c3c2ed56_f7897ad4",
+      "range": {
+        "startLine": 1157,
+        "startChar": 40,
+        "endLine": 1157,
+        "endChar": 42
+      },
+      "revId": "979a561052803edef734c86ed698146c826f9386",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
