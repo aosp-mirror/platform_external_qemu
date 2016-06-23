@@ -6,12 +6,25 @@
 
 #include "gles/pass_through.h"
 #include "common/alog.h"
+#include "common/dlog.h"
 #include "common/rendering_interface.h"
 #include "gles/debug.h"
 #include "gles/gles_context.h"
 
 #include "GLES12Translator/underlying_apis.h"
 #include "GLES12Translator/angle_gles2.h"
+
+#define DEBUG 1
+
+#if DEBUG
+#define DPRINT(fmt,...) do { \
+    DLOG("gles12 underlying: " fmt, ##__VA_ARGS__); \
+} while(0)
+#else
+#define DPRINT(...)
+#endif
+
+
 class ContextAutoLock {
  public:
   ContextAutoLock(emugl::ContextGPU* context) : context_(context) {
@@ -32,9 +45,7 @@ void ActiveTextureCall(const GlesContext* c, GLenum texture) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("ActiveTextureCall(%p, %s (0x%x))", c, GetEnumString(texture), texture);
-#endif
+  DPRINT("ActiveTextureCall(%p, %s (0x%x))", c, GetEnumString(texture), texture);
   return _api->glActiveTexture(texture);
 }
 
@@ -46,9 +57,7 @@ void AttachShaderCall(const GlesContext* c, GLuint program, GLuint shader) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("AttachShaderCall(%p, %u, %u)", c, program, shader);
-#endif
+  DPRINT("AttachShaderCall(%p, %u, %u)", c, program, shader);
   return _api->glAttachShader(program, shader);
 }
 
@@ -60,9 +69,7 @@ void BindAttribLocationCall(const GlesContext* c, GLuint program, GLuint index, 
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("BindAttribLocationCall(%p, %u, %u, %p)", c, program, index, name);
-#endif
+  DPRINT("BindAttribLocationCall(%p, %u, %u, %p)", c, program, index, name);
   return _api->glBindAttribLocation(program, index, name);
 }
 
@@ -74,9 +81,7 @@ void BindBufferCall(const GlesContext* c, GLenum target, GLuint buffer) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("BindBufferCall(%p, %s (0x%x), %u)", c, GetEnumString(target), target, buffer);
-#endif
+  DPRINT("BindBufferCall(%p, %s (0x%x), %u)", c, GetEnumString(target), target, buffer);
   return _api->glBindBuffer(target, buffer);
 }
 
@@ -88,9 +93,7 @@ void BindFramebufferCall(const GlesContext* c, GLenum target, GLuint framebuffer
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("BindFramebufferCall(%p, %s (0x%x), %u)", c, GetEnumString(target), target, framebuffer);
-#endif
+  DPRINT("BindFramebufferCall(%p, %s (0x%x), %u)", c, GetEnumString(target), target, framebuffer);
   return _api->glBindFramebuffer(target, framebuffer);
 }
 
@@ -102,9 +105,7 @@ void BindRenderbufferCall(const GlesContext* c, GLenum target, GLuint renderbuff
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("BindRenderbufferCall(%p, %s (0x%x), %u)", c, GetEnumString(target), target, renderbuffer);
-#endif
+  DPRINT("BindRenderbufferCall(%p, %s (0x%x), %u)", c, GetEnumString(target), target, renderbuffer);
   return _api->glBindRenderbuffer(target, renderbuffer);
 }
 
@@ -116,9 +117,7 @@ void BindTextureCall(const GlesContext* c, GLenum target, GLuint texture) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("BindTextureCall(%p, %s (0x%x), %u)", c, GetEnumString(target), target, texture);
-#endif
+  DPRINT("BindTextureCall(%p, %s (0x%x), %u)", c, GetEnumString(target), target, texture);
   return _api->glBindTexture(target, texture);
 }
 
@@ -130,9 +129,7 @@ void BlendColorCall(const GlesContext* c, GLclampf red, GLclampf green, GLclampf
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("BlendColorCall(%p, %f, %f, %f, %f)", c, red, green, blue, alpha);
-#endif
+  DPRINT("BlendColorCall(%p, %f, %f, %f, %f)", c, red, green, blue, alpha);
   return _api->glBlendColor(red, green, blue, alpha);
 }
 
@@ -144,9 +141,7 @@ void BlendEquationCall(const GlesContext* c, GLenum mode) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("BlendEquationCall(%p, %s (0x%x))", c, GetEnumString(mode), mode);
-#endif
+  DPRINT("BlendEquationCall(%p, %s (0x%x))", c, GetEnumString(mode), mode);
   return _api->glBlendEquation(mode);
 }
 
@@ -158,9 +153,7 @@ void BlendEquationSeparateCall(const GlesContext* c, GLenum modeRGB, GLenum mode
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("BlendEquationSeparateCall(%p, %s (0x%x), %s (0x%x))", c, GetEnumString(modeRGB), modeRGB, GetEnumString(modeAlpha), modeAlpha);
-#endif
+  DPRINT("BlendEquationSeparateCall(%p, %s (0x%x), %s (0x%x))", c, GetEnumString(modeRGB), modeRGB, GetEnumString(modeAlpha), modeAlpha);
   return _api->glBlendEquationSeparate(modeRGB, modeAlpha);
 }
 
@@ -172,9 +165,7 @@ void BlendFuncCall(const GlesContext* c, GLenum sfactor, GLenum dfactor) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("BlendFuncCall(%p, %s (0x%x), %s (0x%x))", c, GetEnumString(sfactor), sfactor, GetEnumString(dfactor), dfactor);
-#endif
+  DPRINT("BlendFuncCall(%p, %s (0x%x), %s (0x%x))", c, GetEnumString(sfactor), sfactor, GetEnumString(dfactor), dfactor);
   return _api->glBlendFunc(sfactor, dfactor);
 }
 
@@ -186,9 +177,7 @@ void BlendFuncSeparateCall(const GlesContext* c, GLenum srcRGB, GLenum dstRGB, G
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("BlendFuncSeparateCall(%p, %s (0x%x), %s (0x%x), %s (0x%x), %s (0x%x))", c, GetEnumString(srcRGB), srcRGB, GetEnumString(dstRGB), dstRGB, GetEnumString(srcAlpha), srcAlpha, GetEnumString(dstAlpha), dstAlpha);
-#endif
+  DPRINT("BlendFuncSeparateCall(%p, %s (0x%x), %s (0x%x), %s (0x%x), %s (0x%x))", c, GetEnumString(srcRGB), srcRGB, GetEnumString(dstRGB), dstRGB, GetEnumString(srcAlpha), srcAlpha, GetEnumString(dstAlpha), dstAlpha);
   return _api->glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
 }
 
@@ -200,9 +189,7 @@ void BufferDataCall(const GlesContext* c, GLenum target, GLsizeiptr size, const 
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("BufferDataCall(%p, %s (0x%x), %ld, %p, %s (0x%x))", c, GetEnumString(target), target, size, data, GetEnumString(usage), usage);
-#endif
+  DPRINT("BufferDataCall(%p, %s (0x%x), %ld, %p, %s (0x%x))", c, GetEnumString(target), target, size, data, GetEnumString(usage), usage);
   return _api->glBufferData(target, size, data, usage);
 }
 
@@ -214,9 +201,7 @@ void BufferSubDataCall(const GlesContext* c, GLenum target, GLintptr offset, GLs
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("BufferSubDataCall(%p, %s (0x%x), %ld, %ld, %p)", c, GetEnumString(target), target, offset, size, data);
-#endif
+  DPRINT("BufferSubDataCall(%p, %s (0x%x), %ld, %ld, %p)", c, GetEnumString(target), target, offset, size, data);
   return _api->glBufferSubData(target, offset, size, data);
 }
 
@@ -228,9 +213,7 @@ GLenum CheckFramebufferStatusCall(const GlesContext* c, GLenum target) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("CheckFramebufferStatusCall(%p, %s (0x%x))", c, GetEnumString(target), target);
-#endif
+  DPRINT("CheckFramebufferStatusCall(%p, %s (0x%x))", c, GetEnumString(target), target);
   return _api->glCheckFramebufferStatus(target);
 }
 
@@ -242,9 +225,7 @@ void ClearCall(const GlesContext* c, GLbitfield mask) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("ClearCall(%p, 0x%x)", c, mask);
-#endif
+  DPRINT("ClearCall(%p, 0x%x)", c, mask);
   return _api->glClear(mask);
 }
 
@@ -256,9 +237,7 @@ void ClearColorCall(const GlesContext* c, GLclampf red, GLclampf green, GLclampf
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("ClearColorCall(%p, %f, %f, %f, %f)", c, red, green, blue, alpha);
-#endif
+  DPRINT("ClearColorCall(%p, %f, %f, %f, %f)", c, red, green, blue, alpha);
   return _api->glClearColor(red, green, blue, alpha);
 }
 
@@ -270,9 +249,7 @@ void ClearDepthfCall(const GlesContext* c, GLclampf depth) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("ClearDepthfCall(%p, %f)", c, depth);
-#endif
+  DPRINT("ClearDepthfCall(%p, %f)", c, depth);
   return _api->glClearDepthf(depth);
 }
 
@@ -284,9 +261,7 @@ void ClearStencilCall(const GlesContext* c, GLint s) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("ClearStencilCall(%p, %d)", c, s);
-#endif
+  DPRINT("ClearStencilCall(%p, %d)", c, s);
   return _api->glClearStencil(s);
 }
 
@@ -298,9 +273,7 @@ void ColorMaskCall(const GlesContext* c, GLboolean red, GLboolean green, GLboole
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("ColorMaskCall(%p, %d, %d, %d, %d)", c, red, green, blue, alpha);
-#endif
+  DPRINT("ColorMaskCall(%p, %d, %d, %d, %d)", c, red, green, blue, alpha);
   return _api->glColorMask(red, green, blue, alpha);
 }
 
@@ -312,9 +285,7 @@ void CompileShaderCall(const GlesContext* c, GLuint shader) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("CompileShaderCall(%p, %u)", c, shader);
-#endif
+  DPRINT("CompileShaderCall(%p, %u)", c, shader);
   return _api->glCompileShader(shader);
 }
 
@@ -326,9 +297,7 @@ void CompressedTexImage2DCall(const GlesContext* c, GLenum target, GLint level, 
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("CompressedTexImage2DCall(%p, %s (0x%x), %d, %s (0x%x), %zd, %zd, %d, %zd, %p)", c, GetEnumString(target), target, level, GetEnumString(internalformat), internalformat, width, height, border, imageSize, data);
-#endif
+  DPRINT("CompressedTexImage2DCall(%p, %s (0x%x), %d, %s (0x%x), %zd, %zd, %d, %zd, %p)", c, GetEnumString(target), target, level, GetEnumString(internalformat), internalformat, width, height, border, imageSize, data);
   return _api->glCompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, data);
 }
 
@@ -340,9 +309,7 @@ void CompressedTexSubImage2DCall(const GlesContext* c, GLenum target, GLint leve
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("CompressedTexSubImage2DCall(%p, %s (0x%x), %d, %d, %d, %zd, %zd, %s (0x%x), %zd, %p)", c, GetEnumString(target), target, level, xoffset, yoffset, width, height, GetEnumString(format), format, imageSize, data);
-#endif
+  DPRINT("CompressedTexSubImage2DCall(%p, %s (0x%x), %d, %d, %d, %zd, %zd, %s (0x%x), %zd, %p)", c, GetEnumString(target), target, level, xoffset, yoffset, width, height, GetEnumString(format), format, imageSize, data);
   return _api->glCompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize, data);
 }
 
@@ -354,9 +321,7 @@ void CopyTexImage2DCall(const GlesContext* c, GLenum target, GLint level, GLenum
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("CopyTexImage2DCall(%p, %s (0x%x), %d, %s (0x%x), %d, %d, %zd, %zd, %d)", c, GetEnumString(target), target, level, GetEnumString(internalformat), internalformat, x, y, width, height, border);
-#endif
+  DPRINT("CopyTexImage2DCall(%p, %s (0x%x), %d, %s (0x%x), %d, %d, %zd, %zd, %d)", c, GetEnumString(target), target, level, GetEnumString(internalformat), internalformat, x, y, width, height, border);
   return _api->glCopyTexImage2D(target, level, internalformat, x, y, width, height, border);
 }
 
@@ -368,9 +333,7 @@ void CopyTexSubImage2DCall(const GlesContext* c, GLenum target, GLint level, GLi
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("CopyTexSubImage2DCall(%p, %s (0x%x), %d, %d, %d, %d, %d, %zd, %zd)", c, GetEnumString(target), target, level, xoffset, yoffset, x, y, width, height);
-#endif
+  DPRINT("CopyTexSubImage2DCall(%p, %s (0x%x), %d, %d, %d, %d, %d, %zd, %zd)", c, GetEnumString(target), target, level, xoffset, yoffset, x, y, width, height);
   return _api->glCopyTexSubImage2D(target, level, xoffset, yoffset, x, y, width, height);
 }
 
@@ -382,9 +345,7 @@ GLuint CreateProgramCall(const GlesContext* c) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("CreateProgramCall(%p)", c);
-#endif
+  DPRINT("CreateProgramCall(%p)", c);
   return _api->glCreateProgram();
 }
 
@@ -396,9 +357,7 @@ GLuint CreateShaderCall(const GlesContext* c, GLenum type) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("CreateShaderCall(%p, %s (0x%x))", c, GetEnumString(type), type);
-#endif
+  DPRINT("CreateShaderCall(%p, %s (0x%x))", c, GetEnumString(type), type);
   return _api->glCreateShader(type);
 }
 
@@ -410,9 +369,7 @@ void CullFaceCall(const GlesContext* c, GLenum mode) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("CullFaceCall(%p, %s (0x%x))", c, GetEnumString(mode), mode);
-#endif
+  DPRINT("CullFaceCall(%p, %s (0x%x))", c, GetEnumString(mode), mode);
   return _api->glCullFace(mode);
 }
 
@@ -424,9 +381,7 @@ void DeleteBuffersCall(const GlesContext* c, GLsizei n, const GLuint* buffers) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("DeleteBuffersCall(%p, %zd, %p)", c, n, buffers);
-#endif
+  DPRINT("DeleteBuffersCall(%p, %zd, %p)", c, n, buffers);
   return _api->glDeleteBuffers(n, buffers);
 }
 
@@ -438,9 +393,7 @@ void DeleteFramebuffersCall(const GlesContext* c, GLsizei n, const GLuint* frame
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("DeleteFramebuffersCall(%p, %zd, %p)", c, n, framebuffers);
-#endif
+  DPRINT("DeleteFramebuffersCall(%p, %zd, %p)", c, n, framebuffers);
   return _api->glDeleteFramebuffers(n, framebuffers);
 }
 
@@ -452,9 +405,7 @@ void DeleteProgramCall(const GlesContext* c, GLuint program) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("DeleteProgramCall(%p, %u)", c, program);
-#endif
+  DPRINT("DeleteProgramCall(%p, %u)", c, program);
   return _api->glDeleteProgram(program);
 }
 
@@ -466,9 +417,7 @@ void DeleteRenderbuffersCall(const GlesContext* c, GLsizei n, const GLuint* rend
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("DeleteRenderbuffersCall(%p, %zd, %p)", c, n, renderbuffers);
-#endif
+  DPRINT("DeleteRenderbuffersCall(%p, %zd, %p)", c, n, renderbuffers);
   return _api->glDeleteRenderbuffers(n, renderbuffers);
 }
 
@@ -480,9 +429,7 @@ void DeleteShaderCall(const GlesContext* c, GLuint shader) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("DeleteShaderCall(%p, %u)", c, shader);
-#endif
+  DPRINT("DeleteShaderCall(%p, %u)", c, shader);
   return _api->glDeleteShader(shader);
 }
 
@@ -494,9 +441,7 @@ void DeleteTexturesCall(const GlesContext* c, GLsizei n, const GLuint* textures)
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("DeleteTexturesCall(%p, %zd, %p)", c, n, textures);
-#endif
+  DPRINT("DeleteTexturesCall(%p, %zd, %p)", c, n, textures);
   return _api->glDeleteTextures(n, textures);
 }
 
@@ -508,9 +453,7 @@ void DepthFuncCall(const GlesContext* c, GLenum func) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("DepthFuncCall(%p, %s (0x%x))", c, GetEnumString(func), func);
-#endif
+  DPRINT("DepthFuncCall(%p, %s (0x%x))", c, GetEnumString(func), func);
   return _api->glDepthFunc(func);
 }
 
@@ -522,9 +465,7 @@ void DepthMaskCall(const GlesContext* c, GLboolean flag) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("DepthMaskCall(%p, %d)", c, flag);
-#endif
+  DPRINT("DepthMaskCall(%p, %d)", c, flag);
   return _api->glDepthMask(flag);
 }
 
@@ -536,9 +477,7 @@ void DepthRangefCall(const GlesContext* c, GLclampf zNear, GLclampf zFar) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("DepthRangefCall(%p, %f, %f)", c, zNear, zFar);
-#endif
+  DPRINT("DepthRangefCall(%p, %f, %f)", c, zNear, zFar);
   return _api->glDepthRangef(zNear, zFar);
 }
 
@@ -550,9 +489,7 @@ void DetachShaderCall(const GlesContext* c, GLuint program, GLuint shader) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("DetachShaderCall(%p, %u, %u)", c, program, shader);
-#endif
+  DPRINT("DetachShaderCall(%p, %u, %u)", c, program, shader);
   return _api->glDetachShader(program, shader);
 }
 
@@ -564,9 +501,7 @@ void DisableCall(const GlesContext* c, GLenum cap) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("DisableCall(%p, %s (0x%x))", c, GetEnumString(cap), cap);
-#endif
+  DPRINT("DisableCall(%p, %s (0x%x))", c, GetEnumString(cap), cap);
   return _api->glDisable(cap);
 }
 
@@ -578,9 +513,7 @@ void DisableVertexAttribArrayCall(const GlesContext* c, GLuint index) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("DisableVertexAttribArrayCall(%p, %u)", c, index);
-#endif
+  DPRINT("DisableVertexAttribArrayCall(%p, %u)", c, index);
   return _api->glDisableVertexAttribArray(index);
 }
 
@@ -592,9 +525,7 @@ void DrawArraysCall(const GlesContext* c, GLenum mode, GLint first, GLsizei coun
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("DrawArraysCall(%p, %s (0x%x), %d, %zd)", c, GetEnumString(mode), mode, first, count);
-#endif
+  DPRINT("DrawArraysCall(%p, %s (0x%x), %d, %zd)", c, GetEnumString(mode), mode, first, count);
   return _api->glDrawArrays(mode, first, count);
 }
 
@@ -606,9 +537,7 @@ void DrawElementsCall(const GlesContext* c, GLenum mode, GLsizei count, GLenum t
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("DrawElementsCall(%p, %s (0x%x), %zd, %s (0x%x), %p)", c, GetEnumString(mode), mode, count, GetEnumString(type), type, indices);
-#endif
+  DPRINT("DrawElementsCall(%p, %s (0x%x), %zd, %s (0x%x), %p)", c, GetEnumString(mode), mode, count, GetEnumString(type), type, indices);
   return _api->glDrawElements(mode, count, type, indices);
 }
 
@@ -620,9 +549,7 @@ void EnableCall(const GlesContext* c, GLenum cap) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("EnableCall(%p, %s (0x%x))", c, GetEnumString(cap), cap);
-#endif
+  DPRINT("EnableCall(%p, %s (0x%x))", c, GetEnumString(cap), cap);
   return _api->glEnable(cap);
 }
 
@@ -634,9 +561,7 @@ void EnableVertexAttribArrayCall(const GlesContext* c, GLuint index) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("EnableVertexAttribArrayCall(%p, %u)", c, index);
-#endif
+  DPRINT("EnableVertexAttribArrayCall(%p, %u)", c, index);
   return _api->glEnableVertexAttribArray(index);
 }
 
@@ -648,9 +573,7 @@ void FinishCall(const GlesContext* c) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("FinishCall(%p)", c);
-#endif
+  DPRINT("FinishCall(%p)", c);
   return _api->glFinish();
 }
 
@@ -662,9 +585,7 @@ void FlushCall(const GlesContext* c) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("FlushCall(%p)", c);
-#endif
+  DPRINT("FlushCall(%p)", c);
   return _api->glFlush();
 }
 
@@ -676,9 +597,7 @@ void FramebufferRenderbufferCall(const GlesContext* c, GLenum target, GLenum att
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("FramebufferRenderbufferCall(%p, %s (0x%x), %s (0x%x), %s (0x%x), %u)", c, GetEnumString(target), target, GetEnumString(attachment), attachment, GetEnumString(renderbuffertarget), renderbuffertarget, renderbuffer);
-#endif
+  DPRINT("FramebufferRenderbufferCall(%p, %s (0x%x), %s (0x%x), %s (0x%x), %u)", c, GetEnumString(target), target, GetEnumString(attachment), attachment, GetEnumString(renderbuffertarget), renderbuffertarget, renderbuffer);
   return _api->glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer);
 }
 
@@ -690,9 +609,7 @@ void FramebufferTexture2DCall(const GlesContext* c, GLenum target, GLenum attach
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("FramebufferTexture2DCall(%p, %s (0x%x), %s (0x%x), %s (0x%x), %u, %d)", c, GetEnumString(target), target, GetEnumString(attachment), attachment, GetEnumString(textarget), textarget, texture, level);
-#endif
+  DPRINT("FramebufferTexture2DCall(%p, %s (0x%x), %s (0x%x), %s (0x%x), %u, %d)", c, GetEnumString(target), target, GetEnumString(attachment), attachment, GetEnumString(textarget), textarget, texture, level);
   return _api->glFramebufferTexture2D(target, attachment, textarget, texture, level);
 }
 
@@ -704,9 +621,7 @@ void FrontFaceCall(const GlesContext* c, GLenum mode) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("FrontFaceCall(%p, %s (0x%x))", c, GetEnumString(mode), mode);
-#endif
+  DPRINT("FrontFaceCall(%p, %s (0x%x))", c, GetEnumString(mode), mode);
   return _api->glFrontFace(mode);
 }
 
@@ -718,9 +633,7 @@ void GenBuffersCall(const GlesContext* c, GLsizei n, GLuint* buffers) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GenBuffersCall(%p, %zd, %p)", c, n, buffers);
-#endif
+  DPRINT("GenBuffersCall(%p, %zd, %p)", c, n, buffers);
   return _api->glGenBuffers(n, buffers);
 }
 
@@ -732,9 +645,7 @@ void GenerateMipmapCall(const GlesContext* c, GLenum target) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GenerateMipmapCall(%p, %s (0x%x))", c, GetEnumString(target), target);
-#endif
+  DPRINT("GenerateMipmapCall(%p, %s (0x%x))", c, GetEnumString(target), target);
   return _api->glGenerateMipmap(target);
 }
 
@@ -746,9 +657,7 @@ void GenFramebuffersCall(const GlesContext* c, GLsizei n, GLuint* framebuffers) 
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GenFramebuffersCall(%p, %zd, %p)", c, n, framebuffers);
-#endif
+  DPRINT("GenFramebuffersCall(%p, %zd, %p)", c, n, framebuffers);
   return _api->glGenFramebuffers(n, framebuffers);
 }
 
@@ -760,9 +669,7 @@ void GenRenderbuffersCall(const GlesContext* c, GLsizei n, GLuint* renderbuffers
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GenRenderbuffersCall(%p, %zd, %p)", c, n, renderbuffers);
-#endif
+  DPRINT("GenRenderbuffersCall(%p, %zd, %p)", c, n, renderbuffers);
   return _api->glGenRenderbuffers(n, renderbuffers);
 }
 
@@ -774,9 +681,7 @@ void GenTexturesCall(const GlesContext* c, GLsizei n, GLuint* textures) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GenTexturesCall(%p, %zd, %p)", c, n, textures);
-#endif
+  DPRINT("GenTexturesCall(%p, %zd, %p)", c, n, textures);
   return _api->glGenTextures(n, textures);
 }
 
@@ -788,9 +693,7 @@ void GetActiveAttribCall(const GlesContext* c, GLuint program, GLuint index, GLs
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetActiveAttribCall(%p, %u, %u, %zd, %p, %p, %p, %p)", c, program, index, bufsize, length, size, type, name);
-#endif
+  DPRINT("GetActiveAttribCall(%p, %u, %u, %zd, %p, %p, %p, %p)", c, program, index, bufsize, length, size, type, name);
   return _api->glGetActiveAttrib(program, index, bufsize, length, size, type, name);
 }
 
@@ -802,9 +705,7 @@ void GetActiveUniformCall(const GlesContext* c, GLuint program, GLuint index, GL
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetActiveUniformCall(%p, %u, %u, %zd, %p, %p, %p, %p)", c, program, index, bufsize, length, size, type, name);
-#endif
+  DPRINT("GetActiveUniformCall(%p, %u, %u, %zd, %p, %p, %p, %p)", c, program, index, bufsize, length, size, type, name);
   return _api->glGetActiveUniform(program, index, bufsize, length, size, type, name);
 }
 
@@ -816,9 +717,7 @@ void GetAttachedShadersCall(const GlesContext* c, GLuint program, GLsizei maxcou
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetAttachedShadersCall(%p, %u, %zd, %p, %p)", c, program, maxcount, count, shaders);
-#endif
+  DPRINT("GetAttachedShadersCall(%p, %u, %zd, %p, %p)", c, program, maxcount, count, shaders);
   return _api->glGetAttachedShaders(program, maxcount, count, shaders);
 }
 
@@ -830,9 +729,7 @@ GLint GetAttribLocationCall(const GlesContext* c, GLuint program, const char* na
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetAttribLocationCall(%p, %u, %p)", c, program, name);
-#endif
+  DPRINT("GetAttribLocationCall(%p, %u, %p)", c, program, name);
   return _api->glGetAttribLocation(program, name);
 }
 
@@ -844,9 +741,7 @@ void GetBooleanvCall(const GlesContext* c, GLenum pname, GLboolean* params) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetBooleanvCall(%p, %s (0x%x), %p)", c, GetEnumString(pname), pname, params);
-#endif
+  DPRINT("GetBooleanvCall(%p, %s (0x%x), %p)", c, GetEnumString(pname), pname, params);
   return _api->glGetBooleanv(pname, params);
 }
 
@@ -858,9 +753,7 @@ void GetBufferParameterivCall(const GlesContext* c, GLenum target, GLenum pname,
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetBufferParameterivCall(%p, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(pname), pname, params);
-#endif
+  DPRINT("GetBufferParameterivCall(%p, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(pname), pname, params);
   return _api->glGetBufferParameteriv(target, pname, params);
 }
 
@@ -872,9 +765,7 @@ GLenum GetErrorCall(const GlesContext* c) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetErrorCall(%p)", c);
-#endif
+  DPRINT("GetErrorCall(%p)", c);
   return _api->glGetError();
 }
 
@@ -886,9 +777,7 @@ void GetFloatvCall(const GlesContext* c, GLenum pname, GLfloat* params) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetFloatvCall(%p, %s (0x%x), %p)", c, GetEnumString(pname), pname, params);
-#endif
+  DPRINT("GetFloatvCall(%p, %s (0x%x), %p)", c, GetEnumString(pname), pname, params);
   return _api->glGetFloatv(pname, params);
 }
 
@@ -900,9 +789,7 @@ void GetFramebufferAttachmentParameterivCall(const GlesContext* c, GLenum target
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetFramebufferAttachmentParameterivCall(%p, %s (0x%x), %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(attachment), attachment, GetEnumString(pname), pname, params);
-#endif
+  DPRINT("GetFramebufferAttachmentParameterivCall(%p, %s (0x%x), %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(attachment), attachment, GetEnumString(pname), pname, params);
   return _api->glGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
 }
 
@@ -914,9 +801,7 @@ void GetIntegervCall(const GlesContext* c, GLenum pname, GLint* params) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetIntegervCall(%p, %s (0x%x), %p)", c, GetEnumString(pname), pname, params);
-#endif
+  DPRINT("GetIntegervCall(%p, %s (0x%x), %p)", c, GetEnumString(pname), pname, params);
   return _api->glGetIntegerv(pname, params);
 }
 
@@ -928,9 +813,7 @@ void GetProgramivCall(const GlesContext* c, GLuint program, GLenum pname, GLint*
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetProgramivCall(%p, %u, %s (0x%x), %p)", c, program, GetEnumString(pname), pname, params);
-#endif
+  DPRINT("GetProgramivCall(%p, %u, %s (0x%x), %p)", c, program, GetEnumString(pname), pname, params);
   return _api->glGetProgramiv(program, pname, params);
 }
 
@@ -942,9 +825,7 @@ void GetProgramInfoLogCall(const GlesContext* c, GLuint program, GLsizei bufsize
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetProgramInfoLogCall(%p, %u, %zd, %p, %p)", c, program, bufsize, length, infolog);
-#endif
+  DPRINT("GetProgramInfoLogCall(%p, %u, %zd, %p, %p)", c, program, bufsize, length, infolog);
   return _api->glGetProgramInfoLog(program, bufsize, length, infolog);
 }
 
@@ -956,9 +837,7 @@ void GetRenderbufferParameterivCall(const GlesContext* c, GLenum target, GLenum 
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetRenderbufferParameterivCall(%p, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(pname), pname, params);
-#endif
+  DPRINT("GetRenderbufferParameterivCall(%p, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(pname), pname, params);
   return _api->glGetRenderbufferParameteriv(target, pname, params);
 }
 
@@ -970,9 +849,7 @@ void GetShaderivCall(const GlesContext* c, GLuint shader, GLenum pname, GLint* p
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetShaderivCall(%p, %u, %s (0x%x), %p)", c, shader, GetEnumString(pname), pname, params);
-#endif
+  DPRINT("GetShaderivCall(%p, %u, %s (0x%x), %p)", c, shader, GetEnumString(pname), pname, params);
   return _api->glGetShaderiv(shader, pname, params);
 }
 
@@ -984,9 +861,7 @@ void GetShaderInfoLogCall(const GlesContext* c, GLuint shader, GLsizei bufsize, 
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetShaderInfoLogCall(%p, %u, %zd, %p, %p)", c, shader, bufsize, length, infolog);
-#endif
+  DPRINT("GetShaderInfoLogCall(%p, %u, %zd, %p, %p)", c, shader, bufsize, length, infolog);
   return _api->glGetShaderInfoLog(shader, bufsize, length, infolog);
 }
 
@@ -998,9 +873,7 @@ void GetShaderPrecisionFormatCall(const GlesContext* c, GLenum shadertype, GLenu
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetShaderPrecisionFormatCall(%p, %s (0x%x), %s (0x%x), %p, %p)", c, GetEnumString(shadertype), shadertype, GetEnumString(precisiontype), precisiontype, range, precision);
-#endif
+  DPRINT("GetShaderPrecisionFormatCall(%p, %s (0x%x), %s (0x%x), %p, %p)", c, GetEnumString(shadertype), shadertype, GetEnumString(precisiontype), precisiontype, range, precision);
   return _api->glGetShaderPrecisionFormat(shadertype, precisiontype, range, precision);
 }
 
@@ -1012,9 +885,7 @@ void GetShaderSourceCall(const GlesContext* c, GLuint shader, GLsizei bufsize, G
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetShaderSourceCall(%p, %u, %zd, %p, %p)", c, shader, bufsize, length, source);
-#endif
+  DPRINT("GetShaderSourceCall(%p, %u, %zd, %p, %p)", c, shader, bufsize, length, source);
   return _api->glGetShaderSource(shader, bufsize, length, source);
 }
 
@@ -1026,9 +897,7 @@ const GLubyte* GetStringCall(const GlesContext* c, GLenum name) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetStringCall(%p, %s (0x%x))", c, GetEnumString(name), name);
-#endif
+  DPRINT("GetStringCall(%p, %s (0x%x))", c, GetEnumString(name), name);
   return _api->glGetString(name);
 }
 
@@ -1040,9 +909,7 @@ void GetTexParameterfvCall(const GlesContext* c, GLenum target, GLenum pname, GL
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetTexParameterfvCall(%p, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(pname), pname, params);
-#endif
+  DPRINT("GetTexParameterfvCall(%p, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(pname), pname, params);
   return _api->glGetTexParameterfv(target, pname, params);
 }
 
@@ -1054,9 +921,7 @@ void GetTexParameterivCall(const GlesContext* c, GLenum target, GLenum pname, GL
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetTexParameterivCall(%p, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(pname), pname, params);
-#endif
+  DPRINT("GetTexParameterivCall(%p, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(pname), pname, params);
   return _api->glGetTexParameteriv(target, pname, params);
 }
 
@@ -1068,9 +933,7 @@ void GetUniformfvCall(const GlesContext* c, GLuint program, GLint location, GLfl
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetUniformfvCall(%p, %u, %d, %p)", c, program, location, params);
-#endif
+  DPRINT("GetUniformfvCall(%p, %u, %d, %p)", c, program, location, params);
   return _api->glGetUniformfv(program, location, params);
 }
 
@@ -1082,9 +945,7 @@ void GetUniformivCall(const GlesContext* c, GLuint program, GLint location, GLin
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetUniformivCall(%p, %u, %d, %p)", c, program, location, params);
-#endif
+  DPRINT("GetUniformivCall(%p, %u, %d, %p)", c, program, location, params);
   return _api->glGetUniformiv(program, location, params);
 }
 
@@ -1096,9 +957,7 @@ GLint GetUniformLocationCall(const GlesContext* c, GLuint program, const char* n
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetUniformLocationCall(%p, %u, %p)", c, program, name);
-#endif
+  DPRINT("GetUniformLocationCall(%p, %u, %p)", c, program, name);
   return _api->glGetUniformLocation(program, name);
 }
 
@@ -1110,9 +969,7 @@ void GetVertexAttribfvCall(const GlesContext* c, GLuint index, GLenum pname, GLf
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetVertexAttribfvCall(%p, %u, %s (0x%x), %p)", c, index, GetEnumString(pname), pname, params);
-#endif
+  DPRINT("GetVertexAttribfvCall(%p, %u, %s (0x%x), %p)", c, index, GetEnumString(pname), pname, params);
   return _api->glGetVertexAttribfv(index, pname, params);
 }
 
@@ -1124,9 +981,7 @@ void GetVertexAttribivCall(const GlesContext* c, GLuint index, GLenum pname, GLi
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetVertexAttribivCall(%p, %u, %s (0x%x), %p)", c, index, GetEnumString(pname), pname, params);
-#endif
+  DPRINT("GetVertexAttribivCall(%p, %u, %s (0x%x), %p)", c, index, GetEnumString(pname), pname, params);
   return _api->glGetVertexAttribiv(index, pname, params);
 }
 
@@ -1138,9 +993,7 @@ void GetVertexAttribPointervCall(const GlesContext* c, GLuint index, GLenum pnam
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("GetVertexAttribPointervCall(%p, %u, %s (0x%x), %p)", c, index, GetEnumString(pname), pname, pointer);
-#endif
+  DPRINT("GetVertexAttribPointervCall(%p, %u, %s (0x%x), %p)", c, index, GetEnumString(pname), pname, pointer);
   return _api->glGetVertexAttribPointerv(index, pname, pointer);
 }
 
@@ -1152,9 +1005,7 @@ void HintCall(const GlesContext* c, GLenum target, GLenum mode) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("HintCall(%p, %s (0x%x), %s (0x%x))", c, GetEnumString(target), target, GetEnumString(mode), mode);
-#endif
+  DPRINT("HintCall(%p, %s (0x%x), %s (0x%x))", c, GetEnumString(target), target, GetEnumString(mode), mode);
   return _api->glHint(target, mode);
 }
 
@@ -1166,9 +1017,7 @@ GLboolean IsBufferCall(const GlesContext* c, GLuint buffer) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("IsBufferCall(%p, %u)", c, buffer);
-#endif
+  DPRINT("IsBufferCall(%p, %u)", c, buffer);
   return _api->glIsBuffer(buffer);
 }
 
@@ -1180,9 +1029,7 @@ GLboolean IsEnabledCall(const GlesContext* c, GLenum cap) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("IsEnabledCall(%p, %s (0x%x))", c, GetEnumString(cap), cap);
-#endif
+  DPRINT("IsEnabledCall(%p, %s (0x%x))", c, GetEnumString(cap), cap);
   return _api->glIsEnabled(cap);
 }
 
@@ -1194,9 +1041,7 @@ GLboolean IsFramebufferCall(const GlesContext* c, GLuint framebuffer) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("IsFramebufferCall(%p, %u)", c, framebuffer);
-#endif
+  DPRINT("IsFramebufferCall(%p, %u)", c, framebuffer);
   return _api->glIsFramebuffer(framebuffer);
 }
 
@@ -1208,9 +1053,7 @@ GLboolean IsProgramCall(const GlesContext* c, GLuint program) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("IsProgramCall(%p, %u)", c, program);
-#endif
+  DPRINT("IsProgramCall(%p, %u)", c, program);
   return _api->glIsProgram(program);
 }
 
@@ -1222,9 +1065,7 @@ GLboolean IsRenderbufferCall(const GlesContext* c, GLuint renderbuffer) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("IsRenderbufferCall(%p, %u)", c, renderbuffer);
-#endif
+  DPRINT("IsRenderbufferCall(%p, %u)", c, renderbuffer);
   return _api->glIsRenderbuffer(renderbuffer);
 }
 
@@ -1236,9 +1077,7 @@ GLboolean IsShaderCall(const GlesContext* c, GLuint shader) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("IsShaderCall(%p, %u)", c, shader);
-#endif
+  DPRINT("IsShaderCall(%p, %u)", c, shader);
   return _api->glIsShader(shader);
 }
 
@@ -1250,9 +1089,7 @@ GLboolean IsTextureCall(const GlesContext* c, GLuint texture) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("IsTextureCall(%p, %u)", c, texture);
-#endif
+  DPRINT("IsTextureCall(%p, %u)", c, texture);
   return _api->glIsTexture(texture);
 }
 
@@ -1264,9 +1101,7 @@ void LineWidthCall(const GlesContext* c, GLfloat width) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("LineWidthCall(%p, %f)", c, width);
-#endif
+  DPRINT("LineWidthCall(%p, %f)", c, width);
   return _api->glLineWidth(width);
 }
 
@@ -1278,9 +1113,7 @@ void LinkProgramCall(const GlesContext* c, GLuint program) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("LinkProgramCall(%p, %u)", c, program);
-#endif
+  DPRINT("LinkProgramCall(%p, %u)", c, program);
   return _api->glLinkProgram(program);
 }
 
@@ -1292,9 +1125,7 @@ void PixelStoreiCall(const GlesContext* c, GLenum pname, GLint param) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("PixelStoreiCall(%p, %s (0x%x), %d)", c, GetEnumString(pname), pname, param);
-#endif
+  DPRINT("PixelStoreiCall(%p, %s (0x%x), %d)", c, GetEnumString(pname), pname, param);
   return _api->glPixelStorei(pname, param);
 }
 
@@ -1306,9 +1137,7 @@ void PolygonOffsetCall(const GlesContext* c, GLfloat factor, GLfloat units) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("PolygonOffsetCall(%p, %f, %f)", c, factor, units);
-#endif
+  DPRINT("PolygonOffsetCall(%p, %f, %f)", c, factor, units);
   return _api->glPolygonOffset(factor, units);
 }
 
@@ -1320,9 +1149,7 @@ void ReadPixelsCall(const GlesContext* c, GLint x, GLint y, GLsizei width, GLsiz
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("ReadPixelsCall(%p, %d, %d, %zd, %zd, %s (0x%x), %s (0x%x), %p)", c, x, y, width, height, GetEnumString(format), format, GetEnumString(type), type, pixels);
-#endif
+  DPRINT("ReadPixelsCall(%p, %d, %d, %zd, %zd, %s (0x%x), %s (0x%x), %p)", c, x, y, width, height, GetEnumString(format), format, GetEnumString(type), type, pixels);
   return _api->glReadPixels(x, y, width, height, format, type, pixels);
 }
 
@@ -1334,9 +1161,7 @@ void ReleaseShaderCompilerCall(const GlesContext* c) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("ReleaseShaderCompilerCall(%p)", c);
-#endif
+  DPRINT("ReleaseShaderCompilerCall(%p)", c);
   return _api->glReleaseShaderCompiler();
 }
 
@@ -1348,9 +1173,7 @@ void RenderbufferStorageCall(const GlesContext* c, GLenum target, GLenum interna
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("RenderbufferStorageCall(%p, %s (0x%x), %s (0x%x), %zd, %zd)", c, GetEnumString(target), target, GetEnumString(internalformat), internalformat, width, height);
-#endif
+  DPRINT("RenderbufferStorageCall(%p, %s (0x%x), %s (0x%x), %zd, %zd)", c, GetEnumString(target), target, GetEnumString(internalformat), internalformat, width, height);
   return _api->glRenderbufferStorage(target, internalformat, width, height);
 }
 
@@ -1362,9 +1185,7 @@ void SampleCoverageCall(const GlesContext* c, GLclampf value, GLboolean invert) 
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("SampleCoverageCall(%p, %f, %d)", c, value, invert);
-#endif
+  DPRINT("SampleCoverageCall(%p, %f, %d)", c, value, invert);
   return _api->glSampleCoverage(value, invert);
 }
 
@@ -1376,9 +1197,7 @@ void ScissorCall(const GlesContext* c, GLint x, GLint y, GLsizei width, GLsizei 
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("ScissorCall(%p, %d, %d, %zd, %zd)", c, x, y, width, height);
-#endif
+  DPRINT("ScissorCall(%p, %d, %d, %zd, %zd)", c, x, y, width, height);
   return _api->glScissor(x, y, width, height);
 }
 
@@ -1390,9 +1209,7 @@ void ShaderBinaryCall(const GlesContext* c, GLsizei n, const GLuint* shaders, GL
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("ShaderBinaryCall(%p, %zd, %p, %s (0x%x), %p, %zd)", c, n, shaders, GetEnumString(binaryformat), binaryformat, binary, length);
-#endif
+  DPRINT("ShaderBinaryCall(%p, %zd, %p, %s (0x%x), %p, %zd)", c, n, shaders, GetEnumString(binaryformat), binaryformat, binary, length);
   return _api->glShaderBinary(n, shaders, binaryformat, binary, length);
 }
 
@@ -1404,9 +1221,7 @@ void ShaderSourceCall(const GlesContext* c, GLuint shader, GLsizei count, const 
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("ShaderSourceCall(%p, %u, %zd, %p, %p)", c, shader, count, str, length);
-#endif
+  DPRINT("ShaderSourceCall(%p, %u, %zd, %p, %p)", c, shader, count, str, length);
   return _api->glShaderSource(shader, count, str, length);
 }
 
@@ -1418,9 +1233,7 @@ void StencilFuncCall(const GlesContext* c, GLenum func, GLint ref, GLuint mask) 
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("StencilFuncCall(%p, %s (0x%x), %d, %u)", c, GetEnumString(func), func, ref, mask);
-#endif
+  DPRINT("StencilFuncCall(%p, %s (0x%x), %d, %u)", c, GetEnumString(func), func, ref, mask);
   return _api->glStencilFunc(func, ref, mask);
 }
 
@@ -1432,9 +1245,7 @@ void StencilFuncSeparateCall(const GlesContext* c, GLenum face, GLenum func, GLi
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("StencilFuncSeparateCall(%p, %s (0x%x), %s (0x%x), %d, %u)", c, GetEnumString(face), face, GetEnumString(func), func, ref, mask);
-#endif
+  DPRINT("StencilFuncSeparateCall(%p, %s (0x%x), %s (0x%x), %d, %u)", c, GetEnumString(face), face, GetEnumString(func), func, ref, mask);
   return _api->glStencilFuncSeparate(face, func, ref, mask);
 }
 
@@ -1446,9 +1257,7 @@ void StencilMaskCall(const GlesContext* c, GLuint mask) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("StencilMaskCall(%p, %u)", c, mask);
-#endif
+  DPRINT("StencilMaskCall(%p, %u)", c, mask);
   return _api->glStencilMask(mask);
 }
 
@@ -1460,9 +1269,7 @@ void StencilMaskSeparateCall(const GlesContext* c, GLenum face, GLuint mask) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("StencilMaskSeparateCall(%p, %s (0x%x), %u)", c, GetEnumString(face), face, mask);
-#endif
+  DPRINT("StencilMaskSeparateCall(%p, %s (0x%x), %u)", c, GetEnumString(face), face, mask);
   return _api->glStencilMaskSeparate(face, mask);
 }
 
@@ -1474,9 +1281,7 @@ void StencilOpCall(const GlesContext* c, GLenum fail, GLenum zfail, GLenum zpass
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("StencilOpCall(%p, %s (0x%x), %s (0x%x), %s (0x%x))", c, GetEnumString(fail), fail, GetEnumString(zfail), zfail, GetEnumString(zpass), zpass);
-#endif
+  DPRINT("StencilOpCall(%p, %s (0x%x), %s (0x%x), %s (0x%x))", c, GetEnumString(fail), fail, GetEnumString(zfail), zfail, GetEnumString(zpass), zpass);
   return _api->glStencilOp(fail, zfail, zpass);
 }
 
@@ -1488,9 +1293,7 @@ void StencilOpSeparateCall(const GlesContext* c, GLenum face, GLenum fail, GLenu
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("StencilOpSeparateCall(%p, %s (0x%x), %s (0x%x), %s (0x%x), %s (0x%x))", c, GetEnumString(face), face, GetEnumString(fail), fail, GetEnumString(zfail), zfail, GetEnumString(zpass), zpass);
-#endif
+  DPRINT("StencilOpSeparateCall(%p, %s (0x%x), %s (0x%x), %s (0x%x), %s (0x%x))", c, GetEnumString(face), face, GetEnumString(fail), fail, GetEnumString(zfail), zfail, GetEnumString(zpass), zpass);
   return _api->glStencilOpSeparate(face, fail, zfail, zpass);
 }
 
@@ -1502,9 +1305,7 @@ void TexImage2DCall(const GlesContext* c, GLenum target, GLint level, GLint inte
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("TexImage2DCall(%p, %s (0x%x), %d, %d, %zd, %zd, %d, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, level, internalformat, width, height, border, GetEnumString(format), format, GetEnumString(type), type, pixels);
-#endif
+  DPRINT("TexImage2DCall(%p, %s (0x%x), %d, %d, %zd, %zd, %d, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, level, internalformat, width, height, border, GetEnumString(format), format, GetEnumString(type), type, pixels);
   return _api->glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
 }
 
@@ -1516,9 +1317,7 @@ void TexParameterfCall(const GlesContext* c, GLenum target, GLenum pname, GLfloa
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("TexParameterfCall(%p, %s (0x%x), %s (0x%x), %f)", c, GetEnumString(target), target, GetEnumString(pname), pname, param);
-#endif
+  DPRINT("TexParameterfCall(%p, %s (0x%x), %s (0x%x), %f)", c, GetEnumString(target), target, GetEnumString(pname), pname, param);
   return _api->glTexParameterf(target, pname, param);
 }
 
@@ -1530,9 +1329,7 @@ void TexParameterfvCall(const GlesContext* c, GLenum target, GLenum pname, const
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("TexParameterfvCall(%p, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(pname), pname, params);
-#endif
+  DPRINT("TexParameterfvCall(%p, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(pname), pname, params);
   return _api->glTexParameterfv(target, pname, params);
 }
 
@@ -1544,9 +1341,7 @@ void TexParameteriCall(const GlesContext* c, GLenum target, GLenum pname, GLint 
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("TexParameteriCall(%p, %s (0x%x), %s (0x%x), %d)", c, GetEnumString(target), target, GetEnumString(pname), pname, param);
-#endif
+  DPRINT("TexParameteriCall(%p, %s (0x%x), %s (0x%x), %d)", c, GetEnumString(target), target, GetEnumString(pname), pname, param);
   return _api->glTexParameteri(target, pname, param);
 }
 
@@ -1558,9 +1353,7 @@ void TexParameterivCall(const GlesContext* c, GLenum target, GLenum pname, const
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("TexParameterivCall(%p, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(pname), pname, params);
-#endif
+  DPRINT("TexParameterivCall(%p, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(pname), pname, params);
   return _api->glTexParameteriv(target, pname, params);
 }
 
@@ -1572,9 +1365,7 @@ void TexSubImage2DCall(const GlesContext* c, GLenum target, GLint level, GLint x
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("TexSubImage2DCall(%p, %s (0x%x), %d, %d, %d, %zd, %zd, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, level, xoffset, yoffset, width, height, GetEnumString(format), format, GetEnumString(type), type, pixels);
-#endif
+  DPRINT("TexSubImage2DCall(%p, %s (0x%x), %d, %d, %d, %zd, %zd, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, level, xoffset, yoffset, width, height, GetEnumString(format), format, GetEnumString(type), type, pixels);
   return _api->glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
 }
 
@@ -1586,9 +1377,7 @@ void Uniform1fCall(const GlesContext* c, GLint location, GLfloat x) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("Uniform1fCall(%p, %d, %f)", c, location, x);
-#endif
+  DPRINT("Uniform1fCall(%p, %d, %f)", c, location, x);
   return _api->glUniform1f(location, x);
 }
 
@@ -1600,9 +1389,7 @@ void Uniform1fvCall(const GlesContext* c, GLint location, GLsizei count, const G
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("Uniform1fvCall(%p, %d, %zd, %p)", c, location, count, v);
-#endif
+  DPRINT("Uniform1fvCall(%p, %d, %zd, %p)", c, location, count, v);
   return _api->glUniform1fv(location, count, v);
 }
 
@@ -1614,9 +1401,7 @@ void Uniform1iCall(const GlesContext* c, GLint location, GLint x) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("Uniform1iCall(%p, %d, %d)", c, location, x);
-#endif
+  DPRINT("Uniform1iCall(%p, %d, %d)", c, location, x);
   return _api->glUniform1i(location, x);
 }
 
@@ -1628,9 +1413,7 @@ void Uniform1ivCall(const GlesContext* c, GLint location, GLsizei count, const G
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("Uniform1ivCall(%p, %d, %zd, %p)", c, location, count, v);
-#endif
+  DPRINT("Uniform1ivCall(%p, %d, %zd, %p)", c, location, count, v);
   return _api->glUniform1iv(location, count, v);
 }
 
@@ -1642,9 +1425,7 @@ void Uniform2fCall(const GlesContext* c, GLint location, GLfloat x, GLfloat y) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("Uniform2fCall(%p, %d, %f, %f)", c, location, x, y);
-#endif
+  DPRINT("Uniform2fCall(%p, %d, %f, %f)", c, location, x, y);
   return _api->glUniform2f(location, x, y);
 }
 
@@ -1656,9 +1437,7 @@ void Uniform2fvCall(const GlesContext* c, GLint location, GLsizei count, const G
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("Uniform2fvCall(%p, %d, %zd, %p)", c, location, count, v);
-#endif
+  DPRINT("Uniform2fvCall(%p, %d, %zd, %p)", c, location, count, v);
   return _api->glUniform2fv(location, count, v);
 }
 
@@ -1670,9 +1449,7 @@ void Uniform2iCall(const GlesContext* c, GLint location, GLint x, GLint y) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("Uniform2iCall(%p, %d, %d, %d)", c, location, x, y);
-#endif
+  DPRINT("Uniform2iCall(%p, %d, %d, %d)", c, location, x, y);
   return _api->glUniform2i(location, x, y);
 }
 
@@ -1684,9 +1461,7 @@ void Uniform2ivCall(const GlesContext* c, GLint location, GLsizei count, const G
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("Uniform2ivCall(%p, %d, %zd, %p)", c, location, count, v);
-#endif
+  DPRINT("Uniform2ivCall(%p, %d, %zd, %p)", c, location, count, v);
   return _api->glUniform2iv(location, count, v);
 }
 
@@ -1698,9 +1473,7 @@ void Uniform3fCall(const GlesContext* c, GLint location, GLfloat x, GLfloat y, G
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("Uniform3fCall(%p, %d, %f, %f, %f)", c, location, x, y, z);
-#endif
+  DPRINT("Uniform3fCall(%p, %d, %f, %f, %f)", c, location, x, y, z);
   return _api->glUniform3f(location, x, y, z);
 }
 
@@ -1712,9 +1485,7 @@ void Uniform3fvCall(const GlesContext* c, GLint location, GLsizei count, const G
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("Uniform3fvCall(%p, %d, %zd, %p)", c, location, count, v);
-#endif
+  DPRINT("Uniform3fvCall(%p, %d, %zd, %p)", c, location, count, v);
   return _api->glUniform3fv(location, count, v);
 }
 
@@ -1726,9 +1497,7 @@ void Uniform3iCall(const GlesContext* c, GLint location, GLint x, GLint y, GLint
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("Uniform3iCall(%p, %d, %d, %d, %d)", c, location, x, y, z);
-#endif
+  DPRINT("Uniform3iCall(%p, %d, %d, %d, %d)", c, location, x, y, z);
   return _api->glUniform3i(location, x, y, z);
 }
 
@@ -1740,9 +1509,7 @@ void Uniform3ivCall(const GlesContext* c, GLint location, GLsizei count, const G
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("Uniform3ivCall(%p, %d, %zd, %p)", c, location, count, v);
-#endif
+  DPRINT("Uniform3ivCall(%p, %d, %zd, %p)", c, location, count, v);
   return _api->glUniform3iv(location, count, v);
 }
 
@@ -1754,9 +1521,7 @@ void Uniform4fCall(const GlesContext* c, GLint location, GLfloat x, GLfloat y, G
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("Uniform4fCall(%p, %d, %f, %f, %f, %f)", c, location, x, y, z, w);
-#endif
+  DPRINT("Uniform4fCall(%p, %d, %f, %f, %f, %f)", c, location, x, y, z, w);
   return _api->glUniform4f(location, x, y, z, w);
 }
 
@@ -1768,9 +1533,7 @@ void Uniform4fvCall(const GlesContext* c, GLint location, GLsizei count, const G
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("Uniform4fvCall(%p, %d, %zd, %p)", c, location, count, v);
-#endif
+  DPRINT("Uniform4fvCall(%p, %d, %zd, %p)", c, location, count, v);
   return _api->glUniform4fv(location, count, v);
 }
 
@@ -1782,9 +1545,7 @@ void Uniform4iCall(const GlesContext* c, GLint location, GLint x, GLint y, GLint
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("Uniform4iCall(%p, %d, %d, %d, %d, %d)", c, location, x, y, z, w);
-#endif
+  DPRINT("Uniform4iCall(%p, %d, %d, %d, %d, %d)", c, location, x, y, z, w);
   return _api->glUniform4i(location, x, y, z, w);
 }
 
@@ -1796,9 +1557,7 @@ void Uniform4ivCall(const GlesContext* c, GLint location, GLsizei count, const G
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("Uniform4ivCall(%p, %d, %zd, %p)", c, location, count, v);
-#endif
+  DPRINT("Uniform4ivCall(%p, %d, %zd, %p)", c, location, count, v);
   return _api->glUniform4iv(location, count, v);
 }
 
@@ -1810,9 +1569,7 @@ void UniformMatrix2fvCall(const GlesContext* c, GLint location, GLsizei count, G
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("UniformMatrix2fvCall(%p, %d, %zd, %d, %p)", c, location, count, transpose, value);
-#endif
+  DPRINT("UniformMatrix2fvCall(%p, %d, %zd, %d, %p)", c, location, count, transpose, value);
   return _api->glUniformMatrix2fv(location, count, transpose, value);
 }
 
@@ -1824,9 +1581,7 @@ void UniformMatrix3fvCall(const GlesContext* c, GLint location, GLsizei count, G
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("UniformMatrix3fvCall(%p, %d, %zd, %d, %p)", c, location, count, transpose, value);
-#endif
+  DPRINT("UniformMatrix3fvCall(%p, %d, %zd, %d, %p)", c, location, count, transpose, value);
   return _api->glUniformMatrix3fv(location, count, transpose, value);
 }
 
@@ -1838,9 +1593,7 @@ void UniformMatrix4fvCall(const GlesContext* c, GLint location, GLsizei count, G
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("UniformMatrix4fvCall(%p, %d, %zd, %d, %p)", c, location, count, transpose, value);
-#endif
+  DPRINT("UniformMatrix4fvCall(%p, %d, %zd, %d, %p)", c, location, count, transpose, value);
   return _api->glUniformMatrix4fv(location, count, transpose, value);
 }
 
@@ -1852,9 +1605,7 @@ void UseProgramCall(const GlesContext* c, GLuint program) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("UseProgramCall(%p, %u)", c, program);
-#endif
+  DPRINT("UseProgramCall(%p, %u)", c, program);
   return _api->glUseProgram(program);
 }
 
@@ -1866,9 +1617,7 @@ void ValidateProgramCall(const GlesContext* c, GLuint program) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("ValidateProgramCall(%p, %u)", c, program);
-#endif
+  DPRINT("ValidateProgramCall(%p, %u)", c, program);
   return _api->glValidateProgram(program);
 }
 
@@ -1880,9 +1629,7 @@ void VertexAttrib1fCall(const GlesContext* c, GLuint indx, GLfloat x) {
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("VertexAttrib1fCall(%p, %u, %f)", c, indx, x);
-#endif
+  DPRINT("VertexAttrib1fCall(%p, %u, %f)", c, indx, x);
   return _api->glVertexAttrib1f(indx, x);
 }
 
@@ -1894,9 +1641,7 @@ void VertexAttrib1fvCall(const GlesContext* c, GLuint indx, const GLfloat* value
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("VertexAttrib1fvCall(%p, %u, %p)", c, indx, values);
-#endif
+  DPRINT("VertexAttrib1fvCall(%p, %u, %p)", c, indx, values);
   return _api->glVertexAttrib1fv(indx, values);
 }
 
@@ -1908,9 +1653,7 @@ void VertexAttrib2fCall(const GlesContext* c, GLuint indx, GLfloat x, GLfloat y)
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("VertexAttrib2fCall(%p, %u, %f, %f)", c, indx, x, y);
-#endif
+  DPRINT("VertexAttrib2fCall(%p, %u, %f, %f)", c, indx, x, y);
   return _api->glVertexAttrib2f(indx, x, y);
 }
 
@@ -1922,9 +1665,7 @@ void VertexAttrib2fvCall(const GlesContext* c, GLuint indx, const GLfloat* value
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("VertexAttrib2fvCall(%p, %u, %p)", c, indx, values);
-#endif
+  DPRINT("VertexAttrib2fvCall(%p, %u, %p)", c, indx, values);
   return _api->glVertexAttrib2fv(indx, values);
 }
 
@@ -1936,9 +1677,7 @@ void VertexAttrib3fCall(const GlesContext* c, GLuint indx, GLfloat x, GLfloat y,
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("VertexAttrib3fCall(%p, %u, %f, %f, %f)", c, indx, x, y, z);
-#endif
+  DPRINT("VertexAttrib3fCall(%p, %u, %f, %f, %f)", c, indx, x, y, z);
   return _api->glVertexAttrib3f(indx, x, y, z);
 }
 
@@ -1950,9 +1689,7 @@ void VertexAttrib3fvCall(const GlesContext* c, GLuint indx, const GLfloat* value
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("VertexAttrib3fvCall(%p, %u, %p)", c, indx, values);
-#endif
+  DPRINT("VertexAttrib3fvCall(%p, %u, %p)", c, indx, values);
   return _api->glVertexAttrib3fv(indx, values);
 }
 
@@ -1964,9 +1701,7 @@ void VertexAttrib4fCall(const GlesContext* c, GLuint indx, GLfloat x, GLfloat y,
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("VertexAttrib4fCall(%p, %u, %f, %f, %f, %f)", c, indx, x, y, z, w);
-#endif
+  DPRINT("VertexAttrib4fCall(%p, %u, %f, %f, %f, %f)", c, indx, x, y, z, w);
   return _api->glVertexAttrib4f(indx, x, y, z, w);
 }
 
@@ -1978,9 +1713,7 @@ void VertexAttrib4fvCall(const GlesContext* c, GLuint indx, const GLfloat* value
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("VertexAttrib4fvCall(%p, %u, %p)", c, indx, values);
-#endif
+  DPRINT("VertexAttrib4fvCall(%p, %u, %p)", c, indx, values);
   return _api->glVertexAttrib4fv(indx, values);
 }
 
@@ -1992,9 +1725,7 @@ void VertexAttribPointerCall(const GlesContext* c, GLuint indx, GLint size, GLen
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("VertexAttribPointerCall(%p, %u, %d, %s (0x%x), %d, %zd, %p)", c, indx, size, GetEnumString(type), type, normalized, stride, ptr);
-#endif
+  DPRINT("VertexAttribPointerCall(%p, %u, %d, %s (0x%x), %d, %zd, %p)", c, indx, size, GetEnumString(type), type, normalized, stride, ptr);
   return _api->glVertexAttribPointer(indx, size, type, normalized, stride, ptr);
 }
 
@@ -2006,9 +1737,7 @@ void ViewportCall(const GlesContext* c, GLint x, GLint y, GLsizei width, GLsizei
       static_cast<const GraphicsApis*>(c->Apis());
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
-#ifdef ENABLE_PASSTHROUGH_LOGGING
-  ALOGI("ViewportCall(%p, %d, %d, %zd, %zd)", c, x, y, width, height);
-#endif
+  DPRINT("ViewportCall(%p, %d, %d, %zd, %zd)", c, x, y, width, height);
   return _api->glViewport(x, y, width, height);
 }
 
