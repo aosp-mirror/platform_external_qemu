@@ -1786,6 +1786,10 @@ GL_APICALL void  GL_APIENTRY glReleaseShaderCompiler(void){
 
 GL_APICALL void  GL_APIENTRY glRenderbufferStorage(GLenum target, GLenum internalformat, GLsizei width, GLsizei height){
     GET_CTX();
+    SET_ERROR_IF(internalformat == GL_DEPTH24_STENCIL8_OES &&
+                 !ctx->getCaps()->GL_EXT_PACKED_DEPTH_STENCIL, GL_INVALID_ENUM);
+    SET_ERROR_IF((internalformat == GL_RGB8_OES || internalformat == GL_RGBA8_OES) &&
+                 !ctx->getCaps()->GL_OES_RGB8_RGBA8, GL_INVALID_ENUM);
     GLenum internal = internalformat;
     switch (internalformat) {
     case GL_RGB565:
