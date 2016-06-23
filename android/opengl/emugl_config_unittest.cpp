@@ -159,8 +159,8 @@ TEST(EmuglConfig, init) {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
                 &config, true, "guest", "auto", 0, false, false, false));
-        EXPECT_TRUE(config.enabled);
-        EXPECT_STREQ("guest", config.backend);
+        EXPECT_FALSE(config.enabled);
+        EXPECT_STREQ("GPU emulation is disabled", config.status);
     }
 
     {
