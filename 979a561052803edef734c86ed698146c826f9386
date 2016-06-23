@@ -93,6 +93,29 @@
       "revId": "979a561052803edef734c86ed698146c826f9386",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3c2ed56_f7897ad4",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1157,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-23T20:59:57Z",
+      "side": 1,
+      "message": "nit: \u0027std::string()\u0027 or even \u0027{}\u0027 IMO would be more explicit about what we\u0027re doing: clearing out the custom path",
+      "range": {
+        "startLine": 1157,
+        "startChar": 40,
+        "endLine": 1157,
+        "endChar": 42
+      },
+      "revId": "979a561052803edef734c86ed698146c826f9386",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
