@@ -679,6 +679,38 @@ static X86CPUDefinition builtin_x86_defs[] = {
             CPUID_EXT3_ABM | CPUID_EXT3_SSE4A,
         .xlevel = 0x8000000A,
     },
+#ifdef CONFIG_ANDROID
+    {
+        /* A variant of qemu64 for Android emulation.
+         * According to Table 1 of NDK Programmer's Guide, section "ABI
+         * Management" (https://developer.android.com/ndk/guides/abis.html),
+         * Android requires the following additional instruction sets for the
+         * x86_64 ABI that are not supported by qemu64:
+         *  SSSE3, SSE4.1, SSE4.2
+         */
+        .name = "android64",
+        .level = 4,
+        .vendor = CPUID_VENDOR_INTEL,
+        .family = 6,
+        .model = 6,
+        .stepping = 3,
+        .features[FEAT_1_EDX] =
+            PPRO_FEATURES |
+            CPUID_MTRR | CPUID_CLFLUSH | CPUID_MCA |
+            CPUID_PSE36,
+        .features[FEAT_1_ECX] =
+            CPUID_EXT_POPCNT | CPUID_EXT_SSE42 | CPUID_EXT_SSE41 |
+            CPUID_EXT_CX16 | CPUID_EXT_SSSE3 | CPUID_EXT_SSE3,
+        .features[FEAT_8000_0001_EDX] =
+            (PPRO_FEATURES & CPUID_EXT2_AMD_ALIASES) |
+            CPUID_EXT2_LM | CPUID_EXT2_SYSCALL | CPUID_EXT2_NX,
+        .features[FEAT_8000_0001_ECX] =
+            CPUID_EXT3_LAHF_LM | CPUID_EXT3_SVM |
+            CPUID_EXT3_ABM | CPUID_EXT3_SSE4A,
+        .xlevel = 0x8000000A,
+        .model_id = "Android virtual processor"
+    },
+#endif
     {
         .name = "phenom",
         .level = 5,
@@ -777,6 +809,31 @@ static X86CPUDefinition builtin_x86_defs[] = {
             CPUID_EXT_SSE3 | CPUID_EXT_SSSE3,
         .xlevel = 0x80000004,
     },
+#ifdef CONFIG_ANDROID
+    {
+        /* A variant of qemu32 for Android emulation.
+         * According to Table 1 of NDK Programmer's Guide, section "ABI
+         * Management" (https://developer.android.com/ndk/guides/abis.html),
+         * Android requires the following additional instruction sets for the
+         * x86 ABI that are not supported by qemu32:
+         *  SSSE3
+         * Another change from qemu32 is the removal of POPCNT, which is not
+         * required by Android and usually comes alongside SSE4.2.
+         */
+        .name = "android32",
+        .level = 4,
+        .vendor = CPUID_VENDOR_INTEL,
+        .family = 6,
+        .model = 6,
+        .stepping = 3,
+        .features[FEAT_1_EDX] =
+            PPRO_FEATURES,
+        .features[FEAT_1_ECX] =
+            CPUID_EXT_SSE3 | CPUID_EXT_SSSE3,
+        .xlevel = 0x80000004,
+        .model_id = "Android 32-bit virtual processor"
+    },
+#endif
     {
         .name = "kvm32",
         .level = 5,
