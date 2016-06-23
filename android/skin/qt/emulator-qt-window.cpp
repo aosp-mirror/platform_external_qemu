@@ -956,16 +956,6 @@ void EmulatorQtWindow::screenshot() {
         return;
     }
 
-    auto args = getAdbFullPathStd();
-    if (args.empty()) {
-        showErrorDialog(
-                tr("Could not locate 'adb'<br/>"
-                   "Check settings to verify that your chosen adb path is "
-                   "valid."),
-                tr("Screenshot"));
-        return;
-    }
-
     QString savePath = getScreenshotSaveDirectory();
     if (savePath.isEmpty()) {
         showErrorDialog(tr("The screenshot save location is invalid.<br/>"
@@ -1083,15 +1073,6 @@ void EmulatorQtWindow::installDone(ApkInstaller::Result result,
 }
 
 void EmulatorQtWindow::runAdbPush(const QList<QUrl>& urls) {
-    auto adbCommandArgs = getAdbFullPathStd();
-    if (adbCommandArgs.empty()) {
-        showErrorDialog(
-                tr("Could not locate 'adb'<br/>"
-                   "Check settings to verify that your chosen adb path is "
-                   "valid."),
-                tr("File Copy"));
-        return;
-    }
     std::vector<std::pair<std::string, std::string>> file_paths;
     StringView remoteDownloadsDir = avdInfo_getApiLevel(android_avdInfo) > 10
                                             ? kRemoteDownloadsDir
@@ -1142,31 +1123,6 @@ void EmulatorQtWindow::adbPushDone(StringView filePath,
             msg = tr("Could not copy %1").arg(filePath.c_str());
     }
     showErrorDialog(msg, tr("File Copy"));
-}
-
-vector<string> EmulatorQtWindow::getAdbFullPathStd() {
-    std::string adbPath;
-    QSettings settings;
-    if (settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool()) {
-        if (!mAdbInterface->detectedAdbPath().empty()) {
-            adbPath = mAdbInterface->detectedAdbPath();
-        } else {
-            showErrorDialog(tr("Could not automatically find ADB.<br>"
-                               "Please use the settings page to manually set "
-                               "an ADB path."),
-                            tr("ADB"));
-            return {};
-        }
-    } else {
-        adbPath = settings.value(Ui::Settings::ADB_PATH, "")
-                          .toString()
-                          .toStdString();
-    }
-
-    vector<string> args{
-            adbPath, "-s",
-            android::base::StringFormat("emulator-%d", android_base_port)};
-    return args;
 }
 
 // Convert a Qt::Key_XXX code into the corresponding Linux keycode value.
@@ -1504,6 +1460,10 @@ QRect EmulatorQtWindow::deviceGeometry() const {
     return mDeviceGeometry;
 }
 
+android::emulation::AdbInterface* EmulatorQtWindow::getAdbInterface() const {
+    return mAdbInterface.get();
+}
+
 void EmulatorQtWindow::toggleZoomMode() {
     mInZoomMode = !mInZoomMode;
 
@@ -1663,11 +1623,20 @@ void EmulatorQtWindow::checkAdbVersionAndWarn() {
     QSettings settings;
     if (!mAdbInterface->isAdbVersionCurrent() &&
         settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool()) {
-        mAdbWarningBox.setText(tr(
-            "The ADB binary found at %1 is obsolete and has serious"
-            "performance problems with the Android Emulator. Please update to "
-            "a newer version to get significantly faster app/file transfer.")
-                .arg(mAdbInterface->detectedAdbPath().c_str()));
+        std::string adb_path = mAdbInterface->detectedAdbPath();
+        if (adb_path.empty()) {
+            mAdbWarningBox.setText(
+                    tr("Could not automatically detect an ADB binary. Some "
+                       "emulator functionality will not work until a custom "
+                       "path to ADB  is added in the extended settings page."));
+        } else {
+            mAdbWarningBox.setText(
+                    tr("The ADB binary found at %1 is obsolete and has serious"
+                       "performance problems with the Android Emulator. Please "
+                       "update to a newer version to get significantly faster "
+                       "app/file transfer.")
+                            .arg(adb_path.c_str()));
+        }
         QSettings settings;
         if (settings.value(Ui::Settings::SHOW_ADB_WARNING, true).toBool()) {
             QObject::connect(&mAdbWarningBox,

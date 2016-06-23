@@ -37,8 +37,15 @@ public:
     // Returns true is the ADB version is fresh enough.
     bool isAdbVersionCurrent() const override final { return mAdbVersionCurrent; }
 
+    // Setup a custom adb path.
+    void setCustomAdbPath(const std::string& path) override final {
+        mCustomAdbPath = path;
+    }
+
     // Returns the automatically detected path to adb
-    const std::string& detectedAdbPath() const override final { return mAdbPath; }
+    const std::string& detectedAdbPath() const override final {
+        return mAutoAdbPath;
+    }
 
     // Setup the emulator base port this interface is connected to
     virtual void setEmulatorBasePort(int port) override final {
@@ -64,7 +71,8 @@ public:
 
 private:
     android::base::Looper* mLooper;
-    std::string mAdbPath;
+    std::string mAutoAdbPath;
+    std::string mCustomAdbPath;
     std::string mSerialString;
     bool mAdbVersionCurrent;
 };
@@ -75,11 +83,16 @@ std::unique_ptr<AdbInterface> AdbInterface::create(android::base::Looper* looper
 
 // Helper function, checks if the version of adb in the given SDK is
 // fresh enough.
-static bool checkAdbVersion(const std::string& sdk_root_directory) {
+static bool checkAdbVersion(const std::string& sdk_root_directory,
+                            const std::string& adb_path) {
     static const int kMinAdbVersionMajor = 23;
     static const int kMinAdbVersionMinor = 1;
 
     if (sdk_root_directory.empty()) {
+        return false;
+    }
+
+    if (!System::get()->pathCanExec(adb_path)) {
         return false;
     }
 
@@ -116,8 +129,10 @@ AdbInterfaceImpl::AdbInterfaceImpl(android::base::Looper* looper)
         // If ANDROID_SDK_ROOT is defined, the user most likely wanted to use
         // that ADB. Store it for later - if the second potential ADB path
         // also fails, we'll warn the user about this one.
-        mAdbPath = PathUtils::join(sdk_root_by_env, "platform-tools", "adb");
-        if (checkAdbVersion(sdk_root_by_env)) {
+        auto adb_path =
+                PathUtils::join(sdk_root_by_env, "platform-tools", "adb");
+        if (checkAdbVersion(sdk_root_by_env, adb_path)) {
+            mAutoAdbPath = adb_path;
             mAdbVersionCurrent = true;
             return;
         }
@@ -127,28 +142,20 @@ AdbInterfaceImpl::AdbInterfaceImpl(android::base::Looper* looper)
     // path based on the emulator executable location.
     auto sdk_root_by_path = android::ConfigDirs::getSdkRootDirectoryByPath();
     if (sdk_root_by_path != sdk_root_by_env && !sdk_root_by_path.empty()) {
-        if (checkAdbVersion(sdk_root_by_path)) {
-            mAdbPath =
-                    PathUtils::join(sdk_root_by_path, "platform-tools", "adb");
+        auto adb_path =
+                PathUtils::join(sdk_root_by_path, "platform-tools", "adb");
+        if (checkAdbVersion(sdk_root_by_path, adb_path)) {
+            mAutoAdbPath = adb_path;
             mAdbVersionCurrent = true;
             return;
-
-            // Only save this path if the ANDROID_SDK_ROOT path was not set.
-        } else if (mAdbPath.empty()) {
-            mAdbPath =
-                    PathUtils::join(sdk_root_by_path, "platform-tools", "adb");
         }
     }
 
     // TODO(zyy): check if there's an adb binary on %PATH% and use that as a
     //  last line of defense.
 
-    if (mAdbPath.empty()) {
-        // Well, we won't run any ADB commands during this session. Let's at
-        // least warn the user.
-        dwarning("couldn't detect an ADB binary on the machine. "
-                 "ADB functionality is disabled");
-    }
+    // If no ADB has been found at this point, an error message will warn the
+    // user and direct them to the custom adb path setting.
 }
 
 AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
@@ -156,9 +163,9 @@ AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
         std::function<void(const OptionalAdbCommandResult&)> result_callback,
         base::System::Duration timeout_ms,
         bool want_output) {
-    auto command = std::shared_ptr<AdbCommand>(
-            new AdbCommand(mLooper, mAdbPath, mSerialString, args,
-                           want_output, timeout_ms, result_callback));
+    auto command = std::shared_ptr<AdbCommand>(new AdbCommand(
+            mLooper, mCustomAdbPath.empty() ? mAutoAdbPath : mCustomAdbPath,
+            mSerialString, args, want_output, timeout_ms, result_callback));
     command->start();
     return command;
 }
