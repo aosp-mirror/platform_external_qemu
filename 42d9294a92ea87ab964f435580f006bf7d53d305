@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c3c2ed56_d4271ca3",
+        "filename": "android/emulation/android_pipe_common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-23T20:24:59Z",
+      "side": 1,
+      "message": "nit: android_pipe_device",
+      "range": {
+        "startLine": 21,
+        "startChar": 49,
+        "endLine": 21,
+        "endChar": 61
+      },
+      "revId": "42d9294a92ea87ab964f435580f006bf7d53d305",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
