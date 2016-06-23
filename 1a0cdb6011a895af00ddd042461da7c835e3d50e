@@ -22,6 +22,30 @@
       "revId": "1a0cdb6011a895af00ddd042461da7c835e3d50e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3c2ed56_83f72891",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 967,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-06-23T23:12:04Z",
+      "side": 0,
+      "message": "This comment led me to another problem that is now fixed, so thanks :)\n\nWhen there is no valid auto-detected ADB, we now pop up an error message on startup indicating as such.\n\nWhen they give us an *empty* custom ADB location (which can only happen when the setting is initially turned on), we default to the auto-detected on.\n\nWhen they give us a custom ADB location that is bad, we...well, we don\u0027t really care. This setting is intended only for people who know what they\u0027re doing, so I\u0027m okay with this.",
+      "parentUuid": "c3c2ed56_bdd52355",
+      "range": {
+        "startLine": 959,
+        "startChar": 2,
+        "endLine": 967,
+        "endChar": 5
+      },
+      "revId": "1a0cdb6011a895af00ddd042461da7c835e3d50e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
