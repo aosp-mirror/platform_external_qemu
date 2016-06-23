@@ -22,6 +22,29 @@
       "revId": "979a561052803edef734c86ed698146c826f9386",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3c2ed56_f7b41ae3",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1094,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-23T20:44:10Z",
+      "side": 1,
+      "message": "do we really need to do it every time, not just once?",
+      "range": {
+        "startLine": 1094,
+        "startChar": 9,
+        "endLine": 1094,
+        "endChar": 35
+      },
+      "revId": "979a561052803edef734c86ed698146c826f9386",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
