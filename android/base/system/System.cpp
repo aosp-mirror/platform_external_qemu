@@ -17,8 +17,10 @@
 #include "android/base/EintrWrapper.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/StringFormat.h"
+#include "android/utils/path.h"
 
 #ifdef _WIN32
 #include "android/base/system/Win32UnicodeString.h"
@@ -68,6 +70,7 @@
 // the shared libraries, and one has to use the _NSGetEnviron() function instead
 #ifdef __APPLE__
 #include <crt_externs.h>
+
 #define environ (*_NSGetEnviron())
 #else
 extern "C" char** environ;
@@ -252,10 +255,7 @@ public:
         if (mLauncherDir.empty()) {
             std::string programDir = getProgramDirectory();
 
-            std::string launcherName("emulator");
-#ifdef _WIN32
-            launcherName += ".exe";
-#endif
+            std::string launcherName = PathUtils::toExecutableName("emulator");
             std::vector<std::string> pathList = {programDir, launcherName};
             std::string launcherPath = PathUtils::recompose(pathList);
 
@@ -264,21 +264,33 @@ public:
                 return mLauncherDir;
             }
 
+#ifdef CONFIG_CMAKE
+
+#if defined(CONFIG_WIN32) && defined(__x86_64__)
+            // In an SDK installation, Windows 64 bit binaries are in a
+            // subdirectory of the 32 bit launcher so also check the parent
+            // directory
+            std::string parentPath = PathUtils::getNthParentDir(programDir, 1));
+            std::vector<std::string> pathList2 = {parentPath.get(), launcherName};
+            std::string launcherPath2 = PathUtils::recompose(pathList2);
+            if (pathIsFile(launcherPath2)) {
+                mLauncherDir = programDir;
+                return mLauncherDir;
+            }
+#endif
+
+#else
             // we are probably executing a qemu2 binary, which live in
             // <launcher-dir>/qemu/<os>-<arch>/
             // look for the launcher in grandparent directory
-            std::vector<std::string> programDirVector =
-                    PathUtils::decompose(programDir);
-            if (programDirVector.size() >= 2) {
-                programDirVector.resize(programDirVector.size() - 2);
-                std::string grandparentDir = PathUtils::recompose(programDirVector);
-                programDirVector.push_back(launcherName);
-                std::string launcherPath = PathUtils::recompose(programDirVector);
-                if (pathIsFile(launcherPath)) {
-                    mLauncherDir = grandparentDir;
-                    return mLauncherDir;
-                }
+            std::string parentPath = PathUtils::getNthParentDir(programDir, 2));
+            std::vector<std::string> pathList2 = {parentPath.get(), launcherName};
+            std::string launcherPath2 = PathUtils::recompose(pathList2);
+            if (pathIsFile(launcherPath2)) {
+                mLauncherDir = programDir;
+                return mLauncherDir;
             }
+#endif // CONFIG_CMAKE
 
             mLauncherDir.assign("<unknown-launcher-dir>");
         }
@@ -1283,6 +1295,27 @@ std::string System::findBundledExecutable(StringView programName) {
     System* const system = System::get();
     const std::string executableName = PathUtils::toExecutableName(programName);
 
+#ifdef CONFIG_CMAKE
+    // first, try the executable directory
+    std::vector<std::string> pathList = {system->getProgramDirectory(),
+                                         executableName};
+    std::string executablePath = PathUtils::recompose(pathList);
+    if (system->pathIsFile(executablePath)) {
+        return executablePath;
+    }
+
+#if defined(_WIN32) && defined(__x86_64)
+    // On Windows we don't have a x64 version e2fsprogs, so let's try
+    // 32-bit directory if 64-bit lookup failed
+    std::vector<std::string> pathList = {system->getLauncherDirectory(),
+                                         executableName};
+    std::string executablePath = PathUtils::recompose(pathList);
+    if (system->pathIsFile(executablePath)) {
+        return executablePath;
+    }
+#endif
+
+#else
     // first, try the root launcher directory
     std::vector<std::string> pathList = {system->getLauncherDirectory(),
                                          executableName};
@@ -1312,6 +1345,7 @@ std::string System::findBundledExecutable(StringView programName) {
     }
 #endif
 
+#endif // CONFIG_CMAKE
     return std::string();
 }
 

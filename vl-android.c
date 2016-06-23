@@ -1561,7 +1561,11 @@ char *qemu_find_file(int type, const char *name)
         /* This case corresponds to the emulator being used as part of an
          * SDK installation. NOTE: data_dir is really $bindir. */
         if (buf == NULL)
+#ifdef CONFIG_CMAKE
+            buf = qemu_find_file_with_subdir(data_dir, "data/pc-bios/", name);
+#else
             buf = qemu_find_file_with_subdir(data_dir, "lib/pc-bios/", name);
+#endif
         /* This case corresponds to platform builds. */
         if (buf == NULL)
             buf = qemu_find_file_with_subdir(data_dir, "../usr/share/pc-bios/", name);

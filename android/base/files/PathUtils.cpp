@@ -11,6 +11,7 @@
 
 #include "android/base/files/PathUtils.h"
 
+#include "android/base/containers/StringVector.h"
 #include "android/base/system/System.h"
 
 #include <iterator>
@@ -289,6 +290,18 @@ void PathUtils::simplifyComponents(std::vector<std::string>* components) {
 
     components->swap(stack);
 }
+
+// static
+std::string PathUtils::getNthParentDir(StringView path, size_t elementsToRemove) {
+    StringVector dir = PathUtils::decompose(path);
+    PathUtils::simplifyComponents(&dir);
+    if (dir.size() < elementsToRemove + 1U) {
+        return std::string("");
+    }
+    dir.resize(dir.size() - elementsToRemove);
+    return PathUtils::recompose(dir);
+}
+
 
 }  // namespace base
 }  // namespace android

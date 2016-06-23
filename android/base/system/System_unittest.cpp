@@ -353,13 +353,19 @@ TEST(System, findBundledExecutable) {
 
     std::vector<std::string> pathList;
     pathList.push_back(std::string("foo"));
+#ifndef CONFIG_CMAKE
     pathList.push_back(std::string(System::kBinSubDir));
     ASSERT_TRUE(testDir->makeSubDir(PathUtils::recompose(pathList).c_str()));
+#endif
 
+    // CONFIG_CMAKE create file "<tmp-root>/foo/myprogram(|.exe)"
+    // !CONFIG_CMAKE create file "<tmp-root>/foo/(bin|bin64)/myprogram(|.exe)"
     pathList.push_back(std::string(kProgramFile));
     std::string programPath = PathUtils::recompose(pathList);
     make_subfile(testDir->path(), programPath.c_str());
 
+    // CONFIG_CMAKE check for "<tmp-root>/foo/myprogram(|.exe)"
+    // !CONFIG_CMAKE check for "<tmp-root>/foo/(bin|bin64)/myprogram(|.exe)"
     std::string path = testSys.findBundledExecutable("myprogram");
     std::string expectedPath("/");
     expectedPath += programPath;

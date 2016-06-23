@@ -291,8 +291,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         var_append EXTRA_CONFIGURE_FLAGS \
                 -opensource \
                 -confirm-license \
-                -force-debug-info \
-                -release \
+                -debug \
                 -no-c++11 \
                 -no-rpath \
                 -no-gtkstyle \
