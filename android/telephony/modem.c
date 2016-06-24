@@ -1678,7 +1678,6 @@ smspdu_dump( SmsPDU  pdu, FILE*  out )
 static const char*
 handleSendSMSText( const char*  cmd, AModem  modem )
 {
-#if 1
     SmsAddressRec  address;
     char           temp[16];
     char           number[16];
@@ -1778,52 +1777,6 @@ handleSendSMSText( const char*  cmd, AModem  modem )
     if (pdu != NULL)
         smspdu_free(pdu);
 
-#elif 1
-    SmsAddressRec  address;
-    char           number[16];
-    int            numlen;
-    int            len = strlen(cmd);
-    SmsPDU         pdu;
-
-    /* get rid of trailing escape */
-    if (len > 0 && cmd[len-1] == 0x1a)
-        len -= 1;
-
-    pdu = smspdu_create_from_hex( cmd, len );
-    if (pdu == NULL) {
-        D("%s: invalid SMS PDU ?: '%s'\n", __FUNCTION__, cmd);
-        return "+CMS ERROR: INVALID SMS PDU";
-    }
-    if (smspdu_get_receiver_address(pdu, &address) < 0) {
-        D("%s: could not get SMS receiver address from '%s'\n",
-          __FUNCTION__, cmd);
-        return "+CMS ERROR: BAD SMS RECEIVER ADDRESS";
-    }
-    do {
-        numlen = sms_address_to_str( &address, number, sizeof(number) );
-        if (numlen > sizeof(number)-1)
-            break;
-
-        number[numlen] = 0;
-        if ( remote_number_string_to_port( number ) < 0 )
-            break;
-
-        if ( remote_call_sms( number, modem->base_port, pdu ) < 0 )
-        {
-            D("%s: could not send SMS PDU to remote emulator\n",
-              __FUNCTION__);
-            return "+CMS ERROR: NO EMULATOR RECEIVER";
-        }
-    } while (0);
-#else
-    fprintf(stderr, "SMS<< %s\n", cmd);
-    SmsPDU  pdu = smspdu_create_from_hex( cmd, strlen(cmd) );
-    if (pdu == NULL) {
-        fprintf(stderr, "invalid SMS PDU ?: '%s'\n", cmd);
-    } else {
-        smspdu_dump(pdu, stderr);
-    }
-#endif
     return "+CMGS: 0\rOK\r";
 }
 
