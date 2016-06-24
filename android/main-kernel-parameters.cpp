@@ -31,7 +31,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    const char* kernelSerialPrefix,
                                    const char* avdKernelParameters,
                                    AndroidGlesEmulationMode glesMode,
-                                   uint64_t glesGuestCmaMB,
+                                   uint64_t glesFramebufferCMA,
                                    bool isQemu2) {
     android::ParameterList params;
     bool isX86ish = !strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64");
@@ -73,9 +73,9 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         params.addFormat("qemu.gles=%d", gles);
     }
 
-    // Additional memory for -gpu guest software renderers (e.g., SwiftShader)
-    if (glesMode == kAndroidGlesEmulationGuest && glesGuestCmaMB > 0) {
-        params.addFormat("cma=%" PRIu64 "M", glesGuestCmaMB);
+    // Additional memory for software renderers (e.g., SwiftShader)
+    if (glesFramebufferCMA > 0) {
+        params.addFormat("cma=%" PRIu64 "M", glesFramebufferCMA);
     }
 
     if (opts->logcat) {
