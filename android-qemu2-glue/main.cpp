@@ -495,13 +495,13 @@ extern "C" int main(int argc, char **argv) {
     }
 
     if (opts->port) {
-        int port = -1;
-        if (!android_parse_port_option(opts->port, &port)) {
+        int console_port = -1;
+        int adb_port = -1;
+        if (!android_parse_port_option(opts->port, &console_port, &adb_port)) {
             return 1;
         }
-        // Reuse the -android-ports parameter since -ports does the same
-        // thing but with the second port just being the console port + 1
-        std::string portsOption = StringFormat("%d,%d", port, port + 1);
+        std::string portsOption = StringFormat("%d,%d",
+                                               console_port, adb_port);
         args[n++] = "-android-ports";
         args[n++] = strdup(portsOption.c_str());
     }

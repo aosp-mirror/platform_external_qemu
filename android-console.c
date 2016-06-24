@@ -36,6 +36,7 @@
 #include "sysemu/sysemu.h"
 #include "hmp.h"
 
+#include "android/cmdline-option.h"
 #include "android/error-messages.h"
 #include "android/emulator-window.h"
 #include "android/skin/ui.h"
@@ -137,6 +138,7 @@ static bool perform_console_and_adb_init(int console_port,
         monitor_init(chr, MONITOR_ANDROID_CONSOLE | MONITOR_USE_READLINE);
         android_base_port = console_port;
 
+        android_validate_ports(console_port, adb_port);
         return true;
     }
     return false;
