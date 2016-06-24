@@ -198,6 +198,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
         .enable_dpad = android_hw->hw_dPad != 0,
         .enable_keyboard = android_hw->hw_keyboard != 0,
         .enable_trackball = android_hw->hw_trackBall != 0,
+        .enable_scale = !emulator->opts->fixed_scale,
 
         .window_x = emulator->win_x,
         .window_y = emulator->win_y,

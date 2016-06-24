@@ -170,6 +170,8 @@ OPT_FLAG( force_32bit, "always use 32-bit emulator" )
 OPT_PARAM(selinux, "<disabled|permissive>", "Set SELinux to either disabled or permissive mode")
 OPT_LIST(unix_pipe, "<path>", "Add <path> to the list of allowed Unix pipes")
 
+CFG_FLAG (fixed_scale, "Use fixed 1:1 scale for the initial emulator window.")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

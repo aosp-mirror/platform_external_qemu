@@ -1560,6 +1560,15 @@ help_unix_pipe(stralloc_t* out)
     );
 }
 
+static void
+help_fixed_scale(stralloc_t* out)
+{
+    PRINTF(
+    "  By default, we automatically scale the initial emulator window if it\n"
+    "  doesn't fit into the screen. Use '-fixed-scale' to disable this.\n\n"
+    );
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper

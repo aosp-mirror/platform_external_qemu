@@ -72,6 +72,7 @@ typedef struct SkinUIParams {
     bool enable_dpad;
     bool enable_keyboard;
     bool enable_trackball;
+    bool enable_scale;
 
     const char* keyboard_charmap;
 
