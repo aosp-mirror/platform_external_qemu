@@ -1513,14 +1513,10 @@ void EmulatorQtWindow::toggleZoomMode() {
         mContainer.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
+        simulateSetZoom(1.0);
         doResize(mContainer.size());
         mOverlay.hide();
     } else {
-        // Once in zoom mode, the scroll bars should automatically show up
-        // when necessary.
-        mContainer.setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-        mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-
         mOverlay.showForZoom();
     }
 }
