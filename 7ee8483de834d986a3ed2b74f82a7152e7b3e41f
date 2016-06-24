@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e3c531ce_51ec67c2",
+        "filename": "android/utils/filelock.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-24T23:39:18Z",
+      "side": 1,
+      "message": "Why this change? My personal preference would be to declare the variables at least as possible, so a reader can be sure it\u0027s not used above that declaration.  We\u0027re switching from C to C++; might as well use the freedom to program better when it\u0027s allowed.\n\nHere\u0027s a stack overflow discussion where the answer seems to summarize the arguments pretty well (IMO).\nhttp://stackoverflow.com/questions/288441/variable-declaration-placement-in-c",
+      "range": {
+        "startLine": 242,
+        "startChar": 2,
+        "endLine": 242,
+        "endChar": 30
+      },
+      "revId": "7ee8483de834d986a3ed2b74f82a7152e7b3e41f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
