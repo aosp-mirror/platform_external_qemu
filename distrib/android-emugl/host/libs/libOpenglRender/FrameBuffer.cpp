@@ -24,10 +24,22 @@
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
+#include "android/utils/debug.h"
 #include "emugl/common/logging.h"
 
 #include <stdio.h>
 #include <string.h>
+
+#define FB_DEBUG 0
+
+#if FB_DEBUG
+#define DPRINT(...) do { \
+    if (!VERBOSE_CHECK(gles)) { VERBOSE_ENABLE(gles); } \
+    VERBOSE_TID_FUNCTION_DPRINT(gles, __VA_ARGS__); \
+} while(0)
+#else
+#define DPRINT(...)
+#endif
 
 namespace {
 
@@ -837,6 +849,8 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
 
 bool FrameBuffer::bindColorBufferToTexture(HandleType p_colorbuffer)
 {
+    DPRINT("call. bind colorbuffer 0x%lx", p_colorbuffer);
+
     emugl::Mutex::AutoLock mutex(m_lock);
 
     ColorBufferMap::iterator c( m_colorbuffers.find(p_colorbuffer) );

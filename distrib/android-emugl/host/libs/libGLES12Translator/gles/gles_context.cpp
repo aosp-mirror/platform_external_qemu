@@ -37,6 +37,13 @@
 #include "gles/state.h"
 #include "gles/texture_data.h"
 
+#define CHECK_ERR() do { \
+    err = PASS_THROUGH(this, GetError); \
+    if (err != GL_NO_ERROR) { \
+        DLOG("underlying GLESv2 error! err=0x%lx", err); \
+    } \
+} while(0)
+
 namespace {
 
 #define VERTEX_ATTRIBUTE_KEY(enum, name) name,
@@ -137,6 +144,9 @@ void GlesContext::Restore() {
   } else {
     LOG_ALWAYS_FATAL("Unknown GLES version %d", version_);
   }
+
+  DLOG("Initialize texture context with max texture units=%d and max texture size=%d",
+       max_texture_units, max_texture_size_.Get());
   texture_context_.Init(max_texture_units, max_texture_size_.Get());
   uniform_context_.Init(max_texture_units);
 
@@ -428,6 +438,8 @@ void GlesContext::DrawFullscreenQuad(GLuint texture, bool flip_v) {
 
 void GlesContext::Draw(DrawType draw, GLenum mode, GLint first, GLsizei count,
             GLenum type, const GLvoid* indices) {
+    GLint err = GL_NO_ERROR;
+    CHECK_ERR();
   LOG_ALWAYS_FATAL_IF(draw != kDrawArrays && draw != kDrawElements);
   if (!CanDraw()) {
     return;
@@ -442,11 +454,15 @@ void GlesContext::Draw(DrawType draw, GLenum mode, GLint first, GLsizei count,
 
   if (draw == kDrawArrays) {
     pointer_context_.PrepareBuffersForDrawArrays(first, count);
+    CHECK_ERR();
     PASS_THROUGH(this, DrawArrays, mode, first, count);
+    CHECK_ERR();
   } else {
     indices = pointer_context_.PrepareBuffersForDrawElements(count, type,
                                                              indices);
+    CHECK_ERR();
     PASS_THROUGH(this, DrawElements, mode, count, type, indices);
+    CHECK_ERR();
   }
 
   // Restore the buffer bindings as the pointer context may have changed them.
@@ -538,10 +554,15 @@ void GlesContext::BindFramebuffer(GLuint framebuffer) {
 
 void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
                           GLfloat height) {
+  DLOG("Enter DrawTex x %f y %f z %f w %f h %f",x,y,z,width,height);
+  GLint err = GL_NO_ERROR;
+
   // Backup vbo's
   const GLint array_buffer = array_buffer_binding_;
   const GLint element_buffer = element_buffer_binding_;
+  CHECK_ERR();
   PASS_THROUGH(this, BindBuffer, GL_ARRAY_BUFFER, 0);
+  CHECK_ERR();
   PASS_THROUGH(this, BindBuffer, GL_ELEMENT_ARRAY_BUFFER, 0);
 
   // Backup pointers
@@ -549,6 +570,7 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
   for (GLint index = 0; index < kNumVertexAttributeKeys; ++index) {
     pointer_context_.DisableArray(index);
     PASS_THROUGH(this, DisableVertexAttribArray, index);
+  CHECK_ERR();
   }
 
   // Setup projection matrix to draw in viewport aligned coordinates
@@ -580,12 +602,16 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
   GLint num_textures = 0;
   for (GLint i = 0; i < UniformContext::kMaxTextureUnits; ++i) {
     if (!texture_context_.IsEnabled(GL_TEXTURE0 + i, GL_TEXTURE_2D)) {
+        DLOG("texture context not enabled for some reason for unit GL_TEXTURE0 + %d", i);
       continue;
     }
+
+    DLOG("Getting texture data for GL_TEXTURE0 + %d", i);
     const GLint texture = texture_context_.GetTexture(GL_TEXTURE0 + i,
                                                       GL_TEXTURE_2D);
-    const TextureDataPtr texture_data = share_group_->GetTextureData(texture);
+    const TextureDataPtr texture_data = texture == 0 ? texture_context_.GetDefaultTextureData(GL_TEXTURE_2D) : share_group_->GetTextureData(texture);
     if (texture_data == NULL) {
+        DLOG("texture data is null, stop");
       continue;
     }
 
@@ -608,8 +634,10 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
 
     pointer_context_.EnableArray(kTexCoord0VertexAttribute + i);
     PASS_THROUGH(this, EnableVertexAttribArray, kTexCoord0VertexAttribute + i);
+  CHECK_ERR();
     PASS_THROUGH(this, VertexAttribPointer, kTexCoord0VertexAttribute + i, 2,
                  GL_FLOAT, GL_FALSE, 0, texels[i]);
+  CHECK_ERR();
     num_textures++;
   }
 
@@ -623,12 +651,17 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
     };
     pointer_context_.EnableArray(kPositionVertexAttribute);
     PASS_THROUGH(this, EnableVertexAttribArray, kPositionVertexAttribute);
+  CHECK_ERR();
     PASS_THROUGH(this, VertexAttribPointer, kPositionVertexAttribute, 3,
                  GL_FLOAT, GL_FALSE, 0, vertices);
+  CHECK_ERR();
 
     // DrawTex() needs texture environments etc, so we use GLES1 emulation to
     // avoid unnecessary complexity.
     Draw(kDrawArrays, GL_TRIANGLE_FAN, 0, 4, 0, 0);
+  CHECK_ERR();
+  } else {
+        DLOG("num_texture == 0, skip drawing!");
   }
 
   // Restore enabled_set_
@@ -647,12 +680,16 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
     const PointerData& ptr = pointers[index];
     PASS_THROUGH(this, BindBuffer, GL_ARRAY_BUFFER,
                  share_group_->GetBufferGlobalName(ptr.buffer_name));
+  CHECK_ERR();
     PASS_THROUGH(this, VertexAttribPointer, index, ptr.size, ptr.type,
                  ptr.normalize, ptr.stride, ptr.pointer);
+  CHECK_ERR();
     if (ptr.enabled) {
       PASS_THROUGH(this, EnableVertexAttribArray, index);
+  CHECK_ERR();
     } else {
       PASS_THROUGH(this, DisableVertexAttribArray, index);
+  CHECK_ERR();
     }
   }
   pointer_context_.SetPointers(pointers);
@@ -660,8 +697,11 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
   // Restore vbo's
   PASS_THROUGH(this, BindBuffer, GL_ARRAY_BUFFER,
                share_group_->GetBufferGlobalName(array_buffer));
+  CHECK_ERR();
   PASS_THROUGH(this, BindBuffer, GL_ELEMENT_ARRAY_BUFFER,
                share_group_->GetBufferGlobalName(element_buffer));
+  CHECK_ERR();
+  DLOG("Exit DrawTex");
 }
 
 BufferDataPtr GlesContext::GetBoundTargetBufferData(GLenum target) {
@@ -733,7 +773,7 @@ ShaderConfig GlesContext::ConfigureShader(GLenum mode) {
     const TexGen* texgen = uniform_context_.GetTexGen(id);
 
     const GLuint texture = texture_context_.GetTexture(id, target);
-    TextureDataPtr obj = share_group_->GetTextureData(texture);
+    TextureDataPtr obj = texture == 0 ? texture_context_.GetDefaultTextureData(target) : share_group_->GetTextureData(texture);
     if (obj == NULL && texture == 0) {
       obj = texture_context_.GetDefaultTextureData(target);
     }

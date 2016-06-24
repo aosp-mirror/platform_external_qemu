@@ -25,6 +25,8 @@
 
 #include "android/base/synchronization/Lock.h"
 
+#include "common/dlog.h"
+
 #include <map>
 #include <utility>
 #include <utils/RefBase.h>
@@ -81,6 +83,7 @@ class ShareGroup : public android::RefBase {
     return GetObjectAs<RenderbufferData>(RENDERBUFFER, name, true);
   }
   TextureDataPtr CreateTextureData(ObjectLocalName name) {
+    DLOG("Create texture data for obj local name=%d", name);
     return GetObjectAs<TextureData>(TEXTURE, name, true);
   }
   ProgramDataPtr CreateProgramData(ObjectLocalName name) {
@@ -104,7 +107,10 @@ class ShareGroup : public android::RefBase {
     return GetObjectAs<RenderbufferData>(RENDERBUFFER, name, false);
   }
   TextureDataPtr GetTextureData(ObjectLocalName name) {
-    return GetObjectAs<TextureData>(TEXTURE, name, false);
+      DLOG("Get texture data for obj local name=%d", name);
+    TextureDataPtr res(GetObjectAs<TextureData>(TEXTURE, name, false));
+      DLOG("Got texture data ptr=%p", res.get());
+    return res;
   }
   ProgramDataPtr GetProgramData(ObjectLocalName name) {
     return GetObjectAs<ProgramData>(PROGRAM, name, false);

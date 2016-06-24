@@ -6,6 +6,7 @@
 
 #include "gles/pass_through.h"
 #include "common/alog.h"
+#include "common/dlog.h"
 #include "common/rendering_interface.h"
 #include "gles/debug.h"
 #include "gles/gles_context.h"
@@ -16,7 +17,7 @@
 #define DEBUG 0
 
 #if DEBUG
-#define DPRINT(...) do { fprintf(stderr, "gles12 underlying: "); fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); } while(0)
+#define DPRINT(fmt,...) do { DLOG("gles2 underlying: " fmt, ##__VA_ARGS__); } while(0)
 #else
 #define DPRINT(...)
 #endif
