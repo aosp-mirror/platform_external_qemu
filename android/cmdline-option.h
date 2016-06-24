@@ -42,12 +42,13 @@ typedef struct {
 extern int
 android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt );
 
-/* parse |port_string| into |console_port|. Error checking is done and
- * approriate warning or error messages shown if needed. If the function
- * returns false the output parameter is not touched.
+/* parse |port_string| into |console_port| and |adb_port|. Error checking is
+ * done and approriate warning or error messages shown if needed. If the
+ * function returns false the output parameter is not touched.
  */
 extern bool android_parse_port_option(const char* port_string,
-                                      int* console_port);
+                                      int* console_port,
+                                      int* adb_port);
 
 /* parse |ports_string| into |console_port| and |adb_port|. The format of the
  * -ports option is currently "<console port>,<adb port>". Error checking is
@@ -57,6 +58,13 @@ extern bool android_parse_port_option(const char* port_string,
 extern bool android_parse_ports_option(const char* ports_string,
                                        int* console_port,
                                        int* adb_port);
+
+/* Validates the ports in use and warns the user if they are likely to cause
+ * problems. Also announces the serial number of the emulator as seen from adb.
+ *
+ * Returns: true if no validation errors were detected, false otherwise.
+ */
+extern bool android_validate_ports(int console_port, int adb_port);
 
 /* name of default keyset file */
 #define  KEYSET_FILE    "default.keyset"

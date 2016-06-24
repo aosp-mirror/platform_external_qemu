@@ -3,6 +3,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
+#include <errno.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -302,28 +303,53 @@ parse_env_debug_tags( void )
     parse_debug_tags( env );
 }
 
+bool android_validate_ports(int console_port, int adb_port) {
+    bool result = true;
+
+    int lower_bound = ANDROID_CONSOLE_BASEPORT  + 1;
+    int upper_bound = lower_bound + (MAX_ANDROID_EMULATORS - 1) * 2 + 1;
+    if (adb_port < lower_bound || adb_port > upper_bound) {
+        dwarning("Requested adb port (%d) is outside the recommended range "
+                 "[%d,%d]. ADB may not function properly for the emulator. See "
+                 "-help-port for details.",
+                 adb_port, lower_bound, upper_bound);
+        result = false;
+    } else if (adb_port % 2 == 0) {
+        dwarning("Requested adb port (%d) is an even number. ADB may not "
+                 "function properly for the emulator. See -help-port for "
+                 "details.", adb_port);
+        result = false;
+    }
+
+    dprint("Listening for console connections on port: %d", console_port);
+    dprint("Serial number of this emulator (for ADB): emulator-%d",
+            adb_port - 1);
+    return result;
+}
+
 bool android_parse_port_option(const char* port_string,
-                               int* console_port) {
+                               int* console_port,
+                               int* adb_port) {
     if (port_string == NULL) {
         return false;
     }
+
     char* end;
-    int lower_bound = ANDROID_CONSOLE_BASEPORT;
-    int upper_bound = lower_bound + (MAX_ANDROID_EMULATORS - 1) * 2;
+    errno = 0;
     int port = strtol(port_string, &end, 0);
-    if (end == NULL || *end || port < lower_bound || port > upper_bound) {
-        derror("option -port must be followed by an even integer "
-                 "between %d and %d, '%s' is not a valid input",
-                 lower_bound, upper_bound, port_string);
+    if (end == NULL || *end || errno || port < 1 || port > UINT16_MAX) {
+        derror("option -port must be followed by an integer. "
+               "'%s' is not a valid input.", port_string);
         return false;
-    } else if ((port & 1) != 0) {
-        port &= ~1;
-        dwarning("option -port must be followed by an even integer, using port "
-                 "number %d\n", port);
     }
+
     *console_port = port;
+    *adb_port = *console_port + 1;
+    dprint("Requested console port %d: Inferring adb port %d.",
+           *console_port, *adb_port);
     return true;
 }
+
 
 bool android_parse_ports_option(const char* ports_string,
                                 int* console_port,
@@ -335,27 +361,25 @@ bool android_parse_ports_option(const char* ports_string,
     char* comma_location;
     char* end;
     int first_port = strtol(ports_string, &comma_location, 0);
-
     if (comma_location == NULL || *comma_location != ',' ||
         first_port < 1 || first_port > UINT16_MAX) {
-        derror("option -ports must be followed by two comma separated "
-               "positive integer numbers");
+        derror("Failed to parse option: |%s| (Could not parse first port). "
+               "See -help-ports.", ports_string);
         return false;
     }
 
     int second_port = strtol(comma_location+1, &end, 0);
-
     if (end == NULL || *end || second_port < 1 || second_port > UINT16_MAX) {
-        derror("option -ports must be followed by two comma separated "
-               "positive integer numbers");
+        derror("Failed to parse option: |%s|. (Could not parse second port). "
+               "See -help-ports.", ports_string);
+        return false;
+    }
+    if (first_port == second_port) {
+        derror("Failed to parse option: |%s|. (Both ports are identical). "
+               "See -help-ports.", ports_string);
         return false;
     }
 
-    if (first_port == second_port) {
-        derror("option -ports must be followed by two different "
-               "integer numbers");
-        return false;
-    }
     *console_port = first_port;
     *adb_port = second_port;
     return true;
