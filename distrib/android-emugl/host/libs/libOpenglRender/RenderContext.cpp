@@ -15,10 +15,23 @@
 */
 #include "RenderContext.h"
 
+#include "android/utils/debug.h"
+
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
 
 #include <OpenglCodecCommon/ErrorLog.h>
+
+#define RCXT_DEBUG 0
+
+#if RCXT_DEBUG
+#define DPRINT(...) do { \
+    if (!VERBOSE_CHECK(gles)) { VERBOSE_ENABLE(gles); } \
+    VERBOSE_TID_FUNCTION_DPRINT(gles, __VA_ARGS__); \
+} while(0)
+#else
+#define DPRINT(...)
+#endif
 
 extern GLESv1Dispatch s_gles1;
 
@@ -53,14 +66,14 @@ RenderContext* RenderContext::create(EGLDisplay display,
     }
 
     if (shouldEmulateGLES1) {
-        DBG("%s: should be creating a emulated gles1 context here\n", __FUNCTION__);
+        DPRINT("%s: should be creating a emulated gles1 context here\n", __FUNCTION__);
         if (sharedContext == EGL_NO_CONTEXT) {
-            DBG("%s: thankfully, this context isn't sharing anything :)\n", __FUNCTION__);
+            DPRINT("%s: thankfully, this context isn't sharing anything :)\n", __FUNCTION__);
         } else {
-            DBG("%s: this context is shared. need to maintain a sort of map I guess\n", __FUNCTION__);
+            DPRINT("%s: this context is shared. need to maintain a sort of map I guess\n", __FUNCTION__);
         }
         emulatedGLES1Context = s_gles1.create_gles1_context(NULL, s_gles1.underlying_gles2_api);
-        DBG("%s: created a emulated gles1 context @ %p\n", __FUNCTION__, emulatedGLES1Context);
+        DPRINT("%s: created a emulated gles1 context @ %p\n", __FUNCTION__, emulatedGLES1Context);
     }
 
     return new RenderContext(display, context, isGl2, emulatedGLES1Context);
