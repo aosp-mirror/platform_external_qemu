@@ -119,7 +119,14 @@ NameSpace::deleteName(ObjectLocalName p_localName)
 {
     NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
     if (n != m_localToGlobalMap.end()) {
-        m_globalNameSpace->deleteName(m_type, (*n).second);
+        if (m_type != TEXTURE) {
+            m_globalNameSpace->deleteName(m_type, (*n).second);
+        }
+        /*if (m_type == FRAMEBUFFER) {
+            fprintf(stderr, "fb name %d triggered destruct %p\n",
+                (*n).second, GLEScontext::dispatcher().glDeleteFramebuffersEXT);
+            m_globalNameSpace->deleteName(1, &((*n).second));
+        }*/
         m_globalToLocalMap.erase(n->second);
         m_localToGlobalMap.erase(n);
     }
@@ -136,7 +143,9 @@ NameSpace::replaceGlobalName(ObjectLocalName p_localName, unsigned int p_globalN
 {
     NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
     if (n != m_localToGlobalMap.end()) {
-        m_globalNameSpace->deleteName(m_type, (*n).second);
+        if (m_type != TEXTURE) {
+            m_globalNameSpace->deleteName(m_type, (*n).second);
+        }
         m_globalToLocalMap.erase(n->second);
         (*n).second = p_globalName;
         m_globalToLocalMap.emplace(p_globalName, p_localName);
@@ -153,15 +162,23 @@ GlobalNameSpace::genName(NamedObjectType p_type)
     switch (p_type) {
     case VERTEXBUFFER:
         GLEScontext::dispatcher().glGenBuffers(1,&name);
+        m_destructMap[p_type].emplace(name,
+                GLEScontext::dispatcher().glDeleteBuffers);
         break;
     case TEXTURE:
         GLEScontext::dispatcher().glGenTextures(1,&name);
+        m_destructMap[p_type].emplace(name,
+                GLEScontext::dispatcher().glDeleteTextures);
         break;
     case RENDERBUFFER:
         GLEScontext::dispatcher().glGenRenderbuffersEXT(1,&name);
+        m_destructMap[p_type].emplace(name,
+                GLEScontext::dispatcher().glDeleteRenderbuffersEXT);
         break;
     case FRAMEBUFFER:
         GLEScontext::dispatcher().glGenFramebuffersEXT(1,&name);
+        m_destructMap[p_type].emplace(name,
+                GLEScontext::dispatcher().glDeleteFramebuffersEXT);
         break;
     case SHADER: //objects in shader namepace are not handled
     default:
@@ -173,6 +190,17 @@ GlobalNameSpace::genName(NamedObjectType p_type)
 void 
 GlobalNameSpace::deleteName(NamedObjectType p_type, unsigned int p_name)
 {
+    emugl::Mutex::AutoLock _lock(m_lock);
+    std::unordered_map<unsigned int, GLdelete> map = m_destructMap[p_type];
+    std::unordered_map<unsigned int, GLdelete>::iterator ite =
+                    map.find(p_name);
+    if (ite == map.end()) {
+        return;
+    }
+    //if (p_type == FRAMEBUFFER)
+    //    fprintf(stderr, "fb name %d triggered destruct %p\n",
+    //            p_name, ite->second);
+    ite->second(1, &p_name);
 }
 
 ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace) {
@@ -342,9 +370,10 @@ ShareGroup::decTexRefCounterAndReleaseIf0(unsigned int p_globalName) {
         return val;
     }
     map->erase(iterator);
-    if (GLEScontext::dispatcher().isInitialized()) {
-        GLEScontext::dispatcher().glDeleteTextures(1, &p_globalName);
-    }
+    m_nameSpace[TEXTURE]->m_globalNameSpace->deleteName(TEXTURE, p_globalName);
+    //if (GLEScontext::dispatcher().isInitialized()) {
+    //    GLEScontext::dispatcher().glDeleteTextures(1, &p_globalName);
+    //}
     return 0;
 }
 

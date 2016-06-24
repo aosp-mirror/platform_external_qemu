@@ -1806,8 +1806,9 @@ GL_API void GLAPIENTRY glDeleteRenderbuffersOES(GLsizei n, const GLuint *renderb
     GET_CTX()
     SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION);
     for (int i=0;i<n;++i) {
-        GLuint globalBufferName = ctx->shareGroup()->getGlobalName(RENDERBUFFER,renderbuffers[i]);
-        ctx->dispatcher().glDeleteRenderbuffersEXT(1,&globalBufferName);
+        ctx->shareGroup()->deleteName(RENDERBUFFER, renderbuffers[i]);
+        //GLuint globalBufferName = ctx->shareGroup()->getGlobalName(RENDERBUFFER,renderbuffers[i]);
+        //ctx->dispatcher().glDeleteRenderbuffersEXT(1,&globalBufferName);
     }
 }
 
@@ -1946,8 +1947,9 @@ GL_API void GLAPIENTRY glDeleteFramebuffersOES(GLsizei n, const GLuint *framebuf
     GET_CTX()
     SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION);
     for (int i=0;i<n;++i) {
+        ctx->shareGroup()->deleteName(FRAMEBUFFER,framebuffers[i]);
         GLuint globalBufferName = ctx->shareGroup()->getGlobalName(FRAMEBUFFER,framebuffers[i]);
-        ctx->dispatcher().glDeleteFramebuffersEXT(1,&globalBufferName);
+        //ctx->dispatcher().glDeleteFramebuffersEXT(1,&globalBufferName);
     }
 }
 
