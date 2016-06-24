@@ -1326,6 +1326,7 @@ static int  skin_window_reset_internal (SkinWindow*, SkinLayout*);
 SkinWindow* skin_window_create(SkinLayout* slayout,
                                int x,
                                int y,
+                               double monitor_scale,
                                bool use_emugl_subwindow,
                                const SkinWindowFuncs* win_funcs) {
     SkinWindow*  window;
@@ -1351,14 +1352,21 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
     int       win_h = slayout->size.h;
     double    scale_w = 1.0;
     double    scale_h = 1.0;
+    double    scale_factor = 0.8;
 
     skin_winsys_get_monitor_rect(&monitor);
 
+    if (monitor_scale < 0.5 || monitor_scale > 1.0) {
+        dwarning("The -scale flag accepts values between 0.5 and 1.0. Defaulting to 0.8.");
+    } else {
+        scale_factor = monitor_scale;
+    }
+
     // Make the default scale about 80% of the screen size.
     if (monitor.size.w < win_w && win_w > 1.)
-        scale_w = 0.80 * monitor.size.w / win_w;
+        scale_w = scale_factor * monitor.size.w / win_w;
     if (monitor.size.h < win_h && win_h > 1.)
-        scale_h = 0.80 * monitor.size.h / win_h;
+        scale_h = scale_factor * monitor.size.h / win_h;
 
     window->scale = (scale_w <= scale_h) ? scale_w : scale_h;
 

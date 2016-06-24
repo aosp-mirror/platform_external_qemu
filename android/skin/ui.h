@@ -68,6 +68,8 @@ typedef struct SkinUIParams {
     int window_x;
     int window_y;
 
+    double monitor_scale;
+
     bool enable_touch;
     bool enable_dpad;
     bool enable_keyboard;

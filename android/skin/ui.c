@@ -95,7 +95,7 @@ SkinUI* skin_ui_create(SkinFile* layout_file,
     skin_keyboard_on_command(ui->keyboard, _skin_ui_handle_key_command, ui);
 
     ui->window = skin_window_create(
-            ui->layout, ui->ui_params.window_x, ui->ui_params.window_y,
+            ui->layout, ui->ui_params.window_x, ui->ui_params.window_y, ui->ui_params.monitor_scale,
             use_emugl_subwindow, ui->ui_funcs->window_funcs);
     if (!ui->window) {
         skin_ui_free(ui);

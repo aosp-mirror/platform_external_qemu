@@ -155,7 +155,6 @@ static void _emulator_window_on_gpu_frame(void* context,
     // instance, and send its address into the pipe.
     skin_ui_update_gpu_frame(emulator->ui, width, height, pixels);
 }
-
 static void
 emulator_window_setup( EmulatorWindow*  emulator )
 {
@@ -185,12 +184,13 @@ emulator_window_setup( EmulatorWindow*  emulator )
         return;
     }
 
-    if (emulator->opts->scale) {
-        dwarning("The -scale flag is obsolete and will be ignored.");
-    }
-
     if (emulator->opts->dpi_device) {
         dwarning("The -dpi-device flag is obsolete and will be ignored.");
+    }
+
+    double scale_factor = 0.0;
+    if (emulator->opts->scale) {
+        scale_factor = strtod(emulator->opts->scale, 0);
     }
 
     SkinUIParams my_ui_params = {
@@ -201,6 +201,8 @@ emulator_window_setup( EmulatorWindow*  emulator )
 
         .window_x = emulator->win_x,
         .window_y = emulator->win_y,
+
+        .monitor_scale = scale_factor,
 
         .keyboard_charmap = emulator->opts->charmap
     };
