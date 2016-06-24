@@ -283,14 +283,13 @@ QSize EmulatorContainer::viewportSize() const {
 }
 
 void EmulatorContainer::slot_resizeDone() {
-// Windows and Apple have convenient ways of checking global mouse state, so
-// we'll only do a resize if no mouse buttons are held down.
-#if defined(__APPLE__) || defined(_WIN32)
-
     if (mEmulatorWindow->isInZoomMode()) {
         return;
     }
 
+// Windows and Apple have convenient ways of checking global mouse state, so
+// we'll only do a resize if no mouse buttons are held down.
+#if defined(__APPLE__) || defined(_WIN32)
     // A hacky way of determining if the user is still holding down for a
     // resize.
     // This queries the global event state to see if any mouse buttons are held
