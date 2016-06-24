@@ -37,6 +37,7 @@
 #include "gles/texture_codecs.h"
 #include "gles/texture_data.h"
 
+#include "gles/gles12_internal_dispatch.h"
 
 typedef GlesContext* ContextPtr;
 
@@ -251,9 +252,73 @@ namespace {
 
 }  // namespace
 
+// Unless we separate "entry points" by users of the library
+// from internal uses of gl functions, we could end up in
+// a situation where the host system's GL driver shadows
+// OpenGL function names, causing segfaults and other badness.
+
+// These macros do the following:
+// 1. Forward-declare GLESv1 entry points.
+// 2. Forward-declare "Implementation" functions that are then
+//    called by the entry points.
+// 3. Define the entry points in terms of just directly calling
+//    the implementation.
+// 4. Define a struct holding the ***Impl functions.
+// 5. Make all calls to GLESv1 internal to translator use
+//    ***Impl functions inside the struct, instead of a
+//    global GLESv1 entry point. This avoids the shadowing.
+
+#define FWD_DECLARE(return_type, func_name, signature, args) \
+    EXPORT_DECL return_type func_name signature;
+
+#ifdef _WIN32
+#define FWD_DECLARE_IMPL(return_type, func_name, signature, args) \
+    return_type __stdcall func_name##Impl signature;
+#else
+#define FWD_DECLARE_IMPL(return_type, func_name, signature, args) \
+    return_type func_name##Impl signature;
+#endif
+
+#define DO_RETURN(return_type, func_name, args) DO_RETURN##return_type(func_name, args)
+
+#define DO_RETURNvoid(func_name, args) func_name args;
+#define DO_RETURNGLenum(func_name, args) return func_name args;
+#define DO_RETURNGLuint(func_name, args) return func_name args;
+#define DO_RETURNGLint(func_name, args) return func_name args;
+#define DO_RETURNGLboolean(func_name, args) return func_name args;
+#define DO_RETURNGLvoidptr(func_name, args) return func_name args;
+#define DO_RETURNconstGLubyte(func_name, args) return func_name args;
+
+#define DEFINE_ENTRYPT(return_type, func_name, signature, args) \
+    EXPORT_DECL return_type func_name signature { \
+        DO_RETURN(return_type, func_name##Impl, args) \
+    }
+
+LIST_GLES12TR_INTERNAL_FUNCTIONS(FWD_DECLARE)
+LIST_GLES12TR_INTERNAL_FUNCTIONS(FWD_DECLARE_IMPL)
+LIST_GLES12TR_INTERNAL_FUNCTIONS(DEFINE_ENTRYPT)
+
+static GLES12TranslatorFuncs sTranslatorFuncs = {
+#define ASSIGN_TRANSLATOR_FUNC(return_type, func_name, signature, callargs) \
+    .internal##func_name = func_name##Impl,
+    LIST_GLES12TR_INTERNAL_FUNCTIONS(ASSIGN_TRANSLATOR_FUNC)
+};
+
+#define TRCALL(X) sTranslatorFuncs.internal##X
+
+#ifdef _WIN32
+#define APIENTRY_IMPL(_return, _name, ...) \
+    _return __stdcall gl##_name##Impl(__VA_ARGS__)
+#else
+#define APIENTRY_IMPL(_return, _name, ...) \
+    _return gl##_name##Impl(__VA_ARGS__)
+#endif
+
+// Actual implementations of the GLESv1->2 functions are defined below.
+
 // Selects the server texture unit state that will be modified by server
 // texture state calls.
-GLES_APIENTRY(void, ActiveTexture, GLenum texture) {
+APIENTRY_IMPL(void, ActiveTexture, GLenum texture) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -269,7 +334,7 @@ GLES_APIENTRY(void, ActiveTexture, GLenum texture) {
 }
 
 // Discard pixel writes based on an alpha value test.
-GLES_APIENTRY(void, AlphaFunc, GLenum func, GLclampf ref) {
+APIENTRY_IMPL(void, AlphaFunc, GLenum func, GLclampf ref) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -286,18 +351,18 @@ GLES_APIENTRY(void, AlphaFunc, GLenum func, GLclampf ref) {
     alpha.value = ClampValue(ref, 0.f, 1.f);
 }
 
-GLES_APIENTRY(void, AlphaFuncx, GLenum func, GLclampx ref) {
+APIENTRY_IMPL(void, AlphaFuncx, GLenum func, GLclampx ref) {
     APITRACE();
-    glAlphaFunc(func, X2F(ref));
+    TRCALL(glAlphaFunc(func, X2F(ref)));
 }
 
-GLES_APIENTRY(void, AlphaFuncxOES, GLenum func, GLclampx ref) {
+APIENTRY_IMPL(void, AlphaFuncxOES, GLenum func, GLclampx ref) {
     APITRACE();
-    glAlphaFunc(func, X2F(ref));
+    TRCALL(glAlphaFunc(func, X2F(ref)));
 }
 
 // Attaches a shader object to a program object.
-GLES_APIENTRY(void, AttachShader, GLuint program, GLuint shader) {
+APIENTRY_IMPL(void, AttachShader, GLuint program, GLuint shader) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -320,8 +385,7 @@ GLES_APIENTRY(void, AttachShader, GLuint program, GLuint shader) {
 }
 
 // Requests a named shader attribute be assigned a particular attribute index.
-GLES_APIENTRY(void, BindAttribLocation, GLuint program, GLuint index,
-        const GLchar* name) {
+APIENTRY_IMPL(void, BindAttribLocation, GLuint program, GLuint index, const GLchar* name) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -339,7 +403,7 @@ GLES_APIENTRY(void, BindAttribLocation, GLuint program, GLuint index,
 }
 
 // Bind the specified buffer as vertex buffer or index buffer.
-GLES_APIENTRY(void, BindBuffer, GLenum target, GLuint buffer) {
+APIENTRY_IMPL(void, BindBuffer, GLenum target, GLuint buffer) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -367,7 +431,7 @@ GLES_APIENTRY(void, BindBuffer, GLenum target, GLuint buffer) {
 }
 
 // Specify framebuffer for off-screen rendering.
-GLES_APIENTRY(void, BindFramebuffer, GLenum target, GLuint framebuffer) {
+APIENTRY_IMPL(void, BindFramebuffer, GLenum target, GLuint framebuffer) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -388,13 +452,13 @@ GLES_APIENTRY(void, BindFramebuffer, GLenum target, GLuint framebuffer) {
     c->BindFramebuffer(framebuffer);
 }
 
-GLES_APIENTRY(void, BindFramebufferOES, GLenum target, GLuint framebuffer) {
+APIENTRY_IMPL(void, BindFramebufferOES, GLenum target, GLuint framebuffer) {
     APITRACE();
-    glBindFramebuffer(target, framebuffer);
+    TRCALL(glBindFramebuffer(target, framebuffer));
 }
 
 // Specify the renderbuffer that will be modified by renderbuffer calls.
-GLES_APIENTRY(void, BindRenderbuffer, GLenum target, GLuint renderbuffer) {
+APIENTRY_IMPL(void, BindRenderbuffer, GLenum target, GLuint renderbuffer) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -418,16 +482,16 @@ GLES_APIENTRY(void, BindRenderbuffer, GLenum target, GLuint renderbuffer) {
     PASS_THROUGH(c, BindRenderbuffer, GL_RENDERBUFFER, global_name);
 }
 
-GLES_APIENTRY(void, BindRenderbufferOES, GLenum target, GLuint renderbuffer) {
+APIENTRY_IMPL(void, BindRenderbufferOES, GLenum target, GLuint renderbuffer) {
     APITRACE();
-    glBindRenderbuffer(target, renderbuffer);
+    TRCALL(glBindRenderbuffer(target, renderbuffer));
 }
 
 // This call makes the given texture name the current texture of
 // kind "target" (which is usually GL_TEXTURE_2D) which later
 // environment/parameter calls will reference, and S/T texture
 // mapping coordinates apply to.
-GLES_APIENTRY(void, BindTexture, GLenum target, GLuint texture) {
+APIENTRY_IMPL(void, BindTexture, GLenum target, GLuint texture) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -521,8 +585,7 @@ GLES_APIENTRY(void, BindTexture, GLenum target, GLuint texture) {
 }
 
 // Used in compositing the fragment shader output with the framebuffer.
-GLES_APIENTRY(void, BlendColor, GLfloat red, GLfloat green, GLfloat blue,
-        GLfloat alpha) {
+APIENTRY_IMPL(void, BlendColor, GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -533,7 +596,7 @@ GLES_APIENTRY(void, BlendColor, GLfloat red, GLfloat green, GLfloat blue,
 }
 
 // Used in compositing the fragment shader output with the framebuffer.
-GLES_APIENTRY(void, BlendEquation, GLenum mode) {
+APIENTRY_IMPL(void, BlendEquation, GLenum mode) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -543,13 +606,13 @@ GLES_APIENTRY(void, BlendEquation, GLenum mode) {
     PASS_THROUGH(c, BlendEquation, mode);
 }
 
-GLES_APIENTRY(void, BlendEquationOES, GLenum mode) {
+APIENTRY_IMPL(void, BlendEquationOES, GLenum mode) {
     APITRACE();
-    glBlendEquation(mode);
+    TRCALL(glBlendEquation(mode));
 }
 
 // Used in compositing the fragment shader output with the framebuffer.
-GLES_APIENTRY(void, BlendEquationSeparate, GLenum modeRGB, GLenum modeAlpha) {
+APIENTRY_IMPL(void, BlendEquationSeparate, GLenum modeRGB, GLenum modeAlpha) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -559,14 +622,13 @@ GLES_APIENTRY(void, BlendEquationSeparate, GLenum modeRGB, GLenum modeAlpha) {
     PASS_THROUGH(c, BlendEquationSeparate, modeRGB, modeAlpha);
 }
 
-GLES_APIENTRY(void, BlendEquationSeparateOES, GLenum modeRGB,
-        GLenum modeAlpha) {
+APIENTRY_IMPL(void, BlendEquationSeparateOES, GLenum modeRGB, GLenum modeAlpha) {
     APITRACE();
-    glBlendEquationSeparate(modeRGB, modeAlpha);
+    TRCALL(glBlendEquationSeparate(modeRGB, modeAlpha));
 }
 
 // Used in compositing the fragment shader output with the framebuffer.
-GLES_APIENTRY(void, BlendFunc, GLenum sfactor, GLenum dfactor) {
+APIENTRY_IMPL(void, BlendFunc, GLenum sfactor, GLenum dfactor) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -590,8 +652,7 @@ GLES_APIENTRY(void, BlendFunc, GLenum sfactor, GLenum dfactor) {
 }
 
 // Used in compositing the fragment shader output with the framebuffer.
-GLES_APIENTRY(void, BlendFuncSeparate, GLenum srcRGB, GLenum dstRGB,
-        GLenum srcAlpha, GLenum dstAlpha) {
+APIENTRY_IMPL(void, BlendFuncSeparate, GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -622,15 +683,13 @@ GLES_APIENTRY(void, BlendFuncSeparate, GLenum srcRGB, GLenum dstRGB,
     PASS_THROUGH(c, BlendFuncSeparate, srcRGB, dstRGB, srcAlpha, dstAlpha);
 }
 
-GLES_APIENTRY(void, BlendFuncSeparateOES, GLenum srcRGB, GLenum dstRGB,
-        GLenum srcAlpha, GLenum dstAlpha) {
+APIENTRY_IMPL(void, BlendFuncSeparateOES, GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha) {
     APITRACE();
-    glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
+    TRCALL(glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha));
 }
 
 // Loads arbitrary binary data into a buffer.
-GLES_APIENTRY(void, BufferData, GLenum target, GLsizeiptr size,
-        const GLvoid* data, GLenum usage) {
+APIENTRY_IMPL(void, BufferData, GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -659,8 +718,7 @@ GLES_APIENTRY(void, BufferData, GLenum target, GLsizeiptr size,
 }
 
 // Loads arbitrary binary data into a portion of a buffer.
-GLES_APIENTRY(void, BufferSubData, GLenum target, GLintptr offset,
-        GLsizeiptr size, const GLvoid* data) {
+APIENTRY_IMPL(void, BufferSubData, GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -694,7 +752,7 @@ GLES_APIENTRY(void, BufferSubData, GLenum target, GLintptr offset,
 }
 
 // Verifies if a framebuffer object is set up correctly.
-GLES_APIENTRY(GLenum, CheckFramebufferStatus, GLenum target) {
+APIENTRY_IMPL(GLenum, CheckFramebufferStatus, GLenum target) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -703,13 +761,13 @@ GLES_APIENTRY(GLenum, CheckFramebufferStatus, GLenum target) {
     return PASS_THROUGH(c, CheckFramebufferStatus, target);
 }
 
-GLES_APIENTRY(GLenum, CheckFramebufferStatusOES, GLenum target) {
+APIENTRY_IMPL(GLenum, CheckFramebufferStatusOES, GLenum target) {
     APITRACE();
-    return glCheckFramebufferStatus(target);
+    return TRCALL(glCheckFramebufferStatus(target));
 }
 
 // Clears the framebuffer to the current clear color.
-GLES_APIENTRY(void, Clear, GLbitfield mask) {
+APIENTRY_IMPL(void, Clear, GLbitfield mask) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -720,8 +778,7 @@ GLES_APIENTRY(void, Clear, GLbitfield mask) {
 }
 
 // Sets the color to use when clearing the framebuffer.
-GLES_APIENTRY(void, ClearColor, GLclampf red, GLclampf green, GLclampf blue,
-        GLclampf alpha) {
+APIENTRY_IMPL(void, ClearColor, GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -741,20 +798,18 @@ GLES_APIENTRY(void, ClearColor, GLclampf red, GLclampf green, GLclampf blue,
     PASS_THROUGH(c, ClearColor, red, green, blue, alpha);
 }
 
-GLES_APIENTRY(void, ClearColorx, GLclampx red, GLclampx green, GLclampx blue,
-        GLclampx alpha) {
+APIENTRY_IMPL(void, ClearColorx, GLclampx red, GLclampx green, GLclampx blue, GLclampx alpha) {
     APITRACE();
-    glClearColor(X2F(red), X2F(green), X2F(blue), X2F(alpha));
+    TRCALL(glClearColor(X2F(red), X2F(green), X2F(blue), X2F(alpha)));
 }
 
-GLES_APIENTRY(void, ClearColorxOES, GLclampx red, GLclampx green,
-        GLclampx blue, GLclampx alpha) {
+APIENTRY_IMPL(void, ClearColorxOES, GLclampx red, GLclampx green, GLclampx blue, GLclampx alpha) {
     APITRACE();
-    glClearColor(X2F(red), X2F(green), X2F(blue), X2F(alpha));
+    TRCALL(glClearColor(X2F(red), X2F(green), X2F(blue), X2F(alpha)));
 }
 
 // Sets the depth value to use when clearing the framebuffer.
-GLES_APIENTRY(void, ClearDepthf, GLfloat depth) {
+APIENTRY_IMPL(void, ClearDepthf, GLfloat depth) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -767,23 +822,23 @@ GLES_APIENTRY(void, ClearDepthf, GLfloat depth) {
     PASS_THROUGH(c, ClearDepthf, depth);
 }
 
-GLES_APIENTRY(void, ClearDepthfOES, GLclampf depth) {
+APIENTRY_IMPL(void, ClearDepthfOES, GLclampf depth) {
     APITRACE();
-    glClearDepthf(depth);
+    TRCALL(glClearDepthf(depth));
 }
 
-GLES_APIENTRY(void, ClearDepthx, GLclampx depth) {
+APIENTRY_IMPL(void, ClearDepthx, GLclampx depth) {
     APITRACE();
-    glClearDepthf(X2F(depth));
+    TRCALL(glClearDepthf(X2F(depth)));
 }
 
-GLES_APIENTRY(void, ClearDepthxOES, GLclampx depth) {
+APIENTRY_IMPL(void, ClearDepthxOES, GLclampx depth) {
     APITRACE();
-    glClearDepthf(X2F(depth));
+    TRCALL(glClearDepthf(X2F(depth)));
 }
 
 // Sets the stencil bit pattern to use when clearing the framebuffer.
-GLES_APIENTRY(void, ClearStencil, GLint s) {
+APIENTRY_IMPL(void, ClearStencil, GLint s) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -795,7 +850,7 @@ GLES_APIENTRY(void, ClearStencil, GLint s) {
 
 // Selects the client texture unit state that will be modified by client
 // texture state calls.
-GLES_APIENTRY(void, ClientActiveTexture, GLenum texture) {
+APIENTRY_IMPL(void, ClientActiveTexture, GLenum texture) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -808,7 +863,7 @@ GLES_APIENTRY(void, ClientActiveTexture, GLenum texture) {
 }
 
 // Specify a plane against which all geometry is clipped.
-GLES_APIENTRY(void, ClipPlanef, GLenum pname, const GLfloat* equation) {
+APIENTRY_IMPL(void, ClipPlanef, GLenum pname, const GLfloat* equation) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -831,27 +886,26 @@ GLES_APIENTRY(void, ClipPlanef, GLenum pname, const GLfloat* equation) {
     plane->AssignMatrixMultiply(mv, value);
 }
 
-GLES_APIENTRY(void, ClipPlanefOES, GLenum pname, const GLfloat* equation) {
+APIENTRY_IMPL(void, ClipPlanefOES, GLenum pname, const GLfloat* equation) {
     APITRACE();
-    glClipPlanef(pname, equation);
+    TRCALL(glClipPlanef(pname, equation));
 }
 
-GLES_APIENTRY(void, ClipPlanex, GLenum pname, const GLfixed* equation) {
+APIENTRY_IMPL(void, ClipPlanex, GLenum pname, const GLfixed* equation) {
     APITRACE();
     static const size_t kNumElements = 4;
     GLfloat tmp[kNumElements];
     Convert(tmp, kNumElements, equation);
-    glClipPlanef(pname, tmp);
+    TRCALL(glClipPlanef(pname, tmp));
 }
 
-GLES_APIENTRY(void, ClipPlanexOES, GLenum pname, const GLfixed* equation) {
+APIENTRY_IMPL(void, ClipPlanexOES, GLenum pname, const GLfixed* equation) {
     APITRACE();
-    glClipPlanex(pname, equation);
+    TRCALL(glClipPlanex(pname, equation));
 }
 
 // Sets the vertex color that is used when no vertex color array is enabled.
-GLES_APIENTRY(void, Color4f, GLfloat red, GLfloat green, GLfloat blue,
-        GLfloat alpha) {
+APIENTRY_IMPL(void, Color4f, GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -862,7 +916,7 @@ GLES_APIENTRY(void, Color4f, GLfloat red, GLfloat green, GLfloat blue,
     color = emugl::Vector(red, green, blue, alpha);
 }
 
-GLES_APIENTRY(void, Color4fv, const GLfloat* components) {
+APIENTRY_IMPL(void, Color4fv, const GLfloat* components) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -873,8 +927,7 @@ GLES_APIENTRY(void, Color4fv, const GLfloat* components) {
     color.AssignLinearMapping(components, 4);
 }
 
-GLES_APIENTRY(void, Color4ub, GLubyte red, GLubyte green, GLubyte blue,
-        GLubyte alpha) {
+APIENTRY_IMPL(void, Color4ub, GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -886,7 +939,7 @@ GLES_APIENTRY(void, Color4ub, GLubyte red, GLubyte green, GLubyte blue,
     color.AssignLinearMapping(params, 4);
 }
 
-GLES_APIENTRY(void, Color4ubv, const GLubyte* components) {
+APIENTRY_IMPL(void, Color4ubv, const GLubyte* components) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -897,22 +950,19 @@ GLES_APIENTRY(void, Color4ubv, const GLubyte* components) {
     color.AssignLinearMapping(components, 4);
 }
 
-GLES_APIENTRY(void, Color4x, GLfixed red, GLfixed green, GLfixed blue,
-        GLfixed alpha) {
+APIENTRY_IMPL(void, Color4x, GLfixed red, GLfixed green, GLfixed blue, GLfixed alpha) {
     APITRACE();
-    glColor4f(X2F(red), X2F(green), X2F(blue), X2F(alpha));
+    TRCALL(glColor4f(X2F(red), X2F(green), X2F(blue), X2F(alpha)));
 }
 
-GLES_APIENTRY(void, Color4xOES, GLfixed red, GLfixed green, GLfixed blue,
-        GLfixed alpha) {
+APIENTRY_IMPL(void, Color4xOES, GLfixed red, GLfixed green, GLfixed blue, GLfixed alpha) {
     APITRACE();
-    glColor4f(X2F(red), X2F(green), X2F(blue), X2F(alpha));
+    TRCALL(glColor4f(X2F(red), X2F(green), X2F(blue), X2F(alpha)));
 }
 
 // Controls what components output from the fragment shader are written to the
 // framebuffer.
-GLES_APIENTRY(void, ColorMask, GLboolean red, GLboolean green, GLboolean blue,
-        GLboolean alpha) {
+APIENTRY_IMPL(void, ColorMask, GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -928,8 +978,7 @@ GLES_APIENTRY(void, ColorMask, GLboolean red, GLboolean green, GLboolean blue,
 }
 
 // Specifies source array for per-vertex colors.
-GLES_APIENTRY(void, ColorPointer, GLint size, GLenum type, GLsizei stride,
-        const GLvoid* pointer) {
+APIENTRY_IMPL(void, ColorPointer, GLint size, GLenum type, GLsizei stride, const GLvoid* pointer) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -953,14 +1002,13 @@ GLES_APIENTRY(void, ColorPointer, GLint size, GLenum type, GLsizei stride,
             pointer, normalized);
 }
 
-GLES_APIENTRY(void, ColorPointerBounds, GLint size, GLenum type, GLsizei stride,
-        const GLvoid* pointer, GLsizei count) {
+APIENTRY_IMPL(void, ColorPointerBounds, GLint size, GLenum type, GLsizei stride, const GLvoid* pointer, GLsizei count) {
     APITRACE();
-    glColorPointer(size, type, stride, pointer);
+    TRCALL(glColorPointer(size, type, stride, pointer));
 }
 
 // Compiles a shader from the source code loaded into the shader object.
-GLES_APIENTRY(void, CompileShader, GLuint shader) {
+APIENTRY_IMPL(void, CompileShader, GLuint shader) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1146,9 +1194,7 @@ namespace {
 
 }  // namespace
 
-GLES_APIENTRY(void, CompressedTexImage2D, GLenum target, GLint level,
-        GLenum internalformat, GLsizei width, GLsizei height,
-        GLint border, GLsizei image_size, const GLvoid* data) {
+APIENTRY_IMPL(void, CompressedTexImage2D, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei image_size, const GLvoid* data) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1166,9 +1212,7 @@ GLES_APIENTRY(void, CompressedTexImage2D, GLenum target, GLint level,
             height, border, image_size, data);
 }
 
-GLES_APIENTRY(void, CompressedTexSubImage2D, GLenum target, GLint level,
-        GLint xoffset, GLint yoffset, GLsizei width, GLsizei height,
-        GLenum format, GLsizei image_size, const GLvoid* data) {
+APIENTRY_IMPL(void, CompressedTexSubImage2D, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei image_size, const GLvoid* data) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1185,9 +1229,7 @@ GLES_APIENTRY(void, CompressedTexSubImage2D, GLenum target, GLint level,
 
 // Extracts a portion of the framebuffer, loading it into the currently bound
 // texture.
-GLES_APIENTRY(void, CopyTexImage2D, GLenum target, GLint level,
-        GLenum internalformat, GLint x, GLint y, GLsizei width,
-        GLsizei height, GLint border) {
+APIENTRY_IMPL(void, CopyTexImage2D, GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1242,9 +1284,7 @@ GLES_APIENTRY(void, CopyTexImage2D, GLenum target, GLint level,
 }
 
 // Extracts a portion of another texture, replacing the current bound texture.
-GLES_APIENTRY(void, CopyTexSubImage2D, GLenum target, GLint level,
-        GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width,
-        GLsizei height) {
+APIENTRY_IMPL(void, CopyTexSubImage2D, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1258,7 +1298,7 @@ GLES_APIENTRY(void, CopyTexSubImage2D, GLenum target, GLint level,
 }
 
 // Creates and returns a new program object.
-GLES_APIENTRY(GLuint, CreateProgram) {
+APIENTRY_IMPL(GLuint, CreateProgram) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1273,7 +1313,7 @@ GLES_APIENTRY(GLuint, CreateProgram) {
 }
 
 // Creates and returns a new shader object.
-GLES_APIENTRY(GLuint, CreateShader, GLenum type) {
+APIENTRY_IMPL(GLuint, CreateShader, GLenum type) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1298,7 +1338,7 @@ GLES_APIENTRY(GLuint, CreateShader, GLenum type) {
 }
 
 // Selects which faces are culled (back, front, both) when culling is enabled.
-GLES_APIENTRY(void, CullFace, GLenum mode) {
+APIENTRY_IMPL(void, CullFace, GLenum mode) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1315,7 +1355,7 @@ GLES_APIENTRY(void, CullFace, GLenum mode) {
 }
 
 // Set the current patette matrix.
-GLES_APIENTRY(void, CurrentPaletteMatrixOES, GLuint index) {
+APIENTRY_IMPL(void, CurrentPaletteMatrixOES, GLuint index) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1328,7 +1368,7 @@ GLES_APIENTRY(void, CurrentPaletteMatrixOES, GLuint index) {
 }
 
 // Delete a number of buffer objects.
-GLES_APIENTRY(void, DeleteBuffers, GLsizei n, const GLuint* buffers) {
+APIENTRY_IMPL(void, DeleteBuffers, GLsizei n, const GLuint* buffers) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1354,8 +1394,7 @@ GLES_APIENTRY(void, DeleteBuffers, GLsizei n, const GLuint* buffers) {
 }
 
 // Delete a number of frame buffer objects.
-GLES_APIENTRY(void, DeleteFramebuffers, GLsizei n,
-        const GLuint* framebuffers) {
+APIENTRY_IMPL(void, DeleteFramebuffers, GLsizei n, const GLuint* framebuffers) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1377,14 +1416,13 @@ GLES_APIENTRY(void, DeleteFramebuffers, GLsizei n,
     sg->DeleteFramebuffers(n, framebuffers);
 }
 
-GLES_APIENTRY(void, DeleteFramebuffersOES, GLsizei n,
-        const GLuint* framebuffers) {
+APIENTRY_IMPL(void, DeleteFramebuffersOES, GLsizei n, const GLuint* framebuffers) {
     APITRACE();
-    glDeleteFramebuffers(n, framebuffers);
+    TRCALL(glDeleteFramebuffers(n, framebuffers));
 }
 
 // Delete a single program object.
-GLES_APIENTRY(void, DeleteProgram, GLuint program) {
+APIENTRY_IMPL(void, DeleteProgram, GLuint program) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1406,8 +1444,7 @@ GLES_APIENTRY(void, DeleteProgram, GLuint program) {
 }
 
 // Delete a number of render buffer objects.
-GLES_APIENTRY(void, DeleteRenderbuffers, GLsizei n,
-        const GLuint* renderbuffers) {
+APIENTRY_IMPL(void, DeleteRenderbuffers, GLsizei n, const GLuint* renderbuffers) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1433,14 +1470,13 @@ GLES_APIENTRY(void, DeleteRenderbuffers, GLsizei n,
     sg->DeleteRenderbuffers(n, renderbuffers);
 }
 
-GLES_APIENTRY(void, DeleteRenderbuffersOES, GLsizei n,
-        const GLuint* renderbuffers) {
+APIENTRY_IMPL(void, DeleteRenderbuffersOES, GLsizei n, const GLuint* renderbuffers) {
     APITRACE();
-    glDeleteRenderbuffers(n, renderbuffers);
+    TRCALL(glDeleteRenderbuffers(n, renderbuffers));
 }
 
 // Delete a single shader object.
-GLES_APIENTRY(void, DeleteShader, GLuint shader) {
+APIENTRY_IMPL(void, DeleteShader, GLuint shader) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1452,7 +1488,7 @@ GLES_APIENTRY(void, DeleteShader, GLuint shader) {
 }
 
 // Delete a number of texture objects.
-GLES_APIENTRY(void, DeleteTextures, GLsizei n, const GLuint* textures) {
+APIENTRY_IMPL(void, DeleteTextures, GLsizei n, const GLuint* textures) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1481,7 +1517,7 @@ GLES_APIENTRY(void, DeleteTextures, GLsizei n, const GLuint* textures) {
 }
 
 // Discard pixel writes based on an depth value test.
-GLES_APIENTRY(void, DepthFunc, GLenum func) {
+APIENTRY_IMPL(void, DepthFunc, GLenum func) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1498,7 +1534,7 @@ GLES_APIENTRY(void, DepthFunc, GLenum func) {
 }
 
 // Sets whether or not the pixel depth value is written to the framebuffer.
-GLES_APIENTRY(void, DepthMask, GLboolean flag) {
+APIENTRY_IMPL(void, DepthMask, GLboolean flag) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1511,7 +1547,7 @@ GLES_APIENTRY(void, DepthMask, GLboolean flag) {
 
 // Pixels outside this range are clipped and the fragment depth is normalized
 // on write based on them.
-GLES_APIENTRY(void, DepthRangef, GLfloat zNear, GLfloat zFar) {
+APIENTRY_IMPL(void, DepthRangef, GLfloat zNear, GLfloat zFar) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1527,23 +1563,23 @@ GLES_APIENTRY(void, DepthRangef, GLfloat zNear, GLfloat zFar) {
     PASS_THROUGH(c, DepthRangef, zNear, zFar);
 }
 
-GLES_APIENTRY(void, DepthRangefOES, GLclampf zNear, GLclampf zFar) {
+APIENTRY_IMPL(void, DepthRangefOES, GLclampf zNear, GLclampf zFar) {
     APITRACE();
-    glDepthRangef(zNear, zFar);
+    TRCALL(glDepthRangef(zNear, zFar));
 }
 
-GLES_APIENTRY(void, DepthRangex, GLclampx zNear, GLclampx zFar) {
+APIENTRY_IMPL(void, DepthRangex, GLclampx zNear, GLclampx zFar) {
     APITRACE();
-    glDepthRangef(X2F(zNear), X2F(zFar));
+    TRCALL(glDepthRangef(X2F(zNear), X2F(zFar)));
 }
 
-GLES_APIENTRY(void, DepthRangexOES, GLclampx zNear, GLclampx zFar) {
+APIENTRY_IMPL(void, DepthRangexOES, GLclampx zNear, GLclampx zFar) {
     APITRACE();
-    glDepthRangef(X2F(zNear), X2F(zFar));
+    TRCALL(glDepthRangef(X2F(zNear), X2F(zFar)));
 }
 
 // Removes a shader from a program.
-GLES_APIENTRY(void, DetachShader, GLuint program, GLuint shader) {
+APIENTRY_IMPL(void, DetachShader, GLuint program, GLuint shader) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1566,7 +1602,7 @@ GLES_APIENTRY(void, DetachShader, GLuint program, GLuint shader) {
 }
 
 // Clear server state capability.
-GLES_APIENTRY(void, Disable, GLenum cap) {
+APIENTRY_IMPL(void, Disable, GLenum cap) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1594,7 +1630,7 @@ GLES_APIENTRY(void, Disable, GLenum cap) {
 }
 
 // Clear client state capability.
-GLES_APIENTRY(void, DisableClientState, GLenum cap) {
+APIENTRY_IMPL(void, DisableClientState, GLenum cap) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1614,7 +1650,7 @@ GLES_APIENTRY(void, DisableClientState, GLenum cap) {
 }
 
 // Disables input from an array to the given vertex shader attribute.
-GLES_APIENTRY(void, DisableVertexAttribArray, GLuint index) {
+APIENTRY_IMPL(void, DisableVertexAttribArray, GLuint index) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1630,7 +1666,7 @@ GLES_APIENTRY(void, DisableVertexAttribArray, GLuint index) {
 }
 
 // Renders primitives using the current state.
-GLES_APIENTRY(void, DrawArrays, GLenum mode, GLint first, GLsizei count) {
+APIENTRY_IMPL(void, DrawArrays, GLenum mode, GLint first, GLsizei count) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1653,8 +1689,7 @@ GLES_APIENTRY(void, DrawArrays, GLenum mode, GLint first, GLsizei count) {
 }
 
 // Renders primitives using the current state.
-GLES_APIENTRY(void, DrawElements, GLenum mode, GLsizei count, GLenum type,
-        const GLvoid* indices) {
+APIENTRY_IMPL(void, DrawElements, GLenum mode, GLsizei count, GLenum type, const GLvoid* indices) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1676,8 +1711,7 @@ GLES_APIENTRY(void, DrawElements, GLenum mode, GLsizei count, GLenum type,
     c->Draw(GlesContext::kDrawElements, mode, 0, count, type, indices);
 }
 
-GLES_APIENTRY(void, DrawTexfOES, GLfloat x, GLfloat y, GLfloat z, GLfloat width,
-        GLfloat height) {
+APIENTRY_IMPL(void, DrawTexfOES, GLfloat x, GLfloat y, GLfloat z, GLfloat width, GLfloat height) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1687,50 +1721,46 @@ GLES_APIENTRY(void, DrawTexfOES, GLfloat x, GLfloat y, GLfloat z, GLfloat width,
     c->DrawTex(x, y, z, width, height);
 }
 
-GLES_APIENTRY(void, DrawTexfvOES, const GLfloat* coords) {
+APIENTRY_IMPL(void, DrawTexfvOES, const GLfloat* coords) {
     APITRACE();
-    glDrawTexfOES(coords[0], coords[1], coords[2], coords[3], coords[4]);
+    TRCALL(glDrawTexfOES(coords[0], coords[1], coords[2], coords[3], coords[4]));
 }
 
-GLES_APIENTRY(void, DrawTexiOES, GLint x, GLint y, GLint z, GLint width,
-        GLint height) {
+APIENTRY_IMPL(void, DrawTexiOES, GLint x, GLint y, GLint z, GLint width, GLint height) {
     APITRACE();
-    glDrawTexfOES(x, y, z, width, height);
+    TRCALL(glDrawTexfOES(x, y, z, width, height));
 }
 
-GLES_APIENTRY(void, DrawTexivOES, const GLint* coords) {
+APIENTRY_IMPL(void, DrawTexivOES, const GLint* coords) {
     APITRACE();
-    glDrawTexfOES(coords[0], coords[1], coords[2], coords[3], coords[4]);
+    TRCALL(glDrawTexfOES(coords[0], coords[1], coords[2], coords[3], coords[4]));
 }
 
-GLES_APIENTRY(void, DrawTexsOES, GLshort x, GLshort y, GLshort z, GLshort width,
-        GLshort height) {
+APIENTRY_IMPL(void, DrawTexsOES, GLshort x, GLshort y, GLshort z, GLshort width, GLshort height) {
     APITRACE();
-    glDrawTexfOES(x, y, z, width, height);
+    TRCALL(glDrawTexfOES(x, y, z, width, height));
 }
 
-GLES_APIENTRY(void, DrawTexsvOES, const GLshort* coords) {
+APIENTRY_IMPL(void, DrawTexsvOES, const GLshort* coords) {
     APITRACE();
-    glDrawTexfOES(coords[0], coords[1], coords[2], coords[3], coords[4]);
+    TRCALL(glDrawTexfOES(coords[0], coords[1], coords[2], coords[3], coords[4]));
 }
 
-GLES_APIENTRY(void, DrawTexxOES, GLfixed x, GLfixed y, GLfixed z, GLfixed width,
-        GLfixed height) {
+APIENTRY_IMPL(void, DrawTexxOES, GLfixed x, GLfixed y, GLfixed z, GLfixed width, GLfixed height) {
     APITRACE();
-    glDrawTexfOES(X2F(x), X2F(y), X2F(z), X2F(width), X2F(height));
+    TRCALL(glDrawTexfOES(X2F(x), X2F(y), X2F(z), X2F(width), X2F(height)));
 }
 
-GLES_APIENTRY(void, DrawTexxvOES, const GLfixed* coords) {
+APIENTRY_IMPL(void, DrawTexxvOES, const GLfixed* coords) {
     APITRACE();
-    glDrawTexfOES(X2F(coords[0]), X2F(coords[1]), X2F(coords[2]), X2F(coords[3]),
-            X2F(coords[4]));
+    TRCALL(glDrawTexfOES(X2F(coords[0]), X2F(coords[1]), X2F(coords[2]), X2F(coords[3]),
+            X2F(coords[4])));
 }
 
 EglImagePtr GetEglImageFromNativeBuffer(GLeglImageOES buffer);
 
 // Set the specified EGL image as the renderbuffer storage.
-GLES_APIENTRY(void, EGLImageTargetRenderbufferStorageOES, GLenum target,
-        GLeglImageOES buffer) {
+APIENTRY_IMPL(void, EGLImageTargetRenderbufferStorageOES, GLenum target, GLeglImageOES buffer) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1753,8 +1783,7 @@ GLES_APIENTRY(void, EGLImageTargetRenderbufferStorageOES, GLenum target,
 }
 
 // Set the specified EGLimage as the texture.
-GLES_APIENTRY(void, EGLImageTargetTexture2DOES, GLenum target,
-              GLeglImageOES buffer) {
+APIENTRY_IMPL(void, EGLImageTargetTexture2DOES, GLenum target, GLeglImageOES buffer) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1768,7 +1797,7 @@ GLES_APIENTRY(void, EGLImageTargetTexture2DOES, GLenum target,
 }
 
 // Set server state capabity.
-GLES_APIENTRY(void, Enable, GLenum cap) {
+APIENTRY_IMPL(void, Enable, GLenum cap) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1805,7 +1834,7 @@ GLES_APIENTRY(void, Enable, GLenum cap) {
 }
 
 // Set client state capability.
-GLES_APIENTRY(void, EnableClientState, GLenum cap) {
+APIENTRY_IMPL(void, EnableClientState, GLenum cap) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1825,7 +1854,7 @@ GLES_APIENTRY(void, EnableClientState, GLenum cap) {
 }
 
 // Enables input from an array to the given vertex shader attribute.
-GLES_APIENTRY(void, EnableVertexAttribArray, GLuint index) {
+APIENTRY_IMPL(void, EnableVertexAttribArray, GLuint index) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1842,7 +1871,7 @@ GLES_APIENTRY(void, EnableVertexAttribArray, GLuint index) {
 
 // Finishes any commands in the GL command queue, and returns only when all
 // commands are complete (including any rendering).
-GLES_APIENTRY(void, Finish) {
+APIENTRY_IMPL(void, Finish) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1854,7 +1883,7 @@ GLES_APIENTRY(void, Finish) {
 
 // Flushes any commands in the GL command queue, ensuring they are actually
 // being processed and not just waiting for some other event to trigger them.
-GLES_APIENTRY(void, Flush) {
+APIENTRY_IMPL(void, Flush) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -1915,49 +1944,48 @@ namespace {
 
 }  // namespace
 
-GLES_APIENTRY(void, Fogf, GLenum name, GLfloat param) {
+APIENTRY_IMPL(void, Fogf, GLenum name, GLfloat param) {
     APITRACE();
     HandleFog(name, &param, kParamTypeScalar);
 }
 
-GLES_APIENTRY(void, Fogfv, GLenum name, const GLfloat* params) {
+APIENTRY_IMPL(void, Fogfv, GLenum name, const GLfloat* params) {
     APITRACE();
     HandleFog(name, params, kParamTypeArray);
 }
 
-GLES_APIENTRY(void, Fogx, GLenum pname, GLfixed param) {
+APIENTRY_IMPL(void, Fogx, GLenum pname, GLfixed param) {
     APITRACE();
     if (pname == GL_FOG_MODE) {
-        glFogf(pname, static_cast<GLfloat>(param));
+        TRCALL(glFogf(pname, static_cast<GLfloat>(param)));
     } else {
-        glFogf(pname, X2F(param));
+        TRCALL(glFogf(pname, X2F(param)));
     }
 }
 
-GLES_APIENTRY(void, FogxOES, GLenum pname, GLfixed param) {
+APIENTRY_IMPL(void, FogxOES, GLenum pname, GLfixed param) {
     APITRACE();
-    glFogx(pname, param);
+    TRCALL(glFogx(pname, param));
 }
 
-GLES_APIENTRY(void, Fogxv, GLenum pname, const GLfixed* params) {
+APIENTRY_IMPL(void, Fogxv, GLenum pname, const GLfixed* params) {
     APITRACE();
     if (pname == GL_FOG_MODE) {
-        glFogf(pname, static_cast<GLfloat>(params[0]));
+        TRCALL(glFogf(pname, static_cast<GLfloat>(params[0])));
     } else {
         GLfloat tmp[kMaxParamElementSize];
         Convert(tmp, ParamSize(pname), params);
-        glFogfv(pname, tmp);
+        TRCALL(glFogfv(pname, tmp));
     }
 }
 
-GLES_APIENTRY(void, FogxvOES, GLenum pname, const GLfixed* params) {
+APIENTRY_IMPL(void, FogxvOES, GLenum pname, const GLfixed* params) {
     APITRACE();
-    glFogxv(pname, params);
+    TRCALL(glFogxv(pname, params));
 }
 
 // Attaches a render buffer to a frame buffer.
-GLES_APIENTRY(void, FramebufferRenderbuffer, GLenum target, GLenum attachment,
-        GLenum renderbuffertarget, GLuint renderbuffer) {
+APIENTRY_IMPL(void, FramebufferRenderbuffer, GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2010,17 +2038,14 @@ GLES_APIENTRY(void, FramebufferRenderbuffer, GLenum target, GLenum attachment,
     }
 }
 
-GLES_APIENTRY(void, FramebufferRenderbufferOES, GLenum target,
-        GLenum attachment, GLenum renderbuffertarget,
-        GLuint renderbuffer) {
+APIENTRY_IMPL(void, FramebufferRenderbufferOES, GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer) {
     APITRACE();
-    glFramebufferRenderbuffer(target, attachment, renderbuffertarget,
-            renderbuffer);
+    TRCALL(glFramebufferRenderbuffer(target, attachment, renderbuffertarget,
+            renderbuffer));
 }
 
 // Sets up a texture to be used as the framebuffer for subsequent rendering.
-GLES_APIENTRY(void, FramebufferTexture2D, GLenum target, GLenum attachment,
-        GLenum textarget, GLuint texture, GLint level) {
+APIENTRY_IMPL(void, FramebufferTexture2D, GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2057,14 +2082,13 @@ GLES_APIENTRY(void, FramebufferTexture2D, GLenum target, GLenum attachment,
             global_name, level);
 }
 
-GLES_APIENTRY(void, FramebufferTexture2DOES, GLenum target, GLenum attachment,
-        GLenum textarget, GLuint texture, GLint level) {
+APIENTRY_IMPL(void, FramebufferTexture2DOES, GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level) {
     APITRACE();
-    glFramebufferTexture2D(target, attachment, textarget, texture, level);
+    TRCALL(glFramebufferTexture2D(target, attachment, textarget, texture, level));
 }
 
 // Sets which order (clockwise, counter-clockwise) is considered front facing.
-GLES_APIENTRY(void, FrontFace, GLenum mode) {
+APIENTRY_IMPL(void, FrontFace, GLenum mode) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2081,8 +2105,7 @@ GLES_APIENTRY(void, FrontFace, GLenum mode) {
 }
 
 // Multiplies the current matrix with the specified perspective matrix.
-GLES_APIENTRY(void, Frustumf, GLfloat left, GLfloat right, GLfloat bottom,
-        GLfloat top, GLfloat zNear, GLfloat zFar) {
+APIENTRY_IMPL(void, Frustumf, GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2093,28 +2116,25 @@ GLES_APIENTRY(void, Frustumf, GLfloat left, GLfloat right, GLfloat bottom,
         emugl::Matrix::GeneratePerspective(left, right, bottom, top, zNear, zFar);
 }
 
-GLES_APIENTRY(void, FrustumfOES, GLfloat left, GLfloat right, GLfloat bottom,
-        GLfloat top, GLfloat zNear, GLfloat zFar) {
+APIENTRY_IMPL(void, FrustumfOES, GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar) {
     APITRACE();
-    glFrustumf(left, right, bottom, top, zNear, zFar);
+    TRCALL(glFrustumf(left, right, bottom, top, zNear, zFar));
 }
 
-GLES_APIENTRY(void, Frustumx, GLfixed left, GLfixed right, GLfixed bottom,
-        GLfixed top, GLfixed zNear, GLfixed zFar) {
+APIENTRY_IMPL(void, Frustumx, GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed zNear, GLfixed zFar) {
     APITRACE();
-    glFrustumf(X2F(left), X2F(right), X2F(bottom), X2F(top), X2F(zNear),
-            X2F(zFar));
+    TRCALL(glFrustumf(X2F(left), X2F(right), X2F(bottom), X2F(top), X2F(zNear),
+            X2F(zFar)));
 }
 
-GLES_APIENTRY(void, FrustumxOES, GLfixed left, GLfixed right, GLfixed bottom,
-        GLfixed top, GLfixed zNear, GLfixed zFar) {
+APIENTRY_IMPL(void, FrustumxOES, GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed zNear, GLfixed zFar) {
     APITRACE();
-    glFrustumf(X2F(left), X2F(right), X2F(bottom), X2F(top), X2F(zNear),
-            X2F(zFar));
+    TRCALL(glFrustumf(X2F(left), X2F(right), X2F(bottom), X2F(top), X2F(zNear),
+            X2F(zFar)));
 }
 
 // Generate N buffer objects.
-GLES_APIENTRY(void, GenBuffers, GLsizei n, GLuint* buffers) {
+APIENTRY_IMPL(void, GenBuffers, GLsizei n, GLuint* buffers) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2130,7 +2150,7 @@ GLES_APIENTRY(void, GenBuffers, GLsizei n, GLuint* buffers) {
 }
 
 // Generate N framebuffer objects.
-GLES_APIENTRY(void, GenFramebuffers, GLsizei n, GLuint* framebuffers) {
+APIENTRY_IMPL(void, GenFramebuffers, GLsizei n, GLuint* framebuffers) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2145,13 +2165,13 @@ GLES_APIENTRY(void, GenFramebuffers, GLsizei n, GLuint* framebuffers) {
     c->GetShareGroup()->GenFramebuffers(n, framebuffers);
 }
 
-GLES_APIENTRY(void, GenFramebuffersOES, GLsizei n, GLuint* framebuffers) {
+APIENTRY_IMPL(void, GenFramebuffersOES, GLsizei n, GLuint* framebuffers) {
     APITRACE();
-    glGenFramebuffers(n, framebuffers);
+    TRCALL(glGenFramebuffers(n, framebuffers));
 }
 
 // Generates N renderbuffer objects.
-GLES_APIENTRY(void, GenRenderbuffers, GLsizei n, GLuint* renderbuffers) {
+APIENTRY_IMPL(void, GenRenderbuffers, GLsizei n, GLuint* renderbuffers) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2166,13 +2186,13 @@ GLES_APIENTRY(void, GenRenderbuffers, GLsizei n, GLuint* renderbuffers) {
     c->GetShareGroup()->GenRenderbuffers(n, renderbuffers);
 }
 
-GLES_APIENTRY(void, GenRenderbuffersOES, GLsizei n, GLuint* renderbuffers) {
+APIENTRY_IMPL(void, GenRenderbuffersOES, GLsizei n, GLuint* renderbuffers) {
     APITRACE();
-    glGenRenderbuffers(n, renderbuffers);
+    TRCALL(glGenRenderbuffers(n, renderbuffers));
 }
 
 // Creates N texture objects.
-GLES_APIENTRY(void, GenTextures, GLsizei n, GLuint* textures) {
+APIENTRY_IMPL(void, GenTextures, GLsizei n, GLuint* textures) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2188,7 +2208,7 @@ GLES_APIENTRY(void, GenTextures, GLsizei n, GLuint* textures) {
 }
 
 // Generates all the mipmaps of a texture from the highest resolution image.
-GLES_APIENTRY(void, GenerateMipmap, GLenum target) {
+APIENTRY_IMPL(void, GenerateMipmap, GLenum target) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2200,15 +2220,13 @@ GLES_APIENTRY(void, GenerateMipmap, GLenum target) {
     PASS_THROUGH(c, GenerateMipmap, target);
 }
 
-GLES_APIENTRY(void, GenerateMipmapOES, GLenum target) {
+APIENTRY_IMPL(void, GenerateMipmapOES, GLenum target) {
     APITRACE();
-    glGenerateMipmap(target);
+    TRCALL(glGenerateMipmap(target));
 }
 
 // Gets the list of attribute indices used by the given program.
-GLES_APIENTRY(void, GetActiveAttrib, GLuint program, GLuint index,
-        GLsizei bufsize, GLsizei* length, GLint* size, GLenum* type,
-        GLchar* name) {
+APIENTRY_IMPL(void, GetActiveAttrib, GLuint program, GLuint index, GLsizei bufsize, GLsizei* length, GLint* size, GLenum* type, GLchar* name) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2226,9 +2244,7 @@ GLES_APIENTRY(void, GetActiveAttrib, GLuint program, GLuint index,
 }
 
 // Gets the list of uniform indices used by the given program.
-GLES_APIENTRY(void, GetActiveUniform, GLuint program, GLuint index,
-        GLsizei bufsize, GLsizei* length, GLint* size, GLenum* type,
-        GLchar* name) {
+APIENTRY_IMPL(void, GetActiveUniform, GLuint program, GLuint index, GLsizei bufsize, GLsizei* length, GLint* size, GLenum* type, GLchar* name) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2246,8 +2262,7 @@ GLES_APIENTRY(void, GetActiveUniform, GLuint program, GLuint index,
 }
 
 // Gets the list of shader objects used by the given program.
-GLES_APIENTRY(void, GetAttachedShaders, GLuint program, GLsizei maxcount,
-        GLsizei* count, GLuint* shaders) {
+APIENTRY_IMPL(void, GetAttachedShaders, GLuint program, GLsizei maxcount, GLsizei* count, GLuint* shaders) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2265,7 +2280,7 @@ GLES_APIENTRY(void, GetAttachedShaders, GLuint program, GLsizei maxcount,
 }
 
 // Gets the index of an attribute for a program by name.
-GLES_APIENTRY(GLint, GetAttribLocation, GLuint program, const GLchar* name) {
+APIENTRY_IMPL(GLint, GetAttribLocation, GLuint program, const GLchar* name) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2283,7 +2298,7 @@ GLES_APIENTRY(GLint, GetAttribLocation, GLuint program, const GLchar* name) {
 }
 
 // Gets state as a boolean.
-GLES_APIENTRY(void, GetBooleanv, GLenum pname, GLboolean* params) {
+APIENTRY_IMPL(void, GetBooleanv, GLenum pname, GLboolean* params) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2298,8 +2313,7 @@ GLES_APIENTRY(void, GetBooleanv, GLenum pname, GLboolean* params) {
 }
 
 // Get buffer parameter value.
-GLES_APIENTRY(void, GetBufferParameteriv, GLenum target, GLenum pname,
-        GLint* params) {
+APIENTRY_IMPL(void, GetBufferParameteriv, GLenum target, GLenum pname, GLint* params) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2331,7 +2345,7 @@ GLES_APIENTRY(void, GetBufferParameteriv, GLenum target, GLenum pname,
 }
 
 // Gets the current clip plane parameters.
-GLES_APIENTRY(void, GetClipPlanef, GLenum pname, GLfloat* eqn) {
+APIENTRY_IMPL(void, GetClipPlanef, GLenum pname, GLfloat* eqn) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2348,26 +2362,26 @@ GLES_APIENTRY(void, GetClipPlanef, GLenum pname, GLfloat* eqn) {
     }
 }
 
-GLES_APIENTRY(void, GetClipPlanefOES, GLenum pname, GLfloat* eqn) {
+APIENTRY_IMPL(void, GetClipPlanefOES, GLenum pname, GLfloat* eqn) {
     APITRACE();
-    glGetClipPlanef(pname, eqn);
+    TRCALL(glGetClipPlanef(pname, eqn));
 }
 
-GLES_APIENTRY(void, GetClipPlanex, GLenum pname, GLfixed* eqn) {
+APIENTRY_IMPL(void, GetClipPlanex, GLenum pname, GLfixed* eqn) {
     APITRACE();
     static const size_t kNumElements = 4;
     GLfloat tmp[kNumElements];
-    glGetClipPlanef(pname, tmp);
+    TRCALL(glGetClipPlanef(pname, tmp));
     Convert(tmp, kNumElements, eqn);
 }
 
-GLES_APIENTRY(void, GetClipPlanexOES, GLenum pname, GLfixed* eqn) {
+APIENTRY_IMPL(void, GetClipPlanexOES, GLenum pname, GLfixed* eqn) {
     APITRACE();
-    glGetClipPlanex(pname, eqn);
+    TRCALL(glGetClipPlanex(pname, eqn));
 }
 
 // Returns the oldest error code that was reported.
-GLES_APIENTRY(GLenum, GetError) {
+APIENTRY_IMPL(GLenum, GetError) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c || !c->AreChecksEnabled()) {
@@ -2388,20 +2402,20 @@ GLES_APIENTRY(GLenum, GetError) {
 }
 
 // Gets state as a fixed.
-GLES_APIENTRY(void, GetFixedv, GLenum pname, GLfixed* params) {
+APIENTRY_IMPL(void, GetFixedv, GLenum pname, GLfixed* params) {
     APITRACE();
     GLfloat tmp[kMaxParamElementSize];
-    glGetFloatv(pname, tmp);
+    TRCALL(glGetFloatv(pname, tmp));
     Convert(params, ParamSize(pname), tmp);
 }
 
-GLES_APIENTRY(void, GetFixedvOES, GLenum pname, GLfixed* params) {
+APIENTRY_IMPL(void, GetFixedvOES, GLenum pname, GLfixed* params) {
     APITRACE();
-    glGetFixedv(pname, params);
+    TRCALL(glGetFixedv(pname, params));
 }
 
 // Gets state as a float.
-GLES_APIENTRY(void, GetFloatv, GLenum pname, GLfloat* params) {
+APIENTRY_IMPL(void, GetFloatv, GLenum pname, GLfloat* params) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2415,8 +2429,7 @@ GLES_APIENTRY(void, GetFloatv, GLenum pname, GLfloat* params) {
     PASS_THROUGH(c, GetFloatv, pname, params);
 }
 
-GLES_APIENTRY(void, GetFramebufferAttachmentParameteriv, GLenum target,
-        GLenum attachment, GLenum pname, GLint* params) {
+APIENTRY_IMPL(void, GetFramebufferAttachmentParameteriv, GLenum target, GLenum attachment, GLenum pname, GLint* params) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2470,14 +2483,13 @@ GLES_APIENTRY(void, GetFramebufferAttachmentParameteriv, GLenum target,
     }
 }
 
-GLES_APIENTRY(void, GetFramebufferAttachmentParameterivOES, GLenum target,
-        GLenum attachment, GLenum pname, GLint* params) {
+APIENTRY_IMPL(void, GetFramebufferAttachmentParameterivOES, GLenum target, GLenum attachment, GLenum pname, GLint* params) {
     APITRACE();
-    glGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
+    TRCALL(glGetFramebufferAttachmentParameteriv(target, attachment, pname, params));
 }
 
 // Gets state as an integer.
-GLES_APIENTRY(void, GetIntegerv, GLenum pname, GLint* params) {
+APIENTRY_IMPL(void, GetIntegerv, GLenum pname, GLint* params) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2492,7 +2504,7 @@ GLES_APIENTRY(void, GetIntegerv, GLenum pname, GLint* params) {
 }
 
 // Gets fixed function lighting state.
-GLES_APIENTRY(void, GetLightfv, GLenum lightid, GLenum name, GLfloat* params) {
+APIENTRY_IMPL(void, GetLightfv, GLenum lightid, GLenum name, GLfloat* params) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2551,21 +2563,20 @@ GLES_APIENTRY(void, GetLightfv, GLenum lightid, GLenum name, GLfloat* params) {
     }
 }
 
-GLES_APIENTRY(void, GetLightxv, GLenum light, GLenum pname, GLfixed* params) {
+APIENTRY_IMPL(void, GetLightxv, GLenum light, GLenum pname, GLfixed* params) {
     APITRACE();
     GLfloat tmp[kMaxParamElementSize];
-    glGetLightfv(light, pname, tmp);
+    TRCALL(glGetLightfv(light, pname, tmp));
     Convert(params, ParamSize(pname), tmp);
 }
 
-GLES_APIENTRY(void, GetLightxvOES, GLenum light, GLenum pname,
-        GLfixed* params) {
+APIENTRY_IMPL(void, GetLightxvOES, GLenum light, GLenum pname, GLfixed* params) {
     APITRACE();
-    glGetLightxv(light, pname, params);
+    TRCALL(glGetLightxv(light, pname, params));
 }
 
 // Gets fixed function material state.
-GLES_APIENTRY(void, GetMaterialfv, GLenum face, GLenum name, GLfloat* params) {
+APIENTRY_IMPL(void, GetMaterialfv, GLenum face, GLenum name, GLfloat* params) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2608,21 +2619,20 @@ GLES_APIENTRY(void, GetMaterialfv, GLenum face, GLenum name, GLfloat* params) {
     }
 }
 
-GLES_APIENTRY(void, GetMaterialxv, GLenum face, GLenum pname, GLfixed* params) {
+APIENTRY_IMPL(void, GetMaterialxv, GLenum face, GLenum pname, GLfixed* params) {
     APITRACE();
     GLfloat tmp[kMaxParamElementSize];
-    glGetMaterialfv(face, pname, tmp);
+    TRCALL(glGetMaterialfv(face, pname, tmp));
     Convert(params, ParamSize(pname), tmp);
 }
 
-GLES_APIENTRY(void, GetMaterialxvOES, GLenum face, GLenum pname,
-        GLfixed* params) {
+APIENTRY_IMPL(void, GetMaterialxvOES, GLenum face, GLenum pname, GLfixed* params) {
     APITRACE();
-    glGetMaterialxv(face, pname, params);
+    TRCALL(glGetMaterialxv(face, pname, params));
 }
 
 // Gets pointer data for the specified array.
-GLES_APIENTRY(void, GetPointerv, GLenum pname, void** params) {
+APIENTRY_IMPL(void, GetPointerv, GLenum pname, void** params) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2640,8 +2650,7 @@ GLES_APIENTRY(void, GetPointerv, GLenum pname, void** params) {
 }
 
 // Gets the output text messages from the last program link/validation request.
-GLES_APIENTRY(void, GetProgramInfoLog, GLuint program, GLsizei bufsize,
-        GLsizei* length, GLchar* infolog) {
+APIENTRY_IMPL(void, GetProgramInfoLog, GLuint program, GLsizei bufsize, GLsizei* length, GLchar* infolog) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2659,7 +2668,7 @@ GLES_APIENTRY(void, GetProgramInfoLog, GLuint program, GLsizei bufsize,
 }
 
 // Gets information about a program.
-GLES_APIENTRY(void, GetProgramiv, GLuint program, GLenum pname, GLint* params) {
+APIENTRY_IMPL(void, GetProgramiv, GLuint program, GLenum pname, GLint* params) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2677,8 +2686,7 @@ GLES_APIENTRY(void, GetProgramiv, GLuint program, GLenum pname, GLint* params) {
 }
 
 // Gets information about the render buffer bound to the indicated target.
-GLES_APIENTRY(void, GetRenderbufferParameteriv, GLenum target, GLenum pname,
-        GLint* params) {
+APIENTRY_IMPL(void, GetRenderbufferParameteriv, GLenum target, GLenum pname, GLint* params) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2716,15 +2724,13 @@ GLES_APIENTRY(void, GetRenderbufferParameteriv, GLenum target, GLenum pname,
     }
 }
 
-GLES_APIENTRY(void, GetRenderbufferParameterivOES, GLenum target, GLenum pname,
-        GLint* params) {
+APIENTRY_IMPL(void, GetRenderbufferParameterivOES, GLenum target, GLenum pname, GLint* params) {
     APITRACE();
-    glGetRenderbufferParameteriv(target, pname, params);
+    TRCALL(glGetRenderbufferParameteriv(target, pname, params));
 }
 
 // Gets the output text messages from the last shader compile.
-GLES_APIENTRY(void, GetShaderInfoLog, GLuint shader, GLsizei bufsize,
-        GLsizei* length, GLchar* infolog) {
+APIENTRY_IMPL(void, GetShaderInfoLog, GLuint shader, GLsizei bufsize, GLsizei* length, GLchar* infolog) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2742,8 +2748,7 @@ GLES_APIENTRY(void, GetShaderInfoLog, GLuint shader, GLsizei bufsize,
 }
 
 // Gets the shaders precision.
-GLES_APIENTRY(void, GetShaderPrecisionFormat, GLenum shadertype,
-        GLenum precisiontype, GLint* range, GLint* precision) {
+APIENTRY_IMPL(void, GetShaderPrecisionFormat, GLenum shadertype, GLenum precisiontype, GLint* range, GLint* precision) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2755,8 +2760,7 @@ GLES_APIENTRY(void, GetShaderPrecisionFormat, GLenum shadertype,
 }
 
 // Gets the source code loaded into the indicated shader object.
-GLES_APIENTRY(void, GetShaderSource, GLuint shader, GLsizei bufsize,
-        GLsizei* length, GLchar* source) {
+APIENTRY_IMPL(void, GetShaderSource, GLuint shader, GLsizei bufsize, GLsizei* length, GLchar* source) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2774,7 +2778,7 @@ GLES_APIENTRY(void, GetShaderSource, GLuint shader, GLsizei bufsize,
 }
 
 // Gets information about a shader.
-GLES_APIENTRY(void, GetShaderiv, GLuint shader, GLenum pname, GLint* params) {
+APIENTRY_IMPL(void, GetShaderiv, GLuint shader, GLenum pname, GLint* params) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2792,7 +2796,7 @@ GLES_APIENTRY(void, GetShaderiv, GLuint shader, GLenum pname, GLint* params) {
 }
 
 // Gets string information about the GL implementation.
-GLES_APIENTRY(const GLubyte*, GetString, GLenum name) {
+APIENTRY_IMPL(const GLubyte*, GetString, GLenum name) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2874,32 +2878,30 @@ namespace {
 
 }  // namespace
 
-GLES_APIENTRY(void, GetTexEnvfv, GLenum env, GLenum pname, GLfloat* params) {
+APIENTRY_IMPL(void, GetTexEnvfv, GLenum env, GLenum pname, GLfloat* params) {
     APITRACE();
     HandleGetTexEnv(env, pname, params);
 }
 
-GLES_APIENTRY(void, GetTexEnviv, GLenum env, GLenum pname, GLint* params) {
+APIENTRY_IMPL(void, GetTexEnviv, GLenum env, GLenum pname, GLint* params) {
     APITRACE();
     HandleGetTexEnv(env, pname, params);
 }
 
-GLES_APIENTRY(void, GetTexEnvxv, GLenum env, GLenum pname, GLfixed* params) {
+APIENTRY_IMPL(void, GetTexEnvxv, GLenum env, GLenum pname, GLfixed* params) {
     APITRACE();
     GLfloat tmp[kMaxParamElementSize];
-    glGetTexEnvfv(env, pname, tmp);
+    TRCALL(glGetTexEnvfv(env, pname, tmp));
     Convert(params, ParamSize(pname), tmp);
 }
 
-GLES_APIENTRY(void, GetTexEnvxvOES, GLenum env, GLenum pname,
-        GLfixed* params) {
+APIENTRY_IMPL(void, GetTexEnvxvOES, GLenum env, GLenum pname, GLfixed* params) {
     APITRACE();
-    glGetTexEnvxv(env, pname, params);
+    TRCALL(glGetTexEnvxv(env, pname, params));
 }
 
 // Get texture parameter.
-GLES_APIENTRY(void, GetTexParameterfv, GLenum target, GLenum pname,
-        GLfloat* params) {
+APIENTRY_IMPL(void, GetTexParameterfv, GLenum target, GLenum pname, GLfloat* params) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2916,8 +2918,7 @@ GLES_APIENTRY(void, GetTexParameterfv, GLenum target, GLenum pname,
     c->texture_context_.RestoreBinding(target);
 }
 
-GLES_APIENTRY(void, GetTexParameteriv, GLenum target, GLenum pname,
-        GLint* params) {
+APIENTRY_IMPL(void, GetTexParameteriv, GLenum target, GLenum pname, GLint* params) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2942,23 +2943,20 @@ GLES_APIENTRY(void, GetTexParameteriv, GLenum target, GLenum pname,
     c->texture_context_.RestoreBinding(target);
 }
 
-GLES_APIENTRY(void, GetTexParameterxv, GLenum target, GLenum pname,
-        GLfixed* params) {
+APIENTRY_IMPL(void, GetTexParameterxv, GLenum target, GLenum pname, GLfixed* params) {
     APITRACE();
     GLfloat tmp[kMaxParamElementSize];
-    glGetTexParameterfv(target, pname, tmp);
+    TRCALL(glGetTexParameterfv(target, pname, tmp));
     Convert(params, ParamSize(pname), tmp);
 }
 
-GLES_APIENTRY(void, GetTexParameterxvOES, GLenum target, GLenum pname,
-        GLfixed* params) {
+APIENTRY_IMPL(void, GetTexParameterxvOES, GLenum target, GLenum pname, GLfixed* params) {
     APITRACE();
-    glGetTexParameterxv(target, pname, params);
+    TRCALL(glGetTexParameterxv(target, pname, params));
 }
 
 // Gets the default uniform value for a program.
-GLES_APIENTRY(void, GetUniformfv, GLuint program, GLint location,
-        GLfloat* params) {
+APIENTRY_IMPL(void, GetUniformfv, GLuint program, GLint location, GLfloat* params) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2975,8 +2973,7 @@ GLES_APIENTRY(void, GetUniformfv, GLuint program, GLint location,
     program_data->GetUniformfv(location, params);
 }
 
-GLES_APIENTRY(void, GetUniformiv, GLuint program, GLint location,
-        GLint* params) {
+APIENTRY_IMPL(void, GetUniformiv, GLuint program, GLint location, GLint* params) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -2994,7 +2991,7 @@ GLES_APIENTRY(void, GetUniformiv, GLuint program, GLint location,
 }
 
 // Gets the index of an uniform for a program by name.
-GLES_APIENTRY(GLint, GetUniformLocation, GLuint program, const GLchar* name) {
+APIENTRY_IMPL(GLint, GetUniformLocation, GLuint program, const GLchar* name) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3012,8 +3009,7 @@ GLES_APIENTRY(GLint, GetUniformLocation, GLuint program, const GLchar* name) {
 }
 
 // Gets a pointer value from the vertex attribute state.
-GLES_APIENTRY(void, GetVertexAttribPointerv, GLuint index, GLenum pname,
-        GLvoid** pointer) {
+APIENTRY_IMPL(void, GetVertexAttribPointerv, GLuint index, GLenum pname, GLvoid** pointer) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3034,8 +3030,7 @@ GLES_APIENTRY(void, GetVertexAttribPointerv, GLuint index, GLenum pname,
 }
 
 // Gets the vertex attribute state.
-GLES_APIENTRY(void, GetVertexAttribfv, GLuint index, GLenum pname,
-        GLfloat* params) {
+APIENTRY_IMPL(void, GetVertexAttribfv, GLuint index, GLenum pname, GLfloat* params) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3073,8 +3068,7 @@ GLES_APIENTRY(void, GetVertexAttribfv, GLuint index, GLenum pname,
     }
 }
 
-GLES_APIENTRY(void, GetVertexAttribiv, GLuint index, GLenum pname,
-        GLint* params) {
+APIENTRY_IMPL(void, GetVertexAttribiv, GLuint index, GLenum pname, GLint* params) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3114,7 +3108,7 @@ GLES_APIENTRY(void, GetVertexAttribiv, GLuint index, GLenum pname,
 
 // Provides a hint to the GL implementation. Generally the application uses
 // hints to suggest where performance matters more than rendering quality.
-GLES_APIENTRY(void, Hint, GLenum target, GLenum mode) {
+APIENTRY_IMPL(void, Hint, GLenum target, GLenum mode) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3144,7 +3138,7 @@ GLES_APIENTRY(void, Hint, GLenum target, GLenum mode) {
 }
 
 // Returns true if the specified object is a buffer.
-GLES_APIENTRY(GLboolean, IsBuffer, GLuint buffer) {
+APIENTRY_IMPL(GLboolean, IsBuffer, GLuint buffer) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3157,7 +3151,7 @@ GLES_APIENTRY(GLboolean, IsBuffer, GLuint buffer) {
 }
 
 // Returns true if the given capability is enabled.
-GLES_APIENTRY(GLboolean, IsEnabled, GLenum cap) {
+APIENTRY_IMPL(GLboolean, IsEnabled, GLenum cap) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3194,7 +3188,7 @@ GLES_APIENTRY(GLboolean, IsEnabled, GLenum cap) {
 }
 
 // Returns true if the specified object is a framebuffer.
-GLES_APIENTRY(GLboolean, IsFramebuffer, GLuint framebuffer) {
+APIENTRY_IMPL(GLboolean, IsFramebuffer, GLuint framebuffer) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3206,13 +3200,13 @@ GLES_APIENTRY(GLboolean, IsFramebuffer, GLuint framebuffer) {
     return fb != NULL ? GL_TRUE : GL_FALSE;
 }
 
-GLES_APIENTRY(GLboolean, IsFramebufferOES, GLuint framebuffer) {
+APIENTRY_IMPL(GLboolean, IsFramebufferOES, GLuint framebuffer) {
     APITRACE();
-    return glIsFramebuffer(framebuffer);
+    return TRCALL(glIsFramebuffer(framebuffer));
 }
 
 // Returns true if the specified object is a program.
-GLES_APIENTRY(GLboolean, IsProgram, GLuint program) {
+APIENTRY_IMPL(GLboolean, IsProgram, GLuint program) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3225,7 +3219,7 @@ GLES_APIENTRY(GLboolean, IsProgram, GLuint program) {
 }
 
 // Returns true if the specified object is a renderbuffer.
-GLES_APIENTRY(GLboolean, IsRenderbuffer, GLuint renderbuffer) {
+APIENTRY_IMPL(GLboolean, IsRenderbuffer, GLuint renderbuffer) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3237,13 +3231,13 @@ GLES_APIENTRY(GLboolean, IsRenderbuffer, GLuint renderbuffer) {
     return rb != NULL ? GL_TRUE : GL_FALSE;
 }
 
-GLES_APIENTRY(GLboolean, IsRenderbufferOES, GLuint renderbuffer) {
+APIENTRY_IMPL(GLboolean, IsRenderbufferOES, GLuint renderbuffer) {
     APITRACE();
-    return glIsRenderbuffer(renderbuffer);
+    return TRCALL(glIsRenderbuffer(renderbuffer));
 }
 
 // Returns true if the specified object is a shader.
-GLES_APIENTRY(GLboolean, IsShader, GLuint shader) {
+APIENTRY_IMPL(GLboolean, IsShader, GLuint shader) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3256,7 +3250,7 @@ GLES_APIENTRY(GLboolean, IsShader, GLuint shader) {
 }
 
 // Returns true if the specified object is a texture.
-GLES_APIENTRY(GLboolean, IsTexture, GLuint texture) {
+APIENTRY_IMPL(GLboolean, IsTexture, GLuint texture) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3305,36 +3299,36 @@ namespace {
     }
 }  // namespace
 
-GLES_APIENTRY(void, LightModelf, GLenum name, GLfloat param) {
+APIENTRY_IMPL(void, LightModelf, GLenum name, GLfloat param) {
     APITRACE();
     HandleLightModel(name, &param, kParamTypeScalar);
 }
 
-GLES_APIENTRY(void, LightModelfv, GLenum name, const GLfloat* params) {
+APIENTRY_IMPL(void, LightModelfv, GLenum name, const GLfloat* params) {
     APITRACE();
     HandleLightModel(name, params, kParamTypeArray);
 }
 
-GLES_APIENTRY(void, LightModelx, GLenum pname, GLfixed param) {
+APIENTRY_IMPL(void, LightModelx, GLenum pname, GLfixed param) {
     APITRACE();
-    glLightModelf(pname, X2F(param));
+    TRCALL(glLightModelf(pname, X2F(param)));
 }
 
-GLES_APIENTRY(void, LightModelxOES, GLenum pname, GLfixed param) {
+APIENTRY_IMPL(void, LightModelxOES, GLenum pname, GLfixed param) {
     APITRACE();
-    glLightModelf(pname, X2F(param));
+    TRCALL(glLightModelf(pname, X2F(param)));
 }
 
-GLES_APIENTRY(void, LightModelxv, GLenum pname, const GLfixed* params) {
+APIENTRY_IMPL(void, LightModelxv, GLenum pname, const GLfixed* params) {
     APITRACE();
     GLfloat tmp[kMaxParamElementSize];
     Convert(tmp, ParamSize(pname), params);
-    glLightModelfv(pname, tmp);
+    TRCALL(glLightModelfv(pname, tmp));
 }
 
-GLES_APIENTRY(void, LightModelxvOES, GLenum pname, const GLfixed* params) {
+APIENTRY_IMPL(void, LightModelxvOES, GLenum pname, const GLfixed* params) {
     APITRACE();
-    glLightModelxv(pname, params);
+    TRCALL(glLightModelxv(pname, params));
 }
 
 // Configure fixed function lighting state.
@@ -3424,43 +3418,40 @@ namespace {
     }
 }  // namespace
 
-GLES_APIENTRY(void, Lightf, GLenum lightid, GLenum name, GLfloat param) {
+APIENTRY_IMPL(void, Lightf, GLenum lightid, GLenum name, GLfloat param) {
     APITRACE();
     HandleLight(lightid, name, &param, kParamTypeScalar);
 }
 
-GLES_APIENTRY(void, Lightfv, GLenum lightid, GLenum name,
-        const GLfloat* params) {
+APIENTRY_IMPL(void, Lightfv, GLenum lightid, GLenum name, const GLfloat* params) {
     APITRACE();
     HandleLight(lightid, name, params, kParamTypeArray);
 }
 
-GLES_APIENTRY(void, Lightx, GLenum light, GLenum pname, GLfixed param) {
+APIENTRY_IMPL(void, Lightx, GLenum light, GLenum pname, GLfixed param) {
     APITRACE();
-    glLightf(light, pname, X2F(param));
+    TRCALL(glLightf(light, pname, X2F(param)));
 }
 
-GLES_APIENTRY(void, LightxOES, GLenum light, GLenum pname, GLfixed param) {
+APIENTRY_IMPL(void, LightxOES, GLenum light, GLenum pname, GLfixed param) {
     APITRACE();
-    glLightf(light, pname, X2F(param));
+    TRCALL(glLightf(light, pname, X2F(param)));
 }
 
-GLES_APIENTRY(void, Lightxv, GLenum light, GLenum pname,
-        const GLfixed* params) {
+APIENTRY_IMPL(void, Lightxv, GLenum light, GLenum pname, const GLfixed* params) {
     APITRACE();
     GLfloat tmp[kMaxParamElementSize];
     Convert(tmp, ParamSize(pname), params);
-    glLightfv(light, pname, tmp);
+    TRCALL(glLightfv(light, pname, tmp));
 }
 
-GLES_APIENTRY(void, LightxvOES, GLenum light, GLenum pname,
-        const GLfixed* params) {
+APIENTRY_IMPL(void, LightxvOES, GLenum light, GLenum pname, const GLfixed* params) {
     APITRACE();
-    glLightxv(light, pname, params);
+    TRCALL(glLightxv(light, pname, params));
 }
 
 // Sets the width of a line
-GLES_APIENTRY(void, LineWidth, GLfloat width) {
+APIENTRY_IMPL(void, LineWidth, GLfloat width) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3477,18 +3468,18 @@ GLES_APIENTRY(void, LineWidth, GLfloat width) {
     PASS_THROUGH(c, LineWidth, width);
 }
 
-GLES_APIENTRY(void, LineWidthx, GLfixed width) {
+APIENTRY_IMPL(void, LineWidthx, GLfixed width) {
     APITRACE();
-    glLineWidth(X2F(width));
+    TRCALL(glLineWidth(X2F(width)));
 }
 
-GLES_APIENTRY(void, LineWidthxOES, GLfixed width) {
+APIENTRY_IMPL(void, LineWidthxOES, GLfixed width) {
     APITRACE();
-    glLineWidth(X2F(width));
+    TRCALL(glLineWidth(X2F(width)));
 }
 
 // Links the current program given the shaders that have been attached to it.
-GLES_APIENTRY(void, LinkProgram, GLuint program) {
+APIENTRY_IMPL(void, LinkProgram, GLuint program) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3506,7 +3497,7 @@ GLES_APIENTRY(void, LinkProgram, GLuint program) {
 }
 
 // Loads the identity matrix into the top of theactive matrix stack.
-GLES_APIENTRY(void, LoadIdentity) {
+APIENTRY_IMPL(void, LoadIdentity) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3517,7 +3508,7 @@ GLES_APIENTRY(void, LoadIdentity) {
 }
 
 // Loads a matrix into the top of the active matrix stack.
-GLES_APIENTRY(void, LoadMatrixf, const GLfloat* m) {
+APIENTRY_IMPL(void, LoadMatrixf, const GLfloat* m) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3527,21 +3518,21 @@ GLES_APIENTRY(void, LoadMatrixf, const GLfloat* m) {
     c->uniform_context_.MutateActiveMatrix().SetColumnMajorArray(m);
 }
 
-GLES_APIENTRY(void, LoadMatrixx, const GLfixed* m) {
+APIENTRY_IMPL(void, LoadMatrixx, const GLfixed* m) {
     APITRACE();
     GLfloat tmp[kMaxParamElementSize];
     Convert(tmp, 16, m);
-    glLoadMatrixf(tmp);
+    TRCALL(glLoadMatrixf(tmp));
 }
 
-GLES_APIENTRY(void, LoadMatrixxOES, const GLfixed* m) {
+APIENTRY_IMPL(void, LoadMatrixxOES, const GLfixed* m) {
     APITRACE();
-    glLoadMatrixx(m);
+    TRCALL(glLoadMatrixx(m));
 }
 
 // Copy the current model view matrix to a matrix in the matrix palette,
 // specified by glCurrentPaletteMatrixOES.
-GLES_APIENTRY(void, LoadPaletteFromModelViewMatrixOES) {
+APIENTRY_IMPL(void, LoadPaletteFromModelViewMatrixOES) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3623,9 +3614,7 @@ namespace {
     }
 }  // namespace
 
-GLES_APIENTRY(GLvoid*, MapTexSubImage2DCHROMIUM, GLenum target, GLint level,
-        GLint xoffset, GLint yoffset, GLsizei width, GLsizei height,
-        GLenum format, GLenum type, GLenum access) {
+APIENTRY_IMPL(GLvoid*, MapTexSubImage2DCHROMIUM, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, GLenum access) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3636,43 +3625,40 @@ GLES_APIENTRY(GLvoid*, MapTexSubImage2DCHROMIUM, GLenum target, GLint level,
             yoffset, width, height, format, type, access);
 }
 
-GLES_APIENTRY(void, Materialf, GLenum face, GLenum name, GLfloat param) {
+APIENTRY_IMPL(void, Materialf, GLenum face, GLenum name, GLfloat param) {
     APITRACE();
     HandleMaterial(face, name, &param, kParamTypeScalar);
 }
 
-GLES_APIENTRY(void, Materialfv, GLenum face, GLenum name,
-        const GLfloat* params) {
+APIENTRY_IMPL(void, Materialfv, GLenum face, GLenum name, const GLfloat* params) {
     APITRACE();
     HandleMaterial(face, name, params, kParamTypeArray);
 }
 
-GLES_APIENTRY(void, Materialx, GLenum face, GLenum pname, GLfixed param) {
+APIENTRY_IMPL(void, Materialx, GLenum face, GLenum pname, GLfixed param) {
     APITRACE();
-    glMaterialf(face, pname, X2F(param));
+    TRCALL(glMaterialf(face, pname, X2F(param)));
 }
 
-GLES_APIENTRY(void, MaterialxOES, GLenum face, GLenum pname, GLfixed param) {
+APIENTRY_IMPL(void, MaterialxOES, GLenum face, GLenum pname, GLfixed param) {
     APITRACE();
-    glMaterialx(face, pname, param);
+    TRCALL(glMaterialx(face, pname, param));
 }
 
-GLES_APIENTRY(void, Materialxv, GLenum face, GLenum pname,
-        const GLfixed* params) {
+APIENTRY_IMPL(void, Materialxv, GLenum face, GLenum pname, const GLfixed* params) {
     APITRACE();
     GLfloat tmp[kMaxParamElementSize];
     Convert(tmp, ParamSize(pname), params);
-    glMaterialfv(face, pname, tmp);
+    TRCALL(glMaterialfv(face, pname, tmp));
 }
 
-GLES_APIENTRY(void, MaterialxvOES, GLenum face, GLenum pname,
-        const GLfixed* params) {
+APIENTRY_IMPL(void, MaterialxvOES, GLenum face, GLenum pname, const GLfixed* params) {
     APITRACE();
-    glMaterialxv(face, pname, params);
+    TRCALL(glMaterialxv(face, pname, params));
 }
 
 // Selects the active matrix statck.
-GLES_APIENTRY(void, MatrixMode, GLenum mode) {
+APIENTRY_IMPL(void, MatrixMode, GLenum mode) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3686,8 +3672,7 @@ GLES_APIENTRY(void, MatrixMode, GLenum mode) {
 }
 
 // Set matrix indices used to blend corresponding matrices for a given vertex.
-GLES_APIENTRY(void, MatrixIndexPointerOES, GLint size, GLenum type,
-        GLsizei stride, const GLvoid* pointer) {
+APIENTRY_IMPL(void, MatrixIndexPointerOES, GLint size, GLenum type, GLsizei stride, const GLvoid* pointer) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3706,14 +3691,13 @@ GLES_APIENTRY(void, MatrixIndexPointerOES, GLint size, GLenum type,
             stride, pointer, normalized);
 }
 
-GLES_APIENTRY(void, MatrixIndexPointerOESBounds, GLint size, GLenum type,
-        GLsizei stride, const GLvoid* pointer, GLsizei count) {
+APIENTRY_IMPL(void, MatrixIndexPointerOESBounds, GLint size, GLenum type, GLsizei stride, const GLvoid* pointer, GLsizei count) {
     APITRACE();
-    glMatrixIndexPointerOES(size, type, stride, pointer);
+    TRCALL(glMatrixIndexPointerOES(size, type, stride, pointer));
 }
 
 // Multiplies the matrix on top of the active matrix stack by the given matrix.
-GLES_APIENTRY(void, MultMatrixf, const GLfloat* m) {
+APIENTRY_IMPL(void, MultMatrixf, const GLfloat* m) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3723,20 +3707,20 @@ GLES_APIENTRY(void, MultMatrixf, const GLfloat* m) {
     c->uniform_context_.MutateActiveMatrix() *= emugl::Matrix(m);
 }
 
-GLES_APIENTRY(void, MultMatrixx, const GLfixed* m) {
+APIENTRY_IMPL(void, MultMatrixx, const GLfixed* m) {
     APITRACE();
     GLfloat tmp[kMaxParamElementSize];
     Convert(tmp, 16, m);
-    glMultMatrixf(tmp);
+    TRCALL(glMultMatrixf(tmp));
 }
 
-GLES_APIENTRY(void, MultMatrixxOES, const GLfixed* m) {
+APIENTRY_IMPL(void, MultMatrixxOES, const GLfixed* m) {
     APITRACE();
-    glMultMatrixx(m);
+    TRCALL(glMultMatrixx(m));
 }
 
 // Sets up unvarying normal vector for the fixed function pipeline.
-GLES_APIENTRY(void, Normal3f, GLfloat nx, GLfloat ny, GLfloat nz) {
+APIENTRY_IMPL(void, Normal3f, GLfloat nx, GLfloat ny, GLfloat nz) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3747,7 +3731,7 @@ GLES_APIENTRY(void, Normal3f, GLfloat nx, GLfloat ny, GLfloat nz) {
     normal = emugl::Vector(nx, ny, nz, 0.f);
 }
 
-GLES_APIENTRY(void, Normal3fv, const GLfloat* coords) {
+APIENTRY_IMPL(void, Normal3fv, const GLfloat* coords) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3760,7 +3744,7 @@ GLES_APIENTRY(void, Normal3fv, const GLfloat* coords) {
     }
 }
 
-GLES_APIENTRY(void, Normal3sv, const GLshort* coords) {
+APIENTRY_IMPL(void, Normal3sv, const GLshort* coords) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3772,19 +3756,18 @@ GLES_APIENTRY(void, Normal3sv, const GLshort* coords) {
     normal.Set(3, 0.f);
 }
 
-GLES_APIENTRY(void, Normal3x, GLfixed nx, GLfixed ny, GLfixed nz) {
+APIENTRY_IMPL(void, Normal3x, GLfixed nx, GLfixed ny, GLfixed nz) {
     APITRACE();
-    glNormal3f(X2F(nx), X2F(ny), X2F(nz));
+    TRCALL(glNormal3f(X2F(nx), X2F(ny), X2F(nz)));
 }
 
-GLES_APIENTRY(void, Normal3xOES, GLfixed nx, GLfixed ny, GLfixed nz) {
+APIENTRY_IMPL(void, Normal3xOES, GLfixed nx, GLfixed ny, GLfixed nz) {
     APITRACE();
-    glNormal3f(X2F(nx), X2F(ny), X2F(nz));
+    TRCALL(glNormal3f(X2F(nx), X2F(ny), X2F(nz)));
 }
 
 // Specifies source array for per-vertex normals.
-GLES_APIENTRY(void, NormalPointer, GLenum type, GLsizei stride,
-        const GLvoid* pointer) {
+APIENTRY_IMPL(void, NormalPointer, GLenum type, GLsizei stride, const GLvoid* pointer) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3804,15 +3787,13 @@ GLES_APIENTRY(void, NormalPointer, GLenum type, GLsizei stride,
             pointer, normalized);
 }
 
-GLES_APIENTRY(void, NormalPointerBounds, GLenum type, GLsizei stride,
-        const GLvoid* pointer, GLsizei count) {
+APIENTRY_IMPL(void, NormalPointerBounds, GLenum type, GLsizei stride, const GLvoid* pointer, GLsizei count) {
     APITRACE();
-    glNormalPointer(type, stride, pointer);
+    TRCALL(glNormalPointer(type, stride, pointer));
 }
 
 // Multiplies the current matrix with the specified orthogaphic matrix.
-GLES_APIENTRY(void, Orthof, GLfloat left, GLfloat right, GLfloat bottom,
-        GLfloat top, GLfloat z_near, GLfloat z_far) {
+APIENTRY_IMPL(void, Orthof, GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat z_near, GLfloat z_far) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3824,28 +3805,25 @@ GLES_APIENTRY(void, Orthof, GLfloat left, GLfloat right, GLfloat bottom,
                 z_far);
 }
 
-GLES_APIENTRY(void, OrthofOES, GLfloat left, GLfloat right, GLfloat bottom,
-        GLfloat top, GLfloat zNear, GLfloat zFar) {
+APIENTRY_IMPL(void, OrthofOES, GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar) {
     APITRACE();
-    glOrthof(left, right, bottom, top, zNear, zFar);
+    TRCALL(glOrthof(left, right, bottom, top, zNear, zFar));
 }
 
-GLES_APIENTRY(void, Orthox, GLfixed left, GLfixed right, GLfixed bottom,
-        GLfixed top, GLfixed zNear, GLfixed zFar) {
+APIENTRY_IMPL(void, Orthox, GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed zNear, GLfixed zFar) {
     APITRACE();
-    glOrthof(X2F(left), X2F(right), X2F(bottom), X2F(top), X2F(zNear),
-            X2F(zFar));
+    TRCALL(glOrthof(X2F(left), X2F(right), X2F(bottom), X2F(top), X2F(zNear),
+            X2F(zFar)));
 }
 
-GLES_APIENTRY(void, OrthoxOES, GLfixed left, GLfixed right, GLfixed bottom,
-        GLfixed top, GLfixed zNear, GLfixed zFar) {
+APIENTRY_IMPL(void, OrthoxOES, GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed zNear, GLfixed zFar) {
     APITRACE();
-    glOrthof(X2F(left), X2F(right), X2F(bottom), X2F(top), X2F(zNear),
-            X2F(zFar));
+    TRCALL(glOrthof(X2F(left), X2F(right), X2F(bottom), X2F(top), X2F(zNear),
+            X2F(zFar)));
 }
 
 // Configures pixel storage (write) operation, when transfering to GL.
-GLES_APIENTRY(void, PixelStorei, GLenum pname, GLint param) {
+APIENTRY_IMPL(void, PixelStorei, GLenum pname, GLint param) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3931,40 +3909,40 @@ namespace {
 
 }  // namespace
 
-GLES_APIENTRY(void, PointParameterf, GLenum pname, GLfloat param) {
+APIENTRY_IMPL(void, PointParameterf, GLenum pname, GLfloat param) {
     APITRACE();
     HandlePointParameter(pname, &param, kParamTypeScalar);
 }
 
-GLES_APIENTRY(void, PointParameterfv, GLenum pname, const GLfloat* params) {
+APIENTRY_IMPL(void, PointParameterfv, GLenum pname, const GLfloat* params) {
     APITRACE();
     HandlePointParameter(pname, params, kParamTypeArray);
 }
 
-GLES_APIENTRY(void, PointParameterx, GLenum pname, GLfixed param) {
+APIENTRY_IMPL(void, PointParameterx, GLenum pname, GLfixed param) {
     APITRACE();
-    glPointParameterf(pname, X2F(param));
+    TRCALL(glPointParameterf(pname, X2F(param)));
 }
 
-GLES_APIENTRY(void, PointParameterxOES, GLenum pname, GLfixed param) {
+APIENTRY_IMPL(void, PointParameterxOES, GLenum pname, GLfixed param) {
     APITRACE();
-    glPointParameterf(pname, X2F(param));
+    TRCALL(glPointParameterf(pname, X2F(param)));
 }
 
-GLES_APIENTRY(void, PointParameterxv, GLenum pname, const GLfixed* params) {
+APIENTRY_IMPL(void, PointParameterxv, GLenum pname, const GLfixed* params) {
     APITRACE();
     GLfloat tmp[kMaxParamElementSize];
     Convert(tmp, ParamSize(pname), params);
-    glPointParameterfv(pname, tmp);
+    TRCALL(glPointParameterfv(pname, tmp));
 }
 
-GLES_APIENTRY(void, PointParameterxvOES, GLenum pname, const GLfixed* params) {
+APIENTRY_IMPL(void, PointParameterxvOES, GLenum pname, const GLfixed* params) {
     APITRACE();
-    glPointParameterxv(pname, params);
+    TRCALL(glPointParameterxv(pname, params));
 }
 
 // Sets the point size that is used when no vertex point size array is enabled.
-GLES_APIENTRY(void, PointSize, GLfloat size) {
+APIENTRY_IMPL(void, PointSize, GLfloat size) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -3978,19 +3956,18 @@ GLES_APIENTRY(void, PointSize, GLfloat size) {
     c->uniform_context_.MutatePointParameters().current_size = size;
 }
 
-GLES_APIENTRY(void, PointSizex, GLfixed size) {
+APIENTRY_IMPL(void, PointSizex, GLfixed size) {
     APITRACE();
-    glPointSize(X2F(size));
+    TRCALL(glPointSize(X2F(size)));
 }
 
-GLES_APIENTRY(void, PointSizexOES, GLfixed size) {
+APIENTRY_IMPL(void, PointSizexOES, GLfixed size) {
     APITRACE();
-    glPointSize(X2F(size));
+    TRCALL(glPointSize(X2F(size)));
 }
 
 // Specifies source array for per-vertex point sizes.
-GLES_APIENTRY(void, PointSizePointerOES, GLenum type, GLsizei stride,
-        const GLvoid* pointer) {
+APIENTRY_IMPL(void, PointSizePointerOES, GLenum type, GLsizei stride, const GLvoid* pointer) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4010,21 +3987,19 @@ GLES_APIENTRY(void, PointSizePointerOES, GLenum type, GLsizei stride,
             pointer);
 }
 
-GLES_APIENTRY(void, PointSizePointer, GLenum type, GLsizei stride,
-        const GLvoid* pointer) {
+APIENTRY_IMPL(void, PointSizePointer, GLenum type, GLsizei stride, const GLvoid* pointer) {
     APITRACE();
-    glPointSizePointerOES(type, stride, pointer);
+    TRCALL(glPointSizePointerOES(type, stride, pointer));
 }
 
-GLES_APIENTRY(void, PointSizePointerOESBounds, GLenum type, GLsizei stride,
-        const GLvoid* pointer, GLsizei count) {
+APIENTRY_IMPL(void, PointSizePointerOESBounds, GLenum type, GLsizei stride, const GLvoid* pointer, GLsizei count) {
     APITRACE();
-    glPointSizePointerOES(type, stride, pointer);
+    TRCALL(glPointSizePointerOES(type, stride, pointer));
 }
 
 // Configures a depth offset applied to all fragments (eg. for "fixing"
 // problems with rendering decals/overlays on top of faces).
-GLES_APIENTRY(void, PolygonOffset, GLfloat factor, GLfloat units) {
+APIENTRY_IMPL(void, PolygonOffset, GLfloat factor, GLfloat units) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4036,18 +4011,18 @@ GLES_APIENTRY(void, PolygonOffset, GLfloat factor, GLfloat units) {
     PASS_THROUGH(c, PolygonOffset, factor, units);
 }
 
-GLES_APIENTRY(void, PolygonOffsetx, GLfixed factor, GLfixed units) {
+APIENTRY_IMPL(void, PolygonOffsetx, GLfixed factor, GLfixed units) {
     APITRACE();
-    glPolygonOffset(X2F(factor), X2F(units));
+    TRCALL(glPolygonOffset(X2F(factor), X2F(units)));
 }
 
-GLES_APIENTRY(void, PolygonOffsetxOES, GLfixed factor, GLfixed units) {
+APIENTRY_IMPL(void, PolygonOffsetxOES, GLfixed factor, GLfixed units) {
     APITRACE();
-    glPolygonOffset(X2F(factor), X2F(units));
+    TRCALL(glPolygonOffset(X2F(factor), X2F(units)));
 }
 
 // Pops matrix state.
-GLES_APIENTRY(void, PopMatrix) {
+APIENTRY_IMPL(void, PopMatrix) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4061,7 +4036,7 @@ GLES_APIENTRY(void, PopMatrix) {
 }
 
 // Pushes matrix state.
-GLES_APIENTRY(void, PushMatrix) {
+APIENTRY_IMPL(void, PushMatrix) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4075,8 +4050,7 @@ GLES_APIENTRY(void, PushMatrix) {
 }
 
 // Reads pixels from the frame buffer.
-GLES_APIENTRY(void, ReadPixels, GLint x, GLint y, GLsizei width,
-        GLsizei height, GLenum format, GLenum type, GLvoid* pixels) {
+APIENTRY_IMPL(void, ReadPixels, GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4086,15 +4060,14 @@ GLES_APIENTRY(void, ReadPixels, GLint x, GLint y, GLsizei width,
     PASS_THROUGH(c, ReadPixels, x, y, width, height, format, type, pixels);
 }
 
-GLES_APIENTRY(void, ReleaseShaderCompiler) {
+APIENTRY_IMPL(void, ReleaseShaderCompiler) {
     APITRACE();
     // Since this is only a hint that shader compilations are unlikely to occur,
     // we can ignore it.
 }
 
 // Configures a renderbuffer.
-GLES_APIENTRY(void, RenderbufferStorage, GLenum target, GLenum internalformat,
-        GLsizei width, GLsizei height) {
+APIENTRY_IMPL(void, RenderbufferStorage, GLenum target, GLenum internalformat, GLsizei width, GLsizei height) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4128,14 +4101,13 @@ GLES_APIENTRY(void, RenderbufferStorage, GLenum target, GLenum internalformat,
     PASS_THROUGH(c, RenderbufferStorage, target, internalformat, width, height);
 }
 
-GLES_APIENTRY(void, RenderbufferStorageOES, GLenum target,
-        GLenum internalformat, GLsizei width, GLsizei height) {
+APIENTRY_IMPL(void, RenderbufferStorageOES, GLenum target, GLenum internalformat, GLsizei width, GLsizei height) {
     APITRACE();
-    glRenderbufferStorage(target, internalformat, width, height);
+    TRCALL(glRenderbufferStorage(target, internalformat, width, height));
 }
 
 // Applies a rotation to the top of the current matrix stack.
-GLES_APIENTRY(void, Rotatef, GLfloat angle, GLfloat x, GLfloat y, GLfloat z) {
+APIENTRY_IMPL(void, Rotatef, GLfloat angle, GLfloat x, GLfloat y, GLfloat z) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4147,19 +4119,18 @@ GLES_APIENTRY(void, Rotatef, GLfloat angle, GLfloat x, GLfloat y, GLfloat z) {
         emugl::Matrix::GenerateRotationByDegrees(angle, v);
 }
 
-GLES_APIENTRY(void, Rotatex, GLfixed angle, GLfixed x, GLfixed y, GLfixed z) {
+APIENTRY_IMPL(void, Rotatex, GLfixed angle, GLfixed x, GLfixed y, GLfixed z) {
     APITRACE();
-    glRotatef(X2F(angle), X2F(x), X2F(y), X2F(z));
+    TRCALL(glRotatef(X2F(angle), X2F(x), X2F(y), X2F(z)));
 }
 
-GLES_APIENTRY(void, RotatexOES, GLfixed angle, GLfixed x, GLfixed y,
-        GLfixed z) {
+APIENTRY_IMPL(void, RotatexOES, GLfixed angle, GLfixed x, GLfixed y, GLfixed z) {
     APITRACE();
-    glRotatef(X2F(angle), X2F(x), X2F(y), X2F(z));
+    TRCALL(glRotatef(X2F(angle), X2F(x), X2F(y), X2F(z)));
 }
 
 // Changes the way fragment coverage is computed.
-GLES_APIENTRY(void, SampleCoverage, GLclampf value, GLboolean invert) {
+APIENTRY_IMPL(void, SampleCoverage, GLclampf value, GLboolean invert) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4172,18 +4143,18 @@ GLES_APIENTRY(void, SampleCoverage, GLclampf value, GLboolean invert) {
     PASS_THROUGH(c, SampleCoverage, value, invert);
 }
 
-GLES_APIENTRY(void, SampleCoveragex, GLclampx value, GLboolean invert) {
+APIENTRY_IMPL(void, SampleCoveragex, GLclampx value, GLboolean invert) {
     APITRACE();
-    glSampleCoverage(X2F(value), invert);
+    TRCALL(glSampleCoverage(X2F(value), invert));
 }
 
-GLES_APIENTRY(void, SampleCoveragexOES, GLclampx value, GLboolean invert) {
+APIENTRY_IMPL(void, SampleCoveragexOES, GLclampx value, GLboolean invert) {
     APITRACE();
-    glSampleCoverage(X2F(value), invert);
+    TRCALL(glSampleCoverage(X2F(value), invert));
 }
 
 // Applies a scale to the top of the current matrix stack.
-GLES_APIENTRY(void, Scalef, GLfloat x, GLfloat y, GLfloat z) {
+APIENTRY_IMPL(void, Scalef, GLfloat x, GLfloat y, GLfloat z) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4194,19 +4165,19 @@ GLES_APIENTRY(void, Scalef, GLfloat x, GLfloat y, GLfloat z) {
     c->uniform_context_.MutateActiveMatrix() *= emugl::Matrix::GenerateScale(v);
 }
 
-GLES_APIENTRY(void, Scalex, GLfixed x, GLfixed y, GLfixed z) {
+APIENTRY_IMPL(void, Scalex, GLfixed x, GLfixed y, GLfixed z) {
     APITRACE();
-    glScalef(X2F(x), X2F(y), X2F(z));
+    TRCALL(glScalef(X2F(x), X2F(y), X2F(z)));
 }
 
-GLES_APIENTRY(void, ScalexOES, GLfixed x, GLfixed y, GLfixed z) {
+APIENTRY_IMPL(void, ScalexOES, GLfixed x, GLfixed y, GLfixed z) {
     APITRACE();
-    glScalef(X2F(x), X2F(y), X2F(z));
+    TRCALL(glScalef(X2F(x), X2F(y), X2F(z)));
 }
 
 // Configures fragment rejection based on whether or not it is inside a
 // screen-space rectangle.
-GLES_APIENTRY(void, Scissor, GLint x, GLint y, GLsizei width, GLsizei height) {
+APIENTRY_IMPL(void, Scissor, GLint x, GLint y, GLsizei width, GLsizei height) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4218,7 +4189,7 @@ GLES_APIENTRY(void, Scissor, GLint x, GLint y, GLsizei width, GLsizei height) {
 
 // Configures the shading model to use (how to interpolate colors across
 // triangles).
-GLES_APIENTRY(void, ShadeModel, GLenum mode) {
+APIENTRY_IMPL(void, ShadeModel, GLenum mode) {
     APITRACE();
     // There is no efficient way to emulate GL_FLAT mode with fragment
     // shaders since they automatically interpolate color values.
@@ -4228,8 +4199,7 @@ GLES_APIENTRY(void, ShadeModel, GLenum mode) {
 }
 
 // Loads the source code for a shader into a shader object.
-GLES_APIENTRY(void, ShaderSource, GLuint shader, GLsizei count,
-        const GLchar* const* string, const GLint* length) {
+APIENTRY_IMPL(void, ShaderSource, GLuint shader, GLsizei count, const GLchar* const* string, const GLint* length) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4252,7 +4222,7 @@ GLES_APIENTRY(void, ShaderSource, GLuint shader, GLsizei count,
 }
 
 // Set front and back function and reference value for stencil testing.
-GLES_APIENTRY(void, StencilFunc, GLenum func, GLint ref, GLuint mask) {
+APIENTRY_IMPL(void, StencilFunc, GLenum func, GLint ref, GLuint mask) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4271,8 +4241,7 @@ GLES_APIENTRY(void, StencilFunc, GLenum func, GLint ref, GLuint mask) {
 }
 
 // Set front and/or back function and reference value for stencil testing.
-GLES_APIENTRY(void, StencilFuncSeparate, GLenum face, GLenum func, GLint ref,
-        GLuint mask) {
+APIENTRY_IMPL(void, StencilFuncSeparate, GLenum face, GLenum func, GLint ref, GLuint mask) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4284,7 +4253,7 @@ GLES_APIENTRY(void, StencilFuncSeparate, GLenum face, GLenum func, GLint ref,
 
 // Control the front and back writing of individual bits in the stencil
 // planes.
-GLES_APIENTRY(void, StencilMask, GLuint mask) {
+APIENTRY_IMPL(void, StencilMask, GLuint mask) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4296,7 +4265,7 @@ GLES_APIENTRY(void, StencilMask, GLuint mask) {
 
 // Control the front and/or back writing of individual bits in the stencil
 // planes.
-GLES_APIENTRY(void, StencilMaskSeparate, GLenum face, GLuint mask) {
+APIENTRY_IMPL(void, StencilMaskSeparate, GLenum face, GLuint mask) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4307,7 +4276,7 @@ GLES_APIENTRY(void, StencilMaskSeparate, GLenum face, GLuint mask) {
 }
 
 // Set front and back stencil test actions.
-GLES_APIENTRY(void, StencilOp, GLenum sfail, GLenum zfail, GLenum zpass) {
+APIENTRY_IMPL(void, StencilOp, GLenum sfail, GLenum zfail, GLenum zpass) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4318,8 +4287,7 @@ GLES_APIENTRY(void, StencilOp, GLenum sfail, GLenum zfail, GLenum zpass) {
 }
 
 // Set front and/or back stencil test actions.
-GLES_APIENTRY(void, StencilOpSeparate, GLenum face, GLenum sfail, GLenum zfail,
-        GLenum zpass) {
+APIENTRY_IMPL(void, StencilOpSeparate, GLenum face, GLenum sfail, GLenum zfail, GLenum zpass) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4330,8 +4298,7 @@ GLES_APIENTRY(void, StencilOpSeparate, GLenum face, GLenum sfail, GLenum zfail,
 }
 
 // Specifies source array for per-vertex texture coordinates.
-GLES_APIENTRY(void, TexCoordPointer, GLint size, GLenum type, GLsizei stride,
-        const GLvoid* pointer) {
+APIENTRY_IMPL(void, TexCoordPointer, GLint size, GLenum type, GLsizei stride, const GLvoid* pointer) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4354,10 +4321,9 @@ GLES_APIENTRY(void, TexCoordPointer, GLint size, GLenum type, GLsizei stride,
     c->pointer_context_.SetPointer(index, size, type, stride, pointer);
 }
 
-GLES_APIENTRY(void, TexCoordPointerBounds, GLint size, GLenum type,
-        GLsizei stride, const GLvoid* pointer, GLsizei count) {
+APIENTRY_IMPL(void, TexCoordPointerBounds, GLint size, GLenum type, GLsizei stride, const GLvoid* pointer, GLsizei count) {
     APITRACE();
-    glTexCoordPointer(size, type, stride, pointer);
+    TRCALL(glTexCoordPointer(size, type, stride, pointer));
 }
 
 // Sets up a texture environment for the current texture unit for the fixed
@@ -4366,6 +4332,7 @@ namespace {
     template <typename T>
         void HandleTexEnv(GLenum target, GLenum pname, T* params,
                 ParamType param_type) {
+            APITRACE();
             ContextPtr c = GetCurrentGlesContext();
             if (!c) {
                 return;
@@ -4470,40 +4437,37 @@ namespace {
         }
 }  // namespace
 
-GLES_APIENTRY(void, TexEnvf, GLenum target, GLenum pname, GLfloat param) {
+APIENTRY_IMPL(void, TexEnvf, GLenum target, GLenum pname, GLfloat param) {
     APITRACE();
     HandleTexEnv(target, pname, &param, kParamTypeScalar);
 }
 
-GLES_APIENTRY(void, TexEnvfv, GLenum target, GLenum pname,
-        const GLfloat* params) {
+APIENTRY_IMPL(void, TexEnvfv, GLenum target, GLenum pname, const GLfloat* params) {
     APITRACE();
     HandleTexEnv(target, pname, params, kParamTypeArray);
 }
 
-GLES_APIENTRY(void, TexEnvi, GLenum target, GLenum pname, GLint param) {
+APIENTRY_IMPL(void, TexEnvi, GLenum target, GLenum pname, GLint param) {
     APITRACE();
     HandleTexEnv(target, pname, &param, kParamTypeScalar);
 }
 
-GLES_APIENTRY(void, TexEnviv, GLenum target, GLenum pname,
-        const GLint* params) {
+APIENTRY_IMPL(void, TexEnviv, GLenum target, GLenum pname, const GLint* params) {
     APITRACE();
     HandleTexEnv(target, pname, params, kParamTypeArray);
 }
 
-GLES_APIENTRY(void, TexEnvx, GLenum target, GLenum pname, GLfixed param) {
+APIENTRY_IMPL(void, TexEnvx, GLenum target, GLenum pname, GLfixed param) {
     APITRACE();
-    glTexEnvf(target, pname, static_cast<GLfloat>(param));
+    TRCALL(glTexEnvf(target, pname, static_cast<GLfloat>(param)));
 }
 
-GLES_APIENTRY(void, TexEnvxOES, GLenum target, GLenum pname, GLfixed param) {
+APIENTRY_IMPL(void, TexEnvxOES, GLenum target, GLenum pname, GLfixed param) {
     APITRACE();
-    glTexEnvf(target, pname, static_cast<GLfloat>(param));
+    TRCALL(glTexEnvf(target, pname, static_cast<GLfloat>(param)));
 }
 
-GLES_APIENTRY(void, TexEnvxv, GLenum target, GLenum pname,
-        const GLfixed* params) {
+APIENTRY_IMPL(void, TexEnvxv, GLenum target, GLenum pname, const GLfixed* params) {
     APITRACE();
     GLfloat tmp[kMaxParamElementSize];
     if (pname == GL_TEXTURE_ENV_COLOR) {
@@ -4511,17 +4475,16 @@ GLES_APIENTRY(void, TexEnvxv, GLenum target, GLenum pname,
     } else {
         tmp[0] = static_cast<GLfloat>(params[0]);
     }
-    glTexEnvfv(target, pname, tmp);
+    TRCALL(glTexEnvfv(target, pname, tmp));
 }
 
-GLES_APIENTRY(void, TexEnvxvOES, GLenum target, GLenum pname,
-        const GLfixed* params) {
+APIENTRY_IMPL(void, TexEnvxvOES, GLenum target, GLenum pname, const GLfixed* params) {
     APITRACE();
-    glTexEnvxv(target, pname, params);
+    TRCALL(glTexEnvxv(target, pname, params));
 }
 
 // Control the generation of texture coordinates.
-GLES_APIENTRY(void, TexGeniOES, GLenum coord, GLenum pname, GLint param) {
+APIENTRY_IMPL(void, TexGeniOES, GLenum coord, GLenum pname, GLint param) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4551,28 +4514,23 @@ GLES_APIENTRY(void, TexGeniOES, GLenum coord, GLenum pname, GLint param) {
     }
 }
 
-GLES_APIENTRY(void, TexGenivOES, GLenum coord, GLenum pname,
-        const GLint* params) {
+APIENTRY_IMPL(void, TexGenivOES, GLenum coord, GLenum pname, const GLint* params) {
     APITRACE();
-    glTexGeniOES(coord, pname, params[0]);
+    TRCALL(glTexGeniOES(coord, pname, params[0]));
 }
 
-GLES_APIENTRY(void, TexGenxOES, GLenum coord, GLenum pname, GLfixed param) {
+APIENTRY_IMPL(void, TexGenxOES, GLenum coord, GLenum pname, GLfixed param) {
     APITRACE();
-    glTexGeniOES(coord, pname, param);
+    TRCALL(glTexGeniOES(coord, pname, param));
 }
 
-GLES_APIENTRY(void, TexGenxvOES, GLenum coord, GLenum pname,
-        const GLfixed* params) {
+APIENTRY_IMPL(void, TexGenxvOES, GLenum coord, GLenum pname, const GLfixed* params) {
     APITRACE();
-    glTexGenivOES(coord, pname, params);
+    TRCALL(glTexGenivOES(coord, pname, params));
 }
 
 // Loads pixel data into a texture object.
-GLES_APIENTRY(void, TexImage2D, GLenum target, GLint level,
-        GLint internalformat, GLsizei width, GLsizei height,
-        GLint border, GLenum format, GLenum type,
-        const GLvoid* pixels) {
+APIENTRY_IMPL(void, TexImage2D, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid* pixels) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4658,14 +4616,12 @@ GLES_APIENTRY(void, TexImage2D, GLenum target, GLint level,
 }
 
 // Configure a texture object.
-GLES_APIENTRY(void, TexParameterf, GLenum target, GLenum pname,
-        GLfloat param) {
+APIENTRY_IMPL(void, TexParameterf, GLenum target, GLenum pname, GLfloat param) {
     APITRACE();
-    glTexParameterfv(target, pname, &param);
+    TRCALL(glTexParameterfv(target, pname, &param));
 }
 
-GLES_APIENTRY(void, TexParameterfv, GLenum target, GLenum pname,
-        const GLfloat* params) {
+APIENTRY_IMPL(void, TexParameterfv, GLenum target, GLenum pname, const GLfloat* params) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4698,13 +4654,12 @@ GLES_APIENTRY(void, TexParameterfv, GLenum target, GLenum pname,
     }
 }
 
-GLES_APIENTRY(void, TexParameteri, GLenum target, GLenum pname, GLint param) {
+APIENTRY_IMPL(void, TexParameteri, GLenum target, GLenum pname, GLint param) {
     APITRACE();
-    glTexParameteriv(target, pname, &param);
+    TRCALL(glTexParameteriv(target, pname, &param));
 }
 
-GLES_APIENTRY(void, TexParameteriv, GLenum target, GLenum pname,
-        const GLint* params) {
+APIENTRY_IMPL(void, TexParameteriv, GLenum target, GLenum pname, const GLint* params) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4737,35 +4692,31 @@ GLES_APIENTRY(void, TexParameteriv, GLenum target, GLenum pname,
     }
 }
 
-GLES_APIENTRY(void, TexParameterx, GLenum target, GLenum pname,
-        GLfixed param) {
+APIENTRY_IMPL(void, TexParameterx, GLenum target, GLenum pname, GLfixed param) {
     APITRACE();
-    glTexParameterxv(target, pname, &param);
+    TRCALL(glTexParameterxv(target, pname, &param));
 }
 
-GLES_APIENTRY(void, TexParameterxOES, GLenum target, GLenum pname,
-        GLfixed param) {
+APIENTRY_IMPL(void, TexParameterxOES, GLenum target, GLenum pname, GLfixed param) {
     APITRACE();
-    glTexParameterxv(target, pname, &param);
+    TRCALL(glTexParameterxv(target, pname, &param));
 }
 
-GLES_APIENTRY(void, TexParameterxv, GLenum target, GLenum pname,
-        const GLfixed* params) {
+APIENTRY_IMPL(void, TexParameterxv, GLenum target, GLenum pname, const GLfixed* params) {
     APITRACE();
     GLfloat tmp[kMaxParamElementSize];
     Convert(tmp, ParamSize(pname), params);
     if (pname == GL_TEXTURE_WRAP_S || pname == GL_TEXTURE_WRAP_T ||
             pname == GL_TEXTURE_CROP_RECT_OES) {
-        glTexParameteriv(target, pname, reinterpret_cast<const GLint*>(params));
+        TRCALL(glTexParameteriv(target, pname, reinterpret_cast<const GLint*>(params)));
     } else {
-        glTexParameterfv(target, pname, tmp);
+        TRCALL(glTexParameterfv(target, pname, tmp));
     }
 }
 
-GLES_APIENTRY(void, TexParameterxvOES, GLenum target, GLenum pname,
-        const GLfixed* params) {
+APIENTRY_IMPL(void, TexParameterxvOES, GLenum target, GLenum pname, const GLfixed* params) {
     APITRACE();
-    glTexParameterxv(target, pname, params);
+    TRCALL(glTexParameterxv(target, pname, params));
 }
 
 namespace {
@@ -4826,9 +4777,7 @@ namespace {
 // Redefines a contiguous subregion of a texture.  In GLES 2 profile
 // width, height, format, type, and data must match the values originally
 // specified to TexImage2D.  See es_full_spec_2.0.25.pdf section 3.7.2.
-GLES_APIENTRY(void, TexSubImage2D, GLenum target, GLint level, GLint xoffset,
-        GLint yoffset, GLsizei width, GLsizei height, GLenum format,
-        GLenum type, const GLvoid* pixels) {
+APIENTRY_IMPL(void, TexSubImage2D, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4886,7 +4835,7 @@ GLES_APIENTRY(void, TexSubImage2D, GLenum target, GLint level, GLint xoffset,
 }
 
 // Applies a translation to the top of the current matrix stack.
-GLES_APIENTRY(void, Translatef, GLfloat x, GLfloat y, GLfloat z) {
+APIENTRY_IMPL(void, Translatef, GLfloat x, GLfloat y, GLfloat z) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -4898,14 +4847,14 @@ GLES_APIENTRY(void, Translatef, GLfloat x, GLfloat y, GLfloat z) {
         emugl::Matrix::GenerateTranslation(v);
 }
 
-GLES_APIENTRY(void, Translatex, GLfixed x, GLfixed y, GLfixed z) {
+APIENTRY_IMPL(void, Translatex, GLfixed x, GLfixed y, GLfixed z) {
     APITRACE();
-    glTranslatef(X2F(x), X2F(y), X2F(z));
+    TRCALL(glTranslatef(X2F(x), X2F(y), X2F(z)));
 }
 
-GLES_APIENTRY(void, TranslatexOES, GLfixed x, GLfixed y, GLfixed z) {
+APIENTRY_IMPL(void, TranslatexOES, GLfixed x, GLfixed y, GLfixed z) {
     APITRACE();
-    glTranslatef(X2F(x), X2F(y), X2F(z));
+    TRCALL(glTranslatef(X2F(x), X2F(y), X2F(z)));
 }
 
 namespace {
@@ -4926,7 +4875,7 @@ namespace {
 }  // namespace
 
 // Loads values into the active uniform state.
-GLES_APIENTRY(void, Uniform1f, GLint location, GLfloat x) {
+APIENTRY_IMPL(void, Uniform1f, GLint location, GLfloat x) {
     APITRACE();
     ProgramDataPtr program_data = GetCurrentProgramData();
     if (program_data != NULL) {
@@ -4934,8 +4883,7 @@ GLES_APIENTRY(void, Uniform1f, GLint location, GLfloat x) {
     }
 }
 
-GLES_APIENTRY(void, Uniform1fv, GLint location, GLsizei count,
-        const GLfloat* v) {
+APIENTRY_IMPL(void, Uniform1fv, GLint location, GLsizei count, const GLfloat* v) {
     APITRACE();
     ProgramDataPtr program_data = GetCurrentProgramData();
     if (program_data != NULL) {
@@ -4943,7 +4891,7 @@ GLES_APIENTRY(void, Uniform1fv, GLint location, GLsizei count,
     }
 }
 
-GLES_APIENTRY(void, Uniform1i, GLint location, GLint x) {
+APIENTRY_IMPL(void, Uniform1i, GLint location, GLint x) {
     APITRACE();
     ProgramDataPtr program_data = GetCurrentProgramData();
     if (program_data != NULL) {
@@ -4951,8 +4899,7 @@ GLES_APIENTRY(void, Uniform1i, GLint location, GLint x) {
     }
 }
 
-GLES_APIENTRY(void, Uniform1iv, GLint location, GLsizei count,
-        const GLint* v) {
+APIENTRY_IMPL(void, Uniform1iv, GLint location, GLsizei count, const GLint* v) {
     APITRACE();
     ProgramDataPtr program_data = GetCurrentProgramData();
     if (program_data != NULL) {
@@ -4960,7 +4907,7 @@ GLES_APIENTRY(void, Uniform1iv, GLint location, GLsizei count,
     }
 }
 
-GLES_APIENTRY(void, Uniform2f, GLint location, GLfloat x, GLfloat y) {
+APIENTRY_IMPL(void, Uniform2f, GLint location, GLfloat x, GLfloat y) {
     APITRACE();
     ProgramDataPtr program_data = GetCurrentProgramData();
     if (program_data != NULL) {
@@ -4969,8 +4916,7 @@ GLES_APIENTRY(void, Uniform2f, GLint location, GLfloat x, GLfloat y) {
     }
 }
 
-GLES_APIENTRY(void, Uniform2fv, GLint location, GLsizei count,
-        const GLfloat* v) {
+APIENTRY_IMPL(void, Uniform2fv, GLint location, GLsizei count, const GLfloat* v) {
     APITRACE();
     ProgramDataPtr program_data = GetCurrentProgramData();
     if (program_data != NULL) {
@@ -4978,7 +4924,7 @@ GLES_APIENTRY(void, Uniform2fv, GLint location, GLsizei count,
     }
 }
 
-GLES_APIENTRY(void, Uniform2i, GLint location, GLint x, GLint y) {
+APIENTRY_IMPL(void, Uniform2i, GLint location, GLint x, GLint y) {
     APITRACE();
     ProgramDataPtr program_data = GetCurrentProgramData();
     if (program_data != NULL) {
@@ -4987,8 +4933,7 @@ GLES_APIENTRY(void, Uniform2i, GLint location, GLint x, GLint y) {
     }
 }
 
-GLES_APIENTRY(void, Uniform2iv, GLint location, GLsizei count,
-        const GLint* v) {
+APIENTRY_IMPL(void, Uniform2iv, GLint location, GLsizei count, const GLint* v) {
     APITRACE();
     ProgramDataPtr program_data = GetCurrentProgramData();
     if (program_data != NULL) {
@@ -4996,8 +4941,7 @@ GLES_APIENTRY(void, Uniform2iv, GLint location, GLsizei count,
     }
 }
 
-GLES_APIENTRY(void, Uniform3f, GLint location, GLfloat x, GLfloat y,
-        GLfloat z) {
+APIENTRY_IMPL(void, Uniform3f, GLint location, GLfloat x, GLfloat y, GLfloat z) {
     APITRACE();
     ProgramDataPtr program_data = GetCurrentProgramData();
     if (program_data != NULL) {
@@ -5006,8 +4950,7 @@ GLES_APIENTRY(void, Uniform3f, GLint location, GLfloat x, GLfloat y,
     }
 }
 
-GLES_APIENTRY(void, Uniform3fv, GLint location, GLsizei count,
-        const GLfloat* v) {
+APIENTRY_IMPL(void, Uniform3fv, GLint location, GLsizei count, const GLfloat* v) {
     APITRACE();
     ProgramDataPtr program_data = GetCurrentProgramData();
     if (program_data != NULL) {
@@ -5015,7 +4958,7 @@ GLES_APIENTRY(void, Uniform3fv, GLint location, GLsizei count,
     }
 }
 
-GLES_APIENTRY(void, Uniform3i, GLint location, GLint x, GLint y, GLint z) {
+APIENTRY_IMPL(void, Uniform3i, GLint location, GLint x, GLint y, GLint z) {
     APITRACE();
     ProgramDataPtr program_data = GetCurrentProgramData();
     if (program_data != NULL) {
@@ -5024,8 +4967,7 @@ GLES_APIENTRY(void, Uniform3i, GLint location, GLint x, GLint y, GLint z) {
     }
 }
 
-GLES_APIENTRY(void, Uniform3iv, GLint location, GLsizei count,
-        const GLint* v) {
+APIENTRY_IMPL(void, Uniform3iv, GLint location, GLsizei count, const GLint* v) {
     APITRACE();
     ProgramDataPtr program_data = GetCurrentProgramData();
     if (program_data != NULL) {
@@ -5033,8 +4975,7 @@ GLES_APIENTRY(void, Uniform3iv, GLint location, GLsizei count,
     }
 }
 
-GLES_APIENTRY(void, Uniform4f, GLint location, GLfloat x, GLfloat y, GLfloat z,
-        GLfloat w) {
+APIENTRY_IMPL(void, Uniform4f, GLint location, GLfloat x, GLfloat y, GLfloat z, GLfloat w) {
     APITRACE();
     ProgramDataPtr program_data = GetCurrentProgramData();
     if (program_data != NULL) {
@@ -5043,8 +4984,7 @@ GLES_APIENTRY(void, Uniform4f, GLint location, GLfloat x, GLfloat y, GLfloat z,
     }
 }
 
-GLES_APIENTRY(void, Uniform4fv, GLint location, GLsizei count,
-        const GLfloat* v) {
+APIENTRY_IMPL(void, Uniform4fv, GLint location, GLsizei count, const GLfloat* v) {
     APITRACE();
     ProgramDataPtr program_data = GetCurrentProgramData();
     if (program_data != NULL) {
@@ -5052,8 +4992,7 @@ GLES_APIENTRY(void, Uniform4fv, GLint location, GLsizei count,
     }
 }
 
-GLES_APIENTRY(void, Uniform4i, GLint location, GLint x, GLint y, GLint z,
-        GLint w) {
+APIENTRY_IMPL(void, Uniform4i, GLint location, GLint x, GLint y, GLint z, GLint w) {
     APITRACE();
     ProgramDataPtr program_data = GetCurrentProgramData();
     if (program_data != NULL) {
@@ -5062,8 +5001,7 @@ GLES_APIENTRY(void, Uniform4i, GLint location, GLint x, GLint y, GLint z,
     }
 }
 
-GLES_APIENTRY(void, Uniform4iv, GLint location, GLsizei count,
-        const GLint* v) {
+APIENTRY_IMPL(void, Uniform4iv, GLint location, GLsizei count, const GLint* v) {
     APITRACE();
     ProgramDataPtr program_data = GetCurrentProgramData();
     if (program_data != NULL) {
@@ -5071,8 +5009,7 @@ GLES_APIENTRY(void, Uniform4iv, GLint location, GLsizei count,
     }
 }
 
-GLES_APIENTRY(void, UniformMatrix2fv, GLint location, GLsizei count,
-        GLboolean transpose, const GLfloat* value) {
+APIENTRY_IMPL(void, UniformMatrix2fv, GLint location, GLsizei count, GLboolean transpose, const GLfloat* value) {
     APITRACE();
     ProgramDataPtr program_data = GetCurrentProgramData();
     if (program_data != NULL) {
@@ -5081,8 +5018,7 @@ GLES_APIENTRY(void, UniformMatrix2fv, GLint location, GLsizei count,
     }
 }
 
-GLES_APIENTRY(void, UniformMatrix3fv, GLint location, GLsizei count,
-        GLboolean transpose, const GLfloat* value) {
+APIENTRY_IMPL(void, UniformMatrix3fv, GLint location, GLsizei count, GLboolean transpose, const GLfloat* value) {
     APITRACE();
     ProgramDataPtr program_data = GetCurrentProgramData();
     if (program_data != NULL) {
@@ -5091,8 +5027,7 @@ GLES_APIENTRY(void, UniformMatrix3fv, GLint location, GLsizei count,
     }
 }
 
-GLES_APIENTRY(void, UniformMatrix4fv, GLint location, GLsizei count,
-        GLboolean transpose, const GLfloat* value) {
+APIENTRY_IMPL(void, UniformMatrix4fv, GLint location, GLsizei count, GLboolean transpose, const GLfloat* value) {
     APITRACE();
     ProgramDataPtr program_data = GetCurrentProgramData();
     if (program_data != NULL) {
@@ -5101,7 +5036,7 @@ GLES_APIENTRY(void, UniformMatrix4fv, GLint location, GLsizei count,
     }
 }
 
-GLES_APIENTRY(void, UnmapTexSubImage2DCHROMIUM, const GLvoid* mem) {
+APIENTRY_IMPL(void, UnmapTexSubImage2DCHROMIUM, const GLvoid* mem) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -5112,7 +5047,7 @@ GLES_APIENTRY(void, UnmapTexSubImage2DCHROMIUM, const GLvoid* mem) {
 }
 
 // Selects a program to use for subsequent rendering.
-GLES_APIENTRY(void, UseProgram, GLuint program) {
+APIENTRY_IMPL(void, UseProgram, GLuint program) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -5132,7 +5067,7 @@ GLES_APIENTRY(void, UseProgram, GLuint program) {
 }
 
 // Validates the indicated program.
-GLES_APIENTRY(void, ValidateProgram, GLuint program) {
+APIENTRY_IMPL(void, ValidateProgram, GLuint program) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -5150,7 +5085,7 @@ GLES_APIENTRY(void, ValidateProgram, GLuint program) {
 }
 
 // Sets up a vertex attribute value or array to use for the vertex shader.
-GLES_APIENTRY(void, VertexAttrib1f, GLuint indx, GLfloat x) {
+APIENTRY_IMPL(void, VertexAttrib1f, GLuint indx, GLfloat x) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -5160,7 +5095,7 @@ GLES_APIENTRY(void, VertexAttrib1f, GLuint indx, GLfloat x) {
     PASS_THROUGH(c, VertexAttrib1f, indx, x);
 }
 
-GLES_APIENTRY(void, VertexAttrib1fv, GLuint indx, const GLfloat* values) {
+APIENTRY_IMPL(void, VertexAttrib1fv, GLuint indx, const GLfloat* values) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -5170,7 +5105,7 @@ GLES_APIENTRY(void, VertexAttrib1fv, GLuint indx, const GLfloat* values) {
     PASS_THROUGH(c, VertexAttrib1fv, indx, values);
 }
 
-GLES_APIENTRY(void, VertexAttrib2f, GLuint indx, GLfloat x, GLfloat y) {
+APIENTRY_IMPL(void, VertexAttrib2f, GLuint indx, GLfloat x, GLfloat y) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -5180,7 +5115,7 @@ GLES_APIENTRY(void, VertexAttrib2f, GLuint indx, GLfloat x, GLfloat y) {
     PASS_THROUGH(c, VertexAttrib2f, indx, x, y);
 }
 
-GLES_APIENTRY(void, VertexAttrib2fv, GLuint indx, const GLfloat* values) {
+APIENTRY_IMPL(void, VertexAttrib2fv, GLuint indx, const GLfloat* values) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -5190,8 +5125,7 @@ GLES_APIENTRY(void, VertexAttrib2fv, GLuint indx, const GLfloat* values) {
     PASS_THROUGH(c, VertexAttrib2fv, indx, values);
 }
 
-GLES_APIENTRY(void, VertexAttrib3f, GLuint indx, GLfloat x, GLfloat y,
-        GLfloat z) {
+APIENTRY_IMPL(void, VertexAttrib3f, GLuint indx, GLfloat x, GLfloat y, GLfloat z) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -5201,7 +5135,7 @@ GLES_APIENTRY(void, VertexAttrib3f, GLuint indx, GLfloat x, GLfloat y,
     PASS_THROUGH(c, VertexAttrib3f, indx, x, y, z);
 }
 
-GLES_APIENTRY(void, VertexAttrib3fv, GLuint indx, const GLfloat* values) {
+APIENTRY_IMPL(void, VertexAttrib3fv, GLuint indx, const GLfloat* values) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -5211,8 +5145,7 @@ GLES_APIENTRY(void, VertexAttrib3fv, GLuint indx, const GLfloat* values) {
     PASS_THROUGH(c, VertexAttrib3fv, indx, values);
 }
 
-GLES_APIENTRY(void, VertexAttrib4f, GLuint indx, GLfloat x, GLfloat y,
-        GLfloat z, GLfloat w) {
+APIENTRY_IMPL(void, VertexAttrib4f, GLuint indx, GLfloat x, GLfloat y, GLfloat z, GLfloat w) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -5222,7 +5155,7 @@ GLES_APIENTRY(void, VertexAttrib4f, GLuint indx, GLfloat x, GLfloat y,
     PASS_THROUGH(c, VertexAttrib4f, indx, x, y, z, w);
 }
 
-GLES_APIENTRY(void, VertexAttrib4fv, GLuint indx, const GLfloat* values) {
+APIENTRY_IMPL(void, VertexAttrib4fv, GLuint indx, const GLfloat* values) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -5233,8 +5166,7 @@ GLES_APIENTRY(void, VertexAttrib4fv, GLuint indx, const GLfloat* values) {
 }
 
 // Specify an array of generic vertex attribute data.
-GLES_APIENTRY(void, VertexAttribPointer, GLuint indx, GLint size, GLenum type,
-        GLboolean normalized, GLsizei stride, const GLvoid* pointer) {
+APIENTRY_IMPL(void, VertexAttribPointer, GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* pointer) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -5261,8 +5193,7 @@ GLES_APIENTRY(void, VertexAttribPointer, GLuint indx, GLint size, GLenum type,
 }
 
 // Specifies source array for vertex coordinates.
-GLES_APIENTRY(void, VertexPointer, GLint size, GLenum type, GLsizei stride,
-        const GLvoid* pointer) {
+APIENTRY_IMPL(void, VertexPointer, GLint size, GLenum type, GLsizei stride, const GLvoid* pointer) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -5285,19 +5216,18 @@ GLES_APIENTRY(void, VertexPointer, GLint size, GLenum type, GLsizei stride,
             pointer);
 }
 
-GLES_APIENTRY(void, VertexPointerBounds, GLint size, GLenum type,
-        GLsizei stride, GLvoid* pointer, GLsizei count) {
+APIENTRY_IMPL(void, VertexPointerBounds, GLint size, GLenum type, GLsizei stride, GLvoid* pointer, GLsizei count) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
         return;
     }
 
-    glVertexPointer(size, type, stride, pointer);
+    TRCALL(glVertexPointer(size, type, stride, pointer));
 }
 
 // Sets up the current viewport.
-GLES_APIENTRY(void, Viewport, GLint x, GLint y, GLsizei width, GLsizei height) {
+APIENTRY_IMPL(void, Viewport, GLint x, GLint y, GLsizei width, GLsizei height) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -5324,8 +5254,7 @@ GLES_APIENTRY(void, Viewport, GLint x, GLint y, GLsizei width, GLsizei height) {
 }
 
 // Set the weights used to blend corresponding matrices for a given vertex.
-GLES_APIENTRY(void, WeightPointerOES, GLint size, GLenum type, GLsizei stride,
-        const GLvoid* pointer) {
+APIENTRY_IMPL(void, WeightPointerOES, GLint size, GLenum type, GLsizei stride, const GLvoid* pointer) {
     APITRACE();
     ContextPtr c = GetCurrentGlesContext();
     if (!c) {
@@ -5346,8 +5275,8 @@ GLES_APIENTRY(void, WeightPointerOES, GLint size, GLenum type, GLsizei stride,
             pointer, normalized);
 }
 
-GLES_APIENTRY(void, WeightPointerOESBounds, GLint size, GLenum type,
-        GLsizei stride, const GLvoid* pointer, GLsizei count) {
+APIENTRY_IMPL(void, WeightPointerOESBounds, GLint size, GLenum type, GLsizei stride, const GLvoid* pointer, GLsizei count) {
     APITRACE();
-    glWeightPointerOES(size, type, stride, pointer);
+    TRCALL(glWeightPointerOES(size, type, stride, pointer));
 }
+
