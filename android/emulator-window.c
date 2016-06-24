@@ -186,7 +186,8 @@ emulator_window_setup( EmulatorWindow*  emulator )
     }
 
     if (emulator->opts->scale) {
-        dwarning("The -scale flag is obsolete and will be ignored.");
+        dwarning("The -scale flag is obsolete. We will scale automatically "
+                 "unless you set it to 1.");
     }
 
     if (emulator->opts->dpi_device) {
@@ -198,6 +199,8 @@ emulator_window_setup( EmulatorWindow*  emulator )
         .enable_dpad = android_hw->hw_dPad != 0,
         .enable_keyboard = android_hw->hw_keyboard != 0,
         .enable_trackball = android_hw->hw_trackBall != 0,
+        .enable_scale = (emulator->opts->scale == NULL ||
+                         strcmp(emulator->opts->scale, "1")),
 
         .window_x = emulator->win_x,
         .window_y = emulator->win_y,
