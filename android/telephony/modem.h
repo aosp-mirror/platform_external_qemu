@@ -50,6 +50,9 @@ extern void         amodem_set_radio_state( AModem modem, ARadioState  state );
 /* Set the received signal strength indicator and bit error rate */
 extern void         amodem_set_signal_strength( AModem modem, int rssi, int ber );
 
+/* Set the received signal strength profile */
+extern void         amodem_set_signal_strength_profile( AModem modem, int quality );
+
 /** SIM CARD STATUS
  **/
 extern ASimCard    amodem_get_sim( AModem  modem );
