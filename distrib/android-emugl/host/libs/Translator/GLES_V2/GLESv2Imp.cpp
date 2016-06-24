@@ -481,11 +481,8 @@ GL_APICALL void  GL_APIENTRY glDeleteBuffers(GLsizei n, const GLuint* buffers){
     SET_ERROR_IF(n<0,GL_INVALID_VALUE);
     if(ctx->shareGroup().get()) {
         for(int i=0; i < n; i++){
-            const GLuint globalBufferName = ctx->shareGroup()->getGlobalName(
-                VERTEXBUFFER, buffers[i]);
             ctx->shareGroup()->deleteName(VERTEXBUFFER,buffers[i]);
             ctx->unbindBuffer(buffers[i]);
-            ctx->dispatcher().glDeleteBuffers(1, &globalBufferName);
         }
     }
 }
@@ -497,7 +494,6 @@ GL_APICALL void  GL_APIENTRY glDeleteFramebuffers(GLsizei n, const GLuint* frame
         for(int i=0; i < n; i++){
            const GLuint globalFrameBufferName = ctx->shareGroup()->getGlobalName(FRAMEBUFFER,framebuffers[i]);
            ctx->shareGroup()->deleteName(FRAMEBUFFER,framebuffers[i]);
-           ctx->dispatcher().glDeleteFramebuffersEXT(1,&globalFrameBufferName);
         }
     }
 }
@@ -528,9 +524,7 @@ GL_APICALL void  GL_APIENTRY glDeleteRenderbuffers(GLsizei n, const GLuint* rend
     SET_ERROR_IF(n<0,GL_INVALID_VALUE);
     if(ctx->shareGroup().get()) {
         for(int i=0; i < n; i++){
-           const GLuint globalRenderBufferName = ctx->shareGroup()->getGlobalName(RENDERBUFFER,renderbuffers[i]);
            ctx->shareGroup()->deleteName(RENDERBUFFER,renderbuffers[i]);
-           ctx->dispatcher().glDeleteRenderbuffersEXT(1,&globalRenderBufferName);
            s_detachFromFramebuffer(RENDERBUFFER, renderbuffers[i]);
         }
     }

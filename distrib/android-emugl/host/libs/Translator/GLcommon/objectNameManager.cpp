@@ -119,7 +119,9 @@ NameSpace::deleteName(ObjectLocalName p_localName)
 {
     NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
     if (n != m_localToGlobalMap.end()) {
-        m_globalNameSpace->deleteName(m_type, (*n).second);
+        if (m_type != TEXTURE) {
+            m_globalNameSpace->deleteName(m_type, (*n).second);
+        }
         m_globalToLocalMap.erase(n->second);
         m_localToGlobalMap.erase(n);
     }
@@ -136,7 +138,9 @@ NameSpace::replaceGlobalName(ObjectLocalName p_localName, unsigned int p_globalN
 {
     NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
     if (n != m_localToGlobalMap.end()) {
-        m_globalNameSpace->deleteName(m_type, (*n).second);
+        if (m_type != TEXTURE) {
+            m_globalNameSpace->deleteName(m_type, (*n).second);
+        }
         m_globalToLocalMap.erase(n->second);
         (*n).second = p_globalName;
         m_globalToLocalMap.emplace(p_globalName, p_localName);
@@ -167,12 +171,25 @@ GlobalNameSpace::genName(NamedObjectType p_type)
     default:
         name = 0;
     }
+    if (!m_deleteInitialized) {
+        m_deleteInitialized = true;
+        m_glDelete[VERTEXBUFFER] = GLEScontext::dispatcher().glDeleteBuffers;
+        m_glDelete[TEXTURE] = GLEScontext::dispatcher().glDeleteTextures;
+        m_glDelete[RENDERBUFFER] =
+                GLEScontext::dispatcher().glDeleteRenderbuffersEXT;
+        m_glDelete[FRAMEBUFFER] =
+                GLEScontext::dispatcher().glDeleteFramebuffersEXT;
+    }
     return name;
 }
 
 void 
 GlobalNameSpace::deleteName(NamedObjectType p_type, unsigned int p_name)
 {
+    if (p_type != SHADER) {
+        emugl::Mutex::AutoLock _lock(m_lock);
+        m_glDelete[p_type](1, &p_name);
+    }
 }
 
 ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace) {
@@ -342,9 +359,7 @@ ShareGroup::decTexRefCounterAndReleaseIf0(unsigned int p_globalName) {
         return val;
     }
     map->erase(iterator);
-    if (GLEScontext::dispatcher().isInitialized()) {
-        GLEScontext::dispatcher().glDeleteTextures(1, &p_globalName);
-    }
+    m_nameSpace[TEXTURE]->m_globalNameSpace->deleteName(TEXTURE, p_globalName);
     return 0;
 }
 
