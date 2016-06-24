@@ -1021,7 +1021,10 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     // all 64 bit archs we support include "64"
     bool guest_is_32_bit = strstr(hw->hw_cpu_arch, "64") == 0;
     bool host_is_32_bit = sizeof(void*) == 4;
-    bool limit_is_4gb = (guest_is_32_bit || host_is_32_bit);
+
+    // It turns out memory over 3G is not well-handled by systm images
+    // b.android.com/214093
+    const bool limit_is_3gb = (guest_is_32_bit || host_is_32_bit);
 
     // enforce CDD minimums
     int minRam = 32;
@@ -1055,9 +1058,9 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         D("Increasing RAM size to %iMB", minRam);
         hw->hw_ramSize = minRam;
     }
-    else if (limit_is_4gb && hw->hw_ramSize > 4096) {
-        D("Decreasing RAM size to 4096MB");
-        hw->hw_ramSize = 4096;
+    else if (limit_is_3gb && hw->hw_ramSize > 3072) {
+        D("Decreasing RAM size to 3072MB");
+        hw->hw_ramSize = 3072;
     }
     else {
         D("Physical RAM size: %dMB\n", hw->hw_ramSize);
@@ -1073,6 +1076,11 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
 
         if (vmHeapSize < minVmHeapSize) {
             vmHeapSize = minVmHeapSize;
+        }
+
+        if (vmHeapSize > 512) {
+            // enforce 512M cap b.android.com/214093
+            vmHeapSize = 512;
         }
 
         D("Setting VM heap size to %iMB", vmHeapSize);
