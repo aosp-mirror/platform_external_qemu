@@ -21,9 +21,23 @@
 #include "TextureDraw.h"
 #include "TextureResize.h"
 
+#include "android/utils/debug.h"
+
 #include "OpenGLESDispatch/EGLDispatch.h"
 
 #include <stdio.h>
+
+#define CB_DEBUG 0
+
+#if CB_DEBUG
+#define DPRINT(...) do { \
+    if (!VERBOSE_CHECK(gles)) { VERBOSE_ENABLE(gles); } \
+    VERBOSE_TID_FUNCTION_DPRINT(gles, __VA_ARGS__); \
+} while(0)
+#else
+#define DPRINT(...)
+#endif
+
 
 namespace {
 
@@ -182,13 +196,16 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                 EGL_GL_TEXTURE_2D_KHR,
                 (EGLClientBuffer)SafePointerFromUInt(cb->m_tex),
                 NULL);
-
+        DPRINT("set m_eglImage to 0x%lx mapping from gltex 0x%lx",
+                cb->m_eglImage, cb->m_tex);
         cb->m_blitEGLImage = s_egl.eglCreateImageKHR(
                 p_display,
                 s_egl.eglGetCurrentContext(),
                 EGL_GL_TEXTURE_2D_KHR,
                 (EGLClientBuffer)SafePointerFromUInt(cb->m_blitTex),
                 NULL);
+        DPRINT("set m_blitEGLImage to 0x%lx mapping from gltex 0x%lx",
+                cb->m_blitEGLImage, cb->m_blitTex);
     }
 
     cb->m_resizer = new TextureResize(p_width, p_height);
@@ -301,6 +318,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
         s_gles1.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
         s_gles1.glGenTextures(1,&tmpTex);
         s_gles1.glBindTexture(GL_TEXTURE_2D, tmpTex);
+        DPRINT("call eglimagetargettexture. m_blitEGLImage=0x%lx", m_blitEGLImage);
         s_gles1.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
         s_gles1.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0,
                                  m_width, m_height);
@@ -333,6 +351,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
 }
 
 bool ColorBuffer::bindToTexture() {
+    DPRINT("binding to texture! m_eglImage=0x%lx", m_eglImage);
     if (!m_eglImage) {
         return false;
     }
@@ -350,6 +369,7 @@ bool ColorBuffer::bindToTexture() {
 }
 
 bool ColorBuffer::bindToRenderbuffer() {
+    DPRINT("binding to rb! m_eglImage=0x%lx", m_eglImage);
     if (!m_eglImage) {
         return false;
     }

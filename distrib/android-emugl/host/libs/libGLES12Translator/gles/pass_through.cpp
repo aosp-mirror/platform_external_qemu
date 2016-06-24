@@ -6,6 +6,7 @@
 
 #include "gles/pass_through.h"
 #include "common/alog.h"
+#include "common/dlog.h"
 #include "common/rendering_interface.h"
 #include "gles/debug.h"
 #include "gles/gles_context.h"
@@ -13,10 +14,10 @@
 #include "GLES12Translator/underlying_apis.h"
 #include "GLES12Translator/angle_gles2.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG
-#define DPRINT(...) do { fprintf(stderr, "gles12 underlying: "); fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); } while(0)
+#define DPRINT(fmt,...) do { DLOG("gles2 underlying: " fmt, ##__VA_ARGS__); } while(0)
 #else
 #define DPRINT(...)
 #endif
@@ -127,7 +128,11 @@ void BindTextureCall(const GlesContext* c, GLenum target, GLuint texture) {
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
 #ifdef DEBUG
+  GLint err = _api->glGetError();
+  DPRINT("err before=0x%x", err);
   DPRINT("BindTextureCall(%p, %s (0x%x), %u)", c, GetEnumString(target), target, texture);
+  err = _api->glGetError();
+  DPRINT("err after=0x%x", err);
 #endif
   return _api->glBindTexture(target, texture);
 }
@@ -253,7 +258,11 @@ void ClearCall(const GlesContext* c, GLbitfield mask) {
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
 #ifdef DEBUG
+  GLint err = _api->glGetError();
+  DPRINT("err before=0x%x", err);
   DPRINT("ClearCall(%p, 0x%x)", c, mask);
+  err = _api->glGetError();
+  DPRINT("err after=0x%x", err);
 #endif
   return _api->glClear(mask);
 }
@@ -575,6 +584,8 @@ void DisableCall(const GlesContext* c, GLenum cap) {
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
 #ifdef DEBUG
+  GLint err = _api->glGetError();
+  DPRINT("err before=0x%x", err);
   DPRINT("DisableCall(%p, %s (0x%x))", c, GetEnumString(cap), cap);
 #endif
   return _api->glDisable(cap);
@@ -604,6 +615,7 @@ void DrawArraysCall(const GlesContext* c, GLenum mode, GLint first, GLsizei coun
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
 #ifdef DEBUG
   DPRINT("DrawArraysCall(%p, %s (0x%x), %d, %zd)", c, GetEnumString(mode), mode, first, count);
+  DPRINT("DrawArraysCall?(%p, %s (0x%x), %d, %u)", c, GetEnumString(mode), mode, first, count);
 #endif
   return _api->glDrawArrays(mode, first, count);
 }
@@ -643,6 +655,8 @@ void EnableCall(const GlesContext* c, GLenum cap) {
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
 #ifdef DEBUG
+  GLint err = _api->glGetError();
+  DPRINT("err before=0x%x", err);
   DPRINT("EnableCall(%p, %s (0x%x))", c, GetEnumString(cap), cap);
 #endif
   return _api->glEnable(cap);
@@ -1062,7 +1076,11 @@ void GetTexParameterivCall(const GlesContext* c, GLenum target, GLenum pname, GL
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
 #ifdef DEBUG
+  GLint err = _api->glGetError();
+  DPRINT("err before=0x%x", err);
   DPRINT("GetTexParameterivCall(%p, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(pname), pname, params);
+  err = _api->glGetError();
+  DPRINT("err after=0x%x", err);
 #endif
   return _api->glGetTexParameteriv(target, pname, params);
 }
@@ -1369,7 +1387,11 @@ void ScissorCall(const GlesContext* c, GLint x, GLint y, GLsizei width, GLsizei 
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
 #ifdef DEBUG
-  DPRINT("ScissorCall(%p, %d, %d, %zd, %zd)", c, x, y, width, height);
+  GLint err = _api->glGetError();
+  DPRINT("err before=0x%x", err);
+  DPRINT("ScissorCall(%p, %d, %d, %u, %u)", c, x, y, width, height);
+  err = _api->glGetError();
+  DPRINT("err after=0x%x", err);
 #endif
   return _api->glScissor(x, y, width, height);
 }
@@ -1523,7 +1545,11 @@ void TexParameterfvCall(const GlesContext* c, GLenum target, GLenum pname, const
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
 #ifdef DEBUG
+  GLint err = _api->glGetError();
+  DPRINT("err before=0x%x", err);
   DPRINT("TexParameterfvCall(%p, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, GetEnumString(pname), pname, params);
+  err = _api->glGetError();
+  DPRINT("err after=0x%x", err);
 #endif
   return _api->glTexParameterfv(target, pname, params);
 }
@@ -1565,7 +1591,11 @@ void TexSubImage2DCall(const GlesContext* c, GLenum target, GLint level, GLint x
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
 #ifdef DEBUG
+  GLint err = _api->glGetError();
+  DPRINT("err before=0x%x", err);
   DPRINT("TexSubImage2DCall(%p, %s (0x%x), %d, %d, %d, %zd, %zd, %s (0x%x), %s (0x%x), %p)", c, GetEnumString(target), target, level, xoffset, yoffset, width, height, GetEnumString(format), format, GetEnumString(type), type, pixels);
+  err = _api->glGetError();
+  DPRINT("err after=0x%x", err);
 #endif
   return _api->glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
 }

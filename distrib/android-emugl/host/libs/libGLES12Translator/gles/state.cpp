@@ -1021,6 +1021,8 @@ void TextureContext::RestoreTextures() {
 }
 
 void TextureContext::Enable(GLenum target) {
+  DLOG("Enabling texture unit %d for target 0x%lx",
+       active_texture_unit_, target);
   const Target t = MapTarget(target);
   TextureUnit& unit = GetTextureUnit(t, active_texture_unit_);
   unit.enabled = true;
@@ -1033,7 +1035,10 @@ void TextureContext::Disable(GLenum target) {
 }
 
 bool TextureContext::IsEnabled(GLenum target) const {
-  return IsEnabled(active_texture_unit_ + GL_TEXTURE0, target);
+  DLOG("Asking if texture target 0x%lx is enabled", target);
+  bool res =  IsEnabled(active_texture_unit_ + GL_TEXTURE0, target);
+  DLOG("Got %d", res);
+  return res;
 }
 
 bool TextureContext::IsEnabled(GLenum id, GLenum target) const {

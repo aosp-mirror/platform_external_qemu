@@ -37,6 +37,13 @@
 #include "gles/state.h"
 #include "gles/texture_data.h"
 
+#define CHECK_ERR() do { \
+    err = PASS_THROUGH(this, GetError); \
+    if (err != GL_NO_ERROR) { \
+        DLOG("underlying GLESv2 error! err=0x%lx", err); \
+    } \
+} while(0)
+
 namespace {
 
 #define VERTEX_ATTRIBUTE_KEY(enum, name) name,
@@ -137,6 +144,9 @@ void GlesContext::Restore() {
   } else {
     LOG_ALWAYS_FATAL("Unknown GLES version %d", version_);
   }
+
+  DLOG("Initialize texture context with max texture units=%d and max texture size=%d",
+       max_texture_units, max_texture_size_.Get());
   texture_context_.Init(max_texture_units, max_texture_size_.Get());
   uniform_context_.Init(max_texture_units);
 
@@ -160,6 +170,7 @@ void GlesContext::OnAttachSurface(SurfaceControlCallbackPtr sfc,
   if (!initialized_viewport_) {
     initialized_viewport_ = true;
 
+    DLOG("mutate viewport: 0 0 %d %d", width, height);
     // The first time that a context is attached to a surface, the context needs
     // to be initialized with the dimensions of the draw surface. These
     // dimensions are used to initialized the viewport and scissor rectangles
@@ -171,7 +182,15 @@ void GlesContext::OnAttachSurface(SurfaceControlCallbackPtr sfc,
     viewport_.Mutate()[3] = height;
     PASS_THROUGH(this, Viewport, 0, 0, width, height);
     PASS_THROUGH(this, Scissor, 0, 0, width, height);
+  const GLint* viewport = viewport_.Get();
+
+  DLOG("Generate orthographic: viewport: %d %d %d %d",
+          viewport[0],
+          viewport[1],
+          viewport[2],
+          viewport[3]);
   }
+
 }
 
 void GlesContext::UpdateFramebufferOverride(GLint width, GLint height,
@@ -428,12 +447,18 @@ void GlesContext::DrawFullscreenQuad(GLuint texture, bool flip_v) {
 
 void GlesContext::Draw(DrawType draw, GLenum mode, GLint first, GLsizei count,
             GLenum type, const GLvoid* indices) {
+
+      DLOG("Enter");
+    GLint err = GL_NO_ERROR;
+    CHECK_ERR();
   LOG_ALWAYS_FATAL_IF(draw != kDrawArrays && draw != kDrawElements);
   if (!CanDraw()) {
+      DLOG("Cannot draw. exit.");
     return;
   }
 
   EnsureSurfaceReadyToDraw();
+      DLOG("ensured surface ready to draw.");
 
   bool program_uses_external_as_2d = false;
   PrepareProgramObject(mode, &program_uses_external_as_2d);
@@ -441,12 +466,19 @@ void GlesContext::Draw(DrawType draw, GLenum mode, GLint first, GLsizei count,
                                    program_uses_external_as_2d);
 
   if (draw == kDrawArrays) {
+      DLOG("Draw is kDrawArrays. count=%u", count);
     pointer_context_.PrepareBuffersForDrawArrays(first, count);
+    CHECK_ERR();
+      DLOG("Calling drawArrays. count=%u", count);
     PASS_THROUGH(this, DrawArrays, mode, first, count);
+      DLOG("Done calling drawArrays. count=%u", count);
+    CHECK_ERR();
   } else {
     indices = pointer_context_.PrepareBuffersForDrawElements(count, type,
                                                              indices);
+    CHECK_ERR();
     PASS_THROUGH(this, DrawElements, mode, count, type, indices);
+    CHECK_ERR();
   }
 
   // Restore the buffer bindings as the pointer context may have changed them.
@@ -456,6 +488,7 @@ void GlesContext::Draw(DrawType draw, GLenum mode, GLint first, GLsizei count,
                share_group_->GetBufferGlobalName(element_buffer_binding_));
   texture_context_.RestoreTextures();
   ClearProgramObject();
+      DLOG("Exit");
 }
 
 bool GlesContext::BindImageToTexture(GLenum target, EglImagePtr image) {
@@ -538,10 +571,20 @@ void GlesContext::BindFramebuffer(GLuint framebuffer) {
 
 void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
                           GLfloat height) {
+  DLOG("Enter DrawTex x %f y %f z %f w %f h %f",x,y,z,width,height);
+  GLint err = GL_NO_ERROR;
+
+
+  // PASS_THROUGH(this, BindFramebuffer, GL_FRAMEBUFFER, 0);
+  // PASS_THROUGH(this, ClearColor, 1.0, 0.6, 0.3, 0.2);
+  // PASS_THROUGH(this, Clear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
   // Backup vbo's
   const GLint array_buffer = array_buffer_binding_;
   const GLint element_buffer = element_buffer_binding_;
+  CHECK_ERR();
   PASS_THROUGH(this, BindBuffer, GL_ARRAY_BUFFER, 0);
+  CHECK_ERR();
   PASS_THROUGH(this, BindBuffer, GL_ELEMENT_ARRAY_BUFFER, 0);
 
   // Backup pointers
@@ -549,14 +592,23 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
   for (GLint index = 0; index < kNumVertexAttributeKeys; ++index) {
     pointer_context_.DisableArray(index);
     PASS_THROUGH(this, DisableVertexAttribArray, index);
+  CHECK_ERR();
   }
 
   // Setup projection matrix to draw in viewport aligned coordinates
-  const emugl::Matrix projection_matrix = uniform_context_.GetProjectionMatrix();
+ const emugl::Matrix projection_matrix = uniform_context_.GetProjectionMatrix();
   const GLint* viewport = viewport_.Get();
+
+  DLOG("Generate orthographic: viewport: %d %d %d %d",
+          viewport[0],
+          viewport[1],
+          viewport[2],
+          viewport[3]);
   uniform_context_.MutateProjectionMatrix() = emugl::Matrix::GenerateOrthographic(
       viewport[0], viewport[0] + viewport[2], viewport[1],
-      viewport[1] + viewport[3], 0.f, -1.f);
+      viewport[1] + viewport[3], 0.0f, -1.0f);
+
+  // uniform_context_.MutateProjectionMatrix().AssignIdentity();
 
   // Setup modelview matrix
   const emugl::Matrix model_view_matrix = uniform_context_.GetModelViewMatrix();
@@ -566,7 +618,7 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
   emugl::Matrix texture_matrices[UniformContext::kMaxTextureUnits];
   for (GLint stage = 0; stage < UniformContext::kMaxTextureUnits; ++stage) {
     texture_matrices[stage] = uniform_context_.GetTextureMatrixByStage(stage);
-    uniform_context_.MutateTextureMatrixByStage(stage).AssignIdentity();
+    // uniform_context_.MutateTextureMatrixByStage(stage).AssignIdentity();
   }
 
   // Backup |enabled_set_| and disable clip planes and lighting.
@@ -576,16 +628,20 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
   }
   enabled_set_.erase(GL_LIGHTING);
 
-  GLfloat texels[UniformContext::kMaxTextureUnits][8] = {};
+  GLfloat texels[UniformContext::kMaxTextureUnits][12] = {};
   GLint num_textures = 0;
   for (GLint i = 0; i < UniformContext::kMaxTextureUnits; ++i) {
     if (!texture_context_.IsEnabled(GL_TEXTURE0 + i, GL_TEXTURE_2D)) {
+        DLOG("texture context not enabled for some reason for unit GL_TEXTURE0 + %d", i);
       continue;
     }
+
+    DLOG("Getting texture data for GL_TEXTURE0 + %d", i);
     const GLint texture = texture_context_.GetTexture(GL_TEXTURE0 + i,
                                                       GL_TEXTURE_2D);
-    const TextureDataPtr texture_data = share_group_->GetTextureData(texture);
+    const TextureDataPtr texture_data = texture == 0 ? texture_context_.GetDefaultTextureData(GL_TEXTURE_2D) : share_group_->GetTextureData(texture);
     if (texture_data == NULL) {
+        DLOG("texture data is null, stop");
       continue;
     }
 
@@ -593,42 +649,131 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
     const GLfloat tex_width = texture_data->GetWidth();
     const GLfloat tex_height = texture_data->GetHeight();
 
-    texels[i][0] = crop_rect[0] / tex_width;
-    texels[i][1] = crop_rect[1] / tex_height;
+    DLOG("texture dimensions: %fx%f with crop rect=%d %d %d %d ", tex_width, tex_height,
+            crop_rect[0], crop_rect[1], crop_rect[2], crop_rect[3]);
 
-    texels[i][2] = crop_rect[0] / tex_width;
-    texels[i][3] = (crop_rect[1] + crop_rect[3]) / tex_height;
+    const GLfloat ts0[] = {
+        crop_rect[0] / tex_width,
+        crop_rect[1] / tex_height,
 
-    texels[i][4] = (crop_rect[0] + crop_rect[2]) / tex_width;
-    texels[i][5] = (crop_rect[1] + crop_rect[3]) / tex_height;
+        (crop_rect[0] + crop_rect[2]) / tex_width,
+        crop_rect[1] / tex_height,
 
-    texels[i][6] = (crop_rect[0] + crop_rect[2]) / tex_width;
-    texels[i][7] = crop_rect[1] / tex_height;
+        (crop_rect[0] + crop_rect[2]) / tex_width,
+        (crop_rect[1] + crop_rect[3]) / tex_height,
+
+        crop_rect[0] / tex_width,
+        (crop_rect[1] + crop_rect[3]) / tex_height,
+    };
 
 
-    pointer_context_.EnableArray(kTexCoord0VertexAttribute + i);
-    PASS_THROUGH(this, EnableVertexAttribArray, kTexCoord0VertexAttribute + i);
-    PASS_THROUGH(this, VertexAttribPointer, kTexCoord0VertexAttribute + i, 2,
-                 GL_FLOAT, GL_FALSE, 0, texels[i]);
+    texels[i][0] = ts0[0];
+    texels[i][1] = ts0[0 + 1];
+
+    texels[i][2] = ts0[2];
+    texels[i][3] = ts0[2 + 1];
+
+    texels[i][4] = ts0[4];
+    texels[i][5] = ts0[4 + 1];
+
+    texels[i][6] = ts0[0];
+    texels[i][7] = ts0[0 + 1];
+
+    texels[i][8] = ts0[4];
+    texels[i][9] = ts0[4 + 1];
+
+    texels[i][10] = ts0[6];
+    texels[i][11] = ts0[6 + 1];
+
+
+
+    // texels[i][0] = crop_rect[0] / tex_width;
+    // texels[i][1] = crop_rect[1] / tex_height;
+
+    // texels[i][2] = crop_rect[0] / tex_width;
+    // texels[i][3] = (crop_rect[1] + crop_rect[3]) / tex_height;
+
+    // texels[i][4] = (crop_rect[0] + crop_rect[2]) / tex_width;
+    // texels[i][5] = (crop_rect[1] + crop_rect[3]) / tex_height;
+
+    // texels[i][6] = (crop_rect[0] + crop_rect[2]) / tex_width;
+    // texels[i][7] = crop_rect[1] / tex_height;
+
+    DLOG("texture dimensions: resulting texels: %f %f / %f %f / %f %f / %f %f",
+            texels[i][0],
+            texels[i][1],
+            texels[i][2],
+            texels[i][3],
+            texels[i][4],
+            texels[i][5],
+            texels[i][6],
+            texels[i][7]);
+
+    pointer_context_.EnableArray(kColorVertexAttribute);
+    PASS_THROUGH(this, EnableVertexAttribArray, kColorVertexAttribute);
+  CHECK_ERR();
+  const GLfloat debugcolor[] = { 1.0, 0.5, 0.2, 1.0 };
+    PASS_THROUGH(this, VertexAttrib4fv, kColorVertexAttribute,  debugcolor);
+    // PASS_THROUGH(this, VertexAttribPointer, kTexCoord0VertexAttribute + i, 4,
+    //              GL_FLOAT, GL_FALSE, 0, texels[i]);
+  //   pointer_context_.EnableArray(kTexCoord0VertexAttribute + i);
+  //   PASS_THROUGH(this, EnableVertexAttribArray, kTexCoord0VertexAttribute + i);
+  // CHECK_ERR();
+  //   PASS_THROUGH(this, VertexAttribPointer, kTexCoord0VertexAttribute + i, 2,
+  //                GL_FLOAT, GL_FALSE, 0, texels[i]);
+  CHECK_ERR();
     num_textures++;
   }
 
   if (num_textures > 0) {
-    z = ClampValue(z, 0.0f, 1.0f);
+      z = -0.5;
+    // z = ClampValue(z, 0.2f, 1.0f);
     const GLfloat vertices[] = {
+        -1,-1,z,
+        1,1,z,
+        1,-1,z,
+
+        -1,-1,z,
+        1,-1,z,
+        1,1,z,
+
+      //x, y, z,
+      //x + width, y + height, z,
+      //x + width, y, z,
+
+      x, y, z,
+      x + width, y + height, z,
+      x, y + height, z,
+    };
+    // const GLfloat vertices[] = {
+    //   x, y, z,
+    //   x, y + height, z,
+    //   x + width, y + height, z,
+    //   x + width, y, z,
+    // };
+    DLOG("Vertices at: "
+         "{ %f %f %f } "
+         "{ %f %f %f } "
+         "{ %f %f %f } "
+         "{ %f %f %f } ",
       x, y, z,
       x, y + height, z,
       x + width, y + height, z,
-      x + width, y, z,
-    };
+      x + width, y, z);
+
     pointer_context_.EnableArray(kPositionVertexAttribute);
     PASS_THROUGH(this, EnableVertexAttribArray, kPositionVertexAttribute);
+  CHECK_ERR();
     PASS_THROUGH(this, VertexAttribPointer, kPositionVertexAttribute, 3,
                  GL_FLOAT, GL_FALSE, 0, vertices);
+  CHECK_ERR();
 
     // DrawTex() needs texture environments etc, so we use GLES1 emulation to
     // avoid unnecessary complexity.
-    Draw(kDrawArrays, GL_TRIANGLE_FAN, 0, 4, 0, 0);
+    Draw(kDrawArrays, GL_TRIANGLES, 0, 9, GL_FLOAT, NULL);
+  CHECK_ERR();
+  } else {
+        DLOG("num_texture == 0, skip drawing!");
   }
 
   // Restore enabled_set_
@@ -647,12 +792,16 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
     const PointerData& ptr = pointers[index];
     PASS_THROUGH(this, BindBuffer, GL_ARRAY_BUFFER,
                  share_group_->GetBufferGlobalName(ptr.buffer_name));
+  CHECK_ERR();
     PASS_THROUGH(this, VertexAttribPointer, index, ptr.size, ptr.type,
                  ptr.normalize, ptr.stride, ptr.pointer);
+  CHECK_ERR();
     if (ptr.enabled) {
       PASS_THROUGH(this, EnableVertexAttribArray, index);
+  CHECK_ERR();
     } else {
       PASS_THROUGH(this, DisableVertexAttribArray, index);
+  CHECK_ERR();
     }
   }
   pointer_context_.SetPointers(pointers);
@@ -660,8 +809,11 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
   // Restore vbo's
   PASS_THROUGH(this, BindBuffer, GL_ARRAY_BUFFER,
                share_group_->GetBufferGlobalName(array_buffer));
+  CHECK_ERR();
   PASS_THROUGH(this, BindBuffer, GL_ELEMENT_ARRAY_BUFFER,
                share_group_->GetBufferGlobalName(element_buffer));
+  CHECK_ERR();
+  DLOG("Exit DrawTex");
 }
 
 BufferDataPtr GlesContext::GetBoundTargetBufferData(GLenum target) {
@@ -733,7 +885,7 @@ ShaderConfig GlesContext::ConfigureShader(GLenum mode) {
     const TexGen* texgen = uniform_context_.GetTexGen(id);
 
     const GLuint texture = texture_context_.GetTexture(id, target);
-    TextureDataPtr obj = share_group_->GetTextureData(texture);
+    TextureDataPtr obj = texture == 0 ? texture_context_.GetDefaultTextureData(target) : share_group_->GetTextureData(texture);
     if (obj == NULL && texture == 0) {
       obj = texture_context_.GetDefaultTextureData(target);
     }
@@ -810,7 +962,10 @@ GLuint GlesContext::CompileShader(GLenum shader_kind, const char* source) {
   PASS_THROUGH(this, ShaderSource, object, 1, &source, NULL);
   PASS_THROUGH(this, CompileShader, object);
 
-  if (AreChecksEnabled()) {
+  DLOG("shader source: [\n%s\n]", source);
+
+  // if (AreChecksEnabled()) {
+  if (true) {
     GLint compiled = 0;
     PASS_THROUGH(this, GetShaderiv, object, GL_COMPILE_STATUS, &compiled);
     if (compiled == GL_FALSE) {
@@ -854,6 +1009,8 @@ GLuint GlesContext::CompileProgram(GLuint vertex_shader,
 }
 
 ProgramContext& GlesContext::BindProgramContext(GLenum mode) {
+    GLint err = GL_NO_ERROR;
+    CHECK_ERR();
   // TODO(crbug.com/441922): Figure out actual maximum sizes for these two
   // buffers to minimize the fixed memory footprint we need.
   static const size_t kMaxShaderBufferSize = 65536;
@@ -863,38 +1020,56 @@ ProgramContext& GlesContext::BindProgramContext(GLenum mode) {
 
   GLuint* vs = vertex_shader_cache_.Get(cfg);
   if (!vs) {
+    CHECK_ERR();
     GenerateVertexShader(cfg, buffer, sizeof(buffer));
+    CHECK_ERR();
     const GLuint shader = CompileShader(GL_VERTEX_SHADER, buffer);
+    CHECK_ERR();
     vs = vertex_shader_cache_.Push(cfg, shader);
+    CHECK_ERR();
   }
 
   GLuint* fs = fragment_shader_cache_.Get(cfg);
   if (!fs) {
+    CHECK_ERR();
     GenerateFragmentShader(cfg, buffer, sizeof(buffer));
+    CHECK_ERR();
     const GLuint shader = CompileShader(GL_FRAGMENT_SHADER, buffer);
+    CHECK_ERR();
     fs = fragment_shader_cache_.Push(cfg, shader);
+    CHECK_ERR();
   }
 
   ProgramContext* program = program_cache_.Get(cfg);
   if (!program) {
+    CHECK_ERR();
     GLuint id = CompileProgram(*vs, *fs);
+    CHECK_ERR();
     program = program_cache_.Push(cfg, ProgramContext(this, id));
+    CHECK_ERR();
   }
 
   LOG_ALWAYS_FATAL_IF(program == NULL, "Program not created?");
   program->Bind();
+    CHECK_ERR();
   return *program;
 }
 
 void GlesContext::PrepareProgramObject(GLenum mode,
                                        bool* program_uses_external_as_2d) {
+    GLint err = GL_NO_ERROR;
+    CHECK_ERR();
   if (current_user_program_ != NULL) {
+      DLOG("Current user program not null, exit");
     current_user_program_->PrepareForRendering(program_uses_external_as_2d);
+    CHECK_ERR();
     return;
   }
 
   ProgramContext& program = BindProgramContext(mode);
+    CHECK_ERR();
   uniform_context_.Bind(&program);
+    CHECK_ERR();
 
   if (pointer_context_.IsArrayEnabled(kPositionVertexAttribute)) {
     PASS_THROUGH(this, EnableVertexAttribArray, kPositionVertexAttribute);

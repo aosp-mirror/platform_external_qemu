@@ -19,16 +19,16 @@
 
 ANDROID_BEGIN_HEADER
 
-#define GLES12TR_DLOG 0
+#define GLES12TR_DLOG 1
 
 #if GLES12TR_DLOG
 #define APITRACE() do { \
     if (!VERBOSE_CHECK(gles1emu)) VERBOSE_ENABLE(gles1emu); \
     VERBOSE_TID_FUNCTION_DPRINT(gles1emu, "(gles1->2 translator) "); \
 } while (0)
-#define DLOG(...) do { \
+#define DLOG(fmt,...) do { \
     if (!VERBOSE_CHECK(gles1emu)) VERBOSE_ENABLE(gles1emu); \
-    VERBOSE_TID_FUNCTION_DPRINT(gles1emu, "(gles1->2 translator): ", ##__VA_ARGS__); \
+    VERBOSE_TID_FUNCTION_DPRINT(gles1emu, "(gles1->2 translator): " fmt, ##__VA_ARGS__); \
 } while (0)
 #else
 #define APITRACE()

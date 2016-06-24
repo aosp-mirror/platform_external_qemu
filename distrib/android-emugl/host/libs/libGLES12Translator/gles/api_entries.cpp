@@ -512,8 +512,8 @@ APIENTRY_IMPL(void, BindTexture, GLenum target, GLuint texture) {
 
     // Handle special-case 0 texture.
     if (texture == 0) {
-        DLOG("special-case 0 texture");
         tex = c->texture_context_.GetDefaultTextureData(target);
+        DLOG("special-case 0 texture. has tex data ptr of %p", tex.get());
     } else {
         DLOG("Not the 0 texture");
         tex = sg->GetTextureData(texture);
@@ -1817,6 +1817,7 @@ APIENTRY_IMPL(void, Enable, GLenum cap) {
         c->uniform_context_.Enable(cap);
     }
     if (kind & kHandlingKindTexture) {
+        DLOG("Enabling texture context for target 0x%lx", cap);
         c->texture_context_.Enable(cap);
     }
     if (kind & kHandlingKindUnsupported) {
