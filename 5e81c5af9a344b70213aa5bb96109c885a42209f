@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e3c531ce_f9ee1f24",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-24T21:15:46Z",
+      "side": 1,
+      "message": "what if the integer was \u00270\u0027 ?\nyou could check the errno instead (but it has to be reset to 0 before the call)",
+      "range": {
+        "startLine": 339,
+        "startChar": 39,
+        "endLine": 339,
+        "endChar": 40
+      },
+      "revId": "5e81c5af9a344b70213aa5bb96109c885a42209f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_b93ae78b",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-24T21:15:46Z",
+      "side": 1,
+      "message": "nit: could you please add a little bit of an error detail? It also would help with investigation in user reports later - to know which line exactly printed it",
+      "range": {
+        "startLine": 376,
+        "startChar": 39,
+        "endLine": 376,
+        "endChar": 44
+      },
+      "revId": "5e81c5af9a344b70213aa5bb96109c885a42209f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_39ab97ed",
+        "filename": "android/cmdline-option.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-24T21:15:46Z",
+      "side": 1,
+      "message": "nit: please update the comment",
+      "range": {
+        "startLine": 45,
+        "startChar": 29,
+        "endLine": 45,
+        "endChar": 41
+      },
+      "revId": "5e81c5af9a344b70213aa5bb96109c885a42209f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
