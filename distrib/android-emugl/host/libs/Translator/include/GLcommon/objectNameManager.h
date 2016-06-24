@@ -18,6 +18,7 @@
 
 #include "emugl/common/mutex.h"
 #include "emugl/common/smart_ptr.h"
+#include <GLES/gl.h>
 #include <unordered_map>
 
 enum NamedObjectType {
@@ -126,9 +127,11 @@ class GlobalNameSpace
 public:
     unsigned int genName(NamedObjectType p_type);
     void deleteName(NamedObjectType p_type, unsigned int p_name);
-
 private:
     emugl::Mutex m_lock;
+    typedef void (*GLdelete) (GLsizei, const GLuint *);
+    GLdelete m_glDelete[NUM_OBJECT_TYPES];
+    bool m_deleteInitialized = false;
 };
 
 //
