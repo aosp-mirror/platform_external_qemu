@@ -23,7 +23,6 @@ TEST(CmdLineOptions, parsePort) {
         {"5555", true, 5554}, // Odd ports not allowed, adjusted down
         {"5552", false, 0},   // Port below lower bound of 5554
         {"5553", false, 0},   // Port below lower bound of 5554
-        {"5680", true, 5680}, // Port at upper bound
         {"5681", false, 0},   // Odd port adjusted down still not valid
         {"5682", false, 0},   // Even port above range
         {"80", false, 0},     // Out of range
