@@ -350,12 +350,14 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
             base_port = console_port;
         } else {
             if (android_op_port) {
-                if (!android_parse_port_option(android_op_port, &base_port)) {
+                if (!android_parse_port_option(android_op_port, &base_port,
+                                               &adb_port)) {
                     return false;
                 }
                 tries     = 1;
             }
 
+            // TODO(pprabhu): Is this loop lying?
             for ( ; tries > 0; tries--, base_port += 2 ) {
 
                 /* setup first redirection for ADB, the Android Debug Bridge */
@@ -405,6 +407,8 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
 
             socket_close(s);
         }
+
+        android_validate_ports(base_port, adb_port);
     }
 
     if (android_op_report_console) {
