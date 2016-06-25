@@ -16,6 +16,52 @@
       "revId": "ea0d8aadbfde83dad3d19d85986dcfd56df73661",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_82196bd0",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.ui",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1044603
+      },
+      "writtenOn": "2016-06-25T03:45:51Z",
+      "side": 1,
+      "message": "*Just a comment..it may make more sense for the buttons to be in the order of:\n\n0-\u003e90-\u003e180-\u003e270\n\nversus the current order of:\n\n0-\u003e270-\u003e180-\u003e90\n\nWDYT?",
+      "range": {
+        "startLine": 125,
+        "startChar": 14,
+        "endLine": 125,
+        "endChar": 27
+      },
+      "revId": "ea0d8aadbfde83dad3d19d85986dcfd56df73661",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_a21c67bf",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.ui",
+        "patchSetId": 4
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1044603
+      },
+      "writtenOn": "2016-06-25T03:45:51Z",
+      "side": 1,
+      "message": "this should be :\nROTATION_90",
+      "range": {
+        "startLine": 189,
+        "startChar": 14,
+        "endLine": 189,
+        "endChar": 26
+      },
+      "revId": "ea0d8aadbfde83dad3d19d85986dcfd56df73661",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
