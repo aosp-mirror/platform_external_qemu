@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e3c531ce_dcba1e1f",
+        "filename": "distrib/android-emugl/host/libs/libGLES12Translator/gles/pass_through.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-27T22:15:20Z",
+      "side": 1,
+      "message": "why do you need one more level of #ifdef DEBUG ?",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 12
+      },
+      "revId": "b471f74b9017666c859270c63b3c7489f4a8949f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
