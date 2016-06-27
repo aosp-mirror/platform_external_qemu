@@ -46,6 +46,30 @@
       "revId": "54aabb83936a03e8dad94221a1963cb9a0852a2c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_b6ab0899",
+        "filename": "android/skin/qt/extended-pages/settings-page.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-06-27T18:00:46Z",
+      "side": 1,
+      "message": "I do prefer the various window classes holding a pointer to EmulatorQtWindow and getting to other object from that \"context\".\nMost of our long-lived objects are owned by EmulatorQtWindow. Usually, you\u0027d have a Context object to hold such global data. In our case, it\u0027s simply EmulatorQtWindow.\n\nEmulatorQtWindow holds pointers to all objects that these sub-windows need, is the logical \"parent\" of these sub-windows, and is (or can be) guaranteed to outlive all these sub-windows.\n\nwdyt?",
+      "parentUuid": "e3c531ce_56fa94c1",
+      "range": {
+        "startLine": 28,
+        "startChar": 27,
+        "endLine": 28,
+        "endChar": 43
+      },
+      "revId": "54aabb83936a03e8dad94221a1963cb9a0852a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
