@@ -48,6 +48,54 @@
     },
     {
       "key": {
+        "uuid": "e3c531ce_a7bab01d",
+        "filename": "android/cmdline-options.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2016-06-27T19:54:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e3c531ce_e79668bb",
+      "range": {
+        "startLine": 173,
+        "startChar": 37,
+        "endLine": 173,
+        "endChar": 38
+      },
+      "revId": "3002222d423b4e469fd11dd2728d3eb5a30d8523",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_27c6c0a8",
+        "filename": "android/cmdline-options.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2016-06-27T19:54:39Z",
+      "side": 1,
+      "message": "I guess you want me to put \"the\" before initial?",
+      "parentUuid": "e3c531ce_27a1a00c",
+      "range": {
+        "startLine": 173,
+        "startChar": 47,
+        "endLine": 173,
+        "endChar": 48
+      },
+      "revId": "3002222d423b4e469fd11dd2728d3eb5a30d8523",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3c531ce_67ab98ec",
         "filename": "android/help.c",
         "patchSetId": 2
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "e3c531ce_c7e36c0c",
+        "filename": "android/help.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1567,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2016-06-27T19:54:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e3c531ce_67ab98ec",
+      "range": {
+        "startLine": 1567,
+        "startChar": 41,
+        "endLine": 1567,
+        "endChar": 42
+      },
+      "revId": "3002222d423b4e469fd11dd2728d3eb5a30d8523",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3c531ce_47a81cee",
         "filename": "android/help.c",
         "patchSetId": 2
@@ -82,6 +154,30 @@
       "writtenOn": "2016-06-27T19:43:16Z",
       "side": 1,
       "message": "nit: add \"the\"",
+      "range": {
+        "startLine": 1568,
+        "startChar": 6,
+        "endLine": 1568,
+        "endChar": 7
+      },
+      "revId": "3002222d423b4e469fd11dd2728d3eb5a30d8523",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_27e9a0ed",
+        "filename": "android/help.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1568,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2016-06-27T19:54:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e3c531ce_47a81cee",
       "range": {
         "startLine": 1568,
         "startChar": 6,
