@@ -168,6 +168,8 @@ int androidHwConfig_getMinVmHeapSize(AndroidHwConfig* config, int apiLevel) {
     // TODO: android wear minimums
     if (apiLevel >= 23) {
         if (screenSize >= LCD_SIZE_XLARGE) {
+            // TODO(zyy): emulator currently is unable to allocate a heap this
+            // big, so it gets reduced to 576 in main-common.c
             if (config->hw_lcd_density >= LCD_DENSITY_XXXHDPI) {
                 minVMHeapSize = 768;
             } else if (config->hw_lcd_density >= LCD_DENSITY_560DPI) {
