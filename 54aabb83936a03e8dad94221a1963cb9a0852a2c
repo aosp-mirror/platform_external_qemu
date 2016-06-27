@@ -190,6 +190,30 @@
       "revId": "54aabb83936a03e8dad94221a1963cb9a0852a2c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_19184d25",
+        "filename": "android/skin/qt/extended-pages/settings-page.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-27T18:33:27Z",
+      "side": 1,
+      "message": "what about creating a \u0027context\u0027 interface and make the main window to implement it? In that case we can keep passing it around, just as a context interface and not as a whole main window.\nAlso, it would allow us to dirty-cast that back to main window in case we need it for a hack or some quick debug change",
+      "parentUuid": "e3c531ce_592be572",
+      "range": {
+        "startLine": 28,
+        "startChar": 27,
+        "endLine": 28,
+        "endChar": 43
+      },
+      "revId": "54aabb83936a03e8dad94221a1963cb9a0852a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
