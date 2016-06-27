@@ -118,6 +118,30 @@
       "revId": "54aabb83936a03e8dad94221a1963cb9a0852a2c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_798341b7",
+        "filename": "android/skin/qt/extended-pages/settings-page.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-27T18:18:11Z",
+      "side": 1,
+      "message": "I don\u0027t like it because it leads to bloating the interface of EmulatorQtWindow, making it responsible for stuff that it doesn\u0027t need to be responsible for.\n\nI think that, ideally, EmulatorQtWindow shouldn\u0027t even own these objects. It should do stuff related to presenting the window and responding to user events, while the \"global\" objects should be created in the correct order within a different \"context\", and injected as dependencies into constructors. But we have what we have, so let\u0027s at least try not to make it worse.",
+      "parentUuid": "e3c531ce_b6ab0899",
+      "range": {
+        "startLine": 28,
+        "startChar": 27,
+        "endLine": 28,
+        "endChar": 43
+      },
+      "revId": "54aabb83936a03e8dad94221a1963cb9a0852a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
