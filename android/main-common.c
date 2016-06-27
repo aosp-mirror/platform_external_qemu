@@ -849,10 +849,13 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         android_op_wipe_data = opts->wipe_data;
         android_op_writable_system = opts->writable_system;
 
-        uint64_t     defaultBytes =
-                hw->disk_dataPartition_size == 0 ?
-                defaultPartitionSize :
-                hw->disk_dataPartition_size;
+        uint64_t defaultBytes = hw->disk_dataPartition_size;
+        if (defaultBytes == 0 || opts->partition_size) {
+            // If the -partition-size option is given that should override
+            // whatever setting was in the config file.
+            defaultBytes = defaultPartitionSize;
+        }
+
         uint64_t     dataBytes;
         const char*  dataPath = hw->disk_dataPartition_initPath;
 
