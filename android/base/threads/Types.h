@@ -26,7 +26,7 @@ namespace base {
 using ThreadFunctor = std::function<intptr_t()>;
 
 enum class ThreadFlags : unsigned char {
-    None = 0,
+    NoFlags = 0,
     MaskSignals = 1,
     // A Detach-ed thread is a launch-and-forget thread.
     // wait() and tryWait() on a Detach-ed thread always fails.
