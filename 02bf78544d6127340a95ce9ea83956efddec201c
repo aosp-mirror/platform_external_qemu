@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e3c531ce_3c61b28b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 12
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-27T22:17:15Z",
+      "side": 1,
+      "message": "what\u0027s \u0027fxs\u0027?",
+      "range": {
+        "startLine": 7,
+        "startChar": 45,
+        "endLine": 7,
+        "endChar": 48
+      },
+      "revId": "02bf78544d6127340a95ce9ea83956efddec201c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
