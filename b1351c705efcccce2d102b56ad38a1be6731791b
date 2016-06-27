@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e3c531ce_9c88a63c",
+        "filename": "distrib/android-emugl/host/libs/libGLES12Translator/gles/share_group.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-27T22:23:00Z",
+      "side": 1,
+      "message": "this is one of the locations where std::shared_ptr doesn\u0027t work: they construct a new smart pointer from a raw pointer that\u0027s reference-counted anyway.\nThis is something only intrusive reference counter is capable of. For shared_ptr one needs to use std::static_pointer_cast\u003c\u003e",
+      "range": {
+        "startLine": 169,
+        "startChar": 1,
+        "endLine": 173,
+        "endChar": 3
+      },
+      "revId": "b1351c705efcccce2d102b56ad38a1be6731791b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
