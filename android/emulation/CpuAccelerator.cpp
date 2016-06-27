@@ -96,13 +96,19 @@ GlobalState gGlobals = {false,
 
 #include <linux/kvm.h>
 
+#include "android/emulation/kvm_env.h"
+
 // Return true iff KVM is installed and usable on this machine.
 // |*status| will be set to a small status string explaining the
 // status of KVM on success or failure.
 AndroidCpuAcceleration ProbeKVM(std::string* status) {
-    // Check that /dev/kvm exists.
-    if (::access("/dev/kvm", F_OK)) {
-        // /dev/kvm does not exist
+    const char* kvm_device = getenv(KVM_DEVICE_NAME_ENV);
+    if (NULL == kvm_device) {
+      kvm_device = "/dev/kvm";
+    }
+    // Check that kvm device exists.
+    if (::access(kvm_device, F_OK)) {
+        // kvm device does not exist
         bool cpu_ok =
                 android_get_x86_cpuid_vmx_support() ||
                 android_get_x86_cpuid_svm_support();
@@ -111,24 +117,25 @@ AndroidCpuAcceleration ProbeKVM(std::string* status) {
                 "KVM requires a CPU that supports vmx or svm");
             return ANDROID_CPU_ACCELERATION_NO_CPU_SUPPORT;
         }
-
-        status->assign(
-            "/dev/kvm is not found: VT disabled in BIOS or KVM kernel module not loaded");
+        StringAppendFormat(status,
+                           "%s is not found: VT disabled in BIOS or KVM kernel "
+                           "module not loaded", kvm_device);
         return ANDROID_CPU_ACCELERATION_DEV_NOT_FOUND;
     }
 
-    // Check that /dev/kvm can be opened.
-    if (::access("/dev/kvm", R_OK)) {
-        status->assign(
-            "This user doesn't have permissions to use KVM (/dev/kvm).");
+    // Check that kvm device can be opened.
+    if (::access(kvm_device, R_OK)) {
+        StringAppendFormat(status,
+                           "This user doesn't have permissions to use KVM (%s)",
+                           kvm_device);
         return ANDROID_CPU_ACCELERATION_DEV_PERMISSION;
     }
 
     // Open the file.
-    ScopedFd fd(TEMP_FAILURE_RETRY(open("/dev/kvm", O_RDWR)));
+    ScopedFd fd(TEMP_FAILURE_RETRY(open(kvm_device, O_RDWR)));
     if (!fd.valid()) {
-        status->assign("Could not open /dev/kvm :");
-        status->append(strerror(errno));
+        StringAppendFormat(status, "Could not open %s : %s", kvm_device,
+                           strerror(errno));
         return ANDROID_CPU_ACCELERATION_DEV_OPEN_FAILED;
     }
 
