@@ -22,6 +22,30 @@
       "revId": "7ee8483de834d986a3ed2b74f82a7152e7b3e41f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_923b6f2d",
+        "filename": "android/utils/filelock.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-27T22:52:43Z",
+      "side": 1,
+      "message": "this function contains a number of \u0027goto Fail\u0027 statements. C++ doesn\u0027t allow one to jump over an initialization, that\u0027s why I moved it to the beginning - the safest place",
+      "parentUuid": "e3c531ce_51ec67c2",
+      "range": {
+        "startLine": 242,
+        "startChar": 2,
+        "endLine": 242,
+        "endChar": 30
+      },
+      "revId": "7ee8483de834d986a3ed2b74f82a7152e7b3e41f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
