@@ -20,7 +20,7 @@ using android::base::ThreadFlags;
 
 bool asyncWithParam(async_function_t func, bool maskSignals) {
     return android::base::async(func,
-                maskSignals ? ThreadFlags::MaskSignals : ThreadFlags::None);
+                maskSignals ? ThreadFlags::MaskSignals : ThreadFlags::NoFlags);
 }
 
 bool async(async_function_t func) {
