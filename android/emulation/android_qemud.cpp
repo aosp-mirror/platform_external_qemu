@@ -15,7 +15,7 @@
 #include "android/utils/misc.h"
 #include "android/utils/panic.h"
 
-#include "android/emulation/android_pipe.h"
+#include "android/emulation/android_pipe_host.h"
 #include "android/emulation/qemud/android_qemud_client.h"
 #include "android/emulation/qemud/android_qemud_common.h"
 #include "android/emulation/qemud/android_qemud_multiplexer.h"

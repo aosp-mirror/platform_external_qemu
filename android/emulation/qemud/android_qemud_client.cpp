@@ -11,7 +11,7 @@
 
 #include "android/emulation/qemud/android_qemud_client.h"
 
-#include "android/emulation/android_pipe.h"
+#include "android/emulation/android_pipe_host.h"
 #include "android/emulation/qemud/android_qemud_common.h"
 #include "android/emulation/qemud/android_qemud_multiplexer.h"
 #include "android/utils/bufprint.h"
