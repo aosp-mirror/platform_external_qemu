@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e3c531ce_b6282876",
+        "filename": "android/skin/qt/extended-pages/settings-page.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-27T17:50:40Z",
+      "side": 1,
+      "message": "Make \"ExtendedWindow\" accept a pointer to AdbInterface instance (EmulatorQtWindow can provide it) and pass it to this function (rename it to setAdbInterface, obviously)",
+      "range": {
+        "startLine": 28,
+        "startChar": 27,
+        "endLine": 28,
+        "endChar": 43
+      },
+      "revId": "54aabb83936a03e8dad94221a1963cb9a0852a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
