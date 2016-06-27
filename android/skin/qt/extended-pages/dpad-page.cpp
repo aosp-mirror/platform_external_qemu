@@ -43,7 +43,7 @@ DPadPage::DPadPage(QWidget *parent) :
             {mUi->dpad_downButton, kKeyCodeDpadDown},
             {mUi->dpad_selectButton, kKeyCodeDpadCenter},
             {mUi->dpad_backButton, kKeyCodeRewind},
-            {mUi->dpad_playButton, kKeyCodePlay},
+            {mUi->dpad_playButton, kKeyCodePlaypause},
             {mUi->dpad_forwardButton, kKeyCodeFastForward},
         };
 
