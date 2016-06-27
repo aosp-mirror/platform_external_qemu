@@ -96,14 +96,19 @@ ANDROID_BEGIN_HEADER
 //                  |hwpipe| <---------------------> |internal-pipe|
 //
 //        . guest writes service name to connector pipe
-//          . internal pipee finds corresponding service and creates new
-//            service-specific pipe instance for it:
+//          . internal pipe implementation finds corresponding service and
+//            creates a new internal pipe and service pipe for it.
 //
-//                  |hwpipe| <---------------------> |internal-pipe|
-//                                                       |
-//                             AndroidPipeFuncs::init()  |
-//                                                       V
-//                                                  |service-pipe|
+//                  |hwpipe| <------> |internal-pipe|
+//
+//                         |internal-pipe2| <----> |service-pipe|
+//
+//          . AndroidPipeHwFuncs::resetPipe() is called to associate the |hwpipe| with
+//            the new |internal-pipe2|, the old |internal-pipe| is then
+//            discarded.
+//
+//                  |hwpipe| <------> |internal-pipe2| <----> |service-pipe|
+//
 //
 // 5/ At runtime, the host can call android_pipe_host_close() to force the
 // closure
@@ -192,6 +197,8 @@ extern void android_pipe_guest_wake_on(void* internal_pipe, unsigned wakes);
 // A set of functions that must be implemented by the virtual device
 // implementation. Used with call android_pipe_set_hw_funcs().
 typedef struct AndroidPipeHwFuncs {
+    // Change the internal pipe associated with |hwpipe| to be |internal_pipe|
+    void (*resetPipe)(void* hwpipe, void* internal_pipe);
     void (*closeFromHost)(void* hwpipe);
     void (*signalWake)(void* hwpipe, unsigned flags);
 } AndroidPipeHwFuncs;

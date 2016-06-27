@@ -72,6 +72,7 @@ private:
     // AndroidPipeHwFuncs callbacks.
     static void closeFromHost(void* hwpipe);
     static void signalWake(void* hwpipe, unsigned wakes);
+    static void resetPipe(void* hwpipe, void* internal_pipe);
 
     static const AndroidPipeHwFuncs sHwFuncs;
 
