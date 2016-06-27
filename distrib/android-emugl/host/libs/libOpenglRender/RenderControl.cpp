@@ -19,19 +19,21 @@
 #include "FbConfig.h"
 #include "FrameBuffer.h"
 #include "RenderThreadInfo.h"
+#include "SyncThread.h"
 #include "ChecksumCalculatorThreadInfo.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
 
 #include "android/utils/debug.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
+#include "emugl/common/thread.h"
 
 #include <atomic>
 #include <inttypes.h>
 #include <string.h>
 
-using android::base::Lock;
 using android::base::AutoLock;
+using android::base::Lock;
 
 #define DEBUG 0
 
@@ -399,6 +401,13 @@ static void rcCloseColorBuffer(uint32_t colorbuffer)
     fb->closeColorBuffer( colorbuffer );
 }
 
+// static int triggerSyncThreadAndCreateFenceFd() {
+//     RenderThreadInfo *tInfo = RenderThreadInfo::get();
+// 
+//     if (tInfo->syncThread
+// 
+// }
+
 static int rcFlushWindowColorBuffer(uint32_t windowSurface)
 {
     DPRINT("waiting for gralloc cb lock");
@@ -416,6 +425,9 @@ static int rcFlushWindowColorBuffer(uint32_t windowSurface)
     }
 
     DPRINT("unlock gralloc cb lock }");
+
+    // int fenceFd = triggerSyncThreadAndCreateFenceFd();
+
     return 0;
 }
 

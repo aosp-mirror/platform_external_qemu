@@ -79,6 +79,7 @@ intptr_t RenderThread::main() {
     tInfo.m_glDec.initGL(gles1_dispatch_get_proc_func, NULL);
     tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, NULL);
     initRenderControlContext(&tInfo.m_rcDec);
+    initSyncThread(&tInfo);
 
     ReadBuffer readBuf(STREAM_BUFFER_SIZE);
 
