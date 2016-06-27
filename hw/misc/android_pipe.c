@@ -720,10 +720,12 @@ static const MemoryRegionOps android_pipe_iomem_ops = {
     .endianness = DEVICE_NATIVE_ENDIAN
 };
 
+static void qemu2_android_pipe_reset(void* hwpipe, void* internal_pipe);
 static void qemu2_android_pipe_host_signal_wake(void* hwpipe, unsigned flags);
 static void qemu2_android_pipe_host_close(void* hwpipe);
 
 static const AndroidPipeHwFuncs qemu2_android_pipe_hw_funcs = {
+    .resetPipe = qemu2_android_pipe_reset,
     .closeFromHost = qemu2_android_pipe_host_close,
     .signalWake = qemu2_android_pipe_host_signal_wake,
 };
@@ -768,6 +770,11 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
      * Initialize adb pipe backends
      */
     android_adb_dbg_backend_init();
+}
+
+static void qemu2_android_pipe_reset(void* hwpipe, void* internal_pipe) {
+    HwPipe* pipe = hwpipe;
+    pipe->pipe = internal_pipe;
 }
 
 static void qemu2_android_pipe_host_signal_wake( void* hwpipe, unsigned flags )
