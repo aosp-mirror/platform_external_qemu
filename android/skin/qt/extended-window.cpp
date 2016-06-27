@@ -103,6 +103,11 @@ ExtendedWindow::ExtendedWindow(
     for (QWidget* w : findChildren<QWidget*>()) {
         w->setAttribute(Qt::WA_MacShowFocusRect, false);
     }
+
+    connect(mExtendedUi->virtualSensorsPage,
+            SIGNAL(coarseOrientationChanged(SkinRotation)),
+            eW,
+            SLOT(rotateSkin(SkinRotation)));
 }
 
 ExtendedWindow::~ExtendedWindow() {

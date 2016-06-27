@@ -71,6 +71,8 @@ signals:
     // This signal is emitted when the value stored by the widget changes.
     void valueChanged(double value);
     void valueChanged();
+    void sliderPressed();
+    void sliderReleased();
 
 private slots:
     // Handles the changes in the child slider widget.

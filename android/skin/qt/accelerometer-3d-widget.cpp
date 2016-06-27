@@ -361,8 +361,8 @@ void Accelerometer3DWidget::mouseMoveEvent(QMouseEvent *event) {
     } else if (mTracking && mOperationMode == OperationMode::Move) {
         QVector2D vec = screenToXYPlane(event->x(), event->y());
         mTranslation += vec - mPrevDragOrigin;
-        mTranslation.setX(clamp(-7.0, 7.0, mTranslation.x()));
-        mTranslation.setY(clamp(-4.0, 4.0, mTranslation.y()));
+        mTranslation.setX(clamp(MinX, MaxX, mTranslation.x()));
+        mTranslation.setY(clamp(MinY, MaxY, mTranslation.y()));
         renderFrame();
         emit(positionChanged());
         mPrevDragOrigin = vec;

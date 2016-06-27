@@ -217,6 +217,25 @@ void skin_ui_set_onion(SkinUI* ui,
     }
 }
 
+static void skin_ui_switch_to_layout(SkinUI* ui, SkinLayout* layout) {
+    ui->layout = layout;
+    skin_window_reset(ui->window, layout);
+    SkinRotation rotation = skin_layout_get_dpad_rotation(layout);
+
+    if (ui->keyboard) {
+        skin_keyboard_set_rotation(ui->keyboard, rotation);
+    }
+
+    if (ui->trackball) {
+        skin_trackball_set_rotation(ui->trackball, rotation);
+        skin_window_set_trackball(ui->window, ui->trackball);
+        skin_window_show_trackball(ui->window, ui->show_trackball);
+    }
+
+    skin_window_set_lcd_brightness(ui->window, ui->lcd_brightness);
+    ui->ui_funcs->framebuffer_invalidate();
+}
+
 /* used to respond to a given keyboard command shortcut
  */
 static void
@@ -341,25 +360,7 @@ _skin_ui_handle_key_command(void* opaque, SkinKeyCommand command, int  down)
                     layout = layout->next;
             }
             if (layout != NULL) {
-                ui->layout = layout;
-                if (VERBOSE_CHECK(rotation)) {
-                    fprintf(stderr, "Applying new layout\n");
-                }
-                skin_window_reset(ui->window, layout);
-                SkinRotation rotation = skin_layout_get_dpad_rotation(layout);
-
-                if (ui->keyboard)
-                    skin_keyboard_set_rotation(ui->keyboard, rotation);
-
-                if (ui->trackball) {
-                    skin_trackball_set_rotation(ui->trackball, rotation);
-                    skin_window_set_trackball(ui->window, ui->trackball);
-                    skin_window_show_trackball(ui->window, ui->show_trackball);
-                }
-
-                skin_window_set_lcd_brightness(ui->window, ui->lcd_brightness);
-
-                ui->ui_funcs->framebuffer_invalidate();
+                skin_ui_switch_to_layout(ui, layout);
             }
         }
         break;
@@ -430,6 +431,20 @@ bool skin_ui_process_events(SkinUI* ui) {
                 fprintf(stderr, "Polled event: LayoutPrev\n");
             }
             _skin_ui_handle_key_command(ui, SKIN_KEY_COMMAND_CHANGE_LAYOUT_PREV, 1);
+            break;
+        case kEventLayoutRotate:
+            {
+                SkinRotation rot = ev.u.layout_rotation.rotation;
+                SkinLayout* l;
+                for (l = ui->layout_file->layouts;
+                     l;
+                     l = l->next) {
+                    if (l->orientation == rot) {
+                        skin_ui_switch_to_layout(ui, l);
+                        break;
+                    }
+                }
+            }
             break;
         case kEventMouseButtonDown:
         case kEventMouseButtonUp:
