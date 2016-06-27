@@ -22,6 +22,30 @@
       "revId": "54aabb83936a03e8dad94221a1963cb9a0852a2c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_56fa94c1",
+        "filename": "android/skin/qt/extended-pages/settings-page.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-06-27T17:55:05Z",
+      "side": 1,
+      "message": "I spoke to Prathmesh - he said he would prefer this because the AdbInterface is a unique_ptr and should be kept that way.\n\nThe DPad page does this as well.",
+      "parentUuid": "e3c531ce_b6282876",
+      "range": {
+        "startLine": 28,
+        "startChar": 27,
+        "endLine": 28,
+        "endChar": 43
+      },
+      "revId": "54aabb83936a03e8dad94221a1963cb9a0852a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
