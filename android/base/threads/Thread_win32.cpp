@@ -74,7 +74,7 @@ bool Thread::start() {
 }
 
 bool Thread::wait(intptr_t* exitStatus) {
-    if (!mStarted || (mFlags & ThreadFlags::Detach) != ThreadFlags::None) {
+    if (!mStarted || (mFlags & ThreadFlags::Detach) != ThreadFlags::NoFlags) {
         return false;
     }
 
@@ -92,7 +92,7 @@ bool Thread::wait(intptr_t* exitStatus) {
 }
 
 bool Thread::tryWait(intptr_t* exitStatus) {
-    if (!mStarted || (mFlags & ThreadFlags::Detach) != ThreadFlags::None) {
+    if (!mStarted || (mFlags & ThreadFlags::Detach) != ThreadFlags::NoFlags) {
         return false;
     }
 
