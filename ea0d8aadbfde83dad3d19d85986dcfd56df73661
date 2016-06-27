@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "e3c531ce_085bd173",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-27T21:25:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c3c2ed56_2309f4da",
+      "revId": "ea0d8aadbfde83dad3d19d85986dcfd56df73661",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3c531ce_a7a110aa",
         "filename": "android/skin/qt/extended-pages/virtual-sensors-page.cpp",
         "patchSetId": 4
@@ -30,6 +48,30 @@
       "writtenOn": "2016-06-27T19:18:16Z",
       "side": 1,
       "message": "should it be a `static const std::array\u003c...\u003e` ?",
+      "range": {
+        "startLine": 340,
+        "startChar": 0,
+        "endLine": 345,
+        "endChar": 6
+      },
+      "revId": "ea0d8aadbfde83dad3d19d85986dcfd56df73661",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_0d6763d0",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-27T21:25:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e3c531ce_a7a110aa",
       "range": {
         "startLine": 340,
         "startChar": 0,
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "e3c531ce_a84a7d97",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-27T21:25:10Z",
+      "side": 1,
+      "message": "replaced with QTextStream",
+      "parentUuid": "e3c531ce_27a400b3",
+      "range": {
+        "startLine": 370,
+        "startChar": 18,
+        "endLine": 370,
+        "endChar": 25
+      },
+      "revId": "ea0d8aadbfde83dad3d19d85986dcfd56df73661",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3c531ce_82196bd0",
         "filename": "android/skin/qt/extended-pages/virtual-sensors-page.ui",
         "patchSetId": 4
@@ -88,6 +154,30 @@
     },
     {
       "key": {
+        "uuid": "e3c531ce_4db15ba2",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.ui",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-27T21:25:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e3c531ce_82196bd0",
+      "range": {
+        "startLine": 125,
+        "startChar": 14,
+        "endLine": 125,
+        "endChar": 27
+      },
+      "revId": "ea0d8aadbfde83dad3d19d85986dcfd56df73661",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3c531ce_a21c67bf",
         "filename": "android/skin/qt/extended-pages/virtual-sensors-page.ui",
         "patchSetId": 4
@@ -99,6 +189,30 @@
       "writtenOn": "2016-06-25T03:45:51Z",
       "side": 1,
       "message": "this should be :\nROTATION_90",
+      "range": {
+        "startLine": 189,
+        "startChar": 14,
+        "endLine": 189,
+        "endChar": 26
+      },
+      "revId": "ea0d8aadbfde83dad3d19d85986dcfd56df73661",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_0dbf6373",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.ui",
+        "patchSetId": 4
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-27T21:25:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e3c531ce_a21c67bf",
       "range": {
         "startLine": 189,
         "startChar": 14,
