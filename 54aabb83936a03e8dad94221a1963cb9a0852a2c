@@ -70,6 +70,30 @@
       "revId": "54aabb83936a03e8dad94221a1963cb9a0852a2c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_d92b55dd",
+        "filename": "android/skin/qt/extended-pages/settings-page.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-06-27T18:07:51Z",
+      "side": 1,
+      "message": "DPadPage has a reason for doing it this way - it actually uses the interface exposed by EmulatorQtWindow (queueSkinEvent) that is related to what EmulatorQtWindow does.\n\nIn this case, however, we\u0027re adding a method that is completely unrelated to what EmulatorQtWindow actually does. I don\u0027t like it because EmulatorQtWindow is already pretty hairy (despite some efforts to reduce it) and we shouldn\u0027t be adding to the mess.\n\n\u003e  AdbInterface is a unique_ptr and should be kept that way\n\nI didn\u0027t propose making it not a unique_ptr. EmulatorQtWindow should still own AdbInterface, the other objects can use the raw pointer to refer to it.",
+      "parentUuid": "e3c531ce_56fa94c1",
+      "range": {
+        "startLine": 28,
+        "startChar": 27,
+        "endLine": 28,
+        "endChar": 43
+      },
+      "revId": "54aabb83936a03e8dad94221a1963cb9a0852a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
