@@ -179,6 +179,7 @@ signals:
     void layoutChanged(bool next);
 
 public:
+    android::emulation::AdbInterface* getAdbInterface() const;
     bool isInZoomMode() const;
     ToolWindow* toolWindow() const;
     void showZoomIfNotUserHidden();
@@ -317,7 +318,6 @@ private:
     void forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event);
     void handleKeyEvent(SkinEventType type, QKeyEvent* event);
 
-    std::vector<std::string> getAdbFullPathStd();
     void screenshotDone(android::emulation::ScreenCapturer::Result result);
 
     void runAdbInstall(const QString& path);

@@ -12,6 +12,7 @@
 #pragma once
 
 #include "android/settings-agent.h"
+#include "android/skin/qt/emulator-qt-window.h"
 #include "ui_settings-page.h"
 #include <QString>
 #include <QWidget>
@@ -23,6 +24,8 @@ class SettingsPage : public QWidget
 
 public:
     explicit SettingsPage(QWidget *parent = 0);
+
+    void setAdbInterface(android::emulation::AdbInterface* adb);
 
 signals:
     void onForwardShortcutsToDeviceChanged(int index);
@@ -43,5 +46,6 @@ private slots:
 private:
     bool eventFilter (QObject* object, QEvent* event) override;
 
+    android::emulation::AdbInterface* mAdb;
     std::unique_ptr<Ui::SettingsPage> mUi;
 };
