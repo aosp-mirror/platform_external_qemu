@@ -46,6 +46,30 @@
       "revId": "7ee8483de834d986a3ed2b74f82a7152e7b3e41f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_75dcddef",
+        "filename": "android/utils/filelock.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-06-27T23:20:32Z",
+      "side": 1,
+      "message": "Ah, good point.  Fair enough.  Though: this could also be solved by adding a new block in which sleep_duration_us is declared, and which the goto Fail skips over.  Not suggesting you do this, just recording the alternative for posterity.",
+      "parentUuid": "e3c531ce_923b6f2d",
+      "range": {
+        "startLine": 242,
+        "startChar": 2,
+        "endLine": 242,
+        "endChar": 30
+      },
+      "revId": "7ee8483de834d986a3ed2b74f82a7152e7b3e41f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
