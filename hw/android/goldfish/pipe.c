@@ -617,6 +617,11 @@ goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
     return 0;
 }
 
+static void goldfish_pipe_reset(void* hwpipe, void* internal_pipe) {
+    HwPipe*  pipe = hwpipe;
+    pipe->pipe = internal_pipe;
+}
+
 static void goldfish_pipe_wake(void* hwpipe, unsigned flags) {
     HwPipe*  pipe = hwpipe;
     HwPipe** lookup;
@@ -651,6 +656,7 @@ static void goldfish_pipe_close(void* hwpipe) {
 }
 
 static const AndroidPipeHwFuncs goldfish_pipe_hw_funcs = {
+    .resetPipe = goldfish_pipe_reset,
     .closeFromHost = goldfish_pipe_close,
     .signalWake = goldfish_pipe_wake,
 };

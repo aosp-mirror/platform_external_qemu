@@ -77,6 +77,10 @@ public:
         return android_pipe_guest_poll(mPipe);
     }
 
+    void resetPipe(void* internal_pipe) {
+        mPipe = internal_pipe;
+    }
+
     void closeFromHost() {
         mClosed = true;
     }
@@ -107,9 +111,15 @@ TestAndroidPipeDevice::~TestAndroidPipeDevice() {
 
 // static
 const AndroidPipeHwFuncs TestAndroidPipeDevice::sHwFuncs = {
+    &TestAndroidPipeDevice::resetPipe,
     &TestAndroidPipeDevice::closeFromHost,
     &TestAndroidPipeDevice::signalWake,
 };
+
+// static
+void TestAndroidPipeDevice::resetPipe(void* hwpipe, void* internal_pipe) {
+    static_cast<TestGuest*>(hwpipe)->resetPipe(internal_pipe);
+}
 
 // static
 void TestAndroidPipeDevice::closeFromHost(void* hwpipe) {
