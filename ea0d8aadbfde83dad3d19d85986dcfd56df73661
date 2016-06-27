@@ -19,6 +19,52 @@
     },
     {
       "key": {
+        "uuid": "e3c531ce_a7a110aa",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-27T19:18:16Z",
+      "side": 1,
+      "message": "should it be a `static const std::array\u003c...\u003e` ?",
+      "range": {
+        "startLine": 340,
+        "startChar": 0,
+        "endLine": 345,
+        "endChar": 6
+      },
+      "revId": "ea0d8aadbfde83dad3d19d85986dcfd56df73661",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_27a400b3",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-27T19:18:16Z",
+      "side": 1,
+      "message": "a ping on a use of deprecated QString::sprintf()",
+      "range": {
+        "startLine": 370,
+        "startChar": 18,
+        "endLine": 370,
+        "endChar": 25
+      },
+      "revId": "ea0d8aadbfde83dad3d19d85986dcfd56df73661",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3c531ce_82196bd0",
         "filename": "android/skin/qt/extended-pages/virtual-sensors-page.ui",
         "patchSetId": 4
