@@ -1066,27 +1066,31 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         D("Physical RAM size: %dMB\n", hw->hw_ramSize);
     }
 
-    int minVmHeapSize =
+    // Set the VM heap size to min vm heap per api level and make sure it falls
+    // into the range (min vm heap per api level, RAM size / 4); we want to
+    // neither constrain the apps just because of a dumb old hardcoded constant
+    // nor try to allocate a huge single chunk or memory for a heap which just
+    // could be impossible.
+    const int minApiLevelVmHeapSize =
             androidHwConfig_getMinVmHeapSize(hw, avdInfo_getApiLevel(avd));
-    if (hw->vm_heapSize < minVmHeapSize) {
-        D("VM heap size set below hardware specified minimum of %iMB",
-          minVmHeapSize);
+    const int minRamVmHeapSize = hw->hw_ramSize / 4;
+    const int maxVmHeapSize = 4 * minApiLevelVmHeapSize;
+    const int vmHeapSize =
+            minRamVmHeapSize > minApiLevelVmHeapSize
+                ? (minRamVmHeapSize > maxVmHeapSize
+                    ? maxVmHeapSize
+                    : minRamVmHeapSize)
+                : minApiLevelVmHeapSize;
+    if (hw->vm_heapSize < vmHeapSize) {
+        D("VM heap size %iMB is below hardware specified minimum of %iMB,"
+          "setting it to that value", hw->vm_heapSize, vmHeapSize);
 
-        int vmHeapSize = hw->hw_ramSize / 4;
-
-        if (vmHeapSize < minVmHeapSize) {
-            vmHeapSize = minVmHeapSize;
-        }
-
-        D("Setting VM heap size to %iMB", vmHeapSize);
         hw->vm_heapSize = vmHeapSize;
 
-        int minRamSize = vmHeapSize * 2;
-
+        const int minRamSize = vmHeapSize * 2;
         if (hw->hw_ramSize < minRamSize) {
             hw->hw_ramSize = minRamSize;
-            D("Increasing RAM to %iMB to accomodate min VM heap",
-                     minRamSize);
+            D("Increasing RAM to %iMB to accomodate min VM heap", minRamSize);
         }
     }
 
