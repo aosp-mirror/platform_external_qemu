@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e3c531ce_7906a14f",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ANGLEShaderParser.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-27T18:23:54Z",
+      "side": 1,
+      "message": "statics ?",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 33
+      },
+      "revId": "e95d14060bc0283c7a36a425955c4dfec01f03f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_998a7dc7",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ANGLEShaderParser.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-27T18:23:54Z",
+      "side": 1,
+      "message": "should this be lock-protected, or it\u0027s protected somewhere on a higher level? Anyway, a comment would help here",
+      "range": {
+        "startLine": 61,
+        "startChar": 5,
+        "endLine": 61,
+        "endChar": 21
+      },
+      "revId": "e95d14060bc0283c7a36a425955c4dfec01f03f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_d928758c",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-27T18:23:54Z",
+      "side": 1,
+      "message": "nit: please use the same kind of code for the m_infoLog assignment",
+      "range": {
+        "startLine": 49,
+        "startChar": 3,
+        "endLine": 52,
+        "endChar": 54
+      },
+      "revId": "e95d14060bc0283c7a36a425955c4dfec01f03f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
