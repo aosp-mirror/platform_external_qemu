@@ -19,29 +19,42 @@
 #include "FbConfig.h"
 #include "FrameBuffer.h"
 #include "RenderThreadInfo.h"
+#include "SyncThread.h"
 #include "ChecksumCalculatorThreadInfo.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
 
 #include "android/utils/debug.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
+#include "emugl/common/thread.h"
 
 #include <atomic>
 #include <inttypes.h>
 #include <string.h>
 
-using android::base::Lock;
 using android::base::AutoLock;
+using android::base::Lock;
 
-#define DEBUG 0
+#define DEBUG_GRALLOC_SYNC 0
 
-#if DEBUG
-#define DPRINT(...) do { \
+#define DEBUG_SYNC_THREADS 0
+
+#if DEBUG_GRALLOC_SYNC
+#define GRSYNC_DPRINT(...) do { \
     if (!VERBOSE_CHECK(gles)) { VERBOSE_ENABLE(gles); } \
     VERBOSE_TID_FUNCTION_DPRINT(gles, __VA_ARGS__); \
 } while(0)
 #else
-#define DPRINT(...)
+#define GRSYNC_DPRINT(...)
+#endif
+
+#if DEBUG_SYNC_THREADS
+#define SYNC_DPRINT(...) do { \
+    if (!VERBOSE_CHECK(gles)) { VERBOSE_ENABLE(gles); } \
+    VERBOSE_TID_FUNCTION_DPRINT(gles, __VA_ARGS__); \
+} while(0)
+#else
+#define SYNC_DPRINT(...)
 #endif
 
 // GrallocSync is a class that helps to reflect the behavior of
@@ -104,7 +117,7 @@ public:
         if (mEnabled && newLockState == 1) {
             mGrallocColorBufferLock.lockRead();
         } else if (mEnabled) {
-            DPRINT("warning: recursive/multiple locks from guest!");
+            GRSYNC_DPRINT("warning: recursive/multiple locks from guest!");
         }
     }
     void unlockColorBufferPrepare() {
@@ -399,23 +412,33 @@ static void rcCloseColorBuffer(uint32_t colorbuffer)
     fb->closeColorBuffer( colorbuffer );
 }
 
+// static int triggerSyncThreadAndCreateFenceFd() {
+//     RenderThreadInfo *tInfo = RenderThreadInfo::get();
+// 
+//     if (tInfo->syncThread
+// 
+// }
+
 static int rcFlushWindowColorBuffer(uint32_t windowSurface)
 {
-    DPRINT("waiting for gralloc cb lock");
+    GRSYNC_DPRINT("waiting for gralloc cb lock");
     GrallocSyncPostLock lock(sGrallocSync.get());
-    DPRINT("lock gralloc cb lock {");
+    GRSYNC_DPRINT("lock gralloc cb lock {");
 
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
-        DPRINT("unlock gralloc cb lock");
+        GRSYNC_DPRINT("unlock gralloc cb lock");
         return -1;
     }
     if (!fb->flushWindowSurfaceColorBuffer(windowSurface)) {
-        DPRINT("unlock gralloc cb lock }");
+        GRSYNC_DPRINT("unlock gralloc cb lock }");
         return -1;
     }
 
-    DPRINT("unlock gralloc cb lock }");
+    GRSYNC_DPRINT("unlock gralloc cb lock }");
+
+    // int fenceFd = triggerSyncThreadAndCreateFenceFd();
+
     return 0;
 }
 
@@ -481,9 +504,9 @@ static EGLint rcColorBufferCacheFlush(uint32_t colorBuffer,
                                       EGLint postCount, int forRead)
 {
    // gralloc_lock() on the guest calls rcColorBufferCacheFlush
-   DPRINT("waiting for gralloc cb lock");
+   GRSYNC_DPRINT("waiting for gralloc cb lock");
    sGrallocSync->lockColorBufferPrepare();
-   DPRINT("lock gralloc cb lock {");
+   GRSYNC_DPRINT("lock gralloc cb lock {");
    return 0;
 }
 
@@ -507,14 +530,14 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
 {
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
-        DPRINT("unlock gralloc cb lock");
+        GRSYNC_DPRINT("unlock gralloc cb lock");
         sGrallocSync->unlockColorBufferPrepare();
         return -1;
     }
 
     fb->updateColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
 
-    DPRINT("unlock gralloc cb lock");
+    GRSYNC_DPRINT("unlock gralloc cb lock");
     sGrallocSync->unlockColorBufferPrepare();
     return 0;
 }
@@ -574,4 +597,13 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCreateClientImage = rcCreateClientImage;
     dec->rcDestroyClientImage = rcDestroyClientImage;
     dec->rcSelectChecksumHelper = rcSelectChecksumHelper;
+}
+
+void initSyncThread(RenderThreadInfo* info) {
+    SYNC_DPRINT("call. info=%p", info);
+    SyncThread* test = createSyncThread();
+    test->createSyncContext();
+    test->triggerWait(NULL, 1234);
+    test->triggerExit();
+    SYNC_DPRINT("done");
 }

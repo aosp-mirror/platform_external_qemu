@@ -55,6 +55,9 @@ struct RenderThreadInfo {
     ThreadContextSet                m_contextSet;
     // all the window surfaces that are created by this render thread
     WindowSurfaceSet                m_windowSet;
+
+    // accompanying sync thread
+    void*                           syncThread;
 };
 
 #endif
