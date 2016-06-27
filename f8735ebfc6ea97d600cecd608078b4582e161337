@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e3c531ce_55a1e10a",
+        "filename": "android/main-common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1095,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-06-27T23:29:02Z",
+      "side": 1,
+      "message": "should it also check some maxim heapsize ?\nfor example, XXXHDPI has minVMHeapSize set to 768M, this is too big based on my testing.\n\nso far, 512m seems the lucky number",
+      "revId": "f8735ebfc6ea97d600cecd608078b4582e161337",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
