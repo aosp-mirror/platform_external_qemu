@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e3c531ce_fc79dae0",
+        "filename": "distrib/android-emugl/host/libs/libGLES12Translator/common/dlog.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-27T21:59:05Z",
+      "side": 1,
+      "message": "really? why do we need a kind of logging that enables itself and never turns off?",
+      "range": {
+        "startLine": 26,
+        "startChar": 4,
+        "endLine": 26,
+        "endChar": 61
+      },
+      "revId": "fad711000dc1e62c662dd5ab1c99284b557d7cea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
