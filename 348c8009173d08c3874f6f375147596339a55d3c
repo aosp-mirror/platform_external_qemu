@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e3c531ce_c29d1a29",
+        "filename": "android/emulation/control/test_runner.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-27T20:15:43Z",
+      "side": 1,
+      "message": "please use helpers from android/base/containers/Lookup.h\nthis code performs two lookups",
+      "range": {
+        "startLine": 106,
+        "startChar": 0,
+        "endLine": 107,
+        "endChar": 35
+      },
+      "revId": "348c8009173d08c3874f6f375147596339a55d3c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
