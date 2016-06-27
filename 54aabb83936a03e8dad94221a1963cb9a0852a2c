@@ -214,6 +214,30 @@
       "revId": "54aabb83936a03e8dad94221a1963cb9a0852a2c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_072f4431",
+        "filename": "android/skin/qt/extended-pages/settings-page.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-06-27T19:52:59Z",
+      "side": 1,
+      "message": "Changed to a raw pointer for now - I don\u0027t have a particularly strong opinion on dependency injection vs. context interface vs. other options.",
+      "parentUuid": "e3c531ce_19184d25",
+      "range": {
+        "startLine": 28,
+        "startChar": 27,
+        "endLine": 28,
+        "endChar": 43
+      },
+      "revId": "54aabb83936a03e8dad94221a1963cb9a0852a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
