@@ -60,6 +60,8 @@ ExtendedWindow::ExtendedWindow(
     mExtendedUi->finger_page->setFingerAgent(agentPtr->finger);
     mExtendedUi->helpPage->initialize(shortcuts);
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
+    mExtendedUi->settingsPage->setAdbInterface(
+            mEmulatorWindow->getAdbInterface());
     mExtendedUi->location_page->setLocationAgent(agentPtr->location);
     mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
     mExtendedUi->virtualSensorsPage->setLayoutChangeNotifier(eW);
