@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e3c531ce_ff79cce0",
+        "filename": "distrib/android-emugl/host/libs/libGLES12Translator/gles/api_entries.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 4227,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-27T22:28:24Z",
+      "side": 1,
+      "message": "why?",
+      "range": {
+        "startLine": 4227,
+        "startChar": 4,
+        "endLine": 4227,
+        "endChar": 7
+      },
+      "revId": "3cf2b656a2ba5393b2e7ed1a596828b8a34e09fb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
