@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e3c531ce_3c2372ad",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-27T22:09:22Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 125,
+        "startChar": 0,
+        "endLine": 129,
+        "endChar": 11
+      },
+      "revId": "ce68e93da47729328aad224ccf282ed3d0d8c4da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_1cf31642",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-27T22:09:22Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 368,
+        "startChar": 0,
+        "endLine": 370,
+        "endChar": 7
+      },
+      "revId": "ce68e93da47729328aad224ccf282ed3d0d8c4da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
