@@ -129,7 +129,7 @@ public:
     void deleteName(NamedObjectType p_type, unsigned int p_name);
 private:
     emugl::Mutex m_lock;
-    typedef void (*GLdelete) (GLsizei, const GLuint *);
+    typedef void (GL_APIENTRY *GLdelete) (GLsizei, const GLuint *);
     GLdelete m_glDelete[NUM_OBJECT_TYPES];
     bool m_deleteInitialized = false;
 };
