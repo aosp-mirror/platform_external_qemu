@@ -46,6 +46,30 @@
       "revId": "fad711000dc1e62c662dd5ab1c99284b557d7cea",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_e93c71b3",
+        "filename": "distrib/android-emugl/host/libs/libGLES12Translator/common/dlog.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-28T05:52:49Z",
+      "side": 1,
+      "message": "(pach set 4 of https://android-review.googlesource.com/#/c/242360/)",
+      "parentUuid": "e3c531ce_eb73cacd",
+      "range": {
+        "startLine": 26,
+        "startChar": 4,
+        "endLine": 26,
+        "endChar": 61
+      },
+      "revId": "fad711000dc1e62c662dd5ab1c99284b557d7cea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
