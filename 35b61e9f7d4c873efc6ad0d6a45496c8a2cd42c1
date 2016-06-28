@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e3c531ce_d082ff17",
+        "filename": "distrib/android-emugl/host/libs/libGLES12Translator/Android.mk",
+        "patchSetId": 7
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-28T05:37:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e3c531ce_87e694b5",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 7
+      },
+      "revId": "35b61e9f7d4c873efc6ad0d6a45496c8a2cd42c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3c531ce_870e942a",
         "filename": "distrib/android-emugl/host/libs/libGLES12Translator/common/wgl_renderer.cpp",
         "patchSetId": 7
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "e3c531ce_4b8dbe43",
+        "filename": "distrib/android-emugl/host/libs/libGLES12Translator/common/wgl_renderer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-28T05:37:00Z",
+      "side": 1,
+      "message": "Sorry, this was experimental code that was left in. Taken out.",
+      "parentUuid": "e3c531ce_870e942a",
+      "range": {
+        "startLine": 141,
+        "startChar": 0,
+        "endLine": 142,
+        "endChar": 38
+      },
+      "revId": "35b61e9f7d4c873efc6ad0d6a45496c8a2cd42c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3c531ce_47593c17",
         "filename": "distrib/android-emugl/host/libs/libGLES12Translator/gles/api_stubs.cpp",
         "patchSetId": 7
@@ -59,6 +107,30 @@
       "writtenOn": "2016-06-27T19:45:24Z",
       "side": 1,
       "message": "what is this file about?",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 25
+      },
+      "revId": "35b61e9f7d4c873efc6ad0d6a45496c8a2cd42c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_2ba9628c",
+        "filename": "distrib/android-emugl/host/libs/libGLES12Translator/gles/api_stubs.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-28T05:37:00Z",
+      "side": 1,
+      "message": "I think it was for the GLESv3 backend. We\u0027ll never need a GLESv1-\u003e3 backend. Taken out.",
+      "parentUuid": "e3c531ce_47593c17",
       "range": {
         "startLine": 19,
         "startChar": 0,
