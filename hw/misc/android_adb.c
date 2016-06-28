@@ -226,7 +226,7 @@ static void tcp_adb_server_close(adb_backend_state *bs)
     /* clean-up connected pipes */
     if (bs->connected_pipe) {
         DPRINTF("%s: closing connected pipe\n", __func__);
-        android_pipe_close(bs->connected_pipe->hwpipe);
+        android_pipe_host_close(bs->connected_pipe->hwpipe);
         bs->connected_pipe->chan = NULL;
         bs->connected_pipe = NULL;
     }
@@ -273,7 +273,7 @@ static gboolean tcp_adb_server_data(GIOChannel *channel, GIOCondition cond,
         bs->data_in = TRUE;
         if (bs->connected_pipe && bs->connected_pipe->flags & PIPE_WAKE_READ) {
             DPRINTF("%s: waking up pipe for incomming data\n", __func__);
-            android_pipe_wake(bs->connected_pipe->hwpipe, PIPE_WAKE_READ);
+            android_pipe_host_signal_wake(bs->connected_pipe->hwpipe, PIPE_WAKE_READ);
         }
         qemu_mutex_unlock(bs->mutex);
     }
@@ -283,7 +283,7 @@ static gboolean tcp_adb_server_data(GIOChannel *channel, GIOCondition cond,
         bs->data_out = TRUE;
         if (bs->connected_pipe && bs->connected_pipe->flags & PIPE_WAKE_WRITE) {
             DPRINTF("%s: waking up pipe for now able to write\n", __func__);
-            android_pipe_wake(bs->connected_pipe->hwpipe, PIPE_WAKE_WRITE);
+            android_pipe_host_signal_wake(bs->connected_pipe->hwpipe, PIPE_WAKE_WRITE);
         }
         qemu_mutex_unlock(bs->mutex);
     }
@@ -365,7 +365,7 @@ static gboolean tcp_adb_connect(adb_backend_state *bs, int fd)
             abort();
         }
         adb_reply(apipe, _ok_resp);
-        android_pipe_wake(bs->connected_pipe->hwpipe, PIPE_WAKE_READ);
+        android_pipe_host_signal_wake(bs->connected_pipe->hwpipe, PIPE_WAKE_READ);
     }
 
     return TRUE;
@@ -607,7 +607,7 @@ static const char *handle_request(adb_pipe *apipe, const char *request, int len)
     } else if (match_request(request, len, _start_req)) {
         if (apipe->state != ADB_CONNECTION_STATE_ACCEPT) {
             DPRINTF("adbd requested 'start' when we are not ready, error\n");
-            android_pipe_close(apipe->hwpipe);
+            android_pipe_host_close(apipe->hwpipe);
             return NULL;
         }
 
@@ -615,7 +615,7 @@ static const char *handle_request(adb_pipe *apipe, const char *request, int len)
             qemu_mutex_lock(bs->mutex);
             DPRINTF("adbd requested 'start' but tcp connection not yet connected, error\n");
             bs->connected_pipe->chan = NULL;
-            android_pipe_close(apipe->hwpipe);
+            android_pipe_host_close(apipe->hwpipe);
             qemu_mutex_unlock(bs->mutex);
             return NULL;
         }
@@ -732,7 +732,7 @@ static int adb_pipe_send(void *opaque, const AndroidPipeBuffer* buffers,
 
         if (reply) {
             adb_reply(apipe, reply);
-            android_pipe_wake(apipe->hwpipe, PIPE_WAKE_READ);
+            android_pipe_host_signal_wake(apipe->hwpipe, PIPE_WAKE_READ);
         }
     } else {
         ret = adb_pipe_proxy_send(apipe, buffers, cnt);
@@ -904,11 +904,11 @@ static void adb_pipe_wake_on(void *opaque, int flags)
     apipe->flags |= flags;
 
     if (flags & PIPE_WAKE_READ && adb_state.data_in) {
-        android_pipe_wake(apipe->hwpipe, PIPE_WAKE_READ);
+        android_pipe_host_signal_wake(apipe->hwpipe, PIPE_WAKE_READ);
     }
 
     if (flags & PIPE_WAKE_WRITE && adb_state.data_out) {
-        android_pipe_wake(apipe->hwpipe, PIPE_WAKE_WRITE);
+        android_pipe_host_signal_wake(apipe->hwpipe, PIPE_WAKE_WRITE);
     }
 }
 

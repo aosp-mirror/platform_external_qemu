@@ -218,18 +218,18 @@ pipe_new(uint64_t channel, PipeDevice* dev)
 {
     HwPipe*  pipe = pipe_new0(dev);
     pipe->channel = channel;
-    pipe->pipe  = android_pipe_new(pipe);
+    pipe->pipe  = android_pipe_guest_open(pipe);
     qemu_mutex_init(&pipe->lock);
     return pipe;
 }
 
 static void pipe_free(HwPipe* pipe)
 {
-    android_pipe_free(pipe->pipe);
+    android_pipe_guest_close(pipe->pipe);
     /* Free stuff */
-    /* note: should call destroy mutex after android_pipe_free
-       because it will call qemu2_android_pipe_wake, and
-       mutex could also be called in "android_pipe_free"
+    /* note: should call destroy mutex after android_pipe_guest_close
+       because it will call qemu2_android_pipe_host_signal_wake, and
+       mutex could also be called in "android_pipe_guest_close"
        */
     qemu_mutex_destroy(&pipe->lock);
     g_free(pipe);
@@ -440,7 +440,7 @@ static void pipeDevice_doCommand(PipeDevice* dev, uint32_t command) {
     }
 
     case PIPE_CMD_POLL:
-        dev->status = android_pipe_poll(pipe->pipe);
+        dev->status = android_pipe_guest_poll(pipe->pipe);
         DD("%s: CMD_POLL > status=%d", __FUNCTION__, dev->status);
         break;
 
@@ -453,7 +453,7 @@ static void pipeDevice_doCommand(PipeDevice* dev, uint32_t command) {
             break;
         }
         buffer.size = dev->size;
-        dev->status = android_pipe_recv(pipe->pipe, &buffer, 1);
+        dev->status = android_pipe_guest_recv(pipe->pipe, &buffer, 1);
         DD("%s: CMD_READ_BUFFER channel=0x%llx address=0x%16llx size=%d > status=%d",
            __FUNCTION__, (unsigned long long)dev->channel, (unsigned long long)dev->address,
            dev->size, dev->status);
@@ -470,7 +470,7 @@ static void pipeDevice_doCommand(PipeDevice* dev, uint32_t command) {
             break;
         }
         buffer.size = dev->size;
-        dev->status = android_pipe_send(pipe->pipe, &buffer, 1);
+        dev->status = android_pipe_guest_send(pipe->pipe, &buffer, 1);
         DD("%s: CMD_WRITE_BUFFER channel=0x%llx address=0x%16llx size=%d > status=%d",
            __FUNCTION__, (unsigned long long)dev->channel, (unsigned long long)dev->address,
            dev->size, dev->status);
@@ -482,7 +482,7 @@ static void pipeDevice_doCommand(PipeDevice* dev, uint32_t command) {
         DD("%s: CMD_WAKE_ON_READ channel=0x%llx", __FUNCTION__, (unsigned long long)dev->channel);
         if ((pipe->wanted & PIPE_WAKE_READ) == 0) {
             pipe->wanted |= PIPE_WAKE_READ;
-            android_pipe_wake_on(pipe->pipe, pipe->wanted);
+            android_pipe_guest_wake_on(pipe->pipe, pipe->wanted);
         }
         dev->status = 0;
         break;
@@ -491,7 +491,7 @@ static void pipeDevice_doCommand(PipeDevice* dev, uint32_t command) {
         DD("%s: CMD_WAKE_ON_WRITE channel=0x%llx", __FUNCTION__, (unsigned long long)dev->channel);
         if ((pipe->wanted & PIPE_WAKE_WRITE) == 0) {
             pipe->wanted |= PIPE_WAKE_WRITE;
-            android_pipe_wake_on(pipe->pipe, pipe->wanted);
+            android_pipe_guest_wake_on(pipe->pipe, pipe->wanted);
         }
         dev->status = 0;
         break;
@@ -720,12 +720,12 @@ static const MemoryRegionOps android_pipe_iomem_ops = {
     .endianness = DEVICE_NATIVE_ENDIAN
 };
 
-static void qemu2_android_pipe_wake(void* hwpipe, unsigned flags);
-static void qemu2_android_pipe_close(void* hwpipe);
+static void qemu2_android_pipe_host_signal_wake(void* hwpipe, unsigned flags);
+static void qemu2_android_pipe_host_close(void* hwpipe);
 
 static const AndroidPipeHwFuncs qemu2_android_pipe_hw_funcs = {
-    .closeFromHost = qemu2_android_pipe_close,
-    .signalWake = qemu2_android_pipe_wake,
+    .closeFromHost = qemu2_android_pipe_host_close,
+    .signalWake = qemu2_android_pipe_host_signal_wake,
 };
 
 static void android_pipe_realize(DeviceState *dev, Error **errp)
@@ -770,7 +770,7 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
     android_adb_dbg_backend_init();
 }
 
-static void qemu2_android_pipe_wake( void* hwpipe, unsigned flags )
+static void qemu2_android_pipe_host_signal_wake( void* hwpipe, unsigned flags )
 {
     HwPipe*  pipe = hwpipe;
     PipeDevice*  dev = pipe->device;
@@ -787,7 +787,7 @@ static void qemu2_android_pipe_wake( void* hwpipe, unsigned flags )
     DD("%s: raising IRQ", __FUNCTION__);
 }
 
-static void qemu2_android_pipe_close( void* hwpipe )
+static void qemu2_android_pipe_host_close( void* hwpipe )
 {
     HwPipe* pipe = hwpipe;
 
@@ -795,7 +795,7 @@ static void qemu2_android_pipe_close( void* hwpipe )
 
     if (!pipe->closed) {
         pipe->closed = 1;
-        qemu2_android_pipe_wake( hwpipe, PIPE_WAKE_CLOSED );
+        qemu2_android_pipe_host_signal_wake( hwpipe, PIPE_WAKE_CLOSED );
     }
 }
 

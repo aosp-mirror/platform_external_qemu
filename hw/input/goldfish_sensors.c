@@ -144,7 +144,7 @@ static void sensor_send_data(SensorsPipe *sp, const uint8_t *buf, int len)
 {
     gchar *msg = g_strndup((gchar *) buf, len);
     g_ptr_array_add(sp->send_data, msg);
-    android_pipe_wake(sp->hwpipe, PIPE_WAKE_READ);
+    android_pipe_host_signal_wake(sp->hwpipe, PIPE_WAKE_READ);
 }
 
 
@@ -330,13 +330,13 @@ static void sensors_pipe_wake(void *opaque, int flags)
         DPRINTF("0x%x:PIPE_WAKE_READ we have %d bytes, %d msgs\n", flags,
                 (int) pipe->send_outstanding->len,
                 pipe->send_data->len);
-        android_pipe_wake(pipe->hwpipe, PIPE_WAKE_READ);
+        android_pipe_host_signal_wake(pipe->hwpipe, PIPE_WAKE_READ);
     }
 
     /* we can always be written to... */
     if (flags & PIPE_WAKE_WRITE) {
         DPRINTF("0x%x:PIPE_WAKE_WRITE\n", flags);
-        android_pipe_wake(pipe->hwpipe, PIPE_WAKE_WRITE);
+        android_pipe_host_signal_wake(pipe->hwpipe, PIPE_WAKE_WRITE);
     }
 }
 
