@@ -67,11 +67,6 @@
  ** When unlocking:
  **      unlink 'lock'
  **
- **
- ** On Windows, 'lock' is a directory name. locking is equivalent to
- ** creating it. The directory will contain a file named 'pid' that
- ** contains the locking process' PID.
- **
  **/
 
 
@@ -244,6 +239,7 @@ filelock_lock( FileLock*  lock )
     FILE*  f = NULL;
     char   pid[8];
     struct stat  st_temp;
+    int sleep_duration_us = 0;
 
     temp_fd = mkstemp(lock->temp);
 
@@ -268,7 +264,6 @@ filelock_lock( FileLock*  lock )
     }
 
     /* now attempt to link the temp file to the lock file */
-    int sleep_duration_us = 0;
     for (tries = 4; tries > 0; tries--)
     {
         const int kSleepDurationUsMax = 2000000;  // 2 seconds.
@@ -450,7 +445,7 @@ filelock_create( const char*  file )
 #endif
     int    total_len = sizeof(FileLock) + file_len + lock_len + temp_len + 3;
 
-    FileLock*  lock = malloc(total_len);
+    FileLock* lock = (FileLock*)malloc(total_len);
 
     lock->file = (const char*)(lock + 1);
     memcpy( (char*)lock->file, file, file_len+1 );
