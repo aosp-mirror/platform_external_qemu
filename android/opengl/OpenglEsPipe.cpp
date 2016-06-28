@@ -65,14 +65,14 @@ namespace {
 // from its main thread. Qemu2 has this global mutex you need to acquire before
 // running those operations, and doesn't really care about the thread.
 //
-// OpenglEsPipe needs to call android_pipe_wake() and, sometimes,
-// android_pipe_close(); these functions set the pipe's IRQ, so they have to
-// comply with all those threading/locking rules on where and how to run.
+// OpenglEsPipe needs to call android_pipe_host_signal_wake() and, sometimes,
+// android_pipe_host_close(); these functions set the pipe's IRQ, so they have
+// to comply with all those threading/locking rules on where and how to run.
 // To add more to the complexity, Qemu2's dynamic code recompilation (TCG) is
 // non thread-safe in even scarrier manner: one may not call any related
 // functions from a non-main loop thread, even when holding the lock.
 //
-// Implementaiton:
+// Implementation:
 // PipeWaker constructor takes a Looper* parameter, and operates based on it:
 // - if it is not null, it assumes one needs to run on the looper's main thread
 //   and creates a timer callback that will run all wake/close pipe operations
@@ -156,9 +156,9 @@ PipeWaker::~PipeWaker() {
 
 void PipeWaker::performPipeOperation(void* pipe, int flags) {
     if (flags == kWakeFlagsClose) {
-        android_pipe_close(pipe);
+        android_pipe_host_close(pipe);
     } else {
-        android_pipe_wake(pipe, flags);
+        android_pipe_host_signal_wake(pipe, flags);
     }
 }
 
