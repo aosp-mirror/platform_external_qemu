@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e3c531ce_695081f5",
+        "filename": "distrib/android-emugl/host/libs/libGLES12Translator/gles/translator_interface.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-28T05:50:18Z",
+      "side": 1,
+      "message": "VERBOSE_ENABLE has been reintroduced here.",
+      "revId": "af265606d5327b009fa98a025705129aa1c47057",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
