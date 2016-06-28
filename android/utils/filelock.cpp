@@ -16,17 +16,19 @@
 #include "android/utils/lock.h"
 #include "android/utils/path.h"
 
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <fcntl.h>
 #ifdef _WIN32
-#  include <process.h>
+#  include "android/base/memory/ScopedPtr.h"
+#  include "android/base/system/Win32UnicodeString.h"
+#  define WIN32_LEAN_AND_MEAN
 #  include <windows.h>
-#  include <tlhelp32.h>
 #else
 #  include <sys/types.h>
 #  include <unistd.h>
@@ -91,6 +93,9 @@ struct FileLock
   const char*  file;
   const char*  lock;
   char*        temp;
+#ifdef _WIN32
+  HANDLE       lock_handle;
+#endif
   int          locked;
   FileLock*    next;
 };
@@ -107,132 +112,105 @@ filelock_init() {
     _all_filelocks_tl = android_lock_new();
 }
 
-/* returns 0 on success, -1 on failure */
-static int
-filelock_lock( FileLock*  lock )
-{
-    int    ret;
 #ifdef _WIN32
-    int  pidfile_fd = -1;
-
-    ret = mkdir( lock->lock );
-    if (ret < 0) {
-        if (errno == ENOENT) {
-            D( "could not access directory '%s', check path elements", lock->lock );
-            return -1;
-        } else if (errno != EEXIST) {
-            D( "mkdir(%s): %s", lock->lock, strerror(errno) );
-            return -1;
+template <class Func>
+static bool retry(Func func, int tries = 4, int timeoutMs = 100) {
+    for (;;) {
+        if (func()) {
+            return true;
         }
-
-        /* if we get here, it's because the .lock directory already exists */
-        /* check to see if there is a pid file in it                       */
-        D("directory '%s' already exist, waiting a bit to ensure that no other emulator instance is starting", lock->lock );
-        {
-            int  _sleep = 200;
-            int  tries;
-
-            for ( tries = 4; tries > 0; tries-- )
-            {
-                pidfile_fd = open( lock->temp, O_RDONLY );
-
-                if (pidfile_fd >= 0)
-                    break;
-
-                Sleep( _sleep );
-                _sleep *= 2;
-            }
+        if (--tries == 0) {
+            return false;
         }
+        ::Sleep(timeoutMs);
+    }
+}
 
-        if (pidfile_fd < 0) {
-            D( "no pid file in '%s', assuming stale directory", lock->lock );
-        }
-        else
-        {
-            /* read the pidfile, and check wether the corresponding process is still running */
-            char            buf[16];
-            int             len, lockpid;
-            HANDLE          processSnapshot;
-            PROCESSENTRY32  pe32;
-            int             is_locked = 0;
+static bool delete_file(const android::base::Win32UnicodeString& name) {
+    return retry([&name]() {
+        return ::DeleteFileW(name.c_str()) != 0 ||
+               ::GetLastError() == ERROR_FILE_NOT_FOUND;
+    });
+}
 
-            len = read( pidfile_fd, buf, sizeof(buf)-1 );
-            if (len < 0) {
-                D( "could not read pid file '%s'", lock->temp );
-                close( pidfile_fd );
-                return -1;
-            }
-            buf[len] = 0;
-            lockpid  = atoi(buf);
+static bool delete_dir(const android::base::Win32UnicodeString& name) {
+    return retry([&name]() {
+        return ::RemoveDirectoryW(name.c_str()) != 0 ||
+               ::GetLastError() == ERROR_FILE_NOT_FOUND;
+    });
+}
 
-            /* PID 0 is the IDLE process, and 0 is returned in case of invalid input */
-            if (lockpid == 0)
-                lockpid = -1;
+/* returns 0 on success, -1 on failure */
+static int filelock_lock(FileLock* lock) {
+    lock->lock_handle = nullptr;
+    const auto unicodeDir = android::base::Win32UnicodeString(lock->lock);
+    const auto unicodeName = android::base::Win32UnicodeString(lock->temp);
 
-            close( pidfile_fd );
-
-            pe32.dwSize     = sizeof( PROCESSENTRY32 );
-            processSnapshot = CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, 0 );
-
-            if ( processSnapshot == INVALID_HANDLE_VALUE ) {
-                D( "could not retrieve the list of currently active processes\n" );
-                is_locked = 1;
-            }
-            else if ( !Process32First( processSnapshot, &pe32 ) )
-            {
-                D( "could not retrieve first process id\n" );
-                CloseHandle( processSnapshot );
-                is_locked = 1;
-            }
-            else
-            {
-                do {
-                    if (pe32.th32ProcessID == lockpid) {
-                        is_locked = 1;
-                        break;
-                    }
-                } while (Process32Next( processSnapshot, &pe32 ) );
-
-                CloseHandle( processSnapshot );
+    HANDLE lockHandle = INVALID_HANDLE_VALUE;
+    const bool createFileResult = retry(
+        [&lockHandle, &unicodeDir, &unicodeName]() {
+            if (!::CreateDirectoryW(unicodeDir.c_str(), nullptr) &&
+                ::GetLastError() != ERROR_ALREADY_EXISTS) {
+                return false;
             }
 
-            if (is_locked) {
-                D( "the file '%s' is locked by process ID %d\n", lock->file, lockpid );
-                return -1;
-            }
-        }
+            // Open/create a lock file with a flags combination like:
+            //  - open for writing only
+            //  - allow only one process to open file for writing (our process)
+            // Together, this guarantees that the file can only be opened when
+            // our process is alive and keeps a handle to it.
+            // As soon as our process ends or we close/delete it - other lock
+            // can be acquired.
+            // Note: FILE_FLAG_DELETE_ON_CLOSE doesn't work well here, as
+            //  everyone else would need to open the file in FILE_SHARE_DELETE
+            //  mode, and both Android Studio and cmd.exe don't use it. Fix
+            //  at least the Android Studio part before trying to add this flag
+            //  instead of the manual deletion code.
+            lockHandle = ::CreateFileW(
+                    unicodeName.c_str(),
+                    GENERIC_WRITE,    // open only for writing
+                    FILE_SHARE_READ,  // allow others to read the file, but not
+                                      // to write to it or not to delete it
+                    nullptr,          // no special security attributes
+                    CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY,
+                    nullptr);  // no template file
+            return lockHandle != INVALID_HANDLE_VALUE;
+        },
+        5,      // tries
+        200);   // sleep timeout between tries
+
+    if (!createFileResult) {
+        assert(lockHandle == INVALID_HANDLE_VALUE);
+        return -1;
     }
 
-    /* write our PID into the pid file */
-    pidfile_fd = open( lock->temp, O_WRONLY | O_CREAT | O_TRUNC );
-    if (pidfile_fd < 0) {
-        if (errno == EACCES) {
-            if ( path_delete_file( lock->temp ) < 0 ) {
-                D( "could not remove '%s': %s\n", lock->temp, strerror(errno) );
-                return -1;
-            }
-            pidfile_fd = open( lock->temp, O_WRONLY | O_CREAT | O_TRUNC );
-        }
-        if (pidfile_fd < 0) {
-            D( "could not create '%s': %s\n", lock->temp, strerror(errno) );
-            return -1;
-        }
-    }
+    assert(lockHandle != INVALID_HANDLE_VALUE);
 
-    {
-        char  buf[16];
-        sprintf( buf, "%ld", GetCurrentProcessId() );
-        ret = write( pidfile_fd, buf, strlen(buf) );
-        close(pidfile_fd);
-        if (ret < 0) {
-            D( "could not write PID to '%s'\n", lock->temp );
-            return -1;
-        }
-    }
+    // Make sure we kill the file/directory on any failure.
+    auto fileDeleter = android::base::makeCustomScopedPtr(
+            lockHandle, [&unicodeName, &unicodeDir](HANDLE h) {
+                ::CloseHandle(h);
+                delete_file(unicodeName);
+                delete_dir(unicodeDir);
+            });
 
+    // We're good. Now write down the process ID as Android Studio relies on it.
+    const DWORD pid = ::GetCurrentProcessId();
+    char pidBuf[12];
+    const int len = snprintf(pidBuf, sizeof(pidBuf), "%lu", pid);
+    assert(len < (int)sizeof(pidBuf));
+    if (!::WriteFile(lockHandle, pidBuf, len, nullptr, nullptr)) {
+        D("Failed to write the current PID into the lock file");
+        return -1;
+    }
     lock->locked = 1;
-    return 0;
+    lock->lock_handle = fileDeleter.release();
+    return 0;  // we're all good
+}
 #else
+/* returns 0 on success, -1 on failure */
+static int filelock_lock(FileLock* lock) {
+    int    ret;
     int    temp_fd = -1;
     int    lock_fd = -1;
     int    rc, tries;
@@ -397,16 +375,18 @@ Fail:
 
     HANDLE_EINTR(unlink(lock->temp));
     return -1;
-#endif
 }
+#endif
 
 void
 filelock_release( FileLock*  lock )
 {
     if (lock->locked) {
 #ifdef _WIN32
-        path_delete_file( (char*)lock->temp );
-        rmdir( (char*)lock->lock );
+        ::CloseHandle(lock->lock_handle);
+        lock->lock_handle = nullptr;
+        delete_file(android::base::Win32UnicodeString(lock->temp));
+        delete_dir(android::base::Win32UnicodeString(lock->lock));
 #else
         unlink( (char*)lock->lock );
 #endif
