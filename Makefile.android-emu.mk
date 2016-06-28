@@ -219,7 +219,8 @@ LOCAL_SRC_FILES := \
     android/crashreport/CrashReporter_common.cpp \
     android/crashreport/CrashReporter_$(BUILD_TARGET_OS).cpp \
     android/curl-support.c \
-    android/emulation/android_pipe.c \
+    android/emulation/AndroidPipe.cpp \
+    android/emulation/android_pipe_host.cpp \
     android/emulation/android_pipe_pingpong.c \
     android/emulation/android_pipe_throttle.c \
     android/emulation/android_pipe_unix.cpp \
