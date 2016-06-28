@@ -22,6 +22,30 @@
       "revId": "afb50c5e0670af66f1fc5cdd17e6b300388bba0c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_4924a5b5",
+        "filename": "distrib/android-emugl/host/include/GLES12Translator/angle_gles2.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-28T05:39:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e3c531ce_1c6f96e4",
+      "range": {
+        "startLine": 212,
+        "startChar": 0,
+        "endLine": 212,
+        "endChar": 8
+      },
+      "revId": "afb50c5e0670af66f1fc5cdd17e6b300388bba0c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
