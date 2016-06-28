@@ -16,6 +16,24 @@
       "revId": "8de270be53295046c11d0bef6767b80d0f72fa84",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a347b966_83189eca",
+        "filename": "distrib/android-emugl/host/libs/libGLES12Translator/common/dlog.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-28T05:37:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ceabf2ee_ac1c635e",
+      "revId": "8de270be53295046c11d0bef6767b80d0f72fa84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
