@@ -22,6 +22,30 @@
       "revId": "3cf2b656a2ba5393b2e7ed1a596828b8a34e09fb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_09746de0",
+        "filename": "distrib/android-emugl/host/libs/libGLES12Translator/gles/api_entries.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 4227,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-28T05:40:23Z",
+      "side": 1,
+      "message": "Adding GL_FLAT support is definitely in the future work list, but the log printing would just spam whenever demos or apps that specifically use flat shading, so I turned it off.",
+      "parentUuid": "e3c531ce_ff79cce0",
+      "range": {
+        "startLine": 4227,
+        "startChar": 4,
+        "endLine": 4227,
+        "endChar": 7
+      },
+      "revId": "3cf2b656a2ba5393b2e7ed1a596828b8a34e09fb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
