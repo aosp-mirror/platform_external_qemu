@@ -38,6 +38,7 @@ TEST(AdbInterface, freshAdbVersion) {
     TestTempDir* dir = system.getTempRoot();
     ASSERT_TRUE(dir->makeSubDir("Sdk"));
     ASSERT_TRUE(dir->makeSubDir("Sdk/platform-tools"));
+    ASSERT_TRUE(dir->makeSubFile("Sdk/platform-tools/adb"));
     std::string output_file =
             dir->makeSubPath("Sdk/platform-tools/source.properties");
     std::ofstream ofs(output_file);
@@ -62,6 +63,7 @@ TEST(AdbInterface, freshAdbVersionNoMinor) {
     TestTempDir* dir = system.getTempRoot();
     ASSERT_TRUE(dir->makeSubDir("Sdk"));
     ASSERT_TRUE(dir->makeSubDir("Sdk/platform-tools"));
+    ASSERT_TRUE(dir->makeSubFile("Sdk/platform-tools/adb"));
     std::string output_file =
             dir->makeSubPath("Sdk/platform-tools/source.properties");
     std::ofstream ofs(output_file);
@@ -86,6 +88,7 @@ TEST(AdbInterface, staleAdbMinorVersion) {
     TestTempDir* dir = system.getTempRoot();
     ASSERT_TRUE(dir->makeSubDir("Sdk"));
     ASSERT_TRUE(dir->makeSubDir("Sdk/platform-tools"));
+    ASSERT_TRUE(dir->makeSubFile("Sdk/platform-tools/adb"));
     std::string output_file =
             dir->makeSubPath("Sdk/platform-tools/source.properties");
     std::ofstream ofs(output_file);
@@ -99,9 +102,7 @@ TEST(AdbInterface, staleAdbMinorVersion) {
     system.envSet("ANDROID_SDK_ROOT", sdkRoot);
     auto adb = AdbInterface::create(nullptr);
     EXPECT_FALSE(adb->isAdbVersionCurrent());
-    std::string expectedAdbPath =
-            PathUtils::join(sdkRoot, "platform-tools", "adb");
-    EXPECT_EQ(expectedAdbPath, adb->detectedAdbPath());
+    EXPECT_EQ("", adb->detectedAdbPath());
 }
 
 TEST(AdbInterface, staleAdbMajorVersion) {
@@ -110,6 +111,7 @@ TEST(AdbInterface, staleAdbMajorVersion) {
     TestTempDir* dir = system.getTempRoot();
     ASSERT_TRUE(dir->makeSubDir("Sdk"));
     ASSERT_TRUE(dir->makeSubDir("Sdk/platform-tools"));
+    ASSERT_TRUE(dir->makeSubFile("Sdk/platform-tools/adb"));
     std::string output_file =
             dir->makeSubPath("Sdk/platform-tools/source.properties");
     std::ofstream ofs(output_file);
@@ -123,7 +125,5 @@ TEST(AdbInterface, staleAdbMajorVersion) {
     system.envSet("ANDROID_SDK_ROOT", sdkRoot);
     auto adb = AdbInterface::create(nullptr);
     EXPECT_FALSE(adb->isAdbVersionCurrent());
-    std::string expectedAdbPath =
-            PathUtils::join(sdkRoot, "platform-tools", "adb");
-    EXPECT_EQ(expectedAdbPath, adb->detectedAdbPath());
+    EXPECT_EQ("", adb->detectedAdbPath());
 }
