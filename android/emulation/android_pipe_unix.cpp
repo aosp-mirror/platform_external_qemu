@@ -145,7 +145,7 @@ static void socketPipe_closeFromSocket(void* opaque) {
     /* Force the closure of the QEMUD channel - if a guest is blocked
      * waiting for a wake signal, it will receive an error. */
     if (pipe->hwpipe != NULL) {
-        android_pipe_close(pipe->hwpipe);
+        android_pipe_host_close(pipe->hwpipe);
         pipe->hwpipe = NULL;
     }
 
@@ -193,7 +193,7 @@ static void socketPipe_io_func(void* opaque, int fd, unsigned events) {
 
     /* Send wake signal to the guest if needed */
     if (wakeFlags != 0) {
-        android_pipe_wake(pipe->hwpipe, wakeFlags);
+        android_pipe_host_signal_wake(pipe->hwpipe, wakeFlags);
         pipe->wakeWanted &= ~wakeFlags;
     }
 

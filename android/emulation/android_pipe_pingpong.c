@@ -138,7 +138,7 @@ pingPongPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int nu
 
     /* Wake up any waiting readers if we wrote something */
     if (pipe->count > 0 && (pipe->flags & PIPE_WAKE_READ)) {
-        android_pipe_wake(pipe->hwpipe, PIPE_WAKE_READ);
+        android_pipe_host_signal_wake(pipe->hwpipe, PIPE_WAKE_READ);
     }
 
     return ret;
@@ -195,7 +195,7 @@ pingPongPipe_recvBuffers( void* opaque, AndroidPipeBuffer* buffers, int numBuffe
 
     /* Wake up any waiting readers if we wrote something */
     if (pipe->count < PINGPONG_SIZE && (pipe->flags & PIPE_WAKE_WRITE)) {
-        android_pipe_wake(pipe->hwpipe, PIPE_WAKE_WRITE);
+        android_pipe_host_signal_wake(pipe->hwpipe, PIPE_WAKE_WRITE);
     }
 
     return ret;

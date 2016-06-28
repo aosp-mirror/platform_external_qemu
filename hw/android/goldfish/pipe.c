@@ -96,13 +96,13 @@ static HwPipe* hwpipe_new0(struct PipeDevice* device) {
 static HwPipe* hwpipe_new(uint64_t channel, struct PipeDevice* device) {
     HwPipe* hwp = hwpipe_new0(device);
     hwp->channel = channel;
-    hwp->pipe = android_pipe_new(hwp);
+    hwp->pipe = android_pipe_guest_open(hwp);
     return hwp;
 }
 
 static void hwpipe_free(HwPipe* hwp) {
-    android_pipe_free(hwp->pipe);
-    free(hwp);
+  android_pipe_guest_close(hwp->pipe);
+  free(hwp);
 }
 
 static HwPipe** hwpipe_findp_by_channel(HwPipe** list, uint64_t channel) {
@@ -147,7 +147,7 @@ static void hwpipe_save(HwPipe* pipe, Stream* file) {
     stream_put_byte(file, (int)pipe->wakes);
     stream_put_byte(file, (int)pipe->closed);
 
-    android_pipe_save(pipe->pipe, file);
+    android_pipe_guest_save(pipe->pipe, file);
 }
 
 static HwPipe* hwpipe_load(PipeDevice* dev, Stream* file, int version_id) {
@@ -155,14 +155,14 @@ static HwPipe* hwpipe_load(PipeDevice* dev, Stream* file, int version_id) {
 
     char force_close = 0;
     if (version_id == GOLDFISH_PIPE_SAVE_LEGACY_VERSION) {
-        pipe->pipe = android_pipe_load_legacy(file, pipe, &pipe->channel,
-                                              &pipe->wakes, &pipe->closed,
-                                              &force_close);
+      pipe->pipe = android_pipe_guest_load_legacy(file, pipe, &pipe->channel,
+                                                  &pipe->wakes, &pipe->closed,
+                                                  &force_close);
     } else {
         pipe->channel = stream_get_be64(file);
         pipe->wakes = stream_get_byte(file);
         pipe->closed = stream_get_byte(file);
-        pipe->pipe = android_pipe_load(file, pipe, &force_close);
+        pipe->pipe = android_pipe_guest_load(file, pipe, &force_close);
     }
 
     if (!pipe->pipe) {
@@ -298,9 +298,9 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         break;
 
     case PIPE_CMD_POLL:
-        dev->status = android_pipe_poll(pipe->pipe);
-        DD("%s: CMD_POLL > status=%d", __FUNCTION__, dev->status);
-        break;
+      dev->status = android_pipe_guest_poll(pipe->pipe);
+      DD("%s: CMD_POLL > status=%d", __FUNCTION__, dev->status);
+      break;
 
     case PIPE_CMD_READ_BUFFER: {
         /* Map guest buffer identified by dev->address
@@ -314,7 +314,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
             break;
         }
         buffer.size = dev->size;
-        dev->status = android_pipe_recv(pipe->pipe, &buffer, 1);
+        dev->status = android_pipe_guest_recv(pipe->pipe, &buffer, 1);
         DD("%s: CMD_READ_BUFFER channel=0x%llx address=0x%llx size=%d > status=%d",
            __FUNCTION__, (unsigned long long)dev->channel, (unsigned long long)dev->address,
            dev->size, dev->status);
@@ -334,7 +334,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
             break;
         }
         buffer.size = dev->size;
-        dev->status = android_pipe_send(pipe->pipe, &buffer, 1);
+        dev->status = android_pipe_guest_send(pipe->pipe, &buffer, 1);
         DD("%s: CMD_WRITE_BUFFER channel=0x%llx address=0x%llx size=%d > status=%d",
            __FUNCTION__, (unsigned long long)dev->channel,
            (unsigned long long)dev->address,
@@ -348,7 +348,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
            (unsigned long long)dev->channel);
         if ((pipe->wakes & PIPE_WAKE_READ) == 0) {
             pipe->wakes |= PIPE_WAKE_READ;
-            android_pipe_wake_on(pipe->pipe, pipe->wakes);
+            android_pipe_guest_wake_on(pipe->pipe, pipe->wakes);
         }
         dev->status = 0;
         break;
@@ -358,7 +358,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
            (unsigned long long)dev->channel);
         if ((pipe->wakes & PIPE_WAKE_WRITE) == 0) {
             pipe->wakes |= PIPE_WAKE_WRITE;
-            android_pipe_wake_on(pipe->pipe, pipe->wakes);
+            android_pipe_guest_wake_on(pipe->pipe, pipe->wakes);
         }
         dev->status = 0;
         break;
@@ -565,6 +565,9 @@ goldfish_pipe_save( QEMUFile* file, void* opaque )
     stream_free(stream);
 }
 
+static void goldfish_pipe_wake(void* hwpipe, unsigned flags);  // forward
+static void goldfish_pipe_close(void* hwpipe);                 // forward
+
 static int
 goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
 {
@@ -603,10 +606,10 @@ goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
     /* Now we need to wake/close all relevant pipes */
     for (pipe = dev->pipes; pipe; pipe = pipe->next) {
         if (pipe->wakes != 0) {
-            android_pipe_wake(pipe, pipe->wakes);
+          goldfish_pipe_wake(pipe, pipe->wakes);
         }
         if (pipe->closed != 0) {
-            android_pipe_close(pipe);
+          goldfish_pipe_close(pipe);
         }
     }
 

@@ -62,8 +62,9 @@ void _qemud_pipe_cache_buffer(QemudClient* client, const uint8_t* msg, int msgle
                     client->ProtocolSelector.Pipe.messages = buf;
         }
         /* Notify the pipe that there is data to read. */
-        android_pipe_wake(client->ProtocolSelector.Pipe.qemud_pipe->hwpipe,
-                          PIPE_WAKE_READ);
+        android_pipe_host_signal_wake(
+                client->ProtocolSelector.Pipe.qemud_pipe->hwpipe,
+                PIPE_WAKE_READ);
     }
 }
 
@@ -278,7 +279,7 @@ void qemud_client_disconnect(void* opaque, int guest_close) {
     }
 
     if (qemud_is_pipe_client(c) && !guest_close) {
-        android_pipe_close(c->ProtocolSelector.Pipe.qemud_pipe->hwpipe);
+        android_pipe_host_close(c->ProtocolSelector.Pipe.qemud_pipe->hwpipe);
         return;
     }
 

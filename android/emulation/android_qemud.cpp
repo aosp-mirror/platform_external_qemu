@@ -281,8 +281,9 @@ _qemudPipe_wakeOn(void* opaque, int flags) {
     D("%s: -> %X", __FUNCTION__, flags);
     if (flags & PIPE_WAKE_READ) {
         if (c->ProtocolSelector.Pipe.messages != NULL) {
-            android_pipe_wake(c->ProtocolSelector.Pipe.qemud_pipe->hwpipe,
-                              PIPE_WAKE_READ);
+            android_pipe_host_signal_wake(
+                    c->ProtocolSelector.Pipe.qemud_pipe->hwpipe,
+                    PIPE_WAKE_READ);
         }
     }
 }

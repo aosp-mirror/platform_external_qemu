@@ -145,7 +145,7 @@ throttlePipe_timerFunc(void* opaque, LoopTimer* unused)
     flags &= pipe->flags;
     if (flags != 0) {
         DD("%s: WAKE %d\n", __FUNCTION__, flags);
-        android_pipe_wake(pipe->hwpipe, flags);
+        android_pipe_host_signal_wake(pipe->hwpipe, flags);
     }
 
     throttlePipe_rearm(pipe);
@@ -214,7 +214,7 @@ throttlePipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int nu
 
     /* Wake up any waiting readers if we wrote something */
     if (pipe->count > 0 && (pipe->flags & PIPE_WAKE_READ)) {
-        android_pipe_wake(pipe->hwpipe, PIPE_WAKE_READ);
+        android_pipe_host_signal_wake(pipe->hwpipe, PIPE_WAKE_READ);
     }
 
     if (ret > 0) {
@@ -267,7 +267,7 @@ throttlePipe_recvBuffers( void* opaque, AndroidPipeBuffer* buffers, int numBuffe
 
     /* Wake up any waiting readers if we wrote something */
     if (pipe->count < PINGPONG_SIZE && (pipe->flags & PIPE_WAKE_WRITE)) {
-        android_pipe_wake(pipe->hwpipe, PIPE_WAKE_WRITE);
+        android_pipe_host_signal_wake(pipe->hwpipe, PIPE_WAKE_WRITE);
     }
 
     if (ret > 0) {

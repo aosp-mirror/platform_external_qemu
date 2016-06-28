@@ -118,11 +118,11 @@ const AndroidPipeHwFuncs* android_pipe_set_hw_funcs(
     return result;
 }
 
-void android_pipe_close(void* hwpipe) {
+void android_pipe_host_close(void* hwpipe) {
     sPipeHwFuncs->closeFromHost(hwpipe);
 }
 
-void android_pipe_wake(void* hwpipe, unsigned flags) {
+void android_pipe_host_signal_wake(void* hwpipe, unsigned flags) {
     sPipeHwFuncs->signalWake(hwpipe, flags);
 }
 
@@ -144,13 +144,13 @@ static Pipe* pipe_new0(void* hwpipe) {
     return pipe;
 }
 
-void* android_pipe_new(void* hwpipe) {
+void* android_pipe_guest_open(void* hwpipe) {
     Pipe* pipe = pipe_new0(hwpipe);
     pipe->opaque = pipeConnector_new(pipe);
     return pipe;
 }
 
-void android_pipe_free(void* internal_pipe) {
+void android_pipe_guest_close(void* internal_pipe) {
     if (!internal_pipe) {
         return;
     }
@@ -165,7 +165,7 @@ void android_pipe_free(void* internal_pipe) {
     AFREE(pipe);
 }
 
-void android_pipe_save(void* internal_pipe, Stream* file) {
+void android_pipe_guest_save(void* internal_pipe, Stream* file) {
     Pipe* pipe = internal_pipe;
     if (pipe->service == NULL) {
         /* pipe->service == NULL means we're still using a PipeConnector */
@@ -249,7 +249,7 @@ static Pipe* pipe_load_state(Stream* file,
         pipe->opaque = pipe->funcs->load(
                 hwpipe, service ? service->opaque : NULL, pipe->args, file);
         if (!pipe->opaque) {
-            android_pipe_free(pipe);
+            android_pipe_guest_close(pipe);
             return NULL;
         }
     } else {
@@ -258,7 +258,7 @@ static Pipe* pipe_load_state(Stream* file,
     return pipe;
 }
 
-void* android_pipe_load(Stream* file, void* hwpipe, char* force_close) {
+void* android_pipe_guest_load(Stream* file, void* hwpipe, char* force_close) {
     const PipeService* service;
     if (pipe_load_service_name(file, &service) < 0) {
         return NULL;
@@ -266,12 +266,12 @@ void* android_pipe_load(Stream* file, void* hwpipe, char* force_close) {
     return pipe_load_state(file, hwpipe, service, force_close);
 }
 
-void* android_pipe_load_legacy(Stream* file,
-                               void* hwpipe,
-                               uint64_t* channel,
-                               unsigned char* wakes,
-                               unsigned char* closed,
-                               char* force_close) {
+void* android_pipe_guest_load_legacy(Stream* file,
+                                     void* hwpipe,
+                                     uint64_t* channel,
+                                     unsigned char* wakes,
+                                     unsigned char* closed,
+                                     char* force_close) {
     const PipeService* service;
     if (pipe_load_service_name(file, &service) < 0) {
         return NULL;
@@ -284,25 +284,26 @@ void* android_pipe_load_legacy(Stream* file,
     return pipe_load_state(file, hwpipe, service, force_close);
 }
 
-unsigned android_pipe_poll(void* internal_pipe) {
+unsigned android_pipe_guest_poll(void* internal_pipe) {
     Pipe* pipe = internal_pipe;
     return pipe->funcs->poll(pipe->opaque);
 }
 
-int android_pipe_recv(void* internal_pipe, AndroidPipeBuffer* buffers,
-                      int numBuffers) {
+int android_pipe_guest_recv(void* internal_pipe,
+                            AndroidPipeBuffer* buffers,
+                            int numBuffers) {
     Pipe* pipe = internal_pipe;
     return pipe->funcs->recvBuffers(pipe->opaque, buffers, numBuffers);
 }
 
-int android_pipe_send(void* internal_pipe,
-                      const AndroidPipeBuffer* buffers,
-                      int numBuffers) {
+int android_pipe_guest_send(void* internal_pipe,
+                            const AndroidPipeBuffer* buffers,
+                            int numBuffers) {
     Pipe* pipe = internal_pipe;
     return pipe->funcs->sendBuffers(pipe->opaque, buffers, numBuffers);
 }
 
-void android_pipe_wake_on(void* internal_pipe, unsigned wakes) {
+void android_pipe_guest_wake_on(void* internal_pipe, unsigned wakes) {
     Pipe* pipe = internal_pipe;
     pipe->funcs->wakeOn(pipe->opaque, wakes);
 }
