@@ -22,6 +22,30 @@
       "revId": "b1351c705efcccce2d102b56ad38a1be6731791b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_291329b5",
+        "filename": "distrib/android-emugl/host/libs/libGLES12Translator/gles/share_group.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-28T05:39:08Z",
+      "side": 1,
+      "message": "I think I got it: it seems then that the previous scheme with shared_ptr and no subclassing RefBase would drop existing references as soon as this method was used to obtain a ptr, as it goes through conversion to a raw pointer, right?\n\nThis could explain aborts / segfaults I was getting with the old scheme since the references would expect the object to be there and then it\u0027s suddenly not.",
+      "parentUuid": "e3c531ce_9c88a63c",
+      "range": {
+        "startLine": 169,
+        "startChar": 1,
+        "endLine": 173,
+        "endChar": 3
+      },
+      "revId": "b1351c705efcccce2d102b56ad38a1be6731791b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
