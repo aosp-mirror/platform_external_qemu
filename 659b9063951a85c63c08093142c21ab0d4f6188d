@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "00c6bb30_584f1254",
+        "filename": "android/emulation/AndroidPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-28T23:48:42Z",
+      "side": 1,
+      "message": "why not an unordered_map\u003c Name -\u003e Service \u003e ?",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 58
+      },
+      "revId": "659b9063951a85c63c08093142c21ab0d4f6188d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "00c6bb30_3846c662",
+        "filename": "android/emulation/AndroidPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-28T23:48:42Z",
+      "side": 1,
+      "message": "this isn\u0027t really needed - std::min() on the next line would return 0 anyway",
+      "range": {
+        "startLine": 132,
+        "startChar": 0,
+        "endLine": 135,
+        "endChar": 13
+      },
+      "revId": "659b9063951a85c63c08093142c21ab0d4f6188d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "00c6bb30_b83956e3",
+        "filename": "android/emulation/AndroidPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-28T23:48:42Z",
+      "side": 1,
+      "message": "so, if this is 0 (internal buffer is full), we just iterate over the rest of the buffers doing nothing. It this the intended behavior?",
+      "range": {
+        "startLine": 136,
+        "startChar": 33,
+        "endLine": 136,
+        "endChar": 55
+      },
+      "revId": "659b9063951a85c63c08093142c21ab0d4f6188d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "00c6bb30_f8a91ef2",
+        "filename": "android/emulation/AndroidPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-28T23:48:42Z",
+      "side": 1,
+      "message": "nit: could you please clean up the commented code (or uncomment the DD prints)?",
+      "range": {
+        "startLine": 481,
+        "startChar": 0,
+        "endLine": 482,
+        "endChar": 15
+      },
+      "revId": "659b9063951a85c63c08093142c21ab0d4f6188d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
