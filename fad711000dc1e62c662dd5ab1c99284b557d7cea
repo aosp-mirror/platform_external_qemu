@@ -22,6 +22,30 @@
       "revId": "fad711000dc1e62c662dd5ab1c99284b557d7cea",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c531ce_eb73cacd",
+        "filename": "distrib/android-emugl/host/libs/libGLES12Translator/common/dlog.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-06-28T05:37:19Z",
+      "side": 1,
+      "message": "Since VERBOSE_* prints don\u0027t do anything if VERBOSE_ENABLE was not called with the tags, I used the #if GLES12TR_DLOG to automatically enable the verbose print. I\u0027ll make this more clear by moving the VERBOSE_ENABLE to the CL where these APITRACE/DLOG\u0027s are inserted, and make it only called once.",
+      "parentUuid": "e3c531ce_fc79dae0",
+      "range": {
+        "startLine": 26,
+        "startChar": 4,
+        "endLine": 26,
+        "endChar": 61
+      },
+      "revId": "fad711000dc1e62c662dd5ab1c99284b557d7cea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
