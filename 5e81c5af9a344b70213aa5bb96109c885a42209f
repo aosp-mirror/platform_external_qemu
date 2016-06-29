@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "00487bfc_e1c90033",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 332,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-06-29T22:08:04Z",
+      "side": 1,
+      "message": "Dropped this change. I\u0027d added it for sanity, but the header explicitly says we don\u0027t touch output param when function returns false. Keeping that behaviour unchanged in this CL.",
+      "range": {
+        "startLine": 332,
+        "startChar": 4,
+        "endLine": 332,
+        "endChar": 34
+      },
+      "revId": "5e81c5af9a344b70213aa5bb96109c885a42209f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3c531ce_f9ee1f24",
         "filename": "android/cmdline-option.c",
         "patchSetId": 2
@@ -25,6 +48,53 @@
     },
     {
       "key": {
+        "uuid": "00487bfc_be7d5952",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-06-29T22:08:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e3c531ce_f9ee1f24",
+      "range": {
+        "startLine": 339,
+        "startChar": 39,
+        "endLine": 339,
+        "endChar": 40
+      },
+      "revId": "5e81c5af9a344b70213aa5bb96109c885a42209f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "00487bfc_01cf4c36",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-06-29T22:08:04Z",
+      "side": 1,
+      "message": "Dropped this change. I\u0027d added it for sanity, but the header explicitly says we don\u0027t touch output param when function returns false. Keeping that behaviour unchanged in this CL.",
+      "range": {
+        "startLine": 356,
+        "startChar": 4,
+        "endLine": 356,
+        "endChar": 34
+      },
+      "revId": "5e81c5af9a344b70213aa5bb96109c885a42209f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3c531ce_b93ae78b",
         "filename": "android/cmdline-option.c",
         "patchSetId": 2
@@ -36,6 +106,30 @@
       "writtenOn": "2016-06-24T21:15:46Z",
       "side": 1,
       "message": "nit: could you please add a little bit of an error detail? It also would help with investigation in user reports later - to know which line exactly printed it",
+      "range": {
+        "startLine": 376,
+        "startChar": 39,
+        "endLine": 376,
+        "endChar": 44
+      },
+      "revId": "5e81c5af9a344b70213aa5bb96109c885a42209f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "00487bfc_1ee24d36",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-06-29T22:08:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e3c531ce_b93ae78b",
       "range": {
         "startLine": 376,
         "startChar": 39,
