@@ -31,7 +31,8 @@ public:
     virtual void setSyncDevice(emugl_sync_create_timeline_t,
                                emugl_sync_create_fence_t,
                                emugl_sync_timeline_inc_t,
-                               emugl_sync_destroy_timeline_t) override;
+                               emugl_sync_destroy_timeline_t,
+                               emugl_sync_register_trigger_wait_t) override;
 
     virtual RendererPtr initRenderer(int width,
                                      int height,
