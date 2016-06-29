@@ -15,15 +15,18 @@
 #include "android-qemu2-glue/qemu-setup.h"
 
 #include "android/android.h"
+#include "android/base/Log.h"
 #include "android/console.h"
-#include "android/emulation/vm_lock.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
+#include "android-qemu2-glue/emulation/VmLock.h"
 
 extern "C" {
 #include "qemu/main-loop.h"
 }  // extern "C"
 
 extern "C" void qemu2_android_console_setup(const AndroidConsoleAgents* agents);
+
+using android::VmLock;
 
 bool qemu_android_emulation_setup() {
     static const AndroidConsoleAgents consoleAgents = {
@@ -36,8 +39,9 @@ bool qemu_android_emulation_setup() {
             gQAndroidNetAgent
     };
 
-    android_vm_set_lock_funcs(qemu_mutex_lock_iothread,
-                              qemu_mutex_unlock_iothread);
+    VmLock* vmLock = new qemu2::VmLock();
+    VmLock* prevVmLock = VmLock::set(vmLock);
+    CHECK(prevVmLock == nullptr) << "Another VmLock was already installed!";
 
     qemu2_android_console_setup(&consoleAgents);
     return android_emulation_setup(&consoleAgents);

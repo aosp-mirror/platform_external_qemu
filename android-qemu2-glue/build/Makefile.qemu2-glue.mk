@@ -32,6 +32,7 @@ LOCAL_SRC_FILES := \
     emulation/charpipe.c \
     emulation/CharSerialLine.cpp \
     emulation/serial_line.cpp \
+    emulation/VmLock.cpp \
     telephony/modem_init.c \
 
 LOCAL_SRC_FILES := $(LOCAL_SRC_FILES:%=android-qemu2-glue/%)
