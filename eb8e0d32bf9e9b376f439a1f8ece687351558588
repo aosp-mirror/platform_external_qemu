@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "00acfbb3_017f6c4d",
+        "filename": "cpus.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-29T20:31:41Z",
+      "side": 1,
+      "message": "same question about the order of the checks",
+      "range": {
+        "startLine": 187,
+        "startChar": 11,
+        "endLine": 188,
+        "endChar": 34
+      },
+      "revId": "eb8e0d32bf9e9b376f439a1f8ece687351558588",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
