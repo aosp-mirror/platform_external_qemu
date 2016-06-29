@@ -44,171 +44,7 @@ using emugl::RenderChannel;
 
 namespace android {
 
-namespace {
-
-// PipeWaker - a class to run Android Pipe operations in a correct manner.
-//
-// Background:
-// Qemu1 and Qemu2 have completely different threading models:
-// - Qemu1 runs all CPU-related operations and all timers/io/... events on its
-//   main loop with no locking
-// - Qemu2 has dedicated CPU threads to run guest read/write operations and a
-//   "main loop" thread to run timers, check for pending IO etc. To make this
-//   all work it has a global lock that has to be held during every qemu-related
-//   function call.
-//
-// OpenglEsPipe is a just a set of callbacks running either on one of the CPU
-// threads in Qemu2, or on the main loop in Qemu1, or on some render thread
-// which performs the actual GPU emulation.
-//
-// Qemu1 has no locking mechanisms and it *requires* you to call its functions
-// from its main thread. Qemu2 has this global mutex you need to acquire before
-// running those operations, and doesn't really care about the thread.
-//
-// OpenglEsPipe needs to call android_pipe_host_signal_wake() and, sometimes,
-// android_pipe_host_close(); these functions set the pipe's IRQ, so they have
-// to comply with all those threading/locking rules on where and how to run.
-// To add more to the complexity, Qemu2's dynamic code recompilation (TCG) is
-// non thread-safe in even scarrier manner: one may not call any related
-// functions from a non-main loop thread, even when holding the lock.
-//
-// Implementation:
-// PipeWaker constructor takes a Looper* parameter, and operates based on it:
-// - if it is not null, it assumes one needs to run on the looper's main thread
-//   and creates a timer callback that will run all wake/close pipe operations
-//   when you call PipeWaker::wake()/close(); the operation is just scheduled
-//   to run in the timer callback.
-//
-// - if the looper is null, PipeWaker runs the pipe operation in the thread that
-//   calls PipeWaker::wake/close, but holds the Qemu global lock for the
-//   duration of the operation.
-class PipeWaker final {
-public:
-    // Wake the |hwPipe|, setting its wake flags to |flags|.
-    // If |needsLock| is set, lock the global Qemu lock (VmLock) for the wake
-    // call.
-    void wake(void* hwPipe, int flags, bool needsLock);
-
-    // Same as the former, but close the pipe instead of waking it.
-    void close(void* hwPipe, bool needsLock);
-
-    // create() creates a static object instance, get() returns it.
-    // |looper| - if set to non-null, schedule all operations on this looper's
-    //            main loop. Otherwise, run them on the calling thread.
-    static void create(Looper* looper);
-    static PipeWaker& get();
-
-    ~PipeWaker();
-
-private:
-    PipeWaker(Looper* looper);
-
-    void onWakeTimer();
-    static void performPipeOperation(void* pipe, int flags);
-
-private:
-    static PipeWaker* sThis;
-
-    // This has to have all bits set to make sure it contains and overrides
-    // all other possible flags - we don't need to wake a pipe if it's closed.
-    static const int kWakeFlagsClose = ~0;
-
-    std::unordered_map<void*, int> mWakeMap;  // HwPipe* -> wake/close flags
-    base::Lock mWakeMapLock;                  // protects the mWakeMap
-    LoopTimer* mWakeTimer = nullptr;
-
-    DISALLOW_COPY_ASSIGN_AND_MOVE(PipeWaker);
-};
-
-PipeWaker* PipeWaker::sThis = nullptr;
-
-PipeWaker& PipeWaker::get() {
-    assert(sThis);
-    return *sThis;
-}
-
-void PipeWaker::create(Looper* looper) {
-    assert(!sThis);
-    sThis = new PipeWaker(looper);
-}
-
-PipeWaker::PipeWaker(Looper* looper) {
-    if (looper) {
-        mWakeTimer =
-                loopTimer_new(looper,
-                              [](void* that, LoopTimer*) {
-                                  static_cast<PipeWaker*>(that)->onWakeTimer();
-                              },
-                              this);
-        if (!mWakeTimer) {
-            D("%s: Failed to create a loop timer, "
-              "falling back to regular locking!", __func__);
-        }
-    }
-}
-
-PipeWaker::~PipeWaker() {
-    if (mWakeTimer) {
-        loopTimer_stop(mWakeTimer);
-        loopTimer_free(mWakeTimer);
-    }
-}
-
-void PipeWaker::performPipeOperation(void* pipe, int flags) {
-    if (flags == kWakeFlagsClose) {
-        android_pipe_host_close(pipe);
-    } else {
-        android_pipe_host_signal_wake(pipe, flags);
-    }
-}
-
-void PipeWaker::wake(void* pipe, int flags, bool needsLock) {
-    if (mWakeTimer) {
-        base::AutoLock lock(mWakeMapLock);
-        const bool startTimer = mWakeMap.empty();
-        // 'close' flags have all bits set, so they override everything else
-        mWakeMap[pipe] |= flags;
-        lock.unlock();
-
-        if (startTimer) {
-            loopTimer_startAbsolute(mWakeTimer, 0);
-        }
-    } else {
-        // Qemu global lock abstraction, see android/emulation/VmLock.h
-        Optional<ScopedVmLock> vmLock;
-        if (needsLock) {
-            vmLock.emplace();  // lock only if we need it
-        }
-        performPipeOperation(pipe, flags);
-    }
-}
-
-void PipeWaker::close(void* pipe, bool needsLock) {
-    wake(pipe, kWakeFlagsClose, needsLock);
-}
-
-void PipeWaker::onWakeTimer() {
-    assert(mWakeTimer);
-
-    std::unordered_map<void*, int> wakeMap;
-    base::AutoLock lock(mWakeMapLock);
-    wakeMap.swap(mWakeMap);
-    lock.unlock();
-
-    for (const auto& pair : wakeMap) {
-        performPipeOperation(pair.first, pair.second);
-    }
-
-    lock.lock();
-    // Check if we need to rearm the timer if someone has added an event during
-    // the processing.
-    if (!mWakeMap.empty()) {
-        lock.unlock();
-        loopTimer_startAbsolute(mWakeTimer, 0);
-    }
-}
-
-}  // namespace
+// TODO(digit): Use AndroidPipe directly instead of the legacy C wrappers.
 
 const AndroidPipeFuncs OpenglEsPipe::kPipeFuncs = {
         [](void* hwpipe, void* data, const char* args) -> void* {
@@ -249,7 +85,7 @@ void OpenglEsPipe::processIoEvents(bool lock) {
 
     /* Send wake signal to the guest if needed */
     if (wakeFlags != 0) {
-        PipeWaker::get().wake(mHwpipe, wakeFlags, lock);
+        android_pipe_host_signal_wake(mHwpipe, wakeFlags);
     }
 }
 
@@ -478,7 +314,7 @@ void OpenglEsPipe::close(bool lock) {
     // Force the closure of the channel - if a guest is blocked
     // waiting for a wake signal, it will receive an error.
     if (mHwpipe) {
-        PipeWaker::get().close(mHwpipe, lock);
+        android_pipe_host_close(mHwpipe);
         mHwpipe = nullptr;
     }
 
@@ -488,6 +324,5 @@ void OpenglEsPipe::close(bool lock) {
 }  // namespace android
 
 void android_init_opengles_pipe(Looper* looper) {
-    android::PipeWaker::create(looper);
     android::OpenglEsPipe::registerPipeType();
 }

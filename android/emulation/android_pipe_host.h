@@ -118,4 +118,20 @@ extern void  android_pipe_add_type(const char* serviceName,
 // Useful at the start and end of a unit-test.
 extern void android_pipe_reset_services(void);
 
+/* This tells the guest system that we want to close the pipe and that
+ * further attempts to read or write to it will fail. This will not
+ * necessarily destroys the |hwpipe| immediately. The latter will call
+ * android_pipe_guest_close() at destruction time though.
+ *
+ * This will also wake-up any blocked guest threads waiting for i/o.
+ * NOTE: This function can be called from any thread.
+ */
+extern void android_pipe_host_close(void* hwpipe);
+
+/* Signal that the pipe can be woken up. 'flags' must be a combination of
+ * PIPE_WAKE_READ and PIPE_WAKE_WRITE.
+ * NOTE: This function can be called from any thread.
+ */
+extern void android_pipe_host_signal_wake(void* hwpipe, unsigned flags);
+
 ANDROID_END_HEADER
