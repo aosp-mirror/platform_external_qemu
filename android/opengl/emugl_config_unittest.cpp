@@ -237,14 +237,16 @@ TEST(EmuglConfig, initGLESv2Only) {
     }
 }
 
-TEST(EmuglConfig, initNxWithMesa) {
+TEST(EmuglConfig, initNxWithSwiftshader) {
     TestSystem testSys("foo", System::kProgramBitness);
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
 
-    makeLibSubDir(myDir, "gles_mesa");
-    makeLibSubFile(myDir, "gles_mesa/libGLES.so");
+    makeLibSubDir(myDir, "gles_swiftshader");
+    makeLibSubFile(myDir, "gles_swiftshader/libEGL.so");
+    makeLibSubFile(myDir, "gles_swiftshader/libGLES_CM.so");
+    makeLibSubFile(myDir, "gles_swiftshader/libGLESv2.so");
 
     testSys.setRemoteSessionType("NX");
 
@@ -252,11 +254,11 @@ TEST(EmuglConfig, initNxWithMesa) {
     EXPECT_TRUE(emuglConfig_init(
                 &config, true, "auto", NULL, 0, false, false, false));
     EXPECT_TRUE(config.enabled);
-    EXPECT_STREQ("mesa", config.backend);
-    EXPECT_STREQ("GPU emulation enabled using 'mesa' mode", config.status);
+    EXPECT_STREQ("swiftshader", config.backend);
+    EXPECT_STREQ("GPU emulation enabled using 'swiftshader' mode", config.status);
 }
 
-TEST(EmuglConfig, initNxWithoutMesa) {
+TEST(EmuglConfig, initNxWithoutSwiftshader) {
     TestSystem testSys("foo", System::kProgramBitness);
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
@@ -268,17 +270,19 @@ TEST(EmuglConfig, initNxWithoutMesa) {
     EXPECT_TRUE(emuglConfig_init(
                 &config, true, "auto", NULL, 0, false, false, false));
     EXPECT_FALSE(config.enabled);
-    EXPECT_STREQ("GPU emulation is disabled under NX without Mesa", config.status);
+    EXPECT_STREQ("GPU emulation is disabled under NX without Swiftshader", config.status);
 }
 
-TEST(EmuglConfig, initChromeRemoteDesktopWithMesa) {
+TEST(EmuglConfig, initChromeRemoteDesktopWithSwiftshader) {
     TestSystem testSys("foo", System::kProgramBitness);
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
 
-    makeLibSubDir(myDir, "gles_mesa");
-    makeLibSubFile(myDir, "gles_mesa/libGLES.so");
+    makeLibSubDir(myDir, "gles_swiftshader");
+    makeLibSubFile(myDir, "gles_swiftshader/libEGL.so");
+    makeLibSubFile(myDir, "gles_swiftshader/libGLES_CM.so");
+    makeLibSubFile(myDir, "gles_swiftshader/libGLESv2.so");
 
     testSys.setRemoteSessionType("Chrome Remote Desktop");
 
@@ -286,11 +290,11 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithMesa) {
     EXPECT_TRUE(emuglConfig_init(
                 &config, true, "auto", NULL, 0, false, false, false));
     EXPECT_TRUE(config.enabled);
-    EXPECT_STREQ("mesa", config.backend);
-    EXPECT_STREQ("GPU emulation enabled using 'mesa' mode", config.status);
+    EXPECT_STREQ("swiftshader", config.backend);
+    EXPECT_STREQ("GPU emulation enabled using 'swiftshader' mode", config.status);
 }
 
-TEST(EmuglConfig, initChromeRemoteDesktopWithoutMesa) {
+TEST(EmuglConfig, initChromeRemoteDesktopWithoutSwiftshader) {
     TestSystem testSys("foo", System::kProgramBitness);
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
@@ -302,27 +306,29 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithoutMesa) {
     EXPECT_TRUE(emuglConfig_init(
                 &config, true, "auto", NULL, 0, false, false, false));
     EXPECT_FALSE(config.enabled);
-    EXPECT_STREQ("GPU emulation is disabled under Chrome Remote Desktop without Mesa", config.status);
+    EXPECT_STREQ("GPU emulation is disabled under Chrome Remote Desktop without Swiftshader", config.status);
 }
 
-TEST(EmuglConfig, initNoWindowWithMesa) {
+TEST(EmuglConfig, initNoWindowWithSwiftshader) {
     TestSystem testSys("foo", System::kProgramBitness);
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
 
-    makeLibSubDir(myDir, "gles_mesa");
-    makeLibSubFile(myDir, "gles_mesa/libGLES.so");
+    makeLibSubDir(myDir, "gles_swiftshader");
+    makeLibSubFile(myDir, "gles_swiftshader/libEGL.so");
+    makeLibSubFile(myDir, "gles_swiftshader/libGLES_CM.so");
+    makeLibSubFile(myDir, "gles_swiftshader/libGLESv2.so");
 
     EmuglConfig config;
     EXPECT_TRUE(emuglConfig_init(
                 &config, true, "auto", NULL, 0, true, false, false));
     EXPECT_TRUE(config.enabled);
-    EXPECT_STREQ("mesa", config.backend);
-    EXPECT_STREQ("GPU emulation enabled using 'mesa' mode", config.status);
+    EXPECT_STREQ("swiftshader", config.backend);
+    EXPECT_STREQ("GPU emulation enabled using 'swiftshader' mode", config.status);
 }
 
-TEST(EmuglConfig, initNoWindowWithoutMesa) {
+TEST(EmuglConfig, initNoWindowWithoutSwiftshader) {
     TestSystem testSys("foo", System::kProgramBitness);
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
@@ -332,7 +338,7 @@ TEST(EmuglConfig, initNoWindowWithoutMesa) {
     EXPECT_TRUE(emuglConfig_init(
                 &config, true, "auto", NULL, 0, true, false, false));
     EXPECT_FALSE(config.enabled);
-    EXPECT_STREQ("GPU emulation is disabled (-no-window without Mesa)",
+    EXPECT_STREQ("GPU emulation is disabled (-no-window without Swiftshader)",
                  config.status);
 }
 
