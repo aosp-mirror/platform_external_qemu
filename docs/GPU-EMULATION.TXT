@@ -21,17 +21,27 @@ At this time, the following modes are supported:
 
             Note that on some platforms (Windows in particular), OpenGL drivers
             can be buggy, resulting in poor performance, rendering artefacts
-            or even crashes. To work-around this, use the 'mesa' mode instead.
+            or even crashes. To work-around this, use the 'swiftshader' mode.
 
-  'mesa'    Software-based desktop GL renderer, based on the Mesa3D library.
-            This is slower than 'host' mode by a large margin, but works
-            equally well on all supported platforms. This is recommended if
-            there are issues with 'host' mode.
+  'swiftshader'
+            Software OpenGL renderer using the Swiftshader renderer.
+            This is recommended if there are issues with 'host' mode.
+            It is generally slower than -gpu host, but works equally well
+            on all supported platforms.
 
-            Another benefit of 'mesa' mode is that it can be run on headless
-            servers which do not have a GPU, or OpenGL libraries installed.
+            Swiftshader also takes advantage of SIMD on modern CPUs;
+            reducing AVD resolution may result in smoother performance.
 
-  'auto'    Uses 'host' mode if not remoting (NX or CRD), 'mesa' otherwise.
+            Another benefit of 'swiftshader' mode is that it can be run on
+            headless servers which do not have a GPU or OpenGL libraries.
+
+  'mesa'    (DEPRECATED; please use 'swiftshader' mode if possible)
+            Software-based desktop GL renderer, based on the Mesa3D library.
+            This is slower than 'swiftshader' mode,
+            and slower than 'host' mode by a large margin.
+
+  'auto'    Uses 'host' mode if not remoting (NX or CRD),
+            'swiftshader' otherwise.
 
   'guest'   Use a guest-side OpenGL ES implementation.
 
