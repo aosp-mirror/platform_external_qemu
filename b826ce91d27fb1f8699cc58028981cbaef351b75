@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "00acfbb3_e135a084",
+        "filename": "android/emulation/AndroidPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-29T20:42:40Z",
+      "side": 1,
+      "message": "this really needs a unit test",
+      "range": {
+        "startLine": 138,
+        "startChar": 16,
+        "endLine": 138,
+        "endChar": 27
+      },
+      "revId": "b826ce91d27fb1f8699cc58028981cbaef351b75",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "00acfbb3_e1b0000e",
+        "filename": "android/emulation/AndroidPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-29T20:42:40Z",
+      "side": 1,
+      "message": "where do we use these args?",
+      "range": {
+        "startLine": 296,
+        "startChar": 42,
+        "endLine": 296,
+        "endChar": 46
+      },
+      "revId": "b826ce91d27fb1f8699cc58028981cbaef351b75",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
