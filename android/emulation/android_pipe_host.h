@@ -28,24 +28,25 @@ ANDROID_BEGIN_HEADER
 // More specifically:
 //
 // - When a pipe has data for the guest, it should signal it by calling
-//   'android_pipe_wake(pipe, PIPE_WAKE_READ)'. The guest kernel will be
-//   signaled and will later initiate a recvBuffers() call.
+//   'android_pipe_host_signal_wake(pipe, PIPE_WAKE_READ)'. The guest kernel
+//   will be signaled and will later initiate a recvBuffers() call.
 //
 // - When a pipe is ready to accept data from the guest, it should signal
-//   it by calling 'android_pipe_wake(pipe, PIPE_WAKE_WRITE)'. The guest
-//   kernel will be signaled, and will later initiate a sendBuffers()
+//   it by calling 'android_pipe_host_signal_wake(pipe, PIPE_WAKE_WRITE)'. The
+//   guest kernel will be signaled, and will later initiate a sendBuffers()
 //   call when the guest client writes data to the pipe.
 //
 // - Finally, the guest kernel can signal whether it wants to be signaled
 //   on read or write events by calling the wakeOn() callback.
 //
 // - When the emulator wants to close a pipe, it shall call
-//   android_pipe_close(). This signals the guest kernel which will later
+//   android_pipe_host_close(). This signals the guest kernel which will later
 //   initiate a close() call.
 //
 typedef struct AndroidPipeFuncs {
     // Call to open a new pipe instance. |hwpipe| is a device-side view of the
-    // pipe that must be passed to android_pipe_wake() and android_pipe_close()
+    // pipe that must be passed to android_pipe_host_signal_wake() and
+    // android_pipe_host_close()
     // functions. |serviceOpaque| is the parameter passed to
     // android_pipe_add_type(), and |args| is either NULL
     // or parameters passed to the service when opening the connection.
@@ -54,7 +55,8 @@ typedef struct AndroidPipeFuncs {
 
     // Called when the guest kernel has finally closed a pipe connection.
     // This is the only place one should release/free the instance, but never
-    // call this directly, use android_pipe_close() instead. |pipe| is a client
+    // call this directly, use android_pipe_host_close() instead. |pipe| is a
+    // client
     // instance returned by init() or load().
     void (*close)(void* service_pipe);
 
@@ -84,7 +86,8 @@ typedef struct AndroidPipeFuncs {
 
     // Called to signal that the guest wants to be woken when the set of
     // PIPE_WAKE_XXX bit-flags in |flags| occur. When the condition occurs,
-    // then the |service_pipe| client shall call android_pipe_wake().
+    // then the |service_pipe| client shall call
+    // android_pipe_host_signal_wake().
     void (*wakeOn)(void* service_pipe, int flags);
 
     // Called to save the |service_pipe| client's state to a Stream, i.e. when

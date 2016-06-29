@@ -25,7 +25,7 @@ namespace {
 class TestGuest : public TestAndroidPipeDevice::Guest {
 public:
     TestGuest() : mClosed(true), mWakes(0u), mPipe(nullptr) {
-        mPipe = android_pipe_new(this);
+        mPipe = android_pipe_guest_open(this);
         if (!mPipe) {
             LOG(ERROR) << "Could not create new "
                           "TestAndroidPipeDevice::Guest instance!";
@@ -34,7 +34,7 @@ public:
 
     virtual ~TestGuest() {
         if (mPipe) {
-            android_pipe_free(mPipe);
+            android_pipe_guest_close(mPipe);
         }
     }
 
@@ -58,7 +58,7 @@ public:
             return 0;
         }
         AndroidPipeBuffer buf = { static_cast<uint8_t*>(buffer), len };
-        return android_pipe_recv(mPipe, &buf, 1);
+        return android_pipe_guest_recv(mPipe, &buf, 1);
     }
 
     virtual ssize_t write(const void* buffer, size_t len) override {
@@ -67,14 +67,14 @@ public:
         }
         AndroidPipeBuffer buf = {
                 (uint8_t*)buffer, len };
-        return android_pipe_send(mPipe, &buf, 1);
+        return android_pipe_guest_send(mPipe, &buf, 1);
     }
 
     virtual unsigned poll() const override {
         if (mClosed) {
             return PIPE_POLL_HUP;
         }
-        return android_pipe_poll(mPipe);
+        return android_pipe_guest_poll(mPipe);
     }
 
     void closeFromHost() {

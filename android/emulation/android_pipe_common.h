@@ -21,7 +21,8 @@ ANDROID_BEGIN_HEADER
 // Shared type and constant declarations between android_pipe.h and
 // android_pipe_host.h
 
-// Buffer descriptor for android_pipe_send() and android_pipe_recv().
+// Buffer descriptor for android_pipe_guest_send() and
+// android_pipe_guest_recv().
 typedef struct AndroidPipeBuffer {
     uint8_t* data;
     size_t size;
@@ -55,15 +56,15 @@ typedef struct AndroidPipeBuffer {
 /* This tells the guest system that we want to close the pipe and that
  * further attempts to read or write to it will fail. This will not
  * necessarily destroys the |hwpipe| immediately. The latter will call
- * android_pipe_free() at destruction time though.
+ * android_pipe_guest_close() at destruction time though.
  *
  * This will also wake-up any blocked guest threads waiting for i/o.
  */
-extern void android_pipe_close(void* hwpipe);
+extern void android_pipe_host_close(void* hwpipe);
 
 /* Signal that the pipe can be woken up. 'flags' must be a combination of
  * PIPE_WAKE_READ and PIPE_WAKE_WRITE.
  */
-extern void android_pipe_wake(void* hwpipe, unsigned flags);
+extern void android_pipe_host_signal_wake(void* hwpipe, unsigned flags);
 
 ANDROID_END_HEADER

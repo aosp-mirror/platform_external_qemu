@@ -77,7 +77,8 @@ ANDROID_BEGIN_HEADER
 //
 // 3/ At runtime, when a guest opens /dev/goldfish_pipe, this ends up creating
 //    a new |hwpipe| object in the virtual device, which will then call
-//    android_pipe_new() to create a corresponding |internal-pipe| object.
+//    android_pipe_guest_open() to create a corresponding |internal-pipe|
+//    object.
 //
 //    Note that at this point, the guest has not written any service name
 //    yet to the pipe, so there is no |pipe| value associated with these.
@@ -87,10 +88,11 @@ ANDROID_BEGIN_HEADER
 //    a new |pipe| instance.
 //
 //        . guest opens /dev/goldfish_pipe
-//          . virtual device creates |hwpipe| and calls android_pipe_new()
+//          . virtual device creates |hwpipe| and calls
+//          android_pipe_guest_open()
 //            to create |internal-pipe|:
 //
-//                              android_pipe_new()
+//                              android_pipe_guest_open()
 //                  |hwpipe| <---------------------> |internal-pipe|
 //
 //        . guest writes service name to connector pipe
@@ -103,10 +105,12 @@ ANDROID_BEGIN_HEADER
 //                                                       V
 //                                                  |service-pipe|
 //
-// 5/ At runtime, the host can call android_pipe_close() to force the closure
+// 5/ At runtime, the host can call android_pipe_host_close() to force the
+// closure
 //    of a given pipe. Note that this takes the |hwpipe| parameter.
 //
-// 5/ At runtime, the host can call android_pipe_wake() to signal a change of
+// 5/ At runtime, the host can call android_pipe_host_signal_wake() to signal a
+// change of
 //    state to the pipe. Note that this also takes the |hwpipe| parameter.
 //
 // VERY IMPORTANT NOTE:
@@ -128,53 +132,62 @@ ANDROID_BEGIN_HEADER
 // hardware-side view of the pipe, and will be passed to the 'init' callback
 // from AndroidPipeHwFuncs. This returns a new |internal-pipe| value that is
 // only used by the virtual device to call android_pipe_xxx() functions below.
-extern void* android_pipe_new(void* hwpipe);
+extern void* android_pipe_guest_open(void* hwpipe);
 
 // Close and free an Android pipe. |pipe| must be the result of a previous
-// android_pipe_new() call or the second parameter to android_pipe_reset().
-// This must *not* be called from the host side, see android_pipe_close()
+// android_pipe_guest_open() call or the second parameter to
+// android_pipe_reset().
+// This must *not* be called from the host side, see android_pipe_host_close()
 // instead.
-extern void android_pipe_free(void* internal_pipe);
+extern void android_pipe_guest_close(void* internal_pipe);
 
 // Save the state of an Android pipe to a stream. |internal_pipe| is the pipe
-// instance from android_pipe_new() or android_pipe_load(), and |file| is the
+// instance from android_pipe_guest_open() or android_pipe_guest_load(), and
+// |file| is the
 // output stream.
-extern void android_pipe_save(void* internal_pipe, Stream* file);
+extern void android_pipe_guest_save(void* internal_pipe, Stream* file);
 
 // Load the state of an Android pipe from a stream. |file| is the input stream,
 // |hwpipe| is the hardware-side pipe descriptor. On success, return a new
-// internal pipe instance (similar to one returned by android_pipe_new()), and
+// internal pipe instance (similar to one returned by
+// android_pipe_guest_open()), and
 // sets |*force_close| to 1 to indicate that the pipe must be force-closed
 // just after its load/creation (only useful for certain services that can't
 // preserve state into streams). Return NULL on faillure.
-extern void* android_pipe_load(Stream* file, void* hwpipe, char* force_close);
+extern void* android_pipe_guest_load(Stream* file,
+                                     void* hwpipe,
+                                     char* force_close);
 
-// Similar to android_pipe_load(), but this function is only called from the
+// Similar to android_pipe_guest_load(), but this function is only called from
+// the
 // QEMU1 virtual pipe device, to support legacy snapshot formats. It can be
 // ignored by the QEMU2 virtual device implementation.
 //
 // The difference is that this must also read the hardware-specific state
 // fields, and store them into |*channel|, |*wakes| and |*closed| on
 // success.
-extern void* android_pipe_load_legacy(Stream* file, void* hwpipe,
-                                      uint64_t* channel, unsigned char* wakes,
-                                      unsigned char* closed,
-                                      char* force_close);
+extern void* android_pipe_guest_load_legacy(Stream* file,
+                                            void* hwpipe,
+                                            uint64_t* channel,
+                                            unsigned char* wakes,
+                                            unsigned char* closed,
+                                            char* force_close);
 
 // Call the poll() callback of the client associated with |pipe|.
-extern unsigned android_pipe_poll(void* internal_pipe);
+extern unsigned android_pipe_guest_poll(void* internal_pipe);
 
 // Call the recvBuffers() callback of the client associated with |pipe|.
-extern int android_pipe_recv(void* internal_pipe, AndroidPipeBuffer* buffers,
-                             int numBuffers);
+extern int android_pipe_guest_recv(void* internal_pipe,
+                                   AndroidPipeBuffer* buffers,
+                                   int numBuffers);
 
 // Call the sendBuffers() callback of the client associated with |pipe|.
-extern int android_pipe_send(void* internal_pipe,
-                             const AndroidPipeBuffer* buffer,
-                             int numBuffer);
+extern int android_pipe_guest_send(void* internal_pipe,
+                                   const AndroidPipeBuffer* buffer,
+                                   int numBuffer);
 
 // Call the wakeOn() callback of the client associated with |pipe|.
-extern void android_pipe_wake_on(void* internal_pipe, unsigned wakes);
+extern void android_pipe_guest_wake_on(void* internal_pipe, unsigned wakes);
 
 // A set of functions that must be implemented by the virtual device
 // implementation. Used with call android_pipe_set_hw_funcs().
