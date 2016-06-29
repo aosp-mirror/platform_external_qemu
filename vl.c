@@ -4573,6 +4573,11 @@ int run_qemu_main(int argc, const char **argv)
         snprintf(str, sizeof(str) - 1, "%"PRIu64, hax_max_ram);
         crashhandler_add_string("hax_max_ram.txt", str);
 #endif
+        // current haxm cannot handle more than 3G memory
+        // b.android.com/214422
+        if (hax_max_ram  > 3072LL * 1024 * 1024) {
+            hax_max_ram = 3072LL * 1024 * 1024;
+        }
         if (ram_size > hax_max_ram) {
             const int requested_meg = ram_size / (1024 * 1024);
             const int actual_meg = hax_max_ram / (1024 * 1024);
