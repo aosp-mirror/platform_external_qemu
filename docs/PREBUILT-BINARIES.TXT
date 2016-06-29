@@ -170,6 +170,11 @@ In particular:
 
         android/scripts/
 
+  - Swiftshader must be placed under:
+
+       $OUT_DIR/lib/gles_swiftshader/    (32-bit ones)
+       $OUT_DIR/lib64/gles_swiftshader/  (64-bit ones)
+
   - Mesa libraries must be placed under:
 
        $OUT_DIR/lib/gles_mesa/    (32-bit ones)
@@ -187,7 +192,7 @@ In particular:
 
 Note that the top-level 'emulator' launcher program will modify the runtime
 library search path (e.g. LD_LIBRARY_PATH on Linux) to ensure that libraries
-under <lib>/, <lib>/qt/ or <lib>/gles_mesa/, whenever that makes sense.
+under <lib>/, <lib>/qt/ or <lib>/gles_swiftshader/, whenever that makes sense.
 
 The PATH is not modified though, so use explicit bin/ or bin64/ prefixes
 when invoking host binaries.
