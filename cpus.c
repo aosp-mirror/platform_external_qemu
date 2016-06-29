@@ -801,7 +801,9 @@ static QemuMutex qemu_global_mutex;
 static QemuCond qemu_io_proceeded_cond;
 static bool iothread_requesting_mutex;
 
-static QemuThread io_thread;
+#ifdef CONFIG_ANDROID
+static __thread bool qemu_global_mutex_held;
+#endif
 
 static QemuThread *tcg_cpu_thread;
 static QemuCond *tcg_halt_cond;
@@ -820,8 +822,6 @@ void qemu_init_cpu_loop(void)
     qemu_cond_init(&qemu_work_cond);
     qemu_cond_init(&qemu_io_proceeded_cond);
     qemu_mutex_init(&qemu_global_mutex);
-
-    qemu_thread_get_self(&io_thread);
 }
 
 void run_on_cpu(CPUState *cpu, void (*func)(void *data), void *data)
@@ -1208,12 +1208,25 @@ void qemu_mutex_lock_iothread(void)
         iothread_requesting_mutex = false;
         qemu_cond_broadcast(&qemu_io_proceeded_cond);
     }
+#ifdef CONFIG_ANDROID
+    qemu_global_mutex_held = true;
+#endif
 }
 
 void qemu_mutex_unlock_iothread(void)
 {
+#ifdef CONFIG_ANDROID
+    qemu_global_mutex_held = false;
+#endif
     qemu_mutex_unlock(&qemu_global_mutex);
 }
+
+#ifdef CONFIG_ANDROID
+bool qemu_mutex_check_iothread(void)
+{
+    return qemu_global_mutex_held;
+}
+#endif
 
 static int all_vcpus_paused(void)
 {
