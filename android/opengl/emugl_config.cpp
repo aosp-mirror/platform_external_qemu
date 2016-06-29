@@ -155,7 +155,7 @@ bool emuglConfig_init(EmuglConfig* config,
 
     // Check that the GPU mode is a valid value. 'auto' means determine
     // the best mode depending on the environment. Its purpose is to
-    // enable 'mesa' mode automatically when NX or Chrome Remote Desktop
+    // enable 'swiftshader' mode automatically when NX or Chrome Remote Desktop
     // is detected.
     if (!strcmp(gpu_mode, "auto")) {
         // The default will be 'host' unless:
@@ -164,29 +164,29 @@ bool emuglConfig_init(EmuglConfig* config,
         std::string sessionType;
         if (System::get()->isRemoteSession(&sessionType)) {
             D("%s: %s session detected\n", __FUNCTION__, sessionType.c_str());
-            if (!sBackendList->contains("mesa")) {
+            if (!sBackendList->contains("swiftshader")) {
                 config->enabled = false;
                 snprintf(config->status, sizeof(config->status),
-                        "GPU emulation is disabled under %s without Mesa",
+                        "GPU emulation is disabled under %s without Swiftshader",
                         sessionType.c_str());
                 return true;
             }
-            D("%s: 'mesa' mode auto-selected\n", __FUNCTION__);
-            gpu_mode = "mesa";
+            D("%s: 'swiftshader' mode auto-selected\n", __FUNCTION__);
+            gpu_mode = "swiftshader";
         } else if (no_window || blacklisted) {
             if (!has_guest_renderer &&
-                stringVectorContains(sBackendList->names(), "mesa")) {
+                stringVectorContains(sBackendList->names(), "swiftshader")) {
                 D("%s: Headless (-no-window) mode (or blacklisted GPU driver)"
-                  ", using Mesa backend\n",
+                  ", using Swiftshader backend\n",
                   __FUNCTION__);
-                gpu_mode = "mesa";
+                gpu_mode = "swiftshader";
             } else if (!has_guest_renderer) {
                 D("%s: Headless (-no-window) mode (or blacklisted GPU driver)"
-                  " without Mesa, forcing '-gpu off'\n",
+                  " without Swiftshader, forcing '-gpu off'\n",
                   __FUNCTION__);
                 config->enabled = false;
                 snprintf(config->status, sizeof(config->status),
-                        "GPU emulation is disabled (-no-window without Mesa)");
+                        "GPU emulation is disabled (-no-window without Swiftshader)");
                 return true;
             } else {
                 D("%s: Headless (-no-window) mode (or blacklisted GPU driver)"
@@ -297,6 +297,8 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     }
 
     if (!strcmp(config->backend, "mesa")) {
+        fprintf(stderr, "WARNING: The Mesa software renderer is deprecated. "
+                        "Use Swiftshader (-gpu swiftshader) for software rendering.\n");
         system->envSet("ANDROID_GL_LIB", "mesa");
         system->envSet("ANDROID_GL_SOFTWARE_RENDERER", "1");
     }
