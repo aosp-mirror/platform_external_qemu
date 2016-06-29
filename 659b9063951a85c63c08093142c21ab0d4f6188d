@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c04d83b0_fca989a0",
+        "filename": "android/emulation/AndroidPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-29T18:19:24Z",
+      "side": 1,
+      "message": "simplicity :) the service already has an internal name, I don\u0027t like the idea of duplicating them as keys, and we have a very small number of services anyway.",
+      "parentUuid": "00c6bb30_584f1254",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 58
+      },
+      "revId": "659b9063951a85c63c08093142c21ab0d4f6188d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "00c6bb30_3846c662",
         "filename": "android/emulation/AndroidPipe.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-06-28T23:48:42Z",
       "side": 1,
       "message": "this isn\u0027t really needed - std::min() on the next line would return 0 anyway",
+      "range": {
+        "startLine": 132,
+        "startChar": 0,
+        "endLine": 135,
+        "endChar": 13
+      },
+      "revId": "659b9063951a85c63c08093142c21ab0d4f6188d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c04d83b0_3cac91b5",
+        "filename": "android/emulation/AndroidPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-29T18:19:24Z",
+      "side": 1,
+      "message": "good point :) will do.",
+      "parentUuid": "00c6bb30_3846c662",
       "range": {
         "startLine": 132,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "c04d83b0_bc9f017c",
+        "filename": "android/emulation/AndroidPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-29T18:19:24Z",
+      "side": 1,
+      "message": "yes, we don\u0027t support connection commands that are too large at the moment. Since this is just a port of the existing code to C++, I prefer not to touch it for now.",
+      "parentUuid": "00c6bb30_b83956e3",
+      "range": {
+        "startLine": 136,
+        "startChar": 33,
+        "endLine": 136,
+        "endChar": 55
+      },
+      "revId": "659b9063951a85c63c08093142c21ab0d4f6188d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "00c6bb30_f8a91ef2",
         "filename": "android/emulation/AndroidPipe.cpp",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2016-06-28T23:48:42Z",
       "side": 1,
       "message": "nit: could you please clean up the commented code (or uncomment the DD prints)?",
+      "range": {
+        "startLine": 481,
+        "startChar": 0,
+        "endLine": 482,
+        "endChar": 15
+      },
+      "revId": "659b9063951a85c63c08093142c21ab0d4f6188d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c04d83b0_fcd4e920",
+        "filename": "android/emulation/AndroidPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-29T18:19:24Z",
+      "side": 1,
+      "message": "will do",
+      "parentUuid": "00c6bb30_f8a91ef2",
       "range": {
         "startLine": 481,
         "startChar": 0,
