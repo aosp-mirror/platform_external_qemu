@@ -741,6 +741,9 @@ if [ -d $SWIFTSHADER_PREBUILTS_DIR ]; then
         windows)
             SWIFTSHADER_SUFFIX=.dll
             ;;
+        darwin)
+            SWIFTSHADER_SUFFIX=.dylib
+            ;;
         linux)
             SWIFTSHADER_SUFFIX=.so
             ;;
