@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "609db76f_77302892",
+        "filename": "android-configure.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 561,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-06-29T18:17:28Z",
+      "side": 1,
+      "message": "Is this comment out of date?  If not, why doesn\u0027t this apply to Windows?",
+      "revId": "24be85bb55688e04daf736bb32bca889068255f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "609db76f_65e86ee8",
+        "filename": "android/scripts/build-ANGLE.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-06-29T18:17:28Z",
+      "side": 1,
+      "message": "Consider rewriting in Python (don\u0027t hate me)",
+      "revId": "24be85bb55688e04daf736bb32bca889068255f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "609db76f_45e36a0e",
+        "filename": "android/scripts/build-ANGLE.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-06-29T18:17:28Z",
+      "side": 1,
+      "message": "Notice how all of the packages in the PACKAGES.TXT file have specific version numbers and SHAs?  You should be cloning a specific SHA from the git repo",
+      "revId": "24be85bb55688e04daf736bb32bca889068255f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "609db76f_05f962b8",
+        "filename": "android/scripts/build-ANGLE.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-06-29T18:17:28Z",
+      "side": 1,
+      "message": "SHA here, too",
+      "revId": "24be85bb55688e04daf736bb32bca889068255f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "609db76f_e5d45e21",
+        "filename": "android/scripts/build-ANGLE.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-06-29T18:17:28Z",
+      "side": 1,
+      "message": "Is this extra complexity worth it?  I would bring this up at the next emulator meeting.",
+      "revId": "24be85bb55688e04daf736bb32bca889068255f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
