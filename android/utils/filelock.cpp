@@ -198,8 +198,11 @@ static int filelock_lock(FileLock* lock) {
     const DWORD pid = ::GetCurrentProcessId();
     char pidBuf[12];
     const int len = snprintf(pidBuf, sizeof(pidBuf), "%lu", pid);
-    assert(len < (int)sizeof(pidBuf));
-    if (!::WriteFile(lockHandle, pidBuf, len, nullptr, nullptr)) {
+    assert(len > 0 && len < (int)sizeof(pidBuf));
+    DWORD bytesWritten;
+    if (!::WriteFile(lockHandle, pidBuf, static_cast<DWORD>(len), &bytesWritten,
+                     nullptr) ||
+        bytesWritten != static_cast<DWORD>(len)) {
         D("Failed to write the current PID into the lock file");
         return -1;
     }
