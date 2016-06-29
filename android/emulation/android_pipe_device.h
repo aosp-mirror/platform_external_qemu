@@ -43,88 +43,58 @@ ANDROID_BEGIN_HEADER
 // The Goldfish pipe virtual device is in charge of communicating with the
 // kernel to manage pipe operations.
 //
-// Each pipe connection corresponds to three objects:
+// Each pipe connection corresponds to two objects:
 //
 //   - A hardware-side opaque object (implemented by the virtual pipe device)
 //     identified here as a |hwpipe| value.
 //
-//  - An internal Pipe object identified as a |internal-pipe| value. This
-//    object is an implementation detail of android_pipe.c and might disappear
-//    in a future refactor of the sources.
+//  - A host-specific opaque object, identified here either as |host-pipe|.
 //
-//  - A host-specific opaque object, identified here as a |service-pipe| value.
-//    Each one is created by a specific pipe service implementation, through
-//    either AndroidHwFuncs::init() or AndroidHwFuncs::load() below.
+//       (virtual device) |hwpipe|  <----->  |host-pipe|   (emulator)
 //
-//
-//       (virtual device) |hwpipe|  <----->  |internal-pipe|   (emulator)
-//                                                  ^
-//                                                  |
-//                                                  v
-//                                            |service-pipe|   (service)
-//
-// This header provides the interface used between the virtual device and the
-// host-side emulator pipe services. Expected usage is the following:
+// Expected usage is the following:
 //
 // 1/ During setup, the virtual device should call android_pipe_set_hw_funcs()
 //    to point to callbacks it provides to implement a few functions called
 //    from the host, later at runtime.
 //
-// 2/ During setup, the emulator should call android_pipe_service_add() to
-//    register any pipe service by name. This must provide a pointer to a
-//    series of functions that will be called during normal pipe operations
-//    (see below). See android/emulation/android_pipe_host.h
+// 2/ During setup, the emulator should register host pipe service instances,
+//    each one identified by a name, before the VM starts.
 //
 // 3/ At runtime, when a guest opens /dev/goldfish_pipe, this ends up creating
 //    a new |hwpipe| object in the virtual device, which will then call
-//    android_pipe_guest_open() to create a corresponding |internal-pipe|
+//    android_pipe_guest_open() to create a corresponding |host-pipe|
 //    object.
 //
-//    Note that at this point, the guest has not written any service name
-//    yet to the pipe, so there is no |pipe| value associated with these.
+//    Note that at this point, the |host-pipe| corresponds to a special
+//    host-side pipe state that waits for the name of the pipe service to
+//    connect to, and potential arguments. This is called a |connect-pipe|
+//    here:
 //
-// 4/ When the pipe service name is fully written, the |internal-pipe| finds a
+//                     android_pipe_guest_open()
+//         |hwpipe|  <--------------------------->  |connect-pipe|
+//
+// 4/ When the pipe service name is fully written, the |connect-pipe| finds a
 //    service registered for it, and calls its ::init() callback to create
-//    a new |pipe| instance.
+//    a new |service-pipe| instance.
 //
-//        . guest opens /dev/goldfish_pipe
-//          . virtual device creates |hwpipe| and calls
-//          android_pipe_guest_open()
-//            to create |internal-pipe|:
+//         |hwpipe|  <--------------------------->  |connect-pipe|
 //
-//                              android_pipe_guest_open()
-//                  |hwpipe| <---------------------> |internal-pipe|
+//                                                  |service-pipe|
 //
-//        . guest writes service name to connector pipe
-//          . internal pipe implementation finds corresponding service and
-//            creates a new internal pipe and service pipe for it.
+// 5/ It then calls the AndroidPipeHwFuncs::resetPipe() callback provided
+//    by the virtual device to reattach the |hwpipe| to the |service-pipe|
+//    then later delete the now-useless |connect-pipe|.
 //
-//                  |hwpipe| <------> |internal-pipe|
-//
-//                         |internal-pipe2| <----> |service-pipe|
-//
-//          . AndroidPipeHwFuncs::resetPipe() is called to associate the |hwpipe| with
-//            the new |internal-pipe2|, the old |internal-pipe| is then
-//            discarded.
-//
-//                  |hwpipe| <------> |internal-pipe2| <----> |service-pipe|
-//
-//
-// 5/ At runtime, the host can call android_pipe_host_close() to force the
-// closure
-//    of a given pipe. Note that this takes the |hwpipe| parameter.
-//
-// 5/ At runtime, the host can call android_pipe_host_signal_wake() to signal a
-// change of
-//    state to the pipe. Note that this also takes the |hwpipe| parameter.
+//         |hwpipe|  <------------+                 |connect-pipe|
+//                                |
+//                                +---------------->|service-pipe|
 //
 // VERY IMPORTANT NOTE:
 //
-// All operations should happen on the 'device thread'. On QEMU1, this means
-// the main QEMU thread hosting the main-loop and all i/o operations.
-// On QEMU2, this is the current vCPU thread that holds the VM lock
-// (see android/emulation/vm_lock.h). It's up to the host implementation
-// to ensure that this is always the case.
+// All operations should happen on the thread that currently holds the
+// global VM state lock (see android/emulation/VmLock.h). It's up to
+// the host implementation to ensure that this is always the case.
 //
 
 ////////////////////////////////////////////////////////////////////////////
