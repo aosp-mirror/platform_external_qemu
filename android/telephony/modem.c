@@ -226,14 +226,6 @@ typedef struct _signal {
     int lte_timing;
 } signal_t;
 
-typedef enum {
-    NONE = 0,
-    POOR = 1,
-    MODERATE = 2,
-    GOOD = 3,
-    GREAT = 4,
-} signal_strength;
-
 /*
  * Values derived from the ranges used in the SignalStrength
  * class in the frameworks/base telephony framework.
@@ -264,7 +256,7 @@ typedef struct AModemRec_
 
     /* Signal strength variables */
     int             use_signal_profile;
-    signal_strength quality;
+    ASignalStrength quality;
     int             rssi;
     int             ber;
 
@@ -500,7 +492,7 @@ amodem_reset( AModem  modem )
     modem->wait_sms    = 0;
 
     modem->use_signal_profile = 1;
-    modem->quality = MODERATE;    // Two signal strength bars
+    modem->quality = A_STRENGTH_MODERATE;    // Two signal strength bars
     modem->rssi = 7;   // Two signal strength bars
     modem->ber = 99;   // Means 'unknown'
 
@@ -970,9 +962,9 @@ amodem_set_signal_strength( AModem modem, int rssi, int ber )
 }
 
 void
-amodem_set_signal_strength_profile( AModem modem, int quality )
+amodem_set_signal_strength_profile( AModem modem, ASignalStrength quality )
 {
-    if (quality >= NONE && quality <= GREAT) {
+    if (quality >= A_STRENGTH_NONE && quality <= A_STRENGTH_GREAT) {
         modem->quality = quality;
         modem->use_signal_profile = 1;
     }

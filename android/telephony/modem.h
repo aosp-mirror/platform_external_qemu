@@ -47,16 +47,6 @@ typedef enum {
 extern ARadioState  amodem_get_radio_state( AModem modem );
 extern void         amodem_set_radio_state( AModem modem, ARadioState  state );
 
-/* Set the received signal strength indicator and bit error rate */
-extern void         amodem_set_signal_strength( AModem modem, int rssi, int ber );
-
-/* Set the received signal strength profile */
-extern void         amodem_set_signal_strength_profile( AModem modem, int quality );
-
-/** SIM CARD STATUS
- **/
-extern ASimCard    amodem_get_sim( AModem  modem );
-
 /** VOICE AND DATA NETWORK REGISTRATION
  **/
 
@@ -101,6 +91,24 @@ typedef enum {
     A_ROAMING_PREF_ANY,
     A_ROAMING_PREF_UNKNOWN // This must always be the last value in the enum
 } ACdmaRoamingPref;
+
+typedef enum {
+    A_STRENGTH_NONE = 0,
+    A_STRENGTH_POOR,
+    A_STRENGTH_MODERATE,
+    A_STRENGTH_GOOD,
+    A_STRENGTH_GREAT
+} ASignalStrength;
+
+/* Set the received signal strength indicator and bit error rate */
+extern void         amodem_set_signal_strength( AModem modem, int rssi, int ber );
+
+/* Set the received signal strength profile */
+extern void         amodem_set_signal_strength_profile( AModem modem, ASignalStrength quality );
+
+/** SIM CARD STATUS
+ **/
+extern ASimCard     amodem_get_sim( AModem  modem );
 
 extern ARegistrationState  amodem_get_voice_registration( AModem  modem );
 extern void                amodem_set_voice_registration( AModem  modem, ARegistrationState    state );
