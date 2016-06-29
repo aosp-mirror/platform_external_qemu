@@ -414,10 +414,14 @@ static void _hwSensorClient_tick(void* opaque, LoopTimer* unused) {
     //  the host and execution of the tick function. 1ms is enough, as the
     //  overhead is very small; on the other hand, it's always present - that's
     //  why we can't just have (delay_ms) here.
-    // Note2: Driver in the guest image sets the minimal tick interval to 2ms,
-    //  so no one will expect anything lower than that - that's why we have 1ms
-    //  as a lowest timer delay here.
-    loopTimer_startRelative(cl->timer, delay_ms > 1 ? delay_ms - 1 : 1);
+    // Note2: Let's cap the minimal tick interval to 5ms, to make sure we never
+    //  overload the main QEMU loop. Upper limit is just some reasonable value.
+    if (delay_ms < 5) {
+        delay_ms = 5;
+    } else if (delay_ms > 60 * 60 * 1000) {
+        delay_ms = 60 * 60 * 1000;
+    }
+    loopTimer_startRelative(cl->timer, delay_ms - 1);
 }
 
 /* handle incoming messages from the HAL module */
