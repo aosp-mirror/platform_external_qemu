@@ -371,11 +371,6 @@ extern "C" int main(int argc, char **argv) {
         args[n++] = boot_prop_ip;
     }
 
-    if (opts->tcpdump) {
-        args[n++] = "-tcpdump";
-        args[n++] = opts->tcpdump;
-    }
-
 #ifdef CONFIG_NAND_LIMITS
     if (opts->nand_limits) {
         args[n++] = "-nand-limits";
@@ -777,6 +772,23 @@ extern "C" int main(int argc, char **argv) {
             StringFormat("%s,netdev=mynet", kTarget.networkDeviceType);
     args[n++] = netDevice.c_str();
     args[n++] = "-show-cursor";
+
+    // TODO: the following *should* re-enable -tcpdump in QEMU2 when we have
+    // rebased to at least QEMU 2.5 - the standard -tcpdump flag
+    // See http://wiki.qemu.org/ChangeLog/2.5#Network_2 and
+    // http://wiki.qemu.org/download/qemu-doc.html#index-_002dobject
+//    std::string tcpdumpArg;
+//    if (opts->tcpdump) {
+//        args[n++] = "-object";
+//        tcpdumpArg = StringFormat("filter-dump,id=mytcpdump,netdev=mynet,file=%s",
+//                                  opts->tcpdump);
+//        args[n++] = tcpdumpArg.c_str();
+//    }
+
+    if (opts->tcpdump) {
+        dwarning("The -tcpdump flag is not supported in QEMU2 yet and will "
+                 "be ignored.");
+    }
 
     // Graphics
     if (opts->no_window) {
