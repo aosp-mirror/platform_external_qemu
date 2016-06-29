@@ -42,7 +42,8 @@ public:
     // actual value will be set to the minimum allowed value, and if the provided
     // value is greater than the maximum allowed value, the actual value will be
     // set to max.
-    // Calling this method will emit the valueChanged signal.
+    // Calling this method will emit the valueChanged signal as long as the
+    // emit_signal parameter is true.
     void setValue(double value, bool emit_signal = true);
 
     // Changes the lower bound of the allowed value range. The current value is
@@ -63,9 +64,13 @@ public:
         }
     }
 
+    // Returns true if the slider is pressed down.
     bool isSliderDown() const {
         return mSlider.isSliderDown();
     }
+
+protected:
+    bool eventFilter(QObject*, QEvent*) override;
 
 signals:
     // This signal is emitted when the value stored by the widget changes.
