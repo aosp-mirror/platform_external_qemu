@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "00c6bb30_8bd522fa",
+        "filename": "android/emulation/android_pipe_host.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-29T00:06:38Z",
+      "side": 1,
+      "message": "nit: formatting is off now",
+      "range": {
+        "startLine": 32,
+        "startChar": 5,
+        "endLine": 32,
+        "endChar": 12
+      },
+      "revId": "df9ae142be5a68b827058980073c23b16151b889",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
