@@ -143,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "609db76f_e5829e18",
+        "filename": "android/emulation/AndroidPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-29T18:20:54Z",
+      "side": 1,
+      "message": "Could you please add an assert for this case here? So we can catch it in debug mode and at least increase the internal array size",
+      "parentUuid": "c04d83b0_bc9f017c",
+      "range": {
+        "startLine": 136,
+        "startChar": 33,
+        "endLine": 136,
+        "endChar": 55
+      },
+      "revId": "659b9063951a85c63c08093142c21ab0d4f6188d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "00c6bb30_f8a91ef2",
         "filename": "android/emulation/AndroidPipe.cpp",
         "patchSetId": 1
