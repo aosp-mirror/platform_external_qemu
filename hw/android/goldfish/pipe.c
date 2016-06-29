@@ -165,13 +165,14 @@ static HwPipe* hwpipe_load(PipeDevice* dev, Stream* file, int version_id) {
         pipe->pipe = android_pipe_guest_load(file, pipe, &force_close);
     }
 
-    if (!pipe->pipe) {
-        hwpipe_free(pipe);
-        return NULL;
-    }
-
+    // SUBTLE: android_pipe_guest_load() may return NULL if the pipe state
+    // could not be saved. In this case |force_close| will be set though, so
+    // always check it first.
     if (force_close) {
         pipe->closed = 1;
+    } else if (!pipe->pipe) {
+        hwpipe_free(pipe);
+        return NULL;
     }
 
     return pipe;
@@ -649,10 +650,8 @@ static void goldfish_pipe_close(void* hwpipe) {
     D("%s: channel=0x%llx (closed=%d)", __FUNCTION__,
       (unsigned long long)pipe->channel, pipe->closed);
 
-    if (!pipe->closed) {
-        pipe->closed = 1;
-        goldfish_pipe_wake(hwpipe, PIPE_WAKE_CLOSED);
-    }
+    pipe->closed = 1;
+    goldfish_pipe_wake(hwpipe, PIPE_WAKE_CLOSED);
 }
 
 static const AndroidPipeHwFuncs goldfish_pipe_hw_funcs = {
