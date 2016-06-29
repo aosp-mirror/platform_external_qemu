@@ -162,12 +162,30 @@ void qemu_notify_event(void)
 #endif
 }
 
+// Global mutex used to protect the global VM state from foreign threads
+// like Android EmuGL ones.
+static QemuMutex qemu_global_lock;
+static QemuThread qemu_global_lock_thread;
+static bool qemu_global_lock_held;
+
 void qemu_mutex_lock_iothread(void)
 {
+    qemu_mutex_lock(&qemu_global_lock);
+    qemu_global_lock_held = true;
+    qemu_thread_get_self(&qemu_global_lock_thread);
 }
 
 void qemu_mutex_unlock_iothread(void)
 {
+    qemu_global_lock_held = false;
+    qemu_mutex_unlock(&qemu_global_lock);
+}
+
+// Returns true if the current thread holds the global mutex, false otherwise.
+bool qemu_mutex_check_iothread(void)
+{
+    return qemu_thread_is_self(&qemu_global_lock_thread) &&
+            qemu_global_lock_held;
 }
 
 void vm_stop(int reason)
