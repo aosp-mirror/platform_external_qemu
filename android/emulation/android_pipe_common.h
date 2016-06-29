@@ -44,27 +44,4 @@ typedef struct AndroidPipeBuffer {
 #define PIPE_POLL_OUT  (1 << 1)   /* means guest can write */
 #define PIPE_POLL_HUP  (1 << 2)   /* means closed by host */
 
-////////////////////////////////////////////////////////////////////////////
-//
-// The following functions are called from the host and must be implemented
-// by the virtual device, through a series of callbacks that are registered
-// by calling android_pipe_set_hw_funcs() declared below.
-//
-// IMPORTANT: These must be called in the context of the 'device thread' only.
-// See technical note in android_pipe_device.h for more details.
-
-/* This tells the guest system that we want to close the pipe and that
- * further attempts to read or write to it will fail. This will not
- * necessarily destroys the |hwpipe| immediately. The latter will call
- * android_pipe_guest_close() at destruction time though.
- *
- * This will also wake-up any blocked guest threads waiting for i/o.
- */
-extern void android_pipe_host_close(void* hwpipe);
-
-/* Signal that the pipe can be woken up. 'flags' must be a combination of
- * PIPE_WAKE_READ and PIPE_WAKE_WRITE.
- */
-extern void android_pipe_host_signal_wake(void* hwpipe, unsigned flags);
-
 ANDROID_END_HEADER

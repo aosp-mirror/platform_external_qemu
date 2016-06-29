@@ -19,6 +19,7 @@
 #include "android/android.h"
 #include "android/base/Log.h"
 #include "android/console.h"
+#include "android/emulation/AndroidPipe.h"
 
 extern "C" {
 #include "qemu-common.h"
@@ -39,6 +40,8 @@ bool qemu_android_emulation_setup() {
   VmLock* vmLock = new qemu::VmLock();
   VmLock* prevVmLock = android::VmLock::set(vmLock);
   CHECK(prevVmLock == nullptr) << "Another VmLock was already installed!";
+
+  android::AndroidPipe::initThreading(vmLock);
 
   return android_emulation_setup(&consoleAgents);
 }

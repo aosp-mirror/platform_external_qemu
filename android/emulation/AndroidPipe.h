@@ -30,27 +30,43 @@ namespace android {
 //   are performed. The 'device thread' is whichever CPU thread is holding
 //   the lock.
 //
-// IMPORTANT: All AndroidPipe methods must be called from a thread that holds
+// IMPORTANT: Most AndroidPipe methods must be called from a thread that holds
 // the global VM state lock (i.e. where VmLock::isLockedBySelf() is true).
 // Failure to do so will result in incorrect results, and panics in debug
 // builds.
 //
+// A few methods can be called from any thread though, see signalWake() and
+// closeFromHost().
+//
 // Usage is the following:
 //
-// 1) For each supported pipe service, create a new AndroidPipe::Service
+// 1) At emulation setup time (i.e. before the VM runs), call
+//    AndroidPipe::initThreading() from the main loop thread and pass an
+//    appropriate VmLock instance.
+//
+// 2) For each supported pipe service, create a new AndroidPipe::Service
 //    instance, and register it globally by calling AndroidPipe::Service::add().
 //    This can happen before 1) and in different threads.
 //
-// 2) Once the VM starts, whenever a guest wants to connect to a specific
+// 3) Once the VM starts, whenever a guest wants to connect to a specific
 //    named service, its instance's 'create' method will be called from the
 //    device thread. Alternatively, when resuming from a snapshot, the 'load'
 //    method will be called iff 'canLoad()' is overloaded to return true.
 //
-// 3) During pipe operations, onGuestXXX() methods will be called from the
+// 4) During pipe operations, onGuestXXX() methods will be called from the
 //    device thread to operate on the pipe.
+//
+// 5) The signalWake() and closeFromHost() pipe methods can be called from
+//    any thread to signal i/o events, or ask for the pipe closure.
 //
 class AndroidPipe {
 public:
+    // Call this function in the main loop thread to ensure proper threading
+    // support. |vmLock| must be a valid android::VmLock instance that will be
+    // used to determine whether the current thread holds the global VM
+    // state lock or not (if not, operations are queued).
+    static void initThreading(VmLock* vmLock);
+
     // A base class for all AndroidPipe services, which is in charge
     // of creating new instances when a guest client connects to the
     // service.
