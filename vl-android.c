@@ -3344,6 +3344,9 @@ int main(int argc, char **argv, char **envp)
     /* must be after terminal init, SDL library changes signal handlers */
     os_setup_signal_handling();
 
+    qemu_init_cpu_loop();
+    qemu_mutex_lock_iothread();
+
     /* Maintain compatibility with multiple stdio monitors */
     if (!strcmp(monitor_device,"stdio")) {
         for (i = 0; i < MAX_SERIAL_PORTS; i++) {

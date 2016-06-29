@@ -215,6 +215,8 @@ const char *path(const char *pathname);
 
 void qemu_mutex_lock_iothread(void);
 void qemu_mutex_unlock_iothread(void);
+bool qemu_mutex_check_iothread(void);
+void qemu_init_cpu_loop(void);
 
 int qemu_open(const char *name, int flags, ...);
 ssize_t qemu_write_full(int fd, const void *buf, size_t count)
