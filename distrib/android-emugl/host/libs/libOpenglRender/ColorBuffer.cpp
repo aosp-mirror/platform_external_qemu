@@ -284,17 +284,6 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
                                   m_width, m_height);
         s_gles2.glDeleteTextures(1, &tmpTex);
         s_gles2.glBindTexture(GL_TEXTURE_2D, currTexBind);
-        // TODO:  glClientWaitSync on a different thread
-        // At the moment, is equivalent to glFinish() from before
-        GLsync wait_here = s_gles2.glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-        // Wait up to 1 second for the texture copy to finish.
-        // This needs to be > any reasonable frame time.
-        // 1 second seems to cover most cases.
-        // Generally, if we set this to 16ms or otherwise close to a frame time,
-        // we can get out of order frames again.
-        GLenum wait_res = s_gles2.glClientWaitSync(wait_here,
-                                                   GL_SYNC_FLUSH_COMMANDS_BIT,
-                                                   kFenceSyncWaitTime);
     }
     else {
         s_gles1.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);

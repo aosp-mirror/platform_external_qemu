@@ -42,3 +42,8 @@ rcUpdateColorBuffer
 
 rcCloseColorBuffer
     flag flushOnEncode
+
+rcCreateSyncKHR
+    dir fence_fd_out out
+    len fence_fd_out sizeof(int)
+
