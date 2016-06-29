@@ -39,6 +39,10 @@ void goldfish_sync_destroy_timeline(uint64_t timeline) {
     sGoldfishSyncHwFuncs->destroyTimeline(timeline);
 }
 
+void goldfish_sync_register_trigger_wait(trigger_wait_fn_t f) {
+    sGoldfishSyncHwFuncs->registerTriggerWait(f);
+}
+
 #if TEST_GOLDFISH_SYNC
 
 #include <stdio.h>

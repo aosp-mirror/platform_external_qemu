@@ -33,7 +33,8 @@ public:
     virtual void setSyncDevice(emugl_sync_create_timeline_t,
                                emugl_sync_create_fence_t,
                                emugl_sync_timeline_inc_t,
-                               emugl_sync_destroy_timeline_t) = 0;
+                               emugl_sync_destroy_timeline_t,
+                               emugl_sync_register_trigger_wait_t) = 0;
 
     // initRenderer - initialize the OpenGL renderer object.
     //
