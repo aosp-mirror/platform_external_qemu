@@ -39,7 +39,7 @@
 #endif
 
 using android::base::Optional;
-using android::base::ScopedVmLock;
+using android::ScopedVmLock;
 using emugl::RenderChannel;
 
 namespace android {
