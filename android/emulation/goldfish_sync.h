@@ -47,26 +47,49 @@ ANDROID_BEGIN_HEADER
 // Destroys a timeline. reads timeline handle
 #define CMD_DESTROY_SYNC_TIMELINE 4
 
+// Starts a wait on the host with
+// the given glsync object and sync thread handle.
+#define CMD_TRIGGER_HOST_WAIT     5
+
 // The register layout is:
 
-#define SYNC_REG_COMMAND      0x00 // which operation to run
-#define SYNC_REG_HANDLE       0x04 // Timeline or fence fd to operator on
-#define SYNC_REG_HANDLE_HIGH  0x08 // 64-bit part
-#define SYNC_REG_TIME_ARG     0x0c // how much to increment timeline
+#define SYNC_REG_COMMAND         0x00 // which operation to run
+#define SYNC_REG_HANDLE          0x04 // Stores pointer to goldfish_timeline_obj
+#define SYNC_REG_HANDLE_HIGH     0x08 // 64-bit part
+#define SYNC_REG_TIME_ARG        0x0c // how much to increment timeline
+#define SYNC_REG_GLSYNC_HANDLE       0x10 // Stores pointer to host sync object
+#define SYNC_REG_GLSYNC_HANDLE_HIGH  0x14 // 64-bit part
+#define SYNC_REG_THREAD_HANDLE       0x18 // Stores pointer to host sync thread object
+#define SYNC_REG_THREAD_HANDLE_HIGH  0x22 // 64-bit part
 
 #define NO_WRITE_BACK(cmd) (cmd == CMD_SYNC_TIMELINE_INC || \
                             cmd == CMD_DESTROY_SYNC_TIMELINE)
+
+typedef void (*trigger_wait_fn_t)(uint64_t, uint64_t, uint64_t);
 
 uint64_t goldfish_sync_create_timeline();
 int goldfish_sync_create_fence(uint64_t timeline, uint32_t pt);
 void goldfish_sync_timeline_inc(uint64_t timeline, uint32_t howmuch);
 void goldfish_sync_destroy_timeline(uint64_t timeline);
 
+// Registering callbacks for goldfish sync ops
+// Currently, only trigger_wait is supported.
+void goldfish_sync_register_trigger_wait(
+        trigger_wait_fn_t trigger_fn);
+
+typedef struct GoldfishSyncHwFuncs2 {
+    void (*goldfishSyncSendCmd)(void* cmd);
+    void (*goldfishSyncRecvCmd)(void* cmd);
+} GoldfishSyncHwFuncs2;
+
 typedef struct GoldfishSyncHwFuncs {
     uint64_t (*createTimeline)();
     int (*createFence)(uint64_t timeline, uint32_t pt);
     void (*incTimeline)(uint64_t timeline, uint32_t howmuch);
     void (*destroyTimeline)(uint64_t timeline);
+
+    // Callbacks to register other callbacks
+    void (*registerTriggerWait)(trigger_wait_fn_t);
 } GoldfishSyncHwFuncs;
 
 extern const GoldfishSyncHwFuncs*

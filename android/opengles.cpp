@@ -137,7 +137,8 @@ android_startOpenglesRenderer(int width, int height)
     sRenderLib->setSyncDevice(goldfish_sync_create_timeline,
                               goldfish_sync_create_fence,
                               goldfish_sync_timeline_inc,
-                              goldfish_sync_destroy_timeline);
+                              goldfish_sync_destroy_timeline,
+                              goldfish_sync_register_trigger_wait);
 
     emugl_logger_struct logfuncs;
     logfuncs.coarse = android_opengl_logger_write;

@@ -10,6 +10,9 @@
 ** GNU General Public License for more details.
 */
 
+#include "android/base/threads/Thread.h"
+#include "android/base/synchronization/MessageChannel.h"
+
 #include "android/emulation/goldfish_sync.h"
 
 #include "android/utils/system.h"
@@ -39,6 +42,10 @@ void goldfish_sync_destroy_timeline(uint64_t timeline) {
     sGoldfishSyncHwFuncs->destroyTimeline(timeline);
 }
 
+void goldfish_sync_register_trigger_wait(trigger_wait_fn_t f) {
+    sGoldfishSyncHwFuncs->registerTriggerWait(f);
+}
+
 #if TEST_GOLDFISH_SYNC
 
 #include <stdio.h>
@@ -49,4 +56,14 @@ void goldfish_sync_run_test() {
 }
 
 #endif
+
+using android::base::Thread;
+using android::base::MessageChannel;
+
+class SyncCmdThread : public Thread {
+
+private:
+    MessageChannel<void*, 4U> mToDevice;
+    MessageChannel<void*, 4U> mFromDevice;
+};
 
