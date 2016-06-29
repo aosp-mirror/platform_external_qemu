@@ -1,5 +1,8 @@
 #include "android/skin/qt/editable-slider-widget.h"
 
+#include <QEvent>
+#include <QStyle>
+
 EditableSliderWidget::EditableSliderWidget(QWidget *parent) :
     QWidget(parent),
     mMinValueLabel(this),
@@ -43,6 +46,7 @@ EditableSliderWidget::EditableSliderWidget(QWidget *parent) :
     mLineEdit.setMaximumWidth(50);
     mLineEdit.setTextMargins(0, 0, 0, 4);
     mLineEdit.setProperty("class", "EditableValue");
+    mLineEdit.installEventFilter(this);
 
     // Handle child widgets' value changes in our own slots.
     connect(&mSlider, SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged(int)));
@@ -65,6 +69,9 @@ void EditableSliderWidget::setValue(double value, bool emit_signal) {
         emit valueChanged(mValue);
         emit valueChanged();
     }
+    mLineEdit.setProperty("ColorGroup", QString());
+    mLineEdit.style()->unpolish(&mLineEdit);
+    mLineEdit.style()->polish(&mLineEdit);
 }
 
 void EditableSliderWidget::setMinimum(double minimum) {
@@ -91,4 +98,26 @@ void EditableSliderWidget::lineEditValueChanged() {
     QString new_value = mLineEdit.text();
     setValue(new_value.toDouble());
 }
+
+bool EditableSliderWidget::eventFilter(QObject*, QEvent* e) {
+    if (e->type() == QEvent::FocusIn) {
+        // If the edit box was previously highlighted due to an
+        // invalid value, un-highlight it.
+        mLineEdit.setProperty("ColorGroup", QString());
+        mLineEdit.style()->unpolish(&mLineEdit);
+        mLineEdit.style()->polish(&mLineEdit);
+    } else if (e->type() == QEvent::FocusOut) {
+        // When the edit box loses focus, highlight it
+        // if it contains an invalid value.
+        int dummy;
+        QString text = mLineEdit.text();
+        if (mLineEdit.validator()->validate(text, dummy) != QValidator::Acceptable) {
+            mLineEdit.setProperty("ColorGroup", QString("InvalidInput"));
+            mLineEdit.style()->unpolish(&mLineEdit);
+            mLineEdit.style()->polish(&mLineEdit);
+        }
+    }
+    return false;
+}
+
 
