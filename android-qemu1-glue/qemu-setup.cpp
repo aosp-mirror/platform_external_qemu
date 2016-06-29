@@ -14,14 +14,17 @@
 
 #include "android-qemu1-glue/qemu-setup.h"
 
-#include "android/android.h"
-#include "android/console.h"
-#include "android/emulation/vm_lock.h"
+#include "android-qemu1-glue/emulation/VmLock.h"
 #include "android-qemu1-glue/qemu-control-impl.h"
+#include "android/android.h"
+#include "android/base/Log.h"
+#include "android/console.h"
 
 extern "C" {
 #include "qemu-common.h"
 }  // extern "C"
+
+using android::VmLock;
 
 bool qemu_android_emulation_setup() {
   android_emulation_setup_use_android_emu_console(true);
@@ -33,8 +36,9 @@ bool qemu_android_emulation_setup() {
       gQAndroidNetAgent,
   };
 
-  android_vm_set_lock_funcs(qemu_mutex_lock_iothread,
-                            qemu_mutex_unlock_iothread);
+  VmLock* vmLock = new qemu::VmLock();
+  VmLock* prevVmLock = android::VmLock::set(vmLock);
+  CHECK(prevVmLock == nullptr) << "Another VmLock was already installed!";
 
   return android_emulation_setup(&consoleAgents);
 }

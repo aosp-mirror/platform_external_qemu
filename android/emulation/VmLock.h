@@ -17,7 +17,6 @@
 #include "android/base/Compiler.h"
 
 namespace android {
-namespace base {
 
 // In QEMU2, each virtual CPU runs on its own host threads, but all these
 // threads are synchronized through a global mutex, which allows the virtual
@@ -54,6 +53,13 @@ public:
     // Unlock the VM global mutex.
     virtual void unlock() {}
 
+    // Returns true iff the lock is held by the current thread, false
+    // otherwise. Note that for a correct implementation, that doesn't
+    // only depend on the number of times that VmLock::lock() and
+    // VmLock::unlock() were called, but also on other QEMU threads that
+    // act on the global lock.
+    virtual bool isLockedBySelf() const { return true; }
+
     // Return current VmLock instance. Cannot return nullptr.
     static VmLock* get();
 
@@ -82,5 +88,4 @@ private:
     VmLock* mVmLock;
 };
 
-}  // namespace base
 }  // namespace android
