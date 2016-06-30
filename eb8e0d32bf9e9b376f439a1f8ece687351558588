@@ -22,6 +22,30 @@
       "revId": "eb8e0d32bf9e9b376f439a1f8ece687351558588",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8082ab4f_b82321ac",
+        "filename": "cpus.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-06-30T22:33:02Z",
+      "side": 1,
+      "message": "yurii:\n  why there is problem of order here ?\nI assume qemu_thread_is_self() be called earlier , right ?",
+      "parentUuid": "00acfbb3_017f6c4d",
+      "range": {
+        "startLine": 187,
+        "startChar": 11,
+        "endLine": 188,
+        "endChar": 34
+      },
+      "revId": "eb8e0d32bf9e9b376f439a1f8ece687351558588",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
