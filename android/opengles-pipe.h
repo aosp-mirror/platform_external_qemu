@@ -23,10 +23,7 @@ ANDROID_BEGIN_HEADER
 
 // Initialize the 'opengles' pipe - the one used for GPU emulation protocol
 // between guest and the emugl library.
-// |looper| - pass a non-null looper if you need to run all qemu-related pipe
-//   operations on that looper's main thread. If set to null, pipe operations
-//   run on the thread from which they're called, but under a VmLock
-//   (see android/emulation/VmLock.h)
-void android_init_opengles_pipe(Looper* looper);
+// |dummyLooper| is now unused, this will be removed in a future patch.
+void android_init_opengles_pipe(void* dummyLooper);
 
 ANDROID_END_HEADER
