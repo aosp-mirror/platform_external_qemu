@@ -185,7 +185,7 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             return;
         }
 
-        if (code == KEY_APPSWITCH   || code == KEY_PLAY       ||
+        if (code == KEY_APPSWITCH   || code == KEY_PLAYPAUSE  ||
             code == KEY_BACK        || code == KEY_POWER      ||
             code == KEY_BACKSPACE   || code == KEY_SOFT1      ||
             code == KEY_CENTER      || code == KEY_REWIND     ||
