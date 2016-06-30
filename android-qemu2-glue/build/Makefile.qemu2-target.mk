@@ -70,7 +70,6 @@ LOCAL_SRC_FILES += \
     hw/display/framebuffer.c \
     hw/display/goldfish_fb.c \
     hw/input/goldfish_events.c \
-    hw/input/goldfish_sensors.c \
     hw/intc/goldfish_pic.c \
     hw/misc/android_adb.c \
     hw/misc/android_adb_dbg.c \
