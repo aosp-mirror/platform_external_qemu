@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "80ae2bf8_52b634eb",
+        "filename": "android/emulation/AndroidPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-30T08:58:41Z",
+      "side": 1,
+      "message": "My God, that\u0027s an excellent point, I didn\u0027t realize this.\nI\u0027ll update the comment. I still think that a better abstraction / event object is needed in the future, but with a much much lower priority.",
+      "parentUuid": "00acfbb3_6193d069",
+      "range": {
+        "startLine": 317,
+        "startChar": 0,
+        "endLine": 317,
+        "endChar": 72
+      },
+      "revId": "4f4fe356b676054830ac0af7f5d238713d0c495c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "00acfbb3_219dc870",
         "filename": "android/emulation/AndroidPipe.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-06-29T20:35:22Z",
       "side": 1,
       "message": "ditto",
+      "range": {
+        "startLine": 346,
+        "startChar": 0,
+        "endLine": 349,
+        "endChar": 35
+      },
+      "revId": "4f4fe356b676054830ac0af7f5d238713d0c495c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80ae2bf8_b2cfa065",
+        "filename": "android/emulation/AndroidPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 349,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-06-30T08:58:41Z",
+      "side": 1,
+      "message": "Yes, I\u0027ll update this too :) Thanks.",
+      "parentUuid": "00acfbb3_219dc870",
       "range": {
         "startLine": 346,
         "startChar": 0,
