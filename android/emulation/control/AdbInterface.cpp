@@ -129,8 +129,8 @@ AdbInterfaceImpl::AdbInterfaceImpl(android::base::Looper* looper)
         // If ANDROID_SDK_ROOT is defined, the user most likely wanted to use
         // that ADB. Store it for later - if the second potential ADB path
         // also fails, we'll warn the user about this one.
-        auto adb_path =
-                PathUtils::join(sdk_root_by_env, "platform-tools", "adb");
+        auto adb_path = PathUtils::join(sdk_root_by_env, "platform-tools",
+                                        PathUtils::toExecutableName("adb"));
         if (checkAdbVersion(sdk_root_by_env, adb_path)) {
             mAutoAdbPath = adb_path;
             mAdbVersionCurrent = true;
@@ -142,8 +142,8 @@ AdbInterfaceImpl::AdbInterfaceImpl(android::base::Looper* looper)
     // path based on the emulator executable location.
     auto sdk_root_by_path = android::ConfigDirs::getSdkRootDirectoryByPath();
     if (sdk_root_by_path != sdk_root_by_env && !sdk_root_by_path.empty()) {
-        auto adb_path =
-                PathUtils::join(sdk_root_by_path, "platform-tools", "adb");
+        auto adb_path = PathUtils::join(sdk_root_by_path, "platform-tools",
+                                        PathUtils::toExecutableName("adb"));
         if (checkAdbVersion(sdk_root_by_path, adb_path)) {
             mAutoAdbPath = adb_path;
             mAdbVersionCurrent = true;
