@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3db5aaac_c8a24fc0",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1044603
+      },
+      "writtenOn": "2016-06-30T04:41:50Z",
+      "side": 1,
+      "message": "is this suppose to be a: μ  instead of a u ?  Perhaps the QT HTML parser does not support the HTML tag for (http://www.fileformat.info/info/unicode/char/03BC/index.htm ).",
+      "range": {
+        "startLine": 385,
+        "startChar": 39,
+        "endLine": 385,
+        "endChar": 40
+      },
+      "revId": "48fa2e00d3f68a73170cb9a779f25564b5af6cad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
