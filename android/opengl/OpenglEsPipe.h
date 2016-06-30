@@ -11,75 +11,14 @@
 #pragma once
 
 #include "android/base/Compiler.h"
-#include "android/emulation/android_pipe_host.h"
+#include "android/emulation/AndroidPipe.h"
 
 #include "OpenglRender/RenderChannel.h"
 
 namespace android {
+namespace opengl {
 
-// OpenglEsPipe - an implementation of the fast "opengles" pipe for the
-// GPU emulation.
-//
-// This class provides a
-class OpenglEsPipe {
-public:
-    ~OpenglEsPipe();
+void registerPipeService();
 
-    // Registers the "opengles" pipe type.
-    static void registerPipeType();
-
-private:
-    OpenglEsPipe(void* mHwpipe);
-    // 2-phase initialization because of the ban of exceptions. Grrr.
-    bool initialize();
-
-    static const AndroidPipeFuncs kPipeFuncs;
-
-    // Pipe interface needed for kPipeFuncs.
-    static OpenglEsPipe* create(void* mHwpipe);
-    void onCloseByGuest();
-    void onWakeOn(int flags);
-    unsigned onPoll();
-    int onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers);
-    int onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers);
-
-    // RenderChannel state change callback
-    void onIoEvent(emugl::RenderChannel::State state,
-                   emugl::RenderChannel::EventSource source);
-
-    // Generic private functions
-    bool canRead() const;
-    bool canWrite() const;
-    bool canReadAny() const;
-
-    void close(bool lock);
-    void processIoEvents(bool lock);
-    int sendReadyStatus() const;
-
-private:
-    void* mHwpipe = nullptr;
-    emugl::RenderChannelPtr mChannel;
-
-    // Guest state tracking - if it requested us to wake on read/write
-    // availability. If guest doesn't care about some operation type, we should
-    // not wake it when that operation becomes available.
-    bool mCareAboutRead = false;
-    bool mCareAboutWrite = false;
-
-    // Set to |true| if the pipe is in working state, |false| means we're not
-    // initialized or the pipe is closed.
-    bool mIsWorking = false;
-
-    // These two variables serve as a reading buffer for the guest.
-    // Each time we get a read request, first we extract a single chunk from
-    // the |mChannel| into here, and then copy its content into the
-    // guest-supplied memory.
-    // If guest didn't have enough room for the whole buffer, we track the
-    // number of remaining bytes in |mDataForReadingLeft| for the next read().
-    emugl::ChannelBuffer mDataForReading;
-    size_t mDataForReadingLeft = 0;
-
-    DISALLOW_COPY_ASSIGN_AND_MOVE(OpenglEsPipe);
-};
-
+}  // namespace opengl
 }  // namespace android

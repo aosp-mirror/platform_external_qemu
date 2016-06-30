@@ -10,18 +10,13 @@
 // GNU General Public License for more details.
 #include "android/opengl/OpenglEsPipe.h"
 
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/Optional.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/emulation/VmLock.h"
+#include "android/base/async/Looper.h"
 #include "android/opengles.h"
 #include "android/opengles-pipe.h"
 
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <unordered_map>
 
 // Set to 1 or 2 for debug traces
 //#define DEBUG 1
@@ -38,291 +33,310 @@
 #define DD(...) ((void)0)
 #endif
 
-using android::base::Optional;
-using android::ScopedVmLock;
+using emugl::ChannelBuffer;
 using emugl::RenderChannel;
+using emugl::RenderChannelPtr;
+using ChannelState = emugl::RenderChannel::State;
 
 namespace android {
+namespace opengl {
 
-// TODO(digit): Use AndroidPipe directly instead of the legacy C wrappers.
+namespace {
 
-const AndroidPipeFuncs OpenglEsPipe::kPipeFuncs = {
-        [](void* hwpipe, void* data, const char* args) -> void* {
-            return OpenglEsPipe::create(hwpipe);
-        },
-        [](void* pipe) { static_cast<OpenglEsPipe*>(pipe)->onCloseByGuest(); },
-        [](void* pipe, const AndroidPipeBuffer* buffers, int numBuffers) {
-            return static_cast<OpenglEsPipe*>(pipe)->onGuestSend(buffers,
-                                                                 numBuffers);
-        },
-        [](void* pipe, AndroidPipeBuffer* buffers, int numBuffers) {
-            return static_cast<OpenglEsPipe*>(pipe)->onGuestRecv(buffers,
-                                                                 numBuffers);
-        },
-        [](void* pipe) { return static_cast<OpenglEsPipe*>(pipe)->onPoll(); },
-        [](void* pipe, int flags) {
-            return static_cast<OpenglEsPipe*>(pipe)->onWakeOn(flags);
-        },
-        nullptr,  // we can't save these
-        nullptr,  // we can't load these
-};
+class EmuglPipe : public AndroidPipe {
+public:
+    //////////////////////////////////////////////////////////////////////////
+    // The pipe service class for this implementation.
+    class Service : public AndroidPipe::Service {
+    public:
+        Service() : AndroidPipe::Service("opengles") {}
 
-void OpenglEsPipe::registerPipeType() {
-    android_pipe_add_type("opengles", nullptr, &OpenglEsPipe::kPipeFuncs);
-}
+        // Create a new EmuglPipe instance.
+        virtual AndroidPipe* create(void* mHwPipe, const char* args) const
+                override {
+            auto renderer = android_getOpenglesRenderer();
+            if (!renderer) {
+                // This should never happen, unless there is a bug in the
+                // emulator's initialization, or the system image.
+                D("Trying to open the OpenGLES pipe without GPU emulation!");
+                return nullptr;
+            }
 
-void OpenglEsPipe::processIoEvents(bool lock) {
-    int wakeFlags = 0;
-
-    if (mCareAboutRead && canReadAny()) {
-        wakeFlags |= PIPE_WAKE_READ;
-        mCareAboutRead = false;
-    }
-    if (mCareAboutWrite && canWrite()) {
-        wakeFlags |= PIPE_WAKE_WRITE;
-        mCareAboutWrite = false;
-    }
-
-    /* Send wake signal to the guest if needed */
-    if (wakeFlags != 0) {
-        android_pipe_host_signal_wake(mHwpipe, wakeFlags);
-    }
-}
-
-void OpenglEsPipe::onCloseByGuest() {
-    D("%s", __func__);
-
-    mIsWorking = false;
-    mChannel->stop();
-    // stop callback will call close() which deletes the pipe
-}
-
-void OpenglEsPipe::onWakeOn(int flags) {
-    D("%s: flags=%d", __FUNCTION__, flags);
-
-    // We reset these flags when we actually wake the pipe, so only
-    // add to them here.
-    mCareAboutRead |= (flags & PIPE_WAKE_READ) != 0;
-    mCareAboutWrite |= (flags & PIPE_WAKE_WRITE) != 0;
-
-    processIoEvents(false);
-}
-
-unsigned OpenglEsPipe::onPoll() {
-    D("%s", __FUNCTION__);
-
-    unsigned ret = 0;
-    if (canReadAny()) {
-        ret |= PIPE_POLL_IN;
-    }
-    if (canWrite()) {
-        ret |= PIPE_POLL_OUT;
-    }
-    return ret;
-}
-
-int OpenglEsPipe::sendReadyStatus() const {
-    if (mIsWorking) {
-        if (canWrite()) {
-            return 0;
+            EmuglPipe* pipe = new EmuglPipe(mHwPipe, this, renderer);
+            if (!pipe->mIsWorking) {
+                delete pipe;
+                pipe = nullptr;
+            }
+            return pipe;
         }
-        return PIPE_ERROR_AGAIN;
-    } else if (!mHwpipe) {
-        return PIPE_ERROR_IO;
-    } else {
-        return PIPE_ERROR_INVAL;
+
+        // Really cannot save/load these pipes' state.
+        virtual bool canLoad() const override { return false; }
+    };
+
+    /////////////////////////////////////////////////////////////////////////
+    // Constructor, check that |mIsWorking| is true after this call to verify
+    // that everything went well.
+    EmuglPipe(void* hwPipe,
+              const Service* service,
+              const emugl::RendererPtr& renderer)
+            : AndroidPipe(hwPipe, service) {
+        mChannel = renderer->createRenderChannel();
+        if (!mChannel) {
+            D("Failed to create an OpenGLES pipe channel!");
+            return;
+        }
+
+        mIsWorking = true;
+        mChannel->setEventCallback([this](ChannelState state,
+                                          RenderChannel::EventSource source) {
+            this->onChannelIoEvent(state);
+        });
     }
-}
 
-int OpenglEsPipe::onGuestSend(const AndroidPipeBuffer* buffers,
-                              int numBuffers) {
-    D("%s", __FUNCTION__);
+    //////////////////////////////////////////////////////////////////////////
+    // Overriden AndroidPipe methods
 
-    if (int ret = sendReadyStatus()) {
+    virtual void onGuestClose() override {
+        D("%s", __func__);
+        mIsWorking = false;
+        mChannel->stop();
+        // stop callback will call close() which deletes the pipe
+    }
+
+    virtual unsigned onGuestPoll() const override {
+        DD("%s", __func__);
+
+        unsigned ret = 0;
+        ChannelState state = mChannel->currentState();
+        if (canReadAny(state)) {
+            ret |= PIPE_POLL_IN;
+        }
+        if (canWrite(state)) {
+            ret |= PIPE_POLL_OUT;
+        }
         return ret;
     }
 
-    const AndroidPipeBuffer* const buffEnd = buffers + numBuffers;
-    int count = 0;
-    for (auto buff = buffers; buff < buffEnd; buff++) {
-        count += buff->size;
-    }
+    virtual int onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers)
+            override {
+        DD("%s", __func__);
 
-    emugl::ChannelBuffer outBuffer;
-    outBuffer.reserve(count);
-    for (auto buff = buffers; buff < buffEnd; buff++) {
-        outBuffer.insert(outBuffer.end(), buff->data, buff->data + buff->size);
-    }
+        // Consume the pipe's dataForReading, then put the next received data piece
+        // there. Repeat until the buffers are full or we're out of data
+        // in the channel.
+        int len = 0;
+        size_t buffOffset = 0;
 
-    if (!mChannel->write(std::move(outBuffer))) {
-        return PIPE_ERROR_IO;
-    }
-
-    return count;
-}
-
-int OpenglEsPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
-    D("%s", __FUNCTION__);
-
-    // Consume the pipe's dataForReading, then put the next received data piece
-    // there. Repeat until the buffers are full or we're out of data
-    // in the channel.
-    int len = 0;
-    size_t buffOffset = 0;
-
-    auto buff = buffers;
-    const auto buffEnd = buff + numBuffers;
-    while (buff != buffEnd) {
-        if (mDataForReadingLeft == 0) {
-            // No data left, read a new chunk from the channel.
-            //
-            // Spin a little bit here: many GL calls are much faster than
-            // the whole host-to-guest-to-host transition.
-            int spinCount = 20;
-            while (!mChannel->read(&mDataForReading,
-                                   RenderChannel::CallType::Nonblocking)) {
-                if (mChannel->isStopped()) {
-                    return PIPE_ERROR_IO;
-                } else if (len == 0) {
-                    if (canRead() || --spinCount > 0) {
-                        continue;
+        auto buff = buffers;
+        const auto buffEnd = buff + numBuffers;
+        while (buff != buffEnd) {
+            if (mDataForReadingLeft == 0) {
+                // No data left, read a new chunk from the channel.
+                //
+                // Spin a little bit here: many GL calls are much faster than
+                // the whole host-to-guest-to-host transition.
+                int spinCount = 20;
+                while (!mChannel->read(&mDataForReading,
+                                    RenderChannel::CallType::Nonblocking)) {
+                    if (mChannel->isStopped()) {
+                        return PIPE_ERROR_IO;
+                    } else if (len == 0) {
+                        if (canRead(mChannel->currentState()) || --spinCount > 0) {
+                            continue;
+                        }
+                        return PIPE_ERROR_AGAIN;
+                    } else {
+                        return len;
                     }
-                    return PIPE_ERROR_AGAIN;
-                } else {
-                    return len;
                 }
+
+                mDataForReadingLeft = mDataForReading.size();
             }
 
-            mDataForReadingLeft = mDataForReading.size();
+            const size_t curSize =
+                    std::min(buff->size - buffOffset, mDataForReadingLeft);
+            memcpy(buff->data + buffOffset,
+                mDataForReading.data() +
+                        (mDataForReading.size() - mDataForReadingLeft),
+                curSize);
+
+            len += curSize;
+            mDataForReadingLeft -= curSize;
+            buffOffset += curSize;
+            if (buffOffset == buff->size) {
+                ++buff;
+                buffOffset = 0;
+            }
         }
 
-        const size_t curSize =
-                std::min(buff->size - buffOffset, mDataForReadingLeft);
-        memcpy(buff->data + buffOffset,
-               mDataForReading.data() +
-                       (mDataForReading.size() - mDataForReadingLeft),
-               curSize);
+        return len;
+    }
 
-        len += curSize;
-        mDataForReadingLeft -= curSize;
-        buffOffset += curSize;
-        if (buffOffset == buff->size) {
-            ++buff;
-            buffOffset = 0;
+    virtual int onGuestSend(const AndroidPipeBuffer* buffers,
+                            int numBuffers) override {
+        DD("%s", __func__);
+
+        if (int ret = sendReadyStatus()) {
+            return ret;
+        }
+
+        // Count the total bytes to send.
+        int count = 0;
+        for (int n = 0; n < numBuffers; ++n) {
+            count += buffers[n].size;
+        }
+
+        // Copy everything into a single ChannelBuffer.
+        ChannelBuffer outBuffer;
+        outBuffer.reserve(count);
+        for (int n = 0; n < numBuffers; ++n) {
+            outBuffer.insert(outBuffer.end(),
+                             buffers[n].data,
+                             buffers[n].data + buffers[n].size);
+        }
+
+        // Send it through the channel.
+        if (!mChannel->write(std::move(outBuffer))) {
+            return PIPE_ERROR_IO;
+        }
+
+        return count;
+    }
+
+    virtual void onGuestWantWakeOn(int flags) override {
+        DD("%s: flags=%d", __func__, flags);
+
+        // We reset these flags when we actually wake the pipe, so only
+        // add to them here.
+        mCareAboutRead |= (flags & PIPE_WAKE_READ) != 0;
+        mCareAboutWrite |= (flags & PIPE_WAKE_WRITE) != 0;
+
+        ChannelState state = mChannel->currentState();
+        processIoEvents(state);
+    }
+
+private:
+    // Returns true iff there is data to read from the emugl channel.
+    static bool canRead(ChannelState state) {
+        return (state & ChannelState::CanRead) != ChannelState::Empty;
+    }
+
+    // Returns true iff the emugl channel can accept data.
+    static bool canWrite(ChannelState state) {
+        return (state & ChannelState::CanWrite) != ChannelState::Empty;
+    }
+
+    // Returns true iff there is data to read from the local cache or from
+    // the emugl channel.
+    bool canReadAny(ChannelState state) const {
+        return mDataForReadingLeft != 0 || canRead(state);
+    }
+
+    // Check that the pipe is working and that the render channel can be
+    // written to. Return 0 in case of success, and one PIPE_ERROR_XXX
+    // value on error.
+    int sendReadyStatus() const {
+        if (mIsWorking) {
+            ChannelState state = mChannel->currentState();
+            if (canWrite(state)) {
+                return 0;
+            }
+            return PIPE_ERROR_AGAIN;
+        } else if (!mHwPipe) {
+            return PIPE_ERROR_IO;
+        } else {
+            return PIPE_ERROR_INVAL;
         }
     }
 
-    return len;
-}
+    // Check the read/write state of the render channel and signal the pipe
+    // if any condition meets mCareAboutRead or mCareAboutWrite.
+    void processIoEvents(ChannelState state) {
+        int wakeFlags = 0;
 
-OpenglEsPipe::~OpenglEsPipe() {
-    D("%s", __FUNCTION__);
-}
+        if (mCareAboutRead && canReadAny(state)) {
+            wakeFlags |= PIPE_WAKE_READ;
+            mCareAboutRead = false;
+        }
+        if (mCareAboutWrite && canWrite(state)) {
+            wakeFlags |= PIPE_WAKE_WRITE;
+            mCareAboutWrite = false;
+        }
 
-OpenglEsPipe* OpenglEsPipe::create(void* hwpipe) {
-    D("%s", __FUNCTION__);
-
-    if (!android_getOpenglesRenderer()) {
-        // This should never happen, unless there is a bug in the
-        // emulator's initialization, or the system image.
-        D("Trying to open the OpenGLES pipe without GPU emulation!");
-        return nullptr;
+        // Send wake signal to the guest if needed.
+        if (wakeFlags != 0) {
+            signalWake(wakeFlags);
+        }
     }
 
-    std::unique_ptr<OpenglEsPipe> pipe(new OpenglEsPipe(hwpipe));
-    if (!pipe) {
-        D("Out of memory when creating an OpenGLES pipe!");
-        return nullptr;
+    // Called when an i/o event occurs on the render channel
+    void onChannelIoEvent(ChannelState state) {
+        D("%s: %d", __func__, (int)state);
+
+        if ((state & ChannelState::Stopped) != ChannelState::Empty) {
+            close();
+        } else {
+            processIoEvents(state);
+        }
     }
 
-    if (!pipe->initialize()) {
-        return nullptr;
+    // Close the pipe, this may be called from the host or guest side.
+    void close() {
+        D("%s", __func__);
+
+        // If the pipe isn't in a working state, delete immediately.
+        if (!mIsWorking) {
+            mChannel->stop();
+            delete this;
+            return;
+        }
+
+        // Force the closure of the channel - if a guest is blocked
+        // waiting for a wake signal, it will receive an error.
+        if (mHwPipe) {
+            closeFromHost();
+            mHwPipe = nullptr;
+        }
+
+        mIsWorking = false;
     }
 
-    return pipe.release();
+    // A RenderChannel pointer used for communication.
+    RenderChannelPtr mChannel;
+
+    // Guest state tracking - if it requested us to wake on read/write
+    // availability. If guest doesn't care about some operation type, we should
+    // not wake it when that operation becomes available.
+    bool mCareAboutRead = false;
+    bool mCareAboutWrite = false;
+
+    // Set to |true| if the pipe is in working state, |false| means we're not
+    // initialized or the pipe is closed.
+    bool mIsWorking = false;
+
+    // These two variables serve as a reading buffer for the guest.
+    // Each time we get a read request, first we extract a single chunk from
+    // the |mChannel| into here, and then copy its content into the
+    // guest-supplied memory.
+    // If guest didn't have enough room for the whole buffer, we track the
+    // number of remaining bytes in |mDataForReadingLeft| for the next read().
+    ChannelBuffer mDataForReading;
+    size_t mDataForReadingLeft = 0;
+
+    DISALLOW_COPY_ASSIGN_AND_MOVE(EmuglPipe);
+};
+
+}  // namespace
+
+void registerPipeService() {
+    android::AndroidPipe::Service::add(new EmuglPipe::Service());
 }
 
-OpenglEsPipe::OpenglEsPipe(void* hwpipe) : mHwpipe(hwpipe) {
-    D("%s", __FUNCTION__);
-
-    assert(hwpipe != nullptr);
-}
-
-bool OpenglEsPipe::initialize() {
-    D("%s", __FUNCTION__);
-
-    mChannel = android_getOpenglesRenderer()->createRenderChannel();
-    if (!mChannel) {
-        D("Failed to create an OpenGLES pipe channel!");
-        return false;
-    }
-
-    // Update the state before setting the callback, as the callback is called
-    // at once.
-    mIsWorking = true;
-
-    mChannel->setEventCallback([this](RenderChannel::State state,
-                                      RenderChannel::EventSource source) {
-        this->onIoEvent(state, source);
-    });
-
-    return true;
-}
-
-void OpenglEsPipe::onIoEvent(RenderChannel::State state,
-                             RenderChannel::EventSource source) {
-    D("%s: %d/%d", __FUNCTION__, (int)state, (int)source);
-
-    // We have to lock the qemu global mutex if this event isn't coming
-    // from the pipe - because it means we're currently running on a
-    // RenderThread.
-    const bool needsLock = (source != RenderChannel::EventSource::Client);
-
-    if ((state & RenderChannel::State::Stopped) !=
-        RenderChannel::State::Empty) {
-        close(needsLock);
-        return;
-    }
-
-    processIoEvents(needsLock);
-}
-
-bool OpenglEsPipe::canRead() const {
-    return (mChannel->currentState() & RenderChannel::State::CanRead) !=
-           RenderChannel::State::Empty;
-}
-
-bool OpenglEsPipe::canWrite() const {
-    return (mChannel->currentState() & RenderChannel::State::CanWrite) !=
-           RenderChannel::State::Empty;
-}
-
-bool OpenglEsPipe::canReadAny() const {
-    return mDataForReadingLeft != 0 || canRead();
-}
-
-void OpenglEsPipe::close(bool lock) {
-    D("%s", __FUNCTION__);
-
-    // If the pipe isn't in a working state, delete immediately.
-    if (!mIsWorking) {
-        mChannel->stop();
-        delete this;
-        return;
-    }
-
-    // Force the closure of the channel - if a guest is blocked
-    // waiting for a wake signal, it will receive an error.
-    if (mHwpipe) {
-        android_pipe_host_close(mHwpipe);
-        mHwpipe = nullptr;
-    }
-
-    mIsWorking = false;
-}
-
+}  // namespace opengl
 }  // namespace android
 
-void android_init_opengles_pipe(Looper* looper) {
-    android::OpenglEsPipe::registerPipeType();
+// Declared in android/opengles-pipe.h
+void android_init_opengles_pipe(void* dummyLooper) {
+    android::opengl::registerPipeService();
 }
