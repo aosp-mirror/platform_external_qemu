@@ -16,6 +16,7 @@
 #include "android/emulation/qemud/android_qemud_multiplexer.h"
 #include "android/utils/bufprint.h"
 
+#include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
 
@@ -43,33 +44,34 @@ QemudClient* qemud_client_new(QemudService* service,
     return c;
 }
 
-void _qemud_pipe_cache_buffer(QemudClient* client, const uint8_t* msg, int msglen) {
-    /* Allocate descriptor big enough to contain message as well. */
-    QemudPipeMessage* buf =
-            (QemudPipeMessage*) malloc(msglen + sizeof(QemudPipeMessage));
-    if (buf != NULL) {
-        /* Message starts right after the descriptor. */
-        buf->message = (uint8_t*) buf + sizeof(QemudPipeMessage);
-        buf->size = msglen;
-        memcpy(buf->message, msg, msglen);
-        buf->offset = 0;
-        buf->next = NULL;
-        if (client->ProtocolSelector.Pipe.last_msg) {
-            client->ProtocolSelector.Pipe.last_msg->next = buf;
-            client->ProtocolSelector.Pipe.last_msg = buf;
-        } else {
-            client->ProtocolSelector.Pipe.last_msg =
-                    client->ProtocolSelector.Pipe.messages = buf;
-        }
-        /* Notify the pipe that there is data to read. */
-        android_pipe_host_signal_wake(
-                client->ProtocolSelector.Pipe.qemud_pipe->hwpipe,
-                PIPE_WAKE_READ);
+static QemudPipeMessage* _qemud_pipe_alloc_msg(int msglen) {
+    auto buf = (QemudPipeMessage*) malloc(msglen + sizeof(QemudPipeMessage));
+    if (!buf) {
+        return nullptr;
+    }
+
+    /* Message starts right after the descriptor. */
+    buf->message = (uint8_t*) buf + sizeof(QemudPipeMessage);
+    buf->size = msglen;
+    buf->offset = 0;
+    buf->next = NULL;
+    return buf;
+}
+
+static void _qemud_pipe_cache_msg(QemudClient* client, QemudPipeMessage* msg) {
+    if (client->ProtocolSelector.Pipe.last_msg) {
+        client->ProtocolSelector.Pipe.last_msg->next = msg;
+        client->ProtocolSelector.Pipe.last_msg = msg;
+    } else {
+        client->ProtocolSelector.Pipe.last_msg =
+                client->ProtocolSelector.Pipe.messages = msg;
+        // On the first message we notify the pipe that there is data to read.
+        android_pipe_host_signal_wake(client->ProtocolSelector.Pipe.qemud_pipe->hwpipe,
+                          PIPE_WAKE_READ);
     }
 }
 
 void _qemud_pipe_send(QemudClient* client, const uint8_t* msg, int msglen) {
-    uint8_t frame[FRAME_HEADER_SIZE];
     int avail, len = msglen;
     int framing = client->framing;
 
@@ -90,18 +92,25 @@ void _qemud_pipe_send(QemudClient* client, const uint8_t* msg, int msglen) {
             avail = MAX_SERIAL_PAYLOAD;
 
         /* insert frame header when needed */
+        uint8_t* out_buf;
+        QemudPipeMessage* pipe_msg;
         if (framing) {
-            int2hex(frame, FRAME_HEADER_SIZE, msglen);
-            T("%s: '%.*s'", __FUNCTION__, FRAME_HEADER_SIZE, frame);
-            _qemud_pipe_cache_buffer(client, frame, FRAME_HEADER_SIZE);
+            pipe_msg = _qemud_pipe_alloc_msg(msglen + FRAME_HEADER_SIZE);
+            int2hex(pipe_msg->message, FRAME_HEADER_SIZE, msglen);
+            out_buf = pipe_msg->message + FRAME_HEADER_SIZE;
             avail -= FRAME_HEADER_SIZE;
             len -= FRAME_HEADER_SIZE;
             framing = 0;
+        } else {
+            pipe_msg = _qemud_pipe_alloc_msg(msglen);
+            out_buf = pipe_msg->message;
         }
+        assert(pipe_msg);
 
-        /* write message content */
-        T("%s: '%.*s'", __FUNCTION__, avail, msg);
-        _qemud_pipe_cache_buffer(client, msg, avail);
+        memcpy(out_buf, msg, msglen);
+
+        T("%s: '%.*s'", __func__, avail, msg);
+        _qemud_pipe_cache_msg(client, pipe_msg);
         msg += avail;
         len -= avail;
     }
