@@ -46,6 +46,30 @@
       "revId": "eb8e0d32bf9e9b376f439a1f8ece687351558588",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9d4856a2_6e7772eb",
+        "filename": "cpus.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-06-30T23:00:03Z",
+      "side": 1,
+      "message": "I just think that qemu_global_lock_held check is much faster than qemu_thread_is_self(), and if it\u0027s false we short-circuit and don\u0027t even call the more expensive one",
+      "parentUuid": "8082ab4f_b82321ac",
+      "range": {
+        "startLine": 187,
+        "startChar": 11,
+        "endLine": 188,
+        "endChar": 34
+      },
+      "revId": "eb8e0d32bf9e9b376f439a1f8ece687351558588",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
