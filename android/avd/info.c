@@ -574,8 +574,7 @@ avdInfo_getApiDessertName(int apiLevel) {
     if (apiLevel <= 20) return "KitKat";             // 19..20
     if (apiLevel <= 22) return "Lollipop";           // 21..22
     if (apiLevel <= 23) return "Marshmallow";        // 23
-
-    if (apiLevel <= 24) return "N";                  // 24
+    if (apiLevel <= 24) return "Nougat";             // 24
 
     return "";
 }
@@ -596,8 +595,7 @@ avdInfo_getFullApiName(int apiLevel, char* nameStr, int strLen) {
         case 21: strncpy(nameStr, "5.0 (Lollipop) - API 21 (Rev 2)",             strLen); break;
         case 22: strncpy(nameStr, "5.1 (Lollipop) - API 22 (Rev 2)",             strLen); break;
         case 23: strncpy(nameStr, "6.0 (Marshmallow) - API 23 (Rev 1)",          strLen); break;
-
-        case 24: strncpy(nameStr, "N preview - API 24",                          strLen); break;
+        case 24: strncpy(nameStr, "7.0 (Nougat) - API 24",                       strLen); break;
 
         default:
             if (apiLevel < 0 || apiLevel > 99) {
