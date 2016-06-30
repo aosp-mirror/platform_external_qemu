@@ -1053,7 +1053,15 @@ int pathStat(StringView path, PathStat* st) {
 
 int pathAccess(StringView path, int mode) {
 #ifdef _WIN32
-    return _waccess(win32Path(path).c_str(), mode);
+    // Convert |mode| to win32 permission bits.
+    int win32mode = 0x0;
+    if ((mode & R_OK) || (mode & X_OK)) {
+        win32mode |= 0x4;
+    }
+    if (mode & W_OK) {
+        win32mode |= 0x2;
+    }
+    return _waccess(win32Path(path).c_str(), win32mode);
 #else   // !_WIN32
     return HANDLE_EINTR(access(path.c_str(), mode));
 #endif  // !_WIN32
