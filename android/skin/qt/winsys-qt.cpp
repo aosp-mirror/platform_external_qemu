@@ -15,6 +15,7 @@
 #endif
 
 #include "android/base/async/ThreadLooper.h"
+#include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/qt/qt_path.h"
@@ -445,23 +446,28 @@ int qMain(int argc, char** argv) {
     // problems for Qt. But the emulator uses argv[0] to determine the path of
     // the emulator executable so we need that to be encoded correctly.
     int numArgs = 0;
-    wchar_t** wideArgv = CommandLineToArgvW(GetCommandLineW(), &numArgs);
-    if (wideArgv == nullptr) {
+    const auto wideArgv = android::base::makeCustomScopedPtr(
+                        CommandLineToArgvW(GetCommandLineW(), &numArgs),
+                        [](wchar_t** ptr) { LocalFree(ptr); });
+    if (!wideArgv) {
         // If this fails we can at least give it a try with the local code page
         // As long as there are only ANSI characters in the arguments this works
         return qt_main(argc, argv);
     }
 
     // Store converted strings and pointers to those strings, the pointers are
-    // what will become the argv for qt_main
+    // what will become the argv for qt_main.
+    // Also reserve a slot for an array null-terminator as QEMU command line
+    // parsing code relies on it (and it's a part of C Standard, actually).
     std::vector<std::string> arguments(numArgs);
-    std::vector<char*> argumentPointers(numArgs);
+    std::vector<char*> argumentPointers(numArgs + 1);
 
     for (int i = 0; i < numArgs; ++i) {
-        arguments[i] = Win32UnicodeString::convertToUtf8(wideArgv[i]);
-        argumentPointers[i] = reinterpret_cast<char*>(&arguments[i][0]);
+        arguments[i] = Win32UnicodeString::convertToUtf8(wideArgv.get()[i]);
+        argumentPointers[i] = &arguments[i].front();
     }
+    argumentPointers.back() = nullptr;
 
-    return qt_main(numArgs, &argumentPointers[0]);
+    return qt_main(numArgs, argumentPointers.data());
 }
 #endif  // _WIN32

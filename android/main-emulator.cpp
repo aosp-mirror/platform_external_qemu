@@ -31,6 +31,7 @@
 
 #include "android/avd/scanner.h"
 #include "android/avd/util.h"
+#include "android/base/ArraySize.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
@@ -96,8 +97,6 @@ static const char kExeExtension[] = ".exe";
 static const char kExeExtension[] = "";
 #endif
 
-#define ARRAY_SIZE(x)  (sizeof(x)/sizeof(x[0]))
-
 // Return true if string |str| is in |list|, which is an array of string
 // pointers of |listSize| elements.
 static bool isStringInList(const char* str,
@@ -139,6 +138,7 @@ int main(int argc, char** argv)
     bool force_32bit = false;
     bool no_window = false;
     bool useSystemLibs = false;
+    bool forceEngineLaunch = false;
 
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
@@ -186,13 +186,23 @@ int main(int argc, char** argv)
             return ret ? exit_code : -1;
         }
 
-        if (!strcmp(opt,"-qemu"))
+        if (!strcmp(opt,"-qemu")) {
+            forceEngineLaunch = true;
             break;
+        }
+
+        static const char helpOption[] = "-help";
+        if (!strncmp(opt, helpOption,
+                     android::base::stringLiteralLength(helpOption))) {
+            forceEngineLaunch = true;
+            continue;
+        }
 
         if (!strcmp(opt,"-verbose") || !strcmp(opt,"-debug-all")
                  || !strcmp(opt,"-debug-init")) {
             android_verbose = 1;
             base_enable_verbose_logs();
+            continue;
         }
 
         if (!strcmp(opt,"-debug") && nn + 1 < argc &&
@@ -245,7 +255,7 @@ int main(int argc, char** argv)
                 printf("%s\n", name);
             }
             avdScanner_free(scanner);
-            exit(0);
+            return 0;
         }
 
         if (!avdName) {
@@ -289,7 +299,7 @@ int main(int argc, char** argv)
 "       Consider moving to a 64-bit Linux system before that happens.\n"
 "\n"
         );
-        exit(1);
+        return 1;
     }
 #endif  // __linux__
 
@@ -329,6 +339,12 @@ int main(int argc, char** argv)
             D("Found build target architecture: %s\n",
               avdArch ? avdArch : "<NULL>");
         }
+    }
+
+    if (!avdName && !androidOut && !forceEngineLaunch) {
+        derror("No AVD specified. Use '@foo' or '-avd foo' to launch a virtual"
+               " device named 'foo'\n");
+        return 1;
     }
 
     if (avdArch == NULL) {
@@ -373,7 +389,7 @@ int main(int argc, char** argv)
                 ranchu = RANCHU_ON;
             }
         } else {
-            APANIC("Invalid -engine value '%s', please use one of: auto, classic, qemu2",
+            APANIC("Invalid -engine value '%s', please use one of: auto, classic, qemu2\n",
                    engine);
         }
     }
@@ -480,7 +496,7 @@ int main(int argc, char** argv)
                                 wantedBitness,
                                 no_window)) {
         fprintf(stderr, "ERROR: %s\n", config.status);
-        exit(1);
+        return 1;
     }
     D("%s\n", config.status);
 
