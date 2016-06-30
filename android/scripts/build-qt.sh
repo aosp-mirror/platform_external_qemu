@@ -294,7 +294,6 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 -force-debug-info \
                 -release \
                 -no-c++11 \
-                -no-rpath \
                 -no-gtkstyle \
                 -shared \
                 -nomake examples \
@@ -307,11 +306,13 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         case $SYSTEM in
             linux-x86)
                 var_append EXTRA_CONFIGURE_FLAGS \
+                        -R $ORIGIN/../lib \
                         -qt-xcb \
                         -platform linux-g++-32
                 ;;
             linux-x86_64)
                 var_append EXTRA_CONFIGURE_FLAGS \
+                        -R $ORIGIN/../lib \
                         -qt-xcb \
                         -platform linux-g++-64
                 ;;
@@ -328,6 +329,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                         ;;
                 esac
                 var_append EXTRA_CONFIGURE_FLAGS \
+                    -no-rpath \
                     -xplatform win32-g++ \
                     -device-option CROSS_COMPILE=$BINPREFIX \
                     -no-warnings-are-errors
@@ -342,6 +344,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 echo "(using the latest version for the Qt build)"
 
                 var_append EXTRA_CONFIGURE_FLAGS \
+                    -R @executable_path/../lib \
                     -no-framework \
                     -sdk macosx
                 var_append CFLAGS -mmacosx-version-min=10.8
