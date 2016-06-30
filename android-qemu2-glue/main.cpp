@@ -634,34 +634,31 @@ extern "C" int main(int argc, char **argv) {
         }
     }
 
+    // Make sure we always use the custom Android CPU definition.
+    args[n++] = "-cpu";
+    args[n++] = kTarget.qemuCpu;
+
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
     char* accel_status = NULL;
     CpuAccelMode accel_mode = ACCEL_AUTO;
-    const bool accel_ok = handleCpuAcceleration(opts, avd, &accel_mode, &accel_status);
+    const bool accel_ok = handleCpuAcceleration(opts, avd,
+                                                &accel_mode, &accel_status);
 
-    if (accel_mode == ACCEL_OFF) {  // 'accel off' is specified'
-        args[n++] = "-cpu";
-        args[n++] = kTarget.qemuCpu;
-    } else if (accel_mode == ACCEL_ON) {  // 'accel on' is specified'
+    if (accel_mode == ACCEL_ON) {  // 'accel on' is specified'
         if (!accel_ok) {
             derror("CPU acceleration is not supported on this machine!");
             derror("Reason: %s", accel_status);
             return 1;
         }
         args[n++] = ASTRDUP(kEnableAccelerator);
-    } else {  // ACCEL_AUTO
+    } else if (accel_mode == ACCEL_AUTO) {
         if (accel_ok) {
             args[n++] = ASTRDUP(kEnableAccelerator);
-        } else {
-            args[n++] = "-cpu";
-            args[n++] = kTarget.qemuCpu;
         }
-    }
+    } // else accel is off and we don't need to add anything else
 
     AFREE(accel_status);
 #else   // !TARGET_X86_64 && !TARGET_I386
-    args[n++] = "-cpu";
-    args[n++] = kTarget.qemuCpu;
     args[n++] = "-machine";
     args[n++] = "type=ranchu";
 #endif  // !TARGET_X86_64 && !TARGET_I386
