@@ -70,6 +70,30 @@
       "revId": "eb8e0d32bf9e9b376f439a1f8ece687351558588",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80ae2bf8_b55caa6c",
+        "filename": "cpus.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T13:14:21Z",
+      "side": 1,
+      "message": "Ok, I wanted to avoid memory-ordering related issues by performing the thread self check first, but I\u0027ve performed a more in-deep analysis, and came to the conclusion that this will not work, even trying to use atomic operations on the qemu_global_lock_held doesn\u0027t get rid of all possible data races because there is no way to atomically compare a QemuThread value at the moment. I\u0027m uploading a new implementation that uses a __thread boolean instead which seems to work well and is 100% reliable. Testing doesn\u0027t show performance differences with 3DMark. Oh my.",
+      "parentUuid": "9d4856a2_6e7772eb",
+      "range": {
+        "startLine": 187,
+        "startChar": 11,
+        "endLine": 188,
+        "endChar": 34
+      },
+      "revId": "eb8e0d32bf9e9b376f439a1f8ece687351558588",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
