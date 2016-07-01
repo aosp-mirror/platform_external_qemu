@@ -254,11 +254,13 @@ GLEScontext::~GLEScontext() {
 const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data,bool normalize) {
     GLuint bufferName = m_arrayBuffer;
     if(bufferName) {
+        fprintf(stderr, "%s: has buffer name. is vbo.\n", __FUNCTION__);
         unsigned int offset = SafeUIntFromPointer(data);
         GLESbuffer* vbo = static_cast<GLESbuffer*>(m_shareGroup->getObjectData(VERTEXBUFFER,bufferName).get());
         m_map[arrType]->setBuffer(size,type,stride,vbo,bufferName,offset,normalize);
         return  static_cast<const unsigned char*>(vbo->getData()) +  offset;
     }
+    fprintf(stderr, "%s: no has buffer name. is not vbo.\n", __FUNCTION__);
     m_map[arrType]->setArray(size,type,stride,data,normalize);
     return data;
 }

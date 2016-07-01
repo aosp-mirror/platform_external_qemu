@@ -109,9 +109,27 @@ void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
 }
 
 //setting client side arr
-void GLESv2Context::setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int index){
+void GLESv2Context::setupArr(const GLvoid* arr,
+                             GLenum arrayType,
+                             GLenum dataType,
+                             GLint size,GLsizei stride,GLboolean normalized, int index){
      if(arr == NULL) return;
+
+     GLint err = GL_NO_ERROR;
+
+     err = s_glDispatch.glGetError();
+     if (err != GL_NO_ERROR) {
+         fprintf(stderr, "%s: error 0x%x (pre glVertexAttribPointer)\n", __FUNCTION__, err);
+     }
+
+     fprintf(stderr, "%s: glVertexAttribPointer(0x%x, %d, 0x%x, %d, %d, %p)\n",
+             __FUNCTION__, arrayType, size, dataType, normalized, stride, arr);
      s_glDispatch.glVertexAttribPointer(arrayType,size,dataType,normalized,stride,arr);
+
+     err = s_glDispatch.glGetError();
+     if (err != GL_NO_ERROR) {
+         fprintf(stderr, "%s: error 0x%x\n", __FUNCTION__, err);
+     }
 }
 
 bool GLESv2Context::needConvert(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id) {
@@ -122,18 +140,22 @@ bool GLESv2Context::needConvert(GLESConversionArrays& cArrs,GLint first,GLsizei 
      conversion is not necessary in the following cases:
       (*) array type is not fixed
     */
-    if(arrType != GL_FIXED) return false;
+    if(arrType != GL_FIXED) { fprintf(stderr, "%s: arrType not fixed, return. usingVBO=%d\n", __FUNCTION__, usingVBO); return false; }
 
     if(!usingVBO) {
         if (direct) {
+            fprintf(stderr, "%s: not using vbo, convertDirect\n", __FUNCTION__);
             convertDirect(cArrs,first,count,array_id,p);
         } else {
+            fprintf(stderr, "%s: not using vbo, convertIndirect\n", __FUNCTION__);
             convertIndirect(cArrs,count,type,indices,array_id,p);
         }
     } else {
         if (direct) {
+            fprintf(stderr, "%s: using vbo, convertDirect\n", __FUNCTION__);
             convertDirectVBO(cArrs,first,count,array_id,p) ;
         } else {
+            fprintf(stderr, "%s: using vbo, convertIndirect\n", __FUNCTION__);
             convertIndirectVBO(cArrs,count,type,indices,array_id,p);
         }
     }

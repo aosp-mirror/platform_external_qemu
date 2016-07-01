@@ -640,32 +640,57 @@ GL_APICALL void  GL_APIENTRY glDisableVertexAttribArray(GLuint index){
 }
 
 GL_APICALL void  GL_APIENTRY glDrawArrays(GLenum mode, GLint first, GLsizei count){
+    fprintf(stderr, "drawArrays start {\n");
     GET_CTX_V2();
+
+    GLint err = GL_NO_ERROR;
+    err = ctx->dispatcher().glGetError();
+    if (err != GL_NO_ERROR) {
+        fprintf(stderr, "has error 0x%x\n", err);
+    }
+
+    fprintf(stderr, "nextline: SET_ERROR_IF(count < 0,GL_INVALID_VALUE)\n");
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
+    fprintf(stderr, "nextline: SET_ERROR_IF(!GLESv2Validate::drawMode(mode),GL_INVALID_ENUM);\n");
     SET_ERROR_IF(!GLESv2Validate::drawMode(mode),GL_INVALID_ENUM);
 
+    fprintf(stderr, "nextline: ctx->drawValidate();\n");
     ctx->drawValidate();
 
+    fprintf(stderr, "nextline: GLESConversionArrays tmpArrs;\n");
     GLESConversionArrays tmpArrs;
+    fprintf(stderr, "nextline: ctx->setupArraysPointers(tmpArrs,first,count,0,NULL,true);\n");
+    err = ctx->dispatcher().glGetError();
+    if (err != GL_NO_ERROR) {
+        fprintf(stderr, "has error 0x%x\n", err);
+    }
     ctx->setupArraysPointers(tmpArrs,first,count,0,NULL,true);
 
+    fprintf(stderr, "nextline: ctx->validateAtt0PreDraw(count);\n");
     ctx->validateAtt0PreDraw(count);
 
     //Enable texture generation for GL_POINTS and gl_PointSize shader variable
     //GLES2 assumes this is enabled by default, we need to set this state for GL
     if (mode==GL_POINTS) {
+        fprintf(stderr, "nextline: ctx->dispatcher().glEnable(GL_POINT_SPRITE);\n");
         ctx->dispatcher().glEnable(GL_POINT_SPRITE);
+        fprintf(stderr, "nextline: ctx->dispatcher().glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);\n");
         ctx->dispatcher().glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
     }
 
+    fprintf(stderr, "nextline: ctx->dispatcher().glDrawArrays(mode,first,count);\n");
     ctx->dispatcher().glDrawArrays(mode,first,count);
 
     if (mode==GL_POINTS) {
+        fprintf(stderr, "nextline: ctx->dispatcher().glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);\n");
         ctx->dispatcher().glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
+        fprintf(stderr, "nextline: ctx->dispatcher().glDisable(GL_POINT_SPRITE);\n");
         ctx->dispatcher().glDisable(GL_POINT_SPRITE);
     }
 
+    fprintf(stderr, "nextline: ctx->validateAtt0PostDraw();\n");
     ctx->validateAtt0PostDraw();
+    fprintf(stderr, "drawArrays done }\n");
 }
 
 GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid* elementsIndices){

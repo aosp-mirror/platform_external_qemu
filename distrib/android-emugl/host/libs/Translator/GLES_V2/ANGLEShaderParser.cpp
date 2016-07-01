@@ -105,6 +105,7 @@ bool translate(const char* src, GLenum shaderType,
     // and we manually clear them immediately anyway.
     *outInfolog = std::string(ShGetInfoLog(compilerHandle));
     *outObjCode = std::string(ShGetObjectCode(compilerHandle));
+    fprintf(stderr, "%s: outObjCode=[\n%s]\n", __FUNCTION__, outObjCode->c_str());
     ShClearResults(compilerHandle);
 
     return res;
