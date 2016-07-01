@@ -87,6 +87,14 @@ typedef struct {
  * active connection at a time as data is multiplexed over the pipe.
  */
 
+struct ipv4_listen_struct {
+    void* bs;
+};
+
+struct ipv6_listen_struct {
+    void* bs;
+};
+
 typedef struct {
     GIOChannel *listen_chan;    /* listener/connect socket */
     GIOChannel *listen_chan_ipv6;
@@ -98,6 +106,8 @@ typedef struct {
     adb_pipe *connected_pipe;
     guint       listen_chan_event; /* an event id if we're listening or 0 */
     guint       listen_chan_event_ipv6;
+    struct ipv4_listen_struct ipv4_listener;
+    struct ipv6_listen_struct ipv6_listener;
     QemuMutex*  mutex;
 } adb_backend_state;
 
@@ -234,14 +244,14 @@ static void tcp_adb_server_close(adb_backend_state *bs)
     if (bs->listen_chan_event == 0) {
         /* wait for new connections */
         bs->listen_chan_event =
-                g_io_add_watch(bs->listen_chan, G_IO_IN, tcp_adb_accept, bs);
+                g_io_add_watch(bs->listen_chan, G_IO_IN, tcp_adb_accept, &(bs->ipv4_listener));
     }
 
     if (bs->listen_chan_event_ipv6 == 0) {
         /* wait for new connections */
         bs->listen_chan_event_ipv6 =
                 g_io_add_watch(bs->listen_chan_ipv6, G_IO_IN,
-                    tcp_adb_accept_ipv6, bs);
+                    tcp_adb_accept_ipv6, &(bs->ipv6_listener));
     }
 
     if (bs->chan) {
@@ -379,7 +389,7 @@ static gboolean tcp_adb_connect(adb_backend_state *bs, int fd)
 static gboolean tcp_adb_accept(GIOChannel *channel, GIOCondition cond,
                                void *opaque)
 {
-    adb_backend_state *bs = opaque;
+    adb_backend_state *bs = ((struct ipv4_listen_struct*)opaque)->bs;
     struct sockaddr_in saddr;
     struct sockaddr *addr;
     socklen_t len;
@@ -414,7 +424,7 @@ static gboolean tcp_adb_accept(GIOChannel *channel, GIOCondition cond,
 static gboolean tcp_adb_accept_ipv6(GIOChannel *channel, GIOCondition cond,
                                void *opaque)
 {
-    adb_backend_state *bs = opaque;
+    adb_backend_state *bs = ((struct ipv6_listen_struct*)opaque)->bs;
     struct sockaddr_in6 saddr;
     struct sockaddr *addr;
     socklen_t len;
@@ -474,14 +484,14 @@ static bool adb_server_listen_incoming(int port)
     if (fd >= 0) {
         bs->listen_chan = io_channel_from_socket(fd);
         bs->listen_chan_event =
-                g_io_add_watch(bs->listen_chan, G_IO_IN, tcp_adb_accept, bs);
+                g_io_add_watch(bs->listen_chan, G_IO_IN, tcp_adb_accept, &(bs->ipv4_listener));
     }
 
     if (fd_ipv6 >= 0) {
         bs->listen_chan_ipv6 = io_channel_from_socket(fd_ipv6);
         bs->listen_chan_event_ipv6 =
                 g_io_add_watch(bs->listen_chan_ipv6, G_IO_IN,
-                               tcp_adb_accept_ipv6, bs);
+                        tcp_adb_accept_ipv6, &(bs->ipv6_listener));
     }
 
     DPRINTF("ADB server has been initialized for port %d. "
@@ -793,6 +803,9 @@ static int adb_pipe_proxy_recv(adb_pipe *apipe, AndroidPipeBuffer *buffers,
          * let it come back to here */
         if (total_copied > 0 &&
             ((status == G_IO_STATUS_EOF || status == G_IO_STATUS_AGAIN))) {
+            if (status == G_IO_STATUS_AGAIN) {
+                g_io_add_watch(chan, G_IO_IN|G_IO_ERR|G_IO_HUP, tcp_adb_server_data, bs);
+            }
             g_io_channel_unref(chan);
             bs->data_in = FALSE;
             return total_copied;
@@ -824,6 +837,7 @@ static int adb_pipe_proxy_recv(adb_pipe *apipe, AndroidPipeBuffer *buffers,
 
         if (copied < bsize) {
             g_assert(total_copied > 0);
+            g_io_add_watch(chan, G_IO_IN|G_IO_ERR|G_IO_HUP, tcp_adb_server_data, bs);
             bs->data_in = FALSE;
             break;
         }
@@ -934,6 +948,8 @@ bool qemu2_adb_server_init(int port)
         adb_state.listen_chan_ipv6 = NULL;
         adb_state.listen_chan_event = 0;
         adb_state.listen_chan_event_ipv6 = 0;
+        adb_state.ipv4_listener.bs = &adb_state;
+        adb_state.ipv6_listener.bs = &adb_state;
         adb_state.data_in = FALSE;
         adb_state.connected_pipe = NULL;
         qemu_mutex_init(&adb_state_mutex);
