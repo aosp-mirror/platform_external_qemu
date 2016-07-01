@@ -1,0 +1,395 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a0116f0b_b60e8688",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 34
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "nit: probably goes on a single line",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bd143a89_0444f659",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 34
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "nit: Add //static above",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80ae2bf8_b5978a08",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 34
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "nit: do you want to delete the default initializer? If not provide default values to |sync| and |gl_cxt| below.\n\nAlso delete copy-constructor / copy-assignment?",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "001ddb1a_79afc33c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 34
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "nit: did you mean uint64_t as the return type?",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "20d49f7c_ca342340",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 34
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "why not using a bool member in RcSync instead of creating a new struct?",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "001ddb1a_d97c179f",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 34
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "nit: remove here and below?",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9d193675_d3be7412",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 34
+      },
+      "lineNbr": 474,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "nit: s/resultign/resulting/",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a0116f0b_5641f292",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderThreadInfo.h",
+        "patchSetId": 34
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "should be std::unique_ptr\u003cSyncThread\u003e instead.",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80ae2bf8_7596c208",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 34
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "static? Also probably better named with current_time_ms() or now_ms()",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bd143a89_64496a72",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 34
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "nit: move this to the header.",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "00a23b11_71e89284",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 34
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "nit: simplify:\n\n  while (!exiting) {\n      ...\n  }",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9d193675_f3c17090",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 34
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "nit: no way to handle failure in the caller?",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "00a23b11_51e596aa",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 34
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "should you exit / release resources here?",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80ae2bf8_95c52600",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 34
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fdaeb264_c95d7504",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 34
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "nit: please simplify, e.g.\n\n  if (!tInfo-\u003esyncThread) {\n    tInfo-\u003esyncThread \u003d new SyncThread(s_egl.eglGetCurrentContext());\n  }\n  return tInfo-\u003esyncThread;",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80ae2bf8_b5c02af0",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 34
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "same here:\n\n  if (tInfo-\u003esyncThread) {\n      tInfo-\u003esyncThread-\u003ecleanup();\n      delete tInfo-\u003esyncThread;\n  }\n\nBut you probably want a std::unique_ptr\u003cSyncThread\u003e member in RenderThreadInfo instead, and call cleanup() from the destructor directly.",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80ae2bf8_f5a1125e",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.h",
+        "patchSetId": 34
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "nit: place everything in emugl namespace",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c0abc3ee_2cfcf3ba",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.h",
+        "patchSetId": 34
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "nit: Define this inside SyncThread as an enum class:\n\n  class SyncThread {\n  public:\n      enum class Opcode {\n         Init \u003d 0;\n         Wait \u003d 1;\n         Exit \u003d 2;\n      };\n\n+ documentation",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fdaeb264_099f0dcf",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.h",
+        "patchSetId": 34
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "Same here, declare as SyncThread::Cmd",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80ae2bf8_158936e5",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.h",
+        "patchSetId": 34
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "Please. All this requires a lot more documentation!",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a0116f0b_7644eea4",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.h",
+        "patchSetId": 34
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "nit: use a move reference to optimize flow.\n\n  // Method declaration.\n  GLint sendAndWaitForResult(SyncThreadCmd\u0026\u0026 cmd);\n\n  ...\n  // at caller site:\n  SyncThreadCmd cmd \u003d { ... }:\n  syncThread-\u003esendAndWaitForResult(std::move(cmd));",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bd143a89_444eee7b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.h",
+        "patchSetId": 34
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "ditto.",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80ae2bf8_358c3af5",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.h",
+        "patchSetId": 34
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-01T14:33:16Z",
+      "side": 1,
+      "message": "Should be static methods of SyncThread instead, and properly documented.",
+      "revId": "28716dc39a1a651dc13fd059c08bbffddb15deb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
