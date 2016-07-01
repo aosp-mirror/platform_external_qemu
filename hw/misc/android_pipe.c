@@ -30,14 +30,9 @@
 */
 #include "hw/misc/android_pipe.h"
 
-#include "android/utils/looper.h"
-
 #include "hw/hw.h"
 #include "hw/sysbus.h"
-#include "qemu-common.h"
-#include "qemu/timer.h"
 #include "qemu/error-report.h"
-#include "qemu/thread.h"
 
 #include <assert.h>
 #include <glib.h>
@@ -187,21 +182,16 @@ typedef struct HwPipe {
     unsigned char               wanted;
     char                        closed;
     void                        *pipe;
-    QemuMutex                   lock;
 } HwPipe;
 
 static unsigned char get_and_clear_pipe_wanted(HwPipe* pipe) {
-    qemu_mutex_lock(&pipe->lock);
     unsigned char val = pipe->wanted;
     pipe->wanted = 0;
-    qemu_mutex_unlock(&pipe->lock);
     return val;
 }
 
 static void set_pipe_wanted_bits(HwPipe* pipe, unsigned char val) {
-    qemu_mutex_lock(&pipe->lock);
     pipe->wanted |= val;
-    qemu_mutex_unlock(&pipe->lock);
 }
 
 static HwPipe*
@@ -219,19 +209,12 @@ pipe_new(uint64_t channel, PipeDevice* dev)
     HwPipe*  pipe = pipe_new0(dev);
     pipe->channel = channel;
     pipe->pipe  = android_pipe_guest_open(pipe);
-    qemu_mutex_init(&pipe->lock);
     return pipe;
 }
 
 static void pipe_free(HwPipe* pipe)
 {
     android_pipe_guest_close(pipe->pipe);
-    /* Free stuff */
-    /* note: should call destroy mutex after android_pipe_guest_close
-       because it will call qemu2_android_pipe_host_signal_wake, and
-       mutex could also be called in "android_pipe_guest_close"
-       */
-    qemu_mutex_destroy(&pipe->lock);
     g_free(pipe);
 }
 
@@ -253,8 +236,6 @@ struct PipeDevice {
 
     // cache of the pipes by channel for a faster lookup
     GHashTable* pipes_by_channel;
-
-    QemuMutex lock;
 
     // i/o registers
     uint64_t  address;
@@ -325,28 +306,22 @@ static HwPipe* get_and_clear_cache_pipe(PipeDevice* dev) {
         dev->cache_pipe_64bit = NULL;
         return val;
     }
-    qemu_mutex_lock(&dev->lock);
     HwPipe* val = dev->cache_pipe;
     dev->cache_pipe = NULL;
-    qemu_mutex_unlock(&dev->lock);
     return val;
 }
 
 static void set_cache_pipe(PipeDevice* dev, HwPipe* cache_pipe) {
-    qemu_mutex_lock(&dev->lock);
     dev->cache_pipe = cache_pipe;
-    qemu_mutex_unlock(&dev->lock);
 }
 
 static void clear_cache_pipe_if_equal(PipeDevice* dev, HwPipe* pipe) {
-    qemu_mutex_lock(&dev->lock);
     if (dev->cache_pipe == pipe) {
         dev->cache_pipe = NULL;
     }
     if (dev->cache_pipe_64bit == pipe) {
         dev->cache_pipe_64bit = NULL;
     }
-    qemu_mutex_unlock(&dev->lock);
 }
 
 /* Update this version number if the device's interface changes. */
@@ -745,8 +720,6 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
     if (!s->dev->pipes_by_channel) {
         APANIC("%s: failed to initialize pipes hash\n", __func__);
     }
-    qemu_mutex_init(&s->dev->lock);
-
     memory_region_init_io(&s->iomem, OBJECT(s), &android_pipe_iomem_ops, s,
                           "android_pipe", 0x2000 /*TODO: ?how big?*/);
     sysbus_init_mmio(sbdev, &s->iomem);
