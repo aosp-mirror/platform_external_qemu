@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8082ab4f_e725800b",
+        "filename": "android/emulation/AndroidPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-01T16:40:51Z",
+      "side": 1,
+      "message": "I\u0027d also mention that timer isn\u0027t the most efficient abstraction either: it\u0027s always processed as a last item in the main QEMU loop, and this means any other event from the guest or from some file descriptor might get in front, even if it\u0027s not important at all.\nThe best abstraction here is QEMU\u0027s bottom-half. It just needs to have it\u0027s personal Looper::??? wrapper",
+      "range": {
+        "startLine": 328,
+        "startChar": 0,
+        "endLine": 328,
+        "endChar": 38
+      },
+      "revId": "de70f51f51db43f6752f7d55a74a9f9cbda67e4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
