@@ -292,10 +292,16 @@ HWND createDummyWindow() {
     X(int, wglReleasePbufferDCARB, (HPBUFFERARB hPbuffer, HDC hdc)) \
     X(BOOL, wglDestroyPbufferARB, (HPBUFFERARB hPbuffer)) \
 
+// List of functions defined by the WGL_ARB_create_context extension.
+#define LIST_WGL_ARB_create_context_FUNCTIONS(X) \
+    X(HGLRC, wglCreateContextAttribsARB, (HDC hdc, HGLRC shared, const int* attribs)) \
+    X(void, glBindVertexArray, (GLuint array)) \
+
 #define LIST_WGL_EXTENSIONS_FUNCTIONS(X) \
     LIST_WGL_ARB_pixel_format_FUNCTIONS(X) \
     LIST_WGL_ARB_make_current_read_FUNCTIONS(X) \
     LIST_WGL_ARB_pbuffer_FUNCTIONS(X) \
+    LIST_WGL_ARB_create_context_FUNCTIONS(X) \
 
 // A structure used to hold pointers to WGL extension functions.
 struct WglExtensionsDispatch : public WglBaseDispatch {
@@ -354,6 +360,7 @@ public:
         LOAD_WGL_EXTENSION(WGL_ARB_pixel_format)
         LOAD_WGL_EXTENSION(WGL_ARB_make_current_read)
         LOAD_WGL_EXTENSION(WGL_ARB_pbuffer)
+        LOAD_WGL_EXTENSION(WGL_ARB_create_context)
 
         // Done.
         return result;
@@ -405,7 +412,9 @@ const WglExtensionsDispatch* initExtensionsDispatch(
     }
 
     int err;
-    HGLRC ctx = dispatch->wglCreateContext(hdc);
+    HGLRC ctx;
+    ctx = dispatch->wglCreateContext(hdc);
+
     if (!ctx) {
         err =  GetLastError();
         fprintf(stderr,"error while creating dummy context %d\n", err);
@@ -857,13 +866,20 @@ public:
             return nullptr;
         }
 
-        HGLRC ctx = mDispatch->wglCreateContext(dpy);
-        if (ctx && sharedContext) {
-            if (!mDispatch->wglShareLists(WinContext::from(sharedContext), ctx)) {
-                mDispatch->wglDeleteContext(ctx);
-                return NULL;
-            }
-        }
+        HGLRC ctx;
+
+        const int attrib_list[] = {
+            WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+            WGL_CONTEXT_MINOR_VERSION_ARB, 2,
+            0
+        };
+
+        ctx = mDispatch->wglCreateContextAttribsARB
+            (dpy,
+             sharedContext ? WinContext::from(sharedContext) : 0,
+             attrib_list);
+
+
         return new WinContext(ctx);
     }
 
@@ -962,12 +978,14 @@ public:
             while (!dispatch->wglMakeCurrent(hdcDraw, hdcContext)) {
                 Sleep(100);
             }
+            dispatch->glBindVertexArray(0);
             return true;
         } else if (!dispatch->wglMakeContextCurrentARB) {
             return false;
         }
         bool retVal = dispatch->wglMakeContextCurrentARB(
                 hdcDraw, hdcRead, hdcContext);
+        dispatch->glBindVertexArray(0);
         return retVal;
     }
 
