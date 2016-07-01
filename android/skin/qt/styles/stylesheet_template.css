@@ -211,3 +211,6 @@ QAbstractSpinBox:down-button {
     border-image: url(:/%%PATH%%/arrow_drop_down);
     width: 12;
 }
+QLineEdit[ColorGroup="InvalidInput"] {
+    color: #ff0000;
+}
