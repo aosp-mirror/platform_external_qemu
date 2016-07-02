@@ -196,11 +196,18 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     return cb;
 }
 
+static int s_colorBuffers = 0;
+
 ColorBuffer::ColorBuffer(EGLDisplay display, Helper* helper) :
         m_display(display),
-        m_helper(helper) {}
+        m_helper(helper) {
+    s_colorBuffers ++;
+    fprintf(stderr, "create color buffers %d\n", s_colorBuffers);
+}
 
 ColorBuffer::~ColorBuffer() {
+    s_colorBuffers --;
+    fprintf(stderr, "delete color buffers %d\n", s_colorBuffers);
     ScopedHelperContext context(m_helper);
 
     if (m_blitEGLImage) {

@@ -23,10 +23,13 @@
 #include "renderControl_dec.h"
 
 #include <set>
+#include <unordered_map>
 
 typedef uint32_t HandleType;
 typedef std::set<HandleType> ThreadContextSet;
 typedef std::set<HandleType> WindowSurfaceSet;
+typedef std::set<HandleType> ColorBufferSet;
+typedef std::unordered_map<HandleType, int> ColorBufferOpenNum;
 
 // A class used to model the state of each RenderThread related
 struct RenderThreadInfo {
@@ -55,6 +58,11 @@ struct RenderThreadInfo {
     ThreadContextSet                m_contextSet;
     // all the window surfaces that are created by this render thread
     WindowSurfaceSet                m_windowSet;
+    // counting of color buffer opening of this render thread
+    ColorBufferOpenNum              m_colorBufferOpens;
+    
+    // for debug
+    int m_numClrBuffers = 0;
 };
 
 #endif

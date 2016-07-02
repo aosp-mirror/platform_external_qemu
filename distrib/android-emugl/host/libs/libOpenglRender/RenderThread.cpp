@@ -72,6 +72,7 @@ intptr_t RenderThread::main() {
 
     RenderThreadInfo tInfo;
     ChecksumCalculatorThreadInfo tChecksumInfo;
+    fprintf(stderr, "New RenderThreadInfo %p\n", &tInfo);
 
     //
     // initialize decoders
@@ -183,10 +184,11 @@ intptr_t RenderThread::main() {
     }
 
     FrameBuffer::getFB()->drainWindowSurface();
-
+    FrameBuffer::getFB()->drainColorBuffer();
     FrameBuffer::getFB()->drainRenderContext();
 
-    DBG("Exited a RenderThread @%p\n", this);
+    //DBG("Exited a RenderThread @%p\n", this);
+    fprintf(stderr, "Closing RenderThreadInfo %p\n", &tInfo);
 
     return 0;
 }

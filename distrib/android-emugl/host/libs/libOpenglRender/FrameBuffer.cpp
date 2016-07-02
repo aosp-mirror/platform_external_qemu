@@ -437,7 +437,8 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow) :
     m_windowHeight(p_height),
     m_useSubWindow(useSubWindow),
     m_fpsStats(getenv("SHOW_FPS_STATS") != nullptr),
-    m_colorBufferHelper(new ColorBufferHelper(this)) {}
+    m_colorBufferHelper(new ColorBufferHelper(this)) {
+}
 
 FrameBuffer::~FrameBuffer() {
     delete m_textureDraw;
@@ -615,6 +616,10 @@ HandleType FrameBuffer::createColorBuffer(int p_width, int p_height,
         ret = genHandle();
         m_colorbuffers[ret].cb = cb;
         m_colorbuffers[ret].refcount = 1;
+        RenderThreadInfo *tinfo = RenderThreadInfo::get();
+        tinfo->m_colorBufferOpens[ret]++;
+        // TODO: for debug
+        fprintf(stderr, "%p created color buffer %d:%u\n", tinfo, ret, tinfo->m_colorBufferOpens.size());
     }
     return ret;
 }
@@ -675,6 +680,24 @@ HandleType FrameBuffer::createWindowSurface(int p_config, int p_width, int p_hei
     return ret;
 }
 
+void FrameBuffer::drainColorBuffer()
+{
+    emugl::Mutex::AutoLock mutex(m_lock);
+    RenderThreadInfo *tinfo = RenderThreadInfo::get();
+
+    // the loop might remove iterators, so we cannot use foreach here
+    auto it = tinfo->m_colorBufferOpens.begin();
+    while (it != tinfo->m_colorBufferOpens.end()) {
+        HandleType cb = it->first;
+        int num = it->second;
+        it ++;
+        for (int i=0; i<num; i++) {
+            closeColorBuffer_locked(cb);
+        }
+    }
+    tinfo->m_colorBufferOpens.clear();
+}
+
 void FrameBuffer::drainRenderContext()
 {
     emugl::Mutex::AutoLock mutex(m_lock);
@@ -699,10 +722,7 @@ void FrameBuffer::drainWindowSurface()
         if (m_windows.find(windowHandle) != m_windows.end()) {
             HandleType oldColorBufferHandle = m_windows[windowHandle].second;
             if (oldColorBufferHandle) {
-                ColorBufferMap::iterator cit(m_colorbuffers.find(oldColorBufferHandle));
-                if (cit != m_colorbuffers.end()) {
-                    if (--(*cit).second.refcount == 0) { m_colorbuffers.erase(cit); }
-                }
+                //decColorBufferRefCounter(oldColorBufferHandle);
             }
             m_windows.erase(windowHandle);
         }
@@ -730,9 +750,17 @@ void FrameBuffer::DestroyWindowSurface(HandleType p_surface)
     }
 }
 
-int FrameBuffer::openColorBuffer(HandleType p_colorbuffer)
-{
+int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
     emugl::Mutex::AutoLock mutex(m_lock);
+    return openColorBuffer_locked(p_colorbuffer);
+}
+
+int FrameBuffer::openColorBuffer_locked(HandleType p_colorbuffer)
+{
+    if (RenderThreadInfo::get()->m_colorBufferOpens.count(p_colorbuffer) != 0) {
+        fprintf(stderr, "warning: opening a color buffer twice, ");
+        //return 0;
+    }
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
         // bad colorbuffer handle
@@ -740,13 +768,37 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer)
         return -1;
     }
     (*c).second.refcount++;
+    RenderThreadInfo::get()->m_colorBufferOpens[p_colorbuffer]++;
+    RenderThreadInfo *tinfo = RenderThreadInfo::get();
+    fprintf(stderr, "%p opened color buffer %d:%u\n", tinfo, p_colorbuffer, tinfo->m_colorBufferOpens.size());
     return 0;
 }
 
-void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer)
-{
+void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
     emugl::Mutex::AutoLock mutex(m_lock);
-    ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
+    closeColorBuffer_locked(p_colorbuffer);
+}
+
+void FrameBuffer::closeColorBuffer_locked(HandleType p_colorbuffer)
+{
+    decColorBufferRefCounter(p_colorbuffer);
+    RenderThreadInfo *tinfo = RenderThreadInfo::get();
+    ColorBufferOpenNum::iterator ite
+            = tinfo->m_colorBufferOpens.find(p_colorbuffer);
+    if (ite != tinfo->m_colorBufferOpens.end()) {
+        ite->second --;
+        if (!ite->second) {
+            tinfo->m_colorBufferOpens.erase(ite);
+        }
+    } else {
+        // TODO: for debug
+        fprintf(stderr, "warning: closing a buffer that is not owned by current thread, ");
+    }
+    fprintf(stderr, "%p closed color buffer %d:%u\n", tinfo, p_colorbuffer, tinfo->m_colorBufferOpens.size());
+}
+
+void FrameBuffer::decColorBufferRefCounter(HandleType p_colorBuffer) {
+    ColorBufferMap::iterator c(m_colorbuffers.find(p_colorBuffer));
     if (c == m_colorbuffers.end()) {
         // This is harmless: it is normal for guest system to issue
         // closeColorBuffer command when the color buffer is already

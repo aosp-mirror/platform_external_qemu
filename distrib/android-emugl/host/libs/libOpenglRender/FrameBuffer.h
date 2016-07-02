@@ -164,6 +164,12 @@ public:
         int p_width, int p_height, GLenum p_internalFormat);
 
     // Call this function when a render thread terminates to destroy all
+    // the remaining color buffers it created. Necessary to avoid leaking host
+    // color buffers when a guest application crashes, for example.
+    // Please call it after calling drainWindowSurface()
+    void drainColorBuffer();
+
+    // Call this function when a render thread terminates to destroy all
     // the remaining contexts it created. Necessary to avoid leaking host
     // contexts when a guest application crashes, for example.
     void drainRenderContext();
@@ -307,7 +313,9 @@ private:
     HandleType genHandle();
 
     bool bindSubwin_locked();
-
+    int openColorBuffer_locked(HandleType p_colorbuffer);
+    void closeColorBuffer_locked(HandleType p_colorbuffer);
+    void decColorBufferRefCounter(HandleType p_colorBuffer);
 private:
     static FrameBuffer *s_theFrameBuffer;
     static HandleType s_nextHandle;

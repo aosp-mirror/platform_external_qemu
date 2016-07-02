@@ -114,8 +114,8 @@ RenderChannelPtr RendererImpl::createRenderChannel() {
                                       }),
                        mThreads.end());
 
-        DBG("Started new RenderThread (total %lu) @%p\n",
-            mThreads.size() + 1, rt.get());
+        //DBG("Started new RenderThread (total %lu) @%p\n",
+        //    mThreads.size() + 1, rt.get());
 
         mThreads.emplace_back(std::move(rt), channel);
     }
