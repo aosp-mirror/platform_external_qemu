@@ -117,7 +117,7 @@ void goldfish_battery_display_cb(void* opaque, BatteryLineCallback callback)
         value = "Good";
         break;
     case POWER_SUPPLY_HEALTH_OVERHEAT:
-        value = "Overhead";
+        value = "Overheat";
         break;
     case POWER_SUPPLY_HEALTH_DEAD:
         value = "Dead";
