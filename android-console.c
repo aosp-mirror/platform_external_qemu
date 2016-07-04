@@ -1650,7 +1650,7 @@ void android_console_gsm_hold(Monitor* mon, const QDict* qdict) {
     if (!args) {
         monitor_printf(
                 mon,
-                "KO: missing argument, try 'gsm out hold <phonenumber>'\n");
+                "KO: missing argument, try 'gsm hold <phonenumber>'\n");
         return;
     }
     call = amodem_find_call_by_number(android_modem, args);
