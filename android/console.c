@@ -1448,7 +1448,7 @@ do_gsm_hold( ControlClient  client, char*  args )
     ACall  call;
 
     if (!args) {
-        control_write( client, "KO: missing argument, try 'gsm out hold <phonenumber>'\r\n" );
+        control_write( client, "KO: missing argument, try 'gsm hold <phonenumber>'\r\n" );
         return -1;
     }
     call = amodem_find_call_by_number( android_modem, args );
