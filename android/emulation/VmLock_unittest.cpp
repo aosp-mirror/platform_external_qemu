@@ -17,7 +17,6 @@
 #include <gtest/gtest.h>
 
 namespace android {
-namespace base {
 
 namespace {
 
@@ -36,6 +35,9 @@ public:
 
     virtual void lock() override { mLockCount++; }
     virtual void unlock() override { mUnlockCount++; }
+    virtual bool isLockedBySelf() const override {
+        return mLockCount > mUnlockCount;
+    }
 
     int mLockCount = 0;
     int mUnlockCount = 0;
@@ -55,32 +57,39 @@ TEST(VmLock, CustomVmLock) {
 
     EXPECT_EQ(0, myLock.mLockCount);
     EXPECT_EQ(0, myLock.mUnlockCount);
+    EXPECT_FALSE(myLock.isLockedBySelf());
 
     VmLock::get()->lock();
     EXPECT_EQ(1, myLock.mLockCount);
     EXPECT_EQ(0, myLock.mUnlockCount);
+    EXPECT_TRUE(myLock.isLockedBySelf());
 
     VmLock::get()->unlock();
     EXPECT_EQ(1, myLock.mLockCount);
     EXPECT_EQ(1, myLock.mUnlockCount);
+    EXPECT_FALSE(myLock.isLockedBySelf());
 
     VmLock::get()->lock();
     EXPECT_EQ(2, myLock.mLockCount);
     EXPECT_EQ(1, myLock.mUnlockCount);
+    EXPECT_TRUE(myLock.isLockedBySelf());
 
     VmLock::get()->unlock();
     EXPECT_EQ(2, myLock.mLockCount);
     EXPECT_EQ(2, myLock.mUnlockCount);
+    EXPECT_FALSE(myLock.isLockedBySelf());
 
     myLock.release();
 
     VmLock::get()->lock();
     EXPECT_EQ(2, myLock.mLockCount);
     EXPECT_EQ(2, myLock.mUnlockCount);
+    EXPECT_FALSE(myLock.isLockedBySelf());
 
     VmLock::get()->unlock();
     EXPECT_EQ(2, myLock.mLockCount);
     EXPECT_EQ(2, myLock.mUnlockCount);
+    EXPECT_FALSE(myLock.isLockedBySelf());
 }
 
 TEST(ScopedVmLock, Default) {
@@ -119,5 +128,4 @@ TEST(ScopedVmLock, CustomVmLock) {
     EXPECT_EQ(2, myLock.mUnlockCount);
 }
 
-}  // namespace
 }  // namespace android

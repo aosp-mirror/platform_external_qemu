@@ -244,7 +244,6 @@ LOCAL_SRC_FILES := \
     android/emulation/SerialLine.cpp \
     android/emulation/SetupParameters.cpp \
     android/emulation/VmLock.cpp \
-    android/emulation/vm_lock.cpp \
     android/emulator-window.c \
     android/error-messages.cpp \
     android/featurecontrol/FeatureControl.cpp \
@@ -469,7 +468,6 @@ LOCAL_SRC_FILES := \
   android/emulation/SetupParameters_unittest.cpp \
   android/emulation/testing/TestAndroidPipeDevice.cpp \
   android/emulation/VmLock_unittest.cpp \
-  android/emulation/vm_lock_unittest.cpp \
   android/error-messages_unittest.cpp \
   android/featurecontrol/FeatureControl_unittest.cpp \
   android/filesystems/ext4_resize_unittest.cpp \

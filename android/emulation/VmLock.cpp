@@ -17,7 +17,6 @@
 #include "android/base/memory/LazyInstance.h"
 
 namespace android {
-namespace base {
 
 static VmLock* sInstance = nullptr;
 
@@ -37,6 +36,5 @@ VmLock* VmLock::set(VmLock* vmLock) {
     return result;
 }
 
-}  // namespace base
 }  // namespace android
 
