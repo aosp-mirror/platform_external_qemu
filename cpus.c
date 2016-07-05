@@ -33,6 +33,7 @@
 #include "sysemu/kvm.h"
 #include "exec/exec-all.h"
 #include "exec/hax.h"
+#include "qemu/atomic.h"
 
 #include "sysemu/cpus.h"
 
@@ -162,12 +163,38 @@ void qemu_notify_event(void)
 #endif
 }
 
+// Global mutex used to synchronize access to the global VM state.
+static QemuMutex qemu_global_lock;
+
+// The following variable is used to track whether the current thread
+// holds the global lock. This is thread-specific to avoid subtle
+// memory-ordering issues that appear if one tries to track this with
+// a set of global variables. The main reason for them being that there is no
+// value of QemuThread that can be tested atomically against a different
+// or invalid value.
+static __thread bool qemu_global_lock_held;
+
+void qemu_init_cpu_loop(void)
+{
+    qemu_mutex_init(&qemu_global_lock);
+}
+
 void qemu_mutex_lock_iothread(void)
 {
+    qemu_mutex_lock(&qemu_global_lock);
+    qemu_global_lock_held = true;
 }
 
 void qemu_mutex_unlock_iothread(void)
 {
+    qemu_global_lock_held = false;
+    qemu_mutex_unlock(&qemu_global_lock);
+}
+
+// Returns true if the current thread holds the global mutex, false otherwise.
+bool qemu_mutex_check_iothread(void)
+{
+    return qemu_global_lock_held;
 }
 
 void vm_stop(int reason)
