@@ -22,6 +22,30 @@
       "revId": "de70f51f51db43f6752f7d55a74a9f9cbda67e4f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80ae2bf8_b595cab2",
+        "filename": "android/emulation/AndroidPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-05T13:03:43Z",
+      "side": 1,
+      "message": "QEMU BH objects are _totally_ not thread-safe though, and they are also checked after all timers anyway. I\u0027m not too worried about the latter, more about the former. I agree a better alternative is needed (e.g. our generic EventHub).\n\nI also wonder if we don\u0027t want a Win32 Looper based on events / WaitForMultipleEvents() (wich has the hideous limitations of being able to wait for only up to 64 concurrent events, though there are hacky ways to work-around this by creating helper threads).",
+      "parentUuid": "8082ab4f_e725800b",
+      "range": {
+        "startLine": 328,
+        "startChar": 0,
+        "endLine": 328,
+        "endChar": 38
+      },
+      "revId": "de70f51f51db43f6752f7d55a74a9f9cbda67e4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
