@@ -45,6 +45,30 @@
       "revId": "b826ce91d27fb1f8699cc58028981cbaef351b75",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1d0c66bf_a7144af0",
+        "filename": "android/emulation/AndroidPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-05T11:04:36Z",
+      "side": 1,
+      "message": "These only make sense when reloading a concrete service pipe, for connector ones, |args| will always be nullptr, but since this is an overriden method, we can\u0027t just remove the parameter.",
+      "parentUuid": "00acfbb3_e1b0000e",
+      "range": {
+        "startLine": 296,
+        "startChar": 42,
+        "endLine": 296,
+        "endChar": 46
+      },
+      "revId": "b826ce91d27fb1f8699cc58028981cbaef351b75",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
