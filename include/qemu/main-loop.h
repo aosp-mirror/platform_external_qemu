@@ -299,6 +299,12 @@ void qemu_mutex_lock_iothread(void);
  */
 void qemu_mutex_unlock_iothread(void);
 
+#ifdef CONFIG_ANDROID
+// This returns true iff the current thread currently holds the
+// main loop mutex (used to protect global VM state).
+bool qemu_mutex_check_iothread(void);
+#endif
+
 /* internal interfaces */
 
 void qemu_fd_register(int fd);
