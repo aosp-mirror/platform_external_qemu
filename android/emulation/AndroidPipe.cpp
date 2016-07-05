@@ -304,9 +304,114 @@ public:
     }
 };
 
+// A helper class used to send signalWake() and closeFromHost() commands to
+// the device thread, depending on the threading mode setup by the emulation
+// engine.
+class PipeWaker final {
+public:
+    // Initialize the PipeWaker, this must be called in the main loop
+    // thread, so cannot be performed in the constructor which may run in
+    // a different one.
+    void init(VmLock* vmLock) {
+        mVmLock = vmLock;
+        // TODO(digit): Find a better event abstraction.
+        //
+        // Operating on Looper::Timer objects is not supposed to be
+        // thread-safe, but it appears that their QEMU1 and QEMU2 specific
+        // implementation *is* (see qemu-timer.c:timer_mod()).
+        //
+        // This means that in practice the code below is safe when used
+        // in the context of an Android emulation engine. However, we probably
+        // need a better abstraction that also works with the generic
+        // Looper implementation (for unit-testing) or any other kind of
+        // runtime environment, should we one day link AndroidEmu to a
+        // different emulation engine.
+        Looper* looper = android::base::ThreadLooper::get();
+        mTimer.reset(looper->createTimer(
+                [](void* that, Looper::Timer*) {
+                    static_cast<PipeWaker*>(that)->onTimerEvent();
+                },
+                this));
+        if (!mTimer.get()) {
+            LOG(WARNING) << "Failed to create a loop timer, falling back "
+                            "to regular locking!";
+        }
+    }
+
+    void signalWake(void* hwPipe, int wakeFlags) {
+        CHECK(hwPipe != nullptr);
+        CHECK(mVmLock != nullptr);
+
+        bool inDeviceContext = mVmLock->isLockedBySelf();
+        if (inDeviceContext) {
+            // Perform the operation correctly since the current thread
+            // already holds the lock that protects the global VM state.
+            doPipeOperation(hwPipe, wakeFlags);
+        } else {
+            // Queue the operation in the mPendingMap structure, then
+            // restart the timer.
+            base::AutoLock lock(mLock);
+            mPendingMap[hwPipe] |= wakeFlags;
+            lock.unlock();
+
+            // NOTE: See TODO above why this is thread-safe when used with
+            // QEMU1 and QEMU2.
+            mTimer->startAbsolute(0);
+        }
+    }
+
+    void closeFromHost(void* hwPipe) {
+        this->signalWake(hwPipe, PIPE_WAKE_CLOSED);
+    }
+
+private:
+    // A hash table mapping hwPipe handles to integer flags. Used to implement
+    // the set of pending operations when ThreadMode::SingleThreadedWithQueue
+    // is used.
+    using PendingMap = std::unordered_map<void*, int>;
+
+    // Called whenever the timer is triggered to apply pending operations
+    // on the main loop thread.
+    void onTimerEvent() {
+        base::AutoLock lock(mLock);
+        PendingMap pendingMap;
+        pendingMap.swap(mPendingMap);
+        lock.unlock();
+
+        for (const auto& pair : pendingMap) {
+            doPipeOperation(pair.first, pair.second);
+        }
+
+        // Check if the timer needs to be re-armed if someone added an event
+        // during processing.
+        lock.lock();
+        if (!mPendingMap.empty()) {
+            mTimer->startAbsolute(0);
+        }
+    }
+
+    // Perform a pipe operation on the device thread.
+    void doPipeOperation(void* hwPipe, int flags) {
+#if DEBUG > 0
+        CHECK(mVmLock->isLockedBySelf());
+#endif
+        if (flags & PIPE_WAKE_CLOSED) {
+            sPipeHwFuncs->closeFromHost(hwPipe);
+        } else {
+            sPipeHwFuncs->signalWake(hwPipe, flags);
+        }
+    }
+
+    android::VmLock* mVmLock = nullptr;
+    base::Lock mLock;
+    PendingMap mPendingMap;
+    std::unique_ptr<Looper::Timer> mTimer;
+};
+
 struct Globals {
     ServiceList services;
     ConnectorService connectorService;
+    PipeWaker pipeWaker;
 
     const Service* findServiceByName(const char* name) const {
         for (const auto& service : services) {
@@ -355,6 +460,11 @@ AndroidPipe* loadPipeFromStreamCommon(BaseStream* stream,
 
 }  // namespace
 
+// static
+void AndroidPipe::initThreading(VmLock* vmLock) {
+    sGlobals->pipeWaker.init(vmLock);
+}
+
 AndroidPipe::~AndroidPipe() {
     DD("%s: for hwpipe=%p (host %p '%s')", __FUNCTION__, mHwPipe, this,
        mService->name().c_str());
@@ -375,13 +485,11 @@ void AndroidPipe::Service::resetAll() {
 }
 
 void AndroidPipe::signalWake(int wakeFlags) {
-    CHECK_VM_STATE_LOCK();
-    sPipeHwFuncs->signalWake(mHwPipe, wakeFlags);
+    sGlobals->pipeWaker.signalWake(mHwPipe, wakeFlags);
 }
 
 void AndroidPipe::closeFromHost() {
-    CHECK_VM_STATE_LOCK();
-    sPipeHwFuncs->closeFromHost(mHwPipe);
+    sGlobals->pipeWaker.closeFromHost(mHwPipe);
 }
 
 // static
@@ -518,12 +626,10 @@ void android_pipe_guest_wake_on(void* internalPipe, unsigned wakes) {
 
 // API implemented by the virtual device.
 void android_pipe_host_close(void* hwpipe) {
-    CHECK_VM_STATE_LOCK();
     DD("%s: hwpipe=%p", __FUNCTION__, hwpipe);
-    sPipeHwFuncs->closeFromHost(hwpipe);
+    android::sGlobals->pipeWaker.closeFromHost(hwpipe);
 }
 
 void android_pipe_host_signal_wake(void* hwpipe, unsigned flags) {
-    CHECK_VM_STATE_LOCK();
-    sPipeHwFuncs->signalWake(hwpipe, flags);
+    android::sGlobals->pipeWaker.signalWake(hwpipe, flags);
 }
