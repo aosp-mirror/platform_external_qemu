@@ -1074,22 +1074,20 @@ camera_device_close(CameraDevice* ccd)
 }
 
 int
-enumerate_camera_devices(CameraInfo* cis, int max)
+camera_enumerate_devices(CameraInfo* cis, int max)
 {
     char dev_name[24];
     int found = 0;
     int n;
 
     for (n = 0; n < max; n++) {
-        CameraDevice* cd;
-
-        sprintf(dev_name, "/dev/video%d", n);
-        cd = camera_device_open(dev_name, 0);
+        snprintf(dev_name, sizeof(dev_name), "/dev/video%d", n);
+        CameraDevice* cd = camera_device_open(dev_name, 0);
         if (cd != NULL) {
             LinuxCameraDevice* lcd = (LinuxCameraDevice*)cd->opaque;
             if (!_camera_device_get_info(lcd, cis + found)) {
                 char user_name[24];
-                sprintf(user_name, "webcam%d", found);
+                snprintf(user_name, sizeof(user_name), "webcam%d", found);
                 cis[found].display_name = ASTRDUP(user_name);
                 cis[found].in_use = 0;
                 found++;

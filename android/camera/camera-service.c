@@ -232,7 +232,9 @@ _camera_info_to_string(const CameraInfo* ci, char** str, size_t* str_size) {
  *  given display name has not been found in the array.
  */
 static CameraInfo*
-_camera_info_get_by_display_name(const char* disp_name, CameraInfo* arr, int num)
+_camera_info_get_by_display_name(const char* disp_name,
+                                 CameraInfo* arr,
+                                 int num)
 {
     int n;
     for (n = 0; n < num; n++) {
@@ -285,7 +287,8 @@ _wecam_setup(CameraServiceDesc* csd,
              int ci_cnt)
 {
     /* Find webcam record in the list of enumerated web cameras. */
-    CameraInfo* found = _camera_info_get_by_display_name(disp_name, ci, ci_cnt);
+    CameraInfo* found =
+            _camera_info_get_by_display_name(disp_name, ci, ci_cnt);
     if (found == NULL) {
         W("Camera name '%s' is not found in the list of connected cameras.\n"
           "Use '-webcam-list' emulator option to obtain the list of connected camera names.\n",
@@ -294,7 +297,7 @@ _wecam_setup(CameraServiceDesc* csd,
     }
 
     /* Save to the camera info array that will be used by the service. */
-    memcpy(csd->camera_info + csd->camera_count, found, sizeof(CameraInfo));
+    camera_info_copy(&csd->camera_info[csd->camera_count], found);
     /* This camera is taken. */
     found->in_use = 1;
     /* Update direction parameter. */
@@ -307,7 +310,8 @@ _wecam_setup(CameraServiceDesc* csd,
       csd->camera_info[csd->camera_count].device_name,
       csd->camera_info[csd->camera_count].direction,
       (const char*)(&csd->camera_info[csd->camera_count].pixel_format));
-      csd->camera_count++;
+
+    csd->camera_count++;
 }
 
 /* Initializes camera service descriptor.
@@ -315,11 +319,10 @@ _wecam_setup(CameraServiceDesc* csd,
 static void
 _camera_service_init(CameraServiceDesc* csd)
 {
-    CameraInfo ci[MAX_CAMERA];
+    CameraInfo ci[MAX_CAMERA] = {};
     int connected_cnt;
 
     /* Enumerate camera devices connected to the host. */
-    memset(ci, 0, sizeof(CameraInfo) * MAX_CAMERA);
     memset(csd->camera_info, 0, sizeof(CameraInfo) * MAX_CAMERA);
     csd->camera_count = 0;
 
@@ -331,7 +334,7 @@ _camera_service_init(CameraServiceDesc* csd)
     }
 
     /* Enumerate web cameras connected to the host. */
-    connected_cnt = enumerate_camera_devices(ci, MAX_CAMERA);
+    connected_cnt = camera_enumerate_devices(ci, MAX_CAMERA);
     if (connected_cnt <= 0) {
         /* Nothing is connected - nothing to emulate. */
         return;
@@ -345,6 +348,11 @@ _camera_service_init(CameraServiceDesc* csd)
     /* Set up front camera emulation. */
     if (!strncmp(android_hw->hw_camera_front, "webcam", 6)) {
         _wecam_setup(csd, android_hw->hw_camera_front, "front", ci, connected_cnt);
+    }
+
+    int i;
+    for (i = 0; i < connected_cnt; ++i) {
+        camera_info_done(&ci[i]);
     }
 }
 
@@ -1274,8 +1282,7 @@ extern int windows_camera_thread_init();
 
 void
 android_camera_service_init(void)
-{ 
-    
+{
     static int _inited = 0;
 
     if (!_inited) {
@@ -1313,26 +1320,4 @@ android_camera_service_init(void)
 
         D("%s: Registered '%s' qemud service", __FUNCTION__, SERVICE_NAME);
     }
-}
-
-void
-android_list_web_cameras(void)
-{
-    CameraInfo ci[MAX_CAMERA];
-    int connected_cnt;
-    int i;
-
-    /* Enumerate camera devices connected to the host. */
-    connected_cnt = enumerate_camera_devices(ci, MAX_CAMERA);
-    if (connected_cnt <= 0) {
-        return;
-    }
-
-    printf("List of web cameras connected to the computer:\n");
-    for (i = 0; i < connected_cnt; i++) {
-        printf(" Camera '%s' is connected to device '%s' on channel %d using pixel format '%.4s'\n",
-               ci[i].display_name, ci[i].device_name, ci[i].inp_channel,
-               (const char*)&ci[i].pixel_format);
-    }
-    printf("\n");
 }
