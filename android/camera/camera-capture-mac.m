@@ -509,7 +509,7 @@ camera_device_close(CameraDevice* cd)
 }
 
 int
-enumerate_camera_devices(CameraInfo* cis, int max)
+camera_enumerate_devices(CameraInfo* cis, int max)
 {
 /* Array containing emulated webcam frame dimensions.
  * QT API provides device independent frame dimensions, by scaling frames

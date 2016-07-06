@@ -35,6 +35,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+#include "android/camera/camera-list.h"
 #include "android/main-emugl.h"
 #include "android/main-help.h"
 #include "android/opengl/emugl_config.h"
@@ -142,6 +143,7 @@ int main(int argc, char** argv)
     bool noWindow = false;
     bool useSystemLibs = false;
     bool forceEngineLaunch = false;
+    bool doListWebcams = false;
 
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
@@ -235,8 +237,13 @@ int main(int argc, char** argv)
         }
 #endif  // __linux__
 
-        if (!strcmp(opt,"-list-avds")) {
+        if (!strcmp(opt, "-list-avds")) {
             doListAvds = true;
+            continue;
+        }
+
+        if (!strcmp(opt, "-webcam-list")) {
+            doListWebcams = true;
             continue;
         }
 
@@ -278,6 +285,11 @@ int main(int argc, char** argv)
             printf("%s\n", name);
         }
         avdScanner_free(scanner);
+        return 0;
+    }
+
+    if (doListWebcams) {
+        android_camera_list_webcams();
         return 0;
     }
 
