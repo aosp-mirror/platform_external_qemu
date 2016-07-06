@@ -508,26 +508,22 @@ camera_device_close(CameraDevice* cd)
     }
 }
 
-int
-enumerate_camera_devices(CameraInfo* cis, int max)
-{
-/* Array containing emulated webcam frame dimensions.
- * QT API provides device independent frame dimensions, by scaling frames
- * received from the device to whatever dimensions were requested for the
- * output device. So, we can just use a small set of frame dimensions to
- * emulate.
- */
-static const CameraFrameDim _emulate_dims[] =
-{
-  /* Emulates 640x480 frame. */
-  {640, 480},
-  /* Emulates 352x288 frame (required by camera framework). */
-  {352, 288},
-  /* Emulates 320x240 frame (required by camera framework). */
-  {320, 240},
-  /* Emulates 176x144 frame (required by camera framework). */
-  {176, 144}
-};
+int camera_enumerate_devices(CameraInfo* cis, int max) {
+    /* Array containing emulated webcam frame dimensions.
+     * QT API provides device independent frame dimensions, by scaling frames
+     * received from the device to whatever dimensions were requested for the
+     * output device. So, we can just use a small set of frame dimensions to
+     * emulate.
+     */
+    static const CameraFrameDim _emulate_dims[] = {
+            /* Emulates 640x480 frame. */
+            {640, 480},
+            /* Emulates 352x288 frame (required by camera framework). */
+            {352, 288},
+            /* Emulates 320x240 frame (required by camera framework). */
+            {320, 240},
+            /* Emulates 176x144 frame (required by camera framework). */
+            {176, 144}};
 
     /* Obtain default video device. QT API doesn't really provide a reliable
      * way to identify camera devices. There is a QTCaptureDevice::uniqueId

@@ -150,33 +150,12 @@ typedef struct CameraInfo {
     int                 in_use;
 } CameraInfo;
 
-#if 0
-/* Allocates CameraInfo instance. */
-static __inline__ CameraInfo* _camera_info_alloc(void)
-{
-    CameraInfo* ci;
-    ANEW0(ci);
-    return ci;
-}
-#endif
+/* Frees all resources allocated for CameraInfo instance (NOT including the
+ * instance itself). */
+void camera_info_done(CameraInfo* ci);
 
-/* Frees all resources allocated for CameraInfo instance (including the
- * instance itself).
- */
-static __inline__ void _camera_info_free(CameraInfo* ci)
-{
-    if (ci != NULL) {
-        if (ci->display_name != NULL)
-            free(ci->display_name);
-        if (ci->device_name != NULL)
-            free(ci->device_name);
-        if (ci->direction != NULL)
-            free(ci->direction);
-        if (ci->frame_sizes != NULL)
-            free(ci->frame_sizes);
-        AFREE(ci);
-    }
-}
+/* Copy a CameraInfo instance |*from| into |*ci|. */
+void camera_info_copy(CameraInfo* ci, const CameraInfo* from);
 
 /* Describes a connected camera device.
  * This is a pratform-independent camera device descriptor that is used in
