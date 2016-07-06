@@ -226,7 +226,15 @@ static gboolean tcp_adb_accept_ipv6(GIOChannel *channel, GIOCondition cond,
 ** Note: this function could be called from any thread - both host and
 **  guest may initiate a connection closing process
 */
-static void tcp_adb_server_close(adb_backend_state *bs)
+
+// A source of the close request.
+typedef enum {
+    REQUEST_FROM_SOCKET,
+    REQUEST_FROM_PIPE
+} CloseRequestSource;
+
+static void tcp_adb_server_close(adb_backend_state *bs,
+                                 CloseRequestSource source)
 {
     g_assert(bs->listen_chan || bs->listen_chan_ipv6);
     g_assert(bs->mutex);
@@ -235,8 +243,10 @@ static void tcp_adb_server_close(adb_backend_state *bs)
 
     /* clean-up connected pipes */
     if (bs->connected_pipe) {
-        DPRINTF("%s: closing connected pipe\n", __func__);
-        android_pipe_host_close(bs->connected_pipe->hwpipe);
+        if (source != REQUEST_FROM_PIPE) {
+            DPRINTF("%s: closing connected pipe\n", __func__);
+            android_pipe_host_close(bs->connected_pipe->hwpipe);
+        }
         bs->connected_pipe->chan = NULL;
         bs->connected_pipe = NULL;
     }
@@ -301,7 +311,7 @@ static gboolean tcp_adb_server_data(GIOChannel *channel, GIOCondition cond,
     if ((cond & G_IO_ERR) ||
         (cond & G_IO_HUP)) {
         DPRINTF("%s: error %d - closing server connectio\n", __func__, cond);
-        tcp_adb_server_close(bs);
+        tcp_adb_server_close(bs, REQUEST_FROM_SOCKET);
     }
 
     /* Done, we must re-add watch next time we are waiting for data */
@@ -541,7 +551,7 @@ static void adb_pipe_close(void *opaque )
 
     DPRINTF("%s: hwpipe=%p\n", __FUNCTION__, apipe->hwpipe);
     if (adb_state.connected_pipe == apipe) {
-        tcp_adb_server_close(&adb_state);
+        tcp_adb_server_close(&adb_state, REQUEST_FROM_PIPE);
         // tcp_adb_server_close() has cleaned |adb_state.connected_pipe| for us
     }
     for (i = 0; i < PIPE_QUEUE_LEN; i++) {
@@ -698,7 +708,7 @@ static int adb_pipe_proxy_send(adb_pipe *apipe, const AndroidPipeBuffer *buffers
         if (status == G_IO_STATUS_EOF) {
             g_io_channel_unref(chan);
             bs->data_out = FALSE;
-            tcp_adb_server_close(bs);
+            tcp_adb_server_close(bs, REQUEST_FROM_SOCKET);
             return 0;
         }
 
@@ -706,7 +716,7 @@ static int adb_pipe_proxy_send(adb_pipe *apipe, const AndroidPipeBuffer *buffers
             DPRINTF("%s: went wrong (%d)\n", __func__, status);
             g_io_channel_unref(chan);
             bs->data_out = FALSE;
-            tcp_adb_server_close(bs);
+            tcp_adb_server_close(bs, REQUEST_FROM_SOCKET);
             return PIPE_ERROR_IO;
         }
 
@@ -831,7 +841,7 @@ static int adb_pipe_proxy_recv(adb_pipe *apipe, AndroidPipeBuffer *buffers,
             DPRINTF("%s: went wrong (%d)\n", __func__, status);
             g_io_channel_unref(chan);
             bs->data_in = FALSE;
-            tcp_adb_server_close(bs);
+            tcp_adb_server_close(bs, REQUEST_FROM_SOCKET);
             return PIPE_ERROR_IO;
         }
 
