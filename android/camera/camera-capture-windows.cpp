@@ -715,25 +715,22 @@ cmd_camera_device_close(CameraDevice* cd)
     }
 }
 
-static int
-cmd_enumerate_camera_devices(CameraInfo* cis, int max)
-{
-/* Array containing emulated webcam frame dimensions.
- * capXxx API provides device independent frame dimensions, by scaling frames
- * received from the device to whatever dimensions were requested by the user.
- * So, we can just use a small set of frame dimensions to emulate.
- */
-static const CameraFrameDim _emulate_dims[] =
-{
-  /* Emulates 640x480 frame. */
-  {640, 480},
-  /* Emulates 352x288 frame (required by camera framework). */
-  {352, 288},
-  /* Emulates 320x240 frame (required by camera framework). */
-  {320, 240},
-  /* Emulates 176x144 frame (required by camera framework). */
-  {176, 144}
-};
+static int cmd_camera_enumerate_devices(CameraInfo* cis, int max) {
+    /* Array containing emulated webcam frame dimensions.
+    * capXxx API provides device independent frame dimensions, by scaling frames
+    * received from the device to whatever dimensions were requested by the
+    * user.
+    * So, we can just use a small set of frame dimensions to emulate.
+    */
+    static const CameraFrameDim _emulate_dims[] = {
+            /* Emulates 640x480 frame. */
+            {640, 480},
+            /* Emulates 352x288 frame (required by camera framework). */
+            {352, 288},
+            /* Emulates 320x240 frame (required by camera framework). */
+            {320, 240},
+            /* Emulates 176x144 frame (required by camera framework). */
+            {176, 144}};
     int inp_channel, found = 0;
 
     for (inp_channel = 0; inp_channel < 10 && found < max; inp_channel++) {
@@ -751,7 +748,7 @@ static const CameraFrameDim _emulate_dims[] =
                 cis[found].frame_sizes = (CameraFrameDim*)malloc(sizeof(_emulate_dims));
                 if (cis[found].frame_sizes != NULL) {
                     char disp_name[24];
-                    sprintf(disp_name, "webcam%d", found);
+                    snprintf(disp_name, sizeof(disp_name), "webcam%d", found);
                     cis[found].display_name = ASTRDUP(disp_name);
                     cis[found].device_name = ASTRDUP(name);
                     cis[found].direction = ASTRDUP("front");
@@ -881,7 +878,7 @@ struct CameraCommand {
                 break;
 
             case CAMERA_CMD_ENUMERATE_DEVICES:
-                result = cmd_enumerate_camera_devices(cmd.enumerate.info,
+                result = cmd_camera_enumerate_devices(cmd.enumerate.info,
                                                       cmd.enumerate.max);
                 break;
         }
@@ -1000,7 +997,7 @@ void camera_device_close(CameraDevice* cd) {
     (void)sCameraThread->sendCommandAndGetResult(cmd);
 }
 
-int enumerate_camera_devices(CameraInfo* cis, int max) {
+int camera_enumerate_devices(CameraInfo* cis, int max) {
     CameraCommand cmd = {};
     cmd.cmd = CAMERA_CMD_ENUMERATE_DEVICES;
     cmd.enumerate.info = cis;

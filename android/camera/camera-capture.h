@@ -144,6 +144,6 @@ extern void camera_device_close(CameraDevice* cd);
  * Return:
  *  Number of entries added to the 'cis' array on success, or < 0 on failure.
  */
-extern int enumerate_camera_devices(CameraInfo* cis, int max);
+extern int camera_enumerate_devices(CameraInfo* cis, int max);
 
 ANDROID_END_HEADER

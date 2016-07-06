@@ -144,9 +144,6 @@ QemuParameters* qemu_parameters_create(const char* argv0,
     params.add2If("-android-report-console", opts->report_console);
     params.add2If("-http-proxy", opts->http_proxy);
 
-    /* Deal with camera emulation */
-    params.addIf("-list-webcam", opts->webcam_list);
-
     /* Set up the interfaces for inter-emulator networking */
     if (opts->shared_net_id) {
         unsigned int shared_net_id = atoi(opts->shared_net_id);

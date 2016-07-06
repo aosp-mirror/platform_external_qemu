@@ -13,6 +13,7 @@
 
 #include "android/avd/info.h"
 #include "android/avd/util.h"
+#include "android/camera/camera-list.h"
 #include "android/cpu_accelerator.h"
 #include "android/emulation/android_pipe_unix.h"
 #include "android/emulation/bufprint_config_dirs.h"
@@ -1339,6 +1340,12 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
                "  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
                "  GNU General Public License for more details.\n\n");
 
+        *exit_status = 0;
+        return false;
+    }
+
+    if (opts->webcam_list) {
+        android_camera_list_webcams();
         *exit_status = 0;
         return false;
     }
