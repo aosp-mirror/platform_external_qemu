@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1dd9c63e_30f03266",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 608,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-06T22:22:25Z",
+      "side": 1,
+      "message": "nit: could you please run it through clang-format to align the new code correctly? we use 4 spaces/tab",
+      "range": {
+        "startLine": 594,
+        "startChar": 4,
+        "endLine": 608,
+        "endChar": 13
+      },
+      "revId": "edb6c402b9de64723804e1dbc9f93be3c7878aae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
