@@ -540,12 +540,6 @@ extern "C" int main(int argc, char **argv) {
         reassign_string(&hw->hw_keyboard_charmap, charmap_name);
     }
 
-    /* Deal with camera emulation */
-    if (opts->webcam_list) {
-        /* List connected webcameras */
-        args[n++] = "-list-webcam";
-    }
-
 // TODO: imement network
 #if 0
     /* Set up the interfaces for inter-emulator networking */

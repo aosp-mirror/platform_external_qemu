@@ -3475,14 +3475,6 @@ STEXI
 Use one or more DNS servers, separated by comma, in the emulated system
 ETEXI
 
-DEF("list-webcam", 0, QEMU_OPTION_list_webcam, \
-    "-list-webcam    list web cameras available for emulation\n", QEMU_ARCH_ALL)
-STEXI
-@item -list-webcam
-@findex -list-webcam
-List web cameras available for emulation
-ETEXI
-
 DEF("android-hw", HAS_ARG, QEMU_OPTION_android_hw,
     "-android-hw <file>\n"
     "                specify the hw config ini file location\n", QEMU_ARCH_ALL)
