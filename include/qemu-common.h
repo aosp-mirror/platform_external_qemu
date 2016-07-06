@@ -18,6 +18,8 @@
 
 #include "qemu/option.h"
 
+#include <stdbool.h>
+
 /* Copyright string for -version arguments, About dialogs, etc */
 #define QEMU_COPYRIGHT "Copyright (c) 2003-2016 " \
     "Fabrice Bellard and the QEMU Project developers"
@@ -77,7 +79,11 @@ int qemu_openpty_raw(int *aslave, char *pty_name);
 #endif
 
 void tcg_exec_init(unsigned long tb_size);
-bool tcg_enabled(void);
+
+extern bool g_tcg_enabled;
+static __inline__ bool tcg_enabled(void) {
+    return g_tcg_enabled;
+}
 
 void cpu_exec_init_all(void);
 

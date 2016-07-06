@@ -120,6 +120,8 @@ static void *l1_map[V_L1_SIZE];
 /* code generation context */
 TCGContext tcg_ctx;
 
+bool g_tcg_enabled = false;
+
 /* translation block context */
 #ifdef CONFIG_USER_ONLY
 __thread int have_tb_lock;
@@ -730,6 +732,8 @@ static inline void code_gen_alloc(size_t tb_size)
         = tcg_ctx.code_gen_buffer_size / CODE_GEN_AVG_BLOCK_SIZE;
     tcg_ctx.tb_ctx.tbs = g_new(TranslationBlock, tcg_ctx.code_gen_max_blocks);
 
+    g_tcg_enabled = true;
+
     qemu_mutex_init(&tcg_ctx.tb_ctx.tb_lock);
 }
 
@@ -754,11 +758,6 @@ void tcg_exec_init(unsigned long tb_size)
        initialize the prologue now.  */
     tcg_prologue_init(&tcg_ctx);
 #endif
-}
-
-bool tcg_enabled(void)
-{
-    return tcg_ctx.code_gen_buffer != NULL;
 }
 
 /* Allocate a new translation block. Flush the translation buffer if
