@@ -126,6 +126,8 @@ static void *l1_map[V_L1_SIZE];
 /* code generation context */
 TCGContext tcg_ctx;
 
+bool g_tcg_enabled = false;
+
 static void tb_link_page(TranslationBlock *tb, tb_page_addr_t phys_pc,
                          tb_page_addr_t phys_page2);
 static TranslationBlock *tb_find_pc(uintptr_t tc_ptr);
@@ -661,6 +663,8 @@ static inline void code_gen_alloc(size_t tb_size)
         exit(1);
     }
 
+    g_tcg_enabled = true;
+
     qemu_madvise(tcg_ctx.code_gen_buffer, tcg_ctx.code_gen_buffer_size,
             QEMU_MADV_HUGEPAGE);
 
@@ -696,11 +700,6 @@ void tcg_exec_init(unsigned long tb_size)
        initialize the prologue now.  */
     tcg_prologue_init(&tcg_ctx);
 #endif
-}
-
-bool tcg_enabled(void)
-{
-    return tcg_ctx.code_gen_buffer != NULL;
 }
 
 /* Allocate a new translation block. Flush the translation buffer if
