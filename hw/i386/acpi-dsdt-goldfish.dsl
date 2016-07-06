@@ -93,4 +93,19 @@ Scope(\_SB) {
             }
         })
     }
+
+    /* RTC */
+    Device(GFRT) {
+        Name(_HID, "GFSH0007")
+        Name(_STR, Unicode("goldfish rtc"))
+        Name(_CRS, ResourceTemplate() {
+            Memory32Fixed(ReadWrite,
+                GF_RTC_IOMEM_BASE,
+                GF_RTC_IOMEM_SIZE
+                )
+            Interrupt(, Edge, ActiveHigh) {
+                GF_RTC_IRQ
+            }
+        })
+    }
 }
