@@ -177,6 +177,8 @@ typedef struct {
 
 typedef struct HwPipe {
     struct HwPipe               *next;
+    struct HwPipe               *wanted_next;
+    struct HwPipe               *wanted_prev;
     PipeDevice                  *device;
     uint64_t                    channel; /* opaque kernel handle */
     unsigned char               wanted;
@@ -228,13 +230,15 @@ static void pipe_free(HwPipe* pipe)
 struct PipeDevice {
     AndroidPipeState *ps;       // FIXME: backlink to instance state
 
-    // the list of all pipes
+    // The list of all pipes.
     HwPipe*  pipes;
-    HwPipe*  save_pipes;
-    HwPipe*  cache_pipe;
-    HwPipe*  cache_pipe_64bit;
+    // The list of the pipes that signalled some 'wanted' state.
+    HwPipe*  wanted_pipes_first;
+    // A cached wanted pipe after the guest's _CHANNEL_HIGH call. We need to
+    // return the very same pipe during the following *_CHANNEL call.
+    HwPipe*  wanted_pipe_after_channel_high;
 
-    // cache of the pipes by channel for a faster lookup
+    // Cache of the pipes by channel for a faster lookup.
     GHashTable* pipes_by_channel;
 
     // i/o registers
@@ -299,29 +303,52 @@ static void hash_channel_destroy(gpointer a) {
 }
 #endif
 
-// Cache pipe operations
-static HwPipe* get_and_clear_cache_pipe(PipeDevice* dev) {
-    if (dev->cache_pipe_64bit) {
-        HwPipe* val = dev->cache_pipe_64bit;
-        dev->cache_pipe_64bit = NULL;
+// Wanted pipe linked list operations
+static HwPipe* wanted_pipes_pop_first(PipeDevice* dev) {
+    if (dev->wanted_pipe_after_channel_high) {
+        HwPipe* val = dev->wanted_pipe_after_channel_high;
+        dev->wanted_pipe_after_channel_high = NULL;
         return val;
     }
-    HwPipe* val = dev->cache_pipe;
-    dev->cache_pipe = NULL;
-    return val;
+    HwPipe* pipe = dev->wanted_pipes_first;
+    if (pipe) {
+        dev->wanted_pipes_first = pipe->wanted_next;
+        assert(pipe->wanted_prev == NULL);
+        pipe->wanted_next = NULL;
+        if (dev->wanted_pipes_first) {
+            dev->wanted_pipes_first->wanted_prev = NULL;
+        }
+    }
+    return pipe;
 }
 
-static void set_cache_pipe(PipeDevice* dev, HwPipe* cache_pipe) {
-    dev->cache_pipe = cache_pipe;
+static void wanted_pipes_add(PipeDevice* dev, HwPipe* pipe) {
+    if (!pipe->wanted_next && !pipe->wanted_prev
+        && dev->wanted_pipes_first != pipe
+        && dev->wanted_pipe_after_channel_high != pipe) {
+        pipe->wanted_next = dev->wanted_pipes_first;
+        if (dev->wanted_pipes_first) {
+            dev->wanted_pipes_first->wanted_prev = pipe;
+        }
+        dev->wanted_pipes_first = pipe;
+    }
 }
 
-static void clear_cache_pipe_if_equal(PipeDevice* dev, HwPipe* pipe) {
-    if (dev->cache_pipe == pipe) {
-        dev->cache_pipe = NULL;
+static void wanted_pipes_remove(PipeDevice* dev, HwPipe* pipe) {
+    if (dev->wanted_pipe_after_channel_high == pipe) {
+        dev->wanted_pipe_after_channel_high = NULL;
     }
-    if (dev->cache_pipe_64bit == pipe) {
-        dev->cache_pipe_64bit = NULL;
+
+    if (pipe->wanted_next) {
+        pipe->wanted_next->wanted_prev = pipe->wanted_prev;
     }
+    if (pipe->wanted_prev) {
+        pipe->wanted_prev->wanted_next = pipe->wanted_next;
+        pipe->wanted_prev = NULL;
+    } else if (dev->wanted_pipes_first == pipe) {
+        dev->wanted_pipes_first = pipe->wanted_next;
+    }
+    pipe->wanted_next = NULL;
 }
 
 /* Update this version number if the device's interface changes. */
@@ -382,7 +409,6 @@ static void pipeDevice_doCommand(PipeDevice* dev, uint32_t command) {
         pipe = pipe_new(dev->channel, dev);
         pipe->next = dev->pipes;
         dev->pipes = pipe;
-        dev->save_pipes = dev->pipes;
         dev->status = 0;
         g_hash_table_insert(dev->pipes_by_channel,
                             hash_create_key_from_channel(dev->channel), pipe);
@@ -403,12 +429,9 @@ static void pipeDevice_doCommand(PipeDevice* dev, uint32_t command) {
         }
         *pnode = pipe->next;
         pipe->next = NULL;
-        dev->save_pipes = dev->pipes;
         g_hash_table_remove(dev->pipes_by_channel,
                             hash_cast_key_from_channel(&pipe->channel));
-
-        // clear the device's cache_pipe if we're closing it now
-        clear_cache_pipe_if_equal(dev, pipe);
+        wanted_pipes_remove(dev, pipe);
 
         pipe_free(pipe);
         break;
@@ -579,7 +602,6 @@ static uint64_t pipe_dev_read(void *opaque, hwaddr offset, unsigned size)
 {
     AndroidPipeState *s = (AndroidPipeState *)opaque;
     PipeDevice *dev = s->dev;
-    HwPipe* cache_pipe = NULL;
 
     switch (offset) {
     case PIPE_REG_STATUS:
@@ -587,43 +609,17 @@ static uint64_t pipe_dev_read(void *opaque, hwaddr offset, unsigned size)
         return dev->status;
 
     case PIPE_REG_CHANNEL: {
-        cache_pipe = get_and_clear_cache_pipe(dev);
-        if (cache_pipe != NULL) {
-            dev->wakes = get_and_clear_pipe_wanted(cache_pipe);
-            return (uint32_t)(cache_pipe->channel & 0xFFFFFFFFUL);
-        }
-
-        HwPipe* pipe = dev->pipes;
-        const bool hadPipesInList = (pipe != NULL);
-
-        // find the next pipe to wake
-        while (pipe && pipe->wanted == 0) {
-            pipe = pipe->next;
-        }
-        if (!pipe) {
-            // no pending pipes - restore the pipes list
-            dev->pipes = dev->save_pipes;
-            if (hadPipesInList) {
-                // This means we had some pipes on the previous call and didn't
-                // reset the IRQ yet; let's do it now.
-                qemu_set_irq(s->irq, 0);
-            }
-            DD("%s: no signaled channels%s", __FUNCTION__,
-               hasPipesInList ? ", lowering IRQ" : "");
+        HwPipe* wanted_pipe = wanted_pipes_pop_first(dev);
+        if (wanted_pipe != NULL) {
+            dev->wakes = get_and_clear_pipe_wanted(wanted_pipe);
+            DR("%s: channel=0x%llx wanted=%d", __FUNCTION__,
+               (unsigned long long)wanted_pipe->channel, dev->wakes);
+            return (uint32_t)(wanted_pipe->channel & 0xFFFFFFFFUL);
+        } else {
+            qemu_set_irq(s->irq, 0);
+            DD("%s: no signaled channels, lowering IRQ", __FUNCTION__);
             return 0;
         }
-
-        DR("%s: channel=0x%llx wanted=%d", __FUNCTION__,
-           (unsigned long long)pipe->channel, pipe->wanted);
-        dev->wakes = get_and_clear_pipe_wanted(pipe);
-        dev->pipes = pipe->next;
-        if (dev->pipes == NULL) {
-            // no next pipe, lower the IRQ and wait for a next call - that's
-            // where we'll restore the pipes list
-            qemu_set_irq(s->irq, 0);
-            DD("%s: lowering IRQ", __FUNCTION__);
-        }
-        return (uint32_t)(pipe->channel & 0xFFFFFFFFUL);
     }
 
     case PIPE_REG_CHANNEL_HIGH: {
@@ -634,39 +630,18 @@ static uint64_t pipe_dev_read(void *opaque, hwaddr offset, unsigned size)
         //  I think we should create a new pipe protocol to deal with this
         //  issue and also reduce chattiness of the pipe communication at the
         //  same time.
-
-        cache_pipe = get_and_clear_cache_pipe(dev);
-        if (cache_pipe != NULL) {
-            dev->cache_pipe_64bit = cache_pipe;
-            assert((uint32_t)(cache_pipe->channel >> 32) != 0);
-            return (uint32_t)(cache_pipe->channel >> 32);
-        }
-
-        HwPipe* pipe = dev->pipes;
-        const bool hadPipesInList = (pipe != NULL);
-
-        // skip all non-waked pipes here
-        while (pipe && pipe->wanted == 0) {
-            pipe = pipe->next;
-        }
-        if (!pipe) {
-            // no pending pipes - restore the pipes list
-            dev->pipes = dev->save_pipes;
-            if (hadPipesInList) {
-                // This means we had some pipes on the previous call and didn't
-                // reset the IRQ yet; let's do it now.
-                qemu_set_irq(s->irq, 0);
-            }
-            DD("%s: no signaled channels%s", __FUNCTION__,
-               hasPipesInList ? ", lowering IRQ" : "");
+        HwPipe* wanted_pipe = wanted_pipes_pop_first(dev);
+        if (wanted_pipe != NULL) {
+            dev->wanted_pipe_after_channel_high = wanted_pipe;
+            DR("%s: channel_high=0x%llx wanted=%d", __FUNCTION__,
+               (unsigned long long)wanted_pipe->channel, wanted_pipe->wanted);
+            assert((uint32_t)(wanted_pipe->channel >> 32) != 0);
+            return (uint32_t)(wanted_pipe->channel >> 32);
+        } else {
+            qemu_set_irq(s->irq, 0);
+            DD("%s: no signaled channels (for high), lowering IRQ", __func__);
             return 0;
         }
-
-        DR("%s: channel_high=0x%llx wanted=%d", __FUNCTION__,
-           (unsigned long long)pipe->channel, pipe->wanted);
-        dev->pipes = pipe;
-        assert((uint32_t)(pipe->channel >> 32) != 0);
-        return (uint32_t)(pipe->channel >> 32);
     }
 
     case PIPE_REG_WAKES:
@@ -712,8 +687,8 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
 
     s->dev = (PipeDevice *) g_malloc0(sizeof(PipeDevice));
     s->dev->ps = s; /* HACK: backlink */
-    s->dev->cache_pipe = NULL;
-    s->dev->cache_pipe_64bit = NULL;
+    s->dev->wanted_pipes_first = NULL;
+    s->dev->wanted_pipe_after_channel_high = NULL;
     s->dev->pipes_by_channel = g_hash_table_new_full(
                                    hash_channel, hash_channel_equal,
                                    hash_channel_destroy, NULL);
@@ -758,11 +733,9 @@ static void qemu2_android_pipe_host_signal_wake( void* hwpipe, unsigned flags )
     DD("%s: channel=0x%llx flags=%d", __FUNCTION__, (unsigned long long)pipe->channel, flags);
 
     set_pipe_wanted_bits(pipe, (unsigned char)flags);
-    if (!pipe->closed) {
-        set_cache_pipe(dev, pipe);
-    }
+    wanted_pipes_add(dev, pipe);
+
     /* Raise IRQ to indicate there are items on our list ! */
-    /* android_device_set_irq(&dev->dev, 0, 1);*/
     qemu_set_irq(dev->ps->irq, 1);
     DD("%s: raising IRQ", __FUNCTION__);
 }
