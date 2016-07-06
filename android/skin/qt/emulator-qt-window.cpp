@@ -1473,7 +1473,6 @@ void EmulatorQtWindow::toggleZoomMode() {
         mContainer.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-        simulateSetZoom(1.0);
         doResize(mContainer.size());
         mOverlay.hide();
     } else {
