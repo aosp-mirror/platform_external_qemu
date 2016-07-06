@@ -17,27 +17,32 @@ TEST(CmdLineOptions, parsePort) {
     struct {
         const char* input;
         bool expectSuccess;
-        int expectOutput;
+        int expectConsolePort;
+        int expectAdbPort;
     } kData[] = {
-        {"5554", true, 5554},
-        {"5555", true, 5554}, // Odd ports not allowed, adjusted down
-        {"5552", false, 0},   // Port below lower bound of 5554
-        {"5553", false, 0},   // Port below lower bound of 5554
-        {"5680", true, 5680}, // Port at upper bound
-        {"5681", false, 0},   // Odd port adjusted down still not valid
-        {"5682", false, 0},   // Even port above range
-        {"80", false, 0},     // Out of range
-        {"foo", false, 0},
-        {"5554trailingText", false, 0},
-        {"", false, 0},
-        {nullptr, false, 0},
+        {"5554", true, 5554, 5555},
+        {"5555", true, 5555, 5556},  // Odd port.
+        {"5552", true, 5552, 5553},  // Port below lower bound of 5554.
+        {"5553", true, 5553, 5554},  // Port below lower bound of 5554.
+        {"6000", true, 6000, 6001},  // Port above upper bound.
+        {"6001", true, 6001, 6002},  // Even port above range
+        {"foo", false, 0, 0},
+        {"5554trailingText", false, 0, 0},
+        {"", false, 0, 0},
+        {nullptr, false, 0, 0},
     };
 
     for (const auto& data : kData) {
-        int output = 0;
-        bool result = android_parse_port_option(data.input, &output);
-        EXPECT_EQ(data.expectSuccess, result);
-        EXPECT_EQ(data.expectOutput, output);
+        int consolePort = 0;
+        int adbPort = 0;
+        bool result = android_parse_port_option(data.input, &consolePort,
+                                                &adbPort);
+        EXPECT_EQ(data.expectSuccess, result)
+                << "Failed on test case: (" << data.input << ")";
+        EXPECT_EQ(data.expectConsolePort, consolePort)
+                << "Failed on test case: (" << data.input << ")";
+        EXPECT_EQ(data.expectAdbPort, adbPort)
+                << "Failed on test case: (" << data.input << ")";
     }
 }
 
@@ -74,9 +79,38 @@ TEST(CmdLineOptions, parsePorts) {
         bool result = android_parse_ports_option(data.input,
                                                  &consolePort,
                                                  &adbPort);
-        EXPECT_EQ(data.expectSuccess, result);
-        EXPECT_EQ(data.expectConsolePort, consolePort);
-        EXPECT_EQ(data.expectAdbPort, adbPort);
+        EXPECT_EQ(data.expectSuccess, result)
+                << "Failed on test case: (" << data.input << ")";
+        EXPECT_EQ(data.expectConsolePort, consolePort)
+                << "Failed on test case: (" << data.input << ")";
+        EXPECT_EQ(data.expectAdbPort, adbPort)
+                << "Failed on test case: (" << data.input << ")";
+    }
+}
+
+TEST(CmdLineOptions, validatePorts) {
+    struct {
+        int consolePortInput;
+        int adbPortInput;
+        bool expectSuccess;
+    } kData[] = {
+        {5554, 5555, true},
+        {5553, 5554, false},
+        {5552, 5553, false},
+        {5584, 5585, true},  // At least 16 port combinations are supported.
+        {5555, 5556, false},  // Odd ports not allowed.
+        {5552, 5553, false},  // Port below lower bound.
+        {5553, 5554, false},  // Port below lower bound.
+        {6000, 6001, false},  // Port above upper bound.
+        {6001, 6002, false},  // Port above upper bound.
+    };
+
+    for (const auto& data : kData) {
+        bool result = android_validate_ports(data.consolePortInput,
+                                             data.adbPortInput);
+        EXPECT_EQ(data.expectSuccess, result)
+                << "Failed on test case: (" << data.consolePortInput
+                << "," << data.adbPortInput << ")";
     }
 }
 
