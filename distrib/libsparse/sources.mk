@@ -4,7 +4,11 @@
 LIBSPARSE_OLD_LOCAL_PATH := $(LOCAL_PATH)
 LOCAL_PATH := $(call my-dir)
 
-LIBSPARSE_SOURCES := \
+LIBSPARSE_INCLUDES := $(LOCAL_PATH)/include $(ZLIB_INCLUDES)
+
+$(call start-emulator-library,emulator-libsparse)
+
+LOCAL_SRC_FILES := \
     src/backed_block.c \
     src/output_file.c \
     src/sparse.c \
@@ -12,16 +16,14 @@ LIBSPARSE_SOURCES := \
     src/sparse_err.c \
     src/sparse_read.c \
 
-LIBSPARSE_INCLUDES := $(LOCAL_PATH)/include $(ZLIB_INCLUDES)
+LOCAL_C_INCLUDES := $(LIBSPARSE_INCLUDES) $(LOCAL_PATH)/src
 
 ifeq (windows,$(BUILD_TARGET_OS))
-LIBSPARSE_CFLAGS := -DUSE_MINGW=1
+LOCAL_CFLAGS := -DUSE_MINGW=1
 endif
+# This third-party library creates warnings at compile time.
+LOCAL_CFLAGS += -Wno-error
 
-$(call start-emulator-library,emulator-libsparse)
-LOCAL_SRC_FILES := $(LIBSPARSE_SOURCES)
-LOCAL_C_INCLUDES := $(LIBSPARSE_INCLUDES) $(LOCAL_PATH)/src
-LOCAL_CFLAGS := $(LIBSPARSE_CFLAGS)
 $(call end-emulator-library)
 
 $(call start-emulator-program,emulator$(BUILD_TARGET_SUFFIX)_img2simg)

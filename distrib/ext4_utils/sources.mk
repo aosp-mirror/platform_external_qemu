@@ -1,7 +1,18 @@
 OLD_LOCAL_PATH := $(LOCAL_PATH)
 LOCAL_PATH := $(call my-dir)
 
-LIBEXT4_UTILS_SOURCES := \
+LIBEXT4_UTILS_INCLUDES := $(LOCAL_PATH)/include
+
+LIBEXT4_UTILS_CFLAGS := -DHOST
+LIBEXT4_UTILS_CFLAGS += -Wno-error
+
+ifeq ($(BUILD_TARGET_OS),windows)
+    LIBEXT4_UTILS_CFLAGS += -DUSE_MINGW=1
+endif
+
+$(call start-emulator-library,emulator-libext4_utils)
+
+LOCAL_SRC_FILES := \
     src/allocate.c \
     src/contents.c \
     src/crc16.c \
@@ -14,15 +25,6 @@ LIBEXT4_UTILS_SOURCES := \
     src/uuid.c \
     src/wipe.c \
 
-LIBEXT4_UTILS_INCLUDES := $(LOCAL_PATH)/include
-
-LIBEXT4_UTILS_CFLAGS := -DHOST
-ifeq ($(BUILD_TARGET_OS),windows)
-    LIBEXT4_UTILS_CFLAGS += -DUSE_MINGW=1
-endif
-
-$(call start-emulator-library,emulator-libext4_utils)
-LOCAL_SRC_FILES := $(LIBEXT4_UTILS_SOURCES)
 LOCAL_C_INCLUDES := \
     $(LIBEXT4_UTILS_INCLUDES) \
     $(LIBSPARSE_INCLUDES) \
