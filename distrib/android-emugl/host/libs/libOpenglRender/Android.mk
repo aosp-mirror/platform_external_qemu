@@ -23,6 +23,7 @@ host_common_SRC_FILES := \
     ChannelStream.cpp \
     ColorBuffer.cpp \
     FbConfig.cpp \
+    FenceSyncInfo.cpp \
     FrameBuffer.cpp \
     ReadBuffer.cpp \
     RenderChannelImpl.cpp \
@@ -34,6 +35,7 @@ host_common_SRC_FILES := \
     RenderThreadInfo.cpp \
     render_api.cpp \
     RenderWindow.cpp \
+    SyncThread.cpp \
     TextureDraw.cpp \
     TextureResize.cpp \
     TimeUtils.cpp \

@@ -238,7 +238,8 @@ LOCAL_SRC_FILES := \
     android/emulation/control/TestRunnerSelfTests.cpp \
     android/emulation/control/ScreenCapturer.cpp \
     android/emulation/CpuAccelerator.cpp \
-    android/emulation/goldfish_sync.c \
+    android/emulation/GoldfishSyncCommandQueue.cpp \
+    android/emulation/goldfish_sync.cpp \
     android/emulation/goldfish_sync_tests.cpp \
     android/emulation/nand_limits.c \
     android/emulation/ParameterList.cpp \
