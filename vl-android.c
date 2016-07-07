@@ -1604,14 +1604,14 @@ int parse_port_range(const char *str, unsigned short *lport,
     p = arg + 1;   /* skip '[' */
     low  = atoi(strtok(p, "-"));
     high = atoi(strtok(NULL, "-"));
-    if ((low > 0) && (high > 0) && (low < high) && (high < 65535)) {
+    if ((low > 0) && (high > 0) && (low < high) && (high <= 65535)) {
       *lport = low;
       *hport = high;
     }
   }
   else {
     low = atoi(arg);
-    if ((0 < low) && (low < 65535)) {
+    if ((0 < low) && (low <= 65535)) {
       *lport = low;
       *hport = low;
     }
