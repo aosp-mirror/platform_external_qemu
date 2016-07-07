@@ -66,9 +66,6 @@ extern bool android_parse_ports_option(const char* ports_string,
  */
 extern bool android_validate_ports(int console_port, int adb_port);
 
-/* name of default keyset file */
-#define  KEYSET_FILE    "default.keyset"
-
 /* the default device DPI if none is specified by the skin
  */
 #define  DEFAULT_DEVICE_DPI  165

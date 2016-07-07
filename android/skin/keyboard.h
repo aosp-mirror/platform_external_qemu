@@ -16,12 +16,9 @@
 #include "android/skin/event.h"
 #include "android/skin/image.h"  /* for SkinRotation */
 #include "android/skin/keycode-buffer.h"
-#include "android/skin/keyset.h"
 #include "android/utils/aconfig-file.h"
 
 typedef struct SkinKeyboard   SkinKeyboard;
-
-typedef void (*SkinKeyCommandFunc)( void*  opaque, SkinKeyCommand  command, int  param );
 
 typedef void (*SkinKeyEventFunc)( void*  opaque, SkinKeyCode  code, int  down );
 
@@ -30,13 +27,7 @@ extern SkinKeyboard* skin_keyboard_create(const char* kcm_file_path,
                                           SkinRotation dpad_rotation,
                                           SkinKeyCodeFlushFunc keycode_flush);
 
-extern SkinKeyset*    skin_keyboard_get_keyset( SkinKeyboard* keyboard);
-
 extern void           skin_keyboard_free( SkinKeyboard*  keyboard );
-
-extern void           skin_keyboard_on_command( SkinKeyboard*       keyboard,
-                                                SkinKeyCommandFunc  cmd_func,
-                                                void*               cmd_opaque );
 
 extern void           skin_keyboard_set_rotation( SkinKeyboard*     keyboard,
                                                   SkinRotation      rotation );

@@ -31,12 +31,8 @@
 
 struct SkinKeyboard {
     const SkinCharmap*  charmap;
-    SkinKeyset*         kset;
 
     SkinRotation        rotation;
-
-    SkinKeyCommandFunc  command_func;
-    void*               command_opaque;
 
     SkinKeycodeBuffer   keycodes[1];
 };
@@ -50,24 +46,12 @@ static bool skin_key_code_is_arrow(int code) {
            code == kKeyCodeDpadDown;
 }
 
-static void
-skin_keyboard_cmd( SkinKeyboard*   keyboard,
-                   SkinKeyCommand  command,
-                   int             param )
-{
-    if (keyboard->command_func) {
-        keyboard->command_func( keyboard->command_opaque, command, param );
-    }
-}
-
 static SkinKeyCode
 skin_keyboard_key_to_code(SkinKeyboard*  keyboard,
                           int            code,
                           int            mod,
                           int            down)
 {
-    SkinKeyCommand  command;
-
     D("key code=%d mod=%d str=%s",
       code,
       mod,
@@ -128,17 +112,6 @@ skin_keyboard_key_to_code(SkinKeyboard*  keyboard,
         }
     }
 
-    /* now try all keyset combos */
-    command = skin_keyset_get_command(keyboard->kset, code, mod);
-    if (command != SKIN_KEY_COMMAND_NONE) {
-        D("handling command %s from (sym=%d, mod=%d, str=%s)",
-          skin_key_command_to_str(command),
-          code,
-          mod,
-          skin_key_pair_to_string(code, mod));
-        skin_keyboard_cmd(keyboard, command, down);
-        return 0;
-    }
     D("could not handle (code=%d, mod=%d, str=%s)", code, mod,
       skin_key_pair_to_string(code,mod));
     return -1;
@@ -201,23 +174,11 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
     }
 }
 
-SkinKeyset*
-skin_keyboard_get_keyset( SkinKeyboard* keyboard ) {
-    return keyboard->kset;
-}
-
 void
 skin_keyboard_set_rotation( SkinKeyboard*     keyboard,
                             SkinRotation      rotation )
 {
     keyboard->rotation = (rotation & 3);
-}
-
-void
-skin_keyboard_on_command( SkinKeyboard*  keyboard, SkinKeyCommandFunc  cmd_func, void*  cmd_opaque )
-{
-    keyboard->command_func   = cmd_func;
-    keyboard->command_opaque = cmd_opaque;
 }
 
 void
@@ -257,14 +218,6 @@ static SkinKeyboard* skin_keyboard_create_from_charmap_name(
         kb->charmap = skin_charmap_get_by_name(DEFAULT_ANDROID_CHARMAP);
         fprintf(stderr, "### warning, skin requires unknown '%s' charmap, reverting to '%s'\n",
                 charmap_name, kb->charmap->name );
-    }
-
-    /* add default keyset */
-    if (skin_keyset_get_default()) {
-        kb->kset = skin_keyset_get_default();
-    } else {
-        kb->kset = skin_keyset_new_from_text(
-                skin_keyset_get_default_text());
     }
     skin_keycode_buffer_init(kb->keycodes, keycode_flush);
     skin_keyboard_set_rotation(kb, dpad_rotation);

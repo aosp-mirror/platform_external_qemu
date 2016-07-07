@@ -14,7 +14,6 @@
 #include "android/skin/qt/extended-window-styles.h"
 
 #include "android/main-common.h"
-#include "android/skin/keyset.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"

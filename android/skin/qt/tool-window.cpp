@@ -120,6 +120,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             "Ctrl+-     VOLUME_DOWN\n"
             "Ctrl+P     POWER\n"
             "Ctrl+M     MENU\n"
+            "Ctrl+T     TOGGLE_TRACKBALL\n"
 #ifndef __APPLE__
             "Ctrl+H     HOME\n"
 #else
@@ -361,6 +362,13 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                 mEmulatorWindow->queueSkinEvent(skin_event);
             }
             break;
+        case QtUICommand::TOGGLE_TRACKBALL:
+            if (down) {
+                SkinEvent* skin_event = new SkinEvent();
+                skin_event->type = kEventToggleTrackball;
+                mEmulatorWindow->queueSkinEvent(skin_event);
+                break;
+            }
         case QtUICommand::SHOW_MULTITOUCH:
         // Multitouch is handled in EmulatorQtWindow, and doesn't
         // really need an element in the QtUICommand enum. This
