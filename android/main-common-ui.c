@@ -85,18 +85,6 @@ user_config_get_window_pos( int *window_x, int *window_y )
 /***********************************************************************/
 /***********************************************************************/
 /*****                                                             *****/
-/*****            K E Y S E T   R O U T I N E S                    *****/
-/*****                                                             *****/
-/***********************************************************************/
-/***********************************************************************/
-
-void write_default_keyset( void ) {
-    // Intentionally empty, the new UI doesn't use keyset files anymore.
-}
-
-/***********************************************************************/
-/***********************************************************************/
-/*****                                                             *****/
 /*****            S K I N   S U P P O R T                          *****/
 /*****                                                             *****/
 /***********************************************************************/
@@ -297,17 +285,6 @@ bool emulator_parseUiCommandLineOptions(AndroidOptions* opts,
                                         AndroidHwConfig* hw) {
     if (skin_charmap_setup(opts->charmap)) {
         return false;
-    }
-
-    /* The Qt UI handles keyboard shortcuts on its own. Don't load any keyset. */
-    SkinKeyset* keyset = skin_keyset_new_from_text("");
-    if (!keyset) {
-        derror("PANIC: unable to create empty default keyset!!\n" );
-        return false;
-    }
-    skin_keyset_set_default(keyset);
-    if (!opts->keyset) {
-        write_default_keyset();
     }
 
     user_config_init();

@@ -118,7 +118,6 @@ OPT_FLAG ( no_audio, "disable audio support" )
 OPT_FLAG ( noaudio,  "same as -no-audio" )
 OPT_PARAM( audio,    "<backend>", "use specific audio backend" )
 
-OPT_FLAG ( raw_keys, "disable Unicode keyboard reverse-mapping (deprecated)" )
 OPT_PARAM( radio, "<device>", "redirect radio modem interface to character device" )
 OPT_PARAM( port, "<port>", "TCP port that will be used for the console" )
 OPT_PARAM( ports, "<consoleport>,<adbport>", "TCP ports used for the console and adb bridge" )
@@ -141,7 +140,6 @@ OPT_FLAG( version, "display emulator version number" )
 
 OPT_PARAM( report_console, "<socket>", "report console port to remote socket" )
 OPT_PARAM( gps, "<device>", "redirect NMEA GPS to character device" )
-OPT_PARAM( keyset, "<name>", "specify keyset file name" )
 OPT_PARAM( shell_serial, "<device>", "specific character device for root shell" )
 OPT_PARAM( tcpdump, "<file>", "capture network packets to file" )
 
