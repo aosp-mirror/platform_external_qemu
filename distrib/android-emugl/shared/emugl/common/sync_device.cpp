@@ -35,10 +35,16 @@ static void defaultDestroyTimeline(uint64_t timeline) {
     return;
 }
 
+static void defaultRegisterTriggerWait(emugl_sync_trigger_wait_t f) {
+    (void)f;
+    return;
+}
+
 emugl_sync_create_timeline_t emugl_sync_create_timeline = defaultCreateTimeline;
 emugl_sync_create_fence_t emugl_sync_create_fence = defaultCreateFence;
 emugl_sync_timeline_inc_t emugl_sync_timeline_inc = defaultTimelineInc;
 emugl_sync_destroy_timeline_t emugl_sync_destroy_timeline = defaultDestroyTimeline;
+emugl_sync_register_trigger_wait_t emugl_sync_register_trigger_wait = defaultRegisterTriggerWait;
 
 void set_emugl_sync_create_timeline(emugl_sync_create_timeline_t f) {
     if (f) emugl_sync_create_timeline = f;
@@ -54,4 +60,8 @@ void set_emugl_sync_timeline_inc(emugl_sync_timeline_inc_t f) {
 
 void set_emugl_sync_destroy_timeline(emugl_sync_destroy_timeline_t f) {
     if (f) emugl_sync_destroy_timeline = f;
+}
+
+void set_emugl_sync_register_trigger_wait(emugl_sync_register_trigger_wait_t f) {
+    if (f) emugl_sync_register_trigger_wait = f;
 }
