@@ -80,7 +80,8 @@ bool androidEmuglConfigInit(EmuglConfig* config,
         setGpuBlacklistStatus(blacklisted);
     } else if (onBlacklist && gpuChoice &&
             (!strcmp(gpuChoice, "host") || !strcmp(gpuChoice, "on"))) {
-        dwarning("Your GPU drivers may have a bug. "
+        dwarning("Your GPU drivers may have a bug, "
+                 "but you have chosen to use the host GPU anyway. "
                  "If you experience graphical issues, "
                  "please consider switching to software rendering.");
     }
