@@ -54,6 +54,9 @@ public:
     // waiting thread that is blocked on wait().
     void signal();
 
+    // Like signal(), but wakes all of the waiting threads.
+    void broadcast();
+
     // XP-specific members of the condition variable
     struct XpCV {
         std::vector<Win32Utils::ScopedHandle> mWaiters;
@@ -95,6 +98,10 @@ private:
 
     void signal() {
         pthread_cond_signal(&mCond);
+    }
+
+    void broadcast() {
+        pthread_cond_broadcast(&mCond);
     }
 
 private:
