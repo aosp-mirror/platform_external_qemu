@@ -101,7 +101,6 @@ typedef struct {
     GIOChannel *chan;           /* actual comms socket */
     /* these cache the read/write state for when wakeon is called */
     gboolean    data_in;        /* have we seen data? */
-    gboolean    data_out;       /* can we output data? */
     adb_pipe *adb_pipes[PIPE_QUEUE_LEN];
     adb_pipe *connected_pipe;
     guint       listen_chan_event; /* an event id if we're listening or 0 */
@@ -293,17 +292,10 @@ static gboolean tcp_adb_server_data(GIOChannel *channel, GIOCondition cond,
         bs->data_in = TRUE;
         if (bs->connected_pipe && bs->connected_pipe->flags & PIPE_WAKE_READ) {
             DPRINTF("%s: waking up pipe for incomming data\n", __func__);
-            android_pipe_host_signal_wake(bs->connected_pipe->hwpipe, PIPE_WAKE_READ);
-        }
-        qemu_mutex_unlock(bs->mutex);
-    }
-
-    if (cond & G_IO_OUT) {
-        qemu_mutex_lock(bs->mutex);
-        bs->data_out = TRUE;
-        if (bs->connected_pipe && bs->connected_pipe->flags & PIPE_WAKE_WRITE) {
-            DPRINTF("%s: waking up pipe for now able to write\n", __func__);
-            android_pipe_host_signal_wake(bs->connected_pipe->hwpipe, PIPE_WAKE_WRITE);
+            // We always set the write flag as well, just in case. Socket write
+            // rarely fails.
+            android_pipe_host_signal_wake(bs->connected_pipe->hwpipe,
+                                          PIPE_WAKE_READ | PIPE_WAKE_WRITE);
         }
         qemu_mutex_unlock(bs->mutex);
     }
@@ -690,24 +682,21 @@ static int adb_pipe_proxy_send(adb_pipe *apipe, const AndroidPipeBuffer *buffers
          */
         if (total_copied > 0 &&
             ((status == G_IO_STATUS_EOF || status == G_IO_STATUS_AGAIN))) {
-            bs->data_out = FALSE;
             g_io_channel_unref(chan);
             return total_copied;
         }
 
         /* Can't write and more data.... */
         if (status == G_IO_STATUS_AGAIN) {
-            DPRINTF("%s: out of data, setting up watch\n", __func__);
-            g_io_add_watch(chan, G_IO_IN|G_IO_ERR|G_IO_HUP,
-                           tcp_adb_server_data, bs);
+            DPRINTF("%s: out of data, returning 'AGAIN'\n", __func__);
             g_io_channel_unref(chan);
-            bs->data_out = FALSE;
+            // No watch is needed here: socket will become writable very
+            // quickly anyway, usually much faster than the watch callback.
             return PIPE_ERROR_AGAIN;
         }
 
         if (status == G_IO_STATUS_EOF) {
             g_io_channel_unref(chan);
-            bs->data_out = FALSE;
             tcp_adb_server_close(bs, REQUEST_FROM_SOCKET);
             return 0;
         }
@@ -715,14 +704,12 @@ static int adb_pipe_proxy_send(adb_pipe *apipe, const AndroidPipeBuffer *buffers
         if (status != G_IO_STATUS_NORMAL) {
             DPRINTF("%s: went wrong (%d)\n", __func__, status);
             g_io_channel_unref(chan);
-            bs->data_out = FALSE;
             tcp_adb_server_close(bs, REQUEST_FROM_SOCKET);
             return PIPE_ERROR_IO;
         }
 
         if (copied < bsize) {
             g_assert(total_copied > 0);
-            bs->data_out = FALSE;
             break;
         }
 
@@ -927,12 +914,20 @@ static void adb_pipe_wake_on(void *opaque, int flags)
     DPRINTF("%s: setting flags 0x%x->0x%x\n", __func__, apipe->flags, flags);
     apipe->flags |= flags;
 
-    if (flags & PIPE_WAKE_READ && adb_state.data_in) {
-        android_pipe_host_signal_wake(apipe->hwpipe, PIPE_WAKE_READ);
+    int wake_flags = 0;
+
+    // quick check if we're good to go already
+    if (apipe->flags & PIPE_WAKE_READ && adb_state.data_in) {
+        wake_flags |= PIPE_WAKE_READ;
+    }
+    if (apipe->flags & PIPE_WAKE_WRITE) {
+        // we assume we can always write to the socket (not really true on
+        // Windows, but it won't cause too many unneeded "send" calls)
+        wake_flags |= PIPE_WAKE_WRITE;
     }
 
-    if (flags & PIPE_WAKE_WRITE && adb_state.data_out) {
-        android_pipe_host_signal_wake(apipe->hwpipe, PIPE_WAKE_WRITE);
+    if (wake_flags != 0) {
+        android_pipe_host_signal_wake(apipe->hwpipe, wake_flags);
     }
 }
 
