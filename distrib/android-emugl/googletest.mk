@@ -12,7 +12,7 @@ common_SRC_FILES := \
     src/gtest-all.cc \
     src/gtest_main.cc
 
-common_CFLAGS := -O0
+common_CFLAGS := -O0 -Wno-unused-variable
 
 ifneq (windows,$(BUILD_TARGET_OS))
     common_LDLIBS += -lpthread
