@@ -20,6 +20,7 @@
 #include "android/kernel/kernel_utils.h"
 #include "android/help.h"
 #include "android/main-emugl.h"
+#include "android/main-help.h"
 #include "android/opengl/emugl_config.h"
 #include "android/resource.h"
 #include "android/snapshot.h"
@@ -1301,35 +1302,9 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
             break;
         }
 
-        if (!strcmp(opt, "-help")) {
-            STRALLOC_DEFINE(out);
-            android_help_main(out);
-            printf("%.*s", out->n, out->s);
-            stralloc_reset(out);
-            return false;
-        }
-
-        if (!strncmp(opt, "-help-",6)) {
-            STRALLOC_DEFINE(out);
-            opt += 6;
-
-            if (!strcmp(opt, "all")) {
-                android_help_all(out);
-            }
-            else if (android_help_for_option(opt, out) == 0) {
-                /* ok */
-            }
-            else if (android_help_for_topic(opt, out) == 0) {
-                /* ok */
-            }
-            if (out->n > 0) {
-                printf("\n%.*s", out->n, out->s);
-                *exit_status = 0;
-                return false;
-            }
-
-            fprintf(stderr, "unknown option: -help-%s\n", opt);
-            fprintf(stderr, "please use -help for a list of valid topics\n");
+        int helpStatus = emulator_parseHelpOption(opt);
+        if (helpStatus >= 0) {
+            *exit_status = helpStatus;
             return false;
         }
 

@@ -36,6 +36,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/main-emugl.h"
+#include "android/main-help.h"
 #include "android/opengl/emugl_config.h"
 #include "android/qt/qt_setup.h"
 #include "android/utils/compiler.h"
@@ -135,8 +136,10 @@ int main(int argc, char** argv)
     const char* gpu = NULL;
     char*       emulatorPath;
     const char* engine = NULL;
-    bool force_32bit = false;
-    bool no_window = false;
+    bool doAccelCheck = false;
+    bool doListAvds = false;
+    bool force32bit = false;
+    bool noWindow = false;
     bool useSystemLibs = false;
     bool forceEngineLaunch = false;
 
@@ -169,21 +172,8 @@ int main(int argc, char** argv)
         const char* opt = argv[nn];
 
         if (!strcmp(opt, "-accel-check")) {
-            // forward the option to our answering machine
-            auto& sys = *System::get();
-            const auto path = sys.findBundledExecutable("emulator-check");
-            if (path.empty()) {
-                derror("can't find the emulator-check executable "
-                       "(corrupted tools installation?)");
-                return -1;
-            }
-
-            System::ProcessExitCode exit_code;
-            bool ret = sys.runCommand(
-                    {path, "accel"},
-                    RunOptions::WaitForCompletion | RunOptions::ShowOutput,
-                    System::kInfinite, &exit_code);
-            return ret ? exit_code : -1;
+            doAccelCheck = true;
+            continue;
         }
 
         if (!strcmp(opt,"-qemu")) {
@@ -191,11 +181,11 @@ int main(int argc, char** argv)
             break;
         }
 
-        static const char helpOption[] = "-help";
-        if (!strncmp(opt, helpOption,
-                     android::base::stringLiteralLength(helpOption))) {
-            forceEngineLaunch = true;
-            continue;
+        // NOTE: Process -help options immediately, ignoring all other
+        // parameters.
+        int helpStatus = emulator_parseHelpOption(opt);
+        if (helpStatus >= 0) {
+            return helpStatus;
         }
 
         if (!strcmp(opt,"-verbose") || !strcmp(opt,"-debug-all")
@@ -229,12 +219,12 @@ int main(int argc, char** argv)
         }
 
         if (!strcmp(opt,"-force-32bit")) {
-            force_32bit = true;
+            force32bit = true;
             continue;
         }
 
         if (!strcmp(opt,"-no-window")) {
-            no_window = true;
+            noWindow = true;
             continue;
         }
 
@@ -246,16 +236,8 @@ int main(int argc, char** argv)
 #endif  // __linux__
 
         if (!strcmp(opt,"-list-avds")) {
-            AvdScanner* scanner = avdScanner_new(NULL);
-            for (;;) {
-                const char* name = avdScanner_next(scanner);
-                if (!name) {
-                    break;
-                }
-                printf("%s\n", name);
-            }
-            avdScanner_free(scanner);
-            return 0;
+            doListAvds = true;
+            continue;
         }
 
         if (!avdName) {
@@ -268,6 +250,37 @@ int main(int argc, char** argv)
         }
     }
 
+    if (doAccelCheck) {
+        // forward the option to our answering machine
+        auto& sys = *System::get();
+        const auto path = sys.findBundledExecutable("emulator-check");
+        if (path.empty()) {
+            derror("can't find the emulator-check executable "
+                    "(corrupted tools installation?)");
+            return -1;
+        }
+
+        System::ProcessExitCode exit_code;
+        bool ret = sys.runCommand(
+                {path, "accel"},
+                RunOptions::WaitForCompletion | RunOptions::ShowOutput,
+                System::kInfinite, &exit_code);
+        return ret ? exit_code : -1;
+    }
+
+    if (doListAvds) {
+        AvdScanner* scanner = avdScanner_new(NULL);
+        for (;;) {
+            const char* name = avdScanner_next(scanner);
+            if (!name) {
+                break;
+            }
+            printf("%s\n", name);
+        }
+        avdScanner_free(scanner);
+        return 0;
+    }
+
     /* If ANDROID_EMULATOR_FORCE_32BIT is set to 'true' or '1' in the
      * environment, set -force-32bit automatically.
      */
@@ -275,9 +288,9 @@ int main(int argc, char** argv)
         const char kEnvVar[] = "ANDROID_EMULATOR_FORCE_32BIT";
         const char* val = getenv(kEnvVar);
         if (val && (!strcmp(val, "true") || !strcmp(val, "1"))) {
-            if (!force_32bit) {
+            if (!force32bit) {
                 D("Auto-config: -force-32bit (%s=%s)\n", kEnvVar, val);
-                force_32bit = true;
+                force32bit = true;
             }
         }
     }
@@ -286,7 +299,7 @@ int main(int argc, char** argv)
     int wantedBitness = hostBitness;
 
 #if defined(__linux__)
-    if (!force_32bit && hostBitness == 32) {
+    if (!force32bit && hostBitness == 32) {
         fprintf(stderr,
 "ERROR: 32-bit Linux Android emulator binaries are DEPRECATED, to use them\n"
 "       you will have to do at least one of the following:\n"
@@ -303,7 +316,7 @@ int main(int argc, char** argv)
     }
 #endif  // __linux__
 
-    if (force_32bit) {
+    if (force32bit) {
         wantedBitness = 32;
     }
 
@@ -311,7 +324,7 @@ int main(int argc, char** argv)
     // Not sure when the android_getHostBitness will break again
     // but we are not shiping 32bit for OSX long time ago.
     // https://code.google.com/p/android/issues/detail?id=196779
-    if (force_32bit) {
+    if (force32bit) {
         fprintf(stderr,
 "WARNING: 32-bit OSX Android emulator binaries are not supported, use 64bit.\n");
     }
@@ -494,7 +507,7 @@ int main(int argc, char** argv)
                                 googleApis,
                                 gpu,
                                 wantedBitness,
-                                no_window)) {
+                                noWindow)) {
         fprintf(stderr, "ERROR: %s\n", config.status);
         return 1;
     }
