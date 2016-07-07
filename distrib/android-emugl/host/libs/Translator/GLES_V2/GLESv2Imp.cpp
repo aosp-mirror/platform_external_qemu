@@ -489,11 +489,10 @@ GL_APICALL void  GL_APIENTRY glDeleteBuffers(GLsizei n, const GLuint* buffers){
 
 GL_APICALL void  GL_APIENTRY glDeleteFramebuffers(GLsizei n, const GLuint* framebuffers){
     GET_CTX();
-    SET_ERROR_IF(n<0,GL_INVALID_VALUE);
-    if(ctx->shareGroup().get()) {
-        for(int i=0; i < n; i++){
-           const GLuint globalFrameBufferName = ctx->shareGroup()->getGlobalName(FRAMEBUFFER,framebuffers[i]);
-           ctx->shareGroup()->deleteName(FRAMEBUFFER,framebuffers[i]);
+    SET_ERROR_IF(n < 0, GL_INVALID_VALUE);
+    if (ctx->shareGroup().get()) {
+        for (int i = 0; i < n; i++) {
+           ctx->shareGroup()->deleteName(FRAMEBUFFER, framebuffers[i]);
         }
     }
 }
