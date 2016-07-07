@@ -27,7 +27,9 @@
 #include "emugl/common/mutex.h"
 
 #define GLAPIENTRY GL_APIENTRY
-typedef void(*FUNCPTR)();
+typedef void(*FUNCPTR_FLUSH_FINISH)();
+typedef GLsync (*FUNCPTR_FENCE_SYNC)(GLenum, GLbitfield);
+typedef GLenum (*FUNCPTR_CLIENT_WAIT_SYNC)(GLsync, GLbitfield, GLuint64);
 
 class GlLibrary;
 
