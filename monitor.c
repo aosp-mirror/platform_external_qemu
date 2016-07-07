@@ -5632,9 +5632,11 @@ void monitor_set_command_table(Monitor* mon, mon_cmd_t* cmds) {
     }
 }
 
+#ifdef CONFIG_ANDROID
 mon_cmd_t* monitor_get_android_cmds() {
     return android_cmds;
 }
+#endif
 
 static void bdrv_password_cb(void *opaque, const char *password,
                              void *readline_opaque)
