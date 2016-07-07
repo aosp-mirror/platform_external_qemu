@@ -25,7 +25,7 @@ LOCAL_PATH := $(EMULATOR_GTEST_SOURCES_DIR)
 $(call start-emulator-library, emulator-libgtest)
 LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES)
 LOCAL_CPP_EXTENSION := .cc
-LOCAL_CFLAGS += -O0
+LOCAL_CFLAGS += -O0 -Wno-unused-variable
 LOCAL_SRC_FILES := $(EMULATOR_GTEST_SOURCES)
 $(call end-emulator-library)
 
