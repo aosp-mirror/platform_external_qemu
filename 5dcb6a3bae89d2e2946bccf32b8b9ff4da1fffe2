@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ddc56ece_cee1d7d6",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-07T16:21:04Z",
+      "side": 1,
+      "message": "there\u0027s no need to have this check now: just check if emulator_parseHelpOption() returned \u003e\u003d0",
+      "range": {
+        "startLine": 184,
+        "startChar": 8,
+        "endLine": 186,
+        "endChar": 71
+      },
+      "revId": "5dcb6a3bae89d2e2946bccf32b8b9ff4da1fffe2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ddc56ece_6ed1c303",
+        "filename": "android/main-help.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-07T16:21:04Z",
+      "side": 1,
+      "message": "nor?",
+      "range": {
+        "startLine": 20,
+        "startChar": 29,
+        "endLine": 20,
+        "endChar": 31
+      },
+      "revId": "5dcb6a3bae89d2e2946bccf32b8b9ff4da1fffe2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ddc56ece_2ec7cb4d",
+        "filename": "android/main-help.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-07T16:21:04Z",
+      "side": 1,
+      "message": "typo: returns",
+      "range": {
+        "startLine": 20,
+        "startChar": 67,
+        "endLine": 20,
+        "endChar": 73
+      },
+      "revId": "5dcb6a3bae89d2e2946bccf32b8b9ff4da1fffe2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
