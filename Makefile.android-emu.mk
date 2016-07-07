@@ -440,6 +440,7 @@ LOCAL_SRC_FILES := \
   android/base/sockets/SocketWaiter_unittest.cpp \
   android/base/StringFormat_unittest.cpp \
   android/base/StringView_unittest.cpp \
+  android/base/synchronization/ConditionVariable_unittest.cpp \
   android/base/synchronization/Lock_unittest.cpp \
   android/base/synchronization/ReadWriteLock_unittest.cpp \
   android/base/synchronization/MessageChannel_unittest.cpp \

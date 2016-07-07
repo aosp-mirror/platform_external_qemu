@@ -69,6 +69,7 @@ public:
     virtual void initCV(ConditionVariable::Data* cvData) const = 0;
     virtual void waitCV(ConditionVariable::Data* cvData, Lock* lock) const = 0;
     virtual void signalCV(ConditionVariable::Data* cvData) const = 0;
+    virtual void broadcastCV(ConditionVariable::Data* cvData) const = 0;
     virtual void destroyCV(ConditionVariable::Data* cvData) const = 0;
 
 protected:
@@ -113,6 +114,23 @@ public:
         SetEvent(handle);
         // NOTE: The handle will be closed/recycled by the waiter.
     }
+    virtual void broadcastCV(
+            ConditionVariable::Data* cvData) const override final {
+        android::base::AutoLock lock(cvData->xp.mLock);
+        if (cvData->xp.mWaiters.empty()) {
+            return;
+        }
+
+        lock.unlock();
+
+        for (auto& waiter : cvData->xp.mWaiters) {
+            HANDLE handle = waiter.release();
+            SetEvent(handle);
+            // NOTE: The handle will be closed/recycled by the waiter.
+        }
+
+        cvData->xp.mWaiters.clear();
+    }
     virtual void destroyCV(
             ConditionVariable::Data* cvData) const override final {
         cvData->xp.ConditionVariable::XpCV::~XpCV();
@@ -149,6 +167,10 @@ public:
     virtual void signalCV(
             ConditionVariable::Data* cvData) const override final {
         sWakeOneCV(&cvData->vista);
+    }
+    virtual void broadcastCV(
+            ConditionVariable::Data* cvData) const override final {
+        sWakeAllCV(&cvData->vista);
     }
     virtual void destroyCV(
             ConditionVariable::Data* cvData) const override final {
@@ -226,6 +248,10 @@ void ConditionVariable::wait(Lock* userLock) {
 
 void ConditionVariable::signal() {
     sImpl->signalCV(&mData);
+}
+
+void ConditionVariable::broadcast() {
+    sImpl->broadcastCV(&mData);
 }
 
 }  // namespace base
