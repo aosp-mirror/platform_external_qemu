@@ -76,31 +76,20 @@ android_tid_function_print(
         const char* function,
         const char* format, ... )
 {
-    android_thread_id_t tid;
-    va_list  args;
-    tid = android_get_thread_id();
-    va_start( args, format );
-    if (use_emulator_prefix && function) {
-        fprintf( stdout,
-                 "emulator: tid=0x%" ANDROID_THREADID_FMT ": %s: ",
-                 tid, function);
-    } else if (!use_emulator_prefix && function) {
-        fprintf( stdout,
-                 "tid=0x%" ANDROID_THREADID_FMT ": %s: ",
-                 tid, function);
-    } else if (!use_emulator_prefix && !function) {
-        fprintf( stdout,
-                 "tid=0x%" ANDROID_THREADID_FMT ": ",
-                 tid, function);
-    } else if (use_emulator_prefix && !function) {
-        fprintf( stdout,
-                 "emulator: tid=0x%" ANDROID_THREADID_FMT ": ",
-                 tid, function);
+    android_thread_id_t tid = android_get_thread_id();
+    va_list args;
+    va_start(args, format);
+    const char* prefix = use_emulator_prefix ? "emulator: " : "";
+    if (function) {
+        printf("%stid=0x%" ANDROID_THREADID_FMT ": %s: ", prefix, tid,
+               function);
+    } else {
+        printf("%stid=0x%" ANDROID_THREADID_FMT ": ", prefix, tid);
     }
 
-    vfprintf( stdout, format, args );
-    fprintf( stdout, "\n" );
-    va_end( args );
+    vprintf(format, args);
+    printf("\n");
+    va_end(args);
 }
 
 /** STDOUT/STDERR REDIRECTION
