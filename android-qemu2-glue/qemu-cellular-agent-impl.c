@@ -30,15 +30,21 @@ static void cellular_setSignalStrength(int zeroTo31)
     }
 }
 
-static void cellular_setSignalStrengthProfile(int zeroTo4)
+static void cellular_setSignalStrengthProfile(enum CellularSignal signal)
 {
     // (See do_gsm_signal_profile() in android-qemu1-glue/console.c)
-
     if (android_modem) {
-        if (zeroTo4 < 0) zeroTo4 = 0;
-        if (zeroTo4 > 4) zeroTo4 = 4;
-
-        amodem_set_signal_strength_profile(android_modem, zeroTo4);
+        int signalQuality = -1;
+        switch (signal) {
+            case Cellular_Signal_None: signalQuality = 0; break;
+            case Cellular_Signal_Poor: signalQuality = 1; break;
+            case Cellular_Signal_Moderate: signalQuality = 2; break;
+            case Cellular_Signal_Good: signalQuality = 3; break;
+            case Cellular_Signal_Great: signalQuality = 4; break;
+        }
+        if (signalQuality >= 0) {
+            amodem_set_signal_strength_profile(android_modem, signalQuality);
+        }
     }
 }
 
