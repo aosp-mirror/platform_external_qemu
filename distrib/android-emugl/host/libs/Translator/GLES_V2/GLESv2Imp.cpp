@@ -62,10 +62,12 @@ static GLESiface  s_glesIface = {
     .createGLESContext = createGLESContext,
     .initContext       = initContext,
     .deleteGLESContext = deleteGLESContext,
-    .flush             = (FUNCPTR)glFlush,
-    .finish            = (FUNCPTR)glFinish,
+    .flush             = (FUNCPTR_FLUSH_FINISH)glFlush,
+    .finish            = (FUNCPTR_FLUSH_FINISH)glFinish,
     .setShareGroup     = setShareGroup,
-    .getProcAddress    = getProcAddress
+    .getProcAddress    = getProcAddress,
+    .fenceSync         = (FUNCPTR_FENCE_SYNC)glFenceSync,
+    .clientWaitSync    = (FUNCPTR_CLIENT_WAIT_SYNC)glClientWaitSync,
 };
 
 #include <GLcommon/GLESmacros.h>
@@ -2293,12 +2295,18 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
 
 GL_APICALL GLsync GL_APIENTRY glFenceSync(GLenum condition, GLbitfield flags)
 {
-    GET_CTX_RET(NULL);
+    GET_CTX_V2_RET(NULL);
     return ctx->dispatcher().glFenceSync(condition, flags);
 }
 
 GL_APICALL GLenum GL_APIENTRY glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout)
 {
-    GET_CTX_RET(GL_WAIT_FAILED);
+    GET_CTX_V2_RET(GL_WAIT_FAILED);
     return ctx->dispatcher().glClientWaitSync(wait_on, flags, timeout);
+}
+
+GL_APICALL void GL_APIENTRY glWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout)
+{
+    GET_CTX_V2();
+    ctx->dispatcher().glWaitSync(wait_on, flags, timeout);
 }
