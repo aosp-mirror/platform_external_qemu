@@ -45,8 +45,7 @@ bool androidEmuglConfigInit(EmuglConfig* config,
 
     bool hasGuestRenderer = (!strcmp(avdArch, "x86") ||
                              !strcmp(avdArch, "x86_64")) &&
-                             (apiLevel >= 23) &&
-                             hasGoogleApis;
+                             (apiLevel >= 23);
 
     bool blacklisted = false;
     bool onBlacklist = false;
