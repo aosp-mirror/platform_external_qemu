@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9d42162f_8b388d94",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-07T16:29:56Z",
+      "side": 1,
+      "message": "Absolutely, it was a left-over from a previous version of the code. Fixed. Thanks :)",
+      "parentUuid": "ddc56ece_cee1d7d6",
+      "range": {
+        "startLine": 184,
+        "startChar": 8,
+        "endLine": 186,
+        "endChar": 71
+      },
+      "revId": "5dcb6a3bae89d2e2946bccf32b8b9ff4da1fffe2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ddc56ece_6ed1c303",
         "filename": "android/main-help.h",
         "patchSetId": 2
@@ -64,6 +88,54 @@
         "startChar": 67,
         "endLine": 20,
         "endChar": 73
+      },
+      "revId": "5dcb6a3bae89d2e2946bccf32b8b9ff4da1fffe2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5d36dec8_a9d2bd63",
+        "filename": "android/main-help.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-07T16:29:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ddc56ece_2ec7cb4d",
+      "range": {
+        "startLine": 20,
+        "startChar": 67,
+        "endLine": 20,
+        "endChar": 73
+      },
+      "revId": "5dcb6a3bae89d2e2946bccf32b8b9ff4da1fffe2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3dd12a8d_a8dc5b53",
+        "filename": "android/main-help.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-07T16:29:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ddc56ece_6ed1c303",
+      "range": {
+        "startLine": 20,
+        "startChar": 29,
+        "endLine": 20,
+        "endChar": 31
       },
       "revId": "5dcb6a3bae89d2e2946bccf32b8b9ff4da1fffe2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
