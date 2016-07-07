@@ -80,6 +80,9 @@ intptr_t RenderThread::main() {
     tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, NULL);
     initRenderControlContext(&tInfo.m_rcDec);
 
+    // initialize sync thread
+    tInfo.syncThread = NULL; // no need to allocate if sync is not used
+
     ReadBuffer readBuf(STREAM_BUFFER_SIZE);
 
     int stats_totalBytes = 0;
