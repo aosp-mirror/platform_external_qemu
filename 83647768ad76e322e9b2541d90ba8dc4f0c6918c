@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "daf6544b_2332ee98",
+        "filename": "android/main-emugl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-07T22:23:58Z",
+      "side": 1,
+      "message": "nit: this comment is way obsolete",
+      "range": {
+        "startLine": 44,
+        "startChar": 4,
+        "endLine": 44,
+        "endChar": 37
+      },
+      "revId": "83647768ad76e322e9b2541d90ba8dc4f0c6918c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
