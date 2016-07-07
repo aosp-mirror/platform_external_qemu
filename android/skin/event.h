@@ -38,7 +38,8 @@ typedef enum {
     kEventWindowMoved,
     kEventLayoutRotate,
     kEventScreenChanged,
-    kEventZoomedWindowResized
+    kEventZoomedWindowResized,
+    kEventToggleTrackball,
 } SkinEventType;
 
 typedef enum {

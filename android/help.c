@@ -8,7 +8,6 @@
 #include "android/utils/misc.h"
 #ifndef NO_SKIN
 #include "android/skin/keycode.h"
-#include "android/skin/keyset.h"
 #endif
 #include "android/android.h"
 #include <stdint.h>

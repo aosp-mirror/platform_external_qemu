@@ -16,8 +16,7 @@
 #include "android/skin/ui.h"
 
 static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
-    .getEmulatorWindow = emulator_window_get,
-    .getCurrentKeyset = skin_ui_get_current_keyset
+    .getEmulatorWindow = emulator_window_get
 };
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =

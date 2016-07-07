@@ -123,9 +123,6 @@ struct SkinLayout* skin_ui_get_current_layout(const SkinUI* ui);
 struct SkinLayout* skin_ui_get_next_layout(const SkinUI* ui);
 struct SkinLayout* skin_ui_get_prev_layout(const SkinUI* ui);
 
-// Return the current keyset (hotkey bindings) used by the UI.
-struct SkinKeyset* skin_ui_get_current_keyset(SkinUI* ui);
-
 // Process all pending user input events. Returns true if the program needs
 // to exit/quit, false otherwise.
 bool skin_ui_process_events(SkinUI* ui);
