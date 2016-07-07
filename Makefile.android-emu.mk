@@ -272,6 +272,7 @@ LOCAL_SRC_FILES := \
     android/kernel/kernel_utils.cpp \
     android/loadpng.c \
     android/main-common.c \
+    android/main-help.cpp \
     android/main-emugl.cpp \
     android/main-kernel-parameters.cpp \
     android/main-qemu-parameters.cpp \
