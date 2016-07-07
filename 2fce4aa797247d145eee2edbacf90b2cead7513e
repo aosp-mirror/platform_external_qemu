@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ddc56ece_851062a6",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1614,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-07T05:10:48Z",
+      "side": 1,
+      "message": "atoi returns 0 on error - please use a better parsing function if you need it to be a valid value",
+      "range": {
+        "startLine": 1614,
+        "startChar": 9,
+        "endLine": 1614,
+        "endChar": 10
+      },
+      "revId": "2fce4aa797247d145eee2edbacf90b2cead7513e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
