@@ -13,7 +13,6 @@
 #pragma once
 
 #include "android/emulator-window.h"
-#include "android/skin/ui.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
@@ -21,9 +20,6 @@ ANDROID_BEGIN_HEADER
 typedef struct QAndroidEmulatorWindowAgent {
     // Get a pointer to the emulator window structure.
     EmulatorWindow* (*getEmulatorWindow)();
-
-    // Get the current keyset from the given UI.
-    SkinKeyset* (*getCurrentKeyset)(SkinUI*);
 } QAndroidEmulatorWindowAgent;
 
 ANDROID_END_HEADER

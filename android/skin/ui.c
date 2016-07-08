@@ -55,10 +55,6 @@ struct SkinUI {
 
 };
 
-static void _skin_ui_handle_key_command(void* opaque,
-                                        SkinKeyCommand command,
-                                        int  down);
-
 static SkinLayout* skin_file_select_layout(SkinLayout* layouts,
         const char* layout_name) {
     if (!layout_name) return layouts;
@@ -91,8 +87,6 @@ SkinUI* skin_ui_create(SkinFile* layout_file,
                                         ui->layout->dpad_rotation,
                                         ui_funcs->keyboard_flush);
     ui->window = NULL;
-
-    skin_keyboard_on_command(ui->keyboard, _skin_ui_handle_key_command, ui);
 
     ui->window = skin_window_create(
             ui->layout, ui->ui_params.window_x, ui->ui_params.window_y,
@@ -169,27 +163,7 @@ void skin_ui_reset_title(SkinUI* ui) {
         return;
 
     if (ui->show_trackball) {
-        SkinKeyBinding  bindings[SKIN_KEY_COMMAND_MAX_BINDINGS];
-
-        int count = skin_keyset_get_bindings(skin_keyset_get_default(),
-                                             SKIN_KEY_COMMAND_TOGGLE_TRACKBALL,
-                                             bindings);
-        if (count > 0) {
-            int  nn;
-            p = bufprint(p, end, "Press ");
-            for (nn = 0; nn < count; nn++) {
-                if (nn > 0) {
-                    if (nn < count-1)
-                        p = bufprint(p, end, ", ");
-                    else
-                        p = bufprint(p, end, " or ");
-                }
-                p = bufprint(p, end, "%s",
-                             skin_key_pair_to_string(bindings[nn].sym,
-                                                     bindings[nn].mod));
-            }
-            p = bufprint(p, end, " to leave trackball mode. ");
-        }
+        p = bufprint(p, end, "Press Ctrl-T to leave trackball mode. ");
     }
 
     p = bufprint(p, end, "%s", ui->ui_params.window_name);
@@ -236,143 +210,25 @@ static void skin_ui_switch_to_layout(SkinUI* ui, SkinLayout* layout) {
     ui->ui_funcs->framebuffer_invalidate();
 }
 
-/* used to respond to a given keyboard command shortcut
- */
-static void
-_skin_ui_handle_key_command(void* opaque, SkinKeyCommand command, int  down)
-{
-    SkinUI* ui = opaque;
+static void _skin_ui_handle_rotate_key_command(SkinUI* ui, bool next) {
+    SkinLayout* layout = NULL;
 
-    static const struct { SkinKeyCommand  cmd; SkinKeyCode  kcode; }  keycodes[] =
-    {
-        { SKIN_KEY_COMMAND_BUTTON_CALL,        kKeyCodeCall },
-        { SKIN_KEY_COMMAND_BUTTON_HOME,        kKeyCodeHome },
-        { SKIN_KEY_COMMAND_BUTTON_HOMEPAGE,    kKeyCodeHomePage },
-        { SKIN_KEY_COMMAND_BUTTON_BACK,        kKeyCodeBack },
-        { SKIN_KEY_COMMAND_BUTTON_HANGUP,      kKeyCodeEndCall },
-        { SKIN_KEY_COMMAND_BUTTON_POWER,       kKeyCodePower },
-        { SKIN_KEY_COMMAND_BUTTON_SEARCH,      kKeyCodeSearch },
-        { SKIN_KEY_COMMAND_BUTTON_MENU,        kKeyCodeMenu },
-        { SKIN_KEY_COMMAND_BUTTON_DPAD_UP,     kKeyCodeDpadUp },
-        { SKIN_KEY_COMMAND_BUTTON_DPAD_LEFT,   kKeyCodeDpadLeft },
-        { SKIN_KEY_COMMAND_BUTTON_DPAD_RIGHT,  kKeyCodeDpadRight },
-        { SKIN_KEY_COMMAND_BUTTON_DPAD_DOWN,   kKeyCodeDpadDown },
-        { SKIN_KEY_COMMAND_BUTTON_DPAD_CENTER, kKeyCodeDpadCenter },
-        { SKIN_KEY_COMMAND_BUTTON_VOLUME_UP,   kKeyCodeVolumeUp },
-        { SKIN_KEY_COMMAND_BUTTON_VOLUME_DOWN, kKeyCodeVolumeDown },
-        { SKIN_KEY_COMMAND_BUTTON_CAMERA,      kKeyCodeCamera },
-        { SKIN_KEY_COMMAND_BUTTON_TV,          kKeyCodeTV },
-        { SKIN_KEY_COMMAND_BUTTON_EPG,         kKeyCodeEPG },
-        { SKIN_KEY_COMMAND_BUTTON_DVR,         kKeyCodeDVR },
-        { SKIN_KEY_COMMAND_BUTTON_PREV,        kKeyCodePrevious },
-        { SKIN_KEY_COMMAND_BUTTON_NEXT,        kKeyCodeNext },
-        { SKIN_KEY_COMMAND_BUTTON_PLAY,        kKeyCodePlay },
-        { SKIN_KEY_COMMAND_BUTTON_PLAYPAUSE,   kKeyCodePlaypause },
-        { SKIN_KEY_COMMAND_BUTTON_PAUSE,       kKeyCodePause },
-        { SKIN_KEY_COMMAND_BUTTON_STOP,        kKeyCodeStop },
-        { SKIN_KEY_COMMAND_BUTTON_REWIND,      kKeyCodeRewind },
-        { SKIN_KEY_COMMAND_BUTTON_FFWD,        kKeyCodeFastForward },
-        { SKIN_KEY_COMMAND_BUTTON_BOOKMARKS,   kKeyCodeBookmarks },
-        { SKIN_KEY_COMMAND_BUTTON_WINDOW,      kKeyCodeCycleWindows },
-        { SKIN_KEY_COMMAND_BUTTON_CHANNELUP,   kKeyCodeChannelUp },
-        { SKIN_KEY_COMMAND_BUTTON_CHANNELDOWN, kKeyCodeChannelDown },
-        { SKIN_KEY_COMMAND_BUTTON_APPSWITCH,   kKeyCodeAppSwitch },
-        { SKIN_KEY_COMMAND_NONE, 0 }
-    };
-
-    int nn;
-    for (nn = 0; keycodes[nn].kcode != 0; nn++) {
-        if (command == keycodes[nn].cmd) {
-            unsigned  code = keycodes[nn].kcode;
-            ui->ui_funcs->keyboard_event(NULL, code, down);
-            return;
-        }
+    if (next) {
+        layout = ui->layout->next;
+        if (layout == NULL)
+            layout = ui->layout_file->layouts;
+    } else {
+        layout = ui->layout_file->layouts;
+        while (layout->next && layout->next != ui->layout)
+            layout = layout->next;
     }
-
-    // for the show-trackball command, handle down events to enable, and
-    // up events to disable
-    if (command == SKIN_KEY_COMMAND_SHOW_TRACKBALL) {
-        ui->show_trackball = (down != 0);
-        skin_window_show_trackball(ui->window, ui->show_trackball);
-        return;
-    }
-
-    // only handle down events for the rest
-    if (down == 0)
-        return;
-
-    switch (command)
-    {
-    case SKIN_KEY_COMMAND_TOGGLE_NETWORK:
-        {
-            bool enabled = ui->ui_funcs->network_toggle();
-            D( "network is now %s", enabled ? "connected" : "disconnected");
-        }
-        break;
-
-    case SKIN_KEY_COMMAND_TOGGLE_TRACKBALL:
-        if (ui->ui_params.enable_trackball) {
-            ui->show_trackball = !ui->show_trackball;
-            skin_window_show_trackball(ui->window, ui->show_trackball);
-            skin_ui_reset_title(ui);
-        }
-        break;
-
-    case SKIN_KEY_COMMAND_ONION_ALPHA_UP:
-    case SKIN_KEY_COMMAND_ONION_ALPHA_DOWN:
-        if (ui->onion) {
-            int alpha = ui->onion_alpha;
-
-            if (command == SKIN_KEY_COMMAND_ONION_ALPHA_UP)
-                alpha += 16;
-            else
-                alpha -= 16;
-
-            if (alpha > 256)
-                alpha = 256;
-            else if (alpha < 0)
-                alpha = 0;
-
-            ui->onion_alpha = alpha;
-
-            skin_window_set_onion(ui->window,
-                                  ui->onion,
-                                  ui->onion_rotation,
-                                  ui->onion_alpha);
-            skin_window_redraw(ui->window, NULL);
-            //dprint( "onion alpha set to %d (%.f %%)", alpha, alpha/2.56 );
-        }
-        break;
-
-    case SKIN_KEY_COMMAND_CHANGE_LAYOUT_PREV:
-    case SKIN_KEY_COMMAND_CHANGE_LAYOUT_NEXT:
-        {
-            SkinLayout* layout = NULL;
-
-            if (command == SKIN_KEY_COMMAND_CHANGE_LAYOUT_NEXT) {
-                layout = ui->layout->next;
-                if (layout == NULL)
-                    layout = ui->layout_file->layouts;
-            }
-            else if (command == SKIN_KEY_COMMAND_CHANGE_LAYOUT_PREV) {
-                layout = ui->layout_file->layouts;
-                while (layout->next && layout->next != ui->layout)
-                    layout = layout->next;
-            }
-            if (layout != NULL) {
-                skin_ui_switch_to_layout(ui, layout);
-            }
-        }
-        break;
-
-    default:
-        /* XXX: TODO ? */
-        ;
+    if (layout != NULL) {
+        skin_ui_switch_to_layout(ui, layout);
     }
 }
 
 void skin_ui_select_next_layout(SkinUI* ui) {
-    _skin_ui_handle_key_command(ui, SKIN_KEY_COMMAND_CHANGE_LAYOUT_NEXT, 1);
+    _skin_ui_handle_rotate_key_command(ui, true);
 }
 
 bool skin_ui_process_events(SkinUI* ui) {
@@ -423,14 +279,14 @@ bool skin_ui_process_events(SkinUI* ui) {
             if (VERBOSE_CHECK(rotation)) {
                 fprintf(stderr, "Polled event: LayoutNext\n");
             }
-            _skin_ui_handle_key_command(ui, SKIN_KEY_COMMAND_CHANGE_LAYOUT_NEXT, 1);
+            _skin_ui_handle_rotate_key_command(ui, true);
             break;
         case kEventLayoutPrev:
             DE("EVENT: kEventLayoutPrev\n");
             if (VERBOSE_CHECK(rotation)) {
                 fprintf(stderr, "Polled event: LayoutPrev\n");
             }
-            _skin_ui_handle_key_command(ui, SKIN_KEY_COMMAND_CHANGE_LAYOUT_PREV, 1);
+            _skin_ui_handle_rotate_key_command(ui, false);
             break;
         case kEventLayoutRotate:
             {
@@ -501,6 +357,13 @@ bool skin_ui_process_events(SkinUI* ui) {
                                                           ev.u.scroll.xmax, ev.u.scroll.ymax,
                                                           ev.u.scroll.scroll_h);
             break;
+        case kEventToggleTrackball:
+            if (ui->ui_params.enable_trackball) {
+                ui->show_trackball = !ui->show_trackball;
+                skin_window_show_trackball(ui->window, ui->show_trackball);
+                skin_ui_reset_title(ui);
+            }
+            break;
         }
     }
 
@@ -534,10 +397,6 @@ SkinLayout* skin_ui_get_prev_layout(const SkinUI* ui) {
         layout = layout->next;
     }
     return layout;
-}
-
-SkinKeyset* skin_ui_get_current_keyset(SkinUI* ui) {
-    return skin_keyboard_get_keyset(ui->keyboard);
 }
 
 void skin_ui_set_name(SkinUI* ui, const char* name) {

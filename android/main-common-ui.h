@@ -51,9 +51,6 @@ void user_config_done( void );
 
 void user_config_get_window_pos( int *window_x, int *window_y );
 
-void parse_keyset(const char*  keyset, AndroidOptions*  opts);
-void write_default_keyset( void );
-
 /* Find the skin corresponding to our options, and return an AConfig pointer
  * and the base path to load skin data from
  */

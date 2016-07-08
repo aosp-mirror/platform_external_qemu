@@ -16,7 +16,6 @@ ANDROID_SKIN_SOURCES := \
     android/skin/keyboard.c \
     android/skin/keycode.c \
     android/skin/keycode-buffer.c \
-    android/skin/keyset.c \
     android/skin/file.c \
     android/skin/window.c \
     android/skin/resource.c \
