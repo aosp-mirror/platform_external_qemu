@@ -295,6 +295,16 @@ Will show the audio subsystem help: list of drivers, tunable
 parameters.
 ETEXI
 
+DEF("no-audio", 0, QEMU_OPTION_audio_none,
+    "-no-audio        disable audio support\n",
+    QEMU_ARCH_ALL)
+STEXI
+@item -no-audio
+@findex -no-audio
+Will disable audio support
+parameters.
+ETEXI
+
 DEF("soundhw", HAS_ARG, QEMU_OPTION_soundhw,
     "-soundhw c1,... enable audio support\n"
     "                and only specified sound cards (comma separated list)\n"
