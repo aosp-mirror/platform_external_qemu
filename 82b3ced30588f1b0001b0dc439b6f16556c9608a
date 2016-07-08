@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da3e54ec_f17090ed",
+        "filename": "android/skin/window.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1747,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-08T23:14:47Z",
+      "side": 1,
+      "message": "nit: could you please explain the reason for the change?",
+      "range": {
+        "startLine": 1747,
+        "startChar": 11,
+        "endLine": 1747,
+        "endChar": 25
+      },
+      "revId": "82b3ced30588f1b0001b0dc439b6f16556c9608a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
