@@ -803,6 +803,16 @@ static bool iothread_requesting_mutex;
 
 #ifdef CONFIG_ANDROID
 static __thread bool qemu_global_mutex_held;
+
+void qemu_global_cond_wait(QemuCond* cond) {
+    qemu_global_mutex_held = false;
+    qemu_cond_wait(cond, &qemu_global_mutex);
+    qemu_global_mutex_held = true;
+}
+#else
+void qemu_global_cond_wait(QemuCond* cond) {
+    qemu_cond_wait(cond, &qemu_global_mutex);
+}
 #endif
 
 static QemuThread *tcg_cpu_thread;
@@ -849,7 +859,7 @@ void run_on_cpu(CPUState *cpu, void (*func)(void *data), void *data)
     while (!wi.done) {
         CPUState *self_cpu = current_cpu;
 
-        qemu_cond_wait(&qemu_work_cond, &qemu_global_mutex);
+        qemu_global_cond_wait(&qemu_work_cond);
         current_cpu = self_cpu;
     }
 }
@@ -918,11 +928,11 @@ static void qemu_tcg_wait_io_event(void)
        /* Start accounting real time to the virtual clock if the CPUs
           are idle.  */
         qemu_clock_warp(QEMU_CLOCK_VIRTUAL);
-        qemu_cond_wait(tcg_halt_cond, &qemu_global_mutex);
+        qemu_global_cond_wait(tcg_halt_cond);
     }
 
     while (iothread_requesting_mutex) {
-        qemu_cond_wait(&qemu_io_proceeded_cond, &qemu_global_mutex);
+        qemu_global_cond_wait(&qemu_io_proceeded_cond);
     }
 
     CPU_FOREACH(cpu) {
@@ -934,7 +944,7 @@ static void qemu_tcg_wait_io_event(void)
 static void qemu_hax_wait_io_event(CPUState *cpu)
 {
     while (cpu_thread_is_idle(cpu)) {
-        qemu_cond_wait(cpu->halt_cond, &qemu_global_mutex);
+        qemu_global_cond_wait(cpu->halt_cond);
     }
 
     qemu_wait_io_event_common(cpu);
@@ -944,7 +954,7 @@ static void qemu_hax_wait_io_event(CPUState *cpu)
 static void qemu_kvm_wait_io_event(CPUState *cpu)
 {
     while (cpu_thread_is_idle(cpu)) {
-        qemu_cond_wait(cpu->halt_cond, &qemu_global_mutex);
+        qemu_global_cond_wait(cpu->halt_cond);
     }
 
     qemu_kvm_eat_signals(cpu);
@@ -957,6 +967,9 @@ static void *qemu_kvm_cpu_thread_fn(void *arg)
     int r;
 
     qemu_mutex_lock(&qemu_global_mutex);
+#ifdef CONFIG_ANDROID
+    qemu_global_mutex_held = true;
+#endif
     qemu_thread_get_self(cpu->thread);
     cpu->thread_id = qemu_get_thread_id();
     current_cpu = cpu;
@@ -1039,6 +1052,9 @@ static void *qemu_tcg_cpu_thread_fn(void *arg)
     qemu_thread_get_self(cpu->thread);
 
     qemu_mutex_lock(&qemu_global_mutex);
+#ifdef CONFIG_ANDROID
+    qemu_global_mutex_held = true;
+#endif
     CPU_FOREACH(cpu) {
         cpu->thread_id = qemu_get_thread_id();
         cpu->created = true;
@@ -1047,7 +1063,7 @@ static void *qemu_tcg_cpu_thread_fn(void *arg)
 
     /* wait for initial kick-off after machine start */
     while (QTAILQ_FIRST(&cpus)->stopped) {
-        qemu_cond_wait(tcg_halt_cond, &qemu_global_mutex);
+        qemu_global_cond_wait(tcg_halt_cond);
 
         /* process any pending work */
         CPU_FOREACH(cpu) {
@@ -1078,7 +1094,9 @@ static void *qemu_hax_cpu_thread_fn(void *arg)
     int r;
     qemu_thread_get_self(cpu->thread);
     qemu_mutex_lock(&qemu_global_mutex);
-
+#ifdef CONFIG_ANDROID
+    qemu_global_mutex_held = true;
+#endif
     cpu->thread_id = qemu_get_thread_id();
     cpu->created = true;
     cpu->halted = 0;
@@ -1263,7 +1281,7 @@ void pause_all_vcpus(void)
     }
 
     while (!all_vcpus_paused()) {
-        qemu_cond_wait(&qemu_pause_cond, &qemu_global_mutex);
+        qemu_global_cond_wait(&qemu_pause_cond);
         CPU_FOREACH(cpu) {
             qemu_cpu_kick(cpu);
         }
@@ -1315,7 +1333,7 @@ static void qemu_tcg_init_vcpu(CPUState *cpu)
         cpu->hThread = qemu_thread_get_handle(cpu->thread);
 #endif
         while (!cpu->created) {
-            qemu_cond_wait(&qemu_cpu_cond, &qemu_global_mutex);
+            qemu_global_cond_wait(&qemu_cpu_cond);
         }
         tcg_cpu_thread = cpu->thread;
     } else {
@@ -1341,7 +1359,7 @@ static void qemu_hax_start_vcpu(CPUState *cpu)
     cpu->hThread = qemu_thread_get_handle(cpu->thread);
 #endif
     while (!cpu->created) {
-        qemu_cond_wait(&qemu_cpu_cond, &qemu_global_mutex);
+        qemu_global_cond_wait(&qemu_cpu_cond);
     }
 }
 #endif
@@ -1358,7 +1376,7 @@ static void qemu_kvm_start_vcpu(CPUState *cpu)
     qemu_thread_create(cpu->thread, thread_name, qemu_kvm_cpu_thread_fn,
                        cpu, QEMU_THREAD_JOINABLE);
     while (!cpu->created) {
-        qemu_cond_wait(&qemu_cpu_cond, &qemu_global_mutex);
+        qemu_global_cond_wait(&qemu_cpu_cond);
     }
 }
 
@@ -1374,7 +1392,7 @@ static void qemu_dummy_start_vcpu(CPUState *cpu)
     qemu_thread_create(cpu->thread, thread_name, qemu_dummy_cpu_thread_fn, cpu,
                        QEMU_THREAD_JOINABLE);
     while (!cpu->created) {
-        qemu_cond_wait(&qemu_cpu_cond, &qemu_global_mutex);
+        qemu_global_cond_wait(&qemu_cpu_cond);
     }
 }
 
