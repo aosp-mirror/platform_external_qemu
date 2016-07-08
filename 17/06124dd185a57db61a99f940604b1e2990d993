@@ -1,0 +1,8 @@
+Code-Review+2: Prathmesh Prabhu <pprabhu@google.com>
+Verified+1: Prathmesh Prabhu <pprabhu@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Prathmesh Prabhu <pprabhu@google.com>
+Submitted-at: Fri, 08 Jul 2016 22:01:16 +0000
+Reviewed-on: https://android-review.googlesource.com/233326
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
