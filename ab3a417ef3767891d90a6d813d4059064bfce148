@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fa295886_4ed773ff",
+        "filename": "android/camera/camera-common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-08T09:25:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "daf6544b_066a6000",
+      "range": {
+        "startLine": 59,
+        "startChar": 59,
+        "endLine": 59,
+        "endChar": 60
+      },
+      "revId": "ab3a417ef3767891d90a6d813d4059064bfce148",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "daf6544b_865f905e",
         "filename": "android/camera/camera-common.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-07-07T22:41:23Z",
       "side": 1,
       "message": "why calloc if we\u0027re memcpying over it in the next line? calloc performs some completely useless zeroing here",
+      "range": {
+        "startLine": 60,
+        "startChar": 22,
+        "endLine": 60,
+        "endChar": 28
+      },
+      "revId": "ab3a417ef3767891d90a6d813d4059064bfce148",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa523822_c6b902da",
+        "filename": "android/camera/camera-common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-08T09:25:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "daf6544b_865f905e",
       "range": {
         "startLine": 60,
         "startChar": 22,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "3a593046_883e7716",
+        "filename": "android/camera/camera-common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-08T09:25:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "daf6544b_a6704cec",
+      "range": {
+        "startLine": 61,
+        "startChar": 14,
+        "endLine": 61,
+        "endChar": 21
+      },
+      "revId": "ab3a417ef3767891d90a6d813d4059064bfce148",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "daf6544b_66cda43e",
         "filename": "android/camera/camera-list.cpp",
         "patchSetId": 2
@@ -82,6 +154,30 @@
       "writtenOn": "2016-07-07T22:41:23Z",
       "side": 1,
       "message": "should we say something about \u0027no cameras\u0027 or \u0027error blah\u0027 ?",
+      "range": {
+        "startLine": 32,
+        "startChar": 8,
+        "endLine": 32,
+        "endChar": 14
+      },
+      "revId": "ab3a417ef3767891d90a6d813d4059064bfce148",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa295886_2edc271f",
+        "filename": "android/camera/camera-list.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-08T09:25:33Z",
+      "side": 1,
+      "message": "I didn\u0027t want to change the format in this patch, only move things around. Maybe we could do this, but I\u0027m not sure Studio isn\u0027t going to parse this.",
+      "parentUuid": "daf6544b_66cda43e",
       "range": {
         "startLine": 32,
         "startChar": 8,
