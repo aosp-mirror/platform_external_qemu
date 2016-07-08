@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba3360f4_ccb92fda",
+        "filename": "android/emulation/AdbPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-08T09:58:54Z",
+      "side": 1,
+      "message": "Actually, this is not a given, AndroidPipeBuffer are always page-aligned, so even if a single write() happens on the guest, if the input buffer is accross two pages, this may result in two distinct buffers, or even two distinct onGuestSend() calls, depending on the kernel driver :-(\n\nI\u0027ll fix this anyway.",
+      "revId": "bed8f0b5c3fa4e12c788b158a23b3bed6b5ec14d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
