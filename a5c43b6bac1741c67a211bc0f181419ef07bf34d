@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "daf6544b_7138c078",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-07-08T00:00:28Z",
+      "side": 1,
+      "message": "I think you want this outside the \u0027if\u0027",
+      "revId": "a5c43b6bac1741c67a211bc0f181419ef07bf34d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "daf6544b_11d97c55",
+        "filename": "android/skin/ui.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-07-08T00:00:28Z",
+      "side": 1,
+      "message": "Probably want a \u0027break\u0027 here, to save the guy who adds another case after this one.",
+      "revId": "a5c43b6bac1741c67a211bc0f181419ef07bf34d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
