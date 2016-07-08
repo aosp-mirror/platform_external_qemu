@@ -46,6 +46,30 @@
       "revId": "12c61dc471a19cedf0d8ae191048dc10b5f203a2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba4c408c_a4cf2262",
+        "filename": "android/emulation/AndroidPipe.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 449,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2016-07-08T10:17:55Z",
+      "side": 1,
+      "message": "Well I just rebuilt the ToT emu-master-dev and tried to run emulator from the platform build :\ncd \u003cAOSP\u003e\nsource build/envsetup.sh\nlunch aosp_mips64-eng\nmake -j\u003cN\u003e\n\ncd \u003cEMU_MASTER_DEV\u003e\nrepo sync \u0026\u0026 cd external/qemu \u0026\u0026 ./android-rebuild.sh\n\n./objs/emulator -show-kernel -gpu on\n...\n[140355253909248]:FATAL:./android/emulation/AndroidPipe.cpp:557:Check failed: VmLock::get()-\u003eisLockedBySelf(). \nQObject::~QObject: Timers cannot be stopped from another thread",
+      "parentUuid": "3d176ada_d8f94d88",
+      "range": {
+        "startLine": 449,
+        "startChar": 4,
+        "endLine": 449,
+        "endChar": 26
+      },
+      "revId": "12c61dc471a19cedf0d8ae191048dc10b5f203a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
