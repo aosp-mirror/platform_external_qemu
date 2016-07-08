@@ -1744,6 +1744,10 @@ void
 skin_window_set_scale(SkinWindow* window, double scale)
 {
     window->scale = scale;
+
+    // The scroll bars *will* be gone if this function is called, so make sure
+    // they are not taken into account when resizing the window.
+    window->scroll_h = 0;
     window->zoom = 1.0;      // Scaling the window should reset all "viewport" parameters
 
     skin_window_resize( window, 1 );
