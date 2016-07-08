@@ -395,9 +395,8 @@ extern "C" int main(int argc, char **argv) {
         args[n++] = "-netfast";
     }
 
-    if (opts->audio) {
-        args[n++] = "-audio";
-        args[n++] = opts->audio;
+    if (opts->audio && !strcmp(opts->audio, "none")) {
+        args[n++] = "-no-audio";
     }
 
     if (opts->cpu_delay) {

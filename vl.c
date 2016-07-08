@@ -3336,6 +3336,9 @@ int run_qemu_main(int argc, const char **argv)
                 AUD_help ();
                 return (0);
                 break;
+            case QEMU_OPTION_audio_none:
+                setenv("QEMU_AUDIO_DRV", "none", 1);
+                break;
             case QEMU_OPTION_soundhw:
                 select_soundhw (optarg);
                 break;
