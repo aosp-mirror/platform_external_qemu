@@ -936,16 +936,22 @@ void EmulatorQtWindow::slot_screenChanged() {
 }
 
 void EmulatorQtWindow::slot_horizontalScrollChanged(int value) {
-    simulateScrollBarChanged(value, mContainer.verticalScrollBar()->value());
+    if (mInZoomMode) {
+        simulateScrollBarChanged(value, mContainer.verticalScrollBar()->value());
+    }
 }
 
 void EmulatorQtWindow::slot_verticalScrollChanged(int value) {
-    simulateScrollBarChanged(mContainer.horizontalScrollBar()->value(), value);
+    if (mInZoomMode) {
+        simulateScrollBarChanged(mContainer.horizontalScrollBar()->value(), value);
+    }
 }
 
 void EmulatorQtWindow::slot_scrollRangeChanged(int min, int max) {
-    simulateScrollBarChanged(mContainer.horizontalScrollBar()->value(),
-                             mContainer.verticalScrollBar()->value());
+    if (mInZoomMode) {
+        simulateScrollBarChanged(mContainer.horizontalScrollBar()->value(),
+                                 mContainer.verticalScrollBar()->value());
+    }
 }
 
 void EmulatorQtWindow::screenshot() {
@@ -1413,6 +1419,11 @@ void EmulatorQtWindow::simulateWindowMoved(const QPoint& pos) {
 }
 
 void EmulatorQtWindow::simulateZoomedWindowResized(const QSize& size) {
+    mOverlay.resize(size);
+    if (!mInZoomMode) {
+        return;
+    }
+
     SkinEvent* event = createSkinEvent(kEventZoomedWindowResized);
     QScrollBar* horizontal = mContainer.horizontalScrollBar();
     event->u.scroll.x = horizontal->value();
@@ -1422,8 +1433,6 @@ void EmulatorQtWindow::simulateZoomedWindowResized(const QSize& size) {
     event->u.scroll.scroll_h =
             horizontal->isVisible() ? horizontal->height() : 0;
     queueSkinEvent(event);
-
-    mOverlay.resize(size);
 }
 
 void EmulatorQtWindow::setForwardShortcutsToDevice(int index) {
