@@ -2,6 +2,57 @@
   "comments": [
     {
       "key": {
+        "uuid": "ba3360f4_6ca91b8f",
+        "filename": "android/skin/event.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-08T09:30:18Z",
+      "side": 1,
+      "message": "I\u0027d suggest adding a trailing comma to make the next patch modifying this list shorter / easier to merge.",
+      "revId": "a5c43b6bac1741c67a211bc0f181419ef07bf34d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba4c408c_e4bcfacb",
+        "filename": "android/skin/qt/qt-ui-commands.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-08T09:30:18Z",
+      "side": 1,
+      "message": "here too :)",
+      "revId": "a5c43b6bac1741c67a211bc0f181419ef07bf34d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa523822_a6b606e8",
+        "filename": "android/skin/qt/qt-ui-commands.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-08T09:30:18Z",
+      "side": 1,
+      "message": "and there :)",
+      "revId": "a5c43b6bac1741c67a211bc0f181419ef07bf34d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "daf6544b_7138c078",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 1
@@ -19,6 +70,24 @@
     },
     {
       "key": {
+        "uuid": "fa24f8a5_d6c2e43b",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-08T09:30:18Z",
+      "side": 1,
+      "message": "yes, even though this will work for now because the next case doesn\u0027t do anything. Good catch Jim!",
+      "parentUuid": "daf6544b_7138c078",
+      "revId": "a5c43b6bac1741c67a211bc0f181419ef07bf34d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "daf6544b_11d97c55",
         "filename": "android/skin/ui.c",
         "patchSetId": 1
@@ -30,6 +99,24 @@
       "writtenOn": "2016-07-08T00:00:28Z",
       "side": 1,
       "message": "Probably want a \u0027break\u0027 here, to save the guy who adds another case after this one.",
+      "revId": "a5c43b6bac1741c67a211bc0f181419ef07bf34d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da2494af_4dae5999",
+        "filename": "android/skin/ui.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-08T09:30:18Z",
+      "side": 1,
+      "message": "Agreed :)",
+      "parentUuid": "daf6544b_11d97c55",
       "revId": "a5c43b6bac1741c67a211bc0f181419ef07bf34d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
