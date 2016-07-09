@@ -292,6 +292,7 @@ LOCAL_SRC_FILES := \
     android/opengl/EmuglBackendScanner.cpp \
     android/opengl/emugl_config.cpp \
     android/opengl/GpuFrameBridge.cpp \
+    android/opengl/GrallocPipe.cpp \
     android/opengl/gpuinfo.cpp \
     android/opengl/logger.cpp \
     android/opengl/OpenglEsPipe.cpp \

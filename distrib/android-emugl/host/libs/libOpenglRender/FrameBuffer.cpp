@@ -609,10 +609,9 @@ HandleType FrameBuffer::genHandle()
     return id;
 }
 
-HandleType FrameBuffer::createColorBuffer(int p_width, int p_height,
-                                          GLenum p_internalFormat)
+HandleType FrameBuffer::createColorBufferLocked(int p_width, int p_height,
+                                                GLenum p_internalFormat)
 {
-    emugl::Mutex::AutoLock mutex(m_lock);
     HandleType ret = 0;
 
     ColorBufferPtr cb(ColorBuffer::create(
@@ -626,6 +625,24 @@ HandleType FrameBuffer::createColorBuffer(int p_width, int p_height,
         ret = genHandle();
         m_colorbuffers[ret].cb = cb;
         m_colorbuffers[ret].refcount = 1;
+    }
+    return ret;
+}
+
+HandleType FrameBuffer::createColorBuffer(int p_width, int p_height,
+                                          GLenum p_internalFormat) {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    return createColorBufferLocked(p_width, p_height, p_internalFormat);
+}
+
+HandleType FrameBuffer::createColorBufferPuid(int p_width, int p_height,
+                                              GLenum p_internalFormat,
+                                              uint64_t puid) {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    HandleType ret = createColorBufferLocked(
+                            p_width, p_height, p_internalFormat);
+    if (ret>0) {
+        m_procOwnedColorBuffers[puid].insert(ret);
     }
     return ret;
 }
@@ -741,9 +758,8 @@ void FrameBuffer::DestroyWindowSurface(HandleType p_surface)
     }
 }
 
-int FrameBuffer::openColorBuffer(HandleType p_colorbuffer)
+int FrameBuffer::openColorBufferLocked(HandleType p_colorbuffer)
 {
-    emugl::Mutex::AutoLock mutex(m_lock);
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
         // bad colorbuffer handle
@@ -754,9 +770,22 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer)
     return 0;
 }
 
-void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer)
-{
+int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
     emugl::Mutex::AutoLock mutex(m_lock);
+    return openColorBufferLocked(p_colorbuffer);
+}
+
+int FrameBuffer::openColorBufferPuid(HandleType p_colorbuffer, uint64_t puid) {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    int ret = openColorBufferLocked(p_colorbuffer);
+    if (ret == 0) {
+        m_procOwnedColorBuffers[puid].insert(p_colorbuffer);
+    }
+    return ret;
+}
+
+void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer)
+{
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
         // This is harmless: it is normal for guest system to issue
@@ -768,6 +797,33 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer)
     if (--(*c).second.refcount == 0) {
         m_colorbuffers.erase(c);
     }
+}
+
+void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    closeColorBufferLocked(p_colorbuffer);
+}
+
+void FrameBuffer::closeColorBufferPuid(HandleType p_colorbuffer, uint64_t puid) {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    closeColorBufferLocked(p_colorbuffer);
+    auto ite = m_procOwnedColorBuffers.find(puid);
+    if (ite != m_procOwnedColorBuffers.end()) {
+        ite->second.erase(p_colorbuffer);
+    }
+}
+
+void FrameBuffer::cleanupProcColorbuffers(uint64_t puid) {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    // A color buffer needs to be closed as many times as it is opened by
+    // the guest process, to give the correct reference count.
+    // (Note that a color buffer can be shared across guest processes.)
+    auto procIte = m_procOwnedColorBuffers.find(puid);
+    if (procIte == m_procOwnedColorBuffers.end()) return;
+    for (auto cb: procIte->second) {
+        closeColorBufferLocked(cb);
+    }
+    m_procOwnedColorBuffers.erase(procIte);
 }
 
 bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface)

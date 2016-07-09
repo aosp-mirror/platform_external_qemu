@@ -39,11 +39,11 @@ public:
     void stop();
 
 public:
-    virtual RenderChannelPtr createRenderChannel() override final;
-    virtual HardwareStrings getHardwareStrings() override final;
-    virtual void setPostCallback(OnPostCallback onPost,
-                                 void* context) override final;
-    virtual bool showOpenGLSubwindow(FBNativeWindowType window,
+    RenderChannelPtr createRenderChannel() final;
+    HardwareStrings getHardwareStrings() final;
+    void setPostCallback(OnPostCallback onPost,
+                                 void* context) final;
+    bool showOpenGLSubwindow(FBNativeWindowType window,
                                      int wx,
                                      int wy,
                                      int ww,
@@ -51,12 +51,12 @@ public:
                                      int fbw,
                                      int fbh,
                                      float dpr,
-                                     float zRot) override final;
-    virtual bool destroyOpenGLSubwindow() override final;
-    virtual void setOpenGLDisplayRotation(float zRot) override final;
-    virtual void setOpenGLDisplayTranslation(float px, float py) override final;
-    virtual void repaintOpenGLDisplay() override final;
-
+                                     float zRot) final;
+    bool destroyOpenGLSubwindow() final;
+    void setOpenGLDisplayRotation(float zRot) final;
+    void setOpenGLDisplayTranslation(float px, float py) final;
+    void repaintOpenGLDisplay() final;
+    void cleanupProcColorbuffers(uint64_t puid) final;
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RendererImpl);
 
