@@ -70,6 +70,8 @@ void android_stopOpenglesRenderer(void);
  */
 extern int  android_gles_fast_pipes;
 
+void android_cleanupProcColorbuffers(uint64_t puid);
+
 #ifdef __cplusplus
 const emugl::RendererPtr& android_getOpenglesRenderer();
 #endif
