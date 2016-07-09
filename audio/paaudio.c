@@ -605,12 +605,20 @@ static int qpa_init_in (HWVoiceIn *hw, struct audsettings *as)
 {
     int error;
     static pa_sample_spec ss;
+    static pa_buffer_attr ba;
     struct audsettings obt_as = *as;
     PAVoiceIn *pa = (PAVoiceIn *) hw;
 
     ss.format = audfmt_to_pa (as->fmt, as->endianness);
     ss.channels = as->nchannels;
     ss.rate = as->freq;
+
+    /*
+     * qemu audio tick runs at 100 Hz (by default), so processing
+     * data chunks worth 10 ms of sound should be a good fit.
+     */
+    ba.maxlength = -1;
+    ba.fragsize = pa_usec_to_bytes (10 * 1000, &ss);
 
     obt_as.fmt = pa_to_audfmt (ss.format, &obt_as.endianness);
 
@@ -622,7 +630,7 @@ static int qpa_init_in (HWVoiceIn *hw, struct audsettings *as)
         "pcm.capture",
         &ss,
         NULL,                   /* channel map */
-        NULL,                   /* buffering attributes */
+        &ba,                   /* buffering attributes */
         &error
         );
     if (!pa->stream) {
