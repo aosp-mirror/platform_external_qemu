@@ -162,7 +162,7 @@ int ApiGen::genContext(const std::string & filename, SideType side)
     }
 
     // virtual destructor
-    fprintf(fp, "\t virtual ~%s_%s_context_t() {}\n", m_basename.c_str(), sideString(side));
+    fprintf(fp, "\tvirtual ~%s_%s_context_t() {}\n", m_basename.c_str(), sideString(side));
     // accessor
     if (side == CLIENT_SIDE || side == WRAPPER_SIDE) {
         fprintf(fp, "\n\ttypedef %s_%s_context_t *CONTEXT_ACCESSOR_TYPE(void);\n",
