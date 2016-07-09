@@ -25,6 +25,8 @@
 
 #include <stdio.h>
 
+static int s_numCb = 0;
+
 namespace {
 
 // Lazily create and bind a framebuffer object to the current host context.
@@ -198,7 +200,10 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
 
 ColorBuffer::ColorBuffer(EGLDisplay display, Helper* helper) :
         m_display(display),
-        m_helper(helper) {}
+        m_helper(helper) {
+    s_numCb ++;
+    fprintf(stderr, "cb created %d\n", s_numCb);
+}
 
 ColorBuffer::~ColorBuffer() {
     ScopedHelperContext context(m_helper);
@@ -218,6 +223,9 @@ ColorBuffer::~ColorBuffer() {
     s_gles2.glDeleteTextures(2, tex);
 
     delete m_resizer;
+    
+    s_numCb --;
+    fprintf(stderr, "cb removed %d\n", s_numCb);
 }
 
 void ColorBuffer::readPixels(int x,
