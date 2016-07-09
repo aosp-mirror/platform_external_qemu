@@ -265,3 +265,9 @@ const emugl::RendererPtr& android_getOpenglesRenderer()
 {
     return sRenderer;
 }
+
+void android_cleanupProcColorbuffers(int pid) {
+    if (sRenderer) {
+        sRenderer->cleanupProcColorbuffers(pid);
+    }
+}
