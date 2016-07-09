@@ -15,7 +15,7 @@ struct foo_client_context_t {
 	fooUnsupported_client_proc_t fooUnsupported;
 	fooDoEncoderFlush_client_proc_t fooDoEncoderFlush;
 	fooTakeConstVoidPtrConstPtr_client_proc_t fooTakeConstVoidPtrConstPtr;
-	 virtual ~foo_client_context_t() {}
+	virtual ~foo_client_context_t() {}
 
 	typedef foo_client_context_t *CONTEXT_ACCESSOR_TYPE(void);
 	static void setContextAccessor(CONTEXT_ACCESSOR_TYPE *f);
