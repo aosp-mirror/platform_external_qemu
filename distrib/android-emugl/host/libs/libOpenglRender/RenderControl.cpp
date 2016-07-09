@@ -335,6 +335,13 @@ static uint32_t rcCreateColorBuffer(uint32_t width,
     return fb->createColorBuffer(width, height, internalFormat);
 }
 
+static uint32_t rcCreateColorBufferPid(uint32_t width, uint32_t height,
+                                       GLenum internalFormat, int pid) {
+    // TODO
+    return 0;
+}
+
+
 static int rcOpenColorBuffer2(uint32_t colorbuffer)
 {
     FrameBuffer *fb = FrameBuffer::getFB();
@@ -342,6 +349,12 @@ static int rcOpenColorBuffer2(uint32_t colorbuffer)
         return -1;
     }
     return fb->openColorBuffer( colorbuffer );
+}
+
+static int rcOpenColorBuffer2Pid(uint32_t colorbuffer, int pid)
+{
+    // TODO
+    return 0;
 }
 
 // Deprecated, kept for compatibility with old system images only.
@@ -358,6 +371,10 @@ static void rcCloseColorBuffer(uint32_t colorbuffer)
         return;
     }
     fb->closeColorBuffer( colorbuffer );
+}
+
+static void rcCloseColorBufferPid(uint32_t colorbuffer, int pid) {
+    // TODO
 }
 
 static int rcFlushWindowColorBuffer(uint32_t windowSurface)
@@ -535,4 +552,7 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCreateClientImage = rcCreateClientImage;
     dec->rcDestroyClientImage = rcDestroyClientImage;
     dec->rcSelectChecksumHelper = rcSelectChecksumHelper;
+    dec->rcCreateColorBufferPid = rcCreateColorBufferPid;
+    dec->rcCloseColorBufferPid = rcCloseColorBufferPid;
+    dec->rcOpenColorBuffer2Pid = rcOpenColorBuffer2Pid;
 }

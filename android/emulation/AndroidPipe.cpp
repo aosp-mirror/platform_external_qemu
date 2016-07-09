@@ -472,7 +472,7 @@ AndroidPipe::~AndroidPipe() {
 
 // static
 void AndroidPipe::Service::add(Service* service) {
-    DD("Adding new pipe service '%s' this=%p", service->name().c_str(),
+    fprintf(stderr, "Adding new pipe service '%s' this=%p\n", service->name().c_str(),
        service);
     std::unique_ptr<Service> svc(service);
     sGlobals->services.push_back(std::move(svc));
