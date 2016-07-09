@@ -29,6 +29,7 @@
 #include <EGL/egl.h>
 
 #include <unordered_map>
+#include <unordered_set>
 
 #include <stdint.h>
 
@@ -43,6 +44,8 @@ struct ColorBufferRef {
 typedef std::unordered_map<HandleType, RenderContextPtr> RenderContextMap;
 typedef std::unordered_map<HandleType, std::pair<WindowSurfacePtr, HandleType> > WindowSurfaceMap;
 typedef std::unordered_map<HandleType, ColorBufferRef> ColorBufferMap;
+typedef std::unordered_multiset<HandleType> ColorBufferSet;
+typedef std::unordered_map<uint64_t, ColorBufferSet> ProcOwnedColorBuffers;
 
 // A structure used to list the capabilities of the underlying EGL
 // implementation that the FrameBuffer instance depends on.
@@ -160,8 +163,12 @@ public:
     // list of valid values. Note that ColorBuffer instances are reference-
     // counted. Use openColorBuffer / closeColorBuffer to operate on the
     // internal count.
+    HandleType createColorBufferLocked(
+        int p_width, int p_height, GLenum p_internalFormat);
     HandleType createColorBuffer(
         int p_width, int p_height, GLenum p_internalFormat);
+    HandleType createColorBufferPuid(
+        int p_width, int p_height, GLenum p_internalFormat, uint64_t puid);
 
     // Call this function when a render thread terminates to destroy all
     // the remaining contexts it created. Necessary to avoid leaking host
@@ -184,14 +191,19 @@ public:
     // Increment the reference count associated with a given ColorBuffer
     // instance. |p_colorbuffer| is its handle value as returned by
     // createColorBuffer().
+    int openColorBufferLocked(HandleType p_colorbuffer);
     int openColorBuffer(HandleType p_colorbuffer);
+    int openColorBufferPuid(HandleType p_colorbuffer, uint64_t puid);
 
     // Decrement the reference count associated with a given ColorBuffer
     // instance. |p_colorbuffer| is its handle value as returned by
     // createColorBuffer(). Note that if the reference count reaches 0,
     // the instance is destroyed automatically.
+    void closeColorBufferLocked(HandleType p_colorbuffer);
     void closeColorBuffer(HandleType p_colorbuffer);
+    void closeColorBufferPuid(HandleType p_colorbuffer, uint64_t puid);
 
+    void cleanupProcColorbuffers(uint64_t puid);
     // Equivalent for eglMakeCurrent() for the current display.
     // |p_context|, |p_drawSurface| and |p_readSurface| are the handle values
     // of the context, the draw surface and the read surface, respectively.
@@ -359,5 +371,9 @@ private:
     const char* m_glVendor = nullptr;
     const char* m_glRenderer = nullptr;
     const char* m_glVersion = nullptr;
+
+    // The host associates color buffers with guest processes for memory
+    // cleanup. Guest processes are identified with a host generated unique ID.
+    ProcOwnedColorBuffers m_procOwnedColorBuffers;
 };
 #endif
