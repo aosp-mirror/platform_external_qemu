@@ -130,6 +130,10 @@ public:
     //    latest framebuffer content.
     virtual void repaintOpenGLDisplay() = 0;
 
+    // cleanupProcColorbuffers -
+    //    cleanup all color buffer reference counters a guest process holds
+    //    when the guest process exists (or is killed)
+    virtual void cleanupProcColorbuffers(uint64_t pid) = 0;
 protected:
     ~Renderer() = default;
 };

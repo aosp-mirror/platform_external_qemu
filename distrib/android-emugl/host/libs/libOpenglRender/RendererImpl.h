@@ -56,7 +56,7 @@ public:
     virtual void setOpenGLDisplayRotation(float zRot) override final;
     virtual void setOpenGLDisplayTranslation(float px, float py) override final;
     virtual void repaintOpenGLDisplay() override final;
-
+    virtual void cleanupProcColorbuffers(uint64_t pid) override final;
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RendererImpl);
 
