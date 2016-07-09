@@ -1413,6 +1413,11 @@ void EmulatorQtWindow::simulateWindowMoved(const QPoint& pos) {
 }
 
 void EmulatorQtWindow::simulateZoomedWindowResized(const QSize& size) {
+    mOverlay.resize(size);
+    if (!mInZoomMode) {
+        return;
+    }
+
     SkinEvent* event = createSkinEvent(kEventZoomedWindowResized);
     QScrollBar* horizontal = mContainer.horizontalScrollBar();
     event->u.scroll.x = horizontal->value();
@@ -1422,8 +1427,6 @@ void EmulatorQtWindow::simulateZoomedWindowResized(const QSize& size) {
     event->u.scroll.scroll_h =
             horizontal->isVisible() ? horizontal->height() : 0;
     queueSkinEvent(event);
-
-    mOverlay.resize(size);
 }
 
 void EmulatorQtWindow::setForwardShortcutsToDevice(int index) {
