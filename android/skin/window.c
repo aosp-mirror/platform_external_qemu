@@ -1613,6 +1613,16 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
     window->framebuffer.w = 0;
     window->framebuffer.h = 0;
 
+    // Resetting the subwindow parameters ensures that a proper resizing of
+    // the native subwindow actually occurs. Without this, it is possible for
+    // a rotation to not reach the subwindow (for example, in the case of a
+    // square watch skin, which might have two layouts with *exactly* the same
+    // subwindow).
+    window->subwindow.pos.x = -1;
+    window->subwindow.pos.y = -1;
+    window->subwindow.size.w = 0;
+    window->subwindow.size.h = 0;
+
     disp = window->layout.displays;
     if (disp != NULL) {
         if (slayout->onion_image) {

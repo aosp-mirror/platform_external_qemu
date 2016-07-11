@@ -87,6 +87,18 @@ int moveSubWindow(FBNativeWindowType p_parent_window,
         return false;
     }
 
+    // Make sure something has changed, otherwise XIfEvent will block and
+    // freeze the emulator.
+    XWindowAttributes attrs;
+    if (!XGetWindowAttributes(s_display, p_sub_window, &attrs)) {
+        return false;
+    }
+    if (x == attrs.x && y == attrs.y &&
+        width == attrs.width && height == attrs.height) {
+        // Technically, resizing was a success because it was unneeded.
+        return true;
+    }
+
     // This prevents flicker on resize.
     XSetWindowBackgroundPixmap(s_display, p_sub_window, None);
 
