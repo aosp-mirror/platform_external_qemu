@@ -1769,7 +1769,4 @@ DEF("audio-test-out", 0, QEMU_OPTION_audio_test_out, \
 DEF("snapshot-no-time-update", 0, QEMU_OPTION_snapshot_no_time_update, \
     "-snapshot-no-time-update Disable time update when restoring snapshots\n")
 
-DEF("list-webcam", 0, QEMU_OPTION_list_webcam, \
-    "-list-webcam List web cameras available for emulation\n")
-
 #endif /* ANDROID */

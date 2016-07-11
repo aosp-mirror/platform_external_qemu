@@ -16,9 +16,12 @@
 
 #pragma once
 
-/*
- * Contains public camera service API.
- */
+#include "android/utils/compiler.h"
 
-/* Initializes camera emulation service over qemu pipe. */
-extern void android_camera_service_init(void);
+ANDROID_BEGIN_HEADER
+
+// List available we cameras to stdout. Used to implement -webcam-list
+// option.
+extern void android_camera_list_webcams(void);
+
+ANDROID_END_HEADER

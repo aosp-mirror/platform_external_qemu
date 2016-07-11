@@ -2800,10 +2800,6 @@ int main(int argc, char **argv, char **envp)
                 android_snapshot_update_time = 0;
                 break;
 
-            case QEMU_OPTION_list_webcam:
-                android_list_web_cameras();
-                return 0;
-
             default:
                 os_parse_cmd_args(popt->index, optarg);
             }
