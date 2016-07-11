@@ -524,10 +524,21 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
     if (m_subWin && bindSubwin_locked()) {
 
         // Only attempt to update window geometry if anything has actually changed.
-        if (!(m_x == wx &&
-              m_y == wy &&
-              m_windowWidth == ww &&
-              m_windowHeight == wh)) {
+        bool updateSubWindow = !(m_x == wx && m_y == wy &&
+                                 m_windowWidth == ww && m_windowHeight == wh);
+
+        // On Mac, since window coordinates are Y-up and not Y-down, the
+        // subwindow may not change dimensions, but because the main window
+        // did, the subwindow technically needs to be re-positioned. This
+        // can happen on rotation, so a change in Z-rotation can be checked
+        // for this case. However, this *should not* be done on Windows/Linux,
+        // because the functions used to resize a native window on those hosts
+        // will block if the shape doesn't actually change, freezing the
+        // emulator.
+#if defined(__APPLE__)
+        updateSubWindow |= (m_zRot != zRot);
+#endif
+        if (updateSubWindow) {
 
             m_x = wx;
             m_y = wy;
