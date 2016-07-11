@@ -62,13 +62,18 @@ static void
 _lineInput_grow( LineInput* input )
 {
     char*  line;
+    char grow_from_line0 = 0;
 
     input->line_size += input->line_size >> 1;
     line = input->line;
-    if (line == input->line0)
+    if (line == input->line0) {
+        grow_from_line0 = 1;
         line = NULL;
-
+    }
     AARRAY_RENEW(line, input->line_size);
+    if (grow_from_line0) {
+        memcpy(line, input->line0, sizeof(input->line0));
+    }
     input->line = line;
 }
 
