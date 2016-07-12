@@ -150,8 +150,16 @@ int main(int argc, char **argv) {
         glesMode, 0ULL, false);
 
     if (hw->hw_cpu_ncore > 1) {
-        dwarning("Classic qemu does not support SMP. "
-                "The hw.cpu.ncore option from your config file is ignored.");
+        // Avoid printing this warning all the time because the default
+        // value for this hardware property is now 2, meaning that any
+        // new AVD created by the user will trigger this condition, even
+        // though they didn't specifically ask for it. As a rule of thumb,
+        // it's always better to print a warning when it corresponds to
+        // a user-selectable condition, not a default.
+        if (VERBOSE_CHECK(init)) {
+            dwarning("Classic qemu does not support SMP. "
+                     "The hw.cpu.ncore option from your config file is ignored.");
+        }
     }
 
     /* Generate a hardware-qemu.ini for this AVD. The real hardware
