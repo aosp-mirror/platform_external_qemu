@@ -175,6 +175,7 @@ void VirtualSensorsPage::resetAccelerometerRotation(const QQuaternion& rotation)
         mUi->accelWidget->setRotation(rotation);
         mUi->accelWidget->renderFrame();
         onPhoneRotationChanged();
+        onPhonePositionChanged();
     }
 }
 
@@ -403,7 +404,7 @@ void VirtualSensorsPage::updateResultingValues(QVector3D acceleration,
         << "<td align=left>" << acceleration.y() << "</td>"
         << "<td align=left>" << acceleration.z() << "</td></tr>"
         << "<tr>"
-        << "<td>" << tr("Magnetometer (uT)") << ":</td>"
+        << "<td>" << tr("Magnetometer (&mu;T)") << ":</td>"
         << "<td align=left>" << device_magnetic_vector.x() << "</td>"
         << "<td align=left>" << device_magnetic_vector.y() << "</td>"
         << "<td align=left>" << device_magnetic_vector.z() << "</td></tr>"
