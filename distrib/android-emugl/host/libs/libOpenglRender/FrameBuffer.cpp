@@ -759,6 +759,11 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer)
     }
 }
 
+void FrameBuffer::freeColorBuffer(uint32_t colorbuffer) {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    m_colorbuffers.erase(colorbuffer);
+}
+
 bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface)
 {
     emugl::Mutex::AutoLock mutex(m_lock);

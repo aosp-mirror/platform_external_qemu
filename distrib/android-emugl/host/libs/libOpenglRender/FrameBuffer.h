@@ -301,6 +301,7 @@ public:
     bool bind_locked();
     bool unbind_locked();
 
+    void freeColorBuffer(uint32_t colorbuffer);
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     ~FrameBuffer();
