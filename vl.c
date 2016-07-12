@@ -4674,7 +4674,7 @@ int run_qemu_main(int argc, const char **argv)
 
     linux_boot = (kernel_filename != NULL);
 
-    if (!linux_boot && *kernel_cmdline != '\0') {
+    if (!linux_boot && *current_machine->kernel_cmdline != '\0') {
         fprintf(stderr, "-append only allowed with -kernel option\n");
         return 1;
     }
