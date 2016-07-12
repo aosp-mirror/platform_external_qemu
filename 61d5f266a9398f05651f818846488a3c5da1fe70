@@ -142,6 +142,30 @@
       "revId": "61d5f266a9398f05651f818846488a3c5da1fe70",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da157484_8e775a71",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-12T01:26:33Z",
+      "side": 1,
+      "message": "Good idea, that seems to work---I think we\u0027re fine as long as keep the nextBufferSize \u003e\u003d 1 invariant. Nice catch! Done.",
+      "parentUuid": "da157484_2ecd863f",
+      "range": {
+        "startLine": 204,
+        "startChar": 4,
+        "endLine": 204,
+        "endChar": 32
+      },
+      "revId": "61d5f266a9398f05651f818846488a3c5da1fe70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
