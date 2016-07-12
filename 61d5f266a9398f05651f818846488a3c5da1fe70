@@ -22,6 +22,30 @@
       "revId": "61d5f266a9398f05651f818846488a3c5da1fe70",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da157484_7febaf7e",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-12T00:13:02Z",
+      "side": 1,
+      "message": "Thanks for catching this one. I looked into it and was about to add it, but  in HostConnection.cpp in the guest, in the calls to rcGetGLString, we depend on len\u003d0 in order to signal that there is no gl ext string to read. So, it looks we won\u0027t need len + 1 here.",
+      "parentUuid": "da157484_74c916b9",
+      "range": {
+        "startLine": 204,
+        "startChar": 4,
+        "endLine": 204,
+        "endChar": 32
+      },
+      "revId": "61d5f266a9398f05651f818846488a3c5da1fe70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
