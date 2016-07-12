@@ -22,6 +22,30 @@
       "revId": "cbeb08adfeb4fb7f8a06d883b6971b963722004a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da157484_9f9ad82c",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-07-12T22:26:54Z",
+      "side": 1,
+      "message": "The \"reset\" operation resets *both* rotation and position in space, so the second call is needed to update the position sliders",
+      "parentUuid": "da157484_a24cde62",
+      "range": {
+        "startLine": 165,
+        "startChar": 0,
+        "endLine": 166,
+        "endChar": 33
+      },
+      "revId": "cbeb08adfeb4fb7f8a06d883b6971b963722004a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
