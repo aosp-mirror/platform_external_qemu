@@ -31,6 +31,10 @@
 #include "qemu/main-loop.h"
 #include "hax-slot.h"
 
+#ifdef _WIN32
+#include "sysemu/os-win32.h"
+#endif
+
 #ifdef CONFIG_ANDROID
 #include "android/error-messages.h"
 #include "android/utils/debug.h"

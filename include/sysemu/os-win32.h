@@ -73,7 +73,14 @@
 #define siglongjmp(env, val) longjmp(env, val)
 
 /* Declaration of ffs() is missing in MinGW's strings.h. */
-int ffs(int i);
+/* ANDROID EMULATOR BUILD HACK: Our mingw environment doesn't have any library
+ * that provides ffs and friends.  This results in linking errors for these
+ * functions when compiling with debugging enabled.  Without debug, gcc seems to
+ * inline from the builtin.
+ */
+#define ffs(i) __builtin_ffs(i)
+#define ffsl(i) __builtin_ffsl(i)
+#define ffsll(i) __builtin_ffsll(i)
 
 /* Missing POSIX functions. Don't use MinGW-w64 macros. */
 #undef gmtime_r
