@@ -70,6 +70,30 @@
       "revId": "61d5f266a9398f05651f818846488a3c5da1fe70",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da157484_3a3e65cf",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-12T00:39:55Z",
+      "side": 1,
+      "message": "Ah, I think I got it now: the pathological case where call #1, the underlying OpenGL returns an empty string, and we tack on the protocol strings. call #2 won\u0027t account for this case.  I\u0027ll look at making that a bit clearer...",
+      "parentUuid": "da157484_9f8dcb9d",
+      "range": {
+        "startLine": 204,
+        "startChar": 4,
+        "endLine": 204,
+        "endChar": 32
+      },
+      "revId": "61d5f266a9398f05651f818846488a3c5da1fe70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
