@@ -375,6 +375,11 @@ EOF
                 fi
             done
 
+            if ! run make -j$NUM_JOBS $BUILD_FLAGS check GTESTER_FLAGS="-m quick -k"
+            then
+                panic "$(builder_text) Failure when running qemu2 unittests!!"
+            fi
+
     ) || panic "Build failed!!"
 
     BINARY_DIR=$INSTALL_DIR/$1
