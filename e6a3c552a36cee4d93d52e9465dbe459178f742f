@@ -1,0 +1,136 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da157484_b82c01a0",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-13T16:29:22Z",
+      "side": 1,
+      "message": "please add \u0027final\u0027, otherwise virtual calls from ctor won\u0027t end up well",
+      "revId": "e6a3c552a36cee4d93d52e9465dbe459178f742f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da157484_b8436153",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-13T16:29:22Z",
+      "side": 1,
+      "message": "while (input.receive(...)) ?",
+      "range": {
+        "startLine": 87,
+        "startChar": 8,
+        "endLine": 88,
+        "endChar": 35
+      },
+      "revId": "e6a3c552a36cee4d93d52e9465dbe459178f742f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da157484_382f7199",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-13T16:29:22Z",
+      "side": 1,
+      "message": "please make it private",
+      "range": {
+        "startLine": 92,
+        "startChar": 5,
+        "endLine": 93,
+        "endChar": 44
+      },
+      "revId": "e6a3c552a36cee4d93d52e9465dbe459178f742f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da157484_78128959",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-13T16:29:22Z",
+      "side": 1,
+      "message": "we should also join the thread here (call wait()) to make sure there are no races on destruction",
+      "range": {
+        "startLine": 95,
+        "startChar": 8,
+        "endLine": 95,
+        "endChar": 21
+      },
+      "revId": "e6a3c552a36cee4d93d52e9465dbe459178f742f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da157484_184d555e",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-13T16:29:22Z",
+      "side": 1,
+      "message": "doesn\u0027t it mean writeFine() is still thread-unsafe?",
+      "range": {
+        "startLine": 125,
+        "startChar": 19,
+        "endLine": 125,
+        "endChar": 28
+      },
+      "revId": "e6a3c552a36cee4d93d52e9465dbe459178f742f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da157484_980e652d",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-13T16:29:22Z",
+      "side": 1,
+      "message": "nit: please remove this extra copying as well",
+      "range": {
+        "startLine": 127,
+        "startChar": 27,
+        "endLine": 127,
+        "endChar": 38
+      },
+      "revId": "e6a3c552a36cee4d93d52e9465dbe459178f742f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
