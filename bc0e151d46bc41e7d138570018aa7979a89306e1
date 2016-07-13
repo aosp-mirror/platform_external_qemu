@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "da157484_8b6a7ffe",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 755,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-07-13T23:55:58Z",
+      "side": 1,
+      "message": "I need either this or \u0027default\u0027 to keep the compiler from complaining.",
+      "parentUuid": "da157484_572f92ea",
+      "range": {
+        "startLine": 755,
+        "startChar": 13,
+        "endLine": 755,
+        "endChar": 34
+      },
+      "revId": "bc0e151d46bc41e7d138570018aa7979a89306e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da157484_17251a0d",
         "filename": "android/telephony/modem.h",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-07-13T22:01:44Z",
       "side": 1,
       "message": "If this is unused, I would rather you remove it and explicitly value everything afterwards.",
+      "range": {
+        "startLine": 81,
+        "startChar": 4,
+        "endLine": 81,
+        "endChar": 54
+      },
+      "revId": "bc0e151d46bc41e7d138570018aa7979a89306e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da157484_cbff5733",
+        "filename": "android/telephony/modem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-07-13T23:55:58Z",
+      "side": 1,
+      "message": "I considered that, and also instead calling it \"_IS95A\". I think I prefer the way it is, but not strongly.\nHow strongly do you feel?",
+      "parentUuid": "da157484_17251a0d",
       "range": {
         "startLine": 81,
         "startChar": 4,
