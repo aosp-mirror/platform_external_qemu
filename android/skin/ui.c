@@ -169,27 +169,7 @@ void skin_ui_reset_title(SkinUI* ui) {
         return;
 
     if (ui->show_trackball) {
-        SkinKeyBinding  bindings[SKIN_KEY_COMMAND_MAX_BINDINGS];
-
-        int count = skin_keyset_get_bindings(skin_keyset_get_default(),
-                                             SKIN_KEY_COMMAND_TOGGLE_TRACKBALL,
-                                             bindings);
-        if (count > 0) {
-            int  nn;
-            p = bufprint(p, end, "Press ");
-            for (nn = 0; nn < count; nn++) {
-                if (nn > 0) {
-                    if (nn < count-1)
-                        p = bufprint(p, end, ", ");
-                    else
-                        p = bufprint(p, end, " or ");
-                }
-                p = bufprint(p, end, "%s",
-                             skin_key_pair_to_string(bindings[nn].sym,
-                                                     bindings[nn].mod));
-            }
-            p = bufprint(p, end, " to leave trackball mode. ");
-        }
+        p = bufprint(p, end, "Press Ctrl-T to leave trackball mode. ");
     }
 
     p = bufprint(p, end, "%s", ui->ui_params.window_name);
@@ -500,6 +480,13 @@ bool skin_ui_process_events(SkinUI* ui) {
             skin_window_zoomed_window_resized(ui->window, ev.u.scroll.x, ev.u.scroll.y,
                                                           ev.u.scroll.xmax, ev.u.scroll.ymax,
                                                           ev.u.scroll.scroll_h);
+            break;
+        case kEventToggleTrackball:
+            if (ui->ui_params.enable_trackball) {
+                ui->show_trackball = !ui->show_trackball;
+                skin_window_show_trackball(ui->window, ui->show_trackball);
+                skin_ui_reset_title(ui);
+            }
             break;
         }
     }

@@ -40,7 +40,8 @@ enum class QtUICommand {
     BACK,
     OVERVIEW,
     ROTATE_RIGHT,
-    ROTATE_LEFT
+    ROTATE_LEFT,
+    TOGGLE_TRACKBALL,
 };
 
 #define NAME_TO_CMD(x) {#x, QtUICommand::x}
@@ -71,7 +72,8 @@ static const std::pair<QString, QtUICommand> NameToQtUICmd[] = {
         NAME_TO_CMD(MENU),
         NAME_TO_CMD(HOME),
         NAME_TO_CMD(BACK),
-        NAME_TO_CMD(OVERVIEW)};
+        NAME_TO_CMD(OVERVIEW),
+        NAME_TO_CMD(TOGGLE_TRACKBALL),};
 #undef NAME_TO_CMD
 
 #define CMD_TO_DESC(x, y) {QtUICommand::x, qApp->translate("QtUICommand", y)}
@@ -103,7 +105,9 @@ static const std::pair<QtUICommand, QString> QtUICmdToDesc[] = {
         CMD_TO_DESC(VOLUME_UP, "Volume up"),
         CMD_TO_DESC(VOLUME_DOWN, "Volume down"), CMD_TO_DESC(POWER, "Power"),
         CMD_TO_DESC(HOME, "Home"), CMD_TO_DESC(BACK, "Back"),
-        CMD_TO_DESC(MENU, "Menu"), CMD_TO_DESC(OVERVIEW, "Overview")};
+        CMD_TO_DESC(MENU, "Menu"), CMD_TO_DESC(OVERVIEW, "Overview"),
+        CMD_TO_DESC(TOGGLE_TRACKBALL, "Toggle trackball mode (if AVD is configured for it)"),
+                    CMD_TO_DESC(TOGGLE_TRACKBALL, "Toggle Trackball"),};
 #undef CMD_TO_DESC
 
 bool parseQtUICommand(const QString& string, QtUICommand* command);

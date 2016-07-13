@@ -120,6 +120,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             "Ctrl+-     VOLUME_DOWN\n"
             "Ctrl+P     POWER\n"
             "Ctrl+M     MENU\n"
+            "Ctrl+T     TOGGLE_TRACKBALL\n"
 #ifndef __APPLE__
             "Ctrl+H     HOME\n"
 #else
@@ -358,6 +359,13 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                              cmd == QtUICommand::ROTATE_RIGHT ? "ROTATE_RIGHT"
                                                               : "ROTATE_LEFT");
                 }
+                mEmulatorWindow->queueSkinEvent(skin_event);
+            }
+            break;
+        case QtUICommand::TOGGLE_TRACKBALL:
+            if (down) {
+                SkinEvent* skin_event = new SkinEvent();
+                skin_event->type = kEventToggleTrackball;
                 mEmulatorWindow->queueSkinEvent(skin_event);
             }
             break;
