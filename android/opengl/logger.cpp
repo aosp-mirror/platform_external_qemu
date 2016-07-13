@@ -11,6 +11,10 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
+
+#include "android/base/threads/Thread.h"
+#include "android/base/synchronization/MessageChannel.h"
+
 #include "android/crashreport/CrashReporter.h"
 #include "android/opengl/logger.h"
 
@@ -36,16 +40,24 @@ using android::crashreport::CrashReporter;
 
 static const int kBufferLen = 2048;
 
+using android::base::Thread;
+using android::base::MessageChannel;
+
+
+
 class OpenGLLogger {
 public:
     OpenGLLogger();
     OpenGLLogger(const char* filename);
     // Coarse log: Call this infrequently.
     void writeCoarse(const char* str);
+
     // Fine log: When we want to log very frequent events.
     // Fine logs can be toggled on/off.
-    void writeFine(const char* str);
+    void writeFine(const std::string& str);
+    void queueFineLogEntry(const char* str);
     void writeFineTimestamped(const char* str);
+
     void startFineLog();
     void stopFineLog();
     static OpenGLLogger* get();
@@ -65,6 +77,28 @@ private:
 OpenGLLogger* OpenGLLogger::get() {
     return sOpenGLLogger.ptr();
 }
+
+class OpenGLLoggingThread : public Thread {
+public:
+    OpenGLLoggingThread() { this->start(); }
+    virtual intptr_t main() override {
+        std::string logmsg;
+        OpenGLLogger* logger = OpenGLLogger::get();
+        while(true) {
+            mInput.receive(&logmsg);
+            logger->writeFine(logmsg);
+        }
+        return 0;
+    }
+    MessageChannel<std::string, 2048> mInput;
+    MessageChannel<int, 2048> mOutput;
+    void cleanup() {
+        mInput.stop();
+        mOutput.stop();
+    }
+};
+
+::android::base::LazyInstance<OpenGLLoggingThread> sOpenGLLoggingThread = LAZY_INSTANCE_INIT;
 
 OpenGLLogger::OpenGLLogger() :
     mFineLogActive(false) {
@@ -90,9 +124,15 @@ void OpenGLLogger::writeCoarse(const char* str) {
     }
 }
 
-void OpenGLLogger::writeFine(const char* str) {
+void OpenGLLogger::writeFine(const std::string& str) {
     if (mFineLogActive) {
         mFineLog.push_back(std::string(str));
+    }
+}
+
+void OpenGLLogger::queueFineLogEntry(const char* str) {
+    if (mFineLogActive) {
+        sOpenGLLoggingThread.ptr()->mInput.send(std::string(str));
     }
 }
 
@@ -114,7 +154,7 @@ void OpenGLLogger::writeFineTimestamped(const char* str) {
                 curr_millis,
                 curr_micros,
                 str);
-        writeFine(buf);
+        queueFineLogEntry(buf);
     }
 }
 
@@ -124,6 +164,7 @@ void OpenGLLogger::startFineLog() {
 
 void OpenGLLogger::stopFineLog() {
     mFineLogActive = false;
+    sOpenGLLoggingThread.ptr()->cleanup();
     // Only print message when fine-grained
     // logging is turned on.
     if (!mFineLog.empty()) {
