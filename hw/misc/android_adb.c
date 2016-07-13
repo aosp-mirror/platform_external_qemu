@@ -250,13 +250,14 @@ static void tcp_adb_server_close(adb_backend_state *bs,
         bs->connected_pipe = NULL;
     }
 
-    if (bs->listen_chan_event == 0) {
+    if (bs->listen_chan && bs->listen_chan_event == 0) {
         /* wait for new connections */
         bs->listen_chan_event =
-                g_io_add_watch(bs->listen_chan, G_IO_IN, tcp_adb_accept, &(bs->ipv4_listener));
+                g_io_add_watch(bs->listen_chan, G_IO_IN,
+                    tcp_adb_accept, &(bs->ipv4_listener));
     }
 
-    if (bs->listen_chan_event_ipv6 == 0) {
+    if (bs->listen_chan_ipv6 && bs->listen_chan_event_ipv6 == 0) {
         /* wait for new connections */
         bs->listen_chan_event_ipv6 =
                 g_io_add_watch(bs->listen_chan_ipv6, G_IO_IN,
