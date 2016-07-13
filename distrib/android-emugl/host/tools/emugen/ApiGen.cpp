@@ -755,6 +755,7 @@ int ApiGen::genDecoderHeader(const std::string &filename)
 
     fprintf(fp, "#include \"IOStream.h\" \n");
     fprintf(fp, "#include \"%s_%s_context.h\"\n\n\n", m_basename.c_str(), sideString(SERVER_SIDE));
+    fprintf(fp, "#include \"emugl/common/logging.h\"\n");
 
     for (size_t i = 0; i < m_decoderHeaders.size(); i++) {
         fprintf(fp, "#include %s\n", m_decoderHeaders[i].c_str());
@@ -825,7 +826,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
 
     // helper macros
     fprintf(fp,
-            "#ifdef OPENGL_DEBUG_PRINTOUT\n"
+            "#if OPENGL_DEBUG_PRINTOUT\n"
             "#  define DEBUG(...) do { if (emugl_cxt_logger) { emugl_cxt_logger(__VA_ARGS__); } } while(0)\n"
             "#else\n"
             "#  define DEBUG(...)  ((void)0)\n"
