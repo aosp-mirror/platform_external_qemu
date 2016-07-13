@@ -47,4 +47,9 @@
 #define GF_AUDIO_IOMEM_SIZE     0x00000100
 #define GF_AUDIO_IRQ            20
 
+/* goldfish rtc */
+#define GF_RTC_IOMEM_BASE       0xff016000
+#define GF_RTC_IOMEM_SIZE       0x00001000
+#define GF_RTC_IRQ              22
+
 #endif  /* !ACPI_GOLDFISH_DEFS_H */
