@@ -9,11 +9,14 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/crashreport/CrashReporter.h"
 #include "android/opengl/logger.h"
 
+#include "android/base/files/PathUtils.h"
+#include "android/base/memory/LazyInstance.h"
+#include "android/base/synchronization/Lock.h"
+#include "android/crashreport/CrashReporter.h"
+
+#include <algorithm>
 #include <fstream>
 #include <inttypes.h>
 #include <stdarg.h>
@@ -22,6 +25,8 @@
 #include <sys/time.h>
 #include <vector>
 
+using android::base::AutoLock;
+using android::base::Lock;
 using android::base::PathUtils;
 using android::crashreport::CrashReporter;
 
@@ -36,29 +41,33 @@ using android::crashreport::CrashReporter;
 
 static const int kBufferLen = 2048;
 
+typedef std::pair<uint64_t, std::string> TimestampedLogEntry;
+
 class OpenGLLogger {
 public:
     OpenGLLogger();
     OpenGLLogger(const char* filename);
     // Coarse log: Call this infrequently.
     void writeCoarse(const char* str);
+
     // Fine log: When we want to log very frequent events.
     // Fine logs can be toggled on/off.
-    void writeFine(const char* str);
+    void writeFine(uint64_t time, const char* str);
     void writeFineTimestamped(const char* str);
+
     void startFineLog();
     void stopFineLog();
     static OpenGLLogger* get();
 private:
+    Lock mLock;
     bool mFineLogActive;
     std::string mFileName;
     std::ofstream mFileHandle;
     std::string mFineLogFileName;
     std::ofstream mFineLogFileHandle;
-    std::vector<std::string> mFineLog;
+    std::vector<TimestampedLogEntry> mFineLog;
     DISALLOW_COPY_ASSIGN_AND_MOVE(OpenGLLogger);
 };
-
 
 ::android::base::LazyInstance<OpenGLLogger> sOpenGLLogger = LAZY_INSTANCE_INIT;
 
@@ -90,9 +99,10 @@ void OpenGLLogger::writeCoarse(const char* str) {
     }
 }
 
-void OpenGLLogger::writeFine(const char* str) {
+void OpenGLLogger::writeFine(uint64_t time, const char* str) {
     if (mFineLogActive) {
-        mFineLog.push_back(std::string(str));
+        AutoLock lock(mLock);
+        mFineLog.emplace_back(time, str);
     }
 }
 
@@ -114,7 +124,8 @@ void OpenGLLogger::writeFineTimestamped(const char* str) {
                 curr_millis,
                 curr_micros,
                 str);
-        writeFine(buf);
+        writeFine(curr_micros + 1000ULL * curr_millis +
+                  1000ULL * 1000ULL * curr_secs, buf);
     }
 }
 
@@ -123,26 +134,38 @@ void OpenGLLogger::startFineLog() {
 }
 
 void OpenGLLogger::stopFineLog() {
-    mFineLogActive = false;
-    // Only print message when fine-grained
-    // logging is turned on.
-    if (!mFineLog.empty()) {
-        fprintf(stderr,
-                "Writing fine-grained GL log to %s...",
-                mFineLogFileName.c_str());
+    if (mFineLogActive) {
+        mFineLogActive = false;
+        // Only print message when fine-grained
+        // logging is turned on.
+        if (!mFineLog.empty()) {
+            fprintf(stderr,
+                    "Writing fine-grained GL log to %s...",
+                    mFineLogFileName.c_str());
+        }
+
+        // Sort log entries according to their timestamps.
+        // This is because the log entries might arrive
+        // out of order.
+        std::sort(mFineLog.begin(), mFineLog.end(),
+                  [](const TimestampedLogEntry& x,
+                     const TimestampedLogEntry& y) {
+                      return x.first < y.first;
+                  });
+
+        for (const auto& entry : mFineLog) {
+            // The fine log does not print newlines
+            // as it is used with the opengl debug
+            // printout in emugl, which adds
+            // newlines of its own.
+            mFineLogFileHandle << entry.second;
+        }
+        mFineLogFileHandle.close();
+        if (!mFineLog.empty()) {
+            fprintf(stderr, "done\n");
+        }
+        mFineLog.clear();
     }
-    for (const auto& entry : mFineLog) {
-        // The fine log does not print newlines
-        // as it is used with the opengl debug
-        // printout in emugl, which adds
-        // newlines of its own.
-        mFineLogFileHandle << entry;
-    }
-    mFineLogFileHandle.close();
-    if (!mFineLog.empty()) {
-        fprintf(stderr, "done\n");
-    }
-    mFineLog.clear();
 }
 
 // C interface

@@ -8,6 +8,7 @@
 #include "foo_server_context.h"
 
 
+#include "emugl/common/logging.h"
 
 struct foo_decoder_context_t : public foo_server_context_t {
 
