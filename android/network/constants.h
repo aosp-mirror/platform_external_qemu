@@ -33,14 +33,14 @@ ANDROID_BEGIN_HEADER
 // upload/download rate come from the following wikipedia page:
 //  http://en.wikipedia.org/wiki/List_of_device_bandwidths
 #define ANDROID_NETWORK_LIST_MODES(X) \
-    X(gsm, "GSM/CD", 14.4, 14.4, 150, 550) \
-    X(hscsd, "HSCSD", 14.4, 57.6, 80, 400) \
-    X(gprs, "GPRS", 28.8, 57.6, 35, 200) \
-    X(umts, "UMTS/3G", 384, 384, 35, 200) \
-    X(edge, "EDGE/EGPRS", 473.6, 473.6, 80, 400) \
-    X(hsdpa, "HSDPA", 5760, 13980, 0, 0) \
-    X(lte, "LTE", 58e6, 173e6, 0, 0) \
-    X(evdo, "EVDO", 173e6, 58e6, 0, 0) \
+    X(gsm,   "GSM/CD",        14.4,     14.4, 150, 550) \
+    X(hscsd, "HSCSD",         14.4,     57.6,  80, 400) \
+    X(gprs,  "GPRS",          28.8,     57.6,  35, 200) \
+    X(umts,  "UMTS/3G",      384.0,    384.0,  35, 200) \
+    X(edge,  "EDGE/EGPRS",   473.6,    473.6,  80, 400) \
+    X(hsdpa, "HSDPA",       5760.0,  13980.0,   0,   0) \
+    X(lte,   "LTE",        58000.0, 173000.0,   0,   0) \
+    X(evdo,  "EVDO",       75000.0, 280000.0,   0,   0) \
 
 // Describes one of the supported emulated network bandwith limits.
 // |name| is the name as used in the Android console (e.g. 'gsm')

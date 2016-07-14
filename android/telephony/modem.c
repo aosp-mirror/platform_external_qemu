@@ -105,9 +105,6 @@ android_parse_modem_tech( const char * tech )
 {
     const struct { const char* name; AModemTech  tech; }  techs[] = {
         { "gsm", A_TECH_GSM },
-        { "wcdma", A_TECH_WCDMA },
-        { "cdma", A_TECH_CDMA },
-        { "evdo", A_TECH_EVDO },
         { "lte", A_TECH_LTE },
         { NULL, 0 }
     };
@@ -125,14 +122,14 @@ extern ADataNetworkType
 android_parse_network_type( const char*  speed )
 {
     const struct { const char* name; ADataNetworkType  type; }  types[] = {
+        { "gsm",   A_DATA_NETWORK_GPRS },
+        { "hscsd", A_DATA_NETWORK_GPRS },
         { "gprs",  A_DATA_NETWORK_GPRS },
         { "edge",  A_DATA_NETWORK_EDGE },
         { "umts",  A_DATA_NETWORK_UMTS },
         { "hsdpa", A_DATA_NETWORK_UMTS },  /* not handled yet by Android GSM framework */
-        { "full",  A_DATA_NETWORK_UMTS },
         { "lte",   A_DATA_NETWORK_LTE },
-        { "cdma",  A_DATA_NETWORK_CDMA1X },
-        { "evdo",  A_DATA_NETWORK_EVDO },
+        { "full",  A_DATA_NETWORK_LTE },
         { NULL, 0 }
     };
     int  nn;
@@ -537,7 +534,7 @@ amodem_reset( AModem  modem )
     modem->voice_state  = A_REGISTRATION_HOME;
     modem->data_mode    = A_REGISTRATION_UNSOL_ENABLED_FULL;
     modem->data_state   = A_REGISTRATION_HOME;
-    modem->data_network = A_DATA_NETWORK_UMTS;
+    modem->data_network = A_DATA_NETWORK_LTE;
 
     tmp = amodem_nvram_get_str( modem, NV_MODEM_TECHNOLOGY, "gsm" );
     modem->technology = android_parse_modem_tech( tmp );
@@ -745,13 +742,9 @@ tech_from_network_type( ADataNetworkType type )
         case A_DATA_NETWORK_GPRS:
         case A_DATA_NETWORK_EDGE:
         case A_DATA_NETWORK_UMTS:
-            // TODO: Add A_TECH_WCDMA
             return A_TECH_GSM;
         case A_DATA_NETWORK_LTE:
             return A_TECH_LTE;
-        case A_DATA_NETWORK_CDMA1X:
-        case A_DATA_NETWORK_EVDO:
-            return A_TECH_CDMA;
         case A_DATA_NETWORK_UNKNOWN:
             return A_TECH_UNKNOWN;
     }
@@ -1089,7 +1082,7 @@ static const char*
 _amodem_switch_technology( AModem modem, AModemTech newtech, int32_t newpreferred )
 {
     D("_amodem_switch_technology: oldtech: %d, newtech %d, preferred: %d. newpreferred: %d\n",
-                      modem->technology, newtech, modem->preferred_mask,newpreferred);
+                      modem->technology, newtech, modem->preferred_mask, newpreferred);
     const char *ret = "+CTEC: DONE";
     assert( modem );
 
