@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "da157484_8cef35b8",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-14T01:31:38Z",
+      "side": 1,
+      "message": "Oops :) Done.",
+      "parentUuid": "da157484_4b78875f",
+      "range": {
+        "startLine": 125,
+        "startChar": 18,
+        "endLine": 125,
+        "endChar": 29
+      },
+      "revId": "53a60085285fcbe5da22c3f74f8d436b027135fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da157484_ebeb3315",
         "filename": "android/opengl/logger.cpp",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2016-07-14T00:09:06Z",
       "side": 1,
       "message": "could you please add a custom comparator to only use pair.first?",
+      "range": {
+        "startLine": 143,
+        "startChar": 18,
+        "endLine": 143,
+        "endChar": 50
+      },
+      "revId": "53a60085285fcbe5da22c3f74f8d436b027135fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da157484_6cec79c3",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-14T01:31:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da157484_ebeb3315",
       "range": {
         "startLine": 143,
         "startChar": 18,
