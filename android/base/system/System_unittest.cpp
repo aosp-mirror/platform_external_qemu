@@ -291,6 +291,10 @@ TEST(System, pathOperations) {
     fooFile.close();
     EXPECT_TRUE(sys->pathFileSize(fooPath, &fileSize));
     EXPECT_LT(0, fileSize);
+
+    // Test file deletion
+    EXPECT_TRUE(sys->deleteFile(fooPath));
+    EXPECT_FALSE(sys->pathFileSize(fooPath, &fileSize));
 }
 
 TEST(System, scanDirEntriesWithFullPaths) {
