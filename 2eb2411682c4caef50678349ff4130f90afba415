@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "da157484_50c78a08",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 554,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-14T19:41:27Z",
+      "side": 1,
+      "message": "Never mind, it looks like there is a way around: just call the Internal variants in there :)",
+      "parentUuid": "da157484_f0ef96b6",
+      "range": {
+        "startLine": 554,
+        "startChar": 31,
+        "endLine": 554,
+        "endChar": 48
+      },
+      "revId": "2eb2411682c4caef50678349ff4130f90afba415",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da157484_ad2e6534",
         "filename": "android/base/system/System.cpp",
         "patchSetId": 1
@@ -60,6 +84,30 @@
       "writtenOn": "2016-07-14T19:21:25Z",
       "side": 1,
       "message": "Errr.... what?\n\nIn general, sleeping arbitrarily for 16 has bad code smell.\nIf it\u0027s necessary due to some finicky windows stuff, please add a comment here describing why we need to do this.",
+      "range": {
+        "startLine": 1229,
+        "startChar": 8,
+        "endLine": 1229,
+        "endChar": 20
+      },
+      "revId": "2eb2411682c4caef50678349ff4130f90afba415",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da157484_3043eea0",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1229,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-14T19:41:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da157484_ad2e6534",
       "range": {
         "startLine": 1229,
         "startChar": 8,
@@ -95,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "da157484_1017d299",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-14T19:41:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da157484_ad15c5ee",
+      "range": {
+        "startLine": 220,
+        "startChar": 7,
+        "endLine": 221,
+        "endChar": 39
+      },
+      "revId": "2eb2411682c4caef50678349ff4130f90afba415",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da157484_8d31e995",
         "filename": "android/base/testing/TestSystem.h",
         "patchSetId": 1
@@ -106,6 +178,30 @@
       "writtenOn": "2016-07-14T19:21:25Z",
       "side": 1,
       "message": "If you push this logic to deleteFileInternal, you won\u0027t have to duplicate it in TestSystem.",
+      "range": {
+        "startLine": 204,
+        "startChar": 12,
+        "endLine": 205,
+        "endChar": 60
+      },
+      "revId": "2eb2411682c4caef50678349ff4130f90afba415",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da157484_908462f3",
+        "filename": "android/base/testing/TestSystem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-14T19:41:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da157484_8d31e995",
       "range": {
         "startLine": 204,
         "startChar": 12,
