@@ -442,6 +442,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         }
         event->ignore();
     } else {
+        mToolWindow->closeExtendedWindow();
         event->accept();
     }
 }
