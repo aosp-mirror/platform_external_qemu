@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da157484_a6e692e0",
+        "filename": "android/skin/qt/qt-ui-commands.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-07-14T00:21:09Z",
+      "side": 1,
+      "message": "Lowercase the second T: \"Toggle trackball\"",
+      "revId": "532362283d19ddbccec25c1db1afcfcae96c368e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
