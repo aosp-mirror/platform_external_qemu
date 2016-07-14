@@ -200,6 +200,10 @@ public:
         return pathCanExecInternal(toTempRoot(path));
     }
 
+    virtual bool deleteFile(StringView path) const override {
+        return deleteFileInternal(toTempRoot(path));
+    }
+
     virtual bool pathFileSize(StringView path,
                               FileSize* outFileSize) const override {
         return pathFileSizeInternal(toTempRoot(path), outFileSize);
