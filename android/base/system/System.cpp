@@ -549,6 +549,12 @@ public:
         return pathCanExecInternal(path);
     }
 
+    virtual bool deleteFile(StringView path) const override {
+        if (!pathIsFile(path) ||
+            !pathExists(path)) { return false; }
+        return deleteFileInternal(path);
+    }
+
     virtual bool pathFileSize(StringView path,
                               FileSize* outFileSize) const override {
         return pathFileSizeInternal(path, outFileSize);
@@ -1213,6 +1219,25 @@ bool System::pathCanExecInternal(StringView path) {
         return false;
     }
     return pathAccess(path, X_OK) == 0;
+}
+
+bool System::deleteFileInternal(StringView path) {
+    int remove_res = -1;
+
+#ifdef _WIN32
+    if (remove(path.c_str()) < 0) {
+        sleepMs(16);
+        remove_res = remove(path.c_str());
+    }
+#else
+    remove_res = remove(path.c_str());
+#endif
+
+    if (remove_res != 0) {
+        LOG(VERBOSE) << "Failed to delete file [" << path << "].";
+    }
+
+    return remove_res == 0;
 }
 
 // static
