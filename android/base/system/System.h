@@ -216,6 +216,10 @@ public:
     // user.
     virtual bool pathCanExec(StringView path) const = 0;
 
+    // Function for deleting files. Return true iff
+    // (|path| is a file and we have successfully deleted it)
+    virtual bool deleteFile(StringView path) const = 0;
+
     // Get the size of file at |path|.
     // Fails if path is not a file or not readable, and in case of other errors.
     virtual bool pathFileSize(StringView path, FileSize* outFileSize) const = 0;
@@ -320,6 +324,7 @@ protected:
     static bool pathCanReadInternal(StringView path);
     static bool pathCanWriteInternal(StringView path);
     static bool pathCanExecInternal(StringView path);
+    static bool deleteFileInternal(StringView path);
     static bool pathFileSizeInternal(StringView path, FileSize* outFileSize);
 
 private:
