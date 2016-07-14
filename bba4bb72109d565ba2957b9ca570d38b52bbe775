@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da157484_cf291ae8",
+        "filename": "android/scripts/build-ANGLE.sh",
+        "patchSetId": 17
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-14T17:43:05Z",
+      "side": 1,
+      "message": "this message looks really fun: if it takes no arguments, how can I specify a \u0027--help\u0027 _argument_? :)",
+      "range": {
+        "startLine": 40,
+        "startChar": 10,
+        "endLine": 40,
+        "endChar": 67
+      },
+      "revId": "bba4bb72109d565ba2957b9ca570d38b52bbe775",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
