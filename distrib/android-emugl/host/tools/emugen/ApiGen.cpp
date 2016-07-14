@@ -755,6 +755,7 @@ int ApiGen::genDecoderHeader(const std::string &filename)
 
     fprintf(fp, "#include \"IOStream.h\" \n");
     fprintf(fp, "#include \"%s_%s_context.h\"\n\n\n", m_basename.c_str(), sideString(SERVER_SIDE));
+    fprintf(fp, "#include \"emugl/common/logging.h\"\n");
 
     for (size_t i = 0; i < m_decoderHeaders.size(); i++) {
         fprintf(fp, "#include %s\n", m_decoderHeaders[i].c_str());
