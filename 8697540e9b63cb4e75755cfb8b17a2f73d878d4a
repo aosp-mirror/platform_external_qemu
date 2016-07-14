@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da157484_3022ce47",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1235,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-14T19:52:48Z",
+      "side": 1,
+      "message": "I\u0027m still not comfortable here. +zyy: Do we know why lfy@ may be observing this behaviour.\n\nThe problem is, I wouldn\u0027t expect a function like System::deleteFile to sleep. If there\u0027s no way around it, I\u0027d add an optional boolean flag to the function, retryOnFailure\u003dfalse, and the documentation clearly states that the function may block if you set this flag to true.",
+      "range": {
+        "startLine": 1235,
+        "startChar": 8,
+        "endLine": 1235,
+        "endChar": 20
+      },
+      "revId": "8697540e9b63cb4e75755cfb8b17a2f73d878d4a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
