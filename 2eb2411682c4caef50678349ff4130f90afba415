@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "da157484_f0ef96b6",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 554,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-14T19:30:32Z",
+      "side": 1,
+      "message": "It\u0027d have to be another System::get() in a Internal thing, and I felt it looked better keeping the separate levels separate.",
+      "parentUuid": "da157484_cdf921ca",
+      "range": {
+        "startLine": 554,
+        "startChar": 31,
+        "endLine": 554,
+        "endChar": 48
+      },
+      "revId": "2eb2411682c4caef50678349ff4130f90afba415",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da157484_ad2e6534",
         "filename": "android/base/system/System.cpp",
         "patchSetId": 1
