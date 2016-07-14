@@ -861,6 +861,7 @@ static int skin_file_load_from_v1(SkinFile* file,
                 break;
         }
         layout->locations = location;
+        layout->orientation = location->rotation;
 
         *ptail = layout;
         ptail  = &layout->next;
