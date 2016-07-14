@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a65b096_6888833b",
+        "filename": "android/telephony/modem.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-07-14T21:37:24Z",
+      "side": 1,
+      "message": "Assuming all of these values are *actually* used, looks fine to me, thanks :)",
+      "range": {
+        "startLine": 77,
+        "startChar": 4,
+        "endLine": 81,
+        "endChar": 52
+      },
+      "revId": "94cbe1f21620e50cbbbb1eebc015f4df20af89e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
