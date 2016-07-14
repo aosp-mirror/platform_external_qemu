@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da157484_4b78875f",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-14T00:09:06Z",
+      "side": 1,
+      "message": "no, this isn\u0027t correct.\nplease calculate the full timestamp (in some unit you add as a comment in the .h file) and use it there. Currently it\u0027s _only_ microseconds, so you only get 0-999 there",
+      "range": {
+        "startLine": 125,
+        "startChar": 18,
+        "endLine": 125,
+        "endChar": 29
+      },
+      "revId": "53a60085285fcbe5da22c3f74f8d436b027135fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da157484_ebeb3315",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-14T00:09:06Z",
+      "side": 1,
+      "message": "could you please add a custom comparator to only use pair.first?",
+      "range": {
+        "startLine": 143,
+        "startChar": 18,
+        "endLine": 143,
+        "endChar": 50
+      },
+      "revId": "53a60085285fcbe5da22c3f74f8d436b027135fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
