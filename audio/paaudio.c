@@ -511,6 +511,7 @@ static pa_stream *qpa_simple_new (
     } else {
         r = pa_stream_connect_record (stream, dev, attr,
                                       PA_STREAM_INTERPOLATE_TIMING
+                                      |PA_STREAM_START_CORKED
 #ifdef PA_STREAM_ADJUST_LATENCY
                                       |PA_STREAM_ADJUST_LATENCY
 #endif
@@ -696,6 +697,7 @@ static void qpa_fini_in (HWVoiceIn *hw)
     PAVoiceIn *pa = (PAVoiceIn *) hw;
 
     audio_pt_lock (&pa->pt, AUDIO_FUNC);
+    pa_stream_cork(pa->stream, 0, NULL, NULL);
     pa->done = 1;
     audio_pt_unlock_and_signal (&pa->pt, AUDIO_FUNC);
     audio_pt_join (&pa->pt, &ret, AUDIO_FUNC);
@@ -774,6 +776,27 @@ static int qpa_ctl_in (HWVoiceIn *hw, int cmd, ...)
 #endif
 
     switch (cmd) {
+    case VOICE_ENABLE:
+        {
+            pa_threaded_mainloop_lock (g->mainloop);
+            pa_stream_peek (pa->stream, &pa->read_data, &pa->read_length);
+            if (pa->read_length) {
+                pa_stream_drop (pa->stream);
+            }
+            pa->read_data = NULL;
+            pa->read_length = 0;
+            pa->read_index = 0;
+            pa_stream_cork(pa->stream, 0, NULL, NULL);
+            pa_threaded_mainloop_unlock (g->mainloop);
+            break;
+        }
+    case VOICE_DISABLE:
+        {
+            pa_threaded_mainloop_lock (g->mainloop);
+            pa_stream_cork(pa->stream, 1, NULL, NULL);
+            pa_threaded_mainloop_unlock (g->mainloop);
+            break;
+        }
     case VOICE_VOLUME:
         {
             SWVoiceIn *sw;
@@ -811,6 +834,7 @@ static int qpa_ctl_in (HWVoiceIn *hw, int cmd, ...)
             }
 
             pa_threaded_mainloop_unlock (g->mainloop);
+            break;
         }
     }
     return 0;
