@@ -101,7 +101,7 @@
    <property name="geometry">
     <rect>
      <x>324</x>
-     <y>20</y>
+     <y>94</y>
      <width>91</width>
      <height>24</height>
     </rect>
@@ -139,7 +139,7 @@
    <property name="geometry">
     <rect>
      <x>324</x>
-     <y>94</y>
+     <y>20</y>
      <width>131</width>
      <height>24</height>
     </rect>
@@ -205,7 +205,7 @@
    <property name="geometry">
     <rect>
      <x>324</x>
-     <y>38</y>
+     <y>112</y>
      <width>280</width>
      <height>31</height>
     </rect>
@@ -252,7 +252,7 @@
    <property name="geometry">
     <rect>
      <x>324</x>
-     <y>112</y>
+     <y>38</y>
      <width>280</width>
      <height>31</height>
     </rect>
@@ -296,6 +296,12 @@
    </item>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>cell_standardBox</tabstop>
+  <tabstop>cell_signalStatusBox</tabstop>
+  <tabstop>cell_voiceStatusBox</tabstop>
+  <tabstop>cell_dataStatusBox</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
