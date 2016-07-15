@@ -186,6 +186,9 @@ intptr_t RenderThread::main() {
 
     FrameBuffer::getFB()->drainRenderContext();
 
+    // exit sync thread, if any.
+    SyncThread::destroySyncThread();
+
     DBG("Exited a RenderThread @%p\n", this);
 
     return 0;
