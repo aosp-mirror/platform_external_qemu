@@ -402,6 +402,13 @@ bool ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
     return h;
 }
 
+void ToolWindow::closeExtendedWindow() {
+    if (mExtendedWindow) {
+        mExtendedWindow->close();
+        mExtendedWindow.reset();
+    }
+}
+
 void ToolWindow::dockMainWindow() {
 #ifdef __linux__
     // On Linux, the gap between the main window and
@@ -447,10 +454,6 @@ void ToolWindow::on_back_button_released() {
 }
 
 void ToolWindow::on_close_button_clicked() {
-    if (mExtendedWindow) {
-        mExtendedWindow->close();
-        mExtendedWindow.reset();
-    }
     parentWidget()->close();
 }
 
