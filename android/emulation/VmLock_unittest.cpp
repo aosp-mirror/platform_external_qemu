@@ -13,38 +13,11 @@
 // limitations under the License.
 
 #include "android/emulation/VmLock.h"
+#include "android/emulation/testing/TestVmLock.h"
 
 #include <gtest/gtest.h>
 
 namespace android {
-
-namespace {
-
-class TestVmLock : public VmLock {
-public:
-    TestVmLock() : mOldVmLock(VmLock::set(this)) {}
-
-    ~TestVmLock() { release(); }
-
-    void release() {
-        if (mOldVmLock) {
-            VmLock::set(mOldVmLock);
-            mOldVmLock = nullptr;
-        }
-    }
-
-    virtual void lock() override { mLockCount++; }
-    virtual void unlock() override { mUnlockCount++; }
-    virtual bool isLockedBySelf() const override {
-        return mLockCount > mUnlockCount;
-    }
-
-    int mLockCount = 0;
-    int mUnlockCount = 0;
-    VmLock* mOldVmLock = nullptr;
-};
-
-}  // namespace
 
 TEST(VmLock, Default) {
     VmLock* vmLock = VmLock::get();

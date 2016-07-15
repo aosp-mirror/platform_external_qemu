@@ -461,6 +461,7 @@ LOCAL_SRC_FILES := \
   android/emulation/android_pipe_zero_unittest.cpp \
   android/emulation/bufprint_config_dirs_unittest.cpp \
   android/emulation/ConfigDirs_unittest.cpp \
+  android/emulation/DeviceContextRunner_unittest.cpp \
   android/emulation/control/AdbInterface_unittest.cpp \
   android/emulation/control/ApkInstaller_unittest.cpp \
   android/emulation/control/FilePusher_unittest.cpp \
