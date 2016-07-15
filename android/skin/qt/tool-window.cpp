@@ -441,6 +441,8 @@ void ToolWindow::setToolEmuAgent(const UiEmuAgent* agPtr) {
     const QAndroidLocationAgent* locAgent = (agPtr ? agPtr->location : nullptr);
     LocationPage::getDeviceLocation(locAgent, &lat, &lon, &alt);
     LocationPage::sendLocationToDevice(locAgent, lat, lon, alt);
+
+    ExtendedWindow::staticInit(agPtr);
 }
 
 void ToolWindow::on_back_button_pressed() {

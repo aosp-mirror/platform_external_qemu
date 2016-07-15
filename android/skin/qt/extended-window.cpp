@@ -19,6 +19,7 @@
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
+#include "android/ui-emu-agent.h"
 
 #include "ui_extended.h"
 
@@ -113,6 +114,15 @@ ExtendedWindow::ExtendedWindow(
 
 ExtendedWindow::~ExtendedWindow() {
     mExtendedUi->location_page->requestStopLoadingGeoData();
+}
+
+// Perform initialization that must be done *before* the extended
+// window is created. (So, obviously, this method and everything
+// it calls must be static.)
+void ExtendedWindow::staticInit(const UiEmuAgent* agentPtr) {
+    if (agentPtr) {
+        CellularPage::staticInit(agentPtr->cellular);
+    }
 }
 
 void ExtendedWindow::show() {

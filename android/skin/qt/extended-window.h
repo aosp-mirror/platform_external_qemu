@@ -62,6 +62,8 @@ public:
 
     ~ExtendedWindow();
 
+    static void staticInit(const UiEmuAgent* agentPtr);
+
     void show();
     void showPane(ExtendedWindowPane pane);
 

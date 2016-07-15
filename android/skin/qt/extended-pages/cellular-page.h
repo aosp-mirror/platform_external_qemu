@@ -22,6 +22,7 @@ class CellularPage : public QWidget
 
 public:
     explicit CellularPage(QWidget *parent = nullptr);
+    static void staticInit(const QAndroidCellularAgent*);
     void setCellularAgent(const QAndroidCellularAgent* agent);
 
 private slots:
