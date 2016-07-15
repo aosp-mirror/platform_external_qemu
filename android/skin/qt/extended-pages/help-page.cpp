@@ -49,11 +49,6 @@ HelpPage::HelpPage(QWidget *parent) :
     avdInfo_getFullApiName(apiLevel, versionString, 128);
     mUi->help_androidVersionBox->setPlainText(versionString);
 
-    // Show the "serial number" that can be used to connect ADB
-    // to this device
-    mUi->help_adbSerialNumberBox->setPlainText(
-            "emulator-" + QString::number(android_base_port) );
-
     // launch the latest version loader in a separate thread
     auto latestVersionThread = new QThread();
     auto latestVersionTask = new LatestVersionLoadTask();
@@ -66,6 +61,9 @@ HelpPage::HelpPage(QWidget *parent) :
     connect(latestVersionThread, SIGNAL(finished()), latestVersionThread, SLOT(deleteLater()));
     mUi->help_latestVersionBox->setPlainText(tr("Loading..."));
     latestVersionThread->start();
+
+    QObject::connect(this, &HelpPage::adbPortUpdateRequired,
+                     this, &HelpPage::updateAdbPortNumber);
 }
 
 void HelpPage::initialize(const ShortcutKeyStore<QtUICommand>* key_store) {
@@ -135,6 +133,20 @@ void HelpPage::initializeKeyboardShortcutList(const ShortcutKeyStore<QtUICommand
     }
 
     table_widget->sortItems(0);
+}
+
+void HelpPage::setAdbPort() {
+    // The UI can only be updated from the proper thread.
+    // Emit a signal so that happens now, but in the right
+    // context.
+    emit adbPortUpdateRequired();
+}
+
+void HelpPage::updateAdbPortNumber() {
+    // Show the "serial number" that can be used to connect ADB
+    // to this device
+    mUi->help_adbSerialNumberBox->setPlainText(
+            "emulator-" + QString::number(android_base_port) );
 }
 
 void HelpPage::on_help_docs_clicked() {

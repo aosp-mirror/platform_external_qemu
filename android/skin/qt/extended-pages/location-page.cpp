@@ -45,6 +45,8 @@ LocationPage::LocationPage(QWidget *parent) :
     mUi->loc_latitudeInput->setMinValue(-90.0);
     mUi->loc_latitudeInput->setMaxValue(90.0);
     QObject::connect(&mTimer, &QTimer::timeout, this, &LocationPage::timeout);
+    QObject::connect(this, &LocationPage::locationUpdateRequired,
+                     this, &LocationPage::updateDisplayedLocation);
     setButtonEnabled(mUi->loc_playStopButton, getSelectedTheme(), false);
 
     // Restore previous values. If there are no previous values, use the
@@ -84,8 +86,11 @@ void LocationPage::setLocationAgent(const QAndroidLocationAgent* agent) {
     double curLat, curLon, curAlt;
     getDeviceLocation(mLocationAgent, &curLat, &curLon, &curAlt);
 
-    updateDisplayedLocation(curLat, curLon, curAlt);
     sendLocationToDevice(mLocationAgent, curLat, curLon, curAlt);
+
+    // We cannot update the UI here because we are not called from
+    // the Qt thread. Emit a signal to do that update.
+    emit locationUpdateRequired(curLat, curLon, curAlt);
 }
 
 void LocationPage::on_loc_GpxKmlButton_clicked()

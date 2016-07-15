@@ -38,6 +38,11 @@ const QString FORWARD_SHORTCUTS_TO_DEVICE("set/forwardShortcutsToDevice");
 const QString SAVE_PATH("set/savePath");
 const QString UI_THEME("set/theme");
 
+const QString CELLULAR_NETWORK_TYPE   ("cell/network_type");
+const QString CELLULAR_SIGNAL_STRENGTH("cell/signal_strength");
+const QString CELLULAR_VOICE_STATUS   ("cell/voice_status");
+const QString CELLULAR_DATA_STATUS    ("cell/data_status");
+
 const QString CRASHREPORT_PREFERENCE("set/crashReportPreference");
 enum CRASHREPORT_PREFERENCE_VALUE {
     CRASHREPORT_PREFERENCE_ASK = 0,
