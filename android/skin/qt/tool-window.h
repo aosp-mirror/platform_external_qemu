@@ -75,6 +75,8 @@ public:
 
     bool handleQtKeyEvent(QKeyEvent* event);
 
+    void closeExtendedWindow();
+
     // The designers want a gap between the main emulator
     // window and the tool bar. This is how big that gap is.
     static const int toolGap = 10;
