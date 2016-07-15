@@ -4262,11 +4262,13 @@ int run_qemu_main(int argc, const char **argv)
         boot_property_add("qemu.sf.lcd_density", temp);
     }
 
-    /* Initialize net speed and delays stuff. */
-    if (android_parse_network_speed(android_op_netspeed) < 0) {
-        fprintf(stderr, "invalid -netspeed parameter '%s'",
-                android_op_netspeed);
-        return 1;
+    if (android_op_netspeed) {
+        /* The command line gives the network speed */
+        if (android_parse_network_speed(android_op_netspeed) < 0) {
+            fprintf(stderr, "invalid -netspeed parameter '%s'\n",
+                    android_op_netspeed);
+            return 1;
+        }
     }
 
     if (android_parse_network_latency(android_op_netdelay) < 0) {
@@ -4925,6 +4927,16 @@ int run_qemu_main(int argc, const char **argv)
 
     net_check_clients();
 
+#if defined(CONFIG_ANDROID)
+    /* call android-specific setup function */
+    if (!qemu_android_emulation_setup()) {
+        return 1;
+    }
+
+    extern void android_emulator_set_base_port(int);
+    android_emulator_set_base_port(android_base_port);
+#endif  // CONFIG_ANDROID
+
     ds = init_displaystate();
 
     /* init local displays */
@@ -4994,16 +5006,6 @@ int run_qemu_main(int argc, const char **argv)
         fprintf(stderr, "rom loading failed\n");
         return 1;
     }
-
-#if defined(CONFIG_ANDROID)
-    /* call android-specific setup function */
-    if (!qemu_android_emulation_setup()) {
-        return 1;
-    }
-
-    extern void android_emulator_set_base_port(int);
-    android_emulator_set_base_port(android_base_port);
-#endif  // CONFIG_ANDROID
 
     if (qemu_opts_foreach(qemu_find_opts("mon"), mon_init_func, NULL, 1) != 0) {
         return 1;
