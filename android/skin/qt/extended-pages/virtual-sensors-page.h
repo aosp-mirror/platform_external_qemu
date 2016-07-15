@@ -80,7 +80,7 @@ private:
     void resetAccelerometerRotationFromSkinLayout(const SkinLayout*);
     void setAccelerometerRotationFromSliders();
     void setPhonePositionFromSliders();
-    void updateAccelerometerValues();
+    void updateAccelerometerValues(bool updateDisplay=true);
 
     std::unique_ptr<Ui::VirtualSensorsPage> mUi;
     QDoubleValidator mMagFieldValidator;
@@ -92,4 +92,3 @@ private:
     bool mFirstShow = true;
     SkinRotation mCoarseOrientation;
 };
-

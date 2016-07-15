@@ -190,7 +190,9 @@ void VirtualSensorsPage::setSensorsAgent(const QAndroidSensorsAgent* agent) {
     mSensorsAgent = agent;
 
     // Update the agent with current values.
-    updateAccelerometerValues();
+    // Don't update the display because this function gets called
+    // from threads that are not the Qt thread.
+    updateAccelerometerValues(false);
 }
 
 // Helper function
@@ -201,7 +203,7 @@ static void setSensorValue(
         double v2 = 0.0,
         double v3 = 0.0) {
     if (agent) {
-        agent->setSensor(sensor_id, 
+        agent->setSensor(sensor_id,
                          static_cast<float>(v1),
                          static_cast<float>(v2),
                          static_cast<float>(v3));
@@ -304,7 +306,7 @@ void VirtualSensorsPage::on_positionYSlider_valueChanged(double) {
     setPhonePositionFromSliders();
 }
 
-void VirtualSensorsPage::updateAccelerometerValues() {
+void VirtualSensorsPage::updateAccelerometerValues(bool updateDisplay) {
     // Gravity and magnetic vector in the device's frame of
     // reference.
     QVector3D gravity_vector(0.0, 9.8, 0.0);
@@ -360,39 +362,42 @@ void VirtualSensorsPage::updateAccelerometerValues() {
       emit(coarseOrientationChanged(mCoarseOrientation));
     }
 
-    static const QString rotation_labels[] = {
-        "ROTATION_0",
-        "ROTATION_90",
-        "ROTATION_180",
-        "ROTATION_270"
-    };
+    if (updateDisplay) {
+        static const QString rotation_labels[] = {
+            "ROTATION_0",
+            "ROTATION_90",
+            "ROTATION_180",
+            "ROTATION_270"
+        };
 
-    // Update labels with new values.
-    QString table_html;
-    QTextStream table_html_stream(&table_html);
-    table_html_stream.setRealNumberPrecision(2);
-    table_html_stream.setNumberFlags(table_html_stream.numberFlags() |
-                                     QTextStream::ForcePoint);
-    table_html_stream.setRealNumberNotation(QTextStream::FixedNotation);
-    table_html_stream
-        << "<table border=\"0\""
-        << "       cellpadding=\"3\" style=\"font-size:8pt\">"
-        << "<tr>"
-        << "<td>" << tr("Accelerometer (m/s<sup>2</sup>)") << ":</td>"
-        << "<td align=left>" << acceleration.x() << "</td>"
-        << "<td align=left>" << acceleration.y() << "</td>"
-        << "<td align=left>" << acceleration.z() << "</td></tr>"
-        << "<tr>"
-        << "<td>" << tr("Magnetometer (&mu;T)") << ":</td>"
-        << "<td align=left>" << device_magnetic_vector.x() << "</td>"
-        << "<td align=left>" << device_magnetic_vector.y() << "</td>"
-        << "<td align=left>" << device_magnetic_vector.z() << "</td></tr>"
-        << "<tr><td>" << tr("Rotation")
-        << ":</td><td colspan = \"3\" align=left>"
-        << rotation_labels[mCoarseOrientation - SKIN_ROTATION_0]
-        << "</td></tr>"
-        << "</table>";
-    mUi->resultingAccelerometerValues->setText(table_html);
+        // Update labels with new values.
+        QString table_html;
+        QTextStream table_html_stream(&table_html);
+        table_html_stream.setRealNumberPrecision(2);
+        table_html_stream.setNumberFlags(table_html_stream.numberFlags() |
+                                         QTextStream::ForcePoint);
+        table_html_stream.setRealNumberNotation(QTextStream::FixedNotation);
+        table_html_stream
+            << "<table border=\"0\""
+            << "       cellpadding=\"3\" style=\"font-size:8pt\">"
+            << "<tr>"
+            << "<td>" << tr("Accelerometer (m/s<sup>2</sup>)") << ":</td>"
+            << "<td align=left>" << acceleration.x() << "</td>"
+            << "<td align=left>" << acceleration.y() << "</td>"
+            << "<td align=left>" << acceleration.z() << "</td></tr>"
+            << "<tr>"
+            << "<td>" << tr("Magnetometer (&mu;T)") << ":</td>"
+            << "<td align=left>" << device_magnetic_vector.x() << "</td>"
+            << "<td align=left>" << device_magnetic_vector.y() << "</td>"
+            << "<td align=left>" << device_magnetic_vector.z() << "</td></tr>"
+            << "<tr><td>" << tr("Rotation")
+            << ":</td><td colspan = \"3\" align=left>"
+            << rotation_labels[mCoarseOrientation - SKIN_ROTATION_0]
+            << "</td></tr>"
+            << "</table>";
+
+        mUi->resultingAccelerometerValues->setText(table_html);
+    }
 }
 
 void VirtualSensorsPage::onPhonePositionChanged() {

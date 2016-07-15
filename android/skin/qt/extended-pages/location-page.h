@@ -54,6 +54,8 @@ private slots:
     void on_loc_altitudeInput_editingFinished();
     void on_loc_playbackSpeed_currentIndexChanged(int index);
 
+    void showEvent(QShowEvent* showEv);
+
     // Called when the thread that loads and parses
     // geo data from file is initiated.
     void geoDataThreadStarted();
@@ -97,6 +99,11 @@ private:
     bool mNowLoadingGeoData;
     bool mGeoDataLoadingStopRequested;
     int mRowToSend;
+
+    bool   mUpdateLocationDisplay;
+    double mLongitudeToDisplay;
+    double mLatitudeToDisplay;
+    double mAltitudeToDisplay;
 };
 
 class GeoDataLoaderThread : public QThread {

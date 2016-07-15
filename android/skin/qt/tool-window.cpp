@@ -165,6 +165,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         }
     }
 
+    createExtendedWindow(); // But don't show it yet
+
 #ifndef Q_OS_MAC
     // Swap minimize and close buttons on non-apple OSes
     int tmp_x = mToolsUi->close_button->x();
@@ -435,12 +437,9 @@ void ToolWindow::raiseMainWindow() {
 void ToolWindow::setToolEmuAgent(const UiEmuAgent* agPtr) {
     mUiEmuAgent = agPtr;
 
-    // Send the initial location to the device
-    // (it may already have this)
-    double lat, lon, alt;
-    const QAndroidLocationAgent* locAgent = (agPtr ? agPtr->location : nullptr);
-    LocationPage::getDeviceLocation(locAgent, &lat, &lon, &alt);
-    LocationPage::sendLocationToDevice(locAgent, lat, lon, alt);
+    if (mExtendedWindow) {
+        mExtendedWindow->setAgent(agPtr);
+    }
 }
 
 void ToolWindow::on_back_button_pressed() {
@@ -528,22 +527,15 @@ void ToolWindow::on_zoom_button_clicked() {
 }
 
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
-    if (!mExtendedWindow) {
-        createExtendedWindow();
-    }
     // Show the tabbed pane
     if (mExtendedWindow) {
         mExtendedWindow->showPane(pane);
         mExtendedWindow->raise();
         mExtendedWindow->activateWindow();
-        return;
     }
 }
 
 void ToolWindow::on_more_button_clicked() {
-    if (!mExtendedWindow) {
-        createExtendedWindow();
-    }
     if (mExtendedWindow) {
         mExtendedWindow->show();
         mExtendedWindow->raise();
@@ -555,7 +547,6 @@ void ToolWindow::createExtendedWindow() {
     mExtendedWindow.reset(
             new ExtendedWindow(mEmulatorWindow,
                                this,
-                               mUiEmuAgent,
                                &mShortcutKeyStore));
     if (auto recorder_ptr = mUIEventRecorder.lock()) {
         recorder_ptr->startRecording(mExtendedWindow.get());

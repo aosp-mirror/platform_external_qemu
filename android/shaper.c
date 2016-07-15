@@ -195,6 +195,8 @@ void
 netshaper_set_rate( NetShaper  shaper,
                     double     rate )
 {
+    if (!shaper) return;
+
     /* send all current packets when changing the rate */
     while (shaper->packets) {
         QueuedPacket  packet = shaper->packets;

@@ -30,7 +30,8 @@ LocationPage::LocationPage(QWidget *parent) :
     QWidget(parent),
     mUi(new Ui::LocationPage),
     mNowLoadingGeoData(false),
-    mGeoDataLoadingStopRequested(false)
+    mGeoDataLoadingStopRequested(false),
+    mUpdateLocationDisplay(false)
 {
     mUi->setupUi(this);
     mNowPlaying = false;
@@ -84,8 +85,15 @@ void LocationPage::setLocationAgent(const QAndroidLocationAgent* agent) {
     double curLat, curLon, curAlt;
     getDeviceLocation(mLocationAgent, &curLat, &curLon, &curAlt);
 
-    updateDisplayedLocation(curLat, curLon, curAlt);
     sendLocationToDevice(mLocationAgent, curLat, curLon, curAlt);
+
+    // We cannot update the UI here because we are not called from
+    // the Qt thread. Save this location and update the display
+    // on the next 'show'.
+    mLatitudeToDisplay  = curLat;
+    mLongitudeToDisplay = curLon;
+    mAltitudeToDisplay  = curAlt;
+    mUpdateLocationDisplay = true;
 }
 
 void LocationPage::on_loc_GpxKmlButton_clicked()
@@ -489,6 +497,18 @@ void LocationPage::getDeviceLocation(const QAndroidLocationAgent* locAgent,
         *pAltitude  = settings.value(Ui::Settings::LOCATION_RECENT_ALTITUDE,
                                      0.0).toDouble();
     }
+}
+
+void LocationPage::showEvent(QShowEvent* showEv) {
+    if (mUpdateLocationDisplay) {
+        updateDisplayedLocation(mLatitudeToDisplay,
+                                mLongitudeToDisplay,
+                                mAltitudeToDisplay);
+
+        mUpdateLocationDisplay = false;
+    }
+
+    QWidget::showEvent(showEv);
 }
 
 // Send a GPS location to the device

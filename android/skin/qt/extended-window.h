@@ -57,10 +57,11 @@ public:
     ExtendedWindow(
         EmulatorQtWindow* eW,
         ToolWindow* tW,
-        const UiEmuAgent* agentPtr,
         const ShortcutKeyStore<QtUICommand>* shortcuts);
 
     ~ExtendedWindow();
+
+    void setAgent(const UiEmuAgent* agentPtr);
 
     void show();
     void showPane(ExtendedWindowPane pane);
