@@ -165,6 +165,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         }
     }
 
+    createExtendedWindow(); // But don't show it yet
+
 #ifndef Q_OS_MAC
     // Swap minimize and close buttons on non-apple OSes
     int tmp_x = mToolsUi->close_button->x();
@@ -178,9 +180,9 @@ ToolWindow::~ToolWindow() {}
 
 void ToolWindow::hide() {
     QFrame::hide();
-    if (mExtendedWindow) {
-        mExtendedWindow->hide();
-    }
+
+    assert(mExtendedWindow);
+    mExtendedWindow->hide();
 }
 
 void ToolWindow::closeEvent(QCloseEvent* ce) {
@@ -195,16 +197,16 @@ void ToolWindow::mousePressEvent(QMouseEvent* event) {
 }
 
 void ToolWindow::hideEvent(QHideEvent*) {
-    if (mExtendedWindow) {
-        mIsExtendedWindowVisibleOnShow = mExtendedWindow->isVisible();
-    }
+    assert(mExtendedWindow);
+    mIsExtendedWindowVisibleOnShow = mExtendedWindow->isVisible();
 }
 
 void ToolWindow::show() {
     QFrame::show();
     setFixedSize(size());
 
-    if (mExtendedWindow && mIsExtendedWindowVisibleOnShow) {
+    if (mIsExtendedWindowVisibleOnShow) {
+        assert(mExtendedWindow);
         mExtendedWindow->show();
     }
 }
@@ -403,10 +405,9 @@ bool ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
 }
 
 void ToolWindow::closeExtendedWindow() {
-    if (mExtendedWindow) {
-        mExtendedWindow->close();
-        mExtendedWindow.reset();
-    }
+    assert(mExtendedWindow);
+    mExtendedWindow->close();
+    mExtendedWindow.reset();
 }
 
 void ToolWindow::dockMainWindow() {
@@ -435,12 +436,8 @@ void ToolWindow::raiseMainWindow() {
 void ToolWindow::setToolEmuAgent(const UiEmuAgent* agPtr) {
     mUiEmuAgent = agPtr;
 
-    // Send the initial location to the device
-    // (it may already have this)
-    double lat, lon, alt;
-    const QAndroidLocationAgent* locAgent = (agPtr ? agPtr->location : nullptr);
-    LocationPage::getDeviceLocation(locAgent, &lat, &lon, &alt);
-    LocationPage::sendLocationToDevice(locAgent, lat, lon, alt);
+    assert(mExtendedWindow);
+    mExtendedWindow->setAgent(agPtr);
 }
 
 void ToolWindow::on_back_button_pressed() {
@@ -528,34 +525,26 @@ void ToolWindow::on_zoom_button_clicked() {
 }
 
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
-    if (!mExtendedWindow) {
-        createExtendedWindow();
-    }
     // Show the tabbed pane
-    if (mExtendedWindow) {
-        mExtendedWindow->showPane(pane);
-        mExtendedWindow->raise();
-        mExtendedWindow->activateWindow();
-        return;
-    }
+    assert(mExtendedWindow);
+
+    mExtendedWindow->showPane(pane);
+    mExtendedWindow->raise();
+    mExtendedWindow->activateWindow();
 }
 
 void ToolWindow::on_more_button_clicked() {
-    if (!mExtendedWindow) {
-        createExtendedWindow();
-    }
-    if (mExtendedWindow) {
-        mExtendedWindow->show();
-        mExtendedWindow->raise();
-        mExtendedWindow->activateWindow();
-    }
+    assert(mExtendedWindow);
+
+    mExtendedWindow->show();
+    mExtendedWindow->raise();
+    mExtendedWindow->activateWindow();
 }
 
 void ToolWindow::createExtendedWindow() {
     mExtendedWindow.reset(
             new ExtendedWindow(mEmulatorWindow,
                                this,
-                               mUiEmuAgent,
                                &mShortcutKeyStore));
     if (auto recorder_ptr = mUIEventRecorder.lock()) {
         recorder_ptr->startRecording(mExtendedWindow.get());

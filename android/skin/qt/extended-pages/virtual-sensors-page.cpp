@@ -89,6 +89,10 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
             this,
             SLOT(onDragStopped()));
 
+    connect(this, &VirtualSensorsPage::updateResultingValuesRequired,
+            this, &VirtualSensorsPage::updateResultingValues);
+
+
     connect(&mAccelerationTimer, SIGNAL(timeout()),
             this, SLOT(updateLinearAcceleration()));
     mAccelerationTimer.setInterval(100);
@@ -201,7 +205,7 @@ static void setSensorValue(
         double v2 = 0.0,
         double v3 = 0.0) {
     if (agent) {
-        agent->setSensor(sensor_id, 
+        agent->setSensor(sensor_id,
                          static_cast<float>(v1),
                          static_cast<float>(v2),
                          static_cast<float>(v3));
@@ -359,6 +363,15 @@ void VirtualSensorsPage::updateAccelerometerValues() {
       mCoarseOrientation = coarse_orientation;
       emit(coarseOrientationChanged(mCoarseOrientation));
     }
+
+    // Emit a signal to update the UI. We cannot just update
+    // the UI here because the current function is sometimes
+    // called from a non-Qt thread.
+    emit updateResultingValuesRequired(acceleration, device_magnetic_vector);
+}
+
+void VirtualSensorsPage::updateResultingValues(QVector3D acceleration,
+                                               QVector3D device_magnetic_vector) {
 
     static const QString rotation_labels[] = {
         "ROTATION_0",

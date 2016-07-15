@@ -55,6 +55,8 @@ private slots:
 
 signals:
     void coarseOrientationChanged(SkinRotation);
+    void updateResultingValuesRequired(QVector3D acceleration,
+                                       QVector3D device_magnetic_vector);
 
 private slots:
     void on_rotateToPortrait_clicked();
@@ -72,6 +74,9 @@ private slots:
     void on_rollSlider_valueChanged(double);
     void on_positionXSlider_valueChanged(double);
     void on_positionYSlider_valueChanged(double);
+
+    void updateResultingValues(QVector3D acceleration,
+                               QVector3D device_magnetic_vector);
 
 private:
     void showEvent(QShowEvent*) override;
@@ -92,4 +97,3 @@ private:
     bool mFirstShow = true;
     SkinRotation mCoarseOrientation;
 };
-
