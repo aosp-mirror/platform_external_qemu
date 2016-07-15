@@ -16,11 +16,14 @@
 #ifndef _LIB_OPENGL_RENDER_THREAD_INFO_H
 #define _LIB_OPENGL_RENDER_THREAD_INFO_H
 
+#include "android/base/memory/LazyInstance.h"
+
 #include "RenderContext.h"
 #include "WindowSurface.h"
 #include "GLESv1Decoder.h"
 #include "GLESv2Decoder.h"
 #include "renderControl_dec.h"
+#include "SyncThread.h"
 
 #include <set>
 
@@ -55,6 +58,9 @@ struct RenderThreadInfo {
     ThreadContextSet                m_contextSet;
     // all the window surfaces that are created by this render thread
     WindowSurfaceSet                m_windowSet;
+
+    // Sync timeline info + sync thread pointer
+    std::unique_ptr<SyncThread>     syncThread;
 };
 
 #endif
