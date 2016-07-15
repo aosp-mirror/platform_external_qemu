@@ -313,6 +313,13 @@ public:
     bool bind_locked();
     bool unbind_locked();
 
+    // Used by anyone who wants to create or destroy OpenGL contexts.
+    // We need to protect all forms of context creation/destruction.
+    // At least Linux OpenGL drivers are not thread-safe in this
+    // manner.
+    void lockFramebuffer() { m_lock.lock(); }
+    void unlockFramebuffer() { m_lock.unlock(); }
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     ~FrameBuffer();
