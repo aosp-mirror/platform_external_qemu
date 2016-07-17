@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "faa1580d_b9f76ac3",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 1231,
+      "author": {
+        "id": 1011673
+      },
+      "writtenOn": "2016-07-17T06:00:36Z",
+      "side": 1,
+      "message": "If this first remove() succeeds, won\u0027t remove_res remain set to its initial value of -1 and report a failure?",
+      "revId": "07ed3d00c3f15156e797ffae3ecf8b3ae60052df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
