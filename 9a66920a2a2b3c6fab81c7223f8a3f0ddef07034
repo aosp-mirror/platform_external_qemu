@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "faa1580d_1286502f",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 1224,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-18T19:05:05Z",
+      "side": 1,
+      "message": "why both?",
+      "range": {
+        "startLine": 1223,
+        "startChar": 4,
+        "endLine": 1224,
+        "endChar": 36
+      },
+      "revId": "9a66920a2a2b3c6fab81c7223f8a3f0ddef07034",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
