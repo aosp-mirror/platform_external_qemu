@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "faa1580d_4dbddc76",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-18T17:49:03Z",
+      "side": 1,
+      "message": "this looks like a hack to me. Is it possible to just create the extended window object here, but not show it? So all ctors could do their job",
+      "range": {
+        "startLine": 445,
+        "startChar": 0,
+        "endLine": 445,
+        "endChar": 38
+      },
+      "revId": "5cdc8e43f582bf46b2a45c94a49ea53b77aa2a9d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
