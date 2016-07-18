@@ -61,6 +61,7 @@
 #include <QScrollBar>
 #include <QSemaphore>
 #include <QSettings>
+#include <QToolTip>
 #include <QWindow>
 #include <QtCore>
 
@@ -458,6 +459,15 @@ void EmulatorQtWindow::dragEnterEvent(QDragEnterEvent* event) {
     if (event->mimeData() && event->mimeData()->hasUrls()) {
         event->acceptProposedAction();
     }
+}
+
+void EmulatorQtWindow::dragLeaveEvent(QDragLeaveEvent* event) {
+    QToolTip::hideText();
+}
+
+void EmulatorQtWindow::dragMoveEvent(QDragMoveEvent* event) {
+    QToolTip::showText(mapToGlobal(event->pos()),
+                       "Files will be copied to /sdcard/Download.");
 }
 
 void EmulatorQtWindow::dropEvent(QDropEvent* event) {
