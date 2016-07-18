@@ -22,6 +22,30 @@
       "revId": "9a66920a2a2b3c6fab81c7223f8a3f0ddef07034",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faa1580d_dbc34398",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 1224,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-18T21:05:29Z",
+      "side": 1,
+      "message": "Ah, that\u0027s right, didn\u0027t realize pathIsFileInternal would also end up checking existence. Removing the second case (Done)",
+      "parentUuid": "faa1580d_1286502f",
+      "range": {
+        "startLine": 1223,
+        "startChar": 4,
+        "endLine": 1224,
+        "endChar": 36
+      },
+      "revId": "9a66920a2a2b3c6fab81c7223f8a3f0ddef07034",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
