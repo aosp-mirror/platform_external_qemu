@@ -467,7 +467,8 @@ void EmulatorQtWindow::dragLeaveEvent(QDragLeaveEvent* event) {
 
 void EmulatorQtWindow::dragMoveEvent(QDragMoveEvent* event) {
     QToolTip::showText(mapToGlobal(event->pos()),
-                       "Files will be copied to /sdcard/Download.");
+                       tr("APK's will be installed.<br/>"
+                          "Other files will be copied to /sdcard/Download."));
 }
 
 void EmulatorQtWindow::dropEvent(QDropEvent* event) {
