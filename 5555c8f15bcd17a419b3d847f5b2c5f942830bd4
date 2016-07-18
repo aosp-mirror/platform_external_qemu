@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "faa1580d_c84d3ab3",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-18T18:14:20Z",
+      "side": 1,
+      "message": "Thanks for catching this! Does this also mean that we don\u0027t have to do this in qemu-setup.cpp? In that case, we could also cleanly (for goldfish sync) make the device operation itself a virtual member.",
+      "parentUuid": "faa1580d_0d7d9451",
+      "range": {
+        "startLine": 41,
+        "startChar": 4,
+        "endLine": 43,
+        "endChar": 23
+      },
+      "revId": "5555c8f15bcd17a419b3d847f5b2c5f942830bd4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faa1580d_adba8019",
         "filename": "android/emulation/DeviceContextRunner.h",
         "patchSetId": 7
