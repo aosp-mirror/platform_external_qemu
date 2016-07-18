@@ -384,7 +384,7 @@
     <widget class="QLabel" name="label_4">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>20</x>
        <y>30</y>
        <width>160</width>
        <height>15</height>
@@ -397,9 +397,9 @@
     <widget class="EditableSliderWidget" name="temperatureSensorValueWidget" native="true">
      <property name="geometry">
       <rect>
-       <x>0</x>
+       <x>10</x>
        <y>50</y>
-       <width>250</width>
+       <width>290</width>
        <height>80</height>
       </rect>
      </property>
@@ -410,7 +410,7 @@
     <widget class="QLabel" name="label_5">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>20</x>
        <y>140</y>
        <width>90</width>
        <height>15</height>
@@ -423,9 +423,9 @@
     <widget class="EditableSliderWidget" name="proximitySensorValueWidget" native="true">
      <property name="geometry">
       <rect>
-       <x>0</x>
+       <x>10</x>
        <y>160</y>
-       <width>250</width>
+       <width>290</width>
        <height>80</height>
       </rect>
      </property>
@@ -436,7 +436,7 @@
     <widget class="QLabel" name="label_7">
      <property name="geometry">
       <rect>
-       <x>280</x>
+       <x>324</x>
        <y>30</y>
        <width>120</width>
        <height>15</height>
@@ -449,9 +449,9 @@
     <widget class="QWidget" name="horizontalLayoutWidget">
      <property name="geometry">
       <rect>
-       <x>270</x>
+       <x>324</x>
        <y>50</y>
-       <width>272</width>
+       <width>280</width>
        <height>40</height>
       </rect>
      </property>
@@ -512,9 +512,9 @@
     <widget class="EditableSliderWidget" name="lightSensorValueWidget" native="true">
      <property name="geometry">
       <rect>
-       <x>270</x>
+       <x>314</x>
        <y>160</y>
-       <width>250</width>
+       <width>300</width>
        <height>80</height>
       </rect>
      </property>
@@ -525,7 +525,7 @@
     <widget class="QLabel" name="label_9">
      <property name="geometry">
       <rect>
-       <x>280</x>
+       <x>324</x>
        <y>140</y>
        <width>60</width>
        <height>15</height>
@@ -540,7 +540,7 @@
       <rect>
        <x>10</x>
        <y>280</y>
-       <width>250</width>
+       <width>290</width>
        <height>80</height>
       </rect>
      </property>
@@ -564,9 +564,9 @@
     <widget class="EditableSliderWidget" name="humiditySensorValueWidget" native="true">
      <property name="geometry">
       <rect>
-       <x>270</x>
+       <x>314</x>
        <y>280</y>
-       <width>250</width>
+       <width>300</width>
        <height>80</height>
       </rect>
      </property>
@@ -577,7 +577,7 @@
     <widget class="QLabel" name="label_11">
      <property name="geometry">
       <rect>
-       <x>280</x>
+       <x>324</x>
        <y>260</y>
        <width>130</width>
        <height>15</height>
@@ -590,7 +590,7 @@
     <widget class="QPushButton" name="helpMagneticField">
      <property name="geometry">
       <rect>
-       <x>402</x>
+       <x>430</x>
        <y>30</y>
        <width>15</width>
        <height>15</height>
@@ -622,7 +622,7 @@
     <widget class="QPushButton" name="helpLight">
      <property name="geometry">
       <rect>
-       <x>342</x>
+       <x>390</x>
        <y>140</y>
        <width>15</width>
        <height>15</height>
@@ -654,7 +654,7 @@
     <widget class="QPushButton" name="helpPressure">
      <property name="geometry">
       <rect>
-       <x>112</x>
+       <x>110</x>
        <y>260</y>
        <width>15</width>
        <height>15</height>
@@ -686,7 +686,7 @@
     <widget class="QPushButton" name="helpAmbientTemp">
      <property name="geometry">
       <rect>
-       <x>170</x>
+       <x>160</x>
        <y>30</y>
        <width>15</width>
        <height>15</height>
@@ -718,7 +718,7 @@
     <widget class="QPushButton" name="helpProximity">
      <property name="geometry">
       <rect>
-       <x>100</x>
+       <x>110</x>
        <y>140</y>
        <width>15</width>
        <height>15</height>
@@ -782,7 +782,7 @@
     <widget class="QPushButton" name="helpHumidity">
      <property name="geometry">
       <rect>
-       <x>410</x>
+       <x>440</x>
        <y>260</y>
        <width>15</width>
        <height>15</height>
