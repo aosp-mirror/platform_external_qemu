@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "faa1580d_6c61b390",
+        "filename": "android/emulation/AndroidPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-18T22:49:28Z",
+      "side": 1,
+      "message": "I ended up removing the static function, but it looks like the struct declaration at least needs to be before the part where we use it as a template argument in class PipeWaker final: public DeviceContextRunner\u003cPipeWakeCOmmand\u003e, so the struct definition is still there.",
+      "parentUuid": "faa1580d_6d5c1805",
+      "range": {
+        "startLine": 308,
+        "startChar": 0,
+        "endLine": 315,
+        "endChar": 35
+      },
+      "revId": "5555c8f15bcd17a419b3d847f5b2c5f942830bd4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faa1580d_0d7d9451",
         "filename": "android/emulation/DeviceContextRunner.h",
         "patchSetId": 7
@@ -96,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "faa1580d_0cbbcf20",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-18T22:49:28Z",
+      "side": 1,
+      "message": "Hmm, it seems like we can\u0027t really do it this way, as I tried moving the initialization code off of qemu-setup.cpp in qemu2, and then starting the emulator would sometimes fail an assertion in wanted_pipes_pop_first: that pipe-\u003ewanted_prev \u003d\u003d NULL.\n\nSo I ended up making DeviceOperation a virtual member and keeping the two-stage initialization for the VmLock, at least for now.",
+      "parentUuid": "faa1580d_48c94ab9",
+      "range": {
+        "startLine": 41,
+        "startChar": 4,
+        "endLine": 43,
+        "endChar": 23
+      },
+      "revId": "5555c8f15bcd17a419b3d847f5b2c5f942830bd4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faa1580d_adba8019",
         "filename": "android/emulation/DeviceContextRunner.h",
         "patchSetId": 7
@@ -119,6 +167,30 @@
     },
     {
       "key": {
+        "uuid": "faa1580d_4c3dd77f",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-18T22:49:28Z",
+      "side": 1,
+      "message": "Ack, WIP",
+      "parentUuid": "faa1580d_adba8019",
+      "range": {
+        "startLine": 58,
+        "startChar": 8,
+        "endLine": 58,
+        "endChar": 45
+      },
+      "revId": "5555c8f15bcd17a419b3d847f5b2c5f942830bd4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faa1580d_6dd7f85a",
         "filename": "android/emulation/DeviceContextRunner.h",
         "patchSetId": 7
@@ -130,6 +202,30 @@
       "writtenOn": "2016-07-18T18:02:43Z",
       "side": 1,
       "message": "nit: I can only understand why this function is public here. Who needs the rest of them?",
+      "range": {
+        "startLine": 83,
+        "startChar": 9,
+        "endLine": 83,
+        "endChar": 29
+      },
+      "revId": "5555c8f15bcd17a419b3d847f5b2c5f942830bd4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faa1580d_ec4c8331",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-18T22:49:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faa1580d_6dd7f85a",
       "range": {
         "startLine": 83,
         "startChar": 9,
