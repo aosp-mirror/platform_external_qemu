@@ -43,7 +43,7 @@ EditableSliderWidget::EditableSliderWidget(QWidget *parent) :
     mLineEditValidator.setLocale(QLocale::c());
     mLineEdit.setValidator(&mLineEditValidator);
     mLineEdit.setAlignment(Qt::AlignRight | Qt::AlignTop);
-    mLineEdit.setMaximumWidth(50);
+    mLineEdit.setMaximumWidth(60);
     mLineEdit.setTextMargins(0, 0, 0, 4);
     mLineEdit.setProperty("class", "EditableValue");
     mLineEdit.installEventFilter(this);
@@ -119,5 +119,3 @@ bool EditableSliderWidget::eventFilter(QObject*, QEvent* e) {
     }
     return false;
 }
-
-
