@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "faa1580d_03d72bff",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-18T18:14:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faa1580d_9fa9b9a3",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 46
+      },
+      "revId": "0d4512c992b23821ee4387aa0ecfce4366708c1b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faa1580d_f0c2aaf8",
         "filename": "android/emulation/DeviceContextRunner.h",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-07-15T22:23:23Z",
       "side": 1,
       "message": "please use a std::function\u003cvoid(const T\u0026)\u003e here, and declare it inside the class",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 42
+      },
+      "revId": "0d4512c992b23821ee4387aa0ecfce4366708c1b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faa1580d_63dc2f20",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-18T18:14:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faa1580d_f0c2aaf8",
       "range": {
         "startLine": 28,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "faa1580d_43e133d5",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-18T18:14:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faa1580d_10a93645",
+      "range": {
+        "startLine": 78,
+        "startChar": 30,
+        "endLine": 78,
+        "endChar": 38
+      },
+      "revId": "0d4512c992b23821ee4387aa0ecfce4366708c1b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faa1580d_1fbdc9de",
         "filename": "android/emulation/DeviceContextRunner.h",
         "patchSetId": 2
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "faa1580d_23fb4780",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-18T18:14:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faa1580d_1fbdc9de",
+      "range": {
+        "startLine": 103,
+        "startChar": 0,
+        "endLine": 103,
+        "endChar": 24
+      },
+      "revId": "0d4512c992b23821ee4387aa0ecfce4366708c1b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faa1580d_f05e2a61",
         "filename": "android/emulation/DeviceContextRunner.h",
         "patchSetId": 2
@@ -105,6 +201,30 @@
       "writtenOn": "2016-07-15T22:23:23Z",
       "side": 1,
       "message": "what\u0027s the purpose of this \u0027post\u0027 operation?",
+      "range": {
+        "startLine": 109,
+        "startChar": 12,
+        "endLine": 109,
+        "endChar": 32
+      },
+      "revId": "0d4512c992b23821ee4387aa0ecfce4366708c1b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faa1580d_43fad378",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-18T18:14:20Z",
+      "side": 1,
+      "message": "It was to delete the object the void* pointed at. This is no longer necessary now that it\u0027s a template :) Done.",
+      "parentUuid": "faa1580d_f05e2a61",
       "range": {
         "startLine": 109,
         "startChar": 12,
