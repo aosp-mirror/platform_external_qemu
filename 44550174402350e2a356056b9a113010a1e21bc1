@@ -33,6 +33,24 @@
       "revId": "44550174402350e2a356056b9a113010a1e21bc1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_60890b1c",
+        "filename": "android/emulation/VmLock_unittest.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-19T16:00:19Z",
+      "side": 1,
+      "message": "That\u0027s weird. Which header is it? I ran the VmLock unit tests again on patch set 12 and they worked.",
+      "parentUuid": "ca7e839c_1502b410",
+      "revId": "44550174402350e2a356056b9a113010a1e21bc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
