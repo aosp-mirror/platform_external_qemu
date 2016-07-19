@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6a6037e5_5ff25e6d",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 819,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-19T22:59:37Z",
+      "side": 1,
+      "message": "counter --\u003e count",
+      "range": {
+        "startLine": 819,
+        "startChar": 56,
+        "endLine": 819,
+        "endChar": 63
+      },
+      "revId": "03e121366603eaed3c65549f7fa3868ad84c43d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_3f9d6a00",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 820,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-19T22:59:37Z",
+      "side": 1,
+      "message": "buffer--\u003ebuffers  (or else \"a color buffer\").",
+      "range": {
+        "startLine": 820,
+        "startChar": 26,
+        "endLine": 820,
+        "endChar": 32
+      },
+      "revId": "03e121366603eaed3c65549f7fa3868ad84c43d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_5f793ed7",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 820,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-19T22:59:37Z",
+      "side": 1,
+      "message": "Notice --\u003e Note\n\nThanks for expanding this -- this says that the \"set\" alternative I mentioned in my previous comments wouldn\u0027t actually work, and you really have to do it this way.  Good to know.",
+      "range": {
+        "startLine": 820,
+        "startChar": 8,
+        "endLine": 820,
+        "endChar": 14
+      },
+      "revId": "03e121366603eaed3c65549f7fa3868ad84c43d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
