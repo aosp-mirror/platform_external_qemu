@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ca7e839c_750d2841",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-19T15:46:30Z",
+      "side": 1,
+      "message": "nit: trailing whitespace :) Maybe reformat this into wider paragraphs, but that\u0027s optional.",
+      "revId": "44550174402350e2a356056b9a113010a1e21bc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca7e839c_1502b410",
+        "filename": "android/emulation/VmLock_unittest.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-19T15:46:30Z",
+      "side": 1,
+      "message": "I\u0027m still not seeing this header in the CL? Is this normal?",
+      "revId": "44550174402350e2a356056b9a113010a1e21bc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
