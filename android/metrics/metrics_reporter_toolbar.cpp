@@ -19,6 +19,7 @@
 #include "android/base/Uri.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/curl-support.h"
+#include "android/metrics/StudioConfig.h"
 #include "android/metrics/studio-config.h"
 #include "android/utils/compiler.h"
 #include "android/utils/debug.h"
@@ -35,6 +36,7 @@
 
 using android::base::ScopedCPtr;
 using android::base::Uri;
+using android::studio::UpdateChannel;
 
 static const int kUrlLengthLimit = 8000;
 static void url_limit_append(std::string* dst, const std::string& src) {
@@ -74,6 +76,22 @@ static void url_addi64val(std::string* dst, const char* key, uint64_t val) {
         url_addstrval(dst, #gpu "_renderer", metrics->gpu##_renderer);       \
     } while (0);
 
+// Keep in sync with backend enum in .../processed_logs.proto
+int toUpdateChannelToolbarEnum(UpdateChannel channel) {
+    switch (channel) {
+        case UpdateChannel::Stable:
+            return 1;
+        case UpdateChannel::Beta:
+            return 2;
+        case UpdateChannel::Dev:
+            return 3;
+        case UpdateChannel::Canary:
+            return 4;
+        default:
+            return 0;
+    }
+}
+
 int formatToolbarGetUrl(char** ptr,
                         const char* url,
                         const AndroidMetrics* metrics) {
@@ -94,6 +112,7 @@ int formatToolbarGetUrl(char** ptr,
     // Matches the key used by the update ping.
     static const char host_os_key[] = "os";
 
+    static const char update_channel_key[] = "update_channel";
     static const char wallclock_time_key[] = "wall_time";
     static const char user_actions_key[] = "user_actions";
     static const char exit_started_key[] = "exit_started";
@@ -115,6 +134,8 @@ int formatToolbarGetUrl(char** ptr,
     // Keep the URL length under kUrlLengthLimit.
     url_addstrval(&fullUrl, version_key, metrics->emulator_version);
     url_addstrval(&fullUrl, core_version_key, metrics->core_version);
+    url_addi64val(&fullUrl, update_channel_key,
+                    toUpdateChannelToolbarEnum(android::studio::updateChannel()));
     url_addstrval(&fullUrl, host_os_key, metrics->host_os_type);
     url_addstrval(&fullUrl, client_id_key, client_id.get());
     url_addstrval(&fullUrl, guest_arch_key, metrics->guest_arch);
