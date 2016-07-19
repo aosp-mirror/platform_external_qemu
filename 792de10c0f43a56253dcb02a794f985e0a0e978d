@@ -214,6 +214,30 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_cd8227fb",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 644,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T22:51:38Z",
+      "side": 1,
+      "message": "done explaining in the cleanup.",
+      "parentUuid": "6a6037e5_52ddb6d8",
+      "range": {
+        "startLine": 644,
+        "startChar": 8,
+        "endLine": 644,
+        "endChar": 49
+      },
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_b28512b4",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 16
@@ -225,6 +249,30 @@
       "writtenOn": "2016-07-19T21:52:30Z",
       "side": 1,
       "message": "As per the discussion above, it might be good to put a comment here explaining that a given cb will be yielded as many times as it\u0027s currently opened by the owning process, so this will result in its ref count going to zero.",
+      "range": {
+        "startLine": 819,
+        "startChar": 3,
+        "endLine": 819,
+        "endChar": 36
+      },
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_d26e46c4",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 819,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T22:51:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_b28512b4",
       "range": {
         "startLine": 819,
         "startChar": 3,
