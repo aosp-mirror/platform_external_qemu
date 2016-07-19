@@ -12,6 +12,9 @@
 #pragma once
 
 #include "android/emulation/android_pipe_device.h"
+#include "android/emulation/testing/TestVmLock.h"
+
+#include <memory>
 
 namespace android {
 
@@ -58,10 +61,16 @@ public:
         // for i/o error.
         virtual ssize_t write(const void* buffer, size_t len) = 0;
 
+        // Force-close the connection from the guest.
+        virtual void close() = 0;
+
         // Poll the current state of the guest connection.
         // Returns a combination of PIPE_POLL_IN and PIPE_POLL_OUT
         // flags.
         virtual unsigned poll() const = 0;
+
+        // Return the AndroidPipe associated with this guest.
+        virtual void* getPipe() const = 0;
 
     protected:
         // Private constructor.
@@ -76,6 +85,7 @@ private:
 
     static const AndroidPipeHwFuncs sHwFuncs;
 
+    TestVmLock mVmLock;
     const AndroidPipeHwFuncs* mOldHwFuncs;
 };
 
