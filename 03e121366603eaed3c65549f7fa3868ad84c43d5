@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_ff1b5280",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 819,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T23:03:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_5ff25e6d",
+      "range": {
+        "startLine": 819,
+        "startChar": 56,
+        "endLine": 819,
+        "endChar": 63
+      },
+      "revId": "03e121366603eaed3c65549f7fa3868ad84c43d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_3f9d6a00",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 24
@@ -59,6 +83,30 @@
       "writtenOn": "2016-07-19T22:59:37Z",
       "side": 1,
       "message": "Notice --\u003e Note\n\nThanks for expanding this -- this says that the \"set\" alternative I mentioned in my previous comments wouldn\u0027t actually work, and you really have to do it this way.  Good to know.",
+      "range": {
+        "startLine": 820,
+        "startChar": 8,
+        "endLine": 820,
+        "endChar": 14
+      },
+      "revId": "03e121366603eaed3c65549f7fa3868ad84c43d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_df088e34",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 820,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T23:03:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_5f793ed7",
       "range": {
         "startLine": 820,
         "startChar": 8,
