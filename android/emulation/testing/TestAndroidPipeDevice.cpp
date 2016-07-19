@@ -11,7 +11,7 @@
 
 #include "android/emulation/testing/TestAndroidPipeDevice.h"
 
-#include "android/emulation/android_pipe_host.h"
+#include "android/emulation/AndroidPipe.h"
 #include "android/base/Log.h"
 
 #include <errno.h>
@@ -32,11 +32,7 @@ public:
         }
     }
 
-    virtual ~TestGuest() {
-        if (mPipe) {
-            android_pipe_guest_close(mPipe);
-        }
-    }
+    virtual ~TestGuest() { close(); }
 
     virtual int connect(const char* name) override {
         std::string handshake("pipe:");
@@ -70,12 +66,21 @@ public:
         return android_pipe_guest_send(mPipe, &buf, 1);
     }
 
+    virtual void close() override {
+        if (!mClosed) {
+            mClosed = true;
+            android_pipe_guest_close(mPipe);
+        }
+    }
+
     virtual unsigned poll() const override {
         if (mClosed) {
             return PIPE_POLL_HUP;
         }
         return android_pipe_guest_poll(mPipe);
     }
+
+    virtual void* getPipe() const override { return mPipe; }
 
     void resetPipe(void* internal_pipe) {
         mPipe = internal_pipe;
@@ -101,12 +106,15 @@ private:
 
 TestAndroidPipeDevice::TestAndroidPipeDevice()
         : mOldHwFuncs(android_pipe_set_hw_funcs(&sHwFuncs)) {
-    android_pipe_reset_services();
+    AndroidPipe::Service::resetAll();
+    AndroidPipe::initThreading(&mVmLock);
+    mVmLock.lock();
 }
 
 TestAndroidPipeDevice::~TestAndroidPipeDevice() {
     android_pipe_set_hw_funcs(mOldHwFuncs);
-    android_pipe_reset_services();
+    AndroidPipe::Service::resetAll();
+    mVmLock.unlock();
 }
 
 // static
