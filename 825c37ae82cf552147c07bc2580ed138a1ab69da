@@ -114,6 +114,30 @@
       "revId": "825c37ae82cf552147c07bc2580ed138a1ab69da",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_6c922154",
+        "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl.in",
+        "patchSetId": 17
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T21:29:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_2c78a98b",
+      "range": {
+        "startLine": 30,
+        "startChar": 19,
+        "endLine": 30,
+        "endChar": 41
+      },
+      "revId": "825c37ae82cf552147c07bc2580ed138a1ab69da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
