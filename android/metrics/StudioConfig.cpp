@@ -223,12 +223,11 @@ UpdateChannel updateChannel() {
     static const struct NamedChannel {
         StringView name;
         UpdateChannel channel;
-    } channelNames[] = {
-            {"", UpdateChannel::Canary},  // this is the current default
-            {"eap", UpdateChannel::Canary},
-            {"release", UpdateChannel::Stable},
-            {"beta", UpdateChannel::Beta},
-            {"milestone", UpdateChannel::Dev}};
+    } channelNames[] = {{"", UpdateChannel::Unknown},
+                        {"eap", UpdateChannel::Canary},
+                        {"release", UpdateChannel::Stable},
+                        {"beta", UpdateChannel::Beta},
+                        {"milestone", UpdateChannel::Dev}};
 
     const auto channelIt =
             std::find_if(std::begin(channelNames), std::end(channelNames),

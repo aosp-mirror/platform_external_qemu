@@ -259,7 +259,11 @@ Optional<UpdateChecker::VersionInfo> UpdateChecker::getLatestVersion() {
         return {};
     }
 
-    const auto updateChannel = android::studio::updateChannel();
+    auto updateChannel = android::studio::updateChannel();
+    if (updateChannel == android::studio::UpdateChannel::Unknown) {
+        // This is the current default.
+        updateChannel = android::studio::UpdateChannel::Canary;
+    }
 
     // now find the first channel which is equal to or lower than the selected
     // update channel
