@@ -693,6 +693,6 @@ void pipe_dev_init(bool newDeviceNaming)
     android_pipe_add_type_pingpong();
 #endif
 #if DEBUG_THROTTLE_PIPE
-    android_pipe_add_type_pingpong();
+    android_pipe_add_type_throttle();
 #endif
 }
