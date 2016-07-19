@@ -13,12 +13,16 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+
 #include "RenderControl.h"
 
 #include "DispatchTables.h"
 #include "FbConfig.h"
+#include "FenceSyncInfo.h"
 #include "FrameBuffer.h"
+#include "RenderContext.h"
 #include "RenderThreadInfo.h"
+#include "SyncThread.h"
 #include "ChecksumCalculatorThreadInfo.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
 
@@ -26,23 +30,35 @@
 #include "android/base/StringView.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
+#include "emugl/common/sync_device.h"
+#include "emugl/common/thread.h"
 
 #include <atomic>
 #include <inttypes.h>
 #include <string.h>
 
-using android::base::Lock;
 using android::base::AutoLock;
+using android::base::Lock;
 
-#define DEBUG 0
+#define DEBUG_GRALLOC_SYNC 0
+#define DEBUG_EGL_SYNC 0
 
-#if DEBUG
-#define DPRINT(...) do { \
+#if DEBUG_GRALLOC_SYNC
+#define GRSYNC_DPRINT(...) do { \
     if (!VERBOSE_CHECK(gles)) { VERBOSE_ENABLE(gles); } \
     VERBOSE_TID_FUNCTION_DPRINT(gles, __VA_ARGS__); \
 } while(0)
 #else
-#define DPRINT(...)
+#define GRSYNC_DPRINT(...)
+#endif
+
+#if DEBUG_EGL_SYNC
+#define EGLSYNC_DPRINT(...) do { \
+    if (!VERBOSE_CHECK(gles)) { VERBOSE_ENABLE(gles); } \
+    VERBOSE_TID_FUNCTION_DPRINT(gles, __VA_ARGS__); \
+} while(0)
+#else
+#define EGLSYNC_DPRINT(...)
 #endif
 
 // GrallocSync is a class that helps to reflect the behavior of
@@ -105,7 +121,7 @@ public:
         if (mEnabled && newLockState == 1) {
             mGrallocColorBufferLock.lockRead();
         } else if (mEnabled) {
-            DPRINT("warning: recursive/multiple locks from guest!");
+            GRSYNC_DPRINT("warning: recursive/multiple locks from guest!");
         }
     }
     void unlockColorBufferPrepare() {
@@ -130,8 +146,14 @@ static ::emugl::LazyInstance<GrallocSync> sGrallocSync = LAZY_INSTANCE_INIT;
 static const GLint rendererVersion = 1;
 static android::base::StringView kAsyncSwapStr = "ANDROID_EMU_NATIVE_SYNC";
 
+static void rcTriggerWait(uint64_t glsync_ptr,
+                          uint64_t thread_ptr,
+                          uint64_t timeline);
+
 static GLint rcGetRendererVersion()
 {
+    emugl_sync_register_trigger_wait(rcTriggerWait);
+
     sGrallocSync.ptr();
     return rendererVersion;
 }
@@ -155,17 +177,21 @@ static EGLint rcQueryEGLString(EGLenum name, void* buffer, EGLint bufferSize)
         return 0;
     }
 
+    std::string eglStr;
+
     const char *str = s_egl.eglQueryString(fb->getDisplay(), name);
     if (!str) {
         return 0;
     }
 
-    int len = strlen(str) + 1;
+    eglStr = str;
+
+    int len = eglStr.size() + 1;
     if (!buffer || len > bufferSize) {
         return -len;
     }
 
-    strcpy((char *)buffer, str);
+    strcpy((char *)buffer, eglStr.c_str());
     return len;
 }
 
@@ -302,6 +328,8 @@ static uint32_t rcCreateContext(uint32_t config,
 
 static void rcDestroyContext(uint32_t context)
 {
+    SyncThread::destroySyncThread();
+
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return;
@@ -397,22 +425,44 @@ static void rcCloseColorBufferPuid(uint32_t colorbuffer, uint64_t puid) {
 
 static int rcFlushWindowColorBuffer(uint32_t windowSurface)
 {
-    DPRINT("waiting for gralloc cb lock");
+    GRSYNC_DPRINT("waiting for gralloc cb lock");
     GrallocSyncPostLock lock(sGrallocSync.get());
-    DPRINT("lock gralloc cb lock {");
+    GRSYNC_DPRINT("lock gralloc cb lock {");
 
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
-        DPRINT("unlock gralloc cb lock");
+        GRSYNC_DPRINT("unlock gralloc cb lock");
         return -1;
     }
     if (!fb->flushWindowSurfaceColorBuffer(windowSurface)) {
-        DPRINT("unlock gralloc cb lock }");
+        GRSYNC_DPRINT("unlock gralloc cb lock }");
         return -1;
     }
 
-    DPRINT("unlock gralloc cb lock }");
+    GRSYNC_DPRINT("unlock gralloc cb lock }");
+
+    // int fenceFd = triggerSyncThreadAndCreateFenceFd();
+
     return 0;
+}
+
+// Note that even though this calls rcFlushWindowColorBuffer,
+// the "Async" part is in the return type, which is void
+// versus return type int for rcFlushWindowColorBuffer.
+//
+// In fact, if the return type is int, we will wait on the guest
+// until the function returns, and then get traffic
+// (consisting of return value) back to the guest,
+// and only then will guest proceed.
+//
+// rcFlushWindowColorBufferAsync is designed to not
+// incur this traffic cost: with return type void,
+// the guest will not wait until this function returns,
+// nor will it immediately send the command,
+// resultign in more asynchronous behavior.
+static void rcFlushWindowColorBufferAsync(uint32_t windowSurface)
+{
+    rcFlushWindowColorBuffer(windowSurface);
 }
 
 static void rcSetWindowColorBuffer(uint32_t windowSurface,
@@ -477,9 +527,9 @@ static EGLint rcColorBufferCacheFlush(uint32_t colorBuffer,
                                       EGLint postCount, int forRead)
 {
    // gralloc_lock() on the guest calls rcColorBufferCacheFlush
-   DPRINT("waiting for gralloc cb lock");
+   GRSYNC_DPRINT("waiting for gralloc cb lock");
    sGrallocSync->lockColorBufferPrepare();
-   DPRINT("lock gralloc cb lock {");
+   GRSYNC_DPRINT("lock gralloc cb lock {");
    return 0;
 }
 
@@ -503,14 +553,14 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
 {
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
-        DPRINT("unlock gralloc cb lock");
+        GRSYNC_DPRINT("unlock gralloc cb lock");
         sGrallocSync->unlockColorBufferPrepare();
         return -1;
     }
 
     fb->updateColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
 
-    DPRINT("unlock gralloc cb lock");
+    GRSYNC_DPRINT("unlock gralloc cb lock");
     sGrallocSync->unlockColorBufferPrepare();
     return 0;
 }
@@ -537,6 +587,114 @@ static int rcDestroyClientImage(uint32_t image)
 
 static void rcSelectChecksumHelper(uint32_t protocol, uint32_t reserved) {
     ChecksumCalculatorThreadInfo::setVersion(protocol);
+}
+
+static void get_sync_error(EGLSyncKHR sync,
+                           RenderContext* cxt,
+                           FenceSync* fenceSync,
+                           GLint* err) {
+#if DEBUG
+    *err = s_gles2.glGetError();
+    if (err != GL_NO_ERROR || !sync) {
+        fprintf(stderr, "%s: Error: glFenceSync returned sync=%p glerror=0x%x\n",
+                func_name, (void*)sync, err);
+    }
+    EGLSYNC_DPRINT("glerror=0x%x cxt@%p eglsync@%p handle=0x%lx\n",
+                err,
+                cxt,
+                fenceSync->sync,
+                fenceSync->getHandle());
+#endif
+}
+
+static void rcTriggerWait(uint64_t eglsync_ptr,
+                          uint64_t thread_ptr,
+                          uint64_t timeline) {
+    FenceSyncInfo* sync_info = FenceSyncInfo::get();
+    FenceSync* fenceSync = sync_info->findNonSignaledSync(eglsync_ptr);
+    EGLSYNC_DPRINT("eglsync=0x%llx fenceSync=0x%llx thread_ptr=0x%llx timeline=0x%llx",
+                eglsync_ptr, fenceSync, thread_ptr, timeline);
+    SyncThread* syncThread = (SyncThread*)(uintptr_t)thread_ptr;
+    syncThread->triggerWait(fenceSync, timeline);
+}
+
+static void rcCreateSyncKHR(EGLenum type,
+                                EGLint* attribs,
+                                uint32_t num_attribs,
+                                uint64_t* eglsync_out,
+                                uint64_t* syncthread_out) {
+
+    FenceSyncInfo* sync_info = FenceSyncInfo::get();
+    FrameBuffer *fb = FrameBuffer::getFB();
+
+    if (eglsync_out) *eglsync_out = 0;
+    if (syncthread_out) *syncthread_out = 0;
+
+    SyncThread* syncthread = SyncThread::getSyncThread();
+
+    if (syncthread_out) *syncthread_out = (uint64_t)(uintptr_t)(syncthread);
+
+    EGLSYNC_DPRINT("type=0x%x num_attribs=%d",
+            type, num_attribs);
+
+    EGLSyncKHR sync = s_egl.eglCreateSyncKHR(fb->getDisplay(), EGL_SYNC_FENCE_KHR, NULL);
+    FenceSync* fenceSync = new FenceSync(sync, (void*)RenderThreadInfo::get()->currContext.get());
+    sync_info->addSync(fenceSync);
+
+    GLint err;
+    get_sync_error(sync, RenderThreadInfo::get()->currContext.get(), fenceSync, &err);
+    // This MUST be present, or we get a deadlock effect.
+    s_gles2.glFlush();
+
+    uint64_t res = fenceSync->getHandle();
+    EGLSYNC_DPRINT("send out eglsync 0x%llx", res);
+    if (eglsync_out) *eglsync_out = res;
+}
+
+static EGLint rcClientWaitSyncKHR(uint64_t handle, EGLint flags, uint64_t timeout) {
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    FrameBuffer *fb = FrameBuffer::getFB();
+    RenderContext* cxt;
+
+    FenceSyncInfo* sync_info = FenceSyncInfo::get();
+    EGLSYNC_DPRINT("handle=0x%lx flags=0x%x timeout=%" PRIu64,
+                handle, flags, timeout);
+
+    FenceSync* fenceSync = sync_info->findNonSignaledSync(handle);
+
+    if (!fenceSync) {
+        EGLSYNC_DPRINT("fenceSync null, return condition satisfied");
+        return EGL_CONDITION_SATISFIED_KHR;
+    }
+
+    EGLSyncKHR eglsync = fenceSync->sync;
+    RenderContext* orig_cxt = (RenderContext*)fenceSync->gl_cxt;
+
+    // Sometimes a gralloc-buffer-only thread is doing stuff with sync.
+    // This happens all the time with YouTube videos in the browser.
+    // In this case, create a context on the host just for syncing.
+    if (!tInfo->currContext) {
+        EGLSYNC_DPRINT("no context yet, creating");
+        const FbConfig* cfg = fb->getConfigs()->get(0);
+        cxt = RenderContext::create(fb->getDisplay(), cfg->getEglConfig(), orig_cxt->getEGLContext(), 1);
+        EGLSYNC_DPRINT("context created, cxt@%p err=0x%x", cxt, s_egl.eglGetError());
+        EGLSYNC_DPRINT("cxt->eglcxt=%p origcxt=%p", cxt->getEGLContext(), orig_cxt->getEGLContext());
+        static const EGLint pbuf_attribs[] = {
+            EGL_WIDTH, 1,
+            EGL_HEIGHT, 1,
+            EGL_NONE
+        };
+        EGLSurface surf = s_egl.eglCreatePbufferSurface(fb->getDisplay(), cfg->getEglConfig(), pbuf_attribs);
+        s_egl.eglMakeCurrent(fb->getDisplay(), surf, surf, cxt->getEGLContext());
+        tInfo->currContext = RenderContextPtr(cxt);
+        EGLSYNC_DPRINT("context current, cxt@%p err=0x%x", cxt, s_egl.eglGetError());
+    } else {
+        cxt = tInfo->currContext.get();
+    }
+
+    EGLint egl_wait_res = EGL_CONDITION_SATISFIED_KHR;
+    s_egl.eglClientWaitSyncKHR(fb->getDisplay(), eglsync, 0, timeout);
+    return egl_wait_res;
 }
 
 void initRenderControlContext(renderControl_decoder_context_t *dec)
@@ -573,4 +731,7 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCreateColorBufferPuid = rcCreateColorBufferPuid;
     dec->rcCloseColorBufferPuid = rcCloseColorBufferPuid;
     dec->rcOpenColorBuffer2Puid = rcOpenColorBuffer2Puid;
+    dec->rcCreateSyncKHR = rcCreateSyncKHR;
+    dec->rcClientWaitSyncKHR = rcClientWaitSyncKHR;
+    dec->rcFlushWindowColorBufferAsync = rcFlushWindowColorBufferAsync;
 }
