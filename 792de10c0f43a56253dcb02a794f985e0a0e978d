@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_0cd16552",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/Renderer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T21:04:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_d840af3c",
+      "range": {
+        "startLine": 134,
+        "startChar": 10,
+        "endLine": 134,
+        "endChar": 17
+      },
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_586cbfd7",
         "filename": "distrib/android-emugl/host/include/OpenglRender/Renderer.h",
         "patchSetId": 16
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_eccdf1b5",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/Renderer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T21:04:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_586cbfd7",
+      "range": {
+        "startLine": 135,
+        "startChar": 34,
+        "endLine": 135,
+        "endChar": 35
+      },
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_58071f20",
         "filename": "distrib/android-emugl/host/include/OpenglRender/Renderer.h",
         "patchSetId": 16
@@ -59,6 +107,30 @@
       "writtenOn": "2016-07-19T20:59:22Z",
       "side": 1,
       "message": "As before, perhaps \"puid\", or something else to make sure the reader doesn\u0027t assume it\u0027s a \"standard\" pid...",
+      "range": {
+        "startLine": 136,
+        "startChar": 50,
+        "endLine": 136,
+        "endChar": 53
+      },
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_ccca2d9c",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/Renderer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T21:04:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_58071f20",
       "range": {
         "startLine": 136,
         "startChar": 50,
@@ -168,6 +240,30 @@
       "writtenOn": "2016-07-19T20:59:22Z",
       "side": 1,
       "message": "I think it would be nice if the naming scheme was the same for the different abstractions.  That is, why is this method name different from the one being called (cleanupProcColorBuffers vs onProcKilled)?  They\u0027re the same sort of notification, right?",
+      "range": {
+        "startLine": 184,
+        "startChar": 26,
+        "endLine": 184,
+        "endChar": 38
+      },
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_2c82e92e",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T21:04:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_81363e99",
       "range": {
         "startLine": 184,
         "startChar": 26,
