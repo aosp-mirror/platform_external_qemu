@@ -1,0 +1,205 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6a6037e5_d840af3c",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/Renderer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-19T20:59:22Z",
+      "side": 1,
+      "message": "cleanup \u003d\u003d\u003e clean up\n(put them together only if you\u0027re using as a noun or adjective -- \"we did the cleanup\", \"the cleanup methodology\".  As a verb phrase they stay apart.)",
+      "range": {
+        "startLine": 134,
+        "startChar": 10,
+        "endLine": 134,
+        "endChar": 17
+      },
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_586cbfd7",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/Renderer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-19T20:59:22Z",
+      "side": 1,
+      "message": "exits, I think",
+      "range": {
+        "startLine": 135,
+        "startChar": 34,
+        "endLine": 135,
+        "endChar": 35
+      },
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_58071f20",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/Renderer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-19T20:59:22Z",
+      "side": 1,
+      "message": "As before, perhaps \"puid\", or something else to make sure the reader doesn\u0027t assume it\u0027s a \"standard\" pid...",
+      "range": {
+        "startLine": 136,
+        "startChar": 50,
+        "endLine": 136,
+        "endChar": 53
+      },
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_18a2c7a9",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 644,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-19T20:59:22Z",
+      "side": 1,
+      "message": "The result of m_procOwnedColorBuffers[pid] is defined to be a multiset.  Looking at genHandle(...), which is the result returned by createColorBufferLocked, it seems like it\u0027s intended to produce a unique value each time.  If there were a collision, things would just break, as far as I can tell.\n\nSo maybe this can just be a set, rather than a multiset?",
+      "range": {
+        "startLine": 644,
+        "startChar": 8,
+        "endLine": 644,
+        "endChar": 49
+      },
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_f885b304",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-19T20:59:22Z",
+      "side": 1,
+      "message": "I wonder if this really needs to be a multiset.  Further comment on this in the .cpp file.",
+      "range": {
+        "startLine": 47,
+        "startChar": 13,
+        "endLine": 47,
+        "endChar": 31
+      },
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_780303dd",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-19T20:59:22Z",
+      "side": 1,
+      "message": "As elsewhere, I\u0027m uncomfortable with \"Pid\" (or the argument name \"pid\") when it isn\u0027t a traditional os pid -- that term is too well known.",
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_38d46b43",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-19T20:59:22Z",
+      "side": 1,
+      "message": "This comment now seems out of date.",
+      "range": {
+        "startLine": 375,
+        "startChar": 3,
+        "endLine": 378,
+        "endChar": 70
+      },
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_81363e99",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-19T20:59:22Z",
+      "side": 1,
+      "message": "I think it would be nice if the naming scheme was the same for the different abstractions.  That is, why is this method name different from the one being called (cleanupProcColorBuffers vs onProcKilled)?  They\u0027re the same sort of notification, right?",
+      "range": {
+        "startLine": 184,
+        "startChar": 26,
+        "endLine": 184,
+        "endChar": 38
+      },
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_a14ca246",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-19T20:59:22Z",
+      "side": 1,
+      "message": "I know you\u0027re obeying local convention -- but the C++ style guide says exactly one of override, final, virtual.  That would mean \"override final\" --\u003e \"final\".  If you do that, do it on all the ones above, as well.",
+      "range": {
+        "startLine": 59,
+        "startChar": 55,
+        "endLine": 59,
+        "endChar": 69
+      },
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
