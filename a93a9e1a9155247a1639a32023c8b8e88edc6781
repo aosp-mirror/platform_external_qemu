@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_8dc7a53b",
+        "filename": "android/opengl/GrallocPipe.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T00:00:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_4afe33d6",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 33
+      },
+      "revId": "a93a9e1a9155247a1639a32023c8b8e88edc6781",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_ea81672a",
         "filename": "android/opengl/GrallocPipe.cpp",
         "patchSetId": 14
@@ -36,6 +60,30 @@
       "writtenOn": "2016-07-18T23:28:23Z",
       "side": 1,
       "message": "sizeof",
+      "range": {
+        "startLine": 54,
+        "startChar": 58,
+        "endLine": 54,
+        "endChar": 59
+      },
+      "revId": "a93a9e1a9155247a1639a32023c8b8e88edc6781",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_0d01755a",
+        "filename": "android/opengl/GrallocPipe.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T00:00:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_ea81672a",
       "range": {
         "startLine": 54,
         "startChar": 58,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_cd123daf",
+        "filename": "android/opengl/GrallocPipe.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T00:00:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_2a689f8b",
+      "range": {
+        "startLine": 55,
+        "startChar": 15,
+        "endLine": 55,
+        "endChar": 16
+      },
+      "revId": "a93a9e1a9155247a1639a32023c8b8e88edc6781",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_ca57c3ce",
         "filename": "android/opengl/GrallocPipe.cpp",
         "patchSetId": 14
@@ -82,6 +154,30 @@
       "writtenOn": "2016-07-18T23:28:23Z",
       "side": 1,
       "message": "buffers[0].size",
+      "range": {
+        "startLine": 61,
+        "startChar": 15,
+        "endLine": 61,
+        "endChar": 16
+      },
+      "revId": "a93a9e1a9155247a1639a32023c8b8e88edc6781",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_ad0f0985",
+        "filename": "android/opengl/GrallocPipe.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T00:00:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_ca57c3ce",
       "range": {
         "startLine": 61,
         "startChar": 15,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_cdeebd86",
+        "filename": "android/opengl/GrallocPipe.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T00:00:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_8a78ab5a",
+      "range": {
+        "startLine": 16,
+        "startChar": 5,
+        "endLine": 16,
+        "endChar": 31
+      },
+      "revId": "a93a9e1a9155247a1639a32023c8b8e88edc6781",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_8a578bfd",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 14
@@ -128,6 +248,30 @@
       "writtenOn": "2016-07-18T23:28:23Z",
       "side": 1,
       "message": "can a color buffer be referenced by multiple PIDs? if not, you could use this reference counter for per-process deletion and dump the unordered_multiset (which is really bad for performance)",
+      "range": {
+        "startLine": 757,
+        "startChar": 16,
+        "endLine": 757,
+        "endChar": 24
+      },
+      "revId": "a93a9e1a9155247a1639a32023c8b8e88edc6781",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_ed662126",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 757,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T00:00:52Z",
+      "side": 1,
+      "message": "Yes it can be referenced by multiple PIDs.",
+      "parentUuid": "6a6037e5_8a578bfd",
       "range": {
         "startLine": 757,
         "startChar": 16,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_cd4d9d6f",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 770,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T00:00:52Z",
+      "side": 1,
+      "message": "Your suggestion makes sense. The only problem is that it is unclear to me what is the expected behavior if a process opens a color buffer multiple times. Does it only need to close the color buffer one time or it needs to close it multiple times? The current implementation assumes it needs to be close one time for each open, so that it behaves more similar to the original implementation.\n\nThe behavior doesn\u0027t seem to be specified here:\nhttps://cs.corp.google.com/aosp-master/hardware/libhardware/include/hardware/gralloc.h\n\nIf you know about the expected behavior, please tell me. (I need to convince myself to dump multi-set)",
+      "parentUuid": "6a6037e5_8ae8ab78",
+      "range": {
+        "startLine": 770,
+        "startChar": 8,
+        "endLine": 770,
+        "endChar": 31
+      },
+      "revId": "a93a9e1a9155247a1639a32023c8b8e88edc6781",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_2a309fec",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 14
@@ -174,6 +342,30 @@
       "writtenOn": "2016-07-18T23:28:23Z",
       "side": 1,
       "message": "if it wasn\u0027t there, operator[] would insert a new item into the map. What about .find with a check instead?",
+      "range": {
+        "startLine": 798,
+        "startChar": 5,
+        "endLine": 798,
+        "endChar": 54
+      },
+      "revId": "a93a9e1a9155247a1639a32023c8b8e88edc6781",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_8d57a5fd",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 798,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T00:00:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_2a309fec",
       "range": {
         "startLine": 798,
         "startChar": 5,
