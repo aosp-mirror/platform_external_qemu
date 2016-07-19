@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ca7e839c_75abe872",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-19T10:06:35Z",
+      "side": 1,
+      "message": "nit: re-order these headers in alphabetical order. \"git clang-format\" should do it for you these days :)",
+      "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa778fbf_54a6ecab",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-19T10:06:35Z",
+      "side": 1,
+      "message": "nit: This should be the first line after the top-level comment.",
+      "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca7e839c_75076872",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-19T10:06:35Z",
+      "side": 1,
+      "message": "nit: All of this should be in the android:: namespace!",
+      "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0adedbf6_afb039d9",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-19T10:06:35Z",
+      "side": 1,
+      "message": "Put these using statements inside the class declaration instead, so they don\u0027t accidentally pollute the namespace of whichever source code includes this header.",
+      "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca7e839c_f52b78e4",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-19T10:06:35Z",
+      "side": 1,
+      "message": "This wording is a little ambiguous (e.g. the main loop or the vCPU threads can hold the global VM lock, but so do other emulator threads which use the VmLock). A better wording might be:\n\n  // All operations that change the global VM state (e.g.\n  // virtual device operations) should happen in a thread\n  // that holds the global VM lock.\n  //\n  // DeviceContextRunner is a helper template class used\n  // to ensure that a given operation is always performed\n  // in such a thread, more specifically: if the current\n  // thread already owns the lock, the operation is\n  // performed as-in, otherwise it is queued and will be\n  // run in the main-loop thread as soon as possible.\n  //\n  // Usage is the following:\n  //\n  // - Define a custom type |OP| corresponding to\n  //   the state of each operation. It must be copy-able.\n  //\n  // - Define a derived class of \n  //   |DeviceContextRunner\u003cOP\u003e| that must override\n  //   the abstract performDeviceOperation() method.\n  //\n  // - Create a DeviceContextRunner\u003cOP\u003e instance, and call\n  //   its init() method, passing a valid android::VmLock\n  //   instance to it. NOTE: This should be called from\n  //   the main loop thread, during emulation setup time!!\n  //\n  // - Whenever you want to perform an operation, call\n  //   queueDeviceOperation(\u003cop\u003e) on it. If the current\n  //   thread holds the lock, it will be\n  //   performed immediately. Otherwise, it will be queued\n  //   and run later. This is obviously asynchronous, i.e.\n  //   you cannot expect a return value from it.",
+      "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca7e839c_9538043c",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-19T10:06:35Z",
+      "side": 1,
+      "message": "nit: PendingList is probably a slightly better name.",
+      "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca7e839c_b5350043",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-19T10:06:35Z",
+      "side": 1,
+      "message": "This seems to not be used anymore. It looks like you started by using a callback instead of a virtual abstract method, and I assume this is a left-over. If so, please remove.",
+      "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca7e839c_15fcf461",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-19T10:06:35Z",
+      "side": 1,
+      "message": "nit: There is no QueueDeviceRunner anymore :-)",
+      "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca7e839c_55026c63",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-19T10:06:35Z",
+      "side": 1,
+      "message": "actually, since you used push_back, you\u0027re going to do that in reverse order! I\u0027m not sure that\u0027s what you want!\n\nAlso: Please create a unit-test to check that order is correct if this is what you want.",
+      "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
