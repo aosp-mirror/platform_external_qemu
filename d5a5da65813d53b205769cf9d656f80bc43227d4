@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_aa78045a",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-19T14:37:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ca7e839c_75abe872",
+      "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aa778fbf_54a6ecab",
         "filename": "android/emulation/DeviceContextRunner.h",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2016-07-19T10:06:35Z",
       "side": 1,
       "message": "nit: This should be the first line after the top-level comment.",
+      "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_6a1a0c26",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-19T14:37:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aa778fbf_54a6ecab",
       "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_4a1f4814",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-19T14:37:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ca7e839c_75076872",
+      "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0adedbf6_afb039d9",
         "filename": "android/emulation/DeviceContextRunner.h",
         "patchSetId": 8
@@ -64,6 +118,24 @@
       "writtenOn": "2016-07-19T10:06:35Z",
       "side": 1,
       "message": "Put these using statements inside the class declaration instead, so they don\u0027t accidentally pollute the namespace of whichever source code includes this header.",
+      "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_0a0950da",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-19T14:37:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0adedbf6_afb039d9",
       "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_8ae3000a",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-19T14:37:45Z",
+      "side": 1,
+      "message": "That\u0027s definitely more detailed and helpful. I\u0027ll pretty much just use this one. Thanks! (Done)",
+      "parentUuid": "ca7e839c_f52b78e4",
+      "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ca7e839c_9538043c",
         "filename": "android/emulation/DeviceContextRunner.h",
         "patchSetId": 8
@@ -98,6 +188,24 @@
       "writtenOn": "2016-07-19T10:06:35Z",
       "side": 1,
       "message": "nit: PendingList is probably a slightly better name.",
+      "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_0af710c6",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-19T14:37:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ca7e839c_9538043c",
       "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_eaf39cd5",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-19T14:37:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ca7e839c_b5350043",
+      "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ca7e839c_15fcf461",
         "filename": "android/emulation/DeviceContextRunner.h",
         "patchSetId": 8
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_aafda4a3",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-19T14:37:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ca7e839c_15fcf461",
+      "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ca7e839c_55026c63",
         "filename": "android/emulation/DeviceContextRunner.h",
         "patchSetId": 8
@@ -149,6 +293,24 @@
       "writtenOn": "2016-07-19T10:06:35Z",
       "side": 1,
       "message": "actually, since you used push_back, you\u0027re going to do that in reverse order! I\u0027m not sure that\u0027s what you want!\n\nAlso: Please create a unit-test to check that order is correct if this is what you want.",
+      "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_e5e18dc4",
+        "filename": "android/emulation/DeviceContextRunner.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-19T14:37:45Z",
+      "side": 1,
+      "message": "Oops! Done (I think there might have been some other lock involved in the other thing I was testing)",
+      "parentUuid": "ca7e839c_55026c63",
       "revId": "d5a5da65813d53b205769cf9d656f80bc43227d4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
