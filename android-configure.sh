@@ -557,6 +557,11 @@ probe_prebuilts_dir "Libxml2" LIBXML2_PREBUILTS_DIR common/libxml2
 ###
 probe_prebuilts_dir "LibCURL" LIBCURL_PREBUILTS_DIR curl
 
+###
+###  LibANGLEtranslation probe
+###
+probe_prebuilts_dir "LibANGLEtranslation" ANGLE_TRANSLATION_PREBUILTS_DIR common/ANGLE
+
 CACERTS_FILE="$PROGDIR/android/data/ca-bundle.pem"
 if [ ! -f "$CACERTS_FILE" ]; then
     panic "Missing cacerts file: $CACERTS_FILE"
@@ -694,7 +699,6 @@ esac
 ###
 ANGLE_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/ANGLE
 if [ -d $ANGLE_PREBUILTS_DIR ]; then
-    log "Copying ANGLE prebuilt libraries from $ANGLE_PREBUILTS_DIR"
     ANGLE_PREFIX=lib
     ANGLE_HOST=$HOST_OS
     case $ANGLE_HOST in
@@ -708,6 +712,7 @@ if [ -d $ANGLE_PREBUILTS_DIR ]; then
     esac
     # Windows only (for now)
     if [ "$ANGLE_HOST" = "windows" ]; then
+        log "Copying ANGLE prebuilt libraries from $ANGLE_PREBUILTS_DIR"
         for LIBNAME in EGL GLESv2; do # GLESv2 only for now
             for ANGLE_ARCH in $PREBUILT_ARCHS; do
                 if [ "$ANGLE_ARCH" = "x86" ]; then
@@ -974,6 +979,7 @@ echo "ZLIB_PREBUILTS_DIR := $ZLIB_PREBUILTS_DIR" >> $config_mk
 echo "LIBPNG_PREBUILTS_DIR := $LIBPNG_PREBUILTS_DIR" >> $config_mk
 echo "LIBXML2_PREBUILTS_DIR := $LIBXML2_PREBUILTS_DIR" >> $config_mk
 echo "LIBCURL_PREBUILTS_DIR := $LIBCURL_PREBUILTS_DIR" >> $config_mk
+echo "ANGLE_TRANSLATION_PREBUILTS_DIR := $ANGLE_TRANSLATION_PREBUILTS_DIR" >> $config_mk
 echo "BREAKPAD_PREBUILTS_DIR := $BREAKPAD_PREBUILTS_DIR" >> $config_mk
 # libuuid is a part of e2fsprogs package
 echo "LIBUUID_PREBUILTS_DIR := $E2FSPROGS_PREBUILTS_DIR" >> $config_mk
