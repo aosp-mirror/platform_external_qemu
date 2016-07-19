@@ -190,6 +190,53 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_52ddb6d8",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 644,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-19T21:52:30Z",
+      "side": 1,
+      "message": "Ah!  I think I understand now.  The refcount that openColorBuffer and closeColorBuffer manipulate represents the number of times that color buffer has been opened - closed by the given guest process.  So if it\u0027s opened N times, we want it to be closed N times.  So it makes sense to use a multiset.\n\nYou could also just use a set, if you had a version of closeColorBuffer that was something like \"reallyCloseColorBuffer\" -- assume that its reference count went immediately to zero.  But I\u0027m now happy with what you\u0027re doing here.  Maybe some sort of explanation of this in the cleanup iteration?",
+      "parentUuid": "6a6037e5_e73d0a14",
+      "range": {
+        "startLine": 644,
+        "startChar": 8,
+        "endLine": 644,
+        "endChar": 49
+      },
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_b28512b4",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 819,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-19T21:52:30Z",
+      "side": 1,
+      "message": "As per the discussion above, it might be good to put a comment here explaining that a given cb will be yielded as many times as it\u0027s currently opened by the owning process, so this will result in its ref count going to zero.",
+      "range": {
+        "startLine": 819,
+        "startChar": 3,
+        "endLine": 819,
+        "endChar": 36
+      },
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_f885b304",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
         "patchSetId": 16
