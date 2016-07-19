@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_672b5a9a",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 638,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T21:36:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_0c4e056b",
+      "range": {
+        "startLine": 638,
+        "startChar": 41,
+        "endLine": 638,
+        "endChar": 44
+      },
+      "revId": "825c37ae82cf552147c07bc2580ed138a1ab69da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_0c472557",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
         "patchSetId": 17
@@ -36,6 +60,30 @@
       "writtenOn": "2016-07-19T20:59:22Z",
       "side": 1,
       "message": "If we make the pid \u003d\u003d\u003e puid change in one place, we really ought to go through and make it everwhere.  Including, I\u0027m afraid, the method names ending in Pid.  A pain, but it\u0027s just an bit of editing.",
+      "range": {
+        "startLine": 171,
+        "startChar": 69,
+        "endLine": 171,
+        "endChar": 72
+      },
+      "revId": "825c37ae82cf552147c07bc2580ed138a1ab69da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_07f93e1f",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T21:36:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_0c472557",
       "range": {
         "startLine": 171,
         "startChar": 69,
