@@ -166,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_e73d0a14",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 644,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T21:29:47Z",
+      "side": 1,
+      "message": "The purpose of the multiset is not for creation, but for opening. The process will own a reference of the color buffer when it creates or opens the color buffer. And nothing prevents it from opening a color buffer multiple times.",
+      "parentUuid": "6a6037e5_18a2c7a9",
+      "range": {
+        "startLine": 644,
+        "startChar": 8,
+        "endLine": 644,
+        "endChar": 49
+      },
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_f885b304",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
         "patchSetId": 16
@@ -206,6 +230,24 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_675d9a52",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T21:29:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_780303dd",
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_38d46b43",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
         "patchSetId": 16
@@ -217,6 +259,30 @@
       "writtenOn": "2016-07-19T20:59:22Z",
       "side": 1,
       "message": "This comment now seems out of date.",
+      "range": {
+        "startLine": 375,
+        "startChar": 3,
+        "endLine": 378,
+        "endChar": 70
+      },
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_0776dee7",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T21:29:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_38d46b43",
       "range": {
         "startLine": 375,
         "startChar": 3,
@@ -287,6 +353,30 @@
       "writtenOn": "2016-07-19T20:59:22Z",
       "side": 1,
       "message": "I know you\u0027re obeying local convention -- but the C++ style guide says exactly one of override, final, virtual.  That would mean \"override final\" --\u003e \"final\".  If you do that, do it on all the ones above, as well.",
+      "range": {
+        "startLine": 59,
+        "startChar": 55,
+        "endLine": 59,
+        "endChar": 69
+      },
+      "revId": "792de10c0f43a56253dcb02a794f985e0a0e978d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_2c30a99a",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T21:29:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_a14ca246",
       "range": {
         "startLine": 59,
         "startChar": 55,
