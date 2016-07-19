@@ -549,6 +549,23 @@ int register_savevm(DeviceState *dev,
                                 ops, opaque);
 }
 
+int register_savevm_with_post_load(DeviceState *dev,
+                                   const char *idstr,
+                                   int instance_id,
+                                   int version_id,
+                                   SaveStateHandler *save_state,
+                                   LoadStateHandler *load_state,
+                                   PostLoadHandler *post_load,
+                                   void *opaque)
+{
+    SaveVMHandlers *ops = g_new0(SaveVMHandlers, 1);
+    ops->save_state = save_state;
+    ops->load_state = load_state;
+    ops->post_load = post_load;
+    return register_savevm_live(dev, idstr, instance_id, version_id,
+                                ops, opaque);
+}
+
 void unregister_savevm(DeviceState *dev, const char *idstr, void *opaque)
 {
     SaveStateEntry *se, *new_se;
@@ -1954,6 +1971,17 @@ int qemu_loadvm_state(QEMUFile *f)
     }
 
     cpu_synchronize_all_post_init();
+
+    {
+        LoadStateEntry *le;
+
+        QLIST_FOREACH(le, &mis->loadvm_handlers, entry) {
+            SaveStateEntry *se = le->se;
+            if (!se->vmsd && se->ops->post_load) {
+                se->ops->post_load(se->opaque);
+            }
+        }
+    }
 
     return ret;
 }

@@ -34,6 +34,7 @@
 
 typedef void SaveStateHandler(QEMUFile *f, void *opaque);
 typedef int LoadStateHandler(QEMUFile *f, void *opaque, int version_id);
+typedef void PostLoadHandler(void*);
 
 typedef struct SaveVMHandlers {
     /* This runs inside the iothread lock.  */
@@ -60,6 +61,7 @@ typedef struct SaveVMHandlers {
                               uint64_t *non_postcopiable_pending,
                               uint64_t *postcopiable_pending);
     LoadStateHandler *load_state;
+    PostLoadHandler *post_load;
 } SaveVMHandlers;
 
 int register_savevm(DeviceState *dev,
@@ -69,6 +71,16 @@ int register_savevm(DeviceState *dev,
                     SaveStateHandler *save_state,
                     LoadStateHandler *load_state,
                     void *opaque);
+
+int register_savevm_with_post_load(DeviceState *dev,
+                                   const char *idstr,
+                                   int instance_id,
+                                   int version_id,
+                                   SaveStateHandler *save_state,
+                                   LoadStateHandler *load_state,
+                                   PostLoadHandler *post_load,
+                                   void *opaque);
+
 
 int register_savevm_live(DeviceState *dev,
                          const char *idstr,
