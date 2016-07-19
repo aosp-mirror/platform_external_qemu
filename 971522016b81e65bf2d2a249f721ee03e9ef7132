@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ca7e839c_b5c500a5",
+        "filename": "android/emulation/testing/TestVmLock.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-19T17:03:27Z",
+      "side": 1,
+      "message": "I don\u0027t think you need an anonymous namespace here. This used to be useful when this was part of a source file, but not if this is in a header that is only included by unit-tests.",
+      "revId": "971522016b81e65bf2d2a249f721ee03e9ef7132",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
