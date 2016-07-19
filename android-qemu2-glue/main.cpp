@@ -799,6 +799,12 @@ extern "C" int main(int argc, char **argv) {
     }
     args[n++] = dataDir.c_str();
 
+    // Audio enable hda by default for x86 and x64 platforms
+#if defined(TARGET_X86_64) || defined(TARGET_I386)
+    args[n++] = "-soundhw";
+    args[n++] = "hda";
+#endif
+
     /* append extra qemu parameters if any */
     for (int idx = 0; kTarget.qemuExtraArgs[idx] != NULL; idx++) {
         args[n++] = kTarget.qemuExtraArgs[idx];
