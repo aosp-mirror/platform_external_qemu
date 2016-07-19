@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6a6037e5_0c4e056b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 638,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-19T20:59:22Z",
+      "side": 1,
+      "message": "Pid \u003d\u003e Puid everywhere.",
+      "range": {
+        "startLine": 638,
+        "startChar": 41,
+        "endLine": 638,
+        "endChar": 44
+      },
+      "revId": "825c37ae82cf552147c07bc2580ed138a1ab69da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_0c472557",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-19T20:59:22Z",
+      "side": 1,
+      "message": "If we make the pid \u003d\u003d\u003e puid change in one place, we really ought to go through and make it everwhere.  Including, I\u0027m afraid, the method names ending in Pid.  A pain, but it\u0027s just an bit of editing.",
+      "range": {
+        "startLine": 171,
+        "startChar": 69,
+        "endLine": 171,
+        "endChar": 72
+      },
+      "revId": "825c37ae82cf552147c07bc2580ed138a1ab69da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_ec5a9126",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-19T20:59:22Z",
+      "side": 1,
+      "message": "pid \u003d\u003e puid everywhere.",
+      "range": {
+        "startLine": 358,
+        "startChar": 64,
+        "endLine": 358,
+        "endChar": 67
+      },
+      "revId": "825c37ae82cf552147c07bc2580ed138a1ab69da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_8c89d587",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-19T20:59:22Z",
+      "side": 1,
+      "message": "pid \u003d\u003d\u003e puid everywhere.",
+      "range": {
+        "startLine": 59,
+        "startChar": 50,
+        "endLine": 59,
+        "endChar": 53
+      },
+      "revId": "825c37ae82cf552147c07bc2580ed138a1ab69da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_2c78a98b",
+        "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl.in",
+        "patchSetId": 17
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-19T20:59:22Z",
+      "side": 1,
+      "message": "Pid \u003d\u003d\u003e Puid everywhere",
+      "range": {
+        "startLine": 30,
+        "startChar": 19,
+        "endLine": 30,
+        "endChar": 41
+      },
+      "revId": "825c37ae82cf552147c07bc2580ed138a1ab69da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
