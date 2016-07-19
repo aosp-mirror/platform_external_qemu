@@ -19,6 +19,8 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 
+#include "RenderContext.h"
+
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
@@ -50,11 +52,11 @@
 class FenceSync {
 public:
     explicit FenceSync(EGLSyncKHR eglsync,
-                       void* cxt = nullptr) :
+                       RenderContext* cxt = nullptr) :
         mGLSync(eglsync), mContext(cxt) { }
     uint64_t getHandle() const { return reinterpret_cast<uint64_t>(mGLSync); }
     EGLSyncKHR mGLSync;
-    void* mContext;
+    RenderContext* mContext;
 };
 
 // The FenceSyncInfo class maps handles to FenceSync object pointers,

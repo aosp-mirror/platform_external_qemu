@@ -283,22 +283,6 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
                                   m_width, m_height);
         s_gles2.glDeleteTextures(1, &tmpTex);
         s_gles2.glBindTexture(GL_TEXTURE_2D, currTexBind);
-        // HACK:
-        // Fix out of order posting
-        // If we don't Finish() these commands,
-        // the texture will not actually be updated,
-        // but rcFlushWindowColorBuffer (which calls this)
-        // will return anyway, and happily give surfaceflinger
-        // an old frame.
-        // This is not good for performance.
-        // Ideally we want to find a different synchronization setup,
-        // perhaps one that involves the guest as well:
-        // Queues the buffer on the guest at the same time like before,
-        // but give it a fence that is not signaled until we know
-        // on the host that the frame is done.
-        // E.g., with this hack, we still "max out" score in
-        // 3DMark Ice Storm Extreme, but the FPS dips in parts.
-        s_gles2.glFinish();
     }
     else {
         s_gles1.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
