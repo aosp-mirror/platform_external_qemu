@@ -30,6 +30,8 @@
 */
 #include "hw/misc/android_pipe.h"
 
+#include "android-qemu2-glue/utils/stream.h"
+#include "android/emulation/android_pipe_device.h"
 #include "hw/hw.h"
 #include "hw/sysbus.h"
 #include "qemu/error-report.h"
@@ -185,6 +187,18 @@ typedef struct HwPipe {
     char                        closed;
     void                        *pipe;
 } HwPipe;
+
+static HwPipe* hwpipe_new0(struct PipeDevice* device) {
+    HwPipe* hwp;
+    ANEW0(hwp);
+    hwp->device = device;
+    return hwp;
+}
+
+static void hwpipe_free(HwPipe* hwp) {
+    android_pipe_guest_close(hwp->pipe);
+    free(hwp);
+}
 
 static unsigned char get_and_clear_pipe_wanted(HwPipe* pipe) {
     unsigned char val = pipe->wanted;
@@ -680,6 +694,186 @@ static const AndroidPipeHwFuncs qemu2_android_pipe_hw_funcs = {
     .signalWake = qemu2_android_pipe_host_signal_wake,
 };
 
+#define ANDROID_PIPE_SAVE_VERSION 1
+
+static void android_pipe_save(QEMUFile* f, void* opaque) {
+    AndroidPipeState* s = opaque;
+    PipeDevice* dev = s->dev;
+    Stream* stream = stream_from_qemufile(f);
+
+    /* Save i/o registers. */
+    stream_put_be64(stream, dev->address);
+    stream_put_be32(stream, dev->size);
+    stream_put_be32(stream, dev->status);
+    stream_put_be64(stream, dev->channel);
+    stream_put_be32(stream, dev->wakes);
+    stream_put_be64(stream, dev->params_addr);
+
+    /* Save the pipe count and state of the pipes. */
+    int pipe_count = 0;
+    HwPipe* pipe;
+    for (pipe = dev->pipes; pipe; pipe = pipe->next) {
+        ++pipe_count;
+    }
+    stream_put_be32(stream, pipe_count);
+    for (pipe = dev->pipes; pipe; pipe = pipe->next) {
+        stream_put_be64(stream, pipe->channel);
+        stream_put_byte(stream, pipe->closed);
+        stream_put_byte(stream, pipe->wanted);
+        android_pipe_guest_save(pipe->pipe, stream);
+    }
+
+    /* Save wanted pipes list. */
+    int wanted_pipes_count = 0;
+    for (pipe = dev->wanted_pipes_first; pipe; pipe = pipe->wanted_next) {
+        wanted_pipes_count++;
+    }
+    stream_put_be32(stream, wanted_pipes_count);
+    for (pipe = dev->wanted_pipes_first; pipe; pipe = pipe->wanted_next) {
+        stream_put_be64(stream, pipe->channel);
+    }
+    if (dev->wanted_pipe_after_channel_high) {
+        stream_put_byte(stream, 1);
+        stream_put_be64(stream, dev->wanted_pipe_after_channel_high->channel);
+    } else {
+        stream_put_byte(stream, 0);
+    }
+
+    stream_free(stream);
+}
+
+static int android_pipe_load(QEMUFile* f, void* opaque, int version_id) {
+    AndroidPipeState* s = opaque;
+    PipeDevice* dev = s->dev;
+    Stream* stream = stream_from_qemufile(f);
+
+    /* Load i/o registers. */
+    dev->address = stream_get_be64(stream);
+    dev->size = stream_get_be32(stream);
+    dev->status = stream_get_be32(stream);
+    dev->channel = stream_get_be64(stream);
+    dev->wakes = stream_get_be32(stream);
+    dev->params_addr = stream_get_be64(stream);
+
+    /* Clean up old pipe objects. */
+    HwPipe* pipe = dev->pipes;
+    while(pipe) {
+        HwPipe* old_pipe = pipe;
+        pipe = pipe->next;
+        hwpipe_free(old_pipe);
+    }
+
+    /* Restore pipes. */
+    int pipe_count = stream_get_be32(stream);
+    int pipe_n;
+    HwPipe** pipe_list_end = &(dev->pipes);
+    *pipe_list_end = NULL;
+    uint64_t* force_closed_pipes = malloc(sizeof(uint64_t) * pipe_count);
+    int force_closed_pipes_count = 0;
+    for (pipe_n = 0; pipe_n < pipe_count; pipe_n++) {
+        HwPipe* pipe = hwpipe_new0(dev);
+        char force_close = 0;
+        pipe->channel = stream_get_be64(stream);
+        pipe->closed = stream_get_byte(stream);
+        pipe->wanted = stream_get_byte(stream);
+        pipe->pipe = android_pipe_guest_load(stream, pipe, &force_close);
+        pipe->wanted_next = pipe->wanted_prev = NULL;
+
+        // |pipe| might be NULL in case it couldn't be saved. However,
+        // in that case |force_close| will be set by android_pipe_guest_load,
+        // so |force_close| should be checked first so that the function
+        // can continue.
+        if (force_close) {
+            pipe->closed = 1;
+            force_closed_pipes[force_closed_pipes_count++] = pipe->channel;
+        } else if (!pipe->pipe) {
+            hwpipe_free(pipe);
+            free(force_closed_pipes);
+            return -EIO;
+        }
+
+        pipe->next = NULL;
+        *pipe_list_end = pipe;
+        pipe_list_end = &(pipe->next);
+    }
+
+    /* Rebuild the pipes-by-channel table. */
+    g_hash_table_remove_all(dev->pipes_by_channel); /* Clean up old data. */
+    for(pipe = dev->pipes; pipe; pipe = pipe->next) {
+        g_hash_table_insert(dev->pipes_by_channel,
+                            hash_create_key_from_channel(pipe->channel),
+                            pipe);
+    }
+
+    /* Reconstruct wanted pipes list. */
+    HwPipe** wanted_pipe_list_end = &(dev->wanted_pipes_first);
+    *wanted_pipe_list_end = NULL;
+    int wanted_pipes_count = stream_get_be32(stream);
+    uint64_t channel;
+    for (pipe_n = 0; pipe_n < wanted_pipes_count; ++pipe_n) {
+        channel = stream_get_be64(stream);
+        HwPipe* pipe = g_hash_table_lookup(dev->pipes_by_channel,
+                                           hash_cast_key_from_channel(&channel));
+        if (pipe) {
+            pipe->wanted_prev = *wanted_pipe_list_end;
+            pipe->wanted_next = NULL;
+            *wanted_pipe_list_end = pipe;
+            wanted_pipe_list_end = &(pipe->wanted_next);
+        } else {
+            stream_free(stream);
+            free(force_closed_pipes);
+            return -EIO;
+        }
+    }
+    if (stream_get_byte(stream)) {
+        channel = stream_get_be64(stream);
+        dev->wanted_pipe_after_channel_high =
+            g_hash_table_lookup(dev->pipes_by_channel,
+                                hash_cast_key_from_channel(&channel));
+        if (!dev->wanted_pipe_after_channel_high) {
+            stream_free(stream);
+            free(force_closed_pipes);
+            return -EIO;
+        }
+    } else {
+        dev->wanted_pipe_after_channel_high = NULL;
+    }
+
+    /* Add forcibly closed pipes to wanted pipes list */
+    for (pipe_n = 0; pipe_n < force_closed_pipes_count; pipe_n++) {
+        HwPipe* pipe =
+            g_hash_table_lookup(dev->pipes_by_channel,
+                                hash_cast_key_from_channel(
+                                    &force_closed_pipes[pipe_n]));
+        set_pipe_wanted_bits(pipe, PIPE_WAKE_CLOSED);
+        pipe->closed = 1;
+        if (!pipe->wanted_next &&
+            !pipe->wanted_prev &&
+            pipe != dev->wanted_pipe_after_channel_high) {
+            pipe->wanted_prev = *wanted_pipe_list_end;
+            *wanted_pipe_list_end = pipe;
+            wanted_pipe_list_end = &(pipe->wanted_next);
+        }
+    }
+
+    stream_free(stream);
+    free(force_closed_pipes);
+    return 0;
+}
+
+static void android_pipe_post_load(void* opaque) {
+    /* This function gets invoked after all VM state has
+     * been loaded. Raising IRQ in the load handler causes
+     * problems.
+     */
+    PipeDevice* dev = ((AndroidPipeState*)opaque)->dev;
+    if (dev->wanted_pipes_first) {
+        qemu_set_irq(dev->ps->irq, 1);
+    } else {
+        qemu_set_irq(dev->ps->irq, 0);
+    }
+}
+
 static void android_pipe_realize(DeviceState *dev, Error **errp)
 {
     SysBusDevice *sbdev = SYS_BUS_DEVICE(dev);
@@ -711,6 +905,16 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
     android_init_opengles_pipe(tcg_enabled() ? looper_getForThread() : NULL);
 
     android_pipe_set_hw_funcs(&qemu2_android_pipe_hw_funcs);
+
+    register_savevm_with_post_load
+        (dev,
+         "android_pipe",
+         0,
+         ANDROID_PIPE_SAVE_VERSION,
+         android_pipe_save,
+         android_pipe_load,
+         android_pipe_post_load,
+         s);
 
     /* TODO: This may be a complete hack and there may be beautiful QOM ways
      * to accomplish this.
