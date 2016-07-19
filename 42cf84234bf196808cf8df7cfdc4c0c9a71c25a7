@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ca7e839c_1534f400",
+        "filename": "android/emulation/DeviceContextRunner_unittest.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-19T15:00:38Z",
+      "side": 1,
+      "message": "nit: alphabetical order T \u003c V :-)",
+      "revId": "42cf84234bf196808cf8df7cfdc4c0c9a71c25a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca7e839c_3539f0f9",
+        "filename": "android/emulation/VmLock_unittest.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-19T15:00:38Z",
+      "side": 1,
+      "message": "oops: it looks like you forgot to include the correponding header here!!",
+      "revId": "42cf84234bf196808cf8df7cfdc4c0c9a71c25a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
