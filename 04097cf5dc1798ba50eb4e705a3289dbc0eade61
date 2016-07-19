@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_d8630f42",
+        "filename": "android/opengl/GrallocPipe.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T18:23:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_406de79a",
+      "range": {
+        "startLine": 27,
+        "startChar": 20,
+        "endLine": 27,
+        "endChar": 26
+      },
+      "revId": "04097cf5dc1798ba50eb4e705a3289dbc0eade61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_60510bdd",
         "filename": "android/opengl/GrallocPipe.cpp",
         "patchSetId": 15
@@ -36,6 +60,30 @@
       "writtenOn": "2016-07-19T16:56:59Z",
       "side": 1,
       "message": "exits",
+      "range": {
+        "startLine": 31,
+        "startChar": 38,
+        "endLine": 31,
+        "endChar": 44
+      },
+      "revId": "04097cf5dc1798ba50eb4e705a3289dbc0eade61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_b8505b64",
+        "filename": "android/opengl/GrallocPipe.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T18:23:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_60510bdd",
       "range": {
         "startLine": 31,
         "startChar": 38,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_38cb4b1d",
+        "filename": "android/opengl/GrallocPipe.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T18:23:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_20a67307",
+      "range": {
+        "startLine": 53,
+        "startChar": 4,
+        "endLine": 53,
+        "endChar": 11
+      },
+      "revId": "04097cf5dc1798ba50eb4e705a3289dbc0eade61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_40ba8727",
         "filename": "android/opengl/GrallocPipe.cpp",
         "patchSetId": 15
@@ -82,6 +154,30 @@
       "writtenOn": "2016-07-19T16:56:59Z",
       "side": 1,
       "message": "Missing override.",
+      "range": {
+        "startLine": 60,
+        "startChar": 71,
+        "endLine": 60,
+        "endChar": 73
+      },
+      "revId": "04097cf5dc1798ba50eb4e705a3289dbc0eade61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_18c8871c",
+        "filename": "android/opengl/GrallocPipe.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T18:23:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_40ba8727",
       "range": {
         "startLine": 60,
         "startChar": 71,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_d8d1cfc9",
+        "filename": "android/opengl/GrallocPipe.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T18:23:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_002daf41",
+      "range": {
+        "startLine": 67,
+        "startChar": 6,
+        "endLine": 69,
+        "endChar": 29
+      },
+      "revId": "04097cf5dc1798ba50eb4e705a3289dbc0eade61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_e085fb04",
         "filename": "android/opengl/GrallocPipe.cpp",
         "patchSetId": 15
@@ -140,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_d87f8fb9",
+        "filename": "android/opengl/GrallocPipe.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T18:23:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_e085fb04",
+      "range": {
+        "startLine": 75,
+        "startChar": 4,
+        "endLine": 76,
+        "endChar": 70
+      },
+      "revId": "04097cf5dc1798ba50eb4e705a3289dbc0eade61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_40f287d6",
         "filename": "android/opengles.h",
         "patchSetId": 15
@@ -151,6 +295,30 @@
       "writtenOn": "2016-07-19T16:56:59Z",
       "side": 1,
       "message": "\"pid\" seems like a bad name, since it has a strong existing connotation.  Maybe \"puid\", to indicate that this is a separate concept -- a unique ID over time?",
+      "range": {
+        "startLine": 73,
+        "startChar": 46,
+        "endLine": 73,
+        "endChar": 49
+      },
+      "revId": "04097cf5dc1798ba50eb4e705a3289dbc0eade61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_785d4352",
+        "filename": "android/opengles.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-19T18:23:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_40f287d6",
       "range": {
         "startLine": 73,
         "startChar": 46,
