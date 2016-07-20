@@ -18,14 +18,15 @@ namespace android {
 
 class TestVmLock : public VmLock {
 public:
-    TestVmLock() : mOldVmLock(VmLock::set(this)) {}
+    TestVmLock() : mOldVmLock(VmLock::set(this)), mInstalled(true) {}
 
     ~TestVmLock() { release(); }
 
     void release() {
-        if (mOldVmLock) {
+        if (mInstalled) {
+            // NOTE: A value of nullptr for mOldVmLock is valid.
             VmLock::set(mOldVmLock);
-            mOldVmLock = nullptr;
+            mInstalled = false;
         }
     }
 
@@ -38,6 +39,7 @@ public:
     int mLockCount = 0;
     int mUnlockCount = 0;
     VmLock* mOldVmLock = nullptr;
+    bool mInstalled = false;
 };
 
 } // namespace android
