@@ -13,6 +13,7 @@
 #include "android/base/async/Looper.h"
 #include "android/opengles.h"
 #include "android/opengles-pipe.h"
+#include "android/opengl/GrallocPipe.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -331,6 +332,7 @@ private:
 
 void registerPipeService() {
     android::AndroidPipe::Service::add(new EmuglPipe::Service());
+    registerGrallocPipeService();
 }
 
 }  // namespace opengl

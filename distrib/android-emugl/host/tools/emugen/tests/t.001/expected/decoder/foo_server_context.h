@@ -15,7 +15,7 @@ struct foo_server_context_t {
 	fooUnsupported_server_proc_t fooUnsupported;
 	fooDoEncoderFlush_server_proc_t fooDoEncoderFlush;
 	fooTakeConstVoidPtrConstPtr_server_proc_t fooTakeConstVoidPtrConstPtr;
-	 virtual ~foo_server_context_t() {}
+	virtual ~foo_server_context_t() {}
 	int initDispatchByName( void *(*getProc)(const char *name, void *userData), void *userData);
 };
 

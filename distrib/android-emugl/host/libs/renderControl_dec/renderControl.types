@@ -1,4 +1,5 @@
 uint32_t 32 0x%08x
+uint64_t 64 0x%016lx
 EGLint 32 0x%08x
 GLint 32 0x%08x
 GLuint 32 0x%08x

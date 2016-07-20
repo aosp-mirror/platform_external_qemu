@@ -17,6 +17,7 @@
 
 #include "emugl/common/logging.h"
 #include "ErrorLog.h"
+#include "FrameBuffer.h"
 
 #include <algorithm>
 #include <utility>
@@ -177,6 +178,10 @@ void RendererImpl::setOpenGLDisplayTranslation(float px, float py) {
 void RendererImpl::repaintOpenGLDisplay() {
     assert(mRenderWindow);
     mRenderWindow->repaint();
+}
+
+void RendererImpl::cleanupProcColorbuffers(uint64_t puid) {
+    FrameBuffer::getFB()->cleanupProcColorbuffers(puid);
 }
 
 }  // namespace emugl
