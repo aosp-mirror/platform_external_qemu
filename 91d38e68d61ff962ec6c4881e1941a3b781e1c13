@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aaf86f8a_92f81c1d",
+        "filename": "android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-20T19:12:23Z",
+      "side": 1,
+      "message": "instead of doing this you could make updateDisplayedLocation to be a signal, connect a slot to it that implements the update and emit a signal from here. Qt would take care of the threading issues",
+      "range": {
+        "startLine": 93,
+        "startChar": 0,
+        "endLine": 96,
+        "endChar": 34
+      },
+      "revId": "91d38e68d61ff962ec6c4881e1941a3b781e1c13",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aaf86f8a_f2436046",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-20T19:12:23Z",
+      "side": 1,
+      "message": "same thing - if it\u0027s a signal, Qt manages all threading issues and the parameter isn\u0027t needed",
+      "range": {
+        "startLine": 83,
+        "startChar": 9,
+        "endLine": 83,
+        "endChar": 34
+      },
+      "revId": "91d38e68d61ff962ec6c4881e1941a3b781e1c13",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aaf86f8a_3284c86d",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 440,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-20T19:12:23Z",
+      "side": 1,
+      "message": "assert() instead? now, when we create in in ctor, it should always be there",
+      "range": {
+        "startLine": 440,
+        "startChar": 8,
+        "endLine": 440,
+        "endChar": 23
+      },
+      "revId": "91d38e68d61ff962ec6c4881e1941a3b781e1c13",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
