@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6a6037e5_496501b7",
+        "filename": "android/emulation/testing/TestVmLock.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-20T16:32:16Z",
+      "side": 1,
+      "message": "nit: this could\u0027ve been Optional\u003cVmLock*\u003e ;)",
+      "range": {
+        "startLine": 41,
+        "startChar": 4,
+        "endLine": 41,
+        "endChar": 11
+      },
+      "revId": "53501e97664c97dcb0a8576606ab36c9e92f3f6a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
