@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aaf86f8a_8c8c7c86",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-20T23:01:30Z",
+      "side": 1,
+      "message": "can we just cast the enum to int here?",
+      "range": {
+        "startLine": 82,
+        "startChar": 0,
+        "endLine": 91,
+        "endChar": 21
+      },
+      "revId": "1644e274b0c62338acb27163c1a0b139bc518862",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aaf86f8a_6c0830f8",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-20T23:01:30Z",
+      "side": 1,
+      "message": "you\u0027re really expecting a lot of update channels here :)",
+      "range": {
+        "startLine": 137,
+        "startChar": 4,
+        "endLine": 137,
+        "endChar": 19
+      },
+      "revId": "1644e274b0c62338acb27163c1a0b139bc518862",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
