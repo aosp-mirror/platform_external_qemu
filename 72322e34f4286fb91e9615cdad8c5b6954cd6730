@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6a6037e5_8c4e6792",
+        "filename": "android/opengl/GrallocPipe.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-20T17:25:02Z",
+      "side": 1,
+      "message": "not true anymore",
+      "range": {
+        "startLine": 67,
+        "startChar": 43,
+        "endLine": 67,
+        "endChar": 65
+      },
+      "revId": "72322e34f4286fb91e9615cdad8c5b6954cd6730",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
