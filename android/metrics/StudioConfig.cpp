@@ -16,6 +16,7 @@
 
 #include "android/base/ArraySize.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/Optional.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/StringView.h"
@@ -35,6 +36,9 @@
 
 #include <stdlib.h>
 #include <string.h>
+
+using android::base::Optional;
+using std::string;
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -88,7 +92,7 @@ namespace studio {
 
 // Find latest studio preferences directory and return the
 // value of the xml entry described in |match|.
-static std::string parseStudioXML(const StudioXml* const match);
+static Optional<string> parseStudioXML(const StudioXml* const match);
 
 Version extractAndroidStudioVersion(const char* const dirName) {
     if (dirName == NULL) {
@@ -219,6 +223,9 @@ UpdateChannel updateChannel() {
             .keyname = "value",
     };
     const auto channelStr = parseStudioXML(&channelInfo);
+    if (!channelStr) {
+        return UpdateChannel::Unknown;
+    }
 
     static const struct NamedChannel {
         StringView name;
@@ -233,7 +240,7 @@ UpdateChannel updateChannel() {
     const auto channelIt =
             std::find_if(std::begin(channelNames), std::end(channelNames),
                          [&channelStr](const NamedChannel& channel) {
-                             return channel.name == channelStr;
+                             return channel.name == *channelStr;
                          });
     if (channelIt != std::end(channelNames)) {
         return channelIt->channel;
@@ -283,8 +290,12 @@ static std::string eval_studio_config_xml(xmlDocPtr doc,
     return retVal;
 }
 
-static std::string parseStudioXML(const StudioXml* const match) {
-    std::string retval;
+// Returns:
+//   - An empty Optional to indicate that parsing failed.
+//   - Optional("") to indicate that we found the file, but |match| failed.
+//   - Optional(matched_vaule) in case of success.
+static Optional<string> parseStudioXML(const StudioXml* const match) {
+    Optional<string> retval;
 
     System* sys = System::get();
     // Get path to .AndroidStudio
@@ -317,9 +328,11 @@ static std::string parseStudioXML(const StudioXml* const match) {
     if (doc == NULL)
         return retval;
 
+    // At this point, we assume that we have found the correct xml file.
+    // If we fail to match within this file, we'll return an empty string
+    // indicating that nothing matches.
     xmlNodePtr root = xmlDocGetRootElement(doc);
     retval = eval_studio_config_xml(doc, root, match);
-
     xmlFreeDoc(doc);
 
     return retval;
@@ -359,8 +372,8 @@ int android_studio_get_optins() {
             .keyname = "allowed",  // assuming "true"/"false" string values
     };
 
-    std::string xmlVal = android::studio::parseStudioXML(&optins);
-    if (xmlVal.empty()) {
+    const auto xmlVal = android::studio::parseStudioXML(&optins);
+    if (!xmlVal || xmlVal->empty()) {
         D("Failed to parse %s preferences file %s", kAndroidStudioDir,
           optins.filename);
         D("Defaulting user crash-report opt-in to false");
@@ -368,9 +381,9 @@ int android_studio_get_optins() {
     }
 
     // return 0 if user has not opted in to crash reports
-    if (xmlVal == "true") {
+    if (*xmlVal == "true") {
         retval = 1;
-    } else if (xmlVal == "false") {
+    } else if (*xmlVal == "false") {
         retval = 0;
     } else {
         D("Invalid value set in %s preferences file %s", kAndroidStudioDir,
@@ -390,11 +403,12 @@ static std::string android_studio_get_installation_id_legacy() {
             .propvalue = "installation.uid",
             .keyname = "value",  // assuming kAndroidStudioUuidHexPattern
     };
-    retval = android::studio::parseStudioXML(&uuid);
-
-    if (retval.empty()) {
+    const auto optional_retval = android::studio::parseStudioXML(&uuid);
+    if (!optional_retval || optional_retval->empty()) {
         D("Failed to parse %s preferences file %s", kAndroidStudioDir,
           uuid.filename);
+    } else {
+        retval = *optional_retval;
     }
 #else
     // In Microsoft Windows, getting Android Studio installation
