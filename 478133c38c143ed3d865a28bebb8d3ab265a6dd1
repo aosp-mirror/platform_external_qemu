@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aaf86f8a_6c5670d7",
+        "filename": "android/metrics/StudioConfig.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-20T23:03:15Z",
+      "side": 1,
+      "message": "An empty Optional? \"non-constructed\" sounds like raw memory to me",
+      "range": {
+        "startLine": 294,
+        "startChar": 7,
+        "endLine": 294,
+        "endChar": 33
+      },
+      "revId": "478133c38c143ed3d865a28bebb8d3ab265a6dd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
