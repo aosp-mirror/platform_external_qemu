@@ -1,0 +1,424 @@
+// Copyright 2016 The Android Open Source Project
+//
+// This software is licensed under the terms of the GNU General Public
+// License version 2, as published by the Free Software Foundation, and
+// may be copied, distributed, and modified under those terms.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+#include "android/emulation/AdbGuestPipe.h"
+
+#include "android/base/async/AsyncSocketServer.h"
+#include "android/base/async/Looper.h"
+#include "android/base/async/ScopedSocketWatch.h"
+#include "android/base/async/ThreadLooper.h"
+#include "android/base/Log.h"
+#include "android/base/sockets/SocketUtils.h"
+#include "android/base/StringView.h"
+
+#include <string>
+
+#include <assert.h>
+
+#define DEBUG 0
+
+#if DEBUG >= 1
+#include <stdio.h>
+#define D(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
+#else
+#define D(...) (void)0
+#endif
+
+#if DEBUG >= 2
+#define DD(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
+#else
+#define DD(...) (void)0
+#endif
+
+#define E(...) fprintf(stderr, "ERROR:" __VA_ARGS__), fprintf(stderr, "\n")
+
+namespace android {
+namespace emulation {
+
+// Technical note: full state transition diagram
+//
+// State::WaitingForGuestAcceptCommand:
+//   onGuestClose() -> State::ClosedByGuest
+//   receive bad command bytes -> State::ClosedByHost
+//   receive complete command -> State::WaitingForHostAdbConnection or
+//                               State::SendingAcceptReplyOk
+//   onHostConnection -> State::WaitingForGuestAcceptCommand (self)
+//
+// State::WaitingForHostAdbConnection:
+//   onGuestClose -> State::Dead
+//   onHostConnection -> State::SendingAcceptReplyOk
+//
+// State::SendingAcceptReplyOk:
+//   onGuestClose -> State::Dead
+//   all bytes sent -> State::WaitingForGuestStartCommand
+//
+// State::WaitingForGuestStartCommand:
+//   onGuestClose -> State::Dead
+//   receive bad command bytes -> State::ClosedByHost
+//   receive complete command -> State::ProxyingData
+//
+// State::ProxyingData:
+//   onGuestClose -> State::Dead
+//   on host disconnect -> State::ClosedByHost
+//   data in or out -> State;:ProxyingData (self)
+//
+// State::ClosedByHost:
+//   onGuestClose -> State::Dead
+//
+// State::ClosedByGuest:
+//   close host socket ->  State::Dead
+//
+
+using FdWatch = android::base::Looper::FdWatch;
+using android::base::ScopedSocketWatch;
+using android::base::StringView;
+
+AndroidPipe* AdbGuestPipe::Service::create(void* mHwPipe,
+                                           const char* args) const {
+    auto pipe = new AdbGuestPipe(mHwPipe, this, mHostAgent);
+    mHostAgent->addGuest(pipe);
+    return pipe;
+}
+
+AdbGuestPipe::~AdbGuestPipe() {
+    if (mState != State::ClosedByGuest) {
+        closeFromHost();
+    }
+}
+
+void AdbGuestPipe::onGuestClose() {
+    DD("%s: [%p]", __func__, this);
+    mState = State::ClosedByGuest;
+    mHostSocket.reset();
+    mHostAgent->deleteGuest(this);  // This deletes the instance.
+}
+
+unsigned AdbGuestPipe::onGuestPoll() const {
+    DD("%s: [%p]", __func__, this);
+    unsigned result = 0;
+    switch (mState) {
+        case State::WaitingForGuestAcceptCommand:
+        case State::WaitingForGuestStartCommand:
+            result = PIPE_POLL_OUT;
+            break;
+
+        case State::SendingAcceptReplyOk:
+            result = PIPE_POLL_IN;
+            break;
+
+        case State::ProxyingData: {
+            unsigned flags = mHostSocket->poll();
+            if (flags & FdWatch::kEventRead) {
+                result |= PIPE_POLL_IN;
+            }
+            if (flags & FdWatch::kEventWrite) {
+                result |= PIPE_POLL_OUT;
+            }
+            break;
+        }
+
+        case State::ClosedByHost:
+            result |= PIPE_POLL_HUP;
+            break;
+
+        default:;
+    }
+    return result;
+}
+
+int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
+    DD("%s: [%p] numBuffers=%d state=%s", __func__, this, numBuffers,
+       toString(mState));
+    if (mState == State::ProxyingData) {
+        // Common case, proxy-ing the data from the host to the guest.
+        return onGuestRecvData(buffers, numBuffers);
+    } else if (mState == State::SendingAcceptReplyOk) {
+        // The guest is receiving the 'ok' reply.
+        return onGuestRecvReply(buffers, numBuffers);
+    } else {
+        if (mState != State::ClosedByHost) {
+            // Invalid state !!!
+            LOG(ERROR) << "Invalid state: " << toString(mState);
+        }
+        return PIPE_ERROR_IO;
+    }
+}
+
+int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
+                              int numBuffers) {
+    DD("%s: [%p] numBuffers=%d state=%s", __func__, this, numBuffers,
+       toString(mState));
+    if (mState == State::ProxyingData) {
+        // Common-case, proxy-ing the data from the guest to the host.
+        return onGuestSendData(buffers, numBuffers);
+    } else if (mState == State::WaitingForGuestAcceptCommand ||
+               mState == State::WaitingForGuestStartCommand) {
+        // Waiting command bytes from the guest.
+        return onGuestSendCommand(buffers, numBuffers);
+    } else {
+        if (mState != State::ClosedByHost) {
+            // Invalid state !!!
+            LOG(ERROR) << "Invalid state: " << toString(mState);
+        }
+        return PIPE_ERROR_IO;
+    }
+}
+
+void AdbGuestPipe::onGuestWantWakeOn(int flags) {
+    if (flags & PIPE_WAKE_READ) {
+        if (mHostSocket.get()) {
+            mHostSocket->wantRead();
+        }
+    }
+    if (flags & PIPE_WAKE_WRITE) {
+        if (mHostSocket.get()) {
+            mHostSocket->wantWrite();
+        }
+    }
+}
+
+bool AdbGuestPipe::onHostConnection(int socket) {
+    if (mState > State::WaitingForHostAdbConnection) {
+        // Too late, the connection was closed by the guest.
+        CHECK(mState == State::ClosedByGuest);
+        android::base::socketClose(socket);
+        return false;
+    }
+
+    mHostSocket.reset(android::base::ThreadLooper::get()->createFdWatch(
+            socket,
+            [](void* opaque, int fd, unsigned events) {
+                static_cast<AdbGuestPipe*>(opaque)->onHostSocketEvent(events);
+            },
+            this));
+
+    waitForHostConnection();
+    return true;
+}
+
+// static
+const char* AdbGuestPipe::toString(AdbGuestPipe::State state) {
+    switch (state) {
+        case State::WaitingForGuestAcceptCommand:
+            return "WaitingForGuestAcceptCommand";
+            break;
+        case State::WaitingForHostAdbConnection:
+            return "WaitingForHostAdbConnection";
+            break;
+        case State::SendingAcceptReplyOk:
+            return "SendingAcceptReplyOk";
+            break;
+        case State::WaitingForGuestStartCommand:
+            return "WaitingForGuestStartCommand";
+            break;
+        case State::ProxyingData:
+            return "ProxyingData";
+            break;
+        case State::ClosedByGuest:
+            return "ClosedByGuest";
+            break;
+        case State::ClosedByHost:
+            return "ClosedByHost";
+            break;
+        default:
+            return "Unknown";
+            break;
+    }
+}
+
+// Called whenever an i/o event occurs on the host socket.
+void AdbGuestPipe::onHostSocketEvent(unsigned events) {
+    int wakeFlags = 0;
+    if ((events & FdWatch::kEventRead)) {
+        wakeFlags |= PIPE_WAKE_READ;
+        mHostSocket->dontWantRead();
+    }
+    if ((events & FdWatch::kEventWrite)) {
+        wakeFlags |= PIPE_WAKE_WRITE;
+        mHostSocket->dontWantWrite();
+    }
+    if (wakeFlags) {
+        signalWake(wakeFlags);
+    }
+}
+
+int AdbGuestPipe::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
+    DD("%s: [%p] numBuffers=%d", __func__, this, numBuffers);
+    int result = 0;
+    while (numBuffers > 0) {
+        uint8_t* data = buffers[0].data;
+        size_t dataSize = buffers[0].size;
+        DD("%s: [%p] dataSize=%d", __func__, this, (int)dataSize);
+        while (dataSize > 0) {
+            ssize_t len = android::base::socketRecv(mHostSocket->fd(), data,
+                                                    dataSize);
+            if (len > 0) {
+                data += len;
+                dataSize -= len;
+                result += static_cast<int>(len);
+                continue;
+            }
+            if (len < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+                if (result == 0) {
+                    mHostSocket->dontWantRead();
+                    return PIPE_ERROR_AGAIN;
+                }
+            } else {
+                // End of stream or i/o error means the guest has closed
+                // the connection.
+                if (result == 0) {
+                    mHostSocket.reset();
+                    mState = State::ClosedByHost;
+                    return PIPE_ERROR_IO;
+                }
+            }
+            // Some data was received so report it, the guest will have
+            // to try again to get an error.
+            return result;
+        }
+        buffers++;
+        numBuffers--;
+    }
+    return result;
+}
+
+int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
+                                  int numBuffers) {
+    int result = 0;
+    while (numBuffers > 0) {
+        const uint8_t* data = buffers[0].data;
+        size_t dataSize = buffers[0].size;
+        while (dataSize > 0) {
+            ssize_t len = android::base::socketSend(mHostSocket->fd(), data,
+                                                    dataSize);
+            if (len > 0) {
+                data += len;
+                dataSize -= len;
+                result += static_cast<int>(len);
+                continue;
+            }
+            if (len < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+                if (result == 0) {
+                    mHostSocket->dontWantWrite();
+                    return PIPE_ERROR_AGAIN;
+                }
+            } else {
+                // End of stream or i/o error means the guest has closed
+                // the connection.
+                if (result == 0) {
+                    mHostSocket.reset();
+                    mState = State::ClosedByHost;
+                    return PIPE_ERROR_IO;
+                }
+            }
+            // Some data was received so report it, the guest will have
+            // to try again to get an error.
+            return result;
+        }
+        buffers++;
+        numBuffers--;
+    }
+    return result;
+}
+
+int AdbGuestPipe::onGuestRecvReply(AndroidPipeBuffer* buffers, int numBuffers) {
+    // Sending reply to the guest.
+    int result = 0;
+    while (numBuffers > 0) {
+        uint8_t* data = buffers[0].data;
+        size_t dataSize = buffers[0].size;
+        while (dataSize > 0) {
+            size_t avail = std::min(mCommand.size() - mCommandPos, dataSize);
+            memcpy(data, mCommand.data() + mCommandPos, avail);
+            data += avail;
+            dataSize -= avail;
+            result += static_cast<int>(avail);
+            mCommandPos += avail;
+            if (mCommandPos == mCommand.size()) {
+                // Full reply sent, now wait for the guest 'start' command.
+                setExpectedGuestCommand("start",
+                                        State::WaitingForGuestStartCommand);
+                return result;
+            }
+        }
+        buffers++;
+        numBuffers--;
+    }
+    return result;
+}
+
+int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
+                                     int numBuffers) {
+    // Waiting for a command from the guest. Just match the bytes
+    // with the expected command. Any mismatch triggers an I/O error
+    // which will force the guest to close the connection.
+    int result = 0;
+    while (numBuffers > 0) {
+        const char* data = reinterpret_cast<const char*>(buffers[0].data);
+        size_t dataSize = buffers[0].size;
+        while (dataSize > 0) {
+            size_t avail = std::min(mCommand.size() - mCommandPos, dataSize);
+            if (memcmp(data, mCommand.data() + mCommandPos, avail) != 0) {
+                // Mismatched, this is not what the pipe is expecting.
+                // Closing the connection now is easier than sending 'ko'.
+                mHostSocket.reset();
+                return PIPE_ERROR_IO;
+            }
+            data += avail;
+            dataSize -= avail;
+            result += static_cast<int>(avail);
+            mCommandPos += avail;
+            if (mCommandPos == mCommand.size()) {
+                // Expected command was received.
+                if (mState == State::WaitingForGuestAcceptCommand) {
+                    waitForHostConnection();
+                } else if (mState == State::WaitingForGuestStartCommand) {
+                    // Proxying data can start right now.
+                    mState = State::ProxyingData;
+                }
+                return result;
+            }
+        }
+        numBuffers--;
+        buffers++;
+    }
+    return result;
+}
+
+void AdbGuestPipe::setReply(StringView reply, State newState) {
+    CHECK(newState == State::SendingAcceptReplyOk);
+    mCommand = reply;
+    mCommandPos = 0;
+    mState = newState;
+}
+
+void AdbGuestPipe::setExpectedGuestCommand(StringView command, State newState) {
+    CHECK(newState == State::WaitingForGuestAcceptCommand ||
+          newState == State::WaitingForGuestStartCommand);
+    mCommand = command;
+    mCommandPos = 0;
+    mState = newState;
+}
+
+void AdbGuestPipe::waitForHostConnection() {
+    if (mHostSocket.get()) {
+        // A host connection already exists! Send the 'ok' reply back to
+        // the guest.
+        setReply("ok", State::SendingAcceptReplyOk);
+    } else {
+        // No host connection yet. The guest is still waiting for the 'ok'
+        // reply.
+        mState = State::WaitingForHostAdbConnection;
+    }
+}
+
+}  // namespace emulation
+}  // namespace android
