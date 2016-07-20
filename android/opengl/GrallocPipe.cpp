@@ -64,9 +64,8 @@ public:
     }
     int onGuestSend(const AndroidPipeBuffer* buffers,
                             int numBuffers) override {
-        // The guest is supposed to send us the guest process id (4 bytes).
-        // But we don't use it.
-        // Not doing anything
+        // The guest is supposed to send us a confirm code first. The code is
+        // 100 (4 byte integer).
         assert(buffers[0].size >= 4);
         int32_t confirmInt = *((int32_t*)buffers[0].data);
         assert(confirmInt == 100);
