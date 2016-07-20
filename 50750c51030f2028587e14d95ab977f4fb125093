@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_c6c43e66",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderThreadInfo.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-20T19:17:25Z",
+      "side": 1,
+      "message": "That turned out to work pretty well, thanks! Done",
+      "parentUuid": "6a6037e5_b8e850e6",
+      "range": {
+        "startLine": 61,
+        "startChar": 4,
+        "endLine": 61,
+        "endChar": 14
+      },
+      "revId": "50750c51030f2028587e14d95ab977f4fb125093",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_182d1c99",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 13
@@ -36,6 +60,30 @@
       "writtenOn": "2016-07-20T00:31:53Z",
       "side": 1,
       "message": "static?",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 22
+      },
+      "revId": "50750c51030f2028587e14d95ab977f4fb125093",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_c6bb1eda",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-20T19:17:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_182d1c99",
       "range": {
         "startLine": 30,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_c692fe51",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-20T19:17:25Z",
+      "side": 1,
+      "message": "I\u0027ll use it to track sync thread construction/destruction for memleak fixing / debugging purposes. It\u0027s been made more clear (moved to the static function for getting/destroying sync threads)",
+      "parentUuid": "6a6037e5_f840083c",
+      "range": {
+        "startLine": 67,
+        "startChar": 11,
+        "endLine": 67,
+        "endChar": 17
+      },
+      "revId": "50750c51030f2028587e14d95ab977f4fb125093",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_d8ab04da",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 13
@@ -82,6 +154,30 @@
       "writtenOn": "2016-07-20T00:31:53Z",
       "side": 1,
       "message": "does it set the object state to something that can be detected from the caller? constructors don\u0027t return values, so there has to be a way to detect a failure",
+      "range": {
+        "startLine": 72,
+        "startChar": 0,
+        "endLine": 72,
+        "endChar": 15
+      },
+      "revId": "50750c51030f2028587e14d95ab977f4fb125093",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_26ac3a9b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-20T19:17:25Z",
+      "side": 1,
+      "message": "good question. The users of this class pretty much only interact without expecting return values, but if we do attempt to create a sync thread and communicate with it without a parent context, that\u0027s near-instant deadlock due to fences on the guest not being signaled. A fallback path that signals anyway sounded appealing at first, but a) adds a branch to performance critical paths and b) as no other code will use the constructor explicitly, it means we must have ended up running getSyncThread in an improper usage.\n\nSo, emugl_crash_reporter it is.",
+      "parentUuid": "6a6037e5_d8ab04da",
       "range": {
         "startLine": 72,
         "startChar": 0,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_098029f0",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-20T19:17:25Z",
+      "side": 1,
+      "message": "Sorry, that was an earlier version of the triggerWait that didn\u0027t make it. Removed",
+      "parentUuid": "6a6037e5_93d7adf2",
+      "range": {
+        "startLine": 86,
+        "startChar": 0,
+        "endLine": 88,
+        "endChar": 1
+      },
+      "revId": "50750c51030f2028587e14d95ab977f4fb125093",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_b384f105",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 13
@@ -128,6 +248,30 @@
       "writtenOn": "2016-07-20T00:31:53Z",
       "side": 1,
       "message": "while (!exiting) instead of a break?",
+      "range": {
+        "startLine": 127,
+        "startChar": 4,
+        "endLine": 127,
+        "endChar": 18
+      },
+      "revId": "50750c51030f2028587e14d95ab977f4fb125093",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_a978fdf5",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-20T19:17:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_b384f105",
       "range": {
         "startLine": 127,
         "startChar": 4,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "aaf86f8a_55c69e14",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-20T19:17:25Z",
+      "side": 1,
+      "message": "I think we should be pretty good here, since the way if fails if the context cannot be created, is that it\u0027s possible for the eglClientWaitSyncKHR to do a no-op, and we would signal the fence fd anyway.",
+      "parentUuid": "6a6037e5_13b4ddcc",
+      "range": {
+        "startLine": 229,
+        "startChar": 0,
+        "endLine": 231,
+        "endChar": 1
+      },
+      "revId": "50750c51030f2028587e14d95ab977f4fb125093",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_b81a9022",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 13
@@ -174,6 +342,30 @@
       "writtenOn": "2016-07-20T00:31:53Z",
       "side": 1,
       "message": "I really doubt this would help our users; Android Studio highlights all lines with \u0027error\u0027 so any app might make it look really bad",
+      "range": {
+        "startLine": 253,
+        "startChar": 1,
+        "endLine": 254,
+        "endChar": 37
+      },
+      "revId": "50750c51030f2028587e14d95ab977f4fb125093",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_894419a3",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-20T19:17:25Z",
+      "side": 1,
+      "message": "Done (changed to DPRINT)",
+      "parentUuid": "6a6037e5_b81a9022",
       "range": {
         "startLine": 253,
         "startChar": 1,
@@ -209,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_293bed1f",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-20T19:17:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_58a5d4b0",
+      "range": {
+        "startLine": 265,
+        "startChar": 38,
+        "endLine": 265,
+        "endChar": 50
+      },
+      "revId": "50750c51030f2028587e14d95ab977f4fb125093",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_f826c862",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 13
@@ -220,6 +436,30 @@
       "writtenOn": "2016-07-20T00:31:53Z",
       "side": 1,
       "message": "set it to null after that?",
+      "range": {
+        "startLine": 339,
+        "startChar": 0,
+        "endLine": 339,
+        "endChar": 29
+      },
+      "revId": "50750c51030f2028587e14d95ab977f4fb125093",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_e9bcb585",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-20T19:17:25Z",
+      "side": 1,
+      "message": "Done. Also, I added an extra call to destroySyncThread to delete the sync thread when a RenderThread is exited, if the sync thread exists. They should be 1:1.",
+      "parentUuid": "6a6037e5_f826c862",
       "range": {
         "startLine": 339,
         "startChar": 0,
@@ -255,6 +495,30 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_66f472bf",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-20T19:17:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_f8fda8a2",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 36,
+        "endChar": 26
+      },
+      "revId": "50750c51030f2028587e14d95ab977f4fb125093",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_98034cdc",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.h",
         "patchSetId": 13
@@ -266,6 +530,30 @@
       "writtenOn": "2016-07-20T00:31:53Z",
       "side": 1,
       "message": "could you please add member initializers to 0 for all of these?",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 19
+      },
+      "revId": "50750c51030f2028587e14d95ab977f4fb125093",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_46016e9e",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-20T19:17:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_98034cdc",
       "range": {
         "startLine": 47,
         "startChar": 0,
@@ -301,6 +589,30 @@
     },
     {
       "key": {
+        "uuid": "6a6037e5_66db5245",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-20T19:17:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_38d10053",
+      "range": {
+        "startLine": 63,
+        "startChar": 27,
+        "endLine": 63,
+        "endChar": 28
+      },
+      "revId": "50750c51030f2028587e14d95ab977f4fb125093",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a6037e5_98da2c72",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.h",
         "patchSetId": 13
@@ -312,6 +624,30 @@
       "writtenOn": "2016-07-20T00:31:53Z",
       "side": 1,
       "message": "nit: should these be static members of the SyncThread class?",
+      "range": {
+        "startLine": 96,
+        "startChar": 0,
+        "endLine": 97,
+        "endChar": 27
+      },
+      "revId": "50750c51030f2028587e14d95ab977f4fb125093",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a6037e5_e6b622f3",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-20T19:17:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a6037e5_98da2c72",
       "range": {
         "startLine": 96,
         "startChar": 0,
