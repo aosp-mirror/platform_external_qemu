@@ -23,10 +23,8 @@ public:
     ~TestVmLock() { release(); }
 
     void release() {
-        if (mOldVmLock) {
-            VmLock::set(mOldVmLock);
-            mOldVmLock = nullptr;
-        }
+        VmLock::set(mOldVmLock);
+        mOldVmLock = nullptr;
     }
 
     virtual void lock() override { mLockCount++; }

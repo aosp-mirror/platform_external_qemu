@@ -21,6 +21,7 @@ namespace android {
 
 TEST(VmLock, Default) {
     VmLock* vmLock = VmLock::get();
+    ASSERT_TRUE(vmLock);
     vmLock->lock();
     vmLock->unlock();
 }
