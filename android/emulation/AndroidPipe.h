@@ -73,8 +73,8 @@ public:
     class Service {
     public:
         // Explicit constructor.
-        explicit Service(const char* name) : mName(name) {}
-
+        explicit Service(const char* name) : mName(name)
+        { fprintf(stderr, "constructed a pipe service with name %s\n", name); }
         // Default destructor.
         virtual ~Service() = default;
 
@@ -113,6 +113,7 @@ public:
         // Reset the list of registered services. Useful at the start and
         // end of a unit-test.
         static void resetAll();
+
 
     protected:
         // No default constructor.
@@ -203,13 +204,15 @@ public:
                                              unsigned char* pClosed,
                                              char* pForceClose);
 
+    void* wakethread = NULL;
 protected:
     // No default constructor.
     AndroidPipe() = delete;
 
     // Constructor used by derived classes only.
     AndroidPipe(void* hwPipe, const Service* service)
-        : mHwPipe(hwPipe), mService(service) {}
+        : mHwPipe(hwPipe), mService(service) {
+        }
 
     void* mHwPipe = nullptr;
     const Service* mService = nullptr;

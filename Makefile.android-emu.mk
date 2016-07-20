@@ -246,6 +246,7 @@ LOCAL_SRC_FILES := \
     android/emulation/SetupParameters.cpp \
     android/emulation/VmLock.cpp \
     android/emulator-window.c \
+    android/emulation/WakeThread.cpp \
     android/error-messages.cpp \
     android/featurecontrol/FeatureControl.cpp \
     android/featurecontrol/FeatureControlImpl.cpp \

@@ -21,6 +21,7 @@
 #include "android/emulation/android_pipe_device.h"
 #include "android/emulation/android_pipe_host.h"
 #include "android/emulation/VmLock.h"
+#include "android/emulation/WakeThread.h"
 
 #include <memory>
 #include <string>
@@ -241,11 +242,14 @@ public:
         }
 
         // Swap your host-side pipe instance with this one weird trick!
-        DD("%s: swapping host pipe %p for hwpipe=%p", __FUNCTION__, newPipe,
-           mHwPipe);
+        fprintf(stderr, "%s: swapping host pipe %p for hwpipe=%p\n", __FUNCTION__, newPipe, mHwPipe);
         sPipeHwFuncs->resetPipe(mHwPipe, newPipe);
         delete this;
 
+        if (!::strncmp(pipeName, "opengles", 9)) {
+            fprintf(stderr, "%s: starting wake thread for service name %s\n", __FUNCTION__, pipeName);
+            newPipe->wakethread = (void*)(new WakeThread(newPipe));
+        }
         return result;
     }
 
@@ -550,19 +554,32 @@ const AndroidPipeHwFuncs* android_pipe_set_hw_funcs(
 }
 
 void android_pipe_reset_services() {
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
     AndroidPipe::Service::resetAll();
 }
 
 void* android_pipe_guest_open(void* hwpipe) {
     CHECK_VM_STATE_LOCK();
-    DD("%s: Creating new connector pipe for hwpipe=%p", __FUNCTION__, hwpipe);
-    return android::sGlobals->connectorService.create(hwpipe, nullptr);
+    fprintf(stderr, "%s: Creating new connector pipe for hwpipe=%p\n", __FUNCTION__, hwpipe);
+    AndroidPipe* res = android::sGlobals->connectorService.create(hwpipe, nullptr);
+    return (void*)res;
 }
 
 void android_pipe_guest_close(void* internalPipe) {
     CHECK_VM_STATE_LOCK();
     auto pipe = static_cast<android::AndroidPipe*>(internalPipe);
-    DD("%s: host=%p [%s]", __FUNCTION__, pipe, pipe->name());
+
+    if (pipe->wakethread) {
+        fprintf(stderr, "WARNING: STOP WAKE THREAD\n");
+        WakeThread* to_del = (WakeThread*)(pipe->wakethread);
+        to_del->exiting = true;
+        intptr_t exitcode;
+        to_del->wait(&exitcode);
+        fprintf(stderr, "deleting wake thread\n");
+        delete to_del;
+    }
+
+    fprintf(stderr, "%s: host=%p [%s]\n", __FUNCTION__, pipe, pipe->name());
     pipe->onGuestClose();
 }
 
@@ -626,7 +643,7 @@ void android_pipe_guest_wake_on(void* internalPipe, unsigned wakes) {
 
 // API implemented by the virtual device.
 void android_pipe_host_close(void* hwpipe) {
-    DD("%s: hwpipe=%p", __FUNCTION__, hwpipe);
+    fprintf(stderr, "%s: hwpipe=%p\n", __FUNCTION__, hwpipe);
     android::sGlobals->pipeWaker.closeFromHost(hwpipe);
 }
 

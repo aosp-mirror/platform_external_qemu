@@ -12,6 +12,7 @@
 #include "android/emulation/android_pipe_host.h"
 
 #include "android/emulation/AndroidPipe.h"
+#include "android/emulation/WakeThread.h"
 
 namespace android {
 
@@ -112,9 +113,11 @@ const AndroidPipeFuncs* LegacyPipe::getFuncs() const {
 void android_pipe_add_type(const char* pipeName,
                            void* pipeOpaque,
                            const AndroidPipeFuncs* pipeFuncs) {
+    fprintf(stderr, "add pipe type %s\n", pipeName);
     auto service =
             new android::LegacyPipeService(pipeName, pipeOpaque, pipeFuncs);
     android::Service::add(service);
+
 }
 
 void android_pipe_reset_service(void) {
