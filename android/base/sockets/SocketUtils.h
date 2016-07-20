@@ -88,5 +88,9 @@ int socketCreateTcp6();
 // Return the port number of a TCP or UDP socket, or -1/errno otherwise.
 int socketGetPort(int socket);
 
+// Return the port number of a TCP socket peer, if available, or
+// -1/errno otherwise.
+int socketGetPeerPort(int socket);
+
 }  // namespace base
 }  // namespace android
