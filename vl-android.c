@@ -3573,6 +3573,13 @@ int main(int argc, char **argv, char **envp)
     }
 #endif
 
+    /* call android-specific setup function */
+    if (!qemu_android_emulation_setup()) {
+        return 1;
+    }
+
+    android_emulator_set_base_port(android_base_port);
+
     /* just use the first displaystate for the moment */
     ds = get_displaystate();
 
@@ -3683,12 +3690,6 @@ int main(int argc, char **argv, char **envp)
         return 1;
     }
 
-    /* call android-specific setup function */
-    if (!qemu_android_emulation_setup()) {
-        return 1;
-    }
-
-    android_emulator_set_base_port(android_base_port);
 
     if (loadvm)
         do_loadvm(cur_mon, loadvm);
