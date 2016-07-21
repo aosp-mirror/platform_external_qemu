@@ -64,7 +64,7 @@ typedef struct SkinUIFuncs {
 // to start in Unicode mode. It's possible to toggle between modes at runtime
 // by using Ctrl-K.
 typedef struct SkinUIParams {
-    char window_name[64];
+    char window_name[256];
     int window_x;
     int window_y;
 
