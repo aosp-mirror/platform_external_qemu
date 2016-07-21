@@ -1,0 +1,406 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8a91eb63_52a6c0ab",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T21:33:44Z",
+      "side": 1,
+      "message": "Since we\u0027re doing clean slate here, can we replace all these with LOG(...) calls?\nAlso, let\u0027s not have any compile time macro definition in the file (DEBUG) for debugging.",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 75
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_f2596c94",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T21:33:44Z",
+      "side": 1,
+      "message": "State::closedByGuest?",
+      "range": {
+        "startLine": 56,
+        "startChar": 21,
+        "endLine": 56,
+        "endChar": 32
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_52508063",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T21:33:44Z",
+      "side": 1,
+      "message": "State::closedByGuest?",
+      "range": {
+        "startLine": 60,
+        "startChar": 21,
+        "endLine": 60,
+        "endChar": 32
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_b24fe4bf",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T21:33:44Z",
+      "side": 1,
+      "message": "State::closedByGuest?",
+      "range": {
+        "startLine": 64,
+        "startChar": 21,
+        "endLine": 64,
+        "endChar": 32
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_323bf41f",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T21:33:44Z",
+      "side": 1,
+      "message": "State::closedByGuest?",
+      "range": {
+        "startLine": 69,
+        "startChar": 21,
+        "endLine": 69,
+        "endChar": 32
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_72265cd3",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T21:33:44Z",
+      "side": 1,
+      "message": "nit: I\u0027d invert the nesting to test this just once.",
+      "range": {
+        "startLine": 188,
+        "startChar": 8,
+        "endLine": 188,
+        "endChar": 32
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_32f3f43e",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T21:33:44Z",
+      "side": 1,
+      "message": "Oh, so it _does_ always own the connection.\nJust the comment in the header was wrong.",
+      "range": {
+        "startLine": 199,
+        "startChar": 23,
+        "endLine": 199,
+        "endChar": 34
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_322a1481",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T21:33:44Z",
+      "side": 1,
+      "message": "Is this recommended by the style guilde?\nSince all your statements are returns, I\u0027d drop the unreachable break;",
+      "range": {
+        "startLine": 219,
+        "startChar": 12,
+        "endLine": 219,
+        "endChar": 17
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_264bb983",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T21:33:44Z",
+      "side": 1,
+      "message": "host?",
+      "range": {
+        "startLine": 282,
+        "startChar": 56,
+        "endLine": 282,
+        "endChar": 61
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_26f9f91f",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T21:33:44Z",
+      "side": 1,
+      "message": "host?",
+      "range": {
+        "startLine": 322,
+        "startChar": 56,
+        "endLine": 322,
+        "endChar": 61
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_06231daf",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T21:33:44Z",
+      "side": 1,
+      "message": "sent?",
+      "range": {
+        "startLine": 330,
+        "startChar": 29,
+        "endLine": 330,
+        "endChar": 37
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_9292e850",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T21:33:44Z",
+      "side": 1,
+      "message": "Can you assert here that state is State::SendingAcceptReplyOk\nThe implementation depends on that for correctness.",
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_669a2160",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T21:33:44Z",
+      "side": 1,
+      "message": "Can you assert here that mState is either State::WaitingForGuestAcceptCommand or State::WaitingForGuestStartCommand?\nThe implementation depends on that for correctness.",
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_c6d835ed",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T21:33:44Z",
+      "side": 1,
+      "message": "Should you change state to CloseFromHost here?\nBecause of PIPE_ERROR_IO returned here, guest will call closeFromGuest, and then we need to know that the host socket is gone? Also, that way we\u0027ll deal with any async calls to onGuestSendCommand etc that are queued up correctly (i.e. ignore / reject them).",
+      "range": {
+        "startLine": 382,
+        "startChar": 16,
+        "endLine": 382,
+        "endChar": 36
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_326f74c2",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 407,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T21:33:44Z",
+      "side": 1,
+      "message": "Why even take this argument then?\nFuture extensibility?",
+      "range": {
+        "startLine": 407,
+        "startChar": 4,
+        "endLine": 407,
+        "endChar": 51
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_cce779d9",
+        "filename": "android/emulation/AdbGuestPipe.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T21:33:44Z",
+      "side": 1,
+      "message": "Isn\u0027t this the tcp port that the guest is requesting for a tcp transport between guest and us? :)\n\"suspected\"? :D",
+      "range": {
+        "startLine": 39,
+        "startChar": 36,
+        "endLine": 40,
+        "endChar": 43
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_4c02a963",
+        "filename": "android/emulation/AdbGuestPipe.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T21:33:44Z",
+      "side": 1,
+      "message": "Again, thread type assert would be useful here.",
+      "range": {
+        "startLine": 67,
+        "startChar": 3,
+        "endLine": 67,
+        "endChar": 75
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_ac4f8dbf",
+        "filename": "android/emulation/AdbGuestPipe.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T21:33:44Z",
+      "side": 1,
+      "message": "Actually, this is the one that I wanted  to take ownership of |socket| irrespective of errors. iiuc, currently, it owns |socket| iff return value is true.\n\nIf not, I\u0027d note this as a comment here also (AdbTypes.h already does so)",
+      "range": {
+        "startLine": 106,
+        "startChar": 34,
+        "endLine": 106,
+        "endChar": 44
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
