@@ -94,36 +94,3 @@ TEST(AvdUtil, propertyFile_getApiLevel) {
   EXPECT_EQ(0,fileData_initFromMemory(&fd, testFileBogus, strlen(testFileBogus)));
   EXPECT_EQ(3,propertyFile_getApiLevel(&fd));
 }
-
-TEST(AvdUtil, propertyFile_getAdbdCommunicationMode) {
-  FileData fd;
-
-  const char* emptyFile =
-    "\n";
-
-  const char* valueIsZero =
-    "ro.adb.qemud=0";
-
-  const char* valueIsOne =
-    "ro.adb.qemud=1";
-
-  const char* valueIsBogus =
-    "ro.adb.qemud=bogus";
-
-  // Empty file -> assume 0
-  EXPECT_EQ(0, fileData_initFromMemory(&fd, emptyFile, strlen(emptyFile)));
-  EXPECT_EQ(0, propertyFile_getAdbdCommunicationMode(&fd));
-
-  // 0 -> 0
-  EXPECT_EQ(0, fileData_initFromMemory(&fd, valueIsZero, strlen(valueIsZero)));
-  EXPECT_EQ(0, propertyFile_getAdbdCommunicationMode(&fd));
-
-  // 1 -> 1.
-  EXPECT_EQ(0, fileData_initFromMemory(&fd, valueIsOne, strlen(valueIsOne)));
-  EXPECT_EQ(1, propertyFile_getAdbdCommunicationMode(&fd));
-
-  // BOGUS -> 0
-  EXPECT_EQ(0, fileData_initFromMemory(&fd, valueIsBogus, strlen(valueIsBogus)));
-  EXPECT_EQ(0, propertyFile_getAdbdCommunicationMode(&fd));
-}
-
