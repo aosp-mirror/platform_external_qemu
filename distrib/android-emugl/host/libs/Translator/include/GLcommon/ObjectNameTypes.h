@@ -15,13 +15,46 @@
 */
 #pragma once
 
-enum NamedObjectType {
-    VERTEXBUFFER = 0,
-    TEXTURE = 1,
-    RENDERBUFFER = 2,
-    FRAMEBUFFER = 3,
-    SHADER = 4,
-    NUM_OBJECT_TYPES = 5  // Must be last
+#include <assert.h>
+#include <GLES/gl.h>
+
+enum class NamedObjectType {
+    VERTEXBUFFER,
+    TEXTURE,
+    RENDERBUFFER,
+    FRAMEBUFFER,
+    PROGRAM,
+    SHADER,
+    NUM_OBJECT_TYPES  // Must be last
+};
+
+//
+// Class GenNameInfo - this class contains the type of an GL object to be
+//                     generated. It also contains shader type when generating
+//                     shader object.
+//                     It is used by GlobalNameSpace::genName.
+//                     When generating non-shader object, a NamedObjectType
+//                     parameter should be passed to the constructor. When
+//                     generating shader object, the shader type should be
+//                     passed to the constructor.
+// Example:
+//          GlobalNameSpace globalNameSpace;
+//          GenNameInfo genTexture(NamedObjectType::TEXTURE);
+//          unsigned int texID = globalNameSpace.genName(genTexture);
+//          GenNameInfo genShader(GL_FRAGMENT_SHADER);
+//          unsigned int shaderID = globalNameSpace.genName(genShader);
+
+struct GenNameInfo {
+    NamedObjectType m_type = (NamedObjectType)0;
+    GLenum m_shaderType = 0;  // only used for NamedObjectType::SHADER
+    GenNameInfo() = delete;
+    // constructor for generating non-shader object
+    explicit GenNameInfo(NamedObjectType type) : m_type(type) {
+        assert(type != NamedObjectType::SHADER);
+    }
+    // constructor for generating shader object
+    explicit GenNameInfo(GLenum shaderType)
+        : m_type(NamedObjectType::SHADER), m_shaderType(shaderType) {}
 };
 
 typedef unsigned long long ObjectLocalName;
