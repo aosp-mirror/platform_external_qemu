@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8a91eb63_66b786a1",
+        "filename": "android/emulation/AdbTypes.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T18:58:11Z",
+      "side": 1,
+      "message": "main: I\u0027d strongly recommend taking true ownership of the socket. This method should close the socket no matter what happens. Having the caller cleanup resources based on return value is generally more error prone, imo.\n\nsoft suggestion: Use android::base::ScopedSocket in the implementation to achieve this goal.",
+      "range": {
+        "startLine": 30,
+        "startChar": 34,
+        "endLine": 30,
+        "endChar": 44
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_e6f1b668",
+        "filename": "android/emulation/AdbTypes.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T18:58:11Z",
+      "side": 1,
+      "message": "This is truly unfortunate. We only ever use one guest pipe at any given pipe (the other pipe is partially connected while the first one is use).\nThis adds a lot of unnecessary complexity.\n\nCan we take a trivial performance hit in reconnections (but not stability hit) and make do with exactly one guest pipe?",
+      "range": {
+        "startLine": 34,
+        "startChar": 40,
+        "endLine": 34,
+        "endChar": 58
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_26481e84",
+        "filename": "android/emulation/AdbTypes.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T18:58:11Z",
+      "side": 1,
+      "message": "Soft suggestion: iiuc, the use of init/deinit pair is to be able to cycle through 5555:2:limit ports trying to connect to each.\n\nI think it\u0027ll be a cleaner interface to not have the deinit function at all.\n\nHow about rename init to listen(int adbPort), make it callable multiple times (i.e., if we\u0027re already setup to listen on one port, we\u0027ll tear it down and continue). Additionally, destroying the AdbHostAgent cleans up whatever we\u0027re listening on right now.\n\nSo, the user of this agent can just keep listen()ing on the successive ports, and if nothing works destroy the object and move on.",
+      "range": {
+        "startLine": 36,
+        "startChar": 4,
+        "endLine": 43,
+        "endChar": 30
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_06124267",
+        "filename": "android/emulation/AdbTypes.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T18:58:11Z",
+      "side": 1,
+      "message": "nit: This comment better belongs with the declaration of onHostConnection.",
+      "range": {
+        "startLine": 47,
+        "startChar": 4,
+        "endLine": 48,
+        "endChar": 62
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_6636a6ee",
+        "filename": "android/emulation/AdbTypes.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T18:58:11Z",
+      "side": 1,
+      "message": "nit: I\u0027d drop this implementation detail here.",
+      "range": {
+        "startLine": 53,
+        "startChar": 17,
+        "endLine": 54,
+        "endChar": 17
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_262d7e99",
+        "filename": "android/emulation/AdbTypes.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T18:58:11Z",
+      "side": 1,
+      "message": "This API implies that the user keeps a pointer to the AdbGuestAgent even after calling |addGuest| whereby it transferred ownership of the AdbGuestAgent to us.\n\nI\u0027d recommend that addGuest returns an opaque id that the user can use with deleteGuest.",
+      "range": {
+        "startLine": 55,
+        "startChar": 29,
+        "endLine": 55,
+        "endChar": 48
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
