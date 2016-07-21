@@ -79,13 +79,9 @@ ShareGroup::genName(GenNameInfo genNameInfo,
 
     emugl::Mutex::AutoLock _lock(m_lock);
     ObjectLocalName localName =
-            m_nameSpace[static_cast<ObjectDataType>(genNameInfo.m_type)]
-                    ->genName(genNameInfo, p_localName, genLocal);
-    if (genNameInfo.m_type == NamedObjectType::TEXTURE) {
-        incTexRefCounterNoLock(
-                m_nameSpace[static_cast<int>(NamedObjectType::TEXTURE)]
-                        ->getGlobalName(localName));
-    }
+            m_nameSpace[static_cast<int>(genNameInfo.m_type)]->genName(
+                                                    genNameInfo,
+                                                    p_localName, genLocal);
     return localName;
 }
 
@@ -127,6 +123,17 @@ ShareGroup::getLocalName(NamedObjectType p_type,
     return m_nameSpace[static_cast<int>(p_type)]->getLocalName(p_globalName);
 }
 
+NamedObjectPtr ShareGroup::getNamedObject(NamedObjectType p_type,
+                                          ObjectLocalName p_localName) {
+    if (static_cast<int>(p_type) >= 
+            static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES)) {
+        return 0;
+    }
+
+    emugl::Mutex::AutoLock _lock(m_lock);
+    return m_nameSpace[static_cast<int>(p_type)]->getNamedObject(p_localName);
+}
+
 void
 ShareGroup::deleteName(NamedObjectType p_type, ObjectLocalName p_localName)
 {
@@ -154,17 +161,17 @@ ShareGroup::isObject(NamedObjectType p_type, ObjectLocalName p_localName)
 }
 
 void
-ShareGroup::replaceGlobalName(NamedObjectType p_type,
+ShareGroup::replaceGlobalObject(NamedObjectType p_type,
                               ObjectLocalName p_localName,
-                              unsigned int p_globalName)
+                              NamedObjectPtr p_globalObject)
 {
     if (static_cast<int>(p_type) >=
         static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES))
         return;
 
     emugl::Mutex::AutoLock _lock(m_lock);
-    m_nameSpace[static_cast<int>(p_type)]->replaceGlobalName(p_localName,
-                                                             p_globalName);
+    m_nameSpace[static_cast<int>(p_type)]->replaceGlobalObject(p_localName,
+                                                               p_globalObject);
 }
 
 void
@@ -207,48 +214,6 @@ ShareGroup::getObjectData(NamedObjectType p_type,
         if (i != map->end()) ret = (*i).second;
     }
     return ret;
-}
-
-size_t
-ShareGroup::incTexRefCounterNoLock(unsigned int p_globalName) {
-    TextureRefCounterMap *map =
-            (TextureRefCounterMap *)m_globalTextureRefCounter;
-    if (!map) {
-        map = new TextureRefCounterMap();
-        m_globalTextureRefCounter = map;
-    }
-    size_t& val = (*map)[p_globalName];
-    val ++;
-    return val;
-}
-
-size_t
-ShareGroup::incTexRefCounter(unsigned int p_globalName) {
-    emugl::Mutex::AutoLock _lock(m_lock);
-    return incTexRefCounterNoLock(p_globalName);
-}
-
-size_t
-ShareGroup::decTexRefCounterAndReleaseIf0(unsigned int p_globalName) {
-    emugl::Mutex::AutoLock _lock(m_lock);
-    assert(m_globalTextureRefCounter);
-    TextureRefCounterMap *map =
-            (TextureRefCounterMap *)m_globalTextureRefCounter;
-    auto iterator = map->find(p_globalName);
-    if (iterator == map->end()) {
-        return 0;
-    }
-    size_t& val = iterator->second;
-    assert(val != 0);
-    val --;
-    if (val) {
-        return val;
-    }
-    map->erase(iterator);
-    m_nameSpace[static_cast<int>(NamedObjectType::TEXTURE)]
-            ->m_globalNameSpace->deleteName(NamedObjectType::TEXTURE,
-                                            p_globalName);
-    return 0;
 }
 
 ObjectNameManager::ObjectNameManager(GlobalNameSpace *globalNameSpace) :

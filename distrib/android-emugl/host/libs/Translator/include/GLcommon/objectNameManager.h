@@ -18,7 +18,7 @@
 
 #include "emugl/common/mutex.h"
 #include "emugl/common/smart_ptr.h"
-#include "GLcommon/ObjectNameTypes.h"
+#include "GLcommon/NamedObject.h"
 #include <GLES/gl.h>
 #include <unordered_map>
 
@@ -82,6 +82,11 @@ public:
     ObjectLocalName getLocalName(NamedObjectType p_type, unsigned int p_globalName);
 
     //
+    // getNamedObject - returns the smart pointer of an object or null if the
+    //                  object does not exist.
+    NamedObjectPtr getNamedObject(NamedObjectType p_type, ObjectLocalName p_localName);
+
+    //
     // deleteName - deletes and object from the namespace as well as its
     //              global name from the global name space.
     //
@@ -91,7 +96,7 @@ public:
     // replaceGlobalName - replaces an object to map to an existing global
     //        named object. (used when creating EGLImage siblings)
     //
-    void replaceGlobalName(NamedObjectType p_type, ObjectLocalName p_localName, unsigned int p_globalName);
+    void replaceGlobalObject(NamedObjectType p_type, ObjectLocalName p_localName, NamedObjectPtr p_globalObject);
 
     //
     // isObject - returns true if the named object exist.
@@ -108,21 +113,7 @@ public:
     //
     ObjectDataPtr getObjectData(NamedObjectType p_type, ObjectLocalName p_localName);
 
-    //
-    // Increase the reference counter of a texture by 1
-    // Return the current counter
-    //
-    size_t incTexRefCounter(unsigned int p_globalName);
-
-    //
-    // Decrease the reference counter of a texture by 1
-    // Return the current counter
-    // Release texture if counter reaches 0
-    size_t decTexRefCounterAndReleaseIf0(unsigned int p_globalName);
-
 private:
-    size_t incTexRefCounterNoLock(unsigned int p_globalName);
-
     explicit ShareGroup(GlobalNameSpace *globalNameSpace);
 
 private:

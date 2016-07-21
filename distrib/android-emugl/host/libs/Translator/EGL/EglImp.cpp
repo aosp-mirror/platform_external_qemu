@@ -955,9 +955,9 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
     ThreadInfo* thread  = getThreadInfo();
     ShareGroupPtr sg = thread->shareGroup;
     if (sg.get() != NULL) {
-        unsigned int globalTexName = sg->getGlobalName(
-                NamedObjectType::TEXTURE, SafeUIntFromPointer(buffer));
-        if (!globalTexName) return EGL_NO_IMAGE_KHR;
+        NamedObjectPtr globalTexObject = sg->getNamedObject(NamedObjectType::TEXTURE,
+                                                            SafeUIntFromPointer(buffer));
+        if (!globalTexObject) return EGL_NO_IMAGE_KHR;
 
         ImagePtr img( new EglImage() );
         if (img.get() != NULL) {
@@ -971,8 +971,7 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
             img->height = texData->height;
             img->border = texData->border;
             img->internalFormat = texData->internalFormat;
-            img->globalTexName = globalTexName;
-            sg->incTexRefCounter(globalTexName);
+            img->globalTexObj = globalTexObject;
             return dpy->addImageKHR(img);
         }
     }
@@ -984,13 +983,6 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR image)
 {
     VALIDATE_DISPLAY(display);
-    ThreadInfo* thread  = getThreadInfo();
-    ShareGroupPtr& sg = thread->shareGroup;
-    ImagePtr img = dpy->getImage(image);
-    if (sg != NULL && img != NULL) {
-        unsigned int globalTexName = img->globalTexName;
-        sg->decTexRefCounterAndReleaseIf0(globalTexName);
-    }
     return dpy->destroyImageKHR(image) ? EGL_TRUE:EGL_FALSE;
 }
 
