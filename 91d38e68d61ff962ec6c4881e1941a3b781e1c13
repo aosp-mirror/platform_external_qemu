@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8a91eb63_9e6d9c9e",
+        "filename": "android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-07-21T16:58:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aaf86f8a_92f81c1d",
+      "range": {
+        "startLine": 93,
+        "startChar": 0,
+        "endLine": 96,
+        "endChar": 34
+      },
+      "revId": "91d38e68d61ff962ec6c4881e1941a3b781e1c13",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aaf86f8a_f2436046",
         "filename": "android/skin/qt/extended-pages/virtual-sensors-page.h",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "8a91eb63_f9431a46",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-07-21T16:58:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aaf86f8a_f2436046",
+      "range": {
+        "startLine": 83,
+        "startChar": 9,
+        "endLine": 83,
+        "endChar": 34
+      },
+      "revId": "91d38e68d61ff962ec6c4881e1941a3b781e1c13",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aaf86f8a_3284c86d",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2016-07-20T19:12:23Z",
       "side": 1,
       "message": "assert() instead? now, when we create in in ctor, it should always be there",
+      "range": {
+        "startLine": 440,
+        "startChar": 8,
+        "endLine": 440,
+        "endChar": 23
+      },
+      "revId": "91d38e68d61ff962ec6c4881e1941a3b781e1c13",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_79672af5",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 440,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-07-21T16:58:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aaf86f8a_3284c86d",
       "range": {
         "startLine": 440,
         "startChar": 8,
