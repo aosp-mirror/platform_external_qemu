@@ -102,6 +102,14 @@ ShareGroup::getLocalName(NamedObjectType p_type,
     return m_nameSpace[p_type]->getLocalName(p_globalName);
 }
 
+NamedObjectPtr ShareGroup::getNamedObject(NamedObjectType p_type,
+                                          ObjectLocalName p_localName) {
+    if (p_type >= NUM_OBJECT_TYPES) return 0;
+
+    emugl::Mutex::AutoLock _lock(m_lock);
+    return m_nameSpace[p_type]->getNamedObject(p_localName);
+}
+
 void
 ShareGroup::deleteName(NamedObjectType p_type, ObjectLocalName p_localName)
 {
@@ -125,14 +133,14 @@ ShareGroup::isObject(NamedObjectType p_type, ObjectLocalName p_localName)
 }
 
 void
-ShareGroup::replaceGlobalName(NamedObjectType p_type,
+ShareGroup::replaceGlobalObject(NamedObjectType p_type,
                               ObjectLocalName p_localName,
-                              unsigned int p_globalName)
+                              NamedObjectPtr p_globalObject)
 {
     if (p_type >= NUM_OBJECT_TYPES) return;
 
     emugl::Mutex::AutoLock _lock(m_lock);
-    m_nameSpace[p_type]->replaceGlobalName(p_localName, p_globalName);
+    m_nameSpace[p_type]->replaceGlobalObject(p_localName, p_globalObject);
 }
 
 void

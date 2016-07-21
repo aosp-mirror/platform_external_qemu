@@ -17,13 +17,13 @@
 #pragma once
 
 #include "emugl/common/mutex.h"
-#include "GLcommon/ObjectNameTypes.h"
+#include "GLcommon/NamedObject.h"
 
 #include <GLES/gl.h>
 #include <unordered_map>
 #include <unordered_set>
 
-typedef std::unordered_map<ObjectLocalName, unsigned int> NamesMap;
+typedef std::unordered_map<ObjectLocalName, NamedObjectPtr> NamesMap;
 typedef std::unordered_map<unsigned int, ObjectLocalName> GlobalToLocalNamesMap;
 
 //
@@ -66,6 +66,11 @@ private:
     //                 does not exist.
     //
     ObjectLocalName getLocalName(unsigned int p_globalName);
+    
+    //
+    // getNamedObject - returns the smart pointer of an object or null if the
+    //                  object does not exist.
+    NamedObjectPtr getNamedObject(ObjectLocalName p_localName);
 
     //
     // deleteName - deletes and object from the namespace as well as its
@@ -81,7 +86,7 @@ private:
     //
     // replaces an object to map to an existing global object
     //
-    void replaceGlobalName(ObjectLocalName p_localName, unsigned int p_globalName);
+    void replaceGlobalObject(ObjectLocalName p_localName, NamedObjectPtr p_namedObject);
 
 private:
     ObjectLocalName m_nextName = 0;
@@ -94,6 +99,7 @@ private:
 class GlobalNameSpace
 {
 public:
+    friend class NamedObject;
     unsigned int genName(const GenNameInfo& genNameInfo);
     void deleteName(NamedObjectType p_type, unsigned int p_name);
 private:
