@@ -18,6 +18,8 @@
 
 #include "GLcommon/GLEScontext.h"
 
+#include <assert.h>
+
 NameSpace::NameSpace(NamedObjectType p_type,
                      GlobalNameSpace *globalNameSpace) :
     m_type(p_type),
@@ -33,8 +35,9 @@ NameSpace::~NameSpace()
 }
 
 ObjectLocalName
-NameSpace::genName(ObjectLocalName p_localName, bool genLocal)
+NameSpace::genName(GenNameInfo genNameInfo, ObjectLocalName p_localName, bool genLocal)
 {
+    assert(m_type == genNameInfo.m_type);
     ObjectLocalName localName = p_localName;
     if (genLocal) {
         do {
@@ -44,7 +47,7 @@ NameSpace::genName(ObjectLocalName p_localName, bool genLocal)
                         m_localToGlobalMap.end() );
     }
 
-    unsigned int globalName = m_globalNameSpace->genName(m_type);
+    unsigned int globalName = m_globalNameSpace->genName(genNameInfo);
     m_localToGlobalMap[localName] = globalName;
     m_globalToLocalMap[globalName] = localName;
 
@@ -81,7 +84,7 @@ NameSpace::deleteName(ObjectLocalName p_localName)
 {
     NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
     if (n != m_localToGlobalMap.end()) {
-        if (m_type != TEXTURE) {
+        if (m_type != NamedObjectType::TEXTURE) {
             m_globalNameSpace->deleteName(m_type, (*n).second);
         }
         m_globalToLocalMap.erase(n->second);
@@ -100,7 +103,7 @@ NameSpace::replaceGlobalName(ObjectLocalName p_localName, unsigned int p_globalN
 {
     NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
     if (n != m_localToGlobalMap.end()) {
-        if (m_type != TEXTURE) {
+        if (m_type != NamedObjectType::TEXTURE) {
             m_globalNameSpace->deleteName(m_type, (*n).second);
         }
         m_globalToLocalMap.erase(n->second);
@@ -110,37 +113,58 @@ NameSpace::replaceGlobalName(ObjectLocalName p_localName, unsigned int p_globalN
 }
 
 unsigned int
-GlobalNameSpace::genName(NamedObjectType p_type)
+GlobalNameSpace::genName(GenNameInfo genNameInfo)
 {
-    if ( p_type >= NUM_OBJECT_TYPES ) return 0;
+    if (genNameInfo.m_type >= NamedObjectType::NUM_OBJECT_TYPES)
+        return 0;
     unsigned int name = 0;
 
     emugl::Mutex::AutoLock _lock(m_lock);
-    switch (p_type) {
-    case VERTEXBUFFER:
-        GLEScontext::dispatcher().glGenBuffers(1,&name);
-        break;
-    case TEXTURE:
-        GLEScontext::dispatcher().glGenTextures(1,&name);
-        break;
-    case RENDERBUFFER:
-        GLEScontext::dispatcher().glGenRenderbuffersEXT(1,&name);
-        break;
-    case FRAMEBUFFER:
-        GLEScontext::dispatcher().glGenFramebuffersEXT(1,&name);
-        break;
-    case SHADER: //objects in shader namepace are not handled
-    default:
-        name = 0;
+    switch (genNameInfo.m_type) {
+        case NamedObjectType::VERTEXBUFFER:
+            GLEScontext::dispatcher().glGenBuffers(1, &name);
+            break;
+        case NamedObjectType::TEXTURE:
+            GLEScontext::dispatcher().glGenTextures(1, &name);
+            break;
+        case NamedObjectType::RENDERBUFFER:
+            GLEScontext::dispatcher().glGenRenderbuffersEXT(1, &name);
+            break;
+        case NamedObjectType::FRAMEBUFFER:
+            GLEScontext::dispatcher().glGenFramebuffersEXT(1, &name);
+            break;
+        case NamedObjectType::SHADER:
+            name = GLEScontext::dispatcher().glCreateShader(
+                    genNameInfo.m_shaderType);
+            break;
+        case NamedObjectType::PROGRAM:
+            name = GLEScontext::dispatcher().glCreateProgram();
+            break;
+        default:
+            name = 0;
     }
     if (!m_deleteInitialized) {
         m_deleteInitialized = true;
-        m_glDelete[VERTEXBUFFER] = GLEScontext::dispatcher().glDeleteBuffers;
-        m_glDelete[TEXTURE] = GLEScontext::dispatcher().glDeleteTextures;
-        m_glDelete[RENDERBUFFER] =
-                GLEScontext::dispatcher().glDeleteRenderbuffersEXT;
-        m_glDelete[FRAMEBUFFER] =
-                GLEScontext::dispatcher().glDeleteFramebuffersEXT;
+        m_glDelete[static_cast<int>(NamedObjectType::VERTEXBUFFER)] =
+                [](GLuint lname) {
+                    GLEScontext::dispatcher().glDeleteBuffers(1, &lname);
+                };
+        m_glDelete[static_cast<int>(NamedObjectType::TEXTURE)] =
+                [](GLuint lname) {
+                    GLEScontext::dispatcher().glDeleteTextures(1, &lname);
+                };
+        m_glDelete[static_cast<int>(NamedObjectType::RENDERBUFFER)] = [](
+                GLuint lname) {
+            GLEScontext::dispatcher().glDeleteRenderbuffersEXT(1, &lname);
+        };
+        m_glDelete[static_cast<int>(NamedObjectType::FRAMEBUFFER)] = [](
+                GLuint lname) {
+            GLEScontext::dispatcher().glDeleteFramebuffersEXT(1, &lname);
+        };
+        m_glDelete[static_cast<int>(NamedObjectType::PROGRAM)] =
+                GLEScontext::dispatcher().glDeleteProgram;
+        m_glDelete[static_cast<int>(NamedObjectType::SHADER)] =
+                GLEScontext::dispatcher().glDeleteShader;
     }
     return name;
 }
@@ -148,8 +172,7 @@ GlobalNameSpace::genName(NamedObjectType p_type)
 void
 GlobalNameSpace::deleteName(NamedObjectType p_type, unsigned int p_name)
 {
-    if (p_type != SHADER) {
-        emugl::Mutex::AutoLock _lock(m_lock);
-        m_glDelete[p_type](1, &p_name);
+    if (p_type < NamedObjectType::NUM_OBJECT_TYPES && p_name != 0) {
+        m_glDelete[static_cast<int>(p_type)](p_name);
     }
 }
