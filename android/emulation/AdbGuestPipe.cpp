@@ -85,10 +85,12 @@ AndroidPipe* AdbGuestPipe::Service::create(void* mHwPipe,
                                            const char* args) const {
     auto pipe = new AdbGuestPipe(mHwPipe, this, mHostAgent);
     mHostAgent->addGuest(pipe);
+    DD("%s: [%p] created", __func__, pipe);
     return pipe;
 }
 
 AdbGuestPipe::~AdbGuestPipe() {
+    DD("%s: [%p] destroyed", __func__, this);
     if (mState != State::ClosedByGuest) {
         closeFromHost();
     }
@@ -143,6 +145,10 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
     } else if (mState == State::SendingAcceptReplyOk) {
         // The guest is receiving the 'ok' reply.
         return onGuestRecvReply(buffers, numBuffers);
+    } else if (mState == State::WaitingForHostAdbConnection ||
+               mState == State::WaitingForGuestStartCommand) {
+        // Not ready yet to send data to the guest.
+        return PIPE_ERROR_AGAIN;
     } else {
         if (mState != State::ClosedByHost) {
             // Invalid state !!!
@@ -186,6 +192,7 @@ void AdbGuestPipe::onGuestWantWakeOn(int flags) {
 }
 
 bool AdbGuestPipe::onHostConnection(int socket) {
+    DD("%s: [%p] host connection", __func__, this);
     if (mState > State::WaitingForHostAdbConnection) {
         // Too late, the connection was closed by the guest.
         CHECK(mState == State::ClosedByGuest);
@@ -292,6 +299,7 @@ int AdbGuestPipe::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
 
 int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
                                   int numBuffers) {
+    DD("%s: [%p] numBuffers=%d", __func__, this, numBuffers);
     int result = 0;
     while (numBuffers > 0) {
         const uint8_t* data = buffers[0].data;
@@ -331,6 +339,7 @@ int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
 
 int AdbGuestPipe::onGuestRecvReply(AndroidPipeBuffer* buffers, int numBuffers) {
     // Sending reply to the guest.
+    DD("%s: [%p] numBuffers=%d", __func__, this, numBuffers);
     int result = 0;
     while (numBuffers > 0) {
         uint8_t* data = buffers[0].data;
@@ -357,6 +366,7 @@ int AdbGuestPipe::onGuestRecvReply(AndroidPipeBuffer* buffers, int numBuffers) {
 
 int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
                                      int numBuffers) {
+    DD("%s: [%p] numBuffers=%d", __func__, this, numBuffers);
     // Waiting for a command from the guest. Just match the bytes
     // with the expected command. Any mismatch triggers an I/O error
     // which will force the guest to close the connection.
@@ -413,6 +423,7 @@ void AdbGuestPipe::waitForHostConnection() {
         // A host connection already exists! Send the 'ok' reply back to
         // the guest.
         setReply("ok", State::SendingAcceptReplyOk);
+        signalWake(PIPE_WAKE_READ);
     } else {
         // No host connection yet. The guest is still waiting for the 'ok'
         // reply.
