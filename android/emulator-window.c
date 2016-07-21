@@ -52,7 +52,7 @@ static void write_window_name(char* buff,
                               size_t buff_len,
                               int base_port,
                               const char* avd_name) {
-    snprintf(buff, buff_len, "%d:%s", base_port, avd_name);
+    snprintf(buff, buff_len, "Android Emulator - %s:%d", avd_name, base_port);
 }
 
 
@@ -415,7 +415,7 @@ android_emulator_set_base_port( int  port )
 {
     if (qemulator->ui) {
         /* Base port is already set in the emulator's core. */
-        char buff[32];
+        char buff[256];
         write_window_name(buff,
                         sizeof(buff),
                         android_base_port,
