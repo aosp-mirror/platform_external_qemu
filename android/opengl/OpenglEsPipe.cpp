@@ -256,10 +256,14 @@ private:
     void processIoEvents(ChannelState state) {
         int wakeFlags = 0;
 
-        if (mCareAboutRead && canReadAny(state)) {
+        // |mCareAboutRead| may not line up exactly with
+        // |canReadAny(state)|, so just make sure
+        // one of them is active at least.
+        if (mCareAboutRead || canReadAny(state)) {
             wakeFlags |= PIPE_WAKE_READ;
             mCareAboutRead = false;
         }
+
         if (mCareAboutWrite && canWrite(state)) {
             wakeFlags |= PIPE_WAKE_WRITE;
             mCareAboutWrite = false;
