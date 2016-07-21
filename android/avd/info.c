@@ -1421,7 +1421,9 @@ int avdInfo_getAdbdCommunicationMode( const AvdInfo* i )
         return 0;
     }
 
-    return propertyFile_getAdbdCommunicationMode(i->buildProperties);
+    // Ignore property file since all system images have been updated a long time
+    // ago to support the pipe service for API level >= 16.
+    return 1;
 }
 
 int avdInfo_getSnapshotPresent(const AvdInfo* i)
