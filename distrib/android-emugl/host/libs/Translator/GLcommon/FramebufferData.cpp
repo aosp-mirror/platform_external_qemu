@@ -164,7 +164,8 @@ void FramebufferData::validate(GLEScontext* ctx)
         }
 
         // Create the color attachment and attch it
-        unsigned int tex = ctx->shareGroup()->genGlobalName(TEXTURE);
+        unsigned int tex = 0;
+        ctx->dispatcher().glGenTextures(1, &tex);
         GLint prev;
         ctx->dispatcher().glGetIntegerv(GL_TEXTURE_BINDING_2D, &prev);
         ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, tex);
