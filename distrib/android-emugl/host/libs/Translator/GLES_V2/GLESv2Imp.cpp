@@ -524,20 +524,12 @@ GL_APICALL void  GL_APIENTRY glDeleteTextures(GLsizei n, const GLuint* textures)
     if(ctx->shareGroup().get()) {
         for(int i=0; i < n; i++){
             if (textures[i]!=0) {
-                TextureData* tData = getTextureData(textures[i]);
-                // delete the underlying OpenGL texture but only if this
-                // texture is not a target of EGLImage.
-                if (!tData || tData->sourceEGLImage == 0) {
-                    const GLuint globalTextureName = ctx->shareGroup()->getGlobalName(TEXTURE,textures[i]);
-                    ctx->shareGroup()->decTexRefCounterAndReleaseIf0(globalTextureName);
-                }
-                ctx->shareGroup()->deleteName(TEXTURE,textures[i]);
-
                 if (ctx->getBindedTexture(GL_TEXTURE_2D) == textures[i])
                     ctx->setBindedTexture(GL_TEXTURE_2D,0);
                 if (ctx->getBindedTexture(GL_TEXTURE_CUBE_MAP) == textures[i])
                     ctx->setBindedTexture(GL_TEXTURE_CUBE_MAP,0);
                 s_detachFromFramebuffer(TEXTURE, textures[i]);
+                ctx->shareGroup()->deleteName(TEXTURE,textures[i]);
             }
         }
     }
@@ -753,9 +745,10 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
             // attach the eglimage's texture instead the renderbuffer.
             //
             ctx->dispatcher().glFramebufferTexture2DEXT(target,
-                                                    attachment,
-                                                    GL_TEXTURE_2D,
-                                                    rbData->eglImageGlobalTexName,0);
+                                    attachment,
+                                    GL_TEXTURE_2D,
+                                    rbData->eglImageGlobalTexObject->getGlobalName(),
+                                    0);
             return;
         }
     }
@@ -1224,7 +1217,7 @@ GL_APICALL void  GL_APIENTRY glGetRenderbufferParameteriv(GLenum target, GLenum 
             GLint prevTex;
             ctx->dispatcher().glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTex);
             ctx->dispatcher().glBindTexture(GL_TEXTURE_2D,
-                                            rbData->eglImageGlobalTexName);
+                                            rbData->eglImageGlobalTexObject->getGlobalName());
             ctx->dispatcher().glGetTexLevelParameteriv(GL_TEXTURE_2D, 0,
                                                        texPname,
                                                        params);
@@ -1809,7 +1802,7 @@ GL_APICALL void  GL_APIENTRY glRenderbufferStorage(GLenum target, GLenum interna
             (*rbData->eglImageDetach)(rbData->sourceEGLImage);
         }
         rbData->sourceEGLImage = 0;
-        rbData->eglImageGlobalTexName = 0;
+        rbData->eglImageGlobalTexObject = nullptr;
     }
 
     ctx->dispatcher().glRenderbufferStorageEXT(target,internal,width,height);
@@ -2217,17 +2210,9 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
         // current binded texture object to the existing global object.
         if (ctx->shareGroup().get()) {
             ObjectLocalName tex = TextureLocalName(target,ctx->getBindedTexture(target));
-            unsigned int oldGlobal = ctx->shareGroup()->getGlobalName(TEXTURE, tex);
-            // Delete old texture object but only if it is not a target of a EGLImage
-            if (oldGlobal) {
-                TextureData* oldTexData = getTextureData(tex);
-                if (!oldTexData || oldTexData->sourceEGLImage == 0) {
-                    ctx->shareGroup()->decTexRefCounterAndReleaseIf0(oldGlobal);
-                }
-            }
             // replace mapping and bind the new global object
-            ctx->shareGroup()->replaceGlobalName(TEXTURE, tex,img->globalTexName);
-            ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, img->globalTexName);
+            ctx->shareGroup()->replaceGlobalObject(TEXTURE, tex,img->globalTexObj);
+            ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, img->globalTexObj->getGlobalName());
             TextureData *texData = getTextureTargetData(target);
             SET_ERROR_IF(texData==NULL,GL_INVALID_OPERATION);
             texData->width = img->width;
@@ -2262,7 +2247,7 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
     //
     rbData->sourceEGLImage = imagehndl;
     rbData->eglImageDetach = s_eglIface->eglDetachEGLImage;
-    rbData->eglImageGlobalTexName = img->globalTexName;
+    rbData->eglImageGlobalTexObject = img->globalTexObj;
 
     //
     // if the renderbuffer is attached to a framebuffer
@@ -2280,7 +2265,8 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
         ctx->dispatcher().glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                                     rbData->attachedPoint,
                                                     GL_TEXTURE_2D,
-                                                    img->globalTexName,0);
+                                                    img->globalTexObj->getGlobalName(),
+                                                    0);
         if (prevFB != rbData->attachedFB) {
             ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 
                                                    prevFB);

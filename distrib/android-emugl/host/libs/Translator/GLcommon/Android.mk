@@ -7,6 +7,7 @@ host_common_SRC_FILES :=     \
      GLESvalidate.cpp        \
      GLESpointer.cpp         \
      GLESbuffer.cpp          \
+     NamedObject.cpp         \
      RangeManip.cpp          \
      TextureUtils.cpp        \
      PaletteTexture.cpp      \
