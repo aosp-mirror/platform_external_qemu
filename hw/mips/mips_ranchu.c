@@ -2,6 +2,7 @@
 #include "hw/devices.h"
 #include "hw/mips/mips.h"
 #include "hw/mips/cpudevs.h"
+#include "hw/mips/bios.h"
 #include "net/net.h"
 #include "sysemu/device_tree.h"
 #include "sysemu/sysemu.h"
@@ -29,6 +30,17 @@
 
 #define HIGHMEM_OFFSET    0x20000000
 #define GOLDFISH_IO_SPACE 0x1f000000
+#define RESET_ADDRESS     0x1fc00000
+
+#define RANCHU_BIOS_SIZE  0x100000    /* 1024 * 1024 = 1 MB */
+
+/* Store the environment arguments table in the second page from the top
+ * of the bios memory. Two pages are required since the environment
+ * arguments table is 4160 bytes in size.
+ */
+#define ENVP_ADDR         PHYS_TO_VIRT(RESET_ADDRESS + RANCHU_BIOS_SIZE - 2*TARGET_PAGE_SIZE)
+#define ENVP_NB_ENTRIES   16
+#define ENVP_ENTRY_SIZE   256
 
 #define VIRTIO_TRANSPORTS 16
 #define MAX_GF_TTYS       3
@@ -55,6 +67,7 @@ enum {
     RANCHU_GF_EVDEV,
     RANCHU_ANDROID_PIPE,
     RANCHU_GF_AUDIO,
+    RANCHU_GF_RESET,
     RANCHU_MMIO,
 };
 
@@ -92,17 +105,26 @@ static DevMapEntry devmap[] = {
         "android_pipe", "android_pipe", "generic,android-pipe" },
     [RANCHU_GF_AUDIO] =     { GOLDFISH_IO_SPACE + 0x0C000, 0x0100, 11,
         "goldfish_audio", "goldfish_audio", "generic,goldfish-audio" },
+    [RANCHU_GF_RESET] =     { GOLDFISH_IO_SPACE + 0x0D000, 0x0100, 12,
+        "goldfish_reset", "goldfish_reset", "generic,goldfish-reset" },
     [RANCHU_MMIO] =         { GOLDFISH_IO_SPACE + 0x10000, 0x0200, 16,
         "virtio-mmio", "virtio_mmio", "virtio,mmio" },
     /* ...repeating for a total of VIRTIO_TRANSPORTS, each of that size */
 };
 
-struct machine_params {
-    uint64_t kernel_entry;
-    uint64_t cmdline_ptr;
+struct mips_boot_info {
+    const char* kernel_filename;
+    const char* kernel_cmdline;
+    const char* initrd_filename;
     unsigned ram_size;
     unsigned highmem_size;
+};
+
+typedef struct machine_params {
+    struct mips_boot_info bootinfo;
     MIPSCPU *cpu;
+    int fdt_size;
+    void *fdt;
 } ranchu_params;
 
 static void main_cpu_reset(void* opaque1)
@@ -111,106 +133,189 @@ static void main_cpu_reset(void* opaque1)
     MIPSCPU *cpu = opaque->cpu;
 
     cpu_reset(CPU(cpu));
-
-    cpu->env.active_tc.PC = opaque->kernel_entry;
-    cpu->env.active_tc.gpr[4] = opaque->cmdline_ptr; /* a0 */
-    cpu->env.active_tc.gpr[5] = opaque->ram_size;    /* a1 */
-    cpu->env.active_tc.gpr[6] = opaque->highmem_size;/* a2 */
-    cpu->env.active_tc.gpr[7] = 0;                   /* a3 */
-
 }
 
-static void android_load_kernel(CPUMIPSState *env, int ram_size,
-                                const char *kernel_filename,
-                                const char *kernel_cmdline,
-                                const char *initrd_filename,
-                                void* fdt, int fdt_size)
+/* ROM and pseudo bootloader
+
+   The following code implements a very simple bootloader. It first
+   loads the registers a0, a1, a2 and a3 to the values expected by the kernel,
+   and then jumps at the kernel entry address.
+
+   The registers a0 to a3 should contain the following values:
+     a0 - 32-bit address of the command line
+     a1 - RAM size in bytes (ram_size)
+     a2 - RAM size in bytes (highmen_size)
+     a3 - 0
+*/
+static void write_bootloader(uint8_t *base, int64_t run_addr,
+                              int64_t kernel_entry, ranchu_params *rp)
+{
+    uint32_t *p;
+
+    /* Small bootloader */
+    p = (uint32_t *)base;
+
+    stl_p(p++, 0x08000000 | ((run_addr + 0x040) & 0x0fffffff) >> 2); /* j 0x1fc00040 */
+    stl_p(p++, 0x00000000);                                          /* nop */
+
+    /* Second part of the bootloader */
+    p = (uint32_t *) (base + 0x040);
+    stl_p(p++, 0x3c040000 | (((ENVP_ADDR + 64) >> 16) & 0xffff));    /* lui a0, high(ENVP_ADDR + 64) */
+    stl_p(p++, 0x34840000 | ((ENVP_ADDR + 64) & 0xffff));            /* ori a0, a0, low(ENVP_ADDR + 64) */
+    stl_p(p++, 0x3c050000 | (rp->bootinfo.ram_size >> 16));          /* lui a1, high(ram_size) */
+    stl_p(p++, 0x34a50000 | (rp->bootinfo.ram_size & 0xffff));       /* ori a1, a1, low(ram_size) */
+    stl_p(p++, 0x3c060000 | (rp->bootinfo.highmem_size >> 16));      /* lui a2, high(highmem_size) */
+    stl_p(p++, 0x34c60000 | (rp->bootinfo.highmem_size & 0xffff));   /* ori a2, a2, low(highmem_size) */
+    stl_p(p++, 0x24070000);                                          /* addiu a3, zero, 0 */
+
+    /* Jump to kernel code */
+    stl_p(p++, 0x3c1f0000 | ((kernel_entry >> 16) & 0xffff));        /* lui ra, high(kernel_entry) */
+    stl_p(p++, 0x37ff0000 | (kernel_entry & 0xffff));                /* ori ra, ra, low(kernel_entry) */
+    stl_p(p++, 0x03e00009);                                          /* jalr ra */
+    stl_p(p++, 0x00000000);                                          /* nop */
+}
+
+static void GCC_FMT_ATTR(3, 4) prom_set(uint32_t* prom_buf, int index,
+                                        const char *string, ...)
+{
+    va_list ap;
+    int32_t table_addr;
+
+    if (index >= ENVP_NB_ENTRIES)
+        return;
+
+    if (string == NULL) {
+        prom_buf[index] = 0;
+        return;
+    }
+
+    table_addr = sizeof(int32_t) * ENVP_NB_ENTRIES + index * ENVP_ENTRY_SIZE;
+    prom_buf[index] = tswap32(ENVP_ADDR + table_addr);
+
+    va_start(ap, string);
+    vsnprintf((char *)prom_buf + table_addr, ENVP_ENTRY_SIZE, string, ap);
+    va_end(ap);
+}
+
+static int64_t android_load_kernel(ranchu_params *rp)
 {
     int initrd_size;
     ram_addr_t initrd_offset;
     uint64_t kernel_entry, kernel_low, kernel_high;
-    unsigned int cmdline;
+    uint32_t *prom_buf;
+    long prom_size;
+    int prom_index = 0;
 
     /* Load the kernel.  */
-    if (!kernel_filename) {
+    if (!rp->bootinfo.kernel_filename) {
         fprintf(stderr, "Kernel image must be specified\n");
         exit(1);
     }
 
-    if (load_elf(kernel_filename, cpu_mips_kseg0_to_phys, NULL,
+    if (load_elf(rp->bootinfo.kernel_filename, cpu_mips_kseg0_to_phys, NULL,
         (uint64_t *)&kernel_entry, (uint64_t *)&kernel_low,
         (uint64_t *)&kernel_high, 0, ELF_MACHINE, 1) < 0) {
-        fprintf(stderr, "qemu: could not load kernel '%s'\n", kernel_filename);
+        fprintf(stderr, "qemu: could not load kernel '%s'\n",
+                rp->bootinfo.kernel_filename);
         exit(1);
     }
 
     /* Load the DTB at the kernel_high address, that is the place where
      * kernel with Appended DT support enabled will look for it
      */
-    if (fdt) {
-        cpu_physical_memory_write(kernel_high, fdt, fdt_size);
-        kernel_high += fdt_size;
+    if (rp->fdt) {
+        cpu_physical_memory_write(kernel_high, rp->fdt, rp->fdt_size);
+        kernel_high += rp->fdt_size;
     }
-
-    ranchu_params.kernel_entry = kernel_entry;
 
     /* load initrd */
     initrd_size = 0;
     initrd_offset = 0;
-    if (initrd_filename) {
-        initrd_size = get_image_size (initrd_filename);
+    if (rp->bootinfo.initrd_filename) {
+        initrd_size = get_image_size (rp->bootinfo.initrd_filename);
         if (initrd_size > 0) {
             initrd_offset = (kernel_high + ~TARGET_PAGE_MASK) & TARGET_PAGE_MASK;
-            if (initrd_offset + initrd_size > ram_size) {
+            if (initrd_offset + initrd_size > rp->bootinfo.ram_size) {
                 fprintf(stderr,
                     "qemu: memory too small for initial ram disk '%s'\n",
-                    initrd_filename);
+                    rp->bootinfo.initrd_filename);
                 exit(1);
             }
-            initrd_size = load_image_targphys(initrd_filename,
-                                               initrd_offset,
-                                               ram_size - initrd_offset);
+            initrd_size = load_image_targphys(rp->bootinfo.initrd_filename,
+                                              initrd_offset,
+                                              rp->bootinfo.ram_size - initrd_offset);
         }
 
         if (initrd_size == (target_ulong) -1) {
             fprintf(stderr,
                 "qemu: could not load initial ram disk '%s'\n",
-                initrd_filename);
+                rp->bootinfo.initrd_filename);
             exit(1);
         }
     }
 
-    /* Store command line in top page of memory
-     * kernel will copy the command line to a local buffer
-     */
-    cmdline = ram_size - TARGET_PAGE_SIZE;
     char kernel_cmd[1024];
     if (initrd_size > 0)
         sprintf (kernel_cmd, "%s rd_start=0x%" HWADDR_PRIx " rd_size=%li",
-                 kernel_cmdline,
+                 rp->bootinfo.kernel_cmdline,
                  (hwaddr)PHYS_TO_VIRT(initrd_offset),
                  (long int)initrd_size);
     else
-        strcpy (kernel_cmd, kernel_cmdline);
+        strcpy (kernel_cmd, rp->bootinfo.kernel_cmdline);
 
     /* Setup Highmem */
     char kernel_cmd2[1024];
-    if (ranchu_params.highmem_size) {
+    if (rp->bootinfo.highmem_size) {
         sprintf (kernel_cmd2, "%s mem=%um@0x0 mem=%um@0x%x",
                  kernel_cmd,
                  GOLDFISH_IO_SPACE / (1024 * 1024),
-                 ranchu_params.highmem_size / (1024 * 1024),
+                 rp->bootinfo.highmem_size / (1024 * 1024),
                  HIGHMEM_OFFSET);
     } else {
         strcpy (kernel_cmd2, kernel_cmd);
     }
 
-    cpu_physical_memory_write(ram_size - TARGET_PAGE_SIZE,
-                              (void *)kernel_cmd2,
-                              strlen(kernel_cmd2) + 1);
+    /* Prepare the environment arguments table */
+    prom_size = ENVP_NB_ENTRIES * (sizeof(int32_t) + ENVP_ENTRY_SIZE);
+    prom_buf = g_malloc(prom_size);
 
-    ranchu_params.cmdline_ptr = PHYS_TO_VIRT(cmdline);
+    prom_set(prom_buf, prom_index++, "%s", kernel_cmd2);
+    prom_set(prom_buf, prom_index++, NULL);
+
+    rom_add_blob_fixed("prom", prom_buf, prom_size,
+                       cpu_mips_kseg0_to_phys(NULL, ENVP_ADDR));
+
+    return kernel_entry;
 }
+
+static void goldfish_reset_io_write(void *opaque, hwaddr addr,
+                             uint64_t val, unsigned size)
+{
+    switch (val) {
+    case 0x42:
+        qemu_system_reset_request();
+        break;
+    case 0x43:
+        qemu_system_shutdown_request();
+        break;
+    default:
+        fprintf(stdout, "%s: %d: Unknown command %lx\n",
+                __func__, __LINE__, val);
+        break;
+    }
+}
+
+static uint64_t goldfish_reset_io_read(void *opaque, hwaddr addr,
+                                unsigned size)
+{
+    return 0;
+}
+
+static const MemoryRegionOps goldfish_reset_io_ops = {
+    .read = goldfish_reset_io_read,
+    .write = goldfish_reset_io_write,
+    .endianness = DEVICE_NATIVE_ENDIAN,
+};
 
 /* create_device(void* fdt, DevMapEntry* dev, qemu_irq* pic,
  *               int num_devices, int is_virtio)
@@ -262,6 +367,27 @@ static void create_device(void* fdt, DevMapEntry* dev, qemu_irq* pic,
     }
 }
 
+/* create_pm_device(void* fdt, DevMapEntry* dev)
+ *
+ * Create power management DT node which will be used by kernel
+ * in order to attach PM routines for reset/halt/shoutdown
+ *
+ * @fdt - Place where DT node will be stored
+ * @dev - Device information (base, irq, name)
+ */
+static void create_pm_device(void* fdt, DevMapEntry* dev)
+{
+    hwaddr base = dev->base;
+
+    char* nodename = g_strdup_printf("/%s@%" PRIx64, dev->dt_name, base);
+    qemu_fdt_add_subnode(fdt, nodename);
+    qemu_fdt_setprop(fdt, nodename, "compatible",
+                     dev->dt_compatible,
+                     strlen(dev->dt_compatible) + 1);
+    qemu_fdt_setprop_sized_cells(fdt, nodename, "reg", 1, base, 2, dev->size);
+    g_free(nodename);
+}
+
 static void ranchu_init(MachineState *machine)
 {
     MIPSCPU *cpu;
@@ -269,12 +395,16 @@ static void ranchu_init(MachineState *machine)
     qemu_irq *goldfish_pic;
     int i, fdt_size;
     void *fdt;
+    ranchu_params *rp;
+    int64_t kernel_entry;
 
     DeviceState *dev = qdev_create(NULL, TYPE_MIPS_RANCHU);
     RanchuState *s = MIPS_RANCHU(dev);
 
     MemoryRegion *ram_lo = g_new(MemoryRegion, 1);
     MemoryRegion *ram_hi = g_new(MemoryRegion, 1);
+    MemoryRegion *iomem = g_new(MemoryRegion, 1);
+    MemoryRegion *bios = g_new(MemoryRegion, 1);
 
     /* init CPUs */
     if (machine->cpu_model == NULL) {
@@ -290,6 +420,8 @@ static void ranchu_init(MachineState *machine)
         exit(1);
     }
 
+    rp = g_new0(ranchu_params, 1);
+
     env = &cpu->env;
 
     register_savevm(NULL,
@@ -300,7 +432,7 @@ static void ranchu_init(MachineState *machine)
                     cpu_load,
                     env);
 
-    qemu_register_reset(main_cpu_reset, &ranchu_params);
+    qemu_register_reset(main_cpu_reset, rp);
 
     if (ram_size > (MAX_RAM_SIZE_MB << 20)) {
         fprintf(stderr, "qemu: Too much memory for this machine. "
@@ -320,7 +452,14 @@ static void ranchu_init(MachineState *machine)
     vmstate_register_ram_global(ram_lo);
     memory_region_add_subregion(get_system_memory(), 0, ram_lo);
 
-    ranchu_params.ram_size = MIN(ram_size, GOLDFISH_IO_SPACE);
+    memory_region_init_io(iomem, NULL, &goldfish_reset_io_ops, NULL, "goldfish-reset", 0x0100);
+    memory_region_add_subregion(get_system_memory(), devmap[RANCHU_GF_RESET].base, iomem);
+
+    memory_region_init_ram(bios, NULL, "ranchu.bios", RANCHU_BIOS_SIZE,
+                           &error_abort);
+    vmstate_register_ram_global(bios);
+    memory_region_set_readonly(bios, true);
+    memory_region_add_subregion(get_system_memory(), RESET_ADDRESS, bios);
 
     /* post IO hole, if there is enough RAM */
     if (ram_size > GOLDFISH_IO_SPACE) {
@@ -328,10 +467,16 @@ static void ranchu_init(MachineState *machine)
             ram_size - GOLDFISH_IO_SPACE, &error_abort);
         vmstate_register_ram_global(ram_hi);
         memory_region_add_subregion(get_system_memory(), HIGHMEM_OFFSET, ram_hi);
-        ranchu_params.highmem_size = ram_size - GOLDFISH_IO_SPACE;
+        rp->bootinfo.highmem_size = ram_size - GOLDFISH_IO_SPACE;
     }
 
-    ranchu_params.cpu = cpu;
+    rp->bootinfo.kernel_filename = strdup(machine->kernel_filename);
+    rp->bootinfo.kernel_cmdline = strdup(machine->kernel_cmdline);
+    rp->bootinfo.initrd_filename = strdup(machine->initrd_filename);
+    rp->bootinfo.ram_size = MIN(ram_size, GOLDFISH_IO_SPACE);
+    rp->fdt = fdt;
+    rp->fdt_size = fdt_size;
+    rp->cpu = cpu;
 
     cpu_mips_irq_init_cpu(env);
     cpu_mips_clock_init(env);
@@ -383,16 +528,17 @@ static void ranchu_init(MachineState *machine)
         create_device(fdt, &devmap[i], goldfish_pic, 1, 0);
     }
 
+    create_pm_device(fdt, &devmap[RANCHU_GF_RESET]);
+
     /* Virtio MMIO devices */
     create_device(fdt, &devmap[RANCHU_MMIO], goldfish_pic, VIRTIO_TRANSPORTS, 1);
 
     qemu_fdt_dumpdtb(fdt, fdt_size);
 
-    android_load_kernel(env, MIN(ram_size, GOLDFISH_IO_SPACE),
-                        machine->kernel_filename,
-                        machine->kernel_cmdline,
-                        machine->initrd_filename,
-                        fdt, fdt_size);
+    kernel_entry = android_load_kernel(rp);
+
+    write_bootloader(memory_region_get_ram_ptr(bios),
+                     PHYS_TO_VIRT(RESET_ADDRESS), kernel_entry, rp);
 }
 
 static int mips_ranchu_sysbus_device_init(SysBusDevice *sysbusdev)
