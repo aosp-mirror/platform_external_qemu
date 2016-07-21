@@ -189,8 +189,7 @@ LOCAL_C_INCLUDES := \
     $(ZLIB_INCLUDES) \
 
 LOCAL_SRC_FILES := \
-    android/adb-qemud.c \
-    android/adb-server.c \
+    android/adb-server.cpp \
     android/avd/hw-config.c \
     android/avd/info.c \
     android/avd/scanner.c \
