@@ -256,7 +256,7 @@ private:
     void processIoEvents(ChannelState state) {
         int wakeFlags = 0;
 
-        if (mCareAboutRead && canReadAny(state)) {
+        if (mCareAboutRead) {
             wakeFlags |= PIPE_WAKE_READ;
             mCareAboutRead = false;
         }
@@ -265,7 +265,7 @@ private:
             mCareAboutWrite = false;
         }
 
-        // Send wake signal to the guest if needed.
+        // Send wake signal to the guest.
         if (wakeFlags != 0) {
             signalWake(wakeFlags);
         }
