@@ -66,7 +66,7 @@ ShareGroup::~ShareGroup()
 }
 
 ObjectLocalName
-ShareGroup::genName(NamedObjectType p_type,
+ShareGroup::genName(NamedObjectType p_type, GLuint p_shaderType,
                     ObjectLocalName p_localName,
                     bool genLocal)
 {
@@ -74,7 +74,7 @@ ShareGroup::genName(NamedObjectType p_type,
 
     emugl::Mutex::AutoLock _lock(m_lock);
     ObjectLocalName localName =
-            m_nameSpace[p_type]->genName(p_localName, genLocal);
+            m_nameSpace[p_type]->genName(p_shaderType, p_localName, genLocal);
     if (p_type == TEXTURE) {
         incTexRefCounterNoLock(m_nameSpace[p_type]->getGlobalName(localName));
     }
