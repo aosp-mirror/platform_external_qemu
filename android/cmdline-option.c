@@ -321,9 +321,6 @@ bool android_validate_ports(int console_port, int adb_port) {
         result = false;
     }
 
-    dprint("Listening for console connections on port: %d", console_port);
-    dprint("Serial number of this emulator (for ADB): emulator-%d",
-            adb_port - 1);
     return result;
 }
 
