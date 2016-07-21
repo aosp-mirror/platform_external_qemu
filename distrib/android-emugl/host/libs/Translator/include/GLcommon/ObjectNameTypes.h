@@ -20,8 +20,9 @@ enum NamedObjectType {
     TEXTURE = 1,
     RENDERBUFFER = 2,
     FRAMEBUFFER = 3,
-    SHADER = 4,
-    NUM_OBJECT_TYPES = 5  // Must be last
+    PROGRAM = 4,
+    SHADER = 5,
+    NUM_OBJECT_TYPES = 6  // Must be last
 };
 
 typedef unsigned long long ObjectLocalName;
