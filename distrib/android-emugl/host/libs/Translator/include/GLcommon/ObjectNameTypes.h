@@ -15,13 +15,27 @@
 */
 #pragma once
 
+#include <GLES/gl.h>
+
 enum NamedObjectType {
     VERTEXBUFFER = 0,
     TEXTURE = 1,
     RENDERBUFFER = 2,
     FRAMEBUFFER = 3,
-    SHADER = 4,
-    NUM_OBJECT_TYPES = 5  // Must be last
+    PROGRAM = 4,
+    SHADER = 5,
+    NUM_OBJECT_TYPES = 6  // Must be last
+};
+
+struct GenNameInfo {
+    NamedObjectType m_type;
+    // put type specified info into the following union
+    union {
+        GLuint shaderType;
+    } m_extraInfo;
+    GenNameInfo(const GenNameInfo& genNameInfo);
+    GenNameInfo(NamedObjectType type);
+    GenNameInfo(NamedObjectType type, GLuint shaderType);
 };
 
 typedef unsigned long long ObjectLocalName;

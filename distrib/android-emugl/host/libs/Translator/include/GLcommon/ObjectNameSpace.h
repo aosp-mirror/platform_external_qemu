@@ -53,7 +53,7 @@ private:
     //           the value of the global name can be retrieved using the
     //           getGlobalName function.
     //
-    ObjectLocalName genName(ObjectLocalName p_localName, bool genLocal);
+    ObjectLocalName genName(const GenNameInfo& genNameInfo, ObjectLocalName p_localName, bool genLocal);
 
     //
     // getGlobalName - returns the global name of an object or 0 if the object
@@ -94,11 +94,13 @@ private:
 class GlobalNameSpace
 {
 public:
-    unsigned int genName(NamedObjectType p_type);
+    unsigned int genName(const GenNameInfo& genNameInfo);
     void deleteName(NamedObjectType p_type, unsigned int p_name);
 private:
     emugl::Mutex m_lock;
-    typedef void (GL_APIENTRY *GLdelete) (GLsizei, const GLuint *);
+    typedef void (GL_APIENTRY *GLrelease) (GLsizei, const GLuint *);
+    typedef void (GL_APIENTRY *GLdelete) (GLuint);
+    GLrelease m_glRelease[NUM_OBJECT_TYPES];
     GLdelete m_glDelete[NUM_OBJECT_TYPES];
     bool m_deleteInitialized = false;
 };
