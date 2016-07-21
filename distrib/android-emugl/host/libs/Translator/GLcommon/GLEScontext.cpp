@@ -255,7 +255,11 @@ const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsi
     GLuint bufferName = m_arrayBuffer;
     if(bufferName) {
         unsigned int offset = SafeUIntFromPointer(data);
-        GLESbuffer* vbo = static_cast<GLESbuffer*>(m_shareGroup->getObjectData(VERTEXBUFFER,bufferName).get());
+        GLESbuffer* vbo = static_cast<GLESbuffer*>(
+                m_shareGroup
+                        ->getObjectData(NamedObjectType::VERTEXBUFFER,
+                                        bufferName)
+                        .get());
         m_map[arrType]->setBuffer(size,type,stride,vbo,bufferName,offset,normalize);
         return  static_cast<const unsigned char*>(vbo->getData()) +  offset;
     }
@@ -505,26 +509,38 @@ GLvoid* GLEScontext::getBindedBuffer(GLenum target) {
     GLuint bufferName = getBuffer(target);
     if(!bufferName) return NULL;
 
-    GLESbuffer* vbo = static_cast<GLESbuffer*>(m_shareGroup->getObjectData(VERTEXBUFFER,bufferName).get());
+    GLESbuffer* vbo = static_cast<GLESbuffer*>(
+            m_shareGroup
+                    ->getObjectData(NamedObjectType::VERTEXBUFFER, bufferName)
+                    .get());
     return vbo->getData();
 }
 
 void GLEScontext::getBufferSize(GLenum target,GLint* param) {
     GLuint bufferName = getBuffer(target);
-    GLESbuffer* vbo = static_cast<GLESbuffer*>(m_shareGroup->getObjectData(VERTEXBUFFER,bufferName).get());
+    GLESbuffer* vbo = static_cast<GLESbuffer*>(
+            m_shareGroup
+                    ->getObjectData(NamedObjectType::VERTEXBUFFER, bufferName)
+                    .get());
     *param = vbo->getSize();
 }
 
 void GLEScontext::getBufferUsage(GLenum target,GLint* param) {
     GLuint bufferName = getBuffer(target);
-    GLESbuffer* vbo = static_cast<GLESbuffer*>(m_shareGroup->getObjectData(VERTEXBUFFER,bufferName).get());
+    GLESbuffer* vbo = static_cast<GLESbuffer*>(
+            m_shareGroup
+                    ->getObjectData(NamedObjectType::VERTEXBUFFER, bufferName)
+                    .get());
     *param = vbo->getUsage();
 }
 
 bool GLEScontext::setBufferData(GLenum target,GLsizeiptr size,const GLvoid* data,GLenum usage) {
     GLuint bufferName = getBuffer(target);
     if(!bufferName) return false;
-    GLESbuffer* vbo = static_cast<GLESbuffer*>(m_shareGroup->getObjectData(VERTEXBUFFER,bufferName).get());
+    GLESbuffer* vbo = static_cast<GLESbuffer*>(
+            m_shareGroup
+                    ->getObjectData(NamedObjectType::VERTEXBUFFER, bufferName)
+                    .get());
     return vbo->setBuffer(size,usage,data);
 }
 
@@ -532,7 +548,10 @@ bool GLEScontext::setBufferSubData(GLenum target,GLintptr offset,GLsizeiptr size
 
     GLuint bufferName = getBuffer(target);
     if(!bufferName) return false;
-    GLESbuffer* vbo = static_cast<GLESbuffer*>(m_shareGroup->getObjectData(VERTEXBUFFER,bufferName).get());
+    GLESbuffer* vbo = static_cast<GLESbuffer*>(
+            m_shareGroup
+                    ->getObjectData(NamedObjectType::VERTEXBUFFER, bufferName)
+                    .get());
     return vbo->setSubBuffer(offset,size,data);
 }
 
@@ -838,7 +857,8 @@ void GLEScontext::drawValidate(void)
     if(m_framebuffer == 0)
         return;
 
-    ObjectDataPtr fbObj = m_shareGroup->getObjectData(FRAMEBUFFER,m_framebuffer);
+    ObjectDataPtr fbObj = m_shareGroup->getObjectData(
+            NamedObjectType::FRAMEBUFFER, m_framebuffer);
     if (fbObj.get() == NULL)
         return;
 

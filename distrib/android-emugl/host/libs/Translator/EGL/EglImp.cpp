@@ -955,13 +955,14 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
     ThreadInfo* thread  = getThreadInfo();
     ShareGroupPtr sg = thread->shareGroup;
     if (sg.get() != NULL) {
-        unsigned int globalTexName = sg->getGlobalName(TEXTURE, SafeUIntFromPointer(buffer));
+        unsigned int globalTexName = sg->getGlobalName(
+                NamedObjectType::TEXTURE, SafeUIntFromPointer(buffer));
         if (!globalTexName) return EGL_NO_IMAGE_KHR;
 
         ImagePtr img( new EglImage() );
         if (img.get() != NULL) {
-
-            ObjectDataPtr objData = sg->getObjectData(TEXTURE, SafeUIntFromPointer(buffer));
+            ObjectDataPtr objData = sg->getObjectData(
+                    NamedObjectType::TEXTURE, SafeUIntFromPointer(buffer));
             if (!objData.get()) return EGL_NO_IMAGE_KHR;
 
             TextureData *texData = (TextureData *)objData.get();
