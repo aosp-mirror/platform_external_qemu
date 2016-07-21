@@ -12,6 +12,7 @@ host_common_SRC_FILES :=     \
      PaletteTexture.cpp      \
      etc1.cpp                \
      objectNameManager.cpp   \
+     ObjectNameSpace.cpp     \
      FramebufferData.cpp
 
 host_GL_COMMON_LINKER_FLAGS :=
