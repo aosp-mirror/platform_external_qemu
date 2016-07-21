@@ -265,10 +265,8 @@ private:
             mCareAboutWrite = false;
         }
 
-        // Send wake signal to the guest if needed.
-        if (wakeFlags != 0) {
-            signalWake(wakeFlags);
-        }
+        // Send wake signal to the guest.
+        signalWake(wakeFlags);
     }
 
     // Called when an i/o event occurs on the render channel
