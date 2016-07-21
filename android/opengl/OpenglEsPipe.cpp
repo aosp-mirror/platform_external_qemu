@@ -11,9 +11,12 @@
 #include "android/opengl/OpenglEsPipe.h"
 
 #include "android/base/async/Looper.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/opengles.h"
 #include "android/opengles-pipe.h"
 #include "android/opengl/GrallocPipe.h"
+
+#include "android/utils/debug.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -251,19 +254,73 @@ private:
         }
     }
 
+    struct PipeStateChange {
+        bool prevCareAboutRead;
+        bool prevCareAboutWrite;
+
+        bool prevCanReadAny;
+        bool prevCanWrite;
+
+        bool nextCareAboutRead;
+        bool nextCareAboutWrite;
+
+        bool nextCanReadAny;
+        bool nextCanWrite;
+    };
+
+    // PipeStateChange mStateChange;
+    // android::base::Lock mStateTrackerLock;
     // Check the read/write state of the render channel and signal the pipe
     // if any condition meets mCareAboutRead or mCareAboutWrite.
     void processIoEvents(ChannelState state) {
         int wakeFlags = 0;
 
-        if (mCareAboutRead && canReadAny(state)) {
+        // mStateTrackerLock.lock();
+        bool canReadAnyRes = canReadAny(state);
+        bool canWriteRes = canWrite(state);
+
+        // |mCareAboutRead| may not line up exactly with
+        // |canReadAny(state)|, so just make sure
+        // one of them is active at least.
+        if (mCareAboutRead && canReadAnyRes) {
             wakeFlags |= PIPE_WAKE_READ;
             mCareAboutRead = false;
         }
-        if (mCareAboutWrite && canWrite(state)) {
+
+        if (mCareAboutWrite && canWriteRes) {
             wakeFlags |= PIPE_WAKE_WRITE;
             mCareAboutWrite = false;
         }
+
+        // mStateChange.prevCareAboutRead = mStateChange.nextCareAboutRead;
+        // mStateChange.prevCareAboutWrite = mStateChange.nextCareAboutWrite;
+        // mStateChange.prevCanReadAny = mStateChange.nextCanReadAny;
+        // mStateChange.prevCanWrite = mStateChange.nextCanWrite;
+
+        // mStateChange.nextCareAboutRead = mCareAboutReadPrev;
+        // mStateChange.nextCareAboutWrite = mCareAboutWritePrev;
+        // mStateChange.nextCanReadAny = canReadAnyRes;
+        // mStateChange.nextCanWrite = canWriteRes;
+
+//             PIPEDPRINT("%p: careRead=%d careWrite=%d "
+//                     "canReadAnyRes=%d canWriteRes=%d "
+//                     "wakeFlags=0x%x wake? %d",
+//                     this,
+//                     mCareAboutReadPrev,
+//                     mCareAboutWritePrev,
+//                     canReadAnyRes,
+//                     canWriteRes,
+//                     wakeFlags, wakeFlags != 0);
+//             if (
+//                     (mStateChange.prevCareAboutRead == 0 &&
+//                      mStateChange.nextCareAboutRead == 1 &&
+//                      mStateChange.prevCanReadAny == 1 &&
+//                      mStateChange.nextCanReadAny == 0)
+//                ) {
+//             PIPEDPRINT("%p: POSSIBLE STOP. mDataForReadingLeft=%u state=%x", this, mDataForReadingLeft, state);
+//         }
+            
+        // mStateTrackerLock.unlock();
 
         // Send wake signal to the guest if needed.
         if (wakeFlags != 0) {

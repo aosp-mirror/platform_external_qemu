@@ -73,7 +73,7 @@ public:
     virtual bool read(ChannelBuffer* buffer, CallType callType) = 0;
 
     // Get the current state flags.
-    virtual State currentState() const = 0;
+    virtual State currentState() = 0;
 
     // Abort all pending operations. Any following operation is a noop.
     virtual void stop() = 0;

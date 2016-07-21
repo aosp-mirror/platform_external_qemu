@@ -36,7 +36,8 @@ public:
     virtual bool write(ChannelBuffer&& buffer) override final;
     virtual bool read(ChannelBuffer* buffer, CallType type) override final;
 
-    virtual State currentState() const override final {
+    virtual State currentState() override final {
+        android::base::AutoLock lock(mStateLock);
         return mState.load(std::memory_order_acquire);
     }
 
@@ -56,7 +57,7 @@ private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RenderChannelImpl);
 
 private:
-    void onEvent(bool byGuest);
+    void onEvent(bool byGuest, const State& newState);
     State calcState() const;
     void stop(bool byGuest);
 
