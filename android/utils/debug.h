@@ -47,6 +47,7 @@ ANDROID_BEGIN_HEADER
     _VERBOSE_TAG(mtport,       "multi-touch emulator connected to android device") \
     _VERBOSE_TAG(mtscreen,     "multi-touch screen emulation") \
     _VERBOSE_TAG(gles,         "hardware OpenGLES emulation") \
+    _VERBOSE_TAG(gles1emu,     "emulated GLESv1 renderer") \
     _VERBOSE_TAG(adbserver,    "ADB server") \
     _VERBOSE_TAG(adbclient,    "ADB QEMU client") \
     _VERBOSE_TAG(adb,          "ADB debugger") \
