@@ -15,12 +15,18 @@
 #include "android/opengles-pipe.h"
 #include "android/opengl/GrallocPipe.h"
 
+#include "android/utils/debug.h"
+
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
 // Set to 1 or 2 for debug traces
 //#define DEBUG 1
+
+#define PIPEDPRINT(...) do { \
+    if (!VERBOSE_CHECK(glespipe)) VERBOSE_ENABLE(glespipe); \
+    VERBOSE_TID_FUNCTION_DPRINT(glespipe, __VA_ARGS__); } while(0)
 
 #if DEBUG >= 1
 #define D(...) printf(__VA_ARGS__), printf("\n"), fflush(stdout)
@@ -256,14 +262,32 @@ private:
     void processIoEvents(ChannelState state) {
         int wakeFlags = 0;
 
-        if (mCareAboutRead && canReadAny(state)) {
+        bool mCareAboutReadPrev = mCareAboutRead;
+        bool mCareAboutWritePrev = mCareAboutWrite;
+        bool canReadAnyRes = canReadAny(state);
+        bool canWriteRes = canWrite(state);
+
+        // |mCareAboutRead| may not line up exactly with
+        // |canReadAny(state)|, so just make sure
+        // one of them is active at least.
+        if (mCareAboutRead && canReadAnyRes) {
             wakeFlags |= PIPE_WAKE_READ;
             mCareAboutRead = false;
         }
-        if (mCareAboutWrite && canWrite(state)) {
+
+        if (mCareAboutWrite && canWriteRes) {
             wakeFlags |= PIPE_WAKE_WRITE;
             mCareAboutWrite = false;
         }
+
+            PIPEDPRINT("careRead=%d careWrite=%d "
+                    "canReadAnyRes=%d canWriteRes=%d "
+                    "wakeFlags=0x%x wake? %d",
+                    mCareAboutReadPrev,
+                    mCareAboutWritePrev,
+                    canReadAnyRes,
+                    canWriteRes,
+                    wakeFlags, wakeFlags != 0);
 
         // Send wake signal to the guest if needed.
         if (wakeFlags != 0) {

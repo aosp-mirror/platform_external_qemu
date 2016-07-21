@@ -56,7 +56,7 @@ private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RenderChannelImpl);
 
 private:
-    void onEvent(bool byGuest);
+    void onEvent(bool byGuest, const State& newState);
     State calcState() const;
     void stop(bool byGuest);
 

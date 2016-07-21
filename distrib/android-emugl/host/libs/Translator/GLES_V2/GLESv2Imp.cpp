@@ -37,6 +37,7 @@
 #include "ANGLEShaderParser.h"
 
 #include <stdio.h>
+#include <unistd.h>
 
 #include <unordered_map>
 

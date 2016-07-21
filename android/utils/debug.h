@@ -60,6 +60,7 @@ ANDROID_BEGIN_HEADER
     _VERBOSE_TAG(testrunner,   "TestRunner") \
     _VERBOSE_TAG(goldfishsync, "Goldfish Sync Device") \
     _VERBOSE_TAG(syncthreads,  "HostGPU Sync Threads") \
+    _VERBOSE_TAG(glespipe,     "OpenglEsPipe") \
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
 typedef enum {

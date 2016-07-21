@@ -32,13 +32,16 @@ void RenderChannelImpl::setEventCallback(
     mOnEvent = std::move(callback);
 
     // Reset the current state to make sure the new subscriber gets it.
+    mStateLock.lock();
     mState.store(State::Empty, std::memory_order_release);
-    onEvent(true);
+    onEvent(true, calcState()); // unlocked in here
 }
 
 bool RenderChannelImpl::write(ChannelBuffer&& buffer) {
+    mStateLock.lock();
     const bool res = mFromGuest.send(std::move(buffer));
-    onEvent(true);
+    const State newState = calcState();
+    onEvent(true, newState); // unlocked in here
     return res;
 }
 
@@ -46,8 +49,10 @@ bool RenderChannelImpl::read(ChannelBuffer* buffer, CallType type) {
     if (type == CallType::Nonblocking && mToGuest.size() == 0) {
         return false;
     }
+    mStateLock.lock();
     const bool res = mToGuest.receive(buffer);
-    onEvent(true);
+    const State newState = calcState();
+    onEvent(true, newState);
     return res;
 }
 
@@ -66,7 +71,8 @@ void RenderChannelImpl::stop(bool byGuest) {
     mStopped = true;
     mFromGuest.stop();
     mToGuest.stop();
-    onEvent(byGuest);
+    mStateLock.lock();
+    onEvent(byGuest, calcState());
 }
 
 bool RenderChannelImpl::isStopped() const {
@@ -74,8 +80,10 @@ bool RenderChannelImpl::isStopped() const {
 }
 
 void RenderChannelImpl::writeToGuest(ChannelBuffer&& buf) {
+    mStateLock.lock();
     mToGuest.send(std::move(buf));
-    onEvent(false);
+    const State newState = calcState();
+    onEvent(false, newState); // unlocked in here
 }
 
 size_t RenderChannelImpl::readFromGuest(ChannelBuffer::value_type* buf,
@@ -106,12 +114,14 @@ size_t RenderChannelImpl::readFromGuest(ChannelBuffer::value_type* buf,
         buf += curSize;
         mFromGuestBufferLeft -= curSize;
     }
-    onEvent(false);
+    mStateLock.lock();
+    onEvent(false, calcState()); // unlocked in here
     return read;
 }
 
-void RenderChannelImpl::onEvent(bool byGuest) {
+void RenderChannelImpl::onEvent(bool byGuest, const State& newState) {
     if (!mOnEvent) {
+        mStateLock.unlock();
         return;
     }
 
@@ -135,17 +145,16 @@ void RenderChannelImpl::onEvent(bool byGuest) {
     // The result is that state 2 = "can read" is completely lost - callback
     // is never called when |mState| is "can read".
     //
-    // But if the whole block of code is locked, threads can't overwrite newer
-    // |mState| with some older value, and the described situation would never
-    // happen.
-    android::base::AutoLock lock(mStateLock);
-    const State newState = calcState();
+    // But if we only allow one thread to complete any |mToGuest| operation +
+    // |calcState| operation pair atomically, the described situation
+    // will never happen.
     if (mState != newState) {
         mState = newState;
-        lock.unlock();
-
+        mStateLock.unlock();
         mOnEvent(newState,
                  byGuest ? EventSource::Client : EventSource::RenderChannel);
+    } else {
+        mStateLock.unlock();
     }
 }
 
