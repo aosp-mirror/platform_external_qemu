@@ -2,6 +2,316 @@
   "comments": [
     {
       "key": {
+        "uuid": "8a91eb63_3136964e",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T19:43:56Z",
+      "side": 1,
+      "message": "Please don\u0027t import a whole namespace. It\u0027s disallowed by go/cstyle and by chromium coding guide.",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 30
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_b107e61e",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T19:43:56Z",
+      "side": 1,
+      "message": "Perhaps LOG(WARNING) here?",
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_71b1fe91",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T19:43:56Z",
+      "side": 1,
+      "message": "isn\u0027t this guaranteed, since you just emplace_back()ed?\n\nIn fact, you want to check before emplace()ing, since you want to start listening again if there were no pending guests. (See comment below in |onHostServerConnection|)",
+      "range": {
+        "startLine": 52,
+        "startChar": 25,
+        "endLine": 52,
+        "endChar": 43
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_119a7a07",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T19:43:56Z",
+      "side": 1,
+      "message": "You haven\u0027t removed |guest| from |mGuests| yet, so this condition will always evaluate to true.",
+      "range": {
+        "startLine": 61,
+        "startChar": 12,
+        "endLine": 61,
+        "endChar": 30
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_d1663226",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T19:43:56Z",
+      "side": 1,
+      "message": "consider using std::find_if",
+      "range": {
+        "startLine": 65,
+        "startChar": 4,
+        "endLine": 65,
+        "endChar": 64
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_710d7e41",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T19:43:56Z",
+      "side": 1,
+      "message": "Perhaps LOG(WARNING) here?",
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_d1147256",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T19:43:56Z",
+      "side": 1,
+      "message": "You shouldn\u0027t need c_str() here.\n\niirc, StringFormat works with StringView, and std::string -\u003e StringView conversion should be implicit.",
+      "range": {
+        "startLine": 84,
+        "startChar": 60,
+        "endLine": 84,
+        "endChar": 75
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_112d1a99",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T19:43:56Z",
+      "side": 1,
+      "message": "As noted in AdbTypes, I\u0027d prefer this function to take ownership of |socket| regardless of errors.",
+      "range": {
+        "startLine": 91,
+        "startChar": 45,
+        "endLine": 91,
+        "endChar": 55
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_d15ab2f8",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T19:43:56Z",
+      "side": 1,
+      "message": "I\u0027m confused: onHostServerConnection was called. This implies that we were listening for connections from the host server _and_ that host server connected to us on the port we were listening on |mServer-\u003eport()|.\n\nIf mActiveGuest-\u003eonHostConnection succeeded (The else case starting line 98) , it means that an end to end channel has been setup. Why are we notifying the host server of the same port that it just created a connection on?\n\nOTOH, if mActiveGuest-\u003eonHostConnection failed, we deleted the active guest, and we need the host server to try to connect again. In that case, it might be beneficial to once again tell it that we\u0027re listening for connections on |mServer-\u003eport|.\n\nbtw, in the success case, we might want to stop listening on mServer if there are no more guests pending that can be connected, and then restart in addGuest when we find an empty list of guests.",
+      "range": {
+        "startLine": 99,
+        "startChar": 8,
+        "endLine": 101,
+        "endChar": 9
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_46f44aed",
+        "filename": "android/emulation/AdbHostListener.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T19:43:56Z",
+      "side": 1,
+      "message": "Orthogonal idea: We could use a TLS variable to mark the \"thread type\" (qt main loop, qemu main loop, render thread, vcpu thread).\nThen, provide a method that compiles to an assert that you are in the right kind of thread in the debug build (and to a noop in non-debug build).\n\nWe could pepper the code with this assert to state such assumptions then.",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 58
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_91a02a8d",
+        "filename": "android/emulation/AdbHostListener.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T19:43:56Z",
+      "side": 1,
+      "message": "Consider using android::base::Optional",
+      "range": {
+        "startLine": 74,
+        "startChar": 4,
+        "endLine": 74,
+        "endChar": 7
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_91ee6ab8",
+        "filename": "android/emulation/AdbHostListener.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T19:43:56Z",
+      "side": 1,
+      "message": "Why not make this a class method (non static). Then, you don\u0027t need to pass in adbClientPort and adbPort (since the object already knows both)",
+      "range": {
+        "startLine": 83,
+        "startChar": 16,
+        "endLine": 83,
+        "endChar": 31
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_31df7600",
+        "filename": "android/emulation/AdbHostListener.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T19:43:56Z",
+      "side": 1,
+      "message": "Isn\u0027t this really just 2? Or am I missing something?",
+      "range": {
+        "startLine": 89,
+        "startChar": 28,
+        "endLine": 89,
+        "endChar": 38
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_918f4ad1",
+        "filename": "android/emulation/AdbHostListener.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-21T19:43:56Z",
+      "side": 1,
+      "message": "Combined with my suggestion of returning an opaque handle from |addGuest|, you can make this a std::list and return (typedef\u0027ed) the iterator from inserting the guest.\n\n|addGuest| is not a throughput critical insert so vector --\u003e list is OK.",
+      "range": {
+        "startLine": 97,
+        "startChar": 4,
+        "endLine": 97,
+        "endChar": 15
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_66b786a1",
         "filename": "android/emulation/AdbTypes.h",
         "patchSetId": 2
