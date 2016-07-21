@@ -19,6 +19,7 @@
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
+#include "android/ui-emu-agent.h"
 
 #include "ui_extended.h"
 
@@ -27,7 +28,6 @@
 ExtendedWindow::ExtendedWindow(
     EmulatorQtWindow *eW,
     ToolWindow *tW,
-    const UiEmuAgent *agentPtr,
     const ShortcutKeyStore<QtUICommand>* shortcuts) :
     QFrame(nullptr),
     mEmulatorWindow(eW),
@@ -53,16 +53,10 @@ ExtendedWindow::ExtendedWindow(
     setFrameOnTop(this, onTop);
 
     mExtendedUi->setupUi(this);
-    mExtendedUi->cellular_page->setCellularAgent(agentPtr->cellular);
-    mExtendedUi->batteryPage->setBatteryAgent(agentPtr->battery);
-    mExtendedUi->telephonyPage->setTelephonyAgent(agentPtr->telephony);
-    mExtendedUi->finger_page->setFingerAgent(agentPtr->finger);
     mExtendedUi->helpPage->initialize(shortcuts);
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->settingsPage->setAdbInterface(
             mEmulatorWindow->getAdbInterface());
-    mExtendedUi->location_page->setLocationAgent(agentPtr->location);
-    mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
     mExtendedUi->virtualSensorsPage->setLayoutChangeNotifier(eW);
 
     connect(
@@ -113,6 +107,19 @@ ExtendedWindow::ExtendedWindow(
 
 ExtendedWindow::~ExtendedWindow() {
     mExtendedUi->location_page->requestStopLoadingGeoData();
+}
+
+void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
+    if (agentPtr) {
+        mExtendedUi->cellular_page->setCellularAgent(agentPtr->cellular);
+        mExtendedUi->batteryPage->setBatteryAgent(agentPtr->battery);
+        mExtendedUi->telephonyPage->setTelephonyAgent(agentPtr->telephony);
+        mExtendedUi->finger_page->setFingerAgent(agentPtr->finger);
+        mExtendedUi->location_page->setLocationAgent(agentPtr->location);
+        mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
+    }
+    // The ADB port is known now. Show it on the UI Help page.
+    mExtendedUi->helpPage->setAdbPort();
 }
 
 void ExtendedWindow::show() {

@@ -42,6 +42,7 @@ public:
 
 signals:
     void geoDataLoadingFinished();
+    void locationUpdateRequired(double latitude, double longitude, double altitude);
 
 private slots:
     void on_loc_GpxKmlButton_clicked();
@@ -68,6 +69,8 @@ private slots:
     // loader thread (the one that occurs when the widget is first constructed)
     void startupGeoDataThreadFinished(QString file_name, bool ok, QString error);
 
+    void updateDisplayedLocation(double lat, double lon, double alt);
+
     void locationPlaybackStart();
     void locationPlaybackStop();
     void timeout();
@@ -84,8 +87,6 @@ private:
                              int row,
                              int col,
                              QString* outErrorMessage);
-    void updateDisplayedLocation(double lat, double lon, double alt);
-
 
     std::unique_ptr<Ui::LocationPage> mUi;
     const QAndroidLocationAgent* mLocationAgent;
