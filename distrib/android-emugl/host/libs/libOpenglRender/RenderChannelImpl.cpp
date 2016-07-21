@@ -46,6 +46,7 @@ bool RenderChannelImpl::read(ChannelBuffer* buffer, CallType type) {
     if (type == CallType::Nonblocking && mToGuest.size() == 0) {
         return false;
     }
+    android::base::AutoLock lock(mStateLock);
     const bool res = mToGuest.receive(buffer);
     onEvent(true);
     return res;
@@ -74,6 +75,7 @@ bool RenderChannelImpl::isStopped() const {
 }
 
 void RenderChannelImpl::writeToGuest(ChannelBuffer&& buf) {
+    android::base::AutoLock lock(mStateLock);
     mToGuest.send(std::move(buf));
     onEvent(false);
 }
@@ -138,12 +140,9 @@ void RenderChannelImpl::onEvent(bool byGuest) {
     // But if the whole block of code is locked, threads can't overwrite newer
     // |mState| with some older value, and the described situation would never
     // happen.
-    android::base::AutoLock lock(mStateLock);
     const State newState = calcState();
     if (mState != newState) {
         mState = newState;
-        lock.unlock();
-
         mOnEvent(newState,
                  byGuest ? EventSource::Client : EventSource::RenderChannel);
     }

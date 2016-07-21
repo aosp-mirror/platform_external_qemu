@@ -256,7 +256,7 @@ private:
     void processIoEvents(ChannelState state) {
         int wakeFlags = 0;
 
-        if (mCareAboutRead && canReadAny(state)) {
+        if (mCareAboutRead || canReadAny(state)) {
             wakeFlags |= PIPE_WAKE_READ;
             mCareAboutRead = false;
         }
