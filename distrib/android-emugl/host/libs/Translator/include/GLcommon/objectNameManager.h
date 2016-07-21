@@ -63,8 +63,11 @@ public:
     //           if genLocal is false, p_localName will be used as the name.
     //           This function also generates a "global" name for the object
     //           which can be queried using the getGlobalName function.
-    //
-    ObjectLocalName genName(NamedObjectType p_type, ObjectLocalName p_localName = 0, bool genLocal= false);
+    ObjectLocalName genName(GenNameInfo genNameInfo, ObjectLocalName p_localName = 0, bool genLocal= false);
+    //           overload for generating non-shader object
+    ObjectLocalName genName(NamedObjectType namedObjectType, ObjectLocalName p_localName = 0, bool genLocal= false);
+    //           overload for generating shader object
+    ObjectLocalName genName(GLenum shaderType, ObjectLocalName p_localName = 0, bool genLocal= false);
 
     //
     // getGlobalName - retrieves the "global" name of an object or 0 if the
