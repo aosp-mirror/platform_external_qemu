@@ -654,6 +654,31 @@ static void goldfish_pipe_close(void* hwpipe) {
     goldfish_pipe_wake(hwpipe, PIPE_WAKE_CLOSED);
 }
 
+/* Hold a PipeDevice reference in case of a reboot
+ * we need to release all outstanding pipes
+ */
+static PipeDevice*  _pipe_device = NULL;
+
+void android_pipe_close_all(void)
+{
+    HwPipe* pipe;
+    HwPipe* pipe_old;
+
+    if (_pipe_device) {
+        pipe = _pipe_device->pipes;
+        while (pipe) {
+            pipe_old = pipe;
+            pipe = pipe->next;
+            pipe_old->next = NULL;
+            hwpipe_remove_signaled(&_pipe_device->signaled_pipes, pipe_old);
+            hwpipe_free(pipe_old);
+        }
+
+        _pipe_device->pipes = NULL;
+        _pipe_device->signaled_pipes = NULL;
+    }
+}
+
 static const AndroidPipeHwFuncs goldfish_pipe_hw_funcs = {
     .resetPipe = goldfish_pipe_reset,
     .closeFromHost = goldfish_pipe_close,
@@ -665,7 +690,7 @@ void pipe_dev_init(bool newDeviceNaming)
 {
     PipeDevice *s;
 
-    s = (PipeDevice *) g_malloc0(sizeof(*s));
+    _pipe_device = s = (PipeDevice *) g_malloc0(sizeof(*s));
 
     s->dev.name = newDeviceNaming ? "goldfish_pipe" : "qemu_pipe";
     s->dev.id = -1;

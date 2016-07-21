@@ -57,6 +57,11 @@
 #define PIPE_CMD_READ_BUFFER        6  /* receive a page-contained buffer from the emulator */
 #define PIPE_CMD_WAKE_ON_READ       7  /* tell the emulator to wake us when reading is possible */
 
+/* This routine is called when rebooting the device.
+ * Its responsibility is to close all pipes opened
+ * till the moment of reboot request and start fresh after reboot.
+ */
+void android_pipe_close_all(void);
 void pipe_dev_init(bool newDeviceNaming);
 
 struct access_params{
