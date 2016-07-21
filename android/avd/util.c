@@ -211,19 +211,6 @@ propertyFile_isGoogleApis(const FileData* data) {
     return false;
 }
 
-int
-propertyFile_getAdbdCommunicationMode(const FileData* data) {
-    SearchResult searchResult;
-    int qemud = propertyFile_getInt(data, "ro.adb.qemud", 0, &searchResult);
-    if (searchResult == RESULT_FOUND) {
-        D("Found ro.adb.qemud build property: %d", qemud);
-        return qemud;
-    }
-    D("ro.adb.qemud invalid or not found, API >= 16, defaulting "
-      "ro.adb.qemud = 0");
-    return 0;
-}
-
 char* path_getBuildBuildProp(const char* androidOut) {
     char temp[MAX_PATH], *p = temp, *end = p + sizeof(temp);
     p = bufprint(temp, end, "%s/system/build.prop", androidOut);
