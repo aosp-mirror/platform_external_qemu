@@ -298,7 +298,7 @@ GL_API void GL_APIENTRY  glBindBuffer( GLenum target, GLuint buffer) {
 
     //if buffer wasn't generated before,generate one
     if(buffer && ctx->shareGroup().get() && !ctx->shareGroup()->isObject(VERTEXBUFFER,buffer)){
-        ctx->shareGroup()->genName(VERTEXBUFFER,buffer);
+        ctx->shareGroup()->genName(VERTEXBUFFER, buffer);
         ctx->shareGroup()->setObjectData(VERTEXBUFFER,buffer,ObjectDataPtr(new GLESbuffer()));
     }
     ctx->bindBuffer(target,buffer);
@@ -321,7 +321,7 @@ GL_API void GL_APIENTRY  glBindTexture( GLenum target, GLuint texture) {
         globalTextureName = ctx->shareGroup()->getGlobalName(TEXTURE,localTexName);
         //if texture wasn't generated before,generate one
         if(!globalTextureName){
-            ctx->shareGroup()->genName(TEXTURE,localTexName);
+            ctx->shareGroup()->genName(TEXTURE, localTexName);
             globalTextureName = ctx->shareGroup()->getGlobalName(TEXTURE,localTexName);
         }
 
@@ -1789,7 +1789,7 @@ GL_API void GLAPIENTRY glBindRenderbufferOES(GLenum target, GLuint renderbuffer)
 
     //if buffer wasn't generated before,generate one
     if(renderbuffer && ctx->shareGroup().get() && !ctx->shareGroup()->isObject(RENDERBUFFER,renderbuffer)){
-        ctx->shareGroup()->genName(RENDERBUFFER,renderbuffer);
+        ctx->shareGroup()->genName(RENDERBUFFER, renderbuffer);
         ctx->shareGroup()->setObjectData(RENDERBUFFER,
                                          renderbuffer,
                                          ObjectDataPtr(new RenderbufferData()));
@@ -1930,7 +1930,7 @@ GL_API void GLAPIENTRY glBindFramebufferOES(GLenum target, GLuint framebuffer) {
     SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION);
     SET_ERROR_IF(!GLEScmValidate::framebufferTarget(target) ,GL_INVALID_ENUM);
     if (framebuffer && ctx->shareGroup().get() && !ctx->shareGroup()->isObject(FRAMEBUFFER,framebuffer)) {
-        ctx->shareGroup()->genName(FRAMEBUFFER,framebuffer);
+        ctx->shareGroup()->genName(FRAMEBUFFER, framebuffer);
         ctx->shareGroup()->setObjectData(FRAMEBUFFER, framebuffer,
                                          ObjectDataPtr(new FramebufferData(framebuffer)));
     }
@@ -1979,7 +1979,7 @@ GL_API void GLAPIENTRY glFramebufferTexture2DOES(GLenum target, GLenum attachmen
     GLuint globalTexName = 0;
     if(texture) {
         if (!ctx->shareGroup()->isObject(TEXTURE,texture)) {
-            ctx->shareGroup()->genName(TEXTURE,texture);
+            ctx->shareGroup()->genName(TEXTURE, texture);
         }
         ObjectLocalName texname = TextureLocalName(textarget,texture);
         globalTexName = ctx->shareGroup()->getGlobalName(TEXTURE,texname);
@@ -2012,7 +2012,7 @@ GL_API void GLAPIENTRY glFramebufferRenderbufferOES(GLenum target, GLenum attach
     // generate the renderbuffer object if not yet exist
     if (renderbuffer) {
         if (!ctx->shareGroup()->isObject(RENDERBUFFER,renderbuffer)) {
-            ctx->shareGroup()->genName(RENDERBUFFER,renderbuffer);
+            ctx->shareGroup()->genName(RENDERBUFFER, renderbuffer);
             obj = ObjectDataPtr(new RenderbufferData());
             ctx->shareGroup()->setObjectData(RENDERBUFFER,
                                          renderbuffer,
