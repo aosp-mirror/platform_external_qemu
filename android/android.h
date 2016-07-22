@@ -71,6 +71,11 @@ extern int   android_base_port;
  * default is 5037 */
 extern int   android_adb_port;
 
+/* This number is used to form the "serial number" of
+ * the AVD. The default is 5554, so the default serial
+ * number is "emulator-5554". */
+extern int   android_serial_number_port;
+
 /* parses a network speed parameter and sets android_net_upload_speed and
  * android_net_download_speed accordingly. returns -1 on failure, 0 on success */
 extern int   android_parse_network_speed(const char*  speed);

@@ -146,7 +146,7 @@ void HelpPage::updateAdbPortNumber() {
     // Show the "serial number" that can be used to connect ADB
     // to this device
     mUi->help_adbSerialNumberBox->setPlainText(
-            "emulator-" + QString::number(android_base_port) );
+            "emulator-" + QString::number(android_serial_number_port) );
 }
 
 void HelpPage::on_help_docs_clicked() {
