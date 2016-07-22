@@ -16,6 +16,24 @@
       "revId": "af1aada400e29d68e46998a6c0055ad7e9e60828",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea48a7ff_47dfa4fe",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-22T17:09:04Z",
+      "side": 1,
+      "message": "Just to clarify, do you mean to rename the ObjectNameManager class as ShareGroupManager?",
+      "parentUuid": "8a91eb63_f8c141fc",
+      "revId": "af1aada400e29d68e46998a6c0055ad7e9e60828",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
