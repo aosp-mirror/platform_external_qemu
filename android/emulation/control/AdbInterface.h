@@ -57,8 +57,8 @@ public:
     // Returns the automatically detected path to adb
     virtual const std::string& detectedAdbPath() const = 0;
 
-    // Setup the emulator base port this interface is connected to
-    virtual void setEmulatorBasePort(int port) = 0;
+    // Setup the port this interface is connected to
+    virtual void setSerialNumberPort(int port) = 0;
 
     // Runs an adb command asynchronously.
     // |args| - the arguments to pass to adb, i.e. "shell dumpsys battery"

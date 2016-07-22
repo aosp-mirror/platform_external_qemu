@@ -48,6 +48,8 @@ char* op_http_proxy = NULL;
 int    android_base_port;
 /* ADB port */
 int    android_adb_port = 5037; // Default
+/* The device "serial number" is "emulator-<this number>" */
+int    android_serial_number_port;
 
 // Global configuration flags, 'true' to indicate that the AndroidEmu console
 // code should be used, 'false' otherwise, which is the default used by QEMU2
@@ -380,8 +382,9 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
             }
         }
 
-        /* Save base port. */
+        /* Save base port and ADB port. */
         android_base_port = base_port;
+        android_serial_number_port = adb_port - 1;
 
         /* send a simple message to the ADB host server to tell it we just started.
         * it should be listening on port 5037. if we can't reach it, don't bother
