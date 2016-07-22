@@ -137,6 +137,7 @@ static bool perform_console_and_adb_init(int console_port,
          */
         monitor_init(chr, MONITOR_ANDROID_CONSOLE | MONITOR_USE_READLINE);
         android_base_port = console_port;
+        android_serial_number_port = adb_port - 1;
 
         android_validate_ports(console_port, adb_port);
         return true;
