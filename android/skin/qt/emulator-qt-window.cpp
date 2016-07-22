@@ -886,10 +886,10 @@ void EmulatorQtWindow::slot_setWindowTitle(const QString* title,
                                            QSemaphore* semaphore) {
     mContainer.setWindowTitle(*title);
 
-    // This is the first time that we know the android_base_port has been set.
-    // This port ensures AdbInterface can identify the correct device if there
-    // is more than one.
-    mAdbInterface->setEmulatorBasePort(android_base_port);
+    // This is the first time that we know the android_serial_number_port
+    // has been set. This port ensures AdbInterface can identify the correct
+    // device if there is more than one.
+    mAdbInterface->setSerialNumberPort(android_serial_number_port);
     if (semaphore != NULL)
         semaphore->release();
 }
