@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ea48a7ff_87204ca2",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 905,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-22T17:21:45Z",
+      "side": 1,
+      "message": "This name is now simply wrong -- we used to assume the (console) base port is the serial number port, but you\u0027ve fixed that now!\nSo let\u0027s rename this to setSerialNumberPort in this CL?",
+      "range": {
+        "startLine": 905,
+        "startChar": 19,
+        "endLine": 905,
+        "endChar": 38
+      },
+      "revId": "a732fe11b09ad2c6abeb8eee8addcb5f5f38d394",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
