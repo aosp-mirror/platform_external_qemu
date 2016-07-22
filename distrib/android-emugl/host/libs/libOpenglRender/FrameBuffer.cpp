@@ -965,7 +965,6 @@ bool FrameBuffer::bindContext(HandleType p_context,
         }
     }
 
-    DBG("%s: call to underlying eglMakeCurrent\n", __FUNCTION__);
     if (!s_egl.eglMakeCurrent(m_eglDisplay,
                               draw ? draw->getEGLSurface() : EGL_NO_SURFACE,
                               read ? read->getEGLSurface() : EGL_NO_SURFACE,
@@ -975,10 +974,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
     }
 
     if (ctx) {
-        DBG("%s: querying emulated gles1 context\n", __FUNCTION__);
-        if (!ctx.get()->getEmulatedGLES1Context()) {
-            DBG("%s: either a gles2 or we are not emulating gles1\n", __FUNCTION__);
-        } else {
+        if (ctx.get()->getEmulatedGLES1Context()) {
             DBG("%s: found emulated gles1 context @ %p\n", __FUNCTION__, ctx.get()->getEmulatedGLES1Context());
             s_gles1.set_current_gles_context(ctx.get()->getEmulatedGLES1Context());
             DBG("%s: set emulated gles1 context current in thread info\n", __FUNCTION__);
