@@ -49,6 +49,29 @@
     },
     {
       "key": {
+        "uuid": "8a91eb63_f14a4e7d",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-22T10:14:01Z",
+      "side": 1,
+      "message": "you already use fprintf and stderr here, so \u003cstdio.h\u003e should be included unconditionally IMO",
+      "range": {
+        "startLine": 41,
+        "startChar": 15,
+        "endLine": 41,
+        "endChar": 22
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_f2596c94",
         "filename": "android/emulation/AdbGuestPipe.cpp",
         "patchSetId": 3
@@ -141,6 +164,29 @@
     },
     {
       "key": {
+        "uuid": "8a91eb63_71149e47",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-22T10:14:01Z",
+      "side": 1,
+      "message": "typo",
+      "range": {
+        "startLine": 71,
+        "startChar": 28,
+        "endLine": 71,
+        "endChar": 29
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_72265cd3",
         "filename": "android/emulation/AdbGuestPipe.cpp",
         "patchSetId": 3
@@ -210,6 +256,29 @@
     },
     {
       "key": {
+        "uuid": "ea03478f_a650c6da",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-22T10:14:01Z",
+      "side": 1,
+      "message": "very nit: not needed :)",
+      "range": {
+        "startLine": 219,
+        "startChar": 12,
+        "endLine": 219,
+        "endChar": 17
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_38c1092a",
         "filename": "android/emulation/AdbGuestPipe.cpp",
         "patchSetId": 3
@@ -243,6 +312,29 @@
         "startChar": 56,
         "endLine": 282,
         "endChar": 61
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea03478f_c64bc22d",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-22T10:14:01Z",
+      "side": 1,
+      "message": "why \u0027don\u0027t\u0027? I actually thought one would need to start waiting for writes here (same thing for reads in the other function)",
+      "range": {
+        "startLine": 318,
+        "startChar": 33,
+        "endLine": 318,
+        "endChar": 46
       },
       "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
@@ -399,6 +491,29 @@
     },
     {
       "key": {
+        "uuid": "8a91eb63_f1596e94",
+        "filename": "android/emulation/AdbGuestPipe.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-22T10:14:01Z",
+      "side": 1,
+      "message": "nit: an",
+      "range": {
+        "startLine": 64,
+        "startChar": 49,
+        "endLine": 64,
+        "endChar": 50
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_4c02a963",
         "filename": "android/emulation/AdbGuestPipe.h",
         "patchSetId": 3
@@ -422,6 +537,29 @@
     },
     {
       "key": {
+        "uuid": "8a91eb63_51dec2da",
+        "filename": "android/emulation/AdbGuestPipe.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-22T10:14:01Z",
+      "side": 1,
+      "message": "typo: overridden",
+      "range": {
+        "startLine": 92,
+        "startChar": 7,
+        "endLine": 92,
+        "endChar": 16
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_ac4f8dbf",
         "filename": "android/emulation/AdbGuestPipe.h",
         "patchSetId": 3
@@ -438,6 +576,29 @@
         "startChar": 34,
         "endLine": 106,
         "endChar": 44
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a91eb63_11719add",
+        "filename": "android/emulation/AdbGuestPipe.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-22T10:14:01Z",
+      "side": 1,
+      "message": "this looks dangerous without an explanation: who owns the underlying data? when is it invalidated?",
+      "range": {
+        "startLine": 156,
+        "startChar": 4,
+        "endLine": 156,
+        "endChar": 24
       },
       "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
