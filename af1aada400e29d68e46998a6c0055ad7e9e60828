@@ -34,6 +34,24 @@
       "revId": "af1aada400e29d68e46998a6c0055ad7e9e60828",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea48a7ff_a7fb086b",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-22T17:10:33Z",
+      "side": 1,
+      "message": "Yeah, or come up with a name generally, that reflects the remaining functionality left over in the file",
+      "parentUuid": "ea48a7ff_47dfa4fe",
+      "revId": "af1aada400e29d68e46998a6c0055ad7e9e60828",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
