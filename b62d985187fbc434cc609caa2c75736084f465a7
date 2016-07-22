@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ea03478f_2665f6b7",
+        "filename": "android/emulation/testing/TestAndroidPipeDevice.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-22T10:19:17Z",
+      "side": 1,
+      "message": "final? it is called from destructor now, let\u0027s make it forced-final for no surprises",
+      "range": {
+        "startLine": 69,
+        "startChar": 25,
+        "endLine": 69,
+        "endChar": 33
+      },
+      "revId": "b62d985187fbc434cc609caa2c75736084f465a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
