@@ -42,3 +42,6 @@ rcUpdateColorBuffer
 
 rcCloseColorBuffer
     flag flushOnEncode
+
+rcCloseColorBufferPuid
+    flag flushOnEncode
