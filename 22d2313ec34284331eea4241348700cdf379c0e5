@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ea48a7ff_8764cc1d",
+        "filename": "android/base/testing/TestMemoryOutputStream.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-07-22T17:18:27Z",
+      "side": 1,
+      "message": "Does this have to be strictly limited to testing? A class called MemoryOutputStream might be useful in other code as well.",
+      "revId": "22d2313ec34284331eea4241348700cdf379c0e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea48a7ff_c7aad41c",
+        "filename": "android/emulation/AdbDebugPipe.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-07-22T17:18:27Z",
+      "side": 1,
+      "message": "If the Stream* parameter is converted to std::unique_ptr\u003cStream\u003e that would enforce the ownership transfer at compile time instead of relying on the user to understand that.",
+      "revId": "22d2313ec34284331eea4241348700cdf379c0e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
