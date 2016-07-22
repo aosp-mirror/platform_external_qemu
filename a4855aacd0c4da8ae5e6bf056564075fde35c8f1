@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "ea48a7ff_479a4460",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-22T17:06:04Z",
+      "side": 1,
+      "message": "lfy: Thumb rule here is:\n- use android/base/Log.h in c++\n- use android/utils/debug.h in C files\n- Don\u0027t define arbitrary debug macros / variable switches. They\u0027re hard to discover and impossible to turn on without recompilation.",
+      "parentUuid": "8a91eb63_f14a4e7d",
+      "range": {
+        "startLine": 41,
+        "startChar": 15,
+        "endLine": 41,
+        "endChar": 22
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_f2596c94",
         "filename": "android/emulation/AdbGuestPipe.cpp",
         "patchSetId": 3
@@ -594,6 +618,30 @@
       "writtenOn": "2016-07-22T10:14:01Z",
       "side": 1,
       "message": "this looks dangerous without an explanation: who owns the underlying data? when is it invalidated?",
+      "range": {
+        "startLine": 156,
+        "startChar": 4,
+        "endLine": 156,
+        "endChar": 24
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea48a7ff_07843c03",
+        "filename": "android/emulation/AdbGuestPipe.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-22T17:06:04Z",
+      "side": 1,
+      "message": "Great catch!\nIf you lookat AdbGuestPipe.cpp:425, setReply(\"ok\"...) is eventually using a temporary string for the StringView that gets handed to mCommand (and gets stored there).\nThis should lead to undefined behaviour.",
+      "parentUuid": "8a91eb63_11719add",
       "range": {
         "startLine": 156,
         "startChar": 4,
