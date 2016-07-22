@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8a91eb63_f8c141fc",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-22T04:28:06Z",
+      "side": 1,
+      "message": "Maybe its more like ShareGroupManager now?",
+      "revId": "af1aada400e29d68e46998a6c0055ad7e9e60828",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
