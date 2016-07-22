@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ea48a7ff_72a62008",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-22T17:57:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8a91eb63_f84a21b0",
+      "range": {
+        "startLine": 246,
+        "startChar": 51,
+        "endLine": 246,
+        "endChar": 55
+      },
+      "revId": "96cbfc83c2a9520a83c7a601956b70bad5f846d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_381669a5",
         "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
         "patchSetId": 2
@@ -60,6 +84,24 @@
     },
     {
       "key": {
+        "uuid": "ea48a7ff_b28b486d",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-22T17:57:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea48a7ff_64097eda",
+      "revId": "96cbfc83c2a9520a83c7a601956b70bad5f846d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_1850cd5f",
         "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
         "patchSetId": 2
@@ -71,6 +113,30 @@
       "writtenOn": "2016-07-22T04:23:28Z",
       "side": 1,
       "message": "(similar to other comments)",
+      "range": {
+        "startLine": 69,
+        "startChar": 44,
+        "endLine": 69,
+        "endChar": 64
+      },
+      "revId": "96cbfc83c2a9520a83c7a601956b70bad5f846d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea48a7ff_f2f8f0ea",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-22T17:57:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8a91eb63_1850cd5f",
       "range": {
         "startLine": 69,
         "startChar": 44,
