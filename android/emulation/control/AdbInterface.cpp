@@ -47,8 +47,8 @@ public:
         return mAutoAdbPath;
     }
 
-    // Setup the emulator base port this interface is connected to
-    virtual void setEmulatorBasePort(int port) override final {
+    // Setup the port this interface is connected to
+    virtual void setSerialNumberPort(int port) override final {
         mSerialString = std::string("emulator-") + std::to_string(port);
     }
 

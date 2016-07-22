@@ -32,7 +32,7 @@ public:
     virtual const std::string& detectedAdbPath() const override final {
         return mAdbPath;
     }
-    virtual void setEmulatorBasePort(int port) override final {}
+    virtual void setSerialNumberPort(int port) override final {}
 
     void setAdbOptions(android::base::StringView path, bool isVersionCurrent) {
         mIsAdbVersionCurrent = isVersionCurrent;
