@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ea03478f_06cb1aa2",
+        "filename": "android/opengl/OpenglEsPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-22T10:12:08Z",
+      "side": 1,
+      "message": "AFAIK this is called really often, so it\u0027s no better than a signalWake() everywhere. We need to understand the specific situation where wakeFlags end up being 0 here\nor, even, where we don\u0027t call processIoEvents() at all, so it\u0027s only taken care of on the next call",
+      "range": {
+        "startLine": 256,
+        "startChar": 9,
+        "endLine": 256,
+        "endChar": 24
+      },
+      "revId": "951390fa1093cffa58e3503630d635db60b4e02c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
