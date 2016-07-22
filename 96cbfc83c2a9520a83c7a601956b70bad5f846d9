@@ -42,6 +42,24 @@
     },
     {
       "key": {
+        "uuid": "ea48a7ff_64097eda",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-22T16:58:17Z",
+      "side": 1,
+      "message": "The whole idea is to bind the creation / release of objects with their names. Any idea how to do it in a cleaner way?",
+      "parentUuid": "8a91eb63_381669a5",
+      "revId": "96cbfc83c2a9520a83c7a601956b70bad5f846d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_1850cd5f",
         "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
         "patchSetId": 2
