@@ -5073,6 +5073,8 @@ int run_qemu_main(int argc, const char **argv)
 
 #ifdef CONFIG_ANDROID
     crashhandler_exitmode("after main_loop");
+    android_wear_agent_stop();
+    socket_drainer_stop();
 #endif
     bdrv_close_all();
     pause_all_vcpus();
