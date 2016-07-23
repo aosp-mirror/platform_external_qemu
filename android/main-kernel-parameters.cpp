@@ -42,6 +42,8 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     params.addFormat("androidboot.hardware=%s",
                      isQemu2 ? "ranchu" : "goldfish");
 
+    params.addFormat("audio.alsa=%d", isQemu2 ? 1 : 0);
+
     if (isX86ish) {
         params.add("clocksource=pit");
     }
