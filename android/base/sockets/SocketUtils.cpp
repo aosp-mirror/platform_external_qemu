@@ -685,5 +685,15 @@ int socketGetPort(int socket) {
     return addr.getPort();
 }
 
+int socketGetPeerPort(int socket) {
+    SockAddressStorage addr;
+    socklen_t addrLen = static_cast<socklen_t>(sizeof(addr));
+    if (getpeername(socket, &addr.generic, &addrLen) < 0) {
+        DPLOG(ERROR) << "Could not get socket peer name!";
+        return -1;
+    }
+    return addr.getPort();
+}
+
 }  // namespace base
 }  // namespace android

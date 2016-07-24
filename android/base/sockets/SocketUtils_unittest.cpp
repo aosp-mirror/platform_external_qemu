@@ -11,6 +11,7 @@
 
 #include "android/base/sockets/SocketUtils.h"
 
+#include "android/base/sockets/ScopedSocket.h"
 #include <gtest/gtest.h>
 
 namespace android {
@@ -55,6 +56,50 @@ TEST(SocketUtils, socketRecvAll) {
 
     socketClose(sock[1]);
     socketClose(sock[0]);
+}
+
+TEST(SocketUtils, socketGetPort) {
+    ScopedSocket s0;
+    // Find a free TCP IPv4 port and bind to it.
+    int port;
+    for (port = 1024; port < 65536; ++port) {
+        s0.reset(socketTcp4LoopbackServer(port));
+        if (s0.valid()) {
+            break;
+        }
+    }
+    ASSERT_TRUE(s0.valid()) << "Could not find free TCP port";
+    EXPECT_EQ(port, socketGetPort(s0.get()));
+
+    // Connect to it.
+    ScopedSocket s1(socketTcp4LoopbackClient(port));
+    ASSERT_TRUE(s1.valid());
+
+    // Accept it to create a pair of connected socket.
+    // The port number of |s2| should be |port|.
+    ScopedSocket s2(socketAcceptAny(s0.get()));
+    ASSERT_TRUE(s2.valid());
+
+    EXPECT_EQ(port, socketGetPort(s2.get()));
+}
+
+TEST(SocketUtils, socketGetPeerPort) {
+    // Create a server socket bound to a random port.
+    ScopedSocket s0(socketTcp4LoopbackServer(0));
+    ASSERT_TRUE(s0.valid());
+    int serverPort = socketGetPort(s0.get());
+    ASSERT_GT(serverPort, 0);
+
+    // Connect to it.
+    ScopedSocket s1(socketTcp4LoopbackClient(serverPort));
+    ASSERT_TRUE(s1.valid()) << "Could not connect to server socket";
+
+    // Accept it to create a pair of connected sockets.
+    ScopedSocket s2(socketAcceptAny(s0.get()));
+    ASSERT_TRUE(s2.valid());
+
+    EXPECT_EQ(socketGetPort(s1.get()), socketGetPeerPort(s2.get()));
+    EXPECT_EQ(socketGetPort(s2.get()), socketGetPeerPort(s1.get()));
 }
 
 }  // namespace base
