@@ -22,6 +22,30 @@
       "revId": "b62d985187fbc434cc609caa2c75736084f465a7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca73e35a_edb00591",
+        "filename": "android/emulation/testing/TestAndroidPipeDevice.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-24T15:01:34Z",
+      "side": 1,
+      "message": "It\u0027s part of TestGuest and only called from TestGuest\u0027s destructor. Since this class is not exposed in the header, I don\u0027t think we need to worry about surprises at all.",
+      "parentUuid": "ea03478f_2665f6b7",
+      "range": {
+        "startLine": 69,
+        "startChar": 25,
+        "endLine": 69,
+        "endChar": 33
+      },
+      "revId": "b62d985187fbc434cc609caa2c75736084f465a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
