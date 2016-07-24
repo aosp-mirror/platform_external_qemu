@@ -70,6 +70,69 @@
       "revId": "af1aada400e29d68e46998a6c0055ad7e9e60828",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea48a7ff_86f4bced",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameSpace.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-07-24T19:11:23Z",
+      "side": 1,
+      "message": "nit: more clarification: does a single local namespace belong to a single context ? what is a context group ?",
+      "revId": "af1aada400e29d68e46998a6c0055ad7e9e60828",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea48a7ff_46e55433",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameSpace.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-07-24T19:11:23Z",
+      "side": 1,
+      "message": "what does GlobalNameSpace mean ? is it Global to all processes or Global to a certain Process in the guest ?\nplease make it more clear",
+      "range": {
+        "startLine": 39,
+        "startChar": 6,
+        "endLine": 39,
+        "endChar": 21
+      },
+      "revId": "af1aada400e29d68e46998a6c0055ad7e9e60828",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea48a7ff_26e04825",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameSpace.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-07-24T19:11:23Z",
+      "side": 1,
+      "message": "why not call it LocalNameSpace ? or better ContextLocalNameSpace?",
+      "range": {
+        "startLine": 40,
+        "startChar": 6,
+        "endLine": 40,
+        "endChar": 15
+      },
+      "revId": "af1aada400e29d68e46998a6c0055ad7e9e60828",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
