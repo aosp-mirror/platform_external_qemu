@@ -117,6 +117,9 @@ int formatToolbarGetUrl(char** ptr,
     static const char user_actions_key[] = "user_actions";
     static const char exit_started_key[] = "exit_started";
 
+    // Selected renderer backend
+    static const char selected_renderer_backend_key[] = "selected_renderer";
+
     // Guest GPU information
     static const char guest_gl_vendor_key[] = "ggl_vendor";
     static const char guest_gl_renderer_key[] = "ggl_renderer";
@@ -149,6 +152,8 @@ int formatToolbarGetUrl(char** ptr,
     url_addi64val(&fullUrl, user_actions_key, metrics->user_actions);
     url_addintval(&fullUrl, exit_started_key, metrics->exit_started ? 1 : 0);
 
+    url_addintval(&fullUrl, selected_renderer_backend_key,
+                            metrics->selected_renderer);
     if (metrics->guest_gpu_enabled > 0) {
         url_addstrval(&fullUrl, guest_gl_vendor_key, metrics->guest_gl_vendor);
         url_addstrval(
@@ -164,6 +169,7 @@ int formatToolbarGetUrl(char** ptr,
     URL_GPU_FORMAT(&fullUrl, gpu1);
     URL_GPU_FORMAT(&fullUrl, gpu2);
     URL_GPU_FORMAT(&fullUrl, gpu3);
+
 
     const int result = fullUrl.size();
     *ptr = android::base::strDup(fullUrl);

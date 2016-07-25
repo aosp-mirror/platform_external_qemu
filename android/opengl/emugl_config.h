@@ -55,6 +55,8 @@ typedef struct {
 // Get a description of host GPU properties.
 // Need to free after use.
 emugl_host_gpu_prop_list emuglConfig_get_host_gpu_props();
+int emuglConfig_get_selected_renderer(const char* gpu_mode);
+
 void free_emugl_host_gpu_props(emugl_host_gpu_prop_list props);
 
 // Initialize an EmuglConfig instance based on the AVD's hardware properties

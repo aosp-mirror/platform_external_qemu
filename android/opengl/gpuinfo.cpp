@@ -515,3 +515,35 @@ bool async_query_host_gpu_blacklisted() {
     sGPUInfoQueryThread->wait();
     return GpuInfoList::get()->blacklist_status;
 }
+
+enum SelectedRenderer {
+    SELECTED_RENDERER_HOST = 0,
+    SELECTED_RENDERER_OFF = 1,
+    SELECTED_RENDERER_GUEST = 2,
+    SELECTED_RENDERER_MESA = 3,
+    SELECTED_RENDERER_SWIFTSHADER = 4,
+    SELECTED_RENDERER_ANGLE = 5,
+    SELECTED_RENDERER_ERROR = 254,
+    SELECTED_RENDERER_UNKNOWN = 255,
+};
+
+int emugl_get_selected_renderer(const char* gpu_mode) {
+    if (!strcmp(gpu_mode, "host") ||
+        !strcmp(gpu_mode, "on")) {
+        return SELECTED_RENDERER_HOST;
+    } else if (!strcmp(gpu_mode, "off")) {
+        return SELECTED_RENDERER_OFF;
+    } else if (!strcmp(gpu_mode, "guest")) {
+        return SELECTED_RENDERER_GUEST;
+    } else if (!strcmp(gpu_mode, "mesa")) {
+        return SELECTED_RENDERER_MESA;
+    } else if (!strcmp(gpu_mode, "swiftshader")) {
+        return SELECTED_RENDERER_SWIFTSHADER;
+    } else if (!strcmp(gpu_mode, "angle")) {
+        return SELECTED_RENDERER_ANGLE;
+    } else if (!strcmp(gpu_mode, "error")) {
+        return SELECTED_RENDERER_ERROR;
+    } else {
+        return SELECTED_RENDERER_UNKNOWN;
+    }
+}

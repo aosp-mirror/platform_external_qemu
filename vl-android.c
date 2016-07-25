@@ -1840,6 +1840,10 @@ static void android_init_metrics(int opengl_alive)
     ANDROID_METRICS_STRASSIGN(metrics.guest_arch, android_hw->hw_cpu_arch);
     metrics.guest_api_level = avdInfo_getApiLevel(android_avdInfo);
     metrics.guest_gpu_enabled = android_hw->hw_gpu_enabled;
+
+    metrics.selected_renderer =
+        emuglConfig_get_selected_renderer(android_hw->hw_gpu_mode);
+
     if (android_hw->hw_gpu_enabled) {
         free(metrics.guest_gl_vendor);
         metrics.guest_gl_vendor = NULL;

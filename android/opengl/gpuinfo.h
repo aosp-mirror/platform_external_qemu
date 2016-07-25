@@ -113,3 +113,7 @@ void parse_gpu_info_list_osx(const std::string& contents, GpuInfoList* gpulist);
 void parse_gpu_info_list_linux(const std::string& contents, GpuInfoList* gpulist);
 void parse_gpu_info_list_windows(const std::string& contents, GpuInfoList* gpulist);
 
+// Returns integer representing the selected gpu mode.
+// Assumes that the -gpu command line option
+// has been taken into account already.
+int emugl_get_selected_renderer(const char* gpu_mode);
