@@ -16,7 +16,6 @@ debug_tags[] = {
     { 0, 0, 0 }
 };
 
-static void  parse_debug_tags( const char*  tags );
 void  parse_env_debug_tags( void );
 
 enum {
@@ -58,7 +57,6 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
     while (nargs > 0) {
         char*  arg;
         char   arg2_tab[64], *arg2 = arg2_tab;
-        int    nn;
 
         /* process @<name> as a special exception meaning
          * '-avd <name>'
@@ -92,14 +90,17 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
             arg = "debug-init";
         }
 
-        /* special handing for -debug <tags> */
+        /* special handing for -debug <tags> and -debug-<tags> */
         if (!strcmp(arg, "debug")) {
             if (nargs == 0) {
                 derror( "-debug must be followed by tags (see -help-verbose)\n");
                 return -1;
             }
             nargs--;
-            parse_debug_tags(*aread++);
+            android_parse_debug_option(*aread++);
+            continue;
+        } else if (!strncmp(arg, "debug-", sizeof("debug-") - 1)) {
+            android_parse_debug_option(arg + sizeof("debug-") - 1);
             continue;
         }
 
@@ -119,32 +120,6 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
         arg2 = arg2_tab;
         buffer_translate_char( arg2_tab, sizeof(arg2_tab),
                                arg, '-', '_');
-
-        /* special handling for -debug-<tag> and -debug-no-<tag> */
-        if (!memcmp(arg2, "debug_", 6)) {
-            int remove = 0;
-            uint64_t mask   = 0;
-            arg2 += 6;
-            if (!memcmp(arg2, "no_", 3)) {
-                arg2  += 3;
-                remove = 1;
-            }
-            if (!strcmp(arg2, "all")) {
-                base_enable_verbose_logs();
-                mask = ~0;
-            }
-            for (nn = 0; debug_tags[nn].name; nn++) {
-                if (!strcmp(arg2, debug_tags[nn].name)) {
-                    mask = (1ULL << debug_tags[nn].flag);
-                    break;
-                }
-            }
-            if (remove)
-                android_verbose &= ~mask;
-            else
-                android_verbose |= mask;
-            continue;
-        }
 
         /* look into our table of options
          *
@@ -239,68 +214,85 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
 /* special handling of -debug option and tags */
 #define  ENV_DEBUG   "ANDROID_DEBUG"
 
-static void
-parse_debug_tags( const char*  tags )
-{
-    char*        x;
-    char*        y;
-    char*        x0;
+// Checks if a character range [tagStart, tagEnd) represents a debug tag |to|
+static bool is_tag_equal(const char* tagStart, const char* tagEnd,
+                         const char* to) {
+    const size_t tagLen = tagEnd - tagStart;
+    if (strncmp(to, tagStart, tagLen)) {
+        return false;
+    }
 
-    if (tags == NULL)
-        return;
+    // Can't do this before the strncmp() call as |to| might be not long enough.
+    if (to[tagLen] != 0) {
+        return false;
+    }
+    return true;
+}
 
-    x = x0 = strdup(tags);
+bool android_parse_debug_option(const char* opt) {
+    if (opt == NULL)
+        return false;
+
+    bool result = false;
+    const char* x = opt;
     while (*x) {
-        y = strchr(x, ',');
+        const char* y = strchr(x, ',');
         if (y == NULL)
             y = x + strlen(x);
-        else
-            *y++ = 0;
 
         if (y > x+1) {
-            int  nn, remove = 0;
-            uint64_t mask = 0;
+            int remove = 0;
 
             if (x[0] == '-') {
                 remove = 1;
                 x += 1;
+            } else if (!strncmp(x, "no-", 3)) {
+                remove = 1;
+                x += 3;
             }
 
-            if (!strcmp( "all", x )) {
-                base_enable_verbose_logs();
-                mask = ~0;
+            if (is_tag_equal(x, y, "all")) {
+                result = true;
+                remove
+                        ? base_disable_verbose_logs()
+                        : base_enable_verbose_logs();
             } else {
                 char  temp[32];
-                buffer_translate_char(temp, sizeof temp, x, '-', '_');
+                buffer_translate_char_with_len(temp, sizeof temp,
+                                               x, y - x, '-', '_');
 
+                int nn;
+                uint64_t mask = 0;
                 for (nn = 0; debug_tags[nn].name != NULL; nn++) {
-                    if ( !strcmp( debug_tags[nn].name, temp ) ) {
+                    if (is_tag_equal(temp, temp + (y - x), debug_tags[nn].name)) {
                         mask |= (1ULL << debug_tags[nn].flag);
                         break;
                     }
                 }
-            }
 
-            if (mask == 0)
-                dprint( "ignoring unknown " ENV_DEBUG " item '%s'", x );
-            else {
-                if (remove)
-                    android_verbose &= ~mask;
-                else
-                    android_verbose |= mask;
+                if (mask == 0)
+                    dprint( "ignoring unknown debug item '%s'", x );
+                else {
+                    result = true;
+                    if (remove)
+                        android_verbose &= ~mask;
+                    else
+                        android_verbose |= mask;
+                }
             }
         }
-        x = y;
+        // Skip the comma, but don't jump over the terminating zero.
+        x = *y ? y + 1 : y;
     }
 
-    free(x0);
+    return result;
 }
 
 void
 parse_env_debug_tags( void )
 {
     const char*  env = getenv( ENV_DEBUG );
-    parse_debug_tags( env );
+    android_parse_debug_option(env);
 }
 
 bool android_validate_ports(int console_port, int adb_port) {
