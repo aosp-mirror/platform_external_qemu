@@ -1,0 +1,7 @@
+Code-Review+2: Lingfeng Yang <lfy@google.com>
+Verified+1: Lingfeng Yang <lfy@google.com>
+Submitted-by: Lingfeng Yang <lfy@google.com>
+Submitted-at: Mon, 25 Jul 2016 20:56:17 +0000
+Reviewed-on: https://android-review.googlesource.com/250585
+Project: platform/external/qemu
+Branch: refs/heads/emu-2.2-release
