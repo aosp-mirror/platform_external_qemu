@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0a617bbb_112afce4",
+        "filename": "android/base/memory/ScopedPtr.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-25T22:06:51Z",
+      "side": 1,
+      "message": "I assume that you don\u0027t intend to change the external interface of any of the variants of ScopedPtr, including this one.  And that you want all these to treat T the same way.  But this change seems like it does do such a change (albeit in an unlikely circumstance).  If wanted to have a \n\nScopedCustomPtr\u003cint*, \u003c...func that takes an int**\u003e\u003e\n\nthat is, a scoped pointer to a pointer-sized cell containing a pointer to int, then I could no longer create that: the remove_pointer would cause this to be a scoped pointer to a T, not a T*.\n\nThis seems undesirable -- unique_ptr, for example, doesn\u0027t do this, AFAIK.  So maybe investigating David\u0027s suggestion for fixing the motivating nullptr annoyance would be worthwhile.",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 15
+      },
+      "revId": "c460da045652cef70acf5f4ca4976eaae59e6bc5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
