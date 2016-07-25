@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0a617bbb_03ee31b9",
+        "filename": "android/filesystems/ext4_resize.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-25T23:35:21Z",
+      "side": 1,
+      "message": "Is expecting initializer_list as an argument to arbitrary functions idiomatic?",
+      "range": {
+        "startLine": 70,
+        "startChar": 31,
+        "endLine": 70,
+        "endChar": 47
+      },
+      "revId": "4eef1e4acffb3a7fced58fed199abece9088c919",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
