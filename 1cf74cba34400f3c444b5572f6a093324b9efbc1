@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0a617bbb_80415c41",
+        "filename": "android/metrics/metrics_fields.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-25T20:53:12Z",
+      "side": 1,
+      "message": "Keeping default value of 0, but using 0 to denote \"unknown\".",
+      "parentUuid": "0a617bbb_4064a41c",
+      "range": {
+        "startLine": 48,
+        "startChar": 52,
+        "endLine": 48,
+        "endChar": 53
+      },
+      "revId": "1cf74cba34400f3c444b5572f6a093324b9efbc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a617bbb_80979cdc",
         "filename": "android/metrics/metrics_reporter_toolbar.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-07-25T20:46:35Z",
       "side": 1,
       "message": "As discussed offline, let\u0027s just call this |renderer|. This name is set in stone once added.",
+      "range": {
+        "startLine": 121,
+        "startChar": 57,
+        "endLine": 121,
+        "endChar": 74
+      },
+      "revId": "1cf74cba34400f3c444b5572f6a093324b9efbc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a617bbb_c03a74d0",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-25T20:53:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0a617bbb_80979cdc",
       "range": {
         "startLine": 121,
         "startChar": 57,
@@ -65,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "0a617bbb_c0e4343b",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-25T20:53:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0a617bbb_20a09039",
+      "revId": "1cf74cba34400f3c444b5572f6a093324b9efbc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a617bbb_204ed093",
         "filename": "android/opengl/emugl_config.h",
         "patchSetId": 2
@@ -88,6 +154,30 @@
     },
     {
       "key": {
+        "uuid": "0a617bbb_80c6bcad",
+        "filename": "android/opengl/emugl_config.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-25T20:53:12Z",
+      "side": 1,
+      "message": "Done (0 \u003d unknown)",
+      "parentUuid": "0a617bbb_204ed093",
+      "range": {
+        "startLine": 69,
+        "startChar": 4,
+        "endLine": 69,
+        "endChar": 35
+      },
+      "revId": "1cf74cba34400f3c444b5572f6a093324b9efbc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a617bbb_e018587d",
         "filename": "vl-android.c",
         "patchSetId": 2
@@ -99,6 +189,24 @@
       "writtenOn": "2016-07-25T20:46:35Z",
       "side": 1,
       "message": "nit: Drop the extra newline.",
+      "revId": "1cf74cba34400f3c444b5572f6a093324b9efbc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a617bbb_40474455",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1843,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-25T20:53:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0a617bbb_e018587d",
       "revId": "1cf74cba34400f3c444b5572f6a093324b9efbc1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
