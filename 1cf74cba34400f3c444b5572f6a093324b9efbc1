@@ -1,0 +1,107 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0a617bbb_4064a41c",
+        "filename": "android/metrics/metrics_fields.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-25T20:46:35Z",
+      "side": 1,
+      "message": "Default value should be 255 as the enum currently stands (see comment there though)",
+      "range": {
+        "startLine": 48,
+        "startChar": 52,
+        "endLine": 48,
+        "endChar": 53
+      },
+      "revId": "1cf74cba34400f3c444b5572f6a093324b9efbc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a617bbb_80979cdc",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-25T20:46:35Z",
+      "side": 1,
+      "message": "As discussed offline, let\u0027s just call this |renderer|. This name is set in stone once added.",
+      "range": {
+        "startLine": 121,
+        "startChar": 57,
+        "endLine": 121,
+        "endChar": 74
+      },
+      "revId": "1cf74cba34400f3c444b5572f6a093324b9efbc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a617bbb_20a09039",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-25T20:46:35Z",
+      "side": 1,
+      "message": "nit: no extra newline here.",
+      "revId": "1cf74cba34400f3c444b5572f6a093324b9efbc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a617bbb_204ed093",
+        "filename": "android/opengl/emugl_config.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-25T20:46:35Z",
+      "side": 1,
+      "message": "I have a slight preference for using 0 as unknown. This is the most common default / dropped value that bugs introduce, and it\u0027s better to be buggy and say \"we known nothing\" than be buggy and say \"we know it was host rendering\".",
+      "range": {
+        "startLine": 69,
+        "startChar": 4,
+        "endLine": 69,
+        "endChar": 35
+      },
+      "revId": "1cf74cba34400f3c444b5572f6a093324b9efbc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a617bbb_e018587d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1843,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-25T20:46:35Z",
+      "side": 1,
+      "message": "nit: Drop the extra newline.",
+      "revId": "1cf74cba34400f3c444b5572f6a093324b9efbc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
