@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0a8edb80_4f234daf",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-25T14:02:58Z",
+      "side": 1,
+      "message": "what about just having a single parameter of this type, so there\u0027s no way one can specify a wrong object type?",
+      "range": {
+        "startLine": 29,
+        "startChar": 47,
+        "endLine": 29,
+        "endChar": 64
+      },
+      "revId": "09cfccb4a2209906b91843030d9e094523c96a86",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a8edb80_6f2091a1",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-25T14:02:58Z",
+      "side": 1,
+      "message": "to get rid of a switch you could just have a lambda in m_glRelease that ignores the first \u0027n\u0027 argument and passes the second one to the actual GL call. E.g.\n\nm_glRelease[PROGRAM] \u003d [](int /*unused*/, unsigned* name) { glDeleteProgram(*name); };",
+      "range": {
+        "startLine": 177,
+        "startChar": 3,
+        "endLine": 185,
+        "endChar": 5
+      },
+      "revId": "09cfccb4a2209906b91843030d9e094523c96a86",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a8edb80_2f2a8981",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameTypes.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-25T14:02:58Z",
+      "side": 1,
+      "message": "could you please remove all explicit values? it only makes things worse IMO",
+      "range": {
+        "startLine": 21,
+        "startChar": 2,
+        "endLine": 27,
+        "endChar": 29
+      },
+      "revId": "09cfccb4a2209906b91843030d9e094523c96a86",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a8edb80_0f2d4598",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameTypes.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-25T14:02:58Z",
+      "side": 1,
+      "message": "\"type-specific\" ?",
+      "range": {
+        "startLine": 32,
+        "startChar": 16,
+        "endLine": 32,
+        "endChar": 25
+      },
+      "revId": "09cfccb4a2209906b91843030d9e094523c96a86",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
