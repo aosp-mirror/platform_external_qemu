@@ -117,6 +117,9 @@ int formatToolbarGetUrl(char** ptr,
     static const char user_actions_key[] = "user_actions";
     static const char exit_started_key[] = "exit_started";
 
+    // Selected renderer backend
+    static const char renderer_key[] = "renderer";
+
     // Guest GPU information
     static const char guest_gl_vendor_key[] = "ggl_vendor";
     static const char guest_gl_renderer_key[] = "ggl_renderer";
@@ -148,7 +151,7 @@ int formatToolbarGetUrl(char** ptr,
     url_addi64val(&fullUrl, wallclock_time_key, metrics->wallclock_time);
     url_addi64val(&fullUrl, user_actions_key, metrics->user_actions);
     url_addintval(&fullUrl, exit_started_key, metrics->exit_started ? 1 : 0);
-
+    url_addintval(&fullUrl, renderer_key, metrics->renderer);
     if (metrics->guest_gpu_enabled > 0) {
         url_addstrval(&fullUrl, guest_gl_vendor_key, metrics->guest_gl_vendor);
         url_addstrval(
