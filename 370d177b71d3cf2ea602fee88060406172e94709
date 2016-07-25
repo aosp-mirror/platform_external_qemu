@@ -65,6 +65,30 @@
     },
     {
       "key": {
+        "uuid": "2a89df77_b0dc98de",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-25T07:21:21Z",
+      "side": 1,
+      "message": "is there a predicate function on the |mServer| to check if it\u0027s already listening? that would eliminate most of the possible mistakes here",
+      "parentUuid": "8a91eb63_71b1fe91",
+      "range": {
+        "startLine": 52,
+        "startChar": 25,
+        "endLine": 52,
+        "endChar": 43
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_119a7a07",
         "filename": "android/emulation/AdbHostListener.cpp",
         "patchSetId": 2
@@ -104,6 +128,52 @@
         "startChar": 4,
         "endLine": 65,
         "endChar": 64
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a8edb80_2f0da98b",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-25T07:21:21Z",
+      "side": 1,
+      "message": "or even mGuests.erase(std::remove_if(...), mGuests.end());",
+      "range": {
+        "startLine": 65,
+        "startChar": 4,
+        "endLine": 65,
+        "endChar": 7
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a8edb80_cf689d29",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-25T07:21:21Z",
+      "side": 1,
+      "message": "it looks more and more to me that std::unordered_set\u003c\u003e or just set\u003c\u003e would be a better match here - we mostly add/search/remove in the container",
+      "range": {
+        "startLine": 67,
+        "startChar": 12,
+        "endLine": 67,
+        "endChar": 19
       },
       "revId": "370d177b71d3cf2ea602fee88060406172e94709",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
@@ -381,6 +451,30 @@
     },
     {
       "key": {
+        "uuid": "ca2e8326_15a0f4e6",
+        "filename": "android/emulation/AdbTypes.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-25T07:21:21Z",
+      "side": 1,
+      "message": "or, we could just have a factory function to create an object for a port. if it fails, it returns null and the user just tries creating an object for another port",
+      "parentUuid": "8a91eb63_26481e84",
+      "range": {
+        "startLine": 36,
+        "startChar": 4,
+        "endLine": 43,
+        "endChar": 30
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_06124267",
         "filename": "android/emulation/AdbTypes.h",
         "patchSetId": 2
@@ -397,6 +491,29 @@
         "startChar": 4,
         "endLine": 48,
         "endChar": 62
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a8edb80_ef6d6136",
+        "filename": "android/emulation/AdbTypes.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-25T07:21:21Z",
+      "side": 1,
+      "message": "nit: unique_ptr\u003c\u003e\u0026\u0026 here? to explicitly state that ownership transfer",
+      "range": {
+        "startLine": 50,
+        "startChar": 26,
+        "endLine": 50,
+        "endChar": 45
       },
       "revId": "370d177b71d3cf2ea602fee88060406172e94709",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
@@ -438,6 +555,30 @@
       "writtenOn": "2016-07-21T18:58:11Z",
       "side": 1,
       "message": "This API implies that the user keeps a pointer to the AdbGuestAgent even after calling |addGuest| whereby it transferred ownership of the AdbGuestAgent to us.\n\nI\u0027d recommend that addGuest returns an opaque id that the user can use with deleteGuest.",
+      "range": {
+        "startLine": 55,
+        "startChar": 29,
+        "endLine": 55,
+        "endChar": 48
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a8edb80_8f729515",
+        "filename": "android/emulation/AdbTypes.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-25T07:21:21Z",
+      "side": 1,
+      "message": "I strongly second it. Having a pointer to something that\u0027s owned by another object is a common path to use after free bugs. Either opaque id or shared_ptr/weak_ptr pair would be a better mach here IMO",
+      "parentUuid": "8a91eb63_262d7e99",
       "range": {
         "startLine": 55,
         "startChar": 29,
