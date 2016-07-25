@@ -9,7 +9,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android/base/memory/ScopedPtr.h"
 #include "android/cmdline-option.h"
+#include "android/utils/debug.h"
 
 #include <gtest/gtest.h>
 
@@ -114,3 +116,38 @@ TEST(CmdLineOptions, validatePorts) {
     }
 }
 
+
+TEST(CmdLineOptions, parseDebug) {
+    struct {
+        const char* option;
+        bool expectedResult;
+        uint64_t initialFlags;
+        uint64_t parsedFlags;
+    } kData[] = {
+        { NULL, false, 0, 0 },
+        { "", false, 0, 0 },
+        { "all", true, 0, -1ull },
+        { "-all", true, 1, 0 },
+        { "no-all", true, 1, 0 },
+        { "noall", false, 1, 1 },
+        { "all,no-init", true, 0, -1ull & ~1 },
+        { "init,blah,-foo,no-bar", true, 0, 1 }
+    };
+
+    const auto oldFlags = android_verbose;
+    auto restoreFlags = android::base::makeCustomScopedPtr(nullptr,
+        [oldFlags](std::nullptr_t*) {
+            android_verbose = oldFlags;
+        });
+
+    for (const auto& data : kData) {
+        android_verbose = data.initialFlags;
+        bool result = android_parse_debug_option(data.option);
+        EXPECT_EQ(data.expectedResult, result)
+                << "Failed on test case: ("
+                << (data.option ? data.option : "null") << ")";
+        EXPECT_EQ(data.parsedFlags, android_verbose)
+                << "Failed on test case: ("
+                << (data.option ? data.option : "null") << ")";
+    }
+}

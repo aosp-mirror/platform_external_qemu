@@ -66,6 +66,10 @@ extern bool android_parse_ports_option(const char* ports_string,
  */
 extern bool android_validate_ports(int console_port, int adb_port);
 
+// parse the debug-related options from the argument and apply them at once.
+// returns true if the option was a valid debug flag/flags, false otherwise.
+bool android_parse_debug_option(const char* opt);
+
 /* the default device DPI if none is specified by the skin
  */
 #define  DEFAULT_DEVICE_DPI  165
