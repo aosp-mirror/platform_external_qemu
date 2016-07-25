@@ -202,6 +202,30 @@
     },
     {
       "key": {
+        "uuid": "ea48a7ff_6c14ee46",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-25T17:57:45Z",
+      "side": 1,
+      "message": "Got it. Please add a comment in the code describing this. Not obvious to me on first reading.",
+      "parentUuid": "2a89df77_d0b6fca3",
+      "range": {
+        "startLine": 61,
+        "startChar": 12,
+        "endLine": 61,
+        "endChar": 30
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_d1663226",
         "filename": "android/emulation/AdbHostListener.cpp",
         "patchSetId": 2
@@ -354,6 +378,24 @@
     },
     {
       "key": {
+        "uuid": "ea48a7ff_0c19aa7e",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-25T17:57:45Z",
+      "side": 1,
+      "message": "Ack.",
+      "parentUuid": "ca73e35a_adaafd1a",
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_d1147256",
         "filename": "android/emulation/AdbHostListener.cpp",
         "patchSetId": 2
@@ -483,6 +525,30 @@
       "side": 1,
       "message": "Yes, I think this is here because it was part of the code you contributed lately (of which this is a refactor), I just kept it here without thinking too much about it. Thanks for pointing this out.\n\nI agree we don\u0027t need to do that on onHostServerConnection, however, it\u0027s important to do that when there is no active connection and a new guest arrives. The ADB host server might have been killed, restarted, but didn\u0027t find the emulator because it wasn\u0027t using one of the 16 auto-scanned port values.\n\nI\u0027m not sure what your last paragraph means. When this method is called, stopListener() will already have been called by the caller on the AsyncSocketServer.",
       "parentUuid": "8a91eb63_d15ab2f8",
+      "range": {
+        "startLine": 99,
+        "startChar": 8,
+        "endLine": 101,
+        "endChar": 9
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea48a7ff_2c3b4684",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-25T17:57:45Z",
+      "side": 1,
+      "message": "Agree that it\u0027s needed when a new guest arrives and there is no connection (A new if condition in addGuest?)\n\nLast point: I didn\u0027t realize that AsyncSocketServer stops listening on accept. Ack.",
+      "parentUuid": "2a89df77_301c2879",
       "range": {
         "startLine": 99,
         "startChar": 8,
@@ -1095,6 +1161,30 @@
       "side": 1,
       "message": "I\u0027m not sure I understand what you mean by \"user\". This is called from one of |pipe|\u0027s methods (onGuestClose()), so of course it will retain a pointer to it. An opaque pointer will hide the fact but will not make any of the implementation simpler to understand/maintain.",
       "parentUuid": "8a91eb63_262d7e99",
+      "range": {
+        "startLine": 55,
+        "startChar": 29,
+        "endLine": 55,
+        "endChar": 48
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea48a7ff_4cca5275",
+        "filename": "android/emulation/AdbTypes.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-07-25T17:57:45Z",
+      "side": 1,
+      "message": "Re: use from onGuestCode: I saw that later. Given that the object is itself passing a pointer to |this| both to addGuest and deleteGuest, my original request is weakened. I still think that an opaque handle is better interface, but in this case doesn\u0027t get us much.",
+      "parentUuid": "ea76e749_0e10eba4",
       "range": {
         "startLine": 55,
         "startChar": 29,
