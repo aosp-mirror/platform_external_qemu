@@ -1627,14 +1627,11 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         if (use_software_gpu_and_screen_too_large(hw)) {
             return false;
         }
-        if (config.enabled) {
-            /* Only update hw_gpu_mode if emuglConfig_init determined that gpu
-             * is enabled. Leave the default untouched otherwise, because there
-             * is no canonical value to return from emulConfig_init function in
-             * that case.
-             */
-            str_reset(&hw->hw_gpu_mode, config.backend);
-        }
+
+        /* Update hw_gpu_mode with the canonical renderer name determined by
+         * emuglConfig_init (host/guest/off/swiftshader etc)
+         */
+        str_reset(&hw->hw_gpu_mode, config.backend);
         D("%s", config.status);
 
 #ifdef _WIN32
