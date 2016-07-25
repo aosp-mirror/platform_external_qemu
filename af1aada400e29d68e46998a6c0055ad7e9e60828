@@ -90,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "ea48a7ff_2956d8d5",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameSpace.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-25T17:21:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea48a7ff_86f4bced",
+      "revId": "af1aada400e29d68e46998a6c0055ad7e9e60828",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea48a7ff_46e55433",
         "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameSpace.h",
         "patchSetId": 2
@@ -113,6 +131,30 @@
     },
     {
       "key": {
+        "uuid": "ea48a7ff_c95bb4fc",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameSpace.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-25T17:21:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea48a7ff_46e55433",
+      "range": {
+        "startLine": 39,
+        "startChar": 6,
+        "endLine": 39,
+        "endChar": 21
+      },
+      "revId": "af1aada400e29d68e46998a6c0055ad7e9e60828",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea48a7ff_26e04825",
         "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameSpace.h",
         "patchSetId": 2
@@ -124,6 +166,30 @@
       "writtenOn": "2016-07-24T19:11:23Z",
       "side": 1,
       "message": "why not call it LocalNameSpace ? or better ContextLocalNameSpace?",
+      "range": {
+        "startLine": 40,
+        "startChar": 6,
+        "endLine": 40,
+        "endChar": 15
+      },
+      "revId": "af1aada400e29d68e46998a6c0055ad7e9e60828",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea48a7ff_694140f4",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameSpace.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-25T17:21:20Z",
+      "side": 1,
+      "message": "It is owned by a context sharegroup. We should call it ShareGroupNameSpace. Let\u0027s leave the renaming to another CL.",
+      "parentUuid": "ea48a7ff_26e04825",
       "range": {
         "startLine": 40,
         "startChar": 6,
