@@ -54,12 +54,7 @@ private:
     //           the value of the global name can be retrieved using the
     //           getGlobalName function.
     //
-    ObjectLocalName genName(ObjectLocalName p_localName, bool genGlobal, bool genLocal);
-
-    // genGlobalName() - This function creates a global name
-    //                   with no associated local name, for the
-    //                   translator internal use.
-    unsigned int genGlobalName(void);
+    ObjectLocalName genName(ObjectLocalName p_localName, bool genLocal);
 
     //
     // getGlobalName - returns the global name of an object or 0 if the object

@@ -33,8 +33,7 @@ NameSpace::~NameSpace()
 }
 
 ObjectLocalName
-NameSpace::genName(ObjectLocalName p_localName,
-                   bool genGlobal, bool genLocal)
+NameSpace::genName(ObjectLocalName p_localName, bool genLocal)
 {
     ObjectLocalName localName = p_localName;
     if (genLocal) {
@@ -45,21 +44,13 @@ NameSpace::genName(ObjectLocalName p_localName,
                         m_localToGlobalMap.end() );
     }
 
-    if (genGlobal) {
-        unsigned int globalName = m_globalNameSpace->genName(m_type);
-        m_localToGlobalMap[localName] = globalName;
-        m_globalToLocalMap[globalName] = localName;
-    }
+    unsigned int globalName = m_globalNameSpace->genName(m_type);
+    m_localToGlobalMap[localName] = globalName;
+    m_globalToLocalMap[globalName] = localName;
 
     return localName;
 }
 
-
-unsigned int
-NameSpace::genGlobalName(void)
-{
-    return m_globalNameSpace->genName(m_type);
-}
 
 unsigned int
 NameSpace::getGlobalName(ObjectLocalName p_localName)
