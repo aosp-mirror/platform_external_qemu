@@ -272,6 +272,30 @@
     },
     {
       "key": {
+        "uuid": "0a8edb80_cf073d21",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-25T13:19:27Z",
+      "side": 1,
+      "message": "just an FYI: std::remove_if without container.erase() makes no sense: https://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Erase-Remove",
+      "parentUuid": "4a88d372_1167ac51",
+      "range": {
+        "startLine": 65,
+        "startChar": 4,
+        "endLine": 65,
+        "endChar": 64
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a8edb80_cf689d29",
         "filename": "android/emulation/AdbHostListener.cpp",
         "patchSetId": 2
