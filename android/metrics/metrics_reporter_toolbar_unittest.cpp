@@ -53,6 +53,7 @@ TEST_F(MetricsReporterToolbarTest, defaultMetrics) {
             "&system_time=0&user_time=0&adb_liveness=0&wall_time=0"
             "&user_actions=0"
             "&exit_started=0"
+            "&renderer=0"
             "&gpu0_make=unknown"
             "&gpu0_model=unknown"
             "&gpu0_device_id=unknown"
@@ -98,6 +99,7 @@ TEST_F(MetricsReporterToolbarTest, cleanRun) {
             "&guest_api_level=100500&exf=0&opengl_alive=1&system_time=1170"
             "&user_time=220&adb_liveness=0&wall_time=10&user_actions=10"
             "&exit_started=1"
+            "&renderer=0"
             "&gpu0_make=unknown"
             "&gpu0_model=unknown"
             "&gpu0_device_id=unknown"
@@ -159,6 +161,7 @@ TEST_F(MetricsReporterToolbarTest, dirtyRun) {
             "&guest_api_level=-1"
             "&exf=1&opengl_alive=1&system_time=1080&user_time=180"
             "&adb_liveness=0&wall_time=101&user_actions=432&exit_started=0"
+            "&renderer=0"
             "&gpu0_make=unknown"
             "&gpu0_model=unknown"
             "&gpu0_device_id=unknown"
@@ -218,6 +221,7 @@ TEST_F(MetricsReporterToolbarTest, openGLErrorRun) {
             "&guest_api_level=-1"
             "&exf=1&opengl_alive=0&system_time=1080&user_time=180"
             "&adb_liveness=0&wall_time=0&user_actions=0&exit_started=0"
+            "&renderer=0"
             "&gpu0_make=unknown"
             "&gpu0_model=unknown"
             "&gpu0_device_id=unknown"
@@ -274,6 +278,7 @@ TEST_F(MetricsReporterToolbarTest, guestGpuStrings) {
             "&guest_api_level=-1"
             "&exf=0&opengl_alive=1&system_time=1170&user_time=220"
             "&adb_liveness=0&wall_time=0&user_actions=0&exit_started=0"
+            "&renderer=0"
             "&ggl_vendor=Some_Vendor&ggl_renderer=&ggl_version=1%20.%200"
             "&gpu0_make=unknown"
             "&gpu0_model=unknown"
@@ -334,6 +339,7 @@ TEST_F(MetricsReporterToolbarTest, gpuStrings) {
             "&guest_api_level=-1"
             "&exf=0&opengl_alive=1&system_time=1170&user_time=220"
             "&adb_liveness=0&wall_time=0&user_actions=0&exit_started=0"
+            "&renderer=0"
             "&gpu0_make=Advanced%20Micro%20Devices%2C%20Inc."
             "&gpu0_model=AMD%20Radeon%20%28TM%29%20R5%20M335"
             "&gpu0_device_id=0x0166"
@@ -411,6 +417,54 @@ TEST_F(MetricsReporterToolbarTest, gpuStrings) {
     ANDROID_METRICS_STRASSIGN(metrics.gpu3_renderer,
                               "OpenGL version string: 3.0 Mesa 10.4.2 (git-)");
 
+    EXPECT_EQ(kExpectedLen,
+              formatToolbarGetUrl(&formatted_url, mToolbarUrl, &metrics));
+    EXPECT_STREQ(kExpected, formatted_url);
+    androidMetrics_fini(&metrics);
+    free(formatted_url);
+}
+
+TEST_F(MetricsReporterToolbarTest, rendererSelection) {
+    char* formatted_url = NULL;
+    AndroidMetrics metrics;
+    static const char kExpected[] =
+            "https://tools.google.com/service/update?"
+            "as=androidsdk_emu_crash&version=unknown&core_version=unknown"
+            "&update_channel=0"
+            "&os=unknown&id=00000000-0000-0000-0000-000000000000"
+            "&guest_arch=unknown&guest_api_level=-1&exf=1&opengl_alive=0"
+            "&system_time=0&user_time=0&adb_liveness=0&wall_time=0"
+            "&user_actions=0"
+            "&exit_started=0"
+            "&renderer=1"
+            "&gpu0_make=unknown"
+            "&gpu0_model=unknown"
+            "&gpu0_device_id=unknown"
+            "&gpu0_revision_id=unknown"
+            "&gpu0_version=unknown"
+            "&gpu0_renderer=unknown"
+            "&gpu1_make=unknown"
+            "&gpu1_model=unknown"
+            "&gpu1_device_id=unknown"
+            "&gpu1_revision_id=unknown"
+            "&gpu1_version=unknown"
+            "&gpu1_renderer=unknown"
+            "&gpu2_make=unknown"
+            "&gpu2_model=unknown"
+            "&gpu2_device_id=unknown"
+            "&gpu2_revision_id=unknown"
+            "&gpu2_version=unknown"
+            "&gpu2_renderer=unknown"
+            "&gpu3_make=unknown"
+            "&gpu3_model=unknown"
+            "&gpu3_device_id=unknown"
+            "&gpu3_revision_id=unknown"
+            "&gpu3_version=unknown"
+            "&gpu3_renderer=unknown";
+    static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
+
+    androidMetrics_init(&metrics);
+    metrics.renderer = 1;
     EXPECT_EQ(kExpectedLen,
               formatToolbarGetUrl(&formatted_url, mToolbarUrl, &metrics));
     EXPECT_STREQ(kExpected, formatted_url);

@@ -85,6 +85,27 @@ emugl_host_gpu_prop_list emuglConfig_get_host_gpu_props() {
     return res;
 }
 
+int emuglConfig_get_renderer(const char* gpu_mode) {
+    if (!strcmp(gpu_mode, "host") ||
+        !strcmp(gpu_mode, "on")) {
+        return SELECTED_RENDERER_HOST;
+    } else if (!strcmp(gpu_mode, "off")) {
+        return SELECTED_RENDERER_OFF;
+    } else if (!strcmp(gpu_mode, "guest")) {
+        return SELECTED_RENDERER_GUEST;
+    } else if (!strcmp(gpu_mode, "mesa")) {
+        return SELECTED_RENDERER_MESA;
+    } else if (!strcmp(gpu_mode, "swiftshader")) {
+        return SELECTED_RENDERER_SWIFTSHADER;
+    } else if (!strcmp(gpu_mode, "angle")) {
+        return SELECTED_RENDERER_ANGLE;
+    } else if (!strcmp(gpu_mode, "error")) {
+        return SELECTED_RENDERER_ERROR;
+    } else {
+        return SELECTED_RENDERER_UNKNOWN;
+    }
+}
+
 void free_emugl_host_gpu_props(emugl_host_gpu_prop_list proplist) {
     for (int i = 0; i < proplist.num_gpus; i++) {
         free(proplist.props[i].make);
@@ -124,6 +145,7 @@ bool emuglConfig_init(EmuglConfig* config,
         } else if (!strcmp(gpu_option, "off") ||
                    !strcmp(gpu_option, "disable") ||
                    !strcmp(gpu_option, "guest")) {
+            gpu_mode = gpu_option;
             gpu_enabled = false;
         } else if (!strcmp(gpu_option, "auto")) {
             // Nothing to do, use gpu_mode set from
@@ -142,6 +164,7 @@ bool emuglConfig_init(EmuglConfig* config,
 
     if (!gpu_enabled) {
         config->enabled = false;
+        snprintf(config->backend, sizeof(config->backend), "%s", gpu_mode);
         snprintf(config->status, sizeof(config->status),
                  "GPU emulation is disabled");
         return true;
@@ -166,6 +189,8 @@ bool emuglConfig_init(EmuglConfig* config,
             D("%s: %s session detected\n", __FUNCTION__, sessionType.c_str());
             if (!sBackendList->contains("swiftshader")) {
                 config->enabled = false;
+                gpu_mode = "off";
+                snprintf(config->backend, sizeof(config->backend), "%s", gpu_mode);
                 snprintf(config->status, sizeof(config->status),
                         "GPU emulation is disabled under %s without Swiftshader",
                         sessionType.c_str());
@@ -185,6 +210,8 @@ bool emuglConfig_init(EmuglConfig* config,
                   " without Swiftshader, forcing '-gpu off'\n",
                   __FUNCTION__);
                 config->enabled = false;
+                gpu_mode = "off";
+                snprintf(config->backend, sizeof(config->backend), "%s", gpu_mode);
                 snprintf(config->status, sizeof(config->status),
                         "GPU emulation is disabled (-no-window without Swiftshader)");
                 return true;
@@ -193,6 +220,8 @@ bool emuglConfig_init(EmuglConfig* config,
                   ", using guest GPU backend\n",
                   __FUNCTION__);
                 config->enabled = false;
+                gpu_mode = "off";
+                snprintf(config->backend, sizeof(config->backend), "%s", gpu_mode);
                 snprintf(config->status, sizeof(config->status),
                         "GPU emulation is in the guest");
                 gpu_mode = "guest";
@@ -217,6 +246,8 @@ bool emuglConfig_init(EmuglConfig* config,
                 error += backends[n];
             }
             config->enabled = false;
+            gpu_mode = "error";
+            snprintf(config->backend, sizeof(config->backend), "%s", gpu_mode);
             snprintf(config->status, sizeof(config->status), "%s",
                      error.c_str());
             return false;

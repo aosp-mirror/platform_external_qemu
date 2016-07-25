@@ -55,6 +55,25 @@ typedef struct {
 // Get a description of host GPU properties.
 // Need to free after use.
 emugl_host_gpu_prop_list emuglConfig_get_host_gpu_props();
+
+// Enum tracking all current available renderer backends
+// for the emulator.
+enum SelectedRenderer {
+    SELECTED_RENDERER_UNKNOWN = 0,
+    SELECTED_RENDERER_HOST = 1,
+    SELECTED_RENDERER_OFF = 2,
+    SELECTED_RENDERER_GUEST = 3,
+    SELECTED_RENDERER_MESA = 4,
+    SELECTED_RENDERER_SWIFTSHADER = 5,
+    SELECTED_RENDERER_ANGLE = 6,
+    SELECTED_RENDERER_ERROR = 255,
+};
+
+// Returns integer representing the selected gpu mode.
+// Assumes that the -gpu command line option
+// has been taken into account already.
+int emuglConfig_get_renderer(const char* gpu_mode);
+
 void free_emugl_host_gpu_props(emugl_host_gpu_prop_list props);
 
 // Initialize an EmuglConfig instance based on the AVD's hardware properties

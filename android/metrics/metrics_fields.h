@@ -44,6 +44,9 @@ METRICS_INT(adb_liveness, "adb_liveness", 0)
 METRICS_INT(exit_started, "exit_started", 0)
 METRICS_INT64(user_actions, "user_actions", 0);
 
+// Selected GPU backend
+METRICS_INT(renderer, "renderer", 0);
+
 // Guest GPU OpenGL strings
 METRICS_STRING(guest_gl_vendor, "guest_gl_vendor", "NotApplicable")
 METRICS_STRING(guest_gl_renderer, "guest_gl_renderer", "NotApplicable")

@@ -112,4 +112,3 @@ void parse_gpu_info_list(const std::string& contents, GpuInfoList* gpulist);
 void parse_gpu_info_list_osx(const std::string& contents, GpuInfoList* gpulist);
 void parse_gpu_info_list_linux(const std::string& contents, GpuInfoList* gpulist);
 void parse_gpu_info_list_windows(const std::string& contents, GpuInfoList* gpulist);
-
