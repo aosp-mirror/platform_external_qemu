@@ -17,3 +17,8 @@ void base_enable_verbose_logs() {
     android_verbose = ~0;
     android::base::setMinLogLevel(android::base::LOG_VERBOSE);
 }
+
+void base_disable_verbose_logs() {
+    android_verbose = 0;
+    android::base::setMinLogLevel(android::base::LOG_INFO);
+}
