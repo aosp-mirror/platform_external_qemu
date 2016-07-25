@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "4a88d372_715ab88a",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "Oops, you\u0027re right, I\u0027ll update the code. Thanks :)",
+      "parentUuid": "8a91eb63_3136964e",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 30
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_b107e61e",
         "filename": "android/emulation/AdbHostListener.cpp",
         "patchSetId": 2
@@ -36,6 +60,24 @@
       "writtenOn": "2016-07-21T19:43:56Z",
       "side": 1,
       "message": "Perhaps LOG(WARNING) here?",
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa278f49_741368b4",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "Yes, will do",
+      "parentUuid": "8a91eb63_b107e61e",
       "revId": "370d177b71d3cf2ea602fee88060406172e94709",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -89,6 +131,30 @@
     },
     {
       "key": {
+        "uuid": "4a88d372_3164304a",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "You\u0027re right, this is probably historical, I\u0027ll remove it.",
+      "parentUuid": "8a91eb63_71b1fe91",
+      "range": {
+        "startLine": 52,
+        "startChar": 25,
+        "endLine": 52,
+        "endChar": 43
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_119a7a07",
         "filename": "android/emulation/AdbHostListener.cpp",
         "patchSetId": 2
@@ -100,6 +166,30 @@
       "writtenOn": "2016-07-21T19:43:56Z",
       "side": 1,
       "message": "You haven\u0027t removed |guest| from |mGuests| yet, so this condition will always evaluate to true.",
+      "range": {
+        "startLine": 61,
+        "startChar": 12,
+        "endLine": 61,
+        "endChar": 30
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a89df77_d0b6fca3",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "No, the condition is really \u003e\u003d 2, so it will only be true if there are other guests waiting in the list.",
+      "parentUuid": "8a91eb63_119a7a07",
       "range": {
         "startLine": 61,
         "startChar": 12,
@@ -158,6 +248,30 @@
     },
     {
       "key": {
+        "uuid": "4a88d372_1167ac51",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "I find that this makes the code more difficult to understand, and the implementation is also probably much worse:\n\n  auto it \u003d std::find_if(mGuests.begin(), mGuests.end(),\n                                   [guest](const std::unique\u003cAdbGuestAgent\u003e\u0026 p) {\n                                       return p.get() \u003d\u003d guest;\n                                   });\n  if (it !\u003d mGuests.end()) {\n      mGuests.erase();\n  }\n\nAn alternative is to use std::remove_if:\n\n  std::remove_if(mGuests.begin(), mGuests.end(),\n      [guest](const std::unique_ptr\u003cAdbGuestAgent\u003e\u0026 p) {\n          return p.get() \u003d\u003d guest;\n      });\n\nWhich isn\u0027t too sexy either.",
+      "parentUuid": "8a91eb63_d1663226",
+      "range": {
+        "startLine": 65,
+        "startChar": 4,
+        "endLine": 65,
+        "endChar": 64
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a8edb80_cf689d29",
         "filename": "android/emulation/AdbHostListener.cpp",
         "patchSetId": 2
@@ -198,6 +312,24 @@
     },
     {
       "key": {
+        "uuid": "ca73e35a_adaafd1a",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "No, because this is a common condition if no ADB server is running on the host yet.",
+      "parentUuid": "8a91eb63_710d7e41",
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_d1147256",
         "filename": "android/emulation/AdbHostListener.cpp",
         "patchSetId": 2
@@ -209,6 +341,30 @@
       "writtenOn": "2016-07-21T19:43:56Z",
       "side": 1,
       "message": "You shouldn\u0027t need c_str() here.\n\niirc, StringFormat works with StringView, and std::string -\u003e StringView conversion should be implicit.",
+      "range": {
+        "startLine": 84,
+        "startChar": 60,
+        "endLine": 84,
+        "endChar": 75
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa7cef2d_cc018f5f",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "sure, but this instantiates a template and creates a temporary 2-pointer value, that\u0027s a little overkill when a simple c_str() will work :)",
+      "parentUuid": "8a91eb63_d1147256",
       "range": {
         "startLine": 84,
         "startChar": 60,
@@ -244,6 +400,30 @@
     },
     {
       "key": {
+        "uuid": "0a8edb80_6f5ad18a",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "Yes, will do",
+      "parentUuid": "8a91eb63_112d1a99",
+      "range": {
+        "startLine": 91,
+        "startChar": 45,
+        "endLine": 91,
+        "endChar": 55
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_d15ab2f8",
         "filename": "android/emulation/AdbHostListener.cpp",
         "patchSetId": 2
@@ -255,6 +435,30 @@
       "writtenOn": "2016-07-21T19:43:56Z",
       "side": 1,
       "message": "I\u0027m confused: onHostServerConnection was called. This implies that we were listening for connections from the host server _and_ that host server connected to us on the port we were listening on |mServer-\u003eport()|.\n\nIf mActiveGuest-\u003eonHostConnection succeeded (The else case starting line 98) , it means that an end to end channel has been setup. Why are we notifying the host server of the same port that it just created a connection on?\n\nOTOH, if mActiveGuest-\u003eonHostConnection failed, we deleted the active guest, and we need the host server to try to connect again. In that case, it might be beneficial to once again tell it that we\u0027re listening for connections on |mServer-\u003eport|.\n\nbtw, in the success case, we might want to stop listening on mServer if there are no more guests pending that can be connected, and then restart in addGuest when we find an empty list of guests.",
+      "range": {
+        "startLine": 99,
+        "startChar": 8,
+        "endLine": 101,
+        "endChar": 9
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a89df77_301c2879",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "Yes, I think this is here because it was part of the code you contributed lately (of which this is a refactor), I just kept it here without thinking too much about it. Thanks for pointing this out.\n\nI agree we don\u0027t need to do that on onHostServerConnection, however, it\u0027s important to do that when there is no active connection and a new guest arrives. The ADB host server might have been killed, restarted, but didn\u0027t find the emulator because it wasn\u0027t using one of the 16 auto-scanned port values.\n\nI\u0027m not sure what your last paragraph means. When this method is called, stopListener() will already have been called by the caller on the AsyncSocketServer.",
+      "parentUuid": "8a91eb63_d15ab2f8",
       "range": {
         "startLine": 99,
         "startChar": 8,
@@ -290,6 +494,30 @@
     },
     {
       "key": {
+        "uuid": "ea76e749_2e0da78b",
+        "filename": "android/emulation/AdbHostListener.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "Good idea, will create another patch to implement and use this.",
+      "parentUuid": "8a91eb63_46f44aed",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 58
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_91a02a8d",
         "filename": "android/emulation/AdbHostListener.h",
         "patchSetId": 2
@@ -301,6 +529,30 @@
       "writtenOn": "2016-07-21T19:43:56Z",
       "side": 1,
       "message": "Consider using android::base::Optional",
+      "range": {
+        "startLine": 74,
+        "startChar": 4,
+        "endLine": 74,
+        "endChar": 7
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca2e8326_155b142d",
+        "filename": "android/emulation/AdbHostListener.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "That\u0027s a little bit over-kill imho.",
+      "parentUuid": "8a91eb63_91a02a8d",
       "range": {
         "startLine": 74,
         "startChar": 4,
@@ -336,6 +588,30 @@
     },
     {
       "key": {
+        "uuid": "ca73e35a_8da5c14d",
+        "filename": "android/emulation/AdbHostListener.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "This started as static because it was called directly from qemu-setup.cpp when I started refactoring this. I agree this can be a regular method now, I\u0027ll update this. Thanks.",
+      "parentUuid": "8a91eb63_91ee6ab8",
+      "range": {
+        "startLine": 83,
+        "startChar": 16,
+        "endLine": 83,
+        "endChar": 31
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_31df7600",
         "filename": "android/emulation/AdbHostListener.h",
         "patchSetId": 2
@@ -347,6 +623,30 @@
       "writtenOn": "2016-07-21T19:43:56Z",
       "side": 1,
       "message": "Isn\u0027t this really just 2? Or am I missing something?",
+      "range": {
+        "startLine": 89,
+        "startChar": 28,
+        "endLine": 89,
+        "endChar": 38
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a88d372_b177c004",
+        "filename": "android/emulation/AdbHostListener.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "Actually, this isn\u0027t used anymore, comes from the original code IIRC. I\u0027ll remove it.",
+      "parentUuid": "8a91eb63_31df7600",
       "range": {
         "startLine": 89,
         "startChar": 28,
@@ -382,6 +682,30 @@
     },
     {
       "key": {
+        "uuid": "4a88d372_515d347f",
+        "filename": "android/emulation/AdbHostListener.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "I think this would add un-necessary complexity to the code without clarity benefits anyway (see other comment).",
+      "parentUuid": "8a91eb63_918f4ad1",
+      "range": {
+        "startLine": 97,
+        "startChar": 4,
+        "endLine": 97,
+        "endChar": 15
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_66b786a1",
         "filename": "android/emulation/AdbTypes.h",
         "patchSetId": 2
@@ -405,6 +729,30 @@
     },
     {
       "key": {
+        "uuid": "6a83d755_1239ec3e",
+        "filename": "android/emulation/AdbTypes.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "Yes, great suggestions, I\u0027ll do this.",
+      "parentUuid": "8a91eb63_66b786a1",
+      "range": {
+        "startLine": 30,
+        "startChar": 34,
+        "endLine": 30,
+        "endChar": 44
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_e6f1b668",
         "filename": "android/emulation/AdbTypes.h",
         "patchSetId": 2
@@ -416,6 +764,30 @@
       "writtenOn": "2016-07-21T18:58:11Z",
       "side": 1,
       "message": "This is truly unfortunate. We only ever use one guest pipe at any given pipe (the other pipe is partially connected while the first one is use).\nThis adds a lot of unnecessary complexity.\n\nCan we take a trivial performance hit in reconnections (but not stability hit) and make do with exactly one guest pipe?",
+      "range": {
+        "startLine": 34,
+        "startChar": 40,
+        "endLine": 34,
+        "endChar": 58
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a248b48_f306b074",
+        "filename": "android/emulation/AdbTypes.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "Unfortunately, we cannot do this without refactoring the adbd daemon in all existing system images, it\u0027s better to deal with this for now. See $AOSP/system/core/adb/transport_local.c",
+      "parentUuid": "8a91eb63_e6f1b668",
       "range": {
         "startLine": 34,
         "startChar": 40,
@@ -475,6 +847,30 @@
     },
     {
       "key": {
+        "uuid": "ca2e8326_956644f7",
+        "filename": "android/emulation/AdbTypes.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "I agree that this is a better interface. The init() / deinit() comes from the original C code / usage, but what you suggest seems a lot more cleaner.",
+      "parentUuid": "8a91eb63_26481e84",
+      "range": {
+        "startLine": 36,
+        "startChar": 4,
+        "endLine": 43,
+        "endChar": 30
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_06124267",
         "filename": "android/emulation/AdbTypes.h",
         "patchSetId": 2
@@ -486,6 +882,30 @@
       "writtenOn": "2016-07-21T18:58:11Z",
       "side": 1,
       "message": "nit: This comment better belongs with the declaration of onHostConnection.",
+      "range": {
+        "startLine": 47,
+        "startChar": 4,
+        "endLine": 48,
+        "endChar": 62
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a83d755_3236704e",
+        "filename": "android/emulation/AdbTypes.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "Agreed, I\u0027ll add a technical note that explains the interaction between the two agents more clearly.",
+      "parentUuid": "8a91eb63_06124267",
       "range": {
         "startLine": 47,
         "startChar": 4,
@@ -544,6 +964,30 @@
     },
     {
       "key": {
+        "uuid": "ca2e8326_55518c0a",
+        "filename": "android/emulation/AdbTypes.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "I think it\u0027s quite important with regards to lifecycle management.",
+      "parentUuid": "8a91eb63_6636a6ee",
+      "range": {
+        "startLine": 53,
+        "startChar": 17,
+        "endLine": 54,
+        "endChar": 17
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_262d7e99",
         "filename": "android/emulation/AdbTypes.h",
         "patchSetId": 2
@@ -578,6 +1022,54 @@
       "writtenOn": "2016-07-25T07:21:21Z",
       "side": 1,
       "message": "I strongly second it. Having a pointer to something that\u0027s owned by another object is a common path to use after free bugs. Either opaque id or shared_ptr/weak_ptr pair would be a better mach here IMO",
+      "parentUuid": "8a91eb63_262d7e99",
+      "range": {
+        "startLine": 55,
+        "startChar": 29,
+        "endLine": 55,
+        "endChar": 48
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a248b48_737620e9",
+        "filename": "android/emulation/AdbTypes.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "Ok, I\u0027ll try to see if there is a better interface for this then.",
+      "parentUuid": "0a8edb80_8f729515",
+      "range": {
+        "startLine": 55,
+        "startChar": 29,
+        "endLine": 55,
+        "endChar": 48
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea76e749_0e10eba4",
+        "filename": "android/emulation/AdbTypes.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-25T12:16:19Z",
+      "side": 1,
+      "message": "I\u0027m not sure I understand what you mean by \"user\". This is called from one of |pipe|\u0027s methods (onGuestClose()), so of course it will retain a pointer to it. An opaque pointer will hide the fact but will not make any of the implementation simpler to understand/maintain.",
       "parentUuid": "8a91eb63_262d7e99",
       "range": {
         "startLine": 55,
