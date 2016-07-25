@@ -24,6 +24,7 @@
 #include "android/console.h"
 
 #include "android/android.h"
+#include "android/cmdline-option.h"
 #include "android/console_auth.h"
 #include "android/globals.h"
 #include "android/hw-events.h"
@@ -2720,6 +2721,20 @@ do_kill( ControlClient  client, char*  args )
     exit(0);
 }
 
+static int do_debug(ControlClient client, char* args) {
+    if (!args) {
+        control_write(client, "KO: argument missing, try 'debug <tags>'\r\n");
+        return -1;
+    }
+    if (!android_parse_debug_tags_option(args, /*parse_as_suffix*/false)) {
+        control_write(client, "KO: bad tags, see command line help for "
+                              """-debug"" option for a list of valid ones\r\n");
+        return -1;
+    }
+    return 0;
+}
+
+
 static const CommandDefRec   main_commands[] =
 {
     { "help|h|?", "print a list of commands", NULL, NULL, do_help, NULL },
@@ -2783,6 +2798,9 @@ static const CommandDefRec   main_commands[] =
     { "finger", "manage emulator finger print",
       "allows you to touch the emulator finger print sensor\r\n", NULL,
       NULL, fingerprint_commands},
+
+    { "debug", "control the emulator debug output tags",
+      NULL, NULL, do_debug },
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
