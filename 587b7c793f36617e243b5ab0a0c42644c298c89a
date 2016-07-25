@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0a617bbb_6cafdf91",
+        "filename": "android/opengl/OpenglEsPipe.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-25T22:59:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0a8edb80_6fe5f1cf",
+      "range": {
+        "startLine": 262,
+        "startChar": 27,
+        "endLine": 262,
+        "endChar": 29
+      },
+      "revId": "587b7c793f36617e243b5ab0a0c42644c298c89a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a8edb80_0fe225c9",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.cpp",
         "patchSetId": 11
@@ -36,6 +60,30 @@
       "writtenOn": "2016-07-23T21:05:23Z",
       "side": 1,
       "message": "it feels to me that we could do a little more granular lock here: call calcState() before onEvent under a lock, then unlock it and pass the calculated state here",
+      "range": {
+        "startLine": 117,
+        "startChar": 24,
+        "endLine": 117,
+        "endChar": 31
+      },
+      "revId": "587b7c793f36617e243b5ab0a0c42644c298c89a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a617bbb_6090c33f",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-25T22:59:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0a8edb80_0fe225c9",
       "range": {
         "startLine": 117,
         "startChar": 24,
