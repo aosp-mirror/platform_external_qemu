@@ -15,6 +15,7 @@
 #include "android/filesystems/ext4_resize.h"
 
 #include "android/base/system/System.h"
+#include "android/base/StringView.h"
 #include "android/utils/path.h"
 
 #include <string>
@@ -35,6 +36,7 @@ using android::base::Win32Utils;
 #endif
 
 using android::base::RunOptions;
+using android::base::StringView;
 using android::base::System;
 
 static unsigned convertBytesToMB(uint64_t size) {
@@ -64,17 +66,51 @@ void explainSystemErrors(const char* msg) {
 #endif
 }
 
+static int runExt4Program(StringView program,
+                          std::initializer_list<std::string> params) {
+    std::string executable = System::get()->findBundledExecutable(program);
+    if (executable.empty()) {
+        fprintf(stderr, "ERROR: couldn't get path to %s binary\n",
+                program.c_str());
+        return -1;
+    }
+
+    std::vector<std::string> commandLine{executable};
+    commandLine.insert(commandLine.end(), params);
+
+    System::ProcessExitCode exitCode = 1;
+    auto success = System::get()->runCommand(commandLine,
+                                             RunOptions::WaitForCompletion,
+                                             System::kInfinite, &exitCode);
+
+    if (!success) {
+        fprintf(stderr, "ERROR: resizing partition failed to launch %s\n",
+                executable.c_str());
+        return -1;
+    }
+    if (exitCode != 0) {
+        fprintf(stderr,
+                "ERROR: resizing partition %s failed with exit code %d\n",
+                program.c_str(), (int)exitCode);
+        return exitCode;
+    }
+    return 0;
+}
+
 int resizeExt4Partition(const char* partitionPath, int64_t newByteSize) {
     // sanity checks
     if (partitionPath == NULL || !checkExt4PartitionSize(newByteSize)) {
         return -1;
     }
 
-    // format common arguments once
-    std::string executable = System::get()->findBundledExecutable("resize2fs");
-    if (executable.empty()) {
-        fprintf(stderr, "ERROR: couldn't get path to resize2fs binary\n");
-        return -1;
+    // resize2fs requires that we run e2fsck first in order to make sure that
+    // the filesystem is in good shape. If we resize without first running this
+    // the guest kernel could decide to replay the journal and end up in a state
+    // before the resize took place. This is something that frequently happened
+    // and caused the resize to not be visible in the guest system.
+    int fsckReturnCode = runExt4Program("e2fsck", {"-y", partitionPath});
+    if (fsckReturnCode != 0) {
+        return fsckReturnCode;
     }
 
     char size_in_MB[50];
@@ -86,23 +122,7 @@ int resizeExt4Partition(const char* partitionPath, int64_t newByteSize) {
         return -1;
     }
 
-    auto& sys = *System::get();
-    System::ProcessExitCode exitCode = 1;
-    auto success = sys.runCommand({executable, "-f", partitionPath, size_in_MB},
-                                  RunOptions::WaitForCompletion,
-                                  System::kInfinite, &exitCode);
-
-    if (!success) {
-        fprintf(stderr, "ERROR: resizing partition failed to launch %s\n",
-                executable.c_str());
-        return -1;
-    }
-    if (exitCode != 0) {
-        fprintf(stderr, "ERROR: resizing partition failed with exit code %d\n",
-                (int)exitCode);
-        return exitCode;
-    }
-    return 0;
+    return runExt4Program("resize2fs", {"-f", partitionPath, size_in_MB});
 }
 
 bool checkExt4PartitionSize(int64_t byteSize) {
