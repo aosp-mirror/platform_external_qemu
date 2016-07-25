@@ -133,17 +133,13 @@ void RenderChannelImpl::onEvent(bool byGuest) {
     //  - thread 1 unlocks and calls the |mOnEvent| callback.
     //
     // The result is that state 2 = "can read" is completely lost - callback
-    // is never called when |mState| is "can read".
-    //
-    // But if the whole block of code is locked, threads can't overwrite newer
-    // |mState| with some older value, and the described situation would never
-    // happen.
+    // is never called when |mState| is "can read". We need to lock
+    // all reads and writes of mState.
     android::base::AutoLock lock(mStateLock);
     const State newState = calcState();
     if (mState != newState) {
         mState = newState;
         lock.unlock();
-
         mOnEvent(newState,
                  byGuest ? EventSource::Client : EventSource::RenderChannel);
     }

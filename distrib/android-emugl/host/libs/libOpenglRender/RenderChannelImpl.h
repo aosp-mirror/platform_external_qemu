@@ -36,7 +36,8 @@ public:
     virtual bool write(ChannelBuffer&& buffer) override final;
     virtual bool read(ChannelBuffer* buffer, CallType type) override final;
 
-    virtual State currentState() const override final {
+    virtual State currentState() override final {
+        android::base::AutoLock lock(mStateLock);
         return mState.load(std::memory_order_acquire);
     }
 
