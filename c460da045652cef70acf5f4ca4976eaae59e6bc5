@@ -46,6 +46,30 @@
       "revId": "c460da045652cef70acf5f4ca4976eaae59e6bc5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6fff696c_d262a43f",
+        "filename": "android/base/memory/ScopedPtr.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-26T16:51:30Z",
+      "side": 1,
+      "message": "I\u0027m sorry; you\u0027re right; must have made my comment in a moment of low blood sugar :-).  Now I fear I may be doing something similar, because this stuff is complicated :-), but now I think I see the point of David\u0027s comment: what the change allows is for someone to call this with a non-pointer type (say an int), and get an error message (I assume) involving being unable to find a unique_ptr constructor that takes an int argument.  Whereas in the current situation, that error message would be about the call to makeCustomScopedPtr, which would be easier to diagnose.\n\nPerhaps you should try this case and see if the error messages are as bad as feared?  If so, this does seem to me like a good reason to investigate the other alternative solution David suggested.  At the very least, if you do this, you should emphasize in the spec comment that T must be a pointer type (or nullptr_t).",
+      "parentUuid": "cf41357b_9de5e3d4",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 15
+      },
+      "revId": "c460da045652cef70acf5f4ca4976eaae59e6bc5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
