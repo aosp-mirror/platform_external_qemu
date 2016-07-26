@@ -22,6 +22,30 @@
       "revId": "4eef1e4acffb3a7fced58fed199abece9088c919",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a617bbb_ef891ccf",
+        "filename": "android/filesystems/ext4_resize.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-07-26T00:20:37Z",
+      "side": 1,
+      "message": "I\u0027m not sure if there are established idioms around initializer lists yet but I suppose it can be a bit limiting in what it allows to be passed in. Taking in an std::vector instead should allow for the same call pattern.\n\nI like it this way however as it\u0027s not a public API but a static helper function and it saves us the construction of a temporary vector. If people feel that this is inappropriate I\u0027m not going to fight very hard to keep it though.",
+      "parentUuid": "0a617bbb_03ee31b9",
+      "range": {
+        "startLine": 70,
+        "startChar": 31,
+        "endLine": 70,
+        "endChar": 47
+      },
+      "revId": "4eef1e4acffb3a7fced58fed199abece9088c919",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
