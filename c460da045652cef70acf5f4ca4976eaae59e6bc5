@@ -22,6 +22,30 @@
       "revId": "c460da045652cef70acf5f4ca4976eaae59e6bc5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf41357b_9de5e3d4",
+        "filename": "android/base/memory/ScopedPtr.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-26T09:30:47Z",
+      "side": 1,
+      "message": "The change doesn\u0027t actually change the behavior at all:\npreviously the parameter type was T*, so function used to return a ScopedPtr\u003cT, ...\u003e - which is the same as std::remove_pointer\u003cT*\u003e::type\nNow the only difference is that T includes the star in it, so for conventional usages we can assume T \u003d\u003d U*, and return value is ScopedPtr\u003cU, ...\u003e \u003d\u003d ScopedPtr\u003cstd::remove_pointer\u003cT\u003e::type, ...\u003e\n\nThe real difference here\u0027s in nullptr_t treatment. Old code needed a pointer here, so makeCustomScopedPtr(nullptr) just didn\u0027t compile. Now it does, as remove_pointer\u003cNonPointer\u003e returns the type itself",
+      "parentUuid": "0a617bbb_112afce4",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 15
+      },
+      "revId": "c460da045652cef70acf5f4ca4976eaae59e6bc5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
