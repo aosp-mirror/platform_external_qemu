@@ -1,0 +1,8 @@
+Verified+1: Evan Birenbaum <birenbaum@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Code-Review+2: Evan Birenbaum <birenbaum@google.com>
+Submitted-by: Evan Birenbaum <birenbaum@google.com>
+Submitted-at: Tue, 26 Jul 2016 17:10:37 +0000
+Reviewed-on: https://android-review.googlesource.com/250632
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
