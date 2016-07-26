@@ -48,6 +48,54 @@
     },
     {
       "key": {
+        "uuid": "afa5e183_e4bc1ab1",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-26T09:38:20Z",
+      "side": 1,
+      "message": "No, the return value is just informational - I\u0027m keeping the old code as-is. It will be used in one of the next CLs where this function is called from the console code",
+      "parentUuid": "0a617bbb_0c2ae3e4",
+      "range": {
+        "startLine": 217,
+        "startChar": 0,
+        "endLine": 217,
+        "endChar": 4
+      },
+      "revId": "b1b6acb2251db92f2d899ea9871f9d86b93cc400",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cfacd570_45b64aa7",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-26T09:38:20Z",
+      "side": 1,
+      "message": "I forgot to rename the argument, thanks. \u0027Tag\u0027 doesn\u0027t ring any bell for me, while \u0027option\u0027 in a file called \u0027cmdline-option\u0027 is something I can at least get an idea about quite quickly.\nThere\u0027s no real grammar anywhere, I\u0027ll add it to the header comment.",
+      "parentUuid": "0a617bbb_ec9f6f49",
+      "range": {
+        "startLine": 217,
+        "startChar": 25,
+        "endLine": 217,
+        "endChar": 31
+      },
+      "revId": "b1b6acb2251db92f2d899ea9871f9d86b93cc400",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a617bbb_4ce5bbcf",
         "filename": "android/cmdline-option.c",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2016-07-25T22:41:36Z",
       "side": 1,
       "message": "Why does this do a strdup?  It\u0027s not going to modify the input (which is const)...?\n\nDoesn\u0027t matter from a perf POV, but doing it makes it seem like you expect to modify *x or *x0.",
+      "range": {
+        "startLine": 226,
+        "startChar": 13,
+        "endLine": 226,
+        "endChar": 25
+      },
+      "revId": "b1b6acb2251db92f2d899ea9871f9d86b93cc400",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8f473d8f_1bfa7b77",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-26T09:38:20Z",
+      "side": 1,
+      "message": "I\u0027m just keeping the function almost intact. But yes, it does change the string - there\u0027s a strchr on line 228 and line 232 replaces commas with \\0 to be able to parse individual tags as separate C strings",
+      "parentUuid": "0a617bbb_4ce5bbcf",
       "range": {
         "startLine": 226,
         "startChar": 13,
