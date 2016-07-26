@@ -114,7 +114,7 @@ static void hda_codec_parse_fmt(uint32_t format, struct audsettings *as)
 
 #define QEMU_HDA_ID_VENDOR  0x1af4
 #define QEMU_HDA_PCM_FORMATS (AC_SUPPCM_BITS_16 |       \
-                              0x1fc /* 16 -> 96 kHz */)
+                              0x1ff /* 8 -> 96 kHz */)
 #define QEMU_HDA_AMP_NONE    (0)
 #define QEMU_HDA_AMP_STEPS   0x4a
 
