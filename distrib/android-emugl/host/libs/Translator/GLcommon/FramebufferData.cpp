@@ -18,10 +18,6 @@
 #include <GLcommon/FramebufferData.h>
 #include <GLcommon/GLEScontext.h>
 
-RenderbufferData::~RenderbufferData() {
-    if (sourceEGLImage && eglImageDetach) (*eglImageDetach)(sourceEGLImage);
-}
-
 FramebufferData::FramebufferData(GLuint name) : m_fbName(name) {}
 
 FramebufferData::~FramebufferData() {
