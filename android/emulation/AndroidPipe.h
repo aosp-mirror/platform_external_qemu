@@ -86,7 +86,7 @@ public:
         // name (see add() below). |hwPipe| is the hardware-side
         // view of the pipe, and |args| potential arguments. Must
         // return nullptr on error.
-        virtual AndroidPipe* create(void* hwPipe, const char* args) const = 0;
+        virtual AndroidPipe* create(void* hwPipe, const char* args) = 0;
 
         // Returns true if loading pipe instances from a stream is
         // supported. If true, the load() method will be called to load
@@ -101,7 +101,7 @@ public:
         // to indicate an error loading the instance.
         virtual AndroidPipe* load(void* hwPipe,
                                   const char* args,
-                                  android::base::Stream* stream) const {
+                                  android::base::Stream* stream) {
             return nullptr;
         }
 
@@ -208,11 +208,11 @@ protected:
     AndroidPipe() = delete;
 
     // Constructor used by derived classes only.
-    AndroidPipe(void* hwPipe, const Service* service)
+    AndroidPipe(void* hwPipe, Service* service)
         : mHwPipe(hwPipe), mService(service) {}
 
     void* mHwPipe = nullptr;
-    const Service* mService = nullptr;
+    Service* mService = nullptr;
     std::string mArgs;
 };
 

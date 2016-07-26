@@ -94,7 +94,7 @@ static OptionalString readOptionalString(BaseStream* stream) {
 }
 
 // forward
-const Service* findServiceByName(const char* name);
+Service* findServiceByName(const char* name);
 
 // Implementation of a special AndroidPipe class used to model the state
 // of a pipe connection before the service name has been written to the
@@ -102,7 +102,7 @@ const Service* findServiceByName(const char* name);
 // which will detect when this happens.
 class ConnectorPipe : public AndroidPipe {
 public:
-    ConnectorPipe(void* hwPipe, const Service* service)
+    ConnectorPipe(void* hwPipe, Service* service)
         : AndroidPipe(hwPipe, service) {
         DD("%s: Creating new ConnectorPipe hwpipe=%p", __FUNCTION__, mHwPipe);
     }
@@ -190,7 +190,7 @@ public:
         pipeName = mBuffer + 5;
         pipeArgs = strchr(pipeName, ':');
 
-        const Service* svc = nullptr;
+        Service* svc = nullptr;
 
         // As a special case, if the service name is as:
         //    qemud:<name>
@@ -287,7 +287,7 @@ class ConnectorService : public Service {
 public:
     ConnectorService() : Service("<connector>") {}
 
-    virtual AndroidPipe* create(void* hwPipe, const char* args) const override {
+    virtual AndroidPipe* create(void* hwPipe, const char* args) override {
         return new ConnectorPipe(hwPipe, this);
     }
 
@@ -295,7 +295,7 @@ public:
 
     virtual AndroidPipe* load(void* hwPipe,
                               const char* args,
-                              BaseStream* stream) const override {
+                              BaseStream* stream) override {
         ConnectorPipe* pipe = new ConnectorPipe(hwPipe, this);
         if (!pipe->onLoad(stream)) {
             delete pipe;
@@ -343,7 +343,7 @@ struct Globals {
     ConnectorService connectorService;
     PipeWaker pipeWaker;
 
-    const Service* findServiceByName(const char* name) const {
+    Service* findServiceByName(const char* name) const {
         for (const auto& service : services) {
             if (service->name() == name) {
                 return service.get();
@@ -352,7 +352,7 @@ struct Globals {
         return nullptr;
     }
 
-    const Service* loadServiceByName(BaseStream* stream) const {
+    Service* loadServiceByName(BaseStream* stream) {
         OptionalString serviceName = readOptionalString(stream);
         if (!serviceName) {
             DD("%s: no name (assuming connector state)", __FUNCTION__);
@@ -365,13 +365,13 @@ struct Globals {
 
 android::base::LazyInstance<Globals> sGlobals = LAZY_INSTANCE_INIT;
 
-const Service* findServiceByName(const char* name) {
+Service* findServiceByName(const char* name) {
     return sGlobals->findServiceByName(name);
 }
 
 AndroidPipe* loadPipeFromStreamCommon(BaseStream* stream,
                                       void* hwPipe,
-                                      const Service* service,
+                                      Service* service,
                                       char* pForceClose) {
     *pForceClose = 0;
 
@@ -443,7 +443,7 @@ void AndroidPipe::saveToStream(BaseStream* stream) {
 AndroidPipe* AndroidPipe::loadFromStream(BaseStream* stream,
                                          void* hwPipe,
                                          char* pForceClose) {
-    const Service* service = sGlobals->loadServiceByName(stream);
+    Service* service = sGlobals->loadServiceByName(stream);
     if (!service) {
         return nullptr;
     }
@@ -457,7 +457,7 @@ AndroidPipe* AndroidPipe::loadFromStreamLegacy(BaseStream* stream,
                                                unsigned char* pWakes,
                                                unsigned char* pClosed,
                                                char* pForceClose) {
-    const Service* service = sGlobals->loadServiceByName(stream);
+    Service* service = sGlobals->loadServiceByName(stream);
     if (!service) {
         return nullptr;
     }
