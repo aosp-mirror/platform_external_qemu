@@ -38,9 +38,7 @@ typedef struct {
 class TextureData : public ObjectData
 {
 public:
-    ~TextureData() {
-        if (sourceEGLImage && eglImageDetach) (*eglImageDetach)(sourceEGLImage);
-    }
+    ~TextureData() { }
     TextureData():  ObjectData(TEXTURE_DATA),
                     width(0),
                     height(0),
@@ -61,7 +59,6 @@ public:
     bool wasBound;
     bool requiresAutoMipmap;
     int          crop_rect[4];
-    void (*eglImageDetach)(unsigned int imageId);
     GLenum target;
 };
 
@@ -103,10 +100,7 @@ struct EGLiface {
 
     // Create a new global EglImage object named |imageId| and return a
     // pointer to its new instance.
-    EglImage*    (*eglAttachEGLImage)(unsigned int imageId);
-
-    // Release a global EglImage instance named |imageId|.
-    void         (*eglDetachEGLImage)(unsigned int imageId);
+    ImagePtr    (*eglAttachEGLImage)(unsigned int imageId);
 
     // Return instance of GlLibrary class to use for dispatch.
     // at runtime. This is implemented in the EGL library because on Windows
