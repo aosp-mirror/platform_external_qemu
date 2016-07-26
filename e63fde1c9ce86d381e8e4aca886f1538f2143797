@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6fff696c_9598f071",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-26T23:29:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6fff696c_559848c2",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 42
+      },
+      "revId": "e63fde1c9ce86d381e8e4aca886f1538f2143797",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6fff696c_5574c86b",
         "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-07-26T23:11:32Z",
       "side": 1,
       "message": "Just wondering: is it possible to reset() this here when we don\u0027t actually want to? (maybe we need the condition rbData-\u003eeglImageGlobalTexObject)",
+      "range": {
+        "startLine": 1799,
+        "startChar": 4,
+        "endLine": 1799,
+        "endChar": 44
+      },
+      "revId": "e63fde1c9ce86d381e8e4aca886f1538f2143797",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6fff696c_078fb31e",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1799,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-26T23:29:41Z",
+      "side": 1,
+      "message": "It behaves the same with or without this check.",
+      "parentUuid": "6fff696c_5574c86b",
       "range": {
         "startLine": 1799,
         "startChar": 4,
