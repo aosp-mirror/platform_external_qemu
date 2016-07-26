@@ -15,6 +15,8 @@
 #include "android/opengles-pipe.h"
 #include "android/opengl/GrallocPipe.h"
 
+#include <atomic>
+
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -309,8 +311,10 @@ private:
     // Guest state tracking - if it requested us to wake on read/write
     // availability. If guest doesn't care about some operation type, we should
     // not wake it when that operation becomes available.
-    bool mCareAboutRead = false;
-    bool mCareAboutWrite = false;
+    // Note: we need an atomic or operation, and atomic<bool> doesn't have it -
+    //  that's why it is atomic<char> here.
+    std::atomic<char> mCareAboutRead {false};
+    std::atomic<char> mCareAboutWrite {false};
 
     // Set to |true| if the pipe is in working state, |false| means we're not
     // initialized or the pipe is closed.
