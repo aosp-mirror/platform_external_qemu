@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6fff696c_21e63843",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-26T18:26:49Z",
+      "side": 1,
+      "message": "Would it make sense to break this function up into two: one to parse a single tag (or option, whatever we want to call it), and one to parse a comma-separated list?  IIUC, line 103 is calling this method, the one that parses a comma-separated list of tags/options, when it really should only be accepting a single tag (in the \"debug-\u003ctag\u003e\" form, I assume you don\u0027t want it to accept \"debug-init,no-qemud\", which it seems like it should as written.",
+      "range": {
+        "startLine": 217,
+        "startChar": 5,
+        "endLine": 217,
+        "endChar": 31
+      },
+      "revId": "d415c3aa1966dd65dc56ee667c5f93d500072a51",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
