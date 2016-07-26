@@ -1,0 +1,10 @@
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Code-Review+2: Prathmesh Prabhu <pprabhu@google.com>
+Code-Review+2: Bo Hu <bohu@google.com>
+Code-Review+2: Yurii Zubrytskyi <zyy@google.com>
+Verified+1: Bjoern Johansson <bjoernj@google.com>
+Submitted-by: Bjoern Johansson <bjoernj@google.com>
+Submitted-at: Tue, 26 Jul 2016 19:10:17 +0000
+Reviewed-on: https://android-review.googlesource.com/250634
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
