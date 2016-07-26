@@ -55,8 +55,7 @@ public:
         Service() : AndroidPipe::Service("opengles") {}
 
         // Create a new EmuglPipe instance.
-        virtual AndroidPipe* create(void* mHwPipe, const char* args) const
-                override {
+        virtual AndroidPipe* create(void* mHwPipe, const char* args) override {
             auto renderer = android_getOpenglesRenderer();
             if (!renderer) {
                 // This should never happen, unless there is a bug in the
@@ -81,9 +80,9 @@ public:
     // Constructor, check that |mIsWorking| is true after this call to verify
     // that everything went well.
     EmuglPipe(void* hwPipe,
-              const Service* service,
+              Service* service,
               const emugl::RendererPtr& renderer)
-            : AndroidPipe(hwPipe, service) {
+        : AndroidPipe(hwPipe, service) {
         mChannel = renderer->createRenderChannel();
         if (!mChannel) {
             D("Failed to create an OpenGLES pipe channel!");
