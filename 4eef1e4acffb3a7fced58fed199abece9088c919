@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "0a617bbb_6a909a3f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-07-26T00:46:18Z",
+      "side": 1,
+      "message": "nit: bug number or bug url ?",
+      "revId": "4eef1e4acffb3a7fced58fed199abece9088c919",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a617bbb_03ee31b9",
         "filename": "android/filesystems/ext4_resize.cpp",
         "patchSetId": 1
