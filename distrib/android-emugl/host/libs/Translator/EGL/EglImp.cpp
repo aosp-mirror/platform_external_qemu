@@ -47,8 +47,7 @@
 
 //declarations
 
-EglImage *attachEGLImage(unsigned int imageId);
-void detachEGLImage(unsigned int imageId);
+ImagePtr getEGLImage(unsigned int imageId);
 GLEScontext* getGLESContext();
 GlLibrary* getGlLibrary();
 
@@ -67,8 +66,7 @@ void initGlobalInfo()
 
 static const EGLiface s_eglIface = {
     .getGLESContext = getGLESContext,
-    .eglAttachEGLImage = attachEGLImage,
-    .eglDetachEGLImage = detachEGLImage,
+    .getEGLImage = getEGLImage,
     .eglGetGlLibrary = getGlLibrary,
 };
 
@@ -924,30 +922,16 @@ EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
 }
 
 /************************** KHR IMAGE *************************************************************/
-EglImage *attachEGLImage(unsigned int imageId)
+ImagePtr getEGLImage(unsigned int imageId)
 {
     ThreadInfo* thread  = getThreadInfo();
     EglDisplay* dpy     = static_cast<EglDisplay*>(thread->eglDisplay);
     ContextPtr  ctx     = thread->eglContext;
     if (ctx.get()) {
-        ImagePtr img = dpy->getImage(reinterpret_cast<EGLImageKHR>(imageId));
-        if(img.get()) {
-             ctx->attachImage(imageId,img);
-             return img.get();
-        }
+        return dpy->getImage(reinterpret_cast<EGLImageKHR>(imageId));
     }
-    return NULL;
+    return nullptr;
 }
-
-void detachEGLImage(unsigned int imageId)
-{
-    ThreadInfo* thread  = getThreadInfo();
-    ContextPtr  ctx     = thread->eglContext;
-    if (ctx.get()) {
-        ctx->detachImage(imageId);
-    }
-}
-
 
 EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext context, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list)
 {
