@@ -96,6 +96,54 @@
     },
     {
       "key": {
+        "uuid": "6fff696c_383791eb",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-26T18:26:49Z",
+      "side": 1,
+      "message": "We\u0027re happy with the \"dprint\" in android_parse_debug_option being how an unrecognized debug option is reported?  Just making sure.",
+      "parentUuid": "afa5e183_e4bc1ab1",
+      "range": {
+        "startLine": 217,
+        "startChar": 0,
+        "endLine": 217,
+        "endChar": 4
+      },
+      "revId": "b1b6acb2251db92f2d899ea9871f9d86b93cc400",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6fff696c_213c78ca",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-26T18:26:49Z",
+      "side": 1,
+      "message": "FWIW, \"tags\" made sense to me: this seems to be the name being used for the elements of the mask that is constructed.  I would go back to \"tag\" as the name of this concept: this word is used several times from line 12-19 of this file.  It really seems to me that if you start changing this word here, you have to change it everywhere.  For example, there\u0027s a use just 3 lines above this.  So I would recommend not changing it.",
+      "parentUuid": "cfacd570_45b64aa7",
+      "range": {
+        "startLine": 217,
+        "startChar": 25,
+        "endLine": 217,
+        "endChar": 31
+      },
+      "revId": "b1b6acb2251db92f2d899ea9871f9d86b93cc400",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a617bbb_4ce5bbcf",
         "filename": "android/cmdline-option.c",
         "patchSetId": 1
@@ -131,6 +179,30 @@
       "side": 1,
       "message": "I\u0027m just keeping the function almost intact. But yes, it does change the string - there\u0027s a strchr on line 228 and line 232 replaces commas with \\0 to be able to parse individual tags as separate C strings",
       "parentUuid": "0a617bbb_4ce5bbcf",
+      "range": {
+        "startLine": 226,
+        "startChar": 13,
+        "endLine": 226,
+        "endChar": 25
+      },
+      "revId": "b1b6acb2251db92f2d899ea9871f9d86b93cc400",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6fff696c_61ca0071",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-26T18:26:49Z",
+      "side": 1,
+      "message": "(Apologies for suggesting things somewhat orthogonal to the thrust of your CL.  But it is in some sense a cleanup of this code, so it seems OK to consider some more cleanups.)\n\nOK.  FWIW, it doesn\u0027t seem like the strchr itself should be modifying the string, but certainly line 232 does.  Would I be correct in saying that if the strcmp on line 245 were a strncmp, the string modification would be unnecessary?  This would seem like a simplification to me.  But I leave it up to you...",
+      "parentUuid": "8f473d8f_1bfa7b77",
       "range": {
         "startLine": 226,
         "startChar": 13,
@@ -223,6 +295,30 @@
       "writtenOn": "2016-07-25T22:41:36Z",
       "side": 1,
       "message": "I\u0027m confused on the relationship between these tags and the tags in \"debugs_tags\" in the .cpp file.  (And where VERBOSE_TAGS comes from...)  Shouldn\u0027t you want some tags with specific mask values, to check that they\u0027re added/subtracted correctly?",
+      "range": {
+        "startLine": 134,
+        "startChar": 11,
+        "endLine": 134,
+        "endChar": 25
+      },
+      "revId": "b1b6acb2251db92f2d899ea9871f9d86b93cc400",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6fff696c_4ca733a8",
+        "filename": "android/cmdline-option_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-26T18:26:49Z",
+      "side": 1,
+      "message": "Maybe the api should expose an option to set the debug_tags, to be used by tests to control the set of recognized tags?",
+      "parentUuid": "0a617bbb_8cf3533d",
       "range": {
         "startLine": 134,
         "startChar": 11,
