@@ -3,7 +3,7 @@ apply plugin: 'sdk-files'
 import com.android.tools.internal.emulator.BuildEmulator
 
 // Get SDK revision to define emulator revision
-File fprops = new File(rootDir.getParentFile(), 'sdk/files/tools_source.properties')
+File fprops = project.file('source.properties')
 Properties props = new Properties()
 props.load(fprops.newDataInputStream())
 
