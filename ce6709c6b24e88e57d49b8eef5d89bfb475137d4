@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6fff696c_37fade13",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-27T17:10:27Z",
+      "side": 1,
+      "message": "Period at end of sentence.",
+      "range": {
+        "startLine": 217,
+        "startChar": 73,
+        "endLine": 217,
+        "endChar": 77
+      },
+      "revId": "ce6709c6b24e88e57d49b8eef5d89bfb475137d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6fff696c_37765ea1",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-27T17:10:27Z",
+      "side": 1,
+      "message": "Wouldn\u0027t it be simpler to:\ntake the strlen(to)\nreturn false if that\u0027s not equal to tagLen\nthen just return strncmp(to, tagStart, tagLen) !\u003d 0?\n\nAs it is, I found myself trying to figure out what happens if strlen(to) \u003c tagLen.  I guess it works because you\u0027re assuming there\u0027s no zeros in [tagStart, tagEnd), so they will compare different at the trailing zero of to?  But that\u0027s pretty involved reasoning.",
+      "range": {
+        "startLine": 225,
+        "startChar": 1,
+        "endLine": 228,
+        "endChar": 5
+      },
+      "revId": "ce6709c6b24e88e57d49b8eef5d89bfb475137d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6fff696c_77d6261c",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-27T17:10:27Z",
+      "side": 1,
+      "message": "I still think that if the argument is a comma-separated list of tag specifications, that \"android_parse_debug_tags\" would be a better name for the method, and \"tags\" a better name for the argument.  These are more specific, in a useful way.  If --debug \u003cxxx\u003e were ever able to have an \u003cxxx\u003e that was something other than a tag list, then I would agree to call the union of tags and the new things \"options\", and have a method that could parse all such options.  But we don\u0027t have that yet.",
+      "range": {
+        "startLine": 232,
+        "startChar": 25,
+        "endLine": 232,
+        "endChar": 47
+      },
+      "revId": "ce6709c6b24e88e57d49b8eef5d89bfb475137d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6fff696c_572202ac",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-27T17:10:27Z",
+      "side": 1,
+      "message": "Thanks for making this (and the related) change!",
+      "range": {
+        "startLine": 237,
+        "startChar": 4,
+        "endLine": 237,
+        "endChar": 24
+      },
+      "revId": "ce6709c6b24e88e57d49b8eef5d89bfb475137d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6fff696c_d73d5279",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-27T17:10:27Z",
+      "side": 1,
+      "message": "Let me re-iterate my request that when you have an overall change that is being accomplished via a set of connected CLs, that the commit messages for those CL\u0027s indicate what other CL\u0027s, if any, the current CL relies on.  (Apologies if this dependency info is listed somewhere automatically that I\u0027m not seeing.)  I was scratching my head for 10+ minutes trying to figure out where the new method was defined, and why it wasn\u0027t showing up in this CL.",
+      "range": {
+        "startLine": 261,
+        "startChar": 16,
+        "endLine": 261,
+        "endChar": 46
+      },
+      "revId": "ce6709c6b24e88e57d49b8eef5d89bfb475137d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6fff696c_17feba5a",
+        "filename": "android/cmdline-option.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-27T17:10:27Z",
+      "side": 1,
+      "message": "Capital R -- might as make a complete sentence.",
+      "range": {
+        "startLine": 80,
+        "startChar": 3,
+        "endLine": 80,
+        "endChar": 10
+      },
+      "revId": "ce6709c6b24e88e57d49b8eef5d89bfb475137d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
