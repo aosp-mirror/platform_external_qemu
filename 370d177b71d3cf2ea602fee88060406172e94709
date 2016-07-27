@@ -84,6 +84,24 @@
     },
     {
       "key": {
+        "uuid": "af11619a_e4b43ad1",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T07:46:40Z",
+      "side": 1,
+      "message": "It turns out that a warning is a bad idea because this can be called multiple times when the emulator is probing for a free port at startup. I\u0027ve added a comment explaining why there is no comment instead.",
+      "parentUuid": "aa278f49_741368b4",
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_71b1fe91",
         "filename": "android/emulation/AdbHostListener.cpp",
         "patchSetId": 2
@@ -320,6 +338,30 @@
     },
     {
       "key": {
+        "uuid": "af11619a_c4b13edf",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T07:46:40Z",
+      "side": 1,
+      "message": "Wow!! Thanks!",
+      "parentUuid": "0a8edb80_cf073d21",
+      "range": {
+        "startLine": 65,
+        "startChar": 4,
+        "endLine": 65,
+        "endChar": 64
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a8edb80_cf689d29",
         "filename": "android/emulation/AdbHostListener.cpp",
         "patchSetId": 2
@@ -331,6 +373,30 @@
       "writtenOn": "2016-07-25T07:21:21Z",
       "side": 1,
       "message": "it looks more and more to me that std::unordered_set\u003c\u003e or just set\u003c\u003e would be a better match here - we mostly add/search/remove in the container",
+      "range": {
+        "startLine": 67,
+        "startChar": 12,
+        "endLine": 67,
+        "endChar": 19
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_24cc9265",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T07:46:40Z",
+      "side": 1,
+      "message": "We try to maintain order, treating the vector as a small (tiny really, since most of the time only 2 items will be there) FIFO.",
+      "parentUuid": "0a8edb80_cf689d29",
       "range": {
         "startLine": 67,
         "startChar": 12,
@@ -389,6 +455,24 @@
       "writtenOn": "2016-07-25T17:57:45Z",
       "side": 1,
       "message": "Ack.",
+      "parentUuid": "ca73e35a_adaafd1a",
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_04d196ff",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T07:46:40Z",
+      "side": 1,
+      "message": "I\u0027ve added a warning to explain this though :)",
       "parentUuid": "ca73e35a_adaafd1a",
       "revId": "370d177b71d3cf2ea602fee88060406172e94709",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
@@ -1019,6 +1103,30 @@
       "writtenOn": "2016-07-25T07:21:21Z",
       "side": 1,
       "message": "nit: unique_ptr\u003c\u003e\u0026\u0026 here? to explicitly state that ownership transfer",
+      "range": {
+        "startLine": 50,
+        "startChar": 26,
+        "endLine": 50,
+        "endChar": 45
+      },
+      "revId": "370d177b71d3cf2ea602fee88060406172e94709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_64d68af9",
+        "filename": "android/emulation/AdbTypes.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T07:46:40Z",
+      "side": 1,
+      "message": "It turns out that AndroidPipe instances are owned by the virtual device itself, until onGuestClose() is called (and this method should delete the instance), so ownership should _not_ be transferred here at all. This simplifies the interface / code in the newer patchset.",
+      "parentUuid": "0a8edb80_ef6d6136",
       "range": {
         "startLine": 50,
         "startChar": 26,
