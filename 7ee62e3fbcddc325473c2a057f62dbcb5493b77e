@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "af11619a_84474656",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglContext.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T13:50:36Z",
+      "side": 1,
+      "message": "nit: remove this as well :)",
+      "revId": "7ee62e3fbcddc325473c2a057f62dbcb5493b77e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_245c9227",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/FramebufferData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T13:50:36Z",
+      "side": 1,
+      "message": "nit: It\u0027s probably better to remove the destructor completely now.",
+      "revId": "7ee62e3fbcddc325473c2a057f62dbcb5493b77e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0fd8ad39_9f2db3fc",
         "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/TranslatorIfaces.h",
         "patchSetId": 2
@@ -13,6 +47,23 @@
       "writtenOn": "2016-07-27T10:22:29Z",
       "side": 1,
       "message": "nit: just remove it",
+      "revId": "7ee62e3fbcddc325473c2a057f62dbcb5493b77e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_446b8ebf",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/TranslatorIfaces.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T13:50:36Z",
+      "side": 1,
+      "message": "nit: rename this, also I\u0027m not sure we need an egl prefix, here, i.e. getEGLImage() seems to be sufficient. + Update the comment: this function doesn\u0027t create the object, only retrieves a _shared_ pointer to it.",
       "revId": "7ee62e3fbcddc325473c2a057f62dbcb5493b77e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
