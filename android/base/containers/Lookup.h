@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/base/TypeUtils.h"
+#include "android/base/TypeTraits.h"
 
 #include <initializer_list>
 #include <set>
@@ -42,22 +42,22 @@ namespace base {
 template <class T>
 using is_any_map = std::integral_constant<
         bool,
-        is_template_instantiation<T, std::map>::value ||
-                is_template_instantiation<T, std::unordered_map>::value>;
+        is_template_instantiation_of<T, std::map>::value ||
+                is_template_instantiation_of<T, std::unordered_map>::value>;
 
 template <class T>
 using is_any_set = std::integral_constant<
         bool,
-        is_template_instantiation<T, std::set>::value ||
-                is_template_instantiation<T, std::unordered_set>::value>;
+        is_template_instantiation_of<T, std::set>::value ||
+                is_template_instantiation_of<T, std::unordered_set>::value>;
 
 template <class T>
 using is_any_multikey = std::integral_constant<
         bool,
-        is_template_instantiation<T, std::multimap>::value ||
-                is_template_instantiation<T, std::unordered_multimap>::value ||
-                is_template_instantiation<T, std::multiset>::value ||
-                is_template_instantiation<T, std::unordered_multiset>::value>;
+        is_template_instantiation_of<T, std::multimap>::value ||
+                is_template_instantiation_of<T, std::unordered_multimap>::value ||
+                is_template_instantiation_of<T, std::multiset>::value ||
+                is_template_instantiation_of<T, std::unordered_multiset>::value>;
 
 template <class T, class = enable_if<is_any_map<T>>>
 const typename T::mapped_type* find(const T& map,

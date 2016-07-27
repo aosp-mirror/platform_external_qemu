@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/base/TypeUtils.h"
+#include "android/base/TypeTraits.h"
 
 #include <initializer_list>
 #include <type_traits>
@@ -146,7 +146,7 @@ class Optional;
 //  E.g, for template <T> class Foo if you say 'Foo' inside the class, it
 //  actually means Foo<T>;
 template <class U>
-using is_any_optional = is_template_instantiation<
+using is_any_optional = is_template_instantiation_of<
         typename std::decay<U>::type, Optional>;
 
 template <class T>
