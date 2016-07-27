@@ -258,6 +258,30 @@
     },
     {
       "key": {
+        "uuid": "6a83d755_d2528444",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T12:16:24Z",
+      "side": 1,
+      "message": "Will do",
+      "parentUuid": "8a91eb63_72265cd3",
+      "range": {
+        "startLine": 188,
+        "startChar": 8,
+        "endLine": 188,
+        "endChar": 32
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_32f3f43e",
         "filename": "android/emulation/AdbGuestPipe.cpp",
         "patchSetId": 3
@@ -327,6 +351,30 @@
     },
     {
       "key": {
+        "uuid": "6a83d755_f2578831",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T12:16:24Z",
+      "side": 1,
+      "message": "you\u0027re right, I don\u0027t know what I was thinking here :)",
+      "parentUuid": "ea03478f_a650c6da",
+      "range": {
+        "startLine": 219,
+        "startChar": 12,
+        "endLine": 219,
+        "endChar": 17
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_38c1092a",
         "filename": "android/emulation/AdbGuestPipe.cpp",
         "patchSetId": 3
@@ -338,6 +386,24 @@
       "writtenOn": "2016-07-22T03:57:52Z",
       "side": 1,
       "message": "Do we need to do PIPE_WAKE_CLOSE as well here?",
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a248b48_13832caa",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T12:16:24Z",
+      "side": 1,
+      "message": "Technically no, PIPE_WAKE_CLOSE is not disclosed as part of the android_pipe_device.h API even though that\u0027s how the goldfish device implements guest closure. Let\u0027s leave at that. Meanwhile, there is no FdWatch event for disconnections.",
+      "parentUuid": "8a91eb63_38c1092a",
       "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -367,6 +433,30 @@
     },
     {
       "key": {
+        "uuid": "ca73e35a_0d44714e",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T12:16:24Z",
+      "side": 1,
+      "message": "Yes :)",
+      "parentUuid": "8a91eb63_264bb983",
+      "range": {
+        "startLine": 282,
+        "startChar": 56,
+        "endLine": 282,
+        "endChar": 61
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea03478f_c64bc22d",
         "filename": "android/emulation/AdbGuestPipe.cpp",
         "patchSetId": 3
@@ -378,6 +468,30 @@
       "writtenOn": "2016-07-22T10:14:01Z",
       "side": 1,
       "message": "why \u0027don\u0027t\u0027? I actually thought one would need to start waiting for writes here (same thing for reads in the other function)",
+      "range": {
+        "startLine": 318,
+        "startChar": 33,
+        "endLine": 318,
+        "endChar": 46
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a89df77_f00c6047",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T12:16:24Z",
+      "side": 1,
+      "message": "No, the contract between the kernel driver is that once PIPE_ERROR_AGAIN is returned, the driver will:\n\n1) not try to send data anymore\n\n2) call onGuestWantWakeOn(PIPE_WAKE_WRITE) to indicate it wants to be woken up when it can send more data. This is where mHostSocket-\u003ewantWrite() is called.\n\n3) the pipe should call signalWake(PIPE_WAKE_WRITE) when the socket allows writing again.\n\nThe dontWantWrite() here is to avoid sending signalWake(PIPE_WAKE_WRITE) events when the driver doesn\u0027t expect them.",
+      "parentUuid": "ea03478f_c64bc22d",
       "range": {
         "startLine": 318,
         "startChar": 33,
@@ -470,6 +584,24 @@
     },
     {
       "key": {
+        "uuid": "4a88d372_f10c6847",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T12:16:24Z",
+      "side": 1,
+      "message": "Yes, will do",
+      "parentUuid": "8a91eb63_669a2160",
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_c6d835ed",
         "filename": "android/emulation/AdbGuestPipe.cpp",
         "patchSetId": 3
@@ -516,6 +648,30 @@
     },
     {
       "key": {
+        "uuid": "4a88d372_d107e420",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 407,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T12:16:24Z",
+      "side": 1,
+      "message": "yes, and basic sanity checking.",
+      "parentUuid": "8a91eb63_326f74c2",
+      "range": {
+        "startLine": 407,
+        "startChar": 4,
+        "endLine": 407,
+        "endChar": 51
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_cce779d9",
         "filename": "android/emulation/AdbGuestPipe.h",
         "patchSetId": 3
@@ -527,6 +683,30 @@
       "writtenOn": "2016-07-21T21:33:44Z",
       "side": 1,
       "message": "Isn\u0027t this the tcp port that the guest is requesting for a tcp transport between guest and us? :)\n\"suspected\"? :D",
+      "range": {
+        "startLine": 39,
+        "startChar": 36,
+        "endLine": 40,
+        "endChar": 43
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_04407660",
+        "filename": "android/emulation/AdbGuestPipe.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T12:16:24Z",
+      "side": 1,
+      "message": "Yes, but the guest shouldn\u0027t have to know anything about the port used on the host. I think that\u0027s because the original implementation had \"adbd\" listening on guest localhost port TCP 5555, and we were using a network redirection to get host connections there. This is no longer the case, and the parameter should have been dropped. We ignore it but I\u0027m mentioning it so maintainers would not be surprised when looking at the actual traffic :)\n\n\"suspected\", that\u0027s bad French -\u003e English translation, sorry, \nI meant \"assumed\" here :-) Will fix it.",
+      "parentUuid": "8a91eb63_cce779d9",
       "range": {
         "startLine": 39,
         "startChar": 36,
