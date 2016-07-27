@@ -14,6 +14,10 @@
 #include "android/base/sockets/ScopedSocket.h"
 #include <gtest/gtest.h>
 
+#include <errno.h>
+#include <signal.h>
+#include <string.h>
+
 namespace android {
 namespace base {
 
@@ -101,6 +105,99 @@ TEST(SocketUtils, socketGetPeerPort) {
     EXPECT_EQ(socketGetPort(s1.get()), socketGetPeerPort(s2.get()));
     EXPECT_EQ(socketGetPort(s2.get()), socketGetPeerPort(s1.get()));
 }
+
+#ifndef _WIN32
+namespace {
+
+// Helper class to temporary install a SIGPIPE signal handler that
+// will simply store the signal number into a global variable.
+class SigPipeSignalHandler {
+public:
+    SigPipeSignalHandler() {
+        sSignal = -1;
+        struct sigaction act = {};
+        act.sa_handler = myHandler;
+        ::sigaction(SIGPIPE, &act, &mOldAction);
+    }
+
+    ~SigPipeSignalHandler() {
+        ::sigaction(SIGPIPE, &mOldAction, nullptr);
+    }
+
+    int signaled() const { return sSignal; }
+
+private:
+    struct sigaction mOldAction;
+
+    static int sSignal;
+
+    static void myHandler(int sig) { sSignal = sig; }
+};
+
+// static
+int SigPipeSignalHandler::sSignal = 0;
+
+}  // namespace
+
+TEST(SocketUtils, socketSendDoesNotGenerateSigPipe) {
+    // Check that writing to a broken pipe does not generate a SIGPIPE
+    // signal on non-Windows platforms.
+
+    // First, check that this is true for socket pairs.
+    {
+        SigPipeSignalHandler handler;
+        int s1, s2;
+        EXPECT_EQ(-1, handler.signaled());
+        ASSERT_EQ(0, socketCreatePair(&s1, &s2));
+        socketClose(s2);
+        errno = 0;
+        EXPECT_EQ(-1, socketSend(s1, "x", 1));
+        EXPECT_EQ(EPIPE, errno);
+        EXPECT_EQ(-1, handler.signaled());
+        socketClose(s1);
+    }
+
+    // Second, check that this is true for random TCP sockets.
+    {
+        SigPipeSignalHandler handler;
+        EXPECT_EQ(-1, handler.signaled());
+        ScopedSocket s1(socketTcp4LoopbackServer(0));  // Bind to random port
+        ASSERT_TRUE(s1.valid());
+
+        int port = socketGetPort(s1.get());
+        ScopedSocket s2(socketTcp4LoopbackClient(port));
+        ASSERT_TRUE(s2. valid());
+
+        ScopedSocket s3(socketAcceptAny(s1.get()));
+        ASSERT_TRUE(s3.valid());
+
+        // s2 and s3 are now connected. Close s2 immediately, then try to
+        // send data through s3.
+        socketShutdownReads(s2.get());
+        s2.close();
+
+        // The EPIPE might not happen on the first send due to
+        // TCP packet buffering in the kernel. Perform multiple send()
+        // in a loop to work-around this.
+        errno = 0;
+        const int kMaxSendCount = 100;
+        int n = 0;
+        while (n < kMaxSendCount) {
+            int ret = socketSend(s3.get(), "xxxx", 4);
+            if (ret < 0) {
+                EXPECT_EQ(EPIPE, errno) << strerror(errno);
+                break;
+            }
+            n++;
+        }
+        // For the record, the value of |n| would typically be 2 on Linux,
+        // and 9 or 10 on Darwin, when run on local workstations.
+        EXPECT_LT(n, kMaxSendCount);
+
+        EXPECT_EQ(-1, handler.signaled());
+    }
+}
+#endif  // !_WIN32
 
 }  // namespace base
 }  // namespace android
