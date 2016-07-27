@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4fd2a519_213baef5",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameTypes.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-27T10:29:08Z",
+      "side": 1,
+      "message": "type-specific?",
+      "range": {
+        "startLine": 32,
+        "startChar": 11,
+        "endLine": 32,
+        "endChar": 25
+      },
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
