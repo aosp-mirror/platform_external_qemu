@@ -22,6 +22,30 @@
       "revId": "d415c3aa1966dd65dc56ee667c5f93d500072a51",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2fd3b11e_60d692f9",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-27T11:59:46Z",
+      "side": 1,
+      "message": "I actually want to accept it that way - that\u0027s why I moved everything into a single common function. -debug-\u003clist\u003e and -debug \u003clist\u003e IMO should be exactly the same",
+      "parentUuid": "6fff696c_21e63843",
+      "range": {
+        "startLine": 217,
+        "startChar": 5,
+        "endLine": 217,
+        "endChar": 31
+      },
+      "revId": "d415c3aa1966dd65dc56ee667c5f93d500072a51",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
