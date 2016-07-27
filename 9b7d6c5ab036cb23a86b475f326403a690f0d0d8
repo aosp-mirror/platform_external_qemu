@@ -22,6 +22,30 @@
       "revId": "9b7d6c5ab036cb23a86b475f326403a690f0d0d8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_e46f1af7",
+        "filename": "android/emulation/AdbHostServer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T12:10:42Z",
+      "side": 1,
+      "message": "Because it\u0027s easier to stick to the convention where FooBar.h corresponds to the FooBar class.\n\nAlso namespace would be \"android::adb_host_server::\" which feels a bit out-of-place for a few functions.",
+      "parentUuid": "af11619a_c4c65e40",
+      "range": {
+        "startLine": 17,
+        "startChar": 3,
+        "endLine": 17,
+        "endChar": 17
+      },
+      "revId": "9b7d6c5ab036cb23a86b475f326403a690f0d0d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
