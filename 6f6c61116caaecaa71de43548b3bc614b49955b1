@@ -22,6 +22,30 @@
       "revId": "6f6c61116caaecaa71de43548b3bc614b49955b1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_043cf6c9",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T13:39:04Z",
+      "side": 1,
+      "message": "It means none of the pipe has completed sending the \"accept\" command yet, so we should not start listening. Which is why waitForHostConnection() will call this method when that happens.",
+      "parentUuid": "cf1855bf_451d4a68",
+      "range": {
+        "startLine": 116,
+        "startChar": 15,
+        "endLine": 116,
+        "endChar": 66
+      },
+      "revId": "6f6c61116caaecaa71de43548b3bc614b49955b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
