@@ -174,6 +174,24 @@
       "revId": "1dbfa3de25b89664183f398d316a4f6ca2cbb6a5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6fff696c_5c321bf8",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/NamedObject.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-27T19:26:14Z",
+      "side": 1,
+      "message": "Taking a second thought, I can place all glDeleteXXX in the GlobalNameSpace, and have each shared library its own static pointer to GlobalNameSpace. It should eliminates m_glDelete and m_globalNameSpace. Does this sound good to you?\n\nBut we still need the shared pointer to encapsulate it for texture sharing.",
+      "parentUuid": "6fff696c_bf85fc6c",
+      "revId": "1dbfa3de25b89664183f398d316a4f6ca2cbb6a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
