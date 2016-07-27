@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2f1e51a6_a82dfbfb",
+        "filename": "android/emulation/AdbHostListener.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-27T08:38:15Z",
+      "side": 1,
+      "message": "nit: explicit?",
+      "range": {
+        "startLine": 64,
+        "startChar": 4,
+        "endLine": 64,
+        "endChar": 19
+      },
+      "revId": "ae743219fcc3d49da7924d950808cf36166f0225",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4fd2a519_61721619",
+        "filename": "android/emulation/AdbTypes.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-27T08:38:15Z",
+      "side": 1,
+      "message": "general request: could you please add a protected non-virtual or public virtual dtor, based on the way this interface is supposed to be used?\n\nMore: http://www.gotw.ca/publications/mill18.htm\n\u003eGuideline #4: A base class destructor should be either public and virtual, or protected and nonvirtual.",
+      "range": {
+        "startLine": 35,
+        "startChar": 7,
+        "endLine": 35,
+        "endChar": 20
+      },
+      "revId": "ae743219fcc3d49da7924d950808cf36166f0225",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
