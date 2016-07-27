@@ -788,6 +788,30 @@
     },
     {
       "key": {
+        "uuid": "af11619a_a44ec290",
+        "filename": "android/emulation/AdbGuestPipe.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T12:19:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8a91eb63_51dec2da",
+      "range": {
+        "startLine": 92,
+        "startChar": 7,
+        "endLine": 92,
+        "endChar": 16
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a91eb63_ac4f8dbf",
         "filename": "android/emulation/AdbGuestPipe.h",
         "patchSetId": 3
@@ -799,6 +823,30 @@
       "writtenOn": "2016-07-21T21:33:44Z",
       "side": 1,
       "message": "Actually, this is the one that I wanted  to take ownership of |socket| irrespective of errors. iiuc, currently, it owns |socket| iff return value is true.\n\nIf not, I\u0027d note this as a comment here also (AdbTypes.h already does so)",
+      "range": {
+        "startLine": 106,
+        "startChar": 34,
+        "endLine": 106,
+        "endChar": 44
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_844bc680",
+        "filename": "android/emulation/AdbGuestPipe.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T12:19:08Z",
+      "side": 1,
+      "message": "The code has been changed to use a ScopedSocket\u0026\u0026 parameter :) Should be much clearer now.",
+      "parentUuid": "8a91eb63_ac4f8dbf",
       "range": {
         "startLine": 106,
         "startChar": 34,
@@ -846,6 +894,30 @@
       "side": 1,
       "message": "Great catch!\nIf you lookat AdbGuestPipe.cpp:425, setReply(\"ok\"...) is eventually using a temporary string for the StringView that gets handed to mCommand (and gets stored there).\nThis should lead to undefined behaviour.",
       "parentUuid": "8a91eb63_11719add",
+      "range": {
+        "startLine": 156,
+        "startChar": 4,
+        "endLine": 156,
+        "endChar": 24
+      },
+      "revId": "a4855aacd0c4da8ae5e6bf056564075fde35c8f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_443a6eee",
+        "filename": "android/emulation/AdbGuestPipe.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T12:19:08Z",
+      "side": 1,
+      "message": "I think the literal C string is passed using the StringView(const char*) constructor instead, i.e. there is no temporary std::string() here. I\u0027ve changed the code to use a real buffer anyway to avoid any issue anyway.",
+      "parentUuid": "ea48a7ff_07843c03",
       "range": {
         "startLine": 156,
         "startChar": 4,
