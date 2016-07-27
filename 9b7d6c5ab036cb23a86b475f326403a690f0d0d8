@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "af11619a_c4c65e40",
+        "filename": "android/emulation/AdbHostServer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-27T08:30:56Z",
+      "side": 1,
+      "message": "very nit: why not a namespace?",
+      "range": {
+        "startLine": 17,
+        "startChar": 3,
+        "endLine": 17,
+        "endChar": 17
+      },
+      "revId": "9b7d6c5ab036cb23a86b475f326403a690f0d0d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
