@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6fff696c_3892ca49",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-27T18:09:37Z",
+      "side": 1,
+      "message": "The previous implementation did not distinguish between shader names and program names on purpose (it did not even define the PROGRAM enum), because it never kept track of them anyways. It was not exactly a bug previously, but in this patch we need to distinguish between them. So let\u0027s just keep it here.",
+      "parentUuid": "af11619a_2493f2aa",
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "af11619a_24aad2d6",
         "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
         "patchSetId": 5
@@ -87,6 +105,24 @@
     },
     {
       "key": {
+        "uuid": "6fff696c_4e99c467",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-27T18:09:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "af11619a_44926ea3",
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "af11619a_e4c71aac",
         "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameSpace.h",
         "patchSetId": 5
@@ -104,6 +140,24 @@
     },
     {
       "key": {
+        "uuid": "6fff696c_cedbf41b",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameSpace.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-27T18:09:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "af11619a_e4c71aac",
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "af11619a_048a3679",
         "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameTypes.h",
         "patchSetId": 5
@@ -115,6 +169,24 @@
       "writtenOn": "2016-07-27T15:33:53Z",
       "side": 1,
       "message": "This class should minimally be documented, including usage examples.",
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6fff696c_64e027c0",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameTypes.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-27T18:09:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "af11619a_048a3679",
       "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -144,6 +216,30 @@
     },
     {
       "key": {
+        "uuid": "6fff696c_442ec3f7",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameTypes.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-27T18:09:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4fd2a519_213baef5",
+      "range": {
+        "startLine": 32,
+        "startChar": 11,
+        "endLine": 32,
+        "endChar": 25
+      },
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "af11619a_e4a0baea",
         "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameTypes.h",
         "patchSetId": 5
@@ -155,6 +251,24 @@
       "writtenOn": "2016-07-27T15:33:53Z",
       "side": 1,
       "message": "nit: while extensibility is good, you don\u0027t have to make shaderType part of a union for now. Just an extra field is ok, e.g.:\n\n   struct GenNameInfo {\n       NameObjectType m_type;\n       GLenum m_shaderType;    // only used for SHADER\n       ...\n   };",
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6fff696c_09edf6f3",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameTypes.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-27T18:09:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "af11619a_e4a0baea",
       "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -178,6 +292,24 @@
     },
     {
       "key": {
+        "uuid": "6fff696c_e429b7ef",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameTypes.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-27T18:09:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "af11619a_647faa77",
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "af11619a_a478828c",
         "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameTypes.h",
         "patchSetId": 5
@@ -195,6 +327,24 @@
     },
     {
       "key": {
+        "uuid": "6fff696c_24145f9b",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameTypes.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-27T18:09:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "af11619a_a478828c",
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "af11619a_049876c1",
         "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/objectNameManager.h",
         "patchSetId": 5
@@ -206,6 +356,24 @@
       "writtenOn": "2016-07-27T15:33:53Z",
       "side": 1,
       "message": "there are no p_shaderType and p_type parameters here, Drop this line from the comment, this belongs in the description for GenNameInfo instead.",
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6fff696c_e436d7e9",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/objectNameManager.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-27T18:09:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "af11619a_049876c1",
       "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
