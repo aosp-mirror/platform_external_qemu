@@ -46,6 +46,30 @@
       "revId": "d415c3aa1966dd65dc56ee667c5f93d500072a51",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6fff696c_f7085630",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-27T17:10:27Z",
+      "side": 1,
+      "message": "I think this is a very bad decision (maybe not yours -- was this pre-existing behavior?)  The dashes in -debug-\u003c...\u003e (to me) indicating that the things they separate are to be considered as one composite joined thing.  Having a comma-separated list as one of these joined things seems to me Very Wrong.  I have never seen a command-line interface that worked this way (where \",\" bound tighter than \"-\", if you want to look at it that way.)  Just to be sure, I asked one other person if they found the example I gave odd or normal, and they found it odd.\n\nIs the -debug-\u003ctag(s)\u003e form really necessary?  Who would we break if we just eliminated it, allowing only the \"-debug \u003ctags\u003e\" form?",
+      "parentUuid": "2fd3b11e_60d692f9",
+      "range": {
+        "startLine": 217,
+        "startChar": 5,
+        "endLine": 217,
+        "endChar": 31
+      },
+      "revId": "d415c3aa1966dd65dc56ee667c5f93d500072a51",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
