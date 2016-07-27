@@ -144,6 +144,30 @@
     },
     {
       "key": {
+        "uuid": "af11619a_24681225",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-27T11:59:46Z",
+      "side": 1,
+      "message": "I am fine with it, as it is more than enough to inform a user about bad command line switch",
+      "parentUuid": "6fff696c_383791eb",
+      "range": {
+        "startLine": 217,
+        "startChar": 0,
+        "endLine": 217,
+        "endChar": 4
+      },
+      "revId": "b1b6acb2251db92f2d899ea9871f9d86b93cc400",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a617bbb_4ce5bbcf",
         "filename": "android/cmdline-option.c",
         "patchSetId": 1
@@ -319,6 +343,30 @@
       "side": 1,
       "message": "Maybe the api should expose an option to set the debug_tags, to be used by tests to control the set of recognized tags?",
       "parentUuid": "0a617bbb_8cf3533d",
+      "range": {
+        "startLine": 134,
+        "startChar": 11,
+        "endLine": 134,
+        "endChar": 25
+      },
+      "revId": "b1b6acb2251db92f2d899ea9871f9d86b93cc400",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0fd8ad39_5f240b19",
+        "filename": "android/cmdline-option_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-27T11:59:46Z",
+      "side": 1,
+      "message": "well, those are exposed as we have it as a global array, but I will be strongly against \u0027foo\u0027 and \u0027blah\u0027 debug tags anyway :)",
+      "parentUuid": "6fff696c_4ca733a8",
       "range": {
         "startLine": 134,
         "startChar": 11,
