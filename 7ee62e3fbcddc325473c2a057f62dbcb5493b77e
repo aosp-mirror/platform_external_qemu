@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0fd8ad39_9f2db3fc",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/TranslatorIfaces.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-27T10:22:29Z",
+      "side": 1,
+      "message": "nit: just remove it",
+      "revId": "7ee62e3fbcddc325473c2a057f62dbcb5493b77e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
