@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "af11619a_44ac2e37",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T12:16:24Z",
+      "side": 1,
+      "message": "Good catch, thanks :)",
+      "parentUuid": "6fcda978_42fa7278",
+      "range": {
+        "startLine": 87,
+        "startChar": 4,
+        "endLine": 87,
+        "endChar": 24
+      },
+      "revId": "aef9b10b1df7231da78c0d8aef128fe2b3296596",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2f1e51a6_2803cb68",
         "filename": "android/emulation/AdbGuestPipe.cpp",
         "patchSetId": 4
@@ -64,6 +88,54 @@
         "startChar": 16,
         "endLine": 111,
         "endChar": 22
+      },
+      "revId": "aef9b10b1df7231da78c0d8aef128fe2b3296596",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_a4a0823b",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T12:16:24Z",
+      "side": 1,
+      "message": "As stated in the header, they are owned by the virtual device until onGuestClose() is called. So we should not use unique_ptr\u003c\u003e here.",
+      "parentUuid": "0f234ded_47770e07",
+      "range": {
+        "startLine": 111,
+        "startChar": 16,
+        "endLine": 111,
+        "endChar": 22
+      },
+      "revId": "aef9b10b1df7231da78c0d8aef128fe2b3296596",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_849d8601",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T12:16:24Z",
+      "side": 1,
+      "message": "Done :)",
+      "parentUuid": "2f1e51a6_2803cb68",
+      "range": {
+        "startLine": 111,
+        "startChar": 4,
+        "endLine": 111,
+        "endChar": 15
       },
       "revId": "aef9b10b1df7231da78c0d8aef128fe2b3296596",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
