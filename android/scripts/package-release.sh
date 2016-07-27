@@ -661,6 +661,13 @@ build_darwin_binaries_on () {
     copy_directory "$AOSP_BUILD_PREBUILTS"/qt/darwin-x86_64 \
             "$DARWIN_BUILD_PREBUILTS"/qt/darwin-x86_64
 
+    if [ ! -d "$AOSP_BUILD_PREBUILTS"/common/ANGLE/darwin-x86_64 ]; then
+        panic "Missing Darwin ANGLE prebuilts!"
+    fi
+
+    copy_directory "$AOSP_BUILD_PREBUILTS"/common/ANGLE/darwin-x86_64 \
+            "$DARWIN_BUILD_PREBUILTS"/common/ANGLE/darwin-x86_64
+
     run tar xf "$PKG_FILE" -C "$DARWIN_PKG_DIR"/..
 
     if [ "$AOSP_PREBUILTS_DIR" ]; then
