@@ -2,6 +2,125 @@
   "comments": [
     {
       "key": {
+        "uuid": "af11619a_2493f2aa",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T15:33:53Z",
+      "side": 1,
+      "message": "This looks like a bug fix that should go into a different patch !?",
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_24aad2d6",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T15:33:53Z",
+      "side": 1,
+      "message": "If you don\u0027t inline these in the header, please place them in a new source file like ObjectNameTypes.cpp instead.",
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_04afd6e6",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T15:33:53Z",
+      "side": 1,
+      "message": "this leaves m_extraInfo un-initialized which is a bad idea in general. You should probably define this with default values and inlined constructors like:\n\n  struct GenNameInfo {\n      ObjectNameType m_type \u003d 0;\n      union { .. } m_extraInfo \u003d {};\n\n      GenNameInfo() \u003d delete;\n      explicit GenNameInfo(NameObjectType type) : m_type(type) {}\n      explicit GenNameInfo(ShaderType shaderType)\n          : m_type(SHADER), m_extraInfo({.shaderType \u003d shaderType }) {}\n  };",
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_64b4ca3b",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T15:33:53Z",
+      "side": 1,
+      "message": "nit: If you use assert(), add #include \u003cassert.h\u003e in the source/header that uses it. Don\u0027t depend on other headers to do it for you.",
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_44926ea3",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T15:33:53Z",
+      "side": 1,
+      "message": "shouldn\u0027t you check that |p_name| is not 0, and that |p_type| is in range?",
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_e4c71aac",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameSpace.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T15:33:53Z",
+      "side": 1,
+      "message": "nit: since this is a tiny struct, I suggest passing it by value instead. + Update comment explaining what |genNameInfo| is.",
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_048a3679",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameTypes.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T15:33:53Z",
+      "side": 1,
+      "message": "This class should minimally be documented, including usage examples.",
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4fd2a519_213baef5",
         "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameTypes.h",
         "patchSetId": 5
@@ -19,6 +138,74 @@
         "endLine": 32,
         "endChar": 25
       },
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_e4a0baea",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameTypes.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T15:33:53Z",
+      "side": 1,
+      "message": "nit: while extensibility is good, you don\u0027t have to make shaderType part of a union for now. Just an extra field is ok, e.g.:\n\n   struct GenNameInfo {\n       NameObjectType m_type;\n       GLenum m_shaderType;    // only used for SHADER\n       ...\n   };",
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_647faa77",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameTypes.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T15:33:53Z",
+      "side": 1,
+      "message": "The default constructor generated by the compiler should work, no need to define one here.",
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_a478828c",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameTypes.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T15:33:53Z",
+      "side": 1,
+      "message": "These two constructors should be explicit to avoid bugs, note that the only reason why they don\u0027t clash is that GLenum is \"unsigned int\", and NamedObjectType is \"int\" in this context. That\u0027s a little bit fragile. Consider using an enum class for NameObjectType.\n\nAlso they are so small it\u0027s probably better to inline them directly. + Missing documentation.",
+      "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af11619a_049876c1",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/objectNameManager.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-07-27T15:33:53Z",
+      "side": 1,
+      "message": "there are no p_shaderType and p_type parameters here, Drop this line from the comment, this belongs in the description for GenNameInfo instead.",
       "revId": "18ab124eaac5f143fda54b91cc77625c38110b46",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
