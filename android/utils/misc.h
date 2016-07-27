@@ -37,6 +37,13 @@ extern void   buffer_translate_char( char*        buff,
                                      const char*  src,
                                      char         fromChar,
                                      char         toChar );
+// Note: |srcLen| doesn't include the null-terminator.
+extern void   buffer_translate_char_with_len(char*        buff,
+                                             unsigned     buffLen,
+                                             const char*  src,
+                                             unsigned     srcLen,
+                                             char         fromChar,
+                                             char         toChar );
 
 extern void   string_translate_char( char*  str, char from, char to );
 
