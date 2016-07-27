@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6fff696c_842b8b2b",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/NamedObject.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-27T18:54:31Z",
+      "side": 1,
+      "message": "It is calling the driver\u0027s GL functions, and I can\u0027t confirm that they are thread-safe. So I am doing it as in the previous implementation, which uses the global lock. If you confirm that they are thread-safe, I will remove the mutex.",
+      "parentUuid": "af11619a_c4601eaa",
+      "revId": "1dbfa3de25b89664183f398d316a4f6ca2cbb6a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "af11619a_044b562e",
         "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/NamedObject.h",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2016-07-27T15:53:34Z",
       "side": 1,
       "message": "Maybe you don\u0027t need GenNameInfo anymore, just two constructors for NamedObject?",
+      "revId": "1dbfa3de25b89664183f398d316a4f6ca2cbb6a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6fff696c_1a7536dc",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/NamedObject.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-27T18:54:31Z",
+      "side": 1,
+      "message": "will do, after I submit the other patch (rebasing is painful...)",
+      "parentUuid": "af11619a_044b562e",
       "revId": "1dbfa3de25b89664183f398d316a4f6ca2cbb6a5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "6fff696c_3f5c6c83",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/NamedObject.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-27T18:54:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "af11619a_64504adb",
+      "revId": "1dbfa3de25b89664183f398d316a4f6ca2cbb6a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "af11619a_845626d3",
         "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/NamedObject.h",
         "patchSetId": 5
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "6fff696c_1f59a892",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/NamedObject.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-27T18:54:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "af11619a_845626d3",
+      "revId": "1dbfa3de25b89664183f398d316a4f6ca2cbb6a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "af11619a_246f7298",
         "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/NamedObject.h",
         "patchSetId": 5
@@ -81,6 +153,24 @@
       "writtenOn": "2016-07-27T15:53:34Z",
       "side": 1,
       "message": "It looks like the only purpose of this class is to encapsulate a global name, and provide \"convenience\" wrappers around glGenXXX() and glDeleteXXX() context-specific pointers.\n\nHowever, replacing a single 32-bit uint with a shared-pointer to a structure that contains multiple pointers seems a _little_ overkill to me.\n\nE.g. it looks like you could do the same by adding a context-specific genXXX()/delXXX() callbacks.",
+      "revId": "1dbfa3de25b89664183f398d316a4f6ca2cbb6a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6fff696c_bf85fc6c",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/NamedObject.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-07-27T18:54:31Z",
+      "side": 1,
+      "message": "The other purpose is to have the appropriate reference counter for texture object, which is frequently shared across contexts / share groups because of EglImage.\n\nThe reason I have to keep a glDeleteXXX function pointer is somehow tricky. This code is build into a static library (libGLcommon), it is linked by (at least) 3 shared libraries (EGL_translator, GLES_V2_translator, GLES_CM_translator). Each shared library has its own GLEScontext::dispatcher. EGL_translator does not even initialize its dispatcher. So if we just call the static GLEScontext::dispatcher().glDeleteXXX, we might end up calling a null function because the dispatcher is not initialized in the current shared library :(\n\nSo I have to point glDeleteXXX to the shared library that has the appropriate function...",
+      "parentUuid": "af11619a_246f7298",
       "revId": "1dbfa3de25b89664183f398d316a4f6ca2cbb6a5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
