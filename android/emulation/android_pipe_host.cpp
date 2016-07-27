@@ -29,7 +29,7 @@ static CStream* asCStream(BaseStream* stream) {
 // structure.
 class LegacyPipe : public AndroidPipe {
 public:
-    LegacyPipe(void* instance, void* hwPipe, const Service* service)
+    LegacyPipe(void* instance, void* hwPipe, Service* service)
         : AndroidPipe(hwPipe, service), mInstance(instance) {}
 
     const AndroidPipeFuncs* getFuncs() const;
@@ -76,7 +76,7 @@ public:
                       const AndroidPipeFuncs* funcs)
         : Service(name), mOpaque(opaque), mFuncs(funcs) {}
 
-    virtual AndroidPipe* create(void* hwPipe, const char* args) const override {
+    virtual AndroidPipe* create(void* hwPipe, const char* args) override {
         void* hostPipe = mFuncs->init(hwPipe, mOpaque, args);
         if (!hostPipe) {
             return nullptr;
@@ -88,7 +88,7 @@ public:
 
     virtual AndroidPipe* load(void* hwPipe,
                               const char* args,
-                              BaseStream* stream) const override {
+                              BaseStream* stream) override {
         void* instance = mFuncs->load(hwPipe, mOpaque, args, asCStream(stream));
         if (!instance) {
             return nullptr;

@@ -39,14 +39,12 @@ public:
     public:
         Service() : AndroidPipe::Service("grallocPipe") {}
 
-        virtual AndroidPipe* create(void* mHwPipe, const char* args) const
-                override {
+        virtual AndroidPipe* create(void* mHwPipe, const char* args) override {
             return new GrallocPipe(mHwPipe, this);
         }
     };
 
-    GrallocPipe(void* hwPipe, const Service* service)
-            : AndroidPipe(hwPipe, service) {
+    GrallocPipe(void* hwPipe, Service* service) : AndroidPipe(hwPipe, service) {
         m_uniqueId = ++s_headId;
     }
 

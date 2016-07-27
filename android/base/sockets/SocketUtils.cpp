@@ -466,10 +466,18 @@ ssize_t socketRecv(int socket, void* buffer, size_t bufferLen) {
 
 ssize_t socketSend(int socket, const void* buffer, size_t bufferLen) {
     errno = 0;
+#ifdef MSG_NOSIGNAL
+    // Prevent SIGPIPE generation on Linux when writing to a broken pipe.
+    // ::send() will return -1/EPIPE instead.
+    const int sendFlags = MSG_NOSIGNAL;
+#else
+    // For Darwin, this is handled by setting SO_NOSIGPIPE when creating
+    // the socket. On Windows, there is no SIGPIPE signal to consider.
+    const int sendFlags = 0;
+#endif
     ssize_t ret = ::send(socket,
                          reinterpret_cast<const char*>(buffer),
-                         bufferLen,
-                         0);
+                         bufferLen, sendFlags);
     ON_SOCKET_ERROR_RETURN_M1(ret);
     return ret;
 }
@@ -543,6 +551,12 @@ static int socketCreateTcpFor(int domain) {
     errno = 0;
     int s = ::socket(domain, SOCK_STREAM, 0);
     ON_SOCKET_ERROR_RETURN_M1(s);
+#ifdef SO_NOSIGPIPE
+    // Disable SIGPIPE generation on Darwin.
+    // When writing to a broken pipe, send() will return -1 and
+    // set errno to EPIPE.
+    socketSetOption(s, SOL_SOCKET, SO_NOSIGPIPE, 1);
+#endif
     return s;
 }
 
@@ -616,6 +630,10 @@ int socketCreatePair(int* fd1, int* fd2) {
     if (!ret) {
         socketSetNonBlocking(fds[0]);
         socketSetNonBlocking(fds[1]);
+#ifdef SO_NOSIGPIPE
+        socketSetOption(fds[0], SOL_SOCKET, SO_NOSIGPIPE, 1);
+        socketSetOption(fds[1], SOL_SOCKET, SO_NOSIGPIPE, 1);
+#endif
         *fd1 = fds[0];
         *fd2 = fds[1];
     } else {

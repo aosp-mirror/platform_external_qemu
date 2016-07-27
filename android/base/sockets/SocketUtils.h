@@ -29,7 +29,8 @@ ssize_t socketRecv(int socket, void* buffer, size_t bufferLen);
 // Try to send up to |bufferLen| bytes to |socket| from |buffer|.
 // Return the number of bytes actually sent, 0 in case of disconnection,
 // or -1/errno in case of error. Note that this loops around EINTR as
-// a convenience.
+// a convenience. Also, this will *not* generate a SIGPIPE signal when
+// writing to a broken pipe (but errno will be set to EPIPE).
 ssize_t socketSend(int socket, const void* buffer, size_t bufferLen);
 
 // Same as socketSend() but loop around transient writes.
