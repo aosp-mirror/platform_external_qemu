@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cf1855bf_451d4a68",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-27T13:03:51Z",
+      "side": 1,
+      "message": "what if there\u0027s no such pipe?",
+      "range": {
+        "startLine": 116,
+        "startChar": 15,
+        "endLine": 116,
+        "endChar": 66
+      },
+      "revId": "6f6c61116caaecaa71de43548b3bc614b49955b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
