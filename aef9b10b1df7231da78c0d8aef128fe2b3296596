@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6fcda978_42fa7278",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-27T08:44:44Z",
+      "side": 1,
+      "message": "const_cast isn\u0027t needed anymore here",
+      "range": {
+        "startLine": 87,
+        "startChar": 4,
+        "endLine": 87,
+        "endChar": 24
+      },
+      "revId": "aef9b10b1df7231da78c0d8aef128fe2b3296596",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2f1e51a6_2803cb68",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-27T08:44:44Z",
+      "side": 1,
+      "message": "mPipes.erase(remove(), mPipes.end());",
+      "range": {
+        "startLine": 111,
+        "startChar": 4,
+        "endLine": 111,
+        "endChar": 15
+      },
+      "revId": "aef9b10b1df7231da78c0d8aef128fe2b3296596",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0f234ded_47770e07",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-27T08:44:44Z",
+      "side": 1,
+      "message": "what about making mPipes a vector of unique_ptr\u003cAdbGuestPipe\u003e ? that would manage the memory for you",
+      "range": {
+        "startLine": 111,
+        "startChar": 16,
+        "endLine": 111,
+        "endChar": 22
+      },
+      "revId": "aef9b10b1df7231da78c0d8aef128fe2b3296596",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
