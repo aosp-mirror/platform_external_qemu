@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "android/base/TypeUtils.h"
+#include "android/base/TypeTraits.h"
 #include "android/skin/qt/ui-event-recorder.h"
 
 #include <QEvent>

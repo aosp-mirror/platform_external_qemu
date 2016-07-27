@@ -452,7 +452,7 @@ LOCAL_SRC_FILES := \
   android/base/threads/ParallelTask_unittest.cpp \
   android/base/threads/Thread_unittest.cpp \
   android/base/threads/ThreadStore_unittest.cpp \
-  android/base/TypeUtils_unittest.cpp \
+  android/base/TypeTraits_unittest.cpp \
   android/base/Uri_unittest.cpp \
   android/base/Uuid_unittest.cpp \
   android/base/Version_unittest.cpp \

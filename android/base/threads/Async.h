@@ -15,7 +15,7 @@
 #pragma once
 
 #include "android/base/threads/Types.h"
-#include "android/base/TypeUtils.h"
+#include "android/base/TypeTraits.h"
 
 namespace android {
 namespace base {
@@ -26,7 +26,7 @@ namespace base {
 bool async(const ThreadFunctor& func,
            ThreadFlags flags = ThreadFlags::MaskSignals);
 
-template <class Callable, class = enable_if<is_callable<Callable, void()>>>
+template <class Callable, class = enable_if<is_callable_as<Callable, void()>>>
 bool async(Callable&& func, ThreadFlags flags = ThreadFlags::MaskSignals) {
     return async(ThreadFunctor([func]() { func(); return intptr_t(); }), flags);
 }
