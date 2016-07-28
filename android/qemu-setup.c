@@ -12,7 +12,6 @@
 
 #include "android/console.h"
 #include "android/constants.h"
-#include "android/adb-qemud.h"
 #include "android/adb-server.h"
 #include "android/android.h"
 #include "android/cmdline-option.h"
@@ -288,7 +287,7 @@ static bool setup_console_and_adb_ports(int console_port,
     if (legacy_adb) {
         agents->net->slirpRedir(false, adb_port, guest_ip, 5555);
     } else {
-        if (adb_server_init(adb_port) < 0) {
+        if (android_adb_server_init(adb_port) < 0) {
             return false;
         }
         register_adb_service = true;
@@ -298,7 +297,7 @@ static bool setup_console_and_adb_ports(int console_port,
             agents->net->slirpUnredir(false, adb_port);
         } else {
             register_adb_service = false;
-            adb_server_undo_init();
+            android_adb_server_undo_init();
         }
         return false;
     }
@@ -313,19 +312,6 @@ static bool setup_console_and_adb_ports(int console_port,
  * main loop runs
  */
 bool android_emulation_setup(const AndroidConsoleAgents* agents) {
-    /* Set the port where the emulator expects adb to run on the host
-     * machine */
-    char* adb_host_port_str = getenv( "ANDROID_ADB_SERVER_PORT" );
-    if ( adb_host_port_str && strlen( adb_host_port_str ) > 0 ) {
-        android_adb_port = (int) strtol( adb_host_port_str, NULL, 0 );
-        if ( android_adb_port <= 0 ) {
-            derror("env var ANDROID_ADB_SERVER_PORT must be a number > 0. Got "
-                   "\"%s\"",
-                   adb_host_port_str);
-            return false;
-        }
-    }
-
     if (android_op_port && android_op_ports) {
         derror("options -port and -ports cannot be used together.");
         return false;
@@ -389,27 +375,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
         /* send a simple message to the ADB host server to tell it we just started.
         * it should be listening on port 5037. if we can't reach it, don't bother
         */
-        int s = socket_loopback6_client(android_adb_port, SOCKET_STREAM);
-        if (s < 0) {
-            s = socket_loopback4_client(android_adb_port, SOCKET_STREAM);
-        }
-        if (s < 0) {
-            D("can't connect to ADB server: %s (errno = %d)", errno_str, errno );
-        } else {
-            char tmp[32];
-            char header[5];
-
-            // Expected format: <hex4>host:emulator:<port>
-            // Where <port> is the decimal adb port number, and <hex4> is the length
-            // of the payload that follows it in hex.
-            int len = snprintf(tmp, sizeof tmp, "0000host:emulator:%d", adb_port);
-            snprintf(header, sizeof header, "%04x", len - 4);
-            memcpy(tmp, header, 4);
-            socket_send(s, tmp, len);
-            D("sent '%s' to ADB server", tmp);
-
-            socket_close(s);
-        }
+        android_adb_server_notify(adb_port);
 
         android_validate_ports(base_port, adb_port);
     }

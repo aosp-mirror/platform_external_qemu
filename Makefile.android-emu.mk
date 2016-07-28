@@ -189,8 +189,7 @@ LOCAL_C_INCLUDES := \
     $(ZLIB_INCLUDES) \
 
 LOCAL_SRC_FILES := \
-    android/adb-qemud.c \
-    android/adb-server.c \
+    android/adb-server.cpp \
     android/avd/hw-config.c \
     android/avd/info.c \
     android/avd/scanner.c \
@@ -221,6 +220,10 @@ LOCAL_SRC_FILES := \
     android/crashreport/CrashReporter_common.cpp \
     android/crashreport/CrashReporter_$(BUILD_TARGET_OS).cpp \
     android/curl-support.c \
+    android/emulation/AdbDebugPipe.cpp \
+    android/emulation/AdbGuestPipe.cpp \
+    android/emulation/AdbHostListener.cpp \
+    android/emulation/AdbHostServer.cpp \
     android/emulation/AndroidPipe.cpp \
     android/emulation/android_pipe_host.cpp \
     android/emulation/android_pipe_pingpong.c \
@@ -458,6 +461,10 @@ LOCAL_SRC_FILES := \
   android/base/Version_unittest.cpp \
   android/cmdline-option_unittest.cpp \
   android/console_auth_unittest.cpp \
+  android/emulation/AdbDebugPipe_unittest.cpp \
+  android/emulation/AdbGuestPipe_unittest.cpp \
+  android/emulation/AdbHostListener_unittest.cpp \
+  android/emulation/AdbHostServer_unittest.cpp \
   android/emulation/android_pipe_pingpong_unittest.cpp \
   android/emulation/android_pipe_zero_unittest.cpp \
   android/emulation/bufprint_config_dirs_unittest.cpp \
