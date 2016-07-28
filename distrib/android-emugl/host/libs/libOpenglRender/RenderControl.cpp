@@ -535,6 +535,27 @@ static int rcDestroyClientImage(uint32_t image)
     return fb->destroyClientImage(image);
 }
 
+static uint32_t rcCreateClientImagePuid(uint32_t context, EGLenum target,
+                                        GLuint buffer, uint64_t puid)
+{
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return 0;
+    }
+
+    return fb->createClientImagePuid(context, target, buffer, puid);
+}
+
+static int rcDestroyClientImagePuid(uint32_t image, uint64_t puid)
+{
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return 0;
+    }
+
+    return fb->destroyClientImagePuid(image, puid);
+}
+
 static void rcSelectChecksumHelper(uint32_t protocol, uint32_t reserved) {
     ChecksumCalculatorThreadInfo::setVersion(protocol);
 }
@@ -573,4 +594,6 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCreateColorBufferPuid = rcCreateColorBufferPuid;
     dec->rcCloseColorBufferPuid = rcCloseColorBufferPuid;
     dec->rcOpenColorBuffer2Puid = rcOpenColorBuffer2Puid;
+    dec->rcCreateClientImagePuid = rcCreateClientImagePuid;
+    dec->rcDestroyClientImagePuid = rcDestroyClientImagePuid;
 }

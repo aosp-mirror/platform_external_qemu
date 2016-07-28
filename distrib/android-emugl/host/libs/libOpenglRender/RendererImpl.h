@@ -56,7 +56,7 @@ public:
     void setOpenGLDisplayRotation(float zRot) final;
     void setOpenGLDisplayTranslation(float px, float py) final;
     void repaintOpenGLDisplay() final;
-    void cleanupProcColorbuffers(uint64_t puid) final;
+    void cleanupProcGLObjects(uint64_t puid) final;
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RendererImpl);
 
