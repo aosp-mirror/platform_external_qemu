@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0f40add2_7f8fcf1d",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-28T06:57:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6fff696c_37fade13",
+      "range": {
+        "startLine": 217,
+        "startChar": 73,
+        "endLine": 217,
+        "endChar": 77
+      },
+      "revId": "ce6709c6b24e88e57d49b8eef5d89bfb475137d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6fff696c_37765ea1",
         "filename": "android/cmdline-option.c",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "0f40add2_1f9c8358",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-28T06:57:25Z",
+      "side": 1,
+      "message": "it might be, but it\u0027s an extra string scan - which doesn\u0027t matter here, but a Bad Thing in general",
+      "parentUuid": "6fff696c_37765ea1",
+      "range": {
+        "startLine": 225,
+        "startChar": 1,
+        "endLine": 228,
+        "endChar": 5
+      },
+      "revId": "ce6709c6b24e88e57d49b8eef5d89bfb475137d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6fff696c_77d6261c",
         "filename": "android/cmdline-option.c",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2016-07-27T17:10:27Z",
       "side": 1,
       "message": "I still think that if the argument is a comma-separated list of tag specifications, that \"android_parse_debug_tags\" would be a better name for the method, and \"tags\" a better name for the argument.  These are more specific, in a useful way.  If --debug \u003cxxx\u003e were ever able to have an \u003cxxx\u003e that was something other than a tag list, then I would agree to call the union of tags and the new things \"options\", and have a method that could parse all such options.  But we don\u0027t have that yet.",
+      "range": {
+        "startLine": 232,
+        "startChar": 25,
+        "endLine": 232,
+        "endChar": 47
+      },
+      "revId": "ce6709c6b24e88e57d49b8eef5d89bfb475137d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0f40add2_3f994769",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-28T06:57:25Z",
+      "side": 1,
+      "message": "I\u0027m emphasizing a different thing here: I\u0027m saying that you pass a (command line or console command) option and this function parses it. You want to say that it parses debug tags in that option. I still about this function as the former",
+      "parentUuid": "6fff696c_77d6261c",
       "range": {
         "startLine": 232,
         "startChar": 25,
@@ -128,6 +200,30 @@
       "writtenOn": "2016-07-27T17:10:27Z",
       "side": 1,
       "message": "Capital R -- might as make a complete sentence.",
+      "range": {
+        "startLine": 80,
+        "startChar": 3,
+        "endLine": 80,
+        "endChar": 10
+      },
+      "revId": "ce6709c6b24e88e57d49b8eef5d89bfb475137d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0f40add2_dfa61bab",
+        "filename": "android/cmdline-option.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-28T06:57:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6fff696c_17feba5a",
       "range": {
         "startLine": 80,
         "startChar": 3,
