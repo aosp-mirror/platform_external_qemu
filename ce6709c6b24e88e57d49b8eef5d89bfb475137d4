@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "0ff26de6_b52216aa",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-28T17:24:09Z",
+      "side": 1,
+      "message": "Premature optimization is also a Bad Thing :-).\n\nI won\u0027t argue further on this -- but I would ask that you at least put a comment before the strncmp above explaining the assumption that justifies it in the strlen(to) \u003c tagLen case, which at least seems like it raises the possibility of examining undefined memory.",
+      "parentUuid": "0f40add2_1f9c8358",
+      "range": {
+        "startLine": 225,
+        "startChar": 1,
+        "endLine": 228,
+        "endChar": 5
+      },
+      "revId": "ce6709c6b24e88e57d49b8eef5d89bfb475137d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6fff696c_77d6261c",
         "filename": "android/cmdline-option.c",
         "patchSetId": 3
