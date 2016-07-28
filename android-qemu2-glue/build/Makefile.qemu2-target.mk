@@ -71,11 +71,7 @@ LOCAL_SRC_FILES += \
     hw/display/goldfish_fb.c \
     hw/input/goldfish_events.c \
     hw/intc/goldfish_pic.c \
-    hw/misc/android_adb.c \
-    hw/misc/android_adb_dbg.c \
     hw/misc/android_pipe.c \
-    hw/misc/android_pipe_test.c \
-    hw/misc/android_qemud.c\
     hw/misc/goldfish_battery.c \
     hw/timer/goldfish_timer.c \
     $(call qemu2-if-target,arm arm64,\

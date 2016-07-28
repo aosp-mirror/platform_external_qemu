@@ -894,16 +894,6 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
     sysbus_init_mmio(sbdev, &s->iomem);
     sysbus_init_irq(sbdev, &s->irq);
 
-    android_zero_pipe_init();
-    android_pingpong_init();
-    android_throttle_init();
-
-    // Post the wake messages from the main loop thread if we're running with a
-    // codegen, and use the render thread otherwise.
-    // Codegen is not thread safe and it hangs if we post the wakes from another
-    // thread.
-    android_init_opengles_pipe(tcg_enabled() ? looper_getForThread() : NULL);
-
     android_pipe_set_hw_funcs(&qemu2_android_pipe_hw_funcs);
 
     register_savevm_with_post_load
@@ -915,13 +905,6 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
          android_pipe_load,
          android_pipe_post_load,
          s);
-
-    /* TODO: This may be a complete hack and there may be beautiful QOM ways
-     * to accomplish this.
-     *
-     * Initialize adb pipe backends
-     */
-    android_adb_dbg_backend_init();
 }
 
 static void qemu2_android_pipe_reset(void* hwpipe, void* internal_pipe) {

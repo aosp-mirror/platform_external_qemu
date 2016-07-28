@@ -36,6 +36,7 @@
 #include "sysemu/sysemu.h"
 #include "hmp.h"
 
+#include "android/adb-server.h"
 #include "android/cmdline-option.h"
 #include "android/error-messages.h"
 #include "android/emulator-window.h"
@@ -125,7 +126,7 @@ static bool perform_console_and_adb_init(int console_port,
          * or try selecting adb_port automatically
          */
         adb_port = (auto_adb_port) ? (console_port + 1) : adb_port;
-        if (!qemu2_adb_server_init(adb_port)) {
+        if (android_adb_server_init(adb_port) < 0) {
             qemu_chr_delete(chr);
             chr = NULL;
             continue;
@@ -140,6 +141,7 @@ static bool perform_console_and_adb_init(int console_port,
         android_serial_number_port = adb_port - 1;
 
         android_validate_ports(console_port, adb_port);
+        android_adb_service_init();
         return true;
     }
     return false;
