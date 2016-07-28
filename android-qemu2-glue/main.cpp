@@ -38,7 +38,6 @@
 #include "android/utils/lineinput.h"
 #include "android/utils/property_file.h"
 #include "android/utils/filelock.h"
-#include "android/utils/tempfile.h"
 #include "android/utils/stralloc.h"
 #include "android/utils/string.h"
 #include "android/utils/win32_cmdline_quote.h"
@@ -829,11 +828,10 @@ extern "C" int main(int argc, char **argv) {
         androidHwConfig_write(hw, hwIni.get());
 
         if (filelock_create(coreHwIniPath) == NULL) {
-            /* The AVD is already in use, we still support this as an
-             * experimental feature. Use a temporary hardware-qemu.ini
-             * file though to avoid overwriting the existing one. */
-             TempFile*  tempIni = tempfile_create();
-             coreHwIniPath = tempfile_path(tempIni);
+            // The AVD is already in use
+            derror("There's another emulator instance running with "
+                   "the current AVD '%s'. Exiting...\n", avdInfo_getName(avd));
+            return 1;
         }
 
         /* While saving HW config, ignore valueless entries. This will not break
@@ -842,7 +840,7 @@ extern "C" int main(int argc, char **argv) {
          * VM starts from a snapshot for this instance of emulator). */
         if (iniFile_saveToFileClean(hwIni.get(), coreHwIniPath) < 0) {
             derror("Could not write hardware.ini to %s: %s", coreHwIniPath, strerror(errno));
-            exit(2);
+            return 2;
         }
         args[n++] = "-android-hw";
         args[n++] = strdup(coreHwIniPath);
