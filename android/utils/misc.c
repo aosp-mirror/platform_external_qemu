@@ -66,13 +66,23 @@ buffer_translate_char( char*        buff,
                        char         fromChar,
                        char         toChar )
 {
-    int    len = strlen(src);
+    int len = strlen(src);
+    buffer_translate_char_with_len(buff, buffLen, src, len, fromChar, toChar);
+}
 
-    if (len >= buffLen)
-        len = buffLen-1;
+extern void
+buffer_translate_char_with_len(char*        buff,
+                               unsigned     buffLen,
+                               const char*  src,
+                               unsigned     srcLen,
+                               char         fromChar,
+                               char         toChar)
+{
+    if (srcLen >= buffLen)
+        srcLen = buffLen-1;
 
-    memcpy(buff, src, len);
-    buff[len] = 0;
+    memcpy(buff, src, srcLen);
+    buff[srcLen] = 0;
 
     string_translate_char( buff, fromChar, toChar );
 }
