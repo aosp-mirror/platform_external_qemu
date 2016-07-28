@@ -50,7 +50,7 @@ public:
 
     void onGuestClose() override {
         // process died on the guest, cleanup gralloc memory on the host
-        android_cleanupProcColorbuffers(m_uniqueId);
+        android_cleanupProcGLObjects(m_uniqueId);
     }
     unsigned onGuestPoll() const override {
         return PIPE_POLL_IN | PIPE_POLL_OUT;
