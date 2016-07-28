@@ -813,17 +813,34 @@ void FrameBuffer::closeColorBufferPuid(HandleType p_colorbuffer, uint64_t puid) 
     }
 }
 
-void FrameBuffer::cleanupProcColorbuffers(uint64_t puid) {
+void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
     emugl::Mutex::AutoLock mutex(m_lock);
+    // Clean up color buffers.
     // A color buffer needs to be closed as many times as it is opened by
     // the guest process, to give the correct reference count.
     // (Note that a color buffer can be shared across guest processes.)
-    auto procIte = m_procOwnedColorBuffers.find(puid);
-    if (procIte == m_procOwnedColorBuffers.end()) return;
-    for (auto cb: procIte->second) {
-        closeColorBufferLocked(cb);
+    {
+        auto procIte = m_procOwnedColorBuffers.find(puid);
+        if (procIte != m_procOwnedColorBuffers.end()) {
+            for (auto cb: procIte->second) {
+                closeColorBufferLocked(cb);
+            }
+            m_procOwnedColorBuffers.erase(procIte);
+        }
     }
-    m_procOwnedColorBuffers.erase(procIte);
+
+    // Clean up EGLImage handles
+    {
+        // Bind context before potentially triggering any gl calls
+        ScopedBind bind(this);
+        auto procIte = m_procOwnedEGLImages.find(puid);
+        if (procIte != m_procOwnedEGLImages.end()) {
+            for (auto eglImg : procIte->second) {
+                destroyClientImage(eglImg);
+            }
+            m_procOwnedEGLImages.erase(procIte);
+        }
+    }
 }
 
 bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface)
@@ -1057,6 +1074,26 @@ EGLBoolean FrameBuffer::destroyClientImage(HandleType image)
 {
     return s_egl.eglDestroyImageKHR(m_eglDisplay,
                                     reinterpret_cast<EGLImageKHR>(image));
+}
+
+HandleType FrameBuffer::createClientImagePuid(HandleType context, EGLenum target,
+                                              GLuint buffer, uint64_t puid) {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    HandleType handle = createClientImage(context, target, buffer);
+    m_procOwnedEGLImages[puid].insert(handle);
+    return handle;
+}
+
+EGLBoolean FrameBuffer::destroyClientImagePuid(HandleType image, uint64_t puid) {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    EGLBoolean ret = destroyClientImage(image);
+    m_procOwnedEGLImages[puid].erase(image);
+    // We don't explicitly call m_procOwnedEGLImages.erase(puid) when the size
+    // reaches 0, since it could go between zero and one many times in the
+    // lifetime of a process.
+    // It will be cleaned up by cleanupProcGLObjects(puid) when the process is
+    // dead.
+    return ret;
 }
 
 //
