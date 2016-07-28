@@ -133,7 +133,7 @@ public:
     // cleanupProcColorbuffers -
     //    clean up all color buffer reference counters a guest process holds
     //    when the guest process exits (or is killed)
-    virtual void cleanupProcColorbuffers(uint64_t puid) = 0;
+    virtual void cleanupProcGLObjects(uint64_t puid) = 0;
 protected:
     ~Renderer() = default;
 };
