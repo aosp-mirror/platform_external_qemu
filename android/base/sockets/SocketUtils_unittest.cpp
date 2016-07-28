@@ -185,7 +185,14 @@ TEST(SocketUtils, socketSendDoesNotGenerateSigPipe) {
         while (n < kMaxSendCount) {
             int ret = socketSend(s3.get(), "xxxx", 4);
             if (ret < 0) {
+#ifdef __APPLE__
+                // On OS X, errno is sometimes EPROTOTYPE instead of EPIPE
+                // when this happens.
+                EXPECT_TRUE(errno == EPIPE || errno == EPROTOTYPE)
+                        << strerror(errno);
+#else
                 EXPECT_EQ(EPIPE, errno) << strerror(errno);
+#endif
                 break;
             }
             n++;
