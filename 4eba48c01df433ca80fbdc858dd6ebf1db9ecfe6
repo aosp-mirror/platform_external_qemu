@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0f40add2_9f873309",
+        "filename": "android/base/TypeTraits.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-28T06:30:52Z",
+      "side": 1,
+      "message": "typo: some semicolons",
+      "range": {
+        "startLine": 82,
+        "startChar": 48,
+        "endLine": 82,
+        "endChar": 50
+      },
+      "revId": "4eba48c01df433ca80fbdc858dd6ebf1db9ecfe6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
