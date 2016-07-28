@@ -10,6 +10,8 @@
 ** GNU General Public License for more details.
 */
 
+#include "android/emulation/android_pipe_throttle.h"
+
 #include "android/emulation/android_pipe_host.h"
 #include "android/utils/looper.h"
 #include "android/utils/system.h"

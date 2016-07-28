@@ -685,14 +685,4 @@ void pipe_dev_init(bool newDeviceNaming)
                     s);
 
     android_pipe_set_hw_funcs(&goldfish_pipe_hw_funcs);
-
-#if DEBUG_ZERO_PIPE
-    android_pipe_add_type_zero();
-#endif
-#if DEBUG_PINGPONG_PIPE
-    android_pipe_add_type_pingpong();
-#endif
-#if DEBUG_THROTTLE_PIPE
-    android_pipe_add_type_throttle();
-#endif
 }

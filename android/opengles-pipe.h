@@ -24,6 +24,6 @@ ANDROID_BEGIN_HEADER
 // Initialize the 'opengles' pipe - the one used for GPU emulation protocol
 // between guest and the emugl library.
 // |dummyLooper| is now unused, this will be removed in a future patch.
-void android_init_opengles_pipe(void* dummyLooper);
+void android_init_opengles_pipe(void);
 
 ANDROID_END_HEADER

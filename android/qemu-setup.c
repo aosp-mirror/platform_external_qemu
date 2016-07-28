@@ -16,9 +16,14 @@
 #include "android/android.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
+#include "android/emulation/android_pipe_pingpong.h"
+#include "android/emulation/android_pipe_throttle.h"
+#include "android/emulation/android_pipe_unix.h"
+#include "android/emulation/android_pipe_zero.h"
 #include "android/globals.h"
 #include "android/hw-fingerprint.h"
 #include "android/hw-sensors.h"
+#include "android/opengles-pipe.h"
 #include "android/proxy/proxy_http.h"
 #include "android/utils/debug.h"
 #include "android/utils/ipaddr.h"
@@ -26,6 +31,7 @@
 #include "android/utils/system.h"
 #include "android/utils/bufprint.h"
 #include "android/version.h"
+
 
 #include <stdbool.h>
 
@@ -312,6 +318,15 @@ static bool setup_console_and_adb_ports(int console_port,
  * main loop runs
  */
 bool android_emulation_setup(const AndroidConsoleAgents* agents) {
+
+    // Register Android pipe services.
+    android_pipe_add_type_zero();
+    android_pipe_add_type_pingpong();
+    android_pipe_add_type_throttle();
+
+    android_unix_pipes_init();
+    android_init_opengles_pipe();
+
     if (android_op_port && android_op_ports) {
         derror("options -port and -ports cannot be used together.");
         return false;

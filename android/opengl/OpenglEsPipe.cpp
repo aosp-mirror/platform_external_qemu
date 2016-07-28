@@ -342,6 +342,6 @@ void registerPipeService() {
 }  // namespace android
 
 // Declared in android/opengles-pipe.h
-void android_init_opengles_pipe(void* dummyLooper) {
+void android_init_opengles_pipe() {
     android::opengl::registerPipeService();
 }
