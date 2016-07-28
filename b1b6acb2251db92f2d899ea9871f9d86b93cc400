@@ -427,6 +427,30 @@
     },
     {
       "key": {
+        "uuid": "0ff26de6_70383c3a",
+        "filename": "android/cmdline-option_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-28T17:24:09Z",
+      "side": 1,
+      "message": "Well, we\u0027ll need to have this discussion at greater length, because I think this is absolutely necessary.  You haven\u0027t given any reasons for your position.  To me, it\u0027s a cost-benefit analysis: yes, changes in the non-test code to support testing complicate the understandability (hopefully not the performance) of the non-test code somewhat -- but you have to balance that downside vs. the benefits you get from the testability.  So if the test-code intrusion is small, it can certainly be worth it.\n\nIn C++, a common pattern is to have a test class that is declared as a friend of the class that it\u0027s meant to test -- allowing the test class access to private methods of the class under test.  Would you object to such friend declarations?  That is, is your objection absolute, or does it depend on the extent of the test-code \"intrusiveness\"?",
+      "parentUuid": "0f40add2_ffabdf6f",
+      "range": {
+        "startLine": 134,
+        "startChar": 11,
+        "endLine": 134,
+        "endChar": 25
+      },
+      "revId": "b1b6acb2251db92f2d899ea9871f9d86b93cc400",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a617bbb_4c9dbbfe",
         "filename": "android/cmdline-option_unittest.cpp",
         "patchSetId": 1
