@@ -180,8 +180,8 @@ void RendererImpl::repaintOpenGLDisplay() {
     mRenderWindow->repaint();
 }
 
-void RendererImpl::cleanupProcColorbuffers(uint64_t puid) {
-    FrameBuffer::getFB()->cleanupProcColorbuffers(puid);
+void RendererImpl::cleanupProcGLObjects(uint64_t puid) {
+    FrameBuffer::getFB()->cleanupProcGLObjects(puid);
 }
 
 }  // namespace emugl
