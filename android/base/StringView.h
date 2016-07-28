@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/base/TypeUtils.h"
+#include "android/base/TypeTraits.h"
 
 #include <string>
 #include <string.h>

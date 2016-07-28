@@ -21,7 +21,7 @@ namespace base {
 
 namespace details {
 
-// a simple helper class for SFINAE later
+// a simple helper class for SFINAE below.
 template <class X = void>
 struct dummy {
     using type = X;
@@ -30,24 +30,37 @@ struct dummy {
 }  // namespaces details
 
 // add some convenience shortcuts for an overly complex std::enable_if syntax
+
+// Use 'enable_if<Predicate,Type>' instead of
+// 'typename std::enable_if<Predicate::value,Type>::type'
 template <class Predicate, class Type = void*>
 using enable_if = typename std::enable_if<Predicate::value, Type>::type;
 
+// Use 'enable_if_c<BooleanFlag,Type>' instead of
+// 'typename std::enable_if<BooleanFlag,Type>::type'
 template <bool predicate, class Type = void*>
 using enable_if_c = typename std::enable_if<predicate, Type>::type;
 
+// Use 'enable_if_convertible<From,To,Type>' instead of
+// 'typename std::enable_if<std::is_convertible<From,To>::value, Type>::type'
 template <class From, class To, class Type = void*>
 using enable_if_convertible = enable_if<std::is_convertible<From, To>>;
 
 // -----------------------------------------------------------------------------
-// A predicate for checking if some object is callable
+// A predicate for checking if some object is callable with a specific
+// signature. Examples:
+//
+//     is_callable_as<int, void()>::value == false.
+//     is_callable_as<strcmp, void()>::value == false.
+//     is_callable_as<strcmp, int(const char*, const char*)>::value == true
+//
 template <class F, class Signature, class X = void>
-struct is_callable : std::false_type {};
+struct is_callable_as : std::false_type {};
 
 // This specialization is SFINAE-d out if template arguments can't be combined
 // into a call expression F(), or if the result of that call is not |R|
 template <class F, class R>
-struct is_callable<
+struct is_callable_as<
         F,
         R(),
         typename std::enable_if<std::is_same<
@@ -56,19 +69,25 @@ struct is_callable<
 
 // One more specialization, for non empty argument list
 template <class F, class R, class... Args>
-struct is_callable<F,
+struct is_callable_as<F,
                    R(Args...),
                    typename std::enable_if<std::is_same<
                            typename details::dummy<decltype(std::declval<F>()(
                                    std::declval<Args>()...))>::type,
                            R>::value>::type> : std::true_type {};
 // -----------------------------------------------------------------------------
-// Check if a type |T| is any instantiation of a template |U|
+// Check if a type |T| is any instantiation of a template |U|. Examples:
+//
+//    is_template_instantiation_of<int, std::vector>::value == false
+//    is_template_instantiation_of<std::list<std::vector<int>>, std::vector>::value == false
+//    is_template_instantiation_of<std::vector<int>, std::vector>::value == true
+//    is_template_instantiation_of<std::vector<std::vector<int>>, std::vector>::value == true
+//
 template <class T, template <class ...> class U>
-struct is_template_instantiation : std::false_type {};
+struct is_template_instantiation_of : std::false_type {};
 
 template <template <class ...> class U, class... Args>
-struct is_template_instantiation<U<Args...>, U> : std::true_type {};
+struct is_template_instantiation_of<U<Args...>, U> : std::true_type {};
 // -----------------------------------------------------------------------------
 
 }  // namespace base

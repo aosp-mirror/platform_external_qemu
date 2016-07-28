@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/base/TypeUtils.h"
+#include "android/base/TypeTraits.h"
 
 #include <initializer_list>
 #include <type_traits>
@@ -19,35 +19,79 @@
 
 #include <stddef.h>
 
-// Optional<T> - a template class for passing through an optional value;
-// it's basically an object which implements a pointer semantics while storing
-// the value inside, with no extra heap allocations.
-// Use it when you need to return a single value from a function or indicate
-// an error, e.g.:
+// Optional<T> - a template class to store an optional value of type T.
 //
-// Optional<int> socket(...) {
-//     int sock = ...;
-//     if (sock < 0) {
-//         return kNullopt;
-//     }
-//     return sock;
-// }
+// Usage examples:
 //
-// The class supports a set of conversions one would expect from it:
-//  - it can be constructed from anything that's convertible to the type |T|
-//  - the |T| object can be constructed in-place with syntax:
-//      Optional<T>(kInplace, <args>);
-//  - a convenience function makeOptional() would deduce its type for you
-//  - it has an operator bool() which returns true if there's a value in the
-//      optional object
-//  - overloaded operators * and -> allow an Optional<T> to be used with
-//      pointer-like syntax: *|optional| retrieves the contained value, and
-//      |optional|->field dereferences a field of a contained object
-//  - valueOr() provides one a convenience getter:
-//      Optional<int> size = ...;
-//      vector.resize(size.valueOr(100));
-//  - operators == and < compare optionals to optionals and unpacked values
-//      (empty optional is smaller than any object of type |T|)
+// Initialization and construction:
+//   Optional<Foo> foo;            // |foo| doesn't contain a value.
+//   Optional<Foo> foo(Foo(10));   // |foo| contains a copy-constructed value.
+//   Optional<Foo> foo2(foo);      // |foo2| contains a copy of |foo|'s value.
+//   Optional<Foo> foo3(std::move(foo2));  // Guess what?
+//
+// Assignment:
+//   Foo foo_value(0);
+//   Optional<Foo> foo;   // |foo| is empty.
+//   Optional<Foo> foo2;  // |foo2| is empty.
+//   foo2 = foo;          // |foo2| is still empty.
+//   foo = foo_value;     // set value of |foo| to a copy of |foo_value|
+//   foo = std::move(foo_value);  // move |foo_value| into |foo|.
+//   foo2 = foo;          // now |foo2| has a copy of |foo|'s value.
+//   foo = kNullopt;      // unset |foo|, it has no value.
+//
+// Checking and accessing value:
+//   if (foo) {
+//      // |foo| has a value.
+//      doStuff(*foo);      // |*foo| is the value inside |foo|.
+//      foo->callMethod();  // Same as (*foo).callMethod().
+//   } else {
+//      // |foo| is empty.
+//   }
+//
+//   foo.value()              // Same as *foo
+//   foo.valueOr(<default>)   // Return <default> is |foo| has no value.
+//
+// In-place construction:
+//
+//   Optional<Foo> foo;   // |foo| is empty.
+//   foo.emplace(20);     // |foo| now contains a value constructed as Foo(20)
+//
+//   Optional<Foo> foo(kInplace, 20);  // |foo| is initialized with a value
+//                                     // that is constructed in-place as
+//                                     // Foo(20).
+//
+//   return makeOptional<Foo>(20);     // Takes Foo constructor arguments
+//                                     // directly.
+//
+// Returning values:
+//
+//  Optional<Foo> myFunc(...) {
+//      if (someCondition) {
+//          return Foo(10);      // call Optional<Foo>(Foo&) constructor.
+//      } else {
+//          return {};           // call Optional<Foo>() constructor, which
+//                               // builds an empty value.
+//      }
+//  }
+//
+// Memory layout:
+//   Optional<Foo> is equivalent to:
+//
+//       struct {
+//           bool flag;
+//           Foo value;
+//       };
+//
+//  in terms of memory layout. This means it *doubles* the size of integral
+//  types. Also:
+//
+//  - Optional<Foo> can be constructed from anything that constructs a Foo.
+//
+//  - Same with Optional<Foo>(kInplace, Args...) where Args... matches any
+//    arguments that can be passed to a Foo constructor.
+//
+//  - Comparison operators are provided. Beware: an empty Optional<Foo>
+//    is always smaller than any Foo value.
 
 namespace android {
 namespace base {
@@ -102,7 +146,7 @@ class Optional;
 //  E.g, for template <T> class Foo if you say 'Foo' inside the class, it
 //  actually means Foo<T>;
 template <class U>
-using is_any_optional = is_template_instantiation<
+using is_any_optional = is_template_instantiation_of<
         typename std::decay<U>::type, Optional>;
 
 template <class T>
