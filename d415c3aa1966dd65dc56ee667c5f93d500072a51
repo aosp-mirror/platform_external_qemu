@@ -94,6 +94,30 @@
       "revId": "d415c3aa1966dd65dc56ee667c5f93d500072a51",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0ff26de6_b508d6d6",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-28T17:24:09Z",
+      "side": 1,
+      "message": "I certainly agree that it\u0027s a great idea to have the same syntax for the \u003coptions\u003e in \"-debug \u003coptions\u003e\" and the use of the same \u003coptions\u003e syntax in the console command.\n\nHowever, I can\u0027t get my head around the -debug-\u003coptions\u003e part.  Are you sure you\u0027re comfortable with, say:\n\n-debug--opt\n\nas allowable syntax (note the two dashes between debug and opt -- this is a synonym, AFAICT for -debug-no-opt).  This really strikes me as deciding on a user interface on the basis of how efficiently it can be coded, rather than how understandable or error prone it might be.\n\nIf we can\u0027t resolve this between ourselves, could I suggest we ask some third party to arbitrate?  Maybe somebody with some user-experience credentials?  Any suggestions?",
+      "parentUuid": "0f40add2_5f920b4b",
+      "range": {
+        "startLine": 217,
+        "startChar": 5,
+        "endLine": 217,
+        "endChar": 31
+      },
+      "revId": "d415c3aa1966dd65dc56ee667c5f93d500072a51",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
