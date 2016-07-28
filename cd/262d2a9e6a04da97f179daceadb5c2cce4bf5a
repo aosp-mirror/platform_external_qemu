@@ -1,0 +1,8 @@
+Code-Review+1: Yurii Zubrytskyi <zyy@google.com>
+Verified+1: Yurii Zubrytskyi <zyy@google.com>
+Code-Review+2: Dave Detlefs <ddetlefs@google.com>
+Submitted-by: Yurii Zubrytskyi <zyy@google.com>
+Submitted-at: Thu, 28 Jul 2016 07:26:05 +0000
+Reviewed-on: https://android-review.googlesource.com/251280
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
