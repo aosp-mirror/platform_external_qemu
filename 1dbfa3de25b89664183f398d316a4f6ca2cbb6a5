@@ -192,6 +192,24 @@
       "revId": "1dbfa3de25b89664183f398d316a4f6ca2cbb6a5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aff961d7_24ca9245",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/NamedObject.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-28T08:40:14Z",
+      "side": 1,
+      "message": "please state this kind of things explicitly in class comments. If there\u0027s any reason for something that influenced your decision for the code, please add a comment explaining it. Otherwise in couple months even you won\u0027t really understand what the heck is going on in the very same class. I\u0027ve been through this not once :)",
+      "parentUuid": "6fff696c_bf85fc6c",
+      "revId": "1dbfa3de25b89664183f398d316a4f6ca2cbb6a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
