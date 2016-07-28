@@ -31,26 +31,26 @@ namespace {
 // buffer handles. When guest process exits, the pipe will be closed, and
 // onGuestClose() will trigger the cleanup path.
 
-class GrallocPipe : public AndroidPipe {
+class GLProcessPipe : public AndroidPipe {
 public:
     //////////////////////////////////////////////////////////////////////////
     // The pipe service class for this implementation.
     class Service : public AndroidPipe::Service {
     public:
-        Service() : AndroidPipe::Service("grallocPipe") {}
+        Service() : AndroidPipe::Service("GLProcessPipe") {}
 
         virtual AndroidPipe* create(void* mHwPipe, const char* args) override {
-            return new GrallocPipe(mHwPipe, this);
+            return new GLProcessPipe(mHwPipe, this);
         }
     };
 
-    GrallocPipe(void* hwPipe, Service* service) : AndroidPipe(hwPipe, service) {
+    GLProcessPipe(void* hwPipe, Service* service) : AndroidPipe(hwPipe, service) {
         m_uniqueId = ++s_headId;
     }
 
     void onGuestClose() override {
         // process died on the guest, cleanup gralloc memory on the host
-        android_cleanupProcColorbuffers(m_uniqueId);
+        android_cleanupProcGLObjects(m_uniqueId);
     }
     unsigned onGuestPoll() const override {
         return PIPE_POLL_IN | PIPE_POLL_OUT;
@@ -80,12 +80,12 @@ private:
     static std::atomic_ullong s_headId;
 };
 
-std::atomic_ullong GrallocPipe::s_headId(0);
+std::atomic_ullong GLProcessPipe::s_headId(0);
 
 }
 
-void registerGrallocPipeService() {
-    android::AndroidPipe::Service::add(new GrallocPipe::Service());
+void registerGLProcessPipeService() {
+    android::AndroidPipe::Service::add(new GLProcessPipe::Service());
 }
 
 }

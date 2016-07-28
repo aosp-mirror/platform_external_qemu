@@ -15,7 +15,7 @@ namespace opengl {
 
 // registerGrallocPipeService() registers a "grallocPipe" pipe service that is
 // used to detect gralloc process exits.
-void registerGrallocPipeService();
+void registerGLProcessPipeService();
 
 }  // namespace opengl
 }  // namespace android
