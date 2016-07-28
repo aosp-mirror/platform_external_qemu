@@ -131,9 +131,9 @@ public:
     virtual void repaintOpenGLDisplay() = 0;
 
     // cleanupProcColorbuffers -
-    //    clean up all color buffer reference counters a guest process holds
-    //    when the guest process exits (or is killed)
-    virtual void cleanupProcColorbuffers(uint64_t puid) = 0;
+    //    clean up all pre-process resources when guest process exits (or is
+    // killed). Such resources include color buffer handles and EglImage handles.
+    virtual void cleanupProcGLObjects(uint64_t puid) = 0;
 protected:
     ~Renderer() = default;
 };
