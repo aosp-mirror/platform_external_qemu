@@ -43,9 +43,13 @@ struct ColorBufferRef {
 };
 typedef std::unordered_map<HandleType, RenderContextPtr> RenderContextMap;
 typedef std::unordered_map<HandleType, std::pair<WindowSurfacePtr, HandleType> > WindowSurfaceMap;
+
 typedef std::unordered_map<HandleType, ColorBufferRef> ColorBufferMap;
 typedef std::unordered_multiset<HandleType> ColorBufferSet;
 typedef std::unordered_map<uint64_t, ColorBufferSet> ProcOwnedColorBuffers;
+
+typedef std::unordered_set<HandleType> EGLImageSet;
+typedef std::unordered_map<uint64_t, EGLImageSet> ProcOwnedEGLImages;
 
 // A structure used to list the capabilities of the underlying EGL
 // implementation that the FrameBuffer instance depends on.
@@ -203,7 +207,7 @@ public:
     void closeColorBuffer(HandleType p_colorbuffer);
     void closeColorBufferPuid(HandleType p_colorbuffer, uint64_t puid);
 
-    void cleanupProcColorbuffers(uint64_t puid);
+    void cleanupProcGLObjects(uint64_t puid);
     // Equivalent for eglMakeCurrent() for the current display.
     // |p_context|, |p_drawSurface| and |p_readSurface| are the handle values
     // of the context, the draw surface and the read surface, respectively.
@@ -306,8 +310,16 @@ public:
     // and windows created by this instance.
     TextureDraw* getTextureDraw() const { return m_textureDraw; }
 
+    // Create an eglImage and return its handle.  Reference:
+    // https://www.khronos.org/registry/egl/extensions/KHR/EGL_KHR_image_base.txt
     HandleType createClientImage(HandleType context, EGLenum target, GLuint buffer);
+    HandleType createClientImagePuid(HandleType context, EGLenum target,
+                                     GLuint buffer, uint64_t puid);
+    // Call the implementation of eglDestroyImageKHR, return if succeeds or
+    // not. Reference:
+    // https://www.khronos.org/registry/egl/extensions/KHR/EGL_KHR_image_base.txt
     EGLBoolean destroyClientImage(HandleType image);
+    EGLBoolean destroyClientImagePuid(HandleType image, uint64_t puid);
 
     // Used internally.
     bool bind_locked();
@@ -382,5 +394,6 @@ private:
     // The host associates color buffers with guest processes for memory
     // cleanup. Guest processes are identified with a host generated unique ID.
     ProcOwnedColorBuffers m_procOwnedColorBuffers;
+    ProcOwnedEGLImages m_procOwnedEGLImages;
 };
 #endif
