@@ -40,6 +40,7 @@
 #include "android/utils/filelock.h"
 #include "android/utils/stralloc.h"
 #include "android/utils/string.h"
+#include "android/utils/tempfile.h"
 #include "android/utils/win32_cmdline_quote.h"
 
 #include "android/skin/winsys.h"
