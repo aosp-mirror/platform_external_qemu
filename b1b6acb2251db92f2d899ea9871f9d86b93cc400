@@ -403,6 +403,30 @@
     },
     {
       "key": {
+        "uuid": "0f40add2_ffabdf6f",
+        "filename": "android/cmdline-option_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-28T06:57:25Z",
+      "side": 1,
+      "message": "To be honest, I strongly oppose any changes to the existing code that are needed just for testing or testabiliy. I only prefer to make any changes if they make the overall design better or function easier to understand. That\u0027s why I\u0027m always like \u0027grrr\u0027 when I see any \u003cfoo\u003e_testing.h with some hacks to a production code that\u0027s still compiled into the release",
+      "parentUuid": "6fff696c_75a1fbeb",
+      "range": {
+        "startLine": 134,
+        "startChar": 11,
+        "endLine": 134,
+        "endChar": 25
+      },
+      "revId": "b1b6acb2251db92f2d899ea9871f9d86b93cc400",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a617bbb_4c9dbbfe",
         "filename": "android/cmdline-option_unittest.cpp",
         "patchSetId": 1
