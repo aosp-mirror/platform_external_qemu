@@ -70,6 +70,30 @@
       "revId": "d415c3aa1966dd65dc56ee667c5f93d500072a51",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0f40add2_5f920b4b",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-07-28T06:57:25Z",
+      "side": 1,
+      "message": "no, it was my decision and I like it a lot - I want to be able to use the same style of debug options everywhere, would it be \u0027-debug opt\u0027, \u0027-debug-opt\u0027 or console\u0027s debug command",
+      "parentUuid": "6fff696c_f7085630",
+      "range": {
+        "startLine": 217,
+        "startChar": 5,
+        "endLine": 217,
+        "endChar": 31
+      },
+      "revId": "d415c3aa1966dd65dc56ee667c5f93d500072a51",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
