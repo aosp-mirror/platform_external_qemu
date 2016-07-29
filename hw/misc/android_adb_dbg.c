@@ -136,6 +136,8 @@ static const AndroidPipeFuncs adb_dbg_pipe_funcs = {
     adb_dbg_pipe_recv,
     adb_dbg_pipe_poll,
     adb_dbg_pipe_wake_on,
+    NULL,
+    NULL
 };
 
 void android_adb_dbg_backend_init(void)

@@ -476,6 +476,23 @@ int register_savevm(DeviceState *dev,
                                 ops, opaque);
 }
 
+int register_savevm_with_post_load(DeviceState *dev,
+                                   const char *idstr,
+                                   int instance_id,
+                                   int version_id,
+                                   SaveStateHandler *save_state,
+                                   LoadStateHandler *load_state,
+                                   PostLoadHandler *post_load,
+                                   void *opaque)
+{
+    SaveVMHandlers *ops = g_malloc0(sizeof(SaveVMHandlers));
+    ops->save_state = save_state;
+    ops->load_state = load_state;
+    ops->post_load = post_load;
+    return register_savevm_live(dev, idstr, instance_id, version_id,
+                                ops, opaque);
+}
+
 void unregister_savevm(DeviceState *dev, const char *idstr, void *opaque)
 {
     SaveStateEntry *se, *new_se;
@@ -988,6 +1005,9 @@ int qemu_loadvm_state(QEMUFile *f)
 
 out:
     QLIST_FOREACH_SAFE(le, &loadvm_handlers, entry, new_le) {
+        if (!le->se->vmsd && le->se->ops->post_load) {
+            le->se->ops->post_load(le->se->opaque);
+        }
         QLIST_REMOVE(le, entry);
         g_free(le);
     }

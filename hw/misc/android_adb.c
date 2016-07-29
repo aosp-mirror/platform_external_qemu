@@ -939,6 +939,8 @@ static const AndroidPipeFuncs adb_pipe_funcs = {
     adb_pipe_recv,
     adb_pipe_poll,
     adb_pipe_wake_on,
+    NULL,
+    NULL,
 };
 
 /* Initialize and try to listen on the specified port;
