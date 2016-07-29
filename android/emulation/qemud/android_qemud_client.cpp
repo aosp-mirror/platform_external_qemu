@@ -58,16 +58,13 @@ static QemudPipeMessage* _qemud_pipe_alloc_msg(int msglen) {
     return buf;
 }
 
-static void _qemud_pipe_cache_msg(QemudClient* client, QemudPipeMessage* msg) {
+static void _qemud_pipe_append_msg(QemudClient* client, QemudPipeMessage* buf) {
     if (client->ProtocolSelector.Pipe.last_msg) {
-        client->ProtocolSelector.Pipe.last_msg->next = msg;
-        client->ProtocolSelector.Pipe.last_msg = msg;
+        client->ProtocolSelector.Pipe.last_msg->next = buf;
+        client->ProtocolSelector.Pipe.last_msg = buf;
     } else {
         client->ProtocolSelector.Pipe.last_msg =
-                client->ProtocolSelector.Pipe.messages = msg;
-        // On the first message we notify the pipe that there is data to read.
-        android_pipe_host_signal_wake(client->ProtocolSelector.Pipe.qemud_pipe->hwpipe,
-                          PIPE_WAKE_READ);
+            client->ProtocolSelector.Pipe.messages = buf;
     }
 }
 
@@ -92,25 +89,29 @@ void _qemud_pipe_send(QemudClient* client, const uint8_t* msg, int msglen) {
             avail = MAX_SERIAL_PAYLOAD;
 
         /* insert frame header when needed */
-        uint8_t* out_buf;
+        QemudPipeMessage* frame_msg;
         QemudPipeMessage* pipe_msg;
         if (framing) {
-            pipe_msg = _qemud_pipe_alloc_msg(msglen + FRAME_HEADER_SIZE);
-            int2hex(pipe_msg->message, FRAME_HEADER_SIZE, msglen);
-            out_buf = pipe_msg->message + FRAME_HEADER_SIZE;
+            frame_msg = _qemud_pipe_alloc_msg(FRAME_HEADER_SIZE);
+            int2hex(frame_msg->message, FRAME_HEADER_SIZE, msglen);
+            _qemud_pipe_append_msg(client, frame_msg);
+
             avail -= FRAME_HEADER_SIZE;
             len -= FRAME_HEADER_SIZE;
             framing = 0;
-        } else {
-            pipe_msg = _qemud_pipe_alloc_msg(msglen);
-            out_buf = pipe_msg->message;
         }
-        assert(pipe_msg);
 
-        memcpy(out_buf, msg, msglen);
+        pipe_msg = _qemud_pipe_alloc_msg(avail);
+
+        assert(pipe_msg);
+        memcpy(pipe_msg->message, msg, avail);
 
         T("%s: '%.*s'", __func__, avail, msg);
-        _qemud_pipe_cache_msg(client, pipe_msg);
+
+        _qemud_pipe_append_msg(client, pipe_msg);
+        android_pipe_host_signal_wake(
+                client->ProtocolSelector.Pipe.qemud_pipe->hwpipe,
+                PIPE_WAKE_READ);
         msg += avail;
         len -= avail;
     }

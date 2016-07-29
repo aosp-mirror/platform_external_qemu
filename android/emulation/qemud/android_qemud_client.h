@@ -188,3 +188,4 @@ extern int qemud_serial_client_load(Stream* f,
                                     int version);
 
 ANDROID_END_HEADER
+
