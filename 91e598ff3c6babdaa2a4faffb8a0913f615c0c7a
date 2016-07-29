@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2f5c9104_bed10fcc",
+        "filename": "android/emulation/qemud/android_qemud_client.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-07-29T22:25:01Z",
+      "side": 1,
+      "message": "where is this method used ?",
+      "range": {
+        "startLine": 134,
+        "startChar": 12,
+        "endLine": 134,
+        "endChar": 36
+      },
+      "revId": "91e598ff3c6babdaa2a4faffb8a0913f615c0c7a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
