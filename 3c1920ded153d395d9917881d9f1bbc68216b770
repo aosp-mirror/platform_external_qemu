@@ -16,6 +16,24 @@
       "revId": "3c1920ded153d395d9917881d9f1bbc68216b770",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2f5c9104_7e63f716",
+        "filename": "android/emulation/qemud/android_qemud_client.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-07-29T22:29:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2f5c9104_1ea75b56",
+      "revId": "3c1920ded153d395d9917881d9f1bbc68216b770",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
