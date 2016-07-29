@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2f5c9104_c4b274e2",
+        "filename": "android/cmdline-option.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-07-29T23:33:38Z",
+      "side": 1,
+      "message": "A habit I like: when using constant values like this, when there\u0027s not an associate enum, add a comment giving the argument name: something like\nandroid_parse_debug_tags_option(*aread++,\n                                /*parse_as_suffix*/ false);\n\nI think this really helps readability -- then it\u0027s kind of like you defined the enum to the reader.\n\nThis would be for all the calls to this method.",
+      "range": {
+        "startLine": 100,
+        "startChar": 54,
+        "endLine": 100,
+        "endChar": 59
+      },
+      "revId": "246d82414057a2cea2bee1ae93f70710f566d3b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
