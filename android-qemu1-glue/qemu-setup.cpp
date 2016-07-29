@@ -28,9 +28,6 @@ extern "C" {
 using android::VmLock;
 
 bool qemu_android_emulation_setup() {
-  android_emulation_setup_use_android_emu_console(true);
-  android_emulation_setup_use_configurable_ports(true);
-
   static const AndroidConsoleAgents consoleAgents = {
       gQAndroidBatteryAgent,   gQAndroidFingerAgent,    gQAndroidLocationAgent,
       gQAndroidTelephonyAgent, gQAndroidUserEventAgent, gQAndroidVmOperations,

@@ -56,16 +56,6 @@ int    android_adb_port = 5037; // Default
 /* The device "serial number" is "emulator-<this number>" */
 int    android_serial_number_port;
 
-// Global configuration flags, 'true' to indicate that the AndroidEmu console
-// code should be used, 'false' otherwise, which is the default used by QEMU2
-// which currently provides its own console code.
-static bool s_support_android_emu_console = false;
-
-// Global configuration flag, 'true' to indicate that configurable ADB and
-// console ports are supported (e.g. -ports <port1>,<port2> option). Note that
-// this requires s_support_android_emu_console == true too to work properly.
-static bool s_support_configurable_ports = false;
-
 // The following code is used to support the -report-console option,
 // which takes a parameter in one of the following formats:
 //
@@ -260,19 +250,7 @@ static int report_console(const char* proto_port, int console_port) {
 
 static int qemu_android_console_start(int port,
                                       const AndroidConsoleAgents* agents) {
-    if (!s_support_android_emu_console) {
-        return 0;
-    }
-
     return android_console_start(port, agents);
-}
-
-void android_emulation_setup_use_android_emu_console(bool enabled) {
-    s_support_android_emu_console = enabled;
-}
-
-void android_emulation_setup_use_configurable_ports(bool enabled) {
-    s_support_configurable_ports = enabled;
 }
 
 // Try to bind to specific |console_port| and |adb_port| on the localhost
@@ -332,68 +310,66 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
         return false;
     }
 
-    if (s_support_configurable_ports) {
-        int tries = MAX_ANDROID_EMULATORS;
-        int success   = 0;
-        int adb_port = -1;
-        int base_port = ANDROID_CONSOLE_BASEPORT;
-        int legacy_adb = avdInfo_getAdbdCommunicationMode(android_avdInfo) ? 0 : 1;
+    int tries = MAX_ANDROID_EMULATORS;
+    int success   = 0;
+    int adb_port = -1;
+    int base_port = ANDROID_CONSOLE_BASEPORT;
+    int legacy_adb = avdInfo_getAdbdCommunicationMode(android_avdInfo) ? 0 : 1;
 
-        if (android_op_ports) {
-            int console_port = -1;
-            if (!android_parse_ports_option(android_op_ports,
-                                            &console_port,
+    if (android_op_ports) {
+        int console_port = -1;
+        if (!android_parse_ports_option(android_op_ports,
+                                        &console_port,
+                                        &adb_port)) {
+            return false;
+        }
+
+        setup_console_and_adb_ports(console_port, adb_port, legacy_adb,
+                                    agents);
+
+        base_port = console_port;
+    } else {
+        if (android_op_port) {
+            if (!android_parse_port_option(android_op_port, &base_port,
                                             &adb_port)) {
                 return false;
             }
-
-            setup_console_and_adb_ports(console_port, adb_port, legacy_adb,
-                                        agents);
-
-            base_port = console_port;
-        } else {
-            if (android_op_port) {
-                if (!android_parse_port_option(android_op_port, &base_port,
-                                               &adb_port)) {
-                    return false;
-                }
-                tries     = 1;
-            }
-
-            // TODO(pprabhu): Is this loop lying?
-            for ( ; tries > 0; tries--, base_port += 2 ) {
-
-                /* setup first redirection for ADB, the Android Debug Bridge */
-                adb_port = base_port + 1;
-
-                if (!setup_console_and_adb_ports(base_port, adb_port,
-                                                 legacy_adb, agents)) {
-                    continue;
-                }
-
-                D( "control console listening on port %d, ADB on port %d", base_port, adb_port );
-                success = 1;
-                break;
-            }
-
-            if (!success) {
-                derror("It seems too many emulator instances are running on "
-                       "this machine. Aborting.");
-                return false;
-            }
+            tries     = 1;
         }
 
-        /* Save base port and ADB port. */
-        android_base_port = base_port;
-        android_serial_number_port = adb_port - 1;
+        // TODO(pprabhu): Is this loop lying?
+        for ( ; tries > 0; tries--, base_port += 2 ) {
 
-        /* send a simple message to the ADB host server to tell it we just started.
-        * it should be listening on port 5037. if we can't reach it, don't bother
-        */
-        android_adb_server_notify(adb_port);
+            /* setup first redirection for ADB, the Android Debug Bridge */
+            adb_port = base_port + 1;
 
-        android_validate_ports(base_port, adb_port);
+            if (!setup_console_and_adb_ports(base_port, adb_port,
+                                                legacy_adb, agents)) {
+                continue;
+            }
+
+            D( "control console listening on port %d, ADB on port %d", base_port, adb_port );
+            success = 1;
+            break;
+        }
+
+        if (!success) {
+            derror("It seems too many emulator instances are running on "
+                    "this machine. Aborting.");
+            return false;
+        }
     }
+
+    /* Save base port and ADB port. */
+    android_base_port = base_port;
+    android_serial_number_port = adb_port - 1;
+
+    /* send a simple message to the ADB host server to tell it we just started.
+    * it should be listening on port 5037. if we can't reach it, don't bother
+    */
+    android_adb_server_notify(adb_port);
+
+    android_validate_ports(base_port, adb_port);
 
     if (android_op_report_console) {
         if (report_console(android_op_report_console, android_base_port) < 0) {

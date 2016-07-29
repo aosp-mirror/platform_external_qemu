@@ -86,13 +86,6 @@ extern int   android_parse_network_latency(const char*  delay);
 
 /**  in qemu_setup.c */
 
-// Call this from QEMU1 to enable the AndroidEmu console code to be
-// properly initialized from android_emulation_setup().
-extern void android_emulation_setup_use_android_emu_console(bool enabled);
-
-// Call this from QEMU1 to enable configurable ADB and console ports.
-extern void android_emulation_setup_use_configurable_ports(bool enabled);
-
 // See android/console.h
 struct AndroidConsoleAgents;
 
