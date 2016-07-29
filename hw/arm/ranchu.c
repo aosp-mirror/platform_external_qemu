@@ -40,7 +40,6 @@
 #include "monitor/monitor.h"
 #include "hw/misc/android_pipe.h"
 
-#include "android-console.h"
 #include "android/android.h"
 
 #define NUM_VIRTIO_TRANSPORTS 32
@@ -506,11 +505,6 @@ static void ranchu_init(MachineState *machine)
      * no backend is created the transport will just sit harmlessly idle.
      */
     create_virtio_devices(vbi, pic);
-
-    /* Initialize the Android console and adb connection
-     * (must be done after the pipe has been realized).
-     */
-    android_initialize_console_and_adb();
 
     vbi->bootinfo.ram_size = machine->ram_size;
     vbi->bootinfo.kernel_filename = machine->kernel_filename;

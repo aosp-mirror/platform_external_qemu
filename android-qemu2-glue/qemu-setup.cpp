@@ -25,8 +25,6 @@ extern "C" {
 #include "qemu/main-loop.h"
 }  // extern "C"
 
-extern "C" void qemu2_android_console_setup(const AndroidConsoleAgents* agents);
-
 using android::VmLock;
 
 bool qemu_android_emulation_setup() {
@@ -46,6 +44,5 @@ bool qemu_android_emulation_setup() {
 
     android::AndroidPipe::initThreading(vmLock);
 
-    qemu2_android_console_setup(&consoleAgents);
     return android_emulation_setup(&consoleAgents);
 }

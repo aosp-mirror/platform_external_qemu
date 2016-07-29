@@ -48,7 +48,6 @@ typedef struct mon_cmd_t {
 #define MONITOR_USE_CONTROL   0x04
 #define MONITOR_USE_PRETTY    0x08
 #define MONITOR_DYNAMIC_CMDS  0x10
-#define MONITOR_ANDROID_CONSOLE 0x20
 
 /* flags for monitor commands */
 #define MONITOR_CMD_ASYNC       0x0001
@@ -57,15 +56,9 @@ int monitor_cur_is_qmp(void);
 
 Monitor * monitor_init(CharDriverState *chr, int flags);
 void monitor_add_command(Monitor *mon, mon_cmd_t *cmd);
-void monitor_set_command_table(Monitor* mon, mon_cmd_t* cmds);
-#ifdef CONFIG_ANDROID
-mon_cmd_t* monitor_get_android_cmds();
-#endif
 
 int monitor_suspend(Monitor *mon);
 void monitor_resume(Monitor *mon);
-
-int monitor_disconnect(Monitor *mon);
 
 int monitor_read_bdrv_key_start(Monitor *mon, BlockDriverState *bs,
                                 BlockCompletionFunc *completion_cb,

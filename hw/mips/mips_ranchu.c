@@ -21,7 +21,6 @@
 
 #ifdef CONFIG_ANDROID
 #include "android/android.h"
-#include "android-console.h"
 #endif  // CONFIG_ANDROID
 
 #define PHYS_TO_VIRT(x) ((x) | ~(target_ulong)0x7fffffff)
@@ -387,8 +386,6 @@ static void ranchu_init(MachineState *machine)
 
     /* Virtio MMIO devices */
     create_device(fdt, &devmap[RANCHU_MMIO], goldfish_pic, VIRTIO_TRANSPORTS, 1);
-
-    android_initialize_console_and_adb();
 
     qemu_fdt_dumpdtb(fdt, fdt_size);
 

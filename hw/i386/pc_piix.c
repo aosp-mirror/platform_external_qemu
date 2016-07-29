@@ -60,7 +60,6 @@
 #include "android/constants.h"
 #include "android/android.h"
 #include "android/error-messages.h"
-#include "android-console.h"
 #endif  // CONFIG_ANDROID
 
 // end of android related header
@@ -329,13 +328,6 @@ static void pc_init1(MachineState *machine,
     if (pci_enabled) {
         pc_pci_device_init(pci_bus);
     }
-
-#if defined(CONFIG_ANDROID)
-/* Android initialization */
-    android_initialize_console_and_adb();
-/* end of Android initialization */
-#endif
-
 }
 
 static void pc_init_pci(MachineState *machine)

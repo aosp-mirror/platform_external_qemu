@@ -69,17 +69,10 @@
 #include "exec/cpu_ldst.h"
 #include "qmp-commands.h"
 #include "hmp.h"
-#ifdef CONFIG_ANDROID
-#include "android-console.h"
-#endif
 #include "qemu/thread.h"
 #include "block/qapi.h"
 #include "qapi/qmp-event.h"
 #include "qapi-event.h"
-#ifdef CONFIG_ANDROID
-#include "android/console_auth.h"
-#include "android/utils/file_io.h"
-#endif  // CONFIG_ANDROID
 
 /* for pic/irq_info */
 #if defined(TARGET_SPARC)
@@ -175,10 +168,6 @@ typedef struct MonitorQAPIEventState {
     QObject *data;      /* Event pending delayed dispatch */
 } MonitorQAPIEventState;
 
-typedef void MonitorErrorPrintFn(struct Monitor *mon, const char *fmt, ...);
-
-typedef void MonitorConnectFn(struct Monitor *mon);
-
 struct Monitor {
     CharDriverState *chr;
     int reset_seen;
@@ -206,11 +195,6 @@ struct Monitor {
     cmd_table_t cmds;
 
     QError *error;
-    const char *prompt;
-    const char *banner;
-    MonitorErrorPrintFn *print_error;
-    MonitorConnectFn *connect_handler;
-    bool authorized;
     QLIST_HEAD(,mon_fd_t) fds;
     QLIST_ENTRY(Monitor) entry;
 };
@@ -227,9 +211,6 @@ static int mon_refcount;
 
 static mon_cmd_t mon_cmds[];
 static mon_cmd_t info_cmds[];
-#ifdef CONFIG_ANDROID
-static mon_cmd_t android_cmds[];
-#endif
 
 static const mon_cmd_t qmp_cmds[];
 
@@ -261,7 +242,7 @@ void monitor_read_command(Monitor *mon, int show_prompt)
     if (!mon->rs)
         return;
 
-    readline_start(mon->rs, mon->prompt, 0, monitor_command_cb, NULL);
+    readline_start(mon->rs, "(qemu) ", 0, monitor_command_cb, NULL);
     if (show_prompt)
         readline_show_prompt(mon->rs);
 }
@@ -922,82 +903,6 @@ static mon_cmd_t * get_command_table(Monitor *mon, cmd_table_t cmds)
         return cmds.static_table;
     }
 }
-
-#ifdef CONFIG_ANDROID
-static void android_console_help(Monitor *mon, const QDict *qdict)
-{
-    const char *name = qdict_get_try_str(qdict, "helptext");
-    const mon_cmd_t *cmd;
-    const mon_cmd_t *cmds = get_command_table(mon, mon->cmds);
-    char *args[MAX_ARGS];
-    int nb_args = 0;
-    int thisarg = 0;
-    const mon_cmd_t *parent_cmd = NULL;
-
-    if (!name) {
-        /* No arguments, just print command list */
-        monitor_printf(mon, "Android console command help:\n\n");
-        for (cmd = cmds; cmd->name; cmd++) {
-            monitor_printf(mon, "    %-15s  %s\n", cmd->name, cmd->help);
-        }
-        monitor_printf(mon,
-                       "\ntry 'help <command>' for command-specific help\nOK\n");
-        return;
-    }
-
-    /* With an argument, look for it */
-    if (!parse_cmdline(name, &nb_args, args) < 0 || nb_args == 0) {
-        monitor_printf(mon, "KO: couldn't parse help text\n");
-        return;
-    }
-
-    for (;;) {
-        mon_cmd_t *sub_cmds;
-        
-        for (cmd = cmds; cmd->name; cmd++) {
-            if (compare_cmd(args[thisarg], cmd->name)) {
-                break;
-            }
-        }
-        if (!cmd->name) {
-            /* command/subcommand not found */
-            monitor_printf(mon, "try one of these instead:\n\n");
-            for (cmd = cmds; cmd->name; cmd++) {
-                int i;
-                monitor_printf(mon, "    ");
-                for (i = 0; i < thisarg; i++) {
-                    monitor_printf(mon, "%s ", args[i]);
-                }
-                monitor_printf(mon, "%s\n", cmd->name);
-            }
-            monitor_printf(mon, "\nKO: unknown command\n");
-            return;
-        }
-
-        thisarg++;
-        sub_cmds = get_command_table(mon, cmd->sub_cmds);
-
-        if (thisarg >= nb_args || !sub_cmds) {
-            /* Last in line commands with sub-tables will deal with their own
-             * help messages.  Otherwise, the parent handles the next lower
-             * level sub-command.  Top level commands (no sub-commands) are
-             * dealt with here.
-             */
-            if (sub_cmds) {
-                cmd->mhandler.cmd(mon, qdict);
-            } else if (parent_cmd) {
-                parent_cmd->mhandler.cmd(mon, qdict);
-            } else {
-                monitor_printf(mon, "%s\nOK\n", cmd->help);
-            }
-            return;
-        }
-
-        parent_cmd = cmd;
-        cmds = sub_cmds;
-    }
-}
-#endif  // CONFIG_ANDROID
 
 static void do_trace_event_set_state(Monitor *mon, const QDict *qdict)
 {
@@ -3058,10 +2963,6 @@ static const mon_cmd_t qmp_cmds[] = {
     { /* NULL */ },
 };
 
-#ifdef CONFIG_ANDROID
-#include "android-commands.h"
-#endif  // CONFIG_ANDROID
-
 /*******************************************************************/
 
 static const char *pch;
@@ -3830,12 +3731,8 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
 
     cmd = search_dispatch_table(table, cmdname);
     if (!cmd) {
-        if (mon->flags & MONITOR_ANDROID_CONSOLE) {
-            monitor_printf(mon, "KO: unknown command, try 'help'\n");
-        } else {
-            monitor_printf(mon, "unknown command: '%.*s'\n",
-                           (int)(p - cmdline), cmdline);
-        }
+        monitor_printf(mon, "unknown command: '%.*s'\n",
+                       (int)(p - cmdline), cmdline);
         return NULL;
     }
 
@@ -3882,16 +3779,15 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
                 if (ret < 0) {
                     switch(c) {
                     case 'F':
-                        mon->print_error(mon, "%s: filename expected\n",
-                                         cmdname);
+                        monitor_printf(mon, "%s: filename expected\n",
+                                       cmdname);
                         break;
                     case 'B':
-                        mon->print_error(mon,
-                                         "%s: block device name expected\n",
-                                         cmdname);
+                        monitor_printf(mon, "%s: block device name expected\n",
+                                       cmdname);
                         break;
                     default:
-                        mon->print_error(mon, "%s: string expected\n", cmdname);
+                        monitor_printf(mon, "%s: string expected\n", cmdname);
                         break;
                     }
                     goto fail;
@@ -3976,8 +3872,8 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
                     }
                 next:
                     if (*p != '\0' && !qemu_isspace(*p)) {
-                        mon->print_error(mon, "invalid char in format: '%c'\n",
-                                         *p);
+                        monitor_printf(mon, "invalid char in format: '%c'\n",
+                                       *p);
                         goto fail;
                     }
                     if (format < 0)
@@ -4033,12 +3929,12 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
                     goto fail;
                 /* Check if 'i' is greater than 32-bit */
                 if ((c == 'i') && ((val >> 32) & 0xffffffff)) {
-                    mon->print_error(mon, "\'%s\' has failed: ", cmdname);
-                    mon->print_error(mon, "integer is for 32-bit values\n");
+                    monitor_printf(mon, "\'%s\' has failed: ", cmdname);
+                    monitor_printf(mon, "integer is for 32-bit values\n");
                     goto fail;
                 } else if (c == 'M') {
                     if (val < 0) {
-                        mon->print_error(mon, "enter a positive value\n");
+                        monitor_printf(mon, "enter a positive value\n");
                         goto fail;
                     }
                     val <<= 20;
@@ -4062,7 +3958,7 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
                 }
                 val = strtosz(p, &end);
                 if (val < 0) {
-                    mon->print_error(mon, "invalid size\n");
+                    monitor_printf(mon, "invalid size\n");
                     goto fail;
                 }
                 qdict_put(qdict, key, qint_from_int(val));
@@ -4095,7 +3991,7 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
                     }
                 }
                 if (*p && !qemu_isspace(*p)) {
-                    mon->print_error(mon, "Unknown unit suffix\n");
+                    monitor_printf(mon, "Unknown unit suffix\n");
                     goto fail;
                 }
                 qdict_put(qdict, key, qfloat_from_double(val));
@@ -4118,7 +4014,7 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
                 } else if (p - beg == 3 && !memcmp(beg, "off", p - beg)) {
                     val = 0;
                 } else {
-                    mon->print_error(mon, "Expected 'on' or 'off'\n");
+                    monitor_printf(mon, "Expected 'on' or 'off'\n");
                     goto fail;
                 }
                 qdict_put(qdict, key, qbool_from_int(val));
@@ -4139,9 +4035,9 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
                     p++;
                     if(c != *p) {
                         if(!is_valid_option(p, typestr)) {
-                            mon->print_error(mon,
-                                             "%s: unsupported option -%c\n",
-                                             cmdname, *p);
+                  
+                            monitor_printf(mon, "%s: unsupported option -%c\n",
+                                           cmdname, *p);
                             goto fail;
                         } else {
                             skip_key = 1;
@@ -4174,8 +4070,8 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
                 }
                 len = strlen(p);
                 if (len <= 0) {
-                    mon->print_error(mon, "%s: string expected\n",
-                                     cmdname);
+                    monitor_printf(mon, "%s: string expected\n",
+                                   cmdname);
                     break;
                 }
                 qdict_put(qdict, key, qstring_from_str(p));
@@ -4184,7 +4080,7 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
             break;
         default:
         bad_type:
-            mon->print_error(mon, "%s: unknown type '%c'\n", cmdname, c);
+            monitor_printf(mon, "%s: unknown type '%c'\n", cmdname, c);
             goto fail;
         }
         g_free(key);
@@ -4194,8 +4090,8 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
     while (qemu_isspace(*p))
         p++;
     if (*p != '\0') {
-        mon->print_error(mon, "%s: extraneous characters at the end of line\n",
-                         cmdname);
+        monitor_printf(mon, "%s: extraneous characters at the end of line\n",
+                       cmdname);
         goto fail;
     }
 
@@ -4334,11 +4230,7 @@ static void file_completion(Monitor *mon, const char *input)
             /* stat the file to find out if it's a directory.
              * In that case add a slash to speed up typing long paths
              */
-#ifdef CONFIG_ANDROID
-            if (android_stat(file, &sb) == 0 && S_ISDIR(sb.st_mode)) {
-#else
             if (stat(file, &sb) == 0 && S_ISDIR(sb.st_mode)) {
-#endif
                 pstrcat(file, sizeof(file), "/");
             }
             readline_add_completion(mon->rs, file);
@@ -5310,20 +5202,6 @@ void monitor_resume(Monitor *mon)
         readline_show_prompt(mon->rs);
 }
 
-/**
- * monitor_disconnect() : Disconnect the monitor connection
- *
- * Close this monitor connection, if we can, with the same behaviour
- * as if the other end itself had closed it (eg, we will go back
- * to listening on the TCP socket).
- * File descriptor cleanup happens when the char backend sends us
- * the CHR_EVENT_CLOSED event.
- */
-int monitor_disconnect(Monitor *mon)
-{
-    return qemu_chr_del_client(mon->chr);
-}
-
 static QObject *get_qmp_greeting(void)
 {
     QObject *ver = NULL;
@@ -5391,12 +5269,8 @@ static void monitor_event(void *opaque, int event)
         break;
 
     case CHR_EVENT_OPENED:
-        if (mon->connect_handler) {
-            mon->connect_handler(mon);
-        } else {
-            monitor_printf(mon, "%s\n", mon->banner);
-        }
-
+        monitor_printf(mon, "QEMU %s monitor - type 'help' for more "
+                       "information\n", QEMU_VERSION);
         if (!mon->mux_out) {
             readline_restart(mon->rs);
             readline_show_prompt(mon->rs);
@@ -5503,40 +5377,6 @@ static GArray * make_dynamic_table(mon_cmd_t *cmds)
     return cmd_array;
 }
 
-static void destroy_dynamic_table(GArray* cmd_array) {
-    int i = 0;
-    for (i = 0; i < cmd_array->len; i++) {
-        mon_cmd_t* cmd = &g_array_index(cmd_array, mon_cmd_t, i);
-        if (cmd->sub_cmds.dynamic_table) {
-            destroy_dynamic_table(cmd->sub_cmds.dynamic_table);
-        }
-    }
-
-    g_array_free(cmd_array, TRUE);
-}
-
-#ifdef CONFIG_ANDROID
-void android_connect_handler(Monitor* mon) {
-    // this is the first opportunity to handle new connections
-    mon->cmds.static_table = android_preauth_cmds;
-    int console_auth_status = android_console_auth_get_status();
-    switch (console_auth_status) {
-    case CONSOLE_AUTH_STATUS_DISABLED:
-        mon->cmds.static_table = android_cmds;
-        mon->banner = android_console_help_banner_get();
-        monitor_printf(mon, "%s\n", mon->banner);
-        break;
-    case CONSOLE_AUTH_STATUS_REQUIRED:
-        mon->banner = android_console_auth_banner_get();
-        monitor_printf(mon, "%s\n", mon->banner);
-        break;
-    case CONSOLE_AUTH_STATUS_ERROR:
-        monitor_disconnect(mon);
-        break;
-    }
-}
-#endif
-
 Monitor * monitor_init(CharDriverState *chr, int flags)
 {
     static int is_first_init = 1;
@@ -5550,41 +5390,6 @@ Monitor * monitor_init(CharDriverState *chr, int flags)
 
     mon = g_malloc(sizeof(*mon));
     monitor_data_init(mon);
-    mon->prompt = "(qemu) ";
-    mon->banner =
-        "QEMU " QEMU_VERSION " monitor - type 'help' for more information";
-    mon->print_error = monitor_printf;
-    mon->connect_handler = 0;
-    mon->authorized = false;
-
-#ifdef CONFIG_ANDROID
-    if (flags & MONITOR_ANDROID_CONSOLE) {
-        mon->cmds.static_table = android_preauth_cmds;
-        mon->prompt = "";
-        mon->connect_handler = android_connect_handler;
-
-        int console_auth_status = android_console_auth_get_status();
-        switch (console_auth_status) {
-            case CONSOLE_AUTH_STATUS_ERROR:
-            mon->banner = "";
-
-            // banners don't get sent reliably, output error message on
-            // console
-            char* emulator_console_auth_token_path =
-                android_console_auth_token_path_dup();
-            fprintf(stderr,
-                    "ERROR: Unable to access '%s' emulator console will "
-                    "not work\n",
-                    emulator_console_auth_token_path);
-            free(emulator_console_auth_token_path);
-            break;
-            case CONSOLE_AUTH_STATUS_DISABLED:
-                mon->cmds.static_table = android_cmds;
-                break;
-        }
-        mon->print_error = android_monitor_print_error;
-    }
-#endif  // CONFIG_ANDROID
 
     if (flags & MONITOR_DYNAMIC_CMDS) {
         mon->cmds.dynamic_table = make_dynamic_table(mon->cmds.static_table);
@@ -5622,21 +5427,6 @@ Monitor * monitor_init(CharDriverState *chr, int flags)
 
     return mon;
 }
-
-void monitor_set_command_table(Monitor* mon, mon_cmd_t* cmds) {
-    if (mon->flags & MONITOR_DYNAMIC_CMDS) {
-        destroy_dynamic_table(mon->cmds.dynamic_table);
-        mon->cmds.dynamic_table = make_dynamic_table(mon->cmds.static_table);
-    } else {
-        mon->cmds.static_table = cmds;
-    }
-}
-
-#ifdef CONFIG_ANDROID
-mon_cmd_t* monitor_get_android_cmds() {
-    return android_cmds;
-}
-#endif
 
 static void bdrv_password_cb(void *opaque, const char *password,
                              void *readline_opaque)

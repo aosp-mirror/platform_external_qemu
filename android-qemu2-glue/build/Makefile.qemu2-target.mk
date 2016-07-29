@@ -64,7 +64,6 @@ LOCAL_SRC_FILES += \
     $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES_$(BUILD_TARGET_TAG))
 
 LOCAL_SRC_FILES += \
-    android-console.c \
     hw/audio/goldfish_audio.c \
     hw/char/goldfish_tty.c \
     hw/display/framebuffer.c \
