@@ -11,6 +11,7 @@
 
 #include "android/emulation/AdbGuestPipe.h"
 
+#include "android/base/async/ThreadLooper.h"
 #include "android/base/Log.h"
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketUtils.h"
@@ -141,6 +142,19 @@ private:
     std::unique_ptr<ConnectorThread> mThread;
 };
 
+// The socket associated with |guest| is in non-blocking mode, which
+// means that read() attempts will sometimes return PIPE_ERROR_AGAIN.
+// This function handles these by waiting a little, giving some time
+// slices for the ConnectorThread to write properly.
+int blockingRead(TestGuest* guest, void* buffer, size_t size) {
+    int ret = guest->read(buffer, size);
+    if (ret != PIPE_ERROR_AGAIN) {
+        return ret;
+    }
+    android::base::ThreadLooper::get()->runWithTimeoutMs(2);
+    return guest->read(buffer, size);
+}
+
 }  // namespace
 
 TEST(AdbGuestPipe, createService) {
@@ -172,7 +186,7 @@ TEST(AdbGuestPipe, createOneGuest) {
 
     char buffer[kMessage.size() + 1] = {};
     const ssize_t expectedSize = static_cast<ssize_t>(kMessage.size());
-    EXPECT_EQ(expectedSize, guest->read(buffer, kMessage.size()));
+    EXPECT_EQ(expectedSize, blockingRead(guest, buffer, kMessage.size()));
     EXPECT_STREQ(kMessage.c_str(), buffer);
 
     EXPECT_EQ(1, guest->write("x", 1));
@@ -315,7 +329,7 @@ TEST(AdbGuestPipe, createGuestWhichClosesTheConnection) {
     // Read only partial bytes from the connection.
     char buffer[kMessage.size() + 1] = {};
     const ssize_t expectedSize = static_cast<ssize_t>(kMessage.size()) / 2;
-    EXPECT_EQ(expectedSize, guest->read(buffer, expectedSize));
+    EXPECT_EQ(expectedSize, blockingRead(guest, buffer, expectedSize));
 
     // Force-close the connection now.
     guest->close();
@@ -355,7 +369,7 @@ TEST(AdbGuestPipe, createMultipleGuestConnections) {
         std::string buffer;
         buffer.resize(message.size());
         EXPECT_EQ(static_cast<ssize_t>(message.size()),
-                  guest->read(&buffer[0], message.size()))
+                  blockingRead(guest, &buffer[0], message.size()))
                 << n + 1;
 
         EXPECT_EQ(message, buffer);
