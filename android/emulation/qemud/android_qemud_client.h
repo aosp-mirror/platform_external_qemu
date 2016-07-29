@@ -127,6 +127,12 @@ struct QemudClient {
 /** HIGH-LEVEL API
  **/
 
+/* Caches a service message into the client's descriptor.
+ *
+ * See comments on QemudPipeMessage structure for more info.
+ */
+extern void _qemud_pipe_cache_buffer(QemudClient* client, const uint8_t* msg, int msglen);
+
 /* remove a QemudClient from global list */
 extern void qemud_client_remove(QemudClient* c);
 
@@ -188,3 +194,4 @@ extern int qemud_serial_client_load(Stream* f,
                                     int version);
 
 ANDROID_END_HEADER
+
