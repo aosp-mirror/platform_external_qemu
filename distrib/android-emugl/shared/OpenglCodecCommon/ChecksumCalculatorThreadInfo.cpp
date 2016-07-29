@@ -47,14 +47,14 @@ static ChecksumCalculatorThreadInfo* getChecksumCalculatorThreadInfo() {
 ChecksumCalculatorThreadInfo::ChecksumCalculatorThreadInfo() {
     LOG_CHECKSUMHELPER(
         "%s: Checksum thread created (%u instances)\n", __FUNCTION__,
-        (size_t)sNumInstances);
+        (unsigned int)(++sNumInstances));
     s_tls->set(this);
 }
 
 ChecksumCalculatorThreadInfo::~ChecksumCalculatorThreadInfo() {
     LOG_CHECKSUMHELPER(
         "%s: GLprotocol destroyed (%u instances)\n", __FUNCTION__,
-        (size_t)sNumInstances);
+        (unsigned int)(--sNumInstances));
     s_tls->set(NULL);
 }
 
