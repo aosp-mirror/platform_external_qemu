@@ -51,6 +51,10 @@ ANDROID_BEGIN_HEADER
 // the given glsync object and sync thread handle.
 #define CMD_TRIGGER_HOST_WAIT     5
 
+// Raises IRQ again if the kernel driver
+// stopped early.
+#define CMD_SYNC_MORE_IRQ     6
+
 // The register layout is:
 
 #define SYNC_REG_BATCH_COMMAND                0x00 // host->guest batch commands
