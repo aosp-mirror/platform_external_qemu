@@ -284,6 +284,30 @@
     },
     {
       "key": {
+        "uuid": "cf8db5b7_29778807",
+        "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/gles3_only.entries",
+        "patchSetId": 61
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T20:24:12Z",
+      "side": 1,
+      "message": "OK, thanks.  So glWaitSync always returns immediately, but will prevent other commands from getting to the GPU until the appropriate timeline is incremented, and the fence is signaled.\n\nHere\u0027s what remains confusing to me, about the intended uses.  If two client threads T0 and T1 are generating GL commands, which need to be executed in order (T0\u0027s commands, then T1\u0027s commands, say), there still needs to be synchronization that ensures that these threads issue the commands in the required order.  They could do other computations needed in support of the graphics commands in parallel, but the graphics commands themselves would need to be ordered.  Am I right that the Sync Object stuff is to prevent re-orderings that could otherwise happen *after* the commands had been issued, altering their order?",
+      "parentUuid": "cf8db5b7_c6b5339a",
+      "range": {
+        "startLine": 19,
+        "startChar": 5,
+        "endLine": 19,
+        "endChar": 15
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_57e9d413",
         "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl.attrib",
         "patchSetId": 61
@@ -319,6 +343,30 @@
       "side": 1,
       "message": "Not that I know of, so here is a stab.\n\nI\u0027ve just ended up reverse engineering whenever it looks like I need to edit this. But, usually, we want to include an entry here for any function that is being encoded or decoded, if/when:\n\n- The function involves passing buffers to/from the guest as part of the arguments. For example, if you have a function with one input and one output buffer:\n\n    foo(void* input, uint32_t input_size, void* output, uint32_t output_size)\n\nyou want to add to the \u003capiname\u003e.attrib file:\n\nfoo\n    dir input in\n    len input input_size\n    dir output out\n    len output output_size\n\nwhere dir \u003cname\u003e \u003cin|out\u003e specifies whether the buffer \u003cname\u003e is going to/from the host, respectively, and len \u003cname\u003e \u003clen-var-name\u003e says that the size of the buffer \u003cname\u003e has size stored in the variable \u003clen-var-name\u003e.\n\nThe variable names must be taken from the \u003capiname\u003e.in file, which specifies the C API for the code we want to generate.\n\n- Some functions have flags such as\n\n  flag flushOnEncode\n\nwhich mean that when this command is issued in the guest, it is sent immediately to the host through the pipe (as in the host will read the mapped memory in the guest), with no waiting to accumulate data in some buffer.\n\nI\u0027m not too sure on the function of the other flags, as I haven\u0027t had occasion to use them yet. I think they are generally concerned about how to handle certain input variables; some of them allow a buffer to be null, for example.",
       "parentUuid": "cf8db5b7_57e9d413",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 15
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_29614810",
+        "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl.attrib",
+        "patchSetId": 61
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T20:24:12Z",
+      "side": 1,
+      "message": "Apparently\n\nexternal/qemu/distrib/android-emugl/host/tools/emugen/README\n\nis the documentation I was looking for.  Maybe this file (and other .attrib files in this format, as we find them) could have a comment (# introduces comments, according the README) linking to that README file?",
+      "parentUuid": "cf8db5b7_e6b14f95",
       "range": {
         "startLine": 49,
         "startChar": 0,
