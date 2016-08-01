@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "cf8db5b7_32bb76c2",
+        "filename": "distrib/android-emugl/host/include/GLES2/gl2.h",
+        "patchSetId": 61
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-01T19:32:12Z",
+      "side": 1,
+      "message": "Yep, this and the other OpenGL headers are written by Khronos. We can assume these are to be used wholesale without modification when we want to update anything in GLES*/*.h or EGL/*.h.",
+      "parentUuid": "cf8db5b7_cc88f7cb",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 32
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_4c114763",
         "filename": "distrib/android-emugl/host/include/OpenGLESDispatch/gles_functions.h",
         "patchSetId": 61
@@ -36,6 +60,30 @@
       "writtenOn": "2016-08-01T18:12:10Z",
       "side": 1,
       "message": "Is this CL making this comment false?",
+      "range": {
+        "startLine": 28,
+        "startChar": 24,
+        "endLine": 30,
+        "endChar": 44
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_927a8a50",
+        "filename": "distrib/android-emugl/host/include/OpenGLESDispatch/gles_functions.h",
+        "patchSetId": 61
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-01T19:32:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cf8db5b7_4c114763",
       "range": {
         "startLine": 28,
         "startChar": 24,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "cf8db5b7_b2986675",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 61
+      },
+      "lineNbr": 1022,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-01T19:32:12Z",
+      "side": 1,
+      "message": "Thanks for catching this! Originally, I\u0027d kept GL_WAIT_FAILED with the EGL_CONDITION_SATISFIED_KHR group since I wasn\u0027t sure if host GPU drivers would really support the command. But, if this command fails, we don\u0027t fail dangerously anyway. Done",
+      "parentUuid": "cf8db5b7_6cf603f9",
+      "range": {
+        "startLine": 1022,
+        "startChar": 1,
+        "endLine": 1022,
+        "endChar": 24
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_d7e6c419",
         "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/GLDispatch.h",
         "patchSetId": 61
@@ -82,6 +154,30 @@
       "writtenOn": "2016-08-01T18:12:10Z",
       "side": 1,
       "message": "I guess by the logic of this naming if there were ever another no-arg function for which you\u0027d want to use this type, you\u0027d have to change this name to include the name of that function.  Perhaps better to name it something more generic, like FUNCPTR_NO_ARGS_RET_VOID?  I think for the ones with more specific signatures, less likely to be duplicated, naming the type according to the method to which it applies is fine.  If there are dups, then no big deal.",
+      "range": {
+        "startLine": 30,
+        "startChar": 14,
+        "endLine": 30,
+        "endChar": 34
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_328d362e",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/GLDispatch.h",
+        "patchSetId": 61
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-01T19:32:12Z",
+      "side": 1,
+      "message": "Done (changed from FLUSH_FINISH to NO_ARGS_RET_VOID).",
+      "parentUuid": "cf8db5b7_d7e6c419",
       "range": {
         "startLine": 30,
         "startChar": 14,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "cf8db5b7_869c0b5b",
+        "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/gles3_only.entries",
+        "patchSetId": 61
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-01T19:32:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cf8db5b7_cc739783",
+      "range": {
+        "startLine": 4,
+        "startChar": 13,
+        "endLine": 4,
+        "endChar": 29
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_0c23bf61",
         "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/gles3_only.entries",
         "patchSetId": 61
@@ -128,6 +248,30 @@
       "writtenOn": "2016-08-01T18:12:10Z",
       "side": 1,
       "message": "Not a question on your CL, just for my curiosity.  Is there a rationale for having the two very similar functions \"glWaitSync\" and \"glClientWaitSync\"?  Or is it just historical accident that can\u0027t now be cleaned up?",
+      "range": {
+        "startLine": 19,
+        "startChar": 5,
+        "endLine": 19,
+        "endChar": 15
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_c6b5339a",
+        "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/gles3_only.entries",
+        "patchSetId": 61
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-01T19:32:12Z",
+      "side": 1,
+      "message": "The two functions differ in how heavyweight the waiting is.\n\nglClientWaitSync will block the current CPU thread until the associated sync object has been signaled by the GPU.\n\nglWaitSync will allow the current CPU thread to continue and continue to queue up GPU commands, but only as far as the host GPU driver\u0027s user-facing command buffer, and stopping these GPU commands from being put on the host GPU driver\u0027s GPU-facing command buffer, until the sync object is signaled. Potentially, the CPU thread could then continue to do useful work while that\u0027s going on.\n\nThe second function isn\u0027t integrated yet, but the plan is to use it to implement the extension EGL_KHR_wait_sync in the system image. But, if we activate that extension, the system image\u0027s buffer swap system will go down a whole new code path that is untested and might require more changes in turn. The potential payoff would be better performance in SurfaceFlinger and any other apps that use it well.\n\nRef: https://www.opengl.org/wiki/Sync_Object",
+      "parentUuid": "cf8db5b7_0c23bf61",
       "range": {
         "startLine": 19,
         "startChar": 5,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "cf8db5b7_e6b14f95",
+        "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl.attrib",
+        "patchSetId": 61
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-01T19:32:12Z",
+      "side": 1,
+      "message": "Not that I know of, so here is a stab.\n\nI\u0027ve just ended up reverse engineering whenever it looks like I need to edit this. But, usually, we want to include an entry here for any function that is being encoded or decoded, if/when:\n\n- The function involves passing buffers to/from the guest as part of the arguments. For example, if you have a function with one input and one output buffer:\n\n    foo(void* input, uint32_t input_size, void* output, uint32_t output_size)\n\nyou want to add to the \u003capiname\u003e.attrib file:\n\nfoo\n    dir input in\n    len input input_size\n    dir output out\n    len output output_size\n\nwhere dir \u003cname\u003e \u003cin|out\u003e specifies whether the buffer \u003cname\u003e is going to/from the host, respectively, and len \u003cname\u003e \u003clen-var-name\u003e says that the size of the buffer \u003cname\u003e has size stored in the variable \u003clen-var-name\u003e.\n\nThe variable names must be taken from the \u003capiname\u003e.in file, which specifies the C API for the code we want to generate.\n\n- Some functions have flags such as\n\n  flag flushOnEncode\n\nwhich mean that when this command is issued in the guest, it is sent immediately to the host through the pipe (as in the host will read the mapped memory in the guest), with no waiting to accumulate data in some buffer.\n\nI\u0027m not too sure on the function of the other flags, as I haven\u0027t had occasion to use them yet. I think they are generally concerned about how to handle certain input variables; some of them allow a buffer to be null, for example.",
+      "parentUuid": "cf8db5b7_57e9d413",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 15
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_b76e9898",
         "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl_types.h",
         "patchSetId": 61
@@ -174,6 +342,30 @@
       "writtenOn": "2016-08-01T18:12:10Z",
       "side": 1,
       "message": "Why this change?  Doesn\u0027t seem necessary now -- is this future-proofing, because this file should have access to things defined in eglext.h?",
+      "range": {
+        "startLine": 19,
+        "startChar": 1,
+        "endLine": 19,
+        "endChar": 23
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_a6466776",
+        "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl_types.h",
+        "patchSetId": 61
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-01T19:32:12Z",
+      "side": 1,
+      "message": "Hmm, yep this isn\u0027t necessary. Removed",
+      "parentUuid": "cf8db5b7_b76e9898",
       "range": {
         "startLine": 19,
         "startChar": 1,
