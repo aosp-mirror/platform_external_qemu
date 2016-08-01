@@ -308,6 +308,30 @@
     },
     {
       "key": {
+        "uuid": "cf8db5b7_493134a0",
+        "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/gles3_only.entries",
+        "patchSetId": 61
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-01T21:00:16Z",
+      "side": 1,
+      "message": "Hmm, I think the confusion could be in that it\u0027s not just the client threads that are involved when it comes to doing GPU computations and having stuff show up on the screen; the host driver itself has a bunch of other threads of its own that actually communicate with the GPU. The client threads only talk to the surface of the driver, which can then do anything it wants with respect to making rubber meet road. \n\nParticularly, these other threads don\u0027t have to preserve the ordering of client GL calls, even if the client GL calls are all made in the \"proper order\" from just looking at what the client threads do.\n\nglWaitSync is a way to get these other threads to synchronize on the event of a GPU fence command completing, while glClientWaitSync is a way to get the _client_ threads synchronized on the same kind of events.\n\nA big factor that determines which one an app developer uses is if we ever have non-OpenGL API computations that need to read data updated by the GPU concurrently; in this case, the whole client thread needs to wait (glClientWaitSync). On the other hand, we could be in the situation where we just want to have two sets of commands (that we already determined up front) to execute in order (glWaitSync).\n\nOverall, there are use cases that care about both kinds of reordering, both before and after commands are issued from the client.",
+      "parentUuid": "cf8db5b7_29778807",
+      "range": {
+        "startLine": 19,
+        "startChar": 5,
+        "endLine": 19,
+        "endChar": 15
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_57e9d413",
         "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl.attrib",
         "patchSetId": 61
@@ -367,6 +391,30 @@
       "side": 1,
       "message": "Apparently\n\nexternal/qemu/distrib/android-emugl/host/tools/emugen/README\n\nis the documentation I was looking for.  Maybe this file (and other .attrib files in this format, as we find them) could have a comment (# introduces comments, according the README) linking to that README file?",
       "parentUuid": "cf8db5b7_e6b14f95",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 15
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_9c6d3c01",
+        "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl.attrib",
+        "patchSetId": 61
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-01T21:00:16Z",
+      "side": 1,
+      "message": "Thanks for catching this! Done.",
+      "parentUuid": "cf8db5b7_29614810",
       "range": {
         "startLine": 49,
         "startChar": 0,
