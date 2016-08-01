@@ -755,7 +755,7 @@ void sdl_display_early_init(int opengl)
     }
 }
 
-void sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
+bool sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
 {
     int flags;
     uint8_t data = 0;
@@ -783,7 +783,7 @@ void sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
     if (SDL_Init(flags)) {
         fprintf(stderr, "Could not initialize SDL(%s) - exiting\n",
                 SDL_GetError());
-        exit(1);
+        return false;
     }
     SDL_SetHint(SDL_HINT_GRAB_KEYBOARD, "1");
 
@@ -795,7 +795,7 @@ void sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
     }
     sdl2_num_outputs = i;
     if (sdl2_num_outputs == 0) {
-        return;
+        return true;
     }
     sdl2_console = g_new0(struct sdl2_console, sdl2_num_outputs);
     for (i = 0; i < sdl2_num_outputs; i++) {
@@ -841,4 +841,5 @@ void sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
     sdl_cursor_normal = SDL_GetCursor();
 
     atexit(sdl_cleanup);
+    return true;
 }

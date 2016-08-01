@@ -942,7 +942,7 @@ void sdl_display_early_init(int opengl)
     }
 }
 
-void sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
+bool sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
 {
     int flags;
     uint8_t data = 0;
@@ -957,7 +957,7 @@ void sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
     if(keyboard_layout) {
         kbd_layout = init_keyboard_layout(name2keysym, keyboard_layout);
         if (!kbd_layout)
-            exit(1);
+            return false;
     }
 
     if (no_frame)
@@ -987,7 +987,7 @@ void sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
     if (SDL_Init (flags)) {
         fprintf(stderr, "Could not initialize SDL(%s) - exiting\n",
                 SDL_GetError());
-        exit(1);
+        return false;
     }
     vi = SDL_GetVideoInfo();
     host_format = *(vi->vfmt);
@@ -1024,4 +1024,5 @@ void sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
     sdl_cursor_normal = SDL_GetCursor();
 
     atexit(sdl_cleanup);
+    return true;
 }
