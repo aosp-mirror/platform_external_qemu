@@ -332,6 +332,30 @@
     },
     {
       "key": {
+        "uuid": "cf8db5b7_9c61bcae",
+        "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/gles3_only.entries",
+        "patchSetId": 61
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T21:16:45Z",
+      "side": 1,
+      "message": "OK, thanks, I think I\u0027m getting there.  So in my example, the synchronization that the client threads did between themselves to ensure that T0\u0027s graphics commands were issued before T1\u0027s were necessary, but not sufficient.  In this situation, T0 would add a glWaitSync at the end of it\u0027s commands, to ensure that all of its commands complete before T1\u0027s start.  This wouldn\u0027t keep T1 from acquiring the client-thread level mutex and starting to issue it\u0027s commands.  It\u0027s necessary because in the absence of client-level synchronization, it makes no sense to issue a glWaitSync, since you wouldn\u0027t know what commands had and had not been issued from the drivers POV.\n\nSo in programming language memory model terms, it\u0027s the equivalent of a memory barrier -- make sure previously issued writes complete globally before any of the writes that follow the barrier.",
+      "parentUuid": "cf8db5b7_493134a0",
+      "range": {
+        "startLine": 19,
+        "startChar": 5,
+        "endLine": 19,
+        "endChar": 15
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_57e9d413",
         "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl.attrib",
         "patchSetId": 61
