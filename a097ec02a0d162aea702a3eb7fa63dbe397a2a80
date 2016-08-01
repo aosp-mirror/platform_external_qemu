@@ -1,0 +1,234 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cf8db5b7_ba0f58da",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderThreadInfo.h",
+        "patchSetId": 26
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T22:31:41Z",
+      "side": 1,
+      "message": "Why is this included?  Something used before syncThread became a std::unique_ptr, perhaps?",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 45
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_dfcfb67f",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T22:31:41Z",
+      "side": 1,
+      "message": "This spec:\n\nhttps://www.khronos.org/registry/egl/sdk/docs/man/html/eglChooseConfig.xhtml\n\nsays that EGL_FALSE will be returned on any error.  Your code seems to imply that config_ret might be EGL_TRUE while err is indicating some error.  Is there some reason to believe that this can happen?  That is, couldn\u0027t the if statement just ask if config_ret \u003d\u003d EGL_FALSE, and only then call s_egl.eglGetError() if so?",
+      "range": {
+        "startLine": 188,
+        "startChar": 4,
+        "endLine": 188,
+        "endChar": 30
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_bac7583b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T22:31:41Z",
+      "side": 1,
+      "message": "As above, the spec for eglCreateContext seems to me to imply that err !\u003d EGL_SUCCESS only if mSyncContext \u003d\u003d EGL_NO_CONTEXT, so this seems redundant.\n\n(The reason I care enough to comment is because this usage pattern makes you think the combination it implies is possible, so you ask yourself if you read the spec correctly...)",
+      "range": {
+        "startLine": 203,
+        "startChar": 4,
+        "endLine": 204,
+        "endChar": 33
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_9ab53ccd",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T22:31:41Z",
+      "side": 1,
+      "message": "If you buy my comments above, this should be checking for surf \u003d\u003d EGL_NO_SURFACE, to use the same pattern.",
+      "range": {
+        "startLine": 217,
+        "startChar": 4,
+        "endLine": 217,
+        "endChar": 29
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_bab2f8e0",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T22:31:41Z",
+      "side": 1,
+      "message": "Same comments as above.",
+      "range": {
+        "startLine": 225,
+        "startChar": 2,
+        "endLine": 226,
+        "endChar": 33
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_5ac01427",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T22:31:41Z",
+      "side": 1,
+      "message": "Why not just 0?",
+      "range": {
+        "startLine": 235,
+        "startChar": 25,
+        "endLine": 235,
+        "endChar": 28
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_fa556054",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T22:31:41Z",
+      "side": 1,
+      "message": "Why is this the right error message for this case?  The only way I can see for cmd-\u003efenceSync to be null is if triggerWait is called with a NULL fenceSync.  Nothing modifies the funceSync field to NULL to indicate that the signal has happened, which I thought might be what you were talking about.\n\nPerhaps triggerWait should assert that the fenceSync argument is non-null, so we could justify making a similar assertion here, rather than just a DPRINT.\n\nAFAICT, eglClientWaitSyncKHR does not allow the caller to know that the fence was already signaled when it was called.",
+      "range": {
+        "startLine": 243,
+        "startChar": 3,
+        "endLine": 245,
+        "endChar": 5
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_5a7814d4",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T22:31:41Z",
+      "side": 1,
+      "message": "Is it the right thing to do the timeline increment below if the wait_result is not CONDITION_SATISFIED?  Is there a reasonable thing to do if the timeout expires?",
+      "range": {
+        "startLine": 252,
+        "startChar": 8,
+        "endLine": 253,
+        "endChar": 28
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_ba1bd880",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T22:31:41Z",
+      "side": 1,
+      "message": "The next four methods are private, but have no uses in this file.  How/where are used?",
+      "range": {
+        "startLine": 287,
+        "startChar": 3,
+        "endLine": 287,
+        "endChar": 26
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_baccb8b7",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T22:31:41Z",
+      "side": 1,
+      "message": "Am I understanding correctly that a SyncThread is only ever accessible from a single corresponding RenderThread, which is why there\u0027s no worry about synchronization in this method (or destroySyncThread)?  It might be good to mention this in the overall class comments in the .h file.\n\nAlso, I\u0027ve found the following a useful convention: put a comment like /*static*/ at the definition of a static method, so you know it\u0027s static.  Here and below, for destroySyncThread.",
+      "range": {
+        "startLine": 315,
+        "startChar": 0,
+        "endLine": 315,
+        "endChar": 37
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
