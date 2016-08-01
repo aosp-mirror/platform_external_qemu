@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cf8db5b7_cc88f7cb",
+        "filename": "distrib/android-emugl/host/include/GLES2/gl2.h",
+        "patchSetId": 61
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T18:12:10Z",
+      "side": 1,
+      "message": "I take it that this is generated source that we hadn\u0027t updated for a long time?  Can I assume that this is completely a generated file, without any mods on our part?  For this and the other generated header files?",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 32
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_4c114763",
+        "filename": "distrib/android-emugl/host/include/OpenGLESDispatch/gles_functions.h",
+        "patchSetId": 61
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T18:12:10Z",
+      "side": 1,
+      "message": "Is this CL making this comment false?",
+      "range": {
+        "startLine": 28,
+        "startChar": 24,
+        "endLine": 30,
+        "endChar": 44
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_6cf603f9",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 61
+      },
+      "lineNbr": 1022,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T18:12:10Z",
+      "side": 1,
+      "message": "The spec here\nhttps://www.khronos.org/registry/egl/extensions/KHR/EGL_KHR_reusable_sync.txt\nfor eglClientWaitSyncKHR says that \nIf an error occurs then an error is generated and EGL_FALSE is returned.\nIsn\u0027t GL_WAIT_FAILED the way that the interface call indicates an error?  I would have thought that those would correspond.",
+      "range": {
+        "startLine": 1022,
+        "startChar": 1,
+        "endLine": 1022,
+        "endChar": 24
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_d7e6c419",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/GLDispatch.h",
+        "patchSetId": 61
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T18:12:10Z",
+      "side": 1,
+      "message": "I guess by the logic of this naming if there were ever another no-arg function for which you\u0027d want to use this type, you\u0027d have to change this name to include the name of that function.  Perhaps better to name it something more generic, like FUNCPTR_NO_ARGS_RET_VOID?  I think for the ones with more specific signatures, less likely to be duplicated, naming the type according to the method to which it applies is fine.  If there are dups, then no big deal.",
+      "range": {
+        "startLine": 30,
+        "startChar": 14,
+        "endLine": 30,
+        "endChar": 34
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_cc739783",
+        "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/gles3_only.entries",
+        "patchSetId": 61
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T18:12:10Z",
+      "side": 1,
+      "message": "This is now incorrect.  Could you change the wording a little?  Like \"This is used for two things:\" and then itemize the two things.",
+      "range": {
+        "startLine": 4,
+        "startChar": 13,
+        "endLine": 4,
+        "endChar": 29
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_0c23bf61",
+        "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/gles3_only.entries",
+        "patchSetId": 61
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T18:12:10Z",
+      "side": 1,
+      "message": "Not a question on your CL, just for my curiosity.  Is there a rationale for having the two very similar functions \"glWaitSync\" and \"glClientWaitSync\"?  Or is it just historical accident that can\u0027t now be cleaned up?",
+      "range": {
+        "startLine": 19,
+        "startChar": 5,
+        "endLine": 19,
+        "endChar": 15
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_57e9d413",
+        "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl.attrib",
+        "patchSetId": 61
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T18:12:10Z",
+      "side": 1,
+      "message": "Is there a reference somewhere that defines this little language?  I\u0027d like to know better how to read this, and how this information is used.",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 15
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf8db5b7_b76e9898",
+        "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl_types.h",
+        "patchSetId": 61
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-01T18:12:10Z",
+      "side": 1,
+      "message": "Why this change?  Doesn\u0027t seem necessary now -- is this future-proofing, because this file should have access to things defined in eglext.h?",
+      "range": {
+        "startLine": 19,
+        "startChar": 1,
+        "endLine": 19,
+        "endChar": 23
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
