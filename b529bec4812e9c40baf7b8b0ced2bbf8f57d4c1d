@@ -356,6 +356,30 @@
     },
     {
       "key": {
+        "uuid": "cf8db5b7_bf84aa6f",
+        "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/gles3_only.entries",
+        "patchSetId": 61
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-01T21:51:09Z",
+      "side": 1,
+      "message": "Yes, assuming the glWaitSync is done on the sync object returned from a fence command (glFenceSync) that comes after all of T0\u0027s commands. You could also begin T1 with a glWaitSync on the same sync object.\n\nRegardless, your example should work: T1 gets the lock, it issues all its commands without appearing to wait on anything. Then, at the driver level, the glWaitSync ensures that T1\u0027s commands run after the completion of all of T0\u0027s commands.\n\nAnd yes, the use of sync objects is quite similar to that of memory barriers, but in graphics terms. Any operation that reads/writes to some texture or framebuffer and uses multiple threads will need synchronization in some form, to allow writes to such memory regions to complete before issuing any operations that depend on the result. \n\nThe other synchronization options are glFlush(), which ensures that all commands issued are sent to the GPU before any further commands , and glFinish(), which also causes the CPU to block until the GPU has completed all outstanding operations.\n\nI\u0027m not sure on this, but I think glFlush is equivalent to issuing glFenceSync(..); glWaitSync(); in the same thread for every thread, and glFinish() is like issuing glFenceSync(...); glClientWaitSync(); in the same thread for every thread.",
+      "parentUuid": "cf8db5b7_9c61bcae",
+      "range": {
+        "startLine": 19,
+        "startChar": 5,
+        "endLine": 19,
+        "endChar": 15
+      },
+      "revId": "b529bec4812e9c40baf7b8b0ced2bbf8f57d4c1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_57e9d413",
         "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl.attrib",
         "patchSetId": 61
