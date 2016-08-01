@@ -544,6 +544,10 @@ void socketSetBlocking(int socket) {
 #endif
 }
 
+void socketSetNoDelay(int socket) {
+    socketSetOption(socket, IPPROTO_TCP, TCP_NODELAY, 1);
+}
+
 static int socketCreateTcpFor(int domain) {
 #ifdef _WIN32
     socketInitWinsock();

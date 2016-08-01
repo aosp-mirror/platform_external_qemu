@@ -53,6 +53,9 @@ void socketSetNonBlocking(int socket);
 // Set the socket descriptor |socket| to blocking mode.
 void socketSetBlocking(int socket);
 
+// Disable TCP Nagle algorithm for |socket|.
+void socketSetNoDelay(int socket);
+
 // Bind and listen on TCP |port| on loopback interface (i.e. 127.0.0.1).
 // Return new socket on success, or -1/errno on error.
 int socketTcp4LoopbackServer(int port);
