@@ -243,6 +243,8 @@ void AdbGuestPipe::onHostConnection(ScopedSocket&& socket) {
     DD("%s: [%p] host connection", __func__, this);
     CHECK(mState <= State::WaitingForHostAdbConnection);
 
+    android::base::socketSetNonBlocking(socket.get());
+
     mHostSocket.reset(android::base::ThreadLooper::get()->createFdWatch(
             socket.release(),
             [](void* opaque, int fd, unsigned events) {
