@@ -9,7 +9,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android/base/memory/ScopedPtr.h"
 #include "android/cmdline-option.h"
+#include "android/utils/debug.h"
 
 #include <gtest/gtest.h>
 
@@ -114,3 +116,48 @@ TEST(CmdLineOptions, validatePorts) {
     }
 }
 
+
+TEST(CmdLineOptions, parseDebug) {
+    struct {
+        const char* option;
+        bool parseAsSuffix;
+        bool expectedResult;
+        uint64_t initialFlags;
+        uint64_t parsedFlags;
+    } kData[] = {
+        { NULL, false, false, 0, 0 },
+        { NULL, true, false, 0, 0 },
+        { "", false, 0, 0 },
+        { "all", false, true, 0, -1ull },
+        { "-all", false, true, 1, 0 },
+        { "all", true, true, 0, -1ull },
+        { "-all", true, false, 1, 1 },
+        { "no-all", false, true, 1, 0 },
+        { "noall", false, false, 1, 1 },
+        { "init", false, true, 0, 1 },
+        { "init", true, true, 0, 1 },
+        { "-init", true, false, 1, 1 },
+        { "all,no-init", false, true, 0, -1ull & ~1 },
+        { "all,no-init", true, false, 0, 0 },
+        { "init,blah,-foo,no-bar", false, true, 0, 1 },
+        { "init,blah,-foo,no-bar", true, false, 0, 0 }
+    };
+
+    // Make sure the android_verbose debug flags are restored even if any test
+    // case fails.
+    const auto oldFlags = android_verbose;
+    auto restoreFlags = android::base::makeCustomScopedPtr(nullptr,
+        [oldFlags](std::nullptr_t*) { android_verbose = oldFlags; });
+
+    for (const auto& data : kData) {
+        android_verbose = data.initialFlags;
+        bool result = android_parse_debug_tags_option(data.option,
+                                                      data.parseAsSuffix);
+        EXPECT_EQ(data.expectedResult, result)
+                << "Failed on test case: ("
+                << (data.option ? data.option : "null") << ")";
+        EXPECT_EQ(data.parsedFlags, android_verbose)
+                << "Failed on test case: ("
+                << (data.option ? data.option : "null") << ")";
+    }
+}

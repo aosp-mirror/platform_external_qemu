@@ -35,14 +35,14 @@ typedef struct {
 } AndroidOptions;
 
 
-/* parse command-line arguments options and remove them from (argc,argv)
+/* Parse command-line arguments options and remove them from (argc,argv)
  * 'opt' will be set to the content of parsed options
  * returns 0 on success, -1 on error (unknown option)
  */
 extern int
 android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt );
 
-/* parse |port_string| into |console_port| and |adb_port|. Error checking is
+/* Parse |port_string| into |console_port| and |adb_port|. Error checking is
  * done and approriate warning or error messages shown if needed. If the
  * function returns false the output parameter is not touched.
  */
@@ -50,7 +50,7 @@ extern bool android_parse_port_option(const char* port_string,
                                       int* console_port,
                                       int* adb_port);
 
-/* parse |ports_string| into |console_port| and |adb_port|. The format of the
+/* Parse |ports_string| into |console_port| and |adb_port|. The format of the
  * -ports option is currently "<console port>,<adb port>". Error checking is
  * done and the approriate warning or error messages shown if needed. If the
  * function returns false neither of the output parameters are touched.
@@ -65,6 +65,24 @@ extern bool android_parse_ports_option(const char* ports_string,
  * Returns: true if no validation errors were detected, false otherwise.
  */
 extern bool android_validate_ports(int console_port, int adb_port);
+
+// Parse the debug-related combination of tags from the |opt| argument and
+// apply them.
+// |parse_as_suffix| specifies if the agrument in |opt| is just a suffix of a
+//  longer command-line argument and has to be treated like one (no comma-
+//  separated tags, no '-tag' syntax)
+//  in |opt| or it has to be just a single tag.
+// Expected format: <option>[,<option>[,...]]
+//   where <option> is either one of the debug tags or "all" to control
+//   all tags at once. If an <option> has a '-' or 'no-' prefix, that tag is
+//   disabled. Unknown tags are just ignored. Tags are applied left-to-right,
+//   so the last tag value ('tag' or 'no-tag') wins.
+// E.g. |opt| = "all,-init,no-qemud,blah" enables all debugging tags except
+//   of "init" and "qemud". "blah" tag doesn't exist (I hope) so it adds
+//   nothing.
+//
+// Returns true if the |opt| had at least one valid debug tag.
+bool android_parse_debug_tags_option(const char* opt, bool parse_as_suffix);
 
 /* the default device DPI if none is specified by the skin
  */
