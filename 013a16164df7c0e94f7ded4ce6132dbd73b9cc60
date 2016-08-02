@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "348b0ae2_80e1969c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-02T15:16:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cf8db5b7_a9f39805",
+      "range": {
+        "startLine": 52,
+        "startChar": 1,
+        "endLine": 63,
+        "endChar": 58
+      },
+      "revId": "013a16164df7c0e94f7ded4ce6132dbd73b9cc60",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_09b48c39",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.h",
         "patchSetId": 23
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "348b0ae2_401cee6b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-02T15:16:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cf8db5b7_09b48c39",
+      "range": {
+        "startLine": 55,
+        "startChar": 26,
+        "endLine": 55,
+        "endChar": 39
+      },
+      "revId": "013a16164df7c0e94f7ded4ce6132dbd73b9cc60",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_895a5c25",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.h",
         "patchSetId": 23
@@ -59,6 +107,30 @@
       "writtenOn": "2016-08-01T22:31:41Z",
       "side": 1,
       "message": "I\u0027d like to see specification comments for (at least!) all public methods.  From the POV of the caller, what does this do?  Does it block?  Does getSyncThread always return a non-null result, because it creates a sync thread if needed, or can it return null?   Etc.\n\nI see on further reading that you have reasonable attempts at this in the .cpp file.  I really think they\u0027d be better here, split into overall comments on the SyncThread class as a whole, and method-specific specification comments.",
+      "range": {
+        "startLine": 56,
+        "startChar": 9,
+        "endLine": 56,
+        "endChar": 20
+      },
+      "revId": "013a16164df7c0e94f7ded4ce6132dbd73b9cc60",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "348b0ae2_c03ebebc",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-02T15:16:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cf8db5b7_895a5c25",
       "range": {
         "startLine": 56,
         "startChar": 9,
