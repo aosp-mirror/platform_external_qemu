@@ -17,3 +17,4 @@ endif
 obj-$(CONFIG_MILKYMIST) += milkymist-softusb.o
 obj-$(CONFIG_PXA2XX) += pxa2xx_keypad.o
 obj-$(CONFIG_TSC210X) += tsc210x.o
+obj-$(CONFIG_GOLDFISH) += goldfish_events.o

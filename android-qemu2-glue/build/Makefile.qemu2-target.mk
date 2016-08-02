@@ -87,8 +87,8 @@ LOCAL_SRC_FILES += \
     $(call qemu2-if-target,arm arm64,, \
         hw/display/framebuffer.c \
         ) \
+    hw/input/goldfish_events.c \
 
-#     hw/input/goldfish_events.c \
 #     hw/intc/goldfish_pic.c \
 #     hw/misc/android_pipe.c \
 #     hw/misc/goldfish_battery.c \
