@@ -88,6 +88,30 @@
     },
     {
       "key": {
+        "uuid": "942d9696_f113a0b0",
+        "filename": "android/utils/file_io.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-08-02T17:04:36Z",
+      "side": 1,
+      "message": "oh yeah, my bad :)",
+      "parentUuid": "f4533225_2969c9ca",
+      "range": {
+        "startLine": 127,
+        "startChar": 54,
+        "endLine": 127,
+        "endChar": 75
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "746022e5_b0c640b1",
         "filename": "android/utils/file_io.cpp",
         "patchSetId": 1
@@ -111,6 +135,30 @@
     },
     {
       "key": {
+        "uuid": "942d9696_d110a4a6",
+        "filename": "android/utils/file_io.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-08-02T17:04:36Z",
+      "side": 1,
+      "message": "that\u0027s why we need name.size() to be strictly less than the size of the d_name char[] buffer :)",
+      "parentUuid": "746022e5_b0c640b1",
+      "range": {
+        "startLine": 153,
+        "startChar": 20,
+        "endLine": 153,
+        "endChar": 22
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4f9ce3d_e0fabc11",
         "filename": "android/utils/file_io.cpp",
         "patchSetId": 1
@@ -122,6 +170,30 @@
       "writtenOn": "2016-08-02T16:23:18Z",
       "side": 1,
       "message": "many long names in a directory will cause stack overflow here",
+      "range": {
+        "startLine": 155,
+        "startChar": 15,
+        "endLine": 155,
+        "endChar": 36
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "942d9696_b10d1891",
+        "filename": "android/utils/file_io.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-08-02T17:04:36Z",
+      "side": 1,
+      "message": "This is a typical case of tail-recursion optimisation that the compiler should be able to optimize. However, this still leaks |result|, so I\u0027ll fix that :)",
+      "parentUuid": "d4f9ce3d_e0fabc11",
       "range": {
         "startLine": 155,
         "startChar": 15,
@@ -181,6 +253,30 @@
     },
     {
       "key": {
+        "uuid": "942d9696_d129c4f0",
+        "filename": "android/utils/file_io.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-08-02T17:04:36Z",
+      "side": 1,
+      "message": "correct, but I\u0027ll add some compiler check to be sure.",
+      "parentUuid": "3456aa15_ee905b3f",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 61
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3456aa15_ce8d9729",
         "filename": "android/utils/file_io.h",
         "patchSetId": 1
@@ -192,6 +288,30 @@
       "writtenOn": "2016-08-02T16:23:18Z",
       "side": 1,
       "message": "nit: this is true only for MinGW, MSVC\u0027s long is always 32-bit",
+      "range": {
+        "startLine": 51,
+        "startChar": 18,
+        "endLine": 51,
+        "endChar": 35
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "942d9696_91333c5b",
+        "filename": "android/utils/file_io.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-08-02T17:04:36Z",
+      "side": 1,
+      "message": "Yes, I believe this is also true for Mingw, through we always define _FILE_OFFSET_BITS\u003d64 on the command-line, so I\u0027ll update this comment.",
+      "parentUuid": "3456aa15_ce8d9729",
       "range": {
         "startLine": 51,
         "startChar": 18,
@@ -227,6 +347,30 @@
     },
     {
       "key": {
+        "uuid": "942d9696_7100d05b",
+        "filename": "android/utils/file_io.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-08-02T17:04:36Z",
+      "side": 1,
+      "message": "That\u0027s exactly what happens, they are all independent structs !",
+      "parentUuid": "348b0ae2_a0f85ae1",
+      "range": {
+        "startLine": 60,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 72
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "348b0ae2_20052ae2",
         "filename": "android/utils/file_io.h",
         "patchSetId": 1
@@ -250,6 +394,30 @@
     },
     {
       "key": {
+        "uuid": "942d9696_5105d469",
+        "filename": "android/utils/file_io.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-08-02T17:04:36Z",
+      "side": 1,
+      "message": "Yes, I\u0027ll clarify, the \u0027stat\u0027 macro is only defined if _FILE_OFFSET_BITS\u003d\u003d64, and this happens after the declaration of \u0027struct stat\u0027 but before the one for stat() (ah ah). See _mingw_stat64.h and sys/stat.h in the prebuilt toolchain sysroot.",
+      "parentUuid": "348b0ae2_20052ae2",
+      "range": {
+        "startLine": 58,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 29
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "348b0ae2_a09dbaae",
         "filename": "android/utils/file_io.h",
         "patchSetId": 1
@@ -261,6 +429,30 @@
       "writtenOn": "2016-08-02T15:37:39Z",
       "side": 1,
       "message": "Could there be something up with the comment above versus this one?\n\n1) How do we actually end up with struct _stati64?\n2) there\u0027s no mention of struct stati64 until now\n\nI think we need to know that \u0027stat\u0027 is defined as something else first, in the first comment",
+      "range": {
+        "startLine": 82,
+        "startChar": 0,
+        "endLine": 83,
+        "endChar": 76
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "942d9696_31fa4866",
+        "filename": "android/utils/file_io.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-08-02T17:04:36Z",
+      "side": 1,
+      "message": "Yes, sorry, I forgot to mention there are additional macro definitions to consider. Aarg, this is really complicated. I\u0027ll clarify.",
+      "parentUuid": "348b0ae2_a09dbaae",
       "range": {
         "startLine": 82,
         "startChar": 0,
@@ -307,6 +499,30 @@
       "writtenOn": "2016-08-02T16:23:18Z",
       "side": 1,
       "message": "what about defining these in the makefile instead, to make sure all new code gets the definitions? Or we can force-include file_io.h into all files from there",
+      "range": {
+        "startLine": 108,
+        "startChar": 0,
+        "endLine": 111,
+        "endChar": 23
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "942d9696_11ff4c56",
+        "filename": "android/utils/file_io.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-08-02T17:04:36Z",
+      "side": 1,
+      "message": "I prefer not to: We can\u0027t just force-include the header, we also need to ensure that file_io.cpp and the sources it depends on are linked into the final binaries anyway. These things are better left explicit.\n\nOn the other hand, I\u0027m working on a script that checks that a Windows executable doesn\u0027t imports the ANSI functions (e.g. _open, _fopen, etc...), and add it to the checks performed by android-rebuild.sh --mingw. This will help us catch bad uses.",
+      "parentUuid": "145b6640_6a0d773c",
       "range": {
         "startLine": 108,
         "startChar": 0,
