@@ -40,7 +40,7 @@ template <>
 struct hash<TypedObjectName> {
     size_t operator()(const TypedObjectName& tn) const noexcept {
         return hash<int>()(tn.name) ^
-               hash<ObjectLocalName>()(tn.type);
+               hash<ObjectLocalName>()(static_cast<int>(tn.type));
     }
 };
 }  // namespace std
@@ -49,15 +49,18 @@ using ObjectDataMap = std::unordered_map<TypedObjectName, ObjectDataPtr>;
 using TextureRefCounterMap = std::unordered_map<unsigned int, size_t>;
 
 ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace) {
-    for (int i=0; i < NUM_OBJECT_TYPES; i++) {
-        m_nameSpace[i] = new NameSpace((NamedObjectType)i, globalNameSpace);
+    for (int i = 0; i < static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES);
+         i++) {
+        m_nameSpace[i] =
+                new NameSpace(static_cast<NamedObjectType>(i), globalNameSpace);
     }
 }
 
 ShareGroup::~ShareGroup()
 {
     emugl::Mutex::AutoLock _lock(m_lock);
-    for (int t = 0; t < NUM_OBJECT_TYPES; t++) {
+    for (int t = 0; t < static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES);
+         t++) {
         delete m_nameSpace[t];
     }
 
@@ -66,48 +69,73 @@ ShareGroup::~ShareGroup()
 }
 
 ObjectLocalName
-ShareGroup::genName(NamedObjectType p_type,
+ShareGroup::genName(GenNameInfo genNameInfo,
                     ObjectLocalName p_localName,
                     bool genLocal)
 {
-    if (p_type >= NUM_OBJECT_TYPES) return 0;
+    if (static_cast<int>(genNameInfo.m_type) >=
+        static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES))
+        return 0;
 
     emugl::Mutex::AutoLock _lock(m_lock);
     ObjectLocalName localName =
-            m_nameSpace[p_type]->genName(p_localName, genLocal);
-    if (p_type == TEXTURE) {
-        incTexRefCounterNoLock(m_nameSpace[p_type]->getGlobalName(localName));
+            m_nameSpace[static_cast<ObjectDataType>(genNameInfo.m_type)]
+                    ->genName(genNameInfo, p_localName, genLocal);
+    if (genNameInfo.m_type == NamedObjectType::TEXTURE) {
+        incTexRefCounterNoLock(
+                m_nameSpace[static_cast<int>(NamedObjectType::TEXTURE)]
+                        ->getGlobalName(localName));
     }
     return localName;
+}
+
+ObjectLocalName ShareGroup::genName(NamedObjectType namedObjectType,
+                                    ObjectLocalName p_localName,
+                                    bool genLocal) {
+    return genName(GenNameInfo(namedObjectType), p_localName, genLocal);
+}
+
+ObjectLocalName ShareGroup::genName(GLenum shaderType,
+                                    ObjectLocalName p_localName,
+                                    bool genLocal) {
+    return genName(GenNameInfo(shaderType), p_localName, genLocal);
 }
 
 unsigned int
 ShareGroup::getGlobalName(NamedObjectType p_type,
                           ObjectLocalName p_localName)
 {
-    if (p_type >= NUM_OBJECT_TYPES) return 0;
+    if (static_cast<int>(p_type) >=
+        static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES)) {
+        return 0;
+    }
 
     emugl::Mutex::AutoLock _lock(m_lock);
-    return m_nameSpace[p_type]->getGlobalName(p_localName);
+    return m_nameSpace[static_cast<int>(p_type)]->getGlobalName(p_localName);
 }
 
 ObjectLocalName
 ShareGroup::getLocalName(NamedObjectType p_type,
                          unsigned int p_globalName)
 {
-    if (p_type >= NUM_OBJECT_TYPES) return 0;
+    if (static_cast<int>(p_type) >=
+        static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES)) {
+        return 0;
+    }
 
     emugl::Mutex::AutoLock _lock(m_lock);
-    return m_nameSpace[p_type]->getLocalName(p_globalName);
+    return m_nameSpace[static_cast<int>(p_type)]->getLocalName(p_globalName);
 }
 
 void
 ShareGroup::deleteName(NamedObjectType p_type, ObjectLocalName p_localName)
 {
-    if (p_type >= NUM_OBJECT_TYPES) return;
+    if (static_cast<int>(p_type) >=
+        static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES))
+        return;
 
     emugl::Mutex::AutoLock _lock(m_lock);
-    m_nameSpace[p_type]->deleteName(p_localName);
+    m_nameSpace[static_cast<int>(p_type)]->deleteName(p_localName);
     ObjectDataMap *map = (ObjectDataMap *)m_objectsData;
     if (map) {
         map->erase(TypedObjectName(p_type, p_localName));
@@ -117,10 +145,12 @@ ShareGroup::deleteName(NamedObjectType p_type, ObjectLocalName p_localName)
 bool
 ShareGroup::isObject(NamedObjectType p_type, ObjectLocalName p_localName)
 {
-    if (p_type >= NUM_OBJECT_TYPES) return 0;
+    if (static_cast<int>(p_type) >=
+        static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES))
+        return 0;
 
     emugl::Mutex::AutoLock _lock(m_lock);
-    return m_nameSpace[p_type]->isObject(p_localName);
+    return m_nameSpace[static_cast<int>(p_type)]->isObject(p_localName);
 }
 
 void
@@ -128,10 +158,13 @@ ShareGroup::replaceGlobalName(NamedObjectType p_type,
                               ObjectLocalName p_localName,
                               unsigned int p_globalName)
 {
-    if (p_type >= NUM_OBJECT_TYPES) return;
+    if (static_cast<int>(p_type) >=
+        static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES))
+        return;
 
     emugl::Mutex::AutoLock _lock(m_lock);
-    m_nameSpace[p_type]->replaceGlobalName(p_localName, p_globalName);
+    m_nameSpace[static_cast<int>(p_type)]->replaceGlobalName(p_localName,
+                                                             p_globalName);
 }
 
 void
@@ -139,7 +172,9 @@ ShareGroup::setObjectData(NamedObjectType p_type,
                           ObjectLocalName p_localName,
                           ObjectDataPtr data)
 {
-    if (p_type >= NUM_OBJECT_TYPES) return;
+    if (static_cast<int>(p_type) >=
+        static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES))
+        return;
 
     emugl::Mutex::AutoLock _lock(m_lock);
 
@@ -159,7 +194,9 @@ ShareGroup::getObjectData(NamedObjectType p_type,
 {
     ObjectDataPtr ret;
 
-    if (p_type >= NUM_OBJECT_TYPES) return ret;
+    if (static_cast<int>(p_type) >=
+        static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES))
+        return ret;
 
     emugl::Mutex::AutoLock _lock(m_lock);
 
@@ -208,7 +245,9 @@ ShareGroup::decTexRefCounterAndReleaseIf0(unsigned int p_globalName) {
         return val;
     }
     map->erase(iterator);
-    m_nameSpace[TEXTURE]->m_globalNameSpace->deleteName(TEXTURE, p_globalName);
+    m_nameSpace[static_cast<int>(NamedObjectType::TEXTURE)]
+            ->m_globalNameSpace->deleteName(NamedObjectType::TEXTURE,
+                                            p_globalName);
     return 0;
 }
 
