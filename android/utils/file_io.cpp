@@ -119,6 +119,47 @@ int android_chmod(const char* path, mode_t mode) {
 // and any code that calls stat should use android_stat instead.
 #ifdef _WIN32
 
+ANDROID_DIR* android_opendir(const char* path) {
+    _WDIR* wdir = _wopendir(Win32UnicodeString(path).c_str());
+    if (!wdir) {
+        return NULL;
+    }
+    auto result = static_cast<ANDROID_DIR*>(calloc(1, sizeof(struct dirent)));
+    result->wdir = wdir;
+    return result;
+}
+
+int android_closedir(ANDROID_DIR* dir) {
+    int ret = _wclosedir(dir->wdir);
+    dir->wdir = NULL;
+    free(dir);
+    return ret;
+}
+
+struct dirent* android_readdir(ANDROID_DIR* dir) {
+    if (!dir || !dir->wdir) {
+        return NULL;
+    }
+    struct _wdirent* wdirent = _wreaddir(dir->wdir);
+    if (!wdirent) {
+        return NULL;
+    }
+    struct dirent* result = &dir->dirent;
+    result->d_ino = wdirent->d_ino;
+    result->d_reclen = wdirent->d_reclen;
+    std::string name = Win32UnicodeString::convertToUtf8(
+            wdirent->d_name, wdirent->d_namlen);
+
+    if (name.size() >= sizeof(result->d_name)) {
+        // Name is too long, so ignore it and loop.
+        return android_readdir(dir);
+    }
+    result->d_namlen = static_cast<unsigned short>(name.size());
+    memcpy(result->d_name, name.c_str(), result->d_namlen + 1);
+
+    return result;
+}
+
 // getcwd cannot use the same macro as the other calls because it places data
 // in one of its parameters and it returns a char pointer, not a result code
 char* __cdecl getcwd(char* buffer, int maxlen) {

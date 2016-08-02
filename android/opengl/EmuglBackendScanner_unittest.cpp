@@ -14,6 +14,7 @@
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
+#include "android/utils/file_io.h"
 
 #include <gtest/gtest.h>
 

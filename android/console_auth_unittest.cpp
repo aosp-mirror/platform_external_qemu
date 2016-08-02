@@ -14,8 +14,9 @@
 #include "android/base/files/ScopedFd.h"
 #include "android/base/misc/FileUtils.h"
 #include "android/utils/eintr_wrapper.h"
-#include "android/utils/tempfile.h"
+#include "android/utils/file_io.h"
 #include "android/utils/path.h"
+#include "android/utils/tempfile.h"
 
 #include <fcntl.h>
 #include <gtest/gtest.h>

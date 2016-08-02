@@ -154,6 +154,9 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
 
     ifeq ($(BUILD_TARGET_OS),windows)
     $(eval $(call insert-windows-icon))
+    # Required to override open(), unlink() and a few others for proper
+    # Win32 Unicode path support.
+    LOCAL_SRC_FILES += android/utils/file_io.cpp
     endif
 
     # To avoid runtime linking issues on Linux and Windows, a custom copy of the

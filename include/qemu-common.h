@@ -81,6 +81,11 @@
 #define TIME_MAX LONG_MAX
 #endif
 
+#if defined(CONFIG_ANDROID) && defined(_WIN32)
+// Required to hack stat() and opendir() to properly support Win32 Unicode paths.
+#include "android/utils/file_io.h"
+#endif
+
 /* HOST_LONG_BITS is the size of a native pointer in bits. */
 #if UINTPTR_MAX == UINT32_MAX
 # define HOST_LONG_BITS 32

@@ -380,7 +380,7 @@ static void tftp_handle_rrq(struct tftp_t *tp, int pktlen)
 	      snprintf(buffer, sizeof(buffer), "%s/%s",
                        tftp_prefix, spt->filename);
 
-	      if (android_stat(buffer, &stat_p) == 0)
+	      if (stat(buffer, &stat_p) == 0)
 		  tsize = stat_p.st_size;
 	      else {
 		  tftp_send_error(spt, 1, "File not found", tp);
