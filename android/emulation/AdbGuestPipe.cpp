@@ -245,6 +245,13 @@ void AdbGuestPipe::onHostConnection(ScopedSocket&& socket) {
 
     android::base::socketSetNonBlocking(socket.get());
 
+    // socketSetNoDelay() reduces the latency of sending data, at the cost
+    // of creating more TCP packets on the connection. It's useful when
+    // doing lots of small send() calls, like the ADB protocol requires.
+    // And since this is on localhost, the packet increase should not be
+    // noticeable.
+    android::base::socketSetNoDelay(socket.get());
+
     mHostSocket.reset(android::base::ThreadLooper::get()->createFdWatch(
             socket.release(),
             [](void* opaque, int fd, unsigned events) {
