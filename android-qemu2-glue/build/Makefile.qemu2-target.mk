@@ -149,6 +149,10 @@ LOCAL_C_INCLUDES += \
     $(QEMU2_SDL2_INCLUDES) \
 
 LOCAL_SRC_FILES += \
+    $(call qemu2-if-target,x86 x86_64, \
+        hw/i386/acpi-build.c \
+        hw/i386/pc_piix.c \
+        ) \
     $(call qemu2-if-windows, \
         stubs/win32-stubs.c \
         ) \
@@ -192,6 +196,10 @@ LOCAL_C_INCLUDES += \
 # For now, use stubs/sdl-null.c as an empty/fake SDL UI backend.
 # TODO: Use the glue code to use the Qt-based UI instead.
 LOCAL_SRC_FILES += \
+    $(call qemu2-if-target,x86 x86_64, \
+        hw/i386/acpi-build.c \
+        hw/i386/pc_piix.c \
+        ) \
     $(call qemu2-if-windows, \
         android-qemu2-glue/stubs/win32-stubs.c \
         ) \

@@ -55,6 +55,10 @@
 #include "migration/migration.h"
 #include "kvm_i386.h"
 
+#ifdef CONFIG_ANDROID
+#include "hw/acpi/goldfish_defs.h"
+#endif
+
 #define MAX_IDE_BUS 2
 
 static const int ide_iobase[MAX_IDE_BUS] = { 0x1f0, 0x170 };
@@ -230,6 +234,21 @@ static void pc_init1(MachineState *machine,
     }
 
     pc_register_ferr_irq(gsi[13]);
+
+#if defined(CONFIG_ANDROID)
+    sysbus_create_simple("goldfish_battery", GOLDFISH_BATTERY_IOMEM_BASE,
+                         gsi[GOLDFISH_BATTERY_IRQ]);
+    sysbus_create_simple("goldfish-events", GOLDFISH_EVENTS_IOMEM_BASE,
+                         gsi[GOLDFISH_EVENTS_IRQ]);
+    sysbus_create_simple("goldfish_pipe", GOLDFISH_PIPE_IOMEM_BASE,
+                         gsi[GOLDFISH_PIPE_IRQ]);
+    sysbus_create_simple("goldfish_fb", GOLDFISH_FB_IOMEM_BASE,
+                         gsi[GOLDFISH_FB_IRQ]);
+    sysbus_create_simple("goldfish_audio", GOLDFISH_AUDIO_IOMEM_BASE,
+                         gsi[GOLDFISH_AUDIO_IRQ]);
+    sysbus_create_simple("goldfish_rtc", GOLDFISH_RTC_IOMEM_BASE,
+                         gsi[GOLDFISH_RTC_IRQ]);
+#endif  // CONFIG_ANDROID
 
     pc_vga_init(isa_bus, pcmc->pci_enabled ? pci_bus : NULL);
 

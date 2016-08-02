@@ -63,6 +63,10 @@
 
 #include "hw/acpi/ipmi.h"
 
+#ifdef CONFIG_ANDROID
+#include "hw/acpi/goldfish_defs.h"
+#endif
+
 /* These are used to size the ACPI tables for -M pc-i440fx-1.7 and
  * -M pc-i440fx-2.0.  Even if the actual amount of AML generated grows
  * a little bit, there should be plenty of free space since the DSDT
@@ -1184,6 +1188,72 @@ static void build_hpet_aml(Aml *table)
     aml_append(table, scope);
 }
 
+#ifdef CONFIG_ANDROID
+static void build_goldfish_device_aml(Aml *scope,
+                                      const char *dev_name,
+                                      const char *hid_name,
+                                      const char *str_name,
+                                      uint32_t iomem_base,
+                                      uint32_t iomem_size,
+                                      uint32_t irq_number)
+{
+    Aml *dev = aml_device(dev_name);
+    Aml *crs;
+
+    aml_append(dev, aml_name_decl("_HID", aml_string(hid_name)));
+    aml_append(dev, aml_name_decl("_STR", aml_unicode(str_name)));
+
+    crs = aml_resource_template();
+    aml_append(crs, aml_memory32_fixed(iomem_base, iomem_size, AML_READ_WRITE));
+    aml_append(crs, aml_interrupt(AML_CONSUMER_PRODUCER, AML_EDGE,
+                                  AML_ACTIVE_HIGH, AML_SHARED, &irq_number, 1));
+    aml_append(dev, aml_name_decl("_CRS", crs));
+    aml_append(scope, dev);
+}
+
+static void build_goldfish_aml(Aml *table)
+{
+    Aml *scope = aml_scope("_SB");
+
+    build_goldfish_device_aml(scope, "GFBY", "GFSH0001", "goldfish battery",
+                              GOLDFISH_BATTERY_IOMEM_BASE,
+                              GOLDFISH_BATTERY_IOMEM_SIZE,
+                              GOLDFISH_BATTERY_IRQ);
+
+    build_goldfish_device_aml(scope, "GFEV", "GFSH0002", "goldfish events",
+                              GOLDFISH_EVENTS_IOMEM_BASE,
+                              GOLDFISH_EVENTS_IOMEM_SIZE,
+                              GOLDFISH_EVENTS_IRQ);
+
+    build_goldfish_device_aml(scope, "GFPP", "GFSH0003", "goldfish pipe",
+                              GOLDFISH_PIPE_IOMEM_BASE,
+                              GOLDFISH_PIPE_IOMEM_SIZE,
+                              GOLDFISH_PIPE_IRQ);
+
+    build_goldfish_device_aml(scope, "GFFB", "GFSH0004", "goldfish framebuffer",
+                              GOLDFISH_FB_IOMEM_BASE,
+                              GOLDFISH_FB_IOMEM_SIZE,
+                              GOLDFISH_FB_IRQ);
+
+    build_goldfish_device_aml(scope, "GFAU", "GFSH0005", "goldfish audio",
+                              GOLDFISH_AUDIO_IOMEM_BASE,
+                              GOLDFISH_AUDIO_IOMEM_SIZE,
+                              GOLDFISH_AUDIO_IRQ);
+
+    build_goldfish_device_aml(scope, "GFSK", "GFSH0006", "goldfish sync",
+                              GOLDFISH_SYNC_IOMEM_BASE,
+                              GOLDFISH_SYNC_IOMEM_SIZE,
+                              GOLDFISH_SYNC_IRQ);
+
+    build_goldfish_device_aml(scope, "GFRT", "GFSH0007", "goldfish rtc",
+                              GOLDFISH_RTC_IOMEM_BASE,
+                              GOLDFISH_RTC_IOMEM_SIZE,
+                              GOLDFISH_RTC_IRQ);
+
+    aml_append(table, scope);
+}
+#endif  /* CONFIG_ANDROID */
+
 static Aml *build_fdinfo_aml(int idx, FloppyDriveType type)
 {
     Aml *dev, *fdi;
@@ -2009,6 +2079,9 @@ build_dsdt(GArray *table_data, BIOSLinker *linker,
         build_isa_devices_aml(dsdt);
         build_q35_pci0_int(dsdt);
     }
+#ifdef CONFIG_ANDROID
+    build_goldfish_aml(dsdt);
+#endif
 
     if (pcmc->legacy_cpu_hotplug) {
         build_legacy_cpu_hotplug_aml(dsdt, machine, pm->cpu_hp_io_base);

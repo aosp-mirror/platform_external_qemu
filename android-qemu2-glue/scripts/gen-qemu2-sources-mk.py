@@ -27,6 +27,8 @@ LINK_QEMU_PREFIX = 'LINK-qemu-system-'
 IGNORED_OBJECTS = [
     '../audio/sdlaudio.o',
     'gdbstub-xml.o',
+    'hw/i386/acpi-build.o',
+    'hw/i386/pc_piix.o',
     '../qmp-introspect.o',
     '../qmp-marshal.o',
     'trace/generated-helpers.o',

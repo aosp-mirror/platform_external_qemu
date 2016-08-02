@@ -910,12 +910,10 @@ QEMU2_TARGET_i386_SOURCES := \
     hw/dma/i8257.c \
     hw/i2c/pm_smbus.c \
     hw/i2c/smbus_ich9.c \
-    hw/i386/acpi-build.c \
     hw/i386/intel_iommu.c \
     hw/i386/kvmvapic.c \
     hw/i386/multiboot.c \
     hw/i386/pc.c \
-    hw/i386/pc_piix.c \
     hw/i386/pc_q35.c \
     hw/i386/pc_sysfw.c \
     hw/i386/pci-assign-load-rom.c \
@@ -1150,12 +1148,10 @@ QEMU2_TARGET_x86_64_SOURCES := \
     hw/dma/i8257.c \
     hw/i2c/pm_smbus.c \
     hw/i2c/smbus_ich9.c \
-    hw/i386/acpi-build.c \
     hw/i386/intel_iommu.c \
     hw/i386/kvmvapic.c \
     hw/i386/multiboot.c \
     hw/i386/pc.c \
-    hw/i386/pc_piix.c \
     hw/i386/pc_q35.c \
     hw/i386/pc_sysfw.c \
     hw/i386/pci-assign-load-rom.c \
