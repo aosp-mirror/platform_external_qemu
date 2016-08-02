@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "348b0ae2_60dc92df",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderThreadInfo.h",
+        "patchSetId": 26
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-02T15:16:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cf8db5b7_ba0f58da",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 45
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_dfcfb67f",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 26
@@ -36,6 +60,30 @@
       "writtenOn": "2016-08-01T22:31:41Z",
       "side": 1,
       "message": "This spec:\n\nhttps://www.khronos.org/registry/egl/sdk/docs/man/html/eglChooseConfig.xhtml\n\nsays that EGL_FALSE will be returned on any error.  Your code seems to imply that config_ret might be EGL_TRUE while err is indicating some error.  Is there some reason to believe that this can happen?  That is, couldn\u0027t the if statement just ask if config_ret \u003d\u003d EGL_FALSE, and only then call s_egl.eglGetError() if so?",
+      "range": {
+        "startLine": 188,
+        "startChar": 4,
+        "endLine": 188,
+        "endChar": 30
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "348b0ae2_20a8ca25",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-02T15:16:02Z",
+      "side": 1,
+      "message": "Hmm, I think I was reading the wording of the spec wrong---from looking at some actual implementations of EGL, it seems that when it says EGL_FALSE is returned on failure, that is actually logically equivalent to an error being generated. I had thought that \"failure\" wasn\u0027t necessarily equivalent to \"XXX error generated\", but it is; I wanted to account for the possibility that an error was generated even if a valid config or context was created. I\u0027ve changed the error getting functions accordingly. Thanks!",
+      "parentUuid": "cf8db5b7_dfcfb67f",
       "range": {
         "startLine": 188,
         "startChar": 4,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "348b0ae2_40adce34",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-02T15:16:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cf8db5b7_bac7583b",
+      "range": {
+        "startLine": 203,
+        "startChar": 4,
+        "endLine": 204,
+        "endChar": 33
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_9ab53ccd",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 26
@@ -82,6 +154,30 @@
       "writtenOn": "2016-08-01T22:31:41Z",
       "side": 1,
       "message": "If you buy my comments above, this should be checking for surf \u003d\u003d EGL_NO_SURFACE, to use the same pattern.",
+      "range": {
+        "startLine": 217,
+        "startChar": 4,
+        "endLine": 217,
+        "endChar": 29
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "348b0ae2_e0a18240",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-02T15:16:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cf8db5b7_9ab53ccd",
       "range": {
         "startLine": 217,
         "startChar": 4,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "348b0ae2_009fc6f7",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-02T15:16:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cf8db5b7_bab2f8e0",
+      "range": {
+        "startLine": 225,
+        "startChar": 2,
+        "endLine": 226,
+        "endChar": 33
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_5ac01427",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 26
@@ -128,6 +248,30 @@
       "writtenOn": "2016-08-01T22:31:41Z",
       "side": 1,
       "message": "Why not just 0?",
+      "range": {
+        "startLine": 235,
+        "startChar": 25,
+        "endLine": 235,
+        "endChar": 28
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "348b0ae2_6051f23c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-02T15:16:02Z",
+      "side": 1,
+      "message": "Those wait results are usually particular hexadecimal codes when you want to look them up. I thought this was consistent with their style.",
+      "parentUuid": "cf8db5b7_5ac01427",
       "range": {
         "startLine": 235,
         "startChar": 25,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "348b0ae2_c06b1eed",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-02T15:16:02Z",
+      "side": 1,
+      "message": "cmd-\u003efenceSync is not a raw OpenGL / EGL sync object; it\u0027s a FenceSyncInfo object that is introduced in one of this patch\u0027s dependencies (https://android-review.googlesource.com/248563).\n\nWe track the actually-signaled status of any cmd-\u003efenceSync objects manually in https://android-review.googlesource.com/248563. It\u0027s possible for more than one thread to issue waits on the same OpenGL sync object created in the guest, and we want to know ASAP when the sync object is actually signaled, because we can avoid extra overhead of eglClientWaitSyncKHR calls.\n\nIn particular, we purposely set cmd-\u003efenceSync to NULL when we know that the original OpenGL sync object is already signaled. NULL signifies both signaled status and the fact that we don\u0027t want to use memory for tracking that sync object anymore.\n\nThe effect of already signaled fence objects is benign. The warning DPRINT is put here more out of curiosity, because according to my limited mental model, I usually don\u0027t expect the guest to pass us a OpenGL sync object on this code path while the guest also waits on it behind our backs in another guest rendering thread. But, it does happen, rarely, while playing Youtube videos or using the browser in general.",
+      "parentUuid": "cf8db5b7_fa556054",
+      "range": {
+        "startLine": 243,
+        "startChar": 3,
+        "endLine": 245,
+        "endChar": 5
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_5a7814d4",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 26
@@ -174,6 +342,30 @@
       "writtenOn": "2016-08-01T22:31:41Z",
       "side": 1,
       "message": "Is it the right thing to do the timeline increment below if the wait_result is not CONDITION_SATISFIED?  Is there a reasonable thing to do if the timeout expires?",
+      "range": {
+        "startLine": 252,
+        "startChar": 8,
+        "endLine": 253,
+        "endChar": 28
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "348b0ae2_202d2aaf",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-02T15:16:02Z",
+      "side": 1,
+      "message": "Here\u0027s what can happen on abnormal wait results:\n\n- normal operation: either the sync object is already signaled and we return immediately, or we wait till the object is signaled. both return EGL_CONDITION_SATISFIED_KHR.\n\n- timeout: the fence command we put in earlier in the OpenGL stream is not actually ever signaled, and we end up blocking in the above eglClientWaitSyncKHR call until our timeout runs out.\n\n- error: eglClientWaitSyncKHR errors out for some weird reason, but most likely having to do with the underlying EGL implementation not really supporting fence objects.\n\nTimeline increment is the correct response to all 3 cases because:\n\n- normal operation: we\u0027ve delayed enough to ensure the sync object is signaled, so increment the timeline.\n\n- timeout: we\u0027ve already timed out and made the guest thread that waits on that fence fd wait for at least as long as the timeout. Which, when using kDefaultTimeoutNsecs, is enough to trip error messages about fence fd\u0027s not being signaled in time. So we are properly emulating the bad behavior already; timeline increment after that isn\u0027t going to make things improperly better.\n\n- error: chances are, the underlying EGL implementation on the host doesn\u0027t actually support fence objects. In this case, we should fail safe: 1) It must be only very old or faulty graphics drivers / GPU\u0027s that don\u0027t support fence objects. 2) The consequences of signaling too early are generally, out of order frames and scrambled textures in some apps. But, not incrementing the timeline means that the app\u0027s rendering freezes. So, despite the faulty GPU driver, not incrementing is too heavyweight a response.",
+      "parentUuid": "cf8db5b7_5a7814d4",
       "range": {
         "startLine": 252,
         "startChar": 8,
@@ -209,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "348b0ae2_c01d5e75",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-02T15:16:02Z",
+      "side": 1,
+      "message": "Oops, they were in a previous iteration of the design. Removed.",
+      "parentUuid": "cf8db5b7_ba1bd880",
+      "range": {
+        "startLine": 287,
+        "startChar": 3,
+        "endLine": 287,
+        "endChar": 26
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_baccb8b7",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 26
@@ -220,6 +436,30 @@
       "writtenOn": "2016-08-01T22:31:41Z",
       "side": 1,
       "message": "Am I understanding correctly that a SyncThread is only ever accessible from a single corresponding RenderThread, which is why there\u0027s no worry about synchronization in this method (or destroySyncThread)?  It might be good to mention this in the overall class comments in the .h file.\n\nAlso, I\u0027ve found the following a useful convention: put a comment like /*static*/ at the definition of a static method, so you know it\u0027s static.  Here and below, for destroySyncThread.",
+      "range": {
+        "startLine": 315,
+        "startChar": 0,
+        "endLine": 315,
+        "endChar": 37
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "348b0ae2_800f563c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-02T15:16:02Z",
+      "side": 1,
+      "message": "That\u0027s right. Added /* static */ comments and explanation in the header file.",
+      "parentUuid": "cf8db5b7_baccb8b7",
       "range": {
         "startLine": 315,
         "startChar": 0,
