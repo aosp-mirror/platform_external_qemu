@@ -162,9 +162,13 @@ GlobalNameSpace::genName(GenNameInfo genNameInfo)
             GLEScontext::dispatcher().glDeleteFramebuffersEXT(1, &lname);
         };
         m_glDelete[static_cast<int>(NamedObjectType::PROGRAM)] =
-                GLEScontext::dispatcher().glDeleteProgram;
+                [](GLuint lname) {
+                    GLEScontext::dispatcher().glDeleteProgram(lname);
+                };
         m_glDelete[static_cast<int>(NamedObjectType::SHADER)] =
-                GLEScontext::dispatcher().glDeleteShader;
+                [](GLuint lname) {
+                    GLEScontext::dispatcher().glDeleteShader(lname);
+                };
     }
     return name;
 }
