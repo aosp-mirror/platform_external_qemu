@@ -17,3 +17,10 @@ milkymist_ac97_in_cb(int avail, uint32_t remaining) "avail %d remaining %u"
 milkymist_ac97_in_cb_transferred(int transferred) "transferred %d"
 milkymist_ac97_out_cb(int free, uint32_t remaining) "free %d remaining %u"
 milkymist_ac97_out_cb_transferred(int transferred) "transferred %d"
+
+# hw/audio/goldfish_audio.c
+goldfish_audio_memory_read(const char *regname, uint32_t value) "%s returns %d"
+goldfish_audio_memory_write(const char *regname, uint32_t value) "%s %08x"
+goldfish_audio_buff_recv(int size, int read) "AUD_read (%d) returned %d"
+goldfish_audio_buff_send(int size, int buffer) "sent %5d bytes to audio output (buffer %d)"
+goldfish_audio_buff_full(int available) "AUDIO_INT_READ_BUFFER_FULL available=%d"
