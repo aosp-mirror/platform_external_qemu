@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "348b0ae2_00ed868b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-08-02T14:30:08Z",
+      "side": 1,
+      "message": "interesting: on old adb backend, it was the \u0027adb pull\u0027 that is slow and was also fixed by yurii\u0027s CL to disable TCP Nagle.",
+      "revId": "eb7f2770cc2f02119bcfe1fbe6152c330b8cd733",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
