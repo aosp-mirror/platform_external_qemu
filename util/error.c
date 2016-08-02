@@ -13,6 +13,7 @@
  */
 
 #include "qemu/osdep.h"
+#include "qemu/abort.h"
 #include "qapi/error.h"
 #include "qemu-common.h"
 #include "qemu/error-report.h"
@@ -32,12 +33,20 @@ Error *error_fatal;
 static void error_handle_fatal(Error **errp, Error *err)
 {
     if (errp == &error_abort) {
+        if (qemu_abort_has_custom_handler()) {
+            qemu_abort("Unexpected error in %s() at %s:%d: %s\n",
+                    err->func, err->src, err->line,
+                    error_get_pretty(err));
+        }
         fprintf(stderr, "Unexpected error in %s() at %s:%d:\n",
                 err->func, err->src, err->line);
         error_report_err(err);
         abort();
     }
     if (errp == &error_fatal) {
+        if (qemu_abort_has_custom_handler()) {
+            qemu_abort("Fatal error: %s\n", error_get_pretty(err));
+        }
         error_report_err(err);
         exit(1);
     }

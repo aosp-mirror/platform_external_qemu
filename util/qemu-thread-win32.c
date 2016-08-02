@@ -12,6 +12,7 @@
  */
 #include "qemu/osdep.h"
 #include "qemu-common.h"
+#include "qemu/abort.h"
 #include "qemu/thread.h"
 #include "qemu/notify.h"
 #include <process.h>
@@ -32,9 +33,7 @@ static void error_exit(int err, const char *msg)
 
     FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
                   NULL, err, 0, (LPTSTR)&pstr, 2, NULL);
-    fprintf(stderr, "qemu: %s: %s\n", msg, pstr);
-    LocalFree(pstr);
-    abort();
+    qemu_abort("qemu: %s: %s\n", msg, pstr);
 }
 
 void qemu_mutex_init(QemuMutex *mutex)

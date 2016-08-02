@@ -15,6 +15,7 @@
 #include <sys/syscall.h>
 #include <linux/futex.h>
 #endif
+#include "qemu/abort.h"
 #include "qemu/thread.h"
 #include "qemu/atomic.h"
 #include "qemu/notify.h"
@@ -35,8 +36,7 @@ void qemu_thread_naming(bool enable)
 
 static void error_exit(int err, const char *msg)
 {
-    fprintf(stderr, "qemu: %s: %s\n", msg, strerror(err));
-    abort();
+    qemu_abort("qemu: %s: %s\n", msg, strerror(err));
 }
 
 void qemu_mutex_init(QemuMutex *mutex)

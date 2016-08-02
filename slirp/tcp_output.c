@@ -39,6 +39,7 @@
  */
 
 #include "qemu/osdep.h"
+#include "qemu/abort.h"
 #include "slirp.h"
 
 static const u_char  tcp_outflags[TCP_NSTATES] = {
@@ -57,7 +58,7 @@ static const u_char  tcp_outflags[TCP_NSTATES] = {
 int
 tcp_output(struct tcpcb *tp)
 {
-	register struct socket *so = tp->t_socket;
+	register struct socket *so;
 	register long len, win;
 	int off, flags, error;
 	register struct mbuf *m;
@@ -68,6 +69,13 @@ tcp_output(struct tcpcb *tp)
 	unsigned optlen, hdrlen;
 	int idle, sendalot;
 
+        if (tp == NULL) {
+            qemu_abort("%s: should not happen: tp == NULL\n", __func__);
+        }
+        so = tp->t_socket;
+        if (so == NULL) {
+            qemu_abort("%s: should not happen: so == NULL\n", __func__);
+        }
 	DEBUG_CALL("tcp_output");
 	DEBUG_ARG("tp = %p", tp);
 

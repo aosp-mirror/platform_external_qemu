@@ -195,6 +195,7 @@ LOCAL_SRC_FILES += \
     qobject/qstring.c \
     trace/control.c \
     trace/qmp.c \
+    util/abort.c \
     util/acl.c \
     util/base64.c \
     util/bitmap.c \

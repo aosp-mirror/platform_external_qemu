@@ -19,6 +19,7 @@
 #include <linux/kvm.h>
 
 #include "qemu-common.h"
+#include "qemu/abort.h"
 #include "qemu/atomic.h"
 #include "qemu/option.h"
 #include "qemu/config-file.h"
@@ -162,8 +163,7 @@ static KVMSlot *kvm_alloc_slot(KVMMemoryListener *kml)
         return slot;
     }
 
-    fprintf(stderr, "%s: no free slot available\n", __func__);
-    abort();
+    qemu_abort("%s: no free slot available\n", __func__);
 }
 
 static KVMSlot *kvm_lookup_matching_slot(KVMMemoryListener *kml,
@@ -402,7 +402,7 @@ static void kvm_log_start(MemoryListener *listener,
 
     r = kvm_section_update_flags(kml, section);
     if (r < 0) {
-        abort();
+        qemu_abort("%s: dirty pages log change\n", __func__);
     }
 }
 
@@ -419,7 +419,7 @@ static void kvm_log_stop(MemoryListener *listener,
 
     r = kvm_section_update_flags(kml, section);
     if (r < 0) {
-        abort();
+        qemu_abort("%s: dirty pages log change\n", __func__);
     }
 }
 
@@ -754,9 +754,8 @@ static void kvm_set_phys_mem(KVMMemoryListener *kml,
         mem->memory_size = 0;
         err = kvm_set_user_memory_region(kml, mem);
         if (err) {
-            fprintf(stderr, "%s: error unregistering overlapping slot: %s\n",
+            qemu_abort("%s: error unregistering overlapping slot: %s\n",
                     __func__, strerror(-err));
-            abort();
         }
 
         /* Workaround for older KVM versions: we can't join slots, even not by
@@ -777,9 +776,8 @@ static void kvm_set_phys_mem(KVMMemoryListener *kml,
 
             err = kvm_set_user_memory_region(kml, mem);
             if (err) {
-                fprintf(stderr, "%s: error updating slot: %s\n", __func__,
+                qemu_abort("%s: error updating slot: %s\n", __func__,
                         strerror(-err));
-                abort();
             }
 
             start_addr += old.memory_size;
@@ -798,14 +796,13 @@ static void kvm_set_phys_mem(KVMMemoryListener *kml,
 
             err = kvm_set_user_memory_region(kml, mem);
             if (err) {
-                fprintf(stderr, "%s: error registering prefix slot: %s\n",
-                        __func__, strerror(-err));
+                qemu_abort("%s: error registering prefix slot: %s\n"
 #ifdef TARGET_PPC
-                fprintf(stderr, "%s: This is probably because your kernel's " \
+                                "This is probably because your kernel's " \
                                 "PAGE_SIZE is too big. Please try to use 4k " \
-                                "PAGE_SIZE!\n", __func__);
+                                "PAGE_SIZE!\n"
 #endif
-                abort();
+                        ,__func__ , strerror(-err));
             }
         }
 
@@ -822,9 +819,8 @@ static void kvm_set_phys_mem(KVMMemoryListener *kml,
 
             err = kvm_set_user_memory_region(kml, mem);
             if (err) {
-                fprintf(stderr, "%s: error registering suffix slot: %s\n",
+                qemu_abort("%s: error registering suffix slot: %s\n",
                         __func__, strerror(-err));
-                abort();
             }
         }
     }
@@ -844,9 +840,8 @@ static void kvm_set_phys_mem(KVMMemoryListener *kml,
 
     err = kvm_set_user_memory_region(kml, mem);
     if (err) {
-        fprintf(stderr, "%s: error registering slot: %s\n", __func__,
+        qemu_abort("%s: error registering slot: %s\n", __func__,
                 strerror(-err));
-        abort();
     }
 }
 
@@ -876,7 +871,7 @@ static void kvm_log_sync(MemoryListener *listener,
 
     r = kvm_physical_sync_dirty_bitmap(kml, section);
     if (r < 0) {
-        abort();
+        qemu_abort("%s: sync dirty bitmap\n", __func__);
     }
 }
 
@@ -892,9 +887,8 @@ static void kvm_mem_ioeventfd_add(MemoryListener *listener,
                                data, true, int128_get64(section->size),
                                match_data);
     if (r < 0) {
-        fprintf(stderr, "%s: error adding ioeventfd: %s\n",
+        qemu_abort("%s: error adding ioeventfd: %s\n",
                 __func__, strerror(-r));
-        abort();
     }
 }
 
@@ -910,7 +904,7 @@ static void kvm_mem_ioeventfd_del(MemoryListener *listener,
                                data, false, int128_get64(section->size),
                                match_data);
     if (r < 0) {
-        abort();
+        qemu_abort("%s: set ioeventfd mmio", __func__);
     }
 }
 
@@ -926,9 +920,8 @@ static void kvm_io_ioeventfd_add(MemoryListener *listener,
                               data, true, int128_get64(section->size),
                               match_data);
     if (r < 0) {
-        fprintf(stderr, "%s: error adding ioeventfd: %s\n",
+        qemu_abort("%s: error adding ioeventfd: %s\n",
                 __func__, strerror(-r));
-        abort();
     }
 }
 
@@ -945,7 +938,7 @@ static void kvm_io_ioeventfd_del(MemoryListener *listener,
                               data, false, int128_get64(section->size),
                               match_data);
     if (r < 0) {
-        abort();
+        qemu_abort("%s: set ioeventfd pio", __func__);
     }
 }
 
@@ -997,8 +990,7 @@ int kvm_set_irq(KVMState *s, int irq, int level)
     event.irq = irq;
     ret = kvm_vm_ioctl(s, s->irq_set_ioctl, &event);
     if (ret < 0) {
-        perror("kvm_set_irq");
-        abort();
+        qemu_abort("%s: %s", __func__, strerror(errno));
     }
 
     return (s->irq_set_ioctl == KVM_IRQ_LINE) ? 1 : event.status;
@@ -1406,7 +1398,7 @@ void kvm_irqchip_release_virq(KVMState *s, int virq)
 
 int kvm_irqchip_send_msi(KVMState *s, MSIMessage msg)
 {
-    abort();
+    qemu_abort("%s: should not be called\n", __func__);
 }
 
 int kvm_irqchip_add_msi_route(KVMState *s, int vector, PCIDevice *dev)
@@ -1426,7 +1418,7 @@ int kvm_irqchip_add_hv_sint_route(KVMState *s, uint32_t vcpu, uint32_t sint)
 
 static int kvm_irqchip_assign_irqfd(KVMState *s, int fd, int virq, bool assign)
 {
-    abort();
+    qemu_abort("%s: should not be called\n", __func__);
 }
 
 int kvm_irqchip_update_msi_route(KVMState *s, int virq, MSIMessage msg)
@@ -2145,8 +2137,7 @@ void kvm_device_access(int fd, int group, uint64_t attr,
     if (err < 0) {
         error_report("KVM_%s_DEVICE_ATTR failed: %s",
                      write ? "SET" : "GET", strerror(-err));
-        error_printf("Group %d attr 0x%016" PRIx64 "\n", group, attr);
-        abort();
+        qemu_abort("Group %d attr 0x%016" PRIx64 "\n", group, attr);
     }
 }
 
