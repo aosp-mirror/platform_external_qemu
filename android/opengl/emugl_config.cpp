@@ -154,6 +154,12 @@ bool emuglConfig_init(EmuglConfig* config,
             gpu_enabled = true;
             gpu_mode = gpu_option;
         }
+    } else {
+        // Support "hw.gpu.mode=on" in config.ini
+        if (!strcmp(gpu_mode, "on") || !strcmp(gpu_mode, "enable")) {
+            gpu_enabled = true;
+            gpu_mode = "host";
+        }
     }
 
     if (gpu_mode &&
