@@ -1,0 +1,136 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "348b0ae2_c09a3eb4",
+        "filename": "android/utils/file_io.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-02T15:37:39Z",
+      "side": 1,
+      "message": "I suggest moving this comment to the .h file so that we know it\u0027s just a call to _wstati64 in the very end.",
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "348b0ae2_20dc4a6c",
+        "filename": "android/utils/file_io.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-02T15:37:39Z",
+      "side": 1,
+      "message": "Can we still use this even if we end up using a purely windows toolchain on visual studio?",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 61
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "348b0ae2_a0f85ae1",
+        "filename": "android/utils/file_io.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-02T15:37:39Z",
+      "side": 1,
+      "message": "This part makes it look like struct stat is independent of the others and it\u0027s not defined as any of them.",
+      "range": {
+        "startLine": 60,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 72
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "348b0ae2_20052ae2",
+        "filename": "android/utils/file_io.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-02T15:37:39Z",
+      "side": 1,
+      "message": "Things that need clarification IMO:\n\n- \"stat\" is a macro\n- \"stat\" is defined to be _stati64 (_stat64) (also, when isn\u0027t it?)",
+      "range": {
+        "startLine": 58,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 29
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "348b0ae2_a09dbaae",
+        "filename": "android/utils/file_io.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-02T15:37:39Z",
+      "side": 1,
+      "message": "Could there be something up with the comment above versus this one?\n\n1) How do we actually end up with struct _stati64?\n2) there\u0027s no mention of struct stati64 until now\n\nI think we need to know that \u0027stat\u0027 is defined as something else first, in the first comment",
+      "range": {
+        "startLine": 82,
+        "startChar": 0,
+        "endLine": 83,
+        "endChar": 76
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "348b0ae2_e0d5023f",
+        "filename": "android/utils/file_io.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-02T15:37:39Z",
+      "side": 1,
+      "message": "Same here",
+      "range": {
+        "startLine": 87,
+        "startChar": 0,
+        "endLine": 88,
+        "endChar": 75
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
