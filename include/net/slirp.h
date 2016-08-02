@@ -42,6 +42,18 @@ int net_slirp_smb(const char *exported_dir);
 
 void hmp_info_usernet(Monitor *mon, const QDict *qdict);
 
+/* Functions to be called by |out_send| and |in_send| implementations below */
+/* |opaque| is the result of net_slirp_set_shapers(). */
+void net_slirp_output_raw(void *opaque, const uint8_t *pkt, int pkt_len);
+void net_slirp_receive_raw(void* opaque, const uint8_t *buf, size_t size);
+
+typedef void (*SlirpShaperSendFunc)(void* opaque, const void* data, int len);
+
+void* net_slirp_set_shapers(void* out_opaque,
+                            SlirpShaperSendFunc out_send,
+                            void* in_opaque,
+                            SlirpShaperSendFunc in_send);
+
 #endif
 
 #endif /* QEMU_NET_SLIRP_H */

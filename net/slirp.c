@@ -33,6 +33,7 @@
 #include "clients.h"
 #include "hub.h"
 #include "monitor/monitor.h"
+#include "qemu/abort.h"
 #include "qemu/error-report.h"
 #include "qemu/sockets.h"
 #include "slirp/libslirp.h"
@@ -73,11 +74,18 @@ struct slirp_config_str {
     int legacy_format;
 };
 
+typedef struct SlirpShaper {
+    void* peer;
+    void (*send)(void *peer, const void *packet, int packet_len);
+} SlirpShaper;
+
 typedef struct SlirpState {
     NetClientState nc;
     QTAILQ_ENTRY(SlirpState) entry;
     Slirp *slirp;
     Notifier exit_notifier;
+    SlirpShaper shaper_out;
+    SlirpShaper shaper_in;
 #ifndef _WIN32
     char smb_dir[128];
 #endif
@@ -104,19 +112,40 @@ static void slirp_smb_cleanup(SlirpState *s);
 static inline void slirp_smb_cleanup(SlirpState *s) { }
 #endif
 
+void net_slirp_output_raw(void *opaque, const uint8_t *pkt, int pkt_len)
+{
+    SlirpState *s = opaque;
+    qemu_send_packet(&s->nc, pkt, pkt_len);
+}
+
 void slirp_output(void *opaque, const uint8_t *pkt, int pkt_len)
 {
     SlirpState *s = opaque;
+    SlirpShaper* shaper = &s->shaper_out;
 
-    qemu_send_packet(&s->nc, pkt, pkt_len);
+    if (shaper->send) {
+        shaper->send(shaper->peer, pkt, pkt_len);
+    } else {
+        net_slirp_output_raw(opaque, pkt, pkt_len);
+    }
+}
+
+void net_slirp_receive_raw(void* opaque, const uint8_t *buf, size_t size)
+{
+    SlirpState *s = opaque;
+    slirp_input(s->slirp, buf, size);
 }
 
 static ssize_t net_slirp_receive(NetClientState *nc, const uint8_t *buf, size_t size)
 {
     SlirpState *s = DO_UPCAST(SlirpState, nc, nc);
+    SlirpShaper *shaper = &s->shaper_in;
 
-    slirp_input(s->slirp, buf, size);
-
+    if (shaper->send) {
+        shaper->send(shaper->peer, buf, size);
+    } else {
+        net_slirp_receive_raw(s, buf, size);
+    }
     return size;
 }
 
@@ -362,6 +391,9 @@ static int net_slirp_init(NetClientState *peer, const char *model,
 
     s->exit_notifier.notify = slirp_smb_exit;
     qemu_add_exit_notifier(&s->exit_notifier);
+
+    s->shaper_out.send = NULL;
+    s->shaper_in.send = NULL;
     return 0;
 
 error:
@@ -913,3 +945,20 @@ int net_slirp_parse_legacy(QemuOptsList *opts_list, const char *optarg, int *ret
     return 1;
 }
 
+void* net_slirp_set_shapers(void* out_opaque,
+                            SlirpShaperSendFunc out_send,
+                            void* in_opaque,
+                            SlirpShaperSendFunc in_send)
+{
+    SlirpState *s = QTAILQ_FIRST(&slirp_stacks);
+    if (!s) {
+        qemu_abort("Trying to set network shapers before slirp "
+                   "initialization\n");
+    }
+    s->shaper_out.peer = out_opaque;
+    s->shaper_out.send = out_send;
+    s->shaper_in.peer = in_opaque;
+    s->shaper_in.send = in_send;
+
+    return s;
+}
