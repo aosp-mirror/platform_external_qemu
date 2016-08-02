@@ -91,8 +91,8 @@ LOCAL_SRC_FILES += \
     hw/intc/goldfish_pic.c \
     hw/timer/goldfish_timer.c \
     hw/misc/goldfish_battery.c \
+    hw/misc/goldfish_pipe.c \
 
-#     hw/misc/android_pipe.c \
 #     hw/misc/goldfish_sync.c \
 #     $(call qemu2-if-target,arm arm64,\
 #         hw/arm/ranchu.c) \
