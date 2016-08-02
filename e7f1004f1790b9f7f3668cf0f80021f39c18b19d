@@ -19,6 +19,121 @@
     },
     {
       "key": {
+        "uuid": "b4029af5_02c92e24",
+        "filename": "android/utils/file_io.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-02T16:23:18Z",
+      "side": 1,
+      "message": "this is so C that even auto doesn\u0027t save it :)",
+      "range": {
+        "startLine": 127,
+        "startChar": 4,
+        "endLine": 127,
+        "endChar": 78
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f4533225_2969c9ca",
+        "filename": "android/utils/file_io.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-02T16:23:18Z",
+      "side": 1,
+      "message": "should this be sizeof(ANDROID_DIR) ?",
+      "range": {
+        "startLine": 127,
+        "startChar": 54,
+        "endLine": 127,
+        "endChar": 75
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b430dae9_32fa4866",
+        "filename": "android/utils/file_io.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-02T16:23:18Z",
+      "side": 1,
+      "message": "why not \u0027new\u0027 ?",
+      "range": {
+        "startLine": 127,
+        "startChar": 44,
+        "endLine": 127,
+        "endChar": 50
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "746022e5_b0c640b1",
+        "filename": "android/utils/file_io.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-02T16:23:18Z",
+      "side": 1,
+      "message": "what about the null-terminator? size() doesn\u0027t include it",
+      "range": {
+        "startLine": 153,
+        "startChar": 20,
+        "endLine": 153,
+        "endChar": 22
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4f9ce3d_e0fabc11",
+        "filename": "android/utils/file_io.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-02T16:23:18Z",
+      "side": 1,
+      "message": "many long names in a directory will cause stack overflow here",
+      "range": {
+        "startLine": 155,
+        "startChar": 15,
+        "endLine": 155,
+        "endChar": 36
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "348b0ae2_20dc4a6c",
         "filename": "android/utils/file_io.h",
         "patchSetId": 1
@@ -35,6 +150,53 @@
         "startChar": 0,
         "endLine": 48,
         "endChar": 61
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3456aa15_ee905b3f",
+        "filename": "android/utils/file_io.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-02T16:23:18Z",
+      "side": 1,
+      "message": "most probably we will need to add some additional definitions here, but the general idea will remain the same",
+      "parentUuid": "348b0ae2_20dc4a6c",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 61
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3456aa15_ce8d9729",
+        "filename": "android/utils/file_io.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-02T16:23:18Z",
+      "side": 1,
+      "message": "nit: this is true only for MinGW, MSVC\u0027s long is always 32-bit",
+      "range": {
+        "startLine": 51,
+        "startChar": 18,
+        "endLine": 51,
+        "endChar": 35
       },
       "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
@@ -127,6 +289,29 @@
         "startChar": 0,
         "endLine": 88,
         "endChar": 75
+      },
+      "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "145b6640_6a0d773c",
+        "filename": "android/utils/file_io.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-02T16:23:18Z",
+      "side": 1,
+      "message": "what about defining these in the makefile instead, to make sure all new code gets the definitions? Or we can force-include file_io.h into all files from there",
+      "range": {
+        "startLine": 108,
+        "startChar": 0,
+        "endLine": 111,
+        "endChar": 23
       },
       "revId": "e7f1004f1790b9f7f3668cf0f80021f39c18b19d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
