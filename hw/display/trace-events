@@ -120,3 +120,9 @@ qxl_set_client_capabilities_unsupported_by_revision(int qid, int revision) "%d r
 qxl_render_blit(int32_t stride, int32_t left, int32_t right, int32_t top, int32_t bottom) "stride=%d [%d, %d, %d, %d]"
 qxl_render_guest_primary_resized(int32_t width, int32_t height, int32_t stride, int32_t bytes_pp, int32_t bits_pp) "%dx%d, stride %d, bpp %d, depth %d"
 qxl_render_update_area_done(void *cookie) "%p"
+
+# hw/display/goldfish_fb.c
+goldfish_fb_memory_read(uint32_t addr, uint32_t value) "addr %08x value %08x"
+goldfish_fb_memory_write(uint32_t addr, uint32_t value) "addr %08x value %08x"
+goldfish_fb_update_display(int y, int h, int x, int w) "y:%d,h:%d,x=%d,w=%d"
+goldfish_fb_update_stats(float peak, float total) "peak %.2f %%  total %.2f %%"
