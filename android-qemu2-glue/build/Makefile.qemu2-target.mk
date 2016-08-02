@@ -82,8 +82,8 @@ LOCAL_SRC_FILES += \
 
 LOCAL_SRC_FILES += \
     hw/audio/goldfish_audio.c \
+    hw/char/goldfish_tty.c \
 
-#     hw/char/goldfish_tty.c \
 #     hw/display/framebuffer.c \
 #     hw/display/goldfish_fb.c \
 #     hw/input/goldfish_events.c \
