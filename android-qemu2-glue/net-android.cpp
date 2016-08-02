@@ -62,30 +62,3 @@ slirp_init_shapers(void* slirp_state, void* net_client_state, Slirp* slirp)
 }
 #endif  // CONFIG_SLIRP
 
-int
-android_parse_network_speed(const char*  speed)
-{
-    double upload = 0., download = 0.;
-    if (!android_network_speed_parse(speed, &upload, &download)) {
-        return -1;
-    }
-
-    android_net_upload_speed = upload;
-    android_net_download_speed = download;
-
-    return 0;
-}
-
-
-int
-android_parse_network_latency(const char*  delay)
-{
-    double min_delay_ms = 0., max_delay_ms = 0.;
-    if (!android_network_latency_parse(delay, &min_delay_ms, &max_delay_ms)) {
-        return -1;
-    }
-    android_net_min_latency = (int)min_delay_ms;
-    android_net_max_latency = (int)max_delay_ms;
-
-    return 0;
-}

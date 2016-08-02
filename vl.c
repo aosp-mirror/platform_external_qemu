@@ -127,6 +127,7 @@
 #include "android/skin/winsys.h"
 #include "android/main-common.h"
 #include "android/multitouch-port.h"
+#include "android/network/control.h"
 #include "android/network/globals.h"
 #include "android/opengl/emugl_config.h"
 #include "android/ui-emu-agent.h"
@@ -4265,14 +4266,14 @@ int run_qemu_main(int argc, const char **argv)
 
     if (android_op_netspeed) {
         /* The command line gives the network speed */
-        if (android_parse_network_speed(android_op_netspeed) < 0) {
+        if (!android_network_set_speed(android_op_netspeed)) {
             fprintf(stderr, "invalid -netspeed parameter '%s'\n",
                     android_op_netspeed);
             return 1;
         }
     }
 
-    if (android_parse_network_latency(android_op_netdelay) < 0) {
+    if (!android_network_set_latency(android_op_netdelay)) {
         fprintf(stderr, "invalid -netdelay parameter '%s'",
                 android_op_netdelay);
         return 1;
