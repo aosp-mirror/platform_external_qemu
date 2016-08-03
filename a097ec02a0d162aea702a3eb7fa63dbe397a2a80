@@ -308,6 +308,30 @@
     },
     {
       "key": {
+        "uuid": "54d23e19_ca8db729",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-03T18:29:33Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "54d23e19_e479d45d",
+      "range": {
+        "startLine": 235,
+        "startChar": 25,
+        "endLine": 235,
+        "endChar": 28
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_fa556054",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 26
@@ -379,6 +403,30 @@
     },
     {
       "key": {
+        "uuid": "54d23e19_b05e267a",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-03T18:29:33Z",
+      "side": 1,
+      "message": "It never hurts to verify, and in fact this issue you raised is especially on point :D\n\nI looked into it more, and it looks like although we are supposed to be calling setSignaled when a sync object is signaled, we are not doing that where it counts (either here, nor in yet another CL https://android-review.googlesource.com/223032 (sorry for being misleading there)).\n\nBut then, with all the other revisions and rebases that were going on, I think I totally dropped the setSignaled calls altogether.\n\nI also simplified FenceSyncInfo to just use the existence of FenceSync objects to represent signaled-ness. So that\u0027s quite bad, plus it also revealed a potential problem with FenceSyncInfo\u0027s collection of signaled/nonsignaled infos growing monotonically (also fixed).",
+      "parentUuid": "54d23e19_843d6876",
+      "range": {
+        "startLine": 243,
+        "startChar": 3,
+        "endLine": 245,
+        "endChar": 5
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_5a7814d4",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 26
@@ -438,6 +486,30 @@
       "side": 1,
       "message": "Thanks for explaining this.  My own inclination would be to put this explanation in the code -- but I have a maybe tend to value detailed explanations like this in the code more than some, and reasonable people can differ.  I leave it up to you; maybe some shortened form of this?  Maybe mentioning the point that if the timeout happens, other errors will be triggered is worth mentioning.",
       "parentUuid": "348b0ae2_202d2aaf",
+      "range": {
+        "startLine": 252,
+        "startChar": 8,
+        "endLine": 253,
+        "endChar": 28
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54d23e19_b0b706d2",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-03T18:29:33Z",
+      "side": 1,
+      "message": "Added a comment incorporating this info.",
+      "parentUuid": "54d23e19_e4d5540d",
       "range": {
         "startLine": 252,
         "startChar": 8,
