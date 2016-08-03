@@ -140,6 +140,30 @@
       "revId": "013a16164df7c0e94f7ded4ce6132dbd73b9cc60",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54d23e19_246c9ca4",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-03T17:06:21Z",
+      "side": 1,
+      "message": "This looks *much* better to me; thanks for doing this!",
+      "parentUuid": "348b0ae2_c03ebebc",
+      "range": {
+        "startLine": 56,
+        "startChar": 9,
+        "endLine": 56,
+        "endChar": 20
+      },
+      "revId": "013a16164df7c0e94f7ded4ce6132dbd73b9cc60",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
