@@ -29,13 +29,19 @@ namespace base {
 class MessageChannelBase {
 public:
     // Get the current channel size
-    size_t size() const { return mCount; }
+    size_t size() const {
+        android::base::AutoLock lock(mLock);
+        return mCount;
+    }
 
     // Abort the currently pending operations and don't allow any other ones
     void stop();
 
     // Check if the channel is stopped.
-    bool isStopped() const { return mStopped; }
+    bool isStopped() const {
+        android::base::AutoLock lock(mLock);
+        return isStoppedLocked();
+    }
 
 protected:
     // Constructor. |capacity| is the buffer capacity in messages.
@@ -66,12 +72,16 @@ protected:
     // the corresponding message.
     void afterRead();
 
+    // A version of isStopped() that doesn't lock the channel but expects it
+    // to be locked by the caller.
+    bool isStoppedLocked() const { return mStopped; }
+
 private:
     size_t mPos = 0;
     size_t mCount = 0;
     size_t mCapacity;
     bool mStopped = false;
-    Lock mLock;
+    mutable Lock mLock;     // Mutable to allow const members to lock it.
     ConditionVariable mCanRead;
     ConditionVariable mCanWrite;
 };
@@ -93,34 +103,37 @@ public:
 
     bool send(const T& msg) {
         size_t pos = beforeWrite();
-        if (!isStopped()) {
+        bool res = !isStoppedLocked();
+        if (res) {
             mItems[pos] = msg;
         }
         afterWrite();
-        return !isStopped();
+        return res;
     }
 
     bool send(T&& msg) {
         size_t pos = beforeWrite();
-        if (!isStopped()) {
+        bool res = !isStoppedLocked();
+        if (res) {
             mItems[pos] = std::move(msg);
         }
         afterWrite();
-        return !isStopped();
+        return res;
     }
 
     bool receive(T* msg) {
         size_t pos = beforeRead();
-        if (!isStopped()) {
+        bool res = !isStoppedLocked();
+        if (res) {
             *msg = std::move(mItems[pos]);
         }
         afterRead();
-        return !isStopped();
+        return res;
     }
 
     Optional<T> receive() {
         size_t pos = beforeRead();
-        if (!isStopped()) {
+        if (!isStoppedLocked()) {
             Optional<T> msg(std::move(mItems[pos]));
             afterRead();
             return msg;

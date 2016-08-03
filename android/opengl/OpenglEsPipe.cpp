@@ -157,7 +157,7 @@ public:
             }
 
             const size_t curSize =
-                    std::min(buff->size - buffOffset, mDataForReadingLeft);
+                    std::min(buff->size - buffOffset, mDataForReadingLeft.load());
             memcpy(buff->data + buffOffset,
                 mDataForReading.data() +
                         (mDataForReading.size() - mDataForReadingLeft),
@@ -326,7 +326,7 @@ private:
     // If guest didn't have enough room for the whole buffer, we track the
     // number of remaining bytes in |mDataForReadingLeft| for the next read().
     ChannelBuffer mDataForReading;
-    size_t mDataForReadingLeft = 0;
+    std::atomic<size_t> mDataForReadingLeft { 0 };
 
     DISALLOW_COPY_ASSIGN_AND_MOVE(EmuglPipe);
 };
