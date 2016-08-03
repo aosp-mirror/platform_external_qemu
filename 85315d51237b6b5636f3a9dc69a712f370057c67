@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "54231e3a_9c86690d",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 28
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-03T23:08:25Z",
+      "side": 1,
+      "message": "Could you make this a private static variable of the FenceSyncInfo class (as kind of implied by the \"s\" name?)",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 23
+      },
+      "revId": "85315d51237b6b5636f3a9dc69a712f370057c67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54231e3a_5c91b140",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 28
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-03T23:08:25Z",
+      "side": 1,
+      "message": "/*static*/",
+      "range": {
+        "startLine": 60,
+        "startChar": 0,
+        "endLine": 60,
+        "endChar": 13
+      },
+      "revId": "85315d51237b6b5636f3a9dc69a712f370057c67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54231e3a_9993db54",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-03T23:08:25Z",
+      "side": 1,
+      "message": "You used the initial \"m\"-for-member convention for the instance variables of the instance members below, but not here.\n\nhttps://docs.google.com/document/d/1QivJI_03TcfRAyMGWkTNHEdiQh8h_F-rYGup9soSeLA/edit#heading\u003dh.to9xa261xn1w\n\nsays to the use the \"m\" convention, and camel-case, as you did below.  (also allows you to use the same name for the constructor arg, except for the m.  It could become \"glCtx\" which is used to initialize \"mGlCtx\".",
+      "range": {
+        "startLine": 55,
+        "startChar": 3,
+        "endLine": 56,
+        "endChar": 17
+      },
+      "revId": "85315d51237b6b5636f3a9dc69a712f370057c67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54231e3a_fcb20595",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-03T23:08:25Z",
+      "side": 1,
+      "message": "I believe this is now undefined?  Because setSignaled is the only way things get removed from the table?",
+      "range": {
+        "startLine": 73,
+        "startChar": 4,
+        "endLine": 73,
+        "endChar": 37
+      },
+      "revId": "85315d51237b6b5636f3a9dc69a712f370057c67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54231e3a_3ccabd47",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-03T23:08:25Z",
+      "side": 1,
+      "message": "Could you given these spec comments for all these methods?  Per-method specs will make the class-level explanation more clear, I think.",
+      "range": {
+        "startLine": 72,
+        "startChar": 1,
+        "endLine": 76,
+        "endChar": 52
+      },
+      "revId": "85315d51237b6b5636f3a9dc69a712f370057c67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
