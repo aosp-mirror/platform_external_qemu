@@ -284,6 +284,30 @@
     },
     {
       "key": {
+        "uuid": "54d23e19_e479d45d",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-03T17:06:21Z",
+      "side": 1,
+      "message": "Fair enough, thanks.",
+      "parentUuid": "348b0ae2_6051f23c",
+      "range": {
+        "startLine": 235,
+        "startChar": 25,
+        "endLine": 235,
+        "endChar": 28
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_fa556054",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 26
@@ -331,6 +355,30 @@
     },
     {
       "key": {
+        "uuid": "54d23e19_843d6876",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-03T17:06:21Z",
+      "side": 1,
+      "message": "If you\u0027re saying that the 248563 cl does the setting of cmd-\u003efenceSync to NULL, I don\u0027t see it doing that explicitly.  Are you perhaps saying that the return value of FenceSyncInfo::findNonSignaledSync from that CL is used as the input value to triggerWait, in some code not in either of these CLs?\n\nHaving raised the issue, I feel duty-bound to figure out how cmd-\u003efenceSync can be NULL in this test, and to verify that this means what you say :-).  I trust that it probably does, but if don\u0027t follow through, what\u0027s the purpose of code reviews :-)?",
+      "parentUuid": "348b0ae2_c06b1eed",
+      "range": {
+        "startLine": 243,
+        "startChar": 3,
+        "endLine": 245,
+        "endChar": 5
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_5a7814d4",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 26
@@ -366,6 +414,30 @@
       "side": 1,
       "message": "Here\u0027s what can happen on abnormal wait results:\n\n- normal operation: either the sync object is already signaled and we return immediately, or we wait till the object is signaled. both return EGL_CONDITION_SATISFIED_KHR.\n\n- timeout: the fence command we put in earlier in the OpenGL stream is not actually ever signaled, and we end up blocking in the above eglClientWaitSyncKHR call until our timeout runs out.\n\n- error: eglClientWaitSyncKHR errors out for some weird reason, but most likely having to do with the underlying EGL implementation not really supporting fence objects.\n\nTimeline increment is the correct response to all 3 cases because:\n\n- normal operation: we\u0027ve delayed enough to ensure the sync object is signaled, so increment the timeline.\n\n- timeout: we\u0027ve already timed out and made the guest thread that waits on that fence fd wait for at least as long as the timeout. Which, when using kDefaultTimeoutNsecs, is enough to trip error messages about fence fd\u0027s not being signaled in time. So we are properly emulating the bad behavior already; timeline increment after that isn\u0027t going to make things improperly better.\n\n- error: chances are, the underlying EGL implementation on the host doesn\u0027t actually support fence objects. In this case, we should fail safe: 1) It must be only very old or faulty graphics drivers / GPU\u0027s that don\u0027t support fence objects. 2) The consequences of signaling too early are generally, out of order frames and scrambled textures in some apps. But, not incrementing the timeline means that the app\u0027s rendering freezes. So, despite the faulty GPU driver, not incrementing is too heavyweight a response.",
       "parentUuid": "cf8db5b7_5a7814d4",
+      "range": {
+        "startLine": 252,
+        "startChar": 8,
+        "endLine": 253,
+        "endChar": 28
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54d23e19_e4d5540d",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-03T17:06:21Z",
+      "side": 1,
+      "message": "Thanks for explaining this.  My own inclination would be to put this explanation in the code -- but I have a maybe tend to value detailed explanations like this in the code more than some, and reasonable people can differ.  I leave it up to you; maybe some shortened form of this?  Maybe mentioning the point that if the timeout happens, other errors will be triggered is worth mentioning.",
+      "parentUuid": "348b0ae2_202d2aaf",
       "range": {
         "startLine": 252,
         "startChar": 8,
