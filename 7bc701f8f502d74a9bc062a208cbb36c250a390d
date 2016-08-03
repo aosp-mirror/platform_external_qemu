@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "54231e3a_5f144399",
+        "filename": "android/opengl/GLProcessPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-03T23:52:20Z",
+      "side": 1,
+      "message": "If you\u0027re changing the name of the concept from GrallocPipe to GLProcessPipe (which seems to me like a good thing, given it\u0027s new, more general usage), then you need to go through all the comments and make sure they make sense given the new naming.  Maybe \"releasing gralloc resources\" just becomes an example of a possible use of GLProcessPipe.",
+      "range": {
+        "startLine": 24,
+        "startChar": 3,
+        "endLine": 24,
+        "endChar": 14
+      },
+      "revId": "7bc701f8f502d74a9bc062a208cbb36c250a390d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54231e3a_bfa23f94",
+        "filename": "android/opengl/GLProcessPipe.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-03T23:52:20Z",
+      "side": 1,
+      "message": "If you\u0027re changing the name of this function, it seems like you need to change the text of this comment as well.",
+      "range": {
+        "startLine": 16,
+        "startChar": 1,
+        "endLine": 17,
+        "endChar": 40
+      },
+      "revId": "7bc701f8f502d74a9bc062a208cbb36c250a390d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54231e3a_9fbe5b78",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/Renderer.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-03T23:52:20Z",
+      "side": 1,
+      "message": "Comment needs to reflect the new, more general specification of the method.",
+      "range": {
+        "startLine": 134,
+        "startChar": 10,
+        "endLine": 134,
+        "endChar": 35
+      },
+      "revId": "7bc701f8f502d74a9bc062a208cbb36c250a390d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54231e3a_7f9fc7f6",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 821,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-03T23:52:20Z",
+      "side": 1,
+      "message": "I assume that this comment applies equally well to images?  If so, move it above, and change the wording so its clear that it applies to all kinds of GLObjects that we keep track of.  (And I think this comment would be made even a little bit more clear if it added, after the second line \"-- which is why each process is mapped to a multiset of color buffer handles, rather than just a set.\")\n\nActually, maybe this comment doesn\u0027t apply to images -- I note that the map is from puid to Set\u003cImage\u003e, not MultiSet, as was the case for color buffers.  So I guess each image can get created only once per puid?",
+      "range": {
+        "startLine": 819,
+        "startChar": 4,
+        "endLine": 821,
+        "endChar": 71
+      },
+      "revId": "7bc701f8f502d74a9bc062a208cbb36c250a390d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54231e3a_7f7d8748",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1088,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-03T23:52:20Z",
+      "side": 1,
+      "message": "Should the entry for puid be removed from m_procOwnedEGLImages if this erase reduces the size of the set to zero?  Or are you relying on cleanup eventually doing that when the process dies.  I don\u0027t know if you could have a large number of guest processes that create images, then destroy them, but continue running for a long time.\n\nI think it would be safer/cleaner to do the cleanup here when possible, just to avoid thinking about it further.",
+      "range": {
+        "startLine": 1088,
+        "startChar": 4,
+        "endLine": 1088,
+        "endChar": 44
+      },
+      "revId": "7bc701f8f502d74a9bc062a208cbb36c250a390d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54231e3a_dfe05302",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-03T23:52:20Z",
+      "side": 1,
+      "message": "Here and in the other destroy methods in this file, I think it probably merits spec comments explaining what the boolean return value means.",
+      "range": {
+        "startLine": 317,
+        "startChar": 3,
+        "endLine": 317,
+        "endChar": 14
+      },
+      "revId": "7bc701f8f502d74a9bc062a208cbb36c250a390d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
