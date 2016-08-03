@@ -427,6 +427,30 @@
     },
     {
       "key": {
+        "uuid": "54d23e19_d0772ae0",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-03T18:31:20Z",
+      "side": 1,
+      "message": "(actions taken: added back setSignaled calls after any eglClientWaitSyncKHR call in the host if a fence sync info object was involved, added fence sync info field to triggerWait to allow that to happen in SyncThread.cpp, simplified FenceSyncInfo\u0027s signaledness representation)",
+      "parentUuid": "54d23e19_b05e267a",
+      "range": {
+        "startLine": 243,
+        "startChar": 3,
+        "endLine": 245,
+        "endChar": 5
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_5a7814d4",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 26
