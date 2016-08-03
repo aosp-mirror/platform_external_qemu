@@ -451,6 +451,30 @@
     },
     {
       "key": {
+        "uuid": "54231e3a_1cf81918",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-03T23:17:59Z",
+      "side": 1,
+      "message": "OK.  Just to close the loop, I now see that\nrcTriggerWait  in   223032\ncalls \nfindNonSignaledSync\nwith an egl_sync_ptr argument.  This returns null if the sync object pointed to by the argument has been signaled, but this return value is passed, even in that case, to triggerWait.\nSo we can create cmds with null fenceSync.  AFAICT, though, the cmds are immutable once created, so it is not the case that we ever change a non-null cmd-\u003efenceSync from non-null to null.  (Just to confirm that my initial confusion was correct.  You\u0027ve justified this error message in the null case.)",
+      "parentUuid": "54d23e19_d0772ae0",
+      "range": {
+        "startLine": 243,
+        "startChar": 3,
+        "endLine": 245,
+        "endChar": 5
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_5a7814d4",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 26
@@ -534,6 +558,30 @@
       "side": 1,
       "message": "Added a comment incorporating this info.",
       "parentUuid": "54d23e19_e4d5540d",
+      "range": {
+        "startLine": 252,
+        "startChar": 8,
+        "endLine": 253,
+        "endChar": 28
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54231e3a_f9ad37f0",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-03T23:17:59Z",
+      "side": 1,
+      "message": "Great.  Looks good.",
+      "parentUuid": "54d23e19_b0b706d2",
       "range": {
         "startLine": 252,
         "startChar": 8,
