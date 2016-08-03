@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "54d23e19_47e7e23f",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-03T17:35:58Z",
+      "side": 1,
+      "message": "I don\u0027t understand.  It looks like this exact call is already done just below...?",
+      "range": {
+        "startLine": 247,
+        "startChar": 3,
+        "endLine": 247,
+        "endChar": 50
+      },
+      "revId": "376f178c494b11221c477dc9fc83e02590a23201",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
