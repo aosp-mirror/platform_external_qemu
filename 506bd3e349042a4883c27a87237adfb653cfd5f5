@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "54231e3a_3c3f1dba",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-03T23:17:59Z",
+      "side": 1,
+      "message": "In light of the discussion elsewhere, assuming I have understood things correctly, could you add a note that the the fenceSync argument may be null, which indicates a sync object has already been signalled?  (I guess it can also be non-null, but no longer present in fenceSyncInfo?)",
+      "range": {
+        "startLine": 64,
+        "startChar": 7,
+        "endLine": 64,
+        "endChar": 27
+      },
+      "revId": "506bd3e349042a4883c27a87237adfb653cfd5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
