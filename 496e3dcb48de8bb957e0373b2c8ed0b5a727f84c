@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "54231e3a_d86dc4d6",
+        "filename": "android/base/Debug.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-04T16:50:42Z",
+      "side": 1,
+      "message": "How about putting this in as a new function in a  different android/base/ library? win32 retries + unicode notwithstanding, it looks general enough.",
+      "range": {
+        "startLine": 33,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 6
+      },
+      "revId": "496e3dcb48de8bb957e0373b2c8ed0b5a727f84c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
