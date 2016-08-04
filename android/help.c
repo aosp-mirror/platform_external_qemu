@@ -1402,6 +1402,15 @@ help_fixed_scale(stralloc_t* out)
     );
 }
 
+static void
+help_wait_for_debugger(stralloc_t* out)
+{
+    PRINTF(
+    "  Request emulator process to pause at launch and wait for a debugger.\n"
+    "  This option is useful for debugging it having a custom environment.\n\n"
+    );
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
