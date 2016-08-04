@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "54231e3a_ec5fa646",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 28
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-04T19:46:09Z",
+      "side": 1,
+      "message": "Hmm, I see what you mean now. Thanks for the explanation; I wasn\u0027t seeing the upside of this before. Done",
+      "parentUuid": "54231e3a_96539d12",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 23
+      },
+      "revId": "85315d51237b6b5636f3a9dc69a712f370057c67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "54231e3a_5c91b140",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
         "patchSetId": 28
