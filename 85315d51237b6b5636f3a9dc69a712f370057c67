@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "54231e3a_c5939d53",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 28
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-04T16:20:52Z",
+      "side": 1,
+      "message": "I see the potential leakage. Thanks for catching this. But, I think just making this static is the appropriate thing (Done). Global LazyInstance variables (some without static in front of them either) have been the convention all over, and I\u0027d like to maintain consistency. Plus, I like to avoid class C { \u003cC member or something defined with C\u003e }; when possible.",
+      "parentUuid": "54231e3a_9c86690d",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 23
+      },
+      "revId": "85315d51237b6b5636f3a9dc69a712f370057c67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "54231e3a_5c91b140",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
         "patchSetId": 28
@@ -36,6 +60,30 @@
       "writtenOn": "2016-08-03T23:08:25Z",
       "side": 1,
       "message": "/*static*/",
+      "range": {
+        "startLine": 60,
+        "startChar": 0,
+        "endLine": 60,
+        "endChar": 13
+      },
+      "revId": "85315d51237b6b5636f3a9dc69a712f370057c67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54231e3a_e5982172",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 28
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-04T16:20:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "54231e3a_5c91b140",
       "range": {
         "startLine": 60,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "54231e3a_65f5f11d",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-04T16:20:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "54231e3a_9993db54",
+      "range": {
+        "startLine": 55,
+        "startChar": 3,
+        "endLine": 56,
+        "endChar": 17
+      },
+      "revId": "85315d51237b6b5636f3a9dc69a712f370057c67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "54231e3a_fcb20595",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
         "patchSetId": 28
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "54231e3a_c5bcfdd2",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-04T16:20:52Z",
+      "side": 1,
+      "message": "Yes, we only use addSync, findNonSignaledSync, and removeSync now. Removed |removeSync|.",
+      "parentUuid": "54231e3a_fcb20595",
+      "range": {
+        "startLine": 73,
+        "startChar": 4,
+        "endLine": 73,
+        "endChar": 37
+      },
+      "revId": "85315d51237b6b5636f3a9dc69a712f370057c67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "54231e3a_3ccabd47",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
         "patchSetId": 28
@@ -105,6 +201,30 @@
       "writtenOn": "2016-08-03T23:08:25Z",
       "side": 1,
       "message": "Could you given these spec comments for all these methods?  Per-method specs will make the class-level explanation more clear, I think.",
+      "range": {
+        "startLine": 72,
+        "startChar": 1,
+        "endLine": 76,
+        "endChar": 52
+      },
+      "revId": "85315d51237b6b5636f3a9dc69a712f370057c67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54231e3a_e5c1014e",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-04T16:20:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "54231e3a_3ccabd47",
       "range": {
         "startLine": 72,
         "startChar": 1,
