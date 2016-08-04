@@ -22,6 +22,30 @@
       "revId": "376f178c494b11221c477dc9fc83e02590a23201",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "74d822b0_2a917f42",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-04T08:06:20Z",
+      "side": 1,
+      "message": "Oops, I missed that the final rebase added it. Thanks!",
+      "parentUuid": "54d23e19_47e7e23f",
+      "range": {
+        "startLine": 247,
+        "startChar": 3,
+        "endLine": 247,
+        "endChar": 50
+      },
+      "revId": "376f178c494b11221c477dc9fc83e02590a23201",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
