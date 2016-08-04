@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "54231e3a_96539d12",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 28
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-04T18:18:51Z",
+      "side": 1,
+      "message": "It\u0027s no big deal either way, and the static takes care of the leakage, so I guess I don\u0027t care that much.  That said, I don\u0027t understand the objection.  The place where this is used, FenceSyncInfo::get(), is a static method of FenceSyncInfo.  To me, sFenceSyncInfo is properly part of the implementation of the FenceSyncInfo abstraction.  In the current case, we have only one class being implemented in this .cpp, so there\u0027s no confusion about what abstraction this variable is part of...but sometimes there are several.  In a case like that the FenceSyncInfo::sFenceSyncInfo would then actually be useful, making it clear which class that variable belongs to.  Whereas if it\u0027s just a static at file scope, any code in that file can access it.\n\nI think I\u0027m right on this, and I hope you\u0027ll consider my arguments...but, as I say, it\u0027s not a big deal.",
+      "parentUuid": "54231e3a_c5939d53",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 23
+      },
+      "revId": "85315d51237b6b5636f3a9dc69a712f370057c67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "54231e3a_5c91b140",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
         "patchSetId": 28
