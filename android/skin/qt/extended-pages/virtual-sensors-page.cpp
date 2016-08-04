@@ -26,7 +26,15 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     QWidget(parent),
     mUi(new Ui::VirtualSensorsPage()),
     mSensorsAgent(nullptr) {
+
+    // Historically, the AVD starts up with the screen mostly
+    // vertical, but tilted back 4.75 degrees. Retain that
+    // initial orientation.
+    static const QQuaternion initialQuat =
+            QQuaternion::fromEulerAngles(-4.75, 0.00, 0.00);
+
     mUi->setupUi(this);
+    mUi->accelWidget->setRotation(initialQuat);
     mUi->temperatureSensorValueWidget->setRange(-273.1, 100.0);
     mUi->temperatureSensorValueWidget->setValue(25.0);
     mUi->lightSensorValueWidget->setRange(0, 40000.0);
@@ -104,6 +112,7 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
                                    Accelerometer3DWidget::MaxX);
     mUi->positionYSlider->setRange(Accelerometer3DWidget::MinY,
                                    Accelerometer3DWidget::MaxY);
+    onPhoneRotationChanged();
 }
 
 void VirtualSensorsPage::showEvent(QShowEvent*) {
@@ -309,7 +318,7 @@ void VirtualSensorsPage::on_positionYSlider_valueChanged(double) {
 void VirtualSensorsPage::updateAccelerometerValues() {
     // Gravity and magnetic vector in the device's frame of
     // reference.
-    QVector3D gravity_vector(0.0, 9.8, 0.0);
+    QVector3D gravity_vector(0.0, 9.81, 0.0);
     QVector3D magnetic_vector(
             mUi->magNorthWidget->value(),
             mUi->magEastWidget->value(),
