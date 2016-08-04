@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "54231e3a_6cae3698",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 30
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-04T19:35:09Z",
+      "side": 1,
+      "message": "This one should be unnecessary, since this sFenceSyncInfo is a member of the FenceSyncInfo class.",
+      "range": {
+        "startLine": 62,
+        "startChar": 11,
+        "endLine": 62,
+        "endChar": 26
+      },
+      "revId": "4853207f7c27018a8711151b476a93cec8ecfbc7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
