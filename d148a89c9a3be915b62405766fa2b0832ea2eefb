@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d4762e83_1ea4d1fe",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-08-04T22:31:01Z",
+      "side": 1,
+      "message": "Good catch below. Maybe add the safety here too:\nReturn SELECTED_RENDERER_UNKNOWN if gpu_mode is null?",
+      "revId": "d148a89c9a3be915b62405766fa2b0832ea2eefb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
