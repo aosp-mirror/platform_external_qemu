@@ -28,20 +28,26 @@ typedef struct AndroidPipeBuffer {
     size_t size;
 } AndroidPipeBuffer;
 
-/* Possible status values used to signal errors - see qemu_pipe_error_convert */
-#define PIPE_ERROR_INVAL       -1
-#define PIPE_ERROR_AGAIN       -2
-#define PIPE_ERROR_NOMEM       -3
-#define PIPE_ERROR_IO          -4
+/* List of bitflags returned in status of CMD_POLL command */
+enum PipePollFlags {
+	PIPE_POLL_IN	= 1 << 0,
+	PIPE_POLL_OUT	= 1 << 1,
+	PIPE_POLL_HUP	= 1 << 2
+};
+
+/* Possible status values used to signal errors - see goldfish_pipe_error_convert */
+enum PipeErrors {
+	PIPE_ERROR_INVAL  = -1,
+	PIPE_ERROR_AGAIN  = -2,
+	PIPE_ERROR_NOMEM  = -3,
+	PIPE_ERROR_IO     = -4
+};
 
 /* Bit-flags used to signal events from the emulator */
-#define PIPE_WAKE_CLOSED       (1 << 0)  /* emulator closed pipe */
-#define PIPE_WAKE_READ         (1 << 1)  /* pipe can now be read from */
-#define PIPE_WAKE_WRITE        (1 << 2)  /* pipe can now be written to */
-
-/* List of bitflags returned in status of CMD_POLL command */
-#define PIPE_POLL_IN   (1 << 0)   /* means guest can read */
-#define PIPE_POLL_OUT  (1 << 1)   /* means guest can write */
-#define PIPE_POLL_HUP  (1 << 2)   /* means closed by host */
+enum PipeWakeFlags {
+	PIPE_WAKE_CLOSED = 1 << 0,  /* emulator closed pipe */
+	PIPE_WAKE_READ   = 1 << 1,  /* pipe can now be read from */
+	PIPE_WAKE_WRITE  = 1 << 2  /* pipe can now be written to */
+};
 
 ANDROID_END_HEADER
