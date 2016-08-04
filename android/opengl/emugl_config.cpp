@@ -86,7 +86,9 @@ emugl_host_gpu_prop_list emuglConfig_get_host_gpu_props() {
 }
 
 int emuglConfig_get_renderer(const char* gpu_mode) {
-    if (!strcmp(gpu_mode, "host") ||
+    if (!gpu_mode) {
+        return SELECTED_RENDERER_UNKNOWN;
+    } else if (!strcmp(gpu_mode, "host") ||
         !strcmp(gpu_mode, "on")) {
         return SELECTED_RENDERER_HOST;
     } else if (!strcmp(gpu_mode, "off")) {
@@ -156,7 +158,7 @@ bool emuglConfig_init(EmuglConfig* config,
         }
     } else {
         // Support "hw.gpu.mode=on" in config.ini
-        if (!strcmp(gpu_mode, "on") || !strcmp(gpu_mode, "enable")) {
+        if (gpu_mode && (!strcmp(gpu_mode, "on") || !strcmp(gpu_mode, "enable"))) {
             gpu_enabled = true;
             gpu_mode = "host";
         }
