@@ -84,12 +84,33 @@ private:
     //
     void replaceGlobalName(ObjectLocalName p_localName, unsigned int p_globalName);
 
+    //
+    // setSharedNameSpace - set a shared NameSpace. Objects in shared NameSpaces
+    //                       cannot have the same local name. This function
+    //                       is supposed to be used during initialization and
+    //                       should not be called if either NameSpace is
+    //                       non-empty.
+    //
+    //                       Shaders and programs share the same namespace in
+    //                       GLES2. That is, if one has a program with local
+    //                       name 1, he can't generate a shader with the same
+    //                       local name 1. So, we need to check both namespaces
+    //                       when generating shader and program local names,
+    //                       which is implemented by having a shared NameSpace
+    //                       and check against it.
+    //
+    //                       We cannot merge shader and program namespaces,
+    //                       because the host GL spec does not explicitly say
+    //                       that shader and program will not have the same
+    //                       global name.
+    void setSharedNameSpace(NameSpace *p_sharedNameSpace);
 private:
     ObjectLocalName m_nextName = 0;
     NamesMap m_localToGlobalMap;
     GlobalToLocalNamesMap m_globalToLocalMap;
     const NamedObjectType m_type;
     GlobalNameSpace *m_globalNameSpace = nullptr;
+    NameSpace* m_sharedNameSpace = nullptr;
 };
 
 // Class GlobalNameSpace - this class maintain all global GL object names.
