@@ -193,6 +193,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
 
     cb->m_resizer = new TextureResize(p_width, p_height);
 
+    s_gles2.glFinish();
     return cb;
 }
 
