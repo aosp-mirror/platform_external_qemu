@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d4762e83_8afc17a5",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "54231e3a_f0377892",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 59,
+        "endChar": 10
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4762e83_7b99570f",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 97
@@ -36,6 +60,30 @@
       "writtenOn": "2016-08-04T22:06:45Z",
       "side": 1,
       "message": "Could you remind me which CL this is in, or at least what it does?  (We also put rcClientWaitSync in the context structure, which seemed kind of similar...)",
+      "range": {
+        "startLine": 155,
+        "startChar": 4,
+        "endLine": 155,
+        "endChar": 36
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4762e83_fef9d071",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:55Z",
+      "side": 1,
+      "message": "The purpose of emugl_sync_register_trigger_wait (defined in https://android-review.googlesource.com/#/c/239442/) is to communicate to the virtual device (https://android-review.googlesource.com/#/c/238399/, https://android-review.googlesource.com/#/c/238790/) that upon the virtual sync device\u0027s CMD_TRIGGER_HOST_WAIT, the function argument (here, rcTriggerWait) is to be called.",
+      "parentUuid": "d4762e83_7b99570f",
       "range": {
         "startLine": 155,
         "startChar": 4,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "d4762e83_3ea26845",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:55Z",
+      "side": 1,
+      "message": "What prompted it initially was, I was trying to issue a new EGL extension string \"EGL_ANDROID_native_fence_sync\" but that didn\u0027t take into account guests that didn\u0027t have the support, and then I ended up leaving the std::string logic in, in order to future proof for any further attempts to change the host EGL string. Plus, we switched to std::string logic for rcGetGLString recently (for actual need to put extra extension strings there). In any case, the declaration and initialization is in one place now.",
+      "parentUuid": "54231e3a_3bfb917c",
+      "range": {
+        "startLine": 187,
+        "startChar": 4,
+        "endLine": 187,
+        "endChar": 17
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4762e83_7b1eb771",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 97
@@ -82,6 +154,30 @@
       "writtenOn": "2016-08-04T22:06:45Z",
       "side": 1,
       "message": "Not sure what\u0027s going on here (or in the Async call below).  Is this commented code hinting at what a future implementation of the Async version below might look like?  If so, it needs some more explanation.",
+      "range": {
+        "startLine": 444,
+        "startChar": 4,
+        "endLine": 444,
+        "endChar": 57
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4762e83_1e604c0c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 444,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:55Z",
+      "side": 1,
+      "message": "Sorry for the confusion. This was left over from an earlier design.",
+      "parentUuid": "d4762e83_7b1eb771",
       "range": {
         "startLine": 444,
         "startChar": 4,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "d4762e83_5e62c414",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 462,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d4762e83_5b749b93",
+      "range": {
+        "startLine": 462,
+        "startChar": 3,
+        "endLine": 462,
+        "endChar": 12
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4762e83_3b50bf04",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 97
@@ -128,6 +248,30 @@
       "writtenOn": "2016-08-04T22:06:45Z",
       "side": 1,
       "message": "I\u0027m afraid I really didn\u0027t understand the explanation in the spec comment above this very well.  I don\u0027t understand the \"return type int vs. return type void\" stuff.  I mean -- it calls the non-async version, throwing away it\u0027s return value, so it\u0027s going to behave exactly like it, no?\n\nWith the commented-out code above, it feels like you\u0027re preparing for some future extension of the more-concurrent async wait techniques to this flush operation, but that this CL doesn\u0027t go that far.  If that\u0027s what you\u0027re trying to explain, it didn\u0027t come through to me.\n\n---------------------\n\nI read previous comments a little more, and realized that you\u0027re talking about code generated by emugen, from a specification elsewhere of the signature of this call.  I think if you spell that out a bit more, this will make more sense.  Thanks.",
+      "range": {
+        "startLine": 463,
+        "startChar": 12,
+        "endLine": 463,
+        "endChar": 41
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4762e83_3e2188a8",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 463,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:55Z",
+      "side": 1,
+      "message": "Done (refined comment)",
+      "parentUuid": "d4762e83_3b50bf04",
       "range": {
         "startLine": 463,
         "startChar": 12,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "d4762e83_3ea428ff",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 592,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:55Z",
+      "side": 1,
+      "message": "Hmm, I changed it to check_sync_error instead.",
+      "parentUuid": "d4762e83_9550c43b",
+      "range": {
+        "startLine": 592,
+        "startChar": 12,
+        "endLine": 592,
+        "endChar": 26
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4762e83_55e46cd5",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 97
@@ -174,6 +342,30 @@
       "writtenOn": "2016-08-04T22:06:45Z",
       "side": 1,
       "message": "Any chance I could convince you to start using reinterpret_cast for this kind of conversion?\n\nAlso, in this particular case, it seems to me that the cast to uintptr_t (which, BTW, could be a static_cast\u003cuintptr_t\u003e(...)), is unnecessary.  In a previous case, you cited error messages if the intermediate cast were deleted, I believe because the int was 32 bit.  It seems like we\u0027re already assuming 64-bit pointers here, by using uint64_t in the API for thread_ptr.",
+      "range": {
+        "startLine": 617,
+        "startChar": 29,
+        "endLine": 617,
+        "endChar": 42
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4762e83_befaf8dd",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 617,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:55Z",
+      "side": 1,
+      "message": "Sure thing, I guess I\u0027m still not habitual with C++ casts yet. Done.",
+      "parentUuid": "d4762e83_55e46cd5",
       "range": {
         "startLine": 617,
         "startChar": 29,
@@ -209,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "d4762e83_7ef940e4",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 631,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d4762e83_d54ebc3e",
+      "range": {
+        "startLine": 631,
+        "startChar": 4,
+        "endLine": 631,
+        "endChar": 44
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4762e83_b5706076",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 97
@@ -220,6 +436,30 @@
       "writtenOn": "2016-08-04T22:06:45Z",
       "side": 1,
       "message": "synthread is not used after this.  Could you just get rid of the variable, and substitute the call used in the initializer just above?  Eliminates any question about whether syncthread is used elsewhere in the method.",
+      "range": {
+        "startLine": 635,
+        "startChar": 64,
+        "endLine": 635,
+        "endChar": 74
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4762e83_9ef61cf2",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 635,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d4762e83_b5706076",
       "range": {
         "startLine": 635,
         "startChar": 64,
@@ -255,6 +495,30 @@
     },
     {
       "key": {
+        "uuid": "d4762e83_1e54ccc9",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 651,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d4762e83_b5ff80cd",
+      "range": {
+        "startLine": 650,
+        "startChar": 3,
+        "endLine": 651,
+        "endChar": 51
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4762e83_38d9a54a",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 97
@@ -266,6 +530,30 @@
       "writtenOn": "2016-08-04T22:06:45Z",
       "side": 1,
       "message": "Why is zero the right choice in this situation?  Are there assumptions about the zeroeth element of the config list?  Is it just that we\u0027re ensured \u003e 0 elems, and any will do?  A comment to clarify this would be useful.",
+      "range": {
+        "startLine": 679,
+        "startChar": 52,
+        "endLine": 679,
+        "endChar": 53
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4762e83_5e5644d2",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 679,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d4762e83_38d9a54a",
       "range": {
         "startLine": 679,
         "startChar": 52,
@@ -301,6 +589,30 @@
     },
     {
       "key": {
+        "uuid": "d4762e83_3e80a827",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 680,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d4762e83_58b101f3",
+      "range": {
+        "startLine": 680,
+        "startChar": 102,
+        "endLine": 680,
+        "endChar": 103
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4762e83_5bcd7b5d",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 97
@@ -312,6 +624,30 @@
       "writtenOn": "2016-08-04T22:06:45Z",
       "side": 1,
       "message": "It seems like you\u0027re giving it a minimal sufficient drawing surface?  Maybe a comment to explain what you\u0027re doing, and why it\u0027s necessary -- I imagine it makes some operations not fail?",
+      "range": {
+        "startLine": 683,
+        "startChar": 6,
+        "endLine": 689,
+        "endChar": 81
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4762e83_1e6bec8b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 689,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:55Z",
+      "side": 1,
+      "message": "Added a comment. Yeah, this was for eglMakeCurrent to not fail.",
+      "parentUuid": "d4762e83_5bcd7b5d",
       "range": {
         "startLine": 683,
         "startChar": 6,
@@ -347,6 +683,30 @@
     },
     {
       "key": {
+        "uuid": "d4762e83_1e3dac73",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 696,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:55Z",
+      "side": 1,
+      "message": "Darn it, I thought that too, but I wasn\u0027t really doing it!!! Good catch. egl_wait_res is now equal to the result of calling eglClientWaitSyncKHR.",
+      "parentUuid": "d4762e83_1b46a3ac",
+      "range": {
+        "startLine": 696,
+        "startChar": 4,
+        "endLine": 696,
+        "endChar": 23
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4762e83_1b5f8378",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 97
@@ -370,6 +730,30 @@
     },
     {
       "key": {
+        "uuid": "d4762e83_3e3268a3",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 697,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d4762e83_1b5f8378",
+      "range": {
+        "startLine": 697,
+        "startChar": 58,
+        "endLine": 697,
+        "endChar": 59
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "54231e3a_709e08ab",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.h",
         "patchSetId": 97
@@ -381,6 +765,30 @@
       "writtenOn": "2016-08-04T22:06:45Z",
       "side": 1,
       "message": "Doesn\u0027t seem like this include is used for anything in this .h file.   Perhaps it defines things included in the corresponding .cpp?  If so, always better to Include What You Use, so do the include in the .cpp.",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 29
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4762e83_7eb140f3",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.h",
+        "patchSetId": 97
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "54231e3a_709e08ab",
       "range": {
         "startLine": 20,
         "startChar": 0,
