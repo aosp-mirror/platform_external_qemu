@@ -65,6 +65,7 @@
 #include "android/metrics/studio-config.h"
 #include "android/multitouch-port.h"
 #include "android/multitouch-screen.h"
+#include "android/network/control.h"
 #include "android/network/globals.h"
 #include "android/opengles.h"
 #include "android/opengl/emugl_config.h"
@@ -2968,13 +2969,13 @@ int main(int argc, char **argv, char **envp)
     }
 
     /* Initialize net speed and delays stuff. */
-    if (android_parse_network_speed(android_op_netspeed) < 0 ) {
+    if (!android_network_set_speed(android_op_netspeed)) {
         PANIC("invalid -netspeed parameter '%s'",
                 android_op_netspeed);
         return 1;
     }
 
-    if ( android_parse_network_latency(android_op_netdelay) < 0 ) {
+    if (!android_network_set_latency(android_op_netdelay)) {
         PANIC("invalid -netdelay parameter '%s'",
                 android_op_netdelay);
         return 1;
