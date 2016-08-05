@@ -42,12 +42,9 @@ NameSpace::genName(GenNameInfo genNameInfo, ObjectLocalName p_localName, bool ge
     if (genLocal) {
         do {
             localName = ++m_nextName;
-            if (m_sharedNameSpace) {
-                assert(m_sharedNameSpace->m_nextName+1 == m_nextName);
-                m_sharedNameSpace->m_nextName = m_nextName;
-            }
-        } while(localName == 0 || isObject(localName)
-                || (m_sharedNameSpace && m_sharedNameSpace->isObject(localName)));
+        } while(localName == 0 ||
+                m_localToGlobalMap.find(localName) !=
+                        m_localToGlobalMap.end() );
     }
 
     unsigned int globalName = m_globalNameSpace->genName(genNameInfo);
@@ -113,13 +110,6 @@ NameSpace::replaceGlobalName(ObjectLocalName p_localName, unsigned int p_globalN
         (*n).second = p_globalName;
         m_globalToLocalMap.emplace(p_globalName, p_localName);
     }
-}
-
-void NameSpace::setSharedNameSpace(NameSpace *p_sharedNameSpace) {
-    assert(m_localToGlobalMap.empty());
-    assert(p_sharedNameSpace->m_localToGlobalMap.empty());
-    m_sharedNameSpace = p_sharedNameSpace;
-    p_sharedNameSpace->m_sharedNameSpace = this;
 }
 
 unsigned int

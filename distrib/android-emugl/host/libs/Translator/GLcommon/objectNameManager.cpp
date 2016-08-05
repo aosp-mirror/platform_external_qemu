@@ -54,8 +54,6 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace) {
         m_nameSpace[i] =
                 new NameSpace(static_cast<NamedObjectType>(i), globalNameSpace);
     }
-    m_nameSpace[static_cast<int>(NamedObjectType::PROGRAM)]->setSharedNameSpace(
-            m_nameSpace[static_cast<int>(NamedObjectType::SHADER)]);
 }
 
 ShareGroup::~ShareGroup()
