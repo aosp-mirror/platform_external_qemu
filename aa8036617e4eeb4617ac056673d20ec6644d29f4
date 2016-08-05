@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3964e309_586a9d21",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 68
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d4762e83_0960190c",
+      "range": {
+        "startLine": 70,
+        "startChar": 57,
+        "endLine": 71,
+        "endChar": 41
+      },
+      "revId": "aa8036617e4eeb4617ac056673d20ec6644d29f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4762e83_e9b2fd4b",
         "filename": "android/emulation/goldfish_sync.h",
         "patchSetId": 68
@@ -36,6 +60,30 @@
       "writtenOn": "2016-08-05T00:06:56Z",
       "side": 1,
       "message": "\"a particular number\" is a little vague.  How about lead with the second part, the abstract definition, something like:\n\nA fence object is considered to be signaled if all the counters of all the timelines are \u003e\u003d the corresponding target counter value for that timeline in the fence.  Timeline increments check whether the increment causes any fences to become signaled, so, signaling happens in a timely manner.\n\nJust suggesting give the abstract defn first, then the operational aspects.",
+      "range": {
+        "startLine": 72,
+        "startChar": 35,
+        "endLine": 72,
+        "endChar": 54
+      },
+      "revId": "aa8036617e4eeb4617ac056673d20ec6644d29f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3964e309_786f6130",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 68
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d4762e83_e9b2fd4b",
       "range": {
         "startLine": 72,
         "startChar": 35,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "3964e309_18742500",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 68
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d4762e83_696fcdfb",
+      "range": {
+        "startLine": 77,
+        "startChar": 0,
+        "endLine": 77,
+        "endChar": 8
+      },
+      "revId": "aa8036617e4eeb4617ac056673d20ec6644d29f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4762e83_298eb52d",
         "filename": "android/emulation/goldfish_sync.h",
         "patchSetId": 68
@@ -82,6 +154,30 @@
       "writtenOn": "2016-08-05T00:06:56Z",
       "side": 1,
       "message": "It seems like we\u0027re using a number of different terms here for the same concept: the counter values used by a timeline.  (I\u0027m assuming that \"pt\" is a timeline counter value.  Actually, in some documentation on opengl fences I saw in reading up on this [http://www.linuxplumbersconf.net/2014/ocw//system/presentations/2355/original/03%20-%20sync%20\u0026%20dma-fence.pdf, the slide on \u0027Sync -- after merge\u0027], \"timeline point\" seemed to be used used for an object type containing the \u003ctimeline_id, counter_value\u003e pair, with the restriction that a timeline point is unique to a given fence -- so if two fences wanted to reference the same pair, they couldn\u0027t share the timeline point object.  If that usage is widespread, then using \"timeline point\" as the name of the pair might be a little misleading.)  Elsewhere we refer to:\n* \"monotonically increasing counter\"\n* \"timeline numbers\"\n\" \"timeline counters\"\nI would advise treating this spec a little more mathematically -- defining one term, and using it strictly.\n\nHow about we talk about a timeline having a counter, and that having counter values.  A fence (in this restricted form where there\u0027s only a single timeline) consists of a timeline reference and a \"target counter value\".  Sound reasonable?\n\nFeel free to push back with alternate names.  But I would like to see the terminology more consistent and precise, whatever the choice of terms is.",
+      "range": {
+        "startLine": 80,
+        "startChar": 3,
+        "endLine": 80,
+        "endChar": 17
+      },
+      "revId": "aa8036617e4eeb4617ac056673d20ec6644d29f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3964e309_3879e9f6",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 68
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d4762e83_298eb52d",
       "range": {
         "startLine": 80,
         "startChar": 3,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "3964e309_d85d4d7f",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 68
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d4762e83_a4866cbe",
+      "range": {
+        "startLine": 84,
+        "startChar": 3,
+        "endLine": 84,
+        "endChar": 31
+      },
+      "revId": "aa8036617e4eeb4617ac056673d20ec6644d29f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4762e83_e416a44b",
         "filename": "android/emulation/goldfish_sync.h",
         "patchSetId": 68
@@ -128,6 +248,30 @@
       "writtenOn": "2016-08-05T00:06:56Z",
       "side": 1,
       "message": "In the spec for \"...create_timeline\" you gave the general definition of fence, where they can have multiple points.  Here the spec assume a single point (\"...whose point\").  I would advise writing the specs for the other methods, like this one, assuming the more general spec, while noting that the current restriction allows a simpler implementation.  So maybe: \"Any fence objects that become signaled by this increment are signaled.\"  (This sentence illustrates a tension with using signaled both for an abstract concept -- counters of referenced timelines \u003e\u003d their targets -- and a concrete one -- a signal callback gets called.  Maybe the abstract concept could become something like \"satisfied\"?  So the fence is \"satisfied\" when all the counters advance enough, and it is (concretely) signaled at some point after it becomes satisfied?",
+      "range": {
+        "startLine": 92,
+        "startChar": 3,
+        "endLine": 93,
+        "endChar": 60
+      },
+      "revId": "aa8036617e4eeb4617ac056673d20ec6644d29f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3964e309_f85a9184",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 68
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d4762e83_e416a44b",
       "range": {
         "startLine": 92,
         "startChar": 3,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "3964e309_9867d553",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 68
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d4762e83_c4ad28f1",
+      "range": {
+        "startLine": 98,
+        "startChar": 3,
+        "endLine": 98,
+        "endChar": 60
+      },
+      "revId": "aa8036617e4eeb4617ac056673d20ec6644d29f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4762e83_caa8cf7a",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderLibImpl.h",
         "patchSetId": 68
@@ -186,6 +354,30 @@
     },
     {
       "key": {
+        "uuid": "3964e309_b880999e",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderLibImpl.h",
+        "patchSetId": 68
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:39Z",
+      "side": 1,
+      "message": "Ack. I believe the style may be contrary, and if not official, is at least unofficial.",
+      "parentUuid": "d4762e83_caa8cf7a",
+      "range": {
+        "startLine": 28,
+        "startChar": 4,
+        "endLine": 28,
+        "endChar": 11
+      },
+      "revId": "aa8036617e4eeb4617ac056673d20ec6644d29f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4762e83_6a0edb8c",
         "filename": "distrib/android-emugl/shared/emugl/common/sync_device.cpp",
         "patchSetId": 68
@@ -197,6 +389,30 @@
       "writtenOn": "2016-08-05T00:06:56Z",
       "side": 1,
       "message": "Do we actually use this \"no effect if null function pointer argument\" behavior anywhere?  If we do, could you put a comment in the .h file mentioning it?  If not, maybe just remove, and make the assignment unconditional?",
+      "range": {
+        "startLine": 50,
+        "startChar": 4,
+        "endLine": 50,
+        "endChar": 10
+      },
+      "revId": "aa8036617e4eeb4617ac056673d20ec6644d29f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4762e83_2a7a2384",
+        "filename": "distrib/android-emugl/shared/emugl/common/sync_device.cpp",
+        "patchSetId": 68
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T14:54:39Z",
+      "side": 1,
+      "message": "We don\u0027t use it, and expect things to be seriously wrong if the defaults are used.",
+      "parentUuid": "d4762e83_6a0edb8c",
       "range": {
         "startLine": 50,
         "startChar": 4,
