@@ -475,6 +475,30 @@
     },
     {
       "key": {
+        "uuid": "54231e3a_854cc59d",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-05T19:30:45Z",
+      "side": 1,
+      "message": "Yes, that\u0027s how it works.",
+      "parentUuid": "54231e3a_1cf81918",
+      "range": {
+        "startLine": 243,
+        "startChar": 3,
+        "endLine": 245,
+        "endChar": 5
+      },
+      "revId": "a097ec02a0d162aea702a3eb7fa63dbe397a2a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf8db5b7_5a7814d4",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 26
