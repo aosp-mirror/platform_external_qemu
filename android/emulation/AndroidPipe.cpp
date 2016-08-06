@@ -492,8 +492,10 @@ void* android_pipe_guest_open(void* hwpipe) {
 void android_pipe_guest_close(void* internalPipe) {
     CHECK_VM_STATE_LOCK();
     auto pipe = static_cast<android::AndroidPipe*>(internalPipe);
-    DD("%s: host=%p [%s]", __FUNCTION__, pipe, pipe->name());
-    pipe->onGuestClose();
+    if (pipe) {
+        DD("%s: host=%p [%s]", __FUNCTION__, pipe, pipe->name());
+        pipe->onGuestClose();
+    }
 }
 
 void android_pipe_guest_save(void* internalPipe, CStream* stream) {

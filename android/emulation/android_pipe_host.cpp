@@ -61,7 +61,9 @@ public:
     }
 
     virtual void onSave(BaseStream* stream) {
-        getFuncs()->save(mInstance, asCStream(stream));
+        if (getFuncs()->save) {
+            getFuncs()->save(mInstance, asCStream(stream));
+        }
     }
 
 private:
