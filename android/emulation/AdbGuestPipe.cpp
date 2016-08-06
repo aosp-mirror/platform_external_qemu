@@ -111,7 +111,7 @@ void AdbGuestPipe::Service::onPipeOpen(AdbGuestPipe* pipe) {
 }
 
 void AdbGuestPipe::Service::onPipeClose(AdbGuestPipe* pipe) {
-    mPipes.erase(std::remove(mPipes.begin(), mPipes.end(), pipe), mPipes.end());
+    std::remove(mPipes.begin(), mPipes.end(), pipe);
     if (mActivePipe == pipe) {
         mActivePipe = nullptr;
         mHostAgent->stopListening();
@@ -242,7 +242,6 @@ void AdbGuestPipe::onGuestWantWakeOn(int flags) {
 void AdbGuestPipe::onHostConnection(ScopedSocket&& socket) {
     DD("%s: [%p] host connection", __func__, this);
     CHECK(mState <= State::WaitingForHostAdbConnection);
-
     android::base::socketSetNonBlocking(socket.get());
 
     mHostSocket.reset(android::base::ThreadLooper::get()->createFdWatch(
