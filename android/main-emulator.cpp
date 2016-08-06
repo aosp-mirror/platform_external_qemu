@@ -387,16 +387,6 @@ int main(int argc, char** argv)
     } ranchu = RANCHU_AUTODETECT;
 
     bool isSnapshotPresent = false;
-    if (!androidOut && avdName) {
-        // only qemu1 can handle snapshoting at this moment
-        char* snapShotPresent = path_getAvdSnapshotPresent(avdName);
-        if (0 == strcmp(snapShotPresent, "true")) {
-            fprintf(stderr, "WARNING: Force to use classic engine to support snapshot.\n");
-            ranchu = RANCHU_OFF;
-            isSnapshotPresent = true;
-        }
-        free(snapShotPresent);
-    }
 
     if (engine) {
         if (!strcmp(engine, "auto")) {

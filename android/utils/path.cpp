@@ -9,6 +9,7 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+#include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/file_io.h"
@@ -486,4 +487,17 @@ path_unescape_path(char* str)
         }
     }
     *dst = '\0';
+}
+
+char* path_join(const char* part1, const char* part2, char use_separator) {
+  /* Allocate space for the result, taking into account path separator and
+   * 0-terminator.*/
+  size_t result_size = strlen(part1) + strlen(part2) + 2;
+  char* result = static_cast<char*>(malloc(result_size));
+  bufprint(result,
+           result + result_size,
+           use_separator ? "%s" PATH_SEP "%s" : "%s%s",
+           part1,
+           part2);
+  return result;
 }
