@@ -301,4 +301,8 @@ int          avdInfo_getAdbdCommunicationMode( const AvdInfo* i );
 */
 int          avdInfo_getSnapshotPresent(const AvdInfo* i);
 
+/* Returns the incremental version number of the AVD's system image.
+ */
+int avdInfo_getSysImgIncrementalVersion(const AvdInfo* i);
+
 ANDROID_END_HEADER

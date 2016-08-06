@@ -9,6 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+#include "android/base/files/PathUtils.h"
+#include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/file_io.h"
@@ -44,6 +46,8 @@
 #ifdef _WIN32
 using android::base::Win32UnicodeString;
 #endif  // _WIN32
+
+using android::base::PathUtils;
 
 /** PATH HANDLING ROUTINES
  **
@@ -486,4 +490,8 @@ path_unescape_path(char* str)
         }
     }
     *dst = '\0';
+}
+
+char* path_join(const char* part1, const char* part2) {
+  return strdup(PathUtils::join(part1, part2).c_str());
 }

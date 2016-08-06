@@ -201,5 +201,11 @@ extern char*          path_escape_path( const char* src );
  */
 extern void           path_unescape_path( char* str );
 
+/* Joins two components of a path using a path separator (optionally).
+ * Returns a pointer to a newly allocated string that must be
+ * freed by the caller
+ */
+extern char*          path_join( const char* part1,
+                                 const char* part2);
 /* */
 ANDROID_END_HEADER

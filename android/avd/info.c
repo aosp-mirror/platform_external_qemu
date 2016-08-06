@@ -119,6 +119,7 @@ struct AvdInfo {
 
     /* for both */
     int       apiLevel;
+    int       incrementalVersion;
     bool      isGoogleApis;
     char*     skinName;     /* skin name */
     char*     skinDirPath;  /* skin directory */
@@ -799,6 +800,11 @@ _avdInfo_extractBuildProperties(AvdInfo* i) {
         }
     }
     i->isGoogleApis = propertyFile_isGoogleApis(i->buildProperties);
+    i->incrementalVersion = propertyFile_getInt(
+        i->buildProperties,
+        "ro.build.version.incremental",
+        -1,
+        NULL);
 }
 
 
@@ -1437,4 +1443,8 @@ int avdInfo_getSnapshotPresent(const AvdInfo* i)
 
 const FileData* avdInfo_getBootProperties(const AvdInfo* i) {
     return i->bootProperties;
+}
+
+int avdInfo_getSysImgIncrementalVersion(const AvdInfo* i) {
+    return i->incrementalVersion;
 }
