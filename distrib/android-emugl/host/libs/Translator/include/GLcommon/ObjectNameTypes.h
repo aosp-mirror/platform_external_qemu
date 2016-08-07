@@ -23,14 +23,9 @@ enum class NamedObjectType {
     TEXTURE,
     RENDERBUFFER,
     FRAMEBUFFER,
-    SHADER_OR_PROGRAM,
-    NUM_OBJECT_TYPES  // Must be last
-};
-
-enum class ShaderProgramType {
     PROGRAM,
-    VERTEX_SHADER,
-    FRAGMENT_SHADER
+    SHADER,
+    NUM_OBJECT_TYPES  // Must be last
 };
 
 //
@@ -38,30 +33,28 @@ enum class ShaderProgramType {
 //                     generated. It also contains shader type when generating
 //                     shader object.
 //                     It is used by GlobalNameSpace::genName.
-//                     When generating an object that is not shader or program,
-//                     a NamedObjectType parameter should be passed to the
-//                     constructor. When generating shader / program object, the
-//                     ShaderProgramType should be passed to the constructor.
+//                     When generating non-shader object, a NamedObjectType
+//                     parameter should be passed to the constructor. When
+//                     generating shader object, the shader type should be
+//                     passed to the constructor.
 // Example:
 //          GlobalNameSpace globalNameSpace;
 //          GenNameInfo genTexture(NamedObjectType::TEXTURE);
 //          unsigned int texID = globalNameSpace.genName(genTexture);
-//          GenNameInfo genShader(ShaderProgramType::FRAGMENT_SHADER);
+//          GenNameInfo genShader(GL_FRAGMENT_SHADER);
 //          unsigned int shaderID = globalNameSpace.genName(genShader);
 
 struct GenNameInfo {
     NamedObjectType m_type = (NamedObjectType)0;
-    // only used for NamedObjectType::SHADER_OR_PROGRAM
-    ShaderProgramType m_shaderProgramType = (ShaderProgramType)0;
+    GLenum m_shaderType = 0;  // only used for NamedObjectType::SHADER
     GenNameInfo() = delete;
     // constructor for generating non-shader object
     explicit GenNameInfo(NamedObjectType type) : m_type(type) {
-        assert(type != NamedObjectType::SHADER_OR_PROGRAM);
+        assert(type != NamedObjectType::SHADER);
     }
     // constructor for generating shader object
-    explicit GenNameInfo(ShaderProgramType shaderProgramType) :
-        m_type(NamedObjectType::SHADER_OR_PROGRAM),
-        m_shaderProgramType(shaderProgramType) {}
+    explicit GenNameInfo(GLenum shaderType)
+        : m_type(NamedObjectType::SHADER), m_shaderType(shaderType) {}
 };
 
 typedef unsigned long long ObjectLocalName;
