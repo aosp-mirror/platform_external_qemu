@@ -95,10 +95,10 @@ ObjectLocalName ShareGroup::genName(NamedObjectType namedObjectType,
     return genName(GenNameInfo(namedObjectType), p_localName, genLocal);
 }
 
-ObjectLocalName ShareGroup::genName(ShaderProgramType shaderProgramType,
+ObjectLocalName ShareGroup::genName(GLenum shaderType,
                                     ObjectLocalName p_localName,
                                     bool genLocal) {
-    return genName(GenNameInfo(shaderProgramType), p_localName, genLocal);
+    return genName(GenNameInfo(shaderType), p_localName, genLocal);
 }
 
 unsigned int
