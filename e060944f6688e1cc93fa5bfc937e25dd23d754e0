@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d91827bf_485f1f48",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 35
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-08-08T06:26:40Z",
+      "side": 1,
+      "message": "nit: ws",
+      "revId": "e060944f6688e1cc93fa5bfc937e25dd23d754e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
