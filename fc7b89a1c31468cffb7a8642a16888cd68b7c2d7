@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "d91827bf_84745b02",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-08T21:23:31Z",
+      "side": 1,
+      "message": "Thanks!",
+      "parentUuid": "d4762e83_fef9d071",
+      "range": {
+        "startLine": 155,
+        "startChar": 4,
+        "endLine": 155,
+        "endChar": 36
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "54231e3a_3bfb917c",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 97
@@ -131,6 +155,30 @@
       "side": 1,
       "message": "What prompted it initially was, I was trying to issue a new EGL extension string \"EGL_ANDROID_native_fence_sync\" but that didn\u0027t take into account guests that didn\u0027t have the support, and then I ended up leaving the std::string logic in, in order to future proof for any further attempts to change the host EGL string. Plus, we switched to std::string logic for rcGetGLString recently (for actual need to put extra extension strings there). In any case, the declaration and initialization is in one place now.",
       "parentUuid": "54231e3a_3bfb917c",
+      "range": {
+        "startLine": 187,
+        "startChar": 4,
+        "endLine": 187,
+        "endChar": 17
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d91827bf_04c6abb3",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-08T21:23:31Z",
+      "side": 1,
+      "message": "Well -- it seems to me that the use of \"const char* str\" is enough to prevent modification via str, if that\u0027s what you mean.  Anyway, it\u0027s no worse algorithmically -- the char* constructor has to do a strlen to get then length -- and I guess it\u0027s more \"modern\" this way :-).",
+      "parentUuid": "d4762e83_3ea26845",
       "range": {
         "startLine": 187,
         "startChar": 4,
@@ -284,6 +332,30 @@
     },
     {
       "key": {
+        "uuid": "3964e309_1ba97f29",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 463,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-08T21:23:31Z",
+      "side": 1,
+      "message": "Thanks, I think mentioning behavior of the encoder explicitly makes things a lot more clear.",
+      "parentUuid": "d4762e83_3b50bf04",
+      "range": {
+        "startLine": 463,
+        "startChar": 12,
+        "endLine": 463,
+        "endChar": 41
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4762e83_9550c43b",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 97
@@ -319,6 +391,30 @@
       "side": 1,
       "message": "Hmm, I changed it to check_sync_error instead.",
       "parentUuid": "d4762e83_9550c43b",
+      "range": {
+        "startLine": 592,
+        "startChar": 12,
+        "endLine": 592,
+        "endChar": 26
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d91827bf_c480132b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 592,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-08T21:23:31Z",
+      "side": 1,
+      "message": "Better -- but then a nit: why not checkSyncError as the name?  For \"get_sync_error\", I could buy the argument that it was a (pseudo-) getter, for which the naming convention makes an exception, allowing you to name it like the variable name it fetches.  But now it\u0027s no longer a getter.",
+      "parentUuid": "d4762e83_3ea428ff",
       "range": {
         "startLine": 592,
         "startChar": 12,
@@ -695,6 +791,30 @@
       "side": 1,
       "message": "Darn it, I thought that too, but I wasn\u0027t really doing it!!! Good catch. egl_wait_res is now equal to the result of calling eglClientWaitSyncKHR.",
       "parentUuid": "d4762e83_1b46a3ac",
+      "range": {
+        "startLine": 696,
+        "startChar": 4,
+        "endLine": 696,
+        "endChar": 23
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d91827bf_8420db57",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 696,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-08T21:23:31Z",
+      "side": 1,
+      "message": "Well, now that it does that, there\u0027s no need to declare/initialize it on line 744 -- just make 746 the declaration and (only) initialization.",
+      "parentUuid": "d4762e83_1e3dac73",
       "range": {
         "startLine": 696,
         "startChar": 4,
