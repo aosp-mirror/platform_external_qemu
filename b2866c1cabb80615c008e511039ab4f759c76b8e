@@ -2,6 +2,69 @@
   "comments": [
     {
       "key": {
+        "uuid": "d91827bf_4890bf97",
+        "filename": "android/emulation/GoldfishSyncCommandQueue.h",
+        "patchSetId": 71
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-08-08T06:59:03Z",
+      "side": 1,
+      "message": "a little bit of how this class is used will be helpful, i.e., a simple usage example...",
+      "revId": "b2866c1cabb80615c008e511039ab4f759c76b8e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d91827bf_a8485368",
+        "filename": "android/emulation/goldfish_sync.cpp",
+        "patchSetId": 71
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-08-08T06:59:03Z",
+      "side": 1,
+      "message": "seems a perfect place to use atomic counter",
+      "range": {
+        "startLine": 42,
+        "startChar": 9,
+        "endLine": 42,
+        "endChar": 23
+      },
+      "revId": "b2866c1cabb80615c008e511039ab4f759c76b8e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d91827bf_a8a4d301",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 71
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-08-08T06:59:03Z",
+      "side": 1,
+      "message": "s/nor/or/ ?",
+      "range": {
+        "startLine": 87,
+        "startChar": 5,
+        "endLine": 87,
+        "endChar": 8
+      },
+      "revId": "b2866c1cabb80615c008e511039ab4f759c76b8e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d91827bf_45e26a2f",
         "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
         "patchSetId": 71
