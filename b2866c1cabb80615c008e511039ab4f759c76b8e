@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d91827bf_45e26a2f",
+        "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
+        "patchSetId": 71
+      },
+      "lineNbr": 911,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-08-08T00:21:09Z",
+      "side": 1,
+      "message": "great work!\n\njust nitpick:\n\na bit of simpler explanation on the high level flow of how things work together would be great for anyone else to better understand.\n\nfor example, when guest isssue elgCreateSync(), what happens on the guest, then on the host; what is the results?  what is the main function\nof each major component?\n\nthen when the guest is waiting on the sync object, what is happening on the guest, then on the host; when the guest will be signaled etc. again,",
+      "revId": "b2866c1cabb80615c008e511039ab4f759c76b8e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
