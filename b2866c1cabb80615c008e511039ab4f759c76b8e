@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "d91827bf_4e8ba715",
+        "filename": "android/emulation/GoldfishSyncCommandQueue.h",
+        "patchSetId": 71
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-08T15:12:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d91827bf_4890bf97",
+      "revId": "b2866c1cabb80615c008e511039ab4f759c76b8e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d91827bf_a8485368",
         "filename": "android/emulation/goldfish_sync.cpp",
         "patchSetId": 71
@@ -42,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "d91827bf_0bcec187",
+        "filename": "android/emulation/goldfish_sync.cpp",
+        "patchSetId": 71
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-08T15:12:40Z",
+      "side": 1,
+      "message": "hmm, commandReplyLock also protects the |wait_map| in addition to |sUniqueId|, and |wait_map| interacts with |sUniqueId|. I prefer not to be lockless here because I don\u0027t think there is any performance benefit (the commands that use this are only used in testing), and if we get it wrong, our tests will wrongly convince us something deeper is wrong. \n\nI\u0027ve recently learned my lesson on atomics, and for now, that boils down to\n\n\"No, unless compelled by horrible results in profiling or benchmark stats\"",
+      "parentUuid": "d91827bf_a8485368",
+      "range": {
+        "startLine": 42,
+        "startChar": 9,
+        "endLine": 42,
+        "endChar": 23
+      },
+      "revId": "b2866c1cabb80615c008e511039ab4f759c76b8e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d91827bf_a8a4d301",
         "filename": "android/emulation/goldfish_sync.h",
         "patchSetId": 71
@@ -53,6 +95,30 @@
       "writtenOn": "2016-08-08T06:59:03Z",
       "side": 1,
       "message": "s/nor/or/ ?",
+      "range": {
+        "startLine": 87,
+        "startChar": 5,
+        "endLine": 87,
+        "endChar": 8
+      },
+      "revId": "b2866c1cabb80615c008e511039ab4f759c76b8e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d91827bf_ee99b368",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 71
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-08T15:12:40Z",
+      "side": 1,
+      "message": "It\u0027s actually supposed to use neither...nor construction (we want to say the abstract fences are non-changing (but can be abstractly thought of as signaled depending on the overall timeline state (and the set of immutable fences can still change))) (Done)",
+      "parentUuid": "d91827bf_a8a4d301",
       "range": {
         "startLine": 87,
         "startChar": 5,
