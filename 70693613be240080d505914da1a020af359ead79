@@ -22,6 +22,30 @@
       "revId": "70693613be240080d505914da1a020af359ead79",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d91827bf_3f22d7c1",
+        "filename": "android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-08-08T18:40:42Z",
+      "side": 1,
+      "message": "dang, i thought std::remove would also eliminate the \"hole\" in the container...",
+      "parentUuid": "b94a9396_7cfbb968",
+      "range": {
+        "startLine": 114,
+        "startChar": 4,
+        "endLine": 114,
+        "endChar": 52
+      },
+      "revId": "70693613be240080d505914da1a020af359ead79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
