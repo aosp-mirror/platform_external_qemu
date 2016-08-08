@@ -120,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "d91827bf_38e8280e",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-08T23:32:04Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "d91827bf_84745b02",
+      "range": {
+        "startLine": 155,
+        "startChar": 4,
+        "endLine": 155,
+        "endChar": 36
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "54231e3a_3bfb917c",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 97
@@ -415,6 +439,30 @@
       "side": 1,
       "message": "Better -- but then a nit: why not checkSyncError as the name?  For \"get_sync_error\", I could buy the argument that it was a (pseudo-) getter, for which the naming convention makes an exception, allowing you to name it like the variable name it fetches.  But now it\u0027s no longer a getter.",
       "parentUuid": "d4762e83_3ea428ff",
+      "range": {
+        "startLine": 592,
+        "startChar": 12,
+        "endLine": 592,
+        "endChar": 26
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d91827bf_b8453852",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 592,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-08T23:32:04Z",
+      "side": 1,
+      "message": "Ah, I see what you mean. I was thinking that the use of underscore naming emphasized that the function was a utility function specifically for rc***Sync***, but then it\u0027s inconsistent with other utility type stuff defined in the same file. Changed to checkSyncError.",
+      "parentUuid": "d91827bf_c480132b",
       "range": {
         "startLine": 592,
         "startChar": 12,
@@ -815,6 +863,30 @@
       "side": 1,
       "message": "Well, now that it does that, there\u0027s no need to declare/initialize it on line 744 -- just make 746 the declaration and (only) initialization.",
       "parentUuid": "d4762e83_1e3dac73",
+      "range": {
+        "startLine": 696,
+        "startChar": 4,
+        "endLine": 696,
+        "endChar": 23
+      },
+      "revId": "fc7b89a1c31468cffb7a8642a16888cd68b7c2d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d91827bf_f8f4d0ed",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 97
+      },
+      "lineNbr": 696,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-08T23:32:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d91827bf_8420db57",
       "range": {
         "startLine": 696,
         "startChar": 4,
