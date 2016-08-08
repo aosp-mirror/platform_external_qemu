@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d91827bf_33d32b08",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 100
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-08T23:32:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3964e309_9bea6f71",
+      "range": {
+        "startLine": 58,
+        "startChar": 23,
+        "endLine": 58,
+        "endChar": 37
+      },
+      "revId": "387650604f94097447bc3b191a481c04fc2667f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3964e309_7b3e7be3",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 100
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "d91827bf_98679cbf",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 100
+      },
+      "lineNbr": 744,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-08T23:32:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3964e309_7b3e7be3",
+      "range": {
+        "startLine": 744,
+        "startChar": 4,
+        "endLine": 744,
+        "endChar": 54
+      },
+      "revId": "387650604f94097447bc3b191a481c04fc2667f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3964e309_3b6d63d5",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 100
@@ -59,6 +107,30 @@
       "writtenOn": "2016-08-08T21:23:31Z",
       "side": 1,
       "message": "Sorry for so many low-level style comments, BTW.  But I can\u0027t resist :-)\n\nA great programmer I once worked with referred to \"the tyranny of names\".  He meant that every time you introduce a name into a program, it means that you have an obligation to explain to the reader the meaning of the name.  And if they\u0027re reading the program, and trying to keep track of what they know about all the variables of the program at each program point, you\u0027ve added one more variable\u0027s worth of cognitive burden.\n\nWhich is a long way of suggesting that if a local variable is defined and then used only once, and it\u0027s initializing expression is not a lot longer than the variable name, that you ought to instead just substitute the expression for the variable at that use, and eliminate the variable :-).",
+      "range": {
+        "startLine": 745,
+        "startChar": 4,
+        "endLine": 745,
+        "endChar": 44
+      },
+      "revId": "387650604f94097447bc3b191a481c04fc2667f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d91827bf_d3b8d7c3",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 100
+      },
+      "lineNbr": 745,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-08T23:32:04Z",
+      "side": 1,
+      "message": "That\u0027s a good point! Done.",
+      "parentUuid": "3964e309_3b6d63d5",
       "range": {
         "startLine": 745,
         "startChar": 4,
