@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "99606f1d_872f568e",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-08-09T14:42:49Z",
+      "side": 1,
+      "message": "nit: remove isSnapshotPresent ?",
+      "range": {
+        "startLine": 389,
+        "startChar": 9,
+        "endLine": 389,
+        "endChar": 26
+      },
+      "revId": "c3958956b735e74be16ab89f619d7c8394c83e0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99606f1d_475ede1f",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 410,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-08-09T14:42:49Z",
+      "side": 1,
+      "message": "nit: remove isSnapshot from this block as well ?",
+      "range": {
+        "startLine": 391,
+        "startChar": 1,
+        "endLine": 410,
+        "endChar": 5
+      },
+      "revId": "c3958956b735e74be16ab89f619d7c8394c83e0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
