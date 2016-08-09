@@ -133,12 +133,20 @@ GlobalNameSpace::genName(GenNameInfo genNameInfo)
         case NamedObjectType::FRAMEBUFFER:
             GLEScontext::dispatcher().glGenFramebuffersEXT(1, &name);
             break;
-        case NamedObjectType::SHADER:
-            name = GLEScontext::dispatcher().glCreateShader(
-                    genNameInfo.m_shaderType);
-            break;
-        case NamedObjectType::PROGRAM:
-            name = GLEScontext::dispatcher().glCreateProgram();
+        case NamedObjectType::SHADER_OR_PROGRAM:
+            switch (genNameInfo.m_shaderProgramType) {
+                case ShaderProgramType::PROGRAM:
+                    name = GLEScontext::dispatcher().glCreateProgram();
+                    break;
+                case ShaderProgramType::VERTEX_SHADER:
+                    name = GLEScontext::dispatcher().glCreateShader(
+                            GL_VERTEX_SHADER);
+                    break;
+                case ShaderProgramType::FRAGMENT_SHADER:
+                    name = GLEScontext::dispatcher().glCreateShader(
+                            GL_FRAGMENT_SHADER);
+                    break;
+            }
             break;
         default:
             name = 0;
@@ -161,13 +169,13 @@ GlobalNameSpace::genName(GenNameInfo genNameInfo)
                 GLuint lname) {
             GLEScontext::dispatcher().glDeleteFramebuffersEXT(1, &lname);
         };
-        m_glDelete[static_cast<int>(NamedObjectType::PROGRAM)] =
+        m_glDelete[static_cast<int>(NamedObjectType::SHADER_OR_PROGRAM)] =
                 [](GLuint lname) {
-                    GLEScontext::dispatcher().glDeleteProgram(lname);
-                };
-        m_glDelete[static_cast<int>(NamedObjectType::SHADER)] =
-                [](GLuint lname) {
-                    GLEScontext::dispatcher().glDeleteShader(lname);
+                    if (GLEScontext::dispatcher().glIsProgram(lname)) {
+                        GLEScontext::dispatcher().glDeleteProgram(lname);
+                    } else {
+                        GLEScontext::dispatcher().glDeleteShader(lname);
+                    }
                 };
     }
     return name;
