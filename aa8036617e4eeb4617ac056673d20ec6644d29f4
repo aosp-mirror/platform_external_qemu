@@ -378,6 +378,30 @@
     },
     {
       "key": {
+        "uuid": "d91827bf_5627b4d0",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderLibImpl.h",
+        "patchSetId": 68
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-09T23:47:33Z",
+      "side": 1,
+      "message": "OK, not a big deal.",
+      "parentUuid": "3964e309_b880999e",
+      "range": {
+        "startLine": 28,
+        "startChar": 4,
+        "endLine": 28,
+        "endChar": 11
+      },
+      "revId": "aa8036617e4eeb4617ac056673d20ec6644d29f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4762e83_6a0edb8c",
         "filename": "distrib/android-emugl/shared/emugl/common/sync_device.cpp",
         "patchSetId": 68
