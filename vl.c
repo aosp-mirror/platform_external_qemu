@@ -179,8 +179,9 @@ int android_display_height = 480;
 
 #define MAX_VIRTIO_CONSOLES 1
 #define MAX_SCLP_CONSOLES 1
+#define QCOW2_SUFFIX "qcow2"
 
-
+extern bool android_op_wipe_data;
 static const char *data_dir[16];
 static int data_dir_idx;
 const char *bios_name = NULL;
@@ -846,6 +847,117 @@ void qemu_system_vmstop_request(RunState state)
     vmstop_requested = state;
     qemu_mutex_unlock(&vmstop_lock);
     qemu_notify_event();
+}
+
+static int create_qcow2_images() {
+    /* First, determine if any of the backing images have been altered.
+     * QCoW2 images won't work in that case, and need to be recreated (this
+     * will obliterate previous snapshots).
+     * The most reliable way to do this is to cache some sort of checksum of
+     * the image files, but we go the easier (and faster) route and cache the
+     * version number that is specified in build.prop.
+     */
+    const char* avd_data_dir = avdInfo_getContentPath(android_avdInfo);
+    static const char sysimg_version_number_cache_basename[] =
+        "version_num.cache";
+    char* sysimg_version_number_cache_path =
+        path_join(avd_data_dir, sysimg_version_number_cache_basename);
+    bool reset_version_number_cache = false;
+    if (!path_exists(sysimg_version_number_cache_path)) {
+        /* File with previously saved version number doesn't exist,
+         * we'll create it later.
+         */
+        reset_version_number_cache = true;
+    } else {
+        FILE* vn_cache_file = fopen(sysimg_version_number_cache_path, "r");
+        int sysimg_version_number = -1;
+        /* If the file with version number contained an error, or the
+         * saved version number doesn't match the current one, we'll
+         * update it later.
+         */
+        reset_version_number_cache =
+            vn_cache_file == NULL ||
+            fscanf(vn_cache_file, "%d", &sysimg_version_number) != 1 ||
+            sysimg_version_number !=
+                avdInfo_getSysImgIncrementalVersion(android_avdInfo);
+        if (vn_cache_file) {
+            fclose(vn_cache_file);
+        }
+    }
+
+    /* List of paths to all images that can be mounted.*/
+    const char* const image_paths[] = {
+        android_hw->disk_systemPartition_initPath,
+        android_hw->disk_cachePartition_path,
+        android_hw->disk_dataPartition_path,
+        android_hw->hw_sdCard_path,
+    };
+    int p;
+    for (p = 0; p < ARRAY_SIZE(image_paths); p++) {
+        const char* backing_image_path = image_paths[p];
+        char* qcow2_image_path = NULL;
+        if (!backing_image_path ||
+            *backing_image_path == '\0') {
+            /* If the path is NULL or empty, just ignore it.*/
+            continue;
+        }
+        if (!strcmp(backing_image_path,
+                    android_hw->disk_systemPartition_initPath)) {
+            /* System image is a special case, the backing image is
+             * in the SDK folder, but the QCoW2 image that the emulator
+             * uses is created on a per-AVD basis and is placed in the
+             * AVD's data folder.
+             */
+            static const char sysimage_qcow2_basename[] =
+                "system.img." QCOW2_SUFFIX;
+            qcow2_image_path =
+                path_join(avd_data_dir, sysimage_qcow2_basename);
+        } else {
+            /* For all the other images except system image,
+             * just create another file alongside them
+             * with a 'qcow2' extension
+             */
+            const char qcow2_suffix[] = "." QCOW2_SUFFIX;
+            size_t path_size = strlen(backing_image_path) + sizeof(qcow2_suffix) + 1;
+            qcow2_image_path = malloc(path_size);
+            bufprint(qcow2_image_path, qcow2_image_path + path_size, "%s%s", backing_image_path, qcow2_suffix);
+        }
+
+        Error* img_creation_error = NULL;
+        if (!path_exists(qcow2_image_path) ||
+            android_op_wipe_data ||
+            reset_version_number_cache) {
+            bdrv_img_create(
+                qcow2_image_path,
+                QCOW2_SUFFIX,
+                backing_image_path,
+                "raw",
+                NULL,
+                -1,
+                BDRV_O_CACHE_WB,
+                &img_creation_error,
+                false);
+        }
+        free(qcow2_image_path);
+        if (img_creation_error) {
+            error_report("%s", error_get_pretty(img_creation_error));
+            return 0;
+        }
+    }
+
+    /* Update version number cache if necessary. */
+    if (reset_version_number_cache) {
+        FILE* vn_cache_file = fopen(sysimg_version_number_cache_path, "w");
+        if (vn_cache_file) {
+            fprintf(vn_cache_file,
+                    "%d\n",
+                    avdInfo_getSysImgIncrementalVersion(android_avdInfo));
+            fclose(vn_cache_file);
+        }
+    }
+    free(sysimg_version_number_cache_path);
+
+    return 1;
 }
 
 void vm_start(void)
@@ -4129,6 +4241,15 @@ int run_qemu_main(int argc, const char **argv)
 
     if (qemu_init_main_loop(&main_loop_err)) {
         error_report("%s", error_get_pretty(main_loop_err));
+        return 1;
+    }
+
+    /* At this point, both block drivers and main loop have been initialized
+     * which means we can create the QCoW2 images to boot from.
+     * The QCoW2 images are backed by the "raw" images specified in the AVD
+     * config, and contain diffs to the backing image. Snapshot data is also
+     * written to QCoW2 images.*/
+    if(!create_qcow2_images()) {
         return 1;
     }
 
