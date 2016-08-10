@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1919df0e_ea8a2a11",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 103
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-08-10T05:00:38Z",
+      "side": 1,
+      "message": "for the situation where the host does not have sync fence support, do we still want the glfinish ?",
+      "revId": "3c3f49727ce76efb12387ca991aa1ab67bfcfec6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
