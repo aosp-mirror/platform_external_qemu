@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1919df0e_f2d77cef",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-10T18:16:15Z",
+      "side": 1,
+      "message": "Do I understand correctly that the underlying problem that this locking is addressing is that OpenGL, and thus GLES, doesn\u0027t make any guarantees about the thread-safety of its operations?  So if T1 and T2 make concurrent OpenGL calls, the results are undefined.  This command causes doSyncContextCreation to be executed, and that invokes operations via s_egl.  Those can\u0027t be concurrent with other operations invoked via s.egl in other threads.\n\nJust to test if I have this right, if I do, one could conceivably enclose each EGL call in doSyncContextCreation in its own lock; the interleavings of the calls in two invocations of doSyncContextCreation by two different threads would be OK.  (Interestingly, the documentation for eglGetError says that it returns the error for the last operation performed by the current thread -- so it\u0027s at least that thread-aware, and it seems possible that this accesses only thread-local storage, and might not need locking.)\n\nIf all this is correct, I guess I would be in favor of having the locking \"next to\" the things it\u0027s really protecting, and with minimal scope.  I.e., hold the lock only in doSyncContextCreation, while doing the graphics operations that must be protected.  It doesn\u0027t seem like holding the lock while sending the command and waiting for it is necessary -- if not, it\u0027s bad both to hold the lock longer than necessary, and, more importantly, to obscure the underlying reason for holding the lock.  (Again, if I\u0027m understanding all this correctly :-)!)",
+      "range": {
+        "startLine": 101,
+        "startChar": 4,
+        "endLine": 101,
+        "endChar": 44
+      },
+      "revId": "6f855615a27eafb521fdec7064345a0207aaeca7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1919df0e_afebdfa7",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-10T18:16:15Z",
+      "side": 1,
+      "message": "It\u0027s a little weird that we assign this, never modify it, and return it.  Was there a kind of command that returned a value before, perhaps, or future-proofing in case we add one?",
+      "range": {
+        "startLine": 291,
+        "startChar": 4,
+        "endLine": 291,
+        "endChar": 19
+      },
+      "revId": "6f855615a27eafb521fdec7064345a0207aaeca7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1919df0e_d2e838ad",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 332,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-10T18:16:15Z",
+      "side": 1,
+      "message": "If my comment above for the other place you acquire this lock is correct, I would argue for the corresponding change here: putting the locking around the eglDestroyContext call in SyncThread::doExit.",
+      "range": {
+        "startLine": 332,
+        "startChar": 4,
+        "endLine": 332,
+        "endChar": 44
+      },
+      "revId": "6f855615a27eafb521fdec7064345a0207aaeca7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
