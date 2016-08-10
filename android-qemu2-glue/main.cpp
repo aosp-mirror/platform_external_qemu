@@ -208,7 +208,7 @@ static std::string getNthParentDir(const char* path, size_t n) {
 
 static void makePartitionCmd(const char** args, int* argsPosition, int* driveIndex,
                              AndroidHwConfig* hw, ImageType type, bool writable,
-                             int apiLevel) {
+                             int apiLevel, const char* avdContentPath) {
     int n   = *argsPosition;
     int idx = *driveIndex;
 
@@ -219,12 +219,12 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
     std::string driveParam;
 #endif
     std::string deviceParam;
-
     switch (type) {
         case IMAGE_TYPE_SYSTEM:
-            driveParam += StringFormat("index=%d,id=system,file=%s,format=raw",
+            driveParam += StringFormat("index=%d,id=system,file=%s"
+                                       PATH_SEP "system.img.qcow2",
                                         idx++,
-                                        hw->disk_systemPartition_initPath);
+                                        avdContentPath);
             // API 15 and under images need a read+write
             // system image.
             if (apiLevel > 15) {
@@ -238,14 +238,14 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
                                        kTarget.storageDeviceType);
             break;
         case IMAGE_TYPE_CACHE:
-            driveParam += StringFormat("index=%d,id=cache,file=%s,format=raw",
+            driveParam += StringFormat("index=%d,id=cache,file=%s.qcow2",
                                       idx++,
                                       hw->disk_cachePartition_path);
             deviceParam = StringFormat("%s,drive=cache",
                                        kTarget.storageDeviceType);
             break;
         case IMAGE_TYPE_USER_DATA:
-            driveParam += StringFormat("index=%d,id=userdata,file=%s,format=raw",
+            driveParam += StringFormat("index=%d,id=userdata,file=%s.qcow2",
                                       idx++,
                                       hw->disk_dataPartition_path);
             deviceParam = StringFormat("%s,drive=userdata",
@@ -253,7 +253,7 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
             break;
         case IMAGE_TYPE_SD_CARD:
             if (hw->hw_sdCard_path != NULL && strcmp(hw->hw_sdCard_path, "")) {
-               driveParam += StringFormat("index=%d,id=sdcard,file=%s,format=raw",
+               driveParam += StringFormat("index=%d,id=sdcard,file=%s.qcow2",
                                          idx++, hw->hw_sdCard_path);
                deviceParam = StringFormat("%s,drive=sdcard",
                                           kTarget.storageDeviceType);
@@ -801,7 +801,8 @@ extern "C" int main(int argc, char **argv) {
         bool writable = (kTarget.imagePartitionTypes[s] == IMAGE_TYPE_SYSTEM) ?
                     android_op_writable_system : true;
         makePartitionCmd(args, &n, &drvIndex, hw,
-                         kTarget.imagePartitionTypes[s], writable, apiLevel);
+                         kTarget.imagePartitionTypes[s], writable, apiLevel,
+                         avdInfo_getContentPath(avd));
     }
 
     // Network
