@@ -436,6 +436,121 @@
       "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1919df0e_862934f1",
+        "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
+        "patchSetId": 72
+      },
+      "lineNbr": 918,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-10T00:02:40Z",
+      "side": 1,
+      "message": "insert \"the\"",
+      "range": {
+        "startLine": 918,
+        "startChar": 0,
+        "endLine": 918,
+        "endChar": 7
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1919df0e_26686821",
+        "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
+        "patchSetId": 72
+      },
+      "lineNbr": 935,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-10T00:02:40Z",
+      "side": 1,
+      "message": "This is already done by the Android sync framework, I assume?",
+      "range": {
+        "startLine": 935,
+        "startChar": 0,
+        "endLine": 935,
+        "endChar": 29
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1919df0e_66f18066",
+        "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
+        "patchSetId": 72
+      },
+      "lineNbr": 968,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-10T00:02:40Z",
+      "side": 1,
+      "message": "?  Didn\u0027t understand this phrasing.",
+      "range": {
+        "startLine": 968,
+        "startChar": 35,
+        "endLine": 968,
+        "endChar": 75
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1919df0e_a68f98d1",
+        "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
+        "patchSetId": 72
+      },
+      "lineNbr": 976,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-10T00:02:40Z",
+      "side": 1,
+      "message": "No comman.",
+      "range": {
+        "startLine": 976,
+        "startChar": 17,
+        "endLine": 976,
+        "endChar": 19
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1919df0e_063a04ce",
+        "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
+        "patchSetId": 72
+      },
+      "lineNbr": 979,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-10T00:02:40Z",
+      "side": 1,
+      "message": "I found it confusing that the wait is described before the create.   Do I have this right: the guest-\u003ehost command does an eglCreateSync, then a sync thread does a corresponding eglClientWaitSync, which issues the host-guest command when that returns?",
+      "range": {
+        "startLine": 979,
+        "startChar": 0,
+        "endLine": 979,
+        "endChar": 20
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
