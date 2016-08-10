@@ -237,6 +237,30 @@
     },
     {
       "key": {
+        "uuid": "d98d87b7_a03e5470",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1088,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-10T22:19:29Z",
+      "side": 1,
+      "message": "That seems fine.  Could you put a comment here keeping readers from having the question I had: say that you explicitly don\u0027t do m_procOwnedEGLImages.erase(puid) when the size becomes zero, since it could go between zero and one many times in the lifetime of a process, and point out that it will be cleaned up when the process is?",
+      "parentUuid": "d98d87b7_e0677cf5",
+      "range": {
+        "startLine": 1088,
+        "startChar": 4,
+        "endLine": 1088,
+        "endChar": 44
+      },
+      "revId": "7bc701f8f502d74a9bc062a208cbb36c250a390d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "54231e3a_dfe05302",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
         "patchSetId": 7
