@@ -84,6 +84,30 @@
     },
     {
       "key": {
+        "uuid": "d91827bf_271480f0",
+        "filename": "android/emulation/goldfish_sync.cpp",
+        "patchSetId": 71
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-08-10T04:58:36Z",
+      "side": 1,
+      "message": "ack",
+      "parentUuid": "d91827bf_0bcec187",
+      "range": {
+        "startLine": 42,
+        "startChar": 9,
+        "endLine": 42,
+        "endChar": 23
+      },
+      "revId": "b2866c1cabb80615c008e511039ab4f759c76b8e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d91827bf_a8a4d301",
         "filename": "android/emulation/goldfish_sync.h",
         "patchSetId": 71
@@ -119,6 +143,30 @@
       "side": 1,
       "message": "It\u0027s actually supposed to use neither...nor construction (we want to say the abstract fences are non-changing (but can be abstractly thought of as signaled depending on the overall timeline state (and the set of immutable fences can still change))) (Done)",
       "parentUuid": "d91827bf_a8a4d301",
+      "range": {
+        "startLine": 87,
+        "startChar": 5,
+        "endLine": 87,
+        "endChar": 8
+      },
+      "revId": "b2866c1cabb80615c008e511039ab4f759c76b8e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d91827bf_673f986f",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 71
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-08-10T04:58:36Z",
+      "side": 1,
+      "message": "ack",
+      "parentUuid": "d91827bf_ee99b368",
       "range": {
         "startLine": 87,
         "startChar": 5,
