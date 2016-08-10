@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1919df0e_2a8b42c9",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 103
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-10T05:46:17Z",
+      "side": 1,
+      "message": "It would definitely be more correct to call glFinish if the host does not support sync, but if it doesn\u0027t, the host driver is older than OpenGL 3.2, which seems to mean that its driver updates have ended in 2009 (refs: https://www.opengl.org/sdk/docs/man/html/glFenceSync.xhtml, https://en.wikipedia.org/wiki/OpenGL#OpenGL_3.1).\n\nSo, I\u0027d be up for adding a check for this in a future CL, but I don\u0027t think the vast majority of users will have issues with OOO frames if we just use what we have right now.\n\nIn terms of testing: sync fence support definitely exists and works on all the dev / personal machines I tested emulator on so far. (windows nvidia 320.xx, 36x.xx, mac os x intel iris, linux nvidia 340.xx)",
+      "parentUuid": "1919df0e_ea8a2a11",
+      "revId": "3c3f49727ce76efb12387ca991aa1ab67bfcfec6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1919df0e_4ab316e6",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 103
@@ -42,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "1919df0e_eaad4a35",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 103
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-10T05:46:17Z",
+      "side": 1,
+      "message": "Yeah I\u0027ve not actually seen this line (this function, really...) fire very much if at all in testing, but I thought it would be nice to clean it up in case we get some shorter lived context that uses sync, and then when that context is destroyed, and some other long lived context is created that doesn\u0027t use sync, we don\u0027t want to leave the sync thread there. Yeah, that is a far fetched situation based on what I\u0027ve seen so far, since the situations where the 1:1 thread:context invariant has been broken seem to be rare if they exist at all, for the emulator use case at least.\n\nThere\u0027s not much evidence-based justification for putting this here, but it seems reasonable to do so, and it is in line with the logic of destroying the render context. Plus, there\u0027s no harm of destroying it too early, since all sync creations will check for and create a sync thread if one does not exist. So, I vote to leave this here anyway, to handle that hypothetical case, and to keep the logic consistent.",
+      "parentUuid": "1919df0e_4ab316e6",
+      "range": {
+        "startLine": 328,
+        "startChar": 16,
+        "endLine": 328,
+        "endChar": 33
+      },
+      "revId": "3c3f49727ce76efb12387ca991aa1ab67bfcfec6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1919df0e_eadc6a14",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 103
@@ -53,6 +95,30 @@
       "writtenOn": "2016-08-10T05:11:19Z",
       "side": 1,
       "message": "why? I expect this to slow things down ?",
+      "range": {
+        "startLine": 668,
+        "startChar": 12,
+        "endLine": 668,
+        "endChar": 19
+      },
+      "revId": "3c3f49727ce76efb12387ca991aa1ab67bfcfec6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1919df0e_6a6b7aee",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 103
+      },
+      "lineNbr": 668,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-10T05:46:17Z",
+      "side": 1,
+      "message": "It doesn\u0027t seem to have caused any performance problems (glFlush might actually help performance in some cases if the driver is improperly delaying a command), but if this flush call is not there, the underlying host driver might do this:\n\nRender thread A:\n\nIssues eglCreateSyncKHR\n\nRender thread B:\n\nIssues eglClientWaitSyncKHR (waiting on the one in A)\n\nIf no glFlush:\n\nRender thread A\u0027s command is not put in the GPU queue for a while, sitting in some intermediate driver queue, for whatever mysterious driver reasons.\n\nRender thread B\u0027s eglClientWaitSyncKHR chances are, is called with the FLUSH_COMMANDS bitfield flag, so it immediately goes to the GPU queue.\n\nThen the GPU queue looks like this:\n\nback | eglCreateSyncKHR | ... maybe some other commands ... |eglClientWaitSyncKHR | front\n\nThis is a deadlock, because eglClientWaitSyncKHR is waiting on something that will complete after it itself is completed.",
+      "parentUuid": "1919df0e_eadc6a14",
       "range": {
         "startLine": 668,
         "startChar": 12,
