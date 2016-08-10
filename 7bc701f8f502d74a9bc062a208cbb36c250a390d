@@ -213,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "d98d87b7_e0677cf5",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1088,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-08-10T22:03:39Z",
+      "side": 1,
+      "message": "I would prefer waiting for the cleanup path - if there are a large number of guest processes, it will have other issues first. The memory usage here comparing to other process resources is insignificant.\n\nOn the other hand, a process can create and release one single EGLImage multiple times, which might have one extra allocation / deallocation if we erase m_procOwnedEGLImages[puid] (which is also insignificant comparing to other stuff).\n\nAll in all, I don\u0027t think we shall worry about this. what do you think?",
+      "parentUuid": "54231e3a_7f7d8748",
+      "range": {
+        "startLine": 1088,
+        "startChar": 4,
+        "endLine": 1088,
+        "endChar": 44
+      },
+      "revId": "7bc701f8f502d74a9bc062a208cbb36c250a390d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "54231e3a_dfe05302",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
         "patchSetId": 7
