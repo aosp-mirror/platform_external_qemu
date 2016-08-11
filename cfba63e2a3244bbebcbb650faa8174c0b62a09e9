@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d924a797_8885f7b6",
+        "filename": "android/emulation/GoldfishSyncCommandQueue.cpp",
+        "patchSetId": 72
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d91827bf_59aa4570",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 13
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "59b43747_f121280c",
         "filename": "android/emulation/GoldfishSyncCommandQueue.h",
         "patchSetId": 72
@@ -36,6 +60,30 @@
       "writtenOn": "2016-08-10T11:00:03Z",
       "side": 1,
       "message": "nit: this should be on the first line",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 12
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "596b579b_dc67c1f5",
+        "filename": "android/emulation/GoldfishSyncCommandQueue.h",
+        "patchSetId": 72
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "59b43747_f121280c",
       "range": {
         "startLine": 18,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "d924a797_c5851a04",
+        "filename": "android/emulation/GoldfishSyncCommandQueue.h",
+        "patchSetId": 72
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "59b43747_d126a421",
+      "range": {
+        "startLine": 56,
+        "startChar": 1,
+        "endLine": 59,
+        "endChar": 28
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d91827bf_76b2b000",
         "filename": "android/emulation/GoldfishSyncCommandQueue.h",
         "patchSetId": 72
@@ -82,6 +154,30 @@
       "writtenOn": "2016-08-09T23:47:33Z",
       "side": 1,
       "message": "This should be declared to be an override.  (As we discussed previously, I would prefer override and not virtual...but it should at least have the override!)",
+      "range": {
+        "startLine": 83,
+        "startChar": 4,
+        "endLine": 83,
+        "endChar": 11
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d924a797_0590123e",
+        "filename": "android/emulation/GoldfishSyncCommandQueue.h",
+        "patchSetId": 72
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d91827bf_76b2b000",
       "range": {
         "startLine": 83,
         "startChar": 4,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "d924a797_c52b5a99",
+        "filename": "android/emulation/goldfish_sync.cpp",
+        "patchSetId": 72
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1919df0e_8b5b7d89",
+      "range": {
+        "startLine": 32,
+        "startChar": 25,
+        "endLine": 32,
+        "endChar": 36
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "59b43747_f1fac863",
         "filename": "android/emulation/goldfish_sync.cpp",
         "patchSetId": 72
@@ -128,6 +248,30 @@
       "writtenOn": "2016-08-10T11:00:03Z",
       "side": 1,
       "message": "lazyinstance?",
+      "range": {
+        "startLine": 40,
+        "startChar": 6,
+        "endLine": 40,
+        "endChar": 12
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d924a797_25fc2e0c",
+        "filename": "android/emulation/goldfish_sync.cpp",
+        "patchSetId": 72
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "59b43747_f1fac863",
       "range": {
         "startLine": 40,
         "startChar": 6,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "d924a797_c89e0f4c",
+        "filename": "android/emulation/goldfish_sync.cpp",
+        "patchSetId": 72
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "59b43747_b100405e",
+      "range": {
+        "startLine": 50,
+        "startChar": 4,
+        "endLine": 50,
+        "endChar": 57
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1919df0e_0b11ad55",
         "filename": "android/emulation/goldfish_sync.cpp",
         "patchSetId": 72
@@ -174,6 +342,30 @@
       "writtenOn": "2016-08-09T23:47:33Z",
       "side": 1,
       "message": "Does lock protect only \"done\", or also return_value?",
+      "range": {
+        "startLine": 51,
+        "startChar": 4,
+        "endLine": 51,
+        "endChar": 14
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d924a797_e8a3cb98",
+        "filename": "android/emulation/goldfish_sync.cpp",
+        "patchSetId": 72
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Yes. Added a comment on the description of command reply lock to clarify. (Done).",
+      "parentUuid": "1919df0e_0b11ad55",
       "range": {
         "startLine": 51,
         "startChar": 4,
@@ -209,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "d924a797_a8fb9378",
+        "filename": "android/emulation/goldfish_sync.cpp",
+        "patchSetId": 72
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1919df0e_4b448571",
+      "range": {
+        "startLine": 59,
+        "startChar": 36,
+        "endLine": 59,
+        "endChar": 52
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1919df0e_2b14b1ef",
         "filename": "android/emulation/goldfish_sync.cpp",
         "patchSetId": 72
@@ -220,6 +436,30 @@
       "writtenOn": "2016-08-09T23:47:33Z",
       "side": 1,
       "message": "Personally, I\u0027d prefer that you make a block just before you declare the AutoLock, and terminate it here, so that the destructor does the unlock.  This (to me) emphasizes the duration of the lock.  I think this is worth having to declare \"res\" outside this block.",
+      "range": {
+        "startLine": 147,
+        "startChar": 3,
+        "endLine": 147,
+        "endChar": 18
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d924a797_a805536d",
+        "filename": "android/emulation/goldfish_sync.cpp",
+        "patchSetId": 72
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1919df0e_2b14b1ef",
       "range": {
         "startLine": 147,
         "startChar": 3,
@@ -255,6 +495,30 @@
     },
     {
       "key": {
+        "uuid": "d924a797_a86e3331",
+        "filename": "android/emulation/goldfish_sync.cpp",
+        "patchSetId": 72
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1919df0e_abc2015a",
+      "range": {
+        "startLine": 166,
+        "startChar": 58,
+        "endLine": 166,
+        "endChar": 76
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d91827bf_1deb9e77",
         "filename": "android/emulation/goldfish_sync.h",
         "patchSetId": 72
@@ -266,6 +530,30 @@
       "writtenOn": "2016-08-09T23:47:33Z",
       "side": 1,
       "message": "I would not refer to the timeline_id as part of the timeline state.  (Since the only way to name a timeline is via a timeline_id, there\u0027s no need to query it -- so it\u0027s not really part of the state.)  So just say it\u0027s has a value, and that timelines are named by uint64_t identifiers, unique across the virtual device.",
+      "range": {
+        "startLine": 81,
+        "startChar": 5,
+        "endLine": 82,
+        "endChar": 26
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d924a797_cbc2895b",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 72
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d91827bf_1deb9e77",
       "range": {
         "startLine": 81,
         "startChar": 5,
@@ -301,6 +589,30 @@
     },
     {
       "key": {
+        "uuid": "d924a797_cb152942",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 72
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d91827bf_1d9a7e5c",
+      "range": {
+        "startLine": 85,
+        "startChar": 5,
+        "endLine": 85,
+        "endChar": 36
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d91827bf_7def32ee",
         "filename": "android/emulation/goldfish_sync.h",
         "patchSetId": 72
@@ -312,6 +624,30 @@
       "writtenOn": "2016-08-09T23:47:33Z",
       "side": 1,
       "message": "\"timeline-id-value\" is a new, undefined term.  I think you want to say what you said for timeline: \"...of (timeline-id, value) pairs.\"  Then maybe \"Each pair indicates a timeline, and the value that the timeline\u0027s value must reach for the fence to become signaled\".  (Or satisfied, if you like that terminology.)\n\nDid you mean to be introducing timeline-id-value as the name for the \u003ctimeline-id, value\u003e pair, perhaps?  You use it that way below, with timeline-id-values sounding like a set of such pairs.  If so, you need to introduce the definition of that here.  Something like:\n\n   \"Let timeline-id-value be a pair of (timeline-id, value), and let timeline-id-values be a set of such pairs.  A fence is a timeline-id-values set.\"",
+      "range": {
+        "startLine": 86,
+        "startChar": 8,
+        "endLine": 86,
+        "endChar": 35
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d924a797_cbd609bd",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 72
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d91827bf_7def32ee",
       "range": {
         "startLine": 86,
         "startChar": 8,
@@ -347,6 +683,30 @@
     },
     {
       "key": {
+        "uuid": "d924a797_0bf10167",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 72
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d91827bf_3db77af0",
+      "range": {
+        "startLine": 87,
+        "startChar": 19,
+        "endLine": 87,
+        "endChar": 36
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d91827bf_fdacc29e",
         "filename": "android/emulation/goldfish_sync.h",
         "patchSetId": 72
@@ -358,6 +718,30 @@
       "writtenOn": "2016-08-09T23:47:33Z",
       "side": 1,
       "message": "Maybe these can be maps from identifiers to timelines or fences (the currently allocated ones).  That\u0027s how I\u0027d treat the identifiers.  If you did that, the id uniqueness properties you call out below would be obvious.",
+      "range": {
+        "startLine": 90,
+        "startChar": 40,
+        "endLine": 91,
+        "endChar": 52
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d924a797_eedcb314",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 72
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d91827bf_fdacc29e",
       "range": {
         "startLine": 90,
         "startChar": 40,
@@ -393,6 +777,30 @@
     },
     {
       "key": {
+        "uuid": "d924a797_0b2021a4",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 72
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d91827bf_98fb1c68",
+      "range": {
+        "startLine": 96,
+        "startChar": 7,
+        "endLine": 96,
+        "endChar": 67
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d91827bf_5853646f",
         "filename": "android/emulation/goldfish_sync.h",
         "patchSetId": 72
@@ -404,6 +812,30 @@
       "writtenOn": "2016-08-09T23:47:33Z",
       "side": 1,
       "message": "I still think there\u0027s potential confusion in using the same term, \"signaled\", for the abstract predicate that determines whether and when a fence may be (concretely) signaled, and the actual concrete action of signaling it.  I\u0027ll read further and see if I still think that\u0027s a problem.",
+      "range": {
+        "startLine": 102,
+        "startChar": 38,
+        "endLine": 102,
+        "endChar": 60
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d924a797_2b1ddd64",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 72
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "d91827bf_5853646f",
       "range": {
         "startLine": 102,
         "startChar": 38,
@@ -439,6 +871,30 @@
     },
     {
       "key": {
+        "uuid": "d924a797_8bf971ec",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 72
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d91827bf_f8e7b0a8",
+      "range": {
+        "startLine": 119,
+        "startChar": 48,
+        "endLine": 119,
+        "endChar": 62
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d91827bf_f86a10e8",
         "filename": "android/emulation/goldfish_sync.h",
         "patchSetId": 72
@@ -450,6 +906,30 @@
       "writtenOn": "2016-08-09T23:47:33Z",
       "side": 1,
       "message": "\u003d\u003d\u003e\npair.  Returns a unique identifier for the fence.\n\n(BTW: What makes these unique?  Do they just wrap linearly, and we assume that any fences allocated 2^32 ago will no longer be in service?  I notice that there\u0027s no destroy_fence method, but there is one for timelines.\n\nSame Q for timelines.  Do the timeline id\u0027s just wrap, or do you keep track of timeline ids in use, and have destroy_timeline return the id to the pool of available ids?)",
+      "range": {
+        "startLine": 121,
+        "startChar": 26,
+        "endLine": 121,
+        "endChar": 61
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d924a797_ab62ade6",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 72
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Done.\n\nTo answer the side question: They don\u0027t need to wrap linearly (and they don\u0027t). We only care about uniqueness with respect to the currently active set of fence fd\u0027s or timeline id\u0027s, and from this perspective, they are unique. The actual behavior would depend on several layers of implementation of file descriptors and kernel memory allocs, which could just count up, or use pools, etc.",
+      "parentUuid": "d91827bf_f86a10e8",
       "range": {
         "startLine": 121,
         "startChar": 26,
@@ -485,6 +965,30 @@
     },
     {
       "key": {
+        "uuid": "d924a797_0b52e10f",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 72
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d91827bf_98331c19",
+      "range": {
+        "startLine": 128,
+        "startChar": 17,
+        "endLine": 128,
+        "endChar": 28
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d91827bf_f85e90e6",
         "filename": "android/emulation/goldfish_sync.h",
         "patchSetId": 72
@@ -508,6 +1012,30 @@
     },
     {
       "key": {
+        "uuid": "d924a797_cbb1a94a",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 72
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Locally, it has no side effect other than incrementing the timeline. Less locally, the kernel sw_sync module would then handle any consequential setting to \"signaled\" status of fences.\n\nBut the important part is that to the user, it would appear that fence fd\u0027s magically notice whether they are signaled without further intervention, which is why we can comfortably use the abstract \"signaled\" property to describe fences.\n\nBTW, timeline_inc is actually called after waiting in the thread that gets the \"trigger wait\" messages. It doesn\u0027t affect trigger_wait\u0027s in any way.",
+      "parentUuid": "d91827bf_f85e90e6",
+      "range": {
+        "startLine": 130,
+        "startChar": 25,
+        "endLine": 130,
+        "endChar": 70
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d91827bf_3844a807",
         "filename": "android/emulation/goldfish_sync.h",
         "patchSetId": 72
@@ -519,6 +1047,30 @@
       "writtenOn": "2016-08-09T23:47:33Z",
       "side": 1,
       "message": "Hmm.  You\u0027ve gone with the full-scale fence \u003d set of timeline-id-value definition in this file.  Do you really mean to say that destroying a single timeline makes a fence that is waiting for that timeline, and several others, to be signaled?  If not, you need to say something more nuanced.",
+      "range": {
+        "startLine": 136,
+        "startChar": 19,
+        "endLine": 136,
+        "endChar": 53
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d924a797_2ba23df5",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 72
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d91827bf_3844a807",
       "range": {
         "startLine": 136,
         "startChar": 19,
