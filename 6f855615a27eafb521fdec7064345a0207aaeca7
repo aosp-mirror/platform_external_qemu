@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "d924a797_0e902a97",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-11T23:59:31Z",
+      "side": 1,
+      "message": "OK, so my mental model know is that OpenGL operations that reference a single already-existing context are thread safe, as long as the context is owned by the thread accessing it.  Presumably operations that create and destroy contexts access global state defining the set of currently-allocated contexts; these accesses must be synchronized, and evidence indicates that at least some OpenGL implementations don\u0027t do internal synchronization of these global-state operations.  So we have to, at least for these.\n\nI hear a little bit of frustration, saying that you did a lot of work to find by experiment a locking scheme that works -- I appreciate that; we\u0027ve all been there :-).  How about I ask you to do one experiment on something that ought to work (based on the mental model above); if it doesn\u0027t, I will be happy with the solution you have.\n\nThe experiment I wanted to try (and perhaps you\u0027ve already done it, and know it doesn\u0027t work -- but it wasn\u0027t described in your response) is to put the locking in the (entire) bodies of doSyncContextCreation and doExit.  My reasoning:\n\nThe code just below sends a SYNC_THREAD_INIT command, and waits for it to return.  Nothing about sending a command or waiting for its return requires another lock to be hold.  SYNC_THREAD_INIT causes doSyncThreadCmd to be executed, without doing anything else that ought to require locking.  So moving this locking into doSyncContextCreation ought to be equivalent.\n\nI\u0027m a little less sure that doExit is sufficient...but it sure seems like it ought to be.  If we send SYNC_THREAD_EXIT, we do doExit, and then, in main, after we\u0027ve sent the result, we exit the loop.  I can\u0027t see why doing the locking just in doExit wouldn\u0027t accomplish the same thing.\n\nIf you try this, and still get errors, I\u0027ll LGTM (maybe asking for some sort of comment explaining that we don\u0027t completely know why the wider locking is necessary, but that experimentally it is).  But if it works, I do still think it would be superior -- we\u0027d have a mental model (the one I described) that justified why the locking was necessary, and why it\u0027s minimal.",
+      "parentUuid": "d924a797_6ecfe325",
+      "range": {
+        "startLine": 101,
+        "startChar": 4,
+        "endLine": 101,
+        "endChar": 44
+      },
+      "revId": "6f855615a27eafb521fdec7064345a0207aaeca7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1919df0e_afebdfa7",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 36
