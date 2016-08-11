@@ -22,6 +22,30 @@
       "revId": "71321404069c111a6314110b0d58fc1021adda51",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d924a797_919a7f02",
+        "filename": "android/utils/path.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-08-11T17:15:51Z",
+      "side": 1,
+      "message": "PathUtils::join returns an std::string. Since this function is called from C code, we can\u0027t return a copy of that std::string instance, and returning a pointer to its internally held string isn\u0027t correct either. There also isn\u0027t a way I know of to make it \"release\" its internally held data.\nI think that\u0027s the reason other functions in this file also do manual allocations (e.g. path_escape_path).",
+      "parentUuid": "3e8be9e1_4005ce69",
+      "range": {
+        "startLine": 493,
+        "startChar": 2,
+        "endLine": 502,
+        "endChar": 16
+      },
+      "revId": "71321404069c111a6314110b0d58fc1021adda51",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
