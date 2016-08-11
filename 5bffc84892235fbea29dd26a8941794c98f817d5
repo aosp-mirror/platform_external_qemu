@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d924a797_99f62b92",
+        "filename": "android/camera/camera-service.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1177,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-08-11T01:00:35Z",
+      "side": 1,
+      "message": "Should command_buffer_offset be initialized to zero at some point before this first use? Or is the struct zeroed out at some point during setup?",
+      "revId": "5bffc84892235fbea29dd26a8941794c98f817d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
