@@ -24,6 +24,7 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 
 #include <stdio.h>
+#include <string.h>
 
 namespace {
 
@@ -134,7 +135,10 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
 
     int nComp = (texInternalFormat == GL_RGB ? 3 : 4);
 
-    char* zBuff = static_cast<char*>(::calloc(nComp * p_width * p_height, 1));
+    unsigned long bufsize = nComp * p_width * p_height;
+    char* initialImage = static_cast<char*>(::calloc(bufsize, 1));
+    memset(initialImage, 0xff, bufsize);
+
     s_gles2.glTexImage2D(GL_TEXTURE_2D,
                          0,
                          texInternalFormat,
@@ -143,8 +147,8 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                          0,
                          texInternalFormat,
                          GL_UNSIGNED_BYTE,
-                         zBuff);
-    ::free(zBuff);
+                         initialImage);
+    ::free(initialImage);
 
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
