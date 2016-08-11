@@ -16,6 +16,24 @@
       "revId": "5bffc84892235fbea29dd26a8941794c98f817d5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d924a797_34a29ef5",
+        "filename": "android/camera/camera-service.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1177,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-08-11T02:28:44Z",
+      "side": 1,
+      "message": "it is initialized to zero when the object CameraClient is created. so we get it for free :)",
+      "parentUuid": "d924a797_99f62b92",
+      "revId": "5bffc84892235fbea29dd26a8941794c98f817d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
