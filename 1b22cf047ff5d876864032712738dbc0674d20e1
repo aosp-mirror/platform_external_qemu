@@ -187,6 +187,30 @@
       "revId": "1b22cf047ff5d876864032712738dbc0674d20e1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d924a797_3ada853e",
+        "filename": "android/emulation/goldfish_sync.h",
+        "patchSetId": 73
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-11T16:19:09Z",
+      "side": 1,
+      "message": "You\u0027re right, it\u0027s not wrong; I should have said it feels incomplete, because it doesn\u0027t positively specify what would have to be true about the other timelines in order for it to become signaled.  The sentence you added addresses that for me, thanks.",
+      "parentUuid": "d924a797_cee9b7eb",
+      "range": {
+        "startLine": 132,
+        "startChar": 0,
+        "endLine": 135,
+        "endChar": 14
+      },
+      "revId": "1b22cf047ff5d876864032712738dbc0674d20e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
