@@ -51,6 +51,9 @@
 /* Maximum number of supported emulated cameras. */
 #define MAX_CAMERA      8
 
+/* the query from guest should not be too long, so 8092 is more than enough */
+#define MAX_BUFFER_SIZE 8092
+
 /* Camera sevice descriptor. */
 typedef struct CameraServiceDesc CameraServiceDesc;
 struct CameraServiceDesc {
@@ -618,6 +621,8 @@ struct CameraClient
     int                 pixel_num;
     /* Status of video and preview frame cache. */
     int                 frames_cached;
+    char command_buffer[MAX_BUFFER_SIZE];
+    int  command_buffer_offset;
 };
 
 /* Frees emulated camera client descriptor. */
@@ -1167,7 +1172,30 @@ _camera_client_recv(void*         opaque,
     /*
      * Emulated camera client queries.
      */
+    CameraClient* cc = (CameraClient*)opaque;
 
+    if (msglen <= 0) {
+        D("%s: query message has invalid length %d", __func__, msglen);
+        return;
+    }
+
+    if (cc->command_buffer_offset + msglen >= MAX_BUFFER_SIZE) {
+        E("%s: command buffer overflowed: existing buffer-size %d needed %d\n", MAX_BUFFER_SIZE,
+          cc->command_buffer_offset + msglen);
+        cc->command_buffer_offset = 0;
+        _qemu_client_reply_ko(client, "query too long");
+        return;
+    }
+    memcpy(cc->command_buffer + cc->command_buffer_offset, msg, msglen);
+    cc->command_buffer_offset += msglen;
+
+    if (cc->command_buffer[cc->command_buffer_offset - 1] != '\0') {
+        D("%s: imcomplete query", __func__);
+        return;
+    }
+    msg = (uint8_t*)(cc->command_buffer);
+    cc->command_buffer_offset = 0;
+    /* E("%s: query is '%s'\n", __func__, msg); */
     /* Connect to the camera. */
     static const char _query_connect[]    = "connect";
     /* Disconnect from the camera. */
@@ -1181,7 +1209,6 @@ _camera_client_recv(void*         opaque,
 
     char query_name[64];
     const char* query_param = NULL;
-    CameraClient* cc = (CameraClient*)opaque;
 
     /*
      * Emulated camera queries are formatted as such:
