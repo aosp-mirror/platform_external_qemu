@@ -378,6 +378,30 @@
     },
     {
       "key": {
+        "uuid": "d924a797_6ef523e7",
+        "filename": "android/emulation/goldfish_sync.cpp",
+        "patchSetId": 72
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-11T00:49:37Z",
+      "side": 1,
+      "message": "sCommandReplyLock seems to protect global things.  I was asking about the \"lock\" member of this struct, which other fields it protects.",
+      "parentUuid": "d924a797_e8a3cb98",
+      "range": {
+        "startLine": 51,
+        "startChar": 4,
+        "endLine": 51,
+        "endChar": 14
+      },
+      "revId": "cfba63e2a3244bbebcbb650faa8174c0b62a09e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1919df0e_4b448571",
         "filename": "android/emulation/goldfish_sync.cpp",
         "patchSetId": 72
