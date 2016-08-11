@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d924a797_6ecfe325",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:30Z",
+      "side": 1,
+      "message": "Ok, I did some further investigation and the current locking scheme is really the minimal one, minus a line at best.\n\nTo clarify: My original idea was that either:\n\na) glXCreateNewContext just by itself was flaky when being called in situations where other contexts were created or destroyed, or\n\nb) since FrameBuffer.cpp uses its lock when changing context structure, we probably want to use the same lock whenever we are touching similar OpenGL state.\n\nBut I wasn\u0027t really precise on what state needed to be protected; I just wanted to fix the problem, as it was blocking mine and Josh\u0027s CTS testing. So the lock just ended up there.\n\nAs for OpenGL in general, usually we expect OpenGL driver calls to be thread safe, allowing concurrent execution of just about any combination of commands (as long as 1:1 context:thread rule is obeyed). \n\nBut that is just the \"spec\"; to motivate theory a) above, OpenGL implementations that we run might not end up following this behavior. So I thought that because of bad implementations, we couldn\u0027t count on GLX to behave right in these particular situations where a context is being created or destroyed. And maybe that is also the reason behind the locks in FrameBuffer.cpp.\n\nIn particular, I found earlier that if I make the lock only around the call to s_egl.eglDestroyContext, I end up reproducing crashes. So originally, I just made the lock big enough to stop crashing, and added the lock around doSyncContextCreation because logical consistency with what was found using experiment.\n\nHere\u0027s the further investigation part:\n\nI went line by line expanding the lock in destroySyncContext, and it seems the smallest that we can make the lock in destroySyncContext is to include both the cleanup() call and the call that exits the SyncThread, which is just one line off how it is now. I couldn\u0027t really see, at least from my inspection, any difference that may have made to a call to create a context in a different thread.\n\nMy best guess at this point from copious debug prints and repros, is perhaps when we call s_egl.eglDestroyContext in a thread, there is thread local storage from the underlying Linux OpenGL driver that still needs to be cleaned up, and either due to how RenderThread/FrameBuffer/RenderContexts works, or driver sloppiness, it\u0027s bad if we try to create a new context at the same time that thread is exiting and/or getting destroyed.\n\nI was also wondering if it was because I needed to in fact call eglMakeCurrent with null surface and context before destroying (and if I didn\u0027t, the spec says it\u0027d delay until at least thread exit), but that wasn\u0027t the problem either. It\u0027s good form to add that, though (Added).",
+      "parentUuid": "1919df0e_f2d77cef",
+      "range": {
+        "startLine": 101,
+        "startChar": 4,
+        "endLine": 101,
+        "endChar": 44
+      },
+      "revId": "6f855615a27eafb521fdec7064345a0207aaeca7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1919df0e_afebdfa7",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 36
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "d924a797_0ef10f67",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:30Z",
+      "side": 1,
+      "message": "Future proofing.",
+      "parentUuid": "1919df0e_afebdfa7",
+      "range": {
+        "startLine": 291,
+        "startChar": 4,
+        "endLine": 291,
+        "endChar": 19
+      },
+      "revId": "6f855615a27eafb521fdec7064345a0207aaeca7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1919df0e_d2e838ad",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 36
@@ -59,6 +107,30 @@
       "writtenOn": "2016-08-10T18:16:15Z",
       "side": 1,
       "message": "If my comment above for the other place you acquire this lock is correct, I would argue for the corresponding change here: putting the locking around the eglDestroyContext call in SyncThread::doExit.",
+      "range": {
+        "startLine": 332,
+        "startChar": 4,
+        "endLine": 332,
+        "endChar": 44
+      },
+      "revId": "6f855615a27eafb521fdec7064345a0207aaeca7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d924a797_2eeecb87",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 332,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-11T00:37:30Z",
+      "side": 1,
+      "message": "This is already minimal (see above).",
+      "parentUuid": "1919df0e_d2e838ad",
       "range": {
         "startLine": 332,
         "startChar": 4,
