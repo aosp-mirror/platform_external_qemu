@@ -70,6 +70,30 @@
       "revId": "dd0464f68219b44acddfefec01047b07cdd04287",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3e3be95b_2075aac5",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/NamedObject.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-08-12T22:51:35Z",
+      "side": 1,
+      "message": "I think they _should_ be",
+      "parentUuid": "1919df0e_cc30a19c",
+      "range": {
+        "startLine": 29,
+        "startChar": 27,
+        "endLine": 29,
+        "endChar": 32
+      },
+      "revId": "dd0464f68219b44acddfefec01047b07cdd04287",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
