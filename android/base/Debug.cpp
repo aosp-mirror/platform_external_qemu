@@ -15,7 +15,6 @@
 #include "android/base/StringView.h"
 
 #ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #elif defined(__linux__)
 #include <fstream>
