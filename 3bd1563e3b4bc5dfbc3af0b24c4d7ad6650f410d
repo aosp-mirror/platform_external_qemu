@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5ed25d19_55378ce3",
+        "filename": "android/camera/camera-service.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1187,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-08-12T15:18:36Z",
+      "side": 1,
+      "message": "This could fail if msglen is zero. Is that worth worrying about?",
+      "range": {
+        "startLine": 1187,
+        "startChar": 52,
+        "endLine": 1187,
+        "endChar": 56
+      },
+      "revId": "3bd1563e3b4bc5dfbc3af0b24c4d7ad6650f410d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5ed25d19_b51e1868",
+        "filename": "android/camera/camera-service.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1188,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-08-12T15:18:36Z",
+      "side": 1,
+      "message": "Is this really an error? Do we want this message at all?\n(If so, it should be \u0027incomplete\u0027)",
+      "range": {
+        "startLine": 1188,
+        "startChar": 15,
+        "endLine": 1188,
+        "endChar": 25
+      },
+      "revId": "3bd1563e3b4bc5dfbc3af0b24c4d7ad6650f410d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
