@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "5ed25d19_1bcff3b1",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-08-12T17:39:31Z",
+      "side": 1,
+      "message": "OK, great.  The new locking scheme now has a decent underlying theory for why it\u0027s necessary and fairly minimal, and (so far) seems to work.  If we encounter cases in which it doesn\u0027t, we\u0027ll revise our theory of operation :-).",
+      "parentUuid": "5ed25d19_a1c6de14",
+      "range": {
+        "startLine": 101,
+        "startChar": 4,
+        "endLine": 101,
+        "endChar": 44
+      },
+      "revId": "6f855615a27eafb521fdec7064345a0207aaeca7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1919df0e_afebdfa7",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 36
