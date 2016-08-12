@@ -170,6 +170,8 @@ OPT_LIST(unix_pipe, "<path>", "Add <path> to the list of allowed Unix pipes")
 
 CFG_FLAG (fixed_scale, "Use fixed 1:1 scale for the initial emulator window.")
 
+OPT_FLAG(wait_for_debugger, "Pause on launch and wait for a debugger process to attach before resuming")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

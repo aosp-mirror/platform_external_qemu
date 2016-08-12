@@ -11,23 +11,39 @@
 
 #include "android/process_setup.h"
 
+#include "android/base/Debug.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
+#include "android/base/StringView.h"
 #include "android/base/system/System.h"
 #include "android/curl-support.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/crashreport/CrashReporter.h"
+#include "android/utils/debug.h"
 #include "android/utils/filelock.h"
 #include "android/utils/sockets.h"
 
 #include <string>
 
 using android::base::PathUtils;
+using android::base::StringView;
 using android::base::System;
 
 // The order of initialization here can be very finicky. Handle with care, and
 // leave hints about any ordering constraints via comments.
 void process_early_setup(int argc, char** argv) {
+    // This function is the first thing emulator calls - so it's the best place
+    // to wait for a debugger to attach, before even the options parsing code.
+    static constexpr StringView waitForDebuggerArg = "-wait-for-debugger";
+    for (int i = 1; i < argc; ++i) {
+        if (waitForDebuggerArg == argv[i]) {
+            dprint("Waiting for a debugger...");
+            android::base::WaitForDebugger();
+            dprint("Debugger has attached, resuming");
+            break;
+        }
+    }
+
     // Initialize sockets first so curl/crash processor can use sockets.
     // Does not create any threads.
     android_socket_init();
