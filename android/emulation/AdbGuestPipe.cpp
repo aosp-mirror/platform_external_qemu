@@ -242,9 +242,7 @@ void AdbGuestPipe::onGuestWantWakeOn(int flags) {
 void AdbGuestPipe::onHostConnection(ScopedSocket&& socket) {
     DD("%s: [%p] host connection", __func__, this);
     CHECK(mState <= State::WaitingForHostAdbConnection);
-
     android::base::socketSetNonBlocking(socket.get());
-
     // socketSetNoDelay() reduces the latency of sending data, at the cost
     // of creating more TCP packets on the connection. It's useful when
     // doing lots of small send() calls, like the ADB protocol requires.
