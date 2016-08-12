@@ -46,6 +46,30 @@
       "revId": "71321404069c111a6314110b0d58fc1021adda51",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1ef2a5e6_cf851db6",
+        "filename": "android/utils/path.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-12T15:00:02Z",
+      "side": 1,
+      "message": "strdup(str.c_str());",
+      "parentUuid": "d924a797_919a7f02",
+      "range": {
+        "startLine": 493,
+        "startChar": 2,
+        "endLine": 502,
+        "endChar": 16
+      },
+      "revId": "71321404069c111a6314110b0d58fc1021adda51",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
