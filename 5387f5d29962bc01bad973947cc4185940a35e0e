@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3e3be95b_035c305a",
+        "filename": "android/camera/camera-service.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-08-12T23:33:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3e3be95b_60e2d2f8",
+      "range": {
+        "startLine": 55,
+        "startChar": 8,
+        "endLine": 55,
+        "endChar": 23
+      },
+      "revId": "5387f5d29962bc01bad973947cc4185940a35e0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3e3be95b_808d9633",
         "filename": "android/camera/camera-service.c",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "3e3be95b_439318f6",
+        "filename": "android/camera/camera-service.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 624,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-08-12T23:33:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3e3be95b_808d9633",
+      "range": {
+        "startLine": 624,
+        "startChar": 4,
+        "endLine": 624,
+        "endChar": 41
+      },
+      "revId": "5387f5d29962bc01bad973947cc4185940a35e0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3e3be95b_638f3c24",
         "filename": "android/camera/camera-service.c",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2016-08-12T23:18:09Z",
       "side": 1,
       "message": "Maybe explain the process here a little -- that it\u0027s a partial command, and we expect _camera_client_recv to be invoked again with the next segment of the command.",
+      "range": {
+        "startLine": 1194,
+        "startChar": 8,
+        "endLine": 1194,
+        "endChar": 14
+      },
+      "revId": "5387f5d29962bc01bad973947cc4185940a35e0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3e3be95b_239614e7",
+        "filename": "android/camera/camera-service.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1194,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-08-12T23:33:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3e3be95b_638f3c24",
       "range": {
         "startLine": 1194,
         "startChar": 8,
