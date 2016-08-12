@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "5ed25d19_a1c6de14",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-12T00:47:22Z",
+      "side": 1,
+      "message": "I did try the doExit part of that experiment (in the \"I went line by line expanding the lock in destroySyncContext...\" part), but what\u0027s weird, is if I put the locks in the body of doExit only like you said, the problem disappears, contrary to how the system was behaving yesterday. The problem also disappeared while removing the locks completely, but it seems at least a doExit() body lock was needed on a different repro case. It could have to do with some other possibly related change, or something else that is goofy on my system that was transient.\n\nThe logic of putting it around the context creation and destruction only is definitely cleaner and matches our models better---and it is working so far! So, I\u0027ll change it to that for now.\n\nTo be specific, the repro cases were:\n\nrun cts -c android.hardware.camera2.cts.PerformanceTest --method testCameraLaunch\u0027\n\nrun cts -c android.media.cts.EncodeDecodeTest\n\nThe first was the repro case I was using all along, and the second seems to require at least the lock protecting doExit. The first case now doesn\u0027t seem to require a lock at all.",
+      "parentUuid": "d924a797_0e902a97",
+      "range": {
+        "startLine": 101,
+        "startChar": 4,
+        "endLine": 101,
+        "endChar": 44
+      },
+      "revId": "6f855615a27eafb521fdec7064345a0207aaeca7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1919df0e_afebdfa7",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 36
