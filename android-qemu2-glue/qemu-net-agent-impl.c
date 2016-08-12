@@ -28,7 +28,7 @@ static bool isSlirpInited() {
 static bool slirpRedir(bool isUdp, int hostPort,
                       uint32_t guestAddr, int guestPort) {
     struct in_addr host = { .s_addr = htonl(SOCK_ADDRESS_INET_LOOPBACK) };
-    struct in_addr guest = { .s_addr = guestAddr };
+    struct in_addr guest = { .s_addr = 0 };
     return slirp_add_hostfwd(net_slirp_lookup(NULL, NULL, NULL), isUdp,
                              host, hostPort, guest, guestPort) == 0;
 }
