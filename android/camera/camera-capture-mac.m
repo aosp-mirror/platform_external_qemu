@@ -353,6 +353,9 @@ struct MacCameraDevice {
     CameraDevice  header;
     /* Actual camera device object. */
     MacCamera*    device;
+    int started;
+    int frame_width;
+    int frame_height;
 };
 
 /* Allocates an instance of MacCameraDevice structure.
@@ -403,6 +406,7 @@ _camera_device_reset(MacCameraDevice* cd)
     if (cd != NULL && cd->device) {
         [cd->device free];
         cd->device = [cd->device init];
+        cd->started = 0;
     }
 }
 
@@ -447,7 +451,9 @@ camera_device_start_capturing(CameraDevice* cd,
         return -1;
     }
 
-    return [mcd->device start_capturing:frame_width:frame_height];
+    mcd->frame_width = frame_width;
+    mcd->frame_height = frame_height;
+    return 0;
 }
 
 int
@@ -494,6 +500,11 @@ camera_device_read_frame(CameraDevice* cd,
         return -1;
     }
 
+    if (!mcd->started) {
+        int result = [mcd->device start_capturing:mcd->frame_width:mcd->frame_height];
+        if (result) return -1;
+        mcd->started = 1;
+    }
     return [mcd->device read_frame:framebuffers:fbs_num:r_scale:g_scale:b_scale:exp_comp];
 }
 
