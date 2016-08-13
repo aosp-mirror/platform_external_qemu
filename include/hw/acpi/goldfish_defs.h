@@ -47,6 +47,11 @@
 #define GF_AUDIO_IOMEM_SIZE     0x00000100
 #define GF_AUDIO_IRQ            20
 
+/* goldfish sync */
+#define GF_SYNC_IOMEM_BASE      0xff014000
+#define GF_SYNC_IOMEM_SIZE      0x00002000
+#define GF_SYNC_IRQ             21
+
 /* goldfish rtc */
 #define GF_RTC_IOMEM_BASE       0xff016000
 #define GF_RTC_IOMEM_SIZE       0x00001000

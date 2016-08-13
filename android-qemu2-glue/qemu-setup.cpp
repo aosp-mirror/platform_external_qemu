@@ -18,6 +18,7 @@
 #include "android/base/Log.h"
 #include "android/console.h"
 #include "android/emulation/AndroidPipe.h"
+#include "android/emulation/GoldfishSyncCommandQueue.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
 #include "android-qemu2-glue/emulation/VmLock.h"
 
@@ -43,6 +44,7 @@ bool qemu_android_emulation_setup() {
     CHECK(prevVmLock == nullptr) << "Another VmLock was already installed!";
 
     android::AndroidPipe::initThreading(vmLock);
+    android::GoldfishSyncCommandQueue::initThreading(vmLock);
 
     return android_emulation_setup(&consoleAgents);
 }
