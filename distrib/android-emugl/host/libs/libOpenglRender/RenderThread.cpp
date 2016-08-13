@@ -173,6 +173,9 @@ intptr_t RenderThread::main() {
         fclose(dumpFP);
     }
 
+    // exit sync thread, if any.
+    SyncThread::destroySyncThread();
+
     //
     // Release references to the current thread's context/surfaces if any
     //
