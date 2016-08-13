@@ -213,6 +213,12 @@ _camera_info_to_string(const CameraInfo* ci, char** str, size_t* str_size) {
         return res;
     }
     for (n = 1; n < ci->frame_sizes_num; n++) {
+        if (ci->frame_sizes[n].width > 1000 || ci->frame_sizes[n].height > 1000) {
+            /* Guest cannot handle large pictures due to memory allocation problem
+               bug:30835259
+             */
+            continue;
+        }
         snprintf(tmp, sizeof(tmp), ",%dx%d",
                  ci->frame_sizes[n].width, ci->frame_sizes[n].height);
         res = _append_string(str, str_size, tmp);
