@@ -80,4 +80,3 @@ void glGetRenderbufferParameteriv(GLenum target, GLenum pname, GLint *params);
 void glFramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
 
 void glGenerateMipmap(GLenum target);
-
