@@ -25,6 +25,7 @@
 #include "SyncThread.h"
 #include "ChecksumCalculatorThreadInfo.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
+#include "TimestampAggregatorThreadInfo.h"
 
 #include "android/utils/debug.h"
 #include "android/base/StringView.h"
@@ -144,6 +145,8 @@ static ::emugl::LazyInstance<GrallocSync> sGrallocSync = LAZY_INSTANCE_INIT;
 
 static const GLint rendererVersion = 1;
 static android::base::StringView kAsyncSwapStr = "ANDROID_EMU_NATIVE_SYNC";
+static android::base::StringView
+  kPipeTimestampStr = "ANDROID_EMU_PIPE_TIMESTAMP";
 
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
@@ -215,11 +218,18 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     }
 
     // We add the maximum supported GL protocol number into GL_EXTENSIONS
+    bool isTimestampEnabled =
+        emugl_feature_is_enabled(android::featurecontrol::GLPipeTimestamp);
     bool isChecksumEnabled =
         emugl_feature_is_enabled(android::featurecontrol::GLPipeChecksum);
     bool asyncSwapEnabled =
         emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap) &&
         emugl_sync_device_exists();
+
+    if (isTimestampEnabled && name == GL_EXTENSIONS) {
+        glStr += kPipeTimestampStr;
+        glStr += " ";
+    }
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -778,6 +788,10 @@ static EGLint rcClientWaitSyncKHR(uint64_t handle,
     return egl_wait_res;
 }
 
+static void rcToggleTimestamp(uint32_t timestampEnabled) {
+    TimestampAggregatorThreadInfo::setTimestampEnabled(timestampEnabled);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -817,4 +831,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcFlushWindowColorBufferAsync = rcFlushWindowColorBufferAsync;
     dec->rcCreateClientImagePuid = rcCreateClientImagePuid;
     dec->rcDestroyClientImagePuid = rcDestroyClientImagePuid;
+    dec->rcToggleTimestamp = rcToggleTimestamp;
 }
