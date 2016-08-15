@@ -7,6 +7,8 @@ commonSources := \
         glUtils.cpp \
         ChecksumCalculator.cpp \
         ChecksumCalculatorThreadInfo.cpp \
+	TimestampLogger.cpp \
+	TimestampLoggerThreadInfo.cpp \
 
 host_commonSources := $(commonSources)
 
