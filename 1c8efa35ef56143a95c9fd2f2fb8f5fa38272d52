@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7ed801b0_8a0fcb35",
+        "filename": "android/camera/camera-service.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-15T12:57:59Z",
+      "side": 1,
+      "message": "192?",
+      "range": {
+        "startLine": 55,
+        "startChar": 32,
+        "endLine": 55,
+        "endChar": 35
+      },
+      "revId": "1c8efa35ef56143a95c9fd2f2fb8f5fa38272d52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7ed801b0_ea14874b",
+        "filename": "android/camera/camera-service.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1206,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-15T12:57:59Z",
+      "side": 1,
+      "message": "nit: please remove",
+      "range": {
+        "startLine": 1206,
+        "startChar": 4,
+        "endLine": 1206,
+        "endChar": 50
+      },
+      "revId": "1c8efa35ef56143a95c9fd2f2fb8f5fa38272d52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
