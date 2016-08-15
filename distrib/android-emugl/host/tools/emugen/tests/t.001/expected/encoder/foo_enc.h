@@ -6,6 +6,7 @@
 
 #include "IOStream.h"
 #include "ChecksumCalculator.h"
+#include "TimestampLogger.h"
 #include "foo_client_context.h"
 
 
@@ -16,8 +17,9 @@ struct foo_encoder_context_t : public foo_client_context_t {
 
 	IOStream *m_stream;
 	ChecksumCalculator *m_checksumCalculator;
+	TimestampLogger *m_timestampLogger;
 
-	foo_encoder_context_t(IOStream *stream, ChecksumCalculator *checksumCalculator);
+	foo_encoder_context_t(IOStream *stream, ChecksumCalculator *checksumCalculator, TimestampLogger *timestampLogger);
 };
 
 #endif  // GUARD_foo_encoder_context_t
