@@ -319,6 +319,7 @@ int ApiGen::genEncoderHeader(const std::string &filename)
 
     fprintf(fp, "#include \"IOStream.h\"\n");
     fprintf(fp, "#include \"ChecksumCalculator.h\"\n");
+    fprintf(fp, "#include \"TimestampLogger.h\"\n");
     fprintf(fp, "#include \"%s_%s_context.h\"\n\n\n", m_basename.c_str(), sideString(CLIENT_SIDE));
 
     for (size_t i = 0; i < m_encoderHeaders.size(); i++) {
@@ -329,9 +330,12 @@ int ApiGen::genEncoderHeader(const std::string &filename)
     fprintf(fp, "struct %s : public %s_%s_context_t {\n\n",
             classname.c_str(), m_basename.c_str(), sideString(CLIENT_SIDE));
     fprintf(fp, "\tIOStream *m_stream;\n");
-    fprintf(fp, "\tChecksumCalculator *m_checksumCalculator;\n\n");
+    fprintf(fp, "\tChecksumCalculator *m_checksumCalculator;\n");
+    fprintf(fp, "\tTimestampLogger *m_timestampLogger;\n\n");
 
-    fprintf(fp, "\t%s(IOStream *stream, ChecksumCalculator *checksumCalculator);\n", classname.c_str());
+    fprintf(fp, "\t%s(IOStream *stream,"
+                " ChecksumCalculator *checksumCalculator,"
+                " TimestampLogger *timestampLogger);\n", classname.c_str());
     fprintf(fp, "};\n\n");
 
     fprintf(fp, "#endif  // GUARD_%s", classname.c_str());
@@ -464,12 +468,17 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 
     printHeader(fp);
     fprintf(fp, "\n\n");
+    fprintf(fp, "#include <cmath>\n");
     fprintf(fp, "#include <vector>\n");
+    fprintf(fp, "#include <string>\n");
     fprintf(fp, "#include <string.h>\n");
     fprintf(fp, "#include \"%s_opcodes.h\"\n\n", m_basename.c_str());
     fprintf(fp, "#include \"%s_enc.h\"\n\n\n", m_basename.c_str());
     fprintf(fp, "#include <stdio.h>\n\n");
     fprintf(fp, "namespace {\n\n");
+
+    // Conversion value needed for timestamp with KVM clock
+    fprintf(fp, "static constexpr long sec_to_nsec = pow(10, 9);\n\n");
 
     // unsupport printout
     fprintf(fp,
@@ -497,7 +506,9 @@ int ApiGen::genEncoderImpl(const std::string &filename)
                 classname.c_str());
         fprintf(fp, "\tIOStream *stream = ctx->m_stream;\n"
                     "\tChecksumCalculator *checksumCalculator = ctx->m_checksumCalculator;\n"
-                    "\tbool useChecksum = checksumCalculator->getVersion() > 0;\n\n");
+                    "\tbool useChecksum = checksumCalculator->getVersion() > 0;\n"
+                    "\tTimestampLogger *timestampLogger = ctx->m_timestampLogger;\n"
+                    "\tbool useTimestamp = timestampLogger->getTimestampEnabled();\n\n");
         VarsArray & evars = e->vars();
         size_t  maxvars = evars.size();
         size_t  j;
@@ -531,9 +542,17 @@ int ApiGen::genEncoderImpl(const std::string &filename)
         size_t  npointers = 0;
 
         // First, compute the total size, 8 bytes for the opcode + payload size (without checksum)
-        fprintf(fp, "\t unsigned char *ptr;\n");
-        fprintf(fp, "\t unsigned char *buf;\n");
-        fprintf(fp, "\t const size_t sizeWithoutChecksum = 8");
+        fprintf(fp, "\tunsigned char *ptr;\n");
+        fprintf(fp, "\tunsigned char *buf;\n");
+
+        // Then, size of the timestamp tag
+        // TODO: Magic # timestamp length
+        // TODO: Error Handling
+        fprintf(fp, "\n\tconst size_t timestampSize = useTimestamp ? timestampLogger->getTimestampSize() : 0;\n");
+        fprintf(fp, "\ttimespec time; uint64_t time_nsec = 0;\n"
+                    "\tif (useTimestamp) time_nsec = timestampLogger->getTimestamp();\n\n");
+
+        fprintf(fp, "\tconst size_t sizeWithoutChecksum = timestampSize + 8");
 
         for (j = 0; j < maxvars; j++) {
             fprintf(fp, " + ");
@@ -545,10 +564,10 @@ int ApiGen::genEncoderImpl(const std::string &filename)
         fprintf(fp, ";\n");
 
         // Then, size of the checksum string
-        fprintf(fp, "\t const size_t checksumSize = checksumCalculator->checksumByteSize();\n");
+        fprintf(fp, "\tconst size_t checksumSize = checksumCalculator->checksumByteSize();\n");
 
         // And, size of the whole thing
-        fprintf(fp, "\t const size_t totalSize = sizeWithoutChecksum + checksumSize;\n");
+        fprintf(fp, "\tconst size_t totalSize = sizeWithoutChecksum + checksumSize;\n");
 
         // We need to divide the packet into fragments. Each fragment contains
         // either copied arguments to a temporary buffer, or direct writes for
@@ -628,22 +647,45 @@ int ApiGen::genEncoderImpl(const std::string &filename)
             nvars = j;
         }
 
+        // checksum and timestamp
+        if (hasLargeFields) { // TODO; allocating but not using??
+            fprintf(fp, "\tbuf = stream->alloc(timestampSize + checksumSize);\n");
+            fprintf(fp, "\tif (useTimestamp) { memcpy(buf, &time_nsec, timestampSize); buf += timestampSize; }\n");
+            fprintf(fp, "\tif (useTimestamp && useChecksum) checksumCalculator->addBuffer(&time_nsec, timestampSize);\n");
+            fprintf(fp, "\tif (useChecksum) checksumCalculator->writeChecksum(buf, checksumSize);\n\n");
+        } else {
+            fprintf(fp, "\tif (useTimestamp) { memcpy(ptr, &time_nsec, timestampSize); ptr += timestampSize; }\n");
+            fprintf(fp, "\tif (useTimestamp && useChecksum) checksumCalculator->addBuffer(&time_nsec, timestampSize);\n");
+            fprintf(fp, "\tif (useChecksum) checksumCalculator->writeChecksum(ptr, checksumSize); ptr += checksumSize;\n\n");
+        }
+
 #else /* !WITH_LARGE_SUPPORT */
         size_t nvars = evars.size();
         size_t npointers = 0;
-        fprintf(fp, "\t const size_t sizeWithoutChecksum = 8");
+
+        // First, size of the timestamp tag
+        // Then, size of the timestamp tag
+        // TODO: Duplicate code
+        fprintf(fp, "\n\tconst size_t timestampSize = useTimestamp ? timestampLogger->getTimestampSize() : 0;\n");
+        fprintf(fp, "\ttimespec time; uint64_t time_nsec = 0;\n"
+                    "\tif (useTimestamp) time_nsec = timestampLogger->getTimestamp();\n\n");
+
+        fprintf(fp, "\tconst size_t sizeWithoutChecksum = timestampSize + 8");
+
         for (size_t j = 0; j < nvars; j++) {
             npointers += getVarEncodingSizeExpression(evars[j],e,buff,sizeof(buff));
             fprintf(fp, " + %s", buff);
         }
         fprintf(fp, " + %u * 4;\n", (unsigned int) npointers);
-        // Size of checksum
-        fprintf(fp, "\t const size_t checksumSize = checksumCalculator->checksumByteSize();\n");
-        // Size of the whole thing
-        fprintf(fp, "\t const size_t totalSize = sizeWithoutChecksum + checksumSize;\n");
+
+        // Then, size of checksum
+        fprintf(fp, "\tconst size_t checksumSize = checksumCalculator->checksumByteSize();\n");
+
+        // And, size of the whole thing
+        fprintf(fp, "\tconst size_t totalSize = sizeWithoutChecksum + checksumSize;\n");
 
         // allocate buffer from the stream;
-        fprintf(fp, "\t unsigned char *ptr = stream->alloc(sizeWithoutChecksum);\n\n");
+        fprintf(fp, "\tunsigned char *ptr = stream->alloc(sizeWithoutChecksum);\n\n");
 
         // encode into the stream;
         fprintf(fp, "\tint tmp = OP_%s; memcpy(ptr, &tmp, 4); ptr += 4;\n",  e->name().c_str());
@@ -653,15 +695,14 @@ int ApiGen::genEncoderImpl(const std::string &filename)
         for (size_t j = 0; j < nvars; j++) {
             writeVarEncodingExpression(evars[j], fp);
         }
-#endif /* !WITH_LARGE_SUPPORT */
 
-        // checksum
-        if (hasLargeFields) {
-            fprintf(fp, "\tbuf = stream->alloc(checksumSize);\n");
-            fprintf(fp, "\tif (useChecksum) checksumCalculator->writeChecksum(buf, checksumSize);\n\n");
-        } else {
-            fprintf(fp, "\tif (useChecksum) checksumCalculator->writeChecksum(ptr, checksumSize); ptr += checksumSize;\n\n");
-        }
+        // checksum and timestamp
+        fprintf(fp, "\tbuf = stream->alloc(timestampSize + checksumSize);\n");
+        fprintf(fp, "\tif (useTimestamp) { memcpy(buf, &time_nsec, timestampSize); buf += timestampSize; }\n");
+        fprintf(fp, "\tif (useTimestamp && useChecksum) checksumCalculator->addBuffer(&time_nsec, timestampSize);\n");
+        fprintf(fp, "\tif (useChecksum) checksumCalculator->writeChecksum(buf, checksumSize);\n\n");
+
+#endif /* !WITH_LARGE_SUPPORT */
 
         // in variables;
         bool hasReadbackChecksum = false;
@@ -713,9 +754,12 @@ int ApiGen::genEncoderImpl(const std::string &filename)
     fprintf(fp, "}  // namespace\n\n");
 
     // constructor
-    fprintf(fp, "%s::%s(IOStream *stream, ChecksumCalculator *checksumCalculator)\n{\n", classname.c_str(), classname.c_str());
+    fprintf(fp, "%s::%s(IOStream *stream,"
+                " ChecksumCalculator *checksumCalculator,"
+                " TimestampLogger *timestampLogger)\n{\n", classname.c_str(), classname.c_str());
     fprintf(fp, "\tm_stream = stream;\n");
-    fprintf(fp, "\tm_checksumCalculator = checksumCalculator;\n\n");
+    fprintf(fp, "\tm_checksumCalculator = checksumCalculator;\n");
+    fprintf(fp, "\tm_timestampLogger = timestampLogger;\n\n");
 
     for (size_t i = 0; i < n; i++) {
         EntryPoint *e = &at(i);
@@ -821,6 +865,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
     fprintf(fp, "#include \"%s_dec.h\"\n\n\n", m_basename.c_str());
     fprintf(fp, "#include \"ProtocolUtils.h\"\n\n");
     fprintf(fp, "#include \"ChecksumCalculatorThreadInfo.h\"\n\n");
+    fprintf(fp, "#include \"TimestampLoggerThreadInfo.h\"\n\n");
     fprintf(fp, "#include <stdio.h>\n\n");
     fprintf(fp, "typedef unsigned int tsize_t; // Target \"size_t\", which is 32-bit for now. It may or may not be the same as host's size_t when emugen is compiled.\n\n");
 
@@ -847,21 +892,23 @@ int ApiGen::genDecoderImpl(const std::string &filename)
     fprintf(fp,
             "                           \n\
 \tsize_t pos = 0;\n\
-\tif (len < 8) return pos; \n\
+\tif (len < 8) return pos;\n\
 \tunsigned char *ptr = (unsigned char *)buf;\n\
-\tbool unknownOpcode = false;  \n\
-#ifdef CHECK_GL_ERROR \n\
-\tchar lastCall[256] = {0}; \n\
-#endif \n\
-\twhile ((len - pos >= 8) && !unknownOpcode) {   \n\
-\t\tuint32_t opcode = *(uint32_t *)ptr;   \n\
+\tbool unknownOpcode = false;\n\
+#ifdef CHECK_GL_ERROR\n\
+\tchar lastCall[256] = {0};\n\
+#endif\n\
+\twhile ((len - pos >= 8) && !unknownOpcode) {\n\
+\t\tuint32_t opcode = *(uint32_t *)ptr;\n\
 \t\tsize_t packetLen = *(uint32_t *)(ptr + 4);\n\
-\t\tif (len - pos < packetLen)  return pos; \n\
+\t\tif (len - pos < packetLen)  return pos;\n\
 \t\tbool useChecksum = ChecksumCalculatorThreadInfo::getVersion() > 0;\n\
 \t\tsize_t checksumSize = 0;\n\
 \t\tif (useChecksum) {\n\
 \t\t\tchecksumSize = ChecksumCalculatorThreadInfo::checksumByteSize();\n\
 \t\t}\n\
+\t\tbool useTimestamp = TimestampLoggerThreadInfo::getTimestampEnabled();\n\
+\t\tconst size_t timestampSize = useTimestamp ? TimestampLoggerThreadInfo::getTimestampSize() : 0;\n\
 \t\tswitch(opcode) {\n");
 
     for (size_t f = 0; f < n; f++) {
@@ -1112,9 +1159,15 @@ int ApiGen::genDecoderImpl(const std::string &filename)
 
             if (pass == PASS_Protocol) {
                 fprintf(fp,
+                        "\t\t\tif (useTimestamp) {\n"
+                        "\t\t\t\tTimestampLoggerThreadInfo::logTimestamp(ptr + %s, timestampSize);\n"
+                        "\t\t\t}\n",
+                        varoffset.c_str()
+                        );
+                fprintf(fp,
                         "\t\t\tif (useChecksum) {\n"
-                        "\t\t\t\tChecksumCalculatorThreadInfo::validOrDie(ptr, %s, "
-                        "ptr + %s, checksumSize, "
+                        "\t\t\t\tChecksumCalculatorThreadInfo::validOrDie(ptr, %s + timestampSize, "
+                        "ptr + %s + timestampSize, checksumSize, "
                         "\n\t\t\t\t\t\"%s::decode,"
                         " OP_%s: GL checksumCalculator failure\\n\");\n"
                         "\t\t\t}\n",

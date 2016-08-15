@@ -12,6 +12,8 @@
 
 #include "ChecksumCalculatorThreadInfo.h"
 
+#include "TimestampLoggerThreadInfo.h"
+
 #include <stdio.h>
 
 typedef unsigned int tsize_t; // Target "size_t", which is 32-bit for now. It may or may not be the same as host's size_t when emugen is compiled.
@@ -34,27 +36,32 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream)
 {
                            
 	size_t pos = 0;
-	if (len < 8) return pos; 
+	if (len < 8) return pos;
 	unsigned char *ptr = (unsigned char *)buf;
-	bool unknownOpcode = false;  
-#ifdef CHECK_GL_ERROR 
-	char lastCall[256] = {0}; 
-#endif 
-	while ((len - pos >= 8) && !unknownOpcode) {   
-		uint32_t opcode = *(uint32_t *)ptr;   
+	bool unknownOpcode = false;
+#ifdef CHECK_GL_ERROR
+	char lastCall[256] = {0};
+#endif
+	while ((len - pos >= 8) && !unknownOpcode) {
+		uint32_t opcode = *(uint32_t *)ptr;
 		size_t packetLen = *(uint32_t *)(ptr + 4);
-		if (len - pos < packetLen)  return pos; 
+		if (len - pos < packetLen)  return pos;
 		bool useChecksum = ChecksumCalculatorThreadInfo::getVersion() > 0;
 		size_t checksumSize = 0;
 		if (useChecksum) {
 			checksumSize = ChecksumCalculatorThreadInfo::checksumByteSize();
 		}
+		bool useTimestamp = TimestampLoggerThreadInfo::getTimestampEnabled();
+		const size_t timestampSize = useTimestamp ? TimestampLoggerThreadInfo::getTimestampSize() : 0;
 		switch(opcode) {
 		case OP_fooAlphaFunc: {
 			FooInt var_func = Unpack<FooInt,uint32_t>(ptr + 8);
 			FooFloat var_ref = Unpack<FooFloat,uint32_t>(ptr + 8 + 4);
+			if (useTimestamp) {
+				TimestampLoggerThreadInfo::logTimestamp(ptr + 8 + 4 + 4, timestampSize);
+			}
 			if (useChecksum) {
-				ChecksumCalculatorThreadInfo::validOrDie(ptr, 8 + 4 + 4, ptr + 8 + 4 + 4, checksumSize, 
+				ChecksumCalculatorThreadInfo::validOrDie(ptr, 8 + 4 + 4 + timestampSize, ptr + 8 + 4 + 4 + timestampSize, checksumSize, 
 					"foo_decoder_context_t::decode, OP_fooAlphaFunc: GL checksumCalculator failure\n");
 			}
 			DEBUG("foo(%p): fooAlphaFunc(%d %f )\n", stream,var_func, var_ref);
@@ -65,8 +72,11 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream)
 		case OP_fooIsBuffer: {
 			uint32_t size_stuff __attribute__((unused)) = Unpack<uint32_t,uint32_t>(ptr + 8);
 			InputBuffer inptr_stuff(ptr + 8 + 4, size_stuff);
+			if (useTimestamp) {
+				TimestampLoggerThreadInfo::logTimestamp(ptr + 8 + 4 + size_stuff, timestampSize);
+			}
 			if (useChecksum) {
-				ChecksumCalculatorThreadInfo::validOrDie(ptr, 8 + 4 + size_stuff, ptr + 8 + 4 + size_stuff, checksumSize, 
+				ChecksumCalculatorThreadInfo::validOrDie(ptr, 8 + 4 + size_stuff + timestampSize, ptr + 8 + 4 + size_stuff + timestampSize, checksumSize, 
 					"foo_decoder_context_t::decode, OP_fooIsBuffer: GL checksumCalculator failure\n");
 			}
 			size_t totalTmpSize = sizeof(FooBoolean);
@@ -84,8 +94,11 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream)
 		case OP_fooUnsupported: {
 			uint32_t size_params __attribute__((unused)) = Unpack<uint32_t,uint32_t>(ptr + 8);
 			InputBuffer inptr_params(ptr + 8 + 4, size_params);
+			if (useTimestamp) {
+				TimestampLoggerThreadInfo::logTimestamp(ptr + 8 + 4 + size_params, timestampSize);
+			}
 			if (useChecksum) {
-				ChecksumCalculatorThreadInfo::validOrDie(ptr, 8 + 4 + size_params, ptr + 8 + 4 + size_params, checksumSize, 
+				ChecksumCalculatorThreadInfo::validOrDie(ptr, 8 + 4 + size_params + timestampSize, ptr + 8 + 4 + size_params + timestampSize, checksumSize, 
 					"foo_decoder_context_t::decode, OP_fooUnsupported: GL checksumCalculator failure\n");
 			}
 			DEBUG("foo(%p): fooUnsupported(%p(%u) )\n", stream,(void*)(inptr_params.get()), size_params);
@@ -95,8 +108,11 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream)
 		}
 		case OP_fooDoEncoderFlush: {
 			FooInt var_param = Unpack<FooInt,uint32_t>(ptr + 8);
+			if (useTimestamp) {
+				TimestampLoggerThreadInfo::logTimestamp(ptr + 8 + 4, timestampSize);
+			}
 			if (useChecksum) {
-				ChecksumCalculatorThreadInfo::validOrDie(ptr, 8 + 4, ptr + 8 + 4, checksumSize, 
+				ChecksumCalculatorThreadInfo::validOrDie(ptr, 8 + 4 + timestampSize, ptr + 8 + 4 + timestampSize, checksumSize, 
 					"foo_decoder_context_t::decode, OP_fooDoEncoderFlush: GL checksumCalculator failure\n");
 			}
 			DEBUG("foo(%p): fooDoEncoderFlush(%d )\n", stream,var_param);
@@ -107,8 +123,11 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream)
 		case OP_fooTakeConstVoidPtrConstPtr: {
 			uint32_t size_param __attribute__((unused)) = Unpack<uint32_t,uint32_t>(ptr + 8);
 			InputBuffer inptr_param(ptr + 8 + 4, size_param);
+			if (useTimestamp) {
+				TimestampLoggerThreadInfo::logTimestamp(ptr + 8 + 4 + size_param, timestampSize);
+			}
 			if (useChecksum) {
-				ChecksumCalculatorThreadInfo::validOrDie(ptr, 8 + 4 + size_param, ptr + 8 + 4 + size_param, checksumSize, 
+				ChecksumCalculatorThreadInfo::validOrDie(ptr, 8 + 4 + size_param + timestampSize, ptr + 8 + 4 + size_param + timestampSize, checksumSize, 
 					"foo_decoder_context_t::decode, OP_fooTakeConstVoidPtrConstPtr: GL checksumCalculator failure\n");
 			}
 			DEBUG("foo(%p): fooTakeConstVoidPtrConstPtr(%p(%u) )\n", stream,(const void* const*)(inptr_param.get()), size_param);
