@@ -19,8 +19,6 @@
 #include "android/base/Uri.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/curl-support.h"
-#include "android/metrics/StudioConfig.h"
-#include "android/metrics/studio-config.h"
 #include "android/utils/compiler.h"
 #include "android/utils/debug.h"
 #include "android/utils/uri.h"
@@ -36,7 +34,6 @@
 
 using android::base::ScopedCPtr;
 using android::base::Uri;
-using android::studio::UpdateChannel;
 
 static const int kUrlLengthLimit = 8000;
 static void url_limit_append(std::string* dst, const std::string& src) {
@@ -76,21 +73,6 @@ static void url_addi64val(std::string* dst, const char* key, uint64_t val) {
         url_addstrval(dst, #gpu "_renderer", metrics->gpu##_renderer);       \
     } while (0);
 
-// Keep in sync with backend enum in .../processed_logs.proto
-int toUpdateChannelToolbarEnum(UpdateChannel channel) {
-    switch (channel) {
-        case UpdateChannel::Stable:
-            return 1;
-        case UpdateChannel::Beta:
-            return 2;
-        case UpdateChannel::Dev:
-            return 3;
-        case UpdateChannel::Canary:
-            return 4;
-        default:
-            return 0;
-    }
-}
 
 int formatToolbarGetUrl(char** ptr,
                         const char* url,
@@ -130,27 +112,23 @@ int formatToolbarGetUrl(char** ptr,
 
     std::string fullUrl = url;
 
-    android::base::ScopedCPtr<char> client_id(
-            android_studio_get_installation_id());
-
     fullUrl += Uri::FormatEncodeArguments("?as=%s", product_name);
     // Keep the URL length under kUrlLengthLimit.
     url_addstrval(&fullUrl, version_key, metrics->emulator_version);
     url_addstrval(&fullUrl, core_version_key, metrics->core_version);
-    url_addi64val(&fullUrl, update_channel_key,
-                    toUpdateChannelToolbarEnum(android::studio::updateChannel()));
+    url_addi64val(&fullUrl, update_channel_key, metrics->update_channel);
     url_addstrval(&fullUrl, host_os_key, metrics->host_os_type);
-    url_addstrval(&fullUrl, client_id_key, client_id.get());
+    url_addstrval(&fullUrl, client_id_key, metrics->client_id);
     url_addstrval(&fullUrl, guest_arch_key, metrics->guest_arch);
     url_addintval(&fullUrl, guest_api_level_key, metrics->guest_api_level);
-    url_addintval(&fullUrl, num_crashes_key, metrics->is_dirty ? 1 : 0);
+    url_addintval(&fullUrl, num_crashes_key, metrics->is_dirty);
     url_addintval(&fullUrl, opengl_alive_key, metrics->opengl_alive);
     url_addi64val(&fullUrl, system_time_key, metrics->system_time);
     url_addi64val(&fullUrl, user_time_key, metrics->user_time);
     url_addintval(&fullUrl, adb_liveness_key, metrics->adb_liveness);
     url_addi64val(&fullUrl, wallclock_time_key, metrics->wallclock_time);
     url_addi64val(&fullUrl, user_actions_key, metrics->user_actions);
-    url_addintval(&fullUrl, exit_started_key, metrics->exit_started ? 1 : 0);
+    url_addintval(&fullUrl, exit_started_key, metrics->exit_started);
     url_addintval(&fullUrl, renderer_key, metrics->renderer);
     if (metrics->guest_gpu_enabled > 0) {
         url_addstrval(&fullUrl, guest_gl_vendor_key, metrics->guest_gl_vendor);

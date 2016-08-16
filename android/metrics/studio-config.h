@@ -39,7 +39,10 @@ int android_studio_get_optins(void);
 // pattern of installation IDs
 // (00000000-0000-0000-0000-000000000000) will be returned.
 // The caller is responsible for freeing the returned string.
-//
 char* android_studio_get_installation_id(void);
+
+// This function returns the value of update channel cast to an int as expected
+// by the backend.
+int android_studio_update_channel(void);
 
 ANDROID_END_HEADER

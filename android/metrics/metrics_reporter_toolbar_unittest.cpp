@@ -472,4 +472,64 @@ TEST_F(MetricsReporterToolbarTest, rendererSelection) {
     free(formatted_url);
 }
 
+TEST_F(MetricsReporterToolbarTest, onlyReportFromFile) {
+    AndroidMetrics metrics;
+    androidMetrics_init(&metrics);
+// Assign really obnoxious values to all fields.
+#undef METRICS_INT
+#undef METRICS_INT64
+#undef METRICS_STRING
+#undef METRICS_DURATION
+#define METRICS_INT(n, s, d) metrics.n = -99;
+#define METRICS_INT64(n, s, d) metrics.n = -99;
+#define METRICS_STRING(n, s, d) metrics.n = strdup("obnoxiousStr");
+#define METRICS_DURATION(n, s, d) metrics.n = -99;
+#include "android/metrics/metrics_fields.h"
+
+    static const char kExpected[] =
+            "https://tools.google.com/service/update?"
+            "as=androidsdk_emu_crash&version=obnoxiousStr"
+            "&core_version=obnoxiousStr"
+            "&update_channel=-99"
+            "&os=obnoxiousStr&id=obnoxiousStr"
+            "&guest_arch=obnoxiousStr&guest_api_level=-99&exf=-99"
+            "&opengl_alive=-99"
+            "&system_time=-99&user_time=-99&adb_liveness=-99&wall_time=-99"
+            "&user_actions=-99"
+            "&exit_started=-99"
+            "&renderer=-99"
+            "&gpu0_make=obnoxiousStr"
+            "&gpu0_model=obnoxiousStr"
+            "&gpu0_device_id=obnoxiousStr"
+            "&gpu0_revision_id=obnoxiousStr"
+            "&gpu0_version=obnoxiousStr"
+            "&gpu0_renderer=obnoxiousStr"
+            "&gpu1_make=obnoxiousStr"
+            "&gpu1_model=obnoxiousStr"
+            "&gpu1_device_id=obnoxiousStr"
+            "&gpu1_revision_id=obnoxiousStr"
+            "&gpu1_version=obnoxiousStr"
+            "&gpu1_renderer=obnoxiousStr"
+            "&gpu2_make=obnoxiousStr"
+            "&gpu2_model=obnoxiousStr"
+            "&gpu2_device_id=obnoxiousStr"
+            "&gpu2_revision_id=obnoxiousStr"
+            "&gpu2_version=obnoxiousStr"
+            "&gpu2_renderer=obnoxiousStr"
+            "&gpu3_make=obnoxiousStr"
+            "&gpu3_model=obnoxiousStr"
+            "&gpu3_device_id=obnoxiousStr"
+            "&gpu3_revision_id=obnoxiousStr"
+            "&gpu3_version=obnoxiousStr"
+            "&gpu3_renderer=obnoxiousStr";
+    static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
+
+    char* formatted_url = NULL;
+    EXPECT_EQ(kExpectedLen,
+              formatToolbarGetUrl(&formatted_url, mToolbarUrl, &metrics));
+    EXPECT_STREQ(kExpected, formatted_url);
+    androidMetrics_fini(&metrics);
+    free(formatted_url);
+}
+
 }  // namespace

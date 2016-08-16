@@ -233,8 +233,9 @@ ABool androidMetrics_tick() {
             callback(&metrics);
         }
 
-        metrics.exit_started =
+        const auto exit_started =
                 android::crashreport::CrashReporter::get()->isInExitMode();
+        metrics.exit_started = exit_started ? 1 : 0;
 
         success = androidMetrics_write(&metrics);
     }
