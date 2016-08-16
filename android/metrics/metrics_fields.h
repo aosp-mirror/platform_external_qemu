@@ -27,8 +27,12 @@
 #error METRICS_DURATION not defined
 #endif
 
+// See kAndroidStudioUuidHexPattern[]
+METRICS_STRING(client_id, "client_id", "00000000-0000-0000-0000-000000000000")
 METRICS_STRING(emulator_version, "emulator_version", "unknown")
 METRICS_STRING(core_version, "core_version", "unknown")
+// See toUpdateChannelToolbarEnum
+METRICS_INT(update_channel, "update_channel", 0)
 METRICS_STRING(host_os_type, "host_os_type", "unknown")
 METRICS_STRING(guest_arch, "guest_arch", "unknown")
 METRICS_INT(guest_api_level, "guest_api_level", -1)
