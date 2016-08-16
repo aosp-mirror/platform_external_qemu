@@ -218,7 +218,8 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     bool isChecksumEnabled =
         emugl_feature_is_enabled(android::featurecontrol::GLPipeChecksum);
     bool asyncSwapEnabled =
-        emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap);
+        emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap) &&
+        emugl_sync_device_exists();
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();

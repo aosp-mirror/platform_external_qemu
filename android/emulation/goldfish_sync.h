@@ -15,6 +15,7 @@
 #include "android/utils/compiler.h"
 
 #include <inttypes.h>
+#include <stdbool.h>
 
 ANDROID_BEGIN_HEADER
 
@@ -139,6 +140,10 @@ void goldfish_sync_destroy_timeline(uint64_t timeline);
 // Registering callbacks for goldfish sync ops
 // Currently, only trigger_wait is supported.
 void goldfish_sync_register_trigger_wait(trigger_wait_fn_t trigger_fn);
+
+// If the virtual device doesn't actually exist (e.g., when
+// using QEMU1), query that using this function:
+bool goldfish_sync_device_exists();
 
 // Function types for sending commands to the virtual device.
 typedef void (*queue_device_command_t)

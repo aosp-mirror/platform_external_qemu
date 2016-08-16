@@ -176,7 +176,16 @@ void goldfish_sync_destroy_timeline(uint64_t timeline) {
 }
 
 void goldfish_sync_register_trigger_wait(trigger_wait_fn_t f) {
-    sGoldfishSyncHwFuncs->registerTriggerWait(f);
+    if (goldfish_sync_device_exists()) {
+        sGoldfishSyncHwFuncs->registerTriggerWait(f);
+    }
+}
+
+bool goldfish_sync_device_exists() {
+    // The idea here is that the virtual device should set
+    // sGoldfishSyncHwFuncs. If it didn't do that, we take
+    // that to mean there is no virtual device.
+    return sGoldfishSyncHwFuncs != NULL;
 }
 
 void goldfish_sync_set_hw_funcs(GoldfishSyncDeviceInterface* hw_funcs) {

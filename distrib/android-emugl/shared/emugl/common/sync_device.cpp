@@ -40,11 +40,16 @@ static void defaultRegisterTriggerWait(emugl_sync_trigger_wait_t f) {
     return;
 }
 
+static bool defaultDeviceExists() {
+    return false;
+}
+
 emugl_sync_create_timeline_t emugl_sync_create_timeline = defaultCreateTimeline;
 emugl_sync_create_fence_t emugl_sync_create_fence = defaultCreateFence;
 emugl_sync_timeline_inc_t emugl_sync_timeline_inc = defaultTimelineInc;
 emugl_sync_destroy_timeline_t emugl_sync_destroy_timeline = defaultDestroyTimeline;
 emugl_sync_register_trigger_wait_t emugl_sync_register_trigger_wait = defaultRegisterTriggerWait;
+emugl_sync_device_exists_t emugl_sync_device_exists = defaultDeviceExists;
 
 void set_emugl_sync_create_timeline(emugl_sync_create_timeline_t f) {
     emugl_sync_create_timeline = f;
@@ -64,4 +69,8 @@ void set_emugl_sync_destroy_timeline(emugl_sync_destroy_timeline_t f) {
 
 void set_emugl_sync_register_trigger_wait(emugl_sync_register_trigger_wait_t f) {
     emugl_sync_register_trigger_wait = f;
+}
+
+void set_emugl_sync_device_exists(emugl_sync_device_exists_t f) {
+    emugl_sync_device_exists = f;
 }
