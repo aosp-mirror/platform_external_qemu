@@ -17,6 +17,8 @@
 #include "EglDisplay.h"
 #include "EglGlobalInfo.h"
 #include "EglOsApi.h"
+#include "EglPbufferSurface.h"
+#include "ThreadInfo.h"
 
 unsigned int EglContext::s_nextContextHndl = 0;
 
@@ -47,19 +49,54 @@ EglContext::EglContext(EglDisplay *dpy,
 
 EglContext::~EglContext()
 {
+    ThreadInfo* thread = getThreadInfo();
+    // get the current context
+    ContextPtr currentCtx = thread->eglContext;
+    if (currentCtx && !m_dpy->getContext((EGLContext)SafePointerFromUInt(
+                        currentCtx->getHndl()))) {
+        currentCtx.reset();
+    }
+    SurfacePtr currentRead = currentCtx ? currentCtx->read() : nullptr;
+    SurfacePtr currentDraw = currentCtx ? currentCtx->draw() : nullptr;
+    // we need to make the context current before releasing GL resources.
+    // create a dummy surface first
+    std::shared_ptr<EglPbufferSurface> pbSurface(new EglPbufferSurface(m_dpy,
+                                                                       m_config));
+    EglOS::PbufferInfo pbInfo;
+    pbSurface->getDim(&pbInfo.width, &pbInfo.height, &pbInfo.largest);
+    pbSurface->getTexInfo(&pbInfo.target, &pbInfo.format);
+    pbInfo.hasMipmap = false;
+    EglOS::Surface* pb = m_dpy->nativeType()->createPbufferSurface(
+            m_config->nativeFormat(), &pbInfo);
+    assert(pb);
+    m_dpy->nativeType()->makeCurrent(pb, pb, m_native);
+    //
+    // release GL resources. m_shareGroup, m_mngr and m_glesContext hold
+    // smart pointers to share groups. We must clean them up when the context
+    // is current.
+    //
+    m_attachedImages.clear();
+    m_shareGroup.reset();
+    if (m_mngr) {
+        m_mngr->deleteShareGroup(m_native);
+    }
+    //
+    // call the client-api to remove the GLES context
+    //
+    g_eglInfo->getIface(version())->deleteGLESContext(m_glesContext);
     //
     // remove the context in the underlying OS layer
     //
     m_dpy->nativeType()->destroyContext(m_native);
-
     //
-    // call the client-api to remove the GLES context
-    // 
-    g_eglInfo->getIface(version())->deleteGLESContext(m_glesContext);
-
-    if (m_mngr)
-    {
-        m_mngr->deleteShareGroup(m_native);
+    // restore the current context
+    //
+    if (currentCtx) {
+        m_dpy->nativeType()->makeCurrent(currentRead->native(),
+                                         currentDraw->native(),
+                                         currentCtx->nativeType());
+    } else {
+        m_dpy->nativeType()->makeCurrent(nullptr, nullptr, nullptr);
     }
 }
 
