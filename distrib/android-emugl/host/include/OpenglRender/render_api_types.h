@@ -33,6 +33,8 @@ typedef void (*emugl_sync_destroy_timeline_t)(uint64_t timeline);
 typedef void (*emugl_sync_trigger_wait_t)(uint64_t glsync, uint64_t thread, uint64_t timeline);
 typedef void (*emugl_sync_register_trigger_wait_t)(emugl_sync_trigger_wait_t trigger_fn);
 
+typedef bool (*emugl_sync_device_exists_t)();
+
 // OpenGL timestamped logger
 typedef void (*emugl_logger_t)(const char* fmt, ...);
 typedef struct {
