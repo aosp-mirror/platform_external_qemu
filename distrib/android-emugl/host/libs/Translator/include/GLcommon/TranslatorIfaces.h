@@ -71,7 +71,7 @@ struct EglImage
 {
     ~EglImage(){};
     unsigned int imageId;
-    unsigned int globalTexName;
+    NamedObjectPtr globalTexObj;
     unsigned int width;
     unsigned int height;
     unsigned int internalFormat;

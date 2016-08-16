@@ -29,7 +29,7 @@ public:
     void (*eglImageDetach)(unsigned int imageId) = nullptr;
     GLuint attachedFB = 0;
     GLenum attachedPoint = 0;
-    GLuint eglImageGlobalTexName = 0;
+    NamedObjectPtr eglImageGlobalTexObject = 0;
 };
 
 const int MAX_ATTACH_POINTS = 3;
