@@ -21,36 +21,36 @@ namespace opengl {
 
 namespace {
 
-// GrallocPipe is a pipe service that is used for releasing gralloc resources
-// per guest process. Gralloc acquires host color buffer handles that needs to
-// be properly released when guest process crashes. This class is used to detect
-// if guest process exits, so that a proper cleanup function can be called.
-
+// GLProcessPipe is a pipe service that is used for releasing graphics resources
+// per guest process. At the time being, guest processes can acquires host color
+// buffer handles / EGLImage handles and they need to be properly released when
+// guest process exits unexpectedly. This class is used to detect if guest
+// process exits, so that a proper cleanup function can be called.
 
 // It is done by setting up a pipe per guest process before acquiring color
 // buffer handles. When guest process exits, the pipe will be closed, and
 // onGuestClose() will trigger the cleanup path.
 
-class GrallocPipe : public AndroidPipe {
+class GLProcessPipe : public AndroidPipe {
 public:
     //////////////////////////////////////////////////////////////////////////
     // The pipe service class for this implementation.
     class Service : public AndroidPipe::Service {
     public:
-        Service() : AndroidPipe::Service("grallocPipe") {}
+        Service() : AndroidPipe::Service("GLProcessPipe") {}
 
         virtual AndroidPipe* create(void* mHwPipe, const char* args) override {
-            return new GrallocPipe(mHwPipe, this);
+            return new GLProcessPipe(mHwPipe, this);
         }
     };
 
-    GrallocPipe(void* hwPipe, Service* service) : AndroidPipe(hwPipe, service) {
+    GLProcessPipe(void* hwPipe, Service* service) : AndroidPipe(hwPipe, service) {
         m_uniqueId = ++s_headId;
     }
 
     void onGuestClose() override {
         // process died on the guest, cleanup gralloc memory on the host
-        android_cleanupProcColorbuffers(m_uniqueId);
+        android_cleanupProcGLObjects(m_uniqueId);
     }
     unsigned onGuestPoll() const override {
         return PIPE_POLL_IN | PIPE_POLL_OUT;
@@ -80,12 +80,12 @@ private:
     static std::atomic_ullong s_headId;
 };
 
-std::atomic_ullong GrallocPipe::s_headId(0);
+std::atomic_ullong GLProcessPipe::s_headId(0);
 
 }
 
-void registerGrallocPipeService() {
-    android::AndroidPipe::Service::add(new GrallocPipe::Service());
+void registerGLProcessPipeService() {
+    android::AndroidPipe::Service::add(new GLProcessPipe::Service());
 }
 
 }
