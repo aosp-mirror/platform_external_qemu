@@ -1833,8 +1833,11 @@ static void android_init_metrics(int opengl_alive)
     }
 
     androidMetrics_init(&metrics);
+    ANDROID_METRICS_STRASSIGN_MALLOCED(metrics.client_id,
+                                       android_studio_get_installation_id());
     ANDROID_METRICS_STRASSIGN(metrics.emulator_version, EMULATOR_VERSION_STRING);
     ANDROID_METRICS_STRASSIGN(metrics.core_version, QEMU_CORE_VERSION);
+    metrics.update_channel = android_studio_update_channel();
     ANDROID_METRICS_STRASSIGN_MALLOCED(metrics.host_os_type, get_host_os_type());
     ANDROID_METRICS_STRASSIGN(metrics.guest_arch, android_hw->hw_cpu_arch);
     metrics.guest_api_level = avdInfo_getApiLevel(android_avdInfo);
