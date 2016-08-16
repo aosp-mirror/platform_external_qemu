@@ -86,6 +86,7 @@ using android::base::System;
 using android::base::Version;
 using android::base::stringLiteralLength;
 using android::ConfigDirs;
+using android::studio::UpdateChannel;
 
 namespace android {
 namespace studio {
@@ -450,4 +451,24 @@ char* android_studio_get_installation_id() {
 
     D("Defaulting to zero installation ID");
     return strDup(kAndroidStudioUuidHexPattern);
+}
+
+// Keep in sync with backend enum in .../processed_logs.proto
+static int toUpdateChannelToolbarEnum(UpdateChannel channel) {
+    switch (channel) {
+        case UpdateChannel::Stable:
+            return 1;
+        case UpdateChannel::Beta:
+            return 2;
+        case UpdateChannel::Dev:
+            return 3;
+        case UpdateChannel::Canary:
+            return 4;
+        default:
+            return 0;
+    }
+}
+
+int android_studio_update_channel() {
+    return toUpdateChannelToolbarEnum(android::studio::updateChannel());
 }
