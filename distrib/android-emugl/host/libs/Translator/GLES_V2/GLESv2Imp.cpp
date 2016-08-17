@@ -391,6 +391,7 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
         ObjectDataPtr objData = ctx->shareGroup()->getObjectData(SHADER,shader);
         SET_ERROR_IF(objData.get()->getDataType()!= SHADER_DATA,GL_INVALID_OPERATION);
         ShaderParser* sp = (ShaderParser*)objData.get();
+        SET_ERROR_IF(sp->getDeleteStatus(), GL_INVALID_VALUE);
         if (sp->validShader()) {
             ctx->dispatcher().glCompileShader(globalShaderName);
 
@@ -586,6 +587,7 @@ GL_APICALL void  GL_APIENTRY glDeleteShader(GLuint shader){
         SET_ERROR_IF(!objData.get() ,GL_INVALID_OPERATION);
         SET_ERROR_IF(objData.get()->getDataType()!=SHADER_DATA,GL_INVALID_OPERATION);
         ShaderParser* sp = (ShaderParser*)objData.get();
+        SET_ERROR_IF(sp->getDeleteStatus(), GL_INVALID_VALUE);
         if (sp->getAttachedProgram()) {
             sp->setDeleteStatus(true);
         } else {
