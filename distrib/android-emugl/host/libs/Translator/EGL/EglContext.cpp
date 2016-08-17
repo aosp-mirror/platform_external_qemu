@@ -62,14 +62,17 @@ EglContext::~EglContext()
     // create a dummy surface first
     std::shared_ptr<EglPbufferSurface> pbSurface(new EglPbufferSurface(m_dpy,
                                                                        m_config));
+    pbSurface->setAttrib(EGL_WIDTH, 1);
+    pbSurface->setAttrib(EGL_HEIGHT, 1);
     EglOS::PbufferInfo pbInfo;
     pbSurface->getDim(&pbInfo.width, &pbInfo.height, &pbInfo.largest);
     pbSurface->getTexInfo(&pbInfo.target, &pbInfo.format);
     pbInfo.hasMipmap = false;
     EglOS::Surface* pb = m_dpy->nativeType()->createPbufferSurface(
             m_config->nativeFormat(), &pbInfo);
+    assert(pb);
     if (pb) {
-        m_dpy->nativeType()->makeCurrent(pb, pb, m_native);
+        assert(m_dpy->nativeType()->makeCurrent(pb, pb, m_native));
         pbSurface->setNativePbuffer(pb);
     }
     //
@@ -87,10 +90,6 @@ EglContext::~EglContext()
     //
     g_eglInfo->getIface(version())->deleteGLESContext(m_glesContext);
     //
-    // remove the context in the underlying OS layer
-    //
-    m_dpy->nativeType()->destroyContext(m_native);
-    //
     // restore the current context
     //
     if (currentCtx) {
@@ -100,6 +99,11 @@ EglContext::~EglContext()
     } else {
         m_dpy->nativeType()->makeCurrent(nullptr, nullptr, nullptr);
     }
+
+    //
+    // remove the context in the underlying OS layer
+    //
+    m_dpy->nativeType()->destroyContext(m_native);
 }
 
 void EglContext::setSurfaces(SurfacePtr read,SurfacePtr draw)
