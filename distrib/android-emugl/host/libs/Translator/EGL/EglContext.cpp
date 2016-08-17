@@ -68,8 +68,10 @@ EglContext::~EglContext()
     pbInfo.hasMipmap = false;
     EglOS::Surface* pb = m_dpy->nativeType()->createPbufferSurface(
             m_config->nativeFormat(), &pbInfo);
-    assert(pb);
-    m_dpy->nativeType()->makeCurrent(pb, pb, m_native);
+    if (pb) {
+        m_dpy->nativeType()->makeCurrent(pb, pb, m_native);
+        pbSurface->setNativePbuffer(pb);
+    }
     //
     // release GL resources. m_shareGroup, m_mngr and m_glesContext hold
     // smart pointers to share groups. We must clean them up when the context
