@@ -23,10 +23,6 @@
 class RenderbufferData : public ObjectData
 {
 public:
-    ~RenderbufferData();
-
-    unsigned int sourceEGLImage = 0;
-    void (*eglImageDetach)(unsigned int imageId) = nullptr;
     GLuint attachedFB = 0;
     GLenum attachedPoint = 0;
     NamedObjectPtr eglImageGlobalTexObject = 0;

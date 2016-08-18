@@ -804,7 +804,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
 
     if (renderbuffer && obj.get() != NULL) {
         RenderbufferData *rbData = (RenderbufferData *)obj.get();
-        if (rbData->sourceEGLImage != 0) {
+        if (rbData->eglImageGlobalTexObject) {
             //
             // This renderbuffer object is an eglImage target
             // attach the eglimage's texture instead the renderbuffer.
@@ -1270,7 +1270,7 @@ GL_APICALL void  GL_APIENTRY glGetRenderbufferParameteriv(GLenum target, GLenum 
         ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::RENDERBUFFER, rb);
         RenderbufferData *rbData = (RenderbufferData *)objData.get();
-        if (rbData && rbData->sourceEGLImage != 0) {
+        if (rbData && rbData->eglImageGlobalTexObject) {
             GLenum texPname;
             switch(pname) {
                 case GL_RENDERBUFFER_WIDTH:
@@ -1929,16 +1929,10 @@ GL_APICALL void  GL_APIENTRY glRenderbufferStorage(GLenum target, GLenum interna
     SET_ERROR_IF(!rbData,GL_INVALID_OPERATION);
 
     //
-    // if the renderbuffer was an eglImage target, detach from
-    // the eglImage.
+    // if the renderbuffer was an eglImage target, release
+    // its underlying texture.
     //
-    if (rbData->sourceEGLImage != 0) {
-        if (rbData->eglImageDetach) {
-            (*rbData->eglImageDetach)(rbData->sourceEGLImage);
-        }
-        rbData->sourceEGLImage = 0;
-        rbData->eglImageGlobalTexObject = nullptr;
-    }
+    rbData->eglImageGlobalTexObject.reset();
 
     ctx->dispatcher().glRenderbufferStorageEXT(target,internal,width,height);
 }
@@ -2056,13 +2050,9 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
             if (texData->sourceEGLImage != 0) {
                 //
                 // This texture was a target of EGLImage,
-                // but now it is re-defined so we need to detach
-                // from the EGLImage and re-generate global texture name
-                // for it.
+                // but now it is re-defined so we need to
+                // re-generate global texture name for it.
                 //
-                if (texData->eglImageDetach) {
-                    (*texData->eglImageDetach)(texData->sourceEGLImage);
-                }
                 unsigned int tex = ctx->getBindedTexture(target);
                 ctx->shareGroup()->genName(NamedObjectType::TEXTURE, tex,
                                            false);
@@ -2351,7 +2341,7 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
     GET_CTX();
     SET_ERROR_IF(!GLESv2Validate::textureTargetLimited(target),GL_INVALID_ENUM);
     unsigned int imagehndl = SafeUIntFromPointer(image);
-    EglImage *img = s_eglIface->eglAttachEGLImage(imagehndl);
+    ImagePtr img = s_eglIface->getEGLImage(imagehndl);
     if (img) {
         // Create the texture object in the underlying EGL implementation,
         // flag to the OpenGL layer to skip the image creation and map the
@@ -2369,7 +2359,6 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             texData->border = img->border;
             texData->internalFormat = img->internalFormat;
             texData->sourceEGLImage = imagehndl;
-            texData->eglImageDetach = s_eglIface->eglDetachEGLImage;
         }
     }
 }
@@ -2379,7 +2368,7 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
     GET_CTX();
     SET_ERROR_IF(target != GL_RENDERBUFFER_OES,GL_INVALID_ENUM);
     unsigned int imagehndl = SafeUIntFromPointer(image);
-    EglImage *img = s_eglIface->eglAttachEGLImage(imagehndl);
+    ImagePtr img = s_eglIface->getEGLImage(imagehndl);
     SET_ERROR_IF(!img,GL_INVALID_VALUE);
     SET_ERROR_IF(!ctx->shareGroup().get(),GL_INVALID_OPERATION);
 
@@ -2393,10 +2382,8 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
     SET_ERROR_IF(!rbData,GL_INVALID_OPERATION);
 
     //
-    // flag in the renderbufferData that it is an eglImage target
+    // acquire the texture in the renderbufferData that it is an eglImage target
     //
-    rbData->sourceEGLImage = imagehndl;
-    rbData->eglImageDetach = s_eglIface->eglDetachEGLImage;
     rbData->eglImageGlobalTexObject = img->globalTexObj;
 
     //
