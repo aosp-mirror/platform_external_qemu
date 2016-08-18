@@ -80,7 +80,6 @@ EglContext::~EglContext()
     // smart pointers to share groups. We must clean them up when the context
     // is current.
     //
-    m_attachedImages.clear();
     m_shareGroup.reset();
     if (m_mngr) {
         m_mngr->deleteShareGroup(m_native);
