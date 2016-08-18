@@ -2968,6 +2968,8 @@ int main(int argc, char **argv, char **envp)
         boot_property_add("ro.config.low_ram", "true");
     }
 
+    /* Initialize emulator adb keys */
+    boot_property_add("qemu.adb.adb_keys", "testkey");
     /* Initialize net speed and delays stuff. */
     if (!android_network_set_speed(android_op_netspeed)) {
         PANIC("invalid -netspeed parameter '%s'",

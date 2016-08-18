@@ -190,6 +190,7 @@ LOCAL_C_INCLUDES := \
     $(ZLIB_INCLUDES) \
 
 LOCAL_SRC_FILES := \
+    android/adb-key-preset.c \
     android/adb-server.cpp \
     android/avd/hw-config.c \
     android/avd/info.c \
