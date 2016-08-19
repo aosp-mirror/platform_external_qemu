@@ -26,7 +26,7 @@
 #include "EglOsApi.h"
 #include "EglSurface.h"
 #include "EglWindowSurface.h"
-
+#include "GLcommon/ObjectNameSpace.h"
 #include <memory>
 #include <unordered_map>
 #include <vector>

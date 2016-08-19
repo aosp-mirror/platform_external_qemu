@@ -164,7 +164,8 @@ void FramebufferData::validate(GLEScontext* ctx)
         }
 
         // Create the color attachment and attch it
-        unsigned int tex = ctx->shareGroup()->genGlobalName(TEXTURE);
+        unsigned int tex = 0;
+        ctx->dispatcher().glGenTextures(1, &tex);
         GLint prev;
         ctx->dispatcher().glGetIntegerv(GL_TEXTURE_BINDING_2D, &prev);
         ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, tex);
@@ -188,7 +189,10 @@ void FramebufferData::validate(GLEScontext* ctx)
         // have changed, and before the next draw, unbind and rebind
         // the framebuffer to sort things out.
         ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER,0);
-        ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER,ctx->shareGroup()->getGlobalName(FRAMEBUFFER,m_fbName));
+        ctx->dispatcher().glBindFramebufferEXT(
+                GL_FRAMEBUFFER,
+                ctx->shareGroup()->getGlobalName(NamedObjectType::FRAMEBUFFER,
+                                                 m_fbName));
 
         m_dirty = false;
     }
