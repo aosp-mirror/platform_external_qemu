@@ -18,6 +18,7 @@
 #include "android/base/Log.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/StringView.h"
+#include "android/utils/debug.h"
 
 #include <algorithm>
 #include <string>
@@ -40,6 +41,8 @@
 #endif
 
 #define E(...) fprintf(stderr, "ERROR:" __VA_ARGS__), fprintf(stderr, "\n")
+
+#define DINIT(...) do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
 namespace android {
 namespace emulation {
@@ -147,6 +150,7 @@ AdbGuestPipe::~AdbGuestPipe() {
 void AdbGuestPipe::onGuestClose() {
     DD("%s: [%p]", __func__, this);
     mState = State::ClosedByGuest;
+    DINIT("%s: [%p] Adb closed by guest",__func__, this);
     mHostSocket.reset();
     service()->onPipeClose(this);  // This deletes the instance.
 }
@@ -327,6 +331,7 @@ int AdbGuestPipe::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
                 if (result == 0) {
                     mHostSocket.reset();
                     mState = State::ClosedByHost;
+                    DINIT("%s: [%p] Adb closed by host",__func__, this);
                     return PIPE_ERROR_IO;
                 }
             }
@@ -369,6 +374,7 @@ int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
                 if (result == 0) {
                     mHostSocket.reset();
                     mState = State::ClosedByHost;
+                    DINIT("%s: [%p] Adb closed by host",__func__, this);
                     return PIPE_ERROR_IO;
                 }
             }
@@ -443,6 +449,8 @@ int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
                 } else if (mState == State::WaitingForGuestStartCommand) {
                     // Proxying data can start right now.
                     mState = State::ProxyingData;
+                    // when -verbose, print a message indicating adb is connected
+                    DINIT("%s: [%p] Adb connected, start proxing data",__func__, this);
                 }
                 return result;
             }
