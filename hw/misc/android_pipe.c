@@ -72,7 +72,7 @@
     do {                                \
         error_report(__VA_ARGS__);      \
         exit(1);                        \
-    } while (0);
+    } while (0)
 
 /* The following definitions must match those in the kernel driver
  * found at android.googlesource.com/kernel/goldfish.git
