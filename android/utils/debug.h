@@ -127,6 +127,10 @@ extern void base_disable_verbose_logs();
          android_tid_function_print(false, __func__, __VA_ARGS__); } \
     while (0)
 
+#define  TID_FUNCTION_DPRINT(...) \
+    do { android_tid_function_print(false, __func__, __VA_ARGS__); } \
+    while (0)
+
 /** DEBUG TRACE SUPPORT
  **
  ** Debug messages can be sent by calling these functions:

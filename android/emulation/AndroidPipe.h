@@ -73,7 +73,9 @@ public:
     class Service {
     public:
         // Explicit constructor.
-        explicit Service(const char* name) : mName(name) {}
+        explicit Service(const char* name) : mName(name) {
+            PIPE_DPRINT("created pipe service [%s]", name);
+        }
 
         // Default destructor.
         virtual ~Service() = default;

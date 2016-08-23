@@ -12,6 +12,7 @@
 #pragma once
 
 #include "android/utils/compiler.h"
+#include "android/utils/debug.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -43,5 +44,15 @@ typedef struct AndroidPipeBuffer {
 #define PIPE_POLL_IN   (1 << 0)   /* means guest can read */
 #define PIPE_POLL_OUT  (1 << 1)   /* means guest can write */
 #define PIPE_POLL_HUP  (1 << 2)   /* means closed by host */
+
+#define PIPE_DEBUG_PRINT 1
+
+#if PIPE_DEBUG_PRINT
+#define PIPE_DPRINT(fmt,...) do { \
+    TID_FUNCTION_DPRINT("android_pipe: " fmt, ##__VA_ARGS__); \
+} while(0)
+#else
+#define PIPE_DPRINT(...)
+#endif
 
 ANDROID_END_HEADER

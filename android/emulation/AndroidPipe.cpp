@@ -247,6 +247,7 @@ public:
         sPipeHwFuncs->resetPipe(mHwPipe, newPipe);
         delete this;
 
+        PIPE_DPRINT("starting pipe %p %s", newPipe, pipeName);
         return result;
     }
 
@@ -493,6 +494,7 @@ void android_pipe_guest_close(void* internalPipe) {
     CHECK_VM_STATE_LOCK();
     auto pipe = static_cast<android::AndroidPipe*>(internalPipe);
     if (pipe) {
+        PIPE_DPRINT("close from guest: %p %s", pipe, pipe->name());
         DD("%s: host=%p [%s]", __FUNCTION__, pipe, pipe->name());
         pipe->onGuestClose();
     }
@@ -558,6 +560,8 @@ void android_pipe_guest_wake_on(void* internalPipe, unsigned wakes) {
 
 // API implemented by the virtual device.
 void android_pipe_host_close(void* hwpipe) {
+    auto pipe = static_cast<android::AndroidPipe*>(hwpipe);
+    PIPE_DPRINT("close from host: %p %s", pipe, pipe->name());
     DD("%s: hwpipe=%p", __FUNCTION__, hwpipe);
     android::sGlobals->pipeWaker.closeFromHost(hwpipe);
 }
