@@ -611,6 +611,16 @@ static void pipe_dev_write(void *opaque, hwaddr offset, uint64_t value, unsigned
     }
 }
 
+static void close_all_pipes(void* opaque) {
+    PipeDevice* dev = opaque;
+    HwPipe* pipe = dev->pipes;
+    while(pipe) {
+        HwPipe* old_pipe = pipe;
+        pipe = pipe->next;
+        hwpipe_free(old_pipe);
+    }
+}
+
 /* I/O read */
 static uint64_t pipe_dev_read(void *opaque, hwaddr offset, unsigned size)
 {
@@ -669,6 +679,10 @@ static uint64_t pipe_dev_read(void *opaque, hwaddr offset, unsigned size)
         return (uint32_t)(dev->params_addr & 0xFFFFFFFFUL);
 
     case PIPE_REG_VERSION:
+        // PIPE_REG_VERSION is issued on probe, which means that
+        // we should clean up all existing stale pipes.
+        // This helps keep the right state on rebooting.
+        close_all_pipes(dev);
         return PIPE_DEVICE_VERSION;
 
     default:
@@ -746,6 +760,7 @@ static int android_pipe_load(QEMUFile* f, void* opaque, int version_id) {
     AndroidPipeState* s = opaque;
     PipeDevice* dev = s->dev;
     Stream* stream = stream_from_qemufile(f);
+    HwPipe* pipe;
 
     /* Load i/o registers. */
     dev->address = stream_get_be64(stream);
@@ -756,12 +771,7 @@ static int android_pipe_load(QEMUFile* f, void* opaque, int version_id) {
     dev->params_addr = stream_get_be64(stream);
 
     /* Clean up old pipe objects. */
-    HwPipe* pipe = dev->pipes;
-    while(pipe) {
-        HwPipe* old_pipe = pipe;
-        pipe = pipe->next;
-        hwpipe_free(old_pipe);
-    }
+    close_all_pipes(dev);
 
     /* Restore pipes. */
     int pipe_count = stream_get_be32(stream);
