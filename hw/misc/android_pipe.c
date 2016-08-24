@@ -621,6 +621,14 @@ static void close_all_pipes(void* opaque) {
     }
 }
 
+static void reset_pipe_device(void* opaque) {
+    PipeDevice* dev = opaque;
+    dev->pipes = NULL;
+    dev->wanted_pipes_first = NULL;
+    dev->wanted_pipe_after_channel_high = NULL;
+    g_hash_table_remove_all(dev->pipes_by_channel);
+}
+
 /* I/O read */
 static uint64_t pipe_dev_read(void *opaque, hwaddr offset, unsigned size)
 {
@@ -683,6 +691,7 @@ static uint64_t pipe_dev_read(void *opaque, hwaddr offset, unsigned size)
         // we should clean up all existing stale pipes.
         // This helps keep the right state on rebooting.
         close_all_pipes(dev);
+        reset_pipe_device(dev);
         return PIPE_DEVICE_VERSION;
 
     default:
