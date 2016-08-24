@@ -627,6 +627,7 @@ static void reset_pipe_device(void* opaque) {
     dev->wanted_pipes_first = NULL;
     dev->wanted_pipe_after_channel_high = NULL;
     g_hash_table_remove_all(dev->pipes_by_channel);
+    qemu_set_irq(dev->ps->irq, 0);
 }
 
 /* I/O read */
