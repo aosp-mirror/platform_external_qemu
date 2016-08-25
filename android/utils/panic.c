@@ -35,6 +35,7 @@ void android_panic( const char*  fmt, ... )
 void android_vpanic( const char*  fmt, va_list  args )
 {
     _panicHandler(fmt, args);
+    abort();
 }
 
 void android_panic_registerHandler( APanicHandlerFunc  handler )

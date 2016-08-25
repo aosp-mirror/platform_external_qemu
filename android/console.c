@@ -653,16 +653,14 @@ static void control_global_accept(void* opaque,
 static void control_global_accept4(void* opaque,
                                    int listen_fd,
                                    unsigned events) {
-    ControlGlobal global = opaque;
-    assert(listen_fd == loopIo_fd(global->listen4_loopio));
+    assert(listen_fd == loopIo_fd(((ControlGlobal)opaque)->listen4_loopio));
     control_global_accept(opaque, listen_fd, events);
 }
 
 static void control_global_accept6(void* opaque,
                                    int listen_fd,
                                    unsigned events) {
-    ControlGlobal global = opaque;
-    assert(listen_fd == loopIo_fd(global->listen6_loopio));
+    assert(listen_fd == loopIo_fd(((ControlGlobal)opaque)->listen6_loopio));
     control_global_accept(opaque, listen_fd, events);
 }
 

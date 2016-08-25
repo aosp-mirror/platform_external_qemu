@@ -881,6 +881,7 @@ static void qemu_opts_from_qdict_1(const char *key, QObject *obj, void *opaque)
     default:
         return;
     }
+    (void)n;
     qemu_opt_set(opaque, key, value);
 }
 

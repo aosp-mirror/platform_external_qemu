@@ -67,6 +67,7 @@ public:
         assert(buffers[0].size >= 4);
         int32_t confirmInt = *((int32_t*)buffers[0].data);
         assert(confirmInt == 100);
+        (void)confirmInt;
         return buffers[0].size;
     }
     void onGuestWantWakeOn(int flags) override {}
