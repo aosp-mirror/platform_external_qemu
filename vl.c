@@ -173,6 +173,9 @@ int android_display_height = 480;
 #define  LCD_DENSITY_XXHDPI    480
 #define  LCD_DENSITY_560DPI    560
 #define  LCD_DENSITY_XXXHDPI   640
+
+extern bool android_op_wipe_data;
+
 #endif // CONFIG_ANDROID
 
 #define DEFAULT_RAM_SIZE 128
@@ -181,7 +184,6 @@ int android_display_height = 480;
 #define MAX_SCLP_CONSOLES 1
 #define QCOW2_SUFFIX "qcow2"
 
-extern bool android_op_wipe_data;
 static const char *data_dir[16];
 static int data_dir_idx;
 const char *bios_name = NULL;
@@ -849,6 +851,7 @@ void qemu_system_vmstop_request(RunState state)
     qemu_notify_event();
 }
 
+#ifdef CONFIG_ANDROID
 static int create_qcow2_images() {
     /* First, determine if any of the backing images have been altered.
      * QCoW2 images won't work in that case, and need to be recreated (this
@@ -959,6 +962,7 @@ static int create_qcow2_images() {
 
     return 1;
 }
+#endif  // CONFIG_ANDROID
 
 void vm_start(void)
 {
@@ -2126,7 +2130,7 @@ static void version(void)
     printf("QEMU emulator version " QEMU_VERSION " " QEMU_PKGVERSION ", Copyright (c) 2003-2008 Fabrice Bellard\n");
 }
 
-static void help()
+static void help(void)
 {
     version();
     printf("usage: %s [options] [disk_image]\n\n"
@@ -2976,6 +2980,10 @@ out:
 // We don't use the AndroidEmu library in the original qemu2 build,
 // so let's return their main function back
 #define run_qemu_main main
+
+// To avoid compiler warning about missing prototype when main is a macro
+// for SDL_main.
+extern int run_qemu_main(int, const char**);
 
 #else  /* CONFIG_ANDROID */
 
@@ -4247,6 +4255,8 @@ int run_qemu_main(int argc, const char **argv)
         return 1;
     }
 
+#ifdef CONFIG_ANDROID
+
     /* At this point, both block drivers and main loop have been initialized
      * which means we can create the QCoW2 images to boot from.
      * The QCoW2 images are backed by the "raw" images specified in the AVD
@@ -4255,8 +4265,6 @@ int run_qemu_main(int argc, const char **argv)
     if(!create_qcow2_images()) {
         return 1;
     }
-
-#ifdef CONFIG_ANDROID
 
     /* Ensure Looper implementation for this thread is based on the QEMU
      * main loop. */
@@ -4785,7 +4793,8 @@ int run_qemu_main(int argc, const char **argv)
         boot_strict = qemu_opt_get_bool(opts, "strict", false);
     }
 
-    current_machine->kernel_cmdline = kernel_cmdline ? (char *)kernel_cmdline : "";
+    current_machine->kernel_cmdline =
+            g_strdup(kernel_cmdline ? kernel_cmdline : "");
 
 #ifdef CONFIG_ANDROID
     if (additional_kernel_params) {

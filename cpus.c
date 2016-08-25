@@ -804,13 +804,13 @@ static bool iothread_requesting_mutex;
 #ifdef CONFIG_ANDROID
 static __thread bool qemu_global_mutex_held;
 
-void qemu_global_cond_wait(QemuCond* cond) {
+static void qemu_global_cond_wait(QemuCond* cond) {
     qemu_global_mutex_held = false;
     qemu_cond_wait(cond, &qemu_global_mutex);
     qemu_global_mutex_held = true;
 }
 #else
-void qemu_global_cond_wait(QemuCond* cond) {
+static void qemu_global_cond_wait(QemuCond* cond) {
     qemu_cond_wait(cond, &qemu_global_mutex);
 }
 #endif

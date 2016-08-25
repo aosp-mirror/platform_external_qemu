@@ -296,7 +296,7 @@ winaudio_out_run (HWVoiceOut *hw, int live)
             played       += wav_samples;
             s->write_pos += wav_bytes;
             if (s->write_pos == s->write_size) {
-#if xxDEBUG
+#if DEBUG
                 int64_t  now  = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) - start_time;
                 int64_t  diff = now - last_time;
 
