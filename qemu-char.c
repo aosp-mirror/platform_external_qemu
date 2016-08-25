@@ -900,6 +900,7 @@ static void io_watch_poll_finalize(GSource *source)
      */
     IOWatchPoll *iwp = io_watch_poll_from_source(source);
     assert(iwp->src == NULL);
+    (void)iwp;
 }
 
 static GSourceFuncs io_watch_poll_funcs = {

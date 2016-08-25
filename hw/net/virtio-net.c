@@ -507,9 +507,11 @@ static void virtio_net_set_queues(VirtIONet *n)
         if (i < n->curr_queues) {
             r = peer_attach(n, i);
             assert(!r);
+            (void)r;
         } else {
             r = peer_detach(n, i);
             assert(!r);
+            (void)r;
         }
     }
 }

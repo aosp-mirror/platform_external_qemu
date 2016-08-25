@@ -65,6 +65,7 @@ static GenericList *qapi_dealloc_next_list(Visitor *v, GenericList *tail,
 
 static void qapi_dealloc_end_list(Visitor *v, void **obj)
 {
+    (void)obj;
 }
 
 static void qapi_dealloc_type_str(Visitor *v, const char *name, char **obj,

@@ -1089,6 +1089,7 @@ void virtio_queue_set_align(VirtIODevice *vdev, int n, int align)
      * silently failing to migrate this state)
      */
     assert(k->has_variable_vring_alignment);
+    (void)k;
 
     vdev->vq[n].vring.align = align;
     virtio_queue_update_rings(vdev, n);

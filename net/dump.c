@@ -202,6 +202,7 @@ int net_init_dump(const Netdev *netdev, const char *name,
 
         ret = net_hub_id_for_client(peer, &id);
         assert(ret == 0); /* peer must be on a hub */
+        (void)ret;
 
         snprintf(def_file, sizeof(def_file), "qemu-vlan%d.pcap", id);
         file = def_file;

@@ -933,6 +933,7 @@ void qemu_opts_set_defaults(QemuOptsList *list, const char *params,
 
     opts = opts_parse(list, params, permit_abbrev, true, NULL);
     assert(opts);
+    (void)opts;
 }
 
 typedef struct OptsFromQDictState {
@@ -959,12 +960,14 @@ static void qemu_opts_from_qdict_1(const char *key, QObject *obj, void *opaque)
         n = snprintf(buf, sizeof(buf), "%" PRId64,
                      qint_get_int(qobject_to_qint(obj)));
         assert(n < sizeof(buf));
+        (void)n;
         value = buf;
         break;
     case QTYPE_QFLOAT:
         n = snprintf(buf, sizeof(buf), "%.17g",
                      qfloat_get_double(qobject_to_qfloat(obj)));
         assert(n < sizeof(buf));
+        (void)n;
         value = buf;
         break;
     case QTYPE_QBOOL:

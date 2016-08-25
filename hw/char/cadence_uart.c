@@ -301,6 +301,7 @@ static gboolean cadence_uart_xmit(GIOChannel *chan, GIOCondition cond,
             s->tx_count = 0;
             return FALSE;
         }
+        (void)r;
     }
 
     uart_update_status(s);

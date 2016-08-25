@@ -417,6 +417,7 @@ void pcie_cap_slot_reset(PCIDevice *dev)
 
     assert(port_type == PCI_EXP_TYPE_DOWNSTREAM ||
            port_type == PCI_EXP_TYPE_ROOT_PORT);
+    (void)port_type;
 
     PCIE_DEV_PRINTF(dev, "reset\n");
 

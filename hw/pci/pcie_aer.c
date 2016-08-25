@@ -702,6 +702,7 @@ int pcie_aer_inject_error(PCIDevice *dev, const PCIEAERErr *err)
         };
         int ret = pcie_aer_inject_error(dev, &header_log_overflow);
         assert(!ret);
+        (void)ret;
     }
     return 0;
 }

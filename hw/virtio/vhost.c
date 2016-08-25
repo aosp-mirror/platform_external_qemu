@@ -578,6 +578,7 @@ static void vhost_commit(MemoryListener *listener)
 
         r = vhost_verify_ring_mappings(dev, start_addr, size);
         assert(r >= 0);
+        (void)r;
     }
 
     if (!dev->log_enabled) {
@@ -585,6 +586,7 @@ static void vhost_commit(MemoryListener *listener)
         if (r < 0) {
             VHOST_OPS_DEBUG("vhost_set_mem_table failed");
         }
+        (void)r;
         dev->memory_changed = false;
         return;
     }
@@ -600,6 +602,7 @@ static void vhost_commit(MemoryListener *listener)
     if (r < 0) {
         VHOST_OPS_DEBUG("vhost_set_mem_table failed");
     }
+    (void)r;
     /* To log less, can only decrease log size after table update. */
     if (dev->log_size > log_size + VHOST_LOG_BUFFER) {
         vhost_dev_log_resize(dev, log_size);
@@ -1258,6 +1261,7 @@ void vhost_virtqueue_mask(struct vhost_dev *hdev, VirtIODevice *vdev, int n,
     if (r < 0) {
         VHOST_OPS_DEBUG("vhost_set_vring_call failed");
     }
+    (void)r;
 }
 
 uint64_t vhost_get_features(struct vhost_dev *hdev, const int *feature_bits,

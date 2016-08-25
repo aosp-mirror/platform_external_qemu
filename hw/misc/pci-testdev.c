@@ -279,6 +279,7 @@ static void pci_testdev_realize(PCIDevice *pci_dev, Error **errp)
         }
         r = event_notifier_init(&test->notifier, 0);
         assert(r >= 0);
+        (void)r;
         test->hasnotifier = true;
     }
 }

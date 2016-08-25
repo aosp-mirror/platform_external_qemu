@@ -188,6 +188,7 @@ static void virtio_scsi_save_request(QEMUFile *f, SCSIRequest *sreq)
     uint32_t n = virtio_get_queue_index(req->vq) - 2;
 
     assert(n < vs->conf.num_queues);
+    (void)vs;
     qemu_put_be32s(f, &n);
     qemu_put_virtqueue_element(f, &req->elem);
 }
@@ -214,7 +215,9 @@ static void *virtio_scsi_load_request(QEMUFile *f, SCSIRequest *sreq)
     scsi_req_ref(sreq);
     req->sreq = sreq;
     if (req->sreq->cmd.mode != SCSI_XFER_NONE) {
-        assert(req->sreq->cmd.mode == req->mode);
+        if (!(req->sreq->cmd.mode == req->mode)) {
+            abort();
+        }
     }
     return req;
 }

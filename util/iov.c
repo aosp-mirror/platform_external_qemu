@@ -575,6 +575,7 @@ void qemu_iovec_discard_back(QEMUIOVector *qiov, size_t bytes)
     assert(qiov->size >= bytes);
     total = iov_discard_back(qiov->iov, &niov, bytes);
     assert(total == bytes);
+    (void)total;
 
     qiov->niov = niov;
     qiov->size -= bytes;

@@ -288,6 +288,7 @@ static void scsi_dma_complete(void *opaque, int ret)
     SCSIDiskState *s = DO_UPCAST(SCSIDiskState, qdev, r->req.dev);
 
     assert(r->req.aiocb != NULL);
+    (void)r;
     r->req.aiocb = NULL;
 
     if (ret < 0) {
@@ -1422,6 +1423,7 @@ static int scsi_disk_check_mode_select(SCSIDiskState *s, int page,
     memset(mode_changeable, 0, inlen + 2);
     changeable_len = mode_sense_page(s, page, &p, 1);
     assert(changeable_len == len);
+    (void)changeable_len;
 
     /* Check that unchangeable bits are the same as what MODE SENSE
      * would return.

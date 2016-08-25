@@ -91,7 +91,7 @@ void helper_msa_shf_df(CPUMIPSState *env, uint32_t df, uint32_t wd,
 {
     wr_t *pwd = &(env->active_fpu.fpr[wd].wr);
     wr_t *pws = &(env->active_fpu.fpr[ws].wr);
-    wr_t wx, *pwx = &wx;
+    wr_t wx = {}, *pwx = &wx;
     uint32_t i;
 
     switch (df) {
@@ -1130,7 +1130,7 @@ void helper_msa_##FUNC(CPUMIPSState *env, uint32_t df, uint32_t wd, \
     wr_t *pwd = &(env->active_fpu.fpr[wd].wr);                      \
     wr_t *pws = &(env->active_fpu.fpr[ws].wr);                      \
     wr_t *pwt = &(env->active_fpu.fpr[wt].wr);                      \
-    wr_t wx, *pwx = &wx;                                            \
+    wr_t wx = {}, *pwx = &wx;                                       \
     uint32_t i;                                                     \
     switch (df) {                                                   \
     case DF_BYTE:                                                   \
@@ -3395,7 +3395,7 @@ void helper_msa_ftint_u_df(CPUMIPSState *env, uint32_t df, uint32_t wd,
 void helper_msa_ffint_s_df(CPUMIPSState *env, uint32_t df, uint32_t wd,
                            uint32_t ws)
 {
-    wr_t wx, *pwx = &wx;
+    wr_t wx = {}, *pwx = &wx;
     wr_t *pwd = &(env->active_fpu.fpr[wd].wr);
     wr_t *pws = &(env->active_fpu.fpr[ws].wr);
     uint32_t i;
@@ -3425,7 +3425,7 @@ void helper_msa_ffint_s_df(CPUMIPSState *env, uint32_t df, uint32_t wd,
 void helper_msa_ffint_u_df(CPUMIPSState *env, uint32_t df, uint32_t wd,
                            uint32_t ws)
 {
-    wr_t wx, *pwx = &wx;
+    wr_t wx = {}, *pwx = &wx;
     wr_t *pwd = &(env->active_fpu.fpr[wd].wr);
     wr_t *pws = &(env->active_fpu.fpr[ws].wr);
     uint32_t i;

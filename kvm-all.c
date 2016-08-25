@@ -1051,6 +1051,7 @@ void kvm_irqchip_commit_routes(KVMState *s)
     trace_kvm_irqchip_commit_routes();
     ret = kvm_vm_ioctl(s, KVM_SET_GSI_ROUTING, s->irq_routes);
     assert(ret == 0);
+    (void)ret;
 }
 
 static void kvm_add_routing_entry(KVMState *s,

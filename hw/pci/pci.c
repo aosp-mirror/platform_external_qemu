@@ -2433,6 +2433,7 @@ static char *pcibus_get_dev_path(DeviceState *dev)
         s = snprintf(slot, sizeof slot, ":%02x.%x",
                      PCI_SLOT(t->devfn), PCI_FUNC(t->devfn));
         assert(s == slot_len);
+        (void)s;
         memcpy(p, slot, slot_len);
     }
 

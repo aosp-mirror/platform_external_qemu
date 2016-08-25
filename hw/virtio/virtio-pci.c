@@ -747,6 +747,7 @@ static void kvm_virtio_pci_irqfd_release(VirtIOPCIProxy *proxy,
 
     ret = kvm_irqchip_remove_irqfd_notifier_gsi(kvm_state, n, irqfd->virq);
     assert(ret == 0);
+    (void)ret;
 }
 
 static int kvm_virtio_pci_vector_use(VirtIOPCIProxy *proxy, int nvqs)
