@@ -846,6 +846,7 @@ static void kvm_log_global_start(struct MemoryListener *listener)
 
     r = kvm_set_migration_log(1);
     assert(r >= 0);
+    (void)r;
 }
 
 static void kvm_log_global_stop(struct MemoryListener *listener)
@@ -854,6 +855,7 @@ static void kvm_log_global_stop(struct MemoryListener *listener)
 
     r = kvm_set_migration_log(0);
     assert(r >= 0);
+    (void)r;
 }
 
 static void kvm_mem_ioeventfd_add(MemoryListener *listener,
@@ -1027,6 +1029,7 @@ void kvm_irqchip_commit_routes(KVMState *s)
     s->irq_routes->flags = 0;
     ret = kvm_vm_ioctl(s, KVM_SET_GSI_ROUTING, s->irq_routes);
     assert(ret == 0);
+    (void)ret;
 }
 
 static void kvm_add_routing_entry(KVMState *s,

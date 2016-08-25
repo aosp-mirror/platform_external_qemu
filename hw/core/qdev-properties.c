@@ -619,6 +619,7 @@ static void get_pci_host_devaddr(Object *obj, Visitor *v, void *opaque,
     rc = snprintf(buffer, sizeof(buffer), "%04x:%02x:%02x.%d",
                   addr->domain, addr->bus, addr->slot, addr->function);
     assert(rc == sizeof(buffer) - 1);
+    (void)rc;
 
     visit_type_str(v, &p, name, errp);
 }

@@ -126,6 +126,7 @@ static void qapi_dealloc_end_list(Visitor *v, Error **errp)
     QapiDeallocVisitor *qov = to_qov(v);
     void *obj = qapi_dealloc_pop(qov);
     assert(obj == NULL); /* should've been list head tracker with no payload */
+    (void)obj;
 }
 
 static void qapi_dealloc_type_str(Visitor *v, char **obj, const char *name,

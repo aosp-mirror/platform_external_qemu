@@ -277,6 +277,7 @@ void msi_notify(PCIDevice *dev, unsigned int vector)
     MSIMessage msg;
 
     assert(vector < nr_vectors);
+    (void)nr_vectors;
     if (msi_is_masked(dev, vector)) {
         assert(flags & PCI_MSI_FLAGS_MASKBIT);
         pci_long_test_and_set_mask(

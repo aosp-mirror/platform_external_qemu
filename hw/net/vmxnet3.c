@@ -1388,6 +1388,7 @@ static void vmxnet3_activate_device(VMXNET3State *s)
     s->event_int_idx =
         VMXNET3_READ_DRV_SHARED8(s->drv_shmem, devRead.intrConf.eventIntrIdx);
     assert(vmxnet3_verify_intx(s, s->event_int_idx));
+    (void)vmxnet3_verify_intx;
     VMW_CFPRN("Events interrupt line is %u", s->event_int_idx);
 
     s->auto_int_masking =

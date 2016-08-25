@@ -549,6 +549,7 @@ static void lsi_do_dma(LSIState *s, int out)
     pci_dev = PCI_DEVICE(s);
     dev = s->current->req->dev;
     assert(dev);
+    (void)dev;
 
     count = s->dbc;
     if (count > s->current->dma_len)

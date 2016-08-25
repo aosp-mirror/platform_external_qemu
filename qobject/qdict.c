@@ -640,11 +640,13 @@ void qdict_array_split(QDict *src, QList **dst)
 
         snprintf_ret = snprintf(indexstr, 32, "%u", i);
         assert(snprintf_ret < 32);
+        (void)snprintf_ret;
 
         subqobj = qdict_get(src, indexstr);
 
         snprintf_ret = snprintf(prefix, 32, "%u.", i);
         assert(snprintf_ret < 32);
+        (void)snprintf_ret;
 
         is_subqdict = qdict_has_prefixed_entries(src, prefix);
 

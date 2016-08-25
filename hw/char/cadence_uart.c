@@ -314,6 +314,7 @@ static gboolean cadence_uart_xmit(GIOChannel *chan, GIOCondition cond,
         int r = qemu_chr_fe_add_watch(s->chr, G_IO_OUT|G_IO_HUP,
                                       cadence_uart_xmit, s);
         assert(r);
+        (void)r;
     }
 
     uart_update_status(s);
