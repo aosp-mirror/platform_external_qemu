@@ -708,6 +708,7 @@ public:
         DWORD exitCode;
         auto exitCodeSuccess = ::GetExitCodeProcess(pinfo.hProcess, &exitCode);
         assert(exitCodeSuccess);
+        (void)exitCodeSuccess;
         if (outExitCode) {
             *outExitCode = exitCode;
         }

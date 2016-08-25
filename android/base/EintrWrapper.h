@@ -25,7 +25,7 @@ namespace base {
 // If the macro is undefined, auto-detect the value based on NDEBUG.
 #if !defined(EINTR_WRAPPER_DEBUG)
 #  ifdef NDEBUG
-#    define EINTER_WRAPPER_DEBUG 0
+#    define EINTR_WRAPPER_DEBUG 0
 #  else
 #    define EINTR_WRAPPER_DEBUG 1
 #  endif
@@ -54,6 +54,8 @@ namespace base {
 //   much random! It's better to leave the descriptor open than risk
 //   closing another one by mistake :(
 //
+#define MAX_EINTR_LOOP_COUNT  100
+
 #ifdef _WIN32
 #  define HANDLE_EINTR(x)  (x)
 #elif EINTR_WRAPPER_DEBUG == 0
@@ -66,8 +68,6 @@ namespace base {
         eintr_wrapper_result; \
     })
 #else  // !_WIN32 && EINTR_WRAPPER_DEBUG
-
-#  define MAX_EINTR_LOOP_COUNT  100
 
 #  define HANDLE_EINTR(x) \
     __extension__ ({ \
