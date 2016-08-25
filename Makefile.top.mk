@@ -37,7 +37,7 @@ BUILD_TARGET_CFLAGS := -g -falign-functions=0
 ifeq ($(BUILD_DEBUG),true)
     BUILD_TARGET_CFLAGS += -O0
 else
-    BUILD_TARGET_CFLAGS += -O2
+    BUILD_TARGET_CFLAGS += -O2 -DNDEBUG=1
 endif
 
 # Generate position-independent binaries. Don't add -fPIC when targetting
