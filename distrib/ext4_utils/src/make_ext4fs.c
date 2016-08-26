@@ -45,6 +45,10 @@
 #define L_S_IRUSR 00400
 #define L_S_IWUSR 00200
 #define L_S_IXUSR 00100
+/* MinGW defines this macro as well */
+#ifdef S_IRWXU
+#undef S_IRWXU
+#endif
 #define S_IRWXU (L_S_IRUSR | L_S_IWUSR | L_S_IXUSR)
 #define S_IRGRP 00040
 #define S_IWGRP 00020
@@ -73,11 +77,6 @@
    Hash or binary tree directories
    Special files: sockets, devices, fifos
  */
-
-static int filter_dot(const struct dirent *d)
-{
-	return (strcmp(d->d_name, "..") && strcmp(d->d_name, "."));
-}
 
 static u32 build_default_directory_structure(const char *dir_path,
 					     struct selabel_handle *sehnd)
@@ -118,6 +117,12 @@ static u32 build_default_directory_structure(const char *dir_path,
 }
 
 #ifndef USE_MINGW
+
+static int filter_dot(const struct dirent *d)
+{
+    return (strcmp(d->d_name, "..") && strcmp(d->d_name, "."));
+}
+
 /* Read a local directory and create the same tree in the generated filesystem.
    Calls itself recursively with each directory in the given directory.
    full_path is an absolute or relative path, with a trailing slash, to the

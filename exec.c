@@ -522,6 +522,7 @@ static void tlb_reset_dirty_range_all(ram_addr_t start, ram_addr_t length)
 
     RAMBlock* block = qemu_get_ram_block(start);
     assert(block == qemu_get_ram_block(end - 1));
+    (void)end;
     uintptr_t start1 = (uintptr_t)block->host + (start - block->offset);
     cpu_tlb_reset_dirty_all(start1, length);
 }
