@@ -242,8 +242,11 @@ public:
         }
 
         // Swap your host-side pipe instance with this one weird trick!
-        DD("%s: swapping host pipe %p for hwpipe=%p", __FUNCTION__, newPipe,
-           mHwPipe);
+        D("%s: starting new pipe %p (swapping %p) for service %s",
+          __FUNCTION__,
+          newPipe,
+          mHwPipe,
+          pipeName);
         sPipeHwFuncs->resetPipe(mHwPipe, newPipe);
         delete this;
 
@@ -493,7 +496,7 @@ void android_pipe_guest_close(void* internalPipe) {
     CHECK_VM_STATE_LOCK();
     auto pipe = static_cast<android::AndroidPipe*>(internalPipe);
     if (pipe) {
-        DD("%s: host=%p [%s]", __FUNCTION__, pipe, pipe->name());
+        D("%s: host=%p [%s]", __FUNCTION__, pipe, pipe->name());
         pipe->onGuestClose();
     }
 }
@@ -558,8 +561,9 @@ void android_pipe_guest_wake_on(void* internalPipe, unsigned wakes) {
 
 // API implemented by the virtual device.
 void android_pipe_host_close(void* hwpipe) {
-    DD("%s: hwpipe=%p", __FUNCTION__, hwpipe);
-    android::sGlobals->pipeWaker.closeFromHost(hwpipe);
+    auto pipe = static_cast<android::AndroidPipe*>(hwpipe);
+    D("%s: host=%p [%s]", __FUNCTION__, pipe, pipe->name());
+    android::sGlobals->pipeWaker.closeFromHost(pipe);
 }
 
 void android_pipe_host_signal_wake(void* hwpipe, unsigned flags) {
