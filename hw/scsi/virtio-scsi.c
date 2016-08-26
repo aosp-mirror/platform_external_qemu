@@ -186,6 +186,7 @@ static void virtio_scsi_save_request(QEMUFile *f, SCSIRequest *sreq)
     uint32_t n = virtio_queue_get_id(req->vq) - 2;
 
     assert(n < vs->conf.num_queues);
+    (void)vs;
     qemu_put_be32s(f, &n);
     qemu_put_buffer(f, (unsigned char *)&req->elem, sizeof(req->elem));
 }
@@ -203,14 +204,14 @@ static void *virtio_scsi_load_request(QEMUFile *f, SCSIRequest *sreq)
     req = virtio_scsi_init_req(s, vs->cmd_vqs[n]);
     qemu_get_buffer(f, (unsigned char *)&req->elem, sizeof(req->elem));
     /* TODO: add a way for SCSIBusInfo's load_request to fail,
-     * and fail migration instead of asserting here.
-     * When we do, we might be able to re-enable NDEBUG below.
+     * and fail migration instead of aborting here.
      */
-#ifdef NDEBUG
-#error building with NDEBUG is not supported
-#endif
-    assert(req->elem.in_num <= ARRAY_SIZE(req->elem.in_sg));
-    assert(req->elem.out_num <= ARRAY_SIZE(req->elem.out_sg));
+    if (!(req->elem.in_num <= ARRAY_SIZE(req->elem.in_sg))) {
+        abort();
+    }
+    if (!(req->elem.out_num <= ARRAY_SIZE(req->elem.out_sg))) {
+        abort();
+    }
 
     if (virtio_scsi_parse_req(req, sizeof(VirtIOSCSICmdReq) + vs->cdb_size,
                               sizeof(VirtIOSCSICmdResp) + vs->sense_size) < 0) {
@@ -221,7 +222,9 @@ static void *virtio_scsi_load_request(QEMUFile *f, SCSIRequest *sreq)
     scsi_req_ref(sreq);
     req->sreq = sreq;
     if (req->sreq->cmd.mode != SCSI_XFER_NONE) {
-        assert(req->sreq->cmd.mode == req->mode);
+        if (!(req->sreq->cmd.mode == req->mode)) {
+            abort();
+        }
     }
     return req;
 }

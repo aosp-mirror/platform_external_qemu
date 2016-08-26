@@ -2688,6 +2688,7 @@ static void define_debug_regs(ARMCPU *cpu)
     ctx_cmps = extract32(cpu->dbgdidr, 20, 4);
 
     assert(ctx_cmps <= brps);
+    (void)ctx_cmps;
 
     /* The DBGDIDR and ID_AA64DFR0_EL1 define various properties
      * of the debug registers such as number of breakpoints;
@@ -3453,6 +3454,7 @@ void define_one_arm_cp_reg_with_opaque(ARMCPU *cpu,
         }
         /* assert our permissions are not too lax (stricter is fine) */
         assert((r->access & ~mask) == 0);
+        (void)mask;
     }
 
     /* Check that the register definition has enough info to handle

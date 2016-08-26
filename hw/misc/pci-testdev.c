@@ -273,6 +273,7 @@ static int pci_testdev_init(PCIDevice *pci_dev)
         }
         r = event_notifier_init(&test->notifier, 0);
         assert(r >= 0);
+        (void)r;
         test->hasnotifier = true;
     }
 

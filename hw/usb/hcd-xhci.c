@@ -3635,6 +3635,7 @@ static int usb_xhci_initfn(struct PCIDevice *dev)
         xhci_get_flag(xhci, XHCI_FLAG_FORCE_PCIE_ENDCAP)) {
         ret = pcie_endpoint_cap_init(dev, 0xa0);
         assert(ret >= 0);
+        (void)ret;
     }
 
     if (xhci_get_flag(xhci, XHCI_FLAG_USE_MSI)) {

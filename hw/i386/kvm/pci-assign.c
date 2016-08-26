@@ -943,6 +943,7 @@ static void deassign_device(AssignedDevice *dev)
 
     r = kvm_device_pci_deassign(kvm_state, dev->dev_id);
     assert(r == 0);
+    (void)r;
 }
 
 /* The pci config space got updated. Check if irq numbers have changed

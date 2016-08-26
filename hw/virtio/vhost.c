@@ -291,6 +291,7 @@ static inline void vhost_dev_log_resize(struct vhost_dev* dev, uint64_t size)
     log_base = (uint64_t)(unsigned long)log;
     r = dev->vhost_ops->vhost_call(dev, VHOST_SET_LOG_BASE, &log_base);
     assert(r >= 0);
+    (void)r;
     /* Sync only the range covered by the old log */
     if (dev->log_size) {
         vhost_log_sync_range(dev, 0, dev->log_size * VHOST_LOG_CHUNK - 1);
@@ -455,11 +456,13 @@ static void vhost_commit(MemoryListener *listener)
 
         r = vhost_verify_ring_mappings(dev, start_addr, size);
         assert(r >= 0);
+        (void)r;
     }
 
     if (!dev->log_enabled) {
         r = dev->vhost_ops->vhost_call(dev, VHOST_SET_MEM_TABLE, dev->mem);
         assert(r >= 0);
+        (void)r;
         dev->memory_changed = false;
         return;
     }
@@ -473,6 +476,7 @@ static void vhost_commit(MemoryListener *listener)
     }
     r = dev->vhost_ops->vhost_call(dev, VHOST_SET_MEM_TABLE, dev->mem);
     assert(r >= 0);
+    (void)r;
     /* To log less, can only decrease log size after table update. */
     if (dev->log_size > log_size + VHOST_LOG_BUFFER) {
         vhost_dev_log_resize(dev, log_size);
@@ -577,9 +581,11 @@ err_vq:
         t = vhost_virtqueue_set_addr(dev, dev->vqs + i, i,
                                      dev->log_enabled);
         assert(t >= 0);
+        (void)t;
     }
     t = vhost_dev_set_features(dev, dev->log_enabled);
     assert(t >= 0);
+    (void)t;
 err_features:
     return r;
 }
@@ -1001,6 +1007,7 @@ void vhost_virtqueue_mask(struct vhost_dev *hdev, VirtIODevice *vdev, int n,
     }
     r = hdev->vhost_ops->vhost_call(hdev, VHOST_SET_VRING_CALL, &file);
     assert(r >= 0);
+    (void)r;
 }
 
 unsigned vhost_get_features(struct vhost_dev *hdev, const int *feature_bits,

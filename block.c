@@ -1025,6 +1025,7 @@ static QDict *parse_json_filename(const char *filename, Error **errp)
 
     ret = strstart(filename, "json:", &filename);
     assert(ret);
+    (void)ret;
 
     options_obj = qobject_from_json(filename);
     if (!options_obj) {
@@ -3256,6 +3257,7 @@ static int coroutine_fn bdrv_aligned_pwritev(BlockDriverState *bs,
     assert(!waited || !req->serialising);
     assert(req->overlap_offset <= offset);
     assert(offset + bytes <= req->overlap_offset + req->overlap_bytes);
+    (void)waited;
 
     ret = notifier_with_return_list_notify(&bs->before_write_notifiers, req);
 
@@ -3372,6 +3374,7 @@ static int coroutine_fn bdrv_co_do_pwritev(BlockDriverState *bs,
         mark_request_serialising(&req, align);
         waited = wait_serialising_requests(&req);
         assert(!waited || !use_local_qiov);
+        (void)waited;
 
         tail_buf = qemu_blockalign(bs, align);
         tail_iov = (struct iovec) {

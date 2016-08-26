@@ -255,6 +255,7 @@ void pcie_cap_slot_hotplug_cb(HotplugHandler *hotplug_dev, DeviceState *dev,
      * hot plugged/unplugged.
      */
     assert(PCI_FUNC(pci_dev->devfn) == 0);
+    (void)pci_dev;
 
     pci_word_test_and_set_mask(exp_cap + PCI_EXP_SLTSTA,
                                PCI_EXP_SLTSTA_PDS);
@@ -338,6 +339,7 @@ void pcie_cap_slot_reset(PCIDevice *dev)
 
     assert(port_type == PCI_EXP_TYPE_DOWNSTREAM ||
            port_type == PCI_EXP_TYPE_ROOT_PORT);
+    (void)port_type;
 
     PCIE_DEV_PRINTF(dev, "reset\n");
 
