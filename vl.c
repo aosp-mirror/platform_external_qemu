@@ -235,12 +235,10 @@ char* android_op_netdelay = NULL;
 int android_op_netfast = 0;
 char* android_op_dns_server = NULL;
 int lcd_density = LCD_DENSITY_MDPI;
-char* additional_kernel_params = NULL;
 extern char* op_http_proxy;
 extern char* android_op_ports;
 extern int android_op_ports_numbers[2];
 extern char* android_op_report_console;
-static const char* android_hw_file = NULL;
 #endif  // CONFIG_ANDROID
 const char *watchdog;
 QEMUOptionRom option_rom[MAX_OPTION_ROMS];
@@ -681,9 +679,6 @@ static void res_free(void)
         g_free(boot_splash_filedata);
         boot_splash_filedata = NULL;
     }
-#ifdef CONFIG_ANDROID
-    g_free(additional_kernel_params);
-#endif  // CONFIG_ANDROID
 }
 
 static int default_driver_check(QemuOpts *opts, void *opaque)
@@ -3123,6 +3118,10 @@ int run_qemu_main(int argc, const char **argv)
     uint64_t ram_slots = 0;
     FILE *vmstate_dump_file = NULL;
     Error *main_loop_err = NULL;
+#ifdef CONFIG_ANDROID
+    char* additional_kernel_params = NULL;
+    const char* android_hw_file = NULL;
+#endif
 
     atexit(qemu_run_exit_notifiers);
     error_set_progname(argv[0]);
@@ -4801,11 +4800,11 @@ int run_qemu_main(int argc, const char **argv)
         char* combined = g_strdup_printf("%s %s",
                                          current_machine->kernel_cmdline,
                                          additional_kernel_params);
-        current_machine->kernel_cmdline = combined;
-        // Free the original buffer and put the newly allocated one in there
-        // to make sure it gets deallocated.
         g_free(additional_kernel_params);
-        additional_kernel_params = combined;
+        additional_kernel_params = NULL;
+
+        g_free(current_machine->kernel_cmdline);
+        current_machine->kernel_cmdline = combined;
     }
 #endif  // CONFIG_ANDROID
 
