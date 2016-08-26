@@ -11,9 +11,10 @@
 #include "android/opengl/OpenglEsPipe.h"
 
 #include "android/base/async/Looper.h"
+#include "android/opengl/GLPipeControl.h"
+#include "android/opengl/GLProcessPipe.h"
 #include "android/opengles.h"
 #include "android/opengles-pipe.h"
-#include "android/opengl/GLProcessPipe.h"
 
 #include <atomic>
 
@@ -52,7 +53,9 @@ public:
     // The pipe service class for this implementation.
     class Service : public AndroidPipe::Service {
     public:
-        Service() : AndroidPipe::Service("opengles") {}
+        Service() : AndroidPipe::Service("opengles") {
+            GLPipeControl::get()->registerRemoveCallback(android_close_opengles_pipe);
+        }
 
         // Create a new EmuglPipe instance.
         virtual AndroidPipe* create(void* mHwPipe, const char* args) override {
@@ -69,6 +72,10 @@ public:
                 delete pipe;
                 pipe = nullptr;
             }
+
+            fprintf(stderr, "%s: emugl pipe=%p hwpipe=%p\n", __FUNCTION__, pipe, mHwPipe);
+            // |pipe| is the one we want to close later
+            GLPipeControl::get()->addPipe(pipe);
             return pipe;
         }
 
@@ -103,6 +110,8 @@ public:
         D("%s", __func__);
         mIsWorking = false;
         mChannel->stop();
+        fprintf(stderr, "EmuglPipe:%s: remove %p\n", __FUNCTION__, this);
+        GLPipeControl::get()->removePipe((void*)this);
         // stop callback will call close() which deletes the pipe
     }
 
@@ -344,4 +353,12 @@ void registerPipeService() {
 // Declared in android/opengles-pipe.h
 void android_init_opengles_pipe() {
     android::opengl::registerPipeService();
+}
+
+void android_close_opengles_pipe(void* opaque) {
+    android::opengl::EmuglPipe* pipe =
+        static_cast<android::opengl::EmuglPipe*>(opaque);
+    fprintf(stderr, "%s: closing %p (opqaue=%p)\n", __FUNCTION__, pipe, opaque);
+    pipe->closeFromHost();
+    fprintf(stderr, "%s: closed %p (opqaue=%p)\n", __FUNCTION__, pipe, opaque);
 }
