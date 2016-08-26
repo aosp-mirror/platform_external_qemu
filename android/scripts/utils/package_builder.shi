@@ -260,6 +260,11 @@ builder_remote_darwin_run () {
     run $ANDROID_EMULATOR_SSH_WRAPPER ssh  "$DARWIN_SSH" "$@"
 }
 
+# Run a 'scp' command from/to the rmote Darwin host when --darwin-ssh is used.
+builder_remote_darwin_scp () {
+    run $ANDROID_EMULATOR_SSH_WRAPPER scp "$@"
+}
+
 # Prepare for a remote darwin build. This takes as a parameter the
 # name of a temporary directory, e..g '/tmp/foo/bar/'.
 # This function populates the directory with some scripts and

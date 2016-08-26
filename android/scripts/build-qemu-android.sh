@@ -73,6 +73,10 @@ OPT_DEBUG=
 option_register_var "--debug" OPT_DEBUG \
         "Generate debuggable binaries."
 
+OPT_NO_TESTS=
+option_register_var "--no-tests" OPT_NO_TESTS \
+        "Don't run QEMU2 tests to speed up build."
+
 prebuilts_dir_register_option
 aosp_dir_register_option
 install_dir_register_option qemu-android
@@ -245,9 +249,8 @@ build_qemu_android () {
                 AUDIO_BACKENDS_FLAG="--audio-drv-list=pa"
                 ;;
             windows-*)
-                # Prefer winaudio on Windows because winwave causes
-                # major problems when audio input is enabled
-                AUDIO_BACKENDS_FLAG="--audio-drv-list=winaudio,winwave"
+                # Prefer winaudio on Windows over dsound.
+                AUDIO_BACKENDS_FLAG="--audio-drv-list=winaudio,dsound"
                 ;;
         esac
 
@@ -336,10 +339,8 @@ EOF
             --disable-libiscsi \
             --disable-libssh2 \
             --disable-libusb \
-            --disable-quorum \
             --disable-seccomp \
             --disable-spice \
-            --disable-smartcard-nss \
             --disable-usb-redir \
             --disable-user \
             --disable-vde \
@@ -375,9 +376,11 @@ EOF
                 fi
             done
 
-            if ! run make -j$NUM_JOBS $BUILD_FLAGS check GTESTER_FLAGS="-m quick -k"
-            then
-                panic "$(builder_text) Failure when running qemu2 unittests!!"
+            if [ -z "$OPT_NO_TESTS" ]; then
+                if ! run make -j$NUM_JOBS $BUILD_FLAGS check GTESTER_FLAGS="-m quick -k"
+                then
+                    panic "$(builder_text) Failure when running qemu2 unittests!!"
+                fi
             fi
 
     ) || panic "Build failed!!"
@@ -450,6 +453,7 @@ PROGDIR=\$(dirname \$0)
     --host=$(spaces_to_commas "$DARWIN_SYSTEMS") \\
     --target=$(spaces_to_commas "$TARGETS") \\
     --src-dir=$REMOTE_DIR/qemu-android-src \\
+    --no-tests \\
     $DARWIN_BUILD_FLAGS
 EOF
     builder_run_remote_darwin_build
@@ -459,11 +463,11 @@ EOF
         dump "[$SYSTEM] Retrieving remote darwin binaries."
         run mkdir -p "$BINARY_DIR" ||
                 panic "Could not create installation directory: $BINARY_DIR"
-        builder_remote_darwin_run scp -r \
+        builder_remote_darwin_scp -r \
             "$DARWIN_SSH":$REMOTE_DIR/prebuilts/qemu-android/$SYSTEM/qemu-system-* \
             $BINARY_DIR/
 
-        builder_remote_darwin_run scp -r \
+        builder_remote_darwin_scp -r \
             "$DARWIN_SSH":$REMOTE_DIR/prebuilts/qemu-android/$SYSTEM/LINK-qemu-system-* \
             $BINARY_DIR/
 
