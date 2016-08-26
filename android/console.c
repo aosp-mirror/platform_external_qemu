@@ -2657,6 +2657,74 @@ static const CommandDefRec fingerprint_commands[] =
       NULL, do_fingerprint_remove, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
+/********************************************************************************************/
+/********************************************************************************************/
+/*****                                                                                 ******/
+/*****                         O P E N G L    C O M M A N D S                          ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+static uint64_t str2uint64(char* str) {
+    if (!str) return 0;
+
+    char* leftover;
+    uint64_t res = strtoull(str, &leftover, 16);
+
+    if (!res && leftover == str) {
+        return 0;
+    } else if (*leftover) {
+        return 0;
+    }
+
+    return res;
+}
+
+static int
+do_opengl_pipestop( ControlClient client, char* args )
+{
+
+    uint64_t handle = str2uint64(args);
+
+    if (!handle) {
+        control_write(client, "KO: Invalid handle (must be a valid hex string describing nonzero number)\r\n");
+        return -1;
+    }
+
+    control_write(client, "stopping gl pipe 0x%llx", (unsigned long long)handle);
+    client->global->opengl_agent->stopGLPipe(handle);
+    return 0;
+}
+
+static int
+do_opengl_pipelist( ControlClient client, char* args )
+{
+
+    char* res = NULL;
+    client->global->opengl_agent->listGLPipes(&res);
+
+    if (res) {
+        control_write(client, "%s", res);
+        free(res);
+        return 0;
+    }
+
+    control_write(client, "KO: invalid pipe list...\r\n");
+    return -1;
+}
+
+static const CommandDefRec opengl_commands[] =
+{
+    { "pipestop", "stop the opengl pipe with <handle>",
+      "'stop <handle>' stop the opengl pipe with <handle.\r\n",
+      NULL, do_opengl_pipestop, NULL },
+
+    { "pipelist", "list current opengl pipes by handle\r\n",
+      "'pipelist' list current opengl pipes by handle\r\n",
+      NULL, do_opengl_pipelist, NULL },
+
+    { NULL, NULL, NULL, NULL, NULL, NULL }
+};
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -2800,6 +2868,10 @@ static const CommandDefRec   main_commands[] =
 
     { "debug", "control the emulator debug output tags",
       NULL, NULL, do_debug },
+
+    { "opengl", "control emulator opengl pipes",
+      "control emulator opengl pipes", NULL, NULL,
+      opengl_commands },
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };

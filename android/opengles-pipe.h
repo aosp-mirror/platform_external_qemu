@@ -25,5 +25,6 @@ ANDROID_BEGIN_HEADER
 // between guest and the emugl library.
 // |dummyLooper| is now unused, this will be removed in a future patch.
 void android_init_opengles_pipe(void);
+void android_close_opengles_pipe(void* pipe);
 
 ANDROID_END_HEADER
