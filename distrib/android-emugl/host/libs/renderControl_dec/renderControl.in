@@ -35,3 +35,4 @@ GL_ENTRY(EGLint, rcClientWaitSyncKHR, uint64_t sync, EGLint flags, uint64_t time
 GL_ENTRY(void, rcFlushWindowColorBufferAsync, uint32_t windowSurface)
 GL_ENTRY(uint32_t, rcCreateClientImagePuid, uint32_t context, EGLenum target, GLuint buffer, uint64_t puid)
 GL_ENTRY(int, rcDestroyClientImagePuid, uint32_t image, uint64_t puid)
+GL_ENTRY(int, rcDestroySyncKHR, uint64_t sync);

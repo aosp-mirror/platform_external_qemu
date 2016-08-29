@@ -64,7 +64,7 @@ public:
 // of the underlying OpenGL sync object.
 class FenceSyncInfo {
 public:
-    FenceSyncInfo() = default;
+    FenceSyncInfo();
 
     // Workflow for any OpenGL create sync -> wait sync -> signaled
     // scenario:
@@ -97,6 +97,10 @@ public:
     // does not exist already).
     static FenceSyncInfo* get();
 private:
+    // |mDisplay|: for issuing early eglDestroySyncKHR's on signaled
+    // sync objects.
+    EGLDisplay mDisplay;
+
     // The global FenceSyncInfo object.
     static ::android::base::LazyInstance<FenceSyncInfo> sFenceSyncInfo;
 

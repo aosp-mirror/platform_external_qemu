@@ -1155,6 +1155,20 @@ bool FrameBuffer::unbind_locked()
     return true;
 }
 
+void FrameBuffer::createTrivialContext(HandleType shared,
+                                       HandleType* contextOut,
+                                       HandleType* surfOut) {
+    if (!contextOut || !surfOut) {
+        ERR("Framebuffer::%s: attempted with no place to output "
+            "resulting context and surface!\n",
+            __FUNCTION__);
+        abort();
+    }
+
+    *contextOut = createRenderContext(0, shared, true);
+    *surfOut = createWindowSurface(0, 1, 1);
+}
+
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLock)
 {
     if (needLock) {

@@ -90,6 +90,7 @@ typedef struct {
     __translatorMustCastToProperFunctionPointerType (*getProcAddress)(const char*);
     GLsync                                          (*fenceSync)(GLenum, GLbitfield);
     GLenum                                          (*clientWaitSync)(GLsync, GLbitfield, GLuint64);
+    void                                            (*deleteSync)(GLsync);
 }GLESiface;
 
 class GlLibrary;
