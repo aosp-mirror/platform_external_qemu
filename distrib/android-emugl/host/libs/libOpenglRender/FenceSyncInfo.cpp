@@ -15,6 +15,9 @@
 */
 
 #include "FenceSyncInfo.h"
+#include "FrameBuffer.h"
+#include "DispatchTables.h"
+#include "OpenGLESDispatch/EGLDispatch.h"
 
 #include "android/base/Compiler.h"
 #include "android/base/synchronization/Lock.h"
