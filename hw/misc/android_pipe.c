@@ -718,12 +718,17 @@ static const AndroidPipeHwFuncs qemu2_android_pipe_hw_funcs = {
     .signalWake = qemu2_android_pipe_host_signal_wake,
 };
 
+// Don't change this version unless you want to break forward compatibility.
+// Instead, use the different device version as a first saved field.
 #define ANDROID_PIPE_SAVE_VERSION 1
 
 static void android_pipe_save(QEMUFile* f, void* opaque) {
     AndroidPipeState* s = opaque;
     PipeDevice* dev = s->dev;
     Stream* stream = stream_from_qemufile(f);
+
+    /* Save the device version first*/
+    stream_put_be32(stream, PIPE_DEVICE_VERSION);
 
     /* Save i/o registers. */
     stream_put_be64(stream, dev->address);
@@ -772,6 +777,13 @@ static int android_pipe_load(QEMUFile* f, void* opaque, int version_id) {
     Stream* stream = stream_from_qemufile(f);
     HwPipe* pipe;
 
+    /* Load and verify the device version */
+    uint32_t version = stream_get_be32(stream);
+    if (version != PIPE_DEVICE_VERSION) {
+        stream_free(stream);
+        return -EIO;
+    }
+
     /* Load i/o registers. */
     dev->address = stream_get_be64(stream);
     dev->size = stream_get_be32(stream);
@@ -809,6 +821,7 @@ static int android_pipe_load(QEMUFile* f, void* opaque, int version_id) {
         } else if (!pipe->pipe) {
             hwpipe_free(pipe);
             free(force_closed_pipes);
+            stream_free(stream);
             return -EIO;
         }
 
