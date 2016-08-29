@@ -332,6 +332,15 @@ public:
     void lockFramebuffer() { m_lock.lock(); }
     void unlockFramebuffer() { m_lock.unlock(); }
 
+    // For use with sync threads and otherwise, any time we need a GL context
+    // not specifically for drawing, but to obtain certain things about
+    // GL state.
+    // It can be unsafe / leaky to change the structure of contexts
+    // outside the facilities the FrameBuffer class provides.
+    void createTrivialContext(HandleType shared,
+                              HandleType* contextOut,
+                              HandleType* surfOut);
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     ~FrameBuffer();

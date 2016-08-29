@@ -82,7 +82,7 @@ static void initGLESx(GLESVersion version) {
 /*****************************************  supported extentions  ***********************************************************************/
 
 //extentions
-#define EGL_EXTENTIONS 4
+#define EGL_EXTENTIONS 5
 
 //decleration
 extern "C" {
@@ -90,6 +90,7 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR image);
 EGLAPI EGLSyncKHR EGLAPIENTRY eglCreateSyncKHR(EGLDisplay display, EGLenum type, const EGLint* attribs);
 EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay display, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout);
+EGLAPI EGLBoolean EGLAPIENTRY eglDestroySyncKHR(EGLDisplay display, EGLSyncKHR sync);
 }  // extern "C"
 
 // extentions descriptors
@@ -102,6 +103,8 @@ static const ExtentionDescriptor s_eglExtentions[] = {
                 (__eglMustCastToProperFunctionPointerType)eglCreateSyncKHR },
         {"eglClientWaitSyncKHR",
                 (__eglMustCastToProperFunctionPointerType)eglClientWaitSyncKHR },
+        {"eglDestroySyncKHR",
+                (__eglMustCastToProperFunctionPointerType)eglDestroySyncKHR },
 };
 
 static const int s_eglExtentionsSize =
@@ -1007,6 +1010,13 @@ EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, 
         egl_wait_result = EGL_CONDITION_SATISFIED_KHR;
     }
     return egl_wait_result;
+}
+
+EGLAPI EGLBoolean EGLAPIENTRY eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync) {
+
+    const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+    iface->deleteSync((GLsync)sync);
+    return EGL_TRUE;
 }
 
 /*********************************************************************************/

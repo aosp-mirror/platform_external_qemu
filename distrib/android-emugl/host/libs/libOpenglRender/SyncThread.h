@@ -52,6 +52,7 @@ struct SyncThreadCmd {
     bool needReply = false;
 };
 
+class RenderThreadInfo;
 class SyncThread : public emugl::Thread {
 public:
     // - constructor: start up the sync thread for a given context.
@@ -90,11 +91,11 @@ public:
     static void destroySyncThread();
 
 private:
-    // |createSyncContext| creates an EGL context expressly for calling
+    // |initSyncContext| creates an EGL context expressly for calling
     // eglClientWaitSyncKHR in the processing caused by |triggerWait|.
     // This is used by the constructor only. It is non-blocking.
     // - Triggers a |SyncThreadCmd| with op code |SYNC_THREAD_INIT|
-    void createSyncContext();
+    void initSyncContext();
 
     // Thread function executing all sync commands.
     // It listens for |SyncThreadCmd| objects off the message channel
@@ -119,13 +120,15 @@ private:
     // |doSyncThreadCmd| and related functions below
     // execute the actual commands. These run on the sync thread.
     GLint doSyncThreadCmd(SyncThreadCmd* cmd);
-    void doSyncContextCreation();
+    void doSyncContextInit();
     void doSyncWait(SyncThreadCmd* cmd);
     void doExit();
 
-    // EGL objects specific to the sync thread.
+    // EGL objects / object handles specific to
+    // a sync thread.
     EGLDisplay mDisplay;
-    EGLContext mContext;
-    EGLContext mSyncContext;
+    RenderThreadInfo* mTLS;
+    uint32_t mContext;
+    uint32_t mSurf;
 };
 
