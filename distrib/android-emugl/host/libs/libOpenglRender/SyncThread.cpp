@@ -54,8 +54,7 @@ static const uint64_t kDefaultTimeoutNsecs = 5ULL * 1000ULL * 1000ULL * 1000ULL;
 
 SyncThread::SyncThread(EGLContext parentContext) :
     mDisplay(EGL_NO_DISPLAY),
-    mContext(parentContext),
-    mSyncContext(EGL_NO_CONTEXT) {
+    mContext(0), mSurf(0) {
 
     if (parentContext == EGL_NO_CONTEXT) {
         emugl_crash_reporter(
@@ -68,7 +67,7 @@ SyncThread::SyncThread(EGLContext parentContext) :
 
     this->start();
 
-    createSyncContext();
+    initSyncContext();
 }
 
 void SyncThread::triggerWait(FenceSyncInfo* fenceSyncInfo,
@@ -96,7 +95,7 @@ void SyncThread::cleanup() {
 
 // Private methods below////////////////////////////////////////////////////////
 
-void SyncThread::createSyncContext() {
+void SyncThread::initSyncContext() {
     DPRINT("enter");
     SyncThreadCmd to_send;
     to_send.opCode = SYNC_THREAD_INIT;
@@ -152,72 +151,21 @@ void SyncThread::sendAsync(SyncThreadCmd& cmd) {
     mInput.send(cmd);
 }
 
-void SyncThread::doSyncContextCreation() {
+void SyncThread::doSyncContextInit() {
+    // |mTLS| is cleaned up on doExit(), which is called
+    // when RenderThread's exit.
+    // Note that this will make the subsequent
+    // FrameBuffer::*** calls use |mTLS| as thread local storage,
+    // because the semantics of the |RenderThreadInfo| constructor
+    // are to both create the object _and_ to set it to
+    // the thread local copy.
+    mTLS = new RenderThreadInfo();
+
     DPRINT("enter");
-    FrameBuffer::getFB()->lockFramebuffer();
-
-    EGLint err = s_egl.eglGetError();
-    if (err != EGL_SUCCESS) {
-        DPRINT("has existing EGL error 0x%x", err);
-    }
-
-    static const EGLint kTrivialAttribList[] = {
-        EGL_RED_SIZE, 8,
-        EGL_GREEN_SIZE, 8,
-        EGL_BLUE_SIZE, 8,
-        EGL_DEPTH_SIZE, 24,
-        EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
-        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-        EGL_NONE
-    };
-
-    EGLConfig trivial_config;
-    EGLint numConfigs;
-    EGLBoolean config_ret =
-        s_egl.eglChooseConfig(mDisplay, kTrivialAttribList,
-                &trivial_config, 1, &numConfigs);
-
-    if (config_ret == EGL_FALSE) {
-        err = s_egl.eglGetError();
-        DPRINT("error choosing config! egl err=0x%x", err);
-    }
-
-    static const EGLint kContextAttribList[] = {
-        EGL_CONTEXT_CLIENT_VERSION, 2,
-        EGL_NONE
-    };
-
-    mSyncContext =
-        s_egl.eglCreateContext(mDisplay, trivial_config,
-                mContext, kContextAttribList);
-
-    if (mSyncContext == EGL_NO_CONTEXT) {
-        err = s_egl.eglGetError();
-        DPRINT("error creating context! egl err=0x%x", err);
-    }
-
-    static const EGLint pbuf_attribs[] = {
-        EGL_WIDTH, 1, EGL_HEIGHT, 1,
-        EGL_NONE
-    };
-
-    EGLSurface surf =
-        s_egl.eglCreatePbufferSurface(mDisplay, trivial_config, pbuf_attribs);
-
-    if (surf == EGL_NO_SURFACE) {
-        err = s_egl.eglGetError();
-        DPRINT("error creating surface! egl err=0x%x", err);
-    }
-
-    EGLBoolean makecurrent_ret =
-        s_egl.eglMakeCurrent(mDisplay, surf, surf, mSyncContext);
-
-    if (makecurrent_ret == EGL_FALSE) {
-        err = s_egl.eglGetError();
-        DPRINT("error setting context! egl err=0x%x", __FUNCTION__, err);
-    }
-
-    FrameBuffer::getFB()->unlockFramebuffer();
+    FrameBuffer::getFB()->createTrivialContext(0, // no share context
+                                               &this->mContext,
+                                               &this->mSurf);
+    FrameBuffer::getFB()->bindContext(mContext, mSurf, mSurf);
     DPRINT("exit");
 }
 
@@ -242,7 +190,7 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
            wait_result);
 
     if (wait_result != EGL_CONDITION_SATISFIED_KHR) {
-        DPRINT("error: eglClientWaitSync abnormal exit 0x%x",
+        DPRINT("error: eglClientWaitSync abnormal exit 0x%x\n",
                wait_result);
     }
 
@@ -271,10 +219,13 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
     //   order frames and scrambled textures in some apps. But, not
     //   incrementing the timeline means that the app's rendering freezes.
     //   So, despite the faulty GPU driver, not incrementing is too heavyweight a response.
-    
+
     emugl_sync_timeline_inc(cmd->timeline, kTimelineInterval);
-    // Also set this FenceSync object to signaled.
+    // Also set this FenceSync object to signaled,
+    // and destroy the sync object.
     if (cmd->fenceSync) {
+        s_egl.eglDestroySyncKHR(mDisplay,
+                (EGLSyncKHR)cmd->fenceSync->mGLSync);
         cmd->fenceSyncInfo->setSignaled(cmd->fenceSync->getHandle());
     }
 
@@ -284,16 +235,12 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
 }
 
 void SyncThread::doExit() {
-    FrameBuffer::getFB()->lockFramebuffer();
-
-    s_egl.eglMakeCurrent(mDisplay,
-                         EGL_NO_SURFACE,
-                         EGL_NO_SURFACE,
-                         EGL_NO_CONTEXT);
-    s_egl.eglDestroyContext(mDisplay, mSyncContext);
-    mSyncContext = EGL_NO_CONTEXT;
-
-    FrameBuffer::getFB()->unlockFramebuffer();
+    // This sequence parallels the exit sequence
+    // in RenderThread.
+    FrameBuffer::getFB()->bindContext(0, 0, 0);
+    FrameBuffer::getFB()->drainWindowSurface();
+    FrameBuffer::getFB()->drainRenderContext();
+    delete mTLS;
 }
 
 int SyncThread::doSyncThreadCmd(SyncThreadCmd* cmd) {
@@ -301,7 +248,7 @@ int SyncThread::doSyncThreadCmd(SyncThreadCmd* cmd) {
     switch (cmd->opCode) {
     case SYNC_THREAD_INIT:
         DPRINT("exec SYNC_THREAD_INIT");
-        doSyncContextCreation();
+        doSyncContextInit();
         break;
     case SYNC_THREAD_WAIT:
         DPRINT("exec SYNC_THREAD_WAIT");
