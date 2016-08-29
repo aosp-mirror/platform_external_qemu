@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "25883aa4_a259003c",
+        "filename": "android/emuctl-client.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-08-29T23:09:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a5f7ca08_ea6777b8",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 51,
+        "endChar": 43
+      },
+      "revId": "b65f7fdbcda91b0c630c644569bf5e31094e059b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "857d6655_624536a2",
         "filename": "android/emuctl-client.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-08-29T22:23:42Z",
       "side": 1,
       "message": "nit: please align",
+      "range": {
+        "startLine": 75,
+        "startChar": 0,
+        "endLine": 78,
+        "endChar": 2
+      },
+      "revId": "b65f7fdbcda91b0c630c644569bf5e31094e059b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25883aa4_c2136469",
+        "filename": "android/emuctl-client.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-08-29T23:09:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "857d6655_624536a2",
       "range": {
         "startLine": 75,
         "startChar": 0,
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "25883aa4_020e2c41",
+        "filename": "android/emuctl-client.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-08-29T23:09:43Z",
+      "side": 1,
+      "message": "not really, it depends on what format you request from glReadPixels (i.e. GL_RGB, GL_RGBA etc)",
+      "parentUuid": "25883aa4_1f30434e",
+      "range": {
+        "startLine": 171,
+        "startChar": 21,
+        "endLine": 171,
+        "endChar": 36
+      },
+      "revId": "b65f7fdbcda91b0c630c644569bf5e31094e059b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "25883aa4_1f620342",
         "filename": "android/emuctl-client.cpp",
         "patchSetId": 1
@@ -105,6 +177,30 @@
       "writtenOn": "2016-08-29T22:23:42Z",
       "side": 1,
       "message": "where is this number coming from?",
+      "range": {
+        "startLine": 209,
+        "startChar": 35,
+        "endLine": 209,
+        "endChar": 41
+      },
+      "revId": "b65f7fdbcda91b0c630c644569bf5e31094e059b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25883aa4_4217545a",
+        "filename": "android/emuctl-client.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-08-29T23:09:43Z",
+      "side": 1,
+      "message": "It\u0027s actually defined in QEMU2 glue code, but I didn\u0027t want to pull in that header here",
+      "parentUuid": "25883aa4_1f620342",
       "range": {
         "startLine": 209,
         "startChar": 35,
@@ -140,6 +236,30 @@
     },
     {
       "key": {
+        "uuid": "25883aa4_a2aae01a",
+        "filename": "android/emuctl-client.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-08-29T23:09:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "25883aa4_bf72f710",
+      "range": {
+        "startLine": 209,
+        "startChar": 0,
+        "endLine": 210,
+        "endChar": 47
+      },
+      "revId": "b65f7fdbcda91b0c630c644569bf5e31094e059b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "25883aa4_bf5bd788",
         "filename": "android/emuctl-client.cpp",
         "patchSetId": 1
@@ -163,6 +283,30 @@
     },
     {
       "key": {
+        "uuid": "25883aa4_0291ccf7",
+        "filename": "android/emuctl-client.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-08-29T23:09:43Z",
+      "side": 1,
+      "message": "Shouldn\u0027t have been here, deleted",
+      "parentUuid": "25883aa4_bf5bd788",
+      "range": {
+        "startLine": 215,
+        "startChar": 4,
+        "endLine": 215,
+        "endChar": 44
+      },
+      "revId": "b65f7fdbcda91b0c630c644569bf5e31094e059b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "25883aa4_1f6843ef",
         "filename": "android/emuctl-client.cpp",
         "patchSetId": 1
@@ -174,6 +318,30 @@
       "writtenOn": "2016-08-29T22:23:42Z",
       "side": 1,
       "message": "please move this to the connect() call and remove it during disconnect()",
+      "range": {
+        "startLine": 304,
+        "startChar": 4,
+        "endLine": 307,
+        "endChar": 29
+      },
+      "revId": "b65f7fdbcda91b0c630c644569bf5e31094e059b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25883aa4_8274fc60",
+        "filename": "android/emuctl-client.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-08-29T23:09:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "25883aa4_1f6843ef",
       "range": {
         "startLine": 304,
         "startChar": 4,
