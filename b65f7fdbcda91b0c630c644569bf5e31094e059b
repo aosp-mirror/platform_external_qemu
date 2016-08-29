@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a5f7ca08_ea6777b8",
+        "filename": "android/emuctl-client.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-29T22:23:42Z",
+      "side": 1,
+      "message": "enum?",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 51,
+        "endChar": 43
+      },
+      "revId": "b65f7fdbcda91b0c630c644569bf5e31094e059b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "857d6655_624536a2",
+        "filename": "android/emuctl-client.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-29T22:23:42Z",
+      "side": 1,
+      "message": "nit: please align",
+      "range": {
+        "startLine": 75,
+        "startChar": 0,
+        "endLine": 78,
+        "endChar": 2
+      },
+      "revId": "b65f7fdbcda91b0c630c644569bf5e31094e059b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25883aa4_bf7cb715",
+        "filename": "android/emuctl-client.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-29T22:23:42Z",
+      "side": 1,
+      "message": "lazy instance never destroys the object, so having scoped socket watch in Globals makes not much sense. Even worse, it makes the reader feel that the socket will be closed, but it won\u0027t be",
+      "range": {
+        "startLine": 91,
+        "startChar": 15,
+        "endLine": 91,
+        "endChar": 27
+      },
+      "revId": "b65f7fdbcda91b0c630c644569bf5e31094e059b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25883aa4_1f30434e",
+        "filename": "android/emuctl-client.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-29T22:23:42Z",
+      "side": 1,
+      "message": "is there some constant somewhere in our code for this?",
+      "range": {
+        "startLine": 171,
+        "startChar": 21,
+        "endLine": 171,
+        "endChar": 36
+      },
+      "revId": "b65f7fdbcda91b0c630c644569bf5e31094e059b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25883aa4_1f620342",
+        "filename": "android/emuctl-client.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-29T22:23:42Z",
+      "side": 1,
+      "message": "where is this number coming from?",
+      "range": {
+        "startLine": 209,
+        "startChar": 35,
+        "endLine": 209,
+        "endChar": 41
+      },
+      "revId": "b65f7fdbcda91b0c630c644569bf5e31094e059b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25883aa4_bf72f710",
+        "filename": "android/emuctl-client.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-29T22:23:42Z",
+      "side": 1,
+      "message": "nit: align",
+      "range": {
+        "startLine": 209,
+        "startChar": 0,
+        "endLine": 210,
+        "endChar": 47
+      },
+      "revId": "b65f7fdbcda91b0c630c644569bf5e31094e059b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25883aa4_bf5bd788",
+        "filename": "android/emuctl-client.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-29T22:23:42Z",
+      "side": 1,
+      "message": "nit: single global constant?",
+      "range": {
+        "startLine": 215,
+        "startChar": 4,
+        "endLine": 215,
+        "endChar": 44
+      },
+      "revId": "b65f7fdbcda91b0c630c644569bf5e31094e059b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25883aa4_1f6843ef",
+        "filename": "android/emuctl-client.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-29T22:23:42Z",
+      "side": 1,
+      "message": "please move this to the connect() call and remove it during disconnect()",
+      "range": {
+        "startLine": 304,
+        "startChar": 4,
+        "endLine": 307,
+        "endChar": 29
+      },
+      "revId": "b65f7fdbcda91b0c630c644569bf5e31094e059b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
