@@ -221,6 +221,7 @@ LOCAL_SRC_FILES := \
     android/crashreport/CrashReporter_common.cpp \
     android/crashreport/CrashReporter_$(BUILD_TARGET_OS).cpp \
     android/curl-support.c \
+    android/emuctl-client.cpp \
     android/emulation/AdbDebugPipe.cpp \
     android/emulation/AdbGuestPipe.cpp \
     android/emulation/AdbHostListener.cpp \
