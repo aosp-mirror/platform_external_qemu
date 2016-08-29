@@ -15,8 +15,12 @@
 */
 
 #include "FenceSyncInfo.h"
+#include "FrameBuffer.h"
+#include "DispatchTables.h"
+#include "OpenGLESDispatch/EGLDispatch.h"
 
 #include "android/base/Compiler.h"
+#include "android/base/containers/Lookup.h"
 #include "android/base/synchronization/Lock.h"
 
 #include "android/utils/assert.h"
@@ -24,6 +28,11 @@
 using android::base::AutoReadLock;
 using android::base::AutoWriteLock;
 using android::base::ReadWriteLock;
+
+FenceSyncInfo::FenceSyncInfo() {
+    FrameBuffer* fb = FrameBuffer::getFB();
+    mDisplay = fb->getDisplay();
+}
 
 void FenceSyncInfo::addSync(FenceSync* fencesync) {
     AutoWriteLock lock(mRWLock);
@@ -34,8 +43,11 @@ void FenceSyncInfo::addSync(FenceSync* fencesync) {
 
 void FenceSyncInfo::setSignaled(uint64_t handle) {
     AutoWriteLock lock(mRWLock);
-    mSyncMap[handle].reset();
-    mSyncMap.erase(handle);
+    if (auto val = android::base::find(mSyncMap, handle)) {
+        s_egl.eglDestroySyncKHR(mDisplay, val->get()->mGLSync);
+        val->reset();
+        mSyncMap.erase(handle);
+    }
 }
 
 FenceSync* FenceSyncInfo::findNonSignaledSync(uint64_t handle) {
