@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "25883aa4_9c58d431",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-08-30T16:10:57Z",
+      "side": 1,
+      "message": "how about osx/windows (windows does not have link probably...)",
+      "parentUuid": "25883aa4_bcfaf809",
+      "revId": "60af6ce3bcf3179908e58f026e9e4c8ed54cc011",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "25883aa4_9cce142d",
         "filename": "android/main-emulator.cpp",
         "patchSetId": 2
