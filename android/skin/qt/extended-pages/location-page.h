@@ -98,6 +98,7 @@ private:
     bool mNowLoadingGeoData;
     bool mGeoDataLoadingStopRequested;
     int mRowToSend;
+    bool mLocationUsed = false;
 };
 
 class GeoDataLoaderThread : public QThread {

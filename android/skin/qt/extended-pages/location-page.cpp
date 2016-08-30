@@ -14,6 +14,7 @@
 #include "android/emulation/control/location_agent.h"
 #include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"
+#include "android/metrics/metrics_reporter_callbacks.h"
 #include "android/settings-agent.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
@@ -68,6 +69,9 @@ LocationPage::LocationPage(QWidget *parent) :
             SLOT(geoDataThreadStarted()),
             SLOT(startupGeoDataThreadFinished(QString, bool, QString)));
     mGeoDataLoader->loadGeoDataFromFile(location_data_file, &mGpsFixesArray);
+    android::metrics::addTickCallback([this](AndroidMetrics* m) {
+        m->gps_used = mLocationUsed ? 1 : 0;
+    });
 }
 
 LocationPage::~LocationPage() {
@@ -122,6 +126,7 @@ void LocationPage::on_loc_pathTable_cellChanged(int row, int col)
 }
 
 void LocationPage::on_loc_playStopButton_clicked() {
+    mLocationUsed = true;
     if (mNowPlaying) {
         locationPlaybackStop();
     } else {
@@ -140,6 +145,7 @@ void LocationPage::on_loc_modeSwitch_currentIndexChanged(int index) {
 }
 
 void LocationPage::on_loc_sendPointButton_clicked() {
+    mLocationUsed = true;
     mUi->loc_latitudeInput->forceUpdate();
     mUi->loc_longitudeInput->forceUpdate();
 
