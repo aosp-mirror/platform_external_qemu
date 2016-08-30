@@ -957,10 +957,19 @@ public:
             // situation GetLastError() returns 0 (which is documented as
             // success code). This is not a documented behaviour and is
             // unreliable. But in case one needs to use it, here is the code:
-            //      while (!(isSuccess = dispatch->wglMakeCurrent(hdcDraw, hdcContext)) && GetLastError()==0) Sleep(1000);
+            //
+            //      while (!(isSuccess = dispatch->wglMakeCurrent(hdcDraw, hdcContext))
+            //           && GetLastError()==0) Sleep(16);
+            //
 
-            while (!dispatch->wglMakeCurrent(hdcDraw, hdcContext)) {
-                Sleep(100);
+            int count = 100;
+            while (!dispatch->wglMakeCurrent(hdcDraw, hdcContext)
+                   && --count > 0) {
+                Sleep(16);
+            }
+            if (count <= 0) {
+                D("Error: wglMakeCurrent() failed, error %d\n", (int)GetLastError());
+                return false;
             }
             return true;
         } else if (!dispatch->wglMakeContextCurrentARB) {
