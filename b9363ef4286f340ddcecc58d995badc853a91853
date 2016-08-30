@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "25883aa4_116e6a97",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 492,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-30T19:23:12Z",
+      "side": 1,
+      "message": "I see how this works, pretty cool :)\n\nCould this be clearer if we put the checking into a separate function and had two calls to that function, one with the original search path, and then if that fails, the next one to argv[0]?\n\nOr keep the for loop and have an array/vector of search paths to consider so that it is extensible.",
+      "range": {
+        "startLine": 478,
+        "startChar": 0,
+        "endLine": 492,
+        "endChar": 5
+      },
+      "revId": "b9363ef4286f340ddcecc58d995badc853a91853",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
