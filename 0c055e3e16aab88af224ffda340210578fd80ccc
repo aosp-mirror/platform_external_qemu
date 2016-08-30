@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "25883aa4_77740b92",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-30T21:03:04Z",
+      "side": 1,
+      "message": "Nice catch! Deleted. (this and other revisions in https://android-review.googlesource.com/#/c/266614/)",
+      "parentUuid": "25883aa4_9c1374b5",
+      "range": {
+        "startLine": 85,
+        "startChar": 8,
+        "endLine": 85,
+        "endChar": 22
+      },
+      "revId": "0c055e3e16aab88af224ffda340210578fd80ccc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "25883aa4_bc7d98bc",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 7
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "25883aa4_f7b01b44",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1166,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-30T21:03:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "25883aa4_bc7d98bc",
+      "range": {
+        "startLine": 1160,
+        "startChar": 2,
+        "endLine": 1166,
+        "endChar": 5
+      },
+      "revId": "0c055e3e16aab88af224ffda340210578fd80ccc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "25883aa4_9c7294dc",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 7
@@ -59,6 +107,30 @@
       "writtenOn": "2016-08-30T16:02:15Z",
       "side": 1,
       "message": "nit: \u0027when RenderThreads exit\u0027 or \u0027when RenderThread exits\u0027",
+      "range": {
+        "startLine": 156,
+        "startChar": 12,
+        "endLine": 156,
+        "endChar": 31
+      },
+      "revId": "0c055e3e16aab88af224ffda340210578fd80ccc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25883aa4_72bdf913",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-08-30T21:03:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "25883aa4_9c7294dc",
       "range": {
         "startLine": 156,
         "startChar": 12,
