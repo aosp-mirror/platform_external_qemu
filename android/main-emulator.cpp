@@ -83,7 +83,7 @@ static char* getQemuExecutablePath(const char* programPath,
                                    const char* avdArch,
                                    int wantedBitness);
 
-static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs);
+static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs, const char* launcherDir);
 
 static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
                                              const char* avdArch,
@@ -378,7 +378,8 @@ int main(int argc, char** argv)
     }
 
     /* Find program directory. */
-    const auto progDir = android::base::System::get()->getProgramDirectory();
+    auto progDir = android::base::System::get()->getProgramDirectory();
+    D("argv[0]: '%s'; program directory: '%s'\n", argv[0], progDir.c_str());
 
     enum RanchuState {
         RANCHU_AUTODETECT,
@@ -474,14 +475,20 @@ int main(int argc, char** argv)
     }
 #endif
 
-    if (ranchu == RANCHU_ON) {
-        emulatorPath = getQemuExecutablePath(progDir.c_str(),
-                                             avdArch,
-                                             wantedBitness);
-    } else {
-        emulatorPath = getClassicEmulatorPath(progDir.c_str(),
-                                              avdArch,
-                                              &wantedBitness);
+    for (int i = 0; i < 2; ++i) {
+        if (ranchu == RANCHU_ON) {
+            emulatorPath = getQemuExecutablePath(progDir.c_str(),
+                                                 avdArch,
+                                                 wantedBitness);
+        } else {
+            emulatorPath = getClassicEmulatorPath(progDir.c_str(),
+                                                  avdArch,
+                                                  &wantedBitness);
+        }
+        if (path_exists(emulatorPath)) {
+            break;
+        }
+        progDir = path_dirname(argv[0]);
     }
     D("Found target-specific %d-bit emulator binary: %s\n", wantedBitness, emulatorPath);
 
@@ -491,7 +498,7 @@ int main(int argc, char** argv)
     /* Setup library paths so that bundled standard shared libraries are picked
      * up by the re-exec'ed emulator
      */
-    updateLibrarySearchPath(wantedBitness, useSystemLibs);
+    updateLibrarySearchPath(wantedBitness, useSystemLibs, progDir.c_str());
 
     /* We need to find the location of the GLES emulation shared libraries
      * and modify either LD_LIBRARY_PATH or PATH accordingly
@@ -518,7 +525,7 @@ int main(int argc, char** argv)
     emuglConfig_setupEnv(&config);
 
     /* Add <lib>/qt/ to the library search path. */
-    androidQtSetupEnv(wantedBitness);
+    androidQtSetupEnv(wantedBitness, progDir.c_str());
 
 #ifdef _WIN32
     // Take care of quoting all parameters before sending them to execv().
@@ -708,12 +715,11 @@ static char* getQemuExecutablePath(const char* progDir,
     return strdup(fullPath);
 }
 
-static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs) {
+static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs, const char* launcherDir) {
     const char* libSubDir = (wantedBitness == 64) ? "lib64" : "lib";
     char fullPath[PATH_MAX];
     char* tail = fullPath;
 
-    char* launcherDir = get_launcher_directory();
     tail = bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s", launcherDir,
                     libSubDir);
 
@@ -744,8 +750,6 @@ static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs) {
 #else  // !__linux__
     (void)useSystemLibs;
 #endif  // !__linux__
-
-    free(launcherDir);
 }
 
 // Return the system directory path of a given AVD named |avdName|.
