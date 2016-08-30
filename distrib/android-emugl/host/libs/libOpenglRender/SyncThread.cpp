@@ -153,7 +153,7 @@ void SyncThread::sendAsync(SyncThreadCmd& cmd) {
 
 void SyncThread::doSyncContextInit() {
     // |mTLS| is cleaned up on doExit(), which is called
-    // when RenderThread's exit.
+    // when RenderThreads exit.
     // Note that this will make the subsequent
     // FrameBuffer::*** calls use |mTLS| as thread local storage,
     // because the semantics of the |RenderThreadInfo| constructor
@@ -221,11 +221,8 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
     //   So, despite the faulty GPU driver, not incrementing is too heavyweight a response.
 
     emugl_sync_timeline_inc(cmd->timeline, kTimelineInterval);
-    // Also set this FenceSync object to signaled,
-    // and destroy the sync object.
+    // Also set this FenceSync object to signaled.
     if (cmd->fenceSync) {
-        s_egl.eglDestroySyncKHR(mDisplay,
-                (EGLSyncKHR)cmd->fenceSync->mGLSync);
         cmd->fenceSyncInfo->setSignaled(cmd->fenceSync->getHandle());
     }
 

@@ -53,7 +53,6 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
-//extentions descriptor
 typedef std::unordered_map<std::string, __translatorMustCastToProperFunctionPointerType> ProcTableMap;
 ProcTableMap *s_glesExtensions = NULL;
 /****************************************************************************************************************/

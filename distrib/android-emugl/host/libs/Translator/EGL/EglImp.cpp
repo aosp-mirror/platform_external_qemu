@@ -79,12 +79,8 @@ static void initGLESx(GLESVersion version) {
     iface->initGLESx();
 }
 
-/*****************************************  supported extentions  ***********************************************************************/
+/*****************************************  supported extensions  ***********************************************************************/
 
-//extentions
-#define EGL_EXTENTIONS 5
-
-//decleration
 extern "C" {
 EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext context, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list);
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR image);
@@ -93,8 +89,7 @@ EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay display, EGLSyncKHR sy
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroySyncKHR(EGLDisplay display, EGLSyncKHR sync);
 }  // extern "C"
 
-// extentions descriptors
-static const ExtentionDescriptor s_eglExtentions[] = {
+static const ExtensionDescriptor s_eglExtensions[] = {
         {"eglCreateImageKHR" ,
                 (__eglMustCastToProperFunctionPointerType)eglCreateImageKHR },
         {"eglDestroyImageKHR",
@@ -107,8 +102,8 @@ static const ExtentionDescriptor s_eglExtentions[] = {
                 (__eglMustCastToProperFunctionPointerType)eglDestroySyncKHR },
 };
 
-static const int s_eglExtentionsSize =
-        sizeof(s_eglExtentions) / sizeof(ExtentionDescriptor);
+static const int s_eglExtensionsSize =
+        sizeof(s_eglExtensions) / sizeof(ExtensionDescriptor);
 
 /****************************************************************************************************************************************/
 //macros for accessing global egl info & tls objects
@@ -909,9 +904,9 @@ EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
     initGlobalInfo();
 
     if(!strncmp(procname,"egl",3)) { //EGL proc
-        for(int i=0;i < s_eglExtentionsSize;i++){
-            if(strcmp(procname,s_eglExtentions[i].name) == 0){
-                retVal = s_eglExtentions[i].address;
+        for(int i=0;i < s_eglExtensionsSize;i++){
+            if(strcmp(procname,s_eglExtensions[i].name) == 0){
+                retVal = s_eglExtensions[i].address;
                 break;
             }
         }

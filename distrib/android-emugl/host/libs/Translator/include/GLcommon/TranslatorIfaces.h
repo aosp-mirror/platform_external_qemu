@@ -35,7 +35,7 @@ typedef void (*__translatorMustCastToProperFunctionPointerType)(void);
 typedef struct {
   const char*                                     name;
   __translatorMustCastToProperFunctionPointerType address;
-}ExtentionDescriptor;
+} ExtensionDescriptor;
 
 class TextureData : public ObjectData
 {
