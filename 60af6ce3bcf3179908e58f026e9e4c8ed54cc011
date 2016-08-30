@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "25883aa4_9c77f464",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2016-08-30T16:20:40Z",
+      "side": 1,
+      "message": "Actually, most users doesn\u0027t complain about this before, it looks like the main user of this new added fallback is just us. (google3 run emulator on forge), personally I think if this fallback only works on linux, it\u0027s fine.",
+      "parentUuid": "25883aa4_dcfdfcd2",
+      "revId": "60af6ce3bcf3179908e58f026e9e4c8ed54cc011",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "25883aa4_9cce142d",
         "filename": "android/main-emulator.cpp",
         "patchSetId": 2
