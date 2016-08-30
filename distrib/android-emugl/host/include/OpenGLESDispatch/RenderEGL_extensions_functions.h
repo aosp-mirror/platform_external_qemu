@@ -12,6 +12,7 @@
   X(EGLBoolean, eglDestroyImageKHR, (EGLDisplay display, EGLImageKHR image)) \
   X(EGLSyncKHR, eglCreateSyncKHR, (EGLDisplay display, EGLenum type, const EGLint* attribs)) \
   X(EGLint, eglClientWaitSyncKHR, (EGLDisplay display, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout)) \
+  X(EGLBoolean, eglDestroySyncKHR, (EGLDisplay display, EGLSyncKHR sync)) \
 
 
 #endif  // RENDER_EGL_EXTENSIONS_FUNCTIONS_H

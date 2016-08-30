@@ -70,6 +70,7 @@ static GLESiface  s_glesIface = {
     .getProcAddress    = getProcAddress,
     .fenceSync         = (FUNCPTR_FENCE_SYNC)glFenceSync,
     .clientWaitSync    = (FUNCPTR_CLIENT_WAIT_SYNC)glClientWaitSync,
+    .deleteSync        = (FUNCPTR_DELETE_SYNC)glDeleteSync,
 };
 
 #include <GLcommon/GLESmacros.h>
@@ -2427,4 +2428,10 @@ GL_APICALL void GL_APIENTRY glWaitSync(GLsync wait_on, GLbitfield flags, GLuint6
 {
     GET_CTX_V2();
     ctx->dispatcher().glWaitSync(wait_on, flags, timeout);
+}
+
+GL_APICALL void GL_APIENTRY glDeleteSync(GLsync to_delete)
+{
+    GET_CTX_V2();
+    ctx->dispatcher().glDeleteSync(to_delete);
 }

@@ -21,3 +21,4 @@ GLconstubyteptr glGetStringi(GLenum name, GLint index);
 GLsync glFenceSync(GLenum condition, GLbitfield flags);
 GLenum glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout);
 void glWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout);
+void glDeleteSync(GLsync to_delete);

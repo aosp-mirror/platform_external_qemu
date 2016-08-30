@@ -730,40 +730,14 @@ static EGLint rcClientWaitSyncKHR(uint64_t handle,
     // This happens all the time with YouTube videos in the browser.
     // In this case, create a context on the host just for syncing.
     if (!tInfo->currContext) {
-        EGLSYNC_DPRINT("no context yet, creating");
-        // If we've gotten to this point, there has to be at least one valid
-        // framebuffer config. Get the first one.
-        const FbConfig* cfg = fb->getConfigs()->get(0);
-
-        RenderContext* orig_cxt = fenceSync->mContext;
-        RenderContext* cxt = RenderContext::create(fb->getDisplay(),
-                                                   cfg->getEglConfig(),
-                                                   orig_cxt->getEGLContext(),
-                                                   /* isGL2 */ 1);
-        EGLSYNC_DPRINT("context created, cxt@%p err=0x%x",
-                       cxt, s_egl.eglGetError());
-        EGLSYNC_DPRINT("cxt->eglcxt=%p origcxt=%p",
-                       cxt->getEGLContext(), orig_cxt->getEGLContext());
-
-        // Contexts need some kind of non-EGL_NO_SURFACEs
-        // to act as the draw and read surfaces. We won't plan to be
-        // drawing or reading, but we do plan
-        // to make a valid context current.
-        static const EGLint pbuf_attribs[] = {
-            EGL_WIDTH, 1,
-            EGL_HEIGHT, 1,
-            EGL_NONE
-        };
-        EGLSurface surf = s_egl.eglCreatePbufferSurface(fb->getDisplay(),
-                                                        cfg->getEglConfig(),
-                                                        pbuf_attribs);
-        s_egl.eglMakeCurrent(fb->getDisplay(),
-                             surf,
-                             surf,
-                             cxt->getEGLContext());
-        tInfo->currContext = RenderContextPtr(cxt);
-        EGLSYNC_DPRINT("context current, cxt@%p err=0x%x",
-                       cxt, s_egl.eglGetError());
+        uint32_t gralloc_sync_cxt, gralloc_sync_surf;
+        fb->createTrivialContext(0, // There is no context to share.
+                                 &gralloc_sync_cxt,
+                                 &gralloc_sync_surf);
+        fb->bindContext(gralloc_sync_cxt,
+                        gralloc_sync_surf,
+                        gralloc_sync_surf);
+        // This context is then cleaned up when the render thread exits.
     }
 
     EGLint egl_wait_res = s_egl.eglClientWaitSyncKHR(fb->getDisplay(),
