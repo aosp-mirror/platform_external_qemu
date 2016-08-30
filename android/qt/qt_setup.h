@@ -23,6 +23,9 @@ ANDROID_BEGIN_HEADER
 // Return true in case of success, false if there is no corresponding
 // Qt library directory.
 // |bitness| - target program bittness, 32/64 or 0 for autodetection
-bool androidQtSetupEnv(int bitness);
+// |emulatorDir| - the directory where 'emulator' is located; if not given,
+// it will be inferred based on the location of the calling binary of this
+// function
+bool androidQtSetupEnv(int bitness, const char* emulatorDir = nullptr);
 
 ANDROID_END_HEADER
