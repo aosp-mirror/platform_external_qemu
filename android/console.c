@@ -691,11 +691,12 @@ int android_console_start(int control_port,
 
 
     Socket fd4 = socket_loopback4_server(control_port, SOCKET_STREAM);
-    // a temporary workaround for issue:
-    // https://code.google.com/p/android/issues/detail?id=213734
-    // please re-enable it when ipv6 is impelmented on qemu2
-    //Socket fd6 = socket_loopback6_server(control_port, SOCKET_STREAM);
     Socket fd6 = -1;
+    // Only try to listen on ipv6 if ipv4 is not supported by system.
+    // This is another work around for b.android.com/213734
+    if (fd4 < 0 && errno == EAFNOSUPPORT) {
+      fd6 = socket_loopback6_server(control_port, SOCKET_STREAM);
+    }
 
     if (fd4 < 0 && fd6 < 0) {
         // Could not bind to either IPv4 or IPv6 interface?
