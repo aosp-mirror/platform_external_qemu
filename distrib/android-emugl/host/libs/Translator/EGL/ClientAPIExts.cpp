@@ -25,7 +25,7 @@ namespace ClientAPIExts
 {
 
 //
-// define function pointer type for each extention function
+// define function pointer type for each extension
 // typename has the form __egl_{funcname}_t
 //
 #define FUNC_TYPE(fname) __egl_ ## fname ## _t

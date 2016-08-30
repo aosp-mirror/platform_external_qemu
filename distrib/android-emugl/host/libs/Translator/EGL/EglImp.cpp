@@ -79,12 +79,8 @@ static void initGLESx(GLESVersion version) {
     iface->initGLESx();
 }
 
-/*****************************************  supported extentions  ***********************************************************************/
+/*****************************************  supported extensions  ***********************************************************************/
 
-//extentions
-#define EGL_EXTENTIONS 5
-
-//decleration
 extern "C" {
 EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext context, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list);
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR image);
@@ -93,7 +89,6 @@ EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay display, EGLSyncKHR sy
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroySyncKHR(EGLDisplay display, EGLSyncKHR sync);
 }  // extern "C"
 
-// extentions descriptors
 static const ExtentionDescriptor s_eglExtentions[] = {
         {"eglCreateImageKHR" ,
                 (__eglMustCastToProperFunctionPointerType)eglCreateImageKHR },
