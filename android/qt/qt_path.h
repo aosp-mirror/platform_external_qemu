@@ -18,10 +18,17 @@
 // added to the system library search path and passed to
 // QCoreApplication::setLibraryPaths().
 // |bitness| - target program bittness, 32/64 or 0 for autodetection
-std::string androidQtGetLibraryDir(int bitness = 0);
+// |emulatorDir| - the directory where 'emulator' is located; if not given,
+// it will be inferred based on the location of the calling binary of this
+// function
+std::string androidQtGetLibraryDir(int bitness = 0, const char* emulatorDir = nullptr);
 
 // Return the path to the emulator's Qt plugins directory,
 // which holds Qt's plugins. It should be added to the
 // QT_QPA_PLATFORM_PLUGIN_PATH environment variable.
 // |bitness| - target program bittness, 32/64 or 0 for autodetection
-std::string androidQtGetPluginsDir(int bitness = 0);
+// |emulatorDir| - the directory where 'emulator' is located;
+// |emulatorDir| - the directory where 'emulator' is located; if not given,
+// it will be inferred based on the location of the calling binary of this
+// function
+std::string androidQtGetPluginsDir(int bitness = 0, const char* emulatorDir = nullptr);
