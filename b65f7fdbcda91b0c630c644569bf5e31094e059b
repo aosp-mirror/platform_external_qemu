@@ -190,6 +190,30 @@
     },
     {
       "key": {
+        "uuid": "25883aa4_88109ba9",
+        "filename": "android/emuctl-client.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-08-30T00:02:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "25883aa4_020e2c41",
+      "range": {
+        "startLine": 171,
+        "startChar": 21,
+        "endLine": 171,
+        "endChar": 36
+      },
+      "revId": "b65f7fdbcda91b0c630c644569bf5e31094e059b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "25883aa4_1f620342",
         "filename": "android/emuctl-client.cpp",
         "patchSetId": 1
@@ -249,6 +273,30 @@
       "side": 1,
       "message": "what about a comment, at least?",
       "parentUuid": "25883aa4_4217545a",
+      "range": {
+        "startLine": 209,
+        "startChar": 35,
+        "endLine": 209,
+        "endChar": 41
+      },
+      "revId": "b65f7fdbcda91b0c630c644569bf5e31094e059b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25883aa4_a86d5f35",
+        "filename": "android/emuctl-client.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-08-30T00:02:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "25883aa4_85c7a6b1",
       "range": {
         "startLine": 209,
         "startChar": 35,
