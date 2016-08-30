@@ -1769,4 +1769,7 @@ DEF("audio-test-out", 0, QEMU_OPTION_audio_test_out, \
 DEF("snapshot-no-time-update", 0, QEMU_OPTION_snapshot_no_time_update, \
     "-snapshot-no-time-update Disable time update when restoring snapshots\n")
 
+DEF("skip-adb-auth", 0, QEMU_OPTION_android_skip_adb_auth, \
+    "-skip-adb-auth Skip adb authentication dialogue\n")
+
 #endif /* ANDROID */

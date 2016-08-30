@@ -84,6 +84,7 @@ QemuParameters* qemu_parameters_create(const char* argv0,
     params.add2If( "-audio", opts->audio);
     params.add2If("-cpu-delay", opts->cpu_delay);
     params.add2If("-dns-server", opts->dns_server);
+    params.addIf("-skip-adb-auth", opts->skip_adb_auth);
 
     if (opts->snapstorage) {
         // We still use QEMU command-line options for the following since

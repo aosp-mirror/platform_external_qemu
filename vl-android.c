@@ -1940,6 +1940,7 @@ int main(int argc, char **argv, char **envp)
     CPUState *cpu;
     int show_vnc_port = 0;
     CIniFile *hw_ini = NULL;
+    int adb_auth = 1;
 
     /* Ensure Looper implementation for this thread is based on the QEMU
      * main loop. */
@@ -2803,6 +2804,9 @@ int main(int argc, char **argv, char **envp)
                 android_snapshot_update_time = 0;
                 break;
 
+            case QEMU_OPTION_android_skip_adb_auth:
+                adb_auth = 0;
+                break;
             default:
                 os_parse_cmd_args(popt->index, optarg);
             }
@@ -2970,6 +2974,9 @@ int main(int argc, char **argv, char **envp)
     if (android_hw->hw_ramSize <= 512) {
         boot_property_add("ro.config.low_ram", "true");
     }
+
+    /* Bypass adb security or not. */
+    boot_property_add("qemu.adb.secure", adb_auth ? "1": "0");
 
     /* Initialize net speed and delays stuff. */
     if (!android_network_set_speed(android_op_netspeed)) {
