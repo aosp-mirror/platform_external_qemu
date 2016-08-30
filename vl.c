@@ -3122,6 +3122,7 @@ int run_qemu_main(int argc, const char **argv)
     char* additional_kernel_params = NULL;
     const char* android_hw_file = NULL;
 #endif
+    int adb_auth = 1;
 
     atexit(qemu_run_exit_notifiers);
     error_set_progname(argv[0]);
@@ -4237,7 +4238,9 @@ int run_qemu_main(int argc, const char **argv)
             case QEMU_OPTION_android_report_console:
                 android_op_report_console = (char*)optarg;
                 break;
-
+            case QEMU_OPTION_android_skip_adb_auth:
+                adb_auth = 0;
+                break;
 #endif  // CONFIG_ANDROID
             default:
                 os_parse_cmd_args(popt->index, optarg);
@@ -4373,6 +4376,8 @@ int run_qemu_main(int argc, const char **argv)
     /* Initialize presence of hardware nav button */
     boot_property_add("qemu.hw.mainkeys", android_hw->hw_mainKeys ? "1" : "0");
 
+    /* Bypass adb security or not. */
+    boot_property_add("qemu.adb.secure", adb_auth ? "1": "0");
     if (android_hw->hw_gsmModem) {
         if (android_qemud_get_channel(ANDROID_QEMUD_GSM,
                                       &android_modem_serial_line) < 0) {

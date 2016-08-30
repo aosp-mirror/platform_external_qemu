@@ -3484,6 +3484,14 @@ STEXI
 Specify the hw config ini file location
 ETEXI
 
+DEF("skip-adb-auth", 0, QEMU_OPTION_android_skip_adb_auth,
+    "-skip-adb-auth  skip adb authentication dialogue\n", QEMU_ARCH_ALL)
+STEXI
+@item -adb-auth
+@findex -adb-auth
+Skip adb authentication dialogue
+ETEXI
+
 #endif
 
 HXCOMM This is the last statement. Insert new options before this line!

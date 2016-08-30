@@ -410,6 +410,9 @@ extern "C" int main(int argc, char **argv) {
         args[n++] = opts->dns_server;
     }
 
+    if (opts->skip_adb_auth) {
+        args[n++] = "-skip-adb-auth";
+    }
     /** SNAPSHOT STORAGE HANDLING */
 
     /* If we have a valid snapshot storage path */
