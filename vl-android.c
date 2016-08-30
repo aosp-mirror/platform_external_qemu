@@ -386,6 +386,9 @@ char* android_op_lcd_density = NULL;
  */
 char* android_op_ui_settings = NULL;
 
+/* -adb-auth option enabled or not*/
+int android_op_adb_auth = 0;
+
 // TODO(digit): Remove this
 extern bool android_op_wipe_data;
 extern bool android_op_writable_system;
@@ -2803,6 +2806,9 @@ int main(int argc, char **argv, char **envp)
                 android_snapshot_update_time = 0;
                 break;
 
+            case QEMU_OPTION_android_adb_auth:
+                android_op_adb_auth = 1;
+                break;
             default:
                 os_parse_cmd_args(popt->index, optarg);
             }
@@ -2971,6 +2977,7 @@ int main(int argc, char **argv, char **envp)
         boot_property_add("ro.config.low_ram", "true");
     }
 
+    boot_property_add("qemu.adb.secure", android_op_adb_auth ? "1": "0");
     /* Initialize net speed and delays stuff. */
     if (!android_network_set_speed(android_op_netspeed)) {
         PANIC("invalid -netspeed parameter '%s'",
