@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "25883aa4_68a357f4",
+        "filename": "android/emuctl-client.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-30T00:26:55Z",
+      "side": 1,
+      "message": "nit: missed word",
+      "range": {
+        "startLine": 173,
+        "startChar": 36,
+        "endLine": 173,
+        "endChar": 37
+      },
+      "revId": "5f521222c945400ceefcac767c6108dfe8cd8017",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
