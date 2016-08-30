@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "11545d0d_490c0546",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 968,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-30T20:45:00Z",
+      "side": 1,
+      "message": "16ms is a default timer resolution in Windows, it\u0027s enough to allow other threads to run and GetTickCount() to update its result - that is why I don\u0027t think we need to sleep more here",
+      "range": {
+        "startLine": 968,
+        "startChar": 16,
+        "endLine": 968,
+        "endChar": 26
+      },
+      "revId": "b34b9b43439f83eb2b7d8e881f5298fbd8c56984",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
