@@ -91,6 +91,24 @@
     },
     {
       "key": {
+        "uuid": "25883aa4_373c43e2",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-08-30T16:47:55Z",
+      "side": 1,
+      "message": "actually, the getProgramDirectory() can be called by the \u0027emulator\u0027 and the \u0027qemu-system-\u003carch\u003e\u0027\nit is supposed to get the real thing instead of the cmdline argv[0]\n\nso I am thinking keep it that way to avoid confusion.",
+      "parentUuid": "25883aa4_3cc5085e",
+      "revId": "60af6ce3bcf3179908e58f026e9e4c8ed54cc011",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "25883aa4_9cce142d",
         "filename": "android/main-emulator.cpp",
         "patchSetId": 2
