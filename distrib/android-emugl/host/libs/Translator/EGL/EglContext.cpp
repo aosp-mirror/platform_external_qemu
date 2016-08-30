@@ -72,7 +72,9 @@ EglContext::~EglContext()
             m_config->nativeFormat(), &pbInfo);
     assert(pb);
     if (pb) {
-        assert(m_dpy->nativeType()->makeCurrent(pb, pb, m_native));
+        const bool res = m_dpy->nativeType()->makeCurrent(pb, pb, m_native);
+        assert(res);
+        (void)res;
         pbSurface->setNativePbuffer(pb);
     }
     //
