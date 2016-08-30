@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "25883aa4_dcfdfcd2",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-08-30T16:15:32Z",
+      "side": 1,
+      "message": "In Windows one can always use GetCommandLineW() + CommandLineToArgvW(). Not sure about Mac though",
+      "parentUuid": "25883aa4_9c58d431",
+      "revId": "60af6ce3bcf3179908e58f026e9e4c8ed54cc011",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "25883aa4_9cce142d",
         "filename": "android/main-emulator.cpp",
         "patchSetId": 2
