@@ -279,6 +279,7 @@ LOCAL_SRC_FILES := \
     android/jpeg-compress.c \
     android/kernel/kernel_utils.cpp \
     android/keymaster/KeymasterPipe.cpp \
+    android/keymaster/Keymaster.cpp \
     android/loadpng.c \
     android/main-common.c \
     android/main-help.cpp \
