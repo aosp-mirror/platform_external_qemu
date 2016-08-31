@@ -70,14 +70,12 @@ SyncThread::SyncThread(EGLContext parentContext) :
     initSyncContext();
 }
 
-void SyncThread::triggerWait(FenceSyncInfo* fenceSyncInfo,
-                             FenceSync* fenceSync,
+void SyncThread::triggerWait(FenceSync* fenceSync,
                              uint64_t timeline) {
     DPRINT("fenceSyncInfo=0x%llx timeline=0x%lx ...",
             fenceSyncInfo, timeline);
     SyncThreadCmd to_send;
     to_send.opCode = SYNC_THREAD_WAIT;
-    to_send.fenceSyncInfo = fenceSyncInfo;
     to_send.fenceSync = fenceSync;
     to_send.timeline = timeline;
     DPRINT("opcode=%u", to_send.opCode);
@@ -172,18 +170,12 @@ void SyncThread::doSyncContextInit() {
 void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
     DPRINT("enter");
 
+    assert(cmd->fenceSync);
+
     EGLint wait_result = 0x0;
 
-    if (cmd->fenceSync) {
-        DPRINT("wait on sync obj: 0x%llx", cmd->fenceSync->mGLSync);
-        wait_result = s_egl.eglClientWaitSyncKHR
-            (mDisplay,
-             (EGLSyncKHR)cmd->fenceSync->mGLSync,
-             EGL_SYNC_FLUSH_COMMANDS_BIT_KHR,
-             kDefaultTimeoutNsecs);
-    } else {
-        DPRINT("WARNING: syncthread waiting on already signaled!\n");
-    }
+    DPRINT("wait on sync obj: %p", cmd->fenceSync);
+    wait_result = cmd->fenceSync->wait(kDefaultTimeoutNsecs);
 
     DPRINT("done waiting, with wait result=0x%x. "
            "increment timeline (and signal fence)",
@@ -221,10 +213,7 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
     //   So, despite the faulty GPU driver, not incrementing is too heavyweight a response.
 
     emugl_sync_timeline_inc(cmd->timeline, kTimelineInterval);
-    // Also set this FenceSync object to signaled.
-    if (cmd->fenceSync) {
-        cmd->fenceSyncInfo->setSignaled(cmd->fenceSync->getHandle());
-    }
+    cmd->fenceSync->signaledNativeFd();
 
     DPRINT("done timeline increment");
 

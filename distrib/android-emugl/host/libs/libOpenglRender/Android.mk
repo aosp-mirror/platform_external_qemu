@@ -23,7 +23,7 @@ host_common_SRC_FILES := \
     ChannelStream.cpp \
     ColorBuffer.cpp \
     FbConfig.cpp \
-    FenceSyncInfo.cpp \
+    FenceSync.cpp \
     FrameBuffer.cpp \
     ReadBuffer.cpp \
     RenderChannelImpl.cpp \
