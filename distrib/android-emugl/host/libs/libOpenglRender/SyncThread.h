@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "FenceSyncInfo.h"
+#include "FenceSync.h"
 
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
@@ -46,7 +46,6 @@ enum SyncThreadOpCode {
 
 struct SyncThreadCmd {
     SyncThreadOpCode opCode = SYNC_THREAD_INIT;
-    FenceSyncInfo* fenceSyncInfo = nullptr;
     FenceSync* fenceSync = nullptr;
     uint64_t timeline = 0;
     bool needReply = false;
@@ -59,16 +58,13 @@ public:
     // The initialization of the sync thread is nonblocking.
     // - Triggers a |SyncThreadCmd| with op code |SYNC_THREAD_INIT|
     SyncThread(EGLContext context);
-    // |triggerWait|: async wait with a given FenceSyncInfo object
-    // and FenceSync object. The FenceSyncInfo input is to update
-    // whether the object is signaled already.
-    // If not signaled yet, SyncThread will employ a host-side
-    // eglClientWaitSyncKHR to wait on the sync object. After wait is over or if
-    // the sync object is already signaled, SyncThread will increment the given
-    // timeline, which should signal the guest-side fence FD.
-    // - Triggers a |SyncThreadCmd| with op code |SYNC_THREAD_WAIT|
-    void triggerWait(FenceSyncInfo* fenceSyncInfo,
-                     FenceSync* fenceSync,
+    // |triggerWait|: async wait with a given FenceSync object.
+    // We use the wait() method to do a eglClientWaitSyncKHR.
+    // After wait is over, the timeline will be incremented,
+    // which should signal the guest-side fence FD.
+    // This method is how the goldfish sync virtual device
+    // knows when to increment timelines / signal native fence FD's.
+    void triggerWait(FenceSync* fenceSync,
                      uint64_t timeline);
     // |cleanup|: for use with destructors and other cleanup functions.
     // it destroys the sync context and exits the sync thread.
