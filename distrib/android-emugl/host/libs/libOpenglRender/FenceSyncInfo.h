@@ -19,96 +19,109 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 
-#include "RenderContext.h"
-
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
+#include <atomic>
 #include <memory>
 #include <unordered_map>
 
-// The purpose of FenceSyncInfo is to track the progress
-// of OpenGL fence commands issued from the guest,
-// and to have lower host driver overhead when
-// waiting on fence commands to be completed.
+// The FenceSync class wraps actual EGLSyncKHR objects,
+// issuing calls to eglCreateSyncKHR/eglClientWaitSyncKHR/
+// eglDestroySyncKHR.
 //
-// Tracking is necessary because fence objects on the host
-// are just opaque pointers and don't correspond to anything
-// real on the guest. When the guest calls eglCreateSyncKHR,
-// the guest receives a handle that corresponds to the
-// actual EGLSyncKHR object on the host.
+// We need this class because we need to track, on the host,
+// the EGL sync objects created by the guest and realized
+// in the host OpenGL driver.
 //
-// When the EGLSyncKHR object is signaled / when the guest
-// calls eglClientWaitSyncKHR, the host processes
-// the EGLSyncKHR object directly, while communicating only
-// the result of the wait command to the guest.
-
-// The FenceSync class wraps actual EGLSyncKHR objects.
-// The handle is included with the EGLSyncKHR object.
-// The OpenGL context that created the EGLSyncKHR object is also
-// added as a class member, so that it is easier to
-// create sync contexts when waiting on fence commands
-// from other threads (contexts).
+// Because this class is used for tracking, it must also mirror
+// the construction/destruction behavior of real OpenGL sync
+// objects. As such, there are subtleties, described below,
+// regarding when to destroy FenceSync objects.
 class FenceSync {
 public:
-    explicit FenceSync(EGLSyncKHR eglsync,
-                       RenderContext* cxt = nullptr) :
-        mGLSync(eglsync), mContext(cxt) { }
-    uint64_t getHandle() const { return reinterpret_cast<uint64_t>(mGLSync); }
+    // The constructor wraps eglCreateSyncKHR on the
+    // host OpenGL driver.
+    // |hasNativeFence| specifies whether this sync object
+    // is associated with a native fence FD object
+    // in the Android sync framework. In this case, we will
+    // need to be more careful about when we free this object.
+    // |destroyWhenSignaled| specifies whether to mark this
+    // object for destruction when its native fence FD
+    // becomes signaled (in our case, roughly when the
+    // EGL fence object becomes signaled). This is used
+    // for the case where the goldfish opengl driver in the guest
+    // wants to create EGL sync objects on its own.
+    // Otherwise, we will rely on the guest's calls to
+    // eglDestroySyncKHR / host's rcDestroySyncKHR to
+    // clean up this object.
+    FenceSync(bool hasNativeFence,
+              bool destroyWhenSignaled);
+
+    // wait() wraps eglClientWaitSyncKHR. To be extra conservative,
+    // it also manipulates the reference count in case we ever
+    // call wait() outside of a context that uses the
+    // FenceDestroyer class, described below.
+    EGLint wait(uint64_t timeout);
+
+    // signaledNativeFd(): upon when the native fence fd
+    // is signaled due to the sync object being signaled,
+    // this method does the following:
+    // - adjusts the reference count
+    // - destroy()s the sync object if |mDestroyWhenSignaled|.
+    void signaledNativeFd();
+
+    // destroy() wraps eglDestroySyncKHR. If used in conjunction
+    // with a FenceDestroyer object, the FenceSync object is marked
+    // for deletion and will be deleted when the FenceDestroyer
+    // object goes out of scope.
+    void destroy();
+
+    // Ref counts for dealing with correct sync object destruction
+    // in the presence of concurrent waits / destroys.
+    // This is a simple reference counting implementation
+    // that is pretty much just the kref.
+    //
+    // We do not use shared_ptr or anything like that here
+    // because we need to explicitly manipulate the reference count
+    // in the case of sync objects that use native fences:
+    //
+    // When a sync object is of native fence nature, we need to
+    // keep the sync object around long enough to complete the
+    // wait and signal the fence fd through the goldfish sync
+    // virtual device. Otherwise, we will either signal the
+    // fence fd too early or end up freeing the FenceSync object
+    // too early.
+    void getRef() { assert(mCount > 0); ++mCount; }
+    bool putRef() {
+        assert(mCount > 0);
+
+        if (mCount == 1 || --mCount == 0) {
+            return true;
+        }
+        return false;
+    }
+private:
+    bool mDestroyWhenSignaled;
+    std::atomic<int> mCount;
+    EGLDisplay mDisplay;
     EGLSyncKHR mGLSync;
-    RenderContext* mContext;
 };
 
-// The FenceSyncInfo class maps handles to FenceSync object pointers,
-// and adds functionality for tracking the signaled status
-// of the underlying OpenGL sync object.
-class FenceSyncInfo {
+// FenceDestroyer is to be used in any situation where
+// we might potentially end up freeing a FenceSync object,
+// which is any wait() or destroy() call, plus any
+// signaledNativeFd() call on a sync object generated
+// by the goldfish opengl driver itself, in which case
+// the guest will not even notice that sync object, and
+// we need to clean it up on the host by ourselves.
+class FenceDestroyer {
 public:
-    FenceSyncInfo() = default;
-
-    // Workflow for any OpenGL create sync -> wait sync -> signaled
-    // scenario:
-    // 1. After creating a EGLSyncKHR object,
-    // we wrap it with a FenceSync object and pass it to
-    // |addSync|.
-    void addSync(FenceSync* fencesync);
-
-    // 2. When waiting on a EGLSyncKHR object from the guest,
-    // we pass the |handle| field of that object to
-    // |findNonSignaledSync|. Two things can then happen:
-    // - The object is not signaled yet:
-    //     - Then a non-null FenceSync object is returned.
-    // - The object is signaled:
-    //     - A null FenceSync* is returned to represent the
-    //       signaled status.
-    FenceSync* findNonSignaledSync(uint64_t handle);
-
-    // 3. After we complete waiting, we can notify the
-    // FenceSyncInfo struct that the corresponding
-    // EGLSyncKHR object has been signaled by calling
-    // |setSignaled|. This will end up removing
-    // the corresponding FenceSync* object from the map
-    // and make further queries return NULL to reflect
-    // the signaled status.
-    void setSignaled(uint64_t handle);
-
-    // We interact with a global FenceSyncInfo object,
-    // and use |get| to obtain it (or create it, if it
-    // does not exist already).
-    static FenceSyncInfo* get();
-private:
-    // The global FenceSyncInfo object.
-    static ::android::base::LazyInstance<FenceSyncInfo> sFenceSyncInfo;
-
-    // |mSyncMap| maintains all non-signaled EGLSyncKHR objects.
-    std::unordered_map<uint64_t, std::unique_ptr<FenceSync> > mSyncMap;
-
-    // A read-write lock is used to protect mSyncMap.
-    // There can be an asymmetry between writes and reads.
-    // There are many scenarios where the same sync object is
-    // waited on in multiple threads, which only requires writing
-    // for the first successful wait. Otherwise, only reads
-    // would be used.
-    android::base::ReadWriteLock mRWLock;
-    DISALLOW_COPY_ASSIGN_AND_MOVE(FenceSyncInfo);
+    explicit FenceDestroyer(FenceSync* f) :
+        sync(f) {
+        assert(sync);
+        sync->getRef();
+    }
+    ~FenceDestroyer();
+    FenceSync* sync;
 };

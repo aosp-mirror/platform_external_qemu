@@ -16,7 +16,12 @@
 
 #include "FenceSyncInfo.h"
 
+#include "DispatchTables.h"
+#include "FrameBuffer.h"
+#include "OpenGLESDispatch/EGLDispatch.h"
+
 #include "android/base/Compiler.h"
+#include "android/base/containers/Lookup.h"
 #include "android/base/synchronization/Lock.h"
 
 #include "android/utils/assert.h"
@@ -25,39 +30,41 @@ using android::base::AutoReadLock;
 using android::base::AutoWriteLock;
 using android::base::ReadWriteLock;
 
-void FenceSyncInfo::addSync(FenceSync* fencesync) {
-    AutoWriteLock lock(mRWLock);
-    if (fencesync) {
-        mSyncMap[fencesync->getHandle()].reset(fencesync);
+FenceSync::FenceSync(bool hasNativeFence,
+                     bool destroyWhenSignaled) :
+    mDestroyWhenSignaled(destroyWhenSignaled),
+    mCount(hasNativeFence ? 2 : 1) {
+
+    mDisplay = FrameBuffer::getFB()->getDisplay();
+    mGLSync = s_egl.eglCreateSyncKHR(mDisplay,
+                                     EGL_SYNC_FENCE_KHR,
+                                     NULL);
+}
+
+EGLint FenceSync::wait(uint64_t timeout) {
+    getRef();
+    EGLint wait_res =
+        s_egl.eglClientWaitSyncKHR(mDisplay, mGLSync,
+                                   EGL_SYNC_FLUSH_COMMANDS_BIT_KHR,
+                                   timeout);
+    putRef();
+    return wait_res;
+}
+
+void FenceSync::signaledNativeFd() {
+    putRef();
+    if (mDestroyWhenSignaled) {
+        putRef();
     }
 }
 
-void FenceSyncInfo::setSignaled(uint64_t handle) {
-    AutoWriteLock lock(mRWLock);
-    mSyncMap[handle].reset();
-    mSyncMap.erase(handle);
+void FenceSync::destroy() {
+    s_egl.eglDestroySyncKHR(mDisplay, mGLSync);
 }
 
-FenceSync* FenceSyncInfo::findNonSignaledSync(uint64_t handle) {
-    AutoReadLock lock(mRWLock);
-    auto it = mSyncMap.find(handle);
-
-    if (it == mSyncMap.end()) {
-        // The sync has either been signaled
-        // or wasn't there at all.
-        // This function is to return
-        // non-signaled syncs only.
-        return nullptr;
+FenceDestroyer::~FenceDestroyer() {
+    if (sync->putRef()) {
+        sync->destroy();
+        delete sync;
     }
-
-    return it->second.get();
-}
-
-::android::base::LazyInstance<FenceSyncInfo>
-FenceSyncInfo::sFenceSyncInfo =
-    LAZY_INSTANCE_INIT;
-
-/* static */
-FenceSyncInfo* FenceSyncInfo::get() {
-    return sFenceSyncInfo.ptr();
 }

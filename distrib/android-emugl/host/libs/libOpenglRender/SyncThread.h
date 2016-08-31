@@ -46,7 +46,6 @@ enum SyncThreadOpCode {
 
 struct SyncThreadCmd {
     SyncThreadOpCode opCode = SYNC_THREAD_INIT;
-    FenceSyncInfo* fenceSyncInfo = nullptr;
     FenceSync* fenceSync = nullptr;
     uint64_t timeline = 0;
     bool needReply = false;
@@ -67,8 +66,7 @@ public:
     // the sync object is already signaled, SyncThread will increment the given
     // timeline, which should signal the guest-side fence FD.
     // - Triggers a |SyncThreadCmd| with op code |SYNC_THREAD_WAIT|
-    void triggerWait(FenceSyncInfo* fenceSyncInfo,
-                     FenceSync* fenceSync,
+    void triggerWait(FenceSync* fenceSync,
                      uint64_t timeline);
     // |cleanup|: for use with destructors and other cleanup functions.
     // it destroys the sync context and exits the sync thread.
