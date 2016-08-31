@@ -172,6 +172,8 @@ CFG_FLAG (fixed_scale, "Use fixed 1:1 scale for the initial emulator window.")
 
 OPT_FLAG(wait_for_debugger, "Pause on launch and wait for a debugger process to attach before resuming")
 
+OPT_FLAG(skip_adb_auth, "Skip adb authentication dialogue")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG
