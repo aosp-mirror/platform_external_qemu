@@ -22,6 +22,30 @@
       "revId": "59b46f297d989d2454f959a0aee9bf20b7fdb772",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5137b50c_a7f529b8",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-08-31T13:44:34Z",
+      "side": 0,
+      "message": "we probably need this cleanup. buildbot1 has stall and restart again.",
+      "parentUuid": "11545d0d_ef8a9116",
+      "range": {
+        "startLine": 226,
+        "startChar": 0,
+        "endLine": 228,
+        "endChar": 53
+      },
+      "revId": "59b46f297d989d2454f959a0aee9bf20b7fdb772",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
