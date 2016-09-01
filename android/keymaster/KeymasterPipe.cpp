@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/keymaster/KeymasterPipe.h"
+#include "android/keymaster/KeymasterPipe_wrapper.h"
 #include "android/keymaster/Keymaster.h"
 
 #include <assert.h>
@@ -99,7 +100,7 @@ void KeymasterPipe::addToRecvBuffer(const uint8_t* data, uint32_t len) {
 
 void KeymasterPipe::decodeAndExecute() {
     enum {
-        GenerateKeypair,
+        GenerateKeypair = 0,
         ImportKeypair,
         GetKeypairPublic,
         SignData,
@@ -108,14 +109,14 @@ void KeymasterPipe::decodeAndExecute() {
     mGuestRecvBufferHead = 0;
     mGuestRecvBufferTail = 0;
     uint8_t* data = &mCommandBuffer[0];
-    int cmd = *(int*)data;
+    int32_t cmd = *(int32_t*)data;
     data += sizeof(cmd);
     switch (cmd) {
         case GenerateKeypair:
             {
                 // input parameters
-                Keymaster::keymaster_keypair_t keyType =
-                        unpack<Keymaster::keymaster_keypair_t>(&data);
+                keymaster_keypair_t keyType =
+                        (keymaster_keypair_t)unpack<int32_t>(&data);
                 uint32_t keyParamsLen = unpack<uint32_t>(&data);
                 const void* keyParams = (void*)data;
                 data += keyParamsLen;
@@ -223,4 +224,8 @@ void KeymasterPipe::decodeAndExecute() {
 void registerKeymasterPipeService() {
     android::AndroidPipe::Service::add(new KeymasterPipe::Service());
 }
+}
+
+void android_init_keymaster_pipe(void) {
+    android::registerKeymasterPipeService();
 }

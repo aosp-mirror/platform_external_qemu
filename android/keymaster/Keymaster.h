@@ -11,28 +11,24 @@
 
 #pragma once
 
+#include "android/keymaster/keymaster_common.h"
+
 class Keymaster {
 public:
-    typedef enum {
-        TYPE_RSA = 1,
-        TYPE_DSA = 2,
-        TYPE_EC = 3,
-    } keymaster_keypair_t;
     int generateKeypair(
-            const keymaster_keypair_t key_type, const void* key_params,
-            uint8_t** keyBlob, uint32_t* keyBlobLength) {return 0;}
-    int importKeypair(const uint8_t* key,
-            const uint32_t key_length, uint8_t** key_blob, uint32_t* key_blob_length) {return 0;}
-    int getKeypairPublic(
-            const uint8_t* key_blob, const uint32_t key_blob_length,
-            uint8_t** x509_data, uint32_t* x509_data_length) {return 0;}
+            const keymaster_keypair_t keyType, const void* keyParams,
+            uint8_t** keyBlob, uint32_t* keyBlobLength);
+    int importKeypair(const uint8_t* key, const uint32_t keyLength,
+            uint8_t** keyBlob, uint32_t* keyBlobLength);
+    int getKeypairPublic(const uint8_t* keyBlob, const uint32_t keyBlobLength,
+            uint8_t** x509Data, uint32_t* x509DataLength);
     int signData(const void* params,
             const uint8_t* keyBlob, const uint32_t keyBlobLength,
-            const uint8_t* data, const uint32_t dataLeggnth, uint8_t** signedData,
-            uint32_t* signedDataLength) {return 0;}
+            const uint8_t* data, const uint32_t dataLength, uint8_t** signedData,
+            uint32_t* signedDataLength);
     int verifyData(const void* params,
             const uint8_t* keyBlob, const uint32_t keyBlobLength,
             const uint8_t* signedData, const uint32_t signedDataLength,
-            const uint8_t* signature, const uint32_t signatureLength) {return 0;}
+            const uint8_t* signature, const uint32_t signatureLength);
 };
 
