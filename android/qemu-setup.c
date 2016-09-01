@@ -23,6 +23,7 @@
 #include "android/globals.h"
 #include "android/hw-fingerprint.h"
 #include "android/hw-sensors.h"
+#include "android/keymaster/KeymasterPipe_wrapper.h"
 #include "android/opengles-pipe.h"
 #include "android/proxy/proxy_http.h"
 #include "android/utils/debug.h"
@@ -302,6 +303,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
     android_pipe_add_type_pingpong();
     android_pipe_add_type_throttle();
 
+    android_init_keymaster_pipe();
     android_unix_pipes_init();
     android_init_opengles_pipe();
 
