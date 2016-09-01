@@ -318,7 +318,7 @@ static void goldfish_battery_realize(DeviceState *dev, Error **errp)
     s->status = POWER_SUPPLY_STATUS_CHARGING;
     s->health = POWER_SUPPLY_HEALTH_GOOD;
     s->present = 1;     // battery is present
-    s->capacity = 50;   // 50% charged
+    s->capacity = 100;   // 100% charged
 }
 
 static void goldfish_battery_class_init(ObjectClass *klass, void *data)
