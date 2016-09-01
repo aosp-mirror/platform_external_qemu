@@ -85,6 +85,30 @@
       "revId": "0af7ed3693fd4bd702c27295c172b6a3846cbe3e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11cc5df8_da2cf5a1",
+        "filename": "vl-android.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1943,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-01T23:55:38Z",
+      "side": 1,
+      "message": "Another solution could be to call this variable skip_adb_auth and then it\u0027d follow the skip_adb_auth command line option and we wouldn\u0027t need to do a NOT computation in our heads",
+      "parentUuid": "11cc5df8_5a2e45fd",
+      "range": {
+        "startLine": 1943,
+        "startChar": 19,
+        "endLine": 1943,
+        "endChar": 20
+      },
+      "revId": "0af7ed3693fd4bd702c27295c172b6a3846cbe3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
