@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "11cc5df8_afebb9a2",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSync.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-01T23:00:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "11cc5df8_6cef0f12",
+      "range": {
+        "startLine": 29,
+        "startChar": 7,
+        "endLine": 29,
+        "endChar": 14
+      },
+      "revId": "c377090be70d4170ba40ddf1e79291b90ba877db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "11cc5df8_6cc1cf8f",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSync.h",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2016-09-01T22:44:13Z",
       "side": 1,
       "message": "why not incRef/decRef()\nget/put isn\u0027t really easy to understand (IMO)",
+      "range": {
+        "startLine": 89,
+        "startChar": 9,
+        "endLine": 89,
+        "endChar": 15
+      },
+      "revId": "c377090be70d4170ba40ddf1e79291b90ba877db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11cc5df8_0fb64dd7",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSync.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-01T23:00:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "11cc5df8_6cc1cf8f",
       "range": {
         "startLine": 89,
         "startChar": 9,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "11cc5df8_6fc38129",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSync.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-01T23:00:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "11cc5df8_ecac9ffa",
+      "range": {
+        "startLine": 111,
+        "startChar": 29,
+        "endLine": 112,
+        "endChar": 28
+      },
+      "revId": "c377090be70d4170ba40ddf1e79291b90ba877db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "11cc5df8_ec75bf8e",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSync.h",
         "patchSetId": 3
@@ -82,6 +154,30 @@
       "writtenOn": "2016-09-01T22:44:13Z",
       "side": 1,
       "message": "nit",
+      "range": {
+        "startLine": 117,
+        "startChar": 0,
+        "endLine": 117,
+        "endChar": 4
+      },
+      "revId": "c377090be70d4170ba40ddf1e79291b90ba877db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11cc5df8_4fc0451b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSync.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-01T23:00:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "11cc5df8_ec75bf8e",
       "range": {
         "startLine": 117,
         "startChar": 0,
