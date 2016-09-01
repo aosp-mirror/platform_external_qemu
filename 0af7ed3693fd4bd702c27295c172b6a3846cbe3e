@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "11cc5df8_ba12d9c2",
+        "filename": "android/cmdline-options.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-01T23:47:22Z",
+      "side": 1,
+      "message": "s/dialogue/dialog",
+      "range": {
+        "startLine": 175,
+        "startChar": 49,
+        "endLine": 175,
+        "endChar": 57
+      },
+      "revId": "0af7ed3693fd4bd702c27295c172b6a3846cbe3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11cc5df8_fa1c51d8",
+        "filename": "android/help.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1429,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-01T23:47:22Z",
+      "side": 1,
+      "message": "delete line here?",
+      "revId": "0af7ed3693fd4bd702c27295c172b6a3846cbe3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11cc5df8_7a31815d",
+        "filename": "qemu-options.hx",
+        "patchSetId": 5
+      },
+      "lineNbr": 1773,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-01T23:47:22Z",
+      "side": 1,
+      "message": "s/dialogue/dialog",
+      "range": {
+        "startLine": 1773,
+        "startChar": 44,
+        "endLine": 1773,
+        "endChar": 52
+      },
+      "revId": "0af7ed3693fd4bd702c27295c172b6a3846cbe3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11cc5df8_5a2e45fd",
+        "filename": "vl-android.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1943,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-01T23:47:22Z",
+      "side": 1,
+      "message": "I suggest putting this behind an enum.",
+      "range": {
+        "startLine": 1943,
+        "startChar": 19,
+        "endLine": 1943,
+        "endChar": 20
+      },
+      "revId": "0af7ed3693fd4bd702c27295c172b6a3846cbe3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
