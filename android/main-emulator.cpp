@@ -129,6 +129,15 @@ static bool isCpuArchSupportedByRanchu(const char* avdArch) {
     return isStringInList(avdArch, kSupported, ARRAY_SIZE(kSupported));
 }
 
+static std::string emulator_dirname(const std::string& launcherDir) {
+    char* cstr1 = path_parent(launcherDir.c_str(), 1);
+    char* cstr2 = path_join(cstr1, "emulator");
+    std::string cppstr(cstr2);
+    free(cstr1);
+    free(cstr2);
+    return cppstr;
+}
+
 /* Main routine */
 int main(int argc, char** argv)
 {
@@ -475,7 +484,16 @@ int main(int argc, char** argv)
     }
 #endif
 
-    for (int i = 0; i < 2; ++i) {
+    char* c_argv0_dir_name = path_dirname(argv[0]);
+    std::string argv0DirName(c_argv0_dir_name);
+    free(c_argv0_dir_name);
+
+    std::string emuDirName = emulator_dirname(argv0DirName);
+
+    const std::string candidates[] = {progDir, argv0DirName, emuDirName};
+    for (unsigned int i = 0; i < ARRAY_SIZE(candidates); ++i) {
+        D("try dir %s\n", candidates[i].c_str());
+        progDir = candidates[i];
         if (ranchu == RANCHU_ON) {
             emulatorPath = getQemuExecutablePath(progDir.c_str(),
                                                  avdArch,
@@ -488,7 +506,6 @@ int main(int argc, char** argv)
         if (path_exists(emulatorPath)) {
             break;
         }
-        progDir = path_dirname(argv[0]);
     }
     D("Found target-specific %d-bit emulator binary: %s\n", wantedBitness, emulatorPath);
 
