@@ -3,7 +3,7 @@ apply plugin: 'sdk-files'
 import com.android.tools.internal.emulator.BuildEmulator
 
 // Get SDK revision to define emulator revision
-File fprops = new File(rootDir.getParentFile(), 'sdk/files/tools_source.properties')
+File fprops = new File(rootDir.getParentFile(), 'external/qemu/source.properties')
 Properties props = new Properties()
 props.load(fprops.newDataInputStream())
 
@@ -22,6 +22,9 @@ task buildWindowsEmulator(type: BuildEmulator) {
 
 sdk {
     common(mac, linux) {
+        item(fprops) {
+            notice null
+        }
         item('android/avd/hardware-properties.ini') {
             into 'lib'
             notice null
@@ -89,6 +92,9 @@ sdk {
     }
 
     windows {
+        item(fprops) {
+            notice null
+        }
         item('android/avd/hardware-properties.ini') {
             into 'lib'
             notice null
