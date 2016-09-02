@@ -143,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "11cc5df8_d45f9e42",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1055888
+      },
+      "writtenOn": "2016-09-02T19:34:35Z",
+      "side": 1,
+      "message": "I personally prefer \"emulator\", but maybe J should decide?",
+      "parentUuid": "11cc5df8_d24e9136",
+      "range": {
+        "startLine": 133,
+        "startChar": 51,
+        "endLine": 133,
+        "endChar": 54
+      },
+      "revId": "8308fbc3708eeec7e64bdfd17e234c5c557facbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "11cc5df8_263febc5",
         "filename": "android/main-emulator.cpp",
         "patchSetId": 1
