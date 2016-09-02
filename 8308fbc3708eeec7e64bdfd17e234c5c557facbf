@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "11cc5df8_4642e73f",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-02T15:27:00Z",
+      "side": 1,
+      "message": "the file is C++, what about an std::string here?",
+      "range": {
+        "startLine": 132,
+        "startChar": 13,
+        "endLine": 132,
+        "endChar": 24
+      },
+      "revId": "8308fbc3708eeec7e64bdfd17e234c5c557facbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11cc5df8_e66313de",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-02T15:27:00Z",
+      "side": 1,
+      "message": "path_parent malloc()-s its result",
+      "range": {
+        "startLine": 133,
+        "startChar": 21,
+        "endLine": 133,
+        "endChar": 32
+      },
+      "revId": "8308fbc3708eeec7e64bdfd17e234c5c557facbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11cc5df8_263febc5",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-02T15:27:00Z",
+      "side": 1,
+      "message": "std::string?",
+      "range": {
+        "startLine": 482,
+        "startChar": 10,
+        "endLine": 482,
+        "endChar": 17
+      },
+      "revId": "8308fbc3708eeec7e64bdfd17e234c5c557facbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11cc5df8_4649475a",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-02T15:27:00Z",
+      "side": 1,
+      "message": "path_dirname() returns a result of strdup()",
+      "range": {
+        "startLine": 482,
+        "startChar": 50,
+        "endLine": 482,
+        "endChar": 62
+      },
+      "revId": "8308fbc3708eeec7e64bdfd17e234c5c557facbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11cc5df8_e67af37d",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 483,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-02T15:27:00Z",
+      "side": 1,
+      "message": "there\u0027s an ARRAY_SIZE() macro in android/base/ArraySize.h\nAlso, it has a constexpr function for C++ that\u0027s the preferred over the macro",
+      "range": {
+        "startLine": 483,
+        "startChar": 24,
+        "endLine": 483,
+        "endChar": 66
+      },
+      "revId": "8308fbc3708eeec7e64bdfd17e234c5c557facbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
