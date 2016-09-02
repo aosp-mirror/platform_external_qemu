@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "11cc5df8_32c9e5a2",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-09-02T19:23:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "11cc5df8_4642e73f",
+      "range": {
+        "startLine": 132,
+        "startChar": 13,
+        "endLine": 132,
+        "endChar": 24
+      },
+      "revId": "8308fbc3708eeec7e64bdfd17e234c5c557facbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "11cc5df8_e66313de",
         "filename": "android/main-emulator.cpp",
         "patchSetId": 1
@@ -59,6 +83,54 @@
       "writtenOn": "2016-09-02T18:25:01Z",
       "side": 1,
       "message": "must it be \"emu\" and not \"emulator\"?",
+      "range": {
+        "startLine": 133,
+        "startChar": 51,
+        "endLine": 133,
+        "endChar": 54
+      },
+      "revId": "8308fbc3708eeec7e64bdfd17e234c5c557facbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11cc5df8_92c6d98e",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-09-02T19:23:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "11cc5df8_e66313de",
+      "range": {
+        "startLine": 133,
+        "startChar": 21,
+        "endLine": 133,
+        "endChar": 32
+      },
+      "revId": "8308fbc3708eeec7e64bdfd17e234c5c557facbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11cc5df8_d24e9136",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-09-02T19:23:09Z",
+      "side": 1,
+      "message": "which name you prefer ?\n$ANDROID_SDK_ROOT/emu \nor  $ANDROID_SDK_ROOT/emulator ?",
+      "parentUuid": "11cc5df8_a18e252f",
       "range": {
         "startLine": 133,
         "startChar": 51,
@@ -117,6 +189,54 @@
     },
     {
       "key": {
+        "uuid": "11cc5df8_b25315df",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-09-02T19:23:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "11cc5df8_263febc5",
+      "range": {
+        "startLine": 482,
+        "startChar": 10,
+        "endLine": 482,
+        "endChar": 17
+      },
+      "revId": "8308fbc3708eeec7e64bdfd17e234c5c557facbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11cc5df8_f25d8dea",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-09-02T19:23:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "11cc5df8_4649475a",
+      "range": {
+        "startLine": 482,
+        "startChar": 50,
+        "endLine": 482,
+        "endChar": 62
+      },
+      "revId": "8308fbc3708eeec7e64bdfd17e234c5c557facbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "11cc5df8_e67af37d",
         "filename": "android/main-emulator.cpp",
         "patchSetId": 1
@@ -128,6 +248,30 @@
       "writtenOn": "2016-09-02T15:27:00Z",
       "side": 1,
       "message": "there\u0027s an ARRAY_SIZE() macro in android/base/ArraySize.h\nAlso, it has a constexpr function for C++ that\u0027s the preferred over the macro",
+      "range": {
+        "startLine": 483,
+        "startChar": 24,
+        "endLine": 483,
+        "endChar": 66
+      },
+      "revId": "8308fbc3708eeec7e64bdfd17e234c5c557facbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11cc5df8_125949ff",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 483,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-09-02T19:23:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "11cc5df8_e67af37d",
       "range": {
         "startLine": 483,
         "startChar": 24,
