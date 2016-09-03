@@ -453,6 +453,25 @@ $$(UIC_SRC): $$(SRC) $$(QT_UIC_TOOL)
 LOCAL_GENERATED_SOURCES += $$(UIC_SRC)
 endef
 
+# Generate and compile a .proto Protobuf source file through the 'protoc' tool.
+# NOTE: This expects PROTOC_TOOL to be defined.
+define compile-proto-source
+SRC := $(1)
+OUT_SRC := $$(SRC:%.proto=%.pb.cc)
+ifeq (,$$(strip $$(PROTOC_TOOL)))
+    $$(error PROTOC_TOOL is not defined when trying to generate $$(OUT_SRC) !!)
+endif
+$$(OUT_SRC): PRIVATE_SRC := $$(SRC)
+$$(OUT_SRC): PRIVATE_DST_DIR := $$(dir $$(OUT_SRC))
+$$(OUT_SRC): PRIVATE_DST := $$(OUT_SRC)
+$$(OUT_SRC): PRIVATE_NAME := $$(notdir $$(SRC:%.proto=%))
+$$(OUT_SRC): $$(SRC) $$(PROTOC_TOOL)
+	@echo "Protoc: $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
+	$(hide) $$(PROTOC_TOOL) -I$$(dir $$(PRIVATE_SRC)) --cpp_out=$$(PRIVATE_DST_DIR) $$(PRIVATE_SRC)
+
+$$(eval $$(call compile-generated-cxx-source,$$(OUT_SRC)))
+endef
+
 # Call this function to force a module to link statically to the C++ standard
 # library on platforms that support it (i.e. Linux and Windows).
 local-link-static-c++lib = $(eval $(ev-local-link-static-c++lib))

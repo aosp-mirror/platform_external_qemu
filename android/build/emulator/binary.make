@@ -92,6 +92,10 @@ $(foreach src,$(LOCAL_QT_UI_SRC_FILES), \
     $(eval $(call compile-qt-uic-source,$(src))) \
 )
 
+$(foreach src,$(LOCAL_PROTO_SOURCES), \
+    $(eval $(call compile-proto-source,$(src))) \
+)
+
 $(foreach src,$(LOCAL_GENERATED_C_SOURCES), \
     $(eval $(call compile-generated-c-source,$(src))) \
 )
