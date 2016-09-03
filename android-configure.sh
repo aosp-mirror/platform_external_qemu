@@ -562,6 +562,11 @@ probe_prebuilts_dir "LibCURL" LIBCURL_PREBUILTS_DIR curl
 ###
 probe_prebuilts_dir "LibANGLEtranslation" ANGLE_TRANSLATION_PREBUILTS_DIR common/ANGLE
 
+###
+###  Protobuf library probe
+###
+probe_prebuilts_dir "Protobuf" PROTOBUF_PREBUILTS_DIR protobuf
+
 CACERTS_FILE="$PROGDIR/android/data/ca-bundle.pem"
 if [ ! -f "$CACERTS_FILE" ]; then
     panic "Missing cacerts file: $CACERTS_FILE"
@@ -590,7 +595,6 @@ fi
 ###
 ###  Qt probe
 ###
-QT_PREBUILTS_DIR=
 probe_prebuilts_dir "Qt" QT_PREBUILTS_DIR qt
 
 ###
@@ -983,6 +987,7 @@ echo "ANGLE_TRANSLATION_PREBUILTS_DIR := $ANGLE_TRANSLATION_PREBUILTS_DIR" >> $c
 echo "BREAKPAD_PREBUILTS_DIR := $BREAKPAD_PREBUILTS_DIR" >> $config_mk
 # libuuid is a part of e2fsprogs package
 echo "LIBUUID_PREBUILTS_DIR := $E2FSPROGS_PREBUILTS_DIR" >> $config_mk
+echo "PROTOBUF_PREBUILTS_DIR := $PROTOBUF_PREBUILTS_DIR" >> $config_mk
 
 if [ $OPTION_DEBUG = "yes" ] ; then
     echo "BUILD_DEBUG := true" >> $config_mk
