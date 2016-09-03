@@ -44,9 +44,14 @@ _ANDROID_EMU_OLD_LOCAL_PATH := $(LOCAL_PATH)
 
 _ANDROID_EMU_ROOT := $(call my-dir)
 
+###############################################################################
+#
+# Metrics library is a part of android-emu, so let's include it here
+include $(_ANDROID_EMU_ROOT)/android/metrics/proto/MetricsProto.mk
+
 # all includes are like 'android/...', so we need to count on that
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
-ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES)
+ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES)
 
 ###############################################################################
 #
@@ -54,7 +59,7 @@ ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES)
 #
 #  This is a static library containing the low-level system interfaces
 #  provided by android/base/ and android/utils/. It should only depend on
-#  system headers and libraries, and nothing else (including the C++ STL).
+#  system and language runtime headers and libraries, and nothing else.
 #  Everything that depends on the host implementation, e.g. Looper, shouldn't
 #  be part of this library, but goes into android-emu
 #
@@ -382,6 +387,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-libjpeg \
     emulator-libpng \
     emulator-zlib \
+    $(METRICS_PROTO_STATIC_LIBRARIES) \
 
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \

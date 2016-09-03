@@ -30,6 +30,8 @@
 #include "android/utils/string.h"
 #include "android/utils/system.h"
 
+#include "android/metrics/proto/studio_stats.pb.h"
+
 #ifdef _WIN32
 #include <process.h>
 #else
@@ -81,6 +83,10 @@ static LoopTimer* metrics_timer = NULL;
 static androidMetricsUploaderFunction testUploader = NULL;
 
 ABool androidMetrics_moduleInit(const char* avdHome) {
+    auto e = android_studio::AndroidStudioEvent::default_instance().New();
+    e->Clear();
+    delete e;
+
     char path[PATH_MAX], *pathend = path, *bufend = pathend + sizeof(path);
 
     pathend = bufprint(pathend, bufend, "%s", avdHome);
