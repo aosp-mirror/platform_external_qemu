@@ -84,7 +84,7 @@ int ffs(int i);
 struct tm *gmtime_r(const time_t *timep, struct tm *result);
 #undef localtime_r
 struct tm *localtime_r(const time_t *timep, struct tm *result);
-
+#undef strtok_r
 char *strtok_r(char *str, const char *delim, char **saveptr);
 
 /* Polling handling */
