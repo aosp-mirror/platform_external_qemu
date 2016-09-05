@@ -501,6 +501,17 @@ if [ "$PCBIOS_PROBE" = "yes" ]; then
             cp -f $PCBIOS_DIR/$BIOS_FILE $OUT_DIR/lib/pc-bios/$BIOS_FILE ||
                 panic "Missing BIOS file: $PCBIOS_DIR/$BIOS_FILE"
         done
+        # The following BIOS files are only required by QEMU 2.7.0, move them to the non-optional
+        # list above once the big rebasing has been completed.
+        for BIOS_FILE in linuxboot_dma.bin; do
+            if [ ! -f "$PCBIOS_DIR/$BIOS_FILE" ]; then
+                log "PC Bios   : Skipping optional missing $BIOS_FILE"
+                continue
+            fi
+            log "PC Bios    : Copying $BIOS_FILE"
+            cp -f $PCBIOS_DIR/$BIOS_FILE $OUT_DIR/lib/pc-bios/$BIOS_FILE ||
+                panic "Could not copy BIOS file: $PCBIOS_DIR/$BIOS_FILE"
+        done
     fi
 fi
 
