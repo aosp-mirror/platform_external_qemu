@@ -22,6 +22,30 @@
       "revId": "9b3ae686dc157c9ac94ffb26bed8b634439dee34",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76366f11_0f918449",
+        "filename": "android/metrics/proto/studio_stats.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-06T17:39:56Z",
+      "side": 1,
+      "message": "This is a very good question. We have a single Android Studio help page describing how to update the protocol definitions, but it\u0027s checked into g3. I will update that page and will put a README file in the emulator repository to point there",
+      "parentUuid": "76366f11_99d326fe",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 5,
+        "endChar": 78
+      },
+      "revId": "9b3ae686dc157c9ac94ffb26bed8b634439dee34",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
