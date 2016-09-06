@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "76366f11_99d326fe",
+        "filename": "android/metrics/proto/studio_stats.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-06T14:39:57Z",
+      "side": 1,
+      "message": "zyy@: is the idea that you will take care of this part?\n\nI\u0027m not sure what\u0027s going on yet in the set of CLs, but this seemed to jump out at me: If we add a new metric for the emulator, what would be the best process for updating both emulator / backend (assuming still that both are needed)? Is it same as before? Could we streamline it?",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 5,
+        "endChar": 78
+      },
+      "revId": "9b3ae686dc157c9ac94ffb26bed8b634439dee34",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
