@@ -13,6 +13,7 @@
 #include "android/emulation/control/sensors_agent.h"
 #include "android/emulator-window.h"
 #include "android/hw-sensors.h"
+#include "android/metrics/metrics_reporter_callbacks.h"
 #include "android/skin/ui.h"
 
 
@@ -113,6 +114,9 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     mUi->positionYSlider->setRange(Accelerometer3DWidget::MinY,
                                    Accelerometer3DWidget::MaxY);
     onPhoneRotationChanged();
+    android::metrics::addTickCallback([this](AndroidMetrics* m) {
+        m->sensors_used = mVirtualSensorsUsed ? 1 : 0;
+    });
 }
 
 void VirtualSensorsPage::showEvent(QShowEvent*) {
@@ -170,6 +174,7 @@ void VirtualSensorsPage::resetAccelerometerRotationFromSkinLayout(
     }
 }
 void VirtualSensorsPage::resetAccelerometerRotation(const QQuaternion& rotation) {
+    if (!mFirstShow) mVirtualSensorsUsed = true;
     if (mUi->accelWidget->isValid()) {
         mUi->accelWidget->setPosition(QVector2D(0.0, 0.0));
         mUi->accelWidget->setRotation(rotation);
@@ -212,7 +217,7 @@ static void setSensorValue(
         double v1,
         double v2 = 0.0,
         double v3 = 0.0) {
-    if (agent) {
+  if (agent) {
         agent->setSensor(sensor_id,
                          static_cast<float>(v1),
                          static_cast<float>(v2),
@@ -222,25 +227,30 @@ static void setSensorValue(
 
 void VirtualSensorsPage::on_temperatureSensorValueWidget_valueChanged(
         double value) {
+    if (!mFirstShow) mVirtualSensorsUsed = true;
     setSensorValue(mSensorsAgent, ANDROID_SENSOR_TEMPERATURE, value);
 }
 
 void VirtualSensorsPage::on_proximitySensorValueWidget_valueChanged(
         double value) {
+    if (!mFirstShow) mVirtualSensorsUsed = true;
     setSensorValue(mSensorsAgent, ANDROID_SENSOR_PROXIMITY, value);
 }
 
 void VirtualSensorsPage::on_lightSensorValueWidget_valueChanged(double value) {
+    if (!mFirstShow) mVirtualSensorsUsed = true;
     setSensorValue(mSensorsAgent, ANDROID_SENSOR_LIGHT, value);
 }
 
 void VirtualSensorsPage::on_pressureSensorValueWidget_valueChanged(
     double value) {
+    if (!mFirstShow) mVirtualSensorsUsed = true;
     setSensorValue(mSensorsAgent, ANDROID_SENSOR_PRESSURE, value);
 }
 
 void VirtualSensorsPage::on_humiditySensorValueWidget_valueChanged(
     double value) {
+    if (!mFirstShow) mVirtualSensorsUsed = true;
     setSensorValue(mSensorsAgent, ANDROID_SENSOR_HUMIDITY, value);
 }
 
@@ -317,6 +327,7 @@ void VirtualSensorsPage::on_positionYSlider_valueChanged(double) {
 }
 
 void VirtualSensorsPage::updateAccelerometerValues() {
+    if (!mFirstShow) mVirtualSensorsUsed = true;
     // Gravity and magnetic vector in the device's frame of
     // reference.
     QVector3D gravity_vector(0.0, 9.81, 0.0);

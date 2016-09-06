@@ -96,4 +96,5 @@ private:
     QTimer mAccelerationTimer;
     bool mFirstShow = true;
     SkinRotation mCoarseOrientation;
+    bool mVirtualSensorsUsed = false;
 };
