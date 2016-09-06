@@ -46,6 +46,30 @@
       "revId": "9b3ae686dc157c9ac94ffb26bed8b634439dee34",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "16f373ac_1791beff",
+        "filename": "android/metrics/proto/studio_stats.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-06T20:42:11Z",
+      "side": 1,
+      "message": "Actually, as the source files and scrips are in g3, I can\u0027t put any direct references here.",
+      "parentUuid": "76366f11_0f918449",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 5,
+        "endChar": 78
+      },
+      "revId": "9b3ae686dc157c9ac94ffb26bed8b634439dee34",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
