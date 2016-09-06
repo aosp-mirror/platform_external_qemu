@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "76366f11_19aa766f",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 593,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-06T14:39:16Z",
+      "side": 0,
+      "message": "Is this OK?",
+      "range": {
+        "startLine": 593,
+        "startChar": 0,
+        "endLine": 593,
+        "endChar": 17
+      },
+      "revId": "010b46d97f7f3f980399c1e28073352bdba9b5fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
