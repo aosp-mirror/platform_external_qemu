@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "76366f11_b4f55171",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 513,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-06T16:52:25Z",
+      "side": 1,
+      "message": "this message doesn\u0027t feel right for an optional file. \u0027Failed to copy\u0027 suits better IMO",
+      "range": {
+        "startLine": 513,
+        "startChar": 23,
+        "endLine": 513,
+        "endChar": 41
+      },
+      "revId": "ace79cd40790b589bea19764389d5aa5d7eb91e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
