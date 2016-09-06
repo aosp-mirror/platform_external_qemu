@@ -22,6 +22,30 @@
       "revId": "010b46d97f7f3f980399c1e28073352bdba9b5fd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6417f7a_006b28ad",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 593,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-09-06T14:51:02Z",
+      "side": 0,
+      "message": "It is, this is a left-over from previous versions where probe_prebuilts_dir would not panic if the directory was missing.",
+      "parentUuid": "76366f11_19aa766f",
+      "range": {
+        "startLine": 593,
+        "startChar": 0,
+        "endLine": 593,
+        "endChar": 17
+      },
+      "revId": "010b46d97f7f3f980399c1e28073352bdba9b5fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
