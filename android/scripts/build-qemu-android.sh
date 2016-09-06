@@ -389,6 +389,10 @@ EOF
     run mkdir -p "$BINARY_DIR" ||
     panic "Could not create final directory: $BINARY_DIR"
 
+    run cp -p \
+        "$BUILD_DIR"/config-host.h \
+        "$BINARY_DIR"/config-host.h
+
     for QEMU_TARGET in $QEMU_TARGETS; do
         QEMU_EXE=qemu-system-${QEMU_TARGET}$(builder_host_exe_extension)
         dump "$(builder_text) Copying $QEMU_EXE to $BINARY_DIR/"
@@ -396,6 +400,12 @@ EOF
         run cp -p \
             "$BUILD_DIR"/$QEMU_TARGET-softmmu/$QEMU_EXE \
             "$BINARY_DIR"/$QEMU_EXE
+
+        mkdir -p "$BINARY_DIR"/$QEMU_TARGET-softmmu
+
+        run cp -p \
+            "$BUILD_DIR"/$QEMU_TARGET-softmmu/config-target.h \
+            "$BINARY_DIR"/$QEMU_TARGET-softmmu/config-target.h
 
         if [ -z "$OPT_DEBUG" ]; then
             run ${GNU_CONFIG_HOST_PREFIX}strip "$BINARY_DIR"/$QEMU_EXE
@@ -463,12 +473,13 @@ EOF
         dump "[$SYSTEM] Retrieving remote darwin binaries."
         run mkdir -p "$BINARY_DIR" ||
                 panic "Could not create installation directory: $BINARY_DIR"
-        builder_remote_darwin_scp -r \
-            "$DARWIN_SSH":$REMOTE_DIR/prebuilts/qemu-android/$SYSTEM/qemu-system-* \
-            $BINARY_DIR/
 
+        REMOTE_SRCDIR="$DARWIN_SSH":$REMOTE_DIR/prebuilts/qemu-android/$SYSTEM
         builder_remote_darwin_scp -r \
-            "$DARWIN_SSH":$REMOTE_DIR/prebuilts/qemu-android/$SYSTEM/LINK-qemu-system-* \
+            "$REMOTE_SRCDIR"/qemu-system-* \
+            "$REMOTE_SRCDIR"/LINK-qemu-system-* \
+            "$REMOTE_SRCDIR"/config-host.h \
+            "$REMOTE_SRCDIR"/*/config-target.h \
             $BINARY_DIR/
 
         timestamp_set "$INSTALL_DIR/$SYSTEM" qemu-android
