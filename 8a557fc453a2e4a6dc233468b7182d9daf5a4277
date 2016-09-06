@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "76366f11_59f23e99",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1044603
+      },
+      "writtenOn": "2016-09-06T14:38:36Z",
+      "side": 1,
+      "message": "change to \"emulator\". Emu is a bit too vague for use outside of the dev team.",
+      "range": {
+        "startLine": 134,
+        "startChar": 36,
+        "endLine": 134,
+        "endChar": 39
+      },
+      "revId": "8a557fc453a2e4a6dc233468b7182d9daf5a4277",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
