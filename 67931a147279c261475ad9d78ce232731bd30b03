@@ -45,6 +45,30 @@
       "revId": "67931a147279c261475ad9d78ce232731bd30b03",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "563b2b5a_54d98ce7",
+        "filename": "android/emulation/control/clipboard_agent.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-07T21:27:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "563b2b5a_a60a322f",
+      "range": {
+        "startLine": 23,
+        "startChar": 44,
+        "endLine": 24,
+        "endChar": 43
+      },
+      "revId": "67931a147279c261475ad9d78ce232731bd30b03",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
