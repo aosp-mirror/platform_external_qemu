@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "563b2b5a_86028e15",
+        "filename": "android/emulation/ClipboardPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-07T20:21:28Z",
+      "side": 1,
+      "message": "please add a fallback to a noop function if the passed one is null",
+      "range": {
+        "startLine": 184,
+        "startChar": 30,
+        "endLine": 184,
+        "endChar": 33
+      },
+      "revId": "67931a147279c261475ad9d78ce232731bd30b03",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "563b2b5a_a60a322f",
+        "filename": "android/emulation/control/clipboard_agent.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-07T20:21:28Z",
+      "side": 1,
+      "message": "nit: obsolete",
+      "range": {
+        "startLine": 23,
+        "startChar": 44,
+        "endLine": 24,
+        "endChar": 43
+      },
+      "revId": "67931a147279c261475ad9d78ce232731bd30b03",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
