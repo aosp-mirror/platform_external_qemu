@@ -63,6 +63,7 @@ ANDROID_BEGIN_HEADER
     _AVD_IMG(USERDATA,"userdata-qemu.img", "user data") \
     _AVD_IMG(CACHE,"cache.img","cache") \
     _AVD_IMG(SDCARD,"sdcard.img","SD Card") \
+    _AVD_IMG(ENCRYPTIONKEY,"encryptionkey.img","Encryption Key") \
     _AVD_IMG(SNAPSHOTS,"snapshots.img","snapshots") \
 
 /* define the enumared values corresponding to each AVD image type
@@ -164,6 +165,7 @@ char*  avdInfo_getKernelPath( const AvdInfo*  i );
 char*  avdInfo_getRanchuKernelPath( const AvdInfo*  i );
 char*  avdInfo_getRamdiskPath( const AvdInfo*  i );
 char*  avdInfo_getSdCardPath( const AvdInfo* i );
+char*  avdInfo_getEncryptionKeyImagePath( const AvdInfo* i );
 char*  avdInfo_getSnapStoragePath( const AvdInfo* i );
 
 /* This function returns NULL if the cache image file cannot be found.
