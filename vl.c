@@ -889,6 +889,7 @@ static int create_qcow2_images() {
         android_hw->disk_cachePartition_path,
         android_hw->disk_dataPartition_path,
         android_hw->hw_sdCard_path,
+        android_hw->disk_encryptionKeyPartition_path,
     };
     int p;
     for (p = 0; p < ARRAY_SIZE(image_paths); p++) {
