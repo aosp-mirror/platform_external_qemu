@@ -890,6 +890,7 @@ extern "C" int main(int argc, char **argv) {
     static UiEmuAgent uiEmuAgent;
     uiEmuAgent.battery = gQAndroidBatteryAgent;
     uiEmuAgent.cellular = gQAndroidCellularAgent;
+    uiEmuAgent.clipboard = gQAndroidClipboardAgent;
     uiEmuAgent.finger = gQAndroidFingerAgent;
     uiEmuAgent.location = gQAndroidLocationAgent;
     uiEmuAgent.sensors = gQAndroidSensorsAgent;
