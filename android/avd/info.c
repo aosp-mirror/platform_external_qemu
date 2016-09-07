@@ -1142,6 +1142,12 @@ char*  avdInfo_getSdCardPath( const AvdInfo* i )
     return _avdInfo_getContentFilePath(i, imageName);
 }
 
+char* avdInfo_getEncryptImagePath(const AvdInfo* i )
+{
+    const char* imageName = _imageFileNames[ AVD_IMAGE_ENCRYPT ];
+    return _avdInfo_getContentFilePath(i, imageName);
+}
+
 char*
 avdInfo_getSnapStoragePath( const AvdInfo* i )
 {
