@@ -27,3 +27,4 @@
 // #pragma once here.
 
 FEATURE_CONTROL_ITEM(GrallocSync)
+FEATURE_CONTROL_ITEM(EncryptUserData)

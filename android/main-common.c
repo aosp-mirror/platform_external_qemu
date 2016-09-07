@@ -902,6 +902,8 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         }
     }
 
+    str_reset(&hw->disk_encryptPartition_path, avdInfo_getEncryptImagePath(avd));
+
     if (hw->disk_cachePartition_path && opts->cache_size) {
         /* Set cache partition size per user options. */
         char*  end;
