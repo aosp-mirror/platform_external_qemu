@@ -22,6 +22,7 @@
 #include "android/constants.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/error-messages.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/filesystems/ext4_resize.h"
 #include "android/filesystems/ext4_utils.h"
 #include "android/globals.h"
@@ -87,9 +88,10 @@ enum ImageType {
     IMAGE_TYPE_CACHE,
     IMAGE_TYPE_USER_DATA,
     IMAGE_TYPE_SD_CARD,
+    IMAGE_TYPE_ENCRYPTION_KEY,
 };
 
-const int kMaxPartitions = 4;
+const int kMaxPartitions = 5;
 const int kMaxTargetQemuParams = 16;
 
 /*
@@ -133,7 +135,7 @@ const TargetInfo kTarget = {
     "ttyAMA",
     "virtio-blk-device",
     "virtio-net-device",
-    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
+    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
     {NULL},
 #elif defined(TARGET_ARM)
     "arm",
@@ -142,7 +144,7 @@ const TargetInfo kTarget = {
     "ttyAMA",
     "virtio-blk-device",
     "virtio-net-device",
-    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
+    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
     {NULL},
 #elif defined(TARGET_MIPS64)
     "mips64",
@@ -151,7 +153,7 @@ const TargetInfo kTarget = {
     "ttyGF",
     "virtio-blk-device",
     "virtio-net-device",
-    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
+    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
     {NULL},
 #elif defined(TARGET_MIPS)
     "mips",
@@ -160,7 +162,7 @@ const TargetInfo kTarget = {
     "ttyGF",
     "virtio-blk-device",
     "virtio-net-device",
-    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
+    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
     {NULL},
 #elif defined(TARGET_X86_64)
     "x86_64",
@@ -169,7 +171,7 @@ const TargetInfo kTarget = {
     "ttyS",
     "virtio-blk-pci",
     "virtio-net-pci",
-    {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_SD_CARD},
+    {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_SD_CARD},
     {"-vga", "none", NULL},
 #elif defined(TARGET_I386)  // Both i386 and x86_64 targets define this macro
     "x86",
@@ -178,7 +180,7 @@ const TargetInfo kTarget = {
     "ttyS",
     "virtio-blk-pci",
     "virtio-net-pci",
-    {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_SD_CARD},
+    {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_SD_CARD},
     {"-vga", "none", NULL},
 #else
     #error No target platform is defined
@@ -260,6 +262,18 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
                 return;
             }
             break;
+        case IMAGE_TYPE_ENCRYPTION_KEY:
+            if (android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData) &&
+                hw->disk_encryptionKeyPartition_path != NULL && strcmp(hw->disk_encryptionKeyPartition_path, "")) {
+               driveParam += StringFormat("index=%d,id=encrypt,file=%s.qcow2",
+                                         idx++, hw->disk_encryptionKeyPartition_path);
+               deviceParam = StringFormat("%s,drive=encrypt",
+                                          kTarget.storageDeviceType);
+            } else {
+                /* no encryption partition is defined */
+                return;
+            }
+            break;
         default:
             dwarning("Unknown Image type %d\n", type);
             return;
@@ -300,6 +314,37 @@ static void enter_qemu_main_loop(int argc, char **argv) {
 // implementation, that later calls qMain().
 #define main qt_main
 #endif
+
+static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw) {
+    char* userdata_dir = path_dirname(hw->disk_dataPartition_path);
+    if (!userdata_dir) {
+        derror("no userdata_dir");
+        return false;
+    }
+    hw->disk_encryptionKeyPartition_path = path_join(userdata_dir, "encryptionkey.img");
+    free(userdata_dir);
+    if (path_exists(hw->disk_systemPartition_initPath)) {
+        char* sysimg_dir = path_dirname(hw->disk_systemPartition_initPath);
+        if (!sysimg_dir) {
+            derror("no sysimg_dir %s", hw->disk_systemPartition_initPath);
+            return false;
+        }
+        char* init_encryptionkey_img_path = path_join(sysimg_dir, "encryptionkey.img");
+        free(sysimg_dir);
+        if (path_exists(init_encryptionkey_img_path)) {
+            if (path_copy_file(hw->disk_encryptionKeyPartition_path, init_encryptionkey_img_path) >= 0) {
+                free(init_encryptionkey_img_path);
+                return true;
+            }
+        } else {
+            derror("no init encryptionkey.img");
+        }
+        free(init_encryptionkey_img_path);
+    } else {
+        derror("no system partition %s", hw->disk_systemPartition_initPath);
+    }
+    return false;
+}
 
 extern "C" int main(int argc, char **argv) {
     process_early_setup(argc, argv);
@@ -592,6 +637,18 @@ extern "C" int main(int argc, char **argv) {
                                     android_hw->disk_dataPartition_size);
             }
         }
+    }
+
+    //create encryptionkey.img file if needed
+    if (android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData)) {
+        if (hw->disk_encryptionKeyPartition_path == NULL) {
+            if(!createInitalEncryptionKeyPartition(hw)) {
+                derror("Encryption is requested but failed to create encrypt partition.");
+                return 1;
+            }
+        }
+    } else {
+        dwarning("encryption is off");
     }
 
     bool createEmptyCacheFile = false;
