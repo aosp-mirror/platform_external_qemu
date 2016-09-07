@@ -16,6 +16,7 @@
 
 #include "android/emulation/control/battery_agent.h"
 #include "android/emulation/control/cellular_agent.h"
+#include "android/emulation/control/clipboard_agent.h"
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/location_agent.h"
@@ -38,6 +39,9 @@ extern const QAndroidBatteryAgent* const gQAndroidBatteryAgent;
 
 // Defined in android/qemu-cellular-agent.c
 extern const QAndroidCellularAgent* const gQAndroidCellularAgent;
+
+// Defined in qemu-clipboard-agent-impl.cpp
+extern const QAndroidClipboardAgent* const gQAndroidClipboardAgent;
 
 // Defined in android/qemu-finger-agent.c
 extern const QAndroidFingerAgent* const gQAndroidFingerAgent;
