@@ -3,8 +3,7 @@
 PROTOBUF_TOP_DIR := $(PROTOBUF_PREBUILTS_DIR)/$(BUILD_TARGET_TAG)
 PROTOC_TOOL := $(PROTOBUF_PREBUILTS_DIR)/$(BUILD_HOST_TAG64)/bin/protoc$(BUILD_TARGET_EXEEXT)
 
-# TODO(zyy): uncomment when the protobuf prebuilts git repo is created
-# $(call define-emulator-prebuilt-library, \
+$(call define-emulator-prebuilt-library, \
     emulator-protobuf, \
     $(PROTOBUF_TOP_DIR)/lib/libprotobuf.a)
 
