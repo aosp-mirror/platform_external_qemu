@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "16045397_c90ab529",
+        "filename": "android/emulation/ClipboardPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-07T20:06:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "16f373ac_d561eba7",
+      "range": {
+        "startLine": 20,
+        "startChar": 53,
+        "endLine": 20,
+        "endChar": 76
+      },
+      "revId": "f8326534b41bc7a72bd63388061ef5eedfc8248c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "16f373ac_357caf4a",
         "filename": "android/emulation/ClipboardPipe.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-09-07T01:20:41Z",
       "side": 1,
       "message": "this could be done in .h in a member initializer; also, what about the write state?",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 48
+      },
+      "revId": "f8326534b41bc7a72bd63388061ef5eedfc8248c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "563b2b5a_26db820c",
+        "filename": "android/emulation/ClipboardPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-07T20:06:32Z",
+      "side": 1,
+      "message": "the write state is reset every time \"setGuestClipboardContents\" is called",
+      "parentUuid": "16f373ac_357caf4a",
       "range": {
         "startLine": 25,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "76158fbe_0c3a17d2",
+        "filename": "android/emulation/ClipboardPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-07T20:06:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "16f373ac_95712375",
+      "range": {
+        "startLine": 32,
+        "startChar": 1,
+        "endLine": 32,
+        "endChar": 6
+      },
+      "revId": "f8326534b41bc7a72bd63388061ef5eedfc8248c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "16f373ac_95c2c347",
         "filename": "android/emulation/ClipboardPipe.cpp",
         "patchSetId": 2
@@ -82,6 +154,30 @@
       "writtenOn": "2016-09-07T01:20:41Z",
       "side": 1,
       "message": "what does code style say about the in-out parameters? I strongly prefer references, but if the code style requires pointers then please change it",
+      "range": {
+        "startLine": 38,
+        "startChar": 36,
+        "endLine": 38,
+        "endChar": 51
+      },
+      "revId": "f8326534b41bc7a72bd63388061ef5eedfc8248c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "563b2b5a_e69efa57",
+        "filename": "android/emulation/ClipboardPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-07T20:06:32Z",
+      "side": 1,
+      "message": "docs/ANDROID-CODING-STYLE.TXT doesn\u0027t explicitly mention it for some reason",
+      "parentUuid": "16f373ac_95c2c347",
       "range": {
         "startLine": 38,
         "startChar": 36,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "563b2b5a_a6cd5259",
+        "filename": "android/emulation/ClipboardPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-07T20:06:32Z",
+      "side": 1,
+      "message": "it does... I guess it makes sense though, since it\u0027s the contents of pipeBuffer that is const, to the bytes pointed to by \"pipeBuffer-\u003edata\".",
+      "parentUuid": "16f373ac_754477fc",
+      "range": {
+        "startLine": 105,
+        "startChar": 28,
+        "endLine": 105,
+        "endChar": 35
+      },
+      "revId": "f8326534b41bc7a72bd63388061ef5eedfc8248c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "16f373ac_b5fa5fa1",
         "filename": "android/emulation/ClipboardPipe.cpp",
         "patchSetId": 2
@@ -128,6 +248,30 @@
       "writtenOn": "2016-09-07T01:20:41Z",
       "side": 1,
       "message": "if this isn\u0027t set, you\u0027re not resetting the state. Is that intended?",
+      "range": {
+        "startLine": 170,
+        "startChar": 22,
+        "endLine": 170,
+        "endChar": 45
+      },
+      "revId": "f8326534b41bc7a72bd63388061ef5eedfc8248c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "563b2b5a_66b8aac4",
+        "filename": "android/emulation/ClipboardPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-07T20:06:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "16f373ac_b5fa5fa1",
       "range": {
         "startLine": 170,
         "startChar": 22,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "b6dd4760_318ac8c5",
+        "filename": "android/emulation/ClipboardPipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-07T20:06:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "16f373ac_b5c9bfa2",
+      "range": {
+        "startLine": 24,
+        "startChar": 35,
+        "endLine": 24,
+        "endChar": 66
+      },
+      "revId": "f8326534b41bc7a72bd63388061ef5eedfc8248c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "16f373ac_15c7f38e",
         "filename": "android/emulation/ClipboardPipe.h",
         "patchSetId": 2
@@ -174,6 +342,30 @@
       "writtenOn": "2016-09-07T01:20:41Z",
       "side": 1,
       "message": "assert that this is the first instance?",
+      "range": {
+        "startLine": 30,
+        "startChar": 12,
+        "endLine": 32,
+        "endChar": 24
+      },
+      "revId": "f8326534b41bc7a72bd63388061ef5eedfc8248c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5606cb9f_8b4711a0",
+        "filename": "android/emulation/ClipboardPipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-07T20:06:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "16f373ac_15c7f38e",
       "range": {
         "startLine": 30,
         "startChar": 12,
@@ -209,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "76158fbe_0c2337c6",
+        "filename": "android/emulation/ClipboardPipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-07T20:06:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "16f373ac_f5c3477e",
+      "range": {
+        "startLine": 42,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 31
+      },
+      "revId": "f8326534b41bc7a72bd63388061ef5eedfc8248c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "16f373ac_35bdcfd7",
         "filename": "android/emulation/ClipboardPipe.h",
         "patchSetId": 2
@@ -232,6 +448,30 @@
     },
     {
       "key": {
+        "uuid": "b6dd4760_2b85b93c",
+        "filename": "android/emulation/ClipboardPipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-07T20:06:32Z",
+      "side": 1,
+      "message": "We set the clipboard callback as soon as the main window is created, but the pipe instance won\u0027t exist until the guest side opens it, hence the static-ness",
+      "parentUuid": "16f373ac_35bdcfd7",
+      "range": {
+        "startLine": 52,
+        "startChar": 4,
+        "endLine": 52,
+        "endChar": 10
+      },
+      "revId": "f8326534b41bc7a72bd63388061ef5eedfc8248c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "16f373ac_f5dd072e",
         "filename": "android/emulation/ClipboardPipe.h",
         "patchSetId": 2
@@ -243,6 +483,30 @@
       "writtenOn": "2016-09-07T01:20:41Z",
       "side": 1,
       "message": "I don\u0027t see this function body anywhere. Am I missing something?",
+      "range": {
+        "startLine": 72,
+        "startChar": 9,
+        "endLine": 72,
+        "endChar": 31
+      },
+      "revId": "f8326534b41bc7a72bd63388061ef5eedfc8248c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76158fbe_8c0f273f",
+        "filename": "android/emulation/ClipboardPipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-07T20:06:32Z",
+      "side": 1,
+      "message": "No, I removed the definition and forgot to clean up the declaration in the header",
+      "parentUuid": "16f373ac_f5dd072e",
       "range": {
         "startLine": 72,
         "startChar": 9,
