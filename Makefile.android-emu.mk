@@ -241,6 +241,7 @@ LOCAL_SRC_FILES := \
     android/emulation/android_pipe_zero.c \
     android/emulation/android_qemud.cpp \
     android/emulation/bufprint_config_dirs.cpp \
+    android/emulation/ClipboardPipe.cpp \
     android/emulation/ConfigDirs.cpp \
     android/emulation/control/AdbInterface.cpp \
     android/emulation/control/ApkInstaller.cpp \
