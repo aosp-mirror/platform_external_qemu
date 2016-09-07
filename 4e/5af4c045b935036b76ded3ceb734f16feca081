@@ -1,0 +1,8 @@
+Verified+1: Yurii Zubrytskyi <zyy@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Code-Review+2: David Turner <digit@google.com>
+Submitted-by: Yurii Zubrytskyi <zyy@google.com>
+Submitted-at: Wed, 07 Sep 2016 16:07:24 +0000
+Reviewed-on: https://android-review.googlesource.com/269364
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
