@@ -214,6 +214,30 @@
     },
     {
       "key": {
+        "uuid": "563b2b5a_34f5e84a",
+        "filename": "android/emulation/ClipboardPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-07T21:27:25Z",
+      "side": 1,
+      "message": "changed :(",
+      "parentUuid": "563b2b5a_c636560a",
+      "range": {
+        "startLine": 38,
+        "startChar": 36,
+        "endLine": 38,
+        "endChar": 51
+      },
+      "revId": "f8326534b41bc7a72bd63388061ef5eedfc8248c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "16f373ac_754477fc",
         "filename": "android/emulation/ClipboardPipe.cpp",
         "patchSetId": 2
