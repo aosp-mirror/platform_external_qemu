@@ -14,6 +14,7 @@
 #include "android/base/StringFormat.h"
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/SetupParameters.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/utils/debug.h"
 #include "android/utils/dns.h"
 
@@ -71,6 +72,10 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
             default: gles = 0;
         }
         params.addFormat("qemu.gles=%d", gles);
+    }
+
+    if (isQemu2 && android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData)) {
+        params.add("qemu.encrypt=1");
     }
 
     // Additional memory for software renderers (e.g., SwiftShader)
