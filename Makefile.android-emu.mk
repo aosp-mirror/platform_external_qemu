@@ -47,7 +47,9 @@ _ANDROID_EMU_ROOT := $(call my-dir)
 ###############################################################################
 #
 # Metrics library is a part of android-emu, so let's include it here
-include $(_ANDROID_EMU_ROOT)/android/metrics/proto/MetricsProto.mk
+#
+# TODO(zyy): uncomment when the protobuf prebuilts git repo is created
+#include $(_ANDROID_EMU_ROOT)/android/metrics/proto/MetricsProto.mk
 
 # all includes are like 'android/...', so we need to count on that
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)

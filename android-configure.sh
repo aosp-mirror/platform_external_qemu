@@ -565,7 +565,9 @@ probe_prebuilts_dir "LibANGLEtranslation" ANGLE_TRANSLATION_PREBUILTS_DIR common
 ###
 ###  Protobuf library probe
 ###
-probe_prebuilts_dir "Protobuf" PROTOBUF_PREBUILTS_DIR protobuf
+
+# TODO(zyy): uncomment when the protobuf prebuilts git repo is created
+#probe_prebuilts_dir "Protobuf" PROTOBUF_PREBUILTS_DIR protobuf
 
 CACERTS_FILE="$PROGDIR/android/data/ca-bundle.pem"
 if [ ! -f "$CACERTS_FILE" ]; then
