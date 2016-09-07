@@ -190,6 +190,30 @@
     },
     {
       "key": {
+        "uuid": "563b2b5a_c636560a",
+        "filename": "android/emulation/ClipboardPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-07T20:21:28Z",
+      "side": 1,
+      "message": "https://google.github.io/styleguide/cppguide.html#Reference_Arguments\n\"All parameters passed by reference must be labeled const.\"\nAFAIK we follow the Chromium style by default, which actually falls back to the Google public style\n\n\"In case of doubt, fallback to the Chromium style guide.\" from the ANDROID-CODING-STYLE.TXT\n\nP.S. I personally hate that, as optimization for Notepad coders is IMO plain wrong. If someone intentionally discards modern tooling why everyone else should suffer?",
+      "parentUuid": "563b2b5a_e69efa57",
+      "range": {
+        "startLine": 38,
+        "startChar": 36,
+        "endLine": 38,
+        "endChar": 51
+      },
+      "revId": "f8326534b41bc7a72bd63388061ef5eedfc8248c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "16f373ac_754477fc",
         "filename": "android/emulation/ClipboardPipe.cpp",
         "patchSetId": 2
