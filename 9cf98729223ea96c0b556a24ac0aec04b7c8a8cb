@@ -25,6 +25,53 @@
     },
     {
       "key": {
+        "uuid": "b6dd4760_cbee35e9",
+        "filename": "android/avd/info.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-09-07T20:06:55Z",
+      "side": 1,
+      "message": "This is the place where the key is stored, right?  Not the encrypted data?  From the commit msg for \nhttps://googleplex-android-review.git.corp.google.com/#/c/1411785/\n\nThis is to setup fstab (fstab-encrypt.ranchu) to enable userdata encryption.\nWe need to have an additional disk to store the master key and encrypt.img\nis added as prebuilt here. encrypt.img is a blank disk image with capacity\nof 1M bytes, created with the following command:\nfallocate encrypt.img -l 1M\nThe encrypt.img should be packaged and distributed together with\nsystem.img, userdata.img etc.\n\nSo I think \"Encryption key\" would be more consistent with that.",
+      "parentUuid": "16f373ac_65003a62",
+      "range": {
+        "startLine": 66,
+        "startChar": 36,
+        "endLine": 66,
+        "endChar": 43
+      },
+      "revId": "9cf98729223ea96c0b556a24ac0aec04b7c8a8cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "563b2b5a_86de0efa",
+        "filename": "android/data/advancedFeatures.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-09-07T20:06:55Z",
+      "side": 1,
+      "message": "Nit: \"Emulator will enable this feature only\" is slightly more correct English.\n\nAlso, sentence ends kind of abruptly; maybe \"supports drive encryption\"?",
+      "range": {
+        "startLine": 67,
+        "startChar": 74,
+        "endLine": 67,
+        "endChar": 82
+      },
+      "revId": "9cf98729223ea96c0b556a24ac0aec04b7c8a8cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "16f373ac_0554d653",
         "filename": "android/main-kernel-parameters.cpp",
         "patchSetId": 1
