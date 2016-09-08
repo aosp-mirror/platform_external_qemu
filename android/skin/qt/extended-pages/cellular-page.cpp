@@ -11,13 +11,11 @@
 #include "android/skin/qt/extended-pages/cellular-page.h"
 
 #include "android/emulation/control/cellular_agent.h"
+#include "android/main-common.h"
 #include "android/skin/qt/qt-settings.h"
 #include "ui_cellular-page.h"
 
 #include <QSettings>
-
-extern char* android_op_netspeed;
-
 
 CellularPage::CellularPage(QWidget *parent) :
     QWidget(parent),
@@ -56,7 +54,7 @@ void CellularPage::setCellularAgent(const QAndroidCellularAgent* agent) {
 
     mCellularAgent = agent;
 
-    if (android_op_netspeed) {
+    if (emulator_has_network_option) {
         // The user specified network parameters on the command line.
         // Do not override the command-line values.
         return;
