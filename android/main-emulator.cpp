@@ -152,6 +152,7 @@ int main(int argc, char** argv)
     bool noWindow = false;
     bool useSystemLibs = false;
     bool forceEngineLaunch = false;
+    bool queryVersion = false;
     bool doListWebcams = false;
 
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
@@ -197,6 +198,11 @@ int main(int argc, char** argv)
         int helpStatus = emulator_parseHelpOption(opt);
         if (helpStatus >= 0) {
             return helpStatus;
+        }
+
+        if (!strcmp(opt, "-version")) {
+            queryVersion = true;
+            continue;
         }
 
         if (!strcmp(opt,"-verbose") || !strcmp(opt,"-debug-all")
@@ -375,7 +381,7 @@ int main(int argc, char** argv)
         }
     }
 
-    if (!avdName && !androidOut && !forceEngineLaunch) {
+    if (!avdName && !androidOut && !forceEngineLaunch && !queryVersion) {
         derror("No AVD specified. Use '@foo' or '-avd foo' to launch a virtual"
                " device named 'foo'\n");
         return 1;
