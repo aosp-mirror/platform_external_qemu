@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d6963bc8_f5064577",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1058860
+      },
+      "writtenOn": "2016-09-08T22:25:52Z",
+      "side": 1,
+      "message": "The prebulits also have a static libwinpthread.a.  Would that help with -static-libstdc++?",
+      "range": {
+        "startLine": 21,
+        "startChar": 2,
+        "endLine": 21,
+        "endChar": 59
+      },
+      "revId": "447c64246bf704bdadde27ce70a496d14ceeaaf7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
