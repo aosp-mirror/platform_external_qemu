@@ -229,7 +229,7 @@ UI_DEFAULT=qt
 GLES_DEFAULT=dgl
 
 # Parse options
-OPTION_PREBUILT_QEMU2=
+OPTION_QEMU2_SRCDIR=
 OPTION_DEBUG=no
 OPTION_SANITIZER=no
 OPTION_EMUGL_PRINTOUT=no
@@ -308,7 +308,7 @@ for opt do
   ;;
   --aosp-prebuilts-dir=*) OPTION_AOSP_PREBUILTS_DIR=$optarg
   ;;
-  --prebuilt-qemu2) OPTION_PREBUILT_QEMU2=true
+  --qemu2-src-dir=*) OPTION_QEMU2_SRCDIR=$optarg
   ;;
   --no-pcbios) PCBIOS_PROBE=no
   ;;
@@ -1041,18 +1041,27 @@ if [ "$config_mk" = "yes" ] ; then
     echo "HOST_MINGW_VERSION := $MINGW_GCC_VERSION" >> $config_mk
 fi
 
-QEMU2_TOP_DIR=
-if [ -z "$OPTION_PREBUILT_QEMU2" ]; then
-    QEMU2_TOP_DIR=$PROGDIR/../qemu-android
+if [ -z "$OPTION_QEMU2_SRCDIR" ]; then
+    QEMU2_TOP_DIR=$ANDROID_EMULATOR_QEMU2_SRCDIR
+    if [ -n "$QEMU2_TOP_DIR" ]; then
+        log "QEMU2      : $QEMU2_TOP_DIR  [environment]"
+    else
+        QEMU2_TOP_DIR=$PROGDIR/../qemu-android
+        log "QEMU2      : $QEMU2_TOP_DIR  [auto-detect]"
+    fi
     if [ ! -d "$QEMU2_TOP_DIR" ]; then
         panic "Missing QEMU2 source directory: $QEMU2_TOP_DIR"
     fi
     QEMU2_TOP_DIR=$(cd "$QEMU2_TOP_DIR" && pwd -P)
-    log "QEMU2      : $QEMU2_TOP_DIR"
+else
+    QEMU2_TOP_DIR=$OPTION_QEMU2_SRCDIR
+    log "QEMU2      : $QEMU2_TOP_DIR  [--qemu2-src-dir]"
+fi
 
-    if [ -d "$QEMU2_TOP_DIR"/android-qemu2-glue ]; then
-        echo "QEMU2_TOP_DIR := $QEMU2_TOP_DIR" >> $config_mk
-    fi
+if [ ! -d "$QEMU2_TOP_DIR"/android-qemu2-glue ]; then
+    panic "Missing directory: $QEMU2_TOP_DIR/android-qemu2-glue"
+else
+    echo "QEMU2_TOP_DIR := $QEMU2_TOP_DIR" >> $config_mk
 fi
 
 echo "PREBUILT_PATH_PAIRS := \\" >> $config_mk
