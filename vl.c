@@ -34,7 +34,7 @@
 #include <libvdeplug.h>
 #endif
 
-#ifdef CONFIG_SDL
+#if defined(CONFIG_SDL) && !defined(CONFIG_ANDROID)
 #if defined(__APPLE__) || defined(main)
 #include <SDL.h>
 int qemu_main(int argc, char **argv, char **envp);
