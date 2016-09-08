@@ -429,18 +429,6 @@ extern "C" int main(int argc, char **argv) {
         args[n++] = opts->timezone;
     }
 
-    if (opts->netspeed) {
-        args[n++] = "-netspeed";
-        args[n++] = opts->netspeed;
-    }
-    if (opts->netdelay) {
-        args[n++] = "-netdelay";
-        args[n++] = opts->netdelay;
-    }
-    if (opts->netfast) {
-        args[n++] = "-netfast";
-    }
-
     if (opts->audio && !strcmp(opts->audio, "none")) {
         args[n++] = "-no-audio";
     }

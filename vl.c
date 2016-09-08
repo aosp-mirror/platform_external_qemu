@@ -229,10 +229,6 @@ int no_shutdown = 0;
 int cursor_hide = 1;
 int graphic_rotate = 0;
 #ifdef CONFIG_ANDROID
-/* -netspeed option value. */
-char* android_op_netspeed = NULL;
-char* android_op_netdelay = NULL;
-int android_op_netfast = 0;
 char* android_op_dns_server = NULL;
 int lcd_density = LCD_DENSITY_MDPI;
 extern char* op_http_proxy;
@@ -4183,15 +4179,6 @@ int run_qemu_main(int argc, const char **argv)
                 }
                 break;
 #ifdef CONFIG_ANDROID
-            case QEMU_OPTION_netspeed:
-                android_op_netspeed = (char*)optarg;
-                break;
-            case QEMU_OPTION_netdelay:
-                android_op_netdelay = (char*)optarg;
-                break;
-            case QEMU_OPTION_netfast:
-                android_op_netfast = 1;
-                break;
             case QEMU_OPTION_boot_property:
                 save_cmd_property((char*)optarg);
                 break;
@@ -4399,28 +4386,6 @@ int run_qemu_main(int argc, const char **argv)
         char temp[8];
         snprintf(temp, sizeof(temp), "%d", lcd_density);
         boot_property_add("qemu.sf.lcd_density", temp);
-    }
-
-    if (android_op_netspeed) {
-        /* The command line gives the network speed */
-        if (!android_network_set_speed(android_op_netspeed)) {
-            fprintf(stderr, "invalid -netspeed parameter '%s'\n",
-                    android_op_netspeed);
-            return 1;
-        }
-    }
-
-    if (!android_network_set_latency(android_op_netdelay)) {
-        fprintf(stderr, "invalid -netdelay parameter '%s'",
-                android_op_netdelay);
-        return 1;
-    }
-
-    if (android_op_netfast) {
-        android_net_download_speed = 0;
-        android_net_upload_speed = 0;
-        android_net_min_latency = 0;
-        android_net_max_latency = 0;
     }
 
     int dns_count = 0;
