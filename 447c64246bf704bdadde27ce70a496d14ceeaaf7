@@ -22,6 +22,30 @@
       "revId": "447c64246bf704bdadde27ce70a496d14ceeaaf7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b65a6f4_ec24e321",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-09-08T22:46:13Z",
+      "side": 1,
+      "message": "That doesn\u0027t seem to work, I consider this to be a Mingw bug in the implementation of -static-libstdc++, but hopefully the work-around below is good enough to create really static executables (which we need for the top-level \"emulator\" launcher, as well as our unit-test programs).",
+      "parentUuid": "d6963bc8_f5064577",
+      "range": {
+        "startLine": 21,
+        "startChar": 2,
+        "endLine": 21,
+        "endChar": 59
+      },
+      "revId": "447c64246bf704bdadde27ce70a496d14ceeaaf7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
