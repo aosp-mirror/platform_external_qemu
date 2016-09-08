@@ -22,6 +22,7 @@
 #include "android/help.h"
 #include "android/main-emugl.h"
 #include "android/main-help.h"
+#include "android/network/control.h"
 #include "android/opengl/emugl_config.h"
 #include "android/resource.h"
 #include "android/snapshot.h"
@@ -74,6 +75,8 @@ const char*  android_skin_net_delay = NULL;
 bool android_op_wipe_data = false;
 bool android_op_writable_system = false;
 const char *savevm_on_exit = NULL;
+
+bool emulator_has_network_option = false;
 
 #define ONE_MB (1024 * 1024)
 
@@ -1435,6 +1438,11 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         return false;
     }
 
+    emulator_has_network_option =
+            (opts->netspeed && (opts->netspeed[0] != '\0')) ||
+            (opts->netdelay && (opts->netdelay[0] != '\0')) ||
+            opts->netfast;
+
     if (!opts->netspeed && android_skin_net_speed) {
         D("skin network speed: '%s'", android_skin_net_speed);
         if (strcmp(android_skin_net_speed, NETWORK_SPEED_DEFAULT) != 0) {
@@ -1447,6 +1455,22 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         if (strcmp(android_skin_net_delay, NETWORK_DELAY_DEFAULT) != 0) {
             str_reset(&opts->netdelay, android_skin_net_delay);
         }
+    }
+
+    /* Initialize net speed and delays stuff. */
+    if (!android_network_set_speed(opts->netspeed)) {
+        derror("invalid -netspeed parameter '%s'", opts->netspeed);
+        return false;
+    }
+
+    if (!android_network_set_latency(opts->netdelay)) {
+        derror("invalid -netdelay parameter '%s'", opts->netdelay);
+        return false;
+    }
+
+    if (opts->netfast) {
+        android_network_set_speed("full");
+        android_network_set_latency("none");
     }
 
     if (opts->code_profile) {

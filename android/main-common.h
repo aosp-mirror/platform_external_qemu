@@ -55,6 +55,13 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
                                             AvdInfo** the_avd,
                                             int* exit_status);
 
+// HACK: Value will be true if emulator_parseCommonCommandLineOptions()
+//       has seen a network-related option (e.g. -netspeed). This is
+//       unfortunately used by the Qt UI code.
+//
+// TODO: Find a better way to deal with this.
+extern bool emulator_has_network_option;
+
 /* Common routines used by both android-qemu1-glue/main.c and android/main-ui.c */
 
 // For QEMU2 only
