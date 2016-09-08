@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "d6963bc8_dfcdff58",
+        "filename": "android/avd/info.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-09-08T00:33:20Z",
+      "side": 1,
+      "message": "thanks Dave.  will use \"encryptkey.img\" and \"Encryption Key\"",
+      "parentUuid": "b6dd4760_cbee35e9",
+      "range": {
+        "startLine": 66,
+        "startChar": 36,
+        "endLine": 66,
+        "endChar": 43
+      },
+      "revId": "9cf98729223ea96c0b556a24ac0aec04b7c8a8cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "563b2b5a_86de0efa",
         "filename": "android/data/advancedFeatures.ini",
         "patchSetId": 1
@@ -83,6 +107,30 @@
       "writtenOn": "2016-09-07T15:23:21Z",
       "side": 1,
       "message": "nit: a comment about why only for qemu2 would really help here IMO",
+      "range": {
+        "startLine": 77,
+        "startChar": 4,
+        "endLine": 77,
+        "endChar": 6
+      },
+      "revId": "9cf98729223ea96c0b556a24ac0aec04b7c8a8cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6963bc8_7fbf8ba9",
+        "filename": "android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-09-08T00:33:20Z",
+      "side": 1,
+      "message": "I have not tried with qemu1; will try it and see if it work",
+      "parentUuid": "16f373ac_0554d653",
       "range": {
         "startLine": 77,
         "startChar": 4,
