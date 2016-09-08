@@ -22,6 +22,30 @@
       "revId": "ace79cd40790b589bea19764389d5aa5d7eb91e1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b373ada_d23c24d0",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 513,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-09-08T13:36:47Z",
+      "side": 1,
+      "message": "Good point, fixed. Thanks :)",
+      "parentUuid": "76366f11_b4f55171",
+      "range": {
+        "startLine": 513,
+        "startChar": 23,
+        "endLine": 513,
+        "endChar": 41
+      },
+      "revId": "ace79cd40790b589bea19764389d5aa5d7eb91e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
