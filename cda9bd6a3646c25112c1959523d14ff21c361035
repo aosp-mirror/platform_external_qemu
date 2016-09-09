@@ -45,6 +45,30 @@
       "revId": "cda9bd6a3646c25112c1959523d14ff21c361035",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0bf34aac_4e14534b",
+        "filename": "android/scripts/package-release.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 741,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-09-09T14:52:24Z",
+      "side": 1,
+      "message": "Yes, that\u0027s exactly what I\u0027m doing, and it saves a lot of time compared to running build-qemu-android.sh.\n\nThat doesn\u0027t mean we will do that in regular builds (it will probably become an option controlled by an environment variable).\n\nAlso it helps clean up the code because I want to ensure that no original QEMU2 source is going to directly depend on AndroidEmu or glue code (instead, the glue will inject pointers / data into the QEMU2 stuff at setup). This is not the case currently but will help making future rebases much easier.",
+      "parentUuid": "d6963bc8_9aa9a897",
+      "range": {
+        "startLine": 741,
+        "startChar": 41,
+        "endLine": 741,
+        "endChar": 68
+      },
+      "revId": "cda9bd6a3646c25112c1959523d14ff21c361035",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
