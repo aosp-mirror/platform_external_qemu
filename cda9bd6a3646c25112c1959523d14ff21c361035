@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d6963bc8_fae9cce2",
+        "filename": "android/scripts/package-release.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 473,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-09T14:33:25Z",
+      "side": 1,
+      "message": "cool",
+      "range": {
+        "startLine": 472,
+        "startChar": 0,
+        "endLine": 473,
+        "endChar": 77
+      },
+      "revId": "cda9bd6a3646c25112c1959523d14ff21c361035",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6963bc8_9aa9a897",
+        "filename": "android/scripts/package-release.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 741,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-09T14:33:25Z",
+      "side": 1,
+      "message": "Just wondering: Does this mean we will have some time where we build newer (qemu-upstream-*) versions alongside the current version (qemu-system-*)?",
+      "range": {
+        "startLine": 741,
+        "startChar": 41,
+        "endLine": 741,
+        "endChar": 68
+      },
+      "revId": "cda9bd6a3646c25112c1959523d14ff21c361035",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
