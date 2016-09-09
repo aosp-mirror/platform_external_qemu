@@ -366,15 +366,6 @@ char* android_op_cpu_delay = NULL;
 char* android_op_nand_limits = NULL;
 #endif  // CONFIG_NAND_LIMITS
 
-/* -netspeed option value. */
-char* android_op_netspeed = NULL;
-
-/* -netdelay option value. */
-char* android_op_netdelay = NULL;
-
-/* -netfast option value. */
-int android_op_netfast = 0;
-
 /* -tcpdump option value. */
 char* android_op_tcpdump = NULL;
 
@@ -2761,18 +2752,6 @@ int main(int argc, char **argv, char **envp)
                 break;
 #endif  // CONFIG_NAND_LIMITS
 
-            case QEMU_OPTION_netspeed:
-                android_op_netspeed = (char*)optarg;
-                break;
-
-            case QEMU_OPTION_netdelay:
-                android_op_netdelay = (char*)optarg;
-                break;
-
-            case QEMU_OPTION_netfast:
-                android_op_netfast = 1;
-                break;
-
             case QEMU_OPTION_tcpdump:
                 android_op_tcpdump = (char*)optarg;
                 break;
@@ -2977,26 +2956,6 @@ int main(int argc, char **argv, char **envp)
 
     /* Bypass adb security or not. */
     boot_property_add("qemu.adb.secure", adb_auth ? "1": "0");
-
-    /* Initialize net speed and delays stuff. */
-    if (!android_network_set_speed(android_op_netspeed)) {
-        PANIC("invalid -netspeed parameter '%s'",
-                android_op_netspeed);
-        return 1;
-    }
-
-    if (!android_network_set_latency(android_op_netdelay)) {
-        PANIC("invalid -netdelay parameter '%s'",
-                android_op_netdelay);
-        return 1;
-    }
-
-    if (android_op_netfast) {
-        android_net_download_speed = 0;
-        android_net_upload_speed = 0;
-        android_net_min_latency = 0;
-        android_net_max_latency = 0;
-    }
 
     /* Initialize LCD density */
     if (android_hw->hw_lcd_density) {
