@@ -26,10 +26,6 @@ shell_import utils/package_builder.shi
 ###  CONFIGURATION DEFAULTS
 ###
 
-# The list of AOSP directories that contain relevant sources for this
-# script.
-AOSP_SOURCE_SUBDIRS="external/qemu external/qemu-android external/gtest"
-
 # Default package output directory.
 DEFAULT_PKG_DIR=/tmp
 
@@ -352,6 +348,10 @@ OPT_CRASH_PROD=
 option_register_var "--crash-prod" OPT_CRASH_PROD \
        "Upload crashes to production."
 
+OPT_QEMU2_SRCDIR=$ANDROID_EMULATOR_QEMU2_SRCDIR
+option_register_var "--qemu2-src-dir" OPT_QEMU2_SRCDIR \
+      "Alternate QEMU2 source directory."
+
 package_builder_register_options
 aosp_prebuilts_dir_register_options
 prebuilts_dir_register_option
@@ -466,10 +466,30 @@ if [ "$UNCHECKED_FILES" ]; then
     exit 1
 fi
 
+# The list of AOSP directories that contain relevant sources for this
+# script.
+
+# Create a fake AOSP root-directory with symlinks to the actual source
+# directories, this makes it easier to support alternative QEMU2 source dirs.
+AOSP_ROOT=$QEMU_DIR/../..
+AOSP_TMPDIR=$TEMP_DIR/aosp
+rm -rf "$AOSP_TMPDIR"/*
+mkdir -p "$AOSP_TMPDIR"/external
+ln -s "$AOSP_ROOT"/prebuilts "$AOSP_TMPDIR"/prebuilts
+ln -s "$AOSP_ROOT"/external/qemu "$AOSP_TMPDIR"/external/qemu
+ln -s "$AOSP_ROOT"/external/gtest "$AOSP_TMPDIR"/external/gtest
+if [ "$OPT_QEMU2_SRCDIR" ]; then
+    ln -s $(realpath "$OPT_QEMU2_SRCDIR") "$AOSP_TMPDIR"/external/qemu-android
+else
+    ln -s "$AOSP_ROOT"/external/qemu-android "$AOSP_TMPDIR"/external/qemu-android
+fi
+
+AOSP_SOURCE_SUBDIRS="external/qemu external/qemu-android external/gtest"
+
 for AOSP_SUBDIR in $AOSP_SOURCE_SUBDIRS; do
     extract_subdir_git_history \
             $AOSP_SUBDIR \
-            "$QEMU_DIR"/../.. \
+            "$AOSP_TMPDIR" \
             "$TARGET_PREBUILTS_DIR"
 done
 
@@ -483,7 +503,7 @@ if [ "$OPT_SOURCES" ]; then
     PKG_NAME="$PKG_REVISION-sources"
     for AOSP_SUBDIR in $AOSP_SOURCE_SUBDIRS; do
         dump "[$PKG_NAME] Copying $AOSP_SUBDIR source files."
-        copy_directory_git_files "$QEMU_DIR/../../$AOSP_SUBDIR" "$BUILD_DIR"/$(basename $AOSP_SUBDIR)
+        copy_directory_git_files "$AOSP_TMPDIR"/$AOSP_SUBDIR "$BUILD_DIR"/$(basename $AOSP_SUBDIR)
     done
 
     dump "[$PKG_NAME] Generating README file."
@@ -551,7 +571,8 @@ create_binaries_package () {
         copy_directory objs/lib64 "$TEMP_PKG_DIR"/tools/lib64
     fi
     if [ -d "objs/qemu" ]; then
-        QEMU_BINARIES=$(list_files_under objs/qemu "$SYSTEM-*/qemu-system-*")
+        QEMU_BINARIES=$(list_files_under objs/qemu \
+                "$SYSTEM-*/qemu-system-*" "$SYSTEM-*/qemu-upstream-*")
         if [ "$QEMU_BINARIES" ]; then
             for QEMU_BINARY in $QEMU_BINARIES; do
                 dump "[$PKG_NAME] Copying $QEMU_BINARY."
@@ -716,7 +737,8 @@ EOF
     if [ ! -d "objs/qemu" ]; then
         # For --prebuilt-qemu2
         QEMU_PREBUILTS_DIR=$PREBUILTS_DIR/qemu-android
-        QEMU_BINARIES=$(list_files_under "$QEMU_PREBUILTS_DIR" "darwin-*/qemu-system-*")
+        QEMU_BINARIES=$(list_files_under "$QEMU_PREBUILTS_DIR" \
+                "darwin-*/qemu-system-*" "darwin-*/qemu-upstream-*")
         if [ "$QEMU_BINARIES" ]; then
             for QEMU_BINARY in $QEMU_BINARIES; do
                 dump "[$PKG_NAME] Copying $QEMU_BINARY"
@@ -765,6 +787,10 @@ fi
 
 if [ "$OPT_PREBUILT_QEMU2" ]; then
     var_append REBUILD_FLAGS "--prebuilt-qemu2"
+fi
+
+if [ "$OPT_QEMU2_SRCDIR" ]; then
+    var_append REBUILD_FLAGS "--qemu2-src-dir=$OPT_QEMU2_SRCDIR"
 fi
 
 for SYSTEM in $(convert_host_list_to_os_list $LOCAL_HOST_SYSTEMS); do
@@ -855,7 +881,7 @@ EOF
         if [ "$CUR_SHA1" != "$PREV_SHA1" ]; then
             GIT_LOG_COMMAND="cd $AOSP_SUBDIR && git log --oneline --no-merges $PREV_SHA1..$CUR_SHA1 ."
             printf "    $ %s\n" "$GIT_LOG_COMMAND" >> $README_FILE
-            (cd $QEMU_DIR/../.. && eval $GIT_LOG_COMMAND) | while read LINE; do
+            (cd $AOSP_TMPDIR && eval $GIT_LOG_COMMAND) | while read LINE; do
                 printf "        %s\n" "$LINE" >> $README_FILE
             done
             printf "\n" >> $README_FILE
