@@ -52,7 +52,6 @@ int main(int argc, char **argv)
 #define main qemu_main
 #endif /* CONFIG_COCOA */
 
-
 #include "qemu/error-report.h"
 #include "qemu/sockets.h"
 #include "hw/hw.h"
@@ -2695,7 +2694,7 @@ static const QEMUOption *lookup_opt(int argc, char **argv,
     char *r = argv[optind];
     const char *optarg;
 
-    loc_set_cmdline(argv, optind, 1);
+    loc_set_cmdline((const char**)argv, optind, 1);
     optind++;
     /* Treat --foo the same as -foo.  */
     if (r[1] == '-')
@@ -2716,7 +2715,7 @@ static const QEMUOption *lookup_opt(int argc, char **argv,
             exit(1);
         }
         optarg = argv[optind++];
-        loc_set_cmdline(argv, optind - 2, 2);
+        loc_set_cmdline((const char**)argv, optind - 2, 2);
     } else {
         optarg = NULL;
     }
