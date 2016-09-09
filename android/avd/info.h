@@ -193,7 +193,7 @@ char*  avdInfo_getDefaultDataImagePath( const AvdInfo*  i );
  */
 char* avdInfo_getDefaultSystemFeatureControlPath(const AvdInfo* i);
 
-char*  avdInfo_getDataInitImagePath( const AvdInfo* i );
+char*  avdInfo_getDataInitImagePath( const AvdInfo* i, bool wipe_data );
 
 /* Return a reference to the boot.prop file for this AVD, if any.
  * The file contains additionnal properties to inject at boot time
