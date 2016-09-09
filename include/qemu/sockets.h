@@ -11,6 +11,12 @@ int inet_aton(const char *cp, struct in_addr *ia);
 
 #include "qapi-types.h"
 
+// Avoid conflicts with AndroidEmu functions of the same name.
+#define socket_connect qemu_socket_connect
+#define socket_listen qemu_socket_listen
+#define socket_set_nodelay qemu_socket_set_nodelay
+#define socket_set_cork qemu_socket_set_cork
+
 /* misc helpers */
 int qemu_socket(int domain, int type, int protocol);
 int qemu_accept(int s, struct sockaddr *addr, socklen_t *addrlen);
@@ -41,6 +47,7 @@ int unix_listen(const char *path, char *ostr, int olen, Error **errp);
 int unix_connect(const char *path, Error **errp);
 
 SocketAddress *socket_parse(const char *str, Error **errp);
+
 int socket_connect(SocketAddress *addr, Error **errp,
                    NonBlockingConnectHandler *callback, void *opaque);
 int socket_listen(SocketAddress *addr, Error **errp);

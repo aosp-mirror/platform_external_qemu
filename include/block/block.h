@@ -11,6 +11,9 @@
 #include "qapi-types.h"
 #include "qemu/hbitmap.h"
 
+// Avoid conflict with AndroidEmu function with the same name.
+#define path_is_absolute qemu_path_is_absolute
+
 /* block.c */
 typedef struct BlockDriver BlockDriver;
 typedef struct BlockJob BlockJob;
