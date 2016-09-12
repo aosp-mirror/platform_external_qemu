@@ -29,5 +29,10 @@ int android_createEmptyExt4Image(const char *filePath,
 // Returns true iff the file at |filePath| is an actual EXT4 partition image.
 bool android_pathIsExt4PartitionImage(const char* filePath);
 
+// Returns 0 when succeeds. Otherwise returns a negative error code.
+int android_createExt4ImageFromDir(const char *dstFilePath,
+                                   const char *srcDirectory,
+                                   uint64_t size,
+                                   const char *mountpoint);
 
 ANDROID_END_HEADER
