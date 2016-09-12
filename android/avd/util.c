@@ -52,8 +52,8 @@ path_getRootIniPath( const char*  avdName )
     return ASTRDUP(temp);
 }
 
-static char*
-_getAvdContentPath(const char* avdName)
+char*
+path_getAvdContentPath(const char* avdName)
 {
     char temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
     CIniFile* ini = NULL;
@@ -282,7 +282,7 @@ _getAvdConfigValue(const char* avdPath,
 char*
 path_getAvdTargetArch( const char* avdName )
 {
-    char*  avdPath = _getAvdContentPath(avdName);
+    char*  avdPath = path_getAvdContentPath(avdName);
     char*  avdArch = _getAvdConfigValue(avdPath, "hw.cpu.arch", "arm");
     AFREE(avdPath);
 
@@ -292,7 +292,7 @@ path_getAvdTargetArch( const char* avdName )
 char*
 path_getAvdSnapshotPresent( const char* avdName )
 {
-    char*  avdPath = _getAvdContentPath(avdName);
+    char*  avdPath = path_getAvdContentPath(avdName);
     char*  snapshotPresent = _getAvdConfigValue(avdPath, "snapshot.present", "no");
     AFREE(avdPath);
 
@@ -303,7 +303,7 @@ char*
 path_getAvdSystemPath(const char* avdName,
                       const char* sdkRoot) {
     char* result = NULL;
-    char* avdPath = _getAvdContentPath(avdName);
+    char* avdPath = path_getAvdContentPath(avdName);
     int nn;
     for (nn = 0; nn < MAX_SEARCH_PATHS; ++nn) {
         char searchKey[32];
@@ -330,7 +330,7 @@ path_getAvdSystemPath(const char* avdName,
 char*
 path_getAvdGpuMode(const char* avdName)
 {
-    char* avdPath = _getAvdContentPath(avdName);
+    char* avdPath = path_getAvdContentPath(avdName);
     char* gpuEnabled = _getAvdConfigValue(avdPath, "hw.gpu.enabled", "no");
     bool enabled = !strcmp(gpuEnabled, "yes");
     AFREE(gpuEnabled);
@@ -346,7 +346,7 @@ path_getAvdGpuMode(const char* avdName)
 char*
 path_getAvdGpuBlacklisted(const char* avdName)
 {
-    char* avdPath = _getAvdContentPath(avdName);
+    char* avdPath = path_getAvdContentPath(avdName);
     char* gpuBlacklisted = NULL;
     gpuBlacklisted = _getAvdConfigValue(avdPath, "hw.gpu.blacklisted", "no");
     AFREE(avdPath);
