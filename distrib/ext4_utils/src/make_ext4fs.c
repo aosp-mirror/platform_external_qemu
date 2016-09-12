@@ -72,6 +72,60 @@
 
 #endif
 
+#ifdef USE_MINGW
+static int scandir_win(const char* path, struct dirent ***namelist) {
+    int pathSize = strlen(path);
+    int nameBufferSize = pathSize + 1 + 1;
+    char* nameBuffer = malloc(nameBufferSize);
+    memcpy(nameBuffer, path, pathSize);
+    strcpy(nameBuffer + pathSize, "*");
+    int nameBufferSizeW = MultiByteToWideChar(CP_UTF8, 0,
+                                       nameBuffer, nameBufferSize,
+                                       NULL, 0);
+    wchar_t* nameBufferW = calloc(nameBufferSizeW, sizeof(wchar_t));
+    MultiByteToWideChar(CP_UTF8, 0,
+                        nameBuffer, nameBufferSize,
+                        nameBufferW, nameBufferSizeW);
+    HANDLE hndl;
+    WIN32_FIND_DATAW fileData;
+    hndl = FindFirstFileW(nameBufferW, &fileData);
+    if (hndl == INVALID_HANDLE_VALUE) {
+        int err = GetLastError();
+        free(nameBuffer);
+        free(nameBufferW);
+        if (err == ERROR_NO_MORE_FILES) {
+            return 0;
+        } else {
+            return ENOENT;
+        }
+    }
+    int capacity = 4;
+    *namelist = malloc(capacity * sizeof(struct dirent *));
+    int idx = 0;
+    do {
+        if (wcscmp(L".", fileData.cFileName) != 0
+                && wcscmp(L"..", fileData.cFileName) != 0) {
+            if (idx >= capacity) {
+                capacity *= 2;
+                *namelist = realloc(*namelist,
+                                capacity * sizeof(struct dirent *));
+            }
+            (*namelist)[idx] = malloc(sizeof(struct dirent));
+            assert(wcslen(fileData.cFileName) < MAX_PATH);
+            WideCharToMultiByte(CP_UTF8, 0,
+                                fileData.cFileName, -1,
+                                (*namelist)[idx]->d_name, MAX_PATH,
+                                NULL, NULL);
+            idx ++;
+        }
+    } while (FindNextFileW(hndl, &fileData));
+    FindClose(hndl);
+    free(nameBuffer);
+    free(nameBufferW);
+    return idx;
+}
+#endif
+
 /* TODO: Not implemented:
    Allocating blocks in the same block group as the file inode
    Hash or binary tree directories
@@ -116,8 +170,6 @@ static u32 build_default_directory_structure(const char *dir_path,
 	return root_inode;
 }
 
-#ifndef USE_MINGW
-
 static int filter_dot(const struct dirent *d)
 {
     return (strcmp(d->d_name, "..") && strcmp(d->d_name, "."));
@@ -137,22 +189,29 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 	int entries = 0;
 	struct dentry *dentries;
 	struct dirent **namelist = NULL;
-	struct stat stat;
+	struct stat _stat;
 	int ret;
 	int i;
 	u32 inode;
 	u32 entry_inode;
 	u32 dirs = 0;
+#ifndef USE_MINGW
 	bool needs_lost_and_found = false;
+#endif
 
 	if (full_path) {
-		entries = scandir(full_path, &namelist, filter_dot, (void*)alphasort);
-		if (entries < 0) {
-			error_errno("scandir");
-			return EXT4_ALLOCATE_FAILED;
-		}
+#ifdef USE_MINGW
+            entries = scandir_win(full_path, &namelist);
+#else
+            entries = scandir(full_path, &namelist, filter_dot, (void*)alphasort);
+#endif
+            if (entries < 0) {
+                error_errno("scandir");
+                return EXT4_ALLOCATE_FAILED;
+            }
 	}
 
+#ifndef USE_MINGW
 	if (dir_inode == 0) {
 		/* root directory, check if lost+found already exists */
 		for (i = 0; i < entries; i++)
@@ -161,6 +220,7 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 		if (i == entries)
 			needs_lost_and_found = true;
 	}
+#endif
 
 	dentries = calloc(entries, sizeof(struct dentry));
 	if (dentries == NULL)
@@ -176,7 +236,11 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 
 		free(namelist[i]);
 
-		ret = lstat(dentries[i].full_path, &stat);
+#ifdef USE_MINGW
+		ret = stat(dentries[i].full_path, &_stat);
+#else
+		ret = lstat(dentries[i].full_path, &_stat);
+#endif
 		if (ret < 0) {
 			error_errno("lstat");
 			i--;
@@ -184,16 +248,16 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 			continue;
 		}
 
-		dentries[i].size = stat.st_size;
-		dentries[i].mode = stat.st_mode & (S_ISUID|S_ISGID|S_ISVTX|S_IRWXU|S_IRWXG|S_IRWXO);
-		dentries[i].mtime = stat.st_mtime;
+		dentries[i].size = _stat.st_size;
+		dentries[i].mode = _stat.st_mode & (S_ISUID|S_ISGID|S_ISVTX|S_IRWXU|S_IRWXG|S_IRWXO);
+		dentries[i].mtime = _stat.st_mtime;
 		uint64_t capabilities;
 		if (fs_config_func != NULL) {
 #ifdef ANDROID
 			unsigned int mode = 0;
 			unsigned int uid = 0;
 			unsigned int gid = 0;
-			int dir = S_ISDIR(stat.st_mode);
+			int dir = S_ISDIR(_stat.st_mode);
 			fs_config_func(dentries[i].path, dir, &uid, &gid, &mode, &capabilities);
 			dentries[i].mode = mode;
 			dentries[i].uid = uid;
@@ -205,7 +269,7 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 		}
 #ifndef USE_MINGW
 		if (sehnd) {
-			if (selabel_lookup(sehnd, &dentries[i].secon, dentries[i].path, stat.st_mode) < 0) {
+			if (selabel_lookup(sehnd, &dentries[i].secon, dentries[i].path, _stat.st_mode) < 0) {
 				error("cannot lookup security context for %s", dentries[i].path);
 			}
 
@@ -214,24 +278,28 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 		}
 #endif
 
-		if (S_ISREG(stat.st_mode)) {
+		if (S_ISREG(_stat.st_mode)) {
 			dentries[i].file_type = EXT4_FT_REG_FILE;
-		} else if (S_ISDIR(stat.st_mode)) {
+		} else if (S_ISDIR(_stat.st_mode)) {
 			dentries[i].file_type = EXT4_FT_DIR;
 			dirs++;
-		} else if (S_ISCHR(stat.st_mode)) {
+		} else if (S_ISCHR(_stat.st_mode)) {
 			dentries[i].file_type = EXT4_FT_CHRDEV;
-		} else if (S_ISBLK(stat.st_mode)) {
+		} else if (S_ISBLK(_stat.st_mode)) {
 			dentries[i].file_type = EXT4_FT_BLKDEV;
-		} else if (S_ISFIFO(stat.st_mode)) {
+		} else if (S_ISFIFO(_stat.st_mode)) {
 			dentries[i].file_type = EXT4_FT_FIFO;
-		} else if (S_ISSOCK(stat.st_mode)) {
+		}
+#ifndef USE_MINGW
+                else if (S_ISSOCK(_stat.st_mode)) {
 			dentries[i].file_type = EXT4_FT_SOCK;
-		} else if (S_ISLNK(stat.st_mode)) {
+		} else if (S_ISLNK(_stat.st_mode)) {
 			dentries[i].file_type = EXT4_FT_SYMLINK;
 			dentries[i].link = calloc(info.block_size, 1);
 			readlink(dentries[i].full_path, dentries[i].link, info.block_size - 1);
-		} else {
+		}
+#endif
+                else {
 			error("unknown file type on %s", dentries[i].path);
 			i--;
 			entries--;
@@ -239,6 +307,7 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 	}
 	free(namelist);
 
+#ifndef USE_MINGW
 	if (needs_lost_and_found) {
 		/* insert a lost+found directory at the beginning of the dentries */
 		struct dentry *tmp = calloc(entries + 1, sizeof(struct dentry));
@@ -261,6 +330,7 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 		entries++;
 		dirs++;
 	}
+#endif
 
 	inode = make_directory(dir_inode, entries, dentries, dirs);
 
@@ -320,7 +390,6 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 	free(dentries);
 	return inode;
 }
-#endif
 
 static u32 compute_block_size()
 {
@@ -403,22 +472,28 @@ int make_ext4fs_sparse_fd(int fd, long long len,
 int make_ext4fs(const char *filename, long long len,
                 const char *mountpoint, struct selabel_handle *sehnd)
 {
-	int fd;
-	int status;
+    return make_ext4fs_from_dir(filename, NULL, len, mountpoint, sehnd);
+}
 
-	reset_ext4fs_info();
-	info.len = len;
+int make_ext4fs_from_dir(const char *filename, const char *dirname,
+                         long long len, const char *mountpoint,
+                         struct selabel_handle *sehnd) {
+    int fd;
+    int status;
 
-	fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0644);
-	if (fd < 0) {
-		error_errno("open");
-		return EXIT_FAILURE;
-	}
+    reset_ext4fs_info();
+    info.len = len;
 
-	status = make_ext4fs_internal(fd, NULL, mountpoint, NULL, 0, 0, 0, 1, sehnd, 0);
-	close(fd);
+    fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0644);
+    if (fd < 0) {
+        error_errno("open");
+        return EXIT_FAILURE;
+    }
 
-	return status;
+    status = make_ext4fs_internal(fd, dirname, mountpoint, NULL, 0, 0, 0, 1, sehnd, 0);
+    close(fd);
+
+    return status;
 }
 
 /* return a newly-malloc'd string that is a copy of str.  The new string
@@ -586,17 +661,11 @@ int make_ext4fs_internal(int fd, const char *_directory,
 	if (info.feat_compat & EXT4_FEATURE_COMPAT_RESIZE_INODE)
 		ext4_create_resize_inode();
 
-#ifdef USE_MINGW
-	// Windows needs only 'create an empty fs image' functionality
-	assert(!directory);
-	root_inode_num = build_default_directory_structure(mountpoint, sehnd);
-#else
 	if (directory)
 		root_inode_num = build_directory_structure(directory, mountpoint, 0,
                         fs_config_func, sehnd, verbose);
 	else
 		root_inode_num = build_default_directory_structure(mountpoint, sehnd);
-#endif
 
 	root_mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
 	inode_set_permissions(root_inode_num, root_mode, 0, 0, 0);

@@ -16,6 +16,7 @@
 
 #include "make_ext4fs.h"
 
+#include <memory>
 #include <stdint.h>
 #include <string.h>
 
@@ -71,8 +72,16 @@ bool android_pathIsExt4PartitionImage(const char* path) {
 int android_createEmptyExt4Image(const char *filePath,
                                  uint64_t size,
                                  const char *mountpoint) {
-    int ret = ::make_ext4fs(filePath, size, mountpoint, NULL);
+    return android_createExt4ImageFromDir(filePath, NULL, size, mountpoint);
+}
+
+int android_createExt4ImageFromDir(const char *dstFilePath,
+                                   const char *srcDirectory,
+                                   uint64_t size,
+                                   const char *mountpoint) {
+    int ret = ::make_ext4fs_from_dir(dstFilePath, srcDirectory, size,
+                                     mountpoint, NULL);
     if (ret < 0)
-        EXT4_ERROR << "Failed to create ext4 image at: " << filePath;
+        EXT4_ERROR << "Failed to create ext4 image at: " << dstFilePath;
     return ret;
 }

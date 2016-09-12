@@ -207,5 +207,10 @@ extern void           path_unescape_path( char* str );
  */
 extern char*          path_join( const char* part1,
                                  const char* part2);
-/* */
+
+/* Copy folder from src to dst. If an error happens in the middle (permission
+ * errors, etc), the |dst| folder will be in half-copied state.
+ */
+extern APosixStatus   path_copy_dir(const char* dst, const char* src);
+
 ANDROID_END_HEADER
