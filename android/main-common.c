@@ -1332,8 +1332,8 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
              "others.\n"
              "This program is a derivative of the QEMU CPU emulator "
              "(www.qemu.org).\n\n",
-#if defined ANDROID_BUILD_ID
-             EMULATOR_VERSION_STRING " (build_id " STRINGIFY(ANDROID_BUILD_ID) ")");
+#if defined ANDROID_SDK_TOOLS_BUILD_NUMBER
+             EMULATOR_VERSION_STRING " (build_id " STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER) ")");
 #else
              EMULATOR_VERSION_STRING);
 #endif
