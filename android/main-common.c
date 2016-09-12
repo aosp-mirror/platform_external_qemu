@@ -841,7 +841,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
                 return false;
             }
         } else {
-            initImage = avdInfo_getDataInitImagePath(avd, opts->wipe_data);
+            initImage = avdInfo_getDataInitImagePath(avd);
             D("autoconfig: -initdata %s", initImage);
         }
 
