@@ -34,6 +34,12 @@ char* path_getSdkRoot();
  */
 char* path_getRootIniPath( const char*  avdName );
 
+/* Return the path to the AVD's content directory. it is located in
+ *  ~/.android/avd/<name>.avd or Windows equivalent
+ * Caller must free() returned string.
+ */
+char* path_getAvdContentPath( const char* avdName );
+
 /* Return the target architecture for a given AVD.
  * Caller must free() returned string.
  */
