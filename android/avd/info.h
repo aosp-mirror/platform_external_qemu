@@ -59,6 +59,7 @@ ANDROID_BEGIN_HEADER
     _AVD_IMG(RAMDISK,"ramdisk.img","ramdisk") \
     _AVD_IMG(INITSYSTEM,"system.img","init system") \
     _AVD_IMG(INITDATA,"userdata.img","init data") \
+    _AVD_IMG(INITZIP,"data","init data zip") \
     _AVD_IMG(USERSYSTEM,"system-qemu.img","user system") \
     _AVD_IMG(USERDATA,"userdata-qemu.img", "user data") \
     _AVD_IMG(CACHE,"cache.img","cache") \
@@ -194,6 +195,8 @@ char*  avdInfo_getDefaultDataImagePath( const AvdInfo*  i );
 char* avdInfo_getDefaultSystemFeatureControlPath(const AvdInfo* i);
 
 char*  avdInfo_getDataInitImagePath( const AvdInfo* i );
+
+char*  avdInfo_getDataInitDirPath( const AvdInfo* i );
 
 /* Return a reference to the boot.prop file for this AVD, if any.
  * The file contains additionnal properties to inject at boot time
