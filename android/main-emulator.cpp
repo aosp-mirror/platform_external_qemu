@@ -138,6 +138,39 @@ static std::string emulator_dirname(const std::string& launcherDir) {
     return cppstr;
 }
 
+static void delete_files(const char* file_dir, const std::string files_to_delete[], unsigned int num_files) {
+    for (unsigned int i = 0; i < num_files; ++ i) {
+        char* file = path_join(file_dir, files_to_delete[i].c_str());
+        if (!file) {
+            continue;
+        }
+        APosixStatus ret = path_delete_file(file);
+        if (ret == 0) {
+            D("Deleting file %s done\n", file);
+        } else {
+            D("Deleting file %s failed\n", file);
+        }
+        free(file);
+    }
+}
+
+static void clean_up_avd_contents_except_config_ini(const char* avd_folder) {
+    // sdcard.img should not be deleted
+    std::string files_to_delete[] = {"system.img.qcow2", "userdata-qemu.img",
+        "userdata-qemu.img.qcow2", "userdata.img", "userdata.img.qcow2", "cache.img",
+        "cache.img.qcow2", "version_num.cache", "sdcard.img.qcow2", "encryptionkey.img",
+        "encryptionkey.img.qcow2", "hardware-qemu.ini", "emulator-user.ini"};
+    delete_files(avd_folder, files_to_delete, ARRAY_SIZE(files_to_delete));
+}
+
+static void clean_up_android_out(const char* android_out) {
+    // note: we should not delete 'userdata.img'
+    std::string files_to_delete[] = {"system.img.qcow2", "userdata-qemu.img",
+        "userdata-qemu.img.qcow2", "userdata.img.qcow2", "cache.img.qcow2", "version_num.cache",
+        "hardware-qemu.ini", "emulator-user.ini"};
+    delete_files(android_out, files_to_delete, ARRAY_SIZE(files_to_delete));
+}
+
 /* Main routine */
 int main(int argc, char** argv)
 {
@@ -154,6 +187,7 @@ int main(int argc, char** argv)
     bool forceEngineLaunch = false;
     bool queryVersion = false;
     bool doListWebcams = false;
+    bool cleanUpAvdContent = false;
 
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
@@ -202,6 +236,11 @@ int main(int argc, char** argv)
 
         if (!strcmp(opt, "-version")) {
             queryVersion = true;
+            continue;
+        }
+
+        if (!strcmp(opt, "-wipe-data")) {
+            cleanUpAvdContent= true;
             continue;
         }
 
@@ -385,6 +424,18 @@ int main(int argc, char** argv)
         derror("No AVD specified. Use '@foo' or '-avd foo' to launch a virtual"
                " device named 'foo'\n");
         return 1;
+    }
+
+    if (cleanUpAvdContent) {
+        if (avdName) {
+            char* avd_folder = path_getAvdContentPath(avdName);
+            if (avd_folder) {
+                clean_up_avd_contents_except_config_ini(avd_folder);
+                free(avd_folder);
+            }
+        } else if (androidOut) {
+            clean_up_android_out(androidOut);
+        }
     }
 
     if (avdArch == NULL) {
