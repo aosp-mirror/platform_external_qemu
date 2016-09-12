@@ -403,22 +403,28 @@ int make_ext4fs_sparse_fd(int fd, long long len,
 int make_ext4fs(const char *filename, long long len,
                 const char *mountpoint, struct selabel_handle *sehnd)
 {
-	int fd;
-	int status;
+    return make_ext4fs_from_dir(filename, NULL, len, mountpoint, sehnd);
+}
 
-	reset_ext4fs_info();
-	info.len = len;
+int make_ext4fs_from_dir(const char *filename, const char *dirname,
+                         long long len, const char *mountpoint,
+                         struct selabel_handle *sehnd) {
+    int fd;
+    int status;
 
-	fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0644);
-	if (fd < 0) {
-		error_errno("open");
-		return EXIT_FAILURE;
-	}
+    reset_ext4fs_info();
+    info.len = len;
 
-	status = make_ext4fs_internal(fd, NULL, mountpoint, NULL, 0, 0, 0, 1, sehnd, 0);
-	close(fd);
+    fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0644);
+    if (fd < 0) {
+            error_errno("open");
+            return EXIT_FAILURE;
+    }
 
-	return status;
+    status = make_ext4fs_internal(fd, dirname, mountpoint, NULL, 0, 0, 0, 1, sehnd, 0);
+    close(fd);
+
+    return status;
 }
 
 /* return a newly-malloc'd string that is a copy of str.  The new string

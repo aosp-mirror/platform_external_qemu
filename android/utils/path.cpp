@@ -11,6 +11,7 @@
 */
 #include "android/base/files/PathUtils.h"
 #include "android/utils/bufprint.h"
+#include "android/utils/dirscanner.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/file_io.h"
@@ -18,6 +19,7 @@
 
 #include "android/base/system/Win32UnicodeString.h"
 
+#include <memory>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -494,4 +496,27 @@ path_unescape_path(char* str)
 
 char* path_join(const char* part1, const char* part2) {
   return strdup(PathUtils::join(part1, part2).c_str());
+}
+
+APosixStatus path_copy_dir(const char* dst, const char* src) {
+    std::unique_ptr<DirScanner, void (*)(DirScanner*)>
+            dirScanner(dirScanner_new(src), dirScanner_free);
+    if (!dirScanner) return false;
+    if (path_mkdir_if_needed(dst, S_IRWXU | S_IRWXG | S_IROTH) < 0) return -1;
+    const char* baseName = dirScanner_next(dirScanner.get());
+    while (baseName) {
+        std::unique_ptr<char[]> fullDstName(path_join(dst, baseName));
+        std::unique_ptr<char[]> fullSrcName(path_join(src, baseName));
+        if (path_is_dir(fullSrcName.get())) {
+            if (path_copy_dir(fullDstName.get(), fullSrcName.get()) < 0) {
+                return -1;
+            }
+        } else {
+            if (path_copy_file(fullDstName.get(), fullSrcName.get()) < 0) {
+                return -1;
+            }
+        }
+        baseName = dirScanner_next(dirScanner.get());
+    }
+    return 0;
 }
