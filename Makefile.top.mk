@@ -109,6 +109,9 @@ ifeq ($(BUILD_TARGET_OS),darwin)
     BUILD_TARGET_CFLAGS := $(filter-out -falign-functions=0,$(BUILD_TARGET_CFLAGS))
 endif
 
+ifneq ($(ANDROID_BUILD_ID),)
+	BUILD_TARGET_CFLAGS += -DANDROID_BUILD_ID=$(ANDROID_BUILD_ID)
+endif
 # NOTE: The following definitions are only used by the standalone build.
 BUILD_TARGET_EXEEXT :=
 BUILD_TARGET_DLLEXT := .so
