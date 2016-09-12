@@ -1197,6 +1197,11 @@ char* avdInfo_getDataInitImagePath(const AvdInfo* i, bool wipe_data) {
     }
 }
 
+char* avdInfo_getDataInitDirPath(const AvdInfo* i) {
+    const char* imageName = _imageFileNames[ AVD_IMAGE_INITZIP ];
+    return _avdInfo_getSdkFilePath(i, imageName);
+}
+
 int
 avdInfo_initHwConfig(const AvdInfo* i, AndroidHwConfig*  hw, bool isQemu2)
 {
