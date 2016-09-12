@@ -810,6 +810,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     {
         char*  dataImage = NULL;
         char*  initImage = NULL;
+        char*  initDir = NULL;
 
         do {
             if (!opts->data) {
@@ -845,12 +846,15 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
             D("autoconfig: -initdata %s", initImage);
         }
 
+        initDir = avdInfo_getDataInitDirPath(avd);
+
         str_reset(&hw->disk_dataPartition_path, dataImage);
         if (opts->wipe_data) {
             str_reset(&hw->disk_dataPartition_initPath, initImage);
         } else {
             str_reset_null(&hw->disk_dataPartition_initPath);
         }
+        str_reset(&hw->disk_dataPartition_initDir, initDir);
         android_op_wipe_data = opts->wipe_data;
         android_op_writable_system = opts->writable_system;
 
