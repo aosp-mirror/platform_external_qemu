@@ -1182,13 +1182,9 @@ char* avdInfo_getDefaultSystemFeatureControlPath(const AvdInfo* i) {
     return retVal;
 }
 
-char* avdInfo_getDataInitImagePath(const AvdInfo* i, bool wipe_data) {
+char* avdInfo_getDataInitImagePath(const AvdInfo* i) {
     const char* imageName = _imageFileNames[ AVD_IMAGE_INITDATA ];
-    if (wipe_data && !i->inAndroidBuild) {
-        return _avdInfo_getSdkFilePath(i, imageName);
-    } else {
-        return _avdInfo_getContentOrSdkFilePath(i, imageName);
-    }
+    return _avdInfo_getContentOrSdkFilePath(i, imageName);
 }
 
 int
