@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b3a0657_635e5172",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-12T20:03:51Z",
+      "side": 1,
+      "message": "PathUtils::join is safer",
+      "range": {
+        "startLine": 143,
+        "startChar": 21,
+        "endLine": 143,
+        "endChar": 30
+      },
+      "revId": "f695a76e655936e06149885a76812a0248e1ba66",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3a0657_2368491f",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-12T20:03:51Z",
+      "side": 1,
+      "message": "could you please use static constexpr StringView[] here?",
+      "range": {
+        "startLine": 158,
+        "startChar": 3,
+        "endLine": 158,
+        "endChar": 33
+      },
+      "revId": "f695a76e655936e06149885a76812a0248e1ba66",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3a0657_23c289fc",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-12T20:03:51Z",
+      "side": 1,
+      "message": "why?",
+      "range": {
+        "startLine": 165,
+        "startChar": 7,
+        "endLine": 165,
+        "endChar": 48
+      },
+      "revId": "f695a76e655936e06149885a76812a0248e1ba66",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3a0657_e3710108",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-12T20:03:51Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 166,
+        "startChar": 4,
+        "endLine": 166,
+        "endChar": 33
+      },
+      "revId": "f695a76e655936e06149885a76812a0248e1ba66",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3a0657_4338ed28",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-12T20:03:51Z",
+      "side": 1,
+      "message": "nit: missing space :)",
+      "range": {
+        "startLine": 240,
+        "startChar": 29,
+        "endLine": 240,
+        "endChar": 30
+      },
+      "revId": "f695a76e655936e06149885a76812a0248e1ba66",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
