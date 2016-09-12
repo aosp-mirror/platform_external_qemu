@@ -21,6 +21,7 @@
 #include "android/cmdline-option.h"
 #include "android/constants.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/emulation/ConfigDirs.h"
 #include "android/error-messages.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/filesystems/ext4_resize.h"
@@ -35,6 +36,7 @@
 #include "android/process_setup.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
+#include "android/utils/file_io.h"
 #include "android/utils/path.h"
 #include "android/utils/lineinput.h"
 #include "android/utils/property_file.h"
@@ -599,22 +601,49 @@ extern "C" int main(int argc, char **argv) {
 
     // Create userdata file from init version if needed.
     if (android_op_wipe_data || !path_exists(hw->disk_dataPartition_path)) {
-        if (!path_exists(hw->disk_dataPartition_initPath)) {
+        std::unique_ptr<char[]> initDir(avdInfo_getDataInitDirPath(avd));
+        if (path_exists(initDir.get())) {
+            std::string dataPath = PathUtils::join(
+                    avdInfo_getContentPath(avd), "data");
+            path_copy_dir(dataPath.c_str(), initDir.get());
+            std::string adbKeyPath = PathUtils::join(
+                    android::ConfigDirs::getUserDirectory(), "adbkey.pub");
+            if (path_is_regular(adbKeyPath.c_str())
+                    && path_can_read(adbKeyPath.c_str())) {
+                std::string guestAdbKeyDir = PathUtils::join(
+                        dataPath, "misc", "adb");
+                std::string guestAdbKeyPath = PathUtils::join(
+                        guestAdbKeyDir, "adb_keys");
+                path_mkdir_if_needed(guestAdbKeyDir.c_str(), 0777);
+                path_copy_file(
+                        guestAdbKeyPath.c_str(),
+                        adbKeyPath.c_str());
+                android_chmod(guestAdbKeyPath.c_str(), 0777);
+            } else {
+                dwarning("cannot read adb public key file: %d",
+                         adbKeyPath.c_str());
+            }
+            android_createExt4ImageFromDir(hw->disk_dataPartition_path,
+                    dataPath.c_str(),
+                    android_hw->disk_dataPartition_size,
+                    "data");
+            // TODO: remove dataPath folder
+        } else if (path_exists(hw->disk_dataPartition_initPath)) {
+            D("Creating: %s\n", hw->disk_dataPartition_path);
+
+            if (path_copy_file(hw->disk_dataPartition_path,
+                               hw->disk_dataPartition_initPath) < 0) {
+                derror("Could not create %s: %s", hw->disk_dataPartition_path,
+                       strerror(errno));
+                return 1;
+            }
+
+            resizeExt4Partition(android_hw->disk_dataPartition_path,
+                                android_hw->disk_dataPartition_size);
+        } else {
             derror("Missing initial data partition file: %s",
                    hw->disk_dataPartition_initPath);
-            return 1;
         }
-        D("Creating: %s\n", hw->disk_dataPartition_path);
-
-        if (path_copy_file(hw->disk_dataPartition_path,
-                           hw->disk_dataPartition_initPath) < 0) {
-            derror("Could not create %s: %s", hw->disk_dataPartition_path,
-                   strerror(errno));
-            return 1;
-        }
-
-        resizeExt4Partition(android_hw->disk_dataPartition_path,
-                            android_hw->disk_dataPartition_size);
     }
     else {
         // Resize userdata-qemu.img if the size is smaller than what config.ini
