@@ -48,6 +48,7 @@
 #include "android/utils/path.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/win32_cmdline_quote.h"
+#include "android/version.h"
 
 using android::base::ScopedCPtr;
 using android::base::System;
@@ -401,6 +402,10 @@ int main(int argc, char** argv)
     // directory where image partition files are located.
     const char* androidOut = NULL;
 
+    // print a version string and build id for easier debugging
+#if defined ANDROID_SDK_TOOLS_BUILD_NUMBER
+    D("Android emulator version %s\n", EMULATOR_VERSION_STRING " (build_id " STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER) ")");
+#endif
     /* If there is an AVD name, we're going to extract its target architecture
      * by looking at its config.ini
      */
