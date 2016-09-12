@@ -10,7 +10,9 @@
 ** GNU General Public License for more details.
 */
 #include "android/base/files/PathUtils.h"
+#include "android/base/memory/ScopedPtr.h"
 #include "android/utils/bufprint.h"
+#include "android/utils/dirscanner.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/file_io.h"
@@ -18,6 +20,7 @@
 
 #include "android/base/system/Win32UnicodeString.h"
 
+#include <memory>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -494,4 +497,27 @@ path_unescape_path(char* str)
 
 char* path_join(const char* part1, const char* part2) {
   return strdup(PathUtils::join(part1, part2).c_str());
+}
+
+APosixStatus path_copy_dir(const char* dst, const char* src) {
+    auto dirScanner = android::base::makeCustomScopedPtr(
+                            dirScanner_new(src), dirScanner_free);
+    if (!dirScanner) return false;
+    if (path_mkdir_if_needed(dst, 0777) < 0) return -1;
+    const char* baseName = dirScanner_next(dirScanner.get());
+    while (baseName) {
+        std::string fullDstName = PathUtils::join(dst, baseName);
+        std::string fullSrcName = PathUtils::join(src, baseName);
+        if (path_is_dir(fullSrcName.c_str())) {
+            if (path_copy_dir(fullDstName.c_str(), fullSrcName.c_str()) < 0) {
+                return -1;
+            }
+        } else {
+            if (path_copy_file(fullDstName.c_str(), fullSrcName.c_str()) < 0) {
+                return -1;
+            }
+        }
+        baseName = dirScanner_next(dirScanner.get());
+    }
+    return 0;
 }
