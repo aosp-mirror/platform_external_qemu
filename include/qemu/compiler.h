@@ -101,4 +101,11 @@
 #define GCC_FMT_ATTR(n, m)
 #endif
 
+/* Don't allow CONFIG_ANDROID to be used, if POISON_CONFIG_ANDROID is
+ * defined from the command-line. This is useful to ensure that the code
+ * that should not depend on Android-specific features does not. */
+#ifdef POISON_CONFIG_ANDROID
+#pragma GCC poison CONFIG_ANDROID
+#endif
+
 #endif /* COMPILER_H */

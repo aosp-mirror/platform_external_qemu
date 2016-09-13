@@ -143,7 +143,9 @@ include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-sources.mk
 # A static library containing target-independent code
 $(call start-emulator-library,libqemu2-common)
 
-LOCAL_CFLAGS += $(QEMU2_CFLAGS)
+LOCAL_CFLAGS += \
+    $(QEMU2_CFLAGS) \
+    -DPOISON_CONFIG_ANDROID \
 
 LOCAL_C_INCLUDES += \
     $(QEMU2_INCLUDES) \
