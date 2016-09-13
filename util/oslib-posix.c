@@ -215,7 +215,7 @@ int qemu_utimens(const char *path, const struct timespec *times)
         gettimeofday(&tv_now, NULL);
     }
     if (times[0].tv_nsec == UTIME_OMIT || times[1].tv_nsec == UTIME_OMIT) {
-        stat(path, &st);
+        qemu_stat(path, &st);
     }
 
     for (i = 0; i < 2; i++) {

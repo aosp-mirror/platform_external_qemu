@@ -371,7 +371,7 @@ static void tftp_handle_rrq(Slirp *slirp, struct sockaddr_storage *srcsas,
 	  struct stat stat_p;
 
 	  if (tsize == 0) {
-	      if (stat(spt->filename, &stat_p) == 0)
+	      if (qemu_stat(spt->filename, &stat_p) == 0)
 		  tsize = stat_p.st_size;
 	      else {
 		  tftp_send_error(spt, 1, "File not found", tp);

@@ -806,7 +806,7 @@ static gboolean read_persistent_state(GAPersistentState *pstate,
 
     g_assert(pstate);
 
-    if (stat(path, &st) == -1) {
+    if (qemu_stat(path, &st) == -1) {
         /* it's okay if state file doesn't exist, but any other error
          * indicates a permissions issue or some other misconfiguration
          * that we likely won't be able to recover from.
@@ -1187,7 +1187,7 @@ static bool check_is_frozen(GAState *s)
      * uneeded unfreeze than to risk hanging on start-up
      */
     struct stat st;
-    if (stat(s->state_filepath_isfrozen, &st) == -1) {
+    if (qemu_stat(s->state_filepath_isfrozen, &st) == -1) {
         /* it's okay if the file doesn't exist, but if we can't access for
          * some other reason, such as permissions, there's a configuration
          * that needs to be addressed. so just bail now before we get into

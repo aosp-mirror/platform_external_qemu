@@ -731,7 +731,7 @@ static int read_directory(BDRVVVFATState* s, int mapping_index)
 	buffer = g_malloc(length);
 	snprintf(buffer,length,"%s/%s",dirname,entry->d_name);
 
-	if(stat(buffer,&st)<0) {
+	if(qemu_stat(buffer,&st)<0) {
             g_free(buffer);
             continue;
 	}

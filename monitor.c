@@ -3028,7 +3028,7 @@ static void file_completion(Monitor *mon, const char *input)
             /* stat the file to find out if it's a directory.
              * In that case add a slash to speed up typing long paths
              */
-            if (stat(file, &sb) == 0 && S_ISDIR(sb.st_mode)) {
+            if (qemu_stat(file, &sb) == 0 && S_ISDIR(sb.st_mode)) {
                 pstrcat(file, sizeof(file), "/");
             }
             readline_add_completion(mon->rs, file);

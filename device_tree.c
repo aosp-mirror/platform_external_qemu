@@ -160,7 +160,7 @@ static void read_fstree(void *fdt, const char *dirname)
 
         tmpnam = g_strdup_printf("%s/%s", dirname, de->d_name);
 
-        if (lstat(tmpnam, &st) < 0) {
+        if (qemu_lstat(tmpnam, &st) < 0) {
             error_setg(&error_fatal, "%s cannot lstat %s", __func__, tmpnam);
         }
 

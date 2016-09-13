@@ -9166,7 +9166,7 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
     case TARGET_NR_stat:
         if (!(p = lock_user_string(arg1)))
             goto efault;
-        ret = get_errno(stat(path(p), &st));
+        ret = get_errno(qemu_stat(path(p), &st));
         unlock_user(p, arg1, 0);
         goto do_stat;
 #endif
@@ -9174,7 +9174,7 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
     case TARGET_NR_lstat:
         if (!(p = lock_user_string(arg1)))
             goto efault;
-        ret = get_errno(lstat(path(p), &st));
+        ret = get_errno(qemu_lstat(path(p), &st));
         unlock_user(p, arg1, 0);
         goto do_stat;
 #endif
@@ -10189,7 +10189,7 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
     case TARGET_NR_stat64:
         if (!(p = lock_user_string(arg1)))
             goto efault;
-        ret = get_errno(stat(path(p), &st));
+        ret = get_errno(qemu_stat(path(p), &st));
         unlock_user(p, arg1, 0);
         if (!is_error(ret))
             ret = host_to_target_stat64(cpu_env, arg2, &st);
@@ -10199,7 +10199,7 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
     case TARGET_NR_lstat64:
         if (!(p = lock_user_string(arg1)))
             goto efault;
-        ret = get_errno(lstat(path(p), &st));
+        ret = get_errno(qemu_lstat(path(p), &st));
         unlock_user(p, arg1, 0);
         if (!is_error(ret))
             ret = host_to_target_stat64(cpu_env, arg2, &st);

@@ -2503,7 +2503,7 @@ static int vfio_initfn(PCIDevice *pdev)
                             vdev->host.slot, vdev->host.function);
     }
 
-    if (stat(vdev->vbasedev.sysfsdev, &st) < 0) {
+    if (qemu_stat(vdev->vbasedev.sysfsdev, &st) < 0) {
         error_report("vfio: error: no such host device: %s",
                      vdev->vbasedev.sysfsdev);
         return -errno;

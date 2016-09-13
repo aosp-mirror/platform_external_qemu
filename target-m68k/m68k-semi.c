@@ -344,7 +344,7 @@ void do_m68k_semihosting(CPUM68KState *env, int nr)
                 /* FIXME - check error code? */
                 result = -1;
             } else {
-                result = stat(p, &s);
+                result = qemu_stat(p, &s);
                 unlock_user(p, arg0, 0);
             }
             if (result == 0) {

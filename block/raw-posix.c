@@ -182,7 +182,7 @@ static int raw_normalize_devicepath(const char **filename)
 
     fname = *filename;
     dp = strrchr(fname, '/');
-    if (lstat(fname, &sb) < 0) {
+    if (qemu_lstat(fname, &sb) < 0) {
         fprintf(stderr, "%s: stat failed: %s\n",
             fname, strerror(errno));
         return -errno;
@@ -2003,7 +2003,7 @@ static int hdev_probe_device(const char *filename)
     if (strstart(filename, "/dev/cdrom", NULL))
         return 50;
 
-    if (stat(filename, &st) >= 0 &&
+    if (qemu_stat(filename, &st) >= 0 &&
             (S_ISCHR(st.st_mode) || S_ISBLK(st.st_mode))) {
         return 100;
     }
@@ -2062,7 +2062,7 @@ static bool hdev_is_sg(BlockDriverState *bs)
     struct sg_scsi_id scsiid;
     int sg_version;
 
-    if (stat(bs->filename, &st) >= 0 && S_ISCHR(st.st_mode) &&
+    if (qemu_stat(bs->filename, &st) >= 0 && S_ISCHR(st.st_mode) &&
         !bdrv_ioctl(bs, SG_GET_VERSION_NUM, &sg_version) &&
         !bdrv_ioctl(bs, SG_GET_SCSI_ID, &scsiid)) {
         DPRINTF("SG device found: type=%d, version=%d\n",

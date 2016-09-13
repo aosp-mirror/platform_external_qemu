@@ -319,7 +319,7 @@ static MTPObject *usb_mtp_object_alloc(MTPState *s, uint32_t handle,
         o->path = g_strdup_printf("%s/%s", parent->path, name);
     }
 
-    if (lstat(o->path, &o->stat) != 0) {
+    if (qemu_lstat(o->path, &o->stat) != 0) {
         goto ignore;
     }
     if (S_ISREG(o->stat.st_mode)) {

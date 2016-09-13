@@ -78,6 +78,19 @@ int qemu_openpty_raw(int *aslave, char *pty_name);
     sendto(sockfd, buf, len, flags, destaddr, addrlen)
 #endif
 
+/* ANDROID_BEGIN */
+#ifdef _WIN32
+/* For the Android emulator, filepath are UTF-8 encoded, which the default
+ * stat() doesn't support properly, so use an alternative implementation
+ * for Win32. */
+int qemu_stat(const char* filepath, struct stat* st);
+int qemu_lstat(const char* filepath, struct stat* st);
+#else
+#define qemu_stat stat
+#define qemu_lstat lstat
+#endif
+/* ANDROID_END */
+
 void tcg_exec_init(unsigned long tb_size);
 
 extern bool g_tcg_enabled;

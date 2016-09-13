@@ -132,7 +132,7 @@ static int get_dns_addr_cached(void *pdns_addr, void *cached_addr,
         return 0;
     }
     old_stat = *cached_stat;
-    if (stat("/etc/resolv.conf", cached_stat) != 0) {
+    if (qemu_stat("/etc/resolv.conf", cached_stat) != 0) {
         return -1;
     }
     if (cached_stat->st_dev == old_stat.st_dev

@@ -39,7 +39,7 @@ void *pci_assign_dev_load_option_rom(PCIDevice *dev, struct Object *owner,
              "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/rom",
              domain, bus, slot, function);
 
-    if (stat(rom_file, &st)) {
+    if (qemu_stat(rom_file, &st)) {
         if (errno != ENOENT) {
             error_report("pci-assign: Invalid ROM.");
         }

@@ -124,7 +124,7 @@ static int local_lstat(FsContext *fs_ctx, V9fsPath *fs_path, struct stat *stbuf)
     char *path = fs_path->data;
 
     buffer = rpath(fs_ctx, path);
-    err =  lstat(buffer, stbuf);
+    err =  qemu_lstat(buffer, stbuf);
     if (err) {
         goto err_out;
     }
@@ -949,7 +949,7 @@ static int local_remove(FsContext *ctx, const char *path)
 
     if (ctx->export_flags & V9FS_SM_MAPPED_FILE) {
         buffer = rpath(ctx, path);
-        err =  lstat(buffer, &stbuf);
+        err =  qemu_lstat(buffer, &stbuf);
         g_free(buffer);
         if (err) {
             goto err_out;

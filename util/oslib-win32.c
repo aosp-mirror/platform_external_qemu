@@ -783,3 +783,13 @@ ssize_t qemu_recvfrom_wrap(int sockfd, void *buf, size_t len, int flags,
     }
     return ret;
 }
+
+int qemu_stat(const char* path, struct stat* st)
+{
+    return stat(path, st);
+}
+
+int qemu_lstat(const char* path, struct stat* st)
+{
+    return qemu_stat(path, st);
+}

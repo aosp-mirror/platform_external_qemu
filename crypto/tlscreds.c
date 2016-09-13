@@ -112,7 +112,7 @@ qcrypto_tls_creds_get_path(QCryptoTLSCreds *creds,
 
     *cred = g_strdup_printf("%s/%s", creds->dir, filename);
 
-    if (stat(*cred, &sb) < 0) {
+    if (qemu_stat(*cred, &sb) < 0) {
         if (errno == ENOENT && !required) {
             ret = 0;
         } else {

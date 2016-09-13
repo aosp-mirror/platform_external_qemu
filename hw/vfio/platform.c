@@ -567,7 +567,7 @@ static int vfio_base_device_init(VFIODevice *vbasedev)
                                              vbasedev->name);
     }
 
-    if (stat(vbasedev->sysfsdev, &st) < 0) {
+    if (qemu_stat(vbasedev->sysfsdev, &st) < 0) {
         error_report("vfio: error: no such host device: %s",
                      vbasedev->sysfsdev);
         return -errno;

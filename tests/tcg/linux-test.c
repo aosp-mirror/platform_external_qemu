@@ -152,7 +152,7 @@ void test_file(void)
     tbuf.modtime = 1000;
     chk_error(truncate("file2", 100));
     chk_error(utime("file2", &tbuf));
-    chk_error(stat("file2", &st));
+    chk_error(qemu_stat("file2", &st));
     if (st.st_size != 100)
         error("stat size");
     if (!S_ISREG(st.st_mode))
@@ -163,7 +163,7 @@ void test_file(void)
         st.st_mtime != 1000)
         error("stat time");
 
-    chk_error(stat(TESTPATH, &st));
+    chk_error(qemu_stat(TESTPATH, &st));
     if (!S_ISDIR(st.st_mode))
         error("stat mode");
 
@@ -180,7 +180,7 @@ void test_file(void)
 
     /* symlink/lstat */
     chk_error(symlink("file2", "file3"));
-    chk_error(lstat("file3", &st));
+    chk_error(qemu_lstat("file3", &st));
     if (!S_ISLNK(st.st_mode))
         error("stat mode");
 

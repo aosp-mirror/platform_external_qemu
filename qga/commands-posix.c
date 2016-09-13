@@ -644,7 +644,7 @@ static int dev_major_minor(const char *devpath,
     *devmajor = 0;
     *devminor = 0;
 
-    if (stat(devpath, &st) < 0) {
+    if (qemu_stat(devpath, &st) < 0) {
         slog("failed to stat device file '%s': %s", devpath, strerror(errno));
         return -1;
     }

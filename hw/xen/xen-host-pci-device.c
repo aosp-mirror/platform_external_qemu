@@ -196,7 +196,7 @@ static bool xen_host_pci_dev_is_virtfn(XenHostPCIDevice *d)
 
     xen_host_pci_sysfs_path(d, "physfn", path, sizeof(path));
 
-    return !stat(path, &buf);
+    return !qemu_stat(path, &buf);
 }
 
 static void xen_host_pci_config_open(XenHostPCIDevice *d, Error **errp)

@@ -549,7 +549,7 @@ static int do_stat(int type, struct iovec *iovec, struct iovec *out_iovec)
 
     switch (type) {
     case T_LSTAT:
-        retval = lstat(path.data, &st_buf);
+        retval = qemu_lstat(path.data, &st_buf);
         if (retval < 0) {
             retval = -errno;
         } else {
@@ -1102,7 +1102,7 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    if (lstat(rpath, &stbuf) < 0) {
+    if (qemu_lstat(rpath, &stbuf) < 0) {
         fprintf(stderr, "invalid path \"%s\" specified, %s\n",
                 rpath, strerror(errno));
         exit(EXIT_FAILURE);
