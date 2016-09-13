@@ -124,6 +124,7 @@
 #include "android/utils/filelock.h"
 #include "android/utils/ini.h"
 #include "android/utils/tempfile.h"
+#include "android/utils/timezone.h"
 #include "android/skin/winsys.h"
 #include "android/main-common.h"
 #include "android/multitouch-port.h"
@@ -4228,6 +4229,12 @@ int run_qemu_main(int argc, const char **argv)
                 break;
             case QEMU_OPTION_android_skip_adb_auth:
                 adb_auth = 0;
+                break;
+            case QEMU_OPTION_timezone:
+                if (timezone_set((char*)optarg)) {
+                    fprintf(stderr, "emulator: it seems the timezone '%s' is not in zoneinfo format\n",
+                            (char*)optarg);
+                }
                 break;
 #endif  // CONFIG_ANDROID
             default:
