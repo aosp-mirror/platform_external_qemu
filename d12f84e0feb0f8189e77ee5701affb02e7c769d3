@@ -45,6 +45,30 @@
       "revId": "d12f84e0feb0f8189e77ee5701affb02e7c769d3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3a0657_95b626f2",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-09-13T00:32:17Z",
+      "side": 1,
+      "message": "now I see... why it is called stringview",
+      "parentUuid": "6b3a0657_9568668b",
+      "range": {
+        "startLine": 147,
+        "startChar": 8,
+        "endLine": 147,
+        "endChar": 18
+      },
+      "revId": "d12f84e0feb0f8189e77ee5701affb02e7c769d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
