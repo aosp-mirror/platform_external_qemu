@@ -37,7 +37,6 @@ host_commonSources := \
 $(call emugl-begin-executable,emugl$(BUILD_TARGET_SUFFIX)_common_host_unittests)
 LOCAL_SRC_FILES := $(host_commonSources)
 $(call emugl-import,libemugl_common libemugl_gtest)
-$(call local-link-static-c++lib)
 $(call emugl-end-module)
 
 $(call emugl-begin-shared-library,lib$(BUILD_TARGET_SUFFIX)emugl_test_shared_library)
