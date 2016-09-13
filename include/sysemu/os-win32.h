@@ -181,4 +181,27 @@ ssize_t qemu_recv_wrap(int sockfd, void *buf, size_t len, int flags);
 ssize_t qemu_recvfrom_wrap(int sockfd, void *buf, size_t len, int flags,
                            struct sockaddr *addr, socklen_t *addrlen);
 
+// ANDROID_BEGIN
+/* These are wrappers around Win32 functions. When building against the
+ * Android emulator, they will treat file names as UTF-8 encoded strings,
+ * instead of ANSI ones. */
+HANDLE win32CreateFile(
+        LPCTSTR               lpFileName,
+        DWORD                 dwDesiredAccess,
+        DWORD                 dwShareMode,
+        LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+        DWORD                 dwCreationDisposition,
+        DWORD                 dwFlagsAndAttributes,
+        HANDLE                hTemplateFile);
+
+DWORD win32GetCurrentDirectory(
+        DWORD  nBufferLength,
+        LPTSTR lpBuffer);
+
+DWORD win32GetModuleFileName(
+        HMODULE hModule,
+        LPTSTR  lpFilename,
+        DWORD   nSize);
+// ANDROID_END
+
 #endif

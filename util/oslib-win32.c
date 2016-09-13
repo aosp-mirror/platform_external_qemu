@@ -306,7 +306,7 @@ void qemu_init_exec_dir(const char *argv0)
     char buf[MAX_PATH];
     DWORD len;
 
-    len = GetModuleFileName(NULL, buf, sizeof(buf) - 1);
+    len = win32GetModuleFileName(NULL, buf, sizeof(buf) - 1);
     if (len == 0) {
         return;
     }

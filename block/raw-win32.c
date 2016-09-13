@@ -328,11 +328,11 @@ static int raw_open(BlockDriverState *bs, QDict *options, int flags,
     } else {
         /* Relative path.  */
         char buf[MAX_PATH];
-        GetCurrentDirectory(MAX_PATH, buf);
+        win32GetCurrentDirectory(MAX_PATH, buf);
         snprintf(s->drive_path, sizeof(s->drive_path), "%c:\\", buf[0]);
     }
 
-    s->hfile = CreateFile(filename, access_flags,
+    s->hfile = win32CreateFile(filename, access_flags,
                           FILE_SHARE_READ, NULL,
                           OPEN_EXISTING, overlapped, NULL);
     if (s->hfile == INVALID_HANDLE_VALUE) {
@@ -681,7 +681,7 @@ static int hdev_open(BlockDriverState *bs, QDict *options, int flags,
 
     create_flags = OPEN_EXISTING;
 
-    s->hfile = CreateFile(filename, access_flags,
+    s->hfile = win32CreateFile(filename, access_flags,
                           FILE_SHARE_READ, NULL,
                           create_flags, overlapped, NULL);
     if (s->hfile == INVALID_HANDLE_VALUE) {

@@ -171,7 +171,7 @@ int64_t qmp_guest_file_open(const char *path, bool has_mode,
         return -1;
     }
 
-    fh = CreateFile(path, guest_flags->desired_access, share_mode, sa_attr,
+    fh = win32CreateFile(path, guest_flags->desired_access, share_mode, sa_attr,
                     guest_flags->creation_disposition, flags_and_attr,
                     templ_file);
     if (fh == INVALID_HANDLE_VALUE) {
@@ -598,7 +598,7 @@ static GuestDiskAddressList *build_guest_disk_info(char *guid, Error **errp)
     scsi_ad = &addr;
     char *name = g_strndup(guid, strlen(guid)-1);
 
-    vol_h = CreateFile(name, 0, FILE_SHARE_READ, NULL, OPEN_EXISTING,
+    vol_h = win32CreateFile(name, 0, FILE_SHARE_READ, NULL, OPEN_EXISTING,
                        0, NULL);
     if (vol_h == INVALID_HANDLE_VALUE) {
         error_setg_win32(errp, GetLastError(), "failed to open volume");

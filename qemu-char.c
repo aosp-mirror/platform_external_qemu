@@ -1963,7 +1963,7 @@ static int win_chr_init(CharDriverState *chr, const char *filename, Error **errp
         goto fail;
     }
 
-    s->hcom = CreateFile(filename, GENERIC_READ|GENERIC_WRITE, 0, NULL,
+    s->hcom = win32CreateFile(filename, GENERIC_READ|GENERIC_WRITE, 0, NULL,
                       OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
     if (s->hcom == INVALID_HANDLE_VALUE) {
         error_setg(errp, "Failed CreateFile (%lu)", GetLastError());
@@ -4292,7 +4292,7 @@ static CharDriverState *qmp_chardev_open_file(const char *id,
         flags = CREATE_ALWAYS;
     }
 
-    out = CreateFile(file->out, accessmode, FILE_SHARE_READ, NULL, flags,
+    out = win32CreateFile(file->out, accessmode, FILE_SHARE_READ, NULL, flags,
                      FILE_ATTRIBUTE_NORMAL, NULL);
     if (out == INVALID_HANDLE_VALUE) {
         error_setg(errp, "open %s failed", file->out);

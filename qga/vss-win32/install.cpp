@@ -252,7 +252,7 @@ STDAPI COMRegister(void)
 
     chk(pObj->get_Key(&key));
 
-    if (!GetModuleFileName(g_hinstDll, dllPath, sizeof(dllPath))) {
+    if (!win32GetModuleFileName(g_hinstDll, dllPath, sizeof(dllPath))) {
         hr = HRESULT_FROM_WIN32(GetLastError());
         errmsg(hr, "GetModuleFileName failed");
         goto out;
@@ -367,7 +367,7 @@ STDAPI DllRegisterServer(void)
         goto out;
     }
 
-    if (!GetModuleFileName(g_hinstDll, dllPath, sizeof(dllPath))) {
+    if (!win32GetModuleFileName(g_hinstDll, dllPath, sizeof(dllPath))) {
         errmsg_dialog(GetLastError(), "GetModuleFileName failed");
         goto out;
     }

@@ -298,7 +298,7 @@ static gboolean ga_channel_open(GAChannel *c, GAChannelMethod method,
         g_strlcpy(newpath, path, sizeof(newpath));
     }
 
-    c->handle = CreateFile(newpath, GENERIC_READ | GENERIC_WRITE, 0, NULL,
+    c->handle = win32CreateFile(newpath, GENERIC_READ | GENERIC_WRITE, 0, NULL,
                            OPEN_EXISTING,
                            FILE_FLAG_NO_BUFFERING | FILE_FLAG_OVERLAPPED, NULL);
     if (c->handle == INVALID_HANDLE_VALUE) {
