@@ -146,15 +146,15 @@ static int file_pad(struct output_file *out, int64_t len)
 	 * make sure the actual file size is larger than len so mingw will
 	 * bypass that free space check. */
 	ret = lseek64(outn->fd, len, SEEK_SET);
-	if (ret < 0) {
-		error_errno("lseek64");
-		return -1;
-	}
-	char c = '\0';
-	ret = write(outn->fd, &c, 1);
-	if (ret < 0) {
-		error_errno("write");
-		return -1;
+	/* It seems lseek64 doesn't work on windows, in this case, just
+	 * ignore the error */
+	if (ret >= 0) {
+		char c = '\0';
+		ret = write(outn->fd, &c, 1);
+		if (ret < 0) {
+			error_errno("write");
+			return -1;
+		}
 	}
 #endif
 	ret = ftruncate64(outn->fd, len);
