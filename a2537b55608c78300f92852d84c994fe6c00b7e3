@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6b3a0657_0c7f6406",
+        "filename": "android/utils/path.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-09-13T22:14:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6b3a0657_5b744861",
+      "range": {
+        "startLine": 502,
+        "startChar": 4,
+        "endLine": 502,
+        "endChar": 54
+      },
+      "revId": "a2537b55608c78300f92852d84c994fe6c00b7e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b3a0657_fb851c3f",
         "filename": "android/utils/path.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-09-13T16:18:43Z",
       "side": 1,
       "message": "please use PathUtils::join() - it returns a guaranteed non-null std::string, it also manages its memory automatically",
+      "range": {
+        "startLine": 508,
+        "startChar": 44,
+        "endLine": 508,
+        "endChar": 53
+      },
+      "revId": "a2537b55608c78300f92852d84c994fe6c00b7e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3a0657_4c9c8c5e",
+        "filename": "android/utils/path.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 508,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-09-13T22:14:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6b3a0657_fb851c3f",
       "range": {
         "startLine": 508,
         "startChar": 44,
