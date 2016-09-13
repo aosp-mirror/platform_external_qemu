@@ -401,4 +401,8 @@ int qemu_read_password(char *buf, int buf_size);
  */
 pid_t qemu_fork(Error **errp);
 
+/* Use a custom handler for user-initiated exits (e.g. Ctrl-C).
+ * The default is to call qemu_system_shutdown_request(). */
+void qemu_set_ctrlc_handler(void(*handler)(void));
+
 #endif

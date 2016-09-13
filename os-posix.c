@@ -57,9 +57,19 @@ void os_setup_early_signal_handling(void)
     sigaction(SIGPIPE, &act, NULL);
 }
 
+static void (*qemu_ctrlc_handler)(void) = NULL;
+
+void qemu_set_ctrlc_handler(void(*handler)(void)) {
+    qemu_ctrlc_handler = handler;
+}
+
 static void termsig_handler(int signal, siginfo_t *info, void *c)
 {
-    qemu_system_killed(info->si_signo, info->si_pid);
+    if (qemu_ctrlc_handler) {
+        qemu_ctrlc_handler();
+    } else {
+        qemu_system_killed(info->si_signo, info->si_pid);
+    }
 }
 
 void os_setup_signal_handling(void)
