@@ -474,28 +474,13 @@ endef
 
 # Call this function to force a module to link statically to the C++ standard
 # library on platforms that support it (i.e. Linux and Windows).
-#
-# NOTE: On Windows, recent Mingw versions add support for std::thread through
-#       the libwinpthread-1 library, which libstdc++ depends on, requiring
-#       special link-time flags (instead of the classic -static-libstdc++).
-#
-#       We detect whether this is the case by inspecting the content of
-#       PREBUILT_PATH_PAIRS, which is set by config.make, the auto-generated
-#       file that comes from running 'android-configure.sh --mingw'
-#
-_HAS_WINPTHREAD := $(if $(filter %libwinpthread-1.dll,$(PREBUILT_PATH_PAIRS)),true)
-
 local-link-static-c++lib = $(eval $(ev-local-link-static-c++lib))
 define ev-local-link-static-c++lib
 ifeq (darwin,$(BUILD_TARGET_OS))
 LOCAL_LDLIBS += $(CXX_STD_LIB)
-else
-ifeq (true,$(_HAS_WINPTHREAD))
-LOCAL_LDLIBS += -Wl,-Bstatic -lstdc++ -lwinpthread -Wl,-Bdynamic
-else # !libwinpthread
-LOCAL_LD := $(call local-build-var,CXX)
+else  # BUILD_TARGET_OS != darwin
+LOCAL_LD := $$(call local-build-var,CXX)
 LOCAL_LDLIBS += -static-libstdc++
-endif  # !_HAS_WINPTHREAD
 endif  # BUILD_TARGET_OS != darwin
 endef
 

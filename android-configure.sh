@@ -931,41 +931,7 @@ if [ -n "${TOOLCHAIN_SYSROOT}" ]; then
     esac
 fi
 
-###
-###  Libwinpthreads-1.dll probe
-###
 
-# $1: DLL name (e.g. libwinpthread-1.dll)
-probe_mingw_dlls () {
-    local DLLS DLL SRC_DLL DST_DLL MINGW_SYSROTO
-    MINGW_SYSROOT=$("$GEN_SDK" $GEN_SDK_FLAGS --print=sysroot unused_parameter)
-    DLLS=$(cd "$MINGW_SYSROOT" && find . -name "$1" 2>/dev/null)
-    if [ -z "$DLLS" ]; then
-        log "Mingw      : No $1 available."
-    else
-        log "Mingw      : Copying prebuilt $1 libraries."
-        for DLL in $DLLS; do
-            SRC_DLL=${DLL#./}  # Remove initial ./ in DLL path.
-            case $SRC_DLL in
-                bin/*)
-                    DST_DLL=lib64${SRC_DLL##bin}
-                    ;;
-                lib32/*)
-                    DST_DLL=lib${SRC_DLL##lib32}
-                    ;;
-                *)
-                    DST_DLL=$SRC_DLL
-                    ;;
-            esac
-            log2 "   $SRC_DLL -> $DST_DLL"
-            install_prebuilt_dll "$MINGW_SYSROOT"/$SRC_DLL "$OUT_DIR"/$DST_DLL
-        done
-    fi
-}
-
-if [ "$OPTION_MINGW" ]; then
-    probe_mingw_dlls libwinpthread-1.dll
-fi
 
 # Re-create the configuration file
 config_mk=$OUT_DIR/build/config.make
