@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b3a0657_b5880a5a",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-13T00:25:26Z",
+      "side": 1,
+      "message": "nit: extra space",
+      "range": {
+        "startLine": 146,
+        "startChar": 46,
+        "endLine": 146,
+        "endChar": 47
+      },
+      "revId": "d12f84e0feb0f8189e77ee5701affb02e7c769d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3a0657_9568668b",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-13T00:25:26Z",
+      "side": 1,
+      "message": "well, not here. StringView doesn\u0027t own the memory, it only holds a pointer to a memory owned by someone else. In this case, join() returns a temporary string that needs to be stored somewhere, otherwise StringView would point to a free-d memory.\nPlease replace it _here_ with std::string.",
+      "range": {
+        "startLine": 147,
+        "startChar": 8,
+        "endLine": 147,
+        "endChar": 18
+      },
+      "revId": "d12f84e0feb0f8189e77ee5701affb02e7c769d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
