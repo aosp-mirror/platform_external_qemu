@@ -429,7 +429,9 @@ static void allocate_system_memory_nonnuma(MemoryRegion *mr, Object *owner,
         exit(1);
 #endif
     } else {
-        memory_region_init_ram(mr, owner, name, ram_size, &error_fatal);
+        memory_region_init_ram(mr, owner, name, ram_size, &error_during_init);
+        if (error_during_init != NULL)
+            return;
     }
     vmstate_register_ram_global(mr);
 }

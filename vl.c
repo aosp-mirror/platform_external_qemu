@@ -4508,6 +4508,9 @@ int main(int argc, char **argv, char **envp)
     current_machine->cpu_model = cpu_model;
 
     machine_class->init(current_machine);
+    if (error_during_init != NULL) {
+        return 1;
+    }
 
     if (!realtime_init()) {
         return 1;

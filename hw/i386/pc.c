@@ -1371,6 +1371,10 @@ void pc_memory_init(PCMachineState *pcms,
     ram = g_malloc(sizeof(*ram));
     memory_region_allocate_system_memory(ram, NULL, "pc.ram",
                                          machine->ram_size);
+    if (error_during_init) {
+        g_free(ram);
+        return;
+    }
     *ram_memory = ram;
     ram_below_4g = g_malloc(sizeof(*ram_below_4g));
     memory_region_init_alias(ram_below_4g, NULL, "ram-below-4g", ram,

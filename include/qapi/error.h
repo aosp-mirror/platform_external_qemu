@@ -299,4 +299,10 @@ extern Error *error_abort;
  */
 extern Error *error_fatal;
 
+/*
+ * Special error destination for errors that happen during initialization,
+ * inside functions that do not take an Error** parameter to report them.
+ */
+extern Error *error_during_init;
+
 #endif

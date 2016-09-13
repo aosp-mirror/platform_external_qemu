@@ -182,6 +182,10 @@ static void pc_init1(MachineState *machine,
         xen_load_linux(pcms);
     }
 
+    if (error_during_init != NULL) {
+        return;
+    }
+
     gsi_state = g_malloc0(sizeof(*gsi_state));
     if (kvm_ioapic_in_kernel()) {
         kvm_pc_setup_irq_routing(pcmc->pci_enabled);

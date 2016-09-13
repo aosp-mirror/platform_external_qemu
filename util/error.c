@@ -29,6 +29,7 @@ struct Error
 
 Error *error_abort;
 Error *error_fatal;
+Error *error_during_init;
 
 static void error_handle_fatal(Error **errp, Error *err)
 {
