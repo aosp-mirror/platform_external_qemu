@@ -32,6 +32,7 @@
 #include "android/avd/scanner.h"
 #include "android/avd/util.h"
 #include "android/base/ArraySize.h"
+#include "android/base/StringView.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
@@ -48,10 +49,13 @@
 #include "android/utils/path.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/win32_cmdline_quote.h"
+#include "android/version.h"
 
-using android::base::ScopedCPtr;
-using android::base::System;
+using android::base::PathUtils;
 using android::base::RunOptions;
+using android::base::ScopedCPtr;
+using android::base::StringView;
+using android::base::System;
 
 #define DEBUG 1
 
@@ -138,6 +142,47 @@ static std::string emulator_dirname(const std::string& launcherDir) {
     return cppstr;
 }
 
+static void delete_files(const StringView file_dir, const StringView files_to_delete[],
+        unsigned int num_files) {
+    for (unsigned int i = 0; i < num_files; ++i) {
+        std::string file = PathUtils::join(file_dir, files_to_delete[i]);
+        APosixStatus ret = path_delete_file(file.c_str());
+        if (ret == 0) {
+            D("Deleting file %s done\n", file.c_str());
+        } else {
+            D("Deleting file %s failed\n", file.c_str());
+        }
+    }
+}
+
+static void clean_up_avd_contents_except_config_ini(const char* avd_folder) {
+    // sdcard.img should not be deleted, because it is created by sdk manager
+    // and we dont know how to re-create it from emulator yet
+    // TODO: fixit
+    static constexpr StringView files_to_delete[] = {"system.img.qcow2", "userdata-qemu.img",
+        "userdata-qemu.img.qcow2", "userdata.img", "userdata.img.qcow2", "cache.img",
+        "cache.img.qcow2", "version_num.cache", "sdcard.img.qcow2", "encryptionkey.img",
+        "encryptionkey.img.qcow2", "hardware-qemu.ini", "emulator-user.ini"};
+    delete_files(avd_folder, files_to_delete, ARRAY_SIZE(files_to_delete));
+}
+
+static void copy_userdata_img_from_sys_folder(const char* sys_folder, const char* avd_folder) {
+    std::string dest = PathUtils::join(avd_folder, "userdata.img");
+    std::string src = PathUtils::join(sys_folder, "userdata.img");
+    APosixStatus ret = path_copy_file(dest.c_str(), src.c_str());
+    D("Copying %s to %s %s\n", src.c_str(), dest.c_str(), ret == 0 ? "done" : "failed");
+}
+
+static void clean_up_android_out(const char* android_out) {
+    // note: we should not delete 'userdata.img' otherwise, we will have to run
+    // make again to create it; in avd/ folder, it can be copied from
+    // system-images/.../<arch>/ directory.
+    static constexpr StringView files_to_delete[] = {"system.img.qcow2", "userdata-qemu.img",
+        "userdata-qemu.img.qcow2", "userdata.img.qcow2", "cache.img.qcow2", "version_num.cache",
+        "hardware-qemu.ini", "emulator-user.ini"};
+    delete_files(android_out, files_to_delete, ARRAY_SIZE(files_to_delete));
+}
+
 /* Main routine */
 int main(int argc, char** argv)
 {
@@ -154,6 +199,7 @@ int main(int argc, char** argv)
     bool forceEngineLaunch = false;
     bool queryVersion = false;
     bool doListWebcams = false;
+    bool cleanUpAvdContent = false;
 
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
@@ -202,6 +248,11 @@ int main(int argc, char** argv)
 
         if (!strcmp(opt, "-version")) {
             queryVersion = true;
+            continue;
+        }
+
+        if (!strcmp(opt, "-wipe-data")) {
+            cleanUpAvdContent= true;
             continue;
         }
 
@@ -362,6 +413,11 @@ int main(int argc, char** argv)
     // directory where image partition files are located.
     const char* androidOut = NULL;
 
+    // print a version string and build id for easier debugging
+#if defined ANDROID_SDK_TOOLS_BUILD_NUMBER
+    D("Android emulator version %s\n", EMULATOR_VERSION_STRING
+      " (build_id " STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER) ")");
+#endif
     /* If there is an AVD name, we're going to extract its target architecture
      * by looking at its config.ini
      */
@@ -385,6 +441,22 @@ int main(int argc, char** argv)
         derror("No AVD specified. Use '@foo' or '-avd foo' to launch a virtual"
                " device named 'foo'\n");
         return 1;
+    }
+
+    if (cleanUpAvdContent) {
+        if (avdName) {
+            char* avd_folder = path_getAvdContentPath(avdName);
+            if (avd_folder) {
+                clean_up_avd_contents_except_config_ini(avd_folder);
+                std::string systemPath = getAvdSystemPath(avdName);
+                if (!systemPath.empty()) {
+                    copy_userdata_img_from_sys_folder(systemPath.c_str(), avd_folder);
+                }
+                free(avd_folder);
+            }
+        } else if (androidOut) {
+            clean_up_android_out(androidOut);
+        }
     }
 
     if (avdArch == NULL) {

@@ -146,6 +146,9 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
     # Needed to compile the call to androidQtSetupEnv() in main-emulator.cpp
     LOCAL_CFLAGS += -DCONFIG_QT
 
+    # Need the build number as well
+    LOCAL_CFLAGS += $(EMULATOR_VERSION_CFLAGS)
+
     LOCAL_STATIC_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES)
 
     LOCAL_LDLIBS += $(ANDROID_EMU_LDLIBS)
