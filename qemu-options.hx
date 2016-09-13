@@ -4057,6 +4057,15 @@ STEXI
 @findex -adb-auth
 Skip adb authentication dialogue
 ETEXI
+
+DEF("timezone", HAS_ARG, QEMU_OPTION_timezone,
+    "-timezone <timezone> use this timezone instead of host's default\n", QEMU_ARCH_ALL)
+STEXI
+@item -timezone
+@findex -timezone
+Set timezone instead of using host's default
+ETEXI
+
 #endif  // CONFIG_ANDROID
 
 HXCOMM This is the last statement. Insert new options before this line!

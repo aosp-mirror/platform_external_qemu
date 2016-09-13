@@ -160,6 +160,7 @@ int main(int argc, char **argv)
 #include "android/utils/property_file.h"
 #include "android/utils/socket_drainer.h"
 #include "android/utils/tempfile.h"
+#include "android/utils/timezone.h"
 #include "android/version.h"
 #include "android/wear-agent/android_wear_agent.h"
 #include "android-qemu2-glue/android_qemud.h"
@@ -4347,6 +4348,12 @@ int main(int argc, char** argv, char** envp)
 
             case QEMU_OPTION_android_skip_adb_auth:
                 adb_auth = 0;
+                break;
+            case QEMU_OPTION_timezone:
+                if (timezone_set((char*)optarg)) {
+                    fprintf(stderr, "emulator: it seems the timezone '%s' is not in zoneinfo format\n",
+                            (char*)optarg);
+                }
                 break;
 
 #endif  // CONFIG_ANDROID
