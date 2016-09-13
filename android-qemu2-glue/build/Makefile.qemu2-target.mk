@@ -174,11 +174,15 @@ LOCAL_WHOLE_STATIC_LIBRARIES += \
 
 LOCAL_STATIC_LIBRARIES += \
     $(QEMU2_SYSTEM_STATIC_LIBRARIES) \
+    $(ANDROID_EMU_STATIC_LIBRARIES) \
 
 LOCAL_CFLAGS += \
     $(QEMU2_SYSTEM_CFLAGS) \
+    -DCONFIG_ANDROID \
 
-LOCAL_C_INCLUDES += $(QEMU2_SYSTEM_INCLUDES)
+LOCAL_C_INCLUDES += \
+    $(QEMU2_SYSTEM_INCLUDES) \
+    $(ANDROID_EMU_INCLUDES) \
 
 # For now, use stubs/sdl-null.c as an empty/fake SDL UI backend.
 # TODO: Use the glue code to use the Qt-based UI instead.
@@ -199,6 +203,7 @@ LOCAL_LDLIBS += \
     -lfdt \
     $(call qemu2-if-windows, -lvfw32 -ldxguid) \
     $(call qemu2-if-linux, -lpulse) \
+    $(ANDROID_EMU_LDLIBS) \
 
 LOCAL_INSTALL_DIR := qemu/$(BUILD_TARGET_TAG)
 
