@@ -63,7 +63,7 @@ struct TypeImpl
     const char *parent;
     TypeImpl *parent_type;
 
-    ObjectClass *class;
+    ObjectClass *clazz;
 
     int num_interfaces;
     InterfaceImpl interfaces[MAX_INTERFACES];
@@ -244,12 +244,12 @@ static void type_initialize_interface(TypeImpl *ti, TypeImpl *interface_type,
     type_initialize(iface_impl);
     g_free((char *)info.name);
 
-    new_iface = (InterfaceClass *)iface_impl->class;
-    new_iface->concrete_class = ti->class;
+    new_iface = (InterfaceClass *)iface_impl->clazz;
+    new_iface->concrete_class = ti->clazz;
     new_iface->interface_type = interface_type;
 
-    ti->class->interfaces = g_slist_append(ti->class->interfaces,
-                                           iface_impl->class);
+    ti->clazz->interfaces = g_slist_append(ti->clazz->interfaces,
+                                           iface_impl->clazz);
 }
 
 static void object_property_free(gpointer data)
@@ -266,14 +266,14 @@ static void type_initialize(TypeImpl *ti)
 {
     TypeImpl *parent;
 
-    if (ti->class) {
+    if (ti->clazz) {
         return;
     }
 
     ti->class_size = type_class_get_size(ti);
     ti->instance_size = type_object_get_size(ti);
 
-    ti->class = g_malloc0(ti->class_size);
+    ti->clazz = g_malloc0(ti->class_size);
 
     parent = type_get_parent(ti);
     if (parent) {
@@ -282,12 +282,12 @@ static void type_initialize(TypeImpl *ti)
         int i;
 
         g_assert_cmpint(parent->class_size, <=, ti->class_size);
-        memcpy(ti->class, parent->class, parent->class_size);
-        ti->class->interfaces = NULL;
-        ti->class->properties = g_hash_table_new_full(
+        memcpy(ti->clazz, parent->clazz, parent->class_size);
+        ti->clazz->interfaces = NULL;
+        ti->clazz->properties = g_hash_table_new_full(
             g_str_hash, g_str_equal, g_free, object_property_free);
 
-        for (e = parent->class->interfaces; e; e = e->next) {
+        for (e = parent->clazz->interfaces; e; e = e->next) {
             InterfaceClass *iface = e->data;
             ObjectClass *klass = OBJECT_CLASS(iface);
 
@@ -296,7 +296,7 @@ static void type_initialize(TypeImpl *ti)
 
         for (i = 0; i < ti->num_interfaces; i++) {
             TypeImpl *t = type_get_by_name(ti->interfaces[i].typename);
-            for (e = ti->class->interfaces; e; e = e->next) {
+            for (e = ti->clazz->interfaces; e; e = e->next) {
                 TypeImpl *target_type = OBJECT_CLASS(e->data)->type;
 
                 if (type_is_ancestor(target_type, t)) {
@@ -311,21 +311,21 @@ static void type_initialize(TypeImpl *ti)
             type_initialize_interface(ti, t, t);
         }
     } else {
-        ti->class->properties = g_hash_table_new_full(
+        ti->clazz->properties = g_hash_table_new_full(
             g_str_hash, g_str_equal, g_free, object_property_free);
     }
 
-    ti->class->type = ti;
+    ti->clazz->type = ti;
 
     while (parent) {
         if (parent->class_base_init) {
-            parent->class_base_init(ti->class, ti->class_data);
+            parent->class_base_init(ti->clazz, ti->class_data);
         }
         parent = type_get_parent(parent);
     }
 
     if (ti->class_init) {
-        ti->class_init(ti->class, ti->class_data);
+        ti->class_init(ti->clazz, ti->class_data);
     }
 }
 
@@ -363,7 +363,7 @@ void object_initialize_with_type(void *data, size_t size, TypeImpl *type)
     g_assert_cmpint(size, >=, type->instance_size);
 
     memset(obj, 0, type->instance_size);
-    obj->class = type->class;
+    obj->clazz = type->clazz;
     object_ref(obj);
     obj->properties = g_hash_table_new_full(g_str_hash, g_str_equal,
                                             NULL, object_property_free);
@@ -456,7 +456,7 @@ static void object_deinit(Object *obj, TypeImpl *type)
 static void object_finalize(void *data)
 {
     Object *obj = data;
-    TypeImpl *ti = obj->class->type;
+    TypeImpl *ti = obj->clazz->type;
 
     object_property_del_all(obj);
     object_deinit(obj, ti);
@@ -606,7 +606,7 @@ Object *object_dynamic_cast(Object *obj, const char *typename)
 Object *object_dynamic_cast_assert(Object *obj, const char *typename,
                                    const char *file, int line, const char *func)
 {
-    trace_object_dynamic_cast_assert(obj ? obj->class->type->name : "(null)",
+    trace_object_dynamic_cast_assert(obj ? obj->clazz->type->name : "(null)",
                                      typename, file, line, func);
 
 #ifdef CONFIG_QOM_CAST_DEBUG
@@ -614,7 +614,7 @@ Object *object_dynamic_cast_assert(Object *obj, const char *typename,
     Object *inst;
 
     for (i = 0; obj && i < OBJECT_CLASS_CAST_CACHE; i++) {
-        if (obj->class->object_cast_cache[i] == typename) {
+        if (obj->clazz->object_cast_cache[i] == typename) {
             goto out;
         }
     }
@@ -631,10 +631,10 @@ Object *object_dynamic_cast_assert(Object *obj, const char *typename,
 
     if (obj && obj == inst) {
         for (i = 1; i < OBJECT_CLASS_CAST_CACHE; i++) {
-            obj->class->object_cast_cache[i - 1] =
-                    obj->class->object_cast_cache[i];
+            obj->clazz->object_cast_cache[i - 1] =
+                    obj->clazz->object_cast_cache[i];
         }
-        obj->class->object_cast_cache[i - 1] = typename;
+        obj->clazz->object_cast_cache[i - 1] = typename;
     }
 
 out:
@@ -665,7 +665,7 @@ ObjectClass *object_class_dynamic_cast(ObjectClass *class,
         return NULL;
     }
 
-    if (type->class->interfaces &&
+    if (type->clazz->interfaces &&
             type_is_ancestor(target_type, type_interface)) {
         int found = 0;
         GSList *i;
@@ -736,12 +736,12 @@ out:
 
 const char *object_get_typename(Object *obj)
 {
-    return obj->class->type->name;
+    return obj->clazz->type->name;
 }
 
 ObjectClass *object_get_class(Object *obj)
 {
-    return obj->class;
+    return obj->clazz;
 }
 
 bool object_class_is_abstract(ObjectClass *klass)
@@ -764,7 +764,7 @@ ObjectClass *object_class_by_name(const char *typename)
 
     type_initialize(type);
 
-    return type->class;
+    return type->clazz;
 }
 
 ObjectClass *object_class_get_parent(ObjectClass *class)
@@ -777,7 +777,7 @@ ObjectClass *object_class_get_parent(ObjectClass *class)
 
     type_initialize(type);
 
-    return type->class;
+    return type->clazz;
 }
 
 typedef struct OCFData
@@ -796,7 +796,7 @@ static void object_class_foreach_tramp(gpointer key, gpointer value,
     ObjectClass *k;
 
     type_initialize(type);
-    k = type->class;
+    k = type->clazz;
 
     if (!data->include_abstract && type->abstract) {
         return;
@@ -1358,8 +1358,8 @@ static void object_finalize_child_property(Object *obj, const char *name,
 {
     Object *child = opaque;
 
-    if (child->class->unparent) {
-        (child->class->unparent)(child);
+    if (child->clazz->unparent) {
+        (child->clazz->unparent)(child);
     }
     child->parent = NULL;
     object_unref(child);
