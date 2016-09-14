@@ -11,6 +11,7 @@ LOCAL_C_INCLUDES += \
     $(QEMU2_GLUE_INCLUDES) \
 
 LOCAL_SRC_FILES := \
+    qemu-setup.cpp \
 
 LOCAL_SRC_FILES := $(LOCAL_SRC_FILES:%=android-qemu2-glue/%)
 

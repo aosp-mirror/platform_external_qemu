@@ -121,6 +121,10 @@ int main(int argc, char **argv)
 #include "sysemu/replay.h"
 #include "qapi/qmp/qerror.h"
 
+#ifdef CONFIG_ANDROID
+#include "android-qemu2-glue/qemu-setup.h"
+#endif
+
 #define MAX_VIRTIO_CONSOLES 1
 #define MAX_SCLP_CONSOLES 1
 
@@ -2971,6 +2975,12 @@ int main(int argc, char **argv, char **envp)
     Error *main_loop_err = NULL;
     Error *err = NULL;
     bool list_data_dirs = false;
+
+#ifdef CONFIG_ANDROID
+    if (!qemu_android_emulation_early_setup()) {
+        return 1;
+    }
+#endif
 
     qemu_init_cpu_loop();
     qemu_mutex_lock_iothread();
