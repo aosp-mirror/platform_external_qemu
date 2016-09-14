@@ -37,17 +37,18 @@ typedef struct QIOChannelClass QIOChannelClass;
 
 #define QIO_CHANNEL_ERR_BLOCK -2
 
+#ifndef __cplusplus
 typedef enum QIOChannelFeature QIOChannelFeature;
-
+#endif
 enum QIOChannelFeature {
     QIO_CHANNEL_FEATURE_FD_PASS  = (1 << 0),
     QIO_CHANNEL_FEATURE_SHUTDOWN = (1 << 1),
     QIO_CHANNEL_FEATURE_LISTEN   = (1 << 2),
 };
 
-
+#ifndef __cplusplus
 typedef enum QIOChannelShutdown QIOChannelShutdown;
-
+#endif
 enum QIOChannelShutdown {
     QIO_CHANNEL_SHUTDOWN_BOTH,
     QIO_CHANNEL_SHUTDOWN_READ,
