@@ -13,6 +13,9 @@ LOCAL_C_INCLUDES += \
 LOCAL_SRC_FILES := \
     base/async/Looper.cpp \
     base/files/QemuFileStream.cpp \
+    emulation/charpipe.c \
+    emulation/CharSerialLine.cpp \
+    emulation/serial_line.cpp \
     emulation/VmLock.cpp \
     looper-qemu.cpp \
     qemu-setup.cpp \
