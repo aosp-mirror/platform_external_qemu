@@ -11,8 +11,10 @@ LOCAL_C_INCLUDES += \
     $(QEMU2_GLUE_INCLUDES) \
 
 LOCAL_SRC_FILES := \
+    base/files/QemuFileStream.cpp \
     emulation/VmLock.cpp \
     qemu-setup.cpp \
+    utils/stream.cpp \
 
 LOCAL_SRC_FILES := $(LOCAL_SRC_FILES:%=android-qemu2-glue/%)
 
