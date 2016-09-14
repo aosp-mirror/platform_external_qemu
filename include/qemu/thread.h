@@ -62,6 +62,9 @@ struct Notifier;
 void qemu_thread_atexit_add(struct Notifier *notifier);
 void qemu_thread_atexit_remove(struct Notifier *notifier);
 
+typedef void (*QemuThreadSetupFunc)(void);
+void qemu_thread_register_setup_callback(QemuThreadSetupFunc setup_func);
+
 typedef struct QemuSpin {
     int value;
 } QemuSpin;

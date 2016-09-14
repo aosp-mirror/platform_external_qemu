@@ -19,6 +19,13 @@
 
 static bool name_threads;
 
+static QemuThreadSetupFunc thread_setup_func;
+
+void qemu_thread_register_setup_callback(QemuThreadSetupFunc setup_func)
+{
+    thread_setup_func = setup_func;
+}
+
 void qemu_thread_naming(bool enable)
 {
     /* But note we don't actually name them on Windows yet */
@@ -368,6 +375,10 @@ static unsigned __stdcall win32_start_routine(void *arg)
     void *thread_arg = data->arg;
 
     qemu_thread_data = data;
+
+    if (thread_setup_func)
+        (*thread_setup_func)();
+
     qemu_thread_exit(start_routine(thread_arg));
     abort();
 }
