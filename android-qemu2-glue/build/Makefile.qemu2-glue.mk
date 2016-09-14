@@ -11,8 +11,10 @@ LOCAL_C_INCLUDES += \
     $(QEMU2_GLUE_INCLUDES) \
 
 LOCAL_SRC_FILES := \
+    base/async/Looper.cpp \
     base/files/QemuFileStream.cpp \
     emulation/VmLock.cpp \
+    looper-qemu.cpp \
     qemu-setup.cpp \
     utils/stream.cpp \
 

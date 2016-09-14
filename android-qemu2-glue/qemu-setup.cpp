@@ -17,16 +17,23 @@
 #include "android/android.h"
 #include "android/base/Log.h"
 #include "android-qemu2-glue/emulation/VmLock.h"
+#include "android-qemu2-glue/looper-qemu.h"
 
 extern "C" {
 #include "qemu/osdep.h"
 #include "qemu-common.h"
+#include "qemu/thread.h"
 }  // extern "C"
 
 using android::VmLock;
 
 bool qemu_android_emulation_early_setup() {
+    // Ensure that the looper is set for the main thread and for any
+    // future thread created by QEMU.
+    qemu_looper_setForThread();
+    qemu_thread_register_setup_callback(qemu_looper_setForThread);
 
+    // Ensure the VmLock implementation is setup.
     VmLock* vmLock = new qemu2::VmLock();
     VmLock* prevVmLock = VmLock::set(vmLock);
     CHECK(prevVmLock == nullptr) << "Another VmLock was already installed!";
