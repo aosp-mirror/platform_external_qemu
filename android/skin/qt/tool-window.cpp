@@ -36,6 +36,7 @@
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
 #include "android/utils/debug.h"
+#include "android/emulation/control/clipboard_agent.h"
 
 #include <cassert>
 #include <string>
@@ -44,7 +45,24 @@ using namespace android::base;
 
 static ToolWindow* twInstance = NULL;
 
+void onGuestClipboardChanged(
+    const uint8_t* data,
+    size_t length) {
+    QString content = QString::fromUtf8((const char*)data, length);
+    QApplication::clipboard()->setText(content);
+}
+
 extern "C" void setUiEmuAgent(const UiEmuAgent* agentPtr) {
+    if (agentPtr->clipboard) {
+        agentPtr->clipboard->setGuestClipboardCallback(onGuestClipboardChanged);
+        QObject::connect(
+            QApplication::clipboard(), &QClipboard::dataChanged,
+            [agentPtr]() {
+                QByteArray bytes = QApplication::clipboard()->text().toUtf8();
+                agentPtr->clipboard->setGuestClipboardContents(
+                    (const uint8_t*)bytes.data(), bytes.size());
+            });
+    }
     if (twInstance) {
         twInstance->setToolEmuAgent(agentPtr);
     }
