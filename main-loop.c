@@ -32,6 +32,13 @@
 #include "qemu/main-loop.h"
 #include "block/aio.h"
 
+static MainLoopPollCallback main_loop_poll_callback;
+
+void main_loop_register_poll_callback(MainLoopPollCallback poll_func)
+{
+    main_loop_poll_callback = poll_func;
+}
+
 #ifndef _WIN32
 
 #include "qemu/compatfd.h"
@@ -507,6 +514,9 @@ int main_loop_wait(int nonblocking)
 #ifdef CONFIG_SLIRP
     slirp_pollfds_poll(gpollfds, (ret < 0));
 #endif
+
+    if (main_loop_poll_callback)
+        (*main_loop_poll_callback)();
 
     /* CPU thread can infinitely wait for event after
        missing the warp */

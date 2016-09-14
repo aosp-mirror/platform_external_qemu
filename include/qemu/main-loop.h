@@ -82,6 +82,14 @@ int qemu_init_main_loop(Error **errp);
 int main_loop_wait(int nonblocking);
 
 /**
+ * main_loop_register_poll_callback: Register a custom function that is called
+ * each time the main-loop needs to be polled. Used by the Android emulator
+ * to implement charpipe connectivity.
+ */
+typedef void (*MainLoopPollCallback)(void);
+void main_loop_register_poll_callback(MainLoopPollCallback poll_func);
+
+/**
  * qemu_get_aio_context: Return the main loop's AioContext
  */
 AioContext *qemu_get_aio_context(void);
