@@ -505,8 +505,6 @@ struct CPUMIPSState {
     /* XXX: Maybe make LLAddr per-TC? */
     target_ulong lladdr; /* LL virtual address compared against SC */
     target_ulong llval;
-    target_ulong llnewval;
-    target_ulong llreg;
     uint64_t CP0_LLAddr_rw_bitmask;
     int CP0_LLAddr_shift;
     target_ulong CP0_WatchLo[8];
@@ -830,8 +828,6 @@ enum {
 
     EXCP_LAST = EXCP_TLBRI,
 };
-/* Dummy exception for conditional stores.  */
-#define EXCP_SC 0x100
 
 /*
  * This is an interrnally generated WAKE request line.
