@@ -26,6 +26,9 @@
  * implicit promotion.  int and larger types, as well as pointers, can be
  * converted to a non-qualified type just by applying a binary operator.
  */
+#ifdef __cplusplus
+#define typeof_strip_qual(expr) std::remove_cv<__typeof__(expr)>::type
+#else  /* !__cplusplus */
 #define typeof_strip_qual(expr)                                                    \
   typeof(                                                                          \
     __builtin_choose_expr(                                                         \
@@ -59,6 +62,7 @@
         __builtin_types_compatible_p(typeof(expr), const volatile unsigned short), \
         (unsigned short)1,                                                         \
       (expr)+0))))))
+#endif  /* !__cplusplus */
 
 #ifdef __ATOMIC_RELAXED
 /* For C11 atomic ops */
