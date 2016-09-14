@@ -178,6 +178,7 @@ $(call end-emulator-program)
 $(call start-emulator-program,qemu-system-$(QEMU2_TARGET_SYSTEM))
 
 LOCAL_WHOLE_STATIC_LIBRARIES += \
+    libqemu2-glue \
     libqemu2-system-$(QEMU2_TARGET_SYSTEM) \
     libqemu2-common \
 
@@ -191,6 +192,7 @@ LOCAL_CFLAGS += \
 
 LOCAL_C_INCLUDES += \
     $(QEMU2_SYSTEM_INCLUDES) \
+    $(QEMU2_GLUE_INCLUDES) \
     $(ANDROID_EMU_INCLUDES) \
 
 # For now, use stubs/sdl-null.c as an empty/fake SDL UI backend.

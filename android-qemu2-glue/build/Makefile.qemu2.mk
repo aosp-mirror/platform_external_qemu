@@ -264,10 +264,9 @@ LOCAL_SRC_FILES += \
 $(call gen-hw-config-defs)
 QEMU2_INCLUDES += $(QEMU_HW_CONFIG_DEFS_INCLUDES)
 
-LOCAL_SRC_FILES += \
-    $(QEMU2_GLUE_SOURCES)
-
 $(call end-emulator-library)
+
+include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
 
 QEMU2_TARGET := x86
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
