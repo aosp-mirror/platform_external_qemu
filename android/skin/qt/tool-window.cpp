@@ -20,6 +20,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/emulation/ConfigDirs.h"
+#include "android/emulation/control/clipboard_agent.h"
 #include "android/globals.h"
 #include "android/main-common.h"
 #include "android/skin/event.h"
@@ -44,7 +45,24 @@ using namespace android::base;
 
 static ToolWindow* twInstance = NULL;
 
+static void onGuestClipboardChanged(
+    const uint8_t* data,
+    size_t length) {
+    QString content = QString::fromUtf8((const char*)data, length);
+    QApplication::clipboard()->setText(content);
+}
+
 extern "C" void setUiEmuAgent(const UiEmuAgent* agentPtr) {
+    if (agentPtr->clipboard) {
+        agentPtr->clipboard->setGuestClipboardCallback(onGuestClipboardChanged);
+        QObject::connect(
+            QApplication::clipboard(), &QClipboard::dataChanged,
+            [agentPtr]() {
+                QByteArray bytes = QApplication::clipboard()->text().toUtf8();
+                agentPtr->clipboard->setGuestClipboardContents(
+                    (const uint8_t*)bytes.data(), bytes.size());
+            });
+    }
     if (twInstance) {
         twInstance->setToolEmuAgent(agentPtr);
     }
