@@ -1,4 +1,4 @@
-// Copyright 2015 The Android Open Source Project
+// Copyright 2016 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,31 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android-qemu2-glue/qemu-setup.h"
-
-#include "android/android.h"
-#include "android/base/Log.h"
 #include "android-qemu2-glue/emulation/VmLock.h"
+
+#include <type_traits>
 
 extern "C" {
 #include "qemu/osdep.h"
-#include "qemu-common.h"
+#include "qemu/main-loop.h"
 }  // extern "C"
 
-using android::VmLock;
+namespace qemu2 {
 
-bool qemu_android_emulation_early_setup() {
-
-    VmLock* vmLock = new qemu2::VmLock();
-    VmLock* prevVmLock = VmLock::set(vmLock);
-    CHECK(prevVmLock == nullptr) << "Another VmLock was already installed!";
-
-    return true;
+void VmLock::lock() {
+    qemu_mutex_lock_iothread();
 }
 
-bool qemu_android_emulation_setup() {
-    return true;
+void VmLock::unlock() {
+    qemu_mutex_unlock_iothread();
 }
 
-void qemu_android_emulation_teardown() {
+bool VmLock::isLockedBySelf() const {
+    return qemu_mutex_iothread_locked();
 }
+
+}  // namespace qemu2
