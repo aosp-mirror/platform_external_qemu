@@ -15,6 +15,7 @@
 #include "android/adb-server.h"
 #include "android/android.h"
 #include "android/cmdline-option.h"
+#include "android/clipboard-pipe.h"
 #include "android/console.h"
 #include "android/emulation/android_pipe_pingpong.h"
 #include "android/emulation/android_pipe_throttle.h"
@@ -304,6 +305,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
 
     android_unix_pipes_init();
     android_init_opengles_pipe();
+    android_init_clipboard_pipe();
 
     if (android_op_port && android_op_ports) {
         derror("options -port and -ports cannot be used together.");
