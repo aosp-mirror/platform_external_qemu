@@ -19,6 +19,7 @@
 #include "android-qemu2-glue/emulation/charpipe.h"
 #include "android-qemu2-glue/emulation/VmLock.h"
 #include "android-qemu2-glue/looper-qemu.h"
+#include "android-qemu2-glue/android_qemud.h"
 
 extern "C" {
 #include "qemu/osdep.h"
@@ -37,6 +38,9 @@ bool qemu_android_emulation_early_setup() {
 
     // Ensure charpipes i/o are handled properly.
     main_loop_register_poll_callback(qemu_charpipe_poll);
+
+    // Register qemud-related snapshot callbacks.
+    android_qemu2_qemud_init();
 
     // Ensure the VmLock implementation is setup.
     VmLock* vmLock = new qemu2::VmLock();

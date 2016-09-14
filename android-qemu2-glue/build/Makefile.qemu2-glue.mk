@@ -11,6 +11,7 @@ LOCAL_C_INCLUDES += \
     $(QEMU2_GLUE_INCLUDES) \
 
 LOCAL_SRC_FILES := \
+    android_qemud.cpp \
     base/async/Looper.cpp \
     base/files/QemuFileStream.cpp \
     emulation/charpipe.c \
