@@ -22,6 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+/* Special case to include "qemu-options.h" here without issues */
+#undef POISON_CONFIG_ANDROID
+
 #include "qemu/osdep.h"
 #include <windows.h>
 #include <mmsystem.h>

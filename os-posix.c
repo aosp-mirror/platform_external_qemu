@@ -23,6 +23,9 @@
  * THE SOFTWARE.
  */
 
+/* Special case to include "qemu-options.h" here without issues */
+#undef POISON_CONFIG_ANDROID
+
 #include "qemu/osdep.h"
 #include <sys/wait.h>
 /*needed for MAP_POPULATE before including qemu-options.h */

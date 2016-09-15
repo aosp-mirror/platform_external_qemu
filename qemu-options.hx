@@ -328,6 +328,16 @@ Will show the audio subsystem help: list of drivers, tunable
 parameters.
 ETEXI
 
+DEF("no-audio", 0, QEMU_OPTION_audio_none,
+    "-no-audio        disable audio support\n",
+    QEMU_ARCH_ALL)
+STEXI
+@item -no-audio
+@findex -no-audio
+Will disable audio support
+parameters.
+ETEXI
+
 DEF("soundhw", HAS_ARG, QEMU_OPTION_soundhw,
     "-soundhw c1,... enable audio support\n"
     "                and only specified sound cards (comma separated list)\n"
@@ -3968,6 +3978,76 @@ contents of @code{iv.b64} to the second secret
 
 ETEXI
 
+#ifdef CONFIG_ANDROID
+
+DEF("boot-property", HAS_ARG, QEMU_OPTION_boot_property, \
+    "-boot-property <name>=<value> set system property on boot\n", QEMU_ARCH_ALL)
+STEXI
+@item -boot-property
+@findex -boot-property
+Set system property on boot
+ETEXI
+
+DEF("lcd-density", HAS_ARG, QEMU_OPTION_lcd_density,
+    "-lcd-density density\n"
+    "                select lcd display density value (default is 160)\n", QEMU_ARCH_ALL)
+STEXI
+@item -lcd-density density (integer value)
+@findex -lcd-density
+Select lcd display density value (default is 160)
+ETEXI
+
+DEF("android-ports", HAS_ARG, QEMU_OPTION_android_ports,
+    "-android-ports <consoleport>,<adbport>"
+    " TCP ports used for the emulator instance and adb bridge\n", QEMU_ARCH_ALL)
+STEXI
+@item -android-ports @var{consoleport},@var{adbport}
+@findex -android-ports
+TCP ports used for the emulator instance and adb bridge
+ETEXI
+
+DEF("android-report-console", HAS_ARG, QEMU_OPTION_android_report_console, \
+    "-android-report-console <socket>"
+    " report console port to remote socket\n", QEMU_ARCH_ALL)
+STEXI
+@item -android-report-console @var{socket}
+@findex -android-report-console
+Report console port to remote socket
+ETEXI
+
+DEF("http-proxy", HAS_ARG, QEMU_OPTION_http_proxy,
+    "-http-proxy <proxy> make TCP connections through a HTTP/HTTPS proxy\n", QEMU_ARCH_ALL)
+STEXI
+@item -http-proxy @var{proxy}
+@findex -http-proxy
+make TCP connections through a HTTP/HTTPS proxy
+ETEXI
+
+DEF("dns-server", HAS_ARG, QEMU_OPTION_dns_server,
+    "-dns-server <servers> use this DNS server(s) in the emulated system\n", QEMU_ARCH_ALL)
+STEXI
+@item -dns-server @var{servers}
+@findex -dns-server
+Use one or more DNS servers, separated by comma, in the emulated system
+ETEXI
+
+DEF("android-hw", HAS_ARG, QEMU_OPTION_android_hw,
+    "-android-hw <file>\n"
+    "                specify the hw config ini file location\n", QEMU_ARCH_ALL)
+STEXI
+@item -android-hw @var{file}
+@findex -android-hw
+Specify the hw config ini file location
+ETEXI
+
+DEF("skip-adb-auth", 0, QEMU_OPTION_android_skip_adb_auth,
+    "-skip-adb-auth  skip adb authentication dialogue\n", QEMU_ARCH_ALL)
+STEXI
+@item -adb-auth
+@findex -adb-auth
+Skip adb authentication dialogue
+ETEXI
+#endif  // CONFIG_ANDROID
 
 HXCOMM This is the last statement. Insert new options before this line!
 STEXI
