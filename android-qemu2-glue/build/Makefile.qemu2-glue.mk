@@ -9,6 +9,7 @@ LOCAL_CFLAGS += $(QEMU2_CFLAGS)
 LOCAL_C_INCLUDES += \
     $(QEMU2_INCLUDES) \
     $(QEMU2_GLUE_INCLUDES) \
+    $(LOCAL_PATH)/slirp \
 
 LOCAL_SRC_FILES := \
     android_qemud.cpp \
@@ -25,6 +26,7 @@ LOCAL_SRC_FILES := \
     qemu-cellular-agent-impl.c \
     qemu-finger-agent-impl.c \
     qemu-location-agent-impl.c \
+    qemu-net-agent-impl.c \
     qemu-setup.cpp \
     qemu-telephony-agent-impl.c \
     telephony/modem_init.c \
