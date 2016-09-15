@@ -33,6 +33,7 @@ LOCAL_SRC_FILES := \
     qemu-net-agent-impl.c \
     qemu-sensors-agent-impl.c \
     qemu-setup.cpp \
+    qemu-setup-dns-servers.cpp \
     qemu-telephony-agent-impl.c \
     qemu-user-event-agent-impl.c \
     qemu-vm-operations-impl.c \

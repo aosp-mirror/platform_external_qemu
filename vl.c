@@ -52,10 +52,6 @@ int main(int argc, char **argv)
 #define main qemu_main
 #endif /* CONFIG_COCOA */
 
-#ifdef CONFIG_ANDROID
-#define main run_qemu_main
-#endif
-
 #include "qemu/error-report.h"
 #include "qemu/sockets.h"
 #include "hw/hw.h"
@@ -70,6 +66,7 @@ int main(int argc, char **argv)
 #include "hw/xen/xen.h"
 #include "hw/qdev.h"
 #include "hw/loader.h"
+#include "hw/display/goldfish_fb.h"
 #include "monitor/qdev.h"
 #include "sysemu/bt.h"
 #include "net/net.h"
@@ -126,11 +123,80 @@ int main(int argc, char **argv)
 #include "qapi/qmp/qerror.h"
 
 #ifdef CONFIG_ANDROID
+
+#undef socket_connect
+#undef socket_listen
+
+#include "android/android.h"
+#include "android/boot-properties.h"
+#include "android/crashreport/crash-handler.h"
+#include "android/emulation/bufprint_config_dirs.h"
+#include "android/error-messages.h"
+#include "android/globals.h"
+#include "android/gps.h"
+#include "android/help.h"
+#include "android/hw-control.h"
+#include "android/hw-qemud.h"
+#include "android/main-common.h"
+#include "android/metrics/metrics.h"
+#include "android/multitouch-port.h"
+#include "android/network/control.h"
+#include "android/network/globals.h"
+#include "android/opengl/emugl_config.h"
+#include "android/skin/winsys.h"
+#include "android/snapshot.h"
+#include "android/snaphost-android.h"
+#include "android/telephony/modem_driver.h"
+#include "android/update-check/update_check.h"
+#include "android/ui-emu-agent.h"
+#include "android/utils/async.h"
+#include "android/utils/bufprint.h"
+#include "android/utils/debug.h"
+#include "android/utils/filelock.h"
+#include "android/utils/ini.h"
+#include "android/utils/lineinput.h"
+#include "android/utils/path.h"
+#include "android/utils/property_file.h"
+#include "android/utils/socket_drainer.h"
+#include "android/utils/tempfile.h"
+#include "android/version.h"
+#include "android/wear-agent/android_wear_agent.h"
+#include "android-qemu2-glue/android_qemud.h"
+#include "android-qemu2-glue/looper-qemu.h"
+#include "android-qemu2-glue/qemu-control-impl.h"
 #include "android-qemu2-glue/qemu-setup.h"
-#endif
+#include "android/camera/camera-service.h"
+
+#include "hw/input/goldfish_events.h"
+
+// this path has to be relative as AndroidEmu include paths go after the qemu2
+// ones, and android/opengles.h resolves to the very same this file
+#include "../qemu/android/opengles.h"
+
+#define QEMU_CORE_VERSION "qemu2 " QEMU_VERSION
+
+/////////////////////////////////////////////////////////////
+
+#define  LCD_DENSITY_LDPI      120
+#define  LCD_DENSITY_MDPI      160
+#define  LCD_DENSITY_TVDPI     213
+#define  LCD_DENSITY_HDPI      240
+#define  LCD_DENSITY_280DPI    280
+#define  LCD_DENSITY_XHDPI     320
+#define  LCD_DENSITY_360DPI    360
+#define  LCD_DENSITY_400DPI    400
+#define  LCD_DENSITY_420DPI    420
+#define  LCD_DENSITY_XXHDPI    480
+#define  LCD_DENSITY_560DPI    560
+#define  LCD_DENSITY_XXXHDPI   640
+
+extern bool android_op_wipe_data;
+
+#endif // CONFIG_ANDROID
 
 #define MAX_VIRTIO_CONSOLES 1
 #define MAX_SCLP_CONSOLES 1
+#define QCOW2_SUFFIX "qcow2"
 
 static const char *data_dir[16];
 static int data_dir_idx;
@@ -171,6 +237,14 @@ static int no_reboot;
 int no_shutdown = 0;
 int cursor_hide = 1;
 int graphic_rotate = 0;
+#ifdef CONFIG_ANDROID
+int lcd_density = LCD_DENSITY_MDPI;
+extern char* op_http_proxy;
+extern char* android_op_ports;
+extern int android_op_ports_numbers[2];
+extern char* android_op_report_console;
+static const char* android_hw_file = NULL;
+#endif  // CONFIG_ANDROID
 const char *watchdog;
 QEMUOptionRom option_rom[MAX_OPTION_ROMS];
 int nb_option_roms;
@@ -513,6 +587,38 @@ static QemuOptsList qemu_fw_cfg_opts = {
     },
 };
 
+#ifdef CONFIG_ANDROID
+// Save System boot parameters from the command line
+#define MAX_N_CMD_PROPS 16
+static const char* cmd_props[MAX_N_CMD_PROPS];
+static       int   n_cmd_props = 0;
+
+static void save_cmd_property(const char* propStr) {
+    if (n_cmd_props >= MAX_N_CMD_PROPS) {
+        fprintf(stderr, "Too many command-line boot properties. "
+                        "This property is ignored: \"%s\"\n", propStr);
+        return;
+    }
+    cmd_props[n_cmd_props++] = propStr;
+}
+
+// Provide the saved System boot parameters from the command line
+static void process_cmd_properties(void) {
+    int idx;
+    for(idx = 0; idx < n_cmd_props; idx++) {
+        // The string should be of the form
+        // "keyname=value"
+        const char* pkey = cmd_props[idx];
+        const char* peq = strchr(pkey, '=');
+        if (peq) {
+            // Pass ptr and length for both parts
+            boot_property_add2(pkey, (peq - pkey),
+                               peq + 1, strlen(peq + 1));
+        }
+    }
+}
+#endif  // CONFIG_ANDROID
+
 /**
  * Get machine options
  *
@@ -734,6 +840,120 @@ void qemu_system_vmstop_request(RunState state)
     qemu_mutex_unlock(&vmstop_lock);
     qemu_notify_event();
 }
+
+#ifdef CONFIG_ANDROID
+static int create_qcow2_images(void) {
+    /* First, determine if any of the backing images have been altered.
+     * QCoW2 images won't work in that case, and need to be recreated (this
+     * will obliterate previous snapshots).
+     * The most reliable way to do this is to cache some sort of checksum of
+     * the image files, but we go the easier (and faster) route and cache the
+     * version number that is specified in build.prop.
+     */
+    const char* avd_data_dir = avdInfo_getContentPath(android_avdInfo);
+    static const char sysimg_version_number_cache_basename[] =
+        "version_num.cache";
+    char* sysimg_version_number_cache_path =
+        path_join(avd_data_dir, sysimg_version_number_cache_basename);
+    bool reset_version_number_cache = false;
+    if (!path_exists(sysimg_version_number_cache_path)) {
+        /* File with previously saved version number doesn't exist,
+         * we'll create it later.
+         */
+        reset_version_number_cache = true;
+    } else {
+        FILE* vn_cache_file = fopen(sysimg_version_number_cache_path, "r");
+        int sysimg_version_number = -1;
+        /* If the file with version number contained an error, or the
+         * saved version number doesn't match the current one, we'll
+         * update it later.
+         */
+        reset_version_number_cache =
+            vn_cache_file == NULL ||
+            fscanf(vn_cache_file, "%d", &sysimg_version_number) != 1 ||
+            sysimg_version_number !=
+                avdInfo_getSysImgIncrementalVersion(android_avdInfo);
+        if (vn_cache_file) {
+            fclose(vn_cache_file);
+        }
+    }
+
+    /* List of paths to all images that can be mounted.*/
+    const char* const image_paths[] = {
+        android_hw->disk_systemPartition_initPath,
+        android_hw->disk_cachePartition_path,
+        android_hw->disk_dataPartition_path,
+        android_hw->hw_sdCard_path,
+        android_hw->disk_encryptionKeyPartition_path,
+    };
+    int p;
+    for (p = 0; p < ARRAY_SIZE(image_paths); p++) {
+        const char* backing_image_path = image_paths[p];
+        char* qcow2_image_path = NULL;
+        if (!backing_image_path ||
+            *backing_image_path == '\0') {
+            /* If the path is NULL or empty, just ignore it.*/
+            continue;
+        }
+        if (!strcmp(backing_image_path,
+                    android_hw->disk_systemPartition_initPath)) {
+            /* System image is a special case, the backing image is
+             * in the SDK folder, but the QCoW2 image that the emulator
+             * uses is created on a per-AVD basis and is placed in the
+             * AVD's data folder.
+             */
+            static const char sysimage_qcow2_basename[] =
+                "system.img." QCOW2_SUFFIX;
+            qcow2_image_path =
+                path_join(avd_data_dir, sysimage_qcow2_basename);
+        } else {
+            /* For all the other images except system image,
+             * just create another file alongside them
+             * with a 'qcow2' extension
+             */
+            const char qcow2_suffix[] = "." QCOW2_SUFFIX;
+            size_t path_size = strlen(backing_image_path) + sizeof(qcow2_suffix) + 1;
+            qcow2_image_path = malloc(path_size);
+            bufprint(qcow2_image_path, qcow2_image_path + path_size, "%s%s", backing_image_path, qcow2_suffix);
+        }
+
+        Error* img_creation_error = NULL;
+        if (!path_exists(qcow2_image_path) ||
+            android_op_wipe_data ||
+            reset_version_number_cache) {
+            bdrv_img_create(
+                qcow2_image_path,
+                QCOW2_SUFFIX,
+                backing_image_path,
+                "raw",
+                NULL,
+                -1,
+                0,
+                &img_creation_error,
+                false);
+        }
+        free(qcow2_image_path);
+        if (img_creation_error) {
+            error_report("%s", error_get_pretty(img_creation_error));
+            return 0;
+        }
+    }
+
+    /* Update version number cache if necessary. */
+    if (reset_version_number_cache) {
+        FILE* vn_cache_file = fopen(sysimg_version_number_cache_path, "w");
+        if (vn_cache_file) {
+            fprintf(vn_cache_file,
+                    "%d\n",
+                    avdInfo_getSysImgIncrementalVersion(android_avdInfo));
+            fclose(vn_cache_file);
+        }
+    }
+    free(sysimg_version_number_cache_path);
+
+    return 1;
+}
+#endif  // CONFIG_ANDROID
 
 void vm_start(void)
 {
@@ -1927,7 +2147,7 @@ static void main_loop(void)
 
 static void version(void)
 {
-    printf("QEMU emulator version " QEMU_VERSION QEMU_PKGVERSION ", "
+    printf("QEMU emulator version " QEMU_VERSION " " QEMU_PKGVERSION ", "
            QEMU_COPYRIGHT "\n");
 }
 
@@ -2081,7 +2301,7 @@ static DisplayType select_display(const char *p)
     DisplayType display = DT_DEFAULT;
 
     if (strstart(p, "sdl", &opts)) {
-#ifdef CONFIG_SDL
+#if defined(CONFIG_SDL) || defined(CONFIG_ANDROID)
         display = DT_SDL;
         while (*opts) {
             const char *nextopt;
@@ -2701,12 +2921,12 @@ static void qemu_run_machine_init_done_notifiers(void)
     machine_init_done = true;
 }
 
-static const QEMUOption *lookup_opt(int argc, char **argv,
+static const QEMUOption *lookup_opt(int argc, const char **argv,
                                     const char **poptarg, int *poptind)
 {
     const QEMUOption *popt;
     int optind = *poptind;
-    char *r = argv[optind];
+    const char *r = argv[optind];
     const char *optarg;
 
     loc_set_cmdline((const char**)argv, optind, 1);
@@ -2943,7 +3163,51 @@ static int global_init_func(void *opaque, QemuOpts *opts, Error **errp)
     return 0;
 }
 
-int main(int argc, char **argv, char **envp)
+#if defined(CONFIG_ANDROID)
+
+static int is_opengl_alive = 1;
+
+static void android_check_for_updates()
+{
+    android_checkForUpdates(QEMU_CORE_VERSION);
+}
+
+static void android_init_metrics()
+{
+    android_metrics_start(EMULATOR_VERSION_STRING,
+                          EMULATOR_FULL_VERSION_STRING,
+                          QEMU_VERSION,
+                          android_base_port);
+    android_metrics_report_common_info(is_opengl_alive);
+}
+
+static void android_teardown_metrics()
+{
+    android_metrics_stop();
+}
+
+static bool android_reporting_setup(void)
+{
+    android_init_metrics();
+    if (!is_opengl_alive) {
+        derror("Could not initialize OpenglES emulation, "
+               "use '-gpu off' to disable it.");
+        return false;
+    }
+
+    android_check_for_updates();
+    return true;
+}
+
+static void android_reporting_teardown(void)
+{
+    android_teardown_metrics();
+}
+
+int run_qemu_main(int argc, const char **argv)
+#else
+int main(int argc, char** argv, char** envp)
+#endif
 {
     int i;
     int snapshot, linux_boot;
@@ -2981,9 +3245,8 @@ int main(int argc, char **argv, char **envp)
     bool list_data_dirs = false;
 
 #ifdef CONFIG_ANDROID
-    if (!qemu_android_emulation_early_setup()) {
-        return 1;
-    }
+    char* android_op_dns_server = NULL;
+    int adb_auth = 1;
 #endif
 
     qemu_init_cpu_loop();
@@ -3056,7 +3319,7 @@ int main(int argc, char **argv, char **envp)
         } else {
             const QEMUOption *popt;
 
-            popt = lookup_opt(argc, argv, &optarg, &optind);
+            popt = lookup_opt(argc, (const char**)argv, &optarg, &optind);
             if (!popt) {
                 return 1;
             }
@@ -3089,7 +3352,7 @@ int main(int argc, char **argv, char **envp)
         } else {
             const QEMUOption *popt;
 
-            popt = lookup_opt(argc, argv, &optarg, &optind);
+            popt = lookup_opt(argc, (const char**)argv, &optarg, &optind);
             if (!popt) {
                 return 1;
             }
@@ -4011,6 +4274,60 @@ int main(int argc, char **argv, char **envp)
                     return 1;
                 }
                 break;
+#ifdef CONFIG_ANDROID
+            case QEMU_OPTION_boot_property:
+                save_cmd_property((char*)optarg);
+                break;
+            case QEMU_OPTION_lcd_density:
+                lcd_density = strtol(optarg, (char **) &optarg, 10);
+                switch (lcd_density) {
+                    case LCD_DENSITY_LDPI:
+                    case LCD_DENSITY_MDPI:
+                    case LCD_DENSITY_TVDPI:
+                    case LCD_DENSITY_HDPI:
+                    case LCD_DENSITY_280DPI:
+                    case LCD_DENSITY_XHDPI:
+                    case LCD_DENSITY_360DPI:
+                    case LCD_DENSITY_400DPI:
+                    case LCD_DENSITY_420DPI:
+                    case LCD_DENSITY_XXHDPI:
+                    case LCD_DENSITY_560DPI:
+                    case LCD_DENSITY_XXXHDPI:
+                        break;
+                    default:
+                        fprintf(stderr, "qemu: available lcd densities are: "
+                                "120, 160, 213, 240, 280, 320, 360, 400, 420, 480, 560, 640\n");
+                        return 1;
+                }
+                break;
+            case QEMU_OPTION_dns_server:
+                android_op_dns_server = (char*)optarg;
+                break;
+
+            case QEMU_OPTION_http_proxy:
+                op_http_proxy = (char*)optarg;
+                break;
+            case QEMU_OPTION_android_hw:
+                android_hw_file = optarg;
+                break;
+
+            case QEMU_OPTION_android_ports:
+                android_op_ports = (char*)optarg;
+                if (!android_parse_ports_option(android_op_ports,
+                                                &android_op_ports_numbers[0],
+                                                &android_op_ports_numbers[1])) {
+                    return 1;
+                }
+                break;
+            case QEMU_OPTION_android_report_console:
+                android_op_report_console = (char*)optarg;
+                break;
+
+            case QEMU_OPTION_android_skip_adb_auth:
+                adb_auth = 0;
+                break;
+
+#endif  // CONFIG_ANDROID
             default:
                 os_parse_cmd_args(popt->index, optarg);
             }
@@ -4039,6 +4356,149 @@ int main(int argc, char **argv, char **envp)
         error_report_err(main_loop_err);
         return 1;
     }
+
+#ifdef CONFIG_ANDROID
+
+    if (!qemu_android_emulation_early_setup()) {
+        return 1;
+    }
+
+    /* At this point, both block drivers and main loop have been initialized
+     * which means we can create the QCoW2 images to boot from.
+     * The QCoW2 images are backed by the "raw" images specified in the AVD
+     * config, and contain diffs to the backing image. Snapshot data is also
+     * written to QCoW2 images.*/
+    if(!create_qcow2_images()) {
+        return 1;
+    }
+
+    boot_property_init_service();
+    android_hw_control_init();
+
+    socket_drainer_start(looper_getForThread());
+    android_wear_agent_start(looper_getForThread());
+
+    if (!android_hw_file) {
+        error_report("Missing -android-hw <file> option!");
+        return 1;
+    }
+
+    CIniFile* hw_ini = iniFile_newFromFile(android_hw_file);
+    if (hw_ini == NULL) {
+        error_report("Could not find %s file.", android_hw_file);
+        return 1;
+    }
+
+    androidHwConfig_init(android_hw, 0);
+    androidHwConfig_read(android_hw, hw_ini);
+
+    /* If we're loading VM from a snapshot, make sure that the current HW config
+     * matches the one with which the VM has been saved. */
+    if (loadvm && *loadvm && !snaphost_match_configs(hw_ini, loadvm)) {
+        error_report("HW config doesn't match the one in the snapshot");
+        return 0;
+    }
+
+    iniFile_free(hw_ini);
+
+    {
+        int width  = android_hw->hw_lcd_width;
+        int height = android_hw->hw_lcd_height;
+        int depth  = android_hw->hw_lcd_depth;
+
+        /* A bit of sanity checking */
+        if (width <= 0 || height <= 0    ||
+            (depth != 16 && depth != 32) ||
+            ((width & 1) != 0)  )
+        {
+            error_report("Invalid display configuration (%d,%d,%d)",
+                  width, height, depth);
+            return 1;
+        }
+        graphic_width  = width;
+        graphic_height = height;
+        goldfish_fb_set_display_depth(depth);
+    }
+
+    /* Initialize camera */
+    android_camera_service_init();
+
+    /* Initialize multi-touch emulation. */
+    if (androidHwConfig_isScreenMultiTouch(android_hw)) {
+        mts_port_create(NULL, gQAndroidUserEventAgent, gQAndroidDisplayAgent);
+    }
+
+    /* qemu.gles will be read by the OpenGL ES emulation libraries.
+     * If set to 0, the software GL ES renderer will be used as a fallback.
+     * If the parameter is undefined, this means the system image runs
+     * inside an emulator that doesn't support GPU emulation at all.
+     *
+     * The GL ES renderer cannot start properly if GPU emulation is disabled
+     * because this requires changing the LD_LIBRARY_PATH before launching
+     * the emulation engine. */
+    int qemu_gles = 0;
+    is_opengl_alive = 1;
+    if (android_hw->hw_gpu_enabled) {
+        if (strcmp(android_hw->hw_gpu_mode, "guest") != 0) {
+            if (android_initOpenglesEmulation() != 0 ||
+                android_startOpenglesRenderer(android_hw->hw_lcd_width,
+                                              android_hw->hw_lcd_height) != 0) {
+                is_opengl_alive = 0;
+            } else {
+                goldfish_fb_set_use_host_gpu(1);
+                qemu_gles = 1;   // Using emugl
+            }
+        } else {
+            qemu_gles = 2;   // Using guest
+        }
+    }
+    if (qemu_gles) {
+        char  tmp[64];
+        snprintf(tmp, sizeof(tmp), "%d", 0x20000);
+        boot_property_add("ro.opengles.version", tmp);
+    }
+
+    /* Set the VM's max heap size, passed as a boot property */
+    if (android_hw->vm_heapSize > 0) {
+        char  temp[64];
+        snprintf(temp, sizeof(temp), "%dm", android_hw->vm_heapSize);
+        boot_property_add("dalvik.vm.heapsize",temp);
+    }
+
+    /* From API 19 and above, the platform provides an explicit property for low memory devices. */
+    if (android_hw->hw_ramSize <= 512) {
+        boot_property_add("ro.config.low_ram", "true");
+    }
+
+    /* Initialize presence of hardware nav button */
+    boot_property_add("qemu.hw.mainkeys", android_hw->hw_mainKeys ? "1" : "0");
+
+    /* Enable ADB authenticaiton, or not. */
+    boot_property_add("qemu.adb.secure", adb_auth ? "1" : "0");
+
+    if (android_hw->hw_gsmModem) {
+        if (android_qemud_get_channel(ANDROID_QEMUD_GSM,
+                                      &android_modem_serial_line) < 0) {
+            error_report("could not initialize qemud 'gsm' channel");
+            return 1;
+        }
+    }
+
+    if (android_hw->hw_gps) {
+        if (android_qemud_get_channel(ANDROID_QEMUD_GPS,
+                                      &android_gps_serial_line) < 0) {
+            error_report("could not initialize qemud 'gps' channel");
+            return 1;
+        }
+    }
+
+    if (lcd_density) {
+        char temp[8];
+        snprintf(temp, sizeof(temp), "%d", lcd_density);
+        boot_property_add("qemu.sf.lcd_density", temp);
+    }
+
+#endif // CONFIG_ANDROID
 
     if (qemu_opts_foreach(qemu_find_opts("sandbox"),
                           parse_sandbox, NULL, NULL)) {
@@ -4251,7 +4711,7 @@ int main(int argc, char **argv, char **envp)
     if (display_type == DT_DEFAULT && !display_remote) {
 #if defined(CONFIG_GTK)
         display_type = DT_GTK;
-#elif defined(CONFIG_SDL)
+#elif defined(CONFIG_SDL) || defined(CONFIG_ANDROID)
         display_type = DT_SDL;
 #elif defined(CONFIG_COCOA)
         display_type = DT_COCOA;
@@ -4289,7 +4749,13 @@ int main(int argc, char **argv, char **envp)
     }
 
     page_size_init();
+
+#ifndef CONFIG_ANDROID
+    // When using AndroidEmu, this "main" is no longer the entry point on the
+    // main thread. It is in fact called on a secondary thread, and socket
+    // initialization is long finished (See android-qemu2-glue/main.cpp).
     socket_init();
+#endif
 
     if (qemu_opts_foreach(qemu_find_opts("object"),
                           user_creatable_add_opts_foreach,
@@ -4360,14 +4826,12 @@ int main(int argc, char **argv, char **envp)
         boot_order = machine_class->default_boot_order;
     }
 
-    if (!kernel_cmdline) {
-        kernel_cmdline = "";
-        current_machine->kernel_cmdline = (char *)kernel_cmdline;
-    }
+    current_machine->kernel_cmdline =
+            g_strdup(kernel_cmdline ? kernel_cmdline : "");
 
     linux_boot = (kernel_filename != NULL);
 
-    if (!linux_boot && *kernel_cmdline != '\0') {
+    if (!linux_boot && *current_machine->kernel_cmdline != '\0') {
         error_report("-append only allowed with -kernel option");
         return 1;
     }
@@ -4384,7 +4848,8 @@ int main(int argc, char **argv, char **envp)
 
     if (semihosting_enabled() && !semihosting_get_argc() && kernel_filename) {
         /* fall back to the -kernel/-append */
-        semihosting_arg_fallback(kernel_filename, kernel_cmdline);
+        semihosting_arg_fallback(kernel_filename,
+                                 current_machine->kernel_cmdline);
     }
 
     os_set_line_buffering();
@@ -4413,6 +4878,31 @@ int main(int argc, char **argv, char **envp)
     if (net_init_clients() < 0) {
         return 1;
     }
+
+#ifdef CONFIG_ANDROID
+    char *additional_kernel_params = NULL;
+    int dns_count = 0;
+    int dns6_count = 0;
+    if (android_op_dns_server) {
+        if (!qemu_android_emulation_setup_dns_servers(
+                android_op_dns_server, &dns_count, &dns6_count)) {
+            fprintf(stderr, "invalid -dns-server parameter '%s'\n",
+                    android_op_dns_server);
+            return 1;
+        }
+        // TODO: Find a way to pass the number of IPv6 DNS servers to
+        // the guest system.
+        if (dns_count > 1) {
+            char* combined = g_strdup_printf("%s ndns=%d",
+                                             current_machine->kernel_cmdline,
+                                             dns_count);
+            g_free(current_machine->kernel_cmdline);
+            current_machine->kernel_cmdline = combined;
+        }
+    }
+
+    qemu_android_emulation_init_slirp();
+#endif
 
     if (qemu_opts_foreach(qemu_find_opts("object"),
                           user_creatable_add_opts_foreach,
@@ -4509,6 +4999,78 @@ int main(int argc, char **argv, char **envp)
     qemu_opts_foreach(qemu_find_opts("global"),
                       global_init_func, NULL, NULL);
 
+#if defined(CONFIG_ANDROID)
+    /* Configure goldfish events device */
+    {
+        bool have_multitouch = androidHwConfig_isScreenMultiTouch(android_hw);
+
+        /* TODO(digit): Should we set this up as command-line parameters
+         * in android-qemu2-glue/main.cpp:main() instead? as in:
+         *
+         *    -set device.goldfish-events.have-dpad=<value>
+         *    -set device.goldfish-events.have-trackball=<value>
+         *    ...
+         */
+
+        // The GlobalProperty values are directly added to a global linked list
+        // so store them in a static array instead of the stack to ensure they
+        // have the proper lifecycle. We then initialize the array with
+        // values computed dynamically.
+#define LIST_GOLDFISH_EVENT_PROPS(X) \
+    X("have-dpad", android_hw->hw_dPad) \
+    X("have-trackball", android_hw->hw_trackBall) \
+    X("have-camera", \
+            strcmp(android_hw->hw_camera_back, "none") || \
+            strcmp(android_hw->hw_camera_front, "none")) \
+    X("have-keyboard", android_hw->hw_keyboard) \
+    X("have-lidswitch", android_hw->hw_keyboard_lid) \
+    X("have-touch", androidHwConfig_isScreenTouch(android_hw)) \
+    X("have-multitouch", have_multitouch)
+
+#define GOLDFISH_DECLARE_PROP(name, value) \
+        { \
+            .driver = "goldfish-events", \
+            .property = name, \
+        },
+
+        static GlobalProperty goldfish_events_properties[] = {
+            LIST_GOLDFISH_EVENT_PROPS(GOLDFISH_DECLARE_PROP) \
+            { /* end of list */ }
+        };
+
+        // Then initialize them.
+#define GOLDFISH_INIT_PROP(name, val)  \
+            goldfish_events_properties[n].value = (val) ? "true" : "false"; \
+            VERBOSE_PRINT(init, \
+                          "goldfish_events.%s: %s", \
+                          goldfish_events_properties[n].property, \
+                          goldfish_events_properties[n].value); \
+            n++;
+
+        int n = 0;
+        LIST_GOLDFISH_EVENT_PROPS(GOLDFISH_INIT_PROP)
+
+#undef GOLDFISH_INIT_PROP
+#undef GOLDFISH_DECLARE_PROP
+
+        qdev_prop_register_global_list(goldfish_events_properties);
+
+        if (have_multitouch) {
+            // in android-qemu2-glue/qemu-user-event-agent-impl.c
+            extern const GoldfishEventMultitouchFuncs
+                    qemu2_goldfish_event_multitouch_funcs;
+
+            goldfish_events_enable_multitouch(
+                    &qemu2_goldfish_event_multitouch_funcs);
+        }
+    }
+
+    // Parse the System boot parameters from the command line last,
+    // so they take precedence
+    process_cmd_properties();
+
+#endif  // CONFIG_ANDROID
+
     /* This checkpoint is required by replay to separate prior clock
        reading from the other reads, because timer polling functions query
        clock values from the log. */
@@ -4530,7 +5092,10 @@ int main(int argc, char **argv, char **envp)
     if (!qemu_android_emulation_setup()) {
         return 1;
     }
-#endif
+
+    extern void android_emulator_set_base_port(int);
+    android_emulator_set_base_port(android_base_port);
+#endif  // CONFIG_ANDROID
 
     if (!realtime_init()) {
         return 1;
@@ -4670,9 +5235,24 @@ int main(int argc, char **argv, char **envp)
 
     os_setup_post();
 
+#ifdef CONFIG_ANDROID
+    // Initialize reporting right before entering main loop.
+    // We want to track performance of a running emulator, ignoring any early
+    // exits as a result of incorrect setup.
+    if (!android_reporting_setup()) {
+        return 1;
+    }
+#endif  // CONFIG_ANDROID
+
     trace_init_vcpu_events();
     main_loop();
     replay_disable_events();
+
+#ifdef CONFIG_ANDROID
+    crashhandler_exitmode("after main_loop");
+    android_wear_agent_stop();
+    socket_drainer_stop();
+#endif
 
     bdrv_close_all();
     pause_all_vcpus();
@@ -4683,6 +5263,7 @@ int main(int argc, char **argv, char **envp)
 
 #ifdef CONFIG_ANDROID
     qemu_android_emulation_teardown();
+    android_reporting_teardown();
 #endif
 
     /* vhost-user must be cleaned up before chardevs.  */
