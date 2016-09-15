@@ -16,6 +16,7 @@
 
 #include "android/android.h"
 #include "android/base/Log.h"
+#include "android-qemu2-glue/emulation/android_pipe_device.h"
 #include "android-qemu2-glue/emulation/charpipe.h"
 #include "android-qemu2-glue/emulation/VmLock.h"
 #include "android-qemu2-glue/looper-qemu.h"
@@ -47,6 +48,11 @@ bool qemu_android_emulation_early_setup() {
     VmLock* vmLock = new qemu2::VmLock();
     VmLock* prevVmLock = VmLock::set(vmLock);
     CHECK(prevVmLock == nullptr) << "Another VmLock was already installed!";
+
+    // Initialize host pipe service.
+    if (!qemu_android_pipe_init(vmLock)) {
+        return false;
+    }
 
     return true;
 }
