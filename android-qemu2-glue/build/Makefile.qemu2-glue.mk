@@ -25,6 +25,7 @@ LOCAL_SRC_FILES := \
     net-android.cpp \
     qemu-battery-agent-impl.c \
     qemu-cellular-agent-impl.c \
+    qemu-clipboard-agent-impl.cpp \
     qemu-display-agent-impl.cpp \
     qemu-finger-agent-impl.c \
     qemu-location-agent-impl.c \
