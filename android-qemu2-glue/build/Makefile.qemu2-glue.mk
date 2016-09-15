@@ -19,6 +19,7 @@ LOCAL_SRC_FILES := \
     emulation/android_pipe_device.cpp \
     emulation/charpipe.c \
     emulation/CharSerialLine.cpp \
+    emulation/goldfish_sync.cpp \
     emulation/serial_line.cpp \
     emulation/VmLock.cpp \
     looper-qemu.cpp \
