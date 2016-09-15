@@ -25,3 +25,10 @@ extern "C" {
 bool qemu_android_emulation_early_setup() {
     return true;
 }
+
+bool qemu_android_emulation_setup() {
+    return true;
+}
+
+void qemu_android_emulation_teardown() {
+}

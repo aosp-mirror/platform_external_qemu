@@ -4522,6 +4522,12 @@ int main(int argc, char **argv, char **envp)
         return 1;
     }
 
+#ifdef CONFIG_ANDROID
+    if (!qemu_android_emulation_setup()) {
+        return 1;
+    }
+#endif
+
     if (!realtime_init()) {
         return 1;
     }
@@ -4669,6 +4675,10 @@ int main(int argc, char **argv, char **envp)
     res_free();
 #ifdef CONFIG_TPM
     tpm_cleanup();
+#endif
+
+#ifdef CONFIG_ANDROID
+    qemu_android_emulation_teardown();
 #endif
 
     /* vhost-user must be cleaned up before chardevs.  */
