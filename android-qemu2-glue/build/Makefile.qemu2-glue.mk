@@ -27,6 +27,7 @@ LOCAL_SRC_FILES := \
     qemu-finger-agent-impl.c \
     qemu-location-agent-impl.c \
     qemu-net-agent-impl.c \
+    qemu-sensors-agent-impl.c \
     qemu-setup.cpp \
     qemu-telephony-agent-impl.c \
     telephony/modem_init.c \
