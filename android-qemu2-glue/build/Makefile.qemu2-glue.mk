@@ -31,6 +31,7 @@ LOCAL_SRC_FILES := \
     qemu-setup.cpp \
     qemu-telephony-agent-impl.c \
     qemu-user-event-agent-impl.c \
+    qemu-vm-operations-impl.c \
     telephony/modem_init.c \
     utils/stream.cpp \
 
