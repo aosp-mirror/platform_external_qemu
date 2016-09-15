@@ -30,6 +30,7 @@ LOCAL_SRC_FILES := \
     qemu-sensors-agent-impl.c \
     qemu-setup.cpp \
     qemu-telephony-agent-impl.c \
+    qemu-user-event-agent-impl.c \
     telephony/modem_init.c \
     utils/stream.cpp \
 
