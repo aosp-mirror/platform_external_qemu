@@ -21,6 +21,7 @@ LOCAL_SRC_FILES := \
     emulation/VmLock.cpp \
     looper-qemu.cpp \
     net-android.cpp \
+    qemu-battery-agent-impl.c \
     qemu-setup.cpp \
     qemu-telephony-agent-impl.c \
     telephony/modem_init.c \
