@@ -16,12 +16,14 @@
 
 #include "android/android.h"
 #include "android/base/Log.h"
+#include "android/console.h"
 #include "android-qemu2-glue/emulation/android_pipe_device.h"
 #include "android-qemu2-glue/emulation/charpipe.h"
 #include "android-qemu2-glue/emulation/VmLock.h"
 #include "android-qemu2-glue/looper-qemu.h"
 #include "android-qemu2-glue/android_qemud.h"
 #include "android-qemu2-glue/net-android.h"
+#include "android-qemu2-glue/qemu-control-impl.h"
 
 extern "C" {
 #include "qemu/osdep.h"
@@ -60,7 +62,18 @@ bool qemu_android_emulation_early_setup() {
 bool qemu_android_emulation_setup() {
     android_qemu_init_slirp_shapers();
 
-    return true;
+    // Initialize UI/console agents.
+    static const AndroidConsoleAgents consoleAgents = {
+            gQAndroidBatteryAgent,
+            gQAndroidFingerAgent,
+            gQAndroidLocationAgent,
+            gQAndroidTelephonyAgent,
+            gQAndroidUserEventAgent,
+            gQAndroidVmOperations,
+            gQAndroidNetAgent,
+    };
+
+    return android_emulation_setup(&consoleAgents);
 }
 
 void qemu_android_emulation_teardown() {
