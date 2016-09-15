@@ -426,6 +426,12 @@ static SlirpState *slirp_lookup(Monitor *mon, const char *vlan,
     }
 }
 
+void *net_slirp_state(void)
+{
+    SlirpState *ss = slirp_lookup(NULL, NULL, NULL);
+    return ss ? ss->slirp : NULL;
+}
+
 void hmp_hostfwd_remove(Monitor *mon, const QDict *qdict)
 {
     struct in_addr host_addr = { .s_addr = INADDR_ANY };
