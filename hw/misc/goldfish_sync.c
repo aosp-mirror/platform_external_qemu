@@ -68,6 +68,7 @@ struct goldfish_sync_pending_cmd {
 #define SYNC_REG_BATCH_COMMAND_ADDR_HIGH      0x0c // 64-bit part
 #define SYNC_REG_BATCH_GUESTCOMMAND_ADDR      0x10 // communicate physical address of guest->host commands
 #define SYNC_REG_BATCH_GUESTCOMMAND_ADDR_HIGH 0x14 // 64-bit part
+#define SYNC_REG_INIT                         0x18 // to signal that the device has been detected by the kernel
 
 // The goldfish sync device is represented by the goldfish_sync_state struct.
 // Besides the machinery necessary to do I/O with the guest:
@@ -157,6 +158,25 @@ goldfish_sync_pop_first_cmd(struct goldfish_sync_state* state) {
     if (state->pending == popped) state->pending = NULL;
 
     return popped;
+}
+
+static void goldfish_sync_clear_pending(struct goldfish_sync_state* state) {
+    struct goldfish_sync_pending_cmd* curr =
+        state->pending;
+
+    while (curr) {
+        struct goldfish_sync_pending_cmd* tmp = curr;
+        curr = curr->next;
+        goldfish_sync_free_cmd(tmp);
+    }
+
+    state->pending = NULL;
+    state->first_pending_cmd = NULL;
+}
+
+static void goldfish_sync_reset_device(struct goldfish_sync_state* state) {
+    goldfish_sync_clear_pending(state);
+    qemu_set_irq(state->irq, 0);
 }
 
 // Callbacks and hw_funcs struct================================================
@@ -369,6 +389,9 @@ goldfish_sync_write(void *opaque,
         s->batch_guestcmd_addr |= (uint64_t)(val << 32);
         DPRINT("Got batch guestcommand address. addr=0x%llx",
                s->batch_guestcmd_addr);
+        break;
+    case SYNC_REG_INIT:
+        goldfish_sync_reset_device(s);
         break;
     default:
         DPRINT("INVALID sync_write! reg=%u", offset);
