@@ -60,6 +60,7 @@ ANDROID_BEGIN_HEADER
 #define SYNC_REG_BATCH_COMMAND_ADDR_HIGH      0x0c // 64-bit part
 #define SYNC_REG_BATCH_GUESTCOMMAND_ADDR      0x10 // communicate physical address of guest->host commands
 #define SYNC_REG_BATCH_GUESTCOMMAND_ADDR_HIGH 0x14 // 64-bit part
+#define SYNC_REG_INIT                         0x18 // to signal that the device has been detected by the kernel
 
 #define GUEST_TRIGGERED(cmd) (cmd == CMD_SYNC_READY || \
                               cmd == CMD_TRIGGER_HOST_WAIT)
