@@ -184,6 +184,7 @@ LOCAL_WHOLE_STATIC_LIBRARIES += \
 
 LOCAL_STATIC_LIBRARIES += \
     $(QEMU2_SYSTEM_STATIC_LIBRARIES) \
+    $(QEMU2_GLUE_STATIC_LIBRARIES) \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
 
 LOCAL_CFLAGS += \
@@ -198,6 +199,7 @@ LOCAL_C_INCLUDES += \
 # For now, use stubs/sdl-null.c as an empty/fake SDL UI backend.
 # TODO: Use the glue code to use the Qt-based UI instead.
 LOCAL_SRC_FILES += \
+    android-qemu2-glue/main.cpp \
     $(call qemu2-if-target,x86 x86_64, \
         hw/i386/acpi-build.c \
         hw/i386/pc_piix.c \
@@ -205,11 +207,10 @@ LOCAL_SRC_FILES += \
     $(call qemu2-if-windows, \
         android-qemu2-glue/stubs/win32-stubs.c \
         ) \
-    stubs/sdl-null.c \
     vl.c \
 
-LOCAL_LDFLAGS += $(QEMU2_SYSTEM_LDFLAGS)
-LOCAL_LDLIBS += $(QEMU2_SYSTEM_LDLIBS)
+LOCAL_LDFLAGS += $(QEMU2_SYSTEM_LDFLAGS) $(QEMU2_GLUE_LDFLAGS)
+LOCAL_LDLIBS += $(QEMU2_SYSTEM_LDLIBS) $(QEMU2_GLUE_LDLIBS)
 
 LOCAL_LDFLAGS += \
     $(QEMU2_DEPS_LDFLAGS) \

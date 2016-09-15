@@ -52,6 +52,10 @@ int main(int argc, char **argv)
 #define main qemu_main
 #endif /* CONFIG_COCOA */
 
+#ifdef CONFIG_ANDROID
+#define main qemu_main
+#endif
+
 #include "qemu/error-report.h"
 #include "qemu/sockets.h"
 #include "hw/hw.h"

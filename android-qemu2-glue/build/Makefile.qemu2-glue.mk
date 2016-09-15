@@ -15,6 +15,7 @@ LOCAL_SRC_FILES := \
     android_qemud.cpp \
     base/async/Looper.cpp \
     base/files/QemuFileStream.cpp \
+    display.cpp \
     emulation/android_pipe_device.cpp \
     emulation/charpipe.c \
     emulation/CharSerialLine.cpp \
@@ -33,9 +34,19 @@ LOCAL_SRC_FILES := \
     qemu-telephony-agent-impl.c \
     qemu-user-event-agent-impl.c \
     qemu-vm-operations-impl.c \
+    qemu-window-agent-impl.c \
     telephony/modem_init.c \
     utils/stream.cpp \
 
 LOCAL_SRC_FILES := $(LOCAL_SRC_FILES:%=android-qemu2-glue/%)
 
 $(call end-emulator-library)
+
+QEMU2_GLUE_STATIC_LIBRARIES := \
+    libqemu2-glue \
+    emulator-libui \
+    $(EMULATOR_LIBUI_STATIC_LIBRARIES)
+
+QEMU2_GLUE_LDFLAGS := $(EMULATOR_LIBUI_LDFLAGS)
+
+QEMU2_GLUE_LDLIBS := $(EMULATOR_LIBUI_LDLIBS)
