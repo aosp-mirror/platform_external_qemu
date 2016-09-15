@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 #endif /* CONFIG_COCOA */
 
 #ifdef CONFIG_ANDROID
-#define main qemu_main
+#define main run_qemu_main
 #endif
 
 #include "qemu/error-report.h"
