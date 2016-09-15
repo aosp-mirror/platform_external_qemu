@@ -23,6 +23,7 @@ LOCAL_SRC_FILES := \
     net-android.cpp \
     qemu-battery-agent-impl.c \
     qemu-cellular-agent-impl.c \
+    qemu-finger-agent-impl.c \
     qemu-setup.cpp \
     qemu-telephony-agent-impl.c \
     telephony/modem_init.c \
