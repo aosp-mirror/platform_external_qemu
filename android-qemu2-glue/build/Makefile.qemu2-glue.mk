@@ -22,6 +22,8 @@ LOCAL_SRC_FILES := \
     looper-qemu.cpp \
     net-android.cpp \
     qemu-setup.cpp \
+    qemu-telephony-agent-impl.c \
+    telephony/modem_init.c \
     utils/stream.cpp \
 
 LOCAL_SRC_FILES := $(LOCAL_SRC_FILES:%=android-qemu2-glue/%)
