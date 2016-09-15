@@ -19,6 +19,7 @@ LOCAL_SRC_FILES := \
     emulation/serial_line.cpp \
     emulation/VmLock.cpp \
     looper-qemu.cpp \
+    net-android.cpp \
     qemu-setup.cpp \
     utils/stream.cpp \
 
