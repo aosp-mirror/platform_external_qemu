@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b3926b8_00a1c503",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1005930
+      },
+      "writtenOn": "2016-09-16T21:19:09Z",
+      "side": 1,
+      "message": "Can\u0027t you add a new LoopbackMode that does what you want?  It looks like this enum was specifically created to avoid custom probing at the call site.",
+      "range": {
+        "startLine": 45,
+        "startChar": 31,
+        "endLine": 45,
+        "endChar": 51
+      },
+      "revId": "a129d30e579025352cffd3a417886a39bd76c41c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
