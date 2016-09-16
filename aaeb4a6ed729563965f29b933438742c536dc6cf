@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9085abca_a21b7e27",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-09-16T15:57:05Z",
+      "side": 1,
+      "message": "nit: systemSupport*s*IPv4 :-)",
+      "revId": "aaeb4a6ed729563965f29b933438742c536dc6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
