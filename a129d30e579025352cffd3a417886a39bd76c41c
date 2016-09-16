@@ -22,6 +22,30 @@
       "revId": "a129d30e579025352cffd3a417886a39bd76c41c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3926b8_56f8e7ab",
+        "filename": "android/emulation/AdbHostListener.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2016-09-16T22:30:49Z",
+      "side": 1,
+      "message": "Then the enum should be:\n\nkIPv6WhenNoIpv4OrkIpv4AndOptionalIPv6.\n\nNot sure if this\u0027s too complex...",
+      "parentUuid": "6b3926b8_00a1c503",
+      "range": {
+        "startLine": 45,
+        "startChar": 31,
+        "endLine": 45,
+        "endChar": 51
+      },
+      "revId": "a129d30e579025352cffd3a417886a39bd76c41c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
