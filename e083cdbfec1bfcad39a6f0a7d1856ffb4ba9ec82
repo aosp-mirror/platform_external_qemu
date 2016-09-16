@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6b3926b8_867792c7",
+        "filename": "distrib/ext4_utils/src/make_ext4fs.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-09-16T18:50:45Z",
+      "side": 1,
+      "message": "Done.\n\nBecause this patch is in distrib and built into a stand alone application, I can\u0027t easily reuse android/base. I will use the lower level functions.\n\nIt reminds me the windows tchar troubles.",
+      "parentUuid": "6b3926b8_771c1282",
+      "range": {
+        "startLine": 83,
+        "startChar": 11,
+        "endLine": 83,
+        "endChar": 24
+      },
+      "revId": "e083cdbfec1bfcad39a6f0a7d1856ffb4ba9ec82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b3926b8_b74bea79",
         "filename": "distrib/ext4_utils/src/make_ext4fs.c",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2016-09-16T15:36:07Z",
       "side": 1,
       "message": "nit: alignment",
+      "range": {
+        "startLine": 226,
+        "startChar": 0,
+        "endLine": 226,
+        "endChar": 16
+      },
+      "revId": "e083cdbfec1bfcad39a6f0a7d1856ffb4ba9ec82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3926b8_063562fb",
+        "filename": "distrib/ext4_utils/src/make_ext4fs.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-09-16T18:50:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6b3926b8_b74bea79",
       "range": {
         "startLine": 226,
         "startChar": 0,
