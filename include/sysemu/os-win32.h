@@ -83,13 +83,38 @@
 #define ffsll(i) __builtin_ffsll(i)
 
 /* Missing POSIX functions. Don't use MinGW-w64 macros. */
+
+#ifndef __cplusplus
+// NOTE: Disabled for C++ to avoid compiler conflicts when building the Android
+// emulator.
+//
+// The root of the issue is the following:
+//
+// * <time.h> in newest Mingw headers declare functions like gmtime_r() as
+//   inline _outside_ of an extern "C" {}. They are thus declared with 'C++
+//   linkage', when <time.h> is included directly by a C++ source file.
+//
+// * The emulator's C++ source files include this header _within_ an
+//   extern "C" block (to avoid plenty of other kinds of conflicts), and
+//   the re-declaration below has 'C linkage'.
+//
+// The compiler complains that both declarations are incompatible due to
+// different linkage type (name mangling, really) and exits with an error.
+//
+// Since only QEMU's C source files use these functions, it is safe to avoid
+// re-declaring them here when __cplusplus is defined. This works with both
+// the old and new versions of <time.h> / Mingw headers.
+
 #undef gmtime_r
 struct tm *gmtime_r(const time_t *timep, struct tm *result);
+
 #undef localtime_r
 struct tm *localtime_r(const time_t *timep, struct tm *result);
 
 #undef strtok_r
 char *strtok_r(char *str, const char *delim, char **saveptr);
+
+#endif  /* !__cplusplus */
 
 static inline void os_setup_signal_handling(void) {}
 static inline void os_daemonize(void) {}
