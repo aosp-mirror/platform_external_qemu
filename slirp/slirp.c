@@ -110,7 +110,7 @@ static int get_dns_addr(struct in_addr *pdns_addr)
     return 0;
 }
 
-int get_dns6_addr(struct in6_addr *pdns6_addr, uint32_t *scope_id)
+static int get_dns6_addr(struct in6_addr *pdns6_addr, uint32_t *scope_id)
 {
     return -1;
 }
@@ -229,7 +229,7 @@ static int get_dns_addr(struct in_addr *pdns_addr)
                                     sizeof(dns_addr), NULL, &dns_addr_time);
 }
 
-int get_dns6_addr(struct in6_addr *pdns6_addr, uint32_t *scope_id)
+static int get_dns6_addr(struct in6_addr *pdns6_addr, uint32_t *scope_id)
 {
     static struct stat dns6_addr_stat;
 
@@ -252,7 +252,21 @@ int slirp_translate_guest_dns(Slirp *slirp,
                               const struct sockaddr_in *guest_ip,
                               struct sockaddr_in *host_ip)
 {
-    /* It's an alias */
+    int dns_index = -1;
+
+    if (slirp->host_dns_count > 0) {
+        /* Use custom DNS servers. */
+        uint32_t dns_base = ntohl(slirp->vnameserver_addr.s_addr);
+        uint32_t guest = ntohl(guest_ip->sin_addr.s_addr);
+        dns_index = (int)(guest - dns_base);
+        if (dns_index < 0 || dns_index >= slirp->host_dns_count)
+            return -1;
+
+        host_ip->sin_addr = slirp->host_dns[dns_index];
+        return 0;
+    }
+
+    /* Use system-provided DNS server. */
     if (guest_ip->sin_addr.s_addr != slirp->vnameserver_addr.s_addr) {
         return -1;
     }
@@ -268,6 +282,33 @@ int slirp_translate_guest_dns6(Slirp *slirp,
 {
     uint32_t scope_id;
 
+    if (slirp->host_dns_count > 0) {
+        /* Use custom IPv6 DNS servers. */
+        struct in6_addr dns_base = slirp->vnameserver_addr6;
+        int n, dns_index = -1;
+        for (n = 0; n < slirp->host_dns_count; ++n) {
+            if (in6_equal(&guest_ip6->sin6_addr, &dns_base)) {
+                dns_index = n;
+                break;
+            }
+            /* Increment DNS Ipv6 address */
+            int offset = 15;
+            while (offset >= 0) {
+                dns_base.s6_addr[offset]++;
+                if (dns_base.s6_addr[offset] != 0) {
+                    break;
+                }
+                offset--;
+            }
+        }
+        if (dns_index < 0) {
+            return -1;
+        }
+        host_ip6->sin6_addr = slirp->host_dns6[dns_index];
+        return 0;
+    }
+
+    /* Use system-provided DNS server */
     if (!in6_equal(&guest_ip6->sin6_addr, &slirp->vnameserver_addr6)) {
         return -1;
     }
@@ -277,6 +318,34 @@ int slirp_translate_guest_dns6(Slirp *slirp,
         host_ip6->sin6_addr = in6addr_loopback;
     }
     return 0;
+}
+
+void slirp_init_custom_dns_servers(Slirp *slirp,
+                                   const struct sockaddr_storage* dns,
+                                   int dns_count)
+{
+    int n = 0;
+    for (; n < dns_count; ++n) {
+        switch (dns[n].ss_family) {
+        case AF_INET:
+            if (slirp->host_dns_count < SLIRP_MAX_DNS_SERVERS) {
+                slirp->host_dns[slirp->host_dns_count++] =
+                        ((const struct sockaddr_in *)&dns[n])->sin_addr;
+            }
+            break;
+
+        case AF_INET6:
+            if (slirp->host_dns6_count < SLIRP_MAX_DNS_SERVERS) {
+                slirp->host_dns6[slirp->host_dns6_count++] =
+                        ((const struct sockaddr_in6 *)&dns[n])->sin6_addr;
+            }
+            break;
+
+        default:
+            /* Ignore this one */
+            ;
+        }
+    }
 }
 
 static void slirp_init_once(void)
@@ -349,6 +418,9 @@ Slirp *slirp_init(int restricted, bool in_enabled, struct in_addr vnetwork,
     if (vdnssearch) {
         translate_dnssearch(slirp, vdnssearch);
     }
+
+    slirp->host_dns_count = 0;
+    slirp->host_dns6_count = 0;
 
     slirp->opaque = opaque;
 

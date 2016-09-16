@@ -17,6 +17,15 @@ Slirp *slirp_init(int restricted, bool in_enabled, struct in_addr vnetwork,
                   void *opaque);
 void slirp_cleanup(Slirp *slirp);
 
+/* Setup custom DNS servers to be used. |dns_servers| is an array of
+ * |num_dns_servers| IPv4 host addresses for DNS servers to be used
+ * when translating guest IPv4 DNS addresses (typically from 10.0.2.3
+ * to 10.0.2.(3 + num_dns_servers - 1). */
+void slirp_init_custom_dns_servers(Slirp *slirp,
+                                   const struct sockaddr_storage *dns_servers,
+                                   int num_dns_servers);
+
+
 /* Check whether |guest_ip| is the IPv4 address of a guest DNS server.
  * If that's the case, set |*host_ip| to the corresponding host DNS server
  * address and return 0. Otherwise, leave |host_ip| untouched and

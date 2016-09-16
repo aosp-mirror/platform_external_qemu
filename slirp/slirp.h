@@ -150,6 +150,8 @@ void ndp_table_add(Slirp *slirp, struct in6_addr ip_addr,
 bool ndp_table_search(Slirp *slirp, struct in6_addr ip_addr,
                       uint8_t out_ethaddr[ETH_ALEN]);
 
+#define SLIRP_MAX_DNS_SERVERS 4
+
 struct Slirp {
     QTAILQ_ENTRY(Slirp) entry;
     u_int time_fasttimo;
@@ -171,6 +173,12 @@ struct Slirp {
 
     struct in_addr client_ipaddr;
     char client_hostname[33];
+
+    struct in_addr host_dns[SLIRP_MAX_DNS_SERVERS];
+    int host_dns_count;
+
+    struct in6_addr host_dns6[SLIRP_MAX_DNS_SERVERS];
+    int host_dns6_count;
 
     int restricted;
     struct ex_list *exec_list;
