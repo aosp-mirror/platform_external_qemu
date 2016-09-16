@@ -72,6 +72,8 @@
 #  define  D(x)   do{}while(0)
 #endif
 
+#define DINIT(...) do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
+
 typedef struct ControlGlobalRec_*  ControlGlobal;
 
 typedef struct ControlClientRec_*  ControlClient;
@@ -2718,6 +2720,8 @@ static int
 do_kill( ControlClient  client, char*  args )
 {
     control_write( client, "OK: killing emulator, bye bye\r\n" );
+    DINIT("Emulator killed by console kill command.\n");
+    fflush(stdout);
     exit(0);
 }
 
