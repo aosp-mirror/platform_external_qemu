@@ -6,9 +6,6 @@
 struct Slirp;
 typedef struct Slirp Slirp;
 
-int get_dns_addr(struct in_addr *pdns_addr);
-int get_dns6_addr(struct in6_addr *pdns6_addr, uint32_t *scope_id);
-
 Slirp *slirp_init(int restricted, bool in_enabled, struct in_addr vnetwork,
                   struct in_addr vnetmask, struct in_addr vhost,
                   bool in6_enabled,
@@ -19,6 +16,19 @@ Slirp *slirp_init(int restricted, bool in_enabled, struct in_addr vnetwork,
                   struct in6_addr vnameserver6, const char **vdnssearch,
                   void *opaque);
 void slirp_cleanup(Slirp *slirp);
+
+/* Check whether |guest_ip| is the IPv4 address of a guest DNS server.
+ * If that's the case, set |*host_ip| to the corresponding host DNS server
+ * address and return 0. Otherwise, leave |host_ip| untouched and
+ * return -1 */
+int slirp_translate_guest_dns(Slirp *slirp,
+                              const struct sockaddr_in *guest_ip,
+                              struct sockaddr_in *host_ip);
+
+/* Same for IPv6 addresses */
+int slirp_translate_guest_dns6(Slirp *slirp,
+                               const struct sockaddr_in6 *guest_ip6,
+                               struct sockaddr_in6 *host_ip6);
 
 void slirp_pollfds_fill(GArray *pollfds, uint32_t *timeout);
 

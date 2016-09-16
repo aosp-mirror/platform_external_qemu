@@ -65,7 +65,7 @@ static u_int dns6_addr_time;
 
 #ifdef _WIN32
 
-int get_dns_addr(struct in_addr *pdns_addr)
+static int get_dns_addr(struct in_addr *pdns_addr)
 {
     FIXED_INFO *FixedInfo=NULL;
     ULONG    BufLen;
@@ -213,7 +213,7 @@ static int get_dns_addr_resolv_conf(int af, void *pdns_addr, void *cached_addr,
     return 0;
 }
 
-int get_dns_addr(struct in_addr *pdns_addr)
+static int get_dns_addr(struct in_addr *pdns_addr)
 {
     static struct stat dns_addr_stat;
 
@@ -247,6 +247,37 @@ int get_dns6_addr(struct in6_addr *pdns6_addr, uint32_t *scope_id)
 }
 
 #endif
+
+int slirp_translate_guest_dns(Slirp *slirp,
+                              const struct sockaddr_in *guest_ip,
+                              struct sockaddr_in *host_ip)
+{
+    /* It's an alias */
+    if (guest_ip->sin_addr.s_addr != slirp->vnameserver_addr.s_addr) {
+        return -1;
+    }
+    if (get_dns_addr(&host_ip->sin_addr) < 0) {
+        host_ip->sin_addr = loopback_addr;
+    }
+    return 0;
+}
+
+int slirp_translate_guest_dns6(Slirp *slirp,
+                               const struct sockaddr_in6 *guest_ip6,
+                               struct sockaddr_in6 *host_ip6)
+{
+    uint32_t scope_id;
+
+    if (!in6_equal(&guest_ip6->sin6_addr, &slirp->vnameserver_addr6)) {
+        return -1;
+    }
+    if (get_dns6_addr(&host_ip6->sin6_addr, &scope_id) >= 0) {
+        host_ip6->sin6_scope_id = scope_id;
+    } else {
+        host_ip6->sin6_addr = in6addr_loopback;
+    }
+    return 0;
+}
 
 static void slirp_init_once(void)
 {

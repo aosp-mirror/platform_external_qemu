@@ -797,12 +797,7 @@ void sotranslate_out(struct socket *so, struct sockaddr_storage *addr)
     case AF_INET:
         if ((so->so_faddr.s_addr & slirp->vnetwork_mask.s_addr) ==
                 slirp->vnetwork_addr.s_addr) {
-            /* It's an alias */
-            if (so->so_faddr.s_addr == slirp->vnameserver_addr.s_addr) {
-                if (get_dns_addr(&sin->sin_addr) < 0) {
-                    sin->sin_addr = loopback_addr;
-                }
-            } else {
+            if (slirp_translate_guest_dns(slirp, &so->fhost.sin, sin) < 0) {
                 sin->sin_addr = loopback_addr;
             }
         }
@@ -815,14 +810,7 @@ void sotranslate_out(struct socket *so, struct sockaddr_storage *addr)
     case AF_INET6:
         if (in6_equal_net(&so->so_faddr6, &slirp->vprefix_addr6,
                     slirp->vprefix_len)) {
-            if (in6_equal(&so->so_faddr6, &slirp->vnameserver_addr6)) {
-                uint32_t scope_id;
-                if (get_dns6_addr(&sin6->sin6_addr, &scope_id) >= 0) {
-                    sin6->sin6_scope_id = scope_id;
-                } else {
-                    sin6->sin6_addr = in6addr_loopback;
-                }
-            } else {
+            if (slirp_translate_guest_dns6(slirp, &so->fhost.sin6, sin6) < 0) {
                 sin6->sin6_addr = in6addr_loopback;
             }
         }
