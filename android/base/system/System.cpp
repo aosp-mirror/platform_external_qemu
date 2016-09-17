@@ -59,6 +59,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <unistd.h>
 
 // This variable is a pointer to a zero-terminated array of all environment
@@ -433,6 +434,15 @@ public:
 #endif
     }
 
+    System::Pid getCurrentProcessId() const override
+    {
+#ifdef _WIN32
+        return ::GetCurrentProcessId();
+#else
+        return getpid();
+#endif
+    }
+
     virtual std::vector<std::string> scanDirEntries(
             StringView dirPath,
             bool fullPath = false) const {
@@ -592,8 +602,14 @@ public:
         return res;
     }
 
-    time_t getUnixTime() const {
+    time_t getUnixTime() const override {
         return time(NULL);
+    }
+
+    Duration getUnixTimeUs() const override {
+        timeval tv;
+        gettimeofday(&tv, nullptr);
+        return tv.tv_sec * 1000000LL + tv.tv_usec;
     }
 
     bool runCommand(const std::vector<std::string>& commandLine,

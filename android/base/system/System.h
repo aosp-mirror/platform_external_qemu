@@ -121,6 +121,9 @@ public:
     // returns false for non-Windows builds
     virtual bool isRunningUnderWine() const = 0;
 
+    // Get the current process ID
+    virtual Pid getCurrentProcessId() const = 0;
+
     // Return the program bitness as an integer, either 32 or 64.
 #ifdef __x86_64__
     static const int kProgramBitness = 64;
@@ -274,6 +277,9 @@ public:
 
     // Returns the current Unix timestamp
     virtual time_t getUnixTime() const = 0;
+
+    // Returns the current Unix timestamp with microsecond resolution
+    virtual Duration getUnixTimeUs() const = 0;
 
     // Sleep for |n| milliseconds
     static void sleepMs(unsigned n);

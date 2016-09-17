@@ -67,7 +67,9 @@ static int atomicCompareAndSwap(AtomicType volatile* ptr,
 
 static void yieldThread() {
 #ifdef _WIN32
-    ::Sleep(0);
+    if (!::SwitchToThread()) {
+        ::Sleep(0);
+    }
 #else
     sched_yield();
 #endif
