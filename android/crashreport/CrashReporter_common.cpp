@@ -19,7 +19,9 @@
 #include "android/base/system/System.h"
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/base/Uuid.h"
-#include "android/metrics/metrics_reporter.h"
+#include "android/metrics/metrics.h"
+#include "android/metrics/MetricsReporter.h"
+#include "android/metrics/proto/studio_stats.pb.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/path.h"
@@ -94,7 +96,7 @@ void CrashReporter::GenerateDump(const char* message) {
 }
 
 void CrashReporter::GenerateDumpAndDie(const char* message) {
-    androidMetrics_seal();
+    android_metrics_stop();
     passDumpMessage(message);
     // this is the most cross-platform way of crashing
     // any other I know about has its flows:
@@ -110,11 +112,18 @@ void CrashReporter::GenerateDumpAndDie(const char* message) {
 void CrashReporter::SetExitMode(const char* msg) {
     mIsInExitMode = true;
     // This is a temporary patch fix for an issue with too many crashes on exit
-    // Clear the dirty flag on the metrics as soon as we started exiting, not
-    // in the last moment
-    // TODO: after exit crashes are fixed, change back _seal() to _update()
+    // Stop the metrics reporter as soon as we started exiting, not in the last
+    // moment.
+    // TODO: after exit crashes are fixed, just report the 'exit started' metric
+    //  message here.
     // Bug=http://b.android.com/200665
-    androidMetrics_seal();
+    android::metrics::MetricsReporter::get().report(
+                [](android_studio::AndroidStudioEvent* event) {
+                    event->mutable_emulator_details()->set_exit_started(true);
+                    event->mutable_emulator_details()->set_session_phase(
+                                android_studio::EmulatorDetails::EXIT_GENERAL);
+                });
+    android_metrics_stop();
     attachData(kCrashOnExitFileName, msg);
 }
 

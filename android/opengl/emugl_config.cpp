@@ -85,7 +85,7 @@ emugl_host_gpu_prop_list emuglConfig_get_host_gpu_props() {
     return res;
 }
 
-int emuglConfig_get_renderer(const char* gpu_mode) {
+SelectedRenderer emuglConfig_get_renderer(const char* gpu_mode) {
     if (!gpu_mode) {
         return SELECTED_RENDERER_UNKNOWN;
     } else if (!strcmp(gpu_mode, "host") ||
