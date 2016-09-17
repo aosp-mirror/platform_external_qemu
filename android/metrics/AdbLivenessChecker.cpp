@@ -15,10 +15,12 @@
 #include "android/metrics/AdbLivenessChecker.h"
 
 #include "android/base/system/System.h"
-#include "android/base/Log.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/Log.h"
 #include "android/base/threads/ParallelTask.h"
 #include "android/emulation/ConfigDirs.h"
+
+#include "android/metrics/proto/studio_stats.pb.h"
 
 namespace android {
 namespace metrics {
@@ -34,19 +36,19 @@ static const int kMaxAttempts = 3;
 static const char kPlatformToolsSubdir[] = "platform-tools";
 
 // static
-std::shared_ptr<AdbLivenessChecker> AdbLivenessChecker::create(
+AdbLivenessChecker::Ptr AdbLivenessChecker::create(
         android::base::Looper* looper,
-        shared_ptr<android::base::IniFile> metricsFile,
+        MetricsReporter* reporter,
         android::base::StringView emulatorName,
         android::base::Looper::Duration checkIntervalMs) {
-    auto inst = new AdbLivenessChecker(looper, metricsFile, emulatorName,
-                                       checkIntervalMs);
-    return std::shared_ptr<AdbLivenessChecker>(inst);
+    auto inst = Ptr(new AdbLivenessChecker(looper, reporter, emulatorName,
+                                           checkIntervalMs));
+    return inst;
 }
 
 AdbLivenessChecker::AdbLivenessChecker(
         android::base::Looper* looper,
-        shared_ptr<android::base::IniFile> metricsFile,
+        MetricsReporter* reporter,
         android::base::StringView emulatorName,
         android::base::Looper::Duration checkIntervalMs)
     : mAdbPath(PathUtils::join(
@@ -55,17 +57,23 @@ AdbLivenessChecker::AdbLivenessChecker(
                       kPlatformToolsSubdir,
                       PathUtils::toExecutableName(kAdbExecutableBaseName)))),
       mLooper(looper),
-      mMetricsFile(metricsFile),
-      mEmulatorName(emulatorName.c_str()),
+      mReporter(reporter),
+      mEmulatorName(emulatorName),
       mCheckIntervalMs(checkIntervalMs),
       // We use raw pointer to |this| instead of a shared_ptr to avoid cicrular
       // ownership. mRecurrentTask promises to cancel any outstanding tasks when
       // it's destructed.
       mRecurrentTask(looper,
-                     std::bind(&AdbLivenessChecker::adbCheckRequest, this),
-                     checkIntervalMs),
+                     [this]() { return adbCheckRequest(); },
+                     mCheckIntervalMs),
       mRemainingAttempts(kMaxAttempts) {
-    dropMetrics(CheckResult::kNoResult);
+    // Don't call start() here: start() launches a parallel task that calls
+    // shared_from_this(), which needs at least one shared pointer owning
+    // |this|. We can't guarantee that until the constructor call returns.
+}
+
+AdbLivenessChecker::~AdbLivenessChecker() {
+    stop();
 }
 
 void AdbLivenessChecker::start() {
@@ -96,8 +104,11 @@ bool AdbLivenessChecker::adbCheckRequest() {
     auto taskDoneFunction = [shared_this](const CheckResult& result) {
         shared_this->reportCheckResult(result);
     };
-    android::base::runParallelTask<CheckResult>(mLooper, taskFunction,
-                                                taskDoneFunction);
+    if (!android::base::runParallelTask<CheckResult>(mLooper, taskFunction,
+                                                     taskDoneFunction)) {
+        mIsCheckRunning = false;
+        return false;
+    }
     return true;
 }
 
@@ -107,7 +118,7 @@ void AdbLivenessChecker::runCheckBlocking(CheckResult* outResult) const {
     if (!System::get()->runCommand(
                 adbServerAliveCmd,
                 System::RunOptions::WaitForCompletion |
-                System::RunOptions::TerminateOnTimeout,
+                        System::RunOptions::TerminateOnTimeout,
                 mCheckIntervalMs / 3, &exitCode) ||
         exitCode != 0) {
         *outResult = CheckResult::kFailureAdbServerDead;
@@ -119,7 +130,7 @@ void AdbLivenessChecker::runCheckBlocking(CheckResult* outResult) const {
     if (!System::get()->runCommand(
                 emulatorAliveCmd,
                 System::RunOptions::WaitForCompletion |
-                System::RunOptions::TerminateOnTimeout,
+                        System::RunOptions::TerminateOnTimeout,
                 mCheckIntervalMs / 3, &exitCode) ||
         exitCode != 0) {
         *outResult = CheckResult::kFailureEmulatorDead;
@@ -138,35 +149,43 @@ void AdbLivenessChecker::reportCheckResult(const CheckResult& result) {
     // where emulator boots and then disappears from adb.
     if (!mIsOnline) {
         switch (result) {
-        case CheckResult::kFailureAdbServerDead:
-            dropMetrics(CheckResult::kFailureNoAdb);
-            break;
-        case CheckResult::kOnline:
-            dropMetrics(result);
-            mIsOnline = true;
-            break;
-        default:
-            dropMetrics(CheckResult::kNoResult);
+            case CheckResult::kFailureAdbServerDead:
+                dropMetrics(CheckResult::kFailureNoAdb);
+                break;
+            case CheckResult::kOnline:
+                dropMetrics(result);
+                mIsOnline = true;
+                break;
+            default:
+                dropMetrics(CheckResult::kNoResult);
         }
         return;
     }
 
     if (result == CheckResult::kOnline) {
         mRemainingAttempts = kMaxAttempts;
-        return;
-    }
-
-    if (--mRemainingAttempts == 0) {
+        dropMetrics(result);
+    } else if (--mRemainingAttempts == 0) {
         LOG(VERBOSE) << "Reporting error: " << static_cast<int>(result);
         dropMetrics(result);
+    } else {
+        LOG(VERBOSE) << "Encountered  error. mRemainingAttempts: "
+                     << mRemainingAttempts;
     }
-
-    LOG(VERBOSE) << "Encountered  error. mRemainingAttempts: "
-                 << mRemainingAttempts;
 }
 
 void AdbLivenessChecker::dropMetrics(const CheckResult& result) {
-    mMetricsFile->setInt(kAdbLivenessKey, static_cast<int>(result));
+    // Only report state if it changes. We start with kNoResult, and we only
+    // report kNoResult or kFailureNoAdb until emulator starts.
+    if (mCurrentState != result) {
+        mCurrentState = result;
+        mReporter->report([result](android_studio::AndroidStudioEvent* event) {
+            event->mutable_emulator_details()->set_adb_liveness(
+                    static_cast<android_studio::EmulatorDetails::
+                                        EmulatorAdbLiveness>(
+                            static_cast<int>(result)));
+        });
+    }
 }
 
 }  // namespace metrics

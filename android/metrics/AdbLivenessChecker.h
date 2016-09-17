@@ -17,11 +17,10 @@
 #include "android/base/async/Looper.h"
 #include "android/base/async/RecurrentTask.h"
 #include "android/base/Compiler.h"
-#include "android/base/files/IniFile.h"
 #include "android/base/StringView.h"
 #include "android/base/threads/ParallelTask.h"
+#include "android/metrics/MetricsReporter.h"
 
-#include <functional>
 #include <memory>
 #include <string>
 
@@ -31,24 +30,28 @@ namespace metrics {
 // AdbLivenessChecker is an object that runs repeated background checks to make
 // sure that adb can talk to our emulator process.
 // In case the link fails at some point, a metric is dropped in the usual way.
-class AdbLivenessChecker
+class AdbLivenessChecker final
         : public std::enable_shared_from_this<AdbLivenessChecker> {
 public:
+    using Ptr = std::shared_ptr<AdbLivenessChecker>;
+
     // Entry point to create an AdbLivenessChecker.
     // Objects of this type are managed via shared_ptr.
-    static std::shared_ptr<AdbLivenessChecker> create(
+    static Ptr create(
             android::base::Looper* looper,
-            std::shared_ptr<android::base::IniFile> metricsFile,
+            MetricsReporter* reporter,
             android::base::StringView emulatorName,
             android::base::Looper::Duration checkIntervalMs);
 
     void start();
     void stop();
 
+    ~AdbLivenessChecker();
+
 protected:
     // Use |create| to correctly initialize the shared_ptr count.
     AdbLivenessChecker(android::base::Looper* looper,
-                       std::shared_ptr<android::base::IniFile> metricsFile,
+                       MetricsReporter* reporter,
                        android::base::StringView emulatorName,
                        android::base::Looper::Duration checkIntervalMs);
 
@@ -60,8 +63,6 @@ protected:
         kFailureAdbServerDead = 3,
         kFailureEmulatorDead = 4
     };
-    using AdbCheckTask =
-            android::base::ParallelTask<AdbLivenessChecker::CheckResult>;
 
     // Called by the RecurrentTask.
     bool adbCheckRequest();
@@ -71,17 +72,18 @@ protected:
     void reportCheckResult(const CheckResult& result);
 
     void dropMetrics(const CheckResult& result);
+
 private:
     const std::string mAdbPath;
     android::base::Looper* const mLooper;
-    std::shared_ptr<android::base::IniFile> mMetricsFile;
+    MetricsReporter* const mReporter;
     const std::string mEmulatorName;
     const android::base::Looper::Duration mCheckIntervalMs;
     android::base::RecurrentTask mRecurrentTask;
-    std::unique_ptr<AdbCheckTask> mCheckTask;
     int mRemainingAttempts;
     bool mIsOnline = false;
     bool mIsCheckRunning = false;
+    CheckResult mCurrentState = CheckResult::kNoResult;
 
     DISALLOW_COPY_AND_ASSIGN(AdbLivenessChecker);
 };
