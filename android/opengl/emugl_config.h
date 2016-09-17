@@ -58,7 +58,7 @@ emugl_host_gpu_prop_list emuglConfig_get_host_gpu_props();
 
 // Enum tracking all current available renderer backends
 // for the emulator.
-enum SelectedRenderer {
+typedef enum SelectedRenderer {
     SELECTED_RENDERER_UNKNOWN = 0,
     SELECTED_RENDERER_HOST = 1,
     SELECTED_RENDERER_OFF = 2,
@@ -67,12 +67,12 @@ enum SelectedRenderer {
     SELECTED_RENDERER_SWIFTSHADER = 5,
     SELECTED_RENDERER_ANGLE = 6,
     SELECTED_RENDERER_ERROR = 255,
-};
+} SelectedRenderer;
 
-// Returns integer representing the selected gpu mode.
+// Returns SelectedRenderer value the selected gpu mode.
 // Assumes that the -gpu command line option
 // has been taken into account already.
-int emuglConfig_get_renderer(const char* gpu_mode);
+SelectedRenderer emuglConfig_get_renderer(const char* gpu_mode);
 
 void free_emugl_host_gpu_props(emugl_host_gpu_prop_list props);
 
