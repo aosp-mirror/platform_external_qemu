@@ -292,9 +292,17 @@ LOCAL_SRC_FILES := \
     android/main-kernel-parameters.cpp \
     android/main-qemu-parameters.cpp \
     android/metrics/AdbLivenessChecker.cpp \
-    android/metrics/IniFileAutoFlusher.cpp \
-    android/metrics/metrics_reporter.cpp \
-    android/metrics/metrics_reporter_toolbar.cpp \
+    android/metrics/AsyncMetricsReporter.cpp \
+    android/metrics/CrashMetricsReporting.cpp \
+    android/metrics/FileMetricsWriter.cpp \
+    android/metrics/metrics.cpp \
+    android/metrics/MetricsPaths.cpp \
+    android/metrics/MetricsReporter.cpp \
+    android/metrics/MetricsWriter.cpp \
+    android/metrics/NullMetricsReporter.cpp \
+    android/metrics/NullMetricsWriter.cpp \
+    android/metrics/PeriodicReporter.cpp \
+    android/metrics/SyncMetricsReporter.cpp \
     android/metrics/StudioConfig.cpp \
     android/misc/Random.cpp \
     android/multitouch-port.c \
@@ -313,6 +321,7 @@ LOCAL_SRC_FILES := \
     android/opengles.cpp \
     android/openssl-support.cpp \
     android/process_setup.cpp \
+    android/protobuf/DelimitedSerialization.cpp \
     android/proxy/proxy_common.c \
     android/proxy/proxy_http.c \
     android/proxy/proxy_http_connector.c \
@@ -505,8 +514,6 @@ LOCAL_SRC_FILES := \
   android/gps/GpxParser_unittest.cpp \
   android/gps/KmlParser_unittest.cpp \
   android/kernel/kernel_utils_unittest.cpp \
-  android/metrics/metrics_reporter_unittest.cpp \
-  android/metrics/metrics_reporter_toolbar_unittest.cpp \
   android/metrics/StudioConfig_unittest.cpp \
   android/misc/Random_unittest.cpp \
   android/network/control_unittest.cpp \
