@@ -21,11 +21,16 @@
  *
  * Once confirmation is given, the crash dump is curl'd to google crash servers.
  */
+#include "android/base/Uuid.h"
 #include "android/crashreport/CrashService.h"
 #include "android/crashreport/CrashSystem.h"
 #include "android/crashreport/ui/ConfirmDialog.h"
 #include "android/qt/qt_path.h"
 #include "android/skin/qt/init-qt.h"
+#include "android/metrics/CrashMetricsReporting.h"
+#include "android/metrics/FileMetricsWriter.h"
+#include "android/metrics/MetricsPaths.h"
+#include "android/metrics/SyncMetricsReporter.h"
 #include "android/utils/debug.h"
 #include "android/version.h"
 
@@ -48,14 +53,16 @@ static bool displayConfirmDialog(
         android::crashreport::CrashService* crashservice,
         Ui::Settings::CRASHREPORT_PREFERENCE_VALUE reportPreference,
         const char* data_dir) {
-
-    ConfirmDialog msgBox(nullptr, crashservice, reportPreference, data_dir);
-
+    if (reportPreference == Ui::Settings::CRASHREPORT_PREFERENCE_NEVER) {
+        return false;
+    }
     if (crashservice->getDumpMessage().empty() &&
         crashservice->didCrashOnExit() &&
         reportPreference != Ui::Settings::CRASHREPORT_PREFERENCE_ALWAYS) {
         return false;
     }
+
+    ConfirmDialog msgBox(nullptr, crashservice, reportPreference, data_dir);
 
     if (reportPreference == Ui::Settings::CRASHREPORT_PREFERENCE_ASK) {
         msgBox.show();
@@ -64,10 +71,29 @@ static bool displayConfirmDialog(
     } else if (reportPreference == Ui::Settings::CRASHREPORT_PREFERENCE_ALWAYS) {
         msgBox.sendReport();
         return true;
-    } else if (reportPreference == Ui::Settings::CRASHREPORT_PREFERENCE_NEVER) {
-        return false;
     }
     return false;
+}
+
+static void finalizeMetrics() {
+    using namespace android::metrics;
+
+    D("Finalizing the metrics log file");
+
+    const auto crashedSessions =
+            FileMetricsWriter::finalizeAbandonedSessionFiles(
+                getSpoolDirectory());
+    D("found %d crashed sessions", (int)crashedSessions.size());
+    if (crashedSessions.empty()) {
+        return;
+    }
+
+    auto writer = FileMetricsWriter::create(
+            getSpoolDirectory(), android::base::Uuid::generate().toString(),
+            0, nullptr, 0);  // No record or time limits for this writer.
+    const auto reporter =
+            MetricsReporter::Ptr(new SyncMetricsReporter(std::move(writer)));
+    reportCrashMetrics(*reporter, crashedSessions);
 }
 
 /* Main routine */
@@ -115,6 +141,9 @@ int main(int argc, char** argv) {
             return 1;
         }
         crashservice->stopCrashServer();
+
+        finalizeMetrics();
+
         if (crashservice->getDumpFile().empty()) {
             // No crash dump created
             return 0;

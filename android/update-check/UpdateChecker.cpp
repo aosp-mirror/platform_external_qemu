@@ -20,7 +20,6 @@
 #include "android/base/Uri.h"
 #include "android/curl-support.h"
 #include "android/emulation/ConfigDirs.h"
-#include "android/metrics/studio-config.h"
 #include "android/metrics/StudioConfig.h"
 #include "android/update-check/update_check.h"
 #include "android/update-check/VersionExtractor.h"
@@ -97,9 +96,9 @@ public:
         std::string xml;
         std::string url = kVersionUrl;
         if (!mCoreVersion.empty()) {
-            const ScopedCPtr<char> id(android_studio_get_installation_id());
+            const auto& id = android::studio::getInstallationId();
             url += Uri::FormatEncodeArguments(
-                    "?tool=emulator&uid=%s&os=%s", id.get(),
+                    "?tool=emulator&uid=%s&os=%s", id,
                     toString(System::get()->getOsType()));
             // append the fields which may change from run to run: version and
             // core version

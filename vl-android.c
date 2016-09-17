@@ -61,8 +61,7 @@
 #include "android/hw-sensors.h"
 #include "android/log-rotate.h"
 #include "android-qemu1-glue/looper-qemu.h"
-#include "android/metrics/metrics_reporter.h"
-#include "android/metrics/studio-config.h"
+#include "android/metrics/metrics.h"
 #include "android/multitouch-port.h"
 #include "android/multitouch-screen.h"
 #include "android/network/control.h"
@@ -1807,68 +1806,16 @@ static void android_add_nand_image(void *opaque, const char *part_name,
 
 static void android_init_metrics(int opengl_alive)
 {
-    char path[PATH_MAX], *pathend=path, *bufend=pathend+sizeof(path);
-    AndroidMetrics metrics;
-
-    if (!android_studio_get_optins()) {
-        VERBOSE_PRINT(init, "Skipping metrics reporting: No user opt-in.");
-        return;
-    }
-
-    VERBOSE_PRINT(init, "Initializing metrics reporting.");
-    pathend = bufprint_avd_home_path(path, bufend);
-    if (pathend >= bufend || !androidMetrics_moduleInit(path))
-    {
-        dwarning("Failed to initialize metrics reporting.");
-        return;
-    }
-
-    androidMetrics_init(&metrics);
-    ANDROID_METRICS_STRASSIGN_MALLOCED(metrics.client_id,
-                                       android_studio_get_installation_id());
-    ANDROID_METRICS_STRASSIGN(metrics.emulator_version, EMULATOR_VERSION_STRING);
-    ANDROID_METRICS_STRASSIGN(metrics.core_version, QEMU_CORE_VERSION);
-    metrics.update_channel = android_studio_update_channel();
-    ANDROID_METRICS_STRASSIGN_MALLOCED(metrics.host_os_type, get_host_os_type());
-    ANDROID_METRICS_STRASSIGN(metrics.guest_arch, android_hw->hw_cpu_arch);
-    metrics.guest_api_level = avdInfo_getApiLevel(android_avdInfo);
-
-    metrics.renderer =
-        emuglConfig_get_renderer(android_hw->hw_gpu_mode);
-    metrics.guest_gpu_enabled = android_hw->hw_gpu_enabled;
-    if (android_hw->hw_gpu_enabled) {
-        free(metrics.guest_gl_vendor);
-        metrics.guest_gl_vendor = NULL;
-        free(metrics.guest_gl_renderer);
-        metrics.guest_gl_renderer = NULL;
-        free(metrics.guest_gl_version);
-        metrics.guest_gl_version = NULL;
-        // This call is only sensible after |android_startOpenglesRenderer| has
-        // been called.
-        android_getOpenglesHardwareStrings(&metrics.guest_gl_vendor,
-                                           &metrics.guest_gl_renderer,
-                                           &metrics.guest_gl_version);
-    }
-
-    // Tell the metrics the host GPU information
-    emugl_host_gpu_prop_list gpu_props = emuglConfig_get_host_gpu_props();
-    androidMetrics_populateGpuProps(&metrics, &gpu_props);
-    free_emugl_host_gpu_props(gpu_props);
-
-    metrics.opengl_alive = opengl_alive;
-    androidMetrics_write(&metrics);
-    androidMetrics_fini(&metrics);
-
-    async((async_function_t)androidMetrics_tryReportAll);
-    androidMetrics_keepAlive(looper_getForThread(), android_base_port);
+    android_metrics_start(EMULATOR_VERSION_STRING,
+                          EMULATOR_FULL_VERSION_STRING,
+                          QEMU_VERSION,
+                          android_base_port);
+    android_metrics_report_common_info(opengl_alive);
 }
 
 static void android_teardown_metrics()
 {
-    // NB: It is safe to cleanup metrics reporting even if we never initialized
-    // it.
-    androidMetrics_seal();
-    androidMetrics_moduleFini();
+    android_metrics_stop();
 }
 
 // Save System boot parameters from the command line
