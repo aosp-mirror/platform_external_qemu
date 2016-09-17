@@ -10,10 +10,11 @@ $(call start-emulator-library,libmetrics_proto)
 LOCAL_CFLAGS := $(EMULATOR_COMMON_CFLAGS)
 
 LOCAL_C_INCLUDES := \
-    $(PROTOBUF_INCLUDES)
+    $(PROTOBUF_INCLUDES) \
 
 LOCAL_PROTO_SOURCES := \
-    $(METRICS_DIR)/studio_stats.proto
+    $(METRICS_DIR)/clientanalytics.proto \
+    $(METRICS_DIR)/studio_stats.proto \
 
 $(call end-emulator-library)
 
