@@ -12,6 +12,7 @@
 
 #include "ui_location-page.h"
 #include "android/gps/GpsFix.h"
+#include "android/metrics/PeriodicReporter.h"
 #include <QTimer>
 #include <QThread>
 #include <QWidget>
@@ -99,6 +100,7 @@ private:
     bool mGeoDataLoadingStopRequested;
     int mRowToSend;
     bool mLocationUsed = false;
+    android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
 };
 
 class GeoDataLoaderThread : public QThread {

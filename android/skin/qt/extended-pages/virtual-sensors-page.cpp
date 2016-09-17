@@ -13,7 +13,8 @@
 #include "android/emulation/control/sensors_agent.h"
 #include "android/emulator-window.h"
 #include "android/hw-sensors.h"
-#include "android/metrics/metrics_reporter_callbacks.h"
+#include "android/metrics/PeriodicReporter.h"
+#include "android/metrics/proto/studio_stats.pb.h"
 #include "android/skin/ui.h"
 
 
@@ -114,9 +115,18 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     mUi->positionYSlider->setRange(Accelerometer3DWidget::MinY,
                                    Accelerometer3DWidget::MaxY);
     onPhoneRotationChanged();
-    android::metrics::addTickCallback([this](AndroidMetrics* m) {
-        m->sensors_used = mVirtualSensorsUsed ? 1 : 0;
-    });
+
+    using android::metrics::PeriodicReporter;
+    mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
+            60 * 10 * 1000,  // reporting period
+            [this](android_studio::AndroidStudioEvent* event) {
+                if (mVirtualSensorsUsed) {
+                    // TODO: add sensorsUsed flag to the emulator metrics data
+                    // event->mutable_emulator_details()->set_sensors_used(true);
+                    // return true;
+                }
+                return false;
+            });
 }
 
 void VirtualSensorsPage::showEvent(QShowEvent*) {

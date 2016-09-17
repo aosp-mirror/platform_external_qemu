@@ -22,7 +22,8 @@
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulator-window.h"
-#include "android/metrics/metrics_reporter_callbacks.h"
+#include "android/metrics/PeriodicReporter.h"
+#include "android/metrics/proto/studio_stats.pb.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
@@ -275,11 +276,25 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
             });
     std::weak_ptr<android::qt::UserActionsCounter> user_actions_weak(
             mUserActionsCounter);
-    android::metrics::addTickCallback([user_actions_weak](AndroidMetrics* am) {
-        if (auto user_actions = user_actions_weak.lock()) {
-            am->user_actions = user_actions->count();
-        }
-    });
+
+    using android::metrics::PeriodicReporter;
+    mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
+            60 * 10 * 1000,  // reporting period
+            [user_actions_weak](android_studio::AndroidStudioEvent* event) {
+                if (auto user_actions = user_actions_weak.lock()) {
+                    const auto actionsCount = user_actions->count();
+                    event->mutable_emulator_ui_event()->set_context(
+                            android_studio::EmulatorUiEvent::
+                                    UNKNOWN_EMULATOR_UI_EVENT_CONTEXT);
+                    event->mutable_emulator_ui_event()->set_type(
+                            android_studio::EmulatorUiEvent::
+                                    UNKONWN_EMULATOR_UI_EVENT_TYPE);
+                    event->mutable_emulator_ui_event()->set_value(
+                            actionsCount);
+                    return true;
+                }
+                return false;
+            });
 
     mWheelScrollTimer.setInterval(100);
     mWheelScrollTimer.setSingleShot(true);
@@ -859,7 +874,8 @@ void EmulatorQtWindow::slot_requestClose(QSemaphore* semaphore) {
 
 void EmulatorQtWindow::slot_requestUpdate(const QRect* rect,
                                           QSemaphore* semaphore) {
-    if (!mBackingSurface) return;
+    if (!mBackingSurface)
+        return;
 
     QRect r(rect->x() * mBackingSurface->w / mBackingSurface->original_w,
             rect->y() * mBackingSurface->h / mBackingSurface->original_h,
@@ -990,11 +1006,10 @@ void EmulatorQtWindow::screenshot() {
         return;
     }
 
-    mScreenCapturer.capture(
-        savePath.toStdString(),
-        [this](ScreenCapturer::Result result) {
-            EmulatorQtWindow::screenshotDone(result);
-        });
+    mScreenCapturer.capture(savePath.toStdString(),
+                            [this](ScreenCapturer::Result result) {
+                                EmulatorQtWindow::screenshotDone(result);
+                            });
 
     // Display the flash animation immediately as feedback - if it fails, an
     // error dialog will indicate as such.
@@ -1109,9 +1124,7 @@ void EmulatorQtWindow::runAdbPush(const QList<QUrl>& urls) {
                 std::make_pair(url.toLocalFile().toStdString(), remoteFile));
     }
 
-    mFilePusher.pushFiles(
-        file_paths.begin(),
-        file_paths.end());
+    mFilePusher.pushFiles(file_paths.begin(), file_paths.end());
 }
 
 void EmulatorQtWindow::slot_adbPushCanceled() {
@@ -1248,7 +1261,8 @@ SkinEvent* EmulatorQtWindow::createSkinEvent(SkinEventType type) {
 void EmulatorQtWindow::doResize(const QSize& size,
                                 bool isKbdShortcut,
                                 bool flipDimensions) {
-    if (!mBackingSurface) return;
+    if (!mBackingSurface)
+        return;
 
     int originalWidth = flipDimensions ? mBackingSurface->original_h
                                        : mBackingSurface->original_w;
@@ -1546,7 +1560,8 @@ void EmulatorQtWindow::zoomIn() {
 
 void EmulatorQtWindow::zoomIn(const QPoint& focus,
                               const QPoint& viewportFocus) {
-    if (!mBackingSurface) return;
+    if (!mBackingSurface)
+        return;
 
     saveZoomPoints(focus, viewportFocus);
 
@@ -1581,7 +1596,8 @@ void EmulatorQtWindow::zoomReset() {
 }
 
 void EmulatorQtWindow::zoomTo(const QPoint& focus, const QSize& rectSize) {
-    if (!mBackingSurface) return;
+    if (!mBackingSurface)
+        return;
 
     saveZoomPoints(focus,
                    QPoint(mContainer.width() / 2, mContainer.height() / 2));
@@ -1694,11 +1710,11 @@ void EmulatorQtWindow::runAdbShellStopAndQuit() {
     }
     mStartedAdbStopProcess = true;
     mAdbInterface->runAdbCommand(
-        {"shell", "stop"},
-        [this](const android::emulation::OptionalAdbCommandResult&) {
-            queueQuitEvent();
-        },
-        android::base::System::kInfinite);
+            {"shell", "stop"},
+            [this](const android::emulation::OptionalAdbCommandResult&) {
+                queueQuitEvent();
+            },
+            android::base::System::kInfinite);
 }
 
 void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
