@@ -51,6 +51,16 @@ std::string pathToStudioXML(const std::string& studioPath,
 // of Android Studio
 UpdateChannel updateChannel();
 
+// Checks if the user has opted in for metrics reporting.
+bool getUserMetricsOptIn();
+
+// This function returns a string that describes the Android
+// Studio installation ID. If this installation ID cannot be
+// retrieved, a random string following the Android Studio
+// pattern of installation IDs
+// (00000000-0000-0000-0000-000000000000) will be returned.
+const std::string& getInstallationId();
+
 }  // namespace studio
 }  // namespace android
 
