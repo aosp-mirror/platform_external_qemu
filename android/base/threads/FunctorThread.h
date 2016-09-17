@@ -16,6 +16,7 @@
 
 #include "android/base/threads/Thread.h"
 #include "android/base/threads/Types.h"
+#include "android/base/TypeTraits.h"
 
 // FunctorThread class is an implementation of base Thread interface that
 // allows one to run a function object in separate thread. It's mostly a
@@ -31,6 +32,16 @@ public:
 
     explicit FunctorThread(const Functor& func,
                            ThreadFlags flags = ThreadFlags::MaskSignals);
+
+    // A constructor from a void function in case when result isn't important.
+    template <class Func,
+              class = enable_if<is_callable_as<Func, void()>>>
+    explicit FunctorThread(const Func& func,
+                           ThreadFlags flags = ThreadFlags::MaskSignals)
+        : Thread(flags), mThreadFunc([func]() {
+              func();
+              return intptr_t();
+          }) {}
 
 private:
     virtual intptr_t main() override;

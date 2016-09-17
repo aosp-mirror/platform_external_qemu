@@ -46,7 +46,7 @@ namespace base {
 //         RecurrentTask mAskRepeatedly;
 //     };
 //
-// Note: RecurrentTask is meant to execute a task __on the current thread__.
+// Note: RecurrentTask is meant to execute a task __on the looper thread__.
 // It is not thread safe.
 class RecurrentTask {
 public:

@@ -44,7 +44,8 @@ public:
           mTimes(),
           mShellFunc(NULL),
           mShellOpaque(NULL),
-          mUnixTime() {}
+          mUnixTime(),
+          mPid() {}
 
     virtual ~TestSystem() {
         System::setForTesting(mPrevSystem);
@@ -112,6 +113,14 @@ public:
 
     void setRunningUnderWine(bool underWine) {
         mUnderWine = underWine;
+    }
+
+    virtual Pid getCurrentProcessId() const override {
+        return mPid;
+    }
+
+    void setCurrentProcessId(Pid pid) {
+        mPid = pid;
     }
 
     void setOsType(OsType type) {
@@ -302,11 +311,19 @@ public:
 
     virtual std::string getTempDir() const { return std::string("/tmp"); }
 
-    virtual time_t getUnixTime() const {
+    virtual time_t getUnixTime() const override {
+        return mUnixTime / 1000000;
+    }
+
+    virtual Duration getUnixTimeUs() const override {
         return mUnixTime;
     }
 
     void setUnixTime(time_t time) {
+        setUnixTimeUs(time * 1000000LL);
+    }
+
+    void setUnixTimeUs(Duration time) {
         mUnixTime = time;
     }
 
@@ -345,9 +362,10 @@ private:
     Times mTimes;
     ShellCommand* mShellFunc;
     void* mShellOpaque;
-    time_t mUnixTime;
+    Duration mUnixTime;
     OsType mOsType = OsType::Windows;
     bool mUnderWine = false;
+    Pid mPid = 0;
 };
 
 }  // namespace base
