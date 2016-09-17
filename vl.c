@@ -112,8 +112,7 @@
 #include "android/error-messages.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/bufprint_config_dirs.h"
-#include "android/metrics/metrics_reporter.h"
-#include "android/metrics/studio-config.h"
+#include "android/metrics/metrics.h"
 #include "android/update-check/update_check.h"
 #include "android/utils/async.h"
 #include "android/utils/debug.h"
@@ -2989,70 +2988,11 @@ static void android_check_for_updates()
 
 static void android_init_metrics()
 {
-    char path[MAX_PATH], *pathend=path, *bufend=pathend+sizeof(path);
-    AndroidMetrics metrics;
-
-    if (!android_studio_get_optins()) {
-        return;
-    }
-
-    pathend = bufprint_avd_home_path(path, bufend);
-    if (pathend >= bufend || !androidMetrics_moduleInit(path))
-    {
-        printf("Failed to initialize metrics reporting.\n");
-        return;
-    }
-
-    androidMetrics_init(&metrics);
-    ANDROID_METRICS_STRASSIGN_MALLOCED(metrics.client_id,
-                                       android_studio_get_installation_id());
-    ANDROID_METRICS_STRASSIGN(metrics.emulator_version,
-                              EMULATOR_VERSION_STRING);
-    ANDROID_METRICS_STRASSIGN(metrics.core_version,
-                              QEMU_CORE_VERSION);
-    metrics.update_channel = android_studio_update_channel();
-
-    ANDROID_METRICS_STRASSIGN_MALLOCED(metrics.host_os_type, get_host_os_type());
-    ANDROID_METRICS_STRASSIGN(metrics.guest_arch, android_hw->hw_cpu_arch);
-    metrics.guest_api_level = avdInfo_getApiLevel(android_avdInfo);
-
-    metrics.renderer =
-        emuglConfig_get_renderer(android_hw->hw_gpu_mode);
-    metrics.guest_gpu_enabled = android_hw->hw_gpu_enabled;
-    if (android_hw->hw_gpu_enabled) {
-        free(metrics.guest_gl_vendor);
-        metrics.guest_gl_vendor = NULL;
-        free(metrics.guest_gl_renderer);
-        metrics.guest_gl_renderer = NULL;
-        free(metrics.guest_gl_version);
-        metrics.guest_gl_version = NULL;
-        // This call is only sensible after |android_startOpenglesRenderer| has
-        // been called.
-        android_getOpenglesHardwareStrings(&metrics.guest_gl_vendor,
-                                           &metrics.guest_gl_renderer,
-                                           &metrics.guest_gl_version);
-    }
-
-    // Tell the metrics the host GPU information
-    emugl_host_gpu_prop_list gpu_props = emuglConfig_get_host_gpu_props();
-    androidMetrics_populateGpuProps(&metrics, &gpu_props);
-    free_emugl_host_gpu_props(gpu_props);
-
-    metrics.opengl_alive = is_opengl_alive;
-    androidMetrics_write(&metrics);
-    androidMetrics_fini(&metrics);
-
-    async((async_function_t)androidMetrics_tryReportAll);
-
-    androidMetrics_keepAlive(looper_getForThread(), android_base_port);
-}
-
-static void android_teardown_metrics()
-{
-    // NB: It is safe to cleanup metrics reporting even if we never initialized
-    // it.
-    androidMetrics_seal();
-    androidMetrics_moduleFini();
+    android_metrics_start(EMULATOR_VERSION_STRING,
+                          EMULATOR_FULL_VERSION_STRING,
+                          QEMU_VERSION,
+                          android_base_port);
+    android_metrics_report_common_info(is_opengl_alive);
 }
 
 static bool android_reporting_setup(void)
@@ -3070,7 +3010,7 @@ static bool android_reporting_setup(void)
 
 static void android_reporting_teardown(void)
 {
-    android_teardown_metrics();
+    android_metrics_stop();
 }
 
 #endif  /* CONFIG_ANDROID */
