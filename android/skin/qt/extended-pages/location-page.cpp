@@ -14,7 +14,8 @@
 #include "android/emulation/control/location_agent.h"
 #include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"
-#include "android/metrics/metrics_reporter_callbacks.h"
+#include "android/metrics/MetricsReporter.h"
+#include "android/metrics/proto/studio_stats.pb.h"
 #include "android/settings-agent.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
@@ -69,8 +70,19 @@ LocationPage::LocationPage(QWidget *parent) :
             SLOT(geoDataThreadStarted()),
             SLOT(startupGeoDataThreadFinished(QString, bool, QString)));
     mGeoDataLoader->loadGeoDataFromFile(location_data_file, &mGpsFixesArray);
-    android::metrics::addTickCallback([this](AndroidMetrics* m) {
-        m->gps_used = mLocationUsed ? 1 : 0;
+
+    using android::metrics::PeriodicReporter;
+    mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
+            60 * 10 * 1000,  // reporting period
+            [this](android_studio::AndroidStudioEvent* event) {
+                if (mLocationUsed) {
+                    event->mutable_emulator_details()
+                            ->mutable_used_features()
+                            ->set_gps(true);
+                    mMetricsReportingToken.reset();  // Report it only once.
+                    return true;
+                }
+                return false;
     });
 }
 
