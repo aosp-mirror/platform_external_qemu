@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "6b3926b8_7fc7730a",
+        "filename": "android/metrics/proto/clientanalytics.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-19T19:20:21Z",
+      "side": 1,
+      "message": "Do I understand correctly that same proto definition is duplicated in Studio code? if so, do we have any strategy for keeping them in sync?",
+      "range": {
+        "startLine": 33,
+        "startChar": 8,
+        "endLine": 33,
+        "endChar": 16
+      },
+      "revId": "04da45f2845deb3cf03fa1b92569c644429813a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b3926b8_c810ab07",
         "filename": "android/metrics/proto/studio_stats.proto",
         "patchSetId": 1
