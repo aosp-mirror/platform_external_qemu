@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b3926b8_a861b7a9",
+        "filename": "android/metrics/AsyncMetricsReporter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-19T15:32:55Z",
+      "side": 1,
+      "message": "(a)synchronously with an \u0027h\u0027--- check other CLs for this as well",
+      "range": {
+        "startLine": 23,
+        "startChar": 20,
+        "endLine": 23,
+        "endChar": 33
+      },
+      "revId": "904c0a9a2356ee404ebf16bc5c0a163924e83294",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
