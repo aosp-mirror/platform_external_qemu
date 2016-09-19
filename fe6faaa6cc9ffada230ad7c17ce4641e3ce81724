@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b3926b8_1f80372c",
+        "filename": "android/metrics/PeriodicReporter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-19T19:53:32Z",
+      "side": 1,
+      "message": "the default ctor of InstanceHolder points sReporter-\u003ereporter to an instance of PeriodicReporter with null metrics reporter and looper. That is what will be returned if get() gets called before start(). Is that the intended behavior?",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 32
+      },
+      "revId": "fe6faaa6cc9ffada230ad7c17ce4641e3ce81724",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3926b8_9f5c27ed",
+        "filename": "android/metrics/PeriodicReporter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-19T19:53:32Z",
+      "side": 1,
+      "message": "Shouldn\u0027t we be using LAZY_INSTANCE or something for this?",
+      "range": {
+        "startLine": 72,
+        "startChar": 0,
+        "endLine": 72,
+        "endChar": 26
+      },
+      "revId": "fe6faaa6cc9ffada230ad7c17ce4641e3ce81724",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
