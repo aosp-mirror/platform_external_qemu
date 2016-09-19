@@ -75,7 +75,7 @@ bool GLESvalidate::pixelFrmt(GLEScontext* ctx ,GLenum format) {
 }
 
 bool GLESvalidate::bufferTarget(GLenum target) {
-    return target == GL_ARRAY_BUFFER || target == GL_ELEMENT_ARRAY_BUFFER;
+    return target == GL_ARRAY_BUFFER || target == GL_ELEMENT_ARRAY_BUFFER || target == GL_PIXEL_UNPACK_BUFFER || target == GL_PIXEL_PACK_BUFFER;
 }
 
 bool GLESvalidate::bufferUsage(GLenum usage) {

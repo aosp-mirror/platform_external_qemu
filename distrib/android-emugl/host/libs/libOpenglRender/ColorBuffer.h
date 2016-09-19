@@ -22,6 +22,7 @@
 #include "emugl/common/smart_ptr.h"
 
 #include <memory>
+#include <vector>
 
 
 class TextureDraw;
@@ -152,6 +153,8 @@ private:
     EGLDisplay m_display = nullptr;
     Helper* m_helper = nullptr;
     TextureResize* m_resizer = nullptr;
+
+    std::vector<GLuint> pbos = { 0, 0 };
 };
 
 typedef emugl::SmartPtr<ColorBuffer> ColorBufferPtr;

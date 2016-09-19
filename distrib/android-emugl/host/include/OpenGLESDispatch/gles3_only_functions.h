@@ -6,12 +6,15 @@
 
 #include <GLES/gl.h>
 #include <GLES3/gl3.h>
+#include <GLES3/gl31.h>
 #define LIST_GLES3_ONLY_FUNCTIONS(X) \
   X(GLconstubyteptr, glGetStringi, (GLenum name, GLint index), (name, index)) \
   X(GLsync, glFenceSync, (GLenum condition, GLbitfield flags), (condition, flags)) \
   X(GLenum, glClientWaitSync, (GLsync wait_on, GLbitfield flags, GLuint64 timeout), (wait_on, flags, timeout)) \
   X(void, glWaitSync, (GLsync wait_on, GLbitfield flags, GLuint64 timeout), (wait_on, flags, timeout)) \
   X(void, glDeleteSync, (GLsync to_delete), (to_delete)) \
+  X(void*, glMapBufferRange, (GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access), (target, offset, length, access)) \
+  X(GLboolean, glUnmapBuffer, (GLenum target), (target)) \
 
 
 #endif  // GLES3_ONLY_FUNCTIONS_H

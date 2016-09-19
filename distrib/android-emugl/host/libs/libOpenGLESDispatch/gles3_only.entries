@@ -13,6 +13,7 @@
 
 %#include <GLES/gl.h>
 %#include <GLES3/gl3.h>
+%#include <GLES3/gl31.h>
 
 # New version of glGetString
 GLconstubyteptr glGetStringi(GLenum name, GLint index);
@@ -22,3 +23,8 @@ GLsync glFenceSync(GLenum condition, GLbitfield flags);
 GLenum glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout);
 void glWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout);
 void glDeleteSync(GLsync to_delete);
+
+# Buffer mapping
+void* glMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access);
+GLboolean glUnmapBuffer(GLenum target);
+
