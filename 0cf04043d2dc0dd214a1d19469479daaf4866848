@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b3926b8_281f871c",
+        "filename": "android/metrics/metrics.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-19T15:41:59Z",
+      "side": 1,
+      "message": "I\u0027d want to keep collecting data on selected backends. What\u0027s up with this?",
+      "range": {
+        "startLine": 164,
+        "startChar": 0,
+        "endLine": 165,
+        "endChar": 75
+      },
+      "revId": "0cf04043d2dc0dd214a1d19469479daaf4866848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
