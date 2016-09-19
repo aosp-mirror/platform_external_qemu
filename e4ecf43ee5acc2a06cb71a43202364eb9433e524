@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b3926b8_e83acfd0",
+        "filename": "android/metrics/StudioConfig.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-19T15:09:09Z",
+      "side": 1,
+      "message": "nit: defined",
+      "range": {
+        "startLine": 73,
+        "startChar": 50,
+        "endLine": 73,
+        "endChar": 57
+      },
+      "revId": "e4ecf43ee5acc2a06cb71a43202364eb9433e524",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3926b8_a87297a0",
+        "filename": "android/metrics/StudioConfig.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-19T15:09:09Z",
+      "side": 1,
+      "message": "Nice",
+      "range": {
+        "startLine": 374,
+        "startChar": 0,
+        "endLine": 377,
+        "endChar": 38
+      },
+      "revId": "e4ecf43ee5acc2a06cb71a43202364eb9433e524",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
