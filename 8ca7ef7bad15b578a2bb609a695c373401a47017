@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6b3926b8_ffa44357",
+        "filename": "android/utils/path.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-09-19T19:28:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6b3926b8_f4938a4e",
+      "range": {
+        "startLine": 213,
+        "startChar": 22,
+        "endLine": 213,
+        "endChar": 35
+      },
+      "revId": "8ca7ef7bad15b578a2bb609a695c373401a47017",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b3926b8_f990e34d",
         "filename": "distrib/ext4_utils/src/make_ext4fs.c",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2016-09-19T19:06:14Z",
       "side": 1,
       "message": "IMO now it\u0027s better to move the free() calls to be before if, but after GetLastError()",
+      "range": {
+        "startLine": 95,
+        "startChar": 0,
+        "endLine": 96,
+        "endChar": 30
+      },
+      "revId": "8ca7ef7bad15b578a2bb609a695c373401a47017",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3926b8_ff77e3c5",
+        "filename": "distrib/ext4_utils/src/make_ext4fs.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-09-19T19:28:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6b3926b8_f990e34d",
       "range": {
         "startLine": 95,
         "startChar": 0,
