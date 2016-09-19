@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b3926b8_c810ab07",
+        "filename": "android/metrics/proto/studio_stats.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 667,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-19T15:41:53Z",
+      "side": 1,
+      "message": "Can we re-add selected renderer?",
+      "revId": "04da45f2845deb3cf03fa1b92569c644429813a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
