@@ -92,6 +92,30 @@
       "revId": "e4ecf43ee5acc2a06cb71a43202364eb9433e524",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3926b8_7a630113",
+        "filename": "android/metrics/StudioConfig.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-19T20:33:27Z",
+      "side": 1,
+      "message": "I know it\u0027s not. My point is, how hard is it to pull in a Qt dependency (we already depend on it anyway) vs writing your own json parser that will break when you sneeze at it :)",
+      "parentUuid": "6b3926b8_baaad923",
+      "range": {
+        "startLine": 375,
+        "startChar": 0,
+        "endLine": 377,
+        "endChar": 38
+      },
+      "revId": "e4ecf43ee5acc2a06cb71a43202364eb9433e524",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
