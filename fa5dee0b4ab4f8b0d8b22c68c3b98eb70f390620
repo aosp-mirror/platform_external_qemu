@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6b3926b8_da806da9",
+        "filename": "android/metrics/MetricsLogging.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-19T20:28:06Z",
+      "side": 1,
+      "message": "that\u0027s why it\u0027s in MetricsLogging.h\nwe always use D/W/E for local macros, these macros are also local - for the metrics-related code",
+      "parentUuid": "6b3926b8_ba573955",
+      "range": {
+        "startLine": 21,
+        "startChar": 8,
+        "endLine": 21,
+        "endChar": 9
+      },
+      "revId": "fa5dee0b4ab4f8b0d8b22c68c3b98eb70f390620",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b3926b8_9a4995b8",
         "filename": "android/metrics/MetricsReporter.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-09-19T20:17:15Z",
       "side": 1,
       "message": "do we ever use the synchronous metrics reporter anywhere?",
+      "range": {
+        "startLine": 79,
+        "startChar": 0,
+        "endLine": 79,
+        "endChar": 56
+      },
+      "revId": "fa5dee0b4ab4f8b0d8b22c68c3b98eb70f390620",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3926b8_3a8fc9de",
+        "filename": "android/metrics/MetricsReporter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-19T20:28:06Z",
+      "side": 1,
+      "message": "yes, in the crash monitoring service - that\u0027s where I want to make sure all metrics are reported at once",
+      "parentUuid": "6b3926b8_9a4995b8",
       "range": {
         "startLine": 79,
         "startChar": 0,
