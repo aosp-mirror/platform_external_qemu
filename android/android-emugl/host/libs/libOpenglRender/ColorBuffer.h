@@ -154,6 +154,7 @@ private:
 
     GLuint m_tex = 0;
     GLuint m_blitTex = 0;
+    GLuint m_pbo = 0;
     EGLImageKHR m_eglImage = nullptr;
     EGLImageKHR m_blitEGLImage = nullptr;
     GLuint m_width = 0;

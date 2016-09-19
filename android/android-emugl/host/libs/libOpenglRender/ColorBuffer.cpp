@@ -98,6 +98,13 @@ private:
 
 }  // namespace
 
+static void getErr() {
+    GLint err = s_gles2.glGetError();
+    if (err != GL_NO_ERROR) {
+        fprintf(stderr, "%s:%d detected err 0x%x\n", __FUNCTION__, __LINE__, err);
+    }
+}
+
 // static
 ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  int p_width,
@@ -200,6 +207,15 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     cb->m_resizer = new TextureResize(p_width, p_height);
 
     cb->m_frameworkFormat = p_frameworkFormat;
+
+    fprintf(stderr, "%s: probabyl should initialize PBOs here\n", __FUNCTION__);
+    s_gles2.glGenBuffers(1, &cb->m_pbo); getErr();
+    s_gles2.glBindBuffer(GL_PIXEL_UNPACK_BUFFER, cb->m_pbo); getErr();
+    s_gles2.glBufferData(GL_PIXEL_UNPACK_BUFFER, bufsize, 0, GL_STREAM_DRAW); getErr();
+    s_gles2.glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0); getErr();
+    fprintf(stderr, "%s: created pbo %u\n", __FUNCTION__, cb->m_pbo);
+
+
     switch (cb->m_frameworkFormat) {
     case FRAMEWORK_FORMAT_GL_COMPATIBLE:
         break;
@@ -240,6 +256,8 @@ ColorBuffer::~ColorBuffer() {
     }
 
     m_yuv_converter.reset();
+
+    s_gles2.glDeleteBuffers(1, &m_pbo);
 
     GLuint tex[2] = {m_tex, m_blitTex};
     s_gles2.glDeleteTextures(2, tex);
@@ -290,10 +308,43 @@ void ColorBuffer::subUpdate(int x,
         // |m_tex| still needs to be bound afterwards
         s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
     } else {
+        uint32_t bpp = 4;
+        switch (p_format) {
+            case GL_RGBA:
+                // fprintf(stderr, "%s: update GL_RGBA 4 bpp type 0x%x\n", __FUNCTION__, p_type);
+                bpp = 4;
+                break;
+            case GL_RGB:
+                // fprintf(stderr, "%s: update GL_RGB 3 bpp type 0x%x\n", __FUNCTION__, p_type);
+                bpp = 3;
+                break;
+            default:
+                fprintf(stderr, "%s: update some other format 0x%x type 0x%x\n", __FUNCTION__, p_format, p_type);
+        }
+
+        GLsizeiptr numBytesTotal = bpp * width * height;
+        if (!numBytesTotal) return;
+
         s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
         s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        s_gles2.glTexSubImage2D(
-                GL_TEXTURE_2D, 0, x, y, width, height, p_format, p_type, pixels);
+
+        s_gles2.glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pbo); getErr();
+        GLubyte* device_ptr = (GLubyte*)s_gles2.glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, numBytesTotal,
+                GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT | GL_MAP_INVALIDATE_BUFFER_BIT); getErr();
+
+        if (device_ptr) {
+            // fprintf(stderr, "%s: mapped range %p..memcpying\n", __FUNCTION__, device_ptr);
+            memcpy(device_ptr, pixels, numBytesTotal);
+            // fprintf(stderr, "%s: successfuly wrote to device memory.\n", __FUNCTION__);
+            s_gles2.glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER); getErr();
+            //getErr();
+            // fprintf(stderr, "%s: unmapped range. teximage...\n", __FUNCTION__);
+            s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, p_format, p_type, 0); getErr();
+        }
+        s_gles2.glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0); getErr();
+
+
+
     }
 }
 
