@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b3926b8_883a33eb",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 613,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-19T13:55:06Z",
+      "side": 1,
+      "message": "Yes!",
+      "range": {
+        "startLine": 609,
+        "startChar": 0,
+        "endLine": 613,
+        "endChar": 5
+      },
+      "revId": "60ae9d59d6fc15449b8ea0e879f409de25a44e2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
