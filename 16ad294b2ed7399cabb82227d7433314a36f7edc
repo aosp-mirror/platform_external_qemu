@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b3926b8_5ac2bdfc",
+        "filename": "android/metrics/FileMetricsWriter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-19T20:28:06Z",
+      "side": 1,
+      "message": "does this mean anything on Windows or is it just ignored?",
+      "range": {
+        "startLine": 83,
+        "startChar": 42,
+        "endLine": 83,
+        "endChar": 46
+      },
+      "revId": "16ad294b2ed7399cabb82227d7433314a36f7edc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3926b8_da3b0d25",
+        "filename": "android/metrics/FileMetricsWriter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-19T20:28:06Z",
+      "side": 1,
+      "message": "remove",
+      "range": {
+        "startLine": 92,
+        "startChar": 4,
+        "endLine": 92,
+        "endChar": 11
+      },
+      "revId": "16ad294b2ed7399cabb82227d7433314a36f7edc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
