@@ -22,6 +22,29 @@
       "revId": "904c0a9a2356ee404ebf16bc5c0a163924e83294",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3926b8_df6a1fe4",
+        "filename": "android/metrics/AsyncMetricsReporter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-19T19:34:16Z",
+      "side": 1,
+      "message": "remove",
+      "range": {
+        "startLine": 35,
+        "startChar": 4,
+        "endLine": 35,
+        "endChar": 11
+      },
+      "revId": "904c0a9a2356ee404ebf16bc5c0a163924e83294",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
