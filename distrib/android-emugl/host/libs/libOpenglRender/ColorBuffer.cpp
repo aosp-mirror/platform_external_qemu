@@ -23,6 +23,7 @@
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
+#include <GLES3/gl31.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -197,6 +198,13 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
 
     cb->m_resizer = new TextureResize(p_width, p_height);
 
+    fprintf(stderr, "%s: probabyl should initialize PBOs here\n", __FUNCTION__);
+    s_gles2.glGenBuffers(1, &cb->pbos[0]);
+    s_gles2.glBindBuffer(GL_PIXEL_UNPACK_BUFFER, cb->pbos[0]);
+    s_gles2.glBufferData(GL_PIXEL_UNPACK_BUFFER, bufsize, 0, GL_STREAM_DRAW);
+    s_gles2.glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    fprintf(stderr, "%s: created pbo %u\n", __FUNCTION__, cb->pbos[0]);
+
     s_gles2.glFinish();
     return cb;
 }
@@ -207,6 +215,9 @@ ColorBuffer::ColorBuffer(EGLDisplay display, Helper* helper) :
 
 ColorBuffer::~ColorBuffer() {
     ScopedHelperContext context(m_helper);
+
+    fprintf(stderr, "%s: deleting pbo %u\n", __FUNCTION__, pbos[0]);
+    s_gles2.glDeleteBuffers(1, &pbos[0]);
 
     if (m_blitEGLImage) {
         s_egl.eglDestroyImageKHR(m_display, m_blitEGLImage);
@@ -243,6 +254,21 @@ void ColorBuffer::readPixels(int x,
     }
 }
 
+// static void getErr() {
+//     GLint err = s_gles2.glGetError();
+//     if (err != GL_NO_ERROR) {
+//         fprintf(stderr, "%s: detected err 0x%x\n", __FUNCTION__, err);
+//     }
+// }
+
+
+#include <sys/time.h>
+
+static uint64_t currTime() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return (tv.tv_sec * ((uint64_t)1000000) + tv.tv_usec) / 1000;
+}
 void ColorBuffer::subUpdate(int x,
                             int y,
                             int width,
@@ -250,6 +276,8 @@ void ColorBuffer::subUpdate(int x,
                             GLenum p_format,
                             GLenum p_type,
                             void* pixels) {
+    uint64_t start = currTime();
+
     ScopedHelperContext context(m_helper);
     if (!context.isOk()) {
         return;
@@ -257,8 +285,46 @@ void ColorBuffer::subUpdate(int x,
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
     s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    s_gles2.glTexSubImage2D(
-            GL_TEXTURE_2D, 0, x, y, width, height, p_format, p_type, pixels);
+    // s_gles2.glTexSubImage2D(
+    //         GL_TEXTURE_2D, 0, x, y, width, height, p_format, p_type, pixels);
+   
+
+    uint32_t bpp = 4;
+    switch (p_format) {
+    case GL_RGBA:
+        // fprintf(stderr, "%s: update GL_RGBA 4 bpp type 0x%x\n", __FUNCTION__, p_type);
+        bpp = 4;
+        break;
+    case GL_RGB:
+        // fprintf(stderr, "%s: update GL_RGB 3 bpp type 0x%x\n", __FUNCTION__, p_type);
+        bpp = 3;
+        break;
+    default:
+        fprintf(stderr, "%s: update some other format 0x%x type 0x%x\n", __FUNCTION__, p_format, p_type);
+    }
+
+    GLsizeiptr numBytesTotal = bpp * width * height;
+    if (!numBytesTotal) return;
+
+    // fprintf(stderr, "%s: numBytes %u w h %d %d\n", __FUNCTION__, (uint32_t)numBytesTotal, width, height); fprintf(stderr, "%s: errcheck.\n", __FUNCTION__); getErr(); fprintf(stderr, "%s: writing device memory.\n", __FUNCTION__);
+    s_gles2.glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos[0]);
+    //getErr();
+    // fprintf(stderr, "%s: bound unpack buffer. reset current data\n", __FUNCTION__); fprintf(stderr, "%s: alloced buffer data.\n", __FUNCTION__);
+    GLubyte* device_ptr = (GLubyte*)s_gles2.glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, numBytesTotal, GL_MAP_WRITE_BIT); //getErr();
+    if (device_ptr) {
+        // fprintf(stderr, "%s: mapped range %p..memcpying\n", __FUNCTION__, device_ptr);
+        memcpy(device_ptr, pixels, numBytesTotal);
+        // fprintf(stderr, "%s: successfuly wrote to device memory.\n", __FUNCTION__);
+        s_gles2.glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER); 
+        //getErr();
+        // fprintf(stderr, "%s: unmapped range. teximage...\n", __FUNCTION__);
+        s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, p_format, p_type, 0);
+    }
+    s_gles2.glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0); 
+    //getErr();
+
+    uint64_t end = currTime() - start;
+    fprintf(stderr, "%s: elapsed %llu\n", __FUNCTION__, (unsigned long long)end);
 }
 
 bool ColorBuffer::blitFromCurrentReadBuffer()

@@ -24,6 +24,7 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <GLES3/gl3.h>
+#include <GLES3/gl31.h>
 
 #include <OpenglCodecCommon/ErrorLog.h>
 #include <GLcommon/TranslatorIfaces.h>
@@ -236,19 +237,24 @@ GL_APICALL void  GL_APIENTRY glBindBuffer(GLenum target, GLuint buffer){
     GET_CTX();
     SET_ERROR_IF(!GLESv2Validate::bufferTarget(target),GL_INVALID_ENUM);
     //if buffer wasn't generated before,generate one
-    if (buffer && ctx->shareGroup().get() &&
+    if (buffer && target != GL_PIXEL_PACK_BUFFER && target != GL_PIXEL_UNPACK_BUFFER &&
+        ctx->shareGroup().get() &&
         !ctx->shareGroup()->isObject(NamedObjectType::VERTEXBUFFER, buffer)) {
         ctx->shareGroup()->genName(NamedObjectType::VERTEXBUFFER, buffer);
         ctx->shareGroup()->setObjectData(NamedObjectType::VERTEXBUFFER, buffer,
                                          ObjectDataPtr(new GLESbuffer()));
     }
     ctx->bindBuffer(target,buffer);
-    if (buffer) {
+    if (buffer && target != GL_PIXEL_PACK_BUFFER && target != GL_PIXEL_UNPACK_BUFFER) {
         GLESbuffer* vbo =
                 (GLESbuffer*)ctx->shareGroup()
                         ->getObjectData(NamedObjectType::VERTEXBUFFER, buffer)
                         .get();
         vbo->setBinded();
+    }
+
+    if (target == GL_PIXEL_PACK_BUFFER || target == GL_PIXEL_UNPACK_BUFFER) {
+        ctx->dispatcher().glBindBuffer(target, buffer);
     }
 }
 
@@ -364,9 +370,16 @@ GL_APICALL void  GL_APIENTRY glBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB, G
 GL_APICALL void  GL_APIENTRY glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage){
     GET_CTX();
     SET_ERROR_IF(!GLESv2Validate::bufferTarget(target),GL_INVALID_ENUM);
-    SET_ERROR_IF(!GLESv2Validate::bufferUsage(usage),GL_INVALID_ENUM);
-    SET_ERROR_IF(!ctx->isBindedBuffer(target),GL_INVALID_OPERATION);
-    ctx->setBufferData(target,size,data,usage);
+    SET_ERROR_IF(target != GL_PIXEL_PACK_BUFFER && target != GL_PIXEL_UNPACK_BUFFER &&
+                 !GLESv2Validate::bufferUsage(usage),GL_INVALID_ENUM);
+    SET_ERROR_IF(target != GL_PIXEL_PACK_BUFFER && target != GL_PIXEL_UNPACK_BUFFER &&
+                 !ctx->isBindedBuffer(target),GL_INVALID_OPERATION);
+    if (target != GL_PIXEL_PACK_BUFFER && target != GL_PIXEL_UNPACK_BUFFER) {
+        ctx->setBufferData(target,size,data,usage);
+    } else {
+        fprintf(stderr, "%s: calling real glBufferData (because pixel pack target)\n", __FUNCTION__);
+        ctx->dispatcher().glBufferData(target, size, data, usage);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data){
@@ -2097,6 +2110,14 @@ GL_APICALL void  GL_APIENTRY glTexParameteriv(GLenum target, GLenum pname, const
     ctx->dispatcher().glTexParameteriv(target,pname,params);
 }
 
+// #include <sys/time.h>
+// 
+// static uint64_t currTime() {
+//     struct timeval tv;
+//     gettimeofday(&tv, NULL);
+//     return (tv.tv_sec * ((uint64_t)1000000) + tv.tv_usec) / 1000;
+// }
+
 GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels){
     GET_CTX();
     SET_ERROR_IF(!(GLESv2Validate::textureTargetEx(target)), GL_INVALID_ENUM);
@@ -2114,12 +2135,10 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
     SET_ERROR_IF(!(GLESv2Validate::pixelFrmt(ctx,format)&&
                    GLESv2Validate::pixelType(ctx,type)),GL_INVALID_ENUM);
     SET_ERROR_IF(!GLESv2Validate::pixelOp(format,type),GL_INVALID_OPERATION);
-    SET_ERROR_IF(!pixels,GL_INVALID_OPERATION);
+    // SET_ERROR_IF(!pixels,GL_INVALID_OPERATION);
     if (type==GL_HALF_FLOAT_OES)
         type = GL_HALF_FLOAT_NV;
-
     ctx->dispatcher().glTexSubImage2D(target,level,xoffset,yoffset,width,height,format,type,pixels);
-
 }
 
 GL_APICALL void  GL_APIENTRY glUniform1f(GLint location, GLfloat x){
@@ -2433,4 +2452,14 @@ GL_APICALL void GL_APIENTRY glDeleteSync(GLsync to_delete)
 {
     GET_CTX_V2();
     ctx->dispatcher().glDeleteSync(to_delete);
+}
+
+GL_APICALL void* GL_APIENTRY glMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access) {
+    GET_CTX_V2_RET(NULL);
+    return ctx->dispatcher().glMapBufferRange(target, offset, length, access);
+}
+
+GL_APICALL GLboolean GL_APIENTRY glUnmapBuffer(GLenum target) {
+    GET_CTX_V2_RET(GL_FALSE);
+    return ctx->dispatcher().glUnmapBuffer(target);
 }
