@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b3926b8_f42f0af9",
+        "filename": "android/metrics/NullMetricsReporter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-19T19:17:43Z",
+      "side": 1,
+      "message": "maybe make those a bit more detailed, like \"created null metrics reporter\". otherwise they\u0027ll make no sense when viewed in the stream of other logs",
+      "range": {
+        "startLine": 26,
+        "startChar": 7,
+        "endLine": 26,
+        "endChar": 14
+      },
+      "revId": "95d9e0548fc63f2c446c53169653122c5cfca6a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3926b8_54fd3654",
+        "filename": "android/metrics/NullMetricsReporter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-19T19:17:43Z",
+      "side": 1,
+      "message": "see previous comment",
+      "range": {
+        "startLine": 30,
+        "startChar": 7,
+        "endLine": 30,
+        "endChar": 15
+      },
+      "revId": "95d9e0548fc63f2c446c53169653122c5cfca6a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3926b8_541616b6",
+        "filename": "android/metrics/NullMetricsReporter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-19T19:17:43Z",
+      "side": 1,
+      "message": "no need for virtual keyword here",
+      "range": {
+        "startLine": 27,
+        "startChar": 4,
+        "endLine": 27,
+        "endChar": 11
+      },
+      "revId": "95d9e0548fc63f2c446c53169653122c5cfca6a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3926b8_1f5f576d",
+        "filename": "android/metrics/NullMetricsWriter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-19T19:17:43Z",
+      "side": 1,
+      "message": "see my other comment about logs",
+      "range": {
+        "startLine": 20,
+        "startChar": 7,
+        "endLine": 20,
+        "endChar": 14
+      },
+      "revId": "95d9e0548fc63f2c446c53169653122c5cfca6a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3926b8_ff61a336",
+        "filename": "android/metrics/NullMetricsWriter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-19T19:17:43Z",
+      "side": 1,
+      "message": "remove?",
+      "range": {
+        "startLine": 27,
+        "startChar": 4,
+        "endLine": 27,
+        "endChar": 11
+      },
+      "revId": "95d9e0548fc63f2c446c53169653122c5cfca6a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
