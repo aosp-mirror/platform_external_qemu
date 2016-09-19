@@ -45,6 +45,29 @@
       "revId": "e4ecf43ee5acc2a06cb71a43202364eb9433e524",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3926b8_7a1b01de",
+        "filename": "android/metrics/StudioConfig.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-19T20:09:53Z",
+      "side": 1,
+      "message": "I don\u0027t know if you can use Qt in this context (probably not without some changes) but FYI it has had JSON parsing facilities since 5.0",
+      "range": {
+        "startLine": 375,
+        "startChar": 0,
+        "endLine": 377,
+        "endChar": 38
+      },
+      "revId": "e4ecf43ee5acc2a06cb71a43202364eb9433e524",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
