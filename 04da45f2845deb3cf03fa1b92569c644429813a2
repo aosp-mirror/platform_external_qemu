@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "6b3926b8_3a40a95b",
+        "filename": "android/metrics/proto/clientanalytics.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-19T20:36:39Z",
+      "side": 1,
+      "message": "Sounds good then",
+      "parentUuid": "6b3926b8_df85bf3f",
+      "range": {
+        "startLine": 33,
+        "startChar": 8,
+        "endLine": 33,
+        "endChar": 16
+      },
+      "revId": "04da45f2845deb3cf03fa1b92569c644429813a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b3926b8_c810ab07",
         "filename": "android/metrics/proto/studio_stats.proto",
         "patchSetId": 1
