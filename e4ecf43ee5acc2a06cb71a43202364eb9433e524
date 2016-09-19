@@ -68,6 +68,30 @@
       "revId": "e4ecf43ee5acc2a06cb71a43202364eb9433e524",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3926b8_baaad923",
+        "filename": "android/metrics/StudioConfig.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-19T20:30:08Z",
+      "side": 1,
+      "message": "no, this code isn\u0027t related to UI in any way",
+      "parentUuid": "6b3926b8_7a1b01de",
+      "range": {
+        "startLine": 375,
+        "startChar": 0,
+        "endLine": 377,
+        "endChar": 38
+      },
+      "revId": "e4ecf43ee5acc2a06cb71a43202364eb9433e524",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
