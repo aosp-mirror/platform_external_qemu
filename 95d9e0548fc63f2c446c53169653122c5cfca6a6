@@ -119,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "6b3926b8_da6a2de4",
+        "filename": "android/metrics/NullMetricsReporter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-19T20:35:52Z",
+      "side": 1,
+      "message": "but it really is redundant :)",
+      "parentUuid": "6b3926b8_dffa1fa2",
+      "range": {
+        "startLine": 27,
+        "startChar": 4,
+        "endLine": 27,
+        "endChar": 11
+      },
+      "revId": "95d9e0548fc63f2c446c53169653122c5cfca6a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b3926b8_1f5f576d",
         "filename": "android/metrics/NullMetricsWriter.cpp",
         "patchSetId": 1
