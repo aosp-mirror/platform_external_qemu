@@ -805,6 +805,31 @@ _camera_client_query_disconnect(CameraClient* cc,
 
     _qemu_client_reply_ok(qc, NULL);
 }
+static int align(int value, int alignment) {
+    return (value + alignment - 1) & (~(alignment - 1));
+}
+
+static bool calculate_video_frame_size(uint32_t format,
+                                       int width,
+                                       int height,
+                                       size_t* frame_size) {
+    int yStride = 0;
+    int uvStride = 0;
+    switch (format) {
+        case V4L2_PIX_FMT_YUV420:
+        case V4L2_PIX_FMT_YVU420:
+            yStride = align(width, 16);
+            uvStride = align(yStride / 2, 16);
+            *frame_size = yStride * height + uvStride * height;
+            return true;
+        case V4L2_PIX_FMT_NV12:
+        case V4L2_PIX_FMT_NV21:
+            *frame_size = (width * height * 12) / 8;
+            return true;
+        default:
+            return false;
+    }
+}
 
 /* Client has queried the client to start capturing video.
  * Param:
@@ -905,21 +930,14 @@ _camera_client_query_start(CameraClient* cc, QemudClient* qc, const char* param)
     cc->pixel_num = cc->width * cc->height;
     cc->frames_cached = 0;
 
-    /* Make sure that pixel format is known, and calculate video framebuffer size
-     * along the lines. */
-    switch (cc->pixel_format) {
-        case V4L2_PIX_FMT_YUV420:
-        case V4L2_PIX_FMT_YVU420:
-        case V4L2_PIX_FMT_NV12:
-        case V4L2_PIX_FMT_NV21:
-            cc->video_frame_size = (cc->pixel_num * 12) / 8;
-            break;
-
-        default:
-            E("%s: Unknown pixel format %.4s",
-              __FUNCTION__, (char*)&cc->pixel_format);
-            _qemu_client_reply_ko(qc, "Pixel format is unknown");
-            return;
+    /* Make sure that pixel format is known, and calculate video framebuffer
+     * size along the lines. */
+    if (!calculate_video_frame_size(cc->pixel_format, cc->width,
+                                    cc->height, &cc->video_frame_size)) {
+        E("%s: Unknown pixel format %.4s",
+          __FUNCTION__, (char*)&cc->pixel_format);
+        _qemu_client_reply_ko(qc, "Pixel format is unknown");
+        return;
     }
 
     /* Make sure that we have a converters between the original camera pixel
