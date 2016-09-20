@@ -46,7 +46,7 @@ SHA1=c29e498a295b90c3d4fc4b2c20104ae78627ab34    GIT=https://chromium.googlesour
 SHA1=5b1eea89bf9da9165817f10813518143648cab7d    GIT=https://chromium.googlesource.com/linux-syscall-support BRANCH=9292030 DSTDIR=breakpad-1be03d4/src/third_party/lss
 
 # protobuf v3.0.0
-SHA1=68296f253ada010816e2347e6cdb9e666eb674e7    GIT=https://github.com/google/protobuf.git BRANCH=v3.0.0 DSTDIR=protobuf-3.0.0
+SHA1=68296f253ada010816e2347e6cdb9e666eb674e7    GIT=https://github.com/google/protobuf.git BRANCH=v3.0.0 DSTDIR=protobuf-3.0.0 PATCHES=protobuf-3.0.0-patches.tar.xz
 
 # gmock and gtest v1.7.0 for protobuf
 SHA1=8c088c0b08bd7c11e6677c102730aec552a4abc3    GIT=https://github.com/google/googlemock.git BRANCH=release-1.7.0 DSTDIR=protobuf-3.0.0/gmock
