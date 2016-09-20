@@ -93,6 +93,29 @@
       "revId": "fa5dee0b4ab4f8b0d8b22c68c3b98eb70f390620",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b3926b8_28da276c",
+        "filename": "android/metrics/MetricsReporter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-20T15:11:46Z",
+      "side": 1,
+      "message": "synchronously / asynchronously (there are also other occurrences in other CLs)",
+      "range": {
+        "startLine": 41,
+        "startChar": 41,
+        "endLine": 41,
+        "endChar": 70
+      },
+      "revId": "fa5dee0b4ab4f8b0d8b22c68c3b98eb70f390620",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
