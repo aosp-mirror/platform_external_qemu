@@ -20,6 +20,65 @@ EglConfig::EglConfig(EGLint     red_size,
                      EGLint     blue_size,
                      EGLint     alpha_size,
                      EGLenum    caveat,
+                     EGLint     conformant,
+                     EGLint     config_id,
+                     EGLint     depth_size,
+                     EGLint     frame_buffer_level,
+                     EGLint     max_pbuffer_width,
+                     EGLint     max_pbuffer_height,
+                     EGLint     max_pbuffer_size,
+                     EGLBoolean native_renderable,
+                     EGLint     renderable_type,
+                     EGLint     native_visual_id,
+                     EGLint     native_visual_type,
+                     EGLint     samples_per_pixel,
+                     EGLint     stencil_size,
+                     EGLint     surface_type,
+                     EGLenum    transparent_type,
+                     EGLint     trans_red_val,
+                     EGLint     trans_green_val,
+                     EGLint     trans_blue_val,
+                     EGLBoolean recordable_android,
+                     EglOS::PixelFormat* frmt):
+        m_buffer_size(red_size + green_size + blue_size + alpha_size),
+        m_red_size(red_size),
+        m_green_size(green_size),
+        m_blue_size(blue_size),
+        m_alpha_size(alpha_size),
+        m_bind_to_tex_rgb(EGL_FALSE), //not supported for now
+        m_bind_to_tex_rgba(EGL_FALSE), //not supported for now
+        m_caveat(caveat),
+        m_config_id(config_id),
+        m_native_config_id(config_id),
+        m_frame_buffer_level(frame_buffer_level),
+        m_depth_size(depth_size),
+        m_max_pbuffer_width(max_pbuffer_width),
+        m_max_pbuffer_height(max_pbuffer_height),
+        m_max_pbuffer_size(max_pbuffer_size),
+        m_max_swap_interval(MAX_SWAP_INTERVAL),
+        m_min_swap_interval(MIN_SWAP_INTERVAL),
+        m_native_renderable(native_renderable),
+        m_renderable_type(renderable_type),
+        m_native_visual_id(native_visual_id),
+        m_native_visual_type(native_visual_type),
+        m_sample_buffers_num(samples_per_pixel > 0 ? 1 : 0),
+        m_samples_per_pixel(samples_per_pixel),
+        m_stencil_size(stencil_size),
+        m_surface_type(surface_type),
+        m_transparent_type(transparent_type),
+        m_trans_red_val(trans_red_val),
+        m_trans_green_val(trans_green_val),
+        m_trans_blue_val(trans_blue_val),
+        m_recordable_android(recordable_android),
+        m_conformant(conformant),
+        m_nativeFormat(frmt),
+        m_color_buffer_type(EGL_RGB_BUFFER) {}
+
+EglConfig::EglConfig(EGLint     red_size,
+                     EGLint     green_size,
+                     EGLint     blue_size,
+                     EGLint     alpha_size,
+                     EGLenum    caveat,
                      EGLint     config_id,
                      EGLint     depth_size,
                      EGLint     frame_buffer_level,
@@ -72,7 +131,8 @@ EglConfig::EglConfig(EGLint     red_size,
         m_conformant(((red_size + green_size + blue_size + alpha_size > 0)  &&
                      (caveat != EGL_NON_CONFORMANT_CONFIG)) ?
                      m_renderable_type : 0),
-        m_nativeFormat(frmt) {}
+        m_nativeFormat(frmt),
+        m_color_buffer_type(EGL_RGB_BUFFER) {}
 
 
 EglConfig::EglConfig(const EglConfig& conf) :
@@ -107,7 +167,8 @@ EglConfig::EglConfig(const EglConfig& conf) :
         m_trans_blue_val(conf.m_trans_blue_val),
         m_recordable_android(conf.m_recordable_android),
         m_conformant(conf.m_conformant),
-        m_nativeFormat(conf.m_nativeFormat->clone()) {}
+        m_nativeFormat(conf.m_nativeFormat->clone()),
+        m_color_buffer_type(EGL_RGB_BUFFER) {}
 
 
 EglConfig::EglConfig(const EglConfig& conf,
@@ -147,8 +208,8 @@ EglConfig::EglConfig(const EglConfig& conf,
         m_trans_blue_val(conf.m_trans_blue_val),
         m_recordable_android(conf.m_recordable_android),
         m_conformant(conf.m_conformant),
-        m_nativeFormat(conf.m_nativeFormat->clone()) {};
-
+        m_nativeFormat(conf.m_nativeFormat->clone()),
+        m_color_buffer_type(EGL_RGB_BUFFER) {};
 
 bool EglConfig::getConfAttrib(EGLint attrib,EGLint* val) const {
     switch(attrib) {
@@ -175,6 +236,9 @@ bool EglConfig::getConfAttrib(EGLint attrib,EGLint* val) const {
         break;
     case EGL_CONFIG_CAVEAT:
         *val = m_caveat;
+        break;
+    case EGL_CONFORMANT:
+        *val = m_conformant;
         break;
     case EGL_CONFIG_ID:
         *val = m_config_id;
@@ -224,6 +288,9 @@ bool EglConfig::getConfAttrib(EGLint attrib,EGLint* val) const {
     case EGL_SURFACE_TYPE:
         *val = m_surface_type;
         break;
+    case EGL_COLOR_BUFFER_TYPE:
+        *val = EGL_RGB_BUFFER;
+        break;
     case EGL_TRANSPARENT_TYPE:
         *val =m_transparent_type;
         break;
@@ -238,9 +305,6 @@ bool EglConfig::getConfAttrib(EGLint attrib,EGLint* val) const {
         break;
     case EGL_RECORDABLE_ANDROID:
         *val = m_recordable_android;
-        break;
-    case EGL_CONFORMANT:
-        *val = m_conformant;
         break;
     default:
         return false;
@@ -260,6 +324,17 @@ bool EglConfig::compatibleWith(const EglConfig& conf) const {
            m_stencil_size == conf.m_stencil_size;
 }
 
+// For fixing dEQP EGL tests. This is based on the EGL spec
+// and is inspired by the dEQP EGL test code itself.
+static int ColorBufferTypeVal(EGLenum type) {
+    switch (type) {
+    case EGL_RGB_BUFFER: return 0;
+    case EGL_LUMINANCE_BUFFER: return 1;
+    case EGL_YUV_BUFFER_EXT: return 2;
+    }
+    return 3;
+}
+
 //following the sorting EGLconfig as in spec
 bool EglConfig::operator<(const EglConfig& conf) const {
     //0
@@ -270,7 +345,12 @@ bool EglConfig::operator<(const EglConfig& conf) const {
     if(m_caveat != conf.m_caveat) {
        return m_caveat < conf.m_caveat; // EGL_NONE < EGL_SLOW_CONFIG < EGL_NON_CONFORMANT_CONFIG
     }
-    //2 TODO:
+
+    //2
+    if (m_color_buffer_type != conf.m_color_buffer_type) {
+        return ColorBufferTypeVal(m_color_buffer_type) <
+               ColorBufferTypeVal(conf.m_color_buffer_type);
+    }
 
     //3
     if(m_buffer_size != conf.m_buffer_size) {
@@ -292,23 +372,34 @@ bool EglConfig::operator<(const EglConfig& conf) const {
     if(m_stencil_size != conf.m_stencil_size) {
        return m_stencil_size < conf.m_stencil_size;
     }
-    //8 implementation defined
-    if(m_native_visual_type != conf.m_native_visual_type) {
-       return m_native_visual_type < conf.m_native_visual_type;
-    }
-    //9
+
     return m_config_id < conf.m_config_id;
 }
 
 bool EglConfig::operator>=(const EglConfig& conf) const {
     return  !((*this) < conf);
 }
-#define CHECK_PROP(dummy,prop_name,op) \
-                  if((dummy.prop_name != EGL_DONT_CARE) && (dummy.prop_name op prop_name)) return false;
-#define CHECK_PROP_CAST(dummy,prop_name,op) \
-                  if((((EGLint)dummy.prop_name) != EGL_DONT_CARE) && (dummy.prop_name op prop_name)) return false;
+
 //checking if config stands for all the selection crateria of dummy as defined by EGL spec
+#define CHECK_PROP(dummy,prop_name,op) \
+    if((dummy.prop_name != EGL_DONT_CARE) && (dummy.prop_name op prop_name)) { \
+        CHOOSE_CONFIG_DLOG(#prop_name " does not match."); \
+        return false; \
+    } else { \
+        CHOOSE_CONFIG_DLOG(#prop_name " compatible."); \
+    } \
+
+#define CHECK_PROP_CAST(dummy,prop_name,op) \
+    if((((EGLint)dummy.prop_name) != EGL_DONT_CARE) && (dummy.prop_name op prop_name)) { \
+        CHOOSE_CONFIG_DLOG(#prop_name " does not match."); \
+        return false; \
+    } else { \
+        CHOOSE_CONFIG_DLOG(#prop_name " compatible."); \
+    } \
+
 bool EglConfig::chosen(const EglConfig& dummy) const {
+
+   CHOOSE_CONFIG_DLOG("checking config id 0x%x for compatibility\n", m_config_id);
 
    //atleast
    CHECK_PROP(dummy,m_buffer_size,>);
@@ -324,6 +415,7 @@ bool EglConfig::chosen(const EglConfig& dummy) const {
    //exact
    CHECK_PROP(dummy,m_frame_buffer_level,!=);
    CHECK_PROP(dummy,m_config_id,!=);
+
    CHECK_PROP(dummy,m_native_visual_type,!=);
    CHECK_PROP(dummy,m_max_swap_interval ,!=);
    CHECK_PROP(dummy,m_min_swap_interval ,!=);
@@ -339,13 +431,24 @@ bool EglConfig::chosen(const EglConfig& dummy) const {
 
    //mask
    if(dummy.m_surface_type != EGL_DONT_CARE &&
-    ((dummy.m_surface_type & m_surface_type) != dummy.m_surface_type)) return false;
+      ((dummy.m_surface_type & m_surface_type) != dummy.m_surface_type)) {
+       CHOOSE_CONFIG_DLOG("m_surface_type does not match.");
+       return false;
+   }
 
    if(dummy.m_conformant != (EGLenum)EGL_DONT_CARE &&
-    ((dummy.m_conformant & m_conformant) != dummy.m_conformant)) return false;
+      ((dummy.m_conformant & m_conformant) != dummy.m_conformant)) {
+       CHOOSE_CONFIG_DLOG("m_conformant does not match.");
+       return false;
+   }
 
    if(dummy.m_renderable_type != EGL_DONT_CARE &&
-    ((dummy.m_renderable_type & m_renderable_type) != dummy.m_renderable_type)) return false;
+      ((dummy.m_renderable_type & m_renderable_type) != dummy.m_renderable_type)) {
+       CHOOSE_CONFIG_DLOG("m_renderable_type does not match.");
+       return false;
+   }
+
+   CHOOSE_CONFIG_DLOG("config id 0x%x chosen.", m_config_id);
 
    //passed all checks
    return true;

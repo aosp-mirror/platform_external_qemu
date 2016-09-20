@@ -280,6 +280,7 @@ int EglDisplay::doChooseConfigs(const EglConfig& dummy,
                                 EGLConfig* configs,
                                 int config_size) const {
     int added = 0;
+
     for(ConfigsList::const_iterator it = m_configs.begin();
         it != m_configs.end() && (added < config_size || !configs);
         ++it) {
@@ -290,7 +291,7 @@ int EglDisplay::doChooseConfigs(const EglConfig& dummy,
             added++;
        }
     }
-    //no need to sort since the configurations are saved already in sorted maner
+    // no need to sort since the configurations are saved already in sorted manner
     return added;
 }
 
