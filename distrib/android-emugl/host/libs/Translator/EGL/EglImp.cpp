@@ -306,9 +306,12 @@ EGLAPI EGLBoolean EGLAPIENTRY eglGetConfigs(EGLDisplay display, EGLConfig *confi
 EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *attrib_list,
                EGLConfig *configs, EGLint config_size,
                EGLint *num_config) {
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
+
     VALIDATE_DISPLAY(display);
     if(!num_config) {
          RETURN_ERROR(EGL_FALSE,EGL_BAD_PARAMETER);
+         fprintf(stderr, "%s: RETURN_ERROR(EGL_FALSE,EGL_BAD_PARAMETER);\n", __FUNCTION__);
     }
 
         //selection defaults
@@ -329,7 +332,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
         EGLint      trans_green_val    = EGL_DONT_CARE;
         EGLint      trans_blue_val     = EGL_DONT_CARE;
         EGLenum     transparent_type   = EGL_NONE;
-        //EGLint      buffer_size        = 0;
+        // EGLint      buffer_size        = 0;
         EGLint      red_size           = 0;
         EGLint      green_size         = 0;
         EGLint      blue_size          = 0;
@@ -339,6 +342,9 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
         //EGLint      sample_buffers_num = 0;
         EGLint      samples_per_pixel  = 0;
         EGLint      stencil_size       = 0;
+        // EGLint color_buffer_type = EGL_RGB_BUFFER;
+
+        EGLint conformant = 0;
 
         EGLBoolean  recordable_android = EGL_FALSE;
 
@@ -354,39 +360,57 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
                 break; //we dont care from those selection crateria
             case EGL_LEVEL:
                 if(attrib_list[i+1] == EGL_DONT_CARE) {
+                    fprintf(stderr, "%s: egl lvl sad :( 0x%x\n", __FUNCTION__, attrib_list[i+1]);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
                 }
                 frame_buffer_level = attrib_list[i+1];
                 break;
             case EGL_BUFFER_SIZE:
                 if(attrib_list[i+1] < 0) {
+                    fprintf(stderr, "%s: egl buffer size sad :( 0x%x\n", __FUNCTION__, attrib_list[i+1]);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
                 }
-                //buffer_size = attrib_list[i+1];
+                // buffer_size = attrib_list[i+1];
                 break;
             case EGL_RED_SIZE:
                 if(attrib_list[i+1] < 0) {
+                    fprintf(stderr, "%s: egl red size sad :( 0x%x\n", __FUNCTION__, attrib_list[i+1]);
                      RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
                 }
                 red_size = attrib_list[i+1];
                 break;
             case EGL_GREEN_SIZE:
                 if(attrib_list[i+1] < 0) {
+                    fprintf(stderr, "%s: egl green size sad :( 0x%x\n", __FUNCTION__, attrib_list[i+1]);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
                 }
                 green_size = attrib_list[i+1];
                 break;
             case EGL_BLUE_SIZE:
                 if(attrib_list[i+1] < 0) {
+                    fprintf(stderr, "%s: egl blue size sad :( 0x%x\n", __FUNCTION__, attrib_list[i+1]);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
                 }
                 blue_size = attrib_list[i+1];
                 break;
+            case EGL_LUMINANCE_SIZE:
+                if(attrib_list[i+1] < 0) {
+                    fprintf(stderr, "%s: egl luminance size sad :( 0x%x\n", __FUNCTION__, attrib_list[i+1]);
+                    RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
+                }
+                break;
             case EGL_ALPHA_SIZE:
                 if(attrib_list[i+1] < 0) {
+                    fprintf(stderr, "%s: egl alpha size sad :( 0x%x\n", __FUNCTION__, attrib_list[i+1]);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
                 }
                 alpha_size = attrib_list[i+1];
+                break;
+            case EGL_ALPHA_MASK_SIZE:
+                if(attrib_list[i+1] < 0) {
+                    fprintf(stderr, "%s: egl alphamask size sad :( 0x%x\n", __FUNCTION__, attrib_list[i+1]);
+                    RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
+                }
                 break;
             case EGL_BIND_TO_TEXTURE_RGB:
                 //bind_to_tex_rgb = attrib_list[i+1];
@@ -395,13 +419,21 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
                 //bind_to_tex_rgba = attrib_list[i+1];
                 break;
             case EGL_CONFIG_CAVEAT:
-                if(attrib_list[i+1] != EGL_NONE && attrib_list[i+1] != EGL_SLOW_CONFIG && attrib_list[i+1] != EGL_NON_CONFORMANT_CONFIG) {
+                if(attrib_list[i+1] != EGL_NONE &&
+                   attrib_list[i+1] != EGL_DONT_CARE &&
+                   attrib_list[i+1] != EGL_SLOW_CONFIG &&
+                   attrib_list[i+1] != EGL_NON_CONFORMANT_CONFIG) {
+                    fprintf(stderr, "%s: config caveat sad :( 0x%x\n", __FUNCTION__, attrib_list[i+1]);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
                 }
                 caveat = attrib_list[i+1];
                 break;
+            case EGL_CONFORMANT:
+                conformant = attrib_list[i+1];
+                break;
             case EGL_CONFIG_ID:
                 if(attrib_list[i+1] < 0) {
+                    fprintf(stderr, "%s: config id sad :( 0x%x\n", __FUNCTION__, attrib_list[i+1]);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
                 }
                 config_id = attrib_list[i+1];
@@ -409,18 +441,23 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
                 break;
             case EGL_DEPTH_SIZE:
                 if(attrib_list[i+1] < 0) {
+                    fprintf(stderr, "%s: depth size sad :( 0x%x\n", __FUNCTION__, attrib_list[i+1]);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
                 }
                 depth_size = attrib_list[i+1];
                 break;
             case EGL_MAX_SWAP_INTERVAL:
-                if(attrib_list[i+1] < 0) {
+                if(attrib_list[i+1] != EGL_DONT_CARE &&
+                   attrib_list[i+1] < 0) {
+                    fprintf(stderr, "%s: max swap interval sad :( 0x%x\n", __FUNCTION__, attrib_list[i+1]);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
                 }
                 //max_swap_interval = attrib_list[i+1];
                 break;
             case EGL_MIN_SWAP_INTERVAL:
-                if(attrib_list[i+1] < 0) {
+                if(attrib_list[i+1] != EGL_DONT_CARE &&
+                   attrib_list[i+1] < 0) {
+                    fprintf(stderr, "%s: min swap interval sad :( 0x%x\n", __FUNCTION__, attrib_list[i+1]);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
                 }
                 //min_swap_interval = attrib_list[i+1];
@@ -435,22 +472,26 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
                 native_visual_type = attrib_list[i+1];
                 break;
                 if(attrib_list[i+1] < 0 || attrib_list[i+1] > 1 ) {
+                    fprintf(stderr, "%s: native visual type sad :( 0x%x\n", __FUNCTION__, attrib_list[i+1]);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
                 }
             case EGL_SAMPLE_BUFFERS:
                 //sample_buffers_num = attrib_list[i+1];
                 break;
                 if(attrib_list[i+1] < 0) {
+                    fprintf(stderr, "%s: sample buffers sad :( 0x%x\n", __FUNCTION__, attrib_list[i+1]);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
                 }
             case EGL_SAMPLES:
                 if(attrib_list[i+1] < 0) {
+                    fprintf(stderr, "%s: samples sad :( 0x%x\n", __FUNCTION__, attrib_list[i+1]);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
                 }
                 samples_per_pixel = attrib_list[i+1];
                 break;
             case EGL_STENCIL_SIZE:
                 if(attrib_list[i+1] < 0) {
+                    fprintf(stderr, "%s: stencil size sad :( 0x%x\n", __FUNCTION__, attrib_list[i+1]);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
                 }
                 stencil_size = attrib_list[i+1];
@@ -459,7 +500,10 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
                 surface_type = attrib_list[i+1];
                 break;
             case EGL_TRANSPARENT_TYPE:
-                if(attrib_list[i+1] != EGL_NONE && attrib_list[i+1] != EGL_TRANSPARENT_RGB ) {
+                if(attrib_list[i+1] != EGL_NONE &&
+                   attrib_list[i+1] != EGL_DONT_CARE &&
+                   attrib_list[i+1] != EGL_TRANSPARENT_RGB ) {
+                    fprintf(stderr, "%s: transparent type sad :( 0x%x\n", __FUNCTION__, attrib_list[i+1]);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
                 }
                 transparent_type = attrib_list[i+1];
@@ -473,10 +517,13 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
             case EGL_TRANSPARENT_BLUE_VALUE:
                 trans_blue_val = attrib_list[i+1];
                 break;
+            case EGL_COLOR_BUFFER_TYPE:
+                break;
             case EGL_RECORDABLE_ANDROID:
                 recordable_android = attrib_list[i+1];
                 break;
             default:
+                fprintf(stderr, "%s: unknown config attribute 0x%x\n", __FUNCTION__, attrib_list[i]);
                 RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
             }
             i+=2;
@@ -488,18 +535,21 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
                     configs[0]  = static_cast<EGLConfig>(pConfig);
                 }
                 *num_config = 1;
+                fprintf(stderr, "%s: hasconfigid, return egl true\n", __FUNCTION__);
                 return EGL_TRUE;
             } else {
+                fprintf(stderr, "%s: no pconfig, bad attribute\n", __FUNCTION__);
                 RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
             }
         }
     }
-    EglConfig dummy(red_size,green_size,blue_size,alpha_size,caveat,config_id,depth_size,
+    EglConfig dummy(red_size,green_size,blue_size,alpha_size,caveat,conformant,config_id,depth_size,
                     frame_buffer_level,0,0,0,native_renderable,renderable_type,0,native_visual_type,
                     samples_per_pixel,stencil_size,surface_type,transparent_type,
                     trans_red_val,trans_green_val,trans_blue_val,recordable_android,
                     NULL);
     *num_config = dpy->chooseConfigs(dummy,configs,config_size);
+    fprintf(stderr, "%s: resulting num configs=%d\n", __FUNCTION__, *num_config);
 
 
     return EGL_TRUE;

@@ -104,6 +104,15 @@ FbConfig::FbConfig(EGLConfig hostConfig, EGLDisplay hostDisplay) :
                                  kConfigAttributes[i],
                                  &mAttribValues[i]);
 
+        if (kConfigAttributes[i] == EGL_COLOR_BUFFER_TYPE) {
+            fprintf(stderr, "%s: color buffer type is 0x%x should be 0x%x\n",
+                    __FUNCTION__, mAttribValues[i], EGL_RGB_BUFFER);
+        }
+        if (kConfigAttributes[i] == EGL_CONFIG_ID) {
+            fprintf(stderr, "%s: config id is 0x%x\n",
+                    __FUNCTION__, mAttribValues[i]);
+        }
+
         // This implementation supports guest window surfaces by wrapping
         // them around host Pbuffers, so always report it to the guest.
         if (kConfigAttributes[i] == EGL_SURFACE_TYPE) {
@@ -150,11 +159,16 @@ FbConfigList::~FbConfigList() {
 int FbConfigList::chooseConfig(const EGLint* attribs,
                                EGLint* configs,
                                EGLint configsSize) const {
+
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
+
     EGLint numHostConfigs = 0;
     if (!s_egl.eglGetConfigs(mDisplay, NULL, 0, &numHostConfigs)) {
         E("%s: Could not get number of host EGL configs\n", __FUNCTION__);
+        fprintf(stderr, "%s: Could not get number of host EGL configs\n", __FUNCTION__);
         return 0;
     }
+    fprintf(stderr, "%s: numHostConfigs=%d\n", __FUNCTION__, numHostConfigs);
 
     EGLConfig* matchedConfigs = new EGLConfig[numHostConfigs];
 
@@ -209,6 +223,7 @@ int FbConfigList::chooseConfig(const EGLint* attribs,
     delete [] newAttribs;
 
     int result = 0;
+    fprintf(stderr, "%s: numHostConfigs: %d\n", __FUNCTION__, numHostConfigs);
     for (int n = 0; n < numHostConfigs; ++n) {
         // Don't count or write more than |configsSize| items if |configs|
         // is not NULL.
@@ -223,9 +238,12 @@ int FbConfigList::chooseConfig(const EGLint* attribs,
         EGLint hostConfigId;
         s_egl.eglGetConfigAttrib(
                 mDisplay, matchedConfigs[n], EGL_CONFIG_ID, &hostConfigId);
+        bool found = false;
         for (int k = 0; k < mCount; ++k) {
             int guestConfigId = mConfigs[k]->getConfigId();
             if (guestConfigId == hostConfigId) {
+                found = true;
+                fprintf(stderr, "%s: config id 0x%x matches 0x%x\n", __FUNCTION__, guestConfigId, hostConfigId);
                 // There is a match. Write it to |configs| if it is not NULL.
                 if (configs && result < configsSize) {
                     configs[result] = (uint32_t)k;
@@ -234,6 +252,8 @@ int FbConfigList::chooseConfig(const EGLint* attribs,
                 break;
             }
         }
+
+        if (!found) { fprintf(stderr, "%s: could not find a matching config id.\n", __FUNCTION__); }
     }
 
     delete [] matchedConfigs;

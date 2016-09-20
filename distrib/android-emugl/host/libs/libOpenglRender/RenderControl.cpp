@@ -260,6 +260,7 @@ static EGLint rcGetNumConfigs(uint32_t* p_numAttribs)
 
 static EGLint rcGetConfigs(uint32_t bufSize, GLuint* buffer)
 {
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
     GLuint bufferSize = (GLuint)bufSize;
     return FrameBuffer::getFB()->getConfigs()->packConfigs(bufferSize, buffer);
 }
@@ -269,13 +270,15 @@ static EGLint rcChooseConfig(EGLint *attribs,
                              uint32_t *configs,
                              uint32_t configs_size)
 {
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb || attribs_size==0) {
         return 0;
     }
 
-    return fb->getConfigs()->chooseConfig(
-            attribs, (EGLint*)configs, (EGLint)configs_size);
+    EGLint res = fb->getConfigs()->chooseConfig( attribs, (EGLint*)configs, (EGLint)configs_size);
+
+    return res;
 }
 
 static EGLint rcGetFBParam(EGLint param)
