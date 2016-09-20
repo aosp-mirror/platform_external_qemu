@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "70c1171d_d2ef5578",
+        "filename": "android/metrics/StudioConfig.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 460,
+      "author": {
+        "id": 1079866
+      },
+      "writtenOn": "2016-09-20T17:52:28Z",
+      "side": 1,
+      "message": "worth documenting this should only be used for Crash reporting",
+      "revId": "f7154b599d3c3b4268de698e6f18b6614513e4b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
