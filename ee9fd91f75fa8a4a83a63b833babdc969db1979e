@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "70c1171d_e3fbaea4",
+        "filename": "android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-20T15:43:45Z",
+      "side": 0,
+      "message": "line up case with switch",
+      "range": {
+        "startLine": 141,
+        "startChar": 0,
+        "endLine": 150,
+        "endChar": 9
+      },
+      "revId": "ee9fd91f75fa8a4a83a63b833babdc969db1979e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

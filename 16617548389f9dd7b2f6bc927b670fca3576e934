@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "70c1171d_23f226ce",
+        "filename": "android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-20T15:43:45Z",
+      "side": 1,
+      "message": "nit: Keep this lined up? (remove highlighted area)",
+      "range": {
+        "startLine": 121,
+        "startChar": 16,
+        "endLine": 121,
+        "endChar": 24
+      },
+      "revId": "16617548389f9dd7b2f6bc927b670fca3576e934",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "70c1171d_43f71abd",
+        "filename": "android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-20T15:43:45Z",
+      "side": 1,
+      "message": "Same",
+      "range": {
+        "startLine": 133,
+        "startChar": 16,
+        "endLine": 133,
+        "endChar": 24
+      },
+      "revId": "16617548389f9dd7b2f6bc927b670fca3576e934",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
