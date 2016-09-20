@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "70c1171d_03ccc2b1",
+        "filename": "android/metrics/MetricsReporter.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-20T15:58:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "70c1171d_2379c687",
+      "range": {
+        "startLine": 41,
+        "startChar": 41,
+        "endLine": 41,
+        "endChar": 53
+      },
+      "revId": "c34c6d63b231ca0c7a1d5d9700ed989a06b002cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "70c1171d_437e3a71",
         "filename": "android/metrics/MetricsReporter.h",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-09-20T15:11:46Z",
       "side": 1,
       "message": "nit: remove comma?",
+      "range": {
+        "startLine": 43,
+        "startChar": 74,
+        "endLine": 43,
+        "endChar": 75
+      },
+      "revId": "c34c6d63b231ca0c7a1d5d9700ed989a06b002cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "70c1171d_a3c8569e",
+        "filename": "android/metrics/MetricsReporter.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-20T15:58:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "70c1171d_437e3a71",
       "range": {
         "startLine": 43,
         "startChar": 74,
