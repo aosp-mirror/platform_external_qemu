@@ -391,12 +391,10 @@ prepare_build_for_host () {
         *-x86)
             EXTRA_CFLAGS="-m32"
             EXTRA_CXXFLAGS="-m32"
-            EXTRA_LDFLAGS="-m32"
             ;;
         *-x86_64)
             EXTRA_CFLAGS="-m64"
             EXTRA_CXXFLAGS="-m64"
-            EXTRA_LDFLAGS="-m64"
             ;;
         *)
             panic "Host system '$CURRENT_HOST' is not supported by this script!"
