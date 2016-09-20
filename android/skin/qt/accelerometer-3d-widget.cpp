@@ -25,7 +25,7 @@ Accelerometer3DWidget::~Accelerometer3DWidget() {
     if (!mGLES2) {
         return;
     }
-    if (isValid()) {
+    if (readyForRendering()) {
         if(makeContextCurrent()) {
             mGLES2->glDeleteProgram(mProgram);
             mGLES2->glDeleteBuffers(1, &mVertexDataBuffer);
