@@ -120,11 +120,9 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
 }
 
 void VirtualSensorsPage::showEvent(QShowEvent*) {
-    if (mUi->accelWidget->isValid() && mFirstShow) {
-        resetAccelerometerRotationFromSkinLayout(
-            skin_ui_get_current_layout(emulator_window_get()->ui));
-        mFirstShow = false;
-    }
+  resetAccelerometerRotationFromSkinLayout(
+      skin_ui_get_current_layout(emulator_window_get()->ui));
+  mFirstShow = false;
 }
 
 void VirtualSensorsPage::setLayoutChangeNotifier(
@@ -175,13 +173,11 @@ void VirtualSensorsPage::resetAccelerometerRotationFromSkinLayout(
 }
 void VirtualSensorsPage::resetAccelerometerRotation(const QQuaternion& rotation) {
     if (!mFirstShow) mVirtualSensorsUsed = true;
-    if (mUi->accelWidget->isValid()) {
-        mUi->accelWidget->setPosition(QVector2D(0.0, 0.0));
-        mUi->accelWidget->setRotation(rotation);
-        mUi->accelWidget->renderFrame();
-        onPhoneRotationChanged();
-        onPhonePositionChanged();
-    }
+    mUi->accelWidget->setPosition(QVector2D(0.0, 0.0));
+    mUi->accelWidget->setRotation(rotation);
+    mUi->accelWidget->renderFrame();
+    onPhoneRotationChanged();
+    onPhonePositionChanged();
 }
 
 void VirtualSensorsPage::on_rotateToPortrait_clicked() {
@@ -285,15 +281,13 @@ void VirtualSensorsPage::onPhoneRotationChanged() {
 void VirtualSensorsPage::setAccelerometerRotationFromSliders() {
     // WARNING: read the comment in VirtualSensorsPage::onPhoneRotationChanged
     // before changing the order of these arguments!!
-    if (mUi->accelWidget->isValid()) {
-        mUi->accelWidget->setRotation(
-            QQuaternion::fromEulerAngles(
-                mUi->pitchSlider->getValue(),
-                mUi->rollSlider->getValue(),
-                mUi->yawSlider->getValue()));
-        updateAccelerometerValues();
-        mUi->accelWidget->renderFrame();
-    }
+    mUi->accelWidget->setRotation(
+        QQuaternion::fromEulerAngles(
+            mUi->pitchSlider->getValue(),
+            mUi->rollSlider->getValue(),
+            mUi->yawSlider->getValue()));
+    updateAccelerometerValues();
+    mUi->accelWidget->renderFrame();
 }
 
 void VirtualSensorsPage::on_yawSlider_valueChanged(double) {
@@ -312,10 +306,8 @@ void VirtualSensorsPage::setPhonePositionFromSliders() {
     mCurrentPosition = QVector3D(mUi->positionXSlider->getValue(),
                                  mUi->positionYSlider->getValue(),
                                  0.0);
-    if (mUi->accelWidget->isValid()) {
-        mUi->accelWidget->setPosition(mCurrentPosition.toVector2D());
-        mUi->accelWidget->renderFrame();
-    }
+    mUi->accelWidget->setPosition(mCurrentPosition.toVector2D());
+    mUi->accelWidget->renderFrame();
 }
 
 void VirtualSensorsPage::on_positionXSlider_valueChanged(double) {

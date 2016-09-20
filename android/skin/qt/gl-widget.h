@@ -37,7 +37,7 @@ public:
     virtual ~GLWidget();
 
     QPaintEngine* paintEngine() const override { return nullptr; }
-    bool isValid() const { return mValid; }
+    bool readyForRendering() const { return mValid; }
 
 public slots:
     void renderFrame();
