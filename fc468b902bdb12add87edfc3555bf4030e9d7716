@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "70c1171d_5cd5b4de",
+        "filename": "android/metrics/FileMetricsWriter.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-20T23:29:24Z",
+      "side": 1,
+      "message": "max counter is just an arbitrary number to limit the counter that\u0027s reused, maybe for weeks for the same session; 1000 is actually a little bit high, but I want to make sure we can skip a set of stale files without issues.\n1000 tries x 1ms/try is still just a second",
+      "parentUuid": "70c1171d_12b72dd4",
+      "revId": "fc468b902bdb12add87edfc3555bf4030e9d7716",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "70c1171d_72ef89b1",
         "filename": "android/metrics/FileMetricsWriter.cpp",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "70c1171d_0197d548",
+        "filename": "android/metrics/FileMetricsWriter.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-20T23:29:24Z",
+      "side": 1,
+      "message": "sessionid is uuid, I don\u0027t want to have two of those in a single file name",
+      "parentUuid": "70c1171d_72ef89b1",
+      "revId": "fc468b902bdb12add87edfc3555bf4030e9d7716",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "70c1171d_92f47d83",
         "filename": "android/metrics/FileMetricsWriter.cpp",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2016-09-20T17:41:46Z",
       "side": 1,
       "message": "why not 700?",
+      "revId": "fc468b902bdb12add87edfc3555bf4030e9d7716",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "70c1171d_bc91504a",
+        "filename": "android/metrics/FileMetricsWriter.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-20T23:29:24Z",
+      "side": 1,
+      "message": "we used to have 744 for previous metrics code",
+      "parentUuid": "70c1171d_92f47d83",
       "revId": "fc468b902bdb12add87edfc3555bf4030e9d7716",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
