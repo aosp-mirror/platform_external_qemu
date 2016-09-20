@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "70c1171d_12b72dd4",
+        "filename": "android/metrics/FileMetricsWriter.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1079866
+      },
+      "writtenOn": "2016-09-20T17:41:46Z",
+      "side": 1,
+      "message": "both numbers seem high",
+      "revId": "fc468b902bdb12add87edfc3555bf4030e9d7716",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "70c1171d_72ef89b1",
+        "filename": "android/metrics/FileMetricsWriter.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1079866
+      },
+      "writtenOn": "2016-09-20T17:41:46Z",
+      "side": 1,
+      "message": "why not uuid?",
+      "revId": "fc468b902bdb12add87edfc3555bf4030e9d7716",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "70c1171d_92f47d83",
+        "filename": "android/metrics/FileMetricsWriter.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1079866
+      },
+      "writtenOn": "2016-09-20T17:41:46Z",
+      "side": 1,
+      "message": "why not 700?",
+      "revId": "fc468b902bdb12add87edfc3555bf4030e9d7716",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
