@@ -22,6 +22,30 @@
       "revId": "ee9fd91f75fa8a4a83a63b833babdc969db1979e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "70c1171d_a305b6b8",
+        "filename": "android/metrics/CrashMetricsReporting.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-20T15:43:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "70c1171d_6347be06",
+      "range": {
+        "startLine": 20,
+        "startChar": 23,
+        "endLine": 20,
+        "endChar": 24
+      },
+      "revId": "ee9fd91f75fa8a4a83a63b833babdc969db1979e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
