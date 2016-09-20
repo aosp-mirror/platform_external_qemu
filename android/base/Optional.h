@@ -344,7 +344,7 @@ public:
     constexpr const T& value() const { return get(); }
 
     // Value getter with fallback
-    template <class U,
+    template <class U = T,
               class = enable_if_convertible<typename std::decay<U>::type, T>>
     constexpr T valueOr(U&& defaultValue) const {
         return this->constructed() ? get() : std::move(defaultValue);
