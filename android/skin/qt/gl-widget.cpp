@@ -224,7 +224,7 @@ bool GLWidget::makeContextCurrent() {
 }
 
 void GLWidget::renderFrame() {
-    if (!ensureInit()) {
+    if (!readyForRendering()) {
         return;
     }
     makeContextCurrent();
@@ -251,7 +251,9 @@ void GLWidget::renderFrame() {
 }
 
 void GLWidget::paintEvent(QPaintEvent*) {
-    renderFrame();
+    if (ensureInit()) {
+      renderFrame();
+    }
 }
 
 void GLWidget::showEvent(QShowEvent*) {
@@ -263,7 +265,9 @@ void GLWidget::showEvent(QShowEvent*) {
     // However, show events may be delivered when the widget
     // isn't visible yet, so we need an additional check.
     if (isVisible() && !visibleRegion().isNull()) {
-        renderFrame();
+        if (ensureInit()) {
+            renderFrame();
+        }
     }
     connect(window()->windowHandle(), SIGNAL(screenChanged(QScreen*)), this, SLOT(handleScreenChange(QScreen*)));
 }
