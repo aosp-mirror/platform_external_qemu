@@ -23,6 +23,18 @@
 #define MIN_SWAP_INTERVAL 1
 #define MAX_SWAP_INTERVAL 10
 
+#define DEBUG_CHOOSE_CONFIG 0
+
+#if DEBUG_CHOOSE_CONFIG
+#include <stdio.h>
+#define CHOOSE_CONFIG_DLOG(fmt,...) do { \
+    fprintf(stderr, "chooseconfig: " fmt "\n", ##__VA_ARGS__); \
+} while(0) \
+
+#else
+#define CHOOSE_CONFIG_DLOG(fmt,...)
+#endif
+
 // A class used to model the content of an EGLConfig object.
 // This is really a structure with several fields that can be queried
 // individually with getConfigAttrib(), and compared for sorting according
@@ -63,7 +75,32 @@ public:
     // Return the native pixel format for this config.
     EglOS::PixelFormat* nativeFormat() const { return m_nativeFormat; }
 
-    // Constructor for a new instance, all values explicitly defined.
+    EglConfig(EGLint red_size,
+              EGLint green_size,
+              EGLint blue_size,
+              EGLint alpha_size,
+              EGLenum  caveat,
+              EGLint  conformant,
+              EGLint config_id,
+              EGLint depth_size,
+              EGLint frame_buffer_level,
+              EGLint max_pbuffer_width,
+              EGLint max_pbuffer_height,
+              EGLint max_pbuffer_size,
+              EGLBoolean native_renderable,
+              EGLint renderable_type,
+              EGLint native_visual_id,
+              EGLint native_visual_type,
+              EGLint samples_per_pixel,
+              EGLint stencil_size,
+              EGLint surface_type,
+              EGLenum transparent_type,
+              EGLint trans_red_val,
+              EGLint trans_green_val,
+              EGLint trans_blue_val,
+              EGLBoolean recordable_android,
+              EglOS::PixelFormat* frmt);
+
     EglConfig(EGLint red_size,
               EGLint green_size,
               EGLint blue_size,
@@ -142,6 +179,7 @@ private:
     const EGLenum     m_conformant;
 
     EglOS::PixelFormat*  m_nativeFormat;
+    const EGLint      m_color_buffer_type;
 };
 
 #endif
