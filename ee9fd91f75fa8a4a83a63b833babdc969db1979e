@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "70c1171d_6347be06",
+        "filename": "android/metrics/CrashMetricsReporting.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-20T15:40:26Z",
+      "side": 1,
+      "message": "+space to line up with MetricsReporter\u0026 above",
+      "range": {
+        "startLine": 20,
+        "startChar": 23,
+        "endLine": 20,
+        "endChar": 24
+      },
+      "revId": "ee9fd91f75fa8a4a83a63b833babdc969db1979e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
