@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "70c1171d_435b9af3",
+        "filename": "android/metrics/FileMetricsWriter.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-20T15:29:33Z",
+      "side": 1,
+      "message": "asynchronous",
+      "range": {
+        "startLine": 310,
+        "startChar": 63,
+        "endLine": 310,
+        "endChar": 74
+      },
+      "revId": "b5d4ea0db18e72a035982d89d310be0f1e9b287f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
