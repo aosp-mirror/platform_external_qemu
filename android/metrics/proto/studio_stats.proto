@@ -16,6 +16,8 @@ option java_outer_classname = "AndroidStudioStats";
 
 message AndroidStudioEvent {
   // Describes a group of event kinds related to each other.
+  // This is redundant in the presence of EventKind + event specific message,
+  // and is only necessary for events originally sent to GA.
   enum EventCategory {
     // The event was not grouped into any specific category (default).
     NO_EVENT_CATEGORY = 0;
@@ -258,6 +260,8 @@ message AndroidStudioEvent {
     STUDIO_UI_ACTION_STATS = 97;
     // Stats on the current running Android Studio process.
     STUDIO_PROCESS_STATS = 98;
+    // Stats on Studio's performance
+    STUDIO_PERFORMANCE_STATS = 99;
   }
   // Represents different Performance Monitoring types.
   enum MonitorType {
@@ -369,6 +373,8 @@ message AndroidStudioEvent {
     UNSUPPORTED_GRADLE_VERSION = 13;
   }
   // Describes a group of event kinds related to each other.
+  // Necessary only for events that were originally being reported to Google
+  // Analytics (GA).
   optional .android_studio.AndroidStudioEvent.EventCategory category = 1;
   // Specific kind of event, primary separation key of all Android Studio
   // related events.
@@ -459,6 +465,8 @@ message AndroidStudioEvent {
   optional .android_studio.JvmDetails jvm_details = 36;
   // set when kind = STUDIO_PROCESS_STATS
   optional .android_studio.JavaProcessStats java_process_stats = 37;
+  // set when kind = STUDIO_PERFORMANCE_STATS
+  optional .android_studio.StudioPerformanceStats studio_performance_stats = 38;
 }
 
 // Describes a product, e.g. Android Studio or Emulator.
@@ -601,6 +609,12 @@ message EmulatorGpuInfo {
   optional string renderer = 6;
 }
 
+// Set of emulator feature flags to report ones used during current session.
+message EmulatorFeatures {
+  optional bool gps = 1;
+  optional bool sensors = 2;
+}
+
 // Metrics related to the Emulator.
 message EmulatorDetails {
   // Emulator instance liveness as determined via adb connectivity.
@@ -639,6 +653,17 @@ message EmulatorDetails {
     MIPS = 5;
     MIPS_64 = 6;
   }
+  // Rendering method emulator uses for the reporter session.
+  enum EmulatorRenderer {
+    UNKNOWN_EMULATOR_RENDERER = 0;
+    HOST = 1;
+    OFF = 2;
+    GUEST = 3;
+    MESA = 4;
+    SWIFTSHADER = 5;
+    ANGLE = 6;
+    ERROR_IN_EMULATOR_RENDERER = 255;
+  }
   // Cpu architecture of the guest.
   optional .android_studio.EmulatorDetails.GuestCpuArchitecture guest_arch = 1;
   // cpu time spent in kernel mode in milliseconds since last metrics report.
@@ -665,6 +690,12 @@ message EmulatorDetails {
   repeated .android_studio.EmulatorGpuInfo host_gpu = 13;
   // The "phase" of an emulator session where crash happened.
   optional .android_studio.EmulatorDetails.EmulatorSessionPhase session_phase = 14;
+  // The emulator core version (e.g. QEMU engine's version).
+  optional string core_version = 15;
+  // Renderer of the current emulator session.
+  optional .android_studio.EmulatorDetails.EmulatorRenderer renderer = 16;
+  // Flags for the used featurs.
+  optional .android_studio.EmulatorFeatures used_features = 17;
 }
 
 // Describes a user clicking on some part of the Emulator UI.
@@ -1328,6 +1359,18 @@ message GradleTaskExecution {
     VALIDATE_SIGNING = 67;
     ZIP_ALIGN = 68;
     JAVA_COMPILE = 69;
+    BUILD_INFO_WRITER = 70;
+    BUNDLE_ATOM = 71;
+    CHECK_MANIFEST_IN_INSTANT_RUN_MODE = 72;
+    EXTERNAL_NATIVE_CLEAN = 73;
+    GENERATE_ATOM_METADATA = 74;
+    GENERATE_INSTANT_APP_METADATA = 75;
+    JAVA_PRE_COMPILE = 76;
+    MERGE_DEX_ATOM_RES_CLASS = 77;
+    PACKAGE_ATOM = 78;
+    PACKAGE_INSTANT_APP = 79;
+    PREPARE_ATOM = 80;
+    PROCESS_INSTANT_APP_RESOURCES = 81;
   }
   // The task implementing class.
   // Custom tasks are recorded as UNKNOWN_TASK_TYPE.
@@ -1366,6 +1409,9 @@ message GradleTransformExecution {
     NO_CHANGES_VERIFIER = 16;
     PRO_GUARD = 17;
     SHRINK_RESOURCES = 18;
+    DATA_BINDING_MERGE_ARTIFACTS = 19;
+    INSTANT_RUN_VERIFIER = 20;
+    STRIP_DEBUG_SYMBOL = 21;
   }
   // The transform implementing class.
   // Custom transforms are recorded as UNKNOWN_TRANSFORM_TYPE.
@@ -1525,6 +1571,7 @@ message UIActionStats {
     MENU = 2;
     KEYBOARD_SHORTCUT = 3;
     MACRO = 4;
+    MOUSE = 5;
   }
   // java class name (our code, not customer) of the UI Action reported on
   // e.g. 'com.android.build.instant_run.HotSwapBuildAction'
@@ -1615,6 +1662,12 @@ message JvmDetails {
   optional int64 soft_reference_lru_policy = 8;
   // Type of Garbage Collector to use (various VM Option flags).
   optional .android_studio.JvmDetails.GarbageCollector garbage_collector = 9;
+}
+
+// Stats on Studio's performance
+message StudioPerformanceStats {
+  // Time for which the UI was blocked in milliseconds
+  optional int32 ui_freeze_time_ms = 1;
 }
 
 

@@ -12,6 +12,7 @@
 
 #include "ui_virtual-sensors-page.h"
 
+#include "android/metrics/PeriodicReporter.h"
 #include "android/skin/file.h"
 #include "android/skin/rect.h"
 
@@ -97,4 +98,5 @@ private:
     bool mFirstShow = true;
     SkinRotation mCoarseOrientation;
     bool mVirtualSensorsUsed = false;
+    android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
 };
