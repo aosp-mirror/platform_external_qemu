@@ -16,6 +16,24 @@
       "revId": "f7154b599d3c3b4268de698e6f18b6614513e4b1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "70c1171d_3cc6c010",
+        "filename": "android/metrics/StudioConfig.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 460,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-21T00:45:20Z",
+      "side": 1,
+      "message": "I\u0027ll just remove it",
+      "parentUuid": "70c1171d_d2ef5578",
+      "revId": "f7154b599d3c3b4268de698e6f18b6614513e4b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
