@@ -9,23 +9,21 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#pragma once
-
-#include "android/metrics/MetricsReporter.h"
+#include "android/metrics/tests/MockMetricsWriter.h"
 
 namespace android {
 namespace metrics {
 
-//
-// NullMetricsReporter - a metrics reporter that ignores all requests without
-// reporting them anywhere.
-//
+MockMetricsWriter::MockMetricsWriter(const std::string& sessionId)
+    : MetricsWriter(sessionId) {}
 
-class NullMetricsReporter final : public MetricsReporter {
-public:
-    NullMetricsReporter(MetricsWriter::Ptr writer = {});
-    void reportConditional(ConditionalCallback callback) override;
-};
+void MockMetricsWriter::write(
+        const wireless_android_play_playlog::LogEvent& event) {
+    ++mWriteCallsCount;
+    if (mOnWrite) {
+        mOnWrite(event);
+    }
+}
 
 }  // namespace metrics
 }  // namespace android
