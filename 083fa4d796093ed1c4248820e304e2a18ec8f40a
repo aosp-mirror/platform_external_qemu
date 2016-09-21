@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "70c1171d_f7a7e2a8",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-21T00:54:40Z",
+      "side": 1,
+      "message": "can renderFrame() do this check?",
+      "range": {
+        "startLine": 293,
+        "startChar": 26,
+        "endLine": 293,
+        "endChar": 37
+      },
+      "revId": "083fa4d796093ed1c4248820e304e2a18ec8f40a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
