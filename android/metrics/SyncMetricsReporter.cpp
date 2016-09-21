@@ -26,8 +26,9 @@ void SyncMetricsReporter::reportConditional(ConditionalCallback callback) {
     if (callback) {
         D("executing a reporting callback");
         android_studio::AndroidStudioEvent event;
-        callback(&event);
-        sendToWriter(&event);
+        if (callback(&event)) {
+            sendToWriter(&event);
+        }
     }
 }
 
