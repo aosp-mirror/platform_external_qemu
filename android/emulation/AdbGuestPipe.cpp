@@ -106,6 +106,8 @@ void AdbGuestPipe::Service::onHostConnection(ScopedSocket&& socket) {
     // There must be no active pipe yet, but at least one waiting
     // for activation in mPipes.
     CHECK(mActivePipe != nullptr);
+    //SHOULD STOP listener !!!
+    mHostAgent->stopListening();
     mActivePipe->onHostConnection(std::move(socket));
 }
 
