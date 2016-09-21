@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "509fb379_264cc28f",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-09-21T19:35:43Z",
+      "side": 1,
+      "message": "nit",
+      "revId": "36b0132c7f76ff3a806d92eca039e21f881c910e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
