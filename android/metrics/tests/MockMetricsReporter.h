@@ -13,18 +13,28 @@
 
 #include "android/metrics/MetricsReporter.h"
 
+#include <functional>
+
 namespace android {
 namespace metrics {
 
-//
-// NullMetricsReporter - a metrics reporter that ignores all requests without
-// reporting them anywhere.
-//
-
-class NullMetricsReporter final : public MetricsReporter {
+class MockMetricsReporter final : public MetricsReporter {
 public:
-    NullMetricsReporter(MetricsWriter::Ptr writer = {});
+    using OnReportConditional = std::function<void(ConditionalCallback)>;
+
+    MockMetricsReporter();
+    MockMetricsReporter(bool enabled,
+                        MetricsWriter::Ptr writer,
+                        base::StringView emulatorVersion,
+                        base::StringView emulatorFullVersion,
+                        base::StringView qemuVersion);
+
     void reportConditional(ConditionalCallback callback) override;
+    int mReportConditionalCallsCount = 0;
+    OnReportConditional mOnReportConditional;
+
+    // Allow UTs access to this one as well.
+    using MetricsReporter::sendToWriter;
 };
 
 }  // namespace metrics

@@ -44,7 +44,7 @@ using namespace android::studio;
 using std::endl;
 using std::ofstream;
 
-TEST(DotAndroidStudio, androidStudioVersioning) {
+TEST(StudioConfigTest, androidStudioVersioning) {
     const char* str = NULL;
 
     str = ANDROID_STUDIO_DIR;
@@ -89,7 +89,7 @@ TEST(DotAndroidStudio, androidStudioVersioning) {
 #define FS "/"
 #endif
 
-TEST(DotAndroidStudio, androidStudioScanner) {
+TEST(StudioConfigTest, androidStudioScanner) {
     TestSystem testSys("/root", 32, "/root/home");
     TestTempDir* testDir = testSys.getTempRoot();
 
@@ -149,7 +149,7 @@ TEST(DotAndroidStudio, androidStudioScanner) {
     EXPECT_STREQ(foundStudioPath.c_str(), studioPath.c_str());
 }
 
-TEST(DotAndroidStudio, androidStudioXMLPathBuilder) {
+TEST(StudioConfigTest, androidStudioXMLPathBuilder) {
     TestSystem testSys("/root", 32, "/root/home", "root/home");
     TestTempDir* testDir = testSys.getTempRoot();
 
@@ -187,7 +187,7 @@ TEST(DotAndroidStudio, androidStudioXMLPathBuilder) {
 // without using the cached value.
 namespace android { namespace studio { std::string extractInstallationId(); }}
 
-TEST(DotAndroidStudio, androidStudioInstallationId) {
+TEST(StudioConfigTest, androidStudioInstallationId) {
     TestSystem testSys("/root", 32);
     TestTempDir* testDir = testSys.getTempRoot();
     testSys.setHomeDirectory(std::string(testDir->path()).append("/root/home"));
@@ -235,7 +235,7 @@ TEST(DotAndroidStudio, androidStudioInstallationId) {
     }
 }
 
-TEST(DotAndroidStudio, metricsOptIn) {
+TEST(StudioConfigTest, metricsOptIn) {
     TestSystem testSys("/root", 32);
     TestTempDir* testDir = testSys.getTempRoot();
     testSys.setHomeDirectory(std::string(testDir->path()).append("/root/home"));
