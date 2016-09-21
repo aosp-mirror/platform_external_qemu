@@ -1852,7 +1852,9 @@ handleListCurrentCalls( const char*  cmd, AModem  modem )
  *  "yy/mm/dd,hh:mm:ss(+/-)tz"
  *   mm is 0-based
  *   tz is in number of quarter-hours
- *
+ * if -timezone <timezone> is specified from cmdline option, tz will be based on <timezone>
+ * otherwise the default is local timezone from host OS
+
  * it seems reference-ril doesn't parse the comma (,) as anything else than a token
  * separator, so use a column (:) instead, the Java parsing code won't see a difference
  *
@@ -1866,21 +1868,6 @@ amodem_addTimeUpdate( AModem  modem )
     long         tzdiff;
     char         tzname[64];
 
-    tzset();
-
-    utc   = *gmtime( &now );
-    local = *localtime( &now );
-
-    e_local = local.tm_min + 60*(local.tm_hour + 24*local.tm_yday);
-    e_utc   = utc.tm_min   + 60*(utc.tm_hour   + 24*utc.tm_yday);
-
-    if ( utc.tm_year < local.tm_year )
-        e_local += 24*60;
-    else if ( utc.tm_year > local.tm_year )
-        e_utc += 24*60;
-
-    tzdiff = e_local - e_utc;  /* timezone offset in minutes */
-
    /* retrieve a zoneinfo-compatible name for the host timezone
     */
     {
@@ -1888,6 +1875,8 @@ amodem_addTimeUpdate( AModem  modem )
         char*  p = bufprint_zoneinfo_timezone( tzname, end );
         if (p >= end)
             strcpy(tzname, "Unknown/Unknown");
+        else
+            setenv("TZ", tzname, 1);  /* set TZ environ variable only if tzname is valid */
 
         /* now replace every / in the timezone name by a "!"
          * that's because the code that reads the CTZV line is
@@ -1902,6 +1891,21 @@ amodem_addTimeUpdate( AModem  modem )
             p += 1;
         }
     }
+    tzset();  /* set local timezone given TZ environ variable */
+
+    utc   = *gmtime( &now );
+    local = *localtime( &now );
+
+    e_local = local.tm_min + 60*(local.tm_hour + 24*local.tm_yday);
+    e_utc   = utc.tm_min   + 60*(utc.tm_hour   + 24*utc.tm_yday);
+
+    if ( utc.tm_year < local.tm_year )
+        e_local += 24*60;
+    else if ( utc.tm_year > local.tm_year )
+        e_utc += 24*60;
+
+    tzdiff = e_local - e_utc;  /* timezone offset in minutes */
+
 
    /* as a special extension, we append the name of the host's time zone to the
     * string returned with %CTZ. the system should contain special code to detect
