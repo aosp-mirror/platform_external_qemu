@@ -11,20 +11,25 @@
 
 #pragma once
 
-#include "android/metrics/MetricsReporter.h"
+#include "android/metrics/MetricsWriter.h"
+
+#include <functional>
+#include <string>
 
 namespace android {
 namespace metrics {
 
-//
-// NullMetricsReporter - a metrics reporter that ignores all requests without
-// reporting them anywhere.
-//
-
-class NullMetricsReporter final : public MetricsReporter {
+class MockMetricsWriter final : public MetricsWriter {
 public:
-    NullMetricsReporter(MetricsWriter::Ptr writer = {});
-    void reportConditional(ConditionalCallback callback) override;
+    using OnWrite =
+            std::function<void(const wireless_android_play_playlog::LogEvent&)>;
+
+    MockMetricsWriter(const std::string& sessionId = {});
+
+    void write(const wireless_android_play_playlog::LogEvent& event) override;
+
+    int mWriteCallsCount = 0;
+    OnWrite mOnWrite;
 };
 
 }  // namespace metrics

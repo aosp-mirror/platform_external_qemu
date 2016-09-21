@@ -17,9 +17,10 @@
 namespace android {
 namespace metrics {
 
-NullMetricsReporter::NullMetricsReporter()
+NullMetricsReporter::NullMetricsReporter(MetricsWriter::Ptr writer)
     : MetricsReporter(false,
-                      MetricsWriter::Ptr(new NullMetricsWriter()),
+                      writer ? std::move(writer)
+                             : MetricsWriter::Ptr(new NullMetricsWriter()),
                       {},
                       {},
                       {}) {
