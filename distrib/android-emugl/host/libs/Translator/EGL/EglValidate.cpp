@@ -43,6 +43,7 @@ bool EglValidate::confAttrib(EGLint attrib) {
     case EGL_SAMPLES:
     case EGL_STENCIL_SIZE:
     case EGL_SURFACE_TYPE:
+    case EGL_COLOR_BUFFER_TYPE:
     case EGL_TRANSPARENT_TYPE:
     case EGL_TRANSPARENT_RED_VALUE:
     case EGL_TRANSPARENT_GREEN_VALUE:
