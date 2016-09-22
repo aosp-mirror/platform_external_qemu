@@ -59,6 +59,9 @@ struct RenderThreadInfo {
 
     // Sync timeline info + sync thread pointer
     std::unique_ptr<SyncThread>     syncThread;
+
+    // The unique id of owner guest process of this render thread
+    uint64_t                        m_puid = 0;
 };
 
 #endif
