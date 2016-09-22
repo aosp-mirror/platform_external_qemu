@@ -35,6 +35,7 @@ public:
                                emugl_sync_register_trigger_wait_t,
                                emugl_sync_device_exists_t) override;
 
+    virtual void setDmaGetter(emugl_dma_get_t) override;
     virtual RendererPtr initRenderer(int width,
                                      int height,
                                      bool useSubWindow) override;
