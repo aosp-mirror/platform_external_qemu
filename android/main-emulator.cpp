@@ -590,6 +590,9 @@ int main(int argc, char** argv)
     /* Replace it in our command-line */
     argv[0] = emulatorPath;
 
+    /* setup launcher dir */
+    System::get()->envSet("ANDROID_EMULATOR_LAUNCHER_DIR", progDir);
+
     /* Setup library paths so that bundled standard shared libraries are picked
      * up by the re-exec'ed emulator
      */
