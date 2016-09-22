@@ -37,6 +37,8 @@ public:
                                emugl_sync_register_trigger_wait_t,
                                emugl_sync_device_exists_t) = 0;
 
+    virtual void setDMAPtrGetter(void* (*f)()) = 0;
+
     // initRenderer - initialize the OpenGL renderer object.
     //
     // |width| and |height| are the framebuffer dimensions that will be reported
@@ -49,6 +51,7 @@ public:
     // There might be only one renderer.
     virtual RendererPtr initRenderer(int width, int height,
                                      bool useSubWindow) = 0;
+
 };
 
 using RenderLibPtr = std::unique_ptr<RenderLib>;
