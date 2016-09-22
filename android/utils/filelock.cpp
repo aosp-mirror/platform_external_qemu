@@ -12,6 +12,7 @@
 
 #include "android/utils/filelock.h"
 
+#include "android/base/system/System.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/lock.h"
 #include "android/utils/path.h"
@@ -34,6 +35,8 @@
 #  include <unistd.h>
 #  include <signal.h>
 #endif
+
+using android::base::System;
 
 // Set to 1 to enable debug traces here.
 #if 0
@@ -122,7 +125,7 @@ static bool retry(Func func, int tries = 4, int timeoutMs = 100) {
         if (--tries == 0) {
             return false;
         }
-        ::Sleep(timeoutMs);
+        System::get()->sleepMs(timeoutMs);
     }
 }
 
@@ -220,7 +223,7 @@ static int filelock_lock(FileLock* lock) {
     FILE*  f = NULL;
     char   pid[8];
     struct stat  st_temp;
-    int sleep_duration_us = 0;
+    int sleep_duration_ms = 0;
 
     temp_fd = mkstemp(lock->temp);
 
@@ -247,17 +250,17 @@ static int filelock_lock(FileLock* lock) {
     /* now attempt to link the temp file to the lock file */
     for (tries = 4; tries > 0; tries--)
     {
-        const int kSleepDurationUsMax = 2000000;  // 2 seconds.
-        const int kSleepDurationUsIncrement = 200000;  // 0.2 seconds
+        const int kSleepDurationMsMax = 2000;  // 2 seconds.
+        const int kSleepDurationMsIncrement = 50;
 
-        if (sleep_duration_us > 0) {
-            if (sleep_duration_us > kSleepDurationUsMax) {
+        if (sleep_duration_ms > 0) {
+            if (sleep_duration_ms > kSleepDurationMsMax) {
                 D("Cannot acquire lock file '%s'", lock->lock);
                 goto Fail;
             }
-            usleep(sleep_duration_us);
+            System::get()->sleepMs(sleep_duration_ms);
         }
-        sleep_duration_us += kSleepDurationUsIncrement;
+        sleep_duration_ms += kSleepDurationMsIncrement;
 
         // The return value of link() is buggy on NFS, so ignore it.
         // and use lstat() to look at the result.
@@ -357,7 +360,7 @@ static int filelock_lock(FileLock* lock) {
         if (freshness == FRESHNESS_STALE) {
             D("Removing stale lockfile '%s'", lock->lock);
             rc = HANDLE_EINTR(unlink(lock->lock));
-            sleep_duration_us = 0;
+            sleep_duration_ms = 0;
             tries++;
         }
     }
