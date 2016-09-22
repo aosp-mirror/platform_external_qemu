@@ -284,6 +284,115 @@ registers:
     read the content of the params block, use its fields to perform the
     operation then write back the return value into params.status.
 
+  10/ v2 pipe: faster read/writes through command buffers and buffer lists
+
+    Batch access_params still only perform one buffer transfer at a time. This is OK
+    for applications that only use one page of memory in each transfer, but for
+    many latency/throughput-sensitive applications like OpenGL and ADB push/pull,
+    the one buffer/page per operation is not sufficient.
+
+    Ideally, if the guest wants to transfer a buffer, it should be done in
+    something as resembling one step as possible.
+
+    But, what can make this difficult is that guest pages tend to fragment all
+    over the place and not be physically contiguous.
+
+    The v2 Goldfish pipe driver and device change the register set and
+    device/pipe structs to allow for more buffers to be transferred per loop of
+    goldfish_pipe_read_write, increasing performance for all pipe users
+    in throughput-limited situations.
+
+    There are two key new structures to consider.
+
+    1. The v2 pipe adds a struct goldfish_pipe_command that represents the delivery of
+    multiple buffers in one I/O transaction:
+
+    /* A per-pipe command structure, shared with the host */
+    struct goldfish_pipe_command {
+    	s32 cmd;		/* PipeCmdCode, guest -> host */
+    	s32 id;			/* pipe id, guest -> host */
+    	s32 status;		/* command execution status, host -> guest */
+    	s32 reserved;	/* to pad to 64-bit boundary */
+    	union {
+    		/* Parameters for PIPE_CMD_{READ,WRITE} */
+    		struct {
+    			u64 ptrs[MAX_BUFFERS_PER_COMMAND]; 	/* buffer pointers, guest -> host */
+    			u32 sizes[MAX_BUFFERS_PER_COMMAND];	/* buffer sizes, guest -> host */
+    			u32 buffers_count;					/* number of buffers, guest -> host */
+    			s32 consumed_size;					/* number of consumed bytes, host -> guest */
+    		} rw_params;
+    	};
+    };
+
+    For each pipe fd, there is a corresponding goldfish_pipe_command structure
+    that can hold up to MAX_BUFFERS_PER_COMMAND (concretely, order of 10^2 so
+    far) buffers. The buffers comprising the data on the guest are tracked in
+    rw_params. Some effort is taken to ensure that the list is short as
+    possible (i.e., merge physically contiguous pages).
+
+    2. Previously, for host-triggered transfers, we walked through a linked
+    list of pipes that had pending actions (PIPE_WAKE_***), called the
+    "signaled pipes" list, and the interrupt handler would process roughly 1-3
+    such pipes each time a transfer was occurring. This is not ideal because a)
+    we are doing work in the interrupt handler and b) there can be a lot of
+    transitions between running the kernel driver in the guest versus running
+    the virtual device in the host (transitions are slow).
+
+    Hence, pipe v2 keeps a set of pipes to process from host IRQ raises:
+
+    /* Device-level set of buffers shared with the host */
+    struct goldfish_pipe_dev_buffers {
+    	struct open_command_param open_command_params;
+    	struct signalled_pipe_buffer signalled_pipe_buffers[MAX_SIGNALLED_PIPES];
+    };
+
+    and each interrupt handler can then process up to MAX_SIGNALLED_PIPES at a
+    time.  In addition, the work of waking up the signaled pipes is left to a
+    bottom-half handler and not done in interrupt context.
+
+  11/ goldfish_dma: directly accessing host memory
+
+    Sometimes, for applications that need both very high throughput and very
+    low latency, such as video playback, it can be useful to skip host/guest
+    transitions and gathering discontiguous buffers and write directly memory
+    that is also visible on the host machine.
+
+    To do this, goldfish_dma allocates a generous chunk of contiguous physical
+    memory on pipe driver initialization, maps it on the host in the pipe
+    virtual device, and adds the operations mmap() and the
+    setoffset/lock/unlock ioctl()s to each pipe fd's file_operations:
+
+    1. The registers DMA_ADDR/DMA_ADDR_HIGH hold the physical address (in the
+    guest) of the start of the physically contiguous memory. On startup, this
+    is communicated to the host and made visible for reads (and possibly
+    writes!) through the QEMU cpu_physical_memory_map() call. The resulting
+    pointer can be simultaneously written to by the guest and read on the host.
+
+    2. mmap(): mmap() will map a contiguous sub-region of the physically
+    contiguous memory and make it available to the pipe fd user. It is required
+    that only one mmap() exists for each pipe fd. The size is specified by the
+    user, but the physical offset will need to be separately specified through
+    an ioctl().  The default offset is 0. Once the offset is defined through
+    ioctl() (or using the default), the pipe fd user obtains a pointer to
+    memory whose contents become visible very quickly on the host, as it maps
+    the physically contiguous memory.
+
+    3. setoffset ioctl(): This will set the offset into the physically
+    contiguous memory when using mmap(). It needs to be done before mmap(),
+    otherwise it doesn't count.
+
+    4. getoffset ioctl(): This returns the currently-configured offset into the
+    physically contiguous memory for the pipe fd. It does not mean that mmap()
+    happened; merely, that the offset has been configured.
+
+    5. lock ioctl(): This is a synchronization primitive for the entire
+    dma-extended pipe device, where, if the current user obtains the lock,
+    other users cannot have it at the same time (it is implemented as a
+    mutex_lock). Note that this does not implicitly prevent the user from
+    writing or reading from the mmap()ed region; such accesses will need to be
+    protected by the lock ioct().
+
+    6. unlock ioctl(): The other part of the lock ioctl() that makes it useful.
 
 Available services:
 -------------------
