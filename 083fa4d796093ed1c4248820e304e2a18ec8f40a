@@ -22,6 +22,30 @@
       "revId": "083fa4d796093ed1c4248820e304e2a18ec8f40a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5006d39f_6b897d5b",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-09-22T18:04:50Z",
+      "side": 1,
+      "message": "yeah, if we change GLWidget slightly",
+      "parentUuid": "70c1171d_f7a7e2a8",
+      "range": {
+        "startLine": 293,
+        "startChar": 26,
+        "endLine": 293,
+        "endChar": 37
+      },
+      "revId": "083fa4d796093ed1c4248820e304e2a18ec8f40a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
