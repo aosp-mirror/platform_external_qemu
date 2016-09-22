@@ -163,38 +163,22 @@ int FbConfigList::chooseConfig(const EGLint* attribs,
     // what it used by the current implementation, exclusively. This forces
     // the rewrite of |attribs| into a new array.
     bool hasSurfaceType = false;
-    bool mustReplaceSurfaceType = false;
     int numAttribs = 0;
     while (attribs[numAttribs] != EGL_NONE) {
         if (attribs[numAttribs] == EGL_SURFACE_TYPE) {
             hasSurfaceType = true;
-            if (attribs[numAttribs + 1] != EGL_PBUFFER_BIT) {
-                mustReplaceSurfaceType = true;
-            }
         }
         numAttribs += 2;
     }
 
     EGLint* newAttribs = NULL;
 
-    if (mustReplaceSurfaceType) {
-        // There is at least on EGL_SURFACE_TYPE in |attribs|. Copy the
-        // array and replace all values with EGL_PBUFFER_BIT
-        newAttribs = new GLint[numAttribs + 1];
-        memcpy(newAttribs, attribs, numAttribs * sizeof(GLint));
-        newAttribs[numAttribs] = EGL_NONE;
-        for (int n = 0; n < numAttribs; n += 2) {
-            if (newAttribs[n] == EGL_SURFACE_TYPE) {
-                newAttribs[n + 1] = EGL_PBUFFER_BIT;
-            }
-        }
-    } else if (!hasSurfaceType) {
-        // There is no EGL_SURFACE_TYPE in |attribs|, then add one entry
-        // with the value EGL_PBUFFER_BIT.
+    if (!hasSurfaceType) {
+        // There is no EGL_SURFACE_TYPE in |attribs|.
         newAttribs = new GLint[numAttribs + 3];
         memcpy(newAttribs, attribs, numAttribs * sizeof(GLint));
         newAttribs[numAttribs] = EGL_SURFACE_TYPE;
-        newAttribs[numAttribs + 1] = EGL_PBUFFER_BIT;
+        newAttribs[numAttribs + 1] = 0;
         newAttribs[numAttribs + 2] = EGL_NONE;
     }
 
