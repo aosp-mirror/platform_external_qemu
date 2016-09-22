@@ -35,6 +35,13 @@ public:
                                emugl_sync_register_trigger_wait_t,
                                emugl_sync_device_exists_t) override;
 
+    virtual void setDmaReader(emugl_dma_read_t) override;
+    virtual void setDmaAddBuffer(emugl_dma_add_buffer_t) override;
+    virtual void setDmaRemoveBuffer(emugl_dma_remove_buffer_t) override;
+    virtual void setDmaGetHostAddr(emugl_dma_get_host_addr_t) override;
+    virtual void setDmaInvalidateHostMappings(emugl_dma_invalidate_host_mappings_t) override;
+    virtual void setDmaUnlock(emugl_dma_unlock_t) override;
+
     virtual RendererPtr initRenderer(int width,
                                      int height,
                                      bool useSubWindow) override;

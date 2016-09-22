@@ -1024,13 +1024,27 @@ R"(        // Do this on every iteration, as some commands may change the checks
 
                 if (!v->isPointer()) {
                     if (pass == PASS_VariableDeclarations) {
-                        fprintf(fp,
-                                "\t\t\t%s var_%s = Unpack<%s,uint%u_t>(ptr + %s);\n",
-                                var_type_name,
-                                var_name,
-                                var_type_name,
-                                var_type_bytes * 8U,
-                                varoffset.c_str());
+                        if (v->isDMA()) {
+                            fprintf(fp,
+                                    "\t\t\t%s var_%s_guest_paddr = Unpack<%s,uint%u_t>(ptr + %s);\n"
+                                    "\t\t\t%s var_%s = stream->getDmaForReading(var_%s_guest_paddr);\n",
+                                    var_type_name,
+                                    var_name,
+                                    var_type_name,
+                                    var_type_bytes * 8U,
+                                    varoffset.c_str(),
+                                    var_type_name,
+                                    var_name,
+                                    var_name);
+                        } else {
+                            fprintf(fp,
+                                    "\t\t\t%s var_%s = Unpack<%s,uint%u_t>(ptr + %s);\n",
+                                    var_type_name,
+                                    var_name,
+                                    var_type_name,
+                                    var_type_bytes * 8U,
+                                    varoffset.c_str());
+                        }
                     }
 
                     if (pass == PASS_FunctionCall ||
@@ -1208,6 +1222,22 @@ R"(        // Do this on every iteration, as some commands may change the checks
             if (pass == PASS_FunctionCall ||
                 pass == PASS_DebugPrint) {
                 fprintf(fp, ");\n");
+
+                if (pass == PASS_FunctionCall) {
+                    // unlock all dma buffers that have been passed
+                    for (size_t j = 0; j < evars.size(); j++) {
+                        Var *v = & evars[j];
+                        if (v->isVoid()) {
+                            continue;
+                        }
+                        const char* var_name = v->name().c_str();
+                        if (v->isDMA()) {
+                            fprintf(fp,
+                                    "\t\t\tstream->unlockDma(var_%s_guest_paddr);\n",
+                                    var_name);
+                        }
+                    }
+                }
             }
 
             if (pass == PASS_TmpBuffAlloc) {

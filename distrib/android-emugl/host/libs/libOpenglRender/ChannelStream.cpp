@@ -13,6 +13,8 @@
 // limitations under the License.
 #include "ChannelStream.h"
 
+#include "emugl/common/dma_device.h"
+
 #include <assert.h>
 
 ChannelStream::ChannelStream(std::shared_ptr<emugl::RenderChannelImpl> channel,
@@ -47,6 +49,14 @@ const unsigned char* ChannelStream::read(void* buf, size_t* inout_len) {
     }
     *inout_len = size;
     return (const unsigned char*)buf;
+}
+
+uint64_t ChannelStream::getDmaForReading(uint64_t guest_paddr) {
+    return g_emugl_dma_get_host_addr(guest_paddr);
+}
+
+void ChannelStream::unlockDma(uint64_t guest_paddr) {
+    g_emugl_dma_unlock(guest_paddr);
 }
 
 void ChannelStream::forceStop() {

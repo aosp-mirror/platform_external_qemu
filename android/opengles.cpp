@@ -13,6 +13,7 @@
 #include "android/opengles.h"
 
 #include "android/crashreport/crash-handler.h"
+#include "android/emulation/GoldfishDma.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/opengl/logger.h"
@@ -145,6 +146,14 @@ android_startOpenglesRenderer(int width, int height)
     logfuncs.coarse = android_opengl_logger_write;
     logfuncs.fine = android_opengl_cxt_logger_write;
     sRenderLib->setLogger(logfuncs);
+
+    // render lib impl for goldfish dma:
+    sRenderLib->setDmaReader(android_goldfish_dma_read);
+    sRenderLib->setDmaAddBuffer(android_goldfish_dma_add_buffer);
+    sRenderLib->setDmaRemoveBuffer(android_goldfish_dma_remove_buffer);
+    sRenderLib->setDmaGetHostAddr(android_goldfish_dma_get_host_addr);
+    sRenderLib->setDmaInvalidateHostMappings(android_goldfish_dma_invalidate_host_mappings);
+    sRenderLib->setDmaUnlock(android_goldfish_dma_unlock);
 
     sRenderer = sRenderLib->initRenderer(width, height, sRendererUsesSubWindow);
     if (!sRenderer) {

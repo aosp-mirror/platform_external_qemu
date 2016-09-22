@@ -37,6 +37,15 @@ public:
                                emugl_sync_register_trigger_wait_t,
                                emugl_sync_device_exists_t) = 0;
 
+    // Sets the function use to read from the guest
+    // physically contiguous DMA region at particular offsets.
+    virtual void setDmaReader(emugl_dma_read_t) = 0;
+    virtual void setDmaAddBuffer(emugl_dma_add_buffer_t) = 0;
+    virtual void setDmaRemoveBuffer(emugl_dma_remove_buffer_t) = 0;
+    virtual void setDmaGetHostAddr(emugl_dma_get_host_addr_t) = 0;
+    virtual void setDmaInvalidateHostMappings(emugl_dma_invalidate_host_mappings_t) = 0;
+    virtual void setDmaUnlock(emugl_dma_unlock_t) = 0;
+
     // initRenderer - initialize the OpenGL renderer object.
     //
     // |width| and |height| are the framebuffer dimensions that will be reported
@@ -49,6 +58,7 @@ public:
     // There might be only one renderer.
     virtual RendererPtr initRenderer(int width, int height,
                                      bool useSubWindow) = 0;
+
 };
 
 using RenderLibPtr = std::unique_ptr<RenderLib>;
