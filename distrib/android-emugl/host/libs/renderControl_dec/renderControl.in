@@ -22,7 +22,7 @@ GL_ENTRY(void, rcBindTexture, uint32_t colorBuffer)
 GL_ENTRY(void, rcBindRenderbuffer, uint32_t colorBuffer)
 GL_ENTRY(EGLint, rcColorBufferCacheFlush, uint32_t colorbuffer, EGLint postCount,int forRead)
 GL_ENTRY(void, rcReadColorBuffer, uint32_t colorbuffer, GLint x, GLint y, GLint width, GLint height, GLenum format, GLenum type, void *pixels)
-GL_ENTRY(int, rcUpdateColorBuffer, uint32_t colorbuffer, GLint x, GLint y, GLint width, GLint height, GLenum format, GLenum type, void *pixels)
+GL_ENTRY(int, rcUpdateColorBuffer, uint32_t colorbuffer, GLint x, GLint y, GLint width, GLint height, GLenum format, GLenum type, void *pixels);
 GL_ENTRY(int, rcOpenColorBuffer2, uint32_t colorbuffer)
 GL_ENTRY(uint32_t, rcCreateClientImage, uint32_t context, EGLenum target, GLuint buffer)
 GL_ENTRY(int, rcDestroyClientImage, uint32_t image)
@@ -32,3 +32,4 @@ GL_ENTRY(EGLint, rcClientWaitSyncKHR, uint64_t sync, EGLint flags, uint64_t time
 GL_ENTRY(void, rcFlushWindowColorBufferAsync, uint32_t windowSurface)
 GL_ENTRY(int, rcDestroySyncKHR, uint64_t sync);
 GL_ENTRY(void, rcSetPuid, uint64_t puid);
+GL_ENTRY(int, rcUpdateColorBufferDMA, uint32_t colorbuffer, GLint x, GLint y, GLint width, GLint height, GLenum format, GLenum type)
