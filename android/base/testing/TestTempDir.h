@@ -59,7 +59,7 @@ public:
         }
         temp_dir += "XXXXXX";
         if (mkdtemp(&temp_dir[0])) {
-            mPath = temp_dir;
+            mPath = temp_dir.c_str();
         }
     }
 
