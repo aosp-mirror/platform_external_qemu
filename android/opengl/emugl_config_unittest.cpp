@@ -59,7 +59,7 @@ TEST(EmuglConfig, init) {
     {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
-                    &config, false, "host", NULL, 0, false, false, false));
+                    &config, false, "host", NULL, 0, false, false, false, NULL));
         EXPECT_FALSE(config.enabled);
         EXPECT_STREQ("GPU emulation is disabled", config.status);
     }
@@ -67,7 +67,7 @@ TEST(EmuglConfig, init) {
     {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
-                    &config, true, "host", NULL, 0, false, false, false));
+                    &config, true, "host", NULL, 0, false, false, false, NULL));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("host", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'host' mode", config.status);
@@ -76,7 +76,7 @@ TEST(EmuglConfig, init) {
     {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
-                    &config, true, "mesa", NULL, 0, false, false, false));
+                    &config, true, "mesa", NULL, 0, false, false, false, NULL));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("mesa", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'mesa' mode", config.status);
@@ -85,7 +85,7 @@ TEST(EmuglConfig, init) {
     {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
-                    &config, true, "host", "off", 0, false, false, false));
+                    &config, true, "host", "off", 0, false, false, false, NULL));
         EXPECT_FALSE(config.enabled);
         EXPECT_STREQ("GPU emulation is disabled", config.status);
     }
@@ -93,7 +93,7 @@ TEST(EmuglConfig, init) {
     {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
-                &config, true, "host", "disable", 0, false, false, false));
+                &config, true, "host", "disable", 0, false, false, false, NULL));
         EXPECT_FALSE(config.enabled);
         EXPECT_STREQ("GPU emulation is disabled", config.status);
     }
@@ -101,7 +101,7 @@ TEST(EmuglConfig, init) {
     {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
-                    &config, false, "host", "on", 0, false, false, false));
+                    &config, false, "host", "on", 0, false, false, false, NULL));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("host", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'host' mode", config.status);
@@ -110,7 +110,7 @@ TEST(EmuglConfig, init) {
     {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
-                    &config, false, NULL, "on", 0, false, false, false));
+                    &config, false, NULL, "on", 0, false, false, false, NULL));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("host", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'host' mode", config.status);
@@ -119,7 +119,7 @@ TEST(EmuglConfig, init) {
     {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
-                &config, false, "mesa", "enable", 0, false, false, false));
+                &config, false, "mesa", "enable", 0, false, false, false, NULL));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("mesa", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'mesa' mode", config.status);
@@ -129,12 +129,12 @@ TEST(EmuglConfig, init) {
     {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
-                &config, true, "vendor", "auto", 0, false, false, false));
+                &config, true, "vendor", "auto", 0, false, false, false, NULL));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("vendor", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'vendor' mode",
                      config.status);
-        emuglConfig_setupEnv(&config);
+        emuglConfig_setupEnv(&config, NULL);
         EXPECT_TRUE(
                 strstr(System::get()->envGet("ANDROID_GLESv1_LIB").c_str(),
                        android::opengl::kGLES12TranslatorName) != NULL);
@@ -143,7 +143,7 @@ TEST(EmuglConfig, init) {
     {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
-                &config, false, "vendor", "auto", 0, false, false, false));
+                &config, false, "vendor", "auto", 0, false, false, false, NULL));
         EXPECT_FALSE(config.enabled);
         EXPECT_STREQ("GPU emulation is disabled", config.status);
     }
@@ -151,7 +151,7 @@ TEST(EmuglConfig, init) {
     {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
-                &config, true, "host", "vendor", 0, false, false, false));
+                &config, true, "host", "vendor", 0, false, false, false, NULL));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("vendor", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'vendor' mode", config.status);
@@ -160,7 +160,7 @@ TEST(EmuglConfig, init) {
     {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
-                &config, true, "guest", "auto", 0, false, false, false));
+                &config, true, "guest", "auto", 0, false, false, false, NULL));
         EXPECT_FALSE(config.enabled);
         EXPECT_STREQ("GPU emulation is disabled", config.status);
     }
@@ -168,7 +168,7 @@ TEST(EmuglConfig, init) {
     {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
-                &config, false, "guest", "auto", 0, false, false, false));
+                &config, false, "guest", "auto", 0, false, false, false, NULL));
         EXPECT_FALSE(config.enabled);
         EXPECT_STREQ("GPU emulation is disabled", config.status);
     }
@@ -176,7 +176,7 @@ TEST(EmuglConfig, init) {
     {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
-                &config, true, "host", "guest", 0, false, false, false));
+                &config, true, "host", "guest", 0, false, false, false, NULL));
         EXPECT_FALSE(config.enabled);
     }
 }
@@ -213,12 +213,12 @@ TEST(EmuglConfig, initGLESv2Only) {
     {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
-                &config, true, "angle", "auto", 0, false, false, false));
+                &config, true, "angle", "auto", 0, false, false, false, NULL));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("angle", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'angle' mode",
                      config.status);
-        emuglConfig_setupEnv(&config);
+        emuglConfig_setupEnv(&config, NULL);
         EXPECT_TRUE(
                 strstr(System::get()->envGet("ANDROID_GLESv1_LIB").c_str(),
                        android::opengl::kGLES12TranslatorName) != NULL);
@@ -229,12 +229,12 @@ TEST(EmuglConfig, initGLESv2Only) {
     {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
-                &config, true, "angle", "auto", 0, false, false, false));
+                &config, true, "angle", "auto", 0, false, false, false, NULL));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("angle", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'angle' mode",
                      config.status);
-        emuglConfig_setupEnv(&config);
+        emuglConfig_setupEnv(&config, NULL);
         EXPECT_FALSE(
                 strstr(System::get()->envGet("ANDROID_GLESv1_LIB").c_str(),
                        android::opengl::kGLES12TranslatorName) != NULL);
@@ -256,7 +256,7 @@ TEST(EmuglConfig, initNxWithSwiftshader) {
 
     EmuglConfig config;
     EXPECT_TRUE(emuglConfig_init(
-                &config, true, "auto", NULL, 0, false, false, false));
+                &config, true, "auto", NULL, 0, false, false, false, NULL));
     EXPECT_TRUE(config.enabled);
     EXPECT_STREQ("swiftshader", config.backend);
     EXPECT_STREQ("GPU emulation enabled using 'swiftshader' mode", config.status);
@@ -272,7 +272,7 @@ TEST(EmuglConfig, initNxWithoutSwiftshader) {
 
     EmuglConfig config;
     EXPECT_TRUE(emuglConfig_init(
-                &config, true, "auto", NULL, 0, false, false, false));
+                &config, true, "auto", NULL, 0, false, false, false, NULL));
     EXPECT_FALSE(config.enabled);
     EXPECT_STREQ("GPU emulation is disabled under NX without Swiftshader", config.status);
 }
@@ -292,7 +292,7 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithSwiftshader) {
 
     EmuglConfig config;
     EXPECT_TRUE(emuglConfig_init(
-                &config, true, "auto", NULL, 0, false, false, false));
+                &config, true, "auto", NULL, 0, false, false, false, NULL));
     EXPECT_TRUE(config.enabled);
     EXPECT_STREQ("swiftshader", config.backend);
     EXPECT_STREQ("GPU emulation enabled using 'swiftshader' mode", config.status);
@@ -308,7 +308,7 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithoutSwiftshader) {
 
     EmuglConfig config;
     EXPECT_TRUE(emuglConfig_init(
-                &config, true, "auto", NULL, 0, false, false, false));
+                &config, true, "auto", NULL, 0, false, false, false, NULL));
     EXPECT_FALSE(config.enabled);
     EXPECT_STREQ("GPU emulation is disabled under Chrome Remote Desktop without Swiftshader", config.status);
 }
@@ -326,7 +326,7 @@ TEST(EmuglConfig, initNoWindowWithSwiftshader) {
 
     EmuglConfig config;
     EXPECT_TRUE(emuglConfig_init(
-                &config, true, "auto", NULL, 0, true, false, false));
+                &config, true, "auto", NULL, 0, true, false, false, NULL));
     EXPECT_TRUE(config.enabled);
     EXPECT_STREQ("swiftshader", config.backend);
     EXPECT_STREQ("GPU emulation enabled using 'swiftshader' mode", config.status);
@@ -340,7 +340,7 @@ TEST(EmuglConfig, initNoWindowWithoutSwiftshader) {
 
     EmuglConfig config;
     EXPECT_TRUE(emuglConfig_init(
-                &config, true, "auto", NULL, 0, true, false, false));
+                &config, true, "auto", NULL, 0, true, false, false, NULL));
     EXPECT_FALSE(config.enabled);
     EXPECT_STREQ("GPU emulation is disabled (-no-window without Swiftshader)",
                  config.status);

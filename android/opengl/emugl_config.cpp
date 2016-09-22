@@ -40,9 +40,9 @@ using android::opengl::EmuglBackendList;
 
 static EmuglBackendList* sBackendList = NULL;
 
-static void resetBackendList(int bitness) {
+static void resetBackendList(int bitness, const char* launcherDir) {
     delete sBackendList;
-    sBackendList = new EmuglBackendList(
+    sBackendList = new EmuglBackendList( launcherDir ? launcherDir :
             System::get()->getLauncherDirectory().c_str(), bitness);
 }
 
@@ -127,7 +127,8 @@ bool emuglConfig_init(EmuglConfig* config,
                       int bitness,
                       bool no_window,
                       bool blacklisted,
-                      bool has_guest_renderer) {
+                      bool has_guest_renderer,
+                      const char* launcherDir) {
     D("%s: blacklisted=%d has_guest_renderer=%d\n",
       __FUNCTION__,
       blacklisted,
@@ -182,7 +183,7 @@ bool emuglConfig_init(EmuglConfig* config,
         bitness = System::get()->getProgramBitness();
     }
     config->bitness = bitness;
-    resetBackendList(bitness);
+    resetBackendList(bitness, launcherDir);
 
     // Check that the GPU mode is a valid value. 'auto' means determine
     // the best mode depending on the environment. Its purpose is to
@@ -272,7 +273,7 @@ bool emuglConfig_init(EmuglConfig* config,
     return true;
 }
 
-void emuglConfig_setupEnv(const EmuglConfig* config) {
+void emuglConfig_setupEnv(const EmuglConfig* config, const char* launcherDir) {
     System* system = System::get();
 
     if (!config->enabled) {
@@ -287,7 +288,7 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
 
     // $EXEC_DIR/<lib>/ is already added to the library search path by default,
     // since generic libraries are bundled there. We may need more though:
-    resetBackendList(config->bitness);
+    resetBackendList(config->bitness, launcherDir);
     if (strcmp(config->backend, "host") != 0) {
         // If the backend is not 'host', we also need to add the
         // backend directory.
@@ -314,10 +315,12 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     std::string lib;
     if (sBackendList->getBackendLibPath(
             config->backend, EmuglBackendList::LIBRARY_EGL, &lib)) {
+        D("ANDROID_EGL_LIB %s\n", lib.c_str());
         system->envSet("ANDROID_EGL_LIB", lib);
     }
     if (sBackendList->getBackendLibPath(
             config->backend, EmuglBackendList::LIBRARY_GLESv1, &lib)) {
+        D("ANDROID_GLESv1_LIB %s\n", lib.c_str());
         system->envSet("ANDROID_GLESv1_LIB", lib);
     } else if (strcmp(config->backend, "mesa")) {
         fprintf(stderr, "OpenGL backend '%s' without OpenGL ES 1.x library detected. "
@@ -330,6 +333,7 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
 
     if (sBackendList->getBackendLibPath(
             config->backend, EmuglBackendList::LIBRARY_GLESv2, &lib)) {
+        D("ANDROID_GLESv2_LIB %s\n", lib.c_str());
         system->envSet("ANDROID_GLESv2_LIB", lib);
     }
 

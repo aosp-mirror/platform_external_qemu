@@ -611,13 +611,14 @@ int main(int argc, char** argv)
                                 googleApis,
                                 gpu,
                                 wantedBitness,
-                                noWindow)) {
+                                noWindow,
+                                progDir.c_str())) {
         fprintf(stderr, "ERROR: %s\n", config.status);
         return 1;
     }
     D("%s\n", config.status);
 
-    emuglConfig_setupEnv(&config);
+    emuglConfig_setupEnv(&config, progDir.c_str());
 
     /* Add <lib>/qt/ to the library search path. */
     androidQtSetupEnv(wantedBitness, progDir.c_str());

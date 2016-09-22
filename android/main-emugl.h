@@ -34,6 +34,7 @@ bool androidEmuglConfigInit(EmuglConfig* config,
                             bool hasGoogleApis,
                             const char* gpuOption,
                             int wantedBitness,
-                            bool noWindow);
+                            bool noWindow,
+                            const char* launcherDir);
 
 ANDROID_END_HEADER

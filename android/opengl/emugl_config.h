@@ -98,10 +98,11 @@ bool emuglConfig_init(EmuglConfig* config,
                       int bitness,
                       bool no_window,
                       bool blacklisted,
-                      bool google_apis);
+                      bool google_apis,
+                      const char* launcherDir);
 
 // Setup GPU emulation according to a given |backend|.
 // |bitness| is the host bitness, and can be 0 (autodetect), 32 or 64.
-void emuglConfig_setupEnv(const EmuglConfig* config);
+void emuglConfig_setupEnv(const EmuglConfig* config, const char* launcherDir);
 
 ANDROID_END_HEADER

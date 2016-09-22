@@ -1618,7 +1618,8 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
                                     isGoogle,
                                     opts->gpu,
                                     0,
-                                    opts->no_window)) {
+                                    opts->no_window,
+                                    NULL)) {
             derror("%s", config.status);
             return false;
         }
