@@ -137,6 +137,18 @@ void Thread::maskAllSignals() {
     // no such thing as signal in Windows
 }
 
+// static
+void Thread::sleepMs(unsigned n) {
+    ::Sleep(n);
+}
+
+// static
+void Thread::yield() {
+    if (!::SwitchToThread()) {
+        ::Sleep(0);
+    }
+}
+
 unsigned long getCurrentThreadId() {
     return static_cast<unsigned long>(GetCurrentThreadId());
 }

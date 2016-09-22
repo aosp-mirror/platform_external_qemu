@@ -49,7 +49,8 @@ enum class OsType {
 std::string toString(OsType osType);
 
 enum class RunOptions {
-    None = 0,
+    // Can't use None here: X.h defines None to 0L.
+    Empty = 0,
 
     // some pseudo flags to just state the default behavior
     DontWait = 0,
@@ -281,8 +282,15 @@ public:
     // Returns the current Unix timestamp with microsecond resolution
     virtual Duration getUnixTimeUs() const = 0;
 
+    // Returns the OS-specific high resolution timestamp.
+    virtual WallDuration getHighResTimeUs() const = 0;
+
     // Sleep for |n| milliseconds
-    static void sleepMs(unsigned n);
+    virtual void sleepMs(unsigned n) const = 0;
+
+    // Yield the remaining part of current thread's CPU time slice to another
+    // thread that's ready to run.
+    virtual void yield() const = 0;
 
     // /////////////////////////////////////////////////////////////////////////
     // Execute commands.

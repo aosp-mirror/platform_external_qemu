@@ -80,7 +80,7 @@ bool WaitForDebugger(System::Duration timeoutMs) {
     System::Duration sleptForMs = 0;
     while (!IsDebuggerAttached()
            && (timeoutMs == -1 || sleptForMs < timeoutMs)) {
-        System::sleepMs(sleepTimeoutMs);
+        System::get()->sleepMs(sleepTimeoutMs);
         sleptForMs += sleepTimeoutMs;
     }
     return IsDebuggerAttached();

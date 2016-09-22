@@ -38,7 +38,6 @@ host_common_SRC_FILES := \
     SyncThread.cpp \
     TextureDraw.cpp \
     TextureResize.cpp \
-    TimeUtils.cpp \
     WindowSurface.cpp \
 
 ### host libOpenglRender #################################################

@@ -23,12 +23,13 @@
 #include "RendererImpl.h"
 #include "RenderChannelImpl.h"
 #include "RenderThreadInfo.h"
-#include "TimeUtils.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
 #include "../../../shared/OpenglCodecCommon/ChecksumCalculatorThreadInfo.h"
+
+#include "android/base/system/System.h"
 
 #include <memory>
 #include <string.h>
@@ -83,7 +84,7 @@ intptr_t RenderThread::main() {
     ReadBuffer readBuf(STREAM_BUFFER_SIZE);
 
     int stats_totalBytes = 0;
-    long long stats_t0 = GetCurrentTimeMS();
+    long long stats_t0 = android::base::System::get()->getHighResTimeUs() / 1000;
 
     //
     // open dump file if RENDER_DUMP_DIR is defined
@@ -112,13 +113,13 @@ intptr_t RenderThread::main() {
         // log received bandwidth statistics
         //
         stats_totalBytes += readBuf.validData();
-        long long dt = GetCurrentTimeMS() - stats_t0;
+        long long dt = android::base::System::get()->getHighResTimeUs() / 1000 - stats_t0;
         if (dt > 1000) {
             // float dts = (float)dt / 1000.0f;
             // printf("Used Bandwidth %5.3f MB/s\n", ((float)stats_totalBytes /
             // dts) / (1024.0f*1024.0f));
             stats_totalBytes = 0;
-            stats_t0 = GetCurrentTimeMS();
+            stats_t0 = android::base::System::get()->getHighResTimeUs() / 1000;
         }
 
         //

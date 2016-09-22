@@ -81,7 +81,7 @@ public:
                 return false;
             } else {
                 // Pipe does not exist yet, sleep and try again
-                ::android::base::System::sleepMs(kWaitIntervalMS);
+                ::android::base::System::get()->sleepMs(kWaitIntervalMS);
             }
 
         }

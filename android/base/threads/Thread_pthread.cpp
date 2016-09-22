@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <signal.h>
 #include <stdio.h>
+#include <unistd.h>
 
 namespace android {
 namespace base {
@@ -156,6 +157,16 @@ void Thread::maskAllSignals() {
     sigset_t set;
     sigfillset(&set);
     pthread_sigmask(SIG_SETMASK, &set, nullptr);
+}
+
+// static
+void Thread::sleepMs(unsigned n) {
+    usleep(n * 1000);
+}
+
+// static
+void Thread::yield() {
+    sched_yield();
 }
 
 unsigned long getCurrentThreadId() {
