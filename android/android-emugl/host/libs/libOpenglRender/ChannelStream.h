@@ -33,6 +33,8 @@ protected:
     virtual int commitBuffer(size_t size) override final;
     virtual const unsigned char* readRaw(void* buf, size_t* inout_len)
             override final;
+    virtual void* getDmaForReading(uint64_t guest_paddr) override final;
+    virtual void unlockDma(uint64_t guest_paddr) override final;
 
 private:
     std::shared_ptr<RenderChannelImpl> mChannel;

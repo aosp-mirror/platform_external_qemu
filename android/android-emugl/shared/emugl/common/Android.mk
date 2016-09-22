@@ -7,6 +7,7 @@ LOCAL_PATH := $(call my-dir)
 
 commonSources := \
         crash_reporter.cpp \
+        dma_device.cpp \
         feature_control.cpp \
         logging.cpp \
         shared_library.cpp \
