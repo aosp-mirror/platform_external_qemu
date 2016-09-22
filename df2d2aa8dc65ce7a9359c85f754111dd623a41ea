@@ -34,6 +34,24 @@
       "revId": "df2d2aa8dc65ce7a9359c85f754111dd623a41ea",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5006d39f_4ef927ac",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1894,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-09-22T19:06:14Z",
+      "side": 1,
+      "message": "And also probably another tzset call, that\u0027s the one that changes the behavior of all other date/time related functions, right?",
+      "parentUuid": "5006d39f_2e6dd3c1",
+      "revId": "df2d2aa8dc65ce7a9359c85f754111dd623a41ea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
