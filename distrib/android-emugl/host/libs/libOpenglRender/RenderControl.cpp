@@ -31,6 +31,7 @@
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/sync_device.h"
+#include "emugl/common/dma_device.h"
 #include "emugl/common/thread.h"
 
 #include <atomic>
@@ -149,7 +150,12 @@ static const GLint rendererVersion = 1;
 // "ANDROIDEMU_native_sync_v2": +cleanup of sync objects
 // (We need all the different strings to not be prefixes of any other
 // due to how they are checked for in the GL extensions on the guest)
-static android::base::StringView kAsyncSwapStr = "ANDROID_EMU_native_sync_v2";
+static constexpr android::base::StringView kAsyncSwapStr = "ANDROID_EMU_native_sync_v2";
+
+// DMA version history:
+// "ANDROID_EMU_dma_v1": add dma device and rcUpdateColorBufferDMA and do
+// yv12 conversion on the GPU
+static constexpr android::base::StringView kDmaStr = "ANDROID_EMU_dma_v1";
 
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
@@ -226,6 +232,8 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     bool asyncSwapEnabled =
         emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap) &&
         emugl_sync_device_exists();
+    bool dmaEnabled =
+        emugl_feature_is_enabled(android::featurecontrol::GLDMA);
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -234,6 +242,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
 
     if (asyncSwapEnabled && name == GL_EXTENSIONS) {
         glStr += kAsyncSwapStr;
+        glStr += " ";
+    }
+
+    if (dmaEnabled && name == GL_EXTENSIONS) {
+        glStr += kDmaStr;
         glStr += " ";
     }
 
@@ -528,9 +541,9 @@ static void rcReadColorBuffer(uint32_t colorBuffer,
 }
 
 static int rcUpdateColorBuffer(uint32_t colorBuffer,
-                                GLint x, GLint y,
-                                GLint width, GLint height,
-                                GLenum format, GLenum type, void* pixels)
+                               GLint x, GLint y,
+                               GLint width, GLint height,
+                               GLenum format, GLenum type, void* pixels)
 {
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
@@ -544,6 +557,27 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
     GRSYNC_DPRINT("unlock gralloc cb lock");
     sGrallocSync->unlockColorBufferPrepare();
     return 0;
+}
+
+static void rcUpdateColorBufferDMA(uint32_t colorBuffer,
+                                  GLint x, GLint y,
+                                  GLint width, GLint height,
+                                  GLenum format, GLenum type,
+                                  void* pixels, uint32_t pixels_size)
+{
+    FrameBuffer *fb = FrameBuffer::getFB();
+
+    if (!fb) {
+        GRSYNC_DPRINT("unlock gralloc cb lock");
+        sGrallocSync->unlockColorBufferPrepare();
+        return;
+    }
+
+    fb->updateColorBuffer(colorBuffer, x, y, width, height,
+                          format, type, pixels);
+
+    GRSYNC_DPRINT("unlock gralloc cb lock");
+    sGrallocSync->unlockColorBufferPrepare();
 }
 
 static uint32_t rcCreateClientImage(uint32_t context, EGLenum target, GLuint buffer)
@@ -703,6 +737,7 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcColorBufferCacheFlush = rcColorBufferCacheFlush;
     dec->rcReadColorBuffer = rcReadColorBuffer;
     dec->rcUpdateColorBuffer = rcUpdateColorBuffer;
+    dec->rcUpdateColorBufferDMA = rcUpdateColorBufferDMA;
     dec->rcOpenColorBuffer2 = rcOpenColorBuffer2;
     dec->rcCreateClientImage = rcCreateClientImage;
     dec->rcDestroyClientImage = rcDestroyClientImage;

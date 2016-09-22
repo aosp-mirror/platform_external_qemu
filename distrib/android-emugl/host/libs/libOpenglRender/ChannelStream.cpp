@@ -17,6 +17,7 @@
 
 #define EMUGL_DEBUG_LEVEL  0
 #include "emugl/common/debug.h"
+#include "emugl/common/dma_device.h"
 
 #include <assert.h>
 #include <memory.h>
@@ -84,6 +85,14 @@ const unsigned char* ChannelStream::readRaw(void* buf, size_t* inout_len) {
     *inout_len = count;
     D("read %d bytes", (int)count);
     return (const unsigned char*)buf;
+}
+
+void* ChannelStream::getDmaForReading(uint64_t guest_paddr) {
+    return g_emugl_dma_get_host_addr(guest_paddr);
+}
+
+void ChannelStream::unlockDma(uint64_t guest_paddr) {
+    g_emugl_dma_unlock(guest_paddr);
 }
 
 void ChannelStream::forceStop() {

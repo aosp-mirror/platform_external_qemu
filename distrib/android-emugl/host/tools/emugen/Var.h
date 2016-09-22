@@ -73,8 +73,10 @@ public:
     PointerDir pointerDir() { return m_pointerDir; }
     void setNullAllowed(bool state) { m_nullAllowed = state; }
     void setIsLarge(bool state) { m_isLarge = state; }
+    void setDMA(bool state) { m_isDMA = state; }
     bool nullAllowed() const { return m_nullAllowed; }
     bool isLarge() const { return m_isLarge; }
+    bool isDMA() const { return m_isDMA; }
     void printType(FILE *fp) { fprintf(fp, "%s", m_type->name().c_str()); }
     void printTypeName(FILE *fp) { printType(fp); fprintf(fp, " %s", m_name.c_str()); }
 
@@ -86,6 +88,7 @@ private:
     PointerDir m_pointerDir = POINTER_IN;
     bool m_nullAllowed = false;
     bool m_isLarge = false;
+    bool m_isDMA = false;
     std::string m_packExpression; // an expression to pack data into the stream
     std::string m_writeExpression; // an expression to write data into the stream
     std::string m_paramCheckExpression; //an expression to check parameter value
