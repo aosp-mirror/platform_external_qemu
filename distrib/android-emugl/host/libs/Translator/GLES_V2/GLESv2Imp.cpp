@@ -455,11 +455,44 @@ GL_APICALL void  GL_APIENTRY glCompressedTexSubImage2D(GLenum target, GLint leve
     ctx->dispatcher().glCompressedTexSubImage2D(target,level,xoffset,yoffset,width,height,format,imageSize,data);
 }
 
+void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border){
+    GET_CTX();
+
+    if (ctx->shareGroup().get() && level == 0){
+        TextureData *texData = getTextureTargetData(target);
+        if(texData) {
+            texData->width = width;
+            texData->height = height;
+            texData->border = border;
+            texData->internalFormat = internalformat;
+            texData->target = target;
+
+            if (texData->sourceEGLImage != 0) {
+                //
+                // This texture was a target of EGLImage,
+                // but now it is re-defined so we need to
+                // re-generate global texture name for it.
+                //
+                unsigned int tex = ctx->getBindedTexture(target);
+                ctx->shareGroup()->genName(NamedObjectType::TEXTURE, tex,
+                                           false);
+                unsigned int globalTextureName =
+                        ctx->shareGroup()->getGlobalName(
+                                NamedObjectType::TEXTURE, tex);
+                ctx->dispatcher().glBindTexture(GL_TEXTURE_2D,
+                                                globalTextureName);
+                texData->sourceEGLImage = 0;
+            }
+        }
+    }
+}
+
 GL_APICALL void  GL_APIENTRY glCopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border){
     GET_CTX();
     SET_ERROR_IF(!(GLESv2Validate::pixelFrmt(ctx,internalformat) && GLESv2Validate::textureTargetEx(target)),GL_INVALID_ENUM);
     SET_ERROR_IF((GLESv2Validate::textureIsCubeMap(target) && width != height), GL_INVALID_VALUE);
     SET_ERROR_IF(border != 0,GL_INVALID_VALUE);
+    s_glInitTexImage2D(target,level,internalformat,width,height,border);
     ctx->dispatcher().glCopyTexImage2D(target,level,internalformat,x,y,width,height,border);
 }
 
@@ -2038,34 +2071,7 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
     SET_ERROR_IF(!GLESv2Validate::pixelSizedFrmt(ctx, internalformat, format, type), GL_INVALID_OPERATION);
     SET_ERROR_IF(border != 0,GL_INVALID_VALUE);
 
-    if (ctx->shareGroup().get() && level == 0){
-        TextureData *texData = getTextureTargetData(target);
-        if(texData) {
-            texData->width = width;
-            texData->height = height;
-            texData->border = border;
-            texData->internalFormat = internalformat;
-            texData->target = target;
-
-            if (texData->sourceEGLImage != 0) {
-                //
-                // This texture was a target of EGLImage,
-                // but now it is re-defined so we need to
-                // re-generate global texture name for it.
-                //
-                unsigned int tex = ctx->getBindedTexture(target);
-                ctx->shareGroup()->genName(NamedObjectType::TEXTURE, tex,
-                                           false);
-                unsigned int globalTextureName =
-                        ctx->shareGroup()->getGlobalName(
-                                NamedObjectType::TEXTURE, tex);
-                ctx->dispatcher().glBindTexture(GL_TEXTURE_2D,
-                                                globalTextureName);
-                texData->sourceEGLImage = 0;
-            }
-        }
-    }
-
+    s_glInitTexImage2D(target,level,internalformat,width,height,border);
     if (type==GL_HALF_FLOAT_OES)
         type = GL_HALF_FLOAT_NV;
     if (pixels==NULL && type==GL_UNSIGNED_SHORT_5_5_5_1)
@@ -2074,7 +2080,6 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
         internalformat = (format == GL_RGBA) ? GL_RGBA32F : GL_RGB32F;
     ctx->dispatcher().glTexImage2D(target,level,internalformat,width,height,border,format,type,pixels);
 }
-
 
 GL_APICALL void  GL_APIENTRY glTexParameterf(GLenum target, GLenum pname, GLfloat param){
     GET_CTX();
