@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "706bd79b_22e5f4fc",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglConfig.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-22T23:26:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "706bd79b_dc40a1ed",
+      "range": {
+        "startLine": 164,
+        "startChar": 19,
+        "endLine": 164,
+        "endChar": 72
+      },
+      "revId": "17bdac339e6d7bf4ac70e4cbebc4b3181db87a61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "706bd79b_9c038919",
         "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglDisplay.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "706bd79b_ed7dad0c",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglDisplay.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-22T23:26:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "706bd79b_9c038919",
+      "range": {
+        "startLine": 203,
+        "startChar": 0,
+        "endLine": 203,
+        "endChar": 4
+      },
+      "revId": "17bdac339e6d7bf4ac70e4cbebc4b3181db87a61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "706bd79b_dc3a61f4",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 1
@@ -59,6 +107,24 @@
       "writtenOn": "2016-09-22T22:12:02Z",
       "side": 1,
       "message": "just asking, do we also have to match alpha exactly?",
+      "revId": "17bdac339e6d7bf4ac70e4cbebc4b3181db87a61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "706bd79b_ff5ab7ee",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-22T23:26:59Z",
+      "side": 1,
+      "message": "Yeah, it needs to be exactly 0 alpha bits. I tried it with 8 alpha bits and glXMakeContextCurrent fails with BadMatch X11 error (0x8)",
+      "parentUuid": "706bd79b_dc3a61f4",
       "revId": "17bdac339e6d7bf4ac70e4cbebc4b3181db87a61",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
