@@ -329,9 +329,12 @@ public:
 
 private:
     std::string toTempRoot(StringView path) const {
-        StringView prefix = mTempRootPrefix;
+        // mTempRootPrefix ends with a dir separator, ignore it for comparison.
+        StringView prefix(mTempRootPrefix.c_str(), mTempRootPrefix.size() - 1);
         if (prefix.size() <= path.size() &&
-            prefix == StringView(path.c_str(), prefix.size())) {
+            prefix == StringView(path.c_str(), prefix.size()) &&
+            (prefix.size() == path.size() ||
+             PathUtils::isDirSeparator(path[prefix.size()]))) {
             // Avoid prepending prefix if it's already there.
             return path;
         } else {
