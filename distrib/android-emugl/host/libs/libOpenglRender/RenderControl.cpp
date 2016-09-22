@@ -31,6 +31,7 @@
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/sync_device.h"
+#include "emugl/common/dma_device.h"
 #include "emugl/common/thread.h"
 
 #include <atomic>
@@ -155,9 +156,11 @@ static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
 
+static GoldfishDmaRegion* emuglDma = NULL;
 static GLint rcGetRendererVersion()
 {
     emugl_sync_register_trigger_wait(rcTriggerWait);
+    emuglDma = dma_getter();
 
     sGrallocSync.ptr();
     return rendererVersion;
@@ -530,8 +533,9 @@ static void rcReadColorBuffer(uint32_t colorBuffer,
 static int rcUpdateColorBuffer(uint32_t colorBuffer,
                                 GLint x, GLint y,
                                 GLint width, GLint height,
-                                GLenum format, GLenum type, void* pixels)
+                                GLenum format, GLenum type)
 {
+
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         GRSYNC_DPRINT("unlock gralloc cb lock");
@@ -539,7 +543,8 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
         return -1;
     }
 
-    fb->updateColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
+    // obtain pixels from guest DMA transfer
+    fb->updateColorBuffer(colorBuffer, x, y, width, height, format, type, (void*)emuglDma);
 
     GRSYNC_DPRINT("unlock gralloc cb lock");
     sGrallocSync->unlockColorBufferPrepare();
