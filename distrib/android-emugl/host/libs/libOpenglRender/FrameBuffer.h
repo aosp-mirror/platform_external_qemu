@@ -167,12 +167,8 @@ public:
     // list of valid values. Note that ColorBuffer instances are reference-
     // counted. Use openColorBuffer / closeColorBuffer to operate on the
     // internal count.
-    HandleType createColorBufferLocked(
-        int p_width, int p_height, GLenum p_internalFormat);
     HandleType createColorBuffer(
         int p_width, int p_height, GLenum p_internalFormat);
-    HandleType createColorBufferPuid(
-        int p_width, int p_height, GLenum p_internalFormat, uint64_t puid);
 
     // Call this function when a render thread terminates to destroy all
     // the remaining contexts it created. Necessary to avoid leaking host
@@ -195,17 +191,14 @@ public:
     // Increment the reference count associated with a given ColorBuffer
     // instance. |p_colorbuffer| is its handle value as returned by
     // createColorBuffer().
-    int openColorBufferLocked(HandleType p_colorbuffer);
     int openColorBuffer(HandleType p_colorbuffer);
-    int openColorBufferPuid(HandleType p_colorbuffer, uint64_t puid);
 
     // Decrement the reference count associated with a given ColorBuffer
     // instance. |p_colorbuffer| is its handle value as returned by
     // createColorBuffer(). Note that if the reference count reaches 0,
     // the instance is destroyed automatically.
-    void closeColorBufferLocked(HandleType p_colorbuffer);
     void closeColorBuffer(HandleType p_colorbuffer);
-    void closeColorBufferPuid(HandleType p_colorbuffer, uint64_t puid);
+    void closeColorBufferLocked(HandleType p_colorbuffer);
 
     void cleanupProcGLObjects(uint64_t puid);
     // Equivalent for eglMakeCurrent() for the current display.
@@ -313,13 +306,10 @@ public:
     // Create an eglImage and return its handle.  Reference:
     // https://www.khronos.org/registry/egl/extensions/KHR/EGL_KHR_image_base.txt
     HandleType createClientImage(HandleType context, EGLenum target, GLuint buffer);
-    HandleType createClientImagePuid(HandleType context, EGLenum target,
-                                     GLuint buffer, uint64_t puid);
     // Call the implementation of eglDestroyImageKHR, return if succeeds or
     // not. Reference:
     // https://www.khronos.org/registry/egl/extensions/KHR/EGL_KHR_image_base.txt
     EGLBoolean destroyClientImage(HandleType image);
-    EGLBoolean destroyClientImagePuid(HandleType image, uint64_t puid);
 
     // Used internally.
     bool bind_locked();
