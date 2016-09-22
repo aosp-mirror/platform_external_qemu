@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "706bd79b_dc40a1ed",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglConfig.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-09-22T22:12:02Z",
+      "side": 1,
+      "message": "nit: you can use m_wantedAttribs.count(wanted). It is the same as what you are doing but slightly more readable.",
+      "range": {
+        "startLine": 164,
+        "startChar": 19,
+        "endLine": 164,
+        "endChar": 72
+      },
+      "revId": "17bdac339e6d7bf4ac70e4cbebc4b3181db87a61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "706bd79b_9c038919",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglDisplay.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-09-22T22:12:02Z",
+      "side": 1,
+      "message": "nit: spaces",
+      "range": {
+        "startLine": 203,
+        "startChar": 0,
+        "endLine": 203,
+        "endChar": 4
+      },
+      "revId": "17bdac339e6d7bf4ac70e4cbebc4b3181db87a61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "706bd79b_dc3a61f4",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-09-22T22:12:02Z",
+      "side": 1,
+      "message": "just asking, do we also have to match alpha exactly?",
+      "revId": "17bdac339e6d7bf4ac70e4cbebc4b3181db87a61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
