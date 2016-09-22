@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "10045b97_4f15a544",
+        "filename": "android/base/testing/TestSystem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-22T04:57:56Z",
+      "side": 1,
+      "message": "Can we count on |prefix| ending with a separator all the time?\n\nAlso, what is the problem with separators at a low level? Is it that if the if-statement below is checking if |mTempRootPrefix| is a prefix of |path|, and path is just |mTempRootPrefix| without the dir separator, the thing will incorrectly append?\n\nAnd then in all other cases, if |path| is some subdirectory or file inside of |mTempRootPrefix|, the dir separator should work, right? What if we did something like prefix \u003d\u003d StringView(path.c_str(), min(path.size(), prefix.size()) and not rely on the separator?",
+      "range": {
+        "startLine": 332,
+        "startChar": 0,
+        "endLine": 333,
+        "endChar": 79
+      },
+      "revId": "84ea72a630cf5fbe7ff11dfdd6b3bef1caf28ad0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
