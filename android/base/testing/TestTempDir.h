@@ -17,6 +17,7 @@
 #include "android/base/Compiler.h"
 #include "android/base/Log.h"
 #include "android/base/StringFormat.h"
+#include "android/base/StringView.h"
 #include "android/utils/file_io.h"
 
 #ifdef _WIN32
@@ -50,9 +51,9 @@ class TestTempDir {
 public:
     // Create new instance. This also tries to create a new temporary
     // directory. |debugPrefix| is an optional name prefix and can be NULL.
-    TestTempDir(const char* debugName) {
+    TestTempDir(StringView debugName) {
         std::string temp_dir = getTempPath();
-        if (debugName) {
+        if (!debugName.empty()) {
             temp_dir += debugName;
             temp_dir += ".";
         }
@@ -79,12 +80,12 @@ public:
     }
 
     // Create the path of a directory entry under the temporary directory.
-    std::string makeSubPath(const char* subpath) {
+    std::string makeSubPath(StringView subpath) {
         return StringFormat("%s/%s", mPath, subpath);
     }
 
     // Create an empty directory under the temporary directory.
-    bool makeSubDir(const char* subdir) {
+    bool makeSubDir(StringView subdir) {
         std::string path = makeSubPath(subdir);
 #ifdef _WIN32
         if (mkdir(path.c_str()) < 0) {
@@ -101,7 +102,7 @@ public:
     }
 
     // Create an empty file under the temporary directory.
-    bool makeSubFile(const char* file) {
+    bool makeSubFile(StringView file) {
         std::string path = makeSubPath(file);
         int fd = ::open(path.c_str(), O_WRONLY|O_CREAT, 0744);
         if (fd < 0) {
