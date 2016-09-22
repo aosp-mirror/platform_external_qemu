@@ -594,6 +594,7 @@ LOCAL_LDLIBS += \
 
 LOCAL_SRC_FILES := \
   android/metrics/StudioConfig_unittest.cpp \
+  android/metrics/tests/FileMetricsWriter_unittest.cpp \
   android/metrics/tests/MetricsReporter_unittest.cpp \
   android/metrics/tests/MockMetricsReporter.cpp \
   android/metrics/tests/MockMetricsWriter.cpp \
