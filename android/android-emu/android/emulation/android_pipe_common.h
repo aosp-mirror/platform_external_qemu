@@ -47,7 +47,9 @@ enum PipeErrors {
 enum PipeWakeFlags {
 	PIPE_WAKE_CLOSED = 1 << 0,  /* emulator closed pipe */
 	PIPE_WAKE_READ   = 1 << 1,  /* pipe can now be read from */
-	PIPE_WAKE_WRITE  = 1 << 2  /* pipe can now be written to */
+	PIPE_WAKE_WRITE  = 1 << 2,  /* pipe can now be written to */
+	PIPE_WAKE_UNLOCK_DMA  = 1 << 3,  /* unlock this pipe's DMA buffer */
+	PIPE_WAKE_UNLOCK_DMA_SHARED  = 1 << 4,  /* unlock DMA buffer of the pipe shared to this pipe */
 };
 
 ANDROID_END_HEADER

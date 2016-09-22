@@ -21,9 +21,6 @@ namespace android {
 static VmLock* sInstance = nullptr;
 
 VmLock* VmLock::get() {
-    // NOT thread-safe, but we don't expect multiple threads to call this
-    // concurrently at init time, and the worst that can happen is to leak
-    // a single instance.
     if (!sInstance) {
         sInstance = new VmLock();
     }
