@@ -1024,13 +1024,27 @@ R"(        // Do this on every iteration, as some commands may change the checks
 
                 if (!v->isPointer()) {
                     if (pass == PASS_VariableDeclarations) {
-                        fprintf(fp,
-                                "\t\t\t%s var_%s = Unpack<%s,uint%u_t>(ptr + %s);\n",
-                                var_type_name,
-                                var_name,
-                                var_type_name,
-                                var_type_bytes * 8U,
-                                varoffset.c_str());
+                        if (v->isDMA()) {
+                            fprintf(fp,
+                                    "\t\t\t%s var_%s_guest_paddr = Unpack<%s,uint%u_t>(ptr + %s);\n"
+                                    "\t\t\t%s var_%s = stream->getDmaForReading(var_%s_guest_paddr);\n",
+                                    var_type_name,
+                                    var_name,
+                                    var_type_name,
+                                    var_type_bytes * 8U,
+                                    varoffset.c_str(),
+                                    var_type_name,
+                                    var_name,
+                                    var_name);
+                        } else {
+                            fprintf(fp,
+                                    "\t\t\t%s var_%s = Unpack<%s,uint%u_t>(ptr + %s);\n",
+                                    var_type_name,
+                                    var_name,
+                                    var_type_name,
+                                    var_type_bytes * 8U,
+                                    varoffset.c_str());
+                        }
                     }
 
                     if (pass == PASS_FunctionCall ||

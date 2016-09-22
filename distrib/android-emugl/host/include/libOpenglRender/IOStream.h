@@ -18,6 +18,7 @@
 #include "ErrorLog.h"
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -71,6 +72,8 @@ public:
         m_free = 0;
         return stat;
     }
+
+    virtual uint64_t getDmaForReading(uint64_t guest_paddr) = 0;
 
 protected:
     virtual void *allocBuffer(size_t minSize) = 0;

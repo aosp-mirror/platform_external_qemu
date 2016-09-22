@@ -15,6 +15,7 @@
 
 // Interface between android-emu non-base libraries and emugl
 
+#include "android/emulation/GoldfishDma.h"
 #include "android/emulation/goldfish_sync.h"
 #include "android/featurecontrol/FeatureControl.h"
 
@@ -42,3 +43,11 @@ typedef struct {
     emugl_logger_t fine;
 } emugl_logger_struct;
 
+// Function type that describes functions for
+// reading from the Goldfish DMA region
+// at a specified offset.
+typedef void* (*emugl_dma_read_t)(uint32_t);
+typedef void (*emugl_dma_add_buffer_t)(uint64_t, uint64_t);
+typedef void (*emugl_dma_remove_buffer_t)(uint64_t);
+typedef uint64_t (*emugl_dma_get_host_addr_t)(uint64_t);
+typedef void (*emugl_dma_invalidate_host_mappings_t)(void);
