@@ -31,6 +31,7 @@
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/sync_device.h"
+#include "emugl/common/dma_device.h"
 #include "emugl/common/thread.h"
 
 #include <atomic>
@@ -155,9 +156,11 @@ static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
 
+static void* emuglDMA = NULL;
 static GLint rcGetRendererVersion()
 {
     emugl_sync_register_trigger_wait(rcTriggerWait);
+    emuglDMA = dma_ptr_getter();
 
     sGrallocSync.ptr();
     return rendererVersion;
@@ -532,6 +535,7 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
                                 GLint width, GLint height,
                                 GLenum format, GLenum type, void* pixels)
 {
+
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         GRSYNC_DPRINT("unlock gralloc cb lock");
@@ -539,7 +543,7 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
         return -1;
     }
 
-    fb->updateColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
+    fb->updateColorBuffer(colorBuffer, x, y, width, height, format, type, emuglDMA);
 
     GRSYNC_DPRINT("unlock gralloc cb lock");
     sGrallocSync->unlockColorBufferPrepare();

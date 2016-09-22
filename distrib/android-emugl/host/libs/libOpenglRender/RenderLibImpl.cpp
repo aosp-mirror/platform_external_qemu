@@ -16,6 +16,7 @@
 #include "RendererImpl.h"
 
 #include "emugl/common/crash_reporter.h"
+#include "emugl/common/dma_device.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
 #include "emugl/common/sync_device.h"
@@ -48,6 +49,10 @@ void RenderLibImpl::setSyncDevice
     set_emugl_sync_destroy_timeline(destroy_timeline);
     set_emugl_sync_register_trigger_wait(register_trigger_wait);
     set_emugl_sync_device_exists(device_exists);
+}
+
+void RenderLibImpl::setDMAPtrGetter(void* (*f)()) {
+    set_dma_ptr_getter(f);
 }
 
 RendererPtr RenderLibImpl::initRenderer(int width, int height,
