@@ -248,7 +248,7 @@ static int filelock_lock(FileLock* lock) {
     for (tries = 4; tries > 0; tries--)
     {
         const int kSleepDurationUsMax = 2000000;  // 2 seconds.
-        const int kSleepDurationUsIncrement = 200000;  // 0.2 seconds
+        const int kSleepDurationUsIncrement = 50000;  // 0.05 seconds
 
         if (sleep_duration_us > 0) {
             if (sleep_duration_us > kSleepDurationUsMax) {
