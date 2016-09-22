@@ -15,6 +15,7 @@
 
 // Interface between android-emu non-base libraries and emugl
 
+#include "android/emulation/goldfish_dma.h"
 #include "android/emulation/goldfish_sync.h"
 #include "android/featurecontrol/FeatureControl.h"
 
@@ -42,3 +43,6 @@ typedef struct {
     emugl_logger_t fine;
 } emugl_logger_struct;
 
+// Goldfish DMA
+
+typedef GoldfishDmaRegion* (*emugl_dma_get_t)(void);
