@@ -79,9 +79,8 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     }
 
     // Additional memory for software renderers (e.g., SwiftShader)
-    if (glesFramebufferCMA > 0) {
-        params.addFormat("cma=%" PRIu64 "M", glesFramebufferCMA);
-    }
+    // WIP: And DMA
+    params.addFormat("cma=64M");
 
     if (opts->logcat) {
         std::string param = opts->logcat;
