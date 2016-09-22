@@ -208,6 +208,7 @@ LOCAL_SRC_FILES := \
     android/base/async/AsyncReader.cpp \
     android/base/async/AsyncSocketServer.cpp \
     android/base/async/AsyncWriter.cpp \
+    android/base/async/DefaultLooper.cpp \
     android/base/async/Looper.cpp \
     android/base/async/ScopedSocketWatch.cpp \
     android/base/async/ThreadLooper.cpp \
