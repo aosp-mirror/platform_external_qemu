@@ -859,14 +859,14 @@ XIV. QEMU Pipe device:
 ======================
 
 Relevant files:
-  $QEMU/hw/android/goldfish/pipe.c
-  $KERNEL/drivers/misc/qemupipe/qemu_pipe.c
+  $QEMU-ANDROID/hw/misc/goldfish_pipe.c
+  $KERNEL/drivers/platform/goldfish/goldfish_pipe.c
 
 Device properties:
-  Name: qemu_pipe
+  Name: goldfish_pipe
   Id: -1
   IrqCount: 1
-  I/O Registers:
+  I/O Registers (v1):
     0x00  COMMAND          W: Write to perform command (see below).
     0x04  STATUS           R: Read status
     0x08  CHANNEL          RW: Read or set current channel id.
@@ -876,12 +876,25 @@ Device properties:
     0x18  PARAMS_ADDR_LOW  RW: Read/set low bytes of parameters block address.
     0x1c  PARAMS_ADDR_HIGH RW: Read/set high bytes of parameters block address.
     0x20  ACCESS_PARAMS    W: Perform access with parameter block.
+  I/O Registers (v2):
+    0x00  COMMAND               W: Write to perform command. In v2, we can read/write multiple buffers in one write to COMMAND.
+    0x04  SIGNAL_BUFFER_HIGH    W: Set high bits of global list of signaled buffers in guest.
+    0x08  SIGNAL_BUFFER         W: Set low bits of global list of signaled buffers in guest.
+    0x0c  SIGNAL_BUFFER_COUNT   W: Set number of signaled buffers that the device supports.
+    0x10  OPEN_BUFFER           W: Set the global address that pooints to the command buffer.
+    0x14  VERSION               W: Set version number of pipe driver. R: Get version number of pipe device.
+    0x18  GET_SIGNALLED         R: For interrupt handler. Return number of pipes with something to do.
 
 This is a special device that is totally specific to QEMU, but allows guest
 processes to communicate directly with the emulator with extremely high
 performance. This is achieved by avoiding any in-kernel memory copies, relying
 on the fact that QEMU can access guest memory at runtime (under proper
 conditions controlled by the kernel).
+
+The v1 and v2 pipes differ in several ways for performance reasons.
+The v2 pipes can send multiple buffers from the guest at a time
+and is less sensitive to lock contention, and can share contiguous
+physical memory regions with the host.
 
 Please refer to $QEMU/docs/ANDROID-QEMU-PIPE.TXT for full details on the
 device's operations.
