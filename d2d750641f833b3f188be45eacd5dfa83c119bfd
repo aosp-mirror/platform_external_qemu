@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "706bd79b_1f604ba4",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2016-09-22T22:44:24Z",
+      "side": 1,
+      "message": "BTW, what\u0027s the downside for use some special ENV to modify behavior of getLauncherDirectory ? Then we only need to touch code of one place.",
+      "revId": "d2d750641f833b3f188be45eacd5dfa83c119bfd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
