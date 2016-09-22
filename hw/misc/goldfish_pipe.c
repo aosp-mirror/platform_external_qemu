@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 The Android Open Source Project
+/* Copyright (c) 2011-2016 The Android Open Source Project
 ** Copyright (C) 2014 Linaro Limited
 ** Copyright (C) 2015 Intel Corporation
 **
@@ -124,6 +124,8 @@ typedef enum PipeCmd {
     PIPE_CMD_READ,
     PIPE_CMD_WAKE_ON_READ,
     PIPE_CMD_WAKE_ON_DONE_IO,
+    PIPE_CMD_DMA_MAPHOST,
+    PIPE_CMD_DMA_UNMAPHOST,
 } PipeCmd;
 
 enum {
@@ -138,9 +140,9 @@ enum {
 enum {
     PIPE_DEVICE_VERSION = 2,
     PIPE_DEVICE_VERSION_v1 = 1,
-    // Currently we only support v3 driver for v2 pipe device, and anything
+    // Currently we support {v3,v4} driver for v2 pipe device, and anything
     // else for v1 device.
-    MAX_SUPPORTED_DRIVER_VERSION = 3,
+    MAX_SUPPORTED_DRIVER_VERSION = 4,
     PIPE_DRIVER_VERSION_v1 = 0,  // used to not report its version at all
 };
 
@@ -257,6 +259,10 @@ typedef struct PipeCommand {
             // max_size is supplied at startup, so we can't reserve the space
             // but need to have a function to calculate the pointers.
         } rw_params;
+        struct {
+            uint64_t dma_paddr;
+            uint64_t sz;
+        } dma_maphost_params;
     };
 } PipeCommand;
 
@@ -578,6 +584,7 @@ static void reset_pipe_device(PipeDevice* dev) {
     dev->wanted_pipe_after_channel_high = NULL;
     g_hash_table_remove_all(dev->pipes_by_channel);
     qemu_set_irq(dev->ps->irq, 0);
+    service_ops->dma_reset_host_mappings();
 }
 
 static void pipeDevice_doCommand_v1(PipeDevice* dev, uint32_t command) {
@@ -702,7 +709,6 @@ static void pipeDevice_doCommand_v1(PipeDevice* dev, uint32_t command) {
         }
         dev->status = 0;
         break;
-
     default:
         D("%s: command=%d (0x%x)\n", __func__, command, command);
     }
@@ -873,6 +879,16 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
             pipe->command_buffer->status = 0;
             break;
         }
+        case PIPE_CMD_DMA_MAPHOST:
+            service_ops->dma_add_buffer(
+                    pipe,
+                    pipe->command_buffer->dma_maphost_params.dma_paddr,
+                    pipe->command_buffer->dma_maphost_params.sz);
+            break;
+        case PIPE_CMD_DMA_UNMAPHOST:
+            service_ops->dma_remove_buffer(
+                    pipe->command_buffer->dma_maphost_params.dma_paddr);
+            break;
         default:
             D("%s: command=%d (0x%x)\n", __func__, command, command);
     }
@@ -1040,7 +1056,7 @@ static void pipe_dev_write_v2(PipeDevice* dev,
                     dev->open_command_addr, sizeof(*dev->open_command),
                     /*is_write*/0);
             if (!dev->open_command) {
-                APANIC("%s: failed to map opend command buffer\n", __func__);
+                APANIC("%s: failed to map open command buffer\n", __func__);
             }
             break;
         case PIPE_REG_CMD: {
@@ -1249,6 +1265,9 @@ static void goldfish_pipe_save_v2(QEMUFile* file, PipeDevice* dev) {
     for (pipe = dev->wanted_pipes_first; pipe; pipe = pipe->wanted_next) {
         qemu_put_be32(file, pipe->id);
     }
+
+    /* Invalidate all guest DMA buffer -> host ptr mappings. */
+    service_ops->dma_invalidate_host_mappings();
 }
 
 static int goldfish_pipe_load_v1(QEMUFile* file, PipeDevice* dev) {

@@ -16,6 +16,7 @@
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/android_pipe_common.h"
 #include "android/emulation/android_pipe_device.h"
+#include "android/emulation/GoldfishDma.h"
 #include "android/emulation/VmLock.h"
 #include "android/utils/stream.h"
 #include "android-qemu2-glue/utils/stream.h"
@@ -137,6 +138,22 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
         [](GoldfishHostPipe* hostPipe, GoldfishPipeWakeFlags wakeFlags) {
             android_pipe_guest_wake_on(hostPipe, static_cast<int>(wakeFlags));
         },
+        // dma_add_buffer()
+        [](void* pipe, uint64_t paddr, uint64_t sz) {
+            android_goldfish_dma_ops.add_buffer(pipe, paddr, sz);
+        },
+        // dma_remove_buffer()
+        [](uint64_t paddr) {
+            android_goldfish_dma_ops.remove_buffer(paddr);
+        },
+        // dma_invalidate_host_mappings()
+        []() {
+            android_goldfish_dma_ops.invalidate_host_mappings();
+        },
+        // dma_reset_host_mappings()
+        []() {
+            android_goldfish_dma_ops.reset_host_mappings();
+        },
 };
 
 // These callbacks are called from the pipe service into the virtual device.
@@ -158,6 +175,8 @@ static const AndroidPipeHwFuncs android_pipe_hw_funcs = {
             static_assert((int)GOLDFISH_PIPE_WAKE_READ == (int)PIPE_WAKE_READ,
                           "Invalid PIPE_WAKE_READ values");
             static_assert((int)GOLDFISH_PIPE_WAKE_WRITE == (int)PIPE_WAKE_WRITE,
+                          "Invalid PIPE_WAKE_WRITE values");
+            static_assert((int)GOLDFISH_PIPE_WAKE_UNLOCK_DMA == (int)PIPE_WAKE_UNLOCK_DMA,
                           "Invalid PIPE_WAKE_WRITE values");
 
             goldfish_pipe_signal_wake(
