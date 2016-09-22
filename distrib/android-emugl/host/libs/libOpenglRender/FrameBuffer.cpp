@@ -609,9 +609,10 @@ HandleType FrameBuffer::genHandle()
     return id;
 }
 
-HandleType FrameBuffer::createColorBufferLocked(int p_width, int p_height,
-                                                GLenum p_internalFormat)
+HandleType FrameBuffer::createColorBuffer(int p_width, int p_height,
+                                          GLenum p_internalFormat)
 {
+    emugl::Mutex::AutoLock mutex(m_lock);
     HandleType ret = 0;
 
     ColorBufferPtr cb(ColorBuffer::create(
@@ -625,24 +626,12 @@ HandleType FrameBuffer::createColorBufferLocked(int p_width, int p_height,
         ret = genHandle();
         m_colorbuffers[ret].cb = cb;
         m_colorbuffers[ret].refcount = 1;
-    }
-    return ret;
-}
 
-HandleType FrameBuffer::createColorBuffer(int p_width, int p_height,
-                                          GLenum p_internalFormat) {
-    emugl::Mutex::AutoLock mutex(m_lock);
-    return createColorBufferLocked(p_width, p_height, p_internalFormat);
-}
-
-HandleType FrameBuffer::createColorBufferPuid(int p_width, int p_height,
-                                              GLenum p_internalFormat,
-                                              uint64_t puid) {
-    emugl::Mutex::AutoLock mutex(m_lock);
-    HandleType ret = createColorBufferLocked(
-                            p_width, p_height, p_internalFormat);
-    if (ret>0) {
-        m_procOwnedColorBuffers[puid].insert(ret);
+        RenderThreadInfo *tInfo = RenderThreadInfo::get();
+        uint64_t puid = tInfo->m_puid;
+        if (puid) {
+            m_procOwnedColorBuffers[puid].insert(ret);
+        }
     }
     return ret;
 }
@@ -758,8 +747,9 @@ void FrameBuffer::DestroyWindowSurface(HandleType p_surface)
     }
 }
 
-int FrameBuffer::openColorBufferLocked(HandleType p_colorbuffer)
-{
+int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
+    emugl::Mutex::AutoLock mutex(m_lock);
+
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
         // bad colorbuffer handle
@@ -767,25 +757,29 @@ int FrameBuffer::openColorBufferLocked(HandleType p_colorbuffer)
         return -1;
     }
     (*c).second.refcount++;
+
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    uint64_t puid = tInfo->m_puid;
+    if (puid) {
+        m_procOwnedColorBuffers[puid].insert(p_colorbuffer);
+    }
     return 0;
 }
 
-int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
+void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
     emugl::Mutex::AutoLock mutex(m_lock);
-    return openColorBufferLocked(p_colorbuffer);
-}
-
-int FrameBuffer::openColorBufferPuid(HandleType p_colorbuffer, uint64_t puid) {
-    emugl::Mutex::AutoLock mutex(m_lock);
-    int ret = openColorBufferLocked(p_colorbuffer);
-    if (ret == 0) {
-        m_procOwnedColorBuffers[puid].insert(p_colorbuffer);
+    closeColorBufferLocked(p_colorbuffer);
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    uint64_t puid = tInfo->m_puid;
+    if (puid) {
+        auto ite = m_procOwnedColorBuffers.find(puid);
+        if (ite != m_procOwnedColorBuffers.end()) {
+            ite->second.erase(p_colorbuffer);
+        }
     }
-    return ret;
 }
 
-void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer)
-{
+void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer) {
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
         // This is harmless: it is normal for guest system to issue
@@ -796,20 +790,6 @@ void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer)
     }
     if (--(*c).second.refcount == 0) {
         m_colorbuffers.erase(c);
-    }
-}
-
-void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
-    emugl::Mutex::AutoLock mutex(m_lock);
-    closeColorBufferLocked(p_colorbuffer);
-}
-
-void FrameBuffer::closeColorBufferPuid(HandleType p_colorbuffer, uint64_t puid) {
-    emugl::Mutex::AutoLock mutex(m_lock);
-    closeColorBufferLocked(p_colorbuffer);
-    auto ite = m_procOwnedColorBuffers.find(puid);
-    if (ite != m_procOwnedColorBuffers.end()) {
-        ite->second.erase(p_colorbuffer);
     }
 }
 
@@ -836,7 +816,8 @@ void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
         auto procIte = m_procOwnedEGLImages.find(puid);
         if (procIte != m_procOwnedEGLImages.end()) {
             for (auto eglImg : procIte->second) {
-                destroyClientImage(eglImg);
+                s_egl.eglDestroyImageKHR(m_eglDisplay,
+                            reinterpret_cast<EGLImageKHR>((HandleType)eglImg));
             }
             m_procOwnedEGLImages.erase(procIte);
         }
@@ -1066,34 +1047,34 @@ HandleType FrameBuffer::createClientImage(HandleType context, EGLenum target, GL
     EGLImageKHR image = s_egl.eglCreateImageKHR(
                             m_eglDisplay, eglContext, target,
                             reinterpret_cast<EGLClientBuffer>(buffer), NULL);
+    HandleType imgHnd = (HandleType)reinterpret_cast<uintptr_t>(image);
 
-    return (HandleType)reinterpret_cast<uintptr_t>(image);
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    uint64_t puid = tInfo->m_puid;
+    if (puid) {
+        emugl::Mutex::AutoLock mutex(m_lock);
+        m_procOwnedEGLImages[puid].insert(imgHnd);
+    }
+    return imgHnd;
 }
 
-EGLBoolean FrameBuffer::destroyClientImage(HandleType image)
-{
-    return s_egl.eglDestroyImageKHR(m_eglDisplay,
-                                    reinterpret_cast<EGLImageKHR>(image));
-}
-
-HandleType FrameBuffer::createClientImagePuid(HandleType context, EGLenum target,
-                                              GLuint buffer, uint64_t puid) {
-    emugl::Mutex::AutoLock mutex(m_lock);
-    HandleType handle = createClientImage(context, target, buffer);
-    m_procOwnedEGLImages[puid].insert(handle);
-    return handle;
-}
-
-EGLBoolean FrameBuffer::destroyClientImagePuid(HandleType image, uint64_t puid) {
-    emugl::Mutex::AutoLock mutex(m_lock);
-    EGLBoolean ret = destroyClientImage(image);
-    m_procOwnedEGLImages[puid].erase(image);
-    // We don't explicitly call m_procOwnedEGLImages.erase(puid) when the size
-    // reaches 0, since it could go between zero and one many times in the
-    // lifetime of a process.
-    // It will be cleaned up by cleanupProcGLObjects(puid) when the process is
-    // dead.
-    return ret;
+EGLBoolean FrameBuffer::destroyClientImage(HandleType image) {
+    // eglDestroyImageKHR has its own lock  already.
+    EGLBoolean ret = s_egl.eglDestroyImageKHR(m_eglDisplay,
+                                reinterpret_cast<EGLImageKHR>(image));
+    if (!ret) return false;
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    uint64_t puid = tInfo->m_puid;
+    if (puid) {
+        emugl::Mutex::AutoLock mutex(m_lock);
+        m_procOwnedEGLImages[puid].erase(image);
+        // We don't explicitly call m_procOwnedEGLImages.erase(puid) when the size
+        // reaches 0, since it could go between zero and one many times in the
+        // lifetime of a process.
+        // It will be cleaned up by cleanupProcGLObjects(puid) when the process is
+        // dead.
+    }
+    return true;
 }
 
 //
