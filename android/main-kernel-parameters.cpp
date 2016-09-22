@@ -12,6 +12,7 @@
 #include "android/main-kernel-parameters.h"
 
 #include "android/base/StringFormat.h"
+#include "android/emulation/GoldfishDma.h"
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/SetupParameters.h"
 #include "android/featurecontrol/FeatureControl.h"
@@ -79,7 +80,10 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     }
 
     // Additional memory for software renderers (e.g., SwiftShader)
-    if (glesFramebufferCMA > 0) {
+    if (isQemu2 && android::featurecontrol::isEnabled(android::featurecontrol::GLDMA)) {
+        // needing padding here
+        params.addFormat("cma=%" PRIu64 "M", kDmaBufSizeMB + 16 + glesFramebufferCMA);
+    } else if (glesFramebufferCMA > 0) {
         params.addFormat("cma=%" PRIu64 "M", glesFramebufferCMA);
     }
 
