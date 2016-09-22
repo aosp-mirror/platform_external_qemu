@@ -28,7 +28,8 @@ public:
     virtual int commitBuffer(size_t size) override final;
     virtual const unsigned char* read(void* buf,
                                       size_t* inout_len) override final;
-
+    virtual void* getDmaForReading(uint64_t guest_paddr) override final;
+    virtual void unlockDma(uint64_t guest_paddr) override final;
     void forceStop();
 
 private:
