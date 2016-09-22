@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "10045b97_002adaa0",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1894,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-09-22T16:34:31Z",
+      "side": 1,
+      "message": "Isn\u0027t this global for the entire program? I guess we don\u0027t use a lot of dates and times but we should probably make sure there are no unexpected side effects from this. Look for other places where we use dates and times and try to poke them and see if they behave in an unexpected way with a new timezone.",
+      "revId": "df2d2aa8dc65ce7a9359c85f754111dd623a41ea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
