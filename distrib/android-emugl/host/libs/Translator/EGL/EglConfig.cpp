@@ -31,8 +31,11 @@ EglConfig::EglConfig(EGLint     red_size,
                      EGLint     renderable_type,
                      EGLint     native_visual_id,
                      EGLint     native_visual_type,
+                     EGLint     sample_buffers_num,
                      EGLint     samples_per_pixel,
                      EGLint     stencil_size,
+                     EGLint     luminance_size,
+                     EGLint     wanted_buffer_size,
                      EGLint     surface_type,
                      EGLenum    transparent_type,
                      EGLint     trans_red_val,
@@ -61,9 +64,11 @@ EglConfig::EglConfig(EGLint     red_size,
         m_renderable_type(renderable_type),
         m_native_visual_id(native_visual_id),
         m_native_visual_type(native_visual_type),
-        m_sample_buffers_num(samples_per_pixel > 0 ? 1 : 0),
+        m_sample_buffers_num(sample_buffers_num),
         m_samples_per_pixel(samples_per_pixel),
         m_stencil_size(stencil_size),
+        m_luminance_size(luminance_size),
+        m_wanted_buffer_size(wanted_buffer_size),
         m_surface_type(surface_type),
         m_transparent_type(transparent_type),
         m_trans_red_val(trans_red_val),
@@ -122,6 +127,8 @@ EglConfig::EglConfig(EGLint     red_size,
         m_sample_buffers_num(samples_per_pixel > 0 ? 1 : 0),
         m_samples_per_pixel(samples_per_pixel),
         m_stencil_size(stencil_size),
+        m_luminance_size(0),
+        m_wanted_buffer_size(EGL_DONT_CARE),
         m_surface_type(surface_type),
         m_transparent_type(transparent_type),
         m_trans_red_val(trans_red_val),
@@ -160,6 +167,8 @@ EglConfig::EglConfig(const EglConfig& conf) :
         m_sample_buffers_num(conf.m_sample_buffers_num),
         m_samples_per_pixel(conf.m_samples_per_pixel),
         m_stencil_size(conf.m_stencil_size),
+        m_luminance_size(conf.m_luminance_size),
+        m_wanted_buffer_size(conf.m_wanted_buffer_size),
         m_surface_type(conf.m_surface_type),
         m_transparent_type(conf.m_transparent_type),
         m_trans_red_val(conf.m_trans_red_val),
@@ -201,6 +210,8 @@ EglConfig::EglConfig(const EglConfig& conf,
         m_sample_buffers_num(conf.m_sample_buffers_num),
         m_samples_per_pixel(conf.m_samples_per_pixel),
         m_stencil_size(conf.m_stencil_size),
+        m_luminance_size(conf.m_luminance_size),
+        m_wanted_buffer_size(conf.m_wanted_buffer_size),
         m_surface_type(conf.m_surface_type),
         m_transparent_type(conf.m_transparent_type),
         m_trans_red_val(conf.m_trans_red_val),
@@ -224,6 +235,9 @@ bool EglConfig::getConfAttrib(EGLint attrib,EGLint* val) const {
         break;
     case EGL_BLUE_SIZE:
         *val = m_blue_size;
+        break;
+    case EGL_LUMINANCE_SIZE:
+        *val = m_luminance_size;
         break;
     case EGL_ALPHA_SIZE:
         *val = m_alpha_size;
@@ -312,6 +326,12 @@ bool EglConfig::getConfAttrib(EGLint attrib,EGLint* val) const {
     return true;
 }
 
+EGLint EglConfig::getConfAttrib(EGLint attrib) const {
+    EGLint res;
+    getConfAttrib(attrib, &res);
+    return res;
+}
+
 // checking compitabilty between *this configuration and another configuration
 // the compitability is checked againsed red,green,blue,buffer stencil and depth sizes
 bool EglConfig::compatibleWith(const EglConfig& conf) const {
@@ -336,6 +356,9 @@ static int ColorBufferTypeVal(EGLenum type) {
 }
 
 //following the sorting EGLconfig as in spec
+// Note that we also need to sort during eglChooseConfig
+// when returning configs to user, as sorting order
+// can depend on which attributes the user has requested.
 bool EglConfig::operator<(const EglConfig& conf) const {
     //0
     if(m_conformant != conf.m_conformant) {
@@ -353,9 +376,10 @@ bool EglConfig::operator<(const EglConfig& conf) const {
     }
 
     //3
-    if(m_buffer_size != conf.m_buffer_size) {
-       return m_buffer_size < conf.m_buffer_size;
+    if (m_buffer_size != conf.m_buffer_size) {
+        return m_buffer_size < conf.m_buffer_size;
     }
+
     //4
     if(m_sample_buffers_num != conf.m_sample_buffers_num) {
        return m_sample_buffers_num < conf.m_sample_buffers_num;
@@ -383,7 +407,7 @@ bool EglConfig::operator>=(const EglConfig& conf) const {
 //checking if config stands for all the selection crateria of dummy as defined by EGL spec
 #define CHECK_PROP(dummy,prop_name,op) \
     if((dummy.prop_name != EGL_DONT_CARE) && (dummy.prop_name op prop_name)) { \
-        CHOOSE_CONFIG_DLOG(#prop_name " does not match."); \
+        CHOOSE_CONFIG_DLOG(#prop_name " does not match: %d vs %d", dummy.prop_name, prop_name); \
         return false; \
     } else { \
         CHOOSE_CONFIG_DLOG(#prop_name " compatible."); \
@@ -400,6 +424,41 @@ bool EglConfig::operator>=(const EglConfig& conf) const {
 bool EglConfig::chosen(const EglConfig& dummy) const {
 
    CHOOSE_CONFIG_DLOG("checking config id 0x%x for compatibility\n", m_config_id);
+   CHOOSE_CONFIG_DLOG("config info for 0x%x: "
+                      "rgbads %d %d %d %d %d %d "
+                      "samp spp %d %d fblvl %d n.vistype %d maxswap %d minswap %d"
+                      "transrgb %d %d %d caveat %d n.renderable %d "
+                      "transptype %d surftype %d conform %d rendertype %d",
+                      m_config_id,
+
+                      m_red_size,
+                      m_green_size,
+                      m_blue_size,
+                      m_alpha_size,
+                      m_depth_size,
+                      m_stencil_size,
+
+                      m_sample_buffers_num,
+                      m_samples_per_pixel,
+
+                      m_frame_buffer_level,
+
+                      m_native_visual_type,
+
+                      m_max_swap_interval,
+                      m_min_swap_interval,
+
+                      m_trans_red_val,
+                      m_trans_green_val,
+                      m_trans_blue_val,
+
+                      m_caveat,
+                      m_native_renderable,
+
+                      m_transparent_type,
+                      m_surface_type,
+                      m_conformant,
+                      m_renderable_type);
 
    //atleast
    CHECK_PROP(dummy,m_buffer_size,>);
@@ -409,6 +468,20 @@ bool EglConfig::chosen(const EglConfig& dummy) const {
    CHECK_PROP(dummy,m_alpha_size,>);
    CHECK_PROP(dummy,m_depth_size,>);
    CHECK_PROP(dummy,m_stencil_size,>);
+
+   CHECK_PROP(dummy,m_luminance_size,>);
+
+   // We distinguish here between the buffer size
+   // desired by the user (dummy.m_wanted_buffer_size)
+   // versus the actual config's buffer size
+   // (m_wanted_buffer_size).
+   if (dummy.isWantedAttrib(EGL_BUFFER_SIZE)) {
+       if (dummy.m_wanted_buffer_size != EGL_DONT_CARE &&
+           dummy.m_wanted_buffer_size > m_buffer_size) {
+           return false;
+       }
+   }
+
    CHECK_PROP(dummy,m_sample_buffers_num,>);
    CHECK_PROP(dummy,m_samples_per_pixel,>);
 
@@ -431,8 +504,12 @@ bool EglConfig::chosen(const EglConfig& dummy) const {
 
    //mask
    if(dummy.m_surface_type != EGL_DONT_CARE &&
-      ((dummy.m_surface_type & m_surface_type) != dummy.m_surface_type)) {
-       CHOOSE_CONFIG_DLOG("m_surface_type does not match.");
+      ((dummy.m_surface_type &
+       (m_surface_type | EGL_WINDOW_BIT)) != // Note that we always advertise our configs'
+                                             // EGL_SURFACE_TYPE has having EGL_WINDOW_BIT
+                                             // capability, so we must also respect that here.
+       dummy.m_surface_type)) {
+
        return false;
    }
 
@@ -448,7 +525,7 @@ bool EglConfig::chosen(const EglConfig& dummy) const {
        return false;
    }
 
-   CHOOSE_CONFIG_DLOG("config id 0x%x chosen.", m_config_id);
+   CHOOSE_CONFIG_DLOG("config id 0x%x passes.", m_config_id);
 
    //passed all checks
    return true;

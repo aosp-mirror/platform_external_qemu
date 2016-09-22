@@ -65,20 +65,156 @@ void EglDisplay::terminate(){
      m_initialized = false;
 }
 
-namespace {
-struct CompareEglConfigsPtrs {
+namespace CompareEglConfigs {
+
+// Old compare function used to initialize to something decently sorted.
+struct StaticCompare {
     bool operator()(const std::unique_ptr<EglConfig>& first,
                     const std::unique_ptr<EglConfig>& second) const {
         return *first < *second;
     }
 };
+
+// In actual usage, we need to dynamically re-sort configs
+// that are returned to the user.
+struct DynamicCompare;
+// This is because the sorting order of configs is affected
+// based on dynamic properties.
+//
+// See https://www.khronos.org/registry/egl/sdk/docs/man/html/eglChooseConfig.xhtml
+// and the section on config sorting.
+//
+// If the user requests an EGL config with a particular EGL_RED_SIZE,
+// for example, we must sort configs based on that criteria, while if that
+// was not specified, we would just skip right on to sorting by buffer size.
+// Below is an implementation of EGL config sorting according
+// to spec, that takes the dynamic properties into account.
+static int ColorBufferTypeVal(EGLenum type) {
+    switch (type) {
+    case EGL_RGB_BUFFER: return 0;
+    case EGL_LUMINANCE_BUFFER: return 1;
+    case EGL_YUV_BUFFER_EXT: return 2;
+    }
+    return 3;
+}
+
+static bool nonTrivialAttribVal(EGLint val) {
+    return val != 0 && val != EGL_DONT_CARE;
+}
+
+struct DynamicCompare {
+public:
+    DynamicCompare(const EglConfig& wantedAttribs) {
+
+        EGLint wantedRVal = wantedAttribs.getConfAttrib(EGL_RED_SIZE);
+        EGLint wantedGVal = wantedAttribs.getConfAttrib(EGL_GREEN_SIZE);
+        EGLint wantedBVal = wantedAttribs.getConfAttrib(EGL_BLUE_SIZE);
+        EGLint wantedLVal = wantedAttribs.getConfAttrib(EGL_LUMINANCE_SIZE);
+        EGLint wantedAVal = wantedAttribs.getConfAttrib(EGL_ALPHA_SIZE);
+
+        wantedR = wantedAttribs.isWantedAttrib(EGL_RED_SIZE) && nonTrivialAttribVal(wantedRVal);
+        wantedG = wantedAttribs.isWantedAttrib(EGL_GREEN_SIZE) && nonTrivialAttribVal(wantedGVal);
+        wantedB = wantedAttribs.isWantedAttrib(EGL_BLUE_SIZE) && nonTrivialAttribVal(wantedBVal);
+        wantedL = wantedAttribs.isWantedAttrib(EGL_LUMINANCE_SIZE) && nonTrivialAttribVal(wantedLVal);
+        wantedA = wantedAttribs.isWantedAttrib(EGL_ALPHA_SIZE) && nonTrivialAttribVal(wantedAVal);
+    }
+
+    bool operator()(EglConfig* a, EglConfig* b) const {
+        EGLint aConformant = a->getConfAttrib(EGL_CONFORMANT);
+        EGLint bConformant = b->getConfAttrib(EGL_CONFORMANT);
+
+        if (aConformant != bConformant) {
+            return aConformant != 0;
+        }
+
+        EGLint aCaveat = a->getConfAttrib(EGL_CONFIG_CAVEAT);
+        EGLint bCaveat = b->getConfAttrib(EGL_CONFIG_CAVEAT);
+        if (aCaveat != bCaveat) {
+            return aCaveat < bCaveat;
+        }
+
+        EGLint aCbType = a->getConfAttrib(EGL_COLOR_BUFFER_TYPE);
+        EGLint bCbType = b->getConfAttrib(EGL_COLOR_BUFFER_TYPE);
+        if (aCbType != bCbType) {
+            return ColorBufferTypeVal(aCbType) <
+                   ColorBufferTypeVal(bCbType);
+        }
+
+        EGLint aCbSize = 0;
+        EGLint bCbSize = 0;
+
+        if (wantedR) {
+            aCbSize += a->getConfAttrib(EGL_RED_SIZE);
+            bCbSize += b->getConfAttrib(EGL_RED_SIZE);
+        }
+        if (wantedG) {
+            aCbSize += a->getConfAttrib(EGL_GREEN_SIZE);
+            bCbSize += b->getConfAttrib(EGL_GREEN_SIZE);
+        }
+        if (wantedB) {
+            aCbSize += a->getConfAttrib(EGL_BLUE_SIZE);
+            bCbSize += b->getConfAttrib(EGL_BLUE_SIZE);
+        }
+        if (wantedL) {
+            aCbSize += a->getConfAttrib(EGL_LUMINANCE_SIZE);
+            bCbSize += b->getConfAttrib(EGL_LUMINANCE_SIZE);
+        }
+        if (wantedA) {
+            aCbSize += a->getConfAttrib(EGL_ALPHA_SIZE);
+            bCbSize += b->getConfAttrib(EGL_ALPHA_SIZE);
+        }
+
+        if (aCbSize != bCbSize) {
+            return aCbSize > bCbSize;
+        }
+
+        EGLint aBufferSize = a->getConfAttrib(EGL_BUFFER_SIZE);
+        EGLint bBufferSize = b->getConfAttrib(EGL_BUFFER_SIZE);
+        if (aBufferSize != bBufferSize) {
+            return aBufferSize < bBufferSize;
+        }
+
+        EGLint aSampleBuffersNum = a->getConfAttrib(EGL_SAMPLE_BUFFERS);
+        EGLint bSampleBuffersNum = b->getConfAttrib(EGL_SAMPLE_BUFFERS);
+        if (aSampleBuffersNum != bSampleBuffersNum) {
+            return aSampleBuffersNum < bSampleBuffersNum;
+        }
+
+        EGLint aSPP = a->getConfAttrib(EGL_SAMPLES);
+        EGLint bSPP = b->getConfAttrib(EGL_SAMPLES);
+        if (aSPP != bSPP) {
+            return aSPP < bSPP;
+        }
+
+        EGLint aDepthSize = a->getConfAttrib(EGL_DEPTH_SIZE);
+        EGLint bDepthSize = b->getConfAttrib(EGL_DEPTH_SIZE);
+        if (aDepthSize != bDepthSize) {
+            return aDepthSize < bDepthSize;
+        }
+
+        EGLint aStencilSize = a->getConfAttrib(EGL_STENCIL_SIZE);
+        EGLint bStencilSize = b->getConfAttrib(EGL_STENCIL_SIZE);
+        if (aStencilSize != bStencilSize) {
+            return aStencilSize < bStencilSize;
+        }
+
+        return a->getConfAttrib(EGL_CONFIG_ID) < b->getConfAttrib(EGL_CONFIG_ID);
+    }
+
+    bool wantedR;
+    bool wantedG;
+    bool wantedB;
+    bool wantedL;
+    bool wantedA;
+};
+
 }
 
 void EglDisplay::addSimplePixelFormat(int red_size,
                                       int green_size,
                                       int blue_size,
                                       int alpha_size) {
-    std::sort(m_configs.begin(), m_configs.end(), CompareEglConfigsPtrs());
+    std::sort(m_configs.begin(), m_configs.end(), CompareEglConfigs::StaticCompare());
 
     EGLConfig match;
 
@@ -152,7 +288,7 @@ void EglDisplay::initConfigurations(int renderableType) {
     m_idpy->queryConfigs(renderableType, addConfig, this);
 
     addMissingConfigs();
-    std::sort(m_configs.begin(), m_configs.end(), CompareEglConfigsPtrs());
+    std::sort(m_configs.begin(), m_configs.end(), CompareEglConfigs::StaticCompare());
 
 #if EMUGL_DEBUG
     for (ConfigsList::const_iterator it = m_configs.begin();
@@ -281,17 +417,32 @@ int EglDisplay::doChooseConfigs(const EglConfig& dummy,
                                 int config_size) const {
     int added = 0;
 
+    std::vector<EglConfig*> validConfigs;
+
+    CHOOSE_CONFIG_DLOG("returning configs. ids: {");
     for(ConfigsList::const_iterator it = m_configs.begin();
         it != m_configs.end() && (added < config_size || !configs);
         ++it) {
         if( (*it)->chosen(dummy)){
             if(configs) {
-                configs[added] = static_cast<EGLConfig>(it->get());
+                CHOOSE_CONFIG_DLOG("valid config: id=0x%x", it->get()->id());
+                validConfigs.push_back(it->get());
             }
             added++;
        }
     }
-    // no need to sort since the configurations are saved already in sorted manner
+
+    CHOOSE_CONFIG_DLOG("sorting valid configs...");
+
+    std::sort(validConfigs.begin(),
+              validConfigs.end(),
+              CompareEglConfigs::DynamicCompare(dummy));
+
+    for (int i = 0; i < added; i++) {
+        configs[i] = static_cast<EGLConfig>(validConfigs[i]);
+    }
+
+    CHOOSE_CONFIG_DLOG("returning configs. ids end }");
     return added;
 }
 
