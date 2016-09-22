@@ -251,6 +251,7 @@ LOCAL_SRC_FILES := \
     android/emulation/control/LineConsumer.cpp \
     android/emulation/control/ScreenCapturer.cpp \
     android/emulation/CpuAccelerator.cpp \
+    android/emulation/GoldfishDma.cpp \
     android/emulation/GoldfishSyncCommandQueue.cpp \
     android/emulation/goldfish_sync.cpp \
     android/emulation/nand_limits.c \
