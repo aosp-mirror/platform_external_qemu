@@ -168,13 +168,9 @@ TEST_F(MetricsReporterTest, report) {
         EXPECT_TRUE(cb(&event));
     };
 
-    mReporter->report([](android_studio::AndroidStudioEvent* event) {
-        return false;
-    });
+    mReporter->report([](android_studio::AndroidStudioEvent* event) {});
     EXPECT_EQ(1, mReporter->mReportConditionalCallsCount);
-    mReporter->report([](android_studio::AndroidStudioEvent* event) {
-        return true;
-    });
+    mReporter->report([](android_studio::AndroidStudioEvent* event) {});
     EXPECT_EQ(2, mReporter->mReportConditionalCallsCount);
 
     // empty callbacks don't even reach the reportConditional() override
