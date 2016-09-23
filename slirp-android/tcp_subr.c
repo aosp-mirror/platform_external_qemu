@@ -622,6 +622,15 @@ tcp_connect(struct socket *inso)
 		tcp_close(sototcpcb(so)); /* This will sofree() as well */
 		return;
 	}
+        static const uint8_t kLoopback6[16] =
+		{ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1 };
+	/* If this is from a local connection to IPv6 listen socket, just
+	 * pretend it to IPv4 since we have no support for IPv6 in qemu1 now. */
+	if (sock_address_get_family(&addr) == SOCKET_IN6
+	    && !memcmp(addr.u.in6.address, kLoopback6, sizeof(kLoopback6))) {
+		sock_address_init_inet(&addr, SOCK_ADDRESS_INET_LOOPBACK,
+				       sock_address_get_port(&addr));
+	}
 	socket_set_nonblock(s);
 	socket_set_xreuseaddr(s);
 	socket_set_oobinline(s);
