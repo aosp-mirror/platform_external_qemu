@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "706bd79b_6d60afa5",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2722,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-09-23T23:39:20Z",
+      "side": 0,
+      "message": "you might also want to remove this functionality from vl.c in the qemu-android as well",
+      "range": {
+        "startLine": 2722,
+        "startChar": 37,
+        "endLine": 2722,
+        "endChar": 38
+      },
+      "revId": "9c75961463022b13a22da0a57a5086fcf4e14a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
