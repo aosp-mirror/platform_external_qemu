@@ -16,6 +16,7 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
+#include "android/utils/setenv.h"
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -81,6 +82,7 @@ timezone_set( const char*  tzname )
     if (len > (int)sizeof(android_timezone0)-1)
         return -1;
 
+    setenv("TZ", tzname, 1);
     strcpy( android_timezone0, tzname );
     android_timezone      = android_timezone0;
     android_timezone_init = 1;
