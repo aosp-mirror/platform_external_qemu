@@ -52,7 +52,10 @@ struct RenderThreadInfo {
     GLESv2Decoder                   m_gl2Dec;
     renderControl_decoder_context_t m_rcDec;
 
-    // all the contexts that are created by this render thread
+    // All the contexts that are created by this render thread.
+    // New emulator manages contexts in guest process level,
+    // m_contextSet should be deprecated. It is only kept for
+    // backward compatibility reason.
     ThreadContextSet                m_contextSet;
     // all the window surfaces that are created by this render thread
     WindowSurfaceSet                m_windowSet;

@@ -41,8 +41,12 @@ struct ColorBufferRef {
     ColorBufferPtr cb;
     uint32_t refcount;  // number of client-side references
 };
-typedef std::unordered_map<HandleType, RenderContextPtr> RenderContextMap;
+
 typedef std::unordered_map<HandleType, std::pair<WindowSurfacePtr, HandleType> > WindowSurfaceMap;
+
+typedef std::unordered_map<HandleType, RenderContextPtr> RenderContextMap;
+typedef std::unordered_set<HandleType> RenderContextSet;
+typedef std::unordered_map<uint64_t, RenderContextSet> ProcOwnedRenderContexts;
 
 typedef std::unordered_map<HandleType, ColorBufferRef> ColorBufferMap;
 typedef std::unordered_multiset<HandleType> ColorBufferSet;
@@ -394,5 +398,6 @@ private:
     // cleanup. Guest processes are identified with a host generated unique ID.
     ProcOwnedColorBuffers m_procOwnedColorBuffers;
     ProcOwnedEGLImages m_procOwnedEGLImages;
+    ProcOwnedRenderContexts m_procOwnedRenderContext;
 };
 #endif

@@ -703,8 +703,17 @@ HandleType FrameBuffer::createRenderContext(int p_config, HandleType p_share,
         ret = genHandle();
         m_contexts[ret] = rctx;
         RenderThreadInfo *tinfo = RenderThreadInfo::get();
-        tinfo->m_contextSet.insert(ret);
+        uint64_t puid = tinfo->m_puid;
+        // The new emulator manages render contexts per guest process.
+        // Fall back to per-thread management if the system image does not
+        // support it.
+        if (puid) {
+            m_procOwnedRenderContext[puid].insert(ret);
+        } else {
+            tinfo->m_contextSet.insert(ret);
+        }
     }
+
     return ret;
 }
 
@@ -771,8 +780,18 @@ void FrameBuffer::DestroyRenderContext(HandleType p_context)
     emugl::Mutex::AutoLock mutex(m_lock);
     m_contexts.erase(p_context);
     RenderThreadInfo *tinfo = RenderThreadInfo::get();
-    if (tinfo->m_contextSet.empty()) return;
-    tinfo->m_contextSet.erase(p_context);
+    uint64_t puid = tinfo->m_puid;
+    // The new emulator manages render contexts per guest process.
+    // Fall back to per-thread management if the system image does not
+    // support it.
+    if (puid) {
+        auto ite = m_procOwnedRenderContext.find(puid);
+        if (ite != m_procOwnedRenderContext.end()) {
+            ite->second.erase(p_context);
+        }
+    } else {
+        tinfo->m_contextSet.erase(p_context);
+    }
 }
 
 void FrameBuffer::DestroyWindowSurface(HandleType p_surface)
@@ -859,6 +878,17 @@ void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
                             reinterpret_cast<EGLImageKHR>((HandleType)eglImg));
             }
             m_procOwnedEGLImages.erase(procIte);
+        }
+    }
+
+    // Cleanup render contexts
+    {
+        auto procIte = m_procOwnedRenderContext.find(puid);
+        if (procIte != m_procOwnedRenderContext.end()) {
+            for (auto ctx: procIte->second) {
+                m_contexts.erase(ctx);
+            }
+            m_procOwnedRenderContext.erase(procIte);
         }
     }
 }
