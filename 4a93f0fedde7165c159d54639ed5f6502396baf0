@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "706bd79b_42074329",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 594,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2016-09-23T05:22:33Z",
+      "side": 1,
+      "message": "progDir is get from android::base::System::get()-\u003egetProgramDirectory();  do you think we can just use one Env to let that function just return the correct value from env var?\n\ngetProgramDirectory() vs getLauncherdir(), it looks confusing...\nWhat\u0027s differnece?",
+      "range": {
+        "startLine": 594,
+        "startChar": 59,
+        "endLine": 594,
+        "endChar": 66
+      },
+      "revId": "4a93f0fedde7165c159d54639ed5f6502396baf0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
