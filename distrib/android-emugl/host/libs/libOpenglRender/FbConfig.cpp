@@ -182,12 +182,14 @@ int FbConfigList::chooseConfig(const EGLint* attribs,
         newAttribs[numAttribs + 2] = EGL_NONE;
     }
 
-    if (!s_egl.eglChooseConfig(mDisplay,
+    if (s_egl.eglChooseConfig(mDisplay,
                                newAttribs ? newAttribs : attribs,
                                matchedConfigs,
                                numHostConfigs,
-                               &numHostConfigs)) {
-        numHostConfigs = 0;
+                               &numHostConfigs) == EGL_FALSE) {
+        if (newAttribs) delete [] newAttribs;
+        delete [] matchedConfigs;
+        return -s_egl.eglGetError();
     }
 
     delete [] newAttribs;
