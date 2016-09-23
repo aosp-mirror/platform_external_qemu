@@ -22,6 +22,30 @@
       "revId": "0f436d6aea10210a440ee33d56b050e0cf4002a0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "706bd79b_bb8daae5",
+        "filename": "android/base/async/GenLooper.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-09-23T18:04:40Z",
+      "side": 1,
+      "message": "I wasn\u0027t going to rename it, but if you mentioned...\nI\u0027ll call it \u0027DefaultLooper\u0027",
+      "parentUuid": "706bd79b_020e2b3e",
+      "range": {
+        "startLine": 25,
+        "startChar": 6,
+        "endLine": 25,
+        "endChar": 15
+      },
+      "revId": "0f436d6aea10210a440ee33d56b050e0cf4002a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
