@@ -36,27 +36,27 @@ public:
     using GenLooper::runOneIterationWithDeadlineMs;
 };
 
-const GenLooper::TimerSet& TestLooper::timers() const {
+inline const GenLooper::TimerSet& TestLooper::timers() const {
     return mTimers;
 }
 
-const GenLooper::TimerList& TestLooper::activeTimers() const {
+inline const GenLooper::TimerList& TestLooper::activeTimers() const {
     return mActiveTimers;
 }
 
-const GenLooper::TimerList& TestLooper::pendingTimers() const {
+inline const GenLooper::TimerList& TestLooper::pendingTimers() const {
     return mPendingTimers;
 }
 
-const GenLooper::FdWatchSet& TestLooper::fdWatches() const {
+inline const GenLooper::FdWatchSet& TestLooper::fdWatches() const {
     return mFdWatches;
 }
 
-const GenLooper::FdWatchList& TestLooper::pendingFdWatches() const {
+inline const GenLooper::FdWatchList& TestLooper::pendingFdWatches() const {
     return mPendingFdWatches;
 }
 
-bool TestLooper::exitRequested() const {
+inline bool TestLooper::exitRequested() const {
     return mForcedExit;
 }
 
