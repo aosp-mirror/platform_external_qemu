@@ -286,6 +286,11 @@ public:
 
     virtual const std::string& getLauncherDirectory() const {
         if (mLauncherDir.empty()) {
+            std::string launcherDirEnv = envGet("ANDROID_EMULATOR_LAUNCHER_DIR");
+            if (!launcherDirEnv.empty()) {
+                mLauncherDir = launcherDirEnv;
+                return mLauncherDir;
+            }
             std::string programDir = getProgramDirectory();
 
             std::string launcherName("emulator");
