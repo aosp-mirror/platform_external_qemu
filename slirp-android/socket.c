@@ -618,7 +618,6 @@ struct socket *
 solisten(u_int port, u_int32_t laddr, u_int lport, int flags)
 {
 	SockAddress  addr;
-	uint32_t     addr_ip;
 	struct socket *so;
 	int s;
 
@@ -659,18 +658,10 @@ solisten(u_int port, u_int32_t laddr, u_int lport, int flags)
         return NULL;
 
     socket_get_address(s, &addr);
-
-	so->so_faddr_port = sock_address_get_port(&addr);
-
-    addr_ip = (uint32_t) sock_address_get_ip(&addr);
-
-    if (addr_ip == 0 || addr_ip == loopback_addr_ip)
-        so->so_faddr_ip = alias_addr_ip;
-    else
-        so->so_faddr_ip = addr_ip;
-
-	so->s = s;
-	return so;
+    so->so_faddr_port = sock_address_get_port(&addr);
+    so->so_faddr_ip = alias_addr_ip;
+    so->s = s;
+    return so;
 }
 
 
