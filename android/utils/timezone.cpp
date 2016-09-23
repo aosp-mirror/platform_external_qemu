@@ -16,6 +16,7 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
+#include "android/utils/setenv.h"
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -50,12 +51,18 @@ static int          android_timezone_init;
 static int
 check_timezone_is_zoneinfo(const char*  tz)
 {
+#ifdef _WIN32
+    /*on Windows platform, the name must be of the form tzn[+ | –]hh[:mm[:ss] ][dzn]
+     * but we will skip the check here since the deafult would be
+     * GMT+0*/
+    return 1;
+#else
     const char*  slash1 = NULL, *slash2 = NULL;
 
     if (tz == NULL)
         return 0;
 
-    /* the name must be of the form Area/Location or Area/Location/SubLocation */
+   /*the name must be of the form Area/Location or Area/Location/SubLocation*/
     slash1 = strchr( tz, '/' );
     if (slash1 == NULL || slash1[1] == 0)
         return 0;
@@ -67,6 +74,7 @@ check_timezone_is_zoneinfo(const char*  tz)
     }
 
     return 1;
+#endif
 }
 
 int
@@ -81,6 +89,7 @@ timezone_set( const char*  tzname )
     if (len > (int)sizeof(android_timezone0)-1)
         return -1;
 
+    setenv("TZ", tzname, 1);
     strcpy( android_timezone0, tzname );
     android_timezone      = android_timezone0;
     android_timezone_init = 1;

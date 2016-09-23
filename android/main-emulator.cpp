@@ -49,6 +49,7 @@
 #include "android/utils/path.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/win32_cmdline_quote.h"
+#include "android/utils/timezone.h"
 #include "android/version.h"
 
 using android::base::PathUtils;
@@ -191,6 +192,7 @@ int main(int argc, char** argv)
     const char* gpu = NULL;
     char*       emulatorPath;
     const char* engine = NULL;
+    const char* tzname = NULL;
     bool doAccelCheck = false;
     bool doListAvds = false;
     bool force32bit = false;
@@ -225,6 +227,9 @@ int main(int argc, char** argv)
      * 2) '-force-32bit' which always use 32-bit emulator on 64-bit platforms
      * 3) '-verbose'/'-debug-all'/'-debug all'/'-debug-init'/'-debug init'
      *    to enable verbose mode.
+     * 4) if -timezone <timezone> option is used, set TZ environ var to make
+     *    timezone consistent across the entire program.
+     *
      */
     for (int nn = 1; nn < argc; nn++) {
         const char* opt = argv[nn];
@@ -320,6 +325,16 @@ int main(int argc, char** argv)
             else if (opt[0] == '@' && opt[1] != '\0') {
                 avdName = opt+1;
             }
+        }
+
+        if (!strcmp(opt, "-timezone") && nn+1 < argc) {
+            tzname = argv[nn+1];
+            nn++;
+            if (timezone_set(tzname)) {
+                derror("emulator: it seems the timezone '%s' is not in zoneinfo format\n",
+                            tzname);
+            }
+            continue;
         }
     }
 
