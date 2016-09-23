@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "706bd79b_020e2b3e",
+        "filename": "android/base/async/GenLooper.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-09-23T05:25:44Z",
+      "side": 1,
+      "message": "nit: GenricLooper is better than \u0027GenLooper\u0027\nafter reading a lot of glGenxxx messes",
+      "range": {
+        "startLine": 25,
+        "startChar": 6,
+        "endLine": 25,
+        "endChar": 15
+      },
+      "revId": "0f436d6aea10210a440ee33d56b050e0cf4002a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
