@@ -594,12 +594,13 @@ LOCAL_LDLIBS += \
 
 LOCAL_SRC_FILES := \
   android/metrics/StudioConfig_unittest.cpp \
+  android/metrics/tests/AsyncMetricsReporter_unittest.cpp \
   android/metrics/tests/FileMetricsWriter_unittest.cpp \
   android/metrics/tests/MetricsReporter_unittest.cpp \
   android/metrics/tests/MockMetricsReporter.cpp \
   android/metrics/tests/MockMetricsWriter.cpp \
-  android/metrics/tests/AsyncMetricsReporter_unittest.cpp \
   android/metrics/tests/NullMetricsClasses_unittest.cpp \
+  android/metrics/tests/PeriodicReporter_unittest.cpp \
   android/metrics/tests/SyncMetricsReporter_unittest.cpp \
 
 LOCAL_CFLAGS += -O0
