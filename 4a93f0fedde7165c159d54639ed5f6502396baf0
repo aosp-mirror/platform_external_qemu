@@ -22,6 +22,30 @@
       "revId": "4a93f0fedde7165c159d54639ed5f6502396baf0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "706bd79b_222c0fa0",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 594,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-09-23T05:33:52Z",
+      "side": 1,
+      "message": "getporgramdir can be used by any binary: emulator, qemu-system-xxx etc\nget-launcherdir is just to get the launcher.i.e.: emulator or emulator.ext\n\nwe want to get the launcher here",
+      "parentUuid": "706bd79b_42074329",
+      "range": {
+        "startLine": 594,
+        "startChar": 59,
+        "endLine": 594,
+        "endChar": 66
+      },
+      "revId": "4a93f0fedde7165c159d54639ed5f6502396baf0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
