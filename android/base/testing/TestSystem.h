@@ -227,11 +227,9 @@ public:
         std::string newPath = toTempRoot(dirPath);
         std::vector<std::string> result = scanDirInternal(newPath);
         if (fullPath) {
-            std::string prefix = PathUtils::addTrailingDirSeparator(
-                    std::string(dirPath));
-            size_t prefixLen = prefix.size();
+            std::string prefix = PathUtils::addTrailingDirSeparator(dirPath);
             for (size_t n = 0; n < result.size(); ++n) {
-                result[n] = std::string(result[n].c_str() + prefixLen);
+                result[n] = prefix + result[n];
             }
         }
         return result;
