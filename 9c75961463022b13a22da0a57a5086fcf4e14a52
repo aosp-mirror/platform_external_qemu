@@ -22,6 +22,30 @@
       "revId": "9c75961463022b13a22da0a57a5086fcf4e14a52",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "706bd79b_4d74cb5f",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2722,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-09-23T23:40:38Z",
+      "side": 0,
+      "message": "Yes. that would be a different CL i guess since it\u0027s a different git branch. I am not sure if i can combine them.",
+      "parentUuid": "706bd79b_6d60afa5",
+      "range": {
+        "startLine": 2722,
+        "startChar": 37,
+        "endLine": 2722,
+        "endChar": 38
+      },
+      "revId": "9c75961463022b13a22da0a57a5086fcf4e14a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
