@@ -82,7 +82,6 @@
 #include "android/utils/socket_drainer.h"
 #include "android/utils/stralloc.h"
 #include "android/utils/tempfile.h"
-#include "android/utils/timezone.h"
 #include "android/wear-agent/android_wear_agent.h"
 #include "exec/hwaddr.h"
 #include "migration/qemu-file.h"
@@ -2717,13 +2716,6 @@ int main(int argc, char **argv, char **envp)
 
             case QEMU_OPTION_audio_test_out:
                 android_audio_test_start_out();
-                break;
-
-            case QEMU_OPTION_timezone:
-                if (timezone_set((char*)optarg)) {
-                    fprintf(stderr, "emulator: it seems the timezone '%s' is not in zoneinfo format\n",
-                            (char*)optarg);
-                }
                 break;
 
             case QEMU_OPTION_snapshot_no_time_update:
