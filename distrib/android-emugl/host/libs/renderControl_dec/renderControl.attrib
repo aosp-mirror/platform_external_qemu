@@ -46,9 +46,6 @@ rcUpdateColorBuffer
 rcCloseColorBuffer
     flag flushOnEncode
 
-rcCloseColorBufferPuid
-    flag flushOnEncode
-
 rcCreateSyncKHR
     dir attribs in
     len attribs num_attribs
