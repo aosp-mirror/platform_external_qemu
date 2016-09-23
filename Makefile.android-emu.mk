@@ -208,6 +208,7 @@ LOCAL_SRC_FILES := \
     android/base/async/AsyncReader.cpp \
     android/base/async/AsyncSocketServer.cpp \
     android/base/async/AsyncWriter.cpp \
+    android/base/async/DefaultLooper.cpp \
     android/base/async/Looper.cpp \
     android/base/async/ScopedSocketWatch.cpp \
     android/base/async/ThreadLooper.cpp \
@@ -514,7 +515,6 @@ LOCAL_SRC_FILES := \
   android/gps/GpxParser_unittest.cpp \
   android/gps/KmlParser_unittest.cpp \
   android/kernel/kernel_utils_unittest.cpp \
-  android/metrics/StudioConfig_unittest.cpp \
   android/misc/Random_unittest.cpp \
   android/network/control_unittest.cpp \
   android/network/constants_unittest.cpp \
@@ -560,6 +560,47 @@ LOCAL_SRC_FILES += \
   android/emulation/nand_limits_unittest.cpp \
 
 endif
+
+LOCAL_CFLAGS += -O0
+
+LOCAL_STATIC_LIBRARIES += \
+    $(ANDROID_EMU_STATIC_LIBRARIES) \
+    emulator-libgtest \
+
+# Link against static libstdc++ on Linux and Windows since the unit-tests
+# cannot pick up our custom versions of the library from
+# $(BUILD_OBJS_DIR)/lib[64]/
+$(call local-link-static-c++lib)
+
+$(call end-emulator-program)
+
+###############################################################################
+#
+#  android-emu-metrics unit tests
+#
+#
+
+$(call start-emulator-program, \
+    android_emu_metrics$(BUILD_TARGET_SUFFIX)_unittests)
+
+LOCAL_C_INCLUDES += \
+    $(ANDROID_EMU_INCLUDES) \
+    $(EMULATOR_COMMON_INCLUDES) \
+    $(EMULATOR_GTEST_INCLUDES) \
+    $(LIBXML2_INCLUDES) \
+
+LOCAL_LDLIBS += \
+    $(ANDROID_EMU_LDLIBS) \
+
+LOCAL_SRC_FILES := \
+  android/metrics/StudioConfig_unittest.cpp \
+  android/metrics/tests/FileMetricsWriter_unittest.cpp \
+  android/metrics/tests/MetricsReporter_unittest.cpp \
+  android/metrics/tests/MockMetricsReporter.cpp \
+  android/metrics/tests/MockMetricsWriter.cpp \
+  android/metrics/tests/AsyncMetricsReporter_unittest.cpp \
+  android/metrics/tests/NullMetricsClasses_unittest.cpp \
+  android/metrics/tests/SyncMetricsReporter_unittest.cpp \
 
 LOCAL_CFLAGS += -O0
 

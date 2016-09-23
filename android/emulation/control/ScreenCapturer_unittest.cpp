@@ -14,8 +14,7 @@
 
 #include "android/emulation/control/ScreenCapturer.h"
 
-#include "android/base/async/Looper.h"
-#include "android/base/async/ThreadLooper.h"
+#include "android/base/testing/TestLooper.h"
 #include "android/base/Compiler.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
@@ -51,7 +50,7 @@ public:
         mHaveResult = false;
         mTestSystem.setShellCommand(&ScreenCapturerTest::shellCmdHandler,
                                     this);
-        mLooper = android::base::Looper::create();
+        mLooper = new android::base::TestLooper();
         mAdb.reset(new TestAdbInterface(mLooper, "adb"));
         mCapturer.reset(new ScreenCapturer(mAdb.get()));
         mTestSystem.getTempRoot()->makeSubDir("ScreencapOut");
@@ -65,7 +64,12 @@ public:
         delete mLooper;
     }
 
-    void looperAdvance() { mLooper->runWithTimeoutMs(100); }
+    void looperAdvance() {
+        auto now = mTestSystem.getHighResTimeUs();
+        now += 1000;
+        mLooper->runOneIterationWithDeadlineMs(now / 1000);
+        mTestSystem.setUnixTimeUs(now);
+    }
 
     static bool shellCmdHandler(void* opaque,
                                 const vector<string>& commandLine,
@@ -109,7 +113,7 @@ public:
 
 protected:
     android::base::TestSystem mTestSystem;
-    android::base::Looper* mLooper;
+    android::base::TestLooper* mLooper;
     std::unique_ptr<TestAdbInterface> mAdb;
     std::unique_ptr<ScreenCapturer> mCapturer;
     bool mCaptureMustSucceed;

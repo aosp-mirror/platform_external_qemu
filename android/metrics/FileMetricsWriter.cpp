@@ -66,6 +66,27 @@ static std::string formatFilename(StringView sessionId,
                         extension);
 }
 
+// A cross-platform function to rename an |from| file to |to| name only if |to|
+// doesn't exist.
+// On POSIX one needs to make sure the |to| doesn't exist, otherwise it will be
+// owerwritten. On Windows rename() never overwrites target.
+static bool renameIfNotExists(StringView from, StringView to) {
+#ifdef _WIN32
+    return rename(from.c_str(), to.c_str()) == 0;
+#else
+    if (System::get()->pathExists(to)) {
+        return false;
+    }
+    // There's a small chance of race condition here, but we don't actually
+    // rename files in several threads, so it's OK.
+    // TODO(zyy): use renameat2() on Linux to make it atomic.
+    if (HANDLE_EINTR(rename(from.c_str(), to.c_str())) != 0) {
+        return false;
+    }
+    return true;
+#endif
+}
+
 FileMetricsWriter::FileMetricsWriter(StringView spoolDir,
                                      const std::string& sessionId,
                                      int recordCountLimit,
@@ -132,11 +153,8 @@ FileMetricsWriter::finalizeAbandonedSessionFiles(StringView spoolDir) {
                 const std::string finalName = PathUtils::join(
                         spoolDir, formatFilename(sessionId, filenameCounter,
                                                  kFinalExtension));
-                if (HANDLE_EINTR(rename(PathUtils::join(spoolDir, file).c_str(),
-                                        finalName.c_str()))) {
-                    return false;
-                }
-                return true;
+                return renameIfNotExists(PathUtils::join(spoolDir, file),
+                                         finalName);
             })) {
             W("failed to rename an abandoned log file '%s'", file.c_str());
         }
@@ -166,11 +184,7 @@ void FileMetricsWriter::finalizeActiveFileNoLock() {
             const std::string finalName = PathUtils::join(
                     mSpoolDir, formatFilename(sessionId(), mFilenameCounter,
                                               kFinalExtension));
-            if (HANDLE_EINTR(
-                        rename(mActiveFileName.c_str(), finalName.c_str()))) {
-                return false;
-            }
-            return true;
+            return renameIfNotExists(mActiveFileName, finalName);
         })) {
         W("failed to rename an active log file '%s'", mActiveFileName.c_str());
     } else {

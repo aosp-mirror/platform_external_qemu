@@ -227,11 +227,9 @@ public:
         std::string newPath = toTempRoot(dirPath);
         std::vector<std::string> result = scanDirInternal(newPath);
         if (fullPath) {
-            std::string prefix = PathUtils::addTrailingDirSeparator(
-                    std::string(dirPath));
-            size_t prefixLen = prefix.size();
+            std::string prefix = PathUtils::addTrailingDirSeparator(dirPath);
             for (size_t n = 0; n < result.size(); ++n) {
-                result[n] = std::string(result[n].c_str() + prefixLen);
+                result[n] = prefix + result[n];
             }
         }
         return result;
@@ -344,9 +342,12 @@ public:
 
 private:
     std::string toTempRoot(StringView path) const {
-        StringView prefix = mTempRootPrefix;
+        // mTempRootPrefix ends with a dir separator, ignore it for comparison.
+        StringView prefix(mTempRootPrefix.c_str(), mTempRootPrefix.size() - 1);
         if (prefix.size() <= path.size() &&
-            prefix == StringView(path.c_str(), prefix.size())) {
+            prefix == StringView(path.c_str(), prefix.size()) &&
+            (prefix.size() == path.size() ||
+             PathUtils::isDirSeparator(path[prefix.size()]))) {
             // Avoid prepending prefix if it's already there.
             return path;
         } else {

@@ -52,7 +52,7 @@ public:
     // Create a new generic Looper instance.
     static Looper* create();
 
-    virtual ~Looper() {}
+    virtual ~Looper();
 
     // Return the current time as seen by this looper instance in
     // milliseconds and nanoseconds.
@@ -61,9 +61,7 @@ public:
 
     // Run the event loop until forceQuit() is called or there is no
     // more registered watchers or timers in the looper.
-    void run() {
-        runWithDeadlineMs(kDurationInfinite);
-    }
+    void run();
 
     // A variant of run() that allows to run the event loop only until
     // a fixed deadline has passed. |deadlineMs| is a deadline in
@@ -81,12 +79,7 @@ public:
     //    0           -> normal exit through forceQuit()
     //    EWOULDBLOCK -> no more watchers and timers registered.
     //    ETIMEOUT    -> timeout reached.
-    int runWithTimeoutMs(Duration timeoutMs) {
-        if (timeoutMs != kDurationInfinite) {
-            timeoutMs += nowMs();
-        }
-        return runWithDeadlineMs(timeoutMs);
-    }
+    int runWithTimeoutMs(Duration timeoutMs);
 
     // Call this function from within the event loop to force it to quit
     // as soon as possible. runWithDeadlineMS() and runWithTimeoutMs() will
@@ -100,12 +93,10 @@ public:
         // Type of callback function called when the timer expires.
         typedef void (*Callback)(void* opaque, Timer* timer);
 
-        virtual ~Timer() {}
+        virtual ~Timer();
 
         // Get the parent looper object
-        Looper* parentLooper() const {
-            return mLooper;
-        }
+        Looper* parentLooper() const;
 
         // Start, or restart the timer to expire after |timeout_ms|
         // milliseconds.
@@ -127,11 +118,7 @@ public:
 
     protected:
         Timer(Looper* looper, Callback callback, void* opaque,
-              ClockType clock) :
-            mLooper(looper),
-            mCallback(callback),
-            mOpaque(opaque),
-            mClockType(clock) {}
+              ClockType clock);
 
         Looper* mLooper;
         Callback mCallback;
@@ -160,7 +147,7 @@ public:
         // |events| is an event bitmask.
         typedef void (*Callback)(void* opaque, int fd, unsigned events);
 
-        virtual ~FdWatch() {}
+        virtual ~FdWatch();
 
         virtual void addEvents(unsigned events) = 0;
 
@@ -169,29 +156,22 @@ public:
         inline void wantRead() {
             addEvents(FdWatch::kEventRead);
         }
-
         inline void wantWrite() {
             addEvents(FdWatch::kEventWrite);
         }
-
         inline void dontWantRead() {
             removeEvents(FdWatch::kEventRead);
         }
-
         inline void dontWantWrite() {
             removeEvents(FdWatch::kEventWrite);
         }
 
         virtual unsigned poll() const = 0;
 
-        int fd() const { return mFd; }
+        int fd() const;
 
     protected:
-        FdWatch(Looper* looper, int fd, Callback callback, void* opaque) :
-            mLooper(looper),
-            mFd(fd),
-            mCallback(callback),
-            mOpaque(opaque) {}
+        FdWatch(Looper* looper, int fd, Callback callback, void* opaque);
 
         Looper* mLooper;
         int mFd;
@@ -207,7 +187,7 @@ public:
 protected:
     // Default constructor is protected. Use create() method to create
     // new generic Looper instances.
-    Looper() {}
+    Looper();
 
 private:
     DISALLOW_COPY_AND_ASSIGN(Looper);
