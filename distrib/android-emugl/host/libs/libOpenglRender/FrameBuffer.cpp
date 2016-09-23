@@ -107,7 +107,6 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy)
         return NULL;
     }
 
-    DBG("%s: Found config %p\n", __FUNCTION__, (void*)config);
 
     static const EGLint pbufAttribs[] = {
         EGL_WIDTH, 1,
@@ -228,23 +227,63 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     // Create EGL context for framebuffer post rendering.
     //
     GLint surfaceType = (useSubWindow ? EGL_WINDOW_BIT : 0) | EGL_PBUFFER_BIT;
+
+    // On Linux, we need RGB888 exactly, or eglMakeCurrent will fail,
+    // as glXMakeContextCurrent needs to match the format of the
+    // native pixmap.
+    EGLint wantedRedSize = 8;
+    EGLint wantedGreenSize = 8;
+    EGLint wantedBlueSize = 8;
+    EGLint wantedAlphaSize = 0;
+
     const GLint configAttribs[] = {
-        EGL_RED_SIZE, 1,
-        EGL_GREEN_SIZE, 1,
-        EGL_BLUE_SIZE, 1,
+        EGL_RED_SIZE, wantedRedSize,
+        EGL_GREEN_SIZE, wantedGreenSize,
+        EGL_BLUE_SIZE, wantedBlueSize,
+        EGL_ALPHA_SIZE, wantedAlphaSize,
         EGL_SURFACE_TYPE, surfaceType,
         EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
         EGL_NONE
     };
 
-    int n;
-    if (!s_egl.eglChooseConfig(fb->m_eglDisplay, configAttribs,
-                               &fb->m_eglConfig, 1, &n)) {
+    EGLint total_num_configs = 0;
+    s_egl.eglGetConfigs(fb->m_eglDisplay, NULL, 0, &total_num_configs);
+
+    std::vector<EGLConfig> all_configs(total_num_configs);
+    EGLint total_egl_compatible_configs = 0;
+    s_egl.eglChooseConfig(fb->m_eglDisplay,
+                          configAttribs,
+                          &all_configs[0],
+                          total_num_configs,
+                          &total_egl_compatible_configs);
+
+    uint32_t total_exact_matches = 0;
+    std::vector<EGLint> exact_match_indices;
+    for (EGLint i = 0; i < total_egl_compatible_configs; i++) {
+        EGLint r,g,b,a;
+        EGLConfig c = all_configs[i];
+        s_egl.eglGetConfigAttrib(fb->m_eglDisplay, c, EGL_RED_SIZE, &r);
+        s_egl.eglGetConfigAttrib(fb->m_eglDisplay, c, EGL_GREEN_SIZE, &g);
+        s_egl.eglGetConfigAttrib(fb->m_eglDisplay, c, EGL_BLUE_SIZE, &b);
+        s_egl.eglGetConfigAttrib(fb->m_eglDisplay, c, EGL_ALPHA_SIZE, &a);
+
+        if (r == wantedRedSize &&
+            g == wantedGreenSize &&
+            b == wantedBlueSize &&
+            a == wantedAlphaSize) {
+            total_exact_matches++;
+            exact_match_indices.push_back(i);
+        }
+    }
+
+    if (exact_match_indices.size() == 0) {
         ERR("Failed on eglChooseConfig\n");
         free(gles2Extensions);
         delete fb;
         return false;
     }
+
+    fb->m_eglConfig = all_configs[exact_match_indices[0]];
 
     static const GLint glContextAttribs[] = {
         EGL_CONTEXT_CLIENT_VERSION, 2,

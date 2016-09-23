@@ -20,6 +20,8 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
+#include <unordered_set>
+
 #define MIN_SWAP_INTERVAL 1
 #define MAX_SWAP_INTERVAL 10
 
@@ -45,6 +47,7 @@ public:
     // (e.g. EGL_CONFIG_ID). On success, return true and sets |*val| to the
     // attribute value. On failure (unknown |attrib| value), return false.
     bool getConfAttrib(EGLint attrib, EGLint* val) const;
+    EGLint getConfAttrib(EGLint attrib) const;
 
     // Comparison operators used to sort EglConfig instances.
     bool operator<(const EglConfig& conf) const;
@@ -91,8 +94,12 @@ public:
               EGLint renderable_type,
               EGLint native_visual_id,
               EGLint native_visual_type,
+              EGLint sample_buffers_num,
               EGLint samples_per_pixel,
               EGLint stencil_size,
+              EGLint luminance_size, // We don't really support custom luminance sizes
+              EGLint wanted_buffer_size, // nor buffer sizes (I guess normal CB size + padding),
+                                         // but we still need to properly reject configs that request illegal sizes.
               EGLint surface_type,
               EGLenum transparent_type,
               EGLint trans_red_val,
@@ -145,6 +152,18 @@ public:
         delete m_nativeFormat;
     }
 
+    // We need to track which EGL config attributes were requested by the user
+    // versus others which are just part of the actual config itself.
+    // addWantedAttrib()/isWantedAttrib() are used in sorting configs
+    // depending on what the user requests.
+    void addWantedAttrib(EGLint wanted) {
+        m_wantedAttribs.insert(wanted);
+    }
+
+    bool isWantedAttrib(EGLint wanted) const {
+        return m_wantedAttribs.count(wanted);
+    }
+
 private:
     const EGLint      m_buffer_size;
     const EGLint      m_red_size;
@@ -170,6 +189,8 @@ private:
     const EGLint      m_sample_buffers_num;
     const EGLint      m_samples_per_pixel;
     const EGLint      m_stencil_size;
+    const EGLint      m_luminance_size;
+    const EGLint      m_wanted_buffer_size;
     const EGLint      m_surface_type;
     const EGLenum     m_transparent_type;
     const EGLint      m_trans_red_val;
@@ -180,6 +201,10 @@ private:
 
     EglOS::PixelFormat*  m_nativeFormat;
     const EGLint      m_color_buffer_type;
+
+    // Track which attribute keys are desired by a user.
+    // This dynamically affects config sorting order.
+    std::unordered_set<EGLint> m_wantedAttribs;
 };
 
 #endif
