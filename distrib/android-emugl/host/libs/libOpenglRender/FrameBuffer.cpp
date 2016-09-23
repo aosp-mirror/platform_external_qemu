@@ -19,11 +19,11 @@
 #include "DispatchTables.h"
 #include "NativeSubWindow.h"
 #include "RenderThreadInfo.h"
-#include "TimeUtils.h"
 #include "gles2_dec.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
+#include "android/base/system/System.h"
 #include "emugl/common/logging.h"
 
 #include <stdio.h>
@@ -1227,7 +1227,7 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLock)
     // output FPS statistics
     //
     if (m_fpsStats) {
-        long long currTime = GetCurrentTimeMS();
+        long long currTime = android::base::System::get()->getHighResTimeUs() / 1000;
         m_statsNumFrames++;
         if (currTime - m_statsStartTime >= 1000) {
             float dt = (float)(currTime - m_statsStartTime) / 1000.0f;

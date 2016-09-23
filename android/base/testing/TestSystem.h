@@ -18,6 +18,7 @@
 #include "android/base/Log.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestTempDir.h"
+#include "android/base/threads/Thread.h"
 
 namespace android {
 namespace base {
@@ -319,12 +320,26 @@ public:
         return mUnixTime;
     }
 
+    virtual WallDuration getHighResTimeUs() const override {
+        return mUnixTime;
+    }
+
     void setUnixTime(time_t time) {
         setUnixTimeUs(time * 1000000LL);
     }
 
     void setUnixTimeUs(Duration time) {
         mUnixTime = time;
+    }
+
+    virtual void sleepMs(unsigned n) const override {
+        // Don't sleep in tests, use the static functions from Thread class
+        // if you need a delay (you don't!).
+        Thread::yield();    // Add a small delay to mimic the intended behavior.
+    }
+
+    virtual void yield() const override {
+        Thread::yield();
     }
 
 private:
@@ -337,13 +352,6 @@ private:
         } else {
             return mTempRootPrefix + path.c_str();
         }
-    }
-
-    std::string fromTempRoot(StringView path) {
-        if (path.size() > mTempRootPrefix.size()) {
-            return path.c_str() + mTempRootPrefix.size();
-        }
-        return path;
     }
 
     std::string mProgramDir;

@@ -19,6 +19,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/StringFormat.h"
+#include "android/base/threads/Thread.h"
 
 #ifdef _WIN32
 #include "android/base/system/Win32UnicodeString.h"
@@ -60,7 +61,6 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/time.h>
-#include <unistd.h>
 
 // This variable is a pointer to a zero-terminated array of all environment
 // variables in the current process.
@@ -81,13 +81,42 @@ using std::string;
 using std::unique_ptr;
 using std::vector;
 
-static System::WallDuration getTickCountMs() {
+namespace {
+
+struct TickCountImpl {
+private:
+    System::WallDuration mStartTimeUs;
 #ifdef _WIN32
-    return ::GetTickCount();
+    long long mFreqPerSec = 0;    // 0 means 'high perf counter isn't available'
+#endif
+
+public:
+    TickCountImpl() {
+#ifdef _WIN32
+        LARGE_INTEGER freq;
+        if (::QueryPerformanceFrequency(&freq)) {
+            mFreqPerSec = freq.QuadPart;
+        }
+#endif
+        mStartTimeUs = getUs();
+    }
+
+    System::WallDuration getStartTimeUs() const {
+        return mStartTimeUs;
+    }
+
+    System::WallDuration getUs() const {
+#ifdef _WIN32
+    if (!mFreqPerSec) {
+        return ::GetTickCount() * 1000;
+    }
+    LARGE_INTEGER now;
+    ::QueryPerformanceCounter(&now);
+    return (now.QuadPart * 1000000ull) / mFreqPerSec;
 #elif defined __linux__
     timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+    return ts.tv_sec * 1000000ll + ts.tv_nsec / 1000;
 #else // MAC
     clock_serv_t clockServ;
     mach_timespec_t mts;
@@ -95,11 +124,17 @@ static System::WallDuration getTickCountMs() {
     clock_get_time(clockServ, &mts);
     mach_port_deallocate(mach_task_self(), clockServ);
 
-    return mts.tv_sec * 1000 + mts.tv_nsec / 1000000;
+    return mts.tv_sec * 1000000ll + mts.tv_nsec / 1000;
 #endif
-}
+    }
+};
 
-static const System::WallDuration startTimeMs = getTickCountMs();
+// This is, maybe, the only static variable that may not be a LazyInstance:
+// it holds the actual timestamp at startup, and has to be initialized as
+// soon as possible after the application launch.
+static const TickCountImpl kTickCount;
+
+}  // namespace
 
 #ifdef _WIN32
 // Check if we're currently running under Wine
@@ -568,7 +603,7 @@ public:
         return pathFileSizeInternal(path, outFileSize);
     }
 
-    Times getProcessTimes() const {
+    Times getProcessTimes() const override {
         Times res = {};
 
 #ifdef _WIN32
@@ -576,8 +611,8 @@ public:
         FILETIME exitTime = {};
         FILETIME kernelTime = {};
         FILETIME userTime = {};
-        ::GetProcessTimes(::GetCurrentProcess(),
-            &creationTime, &exitTime, &kernelTime, &userTime);
+        ::GetProcessTimes(::GetCurrentProcess(), &creationTime, &exitTime,
+                          &kernelTime, &userTime);
 
         // convert 100-ns intervals from a struct to int64_t milliseconds
         ULARGE_INTEGER kernelInt64;
@@ -597,7 +632,8 @@ public:
         res.systemMs = (times.tms_stime * 1000ll) / ticksPerSec;
         res.userMs = (times.tms_utime * 1000ll) / ticksPerSec;
 #endif
-        res.wallClockMs = getTickCountMs() - startTimeMs;
+        res.wallClockMs =
+                (kTickCount.getUs() - kTickCount.getStartTimeUs()) / 1000;
 
         return res;
     }
@@ -610,6 +646,18 @@ public:
         timeval tv;
         gettimeofday(&tv, nullptr);
         return tv.tv_sec * 1000000LL + tv.tv_usec;
+    }
+
+    WallDuration getHighResTimeUs() const override {
+        return kTickCount.getUs();
+    }
+
+    void sleepMs(unsigned n) const override {
+        Thread::sleepMs(n);
+    }
+
+    void yield() const override {
+        Thread::yield();
     }
 
     bool runCommand(const std::vector<std::string>& commandLine,
@@ -665,11 +713,11 @@ public:
             commandLineCopy.insert(commandLineCopy.begin(), "/C");
             commandLineCopy.insert(commandLineCopy.begin(), comspec);
 
-            if ((options & RunOptions::DumpOutputToFile) != RunOptions::None) {
+            if ((options & RunOptions::DumpOutputToFile) != RunOptions::Empty) {
                 commandLineCopy.push_back(">");
                 commandLineCopy.push_back(outputFile);
                 commandLineCopy.push_back("2>&1");
-            } else if ((options & RunOptions::ShowOutput) == RunOptions::None) {
+            } else if ((options & RunOptions::ShowOutput) == RunOptions::Empty) {
                 commandLineCopy.push_back(">nul");
                 commandLineCopy.push_back("2>&1");
             }
@@ -881,7 +929,7 @@ public:
         // It will be immediately closed in the parent process, and dup2'd into
         // stdout and stderr in the child process.
         int outputFd = 0;
-        if ((options & RunOptions::DumpOutputToFile) != RunOptions::None) {
+        if ((options & RunOptions::DumpOutputToFile) != RunOptions::Empty) {
             if (outputFile.empty()) {
                 LOG(VERBOSE) << "Can not redirect output to empty file!";
                 return -1;
@@ -913,11 +961,11 @@ public:
         // Do not do __anything__ except execve. That includes printing to
         // stdout/stderr. None of it is safe in the child process forked from a
         // parent with multiple threads.
-        if ((options & RunOptions::DumpOutputToFile) != RunOptions::None) {
+        if ((options & RunOptions::DumpOutputToFile) != RunOptions::Empty) {
             dup2(outputFd, 1);
             dup2(outputFd, 2);
             close(outputFd);
-        } else if ((options & RunOptions::ShowOutput) == RunOptions::None) {
+        } else if ((options & RunOptions::ShowOutput) == RunOptions::Empty) {
             // We were requested to RunOptions::HideAllOutput
             int fd = open("/dev/null", O_WRONLY);
             if (fd > 0) {
@@ -980,7 +1028,7 @@ public:
         unique_ptr<posix_spawn_file_actions_t, decltype(fileActionsDeleter)>
                 scopedFileActions(&fileActions, fileActionsDeleter);
 
-        if ((options & RunOptions::DumpOutputToFile) != RunOptions::None) {
+        if ((options & RunOptions::DumpOutputToFile) != RunOptions::Empty) {
             if (posix_spawn_file_actions_addopen(
                         &fileActions, 1, outputFile.c_str(),
                         O_WRONLY | O_CREAT | O_TRUNC, 0700) ||
@@ -991,7 +1039,7 @@ public:
                              << outputFile;
                 return -1;
             }
-        } else if ((options & RunOptions::ShowOutput) != RunOptions::None) {
+        } else if ((options & RunOptions::ShowOutput) != RunOptions::Empty) {
             if (posix_spawn_file_actions_addinherit_np(&fileActions, 1) ||
                 posix_spawn_file_actions_addinherit_np(&fileActions, 2)) {
                 LOG(VERBOSE) << "Failed to request child stdout/stderr to be "
@@ -1249,7 +1297,7 @@ bool System::deleteFileInternal(StringView path) {
         // Windows sometimes just fails to delete a file
         // on the first try.
         // Sleep a little bit and try again here.
-        sleepMs(16);
+        System::get()->sleepMs(1);
         remove_res = remove(path.c_str());
     }
 #else
@@ -1330,14 +1378,6 @@ std::string System::findBundledExecutable(StringView programName) {
 #endif
 
     return std::string();
-}
-
-void System::sleepMs(unsigned n) {
-#ifdef _WIN32
-    ::Sleep(n);
-#else
-    usleep(n * 1000);
-#endif
 }
 
 std::string toString(OsType osType) {

@@ -95,6 +95,13 @@ public:
     // NB: noop for Win32
     static void maskAllSignals();
 
+    // Sleep for |n| milliseconds
+    static void sleepMs(unsigned n);
+
+    // Yield the remaining part of current thread's CPU time slice to another
+    // thread that's ready to run.
+    static void yield();
+
 private:
 #ifdef _WIN32
     static DWORD WINAPI thread_main(void* arg);

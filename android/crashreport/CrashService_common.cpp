@@ -124,7 +124,7 @@ CrashService::~CrashService() {
         }
         if (remove(mDataDirectory.c_str()) < 0) {
             // on Windows waiting a bit usually helps
-            System::sleepMs(16);
+            System::get()->sleepMs(1);
             remove(mDataDirectory.c_str());
         }
     }
@@ -379,7 +379,7 @@ int64_t CrashService::waitForDumpFile(int clientpid, int timeout) {
         if (timeout >= 0 && waitduration_ms >= timeout) {
             return -1;
         }
-        System::sleepMs(WAIT_INTERVAL_MS);
+        System::get()->sleepMs(WAIT_INTERVAL_MS);
         waitduration_ms += WAIT_INTERVAL_MS;
     }
     if (!mDumpRequestContext.file_path.empty()) {

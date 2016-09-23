@@ -68,7 +68,7 @@ public:
                                   &port) == KERN_SUCCESS) {
                 return true;
             }
-            ::android::base::System::sleepMs(kWaitIntervalMS);
+            ::android::base::System::get()->sleepMs(kWaitIntervalMS);
         }
         return false;
     }
