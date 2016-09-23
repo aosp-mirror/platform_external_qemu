@@ -32,29 +32,31 @@ public:
     const FdWatchList& pendingFdWatches() const;
 
     bool exitRequested() const;
+
+    using DefaultLooper::runOneIterationWithDeadlineMs;
 };
 
-const DefaultLooper::TimerSet& TestLooper::timers() const {
+inline const DefaultLooper::TimerSet& TestLooper::timers() const {
     return mTimers;
 }
 
-const DefaultLooper::TimerList& TestLooper::activeTimers() const {
+inline const DefaultLooper::TimerList& TestLooper::activeTimers() const {
     return mActiveTimers;
 }
 
-const DefaultLooper::TimerList& TestLooper::pendingTimers() const {
+inline const DefaultLooper::TimerList& TestLooper::pendingTimers() const {
     return mPendingTimers;
 }
 
-const DefaultLooper::FdWatchSet& TestLooper::fdWatches() const {
+inline const DefaultLooper::FdWatchSet& TestLooper::fdWatches() const {
     return mFdWatches;
 }
 
-const DefaultLooper::FdWatchList& TestLooper::pendingFdWatches() const {
+inline const DefaultLooper::FdWatchList& TestLooper::pendingFdWatches() const {
     return mPendingFdWatches;
 }
 
-bool TestLooper::exitRequested() const {
+inline bool TestLooper::exitRequested() const {
     return mForcedExit;
 }
 

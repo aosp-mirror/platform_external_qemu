@@ -14,8 +14,7 @@
 
 #include "android/emulation/control/FilePusher.h"
 
-#include "android/base/async/Looper.h"
-#include "android/base/async/ThreadLooper.h"
+#include "android/base/testing/TestLooper.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
@@ -45,7 +44,7 @@ public:
     void SetUp() override {
         mTestSystem.reset(new android::base::TestSystem(
                 "/progdir", System::kProgramBitness, "/homedir", "/appdir"));
-        mLooper = android::base::Looper::create();
+        mLooper = new android::base::TestLooper();
         mAdb.reset(new TestAdbInterface(mLooper, "adb"));
         mFilePusher.reset(
             new FilePusher(mAdb.get(),
@@ -93,7 +92,10 @@ public:
     void looperAdvance(int numCommands) {
         mAtomicNumCommands = numCommands;
         do {
-            mLooper->runWithTimeoutMs(50);
+            auto now = mTestSystem->getHighResTimeUs();
+            now += 1000;
+            mLooper->runOneIterationWithDeadlineMs(now / 1000);
+            mTestSystem->setUnixTimeUs(now);
         } while (mAtomicNumCommands > 0);
     }
 
@@ -112,7 +114,7 @@ public:
 
 protected:
     std::unique_ptr<android::base::TestSystem> mTestSystem;
-    android::base::Looper* mLooper;
+    android::base::TestLooper* mLooper;
     std::unique_ptr<TestAdbInterface> mAdb;
     std::unique_ptr<FilePusher> mFilePusher;
 

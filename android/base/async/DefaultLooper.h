@@ -161,6 +161,8 @@ public:
     typedef ScopedPointerSet<FdWatch> FdWatchSet;
 
 protected:
+    bool runOneIterationWithDeadlineMs(Duration deadlineMs);
+
     std::unique_ptr<SocketWaiter> mWaiter;
     FdWatchSet mFdWatches;          // Set of all fd watches.
     FdWatchList mPendingFdWatches;  // Queue of pending fd watches.

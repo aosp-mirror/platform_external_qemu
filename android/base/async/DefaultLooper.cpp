@@ -126,101 +126,109 @@ int DefaultLooper::runWithDeadlineMs(Looper::Duration deadlineMs) {
             return ETIMEDOUT;
         }
 
-        // Compute next deadline from timers.
-        Duration nextDeadline = kDurationInfinite;
-
-        Timer* firstTimer = mActiveTimers.front();
-        if (firstTimer) {
-            nextDeadline = firstTimer->deadline();
-        }
-
-        if (nextDeadline > deadlineMs) {
-            nextDeadline = deadlineMs;
-        }
-
-        // Wait for fd events until next deadline.
-        Duration timeOut = INT64_MAX;
-        if (nextDeadline < kDurationInfinite) {
-            timeOut = nextDeadline - nowMs();
-            if (timeOut < 0)
-                timeOut = 0;
-        }
-
-        if (!mFdWatches.empty()) {
-            int ret = mWaiter->wait(timeOut);
-            if (ret < 0) {
-                // Error, force stop.
-                break;
-            }
-            DCHECK(mPendingFdWatches.empty());
-
-            if (ret > 0) {
-                // Queue pending FdWatch instances.
-                for (;;) {
-                    unsigned events;
-                    int fd = mWaiter->nextPendingFd(&events);
-                    if (fd < 0) {
-                        break;
-                    }
-
-                    // Find the FdWatch for this file descriptor.
-                    // TODO(digit): Improve efficiency with a map?
-                    FdWatchSet::Iterator iter(&mFdWatches);
-                    while (iter.hasNext()) {
-                        FdWatch* watch = iter.next();
-                        if (watch->fd() == fd) {
-                            watch->setPending(events);
-                            break;
-                        }
-                    }
-                }
-            }
-        } else {
-            // We don't have any FDs to watch, so just sleep till the next
-            // timer expires.
-            System::get()->sleepMs(timeOut);
-        }
-
-        // Queue pending expired timers.
-        DCHECK(mPendingTimers.empty());
-
-        const Duration kNow = nowMs();
-        Timer* timer = mActiveTimers.front();
-        while (timer) {
-            if (timer->deadline() > kNow) {
-                break;
-            }
-
-            // Remove from active list, add to pending list.
-            mActiveTimers.remove(timer);
-            timer->setPending();
-            timer = timer->next();
-        }
-
-        // Fire the pending timers, this is done in a separate step
-        // because the callback could modify the active timers list.
-        for (;;) {
-            Timer* timer = mPendingTimers.front();
-            if (!timer) {
-                break;
-            }
-            timer->clearPending();
-            timer->fire();
-        }
-
-        // Fire the pending fd watches. Also done in a separate step
-        // since the callbacks could modify
-        for (;;) {
-            FdWatch* watch = mPendingFdWatches.front();
-            if (!watch) {
-                break;
-            }
-            watch->clearPending();
-            watch->fire();
+        if (!runOneIterationWithDeadlineMs(deadlineMs)) {
+            break;
         }
     }
 
     return 0;
+}
+
+bool DefaultLooper::runOneIterationWithDeadlineMs(Looper::Duration deadlineMs) {
+    // Compute next deadline from timers.
+    Duration nextDeadline = kDurationInfinite;
+
+    Timer* firstTimer = mActiveTimers.front();
+    if (firstTimer) {
+        nextDeadline = firstTimer->deadline();
+    }
+
+    if (nextDeadline > deadlineMs) {
+        nextDeadline = deadlineMs;
+    }
+
+    // Wait for fd events until next deadline.
+    Duration timeOut = INT64_MAX;
+    if (nextDeadline < kDurationInfinite) {
+        timeOut = nextDeadline - nowMs();
+        if (timeOut < 0)
+            timeOut = 0;
+    }
+
+    if (!mFdWatches.empty()) {
+        int ret = mWaiter->wait(timeOut);
+        if (ret < 0) {
+            // Error, force stop.
+            return false;
+        }
+        DCHECK(mPendingFdWatches.empty());
+
+        if (ret > 0) {
+            // Queue pending FdWatch instances.
+            for (;;) {
+                unsigned events;
+                int fd = mWaiter->nextPendingFd(&events);
+                if (fd < 0) {
+                    break;
+                }
+
+                // Find the FdWatch for this file descriptor.
+                // TODO(digit): Improve efficiency with a map?
+                FdWatchSet::Iterator iter(&mFdWatches);
+                while (iter.hasNext()) {
+                    FdWatch* watch = iter.next();
+                    if (watch->fd() == fd) {
+                        watch->setPending(events);
+                        break;
+                    }
+                }
+            }
+        }
+    } else {
+        // We don't have any FDs to watch, so just sleep till the next
+        // timer expires.
+        System::get()->sleepMs(timeOut);
+    }
+
+    // Queue pending expired timers.
+    DCHECK(mPendingTimers.empty());
+
+    const Duration kNow = nowMs();
+    Timer* timer = mActiveTimers.front();
+    while (timer) {
+        if (timer->deadline() > kNow) {
+            break;
+        }
+
+        // Remove from active list, add to pending list.
+        mActiveTimers.remove(timer);
+        timer->setPending();
+        timer = timer->next();
+    }
+
+    // Fire the pending timers, this is done in a separate step
+    // because the callback could modify the active timers list.
+    for (;;) {
+        Timer* timer = mPendingTimers.front();
+        if (!timer) {
+            break;
+        }
+        timer->clearPending();
+        timer->fire();
+    }
+
+    // Fire the pending fd watches. Also done in a separate step
+    // since the callbacks could modify
+    for (;;) {
+        FdWatch* watch = mPendingFdWatches.front();
+        if (!watch) {
+            break;
+        }
+        watch->clearPending();
+        watch->fire();
+    }
+
+    return true;
 }
 
 DefaultLooper::FdWatch::FdWatch(DefaultLooper* looper,
@@ -364,7 +372,7 @@ void DefaultLooper::Timer::clearPending() {
         mPending = false;
         // resets mDeadline so it can be added to active timers list again later
         // without assertion failure inside startAbsolute
-        // (genLooper->disableTimer)
+        // (defaultLooper->disableTimer)
         mDeadline = kDurationInfinite;
     }
 }
