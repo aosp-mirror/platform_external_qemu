@@ -32,6 +32,8 @@ public:
     const FdWatchList& pendingFdWatches() const;
 
     bool exitRequested() const;
+
+    using GenLooper::runOneIterationWithDeadlineMs;
 };
 
 const GenLooper::TimerSet& TestLooper::timers() const {
