@@ -28,7 +28,9 @@
 #ifdef _WIN32
 #  include "android/base/memory/ScopedPtr.h"
 #  include "android/base/system/Win32UnicodeString.h"
-#  define WIN32_LEAN_AND_MEAN
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
 #  include <windows.h>
 #else
 #  include <sys/types.h>
