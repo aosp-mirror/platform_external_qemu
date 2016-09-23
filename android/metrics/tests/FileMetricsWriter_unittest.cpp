@@ -29,6 +29,8 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <array>
+#include <numeric>
 
 using namespace android::base;
 using namespace android::metrics;
