@@ -429,10 +429,22 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
                 wanted_attribs.push_back(EGL_ALPHA_MASK_SIZE);
                 break;
             case EGL_BIND_TO_TEXTURE_RGB:
+                if (attrib_list[i+1] != EGL_DONT_CARE &&
+                    attrib_list[i+1] != EGL_TRUE &&
+                    attrib_list[i+1] != EGL_FALSE) {
+                    CHOOSE_CONFIG_DLOG_BAD_ATTRIBUTE(EGL_BIND_TO_TEXTURE_RGB);
+                    RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
+                }
                 wanted_attribs.push_back(EGL_BIND_TO_TEXTURE_RGB);
                 //bind_to_tex_rgb = attrib_list[i+1];
                 break;
             case EGL_BIND_TO_TEXTURE_RGBA:
+                if (attrib_list[i+1] != EGL_DONT_CARE &&
+                    attrib_list[i+1] != EGL_TRUE &&
+                    attrib_list[i+1] != EGL_FALSE) {
+                    CHOOSE_CONFIG_DLOG_BAD_ATTRIBUTE(EGL_BIND_TO_TEXTURE_RGBA);
+                    RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
+                }
                 wanted_attribs.push_back(EGL_BIND_TO_TEXTURE_RGBA);
                 //bind_to_tex_rgba = attrib_list[i+1];
                 break;
@@ -487,6 +499,12 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
                 wanted_attribs.push_back(EGL_MIN_SWAP_INTERVAL);
                 break;
             case EGL_NATIVE_RENDERABLE:
+                if (attrib_list[i+1] != EGL_DONT_CARE &&
+                    attrib_list[i+1] != EGL_TRUE &&
+                    attrib_list[i+1] != EGL_FALSE) {
+                    CHOOSE_CONFIG_DLOG_BAD_ATTRIBUTE(EGL_NATIVE_RENDERABLE);
+                    RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
+                }
                 native_renderable = attrib_list[i+1];
                 wanted_attribs.push_back(EGL_NATIVE_RENDERABLE);
                 break;
@@ -553,11 +571,19 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
                 wanted_attribs.push_back(EGL_TRANSPARENT_BLUE_VALUE);
                 break;
             case EGL_COLOR_BUFFER_TYPE:
+                if(attrib_list[i+1] != EGL_DONT_CARE &&
+                   attrib_list[i+1] != EGL_RGB_BUFFER &&
+                   attrib_list[i+1] != EGL_LUMINANCE_BUFFER) {
+                    CHOOSE_CONFIG_DLOG_BAD_ATTRIBUTE(EGL_COLOR_BUFFER_TYPE);
+                    RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
+                }
                 wanted_attribs.push_back(EGL_COLOR_BUFFER_TYPE);
                 break;
             case EGL_RECORDABLE_ANDROID:
                 recordable_android = attrib_list[i+1];
                 wanted_attribs.push_back(EGL_RECORDABLE_ANDROID);
+                break;
+            case EGL_FRAMEBUFFER_TARGET_ANDROID:
                 break;
             default:
                 CHOOSE_CONFIG_DLOG("EGL_BAD_ATTRIBUTE: Unknown attribute key 0x%x", attrib_list[i]);
