@@ -14,7 +14,7 @@
 
 #include "android/base/threads/ParallelTask.h"
 
-#include "android/base/async/ThreadLooper.h"
+#include "android/base/testing/TestLooper.h"
 #include "android/base/system/System.h"
 
 #include <gtest/gtest.h>
@@ -25,7 +25,7 @@
 
 namespace {
 
-using android::base::Looper;
+using android::base::TestLooper;
 using android::base::ParallelTask;
 using std::unique_ptr;
 
@@ -38,8 +38,7 @@ class ParallelTaskTest : public testing::Test {
 public:
     // set mCheckTimeoutMs to 10 to speed things up.
     ParallelTaskTest()
-        : mLooper(android::base::ThreadLooper::get()),
-          mParallelTask(mLooper,
+        : mParallelTask(&mLooper,
                         std::bind(&ParallelTaskTest::taskFunction,
                                   this,
                                   std::placeholders::_1),
@@ -63,7 +62,7 @@ public:
     void unblock() { mShouldRun = true; }
 
 protected:
-    Looper* mLooper;
+    TestLooper mLooper;
     ParallelTask<Result> mParallelTask;
     Result mResult;
     std::atomic_bool mShouldRun = {false};
@@ -72,7 +71,7 @@ protected:
 TEST_F(ParallelTaskTest, start) {
     unblock();
     EXPECT_TRUE(mParallelTask.start());
-    mLooper->runWithTimeoutMs(2000);
+    mLooper.runWithTimeoutMs(2000);
 
     EXPECT_FALSE(mParallelTask.inFlight());
     EXPECT_TRUE(mResult.mWasJoined);
@@ -82,12 +81,12 @@ TEST_F(ParallelTaskTest, start) {
 TEST_F(ParallelTaskTest, inFlight) {
     EXPECT_TRUE(mParallelTask.start());
     // The test will actually block here till timeout. Use a small value.
-    mLooper->runWithTimeoutMs(200);
+    mLooper.runWithTimeoutMs(100);
     EXPECT_FALSE(mResult.mWasJoined);
     EXPECT_TRUE(mParallelTask.inFlight());
 
     unblock();
-    mLooper->runWithTimeoutMs(2000);
+    mLooper.runWithTimeoutMs(2000);
     EXPECT_FALSE(mParallelTask.inFlight());
     EXPECT_EQ(42, mResult.mExitStatus);
     EXPECT_TRUE(mResult.mWasJoined);
@@ -95,20 +94,20 @@ TEST_F(ParallelTaskTest, inFlight) {
 
 static bool parJoined = false;
 
-void setPar(int* outResult) {
+static void setPar(int* outResult) {
     *outResult = 42;
 }
 
-void onJoined(const int& outResult) {
+static void onJoined(const int& outResult) {
     EXPECT_EQ(42, outResult);
     parJoined = true;
 }
 
 TEST(ParallelTaskFunctionTest, basic) {
-    android::base::Looper* looper = android::base::ThreadLooper::get();
-    EXPECT_TRUE(android::base::runParallelTask<int>(looper, &setPar, &onJoined));
+    TestLooper looper;
+    EXPECT_TRUE(android::base::runParallelTask<int>(&looper, &setPar, &onJoined, 10));
     EXPECT_FALSE(parJoined);
-    looper->runWithTimeoutMs(2000);
+    looper.runWithTimeoutMs(2000);
     EXPECT_TRUE(parJoined);
 }
 
