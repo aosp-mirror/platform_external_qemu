@@ -388,8 +388,8 @@ TEST(System, runCommandTrue) {
 #ifndef _WIN32
     std::vector<std::string> cmd = {"ls"};
 #else
-    // 'dir' is a builtin command, so all you need is a sane cmd.exe
-    std::vector<std::string> cmd = {"cmd.exe", "/C", "dir"};
+    // 'ver' is a builtin command, so all you need is a sane cmd.exe
+    std::vector<std::string> cmd = {"cmd.exe", "/C", "ver"};
 #endif
 
     EXPECT_TRUE(System::get()->runCommand(cmd));
@@ -405,7 +405,7 @@ TEST(System, runCommandTrue) {
 
 TEST(System, runCommandTimeout) {
 #ifndef _WIN32
-    std::vector<std::string> cmd = {"sleep", "0.5"};
+    std::vector<std::string> cmd = {"sleep", "0.1"};
 #else
     // 2 Attempts give us a delay of 1 second.
     // 'ping' is not an internal cmd.exe command, but seems always being shipped
@@ -414,10 +414,14 @@ TEST(System, runCommandTimeout) {
 #endif
 
     EXPECT_FALSE(
-            System::get()->runCommand(cmd, RunOptions::WaitForCompletion, 20));
+            System::get()->runCommand(cmd, RunOptions::WaitForCompletion, 1));
 
     System::Pid pid = 0;
     System::ProcessExitCode exitCode = 666;
+#ifdef _WIN32
+    // Make sure we don't wait for too long here, where we expect to succeed.
+    cmd = {"cmd.exe", "/C", "ver"};
+#endif
     EXPECT_TRUE(System::get()->runCommand(cmd, RunOptions::WaitForCompletion,
                                           System::kInfinite, &exitCode, &pid));
     EXPECT_EQ(0, exitCode);

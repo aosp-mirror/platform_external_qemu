@@ -15,15 +15,15 @@
 #include "android/base/async/RecurrentTask.h"
 
 #include "android/base/async/Looper.h"
-#include "android/base/async/ThreadLooper.h"
+#include "android/base/testing/TestLooper.h"
 
 #include <gtest/gtest.h>
 
 #include <memory>
 
 using android::base::Looper;
+using android::base::TestLooper;
 using android::base::RecurrentTask;
-using android::base::ThreadLooper;
 using std::unique_ptr;
 
 class CountUpToN {
@@ -33,10 +33,9 @@ public:
           mRecurrentTask(looper,
                          std::bind(&CountUpToN::countOne, this),
                          0),
-          mPtrMayBeNull(new int) {}
+          mPtrMayBeNull(&sideEffectVar) {}
 
     ~CountUpToN() {
-        delete mPtrMayBeNull;
         mPtrMayBeNull = nullptr;
     }
 
@@ -70,72 +69,64 @@ private:
     int mCurCount = 0;
 
     // Designed to blow up if |countOne| is called after we've been deleted.
-    int* mPtrMayBeNull;
+    volatile int* volatile mPtrMayBeNull;
     volatile int sideEffectVar;
 };
 
 TEST(RecurrentTaskTest, zeroTimes) {
-    Looper* looper = ThreadLooper::get();
-    CountUpToN tasker(looper, 0);
+    TestLooper looper;
+    CountUpToN tasker(&looper, 0);
     tasker.start();
 
     EXPECT_TRUE(tasker.task().inFlight());
     EXPECT_EQ(0, tasker.curCount());
-    looper->runWithTimeoutMs(500);
+    looper.runWithTimeoutMs(500);
     EXPECT_FALSE(tasker.task().inFlight());
     EXPECT_EQ(0, tasker.curCount());
 }
 
 TEST(RecurrentTaskTest, fiveTimes) {
-    Looper* looper = ThreadLooper::get();
-    CountUpToN tasker(looper, 5);
+    TestLooper looper;
+    CountUpToN tasker(&looper, 5);
     tasker.start();
 
     EXPECT_TRUE(tasker.task().inFlight());
     EXPECT_EQ(0, tasker.curCount());
-    looper->runWithTimeoutMs(500);
+    looper.runWithTimeoutMs(500);
     EXPECT_FALSE(tasker.task().inFlight());
     EXPECT_EQ(5, tasker.curCount());
 }
 
 TEST(RecurrentTaskTest, deleteStartedObject) {
-    Looper* looper = ThreadLooper::get();
-    auto tasker = new CountUpToN(looper, 5);
+    TestLooper looper;
+    auto tasker = new CountUpToN(&looper, 5);
     tasker->start();
     delete tasker;
 
     // If |RecurrentTask| does not gracefully handle being deleted while active,
     // this will blow up.
-    looper->runWithTimeoutMs(500);
+    looper.runWithTimeoutMs(500);
 }
 
-namespace internal {
-bool stopAndReturn(RecurrentTask** task, int* count) {
-    (*task)->stop();
+static bool stopAndReturn(RecurrentTask* task, int* count) {
+    task->stop();
     // Let's not overflow and succeed flakily.
     if (*count < 10) {
         ++(*count);
     }
     return true;
 }
-}
 
 TEST(RecurrentTaskTest, stopFromCallback) {
-    Looper* looper = ThreadLooper::get();
+    TestLooper looper;
     int count = 0;
-
-    unique_ptr<RecurrentTask*> ptr(new RecurrentTask*);
-    auto rawptr = ptr.get();
-    auto countptr = &count;
-    RecurrentTask task(looper,
-                       [rawptr, countptr]() {
-                           return internal::stopAndReturn(rawptr, countptr);
+    RecurrentTask task(&looper,
+                       [&task, &count]() {
+                           return stopAndReturn(&task, &count);
                        },
                        0);
-    *ptr = &task;
-
     task.start();
     EXPECT_TRUE(task.inFlight());
-    looper->runWithTimeoutMs(50);
+    looper.runWithTimeoutMs(50);
     EXPECT_EQ(1, count);
 }
