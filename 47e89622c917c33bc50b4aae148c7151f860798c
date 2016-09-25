@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "706bd79b_364a88aa",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 589,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-25T02:56:34Z",
+      "side": 1,
+      "message": "This is currently doing the simplest (unsafest) method possible: Everyone in the guest writes completely unsynchronized to the start of the physical address.\n\nI see a black bar on the wallpaper on startup, but no crashes in youtube so far. I guess it is banking on gralloc_unlock not being called concurrently too much.",
+      "range": {
+        "startLine": 589,
+        "startChar": 73,
+        "endLine": 589,
+        "endChar": 84
+      },
+      "revId": "47e89622c917c33bc50b4aae148c7151f860798c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
