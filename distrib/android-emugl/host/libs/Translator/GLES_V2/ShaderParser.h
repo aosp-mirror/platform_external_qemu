@@ -21,6 +21,7 @@
 #include <string>
 #include <GLES2/gl2.h>
 #include <GLcommon/objectNameManager.h>
+#include <unordered_set>
 
 class ShaderParser : public ObjectData {
 public:
@@ -46,8 +47,9 @@ public:
     void setDeleteStatus(bool val) { m_deleteStatus = val; }
     bool getDeleteStatus() const { return m_deleteStatus; }
 
-    void setAttachedProgram(GLuint program) { m_program = program; }
-    GLuint getAttachedProgram() const { return m_program; }
+    void attachProgram(GLuint program) {m_programs.insert(program);}
+    void detachProgram(GLuint program) {m_programs.erase(program);}
+    bool hasAttachedPrograms() const {return m_programs.size()>0;}
 
 private:
     void convertESSLToGLSL();
@@ -59,7 +61,7 @@ private:
     GLchar*     m_parsedLines = nullptr;
     std::basic_string<GLchar> m_infoLog;
     bool        m_deleteStatus = false;
-    GLuint      m_program = 0;
+    std::unordered_set<GLuint> m_programs;
     bool        m_valid = true;
 };
 #endif

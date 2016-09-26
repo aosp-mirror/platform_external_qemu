@@ -139,18 +139,19 @@ static void s_attachShader(GLEScontext* ctx, GLuint program, GLuint shader) {
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
         if (!shaderData.get()) return;
         ShaderParser* shaderParser = (ShaderParser*)shaderData.get();
-        shaderParser->setAttachedProgram(program);
+        shaderParser->attachProgram(program);
     }
 }
 
-static void s_detachShader(GLEScontext* ctx, GLuint shader) {
+static void s_detachShader(GLEScontext* ctx, GLuint program, GLuint shader) {
     if (ctx && shader && ctx->shareGroup().get()) {
         ObjectDataPtr shaderData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
         if (!shaderData.get()) return;
         ShaderParser* shaderParser = (ShaderParser*)shaderData.get();
-        shaderParser->setAttachedProgram(0);
-        if (shaderParser->getDeleteStatus()) {
+        shaderParser->detachProgram(program);
+        if (shaderParser->getDeleteStatus()
+                && !shaderParser->hasAttachedPrograms()) {
             ctx->shareGroup()->deleteName(NamedObjectType::SHADER_OR_PROGRAM, shader);
         }
     }
@@ -634,8 +635,8 @@ GL_APICALL void  GL_APIENTRY glDeleteProgram(GLuint program){
             pData->setDeleteStatus(true);
             return;
         }
-        s_detachShader(ctx, pData->getAttachedVertexShader());
-        s_detachShader(ctx, pData->getAttachedFragmentShader());
+        s_detachShader(ctx, program, pData->getAttachedVertexShader());
+        s_detachShader(ctx, program, pData->getAttachedFragmentShader());
 
         ctx->shareGroup()->deleteName(NamedObjectType::SHADER_OR_PROGRAM, program);
     }
@@ -653,7 +654,7 @@ GL_APICALL void  GL_APIENTRY glDeleteShader(GLuint shader){
         SET_ERROR_IF(objData.get()->getDataType()!=SHADER_DATA,GL_INVALID_OPERATION);
         ShaderParser* sp = (ShaderParser*)objData.get();
         SET_ERROR_IF(sp->getDeleteStatus(), GL_INVALID_VALUE);
-        if (sp->getAttachedProgram()) {
+        if (sp->hasAttachedPrograms()) {
             sp->setDeleteStatus(true);
         } else {
             ctx->shareGroup()->deleteName(NamedObjectType::SHADER_OR_PROGRAM, shader);
@@ -693,7 +694,7 @@ GL_APICALL void  GL_APIENTRY glDetachShader(GLuint program, GLuint shader){
         SET_ERROR_IF(!programData->isAttached(shader),GL_INVALID_OPERATION);
         programData->detachShader(shader);
 
-        s_detachShader(ctx, shader);
+        s_detachShader(ctx, program, shader);
 
         ctx->dispatcher().glDetachShader(globalProgramName,globalShaderName);
     }
