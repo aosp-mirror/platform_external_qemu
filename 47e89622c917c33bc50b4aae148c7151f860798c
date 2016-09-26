@@ -70,6 +70,30 @@
       "revId": "47e89622c917c33bc50b4aae148c7151f860798c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25c75f2e_5414c45b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 589,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-09-26T18:58:18Z",
+      "side": 1,
+      "message": "Yeah, having multiple parts makes a lot more sense :)\n\nAfter offline discussion with jinqian@, the plan is to fold this stuff into a feature that can be accessed per-pipe with ioctls and mmap, then we won\u0027t need to worry about concurrent writes as long as there is only one guest thread accessing a particular pipe, and we won\u0027t run out of miscdevice minor numbers (!!!)",
+      "parentUuid": "706bd79b_813eacc3",
+      "range": {
+        "startLine": 589,
+        "startChar": 73,
+        "endLine": 589,
+        "endChar": 84
+      },
+      "revId": "47e89622c917c33bc50b4aae148c7151f860798c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
