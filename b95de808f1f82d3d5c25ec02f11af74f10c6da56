@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "706bd79b_c11fc461",
+        "filename": "android/avd/hardware-properties.ini",
+        "patchSetId": 8
+      },
+      "lineNbr": 420,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-09-26T04:00:06Z",
+      "side": 1,
+      "message": "there is no need for this, \nit should be in the system.img\u0027s folder",
+      "revId": "b95de808f1f82d3d5c25ec02f11af74f10c6da56",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
