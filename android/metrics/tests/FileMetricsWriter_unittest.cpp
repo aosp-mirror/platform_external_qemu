@@ -255,6 +255,45 @@ TEST_F(FileMetricsWriterTest, writeSimple) {
     ASSERT_FALSE(android::protobuf::readOneDelimited(&readEvent, &inStream));
 }
 
+TEST_F(FileMetricsWriterTest, writeMultiple) {
+    mWriter = FileMetricsWriter::create(spoolDir(), sessionId(), 0, nullptr, 0);
+
+    // create and write some events
+    std::vector<wireless_android_play_playlog::LogEvent> events;
+    for (int i = 0; i < 100; ++i) {
+        wireless_android_play_playlog::LogEvent event;
+        event.set_is_user_initiated(true);
+        event.set_tag("tag");
+        event.set_source_extension("se");
+        event.set_event_code(i);
+        mWriter->write(event);
+        events.push_back(event);
+    }
+
+    mWriter.reset();
+
+    // read the event back.
+    auto files = mSystem.scanDirEntries(spoolDir(), true);
+    ASSERT_EQ(1, files.size());
+    EXPECT_STREQ(PathUtils::extension(files[0]).c_str(), ".trx");
+
+    std::ifstream in(files[0], std::ios_base::binary);
+    EXPECT_TRUE(in);
+    google::protobuf::io::IstreamInputStream inStream(&in);
+
+    for (const auto& event : events) {
+        wireless_android_play_playlog::LogEvent readEvent;
+        ASSERT_TRUE(android::protobuf::readOneDelimited(&readEvent, &inStream));
+        // make sure it's the same event.
+        ASSERT_TRUE(google::protobuf::util::MessageDifferencer::Equals(event,
+                                                                       readEvent));
+    }
+
+    // and that there are no more events
+    wireless_android_play_playlog::LogEvent readEvent;
+    ASSERT_FALSE(android::protobuf::readOneDelimited(&readEvent, &inStream));
+}
+
 TEST_F(FileMetricsWriterTest, writeLimited) {
     mWriter = FileMetricsWriter::create(spoolDir(), sessionId(),
                                         1,  // records per file
