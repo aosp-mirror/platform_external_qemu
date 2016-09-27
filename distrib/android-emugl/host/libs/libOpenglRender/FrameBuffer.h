@@ -325,6 +325,8 @@ public:
     // manner.
     void lockFramebuffer() { m_lock.lock(); }
     void unlockFramebuffer() { m_lock.unlock(); }
+    void lockContextStructureRead() { m_contextStructureLock.lockRead(); }
+    void unlockContextStructureRead() { m_contextStructureLock.unlockRead(); }
 
     // For use with sync threads and otherwise, any time we need a GL context
     // not specifically for drawing, but to obtain certain things about
@@ -361,6 +363,7 @@ private:
     long long m_statsStartTime = 0;
 
     emugl::Mutex m_lock;
+    emugl::ReadWriteMutex m_contextStructureLock;
     FbConfigList* m_configs = nullptr;
     FBNativeWindowType m_nativeWindow = 0;
     FrameBufferCaps m_caps = {};

@@ -138,6 +138,18 @@ intptr_t RenderThread::main() {
             // try to process some of the command buffer using the GLESv1
             // decoder
             //
+            // DRIVER WORKAROUND:
+            // On Linux with NVIDIA GPU's at least, we need to avoid performing
+            // GLES ops while someone else holds the FrameBuffer write lock.
+            //
+            // To be more specific, on Linux with NVIDIA Quadro K2200 v361.xx,
+            // we get a segfault in the NVIDIA driver when glTexSubImage2D
+            // is called at the same time as glXMake(Context)Current.
+            //
+            // To fix, this driver workaround avoids calling
+            // any sort of GLES call when we are creating/destroying EGL
+            // contexts.
+            FrameBuffer::getFB()->lockContextStructureRead();
             size_t last = tInfo.m_glDec.decode(
                     readBuf.buf(), readBuf.validData(), stream.get());
             if (last > 0) {
@@ -151,6 +163,8 @@ intptr_t RenderThread::main() {
             //
             last = tInfo.m_gl2Dec.decode(readBuf.buf(), readBuf.validData(),
                                          stream.get());
+            FrameBuffer::getFB()->unlockContextStructureRead();
+
             if (last > 0) {
                 progress = true;
                 readBuf.consume(last);
