@@ -523,7 +523,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
         return false;
     }
 
-    m_lock.lock();
+    emugl::Mutex::AutoLock mutex(m_lock);
 
     // If the subwindow doesn't exist, create it with the appropriate dimensions
     if (!m_subWin) {
@@ -611,7 +611,6 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
         unbind_locked();
     }
 
-    m_lock.unlock();
     return success;
 }
 
@@ -622,7 +621,7 @@ bool FrameBuffer::removeSubWindow() {
         return false;
     }
     bool removed = false;
-    m_lock.lock();
+    emugl::Mutex::AutoLock mutex(m_lock);
     if (m_subWin) {
         s_egl.eglMakeCurrent(m_eglDisplay, NULL, NULL, NULL);
         s_egl.eglDestroySurface(m_eglDisplay, m_eglSurface);
@@ -632,7 +631,6 @@ bool FrameBuffer::removeSubWindow() {
         m_subWin = (EGLNativeWindowType)0;
         removed = true;
     }
-    m_lock.unlock();
     return removed;
 }
 
@@ -679,6 +677,7 @@ HandleType FrameBuffer::createRenderContext(int p_config, HandleType p_share,
                                             bool p_isGL2)
 {
     emugl::Mutex::AutoLock mutex(m_lock);
+    emugl::ReadWriteMutex::AutoWriteLock contextLock(m_contextStructureLock);
     HandleType ret = 0;
 
     const FbConfig* config = getConfigs()->get(p_config);
@@ -743,6 +742,7 @@ HandleType FrameBuffer::createWindowSurface(int p_config, int p_width, int p_hei
 void FrameBuffer::drainRenderContext()
 {
     emugl::Mutex::AutoLock mutex(m_lock);
+    emugl::ReadWriteMutex::AutoWriteLock contextLock(m_contextStructureLock);
     RenderThreadInfo *tinfo = RenderThreadInfo::get();
     if (tinfo->m_contextSet.empty()) return;
     for (std::set<HandleType>::iterator it = tinfo->m_contextSet.begin();
@@ -778,6 +778,7 @@ void FrameBuffer::drainWindowSurface()
 void FrameBuffer::DestroyRenderContext(HandleType p_context)
 {
     emugl::Mutex::AutoLock mutex(m_lock);
+    emugl::ReadWriteMutex::AutoWriteLock contextLock(m_contextStructureLock);
     m_contexts.erase(p_context);
     RenderThreadInfo *tinfo = RenderThreadInfo::get();
     uint64_t puid = tinfo->m_puid;
