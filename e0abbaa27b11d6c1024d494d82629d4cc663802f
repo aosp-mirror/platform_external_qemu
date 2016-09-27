@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "85dd6ba2_a971fd71",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 526,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-09-27T20:55:58Z",
+      "side": 1,
+      "message": "AutoWriteLock?",
+      "range": {
+        "startLine": 526,
+        "startChar": 11,
+        "endLine": 526,
+        "endChar": 20
+      },
+      "revId": "e0abbaa27b11d6c1024d494d82629d4cc663802f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "85dd6ba2_2986ad4e",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-09-27T20:55:58Z",
+      "side": 1,
+      "message": "AutoWriteLock?",
+      "range": {
+        "startLine": 625,
+        "startChar": 11,
+        "endLine": 625,
+        "endChar": 20
+      },
+      "revId": "e0abbaa27b11d6c1024d494d82629d4cc663802f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "85dd6ba2_c927116e",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderThread.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-09-27T20:55:58Z",
+      "side": 1,
+      "message": "do we want to lock GLES1 as well?",
+      "revId": "e0abbaa27b11d6c1024d494d82629d4cc663802f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
