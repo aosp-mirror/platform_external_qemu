@@ -140,6 +140,30 @@
       "revId": "9dfe6287487e7f0364bd64abdb514866838065a6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "85ec8b0b_c0d5e83e",
+        "filename": "android/utils/path.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-09-27T01:24:36Z",
+      "side": 1,
+      "message": "in this case, when run the same avd the second time, it should be able to recover and wont be confused by previously failed run.",
+      "parentUuid": "85ec8b0b_00f530e3",
+      "range": {
+        "startLine": 212,
+        "startChar": 62,
+        "endLine": 212,
+        "endChar": 63
+      },
+      "revId": "9dfe6287487e7f0364bd64abdb514866838065a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
