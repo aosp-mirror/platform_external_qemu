@@ -19,5 +19,6 @@
 namespace emugl {
 
 using Mutex = android::base::Lock;
+using ReadWriteMutex = android::base::ReadWriteLock;
 
 }  // namespace emugl

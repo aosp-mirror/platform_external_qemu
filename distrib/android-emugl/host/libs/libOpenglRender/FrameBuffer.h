@@ -323,8 +323,10 @@ public:
     // We need to protect all forms of context creation/destruction.
     // At least Linux OpenGL drivers are not thread-safe in this
     // manner.
-    void lockFramebuffer() { m_lock.lock(); }
-    void unlockFramebuffer() { m_lock.unlock(); }
+    void lockFramebuffer() { m_lock.lockWrite(); }
+    void unlockFramebuffer() { m_lock.unlockWrite(); }
+    void lockFramebufferRead() { m_lock.lockRead(); }
+    void unlockFramebufferRead() { m_lock.unlockRead(); }
 
     // For use with sync threads and otherwise, any time we need a GL context
     // not specifically for drawing, but to obtain certain things about
@@ -360,7 +362,7 @@ private:
     int m_statsNumFrames = 0;
     long long m_statsStartTime = 0;
 
-    emugl::Mutex m_lock;
+    emugl::ReadWriteMutex m_lock;
     FbConfigList* m_configs = nullptr;
     FBNativeWindowType m_nativeWindow = 0;
     FrameBufferCaps m_caps = {};
