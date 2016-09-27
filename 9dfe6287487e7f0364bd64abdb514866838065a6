@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "85ec8b0b_60707ccf",
+        "filename": "android/avd/info.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-09-27T01:22:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "85ec8b0b_c0e168bd",
+      "range": {
+        "startLine": 199,
+        "startChar": 7,
+        "endLine": 199,
+        "endChar": 33
+      },
+      "revId": "9dfe6287487e7f0364bd64abdb514866838065a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "85ec8b0b_4091f84c",
         "filename": "android/filesystems/ext4_utils.h",
         "patchSetId": 9
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "85ec8b0b_20ff14f8",
+        "filename": "android/filesystems/ext4_utils.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-09-27T01:22:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "85ec8b0b_4091f84c",
+      "range": {
+        "startLine": 32,
+        "startChar": 4,
+        "endLine": 32,
+        "endChar": 34
+      },
+      "revId": "9dfe6287487e7f0364bd64abdb514866838065a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "85ec8b0b_40d698e7",
         "filename": "android/utils/path.h",
         "patchSetId": 9
@@ -59,6 +107,30 @@
       "writtenOn": "2016-09-27T00:50:50Z",
       "side": 1,
       "message": "how to handle it properly ?",
+      "range": {
+        "startLine": 212,
+        "startChar": 62,
+        "endLine": 212,
+        "endChar": 63
+      },
+      "revId": "9dfe6287487e7f0364bd64abdb514866838065a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "85ec8b0b_00f530e3",
+        "filename": "android/utils/path.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-09-27T01:22:12Z",
+      "side": 1,
+      "message": "we do not have the \"rmdir -r\". do we want to implement that?",
+      "parentUuid": "85ec8b0b_40d698e7",
       "range": {
         "startLine": 212,
         "startChar": 62,
