@@ -50,6 +50,8 @@ namespace android {
 namespace base {
 
 class AutoLock;
+class AutoWriteLock;
+class AutoReadLock;
 
 // Simple wrapper class for mutexes.
 class Lock {
@@ -129,6 +131,8 @@ private:
 #else
 class ReadWriteLock {
 public:
+    using AutoWriteLock = android::base::AutoWriteLock;
+    using AutoReadLock = android::base::AutoReadLock;
     ReadWriteLock() {
         ::pthread_rwlock_init(&mRWLock, NULL);
     }
