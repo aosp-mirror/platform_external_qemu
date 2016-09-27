@@ -504,12 +504,16 @@ bool EglConfig::chosen(const EglConfig& dummy) const {
 
    //mask
    if(dummy.m_surface_type != EGL_DONT_CARE &&
-      ((dummy.m_surface_type &
+      // Only use EGL_WINDOW_BIT, EGL_PIXMAP_BIT, EGL_PBUFFER_BIT in criteria.
+      // Pretend other surface type bits are not there, at least for now.
+      // (hence & 0b1111)
+      (((dummy.m_surface_type & 0xf)&
        (m_surface_type | EGL_WINDOW_BIT)) != // Note that we always advertise our configs'
                                              // EGL_SURFACE_TYPE has having EGL_WINDOW_BIT
                                              // capability, so we must also respect that here.
-       dummy.m_surface_type)) {
-
+       (dummy.m_surface_type & 0xf))) {
+       CHOOSE_CONFIG_DLOG("m_surface_type does not match. 0x%x vs 0x%x",
+                          dummy.m_surface_type, m_surface_type);
        return false;
    }
 
