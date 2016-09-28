@@ -114,6 +114,8 @@ private:
 #ifdef _WIN32
 class ReadWriteLock {
 public:
+    using AutoWriteLock = android::base::AutoWriteLock;
+    using AutoReadLock = android::base::AutoReadLock;
     ReadWriteLock();
     ~ReadWriteLock();
     void lockRead();
