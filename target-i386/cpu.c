@@ -688,7 +688,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
          *  SSSE3, SSE4.1, SSE4.2
          */
         .name = "android64",
-        .level = 4,
+        .level = 4,  /* may be modified later if KVM is enabled */
         .vendor = CPUID_VENDOR_INTEL,
         .family = 6,
         .model = 6,
@@ -706,7 +706,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
         .features[FEAT_8000_0001_ECX] =
             CPUID_EXT3_LAHF_LM | CPUID_EXT3_SVM |
             CPUID_EXT3_ABM | CPUID_EXT3_SSE4A,
-        .xlevel = 0x8000000A,
+        .xlevel = 0x8000000A,  /* may be modified later if KVM is enabled */
         .model_id = "Android virtual processor"
     },
 #endif
@@ -820,7 +820,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
          * required by Android and usually comes alongside SSE4.2.
          */
         .name = "android32",
-        .level = 4,
+        .level = 4,  /* may be modified later if KVM is enabled */
         .vendor = CPUID_VENDOR_INTEL,
         .family = 6,
         .model = 6,
@@ -829,7 +829,7 @@ static X86CPUDefinition builtin_x86_defs[] = {
             PPRO_FEATURES,
         .features[FEAT_1_ECX] =
             CPUID_EXT_SSE3 | CPUID_EXT_SSSE3,
-        .xlevel = 0x80000004,
+        .xlevel = 0x80000004,  /* may be modified later if KVM is enabled */
         .model_id = "Android 32-bit virtual processor"
     },
 #endif
@@ -2136,6 +2136,25 @@ X86CPU *cpu_x86_create(const char *cpu_model, DeviceState *icc_bridge,
     if (error) {
         goto out;
     }
+
+#ifdef CONFIG_ANDROID
+    if (kvm_enabled()) {
+        CPUX86State *env = &cpu->env;
+        KVMState *s = kvm_state;
+
+        /* Use the host/KVM CPUID level in order to enable additional features
+         * supported by the host CPU, such as PMU. Cf. host_x86_cpu_initfn().
+         */
+        env->cpuid_level = kvm_arch_get_supported_cpuid(s, 0x0, 0, R_EAX);
+        env->cpuid_xlevel = kvm_arch_get_supported_cpuid(s, 0x80000000, 0,
+                                                         R_EAX);
+        env->cpuid_xlevel2 = kvm_arch_get_supported_cpuid(s, 0xC0000000, 0,
+                                                          R_EAX);
+
+        /* Enable PMU (this has no effect if env->cpuid_level < 0xA) */
+        object_property_set_bool(OBJECT(cpu), true, "pmu", &error_abort);
+    }
+#endif
 
 out:
     if (error != NULL) {
