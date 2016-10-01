@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2254b50d_a8ba418a",
+        "filename": "android/scripts/package-release.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 697,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-01T05:52:02Z",
+      "side": 1,
+      "message": "thanks!",
+      "range": {
+        "startLine": 692,
+        "startChar": 3,
+        "endLine": 697,
+        "endChar": 46
+      },
+      "revId": "3b00a35a50a52a449bd9be8d653e08b22e9bf72f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
