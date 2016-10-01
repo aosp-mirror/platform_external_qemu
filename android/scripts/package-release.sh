@@ -689,6 +689,13 @@ build_darwin_binaries_on () {
     copy_directory "$AOSP_BUILD_PREBUILTS"/common/ANGLE/darwin-x86_64 \
             "$DARWIN_BUILD_PREBUILTS"/common/ANGLE/darwin-x86_64
 
+    if [ ! -d "$AOSP_BUILD_PREBUILTS"/protobuf ]; then
+        panic "Missing Darwin protobuf prebuilts!"
+    fi
+
+    copy_directory "$AOSP_BUILD_PREBUILTS"/protobuf \
+            "$DARWIN_BUILD_PREBUILTS"/protobuf
+
     run tar xf "$PKG_FILE" -C "$DARWIN_PKG_DIR"/..
 
     if [ "$AOSP_PREBUILTS_DIR" ]; then
