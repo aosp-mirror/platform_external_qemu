@@ -45,9 +45,12 @@ ifdef EMULATOR_CRASHUPLOAD
     EMULATOR_COMMON_CFLAGS += -DCRASHUPLOAD=$(EMULATOR_CRASHUPLOAD)
 endif
 
-# Required to access config-host.h
+# $(BUILD_OBJS_DIR)/build is required to access config-host.h
+# $(generated-proto-sources-dir) is needed to access generated
+# protobuff headers.
 EMULATOR_COMMON_INCLUDES := \
-    $(BUILD_OBJS_DIR)/build
+    $(BUILD_OBJS_DIR)/build \
+    $(generated-proto-sources-dir) \
 
 EMUGL_SRCDIR := $(LOCAL_PATH)/distrib/android-emugl
 EMUGL_INCLUDES := $(EMUGL_SRCDIR)/host/include
