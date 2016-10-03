@@ -248,18 +248,18 @@ static uint64_t goldfish_battery_read(void *opaque, hwaddr offset, unsigned size
             }
             return ret;
 
-		case BATTERY_INT_ENABLE:
-		    return s->int_enable;
-		case BATTERY_AC_ONLINE:
-		    return s->ac_online;
-		case BATTERY_STATUS:
-		    return s->status;
-		case BATTERY_HEALTH:
-		    return s->health;
-		case BATTERY_PRESENT:
-		    return s->present;
-		case BATTERY_CAPACITY:
-		    return s->capacity;
+        case BATTERY_INT_ENABLE:
+            return s->int_enable;
+        case BATTERY_AC_ONLINE:
+            return s->ac_online;
+        case BATTERY_STATUS:
+            return s->status;
+        case BATTERY_HEALTH:
+            return s->health;
+        case BATTERY_PRESENT:
+            return s->present;
+        case BATTERY_CAPACITY:
+            return s->capacity;
 
         default:
             error_report ("goldfish_battery_read: Bad offset " TARGET_FMT_plx,
@@ -277,6 +277,12 @@ static void goldfish_battery_write(void *opaque, hwaddr offset, uint64_t val,
         case BATTERY_INT_ENABLE:
             /* enable interrupts */
             s->int_enable = val;
+
+            uint32_t now_active = (s->int_enable & s->int_status);
+            if (now_active != 0) {
+                // Some interrupt is now unmasked, signal IRQ
+                qemu_set_irq(s->irq, now_active);
+            }
             break;
 
         default:
