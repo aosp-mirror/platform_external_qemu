@@ -130,8 +130,12 @@ static void goldfish_battery_write(void *opaque, hwaddr offset, uint32_t val)
         case BATTERY_INT_ENABLE:
             /* enable interrupts */
             s->int_enable = val;
-//            s->int_status = (AUDIO_INT_WRITE_BUFFER_1_EMPTY | AUDIO_INT_WRITE_BUFFER_2_EMPTY);
-//            goldfish_device_set_irq(&s->dev, 0, (s->int_status & s->int_enable));
+
+            uint32_t now_active = (s->int_enable & s->int_status);
+            if (now_active != 0) {
+                // Some interrupt is now unmasked, signal IRQ
+                goldfish_device_set_irq(&s->dev, 0, now_active);
+            }
             break;
 
         default:
