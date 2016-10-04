@@ -15,7 +15,9 @@
 
 #include <memory>
 #include <type_traits>
+#include <utility>
 
+#include <assert.h>
 #include <stdlib.h>
 
 namespace android {
@@ -32,6 +34,34 @@ template <class Func>
 struct FuncDelete {
     explicit FuncDelete(Func f) : mF(f) {}
 
+    FuncDelete(const FuncDelete& other) = default;
+    FuncDelete(FuncDelete&& other) = default;
+    FuncDelete& operator=(const FuncDelete& other) = default;
+    FuncDelete& operator=(FuncDelete&& other) = default;
+
+    // To be able to copy/move from all compatible template instantiations.
+    template <class U> friend class FuncDelete;
+
+    // Template constructors and move assignment from compatible instantiations.
+    template <class U>
+    FuncDelete(const FuncDelete<U>& other) : mF(other.mF) {}
+    template <class U>
+    FuncDelete(FuncDelete<U>&& other) : mF(std::move(other.mF)) {}
+    template <class U>
+    FuncDelete& operator=(const FuncDelete<U>& other) {
+        if (this != &other) {
+            mF = other.mF;
+        }
+        return *this;
+    }
+    template <class U>
+    FuncDelete& operator=(FuncDelete<U>&& other) {
+        assert(this != &other);
+        mF = std::move(other.mF);
+        return *this;
+    }
+
+    // This is the actual deleter call.
     template <class T>
     void operator()(T t) const {
         mF(t);
@@ -64,7 +94,7 @@ ScopedCustomPtr<
 makeCustomScopedPtr(T data, Func deleter) {
     return ScopedCustomPtr<
             typename std::decay<typename std::remove_pointer<T>::type>::type,
-            typename std::decay<Func>::type>(
+                           typename std::decay<Func>::type>(
             data, FuncDelete<typename std::decay<Func>::type>(deleter));
 }
 
