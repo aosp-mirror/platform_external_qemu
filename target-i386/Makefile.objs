@@ -5,3 +5,8 @@ obj-y += gdbstub.o
 obj-$(CONFIG_SOFTMMU) += machine.o arch_memory_mapping.o arch_dump.o monitor.o
 obj-$(CONFIG_KVM) += kvm.o hyperv.o
 obj-$(call lnot,$(CONFIG_KVM)) += kvm-stub.o
+ifeq (y,$(CONFIG_HAX))
+obj-y += hax-all.o hax-slot.o
+obj-$(CONFIG_WIN32) += hax-windows.o
+obj-$(CONFIG_DARWIN) += hax-darwin.o
+endif

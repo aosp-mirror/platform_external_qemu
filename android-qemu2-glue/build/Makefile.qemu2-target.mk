@@ -124,6 +124,25 @@ LOCAL_SRC_FILES += \
         stubs/vhost.c \
         ) \
 
+# HAX support.
+HAX_COMMON_SOURCES := \
+    target-i386/hax-all.c \
+    target-i386/hax-slot.c \
+
+LOCAL_SRC_FILES += \
+    $(call qemu2-if-target,x86 x86_64, \
+        $(call qemu2-if-windows, \
+            $(HAX_COMMON_SOURCES) \
+            target-i386/hax-windows.c) \
+        $(call qemu2-if-darwin, \
+            $(HAX_COMMON_SOURCES) \
+            target-i386/hax-darwin.c) \
+	$(call qemu2-if-linux, \
+	    hax-stub.c) \
+    , \
+        hax-stub.c \
+    ) \
+
 LOCAL_PREBUILTS_OBJ_FILES += \
     $(call qemu2-if-windows,$(QEMU2_AUTO_GENERATED_DIR)/version.o)
 

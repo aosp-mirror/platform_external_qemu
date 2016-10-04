@@ -46,6 +46,9 @@
 #include "sysemu/sysemu.h"
 #include "sysemu/numa.h"
 #include "sysemu/kvm.h"
+#ifdef CONFIG_HAX
+#include "sysemu/hax.h"
+#endif
 #include "sysemu/qtest.h"
 #include "kvm_i386.h"
 #include "hw/xen/xen.h"
@@ -2089,6 +2092,10 @@ bool pc_machine_is_smm_enabled(PCMachineState *pcms)
         smm_available = true;
     } else if (kvm_enabled()) {
         smm_available = kvm_has_smm();
+#ifdef CONFIG_HAX
+    } else if (hax_enabled()) {
+        smm_available = false;
+#endif
     }
 
     if (smm_available) {

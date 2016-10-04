@@ -25,6 +25,10 @@
 #include "exec/exec-all.h"
 #include "exec/cpu_ldst.h"
 #include "exec/log.h"
+#ifdef CONFIG_HAX
+#include "target-i386/hax-i386.h"
+#include "sysemu/hax.h"
+#endif
 
 //#define DEBUG_PCALL
 
@@ -1334,6 +1338,10 @@ bool x86_cpu_exec_interrupt(CPUState *cs, int interrupt_request)
             !(env->hflags & HF_SMM_MASK)) {
             cpu_svm_check_intercept_param(env, SVM_EXIT_SMI, 0);
             cs->interrupt_request &= ~CPU_INTERRUPT_SMI;
+#ifdef CONFIG_HAX
+            if (hax_enabled())
+                cs->hax_vcpu->resync = 1;
+#endif
             do_smm_enter(cpu);
             ret = true;
         } else if ((interrupt_request & CPU_INTERRUPT_NMI) &&

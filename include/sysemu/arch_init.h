@@ -35,6 +35,7 @@ void do_smbios_option(QemuOpts *opts);
 bool audio_init(void);
 int kvm_available(void);
 int xen_available(void);
+int hax_available(void);
 
 CpuDefinitionInfoList *arch_query_cpu_definitions(Error **errp);
 

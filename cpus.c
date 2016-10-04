@@ -34,6 +34,7 @@
 #include "exec/gdbstub.h"
 #include "sysemu/dma.h"
 #include "sysemu/kvm.h"
+#include "sysemu/hax.h"
 #include "qmp-commands.h"
 #include "exec/exec-all.h"
 
@@ -711,6 +712,11 @@ void cpu_synchronize_all_states(void)
 
     CPU_FOREACH(cpu) {
         cpu_synchronize_state(cpu);
+#ifdef CONFIG_HAX
+        if (hax_enabled() && hax_ug_platform()) {
+            hax_cpu_synchronize_state(cpu);
+        }
+#endif
     }
 }
 
@@ -720,6 +726,10 @@ void cpu_synchronize_all_post_reset(void)
 
     CPU_FOREACH(cpu) {
         cpu_synchronize_post_reset(cpu);
+#ifdef CONFIG_HAX
+        if (hax_enabled() && hax_ug_platform())
+            hax_cpu_synchronize_post_reset(cpu);
+#endif
     }
 }
 
@@ -729,6 +739,10 @@ void cpu_synchronize_all_post_init(void)
 
     CPU_FOREACH(cpu) {
         cpu_synchronize_post_init(cpu);
+#ifdef CONFIG_HAX
+        if (hax_enabled() && hax_ug_platform())
+            hax_cpu_synchronize_post_init(cpu);
+#endif
     }
 }
 
@@ -1038,6 +1052,16 @@ static void qemu_tcg_wait_io_event(CPUState *cpu)
     }
 }
 
+#ifdef CONFIG_HAX
+static void qemu_hax_wait_io_event(CPUState *cpu)
+{
+    while (cpu_thread_is_idle(cpu)) {
+        qemu_cond_wait(cpu->halt_cond, &qemu_global_mutex);
+    }
+    qemu_wait_io_event_common(cpu);
+}
+#endif /* CONFIG_HAX */
+
 static void qemu_kvm_wait_io_event(CPUState *cpu)
 {
     while (cpu_thread_is_idle(cpu)) {
@@ -1096,6 +1120,7 @@ static void *qemu_dummy_cpu_thread_fn(void *arg)
     fprintf(stderr, "qtest is not supported under Windows\n");
     exit(1);
 #else
+
     CPUState *cpu = arg;
     sigset_t waitset;
     int r;
@@ -1195,6 +1220,51 @@ static void *qemu_tcg_cpu_thread_fn(void *arg)
     return NULL;
 }
 
+#ifdef CONFIG_HAX
+/* The HAX-specific vCPU thread function. This one should only run when the host
+ * CPU supports the VMX "unrestricted guest" feature. */
+static void *qemu_hax_cpu_thread_fn(void *arg)
+{
+    CPUState *cpu = arg;
+    int r;
+
+    assert(hax_enabled() && hax_ug_platform());
+
+    rcu_register_thread();
+
+    qemu_mutex_lock(&qemu_global_mutex);
+    qemu_thread_get_self(cpu->thread);
+
+    cpu->thread_id = qemu_get_thread_id();
+    cpu->can_do_io = 1;
+//     cpu->created = true;
+//     cpu->halted = 0;
+    current_cpu = cpu;
+
+    hax_init_vcpu(cpu);
+
+    /* signal CPU creation */
+    cpu->created = true;
+    qemu_cond_signal(&qemu_cpu_cond);
+
+    do {
+        if (cpu_can_run(cpu)) {
+            r = hax_smp_cpu_exec(cpu);
+            if (r == EXCP_DEBUG) {
+                cpu_handle_guest_debug(cpu);
+            }
+        }
+        qemu_hax_wait_io_event(cpu);
+    } while (!cpu->unplug || cpu_can_run(cpu));
+
+    hax_vcpu_destroy(cpu);
+    cpu->created = false;
+    qemu_cond_signal(&qemu_cpu_cond);
+    qemu_mutex_unlock_iothread();
+    return NULL;
+}
+#endif /* CONFIG_HAX */
+
 static void qemu_cpu_kick_thread(CPUState *cpu)
 {
 #ifndef _WIN32
@@ -1209,9 +1279,49 @@ static void qemu_cpu_kick_thread(CPUState *cpu)
         fprintf(stderr, "qemu:%s: %s", __func__, strerror(err));
         exit(1);
     }
+#ifdef __APPLE__
+    // On OS X, the signal isn't caught reliably during shutdown.
+    if (!atomic_mb_read(&exit_request)) {
+        cpu_exit(cpu);
+        atomic_mb_set(&exit_request, 1);
+    }
+#endif /* __APPLE__ */
+#ifdef CONFIG_HAX
+    if (hax_enabled() && hax_ug_platform()) {
+        cpu_exit(cpu);
+    }
+#endif /* CONFIG_HAX */
 #else /* _WIN32 */
-    abort();
-#endif
+    if (cpu->thread_kicked) {
+        return;
+    }
+    cpu->thread_kicked = true;
+    if (!qemu_cpu_is_self(cpu)) {
+        CONTEXT tcgContext;
+
+        if (SuspendThread(cpu->hThread) == (DWORD)-1) {
+            fprintf(stderr, "qemu:%s: GetLastError:%lu\n", __func__,
+                    GetLastError());
+            exit(1);
+        }
+
+        /* On multi-core systems, we are not sure that the thread is actually
+         * suspended until we can get the context. */
+        tcgContext.ContextFlags = CONTEXT_CONTROL;
+        while (GetThreadContext(cpu->hThread, &tcgContext) != 0) {
+            continue;
+        }
+
+        cpu_exit(cpu);
+        atomic_mb_set(&exit_request, 1);
+
+        if (ResumeThread(cpu->hThread) == (DWORD)-1) {
+            fprintf(stderr, "qemu:%s: GetLastError:%lu\n", __func__,
+                    GetLastError());
+            exit(1);
+        }
+    }
+#endif /* _WIN32 */
 }
 
 static void qemu_cpu_kick_no_halt(void)
@@ -1230,7 +1340,21 @@ static void qemu_cpu_kick_no_halt(void)
 void qemu_cpu_kick(CPUState *cpu)
 {
     qemu_cond_broadcast(cpu->halt_cond);
+    /* There are three cases to consider here:
+     *
+     * - TCG is being used without HAX, then qemu_cpu_kick_no_halt() can be
+     *   called directly.
+     * 
+     * - TCG is being used with HAX, then kicking the thread with a signal (on Posix)
+     *   or with a thread suspend/resume (on Win32) is still needed.
+     * 
+     * - TCG is not being used, kick the thread with a signal or suspend/resume.
+     */
+#ifdef CONFIG_HAX
+    if (tcg_enabled() && !(hax_enabled() && hax_ug_platform())) {
+#else
     if (tcg_enabled()) {
+#endif
         qemu_cpu_kick_no_halt();
     } else {
         qemu_cpu_kick_thread(cpu);
@@ -1262,11 +1386,52 @@ bool qemu_mutex_iothread_locked(void)
 
 void qemu_mutex_lock_iothread(void)
 {
+    /* Technical note on what's going on here, because it's really subtle :-)
+     * 
+     * The single TCG vCPU thread always holds the global mutex when executing
+     * instructions, and only releases it very briefly in qemu_tcg_wait_io_event(),
+     * which gets called periodically to process interrupts.
+     *
+     * Under heavy guest CPU load, it will be hard for other threads to acquire
+     * the lock due to this. To counter that, several things are implemented here:
+     * 
+     * - First, |iothread_requesting_mutex| is used as a global atomic counter that
+     *   will be > 0 whenever other threads are trying to acquire the lock. It is
+     *   actually read by qemu_tcg_wait_io_event() to force the vCPU thread to
+     *   release the lock until its value reaches 0 again. The |qemu_io_proceeded_cond|
+     *   condition variable is used to do that.
+     * 
+     * - Second, if TCG is enabled, a trylock() is first tried to acquire the lock.
+     *   If this fail, the TCG vCPU thread is kicked(), which forces generated code
+     *   to exit to qemu_tcg_wait_io_event() as soon as possible.
+     * 
+     * NOTE: It looks like the use of |iothread_requesting_mutex| isn't needed at all
+     *       when KVM or HAX execution modes are being used, because the corresponding
+     *       vCPU threads actually _release_ the lock just before entering guest mode
+     *       (and re-acquire it just after exiting from it).
+     */
     atomic_inc(&iothread_requesting_mutex);
-    /* In the simple case there is no need to bump the VCPU thread out of
-     * TCG code execution.
+
+    /* A simple lock is sufficient in the following cases:
+     * 
+     * - TCG is not enabled (KVM execution mode).
+     *   [This is the !tcg_enabled() check]
+     * 
+     * - TCG is enabled, but this called from the TCG vCPU thread directly.
+     *   [This is the qemu_in_vcpu_thread() check]
+     *
+     * - TCG is enabled, but so is HAX in "unrestricted guest" mode, which allows it
+     *   to execute all guest code directly (i.e. there is no TCG vCPU thread).
+     *   [This is the (hax_enabled() && hax_ug_platform()) check].
+     * 
+     * - TCG is enabled, but its thread has not started yet (e.g. when this
+     *   function is called during virtual device realization).
+     *   [This is (!first_cpu || !first_cpu->created)].
      */
     if (!tcg_enabled() || qemu_in_vcpu_thread() ||
+#ifdef CONFIG_HAX
+        (hax_enabled() && hax_ug_platform()) ||
+#endif
         !first_cpu || !first_cpu->created) {
         qemu_mutex_lock(&qemu_global_mutex);
         atomic_dec(&iothread_requesting_mutex);
@@ -1370,6 +1535,17 @@ static void qemu_tcg_init_vcpu(CPUState *cpu)
     static QemuCond *tcg_halt_cond;
     static QemuThread *tcg_cpu_thread;
 
+#ifdef CONFIG_HAX
+    if (hax_enabled()) {
+        /* This code path should only be taken when HAX is enabled but the
+         * CPU doesn't support "unrestricted guest" mode. */
+        assert(!hax_ug_platform());
+        /* Initialize HAX-related state for the TCG thread. This is required for
+         * cpu_exec() to work correctly when HAX is enabled. */
+        hax_init_vcpu(cpu);
+    }
+#endif /* CONFIG_HAX */
+
     /* share a single thread for all cpus with TCG */
     if (!tcg_cpu_thread) {
         cpu->thread = g_malloc0(sizeof(QemuThread));
@@ -1392,6 +1568,35 @@ static void qemu_tcg_init_vcpu(CPUState *cpu)
         cpu->halt_cond = tcg_halt_cond;
     }
 }
+
+#ifdef CONFIG_HAX
+static void qemu_hax_start_vcpu(CPUState *cpu)
+{
+    char thread_name[VCPU_THREAD_NAME_SIZE];
+
+    /* This function shall only be called when HAX is enabled, and the host CPU
+     * supports "unrestricted guest" mode. This allows emulation of "real mode"
+     * and completely avoids the use of TCG. It's only the only way to get
+     * multi-core accelerated emulation with HAX. */
+    assert(hax_enabled());
+    assert(hax_ug_platform());
+
+    cpu->thread = g_malloc0(sizeof(QemuThread));
+    cpu->halt_cond = g_malloc0(sizeof(QemuCond));
+    qemu_cond_init(cpu->halt_cond);
+
+    snprintf(thread_name, VCPU_THREAD_NAME_SIZE, "CPU %d/HAX",
+             cpu->cpu_index);
+    qemu_thread_create(cpu->thread, thread_name, qemu_hax_cpu_thread_fn,
+                       cpu, QEMU_THREAD_JOINABLE);
+#ifdef _WIN32
+    cpu->hThread = qemu_thread_get_handle(cpu->thread);
+#endif
+    while (!cpu->created) {
+        qemu_cond_wait(&qemu_cpu_cond, &qemu_global_mutex);
+    }
+}
+#endif /* CONFIG_HAX */
 
 static void qemu_kvm_start_vcpu(CPUState *cpu)
 {
@@ -1443,6 +1648,10 @@ void qemu_init_vcpu(CPUState *cpu)
 
     if (kvm_enabled()) {
         qemu_kvm_start_vcpu(cpu);
+#ifdef CONFIG_HAX
+    } else if (hax_enabled() && hax_ug_platform()) {
+        qemu_hax_start_vcpu(cpu);
+#endif 
     } else if (tcg_enabled()) {
         qemu_tcg_init_vcpu(cpu);
     } else {
