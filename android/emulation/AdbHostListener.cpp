@@ -62,24 +62,28 @@ bool AdbHostListener::reset(int adbPort) {
 }
 
 void AdbHostListener::startListening() {
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
     if (mServer) {
         mServer->startListening();
     }
 }
 
 void AdbHostListener::stopListening() {
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
     if (mServer) {
         mServer->stopListening();
     }
 }
 
 void AdbHostListener::notifyServer() {
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
     if (mServer && mAdbClientPort > 0) {
         AdbHostServer::notify(mServer->port(), mAdbClientPort);
     }
 }
 
 bool AdbHostListener::onHostServerConnection(int socket) {
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
     mGuestAgent->onHostConnection(ScopedSocket(socket));
     return true;
 }

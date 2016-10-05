@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <string>
+#include <unistd.h>
 
 #include <assert.h>
 
@@ -85,7 +86,6 @@ using FdWatch = android::base::Looper::FdWatch;
 using android::base::ScopedSocketWatch;
 using android::base::StringView;
 
-#if DEBUG >= 2
 static int bufferBytes(const AndroidPipeBuffer* buffers, int count) {
     int result = 0;
     for (int n = 0; n < count; ++n) {
@@ -93,7 +93,6 @@ static int bufferBytes(const AndroidPipeBuffer* buffers, int count) {
     }
     return result;
 }
-#endif
 
 AndroidPipe* AdbGuestPipe::Service::create(void* mHwPipe, const char* args) {
     auto pipe = new AdbGuestPipe(mHwPipe, this, mHostAgent);
@@ -191,16 +190,18 @@ unsigned AdbGuestPipe::onGuestPoll() const {
 }
 
 int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
-    DD("%s: [%p] numBuffers=%d bytes=%d state=%s", __func__, this, numBuffers,
-       bufferBytes(buffers, numBuffers), toString(mState));
+    // fprintf(stderr, "%s: [%p] numBuffers=%d bytes=%d state=%s\n", __func__, this, numBuffers, bufferBytes(buffers, numBuffers), toString(mState));
+    fprintf(stderr, "%s: [%p] state=%s\n", __func__, this, toString(mState));
     if (mState == State::ProxyingData) {
         // Common case, proxy-ing the data from the host to the guest.
         return onGuestRecvData(buffers, numBuffers);
     } else if (mState == State::SendingAcceptReplyOk) {
+        firstData = true;
         // The guest is receiving the 'ok' reply.
         return onGuestRecvReply(buffers, numBuffers);
     } else if (mState == State::WaitingForHostAdbConnection ||
                mState == State::WaitingForGuestStartCommand) {
+        firstData = true;
         // Not ready yet to send data to the guest.
         return PIPE_ERROR_AGAIN;
     } else {
@@ -214,8 +215,8 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
 
 int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
                               int numBuffers) {
-    DD("%s: [%p] numBuffers=%d bytes=%d state=%s", __func__, this, numBuffers,
-       bufferBytes(buffers, numBuffers), toString(mState));
+    // fprintf(stderr, "%s: [%p] numBuffers=%d bytes=%d state=%s\n", __func__, this, numBuffers, bufferBytes(buffers, numBuffers), toString(mState));
+    fprintf(stderr, "%s: [%p] state=%s\n", __func__, this, toString(mState));
     if (mState == State::ProxyingData) {
         // Common-case, proxy-ing the data from the guest to the host.
         return onGuestSendData(buffers, numBuffers);
@@ -246,7 +247,7 @@ void AdbGuestPipe::onGuestWantWakeOn(int flags) {
 }
 
 void AdbGuestPipe::onHostConnection(ScopedSocket&& socket) {
-    DD("%s: [%p] host connection", __func__, this);
+    fprintf(stderr, "%s: [%p] host connection\n", __func__, this);
     CHECK(mState <= State::WaitingForHostAdbConnection);
     android::base::socketSetNonBlocking(socket.get());
     // socketSetNoDelay() reduces the latency of sending data, at the cost
@@ -312,8 +313,13 @@ int AdbGuestPipe::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
     while (numBuffers > 0) {
         uint8_t* data = buffers[0].data;
         size_t dataSize = buffers[0].size;
-        DD("%s: [%p] dataSize=%d", __func__, this, (int)dataSize);
+        fprintf(stderr, "%s: [%p] dataSize=%d\n", __func__, this, (int)dataSize);
         while (dataSize > 0) {
+            if (firstData) {
+                fprintf(stderr, "%s: is first data. wait a litlte bit\n", __FUNCTION__);
+                usleep(500000);
+                firstData = false;
+            }
             ssize_t len = android::base::socketRecv(mHostSocket->fd(), data,
                                                     dataSize);
             if (len > 0) {
@@ -322,6 +328,8 @@ int AdbGuestPipe::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
                 result += static_cast<int>(len);
                 continue;
             }
+
+                fprintf(stderr, "%s: [%p] errno=%d len=%u result=%d\n", __FUNCTION__, this, errno, len, (long int)result);
             if (len < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
                 if (result == 0) {
                     mHostSocket->dontWantRead();
@@ -331,6 +339,7 @@ int AdbGuestPipe::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
                 // End of stream or i/o error means the guest has closed
                 // the connection.
                 if (result == 0) {
+                fprintf(stderr, "%s: close the connection? ClosedByHost\n", __FUNCTION__);
                     mHostSocket.reset();
                     mState = State::ClosedByHost;
                     DINIT("%s: [%p] Adb closed by host",__func__, this);

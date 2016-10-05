@@ -185,6 +185,8 @@ private:
     android::base::ScopedSocketWatch
             mHostSocket;  // current host socket, if connected.
     AdbHostAgent* mHostAgent = nullptr;
+
+    bool firstData = false;
 };
 
 }  // namespace emulation
