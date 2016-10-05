@@ -74,7 +74,9 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
                        ToolWindow::UserActionsCounterPtr user_actions_counter)
     : QFrame(parent),
       mEmulatorWindow(window),
-      mExtendedWindow(nullptr),
+      mExtendedWindow(android::base::makeCustomScopedPtr<ExtendedWindow*>(
+              nullptr,
+              [](QObject* o) { o->deleteLater(); })),
       mUiEmuAgent(nullptr),
       mToolsUi(new Ui::ToolControls),
       mUIEventRecorder(event_recorder),
@@ -420,9 +422,13 @@ bool ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
 }
 
 void ToolWindow::closeExtendedWindow() {
-    assert(mExtendedWindow);
-    mExtendedWindow->close();
-    mExtendedWindow.reset();
+    // If user is clicking the 'x' button like crazy, we may get multiple
+    // close events here, so make sure the function doesn't screw the state for
+    // a next call.
+    if (mExtendedWindow) {
+        mExtendedWindow->close();
+        mExtendedWindow.reset();
+    }
 }
 
 void ToolWindow::dockMainWindow() {

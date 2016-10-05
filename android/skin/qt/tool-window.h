@@ -13,6 +13,7 @@
 #pragma once
 
 #include "android/base/containers/CircularBuffer.h"
+#include "android/base/memory/ScopedPtr.h"
 #include "android/skin/event.h"
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/extended-window.h"
@@ -107,7 +108,10 @@ private:
     virtual void hideEvent(QHideEvent* event) override;
 
     EmulatorQtWindow* mEmulatorWindow;
-    std::unique_ptr<ExtendedWindow> mExtendedWindow;
+    // ExtendedWindow has slots with subscribers, so use deleteLater() instead
+    // of regular delete for it.
+    android::base::ScopedCustomPtr<ExtendedWindow, void (*)(QObject*)>
+            mExtendedWindow;
     const UiEmuAgent* mUiEmuAgent;
     std::unique_ptr<Ui::ToolControls> mToolsUi;
     bool mStartedAdbStopProcess = false;
