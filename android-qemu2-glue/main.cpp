@@ -964,7 +964,7 @@ extern "C" int main(int argc, char **argv) {
     sigfillset(&set);
     pthread_sigmask(SIG_SETMASK, &set, NULL);
 #endif  // !_WIN32
-
+    skin_winsys_init_args(argc, argv);
     if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
         return 1;
     }
