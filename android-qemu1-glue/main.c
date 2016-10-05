@@ -241,6 +241,8 @@ int main(int argc, char **argv) {
     sigfillset(&set);
     pthread_sigmask(SIG_SETMASK, &set, NULL);
 #endif
+    skin_winsys_init_args(argc, argv);
+
     if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
         return 1;
     }
@@ -258,7 +260,7 @@ int main(int argc, char **argv) {
                              qemu_parameters_size(qemuParams),
                              qemu_parameters_array(qemuParams));
 
-    skin_winsys_enter_main_loop(opts->no_window, argc, argv);
+    skin_winsys_enter_main_loop(opts->no_window);
 
     emulator_finiUserInterface();
 

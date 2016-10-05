@@ -120,7 +120,7 @@ std::shared_ptr<void> skin_winsys_get_shared_ptr() {
     return std::static_pointer_cast<void>(EmulatorQtWindow::getInstancePtr());
 }
 
-extern void skin_winsys_enter_main_loop(bool no_window, int argc, char** argv) {
+extern void skin_winsys_enter_main_loop(bool no_window) {
     D("Starting QT main loop\n");
 
     // In order for QProcess to correctly handle processes that exit we need
@@ -129,8 +129,6 @@ extern void skin_winsys_enter_main_loop(bool no_window, int argc, char** argv) {
     // signal will not be emitted from QProcess.
     enableSigChild();
     GlobalState* g = globalState();
-    g->argc = argc;
-    g->argv = argv;
     g->app->exec();
     D("Finished QT main loop\n");
 }
@@ -346,6 +344,12 @@ void skin_winsys_setup_library_paths() {
     QApplication::setLibraryPaths(pathList);
     D("Qt lib path: %s\n", qtLibPath.c_str());
     D("Qt plugin path: %s\n", qtPluginsPath.c_str());
+}
+
+extern void skin_winsys_init_args(int argc, char** argv) {
+    GlobalState* g = globalState();
+    g->argc = argc;
+    g->argv = argv;
 }
 
 extern void skin_winsys_start(bool no_window) {
