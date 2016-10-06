@@ -21,6 +21,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+// Init args.
+void skin_winsys_init_args(int argc, char** argv);
 
 // Return window handle of main UI.
 void* skin_winsys_get_window_handle(void);
@@ -76,7 +78,7 @@ void skin_winsys_spawn_thread(bool no_window,
                               char** argv);
 
 // Enter the main event handling loop for the UI subsystem.
-void skin_winsys_enter_main_loop(bool no_window, int argc, char** argv);
+void skin_winsys_enter_main_loop(bool no_window);
 
 // Run some UI update in a way that UI subsystem needs
 // E.g. for Qt UI, it makes sure the function runs on the main Qt UI thread,
