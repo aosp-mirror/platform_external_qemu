@@ -558,7 +558,7 @@ static const mips_def_t mips_defs[] =
     },
     {
         /* A generic CPU supporting MIPS64 Release 6 ISA.
-           FIXME: Support IEEE 754-2008 FP.
+           FIXME: Support IEEE 754-2008 FP and misaligned memory accesses.
                   Eventually this should be replaced by a real CPU model. */
         .name = "MIPS64R6-generic",
         .CP0_PRid = 0x00010000,
