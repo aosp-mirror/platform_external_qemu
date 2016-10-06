@@ -601,6 +601,8 @@ GL_APICALL void  GL_APIENTRY glDeleteProgram(GLuint program){
 
         ObjectDataPtr programData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
+        SET_ERROR_IF(!(programData.get()->getDataType()==PROGRAM_DATA),
+                GL_INVALID_OPERATION);
         ProgramData* pData = (ProgramData*)programData.get();
         if (pData && pData->isInUse()) {
             pData->setDeleteStatus(true);
