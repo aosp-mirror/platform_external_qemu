@@ -1363,7 +1363,7 @@ static void * const qemu_st_helpers[16] = {
    in CR7, loads the addend of the TLB into R3, and returns the register
    containing the guest address (zero-extended into R4).  Clobbers R0 and R2. */
 
-static TCGReg tcg_out_tlb_read(TCGContext *s, TCGMemOp s_bits,
+static TCGReg tcg_out_tlb_read(TCGContext *s, TCGMemOp opc,
                                TCGReg addrlo, TCGReg addrhi,
                                int mem_index, bool is_read)
 {
@@ -1373,6 +1373,8 @@ static TCGReg tcg_out_tlb_read(TCGContext *s, TCGMemOp s_bits,
            : offsetof(CPUArchState, tlb_table[mem_index][0].addr_write));
     int add_off = offsetof(CPUArchState, tlb_table[mem_index][0].addend);
     TCGReg base = TCG_AREG0;
+    TCGMemOp s_bits = opc & MO_SIZE;
+    int a_bits = get_alignment_bits(opc);
 
     /* Extract the page index, shifted into place for tlb index.  */
     if (TCG_TARGET_REG_BITS == 64) {
@@ -1424,17 +1426,40 @@ static TCGReg tcg_out_tlb_read(TCGContext *s, TCGMemOp s_bits,
        to minimize any load use delay.  */
     tcg_out_ld(s, TCG_TYPE_PTR, TCG_REG_R3, TCG_REG_R3, add_off);
 
-    /* Clear the non-page, non-alignment bits from the address.  */
+    /* Clear the non-page, non-alignment bits from the address */
     if (TCG_TARGET_REG_BITS == 32 || TARGET_LONG_BITS == 32) {
+        /* We don't support unaligned accesses on 32-bits, preserve
+         * the bottom bits and thus trigger a comparison failure on
+         * unaligned accesses
+         */
+        if (a_bits < 0) {
+            a_bits = s_bits;
+        }
         tcg_out_rlw(s, RLWINM, TCG_REG_R0, addrlo, 0,
-                    (32 - s_bits) & 31, 31 - TARGET_PAGE_BITS);
-    } else if (!s_bits) {
-        tcg_out_rld(s, RLDICR, TCG_REG_R0, addrlo,
-                    0, 63 - TARGET_PAGE_BITS);
+                    (32 - a_bits) & 31, 31 - TARGET_PAGE_BITS);
+    } else if (a_bits) {
+        /* More than byte access, we need to handle alignment */
+        if (a_bits > 0) {
+            /* Alignment required by the front-end, same as 32-bits */
+            tcg_out_rld(s, RLDICL, TCG_REG_R0, addrlo,
+                        64 - TARGET_PAGE_BITS, TARGET_PAGE_BITS - a_bits);
+            tcg_out_rld(s, RLDICL, TCG_REG_R0, TCG_REG_R0, TARGET_PAGE_BITS, 0);
+       } else {
+           /* We support unaligned accesses, we need to make sure we fail
+            * if we cross a page boundary. The trick is to add the
+            * access_size-1 to the address before masking the low bits.
+            * That will make the address overflow to the next page if we
+            * cross a page boundary which will then force a mismatch of
+            * the TLB compare since the next page cannot possibly be in
+            * the same TLB index.
+            */
+            tcg_out32(s, ADDI | TAI(TCG_REG_R0, addrlo, (1 << s_bits) - 1));
+            tcg_out_rld(s, RLDICR, TCG_REG_R0, TCG_REG_R0,
+                        0, 63 - TARGET_PAGE_BITS);
+        }
     } else {
-        tcg_out_rld(s, RLDICL, TCG_REG_R0, addrlo,
-                    64 - TARGET_PAGE_BITS, TARGET_PAGE_BITS - s_bits);
-        tcg_out_rld(s, RLDICL, TCG_REG_R0, TCG_REG_R0, TARGET_PAGE_BITS, 0);
+        /* Byte access, just chop off the bits below the page index */
+        tcg_out_rld(s, RLDICR, TCG_REG_R0, addrlo, 0, 63 - TARGET_PAGE_BITS);
     }
 
     if (TCG_TARGET_REG_BITS < TARGET_LONG_BITS) {
@@ -1453,28 +1478,27 @@ static TCGReg tcg_out_tlb_read(TCGContext *s, TCGMemOp s_bits,
 /* Record the context of a call to the out of line helper code for the slow
    path for a load or store, so that we can later generate the correct
    helper code.  */
-static void add_qemu_ldst_label(TCGContext *s, bool is_ld, TCGMemOp opc,
+static void add_qemu_ldst_label(TCGContext *s, bool is_ld, TCGMemOpIdx oi,
                                 TCGReg datalo_reg, TCGReg datahi_reg,
                                 TCGReg addrlo_reg, TCGReg addrhi_reg,
-                                int mem_index, tcg_insn_unit *raddr,
-                                tcg_insn_unit *lptr)
+                                tcg_insn_unit *raddr, tcg_insn_unit *lptr)
 {
     TCGLabelQemuLdst *label = new_ldst_label(s);
 
     label->is_ld = is_ld;
-    label->opc = opc;
+    label->oi = oi;
     label->datalo_reg = datalo_reg;
     label->datahi_reg = datahi_reg;
     label->addrlo_reg = addrlo_reg;
     label->addrhi_reg = addrhi_reg;
-    label->mem_index = mem_index;
     label->raddr = raddr;
     label->label_ptr[0] = lptr;
 }
 
 static void tcg_out_qemu_ld_slow_path(TCGContext *s, TCGLabelQemuLdst *lb)
 {
-    TCGMemOp opc = lb->opc;
+    TCGMemOpIdx oi = lb->oi;
+    TCGMemOp opc = get_memop(oi);
     TCGReg hi, lo, arg = TCG_REG_R3;
 
     reloc_pc14(lb->label_ptr[0], s->code_ptr);
@@ -1495,10 +1519,10 @@ static void tcg_out_qemu_ld_slow_path(TCGContext *s, TCGLabelQemuLdst *lb)
         tcg_out_mov(s, TCG_TYPE_TL, arg++, lo);
     }
 
-    tcg_out_movi(s, TCG_TYPE_I32, arg++, lb->mem_index);
+    tcg_out_movi(s, TCG_TYPE_I32, arg++, oi);
     tcg_out32(s, MFSPR | RT(arg) | LR);
 
-    tcg_out_call(s, qemu_ld_helpers[opc & ~MO_SIGN]);
+    tcg_out_call(s, qemu_ld_helpers[opc & (MO_BSWAP | MO_SIZE)]);
 
     lo = lb->datalo_reg;
     hi = lb->datahi_reg;
@@ -1517,7 +1541,8 @@ static void tcg_out_qemu_ld_slow_path(TCGContext *s, TCGLabelQemuLdst *lb)
 
 static void tcg_out_qemu_st_slow_path(TCGContext *s, TCGLabelQemuLdst *lb)
 {
-    TCGMemOp opc = lb->opc;
+    TCGMemOpIdx oi = lb->oi;
+    TCGMemOp opc = get_memop(oi);
     TCGMemOp s_bits = opc & MO_SIZE;
     TCGReg hi, lo, arg = TCG_REG_R3;
 
@@ -1564,10 +1589,10 @@ static void tcg_out_qemu_st_slow_path(TCGContext *s, TCGLabelQemuLdst *lb)
         }
     }
 
-    tcg_out_movi(s, TCG_TYPE_I32, arg++, lb->mem_index);
+    tcg_out_movi(s, TCG_TYPE_I32, arg++, oi);
     tcg_out32(s, MFSPR | RT(arg) | LR);
 
-    tcg_out_call(s, qemu_st_helpers[opc]);
+    tcg_out_call(s, qemu_st_helpers[opc & (MO_BSWAP | MO_SIZE)]);
 
     tcg_out_b(s, 0, lb->raddr);
 }
@@ -1577,6 +1602,7 @@ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args, bool is_64)
 {
     TCGReg datalo, datahi, addrlo, rbase;
     TCGReg addrhi __attribute__((unused));
+    TCGMemOpIdx oi;
     TCGMemOp opc, s_bits;
 #ifdef CONFIG_SOFTMMU
     int mem_index;
@@ -1587,12 +1613,13 @@ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args, bool is_64)
     datahi = (TCG_TARGET_REG_BITS == 32 && is_64 ? *args++ : 0);
     addrlo = *args++;
     addrhi = (TCG_TARGET_REG_BITS < TARGET_LONG_BITS ? *args++ : 0);
-    opc = *args++;
+    oi = *args++;
+    opc = get_memop(oi);
     s_bits = opc & MO_SIZE;
 
 #ifdef CONFIG_SOFTMMU
-    mem_index = *args;
-    addrlo = tcg_out_tlb_read(s, s_bits, addrlo, addrhi, mem_index, true);
+    mem_index = get_mmuidx(oi);
+    addrlo = tcg_out_tlb_read(s, opc, addrlo, addrhi, mem_index, true);
 
     /* Load a pointer into the current opcode w/conditional branch-link. */
     label_ptr = s->code_ptr;
@@ -1624,7 +1651,7 @@ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args, bool is_64)
             tcg_out32(s, LWZ | TAI(datalo, addrlo, 4));
         }
     } else {
-        uint32_t insn = qemu_ldx_opc[opc];
+        uint32_t insn = qemu_ldx_opc[opc & (MO_BSWAP | MO_SSIZE)];
         if (!HAVE_ISA_2_06 && insn == LDBRX) {
             tcg_out32(s, ADDI | TAI(TCG_REG_R0, addrlo, 4));
             tcg_out32(s, LWBRX | TAB(datalo, rbase, addrlo));
@@ -1641,8 +1668,8 @@ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args, bool is_64)
     }
 
 #ifdef CONFIG_SOFTMMU
-    add_qemu_ldst_label(s, true, opc, datalo, datahi, addrlo, addrhi,
-                        mem_index, s->code_ptr, label_ptr);
+    add_qemu_ldst_label(s, true, oi, datalo, datahi, addrlo, addrhi,
+                        s->code_ptr, label_ptr);
 #endif
 }
 
@@ -1650,6 +1677,7 @@ static void tcg_out_qemu_st(TCGContext *s, const TCGArg *args, bool is_64)
 {
     TCGReg datalo, datahi, addrlo, rbase;
     TCGReg addrhi __attribute__((unused));
+    TCGMemOpIdx oi;
     TCGMemOp opc, s_bits;
 #ifdef CONFIG_SOFTMMU
     int mem_index;
@@ -1660,12 +1688,13 @@ static void tcg_out_qemu_st(TCGContext *s, const TCGArg *args, bool is_64)
     datahi = (TCG_TARGET_REG_BITS == 32 && is_64 ? *args++ : 0);
     addrlo = *args++;
     addrhi = (TCG_TARGET_REG_BITS < TARGET_LONG_BITS ? *args++ : 0);
-    opc = *args++;
+    oi = *args++;
+    opc = get_memop(oi);
     s_bits = opc & MO_SIZE;
 
 #ifdef CONFIG_SOFTMMU
-    mem_index = *args;
-    addrlo = tcg_out_tlb_read(s, s_bits, addrlo, addrhi, mem_index, false);
+    mem_index = get_mmuidx(oi);
+    addrlo = tcg_out_tlb_read(s, opc, addrlo, addrhi, mem_index, false);
 
     /* Load a pointer into the current opcode w/conditional branch-link. */
     label_ptr = s->code_ptr;
@@ -1694,7 +1723,7 @@ static void tcg_out_qemu_st(TCGContext *s, const TCGArg *args, bool is_64)
             tcg_out32(s, STW | TAI(datalo, addrlo, 4));
         }
     } else {
-        uint32_t insn = qemu_stx_opc[opc];
+        uint32_t insn = qemu_stx_opc[opc & (MO_BSWAP | MO_SIZE)];
         if (!HAVE_ISA_2_06 && insn == STDBRX) {
             tcg_out32(s, STWBRX | SAB(datalo, rbase, addrlo));
             tcg_out32(s, ADDI | TAI(TCG_REG_TMP1, addrlo, 4));
@@ -1706,8 +1735,8 @@ static void tcg_out_qemu_st(TCGContext *s, const TCGArg *args, bool is_64)
     }
 
 #ifdef CONFIG_SOFTMMU
-    add_qemu_ldst_label(s, false, opc, datalo, datahi, addrlo, addrhi,
-                        mem_index, s->code_ptr, label_ptr);
+    add_qemu_ldst_label(s, false, oi, datalo, datahi, addrlo, addrhi,
+                        s->code_ptr, label_ptr);
 #endif
 }
 

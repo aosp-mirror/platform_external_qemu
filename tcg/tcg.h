@@ -159,6 +159,15 @@ typedef uint64_t tcg_insn_unit;
 #endif
 
 
+#ifdef CONFIG_DEBUG_TCG
+# define tcg_debug_assert(X) do { assert(X); } while (0)
+#elif QEMU_GNUC_PREREQ(4, 5)
+# define tcg_debug_assert(X) \
+    do { if (!(X)) { __builtin_unreachable(); } } while (0)
+#else
+# define tcg_debug_assert(X) do { (void)(X); } while (0)
+#endif
+
 typedef struct TCGRelocation {
     struct TCGRelocation *next;
     int type;
@@ -242,6 +251,41 @@ typedef enum TCGMemOp {
     MO_TE    = MO_LE,
 #endif
 
+    /* MO_UNALN accesses are never checked for alignment.
+     * MO_ALIGN accesses will result in a call to the CPU's
+     * do_unaligned_access hook if the guest address is not aligned.
+     * The default depends on whether the target CPU defines ALIGNED_ONLY.
+     * Some architectures (e.g. ARMv8) need the address which is aligned
+     * to a size more than the size of the memory access.
+     * To support such check it's enough the current costless alignment
+     * check implementation in QEMU, but we need to support
+     * an alignment size specifying.
+     * MO_ALIGN supposes a natural alignment
+     * (i.e. the alignment size is the size of a memory access).
+     * Note that an alignment size must be equal or greater
+     * than an access size.
+     * There are three options:
+     * - an alignment to the size of an access (MO_ALIGN);
+     * - an alignment to the specified size that is equal or greater than
+     *   an access size (MO_ALIGN_x where 'x' is a size in bytes);
+     * - unaligned access permitted (MO_UNALN).
+     */
+    MO_ASHIFT = 4,
+    MO_AMASK = 7 << MO_ASHIFT,
+#ifdef ALIGNED_ONLY
+    MO_ALIGN = 0,
+    MO_UNALN = MO_AMASK,
+#else
+    MO_ALIGN = MO_AMASK,
+    MO_UNALN = 0,
+#endif
+    MO_ALIGN_2  = 1 << MO_ASHIFT,
+    MO_ALIGN_4  = 2 << MO_ASHIFT,
+    MO_ALIGN_8  = 3 << MO_ASHIFT,
+    MO_ALIGN_16 = 4 << MO_ASHIFT,
+    MO_ALIGN_32 = 5 << MO_ASHIFT,
+    MO_ALIGN_64 = 6 << MO_ASHIFT,
+
     /* Combinations of the above, for ease of use.  */
     MO_UB    = MO_8,
     MO_UW    = MO_16,
@@ -271,6 +315,45 @@ typedef enum TCGMemOp {
 
     MO_SSIZE = MO_SIZE | MO_SIGN,
 } TCGMemOp;
+
+/**
+ * get_alignment_bits
+ * @memop: TCGMemOp value
+ *
+ * Extract the alignment size from the memop.
+ *
+ * Returns: 0 in case of byte access (which is always aligned);
+ *          positive value - number of alignment bits;
+ *          negative value if unaligned access enabled
+ *          and this is not a byte access.
+ */
+static inline int get_alignment_bits(TCGMemOp memop)
+{
+    int a = memop & MO_AMASK;
+    int s = memop & MO_SIZE;
+    int r;
+
+    if (a == MO_UNALN) {
+        /* Negative value if unaligned access enabled,
+         * or zero value in case of byte access.
+         */
+        return -s;
+    } else if (a == MO_ALIGN) {
+        /* A natural alignment: return a number of access size bits */
+        r = s;
+    } else {
+        /* Specific alignment size. It must be equal or greater
+         * than the access size.
+         */
+        r = a >> MO_ASHIFT;
+        tcg_debug_assert(r >= s);
+    }
+#if defined(CONFIG_SOFTMMU)
+    /* The requested alignment cannot overlap the TLB flags.  */
+    tcg_debug_assert((TLB_FLAGS_MASK & ((1 << r) - 1)) == 0);
+#endif
+    return r;
+}
 
 typedef tcg_target_ulong TCGArg;
 
@@ -448,10 +531,28 @@ typedef struct TCGTempSet {
     unsigned long l[BITS_TO_LONGS(TCG_MAX_TEMPS)];
 } TCGTempSet;
 
+typedef struct TCGOp {
+    TCGOpcode opc   : 8;
+
+    /* The number of out and in parameter for a call.  */
+    unsigned callo  : 2;
+    unsigned calli  : 6;
+
+    /* Index of the arguments for this op, or -1 for zero-operand ops.  */
+    signed args     : 16;
+
+    /* Index of the prex/next op, or -1 for the end of the list.  */
+    signed prev     : 16;
+    signed next     : 16;
+} TCGOp;
+
+QEMU_BUILD_BUG_ON(NB_OPS > 0xff);
+QEMU_BUILD_BUG_ON(OPC_BUF_SIZE >= 0x7fff);
+QEMU_BUILD_BUG_ON(OPPARAM_BUF_SIZE >= 0x7fff);
+
 struct TCGContext {
     uint8_t *pool_cur, *pool_end;
     TCGPool *pool_first, *pool_current, *pool_first_large;
-    TCGLabel *labels;
     int nb_labels;
     int nb_globals;
     int nb_temps;
@@ -469,9 +570,6 @@ struct TCGContext {
                                corresponding output argument needs to be
                                sync to memory. */
     
-    /* tells in which temporary a given register is. It does not take
-       into account fixed registers */
-    int reg_to_temp[TCG_TARGET_NB_REGS];
     TCGRegSet reserved_regs;
     intptr_t current_frame_offset;
     intptr_t frame_start;
@@ -479,8 +577,6 @@ struct TCGContext {
     int frame_reg;
 
     tcg_insn_unit *code_ptr;
-    TCGTemp temps[TCG_MAX_TEMPS]; /* globals first, temps after */
-    TCGTempSet free_temps[TCG_TYPE_COUNT * 2];
 
     GHashTable *helpers;
 
@@ -508,14 +604,10 @@ struct TCGContext {
     int goto_tb_issue_mask;
 #endif
 
-    uint16_t gen_opc_buf[OPC_BUF_SIZE];
-    TCGArg gen_opparam_buf[OPPARAM_BUF_SIZE];
-
-    uint16_t *gen_opc_ptr;
-    TCGArg *gen_opparam_ptr;
-    target_ulong gen_opc_pc[OPC_BUF_SIZE];
-    uint16_t gen_opc_icount[OPC_BUF_SIZE];
-    uint8_t gen_opc_instr_start[OPC_BUF_SIZE];
+    int gen_first_op_idx;
+    int gen_last_op_idx;
+    int gen_next_op_idx;
+    int gen_next_parm_idx;
 
     /* Code generation.  Note that we specifically do not use tcg_insn_unit
        here, because there's too much arithmetic throughout that relies
@@ -533,9 +625,37 @@ struct TCGContext {
 
     /* The TCGBackendData structure is private to tcg-target.c.  */
     struct TCGBackendData *be;
+
+    TCGTempSet free_temps[TCG_TYPE_COUNT * 2];
+    TCGTemp temps[TCG_MAX_TEMPS]; /* globals first, temps after */
+
+    /* tells in which temporary a given register is. It does not take
+       into account fixed registers */
+    int reg_to_temp[TCG_TARGET_NB_REGS];
+
+    TCGOp gen_op_buf[OPC_BUF_SIZE];
+    TCGArg gen_opparam_buf[OPPARAM_BUF_SIZE];
+
+    target_ulong gen_opc_pc[OPC_BUF_SIZE];
+    uint16_t gen_opc_icount[OPC_BUF_SIZE];
+    uint8_t gen_opc_instr_start[OPC_BUF_SIZE];
+
+    TCGLabel labels[TCG_MAX_LABELS];
 };
 
 extern TCGContext tcg_ctx;
+
+/* The number of opcodes emitted so far.  */
+static inline int tcg_op_buf_count(void)
+{
+    return tcg_ctx.gen_next_op_idx;
+}
+
+/* Test for whether to terminate the TB for using too many opcodes.  */
+static inline bool tcg_op_buf_full(void)
+{
+    return tcg_op_buf_count() >= OPC_MAX_SIZE;
+}
 
 /* pool based memory allocation */
 
@@ -667,15 +787,6 @@ do {\
     abort();\
 } while (0)
 
-#ifdef CONFIG_DEBUG_TCG
-# define tcg_debug_assert(X) do { assert(X); } while (0)
-#elif QEMU_GNUC_PREREQ(4, 5)
-# define tcg_debug_assert(X) \
-    do { if (!(X)) { __builtin_unreachable(); } } while (0)
-#else
-# define tcg_debug_assert(X) do { (void)(X); } while (0)
-#endif
-
 void tcg_add_target_add_op_defs(const TCGTargetOpDef *tdefs);
 
 #if UINTPTR_MAX == UINT32_MAX
@@ -705,11 +816,8 @@ void tcg_add_target_add_op_defs(const TCGTargetOpDef *tdefs);
 void tcg_gen_callN(TCGContext *s, void *func,
                    TCGArg ret, int nargs, TCGArg *args);
 
-void tcg_gen_shifti_i64(TCGv_i64 ret, TCGv_i64 arg1,
-                        int c, int right, int arith);
-
-TCGArg *tcg_optimize(TCGContext *s, uint16_t *tcg_opc_ptr, TCGArg *args,
-                     TCGOpDef *tcg_op_def);
+void tcg_op_remove(TCGContext *s, TCGOp *op);
+void tcg_optimize(TCGContext *s);
 
 /* only used for debugging purposes */
 void tcg_dump_ops(TCGContext *s);
@@ -763,6 +871,44 @@ static inline ptrdiff_t tcg_pcrel_diff(TCGContext *s, void *target)
 static inline size_t tcg_current_code_size(TCGContext *s)
 {
     return tcg_ptr_byte_diff(s->code_ptr, s->code_buf);
+}
+
+/* Combine the TCGMemOp and mmu_idx parameters into a single value.  */
+typedef uint32_t TCGMemOpIdx;
+
+/**
+ * make_memop_idx
+ * @op: memory operation
+ * @idx: mmu index
+ *
+ * Encode these values into a single parameter.
+ */
+static inline TCGMemOpIdx make_memop_idx(TCGMemOp op, unsigned idx)
+{
+    tcg_debug_assert(idx <= 15);
+    return (op << 4) | idx;
+}
+
+/**
+ * get_memop
+ * @oi: combined op/idx parameter
+ *
+ * Extract the memory operation from the combined value.
+ */
+static inline TCGMemOp get_memop(TCGMemOpIdx oi)
+{
+    return oi >> 4;
+}
+
+/**
+ * get_mmuidx
+ * @oi: combined op/idx parameter
+ *
+ * Extract the mmu index from the combined value.
+ */
+static inline unsigned get_mmuidx(TCGMemOpIdx oi)
+{
+    return oi & 15;
 }
 
 /**
@@ -826,46 +972,46 @@ void tcg_register_jit(void *buf, size_t buf_size);
 #ifdef CONFIG_SOFTMMU
 /* Value zero-extended to tcg register size.  */
 tcg_target_ulong helper_ret_ldub_mmu(CPUArchState *env, target_ulong addr,
-                                     int mmu_idx, uintptr_t retaddr);
+                                     TCGMemOpIdx oi, uintptr_t retaddr);
 tcg_target_ulong helper_le_lduw_mmu(CPUArchState *env, target_ulong addr,
-                                    int mmu_idx, uintptr_t retaddr);
+                                    TCGMemOpIdx oi, uintptr_t retaddr);
 tcg_target_ulong helper_le_ldul_mmu(CPUArchState *env, target_ulong addr,
-                                    int mmu_idx, uintptr_t retaddr);
+                                    TCGMemOpIdx oi, uintptr_t retaddr);
 uint64_t helper_le_ldq_mmu(CPUArchState *env, target_ulong addr,
-                           int mmu_idx, uintptr_t retaddr);
+                           TCGMemOpIdx oi, uintptr_t retaddr);
 tcg_target_ulong helper_be_lduw_mmu(CPUArchState *env, target_ulong addr,
-                                    int mmu_idx, uintptr_t retaddr);
+                                    TCGMemOpIdx oi, uintptr_t retaddr);
 tcg_target_ulong helper_be_ldul_mmu(CPUArchState *env, target_ulong addr,
-                                    int mmu_idx, uintptr_t retaddr);
+                                    TCGMemOpIdx oi, uintptr_t retaddr);
 uint64_t helper_be_ldq_mmu(CPUArchState *env, target_ulong addr,
-                           int mmu_idx, uintptr_t retaddr);
+                           TCGMemOpIdx oi, uintptr_t retaddr);
 
 /* Value sign-extended to tcg register size.  */
 tcg_target_ulong helper_ret_ldsb_mmu(CPUArchState *env, target_ulong addr,
-                                     int mmu_idx, uintptr_t retaddr);
+                                     TCGMemOpIdx oi, uintptr_t retaddr);
 tcg_target_ulong helper_le_ldsw_mmu(CPUArchState *env, target_ulong addr,
-                                    int mmu_idx, uintptr_t retaddr);
+                                    TCGMemOpIdx oi, uintptr_t retaddr);
 tcg_target_ulong helper_le_ldsl_mmu(CPUArchState *env, target_ulong addr,
-                                    int mmu_idx, uintptr_t retaddr);
+                                    TCGMemOpIdx oi, uintptr_t retaddr);
 tcg_target_ulong helper_be_ldsw_mmu(CPUArchState *env, target_ulong addr,
-                                    int mmu_idx, uintptr_t retaddr);
+                                    TCGMemOpIdx oi, uintptr_t retaddr);
 tcg_target_ulong helper_be_ldsl_mmu(CPUArchState *env, target_ulong addr,
-                                    int mmu_idx, uintptr_t retaddr);
+                                    TCGMemOpIdx oi, uintptr_t retaddr);
 
 void helper_ret_stb_mmu(CPUArchState *env, target_ulong addr, uint8_t val,
-                        int mmu_idx, uintptr_t retaddr);
+                        TCGMemOpIdx oi, uintptr_t retaddr);
 void helper_le_stw_mmu(CPUArchState *env, target_ulong addr, uint16_t val,
-                       int mmu_idx, uintptr_t retaddr);
+                       TCGMemOpIdx oi, uintptr_t retaddr);
 void helper_le_stl_mmu(CPUArchState *env, target_ulong addr, uint32_t val,
-                       int mmu_idx, uintptr_t retaddr);
+                       TCGMemOpIdx oi, uintptr_t retaddr);
 void helper_le_stq_mmu(CPUArchState *env, target_ulong addr, uint64_t val,
-                       int mmu_idx, uintptr_t retaddr);
+                       TCGMemOpIdx oi, uintptr_t retaddr);
 void helper_be_stw_mmu(CPUArchState *env, target_ulong addr, uint16_t val,
-                       int mmu_idx, uintptr_t retaddr);
+                       TCGMemOpIdx oi, uintptr_t retaddr);
 void helper_be_stl_mmu(CPUArchState *env, target_ulong addr, uint32_t val,
-                       int mmu_idx, uintptr_t retaddr);
+                       TCGMemOpIdx oi, uintptr_t retaddr);
 void helper_be_stq_mmu(CPUArchState *env, target_ulong addr, uint64_t val,
-                       int mmu_idx, uintptr_t retaddr);
+                       TCGMemOpIdx oi, uintptr_t retaddr);
 
 /* Temporary aliases until backends are converted.  */
 #ifdef TARGET_WORDS_BIGENDIAN
