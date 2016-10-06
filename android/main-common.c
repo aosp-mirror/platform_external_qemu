@@ -1097,8 +1097,19 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         }
     }
 
-    if (!opts->no_snapshot_load || !opts->no_snapshot_save) {
-        android_op_writable_system = true;
+    const bool is_qemu1 = !is_qemu2;
+    if (is_qemu1 && avdInfo_getSnapshotPresent(avd)) {
+        const bool load_previous_snapshot = !opts->no_snapshot_load;
+        const bool save_snapshot_on_exit = !opts->no_snapshot_save;
+        if (load_previous_snapshot || save_snapshot_on_exit) {
+            android_op_writable_system = true;
+        }
+    }
+
+    if (!android_op_writable_system) {
+        D("System image is read only");
+    } else {
+        dwarning("System image is writable");
     }
 
     return true;
