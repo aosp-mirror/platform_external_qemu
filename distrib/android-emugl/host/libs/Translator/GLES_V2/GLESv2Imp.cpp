@@ -430,6 +430,7 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
             ctx->dispatcher().glGetShaderiv(globalShaderName,GL_INFO_LOG_LENGTH,&infoLogLength);
             infoLog = new GLchar[infoLogLength+1];
             ctx->dispatcher().glGetShaderInfoLog(globalShaderName,infoLogLength,NULL,infoLog);
+            // fprintf(stderr, "%s: infoLog=[\n%s\n]\n", __FUNCTION__, infoLog);
             if (infoLogLength == 0) {
                 infoLog[0] = 0;
             }
@@ -800,9 +801,16 @@ GL_APICALL void  GL_APIENTRY glFlush(void){
 
 GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer){
     GET_CTX();
-    SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(target)              &&
-                   GLESv2Validate::renderbufferTarget(renderbuffertarget) &&
-                   GLESv2Validate::framebufferAttachment(attachment)),GL_INVALID_ENUM);
+
+    // if(!(GLESv2Validate::framebufferTarget(target)              &&
+    //                GLESv2Validate::renderbufferTarget(renderbuffertarget) &&
+    //                GLESv2Validate::framebufferAttachment(attachment))) {
+    //     fprintf(stderr, "%s: 0x%x 0x%x invalid enum!\n",
+    //             __func__, target, renderbuffertarget);
+    // }
+    // SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(target)              &&
+    //                GLESv2Validate::renderbufferTarget(renderbuffertarget) &&
+    //                GLESv2Validate::framebufferAttachment(attachment)),GL_INVALID_ENUM);
     SET_ERROR_IF(!ctx->shareGroup().get(), GL_INVALID_OPERATION);
 
     GLuint globalRenderbufferName = 0;
@@ -917,9 +925,9 @@ GL_APICALL void  GL_APIENTRY glGenerateMipmap(GLenum target){
             unsigned int width = texData->width;
             unsigned int height = texData->height;
             // set error code if either the width or height is not a power of two.
-            SET_ERROR_IF(width == 0 || height == 0 ||
-                         (width & (width - 1)) != 0 || (height & (height - 1)) != 0,
-                         GL_INVALID_OPERATION);
+            // SET_ERROR_IF(width == 0 || height == 0 ||
+            //              (width & (width - 1)) != 0 || (height & (height - 1)) != 0,
+            //              GL_INVALID_OPERATION);
         }
     }
     ctx->dispatcher().glGenerateMipmapEXT(target);

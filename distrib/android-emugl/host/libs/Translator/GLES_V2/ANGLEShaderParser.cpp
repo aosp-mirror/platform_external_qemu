@@ -52,7 +52,7 @@ void initializeResources() {
 
 ShHandle createShaderCompiler(GLenum shaderType) {
     ShHandle handle = ShConstructCompiler(shaderType,
-                                          SH_GLES2_SPEC,
+                                          SH_GLES3_SPEC,
                                           SH_GLSL_COMPATIBILITY_OUTPUT,
                                           &kResources);
     return handle;
