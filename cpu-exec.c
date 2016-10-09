@@ -582,7 +582,7 @@ int cpu_exec(CPUState *cpu)
 {
     CPUClass *cc = CPU_GET_CLASS(cpu);
     int ret;
-    SyncClocks sc;
+    SyncClocks sc = {};
 
     /* replay_interrupt may need current_cpu */
     current_cpu = cpu;
