@@ -741,6 +741,7 @@ HandleType FrameBuffer::createWindowSurface(int p_config, int p_width, int p_hei
 
 void FrameBuffer::drainRenderContext()
 {
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
     emugl::Mutex::AutoLock mutex(m_lock);
     emugl::ReadWriteMutex::AutoWriteLock contextLock(m_contextStructureLock);
     RenderThreadInfo *tinfo = RenderThreadInfo::get();
@@ -755,6 +756,7 @@ void FrameBuffer::drainRenderContext()
 
 void FrameBuffer::drainWindowSurface()
 {
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
     emugl::Mutex::AutoLock mutex(m_lock);
     RenderThreadInfo *tinfo = RenderThreadInfo::get();
     if (tinfo->m_windowSet.empty()) return;
@@ -777,6 +779,7 @@ void FrameBuffer::drainWindowSurface()
 
 void FrameBuffer::DestroyRenderContext(HandleType p_context)
 {
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
     emugl::Mutex::AutoLock mutex(m_lock);
     emugl::ReadWriteMutex::AutoWriteLock contextLock(m_contextStructureLock);
     m_contexts.erase(p_context);
@@ -797,6 +800,7 @@ void FrameBuffer::DestroyRenderContext(HandleType p_context)
 
 void FrameBuffer::DestroyWindowSurface(HandleType p_surface)
 {
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
     emugl::Mutex::AutoLock mutex(m_lock);
     if (m_windows.find(p_surface) != m_windows.end()) {
         m_windows.erase(p_surface);
@@ -826,6 +830,7 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
 }
 
 void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
     emugl::Mutex::AutoLock mutex(m_lock);
     closeColorBufferLocked(p_colorbuffer);
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
@@ -839,6 +844,7 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
 }
 
 void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer) {
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
         // This is harmless: it is normal for guest system to issue
@@ -853,6 +859,7 @@ void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer) {
 }
 
 void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
     emugl::Mutex::AutoLock mutex(m_lock);
     // Clean up color buffers.
     // A color buffer needs to be closed as many times as it is opened by

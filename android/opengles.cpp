@@ -16,6 +16,7 @@
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/opengl/logger.h"
+#include "android/opengl/OpenglEsPipe.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 #include "android/utils/bufprint.h"
@@ -118,6 +119,18 @@ BAD_EXIT:
     return -1;
 }
 
+#include <atomic>
+static std::atomic<int> sNumRenderThreads;
+static void sRenderThreadInc(int* out) {
+    sNumRenderThreads++;
+    if (out) *out = (int)sNumRenderThreads;
+}
+
+static void sRenderThreadDec(int* out) {
+    sNumRenderThreads--;
+    if (out) *out = (int)sNumRenderThreads;
+}
+
 int
 android_startOpenglesRenderer(int width, int height)
 {
@@ -140,6 +153,9 @@ android_startOpenglesRenderer(int width, int height)
             goldfish_sync_destroy_timeline,
             goldfish_sync_register_trigger_wait,
             goldfish_sync_device_exists);
+    sRenderLib->setRenderThreadIncDec(
+            sRenderThreadInc,
+            sRenderThreadDec);
 
     emugl_logger_struct logfuncs;
     logfuncs.coarse = android_opengl_logger_write;
@@ -228,6 +244,11 @@ android_stopOpenglesRenderer(void)
     }
 }
 
+
+int num_live_render_threads(void) {
+    return (int)sNumRenderThreads;
+}
+
 int
 android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
                            int fbw, int fbh, float dpr, float rotation)
@@ -275,5 +296,11 @@ const emugl::RendererPtr& android_getOpenglesRenderer()
 void android_cleanupProcGLObjects(uint64_t puid) {
     if (sRenderer) {
         sRenderer->cleanupProcGLObjects(puid);
+    }
+}
+
+void android_stopRenderer() {
+    if (sRenderer) {
+        sRenderer->stop();
     }
 }

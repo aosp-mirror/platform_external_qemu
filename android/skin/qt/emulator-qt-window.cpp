@@ -25,6 +25,7 @@
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/opengl/gpuinfo.h"
+#include "android/opengl/GLPipeControl.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/QtLooper.h"
@@ -446,18 +447,25 @@ void EmulatorQtWindow::slot_gpuWarningMessageAccepted() {
 }
 
 void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
+
     crashhandler_exitmode(__FUNCTION__);
     if (mMainLoopThread && mMainLoopThread->isRunning()) {
         // we dont want to restore to a state where the
         // framework is stopped by 'adb shell stop'
         // so skip that step when saving vm on exit
+        fprintf(stderr, "%s: mainloop still running\n", __FUNCTION__);
         if (savevm_on_exit) {
+            fprintf(stderr, "%s: queue quit event\n", __FUNCTION__);
             queueQuitEvent();
         } else {
+            fprintf(stderr, "%s: shell stop and quit\n", __FUNCTION__);
             runAdbShellStopAndQuit();
         }
         event->ignore();
     } else {
+            fprintf(stderr, "%s: main loop not running, close extended window\n", __FUNCTION__);
+            android::opengl::GLPipeControl::get()->stopAll();
         mToolWindow->closeExtendedWindow();
         event->accept();
     }

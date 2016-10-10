@@ -54,6 +54,8 @@ RendererImpl::~RendererImpl() {
 }
 
 bool RendererImpl::initialize(int width, int height, bool useSubWindow) {
+    fprintf(stderr, "RendererImpl::Initialize\n");
+
     if (mRenderWindow) {
         return false;
     }
@@ -76,19 +78,27 @@ bool RendererImpl::initialize(int width, int height, bool useSubWindow) {
 }
 
 void RendererImpl::stop() {
+    fprintf(stderr, "RendererImpl::stop call\n");
+
     android::base::AutoLock lock(mThreadVectorLock);
+
+    for (const auto& t : mThreads) {
+        if (const auto channel = t.second.lock()) {
+            fprintf(stderr, "%s: stopping a channel %p thread %p\n", __FUNCTION__, channel.get(), t.first.get());
+            channel->forceStop();
+        }
+    }
+
     auto threads = std::move(mThreads);
     mThreads.clear();
     lock.unlock();
 
-    for (const auto& t : mThreads) {
-        if (const auto channel = t.second.lock()) {
-            channel->forceStop();
-        }
-    }
+
+    fprintf(stderr, "tried to stop all threads\n");
 }
 
 RenderChannelPtr RendererImpl::createRenderChannel() {
+    fprintf(stderr, "RendererImpl::createRenderChannel\n");
     const auto channel =
             std::make_shared<RenderChannelImpl>(shared_from_this());
 

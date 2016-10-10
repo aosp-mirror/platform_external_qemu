@@ -37,6 +37,9 @@ public:
                                emugl_sync_register_trigger_wait_t,
                                emugl_sync_device_exists_t) = 0;
 
+    virtual void setRenderThreadIncDec(emugl_renderthreads_incdec_t,
+                                       emugl_renderthreads_incdec_t) = 0;
+
     // initRenderer - initialize the OpenGL renderer object.
     //
     // |width| and |height| are the framebuffer dimensions that will be reported

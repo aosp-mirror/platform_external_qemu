@@ -380,9 +380,18 @@ int emulator_window_init(EmulatorWindow* emulator,
     return 0;
 }
 
+#include <unistd.h>
+
 void
 emulator_window_done(EmulatorWindow* emulator)
 {
+    fprintf(stderr, "%s: %d gl pipes still alive\n", __FUNCTION__, num_live_render_threads());
+    while (num_live_render_threads() > 0) {
+        usleep(16666);
+        fprintf(stderr, "%s: %d gl pipes still alive\n", __FUNCTION__, num_live_render_threads());
+    }
+    fprintf(stderr, "%s: gl pipes all gone\n", __FUNCTION__);
+
     if (emulator->ui) {
         skin_ui_free(emulator->ui);
         emulator->ui = NULL;

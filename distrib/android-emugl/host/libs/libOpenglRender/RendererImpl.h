@@ -36,7 +36,7 @@ public:
 
     bool initialize(int width, int height, bool useSubWindow);
 
-    void stop();
+    virtual void stop() override final;
 
 public:
     RenderChannelPtr createRenderChannel() final;

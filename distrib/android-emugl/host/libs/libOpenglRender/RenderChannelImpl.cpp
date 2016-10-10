@@ -52,6 +52,7 @@ bool RenderChannelImpl::read(ChannelBuffer* buffer, CallType type) {
 }
 
 void RenderChannelImpl::stop() {
+    fprintf(stderr, "%s: call render channel impl stop.\n", __FUNCTION__);
     stop(true);
 }
 
