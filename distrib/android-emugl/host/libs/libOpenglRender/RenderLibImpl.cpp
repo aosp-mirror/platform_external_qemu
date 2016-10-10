@@ -18,6 +18,7 @@
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
+#include "emugl/common/renderthread_control.h"
 #include "emugl/common/sync_device.h"
 
 namespace emugl {
@@ -48,6 +49,13 @@ void RenderLibImpl::setSyncDevice
     set_emugl_sync_destroy_timeline(destroy_timeline);
     set_emugl_sync_register_trigger_wait(register_trigger_wait);
     set_emugl_sync_device_exists(device_exists);
+}
+
+void RenderLibImpl::setRenderThreadIncDec
+    (emugl_renderthreads_incdec_t inc,
+     emugl_renderthreads_incdec_t dec) {
+    set_emugl_renderthreads_inc(inc);
+    set_emugl_renderthreads_dec(dec);
 }
 
 RendererPtr RenderLibImpl::initRenderer(int width, int height,

@@ -42,3 +42,5 @@ typedef struct {
     emugl_logger_t fine;
 } emugl_logger_struct;
 
+// Render thread counter
+typedef void (*emugl_renderthreads_incdec_t)(int* next);

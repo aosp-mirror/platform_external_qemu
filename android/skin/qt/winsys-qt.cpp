@@ -40,6 +40,7 @@
 #include <QThread>
 #include <QWidget>
 
+#include <atomic>
 #include <string>
 
 #ifdef Q_OS_LINUX
@@ -132,7 +133,7 @@ extern void skin_winsys_enter_main_loop(bool no_window, int argc, char** argv) {
     g->argc = argc;
     g->argv = argv;
     g->app->exec();
-    D("Finished QT main loop\n");
+    fprintf(stderr, "Finished QT main loop\n");
 }
 
 extern void skin_winsys_get_monitor_rect(SkinRect *rect)
@@ -259,6 +260,7 @@ void skin_winsys_destroy() {
     // Mac is still causing us troubles - it somehow manages to not call the
     // main window destructor (in qemi1 only!) and crashes if QApplication
     // is destroyed right here. So let's delay the deletion for now
+    fprintf(stderr, "%s: queue up atexit handler\n", __FUNCTION__);
 #ifdef __APPLE__
     atexit([] {
         delete globalState()->app;

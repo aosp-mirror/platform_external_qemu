@@ -31,6 +31,7 @@
 
 #include "android/telephony/modem_driver.h"
 
+#include <unistd.h>
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
@@ -380,9 +381,26 @@ int emulator_window_init(EmulatorWindow* emulator,
     return 0;
 }
 
+// As a safeguard, only hang around for 10 seconds max
+// when waiting on GL threads to exit.
+static const uint32_t glPipeWaitLimit = 10 * 1000 * 1000;
+static const uint32_t glPipeWaitPollInterval = 16666;
+
 void
 emulator_window_done(EmulatorWindow* emulator)
 {
+    // Before proceeding (which would unload underlying OpenGL libraries,
+    // and possibly cause a crash on exit),
+    // poll-wait for render threads to get cleaned up.
+    fprintf(stderr, "%s: %d gl pipes still alive\n", __FUNCTION__, num_live_render_threads());
+    uint32_t glPipeWaitSoFar = 0;
+    while (num_live_render_threads() > 0 &&
+           glPipeWaitSoFar < glPipeWaitLimit) {
+        usleep(glPipeWaitPollInterval);
+        glPipeWaitSoFar += glPipeWaitPollInterval;
+    }
+    fprintf(stderr, "%s: gl pipes all gone\n", __FUNCTION__);
+
     if (emulator->ui) {
         skin_ui_free(emulator->ui);
         emulator->ui = NULL;

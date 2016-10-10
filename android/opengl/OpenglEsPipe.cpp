@@ -13,7 +13,6 @@
 #include "android/base/async/Looper.h"
 #include "android/opengl/GLPipeControl.h"
 #include "android/opengl/GLProcessPipe.h"
-#include "android/opengles.h"
 #include "android/opengles-pipe.h"
 
 #include <atomic>
@@ -21,6 +20,9 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+
+static std::atomic<int> sNumPipes = {0};
+emugl::RendererPtr gRenderer;
 
 // Set to 1 or 2 for debug traces
 //#define DEBUG 1
@@ -76,6 +78,8 @@ public:
             fprintf(stderr, "%s: emugl pipe=%p hwpipe=%p\n", __FUNCTION__, pipe, mHwPipe);
             // |pipe| is the one we want to close later
             GLPipeControl::get()->addPipe(pipe);
+            sNumPipes++;
+            fprintf(stderr, "%s: count: %d\n", __FUNCTION__, (int)sNumPipes);
             return pipe;
         }
 
@@ -86,10 +90,12 @@ public:
     /////////////////////////////////////////////////////////////////////////
     // Constructor, check that |mIsWorking| is true after this call to verify
     // that everything went well.
+    
     EmuglPipe(void* hwPipe,
               Service* service,
               const emugl::RendererPtr& renderer)
         : AndroidPipe(hwPipe, service) {
+        gRenderer = renderer;
         mChannel = renderer->createRenderChannel();
         if (!mChannel) {
             D("Failed to create an OpenGLES pipe channel!");
@@ -227,6 +233,37 @@ public:
         processIoEvents(state);
     }
 
+    // Close the pipe, this may be called from the host or guest side.
+    void close() {
+        D("%s", __func__);
+
+        // If the pipe isn't in a working state, delete immediately.
+        if (!mIsWorking) {
+            fprintf(stderr, "%s: stop channel %p", __FUNCTION__, mChannel.get());
+            mChannel->stop();
+            sNumPipes--;
+            fprintf(stderr, "%s: count: %d\n", __FUNCTION__, (int)sNumPipes);
+            delete this;
+            return;
+        } else {
+            fprintf(stderr, "%s: SHOULD stop channel %p\n", __FUNCTION__, mChannel.get());
+        }
+        // Force the closure of the channel - if a guest is blocked
+        // waiting for a wake signal, it will receive an error.
+        if (mHwPipe) {
+            closeFromHost();
+            mHwPipe = nullptr;
+            fprintf(stderr, "%s: also stop this channel %p\n", __FUNCTION__, mChannel.get());
+            // Also stop the channel explicitly.
+            mChannel->stop();
+        }
+
+        mIsWorking = false;
+
+        sNumPipes--;
+        fprintf(stderr, "%s: count: %d\n", __FUNCTION__, (int)sNumPipes);
+    }
+
 private:
     // Returns true iff there is data to read from the emugl channel.
     static bool canRead(ChannelState state) {
@@ -292,27 +329,6 @@ private:
         }
     }
 
-    // Close the pipe, this may be called from the host or guest side.
-    void close() {
-        D("%s", __func__);
-
-        // If the pipe isn't in a working state, delete immediately.
-        if (!mIsWorking) {
-            mChannel->stop();
-            delete this;
-            return;
-        }
-
-        // Force the closure of the channel - if a guest is blocked
-        // waiting for a wake signal, it will receive an error.
-        if (mHwPipe) {
-            closeFromHost();
-            mHwPipe = nullptr;
-        }
-
-        mIsWorking = false;
-    }
-
     // A RenderChannel pointer used for communication.
     RenderChannelPtr mChannel;
 
@@ -347,6 +363,13 @@ void registerPipeService() {
     registerGLProcessPipeService();
 }
 
+void stopRenderer() {
+    if (gRenderer.get()) {
+        fprintf(stderr, "%s: stop %p\n", __FUNCTION__, gRenderer.get());
+        gRenderer->stop();
+    }
+}
+
 }  // namespace opengl
 }  // namespace android
 
@@ -359,6 +382,6 @@ void android_close_opengles_pipe(void* opaque) {
     android::opengl::EmuglPipe* pipe =
         static_cast<android::opengl::EmuglPipe*>(opaque);
     fprintf(stderr, "%s: closing %p (opqaue=%p)\n", __FUNCTION__, pipe, opaque);
-    pipe->closeFromHost();
+    pipe->close();
     fprintf(stderr, "%s: closed %p (opqaue=%p)\n", __FUNCTION__, pipe, opaque);
 }

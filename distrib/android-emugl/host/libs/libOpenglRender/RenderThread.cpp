@@ -31,16 +31,26 @@
 
 #include "android/base/system/System.h"
 
+#include "emugl/common/renderthread_control.h"
+
+#include <atomic>
 #include <memory>
 #include <string.h>
 
 #define STREAM_BUFFER_SIZE 4 * 1024 * 1024
 
+static std::atomic<int> sNumRenderThreads = {0};
+int renderThread_currNum() {
+    return (int)sNumRenderThreads;
+}
+
 RenderThread::RenderThread(std::weak_ptr<emugl::RendererImpl> renderer,
                            std::shared_ptr<emugl::RenderChannelImpl> channel)
     : mChannel(channel), mRenderer(renderer) {}
 
-RenderThread::~RenderThread() = default;
+RenderThread::~RenderThread() {
+    fprintf(stderr, "%s: dtor call\n", __FUNCTION__);
+}
 
 // static
 std::unique_ptr<RenderThread> RenderThread::create(
@@ -102,6 +112,9 @@ intptr_t RenderThread::main() {
         }
         delete[] fname;
     }
+
+    sNumRenderThreads++;
+    emugl_renderthreads_inc(NULL);
 
     while (1) {
         int stat = readBuf.getData(stream.get());
@@ -188,6 +201,7 @@ intptr_t RenderThread::main() {
         fclose(dumpFP);
     }
 
+    fprintf(stderr, "begin exit of renderthread %p\n", this);
     // exit sync thread, if any.
     SyncThread::destroySyncThread();
 
@@ -204,7 +218,9 @@ intptr_t RenderThread::main() {
 
     FrameBuffer::getFB()->drainRenderContext();
 
-    DBG("Exited a RenderThread @%p\n", this);
+    fprintf(stderr, "Exited a RenderThread @%p\n", this);
 
+    sNumRenderThreads--;
+    emugl_renderthreads_dec(NULL);
     return 0;
 }

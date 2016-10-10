@@ -65,12 +65,17 @@ void android_redrawOpenglesWindow(void);
 /* Stop the renderer process */
 void android_stopOpenglesRenderer(void);
 
+/* query # live renderthreads */
+int num_live_render_threads(void);
+
 /* set to TRUE if you want to use fast GLES pipes, 0 if you want to
  * fallback to local TCP ones
  */
 extern int  android_gles_fast_pipes;
 
 void android_cleanupProcGLObjects(uint64_t puid);
+
+void android_stopRenderer();
 
 #ifdef __cplusplus
 const emugl::RendererPtr& android_getOpenglesRenderer();
