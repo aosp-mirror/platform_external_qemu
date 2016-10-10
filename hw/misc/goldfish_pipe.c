@@ -19,7 +19,7 @@
 ** for various purposes including the adb debug bridge and
 ** (eventually) the opengles pass-through. This file contains only the
 ** basic pipe infrastructure and a couple of test pipes. Additional
-** pipes are registered with the android_pipe_add_type() call.
+** pipes are registered with the goldfish_pipe_add_type() call.
 **
 ** Open Questions
 **
@@ -28,8 +28,9 @@
 ** should give some thought to if this needs re-writing to take
 ** advantage of that infrastructure to create the pipes.
 */
+#include "hw/misc/goldfish_pipe.h"
+
 #include "android-qemu2-glue/utils/stream.h"
-#include "android/emulation/android_pipe_device.h"
 #include "hw/hw.h"
 #include "hw/sysbus.h"
 #include "qemu/error-report.h"
@@ -138,18 +139,55 @@ enum {
     PIPE_DRIVER_VERSION_v1 = 0,  // used to not report its version at all
 };
 
+/* These default callbacks are provided to detect when emulation setup
+ * didn't register a pipe service implementation correctly! There is no
+ * need to provide other GoldfishPipeServiceOps callbacks, since they
+ * cannot be called if one could not open or create a host pipe.
+ *
+ * NOTE: Returning NULL will force-close the pipe as soon as it is
+ *       opened by the guest. */
+static GoldfishHostPipe *null_guest_open(GoldfishHwPipe *hw_pipe)
+{
+    E("Android guest tried to open a pipe before service registration!\n"
+      "Please call goldfish_pipe_set_service_ops() at setup time!");
+    (void)hw_pipe;
+    return NULL;
+}
+
+static GoldfishHostPipe *null_guest_load(QEMUFile *file,
+                                         GoldfishHwPipe *hw_pipe,
+                                         char *force_close)
+{
+    E("Trying to load a pipe before service registration!\n"
+      "Please call goldfish_pipe_set_service_ops() at setup time!");
+    (void)file;
+    (void)hw_pipe;
+    (void)force_close;
+    return NULL;
+}
+
+static const GoldfishPipeServiceOps  s_null_service_ops = {
+    .guest_open = null_guest_open,
+    .guest_load = null_guest_load,
+};
+
+static const GoldfishPipeServiceOps* service_ops = &s_null_service_ops;
+
+void goldfish_pipe_set_service_ops(const GoldfishPipeServiceOps* ops) {
+    service_ops = ops;
+}
+
 /* from AOSP version include/hw/android/goldfish/device.h
  * FIXME?: needs to use proper qemu abstractions
  */
-static inline void uint64_set_low(uint64_t* addr, uint32 value) {
+static inline void uint64_set_low(uint64_t* addr, uint32_t value) {
     *addr = (*addr & ~(0xFFFFFFFFULL)) | value;
 }
 
-static inline void uint64_set_high(uint64_t* addr, uint32 value) {
+static inline void uint64_set_high(uint64_t* addr, uint32_t value) {
     *addr = (*addr & 0xFFFFFFFFULL) | ((uint64_t)value << 32);
 }
 
-typedef struct HwPipe HwPipe;
 typedef struct PipeDevice PipeDevice;
 
 struct access_params_32 {
@@ -179,9 +217,9 @@ union access_params {
 
 /* A set of version-specific pipe operations */
 typedef struct {
-    void (*wanted_list_add)(PipeDevice* dev, HwPipe* pipe);
+    void (*wanted_list_add)(PipeDevice* dev, GoldfishHwPipe* pipe);
     void (*close_all)(PipeDevice* dev);
-    void (*save)(Stream* stream, PipeDevice* dev);
+    void (*save)(QEMUFile* file, PipeDevice* dev);
 
     void (*dev_write)(PipeDevice* dev, hwaddr offset, uint64_t value);
     uint64_t (*dev_read)(PipeDevice* dev, hwaddr offset);
@@ -214,21 +252,24 @@ typedef struct PipeCommand {
     };
 } PipeCommand;
 
-typedef struct HwPipe {
-    struct HwPipe* wanted_next;
-    struct HwPipe* wanted_prev;
+struct GoldfishHwPipe {
+    struct GoldfishHwPipe *wanted_next;
+    struct GoldfishHwPipe *wanted_prev;
     PipeDevice* dev;
     uint32_t id;  // pipe ID is its index into the PipeDevice::pipes array
     unsigned char wanted;
     char closed;
-    void* pipe_impl_by_user;
+    GoldfishHostPipe *host_pipe;
     uint64_t command_buffer_addr;
     PipeCommand* command_buffer;
 
     // v1-specific fields
-    struct HwPipe* next;
+    struct GoldfishHwPipe* next;
     uint64_t channel; /* opaque kernel handle */
-} HwPipe;
+};
+
+typedef GoldfishHwPipe HwPipe;
+typedef GoldfishHostPipe HostPipe;
 
 typedef struct GuestSignalledPipe {
     uint32_t id;
@@ -336,33 +377,35 @@ static void hash_channel_destroy(gpointer a) {
 }
 #endif
 
-static unsigned char get_and_clear_pipe_wanted(HwPipe* pipe) {
+static unsigned char hwpipe_get_and_clear_wanted(HwPipe* pipe) {
     unsigned char val = pipe->wanted;
     pipe->wanted = 0;
     return val;
 }
 
-static void set_pipe_wanted_bits(HwPipe* pipe, unsigned char val) {
+static void hwpipe_set_wanted(HwPipe* pipe, unsigned char val) {
     pipe->wanted |= val;
 }
 
-static HwPipe* pipe_new0(PipeDevice* dev) {
+static HwPipe* hwpipe_new0(PipeDevice* dev) {
     HwPipe* pipe;
     pipe = g_malloc0(sizeof(HwPipe));
     pipe->dev = dev;
     return pipe;
 }
 
-static HwPipe* pipe_new(uint32_t id, uint64_t channel, PipeDevice* dev) {
-    HwPipe* pipe = pipe_new0(dev);
+static HwPipe* hwpipe_new(uint32_t id, uint64_t channel, PipeDevice* dev) {
+    HwPipe* pipe = hwpipe_new0(dev);
     pipe->id = id;
     pipe->channel = channel;
-    pipe->pipe_impl_by_user = android_pipe_guest_open(pipe);
+    pipe->host_pipe = service_ops->guest_open(pipe);
     return pipe;
 }
 
-static void pipe_free(HwPipe* pipe) {
-    android_pipe_guest_close(pipe->pipe_impl_by_user);
+static void hwpipe_free(HwPipe* pipe) {
+    if (pipe->host_pipe)
+        service_ops->guest_close(pipe->host_pipe);
+
     g_free(pipe);
 }
 
@@ -489,7 +532,7 @@ static void close_all_pipes_v1(PipeDevice* dev) {
     HwPipe* pipe = dev->pipes_list;
     while (pipe) {
         HwPipe* next = pipe->next;
-        pipe_free(pipe);
+        hwpipe_free(pipe);
         pipe = next;
     }
     dev->pipes_list = NULL;
@@ -501,7 +544,7 @@ static void close_all_pipes_v2(PipeDevice* dev) {
         HwPipe* pipe = dev->pipes[i];
         if (pipe) {
             unmap_command_buffer(pipe->command_buffer);
-            pipe_free(pipe);
+            hwpipe_free(pipe);
             dev->pipes[i] = NULL;
         }
     }
@@ -520,24 +563,30 @@ static void pipeDevice_doCommand_v1(PipeDevice* dev, uint32_t command) {
 
     /* Check that we're referring a known pipe channel */
     if (command != PIPE_CMD_OPEN && pipe == NULL) {
-        dev->status = PIPE_ERROR_INVAL;
+        dev->status = GOLDFISH_PIPE_ERROR_INVAL;
         return;
     }
 
     /* If the pipe is closed by the host, return an error */
     if (pipe != NULL && pipe->closed && command != PIPE_CMD_CLOSE) {
-        dev->status = PIPE_ERROR_IO;
+        dev->status = GOLDFISH_PIPE_ERROR_IO;
         return;
     }
 
     switch (command) {
     case PIPE_CMD_OPEN:
-        DD("%s: CMD_OPEN channel=0x%llx", __FUNCTION__, (unsigned long long)dev->channel);
+        DD("%s: CMD_OPEN channel=0x%llx", __func__,
+           (unsigned long long)dev->channel);
         if (pipe != NULL) {
-            dev->status = PIPE_ERROR_INVAL;
+            dev->status = GOLDFISH_PIPE_ERROR_INVAL;
             break;
         }
-        pipe = pipe_new(0, dev->channel, dev);
+        pipe = hwpipe_new(0, dev->channel, dev);
+        if (!pipe->host_pipe) {
+            hwpipe_free(pipe);
+            dev->status = GOLDFISH_PIPE_ERROR_INVAL;
+            break;
+        }
         pipe->next = dev->pipes_list;
         dev->pipes_list = pipe;
         dev->status = 0;
@@ -546,7 +595,8 @@ static void pipeDevice_doCommand_v1(PipeDevice* dev, uint32_t command) {
         break;
 
     case PIPE_CMD_CLOSE: {
-        DD("%s: CMD_CLOSE channel=0x%llx", __FUNCTION__, (unsigned long long)dev->channel);
+        DD("%s: CMD_CLOSE channel=0x%llx", __func__,
+           (unsigned long long)dev->channel);
         // Remove from device's lists.
         // This linear lookup is potentially slow, but we don't delete pipes
         // often enough for it to become noticable.
@@ -555,7 +605,7 @@ static void pipeDevice_doCommand_v1(PipeDevice* dev, uint32_t command) {
             pnode = &(*pnode)->next;
         }
         if (!*pnode) {
-            dev->status = PIPE_ERROR_INVAL;
+            dev->status = GOLDFISH_PIPE_ERROR_INVAL;
             break;
         }
         *pnode = pipe->next;
@@ -564,27 +614,28 @@ static void pipeDevice_doCommand_v1(PipeDevice* dev, uint32_t command) {
                             hash_cast_key_from_channel(&pipe->channel));
         wanted_pipes_remove_v1(dev, pipe);
 
-        pipe_free(pipe);
+        hwpipe_free(pipe);
         break;
     }
 
     case PIPE_CMD_POLL:
-        dev->status = android_pipe_guest_poll(pipe->pipe_impl_by_user);
-        DD("%s: CMD_POLL > status=%d", __FUNCTION__, dev->status);
+        dev->status = service_ops->guest_poll(pipe->host_pipe);
+        DD("%s: CMD_POLL > status=%d", __func__, dev->status);
         break;
 
     case PIPE_CMD_READ: {
         /* Translate guest physical address into emulator memory. */
-        AndroidPipeBuffer  buffer;
+        GoldfishPipeBuffer buffer;
         buffer.data = map_guest_buffer(dev->address, dev->size, /*is_write*/1);
         if (!buffer.data) {
-            dev->status = PIPE_ERROR_INVAL;
+            dev->status = GOLDFISH_PIPE_ERROR_INVAL;
             break;
         }
         buffer.size = dev->size;
-        dev->status = android_pipe_guest_recv(pipe->pipe_impl_by_user, &buffer, 1);
+        dev->status = service_ops->guest_recv(pipe->host_pipe, &buffer, 1);
         DD("%s: CMD_READ channel=0x%llx address=0x%16llx size=%d > status=%d",
-           __FUNCTION__, (unsigned long long)dev->channel, (unsigned long long)dev->address,
+           __func__, (unsigned long long)dev->channel,
+           (unsigned long long)dev->address,
            dev->size, dev->status);
         cpu_physical_memory_unmap(buffer.data, dev->size,
                                   /*is_write*/1, dev->size);
@@ -593,42 +644,44 @@ static void pipeDevice_doCommand_v1(PipeDevice* dev, uint32_t command) {
 
     case PIPE_CMD_WRITE: {
         /* Translate guest physical address into emulator memory. */
-        AndroidPipeBuffer  buffer;
+        GoldfishPipeBuffer  buffer;
         buffer.data = map_guest_buffer(dev->address, dev->size, /*is_write*/0);
         if (!buffer.data) {
-            dev->status = PIPE_ERROR_INVAL;
+            dev->status = GOLDFISH_PIPE_ERROR_INVAL;
             break;
         }
         buffer.size = dev->size;
-        dev->status = android_pipe_guest_send(pipe->pipe_impl_by_user, &buffer, 1);
-        DD("%s: CMD_WRITE_BUFFER channel=0x%llx address=0x%16llx size=%d > status=%d",
-           __FUNCTION__, (unsigned long long)dev->channel, (unsigned long long)dev->address,
-           dev->size, dev->status);
+        dev->status = service_ops->guest_send(pipe->host_pipe, &buffer, 1);
+        DD("%s: CMD_WRITE_BUFFER channel=0x%llx address=0x%16llx size=%d > "
+           "status=%d", __func__, (unsigned long long)dev->channel,
+           (unsigned long long)dev->address, dev->size, dev->status);
         cpu_physical_memory_unmap(buffer.data, dev->size,
                                   /*is_write*/0, dev->size);
         break;
     }
 
     case PIPE_CMD_WAKE_ON_READ:
-        DD("%s: CMD_WAKE_ON_READ channel=0x%llx", __FUNCTION__, (unsigned long long)dev->channel);
-        if ((pipe->wanted & PIPE_WAKE_READ) == 0) {
-            pipe->wanted |= PIPE_WAKE_READ;
-            android_pipe_guest_wake_on(pipe->pipe_impl_by_user, pipe->wanted);
+        DD("%s: CMD_WAKE_ON_READ channel=0x%llx", __func__,
+           (unsigned long long)dev->channel);
+        if ((pipe->wanted & GOLDFISH_PIPE_WAKE_READ) == 0) {
+            pipe->wanted |= GOLDFISH_PIPE_WAKE_READ;
+            service_ops->guest_wake_on(pipe->host_pipe, pipe->wanted);
         }
         dev->status = 0;
         break;
 
     case PIPE_CMD_WAKE_ON_WRITE:
-        DD("%s: CMD_WAKE_ON_WRITE channel=0x%llx", __FUNCTION__, (unsigned long long)dev->channel);
-        if ((pipe->wanted & PIPE_WAKE_WRITE) == 0) {
-            pipe->wanted |= PIPE_WAKE_WRITE;
-            android_pipe_guest_wake_on(pipe->pipe_impl_by_user, pipe->wanted);
+        DD("%s: CMD_WAKE_ON_WRITE channel=0x%llx", __func__,
+           (unsigned long long)dev->channel);
+        if ((pipe->wanted & GOLDFISH_PIPE_WAKE_WRITE) == 0) {
+            pipe->wanted |= GOLDFISH_PIPE_WAKE_WRITE;
+            service_ops->guest_wake_on(pipe->host_pipe, pipe->wanted);
         }
         dev->status = 0;
         break;
 
     default:
-        D("%s: command=%d (0x%x)\n", __FUNCTION__, command, command);
+        D("%s: command=%d (0x%x)\n", __func__, command, command);
     }
 }
 
@@ -641,7 +694,7 @@ static void pipeDevice_doOpenClose_v2(PipeDevice* dev, uint32_t id) {
         return;
     }
     if (commandBuffer->id != id) {
-        commandBuffer->status = PIPE_ERROR_INVAL;
+        commandBuffer->status = GOLDFISH_PIPE_ERROR_INVAL;
         unmap_command_buffer(commandBuffer);
         return;
     }
@@ -652,7 +705,7 @@ static void pipeDevice_doOpenClose_v2(PipeDevice* dev, uint32_t id) {
         return;
     }
     if (commandBuffer->cmd != PIPE_CMD_OPEN) {
-        commandBuffer->status = PIPE_ERROR_INVAL;
+        commandBuffer->status = GOLDFISH_PIPE_ERROR_INVAL;
         unmap_command_buffer(commandBuffer);
         return;
     }
@@ -662,7 +715,7 @@ static void pipeDevice_doOpenClose_v2(PipeDevice* dev, uint32_t id) {
                                   : 2 * dev->pipes_capacity;
         HwPipe** pipes = calloc(newCapacity, sizeof(HwPipe*));
         if (!pipes) {
-            commandBuffer->status = PIPE_ERROR_NOMEM;
+            commandBuffer->status = GOLDFISH_PIPE_ERROR_NOMEM;
             unmap_command_buffer(commandBuffer);
             return;
         }
@@ -671,10 +724,10 @@ static void pipeDevice_doOpenClose_v2(PipeDevice* dev, uint32_t id) {
         dev->pipes_capacity = newCapacity;
     }
 
-    HwPipe* pipe = pipe_new(id, 0, dev);
-    if (!pipe || !pipe->pipe_impl_by_user) {
-        free(pipe);
-        commandBuffer->status = PIPE_ERROR_NOMEM;
+    HwPipe* pipe = hwpipe_new(id, 0, dev);
+    if (!pipe || !pipe->host_pipe) {
+        hwpipe_free(pipe);
+        commandBuffer->status = GOLDFISH_PIPE_ERROR_NOMEM;
         unmap_command_buffer(commandBuffer);
         return;
     }
@@ -694,7 +747,7 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
 
     /* If the pipe is closed by the host, return an error */
     if (pipe->closed && command != PIPE_CMD_CLOSE) {
-        pipe->command_buffer->status = PIPE_ERROR_IO;
+        pipe->command_buffer->status = GOLDFISH_PIPE_ERROR_IO;
         return;
     }
 
@@ -706,12 +759,13 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
             wanted_pipes_remove_v2(dev, pipe);
             pipe->command_buffer->status = 0;
             unmap_command_buffer(pipe->command_buffer);
-            pipe_free(pipe);
+            hwpipe_free(pipe);
             break;
         }
 
         case PIPE_CMD_POLL:
-            pipe->command_buffer->status = android_pipe_guest_poll(pipe->pipe_impl_by_user);
+            pipe->command_buffer->status =
+                    service_ops->guest_poll(pipe->host_pipe);
             DD("%s: CMD_POLL > status=%d", __func__,
                pipe->command_buffer->status);
             break;
@@ -726,7 +780,7 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
                 buffers_count = MAX_BUFFERS_COUNT;
             }
 
-            AndroidPipeBuffer buffers[MAX_BUFFERS_COUNT];
+            GoldfishPipeBuffer buffers[MAX_BUFFERS_COUNT];
             unsigned i;
             for (i = 0; i < buffers_count; ++i) {
                 buffers[i].size = pipe->command_buffer->rw_params.sizes[i];
@@ -735,17 +789,19 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
                         pipe->command_buffer->rw_params.sizes[i],
                         willModifyData);
                 if (!buffers[i].data) {
-                    pipe->command_buffer->status = PIPE_ERROR_INVAL;
+                    pipe->command_buffer->status = GOLDFISH_PIPE_ERROR_INVAL;
                     goto done;
                 }
             }
 
             pipe->command_buffer->status =
                     willModifyData
-                            ? android_pipe_guest_recv(pipe->pipe_impl_by_user, buffers,
-                                                      buffers_count)
-                            : android_pipe_guest_send(pipe->pipe_impl_by_user, buffers,
-                                                      buffers_count);
+                            ? service_ops->guest_recv(pipe->host_pipe,
+                                                        buffers,
+                                                        buffers_count)
+                            : service_ops->guest_send(pipe->host_pipe,
+                                                        buffers,
+                                                        buffers_count);
             // TODO(zyy): create an extended version of send()/recv() functions
             // to
             //  return both transferred size and resulting status in single
@@ -772,12 +828,13 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
         case PIPE_CMD_WAKE_ON_READ:
         case PIPE_CMD_WAKE_ON_WRITE: {
             bool read = (command == PIPE_CMD_WAKE_ON_READ);
+            int wake_flags = read
+                    ? GOLDFISH_PIPE_WAKE_READ : GOLDFISH_PIPE_WAKE_WRITE;
             DD("%s: CMD_WAKE_ON_%s id=%d", __func__, (read ? "READ" : "WRITE"),
                (int)pipe->id);
-            if ((pipe->wanted & (read ? PIPE_WAKE_READ : PIPE_WAKE_WRITE)) ==
-                0) {
-                pipe->wanted |= (read ? PIPE_WAKE_READ : PIPE_WAKE_WRITE);
-                android_pipe_guest_wake_on(pipe->pipe_impl_by_user, pipe->wanted);
+            if ((pipe->wanted & wake_flags) == 0) {
+                pipe->wanted |= wake_flags;
+                service_ops->guest_wake_on(pipe->host_pipe, pipe->wanted);
             }
             pipe->command_buffer->status = 0;
             break;
@@ -974,19 +1031,19 @@ static uint64_t pipe_dev_read_v1(PipeDevice* dev, hwaddr offset)
 {
     switch (offset) {
     case PIPE_REG_STATUS:
-        DR("%s: REG_STATUS status=%d (0x%x)", __FUNCTION__, dev->status, dev->status);
+        DR("%s: REG_STATUS status=%d (0x%x)", __func__, dev->status, dev->status);
         return dev->status;
 
     case PIPE_REG_CHANNEL: {
         HwPipe* wanted_pipe = wanted_pipes_pop_first_v1(dev);
         if (wanted_pipe != NULL) {
-            dev->wakes = get_and_clear_pipe_wanted(wanted_pipe);
-            DR("%s: channel=0x%llx wanted=%d", __FUNCTION__,
+            dev->wakes = hwpipe_get_and_clear_wanted(wanted_pipe);
+            DR("%s: channel=0x%llx wanted=%d", __func__,
                (unsigned long long)wanted_pipe->channel, dev->wakes);
             return (uint32_t)(wanted_pipe->channel & 0xFFFFFFFFUL);
         } else {
             qemu_set_irq(dev->ps->irq, 0);
-            DD("%s: no signaled channels, lowering IRQ", __FUNCTION__);
+            DD("%s: no signaled channels, lowering IRQ", __func__);
             return 0;
         }
     }
@@ -1000,7 +1057,7 @@ static uint64_t pipe_dev_read_v1(PipeDevice* dev, hwaddr offset)
         HwPipe* wanted_pipe = wanted_pipes_pop_first_v1(dev);
         if (wanted_pipe != NULL) {
             dev->wanted_pipe_after_channel_high = wanted_pipe;
-            DR("%s: channel_high=0x%llx wanted=%d", __FUNCTION__,
+            DR("%s: channel_high=0x%llx wanted=%d", __func__,
                (unsigned long long)wanted_pipe->channel, wanted_pipe->wanted);
             assert((uint32_t)(wanted_pipe->channel >> 32) != 0);
             return (uint32_t)(wanted_pipe->channel >> 32);
@@ -1012,7 +1069,7 @@ static uint64_t pipe_dev_read_v1(PipeDevice* dev, hwaddr offset)
     }
 
     case PIPE_REG_WAKES:
-        DR("%s: wakes %d", __FUNCTION__, dev->wakes);
+        DR("%s: wakes %d", __func__, dev->wakes);
         return dev->wakes;
 
     case PIPE_REG_PARAMS_ADDR_HIGH:
@@ -1023,7 +1080,7 @@ static uint64_t pipe_dev_read_v1(PipeDevice* dev, hwaddr offset)
 
     default:
         qemu_log_mask(LOG_GUEST_ERROR, "%s: unknown register %" HWADDR_PRId
-                      " (0x%" HWADDR_PRIx ")\n", __FUNCTION__, offset, offset);
+                      " (0x%" HWADDR_PRIx ")\n", __func__, offset, offset);
     }
     return 0;
 }
@@ -1037,7 +1094,7 @@ static uint64_t pipe_dev_read_v2(PipeDevice* dev, hwaddr offset) {
                    (pipe = wanted_pipes_pop_first_v2(dev)) != NULL) {
                 dev->signalled_pipe_buffer[count].id = pipe->id;
                 dev->signalled_pipe_buffer[count].flags =
-                        get_and_clear_pipe_wanted(pipe);
+                        hwpipe_get_and_clear_wanted(pipe);
                 ++count;
             }
             if (!dev->wanted_pipes_first) {
@@ -1053,48 +1110,36 @@ static uint64_t pipe_dev_read_v2(PipeDevice* dev, hwaddr offset) {
     return 0;
 }
 
-static const MemoryRegionOps android_pipe_iomem_ops = {
+static const MemoryRegionOps goldfish_pipe_iomem_ops = {
         .read = pipe_dev_read,
         .write = pipe_dev_write,
         .endianness = DEVICE_NATIVE_ENDIAN
 };
 
-static void qemu2_android_pipe_reset(void* hwpipe, void* internal_pipe);
-static void qemu2_android_pipe_host_signal_wake(void* hwpipe, unsigned flags);
-static void qemu2_android_pipe_host_close(void* hwpipe);
-
-static const AndroidPipeHwFuncs qemu2_android_pipe_hw_funcs = {
-        .resetPipe = qemu2_android_pipe_reset,
-        .closeFromHost = qemu2_android_pipe_host_close,
-        .signalWake = qemu2_android_pipe_host_signal_wake,
-};
-
 // Don't change this version unless you want to break forward compatibility.
 // Instead, use the different device version as a first saved field.
 enum {
-    ANDROID_PIPE_SAVE_VERSION = 1,
+    GOLDFISH_PIPE_SAVE_VERSION = 1,
 };
 
-static void android_pipe_save(QEMUFile* f, void* opaque) {
+static void goldfish_pipe_save(QEMUFile* f, void* opaque) {
     AndroidPipeState* s = opaque;
     PipeDevice* dev = s->dev;
-    Stream* stream = stream_from_qemufile(f);
-    dev->ops->save(stream, dev);
-    stream_free(stream);
+    dev->ops->save(f, dev);
 }
 
-static void android_pipe_save_v1(Stream* stream, PipeDevice* dev) {
+static void goldfish_pipe_save_v1(QEMUFile* file, PipeDevice* dev) {
     assert(dev->device_version == PIPE_DEVICE_VERSION_v1);
-    stream_put_be32(stream, dev->device_version);
+    qemu_put_be32(file, dev->device_version);
 
     /* Save the device version */
     /* Save i/o registers. */
-    stream_put_be64(stream, dev->address);
-    stream_put_be32(stream, dev->size);
-    stream_put_be32(stream, dev->status);
-    stream_put_be64(stream, dev->channel);
-    stream_put_be32(stream, dev->wakes);
-    stream_put_be64(stream, dev->params_addr);
+    qemu_put_be64(file, dev->address);
+    qemu_put_be32(file, dev->size);
+    qemu_put_be32(file, dev->status);
+    qemu_put_be64(file, dev->channel);
+    qemu_put_be32(file, dev->wakes);
+    qemu_put_be64(file, dev->params_addr);
 
     /* Save the pipe count and state of the pipes. */
     int pipe_count = 0;
@@ -1102,12 +1147,12 @@ static void android_pipe_save_v1(Stream* stream, PipeDevice* dev) {
     for (pipe = dev->pipes_list; pipe; pipe = pipe->next) {
         ++pipe_count;
     }
-    stream_put_be32(stream, pipe_count);
+    qemu_put_be32(file, pipe_count);
     for (pipe = dev->pipes_list; pipe; pipe = pipe->next) {
-        stream_put_be64(stream, pipe->channel);
-        stream_put_byte(stream, pipe->closed);
-        stream_put_byte(stream, pipe->wanted);
-        android_pipe_guest_save(pipe->pipe_impl_by_user, stream);
+        qemu_put_be64(file, pipe->channel);
+        qemu_put_byte(file, pipe->closed);
+        qemu_put_byte(file, pipe->wanted);
+        service_ops->guest_save(pipe->host_pipe, file);
     }
 
     /* Save wanted pipes list. */
@@ -1115,28 +1160,28 @@ static void android_pipe_save_v1(Stream* stream, PipeDevice* dev) {
     for (pipe = dev->wanted_pipes_first; pipe; pipe = pipe->wanted_next) {
         wanted_pipes_count++;
     }
-    stream_put_be32(stream, wanted_pipes_count);
+    qemu_put_be32(file, wanted_pipes_count);
     for (pipe = dev->wanted_pipes_first; pipe; pipe = pipe->wanted_next) {
-        stream_put_be64(stream, pipe->channel);
+        qemu_put_be64(file, pipe->channel);
     }
     if (dev->wanted_pipe_after_channel_high) {
-        stream_put_byte(stream, 1);
-        stream_put_be64(stream, dev->wanted_pipe_after_channel_high->channel);
+        qemu_put_byte(file, 1);
+        qemu_put_be64(file, dev->wanted_pipe_after_channel_high->channel);
     } else {
-        stream_put_byte(stream, 0);
+        qemu_put_byte(file, 0);
     }
 }
 
-static void android_pipe_save_v2(Stream* stream, PipeDevice* dev) {
+static void goldfish_pipe_save_v2(QEMUFile* file, PipeDevice* dev) {
     assert(dev->device_version == PIPE_DEVICE_VERSION);
-    stream_put_be32(stream, dev->device_version);
+    qemu_put_be32(file, dev->device_version);
 
     /* Save the device data. */
-    stream_put_be32(stream, dev->driver_version);
-    stream_put_be32(stream, dev->signalled_pipe_buffer_size);
-    stream_put_be64(stream, dev->signalled_pipe_buffer_addr);
-    stream_put_be64(stream, dev->open_command_addr);
-    stream_put_be32(stream, dev->pipes_capacity);
+    qemu_put_be32(file, dev->driver_version);
+    qemu_put_be32(file, dev->signalled_pipe_buffer_size);
+    qemu_put_be64(file, dev->signalled_pipe_buffer_addr);
+    qemu_put_be64(file, dev->open_command_addr);
+    qemu_put_be32(file, dev->pipes_capacity);
 
     /* Save the pipes. */
     int i;
@@ -1146,18 +1191,18 @@ static void android_pipe_save_v2(Stream* stream, PipeDevice* dev) {
             ++pipe_count;
         }
     }
-    stream_put_be32(stream, pipe_count);
+    qemu_put_be32(file, pipe_count);
 
     for (i = 0; i < dev->pipes_capacity; ++i) {
         HwPipe* pipe = dev->pipes[i];
         if (!pipe) {
             continue;
         }
-        stream_put_be32(stream, pipe->id);
-        stream_put_be64(stream, pipe->command_buffer_addr);
-        stream_put_byte(stream, pipe->closed);
-        stream_put_byte(stream, pipe->wanted);
-        android_pipe_guest_save(pipe->pipe_impl_by_user, stream);
+        qemu_put_be32(file, pipe->id);
+        qemu_put_be64(file, pipe->command_buffer_addr);
+        qemu_put_byte(file, pipe->closed);
+        qemu_put_byte(file, pipe->wanted);
+        service_ops->guest_save(pipe->host_pipe, file);
     }
 
     /* Save wanted pipes list. */
@@ -1166,55 +1211,55 @@ static void android_pipe_save_v2(Stream* stream, PipeDevice* dev) {
     for (pipe = dev->wanted_pipes_first; pipe; pipe = pipe->wanted_next) {
         wanted_pipes_count++;
     }
-    stream_put_be32(stream, wanted_pipes_count);
+    qemu_put_be32(file, wanted_pipes_count);
     for (pipe = dev->wanted_pipes_first; pipe; pipe = pipe->wanted_next) {
-        stream_put_be32(stream, pipe->id);
+        qemu_put_be32(file, pipe->id);
     }
 }
 
-static int android_pipe_load_v1(Stream* stream, PipeDevice* dev) {
+static int goldfish_pipe_load_v1(QEMUFile* file, PipeDevice* dev) {
     HwPipe* pipe;
 
     assert(dev->device_version == PIPE_DEVICE_VERSION_v1);
     dev->driver_version = PIPE_DRIVER_VERSION_v1;
 
     /* Load i/o registers. */
-    dev->address = stream_get_be64(stream);
-    dev->size = stream_get_be32(stream);
-    dev->status = stream_get_be32(stream);
-    dev->channel = stream_get_be64(stream);
-    dev->wakes = stream_get_be32(stream);
-    dev->params_addr = stream_get_be64(stream);
+    dev->address = qemu_get_be64(file);
+    dev->size = qemu_get_be32(file);
+    dev->status = qemu_get_be32(file);
+    dev->channel = qemu_get_be64(file);
+    dev->wakes = qemu_get_be32(file);
+    dev->params_addr = qemu_get_be64(file);
 
     /* Clean up old pipe objects. */
     dev->ops->close_all(dev);
     dev->ops = &pipe_ops_v1;
 
     /* Restore pipes. */
-    int pipe_count = stream_get_be32(stream);
+    int pipe_count = qemu_get_be32(file);
     int pipe_n;
     HwPipe** pipe_list_end = &dev->pipes_list;
     *pipe_list_end = NULL;
     uint64_t* force_closed_pipes = malloc(sizeof(uint64_t) * pipe_count);
     int force_closed_pipes_count = 0;
     for (pipe_n = 0; pipe_n < pipe_count; pipe_n++) {
-        HwPipe* pipe = pipe_new0(dev);
+        HwPipe* pipe = hwpipe_new0(dev);
         char force_close = 0;
-        pipe->channel = stream_get_be64(stream);
-        pipe->closed = stream_get_byte(stream);
-        pipe->wanted = stream_get_byte(stream);
-        pipe->pipe_impl_by_user = android_pipe_guest_load(stream, pipe, &force_close);
+        pipe->channel = qemu_get_be64(file);
+        pipe->closed = qemu_get_byte(file);
+        pipe->wanted = qemu_get_byte(file);
+        pipe->host_pipe = service_ops->guest_load(file, pipe, &force_close);
         pipe->wanted_next = pipe->wanted_prev = NULL;
 
         // |pipe| might be NULL in case it couldn't be saved. However,
-        // in that case |force_close| will be set by android_pipe_guest_load,
+        // in that case |force_close| will be set by goldfish_pipe_guest_load,
         // so |force_close| should be checked first so that the function
         // can continue.
         if (force_close) {
             pipe->closed = 1;
             force_closed_pipes[force_closed_pipes_count++] = pipe->channel;
-        } else if (!pipe->pipe_impl_by_user) {
-            pipe_free(pipe);
+        } else if (!pipe->host_pipe) {
+            hwpipe_free(pipe);
             free(force_closed_pipes);
             return -EIO;
         }
@@ -1235,10 +1280,10 @@ static int android_pipe_load_v1(Stream* stream, PipeDevice* dev) {
     /* Reconstruct wanted pipes list. */
     HwPipe** wanted_pipe_list_end = &dev->wanted_pipes_first;
     *wanted_pipe_list_end = NULL;
-    int wanted_pipes_count = stream_get_be32(stream);
+    int wanted_pipes_count = qemu_get_be32(file);
     uint64_t channel;
     for (pipe_n = 0; pipe_n < wanted_pipes_count; ++pipe_n) {
-        channel = stream_get_be64(stream);
+        channel = qemu_get_be64(file);
         HwPipe* pipe = g_hash_table_lookup(dev->pipes_by_channel,
                                            hash_cast_key_from_channel(&channel));
         if (pipe) {
@@ -1251,8 +1296,8 @@ static int android_pipe_load_v1(Stream* stream, PipeDevice* dev) {
             return -EIO;
         }
     }
-    if (stream_get_byte(stream)) {
-        channel = stream_get_be64(stream);
+    if (qemu_get_byte(file)) {
+        channel = qemu_get_be64(file);
         dev->wanted_pipe_after_channel_high =
             g_hash_table_lookup(dev->pipes_by_channel,
                                 hash_cast_key_from_channel(&channel));
@@ -1270,7 +1315,7 @@ static int android_pipe_load_v1(Stream* stream, PipeDevice* dev) {
             g_hash_table_lookup(dev->pipes_by_channel,
                                 hash_cast_key_from_channel(
                                     &force_closed_pipes[pipe_n]));
-        set_pipe_wanted_bits(pipe, PIPE_WAKE_CLOSED);
+        hwpipe_set_wanted(pipe, GOLDFISH_PIPE_WAKE_CLOSED);
         pipe->closed = 1;
         if (!pipe->wanted_next &&
             !pipe->wanted_prev &&
@@ -1285,26 +1330,26 @@ static int android_pipe_load_v1(Stream* stream, PipeDevice* dev) {
     return 0;
 }
 
-static int android_pipe_load_v2(Stream* stream, PipeDevice* dev) {
+static int goldfish_pipe_load_v2(QEMUFile* file, PipeDevice* dev) {
     int res = -EIO;
     uint32_t* force_closed_pipes = NULL;
 
     /* Load the device. */
-    dev->device_version = stream_get_be32(stream);
+    dev->device_version = qemu_get_be32(file);
     if (dev->device_version > PIPE_DEVICE_VERSION) {
         goto done;
     } else if (dev->device_version == PIPE_DEVICE_VERSION_v1) {
         // redirect to the v1 loader if this is an old pipe.
-        return android_pipe_load_v1(stream, dev);
+        return goldfish_pipe_load_v1(file, dev);
     }
 
-    dev->driver_version = stream_get_be32(stream);
+    dev->driver_version = qemu_get_be32(file);
     if (dev->driver_version > MAX_SUPPORTED_DRIVER_VERSION) {
         goto done;
     }
 
-    dev->signalled_pipe_buffer_size = stream_get_be32(stream);
-    dev->signalled_pipe_buffer_addr = stream_get_be64(stream);
+    dev->signalled_pipe_buffer_size = qemu_get_be32(file);
+    dev->signalled_pipe_buffer_addr = qemu_get_be64(file);
     dev->signalled_pipe_buffer = (GuestSignalledPipe*)map_guest_buffer(
             dev->signalled_pipe_buffer_addr,
             sizeof(*dev->signalled_pipe_buffer) *
@@ -1313,7 +1358,7 @@ static int android_pipe_load_v2(Stream* stream, PipeDevice* dev) {
     if (!dev->signalled_pipe_buffer) {
         goto done;
     }
-    dev->open_command_addr = stream_get_be64(stream);
+    dev->open_command_addr = qemu_get_be64(file);
     dev->open_command = (OpenCommandParams*)map_guest_buffer(
             dev->open_command_addr, sizeof(*dev->open_command), /*is_write*/0);
     if (!dev->open_command) {
@@ -1325,7 +1370,7 @@ static int android_pipe_load_v2(Stream* stream, PipeDevice* dev) {
     dev->ops->close_all(dev);
     dev->ops = &pipe_ops_v2;
 
-    int pipes_capacity = stream_get_be32(stream);
+    int pipes_capacity = qemu_get_be32(file);
     if (dev->pipes_capacity < pipes_capacity) {
         void* pipes = calloc(pipes_capacity, sizeof(*dev->pipes));
         if (!pipes) {
@@ -1337,7 +1382,7 @@ static int android_pipe_load_v2(Stream* stream, PipeDevice* dev) {
     }
     dev->pipes_capacity = pipes_capacity;
 
-    int pipe_count = stream_get_be32(stream);
+    int pipe_count = qemu_get_be32(file);
     force_closed_pipes = malloc(sizeof(*force_closed_pipes) * pipe_count);
     if (!force_closed_pipes) {
         goto done;
@@ -1345,46 +1390,46 @@ static int android_pipe_load_v2(Stream* stream, PipeDevice* dev) {
     int i;
     int force_closed_pipes_count = 0;
     for (i = 0; i < pipe_count; ++i) {
-        HwPipe* pipe = pipe_new0(dev);
-        pipe->id = stream_get_be32(stream);
-        pipe->command_buffer_addr = stream_get_be64(stream);
+        HwPipe* pipe = hwpipe_new0(dev);
+        pipe->id = qemu_get_be32(file);
+        pipe->command_buffer_addr = qemu_get_be64(file);
         pipe->command_buffer = (PipeCommand*)map_guest_buffer(
                 pipe->command_buffer_addr, COMMAND_BUFFER_SIZE, /*is_write*/1);
         if (!pipe->command_buffer) {
-            pipe_free(pipe);
+            hwpipe_free(pipe);
             goto done;
         }
-        pipe->closed = stream_get_byte(stream);
-        pipe->wanted = stream_get_byte(stream);
+        pipe->closed = qemu_get_byte(file);
+        pipe->wanted = qemu_get_byte(file);
 
         char force_close = 0;
-        pipe->pipe_impl_by_user = android_pipe_guest_load(stream, pipe, &force_close);
+        pipe->host_pipe = service_ops->guest_load(file, pipe, &force_close);
 
         // |pipe| might be NULL in case it couldn't be saved. However,
-        // in that case |force_close| will be set by android_pipe_guest_load,
+        // in that case |force_close| will be set by goldfish_pipe_guest_load,
         // so |force_close| should be checked first so that the function
         // can continue.
         if (force_close) {
             pipe->closed = 1;
             force_closed_pipes[force_closed_pipes_count++] = pipe->id;
-        } else if (!pipe->pipe_impl_by_user) {
+        } else if (!pipe->host_pipe) {
             unmap_command_buffer(pipe->command_buffer);
-            pipe_free(pipe);
+            hwpipe_free(pipe);
             goto done;
         }
 
         if (dev->pipes[pipe->id]) {
             unmap_command_buffer(pipe->command_buffer);
-            pipe_free(pipe);
+            hwpipe_free(pipe);
             goto done;
         }
         dev->pipes[pipe->id] = pipe;
     }
 
     /* Reconstruct wanted pipes list. */
-    int wanted_pipes_count = stream_get_be32(stream);
+    int wanted_pipes_count = qemu_get_be32(file);
     for (i = 0; i < wanted_pipes_count; ++i) {
-        int id = stream_get_be32(stream);
+        int id = qemu_get_be32(file);
         HwPipe* pipe = dev->pipes[id];
         if (!pipe) {
             goto done;
@@ -1395,7 +1440,7 @@ static int android_pipe_load_v2(Stream* stream, PipeDevice* dev) {
     /* Add forcibly closed pipes to wanted pipes list */
     for (i = 0; i < force_closed_pipes_count; ++i) {
         HwPipe* pipe = dev->pipes[force_closed_pipes[i]];
-        set_pipe_wanted_bits(pipe, PIPE_WAKE_CLOSED);
+        hwpipe_set_wanted(pipe, GOLDFISH_PIPE_WAKE_CLOSED);
         pipe->closed = 1;
         wanted_pipes_add_v2(dev, pipe);
     }
@@ -1407,16 +1452,14 @@ done:
     return res;
 }
 
-static int android_pipe_load(QEMUFile* f, void* opaque, int version_id) {
+static int goldfish_pipe_load(QEMUFile* f, void* opaque, int version_id) {
     AndroidPipeState* s = opaque;
     PipeDevice* dev = s->dev;
-    Stream* stream = stream_from_qemufile(f);
-    int res = android_pipe_load_v2(stream, dev);
-    stream_free(stream);
+    int res = goldfish_pipe_load_v2(f, dev);
     return res;
 }
 
-static void android_pipe_post_load(void* opaque) {
+static void goldfish_pipe_post_load(void* opaque) {
     /* This function gets invoked after all VM state has
      * been loaded. Raising IRQ in the load handler causes
      * problems.
@@ -1429,7 +1472,7 @@ static void android_pipe_post_load(void* opaque) {
     }
 }
 
-static void android_pipe_realize(DeviceState* dev, Error** errp) {
+static void goldfish_pipe_realize(DeviceState* dev, Error** errp) {
     SysBusDevice* sbdev = SYS_BUS_DEVICE(dev);
     AndroidPipeState* s = ANDROID_PIPE(dev);
 
@@ -1452,31 +1495,29 @@ static void android_pipe_realize(DeviceState* dev, Error** errp) {
         APANIC("%s: failed to initialize pipes hash\n", __func__);
     }
 
-    memory_region_init_io(&s->iomem, OBJECT(s), &android_pipe_iomem_ops, s,
-                          "android_pipe", 0x2000 /*TODO: ?how big?*/);
+    memory_region_init_io(&s->iomem, OBJECT(s), &goldfish_pipe_iomem_ops, s,
+                          "goldfish_pipe", 0x2000 /*TODO: ?how big?*/);
     sysbus_init_mmio(sbdev, &s->iomem);
     sysbus_init_irq(sbdev, &s->irq);
 
-    android_pipe_set_hw_funcs(&qemu2_android_pipe_hw_funcs);
-
+    /* NOTE: "android_pipe" is the legacy name used in snapshots. */
     register_savevm_with_post_load(
-            dev, "android_pipe", 0, ANDROID_PIPE_SAVE_VERSION,
-            android_pipe_save, android_pipe_load, android_pipe_post_load, s);
+            dev, "android_pipe", 0, GOLDFISH_PIPE_SAVE_VERSION,
+            goldfish_pipe_save, goldfish_pipe_load, goldfish_pipe_post_load, s);
 }
 
-static void qemu2_android_pipe_reset(void* hwpipe, void* internal_pipe) {
-    HwPipe* pipe = hwpipe;
-    pipe->pipe_impl_by_user = internal_pipe;
+void goldfish_pipe_reset(GoldfishHwPipe *pipe, GoldfishHostPipe *host_pipe) {
+    pipe->host_pipe = host_pipe;
 }
 
-static void qemu2_android_pipe_host_signal_wake(void* hwpipe, unsigned flags) {
-    HwPipe* pipe = hwpipe;
-    PipeDevice* dev = pipe->dev;
+void goldfish_pipe_signal_wake(GoldfishHwPipe *pipe,
+                               GoldfishPipeWakeFlags flags) {
+    PipeDevice *dev = pipe->dev;
 
-    DD("%s: id=%d channel=0x%llx flags=%d", __func__,
-        (int)pipe->id, pipe->channel, flags);
+    DD("%s: id=%d channel=0x%llx flags=%d", __func__, (int)pipe->id,
+       pipe->channel, flags);
 
-    set_pipe_wanted_bits(pipe, (unsigned char)flags);
+    hwpipe_set_wanted(pipe, (unsigned char)flags);
     dev->ops->wanted_list_add(dev, pipe);
 
     /* Raise IRQ to indicate there are items on our list ! */
@@ -1484,40 +1525,39 @@ static void qemu2_android_pipe_host_signal_wake(void* hwpipe, unsigned flags) {
     DD("%s: raising IRQ", __func__);
 }
 
-static void qemu2_android_pipe_host_close(void* hwpipe) {
-    HwPipe* pipe = hwpipe;
-
+void goldfish_pipe_close_from_host(GoldfishHwPipe *pipe)
+{
     D("%s: id=%d channel=0x%llx (closed=%d)", __func__, (int)pipe->id,
         pipe->channel, pipe->closed);
 
     if (!pipe->closed) {
         pipe->closed = 1;
-        qemu2_android_pipe_host_signal_wake(hwpipe, PIPE_WAKE_CLOSED);
+        goldfish_pipe_signal_wake(pipe, GOLDFISH_PIPE_WAKE_CLOSED);
     }
 }
 
-static void android_pipe_class_init(ObjectClass* klass, void* data) {
+static void goldfish_pipe_class_init(ObjectClass* klass, void* data) {
     DeviceClass* dc = DEVICE_CLASS(klass);
-    dc->realize = android_pipe_realize;
+    dc->realize = goldfish_pipe_realize;
     dc->desc = "android pipe";
 }
 
-static const TypeInfo android_pipe_info = {
+static const TypeInfo goldfish_pipe_info = {
         .name = TYPE_ANDROID_PIPE,
         .parent = TYPE_SYS_BUS_DEVICE,
         .instance_size = sizeof(AndroidPipeState),
-        .class_init = android_pipe_class_init};
+        .class_init = goldfish_pipe_class_init};
 
-static void android_pipe_register(void) {
-    type_register_static(&android_pipe_info);
+static void goldfish_pipe_register(void) {
+    type_register_static(&goldfish_pipe_info);
 }
 
-type_init(android_pipe_register);
+type_init(goldfish_pipe_register);
 
 static const PipeOperations pipe_ops_v2 = {
         .wanted_list_add = &wanted_pipes_add_v2,
         .close_all = &close_all_pipes_v2,
-        .save = &android_pipe_save_v2,
+        .save = &goldfish_pipe_save_v2,
         .dev_read = &pipe_dev_read_v2,
         .dev_write = &pipe_dev_write_v2
 };
@@ -1525,7 +1565,7 @@ static const PipeOperations pipe_ops_v2 = {
 static const PipeOperations pipe_ops_v1 = {
         .wanted_list_add = &wanted_pipes_add_v1,
         .close_all = &close_all_pipes_v1,
-        .save = &android_pipe_save_v1,
+        .save = &goldfish_pipe_save_v1,
         .dev_read = &pipe_dev_read_v1,
         .dev_write = &pipe_dev_write_v1
 };

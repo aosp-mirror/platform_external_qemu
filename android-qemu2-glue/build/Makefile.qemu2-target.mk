@@ -70,7 +70,7 @@ LOCAL_SRC_FILES += \
     hw/display/goldfish_fb.c \
     hw/input/goldfish_events.c \
     hw/intc/goldfish_pic.c \
-    hw/misc/android_pipe.c \
+    hw/misc/goldfish_pipe.c \
     hw/misc/goldfish_battery.c \
     hw/misc/goldfish_sync.c \
     hw/timer/goldfish_timer.c \
