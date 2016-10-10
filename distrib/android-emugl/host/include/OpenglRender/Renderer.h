@@ -134,6 +134,8 @@ public:
     //    clean up all per-process resources when guest process exits (or is
     // killed). Such resources include color buffer handles and EglImage handles.
     virtual void cleanupProcGLObjects(uint64_t puid) = 0;
+
+    virtual void stop() = 0;
 protected:
     ~Renderer() = default;
 };

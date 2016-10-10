@@ -21,6 +21,7 @@
 #include "android/hw-sensors.h"
 #include "android/network/globals.h"
 #include "android/opengles.h"
+#include "android/opengl/GLPipeControl.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/set-ui-emu-agent.h"
 #include "android/skin/winsys.h"
@@ -380,9 +381,21 @@ int emulator_window_init(EmulatorWindow* emulator,
     return 0;
 }
 
+#include <unistd.h>
+
 void
 emulator_window_done(EmulatorWindow* emulator)
 {
+
+
+        fprintf(stderr, "%s: %d gl pipes still alive\n", __FUNCTION__, num_live_render_threads());
+
+    while (num_live_render_threads() > 0) {
+        usleep(1666666);
+        fprintf(stderr, "%s: %d gl pipes still alive\n", __FUNCTION__, num_live_render_threads());
+    }
+    fprintf(stderr, "%s: gl pipes all gone\n", __FUNCTION__);
+
     if (emulator->ui) {
         skin_ui_free(emulator->ui);
         emulator->ui = NULL;
