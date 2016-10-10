@@ -21,6 +21,8 @@
 
 #include <memory>
 
+int renderThread_currNum(void);
+
 namespace emugl {
 class RenderChannelImpl;
 class RendererImpl;
