@@ -28,8 +28,6 @@
 ** should give some thought to if this needs re-writing to take
 ** advantage of that infrastructure to create the pipes.
 */
-#include "hw/misc/android_pipe.h"
-
 #include "android-qemu2-glue/utils/stream.h"
 #include "android/emulation/android_pipe_device.h"
 #include "hw/hw.h"

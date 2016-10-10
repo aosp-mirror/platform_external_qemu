@@ -38,7 +38,6 @@
 #include "qemu/config-file.h"
 #include "sysemu/char.h"
 #include "monitor/monitor.h"
-#include "hw/misc/android_pipe.h"
 
 #include "android/android.h"
 
