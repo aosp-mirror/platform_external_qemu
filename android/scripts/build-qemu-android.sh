@@ -246,7 +246,7 @@ build_qemu_android () {
             linux-*)
                 # Use PulseAudio on Linux because the default backend,
                 # OSS, does not work
-                AUDIO_BACKENDS_FLAG="--audio-drv-list=pa"
+                AUDIO_BACKENDS_FLAG="--audio-drv-list=sdl"
                 ;;
             windows-*)
                 # Prefer winaudio on Windows over dsound.
