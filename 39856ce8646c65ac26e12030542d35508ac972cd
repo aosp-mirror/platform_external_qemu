@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dff9f4d6_f0c2defd",
+        "filename": "android/base/network/IpAddress.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-10-10T18:05:45Z",
+      "side": 1,
+      "message": "In some places you use \"this-\u003e\" to access members and in other places you don\u0027t. Does our style guide mention any of this? I prefer not to have it, at least if members are prefix with \"m\", in this case I\u0027m fine with either. Would be nice if it was consistent though.",
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dff9f4d6_f0709e01",
+        "filename": "android/base/network/IpAddress.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-10-10T18:05:45Z",
+      "side": 1,
+      "message": "Instead of using const_cast and C-style strchr here I would prefer str.find(\u0027%\u0027).",
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5fcee4f0_c8238f14",
+        "filename": "android/base/network/IpAddress.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-10-10T18:05:45Z",
+      "side": 1,
+      "message": "This is the method where I didn\u0027t see \"this-\u003e\" being used.",
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5fcee4f0_c8c70f0c",
+        "filename": "android/base/network/IpAddress.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-10-10T18:05:45Z",
+      "side": 1,
+      "message": "Could the documentation mention something about the byte-order of IP addresses? It seems to consistently be host-order but could we declare that here to avoid confusion in the future?",
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5fcee4f0_28106bb1",
+        "filename": "android/base/network/IpAddress_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-10-10T18:05:45Z",
+      "side": 1,
+      "message": "Should this also check that addr0 is still valid to prevent mixups between moving and copying?",
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
