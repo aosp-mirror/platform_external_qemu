@@ -76,3 +76,27 @@ std::vector<void*> GLPipeControl::listPipes() {
 
 } // namespace opengl
 } // namespace android
+
+void pipe_control_stop_pipe(uint64_t handle) {
+    fprintf(stderr, "%s: call. handle=0x%llx", __FUNCTION__, (unsigned long long)handle);
+    GLPipeControl::get()->stopPipe(handle);
+}
+
+void pipe_control_list_pipes(char** dst) {
+    std::vector<void*> pipes = GLPipeControl::get()->listPipes();
+
+    std::string strList;
+    char* buf[256] = {};
+    for (auto elt : pipes) {
+        snprintf(buf, sizeof(buf), "0x%llx", (unsigned long long)(uintptr_t)elt);
+        strList += buf;
+        strList += "\n";
+    }
+
+    uint32_t res_sz = (uint32_t)(strList.size() + 1);
+    char* res = (char*)malloc(res_sz);
+    memset(res, 0, res_sz);
+    memcpy(res, &strList[0], res_sz);
+    *dst = res;
+}
+

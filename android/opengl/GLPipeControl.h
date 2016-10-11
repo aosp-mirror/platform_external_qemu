@@ -11,6 +11,10 @@
 
 #pragma once
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 #include "android/base/Compiler.h"
 #include "android/base/synchronization/Lock.h"
 
@@ -65,3 +69,9 @@ private:
 
 } // namespace opengl
 } // namespace android
+
+// C interface for console
+void opengl_pipe_control_stop_pipe(uint64_t);
+void opengl_pipe_control_list_pipes(char**); // freed by user
+
+ANDROID_END_HEADER
