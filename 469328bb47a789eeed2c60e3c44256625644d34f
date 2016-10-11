@@ -22,6 +22,30 @@
       "revId": "469328bb47a789eeed2c60e3c44256625644d34f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df9654c8_83687db0",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-11T19:36:32Z",
+      "side": 1,
+      "message": "Yeah I was wondering about that, but it seemed okay and not a double-free situation since from what I read std::move is supposed to allow you to destroy the source of std::move explicitly (but not do anything else)",
+      "parentUuid": "df9654c8_63445147",
+      "range": {
+        "startLine": 88,
+        "startChar": 4,
+        "endLine": 88,
+        "endChar": 18
+      },
+      "revId": "469328bb47a789eeed2c60e3c44256625644d34f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
