@@ -69,6 +69,7 @@ private:
                                         std::weak_ptr<RenderChannelImpl>>;
 
     std::vector<ThreadWithChannel> mThreads;
+    bool mStopped = false;
 };
 
 }  // namespace emugl

@@ -24,6 +24,7 @@
 #include "android/emulator-window.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
+#include "android/opengles.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
@@ -458,6 +459,12 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         }
         event->ignore();
     } else {
+        // It is only safe to stop the OpenGL ES
+        // renderer after the main loop has exited.
+        // This is not necessarily before
+        // |skin_window_free| is called, especially
+        // on Windows!
+        android_stopOpenglesRenderer();
         mToolWindow->closeExtendedWindow();
         event->accept();
     }
