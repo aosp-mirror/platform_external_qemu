@@ -169,7 +169,6 @@ emulator_window_setup( EmulatorWindow*  emulator )
         .opengles_hide = &emulator_window_opengles_hide_window,
         .opengles_setTranslation = &emulator_window_opengles_set_translation,
         .opengles_redraw = &emulator_window_opengles_redraw_window,
-        .opengles_free = &android_stopOpenglesRenderer,
     };
 
     static const SkinTrackBallParameters my_trackball_params = {

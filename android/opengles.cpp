@@ -223,6 +223,7 @@ void
 android_stopOpenglesRenderer(void)
 {
     if (sRenderer) {
+        sRenderer->stop();
         sRenderer.reset();
         android_stop_opengl_logger();
     }
