@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "df9654c8_63445147",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-10-11T19:34:40Z",
+      "side": 1,
+      "message": "the original impl looks like buggy: the mThreads are cleared and then\nthe for loop is going through mThreads ?\n\nnit: not needed ?",
+      "range": {
+        "startLine": 88,
+        "startChar": 4,
+        "endLine": 88,
+        "endChar": 18
+      },
+      "revId": "469328bb47a789eeed2c60e3c44256625644d34f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
