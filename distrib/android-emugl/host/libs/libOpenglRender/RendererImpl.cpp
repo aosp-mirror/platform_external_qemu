@@ -77,15 +77,15 @@ bool RendererImpl::initialize(int width, int height, bool useSubWindow) {
 
 void RendererImpl::stop() {
     android::base::AutoLock lock(mThreadVectorLock);
-    auto threads = std::move(mThreads);
-    mThreads.clear();
-    lock.unlock();
 
-    for (const auto& t : mThreads) {
+    for (auto& t : mThreads) {
         if (const auto channel = t.second.lock()) {
             channel->forceStop();
         }
     }
+
+    mThreads.clear();
+    lock.unlock();
 }
 
 RenderChannelPtr RendererImpl::createRenderChannel() {

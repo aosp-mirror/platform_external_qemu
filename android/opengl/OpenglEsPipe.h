@@ -12,6 +12,7 @@
 
 #include "android/base/Compiler.h"
 #include "android/emulation/AndroidPipe.h"
+#include "android/opengles.h"
 
 #include "OpenglRender/RenderChannel.h"
 
@@ -19,6 +20,7 @@ namespace android {
 namespace opengl {
 
 void registerPipeService();
+void stopRenderer();
 
 }  // namespace opengl
 }  // namespace android

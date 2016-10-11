@@ -25,6 +25,7 @@
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/opengl/gpuinfo.h"
+#include "android/opengl/OpenglEsPipe.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/QtLooper.h"
@@ -458,6 +459,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         }
         event->ignore();
     } else {
+        android::opengl::stopRenderer();
         mToolWindow->closeExtendedWindow();
         event->accept();
     }
