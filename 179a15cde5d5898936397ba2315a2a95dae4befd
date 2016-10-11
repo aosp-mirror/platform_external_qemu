@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "df9654c8_2310895a",
+        "filename": "android/opengl/OpenglEsPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-11T19:33:30Z",
+      "side": 1,
+      "message": "Ack; not needed with new CL",
+      "parentUuid": "df9654c8_16c82c1d",
+      "range": {
+        "startLine": 260,
+        "startChar": 12,
+        "endLine": 260,
+        "endChar": 29
+      },
+      "revId": "179a15cde5d5898936397ba2315a2a95dae4befd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df9654c8_d6e404a1",
         "filename": "android/opengles.cpp",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2016-10-11T17:45:37Z",
       "side": 1,
       "message": "why not a getter in sRenderLib ?",
+      "range": {
+        "startLine": 123,
+        "startChar": 0,
+        "endLine": 123,
+        "endChar": 42
+      },
+      "revId": "179a15cde5d5898936397ba2315a2a95dae4befd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df9654c8_d1616e08",
+        "filename": "android/opengles.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-11T19:33:30Z",
+      "side": 1,
+      "message": "Ack; will look into it",
+      "parentUuid": "df9654c8_d6e404a1",
       "range": {
         "startLine": 123,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "df9654c8_51f1de57",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-11T19:33:30Z",
+      "side": 1,
+      "message": "That was one of the first things I tried, but the thread calling that ends up waiting for join forever since the render threads themselves are blocked.\n\nAnd then just now, to check again, it turns out that it works, since earlier I switched up the channel stoppping and clear()ing (join()ing). Thanks for the suggestion!",
+      "parentUuid": "df9654c8_767b30b2",
+      "range": {
+        "startLine": 471,
+        "startChar": 8,
+        "endLine": 471,
+        "endChar": 57
+      },
+      "revId": "179a15cde5d5898936397ba2315a2a95dae4befd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df9654c8_76525032",
         "filename": "android/skin/qt/winsys-qt.cpp",
         "patchSetId": 3
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "df9654c8_717b3ab2",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-11T19:33:30Z",
+      "side": 1,
+      "message": "Sorry, that is not really part of the fix, it was just an initial guess.",
+      "parentUuid": "df9654c8_76525032",
+      "range": {
+        "startLine": 264,
+        "startChar": 4,
+        "endLine": 264,
+        "endChar": 15
+      },
+      "revId": "179a15cde5d5898936397ba2315a2a95dae4befd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df9654c8_5607142b",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
         "patchSetId": 3
@@ -105,6 +201,30 @@
       "writtenOn": "2016-10-11T17:45:37Z",
       "side": 1,
       "message": "this move isn\u0027t needed anymore. it was there to get the thread stop calls out of the renderer lock",
+      "range": {
+        "startLine": 92,
+        "startChar": 3,
+        "endLine": 93,
+        "endChar": 21
+      },
+      "revId": "179a15cde5d5898936397ba2315a2a95dae4befd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df9654c8_a301f916",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-11T19:33:30Z",
+      "side": 1,
+      "message": "Ah, this might have been the key---I tried to use this method earlier, but the thread join was before the channel stops, so any thread that is waiting would make the joins fail.\n\nNow, I\u0027m switching the order of channel stopping and thread joining, and am calling it before any DLL unloading is done, so it should work much better now.\n\nBTW, rendererimpl destructor (which was another potential path to call stop) is not called frequently enough. I think it is because it is a smart pointer and it only goes away when all render threads do, but the original problem is that the render threads don\u0027t go away soon enough.",
+      "parentUuid": "df9654c8_5607142b",
       "range": {
         "startLine": 92,
         "startChar": 3,
