@@ -41,6 +41,8 @@ using emugl::RenderChannel;
 using emugl::RenderChannelPtr;
 using ChannelState = emugl::RenderChannel::State;
 
+static emugl::RendererPtr sRenderer;
+
 namespace android {
 namespace opengl {
 
@@ -336,6 +338,12 @@ private:
 void registerPipeService() {
     android::AndroidPipe::Service::add(new EmuglPipe::Service());
     registerGLProcessPipeService();
+}
+
+void stopRenderer() {
+    if (sRenderer.get()) {
+        sRenderer->stop();
+    }
 }
 
 }  // namespace opengl
