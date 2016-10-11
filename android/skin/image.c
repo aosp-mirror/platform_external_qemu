@@ -285,6 +285,10 @@ skin_image_alloc( SkinImageDesc*  desc, unsigned  hash )
 extern void *loadpng(const char *fn, unsigned *_width, unsigned *_height);
 extern void *readpng(const unsigned char*  base, size_t  size, unsigned *_width, unsigned *_height);
 
+extern void *loadWebP(const char *fileName, unsigned *pWidth, unsigned *pHeight);
+extern void *readWebP(const unsigned char*  base, size_t  size,
+                      unsigned *pWidth, unsigned *pHeight);
+
 static int
 skin_image_load( SkinImage*  image )
 {
@@ -307,20 +311,26 @@ skin_image_load( SkinImage*  image )
 
         data = readpng(base, size, &w, &h);
         if (data == NULL) {
-            fprintf(stderr, "failed to load built-in image file '%s'\n", path );
-            return -1;
+            data = readWebP(base, size, &w, &h);
+            if (data == NULL) {
+                fprintf(stderr, "failed to load built-in image file '%s'\n", path );
+                return -1;
+            }
         }
     } else {
         data = loadpng(path, &w, &h);
         if (data == NULL) {
-            fprintf(stderr, "failed to load image file '%s'\n", path );
-            return -1;
+            data = loadWebP(path, &w, &h);
+            if (data == NULL) {
+                fprintf(stderr, "failed to load image file '%s'\n", path );
+                return -1;
+            }
         }
     }
 
-   /* the data is loaded into memory as RGBA bytes by libpng. we want to manage
-    * the values as 32-bit ARGB pixels, so swap the bytes accordingly depending
-    * on our CPU endianess
+   /* The data is loaded into memory as RGBA bytes. We want to manage the values
+    * as 32-bit ARGB pixels, so swap the bytes accordingly, depending on our CPU
+    * endianess.
     */
     {
         unsigned*  d     = data;

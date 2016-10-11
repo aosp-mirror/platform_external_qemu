@@ -426,8 +426,9 @@ build_qemu_android_deps () {
         --without-pc-path \
         --disable-host-tool
 
-    # Handle libpng
+    # Handle libpng and libwebp
     do_autotools_package libpng
+    do_autotools_package libwebp
 
     do_autotools_package pixman \
         --disable-gtk \
