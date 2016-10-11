@@ -1,0 +1,257 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "df9654c8_3147f24d",
+        "filename": "android/base/network/Dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-11T18:41:36Z",
+      "side": 1,
+      "message": "final ?",
+      "range": {
+        "startLine": 44,
+        "startChar": 20,
+        "endLine": 44,
+        "endChar": 21
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df9654c8_11791684",
+        "filename": "android/base/network/Dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-11T18:41:36Z",
+      "side": 1,
+      "message": "you can just assign from StringView - it has an operator std::string\nalso, same comment as in IpAddress CL - can you make it conditional?",
+      "range": {
+        "startLine": 48,
+        "startChar": 27,
+        "endLine": 48,
+        "endChar": 29
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df9654c8_916526d7",
+        "filename": "android/base/network/Dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-11T18:41:36Z",
+      "side": 1,
+      "message": "nullptr",
+      "range": {
+        "startLine": 72,
+        "startChar": 44,
+        "endLine": 72,
+        "endChar": 48
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df9654c8_31eb7207",
+        "filename": "android/base/network/Dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-11T18:41:36Z",
+      "side": 1,
+      "message": "this should only be done if the previous call returned buffer overflow",
+      "range": {
+        "startLine": 114,
+        "startChar": 3,
+        "endLine": 117,
+        "endChar": 5
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df9654c8_916446b2",
+        "filename": "android/base/network/Dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-11T18:41:36Z",
+      "side": 1,
+      "message": "GetAdaptersAddresses()\nhttps://msdn.microsoft.com/en-us/library/windows/desktop/aa365915(v\u003dvs.85).aspx",
+      "range": {
+        "startLine": 119,
+        "startChar": 5,
+        "endLine": 120,
+        "endChar": 44
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df9654c8_d1740e5f",
+        "filename": "android/base/network/Dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-11T18:41:36Z",
+      "side": 1,
+      "message": ".good() isn\u0027t really needed here",
+      "range": {
+        "startLine": 143,
+        "startChar": 12,
+        "endLine": 143,
+        "endChar": 19
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df9654c8_31845247",
+        "filename": "android/base/network/Dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-11T18:41:36Z",
+      "side": 1,
+      "message": "nit: sResolver ?",
+      "range": {
+        "startLine": 176,
+        "startChar": 16,
+        "endLine": 176,
+        "endChar": 18
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df9654c8_917b6648",
+        "filename": "android/base/network/Dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-11T18:41:36Z",
+      "side": 1,
+      "message": "is it ok to have it non thread-safe?",
+      "range": {
+        "startLine": 202,
+        "startChar": 4,
+        "endLine": 204,
+        "endChar": 5
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df9654c8_b152220d",
+        "filename": "android/base/network/Dns.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-11T18:41:36Z",
+      "side": 1,
+      "message": "nit: \u003d default",
+      "range": {
+        "startLine": 53,
+        "startChar": 28,
+        "endLine": 53,
+        "endChar": 30
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df9654c8_1162f6d9",
+        "filename": "android/base/network/Dns.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-11T18:41:36Z",
+      "side": 1,
+      "message": "also disallow copy and assign?",
+      "range": {
+        "startLine": 73,
+        "startChar": 4,
+        "endLine": 73,
+        "endChar": 5
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df9654c8_310ff2ee",
+        "filename": "android/base/network/Dns_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-11T18:41:36Z",
+      "side": 1,
+      "message": "nit: move to some common UT header?",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 1
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
