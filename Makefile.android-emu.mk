@@ -397,6 +397,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-libselinux \
     emulator-libjpeg \
     emulator-libpng \
+    emulator-libwebp \
     emulator-zlib \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
 

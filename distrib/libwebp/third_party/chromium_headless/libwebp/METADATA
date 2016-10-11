@@ -1,0 +1,25 @@
+# Format: google3/devtools/metadata/metadata.proto (go/google3metadata)
+
+name: "libwebp"
+description:
+    "Library libwebp which is bundled with Chromium and required by Headless "
+    "Chromium. Please see //third_party/headless_chromium/README.txt for "
+    "details."
+
+third_party {
+  url {
+    type: ARCHIVE
+    value: "https://chromium.googlesource.com/chromium/src/+/fc48847937de8cc390729596b0a9be6e216f8820/third_party/libwebp"
+  }
+  version: "fc48847937de8cc390729596b0a9be6e216f8820 (Chromium 53.0.2758.1)"
+  last_upgrade_date: {
+    year: 2016
+    month: 6
+    day: 8
+  }
+
+  # NOTE: The "local_modifications" field is entirely optional and may be
+  # removed if it's not useful for the package.
+  #     See go/thirdparty-metadata-local-modifications
+  local_modifications: "http://google3/third_party/chromium_headless/libwebp/README.google?cl=124373188"
+}

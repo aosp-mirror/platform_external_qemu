@@ -559,6 +559,11 @@ probe_prebuilts_dir "Zlib" ZLIB_PREBUILTS_DIR qemu-android-deps
 probe_prebuilts_dir "Libpng" LIBPNG_PREBUILTS_DIR qemu-android-deps
 
 ###
+###  Libwebp probe
+###
+probe_prebuilts_dir "Libwebp" LIBWEBP_PREBUILTS_DIR qemu-android-deps
+
+###
 ###  Libxml2 probe
 ###
 probe_prebuilts_dir "Libxml2" LIBXML2_PREBUILTS_DIR common/libxml2
@@ -1026,6 +1031,7 @@ fi
 
 echo "ZLIB_PREBUILTS_DIR := $ZLIB_PREBUILTS_DIR" >> $config_mk
 echo "LIBPNG_PREBUILTS_DIR := $LIBPNG_PREBUILTS_DIR" >> $config_mk
+echo "LIBWEBP_PREBUILTS_DIR := $LIBWEBP_PREBUILTS_DIR" >> $config_mk
 echo "LIBXML2_PREBUILTS_DIR := $LIBXML2_PREBUILTS_DIR" >> $config_mk
 echo "LIBCURL_PREBUILTS_DIR := $LIBCURL_PREBUILTS_DIR" >> $config_mk
 echo "ANGLE_TRANSLATION_PREBUILTS_DIR := $ANGLE_TRANSLATION_PREBUILTS_DIR" >> $config_mk
