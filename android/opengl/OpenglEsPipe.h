@@ -12,6 +12,7 @@
 
 #include "android/base/Compiler.h"
 #include "android/emulation/AndroidPipe.h"
+#include "android/opengles.h"
 
 #include "OpenglRender/RenderChannel.h"
 
