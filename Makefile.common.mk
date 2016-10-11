@@ -7,6 +7,7 @@ include $(LOCAL_PATH)/distrib/libuuid.mk
 include $(LOCAL_PATH)/distrib/libxml2.mk
 include $(LOCAL_PATH)/distrib/libsparse/sources.mk
 include $(LOCAL_PATH)/distrib/libselinux/sources.mk
+include $(LOCAL_PATH)/distrib/libwebp/sources.mk
 include $(LOCAL_PATH)/distrib/ext4_utils/sources.mk
 include $(LOCAL_PATH)/distrib/libbreakpad.mk
 include $(LOCAL_PATH)/distrib/Qt5.mk
