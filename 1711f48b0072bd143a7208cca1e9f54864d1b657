@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fcefa6c0_76b2c199",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-12T18:56:30Z",
+      "side": 1,
+      "message": "please use the \u0027swap\u0027 trick from the original code. And set the mStopped flag under the same AutoLock",
+      "range": {
+        "startLine": 79,
+        "startChar": 4,
+        "endLine": 79,
+        "endChar": 20
+      },
+      "revId": "1711f48b0072bd143a7208cca1e9f54864d1b657",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcefa6c0_d6a6155d",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-12T18:56:30Z",
+      "side": 1,
+      "message": "return nullptr here",
+      "range": {
+        "startLine": 110,
+        "startChar": 29,
+        "endLine": 110,
+        "endChar": 36
+      },
+      "revId": "1711f48b0072bd143a7208cca1e9f54864d1b657",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
