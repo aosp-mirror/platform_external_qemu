@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fcefa6c0_27c3e655",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-12T17:36:20Z",
+      "side": 1,
+      "message": "why? the original code was thread-safe - it made sure mThreads is modified only under a lock, but it released the lock as fast as possible. Now the modification is unsafe.\nCould you please revert to the original version?",
+      "range": {
+        "startLine": 78,
+        "startChar": 0,
+        "endLine": 86,
+        "endChar": 1
+      },
+      "revId": "51e63e85adee0f2f6bdef0e36a46ed17272b146e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcefa6c0_47a712be",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-12T17:36:20Z",
+      "side": 1,
+      "message": "I think we need an |mStopped| flag so if there\u0027s a call to createRenderChannel() after stop(), we won\u0027t add another channel - otherwise there\u0027s a chance that we create new channels after stopping the renderer",
+      "range": {
+        "startLine": 88,
+        "startChar": 31,
+        "endLine": 88,
+        "endChar": 50
+      },
+      "revId": "51e63e85adee0f2f6bdef0e36a46ed17272b146e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
