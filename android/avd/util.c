@@ -110,11 +110,24 @@ path_getAvdContentPath(const char* avdName)
 
 char*
 propertyFile_getTargetAbi(const FileData* data) {
-    return propertyFile_getValue((const char*)data->data,
-                                 data->size,
-                                 "ro.product.cpu.abi");
+    char* abi = propertyFile_getValue((const char*)data->data,
+                                      data->size,
+                                      "ro.product.cpu.abi");
+    if (abi && !strcmp(abi, "mips")) {
+        // mips32r6 images show cpu.abi as just mips,
+        // but give correct abi in a dalvik property.
+        char* abi2 = propertyFile_getValue((const char*)data->data,
+                                           data->size,
+                                           "dalvik.vm.isa.mips.variant");
+        if (abi2 && !strcmp(abi2, "mips32r6")) {
+            AFREE(abi);
+            abi = abi2;
+        } else {
+            AFREE(abi2);
+        }
+    }
+    return abi;
 }
-
 
 char*
 propertyFile_getTargetArch(const FileData* data) {
@@ -129,6 +142,7 @@ propertyFile_getTargetArch(const FileData* data) {
             { "armeabi", "arm" },
             { "armeabi-v7a", "arm" },
             { "arm64-v8a", "arm64" },
+            { "mips32r6", "mips" },
         };
         size_t n;
         for (n = 0; n < sizeof(kData)/sizeof(kData[0]); ++n) {
