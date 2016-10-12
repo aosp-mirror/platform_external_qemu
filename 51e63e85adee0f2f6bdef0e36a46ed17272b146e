@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fcefa6c0_e2d26cc7",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-12T17:53:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fcefa6c0_27c3e655",
+      "range": {
+        "startLine": 78,
+        "startChar": 0,
+        "endLine": 86,
+        "endChar": 1
+      },
+      "revId": "51e63e85adee0f2f6bdef0e36a46ed17272b146e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fcefa6c0_47a712be",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2016-10-12T17:36:20Z",
       "side": 1,
       "message": "I think we need an |mStopped| flag so if there\u0027s a call to createRenderChannel() after stop(), we won\u0027t add another channel - otherwise there\u0027s a chance that we create new channels after stopping the renderer",
+      "range": {
+        "startLine": 88,
+        "startChar": 31,
+        "endLine": 88,
+        "endChar": 50
+      },
+      "revId": "51e63e85adee0f2f6bdef0e36a46ed17272b146e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcefa6c0_42e1c08f",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-12T17:53:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fcefa6c0_47a712be",
       "range": {
         "startLine": 88,
         "startChar": 31,
