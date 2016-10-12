@@ -28,3 +28,4 @@
 
 FEATURE_CONTROL_ITEM(GrallocSync)
 FEATURE_CONTROL_ITEM(EncryptUserData)
+FEATURE_CONTROL_ITEM(IntelPerformanceMonitoringUnit)
