@@ -709,6 +709,12 @@ extern "C" int main(int argc, char **argv) {
     args[n++] = "-cpu";
     args[n++] = kTarget.qemuCpu;
 
+    // Set env var to "on" for Intel PMU if the feature is enabled.
+    // cpu.c will then read that.
+    if (android::featurecontrol::isEnabled(android::featurecontrol::IntelPerformanceMonitoringUnit)) {
+        setenv("ANDROID_EMU_FEATURE_IntelPerformanceMonitoringUnit", "on", 1);
+    }
+
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
     char* accel_status = NULL;
     CpuAccelMode accel_mode = ACCEL_AUTO;
