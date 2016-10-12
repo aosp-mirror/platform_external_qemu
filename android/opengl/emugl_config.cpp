@@ -207,8 +207,7 @@ bool emuglConfig_init(EmuglConfig* config,
             D("%s: 'swiftshader' mode auto-selected\n", __FUNCTION__);
             gpu_mode = "swiftshader";
         } else if (no_window || blacklisted) {
-            if (!has_guest_renderer &&
-                stringVectorContains(sBackendList->names(), "swiftshader")) {
+            if (stringVectorContains(sBackendList->names(), "swiftshader")) {
                 D("%s: Headless (-no-window) mode (or blacklisted GPU driver)"
                   ", using Swiftshader backend\n",
                   __FUNCTION__);
