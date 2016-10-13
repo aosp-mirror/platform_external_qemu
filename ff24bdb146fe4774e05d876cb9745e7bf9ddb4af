@@ -22,6 +22,30 @@
       "revId": "ff24bdb146fe4774e05d876cb9745e7bf9ddb4af",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c9e567e_84b268fe",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-10-13T18:07:03Z",
+      "side": 1,
+      "message": "ah, same here: I was wondering why we are iterating mThreads since it was mThreads.clear() :)",
+      "parentUuid": "7c9e567e_4466a0bc",
+      "range": {
+        "startLine": 83,
+        "startChar": 25,
+        "endLine": 83,
+        "endChar": 32
+      },
+      "revId": "ff24bdb146fe4774e05d876cb9745e7bf9ddb4af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
