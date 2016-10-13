@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c9e567e_4466a0bc",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-13T17:58:47Z",
+      "side": 1,
+      "message": "oh, so this was the actual bug!",
+      "range": {
+        "startLine": 83,
+        "startChar": 25,
+        "endLine": 83,
+        "endChar": 32
+      },
+      "revId": "ff24bdb146fe4774e05d876cb9745e7bf9ddb4af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
