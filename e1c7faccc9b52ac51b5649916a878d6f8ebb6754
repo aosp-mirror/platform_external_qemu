@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7cec960a_17a45ca0",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-13T20:09:36Z",
+      "side": 0,
+      "message": "why did you remove it?",
+      "range": {
+        "startLine": 82,
+        "startChar": 4,
+        "endLine": 82,
+        "endChar": 18
+      },
+      "revId": "e1c7faccc9b52ac51b5649916a878d6f8ebb6754",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
