@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9c7dca55_22a7ae5a",
+        "filename": "android/base/network/IpAddress.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-14T14:17:27Z",
+      "side": 1,
+      "message": "|string[string.size()]| is technically out-of-bounds access for a StringView, so no :-/\n\nThere is no way to safely do what you want here. The alternative is to change the constructor to take a |const char *| instead, to be passed directly to inet_pton(AF_INET,...)",
+      "parentUuid": "df9654c8_56971449",
+      "range": {
+        "startLine": 47,
+        "startChar": 4,
+        "endLine": 47,
+        "endChar": 51
+      },
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dff9f4d6_f0c2defd",
         "filename": "android/base/network/IpAddress.cpp",
         "patchSetId": 1
@@ -36,6 +60,24 @@
       "writtenOn": "2016-10-10T18:05:45Z",
       "side": 1,
       "message": "In some places you use \"this-\u003e\" to access members and in other places you don\u0027t. Does our style guide mention any of this? I prefer not to have it, at least if members are prefix with \"m\", in this case I\u0027m fine with either. Would be nice if it was consistent though.",
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9c7dca55_62a1b642",
+        "filename": "android/base/network/IpAddress.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-14T14:17:27Z",
+      "side": 1,
+      "message": "I can see how this is annoying. This comes from the fact that the fields of a struct don\u0027t have the member-specific m prefix (see https://google.github.io/styleguide/cppguide.html#Variable_Names), because IpAddress started as a passive struct initially. This is no longer the case.\n\nWhen this happens, using |this-\u003efield| is used to make it explicit that the code is referencing the member, instead of a local variable. The |this-\u003e| prefix can be omitted if the context of the code is small / clear enough though.\n\nI\u0027d rather change it to a full class with accessors instead then, so we\u0027ll get consistent with the coding style.",
+      "parentUuid": "dff9f4d6_f0c2defd",
       "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -59,6 +101,24 @@
     },
     {
       "key": {
+        "uuid": "9c7dca55_a2449e75",
+        "filename": "android/base/network/IpAddress.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-14T14:17:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dff9f4d6_f0709e01",
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df9654c8_71a6daab",
         "filename": "android/base/network/IpAddress.cpp",
         "patchSetId": 1
@@ -70,6 +130,30 @@
       "writtenOn": "2016-10-11T18:21:55Z",
       "side": 1,
       "message": "this isn\u0027t really required, as move() should leave the source in a valid _unspecified_ state. Also, move() should be faster or of the same speed as copying, but here it\u0027s slower because of the assignment",
+      "range": {
+        "startLine": 124,
+        "startChar": 4,
+        "endLine": 124,
+        "endChar": 25
+      },
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9c7dca55_82507a29",
+        "filename": "android/base/network/IpAddress.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-14T14:17:27Z",
+      "side": 1,
+      "message": "Ok, I removed moveFrom() entirely.",
+      "parentUuid": "df9654c8_71a6daab",
       "range": {
         "startLine": 124,
         "startChar": 4,
@@ -122,6 +206,30 @@
     },
     {
       "key": {
+        "uuid": "9c7dca55_42567227",
+        "filename": "android/base/network/IpAddress.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-14T14:17:27Z",
+      "side": 1,
+      "message": "I\u0027ve replaced this with uses of sizeof() + some static_asserts().",
+      "parentUuid": "df9654c8_51db9e0e",
+      "range": {
+        "startLine": 140,
+        "startChar": 55,
+        "endLine": 140,
+        "endChar": 57
+      },
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5fcee4f0_c8c70f0c",
         "filename": "android/base/network/IpAddress.h",
         "patchSetId": 1
@@ -139,6 +247,24 @@
     },
     {
       "key": {
+        "uuid": "9c7dca55_22224ec2",
+        "filename": "android/base/network/IpAddress.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-14T14:17:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5fcee4f0_c8c70f0c",
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df9654c8_3636089b",
         "filename": "android/base/network/IpAddress.h",
         "patchSetId": 1
@@ -150,6 +276,30 @@
       "writtenOn": "2016-10-11T18:21:55Z",
       "side": 1,
       "message": "enum class ?",
+      "range": {
+        "startLine": 27,
+        "startChar": 8,
+        "endLine": 27,
+        "endChar": 9
+      },
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9c7dca55_421f5279",
+        "filename": "android/base/network/IpAddress.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-14T14:17:27Z",
+      "side": 1,
+      "message": "This is now private, so I don\u0027t think that has any benefits now.",
+      "parentUuid": "df9654c8_3636089b",
       "range": {
         "startLine": 27,
         "startChar": 8,
@@ -208,6 +358,30 @@
     },
     {
       "key": {
+        "uuid": "9c7dca55_622c56b2",
+        "filename": "android/base/network/IpAddress.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-14T14:17:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df9654c8_360fe8ee",
+      "range": {
+        "startLine": 43,
+        "startChar": 16,
+        "endLine": 43,
+        "endChar": 18
+      },
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df9654c8_71041a26",
         "filename": "android/base/network/IpAddress.h",
         "patchSetId": 1
@@ -219,6 +393,30 @@
       "writtenOn": "2016-10-11T18:21:55Z",
       "side": 1,
       "message": "explicit too?",
+      "range": {
+        "startLine": 57,
+        "startChar": 4,
+        "endLine": 57,
+        "endChar": 13
+      },
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9c7dca55_82295aa3",
+        "filename": "android/base/network/IpAddress.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-14T14:17:27Z",
+      "side": 1,
+      "message": "no, the point is to get automatic conversion from |const char*| and |std::string| here.",
+      "parentUuid": "df9654c8_71041a26",
       "range": {
         "startLine": 57,
         "startChar": 4,
@@ -254,6 +452,30 @@
     },
     {
       "key": {
+        "uuid": "9c7dca55_e2106667",
+        "filename": "android/base/network/IpAddress.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-14T14:17:27Z",
+      "side": 1,
+      "message": "I prefer to be conservative in case |this| points to a a corrupted instance (e.g. through a dangling reference).",
+      "parentUuid": "df9654c8_16410cf1",
+      "range": {
+        "startLine": 60,
+        "startChar": 37,
+        "endLine": 60,
+        "endChar": 62
+      },
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df9654c8_b114e2b2",
         "filename": "android/base/network/IpAddress.h",
         "patchSetId": 1
@@ -265,6 +487,30 @@
       "writtenOn": "2016-10-11T18:21:55Z",
       "side": 1,
       "message": "check for self-assignment?",
+      "range": {
+        "startLine": 72,
+        "startChar": 8,
+        "endLine": 72,
+        "endChar": 31
+      },
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9c7dca55_02162a60",
+        "filename": "android/base/network/IpAddress.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-14T14:17:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df9654c8_b114e2b2",
       "range": {
         "startLine": 72,
         "startChar": 8,
@@ -300,6 +546,30 @@
     },
     {
       "key": {
+        "uuid": "9c7dca55_4208323b",
+        "filename": "android/base/network/IpAddress.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-14T14:17:27Z",
+      "side": 1,
+      "message": "But that works equally well, and is less typing :)",
+      "parentUuid": "df9654c8_d646c40a",
+      "range": {
+        "startLine": 83,
+        "startChar": 0,
+        "endLine": 88,
+        "endChar": 5
+      },
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df9654c8_f10aea2e",
         "filename": "android/base/network/IpAddress.h",
         "patchSetId": 1
@@ -317,6 +587,24 @@
     },
     {
       "key": {
+        "uuid": "9c7dca55_220b2e3a",
+        "filename": "android/base/network/IpAddress.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-14T14:17:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df9654c8_f10aea2e",
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5fcee4f0_28106bb1",
         "filename": "android/base/network/IpAddress_unittest.cpp",
         "patchSetId": 1
@@ -328,6 +616,24 @@
       "writtenOn": "2016-10-10T18:05:45Z",
       "side": 1,
       "message": "Should this also check that addr0 is still valid to prevent mixups between moving and copying?",
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9c7dca55_a22d7eb5",
+        "filename": "android/base/network/IpAddress_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-14T14:17:27Z",
+      "side": 1,
+      "message": "Since moving no longer destroys the source value, probably not :)",
+      "parentUuid": "5fcee4f0_28106bb1",
       "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -357,6 +663,30 @@
     },
     {
       "key": {
+        "uuid": "9c7dca55_c2328212",
+        "filename": "android/base/network/IpAddress_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-14T14:17:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df9654c8_31a6125d",
+      "range": {
+        "startLine": 70,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 1
+      },
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df9654c8_f10f4a45",
         "filename": "android/base/network/IpAddress_unittest.cpp",
         "patchSetId": 1
@@ -374,6 +704,24 @@
     },
     {
       "key": {
+        "uuid": "9c7dca55_e23786ff",
+        "filename": "android/base/network/IpAddress_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-14T14:17:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df9654c8_f10f4a45",
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df9654c8_310a9236",
         "filename": "android/utils/ipaddr.cpp",
         "patchSetId": 1
@@ -385,6 +733,30 @@
       "writtenOn": "2016-10-11T18:21:55Z",
       "side": 1,
       "message": "looks like check for ipvv4 is enough here",
+      "range": {
+        "startLine": 24,
+        "startChar": 8,
+        "endLine": 24,
+        "endChar": 25
+      },
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9c7dca55_023d4ade",
+        "filename": "android/utils/ipaddr.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-14T14:17:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df9654c8_310a9236",
       "range": {
         "startLine": 24,
         "startChar": 8,
