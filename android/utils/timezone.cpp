@@ -16,12 +16,18 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
+#include "android/utils/setenv.h"
+#include "android/base/files/PathUtils.h"
+#include "android/base/system/System.h"
+#include "android/base/StringFormat.h"
+#include "android/base/memory/LazyInstance.h"
 
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <fstream>
+#include <sstream>
 #include <memory>
 #include <string>
 
@@ -39,12 +45,11 @@
 #  define  D(...)  ((void)0)
 #endif
 
+/* forward declartions*/
+static const char* get_zoneinfo_timezone( void );
 
-
-static const char* get_zoneinfo_timezone( void );  /* forward */
-
-static char         android_timezone0[256];
-static const char*  android_timezone;
+static char android_timezone0[256];
+static const char* android_timezone;
 static int          android_timezone_init;
 
 static int
@@ -68,26 +73,6 @@ check_timezone_is_zoneinfo(const char*  tz)
 
     return 1;
 }
-
-int
-timezone_set( const char*  tzname )
-{
-    int   len;
-
-    if ( !check_timezone_is_zoneinfo(tzname) )
-        return -1;
-
-    len = strlen(tzname);
-    if (len > (int)sizeof(android_timezone0)-1)
-        return -1;
-
-    strcpy( android_timezone0, tzname );
-    android_timezone      = android_timezone0;
-    android_timezone_init = 1;
-
-    return 0;
-}
-
 
 char*
 bufprint_zoneinfo_timezone( char*  p, char*  end )
@@ -422,8 +407,10 @@ get_zoneinfo_timezone( void )
 
 /* on Windows, we need to translate the Windows timezone into a ZoneInfo one */
 #ifdef _WIN32
-#include <time.h>
 
+#include "android/base/files/ScopedRegKey.h"
+#include "android/base/system/Win32Utils.h"
+#include <windows.h>
 typedef struct {
     const char*  win_name;
     const char*  zoneinfo_name;
@@ -928,3 +915,480 @@ Exit:
 
 #endif /* _WIN32 */
 
+namespace {
+
+class TimeZone {
+public:
+    TimeZone();
+    struct tm* android_localtime(time_t* time_now);
+    long android_tzoffset_in_seconds(time_t* time_now);
+    int android_timezone_set(const char* tzname);
+private:
+    struct tm standard_date_utc;
+    struct tm daylight_date_utc;
+    long standard_offset;
+    long daylight_offset;
+    int current_year;
+    int android_timezone_init;
+    std::string timezone_name;
+    static const int kSecondsPerDay = 60 * 60 * 24;
+    long get_tzdiff(time_t* time_now);
+    /*
+     * Return 1 if current timezone is in daylight saving,
+     *        0 if current timezone is NOT in daylight saving.
+     *        -1 if current timezone does NOT have daylight saving
+     * */
+    int get_isdst(time_t* time_now);
+    /*
+     * Return 1 if struct tm a is bigger than struct tm b
+     *        0 if equal
+     *        -1 if struct tm a is less than struct tm b
+     * */
+    static int utc_compare(struct tm*, struct tm*);
+    /*
+     * Compute the timediff in seconds assuming the diff is within 24 hours.
+     * Leap second is NOT taken into account.
+     * */
+    static long timediff(struct tm*, struct tm*);
+#ifdef _WIN32
+    static void convert_systemtime(PSYSTEMTIME win_tm, struct tm* android_tm);
+    /*
+     * Translate tzid to windows timezone name. Then, retrieve time zone
+     * information from registry.  Does NOT work on WINE.
+     * */
+    static int get_time_zone_information_from_registry(const char* win_name, TIME_ZONE_INFORMATION* tzi);
+#else
+    /*
+     * Sample format: Mar 13 07:00:00 2016
+     * */
+    static int parse_zdump_date(struct tm& date, std::vector<std::string>& tokens);
+    /*
+     * Run sample shell cmd: zdump -v America/New_York | grep 2016
+     * Sample Output:
+     * America/New_York  Sun Mar 13 06:59:59 2016 UT = Sun Mar 13 01:59:59 2016 EST isdst=0 [gmtoff=-18000]
+     * America/New_York  Sun Mar 13 07:00:00 2016 UT = Sun Mar 13 03:00:00 2016 EDT isdst=1 [gmtoff=-14400]
+     * America/New_York  Sun Nov  6 05:59:59 2016 UT = Sun Nov  6 01:59:59 2016 EDT isdst=1 [gmtoff=-14400]
+     * America/New_York  Sun Nov  6 06:00:00 2016 UT = Sun Nov  6 01:00:00 2016 EST isdst=0 [gmtoff=-18000]
+     *
+     * Caution: gmtoff is not shown on Mac terminal.
+     * Return 0 if the timezone is found and has daylight saving given the current
+     * year. Otherwise return -1
+     * */
+    int set_android_tzdiff_from_zdump();
+    /*
+     * Run sample shell cmd: TZ=America/New_York date +%:z
+     * Sample output: -0400
+     *
+     * Assuming that the timezone doesn't have daylight saving,
+     * Return 0 if the timezone is found otherwise return -1.
+     **/
+    int set_android_tzdiff_from_date();
+#endif
+};
+
+TimeZone::TimeZone(){
+    time_t time_now = time(NULL);
+    current_year = gmtime(&time_now)->tm_year + 1900;
+    android_timezone_init = 0;
+}
+
+long TimeZone::android_tzoffset_in_seconds(time_t* time_now)
+{
+    if (this->android_timezone_init) {
+        //reset android timezone if year has changed
+        int year = gmtime(time_now)->tm_year + 1900;
+        if (year != current_year){
+            current_year = year;
+            android_timezone_set(timezone_name.c_str());
+        }
+        return get_tzdiff(time_now);
+    }
+    else{
+        struct tm local = *localtime(time_now);
+        struct tm utc = *gmtime(time_now);
+        return this->timediff(&local, &utc);
+    }
+}
+
+struct tm* TimeZone::android_localtime(time_t* time_now)
+{
+    if (this->android_timezone_init) {
+        //reset android timezone if year has changed
+        int year = gmtime(time_now)->tm_year + 1900;
+        if (year != current_year){
+            current_year = year;
+            android_timezone_set(timezone_name.c_str());
+        }
+
+        int is_dst = get_isdst(time_now);
+        long tzdiff = get_tzdiff(time_now);
+        time_t local_time = *time_now + tzdiff;
+        struct tm* local = NULL;
+        local = gmtime(&local_time);
+        local->tm_isdst = is_dst;
+        return local;
+    }
+    else{
+        return localtime(time_now);
+    }
+}
+
+//static
+int TimeZone::utc_compare(struct tm* a, struct tm* b)
+{
+    if (a->tm_year > b->tm_year)
+        return 1;
+    else if (a->tm_year < b->tm_year)
+        return -1;
+    else {
+        if (a->tm_mon > b->tm_mon)
+            return 1;
+        else if (a->tm_mon < b->tm_mon)
+            return -1;
+        else {
+            if (a->tm_mday > b->tm_mday)
+                return 1;
+            else if (a->tm_mday < b->tm_mday)
+                return -1;
+            else {
+                if (a->tm_hour > b->tm_hour)
+                    return 1;
+                else if (a->tm_hour < b->tm_hour)
+                    return -1;
+                else {
+                    if (a->tm_min > b->tm_min)
+                        return 1;
+                    else if (a->tm_min < b->tm_min)
+                        return -1;
+                    else {
+                        if (a->tm_sec > b->tm_sec)
+                            return 1;
+                        else if (a->tm_sec < b->tm_sec)
+                            return -1;
+                        else
+                            return 0;
+                    }
+                }
+            }
+        }
+    }
+}
+
+int TimeZone::get_isdst(time_t* time_now)
+{
+    if (daylight_offset == 0)
+        return -1;
+    else{
+        struct tm utc = *gmtime(time_now);
+        if(utc_compare(&utc, &standard_date_utc) < 0 ||
+            utc_compare(&utc, &daylight_date_utc) >= 0)
+            return 0;
+        else
+            return 1;
+    }
+}
+
+long TimeZone::get_tzdiff(time_t* time_now)
+{
+    int isdst = get_isdst(time_now);
+    if (isdst <= 0)
+        return standard_offset;
+    else
+        return standard_offset + daylight_offset;
+}
+
+
+//static
+long TimeZone::timediff(struct tm* a, struct tm* b)
+{
+    long e_a = a->tm_sec + 60 * (a->tm_min + 60 * a->tm_hour);
+    long e_b = b->tm_sec + 60 * (b->tm_min + 60 * b->tm_hour);
+    if (a->tm_year > b->tm_year)
+        e_a += kSecondsPerDay;
+    else if (a->tm_year < b->tm_year)
+        e_b += kSecondsPerDay;
+    else {
+        if (a->tm_mon > b->tm_mon)
+            e_a += kSecondsPerDay;
+        else if (a->tm_mon < b->tm_mon)
+            e_b += kSecondsPerDay;
+        else{
+            e_a += kSecondsPerDay * a->tm_mday;
+            e_b += kSecondsPerDay * b->tm_mday;
+        }
+    }
+
+    return e_a - e_b;
+}
+#ifdef _WIN32
+
+typedef struct _REG_TZI_FORMAT
+{
+    LONG Bias;
+    LONG StandardBias;
+    LONG DaylightBias;
+    SYSTEMTIME StandardDate;
+    SYSTEMTIME DaylightDate;
+}REG_TZI_FORMAT;
+
+//static
+int TimeZone::get_time_zone_information_from_registry(const char* win_name, TIME_ZONE_INFORMATION* tzi)
+{
+    using android::base::ScopedRegKey;
+    using android::base::Win32Utils;
+    HKEY hkey = 0;
+    std::string registry_path = std::string("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Time Zones\\")
+        + std::string(win_name);
+    LONG result = RegOpenKeyEx(
+        HKEY_LOCAL_MACHINE,
+        registry_path.c_str(),
+        0,
+        KEY_READ,
+        &hkey);
+
+    if (result != ERROR_SUCCESS) {
+        std::string error_string = Win32Utils::getErrorString(result);
+        D( "RegOpenKeyEx failed %li %s\n", result, error_string.c_str());
+        return -1;
+    }
+
+    REG_TZI_FORMAT binary_tzi;
+    DWORD data_type;
+    DWORD len = sizeof(binary_tzi);
+    ScopedRegKey h_timezone_key(hkey);
+
+    result = RegQueryValueEx(
+        h_timezone_key.get(),
+        "TZI",
+        NULL,
+        &data_type,
+        (LPBYTE) &binary_tzi,
+        &len);
+
+    if(result != ERROR_SUCCESS || data_type != REG_BINARY){
+        std::string error_string = Win32Utils::getErrorString(result);
+        D( "RegQueryValueEx failed %li %s\n", result, error_string.c_str());
+        return -1;
+    }
+    tzi->Bias = binary_tzi.Bias;
+    tzi->DaylightBias = binary_tzi.DaylightBias;
+    tzi->DaylightDate = binary_tzi.DaylightDate;
+    tzi->StandardBias = binary_tzi.StandardBias;
+    tzi->StandardDate = binary_tzi.StandardDate;
+
+    return 0;
+}
+
+//static
+void TimeZone::convert_systemtime(PSYSTEMTIME win_tm, struct tm* android_tm)
+{
+    android_tm->tm_year = (int)win_tm->wYear - 1900;
+    android_tm->tm_mon = (int)win_tm->wMonth - 1;
+    android_tm->tm_mday = (int)win_tm->wDay;
+    android_tm->tm_hour = (int)win_tm->wHour;
+    android_tm->tm_min = (int)win_tm->wMinute;
+    android_tm->tm_sec = (int)win_tm->wSecond;
+}
+
+#else
+
+//static
+int TimeZone::parse_zdump_date(struct tm& date, std::vector<std::string>& tokens)
+{
+    static const char mon_name[][4] = {
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    };
+    if (tokens.size() >= 4) {
+         int tm_mon = -1;
+         const char* mon = tokens[0].c_str();
+         for(int i = 0; i < 12; i++){
+             if(!strncmp(mon, mon_name[i], 3)){
+                  tm_mon = i;
+                  break;
+             }
+         }
+         if (tm_mon == -1)
+             return -1;
+         date.tm_mon = tm_mon;
+         date.tm_mday = stoi(tokens[1]);
+         date.tm_hour = stoi(tokens[2].substr(0,2));
+         date.tm_min = stoi(tokens[2].substr(3, 2));
+         date.tm_sec = stoi(tokens[2].substr(6,2));
+         date.tm_year = stoi(tokens[3]) - 1900;
+         return 0;
+    }
+    else
+        return -1;
+}
+
+int TimeZone::set_android_tzdiff_from_zdump()
+{
+    using namespace android::base;
+    std::string zdump_cmd = StringFormat(
+        "zdump -v %s | grep %d", timezone_name, current_year);
+    std::vector<std::string> shell_cmd = {"/bin/bash", "-c", zdump_cmd.c_str()};
+    RunOptions run_flags = System::RunOptions::WaitForCompletion |
+                           System::RunOptions::TerminateOnTimeout |
+                           System::RunOptions::DumpOutputToFile;
+    System::Duration timeout = 1000;
+    System::ProcessExitCode exit_code;
+    const std::string output_file = PathUtils::join(System::get()->getTempDir(), "android_tzoffset");
+
+
+    bool command_ran = System::get()->runCommand(
+            shell_cmd, run_flags, timeout, &exit_code, nullptr, output_file);
+
+    if (command_ran && !exit_code) {
+        std::ifstream file(output_file.c_str());
+        std::string line;
+        std::vector<std::string> rules;
+        while(std::getline(file, line)) {
+            rules.push_back(std::string(line));
+        }
+        long gmtoff_dst = 0;
+        long gmtoff_standard = 0;
+        if(rules.size() == 4) {
+            //tokenize only the 2nd and 4th rule
+            for(int i = 1; i < 4; i += 2){
+                std::stringstream ss(rules.at(i));
+                std::vector<std::string> tokens;
+                std::string token;
+                while(ss >> token)
+                    tokens.push_back(std::string(token));
+                std::vector<std::string> utc_tokens(tokens.begin() + 2, tokens.begin() + 6);
+                if (parse_zdump_date(i == 1 ? standard_date_utc : daylight_date_utc, utc_tokens))
+                    return -1;
+                struct tm local_date;
+                std::vector<std::string> local_tokens(tokens.begin() + 9, tokens.begin() + 13);
+                if (parse_zdump_date(local_date, local_tokens))
+                    return -1;
+                if (i == 1)
+                    gmtoff_dst = this->timediff(&local_date, &standard_date_utc);
+                else
+                    gmtoff_standard = this->timediff(&local_date, &daylight_date_utc);
+            }
+            standard_offset = gmtoff_standard;
+            daylight_offset = gmtoff_dst - gmtoff_standard;
+            return 0;
+        }
+        else
+            return -1;
+    }
+    else
+        return -1;
+}
+
+int TimeZone::set_android_tzdiff_from_date()
+{
+    using namespace android::base;
+    std::string date_cmd = StringFormat("TZ=%s date +%%z", timezone_name.c_str());
+    std::vector<std::string> shell_cmd = {"/bin/bash", "-c", date_cmd.c_str()};
+    RunOptions run_flags = System::RunOptions::WaitForCompletion |
+                           System::RunOptions::TerminateOnTimeout |
+                           System::RunOptions::DumpOutputToFile;
+    System::Duration timeout = 1000;
+    System::ProcessExitCode exit_code;
+    const std::string output_file = PathUtils::join(System::get()->getTempDir(), "android_tzoffset");
+
+    bool command_ran = System::get()->runCommand(
+            shell_cmd, run_flags, timeout, &exit_code, nullptr, output_file);
+
+    if (command_ran && !exit_code) {
+        std::ifstream file(output_file.c_str());
+        std::string tzdiff;
+        std::getline(file, tzdiff);
+        const char* tzdiff_cstr = tzdiff.c_str();
+        int sign = (tzdiff_cstr[0] == '+') ? 1 : -1;
+        int diff_in_secs =  60 * (std::stoi(tzdiff.substr(1, 2)) * 60 + std::stoi(tzdiff.substr(3,2)));
+        file.close();
+        standard_offset = sign * diff_in_secs;
+        daylight_offset = 0;
+        return 0;
+    }
+    else
+        return -1;
+}
+
+#endif
+
+
+int TimeZone::android_timezone_set(const char* tzname)
+{
+    timezone_name = std::string(tzname);
+    this->android_timezone_init = 0;
+#ifdef _WIN32
+    const char* win_name = NULL;
+    for (const Win32Timezone* win32tz = _win32_timezones; win32tz->win_name != NULL; win32tz++){
+        if ( !strcmp(win32tz->zoneinfo_name, tzname) ) {
+            win_name = win32tz->win_name;
+            break;
+        }
+    }
+
+    if (win_name){
+        TIME_ZONE_INFORMATION win_tzi;
+        if (get_time_zone_information_from_registry(win_name, &win_tzi))
+            D( "%s: could not retrieve time zone information from registry on Windows, use host localtime by default.\n", __FUNCTION__ );
+        else{
+            //UTC = localtime + Bias
+            standard_offset = -win_tzi.StandardBias * 60;
+            daylight_offset = -win_tzi.DaylightBias * 60;
+            if (daylight_offset != 0) {
+                convert_systemtime(&win_tzi.StandardDate, &standard_date_utc);
+                convert_systemtime(&win_tzi.DaylightDate, &standard_date_utc);
+            }
+            this->android_timezone_init = 1;
+        }
+    }
+    else
+        D( "%s: could not determine current timezone\n", __FUNCTION__ );
+#else
+    if (set_android_tzdiff_from_zdump()){
+        if(!set_android_tzdiff_from_date())
+            this->android_timezone_init = 1;
+        else
+            D( "%s: could not retrieve time zone information from zdump or date command, use host localtime by default.\n", __FUNCTION__ );
+    }
+    else
+        this->android_timezone_init = 1;
+#endif
+    return this->android_timezone_init ? 0 : -1;
+}
+
+android::base::LazyInstance<TimeZone> sAndroidTimeZone = LAZY_INSTANCE_INIT;
+
+} //namespace
+
+int
+timezone_set( const char*  tzname )
+{
+    int   len;
+    android_timezone_init = 0;
+    if (!check_timezone_is_zoneinfo(tzname))
+       return -1;
+
+    len = strlen(tzname);
+    if (len > (int)sizeof(android_timezone0)-1)
+        return -1;
+    strcpy(android_timezone0, tzname);
+    android_timezone = android_timezone0;
+    if (sAndroidTimeZone->android_timezone_set(tzname)){
+        return -1;
+    }
+    else{
+        android_timezone_init = 1;
+        return 0;
+    }
+}
+
+long
+android_tzoffset_in_seconds( time_t* time )
+{
+    return sAndroidTimeZone->android_tzoffset_in_seconds(time);
+}
+
+struct tm* android_localtime(time_t* time)
+{
+    return sAndroidTimeZone->android_localtime(time);
+}

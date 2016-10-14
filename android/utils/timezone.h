@@ -13,10 +13,13 @@
 #pragma once
 
 #include "android/utils/compiler.h"
+#include <time.h>
 
 ANDROID_BEGIN_HEADER
 
-/* try to set the default host timezone, returns 0 on success, or -1 if
+/* try to set the default android OS timezone, this operation will affect the
+ * emulated networked time in virtual modem
+ * returns 0 on success, or -1 if
  * 'tzname' is not in zoneinfo format (e.g. Area/Location)
  */
 extern int  timezone_set( const char*  tzname );
@@ -31,5 +34,16 @@ extern int  timezone_set( const char*  tzname );
  * if TZ is defined to something like "CET" or "PST", this will return the name "Unknown/Unknown"
  */
 extern char*  bufprint_zoneinfo_timezone( char*  buffer, char*  end );
+
+/* Return the time zone offset including day light saving in seconds with respect to
+ * UTC in guest android OS
+ * + positive if the timezone is east of GMT
+ * - negative if the timezone is west of GMT
+ */
+extern long android_tzoffset_in_seconds(time_t* time);
+
+/* Return local time based on android timezone NOT host OS
+ */
+extern struct tm* android_localtime(time_t* time);
 
 ANDROID_END_HEADER
