@@ -13,6 +13,7 @@
 
 #include "android/telephony/debug.h"
 #include "android/telephony/gsm.h"
+#include "android/utils/timezone.h"
 
 #include <assert.h>
 #include <memory.h>
@@ -218,9 +219,8 @@ void
 sms_timestamp_now( SmsTimeStamp  stamp )
 {
     time_t     now_time = time(NULL);
-    struct tm  gm       = *(gmtime(&now_time));
-    struct tm  local    = *(localtime(&now_time));
-    int        tzdiff   = 0;
+    struct tm  local    = *(android_localtime(&now_time));
+    int        tzdiff   = android_tzoffset_in_seconds(&now_time) / (15 * 60); /*tzdiff is in number of quater-hours*/
 
     stamp->data[0] = gsm_int_to_bcdi( local.tm_year % 100 );
     stamp->data[1] = gsm_int_to_bcdi( local.tm_mon+1 );
@@ -229,11 +229,6 @@ sms_timestamp_now( SmsTimeStamp  stamp )
     stamp->data[4] = gsm_int_to_bcdi( local.tm_min );
     stamp->data[5] = gsm_int_to_bcdi( local.tm_sec );
 
-    tzdiff = (local.tm_hour*4 + local.tm_min/15) - (gm.tm_hour*4 + gm.tm_min/15);
-    if (local.tm_yday > gm.tm_yday)
-        tzdiff += 24*4;
-    else if (local.tm_yday < gm.tm_yday)
-        tzdiff -= 24*4;
 
     stamp->data[6] = gsm_int_to_bcdi( tzdiff >= 0 ? tzdiff : -tzdiff );
     if (tzdiff < 0)

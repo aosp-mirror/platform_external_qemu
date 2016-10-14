@@ -1861,25 +1861,14 @@ static void
 amodem_addTimeUpdate( AModem  modem )
 {
     time_t       now = time(NULL);
-    struct tm    utc, local;
-    long         e_local, e_utc;
+    struct tm    utc;
     long         tzdiff;
     char         tzname[64];
+    int          isdst;
 
-    tzset();
-
-    utc   = *gmtime( &now );
-    local = *localtime( &now );
-
-    e_local = local.tm_min + 60*(local.tm_hour + 24*local.tm_yday);
-    e_utc   = utc.tm_min   + 60*(utc.tm_hour   + 24*utc.tm_yday);
-
-    if ( utc.tm_year < local.tm_year )
-        e_local += 24*60;
-    else if ( utc.tm_year > local.tm_year )
-        e_utc += 24*60;
-
-    tzdiff = e_local - e_utc;  /* timezone offset in minutes */
+    utc   = *gmtime(&now);
+    tzdiff = android_tzoffset_in_seconds(&now) / (15 * 60);  /* timezone offset is in number of quater-hours */
+    isdst = android_localtime(&now)->tm_isdst;
 
    /* retrieve a zoneinfo-compatible name for the host timezone
     */
@@ -1911,8 +1900,8 @@ amodem_addTimeUpdate( AModem  modem )
     amodem_add_line( modem, "%%CTZV: %02d/%02d/%02d:%02d:%02d:%02d%c%d:%d:%s\r\n",
              (utc.tm_year + 1900) % 100, utc.tm_mon + 1, utc.tm_mday,
              utc.tm_hour, utc.tm_min, utc.tm_sec,
-             (tzdiff >= 0) ? '+' : '-', (tzdiff >= 0 ? tzdiff : -tzdiff) / 15,
-             (local.tm_isdst > 0),
+             (tzdiff >= 0) ? '+' : '-', (tzdiff >= 0 ? tzdiff : -tzdiff),
+             (isdst > 0),
              tzname );
 }
 
