@@ -14,11 +14,8 @@
 #include <math.h>
 #include <stdio.h>
 
-void
-hwLcd_setBootProperty(int density)
-{
-    char  temp[8];
-
+int
+hwLcd_mapDensity(int density) {
     /* Map density to one of our bucket values.
        The TV density is a bit particular (and not actually a bucket
        value) so we do only exact match on it.
@@ -28,12 +25,18 @@ hwLcd_setBootProperty(int density)
             density = LCD_DENSITY_LDPI;
         else if (density < (LCD_DENSITY_MDPI + LCD_DENSITY_HDPI)/2)
             density = LCD_DENSITY_MDPI;
-        else if (density < (LCD_DENSITY_HDPI + LCD_DENSITY_280DPI)/2)
+        else if (density < (LCD_DENSITY_HDPI + LCD_DENSITY_260DPI)/2)
             density = LCD_DENSITY_HDPI;
-        else if (density < (LCD_DENSITY_280DPI + LCD_DENSITY_XHDPI)/2)
+        else if (density < (LCD_DENSITY_260DPI + LCD_DENSITY_280DPI)/2)
+            density = LCD_DENSITY_260DPI;
+        else if (density < (LCD_DENSITY_280DPI + LCD_DENSITY_300DPI)/2)
             density = LCD_DENSITY_280DPI;
-        else if (density < (LCD_DENSITY_XHDPI + LCD_DENSITY_360DPI)/2)
+        else if (density < (LCD_DENSITY_300DPI + LCD_DENSITY_XHDPI)/2)
+            density = LCD_DENSITY_300DPI;
+        else if (density < (LCD_DENSITY_XHDPI + LCD_DENSITY_340DPI)/2)
             density = LCD_DENSITY_XHDPI;
+        else if (density < (LCD_DENSITY_340DPI + LCD_DENSITY_360DPI)/2)
+            density = LCD_DENSITY_340DPI;
         else if (density < (LCD_DENSITY_360DPI + LCD_DENSITY_400DPI)/2)
             density = LCD_DENSITY_360DPI;
         else if (density < (LCD_DENSITY_400DPI + LCD_DENSITY_420DPI) / 2)
@@ -47,8 +50,20 @@ hwLcd_setBootProperty(int density)
         else
             density = LCD_DENSITY_XXXHDPI;
     }
+    return density;
+}
 
-    snprintf(temp, sizeof temp, "%d", density);
+
+void
+hwLcd_setBootProperty(int density)
+{
+    char  temp[8];
+    int mapped_density;
+
+    mapped_density = hwLcd_mapDensity(density);
+
+
+    snprintf(temp, sizeof temp, "%d", mapped_density);
     boot_property_add("qemu.sf.lcd_density", temp);
 }
 
