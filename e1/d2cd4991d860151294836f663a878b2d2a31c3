@@ -1,0 +1,8 @@
+Code-Review+2: Bo Hu <bohu@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Verified+1: Weilun Du <wdu@google.com>
+Submitted-by: Weilun Du <wdu@google.com>
+Submitted-at: Fri, 14 Oct 2016 17:34:15 +0000
+Reviewed-on: https://android-review.googlesource.com/288463
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
