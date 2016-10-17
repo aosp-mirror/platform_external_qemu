@@ -2420,8 +2420,7 @@ void sparc_cpu_unassigned_access(CPUState *cs, hwaddr addr,
 #if !defined(CONFIG_USER_ONLY)
 void QEMU_NORETURN sparc_cpu_do_unaligned_access(CPUState *cs,
                                                  vaddr addr, int is_write,
-                                                 int is_user, uintptr_t retaddr,
-                                                 unsigned size)
+                                                 int is_user, uintptr_t retaddr)
 {
     SPARCCPU *cpu = SPARC_CPU(cs);
     CPUSPARCState *env = &cpu->env;

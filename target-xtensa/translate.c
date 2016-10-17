@@ -2987,7 +2987,6 @@ void gen_intermediate_code_internal(XtensaCPU *cpu,
     DisasContext dc;
     int insn_count = 0;
     int j, lj = -1;
-    uint16_t *gen_opc_end = tcg_ctx.gen_opc_buf + OPC_MAX_SIZE;
     int max_insns = tb->cflags & CF_COUNT_MASK;
     uint32_t pc_start = tb->pc;
     uint32_t next_page_start =
@@ -3030,7 +3029,7 @@ void gen_intermediate_code_internal(XtensaCPU *cpu,
         check_breakpoint(env, &dc);
 
         if (search_pc) {
-            j = tcg_ctx.gen_opc_ptr - tcg_ctx.gen_opc_buf;
+            j = tcg_op_buf_count();
             if (lj < j) {
                 lj++;
                 while (lj < j) {
@@ -3081,7 +3080,7 @@ void gen_intermediate_code_internal(XtensaCPU *cpu,
     } while (dc.is_jmp == DISAS_NEXT &&
             insn_count < max_insns &&
             dc.pc < next_page_start &&
-            tcg_ctx.gen_opc_ptr < gen_opc_end);
+            !tcg_op_buf_full());
 
     reset_litbase(&dc);
     reset_sar_tracker(&dc);
@@ -3097,7 +3096,6 @@ void gen_intermediate_code_internal(XtensaCPU *cpu,
         gen_jumpi(&dc, dc.pc, 0);
     }
     gen_tb_end(tb, insn_count);
-    *tcg_ctx.gen_opc_ptr = INDEX_op_end;
 
 #ifdef DEBUG_DISAS
     if (qemu_loglevel_mask(CPU_LOG_TB_IN_ASM)) {
@@ -3108,7 +3106,7 @@ void gen_intermediate_code_internal(XtensaCPU *cpu,
     }
 #endif
     if (search_pc) {
-        j = tcg_ctx.gen_opc_ptr - tcg_ctx.gen_opc_buf;
+        j = tcg_op_buf_count();
         memset(tcg_ctx.gen_opc_instr_start + lj + 1, 0,
                 (j - lj) * sizeof(tcg_ctx.gen_opc_instr_start[0]));
     } else {

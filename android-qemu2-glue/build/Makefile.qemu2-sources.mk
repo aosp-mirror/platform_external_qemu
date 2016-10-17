@@ -341,6 +341,7 @@ QEMU2_TARGET_SOURCES := \
     savevm.c \
     tcg/optimize.c \
     tcg/tcg.c \
+    tcg/tcg-op.c \
     translate-all.c \
     vl.c \
     xen-common-stub.c \

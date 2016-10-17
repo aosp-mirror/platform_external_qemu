@@ -33,7 +33,7 @@
 #include "qemu/timer.h"
 
 void xtensa_cpu_do_unaligned_access(CPUState *cs,
-        vaddr addr, int is_write, int is_user, uintptr_t retaddr, unsigned size)
+        vaddr addr, int is_write, int is_user, uintptr_t retaddr)
 {
     XtensaCPU *cpu = XTENSA_CPU(cs);
     CPUXtensaState *env = &cpu->env;

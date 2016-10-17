@@ -2430,7 +2430,6 @@ gen_intermediate_code_internal(TriCoreCPU *cpu, struct TranslationBlock *tb,
     DisasContext ctx;
     target_ulong pc_start;
     int num_insns;
-    uint16_t *gen_opc_end;
 
     if (search_pc) {
         qemu_log("search pc %d\n", search_pc);
@@ -2438,7 +2437,6 @@ gen_intermediate_code_internal(TriCoreCPU *cpu, struct TranslationBlock *tb,
 
     num_insns = 0;
     pc_start = tb->pc;
-    gen_opc_end = tcg_ctx.gen_opc_buf + OPC_MAX_SIZE;
     ctx.pc = pc_start;
     ctx.saved_pc = -1;
     ctx.tb = tb;
@@ -2454,7 +2452,7 @@ gen_intermediate_code_internal(TriCoreCPU *cpu, struct TranslationBlock *tb,
 
         num_insns++;
 
-        if (tcg_ctx.gen_opc_ptr >= gen_opc_end) {
+        if (tcg_op_buf_full()) {
             gen_save_pc(ctx.next_pc);
             tcg_gen_exit_tb(0);
             break;
@@ -2468,7 +2466,6 @@ gen_intermediate_code_internal(TriCoreCPU *cpu, struct TranslationBlock *tb,
     }
 
     gen_tb_end(tb, num_insns);
-    *tcg_ctx.gen_opc_ptr = INDEX_op_end;
     if (search_pc) {
         printf("done_generating search pc\n");
     } else {

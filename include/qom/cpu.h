@@ -123,8 +123,7 @@ typedef struct CPUClass {
     void (*do_interrupt)(CPUState *cpu);
     CPUUnassignedAccess do_unassigned_access;
     void (*do_unaligned_access)(CPUState *cpu, vaddr addr,
-                                int is_write, int is_user, uintptr_t retaddr,
-                                unsigned size);
+                                int is_write, int is_user, uintptr_t retaddr);
     bool (*virtio_is_big_endian)(CPUState *cpu);
     int (*memory_rw_debug)(CPUState *cpu, vaddr addr,
                            uint8_t *buf, int len, bool is_write);
@@ -589,12 +588,11 @@ static inline void cpu_unassigned_access(CPUState *cpu, hwaddr addr,
 
 static inline void cpu_unaligned_access(CPUState *cpu, vaddr addr,
                                         int is_write, int is_user,
-                                        uintptr_t retaddr, unsigned size)
+                                        uintptr_t retaddr)
 {
     CPUClass *cc = CPU_GET_CLASS(cpu);
 
-    return cc->do_unaligned_access(cpu, addr, is_write, is_user, retaddr,
-            size);
+    return cc->do_unaligned_access(cpu, addr, is_write, is_user, retaddr);
 }
 #endif
 
