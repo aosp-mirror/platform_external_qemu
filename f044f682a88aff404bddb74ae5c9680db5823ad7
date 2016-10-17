@@ -16,6 +16,24 @@
       "revId": "f044f682a88aff404bddb74ae5c9680db5823ad7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc9bc331_274a15c7",
+        "filename": "android/scripts/build-qemu-android-deps.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 431,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-10-17T16:25:45Z",
+      "side": 1,
+      "message": "Can you explain this one to me? \nIs \u0027do_autotools_package\u0027 only used for pre-built libraries?",
+      "parentUuid": "9c7dca55_c57fec67",
+      "revId": "f044f682a88aff404bddb74ae5c9680db5823ad7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
