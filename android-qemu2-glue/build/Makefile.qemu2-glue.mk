@@ -32,6 +32,7 @@ LOCAL_SRC_FILES := \
     base/files/QemuFileStream.cpp \
     emulation/charpipe.c \
     emulation/CharSerialLine.cpp \
+    emulation/goldfish_sync.cpp \
     emulation/serial_line.cpp \
     emulation/VmLock.cpp \
     telephony/modem_init.c \

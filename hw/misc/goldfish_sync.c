@@ -10,7 +10,7 @@
 ** GNU General Public License for more details.
 */
 
-#include "android/emulation/goldfish_sync.h"
+#include "hw/misc/goldfish_sync.h"
 #include "android/utils/debug.h"
 
 #include "hw/hw.h"
@@ -19,14 +19,6 @@
 #include "qemu/error-report.h"
 #include "qemu/main-loop.h"
 #include "trace.h"
-
-#ifndef max
-#define max(x, y) ((x) < (y) ? y : x)
-#endif
-
-#ifndef min
-#define min(x, y) ((x) > (y) ? y : x)
-#endif
 
 #define DEBUG_LOG_ALL_DEVICE_OPS 0
 
@@ -82,6 +74,20 @@ struct goldfish_sync_ops {
                          uint64_t timeline);
 };
 
+// Command numbers that can only be sent from the guest to the device.
+#define SYNC_GUEST_CMD_READY 0
+#define SYNC_GUEST_CMD_TRIGGER_HOST_WAIT 5
+
+// The register layout is:
+
+#define SYNC_REG_BATCH_COMMAND                0x00 // host->guest batch commands
+#define SYNC_REG_BATCH_GUESTCOMMAND           0x04 // guest->host batch commands
+#define SYNC_REG_BATCH_COMMAND_ADDR           0x08 // communicate physical address of host->guest batch commands
+#define SYNC_REG_BATCH_COMMAND_ADDR_HIGH      0x0c // 64-bit part
+#define SYNC_REG_BATCH_GUESTCOMMAND_ADDR      0x10 // communicate physical address of guest->host commands
+#define SYNC_REG_BATCH_GUESTCOMMAND_ADDR_HIGH 0x14 // 64-bit part
+#define SYNC_REG_INIT                         0x18 // to signal that the device has been detected by the kernel
+
 // The goldfish sync device is represented by the goldfish_sync_state struct.
 // Besides the machinery necessary to do I/O with the guest:
 // |pending|: a linked list of |goldfish_sync_pending_cmd|'s
@@ -114,6 +120,12 @@ struct goldfish_sync_state {
 };
 
 static struct goldfish_sync_state* s_goldfish_sync_dev;
+
+static const GoldfishSyncServiceOps* service_ops = NULL;
+
+void goldfish_sync_set_service_ops(const GoldfishSyncServiceOps *ops) {
+    service_ops = ops;
+}
 
 // Command list operations======================================================
 
@@ -187,15 +199,14 @@ static void goldfish_sync_reset_device(struct goldfish_sync_state* state) {
 
 // Callbacks and hw_funcs struct================================================
 
-// goldfish_sync_host_signal does the actual work of setting up
+// goldfish_sync_send_command does the actual work of setting up
 // the sync device registers, causing IRQ blip,
 // and waiting for + reading back results from the guest
 // (if appplicable)
-static void goldfish_sync_host_signal(
-        uint32_t cmd,
-        uint64_t handle,
-        uint32_t time_arg,
-        uint64_t hostcmd_handle) {
+void goldfish_sync_send_command(uint32_t cmd,
+                                uint64_t handle,
+                                uint32_t time_arg,
+                                uint64_t hostcmd_handle) {
 
     struct goldfish_sync_state* s;
     struct goldfish_sync_pending_cmd* to_send;
@@ -220,31 +231,6 @@ static void goldfish_sync_host_signal(
 
     DPRINT("Exit");
 }
-
-// This sets |trigger_fn| as the function to call
-// when guest asks the host to trigger a wait.
-void goldfish_sync_register_trigger_wait_impl(
-        trigger_wait_fn_t trigger_fn) {
-
-    DPRINT("Enter");
-
-    struct goldfish_sync_state* s = s_goldfish_sync_dev;
-
-    if (!s->ops) {
-        s->ops =
-            (struct goldfish_sync_ops*)
-            (malloc(sizeof(struct goldfish_sync_ops)));
-    }
-
-    s->ops->trigger_wait = trigger_fn;
-
-    DPRINT("Exit");
-}
-
-static GoldfishSyncDeviceInterface qemu2_goldfish_sync_hw_funcs = {
-    .doHostCommand = goldfish_sync_host_signal,
-    .registerTriggerWait = goldfish_sync_register_trigger_wait_impl,
-};
 
 #define TYPE_GOLDFISH_SYNC "goldfish_sync"
 #define GOLDFISH_SYNC(obj) \
@@ -365,7 +351,7 @@ goldfish_sync_write(void *opaque,
                incoming.handle,
                incoming.time_arg,
                incoming.hostcmd_handle);
-        goldfish_sync_receive_hostcmd_result(
+        service_ops->receive_hostcmd_result(
                incoming.cmd,
                incoming.handle,
                incoming.time_arg,
@@ -373,7 +359,7 @@ goldfish_sync_write(void *opaque,
         break;
     // SYNC_REG_BATCH_GUESTCOMMAND write: Used to send
     // guest->host commands. Currently, the only guest->host command
-    // that matters is CMD_TRIGGER_HOST_WAIT, which is used
+    // that matters is SYNC_GUEST_CMD_TRIGGER_HOST_WAIT, which is used
     // to cause a OpenGL client wait on the host GPU/CPU.
     case SYNC_REG_BATCH_GUESTCOMMAND:
         DPRINT("write SYNC_REG_BATCH_GUESTCOMMAND. obtaining batch cmd vals.");
@@ -392,14 +378,14 @@ goldfish_sync_write(void *opaque,
                 guest_incoming.thread_handle,
                 guest_incoming.guest_timeline_handle);
         switch (guest_incoming.host_command) {
-        case CMD_TRIGGER_HOST_WAIT:
-            DPRINT("exec CMD_TRIGGER_HOST_WAIT");
-            s->ops->trigger_wait(guest_incoming.glsync_handle,
-                                 guest_incoming.thread_handle,
-                                 guest_incoming.guest_timeline_handle);
+        case SYNC_GUEST_CMD_TRIGGER_HOST_WAIT:
+            DPRINT("exec SYNC_GUEST_CMD_TRIGGER_HOST_WAIT");
+            service_ops->trigger_host_wait(guest_incoming.glsync_handle,
+                                           guest_incoming.thread_handle,
+                                           guest_incoming.guest_timeline_handle);
             break;
-        case CMD_SYNC_READY:
-            DPRINT("exec CMD_SYNC_READY");
+        case SYNC_GUEST_CMD_READY:
+            DPRINT("exec SYNC_GUEST_CMD_READY");
             break;
         }
         break;
@@ -458,8 +444,6 @@ static void goldfish_sync_realize(DeviceState *dev, Error **errp) {
                           0x2000);
     sysbus_init_mmio(sbdev, &s->iomem);
     sysbus_init_irq(sbdev, &s->irq);
-
-    goldfish_sync_set_hw_funcs(&qemu2_goldfish_sync_hw_funcs);
 }
 
 static Property goldfish_sync_properties[] = {
