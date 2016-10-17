@@ -16,6 +16,24 @@
       "revId": "a7318d4c83cde437021b8acb2d7c0914190544a4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc9bc331_07aa795b",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 564,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-10-17T16:09:53Z",
+      "side": 1,
+      "message": "No, I don\u0027t want this.\nRemoved. Thanks.",
+      "parentUuid": "9c7dca55_85bde4ac",
+      "revId": "a7318d4c83cde437021b8acb2d7c0914190544a4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
