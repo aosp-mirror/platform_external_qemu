@@ -22,6 +22,30 @@
       "revId": "d6825c5bc42b2359b43b40699358c2eda3114463",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9c7dca55_05d1d4f7",
+        "filename": "android/base/testing/GTestUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-17T09:39:10Z",
+      "side": 1,
+      "message": "Ooops, copy-paste error, I\u0027ve removed it and made the function inlined. Thanks.",
+      "parentUuid": "9c34eabf_8ab24b9a",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 11
+      },
+      "revId": "d6825c5bc42b2359b43b40699358c2eda3114463",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
