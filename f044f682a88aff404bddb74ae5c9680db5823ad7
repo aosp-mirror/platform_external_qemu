@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9c7dca55_c57fec67",
+        "filename": "android/scripts/build-qemu-android-deps.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 431,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-17T16:11:23Z",
+      "side": 1,
+      "message": "You probably want to remove this as well then :)",
+      "revId": "f044f682a88aff404bddb74ae5c9680db5823ad7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
