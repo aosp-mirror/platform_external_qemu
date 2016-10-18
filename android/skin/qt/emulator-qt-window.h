@@ -12,8 +12,9 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
 #include "android/base/containers/CircularBuffer.h"
+#include "android/base/StringView.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/emulation/control/ApkInstaller.h"
 #include "android/emulation/control/FilePusher.h"
 #include "android/emulation/control/ScreenCapturer.h"
@@ -157,9 +158,6 @@ signals:
     void getWindowId(WId* out_id, QSemaphore* semaphore = NULL);
     void getWindowPos(int* x, int* y, QSemaphore* semaphore = NULL);
     void isWindowFullyVisible(bool* out_value, QSemaphore* semaphore = NULL);
-    void pollEvent(SkinEvent* event,
-                   bool* hasEvent,
-                   QSemaphore* semaphore = NULL);
     void releaseBitmap(SkinSurface* s, QSemaphore* sempahore = NULL);
     void requestClose(QSemaphore* semaphore = NULL);
     void requestUpdate(const QRect* rect, QSemaphore* semaphore = NULL);
@@ -181,6 +179,9 @@ signals:
     void layoutChanged(bool next);
 
 public:
+    void pollEvent(SkinEvent* event,
+                   bool* hasEvent);
+
     android::emulation::AdbInterface* getAdbInterface() const;
     bool isInZoomMode() const;
     ToolWindow* toolWindow() const;
@@ -249,9 +250,6 @@ private slots:
     void slot_getWindowPos(int* x, int* y, QSemaphore* semaphore = NULL);
     void slot_isWindowFullyVisible(bool* out_value,
                                    QSemaphore* semaphore = NULL);
-    void slot_pollEvent(SkinEvent* event,
-                        bool* hasEvent,
-                        QSemaphore* semaphore = NULL);
     void slot_releaseBitmap(SkinSurface* s, QSemaphore* sempahore = NULL);
     void slot_requestClose(QSemaphore* semaphore = NULL);
     void slot_requestUpdate(const QRect* rect, QSemaphore* semaphore = NULL);
@@ -340,6 +338,7 @@ private:
 
     SkinSurface* mBackingSurface;
     QQueue<SkinEvent*> mSkinEventQueue;
+    android::base::Lock mSkinEventQueueLock;
     ToolWindow* mToolWindow;
     EmulatorContainer mContainer;
     EmulatorOverlay mOverlay;
