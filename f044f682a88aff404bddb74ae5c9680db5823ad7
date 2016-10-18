@@ -34,6 +34,24 @@
       "revId": "f044f682a88aff404bddb74ae5c9680db5823ad7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcb24710_1c26b52b",
+        "filename": "android/scripts/build-qemu-android-deps.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 431,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-18T07:58:08Z",
+      "side": 1,
+      "message": "Yes, all build-xxxx.sh scripts here are used to build prebuilt binaries.\n\ndo_autotools_package means that the package comes with a regular Autoconf-generated \u0027configure\u0027 script, so apply the typical parameters to it (used to select the toolchain, disable shared libraries, etc..)\n\nNOTE: We have prebuilt png because building upstream QEMU2 needs it, even though we use the non-prebuilt version when building the Android QEMU2 version.",
+      "parentUuid": "dc9bc331_274a15c7",
+      "revId": "f044f682a88aff404bddb74ae5c9680db5823ad7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
