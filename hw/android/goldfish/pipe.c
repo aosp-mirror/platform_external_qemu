@@ -258,6 +258,24 @@ static void *map_guest_buffer(target_ulong xaddr, size_t size, int is_write)
     return ptr;
 }
 
+static void close_all_pipes(void* opaque) {
+    struct PipeDevice* dev = opaque;
+    HwPipe* pipe = dev->pipes;
+    while(pipe) {
+        HwPipe* old_pipe = pipe;
+        pipe = pipe->next;
+        hwpipe_remove_signaled(&dev->signaled_pipes, old_pipe);
+        hwpipe_free(old_pipe);
+    }
+}
+
+static void reset_pipe_device(void* opaque) {
+    PipeDevice* dev = opaque;
+    dev->pipes = NULL;
+    dev->signaled_pipes = NULL;
+    goldfish_device_set_irq(&dev->dev, 0, 0);
+}
+
 static void
 pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
 {
@@ -516,6 +534,11 @@ static uint32_t pipe_dev_read(void *opaque, hwaddr offset)
 
     case PIPE_REG_VERSION:
         deviceMode = USE_PA;
+        // PIPE_REG_VERSION is issued on probe, which means that
+        // we should clean up all existing stale pipes.
+        // This helps keep the right state on rebooting.
+        close_all_pipes(dev);
+        reset_pipe_device(dev);
         return PIPE_DEVICE_VERSION;
 
     default:

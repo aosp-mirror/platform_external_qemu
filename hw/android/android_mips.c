@@ -40,6 +40,7 @@
 #define GOLDFISH_AUDIO      (GOLDFISH_IO_SPACE + 0x04000)
 #define GOLDFISH_MMC        (GOLDFISH_IO_SPACE + 0x05000)
 #define GOLDFISH_MEMLOG     (GOLDFISH_IO_SPACE + 0x06000)
+#define GOLDFISH_RESET      (GOLDFISH_IO_SPACE + 0x07000)
 #define GOLDFISH_DEVICES    (GOLDFISH_IO_SPACE + 0x10000)
 
 #define MAX_RAM_SIZE_MB 4079UL
@@ -60,6 +61,16 @@ static struct goldfish_device nand_device = {
     .id = 0,
     .size = 0x1000
 };
+
+typedef struct ResetData {
+    CPUOldState *env;
+    ram_addr_t ram_size;
+    const char* kernel_filename;
+    const char* kernel_cmdline;
+    const char* initrd_filename;
+} ResetData;
+
+static ResetData *reset_info;
 
 /* Board init.  */
 
@@ -155,6 +166,52 @@ static void android_load_kernel(CPUOldState *env, int ram_size,
     env->active_tc.gpr[7] = 0;                      /* a3 */
 }
 
+static void goldfish_reset_io_write(void *opaque, hwaddr addr, uint32_t val)
+{
+    switch (val) {
+    case 0x42:
+        qemu_system_reset_request();
+        break;
+    case 0x43:
+        qemu_system_shutdown_request();
+        break;
+    default:
+        fprintf(stdout, "%s: %d: Unknown command %x\n",
+                __func__, __LINE__, val);
+        break;
+    }
+}
+
+static uint32_t goldfish_reset_io_read(void *opaque, hwaddr addr)
+{
+    return 0;
+}
+
+static CPUWriteMemoryFunc * const goldfish_reset_io_ops_write[] = {
+    &goldfish_reset_io_write,
+    &goldfish_reset_io_write,
+    &goldfish_reset_io_write,
+};
+
+static CPUReadMemoryFunc * const goldfish_reset_io_ops_read[] = {
+    &goldfish_reset_io_read,
+    &goldfish_reset_io_read,
+    &goldfish_reset_io_read,
+};
+
+static void main_cpu_reset(void *opaque)
+{
+    ResetData *s = (ResetData *)opaque;
+    CPUOldState *env = s->env;
+
+    cpu_reset(ENV_GET_CPU(env));
+    android_load_kernel(env, MIN(s->ram_size, GOLDFISH_IO_SPACE),
+                             s->kernel_filename,
+                             s->kernel_cmdline,
+                             s->initrd_filename);
+}
+
+static int mips_qemu_iomemtype = 0;
 
 static void android_mips_init_(ram_addr_t ram_size,
                                const char *boot_device,
@@ -173,6 +230,14 @@ static void android_mips_init_(ram_addr_t ram_size,
 
     env = cpu_init(cpu_model);
 
+    reset_info = g_malloc0(sizeof(ResetData));
+    reset_info->env = env;
+    reset_info->kernel_filename = strdup(kernel_filename);
+    reset_info->kernel_cmdline = strdup(kernel_cmdline);
+    reset_info->initrd_filename = strdup(initrd_filename);
+
+    qemu_register_reset(main_cpu_reset, 0, reset_info);
+
     register_savevm(NULL,
                     "cpu",
                     0,
@@ -187,8 +252,16 @@ static void android_mips_init_(ram_addr_t ram_size,
         ram_size = MAX_RAM_SIZE_MB << 20;
     }
 
+    reset_info->ram_size = ram_size;
+
     ram_offset = qemu_ram_alloc(NULL, "android_mips", ram_size);
     cpu_register_physical_memory(0, MIN(ram_size, GOLDFISH_IO_SPACE), ram_offset | IO_MEM_RAM);
+
+    if (!mips_qemu_iomemtype) {
+        mips_qemu_iomemtype = cpu_register_io_memory(goldfish_reset_io_ops_read,
+                                                     goldfish_reset_io_ops_write, NULL);
+    }
+    cpu_register_physical_memory(GOLDFISH_RESET, 0x1000, mips_qemu_iomemtype);
 
     if (ram_size > GOLDFISH_IO_SPACE) {
         highmem_size = ram_size - GOLDFISH_IO_SPACE;
