@@ -517,6 +517,7 @@ LOCAL_SRC_FILES := \
   android/gps/GpxParser_unittest.cpp \
   android/gps/KmlParser_unittest.cpp \
   android/kernel/kernel_utils_unittest.cpp \
+  android/hw-lcd_unittest.cpp \
   android/misc/Random_unittest.cpp \
   android/network/control_unittest.cpp \
   android/network/constants_unittest.cpp \
