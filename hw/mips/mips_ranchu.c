@@ -299,8 +299,8 @@ static void goldfish_reset_io_write(void *opaque, hwaddr addr,
         qemu_system_shutdown_request();
         break;
     default:
-        fprintf(stdout, "%s: %d: Unknown command %lx\n",
-                __func__, __LINE__, val);
+        fprintf(stdout, "%s: %d: Unknown command %llx\n",
+                __func__, __LINE__, (unsigned long long)val);
         break;
     }
 }
