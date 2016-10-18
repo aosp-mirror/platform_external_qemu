@@ -48,9 +48,17 @@ namespace emugl {
 //   thread, which may in turn be blocked on something else.
 static const bool kUseSubwindowThread = false;
 
+RendererImpl::RendererImpl()
+    : mCleanupThread([this]() {
+          while (const auto id = mCleanupProcessIds.receive()) {
+              FrameBuffer::getFB()->cleanupProcGLObjects(*id);
+          }
+      }) {}
+
 RendererImpl::~RendererImpl() {
     stop();
     mRenderWindow.reset();
+    mCleanupThread.wait();
 }
 
 bool RendererImpl::initialize(int width, int height, bool useSubWindow) {
@@ -86,6 +94,10 @@ void RendererImpl::stop() {
             channel->forceStop();
         }
     }
+
+    // We're stopping the renderer, so there's no need to clean up resources
+    // of some pending processes: we'll destroy everything soon.
+    mCleanupProcessIds.stop();
 }
 
 RenderChannelPtr RendererImpl::createRenderChannel() {
@@ -183,7 +195,7 @@ void RendererImpl::repaintOpenGLDisplay() {
 }
 
 void RendererImpl::cleanupProcGLObjects(uint64_t puid) {
-    FrameBuffer::getFB()->cleanupProcGLObjects(puid);
+    mCleanupProcessIds.send(puid);
 }
 
 }  // namespace emugl
