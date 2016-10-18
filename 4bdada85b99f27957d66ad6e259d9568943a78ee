@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3cf3ffac_89662ad6",
+        "filename": "android/base/network/IpAddress.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-18T20:31:03Z",
+      "side": 1,
+      "message": "std::string str \u003d string;",
+      "range": {
+        "startLine": 65,
+        "startChar": 19,
+        "endLine": 65,
+        "endChar": 51
+      },
+      "revId": "4bdada85b99f27957d66ad6e259d9568943a78ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3cf3ffac_09db5a63",
+        "filename": "android/base/network/IpAddress.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-18T20:31:03Z",
+      "side": 1,
+      "message": "IMO simple \u0027return xxx\u0027 work better here than the single return point with |result| variable.",
+      "range": {
+        "startLine": 193,
+        "startChar": 0,
+        "endLine": 209,
+        "endChar": 9
+      },
+      "revId": "4bdada85b99f27957d66ad6e259d9568943a78ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3cf3ffac_69f01ee8",
+        "filename": "android/base/network/IpAddress.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-18T20:31:03Z",
+      "side": 1,
+      "message": "return mKind \u003c other.mKind ?",
+      "range": {
+        "startLine": 213,
+        "startChar": 7,
+        "endLine": 223,
+        "endChar": 9
+      },
+      "revId": "4bdada85b99f27957d66ad6e259d9568943a78ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3cf3ffac_c915d200",
+        "filename": "android/base/network/NetworkUtils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-18T20:31:03Z",
+      "side": 1,
+      "message": "if we only had c++14 enabled...\nreturn std::exchange(sResolver, resolver);",
+      "range": {
+        "startLine": 309,
+        "startChar": 0,
+        "endLine": 311,
+        "endChar": 15
+      },
+      "revId": "4bdada85b99f27957d66ad6e259d9568943a78ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
