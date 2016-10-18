@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "3cf3ffac_8b1bc296",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1872,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-10-18T18:34:49Z",
+      "side": 0,
+      "message": "tzdiff is not computed correctly. Lets say that we have e_local 2015/12/31 20:00:00 and e_utc 2016/01/01 02:00:00 which is a real use case. tzdiff should be 6 hours but the computation below won\u0027t give the correct result. In my cl, I have a function to correctly compute tzdiff.",
+      "revId": "e1d2cd4991d860151294836f663a878b2d2a31c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3cf3ffac_0b2992fc",
         "filename": "android/telephony/sms.c",
         "patchSetId": 1
@@ -30,6 +47,23 @@
       "writtenOn": "2016-10-18T18:09:29Z",
       "side": 0,
       "message": "tzdiff is not computed correctly since year is not taken into account. E.g \nLet\u0027s say we have e_local 2015/12/31 20:00:00 and e_utc 2016/01/01 02:00:00 which is a real use case. tzdiff should be 6 hours but the computation below won\u0027t give the correct result. In my cl, I have a function to correctly compute tzdiff.",
+      "revId": "e1d2cd4991d860151294836f663a878b2d2a31c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3cf3ffac_0b0fd24e",
+        "filename": "android/telephony/sms.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-10-18T18:34:49Z",
+      "side": 0,
+      "message": "tzdiff is not computed correctly since year is not taken into account. E.g \n e_local 2015/12/31 20:00:00 and e_utc 2016/01/01 02:00:00 which is a real use case. tzdiff should be 6 hours but the computation below won\u0027t give the correct result. In my cl, I have a function to correctly compute tzdiff.",
       "revId": "e1d2cd4991d860151294836f663a878b2d2a31c3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false

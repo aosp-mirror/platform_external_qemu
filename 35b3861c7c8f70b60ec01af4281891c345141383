@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3cf3ffac_6b6656d9",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 919,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-10-18T18:34:49Z",
+      "side": 1,
+      "message": "Eventually, all the C function definition should be moved to C++ class. But for now, this CL will keep the previous structure and only add new feature using C++ class.  This will lead to two copies of android_timezone_init and timezone_name.",
+      "revId": "35b3861c7c8f70b60ec01af4281891c345141383",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3cf3ffac_4b4c3a3f",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1035,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-10-18T18:34:49Z",
+      "side": 1,
+      "message": "utc_compare functions is comparing two random utc time without having tm_yday field set. It looks ugly. If there is a better solution or more elegant way of writing the code, feel free.",
+      "revId": "35b3861c7c8f70b60ec01af4281891c345141383",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3cf3ffac_abb2fe30",
+        "filename": "android/utils/timezone.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-10-18T18:34:49Z",
+      "side": 1,
+      "message": "We still keep the C interface because timezone.h is included by modem.c and other c source code.  But the implementation will be in cpp so c funtion definition is just a thin wrapper",
+      "revId": "35b3861c7c8f70b60ec01af4281891c345141383",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
