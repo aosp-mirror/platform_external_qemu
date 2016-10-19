@@ -146,7 +146,9 @@ endif
 # with LTO enabled that it finds some comparisons to become a + b < a just
 # because of inlining, with no original relying on the overflow at all.
 #
-BUILD_TARGET_CFLAGS += -Wall $(GCC_W_NO_MISSING_FIELD_INITIALIZERS) -Wno-strict-overflow
+BUILD_TARGET_CFLAGS += \
+    -Wall $(GCC_W_NO_MISSING_FIELD_INITIALIZERS) -Wno-strict-overflow \
+    -Wno-invalid-offsetof
 
 # Needed to build block.c on Linux/x86_64.
 BUILD_TARGET_CFLAGS += -D_GNU_SOURCE=1
