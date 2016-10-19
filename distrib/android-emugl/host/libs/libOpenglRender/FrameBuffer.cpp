@@ -647,7 +647,8 @@ HandleType FrameBuffer::genHandle()
 }
 
 HandleType FrameBuffer::createColorBuffer(int p_width, int p_height,
-                                          GLenum p_internalFormat)
+                                          GLenum p_internalFormat,
+                                          FrameworkFormat p_frameworkFormat)
 {
     emugl::Mutex::AutoLock mutex(m_lock);
     HandleType ret = 0;
@@ -657,6 +658,7 @@ HandleType FrameBuffer::createColorBuffer(int p_width, int p_height,
             p_width,
             p_height,
             p_internalFormat,
+            p_frameworkFormat,
             getCaps().has_eglimage_texture_2d,
             m_colorBufferHelper));
     if (cb.get() != NULL) {
@@ -962,7 +964,9 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
         return false;
     }
 
-    (*c).second.cb->subUpdate(x, y, width, height, format, type, pixels);
+    (*c).second.cb->subUpdate(
+            x, y, width, height,
+            format, type, pixels);
 
     return true;
 }

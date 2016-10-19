@@ -39,6 +39,7 @@ host_common_SRC_FILES := \
     TextureDraw.cpp \
     TextureResize.cpp \
     WindowSurface.cpp \
+    YUVConverter.cpp \
 
 ### host libOpenglRender #################################################
 $(call emugl-begin-shared-library,lib$(BUILD_TARGET_SUFFIX)OpenglRender)
