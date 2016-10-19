@@ -172,7 +172,8 @@ public:
     // counted. Use openColorBuffer / closeColorBuffer to operate on the
     // internal count.
     HandleType createColorBuffer(
-        int p_width, int p_height, GLenum p_internalFormat);
+        int p_width, int p_height, GLenum p_internalFormat,
+        int p_frameworkFormat);
 
     // Call this function when a render thread terminates to destroy all
     // the remaining contexts it created. Necessary to avoid leaking host
@@ -266,7 +267,7 @@ public:
     // Returns true on success, false otherwise.
     bool updateColorBuffer(HandleType p_colorbuffer,
                            int x, int y, int width, int height,
-                           GLenum format, GLenum type, void *pixels);
+                           GLenum format, GLenum type, int frameworkFormat, void *pixels);
 
     // Display the content of a given ColorBuffer into the framebuffer's
     // sub-window. |p_colorbuffer| is a handle value.

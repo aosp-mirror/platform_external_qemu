@@ -23,9 +23,9 @@
 
 #include <memory>
 
-
 class TextureDraw;
 class TextureResize;
+class YUVConverter;
 
 // A class used to model a guest color buffer, and used to implement several
 // related things:
@@ -55,6 +55,11 @@ class TextureResize;
 //
 // As an additional twist.
 
+enum FrameworkFormat {
+    FRAMEWORK_FORMAT_GL_COMPATIBLE = 0,
+    FRAMEWORK_FORMAT_YV12 = 1,
+};
+
 class ColorBuffer {
 public:
     // Helper interface class used during ColorBuffer operations. This is
@@ -81,6 +86,7 @@ public:
                                int p_width,
                                int p_height,
                                GLenum p_internalFormat,
+                               FrameworkFormat p_frameworkFormat,
                                bool has_eglimage_texture_2d,
                                Helper* helper);
 
@@ -107,6 +113,7 @@ public:
                    int height,
                    GLenum p_format,
                    GLenum p_type,
+                   FrameworkFormat frameworkFormat,
                    void *pixels);
 
     // Draw a ColorBuffer instance, i.e. blit it to the current guest
@@ -141,6 +148,7 @@ private:
     ColorBuffer(EGLDisplay display, Helper* helper);
 
 private:
+
     GLuint m_tex = 0;
     GLuint m_blitTex = 0;
     EGLImageKHR m_eglImage = nullptr;
@@ -152,8 +160,9 @@ private:
     EGLDisplay m_display = nullptr;
     Helper* m_helper = nullptr;
     TextureResize* m_resizer = nullptr;
+    GLuint m_yuv_conversion_fbo = 0; // FBO to offscreen-convert YUV to RGB
+    YUVConverter* m_yuv_converter = nullptr;
 };
 
 typedef emugl::SmartPtr<ColorBuffer> ColorBufferPtr;
-
 #endif
