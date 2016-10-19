@@ -53,7 +53,7 @@ void etc1_encode_block(const etc1_byte* pIn, etc1_uint32 validPixelMask, etc1_by
 // 4 x 4 square of 3-byte pixels in form R, G, B. Byte (3 * (x + 4 * y) is the R
 // value of pixel (x, y).
 
-void etc1_decode_block(const etc1_byte* pIn, etc1_byte* pOut);
+void etc2_decode_block(const etc1_byte* pIn, etc1_byte* pOut);
 
 // Return the size of the encoded image data (does not include size of PKM header).
 
@@ -77,7 +77,7 @@ int etc1_encode_image(const etc1_byte* pIn, etc1_uint32 width, etc1_uint32 heigh
 // pixelSize can be 2 or 3. 2 is an GL_UNSIGNED_SHORT_5_6_5 image, 3 is a GL_BYTE RGB image.
 // returns non-zero if there is an error.
 
-int etc1_decode_image(const etc1_byte* pIn, etc1_byte* pOut,
+int etc2_decode_image(const etc1_byte* pIn, etc1_byte* pOut,
         etc1_uint32 width, etc1_uint32 height,
         etc1_uint32 pixelSize, etc1_uint32 stride);
 
