@@ -15,6 +15,7 @@
 #include <ETC1/etc1.h>
 
 #include <string.h>
+#include <stdio.h>
 
 /* From http://www.khronos.org/registry/gles/extensions/OES/OES_compressed_ETC1_RGB8_texture.txt
 
@@ -206,6 +207,7 @@ void etc1_decode_block(const etc1_byte* pIn, etc1_byte* pOut) {
         int rBase = high >> 27;
         int gBase = high >> 19;
         int bBase = high >> 11;
+
         r1 = convert5To8(rBase);
         r2 = convertDiff(rBase, high >> 24);
         g1 = convert5To8(gBase);
@@ -213,6 +215,7 @@ void etc1_decode_block(const etc1_byte* pIn, etc1_byte* pOut) {
         b1 = convert5To8(bBase);
         b2 = convertDiff(bBase, high >> 8);
     } else {
+        fprintf(stderr, "etc not diff\n");
         // not differential
         r1 = convert4To8(high >> 28);
         r2 = convert4To8(high >> 24);

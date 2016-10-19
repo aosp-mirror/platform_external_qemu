@@ -52,6 +52,7 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
     glTexImage2DPtr =  (glTexImage2DPtr_t)funcPtr; 
 
     switch (internalformat) {
+        case GL_COMPRESSED_RGB8_ETC2:
         case GL_ETC1_RGB8_OES:
             {
                 GLint format = GL_RGB;
@@ -66,7 +67,7 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
                 const size_t size = bpr * height;
 
                 std::unique_ptr<etc1_byte[]> pOut(new etc1_byte[size]);
-                int res = etc1_decode_image((const etc1_byte*)data, pOut.get(), width, height, 3, bpr);
+                int res = etc2_decode_image((const etc1_byte*)data, pOut.get(), width, height, 3, bpr);
                 SET_ERROR_IF(res!=0, GL_INVALID_VALUE);
                 glTexImage2DPtr(target,level,format,width,height,border,format,type,pOut.get());
             }
@@ -105,6 +106,7 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
             break;
 
         default:
+            fprintf(stderr, "compressed tex format %d not supported", internalformat);
             SET_ERROR_IF(1, GL_INVALID_ENUM);
             break;
     }
