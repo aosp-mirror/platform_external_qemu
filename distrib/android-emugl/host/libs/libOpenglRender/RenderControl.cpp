@@ -379,14 +379,16 @@ static void rcDestroyWindowSurface(uint32_t windowSurface)
 }
 
 static uint32_t rcCreateColorBuffer(uint32_t width,
-                                    uint32_t height, GLenum internalFormat)
+                                    uint32_t height, GLenum internalFormat,
+                                    int frameworkFormat)
 {
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return 0;
     }
 
-    return fb->createColorBuffer(width, height, internalFormat);
+    return fb->createColorBuffer(width, height, internalFormat,
+                                 (FrameworkFormat)frameworkFormat);
 }
 
 static int rcOpenColorBuffer2(uint32_t colorbuffer)
@@ -548,6 +550,7 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
                                GLenum format, GLenum type, void* pixels)
 {
     FrameBuffer *fb = FrameBuffer::getFB();
+
     if (!fb) {
         GRSYNC_DPRINT("unlock gralloc cb lock");
         sGrallocSync->unlockColorBufferPrepare();
@@ -555,19 +558,37 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
     }
 
     // obtain pixels from guest DMA transfer
-    fb->updateColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
+    fb->updateColorBuffer(colorBuffer, x, y, width, height, format, type,
+                          FRAMEWORK_FORMAT_GL_COMPATIBLE, pixels);
 
     GRSYNC_DPRINT("unlock gralloc cb lock");
     sGrallocSync->unlockColorBufferPrepare();
+
     return 0;
 }
 
 static int rcUpdateColorBufferDMA(uint32_t colorBuffer,
                                   GLint x, GLint y,
                                   GLint width, GLint height,
-                                  GLenum format, GLenum type)
+                                  GLenum format, GLenum type,
+                                  int frameworkFormat)
 {
-    return rcUpdateColorBuffer(colorBuffer, x, y, width, height, format, type, (void*)emuglDma);
+    FrameBuffer *fb = FrameBuffer::getFB();
+
+    if (!fb) {
+        GRSYNC_DPRINT("unlock gralloc cb lock");
+        sGrallocSync->unlockColorBufferPrepare();
+        return -1;
+    }
+
+    fb->updateColorBuffer(colorBuffer, x, y, width, height,
+                          format, type, (FrameworkFormat)frameworkFormat,
+                          (void*)emuglDma);
+
+    GRSYNC_DPRINT("unlock gralloc cb lock");
+    sGrallocSync->unlockColorBufferPrepare();
+
+    return 0;
 }
 
 static uint32_t rcCreateClientImage(uint32_t context, EGLenum target, GLuint buffer)
