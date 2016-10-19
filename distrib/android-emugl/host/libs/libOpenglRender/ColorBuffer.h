@@ -107,6 +107,7 @@ public:
                    int height,
                    GLenum p_format,
                    GLenum p_type,
+                   GLuint* conversionFbo,
                    void *pixels);
 
     // Draw a ColorBuffer instance, i.e. blit it to the current guest
@@ -141,6 +142,24 @@ private:
     ColorBuffer(EGLDisplay display, Helper* helper);
 
 private:
+
+    bool conversion = false;
+    GLuint vshader;
+    GLuint fshader;
+    GLuint program;
+    GLuint vbuf;
+    GLuint ibuf;
+    GLuint convertSrcTex;
+    char* conversionBuffer;
+
+    char* yBuf;
+    char* uBuf;
+    char* vBuf;
+    GLuint yTex;
+    GLuint uTex;
+    GLuint vTex;
+
+
     GLuint m_tex = 0;
     GLuint m_blitTex = 0;
     EGLImageKHR m_eglImage = nullptr;

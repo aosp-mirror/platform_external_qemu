@@ -243,23 +243,217 @@ void ColorBuffer::readPixels(int x,
     }
 }
 
+static void splityv12(char* yv12, int width, int height, uint32_t* yoff, uint32_t* uoff, uint32_t* voff, uint32_t* alignwidth, uint32_t* alignwidthc) {
+    int align = 16;
+    int yStride = (width + (align -1)) & ~(align-1);
+    *alignwidth = yStride;
+    int cStride = (yStride / 2 + (align - 1)) & ~(align-1);
+    *alignwidthc = cStride;
+
+    int yOffset = 0;
+    int cSize = cStride * height/2;
+    int rgb_stride = 3;
+
+    uint8_t *yv12_y0 = (uint8_t *)yv12;
+    uint8_t *yv12_v0 = yv12_y0 + yStride * height;
+    uint8_t *yv12_u0 = yv12_v0 + cSize;
+
+    *yoff = 0;
+    *voff = (*yoff) + yStride * height;
+    *uoff = (*voff) + cSize;
+}
+
+#define CHECK_GL(x) do { \
+    x; \
+    GLint err = s_gles2.glGetError(); \
+        if (err != GL_NO_ERROR) { \
+            fprintf(stderr, "%s: -> GL error 0x%x\n", #x, err); \
+        } \
+    } while(0) \
+
 void ColorBuffer::subUpdate(int x,
                             int y,
                             int width,
                             int height,
                             GLenum p_format,
                             GLenum p_type,
+                            GLuint* conversionFbo,
                             void* pixels) {
     ScopedHelperContext context(m_helper);
     if (!context.isOk()) {
         return;
     }
 
-    s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
-    s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    s_gles2.glTexSubImage2D(
-            GL_TEXTURE_2D, 0, x, y, width, height, p_format, p_type, pixels);
+    if (conversionFbo) { // convert |pixels| from YUV format.
+        bindFbo(conversionFbo, m_tex);
+        if (!conversion) {
+            // may have changed storage
+            s_gles2.glFramebufferTexture2D(GL_FRAMEBUFFER,
+                    GL_COLOR_ATTACHMENT0_OES,
+                    GL_TEXTURE_2D, m_tex, 0);
+
+
+            // create and parameterize the src texture object
+
+            uint32_t yoff, uoff, voff, ywidth, cwidth;
+            splityv12((char*)pixels, width, height, &yoff, &uoff, &voff, &ywidth, &cwidth);
+
+            // Y part
+            s_gles2.glActiveTexture(GL_TEXTURE0);
+            s_gles2.glGenTextures(1, &yTex);
+            s_gles2.glBindTexture(GL_TEXTURE_2D, yTex);
+            s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            s_gles2.glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE, ywidth, height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, (void*)((char*)pixels + yoff));
+
+            s_gles2.glActiveTexture(GL_TEXTURE1);
+            s_gles2.glGenTextures(1, &uTex);
+            s_gles2.glBindTexture(GL_TEXTURE_2D, uTex);
+            s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            s_gles2.glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE, cwidth, height / 2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, (void*)((char*)pixels + uoff));
+
+            s_gles2.glActiveTexture(GL_TEXTURE2);
+            s_gles2.glGenTextures(1, &vTex);
+            s_gles2.glBindTexture(GL_TEXTURE_2D, vTex);
+            s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            s_gles2.glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE, cwidth, height / 2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, (void*)((char*)pixels + voff));
+
+            const char kVertexShaderSource[] =
+                "attribute mediump vec4 position;\n"
+                "attribute mediump vec2 inCoord;\n"
+                "varying mediump vec2 outCoord;\n"
+                "void main(void) {\n"
+                "  gl_Position = position;\n"
+                "  outCoord = inCoord;\n"
+                "}\n";
+            const GLchar* kVertexShaderSourceStrings =
+                static_cast<const GLchar*>(kVertexShaderSource);
+
+            // From http://stackoverflow.com/questions/11093061/yv12-to-rgb-using-glsl-in-ios-result-image-attached
+            const char kFragmentShaderSource[] =
+                "precision highp float;\n"
+                "varying mediump vec2 outCoord;\n"
+                "uniform sampler2D ysampler;\n"
+                "uniform sampler2D usampler;\n"
+                "uniform sampler2D vsampler;\n"
+                "void main(void) {\n"
+                "    highp vec3 yuv;\n"
+                "    highp vec3 rgb;\n"
+                "    yuv.x = texture2D(ysampler, outCoord).r;\n"
+                "    yuv.y = texture2D(usampler, outCoord).r-0.5;\n"
+                "    yuv.z = texture2D(vsampler, outCoord).r-0.5;\n"
+                "    rgb = mat3(1,       1,      1,\n"
+                "               0, -.34414, 1.772,\n"
+                "               1.402, -.71414, 0) * yuv;\n"
+                "    gl_FragColor = vec4(rgb, 1);\n"
+                "}\n";
+            const GLchar* kFragmentShaderSourceStrings =
+                static_cast<const GLchar*>(kFragmentShaderSource);
+
+            vshader = s_gles2.glCreateShader(GL_VERTEX_SHADER);
+            fshader = s_gles2.glCreateShader(GL_FRAGMENT_SHADER);
+
+            const GLint vtextLen = strlen(kVertexShaderSource);
+            const GLint ftextLen = strlen(kFragmentShaderSource);
+            CHECK_GL(s_gles2.glShaderSource(vshader, 1, &kVertexShaderSourceStrings, &vtextLen));
+            CHECK_GL(s_gles2.glCompileShader(vshader));
+
+            CHECK_GL(s_gles2.glShaderSource(fshader, 1, &kFragmentShaderSourceStrings, &ftextLen));
+            CHECK_GL(s_gles2.glCompileShader(fshader));
+
+            GLsizei infologLength = 0;
+            s_gles2.glGetShaderiv(vshader, GL_INFO_LOG_LENGTH, &infologLength);
+            GLchar* vinfoLog = new GLchar[infologLength + 1];
+            s_gles2.glGetShaderInfoLog(vshader, infologLength, NULL, vinfoLog);
+
+            s_gles2.glGetShaderiv(fshader, GL_INFO_LOG_LENGTH, &infologLength);
+            GLchar* finfoLog = new GLchar[infologLength + 1];
+            s_gles2.glGetShaderInfoLog(fshader, infologLength, NULL, finfoLog);
+
+            fprintf(stderr, "%s: vinfo log:\n%s\n", __FUNCTION__, vinfoLog);
+            fprintf(stderr, "%s: finfo log:\n%s\n", __FUNCTION__, finfoLog);
+
+            delete [] vinfoLog;
+            delete [] finfoLog;
+
+            program = s_gles2.glCreateProgram();
+            s_gles2.glAttachShader(program, vshader);
+            s_gles2.glAttachShader(program, fshader);
+            CHECK_GL(s_gles2.glLinkProgram(program));
+
+            s_gles2.glGenBuffers(1, &vbuf);
+            s_gles2.glGenBuffers(1, &ibuf);
+
+            const float kVertices[] = {
+                +1, -1, +0, +1, +0,
+                +1, +1, +0, +1, +1,
+                -1, +1, +0, +0, +1,
+                -1, -1, +0, +0, +0,
+            };
+
+            const GLubyte kIndices[] = { 0, 1, 2, 2, 3, 0 };
+
+            s_gles2.glBindBuffer(GL_ARRAY_BUFFER, vbuf);
+            s_gles2.glBufferData(GL_ARRAY_BUFFER, sizeof(kVertices), kVertices, GL_STATIC_DRAW);
+            s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibuf);
+            s_gles2.glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(kIndices), kIndices, GL_STATIC_DRAW);
+
+        }
+
+        s_gles2.glViewport(x, y, width, height);
+        s_gles2.glClear(GL_COLOR_BUFFER_BIT);
+        s_gles2.glUseProgram(program);
+
+        uint32_t yoff, uoff, voff, ywidth, cwidth;
+        splityv12((char*)pixels, width, height, &yoff, &uoff, &voff, &ywidth, &cwidth);
+
+        s_gles2.glActiveTexture(GL_TEXTURE0);
+        s_gles2.glBindTexture(GL_TEXTURE_2D, yTex);
+        CHECK_GL(s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, ywidth, height, GL_LUMINANCE, GL_UNSIGNED_BYTE, (void*)((char*)pixels + yoff)));
+        s_gles2.glActiveTexture(GL_TEXTURE1);
+        s_gles2.glBindTexture(GL_TEXTURE_2D, uTex);
+        CHECK_GL(s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, cwidth, height / 2, GL_LUMINANCE, GL_UNSIGNED_BYTE, (void*)((char*)pixels + uoff)));
+        s_gles2.glActiveTexture(GL_TEXTURE2);
+        s_gles2.glBindTexture(GL_TEXTURE_2D, vTex);
+        CHECK_GL(s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, cwidth, height / 2, GL_LUMINANCE, GL_UNSIGNED_BYTE, (void*)((char*)pixels + voff)));
+
+        GLuint ysamplerLoc = s_gles2.glGetUniformLocation(program, "ysampler");
+        CHECK_GL(s_gles2.glUniform1i(ysamplerLoc, 0));
+        GLuint usamplerLoc = s_gles2.glGetUniformLocation(program, "usampler");
+        CHECK_GL(s_gles2.glUniform1i(usamplerLoc, 1));
+        GLuint vsamplerLoc = s_gles2.glGetUniformLocation(program, "vsampler");
+        CHECK_GL(s_gles2.glUniform1i(vsamplerLoc, 2));
+
+        s_gles2.glBindBuffer(GL_ARRAY_BUFFER, vbuf);
+
+        int posHandle = s_gles2.glGetAttribLocation(program, "position");
+        s_gles2.glEnableVertexAttribArray(posHandle);
+        s_gles2.glVertexAttribPointer(posHandle, 3, GL_FLOAT, false, 5 * sizeof(GL_FLOAT), 0);
+        int coordHandle = s_gles2.glGetAttribLocation(program, "inCoord");
+        s_gles2.glEnableVertexAttribArray(coordHandle);
+        s_gles2.glVertexAttribPointer(coordHandle, 2, GL_FLOAT, false, 5 * sizeof(GL_FLOAT), (GLvoid*)(3 * sizeof(GL_FLOAT)));
+
+        s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibuf);
+        s_gles2.glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
+        s_gles2.glDisableVertexAttribArray(posHandle);
+        s_gles2.glDisableVertexAttribArray(coordHandle);
+
+        s_gles2.glActiveTexture(GL_TEXTURE0);
+        s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+        s_gles2.glCopyTexImage2D(GL_TEXTURE_2D, 0, p_format, x, y, width, height, 0);
+        unbindFbo();
+        conversion = true;
+    } else {
+
+        s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+        s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        s_gles2.glTexSubImage2D(
+                GL_TEXTURE_2D, 0, x, y, width, height, p_format, p_type, pixels);
+    }
 }
+
 
 bool ColorBuffer::blitFromCurrentReadBuffer()
 {
