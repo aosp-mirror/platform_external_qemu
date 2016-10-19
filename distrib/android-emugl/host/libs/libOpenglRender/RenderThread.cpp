@@ -57,20 +57,10 @@ intptr_t RenderThread::main() {
         return 0;
     }
 
-    if ((flags & IOSTREAM_CLIENT_EXIT_SERVER) == IOSTREAM_CLIENT_EXIT_SERVER) {
-        // The old code had a separate server thread, this flag meant 'exit the
-        // server thread'. It's not used anymore, but let's just make sure...
-        if (auto renderer = mRenderer.lock()) {
-            renderer->stop();
-        }
-        return 0;
-    }
+    // |flags| used to have something, now they're not used.
+    (void)flags;
 
-    std::unique_ptr<IOStream> stream(new ChannelStream(mChannel, 384));
-    if (!stream) {
-        return 0;
-    }
-
+    ChannelStream stream(mChannel, emugl::ChannelBuffer::kSmallSize);
     RenderThreadInfo tInfo;
     ChecksumCalculatorThreadInfo tChecksumInfo;
 
@@ -104,7 +94,7 @@ intptr_t RenderThread::main() {
     }
 
     while (1) {
-        int stat = readBuf.getData(stream.get());
+        int stat = readBuf.getData(&stream);
         if (stat <= 0) {
             break;
         }
@@ -151,7 +141,7 @@ intptr_t RenderThread::main() {
             // contexts.
             FrameBuffer::getFB()->lockContextStructureRead();
             size_t last = tInfo.m_glDec.decode(
-                    readBuf.buf(), readBuf.validData(), stream.get());
+                    readBuf.buf(), readBuf.validData(), &stream);
             if (last > 0) {
                 progress = true;
                 readBuf.consume(last);
@@ -162,7 +152,7 @@ intptr_t RenderThread::main() {
             // decoder
             //
             last = tInfo.m_gl2Dec.decode(readBuf.buf(), readBuf.validData(),
-                                         stream.get());
+                                         &stream);
             FrameBuffer::getFB()->unlockContextStructureRead();
 
             if (last > 0) {
@@ -175,7 +165,7 @@ intptr_t RenderThread::main() {
             // renderControl decoder
             //
             last = tInfo.m_rcDec.decode(readBuf.buf(), readBuf.validData(),
-                                        stream.get());
+                                        &stream);
             if (last > 0) {
                 readBuf.consume(last);
                 progress = true;

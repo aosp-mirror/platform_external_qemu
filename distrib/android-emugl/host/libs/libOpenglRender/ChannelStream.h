@@ -26,14 +26,13 @@ public:
 
     virtual void* allocBuffer(size_t minSize) override final;
     virtual int commitBuffer(size_t size) override final;
-    virtual const unsigned char* readFully(void* buf,
-                                           size_t len) override final;
     virtual const unsigned char* read(void* buf,
                                       size_t* inout_len) override final;
     virtual int writeFully(const void* buf, size_t len) override final;
-    virtual void forceStop() override final;
+
+    void forceStop();
 
 private:
     std::shared_ptr<emugl::RenderChannelImpl> mChannel;
-    std::vector<char> mBuf;
+    emugl::ChannelBuffer mBuf;
 };

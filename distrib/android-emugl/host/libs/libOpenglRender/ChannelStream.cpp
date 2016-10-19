@@ -17,18 +17,20 @@
 
 ChannelStream::ChannelStream(std::shared_ptr<emugl::RenderChannelImpl> channel,
                              size_t bufSize)
-    : IOStream(bufSize), mChannel(channel), mBuf(bufSize) {}
+    : IOStream(bufSize), mChannel(channel) {
+    mBuf.resize_noinit(bufSize);
+}
 
 void* ChannelStream::allocBuffer(size_t minSize) {
     if (mBuf.size() < minSize) {
-        mBuf.resize(minSize);
+        mBuf.resize_noinit(minSize);
     }
     return mBuf.data();
 }
 
 int ChannelStream::commitBuffer(size_t size) {
     assert(size <= mBuf.size());
-    if (mBuf.capacity() <= 2 * size) {
+    if (mBuf.isAllocated()) {
         mBuf.resize(size);
         mChannel->writeToGuest(std::move(mBuf));
     } else {
@@ -38,20 +40,12 @@ int ChannelStream::commitBuffer(size_t size) {
     return size;
 }
 
-const unsigned char* ChannelStream::readFully(void* buf, size_t len) {
-    size_t size = mChannel->readFromGuest((char*)buf, len, true);
-    if (size < len) {
-        return nullptr;
-    }
-    return (const unsigned char*)buf;
-}
-
 const unsigned char* ChannelStream::read(void* buf, size_t* inout_len) {
     size_t size = mChannel->readFromGuest((char*)buf, *inout_len, true);
     if (size == 0) {
         return nullptr;
     }
-    *inout_len = (int)size;
+    *inout_len = size;
     return (const unsigned char*)buf;
 }
 
