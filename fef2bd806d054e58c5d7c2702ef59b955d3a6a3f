@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3cf3ffac_2b38c301",
+        "filename": "android/base/network/Dns.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-19T17:19:03Z",
+      "side": 1,
+      "message": "just curious, why not vector\u003cchar\u003e. vector usually looks better as a buffer (just IMO)",
+      "range": {
+        "startLine": 124,
+        "startChar": 8,
+        "endLine": 124,
+        "endChar": 26
+      },
+      "revId": "fef2bd806d054e58c5d7c2702ef59b955d3a6a3f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3cf3ffac_cb013f22",
+        "filename": "android/base/network/Dns.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-19T17:19:03Z",
+      "side": 1,
+      "message": "should this be after the check for ip.valid() ?",
+      "range": {
+        "startLine": 197,
+        "startChar": 0,
+        "endLine": 199,
+        "endChar": 6
+      },
+      "revId": "fef2bd806d054e58c5d7c2702ef59b955d3a6a3f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
