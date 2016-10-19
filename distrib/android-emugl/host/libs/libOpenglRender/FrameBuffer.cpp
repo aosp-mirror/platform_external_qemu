@@ -177,6 +177,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
         return true;
     }
 
+
     //
     // allocate space for the FrameBuffer object
     //
@@ -185,6 +186,9 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
         ERR("Failed to create fb\n");
         return false;
     }
+
+    // allocate conversion buffer for yuv
+    fb->conversionBuffer = (char*)malloc(32 * 1048576);
 
     //
     // Initialize backend EGL display
