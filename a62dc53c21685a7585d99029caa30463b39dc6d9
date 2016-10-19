@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9cd86ab1_aa4e0fc2",
+        "filename": "android/base/network/Dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-19T15:11:39Z",
+      "side": 1,
+      "message": "as far as I understand, this is only useful in header files.",
+      "parentUuid": "df9654c8_3147f24d",
+      "range": {
+        "startLine": 44,
+        "startChar": 20,
+        "endLine": 44,
+        "endChar": 21
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df9654c8_11791684",
         "filename": "android/base/network/Dns.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-10-11T18:41:36Z",
       "side": 1,
       "message": "you can just assign from StringView - it has an operator std::string\nalso, same comment as in IpAddress CL - can you make it conditional?",
+      "range": {
+        "startLine": 48,
+        "startChar": 27,
+        "endLine": 48,
+        "endChar": 29
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9c7dca55_2246ce51",
+        "filename": "android/base/network/Dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-19T15:11:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df9654c8_11791684",
       "range": {
         "startLine": 48,
         "startChar": 27,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "9c7dca55_4243d240",
+        "filename": "android/base/network/Dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-19T15:11:39Z",
+      "side": 1,
+      "message": "Ooops, as you can see, this was copied from C code :-) Thanks.",
+      "parentUuid": "df9654c8_916526d7",
+      "range": {
+        "startLine": 72,
+        "startChar": 44,
+        "endLine": 72,
+        "endChar": 48
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df9654c8_31eb7207",
         "filename": "android/base/network/Dns.cpp",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2016-10-11T18:41:36Z",
       "side": 1,
       "message": "this should only be done if the previous call returned buffer overflow",
+      "range": {
+        "startLine": 114,
+        "startChar": 3,
+        "endLine": 117,
+        "endChar": 5
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9c7dca55_a27ade78",
+        "filename": "android/base/network/Dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-19T15:11:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df9654c8_31eb7207",
       "range": {
         "startLine": 114,
         "startChar": 3,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "9c7dca55_426cb2c2",
+        "filename": "android/base/network/Dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-19T15:11:39Z",
+      "side": 1,
+      "message": "Thanks, but I wonder what\u0027s the best way to get a global list of DNS servers. It looks like each interface can have its own DNS server list, which doesn\u0027t exactly fit our API here :-/ Looking into it.",
+      "parentUuid": "df9654c8_916446b2",
+      "range": {
+        "startLine": 119,
+        "startChar": 5,
+        "endLine": 120,
+        "endChar": 44
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df9654c8_d1740e5f",
         "filename": "android/base/network/Dns.cpp",
         "patchSetId": 1
@@ -128,6 +248,30 @@
       "writtenOn": "2016-10-11T18:41:36Z",
       "side": 1,
       "message": ".good() isn\u0027t really needed here",
+      "range": {
+        "startLine": 143,
+        "startChar": 12,
+        "endLine": 143,
+        "endChar": 19
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9c7dca55_c27fe267",
+        "filename": "android/base/network/Dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-19T15:11:39Z",
+      "side": 1,
+      "message": "Yep, this comes from the original code that was in android/utils/",
+      "parentUuid": "df9654c8_d1740e5f",
       "range": {
         "startLine": 143,
         "startChar": 12,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "9c7dca55_e286a672",
+        "filename": "android/base/network/Dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-19T15:11:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df9654c8_31845247",
+      "range": {
+        "startLine": 176,
+        "startChar": 16,
+        "endLine": 176,
+        "endChar": 18
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df9654c8_917b6648",
         "filename": "android/base/network/Dns.cpp",
         "patchSetId": 1
@@ -174,6 +342,30 @@
       "writtenOn": "2016-10-11T18:41:36Z",
       "side": 1,
       "message": "is it ok to have it non thread-safe?",
+      "range": {
+        "startLine": 202,
+        "startChar": 4,
+        "endLine": 204,
+        "endChar": 5
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9c7dca55_028c6a8f",
+        "filename": "android/base/network/Dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-19T15:11:39Z",
+      "side": 1,
+      "message": "I think it is, the worst that can happen is leaking an empty instance (essentialyl a std::unordered_map), and is very very unlikely.",
+      "parentUuid": "df9654c8_917b6648",
       "range": {
         "startLine": 202,
         "startChar": 4,
@@ -209,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "9c7dca55_0228ea87",
+        "filename": "android/base/network/Dns.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-19T15:11:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df9654c8_b152220d",
+      "range": {
+        "startLine": 53,
+        "startChar": 28,
+        "endLine": 53,
+        "endChar": 30
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df9654c8_1162f6d9",
         "filename": "android/base/network/Dns.h",
         "patchSetId": 1
@@ -232,6 +448,47 @@
     },
     {
       "key": {
+        "uuid": "9c7dca55_223deec5",
+        "filename": "android/base/network/Dns.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-19T15:11:39Z",
+      "side": 1,
+      "message": "Actually, this is not necessary at all, and left to the implementation.",
+      "parentUuid": "df9654c8_1162f6d9",
+      "range": {
+        "startLine": 73,
+        "startChar": 4,
+        "endLine": 73,
+        "endChar": 5
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9c7dca55_c2560202",
+        "filename": "android/base/network/Dns.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-19T15:11:39Z",
+      "side": 1,
+      "message": "actually, I removed this.",
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df9654c8_310ff2ee",
         "filename": "android/base/network/Dns_unittest.cpp",
         "patchSetId": 1
@@ -243,6 +500,30 @@
       "writtenOn": "2016-10-11T18:41:36Z",
       "side": 1,
       "message": "nit: move to some common UT header?",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 1
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9c7dca55_22a16ef5",
+        "filename": "android/base/network/Dns_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-19T15:11:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df9654c8_310ff2ee",
       "range": {
         "startLine": 26,
         "startChar": 0,
