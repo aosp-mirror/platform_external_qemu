@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "3cf3ffac_b6c53a9a",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-10-19T18:38:15Z",
+      "side": 1,
+      "message": "Should this be const?",
+      "revId": "81641d5604a2b8a041424cff83578bf05e650243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fce08714_8ccba73c",
         "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
         "patchSetId": 1
@@ -54,6 +71,23 @@
     },
     {
       "key": {
+        "uuid": "3cf3ffac_56a7b6f5",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-10-19T18:38:15Z",
+      "side": 1,
+      "message": "I think it would be a good idea to make this virtual for more general use cases and future safety.",
+      "revId": "81641d5604a2b8a041424cff83578bf05e650243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fce08714_2cbb93a9",
         "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
         "patchSetId": 1
@@ -83,6 +117,46 @@
       "side": 1,
       "message": "Will do",
       "parentUuid": "fce08714_2cbb93a9",
+      "revId": "81641d5604a2b8a041424cff83578bf05e650243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3cf3ffac_f618623a",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-10-19T18:38:15Z",
+      "side": 1,
+      "message": "Tiny nit: I think flipping the if and else here to have if (isAllocated()) instead of the negation would be clearer. It\u0027s also more consistent with the else statement below.",
+      "range": {
+        "startLine": 117,
+        "startChar": 0,
+        "endLine": 122,
+        "endChar": 13
+      },
+      "revId": "81641d5604a2b8a041424cff83578bf05e650243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3cf3ffac_f1822ce5",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-10-19T18:38:15Z",
+      "side": 1,
+      "message": "The (e - b) seems to limit this to random access iterators. Could we make it more generic by using std::distance?",
       "revId": "81641d5604a2b8a041424cff83578bf05e650243",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
