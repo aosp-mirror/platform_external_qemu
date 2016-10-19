@@ -15,19 +15,241 @@
 
 #include "android/base/EnumFlags.h"
 
+#include <algorithm>
 #include <functional>
 #include <memory>
+#include <utility>
 #include <vector>
+
+#include <assert.h>
 
 namespace emugl {
 
 // Turn the RenderChannel::Event enum into flags.
 using namespace ::android::base::EnumFlags;
 
+// WIP: a vector with small buffer optimization
+template <class T>
+class SmallVector {
+public:
+    using value_type = T;
+    using iterator = T*;
+    using const_iterator = const T*;
+    using pointer = T*;
+    using const_pointer = T*;
+    using reference = T&;
+    using const_reference = const T&;
+    using size_type = size_t;
+
+    iterator begin() { return mBegin; }
+    const_iterator begin() const { return mBegin; }
+    const_iterator cbegin() const { return mBegin; }
+
+    iterator end() { return mEnd; }
+    const_iterator end() const { return mEnd; }
+    const_iterator cend() const { return mEnd; }
+
+    size_type size() const { return end() - begin(); }
+    size_type capacity() const { return mCapacity; }
+
+    reference operator[](size_t i) { return *(begin() + i); }
+    const_reference operator[](size_t i) const { return *(cbegin() + i); }
+
+    pointer data() { return mBegin; }
+    const_pointer data() const { return mBegin; }
+
+protected:
+    SmallVector() = default;
+    SmallVector(iterator begin, iterator end, size_type capacity)
+        : mBegin(begin), mEnd(end), mCapacity(capacity) {}
+    ~SmallVector() = default;
+
+    iterator mBegin;
+    iterator mEnd;
+    size_type mCapacity;
+};
+
+template <class T, size_t SmallSize>
+class SmallFixedVector : public SmallVector<T> {
+public:
+    using DynamicVector = std::vector<T>;
+    using value_type = typename SmallVector<T>::value_type;
+    using iterator = typename SmallVector<T>::iterator;
+    using const_iterator = typename SmallVector<T>::const_iterator;
+    using pointer = typename SmallVector<T>::pointer;
+    using const_pointer = typename SmallVector<T>::const_pointer;
+    using reference = typename SmallVector<T>::reference;
+    using const_reference = typename SmallVector<T>::const_reference;
+    using size_type = typename SmallVector<T>::size_type;
+
+    SmallFixedVector() : SmallVector<T>(mData.array, mData.array, SmallSize) {}
+
+    SmallFixedVector(const_iterator b, const_iterator e) : SmallFixedVector() {
+        insert_back(b, e);
+    }
+
+    SmallFixedVector(DynamicVector&& v) {
+        new (&mData.vector) DynamicVector(std::move(v));
+        this->mBegin = &*mData.vector.begin();
+        this->mEnd = &*mData.vector.end();
+        this->mCapacity = mData.vector.capacity();
+    }
+
+    SmallFixedVector(SmallFixedVector&& other) : SmallFixedVector() {
+        if (other.isAllocated()) {
+            new (&mData.vector) DynamicVector(std::move(other.mData.vector));
+            this->mBegin = &*mData.vector.begin();
+            this->mEnd = &*mData.vector.end();
+            this->mCapacity = mData.vector.capacity();
+            other.mBegin = &*other.mData.vector.begin();
+            other.mEnd = &*other.mData.vector.end();
+            other.mCapacity = other.mData.vector.capacity();
+        } else {
+            std::move(other.begin(), other.end(), this->begin());
+            this->mEnd = this->mBegin + other.size();
+        }
+    }
+
+    SmallFixedVector(SmallVector<T>&& other) = delete;
+
+    SmallFixedVector& operator=(SmallFixedVector&& other) {
+        if (other.isAllocated()) {
+            if (!isAllocated()) {
+                destruct(this->begin(), this->end());
+                new (&mData.vector) DynamicVector(std::move(other.mData.vector));
+            } else {
+                mData.vector = std::move(other.mData.vector);
+            }
+            this->mBegin = &*mData.vector.begin();
+            this->mEnd = &*mData.vector.end();
+            this->mCapacity = mData.vector.capacity();
+            other.mBegin = &*other.mData.vector.begin();
+            other.mEnd = &*other.mData.vector.end();
+            other.mCapacity = other.mData.vector.capacity();
+        } else {
+            if (isAllocated()) {
+                if (mData.vector.capacity() >= other.size()) {
+                    mData.vector.resize(other.size());
+                    std::move(other.begin(), other.end(), this->begin());
+                    assert(this->mBegin == &*mData.vector.begin());
+                    this->mEnd = this->mBegin + other.size();
+                    return *this;
+                }
+                mData.vector.~DynamicVector();
+                this->mBegin = &mData.array[0];
+                this->mCapacity = SmallSize;
+            } else if (this->size() < other.size()) {
+                // tricky: move() the part that fits into the size(),
+                // move-construct new elements.
+                std::move(other.begin(),
+                          other.begin() + this->size(),
+                          this->begin());
+                for (auto it = this->begin() + this->size(),
+                        itOther = other.begin() + this->size();
+                     itOther != other.end();
+                     ++it, ++itOther) {
+                    new (it) T(std::move(*itOther));
+                }
+                this->mEnd = this->begin() + other.size();
+                return *this;
+            } else { // size() >= other.size()
+                destruct(this->begin() + other.size(), this->end());
+            }
+            std::move(other.begin(), other.end(), this->begin());
+            this->mEnd = this->begin() + other.size();
+        }
+        return *this;
+    }
+
+    SmallFixedVector& operator=(SmallVector<T>&& other) = delete;
+
+    ~SmallFixedVector() {
+        if (isAllocated()) {
+            mData.vector.~DynamicVector();
+        } else {
+            destruct(this->begin(), this->end());
+        }
+    }
+
+    bool isAllocated() const { return this->begin() != mData.array; }
+
+    void reserve(size_type newCap) {
+        if (newCap <= this->capacity()) {
+            return;
+        }
+
+        if (isAllocated()) {
+            mData.vector.reserve(newCap);
+            this->mBegin = &*mData.vector.begin();
+            this->mEnd = &*mData.vector.end();
+            this->mCapacity = newCap;
+        } else {
+            assert(newCap > SmallSize);
+            toDynamic(newCap);
+        }
+    }
+
+    template <class Iter>
+    void insert(iterator where, Iter b, Iter e) {
+        // This is the only kind of insert we need for now.
+        assert(where == this->end());
+        insert_back(b, e);
+    }
+
+private:
+    void toDynamic(size_type newCap) {
+        assert(!isAllocated());
+
+        DynamicVector vec;
+        vec.reserve(newCap);
+        vec.assign(std::move_iterator<iterator>(this->begin()),
+                   std::move_iterator<iterator>(this->end()));
+        destruct(this->begin(), this->end());
+        new (&mData.vector) DynamicVector(std::move(vec));
+        this->mBegin = &*mData.vector.begin();
+        this->mEnd = &*mData.vector.end();
+        this->mCapacity = mData.vector.capacity();
+    }
+
+    template <class Iter>
+    void insert_back(Iter b, Iter e) {
+        const auto newSize = this->size() + (e - b);
+        if (newSize > this->capacity()) {
+            reserve(std::max(newSize, 2 * this->capacity()));
+        }
+        if (isAllocated()) {
+            mData.vector.insert(mData.vector.end(), b, e);
+            // Should not change after the reserve() call.
+            assert(this->mBegin == &*mData.vector.begin());
+            this->mEnd = &*mData.vector.end();
+        } else {
+            auto it = this->end();
+            for (; b != e; ++it, ++b) {
+                new (it) T(*b);
+            }
+            this->mEnd = it;
+        }
+    }
+
+    static void destruct(T* b, T* e) {
+        for (; b != e; ++b) {
+            b->~T();
+        }
+    }
+
+    union Data {
+        T array[SmallSize];
+        DynamicVector vector;
+
+        // These two are needed as compiler doesn't know how to generate
+        // defaults for a union with std::vector<> in it.
+        Data() {}
+        ~Data() {}
+    } mData;
+};
+
 // A type used for data passing.
-// TODO(zyy): add a small buffer optimization here to pass 4 and 8-byte chunks
-// without heap allocation (those are _very_ common).
-using ChannelBuffer = std::vector<char>;
+using ChannelBuffer = SmallFixedVector<char, 512>;
 
 // RenderChannel - an interface for a single guest to host renderer connection.
 // It allows the guest to send GPU emulation protocol-serialized messages to an
