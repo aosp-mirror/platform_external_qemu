@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "3cf3ffac_3082f24c",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-19T16:58:33Z",
+      "side": 1,
+      "message": "I want to be able to not initialize them here, but only in  SmallFixedVector()",
+      "parentUuid": "fce08714_8ccba73c",
+      "revId": "81641d5604a2b8a041424cff83578bf05e650243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fce08714_2cbb93a9",
         "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
         "patchSetId": 1
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "3cf3ffac_f0fceaca",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-19T16:58:33Z",
+      "side": 1,
+      "message": "Will do",
+      "parentUuid": "fce08714_2cbb93a9",
+      "revId": "81641d5604a2b8a041424cff83578bf05e650243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5cf273e7_6f34f13f",
         "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
         "patchSetId": 1
@@ -64,6 +100,24 @@
       "writtenOn": "2016-10-19T09:23:54Z",
       "side": 1,
       "message": "I\u0027m a bit puzzled here, how does that compile if |T| is not a class type (e.g. char)?",
+      "revId": "81641d5604a2b8a041424cff83578bf05e650243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3cf3ffac_107ff683",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-19T16:58:33Z",
+      "side": 1,
+      "message": "then ~T() is just a noop",
+      "parentUuid": "5cf273e7_6f34f13f",
       "revId": "81641d5604a2b8a041424cff83578bf05e650243",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
