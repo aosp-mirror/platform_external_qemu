@@ -234,6 +234,15 @@ else
     CXX_STD_LIB := -lstdc++
 endif
 
+# TCMalloc
+ifeq (linux,$(BUILD_TARGET_OS))
+  QEMU_SYSTEM_LDLIBS += -L$(LOCAL_PATH)/lib -ltcmalloc
+  BUILD_TARGET_CFLAGS += -fno-builtin-malloc \
+    -fno-builtin-calloc \
+    -fno-builtin-realloc \
+    -fno-builtin-free
+endif
+
 ifdef EMULATOR_BUILD_32BITS
 BUILD_TARGET_BITS := 32
 BUILD_TARGET_ARCH := x86
