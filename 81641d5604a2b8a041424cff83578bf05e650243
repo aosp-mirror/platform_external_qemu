@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fce08714_0cb8d7a8",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-19T09:23:54Z",
+      "side": 1,
+      "message": "verrry nice !! Can this go into android/base/ with a few unit-tests and a little bit more documentation?\n\nMy main concern is to properly document that this is not a 100% replacement for std::vector due to iterator invalidation issues. See http://stackoverflow.com/questions/8190950/may-stdvector-make-use-of-small-buffer-optimization",
+      "revId": "81641d5604a2b8a041424cff83578bf05e650243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce08714_8ccba73c",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-19T09:23:54Z",
+      "side": 1,
+      "message": "nit: shouldn\u0027t you define default initialization values for the members, or use \"\u003d delete\" here instead?",
+      "revId": "81641d5604a2b8a041424cff83578bf05e650243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce08714_2cbb93a9",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-19T09:23:54Z",
+      "side": 1,
+      "message": "nit: these three lines appear several times here, I\u0027d suggest creating a method to implement this, e.g.:\n\n  void resetAllocated() {\n      mBegin \u003d \u0026*mData.vector.begin();\n      mEnd \u003d \u0026*mData.vector.end();\n      mCapacity \u003d \u0026*mData.vector.capacity();\n  }",
+      "revId": "81641d5604a2b8a041424cff83578bf05e650243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5cf273e7_6f34f13f",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-19T09:23:54Z",
+      "side": 1,
+      "message": "I\u0027m a bit puzzled here, how does that compile if |T| is not a class type (e.g. char)?",
+      "revId": "81641d5604a2b8a041424cff83578bf05e650243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
