@@ -367,14 +367,15 @@ static void rcDestroyWindowSurface(uint32_t windowSurface)
 }
 
 static uint32_t rcCreateColorBuffer(uint32_t width,
-                                    uint32_t height, GLenum internalFormat)
+                                    uint32_t height, GLenum internalFormat,
+                                    int frameworkFormat)
 {
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return 0;
     }
 
-    return fb->createColorBuffer(width, height, internalFormat);
+    return fb->createColorBuffer(width, height, internalFormat, frameworkFormat);
 }
 
 static int rcOpenColorBuffer2(uint32_t colorbuffer)
@@ -533,21 +534,23 @@ static void rcReadColorBuffer(uint32_t colorBuffer,
 static int rcUpdateColorBuffer(uint32_t colorBuffer,
                                 GLint x, GLint y,
                                 GLint width, GLint height,
-                                GLenum format, GLenum type)
+                                GLenum format, GLenum type,
+                                int frameworkFormat)
 {
-
     FrameBuffer *fb = FrameBuffer::getFB();
+
     if (!fb) {
         GRSYNC_DPRINT("unlock gralloc cb lock");
         sGrallocSync->unlockColorBufferPrepare();
         return -1;
     }
 
-    // obtain pixels from guest DMA transfer
-    fb->updateColorBuffer(colorBuffer, x, y, width, height, format, type, (void*)emuglDma);
+    fb->updateColorBuffer(colorBuffer, x, y, width, height,
+                          format, type, frameworkFormat, (void*)emuglDma);
 
     GRSYNC_DPRINT("unlock gralloc cb lock");
     sGrallocSync->unlockColorBufferPrepare();
+
     return 0;
 }
 
