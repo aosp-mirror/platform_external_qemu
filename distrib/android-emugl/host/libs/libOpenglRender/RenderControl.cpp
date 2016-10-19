@@ -129,6 +129,20 @@ public:
         if (mEnabled && newLockState == 0) mGrallocColorBufferLock.unlockRead();
     }
     android::base::ReadWriteLock mGrallocColorBufferLock;
+
+    void setSync() {
+        mSync = s_gles2.glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    }
+
+    void waitSync() {
+        if (mSync) {
+            s_gles2.glClientWaitSync(mSync, GL_SYNC_FLUSH_COMMANDS_BIT, 3000000000);
+            s_gles2.glDeleteSync(mSync);
+            mSync = NULL;
+        }
+    }
+
+    GLsync mSync = NULL;
 private:
     bool mEnabled;
     std::atomic<int> lockState;
@@ -530,24 +544,158 @@ static void rcReadColorBuffer(uint32_t colorBuffer,
     fb->readColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
 }
 
-static int rcUpdateColorBuffer(uint32_t colorBuffer,
+static signed clamp_rgb(signed value) {
+    if (value > 255) {
+        value = 255;
+    } else if (value < 0) {
+        value = 0;
+    }
+    return value;
+}
+
+// YV12 is aka YUV420Planar, or YUV420p; the only difference is that YV12 has
+// certain stride requirements for Y and UV respectively.
+static void yv12_to_rgb888(char* dest, char* src, int width, int height,
+        int left, int top, int right, int bottom) {
+    int align = 16;
+    int yStride = (width + (align -1)) & ~(align-1);
+    int cStride = (yStride / 2 + (align - 1)) & ~(align-1);
+    int cSize = cStride * height/2;
+    int rgb_stride = 3;
+
+    uint8_t *rgb_ptr0 = (uint8_t *)dest;
+    uint8_t *yv12_y0 = (uint8_t *)src;
+    uint8_t *yv12_v0 = yv12_y0 + yStride * height;
+
+    for (int j = top; j <= bottom; ++j) {
+        uint8_t *yv12_y = yv12_y0 + j * yStride;
+        uint8_t *yv12_v = yv12_v0 + (j/2) * cStride;
+        uint8_t *yv12_u = yv12_v + cSize;
+        uint8_t *rgb_ptr = rgb_ptr0 + (j-top) * (right-left+1) * rgb_stride;
+        for (int i = left; i <= right; ++i) {
+            // convert to rgb
+            // frameworks/av/media/libstagefright/colorconversion/ColorConverter.cpp
+            signed y1 = (signed)yv12_y[i] - 16;
+            signed u = (signed)yv12_u[i / 2] - 128;
+            signed v = (signed)yv12_v[i / 2] - 128;
+
+            signed u_b = u * 517;
+            signed u_g = -u * 100;
+            signed v_g = -v * 208;
+            signed v_r = v * 409;
+
+            signed tmp1 = y1 * 298;
+            signed b1 = clamp_rgb((tmp1 + u_b) / 256);
+            signed g1 = clamp_rgb((tmp1 + v_g + u_g) / 256);
+            signed r1 = clamp_rgb((tmp1 + v_r) / 256);
+
+            rgb_ptr[(i-left)*rgb_stride] = r1;
+            rgb_ptr[(i-left)*rgb_stride+1] = g1;
+            rgb_ptr[(i-left)*rgb_stride+2] = b1;
+        }
+    }
+}
+
+#define ANDROID_EMU_YV12 0x666
+
+static size_t updateWindowSize = 60;
+static std::vector<int> YVConvertTimes;
+static std::vector<int> TexSubImageTimes;
+static int maxYVConvertTime;
+static int maxTexSubImageTime;
+static float avgYVConvertTime;
+static float avgTexSubImageTime;
+static size_t updateWindowIndex = 0;
+
+#include <sys/time.h>
+static int currTimeMs() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return (int)(tv.tv_usec / 1000 + tv.tv_sec * 1000);
+}
+
+static void rcUpdateColorBuffer(uint32_t colorBuffer,
                                 GLint x, GLint y,
                                 GLint width, GLint height,
                                 GLenum format, GLenum type, void* pixels)
 {
+    GrallocSyncPostLock lock(sGrallocSync.get());
+
+    if (YVConvertTimes.size() < updateWindowSize) {
+        YVConvertTimes.resize(updateWindowSize);
+    }
+
+    if (TexSubImageTimes.size() < updateWindowSize) {
+        TexSubImageTimes.resize(updateWindowSize);
+    }
 
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         GRSYNC_DPRINT("unlock gralloc cb lock");
         sGrallocSync->unlockColorBufferPrepare();
-        return -1;
+        return;
     }
 
-    fb->updateColorBuffer(colorBuffer, x, y, width, height, format, type, emuglDMA);
+    int convStart = currTimeMs();
+    GLenum usedFormat = format;
+    if (format == ANDROID_EMU_YV12) {
+        usedFormat = GL_RGB;
+        uint32_t align = 16;
+
+        uint32_t yStride = (width + (align - 1)) & ~(align - 1);
+        uint32_t uvStride = (yStride / 2 + (align - 1)) & ~(align - 1);
+        uint32_t uvHeight = height / 2;
+        uint32_t total_size = 
+            yStride * height + 2 * (uvHeight * uvStride);
+        memcpy(fb->conversionBuffer,
+               emuglDMA,
+               total_size);
+
+        yv12_to_rgb888((char*)emuglDMA, fb->conversionBuffer,
+                       width, height, 
+                       x, y,
+                       x + width - 1,
+                       y + height - 1);
+    }
+    int convEnd = currTimeMs();
+
+    int texsubStart = currTimeMs();
+    fb->updateColorBuffer(colorBuffer, x, y, width, height, usedFormat, type, emuglDMA);
+    int texsubEnd = currTimeMs();
+
+    YVConvertTimes[updateWindowIndex] = convEnd - convStart;
+    TexSubImageTimes[updateWindowIndex] = texsubEnd - texsubStart;
 
     GRSYNC_DPRINT("unlock gralloc cb lock");
     sGrallocSync->unlockColorBufferPrepare();
-    return 0;
+
+    updateWindowIndex++;
+    if (updateWindowIndex >= updateWindowSize) {
+        updateWindowIndex = 0;
+        maxYVConvertTime = 0;
+        maxTexSubImageTime = 0;
+        avgYVConvertTime = 0.0f;
+        avgTexSubImageTime = 0.0f;
+        for (size_t i = 0; i < updateWindowSize; i++) {
+            if (YVConvertTimes[i] > maxYVConvertTime) {
+                maxYVConvertTime = YVConvertTimes[i];
+            }
+            avgYVConvertTime += (float)YVConvertTimes[i];
+            if (TexSubImageTimes[i] > maxTexSubImageTime) {
+                maxTexSubImageTime = TexSubImageTimes[i];
+            }
+            avgTexSubImageTime += (float)TexSubImageTimes[i];
+        }
+
+        avgYVConvertTime /= (float)updateWindowSize;
+        avgTexSubImageTime /= (float)updateWindowSize;
+
+        fprintf(stderr, "%s: maxyvconvert %d maxtexsub %d avgyvconvert %f avgtexsub %f\n",
+                __FUNCTION__, maxYVConvertTime, maxTexSubImageTime,
+                avgYVConvertTime, avgTexSubImageTime);
+    }
+
+    return;
 }
 
 static uint32_t rcCreateClientImage(uint32_t context, EGLenum target, GLuint buffer)
