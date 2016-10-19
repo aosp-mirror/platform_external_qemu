@@ -177,6 +177,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
         return true;
     }
 
+
     //
     // allocate space for the FrameBuffer object
     //
@@ -466,6 +467,13 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     //
     s_theFrameBuffer = fb;
     GL_LOG("basic EGL initialization successful");
+
+    // allocate conversion buffer for yuv
+    fb->conversionBuffer = (char*)malloc(32 * 1048576);
+    s_gles2.glGenFramebuffers(1, &fb->conversionFbo);
+    s_gles2.glGenTextures(1, &fb->conversionSrcTex);
+    s_gles2.glGenTextures(1, &fb->conversionDstTex);
+
     return true;
 }
 
@@ -952,7 +960,7 @@ void FrameBuffer::readColorBuffer(HandleType p_colorbuffer,
 
 bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
                                     int x, int y, int width, int height,
-                                    GLenum format, GLenum type, void *pixels)
+                                    GLenum format, GLenum type, bool doConvert, void *pixels)
 {
     emugl::Mutex::AutoLock mutex(m_lock);
 
@@ -962,7 +970,7 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
         return false;
     }
 
-    (*c).second.cb->subUpdate(x, y, width, height, format, type, pixels);
+    (*c).second.cb->subUpdate(x, y, width, height, format, type, doConvert? &conversionFbo : NULL, pixels);
 
     return true;
 }
