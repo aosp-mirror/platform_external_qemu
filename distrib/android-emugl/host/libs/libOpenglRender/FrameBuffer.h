@@ -266,7 +266,7 @@ public:
     // Returns true on success, false otherwise.
     bool updateColorBuffer(HandleType p_colorbuffer,
                            int x, int y, int width, int height,
-                           GLenum format, GLenum type, void *pixels);
+                           GLenum format, GLenum type, bool doConvert, void *pixels);
 
     // Display the content of a given ColorBuffer into the framebuffer's
     // sub-window. |p_colorbuffer| is a handle value.
@@ -336,6 +336,13 @@ public:
     void createTrivialContext(HandleType shared,
                               HandleType* contextOut,
                               HandleType* surfOut);
+
+    // YV12 conversion stuff
+    char* conversionBuffer;
+    GLuint conversionSrcTex;
+    GLuint conversionDstTex;
+    GLuint conversionFbo;
+
 
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
