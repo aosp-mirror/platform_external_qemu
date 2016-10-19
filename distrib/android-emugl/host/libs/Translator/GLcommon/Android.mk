@@ -11,7 +11,7 @@ host_common_SRC_FILES :=     \
      RangeManip.cpp          \
      TextureUtils.cpp        \
      PaletteTexture.cpp      \
-     etc1.cpp                \
+     etc.cpp                 \
      objectNameManager.cpp   \
      ObjectNameSpace.cpp     \
      FramebufferData.cpp
