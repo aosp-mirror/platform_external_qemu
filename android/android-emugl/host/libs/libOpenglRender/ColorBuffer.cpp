@@ -20,6 +20,7 @@
 #include "RenderThreadInfo.h"
 #include "TextureDraw.h"
 #include "TextureResize.h"
+#include "YUVConverter.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
@@ -102,6 +103,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  int p_width,
                                  int p_height,
                                  GLenum p_internalFormat,
+                                 FrameworkFormat p_frameworkFormat,
                                  bool has_eglimage_texture_2d,
                                  Helper* helper) {
     GLenum texInternalFormat = 0;
@@ -197,6 +199,20 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
 
     cb->m_resizer = new TextureResize(p_width, p_height);
 
+    cb->m_frameworkFormat = p_frameworkFormat;
+    switch (cb->m_frameworkFormat) {
+    case FRAMEWORK_FORMAT_GL_COMPATIBLE:
+        break;
+    case FRAMEWORK_FORMAT_YV12:
+    case FRAMEWORK_FORMAT_YUV_420_888:
+        cb->m_yuv_converter.reset(new YUVConverter(p_width, p_height, cb->m_frameworkFormat));
+        break;
+        cb->m_yuv_converter.reset(new YUVConverter(p_width, p_height, cb->m_frameworkFormat));
+        break;
+    default:
+        break;
+    }
+
     s_gles2.glFinish();
     return cb;
 }
@@ -218,6 +234,12 @@ ColorBuffer::~ColorBuffer() {
     if (m_fbo) {
         s_gles2.glDeleteFramebuffers(1, &m_fbo);
     }
+
+    if (m_yuv_conversion_fbo) {
+        s_gles2.glDeleteFramebuffers(1, &m_yuv_conversion_fbo);
+    }
+
+    m_yuv_converter.reset();
 
     GLuint tex[2] = {m_tex, m_blitTex};
     s_gles2.glDeleteTextures(2, tex);
@@ -255,11 +277,26 @@ void ColorBuffer::subUpdate(int x,
         return;
     }
 
-    s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
-    s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    s_gles2.glTexSubImage2D(
-            GL_TEXTURE_2D, 0, x, y, width, height, p_format, p_type, pixels);
+    if (m_frameworkFormat == FRAMEWORK_FORMAT_YV12 ||
+        m_frameworkFormat == FRAMEWORK_FORMAT_YUV_420_888) {
+        assert(m_yuv_converter.get());
+
+        // This FBO will convert the YUV frame to RGB
+        // and render it to |m_tex|.
+        bindFbo(&m_yuv_conversion_fbo, m_tex);
+        m_yuv_converter->drawConvert(x, y, width, height, (char*)pixels);
+        unbindFbo();
+
+        // |m_tex| still needs to be bound afterwards
+        s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+    } else {
+        s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+        s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        s_gles2.glTexSubImage2D(
+                GL_TEXTURE_2D, 0, x, y, width, height, p_format, p_type, pixels);
+    }
 }
+
 
 bool ColorBuffer::blitFromCurrentReadBuffer()
 {
