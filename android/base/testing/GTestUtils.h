@@ -30,10 +30,12 @@ namespace base {
 //   EXPECT_TRUE(RangesMatch(range1, range2);
 //
 // Where |range1| and |range2| must have the same item type, and size.
-template <typename Range,
-          typename = enable_if<is_range<Range>>>
-inline ::testing::AssertionResult RangesMatch(const Range& expected,
-                                              const Range& actual) {
+template <typename Range1,
+          typename Range2,
+          typename = enable_if_c<is_range<Range1>::value &&
+                                 is_range<Range2>::value>>
+inline ::testing::AssertionResult RangesMatch(const Range1& expected,
+                                              const Range2& actual) {
     const auto expectedSize =
             std::distance(std::begin(expected), std::end(expected));
     const auto actualSize = std::distance(std::begin(actual), std::end(actual));

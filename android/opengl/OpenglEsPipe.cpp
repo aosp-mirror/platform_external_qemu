@@ -191,11 +191,11 @@ public:
 
         // Copy everything into a single ChannelBuffer.
         ChannelBuffer outBuffer;
-        outBuffer.reserve(count);
+        outBuffer.resize_noinit(count);
+        auto ptr = outBuffer.data();
         for (int n = 0; n < numBuffers; ++n) {
-            outBuffer.insert(outBuffer.end(),
-                             buffers[n].data,
-                             buffers[n].data + buffers[n].size);
+            memcpy(ptr, buffers[n].data, buffers[n].size);
+            ptr += buffers[n].size;
         }
 
         // Send it through the channel.
