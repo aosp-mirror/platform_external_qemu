@@ -167,12 +167,16 @@ public:
 
     // Create a new ColorBuffer instance from this display instance.
     // |p_width| and |p_height| are its dimensions in pixels.
-    // |p_internalFormat| is the pixel format. See ColorBuffer::create() for
+    // |p_internalFormat| is the OpenGL format of this color buffer.
+    // |p_frameworkFormat| describes the Android frameework format of this
+    // color buffer, if differing from |p_internalFormat|.
+    // See ColorBuffer::create() for
     // list of valid values. Note that ColorBuffer instances are reference-
     // counted. Use openColorBuffer / closeColorBuffer to operate on the
     // internal count.
     HandleType createColorBuffer(
-        int p_width, int p_height, GLenum p_internalFormat);
+        int p_width, int p_height, GLenum p_internalFormat,
+        FrameworkFormat p_frameworkFormat);
 
     // Call this function when a render thread terminates to destroy all
     // the remaining contexts it created. Necessary to avoid leaking host
@@ -260,7 +264,10 @@ public:
     // to glReadPixels(), this can be a slow operation.
     // |x|, |y|, |width| and |height| are the position and dimensions of
     // a rectangle whose pixel values will be transfered to the GPU
-    // |format| indicates the format of the pixel data, e.g. GL_RGB or GL_RGBA.
+    // |format| indicates the format of the OpenGL buffer, e.g. GL_RGB or GL_RGBA.
+    // |frameworkFormat| indicates the format of the pixel data; if
+    // FRAMEWORK_FORMAT_GL_COMPATIBLE, |format| (OpenGL format) is used.
+    // Otherwise, explicit conversion to |format| is needed.
     // |type| is the type of pixel data, e.g. GL_UNSIGNED_BYTE.
     // |pixels| is the address of a buffer containing the new pixel data.
     // Returns true on success, false otherwise.
