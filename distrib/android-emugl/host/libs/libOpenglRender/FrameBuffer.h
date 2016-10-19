@@ -337,6 +337,8 @@ public:
                               HandleType* contextOut,
                               HandleType* surfOut);
 
+    char* conversionBuffer;
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     ~FrameBuffer();
