@@ -243,23 +243,131 @@ void ColorBuffer::readPixels(int x,
     }
 }
 
+#define CHECK_GL(x) do { \
+    x; \
+    GLint err = s_gles2.glGetError(); \
+        if (err != GL_NO_ERROR) { \
+            fprintf(stderr, "%s: -> GL error 0x%x\n", #x, err); \
+        } \
+    } while(0) \
+
 void ColorBuffer::subUpdate(int x,
                             int y,
                             int width,
                             int height,
                             GLenum p_format,
                             GLenum p_type,
+                            GLuint* conversionFbo,
                             void* pixels) {
     ScopedHelperContext context(m_helper);
     if (!context.isOk()) {
         return;
     }
 
-    s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
-    s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    s_gles2.glTexSubImage2D(
-            GL_TEXTURE_2D, 0, x, y, width, height, p_format, p_type, pixels);
+    if (conversionFbo) {
+        bindFbo(conversionFbo, m_tex);
+        if (!conversion) {
+            // may have changed storage
+            s_gles2.glFramebufferTexture2D(GL_FRAMEBUFFER,
+                    GL_COLOR_ATTACHMENT0_OES,
+                    GL_TEXTURE_2D, m_tex, 0);
+
+            const char kVertexShaderSource[] =
+                "attribute highp vec4 position;\n"
+                "attribute highp vec2 inCoord;\n"
+                "varying highp vec2 outCoord;\n"
+                "void main(void) {\n"
+                "  gl_Position = position;\n"
+                "  outCoord = inCoord;\n"
+                "}\n";
+            const GLchar* kVertexShaderSourceStrings =
+                static_cast<const GLchar*>(kVertexShaderSource);
+
+            // Similarly, just interpolate texture coordinates.
+            const char kFragmentShaderSource[] =
+                "varying highp vec2 outCoord;\n"
+                "void main(void) {\n"
+                "  gl_FragColor = vec4(outCoord.x, outCoord.y, 0.5, 1.0);\n"
+                "}\n";
+            const GLchar* kFragmentShaderSourceStrings =
+                static_cast<const GLchar*>(kFragmentShaderSource);
+
+            vshader = s_gles2.glCreateShader(GL_VERTEX_SHADER);
+            fshader = s_gles2.glCreateShader(GL_FRAGMENT_SHADER);
+
+            const GLint vtextLen = strlen(kVertexShaderSource);
+            const GLint ftextLen = strlen(kFragmentShaderSource);
+            CHECK_GL(s_gles2.glShaderSource(vshader, 1, &kVertexShaderSourceStrings, &vtextLen));
+            CHECK_GL(s_gles2.glCompileShader(vshader));
+
+            CHECK_GL(s_gles2.glShaderSource(fshader, 1, &kFragmentShaderSourceStrings, &ftextLen));
+            CHECK_GL(s_gles2.glCompileShader(fshader));
+
+            GLsizei infologLength = 0;
+            s_gles2.glGetShaderiv(vshader, GL_INFO_LOG_LENGTH, &infologLength);
+            GLchar* vinfoLog = new GLchar[infologLength + 1];
+            s_gles2.glGetShaderInfoLog(vshader, infologLength, NULL, vinfoLog);
+
+            s_gles2.glGetShaderiv(fshader, GL_INFO_LOG_LENGTH, &infologLength);
+            GLchar* finfoLog = new GLchar[infologLength + 1];
+            s_gles2.glGetShaderInfoLog(fshader, infologLength, NULL, finfoLog);
+
+            fprintf(stderr, "%s: vinfo log:\n%s\n", __FUNCTION__, vinfoLog);
+            fprintf(stderr, "%s: finfo log:\n%s\n", __FUNCTION__, finfoLog);
+
+            delete [] vinfoLog;
+            delete [] finfoLog;
+
+            program = s_gles2.glCreateProgram();
+            s_gles2.glAttachShader(program, vshader);
+            s_gles2.glAttachShader(program, fshader);
+            s_gles2.glLinkProgram(program);
+
+            s_gles2.glGenBuffers(1, &vbuf);
+            s_gles2.glGenBuffers(1, &ibuf);
+
+            const float kVertices[] = {
+                +1, -1, +0, +1, +1,
+                +1, +1, +0, +1, +0,
+                -1, +1, +0, +0, +0,
+                -1, -1, +0, +0, +1,
+            };
+
+            const GLubyte kIndices[] = { 0, 1, 2, 2, 3, 0 };
+
+            s_gles2.glBindBuffer(GL_ARRAY_BUFFER, vbuf);
+            s_gles2.glBufferData(GL_ARRAY_BUFFER, sizeof(kVertices), kVertices, GL_STATIC_DRAW);
+            s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibuf);
+            s_gles2.glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(kIndices), kIndices, GL_STATIC_DRAW);
+        }
+
+        s_gles2.glBindBuffer(GL_ARRAY_BUFFER, vbuf);
+        s_gles2.glViewport(x, y, width, height);
+        s_gles2.glClear(GL_COLOR_BUFFER_BIT);
+        s_gles2.glUseProgram(program);
+
+        int posHandle = s_gles2.glGetAttribLocation(program, "position");
+        s_gles2.glEnableVertexAttribArray(posHandle);
+        s_gles2.glVertexAttribPointer(posHandle, 3, GL_FLOAT, false, 5 * sizeof(GL_FLOAT), 0);
+        int coordHandle = s_gles2.glGetAttribLocation(program, "inCoord");
+        s_gles2.glEnableVertexAttribArray(coordHandle);
+        s_gles2.glVertexAttribPointer(coordHandle, 2, GL_FLOAT, false, 5 * sizeof(GL_FLOAT), (GLvoid*)(3 * sizeof(GL_FLOAT)));
+
+        s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibuf);
+        s_gles2.glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
+        s_gles2.glDisableVertexAttribArray(posHandle);
+        s_gles2.glDisableVertexAttribArray(coordHandle);
+        unbindFbo();
+        conversion = true;
+    } else {
+
+        s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+        s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        s_gles2.glTexSubImage2D(
+                GL_TEXTURE_2D, 0, x, y, width, height, p_format, p_type, pixels);
+    }
 }
+
 
 bool ColorBuffer::blitFromCurrentReadBuffer()
 {
