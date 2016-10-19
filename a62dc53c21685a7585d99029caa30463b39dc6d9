@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "3cf3ffac_6b43eb86",
+        "filename": "android/base/network/Dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-19T17:19:03Z",
+      "side": 1,
+      "message": "no, final makes the class non-inheritable, so the compiler is able to optimize it better",
+      "parentUuid": "9cd86ab1_aa4e0fc2",
+      "range": {
+        "startLine": 44,
+        "startChar": 20,
+        "endLine": 44,
+        "endChar": 21
+      },
+      "revId": "a62dc53c21685a7585d99029caa30463b39dc6d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df9654c8_11791684",
         "filename": "android/base/network/Dns.cpp",
         "patchSetId": 1
