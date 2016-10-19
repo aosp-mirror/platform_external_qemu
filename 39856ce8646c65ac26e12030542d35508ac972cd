@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "fc116799_a46a4299",
+        "filename": "android/base/network/IpAddress.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-19T18:19:49Z",
+      "side": 1,
+      "message": "The StringView could just cover a mmap-ed file that ends at a page boundary, that\u0027s still a valid use case.\n\nI really don\u0027t think it makes sense to add this kind of assertion to StringView, that\u0027s simply not what this class is designed to handle, at all.\n\nAnother way to handle the problem you describe is to accept a null-terminated |const char*| instead, which is enough for the inet_pton(AF_INET, call), and only copy into a string if we detect a \u0027%\u0027 in the potentially-IPv6 input below. I\u0027ll do this.",
+      "parentUuid": "3cf3ffac_e9eb6e35",
+      "range": {
+        "startLine": 47,
+        "startChar": 4,
+        "endLine": 47,
+        "endChar": 51
+      },
+      "revId": "39856ce8646c65ac26e12030542d35508ac972cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dff9f4d6_f0c2defd",
         "filename": "android/base/network/IpAddress.cpp",
         "patchSetId": 1
