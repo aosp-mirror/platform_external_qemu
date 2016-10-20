@@ -187,6 +187,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                      &EmulatorQtWindow::slot_getWindowPos);
     QObject::connect(this, &EmulatorQtWindow::isWindowFullyVisible, this,
                      &EmulatorQtWindow::slot_isWindowFullyVisible);
+    QObject::connect(this, &EmulatorQtWindow::pollEvent, this,
+                     &EmulatorQtWindow::slot_pollEvent);
     QObject::connect(this, &EmulatorQtWindow::releaseBitmap, this,
                      &EmulatorQtWindow::slot_releaseBitmap);
     QObject::connect(this, &EmulatorQtWindow::requestClose, this,
@@ -790,16 +792,14 @@ void EmulatorQtWindow::slot_isWindowFullyVisible(bool* out_value,
         semaphore->release();
 }
 
-void EmulatorQtWindow::pollEvent(SkinEvent* event,
-                                 bool* hasEvent) {
-    android::base::AutoLock lock(mSkinEventQueueLock);
+void EmulatorQtWindow::slot_pollEvent(SkinEvent* event,
+                                      bool* hasEvent,
+                                      QSemaphore* semaphore) {
     if (mSkinEventQueue.isEmpty()) {
-        lock.unlock();
         *hasEvent = false;
     } else {
-        SkinEvent* newEvent = mSkinEventQueue.dequeue();
-        lock.unlock();
         *hasEvent = true;
+        SkinEvent* newEvent = mSkinEventQueue.dequeue();
 
         // TODO(grigoryj): debug output needed for investigating the rotation
         // bug.
@@ -811,26 +811,23 @@ void EmulatorQtWindow::pollEvent(SkinEvent* event,
         memcpy(event, newEvent, sizeof(SkinEvent));
         delete newEvent;
     }
+    if (semaphore != NULL)
+        semaphore->release();
 }
 
 void EmulatorQtWindow::queueSkinEvent(SkinEvent* event) {
-    android::base::AutoLock lock(mSkinEventQueueLock);
     const bool firstEvent = mSkinEventQueue.isEmpty();
 
-    // For the following events, only the "last" example of said event
-    // matters, so ensure that there is only one of them in the queue at a
-    // time. Additionaly the screen changed event processing is very slow,
-    // so let's not generate too many of them.
+    // For the following two events, only the "last" example of said event
+    // matters, so ensure
+    // that there is only one of them in the queue at a time.
     bool replaced = false;
-    const auto type = event->type;
-    if (type == kEventScrollBarChanged ||
-        type == kEventZoomedWindowResized ||
-        type == kEventScreenChanged) {
+    if (event->type == kEventScrollBarChanged ||
+        event->type == kEventZoomedWindowResized) {
         for (int i = 0; i < mSkinEventQueue.size(); i++) {
-            if (mSkinEventQueue.at(i)->type == type) {
+            if (mSkinEventQueue.at(i)->type == event->type) {
                 SkinEvent* toDelete = mSkinEventQueue.at(i);
                 mSkinEventQueue.replace(i, event);
-                lock.unlock();
                 delete toDelete;
                 replaced = true;
                 break;
@@ -840,28 +837,27 @@ void EmulatorQtWindow::queueSkinEvent(SkinEvent* event) {
 
     if (!replaced) {
         mSkinEventQueue.enqueue(event);
-        lock.unlock();
 
         // TODO(grigoryj): debug output needed for investigating the
         // rotation bug.
-        if (VERBOSE_CHECK(rotation) && (type == kEventLayoutNext ||
-                                        type == kEventLayoutPrev)) {
+        if (VERBOSE_CHECK(rotation) && (event->type == kEventLayoutNext ||
+                                        event->type == kEventLayoutPrev)) {
             qWarning("Enqueued Layout%s event",
-                     type == kEventLayoutNext ? "Next" : "Prev");
+                     event->type == kEventLayoutNext ? "Next" : "Prev");
         }
     }
 
     const auto uiAgent = mToolWindow->getUiEmuAgent();
     if (firstEvent && uiAgent && uiAgent->userEvents &&
         uiAgent->userEvents->onNewUserEvent) {
-        // We know that as soon as emulator starts processing user events
-        // it processes them until there are none. So we should only notify it
-        // if this event is the first one.
+        // we know that as soon as emulator starts processing user events
+        // it processes them until there are none. So we can notify it only
+        // if this event is the first one
         uiAgent->userEvents->onNewUserEvent();
     }
-    if (type == kEventLayoutNext) {
+    if (event->type == kEventLayoutNext) {
         emit(layoutChanged(true));
-    } else if (type == kEventLayoutPrev) {
+    } else if (event->type == kEventLayoutPrev) {
         emit(layoutChanged(false));
     }
 }
