@@ -224,6 +224,29 @@
     },
     {
       "key": {
+        "uuid": "7c89f776_8607d3c5",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-20T21:43:36Z",
+      "side": 1,
+      "message": "Is it possible to do a lot of reallocations up and down in size here? If we keep shrinking the current dynamicvector to match the other\u0027s size, we might end up make it grow back up when |other| is a bigger vector again and does the little-\u003ebig-\u003elittle transitions frequently (taking the line 119 path a lot).",
+      "range": {
+        "startLine": 132,
+        "startChar": 20,
+        "endLine": 132,
+        "endChar": 54
+      },
+      "revId": "81641d5604a2b8a041424cff83578bf05e650243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3cf3ffac_f1822ce5",
         "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
         "patchSetId": 1
