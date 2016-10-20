@@ -19,8 +19,6 @@
 
 #include "android/base/Compiler.h"
 #include "android/base/synchronization/Lock.h"
-#include "android/base/synchronization/MessageChannel.h"
-#include "android/base/threads/FunctorThread.h"
 
 #include "RenderThread.h"
 
@@ -33,7 +31,7 @@ namespace emugl {
 class RendererImpl final : public Renderer,
                            public std::enable_shared_from_this<RendererImpl> {
 public:
-    RendererImpl();
+    RendererImpl() = default;
     ~RendererImpl();
 
     bool initialize(int width, int height, bool useSubWindow);
@@ -72,12 +70,6 @@ private:
 
     std::vector<ThreadWithChannel> mThreads;
     bool mStopped = false;
-
-    // A message channel and a cleanup thread for GL resources of finished
-    // guest processes. Cleanup takes time, so we should offload it into a
-    // worker thread.
-    android::base::MessageChannel<uint64_t, 64> mCleanupProcessIds;
-    android::base::FunctorThread mCleanupThread;
 };
 
 }  // namespace emugl
