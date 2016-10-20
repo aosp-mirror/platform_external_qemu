@@ -124,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "7c89f776_37e6576d",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-10-20T16:44:00Z",
+      "side": 1,
+      "message": "Oh right, didn\u0027t think of the protected part, not a problem then.",
+      "parentUuid": "7c89f776_c47dde26",
+      "revId": "81641d5604a2b8a041424cff83578bf05e650243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fce08714_2cbb93a9",
         "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
         "patchSetId": 1
