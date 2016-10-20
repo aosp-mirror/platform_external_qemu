@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "7c89f776_e495821c",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-20T02:50:15Z",
+      "side": 1,
+      "message": "yeah. copy-pasting is bad",
+      "parentUuid": "3cf3ffac_b6c53a9a",
+      "revId": "81641d5604a2b8a041424cff83578bf05e650243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fce08714_8ccba73c",
         "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
         "patchSetId": 1
@@ -82,6 +100,24 @@
       "writtenOn": "2016-10-19T18:38:15Z",
       "side": 1,
       "message": "I think it would be a good idea to make this virtual for more general use cases and future safety.",
+      "revId": "81641d5604a2b8a041424cff83578bf05e650243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c89f776_c47dde26",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-20T02:50:15Z",
+      "side": 1,
+      "message": "definitely not. virtual functions in a vector class would make it much heavier than it should be. Currently the destructor is protected, so no one can accidentally delete it through the base class anyway",
+      "parentUuid": "3cf3ffac_56a7b6f5",
       "revId": "81641d5604a2b8a041424cff83578bf05e650243",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -146,6 +182,30 @@
     },
     {
       "key": {
+        "uuid": "7c89f776_6483d2eb",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-20T02:50:15Z",
+      "side": 1,
+      "message": "good idea",
+      "parentUuid": "3cf3ffac_f618623a",
+      "range": {
+        "startLine": 117,
+        "startChar": 0,
+        "endLine": 122,
+        "endChar": 13
+      },
+      "revId": "81641d5604a2b8a041424cff83578bf05e650243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3cf3ffac_f1822ce5",
         "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
         "patchSetId": 1
@@ -157,6 +217,24 @@
       "writtenOn": "2016-10-19T18:38:15Z",
       "side": 1,
       "message": "The (e - b) seems to limit this to random access iterators. Could we make it more generic by using std::distance?",
+      "revId": "81641d5604a2b8a041424cff83578bf05e650243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c89f776_848036de",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-20T02:50:15Z",
+      "side": 1,
+      "message": "agreed",
+      "parentUuid": "3cf3ffac_f1822ce5",
       "revId": "81641d5604a2b8a041424cff83578bf05e650243",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
