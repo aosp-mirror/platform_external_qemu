@@ -247,6 +247,30 @@
     },
     {
       "key": {
+        "uuid": "7c89f776_c1a14591",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-20T22:24:31Z",
+      "side": 1,
+      "message": "vector doesn\u0027t reallocate down (at least I haven\u0027t seen any STL implementation that does). So resize() just changes the internal size variable, with no real memory reallocation,",
+      "parentUuid": "7c89f776_8607d3c5",
+      "range": {
+        "startLine": 132,
+        "startChar": 20,
+        "endLine": 132,
+        "endChar": 54
+      },
+      "revId": "81641d5604a2b8a041424cff83578bf05e650243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3cf3ffac_f1822ce5",
         "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
         "patchSetId": 1
