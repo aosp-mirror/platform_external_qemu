@@ -1,0 +1,9 @@
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Code-Review+1: Joe Baker-Malone <jbakermalone@google.com>
+Code-Review+2: Bo Hu <bohu@google.com>
+Verified+1: Joe Baker-Malone <jbakermalone@google.com>
+Submitted-by: Joe Baker-Malone <jbakermalone@google.com>
+Submitted-at: Thu, 20 Oct 2016 18:12:07 +0000
+Reviewed-on: https://android-review.googlesource.com/269137
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
