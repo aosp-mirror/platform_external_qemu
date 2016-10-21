@@ -264,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "5c88b3a4_089646d6",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T18:11:59Z",
+      "side": 1,
+      "message": "Will do so after changes to DMA interface in the parent commit, which would simply remove the pixels argument.",
+      "parentUuid": "fce08714_cfd2c1bb",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fce08714_afc775f7",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
         "patchSetId": 9
