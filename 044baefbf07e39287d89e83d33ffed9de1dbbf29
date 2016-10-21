@@ -1,0 +1,276 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fce08714_6fbbcd7a",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-21T12:37:52Z",
+      "side": 1,
+      "message": "nit: this line is too long, please reformat this properly.\nAlso with so many parameters, please provide a little bit documentation about what this function is expected to do.\n\n+ There is no reason for the first parameter to be a |char *|, make it a |void *| or a |uint8_t *| directly, to save you a cast either here or at the caller location.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce08714_4fb8117c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-21T12:37:52Z",
+      "side": 1,
+      "message": "nit: please use consistent formatting, i.e. one space before and after each binary operator.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce08714_2fc5c5f3",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-21T12:37:52Z",
+      "side": 1,
+      "message": "again, long lines make the code difficult to read, please reformat properly.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce08714_0fc209ec",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-21T12:37:52Z",
+      "side": 1,
+      "message": "please use a correct prefix for members, e.g. |m_conversion|, which is the historical convention for EmuGL code, or |mConversion| which we use for new code.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce08714_efcd7d1b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-21T12:37:52Z",
+      "side": 1,
+      "message": "All this seems to be a lot of state that should better put in a separate class :-/",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce08714_8fccb91c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-21T12:37:52Z",
+      "side": 1,
+      "message": "what is this magic number exactly? Also for large allocations you should check that malloc() doesn\u0027 return nullptr.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce08714_6fe2ad8c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-21T12:37:52Z",
+      "side": 1,
+      "message": "please update the destructor to delete these too.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce08714_cfd2c1bb",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-21T12:37:52Z",
+      "side": 1,
+      "message": "Please update the documentation comment to explain what |doConvert| means exactly.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce08714_afc775f7",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-21T12:37:52Z",
+      "side": 1,
+      "message": "Again, please use proper prefix for member names :-(\nAnd these should not be public.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce08714_2fdca5c9",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-21T12:37:52Z",
+      "side": 1,
+      "message": "another magic number? Please at least add a comment explaining this value.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce08714_4fdff1c0",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-21T12:37:52Z",
+      "side": 1,
+      "message": "this doesn\u0027t seem related to conversion directly, please move this to another patch.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce08714_0fd9e9d9",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-21T12:37:52Z",
+      "side": 1,
+      "message": "please don\u0027t use |signed| as a type, just |int| here, thanks.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce08714_af7e55d1",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 603,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-21T12:37:52Z",
+      "side": 1,
+      "message": "avoid non-POD static variables. See below.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce08714_cf79a1ed",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 608,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-21T12:37:52Z",
+      "side": 1,
+      "message": "please group all these into a single global structure instead. Use LazyInstance\u003c\u003e to perform initialization properly on first use.\n\nglobal variables should have a \"s\" prefix, as in |sGlobals|.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce08714_6f698d16",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 662,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-21T12:37:52Z",
+      "side": 1,
+      "message": "it looks like this is missing something here :)",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce08714_8f83999b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 701,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-21T12:37:52Z",
+      "side": 1,
+      "message": "interesting, but all this benchmarking stuff should be conditionally define with a #ifdef .. #endif block.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
