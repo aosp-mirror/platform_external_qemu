@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5c88b3a4_453d9e82",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/Etc2_unittest.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-10-21T01:16:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5c88b3a4_053476a7",
+      "range": {
+        "startLine": 24,
+        "startChar": 26,
+        "endLine": 24,
+        "endChar": 28
+      },
+      "revId": "981df6cb62f77b01ce8da22a658ea9b4c616925c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5c88b3a4_85896642",
         "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/etc.cpp",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2016-10-21T01:09:11Z",
       "side": 1,
       "message": "nit: please align",
+      "range": {
+        "startLine": 212,
+        "startChar": 0,
+        "endLine": 224,
+        "endChar": 1
+      },
+      "revId": "981df6cb62f77b01ce8da22a658ea9b4c616925c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c88b3a4_c5de0e28",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/etc.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-10-21T01:16:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5c88b3a4_85896642",
       "range": {
         "startLine": 212,
         "startChar": 0,
