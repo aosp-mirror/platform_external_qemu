@@ -55,22 +55,32 @@
 # define EWOULDBLOCK  WSAEWOULDBLOCK
 #endif
 
-#if defined(_WIN64)
-/* On w64, setjmp is implemented by _setjmp which needs a second parameter.
- * If this parameter is NULL, longjump does no stack unwinding.
- * That is what we need for QEMU. Passing the value of register rsp (default)
- * lets longjmp try a stack unwinding which will crash with generated code. */
-# undef setjmp
-# define setjmp(env) _setjmp(env, NULL)
-#endif
 /* QEMU uses sigsetjmp()/siglongjmp() as the portable way to specify
  * "longjmp and don't touch the signal masks". Since we know that the
  * savemask parameter will always be zero we can safely define these
  * in terms of setjmp/longjmp on Win32.
  */
 #define sigjmp_buf jmp_buf
+
+#ifndef _WIN64
+
 #define sigsetjmp(env, savemask) setjmp(env)
 #define siglongjmp(env, val) longjmp(env, val)
+
+#else
+
+/* On w64, setjmp implementation tends to crash in MinGW (there were several
+ * attempts to fix it, but it keeps crashing). The only good implementation
+ * is the GCC's undocumented builtins - so let's use them.
+ */
+# undef setjmp
+# undef longjmp
+# define setjmp __builtin_setjmp
+# define longjmp __builtin_longjmp
+# define sigsetjmp(x,y) __builtin_setjmp((x))
+# define siglongjmp(x,y) __builtin_longjmp((x),(y))
+
+#endif
 
 /* Declaration of ffs() is missing in MinGW's strings.h. */
 /* ANDROID EMULATOR BUILD HACK: Our mingw environment doesn't have any library
