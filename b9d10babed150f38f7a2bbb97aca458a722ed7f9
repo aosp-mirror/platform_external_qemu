@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fce08714_afebf588",
+        "filename": "android/avd/util.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2016-10-21T09:46:00Z",
+      "side": 1,
+      "message": "There is a small leak here, you should first do AFREE(abi) before assignment.",
+      "range": {
+        "startLine": 123,
+        "startChar": 12,
+        "endLine": 123,
+        "endChar": 23
+      },
+      "revId": "b9d10babed150f38f7a2bbb97aca458a722ed7f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
