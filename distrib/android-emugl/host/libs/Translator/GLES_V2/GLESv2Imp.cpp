@@ -1464,16 +1464,6 @@ GL_APICALL void  GL_APIENTRY glGetShaderiv(GLuint shader, GLenum pname, GLint* p
             params[0] = (srcLength > 0) ? srcLength + 1 : 0;
             }
             break;
-        case GL_SHADER_SOURCE_LENGTH:
-            {
-                ObjectDataPtr objData = ctx->shareGroup()->getObjectData(SHADER,shader);
-                SET_ERROR_IF(!objData.get() ,GL_INVALID_OPERATION);
-                SET_ERROR_IF(objData.get()->getDataType()!=SHADER_DATA,GL_INVALID_OPERATION);
-                ShaderParser* sp = (ShaderParser*)objData.get();
-                GLint srcLength = sp->getOriginalSrc().length();
-                params[0] = (srcLength>0) ? srcLength+1 : 0;
-            }
-            break;
         default:
             ctx->dispatcher().glGetShaderiv(globalShaderName,pname,params);
         }
