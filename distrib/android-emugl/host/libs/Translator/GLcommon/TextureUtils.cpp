@@ -19,6 +19,7 @@
 #include <GLcommon/GLESvalidate.h>
 #include <stdio.h>
 #include <cmath>
+#include <memory>
 
 int getCompressedFormats(int* formats){
     if(formats){
@@ -64,11 +65,10 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
                 const int32_t bpr = ((width * 3) + align) & ~align;
                 const size_t size = bpr * height;
 
-                etc1_byte* pOut = new etc1_byte[size];
-                int res = etc1_decode_image((const etc1_byte*)data, pOut, width, height, 3, bpr);
+                std::unique_ptr<etc1_byte[]> pOut(new etc1_byte[size]);
+                int res = etc1_decode_image((const etc1_byte*)data, pOut.get(), width, height, 3, bpr);
                 SET_ERROR_IF(res!=0, GL_INVALID_VALUE);
-                glTexImage2DPtr(target,level,format,width,height,border,format,type,pOut);
-                delete [] pOut;
+                glTexImage2DPtr(target,level,format,width,height,border,format,type,pOut.get());
             }
             break;
             
