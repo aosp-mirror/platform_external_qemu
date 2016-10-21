@@ -85,6 +85,9 @@ LOCAL_SRC_FILES := \
     android/base/misc/HttpUtils.cpp \
     android/base/misc/StringUtils.cpp \
     android/base/misc/Utf8Utils.cpp \
+    android/base/network/Dns.cpp \
+    android/base/network/IpAddress.cpp \
+    android/base/network/NetworkUtils.cpp \
     android/base/StringFormat.cpp \
     android/base/StringView.cpp \
     android/base/sockets/SocketUtils.cpp \
@@ -463,6 +466,9 @@ LOCAL_SRC_FILES := \
   android/base/misc/HttpUtils_unittest.cpp \
   android/base/misc/StringUtils_unittest.cpp \
   android/base/misc/Utf8Utils_unittest.cpp \
+  android/base/network/Dns_unittest.cpp \
+  android/base/network/IpAddress_unittest.cpp \
+  android/base/network/NetworkUtils_unittest.cpp \
   android/base/Optional_unittest.cpp \
   android/base/sockets/ScopedSocket_unittest.cpp \
   android/base/sockets/SocketDrainer_unittest.cpp \
