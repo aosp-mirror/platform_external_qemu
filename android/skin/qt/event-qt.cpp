@@ -28,11 +28,9 @@
 #endif
 
 extern bool skin_event_poll(SkinEvent* event) {
-    bool retval;
-    QSemaphore semaphore;
     EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (!window) return false;
-    window->pollEvent(event, &retval, &semaphore);
-    semaphore.acquire();
+    bool retval;
+    window->pollEvent(event, &retval);
     return retval;
 }
