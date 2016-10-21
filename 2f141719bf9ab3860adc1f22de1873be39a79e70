@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5c88b3a4_0b8e407d",
+        "filename": "android/emulation/goldfish_dma.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T21:57:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9c7dca55_45dcbc04",
+      "revId": "2f141719bf9ab3860adc1f22de1873be39a79e70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9c7dca55_25dfb8fb",
         "filename": "android/emulation/goldfish_dma.h",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2016-10-17T10:02:38Z",
       "side": 1,
       "message": "That doesn\u0027t make much sense, what\u0027s the use-case, device purpose, etc?",
+      "revId": "2f141719bf9ab3860adc1f22de1873be39a79e70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c88b3a4_2b9304a7",
+        "filename": "android/emulation/goldfish_dma.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T21:57:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9c7dca55_25dfb8fb",
       "revId": "2f141719bf9ab3860adc1f22de1873be39a79e70",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "bc0a8fd0_e365e0cb",
+        "filename": "android/emulation/goldfish_dma.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T21:57:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9c7dca55_05eab499",
+      "revId": "2f141719bf9ab3860adc1f22de1873be39a79e70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9c7dca55_c5efeca9",
         "filename": "android/emulation/goldfish_dma.h",
         "patchSetId": 7
@@ -64,6 +118,24 @@
       "writtenOn": "2016-10-17T10:02:38Z",
       "side": 1,
       "message": "Please use proper naming:\n- If it\u0027s a C function, use small_caps_with_underscores()\n- Use an android-specific prefix, as in:\n\n  android_goldfish_dma_get()\n  android_goldfish_dma_set()\n\nAlso, I know this is WIP, but provide more detailed documentation than that. You can use an opaque data structure here as well, as in:\n\n  typedef struct GoldfishDmaDevice;\n\n  GoldfishDmaDevice* android_goldfish_dma_device_get(void);\n\n  void android_goldfish_dma_device_set(GoldfishDmaDevice* dev);",
+      "revId": "2f141719bf9ab3860adc1f22de1873be39a79e70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1c1b9b2a_3e6b6da1",
+        "filename": "android/emulation/goldfish_dma.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T21:57:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9c7dca55_c5efeca9",
       "revId": "2f141719bf9ab3860adc1f22de1873be39a79e70",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "bc0a8fd0_e34a0020",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderLib.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T21:57:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9c7dca55_65d9c013",
+      "revId": "2f141719bf9ab3860adc1f22de1873be39a79e70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9c7dca55_85d6c4e2",
         "filename": "distrib/android-emugl/shared/emugl/common/dma_device.h",
         "patchSetId": 7
@@ -98,6 +188,24 @@
       "writtenOn": "2016-10-17T10:02:38Z",
       "side": 1,
       "message": "What is this? That doesn\u0027t make any sense to me :-(",
+      "revId": "2f141719bf9ab3860adc1f22de1873be39a79e70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1cf2bb18_111bfc98",
+        "filename": "distrib/android-emugl/shared/emugl/common/dma_device.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T21:57:56Z",
+      "side": 1,
+      "message": "Fixed (renamed to function that implies it\u0027s to get the DMA region)",
+      "parentUuid": "9c7dca55_85d6c4e2",
       "revId": "2f141719bf9ab3860adc1f22de1873be39a79e70",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
