@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5c88b3a4_74dc0ecb",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T17:57:10Z",
+      "side": 1,
+      "message": "Done; I ended up using char* throughout the new place where this function lives (YUVConverter.cpp), so there is no issue with too many casts anymore.",
+      "parentUuid": "fce08714_6fbbcd7a",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fce08714_4fb8117c",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
         "patchSetId": 9
@@ -30,6 +48,24 @@
       "writtenOn": "2016-10-21T12:37:52Z",
       "side": 1,
       "message": "nit: please use consistent formatting, i.e. one space before and after each binary operator.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c88b3a4_14cd8217",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T17:57:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fce08714_4fb8117c",
       "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "5c88b3a4_793de7d9",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T17:57:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fce08714_2fc5c5f3",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fce08714_0fc209ec",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.h",
         "patchSetId": 9
@@ -64,6 +118,24 @@
       "writtenOn": "2016-10-21T12:37:52Z",
       "side": 1,
       "message": "please use a correct prefix for members, e.g. |m_conversion|, which is the historical convention for EmuGL code, or |mConversion| which we use for new code.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c88b3a4_d4795aed",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T17:57:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fce08714_0fc209ec",
       "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "5c88b3a4_f47e5ed2",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T17:57:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fce08714_efcd7d1b",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fce08714_8fccb91c",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 9
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "5c88b3a4_993aabe1",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T17:57:10Z",
+      "side": 1,
+      "message": "There is no need for this anymore. Removed",
+      "parentUuid": "fce08714_8fccb91c",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fce08714_6fe2ad8c",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 9
@@ -115,6 +223,24 @@
       "writtenOn": "2016-10-21T12:37:52Z",
       "side": 1,
       "message": "please update the destructor to delete these too.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c88b3a4_b945af63",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T17:57:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fce08714_6fe2ad8c",
       "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -155,6 +281,24 @@
     },
     {
       "key": {
+        "uuid": "5c88b3a4_39335f12",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T17:57:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fce08714_afc775f7",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fce08714_2fdca5c9",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 9
@@ -166,6 +310,24 @@
       "writtenOn": "2016-10-21T12:37:52Z",
       "side": 1,
       "message": "another magic number? Please at least add a comment explaining this value.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c88b3a4_3434463f",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T17:57:10Z",
+      "side": 1,
+      "message": "Not needed anymore. Removed",
+      "parentUuid": "fce08714_2fdca5c9",
       "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -189,6 +351,24 @@
     },
     {
       "key": {
+        "uuid": "5c88b3a4_5431ca4d",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T17:57:10Z",
+      "side": 1,
+      "message": "Not needed anymore. Removed",
+      "parentUuid": "fce08714_4fdff1c0",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fce08714_0fd9e9d9",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 9
@@ -200,6 +380,24 @@
       "writtenOn": "2016-10-21T12:37:52Z",
       "side": 1,
       "message": "please don\u0027t use |signed| as a type, just |int| here, thanks.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c88b3a4_742eceee",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T17:57:10Z",
+      "side": 1,
+      "message": "Not needed anymore. Removed",
+      "parentUuid": "fce08714_0fd9e9d9",
       "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -223,6 +421,24 @@
     },
     {
       "key": {
+        "uuid": "5c88b3a4_942b52dc",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 603,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T17:57:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fce08714_af7e55d1",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fce08714_cf79a1ed",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 9
@@ -234,6 +450,24 @@
       "writtenOn": "2016-10-21T12:37:52Z",
       "side": 1,
       "message": "please group all these into a single global structure instead. Use LazyInstance\u003c\u003e to perform initialization properly on first use.\n\nglobal variables should have a \"s\" prefix, as in |sGlobals|.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c88b3a4_b4a69660",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 608,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T17:57:10Z",
+      "side": 1,
+      "message": "Will put benchmarking in a separate CL---it seems useful for more than just this",
+      "parentUuid": "fce08714_cf79a1ed",
       "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -257,6 +491,24 @@
     },
     {
       "key": {
+        "uuid": "5c88b3a4_14b66291",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 662,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T17:57:10Z",
+      "side": 1,
+      "message": "That was the software conversion. Ripped it out.",
+      "parentUuid": "fce08714_6f698d16",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fce08714_8f83999b",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 9
@@ -268,6 +520,24 @@
       "writtenOn": "2016-10-21T12:37:52Z",
       "side": 1,
       "message": "interesting, but all this benchmarking stuff should be conditionally define with a #ifdef .. #endif block.",
+      "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c88b3a4_54b8ea7b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 701,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-21T17:57:10Z",
+      "side": 1,
+      "message": "Ack, benchmarking should/will be in a separate CL",
+      "parentUuid": "fce08714_8f83999b",
       "revId": "044baefbf07e39287d89e83d33ffed9de1dbbf29",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
