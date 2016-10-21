@@ -33,6 +33,8 @@
 #include <GLcommon/TextureUtils.h>
 #include <GLcommon/FramebufferData.h>
 
+#include "ANGLEShaderParser.h"
+
 #include <stdio.h>
 
 #include <unordered_map>
@@ -72,8 +74,7 @@ static GLESiface  s_glesIface = {
 extern "C" {
 
 static void initGLESx() {
-    DBG("No special initialization necessary for GLES_V2\n");
-    return;
+    ANGLEShaderParser::globalInitialize();
 }
 
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
@@ -426,8 +427,6 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
             infoLog = new GLchar[infoLogLength+1];
             ctx->dispatcher().glGetShaderInfoLog(globalShaderName,infoLogLength,NULL,infoLog);
             sp->setInfoLog(infoLog);
-        } else {
-            sp->setInvalidInfoLog();
         }
     }
 }
@@ -1463,6 +1462,16 @@ GL_APICALL void  GL_APIENTRY glGetShaderiv(GLuint shader, GLenum pname, GLint* p
             ShaderParser* sp = (ShaderParser*)objData.get();
             GLint srcLength = sp->getOriginalSrc().length();
             params[0] = (srcLength > 0) ? srcLength + 1 : 0;
+            }
+            break;
+        case GL_SHADER_SOURCE_LENGTH:
+            {
+                ObjectDataPtr objData = ctx->shareGroup()->getObjectData(SHADER,shader);
+                SET_ERROR_IF(!objData.get() ,GL_INVALID_OPERATION);
+                SET_ERROR_IF(objData.get()->getDataType()!=SHADER_DATA,GL_INVALID_OPERATION);
+                ShaderParser* sp = (ShaderParser*)objData.get();
+                GLint srcLength = sp->getOriginalSrc().length();
+                params[0] = (srcLength>0) ? srcLength+1 : 0;
             }
             break;
         default:
