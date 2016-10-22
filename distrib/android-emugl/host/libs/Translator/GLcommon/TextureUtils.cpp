@@ -49,7 +49,11 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
        It will be removed when we'll no longer link against ligGL */
     typedef void (GLAPIENTRY *glTexImage2DPtr_t ) (GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
     glTexImage2DPtr_t glTexImage2DPtr;
-    glTexImage2DPtr =  (glTexImage2DPtr_t)funcPtr; 
+    glTexImage2DPtr =  (glTexImage2DPtr_t)funcPtr;
+
+#ifndef GL_COMPRESSED_RGB8_ETC2
+    #define GL_COMPRESSED_RGB8_ETC2 0x9274
+#endif
 
     switch (internalformat) {
         case GL_COMPRESSED_RGB8_ETC2:
