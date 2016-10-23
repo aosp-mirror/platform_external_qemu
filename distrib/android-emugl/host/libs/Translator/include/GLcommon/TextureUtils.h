@@ -20,7 +20,7 @@
 #include <GLES/glext.h>
 #include "GLEScontext.h"
 #include "PaletteTexture.h"
-#include "etc.h"
+#include "etc1.h"
 
 int getCompressedFormats(int* formats);
 void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level, 
