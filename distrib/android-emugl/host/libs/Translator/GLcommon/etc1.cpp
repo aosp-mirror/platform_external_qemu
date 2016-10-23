@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <GLcommon/etc.h>
+#include <ETC1/etc1.h>
 
 #include <string.h>
-#include <stdint.h>
-#include <stdio.h>
 
 /* From http://www.khronos.org/registry/gles/extensions/OES/OES_compressed_ETC1_RGB8_texture.txt
 
@@ -106,9 +104,7 @@
  0       0             a (small positive value)
  0       1             b (large positive value)
 
- ETC2 codec:
-     from https://www.khronos.org/registry/gles/specs/3.0/es_spec_3.0.4.pdf
-     page 289
+
  */
 
 static const int kModifierTable[] = {
@@ -146,12 +142,6 @@ inline int convert6To8(int b) {
 }
 
 static
-inline int convert7To8(int b) {
-    int c = b & 0x7f;
-    return (c << 1) | (c >> 6);
-}
-
-static
 inline int divideBy255(int d) {
     return (d + 128 + (d >> 8)) >> 8;
 }
@@ -171,11 +161,6 @@ inline int convert8To5(int b) {
 static
 inline int convertDiff(int base, int diff) {
     return convert5To8((0x1f & base) + kLookup[0x7 & diff]);
-}
-static
-int isOverflowed(int base, int diff) {
-    int val = (0x1f & base) + kLookup[0x7 & diff];
-    return val < 0 || val >= 32;
 }
 
 static
@@ -209,117 +194,10 @@ void decode_subblock(etc1_byte* pOut, int r, int g, int b, const int* table,
     }
 }
 
-static void etc2_T_H_index(const int* clrTable, etc1_uint32 low,
-                           etc1_byte* pOut) {
-    etc1_byte* q = pOut;
-    for (int y = 0; y < 4; y++) {
-        for (int x = 0; x < 4; x++) {
-            int k = y + x * 4;
-            int offset = ((low >> k) & 1) | ((low >> (k + 15)) & 2);
-            for (int c = 0; c < 3; c++) {
-                *q++ = clrTable[offset*3 + c];
-            }
-        }
-    }
-}
-
-// ETC2 codec:
-//     from https://www.khronos.org/registry/gles/specs/3.0/es_spec_3.0.4.pdf
-//     page 289
-
-static void etc2_decode_block_T(etc1_uint32 high, etc1_uint32 low,
-        etc1_byte* pOut) {
-    const int LUT[] = {3, 6, 11, 16, 23, 32, 41, 64};
-    int r1, r2, g1, g2, b1, b2;
-    r1 = convert4To8((((high >> 27) & 3) << 2) | ((high >> 24) & 3));
-    g1 = convert4To8(high >> 20);
-    b1 = convert4To8(high >> 16);
-    r2 = convert4To8(high >> 12);
-    g2 = convert4To8(high >> 8);
-    b2 = convert4To8(high >> 4);
-    // 3 bits intense modifier
-    int intenseIdx = (((high >> 2) & 3) << 1) | (high & 1);
-    int intenseMod = LUT[intenseIdx];
-    int clrTable[12];
-    clrTable[0] = r1;
-    clrTable[1] = g1;
-    clrTable[2] = b1;
-    clrTable[3] = clamp(r2 + intenseMod);
-    clrTable[4] = clamp(g2 + intenseMod);
-    clrTable[5] = clamp(b2 + intenseMod);
-    clrTable[6] = r2;
-    clrTable[7] = g2;
-    clrTable[8] = b2;
-    clrTable[9] = clamp(r2 - intenseMod);
-    clrTable[10] = clamp(g2 - intenseMod);
-    clrTable[11] = clamp(b2 - intenseMod);
-    etc2_T_H_index(clrTable, low, pOut);
-}
-
-static void etc2_decode_block_H(etc1_uint32 high, etc1_uint32 low,
-        etc1_byte* pOut) {
-    const int LUT[] = {3, 6, 11, 16, 23, 32, 41, 64};
-    int r1, r2, g1, g2, b1, b2;
-    r1 = convert4To8(high >> 27);
-    g1 = convert4To8((high >> 24) << 1 | ((high >> 20) & 1));
-    b1 = convert4To8((high >> 19) << 3 | ((high >> 15) & 7));
-    r2 = convert4To8(high >> 11);
-    g2 = convert4To8(high >> 7);
-    b2 = convert4To8(high >> 3);
-    // 3 bits intense modifier
-    int intenseIdx = high & 4;
-    intenseIdx |= (high & 1) << 1;
-    intenseIdx |= (((r1 << 16) | (g1 << 8) | b1) >= ((r2 << 16) | (g2 << 8) | b2));
-    int intenseMod = LUT[intenseIdx];
-    int clrTable[12];
-    clrTable[0] = clamp(r1 + intenseMod);
-    clrTable[1] = clamp(g1 + intenseMod);
-    clrTable[2] = clamp(b1 + intenseMod);
-    clrTable[3] = clamp(r1 - intenseMod);
-    clrTable[4] = clamp(g1 - intenseMod);
-    clrTable[5] = clamp(b1 - intenseMod);
-    clrTable[6] = clamp(r2 + intenseMod);
-    clrTable[7] = clamp(g2 + intenseMod);
-    clrTable[8] = clamp(b2 + intenseMod);
-    clrTable[9] = clamp(r2 - intenseMod);
-    clrTable[10] = clamp(g2 - intenseMod);
-    clrTable[11] = clamp(b2 - intenseMod);
-    etc2_T_H_index(clrTable, low, pOut);
-}
-
-static void etc2_decode_block_P(etc1_uint32 high, etc1_uint32 low,
-        etc1_byte* pOut) {
-    int ro, go, bo, rh, gh, bh, rv, gv, bv;
-    uint64_t data = high;
-    data = data << 32 | low;
-    ro = convert6To8(data >> 57);
-    go = convert7To8((data >> 56 << 6) | ((data >> 49) & 63));
-    bo = convert6To8((data >> 48 << 5)
-            | (((data >> 43) & 3 ) << 3)
-            | ((data >> 39) & 7));
-    rh = convert6To8((data >> 34 << 1) | ((data >> 32) & 1));
-    gh = convert7To8(data >> 25);
-    bh = convert6To8(data >> 19);
-    rv = convert6To8(data >> 13);
-    gv = convert7To8(data >> 6);
-    bv = convert6To8(data);
-    etc1_byte* q = pOut;
-    for (int i = 0; i < 16; i++) {
-        int y = i >> 2;
-        int x = i & 3;
-        *q++ = clamp((x * (rh - ro) + y * (rv - ro) + 4 * ro + 2) >> 2);
-        *q++ = clamp((x * (gh - go) + y * (gv - go) + 4 * go + 2) >> 2);
-        *q++ = clamp((x * (bh - bo) + y * (bv - bo) + 4 * bo + 2) >> 2);
-    }
-}
-
-// Input is an ETC1 / ETC2 compressed version of the data.
+// Input is an ETC1 compressed version of the data.
 // Output is a 4 x 4 square of 3-byte pixels in form R, G, B
-// ETC2 codec:
-//     from https://www.khronos.org/registry/gles/specs/3.0/es_spec_3.0.4.pdf
-//     page 289
 
-void etc2_decode_block(const etc1_byte* pIn, etc1_byte* pOut) {
+void etc1_decode_block(const etc1_byte* pIn, etc1_byte* pOut) {
     etc1_uint32 high = (pIn[0] << 24) | (pIn[1] << 16) | (pIn[2] << 8) | pIn[3];
     etc1_uint32 low = (pIn[4] << 24) | (pIn[5] << 16) | (pIn[6] << 8) | pIn[7];
     int r1, r2, g1, g2, b1, b2;
@@ -328,18 +206,6 @@ void etc2_decode_block(const etc1_byte* pIn, etc1_byte* pOut) {
         int rBase = high >> 27;
         int gBase = high >> 19;
         int bBase = high >> 11;
-        if (isOverflowed(rBase, high >> 24)) {
-            etc2_decode_block_T(high, low, pOut);
-            return;
-        }
-        if (isOverflowed(gBase, high >> 16)) {
-            etc2_decode_block_H(high, low, pOut);
-            return;
-        }
-        if (isOverflowed(bBase, high >> 8)) {
-            etc2_decode_block_P(high, low, pOut);
-            return;
-        }
         r1 = convert5To8(rBase);
         r2 = convertDiff(rBase, high >> 24);
         g1 = convert5To8(gBase);
@@ -699,7 +565,7 @@ int etc1_encode_image(const etc1_byte* pIn, etc1_uint32 width, etc1_uint32 heigh
 //        large enough to store entire image.
 
 
-int etc2_decode_image(const etc1_byte* pIn, etc1_byte* pOut,
+int etc1_decode_image(const etc1_byte* pIn, etc1_byte* pOut,
         etc1_uint32 width, etc1_uint32 height,
         etc1_uint32 pixelSize, etc1_uint32 stride) {
     if (pixelSize < 2 || pixelSize > 3) {
@@ -720,7 +586,7 @@ int etc2_decode_image(const etc1_byte* pIn, etc1_byte* pOut,
             if (xEnd > 4) {
                 xEnd = 4;
             }
-            etc2_decode_block(pIn, block);
+            etc1_decode_block(pIn, block);
             pIn += ETC1_ENCODED_BLOCK_SIZE;
             for (etc1_uint32 cy = 0; cy < yEnd; cy++) {
                 const etc1_byte* q = block + (cy * 4) * 3;

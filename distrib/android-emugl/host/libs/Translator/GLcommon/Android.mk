@@ -11,7 +11,7 @@ host_common_SRC_FILES :=     \
      RangeManip.cpp          \
      TextureUtils.cpp        \
      PaletteTexture.cpp      \
-     etc.cpp                 \
+     etc1.cpp                \
      objectNameManager.cpp   \
      ObjectNameSpace.cpp     \
      FramebufferData.cpp
@@ -41,14 +41,5 @@ $(call emugl-export,LDFLAGS,$(host_common_LDFLAGS))
 $(call emugl-export,C_INCLUDES,$(LOCAL_PATH)/../include $(EMUGL_PATH)/shared)
 $(call emugl-export,STATIC_LIBRARIES, libemugl_common)
 
-$(call emugl-end-module)
-
-### EGL unit tests ########################
-
-$(call emugl-begin-executable,lib$(BUILD_TARGET_SUFFIX)GLcommon_unittests)
-
-LOCAL_SRC_FILES := Etc2_unittest.cpp
-$(call emugl-import,libGLcommon libemugl_gtest)
-$(call local-link-static-c++lib)
 $(call emugl-end-module)
 
