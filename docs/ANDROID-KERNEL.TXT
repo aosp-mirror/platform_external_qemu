@@ -21,30 +21,32 @@ Roughly speaking:
   2.6.29     -> For Gingerbread (2.3) until JellyBean MR2 (4.2.x)
   3.4        -> For KitKat (4.4.x) and Lollipop 32 bit (5.0/5.1)
   3.10       -> For Lollipop 64 bit and Marshmallow (6.0)
+  3.18       -> Currently experimental.
 
-To rebuild the ARMv7-A one:
+Besides, you need to select the right 'config', which corresponds to the
+virtual board you want to support. There are currently two to consider:
 
-  /path/to/build-kernel.sh --out=$ANDROID/prebuilt/android-arm/kernel
+- The legacy virtual board is called 'goldfish', and corresponds to
+  the virtual hardware supported by the legacy QEMU1 code base.
 
-To rebuild the x86 kernel:
+- The newest virtual board is called 'ranchu', and corresponds to the
+  virtual hardware supported by the QEMU2 code base.
 
-  /path/to/build-kernel.sh --arch=x86 --out=$ANDROID/prebuilt/android-x86/kernel
+The main difference between them is that 'goldfish' supports obsolete
+goldfish-specific NAND and eMMC virtual devices that are replaced by
+virtio-block in QEMU2 (for much better performance and reliability).
+For more details, see docs/GOLDFISH-VIRTUAL-HARDWARE.TXT.
 
-To rebuild the MIPS kernel:
+You specify which architecture to build for with the --arch=<name>
+option, where <name> is one of the emulator's CPU architecture name
+(e.g. 'arm', 'mips', 'x86', 'x86_64', 'arm64' and 'mips64').
 
-  /path/to/build-kernel.sh --arch=mips --out=$ANDROID/prebuilts/qemu-kernel/mips
+Each architecture has a default configuration (typically 'goldfish') that
+you can override with the --config=<name> option, where <name> is the name
+of a sub-directory under $KERNEL/arch/*/configs/
 
-To rebuild the MIPS64 kernel (version >= 3.10 only):
-
-  /path/to/build-kernel.sh --arch=mips64 --out=$ANDROID/prebuilts/qemu-kernel/mips64 --gcc-version=4.9
-
-To rebuild the x86_64 kernel (version >= 3.10 only):
-
-  /path/to/build-kernel.sh --arch=x86_64 --out=$ANDROID/prebuilts/qemu-kernel/x86_64
-
-To rebuild the ARM64 kernel (version >= 3.10 only):
-
-  /path/to/rebuild-kerenl.sh --arch=arm64 --out=$ANDROID/prebuilts/qemu-kernel/arm64
+The default output directory will be /tmp/kernel-qemu/<arch>-<kernel_version>/
+but this can be overriden with the --out=<dir> option.
 
 By default the script tries to find an appropriate toolchain from
 $AOSP/prebuilts/gcc/, but you can specify a different one using the
@@ -52,8 +54,71 @@ $AOSP/prebuilts/gcc/, but you can specify a different one using the
 
 See build-kernel.sh --help for more options and details.
 
+Here's a table of options to rebuild popular kernel configuration:
 
-II. Rebuilding from scratch:
+  Goldfish:
+     32-bit ARMv7-A     --arch=arm
+     32-bit i386        --arch=x86
+     32-bit MIPS        --arch=mips
+     64-bit x86_64      --arch=x86_64
+
+  Ranchu:
+     32-bit ARMv7-A     --arch=arm --config=ranchu
+     32-bit i386        --arch=x86 --config=i386_ranchu
+     32-bit MIPS        --arch=mips --config=ranchu
+     64-bit ARMv8       --arch=arm64
+     64-bit x86_64      --arch=x86_64 --config=x86_64_ranchu
+     64-bit MIPS        --arch=mip64 --config=ranchu
+
+The script will generate the following files in its output directory:
+
+    kernel-qemu            The kernel image to be used with QEMU, use
+                           the emulator's '-kernel <file>' option to use it,
+                           where <file> is the path to this file.
+
+    vmlinux-qemu           The symbol file used to debug the kernel with
+                           GDB (see below).
+
+    LINUX_KERNEL_COPYING   The kernel's license file, must be provided with
+                           each copy of the binary.
+
+    README                 Small README file explaining how this was built.
+
+II. Debugging the kernel with QEMU:
+----------------------------------
+
+In the case where you need to debug the kernel (e.g. to inspect kernel panics)
+you can do that by following this procedure:
+
+  1) Rebuild the kernel from sources (see previous section).
+
+  2) Start the emulator with special options to use the new kernel image,
+     start kernel debugging, and not start the vCPU to wait to GDB:
+
+         emulator -kernel /path/to/kernel-qemu \
+                  <other-options> \
+                  -qemu -s -S
+
+  3) In another terminal, start a GDB client that will attach to the emulator
+     process, after reading the kernel symbol file:
+
+         $AOSP/prebuilts/gdb/linux-x86/bin/gdb
+         file /path/to/vmlinux-qemu
+         target remote :1234
+         b panic
+         c
+
+NOTE: The version of gdb under $AOSP/prebuilts/ supports all Android target
+      architectures. Your 'host' gdb probably only supports x86/x86_64.
+
+NOTE: You can place as many breakpoints as you want with the 'b' command before
+      starting execution with the 'c' command.
+
+Once you reach the breakpoint, use 'bt' to print a stack trace. See the GDB
+manual for more information.
+
+
+III. Rebuilding from scratch:
 ----------------------------
 
 If you don't or can't use the script, here are manual instructions:
