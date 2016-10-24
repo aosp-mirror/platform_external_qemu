@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dcf74308_734d1bde",
+        "filename": "docs/ANDROID-KERNEL.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-24T12:56:03Z",
+      "side": 1,
+      "message": "spelling of \u0027board\u0027",
+      "range": {
+        "startLine": 32,
+        "startChar": 21,
+        "endLine": 32,
+        "endChar": 26
+      },
+      "revId": "55492eb9b6f1ce03be533b8fb286e5e36a469360",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
