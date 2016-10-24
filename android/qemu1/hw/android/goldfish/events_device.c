@@ -510,15 +510,19 @@ void events_dev_init(uint32_t base, qemu_irq irq)
 
     /* configure EV_SW array
      *
-     * EV_SW events are sent to indicate that the keyboard lid
-     * was closed or opened (done when we switch layouts through
-     * KP-7 or KP-9).
-     *
-     * We only support this when hw.keyboard.lid is true.
+     * EV_SW events are sent to indicate that headphones
+     * were plugged or unplugged.
+     * If hw.keyboard.lid is true, EV_SW events are also
+     * used to indicate if the keybaord lid was opened or
+     * closed (done when we switch layouts through KP-7
+     * or KP-9).
      */
+    events_set_bit(s, EV_SYN, EV_SW);
+    events_set_bit(s, EV_SW, SW_HEADPHONE_INSERT);
+    events_set_bit(s, EV_SW, SW_MICROPHONE_INSERT);
+
     if (config->hw_keyboard && config->hw_keyboard_lid) {
-        events_set_bit(s, EV_SYN, EV_SW);
-        events_set_bit(s, EV_SW, 0);
+        events_set_bit(s, EV_SW, SW_LID);
     }
 
     iomemtype = cpu_register_io_memory(events_readfn, events_writefn, s);

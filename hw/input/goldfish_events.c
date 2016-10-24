@@ -49,10 +49,6 @@ typedef struct {
 #define ABS_MT_DISTANCE         0x3b    /* Contact hover distance */
 #define ABS_MAX                 0x3f
 
-/* Relative axes */
-#define REL_X                   0x00
-#define REL_Y                   0x01
-
 #define BTN_TOUCH 0x14a
 #define BTN_MOUSE 0x110
 
@@ -85,6 +81,17 @@ static const GoldfishEventCodeInfo ev_abs_codes_table[] = {
 static const GoldfishEventCodeInfo ev_rel_codes_table[] = {
     EV_CODE(REL_X),
     EV_CODE(REL_Y),
+    EV_CODE_END,
+};
+
+/* Switches */
+#define SW_LID               0
+#define SW_HEADPHONE_INSERT  2
+#define SW_MICROPHONE_INSERT 4
+static const GoldfishEventCodeInfo ev_sw_codes_table[] = {
+    EV_CODE(SW_LID),
+    EV_CODE(SW_HEADPHONE_INSERT),
+    EV_CODE(SW_MICROPHONE_INSERT),
     EV_CODE_END,
 };
 
@@ -501,7 +508,7 @@ static const GoldfishEventTypeInfo ev_type_table[] = {
     EV_TYPE(EV_REL, ev_rel_codes_table),
     EV_TYPE(EV_ABS, ev_abs_codes_table),
     EV_TYPE(EV_MSC, NULL),
-    EV_TYPE(EV_SW, NULL),
+    EV_TYPE(EV_SW,  ev_sw_codes_table),
     EV_TYPE(EV_LED, NULL),
     EV_TYPE(EV_SND, NULL),
     EV_TYPE(EV_REP, NULL),
@@ -970,9 +977,9 @@ int goldfish_get_event_type_count(void)
 
 int goldfish_get_event_type_name(int type, char *buf)
 {
-   g_stpcpy(buf, ev_type_table[type].name);
+    g_stpcpy(buf, ev_type_table[type].name);
 
-   return 0;
+    return 0;
 }
 
 int goldfish_get_event_type_value(char *typename)
@@ -1245,15 +1252,19 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
 
     /* configure EV_SW array
      *
-     * EV_SW events are sent to indicate that the keyboard lid
-     * was closed or opened (done when we switch layouts through
-     * KP-7 or KP-9).
-     *
-     * We only support this when hw.keyboard.lid is true.
+     * EV_SW events are sent to indicate that headphones
+     * were pluged or unplugged.
+     * If hw.keyboard.lid is true, EV_SW events are also
+     * used to indicate if the keyboard lid was opened or
+     * closed (done when we switch layouts through KP-7
+     * or KP-9).
      */
+    events_set_bit(s, EV_SYN, EV_SW);
+    events_set_bit(s, EV_SW, SW_HEADPHONE_INSERT);
+    events_set_bit(s, EV_SW, SW_MICROPHONE_INSERT);
+
     if (s->have_keyboard && s->have_keyboard_lid) {
-        events_set_bit(s, EV_SYN, EV_SW);
-        events_set_bit(s, EV_SW, 0);
+        events_set_bit(s, EV_SW, SW_LID);
     }
 
     /* Register global variable. */

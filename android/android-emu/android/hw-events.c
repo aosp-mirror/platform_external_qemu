@@ -25,6 +25,7 @@ typedef struct {
 #define  KEY_CODE(n,v)  { "KEY_" STRINGIFY(n), (v) },
 #define  REL_CODE(n,v)  { "REL_" STRINGIFY(n), (v) },
 #define  ABS_CODE(n,v)  { "ABS_" STRINGIFY(n), (v) },
+#define  SW_CODE( n,v)  { "SW_"  STRINGIFY(n), (v) },
 #define  END_CODE       { NULL, 0 }
 
 static const EventInfo  _ev_types_tab[] =
@@ -51,11 +52,18 @@ static const EventInfo _abs_codes_list[] =
     END_CODE
 };
 
+static const EventInfo _sw_codes_list[] =
+{
+    EVENT_SW_LIST
+    END_CODE
+};
+
 #undef EV_TYPE
 #undef BTN_CODE
 #undef KEY_CODE
 #undef REL_CODE
 #undef ABS_CODE
+#undef SW_CODE
 
 typedef const EventInfo*  EventList;
 
@@ -69,6 +77,7 @@ static const EventCodeList  _codes[] = {
     { EV_KEY, _key_codes_list },
     { EV_REL, _rel_codes_list },
     { EV_ABS, _abs_codes_list },
+    { EV_SW,  _sw_codes_list },
     { -1, NULL }
 };
 
@@ -221,4 +230,3 @@ android_event_bufprint_code_str( char*  buff, char*  end, int  type, int  code_i
 
     return eventList_bufprintCode(list, code_index, buff, end);
 }
-

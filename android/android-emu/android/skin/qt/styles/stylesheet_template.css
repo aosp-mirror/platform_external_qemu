@@ -63,6 +63,14 @@ QCheckBox::indicator:unchecked[ColorGroup="Toggle"] {
     image: url(:/%%PATH%%/toggle_off);
     width: 36; height: 24;
 }
+QCheckBox::indicator:checked:disabled[ColorGroup="Toggle"] {
+    image: url(:/%%PATH%%/toggle_on_disabled);
+    width: 36; height: 24;
+}
+QCheckBox::indicator:unchecked:disabled[ColorGroup="Toggle"] {
+    image: url(:/%%PATH%%/toggle_off_disabled);
+    width: 36; height: 24;
+}
 QCheckBox::indicator:checked {
     image: url(:/%%PATH%%/check_yes)
 }
@@ -155,6 +163,12 @@ QScrollBar::handle:vertical {
 QScrollBar::add-line:vertical { border: none; background: none }
 QScrollBar::sub-line:vertical { border: none; background: none }
 QComboBox {
+    border-top: 0px;
+    border-bottom: 1px solid %%BOX_COLOR%%;
+    selection-background-color: %%TAB_BKG_COLOR%%;
+}
+QComboBox:disabled {
+    color: %%DISABLED_PULLDOWN_COLOR%%;
     border-top: 0px;
     border-bottom: 1px solid %%BOX_COLOR%%;
     selection-background-color: %%TAB_BKG_COLOR%%;
