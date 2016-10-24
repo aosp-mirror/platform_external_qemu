@@ -22,6 +22,30 @@
       "revId": "55492eb9b6f1ce03be533b8fb286e5e36a469360",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "21ad986a_a5b61ebd",
+        "filename": "docs/ANDROID-KERNEL.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-24T22:06:36Z",
+      "side": 1,
+      "message": "Good catch, thanks :) Fixed.",
+      "parentUuid": "dcf74308_734d1bde",
+      "range": {
+        "startLine": 32,
+        "startChar": 21,
+        "endLine": 32,
+        "endChar": 26
+      },
+      "revId": "55492eb9b6f1ce03be533b8fb286e5e36a469360",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
