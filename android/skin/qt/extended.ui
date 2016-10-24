@@ -69,6 +69,7 @@ font-family: &quot;Roboto&quot;</string>
    <widget class="TelephonyPage" name="telephonyPage"/>
    <widget class="VirtualSensorsPage" name="virtualSensorsPage"/>
    <widget class="DPadPage" name="dpadPage"/>
+   <widget class="MicrophonePage" name="microphonePage"/>
    <widget class="FingerPage" name="finger_page"/>
    <widget class="SettingsPage" name="settingsPage"/>
    <widget class="HelpPage" name="helpPage"/>
@@ -475,7 +476,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>222</y>
+     <y>264</y>
      <width>194</width>
      <height>42</height>
     </rect>
@@ -600,7 +601,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>310</y>
+     <y>352</y>
      <width>194</width>
      <height>42</height>
     </rect>
@@ -684,7 +685,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>352</y>
+     <y>396</y>
      <width>194</width>
      <height>42</height>
     </rect>
@@ -768,7 +769,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>306</y>
+     <y>348</y>
      <width>194</width>
      <height>4</height>
     </rect>
@@ -790,7 +791,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>264</y>
+     <y>306</y>
      <width>194</width>
      <height>42</height>
     </rect>
@@ -836,12 +837,63 @@ font-family: &quot;Roboto&quot;</string>
     <bool>false</bool>
    </property>
   </widget>
+  <widget class="QPushButton" name="microphoneButton">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>222</y>
+     <width>194</width>
+     <height>42</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
+   </property>
+   <property name="text">
+    <string>  Microphone</string>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/mic</normaloff>:/light/mic</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string>mic</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>MajorTab</string>
+   </property>
+  </widget>
   <zorder>spacer2Button</zorder>
   <zorder>spacer1Button</zorder>
   <zorder>settingsButton</zorder>
   <zorder>helpButton</zorder>
   <zorder>fingerButton</zorder>
   <zorder>dpadButton</zorder>
+  <zorder>microphoneButton</zorder>
   <zorder>telephoneButton</zorder>
   <zorder>batteryButton</zorder>
   <zorder>cellularButton</zorder>
@@ -850,6 +902,7 @@ font-family: &quot;Roboto&quot;</string>
   <zorder>VertDivider</zorder>
   <zorder>line</zorder>
   <zorder>virtSensorsButton</zorder>
+  <zorder>microphoneButton</zorder>
  </widget>
  <customwidgets>
   <customwidget>
@@ -889,6 +942,12 @@ font-family: &quot;Roboto&quot;</string>
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>MicrophonePage</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/extended-pages/microphone-page.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>SettingsPage</class>
    <extends>QWidget</extends>
    <header>android/skin/qt/extended-pages/settings-page.h</header>
@@ -908,16 +967,20 @@ font-family: &quot;Roboto&quot;</string>
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>locationButton</tabstop>
   <tabstop>cellularButton</tabstop>
   <tabstop>batteryButton</tabstop>
   <tabstop>telephoneButton</tabstop>
   <tabstop>dpadButton</tabstop>
+  <tabstop>microphoneButton</tabstop>
   <tabstop>fingerButton</tabstop>
-  <tabstop>settingsButton</tabstop>
-  <tabstop>helpButton</tabstop>
+  <tabstop>virtSensorsButton</tabstop>
   <tabstop>spacer2Button</tabstop>
+  <tabstop>helpButton</tabstop>
   <tabstop>spacer1Button</tabstop>
+  <tabstop>settingsButton</tabstop>
+  <tabstop>locationButton</tabstop>
+  <tabstop>cell_delayBox</tabstop>
+  <tabstop>set_keyboardBox</tabstop>
  </tabstops>
  <resources>
   <include location="resources.qrc"/>
