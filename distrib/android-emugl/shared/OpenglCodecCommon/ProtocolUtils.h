@@ -8,16 +8,6 @@
 
 namespace emugl {
 
-// Helper template: is_pointer.
-// is_pointer<T>::value is true iff |T| is a pointer type.
-template <typename T> struct is_pointer {
-    static const bool value = false;
-};
-
-template <typename T> struct is_pointer<T*> {
-    static const bool value = true;
-};
-
 // A helper template to extract values form the wire protocol stream
 // and convert them to appropriate host values.
 //
@@ -47,59 +37,32 @@ template <typename T> struct is_pointer<T*> {
 // TODO(digit): Add custom unpackers to handle generic opaque void* values.
 //              and map them to unique 32-bit values.
 
-template <typename T, typename S, bool IS_POINTER>
-struct UnpackerT {};
-
 template <typename T, typename S>
-struct UnpackerT<T,S,false> {
-    static inline T unpack(const void* ptr) {
+struct UnpackerT {
+    static T unpack(const void* ptr) {
         static_assert(sizeof(T) == sizeof(S),
                       "Bad input arguments, have to be of the same size");
-        return (T)(*(S*)(ptr));
+        return *(const T*)ptr;
     }
 };
 
 template <typename T, typename S>
-struct UnpackerT<T,S,true> {
-    static inline T unpack(const void* ptr) {
-        return (T)(uintptr_t)(*(S*)(ptr));
+struct UnpackerT<T*, S> {
+    static T* unpack(const void* ptr) {
+        return (T*)(uintptr_t)(*(const S*)ptr);
     }
 };
 
 template <>
-struct UnpackerT<float,uint32_t,false> {
-    static inline float unpack(const void* ptr) {
-        union {
-            float f;
-            uint32_t u;
-        } v;
-        v.u = *(uint32_t*)(ptr);
-        return v.f;
-    }
-};
-
-template <>
-struct UnpackerT<double,uint64_t,false> {
-    static inline double unpack(const void* ptr) {
-        union {
-            double d;
-            uint32_t u;
-        } v;
-        v.u = *(uint64_t*)(ptr);
-        return v.d;
-    }
-};
-
-template <>
-struct UnpackerT<ssize_t,uint32_t,false> {
-    static inline ssize_t unpack(const void* ptr) {
-        return (ssize_t)*(int32_t*)(ptr);
+struct UnpackerT<ssize_t, uint32_t> {
+    static ssize_t unpack(const void* ptr) {
+        return (ssize_t)*(const int32_t*)ptr;
     }
 };
 
 template <typename T, typename S>
 inline T Unpack(const void* ptr) {
-    return UnpackerT<T, S, is_pointer<T>::value>::unpack(ptr);
+    return UnpackerT<T, S>::unpack(ptr);
 }
 
 // Helper classes GenericInputBuffer and GenericOutputBuffer used to ensure
