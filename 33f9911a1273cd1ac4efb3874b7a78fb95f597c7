@@ -19,6 +19,29 @@
     },
     {
       "key": {
+        "uuid": "41d60c38_19e6cffc",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 955,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-10-25T21:29:13Z",
+      "side": 1,
+      "message": "nit: space?",
+      "range": {
+        "startLine": 955,
+        "startChar": 49,
+        "endLine": 955,
+        "endChar": 50
+      },
+      "revId": "33f9911a1273cd1ac4efb3874b7a78fb95f597c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "41d60c38_56b4141f",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 3
@@ -30,6 +53,109 @@
       "writtenOn": "2016-10-25T19:27:26Z",
       "side": 1,
       "message": "It looks ugly. If there is a better solution or more elegant way of writing the code, feel free.",
+      "revId": "33f9911a1273cd1ac4efb3874b7a78fb95f597c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "41d60c38_590327bb",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1097,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-10-25T21:29:13Z",
+      "side": 1,
+      "message": "nit: space?",
+      "range": {
+        "startLine": 1097,
+        "startChar": 34,
+        "endLine": 1097,
+        "endChar": 35
+      },
+      "revId": "33f9911a1273cd1ac4efb3874b7a78fb95f597c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "41d60c38_bcdea9f4",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1250,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-10-25T21:29:13Z",
+      "side": 1,
+      "message": "please put {} for the while loop, as is specified in the coding style",
+      "revId": "33f9911a1273cd1ac4efb3874b7a78fb95f597c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "41d60c38_5cd675dd",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1253,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-10-25T21:29:13Z",
+      "side": 1,
+      "message": "please put {} for the if",
+      "revId": "33f9911a1273cd1ac4efb3874b7a78fb95f597c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "41d60c38_f9f1d3c5",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1296,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-10-25T21:29:13Z",
+      "side": 1,
+      "message": "nit: spaces?",
+      "range": {
+        "startLine": 1296,
+        "startChar": 47,
+        "endLine": 1296,
+        "endChar": 55
+      },
+      "revId": "33f9911a1273cd1ac4efb3874b7a78fb95f597c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "41d60c38_997d3f5f",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1361,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-10-25T21:29:13Z",
+      "side": 1,
+      "message": "nit: remove the spaces?",
+      "range": {
+        "startLine": 1361,
+        "startChar": 0,
+        "endLine": 1361,
+        "endChar": 7
+      },
       "revId": "33f9911a1273cd1ac4efb3874b7a78fb95f597c7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
