@@ -212,8 +212,22 @@ static int hax_get_capability(struct hax_state *hax)
         return -ENXIO;
     }
 
-    if ((cap->winfo & HAX_CAP_UG))
+    if ((cap->winfo & HAX_CAP_UG)) {
         ug_support = 1;
+    }
+
+    // NOTE: If HAX_DISABLE_UNRESTRICTED_GUEST is defined and set to 1 or 'true'
+    // then disable "unrestricted guest" on modern cpus that support it. This
+    // is useful to test and debug the code-path used for older CPUs that
+    // don't have that feature.
+    if (ug_support) {
+        const char* env = getenv("HAX_DISABLE_UNRESTRICTED_GUEST");
+        if (env && (!strcmp(env, "1") || !strcmp(env, "true"))) {
+            DPRINTF(
+                "VTX unrestricted guest disabled by environment variable.\n");
+            ug_support = 0;
+        }
+    }
 
     if (cap->wstatus & HAX_CAP_MEMQUOTA) {
         if (cap->mem_quota < hax->mem_quota) {
