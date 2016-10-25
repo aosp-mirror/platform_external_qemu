@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "41d60c38_b69c88a6",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 925,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-10-25T19:27:26Z",
+      "side": 1,
+      "message": "Eventually, all the C function definition should be moved to C++ class. But for now, this CL will keep the previous structure and only add new feature using C++ class.",
+      "revId": "33f9911a1273cd1ac4efb3874b7a78fb95f597c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "41d60c38_56b4141f",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1040,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-10-25T19:27:26Z",
+      "side": 1,
+      "message": "It looks ugly. If there is a better solution or more elegant way of writing the code, feel free.",
+      "revId": "33f9911a1273cd1ac4efb3874b7a78fb95f597c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

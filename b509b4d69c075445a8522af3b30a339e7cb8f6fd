@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "41d60c38_56cbf4a9",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1873,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-10-25T19:27:26Z",
+      "side": 0,
+      "message": "tzdiff is not computed correctly. Lets say that we have e_local 2015/12/31 20:00:00 and e_utc 2016/01/01 02:00:00 which is a real use case. tzdiff should be 6 hours but the computation below won\u0027t give the correct result. In my cl, I have a function to correctly compute tzdiff.",
+      "revId": "b509b4d69c075445a8522af3b30a339e7cb8f6fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "41d60c38_36d8787d",
+        "filename": "android/telephony/sms.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-10-25T19:27:26Z",
+      "side": 0,
+      "message": "tzdiff is not computed correctly since year is not taken into account. E.g \n e_local 2015/12/31 20:00:00 and e_utc 2016/01/01 02:00:00 which is a real use case. tzdiff should be 6 hours but the computation below won\u0027t give the correct result. In my cl, I have a function to correctly compute tzdiff.",
+      "revId": "b509b4d69c075445a8522af3b30a339e7cb8f6fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
