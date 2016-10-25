@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fce08714_4fcc91c1",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-25T14:47:18Z",
+      "side": 1,
+      "message": "nit: delete will do the nullptr check for you :)",
+      "revId": "d4f63e96bcb99a44acfd6d7506337e9c1c2fd738",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce08714_6fcf4db8",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-25T14:47:18Z",
+      "side": 1,
+      "message": "nit: documentation? E.g. explain why this isn\u0027t part of |internalFormat| and |p_format| in the functions below.",
+      "revId": "d4f63e96bcb99a44acfd6d7506337e9c1c2fd738",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "41260cae_d6d544d1",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-25T14:47:18Z",
+      "side": 1,
+      "message": "is there any reason not to use a std::unique_ptr\u003c\u003e here?",
+      "revId": "d4f63e96bcb99a44acfd6d7506337e9c1c2fd738",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "813d64bf_90a1f47d",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-25T14:47:18Z",
+      "side": 1,
+      "message": "please update the documentation for |p_frameworkFormat|",
+      "revId": "d4f63e96bcb99a44acfd6d7506337e9c1c2fd738",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce08714_2fd94583",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-25T14:47:18Z",
+      "side": 1,
+      "message": "same here for |frameworkFormat|\nnit: why an int type here?",
+      "revId": "d4f63e96bcb99a44acfd6d7506337e9c1c2fd738",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2123d89f_75bc28a4",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-25T14:47:18Z",
+      "side": 1,
+      "message": "nit: use |static const char| here, otherwise you\u0027re asking the compiler to copy the text into a stack-allocated array on each call to the function :-/\n\nE.g. Compare https://godbolt.org/g/g11IhP and https://godbolt.org/g/bPBvpH",
+      "revId": "d4f63e96bcb99a44acfd6d7506337e9c1c2fd738",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc352f64_85304404",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-25T14:47:18Z",
+      "side": 1,
+      "message": "nit: use |const GLchar* const kVshaders| here.",
+      "revId": "d4f63e96bcb99a44acfd6d7506337e9c1c2fd738",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce08714_cf0d211b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-25T14:47:18Z",
+      "side": 1,
+      "message": "nit: static const here",
+      "revId": "d4f63e96bcb99a44acfd6d7506337e9c1c2fd738",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc352f64_6533c011",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/YUVConverter.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-25T14:47:18Z",
+      "side": 1,
+      "message": "Nice, but please provide a simple usage example.",
+      "revId": "d4f63e96bcb99a44acfd6d7506337e9c1c2fd738",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
