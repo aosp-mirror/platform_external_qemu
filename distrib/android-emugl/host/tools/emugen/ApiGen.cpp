@@ -843,25 +843,24 @@ int ApiGen::genDecoderImpl(const std::string &filename)
     fprintf(fp, "using namespace emugl;\n\n");
 
     // decoder switch;
-    fprintf(fp, "size_t %s::decode(void *buf, size_t len, IOStream *stream)\n{\n", classname.c_str());
+    fprintf(fp, "size_t %s::decode(void *buf, size_t len, IOStream *stream)\n{", classname.c_str());
+
+    fprintf(fp,R"(
+)");
+
     fprintf(fp,
-            "                           \n\
-\tsize_t pos = 0;\n\
-\tif (len < 8) return pos; \n\
+"\tif (len < 8) return 0; \n\
 \tunsigned char *ptr = (unsigned char *)buf;\n\
-\tbool unknownOpcode = false;  \n\
+\tconst unsigned char* const end = (const unsigned char*)buf + len;\n\
 #ifdef CHECK_GL_ERROR \n\
 \tchar lastCall[256] = {0}; \n\
 #endif \n\
-\twhile ((len - pos >= 8) && !unknownOpcode) {   \n\
+\twhile (end - ptr >= 8) {\n\
 \t\tuint32_t opcode = *(uint32_t *)ptr;   \n\
-\t\tsize_t packetLen = *(uint32_t *)(ptr + 4);\n\
-\t\tif (len - pos < packetLen)  return pos; \n\
-\t\tbool useChecksum = ChecksumCalculatorThreadInfo::getVersion() > 0;\n\
-\t\tsize_t checksumSize = 0;\n\
-\t\tif (useChecksum) {\n\
-\t\t\tchecksumSize = ChecksumCalculatorThreadInfo::checksumByteSize();\n\
-\t\t}\n\
+\t\tint32_t packetLen = *(int32_t *)(ptr + 4);\n\
+\t\tif (end - ptr < packetLen) return ptr - (unsigned char*)buf;\n\
+\t\tconst size_t checksumSize = ChecksumCalculatorThreadInfo::checksumByteSize();\n\
+\t\tconst bool useChecksum = checksumSize > 0;\n\
 \t\tswitch(opcode) {\n");
 
     for (size_t f = 0; f < n; f++) {
@@ -1172,22 +1171,19 @@ int ApiGen::genDecoderImpl(const std::string &filename)
 
         delete [] tmpBufOffset;
     }
-    fprintf(fp, "\t\t\tdefault:\n");
-    fprintf(fp, "\t\t\t\tunknownOpcode = true;\n");
+    fprintf(fp, "\t\tdefault:\n");
+    fprintf(fp, "\t\t\treturn ptr - (unsigned char*)buf;\n");
     fprintf(fp, "\t\t} //switch\n");
     if (strstr(m_basename.c_str(), "gl")) {
         fprintf(fp, "#ifdef CHECK_GL_ERROR\n");
-        fprintf(fp, "\tint err = lastCall[0] ? this->glGetError() : GL_NO_ERROR;\n");
-        fprintf(fp, "\tif (err) fprintf(stderr, \"%s Error: 0x%%X in %%s\\n\", err, lastCall);\n", m_basename.c_str());
+        fprintf(fp, "\t\tint err = lastCall[0] ? this->glGetError() : GL_NO_ERROR;\n");
+        fprintf(fp, "\t\tif (err) fprintf(stderr, \"%s Error: 0x%%X in %%s\\n\", err, lastCall);\n", m_basename.c_str());
         fprintf(fp, "#endif\n");
     }
 
-    fprintf(fp, "\t\tif (!unknownOpcode) {\n");
-    fprintf(fp, "\t\t\tpos += packetLen;\n");
-    fprintf(fp, "\t\t\tptr += packetLen;\n");
-    fprintf(fp, "\t\t}\n");
+    fprintf(fp, "\t\tptr += packetLen;\n");
     fprintf(fp, "\t} // while\n");
-    fprintf(fp, "\treturn pos;\n");
+    fprintf(fp, "\treturn ptr - (unsigned char*)buf;\n");
     fprintf(fp, "}\n");
 
     fclose(fp);
