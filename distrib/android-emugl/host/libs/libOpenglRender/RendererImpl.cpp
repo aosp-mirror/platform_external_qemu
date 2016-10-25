@@ -60,7 +60,6 @@ RendererImpl::RendererImpl()
 RendererImpl::~RendererImpl() {
     stop();
     mRenderWindow.reset();
-    mCleanupThread.wait();
 }
 
 bool RendererImpl::initialize(int width, int height, bool useSubWindow) {
@@ -96,10 +95,14 @@ void RendererImpl::stop() {
             channel->forceStop();
         }
     }
-
     // We're stopping the renderer, so there's no need to clean up resources
     // of some pending processes: we'll destroy everything soon.
     mCleanupProcessIds.stop();
+
+    for (const auto& t : threads) {
+        t.first->wait();
+    }
+    mCleanupThread.wait();
 }
 
 RenderChannelPtr RendererImpl::createRenderChannel() {
@@ -113,15 +116,15 @@ RenderChannelPtr RendererImpl::createRenderChannel() {
         return nullptr;
     }
 
-    if (!rt->start()) {
-        fprintf(stderr, "Failed to start RenderThread\n");
-        return nullptr;
-    }
-
     {
         android::base::AutoLock lock(mThreadVectorLock);
 
         if (mStopped) return nullptr;
+
+        if (!rt->start()) {
+            fprintf(stderr, "Failed to start RenderThread\n");
+            return nullptr;
+        }
 
         // clean up the threads that are no longer running
         mThreads.erase(std::remove_if(mThreads.begin(), mThreads.end(),
