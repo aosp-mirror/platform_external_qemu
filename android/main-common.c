@@ -1731,7 +1731,13 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     // DNS server support. Validate the option if any, find the DNS
     // server IP addresses, then rewrite the option value with the
     // results.
-    {
+    if (is_qemu2) {
+        // Nothing to do here, everything will be handled by the glue
+        // code (see android-qemu2-glue/qemu-setup-dns-servers.cpp).
+    } else {
+        // QEMU1 only supports IPv4 DNS servers, so use
+        // android_dns_get_servers() that filters out any IPv6 server
+        // from the -dns-server list.
         uint32_t dnsServers[ANDROID_MAX_DNS_SERVERS] = {};
         int dnsCount = android_dns_get_servers(opts->dns_server, dnsServers);
         if (dnsCount < 0) {
