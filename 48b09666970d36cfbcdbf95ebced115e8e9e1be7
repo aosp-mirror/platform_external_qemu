@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "41d60c38_b927dbcc",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-25T20:45:20Z",
+      "side": 1,
+      "message": "Damn :) Is the idea that even after forceStop, the thread might still run long enough to crash at the scope exit here?",
+      "range": {
+        "startLine": 95,
+        "startChar": 12,
+        "endLine": 95,
+        "endChar": 33
+      },
+      "revId": "48b09666970d36cfbcdbf95ebced115e8e9e1be7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
