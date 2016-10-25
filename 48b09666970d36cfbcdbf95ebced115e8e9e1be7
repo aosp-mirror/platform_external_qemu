@@ -22,6 +22,30 @@
       "revId": "48b09666970d36cfbcdbf95ebced115e8e9e1be7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "41d60c38_b940fb51",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-25T20:47:10Z",
+      "side": 1,
+      "message": "yep, kernel scheduler works in mysterious ways",
+      "parentUuid": "41d60c38_b927dbcc",
+      "range": {
+        "startLine": 95,
+        "startChar": 12,
+        "endLine": 95,
+        "endChar": 33
+      },
+      "revId": "48b09666970d36cfbcdbf95ebced115e8e9e1be7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
