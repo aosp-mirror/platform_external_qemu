@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "41d60c38_3c3bb990",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-25T22:43:32Z",
+      "side": 1,
+      "message": "you could use raw string literals here - R\"()\"",
+      "range": {
+        "startLine": 164,
+        "startChar": 7,
+        "endLine": 188,
+        "endChar": 14
+      },
+      "revId": "859f28eebf1ff6917f076da3f67ccafa7b51f6c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
