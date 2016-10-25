@@ -32,23 +32,18 @@ using namespace emugl;
 
 size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream)
 {
-                           
-	size_t pos = 0;
-	if (len < 8) return pos; 
+	if (len < 8) return 0; 
 	unsigned char *ptr = (unsigned char *)buf;
-	bool unknownOpcode = false;  
+	const unsigned char* const end = (const unsigned char*)buf + len;
 #ifdef CHECK_GL_ERROR 
 	char lastCall[256] = {0}; 
 #endif 
-	while ((len - pos >= 8) && !unknownOpcode) {   
+	while (end - ptr >= 8) {
 		uint32_t opcode = *(uint32_t *)ptr;   
-		size_t packetLen = *(uint32_t *)(ptr + 4);
-		if (len - pos < packetLen)  return pos; 
-		bool useChecksum = ChecksumCalculatorThreadInfo::getVersion() > 0;
-		size_t checksumSize = 0;
-		if (useChecksum) {
-			checksumSize = ChecksumCalculatorThreadInfo::checksumByteSize();
-		}
+		int32_t packetLen = *(int32_t *)(ptr + 4);
+		if (end - ptr < packetLen) return ptr - (unsigned char*)buf;
+		const size_t checksumSize = ChecksumCalculatorThreadInfo::checksumByteSize();
+		const bool useChecksum = checksumSize > 0;
 		switch(opcode) {
 		case OP_fooAlphaFunc: {
 			FooInt var_func = Unpack<FooInt,uint32_t>(ptr + 8);
@@ -116,13 +111,10 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream)
 			SET_LASTCALL("fooTakeConstVoidPtrConstPtr");
 			break;
 		}
-			default:
-				unknownOpcode = true;
+		default:
+			return ptr - (unsigned char*)buf;
 		} //switch
-		if (!unknownOpcode) {
-			pos += packetLen;
-			ptr += packetLen;
-		}
+		ptr += packetLen;
 	} // while
-	return pos;
+	return ptr - (unsigned char*)buf;
 }
