@@ -57,7 +57,7 @@ namespace base {
 //    thread->wait(&exitStatus);
 //
 class Thread {
-    DISALLOW_COPY_AND_ASSIGN(Thread);
+    DISALLOW_COPY_ASSIGN_AND_MOVE(Thread);
 
 public:
     // Public constructor.
@@ -117,7 +117,7 @@ private:
 #endif
     // Access guarded by |mLock|.
     intptr_t mExitStatus = 0;
-    ThreadFlags mFlags;
+    const ThreadFlags mFlags;
     bool mStarted = false;
     // Access guarded by |mLock|.
     bool mFinished = false;
