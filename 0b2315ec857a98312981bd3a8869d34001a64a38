@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4128cc69_262fd6a2",
+        "filename": "android/avd/util.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-26T15:40:05Z",
+      "side": 1,
+      "message": "Damn, that\u0027s horrible. I swear these special cases end up striking with a vengeance 6 months to 1 year later :)",
+      "revId": "0b2315ec857a98312981bd3a8869d34001a64a38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
