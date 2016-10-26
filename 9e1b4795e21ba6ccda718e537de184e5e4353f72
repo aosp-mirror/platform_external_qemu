@@ -16,6 +16,24 @@
       "revId": "9e1b4795e21ba6ccda718e537de184e5e4353f72",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "21a03809_d31eac84",
+        "filename": "distrib/android-emugl/host/tools/emugen/tests/t.001/expected/decoder/foo_dec.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-26T16:00:15Z",
+      "side": 1,
+      "message": "to compare it to (end - ptr) result, which is ptrdiff_t, which is signed\nI doubt we are able to process packets of size \u003e INT_MAX but \u003c UINT_MAX anyway",
+      "parentUuid": "4128cc69_468bf2a8",
+      "revId": "9e1b4795e21ba6ccda718e537de184e5e4353f72",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
