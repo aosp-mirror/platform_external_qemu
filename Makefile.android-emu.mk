@@ -542,6 +542,7 @@ LOCAL_SRC_FILES := \
   android/utils/aconfig-file_unittest.cpp \
   android/utils/bufprint_unittest.cpp \
   android/utils/dirscanner_unittest.cpp \
+  android/utils/dns_unittest.cpp \
   android/utils/eintr_wrapper_unittest.cpp \
   android/utils/file_data_unittest.cpp \
   android/utils/format_unittest.cpp \

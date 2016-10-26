@@ -24,6 +24,15 @@ static std::string ipToString(uint32_t ip) {
     return std::string(temp);
 }
 
+TEST(android_dns_parse_servers, IgnoreIpv6) {
+    const int kMaxAddresses = 3;
+    uint32_t addresses[kMaxAddresses] = {};
+    const char kList[] = "127.0.0.1,::1,127.0.1.1";
+    EXPECT_EQ(2, android_dns_parse_servers(kList, addresses, kMaxAddresses));
+    EXPECT_EQ(0x7f000001, addresses[0]);
+    EXPECT_EQ(0x7f000101, addresses[1]);
+}
+
 TEST(android_dns_get_system_servers, DumpList) {
     const size_t kMaxServers = ANDROID_MAX_DNS_SERVERS;
     uint32_t ips[kMaxServers];

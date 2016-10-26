@@ -63,15 +63,13 @@ int android_dns_parse_servers(const char* input,
         if (!addr.valid()) {
             return kAndroidDnsErrorBadServer;
         }
-        if (!addr.isIpv4()) {
-            continue;
-        }
+        if (addr.isIpv4()) {
+            if (count >= bufferSize) {
+                return kAndroidDnsErrorTooManyServers;
+            }
 
-        if (count >= bufferSize) {
-            return kAndroidDnsErrorTooManyServers;
+            buffer[count++] = addr.ipv4();
         }
-
-        buffer[count++] = addr.ipv4();
         pos = servers.find('\0', pos);
         if (pos == std::string::npos) {
             break;
