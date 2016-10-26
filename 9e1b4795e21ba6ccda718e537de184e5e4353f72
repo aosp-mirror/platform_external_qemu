@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4128cc69_468bf2a8",
+        "filename": "distrib/android-emugl/host/tools/emugen/tests/t.001/expected/decoder/foo_dec.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-26T09:06:23Z",
+      "side": 1,
+      "message": "why change the packet len from uint32_t to int32_t exactly?",
+      "revId": "9e1b4795e21ba6ccda718e537de184e5e4353f72",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
