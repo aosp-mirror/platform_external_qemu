@@ -25,6 +25,23 @@
     },
     {
       "key": {
+        "uuid": "21a03809_ed90252d",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 941,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-10-26T00:32:26Z",
+      "side": 1,
+      "message": "an empty line before each comment block is better.\notherwise, it is not clear where the comment is applicable to",
+      "revId": "880a9574e7f8f8771883f0d9ae656b0cba17166a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "211bd82a_95c0a41b",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 4
