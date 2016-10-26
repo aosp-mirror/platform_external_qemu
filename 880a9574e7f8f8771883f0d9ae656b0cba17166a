@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "41d60c38_1f38ef8f",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1276,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-10-26T00:20:46Z",
+      "side": 1,
+      "message": "nit: you can remove those two \"else\" and add \"return -1;\" at the very end of the function. It would be slightly easier to read",
+      "range": {
+        "startLine": 1271,
+        "startChar": 0,
+        "endLine": 1276,
+        "endChar": 5
+      },
+      "revId": "880a9574e7f8f8771883f0d9ae656b0cba17166a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
