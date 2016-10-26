@@ -2,6 +2,98 @@
   "comments": [
     {
       "key": {
+        "uuid": "21d3d849_1ee47162",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 928,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-10-26T00:27:48Z",
+      "side": 1,
+      "message": "more comments on the public methods would be appropriate;",
+      "range": {
+        "startLine": 928,
+        "startChar": 15,
+        "endLine": 928,
+        "endChar": 31
+      },
+      "revId": "880a9574e7f8f8771883f0d9ae656b0cba17166a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "211bd82a_95c0a41b",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 946,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-10-26T00:27:48Z",
+      "side": 1,
+      "message": "nit: longer name ?\ngetIsDaylightSavingTime ?",
+      "range": {
+        "startLine": 946,
+        "startChar": 8,
+        "endLine": 946,
+        "endChar": 16
+      },
+      "revId": "880a9574e7f8f8771883f0d9ae656b0cba17166a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6105d0c2_772870f8",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 952,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-10-26T00:27:48Z",
+      "side": 1,
+      "message": "naming consistency;\nmaybe longer name?",
+      "range": {
+        "startLine": 952,
+        "startChar": 15,
+        "endLine": 952,
+        "endChar": 21
+      },
+      "revId": "880a9574e7f8f8771883f0d9ae656b0cba17166a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e1c8e09a_4856ab74",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 957,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-10-26T00:27:48Z",
+      "side": 1,
+      "message": "diffTime ?\n\nmake it consistent",
+      "range": {
+        "startLine": 957,
+        "startChar": 16,
+        "endLine": 957,
+        "endChar": 24
+      },
+      "revId": "880a9574e7f8f8771883f0d9ae656b0cba17166a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "41d60c38_1f38ef8f",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 4
