@@ -42,6 +42,24 @@
     },
     {
       "key": {
+        "uuid": "21a03809_2d56ad45",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 941,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-10-26T06:11:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "21a03809_ed90252d",
+      "revId": "880a9574e7f8f8771883f0d9ae656b0cba17166a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "211bd82a_95c0a41b",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 4
@@ -53,6 +71,30 @@
       "writtenOn": "2016-10-26T00:27:48Z",
       "side": 1,
       "message": "nit: longer name ?\ngetIsDaylightSavingTime ?",
+      "range": {
+        "startLine": 946,
+        "startChar": 8,
+        "endLine": 946,
+        "endChar": 16
+      },
+      "revId": "880a9574e7f8f8771883f0d9ae656b0cba17166a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "21a03809_2d3fcded",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 946,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-10-26T06:11:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "211bd82a_95c0a41b",
       "range": {
         "startLine": 946,
         "startChar": 8,
@@ -88,6 +130,30 @@
     },
     {
       "key": {
+        "uuid": "21a03809_cd29e9b8",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 952,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-10-26T06:11:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6105d0c2_772870f8",
+      "range": {
+        "startLine": 952,
+        "startChar": 15,
+        "endLine": 952,
+        "endChar": 21
+      },
+      "revId": "880a9574e7f8f8771883f0d9ae656b0cba17166a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e1c8e09a_4856ab74",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 4
@@ -111,6 +177,30 @@
     },
     {
       "key": {
+        "uuid": "21a03809_0d3c91f5",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 957,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-10-26T06:11:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e1c8e09a_4856ab74",
+      "range": {
+        "startLine": 957,
+        "startChar": 16,
+        "endLine": 957,
+        "endChar": 24
+      },
+      "revId": "880a9574e7f8f8771883f0d9ae656b0cba17166a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "41d60c38_1f38ef8f",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 4
@@ -122,6 +212,30 @@
       "writtenOn": "2016-10-26T00:20:46Z",
       "side": 1,
       "message": "nit: you can remove those two \"else\" and add \"return -1;\" at the very end of the function. It would be slightly easier to read",
+      "range": {
+        "startLine": 1271,
+        "startChar": 0,
+        "endLine": 1276,
+        "endChar": 5
+      },
+      "revId": "880a9574e7f8f8771883f0d9ae656b0cba17166a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "21a03809_ad573d74",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1276,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-10-26T06:11:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "41d60c38_1f38ef8f",
       "range": {
         "startLine": 1271,
         "startChar": 0,
