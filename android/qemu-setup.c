@@ -23,6 +23,7 @@
 #include "android/emulation/android_pipe_zero.h"
 #include "android/globals.h"
 #include "android/hw-fingerprint.h"
+#include "android/hw-nfc.h"
 #include "android/hw-sensors.h"
 #include "android/opengles-pipe.h"
 #include "android/proxy/proxy_http.h"
@@ -472,6 +473,9 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
 
     /* initilize fingperprint here */
     android_hw_fingerprint_init();
+	
+	/* initilize nfc here */
+    android_hw_nfc_init();
 
     return true;
 }
