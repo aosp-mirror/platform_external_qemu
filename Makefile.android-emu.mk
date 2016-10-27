@@ -285,6 +285,7 @@ LOCAL_SRC_FILES := \
     android/hw-fingerprint.c \
     android/hw-kmsg.c \
     android/hw-lcd.c \
+    android/hw-nfc.c \
     android/hw-qemud.cpp \
     android/hw-sensors.c \
     android/jpeg-compress.c \

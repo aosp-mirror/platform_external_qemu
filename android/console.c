@@ -28,6 +28,7 @@
 #include "android/console_auth.h"
 #include "android/globals.h"
 #include "android/hw-events.h"
+#include "android/hw-nfc.h"
 #include "android/hw-sensors.h"
 #include "android/network/control.h"
 #include "android/network/constants.h"
@@ -2664,6 +2665,56 @@ static const CommandDefRec fingerprint_commands[] =
 /********************************************************************************************/
 /********************************************************************************************/
 /*****                                                                                 ******/
+/*****                                  NFC  C O M M A N D S                           ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+static int
+do_nfc_message_send(ControlClient client, char* args)
+{
+    if (!args) {
+        control_write(client, "KO: missing message\r\n");
+        return -1;
+    }
+
+    int i, j;
+    int args_len = strlen(args);
+    int message_length = (args_len + 1) / 2;
+    uint8_t* message = (uint8_t *)calloc(message_length, sizeof(uint8_t));
+
+    if (args_len % 2 == 1)
+    {
+        control_write(client, "KO: invalid message; expecting even number of hex digits.\r\n");
+        free(message);
+        return -1;
+    }
+
+    for (i = 0, j = 0; i < args_len; i += 2, j++)
+    {
+        if (sscanf(&(args[i]), "%2hhx", &(message[j])) != 1)
+        {
+            control_write(client, "KO: message copy failed; not proper hexadecimal.\r\n");
+            return -1;
+        }
+    }
+
+    client->global->nfc_agent->sendMessage(message, message_length);
+    free(message);
+    return 0;
+}
+
+static const CommandDefRec nfc_commands[] =
+{
+    { "send", "send hexadecimal string message to NFC HAL",
+      "'send <message>' send hexadecimal string message to NFC HAL.\r\n",
+      NULL, do_nfc_message_send, NULL },
+    { NULL, NULL, NULL, NULL, NULL, NULL }
+};
+
+/********************************************************************************************/
+/********************************************************************************************/
+/*****                                                                                 ******/
 /*****                           Q E M U   C O M M A N D S                             ******/
 /*****                                                                                 ******/
 /********************************************************************************************/
@@ -2802,6 +2853,10 @@ static const CommandDefRec   main_commands[] =
     { "finger", "manage emulator finger print",
       "allows you to touch the emulator finger print sensor\r\n", NULL,
       NULL, fingerprint_commands},
+
+    { "nfc", "manage emulator nfc",
+      "allows you to send a hexadecimal string message to the emulator nfc\r\n", NULL,
+      NULL, nfc_commands},
 
     { "debug", "control the emulator debug output tags",
       NULL, NULL, do_debug },
