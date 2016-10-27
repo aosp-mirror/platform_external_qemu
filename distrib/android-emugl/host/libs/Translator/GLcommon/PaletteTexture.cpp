@@ -107,8 +107,8 @@ Color paletteColor(const unsigned char* pallete,unsigned int index,GLenum format
 
 unsigned char* uncompressTexture(GLenum internalformat,GLenum& formatOut,GLsizei width,GLsizei height,GLsizei imageSize, const GLvoid* data,GLint level) {
 
-    unsigned int indexSizeBits;  //the size of the color index in the pallete
-    unsigned int colorSizeBytes; //the size of each color cell in the pallete
+    unsigned int indexSizeBits = 0;  //the size of the color index in the pallete
+    unsigned int colorSizeBytes = 0; //the size of each color cell in the pallete
 
     getPaletteInfo(internalformat,indexSizeBits,colorSizeBytes,formatOut);
     if(!data)
