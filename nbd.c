@@ -1162,7 +1162,7 @@ static void nbd_trip(void *opaque)
     NBDClient *client = opaque;
     NBDExport *exp = client->exp;
     NBDRequest *req;
-    struct nbd_request request;
+    struct nbd_request request = {};
     struct nbd_reply reply;
     ssize_t ret;
     uint32_t command;

@@ -541,7 +541,7 @@ static void get_real_device(AssignedDevice *pci_dev, Error **errp)
     int fd, r = 0;
     FILE *f;
     uint64_t start, end, size, flags;
-    uint16_t id;
+    uint16_t id = 0;
     PCIRegion *rp;
     PCIDevRegions *dev = &pci_dev->real_device;
     Error *local_err = NULL;
@@ -740,7 +740,7 @@ static void free_assigned_device(AssignedDevice *dev)
 static char *assign_failed_examine(const AssignedDevice *dev)
 {
     char name[PATH_MAX], dir[PATH_MAX], driver[PATH_MAX] = {}, *ns;
-    uint16_t vendor_id, device_id;
+    uint16_t vendor_id = 0, device_id = 0;
     int r;
     Error *local_err = NULL;
 

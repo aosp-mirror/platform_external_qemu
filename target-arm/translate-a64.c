@@ -6069,7 +6069,7 @@ static void handle_shri_with_rndacc(TCGv_i64 tcg_res, TCGv_i64 tcg_src,
     bool extended_result = false;
     bool round = !TCGV_IS_UNUSED_I64(tcg_rnd);
     int ext_lshift = 0;
-    TCGv_i64 tcg_src_hi;
+    TCGv_i64 tcg_src_hi = NULL;
 
     if (round && size == 3) {
         extended_result = true;

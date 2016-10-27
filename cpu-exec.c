@@ -343,7 +343,7 @@ int cpu_exec(CPUArchState *env)
     TranslationBlock *tb;
     uint8_t *tc_ptr;
     uintptr_t next_tb;
-    SyncClocks sc;
+    SyncClocks sc = {};
 
     /* This must be volatile so it is not trashed by longjmp() */
     volatile bool have_tb_lock = false;

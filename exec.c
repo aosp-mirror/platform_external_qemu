@@ -2463,7 +2463,7 @@ void address_space_unmap(AddressSpace *as, void *buffer, hwaddr len,
 {
     if (buffer != bounce.buffer) {
         MemoryRegion *mr;
-        ram_addr_t addr1;
+        ram_addr_t addr1 = 0;
 
         mr = qemu_ram_addr_from_host(buffer, &addr1);
         assert(mr != NULL);
