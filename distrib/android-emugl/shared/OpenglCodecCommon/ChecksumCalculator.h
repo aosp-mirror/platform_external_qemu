@@ -175,7 +175,7 @@ protected:
 private:
     // Compute a 32bit checksum
     // Used in protocol v1
-    uint32_t computeV1Checksum();
+    uint32_t computeV1Checksum() const;
     // The buffer used in protocol version 1 to compute checksum.
     uint32_t m_v1BufferTotalLength = 0;
 };
