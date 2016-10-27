@@ -140,8 +140,6 @@ LOCAL_C_INCLUDES += \
 LOCAL_CFLAGS := \
     $(QEMU1_COMMON_CFLAGS) \
     -W \
-    -Wall \
-    $(GCC_W_NO_MISSING_FIELD_INITIALIZERS) \
     -Wno-sign-compare \
     -fno-strict-aliasing \
     -Wno-unused-parameter \
