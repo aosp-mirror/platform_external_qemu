@@ -34,9 +34,10 @@ public:
     // current value, while OpenGL is not very clear about this, which results
     // in each implementation doing something different.
     void setAttribute0value(float x, float y, float z, float w);
+    bool needAtt0PreDrawValidation();
     void validateAtt0PreDraw(unsigned int count);
     void validateAtt0PostDraw(void);
-    const float* getAtt0(void) {return m_attribute0value;}
+    const float* getAtt0(void) const {return m_attribute0value;}
 
 protected:
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
@@ -45,6 +46,7 @@ private:
     void initExtensionString();
 
     float m_attribute0value[4] = {};
+    bool m_attribute0valueChanged = true;
     GLfloat* m_att0Array = nullptr;
     unsigned int m_att0ArrayLength = 0;
     bool m_att0NeedsDisable = false;

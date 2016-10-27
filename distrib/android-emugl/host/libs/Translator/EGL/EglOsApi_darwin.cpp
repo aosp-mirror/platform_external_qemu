@@ -195,7 +195,7 @@ public:
         int i = 0;
         for (NativeFormatList::iterator it = s_nativeFormats.begin();
                 it != s_nativeFormats.end();
-                it++) {
+                ++it) {
             pixelFormatToConfig(i++,
                                 renderableType,
                                 *it,
