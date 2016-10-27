@@ -17,55 +17,62 @@
 #include <GLcommon/ObjectNameSpace.h>
 #include <GLcommon/GLEScontext.h>
 
+#include "android/base/memory/LazyInstance.h"
+
+#include <array>
 #include <utility>
 
-namespace {
-// A struct serving as a key in a hash table, represents an object name with
-// object type together.
-struct TypedObjectName {
-    ObjectLocalName name;
-    NamedObjectType type;
+static constexpr int toIndex(NamedObjectType type) {
+    return static_cast<int>(type);
+}
 
-    TypedObjectName(NamedObjectType type, ObjectLocalName name)
-        : name(name), type(type) {}
-
-    bool operator==(const TypedObjectName& other) const noexcept {
-        return name == other.name && type == other.type;
-    }
-};
-}  // namespace
-
-namespace std {
-template <>
-struct hash<TypedObjectName> {
-    size_t operator()(const TypedObjectName& tn) const noexcept {
-        return hash<int>()(tn.name) ^
-               hash<ObjectLocalName>()(static_cast<int>(tn.type));
-    }
-};
-}  // namespace std
-
-using ObjectDataMap = std::unordered_map<TypedObjectName, ObjectDataPtr>;
-using TextureRefCounterMap = std::unordered_map<unsigned int, size_t>;
+using ObjectDataMap =
+    std::array<std::unordered_map<ObjectLocalName, ObjectDataPtr>,
+               toIndex(NamedObjectType::NUM_OBJECT_TYPES)>;
 
 ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace) {
-    for (int i = 0; i < static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES);
+    for (int i = 0; i < toIndex(NamedObjectType::NUM_OBJECT_TYPES);
          i++) {
         m_nameSpace[i] =
                 new NameSpace(static_cast<NamedObjectType>(i), globalNameSpace);
     }
 }
 
-ShareGroup::~ShareGroup()
-{
-    emugl::Mutex::AutoLock _lock(m_lock);
-    for (int t = 0; t < static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES);
-         t++) {
-        delete m_nameSpace[t];
+void ShareGroup::lockObjectData() {
+    while (m_objectsDataLock.test_and_set(std::memory_order_acquire)) {
+        ;
+    }
+}
+
+void ShareGroup::unlockObjectData() {
+    m_objectsDataLock.clear(std::memory_order_release);
+}
+
+struct ShareGroup::ObjectDataAutoLock {
+    ObjectDataAutoLock(ShareGroup* self) : self(self) {
+        self->lockObjectData();
+    }
+    ~ObjectDataAutoLock() {
+        self->unlockObjectData();
     }
 
-    delete (ObjectDataMap *)m_objectsData;
-    delete (TextureRefCounterMap *)m_globalTextureRefCounter;
+    ShareGroup* self;
+};
+
+
+ShareGroup::~ShareGroup()
+{
+    {
+        emugl::Mutex::AutoLock lock(m_namespaceLock);
+        for (auto n : m_nameSpace) {
+            delete n;
+        }
+    }
+
+    {
+        ObjectDataAutoLock lock(this);
+        delete (ObjectDataMap *)m_objectsData;
+    }
 }
 
 ObjectLocalName
@@ -73,13 +80,14 @@ ShareGroup::genName(GenNameInfo genNameInfo,
                     ObjectLocalName p_localName,
                     bool genLocal)
 {
-    if (static_cast<int>(genNameInfo.m_type) >=
-        static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES))
+    if (toIndex(genNameInfo.m_type) >=
+        toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
         return 0;
+    }
 
-    emugl::Mutex::AutoLock _lock(m_lock);
+    emugl::Mutex::AutoLock lock(m_namespaceLock);
     ObjectLocalName localName =
-            m_nameSpace[static_cast<int>(genNameInfo.m_type)]->genName(
+            m_nameSpace[toIndex(genNameInfo.m_type)]->genName(
                                                     genNameInfo,
                                                     p_localName, genLocal);
     return localName;
@@ -101,63 +109,64 @@ unsigned int
 ShareGroup::getGlobalName(NamedObjectType p_type,
                           ObjectLocalName p_localName)
 {
-    if (static_cast<int>(p_type) >=
-        static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES)) {
+    if (toIndex(p_type) >= toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
         return 0;
     }
 
-    emugl::Mutex::AutoLock _lock(m_lock);
-    return m_nameSpace[static_cast<int>(p_type)]->getGlobalName(p_localName);
+    emugl::Mutex::AutoLock lock(m_namespaceLock);
+    return m_nameSpace[toIndex(p_type)]->getGlobalName(p_localName);
 }
 
 ObjectLocalName
 ShareGroup::getLocalName(NamedObjectType p_type,
                          unsigned int p_globalName)
 {
-    if (static_cast<int>(p_type) >=
-        static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES)) {
+    if (toIndex(p_type) >= toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
         return 0;
     }
 
-    emugl::Mutex::AutoLock _lock(m_lock);
-    return m_nameSpace[static_cast<int>(p_type)]->getLocalName(p_globalName);
+    emugl::Mutex::AutoLock lock(m_namespaceLock);
+    return m_nameSpace[toIndex(p_type)]->getLocalName(p_globalName);
 }
 
 NamedObjectPtr ShareGroup::getNamedObject(NamedObjectType p_type,
                                           ObjectLocalName p_localName) {
-    if (static_cast<int>(p_type) >= 
-            static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES)) {
+    if (toIndex(p_type) >= toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
         return 0;
     }
 
-    emugl::Mutex::AutoLock _lock(m_lock);
-    return m_nameSpace[static_cast<int>(p_type)]->getNamedObject(p_localName);
+    emugl::Mutex::AutoLock lock(m_namespaceLock);
+    return m_nameSpace[toIndex(p_type)]->getNamedObject(p_localName);
 }
 
 void
 ShareGroup::deleteName(NamedObjectType p_type, ObjectLocalName p_localName)
 {
-    if (static_cast<int>(p_type) >=
-        static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES))
+    if (toIndex(p_type) >= toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
         return;
+    }
 
-    emugl::Mutex::AutoLock _lock(m_lock);
-    m_nameSpace[static_cast<int>(p_type)]->deleteName(p_localName);
+    {
+        emugl::Mutex::AutoLock lock(m_namespaceLock);
+        m_nameSpace[toIndex(p_type)]->deleteName(p_localName);
+    }
+
+    ObjectDataAutoLock lock(this);
     ObjectDataMap *map = (ObjectDataMap *)m_objectsData;
     if (map) {
-        map->erase(TypedObjectName(p_type, p_localName));
+        (*map)[toIndex(p_type)].erase(p_localName);
     }
 }
 
 bool
 ShareGroup::isObject(NamedObjectType p_type, ObjectLocalName p_localName)
 {
-    if (static_cast<int>(p_type) >=
-        static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES))
+    if (toIndex(p_type) >= toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
         return 0;
+    }
 
-    emugl::Mutex::AutoLock _lock(m_lock);
-    return m_nameSpace[static_cast<int>(p_type)]->isObject(p_localName);
+    emugl::Mutex::AutoLock lock(m_namespaceLock);
+    return m_nameSpace[toIndex(p_type)]->isObject(p_localName);
 }
 
 void
@@ -165,12 +174,12 @@ ShareGroup::replaceGlobalObject(NamedObjectType p_type,
                               ObjectLocalName p_localName,
                               NamedObjectPtr p_globalObject)
 {
-    if (static_cast<int>(p_type) >=
-        static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES))
+    if (toIndex(p_type) >= toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
         return;
+    }
 
-    emugl::Mutex::AutoLock _lock(m_lock);
-    m_nameSpace[static_cast<int>(p_type)]->replaceGlobalObject(p_localName,
+    emugl::Mutex::AutoLock lock(m_namespaceLock);
+    m_nameSpace[toIndex(p_type)]->replaceGlobalObject(p_localName,
                                                                p_globalObject);
 }
 
@@ -179,41 +188,55 @@ ShareGroup::setObjectData(NamedObjectType p_type,
                           ObjectLocalName p_localName,
                           ObjectDataPtr data)
 {
-    if (static_cast<int>(p_type) >=
-        static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES))
+    if (toIndex(p_type) >= toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
         return;
+    }
 
-    emugl::Mutex::AutoLock _lock(m_lock);
+    ObjectDataAutoLock lock(this);
 
     ObjectDataMap *map = (ObjectDataMap *)m_objectsData;
     if (!map) {
         map = new ObjectDataMap();
         m_objectsData = map;
     }
-
-    TypedObjectName id(p_type, p_localName);
-    map->emplace(id, std::move(data));
+    (*map)[toIndex(p_type)].emplace(p_localName, std::move(data));
 }
 
-ObjectDataPtr
-ShareGroup::getObjectData(NamedObjectType p_type,
+static android::base::LazyInstance<ObjectDataPtr> nullObjectData = {};
+
+const ObjectDataPtr& ShareGroup::getObjectDataPtrNoLock(
+        NamedObjectType p_type, ObjectLocalName p_localName)
+{
+    if (const auto map = (ObjectDataMap*)m_objectsData) {
+        const auto& typeMap = (*map)[toIndex(p_type)];
+        const auto it = typeMap.find(p_localName);
+        if (it != typeMap.end()) {
+            return it->second;
+        }
+    }
+    return *nullObjectData;
+}
+
+ObjectData* ShareGroup::getObjectData(NamedObjectType p_type,
                           ObjectLocalName p_localName)
 {
-    ObjectDataPtr ret;
+    if (toIndex(p_type) >=
+        toIndex(NamedObjectType::NUM_OBJECT_TYPES))
+        return nullptr;
 
-    if (static_cast<int>(p_type) >=
-        static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES))
-        return ret;
+    ObjectDataAutoLock lock(this);
+    return getObjectDataPtrNoLock(p_type, p_localName).get();
+}
 
-    emugl::Mutex::AutoLock _lock(m_lock);
+ObjectDataPtr ShareGroup::getObjectDataPtr(NamedObjectType p_type,
+                          ObjectLocalName p_localName)
+{
+    if (toIndex(p_type) >=
+        toIndex(NamedObjectType::NUM_OBJECT_TYPES))
+        return {};
 
-    ObjectDataMap *map = (ObjectDataMap *)m_objectsData;
-    if (map) {
-        ObjectDataMap::iterator i =
-                map->find(TypedObjectName(p_type, p_localName));
-        if (i != map->end()) ret = (*i).second;
-    }
-    return ret;
+    ObjectDataAutoLock lock(this);
+    return getObjectDataPtrNoLock(p_type, p_localName);
 }
 
 ObjectNameManager::ObjectNameManager(GlobalNameSpace *globalNameSpace) :
@@ -222,19 +245,11 @@ ObjectNameManager::ObjectNameManager(GlobalNameSpace *globalNameSpace) :
 ShareGroupPtr
 ObjectNameManager::createShareGroup(void *p_groupName)
 {
-    emugl::Mutex::AutoLock _lock(m_lock);
+    emugl::Mutex::AutoLock lock(m_lock);
 
-    ShareGroupPtr shareGroupReturn;
-
-    ShareGroupsMap::iterator s( m_groups.find(p_groupName) );
-    if (s != m_groups.end()) {
-        shareGroupReturn = (*s).second;
-    } else {
-        //
-        // Group does not exist, create new group
-        //
-        shareGroupReturn = ShareGroupPtr(new ShareGroup(m_globalNameSpace));
-        m_groups.emplace(p_groupName, shareGroupReturn);
+    ShareGroupPtr& shareGroupReturn = m_groups[p_groupName];
+    if (!shareGroupReturn) {
+        shareGroupReturn.reset(new ShareGroup(m_globalNameSpace));
     }
 
     return shareGroupReturn;
@@ -243,7 +258,7 @@ ObjectNameManager::createShareGroup(void *p_groupName)
 ShareGroupPtr
 ObjectNameManager::getShareGroup(void *p_groupName)
 {
-    emugl::Mutex::AutoLock _lock(m_lock);
+    emugl::Mutex::AutoLock lock(m_lock);
 
     ShareGroupPtr shareGroupReturn;
 
@@ -259,7 +274,7 @@ ShareGroupPtr
 ObjectNameManager::attachShareGroup(void *p_groupName,
                                     void *p_existingGroupName)
 {
-    emugl::Mutex::AutoLock _lock(m_lock);
+    emugl::Mutex::AutoLock lock(m_lock);
 
     ShareGroupsMap::iterator s( m_groups.find(p_existingGroupName) );
     if (s == m_groups.end()) {
@@ -277,16 +292,12 @@ ObjectNameManager::attachShareGroup(void *p_groupName,
 void
 ObjectNameManager::deleteShareGroup(void *p_groupName)
 {
-    emugl::Mutex::AutoLock _lock(m_lock);
-
-    ShareGroupsMap::iterator s( m_groups.find(p_groupName) );
-    if (s != m_groups.end()) {
-        m_groups.erase(s);
-    }
+    emugl::Mutex::AutoLock lock(m_lock);
+    m_groups.erase(p_groupName);
 }
 
 void *ObjectNameManager::getGlobalContext()
 {
-    emugl::Mutex::AutoLock _lock(m_lock);
+    emugl::Mutex::AutoLock lock(m_lock);
     return m_groups.empty() ? nullptr : m_groups.begin()->first;
 }
