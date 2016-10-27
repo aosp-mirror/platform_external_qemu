@@ -189,7 +189,6 @@ int main(int argc, char** argv)
     const char* avdName = NULL;
     const char* avdArch = NULL;
     const char* gpu = NULL;
-    char*       emulatorPath;
     const char* engine = NULL;
     bool doAccelCheck = false;
     bool doListAvds = false;
@@ -465,8 +464,8 @@ int main(int argc, char** argv)
     }
 
     /* Find program directory. */
-    auto progDir = android::base::System::get()->getProgramDirectory();
-    D("argv[0]: '%s'; program directory: '%s'\n", argv[0], progDir.c_str());
+    const auto progDirSystem = android::base::System::get()->getProgramDirectory();
+    D("argv[0]: '%s'; program directory: '%s'\n", argv[0], progDirSystem.c_str());
 
     enum RanchuState {
         RANCHU_AUTODETECT,
@@ -568,7 +567,9 @@ int main(int argc, char** argv)
 
     std::string emuDirName = emulator_dirname(argv0DirName);
 
-    const std::string candidates[] = {progDir, argv0DirName, emuDirName};
+    const StringView candidates[] = {progDirSystem, argv0DirName, emuDirName};
+    char* emulatorPath = nullptr;
+    StringView progDir;
     for (unsigned int i = 0; i < ARRAY_SIZE(candidates); ++i) {
         D("try dir %s\n", candidates[i].c_str());
         progDir = candidates[i];

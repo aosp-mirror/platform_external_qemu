@@ -1362,9 +1362,9 @@ int get_phys_addr(CPUARMState *env, uint32_t address,
 int cpu_arm_handle_mmu_fault (CPUARMState *env, target_ulong address,
                               int access_type, int mmu_idx)
 {
-    uint32_t phys_addr;
-    target_ulong page_size;
-    int prot;
+    uint32_t phys_addr = 0;
+    target_ulong page_size = 0;
+    int prot = 0;
     int ret, is_user;
 
     is_user = mmu_idx == MMU_USER_IDX;
@@ -1395,7 +1395,7 @@ int cpu_arm_handle_mmu_fault (CPUARMState *env, target_ulong address,
 
 hwaddr cpu_get_phys_page_debug(CPUARMState *env, target_ulong addr)
 {
-    uint32_t phys_addr;
+    uint32_t phys_addr = 0;
     target_ulong page_size;
     int prot;
     int ret;
@@ -1624,8 +1624,8 @@ void HELPER(set_cp15)(CPUARMState *env, uint32_t insn, uint32_t val)
                 }
                 break;
             case 8: {
-                uint32_t phys_addr;
-                target_ulong page_size;
+                uint32_t phys_addr = 0;
+                target_ulong page_size = 0;
                 int prot;
                 int ret, is_user = op2 & 2;
                 int access_type = op2 & 1;
