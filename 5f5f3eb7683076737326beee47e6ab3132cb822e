@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "86ef3a6f_83bf8097",
+        "filename": "android/base/testing/GTestUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T16:52:10Z",
+      "side": 1,
+      "message": "const auto?",
+      "revId": "5f5f3eb7683076737326beee47e6ab3132cb822e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
