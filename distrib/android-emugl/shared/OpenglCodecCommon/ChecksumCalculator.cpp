@@ -18,6 +18,8 @@
 
 #include <string>
 #include <vector>
+
+#include <assert.h>
 #include <string.h>
 
 // Checklist when implementing new protocol:
@@ -80,7 +82,7 @@ size_t ChecksumCalculator::checksumByteSize() const {
         case 0:
             return 0;
         case 1:
-            return sizeof(uint32_t) + sizeof(m_numWrite);
+            return sizeof(computeV1Checksum()) + sizeof(m_numWrite);
         default:
             return 0;
     }
@@ -120,30 +122,36 @@ void ChecksumCalculator::resetChecksum() {
     m_isEncodingChecksum = false;
 }
 
-bool ChecksumCalculator::validate(const void* expectedChecksum, size_t expectedChecksumLen) {
-    size_t checksumSize = checksumByteSize();
+bool ChecksumCalculator::validate(const void* expectedChecksum,
+                                  size_t expectedChecksumLen) {
+    const size_t checksumSize = checksumByteSize();
     if (expectedChecksumLen != checksumSize) {
         m_numRead++;
         resetChecksum();
         return false;
     }
-    // buffers for computing the checksum
-    unsigned char sChecksumBuffer[kMaxChecksumSize];
+    bool isValid;
     switch (m_version) {
         case 1: {
-            uint32_t val = computeV1Checksum();
-            memcpy(sChecksumBuffer, &val, sizeof(val));
-            memcpy(sChecksumBuffer+sizeof(val), &m_numRead, sizeof(m_numRead));
+            const uint32_t val = computeV1Checksum();
+            assert(checksumSize == sizeof(val) + sizeof(m_numRead));
+            isValid = 0 == memcmp(&val, expectedChecksum, sizeof(val)) &&
+                      0 == memcmp(&m_numRead,
+                                  static_cast<const char*>(expectedChecksum) +
+                                          sizeof(val),
+                                  sizeof(m_numRead));
             break;
         }
+        default:
+            isValid = true;  // No checksum is a valid checksum.
+            break;
     }
-    bool isValid = !memcmp(sChecksumBuffer, expectedChecksum, checksumSize);
     m_numRead++;
     resetChecksum();
     return isValid;
 }
 
-uint32_t ChecksumCalculator::computeV1Checksum() {
+uint32_t ChecksumCalculator::computeV1Checksum() const {
     uint32_t revLen = m_v1BufferTotalLength;
     revLen = (revLen & 0xffff0000) >> 16 | (revLen & 0x0000ffff) << 16;
     revLen = (revLen & 0xff00ff00) >> 8 | (revLen & 0x00ff00ff) << 8;

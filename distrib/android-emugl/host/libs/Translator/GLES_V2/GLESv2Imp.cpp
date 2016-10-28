@@ -135,20 +135,20 @@ GLESiface* __translator_getIfaces(EGLiface* eglIface) {
 
 static void s_attachShader(GLEScontext* ctx, GLuint program, GLuint shader) {
     if (ctx && program && shader && ctx->shareGroup().get()) {
-        ObjectDataPtr shaderData = ctx->shareGroup()->getObjectData(
+        auto shaderData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
-        if (!shaderData.get()) return;
-        ShaderParser* shaderParser = (ShaderParser*)shaderData.get();
+        if (!shaderData) return;
+        ShaderParser* shaderParser = (ShaderParser*)shaderData;
         shaderParser->attachProgram(program);
     }
 }
 
 static void s_detachShader(GLEScontext* ctx, GLuint program, GLuint shader) {
     if (ctx && shader && ctx->shareGroup().get()) {
-        ObjectDataPtr shaderData = ctx->shareGroup()->getObjectData(
+        auto shaderData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
-        if (!shaderData.get()) return;
-        ShaderParser* shaderParser = (ShaderParser*)shaderData.get();
+        if (!shaderData) return;
+        ShaderParser* shaderParser = (ShaderParser*)shaderData;
         shaderParser->detachProgram(program);
         if (shaderParser->getDeleteStatus()
                 && !shaderParser->hasAttachedPrograms()) {
@@ -165,14 +165,14 @@ static ObjectLocalName TextureLocalName(GLenum target,unsigned int tex) {
 static TextureData* getTextureData(ObjectLocalName tex) {
     GET_CTX_RET(NULL);
     TextureData *texData = NULL;
-    ObjectDataPtr objData =
+    auto objData =
             ctx->shareGroup()->getObjectData(NamedObjectType::TEXTURE, tex);
-    if(!objData.get()){
+    if(!objData){
         texData = new TextureData();
         ctx->shareGroup()->setObjectData(NamedObjectType::TEXTURE, tex,
                                          ObjectDataPtr(texData));
     } else {
-        texData = (TextureData*)objData.get();
+        texData = (TextureData*)objData;
     }
     return texData;
 }
@@ -200,16 +200,16 @@ GL_APICALL void  GL_APIENTRY glAttachShader(GLuint program, GLuint shader){
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
         SET_ERROR_IF(globalShaderName==0, GL_INVALID_VALUE);
 
-        ObjectDataPtr programData = ctx->shareGroup()->getObjectData(
+        auto programData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
-        ObjectDataPtr shaderData = ctx->shareGroup()->getObjectData(
+        auto shaderData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
-        SET_ERROR_IF(!shaderData.get() || !programData.get() ,GL_INVALID_OPERATION);
-        SET_ERROR_IF(!(shaderData.get()->getDataType() ==SHADER_DATA) ||
-                     !(programData.get()->getDataType()==PROGRAM_DATA) ,GL_INVALID_OPERATION);
+        SET_ERROR_IF(!shaderData || !programData ,GL_INVALID_OPERATION);
+        SET_ERROR_IF(!(shaderData->getDataType() ==SHADER_DATA) ||
+                     !(programData->getDataType()==PROGRAM_DATA) ,GL_INVALID_OPERATION);
 
-        GLenum shaderType = ((ShaderParser*)shaderData.get())->getType();
-        ProgramData* pData = (ProgramData*)programData.get();
+        GLenum shaderType = ((ShaderParser*)shaderData)->getType();
+        ProgramData* pData = (ProgramData*)programData;
         SET_ERROR_IF((pData->getAttachedShader(shaderType)!=0), GL_INVALID_OPERATION);
         pData->attachShader(shader,shaderType);
         s_attachShader(ctx, program, shader);
@@ -225,9 +225,9 @@ GL_APICALL void  GL_APIENTRY glBindAttribLocation(GLuint program, GLuint index, 
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(globalProgramName==0, GL_INVALID_VALUE);
-        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+        auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
-        SET_ERROR_IF(objData.get()->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
+        SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
 
         ctx->dispatcher().glBindAttribLocation(globalProgramName,index,name);
     }
@@ -247,8 +247,7 @@ GL_APICALL void  GL_APIENTRY glBindBuffer(GLenum target, GLuint buffer){
     if (buffer) {
         GLESbuffer* vbo =
                 (GLESbuffer*)ctx->shareGroup()
-                        ->getObjectData(NamedObjectType::VERTEXBUFFER, buffer)
-                        .get();
+                        ->getObjectData(NamedObjectType::VERTEXBUFFER, buffer);
         vbo->setBinded();
     }
 }
@@ -417,10 +416,10 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
         const GLuint globalShaderName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
         SET_ERROR_IF(globalShaderName==0, GL_INVALID_VALUE);
-        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+        auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
-        SET_ERROR_IF(objData.get()->getDataType()!= SHADER_DATA,GL_INVALID_OPERATION);
-        ShaderParser* sp = (ShaderParser*)objData.get();
+        SET_ERROR_IF(objData->getDataType()!= SHADER_DATA,GL_INVALID_OPERATION);
+        ShaderParser* sp = (ShaderParser*)objData;
         SET_ERROR_IF(sp->getDeleteStatus(), GL_INVALID_VALUE);
         if (sp->validShader()) {
             ctx->dispatcher().glCompileShader(globalShaderName);
@@ -570,10 +569,10 @@ static void s_detachFromFramebuffer(NamedObjectType bufferType,
     GET_CTX();
     GLuint fbName = ctx->getFramebufferBinding();
     if (!fbName) return;
-    ObjectDataPtr fbObj = ctx->shareGroup()->getObjectData(
+    auto fbObj = ctx->shareGroup()->getObjectData(
             NamedObjectType::FRAMEBUFFER, fbName);
-    if (fbObj.get() == NULL) return;
-    FramebufferData *fbData = (FramebufferData *)fbObj.get();
+    if (fbObj == NULL) return;
+    FramebufferData *fbData = (FramebufferData *)fbObj;
     GLenum target;
     const GLenum kAttachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT};
     const size_t sizen = sizeof(kAttachments)/sizeof(GLenum);
@@ -628,11 +627,11 @@ GL_APICALL void  GL_APIENTRY glDeleteProgram(GLuint program){
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(!globalProgramName, GL_INVALID_VALUE);
 
-        ObjectDataPtr programData = ctx->shareGroup()->getObjectData(
+        auto programData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
-        SET_ERROR_IF(!(programData.get()->getDataType()==PROGRAM_DATA),
+        SET_ERROR_IF(!(programData->getDataType()==PROGRAM_DATA),
                 GL_INVALID_OPERATION);
-        ProgramData* pData = (ProgramData*)programData.get();
+        ProgramData* pData = (ProgramData*)programData;
         if (pData && pData->isInUse()) {
             pData->setDeleteStatus(true);
             return;
@@ -650,11 +649,11 @@ GL_APICALL void  GL_APIENTRY glDeleteShader(GLuint shader){
         const GLuint globalShaderName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
         SET_ERROR_IF(!globalShaderName, GL_INVALID_VALUE);
-        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+        auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
-        SET_ERROR_IF(!objData.get() ,GL_INVALID_OPERATION);
-        SET_ERROR_IF(objData.get()->getDataType()!=SHADER_DATA,GL_INVALID_OPERATION);
-        ShaderParser* sp = (ShaderParser*)objData.get();
+        SET_ERROR_IF(!objData ,GL_INVALID_OPERATION);
+        SET_ERROR_IF(objData->getDataType()!=SHADER_DATA,GL_INVALID_OPERATION);
+        ShaderParser* sp = (ShaderParser*)objData;
         SET_ERROR_IF(sp->getDeleteStatus(), GL_INVALID_VALUE);
         if (sp->hasAttachedPrograms()) {
             sp->setDeleteStatus(true);
@@ -687,12 +686,12 @@ GL_APICALL void  GL_APIENTRY glDetachShader(GLuint program, GLuint shader){
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
         SET_ERROR_IF(globalShaderName==0, GL_INVALID_VALUE);
 
-        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+        auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
-        SET_ERROR_IF(!objData.get(),GL_INVALID_OPERATION);
-        SET_ERROR_IF(!(objData.get()->getDataType()==PROGRAM_DATA) ,GL_INVALID_OPERATION);
+        SET_ERROR_IF(!objData,GL_INVALID_OPERATION);
+        SET_ERROR_IF(!(objData->getDataType()==PROGRAM_DATA) ,GL_INVALID_OPERATION);
 
-        ProgramData* programData = (ProgramData*)objData.get();
+        ProgramData* programData = (ProgramData*)objData;
         SET_ERROR_IF(!programData->isAttached(shader),GL_INVALID_OPERATION);
         programData->detachShader(shader);
 
@@ -724,7 +723,9 @@ GL_APICALL void  GL_APIENTRY glDrawArrays(GLenum mode, GLint first, GLsizei coun
     GLESConversionArrays tmpArrs;
     ctx->setupArraysPointers(tmpArrs,first,count,0,NULL,true);
 
-    ctx->validateAtt0PreDraw(count);
+    if (ctx->needAtt0PreDrawValidation()) {
+        ctx->validateAtt0PreDraw(count);
+    }
 
     //Enable texture generation for GL_POINTS and gl_PointSize shader variable
     //GLES2 assumes this is enabled by default, we need to set this state for GL
@@ -759,8 +760,10 @@ GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum t
     GLESConversionArrays tmpArrs;
     ctx->setupArraysPointers(tmpArrs,0,count,type,indices,false);
 
-    unsigned int maxIndex = ctx->findMaxIndex(count, type, indices);
-    ctx->validateAtt0PreDraw(maxIndex);
+    if (ctx->needAtt0PreDrawValidation()) {
+        const unsigned int maxIndex = ctx->findMaxIndex(count, type, indices);
+        ctx->validateAtt0PreDraw(maxIndex);
+    }
     
     //See glDrawArrays
     if (mode==GL_POINTS) {
@@ -821,7 +824,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
                                              renderbuffer, obj);
         }
         else {
-            obj = ctx->shareGroup()->getObjectData(
+            obj = ctx->shareGroup()->getObjectDataPtr(
                     NamedObjectType::RENDERBUFFER, renderbuffer);
         }
 
@@ -831,10 +834,10 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
 
     // Update the the current framebuffer object attachment state
     GLuint fbName = ctx->getFramebufferBinding();
-    ObjectDataPtr fbObj = ctx->shareGroup()->getObjectData(
+    auto fbObj = ctx->shareGroup()->getObjectData(
             NamedObjectType::FRAMEBUFFER, fbName);
-    if (fbObj.get() != NULL) {
-        FramebufferData *fbData = (FramebufferData *)fbObj.get();
+    if (fbObj != NULL) {
+        FramebufferData *fbData = (FramebufferData *)fbObj;
         fbData->setAttachment(attachment, renderbuffertarget, renderbuffer, obj);
     }
 
@@ -880,10 +883,10 @@ GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attach
 
     // Update the the current framebuffer object attachment state
     GLuint fbName = ctx->getFramebufferBinding();
-    ObjectDataPtr fbObj = ctx->shareGroup()->getObjectData(
+    auto fbObj = ctx->shareGroup()->getObjectData(
             NamedObjectType::FRAMEBUFFER, fbName);
-    if (fbObj.get() != NULL) {
-        FramebufferData *fbData = (FramebufferData *)fbObj.get();
+    if (fbObj) {
+        FramebufferData *fbData = (FramebufferData *)fbObj;
         fbData->setAttachment(attachment, textarget, 
                               texture, ObjectDataPtr());
     }
@@ -972,9 +975,9 @@ GL_APICALL void  GL_APIENTRY glGetActiveAttrib(GLuint program, GLuint index, GLs
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(globalProgramName==0, GL_INVALID_VALUE);
-        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+        auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
-        SET_ERROR_IF(objData.get()->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
+        SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
         ctx->dispatcher().glGetActiveAttrib(globalProgramName,index,bufsize,length,size,type,name);
     }
 }
@@ -985,9 +988,9 @@ GL_APICALL void  GL_APIENTRY glGetActiveUniform(GLuint program, GLuint index, GL
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(globalProgramName==0, GL_INVALID_VALUE);
-        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+        auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
-        SET_ERROR_IF(objData.get()->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
+        SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
         ctx->dispatcher().glGetActiveUniform(globalProgramName,index,bufsize,length,size,type,name);
     }
 }
@@ -999,9 +1002,9 @@ GL_APICALL void  GL_APIENTRY glGetAttachedShaders(GLuint program, GLsizei maxcou
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(globalProgramName==0, GL_INVALID_VALUE);
         ctx->dispatcher().glGetAttachedShaders(globalProgramName,maxcount,count,shaders);
-        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+        auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
-        SET_ERROR_IF(objData.get()->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
+        SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
         GLint numShaders=0;
         ctx->dispatcher().glGetProgramiv(globalProgramName,GL_ATTACHED_SHADERS,&numShaders);
         for(int i=0 ; i < maxcount && i<numShaders ;i++){
@@ -1017,11 +1020,11 @@ GL_APICALL int GL_APIENTRY glGetAttribLocation(GLuint program, const GLchar* nam
          const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(
                  NamedObjectType::SHADER_OR_PROGRAM, program);
          RET_AND_SET_ERROR_IF(globalProgramName == 0, GL_INVALID_VALUE, -1);
-         ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+         auto objData = ctx->shareGroup()->getObjectData(
                  NamedObjectType::SHADER_OR_PROGRAM, program);
-         RET_AND_SET_ERROR_IF(objData.get()->getDataType() != PROGRAM_DATA,
+         RET_AND_SET_ERROR_IF(objData->getDataType() != PROGRAM_DATA,
                               GL_INVALID_OPERATION, -1);
-         ProgramData* pData = (ProgramData*)objData.get();
+         ProgramData* pData = (ProgramData*)objData;
          RET_AND_SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,
                               GL_INVALID_OPERATION, -1);
          return ctx->dispatcher().glGetAttribLocation(globalProgramName, name);
@@ -1261,10 +1264,10 @@ GL_APICALL void  GL_APIENTRY glGetFramebufferAttachmentParameteriv(GLenum target
     GLuint fbName = ctx->getFramebufferBinding();
     SET_ERROR_IF (!fbName, GL_INVALID_OPERATION);
     if (fbName) {
-        ObjectDataPtr fbObj = ctx->shareGroup()->getObjectData(
+        auto fbObj = ctx->shareGroup()->getObjectData(
                 NamedObjectType::FRAMEBUFFER, fbName);
-        if (fbObj.get() != NULL) {
-            FramebufferData *fbData = (FramebufferData *)fbObj.get();
+        if (fbObj != NULL) {
+            FramebufferData *fbData = (FramebufferData *)fbObj;
             GLenum target;
             GLuint name = fbData->getAttachment(attachment, &target, NULL);
             if (!name) {
@@ -1303,9 +1306,9 @@ GL_APICALL void  GL_APIENTRY glGetRenderbufferParameteriv(GLenum target, GLenum 
     //
     GLuint rb = ctx->getRenderbufferBinding();
     if (rb) {
-        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+        auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::RENDERBUFFER, rb);
-        RenderbufferData *rbData = (RenderbufferData *)objData.get();
+        RenderbufferData *rbData = (RenderbufferData *)objData;
         if (rbData && rbData->eglImageGlobalTexObject) {
             GLenum texPname;
             switch(pname) {
@@ -1366,35 +1369,35 @@ GL_APICALL void  GL_APIENTRY glGetProgramiv(GLuint program, GLenum pname, GLint*
         switch(pname) {
         case GL_DELETE_STATUS:
             {
-            ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+            auto objData = ctx->shareGroup()->getObjectData(
                     NamedObjectType::SHADER_OR_PROGRAM, program);
-            SET_ERROR_IF(!objData.get(), GL_INVALID_OPERATION);
-            SET_ERROR_IF(objData.get()->getDataType() != PROGRAM_DATA,
+            SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
+            SET_ERROR_IF(objData->getDataType() != PROGRAM_DATA,
                          GL_INVALID_OPERATION);
-            ProgramData* programData = (ProgramData*)objData.get();
+            ProgramData* programData = (ProgramData*)objData;
             params[0] = programData->getDeleteStatus() ? GL_TRUE : GL_FALSE;
             }
             break;
         case GL_LINK_STATUS:
             {
-            ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+            auto objData = ctx->shareGroup()->getObjectData(
                     NamedObjectType::SHADER_OR_PROGRAM, program);
-            SET_ERROR_IF(!objData.get(), GL_INVALID_OPERATION);
-            SET_ERROR_IF(objData.get()->getDataType() != PROGRAM_DATA,
+            SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
+            SET_ERROR_IF(objData->getDataType() != PROGRAM_DATA,
                          GL_INVALID_OPERATION);
-            ProgramData* programData = (ProgramData*)objData.get();
+            ProgramData* programData = (ProgramData*)objData;
             params[0] = programData->getLinkStatus();
             }
             break;
         //validate status should not return GL_TRUE if link failed
         case GL_VALIDATE_STATUS:
             {
-            ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+            auto objData = ctx->shareGroup()->getObjectData(
                     NamedObjectType::SHADER_OR_PROGRAM, program);
-            SET_ERROR_IF(!objData.get(), GL_INVALID_OPERATION);
-            SET_ERROR_IF(objData.get()->getDataType() != PROGRAM_DATA,
+            SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
+            SET_ERROR_IF(objData->getDataType() != PROGRAM_DATA,
                          GL_INVALID_OPERATION);
-            ProgramData* programData = (ProgramData*)objData.get();
+            ProgramData* programData = (ProgramData*)objData;
             if (programData->getLinkStatus() == GL_TRUE)
                 ctx->dispatcher().glGetProgramiv(globalProgramName, pname,
                                                  params);
@@ -1404,12 +1407,12 @@ GL_APICALL void  GL_APIENTRY glGetProgramiv(GLuint program, GLenum pname, GLint*
             break;
         case GL_INFO_LOG_LENGTH:
             {
-            ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+            auto objData = ctx->shareGroup()->getObjectData(
                     NamedObjectType::SHADER_OR_PROGRAM, program);
-            SET_ERROR_IF(!objData.get(), GL_INVALID_OPERATION);
-            SET_ERROR_IF(objData.get()->getDataType() != PROGRAM_DATA,
+            SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
+            SET_ERROR_IF(objData->getDataType() != PROGRAM_DATA,
                          GL_INVALID_OPERATION);
-            ProgramData* programData = (ProgramData*)objData.get();
+            ProgramData* programData = (ProgramData*)objData;
             GLint logLength = strlen(programData->getInfoLog());
             params[0] = (logLength > 0) ? logLength + 1 : 0;
             }
@@ -1426,11 +1429,11 @@ GL_APICALL void  GL_APIENTRY glGetProgramInfoLog(GLuint program, GLsizei bufsize
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(globalProgramName==0, GL_INVALID_VALUE);
-        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+        auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
-        SET_ERROR_IF(!objData.get() ,GL_INVALID_OPERATION);
-        SET_ERROR_IF(objData.get()->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
-        ProgramData* programData = (ProgramData*)objData.get();
+        SET_ERROR_IF(!objData ,GL_INVALID_OPERATION);
+        SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
+        ProgramData* programData = (ProgramData*)objData;
 
         if (bufsize==0) {
             if (length) {
@@ -1461,11 +1464,11 @@ GL_APICALL void  GL_APIENTRY glGetShaderiv(GLuint shader, GLenum pname, GLint* p
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
         if (pname == GL_DELETE_STATUS) {
             SET_ERROR_IF(globalShaderName == 0, GL_INVALID_VALUE);
-            ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+            auto objData = ctx->shareGroup()->getObjectData(
                     NamedObjectType::SHADER_OR_PROGRAM, shader);
-            SET_ERROR_IF(!objData.get() ,GL_INVALID_VALUE);
-            SET_ERROR_IF(objData.get()->getDataType()!=SHADER_DATA,GL_INVALID_VALUE);
-            ShaderParser* sp = (ShaderParser*)objData.get();
+            SET_ERROR_IF(!objData ,GL_INVALID_VALUE);
+            SET_ERROR_IF(objData->getDataType()!=SHADER_DATA,GL_INVALID_VALUE);
+            ShaderParser* sp = (ShaderParser*)objData;
             params[0]  = (sp->getDeleteStatus()) ? GL_TRUE : GL_FALSE;
             return;
         }
@@ -1473,24 +1476,24 @@ GL_APICALL void  GL_APIENTRY glGetShaderiv(GLuint shader, GLenum pname, GLint* p
         switch(pname) {
         case GL_INFO_LOG_LENGTH:
             {
-            ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+            auto objData = ctx->shareGroup()->getObjectData(
                     NamedObjectType::SHADER_OR_PROGRAM, shader);
-            SET_ERROR_IF(!objData.get(), GL_INVALID_OPERATION);
-            SET_ERROR_IF(objData.get()->getDataType() != SHADER_DATA,
+            SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
+            SET_ERROR_IF(objData->getDataType() != SHADER_DATA,
                          GL_INVALID_OPERATION);
-            ShaderParser* sp = (ShaderParser*)objData.get();
+            ShaderParser* sp = (ShaderParser*)objData;
             GLint logLength = strlen(sp->getInfoLog());
             params[0] = (logLength > 0) ? logLength + 1 : 0;
             }
             break;
         case GL_SHADER_SOURCE_LENGTH:
             {
-            ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+            auto objData = ctx->shareGroup()->getObjectData(
                     NamedObjectType::SHADER_OR_PROGRAM, shader);
-            SET_ERROR_IF(!objData.get(), GL_INVALID_OPERATION);
-            SET_ERROR_IF(objData.get()->getDataType() != SHADER_DATA,
+            SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
+            SET_ERROR_IF(objData->getDataType() != SHADER_DATA,
                          GL_INVALID_OPERATION);
-            ShaderParser* sp = (ShaderParser*)objData.get();
+            ShaderParser* sp = (ShaderParser*)objData;
             GLint srcLength = sp->getOriginalSrc().length();
             params[0] = (srcLength > 0) ? srcLength + 1 : 0;
             }
@@ -1508,11 +1511,11 @@ GL_APICALL void  GL_APIENTRY glGetShaderInfoLog(GLuint shader, GLsizei bufsize, 
         const GLuint globalShaderName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
         SET_ERROR_IF(globalShaderName==0, GL_INVALID_VALUE);
-        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+        auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
-        SET_ERROR_IF(!objData.get() ,GL_INVALID_OPERATION);
-        SET_ERROR_IF(objData.get()->getDataType()!=SHADER_DATA,GL_INVALID_OPERATION);
-        ShaderParser* sp = (ShaderParser*)objData.get();
+        SET_ERROR_IF(!objData ,GL_INVALID_OPERATION);
+        SET_ERROR_IF(objData->getDataType()!=SHADER_DATA,GL_INVALID_OPERATION);
+        ShaderParser* sp = (ShaderParser*)objData;
 
         if (bufsize==0) {
             if (length) {
@@ -1567,13 +1570,13 @@ GL_APICALL void  GL_APIENTRY glGetShaderSource(GLuint shader, GLsizei bufsize, G
         const GLuint globalShaderName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
         SET_ERROR_IF(globalShaderName == 0, GL_INVALID_VALUE);
-        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+        auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
-        SET_ERROR_IF(!objData.get(), GL_INVALID_OPERATION);
-        SET_ERROR_IF(objData.get()->getDataType() != SHADER_DATA,
+        SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
+        SET_ERROR_IF(objData->getDataType() != SHADER_DATA,
                      GL_INVALID_OPERATION);
         const std::string& src =
-                ((ShaderParser*)objData.get())->getOriginalSrc();
+                ((ShaderParser*)objData)->getOriginalSrc();
         int srcLength = static_cast<int>(src.size());
 
         int returnLength = bufsize < srcLength ? bufsize - 1 : srcLength;
@@ -1626,10 +1629,10 @@ GL_APICALL void  GL_APIENTRY glGetUniformfv(GLuint program, GLint location, GLfl
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(globalProgramName==0, GL_INVALID_VALUE);
-        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+        auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
-        SET_ERROR_IF(objData.get()->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
-        ProgramData* pData = (ProgramData *)objData.get();
+        SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
+        ProgramData* pData = (ProgramData *)objData;
         SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION);
         ctx->dispatcher().glGetUniformfv(globalProgramName,location,params);
     }
@@ -1642,10 +1645,10 @@ GL_APICALL void  GL_APIENTRY glGetUniformiv(GLuint program, GLint location, GLin
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(globalProgramName==0, GL_INVALID_VALUE);
-        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+        auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
-        SET_ERROR_IF(objData.get()->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
-        ProgramData* pData = (ProgramData *)objData.get();
+        SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
+        ProgramData* pData = (ProgramData *)objData;
         SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION);
         ctx->dispatcher().glGetUniformiv(globalProgramName,location,params);
     }
@@ -1657,10 +1660,10 @@ GL_APICALL int GL_APIENTRY glGetUniformLocation(GLuint program, const GLchar* na
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         RET_AND_SET_ERROR_IF(globalProgramName==0, GL_INVALID_VALUE,-1);
-        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+        auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
-        RET_AND_SET_ERROR_IF(objData.get()->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION,-1);
-        ProgramData* pData = (ProgramData *)objData.get();
+        RET_AND_SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION,-1);
+        ProgramData* pData = (ProgramData *)objData;
         RET_AND_SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION,-1);
         return ctx->dispatcher().glGetUniformLocation(globalProgramName,name);
     }
@@ -1785,9 +1788,9 @@ GL_APICALL GLboolean    GL_APIENTRY glIsEnabled(GLenum cap){
 GL_APICALL GLboolean    GL_APIENTRY glIsBuffer(GLuint buffer){
     GET_CTX_RET(GL_FALSE)
     if(buffer && ctx->shareGroup().get()) {
-        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+        auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::VERTEXBUFFER, buffer);
-        return objData.get() ? ((GLESbuffer*)objData.get())->wasBinded()
+        return objData ? ((GLESbuffer*)objData)->wasBinded()
                              : GL_FALSE;
     }
     return GL_FALSE;
@@ -1860,11 +1863,11 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(globalProgramName==0, GL_INVALID_VALUE);
 
-        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+        auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
-        SET_ERROR_IF(!objData.get(), GL_INVALID_OPERATION);
-        SET_ERROR_IF(objData.get()->getDataType()!=PROGRAM_DATA, GL_INVALID_OPERATION);
-        ProgramData* programData = (ProgramData*)objData.get();
+        SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
+        SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA, GL_INVALID_OPERATION);
+        ProgramData* programData = (ProgramData*)objData;
         GLint fragmentShader   = programData->getAttachedFragmentShader();
         GLint vertexShader =  programData->getAttachedVertexShader();
         if (vertexShader != 0 && fragmentShader!=0) {
@@ -1959,9 +1962,9 @@ GL_APICALL void  GL_APIENTRY glRenderbufferStorage(GLenum target, GLenum interna
     // raise INVALID_OPERATIOn if no renderbuffer is bounded
     GLuint rb = ctx->getRenderbufferBinding();
     SET_ERROR_IF(rb == 0,GL_INVALID_OPERATION);
-    ObjectDataPtr objData =
+    auto objData =
             ctx->shareGroup()->getObjectData(NamedObjectType::RENDERBUFFER, rb);
-    RenderbufferData *rbData = (RenderbufferData *)objData.get();
+    RenderbufferData *rbData = (RenderbufferData *)objData;
     SET_ERROR_IF(!rbData,GL_INVALID_OPERATION);
 
     //
@@ -2005,12 +2008,12 @@ GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const 
         const GLuint globalShaderName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
         SET_ERROR_IF(globalShaderName == 0, GL_INVALID_VALUE);
-        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+        auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
-        SET_ERROR_IF(!objData.get(), GL_INVALID_OPERATION);
-        SET_ERROR_IF(objData.get()->getDataType() != SHADER_DATA,
+        SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
+        SET_ERROR_IF(objData->getDataType() != SHADER_DATA,
                      GL_INVALID_OPERATION);
-        ShaderParser* sp = (ShaderParser*)objData.get();
+        ShaderParser* sp = (ShaderParser*)objData;
         sp->setSrc(ctx->glslVersion(), count, string, length);
         ctx->dispatcher().glShaderSource(globalShaderName, 1, sp->parsedLines(),
                                          NULL);
@@ -2225,10 +2228,10 @@ static void s_unUseCurrentProgram() {
     glGetIntegerv(GL_CURRENT_PROGRAM, &localCurrentProgram);
     if (!localCurrentProgram) return;
 
-    ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+    auto objData = ctx->shareGroup()->getObjectData(
             NamedObjectType::SHADER_OR_PROGRAM, localCurrentProgram);
-    SET_ERROR_IF(objData.get()->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
-    ProgramData* programData = (ProgramData*)objData.get();
+    SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
+    ProgramData* programData = (ProgramData*)objData;
     programData->setInUse(false);
     if (programData->getDeleteStatus()) {
         ctx->shareGroup()->deleteName(NamedObjectType::SHADER_OR_PROGRAM,
@@ -2242,13 +2245,13 @@ GL_APICALL void  GL_APIENTRY glUseProgram(GLuint program){
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(program!=0 && globalProgramName==0,GL_INVALID_VALUE);
-        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+        auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
-        SET_ERROR_IF(objData.get() && (objData.get()->getDataType()!=PROGRAM_DATA),GL_INVALID_OPERATION);
+        SET_ERROR_IF(objData && (objData->getDataType()!=PROGRAM_DATA),GL_INVALID_OPERATION);
 
         s_unUseCurrentProgram();
 
-        ProgramData* programData = (ProgramData*)objData.get();
+        ProgramData* programData = (ProgramData*)objData;
         if (programData) programData->setInUse(true);
 
         ctx->dispatcher().glUseProgram(globalProgramName);
@@ -2261,10 +2264,10 @@ GL_APICALL void  GL_APIENTRY glValidateProgram(GLuint program){
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(globalProgramName==0, GL_INVALID_VALUE);
-        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
+        auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
-        SET_ERROR_IF(objData.get()->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
-        ProgramData* programData = (ProgramData*)objData.get();
+        SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
+        ProgramData* programData = (ProgramData*)objData;
         ctx->dispatcher().glValidateProgram(globalProgramName);
 
         GLsizei infoLogLength=0;
@@ -2384,9 +2387,9 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
     // raise INVALID_OPERATIOn if no renderbuffer is bounded
     GLuint rb = ctx->getRenderbufferBinding();
     SET_ERROR_IF(rb == 0,GL_INVALID_OPERATION);
-    ObjectDataPtr objData =
+    auto objData =
             ctx->shareGroup()->getObjectData(NamedObjectType::RENDERBUFFER, rb);
-    RenderbufferData *rbData = (RenderbufferData *)objData.get();
+    RenderbufferData *rbData = (RenderbufferData *)objData;
     SET_ERROR_IF(!rbData,GL_INVALID_OPERATION);
 
     //
