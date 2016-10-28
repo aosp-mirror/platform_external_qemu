@@ -40,6 +40,7 @@
 
 #include "qemu/osdep.h"
 #include "slirp.h"
+#include "proxy.h"
 
 /* patchable/settable parameters for tcp */
 /* Don't do rfc1323 performance enhancements */
@@ -381,6 +382,22 @@ tcp_sockclosed(struct tcpcb *tp)
 	tcp_output(tp);
 }
 
+static void
+tcp_on_proxy_connection(void *opaque, int fd, int af) {
+        struct socket *so = opaque;
+	so->so_state &= ~SS_PROXIFIED;
+	if (fd >= 0) {
+		so->s = fd;
+		so->so_state &= ~(SS_ISFCONNECTING);
+	} else {
+		so->so_state = SS_NOFDREF;
+	}
+	/* continue the request */
+	tcp_input(NULL,
+                  (af == AF_INET6) ? sizeof(struct ip6) : sizeof(struct ip),
+                  so, af);
+}
+
 /*
  * Connect to a host on the Internet
  * Called by tcp_input
@@ -398,19 +415,27 @@ int tcp_fconnect(struct socket *so, unsigned short af)
   DEBUG_CALL("tcp_fconnect");
   DEBUG_ARG("so = %p", so);
 
-  ret = so->s = qemu_socket(af, SOCK_STREAM, 0);
+  struct sockaddr_storage addr;
+  addr = so->fhost.ss;
+  DEBUG_CALL(" connect()ing")
+  sotranslate_out(so, &addr);
+
+  if (slirp_proxy &&
+      slirp_proxy->try_connect(&addr, tcp_on_proxy_connection, so)) {
+	soisfconnecting(so);
+	so->s = -1;
+	so->so_state |= SS_PROXIFIED;
+	return 0;
+  }
+
+  ret = so->s = qemu_socket(addr.ss_family, SOCK_STREAM, 0);
   if (ret >= 0) {
     int opt, s=so->s;
-    struct sockaddr_storage addr;
 
     qemu_set_nonblock(s);
     socket_set_fast_reuse(s);
     opt = 1;
     qemu_setsockopt(s, SOL_SOCKET, SO_OOBINLINE, &opt, sizeof(opt));
-
-    addr = so->fhost.ss;
-    DEBUG_CALL(" connect()ing")
-    sotranslate_out(so, &addr);
 
     /* We don't care what port we get */
     ret = connect(s, (struct sockaddr *)&addr, sockaddr_size(&addr));

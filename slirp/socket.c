@@ -9,6 +9,7 @@
 #include "qemu-common.h"
 #include "slirp.h"
 #include "ip_icmp.h"
+#include "proxy.h"
 #ifdef __sun__
 #include <sys/filio.h>
 #endif
@@ -67,6 +68,9 @@ sofree(struct socket *so)
 {
   Slirp *slirp = so->slirp;
 
+  if (so->so_state && SS_PROXIFIED && slirp_proxy) {
+	slirp_proxy->remove(so);
+  }
   if (so->so_emu==EMU_RSH && so->extra) {
 	sofree(so->extra);
 	so->extra=NULL;
@@ -909,3 +913,5 @@ const char* sockaddr_to_string(const struct sockaddr_storage* ss) {
     snprintf(result, sizeof(result), "%s:%d", temp, port);
     return result;
 }
+
+const struct SlirpProxyOps *slirp_proxy;
