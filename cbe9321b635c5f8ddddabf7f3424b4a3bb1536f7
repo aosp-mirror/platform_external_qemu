@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "21c918eb_0240db9e",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 762,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T06:01:37Z",
+      "side": 0,
+      "message": "awesome catch here! We were doing this in the guest and I sped that up, but it looks like it happens in the host as well :)",
+      "range": {
+        "startLine": 762,
+        "startChar": 4,
+        "endLine": 762,
+        "endChar": 68
+      },
+      "revId": "cbe9321b635c5f8ddddabf7f3424b4a3bb1536f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
