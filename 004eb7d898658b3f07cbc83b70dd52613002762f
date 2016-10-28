@@ -142,6 +142,24 @@
     },
     {
       "key": {
+        "uuid": "612f9071_4d0ead51",
+        "filename": "android/emulation/goldfish_dma.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T15:01:04Z",
+      "side": 1,
+      "message": "what? Can you tell me which one?",
+      "parentUuid": "e19380d8_3d6a629b",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "011ed449_249a7258",
         "filename": "android/main-kernel-parameters.cpp",
         "patchSetId": 17
@@ -256,6 +274,24 @@
       "side": 1,
       "message": "Thanks for bringing this up! Sorry, I should really clarify here.\n\n- Yes, for the current usage. I too began this thinking I would have to allocate separate physical regions for each connection, but I quickly saw that I\u0027d run out of the 32mb pretty much almost on startup or starting browser/youtube.\n\nI agree that it seemed dangerous, but it works just fine for gralloc_unlock, and after I looked into it deeply, I changed my mind and now believe in mmap() being backed by less physical memory than the total mapped virtual memory, and just multiplexing the different users over time.\n\nSo, we do not necessarily want to _begin_ this design with using different physical regions for different connections because it is both wasteful of memory and unnecessary in terms of synchronization.\n\n- gralloc will \"mmap\" hundreds of megabytes over a typical run, only to actually transfer 4mb buffers at a time. I believe that its ashmem also ends up sharing the same memory between processes as well (albeit a virtual and noncontiguous shared memory).\n- gralloc_unlock is the only user and that doesn\u0027t seem to be called concurrently according to extensive testing and CTS/GTS\n- It is really up to the guest to synchronize things. There is a primitive called goldfish_dma_lock ioctl() which prevents concurrent access anyways (and yes that is unlocked and cleaned up in the kenel if there is a sudden fd close or process kill in the middle)\n\nHowever, I do see that if we find another use for this (maybe some very heavy OpenGL texture ops or draw calls), we would need more synchronization. But, such synchronization would also necessarily depend on how it is used; I could see mmap() instead allocating independent offsets into the memory region depending on things, but then a general synchronization solution for that might just look like the current pipe anyway (but then it doesn\u0027t have overhead of BQL). So it\u0027s a real minefield out there, and at the moment, I feel like I have a simple solution that works.",
       "parentUuid": "c6e9326b_c5d90cda",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c134bcc0_b046a094",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 571,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T15:01:04Z",
+      "side": 1,
+      "message": "Thanks for the clarifications, I think I understand a bit more what\u0027s happening here after reading the virtual device and kernel driver code.\n\nStill, from a pure OpenGL library point of view, it makes sense to allow each connection to have at least one an optional DMA region. It\u0027s just basic separation of concerns (and makes the code much more easier to understand ;-)).\n\nThe fact that the current implementation is limited to one region should not be reflected into EmuGL at all. The fact that this region is currently global and shared by all potential guest connections is crazy and completely un-needed, it should be removed at some point (e.g. by limiting the whole device to the creation of a single region, so that only a single mmap() can \"win\"), and that should not impact EmuGL.\n\nAlso, there should be some way to check that the size of the DMA region is large enough to hold all the pixels that are supposed to be transferred here, otherwise the guest has a way to corrupt the host in surprising ways.",
+      "parentUuid": "868bbadf_4fb41987",
       "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
