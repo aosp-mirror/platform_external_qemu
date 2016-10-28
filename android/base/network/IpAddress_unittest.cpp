@@ -65,7 +65,7 @@ TEST(IpAddress, ConstructorIpv6) {
     EXPECT_TRUE(addr1.valid());
     EXPECT_FALSE(addr1.isIpv4());
     EXPECT_TRUE(addr1.isIpv6());
-    EXPECT_TRUE(ArraysMatch(addr6, addr1.ipv6Addr()));
+    EXPECT_TRUE(RangesMatch(addr6, addr1.ipv6Addr()));
 }
 
 TEST(IpAddress, ConstructorFromStringIpv4) {
@@ -139,7 +139,7 @@ TEST(IpAddress, ConstructorFromStringIpv6) {
         EXPECT_EQ(item.expected_valid, addr.valid()) << text;
         if (item.expected_valid && addr.valid()) {
             EXPECT_TRUE(addr.isIpv6()) << text;
-            EXPECT_TRUE(ArraysMatch(item.expected_ip6, addr.ipv6Addr()))
+            EXPECT_TRUE(RangesMatch(item.expected_ip6, addr.ipv6Addr()))
                     << text;
             EXPECT_EQ(item.expected_scope_id, addr.ipv6ScopeId()) << text;
         }

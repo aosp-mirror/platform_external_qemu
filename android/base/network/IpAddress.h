@@ -50,13 +50,13 @@ namespace base {
 //           IpAddress ip2("::1");
 //           CHECK(ip2.isValid());
 //           CHECK(ip2.isIpv6());
-//           ASSERT_TRUE(ArraysMatch(ip2.ipv6.addr, {0,0,0,....,0,1});
+//           ASSERT_TRUE(RangesMatch(ip2.ipv6.addr, {0,0,0,....,0,1});
 //           ASSERT_EQ(0, ip2.ipv6ScopeId());
 //
 //           IpAddress ip3("::2@3");
 //           CHECK(ip3.isValid());
 //           CHECK(ip3.isIpv6());
-//           ASSERT_TRUE(ArraysMatch(ip3.ipv6Addr(), {0,0,0,....,0,2});
+//           ASSERT_TRUE(RangesMatch(ip3.ipv6Addr(), {0,0,0,....,0,2});
 //           ASSERT_EQ(3, ip3.ipv6ScopeId());
 //
 //   5) Convert to string representation:

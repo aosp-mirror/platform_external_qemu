@@ -44,7 +44,7 @@ TEST(NetworkUtils, netStringToIpv4) {
         bool ret = netStringToIpv4(item.string, ip);
         EXPECT_EQ(item.expected_result, ret) << "For [" << item.string << "]";
         if (ret == item.expected_result && ret) {
-            EXPECT_TRUE(ArraysMatch(item.expected_ip, ip))
+            EXPECT_TRUE(RangesMatch(item.expected_ip, ip))
                     << "For [" << item.string << "]";
         }
     }
@@ -68,7 +68,7 @@ TEST(NetworkUtils, netStringToIpv6) {
         bool ret = netStringToIpv6(item.string, ip);
         EXPECT_EQ(item.expected_result, ret) << "For [" << item.string << "]";
         if (ret == item.expected_result && ret) {
-            EXPECT_TRUE(ArraysMatch(item.expected_ip, ip))
+            EXPECT_TRUE(RangesMatch(item.expected_ip, ip))
                     << "For [" << item.string << "]";
         }
     }
