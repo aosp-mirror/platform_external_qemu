@@ -51,7 +51,7 @@ struct SyncThreadCmd {
     bool needReply = false;
 };
 
-class RenderThreadInfo;
+struct RenderThreadInfo;
 class SyncThread : public emugl::Thread {
 public:
     // - constructor: start up the sync thread for a given context.

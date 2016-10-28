@@ -37,7 +37,12 @@ BUILD_TARGET_CFLAGS := -g -falign-functions
 ifeq ($(BUILD_DEBUG),true)
     BUILD_OPT_CFLAGS += -O0
 else
-    BUILD_OPT_CFLAGS += -O3 -DNDEBUG=1 -funroll-loops -flto -ftracer
+    BUILD_OPT_CFLAGS += -O3 -DNDEBUG=1
+
+    # We use a version of Clang that doesn't support these yet.
+    ifneq ($(BUILD_TARGET_OS),darwin)
+        BUILD_OPT_CFLAGS += -funroll-loops -flto -ftracer
+    endif
 endif
 BUILD_TARGET_CFLAGS += $(BUILD_OPT_CFLAGS)
 

@@ -39,7 +39,7 @@ struct FuncDelete {
     FuncDelete& operator=(FuncDelete&& other) = default;
 
     // To be able to copy/move from all compatible template instantiations.
-    template <class U> friend class FuncDelete;
+    template <class U> friend struct FuncDelete;
 
     // Template constructors and move assignment from compatible instantiations.
     template <class U>
