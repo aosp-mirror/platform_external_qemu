@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "612f9071_ca46031d",
+        "filename": "android/base/containers/SmallVector.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T08:47:04Z",
+      "side": 1,
+      "message": "nit: this seems un-necessary now :)",
+      "revId": "45d225869132ca899d367a7ac76d12b304f8df25",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c6e9326b_a58728f5",
+        "filename": "android/base/containers/SmallVector.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T08:47:04Z",
+      "side": 1,
+      "message": "nit: s/emtpt/empty/ :)",
+      "revId": "45d225869132ca899d367a7ac76d12b304f8df25",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
