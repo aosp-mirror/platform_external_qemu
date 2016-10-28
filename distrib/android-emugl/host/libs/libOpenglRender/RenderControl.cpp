@@ -614,9 +614,6 @@ static void rcCreateSyncKHR(EGLenum type,
     FenceSync* fenceSync = new FenceSync(hasNativeFence,
                                          destroy_when_signaled);
 
-    // This MUST be present, or we get a deadlock effect.
-    s_gles2.glFlush();
-
     if (syncthread_out) *syncthread_out =
         reinterpret_cast<uint64_t>(SyncThread::getSyncThread());
 
@@ -625,6 +622,18 @@ static void rcCreateSyncKHR(EGLenum type,
         *eglsync_out = res;
         EGLSYNC_DPRINT("send out eglsync 0x%llx", res);
     }
+}
+
+static void rcCreateSyncKHR_bh(EGLenum type,
+                               EGLint* attribs,
+                               uint32_t num_attribs,
+                               int destroy_when_signaled,
+                               uint64_t* eglsync_out,
+                               uint64_t* syncthread_out) {
+    FenceSync* fencesync = (FenceSync*)(*eglsync_out);
+    fencesync->activate();
+    // This MUST be present, or we get a deadlock effect.
+    s_gles2.glFlush();
 }
 
 // |rcClientWaitSyncKHR| implements |eglClientWaitSyncKHR|
@@ -708,6 +717,7 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcDestroyClientImage = rcDestroyClientImage;
     dec->rcSelectChecksumHelper = rcSelectChecksumHelper;
     dec->rcCreateSyncKHR = rcCreateSyncKHR;
+    dec->rcCreateSyncKHR_bh = rcCreateSyncKHR_bh;
     dec->rcClientWaitSyncKHR = rcClientWaitSyncKHR;
     dec->rcFlushWindowColorBufferAsync = rcFlushWindowColorBufferAsync;
     dec->rcDestroySyncKHR = rcDestroySyncKHR;
