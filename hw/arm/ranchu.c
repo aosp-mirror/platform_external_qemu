@@ -27,6 +27,7 @@
 #include "hw/sysbus.h"
 #include "hw/arm/arm.h"
 #include "hw/arm/primecell.h"
+#include "hw/char/pl011.h"
 #include "hw/devices.h"
 #include "net/net.h"
 #include "sysemu/device_tree.h"
@@ -334,6 +335,54 @@ static void create_gic(const VirtBoardInfo *vbi, qemu_irq *pic)
     fdt_add_gic_node(vbi);
 }
 
+static void init_simple_device(DeviceState *dev,
+                               const VirtBoardInfo *vbi,qemu_irq *pic,
+                               int devid, const char *sysbus_name,
+                               const char *compat,
+                               int num_compat_strings,
+                               const char *clocks, int num_clocks)
+{
+    int irq = irqmap[devid];
+    hwaddr base = memmap[devid].base;
+    hwaddr size = memmap[devid].size;
+    char *nodename;
+    int i;
+    int compat_sz = 0;
+    int clocks_sz = 0;
+
+    SysBusDevice *s = SYS_BUS_DEVICE(dev);
+    qdev_init_nofail(dev);
+    sysbus_mmio_map(s, 0, base);
+    if (pic[irq]) {
+        sysbus_connect_irq(s, 0, pic[irq]);
+    }
+
+    for (i = 0; i < num_compat_strings; i++) {
+        compat_sz += strlen(compat + compat_sz) + 1;
+    }
+
+    for (i = 0; i < num_clocks; i++) {
+        clocks_sz += strlen(clocks + clocks_sz) + 1;
+    }
+
+    nodename = g_strdup_printf("/%s@%" PRIx64, sysbus_name, base);
+    qemu_fdt_add_subnode(vbi->fdt, nodename);
+    qemu_fdt_setprop(vbi->fdt, nodename, "compatible", compat, compat_sz);
+    qemu_fdt_setprop_sized_cells(vbi->fdt, nodename, "reg", 2, base, 2, size);
+    if (irq) {
+        qemu_fdt_setprop_cells(vbi->fdt, nodename, "interrupts",
+                               GIC_FDT_IRQ_TYPE_SPI, irq,
+                               GIC_FDT_IRQ_FLAGS_LEVEL_HI);
+    }
+    if (num_clocks) {
+        qemu_fdt_setprop_cells(vbi->fdt, nodename, "clocks",
+                               vbi->clock_phandle, vbi->clock_phandle);
+        qemu_fdt_setprop(vbi->fdt, nodename, "clock-names",
+                         clocks, clocks_sz);
+    }
+    g_free(nodename);
+}
+
 /**
  * create_simple_device:
  * @vbi: VirtBoardInfo struct
@@ -353,40 +402,21 @@ static void create_simple_device(const VirtBoardInfo *vbi, qemu_irq *pic,
                                  const char *compat, int num_compat_strings,
                                  const char *clocks, int num_clocks)
 {
-    int irq = irqmap[devid];
-    hwaddr base = memmap[devid].base;
-    hwaddr size = memmap[devid].size;
-    char *nodename;
-    int i;
-    int compat_sz = 0;
-    int clocks_sz = 0;
+    DeviceState *dev = qdev_create(NULL, sysbus_name);
+    init_simple_device(dev, vbi, pic, devid, sysbus_name, compat,
+                       num_compat_strings, clocks, num_clocks);
+}
 
-    for (i = 0; i < num_compat_strings; i++) {
-        compat_sz += strlen(compat + compat_sz) + 1;
-    }
-
-    for (i = 0; i < num_clocks; i++) {
-        clocks_sz += strlen(clocks + clocks_sz) + 1;
-    }
-
-    sysbus_create_simple(sysbus_name, base, pic[irq]);
-
-    nodename = g_strdup_printf("/%s@%" PRIx64, sysbus_name, base);
-    qemu_fdt_add_subnode(vbi->fdt, nodename);
-    qemu_fdt_setprop(vbi->fdt, nodename, "compatible", compat, compat_sz);
-    qemu_fdt_setprop_sized_cells(vbi->fdt, nodename, "reg", 2, base, 2, size);
-    if (irq) {
-        qemu_fdt_setprop_cells(vbi->fdt, nodename, "interrupts",
-                               GIC_FDT_IRQ_TYPE_SPI, irq,
-                               GIC_FDT_IRQ_FLAGS_LEVEL_HI);
-    }
-    if (num_clocks) {
-        qemu_fdt_setprop_cells(vbi->fdt, nodename, "clocks",
-                               vbi->clock_phandle, vbi->clock_phandle);
-        qemu_fdt_setprop(vbi->fdt, nodename, "clock-names",
-                         clocks, clocks_sz);
-    }
-    g_free(nodename);
+static void create_serial_device(int serial_index, const VirtBoardInfo *vbi,
+                                 qemu_irq *pic, int devid,
+                                 const char *sysbus_name, const char *compat,
+                                 int num_compat_strings, const char *clocks,
+                                 int num_clocks)
+{
+    DeviceState *dev = qdev_create(NULL, sysbus_name);
+    qdev_prop_set_chr(dev, "chardev", serial_hds[serial_index]);
+    init_simple_device(dev, vbi, pic, devid, sysbus_name, compat,
+                       num_compat_strings, clocks, num_clocks);
 }
 
 static void create_virtio_devices(const VirtBoardInfo *vbi, qemu_irq *pic)
@@ -487,7 +517,7 @@ static void ranchu_init(MachineState *machine)
     memory_region_add_subregion(sysmem, memmap[RANCHU_MEM].base, ram);
 
     create_gic(vbi, pic);
-    create_simple_device(vbi, pic, RANCHU_UART, "pl011",
+    create_serial_device(0, vbi, pic, RANCHU_UART, "pl011",
                          "arm,pl011\0arm,primecell", 2, "uartclk\0apb_pclk", 2);
     create_simple_device(vbi, pic, RANCHU_GOLDFISH_FB, "goldfish_fb",
                          "generic,goldfish-fb", 1, 0, 0);
