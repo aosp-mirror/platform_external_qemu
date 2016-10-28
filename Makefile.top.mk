@@ -33,12 +33,13 @@ include-if-bitness-64 = \
     $(if $(strip $(LOCAL_IGNORE_BITNESS)$(filter true,$(LOCAL_HOST_BUILD))$(EMULATOR_BUILD_64BITS)),\
         $(eval include $1))
 
-BUILD_TARGET_CFLAGS := -g -falign-functions=0
+BUILD_TARGET_CFLAGS := -g -falign-functions
 ifeq ($(BUILD_DEBUG),true)
-    BUILD_TARGET_CFLAGS += -O0
+    BUILD_OPT_CFLAGS += -O0
 else
-    BUILD_TARGET_CFLAGS += -O2 -DNDEBUG=1
+    BUILD_OPT_CFLAGS += -O3 -DNDEBUG=1 -funroll-loops -flto -ftracer
 endif
+BUILD_TARGET_CFLAGS += $(BUILD_OPT_CFLAGS)
 
 # Generate position-independent binaries. Don't add -fPIC when targetting
 # Windows, because newer toolchain complain loudly about it, since all
@@ -141,8 +142,11 @@ endif
 
 # Enable warning, except those related to missing field initializers
 # (the QEMU coding style loves using these).
+# Also disable the strict overflow checking, as GCC sometimes inlines so much
+# with LTO enabled that it finds some comparisons to become a + b < a just
+# because of inlining, with no original relying on the overflow at all.
 #
-BUILD_TARGET_CFLAGS += -Wall $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
+BUILD_TARGET_CFLAGS += -Wall $(GCC_W_NO_MISSING_FIELD_INITIALIZERS) -Wno-strict-overflow
 
 # Needed to build block.c on Linux/x86_64.
 BUILD_TARGET_CFLAGS += -D_GNU_SOURCE=1
