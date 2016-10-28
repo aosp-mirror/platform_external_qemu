@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "a6eefe70_8318959a",
+        "filename": "android/emulation/goldfish_dma.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T14:45:19Z",
+      "side": 1,
+      "message": "Incoming (along with documentation of pipe v2)",
+      "parentUuid": "4128cc69_4906a5fa",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4128cc69_29f969d7",
         "filename": "android/emulation/goldfish_dma.h",
         "patchSetId": 17
@@ -30,6 +48,24 @@
       "writtenOn": "2016-10-28T13:43:25Z",
       "side": 1,
       "message": "Is the allocated memory private or shared? Allocated on demand or committed? Can you be a little more specific what the kernel does with it.",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a16b489a_d694f592",
+        "filename": "android/emulation/goldfish_dma.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T14:45:19Z",
+      "side": 1,
+      "message": "shared, pre-allocated. The kernel maps everyone into the same physical address currently.",
+      "parentUuid": "4128cc69_29f969d7",
       "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "01a974f7_a78bd1a7",
+        "filename": "android/emulation/goldfish_dma.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T14:45:19Z",
+      "side": 1,
+      "message": "1. It\u0027s up to the users of DMA, which is traced in the DMA_vXXX\n2. It is actually bad to differentiate between different pipe regions for the current use, which is gralloc, where if we indeed allocate physically different regions for different users, we will needlessly run out of memory.\n3. If a user of DMA needs to actually have different regions, that will be managed through allowing different offsets into the one big region to be specified.",
+      "parentUuid": "612f9071_ed668167",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c6e9326b_a555e864",
         "filename": "android/emulation/goldfish_dma.h",
         "patchSetId": 17
@@ -64,6 +118,24 @@
       "writtenOn": "2016-10-28T13:43:25Z",
       "side": 1,
       "message": "this should be:\n\n  typedef struct GoldfishDmaRegion\n\nOtherwise this doesn\u0027t compile from C, only C++",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e19380d8_3d6a629b",
+        "filename": "android/emulation/goldfish_dma.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T14:45:19Z",
+      "side": 1,
+      "message": "I think I tried this earlier and got compile errors :/",
+      "parentUuid": "c6e9326b_a555e864",
       "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -166,6 +238,24 @@
       "writtenOn": "2016-10-28T13:43:25Z",
       "side": 1,
       "message": "are you seriously using a single memory region for all guest client connections? This seems really dangerous. There should be a way in this call to identify several independent regions (by id, or something). There should be a way to know when a region is released (what happens if the guest closes the file descriptor but EmuGL is still using the region for some reason, etc...).",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "868bbadf_4fb41987",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 571,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T14:45:19Z",
+      "side": 1,
+      "message": "Thanks for bringing this up! Sorry, I should really clarify here.\n\n- Yes, for the current usage. I too began this thinking I would have to allocate separate physical regions for each connection, but I quickly saw that I\u0027d run out of the 32mb pretty much almost on startup or starting browser/youtube.\n\nI agree that it seemed dangerous, but it works just fine for gralloc_unlock, and after I looked into it deeply, I changed my mind and now believe in mmap() being backed by less physical memory than the total mapped virtual memory, and just multiplexing the different users over time.\n\nSo, we do not necessarily want to _begin_ this design with using different physical regions for different connections because it is both wasteful of memory and unnecessary in terms of synchronization.\n\n- gralloc will \"mmap\" hundreds of megabytes over a typical run, only to actually transfer 4mb buffers at a time. I believe that its ashmem also ends up sharing the same memory between processes as well (albeit a virtual and noncontiguous shared memory).\n- gralloc_unlock is the only user and that doesn\u0027t seem to be called concurrently according to extensive testing and CTS/GTS\n- It is really up to the guest to synchronize things. There is a primitive called goldfish_dma_lock ioctl() which prevents concurrent access anyways (and yes that is unlocked and cleaned up in the kenel if there is a sudden fd close or process kill in the middle)\n\nHowever, I do see that if we find another use for this (maybe some very heavy OpenGL texture ops or draw calls), we would need more synchronization. But, such synchronization would also necessarily depend on how it is used; I could see mmap() instead allocating independent offsets into the memory region depending on things, but then a general synchronization solution for that might just look like the current pipe anyway (but then it doesn\u0027t have overhead of BQL). So it\u0027s a real minefield out there, and at the moment, I feel like I have a simple solution that works.",
+      "parentUuid": "c6e9326b_c5d90cda",
       "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
