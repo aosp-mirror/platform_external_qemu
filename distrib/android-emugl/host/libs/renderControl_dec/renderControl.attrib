@@ -50,6 +50,7 @@ rcCloseColorBuffer
     flag flushOnEncode
 
 rcCreateSyncKHR
+    flag bottomHalf
     dir attribs in
     len attribs num_attribs
     dir glsync_out out

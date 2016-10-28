@@ -83,6 +83,10 @@ public:
     int genDecoderImpl(const std::string &filename);
 
 protected:
+    void genProcTypes_forEntryPoint(FILE* fp, SideType side,
+                                    EntryPoint* e,
+                                    const std::string &usedName);
+
     virtual void printHeader(FILE *fp) const;
     std::string m_basename;
     StringVec m_clientContextHeaders;
