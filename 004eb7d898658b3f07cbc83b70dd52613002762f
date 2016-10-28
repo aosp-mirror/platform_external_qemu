@@ -160,6 +160,24 @@
     },
     {
       "key": {
+        "uuid": "a65fde57_3ffacf07",
+        "filename": "android/emulation/goldfish_dma.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T20:54:10Z",
+      "side": 1,
+      "message": "Ah, they are Werrors with \"\u0027typedef\u0027 was ignored in this declaration\"",
+      "parentUuid": "612f9071_4d0ead51",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "011ed449_249a7258",
         "filename": "android/main-kernel-parameters.cpp",
         "patchSetId": 17
