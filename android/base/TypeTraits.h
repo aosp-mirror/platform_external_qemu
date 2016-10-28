@@ -100,12 +100,30 @@ struct is_template_instantiation_of<U<Args...>, U> : std::true_type {};
 // It makes sure that expressions std::begin(t) and std::end(t) are well-formed
 // and those return the same type.
 //
+// Note: with expression SFINAE from C++14 is_range_helper<> could be renamed to
+//   is_range<> with no extra code. C++11 needs an extra level of enable_if<>
+//   to make it work when the type isn't a range.
+//
+
+namespace details {
+
 template <class T>
-using is_range = std::is_same<
+using is_range_helper = std::is_same<
         decltype(std::begin(
                 std::declval<typename std::add_lvalue_reference<T>::type>())),
         decltype(std::end(
                 std::declval<typename std::add_lvalue_reference<T>::type>()))>;
+
+}  // namespace details
+
+template <class T, class = void>
+struct is_range : std::false_type {};
+
+template <class T>
+struct is_range<
+        T,
+        typename std::enable_if<details::is_range_helper<T>::value>::type>
+        : std::true_type {};
 
 }  // namespace base
 }  // namespace android
