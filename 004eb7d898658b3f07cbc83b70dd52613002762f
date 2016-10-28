@@ -178,6 +178,24 @@
     },
     {
       "key": {
+        "uuid": "a65fde57_3f1daf7b",
+        "filename": "android/emulation/goldfish_dma.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T20:55:54Z",
+      "side": 1,
+      "message": "I think I\u0027m just going to make these fully C++, it\u0027s not talking to the virtual device directly anyway.",
+      "parentUuid": "a65fde57_3ffacf07",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "011ed449_249a7258",
         "filename": "android/main-kernel-parameters.cpp",
         "patchSetId": 17
