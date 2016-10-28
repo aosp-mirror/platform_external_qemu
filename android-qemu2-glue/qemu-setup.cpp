@@ -24,6 +24,7 @@
 #include "android-qemu2-glue/looper-qemu.h"
 #include "android-qemu2-glue/android_qemud.h"
 #include "android-qemu2-glue/net-android.h"
+#include "android-qemu2-glue/proxy/slirp_proxy.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
 
 extern "C" {
@@ -31,6 +32,10 @@ extern "C" {
 #include "qemu-common.h"
 #include "qemu/main-loop.h"
 #include "qemu/thread.h"
+
+// TODO: Remove op_http_proxy global variable.
+extern char* op_http_proxy;
+
 }  // extern "C"
 
 using android::VmLock;
@@ -78,6 +83,10 @@ bool qemu_android_emulation_setup() {
             gQAndroidVmOperations,
             gQAndroidNetAgent,
     };
+
+    if (!qemu_android_setup_http_proxy(op_http_proxy)) {
+        return false;
+    }
 
     return android_emulation_setup(&consoleAgents);
 }

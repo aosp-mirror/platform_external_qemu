@@ -876,9 +876,6 @@ DEF("android-report-console", HAS_ARG, QEMU_OPTION_android_report_console, \
 "-android-report-console <socket>"
 " report console port to remote socket\n", QEMU_ARCH_ALL)
 
-DEF("http-proxy", HAS_ARG, QEMU_OPTION_http_proxy,
-"-http-proxy <proxy> make TCP connections through a HTTP/HTTPS proxy\n", QEMU_ARCH_ALL)
-
 DEF("dns-server", HAS_ARG, QEMU_OPTION_dns_server,
 "-dns-server <servers> use this DNS server(s) in the emulated system\n", QEMU_ARCH_ALL)
 

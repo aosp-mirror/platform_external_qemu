@@ -24,6 +24,7 @@ LOCAL_SRC_FILES := \
     emulation/VmLock.cpp \
     looper-qemu.cpp \
     net-android.cpp \
+    proxy/slirp_proxy.cpp \
     qemu-battery-agent-impl.c \
     qemu-cellular-agent-impl.c \
     qemu-clipboard-agent-impl.cpp \

@@ -241,7 +241,6 @@ int cursor_hide = 1;
 int graphic_rotate = 0;
 #ifdef CONFIG_ANDROID
 int lcd_density = LCD_DENSITY_MDPI;
-extern char* op_http_proxy;
 extern char* android_op_ports;
 extern int android_op_ports_numbers[2];
 extern char* android_op_report_console;
@@ -4327,9 +4326,6 @@ int main(int argc, char** argv, char** envp)
                 android_op_dns_server = (char*)optarg;
                 break;
 
-            case QEMU_OPTION_http_proxy:
-                op_http_proxy = (char*)optarg;
-                break;
             case QEMU_OPTION_android_hw:
                 android_hw_file = optarg;
                 break;

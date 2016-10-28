@@ -56,6 +56,7 @@ extern "C" {
 
 #include "android/ui-emu-agent.h"
 #include "android-qemu2-glue/emulation/serial_line.h"
+#include "android-qemu2-glue/proxy/slirp_proxy.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
 
 #ifdef TARGET_AARCH64
@@ -551,8 +552,9 @@ extern "C" int main(int argc, char **argv) {
     }
 
     if (opts->http_proxy) {
-        args[n++] = "-http-proxy";
-        args[n++] = opts->http_proxy;
+        if (!qemu_android_setup_http_proxy(opts->http_proxy)) {
+            return 1;
+        }
     }
 
     if (!opts->charmap) {
