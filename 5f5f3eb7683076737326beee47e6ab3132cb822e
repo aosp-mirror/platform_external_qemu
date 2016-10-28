@@ -16,6 +16,24 @@
       "revId": "5f5f3eb7683076737326beee47e6ab3132cb822e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e19380d8_1812143c",
+        "filename": "android/base/testing/GTestUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-10-28T16:53:10Z",
+      "side": 1,
+      "message": "no, it\u0027s modified in the for loop to iterate over the |expected| range, so it has to be mutable",
+      "parentUuid": "86ef3a6f_83bf8097",
+      "revId": "5f5f3eb7683076737326beee47e6ab3132cb822e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
