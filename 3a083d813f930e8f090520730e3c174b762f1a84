@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "86ef3a6f_a094ba27",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T13:57:28Z",
+      "side": 1,
+      "message": "Can you be more specific about bottom-half functions? For example, it looks like from the code that the _bh() one must be called later after the main one to ensure work is completed. A simple example (from the guest point of view) would be welcomed.",
+      "revId": "3a083d813f930e8f090520730e3c174b762f1a84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "21259891_680d1be2",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSync.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T13:57:28Z",
+      "side": 1,
+      "message": "it looks like this will dead-lock if activate() was never called before. Please mention this in the documentation for ::wait(), it\u0027s pretty important.",
+      "revId": "3a083d813f930e8f090520730e3c174b762f1a84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "612f9071_ad7809e8",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSync.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T13:57:28Z",
+      "side": 1,
+      "message": "maybe mention that the EGLSyncKHR is not created, until active() is called?",
+      "revId": "3a083d813f930e8f090520730e3c174b762f1a84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "21259891_080667cb",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSync.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T13:57:28Z",
+      "side": 1,
+      "message": "nit: const? Or do you mean that this may call activate() if needed? please clarify.",
+      "revId": "3a083d813f930e8f090520730e3c174b762f1a84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "011ed449_277fd41c",
+        "filename": "distrib/android-emugl/host/tools/emugen/ApiGen.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T13:57:28Z",
+      "side": 1,
+      "message": "Please update the emugen test suite with examples of bottomhalf usage, this will make this change much more understandable. I also recommend putting this into its own patch, and leave the EmuGL changes in a separate one.",
+      "revId": "3a083d813f930e8f090520730e3c174b762f1a84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
