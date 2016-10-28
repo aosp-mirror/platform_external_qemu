@@ -293,6 +293,32 @@ udp_attach(struct socket *so, unsigned short af)
   return(so->s);
 }
 
+/* Ensure so->s's domain is |af|, if not, re-create a new socket instance.
+ * Do not change the state of |so| otherwise. In practice, this is used
+ * when the guest DNS IPv4 address is translated into a host IPv6 one:
+ * if this happens, the socket must change from AF_INET to AF_INET6 for
+ * sendto() to work correctly. See sosendto(). */
+int
+udp_reattach(struct socket *so, unsigned short af)
+{
+    if (so->s != -1) {
+        struct sockaddr_storage addr = {};
+        socklen_t addr_len = sizeof(addr);
+        int ret = getsockname(so->s, (struct sockaddr *)&addr, &addr_len);
+        if (ret != 0) {
+            DEBUG_ARG("Cannot get socket name: %s", strerror(errno));
+            return so->s;
+        }
+        if (addr.ss_family == af) {
+            /* Nothing to reattach. */
+            return so->s;
+        }
+        closesocket(so->s);
+    }
+    so->s = qemu_socket(af, SOCK_DGRAM, 0);
+    return so->s;
+}
+
 void
 udp_detach(struct socket *so)
 {

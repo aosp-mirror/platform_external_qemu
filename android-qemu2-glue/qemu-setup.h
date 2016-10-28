@@ -29,11 +29,10 @@ extern bool qemu_android_emulation_early_setup(void);
 /* Call this function to setup a list of custom DNS servers to be used
  * by the network stack. |dns_servers| must be the content of the
  * -dns-server option, i.e. a comma-separated list of DNS server addresses.
- * On success, return true and set |*count4| and |*count6| to the number
- * of IPv4 and IPv6 IP addresses, respectively. Return false on failure. */
+ * On success, return true and set |*count| to the number of addresses.
+ * Return on failure. */
 extern bool qemu_android_emulation_setup_dns_servers(const char* dns_servers,
-                                                     int* count4,
-                                                     int* count6);
+                                                     int* count);
 
 /* Call this function after the slirp stack has been initialized, typically
  * by calling net_init_clients() in vl.c, to inject Android-specific features

@@ -174,11 +174,8 @@ struct Slirp {
     struct in_addr client_ipaddr;
     char client_hostname[33];
 
-    struct in_addr host_dns[SLIRP_MAX_DNS_SERVERS];
+    struct sockaddr_storage host_dns[SLIRP_MAX_DNS_SERVERS];
     int host_dns_count;
-
-    struct in6_addr host_dns6[SLIRP_MAX_DNS_SERVERS];
-    int host_dns6_count;
 
     int restricted;
     struct ex_list *exec_list;

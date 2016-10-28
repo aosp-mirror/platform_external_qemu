@@ -624,6 +624,7 @@ sosendto(struct socket *so, struct mbuf *m)
 	addr = so->fhost.ss;
 	DEBUG_CALL(" sendto()ing)");
 	sotranslate_out(so, &addr);
+        udp_reattach(so, addr.ss_family);
 
 	/* Don't care what port we get */
 	ret = sendto(so->s, m->m_data, m->m_len, 0,
@@ -797,7 +798,7 @@ void sotranslate_out(struct socket *so, struct sockaddr_storage *addr)
     case AF_INET:
         if ((so->so_faddr.s_addr & slirp->vnetwork_mask.s_addr) ==
                 slirp->vnetwork_addr.s_addr) {
-            if (slirp_translate_guest_dns(slirp, &so->fhost.sin, sin) < 0) {
+            if (slirp_translate_guest_dns(slirp, &so->fhost.sin, addr) < 0) {
                 sin->sin_addr = loopback_addr;
             }
         }
@@ -810,7 +811,7 @@ void sotranslate_out(struct socket *so, struct sockaddr_storage *addr)
     case AF_INET6:
         if (in6_equal_net(&so->so_faddr6, &slirp->vprefix_addr6,
                     slirp->vprefix_len)) {
-            if (slirp_translate_guest_dns6(slirp, &so->fhost.sin6, sin6) < 0) {
+            if (slirp_translate_guest_dns6(slirp, &so->fhost.sin6, addr) < 0) {
                 sin6->sin6_addr = in6addr_loopback;
             }
         }
@@ -883,4 +884,28 @@ void sotranslate_accept(struct socket *so)
     default:
         break;
     }
+}
+
+const char* sockaddr_to_string(const struct sockaddr_storage* ss) {
+    static char result[128];
+    char temp[128];
+    int port = 0;
+    switch (ss->ss_family) {
+        case AF_INET: {
+            struct sockaddr_in *sin = (struct sockaddr_in *)ss;
+            inet_ntop(AF_INET, &sin->sin_addr, temp, sizeof(temp));
+            port = ntohs(sin->sin_port);
+            break;
+        }
+        case AF_INET6: {
+            struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)ss;
+            inet_ntop(AF_INET6, &sin6->sin6_addr, temp, sizeof(temp));
+            port = ntohs(sin6->sin6_port);
+            break;
+        }
+        default:
+            return NULL;
+    }
+    snprintf(result, sizeof(result), "%s:%d", temp, port);
+    return result;
 }

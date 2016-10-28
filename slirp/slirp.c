@@ -198,7 +198,7 @@ static int get_dns_addr_resolv_conf(int af, void *pdns_addr, void *cached_addr,
 #ifdef DEBUG
             else {
                 char s[INET6_ADDRSTRLEN];
-                char *res = inet_ntop(af, tmp_addr, s, sizeof(s));
+                const char *res = inet_ntop(af, tmp_addr, s, sizeof(s));
                 if (!res) {
                     res = "(string conversion error)";
                 }
@@ -248,9 +248,29 @@ static int get_dns6_addr(struct in6_addr *pdns6_addr, uint32_t *scope_id)
 
 #endif
 
+static void reset_host_ip(struct sockaddr_storage* dst,
+                          const struct sockaddr_storage* src,
+                          int port)
+{
+    *dst = *src;
+    switch (dst->ss_family) {
+        case AF_INET: {
+            struct sockaddr_in *sin = (struct sockaddr_in *)dst;
+            sin->sin_port = htons(port);
+            break;
+        }
+        case AF_INET6: {
+            struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)dst;
+            sin6->sin6_port = htons(port);
+            break;
+        }
+    }
+    DEBUG_ARG("TRANSLATED guest DNS -> %s\n", sockaddr_to_string(dst));
+}
+
 int slirp_translate_guest_dns(Slirp *slirp,
                               const struct sockaddr_in *guest_ip,
-                              struct sockaddr_in *host_ip)
+                              struct sockaddr_storage *host_ip)
 {
     int dns_index = -1;
 
@@ -258,11 +278,13 @@ int slirp_translate_guest_dns(Slirp *slirp,
         /* Use custom DNS servers. */
         uint32_t dns_base = ntohl(slirp->vnameserver_addr.s_addr);
         uint32_t guest = ntohl(guest_ip->sin_addr.s_addr);
+        int port = ntohs(guest_ip->sin_port);
         dns_index = (int)(guest - dns_base);
-        if (dns_index < 0 || dns_index >= slirp->host_dns_count)
+        if (dns_index < 0 || dns_index >= slirp->host_dns_count) {
+            fprintf(stderr, "CANNOT TRANSLATE guest DNS ip\n");
             return -1;
-
-        host_ip->sin_addr = slirp->host_dns[dns_index];
+        }
+        reset_host_ip(host_ip, &slirp->host_dns[dns_index], port);
         return 0;
     }
 
@@ -270,23 +292,30 @@ int slirp_translate_guest_dns(Slirp *slirp,
     if (guest_ip->sin_addr.s_addr != slirp->vnameserver_addr.s_addr) {
         return -1;
     }
-    if (get_dns_addr(&host_ip->sin_addr) < 0) {
-        host_ip->sin_addr = loopback_addr;
+    struct sockaddr_in* host_sin = (struct sockaddr_in *)host_ip;
+    if (get_dns_addr(&host_sin->sin_addr) < 0) {
+        host_sin->sin_addr = loopback_addr;
     }
     return 0;
 }
 
 int slirp_translate_guest_dns6(Slirp *slirp,
                                const struct sockaddr_in6 *guest_ip6,
-                               struct sockaddr_in6 *host_ip6)
+                               struct sockaddr_storage *host_ip)
 {
     uint32_t scope_id;
 
     if (slirp->host_dns_count > 0) {
-        /* Use custom IPv6 DNS servers. */
+        /* Map IPv6 addresses to guest IPv6 DNS addresses. In other words,
+         * the n-th IPv6 address in host_dns[] will be mapped from the
+         * n-th guest IPv6 DNS address. */
         struct in6_addr dns_base = slirp->vnameserver_addr6;
         int n, dns_index = -1;
+        int port = ntohs(guest_ip6->sin6_port);
         for (n = 0; n < slirp->host_dns_count; ++n) {
+            if (slirp->host_dns[n].ss_family != AF_INET6) {
+                continue;
+            }
             if (in6_equal(&guest_ip6->sin6_addr, &dns_base)) {
                 dns_index = n;
                 break;
@@ -304,7 +333,7 @@ int slirp_translate_guest_dns6(Slirp *slirp,
         if (dns_index < 0) {
             return -1;
         }
-        host_ip6->sin6_addr = slirp->host_dns6[dns_index];
+        reset_host_ip(host_ip, &slirp->host_dns[dns_index], port);
         return 0;
     }
 
@@ -312,10 +341,11 @@ int slirp_translate_guest_dns6(Slirp *slirp,
     if (!in6_equal(&guest_ip6->sin6_addr, &slirp->vnameserver_addr6)) {
         return -1;
     }
-    if (get_dns6_addr(&host_ip6->sin6_addr, &scope_id) >= 0) {
-        host_ip6->sin6_scope_id = scope_id;
+    struct sockaddr_in6 *host_sin6 = (struct sockaddr_in6 *)host_ip;
+    if (get_dns6_addr(&host_sin6->sin6_addr, &scope_id) >= 0) {
+        host_sin6->sin6_scope_id = scope_id;
     } else {
-        host_ip6->sin6_addr = in6addr_loopback;
+        host_sin6->sin6_addr = in6addr_loopback;
     }
     return 0;
 }
@@ -326,18 +356,16 @@ void slirp_init_custom_dns_servers(Slirp *slirp,
 {
     int n = 0;
     for (; n < dns_count; ++n) {
+        char temp[128];
+        int port;
         switch (dns[n].ss_family) {
         case AF_INET:
-            if (slirp->host_dns_count < SLIRP_MAX_DNS_SERVERS) {
-                slirp->host_dns[slirp->host_dns_count++] =
-                        ((const struct sockaddr_in *)&dns[n])->sin_addr;
-            }
-            break;
-
         case AF_INET6:
-            if (slirp->host_dns6_count < SLIRP_MAX_DNS_SERVERS) {
-                slirp->host_dns6[slirp->host_dns6_count++] =
-                        ((const struct sockaddr_in6 *)&dns[n])->sin6_addr;
+            if (slirp->host_dns_count < SLIRP_MAX_DNS_SERVERS) {
+                slirp->host_dns[slirp->host_dns_count++] = dns[n];
+                DEBUG_ARGS(("Custom DNS server #%d: %s\n",
+                            slirp->host_dns_count - 1,
+                            sockaddr_to_string(&dns[n])));
             }
             break;
 
@@ -420,7 +448,6 @@ Slirp *slirp_init(int restricted, bool in_enabled, struct in_addr vnetwork,
     }
 
     slirp->host_dns_count = 0;
-    slirp->host_dns6_count = 0;
 
     slirp->opaque = opaque;
 

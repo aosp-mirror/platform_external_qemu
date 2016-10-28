@@ -29,15 +29,16 @@ void slirp_init_custom_dns_servers(Slirp *slirp,
 /* Check whether |guest_ip| is the IPv4 address of a guest DNS server.
  * If that's the case, set |*host_ip| to the corresponding host DNS server
  * address and return 0. Otherwise, leave |host_ip| untouched and
- * return -1 */
+ * return -1. NOTE: |*host_ip| can be an IPv6 host address in certain
+ */
 int slirp_translate_guest_dns(Slirp *slirp,
                               const struct sockaddr_in *guest_ip,
-                              struct sockaddr_in *host_ip);
+                              struct sockaddr_storage *host_ip);
 
 /* Same for IPv6 addresses */
 int slirp_translate_guest_dns6(Slirp *slirp,
-                               const struct sockaddr_in6 *guest_ip6,
-                               struct sockaddr_in6 *host_ip6);
+                               const struct sockaddr_in6 *guest_ip,
+                               struct sockaddr_storage *host_ip);
 
 void slirp_pollfds_fill(GArray *pollfds, uint32_t *timeout);
 

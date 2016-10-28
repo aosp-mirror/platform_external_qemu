@@ -134,6 +134,8 @@ static inline socklen_t sockaddr_size(struct sockaddr_storage *a)
     }
 }
 
+const char* sockaddr_to_string(const struct sockaddr_storage* ss);
+
 struct socket *solookup(struct socket **, struct socket *,
         struct sockaddr_storage *, struct sockaddr_storage *);
 struct socket *socreate(Slirp *);

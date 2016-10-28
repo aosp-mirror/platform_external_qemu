@@ -4930,10 +4930,9 @@ int main(int argc, char** argv, char** envp)
 #ifdef CONFIG_ANDROID
     char *additional_kernel_params = NULL;
     int dns_count = 0;
-    int dns6_count = 0;
     if (android_op_dns_server) {
         if (!qemu_android_emulation_setup_dns_servers(
-                android_op_dns_server, &dns_count, &dns6_count)) {
+                android_op_dns_server, &dns_count)) {
             fprintf(stderr, "invalid -dns-server parameter '%s'\n",
                     android_op_dns_server);
             return 1;
