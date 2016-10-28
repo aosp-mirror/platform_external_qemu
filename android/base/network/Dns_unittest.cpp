@@ -74,7 +74,7 @@ TEST(Dns, TestDnsResolver) {
     static const uint8_t kExpected[16] = {0, 0, 0, 0, 0,  0, 0, 0,
                                           0, 0, 0, 0, 10, 0, 3, 4};
     EXPECT_TRUE(list[1].isIpv6());
-    EXPECT_TRUE(ArraysMatch(kExpected, list[1].ipv6Addr()));
+    EXPECT_TRUE(RangesMatch(kExpected, list[1].ipv6Addr()));
 }
 
 }  // namespace base

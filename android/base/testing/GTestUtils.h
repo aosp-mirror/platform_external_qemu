@@ -14,27 +14,48 @@
 
 #pragma once
 
+#include "android/base/TypeTraits.h"
 #include <gtest/gtest.h>
+#include <iterator>
 
 // Miscellenaous helper declarations for unit-tests using the GoogleTest
 // framework.
 
-// ArraysMatch is a useful template used to compare the content of two
-// static arrays at runtime. Usage is simply:
+namespace android {
+namespace base {
+
+// RangesMatch is a useful template used to compare the content of two
+// ranges at runtime. Usage is simply:
 //
-//   EXPECT_TRUE(ArraysMatch(array1, array2);
+//   EXPECT_TRUE(RangesMatch(range1, range2);
 //
-// Where |array1| and |array2| must have the same item type, and size.
-template <typename T, size_t size>
-inline ::testing::AssertionResult ArraysMatch(const T (&expected)[size],
-                                              const T (&actual)[size]) {
-    for (size_t i(0); i < size; ++i) {
-        if (expected[i] != actual[i]) {
+// Where |range1| and |range2| must have the same item type, and size.
+template <typename Range,
+          typename = enable_if<is_range<Range>>>
+inline ::testing::AssertionResult RangesMatch(const Range& expected,
+                                              const Range& actual) {
+    const auto expectedSize =
+            std::distance(std::begin(expected), std::end(expected));
+    const auto actualSize = std::distance(std::begin(actual), std::end(actual));
+    if (actualSize != expectedSize) {
+        return ::testing::AssertionFailure()
+               << "actual range size " << actualSize << " != expected size "
+               << expectedSize;
+    }
+
+    auto itExp = std::begin(expected);
+    for (const auto& act : actual) {
+        if (*itExp != act) {
+            const auto index = std::distance(std::begin(expected), itExp);
             return ::testing::AssertionFailure()
-                   << "array[" << i << "] (" << actual[i] << ") != expected["
-                   << i << "] (" << expected[i] << ")";
+                   << "range[" << index << "] (" << act << ") != expected["
+                   << index << "] (" << *itExp << ")";
         }
+        ++itExp;
     }
 
     return ::testing::AssertionSuccess();
 }
+
+}  // namespace base
+}  // namespace android

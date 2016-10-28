@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <iterator>
 #include <type_traits>
 
 namespace android {
@@ -69,26 +70,42 @@ struct is_callable_as<
 
 // One more specialization, for non empty argument list
 template <class F, class R, class... Args>
-struct is_callable_as<F,
-                   R(Args...),
-                   typename std::enable_if<std::is_same<
-                           typename details::dummy<decltype(std::declval<F>()(
-                                   std::declval<Args>()...))>::type,
-                           R>::value>::type> : std::true_type {};
+struct is_callable_as<
+        F,
+        R(Args...),
+        typename std::enable_if<
+                std::is_same<typename details::dummy<decltype(std::declval<F>()(
+                                     std::declval<Args>()...))>::type,
+                             R>::value>::type> : std::true_type {};
 // -----------------------------------------------------------------------------
 // Check if a type |T| is any instantiation of a template |U|. Examples:
 //
 //    is_template_instantiation_of<int, std::vector>::value == false
-//    is_template_instantiation_of<std::list<std::vector<int>>, std::vector>::value == false
+//    is_template_instantiation_of<
+//         std::list<std::vector<int>>, std::vector>::value == false
 //    is_template_instantiation_of<std::vector<int>, std::vector>::value == true
-//    is_template_instantiation_of<std::vector<std::vector<int>>, std::vector>::value == true
+//    is_template_instantiation_of<
+//         std::vector<std::vector<int>>, std::vector>::value == true
 //
-template <class T, template <class ...> class U>
+template <class T, template <class...> class U>
 struct is_template_instantiation_of : std::false_type {};
 
-template <template <class ...> class U, class... Args>
+template <template <class...> class U, class... Args>
 struct is_template_instantiation_of<U<Args...>, U> : std::true_type {};
 // -----------------------------------------------------------------------------
+
+//
+// is_range<T> - check if type |T| is a range-like type.
+//
+// It makes sure that expressions std::begin(t) and std::end(t) are well-formed
+// and those return the same type.
+//
+template <class T>
+using is_range = std::is_same<
+        decltype(std::begin(
+                std::declval<typename std::add_lvalue_reference<T>::type>())),
+        decltype(std::end(
+                std::declval<typename std::add_lvalue_reference<T>::type>()))>;
 
 }  // namespace base
 }  // namespace android
