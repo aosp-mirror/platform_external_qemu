@@ -455,7 +455,7 @@ static int coreaudio_init_base(coreaudioVoiceBase *core,
 {
     OSStatus status;
     int err;
-    const char *typ = "playback";
+    const char *typ = isInput ? "record" : "playback";
     AudioValueRange frameRange;
     CoreaudioConf *conf = drv_opaque;
 
@@ -473,7 +473,7 @@ static int coreaudio_init_base(coreaudioVoiceBase *core,
     status = coreaudio_get_voice(&core->deviceID, isInput);
     if (status != kAudioHardwareNoError) {
         coreaudio_logerr2 (status, typ,
-                           "Could not get default output Device\n");
+                           "Could not get default %s device\n", typ);
         return -1;
     }
     if (core->deviceID == kAudioDeviceUnknown) {
@@ -938,7 +938,7 @@ struct audio_driver coreaudio_audio_driver = {
     .pcm_ops        = &coreaudio_pcm_ops,
     .can_be_default = 1,
     .max_voices_out = 1,
-    .max_voices_in  = 0,
+    .max_voices_in  = 1,
     .voice_size_out = sizeof (coreaudioVoiceOut),
     .voice_size_in  = sizeof (coreaudioVoiceIn),
 };
