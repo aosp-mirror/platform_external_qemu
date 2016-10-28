@@ -13,6 +13,7 @@
 
 #include "android/telephony/debug.h"
 #include "android/telephony/remote_call.h"
+#include "android/telephony/sim_access_rules.h"
 #include "android/telephony/sim_card.h"
 #include "android/telephony/sms.h"
 #include "android/telephony/sysdeps.h"
@@ -170,6 +171,24 @@ typedef enum {
     A_STATUS_DENIED
 } AOperatorStatus;
 
+/* General error codes for AT commands, see 3gpp.org document 27.007 */
+typedef enum {
+    kCmeErrorMemoryFull = 20,
+    kCmeErrorInvalidIndex = 21,
+    kCmeErrorInvalidCharactersInTextString = 25,
+    kCmeErrorNoNetworkService = 30,
+    kCmeErrorNetworkNotAllowedEmergencyCallsOnly = 32,
+    kCmeErrorUnknownError = 100,
+    kCmeErrorSelectionFailureEmergencyCallsOnly = 529,
+} CmeErrorCode;
+
+/* Command APDU instructions, see ETSI 102 221 and globalplatform.org's
+ * Secure Elements Access Control (SEAC) document for more instructions. */
+typedef enum {
+    kSimApduGetData = 0xCA, // Global Platform SEAC section 4.1 GET DATA Command
+} SimApduInstruction;
+
+
 typedef struct {
     AOperatorStatus  status;
     char             name[3][16];
@@ -203,7 +222,7 @@ typedef struct {
 #define  MAX_DATA_CONTEXTS  4
 #define  MAX_CALLS          4
 #define  MAX_EMERGENCY_NUMBERS 16
-
+#define  MAX_LOGICAL_CHANNELS 16
 
 #define  A_MODEM_SELF_SIZE   3
 
@@ -324,7 +343,77 @@ typedef struct AModemRec_
     int prl_version;
 
     const char *emergency_numbers[MAX_EMERGENCY_NUMBERS];
+
+    /* Logical channels */
+    struct {
+        char* df_name;
+        bool is_open;
+    } logical_channels[MAX_LOGICAL_CHANNELS];
 } AModemRec;
+
+typedef struct SIM_APDU {
+    uint8_t cla; // Class of instruction
+    uint8_t instruction;
+    uint8_t param1;
+    uint8_t param2;
+    uint8_t param3;
+    char* data;
+} SIM_APDU;
+
+static int parseHexCharsToInt(const char* str, int length) {
+    int result = 0;
+    const char* end;
+    for (end = str + length; *str && str < end; ++str) {
+        result = result << 4;
+        if (*str >= '0' && *str <= '9') {
+            result += *str - '0';
+        } else if (*str >= 'a' && *str <= 'f') {
+            result += *str - 'a' + 10;
+        } else  if (*str >= 'A' && *str <= 'F') {
+            result += *str - 'A' + 10;
+        } else {
+            return -1;
+        }
+    }
+    return result;
+}
+
+static bool parseHexCharsToBuffer(const char* str, int length, char* output) {
+    int i;
+    for (i = 0; i < length; ++i) {
+        int value = parseHexCharsToInt(str + i * 2, 2);
+        if (value < 0) {
+            return false;
+        }
+        output[i] = value;
+    }
+    return true;
+}
+
+static bool
+parseSimApduCommand(const char* command, int length, SIM_APDU* apdu) {
+    if (command == NULL || apdu == NULL || length != strlen(command)) {
+        // Invalid or mismatching parameters
+        return false;
+    }
+    if (length < 10) {
+        // Less than minimal length for an APDU
+        return false;
+    }
+
+    apdu->cla = parseHexCharsToInt(command, 2);
+    apdu->instruction = parseHexCharsToInt(command + 2, 2);
+    apdu->param1 = parseHexCharsToInt(command + 4, 2);
+    apdu->param2 = parseHexCharsToInt(command + 6, 2);
+    apdu->param3 = parseHexCharsToInt(command + 8, 2);
+    if (length > 10) {
+        apdu->data = (char*)malloc(length - 10);
+        parseHexCharsToBuffer(command + 10, length - 10, apdu->data);
+    } else {
+        apdu->data = NULL;
+    }
+    return true;
+}
 
 
 static void
@@ -546,6 +635,9 @@ amodem_reset( AModem  modem )
 
     modem->subscription_source = _amodem_get_cdma_subscription_source( modem );
     modem->roaming_pref = _amodem_get_cdma_roaming_preference( modem );
+
+    // Clear out all logical channels, none of them are open, they have no names
+    memset(modem->logical_channels, 0, sizeof(modem->logical_channels));
 }
 
 static AVoiceCall amodem_alloc_call( AModem   modem );
@@ -1331,6 +1423,119 @@ handleRadioPowerReq( const char*  cmd, AModem  modem )
 }
 
 static const char*
+handleOpenLogicalChannel(const char* cmd, AModem modem)
+{
+    int channel;
+    char* df_name = NULL;
+    char* divider = strchr(cmd, '=');
+    if (divider == NULL) {
+        return amodem_printf(modem, "+CME ERROR: %d",
+                            kCmeErrorInvalidCharactersInTextString);
+    }
+    df_name = divider + 1;
+    for (channel = 0; channel < MAX_LOGICAL_CHANNELS; ++channel) {
+        if (!modem->logical_channels[channel].is_open) {
+            modem->logical_channels[channel].is_open = true;
+            modem->logical_channels[channel].df_name = strdup(df_name);
+            break;
+        }
+    }
+    if (channel >= MAX_LOGICAL_CHANNELS) {
+        // Could not find an available channel, we're probably leaking channels
+        return amodem_printf(modem, "+CME ERROR: %d", kCmeErrorMemoryFull);
+    }
+    // Note that logical channels start at 1 so use an offset here
+    return amodem_printf(modem, "%u", channel + 1);
+}
+
+static const char*
+handleCloseLogicalChannel(const char* cmd, AModem modem)
+{
+    int channel;
+    char dummy;
+    char* channel_str = NULL;
+    char* divider = strchr(cmd, '=');
+
+    if (divider == NULL) {
+        return amodem_printf(modem, "+CME ERROR: %d",
+                            kCmeErrorInvalidCharactersInTextString);
+    }
+    channel_str = divider + 1;
+    if (sscanf(channel_str, "%d%c", &channel, &dummy) != 1) {
+        return amodem_printf(modem, "+CME ERROR: %d",
+                            kCmeErrorInvalidCharactersInTextString);
+    }
+    // Logical channels start at 1, decrease by one to create an index
+    --channel;
+    if (channel < 0 ||
+            channel >= MAX_LOGICAL_CHANNELS ||
+            !modem->logical_channels[channel].is_open) {
+        return amodem_printf(modem, "+CME ERROR: %d", kCmeErrorInvalidIndex);
+    }
+    modem->logical_channels[channel].is_open = false;
+    free(modem->logical_channels[channel].df_name);
+    modem->logical_channels[channel].df_name = NULL;
+
+    return "+CCHC";
+}
+
+static const char*
+handleTransmitLogicalChannel(const char* cmd, AModem modem) {
+    char command[1024];
+    char scan_string[128];
+    int channel = -1;
+    int length = -1;
+    char dummy = 0;
+    SIM_APDU apdu;
+
+    // Create a scan string with the size of the command array in it
+    snprintf(scan_string, sizeof(scan_string),
+             "+CGLA=%%d,%%d,%%%ds%%c", (int)(sizeof(command) - 1));
+    // Then scan the AT string to get the components
+    if (sscanf(cmd, scan_string, &channel, &length, command, &dummy) != 3) {
+        return amodem_printf( modem, "+CME ERROR: %d",
+                              kCmeErrorInvalidCharactersInTextString);
+    }
+
+    // Logical channels start at 1, decrease by one to get a channel index
+    --channel;
+    // Validate the channel number and ensure the channel is open
+    if (channel < 0 ||
+            channel >= MAX_LOGICAL_CHANNELS ||
+            !modem->logical_channels[channel].is_open) {
+        return amodem_printf(modem, "+CME ERROR: %d", kCmeErrorInvalidIndex);
+    }
+
+    // Parse the command part of the AT string into a SIM APDU struct
+    if (!parseSimApduCommand(command, length, &apdu)) {
+        return amodem_printf( modem, "+CME ERROR: %d",
+                              kCmeErrorInvalidCharactersInTextString);
+    }
+
+    // Make sure it's an instruction class that we support
+    if ((apdu.cla & 0xf0) != 0x80) {
+        return amodem_printf( modem, "+CME ERROR: %d",
+                              kCmeErrorInvalidCharactersInTextString);
+    }
+
+    // Now see if it's a supported instruction
+    switch (apdu.instruction) {
+    case kSimApduGetData:
+        if (apdu.param1 == 0xFF && apdu.param2 == 0x40) {
+            // Get Data ALL command
+            char* df_name = modem->logical_channels[channel].df_name;
+            const char* rules = sim_get_access_rules(df_name);
+            if (rules) {
+                return amodem_printf(modem, "+CGLA: 144,0,%s", rules);
+            }
+        }
+        break;
+    }
+    return amodem_printf(modem, "+CME ERROR: %d (%d, %d) (%s)",
+                         kCmeErrorUnknownError, apdu.param1, apdu.param2, cmd);
+}
+
+static const char*
 handleSIMStatusReq( const char*  cmd, AModem  modem )
 {
     const char*  answer = NULL;
@@ -1466,8 +1671,8 @@ handleOperatorSelection( const char*  cmd, AModem  modem )
 
         if ( !amodem_has_network( modem ) )
         {
-            /* this error code means "no network" */
-            return amodem_printf( modem, "+CME ERROR: 30" );
+            return amodem_printf( modem, "+CME ERROR: %d",
+                                  kCmeErrorNoNetworkService);
         }
 
         oper = &modem->operators[ modem->oper_index ];
@@ -1532,10 +1737,11 @@ handleOperatorSelection( const char*  cmd, AModem  modem )
 
                     if (found < 0) {
                         /* Selection failed */
-                        return "+CME ERROR: 529";
+                        return amodem_printf(modem, "+CME ERROR: %d",
+                            kCmeErrorSelectionFailureEmergencyCallsOnly);
                     } else if (modem->operators[found].status == A_STATUS_DENIED) {
-                        /* network not allowed */
-                        return "+CME ERROR: 32";
+                        return amodem_printf(modem, "+CME ERROR: %d",
+                            kCmeErrorNetworkNotAllowedEmergencyCallsOnly);
                     }
                     modem->oper_index = found;
 
@@ -1585,7 +1791,8 @@ handleRequestOperator( const char*  cmd, AModem  modem )
     cmd=cmd;
 
     if ( !amodem_has_network(modem) )
-        return "+CME ERROR: 30";
+        return amodem_printf(modem, "+CME ERROR: %d",
+                             kCmeErrorNoNetworkService);
 
     oper = modem->operators + modem->oper_index;
     modem->oper_name_index = 2;
@@ -2449,9 +2656,14 @@ static const struct {
     { "+CSCS=\"HEX\"", NULL, NULL },
     { "+CUSD=1", NULL, NULL },
     { "+CGEREP=1,0", NULL, NULL },
-    { "+CMGF=0", NULL, handleEndOfInit },  /* now is a goof time to send the current tme and timezone */
+    { "+CMGF=0", NULL, handleEndOfInit },  /* now is a good time to send the current time and timezone */
     { "%CPI=3", NULL, NULL },
     { "%CSTAT=1", NULL, NULL },
+
+    /* Logical channels */
+    { "!+CCHO=", NULL, handleOpenLogicalChannel },
+    { "!+CCHC=", NULL, handleCloseLogicalChannel },
+    { "!+CGLA=", NULL, handleTransmitLogicalChannel },
 
     /* end of list */
     {NULL, NULL, NULL}
