@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "a65fde57_425b689f",
+        "filename": "android/emulation/goldfish_dma.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T22:04:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a6eefe70_8318959a",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4128cc69_29f969d7",
         "filename": "android/emulation/goldfish_dma.h",
         "patchSetId": 17
@@ -72,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "a65fde57_e2fa7c4f",
+        "filename": "android/emulation/goldfish_dma.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T22:04:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a16b489a_d694f592",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "612f9071_ed668167",
         "filename": "android/emulation/goldfish_dma.h",
         "patchSetId": 17
@@ -101,6 +137,24 @@
       "side": 1,
       "message": "1. It\u0027s up to the users of DMA, which is traced in the DMA_vXXX\n2. It is actually bad to differentiate between different pipe regions for the current use, which is gralloc, where if we indeed allocate physically different regions for different users, we will needlessly run out of memory.\n3. If a user of DMA needs to actually have different regions, that will be managed through allowing different offsets into the one big region to be specified.",
       "parentUuid": "612f9071_ed668167",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a65fde57_2260f44d",
+        "filename": "android/emulation/goldfish_dma.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T22:04:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "01a974f7_a78bd1a7",
       "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -196,6 +250,24 @@
     },
     {
       "key": {
+        "uuid": "a65fde57_82658060",
+        "filename": "android/emulation/goldfish_dma.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T22:04:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a65fde57_3f1daf7b",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "011ed449_249a7258",
         "filename": "android/main-kernel-parameters.cpp",
         "patchSetId": 17
@@ -207,6 +279,24 @@
       "writtenOn": "2016-10-28T13:43:25Z",
       "side": 1,
       "message": "Why did this become unconditionnal? Don\u0027t you want to check the feature flag instead?",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a65fde57_02fe9045",
+        "filename": "android/main-kernel-parameters.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T22:04:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "011ed449_249a7258",
       "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -230,6 +320,24 @@
     },
     {
       "key": {
+        "uuid": "a65fde57_62ef8c97",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/render_api_types.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T22:04:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "011ed449_049d764f",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "213cb8a3_d0116238",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 17
@@ -241,6 +349,24 @@
       "writtenOn": "2016-10-28T13:43:25Z",
       "side": 1,
       "message": "please use a constexpr here, otherwise you\u0027re declaring a mutable variable that must be initialized at runtime, which is bad :-/",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a65fde57_e2239c1b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T22:04:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "213cb8a3_d0116238",
       "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -264,6 +390,24 @@
     },
     {
       "key": {
+        "uuid": "a65fde57_a219a4eb",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T22:04:02Z",
+      "side": 1,
+      "message": "Done (replaced with g_emugl_dma_read)",
+      "parentUuid": "86ef3a6f_00b7e6db",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c6e9326b_a52cc8f6",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 17
@@ -275,6 +419,24 @@
       "writtenOn": "2016-10-28T13:43:25Z",
       "side": 1,
       "message": "this comment seems odd, since that\u0027s not what is happening here.",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a65fde57_42f08875",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 558,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T22:04:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c6e9326b_a52cc8f6",
       "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -352,6 +514,24 @@
     },
     {
       "key": {
+        "uuid": "a65fde57_22f59465",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 571,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T22:04:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a65fde57_1c0ef9a8",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c134bcc0_90f27c80",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderLibImpl.h",
         "patchSetId": 17
@@ -363,6 +543,24 @@
       "writtenOn": "2016-10-28T13:43:25Z",
       "side": 1,
       "message": "I still think that\u0027s a horrible name, there should be a better way to clarify what this is for. Also no documentation :-(",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a65fde57_8213c0cb",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderLibImpl.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T22:04:02Z",
+      "side": 1,
+      "message": "Done (changed from Getter to Reader, get -\u003e read, etc. with offset). It seems to make more sense now, thanks :)",
+      "parentUuid": "c134bcc0_90f27c80",
       "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -386,6 +584,24 @@
     },
     {
       "key": {
+        "uuid": "a65fde57_22ebd49d",
+        "filename": "distrib/android-emugl/shared/emugl/common/dma_device.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T22:04:02Z",
+      "side": 1,
+      "message": "It seems that GLcommon is specific to a particular OpenGL backend (our Translator), and I\u0027d like DMA available across different backends.\n\nI\u0027m not sure if I understand completely, but I think this is why currently we have a bunch of stuff going through renderLib with global variables in this way; we need to access from libopenglrender and android/opengles.cpp at the same time.\n\nI\u0027m not sure if there is a rock solid reason not to use renderLib instance-\u003estuff, but here I\u0027m mainly just following in the style of the rest of the renderlib users. It might also be convenient to have the function pointer directly...",
+      "parentUuid": "4128cc69_a9f559d9",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "21259891_a8f633ba",
         "filename": "distrib/android-emugl/shared/emugl/common/dma_device.h",
         "patchSetId": 17
@@ -403,6 +619,24 @@
     },
     {
       "key": {
+        "uuid": "a65fde57_c2d9380c",
+        "filename": "distrib/android-emugl/shared/emugl/common/dma_device.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T22:04:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "21259891_a8f633ba",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "21259891_688a7b35",
         "filename": "distrib/android-emugl/shared/emugl/common/dma_device.h",
         "patchSetId": 17
@@ -414,6 +648,24 @@
       "writtenOn": "2016-10-28T13:43:25Z",
       "side": 1,
       "message": "please use a prefix like emugl_set_dma_getter, or put it in emugl namespace instead",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a65fde57_a2d6c4d7",
+        "filename": "distrib/android-emugl/shared/emugl/common/dma_device.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T22:04:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "21259891_688a7b35",
       "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
