@@ -298,6 +298,24 @@
     },
     {
       "key": {
+        "uuid": "a65fde57_1c0ef9a8",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 571,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T19:19:50Z",
+      "side": 1,
+      "message": "Hmm, I will change the interface so that emuglDma is not referenced directly, but through an offset that is provided by the guest.\n\nI\u0027ll also add the necessary logic to the mmap() call so that it will fail if there is not enough memory in the region to hold the requested buffer.",
+      "parentUuid": "c134bcc0_b046a094",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c134bcc0_90f27c80",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderLibImpl.h",
         "patchSetId": 17
