@@ -17,6 +17,7 @@
 #pragma once
 
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
 
 #include <EGL/egl.h>
@@ -54,13 +55,20 @@
 //     to destroy it.
 class FenceSync {
 public:
-    // The constructor wraps eglCreateSyncKHR on the host OpenGL driver.
+    // The constructor lets the guest have a consistent handle
+    // to the sync object.
     // |hasNativeFence| specifies whether this sync object
     // is of EGL_SYNC_NATIVE_FENCE_ANDROID nature (2), and
     // |destroyWhenSignaled| specifies whether or not to destroy
     // the sync object when the native fence FD becomes signaled (3).
     FenceSync(bool hasNativeFence,
               bool destroyWhenSignaled);
+
+    // activate() wraps eglCreateSyncKHR.
+    void activate();
+    // getSync returns the internal EGL sync object.
+    // It may block on creation of the sync object.
+    EGLSyncKHR getSync();
 
     // wait() wraps eglClientWaitSyncKHR. During such a wait, we need
     // to increment the reference count while the wait is active,
@@ -113,6 +121,14 @@ private:
     // EGL state needed for calling OpenGL sync operations.
     EGLDisplay mDisplay;
     EGLSyncKHR mSync;
+
+    // If we do async processing of the fence object itself,
+    // it's possible the sync object was not created yet.
+    // The implementation uses these state variables to synchronize on
+    // sync object creation.
+    android::base::Lock mLock;
+    android::base::ConditionVariable mCond;
+    bool mCreatedSync = false;
 
     // destroy() wraps eglDestroySyncKHR. This is private, because we need
     // careful control of when eglDestroySyncKHR is actually called.

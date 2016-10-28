@@ -173,6 +173,10 @@ bool EntryPoint::hasPointers()
     return pointers;
 }
 
+bool EntryPoint::hasBottomHalf() {
+    return m_hasBottomHalf;
+}
+
 int EntryPoint::setAttribute(const std::string &line, size_t lc)
 {
     size_t pos = 0;
@@ -330,7 +334,9 @@ int EntryPoint::setAttribute(const std::string &line, size_t lc)
             return -4;
         }
 
-        if (flag == "unsupported") {
+        if (flag == "bottomHalf") {
+            m_hasBottomHalf = true;
+        } else if (flag == "unsupported") {
             setUnsupported(true);
         } else if (flag == "custom_decoder") {
             setCustomDecoder(true);

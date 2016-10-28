@@ -35,13 +35,27 @@ FenceSync::FenceSync(bool hasNativeFence,
     assert(RenderThreadInfo::get()->currContext.get());
 
     mDisplay = FrameBuffer::getFB()->getDisplay();
+    mSync = NULL;
+}
+
+void FenceSync::activate() {
+    android::base::AutoLock lock(mLock);
     mSync = s_egl.eglCreateSyncKHR(mDisplay,
                                    EGL_SYNC_FENCE_KHR,
                                    NULL);
+    mCreatedSync = true;
+    mCond.signal();
 }
 
 EGLint FenceSync::wait(uint64_t timeout) {
     incRef();
+
+    android::base::AutoLock lock(mLock);
+    while (!mCreatedSync) {
+        mCond.wait(&mLock);
+    }
+    lock.unlock();
+
     EGLint wait_res =
         s_egl.eglClientWaitSyncKHR(mDisplay, mSync,
                                    EGL_SYNC_FLUSH_COMMANDS_BIT_KHR,
