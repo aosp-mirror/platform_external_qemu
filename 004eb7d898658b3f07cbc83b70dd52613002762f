@@ -1,0 +1,242 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4128cc69_4906a5fa",
+        "filename": "android/emulation/goldfish_dma.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T13:43:25Z",
+      "side": 1,
+      "message": "Any details on how this extension is detected / managed at runtime? I suggest adding a section to docs/GOLDFISH-VIRTUAL-HARDWARE.TXT with all the details you can get.",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4128cc69_29f969d7",
+        "filename": "android/emulation/goldfish_dma.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T13:43:25Z",
+      "side": 1,
+      "message": "Is the allocated memory private or shared? Allocated on demand or committed? Can you be a little more specific what the kernel does with it.",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "612f9071_ed668167",
+        "filename": "android/emulation/goldfish_dma.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T13:43:25Z",
+      "side": 1,
+      "message": "I still don\u0027t understand how to use this GoldfishDmaRegion pointer at all on the host?? How do you differentiate between different pipe regions for example.",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c6e9326b_a555e864",
+        "filename": "android/emulation/goldfish_dma.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T13:43:25Z",
+      "side": 1,
+      "message": "this should be:\n\n  typedef struct GoldfishDmaRegion\n\nOtherwise this doesn\u0027t compile from C, only C++",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "011ed449_249a7258",
+        "filename": "android/main-kernel-parameters.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T13:43:25Z",
+      "side": 1,
+      "message": "Why did this become unconditionnal? Don\u0027t you want to check the feature flag instead?",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "011ed449_049d764f",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/render_api_types.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T13:43:25Z",
+      "side": 1,
+      "message": "please document what this is used for.",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "213cb8a3_d0116238",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T13:43:25Z",
+      "side": 1,
+      "message": "please use a constexpr here, otherwise you\u0027re declaring a mutable variable that must be initialized at runtime, which is bad :-/",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "86ef3a6f_00b7e6db",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T13:43:25Z",
+      "side": 1,
+      "message": "nit: call this |sEmuglDma| to make it explicit that this is a global variable.",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c6e9326b_a52cc8f6",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 558,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T13:43:25Z",
+      "side": 1,
+      "message": "this comment seems odd, since that\u0027s not what is happening here.",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c6e9326b_c5d90cda",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 571,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T13:43:25Z",
+      "side": 1,
+      "message": "are you seriously using a single memory region for all guest client connections? This seems really dangerous. There should be a way in this call to identify several independent regions (by id, or something). There should be a way to know when a region is released (what happens if the guest closes the file descriptor but EmuGL is still using the region for some reason, etc...).",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c134bcc0_90f27c80",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderLibImpl.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T13:43:25Z",
+      "side": 1,
+      "message": "I still think that\u0027s a horrible name, there should be a better way to clarify what this is for. Also no documentation :-(",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4128cc69_a9f559d9",
+        "filename": "distrib/android-emugl/shared/emugl/common/dma_device.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T13:43:25Z",
+      "side": 1,
+      "message": "Technically, the stuff under emugl/common/ was actually used by both the guest encoder and guest decoder (from the time where all sources shared the same location). Also, it was used to hold code that provides non-GL related utilities.\n\nIt\u0027s probably better to place this in a different directory instead (e.g. include/GLcommon).\n\nAlso, why do you need a global variable here? Can\u0027t this be stored in the RenderLib instance instead?",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "21259891_a8f633ba",
+        "filename": "distrib/android-emugl/shared/emugl/common/dma_device.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T13:43:25Z",
+      "side": 1,
+      "message": "please use a prefix like |g_emugl_dma_getter| to better show it is a global variable and that it is specific to emugl.\n\nIt seems really weird to have a single global variable when every guest could potentially allocate one or more regions on its own.",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "21259891_688a7b35",
+        "filename": "distrib/android-emugl/shared/emugl/common/dma_device.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-10-28T13:43:25Z",
+      "side": 1,
+      "message": "please use a prefix like emugl_set_dma_getter, or put it in emugl namespace instead",
+      "revId": "004eb7d898658b3f07cbc83b70dd52613002762f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
