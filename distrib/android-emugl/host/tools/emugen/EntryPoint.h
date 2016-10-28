@@ -41,6 +41,7 @@ public:
     Var & retval() { return m_retval; }
     Var * var(const std::string & name);
     bool hasPointers();
+    bool hasBottomHalf();
     bool unsupported() const { return m_unsupported; }
     void setUnsupported(bool state) { m_unsupported = state; }
     bool customDecoder() { return m_customDecoder; }
@@ -56,6 +57,7 @@ private:
     std::string m_name;
     Var m_retval;
     VarsArray m_vars;
+    bool m_hasBottomHalf;
     bool m_unsupported;
     bool m_customDecoder;
     bool m_notApi;
