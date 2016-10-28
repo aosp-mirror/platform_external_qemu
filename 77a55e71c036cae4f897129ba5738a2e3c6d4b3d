@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a65fde57_79a467a2",
+        "filename": "docs/ANDROID-QEMU-PIPE.TXT",
+        "patchSetId": 19
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-10-28T18:30:37Z",
+      "side": 1,
+      "message": "added docs on v2 pipe as part of documentation effort; Yurii, does this seem right?",
+      "range": {
+        "startLine": 287,
+        "startChar": 2,
+        "endLine": 287,
+        "endChar": 74
+      },
+      "revId": "77a55e71c036cae4f897129ba5738a2e3c6d4b3d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
