@@ -33,6 +33,11 @@ LOCAL_CFLAGS := \
     $(call local-build-var,CFLAGS) \
     $(LOCAL_CFLAGS)
 
+LOCAL_CXXFLAGS := \
+    $(call local-build-var,CXXFLAGS$(LOCAL_BITS)) \
+    $(call local-build-var,CXXFLAGS) \
+    $(LOCAL_CXXFLAGS)
+
 LOCAL_LDFLAGS := \
     $(call local-build-var,LDFLAGS$(LOCAL_BITS)) \
     $(call local-build-var,LDFLAGS) \
