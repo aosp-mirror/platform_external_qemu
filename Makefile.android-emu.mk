@@ -345,9 +345,11 @@ LOCAL_SRC_FILES := \
     android/telephony/modem.c \
     android/telephony/modem_driver.c \
     android/telephony/remote_call.c \
+    android/telephony/SimAccessRules.cpp \
     android/telephony/sim_card.c \
     android/telephony/sms.c \
     android/telephony/sysdeps.c \
+    android/telephony/TagLengthValue.cpp \
     android/uncompress.cpp \
     android/update-check/UpdateChecker.cpp \
     android/update-check/VersionExtractor.cpp \
@@ -536,7 +538,9 @@ LOCAL_SRC_FILES := \
   android/qt/qt_path_unittest.cpp \
   android/qt/qt_setup_unittest.cpp \
   android/telephony/gsm_unittest.cpp \
+  android/telephony/modem_unittest.cpp \
   android/telephony/sms_unittest.cpp \
+  android/telephony/TagLengthValue_unittest.cpp \
   android/update-check/UpdateChecker_unittest.cpp \
   android/update-check/VersionExtractor_unittest.cpp \
   android/utils/aconfig-file_unittest.cpp \
