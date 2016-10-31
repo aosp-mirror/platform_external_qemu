@@ -57,10 +57,17 @@ protected:
     // If the channel is stopped, return value is undefined.
     size_t beforeWrite();
 
-    // To be called after beforeWrite() and copying a new fixed-size message
-    // into the array. This signal the receiver thread that there is a new
-    // incoming message.
-    void afterWrite();
+    // Same as beforeWrite(), but returns an empty optional if there was
+    // no room to write to instead of waiting for it.
+    // One still needs to call afterWrite() anyway.
+    Optional<size_t> beforeTryWrite();
+
+    // To be called after trying to write a new fixed-size message (which should
+    // happen after beforeWrite() or beforeTryWrite()).
+    // |success| must be true to indicate that a new item was added to the
+    // channel, or false otherwise (i.e. if the channel is stopped, or if
+    // beforeTryWrite() returned an empty optional).
+    void afterWrite(bool success);
 
     // Call this method in the receiver thread before reading a new message.
     // This returns the position in the message array where the new message
@@ -68,9 +75,17 @@ protected:
     // If the channel is stopped, return value is undefined.
     size_t beforeRead();
 
-    // To be called in the receiver thread after beforeRead() and processing
-    // the corresponding message.
-    void afterRead();
+    // Same as beforeRead(), but returns an empty optional if there was
+    // no data to read instead of waiting for it.
+    // One still needs to call afterWrite() anyway.
+    Optional<size_t> beforeTryRead();
+
+    // To be called after reading a fixed-size message from the channel (which
+    // must happen after beforeRead() or beforeTryRead()).
+    // |success| must be true to indicate that a message was read, or false
+    // otherwise (i.e. if the channel is stopped or if beforeTryRead() returned
+    // an empty optional).
+    void afterRead(bool success);
 
     // A version of isStopped() that doesn't lock the channel but expects it
     // to be locked by the caller.
@@ -78,8 +93,8 @@ protected:
 
 private:
     size_t mPos = 0;
-    size_t mCount = 0;
     size_t mCapacity;
+    size_t mCount = 0;
     bool mStopped = false;
     mutable Lock mLock;     // Mutable to allow const members to lock it.
     ConditionVariable mCanRead;
@@ -102,45 +117,72 @@ public:
     MessageChannel() : MessageChannelBase(CAPACITY) {}
 
     bool send(const T& msg) {
-        size_t pos = beforeWrite();
-        bool res = !isStoppedLocked();
+        const size_t pos = beforeWrite();
+        const bool res = !isStoppedLocked();
         if (res) {
             mItems[pos] = msg;
         }
-        afterWrite();
+        afterWrite(res);
         return res;
     }
 
     bool send(T&& msg) {
-        size_t pos = beforeWrite();
-        bool res = !isStoppedLocked();
+        const size_t pos = beforeWrite();
+        const bool res = !isStoppedLocked();
         if (res) {
             mItems[pos] = std::move(msg);
         }
-        afterWrite();
+        afterWrite(res);
         return res;
     }
 
+    bool trySend(const T& msg) {
+        const auto pos = beforeTryWrite();
+        if (pos) {
+            mItems[*pos] = msg;
+        }
+        afterWrite(pos);
+        return pos;
+    }
+
+    bool trySend(T&& msg) {
+        const auto pos = beforeTryWrite();
+        if (pos) {
+            mItems[*pos] = std::move(msg);
+        }
+        afterWrite(pos);
+        return pos;
+    }
+
     bool receive(T* msg) {
-        size_t pos = beforeRead();
-        bool res = !isStoppedLocked();
+        const size_t pos = beforeRead();
+        const bool res = !isStoppedLocked();
         if (res) {
             *msg = std::move(mItems[pos]);
         }
-        afterRead();
+        afterRead(res);
         return res;
     }
 
     Optional<T> receive() {
-        size_t pos = beforeRead();
+        const size_t pos = beforeRead();
         if (!isStoppedLocked()) {
             Optional<T> msg(std::move(mItems[pos]));
-            afterRead();
+            afterRead(true);
             return msg;
         } else {
-            afterRead();
+            afterRead(false);
             return {};
         }
+    }
+
+    bool tryReceive(T* msg) {
+        const auto pos = beforeTryRead();
+        if (pos) {
+            *msg = std::move(mItems[*pos]);
+        }
+        afterRead(pos);
+        return pos;
     }
 
     constexpr size_t capacity() const { return CAPACITY; }
