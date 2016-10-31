@@ -23,20 +23,18 @@ void MessageChannelBase::stop() {
     android::base::AutoLock lock(mLock);
     mStopped = true;
     mCount = 0;
-    mCanRead.signal();
-    mCanWrite.signal();
+    mCanRead.broadcast();
+    mCanWrite.broadcast();
 }
 
 size_t MessageChannelBase::beforeWrite() {
     mLock.lock();
-    while (mCount >= mCapacity && !mStopped) {
+    while (mCount.load(std::memory_order_relaxed) >= mCapacity && !mStopped) {
         mCanWrite.wait(&mLock);
     }
-    if (mStopped) {
-        return 0; // just anything
-    }
-
-    size_t result = mPos + mCount;
+    // Return value is undefined if stopped, so let's save a branch and skip the
+    // check for it.
+    size_t result = mPos + mCount.load(std::memory_order_relaxed);
     if (result >= mCapacity) {
         result -= mCapacity;
     }
@@ -45,15 +43,16 @@ size_t MessageChannelBase::beforeWrite() {
 
 void MessageChannelBase::afterWrite() {
     if (!mStopped) {
-        mCount++;
-        mCanRead.signal();
+        ++mCount;
     }
+
     mLock.unlock();
+    mCanRead.signal();
 }
 
 size_t MessageChannelBase::beforeRead() {
     mLock.lock();
-    while (mCount == 0 && !mStopped) {
+    while (mCount.load(std::memory_order_relaxed) == 0 && !mStopped) {
         mCanRead.wait(&mLock);
     }
     return mPos; // return value is undefined if stopped, so let's save a branch
@@ -64,10 +63,10 @@ void MessageChannelBase::afterRead() {
         if (++mPos == mCapacity) {
             mPos = 0U;
         }
-        mCount--;
-        mCanWrite.signal();
+        --mCount;
     }
     mLock.unlock();
+    mCanWrite.signal();
 }
 
 }  // namespace base

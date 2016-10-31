@@ -18,6 +18,7 @@
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
 
+#include <atomic>
 #include <utility>
 #include <stddef.h>
 
@@ -30,8 +31,7 @@ class MessageChannelBase {
 public:
     // Get the current channel size
     size_t size() const {
-        android::base::AutoLock lock(mLock);
-        return mCount;
+        return mCount.load();
     }
 
     // Abort the currently pending operations and don't allow any other ones
@@ -78,8 +78,8 @@ protected:
 
 private:
     size_t mPos = 0;
-    size_t mCount = 0;
     size_t mCapacity;
+    std::atomic<size_t> mCount { 0 };
     bool mStopped = false;
     mutable Lock mLock;     // Mutable to allow const members to lock it.
     ConditionVariable mCanRead;
