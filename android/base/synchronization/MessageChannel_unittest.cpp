@@ -137,5 +137,23 @@ TEST(MessageChannel, Stop) {
     }
 }
 
+TEST(MessageChannel, TryVersions) {
+    MessageChannel<int, 2> channel;
+    int ret;
+    EXPECT_FALSE(channel.tryReceive(&ret));
+
+    EXPECT_TRUE(channel.trySend(1));
+    EXPECT_TRUE(channel.trySend(2));
+    EXPECT_FALSE(channel.trySend(3));
+
+    EXPECT_TRUE(channel.tryReceive(&ret));
+    EXPECT_EQ(1, ret);
+    EXPECT_TRUE(channel.tryReceive(&ret));
+    EXPECT_EQ(2, ret);
+    EXPECT_FALSE(channel.tryReceive(&ret));
+    // make sure |ret| wasn't changed
+    EXPECT_EQ(2, ret);
+}
+
 }  // namespace base
 }  // namespace android
