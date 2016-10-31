@@ -22,52 +22,74 @@ MessageChannelBase::MessageChannelBase(size_t capacity) : mCapacity(capacity) {}
 void MessageChannelBase::stop() {
     android::base::AutoLock lock(mLock);
     mStopped = true;
-    mCount = 0;
-    mCanRead.signal();
-    mCanWrite.signal();
+    mCount.store(0, std::memory_order_release);
+    mCanRead.broadcast();
+    mCanWrite.broadcast();
 }
 
 size_t MessageChannelBase::beforeWrite() {
     mLock.lock();
-    while (mCount >= mCapacity && !mStopped) {
+    size_t count;
+    while ((count = mCount.load(std::memory_order_relaxed)) >= mCapacity
+           && !mStopped) {
         mCanWrite.wait(&mLock);
     }
-    if (mStopped) {
-        return 0; // just anything
-    }
-
-    size_t result = mPos + mCount;
+    // Return value is undefined if stopped, so let's save a branch and skip the
+    // check for it.
+    size_t result = mPos + count;
     if (result >= mCapacity) {
         result -= mCapacity;
     }
     return result;
 }
 
-void MessageChannelBase::afterWrite() {
-    if (!mStopped) {
-        mCount++;
-        mCanRead.signal();
+Optional<size_t> MessageChannelBase::beforeTryWrite() {
+    mLock.lock();
+
+    const auto count = mCount.load(std::memory_order_relaxed);
+    if (count >= mCapacity || mStopped) {
+        return {};
     }
-    mLock.unlock();
+    size_t result = mPos + count;
+    if (result >= mCapacity) {
+        result -= mCapacity;
+    }
+    return result;
+}
+
+void MessageChannelBase::afterWrite(bool success) {
+    if (success) {
+        mCount.fetch_add(1, std::memory_order_relaxed);
+    }
+    mCanRead.signalAndUnlock(&mLock);
 }
 
 size_t MessageChannelBase::beforeRead() {
     mLock.lock();
-    while (mCount == 0 && !mStopped) {
+    while (mCount.load(std::memory_order_relaxed) == 0 && !mStopped) {
         mCanRead.wait(&mLock);
     }
     return mPos; // return value is undefined if stopped, so let's save a branch
 }
 
-void MessageChannelBase::afterRead() {
-    if (!mStopped) {
+Optional<size_t> MessageChannelBase::beforeTryRead() {
+    mLock.lock();
+
+    const auto count = mCount.load(std::memory_order_relaxed);
+    if (count == 0 || mStopped) {
+        return {};
+    }
+    return mPos;
+}
+
+void MessageChannelBase::afterRead(bool success) {
+    if (success) {
         if (++mPos == mCapacity) {
             mPos = 0U;
         }
-        mCount--;
-        mCanWrite.signal();
+        mCount.fetch_sub(1, std::memory_order_relaxed);
     }
-    mLock.unlock();
+    mCanWrite.signalAndUnlock(&mLock);
 }
 
 }  // namespace base
