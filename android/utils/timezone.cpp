@@ -1242,13 +1242,16 @@ int TimeZone::setAndroidTimeZoneUsingZdump()
     using namespace android::base;
     std::string zdumpCmd = StringFormat(
         "zdump -v %s | grep %d", mTimeZoneName, mCurrentYear);
-    std::vector<std::string> shellCmd = {"/bin/bash", "-c", zdumpCmd.c_str()};
+    std::vector<std::string> shellCmd = {"/bin/bash", "-c", std::move(zdumpCmd)};
     RunOptions runFlags = System::RunOptions::WaitForCompletion |
                            System::RunOptions::TerminateOnTimeout |
                            System::RunOptions::DumpOutputToFile;
     System::Duration timeout = 1000;
     System::ProcessExitCode exitCode;
-    const std::string outputFile = PathUtils::join(System::get()->getTempDir(), "android_tzoffset");
+    const std::string outputFile = PathUtils::join(
+            System::get()->getTempDir(),
+                    StringFormat("android_tzoffset%d",
+                         (int)System::get()->getCurrentProcessId()));
 
     bool commandRan = System::get()->runCommand(
             shellCmd, runFlags, timeout, &exitCode, nullptr, outputFile);
@@ -1258,18 +1261,18 @@ int TimeZone::setAndroidTimeZoneUsingZdump()
         std::string line;
         std::vector<std::string> rules;
         while (std::getline(file, line)) {
-            rules.push_back(std::string(line));
+            rules.push_back(std::move(line));
         }
         long utcOffsetDST = 0;
         long utcOffsetStandard = 0;
         if (rules.size() == 4) {
             //tokenize only the 2nd and 4th rule
             for(int i = 1; i < 4; i += 2) {
-                std::stringstream ss(rules.at(i));
+                std::stringstream ss(rules[i]);
                 std::vector<std::string> tokens;
                 std::string token;
                 while (ss >> token) {
-                    tokens.push_back(std::string(token));
+                    tokens.push_back(std::move(token));
                 }
                 std::vector<std::string> utcTokens(tokens.begin() + 2, tokens.begin() + 6);
                 if (parseZdumpDate(utcTokens, i == 1 ? &mStandardDateUtc : &mDaylightDateUtc)) {
@@ -1298,13 +1301,16 @@ int TimeZone::setAndroidTimeZoneUsingDate()
 {
     using namespace android::base;
     std::string dateCmd = StringFormat("TZ=%s date +%%z", mTimeZoneName.c_str());
-    std::vector<std::string> shellCmd = {"/bin/bash", "-c", dateCmd.c_str()};
+    std::vector<std::string> shellCmd = {"/bin/bash", "-c", std::move(dateCmd)};
     RunOptions runFlags = System::RunOptions::WaitForCompletion |
                            System::RunOptions::TerminateOnTimeout |
                            System::RunOptions::DumpOutputToFile;
     System::Duration timeout = 1000;
     System::ProcessExitCode exitCode;
-    const std::string outputFile = PathUtils::join(System::get()->getTempDir(), "android_tzoffset");
+    const std::string outputFile = PathUtils::join(
+            System::get()->getTempDir(),
+                    StringFormat("android_tzoffset%d",
+                         (int)System::get()->getCurrentProcessId()));
 
     bool commandRan = System::get()->runCommand(
             shellCmd, runFlags, timeout, &exitCode, nullptr, outputFile);
@@ -1356,12 +1362,9 @@ int TimeZone::androidTimeZoneSet(const char* tzname)
         D( "%s: could not determine current timezone\n", __FUNCTION__ );
     }
 #else
-    if (setAndroidTimeZoneUsingZdump()) {
-        if (!setAndroidTimeZoneUsingDate()) {
-            this->mAndroidTimeZoneInit = 1;
-        } else {
-            D( "%s: could not retrieve time zone information from zdump or date command, use host localtime by default.\n", __FUNCTION__ );
-        }
+    if (setAndroidTimeZoneUsingZdump() && setAndroidTimeZoneUsingDate()) {
+        D( "%s: could not retrieve time zone information from zdump or date "
+           "command, use host localtime by default.\n", __func__);
     } else {
         this->mAndroidTimeZoneInit = 1;
     }
