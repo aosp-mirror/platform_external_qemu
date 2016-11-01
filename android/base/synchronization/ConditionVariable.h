@@ -33,6 +33,19 @@ namespace base {
 // Useful to implement various synchronization data structures.
 class ConditionVariable {
 public:
+    // A set of functions to efficiently unlock the lock used with
+    // the current condition variable and signal or broadcast it.
+    //
+    // The functions are needed because on some platforms (Posix) it's more
+    // efficient to signal the variable before unlocking mutex, while on others
+    // (Windows) it's exactly the opposite. Functions implement the best way
+    // for each platform and abstract it out from the user.
+    void signalAndUnlock(Lock* lock);
+    void signalAndUnlock(AutoLock* lock);
+
+    void broadcastAndUnlock(Lock* lock);
+    void broadcastAndUnlock(AutoLock* lock);
+
 #ifdef _WIN32
 
     ConditionVariable();
@@ -111,6 +124,43 @@ private:
 
     DISALLOW_COPY_ASSIGN_AND_MOVE(ConditionVariable);
 };
+
+#ifdef _WIN32
+inline void ConditionVariable::signalAndUnlock(Lock* lock) {
+    lock->unlock();
+    signal();
+}
+inline void ConditionVariable::signalAndUnlock(AutoLock* lock) {
+    lock->unlock();
+    signal();
+}
+
+inline void ConditionVariable::broadcastAndUnlock(Lock* lock) {
+    lock->unlock();
+    broadcast();
+}
+inline void ConditionVariable::broadcastAndUnlock(AutoLock* lock) {
+    lock->unlock();
+    broadcast();
+}
+#else  // !_WIN32
+inline void ConditionVariable::signalAndUnlock(Lock* lock) {
+    signal();
+    lock->unlock();
+}
+inline void ConditionVariable::signalAndUnlock(AutoLock* lock) {
+    signal();
+    lock->unlock();
+}
+inline void ConditionVariable::broadcastAndUnlock(Lock* lock) {
+    broadcast();
+    lock->unlock();
+}
+inline void ConditionVariable::broadcastAndUnlock(AutoLock* lock) {
+    broadcast();
+    lock->unlock();
+}
+#endif  // !_WIN32
 
 }  // namespace base
 }  // namespace android
