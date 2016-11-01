@@ -33,6 +33,19 @@ namespace base {
 // Useful to implement various synchronization data structures.
 class ConditionVariable {
 public:
+    // A set of static functions to efficiently unlock the lock used with
+    // the current condition variable and signal or broadcast it.
+    //
+    // The functions are needed because on some platforms (Posix) it's more
+    // efficient to signal the variable before unlocking mutex, while on others
+    // (Windows) it's exactly the opposite. Functions implement the best way
+    // for each platform and abstract it out from the user.
+    static void signalAndUnlock(ConditionVariable* cv, Lock* lock);
+    static void signalAndUnlock(ConditionVariable* cv, AutoLock* lock);
+
+    static void broadcastAndUnlock(ConditionVariable* cv, Lock* lock);
+    static void broadcastAndUnlock(ConditionVariable* cv, AutoLock* lock);
+
 #ifdef _WIN32
 
     ConditionVariable();
@@ -111,6 +124,43 @@ private:
 
     DISALLOW_COPY_ASSIGN_AND_MOVE(ConditionVariable);
 };
+
+#ifdef _WIN32
+inline void ConditionVariable::signalAndUnlock(ConditionVariable* cv, Lock* lock) {
+    lock->unlock();
+    cv->signal();
+}
+inline void ConditionVariable::signalAndUnlock(ConditionVariable* cv, AutoLock* lock) {
+    lock->unlock();
+    cv->signal();
+}
+
+inline void ConditionVariable::broadcastAndUnlock(ConditionVariable* cv, Lock* lock) {
+    lock->unlock();
+    cv->broadcast();
+}
+inline void ConditionVariable::broadcastAndUnlock(ConditionVariable* cv, AutoLock* lock) {
+    lock->unlock();
+    cv->broadcast();
+}
+#else
+inline void ConditionVariable::signalAndUnlock(ConditionVariable* cv, Lock* lock) {
+    cv->signal();
+    lock->unlock();
+}
+inline void ConditionVariable::signalAndUnlock(ConditionVariable* cv, AutoLock* lock) {
+    cv->signal();
+    lock->unlock();
+}
+inline void ConditionVariable::broadcastAndUnlock(ConditionVariable* cv, Lock* lock) {
+    cv->broadcast();
+    lock->unlock();
+}
+inline void ConditionVariable::broadcastAndUnlock(ConditionVariable* cv, AutoLock* lock) {
+    cv->broadcast();
+    lock->unlock();
+}
+#endif
 
 }  // namespace base
 }  // namespace android
