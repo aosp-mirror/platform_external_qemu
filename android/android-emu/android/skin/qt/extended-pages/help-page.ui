@@ -16,9 +16,9 @@
   <widget class="QTabWidget" name="help_tabs">
    <property name="geometry">
     <rect>
-     <x>20</x>
+     <x>0</x>
      <y>20</y>
-     <width>600</width>
+     <width>630</width>
      <height>550</height>
     </rect>
    </property>
@@ -35,9 +35,9 @@
     <widget class="QTableWidget" name="shortcutsTableWidget">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>20</x>
        <y>10</y>
-       <width>570</width>
+       <width>584</width>
        <height>500</height>
       </rect>
      </property>
@@ -79,7 +79,7 @@
        <string>Command</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeading|AlignVCenter</set>
+       <set>AlignLeft|AlignVCenter</set>
       </property>
      </column>
      <column>
@@ -87,7 +87,7 @@
        <string>Key</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeading|AlignVCenter</set>
+       <set>AlignLeft|AlignVCenter</set>
       </property>
      </column>
     </widget>
@@ -96,12 +96,12 @@
     <attribute name="title">
      <string>Emulator help</string>
     </attribute>
-    <widget class="QPushButton" name="help_docs">
+    <widget class="RaisedMaterialButton" name="help_docs">
      <property name="geometry">
       <rect>
-       <x>4</x>
+       <x>20</x>
        <y>10</y>
-       <width>145</width>
+       <width>132</width>
        <height>36</height>
       </rect>
      </property>
@@ -113,15 +113,22 @@
        <bold>true</bold>
       </font>
      </property>
-     <property name="cursor">
-      <cursorShape>PointingHandCursor</cursorShape>
-     </property>
      <property name="styleSheet">
-      <string notr="true">Text-align:left; padding:3px;</string>
+      <string notr="true">Text-align:left; padding:8px</string>
      </property>
      <property name="text">
       <string>DOCUMENTATION</string>
      </property>
+     <property name="icon">
+      <iconset resource="../resources.qrc">
+       <normaloff>:/light/documentation</normaloff>:/light/documentation</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>20</width>
+       <height>20</height>
+      </size>
+     </property>
      <property name="flat">
       <bool>true</bool>
      </property>
@@ -132,12 +139,12 @@
       <bool>false</bool>
      </property>
     </widget>
-    <widget class="QPushButton" name="help_fileBug">
+    <widget class="RaisedMaterialButton" name="help_fileBug">
      <property name="geometry">
       <rect>
-       <x>4</x>
+       <x>20</x>
        <y>60</y>
-       <width>145</width>
+       <width>132</width>
        <height>36</height>
       </rect>
      </property>
@@ -149,15 +156,22 @@
        <bold>true</bold>
       </font>
      </property>
-     <property name="cursor">
-      <cursorShape>PointingHandCursor</cursorShape>
-     </property>
      <property name="styleSheet">
-      <string notr="true">Text-align:left; padding:3px;</string>
+      <string notr="true">Text-align:left; padding:8px</string>
      </property>
      <property name="text">
       <string>FILE A BUG</string>
      </property>
+     <property name="icon">
+      <iconset resource="../resources.qrc">
+       <normaloff>:/light/android_bug</normaloff>:/light/android_bug</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>20</width>
+       <height>20</height>
+      </size>
+     </property>
      <property name="flat">
       <bool>true</bool>
      </property>
@@ -168,12 +182,12 @@
       <bool>false</bool>
      </property>
     </widget>
-    <widget class="QPushButton" name="help_sendFeedback">
+    <widget class="RaisedMaterialButton" name="help_sendFeedback">
      <property name="geometry">
       <rect>
-       <x>4</x>
+       <x>20</x>
        <y>110</y>
-       <width>145</width>
+       <width>132</width>
        <height>36</height>
       </rect>
      </property>
@@ -185,14 +199,21 @@
        <bold>true</bold>
       </font>
      </property>
-     <property name="cursor">
-      <cursorShape>PointingHandCursor</cursorShape>
-     </property>
      <property name="styleSheet">
-      <string notr="true">Text-align:left; padding:3px;</string>
+      <string notr="true">Text-align:left; padding:8px</string>
      </property>
      <property name="text">
       <string>SEND FEEDBACK</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../resources.qrc">
+       <normaloff>:/light/feedback</normaloff>:/light/feedback</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>20</width>
+       <height>20</height>
+      </size>
      </property>
      <property name="flat">
       <bool>true</bool>
@@ -212,9 +233,9 @@
     <widget class="QPlainTextEdit" name="help_licenseText">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>20</x>
        <y>10</y>
-       <width>570</width>
+       <width>584</width>
        <height>500</height>
       </rect>
      </property>
@@ -239,9 +260,9 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>20</x>
        <y>28</y>
-       <width>275</width>
+       <width>280</width>
        <height>31</height>
       </rect>
      </property>
@@ -297,7 +318,7 @@
     <widget class="QGroupBox" name="adbSerialNumberTitle">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>20</x>
        <y>10</y>
        <width>181</width>
        <height>21</height>
@@ -321,7 +342,7 @@
     <widget class="QGroupBox" name="versionTitle">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>20</x>
        <y>84</y>
        <width>181</width>
        <height>21</height>
@@ -348,9 +369,9 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>20</x>
        <y>102</y>
-       <width>275</width>
+       <width>280</width>
        <height>31</height>
       </rect>
      </property>
@@ -393,7 +414,7 @@
       <rect>
        <x>324</x>
        <y>28</y>
-       <width>265</width>
+       <width>280</width>
        <height>31</height>
       </rect>
      </property>
@@ -436,7 +457,7 @@
       <rect>
        <x>324</x>
        <y>102</y>
-       <width>265</width>
+       <width>280</width>
        <height>31</height>
       </rect>
      </property>
@@ -506,6 +527,26 @@
    </widget>
   </widget>
  </widget>
- <resources/>
+ <customwidgets>
+  <customwidget>
+   <class>RaisedMaterialButton</class>
+   <extends>QPushButton</extends>
+   <header>android/skin/qt/raised-material-button.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>help_tabs</tabstop>
+  <tabstop>help_docs</tabstop>
+  <tabstop>help_fileBug</tabstop>
+  <tabstop>help_sendFeedback</tabstop>
+  <tabstop>help_licenseText</tabstop>
+  <tabstop>help_adbSerialNumberBox</tabstop>
+  <tabstop>help_androidVersionBox</tabstop>
+  <tabstop>help_versionBox</tabstop>
+  <tabstop>help_latestVersionBox</tabstop>
+ </tabstops>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

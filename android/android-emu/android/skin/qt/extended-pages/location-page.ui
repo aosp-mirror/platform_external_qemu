@@ -81,9 +81,9 @@
   <widget class="RaisedMaterialButton" name="loc_sendPointButton">
    <property name="geometry">
     <rect>
-     <x>538</x>
+     <x>472</x>
      <y>220</y>
-     <width>66</width>
+     <width>132</width>
      <height>36</height>
     </rect>
    </property>
@@ -97,6 +97,16 @@
    </property>
    <property name="text">
     <string>SEND</string>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/light/loc_send</normaloff>:/light/loc_send</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -181,9 +191,9 @@
   <widget class="RaisedMaterialButton" name="loc_GpxKmlButton">
    <property name="geometry">
     <rect>
-     <x>480</x>
+     <x>472</x>
      <y>550</y>
-     <width>124</width>
+     <width>132</width>
      <height>36</height>
     </rect>
    </property>
@@ -203,6 +213,16 @@
    </property>
    <property name="text">
     <string>LOAD GPX/KML</string>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/light/load_GPX</normaloff>:/light/load_GPX</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -536,8 +556,10 @@
  </customwidgets>
  <tabstops>
   <tabstop>loc_modeSwitch</tabstop>
+  <tabstop>loc_currentLoc</tabstop>
   <tabstop>loc_altitudeInput</tabstop>
   <tabstop>loc_sendPointButton</tabstop>
+  <tabstop>loc_pathTable</tabstop>
   <tabstop>loc_playStopButton</tabstop>
   <tabstop>loc_playbackSpeed</tabstop>
   <tabstop>loc_GpxKmlButton</tabstop>

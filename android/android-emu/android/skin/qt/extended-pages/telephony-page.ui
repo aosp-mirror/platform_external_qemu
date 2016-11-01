@@ -26,7 +26,7 @@
     <string notr="true">padding: 4px 2px 2px 2px;</string>
    </property>
    <property name="plainText">
-    <string>Don't forget the marshmallows!</string>
+    <string>Nougat is sweet!</string>
    </property>
    <property name="ColorGroup" stdset="0">
     <string>SmsBox</string>
@@ -57,9 +57,9 @@
   <widget class="RaisedMaterialButton" name="tel_startEndButton">
    <property name="geometry">
     <rect>
-     <x>172</x>
+     <x>168</x>
      <y>80</y>
-     <width>128</width>
+     <width>132</width>
      <height>36</height>
     </rect>
    </property>
@@ -80,6 +80,12 @@
    <property name="icon">
     <iconset resource="../resources.qrc">
      <normaloff>:/light/phone_button</normaloff>:/light/phone_button</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -135,9 +141,9 @@
   <widget class="RaisedMaterialButton" name="sms_sendButton">
    <property name="geometry">
     <rect>
-     <x>160</x>
+     <x>168</x>
      <y>298</y>
-     <width>140</width>
+     <width>132</width>
      <height>36</height>
     </rect>
    </property>
@@ -155,6 +161,12 @@
    <property name="icon">
     <iconset resource="../resources.qrc">
      <normaloff>:/dark/send</normaloff>:/dark/send</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -175,9 +187,9 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>40</x>
+     <x>20</x>
      <y>80</y>
-     <width>118</width>
+     <width>132</width>
      <height>36</height>
     </rect>
    </property>
@@ -199,6 +211,12 @@
     <iconset resource="../resources.qrc">
      <normaloff>:/light/phone_paused</normaloff>
      <disabledoff>:/light/phone_paused_disabled</disabledoff>:/light/phone_paused</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
    </property>
    <property name="flat">
     <bool>true</bool>
