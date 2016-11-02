@@ -478,13 +478,14 @@ mkdir -p "$AOSP_TMPDIR"/external
 ln -s "$AOSP_ROOT"/prebuilts "$AOSP_TMPDIR"/prebuilts
 ln -s "$AOSP_ROOT"/external/qemu "$AOSP_TMPDIR"/external/qemu
 ln -s "$AOSP_ROOT"/external/gtest "$AOSP_TMPDIR"/external/gtest
+ln -s "$AOSP_ROOT"/external/google-benchmark "$AOSP_TMPDIR"/external/google-benchmark
 if [ "$OPT_QEMU2_SRCDIR" ]; then
     ln -s $(realpath "$OPT_QEMU2_SRCDIR") "$AOSP_TMPDIR"/external/qemu-android
 else
     ln -s "$AOSP_ROOT"/external/qemu-android "$AOSP_TMPDIR"/external/qemu-android
 fi
 
-AOSP_SOURCE_SUBDIRS="external/qemu external/qemu-android external/gtest"
+AOSP_SOURCE_SUBDIRS="external/qemu external/qemu-android external/gtest external/google-benchmark"
 
 for AOSP_SUBDIR in $AOSP_SOURCE_SUBDIRS; do
     extract_subdir_git_history \
