@@ -15,6 +15,8 @@ include $(LOCAL_PATH)/distrib/jpeg-6b/libjpeg.mk
 include $(LOCAL_PATH)/distrib/libpng.mk
 include $(LOCAL_PATH)/distrib/mini-glib/sources.make
 include $(LOCAL_PATH)/distrib/googletest/Android.mk
+include $(LOCAL_PATH)/distrib/regex-win32/sources.mk
+include $(LOCAL_PATH)/distrib/google-benchmark/sources.mk
 include $(LOCAL_PATH)/distrib/libANGLEtranslation.mk
 include $(LOCAL_PATH)/distrib/Protobuf.mk
 
