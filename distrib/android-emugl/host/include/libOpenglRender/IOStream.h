@@ -15,6 +15,7 @@
 */
 #pragma once
 
+#include "OpenglRender/RenderChannel.h"
 #include "ErrorLog.h"
 
 #include <assert.h>
@@ -22,21 +23,17 @@
 #include <stdio.h>
 
 class IOStream {
-public:
-    explicit IOStream(size_t bufSize) : m_bufsize(bufSize) {}
-
-    virtual ~IOStream() {
+protected:
+    ~IOStream() {
         // NOTE: m_buf was owned by the child class thus we expect it to be
         // released and flushed before the object destruction.
         assert(!m_buf || m_free == m_bufsize);
     }
 
-    size_t read(void* buf, size_t bufLen) {
-        if (!read(buf, &bufLen)) {
-            return 0;
-        }
-        return bufLen;
-    }
+public:
+    explicit IOStream(size_t bufSize) : m_bufsize(bufSize) {}
+
+    virtual bool read(emugl::ChannelBuffer* buf) = 0;
 
     unsigned char* alloc(size_t len) {
         if (m_buf && len > m_free) {
@@ -74,8 +71,6 @@ public:
 protected:
     virtual void *allocBuffer(size_t minSize) = 0;
     virtual int commitBuffer(size_t size) = 0;
-    virtual const unsigned char *read(void *buf, size_t *inout_len) = 0;
-    virtual int writeFully(const void* buf, size_t len) = 0;
 
 private:
     unsigned char* m_buf = nullptr;

@@ -48,8 +48,7 @@ public:
     // parallel with the ones from the RenderChannel interface. Make sure the
     // internal state remains consistent all the time.
     void writeToGuest(ChannelBuffer&& buf);
-    size_t readFromGuest(ChannelBuffer::value_type* buf, size_t size,
-                         bool blocking);
+    bool readFromGuest(ChannelBuffer* buf);
     void forceStop();
 
 private:
@@ -86,9 +85,6 @@ private:
     static const size_t kChannelCapacity = 256;
     android::base::MessageChannel<ChannelBuffer, kChannelCapacity> mFromGuest;
     android::base::MessageChannel<ChannelBuffer, kChannelCapacity> mToGuest;
-
-    ChannelBuffer mFromGuestBuffer;
-    size_t mFromGuestBufferLeft = 0;
 };
 
 }  // namespace emugl
