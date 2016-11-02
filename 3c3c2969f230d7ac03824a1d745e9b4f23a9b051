@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "e6a5561c_2a3faa7b",
+        "filename": "android/base/synchronization/MessageChannel.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-02T23:42:24Z",
+      "side": 1,
+      "message": "it will, but if someone checks the size() from a different thread, they might miss the update",
+      "parentUuid": "a688be73_91307cb5",
+      "revId": "3c3c2969f230d7ac03824a1d745e9b4f23a9b051",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a688be73_3122f06a",
         "filename": "android/base/synchronization/MessageChannel.cpp",
         "patchSetId": 2
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "e6a5561c_8a0fbede",
+        "filename": "android/base/synchronization/MessageChannel.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-02T23:42:24Z",
+      "side": 1,
+      "message": "memory order has nothing to do to the locking, aka atomicity.\nmemory order is about what this thread sees about other changed values, and what other threads see about other values changed here.\natomicity is about making sure _this_ value always changes atomically.\nstd::atomic\u003c\u003e can\u0027t turn off the atomicity, but it can get rid of all related explicit fences and barriers",
+      "parentUuid": "8bef436f_0037e644",
+      "revId": "3c3c2969f230d7ac03824a1d745e9b4f23a9b051",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a688be73_11256c71",
         "filename": "android/base/synchronization/MessageChannel.h",
         "patchSetId": 2
@@ -64,6 +100,24 @@
       "writtenOn": "2016-11-02T13:24:11Z",
       "side": 1,
       "message": "it looks like that all operations on |mCount| except this one are performed inside a lock/unlock block, i.e. can be done with relaxed order. If tryWrite() / tryRead() are properly used, size() should not appear in the hot traces anymore. This means you can get rid of the atomic variable, and just use a lock here, this will make the code much more readable.",
+      "revId": "3c3c2969f230d7ac03824a1d745e9b4f23a9b051",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6a5561c_8ae69efc",
+        "filename": "android/base/synchronization/MessageChannel.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-02T23:42:24Z",
+      "side": 1,
+      "message": "we have a function in RenderChannelImpl that uses only size() - it\u0027s the one that calculates channel state (can read / can write). RenderChannel is a single producer/single consumer, so it\u0027s perfectly safe to use size() there. But mCount changes need to be visible in the reading thread",
+      "parentUuid": "a688be73_11256c71",
       "revId": "3c3c2969f230d7ac03824a1d745e9b4f23a9b051",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
