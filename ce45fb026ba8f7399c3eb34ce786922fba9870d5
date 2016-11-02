@@ -1,0 +1,159 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e6a5561c_5f22bb6a",
+        "filename": "android-qemu1-glue/qemu-nfc-agent-impl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-11-02T17:04:28Z",
+      "side": 1,
+      "message": "\u00272016\u0027 because it\u0027s a new file",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6a5561c_bf263f82",
+        "filename": "android/console.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2684,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-11-02T17:04:28Z",
+      "side": 1,
+      "message": "Do you want a \u0027return -1\u0027 here?",
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6a5561c_df350ba4",
+        "filename": "android/console.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2855,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-11-02T17:04:28Z",
+      "side": 1,
+      "message": "Maybe \u0027allows you to send a message to the emulator nfc\u0027?",
+      "range": {
+        "startLine": 2855,
+        "startChar": 6,
+        "endLine": 2855,
+        "endChar": 45
+      },
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6a5561c_9f5263d8",
+        "filename": "android/emulation/control/nfc_agent.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-11-02T17:04:28Z",
+      "side": 1,
+      "message": "2016",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6a5561c_3f424f09",
+        "filename": "android/hw-nfc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-11-02T17:04:28Z",
+      "side": 1,
+      "message": "2016",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6a5561c_7f3cd784",
+        "filename": "android/hw-nfc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-11-02T17:04:28Z",
+      "side": 1,
+      "message": "Unwanted tab?",
+      "range": {
+        "startLine": 50,
+        "startChar": 27,
+        "endLine": 50,
+        "endChar": 28
+      },
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6a5561c_ff472718",
+        "filename": "android/hw-nfc.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-11-02T17:04:28Z",
+      "side": 1,
+      "message": "2016",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
