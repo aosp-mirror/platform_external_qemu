@@ -26,9 +26,7 @@ public:
 
     virtual void* allocBuffer(size_t minSize) override final;
     virtual int commitBuffer(size_t size) override final;
-    virtual const unsigned char* read(void* buf,
-                                      size_t* inout_len) override final;
-    virtual int writeFully(const void* buf, size_t len) override final;
+    virtual bool read(emugl::ChannelBuffer* buf) override final;
 
     void forceStop();
 

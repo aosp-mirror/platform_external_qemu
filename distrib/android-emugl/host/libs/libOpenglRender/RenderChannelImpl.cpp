@@ -78,36 +78,12 @@ void RenderChannelImpl::writeToGuest(ChannelBuffer&& buf) {
     onEvent(false);
 }
 
-size_t RenderChannelImpl::readFromGuest(ChannelBuffer::value_type* buf,
-                                        size_t size,
-                                        bool blocking) {
+bool RenderChannelImpl::readFromGuest(ChannelBuffer* buf) {
     assert(buf);
 
-    size_t read = 0;
-    const auto bufEnd = buf + size;
-    while (buf != bufEnd && !mStopped) {
-        if (mFromGuestBufferLeft == 0) {
-            if (mFromGuest.size() == 0 && (read > 0 || !blocking)) {
-                break;
-            }
-            if (!mFromGuest.receive(&mFromGuestBuffer)) {
-                break;
-            }
-            mFromGuestBufferLeft = mFromGuestBuffer.size();
-        }
-
-        const size_t curSize =
-                std::min<size_t>(bufEnd - buf, mFromGuestBufferLeft);
-        memcpy(buf, mFromGuestBuffer.data() +
-                            (mFromGuestBuffer.size() - mFromGuestBufferLeft),
-               curSize);
-
-        read += curSize;
-        buf += curSize;
-        mFromGuestBufferLeft -= curSize;
-    }
+    const bool res = !mStopped && mFromGuest.receive(buf);
     onEvent(false);
-    return read;
+    return res;
 }
 
 void RenderChannelImpl::onEvent(bool byGuest) {

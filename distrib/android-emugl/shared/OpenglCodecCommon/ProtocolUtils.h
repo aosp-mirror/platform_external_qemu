@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../libs/libOpenglRender/ReadBuffer.h"
+
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -39,7 +41,7 @@ namespace emugl {
 
 template <typename T, typename S>
 struct UnpackerT {
-    static T unpack(const void* ptr) {
+    static const T& unpack(const void* ptr) {
         static_assert(sizeof(T) == sizeof(S),
                       "Bad input arguments, have to be of the same size");
         return *(const T*)ptr;
@@ -61,8 +63,18 @@ struct UnpackerT<ssize_t, uint32_t> {
 };
 
 template <typename T, typename S>
-inline T Unpack(const void* ptr) {
+inline auto Unpack(const void* ptr) -> decltype(UnpackerT<T, S>::unpack(ptr)) {
     return UnpackerT<T, S>::unpack(ptr);
+}
+
+template <typename T, typename S>
+inline auto Unpack(ReadBuffer* buf) -> decltype(Unpack<T, S>((void*)nullptr)) {
+    return Unpack<T, S>(buf->read(sizeof(S)));
+}
+
+template <typename T>
+inline auto Unpack(ReadBuffer* buf) -> decltype(Unpack<T, T>((void*)nullptr)) {
+    return Unpack<T, T>(buf);
 }
 
 // Helper classes GenericInputBuffer and GenericOutputBuffer used to ensure
@@ -90,41 +102,21 @@ inline T Unpack(const void* ptr) {
 // if the |ptr|'s |size| is small enough. If it doesn't fit into the internal
 // array, an aligned copy is allocated on the heap and freed in the dtor.
 
-template <size_t StackSize = 1024, size_t Align = 8>
+template <size_t Align = 8>
 class GenericInputBuffer {
     static_assert(Align == 1 || Align == 2 || Align == 4 || Align == 8,
                   "Bad alignment parameter");
 
 public:
-    GenericInputBuffer(const void* input, size_t size) : mOrigBuff(input) {
-        if (((uintptr_t)input & (Align - 1U)) == 0) {
-            mPtr = const_cast<void*>(input);
-        } else {
-            if (size <= StackSize) {
-                mPtr = &mArray[0];
-            } else {
-                mPtr = malloc(size);
-            }
-            memcpy(mPtr, input, size);
-        }
-    }
-
-    ~GenericInputBuffer() {
-        if (mPtr != mOrigBuff && mPtr != &mArray[0]) {
-            free(mPtr);
-        }
+    GenericInputBuffer(ReadBuffer* buf, size_t size) {
+        mPtr = buf->readAlignedChunk(size, Align);
     }
 
     const void* get() const { return mPtr; }
 
 private:
-    // A pointer to the aligned buffer, might point either to mOrgBuf, to mArray
-    // start or to a heap-allocated chunk of data.
-    void* mPtr;
-    // Original buffer.
-    const void* mOrigBuff;
-    // Inplace aligned array for small enough buffers.
-    char __attribute__((__aligned__(Align))) mArray[StackSize];
+    // A pointer to the aligned buffer
+    const void* mPtr;
 };
 
 template <size_t StackSize = 1024, size_t Align = 8>

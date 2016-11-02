@@ -11,13 +11,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 #include "ChannelStream.h"
 
 #include <assert.h>
 
 ChannelStream::ChannelStream(std::shared_ptr<emugl::RenderChannelImpl> channel,
                              size_t bufSize)
-    : IOStream(bufSize), mChannel(channel) {
+    : IOStream(bufSize), mChannel(std::move(channel)) {
     mBuf.resize_noinit(bufSize);
 }
 
@@ -40,19 +41,8 @@ int ChannelStream::commitBuffer(size_t size) {
     return size;
 }
 
-const unsigned char* ChannelStream::read(void* buf, size_t* inout_len) {
-    size_t size = mChannel->readFromGuest((char*)buf, *inout_len, true);
-    if (size == 0) {
-        return nullptr;
-    }
-    *inout_len = size;
-    return (const unsigned char*)buf;
-}
-
-int ChannelStream::writeFully(const void* buf, size_t len) {
-    mChannel->writeToGuest(
-            emugl::ChannelBuffer((const char*)buf, (const char*)buf + len));
-    return len;
+bool ChannelStream::read(emugl::ChannelBuffer* buf) {
+    return mChannel->readFromGuest(buf);
 }
 
 void ChannelStream::forceStop() {

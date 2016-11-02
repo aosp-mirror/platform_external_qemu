@@ -51,18 +51,23 @@ std::unique_ptr<RenderThread> RenderThread::create(
 }
 
 intptr_t RenderThread::main() {
-    uint32_t flags = 0;
-    if (mChannel->readFromGuest(reinterpret_cast<char*>(&flags),
-                                sizeof(flags), true) != sizeof(flags)) {
+    emugl::ChannelBuffer buf;
+    if (!mChannel->readFromGuest(&buf)) {
         return 0;
     }
-
-    // |flags| used to have something, now they're not used.
+    if (buf.size() != 4) {
+        DBG("Error in protocol, RenderThread failed to start @%p\n", this);
+        return 0;
+    }
+    const auto flags = *reinterpret_cast<const uint32_t*>(buf.data());
+    // |flags| used to mean something, now they're not used.
     (void)flags;
 
     ChannelStream stream(mChannel, emugl::ChannelBuffer::kSmallSize);
     RenderThreadInfo tInfo;
     ChecksumCalculatorThreadInfo tChecksumInfo;
+    ChecksumCalculator& checksumCalc = tChecksumInfo.get();
+    ReadBuffer readBuf(&stream);
 
     //
     // initialize decoders
@@ -71,112 +76,40 @@ intptr_t RenderThread::main() {
     tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, NULL);
     initRenderControlContext(&tInfo.m_rcDec);
 
-    ReadBuffer readBuf(STREAM_BUFFER_SIZE);
+    bool progress;
+    do {
+        progress = false;
+        // try to process some of the command buffer using the GLESv1
+        // decoder
+        //
+        // DRIVER WORKAROUND:
+        // On Linux with NVIDIA GPU's at least, we need to avoid performing
+        // GLES ops while someone else holds the FrameBuffer write lock.
+        //
+        // To be more specific, on Linux with NVIDIA Quadro K2200 v361.xx,
+        // we get a segfault in the NVIDIA driver when glTexSubImage2D
+        // is called at the same time as glXMake(Context)Current.
+        //
+        // To fix, this driver workaround avoids calling
+        // any sort of GLES call when we are creating/destroying EGL
+        // contexts.
+        //FrameBuffer::getFB()->lockContextStructureRead();
+        progress |= tInfo.m_glDec.decode(&readBuf, &stream, &checksumCalc);
 
-    int stats_totalBytes = 0;
-    long long stats_t0 = android::base::System::get()->getHighResTimeUs() / 1000;
+        //
+        // try to process some of the command buffer using the GLESv2
+        // decoder
+        //
+        progress |= tInfo.m_gl2Dec.decode(&readBuf, &stream, &checksumCalc);
+        //FrameBuffer::getFB()->unlockContextStructureRead();
 
-    //
-    // open dump file if RENDER_DUMP_DIR is defined
-    //
-    const char* dump_dir = getenv("RENDERER_DUMP_DIR");
-    FILE* dumpFP = NULL;
-    if (dump_dir) {
-        size_t bsize = strlen(dump_dir) + 32;
-        char* fname = new char[bsize];
-        snprintf(fname, bsize, "%s/stream_%p", dump_dir, this);
-        dumpFP = fopen(fname, "wb");
-        if (!dumpFP) {
-            fprintf(stderr, "Warning: stream dump failed to open file %s\n",
-                    fname);
-        }
-        delete[] fname;
+        //
+        // try to process some of the command buffer using the
+        // renderControl decoder
+        //
+        progress |= tInfo.m_rcDec.decode(&readBuf, &stream, &checksumCalc);
     }
-
-    while (1) {
-        int stat = readBuf.getData(&stream);
-        if (stat <= 0) {
-            break;
-        }
-
-        //
-        // log received bandwidth statistics
-        //
-        stats_totalBytes += readBuf.validData();
-        long long dt = android::base::System::get()->getHighResTimeUs() / 1000 - stats_t0;
-        if (dt > 1000) {
-            // float dts = (float)dt / 1000.0f;
-            // printf("Used Bandwidth %5.3f MB/s\n", ((float)stats_totalBytes /
-            // dts) / (1024.0f*1024.0f));
-            stats_totalBytes = 0;
-            stats_t0 = android::base::System::get()->getHighResTimeUs() / 1000;
-        }
-
-        //
-        // dump stream to file if needed
-        //
-        if (dumpFP) {
-            int skip = readBuf.validData() - stat;
-            fwrite(readBuf.buf() + skip, 1, readBuf.validData() - skip, dumpFP);
-            fflush(dumpFP);
-        }
-
-        bool progress;
-        do {
-            progress = false;
-
-            // try to process some of the command buffer using the GLESv1
-            // decoder
-            //
-            // DRIVER WORKAROUND:
-            // On Linux with NVIDIA GPU's at least, we need to avoid performing
-            // GLES ops while someone else holds the FrameBuffer write lock.
-            //
-            // To be more specific, on Linux with NVIDIA Quadro K2200 v361.xx,
-            // we get a segfault in the NVIDIA driver when glTexSubImage2D
-            // is called at the same time as glXMake(Context)Current.
-            //
-            // To fix, this driver workaround avoids calling
-            // any sort of GLES call when we are creating/destroying EGL
-            // contexts.
-            FrameBuffer::getFB()->lockContextStructureRead();
-            size_t last = tInfo.m_glDec.decode(
-                    readBuf.buf(), readBuf.validData(), &stream);
-            if (last > 0) {
-                progress = true;
-                readBuf.consume(last);
-            }
-
-            //
-            // try to process some of the command buffer using the GLESv2
-            // decoder
-            //
-            last = tInfo.m_gl2Dec.decode(readBuf.buf(), readBuf.validData(),
-                                         &stream);
-            FrameBuffer::getFB()->unlockContextStructureRead();
-
-            if (last > 0) {
-                progress = true;
-                readBuf.consume(last);
-            }
-
-            //
-            // try to process some of the command buffer using the
-            // renderControl decoder
-            //
-            last = tInfo.m_rcDec.decode(readBuf.buf(), readBuf.validData(),
-                                        &stream);
-            if (last > 0) {
-                readBuf.consume(last);
-                progress = true;
-            }
-
-        } while (progress);
-    }
-
-    if (dumpFP) {
-        fclose(dumpFP);
-    }
+    while (progress);
 
     // exit sync thread, if any.
     SyncThread::destroySyncThread();
@@ -191,7 +124,6 @@ intptr_t RenderThread::main() {
     }
 
     FrameBuffer::getFB()->drainWindowSurface();
-
     FrameBuffer::getFB()->drainRenderContext();
 
     DBG("Exited a RenderThread @%p\n", this);
