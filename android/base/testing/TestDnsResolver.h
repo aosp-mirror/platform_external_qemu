@@ -90,6 +90,12 @@ public:
     // through previous addEntryXXX() calls.
     virtual int resolveName(StringView server_name, AddressList* out) override {
         std::string key(server_name);
+        // First try to parse it as a numerical IP address.
+        IpAddress ip(key);
+        if (ip.valid()) {
+            out->push_back(std::move(ip));
+            return 0;
+        }
         auto it = mMap.find(key);
         if (it == mMap.end()) {
             return -ENOENT;
