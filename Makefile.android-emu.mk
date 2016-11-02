@@ -370,6 +370,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-libselinux \
     emulator-libjpeg \
     emulator-libpng \
+    emulator-libwebp \
     emulator-zlib \
 
 ANDROID_EMU_LDLIBS := \
