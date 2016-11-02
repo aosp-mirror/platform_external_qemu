@@ -59,15 +59,17 @@ int ReadBuffer::getData(IOStream *stream)
         len    = m_size - m_validData;
     }
     m_readPtr = m_buf;
-    if (NULL != stream->read(m_buf + m_validData, &len)) {
-        m_validData += len;
-        return len;
+
+    const size_t readLen = stream->read(m_buf + m_validData, len);
+    if (!readLen) {
+        return -1;
     }
-    return -1;
+
+    m_validData += readLen;
+    return readLen;
 }
 
-void ReadBuffer::consume(size_t amount)
-{
+void ReadBuffer::consume(size_t amount) {
     assert(amount <= m_validData);
     m_validData -= amount;
     m_readPtr += amount;

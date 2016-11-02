@@ -13,36 +13,32 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef __IO_STREAM_H__
-#define __IO_STREAM_H__
-
-#include <stdlib.h>
-#include <stdio.h>
+#pragma once
 
 #include "ErrorLog.h"
 
+#include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
+
 class IOStream {
 public:
-    IOStream(size_t bufSize) {
-        m_buf = NULL;
-        m_bufsize = bufSize;
-        m_free = 0;
-    }
-
-    virtual void *allocBuffer(size_t minSize) = 0;
-    virtual int commitBuffer(size_t size) = 0;
-    virtual const unsigned char *readFully( void *buf, size_t len) = 0;
-    virtual const unsigned char *read( void *buf, size_t *inout_len) = 0;
-    virtual int writeFully(const void* buf, size_t len) = 0;
-    virtual void forceStop() = 0;
+    explicit IOStream(size_t bufSize) : m_bufsize(bufSize) {}
 
     virtual ~IOStream() {
-
-        // NOTE: m_buf is 'owned' by the child class thus we expect it to be released by it
+        // NOTE: m_buf was owned by the child class thus we expect it to be
+        // released and flushed before the object destruction.
+        assert(!m_buf || m_free == m_bufsize);
     }
 
-    unsigned char *alloc(size_t len) {
+    size_t read(void* buf, size_t bufLen) {
+        if (!read(buf, &bufLen)) {
+            return 0;
+        }
+        return bufLen;
+    }
 
+    unsigned char* alloc(size_t len) {
         if (m_buf && len > m_free) {
             if (flush() < 0) {
                 ERR("Failed to flush in alloc\n");
@@ -60,16 +56,13 @@ public:
             m_bufsize = m_free = allocLen;
         }
 
-        unsigned char *ptr;
-
-        ptr = m_buf + (m_bufsize - m_free);
+        unsigned char* ptr = m_buf + (m_bufsize - m_free);
         m_free -= len;
 
         return ptr;
     }
 
     int flush() {
-
         if (!m_buf || m_free == m_bufsize) return 0;
 
         int stat = commitBuffer(m_bufsize - m_free);
@@ -78,25 +71,14 @@ public:
         return stat;
     }
 
-    const unsigned char *readback(void *buf, size_t len) {
-        flush();
-        return readFully(buf, len);
-    }
-
+protected:
+    virtual void *allocBuffer(size_t minSize) = 0;
+    virtual int commitBuffer(size_t size) = 0;
+    virtual const unsigned char *read(void *buf, size_t *inout_len) = 0;
+    virtual int writeFully(const void* buf, size_t len) = 0;
 
 private:
-    unsigned char *m_buf;
+    unsigned char* m_buf = nullptr;
     size_t m_bufsize;
-    size_t m_free;
+    size_t m_free = 0;
 };
-
-//
-// When a client opens a connection to the renderer, it should
-// send unsigned int value indicating the "clientFlags".
-// The following are the bitmask of the clientFlags.
-// currently only one bit is used which flags the server
-// it should exit.
-//
-#define IOSTREAM_CLIENT_EXIT_SERVER      1
-
-#endif

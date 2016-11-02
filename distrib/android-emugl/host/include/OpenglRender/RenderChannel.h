@@ -13,11 +13,11 @@
 // limitations under the License.
 #pragma once
 
+#include "android/base/containers/SmallVector.h"
 #include "android/base/EnumFlags.h"
 
 #include <functional>
 #include <memory>
-#include <vector>
 
 namespace emugl {
 
@@ -25,9 +25,7 @@ namespace emugl {
 using namespace ::android::base::EnumFlags;
 
 // A type used for data passing.
-// TODO(zyy): add a small buffer optimization here to pass 4 and 8-byte chunks
-// without heap allocation (those are _very_ common).
-using ChannelBuffer = std::vector<char>;
+using ChannelBuffer = android::base::SmallFixedVector<char, 512>;
 
 // RenderChannel - an interface for a single guest to host renderer connection.
 // It allows the guest to send GPU emulation protocol-serialized messages to an

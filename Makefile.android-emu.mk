@@ -450,6 +450,7 @@ LOCAL_SRC_FILES := \
   android/base/containers/Lookup_unittest.cpp \
   android/base/containers/PointerSet_unittest.cpp \
   android/base/containers/ScopedPointerSet_unittest.cpp \
+  android/base/containers/SmallVector_unittest.cpp \
   android/base/containers/TailQueueList_unittest.cpp \
   android/base/EintrWrapper_unittest.cpp \
   android/base/files/IniFile_unittest.cpp \
