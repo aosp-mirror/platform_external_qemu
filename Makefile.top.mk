@@ -197,6 +197,22 @@ end-emulator-program = \
     $(eval LOCAL_LDLIBS += $(QEMU_SYSTEM_LDLIBS)) \
     $(eval $(end-emulator-module-ev)) \
 
+# A variant of start-emulator-program that also links the Google Benchmark
+# library to the final program. Use with end-emulator-benchmark.
+# NOTE: These are _not_ compiled by default, unless BUILD_BENCHMARKS is
+# set to 'true', which happens is you call android-configure.sh with the
+# --benchmarks option.
+start-emulator-benchmark = \
+  $(call start-emulator-program,$1)
+
+# A variant of end-emulator-program for host benchmark programs instead.
+end-emulator-benchmark = \
+  $(eval LOCAL_C_INCLUDES += $$(GOOGLE_BENCHMARK_INCLUDES)) \
+  $(eval LOCAL_STATIC_LIBRARIES += $$(GOOGLE_BENCHMARK_STATIC_LIBRARIES)) \
+  $(eval LOCAL_LDLIBS += $$(GOOGLE_BENCHMARK_LDLIBS)) \
+  $(call local-link-static-c++lib) \
+  $(if $(filter true,$(BUILD_BENCHMARKS)),$(call end-emulator-program))
+
 define end-emulator-module-ev
 LOCAL_BITS := $$(BUILD_TARGET_BITS)
 include $$(LOCAL_BUILD_FILE)

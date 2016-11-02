@@ -243,6 +243,7 @@ OPTION_MINGW=no
 OPTION_GLES=
 OPTION_SDK_REV=
 OPTION_SYMBOLS=no
+OPTION_BENCHMARKS=no
 ANDROID_SDK_TOOLS_REVISION=
 ANDROID_SDK_TOOLS_BUILD_NUMBER=
 
@@ -329,6 +330,8 @@ for opt do
   ;;
   --sdk-build-number=*) ANDROID_SDK_TOOLS_BUILD_NUMBER=$optarg
   ;;
+  --benchmarks) OPTION_BENCHMARKS=yes
+  ;;
   *)
     echo "unknown option '$opt', use --help"
     exit 1
@@ -362,7 +365,7 @@ EOF
     echo "  --sanitizer=[...]           Build with LLVM sanitizer (sanitizer=[address, thread])"
     echo "  --no-pcbios                 Disable copying of PC Bios files"
     echo "  --no-tests                  Don't run unit test suite"
-    echo "  --prebuilt-qemu2            Don't build QEMU2 from sources, use prebuilts."
+    echo "  --benchmarks                Build benchmark programs."
     echo ""
     exit 1
 fi
@@ -1017,6 +1020,10 @@ echo "CONFIG_ALSA       := $PROBE_ALSA" >> $config_mk
 echo "CONFIG_OSS        := $PROBE_OSS" >> $config_mk
 echo "CONFIG_PULSEAUDIO := $PROBE_PULSEAUDIO" >> $config_mk
 echo "QT_PREBUILTS_DIR  := $QT_PREBUILTS_DIR" >> $config_mk
+
+if [ "$OPTION_BENCHMARKS" = "yes" ]; then
+  echo "BUILD_BENCHMARKS := true" >> $config_mk
+fi
 
 if [ "$OPTION_GLES" = "angle" ] ; then
     echo "EMULATOR_USE_ANGLE := true" >> $config_mk
