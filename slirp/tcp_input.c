@@ -234,6 +234,8 @@ tcp_input(struct mbuf *m, int iphlen, struct socket *inso, unsigned short af)
 	struct sockaddr_in6 *lhost6, *fhost6;
     struct ex_list *ex_ptr;
     Slirp *slirp;
+    memset(&lhost, 0, sizeof(lhost));
+    memset(&fhost, 0, sizeof(lhost));
 
 	DEBUG_CALL("tcp_input");
 	DEBUG_ARGS((dfd, " m = %p  iphlen = %2d  inso = %p\n",
