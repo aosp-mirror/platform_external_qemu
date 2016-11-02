@@ -49,7 +49,9 @@ static void onGuestClipboardChanged(
     const uint8_t* data,
     size_t length) {
     QString content = QString::fromUtf8((const char*)data, length);
+    QApplication::clipboard()->blockSignals(true);
     QApplication::clipboard()->setText(content);
+    QApplication::clipboard()->blockSignals(false);
 }
 
 extern "C" void setUiEmuAgent(const UiEmuAgent* agentPtr) {
