@@ -34,6 +34,11 @@
 // This prevents crashes with certain backends (e.g. OSMesa).
 #define USE_ALIGNED_BUFFERS 1
 
+// Set these to 1 if you want to instrument either guest's or host's code for
+// time-per-call printing.
+#define INSTRUMENT_TIMING_GUEST 0
+#define INSTRUMENT_TIMING_HOST 0
+
 EntryPoint * ApiGen::findEntryByName(const std::string & name)
 {
     EntryPoint * entry = NULL;
@@ -369,14 +374,18 @@ static int getVarEncodingSizeExpression(Var&  var, EntryPoint* e, char* buff, si
     return ret;
 }
 
-static int writeVarEncodingSize(Var& var, FILE* fp)
+static int writeVarEncodingSize(Var& var, bool includeOut, FILE* fp)
 {
     int ret = 0;
     if (!var.isPointer()) {
         fprintf(fp, "%u", (unsigned int) var.type()->bytes());
     } else {
         ret = 1;
-        fprintf(fp, "__size_%s", var.name().c_str());
+        if (var.pointerDir() == Var::POINTER_OUT && !includeOut) {
+            fprintf(fp, "0");
+        } else {
+            fprintf(fp, "__size_%s", var.name().c_str());
+        }
     }
     return ret;
 }
@@ -442,7 +451,7 @@ static void writeVarLargeEncodingExpression(Var& var, FILE* fp)
 static void writeEncodingChecksumValidatorOnReturn(const char* funcName, FILE* fp) {
     fprintf(fp, "\tif (useChecksum) {\n"
                 "\t\tunsigned char *checksumBufPtr = NULL;\n"
-                "\t\tstd::vector<unsigned char> checksumBuf(checksumSize);\n"
+                "\t\tunsigned char checksumBuf[ChecksumCalculator::kMaxChecksumSize];\n"
                 "\t\tif (checksumSize > 0) checksumBufPtr = &checksumBuf[0];\n"
                 "\t\tstream->readback(checksumBufPtr, checksumSize);\n"
                 "\t\tif (!checksumCalculator->validate(checksumBufPtr, checksumSize)) {\n"
@@ -452,6 +461,20 @@ static void writeEncodingChecksumValidatorOnReturn(const char* funcName, FILE* f
                 "\t}\n",
             funcName
     );
+}
+
+static void addGuestTimePrinting(const EntryPoint* e, bool hasTimeBeforeReadback,
+                                 FILE* fp) {
+#if INSTRUMENT_TIMING_GUEST
+    fprintf(fp, "\tclock_gettime(CLOCK_REALTIME, &ts1);\n");
+    fprintf(fp, "\tlong timeDiff = ts1.tv_sec*1000000 + ts1.tv_nsec/1000 - (ts0.tv_sec*1000000 + ts0.tv_nsec/1000);\n");
+    if (hasTimeBeforeReadback) {
+        fprintf(fp, "\tlong timeDiff2 = ts1.tv_sec*1000000 + ts1.tv_nsec/1000 - (ts2.tv_sec*1000000 + ts2.tv_nsec/1000);\n");
+        fprintf(fp, "\tALOGW(\"%s: %%ld (%%ld) us\\n\", timeDiff, timeDiff2);\n", e->name().c_str());
+    } else {
+        fprintf(fp, "\tALOGW(\"%s: %%ld us\\n\", timeDiff);\n", e->name().c_str());
+    }
+#endif
 }
 
 int ApiGen::genEncoderImpl(const std::string &filename)
@@ -464,7 +487,6 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 
     printHeader(fp);
     fprintf(fp, "\n\n");
-    fprintf(fp, "#include <vector>\n");
     fprintf(fp, "#include <string.h>\n");
     fprintf(fp, "#include \"%s_opcodes.h\"\n\n", m_basename.c_str());
     fprintf(fp, "#include \"%s_enc.h\"\n\n\n", m_basename.c_str());
@@ -487,9 +509,13 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 
         if (e->unsupported()) continue;
 
-
         e->print(fp, true, "_enc", /* classname + "::" */"", "void *self");
         fprintf(fp, "{\n");
+
+#if INSTRUMENT_TIMING_GUEST
+        fprintf(fp, "\tstruct timespec ts0, ts1;\n");
+        fprintf(fp, "\tclock_gettime(CLOCK_REALTIME, &ts0);\n");
+#endif
 
 //      fprintf(fp, "\n\tDBG(\">>>> %s\\n\");\n", e->name().c_str());
         fprintf(fp, "\n\t%s *ctx = (%s *)self;\n",
@@ -537,7 +563,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 
         for (j = 0; j < maxvars; j++) {
             fprintf(fp, " + ");
-            npointers += writeVarEncodingSize(evars[j], fp);
+            npointers += writeVarEncodingSize(evars[j], false, fp);
         }
         if (npointers > 0) {
             fprintf(fp, " + %zu*4", npointers);
@@ -586,7 +612,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
                         npointers = 0;
                         for (j = nvars; j < maxvars && !evars[j].isLarge(); j++) {
                             fprintf(fp, "%s", plus); plus = " + ";
-                            npointers += writeVarEncodingSize(evars[j], fp);
+                            npointers += writeVarEncodingSize(evars[j], true, fp);
                         }
                         if (npointers > 0) {
                             fprintf(fp, "%s%zu*4", plus, npointers); plus = " + ";
@@ -664,6 +690,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
         }
 
         // in variables;
+        bool hasTimeBeforeReadback = false;
         bool hasReadbackChecksum = false;
         for (size_t j = 0; j < nvars; j++) {
             if (evars[j].isPointer()) {
@@ -671,10 +698,21 @@ int ApiGen::genEncoderImpl(const std::string &filename)
                 if (dir == Var::POINTER_INOUT || dir == Var::POINTER_OUT) {
                     const char* varname = evars[j].name().c_str();
                     const char* indent = "\t";
+
+#if INSTRUMENT_TIMING_GUEST
+                    if (!hasTimeBeforeReadback) {
+                        hasTimeBeforeReadback = true;
+                        // Let's flush the stream before measuring the time.
+                        fprintf(fp, "\tstream->flush();\n");
+                        fprintf(fp, "\tstruct timespec ts2;\n");
+                        fprintf(fp, "\tclock_gettime(CLOCK_REALTIME, &ts2);\n");
+                    }
+#endif
                     if (evars[j].nullAllowed()) {
                         fprintf(fp, "\tif (%s != NULL) {\n",varname);
                         indent = "\t\t";
                     }
+
                     fprintf(fp, "%sstream->readback(%s, __size_%s);\n",
                             indent, varname, varname);
                     fprintf(fp, "%sif (useChecksum) checksumCalculator->addBuffer(%s, __size_%s);\n",
@@ -695,17 +733,29 @@ int ApiGen::genEncoderImpl(const std::string &filename)
             if (e->flushOnEncode()) {
                 fprintf(fp, "\tstream->flush();\n");
             }
+            addGuestTimePrinting(e, hasTimeBeforeReadback, fp);
             fprintf(fp, "\t return NULL;\n");
         } else if (e->retval().type()->name() != "void") {
+#if INSTRUMENT_TIMING_GUEST
+            if (!hasTimeBeforeReadback) {
+                hasTimeBeforeReadback = true;
+                fprintf(fp, "\tstream->flush();\n");
+                fprintf(fp, "\tstruct timespec ts2;\n");
+                fprintf(fp, "\tclock_gettime(CLOCK_REALTIME, &ts2);\n");
+            }
+#endif
+
             fprintf(fp, "\n\t%s retval;\n", e->retval().type()->name().c_str());
             fprintf(fp, "\tstream->readback(&retval, %u);\n",(unsigned) e->retval().type()->bytes());
             fprintf(fp, "\tif (useChecksum) checksumCalculator->addBuffer(&retval, %u);\n",
                     (unsigned) e->retval().type()->bytes());
             writeEncodingChecksumValidatorOnReturn(e->name().c_str(), fp);
+            addGuestTimePrinting(e, hasTimeBeforeReadback, fp);
             fprintf(fp, "\treturn retval;\n");
         } else {
             if (e->flushOnEncode()) fprintf(fp, "\tstream->flush();\n");
             if (hasReadbackChecksum) writeEncodingChecksumValidatorOnReturn(e->name().c_str(), fp);
+            addGuestTimePrinting(e, hasTimeBeforeReadback, fp);
         }
         fprintf(fp, "}\n\n");
     }
@@ -753,9 +803,13 @@ int ApiGen::genDecoderHeader(const std::string &filename)
     fprintf(fp, "\n#ifndef GUARD_%s\n", classname.c_str());
     fprintf(fp, "#define GUARD_%s\n\n", classname.c_str());
 
-    fprintf(fp, "#include \"IOStream.h\" \n");
+    fprintf(fp, "#include \"IOStream.h\"\n");
+    fprintf(fp, "#include \"ChecksumCalculator.h\"\n");
     fprintf(fp, "#include \"%s_%s_context.h\"\n\n\n", m_basename.c_str(), sideString(SERVER_SIDE));
     fprintf(fp, "#include \"emugl/common/logging.h\"\n");
+#if INSTRUMENT_TIMING_HOST
+    fprintf(fp, "#include \"time.h\"\n");
+#endif
 
     for (size_t i = 0; i < m_decoderHeaders.size(); i++) {
         fprintf(fp, "#include %s\n", m_decoderHeaders[i].c_str());
@@ -764,7 +818,7 @@ int ApiGen::genDecoderHeader(const std::string &filename)
 
     fprintf(fp, "struct %s : public %s_%s_context_t {\n\n",
             classname.c_str(), m_basename.c_str(), sideString(SERVER_SIDE));
-    fprintf(fp, "\tsize_t decode(void *buf, size_t bufsize, IOStream *stream);\n");
+    fprintf(fp, "\tsize_t decode(void *buf, size_t bufsize, IOStream *stream, ChecksumCalculator* checksumCalc);\n");
     fprintf(fp, "\n};\n\n");
     fprintf(fp, "#endif  // GUARD_%s\n", classname.c_str());
 
@@ -816,6 +870,15 @@ int ApiGen::genDecoderImpl(const std::string &filename)
 
     size_t n = size();
 
+    bool changesChecksum = false;
+    for (size_t i = 0; i < size(); ++i) {
+        const EntryPoint& ep = at(i);
+        if (ep.name().find("SelectChecksum") != std::string::npos) {
+            changesChecksum = true;
+            break;
+        }
+    }
+
     fprintf(fp, "\n\n#include <string.h>\n");
     fprintf(fp, "#include \"%s_opcodes.h\"\n\n", m_basename.c_str());
     fprintf(fp, "#include \"%s_dec.h\"\n\n\n", m_basename.c_str());
@@ -843,25 +906,34 @@ int ApiGen::genDecoderImpl(const std::string &filename)
     fprintf(fp, "using namespace emugl;\n\n");
 
     // decoder switch;
-    fprintf(fp, "size_t %s::decode(void *buf, size_t len, IOStream *stream)\n{", classname.c_str());
-
-    fprintf(fp,R"(
-)");
-
+    fprintf(fp, "size_t %s::decode(void *buf, size_t len, IOStream *stream, ChecksumCalculator* checksumCalc) {\n", classname.c_str());
     fprintf(fp,
 "\tif (len < 8) return 0; \n\
+#ifdef CHECK_GL_ERROR\n\
+\tchar lastCall[256] = {0};\n\
+#endif\n\
 \tunsigned char *ptr = (unsigned char *)buf;\n\
-\tconst unsigned char* const end = (const unsigned char*)buf + len;\n\
-#ifdef CHECK_GL_ERROR \n\
-\tchar lastCall[256] = {0}; \n\
-#endif \n\
-\twhile (end - ptr >= 8) {\n\
+\tconst unsigned char* const end = (const unsigned char*)buf + len;\n");
+    if (!changesChecksum) {
+        fprintf(fp,
+R"(    const size_t checksumSize = checksumCalc->checksumByteSize();
+    const bool useChecksum = checksumSize > 0;
+)");
+    }
+    fprintf(fp,
+"\twhile (end - ptr >= 8) {\n\
 \t\tuint32_t opcode = *(uint32_t *)ptr;   \n\
 \t\tint32_t packetLen = *(int32_t *)(ptr + 4);\n\
-\t\tif (end - ptr < packetLen) return ptr - (unsigned char*)buf;\n\
-\t\tconst size_t checksumSize = ChecksumCalculatorThreadInfo::checksumByteSize();\n\
-\t\tconst bool useChecksum = checksumSize > 0;\n\
-\t\tswitch(opcode) {\n");
+\t\tif (end - ptr < packetLen) return ptr - (unsigned char*)buf;\n");
+    if (changesChecksum) {
+        fprintf(fp,
+R"(        // Do this on every iteration, as some commands may change the checksum
+        // calculation parameters.
+        const size_t checksumSize = checksumCalc->checksumByteSize();
+        const bool useChecksum = checksumSize > 0;
+)");
+    }
+    fprintf(fp, "\t\tswitch(opcode) {\n");
 
     for (size_t f = 0; f < n; f++) {
         enum Pass_t {
@@ -875,19 +947,22 @@ int ApiGen::genDecoderImpl(const std::string &filename)
             PASS_FlushOutput,
             PASS_Epilog,
             PASS_LAST };
-        EntryPoint *e = &at(f);
+        EntryPoint *e = &(*this)[f];
 
         // construct a printout string;
-        std::string printString = "";
+        std::string printString;
         for (size_t i = 0; i < e->vars().size(); i++) {
             Var *v = &e->vars()[i];
             if (!v->isVoid())  printString += (v->isPointer() ? "%p(%u)" : v->type()->printFormat()) + " ";
         }
-        printString += "";
-        // TODO - add for return value;
 
+        // TODO - add for return value;
         fprintf(fp, "\t\tcase OP_%s: {\n", e->name().c_str());
 
+#if INSTRUMENT_TIMING_HOST
+        fprintf(fp, "\t\t\tstruct timespec ts0, ts1, ts2;\n");
+        fprintf(fp, "\t\t\tclock_gettime(CLOCK_REALTIME, &ts0);\n");
+#endif
         bool totalTmpBuffExist = false;
         std::string totalTmpBuffOffset = "0";
         std::string *tmpBufOffset = new std::string[e->vars().size()];
@@ -899,13 +974,17 @@ int ApiGen::genDecoderImpl(const std::string &filename)
         }
 
         for (int pass = PASS_FIRST; pass < PASS_LAST; pass++) {
+#if INSTRUMENT_TIMING_HOST
+            if (pass == PASS_FunctionCall) {
+                fprintf(fp, "\t\t\tclock_gettime(CLOCK_REALTIME, &ts2);\n");
+            }
+#endif
             if (pass == PASS_FunctionCall &&
                 !e->retval().isVoid() &&
                 !e->retval().isPointer()) {
                 fprintf(fp, "\t\t\t*(%s *)(&tmpBuf[%s]) = ", retvalType.c_str(),
                         totalTmpBuffOffset.c_str());
             }
-
 
             if (pass == PASS_FunctionCall) {
                 fprintf(fp, "\t\t\tthis->%s(", e->name().c_str());
@@ -919,7 +998,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
                         e->name().c_str(),
                         printString.c_str());
                 if (e->vars().size() > 0 && !e->vars()[0].isVoid()) {
-                    fprintf(fp, ",");
+                    fprintf(fp, ", ");
                 }
             }
 
@@ -982,7 +1061,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
                     if (pass == PASS_FunctionCall) {
                         if (v->nullAllowed()) {
                             fprintf(fp,
-                                    "size_%s == 0 ? NULL : (%s)(inptr_%s.get())",
+                                    "size_%s == 0 ? nullptr : (%s)(inptr_%s.get())",
                                     var_name,
                                     var_type_name,
                                     var_name);
@@ -1053,7 +1132,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
                     } else if (pass == PASS_FunctionCall) {
                         if (v->nullAllowed()) {
                             fprintf(fp,
-                                    "size_%s == 0 ? NULL : (%s)(outptr_%s.get())",
+                                    "size_%s == 0 ? nullptr : (%s)(outptr_%s.get())",
                                     var_name,
                                     var_type_name,
                                     var_name);
@@ -1112,7 +1191,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
             if (pass == PASS_Protocol) {
                 fprintf(fp,
                         "\t\t\tif (useChecksum) {\n"
-                        "\t\t\t\tChecksumCalculatorThreadInfo::validOrDie(ptr, %s, "
+                        "\t\t\t\tChecksumCalculatorThreadInfo::validOrDie(checksumCalc, ptr, %s, "
                         "ptr + %s, checksumSize, "
                         "\n\t\t\t\t\t\"%s::decode,"
                         " OP_%s: GL checksumCalculator failure\\n\");\n"
@@ -1156,15 +1235,22 @@ int ApiGen::genDecoderImpl(const std::string &filename)
                 if (totalTmpBuffExist) {
                     fprintf(fp,
                             "\t\t\tif (useChecksum) {\n"
-                            "\t\t\t\tChecksumCalculatorThreadInfo::writeChecksum("
+                            "\t\t\t\tChecksumCalculatorThreadInfo::writeChecksum(checksumCalc, "
                             "&tmpBuf[0], totalTmpSize - checksumSize, "
                             "&tmpBuf[totalTmpSize - checksumSize], checksumSize);\n"
                             "\t\t\t}\n"
                             "\t\t\tstream->flush();\n");
                 }
             }
-
         } // pass;
+
+#if INSTRUMENT_TIMING_HOST
+        fprintf(fp, "\t\t\tclock_gettime(CLOCK_REALTIME, &ts1);\n");
+        fprintf(fp, "\t\t\tlong timeDiff = ts1.tv_sec*1000000 + ts1.tv_nsec/1000 - (ts0.tv_sec*1000000 + ts0.tv_nsec/1000);\n");
+        fprintf(fp, "\t\t\tlong timeDiff2 = ts1.tv_sec*1000000 + ts1.tv_nsec/1000 - (ts2.tv_sec*1000000 + ts2.tv_nsec/1000);\n");
+        fprintf(fp, "\t\t\tprintf(\"(timing) %%4ld.%%06ld %s: %%ld (%%ld) us\\n\", "
+                    "ts1.tv_sec, ts1.tv_nsec/1000, timeDiff, timeDiff2);\n", e->name().c_str());
+#endif
         fprintf(fp, "\t\t\tSET_LASTCALL(\"%s\");\n", e->name().c_str());
         fprintf(fp, "\t\t\tbreak;\n");
         fprintf(fp, "\t\t}\n");

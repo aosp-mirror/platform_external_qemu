@@ -49,12 +49,6 @@ const unsigned char* ChannelStream::read(void* buf, size_t* inout_len) {
     return (const unsigned char*)buf;
 }
 
-int ChannelStream::writeFully(const void* buf, size_t len) {
-    mChannel->writeToGuest(
-            emugl::ChannelBuffer((const char*)buf, (const char*)buf + len));
-    return len;
-}
-
 void ChannelStream::forceStop() {
     mChannel->stop();
 }

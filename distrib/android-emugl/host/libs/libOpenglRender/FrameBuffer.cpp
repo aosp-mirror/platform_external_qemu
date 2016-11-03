@@ -798,15 +798,15 @@ void FrameBuffer::DestroyRenderContext(HandleType p_context)
 void FrameBuffer::DestroyWindowSurface(HandleType p_surface)
 {
     emugl::Mutex::AutoLock mutex(m_lock);
-    if (m_windows.find(p_surface) != m_windows.end()) {
-        m_windows.erase(p_surface);
+    if (m_windows.erase(p_surface) != 0) {
         RenderThreadInfo *tinfo = RenderThreadInfo::get();
-        if (tinfo->m_windowSet.empty()) return;
         tinfo->m_windowSet.erase(p_surface);
     }
 }
 
 int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+
     emugl::Mutex::AutoLock mutex(m_lock);
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
@@ -817,7 +817,6 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
     }
     (*c).second.refcount++;
 
-    RenderThreadInfo *tInfo = RenderThreadInfo::get();
     uint64_t puid = tInfo->m_puid;
     if (puid) {
         m_procOwnedColorBuffers[puid].insert(p_colorbuffer);
@@ -826,9 +825,10 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
 }
 
 void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+
     emugl::Mutex::AutoLock mutex(m_lock);
     closeColorBufferLocked(p_colorbuffer);
-    RenderThreadInfo *tInfo = RenderThreadInfo::get();
     uint64_t puid = tInfo->m_puid;
     if (puid) {
         auto ite = m_procOwnedColorBuffers.find(puid);
@@ -1156,10 +1156,15 @@ bool FrameBuffer::bind_locked()
     EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
     EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
 
-    if (!s_egl.eglMakeCurrent(m_eglDisplay, m_pbufSurface,
-                              m_pbufSurface, m_pbufContext)) {
-        ERR("eglMakeCurrent failed\n");
-        return false;
+    if (prevContext != m_pbufContext || prevReadSurf != m_pbufSurface
+        || prevDrawSurf != m_pbufSurface) {
+        if (!s_egl.eglMakeCurrent(m_eglDisplay, m_pbufSurface,
+                                  m_pbufSurface, m_pbufContext)) {
+            ERR("eglMakeCurrent failed\n");
+            return false;
+        }
+    } else {
+        ERR("Nested %s call detected, should never happen", __func__);
     }
 
     m_prevContext = prevContext;
@@ -1174,10 +1179,15 @@ bool FrameBuffer::bindSubwin_locked()
     EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
     EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
 
-    if (!s_egl.eglMakeCurrent(m_eglDisplay, m_eglSurface,
-                              m_eglSurface, m_eglContext)) {
-        ERR("eglMakeCurrent failed\n");
-        return false;
+    if (prevContext != m_eglContext || prevReadSurf != m_eglSurface
+        || prevDrawSurf != m_eglSurface) {
+        if (!s_egl.eglMakeCurrent(m_eglDisplay, m_eglSurface,
+                                  m_eglSurface, m_eglContext)) {
+            ERR("eglMakeCurrent failed\n");
+            return false;
+        }
+    } else {
+        ERR("Nested %s call detected, should never happen", __func__);
     }
 
     //
@@ -1195,9 +1205,16 @@ bool FrameBuffer::bindSubwin_locked()
 
 bool FrameBuffer::unbind_locked()
 {
-    if (!s_egl.eglMakeCurrent(m_eglDisplay, m_prevDrawSurf,
-                              m_prevReadSurf, m_prevContext)) {
-        return false;
+    EGLContext curContext = s_egl.eglGetCurrentContext();
+    EGLSurface curReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
+    EGLSurface curDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
+
+    if (m_prevContext != curContext || m_prevReadSurf != curReadSurf ||
+        m_prevDrawSurf != curDrawSurf) {
+        if (!s_egl.eglMakeCurrent(m_eglDisplay, m_prevDrawSurf,
+                                  m_prevReadSurf, m_prevContext)) {
+            return false;
+        }
     }
 
     m_prevContext = EGL_NO_CONTEXT;

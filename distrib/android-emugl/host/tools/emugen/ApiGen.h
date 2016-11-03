@@ -21,7 +21,7 @@
 #include "EntryPoint.h"
 
 
-class ApiGen : public std::vector<EntryPoint> {
+class ApiGen : private std::vector<EntryPoint> {
 
 public:
     typedef std::vector<std::string> StringVec;

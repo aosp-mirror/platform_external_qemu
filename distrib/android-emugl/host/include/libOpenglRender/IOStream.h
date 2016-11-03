@@ -22,15 +22,16 @@
 #include <stdio.h>
 
 class IOStream {
-public:
+protected:
     explicit IOStream(size_t bufSize) : m_bufsize(bufSize) {}
 
-    virtual ~IOStream() {
+    ~IOStream() {
         // NOTE: m_buf was owned by the child class thus we expect it to be
         // released and flushed before the object destruction.
         assert(!m_buf || m_free == m_bufsize);
     }
 
+public:
     size_t read(void* buf, size_t bufLen) {
         if (!read(buf, &bufLen)) {
             return 0;
@@ -75,7 +76,6 @@ protected:
     virtual void *allocBuffer(size_t minSize) = 0;
     virtual int commitBuffer(size_t size) = 0;
     virtual const unsigned char *read(void *buf, size_t *inout_len) = 0;
-    virtual int writeFully(const void* buf, size_t len) = 0;
 
 private:
     unsigned char* m_buf = nullptr;
