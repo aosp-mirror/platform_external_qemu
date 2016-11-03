@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e6a5561c_436661d8",
+        "filename": "distrib/google-benchmark/compat/VersionHelpers.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-03T15:42:39Z",
+      "side": 1,
+      "message": "rofl",
+      "range": {
+        "startLine": 3,
+        "startChar": 0,
+        "endLine": 4,
+        "endChar": 58
+      },
+      "revId": "1c446df0f37c7473293f03fdcb1b0a7c68d3f8b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
