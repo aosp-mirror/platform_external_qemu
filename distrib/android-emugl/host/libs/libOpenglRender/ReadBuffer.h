@@ -13,16 +13,14 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef _READ_BUFFER_H
-#define _READ_BUFFER_H
-
+#pragma once
 #include "IOStream.h"
 
 class ReadBuffer {
 public:
-    ReadBuffer(size_t bufSize);
+    explicit ReadBuffer(size_t bufSize);
     ~ReadBuffer();
-    int getData(IOStream *stream); // get fresh data from the stream
+    int getData(IOStream *stream, int minSize); // get fresh data from the stream
     unsigned char *buf() { return m_readPtr; } // return the next read location
     size_t validData() { return m_validData; } // return the amount of valid data in readptr
     void consume(size_t amount); // notify that 'amount' data has been consumed;
@@ -32,4 +30,3 @@ private:
     size_t m_size;
     size_t m_validData;
 };
-#endif
