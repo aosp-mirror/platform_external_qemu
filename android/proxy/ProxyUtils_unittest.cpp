@@ -27,6 +27,7 @@ using android::base::IpAddress;
 using android::base::Optional;
 using android::base::TestDnsResolver;
 
+
 TEST(ProxyUtils, parseConfigurationString) {
     TestDnsResolver resolver;
     resolver.addEntry("proxy.example.com", "10.0.0.42");
@@ -94,6 +95,7 @@ TEST(ProxyUtils, parseConfigurationStringWithErrors) {
              "Bad format: missing colon between username and password"},
             {"proxy.example.com:7000", "Bad format: invalid proxy name"},
             {"[::1}:7000", "Bad format: missing closing bracket"},
+            {nullptr, "Missing proxy configuration string"},
     };
     for (const auto& item : kData) {
         ParseResult result = parseConfigurationString(item.input);

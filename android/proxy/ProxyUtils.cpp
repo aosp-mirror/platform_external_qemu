@@ -30,6 +30,11 @@ using android::base::Dns;
 ParseResult parseConfigurationString(const char* str) {
     ParseResult result{};
 
+    if (str == nullptr)  {
+        result.mError = "Missing proxy configuration string";
+        return result;
+    }
+
     const char* pos = str;
     const char* end = str + ::strlen(str);
 
