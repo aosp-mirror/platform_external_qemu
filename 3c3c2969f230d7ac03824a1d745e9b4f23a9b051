@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "8bef436f_602b524c",
+        "filename": "android/base/synchronization/MessageChannel.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-03T10:29:43Z",
+      "side": 1,
+      "message": "it doesn\u0027t matter, reading size() doesn\u0027t provide you with any guarantee that the size hasn\u0027t changed just after the method returns due to another thread, i.e. you can\u0027t really make non-racy decision based on the value of size() anyway.",
+      "parentUuid": "e6a5561c_2a3faa7b",
+      "revId": "3c3c2969f230d7ac03824a1d745e9b4f23a9b051",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a688be73_3122f06a",
         "filename": "android/base/synchronization/MessageChannel.cpp",
         "patchSetId": 2
@@ -118,6 +136,24 @@
       "side": 1,
       "message": "we have a function in RenderChannelImpl that uses only size() - it\u0027s the one that calculates channel state (can read / can write). RenderChannel is a single producer/single consumer, so it\u0027s perfectly safe to use size() there. But mCount changes need to be visible in the reading thread",
       "parentUuid": "a688be73_11256c71",
+      "revId": "3c3c2969f230d7ac03824a1d745e9b4f23a9b051",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bef436f_40304eb4",
+        "filename": "android/base/synchronization/MessageChannel.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-03T10:29:43Z",
+      "side": 1,
+      "message": "that function is probably buggy then (see my other comment) :-/ I still think a simple lock would be enough for this method.",
+      "parentUuid": "e6a5561c_8ae69efc",
       "revId": "3c3c2969f230d7ac03824a1d745e9b4f23a9b051",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
