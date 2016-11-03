@@ -31,17 +31,6 @@
 // change CHECKSUMHELPER_MAX_VERSION when you want to update the protocol version
 #define CHECKSUMHELPER_MAX_VERSION 1
 
-// checksum buffer size
-// Please add a new checksum buffer size when implementing a new protocol,
-// as well as modifying the maxChecksumSize function.
-static const size_t kV1ChecksumSize = 8;
-
-static constexpr size_t maxChecksumSize() {
-    return 0 > kV1ChecksumSize ? 0 : kV1ChecksumSize;
-}
-
-static const size_t kMaxChecksumSize = maxChecksumSize();
-
 // utility macros to create checksum string at compilation time
 #define CHECKSUMHELPER_VERSION_STR_PREFIX "ANDROID_EMU_CHECKSUM_HELPER_v"
 #define CHECKSUMHELPER_MACRO_TO_STR(x) #x
@@ -72,20 +61,10 @@ bool ChecksumCalculator::setVersion(uint32_t version) {
         return false;
     }
     m_version = version;
+    m_checksumSize = checksumByteSize(version);
     LOG_CHECKSUMHELPER("%s: ChecksumCalculator Set Version %d\n", __FUNCTION__,
                 m_version);
     return true;
-}
-
-size_t ChecksumCalculator::checksumByteSize() const {
-    switch (m_version) {
-        case 0:
-            return 0;
-        case 1:
-            return sizeof(computeV1Checksum()) + sizeof(m_numWrite);
-        default:
-            return 0;
-    }
 }
 
 void ChecksumCalculator::addBuffer(const void* buf, size_t packetLen) {

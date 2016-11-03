@@ -369,14 +369,18 @@ static int getVarEncodingSizeExpression(Var&  var, EntryPoint* e, char* buff, si
     return ret;
 }
 
-static int writeVarEncodingSize(Var& var, FILE* fp)
+static int writeVarEncodingSize(Var& var, bool includeOut, FILE* fp)
 {
     int ret = 0;
     if (!var.isPointer()) {
         fprintf(fp, "%u", (unsigned int) var.type()->bytes());
     } else {
         ret = 1;
-        fprintf(fp, "__size_%s", var.name().c_str());
+        if (var.pointerDir() == Var::POINTER_OUT && !includeOut) {
+            fprintf(fp, "0");
+        } else {
+            fprintf(fp, "__size_%s", var.name().c_str());
+        }
     }
     return ret;
 }
@@ -487,7 +491,6 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 
         if (e->unsupported()) continue;
 
-
         e->print(fp, true, "_enc", /* classname + "::" */"", "void *self");
         fprintf(fp, "{\n");
 
@@ -537,7 +540,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 
         for (j = 0; j < maxvars; j++) {
             fprintf(fp, " + ");
-            npointers += writeVarEncodingSize(evars[j], fp);
+            npointers += writeVarEncodingSize(evars[j], false, fp);
         }
         if (npointers > 0) {
             fprintf(fp, " + %zu*4", npointers);
@@ -586,7 +589,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
                         npointers = 0;
                         for (j = nvars; j < maxvars && !evars[j].isLarge(); j++) {
                             fprintf(fp, "%s", plus); plus = " + ";
-                            npointers += writeVarEncodingSize(evars[j], fp);
+                            npointers += writeVarEncodingSize(evars[j], true, fp);
                         }
                         if (npointers > 0) {
                             fprintf(fp, "%s%zu*4", plus, npointers); plus = " + ";
@@ -753,7 +756,8 @@ int ApiGen::genDecoderHeader(const std::string &filename)
     fprintf(fp, "\n#ifndef GUARD_%s\n", classname.c_str());
     fprintf(fp, "#define GUARD_%s\n\n", classname.c_str());
 
-    fprintf(fp, "#include \"IOStream.h\" \n");
+    fprintf(fp, "#include \"IOStream.h\"\n");
+    fprintf(fp, "#include \"ChecksumCalculator.h\"\n");
     fprintf(fp, "#include \"%s_%s_context.h\"\n\n\n", m_basename.c_str(), sideString(SERVER_SIDE));
     fprintf(fp, "#include \"emugl/common/logging.h\"\n");
 
@@ -764,7 +768,7 @@ int ApiGen::genDecoderHeader(const std::string &filename)
 
     fprintf(fp, "struct %s : public %s_%s_context_t {\n\n",
             classname.c_str(), m_basename.c_str(), sideString(SERVER_SIDE));
-    fprintf(fp, "\tsize_t decode(void *buf, size_t bufsize, IOStream *stream);\n");
+    fprintf(fp, "\tsize_t decode(void *buf, size_t bufsize, IOStream *stream, ChecksumCalculator* checksumCalc);\n");
     fprintf(fp, "\n};\n\n");
     fprintf(fp, "#endif  // GUARD_%s\n", classname.c_str());
 
@@ -816,6 +820,15 @@ int ApiGen::genDecoderImpl(const std::string &filename)
 
     size_t n = size();
 
+    bool changesChecksum = false;
+    for (size_t i = 0; i < size(); ++i) {
+        const EntryPoint& ep = at(i);
+        if (ep.name().find("SelectChecksum") != std::string::npos) {
+            changesChecksum = true;
+            break;
+        }
+    }
+
     fprintf(fp, "\n\n#include <string.h>\n");
     fprintf(fp, "#include \"%s_opcodes.h\"\n\n", m_basename.c_str());
     fprintf(fp, "#include \"%s_dec.h\"\n\n\n", m_basename.c_str());
@@ -843,25 +856,40 @@ int ApiGen::genDecoderImpl(const std::string &filename)
     fprintf(fp, "using namespace emugl;\n\n");
 
     // decoder switch;
-    fprintf(fp, "size_t %s::decode(void *buf, size_t len, IOStream *stream)\n{", classname.c_str());
-
-    fprintf(fp,R"(
+    fprintf(fp, "size_t %s::decode(void *buf, size_t len, IOStream *stream, ChecksumCalculator* checksumCalc) {\n", classname.c_str());
+    fprintf(fp,
+R"(#ifdef CHECK_GL_ERROR
+    char lastCall[256] = {0};
+#endif
 )");
 
     fprintf(fp,
 "\tif (len < 8) return 0; \n\
 \tunsigned char *ptr = (unsigned char *)buf;\n\
-\tconst unsigned char* const end = (const unsigned char*)buf + len;\n\
-#ifdef CHECK_GL_ERROR \n\
+\tconst unsigned char* const end = (const unsigned char*)buf + len;\n");
+    if (!changesChecksum) {
+        fprintf(fp,
+R"(    const size_t checksumSize = checksumCalc->checksumByteSize();
+    const bool useChecksum = checksumSize > 0;
+)");
+    }
+    fprintf(fp,
+"#ifdef CHECK_GL_ERROR \n\
 \tchar lastCall[256] = {0}; \n\
 #endif \n\
 \twhile (end - ptr >= 8) {\n\
 \t\tuint32_t opcode = *(uint32_t *)ptr;   \n\
 \t\tint32_t packetLen = *(int32_t *)(ptr + 4);\n\
-\t\tif (end - ptr < packetLen) return ptr - (unsigned char*)buf;\n\
-\t\tconst size_t checksumSize = ChecksumCalculatorThreadInfo::checksumByteSize();\n\
-\t\tconst bool useChecksum = checksumSize > 0;\n\
-\t\tswitch(opcode) {\n");
+\t\tif (end - ptr < packetLen) return ptr - (unsigned char*)buf;\n");
+    if (changesChecksum) {
+        fprintf(fp,
+R"(        // Do this on every iteration, as some commands may change the checksum
+        // calculation parameters.
+        const size_t checksumSize = checksumCalc->checksumByteSize();
+        const bool useChecksum = checksumSize > 0;
+)");
+    }
+    fprintf(fp, "\t\tswitch(opcode) {\n");
 
     for (size_t f = 0; f < n; f++) {
         enum Pass_t {
@@ -875,17 +903,16 @@ int ApiGen::genDecoderImpl(const std::string &filename)
             PASS_FlushOutput,
             PASS_Epilog,
             PASS_LAST };
-        EntryPoint *e = &at(f);
+        EntryPoint *e = &(*this)[f];
 
         // construct a printout string;
-        std::string printString = "";
+        std::string printString;
         for (size_t i = 0; i < e->vars().size(); i++) {
             Var *v = &e->vars()[i];
             if (!v->isVoid())  printString += (v->isPointer() ? "%p(%u)" : v->type()->printFormat()) + " ";
         }
-        printString += "";
-        // TODO - add for return value;
 
+        // TODO - add for return value;
         fprintf(fp, "\t\tcase OP_%s: {\n", e->name().c_str());
 
         bool totalTmpBuffExist = false;
@@ -906,7 +933,6 @@ int ApiGen::genDecoderImpl(const std::string &filename)
                         totalTmpBuffOffset.c_str());
             }
 
-
             if (pass == PASS_FunctionCall) {
                 fprintf(fp, "\t\t\tthis->%s(", e->name().c_str());
                 if (e->customDecoder()) {
@@ -919,7 +945,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
                         e->name().c_str(),
                         printString.c_str());
                 if (e->vars().size() > 0 && !e->vars()[0].isVoid()) {
-                    fprintf(fp, ",");
+                    fprintf(fp, ", ");
                 }
             }
 
@@ -982,7 +1008,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
                     if (pass == PASS_FunctionCall) {
                         if (v->nullAllowed()) {
                             fprintf(fp,
-                                    "size_%s == 0 ? NULL : (%s)(inptr_%s.get())",
+                                    "size_%s == 0 ? nullptr : (%s)(inptr_%s.get())",
                                     var_name,
                                     var_type_name,
                                     var_name);
@@ -1053,7 +1079,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
                     } else if (pass == PASS_FunctionCall) {
                         if (v->nullAllowed()) {
                             fprintf(fp,
-                                    "size_%s == 0 ? NULL : (%s)(outptr_%s.get())",
+                                    "size_%s == 0 ? nullptr : (%s)(outptr_%s.get())",
                                     var_name,
                                     var_type_name,
                                     var_name);
@@ -1112,7 +1138,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
             if (pass == PASS_Protocol) {
                 fprintf(fp,
                         "\t\t\tif (useChecksum) {\n"
-                        "\t\t\t\tChecksumCalculatorThreadInfo::validOrDie(ptr, %s, "
+                        "\t\t\t\tChecksumCalculatorThreadInfo::validOrDie(checksumCalc, ptr, %s, "
                         "ptr + %s, checksumSize, "
                         "\n\t\t\t\t\t\"%s::decode,"
                         " OP_%s: GL checksumCalculator failure\\n\");\n"
@@ -1156,7 +1182,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
                 if (totalTmpBuffExist) {
                     fprintf(fp,
                             "\t\t\tif (useChecksum) {\n"
-                            "\t\t\t\tChecksumCalculatorThreadInfo::writeChecksum("
+                            "\t\t\t\tChecksumCalculatorThreadInfo::writeChecksum(checksumCalc, "
                             "&tmpBuf[0], totalTmpSize - checksumSize, "
                             "&tmpBuf[totalTmpSize - checksumSize], checksumSize);\n"
                             "\t\t\t}\n"
