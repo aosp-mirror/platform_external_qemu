@@ -19,6 +19,7 @@
 #include <utility>
 
 #include <stddef.h>
+#include <stdlib.h>
 
 //
 // SmallVector<T>, SmallFixedVector<T, SmallSize>
