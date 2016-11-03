@@ -3500,7 +3500,7 @@ static USBEndpoint *xhci_epid_to_usbep(XHCIState *xhci,
 {
     assert(slotid >= 1 && slotid <= xhci->numslots);
 
-    if (!xhci->slots[slotid - 1].uport) {
+    if (slotid < 1 || !xhci->slots[slotid - 1].uport) {
         return NULL;
     }
 
