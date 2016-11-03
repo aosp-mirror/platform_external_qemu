@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8bef436f_a0203a62",
+        "filename": "android/base/synchronization/MessageChannel.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-03T10:48:04Z",
+      "side": 1,
+      "message": "that\u0027s not really helpful :-/ Something like the following would be more explicit:\n\n  To be called after trying to write a new fixed-size message\n  (which should happen after beforeWrite() or beforeTryWrite()).\n  |success| must be true to indicate that a new item was\n  added to the channel, or false otherwise (i.e. if the\n  channel is stopped, or if beforeTryWrite() returned an\n  empty optional).",
+      "revId": "db07a8089ae9e4af3a9969b9c8294c11f2e4fa32",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bef436f_804f7634",
+        "filename": "android/base/synchronization/MessageChannel.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-03T10:48:04Z",
+      "side": 1,
+      "message": "Same here, consider something like:\n\n  To be called after reading a fixed-size message from the\n  channel (which must happen after beforeRead() or beforeTryRead()).\n  |success| must be true to indicate that a message was read,\n  or false otherwise (i.e. if the channel is stopped or if\n  beforeTryRead() returned an empty optional).",
+      "revId": "db07a8089ae9e4af3a9969b9c8294c11f2e4fa32",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
