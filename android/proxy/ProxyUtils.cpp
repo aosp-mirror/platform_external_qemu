@@ -27,11 +27,11 @@ namespace proxy {
 using android::base::IpAddress;
 using android::base::Dns;
 
-ParseResult parseConfigurationString(const char* str) {
+ParseResult parseConfigurationString(android::base::StringView str) {
     ParseResult result{};
 
-    const char* pos = str;
-    const char* end = str + ::strlen(str);
+    const char* pos = str.begin();
+    const char* end = str.end();
 
     // Skip optional http:// prefix.
     static constexpr android::base::StringView kHttpPrefix = "http://";

@@ -78,6 +78,7 @@ TEST(ProxyUtils, parseConfigurationStringWithErrors) {
     } kData[] = {
             {"http://", "Empty proxy configuration string"},
             {"", "Empty proxy configuration string"},
+            {nullptr, "Empty proxy configuration string"},
             {"256.0.0.1:8080", "Bad format: invalid proxy name"},
             {"127.0.0.1:foo",
              "Bad format: invalid port number (must be decimal)"},
