@@ -160,6 +160,24 @@
     },
     {
       "key": {
+        "uuid": "8bef436f_e03f6278",
+        "filename": "android/base/synchronization/MessageChannel.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-03T10:48:04Z",
+      "side": 1,
+      "message": "Ok, I\u0027ve looked at the function, and it should definitely use tryReceive() after this patch is applied, this makes size() non-critical after that.",
+      "parentUuid": "8bef436f_40304eb4",
+      "revId": "3c3c2969f230d7ac03824a1d745e9b4f23a9b051",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a688be73_d1260484",
         "filename": "android/base/synchronization/MessageChannel.h",
         "patchSetId": 2
