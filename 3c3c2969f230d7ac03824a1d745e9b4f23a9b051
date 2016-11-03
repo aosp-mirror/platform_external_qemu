@@ -178,6 +178,24 @@
     },
     {
       "key": {
+        "uuid": "e6a5561c_63ec3de1",
+        "filename": "android/base/synchronization/MessageChannel.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-03T15:59:55Z",
+      "side": 1,
+      "message": "no, it can\u0027t. I\u0027m talking about RenderChannelImpl::calcState()\n\nFor single producer-single consumer it\u0027s totally OK to rely on size() only",
+      "parentUuid": "8bef436f_e03f6278",
+      "revId": "3c3c2969f230d7ac03824a1d745e9b4f23a9b051",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a688be73_d1260484",
         "filename": "android/base/synchronization/MessageChannel.h",
         "patchSetId": 2
