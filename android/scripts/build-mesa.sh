@@ -128,42 +128,24 @@ do_remote_darwin_build () {
     for SYSTEM in $DARWIN_SYSTEMS; do
         check_mesa_dependencies "$SYSTEM"
     done
-    builder_prepare_remote_darwin_build \
-            "/tmp/$USER-rebuild-darwin-ssh-$$/mesa-build"
-
-    local PKG_DIR="$DARWIN_PKG_DIR"
-    local REMOTE_DIR=/tmp/$DARWIN_PKG_NAME
-
-    run mkdir -p "$PKG_DIR/prebuilts"
-    for SYSTEM in $DARWIN_SYSTEMS; do
-        copy_directory "$INSTALL_DIR/$SYSTEM" \
-                "$PKG_DIR/prebuilts/mesa/$SYSTEM"
-    done
-    copy_directory "$ARCHIVE_DIR" "$PKG_DIR"/prebuilts/archive
 
     if [ "$OPT_OSMESA" ]; then
         var_append DARWIN_BUILD_FLAGS "--osmesa"
     fi
 
-    # Generate a script to rebuild all binaries from sources.
-    # Note that the use of the '-l' flag is important to ensure
-    # that this is run under a login shell. This ensures that
-    # ~/.bash_profile is sourced before running the script, which
-    # puts MacPorts' /opt/local/bin in the PATH properly.
-    #
-    # If not, the build is likely to fail with a cryptic error message
-    # like "readlink: illegal option -- f"
-    cat > $PKG_DIR/build.sh <<EOF
-#!/bin/bash -l
-PROGDIR=\$(dirname \$0)
-\$PROGDIR/scripts/$(program_name) \\
-    --build-dir=$REMOTE_DIR/build \\
-    --host=$(spaces_to_commas "$DARWIN_SYSTEMS") \\
-    --install-dir=$REMOTE_DIR/install-prefix \\
-    --prebuilts-dir=$REMOTE_DIR/prebuilts \\
-    --aosp-dir=$REMOTE_DIR/aosp \\
-    $DARWIN_BUILD_FLAGS
-EOF
+    builder_prepare_remote_darwin_build \
+            "/tmp/$USER-rebuild-darwin-ssh-$$/mesa-build" \
+            "$ARCHIVE_DIR"
+
+    local PKG_DIR="$DARWIN_PKG_DIR"
+    local REMOTE_DIR=/tmp/$DARWIN_PKG_NAME
+
+    run mkdir -p "$DARWIN_PKG_DIR/prebuilts"
+    for SYSTEM in $DARWIN_SYSTEMS; do
+        copy_directory "$INSTALL_DIR/$SYSTEM" \
+                "$DARWIN_PKG_DIR/prebuilts/mesa/$SYSTEM"
+    done
+
     builder_run_remote_darwin_build
 
     local BINARY_DIR=$INSTALL_DIR
@@ -173,7 +155,7 @@ EOF
     for SYSTEM in $DARWIN_SYSTEMS; do
         dump "[$SYSTEM] Retrieving remote darwin binaries"
         builder_remote_darwin_scp -r \
-                "$DARWIN_SSH":$REMOTE_DIR/install-prefix/$SYSTEM \
+                "$DARWIN_SSH":$DARWIN_REMOTE_DIR/install-prefix/$SYSTEM \
                 $BINARY_DIR/
 
         timestamp_set "$INSTALL_DIR/$SYSTEM" mesa

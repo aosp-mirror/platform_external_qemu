@@ -164,31 +164,9 @@ build_qt_package () {
 # $2: List of darwin target systems to build for.
 do_remote_darwin_build () {
     builder_prepare_remote_darwin_build \
-            "/tmp/$USER-rebuild-darwin-ssh-$$/qt-build"
+            "/tmp/$USER-rebuild-darwin-ssh-$$/qt-build" \
+            "$ARCHIVE_DIR"
 
-    copy_directory "$ARCHIVE_DIR" "$DARWIN_PKG_DIR"/archive
-
-    local PKG_DIR="$DARWIN_PKG_DIR"
-    local REMOTE_DIR=/tmp/$DARWIN_PKG_NAME
-    # Generate a script to rebuild all binaries from sources.
-    # Note that the use of the '-l' flag is important to ensure
-    # that this is run under a login shell. This ensures that
-    # ~/.bash_profile is sourced before running the script, which
-    # puts MacPorts' /opt/local/bin in the PATH properly.
-    #
-    # If not, the build is likely to fail with a cryptic error message
-    # like "readlink: illegal option -- f"
-    cat > $PKG_DIR/build.sh <<EOF
-#!/bin/bash -l
-PROGDIR=\$(dirname \$0)
-\$PROGDIR/scripts/$(program_name) \\
-    --build-dir=$REMOTE_DIR/build \\
-    --host=$(spaces_to_commas "$DARWIN_SYSTEMS") \\
-    --install-dir=$REMOTE_DIR/install-prefix \\
-    --prebuilts-dir=$REMOTE_DIR \\
-    --aosp-dir=$REMOTE_DIR/aosp \\
-    $DARWIN_BUILD_FLAGS
-EOF
     builder_run_remote_darwin_build
 
     run mkdir -p "$INSTALL_DIR" ||
@@ -202,11 +180,11 @@ EOF
     for SYSTEM in $DARWIN_SYSTEMS; do
         dump "[$SYSTEM] Retrieving remote darwin binaries"
         builder_remote_darwin_rsync -haz --delete \
-                $DARWIN_SSH:$REMOTE_DIR/install-prefix/$SYSTEM \
+                $DARWIN_SSH:$DARWIN_REMOTE_DIR/install-prefix/$SYSTEM \
                 $INSTALL_DIR &&
         run mkdir -p $INSTALL_DIR/common &&
         builder_remote_darwin_rsync -haz --delete \
-                $DARWIN_SSH:$REMOTE_DIR/install-prefix/common/include \
+                $DARWIN_SSH:$DARWIN_REMOTE_DIR/install-prefix/common/include \
                 $INSTALL_DIR/common/
     done
 

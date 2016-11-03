@@ -280,18 +280,18 @@ builder_remote_darwin_rsync () {
 #    DARWIN_BUILD_FLAGS: common build flags to use with build.sh
 #
 # The caller should then add any appropriate sources or binaries, then
-# create a 'build.sh' script in the directory. Then call the function
-# builder_run_remote_build declared below to actually perform the
-# remote build through SSH
+# call the function builder_run_remote_build declared below to actually
+# perform the remote build through SSH
 #
 # NOTE: Only call this when --darwin-ssh or equivalent is used.
 #
 # $1: Package directory (e.g. '/tmp/foo/bar')
+# $2: Optional archive directory.
 #
-# On exit, defines the following variables:
 builder_prepare_remote_darwin_build () {
     local PKG_DIR=${1%%/}
     local PKG_NAME=$(basename "$PKG_DIR")
+    local ARCHIVE_DIR="$2"
     DARWIN_PKG_NAME=$PKG_NAME
     DARWIN_PKG_DIR="$PKG_DIR"
     DARWIN_REMOTE_DIR=/tmp/$PKG_NAME
@@ -310,7 +310,6 @@ builder_prepare_remote_darwin_build () {
     copy_directory "$AOSP_DIR"/$TOOLCHAIN_SUBDIR \
             "$PKG_DIR"/aosp/$TOOLCHAIN_SUBDIR
     copy_directory "$(program_directory)" "$PKG_DIR/scripts"
-    copy_directory "$(program_directory)"/../dependencies "$PKG_DIR"/dependencies
 
     local BREAKPAD_SUBDIR
     for DARWIN_SYSTEM in $DARWIN_SYSTEMS; do
@@ -328,6 +327,13 @@ builder_prepare_remote_darwin_build () {
     if [ "$OPT_NO_CCACHE" ]; then
         var_append DARWIN_BUILD_FLAGS "--no-ccache"
     fi
+
+    if [ "$ARCHIVE_DIR" ]; then
+        copy_directory "$ARCHIVE_DIR" "$DARWIN_PKG_DIR"/archive
+    fi
+
+    DARWIN_REMOTE_DIR=/tmp/$DARWIN_PKG_NAME
+
 }
 
 # Call this after builder_prepare_remote_darwin_build and populating
@@ -335,13 +341,30 @@ builder_prepare_remote_darwin_build () {
 # a remote darwin build through SSH.
 builder_run_remote_darwin_build () {
     local BUILD_SH="$DARWIN_PKG_DIR"/build.sh
-    if [ ! -f "$BUILD_SH" ]; then
-        panic "Missing file: $BUILD_SH !!"
-    fi
+
+    # Generate a script to rebuild all binaries from sources.
+    # Note that the use of the '-l' flag is important to ensure
+    # that this is run under a login shell. This ensures that
+    # ~/.bash_profile is sourced before running the script, which
+    # puts MacPorts' /opt/local/bin in the PATH properly.
+    #
+    # If not, the build is likely to fail with a cryptic error message
+    # like "readlink: illegal option -- f"
+    cat > $BUILD_SH <<EOF
+#!/bin/bash -l
+PROGDIR=\$(dirname \$0)
+\$PROGDIR/scripts/$(program_name) \\
+    --build-dir=$DARWIN_REMOTE_DIR/build \\
+    --host=$(spaces_to_commas "$DARWIN_SYSTEMS") \\
+    --install-dir=$DARWIN_REMOTE_DIR/install-prefix \\
+    --prebuilts-dir=$DARWIN_REMOTE_DIR \\
+    --aosp-dir=$DARWIN_REMOTE_DIR/aosp \\
+    $DARWIN_BUILD_FLAGS
+EOF
     chmod a+x "$BUILD_SH"
 
     log "Erasing previours remote build directory."
-    builder_remote_darwin_run rm -rf /tmp/$DARWIN_PKG_NAME
+    builder_remote_darwin_run rm -rf $DARWIN_REMOTE_DIR
 
     log "Copying files to remote darwin host."
     (tar cf - -C "$DARWIN_PKG_DIR"/.. "$DARWIN_PKG_NAME") |

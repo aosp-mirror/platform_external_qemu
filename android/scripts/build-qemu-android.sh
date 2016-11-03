@@ -431,41 +431,25 @@ EOF
 # $1: Darwin host name.
 # $2: List of darwin target systems to build for.
 do_remote_darwin_build () {
-    builder_prepare_remote_darwin_build /tmp/$USER-rebuild-darwin-ssh-$$/qemu-android-build
-    local PKG_DIR="$DARWIN_PKG_DIR"
-    copy_directory "$QEMU_ANDROID" "$PKG_DIR/qemu-android-src"
+    builder_prepare_remote_darwin_build \
+            /tmp/$USER-rebuild-darwin-ssh-$$/qemu-android-build \
+            "$ARCHIVE_DIR"
 
-    run mkdir -p "$PKG_DIR/prebuilts"
+    copy_directory "$QEMU_ANDROID" "$DARWIN_PKG_DIR/qemu-android-src"
+
+    run mkdir -p "$DARWIN_PKG_DIR/prebuilts"
     for SYSTEM in $DARWIN_SYSTEMS; do
         copy_directory "$QEMU_ANDROID_DEPS_INSTALL_DIR/$SYSTEM" \
-                "$PKG_DIR/prebuilts/qemu-android-deps/$SYSTEM"
+                "$DARWIN_PKG_DIR/prebuilts/qemu-android-deps/$SYSTEM"
     done
-    copy_directory "$PREBUILTS_DIR"/archive "$PKG_DIR/prebuilts/archive"
 
-    local REMOTE_DIR=/tmp/$DARWIN_PKG_NAME
+    var_append DARWIN_BUILD_FLAGS \
+        --target=$(spaces_to_commas "$TARGETS") \
+        --src-dir=$DARWIN_REMOTE_DIR/qemu-android-src \
+        --no-tests \
+        --prebuilts-dir=$DARWIN_REMOTE_DIR/prebuilts \
+        --install-dir=$DARWIN_REMOTE_DIR/prebuilts/qemu-android \
 
-    # Generate a script to rebuild all binaries from sources.
-    # Note that the use of the '-l' flag is important to ensure
-    # that this is run under a login shell. This ensures that
-    # ~/.bash_profile is sourced before running the script, which
-    # puts MacPorts' /opt/local/bin in the PATH properly.
-    #
-    # If not, the build is likely to fail with a cryptic error message
-    # like "readlink: illegal option -- f"
-    cat > $PKG_DIR/build.sh <<EOF
-#!/bin/bash -l
-PROGDIR=\$(dirname \$0)
-\$PROGDIR/scripts/$(program_name) \\
-    --build-dir=$REMOTE_DIR/build \\
-    --prebuilts-dir=$REMOTE_DIR/prebuilts \\
-    --aosp-dir=$REMOTE_DIR/aosp \\
-    --install-dir=$REMOTE_DIR/prebuilts/qemu-android \\
-    --host=$(spaces_to_commas "$DARWIN_SYSTEMS") \\
-    --target=$(spaces_to_commas "$TARGETS") \\
-    --src-dir=$REMOTE_DIR/qemu-android-src \\
-    --no-tests \\
-    $DARWIN_BUILD_FLAGS
-EOF
     builder_run_remote_darwin_build
 
     for SYSTEM in $DARWIN_SYSTEMS; do
@@ -474,7 +458,7 @@ EOF
         run mkdir -p "$BINARY_DIR" ||
                 panic "Could not create installation directory: $BINARY_DIR"
 
-        REMOTE_SRCDIR="$DARWIN_SSH":$REMOTE_DIR/prebuilts/qemu-android/$SYSTEM
+        REMOTE_SRCDIR="$DARWIN_SSH":$DARWIN_REMOTE_DIR/prebuilts/qemu-android/$SYSTEM
         builder_remote_darwin_scp -r \
             "$REMOTE_SRCDIR"/qemu-system-* \
             "$REMOTE_SRCDIR"/LINK-qemu-system-* \
