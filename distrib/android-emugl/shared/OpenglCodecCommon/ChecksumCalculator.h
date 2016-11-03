@@ -123,6 +123,8 @@
 
 class ChecksumCalculator {
 public:
+    static constexpr size_t kMaxChecksumLength = 8;
+
     // Get and set current checksum version
     uint32_t getVersion() const { return m_version; }
     // Call setVersion to set a checksum version. It should be called before
@@ -142,7 +144,7 @@ public:
     static const char* getMaxVersionStrPrefix();
 
     // Size of checksum in the current version
-    size_t checksumByteSize() const;
+    size_t checksumByteSize() const { return m_checksumSize; }
 
     // Update the current checksum value from the data
     // at |buf| of |bufLen| bytes. Once all buffers
@@ -164,8 +166,19 @@ public:
     // compare it with the checksum encoded in expectedChecksum
     // Will reset the list of buffers by calling resetChecksum.
     bool validate(const void* expectedChecksum, size_t expectedChecksumLen);
+
 protected:
+    static constexpr size_t kVersion1ChecksumSize = 8;  // 2 x uint32_t
+
+    static_assert(kVersion1ChecksumSize <= kMaxChecksumLength,
+                  "Invalid ChecksumCalculator::kMaxChecksumLength value");
+
+    static constexpr size_t checksumByteSize(uint32_t version) {
+        return version == 1 ? kVersion1ChecksumSize : 0;
+    }
+
     uint32_t m_version = 0;
+    uint32_t m_checksumSize = checksumByteSize(0);
     // A temporary state used to compute the total length of a list of buffers,
     // if addBuffer is called.
     uint32_t m_numRead = 0;
