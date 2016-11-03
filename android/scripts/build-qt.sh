@@ -246,7 +246,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             unpack_archive "$ARCHIVE_DIR/$QT_SRC_PACKAGE" "$BUILD_SRC_DIR" ||
                 panic "Failed to unpack source package: $QT_SRC_PACKAGE"
 
-            PATCHES_FOLDER="$(program_directory)/../dependencies/$QT_SRC_PATCH_FOLDER"
+            PATCHES_FOLDER="$ARCHIVE_DIR/$QT_SRC_PATCH_FOLDER"
             cp -R "$PATCHES_FOLDER" "$BUILD_SRC_DIR" ||
                 panic "Failed to copy Qt patches: $PATCHES_FOLDER"
 
