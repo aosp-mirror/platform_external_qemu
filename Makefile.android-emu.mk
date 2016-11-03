@@ -330,6 +330,8 @@ LOCAL_SRC_FILES := \
     android/proxy/proxy_http.c \
     android/proxy/proxy_http_connector.c \
     android/proxy/proxy_http_rewriter.c \
+    android/proxy/proxy_setup.cpp \
+    android/proxy/ProxyUtils.cpp \
     android/qemu-setup.c \
     android/qemu-tcpdump.c \
     android/qt/qt_path.cpp \
@@ -534,6 +536,7 @@ LOCAL_SRC_FILES := \
   android/opengl/GpuFrameBridge_unittest.cpp \
   android/opengl/gpuinfo_unittest.cpp \
   android/proxy/proxy_common_unittest.cpp \
+  android/proxy/ProxyUtils_unittest.cpp \
   android/qt/qt_path_unittest.cpp \
   android/qt/qt_setup_unittest.cpp \
   android/telephony/gsm_unittest.cpp \

@@ -25,10 +25,11 @@
 #include "android/hw-fingerprint.h"
 #include "android/hw-sensors.h"
 #include "android/opengles-pipe.h"
-#include "android/proxy/proxy_http.h"
+#include "android/proxy/proxy_setup.h"
 #include "android/utils/debug.h"
 #include "android/utils/ipaddr.h"
 #include "android/utils/path.h"
+#include "android/utils/sockets.h"
 #include "android/utils/system.h"
 #include "android/utils/bufprint.h"
 #include "android/version.h"
@@ -383,89 +384,10 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
     agents->telephony->initModem(android_base_port);
 
     /* setup the http proxy, if any */
-    if (VERBOSE_CHECK(proxy))
-        proxy_set_verbose(1);
-
     if (!op_http_proxy) {
         op_http_proxy = getenv("http_proxy");
     }
-
-    do
-    {
-        const char*  env = op_http_proxy;
-        int          envlen;
-        ProxyOption  option_tab[4];
-        ProxyOption* option = option_tab;
-        char*        p;
-        char*        q;
-        const char*  proxy_name;
-        int          proxy_name_len;
-        int          proxy_port;
-
-        if (!env)
-            break;
-
-        envlen = strlen(env);
-
-        /* skip the 'http://' header, if present */
-        if (envlen >= 7 && !memcmp(env, "http://", 7)) {
-            env    += 7;
-            envlen -= 7;
-        }
-
-        /* do we have a username:password pair ? */
-        p = strchr(env, '@');
-        if (p != 0) {
-            q = strchr(env, ':');
-            if (q == NULL) {
-            BadHttpProxyFormat:
-                dprint("http_proxy format unsupported, try 'proxy:port' or 'username:password@proxy:port'");
-                break;
-            }
-
-            option->type       = PROXY_OPTION_AUTH_USERNAME;
-            option->string     = env;
-            option->string_len = q - env;
-            option++;
-
-            option->type       = PROXY_OPTION_AUTH_PASSWORD;
-            option->string     = q+1;
-            option->string_len = p - (q+1);
-            option++;
-
-            env = p+1;
-        }
-
-        p = strchr(env,':');
-        if (p == NULL)
-            goto BadHttpProxyFormat;
-
-        proxy_name     = env;
-        proxy_name_len = p - env;
-        proxy_port     = atoi(p+1);
-
-        D( "setting up http proxy:  server=%.*s port=%d",
-                proxy_name_len, proxy_name, proxy_port );
-
-        /* Check that we can connect to the proxy in the next second.
-         * If not, the proxy setting is probably garbage !!
-         */
-        if ( proxy_check_connection( proxy_name, proxy_name_len, proxy_port, 1000 ) < 0) {
-            dprint("Could not connect to proxy at %.*s:%d: %s !",
-                   proxy_name_len, proxy_name, proxy_port, errno_str);
-            dprint("Proxy will be ignored !");
-            break;
-        }
-
-        if ( proxy_http_setup( proxy_name, proxy_name_len, proxy_port,
-                               option - option_tab, option_tab ) < 0 )
-        {
-            dprint( "Http proxy setup failed for '%.*s:%d': %s",
-                    proxy_name_len, proxy_name, proxy_port, errno_str);
-            dprint( "Proxy will be ignored !");
-        }
-    }
-    while (0);
+    android_http_proxy_setup(op_http_proxy, VERBOSE_CHECK(proxy));
 
     /* initialize sensors, this must be done here due to timer issues */
     android_hw_sensors_init();
