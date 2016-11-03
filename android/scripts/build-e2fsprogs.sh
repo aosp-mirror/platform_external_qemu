@@ -191,9 +191,7 @@ EOF
 
     for SYSTEM in $DARWIN_SYSTEMS; do
         dump "[$SYSTEM] Retrieving remote darwin binaries"
-        run rm -rf "$INSTALL_DIR"/* &&
-        run $ANDROID_EMULATOR_SSH_WRAPPER rsync -haz --delete \
-                --exclude=intermediates --exclude=libs \
+        builder_remote_darwin_rsync -haz --delete \
                 $DARWIN_SSH:$REMOTE_DIR/install-prefix/$SYSTEM \
                 $INSTALL_DIR
     done

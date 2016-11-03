@@ -136,7 +136,7 @@ EOF
 
     for SYSTEM in $DARWIN_SYSTEMS; do
         dump "[$SYSTEM] Retrieving remote darwin binaries"
-        run $ANDROID_EMULATOR_SSH_WRAPPER scp -r \
+        builder_remote_darwin_scp -r \
                 "$DARWIN_SSH":$REMOTE_DIR/install-prefix/$SYSTEM \
                 $BINARY_DIR/
 

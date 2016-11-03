@@ -616,9 +616,9 @@ EOF
 # $2: Source package file.
 # $3: Darwin prebuilts directory.
 build_darwin_binaries_on () {
-    local HOST PKG_FILE PKG_FILE_BASENAME DST_DIR TARFLAGS
+    local DARWIN_SSH PKG_FILE PKG_FILE_BASENAME DST_DIR TARFLAGS
     local AOSP_DIR AOSP_PREBUILTS_DIR DARWIN_FLAGS SYSTEM QT_SUBDIR
-    HOST=$1
+    DARWIN_SSH=$1
     PKG_FILE=$2
     AOSP_PREBUILTS_DIR=$3
     AOSP_DIR=$AOSP_PREBUILTS_DIR/..
@@ -732,14 +732,13 @@ EOF
     builder_run_remote_darwin_build ||
         panic "Can't rebuild binaries on Darwin, use --verbose to see why!"
 
-    dump "Retrieving Darwin binaries from: $HOST"
+    dump "Retrieving Darwin binaries from: $DARWIN_SSH"
     # `pwd` == external/qemu
     rm -rf objs/*
-    run $ANDROID_EMULATOR_SSH_WRAPPER rsync -haz --delete \
-            --exclude=intermediates --exclude=libs \
-            $HOST:$DARWIN_REMOTE_DIR/qemu/objs .
+    builder_remote_darwin_rsync -haz --delete \
+            $DARWIN_SSH:$DARWIN_REMOTE_DIR/qemu/objs .
     dump "Deleting files off darwin system"
-    run $ANDROID_EMULATOR_SSH_WRAPPER ssh $HOST rm -rf $DARWIN_REMOTE_DIR
+    builder_remote_darwin_run rm -rf $DARWIN_REMOTE_DIR
 
     if [ ! -d "objs/qemu" ]; then
         # For --prebuilt-qemu2
