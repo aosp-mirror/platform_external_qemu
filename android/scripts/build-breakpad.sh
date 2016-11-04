@@ -116,14 +116,8 @@ do_remote_darwin_build () {
 
     builder_run_remote_darwin_build
 
-    run mkdir -p "$INSTALL_DIR" ||
-            panic "Could not create final directory: $INSTALL_DIR"
-
     for SYSTEM in $DARWIN_SYSTEMS; do
-        dump "[$SYSTEM] Retrieving remote darwin binaries"
-        builder_remote_darwin_rsync -haz --delete \
-                $DARWIN_SSH:$DARWIN_REMOTE_DIR/install-prefix/$SYSTEM \
-                $INSTALL_DIR
+        builder_remote_darwin_retrieve_install_dir $SYSTEM $INSTALL_DIR
     done
 }
 

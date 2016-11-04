@@ -265,8 +265,21 @@ builder_remote_darwin_scp () {
     run $ANDROID_EMULATOR_SSH_WRAPPER scp "$@"
 }
 
+# Run a 'rsync -hax --delete' command to retrieve files from the remote
+# Darwin machine and copy them back to the local one. This uses the
+# '-hax --delete' rsync parameters by default,
+# $1+: parameters to 'rsync' command.
 builder_remote_darwin_rsync () {
     run $ANDROID_EMULATOR_SSH_WRAPPER rsync "$@"
+}
+
+# $1: darwin host system name (e.g. $SYSTEM)
+# $2: local installation directory (e.g. $INSTALL_DIR)
+builder_remote_darwin_retrieve_install_dir () {
+    dump "[$1] Retrieving remote darwin binaries"
+    mkdir -p "$2" || panic "Could not create final directory: $2"
+    run $ANDROID_EMULATOR_SSH_WRAPPER rsync -haz --delete \
+        $DARWIN_SSH:$DARWIN_REMOTE_DIR/install-prefix/$1 "$2"
 }
 
 # Prepare for a remote darwin build. This takes as a parameter the
@@ -374,7 +387,6 @@ EOF
     rm -rf "$DARWIN_PKG_DIR"
 
     log "Performing remote darwin build."
-    log "COMMAND: ssh $DARWIN_SSH /tmp/$DARWIN_PKG_NAME/build.sh"
     builder_remote_darwin_run $DARWIN_REMOTE_DIR/build.sh
 }
 
