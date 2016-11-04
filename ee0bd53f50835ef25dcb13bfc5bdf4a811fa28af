@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cbff7b6a_26712e52",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1159,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-11-04T18:55:31Z",
+      "side": 1,
+      "message": "Please tell me if I am wrong, but I don\u0027t think we have a use case where this could be false?",
+      "revId": "ee0bd53f50835ef25dcb13bfc5bdf4a811fa28af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
