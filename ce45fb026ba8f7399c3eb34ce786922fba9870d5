@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6b55af38_f723606d",
+        "filename": "android-qemu1-glue/qemu-nfc-agent-impl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-04T21:40:47Z",
+      "side": 1,
+      "message": "Also, lawyers tell us the (C) can be dropped out since it has no legal meaning anyway :)",
+      "parentUuid": "e6a5561c_5f22bb6a",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e6a5561c_9dd701a3",
         "filename": "android/console.c",
         "patchSetId": 4
@@ -88,6 +112,58 @@
     },
     {
       "key": {
+        "uuid": "6b55af38_175414c5",
+        "filename": "android/console.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2684,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-04T21:40:47Z",
+      "side": 1,
+      "message": "Agree, also please tell the user what is wrong (expecting even number of hex digits).",
+      "parentUuid": "e6a5561c_bf263f82",
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b55af38_7749102d",
+        "filename": "android/console.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2691,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-04T21:40:47Z",
+      "side": 1,
+      "message": "same here: say the message was not proper hexadecimal instead.",
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b55af38_374f9836",
+        "filename": "android/console.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2707,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-04T21:40:47Z",
+      "side": 1,
+      "message": "nit: it might be useful to state that \u003cmessage\u003e is an hexadecimal byte string :-/ e.g.\n\n   send hexadecimal string message to NFC HAL.",
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e6a5561c_df350ba4",
         "filename": "android/console.c",
         "patchSetId": 4
@@ -105,6 +181,23 @@
         "endLine": 2855,
         "endChar": 45
       },
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b55af38_d720dc63",
+        "filename": "android/console.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-04T21:40:47Z",
+      "side": 1,
+      "message": "nit: I recommend adding a trailing \\ to simplify future patches when adding new agents to this list :)",
       "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -250,6 +343,23 @@
     },
     {
       "key": {
+        "uuid": "6b55af38_37f038be",
+        "filename": "android/hw-nfc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-04T21:40:47Z",
+      "side": 1,
+      "message": "please use (void) here, C thinks that () means \"either zero or one int parameter\". I know this is crazy :)",
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cbff7b6a_01d5f4cc",
         "filename": "android/hw-nfc.c",
         "patchSetId": 4
@@ -267,6 +377,57 @@
         "endLine": 119,
         "endChar": 64
       },
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b55af38_973f8479",
+        "filename": "android/hw-nfc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-04T21:40:47Z",
+      "side": 1,
+      "message": "There is no need to free this as far as I understand, also you forgot to reset p_response_data to NULL, creating a dangling pointer :-/",
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b55af38_f73c0086",
+        "filename": "android/hw-nfc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-04T21:40:47Z",
+      "side": 1,
+      "message": "why don\u0027t you load any of the bytes that were saved in the previous function?",
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b55af38_17f534ae",
+        "filename": "android/hw-nfc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-04T21:40:47Z",
+      "side": 1,
+      "message": "at this point, I\u0027d encourage you to write _hwNfc_reset() to free the p_request_data and reset the fields to NULL and 0 respectively.",
       "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -296,6 +457,23 @@
     },
     {
       "key": {
+        "uuid": "6b55af38_b7428807",
+        "filename": "android/hw-nfc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-04T21:40:47Z",
+      "side": 1,
+      "message": "nit: bad indent",
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e6a5561c_ff472718",
         "filename": "android/hw-nfc.h",
         "patchSetId": 4
@@ -313,6 +491,23 @@
         "endLine": 1,
         "endChar": 21
       },
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b55af38_574e8c36",
+        "filename": "android/hw-nfc.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-04T21:40:47Z",
+      "side": 1,
+      "message": "please provide proper documentation. Also:\n\n- why use uint8_t* instead of const uint8_t* or even const void* ?\n\n- why use an uint64_t instead of a size_t ?\n\n- is it intentional that there is no error handling possible here?",
       "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
