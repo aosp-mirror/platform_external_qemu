@@ -25,6 +25,52 @@
     },
     {
       "key": {
+        "uuid": "e6a5561c_9dd701a3",
+        "filename": "android/console.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2676,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-04T20:20:04Z",
+      "side": 1,
+      "message": "nit: inverting condition will make code simpler IMO",
+      "range": {
+        "startLine": 2676,
+        "startChar": 4,
+        "endLine": 2676,
+        "endChar": 15
+      },
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6a5561c_7de05584",
+        "filename": "android/console.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2680,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-04T20:20:04Z",
+      "side": 1,
+      "message": "please don\u0027t forget to free this, or, if you\u0027re passing it over to sendMessage(), mention that in the comment (and still free it on error)",
+      "range": {
+        "startLine": 2680,
+        "startChar": 17,
+        "endLine": 2680,
+        "endChar": 24
+      },
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e6a5561c_bf263f82",
         "filename": "android/console.c",
         "patchSetId": 4
@@ -111,6 +157,76 @@
     },
     {
       "key": {
+        "uuid": "cbff7b6a_61e680d4",
+        "filename": "android/hw-nfc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-04T20:20:04Z",
+      "side": 1,
+      "message": "this should be a C++, not C code.",
+      "parentUuid": "e6a5561c_3f424f09",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cbff7b6a_61cde050",
+        "filename": "android/hw-nfc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-04T20:20:04Z",
+      "side": 1,
+      "message": "nit: please re-format with clang-format",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 13
+      },
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cbff7b6a_01bcd49a",
+        "filename": "android/hw-nfc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-04T20:20:04Z",
+      "side": 1,
+      "message": "AFAIK this typedef defines a struct HwNfcClient to HwNfcClient, and the following one defines a nameless struct to HwNfcClient. Can you just merge them into a single \"typedef struct HwNfcClient { ... } HwNfcClient\" ?",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 41
+      },
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e6a5561c_7f3cd784",
         "filename": "android/hw-nfc.c",
         "patchSetId": 4
@@ -127,6 +243,52 @@
         "startChar": 27,
         "endLine": 50,
         "endChar": 28
+      },
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cbff7b6a_01d5f4cc",
+        "filename": "android/hw-nfc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-04T20:20:04Z",
+      "side": 1,
+      "message": "are you planning to load it back? if yes, how do you get the length back? if not, why are you writing to to the stream at the first place?",
+      "range": {
+        "startLine": 119,
+        "startChar": 0,
+        "endLine": 119,
+        "endChar": 64
+      },
+      "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cbff7b6a_811284c7",
+        "filename": "android/hw-nfc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-04T20:20:04Z",
+      "side": 1,
+      "message": "why +1?",
+      "range": {
+        "startLine": 176,
+        "startChar": 51,
+        "endLine": 176,
+        "endChar": 53
       },
       "revId": "ce45fb026ba8f7399c3eb34ce786922fba9870d5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
