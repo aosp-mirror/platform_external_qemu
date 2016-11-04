@@ -66,28 +66,9 @@ package_list_parse_file "$PACKAGE_LIST"
 
 # $1+: Extra configuration options.
 build_breakpad_package () {
-    local PKG_NAME PKG_SRC_DIR PKG_BUILD_DIR PKG_SRC_TIMESTAMP PKG_TIMESTAMP
-    PKG_NAME=$(package_list_get_src_dir "breakpad")
     builder_unpack_package_source "breakpad" "$ARCHIVE_DIR"
     builder_unpack_package_source "linux-syscall-support" "$ARCHIVE_DIR"
-    PKG_SRC_DIR="$(builder_src_dir)/$PKG_NAME"
-    PKG_BUILD_DIR=$(builder_build_dir)/$PKG_NAME
-    PKG_TIMESTAMP=$(builder_build_dir)/$PKG_NAME-timestamp
-    if [ ! -f "$PKG_TIMESTAMP" -o -n "$OPT_FORCE" ]; then
-        case $SYSTEM in
-            darwin*)
-                # Required for proper build on Darwin!
-                builder_disable_verbose_install
-                ;;
-        esac
-        builder_build_autotools_package \
-            "$PKG_SRC_DIR" \
-            "$PKG_BUILD_DIR" \
-            "$@"
-
-        touch "$PKG_TIMESTAMP"
-    fi
-
+    builder_build_autotools_package breakpad "$@"
 }
 
 # Perform a Darwin build through ssh to a remote machine.

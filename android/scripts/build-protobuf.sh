@@ -64,38 +64,6 @@ package_builder_process_options protobuf
 
 package_list_parse_file "$PACKAGE_LIST"
 
-# $1: Package basename (e.g. 'libpthread-stubs-0.3')
-# $2+: Extra configuration options.
-build_package () {
-    local PKG_NAME PKG_SRC_DIR PKG_BUILD_DIR PKG_SRC_TIMESTAMP PKG_TIMESTAMP
-    PKG_NAME=$(package_list_get_src_dir $1)
-    builder_unpack_package_source "$1" "$ARCHIVE_DIR"
-    shift
-    PKG_SRC_DIR="$(builder_src_dir)/$PKG_NAME"
-    PKG_BUILD_DIR=$(builder_build_dir)/$PKG_NAME
-    PKG_TIMESTAMP=$(builder_build_dir)/$PKG_NAME-timestamp
-    if [ ! -f "$PKG_TIMESTAMP" -o -n "$OPT_FORCE" ]; then
-        # protobuf requires the autogen script to be ran before it could be
-        # built
-        run pushd "$PKG_SRC_DIR" &&
-        run "$PKG_SRC_DIR"/autogen.sh
-        run popd
-
-        case $SYSTEM in
-            darwin*)
-                # Required for proper build on Darwin!
-                builder_disable_verbose_install
-                ;;
-        esac
-        builder_build_autotools_package \
-            "$PKG_SRC_DIR" \
-            "$PKG_BUILD_DIR" \
-            "$@"
-
-        touch "$PKG_TIMESTAMP"
-    fi
-}
-
 # Perform a Darwin build through ssh to a remote machine.
 # $1: Darwin host name.
 # $2: List of darwin target systems to build for.
@@ -125,8 +93,19 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         builder_unpack_package_source googlemock "$ARCHIVE_DIR"
         builder_unpack_package_source googletest "$ARCHIVE_DIR"
+        builder_unpack_package_source protobuf "$ARCHIVE_DIR"
 
-        build_package protobuf \
+        # protobuf requires the autogen script to be run before it could be
+        # built. TODO(digit): Put the result in a patch, because this
+        # actually doesn't work for the remote build unless autotools are
+        # installed on the remote machine.
+        (
+            PKG_SRC_DIR=$(builder_src_dir)/$(package_list_get_src_dir protobuf)
+            cd "$PKG_SRC_DIR"
+            run ./autogen.sh
+        ) || panic "Could not run autogen.sh required by protobuf!"
+
+        builder_build_autotools_package protobuf \
                 --disable-shared \
                 --without-zlib \
 
