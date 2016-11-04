@@ -64,28 +64,14 @@ package_builder_process_options libxml2
 
 package_list_parse_file "$PACKAGE_LIST"
 
-BUILD_SRC_DIR=$TEMP_DIR/src
-
-# Unpack package source into $BUILD_SRC_DIR if needed.
-# $1: Package basename.
-unpack_package_source () {
-    local PKG_NAME PKG_SRC_DIR PKG_BUILD_DIR PKG_SRC_TIMESTAMP PKG_TIMESTAMP
-    PKG_NAME=$(package_list_get_unpack_src_dir $1)
-    PKG_SRC_TIMESTAMP=$BUILD_SRC_DIR/timestamp-$PKG_NAME
-    if [ ! -f "$PKG_SRC_TIMESTAMP" ]; then
-        package_list_unpack_and_patch "$1" "$ARCHIVE_DIR" "$BUILD_SRC_DIR"
-        touch $PKG_SRC_TIMESTAMP
-    fi
-}
-
 # $1: Package basename (e.g. 'libpthread-stubs-0.3')
 # $2+: Extra configuration options.
 build_package () {
     local PKG_NAME PKG_SRC_DIR PKG_BUILD_DIR PKG_SRC_TIMESTAMP PKG_TIMESTAMP
     PKG_NAME=$(package_list_get_src_dir $1)
-    unpack_package_source "$1"
+    builder_unpack_package_source "$1" "$ARCHIVE_DIR"
     shift
-    PKG_SRC_DIR="$BUILD_SRC_DIR/$PKG_NAME"
+    PKG_SRC_DIR="$(builder_src_dir)/$PKG_NAME"
     PKG_BUILD_DIR=$TEMP_DIR/build-$SYSTEM/$PKG_NAME
     PKG_TIMESTAMP=$TEMP_DIR/build-$SYSTEM/$PKG_NAME-timestamp
     if [ ! -f "$PKG_TIMESTAMP" -o -n "$OPT_FORCE" ]; then

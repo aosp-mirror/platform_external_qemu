@@ -178,31 +178,7 @@ require_program () {
 # Unpack and patch GLib sources
 # $1: Unversioned package name (e.g. 'glib')
 unpack_and_patch () {
-    local PKG_NAME="$1"
-    local BUILD_DIR=$(builder_build_dir)
-    local PKG_VERSION PKG_PACKAGE PKG_PATCHES_DIR PKG_PATCHES_PACKAGE
-    local PKG_DIR PATCH
-    PKG_VERSION=$(package_list_get_version $PKG_NAME)
-    if [ -z "$PKG_VERSION" ]; then
-        panic "Cannot find version for package $PKG_NAME!"
-    fi
-    log "Extracting $PKG_NAME-$PKG_VERSION"
-    PKG_PACKAGE=$(package_list_get_filename $PKG_NAME)
-    unpack_archive "$ARCHIVE_DIR/$PKG_PACKAGE" "$BUILD_DIR" ||
-    panic "Could not unpack $PKG_NAME-$PKG_VERSION"
-    PKG_DIR=$BUILD_DIR/$PKG_NAME-$PKG_VERSION
-
-    PKG_PATCHES_DIR=$PKG_NAME-$PKG_VERSION-patches
-    PKG_PATCHES_PACKAGE=$ARCHIVE_DIR/${PKG_PATCHES_DIR}.tar.xz
-    if [ -f "$PKG_PATCHES_PACKAGE" ]; then
-        log "Patching $PKG_NAME-$PKG_VERSION"
-        unpack_archive "$PKG_PATCHES_PACKAGE" "$BUILD_DIR"
-        for PATCH in $(cd "$BUILD_DIR" && ls "$PKG_PATCHES_DIR"/*.patch); do
-            log "Applying patch: $PATCH"
-            (cd "$PKG_DIR" && run patch -p1 < "../$PATCH") ||
-                    panic "Could not apply $PATCH"
-        done
-    fi
+    package_list_unpack_and_patch $1 "$ARCHIVE_DIR" "$(builder_build_dir)"
 }
 
 # Cross-compiling glib for Win32 is broken and requires special care.
@@ -211,7 +187,7 @@ unpack_and_patch () {
 do_windows_glib_package () {
     local PREFIX=$(builder_install_prefix)
     local GNU_CONFIG_HOST_PREFIX=$(builder_gnu_config_host_prefix)
-    unpack_and_patch glib
+    package_list_unpack_and_patch glib "$ARCHIVE_DIR" "$(builder_build_dir)"
     local GLIB_VERSION GLIB_PACKAGE GLIB_DIR
     GLIB_VERSION=$(package_list_get_version glib)
     GLIB_DIR=$(builder_build_dir)/glib-$GLIB_VERSION

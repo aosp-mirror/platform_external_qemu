@@ -80,20 +80,6 @@ fi
 
 package_list_parse_file "$PACKAGE_LIST"
 
-BUILD_SRC_DIR=$TEMP_DIR/src
-
-# Unpack package source into $BUILD_SRC_DIR if needed.
-# $1: Package basename.
-unpack_package_source () {
-    local PKG_NAME PKG_SRC_DIR PKG_BUILD_DIR PKG_SRC_TIMESTAMP PKG_TIMESTAMP
-    PKG_NAME=$(package_list_get_src_dir $1)
-    PKG_SRC_TIMESTAMP=$BUILD_SRC_DIR/timestamp-$PKG_NAME
-    if [ ! -f "$PKG_SRC_TIMESTAMP" ]; then
-        package_list_unpack_and_patch "$1" "$ARCHIVE_DIR" "$BUILD_SRC_DIR"
-        touch $PKG_SRC_TIMESTAMP
-    fi
-}
-
 # Rebuild dependencies if needed.
 # $1: System name (e..g darwin-x86_64)
 check_mesa_dependencies () {
@@ -200,10 +186,10 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         PKG_NAME=$(package_list_get_src_dir MesaLib)
 
         # Unpack sources if necessary.
-        PKG_SRC_DIR="$BUILD_SRC_DIR/$PKG_NAME"
-        if ! timestamp_check "$BUILD_SRC_DIR" "$PKG_NAME"; then
-            unpack_package_source "MesaLib"
-            timestamp_set "$BUILD_SRC_DIR" "$PKG_NAME"
+        PKG_SRC_DIR="$(builder_src_dir)/$PKG_NAME"
+        if ! timestamp_check "$(builder_src_dir)" "$PKG_NAME"; then
+            builder_unpack_package_source "MesaLib" "$ARCHIVE_DIR"
+            timestamp_set "$(builder_src_dir)" "$PKG_NAME"
         fi
 
         # The SCons build scripts put everything under $PKG_SRC_DIR/build

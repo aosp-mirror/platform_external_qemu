@@ -623,6 +623,20 @@ builder_disable_parallel_install () {
     _SHU_BUILDER_DISABLE_PARALLEL_INSTALL=true
 }
 
+# Unpack package sources if needed into $(builder_src_dir).
+# $1: Package basename.
+# $2: Archive source directory.
+builder_unpack_package_source () {
+    local PKG_NAME TIMESTAMP SRC_DIR
+    PKG_NAME=$(package_list_get_unpack_src_dir $1)
+    SRC_DIR=$(builder_src_dir)
+    TIMESTAMP=$SRC_DIR/timestamp-$PKG_NAME
+    if [ ! -f "$TIMESTAMP" -o "$OPT_FORCE" ]; then
+        package_list_unpack_and_patch "$1" "$2" "$SRC_DIR"
+        touch $TIMESTAMP
+    fi
+}
+
 # Build a given autotools based package and run customized install commands
 #
 # $1: Source directory.
