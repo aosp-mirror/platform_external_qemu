@@ -71,8 +71,8 @@ build_breakpad_package () {
     builder_unpack_package_source "breakpad" "$ARCHIVE_DIR"
     builder_unpack_package_source "linux-syscall-support" "$ARCHIVE_DIR"
     PKG_SRC_DIR="$(builder_src_dir)/$PKG_NAME"
-    PKG_BUILD_DIR=$TEMP_DIR/build-$SYSTEM/$PKG_NAME
-    PKG_TIMESTAMP=$TEMP_DIR/build-$SYSTEM/$PKG_NAME-timestamp
+    PKG_BUILD_DIR=$(builder_build_dir)/$PKG_NAME
+    PKG_TIMESTAMP=$(builder_build_dir)/$PKG_NAME-timestamp
     if [ ! -f "$PKG_TIMESTAMP" -o -n "$OPT_FORCE" ]; then
         case $SYSTEM in
             darwin*)

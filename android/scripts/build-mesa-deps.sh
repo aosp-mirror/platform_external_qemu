@@ -72,8 +72,8 @@ build_package () {
     builder_unpack_package_source "$1" "$ARCHIVE_DIR"
     shift
     PKG_SRC_DIR="$(builder_src_dir)/$PKG_NAME"
-    PKG_BUILD_DIR=$TEMP_DIR/build-$SYSTEM/$PKG_NAME
-    PKG_TIMESTAMP=$TEMP_DIR/build-$SYSTEM/$PKG_NAME-timestamp
+    PKG_BUILD_DIR=$(builder_build_dir)/$PKG_NAME
+    PKG_TIMESTAMP=$(builder_build_dir)/$PKG_NAME-timestamp
     if [ ! -f "$PKG_TIMESTAMP" -o -n "$OPT_FORCE" ]; then
         builder_build_autotools_package \
             "$PKG_SRC_DIR" \

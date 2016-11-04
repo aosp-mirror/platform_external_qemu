@@ -131,7 +131,7 @@ build_qt_package () {
     PKG_MODULES=$2
     shift; shift
     PKG_SRC_DIR="$(builder_src_dir)/$PKG_NAME"
-    PKG_BUILD_DIR=$TEMP_DIR/build-$SYSTEM/$PKG_NAME
+    PKG_BUILD_DIR=$(builder_build_dir)/$PKG_NAME
     (
         run mkdir -p "$PKG_BUILD_DIR" &&
         run cd "$PKG_BUILD_DIR" &&

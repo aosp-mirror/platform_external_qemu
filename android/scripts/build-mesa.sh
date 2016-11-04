@@ -231,7 +231,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             var_append EXTRA_FLAGS "verbose=true"
         fi
 
-        PKG_BUILD_DIR=$TEMP_DIR/build-$SYSTEM/$PKG_NAME
+        PKG_BUILD_DIR=$(builder_build_dir)/$PKG_NAME
         if ! timestamp_check "$PKG_BUILD_DIR" "$PKG_NAME"; then
             (
                 dump "$(builder_text) Building $PKG_NAME"
