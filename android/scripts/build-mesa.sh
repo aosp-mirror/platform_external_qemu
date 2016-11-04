@@ -50,35 +50,14 @@ aosp_dir_parse_option
 install_dir_parse_option
 
 package_builder_process_options mesa
-
-if [ "$OPT_INSTALL_DIR" ]; then
-    INSTALL_DIR=$OPT_INSTALL_DIR
-    log "Using install dir: $INSTALL_DIR"
-else
-    INSTALL_DIR=$PREBUILTS_DIR/$DEFAULT_INSTALL_SUBDIR
-    log "Auto-config: --install-dir=$INSTALL_DIR  [default]"
-fi
+package_builder_parse_package_list
 
 MESA_DEPS_INSTALL_DIR=$PREBUILTS_DIR/mesa-deps
-
-ARCHIVE_DIR=$PREBUILTS_DIR/archive
-if [ ! -d "$ARCHIVE_DIR" ]; then
-    panic "Missing archive directory: $ARCHIVE_DIR"
-fi
-if [ ! -d "$ARCHIVE_DIR" ]; then
-    panic "Missing archive directory: $ARCHIVE_DIR"
-fi
-PACKAGE_LIST=$ARCHIVE_DIR/PACKAGES.TXT
-if [ ! -f "$PACKAGE_LIST" ]; then
-    panic "Missing package list file, run download-sources.sh: $PACKAGE_LIST"
-fi
 
 SCONS=$(which scons 2>/dev/null || true)
 if [ -z "$SCONS" ]; then
     panic "Please install the 'scons' build tool to use this script!"
 fi
-
-package_list_parse_file "$PACKAGE_LIST"
 
 # Rebuild dependencies if needed.
 # $1: System name (e..g darwin-x86_64)
@@ -120,8 +99,7 @@ do_remote_darwin_build () {
     fi
 
     builder_prepare_remote_darwin_build \
-            "/tmp/$USER-rebuild-darwin-ssh-$$/mesa-build" \
-            "$ARCHIVE_DIR"
+            "/tmp/$USER-rebuild-darwin-ssh-$$/mesa-build"
 
     local PKG_DIR="$DARWIN_PKG_DIR"
     local REMOTE_DIR=/tmp/$DARWIN_PKG_NAME
@@ -188,7 +166,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         # Unpack sources if necessary.
         PKG_SRC_DIR="$(builder_src_dir)/$PKG_NAME"
         if ! timestamp_check "$(builder_src_dir)" "$PKG_NAME"; then
-            builder_unpack_package_source "MesaLib" "$ARCHIVE_DIR"
+            builder_unpack_package_source "MesaLib"
             timestamp_set "$(builder_src_dir)" "$PKG_NAME"
         fi
 

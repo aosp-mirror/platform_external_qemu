@@ -44,29 +44,13 @@ prebuilts_dir_parse_option
 aosp_dir_parse_option
 install_dir_parse_option
 
-ARCHIVE_DIR=$PREBUILTS_DIR/archive
-if [ ! -d "$ARCHIVE_DIR" ]; then
-    dump "Downloading dependencies sources first."
-    $(program_directory)/download-sources.sh \
-        --verbosity=$(get_verbosity) \
-        --prebuilts-dir="$PREBUILTS_DIR" ||
-            panic "Could not download source archives!"
-fi
-if [ ! -d "$ARCHIVE_DIR" ]; then
-    panic "Missing archive directory: $ARCHIVE_DIR"
-fi
-PACKAGE_LIST=$ARCHIVE_DIR/PACKAGES.TXT
-if [ ! -f "$PACKAGE_LIST" ]; then
-    panic "Missing package list file, run download-sources.sh: $PACKAGE_LIST"
-fi
-
 package_builder_process_options curl
-package_list_parse_file "$PACKAGE_LIST"
+package_builder_parse_package_list
 
 # $1: Package basename (e.g. 'libpthread-stubs-0.3')
 # $2+: Extra configuration options.
 build_package () {
-    builder_unpack_package_source "$1" "$ARCHIVE_DIR"
+    builder_unpack_package_source "$1"
     builder_build_autotools_package "$@"
 }
 
@@ -90,7 +74,7 @@ build_windows_zlib_package () {
     ZLIB_VERSION=$(package_list_get_version zlib)
     dump "$(builder_text) Building zlib-$ZLIB_VERSION"
     ZLIB_PACKAGE=$(package_list_get_filename zlib)
-    unpack_archive "$ARCHIVE_DIR/$ZLIB_PACKAGE" "$BUILD_DIR"
+    unpack_archive "$(builder_archive_dir)/$ZLIB_PACKAGE" "$BUILD_DIR"
     (
         run cd "$BUILD_DIR/zlib-$ZLIB_VERSION" &&
         export PKG_CONFIG_PATH=$(builder_install_prefix)/lib/pkgconfig &&
@@ -125,7 +109,7 @@ build_zlib_package () {
     ZLIB_VERSION=$(package_list_get_version zlib)
     dump "$(builder_text) Building zlib-$ZLIB_VERSION"
     ZLIB_PACKAGE=$(package_list_get_filename zlib)
-    unpack_archive "$ARCHIVE_DIR/$ZLIB_PACKAGE" "$BUILD_DIR"
+    unpack_archive "$(builder_archive_dir)/$ZLIB_PACKAGE" "$BUILD_DIR"
     (
         run cd "$BUILD_DIR/zlib-$ZLIB_VERSION" &&
         export PKG_CONFIG_PATH=$(builder_install_prefix)/lib/pkgconfig &&
@@ -144,7 +128,8 @@ build_package_openssl () {
     local PKG_SRCD_NAME=$(package_list_get_unpack_src_dir "openssl")
     local PKG_SRC_TIMESTAMP=$(builder_src_dir)/timestamp-${PKG_SRCD_NAME}
     if [ ! -f "$PKG_SRC_TIMESTAMP" ]; then
-      package_list_unpack_and_patch "openssl" "$ARCHIVE_DIR" "$(builder_src_dir)"
+      package_list_unpack_and_patch \
+              "openssl" "$(builder_archive_dir)" "$(builder_src_dir)"
       touch $PKG_SRC_TIMESTAMP
     fi
 
@@ -222,8 +207,7 @@ build_package_openssl () {
 # $2: List of darwin target systems to build for.
 do_remote_darwin_build () {
     builder_prepare_remote_darwin_build \
-            "/tmp/$USER-rebuild-darwin-ssh-$$/curl-build" \
-            "$ARCHIVE_DIR"
+            "/tmp/$USER-rebuild-darwin-ssh-$$/curl-build"
 
     builder_run_remote_darwin_build
 

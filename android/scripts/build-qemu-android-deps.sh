@@ -80,22 +80,7 @@ aosp_dir_parse_option
 prebuilts_dir_parse_option
 install_dir_parse_option
 
-ARCHIVE_DIR=$PREBUILTS_DIR/archive
-if [ ! -d "$ARCHIVE_DIR" ]; then
-    dump "Downloading dependencies sources first."
-    $(program_directory)/download-sources.sh \
-        --verbosity=$(get_verbosity) \
-        --prebuilts-dir=$PREBUILTS_DIR
-fi
-ARCHIVE_DIR=$(cd "$ARCHIVE_DIR" && pwd -P)
-log "Using archive directory: $ARCHIVE_DIR"
-
-PACKAGE_LIST=$ARCHIVE_DIR/PACKAGES.TXT
-if [ ! -f "$PACKAGE_LIST" ]; then
-    panic "Missing package list file from archive: $PACKAGE_LIST"
-fi
-
-package_list_parse_file "$PACKAGE_LIST"
+package_builder_parse_package_list
 
 export PKG_CONFIG=$(find_program pkg-config)
 if [ "$PKG_CONFIG" ]; then
@@ -124,7 +109,7 @@ do_windows_zlib_package () {
     ZLIB_VERSION=$(package_list_get_version zlib)
     dump "$(builder_text) Building zlib-$ZLIB_VERSION"
     ZLIB_PACKAGE=$(package_list_get_filename zlib)
-    unpack_archive "$ARCHIVE_DIR/$ZLIB_PACKAGE" "$BUILD_DIR"
+    unpack_archive "$(builder_archive_dir)/$ZLIB_PACKAGE" "$BUILD_DIR"
     (
         run cd "$BUILD_DIR/zlib-$ZLIB_VERSION" &&
         export BINARY_PATH=$PREFIX/bin &&
@@ -154,7 +139,7 @@ do_zlib_package () {
     ZLIB_VERSION=$(package_list_get_version zlib)
     dump "$(builder_text) Building zlib-$ZLIB_VERSION"
     ZLIB_PACKAGE=$(package_list_get_filename zlib)
-    unpack_archive "$ARCHIVE_DIR/$ZLIB_PACKAGE" "$BUILD_DIR"
+    unpack_archive "$(builder_archive_dir)/$ZLIB_PACKAGE" "$BUILD_DIR"
     (
         run cd "$BUILD_DIR/zlib-$ZLIB_VERSION" &&
         export CROSS_PREFIX=$(builder_gnu_config_host_prefix) &&
@@ -178,7 +163,8 @@ require_program () {
 # Unpack and patch GLib sources
 # $1: Unversioned package name (e.g. 'glib')
 unpack_and_patch () {
-    package_list_unpack_and_patch $1 "$ARCHIVE_DIR" "$(builder_build_dir)"
+    package_list_unpack_and_patch \
+            $1 "$(builder_archive_dir)" "$(builder_build_dir)"
 }
 
 # Cross-compiling glib for Win32 is broken and requires special care.
@@ -187,7 +173,8 @@ unpack_and_patch () {
 do_windows_glib_package () {
     local PREFIX=$(builder_install_prefix)
     local GNU_CONFIG_HOST_PREFIX=$(builder_gnu_config_host_prefix)
-    package_list_unpack_and_patch glib "$ARCHIVE_DIR" "$(builder_build_dir)"
+    package_list_unpack_and_patch \
+            glib "$(builder_archive_dir)" "$(builder_build_dir)"
     local GLIB_VERSION GLIB_PACKAGE GLIB_DIR
     GLIB_VERSION=$(package_list_get_version glib)
     GLIB_DIR=$(builder_build_dir)/glib-$GLIB_VERSION
@@ -482,8 +469,7 @@ EOF
 # $2: List of darwin target systems to build for.
 do_remote_darwin_build () {
     builder_prepare_remote_darwin_build \
-            "/tmp/$USER-rebuild-darwin-ssh-$$/qemu-android-deps-build" \
-            "$ARCHIVE_DIR"
+            "/tmp/$USER-rebuild-darwin-ssh-$$/qemu-android-deps-build"
 
     if [ "$OPT_FORCE" ]; then
         var_append DARWIN_BUILD_FLAGS "--force"

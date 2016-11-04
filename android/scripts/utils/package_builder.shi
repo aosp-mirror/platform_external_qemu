@@ -225,6 +225,32 @@ package_builder_process_options () {
     ORIGINAL_PATH=$PATH
 }
 
+# Find the packages list file in the prebuilts directory and parse it.
+package_builder_parse_package_list () {
+    local ARCHIVE_DIR PACKAGE_LIST
+    if [ -z "$PREBUILTS_DIR" ]; then
+        panic "Missing PREBUILTS_DIR definition, did you call \
+               package_builder_process_options?"
+    fi
+    ARCHIVE_DIR=$PREBUILTS_DIR/archive
+    if [ ! -d "$ARCHIVE_DIR" ]; then
+        panic "Missing archive directory, please run download-sources.sh: $ARCHIVE_DIR"
+    fi
+    _SHU_BUILDER_ARCHIVE_DIR=$ARCHIVE_DIR
+    PACKAGE_LIST=$ARCHIVE_DIR/PACKAGES.TXT
+    if [ ! -f "$PACKAGE_LIST" ]; then
+        panic "Missing package list file: $PACKAGE_LIST"
+    fi
+    package_list_parse_file "$PACKAGE_LIST"
+}
+
+# Return the current prebuilts archive directory.
+# One needs to call package_builder_parse_package_list () before
+# Out: prebuilts archive directory path.
+builder_archive_dir () {
+    printf %s "$_SHU_BUILDER_ARCHIVE_DIR"
+}
+
 # Check all timestamps and adjust HOST_SYSTEMS / DARWIN_SYSTEMS /
 # LOCAL_HOST_SYSTEMS accordingly for all the things.
 # $1: top-level install directory
@@ -304,7 +330,7 @@ builder_remote_darwin_retrieve_install_dir () {
 builder_prepare_remote_darwin_build () {
     local PKG_DIR=${1%%/}
     local PKG_NAME=$(basename "$PKG_DIR")
-    local ARCHIVE_DIR="$2"
+    local ARCHIVE_DIR="${2:-$(builder_archive_dir)}"
     DARWIN_PKG_NAME=$PKG_NAME
     DARWIN_PKG_DIR="$PKG_DIR"
     DARWIN_REMOTE_DIR=/tmp/$PKG_NAME
@@ -625,14 +651,15 @@ builder_disable_parallel_install () {
 
 # Unpack package sources if needed into $(builder_src_dir).
 # $1: Package basename.
-# $2: Archive source directory.
+# $2: Optional archive source directory.
 builder_unpack_package_source () {
-    local PKG_NAME TIMESTAMP SRC_DIR
+    local PKG_NAME ARCHIVE_DIR TIMESTAMP SRC_DIR
     PKG_NAME=$(package_list_get_unpack_src_dir $1)
+    ARCHIVE_DIR=${2:-$(builder_archive_dir)}
     SRC_DIR=$(builder_src_dir)
     TIMESTAMP=$SRC_DIR/timestamp-$PKG_NAME
     if [ ! -f "$TIMESTAMP" -o "$OPT_FORCE" ]; then
-        package_list_unpack_and_patch "$1" "$2" "$SRC_DIR"
+        package_list_unpack_and_patch "$1" "$ARCHIVE_DIR" "$SRC_DIR"
         touch $TIMESTAMP
     fi
 }

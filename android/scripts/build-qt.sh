@@ -50,26 +50,22 @@ aosp_dir_parse_option
 install_dir_parse_option
 
 package_builder_process_options qt
+package_builder_parse_package_list
 
 ###
 ###  Download the source tarball if needed.
 ###
-ARCHIVE_DIR=$PREBUILTS_DIR/archive
-if [ ! -d "$ARCHIVE_DIR" ]; then
-    run mkdir -p "$ARCHIVE_DIR" ||
-        panic "Could not create directory: $ARCHIVE_DIR"
-fi
-
 QT_SRC_NAME=qt-everywhere-opensource-src-5.5.0
 QT_SRC_PACKAGE=$QT_SRC_NAME.tar.xz
 QT_SRC_URL=http://download.qt.io/archive/qt/5.5/5.5.0/single/$QT_SRC_PACKAGE
 QT_SRC_PACKAGE_SHA1=4409ef12d1017a9b5e6733ea27596a6ca637a88c
 
 QT_SRC_PATCH_FOLDER=${QT_SRC_NAME}-patches
+QT_ARCHIVE_DIR=$(builder_archive_dir)
 
-if [ -z "$OPT_DOWNLOAD" -a ! -f "$ARCHIVE_DIR/$QT_SRC_PACKAGE" ]; then
+if [ -z "$OPT_DOWNLOAD" -a ! -f "$QT_ARCHIVE_DIR/$QT_SRC_PACKAGE" ]; then
     if [ -z "$OPT_DOWNLOAD" ]; then
-        echo "The following tarball is missing: $ARCHIVE_DIR/$QT_SRC_PACKAGE"
+        echo "The following tarball is missing: $QT_ARCHIVE_DIR/$QT_SRC_PACKAGE"
         echo "Please use the --download option to download it. Note that this is"
         echo "a huge file over 300 MB, the download will take time."
         exit 1
@@ -81,7 +77,7 @@ fi
 # $2: Destination directory.
 # $3: [Optional] expected SHA-1 sum of downloaded file.
 download_package () {
-    # Assume the packages are already downloaded under $ARCHIVE_DIR
+    # Assume the packages are already downloaded under $QT_ARCHIVE_DIR
     local DST_DIR PKG_URL PKG_NAME SHA1SUM REAL_SHA1SUM
 
     PKG_URL=$1
@@ -103,7 +99,7 @@ download_package () {
 }
 
 if [ "$OPT_DOWNLOAD" ]; then
-    download_package "$QT_SRC_URL" "$ARCHIVE_DIR" "$QT_SRC_PACKAGE_SHA1"
+    download_package "$QT_SRC_URL" "$QT_ARCHIVE_DIR" "$QT_SRC_PACKAGE_SHA1"
 fi
 
 # Atomically update target directory $1 with the content of $2.
@@ -130,7 +126,7 @@ build_qt_package () {
     PKG_NAME=$(package_list_get_src_dir $1)
     PKG_MODULES=$2
     shift; shift
-    PKG_SRC_DIR="$(builder_src_dir)/$PKG_NAME"
+    PKG_SRC_DIR=$(builder_src_dir)/$PKG_NAME
     PKG_BUILD_DIR=$(builder_build_dir)/$PKG_NAME
     (
         run mkdir -p "$PKG_BUILD_DIR" &&
@@ -153,8 +149,7 @@ build_qt_package () {
 # $2: List of darwin target systems to build for.
 do_remote_darwin_build () {
     builder_prepare_remote_darwin_build \
-            "/tmp/$USER-rebuild-darwin-ssh-$$/qt-build" \
-            "$ARCHIVE_DIR"
+            "/tmp/$USER-rebuild-darwin-ssh-$$/qt-build"
 
     builder_run_remote_darwin_build
 
@@ -204,10 +199,10 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         if [ ! -f "$QT_SRC_TIMESTAMP" ]; then
             dump "Unpacking $QT_SRC_NAME sources."
             run mkdir -p "$(builder_src_dir)" &&
-            unpack_archive "$ARCHIVE_DIR/$QT_SRC_PACKAGE" "$(builder_src_dir)" ||
+            unpack_archive "$QT_ARCHIVE_DIR/$QT_SRC_PACKAGE" "$(builder_src_dir)" ||
                 panic "Failed to unpack source package: $QT_SRC_PACKAGE"
 
-            PATCHES_FOLDER="$ARCHIVE_DIR/$QT_SRC_PATCH_FOLDER"
+            PATCHES_FOLDER=$QT_ARCHIVE_DIR/$QT_SRC_PATCH_FOLDER
             cp -R "$PATCHES_FOLDER" "$(builder_src_dir)" ||
                 panic "Failed to copy Qt patches: $PATCHES_FOLDER"
 

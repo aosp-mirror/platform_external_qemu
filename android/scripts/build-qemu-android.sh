@@ -432,8 +432,7 @@ EOF
 # $2: List of darwin target systems to build for.
 do_remote_darwin_build () {
     builder_prepare_remote_darwin_build \
-            /tmp/$USER-rebuild-darwin-ssh-$$/qemu-android-build \
-            "$ARCHIVE_DIR"
+            /tmp/$USER-rebuild-darwin-ssh-$$/qemu-android-build
 
     copy_directory "$QEMU_ANDROID" "$DARWIN_PKG_DIR/qemu-android-src"
 
