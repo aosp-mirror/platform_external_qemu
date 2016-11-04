@@ -34,6 +34,24 @@
       "revId": "ee0bd53f50835ef25dcb13bfc5bdf4a811fa28af",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cbff7b6a_46971294",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1159,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-11-04T19:35:56Z",
+      "side": 1,
+      "message": "Would you print a warning message if that happens? Since it indicates we are nesting the binds which is pretty wrong.",
+      "parentUuid": "cbff7b6a_86ebba89",
+      "revId": "ee0bd53f50835ef25dcb13bfc5bdf4a811fa28af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
