@@ -144,10 +144,11 @@ build_qt_package () {
     panic "Could not build and install $1"
 }
 
-# Perform a Darwin build through ssh to a remote machine.
-# $1: Darwin host name.
-# $2: List of darwin target systems to build for.
-do_remote_darwin_build () {
+build_disable_cxx11
+
+if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
+    # Perform remote Darwin build first.
+    dump "Remote Qt build for: $DARWIN_SYSTEMS"
     builder_prepare_remote_darwin_build \
             "/tmp/$USER-rebuild-darwin-ssh-$$/qt-build"
 
@@ -170,14 +171,6 @@ do_remote_darwin_build () {
     done
 
     run rm -rf "$INSTALL_DIR/common/include.old"
-}
-
-build_disable_cxx11
-
-if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
-    # Perform remote Darwin build first.
-    dump "Remote Qt build for: $DARWIN_SYSTEMS"
-    do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
 fi
 
 for SYSTEM in $LOCAL_HOST_SYSTEMS; do

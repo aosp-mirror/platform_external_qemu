@@ -47,17 +47,13 @@ install_dir_parse_option
 package_builder_process_options mesa-deps
 package_builder_parse_package_list
 
-# $1: Package basename (e.g. 'libpthread-stubs-0.3')
-# $2+: Extra configuration options.
-build_package () {
-    builder_unpack_package_source "$1"
-    builder_build_autotools_package "$@"
-}
+if [ -z "$OPT_FORCE" ]; then
+    builder_check_all_timestamps "$INSTALL_DIR" mesa-deps
+fi
 
-# Perform a Darwin build through ssh to a remote machine.
-# $1: Darwin host name.
-# $2: List of darwin target systems to build for.
-do_remote_darwin_build () {
+if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
+    # Perform remote Darwin build first.
+    dump "Remote mesa-deps build for: $DARWIN_SYSTEMS"
     builder_prepare_remote_darwin_build \
             "/tmp/$USER-rebuild-darwin-ssh-$$/mesa-deps-build"
 
@@ -67,16 +63,6 @@ do_remote_darwin_build () {
         builder_remote_darwin_retrieve_install_dir $SYSTEM $INSTALL_DIR
         timestamp_set "$INSTALL_DIR/$SYSTEM" mesa-deps
     done
-}
-
-if [ -z "$OPT_FORCE" ]; then
-    builder_check_all_timestamps "$INSTALL_DIR" mesa-deps
-fi
-
-if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
-    # Perform remote Darwin build first.
-    dump "Remote mesa-deps build for: $DARWIN_SYSTEMS"
-    do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
 fi
 
 for SYSTEM in $LOCAL_HOST_SYSTEMS; do
@@ -86,7 +72,8 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         case $SYSTEM in
             linux-*)
-                build_package glproto
+                builder_unpack_package_source glproto
+                builder_build_autotools_package glproto
                 ;;
 
             windows-*)
@@ -109,7 +96,9 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --disable-shared \
                 --with-pic
 
-        build_package llvm \
+        builder_unpack_package_source llvm
+
+        builder_build_autotools_package llvm \
                 --disable-clang-arcmt \
                 --disable-clang-plugin-support \
                 --disable-clang-static-analyzer \

@@ -47,13 +47,6 @@ install_dir_parse_option
 package_builder_process_options curl
 package_builder_parse_package_list
 
-# $1: Package basename (e.g. 'libpthread-stubs-0.3')
-# $2+: Extra configuration options.
-build_package () {
-    builder_unpack_package_source "$1"
-    builder_build_autotools_package "$@"
-}
-
 # Handle zlib, only on Win32 because the zlib configure script
 # doesn't know how to generate a static library with -fPIC!
 build_windows_zlib_package () {
@@ -202,10 +195,9 @@ build_package_openssl () {
     fi
 }
 
-# Perform a Darwin build through ssh to a remote machine.
-# $1: Darwin host name.
-# $2: List of darwin target systems to build for.
-do_remote_darwin_build () {
+if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
+    # Perform remote Darwin build first.
+    dump "Remote curl build for: $DARWIN_SYSTEMS"
     builder_prepare_remote_darwin_build \
             "/tmp/$USER-rebuild-darwin-ssh-$$/curl-build"
 
@@ -214,12 +206,6 @@ do_remote_darwin_build () {
     for SYSTEM in $DARWIN_SYSTEMS; do
         builder_remote_darwin_retrieve_install_dir $SYSTEM $INSTALL_DIR
     done
-}
-
-if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
-    # Perform remote Darwin build first.
-    dump "Remote curl build for: $DARWIN_SYSTEMS"
-    do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
 fi
 
 for SYSTEM in $LOCAL_HOST_SYSTEMS; do
@@ -239,7 +225,9 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         dump "$(builder_text) Building libcurl"
 
-        build_package curl \
+        builder_unpack_package_source curl
+
+        builder_build_autotools_package curl \
             --enable-debug \
             --enable-optimize \
             --disable-warnings \

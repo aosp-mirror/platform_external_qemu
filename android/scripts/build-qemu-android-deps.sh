@@ -224,32 +224,8 @@ do_windows_glib_package () {
 # $1: package name, unversioned and unsuffixed (e.g. 'libpng')
 # $2+: extra configuration flags
 do_autotools_package () {
-    local PKG PKG_VERSION PKG_NAME
-    local PREFIX=$(builder_install_prefix)
-    PKG=$1
-    shift
-    unpack_and_patch $PKG
-    PKG_VERSION=$(package_list_get_version $PKG)
-    PKG_NAME=$(package_list_get_filename $PKG)
-    dump "$(builder_text) Building $PKG-$PKG_VERSION"
-    if [ $PKG == "SDL2" ]; then
-        unset SDKROOT
-    fi
-    (
-        run cd "$(builder_build_dir)/$PKG-$PKG_VERSION" &&
-        export LDFLAGS="-L$PREFIX/lib" &&
-        export CPPFLAGS="-I$PREFIX/include" &&
-        export PKG_CONFIG_LIBDIR="$PREFIX/lib/pkgconfig" &&
-        run ./configure \
-            --prefix=$PREFIX \
-            $(builder_gnu_config_host_flag) \
-            --disable-shared \
-            --with-pic \
-            "$@" &&
-        run make -j$NUM_JOBS V=1 &&
-        run make install V=1
-    ) ||
-    panic "Could not build and install $PKG_NAME"
+    builder_unpack_package_source $1
+    builder_build_autotools_package "$@" --disable-shared --with-pic
 }
 
 do_dtc_package () {
@@ -464,10 +440,14 @@ EOF
     timestamp_set "$INSTALL_DIR/$(builder_host)" qemu-android-deps
 }
 
-# Perform a Darwin build through ssh to a remote machine.
-# $1: Darwin host name.
-# $2: List of darwin target systems to build for.
-do_remote_darwin_build () {
+# Ignore prebuilt Darwin binaries if --force is not used.
+if [ -z "$OPT_FORCE" ]; then
+    builder_check_all_timestamps "$INSTALL_DIR" qemu-android-deps
+fi
+
+if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
+    # Perform remote Darwin build first.
+    dump "Remote qemu-android-deps build for: $DARWIN_SYSTEMS"
     builder_prepare_remote_darwin_build \
             "/tmp/$USER-rebuild-darwin-ssh-$$/qemu-android-deps-build"
 
@@ -481,18 +461,6 @@ do_remote_darwin_build () {
         builder_remote_darwin_retrieve_install_dir $SYSTEM $INSTALL_DIR
         timestamp_set "$INSTALL_DIR/$SYSTEM" qemu-android-deps
     done
-
-}
-
-# Ignore prebuilt Darwin binaries if --force is not used.
-if [ -z "$OPT_FORCE" ]; then
-    builder_check_all_timestamps "$INSTALL_DIR" qemu-android-deps
-fi
-
-if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
-    # Perform remote Darwin build first.
-    dump "Remote qemu-android-deps build for: $DARWIN_SYSTEMS"
-    do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
 fi
 
 for SYSTEM in $LOCAL_HOST_SYSTEMS; do

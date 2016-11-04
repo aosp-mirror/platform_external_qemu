@@ -84,12 +84,16 @@ check_mesa_dependencies () {
     fi
 }
 
-# Perform a Darwin build through ssh to a remote machine.
-# $1: Darwin host name.
-# $2: List of darwin target systems to build for.
-do_remote_darwin_build () {
-    local DARWIN_SYSTEMS="$2"
-    local SYSTEM
+if [ -z "$OPT_FORCE" ]; then
+    builder_check_all_timestamps "$INSTALL_DIR" mesa
+fi
+
+if [ "$DARWIN_SYSTEMS" -a "$DARWIN_SSH" ]; then
+    # TODO(digit): Implement Mesa darwin builds?
+    panic "Sorry, I don't know how to build Darwin Mesa binaries for now!"
+
+    # Building OSMesa remotely.
+    dump "Remote Mesa build for: $DARWIN_SYSTEMS"
     for SYSTEM in $DARWIN_SYSTEMS; do
         check_mesa_dependencies "$SYSTEM"
     done
@@ -100,9 +104,6 @@ do_remote_darwin_build () {
 
     builder_prepare_remote_darwin_build \
             "/tmp/$USER-rebuild-darwin-ssh-$$/mesa-build"
-
-    local PKG_DIR="$DARWIN_PKG_DIR"
-    local REMOTE_DIR=/tmp/$DARWIN_PKG_NAME
 
     run mkdir -p "$DARWIN_PKG_DIR/prebuilts"
     for SYSTEM in $DARWIN_SYSTEMS; do
@@ -116,19 +117,6 @@ do_remote_darwin_build () {
         builder_remote_darwin_retrieve_install_dir $SYSTEM $INSTALL_DIR
         timestamp_set "$INSTALL_DIR/$SYSTEM" mesa
     done
-}
-
-if [ -z "$OPT_FORCE" ]; then
-    builder_check_all_timestamps "$INSTALL_DIR" mesa
-fi
-
-if [ "$DARWIN_SYSTEMS" -a "$DARWIN_SSH" ]; then
-    # TODO(digit): Implement Mesa darwin builds?
-    panic "Sorry, I don't know how to build Darwin Mesa binaries for now!"
-
-    # Building OSMesa remotely.
-    dump "Remote Mesa build for: $DARWIN_SYSTEMS"
-    do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
 fi
 
 

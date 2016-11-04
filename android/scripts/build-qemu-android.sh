@@ -427,10 +427,8 @@ EOF
     timestamp_set "$INSTALL_DIR/$1" qemu-android
 }
 
-# Perform a Darwin build through ssh to a remote machine.
-# $1: Darwin host name.
-# $2: List of darwin target systems to build for.
-do_remote_darwin_build () {
+if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
+    dump "Remote build for: $DARWIN_SYSTEMS"
     builder_prepare_remote_darwin_build \
             /tmp/$USER-rebuild-darwin-ssh-$$/qemu-android-build
 
@@ -457,7 +455,7 @@ do_remote_darwin_build () {
         run mkdir -p "$BINARY_DIR" ||
                 panic "Could not create installation directory: $BINARY_DIR"
 
-        REMOTE_SRCDIR="$DARWIN_SSH":$DARWIN_REMOTE_DIR/prebuilts/qemu-android/$SYSTEM
+        local REMOTE_SRCDIR="$DARWIN_SSH:$DARWIN_REMOTE_DIR/prebuilts/qemu-android/$SYSTEM"
         builder_remote_darwin_scp -r \
             "$REMOTE_SRCDIR"/qemu-system-* \
             "$REMOTE_SRCDIR"/LINK-qemu-system-* \
@@ -467,11 +465,6 @@ do_remote_darwin_build () {
 
         timestamp_set "$BINARY_DIR" qemu-android
     done
-}
-
-if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
-    dump "Remote build for: $DARWIN_SYSTEMS"
-    do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
 fi
 
 for SYSTEM in $LOCAL_HOST_SYSTEMS; do

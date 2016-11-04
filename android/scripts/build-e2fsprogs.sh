@@ -94,20 +94,9 @@ unpack_windows_dependencies () {
                         sbin/tune2fs.exe
 }
 
-# $1: Package basename (e.g. 'libpthread-stubs-0.3')
-# $2+: Extra configuration options.
-build_package () {
-    local PKG_NAME=$1
-    shift
-    builder_unpack_package_source "$PKG_NAME"
-        builder_build_autotools_package_full_install \
-                "$PKG_NAME" "install install-libs" "$@"
-}
-
-# Perform a Darwin build through ssh to a remote machine.
-# $1: Darwin host name.
-# $2: List of darwin target systems to build for.
-do_remote_darwin_build () {
+if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
+    # Perform remote Darwin build first.
+    dump "Remote e2fsprogs build for: $DARWIN_SYSTEMS"
     builder_prepare_remote_darwin_build \
             "/tmp/$USER-rebuild-darwin-ssh-$$/e2fsprogs-build"
 
@@ -116,12 +105,6 @@ do_remote_darwin_build () {
     for SYSTEM in $DARWIN_SYSTEMS; do
         builder_remote_darwin_retrieve_install_dir $SYSTEM $INSTALL_DIR
     done
-}
-
-if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
-    # Perform remote Darwin build first.
-    dump "Remote e2fsprogs build for: $DARWIN_SYSTEMS"
-    do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
 fi
 
 for SYSTEM in $LOCAL_HOST_SYSTEMS; do
@@ -147,7 +130,11 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 dump "WARNING: windows-x86_64 isn't supported with this script!"
                 ;;
             *)
-                build_package e2fsprogs $CONFIGURE_FLAGS
+                builder_unpack_package_source e2fsprogs
+
+                builder_build_autotools_package_full_install e2fsprogs \
+                        "install install-libs" \
+                        $CONFIGURE_FLAGS
 
                 # Copy binaries necessary for the build itself as well as static
                 # libraries.

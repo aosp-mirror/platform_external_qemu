@@ -47,10 +47,9 @@ install_dir_parse_option
 package_builder_process_options protobuf
 package_builder_parse_package_list
 
-# Perform a Darwin build through ssh to a remote machine.
-# $1: Darwin host name.
-# $2: List of darwin target systems to build for.
-do_remote_darwin_build () {
+if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
+    # Perform remote Darwin build first.
+    dump "Remote protobuf build for: $DARWIN_SYSTEMS"
     builder_prepare_remote_darwin_build \
             "/tmp/$USER-rebuild-darwin-ssh-$$/protobuf-build"
 
@@ -59,12 +58,6 @@ do_remote_darwin_build () {
     for SYSTEM in $DARWIN_SYSTEMS; do
         builder_remote_darwin_retrieve_install_dir $SYSTEM $INSTALL_DIR
     done
-}
-
-if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
-    # Perform remote Darwin build first.
-    dump "Remote protobuf build for: $DARWIN_SYSTEMS"
-    do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
 fi
 
 for SYSTEM in $LOCAL_HOST_SYSTEMS; do
