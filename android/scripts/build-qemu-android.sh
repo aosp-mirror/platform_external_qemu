@@ -466,7 +466,7 @@ do_remote_darwin_build () {
             "$REMOTE_SRCDIR"/*/config-target.h \
             $BINARY_DIR/
 
-        timestamp_set "$INSTALL_DIR/$SYSTEM" qemu-android
+        timestamp_set "$BINARY_DIR" qemu-android
     done
 }
 
