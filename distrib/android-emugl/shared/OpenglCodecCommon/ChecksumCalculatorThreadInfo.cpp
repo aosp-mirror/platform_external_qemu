@@ -20,21 +20,22 @@
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/thread_store.h"
 
-#include <stdio.h>
 #include <atomic>
 #include <string>
+
+#include <assert.h>
+#include <stdio.h>
 
 namespace {
 
 class ChecksumCalculatorThreadStore : public ::emugl::ThreadStore {
 public:
-    ChecksumCalculatorThreadStore() : ::emugl::ThreadStore(NULL) {}
+    ChecksumCalculatorThreadStore() : ::emugl::ThreadStore(nullptr) {}
 };
 
 #ifdef TRACE_CHECKSUMHELPER
 std::atomic<size_t> sNumInstances(0);
 #endif  // TRACE_CHECKSUMHELPER
-
 }
 
 static ::emugl::LazyInstance<ChecksumCalculatorThreadStore> s_tls =
@@ -45,59 +46,50 @@ static ChecksumCalculatorThreadInfo* getChecksumCalculatorThreadInfo() {
 }
 
 ChecksumCalculatorThreadInfo::ChecksumCalculatorThreadInfo() {
-    LOG_CHECKSUMHELPER(
-        "%s: Checksum thread created (%u instances)\n", __FUNCTION__,
-        (unsigned int)(++sNumInstances));
+    LOG_CHECKSUMHELPER("%s: Checksum thread created (%u instances)\n",
+                       __FUNCTION__, (unsigned int)(++sNumInstances));
     s_tls->set(this);
 }
 
 ChecksumCalculatorThreadInfo::~ChecksumCalculatorThreadInfo() {
-    LOG_CHECKSUMHELPER(
-        "%s: GLprotocol destroyed (%u instances)\n", __FUNCTION__,
-        (unsigned int)(--sNumInstances));
-    s_tls->set(NULL);
+    LOG_CHECKSUMHELPER("%s: GLprotocol destroyed (%u instances)\n",
+                       __FUNCTION__, (unsigned int)(--sNumInstances));
+    s_tls->set(nullptr);
 }
 
-uint32_t ChecksumCalculatorThreadInfo::getVersion() {
-    return getChecksumCalculatorThreadInfo()->m_protocol.getVersion();
+ChecksumCalculator& ChecksumCalculatorThreadInfo::get() {
+    return getChecksumCalculatorThreadInfo()->m_protocol;
 }
 
 bool ChecksumCalculatorThreadInfo::setVersion(uint32_t version) {
     return getChecksumCalculatorThreadInfo()->m_protocol.setVersion(version);
 }
 
-size_t ChecksumCalculatorThreadInfo::checksumByteSize() {
-    return getChecksumCalculatorThreadInfo()->m_protocol.checksumByteSize();
-}
-
-bool ChecksumCalculatorThreadInfo::writeChecksum(void* buf,
+bool ChecksumCalculatorThreadInfo::writeChecksum(ChecksumCalculator* calc,
+                                                 void* buf,
                                                  size_t bufLen,
                                                  void* outputChecksum,
                                                  size_t outputChecksumLen) {
-    ChecksumCalculator& protocol =
-            getChecksumCalculatorThreadInfo()->m_protocol;
-    protocol.addBuffer(buf, bufLen);
-    return protocol.writeChecksum(outputChecksum, outputChecksumLen);
+    calc->addBuffer(buf, bufLen);
+    return calc->writeChecksum(outputChecksum, outputChecksumLen);
 }
 
-bool ChecksumCalculatorThreadInfo::validate(void* buf,
+bool ChecksumCalculatorThreadInfo::validate(ChecksumCalculator* calc,
+                                            void* buf,
                                             size_t bufLen,
                                             void* checksum,
                                             size_t checksumLen) {
-    ChecksumCalculator& protocol =
-            getChecksumCalculatorThreadInfo()->m_protocol;
-    protocol.addBuffer(buf, bufLen);
-    return protocol.validate(checksum, checksumLen);
+    calc->addBuffer(buf, bufLen);
+    return calc->validate(checksum, checksumLen);
 }
 
-void ChecksumCalculatorThreadInfo::validOrDie(void* buf,
+void ChecksumCalculatorThreadInfo::validOrDie(ChecksumCalculator* calc,
+                                              void* buf,
                                               size_t bufLen,
                                               void* checksum,
                                               size_t checksumLen,
                                               const char* message) {
-    // We should actually call crashhandler_die(message), but I don't think we
-    // can link to that library from here
-    if (!validate(buf, bufLen, checksum, checksumLen)) {
+    if (!validate(calc, buf, bufLen, checksum, checksumLen)) {
         emugl_crash_reporter(message);
     }
 }
