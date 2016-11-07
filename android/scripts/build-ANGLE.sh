@@ -46,8 +46,6 @@ install_dir_parse_option
 
 package_builder_process_options ANGLE
 
-BUILD_SRC_DIR=$TEMP_DIR/angle
-
 # Clone a git repository, and checkout a specific branch & commit.
 # $1: Source git URL.
 # $2: Destination directory.
@@ -207,7 +205,7 @@ mingw_build_angle_package() {
     done
 }
 
-# Unpack package source into $BUILD_SRC_DIR if needed.
+# Unpack package source into $(builder_src_dir) if needed.
 # $1: Package basename.
 copy_angle_source () {
     local PKG_SRC_TIMESTAMP PKG_TIMESTAMP

@@ -44,123 +44,20 @@ prebuilts_dir_parse_option
 aosp_dir_parse_option
 install_dir_parse_option
 
-ARCHIVE_DIR=$PREBUILTS_DIR/archive
-if [ ! -d "$ARCHIVE_DIR" ]; then
-    dump "Downloading dependencies sources first."
-    $(program_directory)/download-sources.sh \
-        --verbosity=$(get_verbosity) \
-        --prebuilts-dir="$PREBUILTS_DIR" ||
-            panic "Could not download source archives!"
-fi
-if [ ! -d "$ARCHIVE_DIR" ]; then
-    panic "Missing archive directory: $ARCHIVE_DIR"
-fi
-PACKAGE_LIST=$ARCHIVE_DIR/PACKAGES.TXT
-if [ ! -f "$PACKAGE_LIST" ]; then
-    panic "Missing package list file, run download-sources.sh: $PACKAGE_LIST"
-fi
-
 package_builder_process_options protobuf
-
-package_list_parse_file "$PACKAGE_LIST"
-
-BUILD_SRC_DIR=$TEMP_DIR/src
-
-# Unpack package source into $BUILD_SRC_DIR if needed.
-# $1: Package basename.
-unpack_package_source () {
-    local PKG_NAME PKG_SRC_DIR PKG_BUILD_DIR PKG_SRC_TIMESTAMP PKG_TIMESTAMP
-    PKG_NAME=$(package_list_get_unpack_src_dir $1)
-    PKG_SRC_TIMESTAMP=$BUILD_SRC_DIR/timestamp-$PKG_NAME
-    if [ ! -f "$PKG_SRC_TIMESTAMP" ]; then
-        package_list_unpack_and_patch "$1" "$ARCHIVE_DIR" "$BUILD_SRC_DIR"
-        touch $PKG_SRC_TIMESTAMP
-    fi
-}
-
-# $1: Package basename (e.g. 'libpthread-stubs-0.3')
-# $2+: Extra configuration options.
-build_package () {
-    local PKG_NAME PKG_SRC_DIR PKG_BUILD_DIR PKG_SRC_TIMESTAMP PKG_TIMESTAMP
-    PKG_NAME=$(package_list_get_src_dir $1)
-    unpack_package_source "$1"
-    shift
-    PKG_SRC_DIR="$BUILD_SRC_DIR/$PKG_NAME"
-    PKG_BUILD_DIR=$TEMP_DIR/build-$SYSTEM/$PKG_NAME
-    PKG_TIMESTAMP=$TEMP_DIR/build-$SYSTEM/$PKG_NAME-timestamp
-    if [ ! -f "$PKG_TIMESTAMP" -o -n "$OPT_FORCE" ]; then
-        # protobuf requires the autogen script to be ran before it could be
-        # built
-        run pushd "$PKG_SRC_DIR" &&
-        run "$PKG_SRC_DIR"/autogen.sh
-        run popd
-
-        case $SYSTEM in
-            darwin*)
-                # Required for proper build on Darwin!
-                builder_disable_verbose_install
-                ;;
-        esac
-        builder_build_autotools_package \
-            "$PKG_SRC_DIR" \
-            "$PKG_BUILD_DIR" \
-            "$@"
-
-        touch "$PKG_TIMESTAMP"
-    fi
-}
-
-# Perform a Darwin build through ssh to a remote machine.
-# $1: Darwin host name.
-# $2: List of darwin target systems to build for.
-do_remote_darwin_build () {
-    builder_prepare_remote_darwin_build \
-            "/tmp/$USER-rebuild-darwin-ssh-$$/protobuf-build"
-
-    copy_directory "$ARCHIVE_DIR" "$DARWIN_PKG_DIR"/archive
-
-    local PKG_DIR="$DARWIN_PKG_DIR"
-    local REMOTE_DIR=/tmp/$DARWIN_PKG_NAME
-    # Generate a script to rebuild all binaries from sources.
-    # Note that the use of the '-l' flag is important to ensure
-    # that this is run under a login shell. This ensures that
-    # ~/.bash_profile is sourced before running the script, which
-    # puts MacPorts' /opt/local/bin in the PATH properly.
-    #
-    # If not, the build is likely to fail with a cryptic error message
-    # like "readlink: illegal option -- f"
-    cat > $PKG_DIR/build.sh <<EOF
-#!/bin/bash -l
-PROGDIR=\$(dirname \$0)
-\$PROGDIR/scripts/$(program_name) \\
-    --build-dir=$REMOTE_DIR/build \\
-    --host=$(spaces_to_commas "$DARWIN_SYSTEMS") \\
-    --install-dir=$REMOTE_DIR/install-prefix \\
-    --prebuilts-dir=$REMOTE_DIR \\
-    --aosp-dir=$REMOTE_DIR/aosp \\
-    $DARWIN_BUILD_FLAGS
-EOF
-    builder_run_remote_darwin_build
-
-    run rm -rf "$PKG_DIR"
-
-    run mkdir -p "$INSTALL_DIR" ||
-            panic "Could not create final directory: $INSTALL_DIR"
-
-    for SYSTEM in $DARWIN_SYSTEMS; do
-        dump "[$SYSTEM] Retrieving remote darwin binaries"
-        run rm -rf "$INSTALL_DIR"/* &&
-        run $ANDROID_EMULATOR_SSH_WRAPPER rsync -haz --delete \
-                --exclude=intermediates --exclude=libs \
-                $DARWIN_SSH:$REMOTE_DIR/install-prefix/$SYSTEM \
-                $INSTALL_DIR
-    done
-}
+package_builder_parse_package_list
 
 if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     # Perform remote Darwin build first.
     dump "Remote protobuf build for: $DARWIN_SYSTEMS"
-    do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
+    builder_prepare_remote_darwin_build \
+            "/tmp/$USER-rebuild-darwin-ssh-$$/protobuf-build"
+
+    builder_run_remote_darwin_build
+
+    for SYSTEM in $DARWIN_SYSTEMS; do
+        builder_remote_darwin_retrieve_install_dir $SYSTEM $INSTALL_DIR
+    done
 fi
 
 for SYSTEM in $LOCAL_HOST_SYSTEMS; do
@@ -169,10 +66,21 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         dump "$(builder_text) Building protobuf"
 
-        unpack_package_source googlemock
-        unpack_package_source googletest
+        builder_unpack_package_source googlemock
+        builder_unpack_package_source googletest
+        builder_unpack_package_source protobuf
 
-        build_package protobuf \
+        # protobuf requires the autogen script to be run before it could be
+        # built. TODO(digit): Put the result in a patch, because this
+        # actually doesn't work for the remote build unless autotools are
+        # installed on the remote machine.
+        (
+            PKG_SRC_DIR=$(builder_src_dir)/$(package_list_get_src_dir protobuf)
+            cd "$PKG_SRC_DIR"
+            run ./autogen.sh
+        ) || panic "Could not run autogen.sh required by protobuf!"
+
+        builder_build_autotools_package protobuf \
                 --disable-shared \
                 --without-zlib \
 

@@ -225,6 +225,32 @@ package_builder_process_options () {
     ORIGINAL_PATH=$PATH
 }
 
+# Find the packages list file in the prebuilts directory and parse it.
+package_builder_parse_package_list () {
+    local ARCHIVE_DIR PACKAGE_LIST
+    if [ -z "$PREBUILTS_DIR" ]; then
+        panic "Missing PREBUILTS_DIR definition, did you call \
+               package_builder_process_options?"
+    fi
+    ARCHIVE_DIR=$PREBUILTS_DIR/archive
+    if [ ! -d "$ARCHIVE_DIR" ]; then
+        panic "Missing archive directory, please run download-sources.sh: $ARCHIVE_DIR"
+    fi
+    _SHU_BUILDER_ARCHIVE_DIR=$ARCHIVE_DIR
+    PACKAGE_LIST=$ARCHIVE_DIR/PACKAGES.TXT
+    if [ ! -f "$PACKAGE_LIST" ]; then
+        panic "Missing package list file: $PACKAGE_LIST"
+    fi
+    package_list_parse_file "$PACKAGE_LIST"
+}
+
+# Return the current prebuilts archive directory.
+# One needs to call package_builder_parse_package_list () before
+# Out: prebuilts archive directory path.
+builder_archive_dir () {
+    printf %s "$_SHU_BUILDER_ARCHIVE_DIR"
+}
+
 # Check all timestamps and adjust HOST_SYSTEMS / DARWIN_SYSTEMS /
 # LOCAL_HOST_SYSTEMS accordingly for all the things.
 # $1: top-level install directory
@@ -265,6 +291,23 @@ builder_remote_darwin_scp () {
     run $ANDROID_EMULATOR_SSH_WRAPPER scp "$@"
 }
 
+# Run a 'rsync -hax --delete' command to retrieve files from the remote
+# Darwin machine and copy them back to the local one. This uses the
+# '-hax --delete' rsync parameters by default,
+# $1+: parameters to 'rsync' command.
+builder_remote_darwin_rsync () {
+    run $ANDROID_EMULATOR_SSH_WRAPPER rsync "$@"
+}
+
+# $1: darwin host system name (e.g. $SYSTEM)
+# $2: local installation directory (e.g. $INSTALL_DIR)
+builder_remote_darwin_retrieve_install_dir () {
+    dump "[$1] Retrieving remote darwin binaries"
+    mkdir -p "$2" || panic "Could not create final directory: $2"
+    run $ANDROID_EMULATOR_SSH_WRAPPER rsync -haz --delete \
+        $DARWIN_SSH:$DARWIN_REMOTE_DIR/install-prefix/$1 "$2"
+}
+
 # Prepare for a remote darwin build. This takes as a parameter the
 # name of a temporary directory, e..g '/tmp/foo/bar/'.
 # This function populates the directory with some scripts and
@@ -276,18 +319,18 @@ builder_remote_darwin_scp () {
 #    DARWIN_BUILD_FLAGS: common build flags to use with build.sh
 #
 # The caller should then add any appropriate sources or binaries, then
-# create a 'build.sh' script in the directory. Then call the function
-# builder_run_remote_build declared below to actually perform the
-# remote build through SSH
+# call the function builder_run_remote_build declared below to actually
+# perform the remote build through SSH
 #
 # NOTE: Only call this when --darwin-ssh or equivalent is used.
 #
 # $1: Package directory (e.g. '/tmp/foo/bar')
+# $2: Optional archive directory.
 #
-# On exit, defines the following variables:
 builder_prepare_remote_darwin_build () {
     local PKG_DIR=${1%%/}
     local PKG_NAME=$(basename "$PKG_DIR")
+    local ARCHIVE_DIR="${2:-$(builder_archive_dir)}"
     DARWIN_PKG_NAME=$PKG_NAME
     DARWIN_PKG_DIR="$PKG_DIR"
     DARWIN_REMOTE_DIR=/tmp/$PKG_NAME
@@ -306,7 +349,6 @@ builder_prepare_remote_darwin_build () {
     copy_directory "$AOSP_DIR"/$TOOLCHAIN_SUBDIR \
             "$PKG_DIR"/aosp/$TOOLCHAIN_SUBDIR
     copy_directory "$(program_directory)" "$PKG_DIR/scripts"
-    copy_directory "$(program_directory)"/../dependencies "$PKG_DIR"/dependencies
 
     local BREAKPAD_SUBDIR
     for DARWIN_SYSTEM in $DARWIN_SYSTEMS; do
@@ -324,6 +366,13 @@ builder_prepare_remote_darwin_build () {
     if [ "$OPT_NO_CCACHE" ]; then
         var_append DARWIN_BUILD_FLAGS "--no-ccache"
     fi
+
+    if [ "$ARCHIVE_DIR" ]; then
+        copy_directory "$ARCHIVE_DIR" "$DARWIN_PKG_DIR"/archive
+    fi
+
+    DARWIN_REMOTE_DIR=/tmp/$DARWIN_PKG_NAME
+
 }
 
 # Call this after builder_prepare_remote_darwin_build and populating
@@ -331,13 +380,30 @@ builder_prepare_remote_darwin_build () {
 # a remote darwin build through SSH.
 builder_run_remote_darwin_build () {
     local BUILD_SH="$DARWIN_PKG_DIR"/build.sh
-    if [ ! -f "$BUILD_SH" ]; then
-        panic "Missing file: $BUILD_SH !!"
-    fi
+
+    # Generate a script to rebuild all binaries from sources.
+    # Note that the use of the '-l' flag is important to ensure
+    # that this is run under a login shell. This ensures that
+    # ~/.bash_profile is sourced before running the script, which
+    # puts MacPorts' /opt/local/bin in the PATH properly.
+    #
+    # If not, the build is likely to fail with a cryptic error message
+    # like "readlink: illegal option -- f"
+    cat > $BUILD_SH <<EOF
+#!/bin/bash -l
+PROGDIR=\$(dirname \$0)
+\$PROGDIR/scripts/$(program_name) \\
+    --build-dir=$DARWIN_REMOTE_DIR/build \\
+    --host=$(spaces_to_commas "$DARWIN_SYSTEMS") \\
+    --install-dir=$DARWIN_REMOTE_DIR/install-prefix \\
+    --prebuilts-dir=$DARWIN_REMOTE_DIR \\
+    --aosp-dir=$DARWIN_REMOTE_DIR/aosp \\
+    $DARWIN_BUILD_FLAGS
+EOF
     chmod a+x "$BUILD_SH"
 
     log "Erasing previours remote build directory."
-    builder_remote_darwin_run rm -rf /tmp/$DARWIN_PKG_NAME
+    builder_remote_darwin_run rm -rf $DARWIN_REMOTE_DIR
 
     log "Copying files to remote darwin host."
     (tar cf - -C "$DARWIN_PKG_DIR"/.. "$DARWIN_PKG_NAME") |
@@ -347,7 +413,6 @@ builder_run_remote_darwin_build () {
     rm -rf "$DARWIN_PKG_DIR"
 
     log "Performing remote darwin build."
-    log "COMMAND: ssh $DARWIN_SSH /tmp/$DARWIN_PKG_NAME/build.sh"
     builder_remote_darwin_run $DARWIN_REMOTE_DIR/build.sh
 }
 
@@ -584,19 +649,50 @@ builder_disable_parallel_install () {
     _SHU_BUILDER_DISABLE_PARALLEL_INSTALL=true
 }
 
+# Unpack package sources if needed into $(builder_src_dir).
+# $1: Package basename.
+# $2: Optional archive source directory.
+builder_unpack_package_source () {
+    local PKG_NAME ARCHIVE_DIR TIMESTAMP SRC_DIR
+    PKG_NAME=$(package_list_get_unpack_src_dir $1)
+    ARCHIVE_DIR=${2:-$(builder_archive_dir)}
+    SRC_DIR=$(builder_src_dir)
+    TIMESTAMP=$SRC_DIR/timestamp-$PKG_NAME
+    if [ ! -f "$TIMESTAMP" -o "$OPT_FORCE" ]; then
+        package_list_unpack_and_patch "$1" "$ARCHIVE_DIR" "$SRC_DIR"
+        touch $TIMESTAMP
+    fi
+}
+
 # Build a given autotools based package and run customized install commands
 #
-# $1: Source directory.
-# $2: Build directory.
-# $3: Make commands, e.g. install
-# $4+: Additional configure options.
+# $1: Package basename
+# $2: Make commands, e.g. install
+# $3+: Additional configure options.
 builder_build_autotools_package_full_install () {
-    local PKG_FULLNAME="$(basename "$1")"
+    local PKG_NAME=$(package_list_get_src_dir $1)
+    local INSTALL_COMMANDS="$2"
+    local PKG_SRC_DIR=$(builder_src_dir)/$PKG_NAME
+    local PKG_BUILD_DIR=$(builder_build_dir)/$PKG_NAME
+    local PKG_TIMESTAMP=${PKG_BUILD_DIR}-timestamp
+
+    shift; shift;
+
+    if [ -f "$PKG_TIMESTAMP" -a -z "$OPT_FORCE" ]; then
+        # Return early if the package was already built.
+        return 0
+    fi
+
+    case $_SHU_BUILDER_CURRENT_HOST in
+        darwin*)
+            # Required for proper Autotools builds on Darwin
+            builder_disable_verbose_install
+            ;;
+    esac
+
+    local PKG_FULLNAME="$(basename $PKG_NAME)"
     dump "$(builder_text) Building $PKG_FULLNAME"
 
-    local PKG_SRC_DIR="$1"
-    local PKG_BUILD_DIR="$2"
-    local INSTALL_COMMANDS="$3"
     local INSTALL_FLAGS
     if [ -z "$_SHU_BUILDER_DISABLE_PARALLEL_INSTALL" ]; then
         var_append INSTALL_FLAGS "-j$NUM_JOBS"
@@ -604,7 +700,6 @@ builder_build_autotools_package_full_install () {
     if [ -z "$_SHU_BUILDER_DISABLE_VERBOSE_INSTALL" ]; then
         var_append INSTALL_FLAGS "V=1";
     fi
-    shift; shift; shift;
     (
         run mkdir -p "$PKG_BUILD_DIR" &&
         run cd "$PKG_BUILD_DIR" &&
@@ -621,16 +716,16 @@ builder_build_autotools_package_full_install () {
         run make $INSTALL_COMMANDS $INSTALL_FLAGS
     ) ||
     panic "Could not build and install $PKG_FULLNAME"
+
+    touch "$PKG_TIMESTAMP"
 }
 
 # Build with the default 'make install' command in the end
 #
-# $1: Source directory.
-# $2: Build directory.
-# $3+: Additional configure options.
+# $1: Package basename
+# $2+: Additional configure options.
 builder_build_autotools_package() {
     local FIRST="$1"
-    local SECOND="$2"
-    shift; shift;
-    builder_build_autotools_package_full_install "$FIRST" "$SECOND" install "$@"
+    shift;
+    builder_build_autotools_package_full_install "$FIRST" install "$@"
 }

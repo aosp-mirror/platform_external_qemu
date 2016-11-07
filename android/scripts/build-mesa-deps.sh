@@ -44,105 +44,8 @@ prebuilts_dir_parse_option
 aosp_dir_parse_option
 install_dir_parse_option
 
-ARCHIVE_DIR=$PREBUILTS_DIR/archive
-if [ ! -d "$ARCHIVE_DIR" ]; then
-    dump "Downloading dependencies sources first."
-    $(program_directory)/download-sources.sh \
-        --verbosity=$(get_verbosity) \
-        --prebuilts-dir="$PREBUILTS_DIR" ||
-            panic "Could not download source archives!"
-fi
-if [ ! -d "$ARCHIVE_DIR" ]; then
-    panic "Missing archive directory: $ARCHIVE_DIR"
-fi
-PACKAGE_LIST=$ARCHIVE_DIR/PACKAGES.TXT
-if [ ! -f "$PACKAGE_LIST" ]; then
-    panic "Missing package list file, run download-sources.sh: $PACKAGE_LIST"
-fi
-
 package_builder_process_options mesa-deps
-
-package_list_parse_file "$PACKAGE_LIST"
-
-BUILD_SRC_DIR=$TEMP_DIR/src
-
-# Unpack package source into $BUILD_SRC_DIR if needed.
-# $1: Package basename.
-unpack_package_source () {
-    local PKG_NAME PKG_SRC_DIR PKG_BUILD_DIR PKG_SRC_TIMESTAMP PKG_TIMESTAMP
-    PKG_NAME=$(package_list_get_src_dir $1)
-    PKG_SRC_TIMESTAMP=$BUILD_SRC_DIR/timestamp-$PKG_NAME
-    if [ ! -f "$PKG_SRC_TIMESTAMP" ]; then
-        package_list_unpack_and_patch "$1" "$ARCHIVE_DIR" "$BUILD_SRC_DIR"
-        touch $PKG_SRC_TIMESTAMP
-    fi
-}
-
-# $1: Package basename (e.g. 'libpthread-stubs-0.3')
-# $2+: Extra configuration options.
-build_package () {
-    local PKG_NAME PKG_SRC_DIR PKG_BUILD_DIR PKG_SRC_TIMESTAMP PKG_TIMESTAMP
-    PKG_NAME=$(package_list_get_src_dir $1)
-    unpack_package_source "$1"
-    shift
-    PKG_SRC_DIR="$BUILD_SRC_DIR/$PKG_NAME"
-    PKG_BUILD_DIR=$TEMP_DIR/build-$SYSTEM/$PKG_NAME
-    PKG_TIMESTAMP=$TEMP_DIR/build-$SYSTEM/$PKG_NAME-timestamp
-    if [ ! -f "$PKG_TIMESTAMP" -o -n "$OPT_FORCE" ]; then
-        builder_build_autotools_package \
-            "$PKG_SRC_DIR" \
-            "$PKG_BUILD_DIR" \
-            "$@"
-
-        touch "$PKG_TIMESTAMP"
-    fi
-}
-
-# Perform a Darwin build through ssh to a remote machine.
-# $1: Darwin host name.
-# $2: List of darwin target systems to build for.
-do_remote_darwin_build () {
-    builder_prepare_remote_darwin_build \
-            "/tmp/$USER-rebuild-darwin-ssh-$$/mesa-deps-build"
-
-    copy_directory "$ARCHIVE_DIR" "$DARWIN_PKG_DIR"/archive
-
-    local PKG_DIR="$DARWIN_PKG_DIR"
-    local REMOTE_DIR=/tmp/$DARWIN_PKG_NAME
-    # Generate a script to rebuild all binaries from sources.
-    # Note that the use of the '-l' flag is important to ensure
-    # that this is run under a login shell. This ensures that
-    # ~/.bash_profile is sourced before running the script, which
-    # puts MacPorts' /opt/local/bin in the PATH properly.
-    #
-    # If not, the build is likely to fail with a cryptic error message
-    # like "readlink: illegal option -- f"
-    cat > $PKG_DIR/build.sh <<EOF
-#!/bin/bash -l
-PROGDIR=\$(dirname \$0)
-\$PROGDIR/scripts/$(program_name) \\
-    --build-dir=$REMOTE_DIR/build \\
-    --host=$(spaces_to_commas "$DARWIN_SYSTEMS") \\
-    --install-dir=$REMOTE_DIR/install-prefix \\
-    --prebuilts-dir=$REMOTE_DIR \\
-    --aosp-dir=$REMOTE_DIR/aosp \\
-    $DARWIN_BUILD_FLAGS
-EOF
-    builder_run_remote_darwin_build
-
-    local BINARY_DIR=$INSTALL_DIR
-    run mkdir -p "$BINARY_DIR" ||
-            panic "Could not create final directory: $BINARY_DIR"
-
-    for SYSTEM in $DARWIN_SYSTEMS; do
-        dump "[$SYSTEM] Retrieving remote darwin binaries"
-        run $ANDROID_EMULATOR_SSH_WRAPPER scp -r \
-                "$DARWIN_SSH":$REMOTE_DIR/install-prefix/$SYSTEM \
-                $BINARY_DIR/
-
-        timestamp_set "$INSTALL_DIR/$SYSTEM" mesa-deps
-    done
-}
+package_builder_parse_package_list
 
 if [ -z "$OPT_FORCE" ]; then
     builder_check_all_timestamps "$INSTALL_DIR" mesa-deps
@@ -151,7 +54,15 @@ fi
 if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     # Perform remote Darwin build first.
     dump "Remote mesa-deps build for: $DARWIN_SYSTEMS"
-    do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
+    builder_prepare_remote_darwin_build \
+            "/tmp/$USER-rebuild-darwin-ssh-$$/mesa-deps-build"
+
+    builder_run_remote_darwin_build
+
+    for SYSTEM in $DARWIN_SYSTEMS; do
+        builder_remote_darwin_retrieve_install_dir $SYSTEM $INSTALL_DIR
+        timestamp_set "$INSTALL_DIR/$SYSTEM" mesa-deps
+    done
 fi
 
 for SYSTEM in $LOCAL_HOST_SYSTEMS; do
@@ -161,7 +72,8 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         case $SYSTEM in
             linux-*)
-                build_package glproto
+                builder_unpack_package_source glproto
+                builder_build_autotools_package glproto
                 ;;
 
             windows-*)
@@ -184,7 +96,9 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --disable-shared \
                 --with-pic
 
-        build_package llvm \
+        builder_unpack_package_source llvm
+
+        builder_build_autotools_package llvm \
                 --disable-clang-arcmt \
                 --disable-clang-plugin-support \
                 --disable-clang-static-analyzer \

@@ -50,26 +50,22 @@ aosp_dir_parse_option
 install_dir_parse_option
 
 package_builder_process_options qt
+package_builder_parse_package_list
 
 ###
 ###  Download the source tarball if needed.
 ###
-ARCHIVE_DIR=$PREBUILTS_DIR/archive
-if [ ! -d "$ARCHIVE_DIR" ]; then
-    run mkdir -p "$ARCHIVE_DIR" ||
-        panic "Could not create directory: $ARCHIVE_DIR"
-fi
-
 QT_SRC_NAME=qt-everywhere-opensource-src-5.5.0
 QT_SRC_PACKAGE=$QT_SRC_NAME.tar.xz
 QT_SRC_URL=http://download.qt.io/archive/qt/5.5/5.5.0/single/$QT_SRC_PACKAGE
 QT_SRC_PACKAGE_SHA1=4409ef12d1017a9b5e6733ea27596a6ca637a88c
 
 QT_SRC_PATCH_FOLDER=${QT_SRC_NAME}-patches
+QT_ARCHIVE_DIR=$(builder_archive_dir)
 
-if [ -z "$OPT_DOWNLOAD" -a ! -f "$ARCHIVE_DIR/$QT_SRC_PACKAGE" ]; then
+if [ -z "$OPT_DOWNLOAD" -a ! -f "$QT_ARCHIVE_DIR/$QT_SRC_PACKAGE" ]; then
     if [ -z "$OPT_DOWNLOAD" ]; then
-        echo "The following tarball is missing: $ARCHIVE_DIR/$QT_SRC_PACKAGE"
+        echo "The following tarball is missing: $QT_ARCHIVE_DIR/$QT_SRC_PACKAGE"
         echo "Please use the --download option to download it. Note that this is"
         echo "a huge file over 300 MB, the download will take time."
         exit 1
@@ -81,7 +77,7 @@ fi
 # $2: Destination directory.
 # $3: [Optional] expected SHA-1 sum of downloaded file.
 download_package () {
-    # Assume the packages are already downloaded under $ARCHIVE_DIR
+    # Assume the packages are already downloaded under $QT_ARCHIVE_DIR
     local DST_DIR PKG_URL PKG_NAME SHA1SUM REAL_SHA1SUM
 
     PKG_URL=$1
@@ -103,10 +99,8 @@ download_package () {
 }
 
 if [ "$OPT_DOWNLOAD" ]; then
-    download_package "$QT_SRC_URL" "$ARCHIVE_DIR" "$QT_SRC_PACKAGE_SHA1"
+    download_package "$QT_SRC_URL" "$QT_ARCHIVE_DIR" "$QT_SRC_PACKAGE_SHA1"
 fi
-
-BUILD_SRC_DIR=$TEMP_DIR/src
 
 # Atomically update target directory $1 with the content of $2.
 # This also removes $2 on success.
@@ -132,8 +126,8 @@ build_qt_package () {
     PKG_NAME=$(package_list_get_src_dir $1)
     PKG_MODULES=$2
     shift; shift
-    PKG_SRC_DIR="$BUILD_SRC_DIR/$PKG_NAME"
-    PKG_BUILD_DIR=$TEMP_DIR/build-$SYSTEM/$PKG_NAME
+    PKG_SRC_DIR=$(builder_src_dir)/$PKG_NAME
+    PKG_BUILD_DIR=$(builder_build_dir)/$PKG_NAME
     (
         run mkdir -p "$PKG_BUILD_DIR" &&
         run cd "$PKG_BUILD_DIR" &&
@@ -146,49 +140,18 @@ build_qt_package () {
             "$@" &&
         run make -j$NUM_JOBS V=1 &&
         run make install -j$NUM_JOBS V=1
-#         export QTDIR=$_SHU_BUILDER_PREFIX &&
-#         export PATH=$QTDIR/bin:$PATH &&
-#         for MODULE in $PKG_MODULES; do
-#             cd "$PKG_SRC_DIR/$MODULE" &&
-#             run qmake &&
-#             run make -j$NUM_JOBS V=1 &&
-#             run make install -j$NUM_JOBS V=1 ||
-#                 panic "Could not build Qt $MODULE module!"
-#         done
     ) ||
     panic "Could not build and install $1"
 }
 
-# Perform a Darwin build through ssh to a remote machine.
-# $1: Darwin host name.
-# $2: List of darwin target systems to build for.
-do_remote_darwin_build () {
+build_disable_cxx11
+
+if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
+    # Perform remote Darwin build first.
+    dump "Remote Qt build for: $DARWIN_SYSTEMS"
     builder_prepare_remote_darwin_build \
             "/tmp/$USER-rebuild-darwin-ssh-$$/qt-build"
 
-    copy_directory "$ARCHIVE_DIR" "$DARWIN_PKG_DIR"/archive
-
-    local PKG_DIR="$DARWIN_PKG_DIR"
-    local REMOTE_DIR=/tmp/$DARWIN_PKG_NAME
-    # Generate a script to rebuild all binaries from sources.
-    # Note that the use of the '-l' flag is important to ensure
-    # that this is run under a login shell. This ensures that
-    # ~/.bash_profile is sourced before running the script, which
-    # puts MacPorts' /opt/local/bin in the PATH properly.
-    #
-    # If not, the build is likely to fail with a cryptic error message
-    # like "readlink: illegal option -- f"
-    cat > $PKG_DIR/build.sh <<EOF
-#!/bin/bash -l
-PROGDIR=\$(dirname \$0)
-\$PROGDIR/scripts/$(program_name) \\
-    --build-dir=$REMOTE_DIR/build \\
-    --host=$(spaces_to_commas "$DARWIN_SYSTEMS") \\
-    --install-dir=$REMOTE_DIR/install-prefix \\
-    --prebuilts-dir=$REMOTE_DIR \\
-    --aosp-dir=$REMOTE_DIR/aosp \\
-    $DARWIN_BUILD_FLAGS
-EOF
     builder_run_remote_darwin_build
 
     run mkdir -p "$INSTALL_DIR" ||
@@ -200,28 +163,14 @@ EOF
     fi
 
     for SYSTEM in $DARWIN_SYSTEMS; do
-        dump "[$SYSTEM] Retrieving remote darwin binaries"
-        run rm -rf "$INSTALL_DIR"/* &&
-        run $ANDROID_EMULATOR_SSH_WRAPPER rsync -haz --delete \
-                --exclude=intermediates --exclude=libs \
-                $DARWIN_SSH:$REMOTE_DIR/install-prefix/$SYSTEM \
-                $INSTALL_DIR &&
+        builder_remote_darwin_retrieve_install_dir $SYSTEM $INSTALL_DIR &&
         run mkdir -p $INSTALL_DIR/common &&
-        run $ANDROID_EMULATOR_SSH_WRAPPER rsync -haz --delete \
-                --exclude=intermediates --exclude=libs \
-                $DARWIN_SSH:$REMOTE_DIR/install-prefix/common/include \
+        builder_remote_darwin_rsync -haz --delete \
+                $DARWIN_SSH:$DARWIN_REMOTE_DIR/install-prefix/common/include \
                 $INSTALL_DIR/common/
     done
 
     run rm -rf "$INSTALL_DIR/common/include.old"
-}
-
-build_disable_cxx11
-
-if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
-    # Perform remote Darwin build first.
-    dump "Remote Qt build for: $DARWIN_SYSTEMS"
-    do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
 fi
 
 for SYSTEM in $LOCAL_HOST_SYSTEMS; do
@@ -242,45 +191,29 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         fi
         if [ ! -f "$QT_SRC_TIMESTAMP" ]; then
             dump "Unpacking $QT_SRC_NAME sources."
-            run mkdir -p "$BUILD_SRC_DIR" &&
-            unpack_archive "$ARCHIVE_DIR/$QT_SRC_PACKAGE" "$BUILD_SRC_DIR" ||
+            run mkdir -p "$(builder_src_dir)" &&
+            unpack_archive "$QT_ARCHIVE_DIR/$QT_SRC_PACKAGE" "$(builder_src_dir)" ||
                 panic "Failed to unpack source package: $QT_SRC_PACKAGE"
 
-            PATCHES_FOLDER="$ARCHIVE_DIR/$QT_SRC_PATCH_FOLDER"
-            cp -R "$PATCHES_FOLDER" "$BUILD_SRC_DIR" ||
+            PATCHES_FOLDER=$QT_ARCHIVE_DIR/$QT_SRC_PATCH_FOLDER
+            cp -R "$PATCHES_FOLDER" "$(builder_src_dir)" ||
                 panic "Failed to copy Qt patches: $PATCHES_FOLDER"
 
-            PATCHES_DIR=$BUILD_SRC_DIR/${QT_SRC_NAME}-patches
+            PATCHES_DIR=$(builder_src_dir)/${QT_SRC_NAME}-patches
             if [ ! -d "$PATCHES_DIR" ]; then
                 panic "Failed to find patches directory: $PATCHES_DIR"
             fi
             for PATCH in $(ls "$PATCHES_DIR"/*.patch 2>/dev/null); do
                 dump "Applying patch: $(basename $PATCH)"
-                (cd "$BUILD_SRC_DIR"/$QT_SRC_NAME && patch -p1) < "$PATCH" ||
+                (cd "$(builder_src_dir)"/$QT_SRC_NAME && patch -p1) < "$PATCH" ||
                     panic "Could not apply patch: $PATCH"
             done
-#     PKG_PATCHES_DIR=$PKG_FULLNAME-patches
-#     PKG_PATCHES_FILE=$SRC_DIR/${PKG_PATCHES_DIR}.tar.xz
-#     if [ -f "$PKG_PATCHES_FILE" ]; then
-#         log "Patching $PKG_FULLNAME"
-#         unpack_archive "$PKG_PATCHES_FILE" "$DST_DIR"
-#         for PATCH in $(cd "$DST_DIR" && ls "$PKG_PATCHES_DIR"/*.patch); do
-#             log "Applying patch: $PATCH"
-#             (cd "$PKG_DIR" && run patch -p1 < "../$PATCH") ||
-#                     panic "Could not apply $PATCH"
-#         done
-#     fi
-#     PKG_DST_DIR=$DST_DIR/$(package_list_get_src_dir $PKG_NAME)
-#     if [ "$PKG_DST_DIR" != "$PKG_DIR" ]; then
-#         log "Copying sources from $PKG_DIR into $PKG_DST_DIR"
-#         copy_directory "$PKG_DIR" "$PKG_DST_DIR"
-#     fi
 
             # Need to patch this file to avoid install syncqt.pl which will
             # fail horribly with an error like:
             #  ..../<binprefix>-strip:.../bin/syncqt.pl: File format not recognized
             # because the generated Makefile tries to strip a Perl script.
-            run sed -i 's|^INSTALLS += syncqt|#INSTALLS += syncqt|g' $BUILD_SRC_DIR/$QT_SRC_NAME/qtbase/qtbase.pro
+            run sed -i 's|^INSTALLS += syncqt|#INSTALLS += syncqt|g' $(builder_src_dir)/$QT_SRC_NAME/qtbase/qtbase.pro
             touch "$QT_SRC_TIMESTAMP"
         fi
 
@@ -364,7 +297,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             export CPPFLAGS &&
             export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
             export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
-            run "$BUILD_SRC_DIR"/$QT_SRC_NAME/configure \
+            run "$(builder_src_dir)"/$QT_SRC_NAME/configure \
                 -prefix $_SHU_BUILDER_PREFIX \
                 $EXTRA_CONFIGURE_FLAGS
         ) || panic "Could not configure Qt build!"
