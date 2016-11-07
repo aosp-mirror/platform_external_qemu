@@ -83,9 +83,8 @@ private:
 
     bool mStopped = false;
 
-    static const size_t kChannelCapacity = 256;
-    android::base::MessageChannel<ChannelBuffer, kChannelCapacity> mFromGuest;
-    android::base::MessageChannel<ChannelBuffer, kChannelCapacity> mToGuest;
+    android::base::MessageChannel<ChannelBuffer, 1024> mFromGuest;
+    android::base::MessageChannel<ChannelBuffer, 16> mToGuest;
 
     ChannelBuffer mFromGuestBuffer;
     size_t mFromGuestBufferLeft = 0;
