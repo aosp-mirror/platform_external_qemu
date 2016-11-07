@@ -213,16 +213,23 @@ Use the --prebuilts-dir=<path> option to change it to a new value, or
 alternatively, define the ANDROID_EMULATOR_PREBUILTS_DIR environment
 variable.
 
-If a package file is already in <prebuilts>/archive, the script checks its
-SHA-1 to avoid re-downloading it. You can however use --force to always
-download."
+It relies on a file listing all packages / git repositories, which is by
+default:
+
+    <prebuilts>/archive/PACKAGES.TXT
+
+You can provide another file with the --list=<file> option.
+
+If one of the listed file is not in <prebuilts>/archive it will be downloaded
+automatically. If the file is present, the script checks its SHA-1 to avoid
+re-downloading it. You can however use --force to always download."
 
 PROGRAM_PARAMETERS=""
 
 OPT_FORCE=
 option_register_var "--force" OPT_FORCE "Always download files."
 
-PACKAGE_LIST=$(program_directory)/../dependencies/PACKAGES.TXT
+PACKAGE_LIST=
 option_register_var "--list=<file>" PACKAGE_LIST "Specify package list file"
 
 prebuilts_dir_register_option
@@ -233,13 +240,16 @@ if [ "$PARAMETER_COUNT" != "0" ]; then
     panic "This script doesn't take arguments. See --help."
 fi
 
-if [ ! -f "$PACKAGE_LIST" ]; then
-    panic "Missing package list file: $PACKAGE_LIST"
+prebuilts_dir_parse_option
+
+if [ -z "$PACKAGE_LIST" ]; then
+    PACKAGE_LIST=$PREBUILTS_DIR/archive/PACKAGES.TXT
+    if [ ! -f "$PACKAGE_LIST" ]; then
+        panic "Missing package list file, use --list=<file>: $PACKAGE_LIST"
+    fi
 fi
 
 PACKAGE_DIR=$(dirname "$PACKAGE_LIST")
-
-prebuilts_dir_parse_option
 
 ###
 ###  Do the work.
@@ -346,21 +356,19 @@ for PACKAGE in $(package_list_get_packages); do
         fi
     fi
 
-    # Copy patches file if any.
+    # Check patches file if any.
     PKG_PATCHES=$(package_list_get_patches $PACKAGE)
     if [ "$PKG_PATCHES" ]; then
-        PKG_PATCHES_SRC=$PACKAGE_DIR/$PKG_PATCHES
-        PKG_PATCHES_DST=$ARCHIVE_DIR/$(basename "$PKG_PATCHES")
-        dump "Copying patches file: $PKG_PATCHES_DST"
-        if [ ! -f "$PKG_PATCHES_SRC" ]; then
-            panic "Missing patches file from line $COUNT: $PKG_PATCHES_SRC"
+        PKG_PATCHES_FILE=$ARCHIVE_DIR/$PKG_PATCHES
+        dump "Checking patch file   : $PKG_PATCHES_FILE"
+        if [ ! -f "$PKG_PATCHES_FILE" ]; then
+            panic "Missing patches file from line $COUNT: $PKG_PATCHES_FILE"
         fi
-        run mkdir -p $(dirname "$PKG_PATCHES_DST") &&
-        run cp -f "$PKG_PATCHES_SRC" "$PKG_PATCHES_DST" ||
-                panic "Could not copy: $PKG_PATCHES_SRC to $PKG_PATCHES_DST"
     fi
 done
 
-run cp -f "$PACKAGE_LIST" "$ARCHIVE_DIR"/PACKAGES.TXT
+if [ "$PACKAGE_DIR" != "$ARCHIVE_DIR" ]; then
+    run cp -f "$PACKAGE_LIST" "$ARCHIVE_DIR"/PACKAGES.TXT
+fi
 
 dump "Done."
