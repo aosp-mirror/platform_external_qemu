@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6bd84f3b_a836bf45",
+        "filename": "android/base/network/NetworkUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-07T20:56:15Z",
+      "side": 1,
+      "message": "why this part?",
+      "range": {
+        "startLine": 19,
+        "startChar": 22,
+        "endLine": 19,
+        "endChar": 43
+      },
+      "revId": "77f8413198f40cd7e89a83da547a4a63c0b20de7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
