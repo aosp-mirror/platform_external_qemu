@@ -16,6 +16,10 @@
 
 #include <stdint.h>
 
+#if defined(__APPLE__) && defined(__MACH__)
+#include <sys/socket.h>
+#endif
+
 namespace android {
 namespace base {
 
