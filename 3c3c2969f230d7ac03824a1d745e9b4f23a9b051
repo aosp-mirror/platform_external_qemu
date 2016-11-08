@@ -196,6 +196,24 @@
     },
     {
       "key": {
+        "uuid": "6b55af38_5dfa2b04",
+        "filename": "android/base/synchronization/MessageChannel.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-08T16:22:49Z",
+      "side": 1,
+      "message": "Ok, I\u0027ve looked at the details of RenderChannelImpl in details. There are many wrong things here, mainly from the fact that MessageChannel might not be the most appropriate class to implement a bidirectionnal channel for this use case.\n\nI generally consider the abundance of atomic variables to be the symptom of badly understood threading issues, and I\u0027m afraid that\u0027s totally the case here (just look at the comment in RenderChannelImpl::onEvent) :-(\n\nI now believe that the only correct way to fix this is to write a dedicated RenderChannelImpl class that performs its own synchronous / asynchronous operations properly. And make the RenderChannel interface closer to the one of Android pipes to considerably simplify OpenglesPipe).\n\nI\u0027m preparing a patch to address this. Let\u0027s keep MessageChannel simple instead, it doesn\u0027t need all this complexity.",
+      "parentUuid": "e6a5561c_63ec3de1",
+      "revId": "3c3c2969f230d7ac03824a1d745e9b4f23a9b051",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a688be73_d1260484",
         "filename": "android/base/synchronization/MessageChannel.h",
         "patchSetId": 2
