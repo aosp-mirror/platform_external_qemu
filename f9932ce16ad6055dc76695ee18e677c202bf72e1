@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6bd84f3b_925e7dfb",
+        "filename": "android/console.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2698,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-08T19:39:02Z",
+      "side": 1,
+      "message": "free(message) ?",
+      "range": {
+        "startLine": 2698,
+        "startChar": 12,
+        "endLine": 2698,
+        "endChar": 18
+      },
+      "revId": "f9932ce16ad6055dc76695ee18e677c202bf72e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6bd84f3b_f28d0950",
+        "filename": "android/hw-nfc.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-08T19:39:02Z",
+      "side": 1,
+      "message": "so what about the whole C -\u003e C++ thing?",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 49
+      },
+      "revId": "f9932ce16ad6055dc76695ee18e677c202bf72e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
