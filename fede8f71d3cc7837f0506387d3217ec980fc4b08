@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6bd84f3b_d2e00587",
+        "filename": "android/emulation/ClipboardPipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-11-08T21:18:40Z",
+      "side": 1,
+      "message": "thanks for tidying up the memory layout ;)",
+      "range": {
+        "startLine": 56,
+        "startChar": 8,
+        "endLine": 58,
+        "endChar": 35
+      },
+      "revId": "fede8f71d3cc7837f0506387d3217ec980fc4b08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
