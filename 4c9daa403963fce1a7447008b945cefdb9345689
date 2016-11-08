@@ -1,0 +1,303 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6bd84f3b_7143b6b1",
+        "filename": "android/telephony/SimAccessRules.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-08T22:39:04Z",
+      "side": 1,
+      "message": "const ?",
+      "range": {
+        "startLine": 39,
+        "startChar": 6,
+        "endLine": 39,
+        "endChar": 7
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6bd84f3b_f14d06e1",
+        "filename": "android/telephony/SimAccessRules.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-08T22:39:04Z",
+      "side": 1,
+      "message": "#include \u003cstring\u003e ?",
+      "range": {
+        "startLine": 39,
+        "startChar": 26,
+        "endLine": 39,
+        "endChar": 37
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6bd84f3b_11deeac1",
+        "filename": "android/telephony/TagLengthValue.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-08T22:39:04Z",
+      "side": 1,
+      "message": "int? I thought %x format is for int",
+      "range": {
+        "startLine": 37,
+        "startChar": 29,
+        "endLine": 37,
+        "endChar": 37
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6bd84f3b_912e7ac2",
+        "filename": "android/telephony/TagLengthValue.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-08T22:39:04Z",
+      "side": 1,
+      "message": "nit: singular",
+      "range": {
+        "startLine": 40,
+        "startChar": 39,
+        "endLine": 40,
+        "endChar": 40
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6bd84f3b_d1fac202",
+        "filename": "android/telephony/TagLengthValue.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-08T22:39:04Z",
+      "side": 1,
+      "message": "nit:\nfor (int i \u003d 1; i \u003c\u003d 4; ++i) {\n   if (size \u003c (1LL \u003c\u003c (i * 8))) {\n      snprintf(sizeString, sizeof(sizeString), \"%02x%0*x\",\n                 kMaxSingleByteSize + i, 2 * i, static_cast\u003cuint32_t\u003e(size));\n      return sizeString;\n   }\n}\nassert(false);\n...",
+      "range": {
+        "startLine": 38,
+        "startChar": 10,
+        "endLine": 54,
+        "endChar": 70
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6bd84f3b_d47d5094",
+        "filename": "android/telephony/TagLengthValue.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-08T22:39:04Z",
+      "side": 1,
+      "message": "FYI: there\u0027s a defect report about allowing users to write null into the string\u0027s null-terminator space (and only null, anything else is still an UB).",
+      "range": {
+        "startLine": 101,
+        "startChar": 21,
+        "endLine": 101,
+        "endChar": 22
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6bd84f3b_f19266de",
+        "filename": "android/telephony/TagLengthValue.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-08T22:39:04Z",
+      "side": 1,
+      "message": "why do you need non-template version if it does exactly the same thing?",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 5
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6bd84f3b_f1534651",
+        "filename": "android/telephony/TagLengthValue.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-08T22:39:04Z",
+      "side": 1,
+      "message": "FYI: if a template function is only called from the same .cpp file, you can move its implementation to that .cpp\nCompiler/linker need to see the implementation in each place where it\u0027s called, in this case TagLengthValue.cpp is the only such place (so far)",
+      "range": {
+        "startLine": 52,
+        "startChar": 4,
+        "endLine": 52,
+        "endChar": 21
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6bd84f3b_b1ae1e39",
+        "filename": "android/telephony/TagLengthValue.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-08T22:39:04Z",
+      "side": 1,
+      "message": "should we check for null here?",
+      "range": {
+        "startLine": 58,
+        "startChar": 34,
+        "endLine": 58,
+        "endChar": 37
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6bd84f3b_31c20ef0",
+        "filename": "android/telephony/TagLengthValue.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-08T22:39:04Z",
+      "side": 1,
+      "message": "nit: this is confusing as there\u0027s another |size| in the function. Could you please rename it to, e.g., |objectSize| ?",
+      "range": {
+        "startLine": 68,
+        "startChar": 19,
+        "endLine": 68,
+        "endChar": 23
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_64820f26",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-08T22:39:04Z",
+      "side": 1,
+      "message": "android/utils/misc has hex2int and int2hex",
+      "range": {
+        "startLine": 366,
+        "startChar": 11,
+        "endLine": 366,
+        "endChar": 29
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ebe35fee_188d34be",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-08T22:39:04Z",
+      "side": 1,
+      "message": "please swap the checks: current code reads past the buffer end",
+      "range": {
+        "startLine": 369,
+        "startChar": 29,
+        "endLine": 369,
+        "endChar": 46
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd3c31c_316f6fab",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 408,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-08T22:39:04Z",
+      "side": 1,
+      "message": "why are we passing the length if the only allowed value is strlen(command) and we still are calculating it?",
+      "range": {
+        "startLine": 408,
+        "startChar": 43,
+        "endLine": 408,
+        "endChar": 49
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
