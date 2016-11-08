@@ -48,6 +48,54 @@
     },
     {
       "key": {
+        "uuid": "ebe35fee_b8c7e0a1",
+        "filename": "android/telephony/SimAccessRules.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-11-08T22:59:05Z",
+      "side": 1,
+      "message": "Oops, will do.",
+      "parentUuid": "6bd84f3b_f14d06e1",
+      "range": {
+        "startLine": 39,
+        "startChar": 26,
+        "endLine": 39,
+        "endChar": 37
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6bb12ff1_34acc9d4",
+        "filename": "android/telephony/SimAccessRules.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-11-08T22:59:05Z",
+      "side": 1,
+      "message": "Good point, I think I was thinking about having this writable at some point since there are commands to write here as well. But since we don\u0027t need that now and I think that will require other changes anyway const seems like a good idea. Will do.",
+      "parentUuid": "6bd84f3b_7143b6b1",
+      "range": {
+        "startLine": 39,
+        "startChar": 6,
+        "endLine": 39,
+        "endChar": 7
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6bd84f3b_11deeac1",
         "filename": "android/telephony/TagLengthValue.cpp",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2016-11-08T22:39:04Z",
       "side": 1,
       "message": "int? I thought %x format is for int",
+      "range": {
+        "startLine": 37,
+        "startChar": 29,
+        "endLine": 37,
+        "endChar": 37
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ebe35fee_5826dc86",
+        "filename": "android/telephony/TagLengthValue.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-11-08T22:59:05Z",
+      "side": 1,
+      "message": "According to the Linux manpage for sprintf only d and i are signed and o, u, x and X are for unsigned integers. I don\u0027t think dropping the cast will cause any problems but I figured I\u0027d play it safe.",
+      "parentUuid": "6bd84f3b_11deeac1",
       "range": {
         "startLine": 37,
         "startChar": 29,
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "6bb12ff1_f43fb177",
+        "filename": "android/telephony/TagLengthValue.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-11-08T22:59:05Z",
+      "side": 1,
+      "message": "Oops, will fix.",
+      "parentUuid": "6bd84f3b_912e7ac2",
+      "range": {
+        "startLine": 40,
+        "startChar": 39,
+        "endLine": 40,
+        "endChar": 40
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6bd84f3b_d1fac202",
         "filename": "android/telephony/TagLengthValue.cpp",
         "patchSetId": 2
@@ -105,6 +201,30 @@
       "writtenOn": "2016-11-08T22:39:04Z",
       "side": 1,
       "message": "nit:\nfor (int i \u003d 1; i \u003c\u003d 4; ++i) {\n   if (size \u003c (1LL \u003c\u003c (i * 8))) {\n      snprintf(sizeString, sizeof(sizeString), \"%02x%0*x\",\n                 kMaxSingleByteSize + i, 2 * i, static_cast\u003cuint32_t\u003e(size));\n      return sizeString;\n   }\n}\nassert(false);\n...",
+      "range": {
+        "startLine": 38,
+        "startChar": 10,
+        "endLine": 54,
+        "endChar": 70
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2bc73767_890d7bad",
+        "filename": "android/telephony/TagLengthValue.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-11-08T22:59:05Z",
+      "side": 1,
+      "message": "Good idea, thanks.",
+      "parentUuid": "6bd84f3b_d1fac202",
       "range": {
         "startLine": 38,
         "startChar": 10,
@@ -140,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "6bd84f3b_94b028df",
+        "filename": "android/telephony/TagLengthValue.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-11-08T22:59:05Z",
+      "side": 1,
+      "message": "Cool, yeah that would be nice. It\u0027s pretty annoying the way it is now. Thanks for letting me know :)",
+      "parentUuid": "6bd84f3b_d47d5094",
+      "range": {
+        "startLine": 101,
+        "startChar": 21,
+        "endLine": 101,
+        "endChar": 22
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6bd84f3b_f19266de",
         "filename": "android/telephony/TagLengthValue.h",
         "patchSetId": 2
@@ -151,6 +295,30 @@
       "writtenOn": "2016-11-08T22:39:04Z",
       "side": 1,
       "message": "why do you need non-template version if it does exactly the same thing?",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 5
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ebe35fee_b8a0c0de",
+        "filename": "android/telephony/TagLengthValue.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-11-08T22:59:05Z",
+      "side": 1,
+      "message": "I couldn\u0027t get the compiler to automatically deduce the common base type when the elements in the initializer list were of different types (but with the same baseclass). I don\u0027t know how to specialize the initializer list with an explicit type so I figured the duplication here was OK to keep it nice and readable. That\u0027s also why there\u0027s a common iterator version so as little code as possible is duplicated.",
+      "parentUuid": "6bd84f3b_f19266de",
       "range": {
         "startLine": 47,
         "startChar": 0,
@@ -186,6 +354,30 @@
     },
     {
       "key": {
+        "uuid": "4be1cbe3_0cec154e",
+        "filename": "android/telephony/TagLengthValue.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-11-08T22:59:05Z",
+      "side": 1,
+      "message": "Yeah I think I initially intended for this to be more general but changed my mind at some point. I\u0027ll move it into the .cpp file, thanks for the suggestion.",
+      "parentUuid": "6bd84f3b_f1534651",
+      "range": {
+        "startLine": 52,
+        "startChar": 4,
+        "endLine": 52,
+        "endChar": 21
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6bd84f3b_b1ae1e39",
         "filename": "android/telephony/TagLengthValue.h",
         "patchSetId": 2
@@ -197,6 +389,30 @@
       "writtenOn": "2016-11-08T22:39:04Z",
       "side": 1,
       "message": "should we check for null here?",
+      "range": {
+        "startLine": 58,
+        "startChar": 34,
+        "endLine": 58,
+        "endChar": 37
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_4aa0b579",
+        "filename": "android/telephony/TagLengthValue.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-11-08T22:59:05Z",
+      "side": 1,
+      "message": "Probably better to be safe than sorry, will do.",
+      "parentUuid": "6bd84f3b_b1ae1e39",
       "range": {
         "startLine": 58,
         "startChar": 34,
@@ -232,6 +448,30 @@
     },
     {
       "key": {
+        "uuid": "8baca39c_8ac3ad27",
+        "filename": "android/telephony/TagLengthValue.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-11-08T22:59:05Z",
+      "side": 1,
+      "message": "Good point, will do.",
+      "parentUuid": "6bd84f3b_31c20ef0",
+      "range": {
+        "startLine": 68,
+        "startChar": 19,
+        "endLine": 68,
+        "endChar": 23
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8baca39c_64820f26",
         "filename": "android/telephony/modem.c",
         "patchSetId": 2
@@ -243,6 +483,30 @@
       "writtenOn": "2016-11-08T22:39:04Z",
       "side": 1,
       "message": "android/utils/misc has hex2int and int2hex",
+      "range": {
+        "startLine": 366,
+        "startChar": 11,
+        "endLine": 366,
+        "endChar": 29
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_0a023d70",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-11-08T22:59:05Z",
+      "side": 1,
+      "message": "Oh nice, I tried to find something like that but I obviously didn\u0027t look hard enough. Will use those instead.",
+      "parentUuid": "8baca39c_64820f26",
       "range": {
         "startLine": 366,
         "startChar": 11,
@@ -278,6 +542,30 @@
     },
     {
       "key": {
+        "uuid": "2bde5729_eb926fde",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-11-08T22:59:05Z",
+      "side": 1,
+      "message": "I only pass in the length without counting the null-terminator so I think that\u0027s how this happened. You\u0027re right though that it\u0027s unclear and dangerous, good catch. I\u0027ll just swap to the util functions instead.",
+      "parentUuid": "ebe35fee_188d34be",
+      "range": {
+        "startLine": 369,
+        "startChar": 29,
+        "endLine": 369,
+        "endChar": 46
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bd3c31c_316f6fab",
         "filename": "android/telephony/modem.c",
         "patchSetId": 2
@@ -289,6 +577,30 @@
       "writtenOn": "2016-11-08T22:39:04Z",
       "side": 1,
       "message": "why are we passing the length if the only allowed value is strlen(command) and we still are calculating it?",
+      "range": {
+        "startLine": 408,
+        "startChar": 43,
+        "endLine": 408,
+        "endChar": 49
+      },
+      "revId": "4c9daa403963fce1a7447008b945cefdb9345689",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6bb12ff1_4f6c487c",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 408,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-11-08T22:59:05Z",
+      "side": 1,
+      "message": "The length is encoded in the command string itself so that\u0027s what the modem is telling us the length should be. This just verifies that what it says the length should be actually matches with the length of the string inside the command.",
+      "parentUuid": "8bd3c31c_316f6fab",
       "range": {
         "startLine": 408,
         "startChar": 43,
