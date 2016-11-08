@@ -1,0 +1,8 @@
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Verified+1: Grigory Dzhavadyan <grigoryj@google.com>
+Code-Review+2: Grigory Dzhavadyan <grigoryj@google.com>
+Submitted-by: Yurii Zubrytskyi <zyy@google.com>
+Submitted-at: Tue, 08 Nov 2016 22:39:34 +0000
+Reviewed-on: https://android-review.googlesource.com/300830
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
