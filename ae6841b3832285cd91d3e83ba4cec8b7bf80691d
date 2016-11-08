@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6bd84f3b_f201896c",
+        "filename": "android/telephony/TagLengthValue.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-11-08T19:07:20Z",
+      "side": 1,
+      "message": "Good idea, I\u0027ll update it.",
+      "parentUuid": "e6a5561c_3aec1de0",
+      "range": {
+        "startLine": 23,
+        "startChar": 56,
+        "endLine": 24,
+        "endChar": 43
+      },
+      "revId": "ae6841b3832285cd91d3e83ba4cec8b7bf80691d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e6a5561c_7a98655d",
         "filename": "android/telephony/TagLengthValue.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "6bd84f3b_b2f0e174",
+        "filename": "android/telephony/TagLengthValue.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-11-08T19:07:20Z",
+      "side": 1,
+      "message": "I think I actually intended for this assert to be there, not sure why I commented it out. I\u0027ll put it back and terminate the string as well, good idea.",
+      "parentUuid": "e6a5561c_7a98655d",
+      "range": {
+        "startLine": 50,
+        "startChar": 8,
+        "endLine": 50,
+        "endChar": 24
+      },
+      "revId": "ae6841b3832285cd91d3e83ba4cec8b7bf80691d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e6a5561c_45366e47",
         "filename": "android/telephony/modem.c",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2016-11-02T17:44:33Z",
       "side": 1,
       "message": "Does this get freed?",
+      "range": {
+        "startLine": 410,
+        "startChar": 28,
+        "endLine": 410,
+        "endChar": 34
+      },
+      "revId": "ae6841b3832285cd91d3e83ba4cec8b7bf80691d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6bd84f3b_1226ed2f",
+        "filename": "android/telephony/modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 410,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-11-08T19:07:20Z",
+      "side": 1,
+      "message": "No, good catch, thanks :)",
+      "parentUuid": "e6a5561c_45366e47",
       "range": {
         "startLine": 410,
         "startChar": 28,
