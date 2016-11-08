@@ -19,6 +19,29 @@
     },
     {
       "key": {
+        "uuid": "4be1cbe3_0f03272d",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSync.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-08T23:53:44Z",
+      "side": 1,
+      "message": "nit: member initializer?",
+      "range": {
+        "startLine": 38,
+        "startChar": 4,
+        "endLine": 38,
+        "endChar": 9
+      },
+      "revId": "3a083d813f930e8f090520730e3c174b762f1a84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "21259891_680d1be2",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSync.cpp",
         "patchSetId": 4
@@ -30,6 +53,24 @@
       "writtenOn": "2016-10-28T13:57:28Z",
       "side": 1,
       "message": "it looks like this will dead-lock if activate() was never called before. Please mention this in the documentation for ::wait(), it\u0027s pretty important.",
+      "revId": "3a083d813f930e8f090520730e3c174b762f1a84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2bde5729_4e2e11ef",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSync.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-08T23:53:44Z",
+      "side": 1,
+      "message": "should it check if there was no \u0027activate() call yet and call it synchronously here?",
+      "parentUuid": "21259891_680d1be2",
       "revId": "3a083d813f930e8f090520730e3c174b762f1a84",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -70,6 +111,29 @@
     },
     {
       "key": {
+        "uuid": "2bde5729_8ea49945",
+        "filename": "distrib/android-emugl/host/tools/emugen/ApiGen.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-08T23:53:44Z",
+      "side": 1,
+      "message": "should we check that bottom half is set only for functions with non-void retval or some output parameters? otherwise we can obfuscate the code for no good reason",
+      "range": {
+        "startLine": 81,
+        "startChar": 12,
+        "endLine": 81,
+        "endChar": 24
+      },
+      "revId": "3a083d813f930e8f090520730e3c174b762f1a84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "011ed449_277fd41c",
         "filename": "distrib/android-emugl/host/tools/emugen/ApiGen.cpp",
         "patchSetId": 4
@@ -81,6 +145,23 @@
       "writtenOn": "2016-10-28T13:57:28Z",
       "side": 1,
       "message": "Please update the emugen test suite with examples of bottomhalf usage, this will make this change much more understandable. I also recommend putting this into its own patch, and leave the EmuGL changes in a separate one.",
+      "revId": "3a083d813f930e8f090520730e3c174b762f1a84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4be1cbe3_af91539e",
+        "filename": "distrib/android-emugl/host/tools/emugen/ApiGen.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 933,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-08T23:53:44Z",
+      "side": 1,
+      "message": "why not \"%s_bh\" instead of an extra + outside?",
       "revId": "3a083d813f930e8f090520730e3c174b762f1a84",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
