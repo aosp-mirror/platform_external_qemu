@@ -13,9 +13,19 @@
 // limitations under the License.
 #include "ChannelStream.h"
 
-#include <assert.h>
+#include "OpenglRender/RenderChannel.h"
 
-ChannelStream::ChannelStream(std::shared_ptr<emugl::RenderChannelImpl> channel,
+#define EMUGL_DEBUG_LEVEL  0
+#include "emugl/common/debug.h"
+
+#include <assert.h>
+#include <memory.h>
+
+namespace emugl {
+
+using IoResult = RenderChannel::IoResult;
+
+ChannelStream::ChannelStream(std::shared_ptr<RenderChannelImpl> channel,
                              size_t bufSize)
     : IOStream(bufSize), mChannel(channel) {
     mBuf.resize_noinit(bufSize);
@@ -35,20 +45,52 @@ int ChannelStream::commitBuffer(size_t size) {
         mChannel->writeToGuest(std::move(mBuf));
     } else {
         mChannel->writeToGuest(
-                emugl::ChannelBuffer(mBuf.data(), mBuf.data() + size));
+                RenderChannel::Buffer(mBuf.data(), mBuf.data() + size));
     }
     return size;
 }
 
 const unsigned char* ChannelStream::read(void* buf, size_t* inout_len) {
-    size_t size = mChannel->readFromGuest((char*)buf, *inout_len, true);
-    if (size == 0) {
-        return nullptr;
+    size_t wanted = *inout_len;
+    size_t count = 0U;
+    auto dst = static_cast<uint8_t*>(buf);
+    D("wanted %d bytes", (int)wanted);
+    while (wanted > 0) {
+        if (mReadBufferLeft > 0) {
+            size_t avail = std::min<size_t>(wanted, mReadBufferLeft);
+            memcpy(dst,
+                   mReadBuffer.data() + (mReadBuffer.size() - mReadBufferLeft),
+                   avail);
+            count += avail;
+            dst += avail;
+            mReadBufferLeft -= avail;
+            wanted -= avail;
+            continue;
+        }
+        bool blocking = (count == 0);
+        auto result = mChannel->readFromGuest(&mReadBuffer, blocking);
+        D("readFromGuest() returned %d, size %d", (int)result, (int)mReadBuffer.size());
+        if (result == IoResult::Ok) {
+            mReadBufferLeft = mReadBuffer.size();
+            continue;
+        }
+        if (count > 0) {
+            break;
+        }
+        if (result == IoResult::Error) {
+            D("error while trying to read");
+            *inout_len = count;
+            return nullptr;
+        }
+        mReadBufferLeft = mReadBuffer.size();
     }
-    *inout_len = size;
+    *inout_len = count;
+    D("read %d bytes", (int)count);
     return (const unsigned char*)buf;
 }
 
 void ChannelStream::forceStop() {
-    mChannel->stop();
+    mChannel->stopFromHost();
 }
+
+}  // namespace emugl
