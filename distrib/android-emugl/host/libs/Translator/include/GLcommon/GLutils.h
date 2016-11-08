@@ -35,13 +35,15 @@ inline void* SafePointerFromUInt(unsigned int handle) {
     return (void*)(uintptr_t)(handle);
 }
 
-inline unsigned int SafeUIntFromPointer(const void* ptr) {
+inline unsigned int SafeUIntFromPointerFileLine(const void* ptr,
+                                                const char* file, int line) {
 #if 1
     // Ignore the assert below to avoid crashing when running older
     // system images, which might have buggy encoder libraries. Print
     // an error message though.
     if ((uintptr_t)(ptr) != (unsigned int)(uintptr_t)(ptr)) {
-        fprintf(stderr, "EmuGL:WARNING: bad generic pointer %p\n", ptr);
+        fprintf(stderr, "(%s:%d) EmuGL:WARNING: bad generic pointer %p\n",
+                file, line, ptr);
     }
 #else
     // Assertion error if the pointer contains a value that does not fit
@@ -50,5 +52,8 @@ inline unsigned int SafeUIntFromPointer(const void* ptr) {
 #endif
     return (unsigned int)(uintptr_t)(ptr);
 }
+
+#define SafeUIntFromPointer(ptr) \
+    SafeUIntFromPointerFileLine((ptr), __FILE__, __LINE__)
 
 #endif
