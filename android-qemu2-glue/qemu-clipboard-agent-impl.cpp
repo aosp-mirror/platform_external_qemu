@@ -19,8 +19,8 @@ static void set_guest_clipboard_callback(
 }
 
 static void set_guest_clipboard_contents(const uint8_t* buf, size_t len) {
-    android::emulation::ClipboardPipe* pipe =
-        android::emulation::ClipboardPipe::Service::getPipeInstance();
+    const auto pipe =
+        android::emulation::ClipboardPipe::Service::getPipe();
     if (pipe) {
         pipe->setGuestClipboardContents(buf, len);
     }
