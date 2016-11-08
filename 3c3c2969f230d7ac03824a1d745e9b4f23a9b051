@@ -214,6 +214,24 @@
     },
     {
       "key": {
+        "uuid": "6bd84f3b_dcb73c8a",
+        "filename": "android/base/synchronization/MessageChannel.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-08T17:13:18Z",
+      "side": 1,
+      "message": "what do you mean under \"make the RenderChannel interface closer to the one of Android pipes to considerably simplify OpenglesPipe\"?\n\nRenderChannelImpl used to have a threading issue that was solved in that single change that added an atomic variable, but I agree that it can be implemented in a better way.",
+      "parentUuid": "6b55af38_5dfa2b04",
+      "revId": "3c3c2969f230d7ac03824a1d745e9b4f23a9b051",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a688be73_d1260484",
         "filename": "android/base/synchronization/MessageChannel.h",
         "patchSetId": 2
