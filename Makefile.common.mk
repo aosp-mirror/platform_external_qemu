@@ -18,6 +18,11 @@ include $(LOCAL_PATH)/distrib/googletest/Android.mk
 include $(LOCAL_PATH)/distrib/libANGLEtranslation.mk
 include $(LOCAL_PATH)/distrib/Protobuf.mk
 
+ifeq (true,$(BUILD_BENCHMARKS))
+include $(LOCAL_PATH)/distrib/regex-win32/sources.mk
+include $(LOCAL_PATH)/distrib/google-benchmark/sources.mk
+endif
+
 EMULATOR_VERSION_CFLAGS :=
 
 ANDROID_SDK_TOOLS_REVISION := $(strip $(ANDROID_SDK_TOOLS_REVISION))
