@@ -165,6 +165,21 @@ endif
 
 $(call end-emulator-library)
 
+####
+# Small low-level benchmark for android-emu-base.
+#
+$(call start-emulator-benchmark,android_emu$(BUILD_TARGET_SUFFIX)_benchmark)
+
+LOCAL_C_INCLUDES := \
+    $(ANDROID_EMU_BASE_INCLUDES) \
+
+LOCAL_SRC_FILES := \
+    android/base/synchronization/Lock_benchmark.cpp \
+
+LOCAL_STATIC_LIBRARIES := android-emu-base
+
+$(call end-emulator-benchmark)
+
 ###############################################################################
 #
 #  android-emu
