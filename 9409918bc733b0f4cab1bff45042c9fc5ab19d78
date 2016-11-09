@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "ab9ec77a_c1ece213",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-09T01:02:22Z",
+      "side": 1,
+      "message": "We don\u0027t have those helpers in our SDK :(\nRegarding the API call:\n\u003eApplications not manifested for Windows 8.1 or Windows 10 will return the Windows 8 OS version value (6.2).\nSo it\u0027s OK - we only check for \u003c6.1",
+      "parentUuid": "882d6479_0bff4177",
+      "revId": "9409918bc733b0f4cab1bff45042c9fc5ab19d78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "88864495_46c766bc",
         "filename": "android/main-emulator.cpp",
         "patchSetId": 1
