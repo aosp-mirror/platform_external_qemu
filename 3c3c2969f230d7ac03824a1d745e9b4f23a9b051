@@ -232,6 +232,24 @@
     },
     {
       "key": {
+        "uuid": "6b55af38_5dffcb8b",
+        "filename": "android/base/synchronization/MessageChannel.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-09T11:15:46Z",
+      "side": 1,
+      "message": "I mean making its interface asynchronous and similar to that of Android pipes, to simplify the EmuglPipe implementation.\n\nI\u0027ve now uploaded a patch with what I mean: See https://android-review.googlesource.com/300401",
+      "parentUuid": "6bd84f3b_dcb73c8a",
+      "revId": "3c3c2969f230d7ac03824a1d745e9b4f23a9b051",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a688be73_d1260484",
         "filename": "android/base/synchronization/MessageChannel.h",
         "patchSetId": 2
