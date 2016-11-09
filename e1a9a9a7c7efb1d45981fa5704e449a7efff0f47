@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8b14a3d5_783a81fb",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/BufferQueue.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-09T21:18:31Z",
+      "side": 1,
+      "message": "see future comment.",
+      "parentUuid": "8b89037a_13e9ee3d",
+      "range": {
+        "startLine": 52,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 46
+      },
+      "revId": "e1a9a9a7c7efb1d45981fa5704e449a7efff0f47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b89037a_d3a046e3",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/BufferQueue.h",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2016-11-09T19:51:20Z",
       "side": 1,
       "message": "if (mCount++ \u003d\u003d 0) ?\ncomparison to 0 is usually better",
+      "range": {
+        "startLine": 83,
+        "startChar": 8,
+        "endLine": 86,
+        "endChar": 9
+      },
+      "revId": "e1a9a9a7c7efb1d45981fa5704e449a7efff0f47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b14a3d5_1837c512",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/BufferQueue.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-09T21:18:31Z",
+      "side": 1,
+      "message": "I thought the compiler would optimize them to the same thing, but it appears that you are right, comparison to 0 is better, see https://godbolt.org/g/lqAWTi\n\nI\u0027ll update the code. Interesting!",
+      "parentUuid": "8b89037a_d3a046e3",
       "range": {
         "startLine": 83,
         "startChar": 8,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "0b28b31a_347170fc",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/BufferQueue.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-09T21:18:31Z",
+      "side": 1,
+      "message": "same here, will do, thanks",
+      "parentUuid": "8b89037a_f349ca7f",
+      "range": {
+        "startLine": 117,
+        "startChar": 8,
+        "endLine": 118,
+        "endChar": 37
+      },
+      "revId": "e1a9a9a7c7efb1d45981fa5704e449a7efff0f47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b89037a_93c15e91",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/BufferQueue.h",
         "patchSetId": 5
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "8b14a3d5_3834090b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/BufferQueue.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-09T21:18:31Z",
+      "side": 1,
+      "message": "shouldn\u0027t clear() release memory if the buffer was isAllocated() ?",
+      "parentUuid": "8b89037a_93c15e91",
+      "range": {
+        "startLine": 160,
+        "startChar": 12,
+        "endLine": 166,
+        "endChar": 13
+      },
+      "revId": "e1a9a9a7c7efb1d45981fa5704e449a7efff0f47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b89037a_b39fc296",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/BufferQueue.h",
         "patchSetId": 5
@@ -105,6 +201,30 @@
       "writtenOn": "2016-11-09T19:51:20Z",
       "side": 1,
       "message": "std::vector\u003c\u003e ? or, at least, unique_ptr\u003cBuffer[]\u003e ?",
+      "range": {
+        "startLine": 174,
+        "startChar": 0,
+        "endLine": 174,
+        "endChar": 31
+      },
+      "revId": "e1a9a9a7c7efb1d45981fa5704e449a7efff0f47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b14a3d5_d8114d78",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/BufferQueue.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-09T21:18:31Z",
+      "side": 1,
+      "message": "will do.",
+      "parentUuid": "8b89037a_b39fc296",
       "range": {
         "startLine": 174,
         "startChar": 0,
@@ -163,6 +283,30 @@
     },
     {
       "key": {
+        "uuid": "8b14a3d5_b827b9e5",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ChannelStream.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-09T21:18:31Z",
+      "side": 1,
+      "message": "It is actually required by the caller. It took me some time to understand why. I need to update the method\u0027s comment.\n\nThe interface for read() is that the caller writes the maximum amount of data it is ready to read in its buffer, and receives on exit the real amount that was read. See ReadBuffer implementation.\n\nAlso, it is expected to block, then read as much data as possible, which is why blocking is true only if (count \u003d\u003d 0) above. I should probably add more comments to explain, this is a very subtle point.\n\nWithout this behaviour, nothing works properly (debugging was ... interesting).",
+      "parentUuid": "8b89037a_b67a502a",
+      "range": {
+        "startLine": 82,
+        "startChar": 12,
+        "endLine": 82,
+        "endChar": 31
+      },
+      "revId": "e1a9a9a7c7efb1d45981fa5704e449a7efff0f47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b89037a_767dc81f",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/ChannelStream.cpp",
         "patchSetId": 5
@@ -174,6 +318,30 @@
       "writtenOn": "2016-11-09T19:51:20Z",
       "side": 1,
       "message": "the only way we could get here is result \u003d\u003d TryAgain and count \u003d\u003d 0. but you set blocking to true of count \u003d\u003d 0, so there should be no way result is TryAgain here. assert()?",
+      "range": {
+        "startLine": 85,
+        "startChar": 8,
+        "endLine": 85,
+        "endChar": 45
+      },
+      "revId": "e1a9a9a7c7efb1d45981fa5704e449a7efff0f47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b14a3d5_583d3df0",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ChannelStream.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-09T21:18:31Z",
+      "side": 1,
+      "message": "you\u0027re right, this is a left-over from a previous iteration and should be removed.",
+      "parentUuid": "8b89037a_767dc81f",
       "range": {
         "startLine": 85,
         "startChar": 8,
@@ -209,6 +377,30 @@
     },
     {
       "key": {
+        "uuid": "8b14a3d5_385ba969",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-09T21:18:31Z",
+      "side": 1,
+      "message": "consider that the guest sends a few final commands (e.g. the last one is an eglFlush()) then closes the connection. You want the data to reach the host to ensure that it is processed properly. That\u0027s the idea behind that.\n\nSimilarly, if for some reason the host wants to send a reply then close the connection, better send it to the guest?",
+      "parentUuid": "8b89037a_d0e6fcd4",
+      "range": {
+        "startLine": 87,
+        "startChar": 2,
+        "endLine": 88,
+        "endChar": 48
+      },
+      "revId": "e1a9a9a7c7efb1d45981fa5704e449a7efff0f47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b89037a_d007dc8b",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.cpp",
         "patchSetId": 5
@@ -220,6 +412,30 @@
       "writtenOn": "2016-11-09T19:51:20Z",
       "side": 1,
       "message": "nit: this could go out of the \u0027if\u0027, and DD would just use \"%s\" for the operation with value of (blocking ? \"popLocked\" : \"tryPopLocked\")",
+      "range": {
+        "startLine": 112,
+        "startChar": 0,
+        "endLine": 112,
+        "endChar": 28
+      },
+      "revId": "e1a9a9a7c7efb1d45981fa5704e449a7efff0f47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b14a3d5_d8286dba",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-09T21:18:31Z",
+      "side": 1,
+      "message": "You\u0027re right, I\u0027ll do that, thanks :)",
+      "parentUuid": "8b89037a_d007dc8b",
       "range": {
         "startLine": 112,
         "startChar": 0,
@@ -278,6 +494,30 @@
     },
     {
       "key": {
+        "uuid": "8b14a3d5_f82d31c7",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-09T21:18:31Z",
+      "side": 1,
+      "message": "yes, probably, it\u0027s important. I don\u0027t think we need to do that outside of the lock if the caller is aware of that. And there is no need for this feature at the moment, so let\u0027s keep it simple. I\u0027ll add some comments.",
+      "parentUuid": "8b89037a_50620cf7",
+      "range": {
+        "startLine": 155,
+        "startChar": 8,
+        "endLine": 155,
+        "endChar": 34
+      },
+      "revId": "e1a9a9a7c7efb1d45981fa5704e449a7efff0f47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b89037a_138b2e3c",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.h",
         "patchSetId": 5
@@ -289,6 +529,30 @@
       "writtenOn": "2016-11-09T19:51:20Z",
       "side": 1,
       "message": "please add a note that it needs to appear before the buffer queues in the members list, as those get a reference to the lock in their ctors",
+      "range": {
+        "startLine": 78,
+        "startChar": 1,
+        "endLine": 79,
+        "endChar": 17
+      },
+      "revId": "e1a9a9a7c7efb1d45981fa5704e449a7efff0f47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b14a3d5_9822f5d6",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-09T21:18:31Z",
+      "side": 1,
+      "message": "Excellent point, will do!",
+      "parentUuid": "8b89037a_138b2e3c",
       "range": {
         "startLine": 78,
         "startChar": 1,
@@ -324,6 +588,30 @@
     },
     {
       "key": {
+        "uuid": "8b14a3d5_188d85bd",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderThread.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-09T21:18:31Z",
+      "side": 1,
+      "message": "No but it makes it easy to change the 0 to 1 or 2 during debugging sessions, so I prefer to keep it.\n\nSame reason we have \u0027#define DEBUG 0\u0027 in other parts of our code :)",
+      "parentUuid": "6bbdafe5_4b6c65e5",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 27
+      },
+      "revId": "e1a9a9a7c7efb1d45981fa5704e449a7efff0f47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4bd62b38_c5e064b9",
         "filename": "distrib/android-emugl/shared/emugl/common/debug.h",
         "patchSetId": 5
@@ -335,6 +623,30 @@
       "writtenOn": "2016-11-09T19:51:20Z",
       "side": 1,
       "message": "if it\u0027s not defined, it\u0027s considered 0",
+      "range": {
+        "startLine": 22,
+        "startChar": 34,
+        "endLine": 22,
+        "endChar": 55
+      },
+      "revId": "e1a9a9a7c7efb1d45981fa5704e449a7efff0f47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b14a3d5_388ac9a6",
+        "filename": "distrib/android-emugl/shared/emugl/common/debug.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-09T21:18:31Z",
+      "side": 1,
+      "message": "Some compilers are actually picky about that and will complain with a warning :-/ It\u0027s an habit I\u0027ve formed over the year, not sure if our toolchains are impacted though.",
+      "parentUuid": "4bd62b38_c5e064b9",
       "range": {
         "startLine": 22,
         "startChar": 34,
