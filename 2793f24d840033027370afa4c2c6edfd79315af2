@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ebafdfaa_649080d6",
+        "filename": "android/opengl/OpenglEsPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-09T19:51:20Z",
+      "side": 1,
+      "message": "nit: if you invert the if condition, you can get rid of the \u0027continue\u0027",
+      "range": {
+        "startLine": 166,
+        "startChar": 19,
+        "endLine": 170,
+        "endChar": 44
+      },
+      "revId": "2793f24d840033027370afa4c2c6edfd79315af2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4bad4bb0_c73e34d0",
+        "filename": "android/opengl/OpenglEsPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-09T19:51:20Z",
+      "side": 1,
+      "message": "should we block or return AGAIN here? we\u0027ve already copied the whole data into the buffer, and returning AGAIN means we are going to repeat that.\nOn the other hand, it\u0027s very uncommon to have the write channel full here. That\u0027s why we won\u0027t ever see this part of the code run to be able to compare the ways\n\nOr, you could have a buffer \"dataForWriting\" here, similar to the one for reading. In that case you could stash the data for sending here and return success to the guest (getting rid of two extra calls)",
+      "range": {
+        "startLine": 218,
+        "startChar": 8,
+        "endLine": 224,
+        "endChar": 9
+      },
+      "revId": "2793f24d840033027370afa4c2c6edfd79315af2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4bad4bb0_07265c85",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-09T19:51:20Z",
+      "side": 1,
+      "message": "well, for me \u0027guest-provided\u0027 is something from the Android guest running inside the emulator. User-provided?",
+      "range": {
+        "startLine": 81,
+        "startChar": 7,
+        "endLine": 81,
+        "endChar": 21
+      },
+      "revId": "2793f24d840033027370afa4c2c6edfd79315af2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4bad4bb0_67176007",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-09T19:51:20Z",
+      "side": 1,
+      "message": "nit: typo",
+      "range": {
+        "startLine": 94,
+        "startChar": 19,
+        "endLine": 94,
+        "endChar": 20
+      },
+      "revId": "2793f24d840033027370afa4c2c6edfd79315af2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b89037a_36fc204a",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/BufferQueue.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-09T19:51:20Z",
+      "side": 1,
+      "message": "will you add some UTs for this class?",
+      "range": {
+        "startLine": 32,
+        "startChar": 6,
+        "endLine": 32,
+        "endChar": 17
+      },
+      "revId": "2793f24d840033027370afa4c2c6edfd79315af2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4bad4bb0_07f09cbd",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/BufferQueue.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-09T19:51:20Z",
+      "side": 1,
+      "message": "why not a vector?",
+      "range": {
+        "startLine": 45,
+        "startChar": 40,
+        "endLine": 45,
+        "endChar": 60
+      },
+      "revId": "2793f24d840033027370afa4c2c6edfd79315af2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4bad4bb0_e7f490b3",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/BufferQueue.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-09T19:51:20Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 52,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 46
+      },
+      "revId": "2793f24d840033027370afa4c2c6edfd79315af2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
