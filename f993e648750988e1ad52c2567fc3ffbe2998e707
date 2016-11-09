@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0bf9938d_af8a1566",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-09T11:40:51Z",
+      "side": 1,
+      "message": "did you mean return false?",
+      "revId": "f993e648750988e1ad52c2567fc3ffbe2998e707",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0b12739d_4d94511c",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-09T11:40:51Z",
+      "side": 1,
+      "message": "missing return true?",
+      "revId": "f993e648750988e1ad52c2567fc3ffbe2998e707",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
