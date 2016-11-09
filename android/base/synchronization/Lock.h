@@ -25,27 +25,6 @@
 
 #include <assert.h>
 
-#ifdef _WIN32
-// Declarations for shared reader/writer lock objects.
-// For the ReadWriteLock class.
-struct SRWLock {
-// Note: this is a copy of the definition of the SRWLOCK struct
-// from Windows.h.
-    void* ptr;
-};
-
-struct FallbackLockObj {
-    CRITICAL_SECTION write_lock;
-    CRITICAL_SECTION read_lock;
-    size_t num_readers;
-};
-
-union SRWLockObj {
-    SRWLock srw_lock;
-    FallbackLockObj fallback_lock_obj;
-};
-#endif
-
 namespace android {
 namespace base {
 
@@ -58,28 +37,22 @@ class Lock {
 public:
     using AutoLock = android::base::AutoLock;
 
-    // Constructor.
+#ifdef _WIN32
+    Lock() = default;
+    ~Lock() = default;
+#else
     Lock() {
-#ifdef _WIN32
-        ::InitializeCriticalSection(&mLock);
-#else
         ::pthread_mutex_init(&mLock, NULL);
-#endif
     }
-
-    // Destructor.
     ~Lock() {
-#ifdef _WIN32
-        ::DeleteCriticalSection(&mLock);
-#else
         ::pthread_mutex_destroy(&mLock);
-#endif
     }
+#endif
 
     // Acquire the lock.
     void lock() {
 #ifdef _WIN32
-      ::EnterCriticalSection(&mLock);
+      ::AcquireSRWLockExclusive(&mLock);
 #else
       ::pthread_mutex_lock(&mLock);
 #endif
@@ -88,7 +61,7 @@ public:
     // Release the lock.
     void unlock() {
 #ifdef _WIN32
-       ::LeaveCriticalSection(&mLock);
+       ::ReleaseSRWLockExclusive(&mLock);
 #else
        ::pthread_mutex_unlock(&mLock);
 #endif
@@ -98,67 +71,63 @@ private:
     friend class ConditionVariable;
 
 #ifdef _WIN32
-public: // Currently ConditionVariable has a hidden implementation class, and
-        // that's the one requiring access to mLock - so let it be public.
-    CRITICAL_SECTION mLock;
-private:
+    // Benchmarks show that on Windows SRWLOCK performs a little bit better than
+    // CRITICAL_SECTION for uncontended mode and much better in case of
+    // contention.
+    SRWLOCK mLock = SRWLOCK_INIT;
 #else
     pthread_mutex_t mLock;
 #endif
-    // POSIX threads don't allow move (undefined behavior)
-    // so we also disallow this on Windows to be consistent.
+    // Both POSIX threads and WinAPI don't allow move (undefined behavior).
     DISALLOW_COPY_ASSIGN_AND_MOVE(Lock);
 };
 
 
+class ReadWriteLock {
+public:
+    using AutoWriteLock = android::base::AutoWriteLock;
+    using AutoReadLock = android::base::AutoReadLock;
+
 #ifdef _WIN32
-class ReadWriteLock {
-public:
-    using AutoWriteLock = android::base::AutoWriteLock;
-    using AutoReadLock = android::base::AutoReadLock;
-    ReadWriteLock();
-    ~ReadWriteLock();
-    void lockRead();
-    void lockWrite();
-    void unlockRead();
-    void unlockWrite();
-private:
-    friend class ConditionVariable;
-    SRWLockObj mLock;
-    // POSIX threads don't allow move,
-    // so we don't allow move on Windows as wll,
-    // to be consistent.
-    DISALLOW_COPY_ASSIGN_AND_MOVE(ReadWriteLock);
-};
-#else
-class ReadWriteLock {
-public:
-    using AutoWriteLock = android::base::AutoWriteLock;
-    using AutoReadLock = android::base::AutoReadLock;
-    ReadWriteLock() {
-        ::pthread_rwlock_init(&mRWLock, NULL);
-    }
+    ReadWriteLock() = default;
+    ~ReadWriteLock() = default;
     void lockRead() {
-        ::pthread_rwlock_rdlock(&mRWLock);
+        ::AcquireSRWLockShared(&mLock);
     }
     void unlockRead() {
-        ::pthread_rwlock_unlock(&mRWLock);
+        ::ReleaseSRWLockShared(&mLock);
     }
     void lockWrite() {
-        ::pthread_rwlock_wrlock(&mRWLock);
+        ::AcquireSRWLockExclusive(&mLock);
     }
     void unlockWrite() {
-        ::pthread_rwlock_unlock(&mRWLock);
+        ::ReleaseSRWLockExclusive(&mLock);
     }
 private:
+    SRWLOCK mLock = SRWLOCK_INIT;
+#else  // !_WIN32
+    ReadWriteLock() {
+        ::pthread_rwlock_init(&mLock, NULL);
+    }
+    void lockRead() {
+        ::pthread_rwlock_rdlock(&mLock);
+    }
+    void unlockRead() {
+        ::pthread_rwlock_unlock(&mLock);
+    }
+    void lockWrite() {
+        ::pthread_rwlock_wrlock(&mLock);
+    }
+    void unlockWrite() {
+        ::pthread_rwlock_unlock(&mLock);
+    }
+private:
+    pthread_rwlock_t mLock;
+#endif  // !_WIN32
+
     friend class ConditionVariable;
-    pthread_rwlock_t mRWLock;
-    // POSIX threads don't allow move
-    // (Undefined behavior for what happens when
-    // mutexes are copied)
     DISALLOW_COPY_ASSIGN_AND_MOVE(ReadWriteLock);
 };
-#endif
 
 // Helper class to lock / unlock a mutex automatically on scope
 // entry and exit.
@@ -197,30 +166,30 @@ private:
 
 class AutoWriteLock {
 public:
-    AutoWriteLock(ReadWriteLock& lock) : mRWLock(lock) {
-        mRWLock.lockWrite();
+    AutoWriteLock(ReadWriteLock& lock) : mLock(lock) {
+        mLock.lockWrite();
     }
 
     void lockWrite() {
         assert(!mWriteLocked);
-        mRWLock.lockWrite();
+        mLock.lockWrite();
         mWriteLocked = true;
     }
 
     void unlockWrite() {
         assert(mWriteLocked);
-        mRWLock.unlockWrite();
+        mLock.unlockWrite();
         mWriteLocked = false;
     }
 
     ~AutoWriteLock() {
         if (mWriteLocked) {
-            mRWLock.unlockWrite();
+            mLock.unlockWrite();
         }
     }
 
 private:
-    ReadWriteLock& mRWLock;
+    ReadWriteLock& mLock;
     bool mWriteLocked = true;
     // This class has a non-movable object.
     DISALLOW_COPY_ASSIGN_AND_MOVE(AutoWriteLock);
@@ -228,30 +197,30 @@ private:
 
 class AutoReadLock {
 public:
-    AutoReadLock(ReadWriteLock& lock) : mRWLock(lock) {
-        mRWLock.lockRead();
+    AutoReadLock(ReadWriteLock& lock) : mLock(lock) {
+        mLock.lockRead();
     }
 
     void lockRead() {
         assert(!mReadLocked);
-        mRWLock.lockRead();
+        mLock.lockRead();
         mReadLocked = true;
     }
 
     void unlockRead() {
         assert(mReadLocked);
-        mRWLock.unlockRead();
+        mLock.unlockRead();
         mReadLocked = false;
     }
 
     ~AutoReadLock() {
         if (mReadLocked) {
-            mRWLock.unlockRead();
+            mLock.unlockRead();
         }
     }
 
 private:
-    ReadWriteLock& mRWLock;
+    ReadWriteLock& mLock;
     bool mReadLocked = true;
     // This class has a non-movable object.
     DISALLOW_COPY_ASSIGN_AND_MOVE(AutoReadLock);
