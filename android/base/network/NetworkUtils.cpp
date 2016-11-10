@@ -19,6 +19,11 @@
 #include "android/base/system/System.h"
 
 #include <limits.h>
+
+#ifdef __APPLE__
+#include <sys/socket.h>
+#endif
+
 #ifndef _WIN32
 #include <net/if.h>
 #endif
