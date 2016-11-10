@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "2b8e57b3_d1a5f4f0",
+        "filename": "android/base/StringParse.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-11-10T22:17:30Z",
+      "side": 1,
+      "message": "actually, disregard this comment, I wrote it before reading your implementation thoroughly...",
+      "parentUuid": "2b8e57b3_3180d8e0",
+      "range": {
+        "startLine": 24,
+        "startChar": 54,
+        "endLine": 24,
+        "endChar": 76
+      },
+      "revId": "448d18ed06df620ed8818b774bea5521b2612043",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2b8e57b3_51ec844e",
         "filename": "android/base/StringParse.h",
         "patchSetId": 1
