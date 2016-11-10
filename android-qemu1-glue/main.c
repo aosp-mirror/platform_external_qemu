@@ -135,12 +135,11 @@ int main(int argc, char **argv) {
 
     const char* serialPrefix = androidHwConfig_getKernelSerialPrefix(hw);
     AndroidGlesEmulationMode glesMode = kAndroidGlesEmulationOff;
-    if (android_hw->hw_gpu_enabled) {
-        if (!strcmp(android_hw->hw_gpu_mode, "guest")) {
-            glesMode = kAndroidGlesEmulationGuest;
-        } else {
-            glesMode = kAndroidGlesEmulationHost;
-        }
+
+    if (!strcmp(android_hw->hw_gpu_mode, "guest")) {
+        glesMode = kAndroidGlesEmulationGuest;
+    } else if (android_hw->hw_gpu_enabled) {
+        glesMode = kAndroidGlesEmulationHost;
     }
 
     int apiLevel = avdInfo_getApiLevel(avd);
