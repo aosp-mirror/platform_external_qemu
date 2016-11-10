@@ -3017,7 +3017,7 @@ int main(int argc, char **argv, char **envp)
      * the emulation engine. */
 
     bool opengl_emulation = android_hw->hw_gpu_enabled;
-    if (opengl_emulation) {
+    if (opengl_emulation || strcmp(android_hw->hw_gpu_mode, "guest") == 0) {
         char  tmp[64];
         snprintf(tmp, sizeof(tmp), "%d", 0x20000);
         boot_property_add("ro.opengles.version", tmp);
