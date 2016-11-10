@@ -19,7 +19,8 @@ ANDROID_BEGIN_HEADER
 
 // A small structure used to model the EmuGL configuration
 // to use.
-// |enabled| is true if GPU emulation is enabled, false otherwise.
+// |enabled| is true if host GPU emulation is enabled (-gpu on, -gpu swiftshader),
+//           false otherwise (-gpu off, -gpu guest).
 // |backend| contains the name of the backend to use, if |enabled|
 // is true.
 // |status| is a string used to report error or the current status
@@ -91,6 +92,9 @@ void free_emugl_host_gpu_props(emugl_host_gpu_prop_list props);
 // Returns true on success, or false if there was an error (e.g. bad
 // mode or option value), in which case the |status| field will contain
 // a small error message.
+//
+// Notes: config->enable will be false when in -gpu off and -gpu guest.
+//        config->enable will be true when in -gpu host and -gpu swiftshader
 bool emuglConfig_init(EmuglConfig* config,
                       bool gpu_enabled,
                       const char* gpu_mode,
