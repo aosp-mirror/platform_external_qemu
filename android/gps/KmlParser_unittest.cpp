@@ -12,6 +12,8 @@
 #include "android/gps/KmlParser.h"
 #include "android/base/testing/TestTempDir.h"
 
+#include "android/base/testing/Utils.h"
+
 #include <fstream>
 #include <gtest/gtest.h>
 
@@ -542,5 +544,40 @@ TEST(KmlParser, ParsePlacemarkNullNameNoCrash) {
     ASSERT_EQ(1, locations.size());
     EXPECT_STREQ("", locations.front().name.c_str());
     EXPECT_STREQ("", locations.front().description.c_str());
+}
+
+TEST(KmlParser, ParseLocationNormalCommaLocale) {
+    auto scopedCommaLocale = setScopedCommaLocale();
+
+    TestTempDir myDir("parse_location_tests");
+    ASSERT_TRUE(myDir.path()); // NULL if error during creation.
+    std::string path = myDir.makeSubPath("test.kml");
+
+    std::ofstream myfile;
+    myfile.open(path.c_str());
+    myfile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            "<kml xmlns=\"http://earth.google.com/kml/2.x\">"
+            "<Placemark>"
+                    "<name>Simple placemark</name>"
+                    "<description>Attached to the ground.</description>"
+                    "<Point>"
+                    "<coordinates>-122.0822035425683,37.42228990140251,0</coordinates>"
+                    "</Point>"
+            "</Placemark>"
+            "</kml>";
+    myfile.close();
+
+    GpsFixArray locations;
+    std::string error;
+
+    ASSERT_TRUE(KmlParser::parseFile(path.c_str(), &locations, &error));
+
+    for (unsigned i = 0; i < locations.size(); ++i) {
+        EXPECT_EQ("Simple placemark", locations[i].name);
+        EXPECT_EQ("Attached to the ground.", locations[i].description);
+        EXPECT_FLOAT_EQ(-122.0822035425683, locations[i].longitude);
+        EXPECT_FLOAT_EQ(37.42228990140251, locations[i].latitude);
+        EXPECT_FLOAT_EQ(0, locations[i].elevation);
+    }
 }
 }

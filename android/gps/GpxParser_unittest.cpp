@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/base/testing/TestTempDir.h"
+#include "android/base/testing/Utils.h"
 #include "android/gps/GpxParser.h"
 
 #include <fstream>
@@ -222,6 +223,41 @@ TEST(GpxParser, ParseLocationMissingLongitude) {
 }
 
 TEST(GpxParser, ParseValidLocation) {
+    char text[] =
+            "<?xml version=\"1.0\"?>"
+            "<gpx>"
+            "<wpt lon=\"9.81\" lat=\"3.1415\">"
+            "<ele>6.02</ele>"
+            "<name>Name</name>"
+            "<desc>Desc</desc>"
+            "</wpt>"
+            "</gpx>";
+    TestTempDir myDir("parse_location_tests");
+    ASSERT_TRUE(myDir.path()); // NULL if error during creation.
+    std::string path = myDir.makeSubPath("test.gpx");
+
+    std::ofstream myfile(path.c_str());
+    myfile << text;
+    myfile.close();
+
+    GpsFixArray locations;
+    std::string error;
+    bool isOk = GpxParser::parseFile(path.c_str(), &locations, &error);
+    EXPECT_TRUE(isOk);
+    EXPECT_EQ(1, locations.size());
+    const GpsFix& wpt = locations[0];
+
+    EXPECT_EQ("Desc", wpt.description);
+    EXPECT_FLOAT_EQ(6.02, wpt.elevation);
+    EXPECT_FLOAT_EQ(3.1415, wpt.latitude);
+    EXPECT_FLOAT_EQ(9.81, wpt.longitude);
+    EXPECT_EQ("Name", wpt.name);
+}
+
+
+TEST(GpxParser, ParseValidLocationCommaLocale) {
+    auto scopedCommaLocale = setScopedCommaLocale();
+
     char text[] =
             "<?xml version=\"1.0\"?>"
             "<gpx>"
