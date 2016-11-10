@@ -11,6 +11,8 @@
 
 #include "android/gps/GpxParser.h"
 
+#include "android/base/StringParse.h"
+
 #include <libxml/parser.h>
 
 #include <algorithm>
@@ -50,7 +52,7 @@ static bool parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *result, string *
         return false; // Return error since a point *must* have a latitude
     } else {
         int read =
-            sscanf(reinterpret_cast<const char*>(tmpStr), "%f", &latitude);
+            android::base::SscanfWithCLocale(reinterpret_cast<const char*>(tmpStr), "%f", &latitude);
         xmlFree(tmpStr); // Caller-freed
         if (read != 1) {
             return false;
@@ -65,7 +67,7 @@ static bool parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *result, string *
         return false; // Return error since a point *must* have a longitude
     } else {
         int read =
-            sscanf(reinterpret_cast<const char*>(tmpStr), "%f", &longitude);
+            android::base::SscanfWithCLocale(reinterpret_cast<const char*>(tmpStr), "%f", &longitude);
         xmlFree(tmpStr); // Caller-freed
         if (read != 1) {
             return false;
@@ -110,7 +112,7 @@ static bool parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *result, string *
         else if ( !strcmp((const char *) field->name, "ele") ) {
             if ((tmpStr = xmlNodeListGetString(doc, field->children, 1))) {
                 int read =
-                    sscanf(reinterpret_cast<const char*>(tmpStr), "%f", &result->elevation);
+                    android::base::SscanfWithCLocale(reinterpret_cast<const char*>(tmpStr), "%f", &result->elevation);
                 xmlFree(tmpStr); // Caller-freed
                 if (read != 1) {
                     return false;
