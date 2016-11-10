@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2b8e57b3_e08e9c0d",
+        "filename": "android/base/network/NetworkUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-11-10T19:39:53Z",
+      "side": 1,
+      "message": "Removed",
+      "parentUuid": "6bd84f3b_a836bf45",
+      "range": {
+        "startLine": 19,
+        "startChar": 22,
+        "endLine": 19,
+        "endChar": 43
+      },
+      "revId": "77f8413198f40cd7e89a83da547a4a63c0b20de7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b55af38_9ae969d1",
         "filename": "android/base/network/NetworkUtils.h",
         "patchSetId": 1
@@ -36,6 +60,24 @@
       "writtenOn": "2016-11-08T09:12:27Z",
       "side": 1,
       "message": "This should not appear in this header, since none of the declarations here depend on it. Move it to NetworkUtils.cpp or any other place that really requires it.\n\nI believe we can drop the \u0026\u0026 defined(__MACH__), iirc it dates back from MacOS (*not* OS X) which also defined __APPLE__.",
+      "revId": "77f8413198f40cd7e89a83da547a4a63c0b20de7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b8e57b3_0094681a",
+        "filename": "android/base/network/NetworkUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-11-10T19:39:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6b55af38_9ae969d1",
       "revId": "77f8413198f40cd7e89a83da547a4a63c0b20de7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
