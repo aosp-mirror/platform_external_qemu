@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2b8e57b3_f190309b",
+        "filename": "android/base/StringParse.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-10T22:13:49Z",
+      "side": 1,
+      "message": "Yeah, I\u0027ll add a comment",
+      "parentUuid": "2b8e57b3_9171acfe",
+      "range": {
+        "startLine": 62,
+        "startChar": 4,
+        "endLine": 62,
+        "endChar": 77
+      },
+      "revId": "448d18ed06df620ed8818b774bea5521b2612043",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2b8e57b3_3180d8e0",
         "filename": "android/base/StringParse.h",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "2b8e57b3_117d9c92",
+        "filename": "android/base/StringParse.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-10T22:13:49Z",
+      "side": 1,
+      "message": "well, all notations - if current locale on Windows supports those",
+      "parentUuid": "2b8e57b3_3180d8e0",
+      "range": {
+        "startLine": 24,
+        "startChar": 54,
+        "endLine": 24,
+        "endChar": 76
+      },
+      "revId": "448d18ed06df620ed8818b774bea5521b2612043",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2b8e57b3_51ec844e",
         "filename": "android/base/StringParse.h",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2016-11-10T22:11:35Z",
       "side": 1,
       "message": "What difference does having this make if we already have the global function?",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 75
+      },
+      "revId": "448d18ed06df620ed8818b774bea5521b2612043",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b8e57b3_b196a895",
+        "filename": "android/base/StringParse.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-10T22:13:49Z",
+      "side": 1,
+      "message": "just to have it in the regular android::base namespace for C++",
+      "parentUuid": "2b8e57b3_51ec844e",
       "range": {
         "startLine": 45,
         "startChar": 0,
