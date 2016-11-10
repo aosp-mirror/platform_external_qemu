@@ -23,8 +23,8 @@ void MessageChannelBase::stop() {
     android::base::AutoLock lock(mLock);
     mStopped = true;
     mCount = 0;
-    mCanRead.signal();
-    mCanWrite.signal();
+    mCanRead.broadcast();
+    mCanWrite.broadcast();
 }
 
 size_t MessageChannelBase::beforeWrite() {
@@ -32,10 +32,8 @@ size_t MessageChannelBase::beforeWrite() {
     while (mCount >= mCapacity && !mStopped) {
         mCanWrite.wait(&mLock);
     }
-    if (mStopped) {
-        return 0; // just anything
-    }
-
+    // Return value is undefined if stopped, so let's save a branch and skip the
+    // check for it.
     size_t result = mPos + mCount;
     if (result >= mCapacity) {
         result -= mCapacity;
@@ -43,12 +41,24 @@ size_t MessageChannelBase::beforeWrite() {
     return result;
 }
 
-void MessageChannelBase::afterWrite() {
-    if (!mStopped) {
-        mCount++;
-        mCanRead.signal();
+Optional<size_t> MessageChannelBase::beforeTryWrite() {
+    mLock.lock();
+
+    if (mCount >= mCapacity || mStopped) {
+        return {};
     }
-    mLock.unlock();
+    size_t result = mPos + mCount;
+    if (result >= mCapacity) {
+        result -= mCapacity;
+    }
+    return result;
+}
+
+void MessageChannelBase::afterWrite(bool success) {
+    if (success) {
+        ++mCount;
+    }
+    mCanRead.signalAndUnlock(&mLock);
 }
 
 size_t MessageChannelBase::beforeRead() {
@@ -59,15 +69,23 @@ size_t MessageChannelBase::beforeRead() {
     return mPos; // return value is undefined if stopped, so let's save a branch
 }
 
-void MessageChannelBase::afterRead() {
-    if (!mStopped) {
+Optional<size_t> MessageChannelBase::beforeTryRead() {
+    mLock.lock();
+
+    if (mCount == 0 || mStopped) {
+        return {};
+    }
+    return mPos;
+}
+
+void MessageChannelBase::afterRead(bool success) {
+    if (success) {
         if (++mPos == mCapacity) {
             mPos = 0U;
         }
-        mCount--;
-        mCanWrite.signal();
+        --mCount;
     }
-    mLock.unlock();
+    mCanWrite.signalAndUnlock(&mLock);
 }
 
 }  // namespace base
