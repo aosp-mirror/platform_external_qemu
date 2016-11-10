@@ -761,12 +761,10 @@ extern "C" int main(int argc, char **argv) {
 
     // Kernel command-line parameters.
     AndroidGlesEmulationMode glesMode = kAndroidGlesEmulationOff;
-    if (hw->hw_gpu_enabled) {
-        if (!strcmp(hw->hw_gpu_mode, "guest")) {
-            glesMode = kAndroidGlesEmulationGuest;
-        } else {
-            glesMode = kAndroidGlesEmulationHost;
-        }
+    if (!strcmp(hw->hw_gpu_mode, "guest")) {
+        glesMode = kAndroidGlesEmulationGuest;
+    } else if (hw->hw_gpu_enabled) {
+        glesMode = kAndroidGlesEmulationHost;
     }
 
     uint64_t glesFramebufferCMA = 0ULL;

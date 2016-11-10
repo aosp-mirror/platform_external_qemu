@@ -4463,18 +4463,16 @@ int main(int argc, char** argv, char** envp)
      * the emulation engine. */
     int qemu_gles = 0;
     is_opengl_alive = 1;
-    if (android_hw->hw_gpu_enabled) {
-        if (strcmp(android_hw->hw_gpu_mode, "guest") != 0) {
-            if (android_initOpenglesEmulation() != 0 ||
-                android_startOpenglesRenderer(android_hw->hw_lcd_width,
-                                              android_hw->hw_lcd_height) != 0) {
-                is_opengl_alive = 0;
-            } else {
-                goldfish_fb_set_use_host_gpu(1);
-                qemu_gles = 1;   // Using emugl
-            }
+    if (strcmp(android_hw->hw_gpu_mode, "guest") == 0) {
+        qemu_gles = 2;   // Using guest
+    } else if (android_hw->hw_gpu_enabled) {
+        if (android_initOpenglesEmulation() != 0 ||
+            android_startOpenglesRenderer(android_hw->hw_lcd_width,
+                                          android_hw->hw_lcd_height) != 0) {
+            is_opengl_alive = 0;
         } else {
-            qemu_gles = 2;   // Using guest
+            goldfish_fb_set_use_host_gpu(1);
+            qemu_gles = 1;   // Using emugl
         }
     }
     if (qemu_gles) {
