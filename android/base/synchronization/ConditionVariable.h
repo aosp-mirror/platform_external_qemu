@@ -18,8 +18,6 @@
 #include "android/base/synchronization/Lock.h"
 
 #ifdef _WIN32
-#include "android/base/system/Win32Utils.h"
-#include <vector>
 #include <windows.h>
 #else
 #include <pthread.h>
@@ -48,8 +46,12 @@ public:
 
 #ifdef _WIN32
 
-    ConditionVariable();
-    ~ConditionVariable();
+    ConditionVariable() {
+        ::InitializeConditionVariable(&mCond);
+    }
+
+    // There's no special function to destroy CONDITION_VARIABLE in Windows.
+    ~ConditionVariable() = default;
 
     // Wait until the condition variable is signaled. Note that spurious
     // wakeups are always a possibility, so always check the condition
@@ -61,37 +63,23 @@ public:
     //
     //    if (!condition) { condVar.wait(&lock); }
     //
-    void wait(Lock* userLock);
+    void wait(Lock* userLock) {
+        ::SleepConditionVariableSRW(&mCond, &userLock->mLock, INFINITE, 0);
+    }
 
-    // Signal that a condition was reached. This will wake at most one
-    // waiting thread that is blocked on wait().
-    void signal();
+    // Signal that a condition was reached. This will wake at least (and
+    // preferrably) one waiting thread that is blocked on wait().
+    void signal() {
+        ::WakeConditionVariable(&mCond);
+    }
 
     // Like signal(), but wakes all of the waiting threads.
-    void broadcast();
-
-    // XP-specific members of the condition variable
-    struct XpCV {
-        std::vector<Win32Utils::ScopedHandle> mWaiters;
-        Lock mLock;
-    };
-
-    // Vista-specific members
-    struct VistaCV {
-        void* data; // this is how CONDITION_VARIABLE is defined in Windows.h
-    };
-
-    // A union having either XP or Vista-specific members active
-    union Data {
-        VistaCV vista;
-        XpCV xp;
-
-        Data() {}
-        ~Data() {}
-    };
+    void broadcast() {
+        ::WakeAllConditionVariable(&mCond);
+    }
 
 private:
-    Data mData;
+    CONDITION_VARIABLE mCond;
 
 #else  // !_WIN32
 
