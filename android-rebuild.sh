@@ -152,17 +152,30 @@ if [ "$HOST_OS" = "Linux" ]; then
 fi
 
 if [ "$MINGW" ]; then
-  TEST_SHELL=wine
-  EXE_SUFFIX=.exe
+    TEST_SHELL=wine
+    EXE_SUFFIX=.exe
 
-  # Check for Wine on this machine.
-  WINE_CMD=$(which $TEST_SHELL 2>/dev/null || true)
-  if [ -z "$NO_TESTS" -a -z "$WINE_CMD" ]; then
-    echo "WARNING: Wine is not installed on this machine!! Unit tests will be ignored!!"
-    NO_TESTS=true
-  fi
+    # Check for Wine on this machine.
+    if [ -z "$NO_TESTS" ]; then
+        WINE_CMD=$(which $TEST_SHELL 2>/dev/null || true)
+        if [ -z "$WINE_CMD" ]; then
+            echo "WARNING: Wine is not installed on this machine!! Unit tests will be ignored!!"
+            NO_TESTS=true
+        else
+            WINE_VERSION=$("$WINE_CMD" --version 2>/dev/null)
+            case $WINE_VERSION in
+                wine-1.8.*|wine-1.9.*|wine-1.1?.*)
+                    ;;
+                *)
+                    echo "WARNING: Your Wine version ($WINE_VERSION) is too old, >= 1.8 required"
+                    echo "Unit tests will be ignored!!"
+                    NO_TESTS=true
+                    ;;
+            esac
+        fi
+    fi
 
-  RUN_32BIT_TESTS=true
+    RUN_32BIT_TESTS=true
 fi
 
 # Return the minimum OS X version that a Darwin binary targets.
