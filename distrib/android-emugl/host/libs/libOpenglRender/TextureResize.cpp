@@ -141,7 +141,7 @@ static void detachShaders(GLuint program) {
     }
 }
 
-static GLuint createShader(GLenum type, const std::initializer_list<const char*>& source) {
+static GLuint createShader(GLenum type, std::initializer_list<const char*> source) {
     GLint success, infoLength;
 
     GLuint shader = s_gles2.glCreateShader(type);
@@ -302,9 +302,10 @@ void TextureResize::setupFramebuffers(unsigned int factor) {
 
     // ... then attach the new ones.
     std::ostringstream factorDefine;
-    factorDefine << "#define FACTOR " << factor << "\n";
-    attachShaders(&mFBWidth, factorDefine.str().c_str(), "#define HORIZONTAL\n", mWidth, mHeight);
-    attachShaders(&mFBHeight, factorDefine.str().c_str(), "#define VERTICAL\n", mWidth, mHeight);
+    factorDefine << "#define FACTOR " << factor << '\n';
+    const std::string factorDefineStr = factorDefine.str();
+    attachShaders(&mFBWidth, factorDefineStr.c_str(), "#define HORIZONTAL\n", mWidth, mHeight);
+    attachShaders(&mFBHeight, factorDefineStr.c_str(), "#define VERTICAL\n", mWidth, mHeight);
 
     mFactor = factor;
 }

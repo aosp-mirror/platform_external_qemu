@@ -1230,12 +1230,12 @@ void FrameBuffer::createTrivialContext(HandleType shared,
     assert(surfOut);
 
     *contextOut = createRenderContext(0, shared, true);
-    *surfOut = createWindowSurface(0, 1, 1);
+    *surfOut = createWindowSurface(0, 0, 1);
 }
 
-bool FrameBuffer::post(HandleType p_colorbuffer, bool needLock)
+bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind)
 {
-    if (needLock) {
+    if (needLockAndBind) {
         m_lock.lock();
     }
     bool ret = false;
@@ -1249,7 +1249,7 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLock)
 
     if (m_subWin) {
         // bind the subwindow eglSurface
-        if (!bindSubwin_locked()) {
+        if (needLockAndBind && !bindSubwin_locked()) {
             ERR("FrameBuffer::post(): eglMakeCurrent failed\n");
             goto EXIT;
         }
@@ -1284,7 +1284,9 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLock)
         }
 
         // restore previous binding
-        unbind_locked();
+        if (needLockAndBind) {
+            unbind_locked();
+        }
     } else {
         // If there is no sub-window, don't display anything, the client will
         // rely on m_onPost to get the pixels instead.
@@ -1320,7 +1322,7 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLock)
     }
 
 EXIT:
-    if (needLock) {
+    if (needLockAndBind) {
         m_lock.unlock();
     }
     return ret;

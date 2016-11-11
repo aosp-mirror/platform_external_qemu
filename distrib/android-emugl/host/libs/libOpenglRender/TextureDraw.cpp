@@ -171,23 +171,26 @@ bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
 
     // TODO(digit): Save previous program state.
 
-    GLenum err;
-
     s_gles2.glUseProgram(mProgram);
-    err = s_gles2.glGetError();
+
+#ifndef NDEBUG
+    GLenum err = s_gles2.glGetError();
     if (err != GL_NO_ERROR) {
         ERR("%s: Could not use program error=0x%x\n",
             __FUNCTION__, err);
     }
-
+#endif
 
     // Setup the |position| attribute values.
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
+
+#ifndef NDEBUG
     err = s_gles2.glGetError();
     if (err != GL_NO_ERROR) {
         ERR("%s: Could not bind GL_ARRAY_BUFFER error=0x%x\n",
             __FUNCTION__, err);
     }
+#endif
 
     s_gles2.glEnableVertexAttribArray(mPositionSlot);
     s_gles2.glVertexAttribPointer(mPositionSlot,
@@ -196,11 +199,14 @@ bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
                                   GL_FALSE,
                                   sizeof(Vertex),
                                   0);
+
+#ifndef NDEBUG
     err = s_gles2.glGetError();
     if (err != GL_NO_ERROR) {
         ERR("%s: Could glVertexAttribPointer with mPositionSlot error=0x%x\n",
             __FUNCTION__, err);
     }
+#endif
 
     // Setup the |inCoord| attribute values.
     s_gles2.glEnableVertexAttribArray(mInCoordSlot);
@@ -222,7 +228,7 @@ bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
     s_gles2.glUniform1f(mRotationSlot, rotation * M_PI / 180.);
     s_gles2.glUniform2f(mTranslationSlot, dx, dy);
 
-#if 1
+#ifndef NDEBUG
     // Validate program, just to be sure.
     s_gles2.glValidateProgram(mProgram);
     GLint validState = 0;
@@ -238,18 +244,22 @@ bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
 
     // Do the rendering.
     s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer);
+#ifndef NDEBUG
     err = s_gles2.glGetError();
     if (err != GL_NO_ERROR) {
         ERR("%s: Could not glBindBuffer(GL_ELEMENT_ARRAY_BUFFER) error=0x%x\n",
             __FUNCTION__, err);
     }
+#endif
 
     s_gles2.glDrawElements(GL_TRIANGLES, kIndicesLen, GL_UNSIGNED_BYTE, 0);
+#ifndef NDEBUG
     err = s_gles2.glGetError();
     if (err != GL_NO_ERROR) {
         ERR("%s: Could not glDrawElements() error=0x%x\n",
             __FUNCTION__, err);
     }
+#endif
 
     // TODO(digit): Restore previous program state.
 
