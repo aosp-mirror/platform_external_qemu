@@ -136,7 +136,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     int nComp = (texInternalFormat == GL_RGB ? 3 : 4);
 
     unsigned long bufsize = nComp * p_width * p_height;
-    char* initialImage = static_cast<char*>(::calloc(bufsize, 1));
+    char* initialImage = static_cast<char*>(::malloc(bufsize));
     memset(initialImage, 0xff, bufsize);
 
     s_gles2.glTexImage2D(GL_TEXTURE_2D,

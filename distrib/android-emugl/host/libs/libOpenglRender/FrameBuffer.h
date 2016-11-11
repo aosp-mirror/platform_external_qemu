@@ -270,10 +270,10 @@ public:
 
     // Display the content of a given ColorBuffer into the framebuffer's
     // sub-window. |p_colorbuffer| is a handle value.
-    // |needLock| is used to indicate whether the operation requires
-    // acquiring/releasing the FrameBuffer instance's lock. It should be
-    // false only when called internally.
-    bool post(HandleType p_colorbuffer, bool needLock = true);
+    // |needLockAndBind| is used to indicate whether the operation requires
+    // acquiring/releasing the FrameBuffer instance's lock and binding the
+    // contexts. It should be |false| only when called internally.
+    bool post(HandleType p_colorbuffer, bool needLockAndBind = true);
 
     // Re-post the last ColorBuffer that was displayed through post().
     // This is useful if you detect that the sub-window content needs to
@@ -319,12 +319,6 @@ public:
     bool bind_locked();
     bool unbind_locked();
 
-    // Used by anyone who wants to create or destroy OpenGL contexts.
-    // We need to protect all forms of context creation/destruction.
-    // At least Linux OpenGL drivers are not thread-safe in this
-    // manner.
-    void lockFramebuffer() { m_lock.lock(); }
-    void unlockFramebuffer() { m_lock.unlock(); }
     void lockContextStructureRead() { m_contextStructureLock.lockRead(); }
     void unlockContextStructureRead() { m_contextStructureLock.unlockRead(); }
 
