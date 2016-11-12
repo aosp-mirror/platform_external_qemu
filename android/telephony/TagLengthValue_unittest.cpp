@@ -89,7 +89,7 @@ TEST(TagLengthValue, ConstructArDo) {
 
 TEST(TagLengthValue, ConstructRefArDo) {
     RefDo refDo(AidRefDo(), DeviceAppIdRefDo("C0FFEE"));
-    ArDo arDo(NfcArDo(NfcArDo::Allow::Always));
+    ArDo arDo{NfcArDo{NfcArDo::Allow::Always}};
 
     RefArDo refArDo(refDo, arDo);
     ASSERT_STREQ(/*tag*/ "E2" /*length*/ "0c"
