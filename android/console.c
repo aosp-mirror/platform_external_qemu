@@ -26,6 +26,7 @@
 #include "android/android.h"
 #include "android/cmdline-option.h"
 #include "android/console_auth.h"
+#include "android/emulator-window.h"
 #include "android/globals.h"
 #include "android/hw-events.h"
 #include "android/hw-sensors.h"
@@ -2738,6 +2739,16 @@ static int do_debug(ControlClient client, char* args) {
     return 0;
 }
 
+static int
+do_rotate( ControlClient  client, char* args )
+{
+    EmulatorWindow* win = emulator_window_get();
+    if (win) {
+        skin_ui_select_next_layout(win->ui);
+        return 0;
+    }
+    return -1;
+}
 
 static const CommandDefRec   main_commands[] =
 {
@@ -2805,6 +2816,9 @@ static const CommandDefRec   main_commands[] =
 
     { "debug", "control the emulator debug output tags",
       NULL, NULL, do_debug },
+
+    { "rotate", "rotate the screen by 90 degrees",
+      NULL, NULL, do_rotate, NULL },
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
