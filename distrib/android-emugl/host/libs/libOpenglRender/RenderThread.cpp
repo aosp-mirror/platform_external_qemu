@@ -65,7 +65,6 @@ intptr_t RenderThread::main() {
     ChannelStream stream(mChannel, emugl::ChannelBuffer::kSmallSize);
     RenderThreadInfo tInfo;
     ChecksumCalculatorThreadInfo tChecksumInfo;
-    ChecksumCalculator& checksumCalc = tChecksumInfo.get();
 
     //
     // initialize decoders
@@ -159,7 +158,7 @@ intptr_t RenderThread::main() {
             // contexts.
             FrameBuffer::getFB()->lockContextStructureRead();
             size_t last = tInfo.m_glDec.decode(
-                    readBuf.buf(), readBuf.validData(), &stream, &checksumCalc);
+                    readBuf.buf(), readBuf.validData(), &stream);
             if (last > 0) {
                 progress = true;
                 readBuf.consume(last);
@@ -170,7 +169,7 @@ intptr_t RenderThread::main() {
             // decoder
             //
             last = tInfo.m_gl2Dec.decode(readBuf.buf(), readBuf.validData(),
-                                         &stream, &checksumCalc);
+                                         &stream);
             FrameBuffer::getFB()->unlockContextStructureRead();
 
             if (last > 0) {
@@ -183,7 +182,7 @@ intptr_t RenderThread::main() {
             // renderControl decoder
             //
             last = tInfo.m_rcDec.decode(readBuf.buf(), readBuf.validData(),
-                                        &stream, &checksumCalc);
+                                        &stream);
             if (last > 0) {
                 readBuf.consume(last);
                 progress = true;
@@ -208,6 +207,7 @@ intptr_t RenderThread::main() {
     }
 
     FrameBuffer::getFB()->drainWindowSurface();
+
     FrameBuffer::getFB()->drainRenderContext();
 
     DBG("Exited a RenderThread @%p\n", this);

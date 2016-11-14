@@ -27,8 +27,7 @@ public:
     ChecksumCalculatorThreadInfo();
     ~ChecksumCalculatorThreadInfo();
 
-    ChecksumCalculator& get();
-
+    static uint32_t getVersion();
     static bool setVersion(uint32_t version);
 
     static uint32_t getMaxVersion();
@@ -36,20 +35,17 @@ public:
         return ChecksumCalculator::getMaxVersionStr();
     }
 
-    static bool writeChecksum(ChecksumCalculator* calc,
-                              void* buf,
+    static size_t checksumByteSize();
+    static bool writeChecksum(void* buf,
                               size_t bufLen,
                               void* outputChecksum,
                               size_t outputChecksumLen);
 
-    static bool validate(ChecksumCalculator* calc,
-                         void* buf,
+    static bool validate(void* buf,
                          size_t bufLen,
                          void* checksum,
                          size_t checksumLen);
-
-    static void validOrDie(ChecksumCalculator* calc,
-                           void* buf,
+    static void validOrDie(void* buf,
                            size_t bufLen,
                            void* checksum,
                            size_t checksumLen,

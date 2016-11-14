@@ -110,24 +110,18 @@ bool WindowSurface::flushColorBuffer() {
     EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
     EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
 
-    const bool needToSet = prevContext != mDrawContext->getEGLContext() ||
-                           prevReadSurf != mSurface || prevDrawSurf != mSurface;
-    if (needToSet) {
-        if (!s_egl.eglMakeCurrent(mDisplay,
-                                  mSurface,
-                                  mSurface,
-                                  mDrawContext->getEGLContext())) {
-            fprintf(stderr, "Error making draw context current\n");
-            return false;
-        }
+    if (!s_egl.eglMakeCurrent(mDisplay,
+                              mSurface,
+                              mSurface,
+                              mDrawContext->getEGLContext())) {
+        fprintf(stderr, "Error making draw context current\n");
+        return false;
     }
 
     mAttachedColorBuffer->blitFromCurrentReadBuffer();
 
-    if (needToSet) {
-        // restore current context/surface
-        s_egl.eglMakeCurrent(mDisplay, prevDrawSurf, prevReadSurf, prevContext);
-    }
+    // restore current context/surface
+    s_egl.eglMakeCurrent(mDisplay, prevDrawSurf, prevReadSurf, prevContext);
 
     return true;
 }
