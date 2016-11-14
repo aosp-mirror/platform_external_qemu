@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2b8e57b3_ca536428",
+        "filename": "hw/android/goldfish/events_device.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 495,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-14T20:37:48Z",
+      "side": 1,
+      "message": "please check if you need to update anything in qemu-android",
+      "range": {
+        "startLine": 495,
+        "startChar": 37,
+        "endLine": 495,
+        "endChar": 55
+      },
+      "revId": "3efc568bf59b9b82e96956a52ecaae4456ccfc4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
