@@ -33,7 +33,8 @@ SkinKeyCode skin_keycode_rotate(SkinKeyCode code, int  rotation) {
     return code;
 }
 
-#define  _KEYSYM1_(x)  _KEYSYM_(x,x)
+#define  _KEYSYM1_(x)         _KEYSYM_(x,x)
+#define  _KEYSYM1_ANDROID_(x) _KEYSYM_ANDROID_(x,x)
 
 #define _KEYSYM_LIST  \
     _KEYSYM_(ESC,Escape) \
@@ -138,9 +139,10 @@ SkinKeyCode skin_keycode_rotate(SkinKeyCode code, int  rotation) {
     _KEYSYM1_(PLAYPAUSE) \
     _KEYSYM1_(REWIND) \
     _KEYSYM1_(FASTFORWARD) \
-    _KEYSYM1_(APPSWITCH) \
+    _KEYSYM1_ANDROID_(APPSWITCH) \
 
-#define _KEYSYM_(x,y)   { KEY_##x, #y },
+#define _KEYSYM_(x,y)         { LINUX_KEY_##x, #y },
+#define _KEYSYM_ANDROID_(x,y) { KEY_##x, #y },
 static const struct { int  _sym; const char*  _str; }  keysym_names[] =
 {
     _KEYSYM_LIST
