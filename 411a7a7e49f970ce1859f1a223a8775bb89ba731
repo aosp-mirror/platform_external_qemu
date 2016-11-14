@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30b088be_49f425d8",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-14T21:49:08Z",
+      "side": 1,
+      "message": "This entire green block only adds function declarations in TimeZone class. Nothing else changes",
+      "revId": "411a7a7e49f970ce1859f1a223a8775bb89ba731",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_c966d5d2",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 557,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-14T21:49:08Z",
+      "side": 1,
+      "message": "mAndroidTimeZoneInit is only set when timezone option is enabled from cmdline. Otherwise, timezone name should be looked up in every function call because it is possible that the timezone is changed in the host OS.",
+      "revId": "411a7a7e49f970ce1859f1a223a8775bb89ba731",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
