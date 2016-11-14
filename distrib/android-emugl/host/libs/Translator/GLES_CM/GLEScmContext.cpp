@@ -107,11 +107,11 @@ void GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
     m_pointsIndex = -1;
 
     //going over all clients arrays Pointers
-    for ( it=m_map.begin() ; it != m_map.end(); ++it) {
+    for ( it=m_map.begin() ; it != m_map.end(); it++ ) {
 
         GLenum array_id   = (*it).first;
         GLESpointer* p = (*it).second;
-        if(!p->isEnable()) continue;
+        if(!isArrEnabled(array_id)) continue;
         if(array_id == GL_TEXTURE_COORD_ARRAY) continue; //handling textures later
         setupArrayPointerHelper(cArrs,first,count,type,indices,direct,array_id,p);
     }
@@ -131,7 +131,7 @@ void GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
 
         GLenum array_id   = GL_TEXTURE_COORD_ARRAY;
         GLESpointer* p = m_map[array_id];
-        if(!p->isEnable()) continue;
+        if(!isArrEnabled(array_id)) continue;
         setupArrayPointerHelper(cArrs,first,count,type,indices,direct,array_id,p);
     }
 
