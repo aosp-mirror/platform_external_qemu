@@ -194,14 +194,14 @@ static TextureData* getTextureData(ObjectLocalName tex){
     }
 
     TextureData *texData = NULL;
-    auto objData =
+    ObjectDataPtr objData =
             ctx->shareGroup()->getObjectData(NamedObjectType::TEXTURE, tex);
-    if(!objData){
+    if(!objData.get()){
         texData = new TextureData();
         ctx->shareGroup()->setObjectData(NamedObjectType::TEXTURE, tex,
                                          ObjectDataPtr(texData));
     } else {
-        texData = (TextureData*)objData;
+        texData = (TextureData*)objData.get();
     }
     return texData;
 }
@@ -216,9 +216,9 @@ GL_API GLboolean GL_APIENTRY glIsBuffer(GLuint buffer) {
     GET_CTX_RET(GL_FALSE)
 
     if(buffer && ctx->shareGroup().get()) {
-        auto objData = ctx->shareGroup()->getObjectData(
+        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::VERTEXBUFFER, buffer);
-        return objData ? ((GLESbuffer*)objData)->wasBinded()
+        return objData.get() ? ((GLESbuffer*)objData.get())->wasBinded()
                              : GL_FALSE;
     }
     return GL_FALSE;
@@ -312,7 +312,8 @@ GL_API void GL_APIENTRY  glBindBuffer( GLenum target, GLuint buffer) {
     if (buffer) {
         GLESbuffer* vbo =
                 (GLESbuffer*)ctx->shareGroup()
-                        ->getObjectData(NamedObjectType::VERTEXBUFFER, buffer);
+                        ->getObjectData(NamedObjectType::VERTEXBUFFER, buffer)
+                        .get();
         vbo->setBinded();
     }
 }
@@ -1717,9 +1718,9 @@ GL_API void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target, GL
     // raise INVALID_OPERATIOn if no renderbuffer is bounded
     GLuint rb = ctx->getRenderbufferBinding();
     SET_ERROR_IF(rb == 0,GL_INVALID_OPERATION);
-    auto objData =
+    ObjectDataPtr objData =
             ctx->shareGroup()->getObjectData(NamedObjectType::RENDERBUFFER, rb);
-    RenderbufferData *rbData = (RenderbufferData *)objData;
+    RenderbufferData *rbData = (RenderbufferData *)objData.get();
     SET_ERROR_IF(!rbData,GL_INVALID_OPERATION);
 
     //
@@ -1848,8 +1849,9 @@ GL_API void GLAPIENTRY glRenderbufferStorageOES(GLenum target, GLenum internalfo
     // raise INVALID_OPERATIOn if no renderbuffer is bounded
     GLuint rb = ctx->getRenderbufferBinding();
     SET_ERROR_IF(rb == 0,GL_INVALID_OPERATION);
-    auto objData = ctx->shareGroup()->getObjectData(NamedObjectType::RENDERBUFFER, rb);
-    RenderbufferData *rbData = (RenderbufferData *)objData;
+    ObjectDataPtr objData =
+            ctx->shareGroup()->getObjectData(NamedObjectType::RENDERBUFFER, rb);
+    RenderbufferData *rbData = (RenderbufferData *)objData.get();
     SET_ERROR_IF(!rbData,GL_INVALID_OPERATION);
 
     //
@@ -1872,9 +1874,9 @@ GL_API void GLAPIENTRY glGetRenderbufferParameterivOES(GLenum target, GLenum pna
     //
     GLuint rb = ctx->getRenderbufferBinding();
     if (rb) {
-        auto objData = ctx->shareGroup()->getObjectData(
+        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::RENDERBUFFER, rb);
-        RenderbufferData *rbData = (RenderbufferData *)objData;
+        RenderbufferData *rbData = (RenderbufferData *)objData.get();
         if (rbData && rbData->eglImageGlobalTexObject) {
             GLenum texPname;
             switch(pname) {
@@ -2011,10 +2013,10 @@ GL_API void GLAPIENTRY glFramebufferTexture2DOES(GLenum target, GLenum attachmen
 
     // Update the the current framebuffer object attachment state
     GLuint fbName = ctx->getFramebufferBinding();
-    auto fbObj = ctx->shareGroup()->getObjectData(
+    ObjectDataPtr fbObj = ctx->shareGroup()->getObjectData(
             NamedObjectType::FRAMEBUFFER, fbName);
-    if (fbObj) {
-        FramebufferData *fbData = (FramebufferData *)fbObj;
+    if (fbObj.get() != NULL) {
+        FramebufferData *fbData = (FramebufferData *)fbObj.get();
         fbData->setAttachment(attachment, textarget, 
                               texture, ObjectDataPtr());
     }
@@ -2040,10 +2042,11 @@ GL_API void GLAPIENTRY glFramebufferRenderbufferOES(GLenum target, GLenum attach
                                        renderbuffer);
             obj = ObjectDataPtr(new RenderbufferData());
             ctx->shareGroup()->setObjectData(
-                    NamedObjectType::RENDERBUFFER, renderbuffer, obj);
+                    NamedObjectType::RENDERBUFFER, renderbuffer,
+                    ObjectDataPtr(new RenderbufferData()));
         }
         else {
-            obj = ctx->shareGroup()->getObjectDataPtr(
+            obj = ctx->shareGroup()->getObjectData(
                     NamedObjectType::RENDERBUFFER, renderbuffer);
         }
         globalBufferName = ctx->shareGroup()->getGlobalName(
@@ -2052,10 +2055,10 @@ GL_API void GLAPIENTRY glFramebufferRenderbufferOES(GLenum target, GLenum attach
 
     // Update the the current framebuffer object attachment state
     GLuint fbName = ctx->getFramebufferBinding();
-    auto fbObj = ctx->shareGroup()->getObjectData(
+    ObjectDataPtr fbObj = ctx->shareGroup()->getObjectData(
             NamedObjectType::FRAMEBUFFER, fbName);
-    if (fbObj) {
-        FramebufferData *fbData = (FramebufferData *)fbObj;
+    if (fbObj.get() != NULL) {
+        FramebufferData *fbData = (FramebufferData *)fbObj.get();
         fbData->setAttachment(attachment, renderbuffertarget, renderbuffer, obj);
     }
 
@@ -2089,10 +2092,10 @@ GL_API void GLAPIENTRY glGetFramebufferAttachmentParameterivOES(GLenum target, G
     //
     GLuint fbName = ctx->getFramebufferBinding();
     if (fbName) {
-        auto fbObj = ctx->shareGroup()->getObjectData(
+        ObjectDataPtr fbObj = ctx->shareGroup()->getObjectData(
                 NamedObjectType::FRAMEBUFFER, fbName);
-        if (fbObj) {
-            FramebufferData *fbData = (FramebufferData *)fbObj;
+        if (fbObj.get() != NULL) {
+            FramebufferData *fbData = (FramebufferData *)fbObj.get();
             GLenum target;
             GLuint name = fbData->getAttachment(attachment, &target, NULL);
             if (pname == GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE_OES) {
@@ -2335,10 +2338,10 @@ void glDrawTexOES (T x, T y, T z, T width, T height) {
             unsigned int texname = ctx->getBindedTexture(GL_TEXTURE0+i,GL_TEXTURE_2D);
             ObjectLocalName tex = TextureLocalName(GL_TEXTURE_2D,texname);
             ctx->dispatcher().glClientActiveTexture(GL_TEXTURE0+i);
-            auto objData = ctx->shareGroup()->getObjectData(
+            ObjectDataPtr objData = ctx->shareGroup()->getObjectData(
                     NamedObjectType::TEXTURE, tex);
-            if (objData) {
-                texData = (TextureData*)objData;
+            if (objData.get()) {
+                texData = (TextureData*)objData.get();
                 //calculate texels
                 texels[i][0] = (float)(texData->crop_rect[0])/(float)(texData->width);
                 texels[i][1] = (float)(texData->crop_rect[1])/(float)(texData->height);

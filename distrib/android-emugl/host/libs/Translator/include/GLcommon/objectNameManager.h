@@ -20,8 +20,6 @@
 #include "emugl/common/smart_ptr.h"
 #include "GLcommon/NamedObject.h"
 #include <GLES/gl.h>
-
-#include <atomic>
 #include <unordered_map>
 
 enum ObjectDataType {
@@ -113,31 +111,16 @@ public:
     //
     // Retrieve object global data
     //
-    ObjectData* getObjectData(NamedObjectType p_type, ObjectLocalName p_localName);
-    ObjectDataPtr getObjectDataPtr(NamedObjectType p_type, ObjectLocalName p_localName);
+    ObjectDataPtr getObjectData(NamedObjectType p_type, ObjectLocalName p_localName);
 
 private:
     explicit ShareGroup(GlobalNameSpace *globalNameSpace);
 
-    void lockObjectData();
-    void unlockObjectData();
-
-    // A RAII autolock class for the objectData spinlock.
-    struct ObjectDataAutoLock;
-
 private:
-    const ObjectDataPtr& getObjectDataPtrNoLock(NamedObjectType p_type,
-                                                ObjectLocalName p_localName);
-
-    emugl::Mutex m_namespaceLock;
+    emugl::Mutex m_lock;
     NameSpace* m_nameSpace[static_cast<int>(NamedObjectType::NUM_OBJECT_TYPES)];
-
-    // |m_objectsData| has no measured data races, so replace heavyweight mutex
-    // with a simple spinlock - just in case if there's some missed
-    // multi-threaded access path.
-    // TODO(zyy@): Create a common spinlock class.
-    std::atomic_flag m_objectsDataLock = ATOMIC_FLAG_INIT;
     void *m_objectsData = nullptr;
+    void *m_globalTextureRefCounter = nullptr;
 };
 
 typedef emugl::SmartPtr<ShareGroup> ShareGroupPtr;
