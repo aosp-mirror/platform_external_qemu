@@ -12,6 +12,8 @@
 
 #include "android/gps/KmlParser.h"
 
+#include "android/base/StringParse.h"
+
 #include <libxml/parser.h>
 
 #include <string>
@@ -56,7 +58,8 @@ static bool parseCoordinates(xmlNode* current, GpsFixArray* fixes) {
     int coordinates_len = strlen(coordinates);
     int offset = 0, n = 0;
     GpsFix new_fix;
-    while(3 == sscanf(coordinates + offset,
+    while(3 == android::base::SscanfWithCLocale(
+                      coordinates + offset,
                       "%f , %f , %f%n",
                       &new_fix.longitude,
                       &new_fix.latitude,
@@ -84,7 +87,8 @@ static bool parseGxTrack(xmlNode* children, GpsFixArray* fixes) {
             !strcmp((const char *)current->name, "coord")) {
             std::string coordinates{(const char*)current->xmlChildrenNode->content};
             GpsFix new_fix;
-            result = (3 == sscanf(coordinates.c_str(),
+            result = (3 == android::base::SscanfWithCLocale(
+                                  coordinates.c_str(),
                                   "%f %f %f",
                                   &new_fix.longitude,
                                   &new_fix.latitude,

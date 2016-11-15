@@ -32,11 +32,11 @@ static int paramFunc(int i) {
 
 TEST(FunctorThreadTest, TestCtor) {
     // this test actually just makes sure all constructor syntaxes compile fine
-    FunctorThread t1(intFunc);
-    FunctorThread t2(intptrFunc);
-    FunctorThread t3(std::bind(paramFunc, 2));
-    FunctorThread t4(FunctorThread::Functor(intFunc));
-    FunctorThread t5([](){ return -1;});
+    FunctorThread t1{intFunc};
+    FunctorThread t2{intptrFunc};
+    FunctorThread t3{std::bind(paramFunc, 2)};
+    FunctorThread t4{FunctorThread::Functor(intFunc)};
+    FunctorThread t5{[](){ return -1;}};
 }
 
 TEST(FunctorThreadTest, TestRun) {

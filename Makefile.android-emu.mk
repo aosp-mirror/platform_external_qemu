@@ -89,6 +89,7 @@ LOCAL_SRC_FILES := \
     android/base/network/IpAddress.cpp \
     android/base/network/NetworkUtils.cpp \
     android/base/StringFormat.cpp \
+    android/base/StringParse.cpp \
     android/base/StringView.cpp \
     android/base/sockets/SocketUtils.cpp \
     android/base/sockets/SocketWaiter.cpp \
@@ -493,6 +494,7 @@ LOCAL_SRC_FILES := \
   android/base/sockets/SocketUtils_unittest.cpp \
   android/base/sockets/SocketWaiter_unittest.cpp \
   android/base/StringFormat_unittest.cpp \
+  android/base/StringParse_unittest.cpp \
   android/base/StringView_unittest.cpp \
   android/base/synchronization/ConditionVariable_unittest.cpp \
   android/base/synchronization/Lock_unittest.cpp \
