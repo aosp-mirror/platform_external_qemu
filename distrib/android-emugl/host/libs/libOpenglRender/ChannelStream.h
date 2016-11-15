@@ -19,9 +19,11 @@
 #include <memory>
 #include <vector>
 
+namespace emugl {
+
 class ChannelStream final : public IOStream {
 public:
-    ChannelStream(std::shared_ptr<emugl::RenderChannelImpl> channel,
+    ChannelStream(std::shared_ptr<RenderChannelImpl> channel,
                   size_t bufSize);
 
     virtual void* allocBuffer(size_t minSize) override final;
@@ -32,6 +34,8 @@ public:
     void forceStop();
 
 private:
-    std::shared_ptr<emugl::RenderChannelImpl> mChannel;
-    emugl::ChannelBuffer mBuf;
+    std::shared_ptr<RenderChannelImpl> mChannel;
+    ChannelBuffer mBuf;
 };
+
+}  // namespace emugl

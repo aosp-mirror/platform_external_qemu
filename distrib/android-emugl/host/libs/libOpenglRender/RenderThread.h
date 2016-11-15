@@ -21,9 +21,9 @@
 #include <memory>
 
 namespace emugl {
+
 class RenderChannelImpl;
 class RendererImpl;
-}
 
 // A class used to model a thread of the RenderServer. Each one of them
 // handles a single guest client / protocol byte stream.
@@ -31,8 +31,8 @@ class RenderThread : public emugl::Thread {
 public:
     // Create a new RenderThread instance.
     static std::unique_ptr<RenderThread> create(
-            std::weak_ptr<emugl::RendererImpl> renderer,
-            std::shared_ptr<emugl::RenderChannelImpl> channel);
+            std::weak_ptr<RendererImpl> renderer,
+            std::shared_ptr<RenderChannelImpl> channel);
 
     virtual ~RenderThread();
 
@@ -41,11 +41,13 @@ public:
     bool isFinished() { return tryWait(NULL); }
 
 private:
-    RenderThread(std::weak_ptr<emugl::RendererImpl> renderer,
-                 std::shared_ptr<emugl::RenderChannelImpl> channel);
+    RenderThread(std::weak_ptr<RendererImpl> renderer,
+                 std::shared_ptr<RenderChannelImpl> channel);
 
     virtual intptr_t main();
 
-    std::shared_ptr<emugl::RenderChannelImpl> mChannel;
-    std::weak_ptr<emugl::RendererImpl> mRenderer;
+    std::shared_ptr<RenderChannelImpl> mChannel;
+    std::weak_ptr<RendererImpl> mRenderer;
 };
+
+}  // namespace emugl
