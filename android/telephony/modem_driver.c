@@ -17,10 +17,13 @@
 
 #include "android/telephony/debug.h"
 #include "android/utils/debug.h"
+#include "android/utils/looper.h"
+#include "android/utils/timezone.h"
 
 #include <string.h>
 
 #define  xxDEBUG
+#define  MODEM_TIMEZONE_POLLING_DELAY (1000 * 5)
 
 #ifdef DEBUG
 #  include <stdio.h>
@@ -31,6 +34,7 @@
 
 AModem        android_modem;
 CSerialLine*  android_modem_serial_line;
+time_t current_tzoffset;
 
 typedef struct {
     CSerialLine*      serial_line;
@@ -38,6 +42,7 @@ typedef struct {
     char              in_buff[ 1024 ];
     int               in_pos;
     int               in_sms;
+    LoopTimer* timer;
 } ModemDriver;
 
 /* send unsollicited messages to the device */
@@ -141,6 +146,18 @@ modem_driver_init(int base_port, ModemDriver* dm, CSerialLine* sl) {
                                    modem_driver_read);
 }
 
+static void modem_driver_send_nitz(void* opaque, LoopTimer* unused) {
+    ModemDriver* md = (ModemDriver*) opaque;
+    time_t now = time(NULL);
+    time_t next_tzoffset = android_tzoffset_in_seconds(&now);
+    if( current_tzoffset != next_tzoffset ) {
+        current_tzoffset = next_tzoffset;
+        const char*  answer = amodem_send_unsol_nitz(md->modem);
+        android_serialline_write(md->serial_line, (const uint8_t*)answer, strlen(answer));
+        android_serialline_write(md->serial_line, (const uint8_t*)"\r", 1);
+    }
+    loopTimer_startRelative(md->timer, MODEM_TIMEZONE_POLLING_DELAY);
+}
 
 void android_modem_init( int  base_port )
 {
@@ -152,6 +169,11 @@ void android_modem_init( int  base_port )
 
     if (android_modem_serial_line != NULL) {
         modem_driver_init(base_port, modem_driver, android_modem_serial_line);
+        time_t now = time(NULL);
+        current_tzoffset = android_tzoffset_in_seconds(&now);
         android_modem = modem_driver->modem;
+        modem_driver->timer =   loopTimer_newWithClock(looper_getForThread(), modem_driver_send_nitz,
+                                   modem_driver, LOOPER_CLOCK_VIRTUAL);
+        loopTimer_startRelative(modem_driver->timer, MODEM_TIMEZONE_POLLING_DELAY);
     }
 }

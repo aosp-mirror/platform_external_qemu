@@ -175,6 +175,13 @@ extern int    amodem_state_load( AModem modem, SysFile* file );
 
 /**/
 
+/** return ">> %CTZV: yy/mm/dd,hh:mm:ss(+/-)tz[tzname]"
+ *   mm is 0-based
+ *   tz is in number of quarter-hours"
+ *   tzname is optional and will be in the format of Area!Location
+ **/
+extern const char* amodem_send_unsol_nitz( AModem  modem );
+
 #ifdef __cplusplus
 }
 #endif
