@@ -33,7 +33,7 @@ protected:
 
 public:
     size_t read(void* buf, size_t bufLen) {
-        if (!read(buf, &bufLen)) {
+        if (!readRaw(buf, &bufLen)) {
             return 0;
         }
         return bufLen;
@@ -75,7 +75,7 @@ public:
 protected:
     virtual void *allocBuffer(size_t minSize) = 0;
     virtual int commitBuffer(size_t size) = 0;
-    virtual const unsigned char *read(void *buf, size_t *inout_len) = 0;
+    virtual const unsigned char *readRaw(void *buf, size_t *inout_len) = 0;
 
 private:
     unsigned char* m_buf = nullptr;

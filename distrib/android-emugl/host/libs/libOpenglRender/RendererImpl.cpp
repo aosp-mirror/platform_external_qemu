@@ -92,7 +92,7 @@ void RendererImpl::stop() {
 
     for (const auto& t : threads) {
         if (const auto channel = t.second.lock()) {
-            channel->forceStop();
+            channel->stopFromHost();
         }
     }
     // We're stopping the renderer, so there's no need to clean up resources
@@ -106,8 +106,7 @@ void RendererImpl::stop() {
 }
 
 RenderChannelPtr RendererImpl::createRenderChannel() {
-    const auto channel =
-            std::make_shared<RenderChannelImpl>(shared_from_this());
+    const auto channel = std::make_shared<RenderChannelImpl>();
 
     std::unique_ptr<RenderThread> rt(RenderThread::create(
             shared_from_this(), channel));
