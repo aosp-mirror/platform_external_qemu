@@ -31,6 +31,9 @@
 
 #include "android/base/system/System.h"
 
+#define EMUGL_DEBUG_LEVEL 0
+#include "emugl/common/debug.h"
+
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -114,8 +117,12 @@ intptr_t RenderThread::main() {
 
         const int stat = readBuf.getData(&stream, packetSize);
         if (stat <= 0) {
+            D("Warning: render thread could not read data from stream");
             break;
         }
+        DD("render thread read %d bytes, op %d, packet size %d",
+           (int)readBuf.validData(), *(int32_t*)readBuf.buf(),
+           *(int32_t*)(readBuf.buf() + 4));
 
         //
         // log received bandwidth statistics
