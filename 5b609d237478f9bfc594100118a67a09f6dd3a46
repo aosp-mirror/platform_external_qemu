@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30b088be_4662c7c0",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-15T18:02:25Z",
+      "side": 1,
+      "message": "nit: this usually does nothing in C++",
+      "range": {
+        "startLine": 58,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 39
+      },
+      "revId": "5b609d237478f9bfc594100118a67a09f6dd3a46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_068b6f3f",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-15T18:02:25Z",
+      "side": 1,
+      "message": "nit: please use line comments (// blah)",
+      "range": {
+        "startLine": 64,
+        "startChar": 4,
+        "endLine": 64,
+        "endChar": 6
+      },
+      "revId": "5b609d237478f9bfc594100118a67a09f6dd3a46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_c66d57ad",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-15T18:02:25Z",
+      "side": 1,
+      "message": "\"struct tm\" \u003d\u003d \"tm\" in C++",
+      "range": {
+        "startLine": 91,
+        "startChar": 4,
+        "endLine": 91,
+        "endChar": 13
+      },
+      "revId": "5b609d237478f9bfc594100118a67a09f6dd3a46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_86caff5c",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-15T18:02:25Z",
+      "side": 1,
+      "message": "please create a standalone operator\u003c for struct tm instead. It\u0027s more natural to C++ and easier to implement",
+      "range": {
+        "startLine": 113,
+        "startChar": 15,
+        "endLine": 113,
+        "endChar": 25
+      },
+      "revId": "5b609d237478f9bfc594100118a67a09f6dd3a46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_867f5f54",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-15T18:02:25Z",
+      "side": 1,
+      "message": "nit: nullptr",
+      "range": {
+        "startLine": 167,
+        "startChar": 26,
+        "endLine": 167,
+        "endChar": 30
+      },
+      "revId": "5b609d237478f9bfc594100118a67a09f6dd3a46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_e60ad3d2",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-15T18:02:25Z",
+      "side": 1,
+      "message": "please combine",
+      "range": {
+        "startLine": 203,
+        "startChar": 8,
+        "endLine": 204,
+        "endChar": 35
+      },
+      "revId": "5b609d237478f9bfc594100118a67a09f6dd3a46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_a6c29b3e",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-15T18:02:25Z",
+      "side": 1,
+      "message": "for the operator\u003c use tuples instead, as it gets really messy otherwise:\nreturn std::tie(utc1.tm_year, utc1.tm_mon, ...) \u003c std::tie(utc2.tm_year, utc2.tm_year, ...);\n\nyou need to #include \u003ctuple\u003e for that",
+      "range": {
+        "startLine": 212,
+        "startChar": 14,
+        "endLine": 212,
+        "endChar": 24
+      },
+      "revId": "5b609d237478f9bfc594100118a67a09f6dd3a46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_26a6aba5",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-15T18:02:25Z",
+      "side": 1,
+      "message": "(utc \u003c mStandardDateUtc || !(utc \u003c mDaylightDateUtc))",
+      "range": {
+        "startLine": 259,
+        "startChar": 11,
+        "endLine": 259,
+        "endChar": 91
+      },
+      "revId": "5b609d237478f9bfc594100118a67a09f6dd3a46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
