@@ -19,6 +19,29 @@
     },
     {
       "key": {
+        "uuid": "30b088be_9258f918",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-15T22:12:14Z",
+      "side": 1,
+      "message": "comment is obsolete",
+      "range": {
+        "startLine": 78,
+        "startChar": 0,
+        "endLine": 82,
+        "endChar": 5
+      },
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30e168e5_7e0631d1",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 3
@@ -240,6 +263,75 @@
     },
     {
       "key": {
+        "uuid": "30b088be_3242650d",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1012,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-15T22:12:14Z",
+      "side": 1,
+      "message": "#include \"android/base/StringView.h\u003e\n#include \u003calgorithm\u003e\n\n...\nbool checkTimeZoneIsZoneInfo(android::base::StringView tz) {\n    const int slashCount \u003d std::count(tz.begin(), tz.end(), \u0027/\u0027);\n    return slashCount \u003d\u003d 1 || slashCount \u003d\u003d 2;\n}\n\nStringView takes care of checking for null and everything else",
+      "range": {
+        "startLine": 996,
+        "startChar": 1,
+        "endLine": 1012,
+        "endChar": 13
+      },
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_3407b283",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1021,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-15T22:12:14Z",
+      "side": 1,
+      "message": "nit: just ()\n(void) is for C only, C++ doesn\u0027t need it",
+      "range": {
+        "startLine": 1021,
+        "startChar": 30,
+        "endLine": 1021,
+        "endChar": 36
+      },
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_b21415f7",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1024,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-15T22:12:14Z",
+      "side": 1,
+      "message": "please use android::base::System::envGet() call instead",
+      "range": {
+        "startLine": 1024,
+        "startChar": 26,
+        "endLine": 1024,
+        "endChar": 39
+      },
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "701e80a7_e887f32e",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 3
@@ -257,6 +349,75 @@
     },
     {
       "key": {
+        "uuid": "30b088be_3420120c",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1115,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-15T22:12:14Z",
+      "side": 1,
+      "message": "please use std::ifstream and std::getline() to compare files line-by-line. Otherwise it\u0027ll take ages",
+      "range": {
+        "startLine": 1075,
+        "startChar": 0,
+        "endLine": 1115,
+        "endChar": 16
+      },
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_b2997568",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1125,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-15T22:12:14Z",
+      "side": 1,
+      "message": "please return std::string by value here instead of strdup()-ed string - otherwise it\u0027s just one more memory leak",
+      "range": {
+        "startLine": 1125,
+        "startChar": 0,
+        "endLine": 1125,
+        "endChar": 11
+      },
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_32a6e5a5",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1130,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-15T22:12:14Z",
+      "side": 1,
+      "message": "please use android::base::System::scanDirEntries()",
+      "range": {
+        "startLine": 1130,
+        "startChar": 4,
+        "endLine": 1130,
+        "endChar": 43
+      },
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "50233cec_472d4ebf",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 3
@@ -268,6 +429,52 @@
       "writtenOn": "2016-11-15T22:04:01Z",
       "side": 1,
       "message": "nit: I strongly recommend getting rid of bufprintXXX() function and use std::string instead in C++ code.",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_14add666",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1192,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-15T22:12:14Z",
+      "side": 1,
+      "message": "System::envGet()",
+      "range": {
+        "startLine": 1192,
+        "startChar": 26,
+        "endLine": 1192,
+        "endChar": 32
+      },
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_7480ca92",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1211,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-15T22:12:14Z",
+      "side": 1,
+      "message": "System::envGet",
+      "range": {
+        "startLine": 1211,
+        "startChar": 35,
+        "endLine": 1211,
+        "endChar": 41
+      },
       "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
