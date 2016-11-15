@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30b088be_468f277d",
+        "filename": "android/opengl/OpenglEsPipe.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-15T17:48:35Z",
+      "side": 1,
+      "message": "moving here comments from PS4:\nnit: if you invert the if condition, you can get rid of the \u0027continue\u0027",
+      "range": {
+        "startLine": 166,
+        "startChar": 16,
+        "endLine": 170,
+        "endChar": 44
+      },
+      "revId": "175cb76554a2198ef94ad7c41d142f581ff6f617",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_66bfc306",
+        "filename": "android/opengl/OpenglEsPipe.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-15T17:48:35Z",
+      "side": 1,
+      "message": "PS4: should we block or return AGAIN here? we\u0027ve already copied the whole data into the buffer, and returning AGAIN means we are going to repeat that.\nOn the other hand, it\u0027s very uncommon to have the write channel full here. That\u0027s why we won\u0027t ever see this part of the code run to be able to compare the ways\nOr, you could have a buffer \"dataForWriting\" here, similar to the one for reading. In that case you could stash the data for sending here and return success to the guest (getting rid of two extra calls)",
+      "range": {
+        "startLine": 220,
+        "startChar": 8,
+        "endLine": 224,
+        "endChar": 9
+      },
+      "revId": "175cb76554a2198ef94ad7c41d142f581ff6f617",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_c60797f6",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-15T17:48:35Z",
+      "side": 1,
+      "message": "PS4: well, for me \u0027guest-provided\u0027 is something from the Android guest running inside the emulator. User-provided?",
+      "range": {
+        "startLine": 81,
+        "startChar": 8,
+        "endLine": 81,
+        "endChar": 20
+      },
+      "revId": "175cb76554a2198ef94ad7c41d142f581ff6f617",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
