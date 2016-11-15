@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 
-#include "IOStream.h"
+#include "OpenglRender/IOStream.h"
 #include "RenderChannelImpl.h"
 
 #include <memory>
