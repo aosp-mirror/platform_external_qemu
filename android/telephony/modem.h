@@ -173,6 +173,7 @@ extern int    amodem_disconnect_call( AModem  modem, const char*  number );
 extern void   amodem_state_save( AModem modem, SysFile* file );
 extern int    amodem_state_load( AModem modem, SysFile* file );
 
+extern const char* amodem_send_unsol_nitz( AModem  modem );
 /**/
 
 #ifdef __cplusplus
