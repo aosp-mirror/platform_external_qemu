@@ -21,12 +21,21 @@
 
 namespace emugl {
 
-// Turn the RenderChannel::Event enum into flags.
+// Turn the RenderChannel::State enum into flags.
 using namespace ::android::base::EnumFlags;
 
-// RenderChannel - an interface for a single guest to host renderer connection.
-// It allows the guest to send GPU emulation protocol-serialized messages to an
-// asynchronous renderer, read the responses and subscribe for state updates.
+// RenderChannel - For each guest-to-host renderer connection, this provides
+// an interface for the guest side to interact with the corresponding renderer
+// thread on the host. Its main purpose is to send and receive wire protocol
+// bytes in an asynchronous way (compatible with Android pipes).
+//
+// Usage is the following:
+//    1) Get an instance pointer through a dedicated Renderer function
+//       (e.g. RendererImpl::createRenderChannel()).
+//
+//    2) Call setEventCallback() to indicate which callback should be called
+//       when the channel's state has changed due to a host thread event.
+//
 class RenderChannel {
 public:
     // A type used to pass byte packets between the guest and the
@@ -37,7 +46,10 @@ public:
     // the one used in protocol-heavy benchmark like Antutu3D.
     using Buffer = android::base::SmallFixedVector<char, 512>;
 
-    // Flags for the channel state.
+    // Bit-flags for the channel state.
+    // |CanRead| means there is data from the host to read.
+    // |CanWrite| means there is room to send data to the host.
+    // |Stopped| means the channel was stopped.
     enum class State {
         // Can't use None here, some system header declares it as a macro.
         Empty = 0,
@@ -57,47 +69,49 @@ public:
         Error = 2,
     };
 
-    // Possible points of origin for an event in EventCallback.
-    enum class EventSource {
-        RenderChannel,
-        Client,
-    };
+    // Type of a callback used to tell the guest when the RenderChannel
+    // state changes. Used by setEventCallback(). The parameter contains
+    // the State bits matching the event, i.e. it is the logical AND of
+    // the last value passed to setWantedEvents() and the current
+    // RenderChannel state.
+    using EventCallback = std::function<void(State)>;
 
-    // Types of read() the channel supports.
-    enum class CallType {
-        Blocking,    // if the call can't do what it needs, block until it can
-        Nonblocking, // immidiately return if the call can't do the job
-    };
+    // Sets a single (!) callback that is called when the channel state's
+    // changes due to an event *from* *the* *host* only. |callback| is a
+    // guest-provided callback that will be called from the host renderer
+    // thread, not the guest one.
+    virtual void setEventCallback(EventCallback&& callback) = 0;
 
-    // Sets a single (!) callback that is called if some event happends that
-    // changes the channel state - e.g. when it's stopped, or it gets some data
-    // the client can read after being empty, or it isn't full anymore and the
-    // client may write again without blocking.
-    // If the state isn't State::Empty, the |callback| is called for the first
-    // time during the setEventCallback() to report this initial state.
-    using EventCallback = std::function<void(State, EventSource)>;
-    virtual void setEventCallback(EventCallback callback) = 0;
-
-    // Writes the data in |buffer| into the channel. |buffer| is moved from.
-    // Blocks if there's no room in the channel (shouldn't really happen).
-    // Returns false if the channel is stopped.
-    virtual bool write(Buffer&& buffer) = 0;
-    // Reads a chunk of data from the channel. Returns false if there was no
-    // data for a non-blocking call or if the channel is stopped.
-    virtual bool read(Buffer* buffer, CallType callType) = 0;
+    // Used to indicate which i/o events the guest wants to be notified
+    // through its StateChangeCallback. |state| must be a combination of
+    // State::CanRead or State::CanWrite only. This will *not* call the
+    // callback directly since this happens in the guest thread.
+    virtual void setWantedEvents(State state) = 0;
 
     // Get the current state flags.
-    virtual State currentState() const = 0;
+    virtual State state() const = 0;
+
+    // Try to writes the data in |buffer| into the channel. On success,
+    // return IoResult::Ok and moves |buffer|. On failure, return
+    // IoResult::TryAgain if the channel was full, or IoResult::Error
+    // if it is stopped.
+    virtual IoResult tryWrite(Buffer&& buffer) = 0;
+
+    // Try to read data from the channel. On success, return IoResult::Ok and
+    // sets |*buffer| to contain the data. On failure, return
+    // IoResult::TryAgain if the channel was empty, or IoResult::Error if
+    // it was stopped.
+    virtual IoResult tryRead(Buffer* buffer) = 0;
 
     // Abort all pending operations. Any following operation is a noop.
+    // Once a channel is stopped, it cannot be re-started.
     virtual void stop() = 0;
-    // Check if the channel is stopped.
-    virtual bool isStopped() const = 0;
 
 protected:
     ~RenderChannel() = default;
 };
 
+// Shared pointer to RenderChannel instance.
 using RenderChannelPtr = std::shared_ptr<RenderChannel>;
 
 }  // namespace emugl

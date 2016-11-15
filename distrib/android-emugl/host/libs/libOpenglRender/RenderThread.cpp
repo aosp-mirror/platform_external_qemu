@@ -58,16 +58,16 @@ std::unique_ptr<RenderThread> RenderThread::create(
 }
 
 intptr_t RenderThread::main() {
+    ChannelStream stream(mChannel, RenderChannel::Buffer::kSmallSize);
+
     uint32_t flags = 0;
-    if (mChannel->readFromGuest(reinterpret_cast<char*>(&flags),
-                                sizeof(flags), true) != sizeof(flags)) {
+    if (stream.read(&flags, sizeof(flags)) != sizeof(flags)) {
         return 0;
     }
 
     // |flags| used to have something, now they're not used.
     (void)flags;
 
-    ChannelStream stream(mChannel, RenderChannel::Buffer::kSmallSize);
     RenderThreadInfo tInfo;
     ChecksumCalculatorThreadInfo tChecksumInfo;
     ChecksumCalculator& checksumCalc = tChecksumInfo.get();
