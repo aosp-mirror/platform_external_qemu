@@ -1,0 +1,293 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d0f56c92_6b25c1bf",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-15T22:04:01Z",
+      "side": 1,
+      "message": "nit: you mean |tm1| and |tm2| instead of |a| and |b| here :)\nAlso this returns a bool, not an int that could take 3 values. Please use C++ comments, it\u0027s cleaner.",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30e168e5_7e0631d1",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-15T22:04:01Z",
+      "side": 1,
+      "message": "for C++ constants, prefer kConstantName as in:\n\n  static const Win32Timezone kWin32Timezones[] \u003d { ... }\n\nAlso get rid of the final { NULL, NULL } terminator, and use the following in the code that parses the table:\n\n  for (const auto\u0026 zone : kWin32Timezones) {\n      ...\n  }",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "301c08af_c66302ee",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 580,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-15T22:04:01Z",
+      "side": 1,
+      "message": "I know this isn\u0027t the purpose of your patch, but this comment is not very helpful. It should describe what |timeNow| is,  and how the caller should handle ownership of the result (since it is a pointer to a mutable object, who is responsible for destroying it, can the caller modify it after the call, etc). Can I ask you to update it?",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "50233cec_672852b1",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 586,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-15T22:04:01Z",
+      "side": 1,
+      "message": "same here, what is the role of |timeNow|?",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b028f8c6_8a574b43",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 592,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-15T22:04:01Z",
+      "side": 1,
+      "message": "can you describe the return value?",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30e168e5_5e0175b6",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 599,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-15T22:04:01Z",
+      "side": 1,
+      "message": "nit: please respect 80-column widths for comments. Use \u0027git clang-format\u0027 to reformat your patch automatically for you, it will take care of other issues as well.",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d0f56c92_0b207daf",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 603,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-15T22:04:01Z",
+      "side": 1,
+      "message": "please add documentation for this method. Format of |tz| and meaning of returned value.",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "70d3e01d_00086606",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 611,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-15T22:04:01Z",
+      "side": 1,
+      "message": "Please provide default initialization values for scalar fields to ensure they are all touched by the constructor, e.g.:\n\n   tm mStandardDateUtc \u003d {};\n   tm mDayloghDateUtc \u003d {};\n   long mStandardOffset \u003d 0;\n   long mDaylightOffset \u003d 0;\n   int mCurrentYear \u003d 0;\n   bool mAndroidTimeZoneInit \u003d false;",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "701e80a7_c884af2d",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 633,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-15T22:04:01Z",
+      "side": 1,
+      "message": "what\u0027s the return value here?",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d0e3acee_7bfb9f06",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 641,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-15T22:04:01Z",
+      "side": 1,
+      "message": "nit: documentation update?",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "301c08af_468f127d",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 678,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-15T22:04:01Z",
+      "side": 1,
+      "message": "note that this line will become obsolete with a default initialization value in the member declaration.",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "701e80a7_28210b66",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 731,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-15T22:04:01Z",
+      "side": 1,
+      "message": "nit: avoid chains of else\u0027s when using returns, it makes the code easier to follow, e.g.:\n\n  if (mDaylightOffset \u003d\u003d 0) {\n      return -1;\n  }\n  tm utc \u003d *gmtime(\u0026timeNow);\n  if (utc \u003c mStandardDateUtc || !(utc \u003c mDaylightDateUtc)) {\n      return 0;\n  }\n  return 1;",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "301c08af_2690169f",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 994,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-15T22:04:01Z",
+      "side": 1,
+      "message": "for the record, for C++ sources, we updated the coding style to put the return type on the same line as the function/method name. Use \u0027git clang-format\u0027 to get this automatically :)\n\nAlso, probably change the function to return a bool to indicate success/failure instead.",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f0e6f0fd_5c2b3d45",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1003,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-15T22:04:01Z",
+      "side": 1,
+      "message": "nit: use nullptr here and below.",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "701e80a7_e887f32e",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1066,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-15T22:04:01Z",
+      "side": 1,
+      "message": "nit: change return type to bool to indicate success/failure.",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "50233cec_472d4ebf",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1143,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-15T22:04:01Z",
+      "side": 1,
+      "message": "nit: I strongly recommend getting rid of bufprintXXX() function and use std::string instead in C++ code.",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "50233cec_a741aa77",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1383,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-15T22:04:01Z",
+      "side": 1,
+      "message": "nit: use braces for multi-line if-then-else statements. \u0027git clang-format\u0027 should take care of this.",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
