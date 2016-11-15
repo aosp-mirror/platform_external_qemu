@@ -17,25 +17,30 @@
 #include "RenderChannelImpl.h"
 
 #include <memory>
-#include <vector>
 
 namespace emugl {
 
+// An IOStream instance that can be used by the host RenderThread to
+// wrap a RenderChannelImpl channel.
 class ChannelStream final : public IOStream {
 public:
     ChannelStream(std::shared_ptr<RenderChannelImpl> channel,
                   size_t bufSize);
 
     virtual void* allocBuffer(size_t minSize) override final;
+
     virtual int commitBuffer(size_t size) override final;
-    virtual const unsigned char* read(void* buf,
-                                      size_t* inout_len) override final;
+
+    virtual const unsigned char* read(void* buf, size_t* inout_len)
+            override final;
 
     void forceStop();
 
 private:
     std::shared_ptr<RenderChannelImpl> mChannel;
     RenderChannel::Buffer mBuf;
+    RenderChannel::Buffer mReadBuffer;
+    size_t mReadBufferLeft = 0;
 };
 
 }  // namespace emugl
