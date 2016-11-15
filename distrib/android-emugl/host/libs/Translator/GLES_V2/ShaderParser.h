@@ -54,14 +54,14 @@ public:
 private:
     void convertESSLToGLSL();
 
-    GLenum      m_type = 0;
     std::string m_originalSrc;
     std::string m_src;
     std::string m_parsedSrc;
     GLchar*     m_parsedLines = nullptr;
     std::basic_string<GLchar> m_infoLog;
-    bool        m_deleteStatus = false;
     std::unordered_set<GLuint> m_programs;
+    GLenum      m_type = 0;
+    bool        m_deleteStatus = false;
     bool        m_valid = true;
 };
 #endif

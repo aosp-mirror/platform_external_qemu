@@ -133,12 +133,9 @@ GLESiface* __translator_getIfaces(EGLiface* eglIface) {
 
 }  // extern "C"
 
-static void s_attachShader(GLEScontext* ctx, GLuint program, GLuint shader) {
-    if (ctx && program && shader && ctx->shareGroup().get()) {
-        auto shaderData = ctx->shareGroup()->getObjectData(
-                NamedObjectType::SHADER_OR_PROGRAM, shader);
-        if (!shaderData) return;
-        ShaderParser* shaderParser = (ShaderParser*)shaderData;
+static void s_attachShader(GLEScontext* ctx, GLuint program, GLuint shader,
+                           ShaderParser* shaderParser) {
+    if (ctx && program && shader && shaderParser) {
         shaderParser->attachProgram(program);
     }
 }
@@ -212,7 +209,7 @@ GL_APICALL void  GL_APIENTRY glAttachShader(GLuint program, GLuint shader){
         ProgramData* pData = (ProgramData*)programData;
         SET_ERROR_IF((pData->getAttachedShader(shaderType)!=0), GL_INVALID_OPERATION);
         pData->attachShader(shader,shaderType);
-        s_attachShader(ctx, program, shader);
+        s_attachShader(ctx, program, shader, (ShaderParser*)shaderData);
         ctx->dispatcher().glAttachShader(globalProgramName,globalShaderName);
     }
 }

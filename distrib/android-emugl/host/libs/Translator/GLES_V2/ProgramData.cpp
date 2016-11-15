@@ -22,33 +22,25 @@ ProgramData::ProgramData() :  ObjectData(PROGRAM_DATA),
                               AttachedFragmentShader(0),
                               LinkStatus(GL_FALSE),
                               IsInUse(false),
-                              DeleteStatus(false) {
-    infoLog = new GLchar[1];
-    infoLog[0] = '\0';
+                              DeleteStatus(false) {}
+
+void ProgramData::setInfoLog(const GLchar* log) {
+    infoLog.reset(log);
 }
 
-ProgramData::~ProgramData () {
-    delete[] infoLog;
-};
-
-void ProgramData::setInfoLog(GLchar* log) {
-    delete[] infoLog;
-    infoLog = log;
+const GLchar* ProgramData::getInfoLog() const {
+    return infoLog.get() ? infoLog.get() : (const GLchar*)"";
 }
 
-GLchar* ProgramData::getInfoLog() {
-    return infoLog;
-}
-
-GLuint ProgramData::getAttachedVertexShader() {
+GLuint ProgramData::getAttachedVertexShader() const {
     return AttachedVertexShader;
 }
 
-GLuint ProgramData::getAttachedFragmentShader() {
+GLuint ProgramData::getAttachedFragmentShader() const {
     return AttachedFragmentShader;
 }
 
-GLuint ProgramData::getAttachedShader(GLenum type) {
+GLuint ProgramData::getAttachedShader(GLenum type) const {
     GLuint shader = 0;
     switch (type) {
     case GL_VERTEX_SHADER:
@@ -73,7 +65,7 @@ bool ProgramData::attachShader(GLuint shader,GLenum type) {
     return false;
 }
 
-bool ProgramData::isAttached(GLuint shader) {
+bool ProgramData::isAttached(GLuint shader) const {
     return (AttachedFragmentShader==shader || AttachedVertexShader==shader);
 }
 
@@ -93,6 +85,6 @@ void ProgramData::setLinkStatus(GLint status) {
     LinkStatus = status;
 }
 
-GLint ProgramData::getLinkStatus() {
+GLint ProgramData::getLinkStatus() const {
     return LinkStatus;
 }
