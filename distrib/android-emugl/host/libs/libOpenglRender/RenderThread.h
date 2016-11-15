@@ -14,7 +14,6 @@
 * limitations under the License.
 */
 #pragma once
-#include "IOStream.h"
 
 #include "emugl/common/mutex.h"
 #include "emugl/common/thread.h"
