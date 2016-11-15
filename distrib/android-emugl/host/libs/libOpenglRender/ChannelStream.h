@@ -35,7 +35,7 @@ public:
 
 private:
     std::shared_ptr<RenderChannelImpl> mChannel;
-    ChannelBuffer mBuf;
+    RenderChannel::Buffer mBuf;
 };
 
 }  // namespace emugl

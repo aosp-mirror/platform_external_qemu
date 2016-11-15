@@ -33,8 +33,8 @@ public:
     // RenderChannel implementation, operations provided for a guest system
     virtual void setEventCallback(EventCallback callback) override final;
 
-    virtual bool write(ChannelBuffer&& buffer) override final;
-    virtual bool read(ChannelBuffer* buffer, CallType type) override final;
+    virtual bool write(Buffer&& buffer) override final;
+    virtual bool read(Buffer* buffer, CallType type) override final;
 
     virtual State currentState() const override final {
         return mState.load(std::memory_order_acquire);
@@ -47,8 +47,8 @@ public:
     // These functions are for the RenderThread, they could be called in
     // parallel with the ones from the RenderChannel interface. Make sure the
     // internal state remains consistent all the time.
-    void writeToGuest(ChannelBuffer&& buf);
-    size_t readFromGuest(ChannelBuffer::value_type* buf, size_t size,
+    void writeToGuest(Buffer&& buf);
+    size_t readFromGuest(Buffer::value_type* buf, size_t size,
                          bool blocking);
     void forceStop();
 
@@ -83,10 +83,10 @@ private:
 
     bool mStopped = false;
 
-    android::base::MessageChannel<ChannelBuffer, 1024> mFromGuest;
-    android::base::MessageChannel<ChannelBuffer, 16> mToGuest;
+    android::base::MessageChannel<Buffer, 1024> mFromGuest;
+    android::base::MessageChannel<Buffer, 16> mToGuest;
 
-    ChannelBuffer mFromGuestBuffer;
+    Buffer mFromGuestBuffer;
     size_t mFromGuestBufferLeft = 0;
 };
 

@@ -67,7 +67,7 @@ intptr_t RenderThread::main() {
     // |flags| used to have something, now they're not used.
     (void)flags;
 
-    ChannelStream stream(mChannel, ChannelBuffer::kSmallSize);
+    ChannelStream stream(mChannel, RenderChannel::Buffer::kSmallSize);
     RenderThreadInfo tInfo;
     ChecksumCalculatorThreadInfo tChecksumInfo;
     ChecksumCalculator& checksumCalc = tChecksumInfo.get();

@@ -36,13 +36,13 @@ void RenderChannelImpl::setEventCallback(
     onEvent(true);
 }
 
-bool RenderChannelImpl::write(ChannelBuffer&& buffer) {
+bool RenderChannelImpl::write(Buffer&& buffer) {
     const bool res = mFromGuest.send(std::move(buffer));
     onEvent(true);
     return res;
 }
 
-bool RenderChannelImpl::read(ChannelBuffer* buffer, CallType type) {
+bool RenderChannelImpl::read(Buffer* buffer, CallType type) {
     if (type == CallType::Nonblocking && mToGuest.size() == 0) {
         return false;
     }
@@ -73,12 +73,12 @@ bool RenderChannelImpl::isStopped() const {
     return mStopped;
 }
 
-void RenderChannelImpl::writeToGuest(ChannelBuffer&& buf) {
+void RenderChannelImpl::writeToGuest(Buffer&& buf) {
     mToGuest.send(std::move(buf));
     onEvent(false);
 }
 
-size_t RenderChannelImpl::readFromGuest(ChannelBuffer::value_type* buf,
+size_t RenderChannelImpl::readFromGuest(Buffer::value_type* buf,
                                         size_t size,
                                         bool blocking) {
     assert(buf);
