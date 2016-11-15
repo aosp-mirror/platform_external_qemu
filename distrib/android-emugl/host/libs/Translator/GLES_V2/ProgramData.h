@@ -16,24 +16,25 @@
 #ifndef PROGRAM_DATA_H
 #define PROGRAM_DATA_H
 
+#include <memory>
+
 class ProgramData:public ObjectData{
 public:
     ProgramData();
-    virtual ~ProgramData();
 
-    GLuint getAttachedVertexShader();
-    GLuint getAttachedFragmentShader();
-    GLuint getAttachedShader(GLenum type);
+    GLuint getAttachedVertexShader() const;
+    GLuint getAttachedFragmentShader() const;
+    GLuint getAttachedShader(GLenum type) const;
 
     bool attachShader(GLuint shader,GLenum type);
-    bool isAttached(GLuint shader);
+    bool isAttached(GLuint shader) const;
     bool detachShader(GLuint shader);
 
     void setLinkStatus(GLint status);
-    GLint getLinkStatus();
+    GLint getLinkStatus() const;
 
-    void setInfoLog(GLchar *log);
-    GLchar* getInfoLog();
+    void setInfoLog(const GLchar *log);
+    const GLchar* getInfoLog() const;
 
     bool isInUse() const { return IsInUse; }
     void setInUse(bool inUse) { IsInUse = inUse; }
@@ -43,8 +44,8 @@ public:
 private:
     GLuint AttachedVertexShader;
     GLuint AttachedFragmentShader;
+    std::unique_ptr<const GLchar[]> infoLog;
     GLint  LinkStatus;
-    GLchar* infoLog;
     bool    IsInUse;
     bool    DeleteStatus;
 };
