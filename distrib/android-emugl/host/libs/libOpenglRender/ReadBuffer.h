@@ -16,6 +16,8 @@
 #pragma once
 #include "OpenglRender/IOStream.h"
 
+namespace emugl {
+
 class ReadBuffer {
 public:
     explicit ReadBuffer(size_t bufSize);
@@ -30,3 +32,5 @@ private:
     size_t m_size;
     size_t m_validData;
 };
+
+}  // namespace emugl

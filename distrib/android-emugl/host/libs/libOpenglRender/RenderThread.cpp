@@ -38,19 +38,21 @@
 #include <stdio.h>
 #include <string.h>
 
+namespace emugl {
+
 // Start with a smaller buffer to not waste memory on a low-used render threads.
 static constexpr int kStreamBufferSize = 128 * 1024;
 
-RenderThread::RenderThread(std::weak_ptr<emugl::RendererImpl> renderer,
-                           std::shared_ptr<emugl::RenderChannelImpl> channel)
+RenderThread::RenderThread(std::weak_ptr<RendererImpl> renderer,
+                           std::shared_ptr<RenderChannelImpl> channel)
     : mChannel(channel), mRenderer(renderer) {}
 
 RenderThread::~RenderThread() = default;
 
 // static
 std::unique_ptr<RenderThread> RenderThread::create(
-        std::weak_ptr<emugl::RendererImpl> renderer,
-        std::shared_ptr<emugl::RenderChannelImpl> channel) {
+        std::weak_ptr<RendererImpl> renderer,
+        std::shared_ptr<RenderChannelImpl> channel) {
     return std::unique_ptr<RenderThread>(
             new RenderThread(renderer, channel));
 }
@@ -65,7 +67,7 @@ intptr_t RenderThread::main() {
     // |flags| used to have something, now they're not used.
     (void)flags;
 
-    ChannelStream stream(mChannel, emugl::ChannelBuffer::kSmallSize);
+    ChannelStream stream(mChannel, ChannelBuffer::kSmallSize);
     RenderThreadInfo tInfo;
     ChecksumCalculatorThreadInfo tChecksumInfo;
     ChecksumCalculator& checksumCalc = tChecksumInfo.get();
@@ -221,3 +223,5 @@ intptr_t RenderThread::main() {
 
     return 0;
 }
+
+}  // namespace emugl

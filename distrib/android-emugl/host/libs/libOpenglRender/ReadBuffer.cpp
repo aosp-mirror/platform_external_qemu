@@ -23,6 +23,8 @@
 #include <string.h>
 #include <limits.h>
 
+namespace emugl {
+
 ReadBuffer::ReadBuffer(size_t bufsize) {
     m_size = bufsize;
     m_buf = (unsigned char*)malloc(m_size);
@@ -97,3 +99,5 @@ void ReadBuffer::consume(size_t amount) {
     m_validData -= amount;
     m_readPtr += amount;
 }
+
+}  // namespace emugl
