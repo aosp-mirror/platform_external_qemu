@@ -1,0 +1,9 @@
+Verified+1: David Turner <digit@google.com>
+Code-Review+2: David Turner <digit@google.com>
+Autosubmit+1: David Turner <digit@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Tue, 15 Nov 2016 11:02:53 +0000
+Reviewed-on: https://android-review.googlesource.com/303916
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
