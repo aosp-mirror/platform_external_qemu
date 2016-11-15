@@ -730,7 +730,7 @@ build_darwin_binaries_on () {
 cd $DARWIN_REMOTE_DIR/qemu &&
 ./android-rebuild.sh $DARWIN_BUILD_FLAGS
 EOF
-    builder_run_remote_darwin_build ||
+    builder_run_remote_darwin_build "$DARWIN_PKG_DIR/build.sh" ||
         panic "Can't rebuild binaries on Darwin, use --verbose to see why!"
 
     dump "Retrieving Darwin binaries from: $DARWIN_SSH"
