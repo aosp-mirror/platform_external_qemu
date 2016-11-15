@@ -68,9 +68,9 @@ void GLESv2Context::validateAtt0PreDraw(unsigned int count)
     }
 
     if (count > m_att0ArrayLength) {
-        delete [] m_att0Array; 
-        unsigned newLen = 4 * std::max(count, 2 * m_att0ArrayLength);
-        m_att0Array = new GLfloat[newLen];
+        delete [] m_att0Array;
+        const unsigned newLen = std::max(count, 2 * m_att0ArrayLength);
+        m_att0Array = new GLfloat[4 * newLen];
         m_att0ArrayLength = newLen;
         m_attribute0valueChanged = true;
     }
