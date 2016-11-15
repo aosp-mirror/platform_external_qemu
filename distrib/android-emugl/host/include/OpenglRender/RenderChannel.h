@@ -46,6 +46,17 @@ public:
         Stopped = 1 << 2,
     };
 
+    // Values corresponding to the result of i/o operations.
+    // |Ok| means everything went well.
+    // |TryAgain| means the operation could not be performed and should be
+    // tried later.
+    // |Error| means an error happened (i.e. the channel is stopped).
+    enum class IoResult {
+        Ok = 0,
+        TryAgain = 1,
+        Error = 2,
+    };
+
     // Possible points of origin for an event in EventCallback.
     enum class EventSource {
         RenderChannel,
