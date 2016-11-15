@@ -24,14 +24,19 @@ namespace emugl {
 // Turn the RenderChannel::Event enum into flags.
 using namespace ::android::base::EnumFlags;
 
-// A type used for data passing.
-using ChannelBuffer = android::base::SmallFixedVector<char, 512>;
-
 // RenderChannel - an interface for a single guest to host renderer connection.
 // It allows the guest to send GPU emulation protocol-serialized messages to an
 // asynchronous renderer, read the responses and subscribe for state updates.
 class RenderChannel {
 public:
+    // A type used to pass byte packets between the guest and the
+    // RenderChannel instance. Experience has shown that using a
+    // SmallFixedVector<char, N> instance instead of a std::vector<char>
+    // avoids a lot of un-necessary heap allocations. The current size
+    // of 512 was selected after profiling existing traffic, including
+    // the one used in protocol-heavy benchmark like Antutu3D.
+    using Buffer = android::base::SmallFixedVector<char, 512>;
+
     // Flags for the channel state.
     enum class State {
         // Can't use None here, some system header declares it as a macro.
@@ -65,10 +70,10 @@ public:
     // Writes the data in |buffer| into the channel. |buffer| is moved from.
     // Blocks if there's no room in the channel (shouldn't really happen).
     // Returns false if the channel is stopped.
-    virtual bool write(ChannelBuffer&& buffer) = 0;
+    virtual bool write(Buffer&& buffer) = 0;
     // Reads a chunk of data from the channel. Returns false if there was no
     // data for a non-blocking call or if the channel is stopped.
-    virtual bool read(ChannelBuffer* buffer, CallType callType) = 0;
+    virtual bool read(Buffer* buffer, CallType callType) = 0;
 
     // Get the current state flags.
     virtual State currentState() const = 0;
