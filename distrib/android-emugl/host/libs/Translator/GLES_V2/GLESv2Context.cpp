@@ -43,33 +43,43 @@ GLESv2Context::~GLESv2Context()
 
 void GLESv2Context::setAttribute0value(float x, float y, float z, float w)
 {
+    m_attribute0valueChanged |=
+            x != m_attribute0value[0] || y != m_attribute0value[1] ||
+            z != m_attribute0value[2] || w != m_attribute0value[3];
     m_attribute0value[0] = x;
     m_attribute0value[1] = y;
     m_attribute0value[2] = z;
     m_attribute0value[3] = w;
 }
 
-void GLESv2Context::validateAtt0PreDraw(unsigned int count)
+bool GLESv2Context::needAtt0PreDrawValidation()
 {
     m_att0NeedsDisable = false;
 
-    if(count == 0)
-        return;
-
     int enabled = 0;
     s_glDispatch.glGetVertexAttribiv(0, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &enabled);
-    if(enabled)
-        return;
+    return enabled == 0;
+}
 
-    if(count > m_att0ArrayLength)
-    {
-        delete [] m_att0Array; 
-        m_att0Array = new GLfloat[4*count];
-        m_att0ArrayLength = count;
+void GLESv2Context::validateAtt0PreDraw(unsigned int count)
+{
+    if (count == 0) {
+        return;
     }
 
-    for(unsigned int i=0; i<count; i++)
-        memcpy(m_att0Array+i*4, m_attribute0value, 4*sizeof(GLfloat));
+    if (count > m_att0ArrayLength) {
+        delete [] m_att0Array;
+        const unsigned newLen = std::max(count, 2 * m_att0ArrayLength);
+        m_att0Array = new GLfloat[4 * newLen];
+        m_att0ArrayLength = newLen;
+        m_attribute0valueChanged = true;
+    }
+    if (m_attribute0valueChanged) {
+        for(unsigned int i = 0; i<m_att0ArrayLength; i++) {
+            memcpy(m_att0Array+i*4, m_attribute0value, sizeof(m_attribute0value));
+        }
+        m_attribute0valueChanged = false;
+    }
 
     s_glDispatch.glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, m_att0Array);
     s_glDispatch.glEnableVertexAttribArray(0);
@@ -79,20 +89,20 @@ void GLESv2Context::validateAtt0PreDraw(unsigned int count)
 
 void GLESv2Context::validateAtt0PostDraw(void)
 {
-    if(m_att0NeedsDisable)
+    if (m_att0NeedsDisable) {
         s_glDispatch.glDisableVertexAttribArray(0);
-
-    m_att0NeedsDisable = false;
+        m_att0NeedsDisable = false;
+    }
 }
 
 void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) {
     ArraysMap::iterator it;
 
     //going over all clients arrays Pointers
-    for ( it=m_map.begin() ; it != m_map.end(); it++ ) {
+    for ( it=m_map.begin() ; it != m_map.end(); ++it) {
         GLenum array_id   = (*it).first;
         GLESpointer* p = (*it).second;
-        if(!isArrEnabled(array_id)) continue;
+        if(!p->isEnable()) continue;
 
         unsigned int size = p->getSize();
 
