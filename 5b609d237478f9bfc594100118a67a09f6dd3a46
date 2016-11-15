@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "30b088be_5c437aaf",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-15T19:17:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30b088be_068b6f3f",
+      "range": {
+        "startLine": 64,
+        "startChar": 4,
+        "endLine": 64,
+        "endChar": 6
+      },
+      "revId": "5b609d237478f9bfc594100118a67a09f6dd3a46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30b088be_c66d57ad",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 2
@@ -59,6 +83,30 @@
       "writtenOn": "2016-11-15T18:02:25Z",
       "side": 1,
       "message": "\"struct tm\" \u003d\u003d \"tm\" in C++",
+      "range": {
+        "startLine": 91,
+        "startChar": 4,
+        "endLine": 91,
+        "endChar": 13
+      },
+      "revId": "5b609d237478f9bfc594100118a67a09f6dd3a46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_9c49f2d3",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-15T19:17:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30b088be_c66d57ad",
       "range": {
         "startLine": 91,
         "startChar": 4,
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "30b088be_1c350237",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-15T19:17:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30b088be_86caff5c",
+      "range": {
+        "startLine": 113,
+        "startChar": 15,
+        "endLine": 113,
+        "endChar": 25
+      },
+      "revId": "5b609d237478f9bfc594100118a67a09f6dd3a46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30b088be_867f5f54",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 2
@@ -105,6 +177,30 @@
       "writtenOn": "2016-11-15T18:02:25Z",
       "side": 1,
       "message": "nit: nullptr",
+      "range": {
+        "startLine": 167,
+        "startChar": 26,
+        "endLine": 167,
+        "endChar": 30
+      },
+      "revId": "5b609d237478f9bfc594100118a67a09f6dd3a46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_3c7b1ee1",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-15T19:17:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30b088be_867f5f54",
       "range": {
         "startLine": 167,
         "startChar": 26,
@@ -140,6 +236,30 @@
     },
     {
       "key": {
+        "uuid": "30b088be_1c62e22d",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-15T19:17:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30b088be_e60ad3d2",
+      "range": {
+        "startLine": 203,
+        "startChar": 8,
+        "endLine": 204,
+        "endChar": 35
+      },
+      "revId": "5b609d237478f9bfc594100118a67a09f6dd3a46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30b088be_a6c29b3e",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 2
@@ -163,6 +283,30 @@
     },
     {
       "key": {
+        "uuid": "30b088be_dc6bea06",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-15T19:17:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30b088be_a6c29b3e",
+      "range": {
+        "startLine": 212,
+        "startChar": 14,
+        "endLine": 212,
+        "endChar": 24
+      },
+      "revId": "5b609d237478f9bfc594100118a67a09f6dd3a46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30b088be_26a6aba5",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 2
@@ -174,6 +318,30 @@
       "writtenOn": "2016-11-15T18:02:25Z",
       "side": 1,
       "message": "(utc \u003c mStandardDateUtc || !(utc \u003c mDaylightDateUtc))",
+      "range": {
+        "startLine": 259,
+        "startChar": 11,
+        "endLine": 259,
+        "endChar": 91
+      },
+      "revId": "5b609d237478f9bfc594100118a67a09f6dd3a46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_9c9d72fa",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-15T19:17:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30b088be_26a6aba5",
       "range": {
         "startLine": 259,
         "startChar": 11,
