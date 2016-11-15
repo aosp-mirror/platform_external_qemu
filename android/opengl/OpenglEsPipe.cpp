@@ -36,7 +36,6 @@
 #define DD(...) ((void)0)
 #endif
 
-using emugl::ChannelBuffer;
 using emugl::RenderChannel;
 using emugl::RenderChannelPtr;
 using ChannelState = emugl::RenderChannel::State;
@@ -189,8 +188,8 @@ public:
             count += buffers[n].size;
         }
 
-        // Copy everything into a single ChannelBuffer.
-        ChannelBuffer outBuffer;
+        // Copy everything into a single RenderChannel::Buffer.
+        RenderChannel::Buffer outBuffer;
         outBuffer.resize_noinit(count);
         auto ptr = outBuffer.data();
         for (int n = 0; n < numBuffers; ++n) {
@@ -325,7 +324,7 @@ private:
     // guest-supplied memory.
     // If guest didn't have enough room for the whole buffer, we track the
     // number of remaining bytes in |mDataForReadingLeft| for the next read().
-    ChannelBuffer mDataForReading;
+    RenderChannel::Buffer mDataForReading;
     std::atomic<size_t> mDataForReadingLeft { 0 };
 
     DISALLOW_COPY_ASSIGN_AND_MOVE(EmuglPipe);

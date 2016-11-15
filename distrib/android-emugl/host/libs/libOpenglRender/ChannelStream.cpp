@@ -37,7 +37,7 @@ int ChannelStream::commitBuffer(size_t size) {
         mChannel->writeToGuest(std::move(mBuf));
     } else {
         mChannel->writeToGuest(
-                ChannelBuffer(mBuf.data(), mBuf.data() + size));
+                RenderChannel::Buffer(mBuf.data(), mBuf.data() + size));
     }
     return size;
 }
