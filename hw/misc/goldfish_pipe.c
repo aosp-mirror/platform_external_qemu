@@ -127,7 +127,6 @@ typedef enum PipeCmd {
 } PipeCmd;
 
 enum {
-    MAX_BUFFERS_COUNT = 160,
     COMMAND_BUFFER_SIZE = 4096,
 };
 
@@ -249,10 +248,12 @@ typedef struct PipeCommand {
     int32_t padding;
     union {
         struct {
-            uint64_t ptrs[MAX_BUFFERS_COUNT];
-            uint32_t sizes[MAX_BUFFERS_COUNT];
             uint32_t buffers_count;
             int32_t consumed_size;
+            // There are two arrays here, uint64_t ptrs[max_size]
+            // and uint32_t sizes[max_size].
+            // max_size is supplied at startup, so we can't reserve the space
+            // but need to have a function to calculate the pointers.
         } rw_params;
     };
 } PipeCommand;
@@ -267,6 +268,7 @@ struct GoldfishHwPipe {
     GoldfishHostPipe *host_pipe;
     uint64_t command_buffer_addr;
     PipeCommand* command_buffer;
+    uint32_t rw_params_max_count;
 
     // v1-specific fields
     struct GoldfishHwPipe* next;
@@ -283,6 +285,7 @@ typedef struct GuestSignalledPipe {
 
 typedef struct OpenCommandParams {
     uint64_t command_buffer_ptr;
+    uint32_t rw_params_max_count;
 } OpenCommandParams;
 
 typedef struct PipeDevice {
@@ -328,6 +331,19 @@ typedef struct PipeDevice {
     uint64_t params_addr;
 } PipeDevice;
 
+
+// RW params getter functions for |ptrs| and |sizes| arrays.
+static uint64_t* hwpipe_get_command_rw_ptrs(HwPipe* pipe) {
+    // |ptrs| is right next to the |consumed_size| member.
+    return (uint64_t*)(
+                &pipe->command_buffer->rw_params.consumed_size + 1);
+}
+
+static uint32_t* hwpipe_get_command_rw_sizes(HwPipe* pipe) {
+    // |sizes| follows the |ptrs|.
+    return (uint32_t*)(
+                hwpipe_get_command_rw_ptrs(pipe) + pipe->rw_params_max_count);
+}
 
 // hashtable-related functions
 // 64-bit emulator just casts uint64_t to gpointer to get a key for the
@@ -698,6 +714,11 @@ static void pipeDevice_doOpenClose_v2(PipeDevice* dev, uint32_t id) {
         // well, what can we do here?
         return;
     }
+    if (dev->open_command->rw_params_max_count < 1) {
+        commandBuffer->status = GOLDFISH_PIPE_ERROR_INVAL;
+        unmap_command_buffer(commandBuffer);
+        return;
+    }
     if (commandBuffer->id != id) {
         commandBuffer->status = GOLDFISH_PIPE_ERROR_INVAL;
         unmap_command_buffer(commandBuffer);
@@ -739,6 +760,7 @@ static void pipeDevice_doOpenClose_v2(PipeDevice* dev, uint32_t id) {
 
     pipe->command_buffer_addr = dev->open_command->command_buffer_ptr;
     pipe->command_buffer = commandBuffer;
+    pipe->rw_params_max_count = dev->open_command->rw_params_max_count;
     dev->pipes[id] = pipe;
     commandBuffer->status = 0;
 }
@@ -781,18 +803,24 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
             pipe->command_buffer->rw_params.consumed_size = 0;
             unsigned buffers_count =
                     pipe->command_buffer->rw_params.buffers_count;
-            if (buffers_count > MAX_BUFFERS_COUNT) {
-                buffers_count = MAX_BUFFERS_COUNT;
+            if (buffers_count > pipe->rw_params_max_count) {
+                buffers_count = pipe->rw_params_max_count;
             }
 
-            GoldfishPipeBuffer buffers[MAX_BUFFERS_COUNT];
+            // We know that the |rw_params| fit into single page as of now, so
+            // we're free to estimate the maximum size this way.
+            uint64_t* const rwPtrs = hwpipe_get_command_rw_ptrs(pipe);
+            uint32_t* const rwSizes = hwpipe_get_command_rw_sizes(pipe);
+            assert(buffers_count <=
+                   COMMAND_BUFFER_SIZE / (sizeof(*rwPtrs) + sizeof(*rwSizes)));
+            GoldfishPipeBuffer buffers[
+                    COMMAND_BUFFER_SIZE / (sizeof(*rwPtrs) + sizeof(*rwSizes))];
+
             unsigned i;
             for (i = 0; i < buffers_count; ++i) {
-                buffers[i].size = pipe->command_buffer->rw_params.sizes[i];
+                buffers[i].size = rwSizes[i];
                 buffers[i].data = map_guest_buffer(
-                        pipe->command_buffer->rw_params.ptrs[i],
-                        pipe->command_buffer->rw_params.sizes[i],
-                        willModifyData);
+                                      rwPtrs[i], rwSizes[i], willModifyData);
                 if (!buffers[i].data) {
                     pipe->command_buffer->status = GOLDFISH_PIPE_ERROR_INVAL;
                     goto done;
@@ -808,9 +836,8 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
                                                         buffers,
                                                         buffers_count);
             // TODO(zyy): create an extended version of send()/recv() functions
-            // to
-            //  return both transferred size and resulting status in single
-            //  call.
+            // to return both transferred size and resulting status in single
+            // call.
             pipe->command_buffer->rw_params.consumed_size =
                     pipe->command_buffer->status < 0
                             ? 0
