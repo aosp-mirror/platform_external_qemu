@@ -28,14 +28,7 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     mUi(new Ui::VirtualSensorsPage()),
     mSensorsAgent(nullptr) {
 
-    // Historically, the AVD starts up with the screen mostly
-    // vertical, but tilted back 4.75 degrees. Retain that
-    // initial orientation.
-    static const QQuaternion initialQuat =
-            QQuaternion::fromEulerAngles(-4.75, 0.00, 0.00);
-
     mUi->setupUi(this);
-    mUi->accelWidget->setRotation(initialQuat);
     mUi->temperatureSensorValueWidget->setRange(-273.1, 100.0);
     mUi->temperatureSensorValueWidget->setValue(25.0);
     mUi->lightSensorValueWidget->setRange(0, 40000.0);
@@ -113,6 +106,17 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
                                    Accelerometer3DWidget::MaxX);
     mUi->positionYSlider->setRange(Accelerometer3DWidget::MinY,
                                    Accelerometer3DWidget::MaxY);
+
+    // Historically, the AVD starts up with the screen mostly
+    // vertical, but tilted back 4.75 degrees. Retain that
+    // initial orientation.
+    // We need to do this after we call setRange since setRange will trigger
+    // on_*Slider_valueChanged which just trigger setRotation from default
+    // value of Sliders.
+    static const QQuaternion initialQuat =
+            QQuaternion::fromEulerAngles(-4.75, 0.00, 0.00);
+    mUi->accelWidget->setRotation(initialQuat);
+
     onPhoneRotationChanged();
     android::metrics::addTickCallback([this](AndroidMetrics* m) {
         m->sensors_used = mVirtualSensorsUsed ? 1 : 0;
