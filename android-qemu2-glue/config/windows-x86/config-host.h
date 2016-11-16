@@ -7,35 +7,35 @@
 #define CONFIG_QEMU_LOCALEDIR "/opt2/digit/repo/studio-dev/prebuilts/android-emulator-build/qemu-android-deps/windows-x86/locale"
 #define HOST_I386 1
 #define CONFIG_WIN32 1
-#define CONFIG_FILEVERSION 2,2,0,0
-#define CONFIG_PRODUCTVERSION 2,2,0,0
+#define CONFIG_FILEVERSION 2,7,0,0
+#define CONFIG_PRODUCTVERSION 2,7,0,0
 #define CONFIG_SLIRP 1
 #define CONFIG_SMBD_COMMAND "/usr/sbin/smbd"
 #define CONFIG_AUDIO_DRIVERS \
     &winaudio_audio_driver,\
-    &winwave_audio_driver,\
+    &dsound_audio_driver,\
 
 #define CONFIG_WINAUDIO 1
-#define CONFIG_WINWAVE 1
+#define CONFIG_DSOUND 1
 #define CONFIG_AUDIO_WIN_INT 1
 #define CONFIG_BDRV_RW_WHITELIST\
     NULL
 #define CONFIG_BDRV_RO_WHITELIST\
     NULL
 #define CONFIG_VNC 1
-#define QEMU_VERSION "2.2.0"
-#define QEMU_PKGVERSION ""
+#define QEMU_VERSION "2.7.0"
 #define CONFIG_SDL 1
 #define CONFIG_SDLABI 2.0
+#define CONFIG_HAS_GLIB_SUBPROCESS_TESTS 1
+#define CONFIG_TLS_PRIORITY "NORMAL"
 #define CONFIG_FDT 1
-#define CONFIG_ZERO_MALLOC 1
 #define CONFIG_QOM_CAST_DEBUG 1
 #define CONFIG_COROUTINE_BACKEND win32
 #define CONFIG_COROUTINE_POOL 1
 #define CONFIG_PRAGMA_DIAGNOSTIC_AVAILABLE 1
 #define CONFIG_CPUID_H 1
-#define CONFIG_TPM $(CONFIG_SOFTMMU)
-#define CONFIG_TRACE_NOP 1
+#define CONFIG_TPM 1
+#define CONFIG_TRACE_LOG 1
 #define CONFIG_TRACE_FILE trace
+#define CONFIG_IASL iasl
 #define HOST_DSOSUF ".dll"
-#define CONFIG_ANDROID 1

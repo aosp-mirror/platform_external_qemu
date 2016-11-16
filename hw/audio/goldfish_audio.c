@@ -9,6 +9,7 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+#include "qemu/osdep.h"
 #include "hw/hw.h"
 #include "audio/audio.h"
 #include "hw/sysbus.h"
@@ -57,7 +58,7 @@ enum {
 struct goldfish_audio_buff {
     uint64_t  address;
     uint32_t  length;
-    uint8*    data;
+    uint8_t*  data;
     uint32_t  capacity;
     uint32_t  offset;
 };

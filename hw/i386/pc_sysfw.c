@@ -23,6 +23,8 @@
  * THE SOFTWARE.
  */
 
+#include "qemu/osdep.h"
+#include "qapi/error.h"
 #include "sysemu/block-backend.h"
 #include "qemu/error-report.h"
 #include "hw/sysbus.h"
@@ -56,7 +58,7 @@ static void pc_isa_bios_init(MemoryRegion *rom_memory,
     isa_bios_size = MIN(flash_size, 128 * 1024);
     isa_bios = g_malloc(sizeof(*isa_bios));
     memory_region_init_ram(isa_bios, NULL, "isa-bios", isa_bios_size,
-                           &error_abort);
+                           &error_fatal);
     vmstate_register_ram_global(isa_bios);
     memory_region_add_subregion_overlap(rom_memory,
                                         0x100000 - isa_bios_size,
@@ -193,7 +195,7 @@ static void old_pc_system_rom_init(MemoryRegion *rom_memory, bool isapc_ram_fw)
         goto bios_error;
     }
     bios = g_malloc(sizeof(*bios));
-    memory_region_init_ram(bios, NULL, "pc.bios", bios_size, &error_abort);
+    memory_region_init_ram(bios, NULL, "pc.bios", bios_size, &error_fatal);
     vmstate_register_ram_global(bios);
     if (!isapc_ram_fw) {
         memory_region_set_readonly(bios, true);
@@ -204,9 +206,7 @@ static void old_pc_system_rom_init(MemoryRegion *rom_memory, bool isapc_ram_fw)
         fprintf(stderr, "qemu: could not load PC BIOS '%s'\n", bios_name);
         exit(1);
     }
-    if (filename) {
-        g_free(filename);
-    }
+    g_free(filename);
 
     /* map the last 128KB of the BIOS in ISA space */
     isa_bios_size = bios_size;

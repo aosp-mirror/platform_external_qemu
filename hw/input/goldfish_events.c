@@ -13,7 +13,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
+#include "qemu/osdep.h"
+#include "qemu/log.h"
 #include "hw/sysbus.h"
 #include "ui/input.h"
 #include "ui/console.h"
@@ -877,7 +878,7 @@ events_clr_bit(GoldfishEvDevState *s, int type, int bit)
     }
 }
 
-static const int dpad_map[Q_KEY_CODE_MAX] = {
+static const int dpad_map[Q_KEY_CODE__MAX] = {
     [Q_KEY_CODE_KP_4] = LINUX_KEY_LEFT,
     [Q_KEY_CODE_KP_6] = LINUX_KEY_RIGHT,
     [Q_KEY_CODE_KP_8] = LINUX_KEY_UP,
@@ -893,15 +894,15 @@ static void goldfish_evdev_handle_keyevent(DeviceState *dev, QemuConsole *src,
     int lkey = 0;
     int mod;
 
-    assert(evt->kind == INPUT_EVENT_KIND_KEY);
+    assert(evt->type == INPUT_EVENT_KIND_KEY);
 
-    KeyValue* kv = evt->key->key;
+    KeyValue* kv = evt->u.key.data->key;
 
-    int qcode = kv->qcode;
+    int qcode = kv->u.qcode.data;
 
-    enqueue_event(s, EV_KEY, qcode, evt->key->down);
+    enqueue_event(s, EV_KEY, qcode, evt->u.key.data->down);
 
-    int qemu2_qcode = qemu_input_key_value_to_qcode(evt->key->key);
+    int qemu2_qcode = qemu_input_key_value_to_qcode(evt->u.key.data->key);
 
     /* Keep our modifier state up to date */
     switch (qemu2_qcode) {
@@ -923,7 +924,7 @@ static void goldfish_evdev_handle_keyevent(DeviceState *dev, QemuConsole *src,
     }
 
     if (mod) {
-        if (evt->key->down) {
+        if (evt->u.key.data->down) {
             s->modifier_state |= mod;
         } else {
             s->modifier_state &= ~mod;
@@ -935,7 +936,7 @@ static void goldfish_evdev_handle_keyevent(DeviceState *dev, QemuConsole *src,
     }
 
     if (lkey) {
-        enqueue_event(s, EV_KEY, lkey, evt->key->down);
+        enqueue_event(s, EV_KEY, lkey, evt->u.key.data->down);
     }
 }
 

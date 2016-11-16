@@ -17,15 +17,7 @@
  *  along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/time.h>
-#include <time.h>
+#include "qemu/osdep.h"
 
 #include "cpu.h"
 #if defined(CONFIG_USER_ONLY)
@@ -36,6 +28,7 @@
 #include "exec/gdbstub.h"
 #include "exec/softmmu-semi.h"
 #endif
+#include "qemu/log.h"
 #include "sysemu/sysemu.h"
 
 #define HOSTED_EXIT  0
@@ -351,7 +344,7 @@ void do_m68k_semihosting(CPUM68KState *env, int nr)
                 /* FIXME - check error code? */
                 result = -1;
             } else {
-                result = stat(p, &s);
+                result = qemu_stat(p, &s);
                 unlock_user(p, arg0, 0);
             }
             if (result == 0) {

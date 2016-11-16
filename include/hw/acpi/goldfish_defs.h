@@ -23,38 +23,38 @@
 #define ACPI_GOLDFISH_DEFS_H
 
 /* goldfish battery */
-#define GF_BATTERY_IOMEM_BASE   0xff010000
-#define GF_BATTERY_IOMEM_SIZE   0x00001000
-#define GF_BATTERY_IRQ          16
+#define GOLDFISH_BATTERY_IOMEM_BASE   0xff010000
+#define GOLDFISH_BATTERY_IOMEM_SIZE   0x00001000
+#define GOLDFISH_BATTERY_IRQ          16
 
 /* goldfish events */
-#define GF_EVENTS_IOMEM_BASE    0xff011000
-#define GF_EVENTS_IOMEM_SIZE    0x00001000
-#define GF_EVENTS_IRQ           17
+#define GOLDFISH_EVENTS_IOMEM_BASE    0xff011000
+#define GOLDFISH_EVENTS_IOMEM_SIZE    0x00001000
+#define GOLDFISH_EVENTS_IRQ           17
 
 /* android pipe */
-#define GF_PIPE_IOMEM_BASE      0xff001000
-#define GF_PIPE_IOMEM_SIZE      0x00002000
-#define GF_PIPE_IRQ             18
+#define GOLDFISH_PIPE_IOMEM_BASE      0xff001000
+#define GOLDFISH_PIPE_IOMEM_SIZE      0x00002000
+#define GOLDFISH_PIPE_IRQ             18
 
 /* goldfish framebuffer */
-#define GF_FB_IOMEM_BASE        0xff012000
-#define GF_FB_IOMEM_SIZE        0x00000100
-#define GF_FB_IRQ               19
+#define GOLDFISH_FB_IOMEM_BASE        0xff012000
+#define GOLDFISH_FB_IOMEM_SIZE        0x00000100
+#define GOLDFISH_FB_IRQ               19
 
 /* goldfish audio */
-#define GF_AUDIO_IOMEM_BASE     0xff013000
-#define GF_AUDIO_IOMEM_SIZE     0x00000100
-#define GF_AUDIO_IRQ            20
+#define GOLDFISH_AUDIO_IOMEM_BASE     0xff013000
+#define GOLDFISH_AUDIO_IOMEM_SIZE     0x00000100
+#define GOLDFISH_AUDIO_IRQ            20
 
 /* goldfish sync */
-#define GF_SYNC_IOMEM_BASE      0xff014000
-#define GF_SYNC_IOMEM_SIZE      0x00002000
-#define GF_SYNC_IRQ             21
+#define GOLDFISH_SYNC_IOMEM_BASE      0xff014000
+#define GOLDFISH_SYNC_IOMEM_SIZE      0x00002000
+#define GOLDFISH_SYNC_IRQ             21
 
 /* goldfish rtc */
-#define GF_RTC_IOMEM_BASE       0xff016000
-#define GF_RTC_IOMEM_SIZE       0x00001000
-#define GF_RTC_IRQ              22
+#define GOLDFISH_RTC_IOMEM_BASE       0xff016000
+#define GOLDFISH_RTC_IOMEM_SIZE       0x00001000
+#define GOLDFISH_RTC_IRQ              22
 
 #endif  /* !ACPI_GOLDFISH_DEFS_H */

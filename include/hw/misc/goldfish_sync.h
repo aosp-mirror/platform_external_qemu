@@ -32,14 +32,14 @@ typedef enum {
  * and will be called by the virtual device at runtime. */
 typedef struct {
     /* Called when the guest sends the result of a previous command to the
-     * host. See goldfish_send_send_command(). */
+     * host. */
     void (*receive_hostcmd_result)(uint32_t cmd,
                                    uint64_t handle,
                                    uint32_t time_arg,
                                    uint64_t hostcmd_handle);
 
     /* Called when the guest wants to trigger a host-side wait for a
-     * specific glsync and thread pointer pair. */
+     * specific glsync and thread pointer pair */
     void (*trigger_host_wait)(uint64_t glsync_ptr,
                               uint64_t thread_ptr,
                               uint64_t timeline);
@@ -49,9 +49,7 @@ typedef struct {
  * must be called at emulation setup time before the device runs. */
 void goldfish_sync_set_service_ops(const GoldfishSyncServiceOps *ops);
 
-/* Send a command to the guest through the goldfish_sync device.
- * The result will be sent asynchronously through the |receive_hostcmd_result|
- * callback. */
+/* Send a command to the guest through the goldfish_sync device. */
 void goldfish_sync_send_command(uint32_t cmd,
                                 uint64_t handle,
                                 uint32_t time_arg,

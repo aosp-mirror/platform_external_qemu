@@ -14,6 +14,7 @@
 #include "android/base/Log.h"
 
 extern "C" {
+#include "qemu/osdep.h"
 #include "qemu-common.h"
 #include "migration/qemu-file.h"
 }

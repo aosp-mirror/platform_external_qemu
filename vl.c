@@ -21,14 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include <unistd.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <time.h>
-#include <errno.h>
-#include <sys/time.h>
-
-#include "config-host.h"
+#include "qemu/osdep.h"
+#include "qemu-version.h"
+#include "qemu/cutils.h"
+#include "qemu/help_option.h"
 
 #ifdef CONFIG_SECCOMP
 #include "sysemu/seccomp.h"
@@ -38,8 +34,25 @@
 #include <libvdeplug.h>
 #endif
 
-#include <glib.h>
+#if defined(CONFIG_SDL) && !defined(CONFIG_ANDROID)
+#if defined(__APPLE__) || defined(main)
+#include <SDL.h>
+int qemu_main(int argc, char **argv, char **envp);
+int main(int argc, char **argv)
+{
+    return qemu_main(argc, argv, NULL);
+}
+#undef main
+#define main qemu_main
+#endif
+#endif /* CONFIG_SDL */
 
+#ifdef CONFIG_COCOA
+#undef main
+#define main qemu_main
+#endif /* CONFIG_COCOA */
+
+#include "qemu/error-report.h"
 #include "qemu/sockets.h"
 #include "hw/hw.h"
 #include "hw/boards.h"
@@ -49,7 +62,7 @@
 #include "hw/isa/isa.h"
 #include "hw/bt.h"
 #include "sysemu/watchdog.h"
-#include "hw/i386/smbios.h"
+#include "hw/smbios/smbios.h"
 #include "hw/xen/xen.h"
 #include "hw/qdev.h"
 #include "hw/loader.h"
@@ -60,11 +73,14 @@
 #include "net/slirp.h"
 #include "monitor/monitor.h"
 #include "ui/console.h"
+#include "ui/input.h"
 #include "sysemu/sysemu.h"
+#include "sysemu/numa.h"
 #include "exec/gdbstub.h"
 #include "qemu/timer.h"
 #include "sysemu/char.h"
 #include "qemu/bitmap.h"
+#include "qemu/log.h"
 #include "sysemu/blockdev.h"
 #include "hw/block/block.h"
 #include "migration/block.h"
@@ -72,6 +88,7 @@
 #include "sysemu/dma.h"
 #include "audio/audio.h"
 #include "migration/migration.h"
+#include "sysemu/cpus.h"
 #include "sysemu/kvm.h"
 #include "sysemu/hax.h"
 #include "qapi/qmp/qjson.h"
@@ -95,59 +112,63 @@
 #include "qemu/queue.h"
 #include "sysemu/cpus.h"
 #include "sysemu/arch_init.h"
-#include "qemu/osdep.h"
 
 #include "ui/qemu-spice.h"
 #include "qapi/string-input-visitor.h"
 #include "qapi/opts-visitor.h"
 #include "qom/object_interfaces.h"
 #include "qapi-event.h"
+#include "exec/semihost.h"
+#include "crypto/init.h"
+#include "sysemu/replay.h"
+#include "qapi/qmp/qerror.h"
 
 #ifdef CONFIG_ANDROID
 
+#undef socket_connect
+#undef socket_listen
 
-#include "config.h"
-
+#include "android/android.h"
 #include "android/boot-properties.h"
-#include "android/error-messages.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/bufprint_config_dirs.h"
-#include "android/metrics/metrics.h"
-#include "android/update-check/update_check.h"
-#include "android/utils/async.h"
-#include "android/utils/debug.h"
-#include "android/utils/path.h"
-#include "android/utils/property_file.h"
-#include "android/utils/lineinput.h"
-#include "android/utils/bufprint.h"
-#include "android/utils/filelock.h"
-#include "android/utils/ini.h"
-#include "android/utils/tempfile.h"
-#include "android/utils/timezone.h"
-#include "android/skin/winsys.h"
+#include "android/error-messages.h"
+#include "android/globals.h"
+#include "android/gps.h"
+#include "android/help.h"
+#include "android/hw-control.h"
+#include "android/hw-qemud.h"
 #include "android/main-common.h"
+#include "android/metrics/metrics.h"
 #include "android/multitouch-port.h"
 #include "android/network/control.h"
 #include "android/network/globals.h"
 #include "android/opengl/emugl_config.h"
-#include "android/ui-emu-agent.h"
-#include "android/globals.h"
-#include "android/help.h"
-#include "android-qemu2-glue/looper-qemu.h"
-#include "android/gps.h"
-#include "android/telephony/modem_driver.h"
-#include "android/hw-control.h"
-#include "android/hw-qemud.h"
-#include "android/utils/socket_drainer.h"
-#include "android/wear-agent/android_wear_agent.h"
-#include "android-qemu2-glue/android_qemud.h"
-#include "android-qemu2-glue/qemu-control-impl.h"
-#include "android-qemu2-glue/qemu-setup.h"
+#include "android/skin/winsys.h"
 #include "android/snapshot.h"
 #include "android/snaphost-android.h"
-#include "android/android.h"
-#include "android/camera/camera-service.h"
+#include "android/telephony/modem_driver.h"
+#include "android/update-check/update_check.h"
+#include "android/ui-emu-agent.h"
+#include "android/utils/async.h"
+#include "android/utils/bufprint.h"
+#include "android/utils/debug.h"
+#include "android/utils/filelock.h"
+#include "android/utils/ini.h"
+#include "android/utils/lineinput.h"
+#include "android/utils/path.h"
+#include "android/utils/property_file.h"
+#include "android/utils/socket_drainer.h"
+#include "android/utils/tempfile.h"
+#include "android/utils/timezone.h"
 #include "android/version.h"
+#include "android/wear-agent/android_wear_agent.h"
+#include "android-qemu2-glue/android_qemud.h"
+#include "android-qemu2-glue/looper-qemu.h"
+#include "android-qemu2-glue/qemu-control-impl.h"
+#include "android-qemu2-glue/qemu-setup.h"
+#include "android/camera/camera-service.h"
+
 #include "hw/input/goldfish_events.h"
 
 // this path has to be relative as AndroidEmu include paths go after the qemu2
@@ -155,9 +176,6 @@
 #include "../qemu/android/opengles.h"
 
 #define QEMU_CORE_VERSION "qemu2 " QEMU_VERSION
-
-int android_display_width  = 640;
-int android_display_height = 480;
 
 /////////////////////////////////////////////////////////////
 
@@ -178,8 +196,6 @@ extern bool android_op_wipe_data;
 
 #endif // CONFIG_ANDROID
 
-#define DEFAULT_RAM_SIZE 128
-
 #define MAX_VIRTIO_CONSOLES 1
 #define MAX_SCLP_CONSOLES 1
 #define QCOW2_SUFFIX "qcow2"
@@ -188,8 +204,8 @@ static const char *data_dir[16];
 static int data_dir_idx;
 const char *bios_name = NULL;
 enum vga_retrace_method vga_retrace_method = VGA_RETRACE_DUMB;
-DisplayType display_type = DT_DEFAULT;
-static int display_remote;
+int request_opengl = -1;
+int display_opengl;
 const char* keyboard_layout = NULL;
 ram_addr_t ram_size;
 const char *mem_path = NULL;
@@ -205,9 +221,7 @@ int vga_interface_type = VGA_NONE;
 static int full_screen = 0;
 static int no_frame = 0;
 int no_quit = 0;
-#ifdef CONFIG_GTK
 static bool grab_on_hover;
-#endif
 CharDriverState *serial_hds[MAX_SERIAL_PORTS];
 CharDriverState *parallel_hds[MAX_PARALLEL_PORTS];
 CharDriverState *virtcon_hds[MAX_VIRTIO_CONSOLES];
@@ -215,12 +229,9 @@ CharDriverState *sclp_hds[MAX_SCLP_CONSOLES];
 int win2k_install_hack = 0;
 int singlestep = 0;
 int smp_cpus = 1;
-int max_cpus = 0;
+int max_cpus = 1;
 int smp_cores = 1;
 int smp_threads = 1;
-#ifdef CONFIG_VNC
-const char *vnc_display;
-#endif
 int acpi_enabled = 1;
 int no_hpet = 0;
 int fd_bootchk = 1;
@@ -229,17 +240,15 @@ int no_shutdown = 0;
 int cursor_hide = 1;
 int graphic_rotate = 0;
 #ifdef CONFIG_ANDROID
-char* android_op_dns_server = NULL;
 int lcd_density = LCD_DENSITY_MDPI;
-extern char* op_http_proxy;
 extern char* android_op_ports;
 extern int android_op_ports_numbers[2];
 extern char* android_op_report_console;
+static const char* android_hw_file = NULL;
 #endif  // CONFIG_ANDROID
 const char *watchdog;
 QEMUOptionRom option_rom[MAX_OPTION_ROMS];
 int nb_option_roms;
-int semihosting_enabled = 0;
 int old_param = 0;
 const char *qemu_name;
 int alt_grab = 0;
@@ -254,18 +263,11 @@ uint8_t qemu_extra_params_fw[2];
 
 int icount_align_option;
 
-int nb_numa_nodes;
-int max_numa_nodeid;
-NodeInfo numa_info[MAX_NODES];
-
 /* The bytes in qemu_uuid[] are in the order specified by RFC4122, _not_ in the
  * little-endian "wire format" described in the SMBIOS 2.6 specification.
  */
 uint8_t qemu_uuid[16];
 bool qemu_uuid_set;
-
-static QEMUBootSetHandler *boot_set_handler;
-static void *boot_set_opaque;
 
 static NotifierList exit_notifiers =
     NOTIFIER_LIST_INITIALIZER(exit_notifiers);
@@ -287,6 +289,7 @@ static int default_floppy = 1;
 static int default_cdrom = 1;
 static int default_sdcard = 1;
 static int default_vga = 1;
+static int default_net = 1;
 
 static struct {
     const char *driver;
@@ -300,7 +303,6 @@ static struct {
     { .driver = "ide-drive",            .flag = &default_cdrom     },
     { .driver = "scsi-cd",              .flag = &default_cdrom     },
     { .driver = "virtio-serial-pci",    .flag = &default_virtcon   },
-    { .driver = "virtio-serial-s390",   .flag = &default_virtcon   },
     { .driver = "virtio-serial",        .flag = &default_virtcon   },
     { .driver = "VGA",                  .flag = &default_vga       },
     { .driver = "isa-vga",              .flag = &default_vga       },
@@ -308,6 +310,7 @@ static struct {
     { .driver = "isa-cirrus-vga",       .flag = &default_vga       },
     { .driver = "vmware-svga",          .flag = &default_vga       },
     { .driver = "qxl-vga",              .flag = &default_vga       },
+    { .driver = "virtio-vga",           .flag = &default_vga       },
 };
 
 static QemuOptsList qemu_rtc_opts = {
@@ -341,22 +344,6 @@ static QemuOptsList qemu_sandbox_opts = {
     },
 };
 
-static QemuOptsList qemu_trace_opts = {
-    .name = "trace",
-    .implied_opt_name = "trace",
-    .head = QTAILQ_HEAD_INITIALIZER(qemu_trace_opts.head),
-    .desc = {
-        {
-            .name = "events",
-            .type = QEMU_OPT_STRING,
-        },{
-            .name = "file",
-            .type = QEMU_OPT_STRING,
-        },
-        { /* end of list */ }
-    },
-};
-
 static QemuOptsList qemu_option_rom_opts = {
     .name = "option-rom",
     .implied_opt_name = "romfile",
@@ -379,84 +366,12 @@ static QemuOptsList qemu_machine_opts = {
     .merge_lists = true,
     .head = QTAILQ_HEAD_INITIALIZER(qemu_machine_opts.head),
     .desc = {
-        {
-            .name = "type",
-            .type = QEMU_OPT_STRING,
-            .help = "emulated machine"
-        }, {
-            .name = "accel",
-            .type = QEMU_OPT_STRING,
-            .help = "accelerator list",
-        }, {
-            .name = "kernel_irqchip",
-            .type = QEMU_OPT_BOOL,
-            .help = "use KVM in-kernel irqchip",
-        }, {
-            .name = "kvm_shadow_mem",
-            .type = QEMU_OPT_SIZE,
-            .help = "KVM shadow MMU size",
-        }, {
-            .name = "kernel",
-            .type = QEMU_OPT_STRING,
-            .help = "Linux kernel image file",
-        }, {
-            .name = "initrd",
-            .type = QEMU_OPT_STRING,
-            .help = "Linux initial ramdisk file",
-        }, {
-            .name = "append",
-            .type = QEMU_OPT_STRING,
-            .help = "Linux kernel command line",
-        }, {
-            .name = "dtb",
-            .type = QEMU_OPT_STRING,
-            .help = "Linux kernel device tree file",
-        }, {
-            .name = "dumpdtb",
-            .type = QEMU_OPT_STRING,
-            .help = "Dump current dtb to a file and quit",
-        }, {
-            .name = "phandle_start",
-            .type = QEMU_OPT_NUMBER,
-            .help = "The first phandle ID we may generate dynamically",
-        }, {
-            .name = "dt_compatible",
-            .type = QEMU_OPT_STRING,
-            .help = "Overrides the \"compatible\" property of the dt root node",
-        }, {
-            .name = "dump-guest-core",
-            .type = QEMU_OPT_BOOL,
-            .help = "Include guest memory in  a core dump",
-        }, {
-            .name = "mem-merge",
-            .type = QEMU_OPT_BOOL,
-            .help = "enable/disable memory merge support",
-        },{
-            .name = "usb",
-            .type = QEMU_OPT_BOOL,
-            .help = "Set on/off to enable/disable usb",
-        },{
-            .name = "firmware",
-            .type = QEMU_OPT_STRING,
-            .help = "firmware image",
-        },{
-            .name = "kvm-type",
-            .type = QEMU_OPT_STRING,
-            .help = "Specifies the KVM virtualization mode (HV, PR)",
-        },{
-            .name = PC_MACHINE_MAX_RAM_BELOW_4G,
-            .type = QEMU_OPT_SIZE,
-            .help = "maximum ram below the 4G boundary (32bit boundary)",
-        }, {
-            .name = PC_MACHINE_VMPORT,
-            .type = QEMU_OPT_STRING,
-            .help = "Enable vmport (pc & q35)",
-        },{
-            .name = "iommu",
-            .type = QEMU_OPT_BOOL,
-            .help = "Set on/off to enable/disable Intel IOMMU (VT-d)",
-        },
-        { /* End of list */ }
+        /*
+         * no elements => accept any
+         * sanity checking will happen later
+         * when setting machine properties
+         */
+        { }
     },
 };
 
@@ -617,6 +532,57 @@ static QemuOptsList qemu_icount_opts = {
         }, {
             .name = "align",
             .type = QEMU_OPT_BOOL,
+        }, {
+            .name = "sleep",
+            .type = QEMU_OPT_BOOL,
+        }, {
+            .name = "rr",
+            .type = QEMU_OPT_STRING,
+        }, {
+            .name = "rrfile",
+            .type = QEMU_OPT_STRING,
+        },
+        { /* end of list */ }
+    },
+};
+
+static QemuOptsList qemu_semihosting_config_opts = {
+    .name = "semihosting-config",
+    .implied_opt_name = "enable",
+    .head = QTAILQ_HEAD_INITIALIZER(qemu_semihosting_config_opts.head),
+    .desc = {
+        {
+            .name = "enable",
+            .type = QEMU_OPT_BOOL,
+        }, {
+            .name = "target",
+            .type = QEMU_OPT_STRING,
+        }, {
+            .name = "arg",
+            .type = QEMU_OPT_STRING,
+        },
+        { /* end of list */ }
+    },
+};
+
+static QemuOptsList qemu_fw_cfg_opts = {
+    .name = "fw_cfg",
+    .implied_opt_name = "name",
+    .head = QTAILQ_HEAD_INITIALIZER(qemu_fw_cfg_opts.head),
+    .desc = {
+        {
+            .name = "name",
+            .type = QEMU_OPT_STRING,
+            .help = "Sets the fw_cfg name of the blob to be inserted",
+        }, {
+            .name = "file",
+            .type = QEMU_OPT_STRING,
+            .help = "Sets the name of the file from which\n"
+                    "the fw_cfg blob will be loaded",
+        }, {
+            .name = "string",
+            .type = QEMU_OPT_STRING,
+            .help = "Sets content of the blob to be inserted from a string",
         },
         { /* end of list */ }
     },
@@ -671,13 +637,11 @@ const char *qemu_get_vm_name(void)
 
 static void res_free(void)
 {
-    if (boot_splash_filedata != NULL) {
-        g_free(boot_splash_filedata);
-        boot_splash_filedata = NULL;
-    }
+    g_free(boot_splash_filedata);
+    boot_splash_filedata = NULL;
 }
 
-static int default_driver_check(QemuOpts *opts, void *opaque)
+static int default_driver_check(void *opaque, QemuOpts *opts, Error **errp)
 {
     const char *driver = qemu_opt_get(opts, "driver");
     int i;
@@ -697,8 +661,8 @@ static int default_driver_check(QemuOpts *opts, void *opaque)
 
 static RunState current_run_state = RUN_STATE_PRELAUNCH;
 
-/* We use RUN_STATE_MAX but any invalid value will do */
-static RunState vmstop_requested = RUN_STATE_MAX;
+/* We use RUN_STATE__MAX but any invalid value will do */
+static RunState vmstop_requested = RUN_STATE__MAX;
 static QemuMutex vmstop_lock;
 
 typedef struct {
@@ -710,21 +674,35 @@ static const RunStateTransition runstate_transitions_def[] = {
     /*     from      ->     to      */
     { RUN_STATE_DEBUG, RUN_STATE_RUNNING },
     { RUN_STATE_DEBUG, RUN_STATE_FINISH_MIGRATE },
+    { RUN_STATE_DEBUG, RUN_STATE_PRELAUNCH },
 
-    { RUN_STATE_INMIGRATE, RUN_STATE_RUNNING },
+    { RUN_STATE_INMIGRATE, RUN_STATE_INTERNAL_ERROR },
+    { RUN_STATE_INMIGRATE, RUN_STATE_IO_ERROR },
     { RUN_STATE_INMIGRATE, RUN_STATE_PAUSED },
+    { RUN_STATE_INMIGRATE, RUN_STATE_RUNNING },
+    { RUN_STATE_INMIGRATE, RUN_STATE_SHUTDOWN },
+    { RUN_STATE_INMIGRATE, RUN_STATE_SUSPENDED },
+    { RUN_STATE_INMIGRATE, RUN_STATE_WATCHDOG },
+    { RUN_STATE_INMIGRATE, RUN_STATE_GUEST_PANICKED },
+    { RUN_STATE_INMIGRATE, RUN_STATE_FINISH_MIGRATE },
+    { RUN_STATE_INMIGRATE, RUN_STATE_PRELAUNCH },
+    { RUN_STATE_INMIGRATE, RUN_STATE_POSTMIGRATE },
 
     { RUN_STATE_INTERNAL_ERROR, RUN_STATE_PAUSED },
     { RUN_STATE_INTERNAL_ERROR, RUN_STATE_FINISH_MIGRATE },
+    { RUN_STATE_INTERNAL_ERROR, RUN_STATE_PRELAUNCH },
 
     { RUN_STATE_IO_ERROR, RUN_STATE_RUNNING },
     { RUN_STATE_IO_ERROR, RUN_STATE_FINISH_MIGRATE },
+    { RUN_STATE_IO_ERROR, RUN_STATE_PRELAUNCH },
 
     { RUN_STATE_PAUSED, RUN_STATE_RUNNING },
     { RUN_STATE_PAUSED, RUN_STATE_FINISH_MIGRATE },
+    { RUN_STATE_PAUSED, RUN_STATE_PRELAUNCH },
 
     { RUN_STATE_POSTMIGRATE, RUN_STATE_RUNNING },
     { RUN_STATE_POSTMIGRATE, RUN_STATE_FINISH_MIGRATE },
+    { RUN_STATE_POSTMIGRATE, RUN_STATE_PRELAUNCH },
 
     { RUN_STATE_PRELAUNCH, RUN_STATE_RUNNING },
     { RUN_STATE_PRELAUNCH, RUN_STATE_FINISH_MIGRATE },
@@ -732,8 +710,10 @@ static const RunStateTransition runstate_transitions_def[] = {
 
     { RUN_STATE_FINISH_MIGRATE, RUN_STATE_RUNNING },
     { RUN_STATE_FINISH_MIGRATE, RUN_STATE_POSTMIGRATE },
+    { RUN_STATE_FINISH_MIGRATE, RUN_STATE_PRELAUNCH },
 
     { RUN_STATE_RESTORE_VM, RUN_STATE_RUNNING },
+    { RUN_STATE_RESTORE_VM, RUN_STATE_PRELAUNCH },
 
     { RUN_STATE_RUNNING, RUN_STATE_DEBUG },
     { RUN_STATE_RUNNING, RUN_STATE_INTERNAL_ERROR },
@@ -750,26 +730,42 @@ static const RunStateTransition runstate_transitions_def[] = {
 
     { RUN_STATE_SHUTDOWN, RUN_STATE_PAUSED },
     { RUN_STATE_SHUTDOWN, RUN_STATE_FINISH_MIGRATE },
+    { RUN_STATE_SHUTDOWN, RUN_STATE_PRELAUNCH },
 
     { RUN_STATE_DEBUG, RUN_STATE_SUSPENDED },
     { RUN_STATE_RUNNING, RUN_STATE_SUSPENDED },
     { RUN_STATE_SUSPENDED, RUN_STATE_RUNNING },
     { RUN_STATE_SUSPENDED, RUN_STATE_FINISH_MIGRATE },
+    { RUN_STATE_SUSPENDED, RUN_STATE_PRELAUNCH },
 
     { RUN_STATE_WATCHDOG, RUN_STATE_RUNNING },
     { RUN_STATE_WATCHDOG, RUN_STATE_FINISH_MIGRATE },
+    { RUN_STATE_WATCHDOG, RUN_STATE_PRELAUNCH },
 
     { RUN_STATE_GUEST_PANICKED, RUN_STATE_RUNNING },
     { RUN_STATE_GUEST_PANICKED, RUN_STATE_FINISH_MIGRATE },
+    { RUN_STATE_GUEST_PANICKED, RUN_STATE_PRELAUNCH },
 
-    { RUN_STATE_MAX, RUN_STATE_MAX },
+    { RUN_STATE__MAX, RUN_STATE__MAX },
 };
 
-static bool runstate_valid_transitions[RUN_STATE_MAX][RUN_STATE_MAX];
+static bool runstate_valid_transitions[RUN_STATE__MAX][RUN_STATE__MAX];
 
 bool runstate_check(RunState state)
 {
     return current_run_state == state;
+}
+
+bool runstate_store(char *str, size_t size)
+{
+    const char *state = RunState_lookup[current_run_state];
+    size_t len = strlen(state) + 1;
+
+    if (len > size) {
+        return false;
+    }
+    memcpy(str, state, len);
+    return true;
 }
 
 static void runstate_init(void)
@@ -777,7 +773,7 @@ static void runstate_init(void)
     const RunStateTransition *p;
 
     memset(&runstate_valid_transitions, 0, sizeof(runstate_valid_transitions));
-    for (p = &runstate_transitions_def[0]; p->from != RUN_STATE_MAX; p++) {
+    for (p = &runstate_transitions_def[0]; p->from != RUN_STATE__MAX; p++) {
         runstate_valid_transitions[p->from][p->to] = true;
     }
 
@@ -787,12 +783,16 @@ static void runstate_init(void)
 /* This function will abort() on invalid state transitions */
 void runstate_set(RunState new_state)
 {
-    assert(new_state < RUN_STATE_MAX);
+    assert(new_state < RUN_STATE__MAX);
+
+    if (current_run_state == new_state) {
+        return;
+    }
 
     if (!runstate_valid_transitions[current_run_state][new_state]) {
-        fprintf(stderr, "ERROR: invalid runstate transition: '%s' -> '%s'\n",
-                RunState_lookup[current_run_state],
-                RunState_lookup[new_state]);
+        error_report("invalid runstate transition: '%s' -> '%s'",
+                     RunState_lookup[current_run_state],
+                     RunState_lookup[new_state]);
         abort();
     }
     trace_runstate_set(new_state);
@@ -825,9 +825,9 @@ static bool qemu_vmstop_requested(RunState *r)
 {
     qemu_mutex_lock(&vmstop_lock);
     *r = vmstop_requested;
-    vmstop_requested = RUN_STATE_MAX;
+    vmstop_requested = RUN_STATE__MAX;
     qemu_mutex_unlock(&vmstop_lock);
-    return *r < RUN_STATE_MAX;
+    return *r < RUN_STATE__MAX;
 }
 
 void qemu_system_vmstop_request_prepare(void)
@@ -843,7 +843,7 @@ void qemu_system_vmstop_request(RunState state)
 }
 
 #ifdef CONFIG_ANDROID
-static int create_qcow2_images() {
+static int create_qcow2_images(void) {
     /* First, determine if any of the backing images have been altered.
      * QCoW2 images won't work in that case, and need to be recreated (this
      * will obliterate previous snapshots).
@@ -929,7 +929,7 @@ static int create_qcow2_images() {
                 "raw",
                 NULL,
                 -1,
-                BDRV_O_CACHE_WB,
+                0,
                 &img_creation_error,
                 false);
         }
@@ -961,7 +961,7 @@ void vm_start(void)
     RunState requested;
 
     qemu_vmstop_requested(&requested);
-    if (runstate_is_running() && requested == RUN_STATE_MAX) {
+    if (runstate_is_running() && requested == RUN_STATE__MAX) {
         return;
     }
 
@@ -986,13 +986,17 @@ void vm_start(void)
 /***********************************************************/
 /* real time host monotonic timer */
 
+static time_t qemu_time(void)
+{
+    return qemu_clock_get_ms(QEMU_CLOCK_HOST) / 1000;
+}
+
 /***********************************************************/
 /* host time/date access */
 void qemu_get_timedate(struct tm *tm, int offset)
 {
-    time_t ti;
+    time_t ti = qemu_time();
 
-    time(&ti);
     ti += offset;
     if (rtc_date_offset == -1) {
         if (rtc_utc)
@@ -1020,7 +1024,7 @@ int qemu_timedate_diff(struct tm *tm)
     else
         seconds = mktimegm(tm) + rtc_date_offset;
 
-    return seconds - time(NULL);
+    return seconds - qemu_time();
 }
 
 static bool configure_rtc_date_offset(const char *startdate, int legacy)
@@ -1054,13 +1058,13 @@ static bool configure_rtc_date_offset(const char *startdate, int legacy)
         rtc_start_date = mktimegm(&tm);
         if (rtc_start_date == -1) {
         date_fail:
-            fprintf(stderr, "Invalid date format. Valid formats are:\n"
-                            "'2006-06-17T16:01:21' or '2006-06-17'\n");
+            error_report("invalid date format");
+            error_printf("valid formats: "
+                         "'2006-06-17T16:01:21' or '2006-06-17'\n");
             return false;
         }
-        rtc_date_offset = time(NULL) - rtc_start_date;
+        rtc_date_offset = qemu_time() - rtc_start_date;
     }
-
     return true;
 }
 
@@ -1073,7 +1077,11 @@ static bool configure_rtc(QemuOpts *opts)
         if (!strcmp(value, "utc")) {
             rtc_utc = 1;
         } else if (!strcmp(value, "localtime")) {
+            Error *blocker = NULL;
             rtc_utc = 0;
+            error_setg(&blocker, QERR_REPLAY_NOT_SUPPORTED,
+                      "-rtc base=localtime");
+            replay_add_blocker(blocker);
         } else {
             if (!configure_rtc_date_offset(value, 0)) {
                 return false;
@@ -1089,31 +1097,27 @@ static bool configure_rtc(QemuOpts *opts)
         } else if (!strcmp(value, "vm")) {
             rtc_clock = QEMU_CLOCK_VIRTUAL;
         } else {
-            fprintf(stderr, "qemu: invalid option value '%s'\n", value);
+            error_report("invalid option value '%s'", value);
             return false;
         }
     }
     value = qemu_opt_get(opts, "driftfix");
     if (value) {
         if (!strcmp(value, "slew")) {
-            static GlobalProperty slew_lost_ticks[] = {
-                {
-                    .driver   = "mc146818rtc",
-                    .property = "lost_tick_policy",
-                    .value    = "slew",
-                },
-                { /* end of list */ }
+            static GlobalProperty slew_lost_ticks = {
+                .driver   = "mc146818rtc",
+                .property = "lost_tick_policy",
+                .value    = "slew",
             };
 
-            qdev_prop_register_global_list(slew_lost_ticks);
+            qdev_prop_register_global(&slew_lost_ticks);
         } else if (!strcmp(value, "none")) {
             /* discard is default */
         } else {
-            fprintf(stderr, "qemu: invalid option value '%s'\n", value);
+            error_report("invalid option value '%s'", value);
             return false;
         }
     }
-
     return true;
 }
 
@@ -1137,7 +1141,7 @@ static int bt_hci_parse(const char *str)
     bdaddr_t bdaddr;
 
     if (nb_hcis >= MAX_NICS) {
-        fprintf(stderr, "qemu: Too many bluetooth HCIs (max %i).\n", MAX_NICS);
+        error_report("too many bluetooth HCIs (max %i)", MAX_NICS);
         return -1;
     }
 
@@ -1163,8 +1167,8 @@ static void bt_vhci_add(int vlan_id)
     struct bt_scatternet_s *vlan = qemu_find_bt_vlan(vlan_id);
 
     if (!vlan->slave)
-        fprintf(stderr, "qemu: warning: adding a VHCI to "
-                        "an empty scatternet %i\n", vlan_id);
+        error_report("warning: adding a VHCI to an empty scatternet %i",
+                     vlan_id);
 
     bt_vhci_init(bt_new_hci(vlan));
 }
@@ -1182,7 +1186,7 @@ static struct bt_device_s *bt_device_add(const char *opt)
     if (endp) {
         vlan_id = strtol(endp + 6, &endp, 0);
         if (*endp) {
-            fprintf(stderr, "qemu: unrecognised bluetooth vlan Id\n");
+            error_report("unrecognised bluetooth vlan Id");
             return 0;
         }
     }
@@ -1190,13 +1194,13 @@ static struct bt_device_s *bt_device_add(const char *opt)
     vlan = qemu_find_bt_vlan(vlan_id);
 
     if (!vlan->slave)
-        fprintf(stderr, "qemu: warning: adding a slave device to "
-                        "an empty scatternet %i\n", vlan_id);
+        error_report("warning: adding a slave device to an empty scatternet %i",
+                     vlan_id);
 
     if (!strcmp(devname, "keyboard"))
         return bt_keyboard_init(vlan);
 
-    fprintf(stderr, "qemu: unsupported bluetooth device `%s'\n", devname);
+    error_report("unsupported bluetooth device '%s'", devname);
     return 0;
 }
 
@@ -1219,11 +1223,11 @@ static int bt_parse(const char *opt)
                 if (strstart(endp, ",vlan=", &p)) {
                     vlan = strtol(p, (char **) &endp, 0);
                     if (*endp) {
-                        fprintf(stderr, "qemu: bad scatternet '%s'\n", p);
+                        error_report("bad scatternet '%s'", p);
                         return 1;
                     }
                 } else {
-                    fprintf(stderr, "qemu: bad parameter '%s'\n", endp + 1);
+                    error_report("bad parameter '%s'", endp + 1);
                     return 1;
                 }
             } else
@@ -1235,23 +1239,22 @@ static int bt_parse(const char *opt)
     } else if (strstart(opt, "device:", &endp))
         return !bt_device_add(endp);
 
-    fprintf(stderr, "qemu: bad bluetooth parameter '%s'\n", opt);
+    error_report("bad bluetooth parameter '%s'", opt);
     return 1;
 }
 
-static int parse_sandbox(QemuOpts *opts, void *opaque)
+static int parse_sandbox(void *opaque, QemuOpts *opts, Error **errp)
 {
     /* FIXME: change this to true for 1.3 */
     if (qemu_opt_get_bool(opts, "enable", false)) {
 #ifdef CONFIG_SECCOMP
         if (seccomp_start() < 0) {
-            qerror_report(ERROR_CLASS_GENERIC_ERROR,
-                          "failed to install seccomp syscall filter in the kernel");
+            error_report("failed to install seccomp syscall filter "
+                         "in the kernel");
             return -1;
         }
 #else
-        qerror_report(ERROR_CLASS_GENERIC_ERROR,
-                      "sandboxing request but seccomp is not compiled into this build");
+        error_report("seccomp support is disabled");
         return -1;
 #endif
     }
@@ -1259,7 +1262,7 @@ static int parse_sandbox(QemuOpts *opts, void *opaque)
     return 0;
 }
 
-static int parse_name(QemuOpts *opts, void *opaque)
+static int parse_name(void *opaque, QemuOpts *opts, Error **errp)
 {
     const char *proc_name;
 
@@ -1276,32 +1279,30 @@ static int parse_name(QemuOpts *opts, void *opaque)
     return 0;
 }
 
-bool usb_enabled(bool default_usb)
+bool defaults_enabled(void)
 {
-    return qemu_opt_get_bool(qemu_get_machine_opts(), "usb",
-                             has_defaults && default_usb);
+    return has_defaults;
 }
 
 #ifndef _WIN32
-static int parse_add_fd(QemuOpts *opts, void *opaque)
+static int parse_add_fd(void *opaque, QemuOpts *opts, Error **errp)
 {
     int fd, dupfd, flags;
     int64_t fdset_id;
     const char *fd_opaque = NULL;
+    AddfdInfo *fdinfo;
 
     fd = qemu_opt_get_number(opts, "fd", -1);
     fdset_id = qemu_opt_get_number(opts, "set", -1);
     fd_opaque = qemu_opt_get(opts, "opaque");
 
     if (fd < 0) {
-        qerror_report(ERROR_CLASS_GENERIC_ERROR,
-                      "fd option is required and must be non-negative");
+        error_report("fd option is required and must be non-negative");
         return -1;
     }
 
     if (fd <= STDERR_FILENO) {
-        qerror_report(ERROR_CLASS_GENERIC_ERROR,
-                      "fd cannot be a standard I/O stream");
+        error_report("fd cannot be a standard I/O stream");
         return -1;
     }
 
@@ -1311,14 +1312,12 @@ static int parse_add_fd(QemuOpts *opts, void *opaque)
      */
     flags = fcntl(fd, F_GETFD);
     if (flags == -1 || (flags & FD_CLOEXEC)) {
-        qerror_report(ERROR_CLASS_GENERIC_ERROR,
-                      "fd is not valid or already in use");
+        error_report("fd is not valid or already in use");
         return -1;
     }
 
     if (fdset_id < 0) {
-        qerror_report(ERROR_CLASS_GENERIC_ERROR,
-                      "set option is required and must be non-negative");
+        error_report("set option is required and must be non-negative");
         return -1;
     }
 
@@ -1331,19 +1330,19 @@ static int parse_add_fd(QemuOpts *opts, void *opaque)
     }
 #endif
     if (dupfd == -1) {
-        qerror_report(ERROR_CLASS_GENERIC_ERROR,
-                      "Error duplicating fd: %s", strerror(errno));
+        error_report("error duplicating fd: %s", strerror(errno));
         return -1;
     }
 
     /* add the duplicate fd, and optionally the opaque string, to the fd set */
-    monitor_fdset_add_fd(dupfd, true, fdset_id, fd_opaque ? true : false,
-                         fd_opaque, NULL);
+    fdinfo = monitor_fdset_add_fd(dupfd, true, fdset_id, !!fd_opaque, fd_opaque,
+                                  &error_abort);
+    g_free(fdinfo);
 
     return 0;
 }
 
-static int cleanup_add_fd(QemuOpts *opts, void *opaque)
+static int cleanup_add_fd(void *opaque, QemuOpts *opts, Error **errp)
 {
     int fd;
 
@@ -1364,17 +1363,17 @@ static int cleanup_add_fd(QemuOpts *opts, void *opaque)
 #define MTD_OPTS ""
 #define SD_OPTS ""
 
-static int drive_init_func(QemuOpts *opts, void *opaque)
+static int drive_init_func(void *opaque, QemuOpts *opts, Error **errp)
 {
     BlockInterfaceType *block_default_type = opaque;
 
     return drive_new(opts, *block_default_type) == NULL;
 }
 
-static int drive_enable_snapshot(QemuOpts *opts, void *opaque)
+static int drive_enable_snapshot(void *opaque, QemuOpts *opts, Error **errp)
 {
     if (qemu_opt_get(opts, "snapshot") == NULL) {
-        qemu_opt_set(opts, "snapshot", "on");
+        qemu_opt_set(opts, "snapshot", "on", &error_abort);
     }
     return 0;
 }
@@ -1391,7 +1390,7 @@ static bool default_drive(int enable, int snapshot, BlockInterfaceType type,
 
     opts = drive_add(type, index, NULL, optstr);
     if (snapshot) {
-        drive_enable_snapshot(opts, NULL);
+        drive_enable_snapshot(NULL, opts, NULL);
     }
 
     dinfo = drive_new(opts, type);
@@ -1400,67 +1399,6 @@ static bool default_drive(int enable, int snapshot, BlockInterfaceType type,
     }
     dinfo->is_default = true;
     return true;
-}
-
-void qemu_register_boot_set(QEMUBootSetHandler *func, void *opaque)
-{
-    boot_set_handler = func;
-    boot_set_opaque = opaque;
-}
-
-int qemu_boot_set(const char *boot_order)
-{
-    if (!boot_set_handler) {
-        return -EINVAL;
-    }
-    return boot_set_handler(boot_set_opaque, boot_order);
-}
-
-static bool validate_bootdevices(const char *devices)
-{
-    /* We just do some generic consistency checks */
-    const char *p;
-    int bitmap = 0;
-
-    for (p = devices; *p != '\0'; p++) {
-        /* Allowed boot devices are:
-         * a-b: floppy disk drives
-         * c-f: IDE disk drives
-         * g-m: machine implementation dependent drives
-         * n-p: network devices
-         * It's up to each machine implementation to check if the given boot
-         * devices match the actual hardware implementation and firmware
-         * features.
-         */
-        if (*p < 'a' || *p > 'p') {
-            fprintf(stderr, "Invalid boot device '%c'\n", *p);
-            return false;
-        }
-        if (bitmap & (1 << (*p - 'a'))) {
-            fprintf(stderr, "Boot device '%c' was given twice\n", *p);
-            return false;
-        }
-        bitmap |= 1 << (*p - 'a');
-    }
-
-    return true;
-}
-
-static void restore_boot_order(void *opaque)
-{
-    char *normal_boot_order = opaque;
-    static int first = 1;
-
-    /* Restore boot order and remove ourselves after the first boot */
-    if (first) {
-        first = 0;
-        return;
-    }
-
-    qemu_boot_set(normal_boot_order);
-
-    qemu_unregister_reset(restore_boot_order, normal_boot_order);
-    g_free(normal_boot_order);
 }
 
 static QemuOptsList qemu_smp_opts = {
@@ -1492,7 +1430,6 @@ static QemuOptsList qemu_smp_opts = {
 static bool smp_parse(QemuOpts *opts)
 {
     if (opts) {
-
         unsigned cpus    = qemu_opt_get_number(opts, "cpus", 0);
         unsigned sockets = qemu_opt_get_number(opts, "sockets", 0);
         unsigned cores   = qemu_opt_get_number(opts, "cores", 0);
@@ -1506,36 +1443,51 @@ static bool smp_parse(QemuOpts *opts)
             if (cpus == 0) {
                 cpus = cores * threads * sockets;
             }
-        } else {
-            if (cores == 0) {
-                threads = threads > 0 ? threads : 1;
-                cores = cpus / (sockets * threads);
-            } else {
-                threads = cpus / (cores * sockets);
-            }
+        } else if (cores == 0) {
+            threads = threads > 0 ? threads : 1;
+            cores = cpus / (sockets * threads);
+            cores = cores > 0 ? cores : 1;
+        } else if (threads == 0) {
+            threads = cpus / (cores * sockets);
+            threads = threads > 0 ? threads : 1;
+        } else if (sockets * cores * threads < cpus) {
+            error_report("cpu topology: "
+                         "sockets (%u) * cores (%u) * threads (%u) < "
+                         "smp_cpus (%u)",
+                         sockets, cores, threads, cpus);
+            return false;
         }
 
-        max_cpus = qemu_opt_get_number(opts, "maxcpus", 0);
+        max_cpus = qemu_opt_get_number(opts, "maxcpus", cpus);
+
+        if (max_cpus > MAX_CPUMASK_BITS) {
+            error_report("unsupported number of maxcpus");
+            return false;
+        }
+
+        if (max_cpus < cpus) {
+            error_report("maxcpus must be equal to or greater than smp");
+            return false;
+        }
+
+        if (sockets * cores * threads > max_cpus) {
+            error_report("cpu topology: "
+                         "sockets (%u) * cores (%u) * threads (%u) > "
+                         "maxcpus (%u)",
+                         sockets, cores, threads, max_cpus);
+            return false;
+        }
 
         smp_cpus = cpus;
-        smp_cores = cores > 0 ? cores : 1;
-        smp_threads = threads > 0 ? threads : 1;
-
+        smp_cores = cores;
+        smp_threads = threads;
     }
 
-    if (max_cpus == 0) {
-        max_cpus = smp_cpus;
+    if (smp_cpus > 1) {
+        Error *blocker = NULL;
+        error_setg(&blocker, QERR_REPLAY_NOT_SUPPORTED, "smp");
+        replay_add_blocker(blocker);
     }
-
-    if (max_cpus > MAX_CPUMASK_BITS) {
-        fprintf(stderr, "Unsupported number of maxcpus\n");
-        return false;
-    }
-    if (max_cpus < smp_cpus) {
-        fprintf(stderr, "maxcpus must be equal to or greater than smp\n");
-        return false;
-    }
-
     return true;
 }
 
@@ -1543,11 +1495,10 @@ static bool realtime_init(void)
 {
     if (enable_mlock) {
         if (os_mlock() < 0) {
-            fprintf(stderr, "qemu: locking memory failed\n");
+            error_report("locking memory failed");
             return false;
         }
     }
-
     return true;
 }
 
@@ -1555,6 +1506,88 @@ static bool realtime_init(void)
 static void configure_msg(QemuOpts *opts)
 {
     enable_timestamp_msg = qemu_opt_get_bool(opts, "timestamp", true);
+}
+
+/***********************************************************/
+/* Semihosting */
+
+typedef struct SemihostingConfig {
+    bool enabled;
+    SemihostingTarget target;
+    const char **argv;
+    int argc;
+    const char *cmdline; /* concatenated argv */
+} SemihostingConfig;
+
+static SemihostingConfig semihosting;
+
+bool semihosting_enabled(void)
+{
+    return semihosting.enabled;
+}
+
+SemihostingTarget semihosting_get_target(void)
+{
+    return semihosting.target;
+}
+
+const char *semihosting_get_arg(int i)
+{
+    if (i >= semihosting.argc) {
+        return NULL;
+    }
+    return semihosting.argv[i];
+}
+
+int semihosting_get_argc(void)
+{
+    return semihosting.argc;
+}
+
+const char *semihosting_get_cmdline(void)
+{
+    if (semihosting.cmdline == NULL && semihosting.argc > 0) {
+        semihosting.cmdline = g_strjoinv(" ", (gchar **)semihosting.argv);
+    }
+    return semihosting.cmdline;
+}
+
+static int add_semihosting_arg(void *opaque,
+                               const char *name, const char *val,
+                               Error **errp)
+{
+    SemihostingConfig *s = opaque;
+    if (strcmp(name, "arg") == 0) {
+        s->argc++;
+        /* one extra element as g_strjoinv() expects NULL-terminated array */
+        s->argv = g_realloc(s->argv, (s->argc + 1) * sizeof(void *));
+        s->argv[s->argc - 1] = val;
+        s->argv[s->argc] = NULL;
+    }
+    return 0;
+}
+
+/* Use strings passed via -kernel/-append to initialize semihosting.argv[] */
+static inline void semihosting_arg_fallback(const char *file, const char *cmd)
+{
+    char *cmd_token;
+
+    /* argv[0] */
+    add_semihosting_arg(&semihosting, "arg", file, NULL);
+
+    /* split -append and initialize argv[1..n] */
+    cmd_token = strtok(g_strdup(cmd), " ");
+    while (cmd_token) {
+        add_semihosting_arg(&semihosting, "arg", cmd_token, NULL);
+        cmd_token = strtok(NULL, " ");
+    }
+}
+
+/* Now we still need this for compatibility with XEN. */
+bool has_igd_gfx_passthru;
+static void igd_gfx_passthru(void)
+{
+    has_igd_gfx_passthru = current_machine->igd_gfx_passthru;
 }
 
 /***********************************************************/
@@ -1567,7 +1600,7 @@ static int usb_device_add(const char *devname)
     const char *p;
 #endif
 
-    if (!usb_enabled(false)) {
+    if (!machine_usb(current_machine)) {
         return -1;
     }
 
@@ -1599,7 +1632,7 @@ static int usb_device_del(const char *devname)
         return -1;
     }
 
-    if (!usb_enabled(false)) {
+    if (!machine_usb(current_machine)) {
         return -1;
     }
 
@@ -1617,12 +1650,12 @@ static int usb_parse(const char *cmdline)
     int r;
     r = usb_device_add(cmdline);
     if (r < 0) {
-        fprintf(stderr, "qemu: could not add USB device '%s'\n", cmdline);
+        error_report("could not add USB device '%s'", cmdline);
     }
     return r;
 }
 
-void do_usb_add(Monitor *mon, const QDict *qdict)
+void hmp_usb_add(Monitor *mon, const QDict *qdict)
 {
     const char *devname = qdict_get_str(qdict, "devname");
     if (usb_device_add(devname) < 0) {
@@ -1630,7 +1663,7 @@ void do_usb_add(Monitor *mon, const QDict *qdict)
     }
 }
 
-void do_usb_del(Monitor *mon, const QDict *qdict)
+void hmp_usb_del(Monitor *mon, const QDict *qdict)
 {
     const char *devname = qdict_get_str(qdict, "devname");
     if (usb_device_del(devname) < 0) {
@@ -1642,54 +1675,6 @@ void do_usb_del(Monitor *mon, const QDict *qdict)
 /* machine registration */
 
 MachineState *current_machine;
-
-static void machine_class_init(ObjectClass *oc, void *data)
-{
-    MachineClass *mc = MACHINE_CLASS(oc);
-    QEMUMachine *qm = data;
-
-    mc->family = qm->family;
-    mc->name = qm->name;
-    mc->alias = qm->alias;
-    mc->desc = qm->desc;
-    mc->init = qm->init;
-    mc->reset = qm->reset;
-    mc->hot_add_cpu = qm->hot_add_cpu;
-    mc->kvm_type = qm->kvm_type;
-    mc->block_default_type = qm->block_default_type;
-    mc->units_per_default_bus = qm->units_per_default_bus;
-    mc->max_cpus = qm->max_cpus;
-    mc->no_serial = qm->no_serial;
-    mc->no_parallel = qm->no_parallel;
-    mc->use_virtcon = qm->use_virtcon;
-    mc->use_sclp = qm->use_sclp;
-    mc->no_floppy = qm->no_floppy;
-    mc->no_cdrom = qm->no_cdrom;
-    mc->no_sdcard = qm->no_sdcard;
-    mc->has_dynamic_sysbus = qm->has_dynamic_sysbus;
-    mc->is_default = qm->is_default;
-    mc->default_machine_opts = qm->default_machine_opts;
-    mc->default_boot_order = qm->default_boot_order;
-    mc->default_display = qm->default_display;
-    mc->compat_props = qm->compat_props;
-    mc->hw_version = qm->hw_version;
-}
-
-int qemu_register_machine(QEMUMachine *m)
-{
-    char *name = g_strconcat(m->name, TYPE_MACHINE_SUFFIX, NULL);
-    TypeInfo ti = {
-        .name       = name,
-        .parent     = TYPE_MACHINE,
-        .class_init = machine_class_init,
-        .class_data = (void *)m,
-    };
-
-    type_register(&ti);
-    g_free(name);
-
-    return 0;
-}
 
 static MachineClass *find_machine(const char *name)
 {
@@ -1755,6 +1740,7 @@ MachineInfoList *qmp_query_machines(Error **errp)
 
         info->name = g_strdup(mc->name);
         info->cpu_max = !mc->max_cpus ? 1 : mc->max_cpus;
+        info->hotpluggable_cpus = !!mc->query_hotpluggable_cpus;
 
         entry = g_malloc0(sizeof(*entry));
         entry->value = info;
@@ -1764,6 +1750,33 @@ MachineInfoList *qmp_query_machines(Error **errp)
 
     g_slist_free(machines);
     return mach_list;
+}
+
+static int machine_help_func(QemuOpts *opts, MachineState *machine)
+{
+    ObjectProperty *prop;
+    ObjectPropertyIterator iter;
+
+    if (!qemu_opt_has_help_opt(opts)) {
+        return 0;
+    }
+
+    object_property_iter_init(&iter, OBJECT(machine));
+    while ((prop = object_property_iter_next(&iter))) {
+        if (!prop->set) {
+            continue;
+        }
+
+        error_printf("%s.%s=%s", MACHINE_GET_CLASS(machine)->name,
+                     prop->name, prop->type);
+        if (prop->description) {
+            error_printf(" (%s)\n", prop->description);
+        } else {
+            error_printf("\n");
+        }
+    }
+
+    return 1;
 }
 
 /***********************************************************/
@@ -1850,14 +1863,14 @@ static int qemu_shutdown_requested(void)
 static void qemu_kill_report(void)
 {
     if (!qtest_driver() && shutdown_signal != -1) {
-        fprintf(stderr, "qemu: terminating on signal %d", shutdown_signal);
         if (shutdown_pid == 0) {
             /* This happens for eg ^C at the terminal, so it's worth
              * avoiding printing an odd message in that case.
              */
-            fputc('\n', stderr);
+            error_report("terminating on signal %d", shutdown_signal);
         } else {
-            fprintf(stderr, " from pid " FMT_pid "\n", shutdown_pid);
+            error_report("terminating on signal %d from pid " FMT_pid,
+                         shutdown_signal, shutdown_pid);
         }
         shutdown_signal = -1;
     }
@@ -1866,15 +1879,21 @@ static void qemu_kill_report(void)
 static int qemu_reset_requested(void)
 {
     int r = reset_requested;
-    reset_requested = 0;
-    return r;
+    if (r && replay_checkpoint(CHECKPOINT_RESET_REQUESTED)) {
+        reset_requested = 0;
+        return r;
+    }
+    return false;
 }
 
 static int qemu_suspend_requested(void)
 {
     int r = suspend_requested;
-    suspend_requested = 0;
-    return r;
+    if (r && replay_checkpoint(CHECKPOINT_SUSPEND_REQUESTED)) {
+        suspend_requested = 0;
+        return r;
+    }
+    return false;
 }
 
 static WakeupReason qemu_wakeup_requested(void)
@@ -1934,6 +1953,8 @@ void qemu_system_reset(bool report)
 
     mc = current_machine ? MACHINE_GET_CLASS(current_machine) : NULL;
 
+    cpu_synchronize_all_states();
+
     if (mc && mc->reset) {
         mc->reset();
     } else {
@@ -1943,6 +1964,15 @@ void qemu_system_reset(bool report)
         qapi_event_send_reset(&error_abort);
     }
     cpu_synchronize_all_post_reset();
+}
+
+void qemu_system_guest_panicked(void)
+{
+    if (current_cpu) {
+        current_cpu->crash_occurred = true;
+    }
+    qapi_event_send_guest_panicked(GUEST_PANIC_ACTION_PAUSE, &error_abort);
+    vm_stop(RUN_STATE_GUEST_PANICKED);
 }
 
 void qemu_system_reset_request(void)
@@ -2013,12 +2043,18 @@ void qemu_system_killed(int signal, pid_t pid)
     shutdown_signal = signal;
     shutdown_pid = pid;
     no_shutdown = 0;
-    qemu_system_shutdown_request();
+
+    /* Cannot call qemu_system_shutdown_request directly because
+     * we are in a signal handler.
+     */
+    shutdown_requested = 1;
+    qemu_notify_event();
 }
 
 void qemu_system_shutdown_request(void)
 {
     trace_qemu_system_shutdown_request();
+    replay_shutdown_request();
     shutdown_requested = 1;
     qemu_notify_event();
 }
@@ -2067,16 +2103,15 @@ static bool main_loop_should_exit(void)
     }
     if (qemu_reset_requested()) {
         pause_all_vcpus();
-        cpu_synchronize_all_states();
         qemu_system_reset(VMRESET_REPORT);
         resume_all_vcpus();
-        if (runstate_needs_reset()) {
-            runstate_set(RUN_STATE_PAUSED);
+        if (!runstate_check(RUN_STATE_RUNNING) &&
+                !runstate_check(RUN_STATE_INMIGRATE)) {
+            runstate_set(RUN_STATE_PRELAUNCH);
         }
     }
     if (qemu_wakeup_requested()) {
         pause_all_vcpus();
-        cpu_synchronize_all_states();
         qemu_system_reset(VMRESET_SILENT);
         notifier_list_notify(&wakeup_notifiers, &wakeup_reason);
         wakeup_reason = QEMU_WAKEUP_REASON_NONE;
@@ -2100,13 +2135,19 @@ static void main_loop(void)
     int64_t ti;
 #endif
 
+#ifdef CONFIG_HAX
     if (hax_sync_vcpus() < 0) {
         fprintf(stderr, "Internal error: hax sync failed\n");
         return;
     }
+#endif
 
     do {
+#ifdef CONFIG_HAX
         nonblocking = !kvm_enabled() && !xen_enabled() && !hax_enabled() && last_io > 0;
+#else
+        nonblocking = !kvm_enabled() && !xen_enabled() && last_io > 0;
+#endif
 #ifdef CONFIG_PROFILER
         ti = profile_getclock();
 #endif
@@ -2119,7 +2160,8 @@ static void main_loop(void)
 
 static void version(void)
 {
-    printf("QEMU emulator version " QEMU_VERSION " " QEMU_PKGVERSION ", Copyright (c) 2003-2008 Fabrice Bellard\n");
+    printf("QEMU emulator version " QEMU_VERSION " " QEMU_PKGVERSION ", "
+           QEMU_COPYRIGHT "\n");
 }
 
 static void help(void)
@@ -2156,89 +2198,88 @@ static const QEMUOption qemu_options[] = {
     { NULL },
 };
 
-static bool vga_available(void)
+typedef struct VGAInterfaceInfo {
+    const char *opt_name;    /* option name */
+    const char *name;        /* human-readable name */
+    /* Class names indicating that support is available.
+     * If no class is specified, the interface is always available */
+    const char *class_names[2];
+} VGAInterfaceInfo;
+
+static VGAInterfaceInfo vga_interfaces[VGA_TYPE_MAX] = {
+    [VGA_NONE] = {
+        .opt_name = "none",
+    },
+    [VGA_STD] = {
+        .opt_name = "std",
+        .name = "standard VGA",
+        .class_names = { "VGA", "isa-vga" },
+    },
+    [VGA_CIRRUS] = {
+        .opt_name = "cirrus",
+        .name = "Cirrus VGA",
+        .class_names = { "cirrus-vga", "isa-cirrus-vga" },
+    },
+    [VGA_VMWARE] = {
+        .opt_name = "vmware",
+        .name = "VMWare SVGA",
+        .class_names = { "vmware-svga" },
+    },
+    [VGA_VIRTIO] = {
+        .opt_name = "virtio",
+        .name = "Virtio VGA",
+        .class_names = { "virtio-vga" },
+    },
+    [VGA_QXL] = {
+        .opt_name = "qxl",
+        .name = "QXL VGA",
+        .class_names = { "qxl-vga" },
+    },
+    [VGA_TCX] = {
+        .opt_name = "tcx",
+        .name = "TCX framebuffer",
+        .class_names = { "SUNW,tcx" },
+    },
+    [VGA_CG3] = {
+        .opt_name = "cg3",
+        .name = "CG3 framebuffer",
+        .class_names = { "cgthree" },
+    },
+    [VGA_XENFB] = {
+        .opt_name = "xenfb",
+    },
+};
+
+static bool vga_interface_available(VGAInterfaceType t)
 {
-    return object_class_by_name("VGA") || object_class_by_name("isa-vga");
+    VGAInterfaceInfo *ti = &vga_interfaces[t];
+
+    assert(t < VGA_TYPE_MAX);
+    return !ti->class_names[0] ||
+           object_class_by_name(ti->class_names[0]) ||
+           object_class_by_name(ti->class_names[1]);
 }
 
-static bool cirrus_vga_available(void)
-{
-    return object_class_by_name("cirrus-vga")
-           || object_class_by_name("isa-cirrus-vga");
-}
-
-static bool vmware_vga_available(void)
-{
-    return object_class_by_name("vmware-svga");
-}
-
-static bool qxl_vga_available(void)
-{
-    return object_class_by_name("qxl-vga");
-}
-
-static bool tcx_vga_available(void)
-{
-    return object_class_by_name("SUNW,tcx");
-}
-
-static bool cg3_vga_available(void)
-{
-    return object_class_by_name("cgthree");
-}
-
-static bool select_vgahw (const char *p)
+static bool select_vgahw(const char *p)
 {
     const char *opts;
+    int t;
 
     assert(vga_interface_type == VGA_NONE);
-    if (strstart(p, "std", &opts)) {
-        if (vga_available()) {
-            vga_interface_type = VGA_STD;
-        } else {
-            fprintf(stderr, "Error: standard VGA not available\n");
-            return false;
+    for (t = 0; t < VGA_TYPE_MAX; t++) {
+        VGAInterfaceInfo *ti = &vga_interfaces[t];
+        if (ti->opt_name && strstart(p, ti->opt_name, &opts)) {
+            if (!vga_interface_available(t)) {
+                error_report("%s not available", ti->name);
+                return false;
+            }
+            vga_interface_type = t;
+            break;
         }
-    } else if (strstart(p, "cirrus", &opts)) {
-        if (cirrus_vga_available()) {
-            vga_interface_type = VGA_CIRRUS;
-        } else {
-            fprintf(stderr, "Error: Cirrus VGA not available\n");
-            return false;
-        }
-    } else if (strstart(p, "vmware", &opts)) {
-        if (vmware_vga_available()) {
-            vga_interface_type = VGA_VMWARE;
-        } else {
-            fprintf(stderr, "Error: VMWare SVGA not available\n");
-            return false;
-        }
-    } else if (strstart(p, "xenfb", &opts)) {
-        vga_interface_type = VGA_XENFB;
-    } else if (strstart(p, "qxl", &opts)) {
-        if (qxl_vga_available()) {
-            vga_interface_type = VGA_QXL;
-        } else {
-            fprintf(stderr, "Error: QXL VGA not available\n");
-            return false;
-        }
-    } else if (strstart(p, "tcx", &opts)) {
-        if (tcx_vga_available()) {
-            vga_interface_type = VGA_TCX;
-        } else {
-            fprintf(stderr, "Error: TCX framebuffer not available\n");
-            return false;
-        }
-    } else if (strstart(p, "cg3", &opts)) {
-        if (cg3_vga_available()) {
-            vga_interface_type = VGA_CG3;
-        } else {
-            fprintf(stderr, "Error: CG3 framebuffer not available\n");
-            return false;
-        }
-    } else if (!strstart(p, "none", &opts)) {
+    }
+    if (t == VGA_TYPE_MAX) {
     invalid_vga:
-        fprintf(stderr, "Unknown vga type: %s\n", p);
+        error_report("unknown vga type: %s", p);
         return false;
     }
     while (*opts) {
@@ -2254,9 +2295,18 @@ static bool select_vgahw (const char *p)
         } else goto invalid_vga;
         opts = nextopt;
     }
-
     return true;
 }
+
+typedef enum DisplayType {
+    DT_DEFAULT,
+    DT_CURSES,
+    DT_SDL,
+    DT_COCOA,
+    DT_GTK,
+    DT_NONE,
+    DT_ERROR = -1,
+} DisplayType;
 
 static DisplayType select_display(const char *p)
 {
@@ -2305,42 +2355,39 @@ static DisplayType select_display(const char *p)
                 } else {
                     goto invalid_sdl_args;
                 }
+            } else if (strstart(opts, ",gl=", &nextopt)) {
+                opts = nextopt;
+                if (strstart(opts, "on", &nextopt)) {
+                    request_opengl = 1;
+                } else if (strstart(opts, "off", &nextopt)) {
+                    request_opengl = 0;
+                } else {
+                    goto invalid_sdl_args;
+                }
             } else {
             invalid_sdl_args:
-                fprintf(stderr, "Invalid SDL option string: %s\n", p);
-                return -1;
+                error_report("invalid SDL option string");
+                return DT_ERROR;
             }
             opts = nextopt;
         }
 #else
-        fprintf(stderr, "SDL support is disabled\n");
-        return -1;
+        error_report("SDL support is disabled");
+        return DT_ERROR;
 #endif
     } else if (strstart(p, "vnc", &opts)) {
-#ifdef CONFIG_VNC
-        display_remote++;
-
-        if (*opts) {
-            const char *nextopt;
-
-            if (strstart(opts, "=", &nextopt)) {
-                vnc_display = nextopt;
-            }
+        if (*opts == '=') {
+            vnc_parse(opts + 1, &error_fatal);
+        } else {
+            error_report("VNC requires a display argument vnc=<display>");
+            return DT_ERROR;
         }
-        if (!vnc_display) {
-            fprintf(stderr, "VNC requires a display argument vnc=<display>\n");
-            return -1;
-        }
-#else
-        fprintf(stderr, "VNC support is disabled\n");
-        return -1;
-#endif
     } else if (strstart(p, "curses", &opts)) {
 #ifdef CONFIG_CURSES
         display = DT_CURSES;
 #else
-        fprintf(stderr, "Curses support is disabled\n");
-        return -1;
+        error_report("curses support is disabled");
+        return DT_ERROR;
 #endif
     } else if (strstart(p, "gtk", &opts)) {
 #ifdef CONFIG_GTK
@@ -2357,22 +2404,31 @@ static DisplayType select_display(const char *p)
                 } else {
                     goto invalid_gtk_args;
                 }
+            } else if (strstart(opts, ",gl=", &nextopt)) {
+                opts = nextopt;
+                if (strstart(opts, "on", &nextopt)) {
+                    request_opengl = 1;
+                } else if (strstart(opts, "off", &nextopt)) {
+                    request_opengl = 0;
+                } else {
+                    goto invalid_gtk_args;
+                }
             } else {
             invalid_gtk_args:
-                fprintf(stderr, "Invalid GTK option string: %s\n", p);
-                return -1;
+                error_report("invalid GTK option string");
+                return DT_ERROR;
             }
             opts = nextopt;
         }
 #else
-        fprintf(stderr, "GTK support is disabled\n");
-        return -1;
+        error_report("GTK support is disabled");
+        return DT_ERROR;
 #endif
     } else if (strstart(p, "none", &opts)) {
         display = DT_NONE;
     } else {
-        fprintf(stderr, "Unknown display type: %s\n", p);
-        return -1;
+        error_report("unknown display type");
+        return DT_ERROR;
     }
 
     return display;
@@ -2389,7 +2445,8 @@ static int balloon_parse(const char *arg)
     if (!strncmp(arg, "virtio", 6)) {
         if (arg[6] == ',') {
             /* have params -> parse them */
-            opts = qemu_opts_parse(qemu_find_opts("device"), arg+7, 0);
+            opts = qemu_opts_parse_noisily(qemu_find_opts("device"), arg + 7,
+                                           false);
             if (!opts)
                 return  -1;
         } else {
@@ -2397,7 +2454,7 @@ static int balloon_parse(const char *arg)
             opts = qemu_opts_create(qemu_find_opts("device"), NULL, 0,
                                     &error_abort);
         }
-        qemu_opt_set(opts, "driver", "virtio-balloon");
+        qemu_opt_set(opts, "driver", "virtio-balloon", &error_abort);
         return 0;
     }
 
@@ -2438,46 +2495,98 @@ char *qemu_find_file(int type, const char *name)
     return NULL;
 }
 
-static int device_help_func(QemuOpts *opts, void *opaque)
+static inline bool nonempty_str(const char *str)
+{
+    return str && *str;
+}
+
+static int parse_fw_cfg(void *opaque, QemuOpts *opts, Error **errp)
+{
+    gchar *buf;
+    size_t size;
+    const char *name, *file, *str;
+    FWCfgState *fw_cfg = (FWCfgState *) opaque;
+
+    if (fw_cfg == NULL) {
+        error_report("fw_cfg device not available");
+        return -1;
+    }
+    name = qemu_opt_get(opts, "name");
+    file = qemu_opt_get(opts, "file");
+    str = qemu_opt_get(opts, "string");
+
+    /* we need name and either a file or the content string */
+    if (!(nonempty_str(name) && (nonempty_str(file) || nonempty_str(str)))) {
+        error_report("invalid argument(s)");
+        return -1;
+    }
+    if (nonempty_str(file) && nonempty_str(str)) {
+        error_report("file and string are mutually exclusive");
+        return -1;
+    }
+    if (strlen(name) > FW_CFG_MAX_FILE_PATH - 1) {
+        error_report("name too long (max. %d char)", FW_CFG_MAX_FILE_PATH - 1);
+        return -1;
+    }
+    if (strncmp(name, "opt/", 4) != 0) {
+        error_report("warning: externally provided fw_cfg item names "
+                     "should be prefixed with \"opt/\"");
+    }
+    if (nonempty_str(str)) {
+        size = strlen(str); /* NUL terminator NOT included in fw_cfg blob */
+        buf = g_memdup(str, size);
+    } else {
+        if (!g_file_get_contents(file, &buf, &size, NULL)) {
+            error_report("can't load %s", file);
+            return -1;
+        }
+    }
+    /* For legacy, keep user files in a specific global order. */
+    fw_cfg_set_order_override(fw_cfg, FW_CFG_ORDER_OVERRIDE_USER);
+    fw_cfg_add_file(fw_cfg, name, buf, size);
+    fw_cfg_reset_order_override(fw_cfg);
+    return 0;
+}
+
+static int device_help_func(void *opaque, QemuOpts *opts, Error **errp)
 {
     return qdev_device_help(opts);
 }
 
-static int device_init_func(QemuOpts *opts, void *opaque)
+static int device_init_func(void *opaque, QemuOpts *opts, Error **errp)
 {
+    Error *err = NULL;
     DeviceState *dev;
 
-    dev = qdev_device_add(opts);
-    if (!dev)
+    dev = qdev_device_add(opts, &err);
+    if (!dev) {
+        error_report_err(err);
         return -1;
+    }
     object_unref(OBJECT(dev));
     return 0;
 }
 
-static int chardev_init_func(QemuOpts *opts, void *opaque)
+static int chardev_init_func(void *opaque, QemuOpts *opts, Error **errp)
 {
     Error *local_err = NULL;
 
     qemu_chr_new_from_opts(opts, NULL, &local_err);
     if (local_err) {
-        error_report("%s", error_get_pretty(local_err));
-        error_free(local_err);
+        error_report_err(local_err);
         return -1;
     }
     return 0;
 }
 
 #ifdef CONFIG_VIRTFS
-static int fsdev_init_func(QemuOpts *opts, void *opaque)
+static int fsdev_init_func(void *opaque, QemuOpts *opts, Error **errp)
 {
-    int ret;
-    ret = qemu_fsdev_add(opts);
-
-    return ret;
+    return qemu_fsdev_add(opts);
 }
 #endif
 
-static int mon_init_func(QemuOpts *opts, void *opaque)
+static int mon_init_func(void *opaque, QemuOpts *opts, Error **errp)
 {
     CharDriverState *chr;
     const char *chardev;
@@ -2493,8 +2602,8 @@ static int mon_init_func(QemuOpts *opts, void *opaque)
     } else if (strcmp(mode, "control") == 0) {
         flags = MONITOR_USE_CONTROL;
     } else {
-        fprintf(stderr, "unknown monitor mode \"%s\"\n", mode);
-        return 1;
+        error_report("unknown monitor mode \"%s\"", mode);
+        return -1;
     }
 
     if (qemu_opt_get_bool(opts, "pretty", 0))
@@ -2506,8 +2615,8 @@ static int mon_init_func(QemuOpts *opts, void *opaque)
     chardev = qemu_opt_get(opts, "chardev");
     chr = qemu_chr_find(chardev);
     if (chr == NULL) {
-        fprintf(stderr, "chardev \"%s\" not found\n", chardev);
-        return 1;
+        error_report("chardev \"%s\" not found", chardev);
+        return -1;
     }
 
     qemu_chr_fe_claim_no_fail(chr);
@@ -2515,7 +2624,7 @@ static int mon_init_func(QemuOpts *opts, void *opaque)
     return 0;
 }
 
-static bool monitor_parse(const char *optarg, const char *mode)
+static bool monitor_parse(const char *optarg, const char *mode, bool pretty)
 {
     static int monitor_device_index = 0;
     QemuOpts *opts;
@@ -2533,22 +2642,18 @@ static bool monitor_parse(const char *optarg, const char *mode)
         }
         opts = qemu_chr_parse_compat(label, optarg);
         if (!opts) {
-            fprintf(stderr, "parse error: %s\n", optarg);
+            error_report("parse error: %s", optarg);
             return false;
         }
     }
 
-    opts = qemu_opts_create(qemu_find_opts("mon"), label, 1, NULL);
-    if (!opts) {
-        fprintf(stderr, "duplicate chardev: %s\n", label);
-        return false;
-    }
-    qemu_opt_set(opts, "mode", mode);
-    qemu_opt_set(opts, "chardev", label);
+    opts = qemu_opts_create(qemu_find_opts("mon"), label, 1, &error_fatal);
+    qemu_opt_set(opts, "mode", mode, &error_abort);
+    qemu_opt_set(opts, "chardev", label, &error_abort);
+    qemu_opt_set_bool(opts, "pretty", pretty, &error_abort);
     if (def)
-        qemu_opt_set(opts, "default", "on");
+        qemu_opt_set(opts, "default", "on", &error_abort);
     monitor_device_index++;
-
     return true;
 }
 
@@ -2608,14 +2713,14 @@ static int serial_parse(const char *devname)
     if (strcmp(devname, "none") == 0)
         return 0;
     if (index == MAX_SERIAL_PORTS) {
-        fprintf(stderr, "qemu: too many serial ports\n");
+        error_report("too many serial ports");
         return -1;
     }
     snprintf(label, sizeof(label), "serial%d", index);
     serial_hds[index] = qemu_chr_new(label, devname, NULL);
     if (!serial_hds[index]) {
-        fprintf(stderr, "qemu: could not connect serial device"
-                " to character backend '%s'\n", devname);
+        error_report("could not connect serial device"
+                     " to character backend '%s'", devname);
         return -1;
     }
     index++;
@@ -2630,14 +2735,14 @@ static int parallel_parse(const char *devname)
     if (strcmp(devname, "none") == 0)
         return 0;
     if (index == MAX_PARALLEL_PORTS) {
-        fprintf(stderr, "qemu: too many parallel ports\n");
+        error_report("too many parallel ports");
         return -1;
     }
     snprintf(label, sizeof(label), "parallel%d", index);
     parallel_hds[index] = qemu_chr_new(label, devname, NULL);
     if (!parallel_hds[index]) {
-        fprintf(stderr, "qemu: could not connect parallel device"
-                " to character backend '%s'\n", devname);
+        error_report("could not connect parallel device"
+                     " to character backend '%s'", devname);
         return -1;
     }
     index++;
@@ -2654,28 +2759,24 @@ static int virtcon_parse(const char *devname)
     if (strcmp(devname, "none") == 0)
         return 0;
     if (index == MAX_VIRTIO_CONSOLES) {
-        fprintf(stderr, "qemu: too many virtio consoles\n");
+        error_report("too many virtio consoles");
         return -1;
     }
 
     bus_opts = qemu_opts_create(device, NULL, 0, &error_abort);
-    if (arch_type == QEMU_ARCH_S390X) {
-        qemu_opt_set(bus_opts, "driver", "virtio-serial-s390");
-    } else {
-        qemu_opt_set(bus_opts, "driver", "virtio-serial-pci");
-    }
+    qemu_opt_set(bus_opts, "driver", "virtio-serial", &error_abort);
 
     dev_opts = qemu_opts_create(device, NULL, 0, &error_abort);
-    qemu_opt_set(dev_opts, "driver", "virtconsole");
+    qemu_opt_set(dev_opts, "driver", "virtconsole", &error_abort);
 
     snprintf(label, sizeof(label), "virtcon%d", index);
     virtcon_hds[index] = qemu_chr_new(label, devname, NULL);
     if (!virtcon_hds[index]) {
-        fprintf(stderr, "qemu: could not connect virtio console"
-                " to character backend '%s'\n", devname);
+        error_report("could not connect virtio console"
+                     " to character backend '%s'", devname);
         return -1;
     }
-    qemu_opt_set(dev_opts, "chardev", label);
+    qemu_opt_set(dev_opts, "chardev", label, &error_abort);
 
     index++;
     return 0;
@@ -2692,23 +2793,23 @@ static int sclp_parse(const char *devname)
         return 0;
     }
     if (index == MAX_SCLP_CONSOLES) {
-        fprintf(stderr, "qemu: too many sclp consoles\n");
+        error_report("too many sclp consoles");
         return -1;
     }
 
     assert(arch_type == QEMU_ARCH_S390X);
 
     dev_opts = qemu_opts_create(device, NULL, 0, NULL);
-    qemu_opt_set(dev_opts, "driver", "sclpconsole");
+    qemu_opt_set(dev_opts, "driver", "sclpconsole", &error_abort);
 
     snprintf(label, sizeof(label), "sclpcon%d", index);
     sclp_hds[index] = qemu_chr_new(label, devname, NULL);
     if (!sclp_hds[index]) {
-        fprintf(stderr, "qemu: could not connect sclp console"
-                " to character backend '%s'\n", devname);
+        error_report("could not connect sclp console"
+                     " to character backend '%s'", devname);
         return -1;
     }
-    qemu_opt_set(dev_opts, "chardev", label);
+    qemu_opt_set(dev_opts, "chardev", label, &error_abort);
 
     index++;
     return 0;
@@ -2723,11 +2824,11 @@ static int debugcon_parse(const char *devname)
     }
     opts = qemu_opts_create(qemu_find_opts("device"), "debugcon", 1, NULL);
     if (!opts) {
-        fprintf(stderr, "qemu: already have a debugcon device\n");
+        error_report("already have a debugcon device");
         return -1;
     }
-    qemu_opt_set(opts, "driver", "isa-debugcon");
-    qemu_opt_set(opts, "chardev", "debugcon");
+    qemu_opt_set(opts, "driver", "isa-debugcon", &error_abort);
+    qemu_opt_set(opts, "chardev", "debugcon", &error_abort);
     return 0;
 }
 
@@ -2774,11 +2875,12 @@ static MachineClass *machine_parse(const char *name)
         mc = find_machine(name);
     }
     if (mc) {
+        g_slist_free(machines);
         return mc;
     }
     if (name && !is_help_option(name)) {
-        error_report("Unsupported machine type");
-        error_printf("Use -machine help to list supported machines!\n");
+        error_report("unsupported machine type");
+        error_printf("Use -machine help to list supported machines\n");
     } else {
         printf("Supported machines are:\n");
         machines = g_slist_sort(machines, machine_class_cmp);
@@ -2811,14 +2913,25 @@ static void qemu_run_exit_notifiers(void)
     notifier_list_notify(&exit_notifiers, NULL);
 }
 
+static bool machine_init_done;
+
 void qemu_add_machine_init_done_notifier(Notifier *notify)
 {
     notifier_list_add(&machine_init_done_notifiers, notify);
+    if (machine_init_done) {
+        notify->notify(notify, NULL);
+    }
+}
+
+void qemu_remove_machine_init_done_notifier(Notifier *notify)
+{
+    notifier_remove(notify);
 }
 
 static void qemu_run_machine_init_done_notifiers(void)
 {
     notifier_list_notify(&machine_init_done_notifiers, NULL);
+    machine_init_done = true;
 }
 
 static const QEMUOption *lookup_opt(int argc, const char **argv,
@@ -2829,7 +2942,7 @@ static const QEMUOption *lookup_opt(int argc, const char **argv,
     const char *r = argv[optind];
     const char *optarg;
 
-    loc_set_cmdline(argv, optind, 1);
+    loc_set_cmdline((const char**)argv, optind, 1);
     optind++;
     /* Treat --foo the same as -foo.  */
     if (r[1] == '-')
@@ -2850,7 +2963,7 @@ static const QEMUOption *lookup_opt(int argc, const char **argv,
             return NULL;
         }
         optarg = argv[optind++];
-        loc_set_cmdline(argv, optind - 2, 2);
+        loc_set_cmdline((const char**)argv, optind - 2, 2);
     } else {
         optarg = NULL;
     }
@@ -2861,31 +2974,38 @@ static const QEMUOption *lookup_opt(int argc, const char **argv,
     return popt;
 }
 
-static gpointer malloc_and_trace(gsize n_bytes)
+static MachineClass *select_machine(void)
 {
-    void *ptr = malloc(n_bytes);
-    trace_g_malloc(n_bytes, ptr);
-    return ptr;
+    MachineClass *machine_class = find_default_machine();
+    const char *optarg;
+    QemuOpts *opts;
+    Location loc;
+
+    loc_push_none(&loc);
+
+    opts = qemu_get_machine_opts();
+    qemu_opts_loc_restore(opts);
+
+    optarg = qemu_opt_get(opts, "type");
+    if (optarg) {
+        machine_class = machine_parse(optarg);
+    }
+
+    if (!machine_class) {
+        error_report("No machine specified, and there is no default");
+        error_printf("Use -machine help to list supported machines\n");
+        return NULL;
+    }
+
+    loc_pop(&loc);
+    return machine_class;
 }
 
-static gpointer realloc_and_trace(gpointer mem, gsize n_bytes)
-{
-    void *ptr = realloc(mem, n_bytes);
-    trace_g_realloc(mem, n_bytes, ptr);
-    return ptr;
-}
-
-static void free_and_trace(gpointer mem)
-{
-    trace_g_free(mem);
-    free(mem);
-}
-
-static int machine_set_property(const char *name, const char *value,
-                                void *opaque)
+static int machine_set_property(void *opaque,
+                                const char *name, const char *value,
+                                Error **errp)
 {
     Object *obj = OBJECT(opaque);
-    StringInputVisitor *siv;
     Error *local_err = NULL;
     char *c, *qom_name;
 
@@ -2901,83 +3021,164 @@ static int machine_set_property(const char *name, const char *value,
         }
     }
 
-    siv = string_input_visitor_new(value);
-    object_property_set(obj, string_input_get_visitor(siv), qom_name, &local_err);
-    string_input_visitor_cleanup(siv);
+    object_property_parse(obj, value, qom_name, &local_err);
     g_free(qom_name);
 
     if (local_err) {
-        qerror_report_err(local_err);
-        error_free(local_err);
+        error_report_err(local_err);
         return -1;
     }
 
     return 0;
 }
 
-static int object_create(QemuOpts *opts, void *opaque)
+
+/*
+ * Initial object creation happens before all other
+ * QEMU data types are created. The majority of objects
+ * can be created at this point. The rng-egd object
+ * cannot be created here, as it depends on the chardev
+ * already existing.
+ */
+static bool object_create_initial(const char *type)
 {
-    Error *err = NULL;
-    char *type = NULL;
-    char *id = NULL;
-    void *dummy = NULL;
-    OptsVisitor *ov;
-    QDict *pdict;
-
-    ov = opts_visitor_new(opts);
-    pdict = qemu_opts_to_qdict(opts, NULL);
-
-    visit_start_struct(opts_get_visitor(ov), &dummy, NULL, NULL, 0, &err);
-    if (err) {
-        goto out;
+    if (g_str_equal(type, "rng-egd")) {
+        return false;
     }
 
-    qdict_del(pdict, "qom-type");
-    visit_type_str(opts_get_visitor(ov), &type, "qom-type", &err);
-    if (err) {
-        goto out;
+    /*
+     * return false for concrete netfilters since
+     * they depend on netdevs already existing
+     */
+    if (g_str_equal(type, "filter-buffer") ||
+        g_str_equal(type, "filter-dump") ||
+        g_str_equal(type, "filter-mirror") ||
+        g_str_equal(type, "filter-redirector")) {
+        return false;
     }
 
-    qdict_del(pdict, "id");
-    visit_type_str(opts_get_visitor(ov), &id, "id", &err);
-    if (err) {
-        goto out;
+    return true;
+}
+
+
+/*
+ * The remainder of object creation happens after the
+ * creation of chardev, fsdev, net clients and device data types.
+ */
+static bool object_create_delayed(const char *type)
+{
+    return !object_create_initial(type);
+}
+
+
+static bool set_memory_options(uint64_t *ram_slots, ram_addr_t *maxram_size,
+                               MachineClass *mc)
+{
+    uint64_t sz;
+    const char *mem_str;
+    const char *maxmem_str, *slots_str;
+    const ram_addr_t default_ram_size = mc->default_ram_size;
+    QemuOpts *opts = qemu_find_opts_singleton("memory");
+    Location loc;
+
+    loc_push_none(&loc);
+    qemu_opts_loc_restore(opts);
+
+    sz = 0;
+    mem_str = qemu_opt_get(opts, "size");
+    if (mem_str) {
+        if (!*mem_str) {
+            error_report("missing 'size' option value");
+            return false;
+        }
+
+        sz = qemu_opt_get_size(opts, "size", ram_size);
+
+        /* Fix up legacy suffix-less format */
+        if (g_ascii_isdigit(mem_str[strlen(mem_str) - 1])) {
+            uint64_t overflow_check = sz;
+
+            sz <<= 20;
+            if ((sz >> 20) != overflow_check) {
+                error_report("too large 'size' option value");
+                return false;
+            }
+        }
     }
 
-    object_add(type, id, pdict, opts_get_visitor(ov), &err);
-    if (err) {
-        goto out;
-    }
-    visit_end_struct(opts_get_visitor(ov), &err);
-    if (err) {
-        qmp_object_del(id, NULL);
+    /* backward compatibility behaviour for case "-m 0" */
+    if (sz == 0) {
+        sz = default_ram_size;
     }
 
-out:
-    opts_visitor_cleanup(ov);
-
-    QDECREF(pdict);
-    g_free(id);
-    g_free(type);
-    g_free(dummy);
-    if (err) {
-        qerror_report_err(err);
-        error_free(err);
-        return -1;
+    sz = QEMU_ALIGN_UP(sz, 8192);
+    ram_size = sz;
+    if (ram_size != sz) {
+        error_report("ram size too large");
+        return false;
     }
+#ifdef CONFIG_HAX
+    hax_pre_init(ram_size);
+#endif
+    /* store value for the future use */
+    qemu_opt_set_number(opts, "size", ram_size, &error_abort);
+    *maxram_size = ram_size;
+
+    maxmem_str = qemu_opt_get(opts, "maxmem");
+    slots_str = qemu_opt_get(opts, "slots");
+    if (maxmem_str && slots_str) {
+        uint64_t slots;
+
+        sz = qemu_opt_get_size(opts, "maxmem", 0);
+        slots = qemu_opt_get_number(opts, "slots", 0);
+        if (sz < ram_size) {
+            error_report("invalid value of -m option maxmem: "
+                         "maximum memory size (0x%" PRIx64 ") must be at least "
+                         "the initial memory size (0x" RAM_ADDR_FMT ")",
+                         sz, ram_size);
+            return false;
+        } else if (sz > ram_size) {
+            if (!slots) {
+                error_report("invalid value of -m option: maxmem was "
+                             "specified, but no hotplug slots were specified");
+                return false;
+            }
+        } else if (slots) {
+            error_report("invalid value of -m option maxmem: "
+                         "memory slots were specified but maximum memory size "
+                         "(0x%" PRIx64 ") is equal to the initial memory size "
+                         "(0x" RAM_ADDR_FMT ")", sz, ram_size);
+            return false;
+        }
+
+        *maxram_size = sz;
+        *ram_slots = slots;
+    } else if ((!maxmem_str && slots_str) ||
+            (maxmem_str && !slots_str)) {
+        error_report("invalid -m option value: missing "
+                "'%s' option", slots_str ? "maxmem" : "slots");
+        return false;
+    }
+
+    loc_pop(&loc);
+    return true;
+}
+
+static int global_init_func(void *opaque, QemuOpts *opts, Error **errp)
+{
+    GlobalProperty *g;
+
+    g = g_malloc0(sizeof(*g));
+    g->driver   = qemu_opt_get(opts, "driver");
+    g->property = qemu_opt_get(opts, "property");
+    g->value    = qemu_opt_get(opts, "value");
+    g->user_provided = true;
+    g->errp = &error_fatal;
+    qdev_prop_register_global(g);
     return 0;
 }
 
-#if !defined(CONFIG_ANDROID)
-// We don't use the AndroidEmu library in the original qemu2 build,
-// so let's return their main function back
-#define run_qemu_main main
-
-// To avoid compiler warning about missing prototype when main is a macro
-// for SDL_main.
-extern int run_qemu_main(int, const char**);
-
-#else  /* CONFIG_ANDROID */
+#if defined(CONFIG_ANDROID)
 
 static int is_opengl_alive = 1;
 
@@ -2995,6 +3196,11 @@ static void android_init_metrics()
     android_metrics_report_common_info(is_opengl_alive);
 }
 
+static void android_teardown_metrics()
+{
+    android_metrics_stop();
+}
+
 static bool android_reporting_setup(void)
 {
     android_init_metrics();
@@ -3010,18 +3216,20 @@ static bool android_reporting_setup(void)
 
 static void android_reporting_teardown(void)
 {
-    android_metrics_stop();
+    android_teardown_metrics();
 }
 
-#endif  /* CONFIG_ANDROID */
-
 int run_qemu_main(int argc, const char **argv)
+#else
+int main(int argc, char** argv, char** envp)
+#endif
 {
     int i;
     int snapshot, linux_boot;
     const char *initrd_filename;
     const char *kernel_filename, *kernel_cmdline;
-    const char *boot_order;
+    const char *boot_order = NULL;
+    const char *boot_once = NULL;
     DisplayState *ds;
     int cyls, heads, secs, translation;
     QemuOpts *hda_opts = NULL, *opts, *machine_opts, *icount_opts = NULL;
@@ -3036,37 +3244,32 @@ int run_qemu_main(int argc, const char **argv)
     const char *qtest_log = NULL;
     const char *pid_file = NULL;
     const char *incoming = NULL;
-#ifdef CONFIG_VNC
-    int show_vnc_port = 0;
-#endif
     bool defconfig = true;
     bool userconfig = true;
+    bool nographic = false;
+    DisplayType display_type = DT_DEFAULT;
+    int display_remote = 0;
     const char *log_mask = NULL;
     const char *log_file = NULL;
-    GMemVTable mem_trace = {
-        .malloc = malloc_and_trace,
-        .realloc = realloc_and_trace,
-        .free = free_and_trace,
-    };
-    const char *trace_events = NULL;
-    const char *trace_file = NULL;
-    const ram_addr_t default_ram_size = (ram_addr_t)DEFAULT_RAM_SIZE *
-                                        1024 * 1024;
-    ram_addr_t maxram_size = default_ram_size;
+    char *trace_file = NULL;
+    ram_addr_t maxram_size;
     uint64_t ram_slots = 0;
     FILE *vmstate_dump_file = NULL;
     Error *main_loop_err = NULL;
+    Error *err = NULL;
+    bool list_data_dirs = false;
+
 #ifdef CONFIG_ANDROID
-    char* additional_kernel_params = NULL;
-    const char* android_hw_file = NULL;
-#endif
+    char* android_op_dns_server = NULL;
     int adb_auth = 1;
+#endif
+
+    qemu_init_cpu_loop();
+    qemu_mutex_lock_iothread();
 
     atexit(qemu_run_exit_notifiers);
     error_set_progname(argv[0]);
     qemu_init_exec_dir(argv[0]);
-
-    g_mem_set_vtable(&mem_trace);
 
     module_call_init(MODULE_INIT_QOM);
 
@@ -3096,30 +3299,26 @@ int run_qemu_main(int argc, const char **argv)
     qemu_add_opts(&qemu_name_opts);
     qemu_add_opts(&qemu_numa_opts);
     qemu_add_opts(&qemu_icount_opts);
+    qemu_add_opts(&qemu_semihosting_config_opts);
+    qemu_add_opts(&qemu_fw_cfg_opts);
+    module_call_init(MODULE_INIT_OPTS);
 
     runstate_init();
 
+    if (qcrypto_init(&err) < 0) {
+        error_reportf_err(err, "cannot initialize crypto: ");
+        return 1;
+    }
     rtc_clock = QEMU_CLOCK_HOST;
 
     QLIST_INIT (&vm_change_state_head);
     os_setup_early_signal_handling();
 
-    module_call_init(MODULE_INIT_MACHINE);
-    machine_class = find_default_machine();
     cpu_model = NULL;
-    ram_size = default_ram_size;
     snapshot = 0;
     cyls = heads = secs = 0;
     translation = BIOS_ATA_TRANSLATION_AUTO;
 
-    for (i = 0; i < MAX_NODES; i++) {
-        numa_info[i].node_mem = 0;
-        numa_info[i].present = false;
-        bitmap_zero(numa_info[i].node_cpu, MAX_CPUMASK_BITS);
-    }
-
-    nb_numa_nodes = 0;
-    max_numa_nodeid = 0;
     nb_nics = 0;
 
     bdrv_init_with_whitelist();
@@ -3135,7 +3334,7 @@ int run_qemu_main(int argc, const char **argv)
         } else {
             const QEMUOption *popt;
 
-            popt = lookup_opt(argc, argv, &optarg, &optind);
+            popt = lookup_opt(argc, (const char**)argv, &optarg, &optind);
             if (!popt) {
                 return 1;
             }
@@ -3164,28 +3363,22 @@ int run_qemu_main(int argc, const char **argv)
         if (optind >= argc)
             break;
         if (argv[optind][0] != '-') {
-	    hda_opts = drive_add(IF_DEFAULT, 0, argv[optind++], HD_OPTS);
+            hda_opts = drive_add(IF_DEFAULT, 0, argv[optind++], HD_OPTS);
         } else {
             const QEMUOption *popt;
 
-            popt = lookup_opt(argc, argv, &optarg, &optind);
+            popt = lookup_opt(argc, (const char**)argv, &optarg, &optind);
             if (!popt) {
                 return 1;
             }
             if (!(popt->arch_mask & arch_type)) {
-                printf("Option %s not supported for this target\n", popt->name);
+                error_report("Option not supported for this target");
                 return 1;
             }
             switch(popt->index) {
-            case QEMU_OPTION_M:
-                machine_class = machine_parse(optarg);
-                if (!machine_class) {
-                    return 1;
-                }
-                break;
             case QEMU_OPTION_no_kvm_irqchip: {
                 olist = qemu_find_opts("machine");
-                qemu_opts_parse(olist, "kernel_irqchip=off", 0);
+                qemu_opts_parse_noisily(olist, "kernel_irqchip=off", false);
                 break;
             }
             case QEMU_OPTION_cpu:
@@ -3218,15 +3411,15 @@ int run_qemu_main(int argc, const char **argv)
                 if (drive_def(optarg) == NULL) {
                     return 1;
                 }
-	        break;
+                break;
             case QEMU_OPTION_set:
                 if (qemu_set_option(optarg) != 0)
                     return 1;
-	        break;
+                break;
             case QEMU_OPTION_global:
                 if (qemu_global_option(optarg) != 0)
                     return 1;
-	        break;
+                break;
             case QEMU_OPTION_mtdblock:
                 drive_add(IF_MTD, -1, optarg, MTD_OPTS);
                 break;
@@ -3275,49 +3468,56 @@ int run_qemu_main(int argc, const char **argv)
                         }
                     } else if (*p != '\0') {
                     chs_fail:
-                        fprintf(stderr, "qemu: invalid physical CHS format\n");
+                        error_report("invalid physical CHS format");
                         return 1;
                     }
-		    if (hda_opts != NULL) {
-                        char num[16];
-                        snprintf(num, sizeof(num), "%d", cyls);
-                        qemu_opt_set(hda_opts, "cyls", num);
-                        snprintf(num, sizeof(num), "%d", heads);
-                        qemu_opt_set(hda_opts, "heads", num);
-                        snprintf(num, sizeof(num), "%d", secs);
-                        qemu_opt_set(hda_opts, "secs", num);
+                    if (hda_opts != NULL) {
+                        qemu_opt_set_number(hda_opts, "cyls", cyls,
+                                            &error_abort);
+                        qemu_opt_set_number(hda_opts, "heads", heads,
+                                            &error_abort);
+                        qemu_opt_set_number(hda_opts, "secs", secs,
+                                            &error_abort);
                         if (translation == BIOS_ATA_TRANSLATION_LARGE) {
-                            qemu_opt_set(hda_opts, "trans", "large");
+                            qemu_opt_set(hda_opts, "trans", "large",
+                                         &error_abort);
                         } else if (translation == BIOS_ATA_TRANSLATION_RECHS) {
-                            qemu_opt_set(hda_opts, "trans", "rechs");
+                            qemu_opt_set(hda_opts, "trans", "rechs",
+                                         &error_abort);
                         } else if (translation == BIOS_ATA_TRANSLATION_LBA) {
-                            qemu_opt_set(hda_opts, "trans", "lba");
+                            qemu_opt_set(hda_opts, "trans", "lba",
+                                         &error_abort);
                         } else if (translation == BIOS_ATA_TRANSLATION_NONE) {
-                            qemu_opt_set(hda_opts, "trans", "none");
+                            qemu_opt_set(hda_opts, "trans", "none",
+                                         &error_abort);
                         }
                     }
                 }
                 break;
             case QEMU_OPTION_numa:
-                opts = qemu_opts_parse(qemu_find_opts("numa"), optarg, 1);
+                opts = qemu_opts_parse_noisily(qemu_find_opts("numa"),
+                                               optarg, true);
                 if (!opts) {
                     return 1;
                 }
                 break;
             case QEMU_OPTION_display:
                 display_type = select_display(optarg);
-                if (display_type < 0) {
+                if (display_type == DT_ERROR) {
                     return 1;
                 }
                 break;
             case QEMU_OPTION_nographic:
-                display_type = DT_NOGRAPHIC;
+                olist = qemu_find_opts("machine");
+                qemu_opts_parse_noisily(olist, "graphics=off", false);
+                nographic = true;
+                display_type = DT_NONE;
                 break;
             case QEMU_OPTION_curses:
 #ifdef CONFIG_CURSES
                 display_type = DT_CURSES;
 #else
-                fprintf(stderr, "Curses support is disabled\n");
+                error_report("curses support is disabled");
                 return 1;
 #endif
                 break;
@@ -3328,28 +3528,32 @@ int run_qemu_main(int argc, const char **argv)
                 graphic_rotate = strtol(optarg, (char **) &optarg, 10);
                 if (graphic_rotate != 0 && graphic_rotate != 90 &&
                     graphic_rotate != 180 && graphic_rotate != 270) {
-                    fprintf(stderr,
-                        "qemu: only 90, 180, 270 deg rotation is available\n");
+                    error_report("only 90, 180, 270 deg rotation is available");
                     return 1;
                 }
                 break;
             case QEMU_OPTION_kernel:
-                qemu_opts_set(qemu_find_opts("machine"), 0, "kernel", optarg);
+                qemu_opts_set(qemu_find_opts("machine"), 0, "kernel", optarg,
+                              &error_abort);
                 break;
             case QEMU_OPTION_initrd:
-                qemu_opts_set(qemu_find_opts("machine"), 0, "initrd", optarg);
+                qemu_opts_set(qemu_find_opts("machine"), 0, "initrd", optarg,
+                              &error_abort);
                 break;
             case QEMU_OPTION_append:
-                qemu_opts_set(qemu_find_opts("machine"), 0, "append", optarg);
+                qemu_opts_set(qemu_find_opts("machine"), 0, "append", optarg,
+                              &error_abort);
                 break;
             case QEMU_OPTION_dtb:
-                qemu_opts_set(qemu_find_opts("machine"), 0, "dtb", optarg);
+                qemu_opts_set(qemu_find_opts("machine"), 0, "dtb", optarg,
+                              &error_abort);
                 break;
             case QEMU_OPTION_cdrom:
                 drive_add(IF_DEFAULT, 2, optarg, CDROM_OPTS);
                 break;
             case QEMU_OPTION_boot:
-                opts = qemu_opts_parse(qemu_find_opts("boot-opts"), optarg, 1);
+                opts = qemu_opts_parse_noisily(qemu_find_opts("boot-opts"),
+                                               optarg, true);
                 if (!opts) {
                     return 1;
                 }
@@ -3363,18 +3567,21 @@ int run_qemu_main(int argc, const char **argv)
                 fd_bootchk = 0;
                 break;
             case QEMU_OPTION_netdev:
+                default_net = 0;
                 if (net_client_parse(qemu_find_opts("netdev"), optarg) == -1) {
                     return 1;
                 }
                 break;
             case QEMU_OPTION_net:
+                default_net = 0;
                 if (net_client_parse(qemu_find_opts("net"), optarg) == -1) {
                     return 1;
                 }
                 break;
 #ifdef CONFIG_LIBISCSI
             case QEMU_OPTION_iscsi:
-                opts = qemu_opts_parse(qemu_find_opts("iscsi"), optarg, 0);
+                opts = qemu_opts_parse_noisily(qemu_find_opts("iscsi"),
+                                               optarg, false);
                 if (!opts) {
                     return 1;
                 }
@@ -3382,12 +3589,18 @@ int run_qemu_main(int argc, const char **argv)
 #endif
 #ifdef CONFIG_SLIRP
             case QEMU_OPTION_tftp:
+                error_report("The -tftp option is deprecated. "
+                             "Please use '-netdev user,tftp=...' instead.");
                 legacy_tftp_prefix = optarg;
                 break;
             case QEMU_OPTION_bootp:
+                error_report("The -bootp option is deprecated. "
+                             "Please use '-netdev user,bootfile=...' instead.");
                 legacy_bootp_filename = optarg;
                 break;
             case QEMU_OPTION_redir:
+                error_report("The -redir option is deprecated. "
+                             "Please use '-netdev user,hostfwd=...' instead.");
                 if (net_slirp_redir(optarg) < 0)
                     return 1;
                 break;
@@ -3397,10 +3610,7 @@ int run_qemu_main(int argc, const char **argv)
                 break;
             case QEMU_OPTION_audio_help:
                 AUD_help ();
-                return (0);
-                break;
-            case QEMU_OPTION_audio_none:
-                setenv("QEMU_AUDIO_DRV", "none", 1);
+                return 0;
                 break;
             case QEMU_OPTION_soundhw:
                 select_soundhw (optarg);
@@ -3413,92 +3623,13 @@ int run_qemu_main(int argc, const char **argv)
                 version();
                 return 0;
                 break;
-            case QEMU_OPTION_m: {
-                uint64_t sz;
-                const char *mem_str;
-                const char *maxmem_str, *slots_str;
-
-                opts = qemu_opts_parse(qemu_find_opts("memory"),
-                                       optarg, 1);
+            case QEMU_OPTION_m:
+                opts = qemu_opts_parse_noisily(qemu_find_opts("memory"),
+                                               optarg, true);
                 if (!opts) {
-                    return EXIT_FAILURE;
-                }
-
-                mem_str = qemu_opt_get(opts, "size");
-                if (!mem_str) {
-                    error_report("invalid -m option, missing 'size' option");
-                    return EXIT_FAILURE;
-                }
-                if (!*mem_str) {
-                    error_report("missing 'size' option value");
-                    return EXIT_FAILURE;
-                }
-
-                sz = qemu_opt_get_size(opts, "size", ram_size);
-
-                /* Fix up legacy suffix-less format */
-                if (g_ascii_isdigit(mem_str[strlen(mem_str) - 1])) {
-                    uint64_t overflow_check = sz;
-
-                    sz <<= 20;
-                    if ((sz >> 20) != overflow_check) {
-                        error_report("too large 'size' option value");
-                        return EXIT_FAILURE;
-                    }
-                }
-
-                /* backward compatibility behaviour for case "-m 0" */
-                if (sz == 0) {
-                    sz = default_ram_size;
-                }
-
-                sz = QEMU_ALIGN_UP(sz, 8192);
-                ram_size = sz;
-                if (ram_size != sz) {
-                    error_report("ram size too large");
-                    return EXIT_FAILURE;
-                }
-                maxram_size = ram_size;
-
-                maxmem_str = qemu_opt_get(opts, "maxmem");
-                slots_str = qemu_opt_get(opts, "slots");
-                if (maxmem_str && slots_str) {
-                    uint64_t slots;
-
-                    sz = qemu_opt_get_size(opts, "maxmem", 0);
-                    if (sz < ram_size) {
-                        error_report("invalid -m option value: maxmem "
-                                "(0x%" PRIx64 ") <= initial memory (0x"
-                                RAM_ADDR_FMT ")", sz, ram_size);
-                        return EXIT_FAILURE;
-                    }
-
-                    slots = qemu_opt_get_number(opts, "slots", 0);
-                    if ((sz > ram_size) && !slots) {
-                        error_report("invalid -m option value: maxmem "
-                                "(0x%" PRIx64 ") more than initial memory (0x"
-                                RAM_ADDR_FMT ") but no hotplug slots where "
-                                "specified", sz, ram_size);
-                        return EXIT_FAILURE;
-                    }
-
-                    if ((sz <= ram_size) && slots) {
-                        error_report("invalid -m option value:  %"
-                                PRIu64 " hotplug slots where specified but "
-                                "maxmem (0x%" PRIx64 ") <= initial memory (0x"
-                                RAM_ADDR_FMT ")", slots, sz, ram_size);
-                        return EXIT_FAILURE;
-                    }
-                    maxram_size = sz;
-                    ram_slots = slots;
-                } else if ((!maxmem_str && slots_str) ||
-                           (maxmem_str && !slots_str)) {
-                    error_report("invalid -m option value: missing "
-                            "'%s' option", slots_str ? "maxmem" : "slots");
-                    return EXIT_FAILURE;
+                    return 1;
                 }
                 break;
-            }
 #ifdef CONFIG_TPM
             case QEMU_OPTION_tpmdev:
                 if (tpm_config_parse(qemu_find_opts("tpmdev"), optarg) < 0) {
@@ -3518,6 +3649,9 @@ int run_qemu_main(int argc, const char **argv)
             case QEMU_OPTION_D:
                 log_file = optarg;
                 break;
+            case QEMU_OPTION_DFILTER:
+                qemu_set_dfilter_ranges(optarg, &error_fatal);
+                break;
             case QEMU_OPTION_s:
                 add_device_config(DEV_GDB, "tcp::" DEFAULT_GDBSTUB_PORT);
                 break;
@@ -3525,12 +3659,15 @@ int run_qemu_main(int argc, const char **argv)
                 add_device_config(DEV_GDB, optarg);
                 break;
             case QEMU_OPTION_L:
-                if (data_dir_idx < ARRAY_SIZE(data_dir)) {
+                if (is_help_option(optarg)) {
+                    list_data_dirs = true;
+                } else if (data_dir_idx < ARRAY_SIZE(data_dir)) {
                     data_dir[data_dir_idx++] = optarg;
                 }
                 break;
             case QEMU_OPTION_bios:
-                qemu_opts_set(qemu_find_opts("machine"), 0, "firmware", optarg);
+                qemu_opts_set(qemu_find_opts("machine"), 0, "firmware", optarg,
+                              &error_abort);
                 break;
             case QEMU_OPTION_singlestep:
                 singlestep = 1;
@@ -3538,9 +3675,9 @@ int run_qemu_main(int argc, const char **argv)
             case QEMU_OPTION_S:
                 autostart = 0;
                 break;
-	    case QEMU_OPTION_k:
-		keyboard_layout = optarg;
-		break;
+            case QEMU_OPTION_k:
+                keyboard_layout = optarg;
+                break;
             case QEMU_OPTION_localtime:
                 rtc_utc = 0;
                 break;
@@ -3556,7 +3693,7 @@ int run_qemu_main(int argc, const char **argv)
                     w = strtol(p, (char **)&p, 10);
                     if (w <= 0) {
                     graphic_error:
-                        fprintf(stderr, "qemu: invalid resolution or depth\n");
+                        error_report("invalid resolution or depth");
                         return 1;
                     }
                     if (*p != 'x')
@@ -3593,26 +3730,34 @@ int run_qemu_main(int argc, const char **argv)
             case QEMU_OPTION_monitor:
                 default_monitor = 0;
                 if (strncmp(optarg, "none", 4)) {
-                    if (!monitor_parse(optarg, "readline")) {
+                    if (!monitor_parse(optarg, "readline", false)) {
                         return 1;
                     }
                 }
                 break;
             case QEMU_OPTION_qmp:
-                if (!monitor_parse(optarg, "control")) {
+                if (!monitor_parse(optarg, "control", false)) {
+                    return 1;
+                }
+                default_monitor = 0;
+                break;
+            case QEMU_OPTION_qmp_pretty:
+                if (!monitor_parse(optarg, "control", true)) {
                     return 1;
                 }
                 default_monitor = 0;
                 break;
             case QEMU_OPTION_mon:
-                opts = qemu_opts_parse(qemu_find_opts("mon"), optarg, 1);
+                opts = qemu_opts_parse_noisily(qemu_find_opts("mon"), optarg,
+                                               true);
                 if (!opts) {
                     return 1;
                 }
                 default_monitor = 0;
                 break;
             case QEMU_OPTION_chardev:
-                opts = qemu_opts_parse(qemu_find_opts("chardev"), optarg, 1);
+                opts = qemu_opts_parse_noisily(qemu_find_opts("chardev"),
+                                               optarg, true);
                 if (!opts) {
                     return 1;
                 }
@@ -3620,10 +3765,10 @@ int run_qemu_main(int argc, const char **argv)
             case QEMU_OPTION_fsdev:
                 olist = qemu_find_opts("fsdev");
                 if (!olist) {
-                    fprintf(stderr, "fsdev is not supported by this qemu build.\n");
+                    error_report("fsdev support is disabled");
                     return 1;
                 }
-                opts = qemu_opts_parse(olist, optarg, 1);
+                opts = qemu_opts_parse_noisily(olist, optarg, true);
                 if (!opts) {
                     return 1;
                 }
@@ -3635,60 +3780,64 @@ int run_qemu_main(int argc, const char **argv)
 
                 olist = qemu_find_opts("virtfs");
                 if (!olist) {
-                    fprintf(stderr, "virtfs is not supported by this qemu build.\n");
+                    error_report("virtfs support is disabled");
                     return 1;
                 }
-                opts = qemu_opts_parse(olist, optarg, 1);
+                opts = qemu_opts_parse_noisily(olist, optarg, true);
                 if (!opts) {
                     return 1;
                 }
 
                 if (qemu_opt_get(opts, "fsdriver") == NULL ||
                     qemu_opt_get(opts, "mount_tag") == NULL) {
-                    fprintf(stderr, "Usage: -virtfs fsdriver,mount_tag=tag.\n");
+                    error_report("Usage: -virtfs fsdriver,mount_tag=tag");
                     return 1;
                 }
                 fsdev = qemu_opts_create(qemu_find_opts("fsdev"),
                                          qemu_opt_get(opts, "mount_tag"),
                                          1, NULL);
                 if (!fsdev) {
-                    fprintf(stderr, "duplicate fsdev id: %s\n",
-                            qemu_opt_get(opts, "mount_tag"));
+                    error_report("duplicate fsdev id: %s",
+                                 qemu_opt_get(opts, "mount_tag"));
                     return 1;
                 }
 
                 writeout = qemu_opt_get(opts, "writeout");
                 if (writeout) {
 #ifdef CONFIG_SYNC_FILE_RANGE
-                    qemu_opt_set(fsdev, "writeout", writeout);
+                    qemu_opt_set(fsdev, "writeout", writeout, &error_abort);
 #else
-                    fprintf(stderr, "writeout=immediate not supported on "
-                            "this platform\n");
+                    error_report("writeout=immediate not supported "
+                                 "on this platform");
                     return 1;
 #endif
                 }
-                qemu_opt_set(fsdev, "fsdriver", qemu_opt_get(opts, "fsdriver"));
-                qemu_opt_set(fsdev, "path", qemu_opt_get(opts, "path"));
+                qemu_opt_set(fsdev, "fsdriver",
+                             qemu_opt_get(opts, "fsdriver"), &error_abort);
+                qemu_opt_set(fsdev, "path", qemu_opt_get(opts, "path"),
+                             &error_abort);
                 qemu_opt_set(fsdev, "security_model",
-                             qemu_opt_get(opts, "security_model"));
+                             qemu_opt_get(opts, "security_model"),
+                             &error_abort);
                 socket = qemu_opt_get(opts, "socket");
                 if (socket) {
-                    qemu_opt_set(fsdev, "socket", socket);
+                    qemu_opt_set(fsdev, "socket", socket, &error_abort);
                 }
                 sock_fd = qemu_opt_get(opts, "sock_fd");
                 if (sock_fd) {
-                    qemu_opt_set(fsdev, "sock_fd", sock_fd);
+                    qemu_opt_set(fsdev, "sock_fd", sock_fd, &error_abort);
                 }
 
                 qemu_opt_set_bool(fsdev, "readonly",
-                                qemu_opt_get_bool(opts, "readonly", 0));
+                                  qemu_opt_get_bool(opts, "readonly", 0),
+                                  &error_abort);
                 device = qemu_opts_create(qemu_find_opts("device"), NULL, 0,
                                           &error_abort);
-                qemu_opt_set(device, "driver", "virtio-9p-pci");
+                qemu_opt_set(device, "driver", "virtio-9p-pci", &error_abort);
                 qemu_opt_set(device, "fsdev",
-                             qemu_opt_get(opts, "mount_tag"));
+                             qemu_opt_get(opts, "mount_tag"), &error_abort);
                 qemu_opt_set(device, "mount_tag",
-                             qemu_opt_get(opts, "mount_tag"));
+                             qemu_opt_get(opts, "mount_tag"), &error_abort);
                 break;
             }
             case QEMU_OPTION_virtfs_synth: {
@@ -3698,16 +3847,16 @@ int run_qemu_main(int argc, const char **argv)
                 fsdev = qemu_opts_create(qemu_find_opts("fsdev"), "v_synth",
                                          1, NULL);
                 if (!fsdev) {
-                    fprintf(stderr, "duplicate option: %s\n", "virtfs_synth");
+                    error_report("duplicate option: %s", "virtfs_synth");
                     return 1;
                 }
-                qemu_opt_set(fsdev, "fsdriver", "synth");
+                qemu_opt_set(fsdev, "fsdriver", "synth", &error_abort);
 
                 device = qemu_opts_create(qemu_find_opts("device"), NULL, 0,
                                           &error_abort);
-                qemu_opt_set(device, "driver", "virtio-9p-pci");
-                qemu_opt_set(device, "fsdev", "v_synth");
-                qemu_opt_set(device, "mount_tag", "v_synth");
+                qemu_opt_set(device, "driver", "virtio-9p-pci", &error_abort);
+                qemu_opt_set(device, "fsdev", "v_synth", &error_abort);
+                qemu_opt_set(device, "mount_tag", "v_synth", &error_abort);
                 break;
             }
             case QEMU_OPTION_serial:
@@ -3719,15 +3868,14 @@ int run_qemu_main(int argc, const char **argv)
                 break;
             case QEMU_OPTION_watchdog:
                 if (watchdog) {
-                    fprintf(stderr,
-                            "qemu: only one watchdog option may be given\n");
+                    error_report("only one watchdog option may be given");
                     return 1;
                 }
                 watchdog = optarg;
                 break;
             case QEMU_OPTION_watchdog_action:
                 if (select_watchdog_action(optarg) == -1) {
-                    fprintf(stderr, "Unknown -watchdog-action parameter\n");
+                    error_report("unknown -watchdog-action parameter");
                     return 1;
                 }
                 break;
@@ -3748,9 +3896,9 @@ int run_qemu_main(int argc, const char **argv)
             case QEMU_OPTION_debugcon:
                 add_device_config(DEV_DEBUGCON, optarg);
                 break;
-	    case QEMU_OPTION_loadvm:
-		loadvm = optarg;
-		break;
+            case QEMU_OPTION_loadvm:
+                loadvm = optarg;
+                break;
             case QEMU_OPTION_full_screen:
                 full_screen = 1;
                 break;
@@ -3767,13 +3915,13 @@ int run_qemu_main(int argc, const char **argv)
                 no_quit = 1;
                 break;
             case QEMU_OPTION_sdl:
-#if defined(CONFIG_SDL) || defined(CONFIG_ANDROID)
+#ifdef CONFIG_SDL
                 display_type = DT_SDL;
+                break;
 #else
-                fprintf(stderr, "SDL support is disabled\n");
+                error_report("SDL support is disabled");
                 return 1;
 #endif
-                break;
             case QEMU_OPTION_pidfile:
                 pid_file = optarg;
                 break;
@@ -3781,106 +3929,100 @@ int run_qemu_main(int argc, const char **argv)
                 win2k_install_hack = 1;
                 break;
             case QEMU_OPTION_rtc_td_hack: {
-                static GlobalProperty slew_lost_ticks[] = {
-                    {
-                        .driver   = "mc146818rtc",
-                        .property = "lost_tick_policy",
-                        .value    = "slew",
-                    },
-                    { /* end of list */ }
+                static GlobalProperty slew_lost_ticks = {
+                    .driver   = "mc146818rtc",
+                    .property = "lost_tick_policy",
+                    .value    = "slew",
                 };
 
-                qdev_prop_register_global_list(slew_lost_ticks);
+                qdev_prop_register_global(&slew_lost_ticks);
                 break;
             }
             case QEMU_OPTION_acpitable:
-                opts = qemu_opts_parse(qemu_find_opts("acpi"), optarg, 1);
+                opts = qemu_opts_parse_noisily(qemu_find_opts("acpi"),
+                                               optarg, true);
                 if (!opts) {
                     return 1;
                 }
                 do_acpitable_option(opts);
                 break;
             case QEMU_OPTION_smbios:
-                opts = qemu_opts_parse(qemu_find_opts("smbios"), optarg, 0);
+                opts = qemu_opts_parse_noisily(qemu_find_opts("smbios"),
+                                               optarg, false);
                 if (!opts) {
                     return 1;
                 }
                 do_smbios_option(opts);
                 break;
-            case QEMU_OPTION_enable_kvm:
-                olist = qemu_find_opts("machine");
-                qemu_opts_parse(olist, "accel=kvm", 0);
-                break;
-            case QEMU_OPTION_enable_hax:
-                olist = qemu_find_opts("machine");
-                qemu_opts_parse(olist, "accel=hax", 0);
-                hax_disable(0);
-                break;
-            case QEMU_OPTION_machine:
-                olist = qemu_find_opts("machine");
-                opts = qemu_opts_parse(olist, optarg, 1);
-                if (!opts) {
+            case QEMU_OPTION_fwcfg:
+                opts = qemu_opts_parse_noisily(qemu_find_opts("fw_cfg"),
+                                               optarg, true);
+                if (opts == NULL) {
                     return 1;
                 }
-                optarg = qemu_opt_get(opts, "type");
-                if (optarg) {
-                    machine_class = machine_parse(optarg);
-                    if (!machine_class) {
-                        return 1;
-                    }
+                break;
+            case QEMU_OPTION_enable_kvm:
+                olist = qemu_find_opts("machine");
+                qemu_opts_parse_noisily(olist, "accel=kvm", false);
+                break;
+#ifdef CONFIG_HAX
+            case QEMU_OPTION_enable_hax:
+                olist = qemu_find_opts("machine");
+                qemu_opts_parse_noisily(olist, "accel=hax", false);
+                hax_disable(0);
+                break;
+#endif /* CONFIG_HAX */
+            case QEMU_OPTION_M:
+            case QEMU_OPTION_machine:
+                olist = qemu_find_opts("machine");
+                opts = qemu_opts_parse_noisily(olist, optarg, true);
+                if (!opts) {
+                    return 1;
                 }
                 break;
              case QEMU_OPTION_no_kvm:
                 olist = qemu_find_opts("machine");
-                qemu_opts_parse(olist, "accel=tcg", 0);
+                qemu_opts_parse_noisily(olist, "accel=tcg", false);
                 break;
             case QEMU_OPTION_no_kvm_pit: {
-                fprintf(stderr, "Warning: KVM PIT can no longer be disabled "
-                                "separately.\n");
+                error_report("warning: ignoring deprecated option");
                 break;
             }
             case QEMU_OPTION_no_kvm_pit_reinjection: {
-                static GlobalProperty kvm_pit_lost_tick_policy[] = {
-                    {
-                        .driver   = "kvm-pit",
-                        .property = "lost_tick_policy",
-                        .value    = "discard",
-                    },
-                    { /* end of list */ }
+                static GlobalProperty kvm_pit_lost_tick_policy = {
+                    .driver   = "kvm-pit",
+                    .property = "lost_tick_policy",
+                    .value    = "discard",
                 };
 
-                fprintf(stderr, "Warning: option deprecated, use "
-                        "lost_tick_policy property of kvm-pit instead.\n");
-                qdev_prop_register_global_list(kvm_pit_lost_tick_policy);
+                error_report("warning: deprecated, replaced by "
+                             "-global kvm-pit.lost_tick_policy=discard");
+                qdev_prop_register_global(&kvm_pit_lost_tick_policy);
                 break;
             }
             case QEMU_OPTION_usb:
                 olist = qemu_find_opts("machine");
-                qemu_opts_parse(olist, "usb=on", 0);
+                qemu_opts_parse_noisily(olist, "usb=on", false);
                 break;
             case QEMU_OPTION_usbdevice:
                 olist = qemu_find_opts("machine");
-                qemu_opts_parse(olist, "usb=on", 0);
+                qemu_opts_parse_noisily(olist, "usb=on", false);
                 add_device_config(DEV_USB, optarg);
                 break;
             case QEMU_OPTION_device:
-                if (!qemu_opts_parse(qemu_find_opts("device"), optarg, 1)) {
+                if (!qemu_opts_parse_noisily(qemu_find_opts("device"),
+                                             optarg, true)) {
                     return 1;
                 }
                 break;
             case QEMU_OPTION_smp:
-                if (!qemu_opts_parse(qemu_find_opts("smp-opts"), optarg, 1)) {
+                if (!qemu_opts_parse_noisily(qemu_find_opts("smp-opts"),
+                                             optarg, true)) {
                     return 1;
                 }
                 break;
-	    case QEMU_OPTION_vnc:
-#ifdef CONFIG_VNC
-                display_remote++;
-                vnc_display = optarg;
-#else
-                fprintf(stderr, "VNC support is disabled\n");
-                return 1;
-#endif
+            case QEMU_OPTION_vnc:
+                vnc_parse(optarg, &error_fatal);
                 break;
             case QEMU_OPTION_no_acpi:
                 acpi_enabled = 0;
@@ -3890,7 +4032,7 @@ int run_qemu_main(int argc, const char **argv)
                 break;
             case QEMU_OPTION_balloon:
                 if (balloon_parse(optarg) < 0) {
-                    fprintf(stderr, "Unknown -balloon argument %s\n", optarg);
+                    error_report("unknown -balloon argument %s", optarg);
                     return 1;
                 }
                 break;
@@ -3905,18 +4047,18 @@ int run_qemu_main(int argc, const char **argv)
                 break;
             case QEMU_OPTION_uuid:
                 if(qemu_uuid_parse(optarg, qemu_uuid) < 0) {
-                    fprintf(stderr, "Fail to parse UUID string."
-                            " Wrong format.\n");
+                    error_report("failed to parse UUID string: wrong format");
                     return 1;
                 }
                 qemu_uuid_set = true;
                 break;
-	    case QEMU_OPTION_option_rom:
-		if (nb_option_roms >= MAX_OPTION_ROMS) {
-		    fprintf(stderr, "Too many option ROMs\n");
-            return 1;
-		}
-                opts = qemu_opts_parse(qemu_find_opts("option-rom"), optarg, 1);
+            case QEMU_OPTION_option_rom:
+                if (nb_option_roms >= MAX_OPTION_ROMS) {
+                    error_report("too many option ROMs");
+                    return 1;
+                }
+                opts = qemu_opts_parse_noisily(qemu_find_opts("option-rom"),
+                                               optarg, true);
                 if (!opts) {
                     return 1;
                 }
@@ -3924,27 +4066,59 @@ int run_qemu_main(int argc, const char **argv)
                 option_rom[nb_option_roms].bootindex =
                     qemu_opt_get_number(opts, "bootindex", -1);
                 if (!option_rom[nb_option_roms].name) {
-                    fprintf(stderr, "Option ROM file is not specified\n");
+                    error_report("Option ROM file is not specified");
                     return 1;
                 }
-		nb_option_roms++;
-		break;
+                nb_option_roms++;
+                break;
             case QEMU_OPTION_semihosting:
-                semihosting_enabled = 1;
+                semihosting.enabled = true;
+                semihosting.target = SEMIHOSTING_TARGET_AUTO;
+                break;
+            case QEMU_OPTION_semihosting_config:
+                semihosting.enabled = true;
+                opts = qemu_opts_parse_noisily(qemu_find_opts("semihosting-config"),
+                                               optarg, false);
+                if (opts != NULL) {
+                    semihosting.enabled = qemu_opt_get_bool(opts, "enable",
+                                                            true);
+                    const char *target = qemu_opt_get(opts, "target");
+                    if (target != NULL) {
+                        if (strcmp("native", target) == 0) {
+                            semihosting.target = SEMIHOSTING_TARGET_NATIVE;
+                        } else if (strcmp("gdb", target) == 0) {
+                            semihosting.target = SEMIHOSTING_TARGET_GDB;
+                        } else  if (strcmp("auto", target) == 0) {
+                            semihosting.target = SEMIHOSTING_TARGET_AUTO;
+                        } else {
+                            error_report("unsupported semihosting-config %s",
+                                         optarg);
+                            return 1;
+                        }
+                    } else {
+                        semihosting.target = SEMIHOSTING_TARGET_AUTO;
+                    }
+                    /* Set semihosting argument count and vector */
+                    qemu_opt_foreach(opts, add_semihosting_arg,
+                                     &semihosting, NULL);
+                } else {
+                    error_report("unsupported semihosting-config %s", optarg);
+                    return 1;
+                }
                 break;
             case QEMU_OPTION_tdf:
-                fprintf(stderr, "Warning: user space PIT time drift fix "
-                                "is no longer supported.\n");
+                error_report("warning: ignoring deprecated option");
                 break;
             case QEMU_OPTION_name:
-                opts = qemu_opts_parse(qemu_find_opts("name"), optarg, 1);
+                opts = qemu_opts_parse_noisily(qemu_find_opts("name"),
+                                               optarg, true);
                 if (!opts) {
                     return 1;
                 }
                 break;
             case QEMU_OPTION_prom_env:
                 if (nb_prom_envs >= MAX_PROM_ENVS) {
-                    fprintf(stderr, "Too many prom variables\n");
+                    error_report("too many prom variables");
                     return 1;
                 }
                 prom_envs[nb_prom_envs] = optarg;
@@ -3964,7 +4138,8 @@ int run_qemu_main(int argc, const char **argv)
                 }
                 break;
             case QEMU_OPTION_rtc:
-                opts = qemu_opts_parse(qemu_find_opts("rtc"), optarg, 0);
+                opts = qemu_opts_parse_noisily(qemu_find_opts("rtc"), optarg,
+                                               false);
                 if (!opts) {
                     return 1;
                 }
@@ -3979,56 +4154,52 @@ int run_qemu_main(int argc, const char **argv)
                 }
                 break;
             case QEMU_OPTION_icount:
-                icount_opts = qemu_opts_parse(qemu_find_opts("icount"),
-                                              optarg, 1);
+                icount_opts = qemu_opts_parse_noisily(qemu_find_opts("icount"),
+                                                      optarg, true);
                 if (!icount_opts) {
                     return 1;
                 }
                 break;
             case QEMU_OPTION_incoming:
+                if (!incoming) {
+                    runstate_set(RUN_STATE_INMIGRATE);
+                }
                 incoming = optarg;
-                runstate_set(RUN_STATE_INMIGRATE);
                 break;
             case QEMU_OPTION_nodefaults:
                 has_defaults = 0;
                 break;
             case QEMU_OPTION_xen_domid:
                 if (!(xen_available())) {
-                    printf("Option %s not supported for this target\n", popt->name);
+                    error_report("Option not supported for this target");
                     return 1;
                 }
                 xen_domid = atoi(optarg);
                 break;
             case QEMU_OPTION_xen_create:
                 if (!(xen_available())) {
-                    printf("Option %s not supported for this target\n", popt->name);
+                    error_report("Option not supported for this target");
                     return 1;
                 }
                 xen_mode = XEN_CREATE;
                 break;
             case QEMU_OPTION_xen_attach:
                 if (!(xen_available())) {
-                    printf("Option %s not supported for this target\n", popt->name);
+                    error_report("Option not supported for this target");
                     return 1;
                 }
                 xen_mode = XEN_ATTACH;
                 break;
             case QEMU_OPTION_trace:
-            {
-                opts = qemu_opts_parse(qemu_find_opts("trace"), optarg, 0);
-                if (!opts) {
-                    return 1;
-                }
-                trace_events = qemu_opt_get(opts, "events");
-                trace_file = qemu_opt_get(opts, "file");
+                g_free(trace_file);
+                trace_file = trace_opt_parse(optarg);
                 break;
-            }
             case QEMU_OPTION_readconfig:
                 {
                     int ret = qemu_read_config_file(optarg);
                     if (ret < 0) {
-                        fprintf(stderr, "read config %s: %s\n", optarg,
-                            strerror(-ret));
+                        error_report("read config %s: %s", optarg,
+                                     strerror(-ret));
                         return 1;
                     }
                     break;
@@ -4036,10 +4207,10 @@ int run_qemu_main(int argc, const char **argv)
             case QEMU_OPTION_spice:
                 olist = qemu_find_opts("spice");
                 if (!olist) {
-                    fprintf(stderr, "spice is not supported by this qemu build.\n");
+                    error_report("spice support is disabled");
                     return 1;
                 }
-                opts = qemu_opts_parse(olist, optarg, 0);
+                opts = qemu_opts_parse_noisily(olist, optarg, false);
                 if (!opts) {
                     return 1;
                 }
@@ -4053,7 +4224,8 @@ int run_qemu_main(int argc, const char **argv)
                     } else {
                         fp = fopen(optarg, "w");
                         if (fp == NULL) {
-                            fprintf(stderr, "open %s: %s\n", optarg, strerror(errno));
+                            error_report("open %s: %s", optarg,
+                                         strerror(errno));
                             return 1;
                         }
                     }
@@ -4070,14 +4242,16 @@ int run_qemu_main(int argc, const char **argv)
                 qtest_log = optarg;
                 break;
             case QEMU_OPTION_sandbox:
-                opts = qemu_opts_parse(qemu_find_opts("sandbox"), optarg, 1);
+                opts = qemu_opts_parse_noisily(qemu_find_opts("sandbox"),
+                                               optarg, true);
                 if (!opts) {
                     return 1;
                 }
                 break;
             case QEMU_OPTION_add_fd:
 #ifndef _WIN32
-                opts = qemu_opts_parse(qemu_find_opts("add-fd"), optarg, 0);
+                opts = qemu_opts_parse_noisily(qemu_find_opts("add-fd"),
+                                               optarg, false);
                 if (!opts) {
                     return 1;
                 }
@@ -4088,20 +4262,23 @@ int run_qemu_main(int argc, const char **argv)
 #endif
                 break;
             case QEMU_OPTION_object:
-                opts = qemu_opts_parse(qemu_find_opts("object"), optarg, 1);
+                opts = qemu_opts_parse_noisily(qemu_find_opts("object"),
+                                               optarg, true);
                 if (!opts) {
                     return 1;
                 }
                 break;
             case QEMU_OPTION_realtime:
-                opts = qemu_opts_parse(qemu_find_opts("realtime"), optarg, 0);
+                opts = qemu_opts_parse_noisily(qemu_find_opts("realtime"),
+                                               optarg, false);
                 if (!opts) {
                     return 1;
                 }
                 enable_mlock = qemu_opt_get_bool(opts, "mlock", true);
                 break;
             case QEMU_OPTION_msg:
-                opts = qemu_opts_parse(qemu_find_opts("msg"), optarg, 0);
+                opts = qemu_opts_parse_noisily(qemu_find_opts("msg"), optarg,
+                                               false);
                 if (!opts) {
                     return 1;
                 }
@@ -4109,13 +4286,13 @@ int run_qemu_main(int argc, const char **argv)
                 break;
             case QEMU_OPTION_dump_vmstate:
                 if (vmstate_dump_file) {
-                    fprintf(stderr, "qemu: only one '-dump-vmstate' "
-                            "option may be given\n");
+                    error_report("only one '-dump-vmstate' "
+                                 "option may be given");
                     return 1;
                 }
                 vmstate_dump_file = fopen(optarg, "w");
                 if (vmstate_dump_file == NULL) {
-                    fprintf(stderr, "open %s: %s\n", optarg, strerror(errno));
+                    error_report("open %s: %s", optarg, strerror(errno));
                     return 1;
                 }
                 break;
@@ -4149,9 +4326,6 @@ int run_qemu_main(int argc, const char **argv)
                 android_op_dns_server = (char*)optarg;
                 break;
 
-            case QEMU_OPTION_http_proxy:
-                op_http_proxy = (char*)optarg;
-                break;
             case QEMU_OPTION_android_hw:
                 android_hw_file = optarg;
                 break;
@@ -4167,6 +4341,7 @@ int run_qemu_main(int argc, const char **argv)
             case QEMU_OPTION_android_report_console:
                 android_op_report_console = (char*)optarg;
                 break;
+
             case QEMU_OPTION_android_skip_adb_auth:
                 adb_auth = 0;
                 break;
@@ -4176,23 +4351,42 @@ int run_qemu_main(int argc, const char **argv)
                             (char*)optarg);
                 }
                 break;
+
 #endif  // CONFIG_ANDROID
             default:
                 os_parse_cmd_args(popt->index, optarg);
             }
         }
     }
-
+    /*
+     * Clear error location left behind by the loop.
+     * Best done right after the loop.  Do not insert code here!
+     */
     loc_set_none();
+
+    replay_configure(icount_opts);
+
+    machine_class = select_machine();
+    if (!machine_class) {
+        return 1;
+    }
+
+    if (!set_memory_options(&ram_slots, &maxram_size, machine_class)) {
+        return 1;
+    }
 
     os_daemonize();
 
     if (qemu_init_main_loop(&main_loop_err)) {
-        error_report("%s", error_get_pretty(main_loop_err));
+        error_report_err(main_loop_err);
         return 1;
     }
 
 #ifdef CONFIG_ANDROID
+
+    if (!qemu_android_emulation_early_setup()) {
+        return 1;
+    }
 
     /* At this point, both block drivers and main loop have been initialized
      * which means we can create the QCoW2 images to boot from.
@@ -4202,13 +4396,6 @@ int run_qemu_main(int argc, const char **argv)
     if(!create_qcow2_images()) {
         return 1;
     }
-
-    /* Ensure Looper implementation for this thread is based on the QEMU
-     * main loop. */
-    qemu_looper_setForThread();
-
-    /* make sure qemud is initialized before any calls to it */
-    android_qemu2_qemud_init();
 
     boot_property_init_service();
     android_hw_control_init();
@@ -4253,8 +4440,8 @@ int run_qemu_main(int argc, const char **argv)
                   width, height, depth);
             return 1;
         }
-        android_display_width  = width;
-        android_display_height = height;
+        graphic_width  = width;
+        graphic_height = height;
         goldfish_fb_set_display_depth(depth);
     }
 
@@ -4309,8 +4496,9 @@ int run_qemu_main(int argc, const char **argv)
     /* Initialize presence of hardware nav button */
     boot_property_add("qemu.hw.mainkeys", android_hw->hw_mainKeys ? "1" : "0");
 
-    /* Bypass adb security or not. */
-    boot_property_add("qemu.adb.secure", adb_auth ? "1": "0");
+    /* Enable ADB authenticaiton, or not. */
+    boot_property_add("qemu.adb.secure", adb_auth ? "1" : "0");
+
     if (android_hw->hw_gsmModem) {
         if (android_qemud_get_channel(ANDROID_QEMUD_GSM,
                                       &android_modem_serial_line) < 0) {
@@ -4333,108 +4521,69 @@ int run_qemu_main(int argc, const char **argv)
         boot_property_add("qemu.sf.lcd_density", temp);
     }
 
-    int dns_count = 0;
-    if (android_op_dns_server) {
-        dns_count = slirp_parse_dns_servers(android_op_dns_server);
-        if (dns_count == -2) {
-            // Special case for better user feedback on this error message
-            fprintf(stderr,
-                    "too many servers specified in -dns-server-parameter "
-                    "argument '%s'. A maximum of %d is supported.\n",
-                    android_op_dns_server,
-                    slirp_get_max_dns_servers());
-            return 1;
-        } else if (dns_count < 0) {
-            fprintf(stderr, "invalid -dns-server parameter '%s'\n",
-                    android_op_dns_server);
-            return 1;
-        }
-        if (dns_count == 0) {
-            printf("### WARNING: will use system default DNS server\n");
-        }
-    }
-    if (dns_count == 0) {
-        dns_count = slirp_get_system_dns_servers();
-        if (dns_count < 0) {
-            printf("### WARNING: unable to configure any DNS servers, "
-                   "name resolution will not work\n");
-        }
-    }
-    if (dns_count > 1) {
-        additional_kernel_params = g_strdup_printf("ndns=%d", dns_count);
-    }
-
 #endif // CONFIG_ANDROID
 
-    if (qemu_opts_foreach(qemu_find_opts("sandbox"), parse_sandbox, NULL, 0)) {
+    if (qemu_opts_foreach(qemu_find_opts("sandbox"),
+                          parse_sandbox, NULL, NULL)) {
         return 1;
     }
 
-    if (qemu_opts_foreach(qemu_find_opts("name"), parse_name, NULL, 1)) {
+    if (qemu_opts_foreach(qemu_find_opts("name"),
+                          parse_name, NULL, NULL)) {
         return 1;
     }
 
 #ifndef _WIN32
-    if (qemu_opts_foreach(qemu_find_opts("add-fd"), parse_add_fd, NULL, 1)) {
+    if (qemu_opts_foreach(qemu_find_opts("add-fd"),
+                          parse_add_fd, NULL, NULL)) {
         return 1;
     }
 
-    if (qemu_opts_foreach(qemu_find_opts("add-fd"), cleanup_add_fd, NULL, 1)) {
+    if (qemu_opts_foreach(qemu_find_opts("add-fd"),
+                          cleanup_add_fd, NULL, NULL)) {
         return 1;
     }
 #endif
 
-    if (machine_class == NULL) {
-        fprintf(stderr, "No machine specified, and there is no default.\n"
-                "Use -machine help to list supported machines!\n");
-        return 1;
-    }
-
     current_machine = MACHINE(object_new(object_class_get_name(
                           OBJECT_CLASS(machine_class))));
+    if (machine_help_func(qemu_get_machine_opts(), current_machine)) {
+        return 0;
+    }
     object_property_add_child(object_get_root(), "machine",
                               OBJECT(current_machine), &error_abort);
     cpu_exec_init_all();
 
     if (machine_class->hw_version) {
-        qemu_set_version(machine_class->hw_version);
+        qemu_set_hw_version(machine_class->hw_version);
     }
-
-    /* Init CPU def lists, based on config
-     * - Must be called after all the qemu_read_config_file() calls
-     * - Must be called before list_cpus()
-     * - Must be called before machine->init()
-     */
-    cpudef_init();
 
     if (cpu_model && is_help_option(cpu_model)) {
         list_cpus(stdout, &fprintf, cpu_model);
         return 0;
     }
 
-    /* Open the logfile at this point, if necessary. We can't open the logfile
-     * when encountering either of the logging options (-d or -D) because the
-     * other one may be encountered later on the command line, changing the
-     * location or level of logging.
+    if (!trace_init_backends()) {
+        return 1;
+    }
+    trace_init_file(trace_file);
+
+    /* Open the logfile at this point and set the log mask if necessary.
      */
+    if (log_file) {
+        qemu_set_log_filename(log_file, &error_fatal);
+    }
+
     if (log_mask) {
         int mask;
-        if (log_file) {
-            qemu_set_log_filename(log_file);
-        }
-
         mask = qemu_str_to_log_mask(log_mask);
         if (!mask) {
             qemu_print_log_usage(stdout);
             return 1;
         }
         qemu_set_log(mask);
-    }
-
-    if (!is_daemonized()) {
-        if (!trace_init_backends(trace_events, trace_file)) {
-            return 1;
-        }
+    } else {
+        qemu_set_log(0);
     }
 
     /* If no data_dir is specified then try to find it relative to the
@@ -4450,16 +4599,24 @@ int run_qemu_main(int argc, const char **argv)
         data_dir[data_dir_idx++] = CONFIG_QEMU_DATADIR;
     }
 
+    /* -L help lists the data directories and exits. */
+    if (list_data_dirs) {
+        for (i = 0; i < data_dir_idx; i++) {
+            printf("%s\n", data_dir[i]);
+        }
+        return 0;
+    }
+
     if (!smp_parse(qemu_opts_find(qemu_find_opts("smp-opts"), NULL))) {
-        return false;
+        return 1;
     }
 
     machine_class->max_cpus = machine_class->max_cpus ?: 1; /* Default to UP */
-    if (smp_cpus > machine_class->max_cpus) {
-        fprintf(stderr, "Number of SMP cpus requested (%d), exceeds max cpus "
-                "supported by machine `%s' (%d)\n", smp_cpus,
-                machine_class->name, machine_class->max_cpus);
-        return 1;
+    if (max_cpus > machine_class->max_cpus) {
+        error_report("Number of SMP CPUs requested (%d) exceeds max CPUs "
+                     "supported by machine '%s' (%d)", max_cpus,
+                     machine_class->name, machine_class->max_cpus);
+        return 1;;
     }
 
     /*
@@ -4471,8 +4628,10 @@ int run_qemu_main(int argc, const char **argv)
                                machine_class->default_machine_opts, 0);
     }
 
-    qemu_opts_foreach(qemu_find_opts("device"), default_driver_check, NULL, 0);
-    qemu_opts_foreach(qemu_find_opts("global"), default_driver_check, NULL, 0);
+    qemu_opts_foreach(qemu_find_opts("device"),
+                      default_driver_check, NULL, NULL);
+    qemu_opts_foreach(qemu_find_opts("global"),
+                      default_driver_check, NULL, NULL);
 
     if (!vga_model && !default_vga) {
         vga_interface_type = VGA_DEVICE;
@@ -4514,21 +4673,21 @@ int run_qemu_main(int argc, const char **argv)
          * -nographic _and_ redirects all ports explicitly - this is valid
          * usage, -nographic is just a no-op in this case.
          */
-        if (display_type == DT_NOGRAPHIC
+        if (nographic
             && (default_parallel || default_serial
                 || default_monitor || default_virtcon)) {
-            fprintf(stderr, "-nographic can not be used with -daemonize\n");
+            error_report("-nographic cannot be used with -daemonize");
             return 1;
         }
 #ifdef CONFIG_CURSES
         if (display_type == DT_CURSES) {
-            fprintf(stderr, "curses display can not be used with -daemonize\n");
+            error_report("curses display cannot be used with -daemonize");
             return 1;
         }
 #endif
     }
 
-    if (display_type == DT_NOGRAPHIC) {
+    if (nographic) {
         if (default_parallel)
             add_device_config(DEV_PARALLEL, "null");
         if (default_serial && default_monitor) {
@@ -4545,11 +4704,10 @@ int run_qemu_main(int argc, const char **argv)
             if (default_sclp) {
                 add_device_config(DEV_SCLP, "stdio");
             }
-            if (default_monitor) {
-                if (!monitor_parse("stdio", "readline")) {
+            if (default_monitor)
+                if (!monitor_parse("stdio", "readline", false)) {
                     return 1;
                 }
-            }
         }
     } else {
         if (default_serial)
@@ -4557,7 +4715,7 @@ int run_qemu_main(int argc, const char **argv)
         if (default_parallel)
             add_device_config(DEV_PARALLEL, "vc:80Cx24C");
         if (default_monitor) {
-            if (!monitor_parse("vc:80Cx24C", "readline")) {
+            if (!monitor_parse("vc:80Cx24C", "readline", false)) {
                 return 1;
             }
         }
@@ -4568,33 +4726,52 @@ int run_qemu_main(int argc, const char **argv)
         }
     }
 
+#if defined(CONFIG_VNC)
+    if (!QTAILQ_EMPTY(&(qemu_find_opts("vnc")->head))) {
+        display_remote++;
+    }
+#endif
     if (display_type == DT_DEFAULT && !display_remote) {
 #if defined(CONFIG_GTK)
         display_type = DT_GTK;
-#elif defined(CONFIG_SDL) || defined(CONFIG_COCOA) || defined(CONFIG_ANDROID)
+#elif defined(CONFIG_SDL) || defined(CONFIG_ANDROID)
         display_type = DT_SDL;
+#elif defined(CONFIG_COCOA)
+        display_type = DT_COCOA;
 #elif defined(CONFIG_VNC)
-        vnc_display = "localhost:0,to=99";
-        show_vnc_port = 1;
+        vnc_parse("localhost:0,to=99,id=default", &error_abort);
 #else
         display_type = DT_NONE;
 #endif
     }
 
     if ((no_frame || alt_grab || ctrl_grab) && display_type != DT_SDL) {
-        fprintf(stderr, "-no-frame, -alt-grab and -ctrl-grab are only valid "
-                        "for SDL, ignoring option\n");
+        error_report("-no-frame, -alt-grab and -ctrl-grab are only valid "
+                     "for SDL, ignoring option");
     }
     if (no_quit && (display_type != DT_GTK && display_type != DT_SDL)) {
-        fprintf(stderr, "-no-quit is only valid for GTK and SDL, "
-                        "ignoring option\n");
+        error_report("-no-quit is only valid for GTK and SDL, "
+                     "ignoring option");
     }
 
-#if defined(CONFIG_GTK)
     if (display_type == DT_GTK) {
-        early_gtk_display_init();
+        early_gtk_display_init(request_opengl);
     }
+
+    if (display_type == DT_SDL) {
+        sdl_display_early_init(request_opengl);
+    }
+
+    if (request_opengl == 1 && display_opengl == 0) {
+#if defined(CONFIG_OPENGL)
+        error_report("OpenGL is not supported by the display");
+#else
+        error_report("OpenGL support is disabled");
 #endif
+        return 1;
+    }
+
+    page_size_init();
 
 #ifndef CONFIG_ANDROID
     // When using AndroidEmu, this "main" is no longer the entry point on the
@@ -4603,31 +4780,31 @@ int run_qemu_main(int argc, const char **argv)
     socket_init();
 #endif
 
-    if (qemu_opts_foreach(qemu_find_opts("chardev"), chardev_init_func, NULL, 1) != 0)
+    if (qemu_opts_foreach(qemu_find_opts("object"),
+                          user_creatable_add_opts_foreach,
+                          object_create_initial, NULL)) {
         return 1;
+    }
+
+    if (qemu_opts_foreach(qemu_find_opts("chardev"),
+                          chardev_init_func, NULL, NULL)) {
+        return 1;
+    }
+
 #ifdef CONFIG_VIRTFS
-    if (qemu_opts_foreach(qemu_find_opts("fsdev"), fsdev_init_func, NULL, 1) != 0) {
+    if (qemu_opts_foreach(qemu_find_opts("fsdev"),
+                          fsdev_init_func, NULL, NULL)) {
         return 1;
     }
 #endif
 
     if (pid_file && qemu_create_pidfile(pid_file) != 0) {
-        fprintf(stderr, "Could not acquire pid file: %s\n", strerror(errno));
+        error_report("could not acquire pid file: %s", strerror(errno));
         return 1;
     }
-#if defined(CONFIG_HAX)
+#ifdef CONFIG_HAX
     uint64_t hax_max_ram = 0;
     if (hax_get_max_ram(&hax_max_ram) == 0 && hax_max_ram > 0) {
-#ifdef CONFIG_ANDROID
-        char str[32] = {0};
-        snprintf(str, sizeof(str) - 1, "%"PRIu64, hax_max_ram);
-        crashhandler_add_string("hax_max_ram.txt", str);
-#endif
-        // current haxm cannot handle more than 3G memory
-        // b.android.com/214422
-        if (hax_max_ram  > 3072LL * 1024 * 1024) {
-            hax_max_ram = 3072LL * 1024 * 1024;
-        }
         if (ram_size > hax_max_ram) {
             const int requested_meg = ram_size / (1024 * 1024);
             const int actual_meg = hax_max_ram / (1024 * 1024);
@@ -4636,42 +4813,26 @@ int run_qemu_main(int argc, const char **argv)
             ram_size = hax_max_ram;
         }
     }
-#endif  /* CONFIG_HAX */
+#endif /* CONFIG_HAX */
 
-    /* store value for the future use */
-    qemu_opt_set_number(qemu_find_opts_singleton("memory"), "size", ram_size);
-    hax_pre_init(ram_size);
-
-    if (qemu_opts_foreach(qemu_find_opts("device"), device_help_func, NULL, 0)
-        != 0) {
+    if (qemu_opts_foreach(qemu_find_opts("device"),
+                          device_help_func, NULL, NULL)) {
         return 0;
-    }
-
-    if (qemu_opts_foreach(qemu_find_opts("object"),
-                          object_create, NULL, 0) != 0) {
-        return 1;
     }
 
     machine_opts = qemu_get_machine_opts();
     if (qemu_opt_foreach(machine_opts, machine_set_property, current_machine,
-                         1) < 0) {
+                         NULL)) {
         object_unref(OBJECT(current_machine));
         return 1;
     }
 
-    if (configure_accelerator(current_machine)) {
+    if (configure_accelerator(current_machine) < 0) {
         return 1;
     }
 
-
     if (qtest_chrdev) {
-        Error *local_err = NULL;
-        qtest_init(qtest_chrdev, qtest_log, &local_err);
-        if (local_err) {
-            error_report("%s", error_get_pretty(local_err));
-            error_free(local_err);
-            return 1;
-        }
+        qtest_init(qtest_chrdev, qtest_log, &error_fatal);
     }
 
     machine_opts = qemu_get_machine_opts();
@@ -4680,91 +4841,113 @@ int run_qemu_main(int argc, const char **argv)
     kernel_cmdline = qemu_opt_get(machine_opts, "append");
     bios_name = qemu_opt_get(machine_opts, "firmware");
 
-    boot_order = machine_class->default_boot_order;
     opts = qemu_opts_find(qemu_find_opts("boot-opts"), NULL);
     if (opts) {
-        char *normal_boot_order;
-        const char *order, *once;
-
-        order = qemu_opt_get(opts, "order");
-        if (order) {
-            if (!validate_bootdevices(order)) {
-                return 1;
-            }
-            boot_order = order;
+        boot_order = qemu_opt_get(opts, "order");
+        if (boot_order) {
+            validate_bootdevices(boot_order, &error_fatal);
         }
 
-        once = qemu_opt_get(opts, "once");
-        if (once) {
-            if (!validate_bootdevices(once)) {
-                return 1;
-            }
-            normal_boot_order = g_strdup(boot_order);
-            boot_order = once;
-            qemu_register_reset(restore_boot_order, normal_boot_order);
+        boot_once = qemu_opt_get(opts, "once");
+        if (boot_once) {
+            validate_bootdevices(boot_once, &error_fatal);
         }
 
         boot_menu = qemu_opt_get_bool(opts, "menu", boot_menu);
         boot_strict = qemu_opt_get_bool(opts, "strict", false);
     }
 
+    if (!boot_order) {
+        boot_order = machine_class->default_boot_order;
+    }
+
     current_machine->kernel_cmdline =
             g_strdup(kernel_cmdline ? kernel_cmdline : "");
-
-#ifdef CONFIG_ANDROID
-    if (additional_kernel_params) {
-        char* combined = g_strdup_printf("%s %s",
-                                         current_machine->kernel_cmdline,
-                                         additional_kernel_params);
-        g_free(additional_kernel_params);
-        additional_kernel_params = NULL;
-
-        g_free(current_machine->kernel_cmdline);
-        current_machine->kernel_cmdline = combined;
-    }
-#endif  // CONFIG_ANDROID
 
     linux_boot = (kernel_filename != NULL);
 
     if (!linux_boot && *current_machine->kernel_cmdline != '\0') {
-        fprintf(stderr, "-append only allowed with -kernel option\n");
+        error_report("-append only allowed with -kernel option");
         return 1;
     }
 
     if (!linux_boot && initrd_filename != NULL) {
-        fprintf(stderr, "-initrd only allowed with -kernel option\n");
+        error_report("-initrd only allowed with -kernel option");
         return 1;
     }
 
     if (!linux_boot && qemu_opt_get(machine_opts, "dtb")) {
-        fprintf(stderr, "-dtb only allowed with -kernel option\n");
+        error_report("-dtb only allowed with -kernel option");
         return 1;
+    }
+
+    if (semihosting_enabled() && !semihosting_get_argc() && kernel_filename) {
+        /* fall back to the -kernel/-append */
+        semihosting_arg_fallback(kernel_filename,
+                                 current_machine->kernel_cmdline);
     }
 
     os_set_line_buffering();
 
-    qemu_init_cpu_loop();
-    qemu_mutex_lock_iothread();
-
-#ifdef CONFIG_SPICE
     /* spice needs the timers to be initialized by this point */
     qemu_spice_init();
-#endif
 
     cpu_ticks_init();
     if (icount_opts) {
+#ifdef CONFIG_HAX
         if (kvm_enabled() || xen_enabled() || hax_enabled()) {
-            fprintf(stderr, "-icount is not allowed with kvm or xen or hax\n");
+            error_report("-icount is not allowed with kvm, hax or xen");
             return 1;
         }
+#else
+        if (kvm_enabled() || xen_enabled()) {
+            error_report("-icount is not allowed with kvm or xen");
+            return 1;
+        }
+#endif
         configure_icount(icount_opts, &error_abort);
         qemu_opts_del(icount_opts);
     }
 
-    /* clean up network at qemu process termination */
-    atexit(&net_cleanup);
+    if (default_net) {
+        QemuOptsList *net = qemu_find_opts("net");
+        qemu_opts_set(net, NULL, "type", "nic", &error_abort);
+#ifdef CONFIG_SLIRP
+        qemu_opts_set(net, NULL, "type", "user", &error_abort);
+#endif
+    }
 
     if (net_init_clients() < 0) {
+        return 1;
+    }
+
+#ifdef CONFIG_ANDROID
+    char *additional_kernel_params = NULL;
+    int dns_count = 0;
+    if (android_op_dns_server) {
+        if (!qemu_android_emulation_setup_dns_servers(
+                android_op_dns_server, &dns_count)) {
+            fprintf(stderr, "invalid -dns-server parameter '%s'\n",
+                    android_op_dns_server);
+            return 1;
+        }
+        // TODO: Find a way to pass the number of IPv6 DNS servers to
+        // the guest system.
+        if (dns_count > 1) {
+            char* combined = g_strdup_printf("%s ndns=%d",
+                                             current_machine->kernel_cmdline,
+                                             dns_count);
+            g_free(current_machine->kernel_cmdline);
+            current_machine->kernel_cmdline = combined;
+        }
+    }
+
+    qemu_android_emulation_init_slirp();
+#endif
+
+    if (qemu_opts_foreach(qemu_find_opts("object"),
+                          user_creatable_add_opts_foreach,
+                          object_create_delayed, NULL)) {
         return 1;
     }
 
@@ -4781,7 +4964,7 @@ int run_qemu_main(int argc, const char **argv)
     if (!xen_enabled()) {
         /* On 32-bit hosts, QEMU is limited by virtual address space */
         if (ram_size > (2047 << 20) && HOST_LONG_BITS == 32) {
-            fprintf(stderr, "qemu: at most 2047 MB RAM can be simulated\n");
+            error_report("at most 2047 MB RAM can be simulated");
             return 1;
         }
     }
@@ -4797,10 +4980,12 @@ int run_qemu_main(int argc, const char **argv)
     }
 
     /* open the virtual block devices */
-    if (snapshot)
-        qemu_opts_foreach(qemu_find_opts("drive"), drive_enable_snapshot, NULL, 0);
+    if (snapshot || replay_mode != REPLAY_MODE_NONE) {
+        qemu_opts_foreach(qemu_find_opts("drive"), drive_enable_snapshot,
+                          NULL, NULL);
+    }
     if (qemu_opts_foreach(qemu_find_opts("drive"), drive_init_func,
-                          &machine_class->block_default_type, 1) != 0) {
+                          &machine_class->block_default_type, NULL)) {
         return 1;
     }
 
@@ -4815,12 +5000,12 @@ int run_qemu_main(int argc, const char **argv)
         return 1;
     }
 
-    if (qemu_opts_foreach(qemu_find_opts("numa"), numa_init_func,
-                          NULL, 1) != 0) {
+    parse_numa_opts(machine_class);
+
+    if (qemu_opts_foreach(qemu_find_opts("mon"),
+                          mon_init_func, NULL, NULL)) {
         return 1;
     }
-
-    set_numa_nodes();
 
     if (foreach_device_config(DEV_SERIAL, serial_parse) < 0)
         return 1;
@@ -4838,14 +5023,16 @@ int run_qemu_main(int argc, const char **argv)
     if (default_vga) {
         if (machine_class->default_display) {
             vga_model = machine_class->default_display;
-        } else if (cirrus_vga_available()) {
+        } else if (vga_interface_available(VGA_CIRRUS)) {
             vga_model = "cirrus";
-        } else if (vga_available()) {
+        } else if (vga_interface_available(VGA_STD)) {
             vga_model = "std";
         }
     }
     if (vga_model) {
-        select_vgahw(vga_model);
+        if (!select_vgahw(vga_model)) {
+            return 1;
+        }
     }
 
     if (watchdog) {
@@ -4854,9 +5041,10 @@ int run_qemu_main(int argc, const char **argv)
             return (i == 1 ? 1 : 0);
     }
 
-    if (machine_class->compat_props) {
-        qdev_prop_register_global_list(machine_class->compat_props);
-    }
+    machine_register_compat_props(current_machine);
+
+    qemu_opts_foreach(qemu_find_opts("global"),
+                      global_init_func, NULL, NULL);
 
 #if defined(CONFIG_ANDROID)
     /* Configure goldfish events device */
@@ -4923,10 +5111,17 @@ int run_qemu_main(int argc, const char **argv)
                     &qemu2_goldfish_event_multitouch_funcs);
         }
     }
+
+    // Parse the System boot parameters from the command line last,
+    // so they take precedence
+    process_cmd_properties();
+
 #endif  // CONFIG_ANDROID
 
-    qemu_add_globals();
-
+    /* This checkpoint is required by replay to separate prior clock
+       reading from the other reads, because timer polling functions query
+       clock values from the log. */
+    replay_checkpoint(CHECKPOINT_INIT);
     qdev_machine_init();
 
     current_machine->ram_size = ram_size;
@@ -4936,12 +5131,18 @@ int run_qemu_main(int argc, const char **argv)
     current_machine->cpu_model = cpu_model;
 
     machine_class->init(current_machine);
-#ifdef CONFIG_ANDROID
-    if (android_init_error_occurred()) {
-        // Something went wrong when initializing the virtual machine
+    if (error_during_init != NULL) {
         return 1;
     }
-#endif
+
+#ifdef CONFIG_ANDROID
+    if (!qemu_android_emulation_setup()) {
+        return 1;
+    }
+
+    extern void android_emulator_set_base_port(int);
+    android_emulator_set_base_port(android_base_port);
+#endif  // CONFIG_ANDROID
 
     if (!realtime_init()) {
         return 1;
@@ -4953,68 +5154,76 @@ int run_qemu_main(int argc, const char **argv)
 
     cpu_synchronize_all_post_init();
 
-    set_numa_modes();
+    numa_post_machine_init();
 
+#ifdef CONFIG_HAX
     if (hax_enabled()) {
         if (hax_sync_vcpus() < 0) {
-            fprintf(stderr, "Internal error: initial hax sync failed\n");
+            fprintf(stderr, "Internal error: Initial hax sync failed\n");
             return 1;
         }
     }
+#endif  /* CONFIG_HAX */
+
+    if (qemu_opts_foreach(qemu_find_opts("fw_cfg"),
+                          parse_fw_cfg, fw_cfg_find(), NULL) != 0) {
+        return 1;
+    }
 
     /* init USB devices */
-    if (usb_enabled(false)) {
+    if (machine_usb(current_machine)) {
         if (foreach_device_config(DEV_USB, usb_parse) < 0)
             return 1;
     }
 
+    /* Check if IGD GFX passthrough. */
+    igd_gfx_passthru();
+
     /* init generic devices */
-    if (qemu_opts_foreach(qemu_find_opts("device"), device_init_func, NULL, 1) != 0)
+    rom_set_order_override(FW_CFG_ORDER_OVERRIDE_DEVICE);
+    if (qemu_opts_foreach(qemu_find_opts("device"),
+                          device_init_func, NULL, NULL)) {
         return 1;
+    }
+    rom_reset_order_override();
 
     /* Did we create any drives that we failed to create a device for? */
     drive_check_orphaned();
 
-    net_check_clients();
-
-#if defined(CONFIG_ANDROID)
-    /* call android-specific setup function */
-    if (!qemu_android_emulation_setup()) {
-        return 1;
+    /* Don't warn about the default network setup that you get if
+     * no command line -net or -netdev options are specified. There
+     * are two cases that we would otherwise complain about:
+     * (1) board doesn't support a NIC but the implicit "-net nic"
+     * requested one
+     * (2) CONFIG_SLIRP not set, in which case the implicit "-net nic"
+     * sets up a nic that isn't connected to anything.
+     */
+    if (!default_net) {
+        net_check_clients();
     }
 
-    extern void android_emulator_set_base_port(int);
-    android_emulator_set_base_port(android_base_port);
-#endif  // CONFIG_ANDROID
+
+    if (boot_once) {
+        qemu_boot_set(boot_once, &error_fatal);
+        qemu_register_reset(restore_boot_order, g_strdup(boot_order));
+    }
 
     ds = init_displaystate();
 
     /* init local displays */
     switch (display_type) {
-    case DT_NOGRAPHIC:
-        (void)ds;	/* avoid warning if no display is configured */
-        break;
-#if defined(CONFIG_CURSES)
     case DT_CURSES:
         curses_display_init(ds, full_screen);
         break;
-#endif
-#if defined(CONFIG_SDL) || defined(CONFIG_ANDROID)
     case DT_SDL:
-        if (!sdl_display_init(ds, full_screen, no_frame)) {
-            return 1;
-        }
+        sdl_display_init(ds, full_screen, no_frame);
         break;
-#elif defined(CONFIG_COCOA)
-    case DT_SDL:
+    case DT_COCOA:
         cocoa_display_init(ds, full_screen);
         break;
-#endif
-#if defined(CONFIG_GTK)
     case DT_GTK:
         gtk_display_init(ds, full_screen, grab_on_hover);
         break;
-#endif
     default:
         break;
     }
@@ -5022,29 +5231,15 @@ int run_qemu_main(int argc, const char **argv)
     /* must be after terminal init, SDL library changes signal handlers */
     os_setup_signal_handling();
 
-#ifdef CONFIG_VNC
     /* init remote displays */
-    if (vnc_display) {
-        Error *local_err = NULL;
-        vnc_display_init(ds);
-        vnc_display_open(ds, vnc_display, &local_err);
-        if (local_err != NULL) {
-            error_report("Failed to start VNC server on `%s': %s",
-                         vnc_display, error_get_pretty(local_err));
-            error_free(local_err);
-            return 1;
-        }
-
-        if (show_vnc_port) {
-            printf("VNC server running on `%s'\n", vnc_display_local_addr(ds));
-        }
-    }
+#ifdef CONFIG_VNC
+    qemu_opts_foreach(qemu_find_opts("vnc"),
+                      vnc_init_func, NULL, NULL);
 #endif
-#ifdef CONFIG_SPICE
+
     if (using_spice) {
         qemu_spice_display_init();
     }
-#endif
 
     if (foreach_device_config(DEV_GDB, gdbserver_start) < 0) {
         return 1;
@@ -5052,30 +5247,24 @@ int run_qemu_main(int argc, const char **argv)
 
     qdev_machine_creation_done();
 
-    if (rom_load_all() != 0) {
-        fprintf(stderr, "rom loading failed\n");
-        return 1;
-    }
-
-    if (qemu_opts_foreach(qemu_find_opts("mon"), mon_init_func, NULL, 1) != 0) {
-        return 1;
-    }
-
-#ifdef CONFIG_ANDROID
-    // Parse the System boot parameters from the command line last,
-    // so they take precedence
-    process_cmd_properties();
-#endif  // CONFIG_ANDROID
-
     /* TODO: once all bus devices are qdevified, this should be done
      * when bus is created by qdev.c */
     qemu_register_reset(qbus_reset_all_fn, sysbus_get_default());
     qemu_run_machine_init_done_notifiers();
 
-    /* Done notifiers can load ROMs */
-    rom_load_done();
+    if (rom_check_and_register_reset() != 0) {
+        error_report("rom check and register reset failed");
+        return 1;
+    }
 
+    replay_start();
+
+    /* This checkpoint is required by replay to separate prior clock
+       reading from the other reads, because timer polling functions query
+       clock values from the log. */
+    replay_checkpoint(CHECKPOINT_RESET);
     qemu_system_reset(VMRESET_SILENT);
+    register_global_state();
     if (loadvm) {
         if (load_vmstate(loadvm) < 0) {
             autostart = 0;
@@ -5093,9 +5282,7 @@ int run_qemu_main(int argc, const char **argv)
         Error *local_err = NULL;
         qemu_start_incoming_migration(incoming, &local_err);
         if (local_err) {
-            error_report("-incoming %s: %s", incoming,
-                         error_get_pretty(local_err));
-            error_free(local_err);
+            error_reportf_err(local_err, "-incoming %s: ", incoming);
             return 1;
         }
     } else if (autostart) {
@@ -5104,12 +5291,6 @@ int run_qemu_main(int argc, const char **argv)
 
     os_setup_post();
 
-    if (is_daemonized()) {
-        if (!trace_init_backends(trace_events, trace_file)) {
-            return 1;
-        }
-    }
-
 #ifdef CONFIG_ANDROID
     // Initialize reporting right before entering main loop.
     // We want to track performance of a running emulator, ignoring any early
@@ -5117,15 +5298,18 @@ int run_qemu_main(int argc, const char **argv)
     if (!android_reporting_setup()) {
         return 1;
     }
-#endif
+#endif  // CONFIG_ANDROID
 
+    trace_init_vcpu_events();
     main_loop();
+    replay_disable_events();
 
 #ifdef CONFIG_ANDROID
     crashhandler_exitmode("after main_loop");
     android_wear_agent_stop();
     socket_drainer_stop();
 #endif
+
     bdrv_close_all();
     pause_all_vcpus();
     res_free();
@@ -5134,8 +5318,15 @@ int run_qemu_main(int argc, const char **argv)
 #endif
 
 #ifdef CONFIG_ANDROID
+    qemu_android_emulation_teardown();
     android_reporting_teardown();
 #endif
+
+    /* vhost-user must be cleaned up before chardevs.  */
+    net_cleanup();
+    audio_cleanup();
+    monitor_cleanup();
+    qemu_chr_cleanup();
 
     return 0;
 }

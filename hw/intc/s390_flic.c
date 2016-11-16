@@ -10,6 +10,7 @@
  * directory.
  */
 
+#include "qemu/osdep.h"
 #include "qemu/error-report.h"
 #include "hw/sysbus.h"
 #include "migration/qemu-file.h"
@@ -30,7 +31,6 @@ S390FLICState *s390_get_flic(void)
 void s390_flic_init(void)
 {
     DeviceState *dev;
-    int r;
 
     dev = s390_flic_kvm_create();
     if (!dev) {
@@ -38,10 +38,7 @@ void s390_flic_init(void)
         object_property_add_child(qdev_get_machine(), TYPE_QEMU_S390_FLIC,
                                   OBJECT(dev), NULL);
     }
-    r = qdev_init(dev);
-    if (r) {
-        error_report("flic: couldn't create qdev");
-    }
+    qdev_init_nofail(dev);
 }
 
 static int qemu_s390_register_io_adapter(S390FLICState *fs, uint32_t id,
@@ -70,6 +67,13 @@ static void qemu_s390_release_adapter_routes(S390FLICState *fs,
 {
 }
 
+static int qemu_s390_clear_io_flic(S390FLICState *fs, uint16_t subchannel_id,
+                           uint16_t subchannel_nr)
+{
+    /* Fixme TCG */
+    return -ENOSYS;
+}
+
 static void qemu_s390_flic_class_init(ObjectClass *oc, void *data)
 {
     S390FLICStateClass *fsc = S390_FLIC_COMMON_CLASS(oc);
@@ -78,6 +82,7 @@ static void qemu_s390_flic_class_init(ObjectClass *oc, void *data)
     fsc->io_adapter_map = qemu_s390_io_adapter_map;
     fsc->add_adapter_routes = qemu_s390_add_adapter_routes;
     fsc->release_adapter_routes = qemu_s390_release_adapter_routes;
+    fsc->clear_io_irq = qemu_s390_clear_io_flic;
 }
 
 static const TypeInfo qemu_s390_flic_info = {

@@ -22,8 +22,14 @@
  * THE SOFTWARE.
  */
 
+#include "qemu/osdep.h"
+#include "qemu-common.h"
+#include "cpu.h"
+#include "exec/exec-all.h"
 #include "tcg.h"
 #include "tcg-op.h"
+#include "trace-tcg.h"
+#include "trace/mem.h"
 
 /* Reduce the number of ifdefs below.  This assumes that all uses of
    TCGV_HIGH and TCGV_LOW are properly protected by a conditional that
@@ -46,7 +52,7 @@ static void tcg_emit_op(TCGContext *ctx, TCGOpcode opc, int args)
     int pi = oi - 1;
 
     tcg_debug_assert(oi < OPC_BUF_SIZE);
-    ctx->gen_last_op_idx = oi;
+    ctx->gen_op_buf[0].prev = oi;
     ctx->gen_next_op_idx = ni;
 
     ctx->gen_op_buf[oi] = (TCGOp){
@@ -275,20 +281,24 @@ void tcg_gen_sari_i32(TCGv_i32 ret, TCGv_i32 arg1, unsigned arg2)
     }
 }
 
-void tcg_gen_brcond_i32(TCGCond cond, TCGv_i32 arg1, TCGv_i32 arg2, int label)
+void tcg_gen_brcond_i32(TCGCond cond, TCGv_i32 arg1, TCGv_i32 arg2, TCGLabel *l)
 {
     if (cond == TCG_COND_ALWAYS) {
-        tcg_gen_br(label);
+        tcg_gen_br(l);
     } else if (cond != TCG_COND_NEVER) {
-        tcg_gen_op4ii_i32(INDEX_op_brcond_i32, arg1, arg2, cond, label);
+        tcg_gen_op4ii_i32(INDEX_op_brcond_i32, arg1, arg2, cond, label_arg(l));
     }
 }
 
-void tcg_gen_brcondi_i32(TCGCond cond, TCGv_i32 arg1, int32_t arg2, int label)
+void tcg_gen_brcondi_i32(TCGCond cond, TCGv_i32 arg1, int32_t arg2, TCGLabel *l)
 {
-    TCGv_i32 t0 = tcg_const_i32(arg2);
-    tcg_gen_brcond_i32(cond, arg1, t0, label);
-    tcg_temp_free_i32(t0);
+    if (cond == TCG_COND_ALWAYS) {
+        tcg_gen_br(l);
+    } else if (cond != TCG_COND_NEVER) {
+        TCGv_i32 t0 = tcg_const_i32(arg2);
+        tcg_gen_brcond_i32(cond, arg1, t0, l);
+        tcg_temp_free_i32(t0);
+    }
 }
 
 void tcg_gen_setcond_i32(TCGCond cond, TCGv_i32 ret,
@@ -546,7 +556,11 @@ void tcg_gen_deposit_i32(TCGv_i32 ret, TCGv_i32 arg1, TCGv_i32 arg2,
 void tcg_gen_movcond_i32(TCGCond cond, TCGv_i32 ret, TCGv_i32 c1,
                          TCGv_i32 c2, TCGv_i32 v1, TCGv_i32 v2)
 {
-    if (TCG_TARGET_HAS_movcond_i32) {
+    if (cond == TCG_COND_ALWAYS) {
+        tcg_gen_mov_i32(ret, v1);
+    } else if (cond == TCG_COND_NEVER) {
+        tcg_gen_mov_i32(ret, v2);
+    } else if (TCG_TARGET_HAS_movcond_i32) {
         tcg_gen_op6i_i32(INDEX_op_movcond_i32, ret, c1, c2, v1, v2, cond);
     } else {
         TCGv_i32 t0 = tcg_temp_new_i32();
@@ -800,7 +814,7 @@ void tcg_gen_ld_i64(TCGv_i64 ret, TCGv_ptr arg2, tcg_target_long offset)
 {
     /* Since arg2 and ret have different types,
        they cannot be the same temporary */
-#ifdef TCG_TARGET_WORDS_BIGENDIAN
+#ifdef HOST_WORDS_BIGENDIAN
     tcg_gen_ld_i32(TCGV_HIGH(ret), arg2, offset);
     tcg_gen_ld_i32(TCGV_LOW(ret), arg2, offset + 4);
 #else
@@ -811,7 +825,7 @@ void tcg_gen_ld_i64(TCGv_i64 ret, TCGv_ptr arg2, tcg_target_long offset)
 
 void tcg_gen_st_i64(TCGv_i64 arg1, TCGv_ptr arg2, tcg_target_long offset)
 {
-#ifdef TCG_TARGET_WORDS_BIGENDIAN
+#ifdef HOST_WORDS_BIGENDIAN
     tcg_gen_st_i32(TCGV_HIGH(arg1), arg2, offset);
     tcg_gen_st_i32(TCGV_LOW(arg1), arg2, offset + 4);
 #else
@@ -1084,28 +1098,29 @@ void tcg_gen_sari_i64(TCGv_i64 ret, TCGv_i64 arg1, unsigned arg2)
     }
 }
 
-void tcg_gen_brcond_i64(TCGCond cond, TCGv_i64 arg1, TCGv_i64 arg2, int label)
+void tcg_gen_brcond_i64(TCGCond cond, TCGv_i64 arg1, TCGv_i64 arg2, TCGLabel *l)
 {
     if (cond == TCG_COND_ALWAYS) {
-        tcg_gen_br(label);
+        tcg_gen_br(l);
     } else if (cond != TCG_COND_NEVER) {
         if (TCG_TARGET_REG_BITS == 32) {
             tcg_gen_op6ii_i32(INDEX_op_brcond2_i32, TCGV_LOW(arg1),
                               TCGV_HIGH(arg1), TCGV_LOW(arg2),
-                              TCGV_HIGH(arg2), cond, label);
+                              TCGV_HIGH(arg2), cond, label_arg(l));
         } else {
-            tcg_gen_op4ii_i64(INDEX_op_brcond_i64, arg1, arg2, cond, label);
+            tcg_gen_op4ii_i64(INDEX_op_brcond_i64, arg1, arg2, cond,
+                              label_arg(l));
         }
     }
 }
 
-void tcg_gen_brcondi_i64(TCGCond cond, TCGv_i64 arg1, int64_t arg2, int label)
+void tcg_gen_brcondi_i64(TCGCond cond, TCGv_i64 arg1, int64_t arg2, TCGLabel *l)
 {
     if (cond == TCG_COND_ALWAYS) {
-        tcg_gen_br(label);
+        tcg_gen_br(l);
     } else if (cond != TCG_COND_NEVER) {
         TCGv_i64 t0 = tcg_const_i64(arg2);
-        tcg_gen_brcond_i64(cond, arg1, t0, label);
+        tcg_gen_brcond_i64(cond, arg1, t0, l);
         tcg_temp_free_i64(t0);
     }
 }
@@ -1589,7 +1604,11 @@ void tcg_gen_deposit_i64(TCGv_i64 ret, TCGv_i64 arg1, TCGv_i64 arg2,
 void tcg_gen_movcond_i64(TCGCond cond, TCGv_i64 ret, TCGv_i64 c1,
                          TCGv_i64 c2, TCGv_i64 v1, TCGv_i64 v2)
 {
-    if (TCG_TARGET_REG_BITS == 32) {
+    if (cond == TCG_COND_ALWAYS) {
+        tcg_gen_mov_i64(ret, v1);
+    } else if (cond == TCG_COND_NEVER) {
+        tcg_gen_mov_i64(ret, v2);
+    } else if (TCG_TARGET_REG_BITS == 32) {
         TCGv_i32 t0 = tcg_temp_new_i32();
         TCGv_i32 t1 = tcg_temp_new_i32();
         tcg_gen_op6i_i32(INDEX_op_setcond2_i32, t0,
@@ -1724,28 +1743,28 @@ void tcg_gen_muls2_i64(TCGv_i64 rl, TCGv_i64 rh, TCGv_i64 arg1, TCGv_i64 arg2)
 
 /* Size changing operations.  */
 
-void tcg_gen_trunc_shr_i64_i32(TCGv_i32 ret, TCGv_i64 arg, unsigned count)
+void tcg_gen_extrl_i64_i32(TCGv_i32 ret, TCGv_i64 arg)
 {
-    tcg_debug_assert(count < 64);
     if (TCG_TARGET_REG_BITS == 32) {
-        if (count >= 32) {
-            tcg_gen_shri_i32(ret, TCGV_HIGH(arg), count - 32);
-        } else if (count == 0) {
-            tcg_gen_mov_i32(ret, TCGV_LOW(arg));
-        } else {
-            TCGv_i64 t = tcg_temp_new_i64();
-            tcg_gen_shri_i64(t, arg, count);
-            tcg_gen_mov_i32(ret, TCGV_LOW(t));
-            tcg_temp_free_i64(t);
-        }
-    } else if (TCG_TARGET_HAS_trunc_shr_i32) {
-        tcg_gen_op3i_i32(INDEX_op_trunc_shr_i32, ret,
-                         MAKE_TCGV_I32(GET_TCGV_I64(arg)), count);
-    } else if (count == 0) {
+        tcg_gen_mov_i32(ret, TCGV_LOW(arg));
+    } else if (TCG_TARGET_HAS_extrl_i64_i32) {
+        tcg_gen_op2(&tcg_ctx, INDEX_op_extrl_i64_i32,
+                    GET_TCGV_I32(ret), GET_TCGV_I64(arg));
+    } else {
         tcg_gen_mov_i32(ret, MAKE_TCGV_I32(GET_TCGV_I64(arg)));
+    }
+}
+
+void tcg_gen_extrh_i64_i32(TCGv_i32 ret, TCGv_i64 arg)
+{
+    if (TCG_TARGET_REG_BITS == 32) {
+        tcg_gen_mov_i32(ret, TCGV_HIGH(arg));
+    } else if (TCG_TARGET_HAS_extrh_i64_i32) {
+        tcg_gen_op2(&tcg_ctx, INDEX_op_extrh_i64_i32,
+                    GET_TCGV_I32(ret), GET_TCGV_I64(arg));
     } else {
         TCGv_i64 t = tcg_temp_new_i64();
-        tcg_gen_shri_i64(t, arg, count);
+        tcg_gen_shri_i64(t, arg, 32);
         tcg_gen_mov_i32(ret, MAKE_TCGV_I32(GET_TCGV_I64(t)));
         tcg_temp_free_i64(t);
     }
@@ -1757,9 +1776,8 @@ void tcg_gen_extu_i32_i64(TCGv_i64 ret, TCGv_i32 arg)
         tcg_gen_mov_i32(TCGV_LOW(ret), arg);
         tcg_gen_movi_i32(TCGV_HIGH(ret), 0);
     } else {
-        /* Note: we assume the target supports move between
-           32 and 64 bit registers.  */
-        tcg_gen_ext32u_i64(ret, MAKE_TCGV_I64(GET_TCGV_I32(arg)));
+        tcg_gen_op2(&tcg_ctx, INDEX_op_extu_i32_i64,
+                    GET_TCGV_I64(ret), GET_TCGV_I32(arg));
     }
 }
 
@@ -1769,9 +1787,8 @@ void tcg_gen_ext_i32_i64(TCGv_i64 ret, TCGv_i32 arg)
         tcg_gen_mov_i32(TCGV_LOW(ret), arg);
         tcg_gen_sari_i32(TCGV_HIGH(ret), TCGV_LOW(ret), 31);
     } else {
-        /* Note: we assume the target supports move between
-           32 and 64 bit registers.  */
-        tcg_gen_ext32s_i64(ret, MAKE_TCGV_I64(GET_TCGV_I32(arg)));
+        tcg_gen_op2(&tcg_ctx, INDEX_op_ext_i32_i64,
+                    GET_TCGV_I64(ret), GET_TCGV_I32(arg));
     }
 }
 
@@ -1807,8 +1824,8 @@ void tcg_gen_extr_i64_i32(TCGv_i32 lo, TCGv_i32 hi, TCGv_i64 arg)
         tcg_gen_mov_i32(lo, TCGV_LOW(arg));
         tcg_gen_mov_i32(hi, TCGV_HIGH(arg));
     } else {
-        tcg_gen_trunc_shr_i64_i32(lo, arg, 0);
-        tcg_gen_trunc_shr_i64_i32(hi, arg, 32);
+        tcg_gen_extrl_i64_i32(lo, arg);
+        tcg_gen_extrh_i64_i32(hi, arg);
     }
 }
 
@@ -1898,12 +1915,16 @@ static void gen_ldst_i64(TCGOpcode opc, TCGv_i64 val, TCGv addr,
 void tcg_gen_qemu_ld_i32(TCGv_i32 val, TCGv addr, TCGArg idx, TCGMemOp memop)
 {
     memop = tcg_canonicalize_memop(memop, 0, 0);
+    trace_guest_mem_before_tcg(tcg_ctx.cpu, tcg_ctx.tcg_env,
+                               addr, trace_mem_get_info(memop, 0));
     gen_ldst_i32(INDEX_op_qemu_ld_i32, val, addr, memop, idx);
 }
 
 void tcg_gen_qemu_st_i32(TCGv_i32 val, TCGv addr, TCGArg idx, TCGMemOp memop)
 {
     memop = tcg_canonicalize_memop(memop, 0, 1);
+    trace_guest_mem_before_tcg(tcg_ctx.cpu, tcg_ctx.tcg_env,
+                               addr, trace_mem_get_info(memop, 1));
     gen_ldst_i32(INDEX_op_qemu_st_i32, val, addr, memop, idx);
 }
 
@@ -1920,6 +1941,8 @@ void tcg_gen_qemu_ld_i64(TCGv_i64 val, TCGv addr, TCGArg idx, TCGMemOp memop)
     }
 
     memop = tcg_canonicalize_memop(memop, 1, 0);
+    trace_guest_mem_before_tcg(tcg_ctx.cpu, tcg_ctx.tcg_env,
+                               addr, trace_mem_get_info(memop, 0));
     gen_ldst_i64(INDEX_op_qemu_ld_i64, val, addr, memop, idx);
 }
 
@@ -1931,5 +1954,7 @@ void tcg_gen_qemu_st_i64(TCGv_i64 val, TCGv addr, TCGArg idx, TCGMemOp memop)
     }
 
     memop = tcg_canonicalize_memop(memop, 1, 1);
+    trace_guest_mem_before_tcg(tcg_ctx.cpu, tcg_ctx.tcg_env,
+                               addr, trace_mem_get_info(memop, 1));
     gen_ldst_i64(INDEX_op_qemu_st_i64, val, addr, memop, idx);
 }

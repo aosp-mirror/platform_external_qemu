@@ -7,9 +7,11 @@
  * later.  See the COPYING file in the top-level directory.
  */
 
+#include "qemu/osdep.h"
 #include "sysemu/blockdev.h"
 #include "sysemu/block-backend.h"
 #include "hw/block/block.h"
+#include "qapi/error.h"
 #include "qemu/error-report.h"
 
 void blkconf_serial(BlockConf *conf, char **serial)
@@ -23,6 +25,58 @@ void blkconf_serial(BlockConf *conf, char **serial)
             *serial = g_strdup(dinfo->serial);
         }
     }
+}
+
+void blkconf_blocksizes(BlockConf *conf)
+{
+    BlockBackend *blk = conf->blk;
+    BlockSizes blocksizes;
+    int backend_ret;
+
+    backend_ret = blk_probe_blocksizes(blk, &blocksizes);
+    /* fill in detected values if they are not defined via qemu command line */
+    if (!conf->physical_block_size) {
+        if (!backend_ret) {
+           conf->physical_block_size = blocksizes.phys;
+        } else {
+            conf->physical_block_size = BDRV_SECTOR_SIZE;
+        }
+    }
+    if (!conf->logical_block_size) {
+        if (!backend_ret) {
+            conf->logical_block_size = blocksizes.log;
+        } else {
+            conf->logical_block_size = BDRV_SECTOR_SIZE;
+        }
+    }
+}
+
+void blkconf_apply_backend_options(BlockConf *conf)
+{
+    BlockBackend *blk = conf->blk;
+    BlockdevOnError rerror, werror;
+    bool wce;
+
+    switch (conf->wce) {
+    case ON_OFF_AUTO_ON:    wce = true; break;
+    case ON_OFF_AUTO_OFF:   wce = false; break;
+    case ON_OFF_AUTO_AUTO:  wce = blk_enable_write_cache(blk); break;
+    default:
+        abort();
+    }
+
+    rerror = conf->rerror;
+    if (rerror == BLOCKDEV_ON_ERROR_AUTO) {
+        rerror = blk_get_on_error(blk, true);
+    }
+
+    werror = conf->werror;
+    if (werror == BLOCKDEV_ON_ERROR_AUTO) {
+        werror = blk_get_on_error(blk, false);
+    }
+
+    blk_set_enable_write_cache(blk, wce);
+    blk_set_on_error(blk, rerror, werror);
 }
 
 void blkconf_geometry(BlockConf *conf, int *ptrans,

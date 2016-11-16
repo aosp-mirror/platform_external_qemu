@@ -9,12 +9,14 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+#include "qemu/osdep.h"
 #include "framebuffer.h"
 #include "hw/hw.h"
 #include "hw/sysbus.h"
 #include "ui/console.h"
 #include "ui/pixel_ops.h"
 #include "trace.h"
+#include "exec/address-spaces.h"
 #include "hw/display/goldfish_fb.h"
 
 #include <inttypes.h>
@@ -107,6 +109,8 @@ struct goldfish_fb_state {
     int      rotation;   /* 0, 1, 2 or 3 */
     int      dpi;
     int      format;
+
+    MemoryRegionSection fbsection;
 };
 
 #define  GOLDFISH_FB_SAVE_VERSION  3
@@ -269,8 +273,6 @@ static void goldfish_fb_update_display(void *opaque)
     }
     else
     {
-        SysBusDevice *dev = SYS_BUS_DEVICE(opaque);
-        MemoryRegion *address_space = sysbus_address_space(dev);
         int src_width, src_height;
         int dest_row_pitch, dest_col_pitch;
         drawfn fn;
@@ -347,7 +349,12 @@ static void goldfish_fb_update_display(void *opaque)
         // CPU time on OSX; saving on other platforms may differ.
         if (s_use_host_gpu) return;
 
-        framebuffer_update_display(ds, address_space, s->fb_base,
+        if (s->need_update) {
+            framebuffer_update_memory_section(
+                    &s->fbsection, get_system_memory(), s->fb_base,
+                    src_height, src_width * source_bytes_per_pixel);
+        }
+        framebuffer_update_display(ds, &s->fbsection,
                                    src_width, src_height,
                                    src_width * source_bytes_per_pixel,
                                    dest_row_pitch, dest_col_pitch,

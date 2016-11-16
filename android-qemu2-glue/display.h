@@ -18,8 +18,9 @@
 
 ANDROID_BEGIN_HEADER
 
-#include "ui/console.h"
-#include "../qemu/android/framebuffer.h"
+#include "qemu/osdep.h"
+#include "qemu/typedefs.h"
+#include "android/framebuffer.h"
 
 bool android_display_init(DisplayState* ds, QFrameBuffer* qfbuff);
 

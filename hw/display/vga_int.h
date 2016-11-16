@@ -21,11 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#ifndef HW_VGA_INT_H
-#define HW_VGA_INT_H 1
 
-#include <hw/hw.h>
-#include "qapi/error.h"
+#ifndef HW_VGA_INT_H
+#define HW_VGA_INT_H
+
+#include "hw/hw.h"
 #include "exec/memory.h"
 
 #define ST01_V_RETRACE      0x08
@@ -99,6 +99,7 @@ typedef struct VGACommonState {
     MemoryRegion chain4_alias;
     uint8_t sr_index;
     uint8_t sr[256];
+    uint8_t sr_vbe[256];
     uint8_t gr_index;
     uint8_t gr[256];
     uint8_t ar_index;
@@ -151,6 +152,7 @@ typedef struct VGACommonState {
     uint32_t last_scr_width, last_scr_height; /* in pixels */
     uint32_t last_depth; /* in bits */
     bool last_byteswap;
+    bool force_shadow;
     uint8_t cursor_start, cursor_end;
     bool cursor_visible_phase;
     int64_t cursor_blink_time;
@@ -162,6 +164,8 @@ typedef struct VGACommonState {
     bool default_endian_fb;
     /* hardware mouse cursor support */
     uint32_t invalidated_y_table[VGA_MAX_HEIGHT / 32];
+    uint32_t hw_cursor_x;
+    uint32_t hw_cursor_y;
     void (*cursor_invalidate)(struct VGACommonState *s);
     void (*cursor_draw_line)(struct VGACommonState *s, uint8_t *d, int y);
     /* tell for each page if it has been updated since the last time */
@@ -215,5 +219,11 @@ extern const uint8_t gr_mask[16];
 #define VGABIOS_CIRRUS_FILENAME "vgabios-cirrus.bin"
 
 extern const MemoryRegionOps vga_mem_ops;
+
+/* vga-pci.c */
+void pci_std_vga_mmio_region_init(VGACommonState *s,
+                                  MemoryRegion *parent,
+                                  MemoryRegion *subs,
+                                  bool qext);
 
 #endif

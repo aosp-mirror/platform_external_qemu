@@ -9,7 +9,9 @@
  * or (at your option) any later version.
  */
 
+#include "qemu/osdep.h"
 #include "cpu.h"
+#include "exec/exec-all.h"
 #include "exec/gdbstub.h"
 #include "exec/helper-proto.h"
 #include "qemu/host-utils.h"
@@ -25,15 +27,9 @@
 #define DPRINTF(fmt, ...) do {} while (0)
 #endif
 
-CPUUniCore32State *uc32_cpu_init(const char *cpu_model)
+UniCore32CPU *uc32_cpu_init(const char *cpu_model)
 {
-    UniCore32CPU *cpu;
-
-    cpu = UNICORE32_CPU(cpu_generic_init(TYPE_UNICORE32_CPU, cpu_model));
-    if (cpu == NULL) {
-        return NULL;
-    }
-    return &cpu->env;
+    return UNICORE32_CPU(cpu_generic_init(TYPE_UNICORE32_CPU, cpu_model));
 }
 
 uint32_t HELPER(clo)(uint32_t x)

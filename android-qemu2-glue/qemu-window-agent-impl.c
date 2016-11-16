@@ -21,4 +21,3 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =
     &sQAndroidEmulatorWindowAgent;
-

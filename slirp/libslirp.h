@@ -1,25 +1,44 @@
-#ifndef _LIBSLIRP_H
-#define _LIBSLIRP_H
+#ifndef LIBSLIRP_H
+#define LIBSLIRP_H
 
 #include "qemu-common.h"
 
-int is_dns_addr(Slirp* slirp, const struct in_addr* guest_addr);
+struct Slirp;
+typedef struct Slirp Slirp;
 
-int get_dns_addr(const struct in_addr* guest_addr, struct in_addr* host_addr);
-
-int slirp_get_system_dns_servers(void);
-
-int slirp_parse_dns_servers(const char* servers);
-
-int slirp_get_max_dns_servers(void);
-
-Slirp *slirp_init(int restricted, struct in_addr vnetwork,
+Slirp *slirp_init(int restricted, bool in_enabled, struct in_addr vnetwork,
                   struct in_addr vnetmask, struct in_addr vhost,
-                  const char *vhostname, const char *tftp_path,
-                  const char *bootfile, struct in_addr vdhcp_start,
-                  struct in_addr vnameserver, const char **vdnssearch,
+                  bool in6_enabled,
+                  struct in6_addr vprefix_addr6, uint8_t vprefix_len,
+                  struct in6_addr vhost6, const char *vhostname,
+                  const char *tftp_path, const char *bootfile,
+                  struct in_addr vdhcp_start, struct in_addr vnameserver,
+                  struct in6_addr vnameserver6, const char **vdnssearch,
                   void *opaque);
 void slirp_cleanup(Slirp *slirp);
+
+/* Setup custom DNS servers to be used. |dns_servers| is an array of
+ * |num_dns_servers| IPv4 host addresses for DNS servers to be used
+ * when translating guest IPv4 DNS addresses (typically from 10.0.2.3
+ * to 10.0.2.(3 + num_dns_servers - 1). */
+void slirp_init_custom_dns_servers(Slirp *slirp,
+                                   const struct sockaddr_storage *dns_servers,
+                                   int num_dns_servers);
+
+
+/* Check whether |guest_ip| is the IPv4 address of a guest DNS server.
+ * If that's the case, set |*host_ip| to the corresponding host DNS server
+ * address and return 0. Otherwise, leave |host_ip| untouched and
+ * return -1. NOTE: |*host_ip| can be an IPv6 host address in certain
+ */
+int slirp_translate_guest_dns(Slirp *slirp,
+                              const struct sockaddr_in *guest_ip,
+                              struct sockaddr_storage *host_ip);
+
+/* Same for IPv6 addresses */
+int slirp_translate_guest_dns6(Slirp *slirp,
+                               const struct sockaddr_in6 *guest_ip,
+                               struct sockaddr_storage *host_ip);
 
 void slirp_pollfds_fill(GArray *pollfds, uint32_t *timeout);
 

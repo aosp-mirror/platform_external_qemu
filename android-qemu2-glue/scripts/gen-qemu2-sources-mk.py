@@ -26,29 +26,28 @@ EXPECTED_HOSTS = set([
 LINK_QEMU_PREFIX = 'LINK-qemu-system-'
 IGNORED_OBJECTS = [
     '../audio/sdlaudio.o',
-    '../disas/arm-a64.o',
-    '../disas/libvixl/a64/decoder-a64.o',
-    '../disas/libvixl/a64/disasm-a64.o',
-    '../disas/libvixl/a64/instructions-a64.o',
-    '../disas/libvixl/utils.o',
     'gdbstub-xml.o',
-    '../hw/display/framebuffer.o',
-    'hw/misc/android_boot_properties.o',
-    'hw/misc/android_pipe_opengles.o',
+    'hw/i386/acpi-build.o',
+    'hw/i386/pc_piix.o',
+    '../qmp-introspect.o',
     '../qmp-marshal.o',
     'trace/generated-helpers.o',
     '../ui/sdl_zoom.o',
     '../ui/sdl.o',
     '../ui/sdl2.o',
+    '../ui/sdl2-2d.o',
+    '../ui/sdl2-input.o',
+    '../vl.o',
     '/version.o',   # something from the Windows build
     ]
 
 CC_OBJECTS = [
     'disas/arm-a64.o',
-    'disas/libvixl/a64/decoder-a64.o',
-    'disas/libvixl/a64/disasm-a64.o',
-    'disas/libvixl/a64/instructions-a64.o',
-    'disas/libvixl/utils.o',
+    'disas/libvixl/vixl/a64/decoder-a64.o',
+    'disas/libvixl/vixl/a64/disasm-a64.o',
+    'disas/libvixl/vixl/a64/instructions-a64.o',
+    'disas/libvixl/vixl/compiler-intrinsics.o',
+    'disas/libvixl/vixl/utils.o',
     ]
 
 # objects which have to be moved to *TARGET files,

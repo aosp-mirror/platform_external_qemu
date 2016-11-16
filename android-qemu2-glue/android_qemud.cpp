@@ -16,8 +16,10 @@
 #include "android-qemu2-glue/utils/stream.h"
 
 extern "C" {
-    #include "qemu-common.h"
-    #include "migration/vmstate.h"
+#include "qemu/osdep.h"
+#include "qemu-common.h"
+#include "qom/object.h"
+#include "migration/vmstate.h"
 }
 
 /* Version number of snapshots code. Increment whenever the data saved

@@ -13,6 +13,8 @@
 
 #include "android/multitouch-screen.h"
 #include "android/utils/debug.h"
+
+#include "qemu/osdep.h"
 #include "hw/input/goldfish_events.h"
 #include "ui/console.h"
 

@@ -23,6 +23,7 @@
  * THE SOFTWARE.
  */
 
+#include "qemu/osdep.h"
 #include "qemu-common.h"
 #include "sysemu/sysemu.h"
 #include "audio.h"
@@ -161,7 +162,7 @@ winaudio_out_fini (HWVoiceOut *hw)
 
 
 static int
-winaudio_out_init (HWVoiceOut *hw, struct audsettings *as)
+winaudio_out_init (HWVoiceOut *hw, struct audsettings *as, void* drv_opaque)
 {
     WinAudioOut*   s = (WinAudioOut*) hw;
     MMRESULT       result;
@@ -296,14 +297,6 @@ winaudio_out_run (HWVoiceOut *hw, int live)
             played       += wav_samples;
             s->write_pos += wav_bytes;
             if (s->write_pos == s->write_size) {
-#if DEBUG
-                int64_t  now  = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) - start_time;
-                int64_t  diff = now - last_time;
-
-                D("run_out: (%7.3f:%7d):waveOutWrite buffer:%d\n",
-                   now/1e9, (now-last_time)/1e9, s->write_index);
-                last_time = now;
-#endif
                 waveOutWrite( s->waveout, wav_buffer, sizeof(*wav_buffer) );
                 s->write_pos    = 0;
                 s->write_index += 1;
@@ -407,7 +400,7 @@ winaudio_in_fini (HWVoiceIn *hw)
 
 
 static int
-winaudio_in_init (HWVoiceIn *hw, struct audsettings *as)
+winaudio_in_init (HWVoiceIn *hw, struct audsettings *as, void* drv_opaque)
 {
     WinAudioIn*   s = (WinAudioIn*) hw;
     MMRESULT       result;

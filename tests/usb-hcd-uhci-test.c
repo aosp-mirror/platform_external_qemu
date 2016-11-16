@@ -1,16 +1,14 @@
 /*
  * QTest testcase for USB UHCI controller
  *
- * Copyright (c) 2014 HUAWEI TECHNOLOGIES CO.,LTD.
+ * Copyright (c) 2014 HUAWEI TECHNOLOGIES CO., LTD.
  *
  * This work is licensed under the terms of the GNU GPL, version 2 or later.
  * See the COPYING file in the top-level directory.
  */
 
-#include <glib.h>
-#include <string.h>
-#include "libqtest.h"
 #include "qemu/osdep.h"
+#include "libqtest.h"
 #include "libqos/usb.h"
 #include "hw/usb/uhci-regs.h"
 
@@ -87,7 +85,7 @@ int main(int argc, char **argv)
     qtest_add_func("/uhci/pci/hotplug/usb-storage", test_usb_storage_hotplug);
 
     qtest_start("-device piix3-usb-uhci,id=uhci,addr=1d.0"
-                " -drive id=drive0,if=none,file=/dev/null"
+                " -drive id=drive0,if=none,file=/dev/null,format=raw"
                 " -device usb-tablet,bus=uhci.0,port=1");
     ret = g_test_run();
     qtest_end();

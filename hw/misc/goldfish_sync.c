@@ -10,25 +10,19 @@
 ** GNU General Public License for more details.
 */
 
-#include "hw/misc/goldfish_sync.h"
-#include "android/utils/debug.h"
-
+#include "qemu/osdep.h"
 #include "hw/hw.h"
 #include "hw/sysbus.h"
 #include "qemu-common.h"
 #include "qemu/error-report.h"
 #include "qemu/main-loop.h"
 #include "trace.h"
+#include "hw/misc/goldfish_sync.h"
 
-#define DEBUG_LOG_ALL_DEVICE_OPS 0
+#include <assert.h>
 
-#if DEBUG_LOG_ALL_DEVICE_OPS
-#define DPRINT(...) do { \
-    if (!VERBOSE_CHECK(goldfishsync)) VERBOSE_ENABLE(goldfishsync); \
-    VERBOSE_TID_FUNCTION_DPRINT(goldfishsync, __VA_ARGS__); } while(0)
-#else
+// TODO(digit): Plug better logging for Android emulator.
 #define DPRINT(...)
-#endif
 
 // Goldfish sync commands=======================================================
 
@@ -60,18 +54,6 @@ struct goldfish_sync_pending_cmd {
     uint32_t cmd;
     uint32_t time_arg;
     struct goldfish_sync_pending_cmd* next;
-};
-
-// goldfish_sync_ops contains all the host-side operations that we want
-// triggered along with certain goldfish sync device commands.
-// For example, trigger_wait will run a eglClientWaitSyncKHR
-// on the host in a particular sync thread.
-struct goldfish_sync_ops {
-    // Wait for the specified glsync object glsync_ptr
-    // in thread thread_ptr.
-    void (*trigger_wait)(uint64_t glsync_ptr,
-                         uint64_t thread_ptr,
-                         uint64_t timeline);
 };
 
 // Command numbers that can only be sent from the guest to the device.
@@ -130,7 +112,7 @@ void goldfish_sync_set_service_ops(const GoldfishSyncServiceOps *ops) {
 // Command list operations======================================================
 
 static struct goldfish_sync_pending_cmd*
-goldfish_sync_new_cmd() {
+goldfish_sync_new_cmd(void) {
     struct goldfish_sync_pending_cmd* res;
     res = g_malloc0(sizeof(struct goldfish_sync_pending_cmd));
     return res;

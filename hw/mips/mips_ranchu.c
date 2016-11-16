@@ -1,3 +1,5 @@
+#include "qemu/osdep.h"
+#include "cpu.h"
 #include "hw/sysbus.h"
 #include "hw/devices.h"
 #include "hw/mips/mips.h"
@@ -18,10 +20,7 @@
 #include "elf.h"
 #include "hw/intc/goldfish_pic.h"
 #include "hw/irq.h"
-
-#ifdef CONFIG_ANDROID
-#include "android/android.h"
-#endif  // CONFIG_ANDROID
+#include "qapi/error.h"
 
 #define PHYS_TO_VIRT(x) ((x) | ~(target_ulong)0x7fffffff)
 
@@ -58,16 +57,17 @@ typedef struct {
 #define MAX_RAM_SIZE_MB 4079UL
 
 enum {
-    RANCHU_GF_PIC,
-    RANCHU_GF_TTY,
-    RANCHU_GF_TIMER,
-    RANCHU_GF_RTC,
-    RANCHU_GF_BATTERY,
-    RANCHU_GF_FB,
-    RANCHU_GF_EVDEV,
-    RANCHU_ANDROID_PIPE,
-    RANCHU_GF_AUDIO,
-    RANCHU_GF_RESET,
+    RANCHU_GOLDFISH_PIC,
+    RANCHU_GOLDFISH_TTY,
+    RANCHU_GOLDFISH_TIMER,
+    RANCHU_GOLDFISH_RTC,
+    RANCHU_GOLDFISH_BATTERY,
+    RANCHU_GOLDFISH_FB,
+    RANCHU_GOLDFISH_EVDEV,
+    RANCHU_GOLDFISH_PIPE,
+    RANCHU_GOLDFISH_AUDIO,
+    RANCHU_GOLDFISH_SYNC,
+    RANCHU_GOLDFISH_RESET,
     RANCHU_MMIO,
 };
 
@@ -82,31 +82,33 @@ typedef struct DevMapEntry {
 } DevMapEntry;
 
 static DevMapEntry devmap[] = {
-    [RANCHU_GF_PIC] =       { GOLDFISH_IO_SPACE, 0x1000, 0,
+    [RANCHU_GOLDFISH_PIC] =       { GOLDFISH_IO_SPACE, 0x1000, 0,
         NULL, "goldfish_pic", "generic,goldfish-pic", 1 },
     /* ttyGF0 base address remains hardcoded in the kernel.
      * Early printing (prom_putchar()) relies on finding device
      * mapped on this address. DT can not be used at that early stage
      * for acquiring the base address of the device in the kernel.
      */
-    [RANCHU_GF_TTY] =       { GOLDFISH_IO_SPACE + 0x02000, 0x1000, 2,
+    [RANCHU_GOLDFISH_TTY] =       { GOLDFISH_IO_SPACE + 0x02000, 0x1000, 2,
         "goldfish_tty", "goldfish_tty", "generic,goldfish-tty", 1 },
     /* repeats for a total of MAX_GF_TTYS */
-    [RANCHU_GF_TIMER] =     { GOLDFISH_IO_SPACE + 0x05000, 0x1000, 5,
+    [RANCHU_GOLDFISH_TIMER] =     { GOLDFISH_IO_SPACE + 0x05000, 0x1000, 5,
         "goldfish_timer", "goldfish_timer", "generic,goldfish-timer", 1 },
-    [RANCHU_GF_RTC] =       { GOLDFISH_IO_SPACE + 0x06000, 0x1000, 6,
+    [RANCHU_GOLDFISH_RTC] =       { GOLDFISH_IO_SPACE + 0x06000, 0x1000, 6,
         "goldfish_rtc", "goldfish_rtc", "generic,goldfish-rtc", 1 },
-    [RANCHU_GF_BATTERY] =   { GOLDFISH_IO_SPACE + 0x07000, 0x1000, 7,
+    [RANCHU_GOLDFISH_BATTERY] =   { GOLDFISH_IO_SPACE + 0x07000, 0x1000, 7,
         "goldfish_battery", "goldfish_battery", "generic,goldfish-battery", 1 },
-    [RANCHU_GF_FB] =        { GOLDFISH_IO_SPACE + 0x08000, 0x0100, 8,
+    [RANCHU_GOLDFISH_FB] =        { GOLDFISH_IO_SPACE + 0x08000, 0x0100, 8,
         "goldfish_fb", "goldfish_fb", "generic,goldfish-fb", 1 },
-    [RANCHU_GF_EVDEV] =     { GOLDFISH_IO_SPACE + 0x09000, 0x1000, 9,
-        "goldfish-events", "goldfish_events", "generic,goldfish-events-keypad", 1 },
-    [RANCHU_ANDROID_PIPE] = { GOLDFISH_IO_SPACE + 0x0A000, 0x2000, 10,
-        "android_pipe", "android_pipe","google,android-pipe\0generic,android-pipe", 2 },
-    [RANCHU_GF_AUDIO] =     { GOLDFISH_IO_SPACE + 0x0C000, 0x0100, 11,
-        "goldfish_audio", "goldfish_audio", "generic,goldfish-audio", 1 },
-    [RANCHU_GF_RESET] =     { GOLDFISH_IO_SPACE + 0x0D000, 0x0100, 12,
+    [RANCHU_GOLDFISH_EVDEV] =     { GOLDFISH_IO_SPACE + 0x09000, 0x1000, 9,
+        "goldfish-events", "goldfish_events", "generic,goldfish-events-keypad" },
+    [RANCHU_GOLDFISH_PIPE] = { GOLDFISH_IO_SPACE + 0x0A000, 0x2000, 10,
+        "goldfish_pipe", "android_pipe", "google,android-pipe\0generic,android-pipe", 2 },
+    [RANCHU_GOLDFISH_AUDIO] =     { GOLDFISH_IO_SPACE + 0x0C000, 0x0100, 11,
+        "goldfish_audio", "goldfish_audio", "generic,goldfish-audio" },
+    [RANCHU_GOLDFISH_SYNC] =     { GOLDFISH_IO_SPACE + 0x0D000, 0x0100, 11,
+        "goldfish_sync", "goldfish_sync", "generic,goldfish-audio" },
+    [RANCHU_GOLDFISH_RESET] =     { GOLDFISH_IO_SPACE + 0x0D000, 0x0100, 12,
         "goldfish_reset", "goldfish_reset", "generic,goldfish-reset", 1 },
     [RANCHU_MMIO] =         { GOLDFISH_IO_SPACE + 0x10000, 0x0200, 16,
         "virtio-mmio", "virtio_mmio", "virtio,mmio", 1 },
@@ -215,7 +217,7 @@ static int64_t android_load_kernel(ranchu_params *rp)
 
     if (load_elf(rp->bootinfo.kernel_filename, cpu_mips_kseg0_to_phys, NULL,
         (uint64_t *)&kernel_entry, (uint64_t *)&kernel_low,
-        (uint64_t *)&kernel_high, 0, ELF_MACHINE, 1) < 0) {
+        (uint64_t *)&kernel_high, 0, EM_MIPS, 1, 0) < 0) {
         fprintf(stderr, "qemu: could not load kernel '%s'\n",
                 rp->bootinfo.kernel_filename);
         exit(1);
@@ -391,7 +393,7 @@ static void create_pm_device(void* fdt, DevMapEntry* dev)
     g_free(nodename);
 }
 
-static void ranchu_init(MachineState *machine)
+static void mips_ranchu_init(MachineState *machine)
 {
     MIPSCPU *cpu;
     CPUMIPSState *env;
@@ -427,14 +429,6 @@ static void ranchu_init(MachineState *machine)
 
     env = &cpu->env;
 
-    register_savevm(NULL,
-                    "cpu",
-                    0,
-                    MIPS_CPU_SAVE_VERSION,
-                    cpu_save,
-                    cpu_load,
-                    env);
-
     qemu_register_reset(main_cpu_reset, rp);
 
     if (ram_size > (MAX_RAM_SIZE_MB << 20)) {
@@ -456,7 +450,7 @@ static void ranchu_init(MachineState *machine)
     memory_region_add_subregion(get_system_memory(), 0, ram_lo);
 
     memory_region_init_io(iomem, NULL, &goldfish_reset_io_ops, NULL, "goldfish-reset", 0x0100);
-    memory_region_add_subregion(get_system_memory(), devmap[RANCHU_GF_RESET].base, iomem);
+    memory_region_add_subregion(get_system_memory(), devmap[RANCHU_GOLDFISH_RESET].base, iomem);
 
     memory_region_init_ram(bios, NULL, "ranchu.bios", RANCHU_BIOS_SIZE,
                            &error_abort);
@@ -481,20 +475,20 @@ static void ranchu_init(MachineState *machine)
     rp->fdt_size = fdt_size;
     rp->cpu = cpu;
 
-    cpu_mips_irq_init_cpu(env);
-    cpu_mips_clock_init(env);
+    cpu_mips_irq_init_cpu(cpu);
+    cpu_mips_clock_init(cpu);
 
     /* Initialize Goldfish PIC */
-    s->gfpic = goldfish_pic = goldfish_interrupt_init(devmap[RANCHU_GF_PIC].base,
+    s->gfpic = goldfish_pic = goldfish_interrupt_init(devmap[RANCHU_GOLDFISH_PIC].base,
                                             env->irq[2], env->irq[3]);
     /* Alocate dt handle (label) for interrupt-parent */
-    devmap[RANCHU_GF_PIC].irq = qemu_fdt_alloc_phandle(fdt);
+    devmap[RANCHU_GOLDFISH_PIC].irq = qemu_fdt_alloc_phandle(fdt);
 
     qemu_fdt_setprop_string(fdt, "/", "model", "ranchu");
     qemu_fdt_setprop_string(fdt, "/", "compatible", "mti,goldfish");
     qemu_fdt_setprop_cell(fdt, "/", "#address-cells", 0x1);
     qemu_fdt_setprop_cell(fdt, "/", "#size-cells", 0x2);
-    qemu_fdt_setprop_cell(fdt, "/", "interrupt-parent", devmap[RANCHU_GF_PIC].irq);
+    qemu_fdt_setprop_cell(fdt, "/", "interrupt-parent", devmap[RANCHU_GOLDFISH_PIC].irq);
 
     /* Firmware node */
     qemu_fdt_add_subnode(fdt, "/firmware");
@@ -521,17 +515,17 @@ static void ranchu_init(MachineState *machine)
     }
 
     /* Create goldfish_pic controller node in dt */
-    create_device(fdt, &devmap[RANCHU_GF_PIC], NULL, 1, 0);
+    create_device(fdt, &devmap[RANCHU_GOLDFISH_PIC], NULL, 1, 0);
 
     /* Create 4 Goldfish TTYs */
-    create_device(fdt, &devmap[RANCHU_GF_TTY], goldfish_pic, MAX_GF_TTYS, 0);
+    create_device(fdt, &devmap[RANCHU_GOLDFISH_TTY], goldfish_pic, MAX_GF_TTYS, 0);
 
     /* Other Goldfish Platform devices */
-    for (i = RANCHU_GF_AUDIO; i >= RANCHU_GF_TIMER ; i--) {
+    for (i = RANCHU_GOLDFISH_AUDIO; i >= RANCHU_GOLDFISH_TIMER ; i--) {
         create_device(fdt, &devmap[i], goldfish_pic, 1, 0);
     }
 
-    create_pm_device(fdt, &devmap[RANCHU_GF_RESET]);
+    create_pm_device(fdt, &devmap[RANCHU_GOLDFISH_RESET]);
 
     /* Virtio MMIO devices */
     create_device(fdt, &devmap[RANCHU_MMIO], goldfish_pic, VIRTIO_TRANSPORTS, 1);
@@ -557,28 +551,25 @@ static void mips_ranchu_class_init(ObjectClass *klass, void *data)
 }
 
 static const TypeInfo mips_ranchu_device = {
-    .name          = TYPE_MIPS_RANCHU,
-    .parent        = TYPE_SYS_BUS_DEVICE,
+    .name = TYPE_MIPS_RANCHU,
+    .parent = TYPE_SYS_BUS_DEVICE,
     .instance_size = sizeof(RanchuState),
-    .class_init    = mips_ranchu_class_init,
+    .class_init = mips_ranchu_class_init,
 };
 
-static QEMUMachine ranchu_machine = {
-    .name = "ranchu",
-    .desc = "Ranchu Virtual Machine for Android Emulator",
-    .init = ranchu_init,
-    .max_cpus = 1,
-};
+static void mips_ranchu_machine_init(MachineClass *mc)
+{
+    mc->desc = "Android/MIPS ranchu";
+    mc->init = mips_ranchu_init;
+    mc->max_cpus = 16;
+    mc->is_default = 1;
+}
+
+DEFINE_MACHINE("ranchu", mips_ranchu_machine_init)
 
 static void mips_ranchu_register_types(void)
 {
     type_register_static(&mips_ranchu_device);
 }
 
-static void ranchu_machine_init(void)
-{
-    qemu_register_machine(&ranchu_machine);
-}
-
 type_init(mips_ranchu_register_types)
-machine_init(ranchu_machine_init);

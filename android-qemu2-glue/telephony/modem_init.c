@@ -14,7 +14,10 @@
 #include "android/telephony/modem_driver.h"
 #include "android-qemu2-glue/utils/stream.h"
 
+#include "qemu/osdep.h"
 #include "hw/hw.h"
+
+#include <assert.h>
 
 #define MODEM_DEV_STATE_SAVE_VERSION 1
 
@@ -41,13 +44,13 @@ static int modem_state_load(QEMUFile* file, void* opaque, int version_id)
 void qemu_android_modem_init(int base_port) {
     android_modem_init(base_port);
 
-    if (android_modem_serial_line != NULL) {
-        register_savevm(NULL,
-                        "android_modem",
-                        0,
-                        MODEM_DEV_STATE_SAVE_VERSION,
-                        modem_state_save,
-                        modem_state_load,
-                        android_modem);
-    }
+    assert(android_modem_serial_line != NULL);
+
+    register_savevm(NULL,
+                    "android_modem",
+                    0,
+                    MODEM_DEV_STATE_SAVE_VERSION,
+                    modem_state_save,
+                    modem_state_load,
+                    android_modem);
 }

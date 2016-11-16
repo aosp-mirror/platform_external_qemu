@@ -15,6 +15,7 @@
 #include "android/emulation/control/net_agent.h"
 
 #include "android/utils/sockets.h"
+#include "qemu/osdep.h"
 #include "qemu/sockets.h"
 #include "net/slirp.h"
 
@@ -22,21 +23,20 @@
 #include "libslirp.h"
 
 static bool isSlirpInited() {
-    return net_slirp_is_inited() != 0;
+    return net_slirp_state() != NULL;
 }
 
 static bool slirpRedir(bool isUdp, int hostPort,
                       uint32_t guestAddr, int guestPort) {
     struct in_addr host = { .s_addr = htonl(SOCK_ADDRESS_INET_LOOPBACK) };
     struct in_addr guest = { .s_addr = 0 };
-    return slirp_add_hostfwd(net_slirp_lookup(NULL, NULL, NULL), isUdp,
-                             host, hostPort, guest, guestPort) == 0;
+    return slirp_add_hostfwd(net_slirp_state(), isUdp, host, hostPort, guest,
+                             guestPort) == 0;
 }
 
 bool slirpUnredir(bool isUdp, int hostPort) {
     struct in_addr host = { .s_addr = htonl(SOCK_ADDRESS_INET_LOOPBACK) };
-    return slirp_remove_hostfwd(net_slirp_lookup(NULL, NULL, NULL), isUdp,
-                                host, hostPort) == 0;
+    return slirp_remove_hostfwd(net_slirp_state(), isUdp, host, hostPort) == 0;
 }
 
 

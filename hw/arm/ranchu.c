@@ -23,9 +23,11 @@
  * We only support 64-bit ARM CPUs.
  */
 
+#include "qemu/osdep.h"
 #include "hw/sysbus.h"
 #include "hw/arm/arm.h"
 #include "hw/arm/primecell.h"
+#include "hw/char/pl011.h"
 #include "hw/devices.h"
 #include "net/net.h"
 #include "sysemu/device_tree.h"
@@ -38,8 +40,7 @@
 #include "qemu/config-file.h"
 #include "sysemu/char.h"
 #include "monitor/monitor.h"
-
-#include "android/android.h"
+#include "qapi/error.h"
 
 #define NUM_VIRTIO_TRANSPORTS 32
 
@@ -64,11 +65,12 @@ enum {
     RANCHU_GIC_DIST,
     RANCHU_GIC_CPU,
     RANCHU_UART,
-    RANCHU_GF_FB,
-    RANCHU_GF_BATTERY,
-    RANCHU_GF_AUDIO,
-    RANCHU_GF_EVDEV,
-    RANCHU_ANDROID_PIPE,
+    RANCHU_GOLDFISH_FB,
+    RANCHU_GOLDFISH_BATTERY,
+    RANCHU_GOLDFISH_AUDIO,
+    RANCHU_GOLDFISH_EVDEV,
+    RANCHU_GOLDFISH_PIPE,
+    RANCHU_GOLDFISH_SYNC,
     RANCHU_MMIO,
 };
 
@@ -108,12 +110,12 @@ static const MemMapEntry memmap[] = {
     [RANCHU_GIC_DIST] = { 0x8000000, 0x10000 },
     [RANCHU_GIC_CPU] = { 0x8010000, 0x10000 },
     [RANCHU_UART] = { 0x9000000, 0x1000 },
-    [RANCHU_GF_FB] = { 0x9010000, 0x100 },
-    [RANCHU_GF_BATTERY] = { 0x9020000, 0x1000 },
-    [RANCHU_GF_AUDIO] = { 0x9030000, 0x100 },
-    [RANCHU_GF_EVDEV] = { 0x9040000, 0x1000 },
+    [RANCHU_GOLDFISH_FB] = { 0x9010000, 0x100 },
+    [RANCHU_GOLDFISH_BATTERY] = { 0x9020000, 0x1000 },
+    [RANCHU_GOLDFISH_AUDIO] = { 0x9030000, 0x100 },
+    [RANCHU_GOLDFISH_EVDEV] = { 0x9040000, 0x1000 },
     [RANCHU_MMIO] = { 0xa000000, 0x200 },
-    [RANCHU_ANDROID_PIPE] = {0xa010000, 0x2000 },
+    [RANCHU_GOLDFISH_PIPE] = {0xa010000, 0x2000 },
     /* ...repeating for a total of NUM_VIRTIO_TRANSPORTS, each of that size */
     /* 0x10000000 .. 0x40000000 reserved for PCI */
     [RANCHU_MEM] = { 0x40000000, 30ULL * 1024 * 1024 * 1024 },
@@ -121,11 +123,11 @@ static const MemMapEntry memmap[] = {
 
 static const int irqmap[] = {
     [RANCHU_UART] = 1,
-    [RANCHU_GF_FB] = 2,
-    [RANCHU_GF_BATTERY] = 3,
-    [RANCHU_GF_AUDIO] = 4,
-    [RANCHU_GF_EVDEV] = 5,
-    [RANCHU_ANDROID_PIPE] = 6,
+    [RANCHU_GOLDFISH_FB] = 2,
+    [RANCHU_GOLDFISH_BATTERY] = 3,
+    [RANCHU_GOLDFISH_AUDIO] = 4,
+    [RANCHU_GOLDFISH_EVDEV] = 5,
+    [RANCHU_GOLDFISH_PIPE] = 6,
     [RANCHU_MMIO] = 16, /* ...to 16 + NUM_VIRTIO_TRANSPORTS - 1 */
 };
 
@@ -333,6 +335,54 @@ static void create_gic(const VirtBoardInfo *vbi, qemu_irq *pic)
     fdt_add_gic_node(vbi);
 }
 
+static void init_simple_device(DeviceState *dev,
+                               const VirtBoardInfo *vbi,qemu_irq *pic,
+                               int devid, const char *sysbus_name,
+                               const char *compat,
+                               int num_compat_strings,
+                               const char *clocks, int num_clocks)
+{
+    int irq = irqmap[devid];
+    hwaddr base = memmap[devid].base;
+    hwaddr size = memmap[devid].size;
+    char *nodename;
+    int i;
+    int compat_sz = 0;
+    int clocks_sz = 0;
+
+    SysBusDevice *s = SYS_BUS_DEVICE(dev);
+    qdev_init_nofail(dev);
+    sysbus_mmio_map(s, 0, base);
+    if (pic[irq]) {
+        sysbus_connect_irq(s, 0, pic[irq]);
+    }
+
+    for (i = 0; i < num_compat_strings; i++) {
+        compat_sz += strlen(compat + compat_sz) + 1;
+    }
+
+    for (i = 0; i < num_clocks; i++) {
+        clocks_sz += strlen(clocks + clocks_sz) + 1;
+    }
+
+    nodename = g_strdup_printf("/%s@%" PRIx64, sysbus_name, base);
+    qemu_fdt_add_subnode(vbi->fdt, nodename);
+    qemu_fdt_setprop(vbi->fdt, nodename, "compatible", compat, compat_sz);
+    qemu_fdt_setprop_sized_cells(vbi->fdt, nodename, "reg", 2, base, 2, size);
+    if (irq) {
+        qemu_fdt_setprop_cells(vbi->fdt, nodename, "interrupts",
+                               GIC_FDT_IRQ_TYPE_SPI, irq,
+                               GIC_FDT_IRQ_FLAGS_LEVEL_HI);
+    }
+    if (num_clocks) {
+        qemu_fdt_setprop_cells(vbi->fdt, nodename, "clocks",
+                               vbi->clock_phandle, vbi->clock_phandle);
+        qemu_fdt_setprop(vbi->fdt, nodename, "clock-names",
+                         clocks, clocks_sz);
+    }
+    g_free(nodename);
+}
+
 /**
  * create_simple_device:
  * @vbi: VirtBoardInfo struct
@@ -352,40 +402,21 @@ static void create_simple_device(const VirtBoardInfo *vbi, qemu_irq *pic,
                                  const char *compat, int num_compat_strings,
                                  const char *clocks, int num_clocks)
 {
-    int irq = irqmap[devid];
-    hwaddr base = memmap[devid].base;
-    hwaddr size = memmap[devid].size;
-    char *nodename;
-    int i;
-    int compat_sz = 0;
-    int clocks_sz = 0;
+    DeviceState *dev = qdev_create(NULL, sysbus_name);
+    init_simple_device(dev, vbi, pic, devid, sysbus_name, compat,
+                       num_compat_strings, clocks, num_clocks);
+}
 
-    for (i = 0; i < num_compat_strings; i++) {
-        compat_sz += strlen(compat + compat_sz) + 1;
-    }
-
-    for (i = 0; i < num_clocks; i++) {
-        clocks_sz += strlen(clocks + clocks_sz) + 1;
-    }
-
-    sysbus_create_simple(sysbus_name, base, pic[irq]);
-
-    nodename = g_strdup_printf("/%s@%" PRIx64, sysbus_name, base);
-    qemu_fdt_add_subnode(vbi->fdt, nodename);
-    qemu_fdt_setprop(vbi->fdt, nodename, "compatible", compat, compat_sz);
-    qemu_fdt_setprop_sized_cells(vbi->fdt, nodename, "reg", 2, base, 2, size);
-    if (irq) {
-        qemu_fdt_setprop_cells(vbi->fdt, nodename, "interrupts",
-                               GIC_FDT_IRQ_TYPE_SPI, irq,
-                               GIC_FDT_IRQ_FLAGS_LEVEL_HI);
-    }
-    if (num_clocks) {
-        qemu_fdt_setprop_cells(vbi->fdt, nodename, "clocks",
-                               vbi->clock_phandle, vbi->clock_phandle);
-        qemu_fdt_setprop(vbi->fdt, nodename, "clock-names",
-                         clocks, clocks_sz);
-    }
-    g_free(nodename);
+static void create_serial_device(int serial_index, const VirtBoardInfo *vbi,
+                                 qemu_irq *pic, int devid,
+                                 const char *sysbus_name, const char *compat,
+                                 int num_compat_strings, const char *clocks,
+                                 int num_clocks)
+{
+    DeviceState *dev = qdev_create(NULL, sysbus_name);
+    qdev_prop_set_chr(dev, "chardev", serial_hds[serial_index]);
+    init_simple_device(dev, vbi, pic, devid, sysbus_name, compat,
+                       num_compat_strings, clocks, num_clocks);
 }
 
 static void create_virtio_devices(const VirtBoardInfo *vbi, qemu_irq *pic)
@@ -486,19 +517,21 @@ static void ranchu_init(MachineState *machine)
     memory_region_add_subregion(sysmem, memmap[RANCHU_MEM].base, ram);
 
     create_gic(vbi, pic);
-    create_simple_device(vbi, pic, RANCHU_UART, "pl011",
+    create_serial_device(0, vbi, pic, RANCHU_UART, "pl011",
                          "arm,pl011\0arm,primecell", 2, "uartclk\0apb_pclk", 2);
-    create_simple_device(vbi, pic, RANCHU_GF_FB, "goldfish_fb",
+    create_simple_device(vbi, pic, RANCHU_GOLDFISH_FB, "goldfish_fb",
                          "generic,goldfish-fb", 1, 0, 0);
-    create_simple_device(vbi, pic, RANCHU_GF_BATTERY, "goldfish_battery",
+    create_simple_device(vbi, pic, RANCHU_GOLDFISH_BATTERY, "goldfish_battery",
                          "generic,goldfish-battery", 1, 0, 0);
-    create_simple_device(vbi, pic, RANCHU_GF_AUDIO, "goldfish_audio",
+    create_simple_device(vbi, pic, RANCHU_GOLDFISH_AUDIO, "goldfish_audio",
                          "generic,goldfish-audio", 1, 0, 0);
-    create_simple_device(vbi, pic, RANCHU_GF_EVDEV, "goldfish-events",
+    create_simple_device(vbi, pic, RANCHU_GOLDFISH_EVDEV, "goldfish-events",
                          "generic,goldfish-events-keypad", 1, 0, 0);
-    create_simple_device(vbi, pic, RANCHU_ANDROID_PIPE, "android_pipe",
+    create_simple_device(vbi, pic, RANCHU_GOLDFISH_PIPE, "goldfish_pipe",
                          "google,android-pipe\0generic,android-pipe",
                          2, 0, 0);
+    create_simple_device(vbi, pic, RANCHU_GOLDFISH_SYNC, "goldfish-sync",
+                         "generic,goldfish-sync", 1, 0, 0);
 
     /* Create mmio transports, so the user can create virtio backends
      * (which will be automatically plugged in to the transports). If
@@ -517,16 +550,12 @@ static void ranchu_init(MachineState *machine)
     arm_load_kernel(ARM_CPU(first_cpu), &vbi->bootinfo);
 }
 
-static QEMUMachine ranchu_machine = {
-    .name = "ranchu",
-    .desc = "Ranchu Virtual Machine for Android Emulator",
-    .init = ranchu_init,
-    .max_cpus = 1,
-};
-
-static void ranchu_machine_init(void)
+static void ranchu_machine_init(MachineClass *mc)
 {
-    qemu_register_machine(&ranchu_machine);
+    mc->desc = "Android/ARM ranchu";
+    mc->init = ranchu_init;
+    mc->max_cpus = 16;
+    mc->is_default = 1;
 }
 
-machine_init(ranchu_machine_init);
+DEFINE_MACHINE("ranchu", ranchu_machine_init)

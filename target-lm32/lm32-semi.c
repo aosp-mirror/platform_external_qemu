@@ -10,10 +10,7 @@
  * See the COPYING file in the top-level directory.
  */
 
-#include <errno.h>
-#include <unistd.h>
-#include <string.h>
-#include <stddef.h>
+#include "qemu/osdep.h"
 #include "cpu.h"
 #include "exec/helper-proto.h"
 #include "qemu/log.h"
@@ -187,7 +184,7 @@ bool lm32_cpu_do_semihosting(CPUState *cs)
         if (!p) {
             ret = -1;
         } else {
-            ret = stat(p, &s);
+            ret = qemu_stat(p, &s);
             unlock_user(p, arg0, 0);
             if (translate_stat(env, arg1, &s) == 0) {
                 ret = -1;

@@ -9,6 +9,11 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+#include "qemu/osdep.h"
+#include "qemu/rcu.h"
+#include "cpu.h"
+#include "exec/cpu-all.h"
+#include "exec/memory.h"
 #include "exec/ram_addr.h"
 #include "migration/qemu-file.h"
 #include "sysemu/char.h"
@@ -86,7 +91,7 @@ static int goldfish_tty_load(QEMUFile*  f, void*  opaque, int  version_id)
     s->ready      = qemu_get_byte(f);
     s->data_count = qemu_get_byte(f);
 
-    if (qemu_get_buffer(f, s->data, s->data_count) < 0)
+    if (qemu_get_buffer(f, s->data, s->data_count) < s->data_count)
         return -1;
 
     qemu_set_irq(s->irq, s->ready && s->data_count > 0);

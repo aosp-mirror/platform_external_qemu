@@ -19,7 +19,8 @@
 #include "android/emulator-window.h"
 
 extern "C" {
-    #include "ui/console.h"
+#include "qemu/osdep.h"
+#include "ui/console.h"
 }
 
 namespace {
@@ -147,6 +148,10 @@ bool android_display_init(DisplayState* ds, QFrameBuffer* qf) {
     register_displaychangelistener(dcl);
 
     return true;
+}
+
+extern "C" void sdl_display_early_init(int opengl) {
+    (void)opengl;
 }
 
 extern "C" bool sdl_display_init(DisplayState* ds,

@@ -11,11 +11,12 @@
 */
 #include "android/utils/debug.h"
 #include "android/utils/cbuffer.h"
+#include "qemu/osdep.h"
 #include "sysemu/char.h"
 
-#define  xxDEBUG
+#define DEBUG 0
 
-#ifdef DEBUG
+#if DEBUG
 #  include <stdio.h>
 #  define  D(...)   ( fprintf( stderr, __VA_ARGS__ ), fprintf(stderr, "\n") )
 #else
@@ -69,7 +70,7 @@ bip_buffer_free( BipBuffer*  bip )
 
 /* this models each half of the charpipe */
 typedef struct CharPipeHalf {
-    CharDriverState       cs[1];
+    CharDriverState*      cs;
     BipBuffer*            bip_first;
     BipBuffer*            bip_last;
     struct CharPipeHalf*  peer;         /* NULL if closed */
@@ -89,6 +90,7 @@ charpipehalf_close( CharDriverState*  cs )
     }
     ph->bip_last    = NULL;
     ph->peer        = NULL;
+    ph->cs          = NULL;
 }
 
 
@@ -203,7 +205,9 @@ charpipehalf_poll( CharPipeHalf*  ph )
 static void
 charpipehalf_init( CharPipeHalf*  ph, CharPipeHalf*  peer )
 {
-    CharDriverState*  cs = ph->cs;
+    ChardevCommon backend = {};
+    Error* error = NULL;
+    CharDriverState* cs = qemu_chr_alloc(&backend, &error);
 
     ph->bip_first   = NULL;
     ph->bip_last    = NULL;
@@ -214,7 +218,8 @@ charpipehalf_init( CharPipeHalf*  ph, CharPipeHalf*  peer )
     cs->chr_fe_event         = NULL;
     cs->chr_close            = charpipehalf_close;
     cs->opaque               = ph;
-    qemu_mutex_init(&cs->chr_write_lock);
+
+    ph->cs = cs;
 }
 
 
@@ -441,7 +446,7 @@ qemu_chr_open_buffer( CharDriverState*  endpoint )
 
 
 void
-charpipe_poll( void )
+qemu_charpipe_poll( void )
 {
     CharPipeState*  cp     = _s_charpipes;
     CharPipeState*  cp_end = cp + MAX_CHAR_PIPES;

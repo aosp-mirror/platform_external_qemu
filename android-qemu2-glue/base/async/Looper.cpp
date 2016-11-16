@@ -19,6 +19,7 @@
 #include "android/utils/stream.h"
 
 extern "C" {
+#include "qemu/osdep.h"
 #include "qemu-common.h"
 #include "qemu/timer.h"
 #include "sysemu/char.h"

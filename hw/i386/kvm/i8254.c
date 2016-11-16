@@ -22,6 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
+#include "qemu/osdep.h"
+#include <linux/kvm.h>
+#include "qapi/error.h"
 #include "qemu/timer.h"
 #include "sysemu/sysemu.h"
 #include "hw/timer/i8254.h"
@@ -138,7 +142,7 @@ static void kvm_pit_get(PITCommonState *pit)
 static void kvm_pit_put(PITCommonState *pit)
 {
     KVMPITState *s = KVM_PIT(pit);
-    struct kvm_pit_state2 kpit;
+    struct kvm_pit_state2 kpit = {};
     struct kvm_pit_channel_state *kchan;
     struct PITChannelState *sc;
     int i, ret;

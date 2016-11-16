@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef HW_USB_EHCI_H
-#define HW_USB_EHCI_H 1
+
+#ifndef HW_USB_HCD_EHCI_H
+#define HW_USB_HCD_EHCI_H
 
 #include "hw/hw.h"
 #include "qemu/timer.h"
 #include "hw/usb.h"
-#include "monitor/monitor.h"
 #include "sysemu/dma.h"
 #include "sysemu/sysemu.h"
 #include "hw/pci/pci.h"
@@ -325,6 +325,7 @@ extern const VMStateDescription vmstate_ehci;
 void usb_ehci_init(EHCIState *s, DeviceState *dev);
 void usb_ehci_realize(EHCIState *s, DeviceState *dev, Error **errp);
 void usb_ehci_unrealize(EHCIState *s, DeviceState *dev, Error **errp);
+void ehci_reset(void *opaque);
 
 #define TYPE_PCI_EHCI "pci-ehci-usb"
 #define PCI_EHCI(obj) OBJECT_CHECK(EHCIPCIState, (obj), TYPE_PCI_EHCI)

@@ -22,38 +22,42 @@
  * with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "qemu/osdep.h"
 #include "hw/hw.h"
 #include "sysemu/block-backend.h"
 #include "sysemu/blockdev.h"
 #include "sysemu/dma.h"
 #include "qemu/timer.h"
 #include "qemu/bitops.h"
-
-#include "sdhci.h"
+#include "sdhci-internal.h"
+#include "qemu/log.h"
 
 /* host controller debug messages */
 #ifndef SDHC_DEBUG
 #define SDHC_DEBUG                        0
 #endif
 
-#if SDHC_DEBUG == 0
-    #define DPRINT_L1(fmt, args...)       do { } while (0)
-    #define DPRINT_L2(fmt, args...)       do { } while (0)
-    #define ERRPRINT(fmt, args...)        do { } while (0)
-#elif SDHC_DEBUG == 1
-    #define DPRINT_L1(fmt, args...)       \
-        do {fprintf(stderr, "QEMU SDHC: "fmt, ## args); } while (0)
-    #define DPRINT_L2(fmt, args...)       do { } while (0)
-    #define ERRPRINT(fmt, args...)        \
-        do {fprintf(stderr, "QEMU SDHC ERROR: "fmt, ## args); } while (0)
-#else
-    #define DPRINT_L1(fmt, args...)       \
-        do {fprintf(stderr, "QEMU SDHC: "fmt, ## args); } while (0)
-    #define DPRINT_L2(fmt, args...)       \
-        do {fprintf(stderr, "QEMU SDHC: "fmt, ## args); } while (0)
-    #define ERRPRINT(fmt, args...)        \
-        do {fprintf(stderr, "QEMU SDHC ERROR: "fmt, ## args); } while (0)
-#endif
+#define DPRINT_L1(fmt, args...) \
+    do { \
+        if (SDHC_DEBUG) { \
+            fprintf(stderr, "QEMU SDHC: " fmt, ## args); \
+        } \
+    } while (0)
+#define DPRINT_L2(fmt, args...) \
+    do { \
+        if (SDHC_DEBUG > 1) { \
+            fprintf(stderr, "QEMU SDHC: " fmt, ## args); \
+        } \
+    } while (0)
+#define ERRPRINT(fmt, args...) \
+    do { \
+        if (SDHC_DEBUG) { \
+            fprintf(stderr, "QEMU SDHC ERROR: " fmt, ## args); \
+        } \
+    } while (0)
+
+#define TYPE_SDHCI_BUS "sdhci-bus"
+#define SDHCI_BUS(obj) OBJECT_CHECK(SDBus, (obj), TYPE_SDHCI_BUS)
 
 /* Default SD/MMC host controller features information, which will be
  * presented in CAPABILITIES register of generic SD host controller at reset.
@@ -74,10 +78,10 @@
 #define SDHC_CAPAB_MAXBLOCKLENGTH 512ul
 /* Maximum clock frequency for SDclock in MHz
  * value in range 10-63 MHz, 0 - not defined */
-#define SDHC_CAPAB_BASECLKFREQ    0ul
+#define SDHC_CAPAB_BASECLKFREQ    52ul
 #define SDHC_CAPAB_TOUNIT         1ul  /* Timeout clock unit 0 - kHz, 1 - MHz */
 /* Timeout clock frequency 1-63, 0 - not defined */
-#define SDHC_CAPAB_TOCLKFREQ      0ul
+#define SDHC_CAPAB_TOCLKFREQ      52ul
 
 /* Now check all parameters and calculate CAPABILITIES REGISTER value */
 #if SDHC_CAPAB_64BITBUS > 1 || SDHC_CAPAB_18V > 1 || SDHC_CAPAB_30V > 1 ||     \
@@ -145,9 +149,9 @@ static void sdhci_raise_insertion_irq(void *opaque)
     }
 }
 
-static void sdhci_insert_eject_cb(void *opaque, int irq, int level)
+static void sdhci_set_inserted(DeviceState *dev, bool level)
 {
-    SDHCIState *s = (SDHCIState *)opaque;
+    SDHCIState *s = (SDHCIState *)dev;
     DPRINT_L1("Card state changed: %s!\n", level ? "insert" : "eject");
 
     if ((s->norintsts & SDHC_NIS_REMOVE) && level) {
@@ -172,9 +176,9 @@ static void sdhci_insert_eject_cb(void *opaque, int irq, int level)
     }
 }
 
-static void sdhci_card_readonly_cb(void *opaque, int irq, int level)
+static void sdhci_set_readonly(DeviceState *dev, bool level)
 {
-    SDHCIState *s = (SDHCIState *)opaque;
+    SDHCIState *s = (SDHCIState *)dev;
 
     if (level) {
         s->prnsts &= ~SDHC_WRITE_PROTECT;
@@ -186,6 +190,8 @@ static void sdhci_card_readonly_cb(void *opaque, int irq, int level)
 
 static void sdhci_reset(SDHCIState *s)
 {
+    DeviceState *dev = DEVICE(s);
+
     timer_del(s->insert_timer);
     timer_del(s->transfer_timer);
     /* Set all registers to 0. Capabilities registers are not cleared
@@ -193,17 +199,31 @@ static void sdhci_reset(SDHCIState *s)
      * initialization */
     memset(&s->sdmasysad, 0, (uintptr_t)&s->capareg - (uintptr_t)&s->sdmasysad);
 
-    sd_set_cb(s->card, s->ro_cb, s->eject_cb);
+    /* Reset other state based on current card insertion/readonly status */
+    sdhci_set_inserted(dev, sdbus_get_inserted(&s->sdbus));
+    sdhci_set_readonly(dev, sdbus_get_readonly(&s->sdbus));
+
     s->data_count = 0;
     s->stopped_state = sdhc_not_stopped;
+    s->pending_insert_state = false;
 }
 
-static void sdhci_do_data_transfer(void *opaque)
+static void sdhci_poweron_reset(DeviceState *dev)
 {
-    SDHCIState *s = (SDHCIState *)opaque;
+    /* QOM (ie power-on) reset. This is identical to reset
+     * commanded via device register apart from handling of the
+     * 'pending insert on powerup' quirk.
+     */
+    SDHCIState *s = (SDHCIState *)dev;
 
-    SDHCI_GET_CLASS(s)->data_transfer(s);
+    sdhci_reset(s);
+
+    if (s->pending_insert_quirk) {
+        s->pending_insert_state = true;
+    }
 }
+
+static void sdhci_data_transfer(void *opaque);
 
 static void sdhci_send_command(SDHCIState *s)
 {
@@ -216,7 +236,7 @@ static void sdhci_send_command(SDHCIState *s)
     request.cmd = s->cmdreg >> 8;
     request.arg = s->argument;
     DPRINT_L1("sending CMD%u ARG[0x%08x]\n", request.cmd, request.arg);
-    rlen = sd_do_command(s->card, &request, response);
+    rlen = sdbus_do_command(&s->sdbus, &request, response);
 
     if (s->cmdreg & SDHC_CMD_RESPONSE) {
         if (rlen == 4) {
@@ -248,9 +268,6 @@ static void sdhci_send_command(SDHCIState *s)
             (s->cmdreg & SDHC_CMD_RESPONSE) == SDHC_CMD_RSP_WITH_BUSY) {
             s->norintsts |= SDHC_NIS_TRSCMP;
         }
-    } else if (rlen != 0 && (s->errintstsen & SDHC_EISEN_CMDIDX)) {
-        s->errintsts |= SDHC_EIS_CMDIDX;
-        s->norintsts |= SDHC_NIS_ERR;
     }
 
     if (s->norintstsen & SDHC_NISEN_CMDCMP) {
@@ -261,7 +278,7 @@ static void sdhci_send_command(SDHCIState *s)
 
     if (s->blksize && (s->cmdreg & SDHC_CMD_DATA_PRESENT)) {
         s->data_count = 0;
-        sdhci_do_data_transfer(s);
+        sdhci_data_transfer(s);
     }
 }
 
@@ -275,7 +292,7 @@ static void sdhci_end_transfer(SDHCIState *s)
         request.cmd = 0x0C;
         request.arg = 0;
         DPRINT_L1("Automatically issue CMD%d %08x\n", request.cmd, request.arg);
-        sd_do_command(s->card, &request, response);
+        sdbus_do_command(&s->sdbus, &request, response);
         /* Auto CMD12 response goes to the upper Response register */
         s->rspreg[3] = (response[0] << 24) | (response[1] << 16) |
                 (response[2] << 8) | response[3];
@@ -307,7 +324,7 @@ static void sdhci_read_block_from_card(SDHCIState *s)
     }
 
     for (index = 0; index < (s->blksize & 0x0fff); index++) {
-        s->fifo_buffer[index] = sd_read_data(s->card);
+        s->fifo_buffer[index] = sdbus_read_data(&s->sdbus);
     }
 
     /* New data now available for READ through Buffer Port Register */
@@ -367,9 +384,9 @@ static uint32_t sdhci_read_dataport(SDHCIState *s, unsigned size)
                  /* stop at gap request */
                 (s->stopped_state == sdhc_gap_read &&
                  !(s->prnsts & SDHC_DAT_LINE_ACTIVE))) {
-                SDHCI_GET_CLASS(s)->end_data_transfer(s);
+                sdhci_end_transfer(s);
             } else { /* if there are more data, read next block from card */
-                SDHCI_GET_CLASS(s)->read_block_from_card(s);
+                sdhci_read_block_from_card(s);
             }
             break;
         }
@@ -400,7 +417,7 @@ static void sdhci_write_block_to_card(SDHCIState *s)
     }
 
     for (index = 0; index < (s->blksize & 0x0fff); index++) {
-        sd_write_data(s->card, s->fifo_buffer[index]);
+        sdbus_write_data(&s->sdbus, s->fifo_buffer[index]);
     }
 
     /* Next data can be written through BUFFER DATORT register */
@@ -410,7 +427,7 @@ static void sdhci_write_block_to_card(SDHCIState *s)
     if ((s->trnmod & SDHC_TRNS_MULTI) == 0 ||
             ((s->trnmod & SDHC_TRNS_MULTI) &&
             (s->trnmod & SDHC_TRNS_BLK_CNT_EN) && (s->blkcnt == 0))) {
-        SDHCI_GET_CLASS(s)->end_data_transfer(s);
+        sdhci_end_transfer(s);
     } else if (s->norintstsen & SDHC_NISEN_WBUFRDY) {
         s->norintsts |= SDHC_NIS_WBUFRDY;
     }
@@ -422,7 +439,7 @@ static void sdhci_write_block_to_card(SDHCIState *s)
         if (s->norintstsen & SDHC_EISEN_BLKGAP) {
             s->norintsts |= SDHC_EIS_BLKGAP;
         }
-        SDHCI_GET_CLASS(s)->end_data_transfer(s);
+        sdhci_end_transfer(s);
     }
 
     sdhci_update_irq(s);
@@ -450,7 +467,7 @@ static void sdhci_write_dataport(SDHCIState *s, uint32_t value, unsigned size)
             s->data_count = 0;
             s->prnsts &= ~SDHC_SPACE_AVAILABLE;
             if (s->prnsts & SDHC_DOING_WRITE) {
-                SDHCI_GET_CLASS(s)->write_block_to_card(s);
+                sdhci_write_block_to_card(s);
             }
         }
     }
@@ -482,7 +499,7 @@ static void sdhci_sdma_transfer_multi_blocks(SDHCIState *s)
         while (s->blkcnt) {
             if (s->data_count == 0) {
                 for (n = 0; n < block_size; n++) {
-                    s->fifo_buffer[n] = sd_read_data(s->card);
+                    s->fifo_buffer[n] = sdbus_read_data(&s->sdbus);
                 }
             }
             begin = s->data_count;
@@ -523,7 +540,7 @@ static void sdhci_sdma_transfer_multi_blocks(SDHCIState *s)
             s->sdmasysad += s->data_count - begin;
             if (s->data_count == block_size) {
                 for (n = 0; n < block_size; n++) {
-                    sd_write_data(s->card, s->fifo_buffer[n]);
+                    sdbus_write_data(&s->sdbus, s->fifo_buffer[n]);
                 }
                 s->data_count = 0;
                 if (s->trnmod & SDHC_TRNS_BLK_CNT_EN) {
@@ -537,7 +554,7 @@ static void sdhci_sdma_transfer_multi_blocks(SDHCIState *s)
     }
 
     if (s->blkcnt == 0) {
-        SDHCI_GET_CLASS(s)->end_data_transfer(s);
+        sdhci_end_transfer(s);
     } else {
         if (s->norintstsen & SDHC_NISEN_DMA) {
             s->norintsts |= SDHC_NIS_DMA;
@@ -555,7 +572,7 @@ static void sdhci_sdma_transfer_single_block(SDHCIState *s)
 
     if (s->trnmod & SDHC_TRNS_READ) {
         for (n = 0; n < datacnt; n++) {
-            s->fifo_buffer[n] = sd_read_data(s->card);
+            s->fifo_buffer[n] = sdbus_read_data(&s->sdbus);
         }
         dma_memory_write(&address_space_memory, s->sdmasysad, s->fifo_buffer,
                          datacnt);
@@ -563,7 +580,7 @@ static void sdhci_sdma_transfer_single_block(SDHCIState *s)
         dma_memory_read(&address_space_memory, s->sdmasysad, s->fifo_buffer,
                         datacnt);
         for (n = 0; n < datacnt; n++) {
-            sd_write_data(s->card, s->fifo_buffer[n]);
+            sdbus_write_data(&s->sdbus, s->fifo_buffer[n]);
         }
     }
 
@@ -571,7 +588,7 @@ static void sdhci_sdma_transfer_single_block(SDHCIState *s)
         s->blkcnt--;
     }
 
-    SDHCI_GET_CLASS(s)->end_data_transfer(s);
+    sdhci_end_transfer(s);
 }
 
 typedef struct ADMADescr {
@@ -667,7 +684,7 @@ static void sdhci_do_adma(SDHCIState *s)
                 while (length) {
                     if (s->data_count == 0) {
                         for (n = 0; n < block_size; n++) {
-                            s->fifo_buffer[n] = sd_read_data(s->card);
+                            s->fifo_buffer[n] = sdbus_read_data(&s->sdbus);
                         }
                     }
                     begin = s->data_count;
@@ -708,7 +725,7 @@ static void sdhci_do_adma(SDHCIState *s)
                     dscr.addr += s->data_count - begin;
                     if (s->data_count == block_size) {
                         for (n = 0; n < block_size; n++) {
-                            sd_write_data(s->card, s->fifo_buffer[n]);
+                            sdbus_write_data(&s->sdbus, s->fifo_buffer[n]);
                         }
                         s->data_count = 0;
                         if (s->trnmod & SDHC_TRNS_BLK_CNT_EN) {
@@ -724,7 +741,8 @@ static void sdhci_do_adma(SDHCIState *s)
             break;
         case SDHC_ADMA_ATTR_ACT_LINK:   /* link to next descriptor table */
             s->admasysaddr = dscr.addr;
-            DPRINT_L1("ADMA link: admasysaddr=0x%lx\n", s->admasysaddr);
+            DPRINT_L1("ADMA link: admasysaddr=0x%" PRIx64 "\n",
+                      s->admasysaddr);
             break;
         default:
             s->admasysaddr += dscr.incr;
@@ -732,7 +750,8 @@ static void sdhci_do_adma(SDHCIState *s)
         }
 
         if (dscr.attr & SDHC_ADMA_ATTR_INT) {
-            DPRINT_L1("ADMA interrupt: admasysaddr=0x%lx\n", s->admasysaddr);
+            DPRINT_L1("ADMA interrupt: admasysaddr=0x%" PRIx64 "\n",
+                      s->admasysaddr);
             if (s->norintstsen & SDHC_NISEN_DMA) {
                 s->norintsts |= SDHC_NIS_DMA;
             }
@@ -758,7 +777,7 @@ static void sdhci_do_adma(SDHCIState *s)
 
                 sdhci_update_irq(s);
             }
-            SDHCI_GET_CLASS(s)->end_data_transfer(s);
+            sdhci_end_transfer(s);
             return;
         }
 
@@ -771,9 +790,9 @@ static void sdhci_do_adma(SDHCIState *s)
 
 /* Perform data transfer according to controller configuration */
 
-static void sdhci_data_transfer(SDHCIState *s)
+static void sdhci_data_transfer(void *opaque)
 {
-    SDHCIClass *k = SDHCI_GET_CLASS(s);
+    SDHCIState *s = (SDHCIState *)opaque;
 
     if (s->trnmod & SDHC_TRNS_DMA) {
         switch (SDHC_DMA_TYPE(s->hostctl)) {
@@ -784,9 +803,9 @@ static void sdhci_data_transfer(SDHCIState *s)
             }
 
             if ((s->blkcnt == 1) || !(s->trnmod & SDHC_TRNS_MULTI)) {
-                k->do_sdma_single(s);
+                sdhci_sdma_transfer_single_block(s);
             } else {
-                k->do_sdma_multi(s);
+                sdhci_sdma_transfer_multi_blocks(s);
             }
 
             break;
@@ -796,7 +815,7 @@ static void sdhci_data_transfer(SDHCIState *s)
                 break;
             }
 
-            k->do_adma(s);
+            sdhci_do_adma(s);
             break;
         case SDHC_CTRL_ADMA2_32:
             if (!(s->capareg & SDHC_CAN_DO_ADMA2)) {
@@ -804,7 +823,7 @@ static void sdhci_data_transfer(SDHCIState *s)
                 break;
             }
 
-            k->do_adma(s);
+            sdhci_do_adma(s);
             break;
         case SDHC_CTRL_ADMA2_64:
             if (!(s->capareg & SDHC_CAN_DO_ADMA2) ||
@@ -813,28 +832,28 @@ static void sdhci_data_transfer(SDHCIState *s)
                 break;
             }
 
-            k->do_adma(s);
+            sdhci_do_adma(s);
             break;
         default:
             ERRPRINT("Unsupported DMA type\n");
             break;
         }
     } else {
-        if ((s->trnmod & SDHC_TRNS_READ) && sd_data_ready(s->card)) {
+        if ((s->trnmod & SDHC_TRNS_READ) && sdbus_data_ready(&s->sdbus)) {
             s->prnsts |= SDHC_DOING_READ | SDHC_DATA_INHIBIT |
                     SDHC_DAT_LINE_ACTIVE;
-            SDHCI_GET_CLASS(s)->read_block_from_card(s);
+            sdhci_read_block_from_card(s);
         } else {
             s->prnsts |= SDHC_DOING_WRITE | SDHC_DAT_LINE_ACTIVE |
                     SDHC_SPACE_AVAILABLE | SDHC_DATA_INHIBIT;
-            SDHCI_GET_CLASS(s)->write_block_to_card(s);
+            sdhci_write_block_to_card(s);
         }
     }
 }
 
 static bool sdhci_can_issue_command(SDHCIState *s)
 {
-    if (!SDHC_CLOCK_IS_ON(s->clkcon) || !(s->pwrcon & SDHC_POWER_ON) ||
+    if (!SDHC_CLOCK_IS_ON(s->clkcon) ||
         (((s->prnsts & SDHC_DATA_INHIBIT) || s->stopped_state) &&
         ((s->cmdreg & SDHC_CMD_DATA_PRESENT) ||
         ((s->cmdreg & SDHC_CMD_RESPONSE) == SDHC_CMD_RSP_WITH_BUSY &&
@@ -858,8 +877,9 @@ sdhci_buff_access_is_sequential(SDHCIState *s, unsigned byte_num)
     return true;
 }
 
-static uint32_t sdhci_read(SDHCIState *s, unsigned int offset, unsigned size)
+static uint64_t sdhci_read(void *opaque, hwaddr offset, unsigned size)
 {
+    SDHCIState *s = (SDHCIState *)opaque;
     uint32_t ret = 0;
 
     switch (offset & ~0x3) {
@@ -880,8 +900,8 @@ static uint32_t sdhci_read(SDHCIState *s, unsigned int offset, unsigned size)
         break;
     case  SDHC_BDATA:
         if (sdhci_buff_access_is_sequential(s, offset - SDHC_BDATA)) {
-            ret = SDHCI_GET_CLASS(s)->bdata_read(s, size);
-            DPRINT_L2("read %ub: addr[0x%04x] -> %u(0x%x)\n", size, offset,
+            ret = sdhci_read_dataport(s, size);
+            DPRINT_L2("read %ub: addr[0x%04x] -> %u(0x%x)\n", size, (int)offset,
                       ret, ret);
             return ret;
         }
@@ -927,13 +947,13 @@ static uint32_t sdhci_read(SDHCIState *s, unsigned int offset, unsigned size)
         ret = (SD_HOST_SPECv2_VERS << 16) | sdhci_slotint(s);
         break;
     default:
-        ERRPRINT("bad %ub read: addr[0x%04x]\n", size, offset);
+        ERRPRINT("bad %ub read: addr[0x%04x]\n", size, (int)offset);
         break;
     }
 
     ret >>= (offset & 0x3) * 8;
     ret &= (1ULL << (size * 8)) - 1;
-    DPRINT_L2("read %ub: addr[0x%04x] -> %u(0x%x)\n", size, offset, ret, ret);
+    DPRINT_L2("read %ub: addr[0x%04x] -> %u(0x%x)\n", size, (int)offset, ret, ret);
     return ret;
 }
 
@@ -948,10 +968,10 @@ static inline void sdhci_blkgap_write(SDHCIState *s, uint8_t value)
             (s->blkgap & SDHC_STOP_AT_GAP_REQ) == 0) {
         if (s->stopped_state == sdhc_gap_read) {
             s->prnsts |= SDHC_DAT_LINE_ACTIVE | SDHC_DOING_READ;
-            SDHCI_GET_CLASS(s)->read_block_from_card(s);
+            sdhci_read_block_from_card(s);
         } else {
             s->prnsts |= SDHC_DAT_LINE_ACTIVE | SDHC_DOING_WRITE;
-            SDHCI_GET_CLASS(s)->write_block_to_card(s);
+            sdhci_write_block_to_card(s);
         }
         s->stopped_state = sdhc_not_stopped;
     } else if (!s->stopped_state && (value & SDHC_STOP_AT_GAP_REQ)) {
@@ -967,7 +987,7 @@ static inline void sdhci_reset_write(SDHCIState *s, uint8_t value)
 {
     switch (value) {
     case SDHC_RESET_ALL:
-        DEVICE_GET_CLASS(s)->reset(DEVICE(s));
+        sdhci_reset(s);
         break;
     case SDHC_RESET_CMD:
         s->prnsts &= ~SDHC_CMD_INHIBIT;
@@ -987,10 +1007,12 @@ static inline void sdhci_reset_write(SDHCIState *s, uint8_t value)
 }
 
 static void
-sdhci_write(SDHCIState *s, unsigned int offset, uint32_t value, unsigned size)
+sdhci_write(void *opaque, hwaddr offset, uint64_t val, unsigned size)
 {
+    SDHCIState *s = (SDHCIState *)opaque;
     unsigned shift =  8 * (offset & 0x3);
     uint32_t mask = ~(((1ULL << (size * 8)) - 1) << shift);
+    uint32_t value = val;
     value <<= shift;
 
     switch (offset & ~0x3) {
@@ -1000,7 +1022,7 @@ sdhci_write(SDHCIState *s, unsigned int offset, uint32_t value, unsigned size)
         /* Writing to last byte of sdmasysad might trigger transfer */
         if (!(mask & 0xFF000000) && TRANSFERRING_DATA(s->prnsts) && s->blkcnt &&
                 s->blksize && SDHC_DMA_TYPE(s->hostctl) == SDHC_CTRL_SDMA) {
-            SDHCI_GET_CLASS(s)->do_sdma_multi(s);
+            sdhci_sdma_transfer_multi_blocks(s);
         }
         break;
     case SDHC_BLKSIZE:
@@ -1008,6 +1030,16 @@ sdhci_write(SDHCIState *s, unsigned int offset, uint32_t value, unsigned size)
             MASKED_WRITE(s->blksize, mask, value);
             MASKED_WRITE(s->blkcnt, mask >> 16, value >> 16);
         }
+
+        /* Limit block size to the maximum buffer size */
+        if (extract32(s->blksize, 0, 12) > s->buf_maxsz) {
+            qemu_log_mask(LOG_GUEST_ERROR, "%s: Size 0x%x is larger than " \
+                          "the maximum buffer 0x%x", __func__, s->blksize,
+                          s->buf_maxsz);
+
+            s->blksize = deposit32(s->blksize, 0, 12, s->buf_maxsz);
+        }
+
         break;
     case SDHC_ARGUMENT:
         MASKED_WRITE(s->argument, mask, value);
@@ -1022,15 +1054,15 @@ sdhci_write(SDHCIState *s, unsigned int offset, uint32_t value, unsigned size)
         MASKED_WRITE(s->cmdreg, mask >> 16, value >> 16);
 
         /* Writing to the upper byte of CMDREG triggers SD command generation */
-        if ((mask & 0xFF000000) || !SDHCI_GET_CLASS(s)->can_issue_command(s)) {
+        if ((mask & 0xFF000000) || !sdhci_can_issue_command(s)) {
             break;
         }
 
-        SDHCI_GET_CLASS(s)->send_command(s);
+        sdhci_send_command(s);
         break;
     case  SDHC_BDATA:
         if (sdhci_buff_access_is_sequential(s, offset - SDHC_BDATA)) {
-            SDHCI_GET_CLASS(s)->bdata_write(s, value >> shift, size);
+            sdhci_write_dataport(s, value >> shift, size);
         }
         break;
     case SDHC_HOSTCTL:
@@ -1080,6 +1112,13 @@ sdhci_write(SDHCIState *s, unsigned int offset, uint32_t value, unsigned size)
         } else {
             s->norintsts &= ~SDHC_NIS_ERR;
         }
+        /* Quirk for Raspberry Pi: pending card insert interrupt
+         * appears when first enabled after power on */
+        if ((s->norintstsen & SDHC_NISEN_INSERT) && s->pending_insert_state) {
+            assert(s->pending_insert_quirk);
+            s->norintsts |= SDHC_NIS_INSERT;
+            s->pending_insert_state = false;
+        }
         sdhci_update_irq(s);
         break;
     case SDHC_NORINTSIGEN:
@@ -1111,32 +1150,16 @@ sdhci_write(SDHCIState *s, unsigned int offset, uint32_t value, unsigned size)
         break;
     default:
         ERRPRINT("bad %ub write offset: addr[0x%04x] <- %u(0x%x)\n",
-                size, offset, value >> shift, value >> shift);
+                 size, (int)offset, value >> shift, value >> shift);
         break;
     }
     DPRINT_L2("write %ub: addr[0x%04x] <- %u(0x%x)\n",
-            size, offset, value >> shift, value >> shift);
-}
-
-static uint64_t
-sdhci_readfn(void *opaque, hwaddr offset, unsigned size)
-{
-    SDHCIState *s = (SDHCIState *)opaque;
-
-    return SDHCI_GET_CLASS(s)->mem_read(s, offset, size);
-}
-
-static void
-sdhci_writefn(void *opaque, hwaddr off, uint64_t val, unsigned sz)
-{
-    SDHCIState *s = (SDHCIState *)opaque;
-
-    SDHCI_GET_CLASS(s)->mem_write(s, off, val, sz);
+              size, (int)offset, value >> shift, value >> shift);
 }
 
 static const MemoryRegionOps sdhci_mmio_ops = {
-    .read = sdhci_readfn,
-    .write = sdhci_writefn,
+    .read = sdhci_read,
+    .write = sdhci_write,
     .valid = {
         .min_access_size = 1,
         .max_access_size = 4,
@@ -1160,28 +1183,17 @@ static inline unsigned int sdhci_get_fifolen(SDHCIState *s)
     }
 }
 
-static void sdhci_initfn(Object *obj)
+static void sdhci_initfn(SDHCIState *s)
 {
-    SDHCIState *s = SDHCI(obj);
-    DriveInfo *di;
-
-    di = drive_get_next(IF_SD);
-    s->card = sd_init(di ? blk_by_legacy_dinfo(di) : NULL, false);
-    if (s->card == NULL) {
-        exit(1);
-    }
-    s->eject_cb = qemu_allocate_irq(sdhci_insert_eject_cb, s, 0);
-    s->ro_cb = qemu_allocate_irq(sdhci_card_readonly_cb, s, 0);
-    sd_set_cb(s->card, s->ro_cb, s->eject_cb);
+    qbus_create_inplace(&s->sdbus, sizeof(s->sdbus),
+                        TYPE_SDHCI_BUS, DEVICE(s), "sd-bus");
 
     s->insert_timer = timer_new_ns(QEMU_CLOCK_VIRTUAL, sdhci_raise_insertion_irq, s);
-    s->transfer_timer = timer_new_ns(QEMU_CLOCK_VIRTUAL, sdhci_do_data_transfer, s);
+    s->transfer_timer = timer_new_ns(QEMU_CLOCK_VIRTUAL, sdhci_data_transfer, s);
 }
 
-static void sdhci_uninitfn(Object *obj)
+static void sdhci_uninitfn(SDHCIState *s)
 {
-    SDHCIState *s = SDHCI(obj);
-
     timer_del(s->insert_timer);
     timer_free(s->insert_timer);
     timer_del(s->transfer_timer);
@@ -1189,11 +1201,27 @@ static void sdhci_uninitfn(Object *obj)
     qemu_free_irq(s->eject_cb);
     qemu_free_irq(s->ro_cb);
 
-    if (s->fifo_buffer) {
-        g_free(s->fifo_buffer);
-        s->fifo_buffer = NULL;
-    }
+    g_free(s->fifo_buffer);
+    s->fifo_buffer = NULL;
 }
+
+static bool sdhci_pending_insert_vmstate_needed(void *opaque)
+{
+    SDHCIState *s = opaque;
+
+    return s->pending_insert_state;
+}
+
+static const VMStateDescription sdhci_pending_insert_vmstate = {
+    .name = "sdhci/pending-insert",
+    .version_id = 1,
+    .minimum_version_id = 1,
+    .needed = sdhci_pending_insert_vmstate_needed,
+    .fields = (VMStateField[]) {
+        VMSTATE_BOOL(pending_insert_state, SDHCIState),
+        VMSTATE_END_OF_LIST()
+    },
+};
 
 const VMStateDescription sdhci_vmstate = {
     .name = "sdhci",
@@ -1226,24 +1254,93 @@ const VMStateDescription sdhci_vmstate = {
         VMSTATE_UINT64(admasysaddr, SDHCIState),
         VMSTATE_UINT8(stopped_state, SDHCIState),
         VMSTATE_VBUFFER_UINT32(fifo_buffer, SDHCIState, 1, NULL, 0, buf_maxsz),
-        VMSTATE_TIMER(insert_timer, SDHCIState),
-        VMSTATE_TIMER(transfer_timer, SDHCIState),
+        VMSTATE_TIMER_PTR(insert_timer, SDHCIState),
+        VMSTATE_TIMER_PTR(transfer_timer, SDHCIState),
         VMSTATE_END_OF_LIST()
-    }
+    },
+    .subsections = (const VMStateDescription*[]) {
+        &sdhci_pending_insert_vmstate,
+        NULL
+    },
 };
 
 /* Capabilities registers provide information on supported features of this
  * specific host controller implementation */
-static Property sdhci_properties[] = {
+static Property sdhci_pci_properties[] = {
     DEFINE_PROP_UINT32("capareg", SDHCIState, capareg,
             SDHC_CAPAB_REG_DEFAULT),
     DEFINE_PROP_UINT32("maxcurr", SDHCIState, maxcurr, 0),
     DEFINE_PROP_END_OF_LIST(),
 };
 
-static void sdhci_realize(DeviceState *dev, Error ** errp)
+static void sdhci_pci_realize(PCIDevice *dev, Error **errp)
 {
-    SDHCIState *s = SDHCI(dev);
+    SDHCIState *s = PCI_SDHCI(dev);
+    dev->config[PCI_CLASS_PROG] = 0x01; /* Standard Host supported DMA */
+    dev->config[PCI_INTERRUPT_PIN] = 0x01; /* interrupt pin A */
+    sdhci_initfn(s);
+    s->buf_maxsz = sdhci_get_fifolen(s);
+    s->fifo_buffer = g_malloc0(s->buf_maxsz);
+    s->irq = pci_allocate_irq(dev);
+    memory_region_init_io(&s->iomem, OBJECT(s), &sdhci_mmio_ops, s, "sdhci",
+            SDHC_REGISTERS_MAP_SIZE);
+    pci_register_bar(dev, 0, 0, &s->iomem);
+}
+
+static void sdhci_pci_exit(PCIDevice *dev)
+{
+    SDHCIState *s = PCI_SDHCI(dev);
+    sdhci_uninitfn(s);
+}
+
+static void sdhci_pci_class_init(ObjectClass *klass, void *data)
+{
+    DeviceClass *dc = DEVICE_CLASS(klass);
+    PCIDeviceClass *k = PCI_DEVICE_CLASS(klass);
+
+    k->realize = sdhci_pci_realize;
+    k->exit = sdhci_pci_exit;
+    k->vendor_id = PCI_VENDOR_ID_REDHAT;
+    k->device_id = PCI_DEVICE_ID_REDHAT_SDHCI;
+    k->class_id = PCI_CLASS_SYSTEM_SDHCI;
+    set_bit(DEVICE_CATEGORY_STORAGE, dc->categories);
+    dc->vmsd = &sdhci_vmstate;
+    dc->props = sdhci_pci_properties;
+    dc->reset = sdhci_poweron_reset;
+}
+
+static const TypeInfo sdhci_pci_info = {
+    .name = TYPE_PCI_SDHCI,
+    .parent = TYPE_PCI_DEVICE,
+    .instance_size = sizeof(SDHCIState),
+    .class_init = sdhci_pci_class_init,
+};
+
+static Property sdhci_sysbus_properties[] = {
+    DEFINE_PROP_UINT32("capareg", SDHCIState, capareg,
+            SDHC_CAPAB_REG_DEFAULT),
+    DEFINE_PROP_UINT32("maxcurr", SDHCIState, maxcurr, 0),
+    DEFINE_PROP_BOOL("pending-insert-quirk", SDHCIState, pending_insert_quirk,
+                     false),
+    DEFINE_PROP_END_OF_LIST(),
+};
+
+static void sdhci_sysbus_init(Object *obj)
+{
+    SDHCIState *s = SYSBUS_SDHCI(obj);
+
+    sdhci_initfn(s);
+}
+
+static void sdhci_sysbus_finalize(Object *obj)
+{
+    SDHCIState *s = SYSBUS_SDHCI(obj);
+    sdhci_uninitfn(s);
+}
+
+static void sdhci_sysbus_realize(DeviceState *dev, Error ** errp)
+{
+    SDHCIState *s = SYSBUS_SDHCI(dev);
     SysBusDevice *sbd = SYS_BUS_DEVICE(dev);
 
     s->buf_maxsz = sdhci_get_fifolen(s);
@@ -1254,51 +1351,45 @@ static void sdhci_realize(DeviceState *dev, Error ** errp)
     sysbus_init_mmio(sbd, &s->iomem);
 }
 
-static void sdhci_generic_reset(DeviceState *ds)
-{
-    SDHCIState *s = SDHCI(ds);
-    SDHCI_GET_CLASS(s)->reset(s);
-}
-
-static void sdhci_class_init(ObjectClass *klass, void *data)
+static void sdhci_sysbus_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
-    SDHCIClass *k = SDHCI_CLASS(klass);
 
     dc->vmsd = &sdhci_vmstate;
-    dc->props = sdhci_properties;
-    dc->reset = sdhci_generic_reset;
-    dc->realize = sdhci_realize;
-
-    k->reset = sdhci_reset;
-    k->mem_read = sdhci_read;
-    k->mem_write = sdhci_write;
-    k->send_command = sdhci_send_command;
-    k->can_issue_command = sdhci_can_issue_command;
-    k->data_transfer = sdhci_data_transfer;
-    k->end_data_transfer = sdhci_end_transfer;
-    k->do_sdma_single = sdhci_sdma_transfer_single_block;
-    k->do_sdma_multi = sdhci_sdma_transfer_multi_blocks;
-    k->do_adma = sdhci_do_adma;
-    k->read_block_from_card = sdhci_read_block_from_card;
-    k->write_block_to_card = sdhci_write_block_to_card;
-    k->bdata_read = sdhci_read_dataport;
-    k->bdata_write = sdhci_write_dataport;
+    dc->props = sdhci_sysbus_properties;
+    dc->realize = sdhci_sysbus_realize;
+    dc->reset = sdhci_poweron_reset;
 }
 
-static const TypeInfo sdhci_type_info = {
-    .name = TYPE_SDHCI,
+static const TypeInfo sdhci_sysbus_info = {
+    .name = TYPE_SYSBUS_SDHCI,
     .parent = TYPE_SYS_BUS_DEVICE,
     .instance_size = sizeof(SDHCIState),
-    .instance_init = sdhci_initfn,
-    .instance_finalize = sdhci_uninitfn,
-    .class_init = sdhci_class_init,
-    .class_size = sizeof(SDHCIClass)
+    .instance_init = sdhci_sysbus_init,
+    .instance_finalize = sdhci_sysbus_finalize,
+    .class_init = sdhci_sysbus_class_init,
+};
+
+static void sdhci_bus_class_init(ObjectClass *klass, void *data)
+{
+    SDBusClass *sbc = SD_BUS_CLASS(klass);
+
+    sbc->set_inserted = sdhci_set_inserted;
+    sbc->set_readonly = sdhci_set_readonly;
+}
+
+static const TypeInfo sdhci_bus_info = {
+    .name = TYPE_SDHCI_BUS,
+    .parent = TYPE_SD_BUS,
+    .instance_size = sizeof(SDBus),
+    .class_init = sdhci_bus_class_init,
 };
 
 static void sdhci_register_types(void)
 {
-    type_register_static(&sdhci_type_info);
+    type_register_static(&sdhci_pci_info);
+    type_register_static(&sdhci_sysbus_info);
+    type_register_static(&sdhci_bus_info);
 }
 
 type_init(sdhci_register_types)

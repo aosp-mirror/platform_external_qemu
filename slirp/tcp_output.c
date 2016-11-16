@@ -38,11 +38,9 @@
  * terms and conditions of the copyright.
  */
 
-#if defined(CONFIG_ANDROID)
-#include "android/crashreport/crash-handler.h"
-#endif
-
-#include <slirp.h>
+#include "qemu/osdep.h"
+#include "qemu/abort.h"
+#include "slirp.h"
 
 static const u_char  tcp_outflags[TCP_NSTATES] = {
 	TH_RST|TH_ACK, 0,      TH_SYN,        TH_SYN|TH_ACK,
@@ -64,25 +62,22 @@ tcp_output(struct tcpcb *tp)
 	register long len, win;
 	int off, flags, error;
 	register struct mbuf *m;
-	register struct tcpiphdr *ti;
+	register struct tcpiphdr *ti, tcpiph_save;
+	struct ip *ip;
+	struct ip6 *ip6;
 	u_char opt[MAX_TCPOPTLEN];
 	unsigned optlen, hdrlen;
 	int idle, sendalot;
 
-#ifdef CONFIG_ANDROID
-	if (tp == NULL) {
-		crashhandler_die("QEMU-2 tcp_output() invoked with tp==NULL");
-	}
-#endif
-	so = tp->t_socket;
-#ifdef CONFIG_ANDROID
-	if (so == NULL) {
-		crashhandler_die("QEMU-2 tcp_output() invoked "
-		                 "with tp->t_socket==NULL");
-	}
-#endif
+        if (tp == NULL) {
+            qemu_abort("%s: should not happen: tp == NULL\n", __func__);
+        }
+        so = tp->t_socket;
+        if (so == NULL) {
+            qemu_abort("%s: should not happen: so == NULL\n", __func__);
+        }
 	DEBUG_CALL("tcp_output");
-	DEBUG_ARG("tp = %lx", (long )tp);
+	DEBUG_ARG("tp = %p", tp);
 
 	/*
 	 * Determine length of data that should be transmitted,
@@ -462,16 +457,45 @@ send:
 	 * the template, but need a way to checksum without them.
 	 */
 	m->m_len = hdrlen + len; /* XXX Needed? m_len should be correct */
+	tcpiph_save = *mtod(m, struct tcpiphdr *);
 
-    {
+	switch (so->so_ffamily) {
+	case AF_INET:
+	    m->m_data += sizeof(struct tcpiphdr) - sizeof(struct tcphdr)
+	                                         - sizeof(struct ip);
+	    m->m_len  -= sizeof(struct tcpiphdr) - sizeof(struct tcphdr)
+	                                         - sizeof(struct ip);
+	    ip = mtod(m, struct ip *);
 
-	((struct ip *)ti)->ip_len = m->m_len;
+	    ip->ip_len = m->m_len;
+	    ip->ip_dst = tcpiph_save.ti_dst;
+	    ip->ip_src = tcpiph_save.ti_src;
+	    ip->ip_p = tcpiph_save.ti_pr;
 
-	((struct ip *)ti)->ip_ttl = IPDEFTTL;
-	((struct ip *)ti)->ip_tos = so->so_iptos;
+	    ip->ip_ttl = IPDEFTTL;
+	    ip->ip_tos = so->so_iptos;
+	    error = ip_output(so, m);
+	    break;
 
-	error = ip_output(so, m);
-    }
+	case AF_INET6:
+	    m->m_data += sizeof(struct tcpiphdr) - sizeof(struct tcphdr)
+	                                         - sizeof(struct ip6);
+	    m->m_len  -= sizeof(struct tcpiphdr) - sizeof(struct tcphdr)
+	                                         - sizeof(struct ip6);
+	    ip6 = mtod(m, struct ip6 *);
+
+	    ip6->ip_pl = tcpiph_save.ti_len;
+	    ip6->ip_dst = tcpiph_save.ti_dst6;
+	    ip6->ip_src = tcpiph_save.ti_src6;
+	    ip6->ip_nh = tcpiph_save.ti_nh6;
+
+	    error = ip6_output(so, m, 0);
+	    break;
+
+	default:
+	    g_assert_not_reached();
+	}
+
 	if (error) {
 out:
 		return (error);

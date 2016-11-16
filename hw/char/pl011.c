@@ -7,8 +7,10 @@
  * This code is licensed under the GPL.
  */
 
+#include "qemu/osdep.h"
 #include "hw/sysbus.h"
 #include "sysemu/char.h"
+#include "qemu/log.h"
 
 #define TYPE_PL011 "pl011"
 #define PL011(obj) OBJECT_CHECK(PL011State, (obj), TYPE_PL011)
@@ -272,6 +274,11 @@ static const VMStateDescription vmstate_pl011 = {
     }
 };
 
+static Property pl011_properties[] = {
+    DEFINE_PROP_CHR("chardev", PL011State, chr),
+    DEFINE_PROP_END_OF_LIST(),
+};
+
 static void pl011_init(Object *obj)
 {
     SysBusDevice *sbd = SYS_BUS_DEVICE(obj);
@@ -293,8 +300,6 @@ static void pl011_realize(DeviceState *dev, Error **errp)
 {
     PL011State *s = PL011(dev);
 
-    s->chr = qemu_char_get_next_serial();
-
     if (s->chr) {
         qemu_chr_add_handlers(s->chr, pl011_can_receive, pl011_receive,
                               pl011_event, s);
@@ -307,6 +312,7 @@ static void pl011_class_init(ObjectClass *oc, void *data)
 
     dc->realize = pl011_realize;
     dc->vmsd = &vmstate_pl011;
+    dc->props = pl011_properties;
 }
 
 static const TypeInfo pl011_arm_info = {

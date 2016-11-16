@@ -10,29 +10,24 @@
  * See the COPYING file in the top-level directory.
  *
  */
-#include <stdlib.h>
-#include <stdio.h>
-#include <errno.h>
-#include <time.h>
-#include <signal.h>
-#include <stdint.h>
-#include <string.h>
-#include <limits.h>
-#include <unistd.h>
-#include <sys/time.h>
+#include "qemu/osdep.h"
 #ifdef __linux__
 #include <sys/syscall.h>
 #include <linux/futex.h>
 #endif
+#include "qemu/abort.h"
 #include "qemu/thread.h"
 #include "qemu/atomic.h"
-
-#if defined(CONFIG_ANDROID)
-#include "android-qemu2-glue/looper-qemu.h"
-#include "android/crashreport/crash-handler.h"
-#endif
+#include "qemu/notify.h"
 
 static bool name_threads;
+
+static QemuThreadSetupFunc thread_setup_func;
+
+void qemu_thread_register_setup_callback(QemuThreadSetupFunc setup_func)
+{
+    thread_setup_func = setup_func;
+}
 
 void qemu_thread_naming(bool enable)
 {
@@ -48,25 +43,14 @@ void qemu_thread_naming(bool enable)
 
 static void error_exit(int err, const char *msg)
 {
-    fprintf(stderr, "qemu: %s: %s\n", msg, strerror(err));
-#ifdef CONFIG_ANDROID
-    crashhandler_die_format(
-                "Internal error in %s: %s (%d)",
-                msg, strerror(err), err);
-#else
-    abort();
-#endif
+    qemu_abort("qemu: %s: %s\n", msg, strerror(err));
 }
 
 void qemu_mutex_init(QemuMutex *mutex)
 {
     int err;
-    pthread_mutexattr_t mutexattr;
 
-    pthread_mutexattr_init(&mutexattr);
-    pthread_mutexattr_settype(&mutexattr, PTHREAD_MUTEX_ERRORCHECK);
-    err = pthread_mutex_init(&mutex->lock, &mutexattr);
-    pthread_mutexattr_destroy(&mutexattr);
+    err = pthread_mutex_init(&mutex->lock, NULL);
     if (err)
         error_exit(err, __func__);
 }
@@ -312,16 +296,27 @@ static inline void futex_wake(QemuEvent *ev, int n)
 
 static inline void futex_wait(QemuEvent *ev, unsigned val)
 {
-    futex(ev, FUTEX_WAIT, (int) val, NULL, NULL, 0);
+    while (futex(ev, FUTEX_WAIT, (int) val, NULL, NULL, 0)) {
+        switch (errno) {
+        case EWOULDBLOCK:
+            return;
+        case EINTR:
+            break; /* get out of switch and retry */
+        default:
+            abort();
+        }
+    }
 }
 #else
 static inline void futex_wake(QemuEvent *ev, int n)
 {
+    pthread_mutex_lock(&ev->lock);
     if (n == 1) {
         pthread_cond_signal(&ev->cond);
     } else {
         pthread_cond_broadcast(&ev->cond);
     }
+    pthread_mutex_unlock(&ev->lock);
 }
 
 static inline void futex_wait(QemuEvent *ev, unsigned val)
@@ -401,7 +396,7 @@ void qemu_event_wait(QemuEvent *ev)
             /*
              * Leave the event reset and tell qemu_event_set that there
              * are waiters.  No need to retry, because there cannot be
-             * a concurent busy->free transition.  After the CAS, the
+             * a concurrent busy->free transition.  After the CAS, the
              * event will be either set or busy.
              */
             if (atomic_cmpxchg(&ev->value, EV_FREE, EV_BUSY) == EV_SET) {
@@ -411,6 +406,42 @@ void qemu_event_wait(QemuEvent *ev)
         futex_wait(ev, EV_BUSY);
     }
 }
+
+static pthread_key_t exit_key;
+
+union NotifierThreadData {
+    void *ptr;
+    NotifierList list;
+};
+QEMU_BUILD_BUG_ON(sizeof(union NotifierThreadData) != sizeof(void *));
+
+void qemu_thread_atexit_add(Notifier *notifier)
+{
+    union NotifierThreadData ntd;
+    ntd.ptr = pthread_getspecific(exit_key);
+    notifier_list_add(&ntd.list, notifier);
+    pthread_setspecific(exit_key, ntd.ptr);
+}
+
+void qemu_thread_atexit_remove(Notifier *notifier)
+{
+    union NotifierThreadData ntd;
+    ntd.ptr = pthread_getspecific(exit_key);
+    notifier_remove(notifier);
+    pthread_setspecific(exit_key, ntd.ptr);
+}
+
+static void qemu_thread_atexit_run(void *arg)
+{
+    union NotifierThreadData ntd = { .ptr = arg };
+    notifier_list_notify(&ntd.list, NULL);
+}
+
+static void __attribute__((constructor)) qemu_thread_atexit_init(void)
+{
+    pthread_key_create(&exit_key, qemu_thread_atexit_run);
+}
+
 
 /* Attempt to set the threads name; note that this is for debug, so
  * we're not going to fail if we can't set it.
@@ -422,7 +453,6 @@ static void qemu_thread_set_name(QemuThread *thread, const char *name)
 #endif
 }
 
-#if defined(CONFIG_ANDROID)
 /* A small data structure to group the thread startup parameters.
  * This is passed to the trampoline function below which will first
  * setup AndroidEmu to use the QEMU-based looper implementation before
@@ -445,13 +475,12 @@ static void* qemu_thread_trampoline(void* data_) {
     ThreadStartData data = *(ThreadStartData*)data_;
     free(data_);
 
-    /* Ensure AndroidEmu timers / looper work on this thread. */
-    qemu_looper_setForThread();
+    if (thread_setup_func)
+        (*thread_setup_func)();
 
     /* Start the thread. */
     return (*data.start_routine)(data.arg);
 }
-#endif  // CONFIG_ANDROID
 
 void qemu_thread_create(QemuThread *thread, const char *name,
                        void *(*start_routine)(void*),
@@ -475,7 +504,7 @@ void qemu_thread_create(QemuThread *thread, const char *name,
     /* Leave signal handling to the iothread.  */
     sigfillset(&set);
     pthread_sigmask(SIG_SETMASK, &set, &oldset);
-#if defined(CONFIG_ANDROID)
+
     /* Create heap-allocated ThreadStartData object and pass its ownership
      * to the trampoline. */
     ThreadStartData* data = malloc(sizeof(*data));
@@ -487,11 +516,6 @@ void qemu_thread_create(QemuThread *thread, const char *name,
         free(data);
         error_exit(err, __func__);
     }
-#else  /* !CONFIG_ANDROID */
-    err = pthread_create(&thread->thread, &attr, start_routine, arg);
-    if (err)
-        error_exit(err, __func__);
-#endif  /* !CONFIG_ANDROID */
 
     if (name_threads) {
         qemu_thread_set_name(thread, name);

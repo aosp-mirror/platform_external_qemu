@@ -16,8 +16,8 @@
 
 #include "android/emulation/control/callbacks.h"
 #include "android/emulation/control/vm_operations.h"
-//#include "cpu.h"
-//#include "monitor/monitor.h"
+
+#include "qemu/osdep.h"
 #include "sysemu/sysemu.h"
 
 #include <stdlib.h>

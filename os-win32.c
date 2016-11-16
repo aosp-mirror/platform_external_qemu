@@ -22,21 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+/* Special case to include "qemu-options.h" here without issues */
+#undef POISON_CONFIG_ANDROID
+
+#include "qemu/osdep.h"
 #include <windows.h>
 #include <mmsystem.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <time.h>
-#include <errno.h>
-#include <sys/time.h>
-#include "config-host.h"
 #include "sysemu/sysemu.h"
 #include "qemu-options.h"
-
-#ifdef CONFIG_ANDROID
-#include "android/skin/winsys.h"
-#endif
 
 /***********************************************************/
 /* Functions missing in mingw */
@@ -60,27 +53,30 @@ int setenv(const char *name, const char *value, int overwrite)
     return result;
 }
 
+static void (*ctrlc_handler)(void) = NULL;
+
+void qemu_set_ctrlc_handler(void(*handler)(void)) {
+    ctrlc_handler = handler;
+}
+
 static BOOL WINAPI qemu_ctrl_handler(DWORD type)
 {
-#ifdef CONFIG_ANDROID
-    // In android, request closing the UI, instead of short-circuting down to
-    // qemu. This will eventually call qemu_system_shutdown_request via a skin
-    // event.
-    skin_winsys_quit_request();
-#else
-    qemu_system_shutdown_request();
-#endif  // !CONFIG_ANDROID
+    if (ctrlc_handler) {
+        (*ctrlc_handler)();
+    } else {
+        qemu_system_shutdown_request();
+    }
     fflush(stdout);
     fflush(stderr);
+
     /* Windows 7 kills application when the function returns.
        Sleep here to give QEMU a try for closing.
        Sleep period is 10000ms because Windows kills the program
        after 10 seconds anyway. */
     Sleep(10000);
 
-    // Sometimes (?) it happens that Windows doesn't actually kill the emulator
-    // after 10 seconds. Let's return FALSE so the default handler finishes the
-    // process anyway.
+    /* Sometimes Windows doesn't actually kill QEMU after 10 seconds.
+     * Return FALSE so the default handler finished the process anyway */
     return FALSE;
 }
 
@@ -129,7 +125,7 @@ int qemu_create_pidfile(const char *filename)
     BOOL ret;
     memset(&overlap, 0, sizeof(overlap));
 
-    file = CreateFile(filename, GENERIC_WRITE, FILE_SHARE_READ, NULL,
+    file = win32CreateFile(filename, GENERIC_WRITE, FILE_SHARE_READ, NULL,
                       OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
     if (file == INVALID_HANDLE_VALUE) {
@@ -143,29 +139,4 @@ int qemu_create_pidfile(const char *filename)
         return -1;
     }
     return 0;
-}
-
-char* strtok_r(char *str,
-               const char *delim,
-               char **nextp)
-{
-    char *ret;
-
-    if (str == NULL) {
-        str = *nextp;
-    }
-
-    str += strspn(str, delim);
-    if (*str == '\0') {
-        return NULL;
-    }
-
-    ret = str;
-    str += strcspn(str, delim);
-    if (*str) {
-        *str++ = '\0';
-    }
-
-    *nextp = str;
-    return ret;
 }

@@ -18,9 +18,11 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "qemu/osdep.h"
 #include "cpu.h"
 #include "mmu.h"
 #include "qemu/host-utils.h"
+#include "exec/exec-all.h"
 #include "exec/cpu_ldst.h"
 
 
@@ -84,8 +86,8 @@ int cris_cpu_handle_mmu_fault(CPUState *cs, vaddr address, int rw,
     int r = -1;
     target_ulong phy;
 
-    D(printf("%s addr=%" VADDR_PRIx " pc=%x rw=%x\n",
-             __func__, address, env->pc, rw));
+    qemu_log_mask(CPU_LOG_MMU, "%s addr=%" VADDR_PRIx " pc=%x rw=%x\n",
+            __func__, address, env->pc, rw);
     miss = cris_mmu_translate(&res, env, address & TARGET_PAGE_MASK,
                               rw, mmu_idx, 0);
     if (miss) {
@@ -112,9 +114,10 @@ int cris_cpu_handle_mmu_fault(CPUState *cs, vaddr address, int rw,
         r = 0;
     }
     if (r > 0) {
-        D_LOG("%s returns %d irqreq=%x addr=%" VADDR_PRIx " phy=%x vec=%x"
-              " pc=%x\n", __func__, r, cs->interrupt_request, address, res.phy,
-              res.bf_vec, env->pc);
+        qemu_log_mask(CPU_LOG_MMU,
+                "%s returns %d irqreq=%x addr=%" VADDR_PRIx " phy=%x vec=%x"
+                " pc=%x\n", __func__, r, cs->interrupt_request, address,
+                res.phy, res.bf_vec, env->pc);
     }
     return r;
 }

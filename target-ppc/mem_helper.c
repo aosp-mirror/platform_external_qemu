@@ -16,11 +16,14 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
+#include "qemu/osdep.h"
 #include "cpu.h"
+#include "exec/exec-all.h"
 #include "qemu/host-utils.h"
 #include "exec/helper-proto.h"
 
 #include "helper_regs.h"
+#include "exec/exec-all.h"
 #include "exec/cpu_ldst.h"
 
 //#define DEBUG_OP
@@ -100,8 +103,10 @@ void helper_lswx(CPUPPCState *env, target_ulong addr, uint32_t reg,
                  uint32_t ra, uint32_t rb)
 {
     if (likely(xer_bc != 0)) {
-        if (unlikely((ra != 0 && reg < ra && (reg + xer_bc) > ra) ||
-                     (reg < rb && (reg + xer_bc) > rb))) {
+        int num_used_regs = (xer_bc + 3) / 4;
+        if (unlikely((ra != 0 && lsw_reg_in_range(reg, num_used_regs, ra)) ||
+                     lsw_reg_in_range(reg, num_used_regs, rb))) {
+            env->nip += 4;     /* Compensate the "nip - 4" from gen_lswx() */
             helper_raise_exception_err(env, POWERPC_EXCP_PROGRAM,
                                        POWERPC_EXCP_INVAL |
                                        POWERPC_EXCP_INVAL_LSWX);
@@ -227,16 +232,16 @@ target_ulong helper_lscbx(CPUPPCState *env, target_ulong addr, uint32_t reg,
                                                                 \
         if (needs_byteswap(env)) {                              \
             r->element[LO_IDX ? index : (adjust - index)] =     \
-                swap(access(env, addr));                        \
+                swap(access(env, addr, GETPC()));               \
         } else {                                                \
             r->element[LO_IDX ? index : (adjust - index)] =     \
-                access(env, addr);                              \
+                access(env, addr, GETPC());                     \
         }                                                       \
     }
 #define I(x) (x)
-LVE(lvebx, cpu_ldub_data, I, u8)
-LVE(lvehx, cpu_lduw_data, bswap16, u16)
-LVE(lvewx, cpu_ldl_data, bswap32, u32)
+LVE(lvebx, cpu_ldub_data_ra, I, u8)
+LVE(lvehx, cpu_lduw_data_ra, bswap16, u16)
+LVE(lvewx, cpu_ldl_data_ra, bswap32, u32)
 #undef I
 #undef LVE
 
@@ -254,18 +259,41 @@ LVE(lvewx, cpu_ldl_data, bswap32, u32)
                                                                         \
         if (needs_byteswap(env)) {                                      \
             access(env, addr, swap(r->element[LO_IDX ? index :          \
-                                              (adjust - index)]));      \
+                                              (adjust - index)]),       \
+                        GETPC());                                       \
         } else {                                                        \
             access(env, addr, r->element[LO_IDX ? index :               \
-                                         (adjust - index)]);            \
+                                         (adjust - index)], GETPC());   \
         }                                                               \
     }
 #define I(x) (x)
-STVE(stvebx, cpu_stb_data, I, u8)
-STVE(stvehx, cpu_stw_data, bswap16, u16)
-STVE(stvewx, cpu_stl_data, bswap32, u32)
+STVE(stvebx, cpu_stb_data_ra, I, u8)
+STVE(stvehx, cpu_stw_data_ra, bswap16, u16)
+STVE(stvewx, cpu_stl_data_ra, bswap32, u32)
 #undef I
 #undef LVE
 
 #undef HI_IDX
 #undef LO_IDX
+
+void helper_tbegin(CPUPPCState *env)
+{
+    /* As a degenerate implementation, always fail tbegin.  The reason
+     * given is "Nesting overflow".  The "persistent" bit is set,
+     * providing a hint to the error handler to not retry.  The TFIAR
+     * captures the address of the failure, which is this tbegin
+     * instruction.  Instruction execution will continue with the
+     * next instruction in memory, which is precisely what we want.
+     */
+
+    env->spr[SPR_TEXASR] =
+        (1ULL << TEXASR_FAILURE_PERSISTENT) |
+        (1ULL << TEXASR_NESTING_OVERFLOW) |
+        (msr_hv << TEXASR_PRIVILEGE_HV) |
+        (msr_pr << TEXASR_PRIVILEGE_PR) |
+        (1ULL << TEXASR_FAILURE_SUMMARY) |
+        (1ULL << TEXASR_TFIAR_EXACT);
+    env->spr[SPR_TFIAR] = env->nip | (msr_hv << 1) | msr_pr;
+    env->spr[SPR_TFHAR] = env->nip + 4;
+    env->crf[0] = 0xB; /* 0b1010 = transaction failure */
+}

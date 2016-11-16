@@ -23,25 +23,26 @@
  * HAX common code for both windows and darwin
  */
 
+#include "qemu/osdep.h"
 #include "qemu-common.h"
-#include "strings.h"
+
 #include "hax-i386.h"
-#include "sysemu/accel.h"
-#include "exec/address-spaces.h"
-#include "qemu/main-loop.h"
 #include "hax-slot.h"
+
+#include "exec/address-spaces.h"
+#include "exec/exec-all.h"
+#include "exec/ioport.h"
+#include "qemu/main-loop.h"
+#include "strings.h"
+#include "sysemu/accel.h"
 
 #ifdef _WIN32
 #include "sysemu/os-win32.h"
 #endif
 
-#ifdef CONFIG_ANDROID
-#include "android/error-messages.h"
-#include "android/utils/debug.h"
-#else
 static const char kHaxVcpuSyncFailed[] = "Failed to sync HAX vcpu context";
+
 #define derror(msg) do { fprintf(stderr, (msg)); } while (0)
-#endif
 
 /* #define DEBUG_HAX */
 
@@ -116,7 +117,7 @@ static int hax_prepare_emulation(CPUArchState * env)
 {
     /* Flush all emulation states */
     tlb_flush(ENV_GET_CPU(env), 1);
-    tb_flush(env);
+    tb_flush(ENV_GET_CPU(env));
     /* Sync the vcpu state from hax kernel module */
     hax_vcpu_sync_state(env, 0);
     return 0;
@@ -494,12 +495,14 @@ static void hax_log_global_stop(struct MemoryListener *listener)
 }
 
 static void hax_log_start(MemoryListener * listener,
-                          MemoryRegionSection * section)
+                          MemoryRegionSection * section,
+                          int old, int new)
 {
 }
 
 static void hax_log_stop(MemoryListener * listener,
-                         MemoryRegionSection * section)
+                         MemoryRegionSection * section,
+                         int old, int new)
 {
 }
 
@@ -1329,8 +1332,12 @@ static int hax_get_fpu(CPUArchState * env)
         env->fptags[i] = !((fpu.ftw >> i) & 1);
     memcpy(env->fpregs, fpu.st_mm, sizeof(env->fpregs));
 
-    memcpy(env->xmm_regs, fpu.mmx_1, sizeof(fpu.mmx_1));
-    memcpy((XMMReg *) (env->xmm_regs) + 8, fpu.mmx_2, sizeof(fpu.mmx_2));
+    for (i = 0; i < 8; ++i) {
+        memcpy(&env->xmm_regs[i], fpu.mmx_1[i], sizeof(fpu.mmx_1[i]));
+    }
+    for (i = 0; i < 8; ++i) {
+        memcpy(&env->xmm_regs[8 + i], fpu.mmx_2[i], sizeof(fpu.mmx_2[i]));
+    }
     env->mxcsr = fpu.mxcsr;
 
     return 0;
@@ -1350,8 +1357,13 @@ static int hax_set_fpu(CPUArchState * env)
         fpu.ftw |= (!env->fptags[i]) << i;
 
     memcpy(fpu.st_mm, env->fpregs, sizeof(env->fpregs));
-    memcpy(fpu.mmx_1, env->xmm_regs, sizeof(fpu.mmx_1));
-    memcpy(fpu.mmx_2, (XMMReg *) (env->xmm_regs) + 8, sizeof(fpu.mmx_2));
+    
+    for (i = 0; i < 8; i++) {
+        memcpy(fpu.mmx_1[i], &env->xmm_regs[i], sizeof(fpu.mmx_1[i]));
+    }
+    for (i = 0; i < 8; i++) {
+        memcpy(fpu.mmx_2[i], &env->xmm_regs[i + 8], sizeof(fpu.mmx_2[i]));
+    }
 
     fpu.mxcsr = env->mxcsr;
 

@@ -30,9 +30,13 @@
 */
 #include "hw/misc/goldfish_pipe.h"
 
-#include "android-qemu2-glue/utils/stream.h"
+#include "qemu/osdep.h"
 #include "hw/hw.h"
 #include "hw/sysbus.h"
+
+#include "qemu-common.h"
+#include "qemu/log.h"
+#include "qemu/timer.h"
 #include "qemu/error-report.h"
 
 #include <assert.h>
@@ -46,14 +50,14 @@
 
 #if PIPE_DEBUG >= 1
 #define D(fmt, ...) \
-    do { fprintf(stdout, "android_pipe: " fmt "\n", ## __VA_ARGS__); } while (0)
+    do { fprintf(stdout, "goldfish_pipe: " fmt "\n", ## __VA_ARGS__); } while (0)
 #else
 #define D(fmt, ...)  do { /* nothing */ } while (0)
 #endif
 
 #if PIPE_DEBUG >= 2
 #define DD(fmt, ...) \
-    do { fprintf(stdout, "android_pipe: " fmt "\n", ## __VA_ARGS__); } while (0)
+    do { fprintf(stdout, "goldfish_pipe: " fmt "\n", ## __VA_ARGS__); } while (0)
 #else
 #define DD(fmt, ...)  do { /* nothing */ } while (0)
 #endif
@@ -127,9 +131,9 @@ enum {
     COMMAND_BUFFER_SIZE = 4096,
 };
 
-#define TYPE_ANDROID_PIPE "android_pipe"
-#define ANDROID_PIPE(obj) \
-    OBJECT_CHECK(AndroidPipeState, (obj), TYPE_ANDROID_PIPE)
+#define TYPE_GOLDFISH_PIPE "goldfish_pipe"
+#define GOLDFISH_PIPE(obj) \
+    OBJECT_CHECK(GoldfishPipeState, (obj), TYPE_GOLDFISH_PIPE)
 
 /* Update this version number if the device's interface changes. */
 enum {
@@ -234,8 +238,9 @@ typedef struct {
     MemoryRegion iomem;
     qemu_irq irq;
 
-    PipeDevice* dev;
-} AndroidPipeState;
+    /* TODO: roll into shared state */
+    PipeDevice *dev;
+} GoldfishPipeState;
 
 typedef struct PipeCommand {
     int32_t cmd;
@@ -281,7 +286,7 @@ typedef struct OpenCommandParams {
 } OpenCommandParams;
 
 typedef struct PipeDevice {
-    AndroidPipeState* ps;  // backlink to instance state
+    GoldfishPipeState* ps;  // backlink to instance state
     int device_version;    // host device verion
     int driver_version;    // guest's driver version
 
@@ -848,7 +853,7 @@ static void pipe_dev_write(void* opaque,
                            hwaddr offset,
                            uint64_t value,
                            unsigned size) {
-    AndroidPipeState* state = opaque;
+    GoldfishPipeState* state = opaque;
     PipeDevice* dev = state->dev;
 
     DR("%s: offset = 0x%" HWADDR_PRIx " value=%" PRIu64 "/0x%" PRIx64, __func__,
@@ -861,7 +866,7 @@ static void pipe_dev_write(void* opaque,
 }
 
 static uint64_t pipe_dev_read(void* opaque, hwaddr offset, unsigned size) {
-    AndroidPipeState* s = (AndroidPipeState*)opaque;
+    GoldfishPipeState* s = (GoldfishPipeState*)opaque;
     PipeDevice* dev = s->dev;
     if (offset == PIPE_REG_VERSION) {
         // PIPE_REG_VERSION is issued on probe, which means that
@@ -1123,7 +1128,7 @@ enum {
 };
 
 static void goldfish_pipe_save(QEMUFile* f, void* opaque) {
-    AndroidPipeState* s = opaque;
+    GoldfishPipeState* s = opaque;
     PipeDevice* dev = s->dev;
     dev->ops->save(f, dev);
 }
@@ -1453,7 +1458,7 @@ done:
 }
 
 static int goldfish_pipe_load(QEMUFile* f, void* opaque, int version_id) {
-    AndroidPipeState* s = opaque;
+    GoldfishPipeState* s = opaque;
     PipeDevice* dev = s->dev;
     int res = goldfish_pipe_load_v2(f, dev);
     return res;
@@ -1464,7 +1469,7 @@ static void goldfish_pipe_post_load(void* opaque) {
      * been loaded. Raising IRQ in the load handler causes
      * problems.
      */
-    PipeDevice* dev = ((AndroidPipeState*)opaque)->dev;
+    PipeDevice* dev = ((GoldfishPipeState*)opaque)->dev;
     if (dev->wanted_pipes_first) {
         qemu_set_irq(dev->ps->irq, 1);
     } else {
@@ -1474,7 +1479,7 @@ static void goldfish_pipe_post_load(void* opaque) {
 
 static void goldfish_pipe_realize(DeviceState* dev, Error** errp) {
     SysBusDevice* sbdev = SYS_BUS_DEVICE(dev);
-    AndroidPipeState* s = ANDROID_PIPE(dev);
+    GoldfishPipeState* s = GOLDFISH_PIPE(dev);
 
     s->dev = (PipeDevice*)g_malloc0(sizeof(PipeDevice));
     s->dev->ps = s; /* HACK: backlink */
@@ -1500,9 +1505,8 @@ static void goldfish_pipe_realize(DeviceState* dev, Error** errp) {
     sysbus_init_mmio(sbdev, &s->iomem);
     sysbus_init_irq(sbdev, &s->irq);
 
-    /* NOTE: "android_pipe" is the legacy name used in snapshots. */
     register_savevm_with_post_load(
-            dev, "android_pipe", 0, GOLDFISH_PIPE_SAVE_VERSION,
+            dev, "goldfish_pipe", 0, GOLDFISH_PIPE_SAVE_VERSION,
             goldfish_pipe_save, goldfish_pipe_load, goldfish_pipe_post_load, s);
 }
 
@@ -1539,14 +1543,15 @@ void goldfish_pipe_close_from_host(GoldfishHwPipe *pipe)
 static void goldfish_pipe_class_init(ObjectClass* klass, void* data) {
     DeviceClass* dc = DEVICE_CLASS(klass);
     dc->realize = goldfish_pipe_realize;
-    dc->desc = "android pipe";
+    dc->desc = "goldfish pipe";
 }
 
 static const TypeInfo goldfish_pipe_info = {
-        .name = TYPE_ANDROID_PIPE,
-        .parent = TYPE_SYS_BUS_DEVICE,
-        .instance_size = sizeof(AndroidPipeState),
-        .class_init = goldfish_pipe_class_init};
+    .name          = TYPE_GOLDFISH_PIPE,
+    .parent        = TYPE_SYS_BUS_DEVICE,
+    .instance_size = sizeof(GoldfishPipeState),
+    .class_init    = goldfish_pipe_class_init
+};
 
 static void goldfish_pipe_register(void) {
     type_register_static(&goldfish_pipe_info);

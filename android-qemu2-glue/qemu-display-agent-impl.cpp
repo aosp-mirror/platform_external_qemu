@@ -15,8 +15,11 @@
 #include "android-qemu2-glue/qemu-control-impl.h"
 
 extern "C" {
-    #include "ui/console.h"
+#include "qemu/osdep.h"
+#include "ui/console.h"
 }
+
+#include <string.h>
 
 static void getFrameBuffer(int* w, int* h, int* lineSize, int* bytesPerPixel,
                            uint8_t** frameBufferData) {
@@ -56,36 +59,51 @@ static void getFrameBuffer(int* w, int* h, int* lineSize, int* bytesPerPixel,
 }
 
 namespace {
-    struct dul_data {
-        AndroidDisplayUpdateCallback callback;
-        void* opaque;
-    };
-}
 
-static void on_display_update(DisplayUpdateListener* dul,
-        int x, int y, int w, int h) {
-    dul_data* data = static_cast<dul_data*>(dul->opaque);
-    data->callback(data->opaque, x, y, w, h);
-}
+struct AndroidDisplayChangeListener : public DisplayChangeListener {
+    AndroidDisplayChangeListener(AndroidDisplayUpdateCallback callback,
+                                 void* opaque) {
+        memset(this, 0, sizeof(*this));
+        mCallback = callback;
+        mOpaque = opaque;
+        this->ops = &kOps;
+        register_displaychangelistener(this);
+    }
+
+    ~AndroidDisplayChangeListener() {
+        unregister_displaychangelistener(this);
+    }
+
+    AndroidDisplayUpdateCallback mCallback;
+    void* mOpaque;
+
+    static void onDisplayUpdate(DisplayChangeListener* dcl,
+                                int x, int y, int w, int h) {
+        auto adcl = reinterpret_cast<AndroidDisplayChangeListener*>(dcl);
+        adcl->mCallback(adcl->mOpaque, x, y, w, h);
+    }
+
+    static const DisplayChangeListenerOps kOps;
+};
+
+// static
+const DisplayChangeListenerOps AndroidDisplayChangeListener::kOps = {
+    .dpy_name = "qemu2 display",
+    .dpy_refresh = nullptr,
+    .dpy_gfx_update = &onDisplayUpdate,
+};
+
+}  // namespace
 
 static void registerUpdateListener(AndroidDisplayUpdateCallback callback,
                                    void* opaque) {
-    const auto listener = new DisplayUpdateListener();
-    *listener = DisplayUpdateListener();
-    listener->dpy_gfx_update = &on_display_update;
-
-    auto data = new dul_data();
-    data->callback = callback;
-    data->opaque = opaque;
-    listener->opaque = data;
-
-    register_displayupdatelistener(listener);
+    static AndroidDisplayChangeListener* s_listener =
+            new AndroidDisplayChangeListener(callback, opaque);
 }
 
-
 static const QAndroidDisplayAgent displayAgent = {
-        .getFrameBuffer = &getFrameBuffer,
-        .registerUpdateListener = &registerUpdateListener
+    .getFrameBuffer = &getFrameBuffer,
+    .registerUpdateListener = &registerUpdateListener
 };
 
 const QAndroidDisplayAgent* const gQAndroidDisplayAgent = &displayAgent;

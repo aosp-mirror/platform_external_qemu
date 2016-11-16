@@ -11,7 +11,10 @@
 
 #include "android-qemu2-glue/emulation/CharSerialLine.h"
 
+#include <type_traits>
+
 extern "C" {
+#include "qemu/osdep.h"
 #include "sysemu/char.h"
 }
 

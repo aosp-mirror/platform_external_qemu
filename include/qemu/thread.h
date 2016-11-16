@@ -1,8 +1,8 @@
-#ifndef __QEMU_THREAD_H
-#define __QEMU_THREAD_H 1
+#ifndef QEMU_THREAD_H
+#define QEMU_THREAD_H
 
-#include <inttypes.h>
-#include <stdbool.h>
+#include "qemu/processor.h"
+#include "qemu/atomic.h"
 
 typedef struct QemuMutex QemuMutex;
 typedef struct QemuCond QemuCond;
@@ -24,9 +24,6 @@ void qemu_mutex_destroy(QemuMutex *mutex);
 void qemu_mutex_lock(QemuMutex *mutex);
 int qemu_mutex_trylock(QemuMutex *mutex);
 void qemu_mutex_unlock(QemuMutex *mutex);
-
-#define rcu_read_lock() do { } while (0)
-#define rcu_read_unlock() do { } while (0)
 
 void qemu_cond_init(QemuCond *cond);
 void qemu_cond_destroy(QemuCond *cond);
@@ -60,5 +57,45 @@ void qemu_thread_get_self(QemuThread *thread);
 bool qemu_thread_is_self(QemuThread *thread);
 void qemu_thread_exit(void *retval);
 void qemu_thread_naming(bool enable);
+
+struct Notifier;
+void qemu_thread_atexit_add(struct Notifier *notifier);
+void qemu_thread_atexit_remove(struct Notifier *notifier);
+
+typedef void (*QemuThreadSetupFunc)(void);
+void qemu_thread_register_setup_callback(QemuThreadSetupFunc setup_func);
+
+typedef struct QemuSpin {
+    int value;
+} QemuSpin;
+
+static inline void qemu_spin_init(QemuSpin *spin)
+{
+    __sync_lock_release(&spin->value);
+}
+
+static inline void qemu_spin_lock(QemuSpin *spin)
+{
+    while (unlikely(__sync_lock_test_and_set(&spin->value, true))) {
+        while (atomic_read(&spin->value)) {
+            cpu_relax();
+        }
+    }
+}
+
+static inline bool qemu_spin_trylock(QemuSpin *spin)
+{
+    return __sync_lock_test_and_set(&spin->value, true);
+}
+
+static inline bool qemu_spin_locked(QemuSpin *spin)
+{
+    return atomic_read(&spin->value);
+}
+
+static inline void qemu_spin_unlock(QemuSpin *spin)
+{
+    __sync_lock_release(&spin->value);
+}
 
 #endif

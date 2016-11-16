@@ -23,26 +23,24 @@
  * THE SOFTWARE.
  */
 
-#include <unistd.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <sys/types.h>
+/* Special case to include "qemu-options.h" here without issues */
+#undef POISON_CONFIG_ANDROID
+
+#include "qemu/osdep.h"
 #include <sys/wait.h>
 /*needed for MAP_POPULATE before including qemu-options.h */
-#include <sys/mman.h>
 #include <pwd.h>
 #include <grp.h>
 #include <libgen.h>
 
 /* Needed early for CONFIG_BSD etc. */
-#include "config-host.h"
 #include "sysemu/sysemu.h"
 #include "net/slirp.h"
 #include "qemu-options.h"
-
-#ifdef CONFIG_ANDROID
-#include "android/skin/winsys.h"
-#endif
+#include "qemu/rcu.h"
+#include "qemu/error-report.h"
+#include "qemu/log.h"
+#include "qemu/cutils.h"
 
 #ifdef CONFIG_LINUX
 #include <sys/prctl.h>
@@ -62,16 +60,19 @@ void os_setup_early_signal_handling(void)
     sigaction(SIGPIPE, &act, NULL);
 }
 
+static void (*qemu_ctrlc_handler)(void) = NULL;
+
+void qemu_set_ctrlc_handler(void(*handler)(void)) {
+    qemu_ctrlc_handler = handler;
+}
+
 static void termsig_handler(int signal, siginfo_t *info, void *c)
 {
-#ifdef CONFIG_ANDROID
-    // In android, request closing the UI, instead of short-circuting down to
-    // qemu. This will eventually call qemu_system_shutdown_request via a skin
-    // event.
-    skin_winsys_quit_request();
-#else
-    qemu_system_killed(info->si_signo, info->si_pid);
-#endif  // !CONFIG_ANDROID
+    if (qemu_ctrlc_handler) {
+        qemu_ctrlc_handler();
+    } else {
+        qemu_system_killed(info->si_signo, info->si_pid);
+    }
 }
 
 void os_setup_signal_handling(void)
@@ -101,7 +102,7 @@ char *os_find_datadir(void)
     if (exec_dir == NULL) {
         return NULL;
     }
-    dir = dirname(exec_dir);
+    dir = g_path_get_dirname(exec_dir);
 
     max_len = strlen(dir) +
         MAX(strlen(SHARE_SUFFIX), strlen(BUILD_SUFFIX)) + 1;
@@ -115,6 +116,7 @@ char *os_find_datadir(void)
         }
     }
 
+    g_free(dir);
     g_free(exec_dir);
     return res;
 }
@@ -149,6 +151,8 @@ void os_parse_cmd_args(int index, const char *optarg)
     switch (index) {
 #ifdef CONFIG_SLIRP
     case QEMU_OPTION_smb:
+        error_report("The -smb option is deprecated. "
+                     "Please use '-netdev user,smb=...' instead.");
         if (net_slirp_smb(optarg) < 0)
             exit(1);
         break;
@@ -258,6 +262,7 @@ void os_daemonize(void)
         signal(SIGTSTP, SIG_IGN);
         signal(SIGTTOU, SIG_IGN);
         signal(SIGTTIN, SIG_IGN);
+        rcu_after_fork();
     }
 }
 
@@ -285,7 +290,10 @@ void os_setup_post(void)
 
         dup2(fd, 0);
         dup2(fd, 1);
-        dup2(fd, 2);
+        /* In case -D is given do not redirect stderr to /dev/null */
+        if (!qemu_logfile) {
+            dup2(fd, 2);
+        }
 
         close(fd);
 

@@ -10,12 +10,10 @@
  * See the COPYING file in the top-level directory.
  */
 
-#include <stdio.h>
-#include <string.h>
+#include "qemu/osdep.h"
 
 #include "vss-common.h"
-#include "inc/win2003/vscoordint.h"
-
+#include <inc/win2003/vscoordint.h>
 #include <comadmin.h>
 #include <wbemidl.h>
 #include <comdef.h>
@@ -254,7 +252,7 @@ STDAPI COMRegister(void)
 
     chk(pObj->get_Key(&key));
 
-    if (!GetModuleFileName(g_hinstDll, dllPath, sizeof(dllPath))) {
+    if (!win32GetModuleFileName(g_hinstDll, dllPath, sizeof(dllPath))) {
         hr = HRESULT_FROM_WIN32(GetLastError());
         errmsg(hr, "GetModuleFileName failed");
         goto out;
@@ -369,7 +367,7 @@ STDAPI DllRegisterServer(void)
         goto out;
     }
 
-    if (!GetModuleFileName(g_hinstDll, dllPath, sizeof(dllPath))) {
+    if (!win32GetModuleFileName(g_hinstDll, dllPath, sizeof(dllPath))) {
         errmsg_dialog(GetLastError(), "GetModuleFileName failed");
         goto out;
     }

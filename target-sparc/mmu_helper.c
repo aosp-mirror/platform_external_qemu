@@ -17,7 +17,9 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "qemu/osdep.h"
 #include "cpu.h"
+#include "exec/exec-all.h"
 #include "trace.h"
 #include "exec/address-spaces.h"
 
@@ -213,10 +215,9 @@ int sparc_cpu_handle_mmu_fault(CPUState *cs, vaddr address, int rw,
                                       address, rw, mmu_idx, &page_size);
     vaddr = address;
     if (error_code == 0) {
-#ifdef DEBUG_MMU
-        printf("Translate at %" VADDR_PRIx " -> " TARGET_FMT_plx ", vaddr "
-               TARGET_FMT_lx "\n", address, paddr, vaddr);
-#endif
+        qemu_log_mask(CPU_LOG_MMU,
+                "Translate at %" VADDR_PRIx " -> " TARGET_FMT_plx ", vaddr "
+                TARGET_FMT_lx "\n", address, paddr, vaddr);
         tlb_set_page(cs, vaddr, paddr, prot, mmu_idx, page_size);
         return 0;
     }
@@ -850,7 +851,7 @@ hwaddr sparc_cpu_get_phys_page_debug(CPUState *cs, vaddr addr)
     SPARCCPU *cpu = SPARC_CPU(cs);
     CPUSPARCState *env = &cpu->env;
     hwaddr phys_addr;
-    int mmu_idx = cpu_mmu_index(env);
+    int mmu_idx = cpu_mmu_index(env, false);
     MemoryRegionSection section;
 
     if (cpu_sparc_get_phys_page(env, &phys_addr, addr, 2, mmu_idx) != 0) {

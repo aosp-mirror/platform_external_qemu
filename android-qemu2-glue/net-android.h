@@ -1,4 +1,4 @@
-// Copyright 2015 The Android Open Source Project
+// Copyright 2016 The Android Open Source Project
 //
 // This software is licensed under the terms of the GNU General Public
 // License version 2, as published by the Free Software Foundation, and
@@ -11,17 +11,10 @@
 
 #pragma once
 
-#include "config-host.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
 
-#if defined(CONFIG_SLIRP)
-#include "libslirp.h"
-
-void slirp_init_shapers(void* slirp_state,
-                        void* net_client_state,
-                        Slirp *slirp);
-#endif  // CONFIG_SLIRP
+void android_qemu_init_slirp_shapers(void);
 
 ANDROID_END_HEADER

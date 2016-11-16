@@ -56,6 +56,47 @@ QEMU2_GLIB_LDLIBS := \
 QEMU2_PIXMAN_INCLUDES := $(QEMU2_DEPS_TOP_DIR)/include/pixman-1
 QEMU2_PIXMAN_LDLIBS := -lpixman-1
 
+QEMU2_SDL2_INCLUDES := $(QEMU2_DEPS_TOP_DIR)/include/SDL2
+QEMU2_SDL2_LDLIBS := \
+    $(call qemu2-if-windows, \
+        -lmingw32 \
+    ) \
+    -lSDL2 \
+    $(call qemu2-if-darwin,, \
+        -lSDL2main \
+    ) \
+    $(call qemu2-if-windows, \
+        -limm32 \
+        -ldinput8 \
+        -ldxguid \
+        -ldxerr8 \
+        -luser32 \
+        -lgdi32 \
+        -lwinmm \
+        -lole32 \
+        -loleaut32 \
+        -lshell32 \
+        -lversion \
+        -luuid \
+    , \
+        -ldl \
+    ) \
+
+ifeq (darwin,$(BUILD_TARGET_OS))
+# NOTE: Because the following contain commas, we cannot use qemu2-if-darwin!
+QEMU2_SDL2_LDLIBS += \
+    -Wl,-framework,OpenGL \
+    -Wl,-framework,ForceFeedback \
+    -lobjc \
+    -Wl,-framework,Cocoa \
+    -Wl,-framework,Carbon \
+    -Wl,-framework,IOKit \
+    -Wl,-framework,CoreAudio \
+    -Wl,-framework,AudioToolbox \
+    -Wl,-framework,AudioUnit \
+
+endif
+
 # Ensure config-host.h can be found properly.
 QEMU2_INCLUDES := $(LOCAL_PATH)/android-qemu2-glue/config/$(BUILD_TARGET_TAG)
 
@@ -64,7 +105,6 @@ QEMU2_INCLUDES += \
     $(LOCAL_PATH) \
     $(LOCAL_PATH)/include \
     $(QEMU2_AUTO_GENERATED_DIR) \
-    $(ANDROID_EMU_INCLUDES) \
 
 QEMU2_INCLUDES += $(QEMU2_GLIB_INCLUDES) $(QEMU2_PIXMAN_INCLUDES)
 
@@ -79,23 +119,33 @@ QEMU2_CFLAGS := \
     $(LIBCURL_CFLAGS) \
     -D_GNU_SOURCE \
     -D_FILE_OFFSET_BITS=64 \
-    -DCONFIG_ANDROID \
     $(call qemu2-if-darwin, -Wno-initializer-overrides) \
 
-include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
+QEMU2_CFLAGS += \
+    -Wno-unused-function \
+    $(call qemu2-if-darwin, \
+        -Wno-unused-value \
+        -Wno-parentheses-equality \
+        -Wno-self-assign \
+        , \
+        -Wno-unused-variable \
+        -Wno-unused-but-set-variable \
+        -Wno-maybe-uninitialized \
+        ) \
+    -UNDEBUG \
+
+#include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
 
 #include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-qt.mk
 
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-sources.mk
 
-# Custom fixes.
-QEMU2_COMMON_SOURCES += \
-    stubs/kvm.c
-
 # A static library containing target-independent code
-$(call start-emulator-library,libqemu2_common)
+$(call start-emulator-library,libqemu2-common)
 
-LOCAL_CFLAGS += $(QEMU2_CFLAGS)
+LOCAL_CFLAGS += \
+    $(QEMU2_CFLAGS) \
+    -DPOISON_CONFIG_ANDROID \
 
 LOCAL_C_INCLUDES += \
     $(QEMU2_INCLUDES) \
@@ -111,117 +161,112 @@ LOCAL_GENERATED_SOURCES += \
     $(QEMU2_AUTO_GENERATED_DIR)/qapi-event.c \
     $(QEMU2_AUTO_GENERATED_DIR)/qapi-types.c \
     $(QEMU2_AUTO_GENERATED_DIR)/qapi-visit.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/qmp-introspect.c \
     $(QEMU2_AUTO_GENERATED_DIR)/qmp-marshal.c \
     $(QEMU2_AUTO_GENERATED_DIR)/trace/generated-events.c \
     $(QEMU2_AUTO_GENERATED_DIR)/trace/generated-tracers.c \
 
 # Stuff from libqemuutil, order follows util/Makefile.objs
 LOCAL_SRC_FILES += \
-    qapi/qapi-visit-core.c \
+    crypto/pbkdf-stub.c \
+    qapi/opts-visitor.c \
+    qapi/qapi-clone-visitor.c \
     qapi/qapi-dealloc-visitor.c \
+    qapi/qapi-util.c \
+    qapi/qapi-visit-core.c \
+    qapi/qmp-dispatch.c \
+    qapi/qmp-event.c \
     qapi/qmp-input-visitor.c \
     qapi/qmp-output-visitor.c \
     qapi/qmp-registry.c \
-    qapi/qmp-dispatch.c \
     qapi/string-input-visitor.c \
     qapi/string-output-visitor.c \
-    qapi/opts-visitor.c \
-    qapi/qmp-event.c \
-    qapi/qapi-util.c \
-    qobject/qint.c \
-    qobject/qstring.c \
-    qobject/qdict.c \
-    qobject/qlist.c \
-    qobject/qfloat.c \
-    qobject/qbool.c \
-    qobject/qjson.c \
     qobject/json-lexer.c \
-    qobject/json-streamer.c \
     qobject/json-parser.c \
-    qobject/qerror.c \
+    qobject/json-streamer.c \
+    qobject/qbool.c \
+    qobject/qdict.c \
+    qobject/qfloat.c \
+    qobject/qint.c \
+    qobject/qjson.c \
+    qobject/qlist.c \
+    qobject/qnull.c \
+    qobject/qobject.c \
+    qobject/qstring.c \
     trace/control.c \
     trace/qmp.c \
-    util/osdep.c \
-    util/cutils.c \
-    util/unicode.c \
-    util/qemu-timer-common.c \
-    $(call qemu2-if-windows, \
-        util/oslib-win32.c \
-        util/qemu-thread-win32.c \
-        util/event_notifier-win32.c \
-        ) \
-    $(call qemu2-if-posix, \
-        util/oslib-posix.c \
-        util/qemu-thread-posix.c \
-        util/event_notifier-posix.c \
-        util/qemu-openpty.c \
-        ) \
-    util/envlist.c \
-    util/path.c \
-    util/module.c \
-    $(call qemu2-if-build-target-arch,x86, util/host-utils.c) \
+    util/abort.c \
+    util/acl.c \
+    util/base64.c \
     util/bitmap.c \
     util/bitops.c \
-    util/hbitmap.c \
-    util/fifo8.c \
-    util/acl.c \
+    util/buffer.c \
+    util/crc32c.c \
+    util/cutils.c \
+    util/envlist.c \
     util/error.c \
-    util/qemu-error.c \
-    $(call qemu2-if-posix, \
-        util/compatfd.c \
-        ) \
+    util/fifo8.c \
+    util/getauxval.c \
+    util/hexdump.c \
+    util/hbitmap.c \
     util/id.c \
     util/iov.c \
-    util/aes.c \
-    util/qemu-config.c \
-    util/qemu-sockets.c \
-    util/uri.c \
+    util/log.c \
+    util/module.c \
     util/notify.c \
+    util/osdep.c \
+    util/path.c \
+    util/qdist.c \
+    util/qemu-config.c \
+    util/qemu-coroutine.c \
+    util/qemu-coroutine-io.c \
+    util/qemu-coroutine-lock.c \
+    util/qemu-coroutine-sleep.c \
+    util/qemu-error.c \
     util/qemu-option.c \
     util/qemu-progress.c \
-    util/hexdump.c \
-    util/crc32c.c \
-    util/throttle.c \
-    util/getauxval.c \
+    util/qemu-sockets.c \
+    util/qemu-timer-common.c \
+    util/qht.c \
+    util/range.c \
+    util/rcu.c \
     util/readline.c \
     util/rfifolock.c \
+    util/timed-average.c \
+    util/throttle.c \
+    util/unicode.c \
+    util/uri.c \
     $(call qemu2-if-windows, \
-        util/shared-library-win32.c \
+        util/coroutine-win32.c \
+        util/event_notifier-win32.c \
+        util/oslib-win32.c \
+        util/qemu-thread-win32.c \
+        ) \
+    $(call qemu2-if-linux, \
+        util/coroutine-ucontext.c \
+        util/memfd.c \
+        ) \
+    $(call qemu2-if-darwin, \
+        util/coroutine-sigaltstack.c \
         ) \
     $(call qemu2-if-posix, \
-        util/shared-library-posix.c \
+        util/event_notifier-posix.c \
+        util/mmap-alloc.c \
+        util/oslib-posix.c \
+        util/qemu-openpty.c \
+        util/qemu-thread-posix.c \
+        ) \
+    $(call qemu2-if-build-target-arch,x86, util/host-utils.c) \
+    $(call qemu2-if-posix, \
+        util/compatfd.c \
         ) \
 
 $(call gen-hw-config-defs)
 QEMU2_INCLUDES += $(QEMU_HW_CONFIG_DEFS_INCLUDES)
 
-LOCAL_SRC_FILES += \
-    $(QEMU2_GLUE_SOURCES)
-
 $(call end-emulator-library)
 
-# Special case, the following sources are only used by the arm64
-# target but cannot be part of libqemu2_aarch64 because they need
-# to be compiled without NEED_CPU_H
-$(call start-emulator-library,libqemu2_common_aarch64)
-
-LOCAL_CPP_EXTENSION := .cc
-
-LOCAL_C_INCLUDES += \
-    $(QEMU2_INCLUDES) \
-    $(LOCAL_PATH)/target-arm \
-    $(LOCAL_PATH)/disas/libvixl
-
-LOCAL_CFLAGS += $(QEMU2_CFLAGS)
-
-LOCAL_SRC_FILES += \
-    disas/arm-a64.cc \
-    disas/libvixl/a64/decoder-a64.cc \
-    disas/libvixl/a64/disasm-a64.cc \
-    disas/libvixl/a64/instructions-a64.cc \
-    disas/libvixl/utils.cc \
-
-$(call end-emulator-library)
+include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
 
 QEMU2_TARGET := x86
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk

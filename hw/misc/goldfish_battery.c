@@ -9,6 +9,7 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+#include "qemu/osdep.h"
 #include "hw/hw.h"
 #include "hw/sysbus.h"
 #include "qemu/error-report.h"
@@ -148,7 +149,7 @@ void goldfish_battery_display_cb(void* opaque, BatteryLineCallback callback)
 static void monitor_print_callback(void* opaque, const char* buf, int size)
 {
     Monitor* mon = (Monitor*)opaque;
-    monitor_printf(mon, buf);
+    monitor_printf(mon, "%.*s", size, buf);
 }
 
 void goldfish_battery_display(Monitor *mon)

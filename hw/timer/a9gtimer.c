@@ -20,10 +20,13 @@
  * with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "qemu/osdep.h"
 #include "hw/timer/a9gtimer.h"
+#include "qapi/error.h"
 #include "qemu/timer.h"
 #include "qemu/bitops.h"
 #include "qemu/log.h"
+#include "qom/cpu.h"
 
 #ifndef A9_GTIMER_ERR_DEBUG
 #define A9_GTIMER_ERR_DEBUG 0
@@ -121,7 +124,7 @@ static void a9_gtimer_update_no_sync(void *opaque)
 {
     A9GTimerState *s = A9_GTIMER(opaque);
 
-    return a9_gtimer_update(s, false);
+    a9_gtimer_update(s, false);
 }
 
 static uint64_t a9_gtimer_read(void *opaque, hwaddr addr, unsigned size)
@@ -181,7 +184,7 @@ static void a9_gtimer_write(void *opaque, hwaddr addr, uint64_t value,
     case R_COUNTER_LO:
         /*
          * Keep it simple - ARM docco explicitly says to disable timer before
-         * modding it, so dont bother trying to do all the difficult on the fly
+         * modding it, so don't bother trying to do all the difficult on the fly
          * timer modifications - (if they even work in real hardware??).
          */
         if (s->control & R_CONTROL_TIMER_ENABLE) {
@@ -289,7 +292,7 @@ static void a9_gtimer_realize(DeviceState *dev, Error **errp)
     int i;
 
     if (s->num_cpu < 1 || s->num_cpu > A9_GTIMER_MAX_CPUS) {
-        error_setg(errp, "%s: num-cpu must be between 1 and %d\n",
+        error_setg(errp, "%s: num-cpu must be between 1 and %d",
                    __func__, A9_GTIMER_MAX_CPUS);
         return;
     }
@@ -328,7 +331,7 @@ static const VMStateDescription vmstate_a9_gtimer = {
     .version_id = 1,
     .minimum_version_id = 1,
     .fields = (VMStateField[]) {
-        VMSTATE_TIMER(timer, A9GTimerState),
+        VMSTATE_TIMER_PTR(timer, A9GTimerState),
         VMSTATE_UINT64(counter, A9GTimerState),
         VMSTATE_UINT64(ref_counter, A9GTimerState),
         VMSTATE_UINT64(cpu_ref_time, A9GTimerState),

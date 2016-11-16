@@ -1,4 +1,4 @@
-// Copyright 2015 The Android Open Source Project
+// Copyright 2016 The Android Open Source Project
 //
 // This software is licensed under the terms of the GNU General Public
 // License version 2, as published by the Free Software Foundation, and
@@ -9,7 +9,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "net-android.h"
+#include "android-qemu2-glue/net-android.h"
+
 #include "android/android.h"
 #include "android/network/constants.h"
 #include "android/network/globals.h"
@@ -17,48 +18,48 @@
 #include "android/shaper.h"
 
 extern "C" {
-#include "net/net.h"
+#include "qemu/osdep.h"
+#include "net/slirp.h"
 }
 
-#if defined(CONFIG_SLIRP)
-static void* s_slirp_state = nullptr;
-static void* s_net_client_state = nullptr;
-static Slirp* s_slirp = nullptr;
+static void* s_opaque = nullptr;
 
-static void
-android_net_delay_in_cb(void* data, size_t size, void* opaque)
+void android_qemu_init_slirp_shapers(void)
 {
-    slirp_input(s_slirp, static_cast<const uint8_t*>(data), size);
-}
+    android_net_delay_in = netdelay_create(
+            [](void* data, size_t size, void* opaque) {
+                net_slirp_receive_raw(s_opaque,
+                                      static_cast<const uint8_t*>(data),
+                                      static_cast<int>(size));
+            });
 
-static void
-android_net_shaper_in_cb(void* data, size_t size, void* opaque)
-{
-    netdelay_send_aux(android_net_delay_in, data, size, opaque);
-}
+    android_net_shaper_in = netshaper_create(1,
+            [](void* data, size_t size, void* opaque) {
+                netdelay_send_aux(android_net_delay_in, data, size, opaque);
+            });
 
-static void
-android_net_shaper_out_cb(void* data, size_t size, void* opaque)
-{
-    qemu_send_packet(static_cast<NetClientState*>(s_net_client_state),
-                     static_cast<const uint8_t*>(data),
-                     size);
-}
-
-void
-slirp_init_shapers(void* slirp_state, void* net_client_state, Slirp* slirp)
-{
-    s_slirp_state = slirp_state;
-    s_net_client_state = net_client_state;
-    s_slirp = slirp;
-    android_net_delay_in = netdelay_create(android_net_delay_in_cb);
-    android_net_shaper_in = netshaper_create(1, android_net_shaper_in_cb);
-    android_net_shaper_out = netshaper_create(1, android_net_shaper_out_cb);
+    android_net_shaper_out = netshaper_create(1,
+            [](void* data, size_t size, void* opaque) {
+                net_slirp_output_raw(opaque,
+                                     static_cast<const uint8_t*>(data),
+                                     static_cast<int>(size));
+            });
 
     netdelay_set_latency(android_net_delay_in, android_net_min_latency,
                          android_net_max_latency);
+
     netshaper_set_rate(android_net_shaper_out, android_net_download_speed);
     netshaper_set_rate(android_net_shaper_in, android_net_upload_speed);
-}
-#endif  // CONFIG_SLIRP
 
+    s_opaque = net_slirp_set_shapers(
+            android_net_shaper_out,
+            [](void* opaque, const void* data, int len) {
+                netshaper_send_aux(static_cast<NetShaper>(opaque),
+                                   (char*)data, len, s_opaque);
+            },
+            android_net_shaper_in,
+            [](void* opaque, const void* data, int len) {
+                netshaper_send_aux(static_cast<NetShaper>(opaque),
+                                   (void*)data, len, s_opaque);
+            });
+}

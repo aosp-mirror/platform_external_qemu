@@ -56,6 +56,7 @@ extern "C" {
 
 #include "android/ui-emu-agent.h"
 #include "android-qemu2-glue/emulation/serial_line.h"
+#include "android-qemu2-glue/proxy/slirp_proxy.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
 
 #ifdef TARGET_AARCH64
@@ -448,6 +449,7 @@ extern "C" int main(int argc, char **argv) {
     if (opts->skip_adb_auth) {
         args[n++] = "-skip-adb-auth";
     }
+
     /** SNAPSHOT STORAGE HANDLING */
 
     /* If we have a valid snapshot storage path */
@@ -550,8 +552,9 @@ extern "C" int main(int argc, char **argv) {
     }
 
     if (opts->http_proxy) {
-        args[n++] = "-http-proxy";
-        args[n++] = opts->http_proxy;
+        if (!qemu_android_setup_http_proxy(opts->http_proxy)) {
+            return 1;
+        }
     }
 
     if (!opts->charmap) {
@@ -708,12 +711,6 @@ extern "C" int main(int argc, char **argv) {
     // Make sure we always use the custom Android CPU definition.
     args[n++] = "-cpu";
     args[n++] = kTarget.qemuCpu;
-
-    // Set env var to "on" for Intel PMU if the feature is enabled.
-    // cpu.c will then read that.
-    if (android::featurecontrol::isEnabled(android::featurecontrol::IntelPerformanceMonitoringUnit)) {
-        System::get()->envSet("ANDROID_EMU_FEATURE_IntelPerformanceMonitoringUnit", "on");
-    }
 
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
     char* accel_status = NULL;

@@ -31,8 +31,8 @@
 
 #ifdef CONFIG_SLIRP
 
-void net_slirp_hostfwd_add(Monitor *mon, const QDict *qdict);
-void net_slirp_hostfwd_remove(Monitor *mon, const QDict *qdict);
+void hmp_hostfwd_add(Monitor *mon, const QDict *qdict);
+void hmp_hostfwd_remove(Monitor *mon, const QDict *qdict);
 
 int net_slirp_redir(const char *redir_str);
 
@@ -40,14 +40,22 @@ int net_slirp_parse_legacy(QemuOptsList *opts_list, const char *optarg, int *ret
 
 int net_slirp_smb(const char *exported_dir);
 
-void do_info_usernet(Monitor *mon, const QDict *qdict);
+void hmp_info_usernet(Monitor *mon, const QDict *qdict);
 
-/* Given a VLAN ID and stack name string, look up the corresponding
- * Slirp backend.
- */
-Slirp *net_slirp_lookup(const char *vlan, const char *stack, Error **errp);
+/* Functions to be called by |out_send| and |in_send| implementations below */
+/* |opaque| is the result of net_slirp_set_shapers(). */
+void net_slirp_output_raw(void *opaque, const uint8_t *pkt, int pkt_len);
+void net_slirp_receive_raw(void* opaque, const uint8_t *buf, size_t size);
 
-int net_slirp_is_inited(void);
+/* Return a Slirp instance, or NULL if the network stack is not initialized */
+void* net_slirp_state(void);
+
+typedef void (*SlirpShaperSendFunc)(void* opaque, const void* data, int len);
+
+void* net_slirp_set_shapers(void* out_opaque,
+                            SlirpShaperSendFunc out_send,
+                            void* in_opaque,
+                            SlirpShaperSendFunc in_send);
 
 #endif
 

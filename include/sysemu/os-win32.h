@@ -26,34 +26,9 @@
 #ifndef QEMU_OS_WIN32_H
 #define QEMU_OS_WIN32_H
 
-#include <windows.h>
 #include <winsock2.h>
-
-/* Workaround for older versions of MinGW. */
-#ifndef ECONNREFUSED
-# define ECONNREFUSED WSAECONNREFUSED
-#endif
-#ifndef EINPROGRESS
-# define EINPROGRESS  WSAEINPROGRESS
-#endif
-#ifndef EHOSTUNREACH
-# define EHOSTUNREACH WSAEHOSTUNREACH
-#endif
-#ifndef EINTR
-# define EINTR        WSAEINTR
-#endif
-#ifndef EINPROGRESS
-# define EINPROGRESS  WSAEINPROGRESS
-#endif
-#ifndef ENETUNREACH
-# define ENETUNREACH  WSAENETUNREACH
-#endif
-#ifndef ENOTCONN
-# define ENOTCONN     WSAENOTCONN
-#endif
-#ifndef EWOULDBLOCK
-# define EWOULDBLOCK  WSAEWOULDBLOCK
-#endif
+#include <windows.h>
+#include <ws2tcpip.h>
 
 /* QEMU uses sigsetjmp()/siglongjmp() as the portable way to specify
  * "longjmp and don't touch the signal masks". Since we know that the
@@ -82,49 +57,13 @@
 
 #endif
 
-/* Declaration of ffs() is missing in MinGW's strings.h. */
-/* ANDROID EMULATOR BUILD HACK: Our mingw environment doesn't have any library
- * that provides ffs and friends.  This results in linking errors for these
- * functions when compiling with debugging enabled.  Without debug, gcc seems to
- * inline from the builtin.
- */
-#define ffs(i) __builtin_ffs(i)
-#define ffsl(i) __builtin_ffsl(i)
-#define ffsll(i) __builtin_ffsll(i)
-
 /* Missing POSIX functions. Don't use MinGW-w64 macros. */
-
-#ifndef __cplusplus
-// NOTE: Disabled for C++ to avoid compiler conflicts when building the Android
-// emulator.
-//
-// The root of the issue is the following:
-//
-// * <time.h> in newest Mingw headers declare functions like gmtime_r() as
-//   inline _outside_ of an extern "C" {}. They are thus declared with 'C++
-//   linkage', when <time.h> is included directly by a C++ source file.
-//
-// * The emulator's C++ source files include this header _within_ an
-//   extern "C" block (to avoid plenty of other kinds of conflicts), and
-//   the re-declaration below has 'C linkage'.
-//
-// The compiler complains that both declarations are incompatible due to
-// different linkage type (name mangling, really) and exits with an error.
-//
-// Since only QEMU's C source files use these functions, it is safe to avoid
-// re-declaring them here when __cplusplus is defined. This works with both
-// the old and new versions of <time.h> / Mingw headers.
-
+#ifndef CONFIG_LOCALTIME_R
 #undef gmtime_r
 struct tm *gmtime_r(const time_t *timep, struct tm *result);
-
 #undef localtime_r
 struct tm *localtime_r(const time_t *timep, struct tm *result);
-
-#undef strtok_r
-char *strtok_r(char *str, const char *delim, char **saveptr);
-
-#endif  /* !__cplusplus */
+#endif /* CONFIG_LOCALTIME_R */
 
 static inline void os_setup_signal_handling(void) {}
 static inline void os_daemonize(void) {}
@@ -132,7 +71,7 @@ static inline void os_setup_post(void) {}
 void os_set_line_buffering(void);
 static inline void os_set_proc_name(const char *dummy) {}
 
-size_t getpagesize(void);
+int getpagesize(void);
 
 #if !defined(EPROTONOSUPPORT)
 # define EPROTONOSUPPORT EINVAL
@@ -155,5 +94,124 @@ static inline int os_mlock(void)
 {
     return -ENOSYS;
 }
+
+#define fsync _commit
+
+#if !defined(lseek)
+# define lseek _lseeki64
+#endif
+
+int qemu_ftruncate64(int, int64_t);
+
+#if !defined(ftruncate)
+# define ftruncate qemu_ftruncate64
+#endif
+
+static inline char *realpath(const char *path, char *resolved_path)
+{
+    _fullpath(resolved_path, path, _MAX_PATH);
+    return resolved_path;
+}
+
+
+/* We wrap all the sockets functions so that we can
+ * set errno based on WSAGetLastError()
+ */
+
+#undef connect
+#define connect qemu_connect_wrap
+int qemu_connect_wrap(int sockfd, const struct sockaddr *addr,
+                      socklen_t addrlen);
+
+#undef listen
+#define listen qemu_listen_wrap
+int qemu_listen_wrap(int sockfd, int backlog);
+
+#undef bind
+#define bind qemu_bind_wrap
+int qemu_bind_wrap(int sockfd, const struct sockaddr *addr,
+                   socklen_t addrlen);
+
+#undef socket
+#define socket qemu_socket_wrap
+int qemu_socket_wrap(int domain, int type, int protocol);
+
+#undef accept
+#define accept qemu_accept_wrap
+int qemu_accept_wrap(int sockfd, struct sockaddr *addr,
+                     socklen_t *addrlen);
+
+#undef shutdown
+#define shutdown qemu_shutdown_wrap
+int qemu_shutdown_wrap(int sockfd, int how);
+
+#undef ioctlsocket
+#define ioctlsocket qemu_ioctlsocket_wrap
+int qemu_ioctlsocket_wrap(int fd, int req, void *val);
+
+#undef closesocket
+#define closesocket qemu_closesocket_wrap
+int qemu_closesocket_wrap(int fd);
+
+#undef getsockopt
+#define getsockopt qemu_getsockopt_wrap
+int qemu_getsockopt_wrap(int sockfd, int level, int optname,
+                         void *optval, socklen_t *optlen);
+
+#undef setsockopt
+#define setsockopt qemu_setsockopt_wrap
+int qemu_setsockopt_wrap(int sockfd, int level, int optname,
+                         const void *optval, socklen_t optlen);
+
+#undef getpeername
+#define getpeername qemu_getpeername_wrap
+int qemu_getpeername_wrap(int sockfd, struct sockaddr *addr,
+                          socklen_t *addrlen);
+
+#undef getsockname
+#define getsockname qemu_getsockname_wrap
+int qemu_getsockname_wrap(int sockfd, struct sockaddr *addr,
+                          socklen_t *addrlen);
+
+#undef send
+#define send qemu_send_wrap
+ssize_t qemu_send_wrap(int sockfd, const void *buf, size_t len, int flags);
+
+#undef sendto
+#define sendto qemu_sendto_wrap
+ssize_t qemu_sendto_wrap(int sockfd, const void *buf, size_t len, int flags,
+                         const struct sockaddr *addr, socklen_t addrlen);
+
+#undef recv
+#define recv qemu_recv_wrap
+ssize_t qemu_recv_wrap(int sockfd, void *buf, size_t len, int flags);
+
+#undef recvfrom
+#define recvfrom qemu_recvfrom_wrap
+ssize_t qemu_recvfrom_wrap(int sockfd, void *buf, size_t len, int flags,
+                           struct sockaddr *addr, socklen_t *addrlen);
+
+// ANDROID_BEGIN
+/* These are wrappers around Win32 functions. When building against the
+ * Android emulator, they will treat file names as UTF-8 encoded strings,
+ * instead of ANSI ones. */
+HANDLE win32CreateFile(
+        LPCTSTR               lpFileName,
+        DWORD                 dwDesiredAccess,
+        DWORD                 dwShareMode,
+        LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+        DWORD                 dwCreationDisposition,
+        DWORD                 dwFlagsAndAttributes,
+        HANDLE                hTemplateFile);
+
+DWORD win32GetCurrentDirectory(
+        DWORD  nBufferLength,
+        LPTSTR lpBuffer);
+
+DWORD win32GetModuleFileName(
+        HMODULE hModule,
+        LPTSTR  lpFilename,
+        DWORD   nSize);
+// ANDROID_END
 
 #endif

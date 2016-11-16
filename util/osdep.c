@@ -21,24 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <string.h>
-#include <errno.h>
-#include <unistd.h>
-#include <fcntl.h>
+#include "qemu/osdep.h"
 
 /* Needed early for CONFIG_BSD etc. */
-#include "config-host.h"
-
-#if defined(CONFIG_MADVISE) || defined(CONFIG_POSIX_MADVISE)
-#include <sys/mman.h>
-#endif
 
 #ifdef CONFIG_SOLARIS
-#include <sys/types.h>
 #include <sys/statvfs.h>
 /* See MySQL bug #7156 (http://bugs.mysql.com/bug.php?id=7156) for
    discussion about Solaris header problems */
@@ -46,14 +33,15 @@ extern int madvise(caddr_t, size_t, int);
 #endif
 
 #include "qemu-common.h"
+#include "qemu/cutils.h"
 #include "qemu/sockets.h"
+#include "qemu/error-report.h"
 #include "monitor/monitor.h"
 
 static bool fips_enabled = false;
 
-static const char *qemu_version = QEMU_VERSION;
+static const char *hw_version = QEMU_HW_VERSION;
 
-#if !defined(CONFIG_ANDROID)
 int socket_set_cork(int fd, int v)
 {
 #if defined(SOL_TCP) && defined(TCP_CORK)
@@ -68,7 +56,6 @@ int socket_set_nodelay(int fd)
     int v = 1;
     return qemu_setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &v, sizeof(v));
 }
-#endif
 
 int qemu_madvise(void *addr, size_t len, int advice)
 {
@@ -96,14 +83,7 @@ static int qemu_dup_flags(int fd, int flags)
     int serrno;
     int dup_flags;
 
-#ifdef F_DUPFD_CLOEXEC
-    ret = fcntl(fd, F_DUPFD_CLOEXEC, 0);
-#else
-    ret = dup(fd);
-    if (ret != -1) {
-        qemu_set_cloexec(ret);
-    }
-#endif
+    ret = qemu_dup(fd);
     if (ret == -1) {
         goto fail;
     }
@@ -140,6 +120,20 @@ fail:
     }
     errno = serrno;
     return -1;
+}
+
+int qemu_dup(int fd)
+{
+    int ret;
+#ifdef F_DUPFD_CLOEXEC
+    ret = fcntl(fd, F_DUPFD_CLOEXEC, 0);
+#else
+    ret = dup(fd);
+    if (ret != -1) {
+        qemu_set_cloexec(ret);
+    }
+#endif
+    return ret;
 }
 
 static int qemu_parse_fdset(const char *param)
@@ -312,80 +306,14 @@ int qemu_accept(int s, struct sockaddr *addr, socklen_t *addrlen)
     return ret;
 }
 
-/*
- * A variant of send(2) which handles partial write.
- *
- * Return the number of bytes transferred, which is only
- * smaller than `count' if there is an error.
- *
- * This function won't work with non-blocking fd's.
- * Any of the possibilities with non-bloking fd's is bad:
- *   - return a short write (then name is wrong)
- *   - busy wait adding (errno == EAGAIN) to the loop
- */
-ssize_t qemu_send_full(int fd, const void *buf, size_t count, int flags)
+void qemu_set_hw_version(const char *version)
 {
-    ssize_t ret = 0;
-    ssize_t total = 0;
-
-    while (count) {
-        ret = send(fd, buf, count, flags);
-        if (ret < 0) {
-            if (errno == EINTR) {
-                continue;
-            }
-            break;
-        }
-
-        count -= ret;
-        buf += ret;
-        total += ret;
-    }
-
-    return total;
+    hw_version = version;
 }
 
-/*
- * A variant of recv(2) which handles partial write.
- *
- * Return the number of bytes transferred, which is only
- * smaller than `count' if there is an error.
- *
- * This function won't work with non-blocking fd's.
- * Any of the possibilities with non-bloking fd's is bad:
- *   - return a short write (then name is wrong)
- *   - busy wait adding (errno == EAGAIN) to the loop
- */
-ssize_t qemu_recv_full(int fd, void *buf, size_t count, int flags)
+const char *qemu_hw_version(void)
 {
-    ssize_t ret = 0;
-    ssize_t total = 0;
-
-    while (count) {
-        ret = qemu_recv(fd, buf, count, flags);
-        if (ret <= 0) {
-            if (ret < 0 && errno == EINTR) {
-                continue;
-            }
-            break;
-        }
-
-        count -= ret;
-        buf += ret;
-        total += ret;
-    }
-
-    return total;
-}
-
-void qemu_set_version(const char *version)
-{
-    qemu_version = version;
-}
-
-const char *qemu_get_version(void)
-{
-    return qemu_version;
+    return hw_version;
 }
 
 void fips_set_state(bool requested)

@@ -23,6 +23,7 @@
  * THE SOFTWARE.
  */
 
+#include "qemu/osdep.h"
 #include "sysemu/accel.h"
 #include "hw/boards.h"
 #include "qemu-common.h"
@@ -121,14 +122,13 @@ int configure_accelerator(MachineState *ms)
         if (!init_failed) {
             fprintf(stderr, "No accelerator found!\n");
         }
-        return 1;
+        return -1;
     }
 
     if (init_failed) {
         fprintf(stderr, "Back to %s accelerator.\n", acc->name);
     }
-
-    return !accel_initialised;
+    return 0;
 }
 
 

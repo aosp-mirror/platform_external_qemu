@@ -26,9 +26,11 @@
  *
  */
 
+#include "qemu/osdep.h"
 #include "hw/hw.h"
 #include "hw/sysbus.h"
 #include "sysemu/char.h"
+#include "qemu/log.h"
 
 #include "hw/char/digic-uart.h"
 
@@ -143,7 +145,6 @@ static void digic_uart_realize(DeviceState *dev, Error **errp)
 {
     DigicUartState *s = DIGIC_UART(dev);
 
-    s->chr = qemu_char_get_next_serial();
     if (s->chr) {
         qemu_chr_add_handlers(s->chr, uart_can_rx, uart_rx, uart_event, s);
     }
@@ -169,6 +170,11 @@ static const VMStateDescription vmstate_digic_uart = {
     }
 };
 
+static Property digic_uart_properties[] = {
+    DEFINE_PROP_CHR("chardev", DigicUartState, chr),
+    DEFINE_PROP_END_OF_LIST(),
+};
+
 static void digic_uart_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
@@ -176,6 +182,7 @@ static void digic_uart_class_init(ObjectClass *klass, void *data)
     dc->realize = digic_uart_realize;
     dc->reset = digic_uart_reset;
     dc->vmsd = &vmstate_digic_uart;
+    dc->props = digic_uart_properties;
 }
 
 static const TypeInfo digic_uart_info = {

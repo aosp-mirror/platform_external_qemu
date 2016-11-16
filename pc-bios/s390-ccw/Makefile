@@ -9,10 +9,12 @@ $(call set-vpath, $(SRC_PATH)/pc-bios/s390-ccw)
 
 .PHONY : all clean build-all
 
-OBJECTS=main.o bootmap.o sclp-ascii.o virtio.o start.o
-CFLAGS += -fno-stack-protector
-# XXX find a more clever to locate the bootloader
-LDFLAGS += -Wl,-Ttext,0x7e00000,-Tbss,0x7f00000 -nostdlib
+OBJECTS = start.o main.o bootmap.o sclp-ascii.o virtio.o virtio-scsi.o
+QEMU_CFLAGS := $(filter -W%, $(QEMU_CFLAGS))
+QEMU_CFLAGS += -ffreestanding -fno-delete-null-pointer-checks -msoft-float
+QEMU_CFLAGS += -march=z900 -fPIE -fno-strict-aliasing
+QEMU_CFLAGS += $(call cc-option, $(QEMU_CFLAGS), -fno-stack-protector)
+LDFLAGS += -Wl,-pie -nostdlib
 
 build-all: s390-ccw.img
 
@@ -20,7 +22,9 @@ s390-ccw.elf: $(OBJECTS)
 	$(call quiet-command,$(CC) $(LDFLAGS) -o $@ $(OBJECTS),"  Building $(TARGET_DIR)$@")
 
 s390-ccw.img: s390-ccw.elf
-	$(call quiet-command,strip $< -o $@,"  Stripping $(TARGET_DIR)$@")
+	$(call quiet-command,strip --strip-unneeded $< -o $@,"  Stripping $(TARGET_DIR)$@")
+
+$(OBJECTS): Makefile
 
 clean:
 	rm -f *.o *.d *.img *.elf *~

@@ -25,18 +25,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "qemu/osdep.h"
 #include "cpu.h"
 #include "exec/helper-proto.h"
 #include "qemu/host-utils.h"
+#include "exec/exec-all.h"
 #include "exec/cpu_ldst.h"
 #include "exec/address-spaces.h"
 #include "qemu/timer.h"
 
 void xtensa_cpu_do_unaligned_access(CPUState *cs,
-        vaddr addr, int is_write, int is_user, uintptr_t retaddr)
+        vaddr addr, MMUAccessType access_type,
+        int mmu_idx, uintptr_t retaddr, unsigned size)
 {
     XtensaCPU *cpu = XTENSA_CPU(cs);
     CPUXtensaState *env = &cpu->env;
+
+    (void)size;
 
     if (xtensa_option_enabled(env->config, XTENSA_OPTION_UNALIGNED_EXCEPTION) &&
             !xtensa_option_enabled(env->config, XTENSA_OPTION_HW_ALIGNMENT)) {
@@ -46,19 +51,19 @@ void xtensa_cpu_do_unaligned_access(CPUState *cs,
     }
 }
 
-void tlb_fill(CPUState *cs,
-              target_ulong vaddr, int is_write, int mmu_idx, uintptr_t retaddr)
+void tlb_fill(CPUState *cs, target_ulong vaddr, MMUAccessType access_type,
+              int mmu_idx, uintptr_t retaddr)
 {
     XtensaCPU *cpu = XTENSA_CPU(cs);
     CPUXtensaState *env = &cpu->env;
     uint32_t paddr;
     uint32_t page_size;
     unsigned access;
-    int ret = xtensa_get_physical_addr(env, true, vaddr, is_write, mmu_idx,
+    int ret = xtensa_get_physical_addr(env, true, vaddr, access_type, mmu_idx,
             &paddr, &page_size, &access);
 
-    qemu_log("%s(%08x, %d, %d) -> %08x, ret = %d\n", __func__,
-            vaddr, is_write, mmu_idx, paddr, ret);
+    qemu_log_mask(CPU_LOG_MMU, "%s(%08x, %d, %d) -> %08x, ret = %d\n",
+                  __func__, vaddr, access_type, mmu_idx, paddr, ret);
 
     if (ret == 0) {
         tlb_set_page(cs,
@@ -69,6 +74,20 @@ void tlb_fill(CPUState *cs,
         cpu_restore_state(cs, retaddr);
         HELPER(exception_cause_vaddr)(env, env->pc, ret, vaddr);
     }
+}
+
+void xtensa_cpu_do_unassigned_access(CPUState *cs, hwaddr addr,
+                                     bool is_write, bool is_exec, int opaque,
+                                     unsigned size)
+{
+    XtensaCPU *cpu = XTENSA_CPU(cs);
+    CPUXtensaState *env = &cpu->env;
+
+    HELPER(exception_cause_vaddr)(env, env->pc,
+                                  is_exec ?
+                                  INSTR_PIF_ADDR_ERROR_CAUSE :
+                                  LOAD_STORE_PIF_ADDR_ERROR_CAUSE,
+                                  is_exec ? addr : cs->mem_io_vaddr);
 }
 
 static void tb_invalidate_virtual_addr(CPUXtensaState *env, uint32_t vaddr)
@@ -231,8 +250,8 @@ void HELPER(entry)(CPUXtensaState *env, uint32_t pc, uint32_t s, uint32_t imm)
 {
     int callinc = (env->sregs[PS] & PS_CALLINC) >> PS_CALLINC_SHIFT;
     if (s > 3 || ((env->sregs[PS] & (PS_WOE | PS_EXCM)) ^ PS_WOE) != 0) {
-        qemu_log("Illegal entry instruction(pc = %08x), PS = %08x\n",
-                pc, env->sregs[PS]);
+        qemu_log_mask(LOG_GUEST_ERROR, "Illegal entry instruction(pc = %08x), PS = %08x\n",
+                      pc, env->sregs[PS]);
         HELPER(exception_cause)(env, pc, ILLEGAL_INSTRUCTION_CAUSE);
     } else {
         uint32_t windowstart = xtensa_replicate_windowstart(env) >>
@@ -251,34 +270,27 @@ void HELPER(entry)(CPUXtensaState *env, uint32_t pc, uint32_t s, uint32_t imm)
 void HELPER(window_check)(CPUXtensaState *env, uint32_t pc, uint32_t w)
 {
     uint32_t windowbase = windowbase_bound(env->sregs[WINDOW_BASE], env);
-    uint32_t windowstart = env->sregs[WINDOW_START];
-    uint32_t m, n;
+    uint32_t windowstart = xtensa_replicate_windowstart(env) >>
+        (env->sregs[WINDOW_BASE] + 1);
+    uint32_t n = ctz32(windowstart) + 1;
 
-    if ((env->sregs[PS] & (PS_WOE | PS_EXCM)) ^ PS_WOE) {
-        return;
-    }
+    assert(n <= w);
 
-    for (n = 1; ; ++n) {
-        if (n > w) {
-            return;
-        }
-        if (windowstart & windowstart_bit(windowbase + n, env)) {
-            break;
-        }
-    }
-
-    m = windowbase_bound(windowbase + n, env);
     rotate_window(env, n);
     env->sregs[PS] = (env->sregs[PS] & ~PS_OWB) |
         (windowbase << PS_OWB_SHIFT) | PS_EXCM;
     env->sregs[EPC1] = env->pc = pc;
 
-    if (windowstart & windowstart_bit(m + 1, env)) {
+    switch (ctz32(windowstart >> n)) {
+    case 0:
         HELPER(exception)(env, EXC_WINDOW_OVERFLOW4);
-    } else if (windowstart & windowstart_bit(m + 2, env)) {
+        break;
+    case 1:
         HELPER(exception)(env, EXC_WINDOW_OVERFLOW8);
-    } else {
+        break;
+    default:
         HELPER(exception)(env, EXC_WINDOW_OVERFLOW12);
+        break;
     }
 }
 
@@ -300,9 +312,9 @@ uint32_t HELPER(retw)(CPUXtensaState *env, uint32_t pc)
 
     if (n == 0 || (m != 0 && m != n) ||
             ((env->sregs[PS] & (PS_WOE | PS_EXCM)) ^ PS_WOE) != 0) {
-        qemu_log("Illegal retw instruction(pc = %08x), "
-                "PS = %08x, m = %d, n = %d\n",
-                pc, env->sregs[PS], m, n);
+        qemu_log_mask(LOG_GUEST_ERROR, "Illegal retw instruction(pc = %08x), "
+                      "PS = %08x, m = %d, n = %d\n",
+                      pc, env->sregs[PS], m, n);
         HELPER(exception_cause)(env, pc, ILLEGAL_INSTRUCTION_CAUSE);
     } else {
         int owb = windowbase;
@@ -736,8 +748,8 @@ void xtensa_tlb_set_entry(CPUXtensaState *env, bool dtlb,
             xtensa_tlb_set_entry_mmu(env, entry, dtlb, wi, ei, vpn, pte);
             tlb_flush_page(cs, entry->vaddr);
         } else {
-            qemu_log("%s %d, %d, %d trying to set immutable entry\n",
-                    __func__, dtlb, wi, ei);
+            qemu_log_mask(LOG_GUEST_ERROR, "%s %d, %d, %d trying to set immutable entry\n",
+                          __func__, dtlb, wi, ei);
         }
     } else {
         tlb_flush_page(cs, entry->vaddr);
@@ -799,15 +811,15 @@ static void set_dbreak(CPUXtensaState *env, unsigned i, uint32_t dbreaka,
     }
     /* contiguous mask after inversion is one less than some power of 2 */
     if ((~mask + 1) & ~mask) {
-        qemu_log("DBREAKC mask is not contiguous: 0x%08x\n", dbreakc);
+        qemu_log_mask(LOG_GUEST_ERROR, "DBREAKC mask is not contiguous: 0x%08x\n", dbreakc);
         /* cut mask after the first zero bit */
         mask = 0xffffffff << (32 - clo32(mask));
     }
     if (cpu_watchpoint_insert(cs, dbreaka & mask, ~mask + 1,
             flags, &env->cpu_watchpoint[i])) {
         env->cpu_watchpoint[i] = NULL;
-        qemu_log("Failed to set data breakpoint at 0x%08x/%d\n",
-                dbreaka & mask, ~mask + 1);
+        qemu_log_mask(LOG_GUEST_ERROR, "Failed to set data breakpoint at 0x%08x/%d\n",
+                      dbreaka & mask, ~mask + 1);
     }
 }
 

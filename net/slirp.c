@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#include "qemu/osdep.h"
 #include "net/slirp.h"
 
-#include "config-host.h"
 
 #ifndef _WIN32
 #include <pwd.h>
@@ -33,14 +33,14 @@
 #include "clients.h"
 #include "hub.h"
 #include "monitor/monitor.h"
+#include "qemu/abort.h"
+#include "qemu/error-report.h"
 #include "qemu/sockets.h"
 #include "slirp/libslirp.h"
+#include "slirp/ip6.h"
 #include "sysemu/char.h"
-
-#if defined(CONFIG_ANDROID)
-#include "android/shaper.h"
-#include "android-qemu2-glue/net-android.h"
-#endif
+#include "sysemu/sysemu.h"
+#include "qemu/cutils.h"
 
 static int get_str_sep(char *buf, int buf_size, const char **pp, int sep)
 {
@@ -74,10 +74,18 @@ struct slirp_config_str {
     int legacy_format;
 };
 
+typedef struct SlirpShaper {
+    void* peer;
+    void (*send)(void *peer, const void *packet, int packet_len);
+} SlirpShaper;
+
 typedef struct SlirpState {
     NetClientState nc;
     QTAILQ_ENTRY(SlirpState) entry;
     Slirp *slirp;
+    Notifier exit_notifier;
+    SlirpShaper shaper_out;
+    SlirpShaper shaper_in;
 #ifndef _WIN32
     char smb_dir[128];
 #endif
@@ -89,7 +97,7 @@ const char *legacy_bootp_filename;
 static QTAILQ_HEAD(slirp_stacks, SlirpState) slirp_stacks =
     QTAILQ_HEAD_INITIALIZER(slirp_stacks);
 
-static int slirp_hostfwd(Slirp *s, const char *redir_str,
+static int slirp_hostfwd(SlirpState *s, const char *redir_str,
                          int legacy_format);
 static int slirp_guestfwd(SlirpState *s, const char *config_str,
                           int legacy_format);
@@ -104,28 +112,47 @@ static void slirp_smb_cleanup(SlirpState *s);
 static inline void slirp_smb_cleanup(SlirpState *s) { }
 #endif
 
+void net_slirp_output_raw(void *opaque, const uint8_t *pkt, int pkt_len)
+{
+    SlirpState *s = opaque;
+    qemu_send_packet(&s->nc, pkt, pkt_len);
+}
+
 void slirp_output(void *opaque, const uint8_t *pkt, int pkt_len)
 {
-#if defined(CONFIG_ANDROID)
-    netshaper_send(android_net_shaper_out, (void*)pkt, pkt_len);
-#else
     SlirpState *s = opaque;
+    SlirpShaper* shaper = &s->shaper_out;
 
-    qemu_send_packet(&s->nc, pkt, pkt_len);
-#endif
+    if (shaper->send) {
+        shaper->send(shaper->peer, pkt, pkt_len);
+    } else {
+        net_slirp_output_raw(opaque, pkt, pkt_len);
+    }
+}
+
+void net_slirp_receive_raw(void* opaque, const uint8_t *buf, size_t size)
+{
+    SlirpState *s = opaque;
+    slirp_input(s->slirp, buf, size);
 }
 
 static ssize_t net_slirp_receive(NetClientState *nc, const uint8_t *buf, size_t size)
 {
-#if defined(CONFIG_ANDROID)
-    netshaper_send(android_net_shaper_in, (char*)buf, size);
-#else
     SlirpState *s = DO_UPCAST(SlirpState, nc, nc);
+    SlirpShaper *shaper = &s->shaper_in;
 
-    slirp_input(s->slirp, buf, size);
-#endif
-
+    if (shaper->send) {
+        shaper->send(shaper->peer, buf, size);
+    } else {
+        net_slirp_receive_raw(s, buf, size);
+    }
     return size;
+}
+
+static void slirp_smb_exit(Notifier *n, void *data)
+{
+    SlirpState *s = container_of(n, SlirpState, exit_notifier);
+    slirp_smb_cleanup(s);
 }
 
 static void net_slirp_cleanup(NetClientState *nc)
@@ -133,12 +160,15 @@ static void net_slirp_cleanup(NetClientState *nc)
     SlirpState *s = DO_UPCAST(SlirpState, nc, nc);
 
     slirp_cleanup(s->slirp);
+    if (s->exit_notifier.notify) {
+        qemu_remove_exit_notifier(&s->exit_notifier);
+    }
     slirp_smb_cleanup(s);
     QTAILQ_REMOVE(&slirp_stacks, s, entry);
 }
 
 static NetClientInfo net_slirp_info = {
-    .type = NET_CLIENT_OPTIONS_KIND_USER,
+    .type = NET_CLIENT_DRIVER_USER,
     .size = sizeof(SlirpState),
     .receive = net_slirp_receive,
     .cleanup = net_slirp_cleanup,
@@ -146,11 +176,14 @@ static NetClientInfo net_slirp_info = {
 
 static int net_slirp_init(NetClientState *peer, const char *model,
                           const char *name, int restricted,
-                          const char *vnetwork, const char *vhost,
+                          bool ipv4, const char *vnetwork, const char *vhost,
+                          bool ipv6, const char *vprefix6, int vprefix6_len,
+                          const char *vhost6,
                           const char *vhostname, const char *tftp_export,
                           const char *bootfile, const char *vdhcp_start,
-                          const char *vnameserver, const char *smb_export,
-                          const char *vsmbserver, const char **dnssearch)
+                          const char *vnameserver, const char *vnameserver6,
+                          const char *smb_export, const char *vsmbserver,
+                          const char **dnssearch)
 {
     /* default settings according to historic slirp */
     struct in_addr net  = { .s_addr = htonl(0x0a000200) }; /* 10.0.2.0 */
@@ -158,6 +191,9 @@ static int net_slirp_init(NetClientState *peer, const char *model,
     struct in_addr host = { .s_addr = htonl(0x0a000202) }; /* 10.0.2.2 */
     struct in_addr dhcp = { .s_addr = htonl(0x0a00020f) }; /* 10.0.2.15 */
     struct in_addr dns  = { .s_addr = htonl(0x0a000203) }; /* 10.0.2.3 */
+    struct in6_addr ip6_prefix;
+    struct in6_addr ip6_host;
+    struct in6_addr ip6_dns;
 #ifndef _WIN32
     struct in_addr smbsrv = { .s_addr = 0 };
 #endif
@@ -168,6 +204,19 @@ static int net_slirp_init(NetClientState *peer, const char *model,
     int shift;
     char *end;
     struct slirp_config_str *config;
+
+    if (!ipv4 && (vnetwork || vhost || vnameserver)) {
+        return -1;
+    }
+
+    if (!ipv6 && (vprefix6 || vhost6 || vnameserver6)) {
+        return -1;
+    }
+
+    if (!ipv4 && !ipv6) {
+        /* It doesn't make sense to disable both */
+        return -1;
+    }
 
     if (!tftp_export) {
         tftp_export = legacy_tftp_prefix;
@@ -247,6 +296,64 @@ static int net_slirp_init(NetClientState *peer, const char *model,
     }
 #endif
 
+#if defined(_WIN32) && (_WIN32_WINNT < 0x0600)
+    /* No inet_pton helper before Vista... */
+    if (vprefix6) {
+        /* Unsupported */
+        return -1;
+    }
+    memset(&ip6_prefix, 0, sizeof(ip6_prefix));
+    ip6_prefix.s6_addr[0] = 0xfe;
+    ip6_prefix.s6_addr[1] = 0xc0;
+#else
+    if (!vprefix6) {
+        vprefix6 = "fec0::";
+    }
+    if (!inet_pton(AF_INET6, vprefix6, &ip6_prefix)) {
+        return -1;
+    }
+#endif
+
+    if (!vprefix6_len) {
+        vprefix6_len = 64;
+    }
+    if (vprefix6_len < 0 || vprefix6_len > 126) {
+        return -1;
+    }
+
+    if (vhost6) {
+#if defined(_WIN32) && (_WIN32_WINNT < 0x0600)
+        return -1;
+#else
+        if (!inet_pton(AF_INET6, vhost6, &ip6_host)) {
+            return -1;
+        }
+        if (!in6_equal_net(&ip6_prefix, &ip6_host, vprefix6_len)) {
+            return -1;
+        }
+#endif
+    } else {
+        ip6_host = ip6_prefix;
+        ip6_host.s6_addr[15] |= 2;
+    }
+
+    if (vnameserver6) {
+#if defined(_WIN32) && (_WIN32_WINNT < 0x0600)
+        return -1;
+#else
+        if (!inet_pton(AF_INET6, vnameserver6, &ip6_dns)) {
+            return -1;
+        }
+        if (!in6_equal_net(&ip6_prefix, &ip6_dns, vprefix6_len)) {
+            return -1;
+        }
+#endif
+    } else {
+        ip6_dns = ip6_prefix;
+        ip6_dns.s6_addr[15] |= 3;
+    }
+
+
     nc = qemu_new_net_client(&net_slirp_info, peer, model, name);
 
     snprintf(nc->info_str, sizeof(nc->info_str),
@@ -255,13 +362,15 @@ static int net_slirp_init(NetClientState *peer, const char *model,
 
     s = DO_UPCAST(SlirpState, nc, nc);
 
-    s->slirp = slirp_init(restricted, net, mask, host, vhostname,
-                          tftp_export, bootfile, dhcp, dns, dnssearch, s);
+    s->slirp = slirp_init(restricted, ipv4, net, mask, host,
+                          ipv6, ip6_prefix, vprefix6_len, ip6_host,
+                          vhostname, tftp_export, bootfile, dhcp,
+                          dns, ip6_dns, dnssearch, s);
     QTAILQ_INSERT_TAIL(&slirp_stacks, s, entry);
 
     for (config = slirp_configs; config; config = config->next) {
         if (config->flags & SLIRP_CFG_HOSTFWD) {
-            if (slirp_hostfwd(s->slirp, config->str,
+            if (slirp_hostfwd(s, config->str,
                               config->flags & SLIRP_CFG_LEGACY) < 0)
                 goto error;
         } else {
@@ -280,10 +389,11 @@ static int net_slirp_init(NetClientState *peer, const char *model,
     }
 #endif
 
-#if defined(CONFIG_ANDROID)
-    slirp_init_shapers(s, &s->nc, s->slirp);
-#endif
+    s->exit_notifier.notify = slirp_smb_exit;
+    qemu_add_exit_notifier(&s->exit_notifier);
 
+    s->shaper_out.send = NULL;
+    s->shaper_in.send = NULL;
     return 0;
 
 error:
@@ -291,56 +401,58 @@ error:
     return -1;
 }
 
-Slirp *net_slirp_lookup(const char *vlan, const char *stack, Error **errp)
+static SlirpState *slirp_lookup(Monitor *mon, const char *vlan,
+                                const char *stack)
 {
-    SlirpState *ss;
 
     if (vlan) {
         NetClientState *nc;
         nc = net_hub_find_client_by_name(strtol(vlan, NULL, 0), stack);
         if (!nc) {
-            error_setg(errp, "unrecognized (vlan-id, stackname) pair\n");
+            monitor_printf(mon, "unrecognized (vlan-id, stackname) pair\n");
             return NULL;
         }
         if (strcmp(nc->model, "user")) {
-            error_setg(errp, "invalid device specified");
+            monitor_printf(mon, "invalid device specified\n");
             return NULL;
         }
-        ss = DO_UPCAST(SlirpState, nc, nc);
+        return DO_UPCAST(SlirpState, nc, nc);
     } else {
         if (QTAILQ_EMPTY(&slirp_stacks)) {
-            error_setg(errp, "user mode network stack not in use");
+            monitor_printf(mon, "user mode network stack not in use\n");
             return NULL;
         }
-        ss = QTAILQ_FIRST(&slirp_stacks);
+        return QTAILQ_FIRST(&slirp_stacks);
     }
-    return ss->slirp;
 }
 
-void net_slirp_hostfwd_remove(Monitor *mon, const QDict *qdict)
+void *net_slirp_state(void)
+{
+    SlirpState *ss = slirp_lookup(NULL, NULL, NULL);
+    return ss ? ss->slirp : NULL;
+}
+
+void hmp_hostfwd_remove(Monitor *mon, const QDict *qdict)
 {
     struct in_addr host_addr = { .s_addr = INADDR_ANY };
     int host_port;
     char buf[256];
     const char *src_str, *p;
-    Slirp *s;
+    SlirpState *s;
     int is_udp = 0;
     int err;
-    Error *local_err = NULL;
     const char *arg1 = qdict_get_str(qdict, "arg1");
     const char *arg2 = qdict_get_try_str(qdict, "arg2");
     const char *arg3 = qdict_get_try_str(qdict, "arg3");
 
     if (arg2) {
-        s = net_slirp_lookup(arg1, arg2, &local_err);
+        s = slirp_lookup(mon, arg1, arg2);
         src_str = arg3;
     } else {
-        s = net_slirp_lookup(NULL, NULL, &local_err);
+        s = slirp_lookup(mon, NULL, NULL);
         src_str = arg1;
     }
-    if (local_err) {
-        error_report("%s", error_get_pretty(local_err));
-        error_free(local_err);
+    if (!s) {
         return;
     }
 
@@ -366,7 +478,7 @@ void net_slirp_hostfwd_remove(Monitor *mon, const QDict *qdict)
 
     host_port = atoi(p);
 
-    err = slirp_remove_hostfwd(s, is_udp, host_addr, host_port);
+    err = slirp_remove_hostfwd(s->slirp, is_udp, host_addr, host_port);
 
     monitor_printf(mon, "host forwarding rule for %s %s\n", src_str,
                    err ? "not found" : "removed");
@@ -376,7 +488,7 @@ void net_slirp_hostfwd_remove(Monitor *mon, const QDict *qdict)
     monitor_printf(mon, "invalid format\n");
 }
 
-static int slirp_hostfwd(Slirp *s, const char *redir_str,
+static int slirp_hostfwd(SlirpState *s, const char *redir_str,
                          int legacy_format)
 {
     struct in_addr host_addr = { .s_addr = INADDR_ANY };
@@ -428,7 +540,7 @@ static int slirp_hostfwd(Slirp *s, const char *redir_str,
         goto fail_syntax;
     }
 
-    if (slirp_add_hostfwd(s, is_udp, host_addr, host_port, guest_addr,
+    if (slirp_add_hostfwd(s->slirp, is_udp, host_addr, host_port, guest_addr,
                           guest_port) < 0) {
         error_report("could not set up host forwarding rule '%s'",
                      redir_str);
@@ -441,29 +553,25 @@ static int slirp_hostfwd(Slirp *s, const char *redir_str,
     return -1;
 }
 
-void net_slirp_hostfwd_add(Monitor *mon, const QDict *qdict)
+void hmp_hostfwd_add(Monitor *mon, const QDict *qdict)
 {
     const char *redir_str;
-    Slirp *s;
-    Error *err = NULL;
+    SlirpState *s;
     const char *arg1 = qdict_get_str(qdict, "arg1");
     const char *arg2 = qdict_get_try_str(qdict, "arg2");
     const char *arg3 = qdict_get_try_str(qdict, "arg3");
 
     if (arg2) {
-        s = net_slirp_lookup(arg1, arg2, &err);
+        s = slirp_lookup(mon, arg1, arg2);
         redir_str = arg3;
     } else {
-        s = net_slirp_lookup(NULL, NULL, &err);
+        s = slirp_lookup(mon, NULL, NULL);
         redir_str = arg1;
     }
-    if (err) {
-        error_report("%s", error_get_pretty(err));
-        error_free(err);
-        return;
+    if (s) {
+        slirp_hostfwd(s, redir_str, 0);
     }
 
-    slirp_hostfwd(s, redir_str, 0);
 }
 
 int net_slirp_redir(const char *redir_str)
@@ -479,7 +587,7 @@ int net_slirp_redir(const char *redir_str)
         return 0;
     }
 
-    return slirp_hostfwd(QTAILQ_FIRST(&slirp_stacks)->slirp, redir_str, 1);
+    return slirp_hostfwd(QTAILQ_FIRST(&slirp_stacks), redir_str, 1);
 }
 
 #ifndef _WIN32
@@ -506,7 +614,6 @@ static void slirp_smb_cleanup(SlirpState *s)
 static int slirp_smb(SlirpState* s, const char *exported_dir,
                      struct in_addr vserver_addr)
 {
-    static int instance;
     char smb_conf[128];
     char smb_cmdline[128];
     struct passwd *passwd;
@@ -530,10 +637,10 @@ static int slirp_smb(SlirpState* s, const char *exported_dir,
         return -1;
     }
 
-    snprintf(s->smb_dir, sizeof(s->smb_dir), "/tmp/qemu-smb.%ld-%d",
-             (long)getpid(), instance++);
-    if (mkdir(s->smb_dir, 0700) < 0) {
+    snprintf(s->smb_dir, sizeof(s->smb_dir), "/tmp/qemu-smb.XXXXXX");
+    if (!mkdtemp(s->smb_dir)) {
         error_report("could not create samba server dir '%s'", s->smb_dir);
+        s->smb_dir[0] = 0;
         return -1;
     }
     snprintf(smb_conf, sizeof(smb_conf), "%s/%s", s->smb_dir, "smb.conf");
@@ -677,7 +784,7 @@ static int slirp_guestfwd(SlirpState *s, const char *config_str,
             return -1;
         }
     } else {
-        fwd = g_malloc(sizeof(struct GuestFwd));
+        fwd = g_new(struct GuestFwd, 1);
         fwd->hd = qemu_chr_new(buf, p, NULL);
         if (!fwd->hd) {
             error_report("could not open guest forwarding device '%s'", buf);
@@ -706,7 +813,7 @@ static int slirp_guestfwd(SlirpState *s, const char *config_str,
     return -1;
 }
 
-void do_info_usernet(Monitor *mon, const QDict *qdict)
+void hmp_info_usernet(Monitor *mon, const QDict *qdict)
 {
     SlirpState *s;
 
@@ -761,17 +868,28 @@ static const char **slirp_dnssearch(const StringList *dnsname)
     return ret;
 }
 
-int net_init_slirp(const NetClientOptions *opts, const char *name,
-                   NetClientState *peer)
+int net_init_slirp(const Netdev *netdev, const char *name,
+                   NetClientState *peer, Error **errp)
 {
+    /* FIXME error_setg(errp, ...) on failure */
     struct slirp_config_str *config;
     char *vnet;
     int ret;
     const NetdevUserOptions *user;
     const char **dnssearch;
+    bool ipv4 = true, ipv6 = true;
 
-    assert(opts->kind == NET_CLIENT_OPTIONS_KIND_USER);
-    user = opts->user;
+    assert(netdev->type == NET_CLIENT_DRIVER_USER);
+    user = &netdev->u.user;
+
+    if ((user->has_ipv6 && user->ipv6 && !user->has_ipv4) ||
+        (user->has_ipv4 && !user->ipv4)) {
+        ipv4 = 0;
+    }
+    if ((user->has_ipv4 && user->ipv4 && !user->has_ipv6) ||
+        (user->has_ipv6 && !user->ipv6)) {
+        ipv6 = 0;
+    }
 
     vnet = user->has_net ? g_strdup(user->net) :
            user->has_ip  ? g_strdup_printf("%s/24", user->ip) :
@@ -784,9 +902,12 @@ int net_init_slirp(const NetClientOptions *opts, const char *name,
     net_init_slirp_configs(user->hostfwd, SLIRP_CFG_HOSTFWD);
     net_init_slirp_configs(user->guestfwd, 0);
 
-    ret = net_slirp_init(peer, "user", name, user->q_restrict, vnet,
-                         user->host, user->hostname, user->tftp,
-                         user->bootfile, user->dhcpstart, user->dns, user->smb,
+    ret = net_slirp_init(peer, "user", name, user->q_restrict,
+                         ipv4, vnet, user->host,
+                         ipv6, user->ipv6_prefix, user->ipv6_prefixlen,
+                         user->ipv6_host, user->hostname, user->tftp,
+                         user->bootfile, user->dhcpstart,
+                         user->dns, user->ipv6_dns, user->smb,
                          user->smbserver, dnssearch);
 
     while (slirp_configs) {
@@ -808,6 +929,9 @@ int net_slirp_parse_legacy(QemuOptsList *opts_list, const char *optarg, int *ret
         return 0;
     }
 
+    error_report("The '-net channel' option is deprecated. "
+                 "Please use '-netdev user,guestfwd=...' instead.");
+
     /* handle legacy -net channel,port:chr */
     optarg += strlen("channel,");
 
@@ -827,6 +951,20 @@ int net_slirp_parse_legacy(QemuOptsList *opts_list, const char *optarg, int *ret
     return 1;
 }
 
-int net_slirp_is_inited(void) {
-    return !QTAILQ_EMPTY(&slirp_stacks);
+void* net_slirp_set_shapers(void* out_opaque,
+                            SlirpShaperSendFunc out_send,
+                            void* in_opaque,
+                            SlirpShaperSendFunc in_send)
+{
+    SlirpState *s = QTAILQ_FIRST(&slirp_stacks);
+    if (!s) {
+        qemu_abort("Trying to set network shapers before slirp "
+                   "initialization\n");
+    }
+    s->shaper_out.peer = out_opaque;
+    s->shaper_out.send = out_send;
+    s->shaper_in.peer = in_opaque;
+    s->shaper_in.send = in_send;
+
+    return s;
 }

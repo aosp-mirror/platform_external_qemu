@@ -10,9 +10,7 @@
  * This work is licensed under the terms of the GNU GPL, version 2 or later.
  * See the COPYING file in the top-level directory.
  */
-#include <stdlib.h>
-#include <stdio.h>
-#include <glib.h>
+#include "qemu/osdep.h"
 #include <windows.h>
 #include "qga/service-win32.h"
 
@@ -108,7 +106,7 @@ int ga_install_service(const char *path, const char *logfile,
     GString *cmdline;
     SERVICE_DESCRIPTION desc = { (char *)QGA_SERVICE_DESCRIPTION };
 
-    if (GetModuleFileName(NULL, module_fname, MAX_PATH) == 0) {
+    if (win32GetModuleFileName(NULL, module_fname, MAX_PATH) == 0) {
         printf_win_error("No full path to service's executable");
         return EXIT_FAILURE;
     }

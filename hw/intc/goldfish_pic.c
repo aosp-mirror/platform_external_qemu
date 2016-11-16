@@ -10,6 +10,8 @@
 ** GNU General Public License for more details.
 */
 
+#include "qemu/osdep.h"
+#include "cpu.h"
 #include "exec/ram_addr.h"
 #include "migration/qemu-file.h"
 #include "sysemu/char.h"

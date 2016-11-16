@@ -14,23 +14,14 @@
 
 #include "android-qemu2-glue/emulation/VmLock.h"
 
-#include "android/base/Log.h"
+#include <type_traits>
 
 extern "C" {
+#include "qemu/osdep.h"
 #include "qemu/main-loop.h"
 }  // extern "C"
 
 namespace qemu2 {
-
-// TECHNICAL NOTE:
-//
-// This implementation needs to protect against recursive lock() calls
-// which can happen because some code in AndroidEmu calls it, without
-// knowing whether it's running in the thread that holds the BQL or not.
-//
-// What we want is to ensure that qemu_mutex_lock_iothread() is always true
-// when we leave ::lock(), and that it will be false when ::unlock() has
-// been called as often as ::lock() was.
 
 void VmLock::lock() {
     qemu_mutex_lock_iothread();
@@ -41,7 +32,7 @@ void VmLock::unlock() {
 }
 
 bool VmLock::isLockedBySelf() const {
-    return qemu_mutex_check_iothread();
+    return qemu_mutex_iothread_locked();
 }
 
 }  // namespace qemu2

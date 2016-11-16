@@ -11,6 +11,7 @@
 */
 #pragma once
 
+#include "qemu/osdep.h"
 #include "qemu-common.h"
 #include "android/utils/compiler.h"
 
@@ -20,16 +21,17 @@ ANDROID_BEGIN_HEADER
  * QEMU components. For Android, this is used to connect an emulated serial port
  * with the android modem
  */
-extern int  qemu_chr_open_charpipe( CharDriverState* *pfirst, CharDriverState* *psecond );
+extern int qemu_chr_open_charpipe(CharDriverState* *pfirst,
+                                  CharDriverState* *psecond);
 
 /* create a buffering character driver for a given endpoint. The result will buffer
  * anything that is sent to it but cannot be sent to the endpoint immediately.
  * On the other hand, if the endpoint calls can_read() or read(), these calls
  * are passed immediately to the can_read() or read() handlers of the result.
  */
-extern CharDriverState*  qemu_chr_open_buffer( CharDriverState*  endpoint );
+extern CharDriverState *qemu_chr_open_buffer(CharDriverState*  endpoint);
 
 /* must be called from the main event loop to poll all charpipes */
-extern void charpipe_poll( void );
+extern void qemu_charpipe_poll(void);
 
 ANDROID_END_HEADER

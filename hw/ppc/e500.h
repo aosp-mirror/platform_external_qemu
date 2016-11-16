@@ -17,8 +17,15 @@ typedef struct PPCE500Params {
     hwaddr platform_bus_size;
     int platform_bus_first_irq;
     int platform_bus_num_irqs;
+    hwaddr ccsrbar_base;
+    hwaddr pci_pio_base;
+    hwaddr pci_mmio_base;
+    hwaddr pci_mmio_bus_base;
+    hwaddr spin_base;
 } PPCE500Params;
 
 void ppce500_init(MachineState *machine, PPCE500Params *params);
+
+hwaddr booke206_page_size_to_tlb(uint64_t size);
 
 #endif

@@ -18,27 +18,41 @@
 #include "android/base/Log.h"
 #include "android/console.h"
 #include "android-qemu2-glue/emulation/android_pipe_device.h"
-#include "android-qemu2-glue/emulation/VmLock.h"
-#include "android-qemu2-glue/qemu-control-impl.h"
+#include "android-qemu2-glue/emulation/charpipe.h"
 #include "android-qemu2-glue/emulation/goldfish_sync.h"
+#include "android-qemu2-glue/emulation/VmLock.h"
+#include "android-qemu2-glue/looper-qemu.h"
+#include "android-qemu2-glue/android_qemud.h"
+#include "android-qemu2-glue/net-android.h"
+#include "android-qemu2-glue/proxy/slirp_proxy.h"
+#include "android-qemu2-glue/qemu-control-impl.h"
 
 extern "C" {
+#include "qemu/osdep.h"
+#include "qemu-common.h"
 #include "qemu/main-loop.h"
+#include "qemu/thread.h"
+
+// TODO: Remove op_http_proxy global variable.
+extern char* op_http_proxy;
+
 }  // extern "C"
 
 using android::VmLock;
 
-bool qemu_android_emulation_setup() {
-    static const AndroidConsoleAgents consoleAgents = {
-            gQAndroidBatteryAgent,
-            gQAndroidFingerAgent,
-            gQAndroidLocationAgent,
-            gQAndroidTelephonyAgent,
-            gQAndroidUserEventAgent,
-            gQAndroidVmOperations,
-            gQAndroidNetAgent
-    };
+bool qemu_android_emulation_early_setup() {
+    // Ensure that the looper is set for the main thread and for any
+    // future thread created by QEMU.
+    qemu_looper_setForThread();
+    qemu_thread_register_setup_callback(qemu_looper_setForThread);
 
+    // Ensure charpipes i/o are handled properly.
+    main_loop_register_poll_callback(qemu_charpipe_poll);
+
+    // Register qemud-related snapshot callbacks.
+    android_qemu2_qemud_init();
+
+    // Ensure the VmLock implementation is setup.
     VmLock* vmLock = new qemu2::VmLock();
     VmLock* prevVmLock = VmLock::set(vmLock);
     CHECK(prevVmLock == nullptr) << "Another VmLock was already installed!";
@@ -48,9 +62,34 @@ bool qemu_android_emulation_setup() {
         return false;
     }
 
+    // Initialize host sync service.
     if (!qemu_android_sync_init(vmLock)) {
         return false;
     }
 
+    return true;
+}
+
+bool qemu_android_emulation_setup() {
+    android_qemu_init_slirp_shapers();
+
+    // Initialize UI/console agents.
+    static const AndroidConsoleAgents consoleAgents = {
+            gQAndroidBatteryAgent,
+            gQAndroidFingerAgent,
+            gQAndroidLocationAgent,
+            gQAndroidTelephonyAgent,
+            gQAndroidUserEventAgent,
+            gQAndroidVmOperations,
+            gQAndroidNetAgent,
+    };
+
+    if (!qemu_android_setup_http_proxy(op_http_proxy)) {
+        return false;
+    }
+
     return android_emulation_setup(&consoleAgents);
+}
+
+void qemu_android_emulation_teardown() {
 }

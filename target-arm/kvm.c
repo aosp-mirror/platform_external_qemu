@@ -8,24 +8,29 @@
  *
  */
 
-#include <stdio.h>
-#include <sys/types.h>
+#include "qemu/osdep.h"
 #include <sys/ioctl.h>
-#include <sys/mman.h>
 
 #include <linux/kvm.h>
 
 #include "qemu-common.h"
 #include "qemu/timer.h"
+#include "qemu/error-report.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/kvm.h"
 #include "kvm_arm.h"
 #include "cpu.h"
+#include "internals.h"
 #include "hw/arm/arm.h"
+#include "exec/memattrs.h"
+#include "hw/boards.h"
+#include "qemu/log.h"
 
 const KVMCapabilityInfo kvm_arch_required_capabilities[] = {
     KVM_CAP_LAST_INFO
 };
+
+static bool cap_has_mp_state;
 
 int kvm_arm_vcpu_init(CPUState *cs)
 {
@@ -60,13 +65,18 @@ bool kvm_arm_create_scratch_host_vcpu(const uint32_t *cpus_to_try,
         goto err;
     }
 
+    if (!init) {
+        /* Caller doesn't want the VCPU to be initialized, so skip it */
+        goto finish;
+    }
+
     ret = ioctl(vmfd, KVM_ARM_PREFERRED_TARGET, init);
     if (ret >= 0) {
         ret = ioctl(cpufd, KVM_ARM_VCPU_INIT, init);
         if (ret < 0) {
             goto err;
         }
-    } else {
+    } else if (cpus_to_try) {
         /* Old kernel which doesn't know about the
          * PREFERRED_TARGET ioctl: we know it will only support
          * creating one kind of guest CPU which is its preferred
@@ -83,8 +93,15 @@ bool kvm_arm_create_scratch_host_vcpu(const uint32_t *cpus_to_try,
         if (ret < 0) {
             goto err;
         }
+    } else {
+        /* Treat a NULL cpus_to_try argument the same as an empty
+         * list, which means we will fail the call since this must
+         * be an old kernel which doesn't support PREFERRED_TARGET.
+         */
+        goto err;
     }
 
+finish:
     fdarray[0] = kvmfd;
     fdarray[1] = vmfd;
     fdarray[2] = cpufd;
@@ -152,12 +169,14 @@ static const TypeInfo host_arm_cpu_type_info = {
     .class_size = sizeof(ARMHostCPUClass),
 };
 
-int kvm_arch_init(KVMState *s)
+int kvm_arch_init(MachineState *ms, KVMState *s)
 {
     /* For ARM interrupt delivery is always asynchronous,
      * whether we are using an in-kernel VGIC or not.
      */
     kvm_async_interrupts_allowed = true;
+
+    cap_has_mp_state = kvm_check_extension(s, KVM_CAP_MP_STATE);
 
     type_register_static(&host_arm_cpu_type_info);
 
@@ -282,6 +301,94 @@ void kvm_arm_register_device(MemoryRegion *mr, uint64_t devid, uint64_t group,
     memory_region_ref(kd->mr);
 }
 
+static int compare_u64(const void *a, const void *b)
+{
+    if (*(uint64_t *)a > *(uint64_t *)b) {
+        return 1;
+    }
+    if (*(uint64_t *)a < *(uint64_t *)b) {
+        return -1;
+    }
+    return 0;
+}
+
+/* Initialize the CPUState's cpreg list according to the kernel's
+ * definition of what CPU registers it knows about (and throw away
+ * the previous TCG-created cpreg list).
+ */
+int kvm_arm_init_cpreg_list(ARMCPU *cpu)
+{
+    struct kvm_reg_list rl;
+    struct kvm_reg_list *rlp;
+    int i, ret, arraylen;
+    CPUState *cs = CPU(cpu);
+
+    rl.n = 0;
+    ret = kvm_vcpu_ioctl(cs, KVM_GET_REG_LIST, &rl);
+    if (ret != -E2BIG) {
+        return ret;
+    }
+    rlp = g_malloc(sizeof(struct kvm_reg_list) + rl.n * sizeof(uint64_t));
+    rlp->n = rl.n;
+    ret = kvm_vcpu_ioctl(cs, KVM_GET_REG_LIST, rlp);
+    if (ret) {
+        goto out;
+    }
+    /* Sort the list we get back from the kernel, since cpreg_tuples
+     * must be in strictly ascending order.
+     */
+    qsort(&rlp->reg, rlp->n, sizeof(rlp->reg[0]), compare_u64);
+
+    for (i = 0, arraylen = 0; i < rlp->n; i++) {
+        if (!kvm_arm_reg_syncs_via_cpreg_list(rlp->reg[i])) {
+            continue;
+        }
+        switch (rlp->reg[i] & KVM_REG_SIZE_MASK) {
+        case KVM_REG_SIZE_U32:
+        case KVM_REG_SIZE_U64:
+            break;
+        default:
+            fprintf(stderr, "Can't handle size of register in kernel list\n");
+            ret = -EINVAL;
+            goto out;
+        }
+
+        arraylen++;
+    }
+
+    cpu->cpreg_indexes = g_renew(uint64_t, cpu->cpreg_indexes, arraylen);
+    cpu->cpreg_values = g_renew(uint64_t, cpu->cpreg_values, arraylen);
+    cpu->cpreg_vmstate_indexes = g_renew(uint64_t, cpu->cpreg_vmstate_indexes,
+                                         arraylen);
+    cpu->cpreg_vmstate_values = g_renew(uint64_t, cpu->cpreg_vmstate_values,
+                                        arraylen);
+    cpu->cpreg_array_len = arraylen;
+    cpu->cpreg_vmstate_array_len = arraylen;
+
+    for (i = 0, arraylen = 0; i < rlp->n; i++) {
+        uint64_t regidx = rlp->reg[i];
+        if (!kvm_arm_reg_syncs_via_cpreg_list(regidx)) {
+            continue;
+        }
+        cpu->cpreg_indexes[arraylen] = regidx;
+        arraylen++;
+    }
+    assert(cpu->cpreg_array_len == arraylen);
+
+    if (!write_kvmstate_to_list(cpu)) {
+        /* Shouldn't happen unless kernel is inconsistent about
+         * what registers exist.
+         */
+        fprintf(stderr, "Initial read of kernel register state failed\n");
+        ret = -EINVAL;
+        goto out;
+    }
+
+out:
+    g_free(rlp);
+    return ret;
+}
+
 bool write_kvmstate_to_list(ARMCPU *cpu)
 {
     CPUState *cs = CPU(cpu);
@@ -318,7 +425,7 @@ bool write_kvmstate_to_list(ARMCPU *cpu)
     return ok;
 }
 
-bool write_list_to_kvmstate(ARMCPU *cpu)
+bool write_list_to_kvmstate(ARMCPU *cpu, int level)
 {
     CPUState *cs = CPU(cpu);
     int i;
@@ -329,6 +436,10 @@ bool write_list_to_kvmstate(ARMCPU *cpu)
         uint64_t regidx = cpu->cpreg_indexes[i];
         uint32_t v32;
         int ret;
+
+        if (kvm_arm_cpreg_level(regidx) > level) {
+            continue;
+        }
 
         r.id = regidx;
         switch (regidx & KVM_REG_SIZE_MASK) {
@@ -354,17 +465,90 @@ bool write_list_to_kvmstate(ARMCPU *cpu)
     return ok;
 }
 
+void kvm_arm_reset_vcpu(ARMCPU *cpu)
+{
+    int ret;
+
+    /* Re-init VCPU so that all registers are set to
+     * their respective reset values.
+     */
+    ret = kvm_arm_vcpu_init(CPU(cpu));
+    if (ret < 0) {
+        fprintf(stderr, "kvm_arm_vcpu_init failed: %s\n", strerror(-ret));
+        abort();
+    }
+    if (!write_kvmstate_to_list(cpu)) {
+        fprintf(stderr, "write_kvmstate_to_list failed\n");
+        abort();
+    }
+}
+
+/*
+ * Update KVM's MP_STATE based on what QEMU thinks it is
+ */
+int kvm_arm_sync_mpstate_to_kvm(ARMCPU *cpu)
+{
+    if (cap_has_mp_state) {
+        struct kvm_mp_state mp_state = {
+            .mp_state =
+            cpu->powered_off ? KVM_MP_STATE_STOPPED : KVM_MP_STATE_RUNNABLE
+        };
+        int ret = kvm_vcpu_ioctl(CPU(cpu), KVM_SET_MP_STATE, &mp_state);
+        if (ret) {
+            fprintf(stderr, "%s: failed to set MP_STATE %d/%s\n",
+                    __func__, ret, strerror(-ret));
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+/*
+ * Sync the KVM MP_STATE into QEMU
+ */
+int kvm_arm_sync_mpstate_to_qemu(ARMCPU *cpu)
+{
+    if (cap_has_mp_state) {
+        struct kvm_mp_state mp_state;
+        int ret = kvm_vcpu_ioctl(CPU(cpu), KVM_GET_MP_STATE, &mp_state);
+        if (ret) {
+            fprintf(stderr, "%s: failed to get MP_STATE %d/%s\n",
+                    __func__, ret, strerror(-ret));
+            abort();
+        }
+        cpu->powered_off = (mp_state.mp_state == KVM_MP_STATE_STOPPED);
+    }
+
+    return 0;
+}
+
 void kvm_arch_pre_run(CPUState *cs, struct kvm_run *run)
 {
 }
 
-void kvm_arch_post_run(CPUState *cs, struct kvm_run *run)
+MemTxAttrs kvm_arch_post_run(CPUState *cs, struct kvm_run *run)
 {
+    return MEMTXATTRS_UNSPECIFIED;
 }
+
 
 int kvm_arch_handle_exit(CPUState *cs, struct kvm_run *run)
 {
-    return 0;
+    int ret = 0;
+
+    switch (run->exit_reason) {
+    case KVM_EXIT_DEBUG:
+        if (kvm_arm_handle_debug(cs, &run->debug.arch)) {
+            ret = EXCP_DEBUG;
+        } /* otherwise return to guest */
+        break;
+    default:
+        qemu_log_mask(LOG_UNIMP, "%s: un-handled exit reason %d\n",
+                      __func__, run->exit_reason);
+        break;
+    }
+    return ret;
 }
 
 bool kvm_arch_stop_on_emulation_error(CPUState *cs)
@@ -387,60 +571,72 @@ int kvm_arch_on_sigbus(int code, void *addr)
     return 1;
 }
 
+/* The #ifdef protections are until 32bit headers are imported and can
+ * be removed once both 32 and 64 bit reach feature parity.
+ */
 void kvm_arch_update_guest_debug(CPUState *cs, struct kvm_guest_debug *dbg)
 {
-    qemu_log_mask(LOG_UNIMP, "%s: not implemented\n", __func__);
-}
-
-int kvm_arch_insert_sw_breakpoint(CPUState *cs,
-                                  struct kvm_sw_breakpoint *bp)
-{
-    qemu_log_mask(LOG_UNIMP, "%s: not implemented\n", __func__);
-    return -EINVAL;
-}
-
-int kvm_arch_insert_hw_breakpoint(target_ulong addr,
-                                  target_ulong len, int type)
-{
-    qemu_log_mask(LOG_UNIMP, "%s: not implemented\n", __func__);
-    return -EINVAL;
-}
-
-int kvm_arch_remove_hw_breakpoint(target_ulong addr,
-                                  target_ulong len, int type)
-{
-    qemu_log_mask(LOG_UNIMP, "%s: not implemented\n", __func__);
-    return -EINVAL;
-}
-
-int kvm_arch_remove_sw_breakpoint(CPUState *cs,
-                                  struct kvm_sw_breakpoint *bp)
-{
-    qemu_log_mask(LOG_UNIMP, "%s: not implemented\n", __func__);
-    return -EINVAL;
-}
-
-void kvm_arch_remove_all_hw_breakpoints(void)
-{
-    qemu_log_mask(LOG_UNIMP, "%s: not implemented\n", __func__);
+#ifdef KVM_GUESTDBG_USE_SW_BP
+    if (kvm_sw_breakpoints_active(cs)) {
+        dbg->control |= KVM_GUESTDBG_ENABLE | KVM_GUESTDBG_USE_SW_BP;
+    }
+#endif
+#ifdef KVM_GUESTDBG_USE_HW
+    if (kvm_arm_hw_debug_active(cs)) {
+        dbg->control |= KVM_GUESTDBG_ENABLE | KVM_GUESTDBG_USE_HW;
+        kvm_arm_copy_hw_debug_data(&dbg->arch);
+    }
+#endif
 }
 
 void kvm_arch_init_irq_routing(KVMState *s)
 {
 }
 
-int kvm_arch_irqchip_create(KVMState *s)
+int kvm_arch_irqchip_create(MachineState *ms, KVMState *s)
 {
-    int ret;
+     if (machine_kernel_irqchip_split(ms)) {
+         perror("-machine kernel_irqchip=split is not supported on ARM.");
+         exit(1);
+    }
 
     /* If we can create the VGIC using the newer device control API, we
      * let the device do this when it initializes itself, otherwise we
      * fall back to the old API */
+    return kvm_check_extension(s, KVM_CAP_DEVICE_CTRL);
+}
 
-    ret = kvm_create_device(s, KVM_DEV_TYPE_ARM_VGIC_V2, true);
-    if (ret == 0) {
-        return 1;
+int kvm_arm_vgic_probe(void)
+{
+    if (kvm_create_device(kvm_state,
+                          KVM_DEV_TYPE_ARM_VGIC_V3, true) == 0) {
+        return 3;
+    } else if (kvm_create_device(kvm_state,
+                                 KVM_DEV_TYPE_ARM_VGIC_V2, true) == 0) {
+        return 2;
+    } else {
+        return 0;
     }
+}
 
+int kvm_arch_fixup_msi_route(struct kvm_irq_routing_entry *route,
+                             uint64_t address, uint32_t data, PCIDevice *dev)
+{
     return 0;
+}
+
+int kvm_arch_add_msi_route_post(struct kvm_irq_routing_entry *route,
+                                int vector, PCIDevice *dev)
+{
+    return 0;
+}
+
+int kvm_arch_release_virq_post(int virq)
+{
+    return 0;
+}
+
+int kvm_arch_msi_data_to_gsi(uint32_t data)
+{
+    return (data - 32) & 0xffff;
 }

@@ -2,8 +2,8 @@ QA output created by 071
 
 === Testing blkverify through filename ===
 
-Formatting 'TEST_DIR/t.IMGFMT.base', fmt=IMGFMT size=67108864 
-Formatting 'TEST_DIR/t.IMGFMT', fmt=IMGFMT size=67108864 
+Formatting 'TEST_DIR/t.IMGFMT.base', fmt=IMGFMT size=67108864
+Formatting 'TEST_DIR/t.IMGFMT', fmt=IMGFMT size=67108864
 read 512/512 bytes at offset 0
 512 bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 wrote 512/512 bytes at offset 229376
@@ -12,12 +12,12 @@ read 512/512 bytes at offset 229376
 512 bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 wrote 512/512 bytes at offset 0
 512 bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-blkverify: read sector_num=0 nb_sectors=4 contents mismatch in sector 0
+blkverify: read sector_num=0 nb_sectors=1 contents mismatch in sector 0
 
 === Testing blkverify through file blockref ===
 
-Formatting 'TEST_DIR/t.IMGFMT.base', fmt=IMGFMT size=67108864 
-Formatting 'TEST_DIR/t.IMGFMT', fmt=IMGFMT size=67108864 
+Formatting 'TEST_DIR/t.IMGFMT.base', fmt=IMGFMT size=67108864
+Formatting 'TEST_DIR/t.IMGFMT', fmt=IMGFMT size=67108864
 read 512/512 bytes at offset 0
 512 bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 wrote 512/512 bytes at offset 229376
@@ -26,7 +26,7 @@ read 512/512 bytes at offset 229376
 512 bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 wrote 512/512 bytes at offset 0
 512 bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-blkverify: read sector_num=0 nb_sectors=4 contents mismatch in sector 0
+blkverify: read sector_num=0 nb_sectors=1 contents mismatch in sector 0
 
 === Testing blkdebug through filename ===
 
@@ -38,22 +38,22 @@ read failed: Input/output error
 
 === Testing blkdebug on existing block device ===
 
-Testing: -drive file=TEST_DIR/t.IMGFMT,format=raw,if=none,id=drive0
+Testing:
 QMP_VERSION
+{"return": {}}
 {"return": {}}
 {"return": {}}
 read failed: Input/output error
 {"return": ""}
 {"return": {}}
 {"timestamp": {"seconds":  TIMESTAMP, "microseconds":  TIMESTAMP}, "event": "SHUTDOWN"}
-{"timestamp": {"seconds":  TIMESTAMP, "microseconds":  TIMESTAMP}, "event": "DEVICE_TRAY_MOVED", "data": {"device": "ide1-cd0", "tray-open": true}}
-{"timestamp": {"seconds":  TIMESTAMP, "microseconds":  TIMESTAMP}, "event": "DEVICE_TRAY_MOVED", "data": {"device": "floppy0", "tray-open": true}}
 
 
 === Testing blkverify on existing block device ===
 
-Testing: -drive file=TEST_DIR/t.IMGFMT,format=IMGFMT,if=none,id=drive0
+Testing:
 QMP_VERSION
+{"return": {}}
 {"return": {}}
 {"return": {}}
 blkverify: read sector_num=0 nb_sectors=1 contents mismatch in sector 0
@@ -61,8 +61,9 @@ blkverify: read sector_num=0 nb_sectors=1 contents mismatch in sector 0
 
 === Testing blkverify on existing raw block device ===
 
-Testing: -drive file=TEST_DIR/t.IMGFMT.base,if=none,id=drive0
+Testing:
 QMP_VERSION
+{"return": {}}
 {"return": {}}
 {"return": {}}
 blkverify: read sector_num=0 nb_sectors=1 contents mismatch in sector 0
@@ -70,8 +71,9 @@ blkverify: read sector_num=0 nb_sectors=1 contents mismatch in sector 0
 
 === Testing blkdebug's set-state through QMP ===
 
-Testing: -drive file=TEST_DIR/t.IMGFMT,format=raw,if=none,id=drive0
+Testing:
 QMP_VERSION
+{"return": {}}
 {"return": {}}
 {"return": {}}
 read 512/512 bytes at offset 0
@@ -84,7 +86,5 @@ read failed: Input/output error
 {"return": ""}
 {"return": {}}
 {"timestamp": {"seconds":  TIMESTAMP, "microseconds":  TIMESTAMP}, "event": "SHUTDOWN"}
-{"timestamp": {"seconds":  TIMESTAMP, "microseconds":  TIMESTAMP}, "event": "DEVICE_TRAY_MOVED", "data": {"device": "ide1-cd0", "tray-open": true}}
-{"timestamp": {"seconds":  TIMESTAMP, "microseconds":  TIMESTAMP}, "event": "DEVICE_TRAY_MOVED", "data": {"device": "floppy0", "tray-open": true}}
 
 *** done

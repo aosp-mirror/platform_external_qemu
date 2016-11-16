@@ -14,6 +14,8 @@
 #define _HAX_I386_H
 
 #include "sysemu/hax.h"
+#include "target-i386/hax-interface.h"
+#include "cpu.h"
 
 #ifdef CONFIG_DARWIN
 typedef int hax_fd;
@@ -87,7 +89,5 @@ hax_fd hax_mod_open(void);
 #ifdef CONFIG_WIN32
 #include "target-i386/hax-windows.h"
 #endif
-
-#include "target-i386/hax-interface.h"
 
 #endif

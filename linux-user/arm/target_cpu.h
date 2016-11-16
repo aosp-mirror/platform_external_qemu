@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef TARGET_CPU_H
-#define TARGET_CPU_H
+#ifndef ARM_TARGET_CPU_H
+#define ARM_TARGET_CPU_H
 
 static inline void cpu_clone_regs(CPUARMState *env, target_ulong newsp)
 {
@@ -29,7 +29,20 @@ static inline void cpu_clone_regs(CPUARMState *env, target_ulong newsp)
 
 static inline void cpu_set_tls(CPUARMState *env, target_ulong newtls)
 {
-    env->cp15.tpidrro_el0 = newtls;
+    if (access_secure_reg(env)) {
+        env->cp15.tpidruro_s = newtls;
+    } else {
+        env->cp15.tpidrro_el[0] = newtls;
+    }
+}
+
+static inline target_ulong cpu_get_tls(CPUARMState *env)
+{
+    if (access_secure_reg(env)) {
+        return env->cp15.tpidruro_s;
+    } else {
+        return env->cp15.tpidrro_el[0];
+    }
 }
 
 #endif
