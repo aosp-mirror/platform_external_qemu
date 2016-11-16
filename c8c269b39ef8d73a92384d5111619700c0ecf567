@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "30b088be_972ea8be",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-16T20:35:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d0f56c92_6b25c1bf",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30b088be_9258f918",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 3
@@ -59,6 +77,24 @@
     },
     {
       "key": {
+        "uuid": "30b088be_175b9872",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-16T20:35:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30e168e5_7e0631d1",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "301c08af_c66302ee",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 3
@@ -70,6 +106,24 @@
       "writtenOn": "2016-11-15T22:04:01Z",
       "side": 1,
       "message": "I know this isn\u0027t the purpose of your patch, but this comment is not very helpful. It should describe what |timeNow| is,  and how the caller should handle ownership of the result (since it is a pointer to a mutable object, who is responsible for destroying it, can the caller modify it after the call, etc). Can I ask you to update it?",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_f4d91a86",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 580,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-16T20:35:26Z",
+      "side": 1,
+      "message": "This function is built on top of the c function tm* localtime(time_t* timer).  It will return the localtime based on the |timeNow| and he pointer is derived from localtime(). I will add comment to ask the caller to de-reference before using the pointer.",
+      "parentUuid": "301c08af_c66302ee",
       "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -110,6 +164,24 @@
     },
     {
       "key": {
+        "uuid": "30b088be_1a7f3f1b",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 592,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-16T20:35:26Z",
+      "side": 1,
+      "message": "it might be better to change the return value to bool.",
+      "parentUuid": "b028f8c6_8a574b43",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30e168e5_5e0175b6",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 3
@@ -144,6 +216,24 @@
     },
     {
       "key": {
+        "uuid": "30b088be_f4b03a26",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 603,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-16T20:35:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d0f56c92_0b207daf",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "70d3e01d_00086606",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 3
@@ -155,6 +245,24 @@
       "writtenOn": "2016-11-15T22:04:01Z",
       "side": 1,
       "message": "Please provide default initialization values for scalar fields to ensure they are all touched by the constructor, e.g.:\n\n   tm mStandardDateUtc \u003d {};\n   tm mDayloghDateUtc \u003d {};\n   long mStandardOffset \u003d 0;\n   long mDaylightOffset \u003d 0;\n   int mCurrentYear \u003d 0;\n   bool mAndroidTimeZoneInit \u003d false;",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_34b7b221",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 611,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-16T20:35:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "70d3e01d_00086606",
       "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -178,6 +286,24 @@
     },
     {
       "key": {
+        "uuid": "30b088be_17e878f5",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 633,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-16T20:35:26Z",
+      "side": 1,
+      "message": "The return type maybe changed to \"bool\" instead.",
+      "parentUuid": "701e80a7_c884af2d",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d0e3acee_7bfb9f06",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 3
@@ -189,6 +315,24 @@
       "writtenOn": "2016-11-15T22:04:01Z",
       "side": 1,
       "message": "nit: documentation update?",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_5acff76d",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 641,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-16T20:35:26Z",
+      "side": 1,
+      "message": "i also changed the return type to bool",
+      "parentUuid": "d0e3acee_7bfb9f06",
       "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -212,6 +356,24 @@
     },
     {
       "key": {
+        "uuid": "30b088be_741c4a52",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 678,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-16T20:35:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "301c08af_468f127d",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "701e80a7_28210b66",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 3
@@ -223,6 +385,24 @@
       "writtenOn": "2016-11-15T22:04:01Z",
       "side": 1,
       "message": "nit: avoid chains of else\u0027s when using returns, it makes the code easier to follow, e.g.:\n\n  if (mDaylightOffset \u003d\u003d 0) {\n      return -1;\n  }\n  tm utc \u003d *gmtime(\u0026timeNow);\n  if (utc \u003c mStandardDateUtc || !(utc \u003c mDaylightDateUtc)) {\n      return 0;\n  }\n  return 1;",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_f407daf5",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 731,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-16T20:35:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "701e80a7_28210b66",
       "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -286,6 +466,30 @@
     },
     {
       "key": {
+        "uuid": "30b088be_45538b2f",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1012,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-16T20:35:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30b088be_3242650d",
+      "range": {
+        "startLine": 996,
+        "startChar": 1,
+        "endLine": 1012,
+        "endChar": 13
+      },
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30b088be_3407b283",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 3
@@ -297,6 +501,30 @@
       "writtenOn": "2016-11-15T22:12:14Z",
       "side": 1,
       "message": "nit: just ()\n(void) is for C only, C++ doesn\u0027t need it",
+      "range": {
+        "startLine": 1021,
+        "startChar": 30,
+        "endLine": 1021,
+        "endChar": 36
+      },
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_71c9b1b7",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1021,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-16T20:35:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30b088be_3407b283",
       "range": {
         "startLine": 1021,
         "startChar": 30,
@@ -332,6 +560,30 @@
     },
     {
       "key": {
+        "uuid": "30b088be_3101f9e5",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1024,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-16T20:35:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30b088be_b21415f7",
+      "range": {
+        "startLine": 1024,
+        "startChar": 26,
+        "endLine": 1024,
+        "endChar": 39
+      },
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "701e80a7_e887f32e",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 3
@@ -343,6 +595,24 @@
       "writtenOn": "2016-11-15T22:04:01Z",
       "side": 1,
       "message": "nit: change return type to bool to indicate success/failure.",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_11087d06",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1066,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-16T20:35:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "701e80a7_e887f32e",
       "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -419,6 +689,47 @@
     },
     {
       "key": {
+        "uuid": "30b088be_14362bfa",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1125,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-16T20:35:26Z",
+      "side": 1,
+      "message": "Currently, strdup()-ed string is taken care of by android::base::ScopedCPtr\u003cconst char\u003e tzDeleter;",
+      "parentUuid": "30b088be_b2997568",
+      "range": {
+        "startLine": 1125,
+        "startChar": 0,
+        "endLine": 1125,
+        "endChar": 11
+      },
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_1dd3b969",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1126,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-16T20:35:26Z",
+      "side": 1,
+      "message": "One bug with scanTimeDir function. On linux, after I changed my host OS system timezone, this function will return NULL instead of finding the matched file. I handled this by append an empty string instead of \"Unknown/Unknown\" in function bufprint_zoneinfo_timezone(). Otherwise, it will cause the android framework to use GMT timezone when we pass \"Unknown/Unknown\".",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30b088be_32a6e5a5",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 3
@@ -459,6 +770,24 @@
     },
     {
       "key": {
+        "uuid": "30b088be_ea98430a",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1143,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-16T20:35:26Z",
+      "side": 1,
+      "message": "Here bufprint also has the side-effect of writing into scan-\u003epath as the function keeps exploring the directory. To stop using bufprint(), we probably need to change ScanDataRec data structure to use std::string and instead of     \n    char*         path_end;\n    char*         path_root;\n    char          path[ PATH_MAX ];",
+      "parentUuid": "50233cec_472d4ebf",
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30b088be_14add666",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 3
@@ -482,6 +811,30 @@
     },
     {
       "key": {
+        "uuid": "30b088be_d4e17e10",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1192,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-16T20:35:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30b088be_14add666",
+      "range": {
+        "startLine": 1192,
+        "startChar": 26,
+        "endLine": 1192,
+        "endChar": 32
+      },
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30b088be_7480ca92",
         "filename": "android/utils/timezone.cpp",
         "patchSetId": 3
@@ -493,6 +846,30 @@
       "writtenOn": "2016-11-15T22:12:14Z",
       "side": 1,
       "message": "System::envGet",
+      "range": {
+        "startLine": 1211,
+        "startChar": 35,
+        "endLine": 1211,
+        "endChar": 41
+      },
+      "revId": "c8c269b39ef8d73a92384d5111619700c0ecf567",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_f4defa55",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1211,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-16T20:35:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30b088be_7480ca92",
       "range": {
         "startLine": 1211,
         "startChar": 35,
