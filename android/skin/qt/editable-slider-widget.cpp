@@ -61,9 +61,10 @@ void EditableSliderWidget::setValue(double value, bool emit_signal) {
         value < mMinimum ? mMinimum : (value > mMaximum ? mMaximum : value);
 
     // Update the values displayed by the slider and the edit box.
-    mSlider.blockSignals(true);
-    mSlider.setValue(static_cast<int>(mValue * 10.0));
-    mSlider.blockSignals(false);
+    {
+        QSignalBlocker blocker(mSlider);
+        mSlider.setValue(static_cast<int>(mValue * 10.0));
+    }
     mLineEdit.setText(QString("%1").arg(mValue, 0, 'f', 1, '0'));
     if (emit_signal) {
         emit valueChanged(mValue);
