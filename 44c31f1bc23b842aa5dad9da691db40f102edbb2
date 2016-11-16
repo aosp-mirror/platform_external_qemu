@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30b088be_4db411b1",
+        "filename": "android/utils/timezone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2016-11-16T20:52:23Z",
+      "side": 1,
+      "message": "i forgot to add \"tm2\" in the comment. fixed in patch set 5.",
+      "revId": "44c31f1bc23b842aa5dad9da691db40f102edbb2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
