@@ -2738,6 +2738,12 @@ static int do_debug(ControlClient client, char* args) {
     return 0;
 }
 
+static int
+do_rotate( ControlClient  client, char* args )
+{
+    int ret = client->global->emu_agent->doRotate();
+    return ret;
+}
 
 static const CommandDefRec   main_commands[] =
 {
@@ -2805,6 +2811,9 @@ static const CommandDefRec   main_commands[] =
 
     { "debug", "control the emulator debug output tags",
       NULL, NULL, do_debug },
+
+    { "rotate", "rotate the screen clockwise by 90 degrees",
+      NULL, NULL, do_rotate, NULL },
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };

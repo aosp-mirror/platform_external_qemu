@@ -21,6 +21,7 @@
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/vm_operations.h"
+#include "android/emulation/control/window_agent.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
@@ -32,6 +33,7 @@ ANDROID_BEGIN_HEADER
 // AndroidConsoleAgents.
 #define ANDROID_CONSOLE_AGENTS_LIST(X) \
    X(QAndroidBatteryAgent, battery) \
+   X(QAndroidEmulatorWindowAgent, emu) \
    X(QAndroidFingerAgent, finger) \
    X(QAndroidLocationAgent, location) \
    X(QAndroidTelephonyAgent, telephony) \

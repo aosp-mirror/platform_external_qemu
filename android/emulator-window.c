@@ -439,3 +439,13 @@ emulator_window_get_layout(EmulatorWindow* emulator)
     }
     return NULL;
 }
+
+int
+emulator_window_rotate(void)
+{
+    if (qemulator->ui) {
+        skin_ui_select_next_layout(qemulator->ui);
+        return 0;
+    }
+    return -1;
+}

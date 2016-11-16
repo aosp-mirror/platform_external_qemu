@@ -59,4 +59,8 @@ emulator_window_done(EmulatorWindow* emulator);
 SkinLayout*
 emulator_window_get_layout(EmulatorWindow* emulator);
 
+/* Rotates the screen clockwise by 90 degrees. */
+int
+emulator_window_rotate(void);
+
 ANDROID_END_HEADER
