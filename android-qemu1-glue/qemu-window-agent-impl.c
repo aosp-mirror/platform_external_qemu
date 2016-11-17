@@ -16,8 +16,8 @@
 #include "android/skin/ui.h"
 
 static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
-    .getEmulatorWindow = emulator_window_get
-};
+    .getEmulatorWindow = emulator_window_get,
+    .doRotate = emulator_window_rotate};
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =
     &sQAndroidEmulatorWindowAgent;
