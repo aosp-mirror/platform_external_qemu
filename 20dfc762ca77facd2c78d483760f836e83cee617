@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30b088be_07890d0c",
+        "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl.attrib",
+        "patchSetId": 23
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-17T16:41:10Z",
+      "side": 1,
+      "message": "I\u0027m thinking about adding an annotation \u0027dma\u0027 here. Overall, we need to maintain the DMA lock here to make sure guest doesn\u0027t start writing into the area while updateColorBuffer is still executing.\nmy current idea is to:\n1. Create a ScopedDmaReader class on the host\n   ScopedDmaReader { void* getDma(); ~dtor() { unlockDMA } };\n2. Add a new member to IOStream or ReadBuffer:\n   ScopedDmaReader getDmaForReading();\n3. For the in variable annotated as DMA (there may be only one!) decoder gets the ScopedDmaReader from its IOStream/ReadBuffer and passes it over to the implementation as std::move()\n4. Implementation uses it and then either just destroys it or explicitly calls unlock()\n5. Guest always locks the dma area before writing to it.\n\nWithout this lock-unlock interface we will run into hard to debug issues eventually",
+      "revId": "20dfc762ca77facd2c78d483760f836e83cee617",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30b088be_74ef51cf",
+        "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl.in",
+        "patchSetId": 23
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-17T16:41:10Z",
+      "side": 1,
+      "message": "nit",
+      "range": {
+        "startLine": 25,
+        "startChar": 143,
+        "endLine": 25,
+        "endChar": 144
+      },
+      "revId": "20dfc762ca77facd2c78d483760f836e83cee617",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
