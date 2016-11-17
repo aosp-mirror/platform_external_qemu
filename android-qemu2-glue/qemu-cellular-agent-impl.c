@@ -21,7 +21,7 @@
 
 static void cellular_setSignalStrength(int zeroTo31)
 {
-    // (See do_gsm_signal() in android-qemu1-glue/console.c)
+    // (See do_gsm_signal() in android-qemu2-glue/console.c)
 
     if (android_modem) {
         if (zeroTo31 <  0) zeroTo31 =  0;
@@ -33,7 +33,7 @@ static void cellular_setSignalStrength(int zeroTo31)
 
 static void cellular_setSignalStrengthProfile(enum CellularSignal signal)
 {
-    // (See do_gsm_signal_profile() in android-qemu1-glue/console.c)
+    // (See do_gsm_signal_profile() in android-qemu2-glue/console.c)
     if (android_modem) {
         int signalQuality = -1;
         switch (signal) {
@@ -51,7 +51,7 @@ static void cellular_setSignalStrengthProfile(enum CellularSignal signal)
 
 static void cellular_setVoiceStatus(enum CellularStatus voiceStatus)
 {
-    // (See do_gsm_voice() in android-qemu1-glue/console.c)
+    // (See do_gsm_voice() in android-qemu2-glue/console.c)
     ARegistrationState  state = A_REGISTRATION_UNKNOWN;
 
     if (android_modem) {
@@ -69,7 +69,7 @@ static void cellular_setVoiceStatus(enum CellularStatus voiceStatus)
 
 static void cellular_setDataStatus(enum CellularStatus dataStatus)
 {
-    // (See do_gsm_data() in android-qemu1-glue/console.c)
+    // (See do_gsm_data() in android-qemu2-glue/console.c)
     ARegistrationState  state = A_REGISTRATION_UNKNOWN;
 
     switch (dataStatus) {
@@ -90,7 +90,7 @@ static void cellular_setDataStatus(enum CellularStatus dataStatus)
 
 static void cellular_setStandard(enum CellularStandard cStandard)
 {
-    // (See do_network_speed() in android-qemu1-glue/console.c)
+    // (See do_network_speed() in android-qemu2-glue/console.c)
     char *speedName;
 
     switch (cStandard) {

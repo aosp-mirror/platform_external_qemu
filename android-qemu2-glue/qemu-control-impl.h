@@ -55,13 +55,13 @@ extern const QAndroidSensorsAgent* const gQAndroidSensorsAgent;
 // Defined in android/qemu-telephony-agent.c
 extern const QAndroidTelephonyAgent* const gQAndroidTelephonyAgent;
 
-// Defined in android-qemu1-glue/qemu-user-event-agent-impl.c
+// Defined in android-qemu2-glue/qemu-user-event-agent-impl.c
 extern const QAndroidUserEventAgent* const gQAndroidUserEventAgent;
 
-// Defined in android-qemu1-glue/qemu-net-agent-impl.c
+// Defined in android-qemu2-glue/qemu-net-agent-impl.c
 extern const QAndroidNetAgent* const gQAndroidNetAgent;
 
-// Defined in android-qemu1-glue/qemu-display-agent-impl.cpp
+// Defined in android-qemu2-glue/qemu-display-agent-impl.cpp
 extern const QAndroidDisplayAgent* const gQAndroidDisplayAgent;
 
 extern const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;

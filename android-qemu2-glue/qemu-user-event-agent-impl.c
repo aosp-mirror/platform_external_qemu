@@ -9,7 +9,7 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "android-qemu1-glue/qemu-control-impl.h"
+#include "android-qemu2-glue/qemu-control-impl.h"
 
 #include "android/multitouch-screen.h"
 #include "android/utils/debug.h"
