@@ -2737,76 +2737,85 @@ static int do_debug(ControlClient client, char* args) {
     return 0;
 }
 
+static int do_rotate_90_clockwise(ControlClient client, char* args) {
+    return (int)client->global->emu_agent->rotate90Clockwise();
+}
 
-static const CommandDefRec   main_commands[] =
-{
-    { "help|h|?", "print a list of commands", NULL, NULL, do_help, NULL },
+static const CommandDefRec main_commands[] = {
+        {"help|h|?", "print a list of commands", NULL, NULL, do_help, NULL},
 
-    { "event", "simulate hardware events",
-    "allows you to send fake hardware events to the kernel\r\n", NULL,
-    NULL, event_commands },
+        {"event", "simulate hardware events",
+         "allows you to send fake hardware events to the kernel\r\n", NULL,
+         NULL, event_commands},
 
-    { "geo", "Geo-location commands",
-      "allows you to change Geo-related settings, or to send GPS NMEA sentences\r\n", NULL,
-      NULL, geo_commands },
+        {"geo", "Geo-location commands",
+         "allows you to change Geo-related settings, or to send GPS NMEA "
+         "sentences\r\n",
+         NULL, NULL, geo_commands},
 
-    { "gsm", "GSM related commands",
-      "allows you to change GSM-related settings, or to make a new inbound phone call\r\n", NULL,
-      NULL, gsm_commands },
+        {"gsm", "GSM related commands",
+         "allows you to change GSM-related settings, or to make a new inbound "
+         "phone call\r\n",
+         NULL, NULL, gsm_commands},
 
-    { "cdma", "CDMA related commands",
-      "allows you to change CDMA-related settings\r\n", NULL,
-      NULL, cdma_commands },
+        {"cdma", "CDMA related commands",
+         "allows you to change CDMA-related settings\r\n", NULL, NULL,
+         cdma_commands},
 
-    { "crash", "crash the emulator instance", NULL, NULL,
-      do_crash, NULL },
+        {"crash", "crash the emulator instance", NULL, NULL, do_crash, NULL},
 
-    { "kill", "kill the emulator instance", NULL, NULL,
-      do_kill, NULL },
+        {"kill", "kill the emulator instance", NULL, NULL, do_kill, NULL},
 
-    { "network", "manage network settings",
-      "allows you to manage the settings related to the network data connection of the\r\n"
-      "emulated device.\r\n", NULL,
-      NULL, network_commands },
+        {"network", "manage network settings",
+         "allows you to manage the settings related to the network data "
+         "connection "
+         "of the\r\n"
+         "emulated device.\r\n",
+         NULL, NULL, network_commands},
 
-    { "power", "power related commands",
-      "allows to change battery and AC power status\r\n", NULL,
-      NULL, power_commands },
+        {"power", "power related commands",
+         "allows to change battery and AC power status\r\n", NULL, NULL,
+         power_commands},
 
-    { "quit|exit", "quit control session", NULL, NULL,
-      do_quit, NULL },
+        {"quit|exit", "quit control session", NULL, NULL, do_quit, NULL},
 
-    { "redir",    "manage port redirections",
-      "allows you to add, list and remove UDP and/or PORT redirection from the host to the device\r\n"
-      "as an example, 'redir  tcp:5000:6000' will route any packet sent to the host's TCP port 5000\r\n"
-      "to TCP port 6000 of the emulated device\r\n", NULL,
-      NULL, redir_commands },
+        {"redir", "manage port redirections",
+         "allows you to add, list and remove UDP and/or PORT redirection from "
+         "the "
+         "host to the device\r\n"
+         "as an example, 'redir  tcp:5000:6000' will route any packet sent to "
+         "the "
+         "host's TCP port 5000\r\n"
+         "to TCP port 6000 of the emulated device\r\n",
+         NULL, NULL, redir_commands},
 
-    { "sms", "SMS related commands",
-      "allows you to simulate an inbound SMS\r\n", NULL,
-      NULL, sms_commands },
+        {"sms", "SMS related commands",
+         "allows you to simulate an inbound SMS\r\n", NULL, NULL, sms_commands},
 
-    { "avd", "control virtual device execution",
-    "allows you to control (e.g. start/stop) the execution of the virtual device\r\n", NULL,
-    NULL, vm_commands },
+        {"avd", "control virtual device execution",
+         "allows you to control (e.g. start/stop) the execution of the virtual "
+         "device\r\n",
+         NULL, NULL, vm_commands},
 
-    { "qemu", "QEMU-specific commands",
-    "allows to connect to the QEMU virtual machine monitor\r\n", NULL,
-    NULL, qemu_commands },
+        {"qemu", "QEMU-specific commands",
+         "allows to connect to the QEMU virtual machine monitor\r\n", NULL,
+         NULL, qemu_commands},
 
-    { "sensor", "manage emulator sensors",
-      "allows you to request the emulator sensors\r\n", NULL,
-      NULL, sensor_commands },
+        {"sensor", "manage emulator sensors",
+         "allows you to request the emulator sensors\r\n", NULL, NULL,
+         sensor_commands},
 
-    { "finger", "manage emulator finger print",
-      "allows you to touch the emulator finger print sensor\r\n", NULL,
-      NULL, fingerprint_commands},
+        {"finger", "manage emulator finger print",
+         "allows you to touch the emulator finger print sensor\r\n", NULL, NULL,
+         fingerprint_commands},
 
-    { "debug", "control the emulator debug output tags",
-      NULL, NULL, do_debug },
+        {"debug", "control the emulator debug output tags", NULL, NULL,
+         do_debug},
 
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
+        {"rotate", "rotate the screen clockwise by 90 degrees", NULL, NULL,
+         do_rotate_90_clockwise, NULL},
+
+        {NULL, NULL, NULL, NULL, NULL, NULL}};
 
 /********************************************************************************************/
 /********************************************************************************************/
