@@ -1,26 +1,26 @@
 BUILD_TARGET_TAG := $(BUILD_TARGET_OS)-$(BUILD_TARGET_ARCH)
 
 # Build libext4_utils and related modules/
-include $(LOCAL_PATH)/distrib/zlib.mk
-include $(LOCAL_PATH)/distrib/libcurl.mk
-include $(LOCAL_PATH)/distrib/libuuid.mk
-include $(LOCAL_PATH)/distrib/libxml2.mk
-include $(LOCAL_PATH)/distrib/libsparse/sources.mk
-include $(LOCAL_PATH)/distrib/libselinux/sources.mk
-include $(LOCAL_PATH)/distrib/libwebp/sources.mk
-include $(LOCAL_PATH)/distrib/ext4_utils/sources.mk
-include $(LOCAL_PATH)/distrib/libbreakpad.mk
-include $(LOCAL_PATH)/distrib/Qt5.mk
-include $(LOCAL_PATH)/distrib/jpeg-6b/libjpeg.mk
-include $(LOCAL_PATH)/distrib/libpng.mk
-include $(LOCAL_PATH)/distrib/mini-glib/sources.make
-include $(LOCAL_PATH)/distrib/googletest/Android.mk
-include $(LOCAL_PATH)/distrib/libANGLEtranslation.mk
-include $(LOCAL_PATH)/distrib/Protobuf.mk
+include $(LOCAL_PATH)/android/third_party/zlib.mk
+include $(LOCAL_PATH)/android/third_party/libcurl.mk
+include $(LOCAL_PATH)/android/third_party/libuuid.mk
+include $(LOCAL_PATH)/android/third_party/libxml2.mk
+include $(LOCAL_PATH)/android/third_party/libsparse/sources.mk
+include $(LOCAL_PATH)/android/third_party/libselinux/sources.mk
+include $(LOCAL_PATH)/android/third_party/libwebp/sources.mk
+include $(LOCAL_PATH)/android/third_party/ext4_utils/sources.mk
+include $(LOCAL_PATH)/android/third_party/libbreakpad.mk
+include $(LOCAL_PATH)/android/third_party/Qt5.mk
+include $(LOCAL_PATH)/android/third_party/jpeg-6b/libjpeg.mk
+include $(LOCAL_PATH)/android/third_party/libpng.mk
+include $(LOCAL_PATH)/android/third_party/mini-glib/sources.make
+include $(LOCAL_PATH)/android/third_party/googletest/Android.mk
+include $(LOCAL_PATH)/android/third_party/libANGLEtranslation.mk
+include $(LOCAL_PATH)/android/third_party/Protobuf.mk
 
 ifeq (true,$(BUILD_BENCHMARKS))
-include $(LOCAL_PATH)/distrib/regex-win32/sources.mk
-include $(LOCAL_PATH)/distrib/google-benchmark/sources.mk
+include $(LOCAL_PATH)/android/third_party/regex-win32/sources.mk
+include $(LOCAL_PATH)/android/third_party/google-benchmark/sources.mk
 endif
 
 EMULATOR_VERSION_CFLAGS :=

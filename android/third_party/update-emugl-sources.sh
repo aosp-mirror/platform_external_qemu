@@ -28,7 +28,7 @@ fatal () {
     exit 1
 }
 
-# Assume this is under $AOSP/external/qemu/distrib/
+# Assume this is under $AOSP/external/qemu/android/third_party/
 AOSP_DIR=$PROGDIR/../../..
 AOSP_DIR=$(cd "$AOSP_DIR" && pwd -P)
 
