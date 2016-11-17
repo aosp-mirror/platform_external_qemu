@@ -21,6 +21,7 @@
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/vm_operations.h"
+#include "android/emulation/control/window_agent.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
@@ -30,14 +31,15 @@ ANDROID_BEGIN_HEADER
 // parameter as follows:  X(type, name), where |type| is the agent type
 // name, and |name| is a field name. See usage below to declare
 // AndroidConsoleAgents.
-#define ANDROID_CONSOLE_AGENTS_LIST(X) \
-   X(QAndroidBatteryAgent, battery) \
-   X(QAndroidFingerAgent, finger) \
-   X(QAndroidLocationAgent, location) \
-   X(QAndroidTelephonyAgent, telephony) \
-   X(QAndroidUserEventAgent, user_event) \
-   X(QAndroidVmOperations, vm) \
-   X(QAndroidNetAgent, net)
+#define ANDROID_CONSOLE_AGENTS_LIST(X)    \
+    X(QAndroidBatteryAgent, battery)      \
+    X(QAndroidEmulatorWindowAgent, emu)   \
+    X(QAndroidFingerAgent, finger)        \
+    X(QAndroidLocationAgent, location)    \
+    X(QAndroidTelephonyAgent, telephony)  \
+    X(QAndroidUserEventAgent, user_event) \
+    X(QAndroidVmOperations, vm)           \
+    X(QAndroidNetAgent, net)
 
 // A structure used to group pointers to all agent interfaces used by the
 // Android console.
