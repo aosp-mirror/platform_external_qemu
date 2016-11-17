@@ -608,7 +608,6 @@ static void control_global_accept(void* opaque,
     fd = HANDLE_EINTR(socket_accept(listen_fd, NULL));
     if (fd < 0) {
         D(( "problem in accept: %d: %s\n", errno, errno_str ));
-        perror("accept");
         return;
     }
 

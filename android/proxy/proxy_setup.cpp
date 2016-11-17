@@ -20,6 +20,11 @@
 #include <string.h>
 
 bool android_http_proxy_setup(const char* http_proxy, bool verbose) {
+    if (!http_proxy) {
+        VERBOSE_DPRINT(init, "Not using any http proxy");
+        return true;
+    }
+
     // Parse the configuration string first.
     android::proxy::ParseResult result =
             android::proxy::parseConfigurationString(http_proxy);
