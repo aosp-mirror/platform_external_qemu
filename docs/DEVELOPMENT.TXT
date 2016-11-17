@@ -279,7 +279,7 @@ IV.3) GPU Emulation sources:
 GPU emulation relies on a set of sophisticated shared libraries. For all
 details, read docs/GPU-EMULATION.TXT.
 
-The corresponding sources live under distrib/android-emugl/ and are rebuilt
+The corresponding sources live under android/android-emugl/ and are rebuilt
 by each call to android-rebuild.sh
 
 
