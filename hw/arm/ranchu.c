@@ -520,18 +520,23 @@ static void ranchu_init(MachineState *machine)
     create_serial_device(0, vbi, pic, RANCHU_UART, "pl011",
                          "arm,pl011\0arm,primecell", 2, "uartclk\0apb_pclk", 2);
     create_simple_device(vbi, pic, RANCHU_GOLDFISH_FB, "goldfish_fb",
-                         "generic,goldfish-fb", 1, 0, 0);
+                         "google,goldfish-fb\0"
+                         "generic,goldfish-fb", 2, 0, 0);
     create_simple_device(vbi, pic, RANCHU_GOLDFISH_BATTERY, "goldfish_battery",
-                         "generic,goldfish-battery", 1, 0, 0);
+                         "google,goldfish-battery\0"
+                         "generic,goldfish-battery", 2, 0, 0);
     create_simple_device(vbi, pic, RANCHU_GOLDFISH_AUDIO, "goldfish_audio",
-                         "generic,goldfish-audio", 1, 0, 0);
+                         "google,goldfish-audio\0"
+                         "generic,goldfish-audio", 2, 0, 0);
     create_simple_device(vbi, pic, RANCHU_GOLDFISH_EVDEV, "goldfish-events",
-                         "generic,goldfish-events-keypad", 1, 0, 0);
+                         "google,goldfish-events-keypad\0"
+                         "generic,goldfish-events-keypad", 2, 0, 0);
     create_simple_device(vbi, pic, RANCHU_GOLDFISH_PIPE, "goldfish_pipe",
-                         "google,android-pipe\0generic,android-pipe",
-                         2, 0, 0);
+                         "google,android-pipe\0"
+                         "generic,android-pipe", 2, 0, 0);
     create_simple_device(vbi, pic, RANCHU_GOLDFISH_SYNC, "goldfish-sync",
-                         "generic,goldfish-sync", 1, 0, 0);
+                         "google,goldfish-sync\0"
+                         "generic,goldfish-sync", 2, 0, 0);
 
     /* Create mmio transports, so the user can create virtio backends
      * (which will be automatically plugged in to the transports). If
