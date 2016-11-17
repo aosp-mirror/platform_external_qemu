@@ -46,6 +46,7 @@ private:
     Framebuffer mFBWidth;
     Framebuffer mFBHeight;
     GLuint mVertexBuffer;
+    GLenum mTextureDataType;
 };
 
 #endif
