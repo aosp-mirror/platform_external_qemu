@@ -26,15 +26,15 @@ const struct {
     uint32_t code;
     uint32_t mod;
 } kKeyPairData[] = {
-    { "F1", KEY_F1, 0 },
-    { "Ctrl-F2", KEY_F2, kKeyModLCtrl },
-    { "RCtrl-A", KEY_A, kKeyModRCtrl },
-    { "Alt-Return", KEY_ENTER, kKeyModLAlt },
-    { "RAlt-Comma", KEY_COMMA, kKeyModRAlt },
-    { "Shift-3", KEY_3, kKeyModLShift },
-    { "RShift-Keypad_5", KEY_KP5, kKeyModRShift },
-    { "Ctrl-Shift-Alt-Delete", KEY_DELETE,
-            kKeyModLCtrl|kKeyModLShift|kKeyModLAlt },
+        {"F1", LINUX_KEY_F1, 0},
+        {"Ctrl-F2", LINUX_KEY_F2, kKeyModLCtrl},
+        {"RCtrl-A", LINUX_KEY_A, kKeyModRCtrl},
+        {"Alt-Return", LINUX_KEY_ENTER, kKeyModLAlt},
+        {"RAlt-Comma", LINUX_KEY_COMMA, kKeyModRAlt},
+        {"Shift-3", LINUX_KEY_3, kKeyModLShift},
+        {"RShift-Keypad_5", LINUX_KEY_KP5, kKeyModRShift},
+        {"Ctrl-Shift-Alt-Delete", LINUX_KEY_DELETE,
+         kKeyModLCtrl | kKeyModLShift | kKeyModLAlt},
 };
 
 const size_t kKeyPairDataLen = ARRAYLEN(kKeyPairData);

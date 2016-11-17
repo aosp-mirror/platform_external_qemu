@@ -492,19 +492,22 @@ void events_dev_init(uint32_t base, qemu_irq irq)
             /*
              * Setup multitouch.
              */
-            events_set_bit(s, EV_ABS, ABS_MT_SLOT);
-            events_set_bit(s, EV_ABS, ABS_MT_POSITION_X);
-            events_set_bit(s, EV_ABS, ABS_MT_POSITION_Y);
-            events_set_bit(s, EV_ABS, ABS_MT_TRACKING_ID);
-            events_set_bit(s, EV_ABS, ABS_MT_TOUCH_MAJOR);
-            events_set_bit(s, EV_ABS, ABS_MT_PRESSURE);
+            events_set_bit(s, EV_ABS, LINUX_ABS_MT_SLOT);
+            events_set_bit(s, EV_ABS, LINUX_ABS_MT_POSITION_X);
+            events_set_bit(s, EV_ABS, LINUX_ABS_MT_POSITION_Y);
+            events_set_bit(s, EV_ABS, LINUX_ABS_MT_TRACKING_ID);
+            events_set_bit(s, EV_ABS, LINUX_ABS_MT_TOUCH_MAJOR);
+            events_set_bit(s, EV_ABS, LINUX_ABS_MT_PRESSURE);
 
-            abs_values[ABS_MT_SLOT].max = multitouch_get_max_slot();
-            abs_values[ABS_MT_TRACKING_ID].max = abs_values[ABS_MT_SLOT].max + 1;
-            abs_values[ABS_MT_POSITION_X].max = abs_values[ABS_X].max;
-            abs_values[ABS_MT_POSITION_Y].max = abs_values[ABS_Y].max;
-            abs_values[ABS_MT_TOUCH_MAJOR].max = 0x7fffffff; // TODO: Make it less random
-            abs_values[ABS_MT_PRESSURE].max = 0x100; // TODO: Make it less random
+            abs_values[LINUX_ABS_MT_SLOT].max = multitouch_get_max_slot();
+            abs_values[LINUX_ABS_MT_TRACKING_ID].max =
+                abs_values[LINUX_ABS_MT_SLOT].max + 1;
+            abs_values[LINUX_ABS_MT_POSITION_X].max = abs_values[ABS_X].max;
+            abs_values[LINUX_ABS_MT_POSITION_Y].max = abs_values[ABS_Y].max;
+            abs_values[LINUX_ABS_MT_TOUCH_MAJOR].max =
+                0x7fffffff;  // TODO: Make it less random
+            abs_values[LINUX_ABS_MT_PRESSURE].max =
+                0x100;  // TODO: Make it less random
         }
     }
 
