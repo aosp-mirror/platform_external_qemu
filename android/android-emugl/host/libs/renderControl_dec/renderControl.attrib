@@ -1,5 +1,5 @@
 # For documentation on the .attrib file format, see:
-# distrib/android-emugl/host/tools/emugen/README
+# android/android-emugl/host/tools/emugen/README
 
 GLOBAL
 	base_opcode 10000
