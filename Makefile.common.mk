@@ -58,7 +58,7 @@ EMULATOR_COMMON_INCLUDES := \
     $(BUILD_OBJS_DIR)/build \
     $(generated-proto-sources-dir) \
 
-EMUGL_SRCDIR := $(LOCAL_PATH)/distrib/android-emugl
+EMUGL_SRCDIR := $(LOCAL_PATH)/android/android-emugl
 EMUGL_INCLUDES := $(EMUGL_SRCDIR)/host/include
 ifeq (true,$(BUILD_EMUGL_PRINTOUT))
 	EMUGL_USER_CFLAGS := -DOPENGL_DEBUG_PRINTOUT

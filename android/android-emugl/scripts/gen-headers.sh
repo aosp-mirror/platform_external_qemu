@@ -77,8 +77,8 @@ gen_funcargs_header () {
 ##
 ##  libOpenglRender headers.
 ##
-LIBRENDER_DIR=distrib/android-emugl/host/libs/libOpenglRender
-LIBRENDER_INCLUDE=distrib/android-emugl/host/include/OpenglRender
+LIBRENDER_DIR=android/android-emugl/host/libs/libOpenglRender
+LIBRENDER_INCLUDE=android/android-emugl/host/include/OpenglRender
 gen_funcargs_header \
         "$LIBRENDER_DIR"/render_api.entries \
         "$LIBRENDER_INCLUDE"/render_api_functions.h \
@@ -87,8 +87,8 @@ gen_funcargs_header \
 ##
 ## libOpenGLESDispatch headers.
 ##
-OPENGLES_DISPATCH_SRCDIR=distrib/android-emugl/host/libs/libOpenGLESDispatch
-OPENGLES_DISPATCH_INCLUDE=distrib/android-emugl/host/include/OpenGLESDispatch
+OPENGLES_DISPATCH_SRCDIR=android/android-emugl/host/libs/libOpenGLESDispatch
+OPENGLES_DISPATCH_INCLUDE=android/android-emugl/host/include/OpenGLESDispatch
 
 gen_functions_header \
         "$OPENGLES_DISPATCH_SRCDIR"/render_egl.entries \

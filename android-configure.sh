@@ -481,7 +481,7 @@ if [ "$OPTION_MINGW" = "yes" ] ; then
 fi
 
 # Try to find the GLES emulation headers and libraries automatically
-GLES_DIR=distrib/android-emugl
+GLES_DIR=android/android-emugl
 if [ ! -d "$GLES_DIR" ]; then
     panic "GLES       : Could not find GPU emulation sources!: $GLES_DIR"
 else

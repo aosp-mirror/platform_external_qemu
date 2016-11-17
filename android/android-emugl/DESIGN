@@ -214,7 +214,7 @@ in the Android source trees:
     $ANDROID/device/generic/goldfish/opengl, which we'll call $EMUGL_GUEST
 
   - The host renderer and translator libraries are under
-    $QEMU/distrib/android-emugl, which we'll call $EMUGL_HOST
+    $QEMU/android/android-emugl, which we'll call $EMUGL_HOST
 
   - The QEMU Pipe kernel driver is under $KERNEL/drivers/misc/qemupipe (3.4)
     or $KERNEL/drivers/platform/goldfish/goldfish_pipe.c (3.10)
