@@ -132,4 +132,19 @@ extern int get_token_value_alloc(const char* params, const char* name, char** va
  */
 extern int get_token_value_int(const char* params, const char* name, int* value);
 
+/** ALIGNMENT
+ **/
+
+/* Align a value to the next larger value that is a multiple of alignment.
+ * This only works for alignments that are powers of 2.
+ * Param:
+ *  value - The value that should be aligned
+ *  alignment - The alignment that value should be a multiple of
+ * Return:
+ *  The aligned value
+ */
+static inline int align(int value, int alignment) {
+    return (value + alignment - 1) & (~(alignment - 1));
+}
+
 ANDROID_END_HEADER

@@ -15,6 +15,7 @@
  */
 
 #include "android/camera/camera-format-converters.h"
+#include "android/utils/misc.h"
 
 #ifdef __linux__
 #include <linux/videodev2.h>
@@ -453,29 +454,17 @@ typedef const void* (*load_rgb_func)(const void* rgb,
  */
 typedef void* (*save_rgb_func)(void* rgb, uint8_t r, uint8_t g, uint8_t b);
 
-/* Prototype for a routine that calculates an offset of the first U value for the
- * given line in a YUV framebuffer.
+/* Prototype for a routine that calculates an offset of the first Y, U or V
+ * value for the given line in a YUV framebuffer.
  * Param:
  *  desc - Descriptor for the YUV frame for which the offset is being calculated.
  *  line - Zero-based line number for which to calculate the offset.
  *  width, height - Frame dimensions.
  * Return:
- *  Offset of the first U value for the given frame line. The offset returned
- *  here is relative to the beginning of the YUV framebuffer.
+ *  Offset of the first Y, U or V value for the given frame line. The offset
+ *  returned here is relative to the beginning of the YUV framebuffer.
  */
-typedef int (*u_offset_func)(const YUVDesc* desc, int line, int width, int height);
-
-/* Prototype for a routine that calculates an offset of the first V value for the
- * given line in a YUV framebuffer.
- * Param:
- *  desc - Descriptor for the YUV frame for which the offset is being calculated.
- *  line - Zero-based line number for which to calculate the offset.
- *  width, height - Frame dimensions.
- * Return:
- *  Offset of the first V value for the given frame line. The offset returned
- *  here is relative to the beginning of the YUV framebuffer.
- */
-typedef int (*v_offset_func)(const YUVDesc* desc, int line, int width, int height);
+typedef int (*yuv_offset_func)(const YUVDesc* desc, int line, int width, int height);
 
 /* RGB/BRG format descriptor. */
 struct RGBDesc {
@@ -513,12 +502,15 @@ struct YUVDesc {
     /* Controls location of the first V value in YUV framebuffer.
      * See comments to U_offset for more info. */
     int             V_offset;
+    /* Routine that calculates an offset of the first Y value for the given line
+     * in a YUV framebuffer. */
+    yuv_offset_func y_offset;
     /* Routine that calculates an offset of the first U value for the given line
      * in a YUV framebuffer. */
-    u_offset_func   u_offset;
+    yuv_offset_func u_offset;
     /* Routine that calculates an offset of the first V value for the given line
      * in a YUV framebuffer. */
-    v_offset_func   v_offset;
+    yuv_offset_func v_offset;
 };
 
 /* Bayer format descriptor. */
@@ -659,8 +651,25 @@ _save_BRG16(void* rgb, uint8_t r, uint8_t g, uint8_t b)
 #endif
 
 /********************************************************************************
- * YUV's U/V offset calculation routines.
+ * YUV's Y/U/V offset calculation routines.
  *******************************************************************************/
+
+/* Y offset in an aligned format such as YV12 */
+static int YOffAlignedYUV(const YUVDesc* desc, int line, int width, int height)
+{
+    int stride = align(width, 16);
+    // As the name implies the Y_next_pair value skips a pair of values. Since
+    // this is counting values, not pairs, per line we divide by two.
+    return line * stride * (desc->Y_next_pair / 2) + desc->Y_offset;
+}
+
+/* Y offset in a packed format with no padding or alignment requirements */
+static int YOffPackedYUV(const YUVDesc* desc, int line, int width, int height)
+{
+    // As the name implies the Y_next_pair value skips a pair of values. Since
+    // this is counting values, not pairs, per line we divide by two.
+    return line * width * (desc->Y_next_pair / 2) + desc->Y_offset;
+}
 
 /* U offset in a fully interleaved YUV 4:2:2 */
 static int
@@ -704,9 +713,9 @@ _VOffIntrlUV(const YUVDesc* desc, int line, int width, int height)
     return (height + line / 2) * width + desc->V_offset;
 }
 
-/* U offset in a 3-pane YUV 4:2:0 */
+/* U offset in a 3-pane aligned YUV 4:2:0 */
 static int
-_UOffSepYUV(const YUVDesc* desc, int line, int width, int height)
+_UOffSepAlignedYUV(const YUVDesc* desc, int line, int width, int height)
 {
     /* U, or V pane starts right after the Y pane, that occupies 'height * width'
      * bytes. Eacht line in each of U and V panes contains width / 2 elements.
@@ -721,28 +730,32 @@ _UOffSepYUV(const YUVDesc* desc, int line, int width, int height)
      *
      * for the second pane.
      */
-    const int y_pane_size = height * width;
+    const int y_stride = align(width, 16);
+    const int uv_stride = align(y_stride / 2, 16);
+    const int y_pane_size = height * y_stride;
     if (desc->U_offset) {
         /* U pane comes right after the Y pane. */
-        return y_pane_size + (line / 2) * width / 2;
+        return y_pane_size + (line / 2) * uv_stride;
     } else {
         /* U pane follows V pane. */
-        return y_pane_size + y_pane_size / 4 + (line / 2) * width / 2;
+        return y_pane_size + (height / 2 + line / 2) * uv_stride;
     }
 }
 
-/* V offset in a 3-pane YUV 4:2:0 */
+/* V offset in a 3-pane aligned YUV 4:2:0 */
 static int
-_VOffSepYUV(const YUVDesc* desc, int line, int width, int height)
+_VOffSepAlignedYUV(const YUVDesc* desc, int line, int width, int height)
 {
     /* See comment for _UOffSepYUV. */
-    const int y_pane_size = height * width;
+    const int y_stride = align(width, 16);
+    const int uv_stride = align(y_stride / 2, 16);
+    const int y_pane_size = height * y_stride;
     if (desc->V_offset) {
         /* V pane comes right after the Y pane. */
-        return y_pane_size + (line / 2) * width / 2;
+        return y_pane_size + (line / 2) * uv_stride;
     } else {
         /* V pane follows U pane. */
-        return y_pane_size + y_pane_size / 4 + (line / 2) * width / 2;
+        return y_pane_size + (height / 2 + line / 2) * uv_stride;
     }
 }
 
@@ -1018,8 +1031,9 @@ RGBToYUV(const RGBDesc* rgb_fmt,
     const int Y_Inc = yuv_fmt->Y_inc;
     const int UV_inc = yuv_fmt->UV_inc;
     const int Y_next_pair = yuv_fmt->Y_next_pair;
-    uint8_t* pY = (uint8_t*)yuv + yuv_fmt->Y_offset;
     for (y = 0; y < height; y++) {
+        uint8_t* pY =
+            (uint8_t*)yuv + yuv_fmt->y_offset(yuv_fmt, y, width, height);
         uint8_t* pU =
             (uint8_t*)yuv + yuv_fmt->u_offset(yuv_fmt, y, width, height);
         uint8_t* pV =
@@ -1086,8 +1100,9 @@ YUVToRGB(const YUVDesc* yuv_fmt,
     const int Y_Inc = yuv_fmt->Y_inc;
     const int UV_inc = yuv_fmt->UV_inc;
     const int Y_next_pair = yuv_fmt->Y_next_pair;
-    const uint8_t* pY = (const uint8_t*)yuv + yuv_fmt->Y_offset;
     for (y = 0; y < height; y++) {
+        const uint8_t* pY =
+            (const uint8_t*)yuv + yuv_fmt->y_offset(yuv_fmt, y, width, height);
         const uint8_t* pU =
             (const uint8_t*)yuv + yuv_fmt->u_offset(yuv_fmt, y, width, height);
         const uint8_t* pV =
@@ -1131,13 +1146,15 @@ YUVToYUV(const YUVDesc* src_fmt,
     const int Y_Inc_dst = dst_fmt->Y_inc;
     const int UV_inc_dst = dst_fmt->UV_inc;
     const int Y_next_pair_dst = dst_fmt->Y_next_pair;
-    const uint8_t* pYsrc = (const uint8_t*)src + src_fmt->Y_offset;
-    uint8_t* pYdst = (uint8_t*)dst + dst_fmt->Y_offset;
     for (y = 0; y < height; y++) {
+        const uint8_t* pYsrc =
+            (const uint8_t*)src + src_fmt->y_offset(src_fmt, y, width, height);
         const uint8_t* pUsrc =
             (const uint8_t*)src + src_fmt->u_offset(src_fmt, y, width, height);
         const uint8_t* pVsrc =
             (const uint8_t*)src + src_fmt->v_offset(src_fmt, y, width, height);
+        uint8_t* pYdst =
+            (uint8_t*)dst + dst_fmt->y_offset(dst_fmt, y, width, height);
         uint8_t* pUdst =
             (uint8_t*)dst + dst_fmt->u_offset(dst_fmt, y, width, height);
         uint8_t* pVdst =
@@ -1205,8 +1222,9 @@ BAYERToYUV(const BayerDesc* bayer_fmt,
     const int Y_Inc = yuv_fmt->Y_inc;
     const int UV_inc = yuv_fmt->UV_inc;
     const int Y_next_pair = yuv_fmt->Y_next_pair;
-    uint8_t* pY = (uint8_t*)yuv + yuv_fmt->Y_offset;
     for (y = 0; y < height; y++) {
+        uint8_t* pY =
+            (uint8_t*)yuv + yuv_fmt->y_offset(yuv_fmt, y, width, height);
         uint8_t* pU =
             (uint8_t*)yuv + yuv_fmt->u_offset(yuv_fmt, y, width, height);
         uint8_t* pV =
@@ -1293,6 +1311,7 @@ static const YUVDesc _YUYV =
     .UV_inc         = 4,
     .U_offset       = 1,
     .V_offset       = 3,
+    .y_offset       = &YOffPackedYUV,
     .u_offset       = &_UOffIntrlYUV,
     .v_offset       = &_VOffIntrlYUV
 };
@@ -1306,6 +1325,7 @@ static const YUVDesc _UYVY =
     .UV_inc         = 4,
     .U_offset       = 0,
     .V_offset       = 2,
+    .y_offset       = &YOffPackedYUV,
     .u_offset       = &_UOffIntrlYUV,
     .v_offset       = &_VOffIntrlYUV
 };
@@ -1319,6 +1339,7 @@ static const YUVDesc _YVYU =
     .UV_inc         = 4,
     .U_offset       = 3,
     .V_offset       = 1,
+    .y_offset       = &YOffPackedYUV,
     .u_offset       = &_UOffIntrlYUV,
     .v_offset       = &_VOffIntrlYUV
 };
@@ -1332,6 +1353,7 @@ static const YUVDesc _VYUY =
     .UV_inc         = 4,
     .U_offset       = 2,
     .V_offset       = 0,
+    .y_offset       = &YOffPackedYUV,
     .u_offset       = &_UOffIntrlYUV,
     .v_offset       = &_VOffIntrlYUV
 };
@@ -1345,6 +1367,7 @@ static const YUVDesc _YYUV =
     .UV_inc         = 4,
     .U_offset       = 2,
     .V_offset       = 3,
+    .y_offset       = &YOffPackedYUV,
     .u_offset       = &_UOffIntrlYUV,
     .v_offset       = &_VOffIntrlYUV
 };
@@ -1358,6 +1381,7 @@ static const YUVDesc _YYVU =
     .UV_inc         = 4,
     .U_offset       = 3,
     .V_offset       = 2,
+    .y_offset       = &YOffPackedYUV,
     .u_offset       = &_UOffIntrlYUV,
     .v_offset       = &_VOffIntrlYUV
 };
@@ -1375,8 +1399,9 @@ static const YUVDesc _YV12 =
     .UV_inc         = 1,
     .U_offset       = 0,
     .V_offset       = 1,
-    .u_offset       = &_UOffSepYUV,
-    .v_offset       = &_VOffSepYUV
+    .y_offset       = &YOffAlignedYUV,
+    .u_offset       = &_UOffSepAlignedYUV,
+    .v_offset       = &_VOffSepAlignedYUV
 };
 
 /* YU12: 4:2:0, YUV are fully separated, V pane follows U pane */
@@ -1388,8 +1413,9 @@ static const YUVDesc _YU12 =
     .UV_inc         = 1,
     .U_offset       = 1,
     .V_offset       = 0,
-    .u_offset       = &_UOffSepYUV,
-    .v_offset       = &_VOffSepYUV
+    .y_offset       = &YOffAlignedYUV,
+    .u_offset       = &_UOffSepAlignedYUV,
+    .v_offset       = &_VOffSepAlignedYUV
 };
 
 /* NV12: 4:2:0, UV are interleaved, V follows U in UV pane */
@@ -1401,6 +1427,7 @@ static const YUVDesc _NV12 =
     .UV_inc         = 2,
     .U_offset       = 0,
     .V_offset       = 1,
+    .y_offset       = &YOffPackedYUV,
     .u_offset       = &_UOffIntrlUV,
     .v_offset       = &_VOffIntrlUV
 };
@@ -1414,6 +1441,7 @@ static const YUVDesc _NV21 =
     .UV_inc         = 2,
     .U_offset       = 1,
     .V_offset       = 0,
+    .y_offset       = &YOffPackedYUV,
     .u_offset       = &_UOffIntrlUV,
     .v_offset       = &_VOffIntrlUV
 };
