@@ -16,16 +16,10 @@
 
 #include "DispatchTables.h"
 
-#include <math.h>
+#include <assert.h>
 #include <string.h>
-
 #include <stdio.h>
 #define ERR(...)  fprintf(stderr, __VA_ARGS__)
-
-// M_PI isn't defined in C++ (when strict ISO compliance is enabled)
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327
-#endif
 
 namespace {
 
@@ -56,20 +50,20 @@ GLuint createShader(GLint shaderType, const char* shaderText) {
 }
 
 // No scaling / projection since we want to fill the whole viewport with
-// the texture, hence a trivial vertex shader that only supports clockwise
-// rotation.
+// the texture, hence a trivial vertex shader that only supports translation.
+// Note: we used to have a proper free-angle rotation support in this shader,
+//  but looks like SwiftShader doesn't support either complicated calculations
+//  for gl_Position/varyings or just doesn't like trigonometric functions in
+//  shader; anyway the new code has hardcoded texture coordinate mapping for
+//  different rotation angles and works in both native OpenGL and SwiftShader.
 const char kVertexShaderSource[] =
     "attribute vec4 position;\n"
     "attribute vec2 inCoord;\n"
     "varying vec2 outCoord;\n"
-    "uniform float rotation;\n"
     "uniform vec2 translation;\n"
 
     "void main(void) {\n"
-    "  float cs = cos(rotation);\n"
-    "  float sn = sin(rotation);\n"
-    "  gl_Position.x = position.x * cs + position.y * sn - translation.x;\n"
-    "  gl_Position.y = position.y * cs - position.x * sn - translation.y;\n"
+    "  gl_Position.xy = position.xy - translation.xy;\n"
     "  gl_Position.zw = position.zw;\n"
     "  outCoord = inCoord;\n"
     "}\n";
@@ -94,10 +88,33 @@ const Vertex kVertices[] = {
     {{ +1, +1, +0 }, { +1, +0 }},
     {{ -1, +1, +0 }, { +0, +0 }},
     {{ -1, -1, +0 }, { +0, +1 }},
+
+    {{ +1, -1, +0 }, { +1, +0 }},
+    {{ +1, +1, +0 }, { +0, +0 }},
+    {{ -1, +1, +0 }, { +0, +1 }},
+    {{ -1, -1, +0 }, { +1, +1 }},
+
+    {{ +1, -1, +0 }, { +0, +0 }},
+    {{ +1, +1, +0 }, { +0, +1 }},
+    {{ -1, +1, +0 }, { +1, +1 }},
+    {{ -1, -1, +0 }, { +1, +0 }},
+
+    {{ +1, -1, +0 }, { +0, +1 }},
+    {{ +1, +1, +0 }, { +1, +1 }},
+    {{ -1, +1, +0 }, { +1, +0 }},
+    {{ -1, -1, +0 }, { +0, +0 }},
 };
 
-const GLubyte kIndices[] = { 0, 1, 2, 2, 3, 0 };
+// Vertex indices for predefined rotation angles.
+const GLubyte kIndices[] = {
+    0, 1, 2, 2, 3, 0,      // 0
+    4, 5, 6, 6, 7, 4,      // 90
+    8, 9, 10, 10, 11, 8,   // 180
+    12, 13, 14, 14, 15, 12 // 270
+};
+
 const GLint kIndicesLen = sizeof(kIndices) / sizeof(kIndices[0]);
+const GLint kIndicesPerDraw = 6;
 
 }  // namespace
 
@@ -108,7 +125,6 @@ TextureDraw::TextureDraw() :
         mPositionSlot(-1),
         mInCoordSlot(-1),
         mTextureSlot(-1),
-        mRotationSlot(-1),
         mTranslationSlot(-1) {
     // Create shaders and program.
     mVertexShader = createShader(GL_VERTEX_SHADER, kVertexShaderSource);
@@ -140,13 +156,12 @@ TextureDraw::TextureDraw() :
     mInCoordSlot = s_gles2.glGetAttribLocation(mProgram, "inCoord");
     s_gles2.glEnableVertexAttribArray(mInCoordSlot);
 
-    mRotationSlot = s_gles2.glGetUniformLocation(mProgram, "rotation");
     mTranslationSlot = s_gles2.glGetUniformLocation(mProgram, "translation");
     mTextureSlot = s_gles2.glGetUniformLocation(mProgram, "texture");
 
 #if 0
-    printf("SLOTS position=%d inCoord=%d texture=%d rotation=%d\n",
-          mPositionSlot, mInCoordSlot, mTextureSlot, mRotationSlot);
+    printf("SLOTS position=%d inCoord=%d texture=%d translation=%d\n",
+          mPositionSlot, mInCoordSlot, mTextureSlot, mTranslationSlot);
 #endif
 
     // Create vertex and index buffers.
@@ -224,8 +239,7 @@ bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
     s_gles2.glBindTexture(GL_TEXTURE_2D, texture);
     s_gles2.glUniform1i(mTextureSlot, 0);
 
-    // setup the |rotation| uniform value.
-    s_gles2.glUniform1f(mRotationSlot, rotation * M_PI / 180.);
+    // setup the |translation| uniform value.
     s_gles2.glUniform2f(mTranslationSlot, dx, dy);
 
 #ifndef NDEBUG
@@ -252,7 +266,13 @@ bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
     }
 #endif
 
-    s_gles2.glDrawElements(GL_TRIANGLES, kIndicesLen, GL_UNSIGNED_BYTE, 0);
+    // We may only get 0, 90, 180, 270 in |rotation| so far.
+    const int intRotation = ((int)rotation)/90;
+    assert(intRotation >= 0 && intRotation <= 3);
+    const intptr_t indexShift = intRotation * kIndicesPerDraw;
+
+    s_gles2.glDrawElements(GL_TRIANGLES, kIndicesPerDraw, GL_UNSIGNED_BYTE,
+                           (const GLvoid*)indexShift);
 #ifndef NDEBUG
     err = s_gles2.glGetError();
     if (err != GL_NO_ERROR) {
