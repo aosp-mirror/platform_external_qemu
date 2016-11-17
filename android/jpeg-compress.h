@@ -22,7 +22,7 @@ ANDROID_BEGIN_HEADER
  * Contains declaration of utility routines that compress an RGB bitmap into
  * a JPEG image.
  *
- * NOTE: This code uses a jpeglib library located in distrib/jpeg-6b. It's a
+ * NOTE: This code uses a jpeglib library located in android/third_party/jpeg-6b. It's a
  * 3-rd party library that uses its own type definitions that are different from
  * the ones that are use elsewhere in the emulator code. For instance, in the
  * emulator built for Windows, sizeof(bool) = 1, while in the jpeglib sizeof(bool) = 4.

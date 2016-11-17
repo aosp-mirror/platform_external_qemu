@@ -916,5 +916,5 @@ OTHER:
   libqemu-audio.a), which gets copied to the Android "prebuilt/Linux/qemu"
   directory. this is done to avoid forcing all developers to install various
   development packages on Linux, as well as all build servers. there is also
-  now a script named "distrib/update-audio.sh" which will update the depot
+  now a script named "android/third_party/update-audio.sh" which will update the depot
   file automatically for you: call it whenever you change the audio sources.

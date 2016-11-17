@@ -217,7 +217,7 @@ important sub-directories:
     Implementation files for the Android-specific virtual ARM and MIPS
     boards. For x86, the content of hw/i386/pc.c was modified instead.
 
-  distrib/
+  android/third_party/
     Contains various third-party libraries the emulator depends on
     (e.g. zlib, libpng, libSDL).
 
