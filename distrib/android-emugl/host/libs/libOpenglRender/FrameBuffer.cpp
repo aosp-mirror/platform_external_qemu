@@ -1230,7 +1230,9 @@ void FrameBuffer::createTrivialContext(HandleType shared,
     assert(surfOut);
 
     *contextOut = createRenderContext(0, shared, true);
-    *surfOut = createWindowSurface(0, 0, 1);
+    // Zero size is formally allowed here, but SwiftShader doesn't like it and
+    // fails.
+    *surfOut = createWindowSurface(0, 1, 1);
 }
 
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind)

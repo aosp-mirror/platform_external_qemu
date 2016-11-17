@@ -100,8 +100,8 @@ static const char kVertexShaderSource[] =
 const char kFragmentShaderSource[] =
     "uniform sampler2D uTexture;\n"
 
-    "vec4 read(vec2 uv) {\n"
-    "  vec4 r = texture2D(uTexture, uv);\n"
+    "vec3 read(vec2 uv) {\n"
+    "  vec3 r = texture2D(uTexture, uv).rgb;\n"
     "  #ifdef HORIZONTAL\n"
     "  r.rgb = pow(r.rgb, vec3(2.2));\n"
     "  #endif\n"
@@ -109,7 +109,7 @@ const char kFragmentShaderSource[] =
     "}\n"
 
     "void main() {\n"
-    "  vec4 sum = read(vUV00) + read(vUV01);\n"
+    "  vec3 sum = read(vUV00) + read(vUV01);\n"
     "  #if FACTOR > 2\n"
     "  sum += read(vUV02) + read(vUV03);\n"
     "  #if FACTOR > 4\n"
@@ -124,7 +124,7 @@ const char kFragmentShaderSource[] =
     "  #ifdef VERTICAL\n"
     "  sum.rgb = pow(sum.rgb, vec3(1.0 / 2.2));\n"
     "  #endif\n"
-    "  gl_FragColor = sum;\n"
+    "  gl_FragColor = vec4(sum.rgb, 1.0);\n"
     "}\n";
 
 static const float kVertexData[] = {-1, -1, 3, -1, -1, 3};
@@ -284,14 +284,16 @@ void TextureResize::setupFramebuffers(unsigned int factor) {
     // Update the framebuffer sizes to match the new factor.
     s_gles2.glBindTexture(GL_TEXTURE_2D, mFBWidth.texture);
     s_gles2.glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_RGBA, mWidth / factor, mHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+        GL_TEXTURE_2D, 0, GL_RGB, mWidth / factor, mHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBWidth.framebuffer);
     s_gles2.glFramebufferTexture2D(
         GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFBWidth.texture, 0);
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, mFBHeight.texture);
-    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mWidth / factor, mHeight / factor, 0, GL_RGBA,
+    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mWidth / factor, mHeight / factor, 0, GL_RGB,
         GL_UNSIGNED_BYTE, nullptr);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBHeight.framebuffer);
     s_gles2.glFramebufferTexture2D(
         GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFBHeight.texture, 0);

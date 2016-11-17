@@ -65,7 +65,7 @@ GLCanvas::GLCanvas(int w, int h, const GLESv2Dispatch* gl_dispatch) :
     CHECK_GL_ERROR("Failed to create depth buffer");
     mGLES2->glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer);
     mGLES2->glRenderbufferStorage(GL_RENDERBUFFER,
-                                  GL_DEPTH_COMPONENT,
+                                  GL_DEPTH_COMPONENT16,
                                   width(),
                                   height());
     CHECK_GL_ERROR("Failed to initialize depth buffer");

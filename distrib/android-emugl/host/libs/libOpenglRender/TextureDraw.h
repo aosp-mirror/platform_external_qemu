@@ -31,17 +31,14 @@
 //
 class TextureDraw {
 public:
-    // Create a new instance.
     TextureDraw();
-
-    // Destructor
     ~TextureDraw();
 
     // Fill the current framebuffer with the content of |texture|, which must
     // be the name of a GLES 2.x texture object. |rotationDegrees| is a
     // clockwise rotation angle in degrees (clockwise in the GL Y-upwards
-    // coordinate space). |dx,dy| is the translation of the image towards the
-    // origin.
+    // coordinate space; only supported values are 0, 90, 180, 270). |dx,dy| is
+    // the translation of the image towards the origin.
     bool draw(GLuint texture, float rotationDegrees, float dx, float dy);
 
 private:
@@ -51,7 +48,6 @@ private:
     GLint mPositionSlot;
     GLint mInCoordSlot;
     GLint mTextureSlot;
-    GLint mRotationSlot;
     GLint mTranslationSlot;
     GLuint mVertexBuffer;
     GLuint mIndexBuffer;
