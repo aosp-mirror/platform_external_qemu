@@ -328,22 +328,22 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
             }
             break;
         case QtUICommand::VOLUME_UP:
-            forwardKeyToEmulator(KEY_VOLUMEUP, down);
+            forwardKeyToEmulator(LINUX_KEY_VOLUMEUP, down);
             break;
         case QtUICommand::VOLUME_DOWN:
-            forwardKeyToEmulator(KEY_VOLUMEDOWN, down);
+            forwardKeyToEmulator(LINUX_KEY_VOLUMEDOWN, down);
             break;
         case QtUICommand::POWER:
-            forwardKeyToEmulator(KEY_POWER, down);
+            forwardKeyToEmulator(LINUX_KEY_POWER, down);
             break;
         case QtUICommand::MENU:
-            forwardKeyToEmulator(KEY_SOFT1, down);
+            forwardKeyToEmulator(LINUX_KEY_SOFT1, down);
             break;
         case QtUICommand::HOME:
-            forwardKeyToEmulator(KEY_HOME, down);
+            forwardKeyToEmulator(LINUX_KEY_HOME, down);
             break;
         case QtUICommand::BACK:
-            forwardKeyToEmulator(KEY_BACK, down);
+            forwardKeyToEmulator(LINUX_KEY_BACK, down);
             break;
         case QtUICommand::OVERVIEW:
             forwardKeyToEmulator(KEY_APPSWITCH, down);

@@ -153,13 +153,13 @@ _mts_pointer_down(MTSState* mts_state, int tracking_id, int x, int y, int pressu
         /* Send events indicating a "pointer down" to the EventHub */
         /* Make sure that correct slot is selected. */
         if (slot_index != mts_state->current_slot) {
-            _push_event(EV_ABS, ABS_MT_SLOT, slot_index);
+            _push_event(EV_ABS, LINUX_ABS_MT_SLOT, slot_index);
         }
-        _push_event(EV_ABS, ABS_MT_TRACKING_ID, slot_index);
-        _push_event(EV_ABS, ABS_MT_TOUCH_MAJOR, ++mts_state->touch_major);
-        _push_event(EV_ABS, ABS_MT_PRESSURE, pressure);
-        _push_event(EV_ABS, ABS_MT_POSITION_X, x);
-        _push_event(EV_ABS, ABS_MT_POSITION_Y, y);
+        _push_event(EV_ABS, LINUX_ABS_MT_TRACKING_ID, slot_index);
+        _push_event(EV_ABS, LINUX_ABS_MT_TOUCH_MAJOR, ++mts_state->touch_major);
+        _push_event(EV_ABS, LINUX_ABS_MT_PRESSURE, pressure);
+        _push_event(EV_ABS, LINUX_ABS_MT_POSITION_X, x);
+        _push_event(EV_ABS, LINUX_ABS_MT_POSITION_Y, y);
         mts_state->current_slot = slot_index;
     } else {
         D("MTS pointer count is exceeded.");
@@ -177,13 +177,13 @@ _mts_pointer_up(MTSState* mts_state, int slot_index)
 {
     /* Make sure that correct slot is selected. */
     if (slot_index != mts_state->current_slot) {
-        _push_event(EV_ABS, ABS_MT_SLOT, slot_index);
+        _push_event(EV_ABS, LINUX_ABS_MT_SLOT, slot_index);
     }
 
     /* Send event indicating "pointer up" to the EventHub. */
-    _push_event(EV_ABS, ABS_MT_PRESSURE, 0);
+    _push_event(EV_ABS, LINUX_ABS_MT_PRESSURE, 0);
 
-    _push_event(EV_ABS, ABS_MT_TRACKING_ID, -1);
+    _push_event(EV_ABS, LINUX_ABS_MT_TRACKING_ID, -1);
 
     /* Update MTS descriptor, removing the tracked pointer. */
     mts_state->tracked_pointers[slot_index].tracking_id = MTS_POINTER_UP;
@@ -218,21 +218,21 @@ _mts_pointer_move(MTSState* mts_state, int slot_index, int x, int y, int pressur
 
     /* Make sure that the right slot is selected. */
     if (slot_index != mts_state->current_slot) {
-        _push_event(EV_ABS, ABS_MT_SLOT, slot_index);
+        _push_event(EV_ABS, LINUX_ABS_MT_SLOT, slot_index);
         mts_state->current_slot = slot_index;
     }
 
     /* Push the changes down. */
     if (ptr_state->pressure != pressure && pressure != 0) {
-        _push_event(EV_ABS, ABS_MT_PRESSURE, pressure);
+        _push_event(EV_ABS, LINUX_ABS_MT_PRESSURE, pressure);
         ptr_state->pressure = pressure;
     }
     if (ptr_state->x != x) {
-        _push_event(EV_ABS, ABS_MT_POSITION_X, x);
+        _push_event(EV_ABS, LINUX_ABS_MT_POSITION_X, x);
         ptr_state->x = x;
     }
     if (ptr_state->y != y) {
-        _push_event(EV_ABS, ABS_MT_POSITION_Y, y);
+        _push_event(EV_ABS, LINUX_ABS_MT_POSITION_Y, y);
         ptr_state->y = y;
     }
 }
@@ -536,7 +536,7 @@ void multitouch_update_pointer(MTESource source,
      * delivered at the same time, which is how real devices report events
      * that occur simultaneously. */
     if (!skip_sync) {
-        _push_event(EV_SYN, SYN_REPORT, 0);
+        _push_event(EV_SYN, LINUX_SYN_REPORT, 0);
     }
 }
 

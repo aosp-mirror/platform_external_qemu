@@ -1169,7 +1169,7 @@ void EmulatorQtWindow::adbPushDone(StringView filePath,
 // On failure, return -1.
 static int convertKeyCode(int sym) {
 #define KK(x, y) \
-    { Qt::Key_##x, KEY_##y }
+    { Qt::Key_##x, LINUX_KEY_##y }
 #define K1(x) KK(x, x)
     static const struct {
         int qt_sym;

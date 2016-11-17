@@ -1198,7 +1198,7 @@ skin_window_move_mouse( SkinWindow*  window,
 static void
 skin_window_trackball_press( SkinWindow*  window, int  down )
 {
-    window->win_funcs->key_event(BTN_MOUSE, down);
+    window->win_funcs->key_event(LINUX_BTN_MOUSE, down);
 }
 
 static void
