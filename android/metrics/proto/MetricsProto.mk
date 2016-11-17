@@ -2,8 +2,9 @@
 # A static library containing the metrics protobuf generated code
 #
 
-# Grab the current directory
+# Compute METRICS_DIR relative to LOCAL_PATH
 METRICS_DIR := $(call my-dir)
+METRICS_DIR := $(METRICS_DIR:$(LOCAL_PATH)/%=%)
 
 $(call start-emulator-library,libmetrics_proto)
 

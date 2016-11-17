@@ -465,11 +465,11 @@ OUT_SRC := $$(generated-proto-sources-dir)/$$(SRC:%.proto=%.pb.cc)
 ifeq (,$$(strip $$(PROTOC_TOOL)))
     $$(error PROTOC_TOOL is not defined when trying to generate $$(OUT_SRC) !!)
 endif
-$$(OUT_SRC): PRIVATE_SRC := $$(SRC)
+$$(OUT_SRC): PRIVATE_SRC := $$(LOCAL_PATH)/$$(SRC)
 $$(OUT_SRC): PRIVATE_DST_DIR := $$(dir $$(OUT_SRC))
 $$(OUT_SRC): PRIVATE_DST := $$(OUT_SRC)
 $$(OUT_SRC): PRIVATE_NAME := $$(notdir $$(SRC:%.proto=%))
-$$(OUT_SRC): $$(SRC) $$(PROTOC_TOOL)
+$$(OUT_SRC): $$(PRIVATE_SRC) $$(PROTOC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Protoc: $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
 	$(hide) $$(PROTOC_TOOL) -I$$(dir $$(PRIVATE_SRC)) --cpp_out=$$(PRIVATE_DST_DIR) $$(PRIVATE_SRC)
