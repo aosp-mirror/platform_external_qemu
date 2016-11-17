@@ -36,7 +36,6 @@
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
 #include "android/utils/x86_cpuid.h"
-#include "target-i386/hax-interface.h"
 
 #ifdef _WIN32
 #include "android/base/files/ScopedFileHandle.h"
@@ -385,6 +384,32 @@ using namespace android;
 // The minimum API version supported by the Android emulator.
 #define HAX_MIN_VERSION  3 // 6.0.0
 
+// IMPORTANT: Keep in sync with target-i386/hax-interface.h
+struct hax_capabilityinfo
+{
+    /* bit 0: 1 - HAXM is working
+     *        0 - HAXM is not working possibly because VT/NX is disabled
+                  NX means Non-eXecution, aks. XD (eXecution Disable)
+     * bit 1: 1 - HAXM has hard limit on how many RAM can be used as guest RAM
+     *        0 - HAXM has no memory limitation
+     */
+#define HAX_CAP_STATUS_WORKING  0x1
+#define HAX_CAP_STATUS_NOTWORKING  0x0
+#define HAX_CAP_WORKSTATUS_MASK 0x1
+#define HAX_CAP_MEMQUOTA        0x2
+    uint16_t wstatus;
+    /*
+     * valid when HAXM is not working
+     * bit 0: HAXM is not working because VT is not enabeld
+     * bit 1: HAXM is not working because NX not enabled
+     */
+#define HAX_CAP_FAILREASON_VT   0x1
+#define HAX_CAP_FAILREASON_NX   0x2
+    uint16_t winfo;
+    uint32_t pad;
+    uint64_t mem_quota;
+};
+
 AndroidCpuAcceleration ProbeHAX(std::string* status) {
     status->clear();
 
@@ -460,7 +485,7 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
         return ANDROID_CPU_ACCELERATION_DEV_OBSOLETE;
     }
 
-    hax_capabilityinfo cap;
+    hax_capabilityinfo cap = {};
     ret = DeviceIoControl(hax.get(),
                           HAX_IOCTL_CAPABILITY,
                           NULL, 0,
