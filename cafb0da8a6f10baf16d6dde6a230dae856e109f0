@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30ca486f_45fc3498",
+        "filename": "android/emulation/control/window_agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-17T21:55:06Z",
+      "side": 1,
+      "message": "did David ask for this line? Really?\n:)",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 48
+      },
+      "revId": "cafb0da8a6f10baf16d6dde6a230dae856e109f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30ca486f_650130b7",
+        "filename": "android/emulation/control/window_agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-17T21:55:06Z",
+      "side": 1,
+      "message": "please use (void) for headers used in C - in C () means \"any number of arguments\", not \"no arguments\"",
+      "range": {
+        "startLine": 26,
+        "startChar": 21,
+        "endLine": 26,
+        "endChar": 23
+      },
+      "revId": "cafb0da8a6f10baf16d6dde6a230dae856e109f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
