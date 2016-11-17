@@ -58,7 +58,7 @@ LOCAL_SRC_FILES := \
 ifeq (windows,$(BUILD_TARGET_OS))
 
 LOCAL_C_INCLUDES += \
-    ../qemu/distrib/google-benchmark/compat/$(GOOGLE_BENCHMARK_COMPAT_DIR) \
+    ../qemu/android/third_party/google-benchmark/compat/$(GOOGLE_BENCHMARK_COMPAT_DIR) \
     $(REGEX_WIN32_INCLUDES) \
 
 endif  # BUILD_TARGET_OS == WINDOWS
