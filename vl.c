@@ -144,6 +144,7 @@ int main(int argc, char **argv)
 #include "android/network/control.h"
 #include "android/network/globals.h"
 #include "android/opengl/emugl_config.h"
+#include "android/opengles.h"
 #include "android/skin/winsys.h"
 #include "android/snapshot.h"
 #include "android/snaphost-android.h"
@@ -171,9 +172,6 @@ int main(int argc, char **argv)
 
 #include "hw/input/goldfish_events.h"
 
-// this path has to be relative as AndroidEmu include paths go after the qemu2
-// ones, and android/opengles.h resolves to the very same this file
-#include "../qemu/android/opengles.h"
 
 #define QEMU_CORE_VERSION "qemu2 " QEMU_VERSION
 
