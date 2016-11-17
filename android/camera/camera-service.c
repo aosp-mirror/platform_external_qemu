@@ -805,9 +805,6 @@ _camera_client_query_disconnect(CameraClient* cc,
 
     _qemu_client_reply_ok(qc, NULL);
 }
-static int align(int value, int alignment) {
-    return (value + alignment - 1) & (~(alignment - 1));
-}
 
 static bool calculate_video_frame_size(uint32_t format,
                                        int width,
