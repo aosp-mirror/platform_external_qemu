@@ -406,10 +406,10 @@ endif
 # OS X is not happy with the relative include path if the intermediate
 # build directory is under a symlink. So we're going to force moc to use the
 # absolute path with the path prefix flag (-p).
-$$(MOC_SRC): PRIVATE_SRC_DIR := $$(abspath $$(dir $$(SRC)))
-$$(MOC_SRC): PRIVATE_SRC := $$(SRC)
+$$(MOC_SRC): PRIVATE_SRC_DIR := $$(abspath $$(dir $$(LOCAL_PATH)/$$(SRC)))
+$$(MOC_SRC): PRIVATE_SRC := $$(LOCAL_PATH)/$$(SRC)
 $$(MOC_SRC): PRIVATE_DST := $$(MOC_SRC)
-$$(MOC_SRC): $$(SRC) $$(MOC_TOOL)
+$$(MOC_SRC): $$(PRIVATE_SRC) $$(MOC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Qt moc: $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
 	$(hide) $$(QT_MOC_TOOL) -o $$(PRIVATE_DST) $$(PRIVATE_SRC) -p $$(PRIVATE_SRC_DIR)
@@ -425,10 +425,10 @@ RCC_SRC := $$(LOCAL_OBJS_DIR)/rcc_$$(notdir $$(SRC:%.qrc=%.cpp))
 ifeq (,$$(strip $$(QT_RCC_TOOL)))
 $$(error QT_RCC_TOOL is not defined when trying to generate $$(RCC_SRC) !!)
 endif
-$$(RCC_SRC): PRIVATE_SRC := $$(SRC)
+$$(RCC_SRC): PRIVATE_SRC := $$(LOCAL_PATH)/$$(SRC)
 $$(RCC_SRC): PRIVATE_DST := $$(RCC_SRC)
 $$(RCC_SRC): PRIVATE_NAME := $$(notdir $$(SRC:%.qrc=%))
-$$(RCC_SRC): $$(SRC) $$(QT_RCC_TOOL)
+$$(RCC_SRC): $$(PRIVATE_SRC) $$(QT_RCC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Qt rcc: $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
 	$(hide) $$(QT_RCC_TOOL) -o $$(PRIVATE_DST) --name $$(PRIVATE_NAME) $$(PRIVATE_SRC)
@@ -447,9 +447,9 @@ endif
 ifeq (,$$(strip $$(QT_UIC_TOOL_LDPATH)))
 $$(error QT_UIC_TOOL_LDPATH is not defined when trying to generate $$(UIC_SRC) !!)
 endif
-$$(UIC_SRC): PRIVATE_SRC := $$(SRC)
+$$(UIC_SRC): PRIVATE_SRC := $$(LOCAL_PATH)/$$(SRC)
 $$(UIC_SRC): PRIVATE_DST := $$(UIC_SRC)
-$$(UIC_SRC): $$(SRC) $$(QT_UIC_TOOL)
+$$(UIC_SRC): $$(PRIVATE_SRC) $$(QT_UIC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Qt uic: $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
 	$(hide) $$(call set-host-library-search-path,$$(QT_UIC_TOOL_LDPATH)) $$(QT_UIC_TOOL) -o $$(PRIVATE_DST) $$(PRIVATE_SRC)
