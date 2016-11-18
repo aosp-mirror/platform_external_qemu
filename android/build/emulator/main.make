@@ -35,7 +35,7 @@ _BUILD_SYMBOLS_DIR := $(BUILD_OBJS_DIR)/build/symbols
 _BUILD_DEBUG_INFO_DIR := $(BUILD_OBJS_DIR)/build/debug_info
 
 ifeq ($(wildcard $(_BUILD_CONFIG_MAKE)),)
-    $(error "The configuration file '$(_BUILD_CONFIG_MAKE)' doesn't exist, please run the 'android-configure.sh' script")
+    $(error "The configuration file '$(_BUILD_CONFIG_MAKE)' doesn't exist, please run the 'android/configure.sh' script")
 endif
 
 include $(_BUILD_CONFIG_MAKE)

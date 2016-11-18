@@ -486,7 +486,7 @@ endef
 #
 #       We detect whether this is the case by inspecting the content of
 #       PREBUILT_PATH_PAIRS, which is set by config.make, the auto-generated
-#       file that comes from running 'android-configure.sh --mingw'
+#       file that comes from running 'android/configure.sh --mingw'
 #
 _HAS_WINPTHREAD := $(if $(filter %libwinpthread-1.dll,$(PREBUILT_PATH_PAIRS)),true)
 
