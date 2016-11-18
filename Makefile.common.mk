@@ -90,7 +90,7 @@ QEMU_HARDWARE_PROPERTIES_INI := \
     $(_BUILD_ROOT)/android/android-emu/android/avd/hardware-properties.ini
 
 QEMU_HW_CONFIG_DEFS_H := $(intermediates)/android/avd/hw-config-defs.h
-$(QEMU_HW_CONFIG_DEFS_H): PRIVATE_PATH := $(_BUILD_ROOT)/android/tools
+$(QEMU_HW_CONFIG_DEFS_H): PRIVATE_PATH := $(_BUILD_ROOT)/android/scripts
 $(QEMU_HW_CONFIG_DEFS_H): PRIVATE_CUSTOM_TOOL = $(PRIVATE_PATH)/gen-hw-config.py $< $@
 $(QEMU_HW_CONFIG_DEFS_H): $(QEMU_HARDWARE_PROPERTIES_INI) $(PRIVATE_CUSTOM_TOOL)
 	$(hide) rm -f $@
