@@ -2,7 +2,7 @@ This directory contains the sources of the Android emulator,
 a QEMU-based program to emulate virtual devices running various
 releases of the Android platform image.
 
-See the docs/ directory for more documentation about this
+See the android/docs/ directory for more documentation about this
 code base and the platforms it emulates.
 
 If you plan to contribute patches, please read docs/DEVELOPMENT.TXT
