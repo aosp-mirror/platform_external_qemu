@@ -248,7 +248,6 @@ LOCAL_SRC_FILES += \
     util/qemu-sockets-android.c \
     util/unicode.c \
     util/yield-android.c \
-    $(MINIGLIB_SOURCES) \
 
 ifeq ($(BUILD_TARGET_ARCH),x86)
     LOCAL_SRC_FILES += disas/i386.c
