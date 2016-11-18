@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "30ca486f_c2d3cfee",
+        "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl.attrib",
+        "patchSetId": 23
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-11-18T16:41:16Z",
+      "side": 1,
+      "message": "Great idea; this is in partly at the moment (DmaMap class and obtaining host ptrs in the decoder).\n\nDoing the lock/unlock interface now. I also think the lock/unlock in the guest should be part of the guest\u0027s IOStream/QemuPipeStream. Designs for that incoming.",
+      "parentUuid": "30b088be_07890d0c",
+      "revId": "20dfc762ca77facd2c78d483760f836e83cee617",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30b088be_74ef51cf",
         "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl.in",
         "patchSetId": 23
