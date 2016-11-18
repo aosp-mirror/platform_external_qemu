@@ -102,9 +102,6 @@ gen-hw-config-defs = \
   $(eval LOCAL_GENERATED_SOURCES += $(QEMU_HW_CONFIG_DEFS_H))\
   $(eval LOCAL_C_INCLUDES += $(QEMU_HW_CONFIG_DEFS_INCLUDES))
 
-include $(LOCAL_PATH)/Makefile.android-emu.mk
-include $(LOCAL_PATH)/Makefile.qemu1-common.mk
-
 ifeq ($(BUILD_TARGET_OS),windows)
   # on Windows, link the icon file as well into the executable
   # unfortunately, our build system doesn't help us much, so we need
@@ -115,9 +112,9 @@ WINDRES_CPU_64 := x86-64
 
 EMULATOR_ICON_OBJ := $(BUILD_OBJS_DIR)/build/emulator_icon$(BUILD_TARGET_BITS).o
 $(EMULATOR_ICON_OBJ): PRIVATE_TARGET := $(WINDRES_CPU_$(BUILD_TARGET_BITS))
-$(EMULATOR_ICON_OBJ): $(LOCAL_PATH)/images/emulator_icon.rc
+$(EMULATOR_ICON_OBJ): $(LOCAL_PATH)/android/images/emulator_icon.rc
 	@echo "Windres ($(PRIVATE_TARGET)): $@"
-	$(hide) $(BUILD_TARGET_WINDRES) --target=pe-$(PRIVATE_TARGET) $< -I $(LOCAL_PATH)/images -o $@
+	$(hide) $(BUILD_TARGET_WINDRES) --target=pe-$(PRIVATE_TARGET) $< -I $(LOCAL_PATH)/android/images -o $@
 
 # Usage: $(eval $(call insert-windows-icon))
 define insert-windows-icon
@@ -125,6 +122,10 @@ define insert-windows-icon
 endef
 
 endif  # BUILD_TARGET_OS == windows
+
+include $(LOCAL_PATH)/Makefile.android-emu.mk
+include $(LOCAL_PATH)/Makefile.qemu1-common.mk
+
 
 # We want to build all variants of the emulator binaries. This makes
 # it easier to catch target-specific regressions during emulator development.
