@@ -122,12 +122,12 @@ else
 fi
 
 # Build the binaries from sources.
-cd "$PROGDIR"
+cd "$PROGDIR"/..
 rm -rf "$OUT_DIR"
 echo "Configuring build."
 export IN_ANDROID_REBUILD_SH=1
-run ./android-configure.sh --out-dir=$OUT_DIR "$@" ||
-    panic "Configuration error, please run ./android-configure.sh to see why."
+run android/configure.sh --out-dir=$OUT_DIR "$@" ||
+    panic "Configuration error, please run ./android/configure.sh to see why."
 
 CONFIG_MAKE=$OUT_DIR/build/config.make
 if [ ! -f "$CONFIG_MAKE" ]; then
@@ -276,7 +276,7 @@ if [ -z "$NO_TESTS" ]; then
             TEST_SCRIPT=$PROGDIR/../opengl/host/tools/emugen/tests/run-tests.sh
             if [ ! -f "$TEST_SCRIPT" ]; then
                 # This is the usual location.
-                TEST_SCRIPT=$PROGDIR/android/android-emugl/host/tools/emugen/tests/run-tests.sh
+                TEST_SCRIPT=$PROGDIR/android-emugl/host/tools/emugen/tests/run-tests.sh
             fi
             if [ ! -f "$TEST_SCRIPT" ]; then
                 echo " FAIL: Missing script: $TEST_SCRIPT"

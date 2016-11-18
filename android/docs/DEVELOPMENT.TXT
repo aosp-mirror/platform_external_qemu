@@ -50,9 +50,9 @@ II.2) Build the emulator binaries:
 After building all the dependencies, do:
 
   cd $TOP/external/qemu
-  ./android-rebuild.sh
+  ./android/rebuild.sh
 
-Note that android-rebuild.sh will build all sources, but also run a small
+Note that android/rebuild.sh will build all sources, but also run a small
 series of unit-tests to check that everything works as expected. In case
 of problem, use the --verbose flag to see what's failing.
 
@@ -65,19 +65,19 @@ describe them in detail, and provide an explanation of all supported options.
 On Linux, it is possible to build Windows binaries by using the --mingw option
 as in:
 
-  ./android-rebuild.sh --mingw
+  ./android/rebuild.sh --mingw
 
-If you have Wine installed, android-rebuild.sh will detect it and run the
+If you have Wine installed, android/rebuild.sh will detect it and run the
 unit-tests with it.
 
 IMPORTANT: Unfortunately, it's not possible to run the Windows emulator
            binaries under Wine anymore. This seems related to OpenGL API
            emulation issues in Wine.
 
-android-rebuild.sh also supports other interesting options (e.g. --debug to
+android/rebuild.sh also supports other interesting options (e.g. --debug to
 generate debug versions of the binaries). For all details, use:
 
-  ./android-rebuild.sh --help
+  ./android/rebuild.sh --help
 
 And read the output.
 
@@ -147,7 +147,7 @@ III. Testing:
 III.1) Unit-testing:
 - - - - - - - - - - -
 
-./android-rebuild.sh already runs a small set of unit test programs and
+./android/rebuild.sh already runs a small set of unit test programs and
 verification checks. If they fail, it will print an error message about it.
 
 Most unit-tests are in C++ and use the GoogleTest library. Whenever you add
@@ -160,7 +160,7 @@ III.2) Booting existing AVDs:
 - - - - - - - - - - - - - - -
 
 Otherwise, a simple way to test a emulator code change is trying to boot an
-existing AVD, by doing the following after calling android-rebuild.sh:
+existing AVD, by doing the following after calling android/rebuild.sh:
 
    export ANDROID_SDK_ROOT=/path/to/installed/android/sdk
    objs/emulator <your-options>
@@ -183,7 +183,7 @@ where <cpu> can be one of 'arm', 'x86', 'mips', 'x86_64', 'arm64' or 'mips64'.
 To boot the generated system image:
 
    cd $TOP/external/qemu
-   ./android-rebuild.sh
+   ./android/rebuild.sh
    export ANDROID_BUILD_TOP=/path/to/aosp
    objs/emulator <your-options>
 
@@ -280,7 +280,7 @@ GPU emulation relies on a set of sophisticated shared libraries. For all
 details, read docs/GPU-EMULATION.TXT.
 
 The corresponding sources live under android/android-emugl/ and are rebuilt
-by each call to android-rebuild.sh
+by each call to android/rebuild.sh
 
 
 V) Overview of all binaries:
@@ -329,7 +329,7 @@ of them:
     is a virtual cpu name, following QEMU convention (e.g. 'aarch64' for
     64-bit ARM CPUs).
 
-    They are built by android-rebuild.sh from the sources under
+    They are built by android/rebuild.sh from the sources under
     external/qemu-android/
 
     Note that these are slightly-modified QEMU programs, and thus accept
@@ -448,7 +448,7 @@ are the following:
        something that is put on git repositories. The purpose of this script
        is to rebuild the QEMU2 binaries from sources under
        $TOP/external/qemu-android, using the original QEMU2 configure/build
-       system (unlike android-rebuild.sh, which uses the emulator build
+       system (unlike android/rebuild.sh, which uses the emulator build
        system to compile them). The main difference is that said binaries
        cannot use the AndroidEmu library (see the documentation for it in
        docs/ANDROID-EMULATION-LIBRARY.TXT).
@@ -467,7 +467,7 @@ are the following:
                   scripts/gen-qemu2-sources-mk.sh
 
        to generate the correspond Android .mk rules used with
-       android-rebuild.sh, i.e.:
+       android/rebuild.sh, i.e.:
 
           external/qemu-android/android-qemu2-glue/ \
                   build/Makefile.qemu2-sources.mk

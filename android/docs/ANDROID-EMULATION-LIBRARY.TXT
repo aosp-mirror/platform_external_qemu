@@ -190,7 +190,7 @@ the following groups :
         the rest of QEMU1.
 
         To build it, one must use the --ui=qt flag when calling
-        android-configure.sh, android-rebuild.sh or package-release.sh
+        android/configure.sh, android/rebuild.sh or package-release.sh
 
   android/emulator-window.c:
         The main glue code between the generic skin UI code and the QEMU1
@@ -276,12 +276,12 @@ The current build system assumes the following:
   - QEMU2 binaries can be rebuilt as stand-alone binaries before the QEMU1
     ones, through a specialized script (android/scripts/build-qemu-android.sh)
 
-  - 'android-rebuild.sh' will rebuild QEMU1 binaries and copy QEMU2 prebuilts
+  - 'android/rebuild.sh' will rebuild QEMU1 binaries and copy QEMU2 prebuilts
     to the output directory location.
 
 This only works because QEMU2 sources don't depend on other code from the
 project, but this assumption will no longer hold true. As such, the build
-system (more precisely android-configure.sh and android-rebuild.sh) will
+system (more precisely android/configure.sh and android/rebuild.sh) will
 have to be adjusted to ensure that:
 
   - AndroidEmu code is built as a standalone static library before anything
@@ -294,7 +294,7 @@ have to be adjusted to ensure that:
     --android-libdir=<dir> to the QEMU2 'configure' script.
 
   - Ideally, all of AndroidEmu, QEMU1 and QEMU2 should be rebuilt by
-    android-rebuild.sh at the same time (but in the correct order), to
+    android/rebuild.sh at the same time (but in the correct order), to
     catch build breaks as soon as possible.
 
 Note that this requires running the QEMU2 'configure' script which is

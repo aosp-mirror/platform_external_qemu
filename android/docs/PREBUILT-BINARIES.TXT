@@ -15,7 +15,7 @@ for example:
     GPU emulation.
 
 This documents explains how these prebuilts were generated, how they are
-typically stored and managed by the android-rebuild.sh script.
+typically stored and managed by the android/rebuild.sh script.
 
 
 I. List of Android emulator prebuilt packages:
@@ -157,7 +157,7 @@ Consider providing an archive of the original content for this directory
 IV. How prebuilt binaries are used by the build:
 ================================================
 
-The android-rebuild.sh script is in charge of placing prebuilt binaries
+The android/rebuild.sh script is in charge of placing prebuilt binaries
 to the correct location under $OUT_DIR/, which defaults to objs/
 
 In particular:

@@ -58,7 +58,7 @@ and is *NOT* affected by this coding style guide.
       This is very similar (but simpler) than the Chromium base/ component.
 
       *IMPORTANT*: Any new addition here should come with unit-tests that
-                   will be run each time android-rebuild.sh runs.
+                   will be run each time android/rebuild.sh runs.
 
                    Also see android/base/testing/ for helper classes to use
                    inside your unit tests.
