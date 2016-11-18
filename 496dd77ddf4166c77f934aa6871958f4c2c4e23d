@@ -22,6 +22,30 @@
       "revId": "496dd77ddf4166c77f934aa6871958f4c2c4e23d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "90ecd40b_d1e264e9",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-18T20:11:13Z",
+      "side": 1,
+      "message": "Yes, there will be a patch to do that later, but I wanted to minimize the changes to the bare minimum for now.",
+      "parentUuid": "30ca486f_42533ffc",
+      "range": {
+        "startLine": 145,
+        "startChar": 0,
+        "endLine": 149,
+        "endChar": 3
+      },
+      "revId": "496dd77ddf4166c77f934aa6871958f4c2c4e23d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
