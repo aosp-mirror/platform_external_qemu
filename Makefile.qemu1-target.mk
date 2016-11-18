@@ -3,6 +3,9 @@
 # for arm, x86 and mips
 #
 
+OLD_LOCAL_PATH := $(LOCAL_PATH)
+LOCAL_PATH := $(call my-dir)
+
 ifndef EMULATOR_TARGET_ARCH
 $(error EMULATOR_TARGET_ARCH is not defined!)
 endif
@@ -30,6 +33,7 @@ endif
 
 # Common compiler flags for all target-dependent libraries
 EMULATOR_TARGET_INCLUDES := \
+    $(ANDROID_EMU_INCLUDES) \
     $(LOCAL_PATH)/android/config/target-$(EMULATOR_TARGET_ARCH) \
     $(LOCAL_PATH)/target-$(EMULATOR_TARGET_CPU) \
     $(LOCAL_PATH)/fpu \
@@ -260,3 +264,5 @@ ifeq ($(BUILD_TARGET_OS),windows)
 endif
 
 $(call end-emulator-program)
+
+LOCAL_PATH := $(OLD_LOCAL_PATH)

@@ -61,9 +61,9 @@ EMULATOR_COMMON_INCLUDES := \
 EMUGL_SRCDIR := $(LOCAL_PATH)/android/android-emugl
 EMUGL_INCLUDES := $(EMUGL_SRCDIR)/host/include
 ifeq (true,$(BUILD_EMUGL_PRINTOUT))
-	EMUGL_USER_CFLAGS := -DOPENGL_DEBUG_PRINTOUT
+    EMUGL_USER_CFLAGS := -DOPENGL_DEBUG_PRINTOUT
 else
-	EMUGL_USER_CFLAGS :=
+    EMUGL_USER_CFLAGS :=
 endif
 
 ##############################################################################
@@ -86,11 +86,13 @@ endif
 # which purpose is simply to host the generated header in its output directory.
 intermediates := $(call intermediates-dir-for,$(BUILD_TARGET_BITS),emulator_hw_config_defs)
 
-QEMU_HARDWARE_PROPERTIES_INI := $(LOCAL_PATH)/android/avd/hardware-properties.ini
+QEMU_HARDWARE_PROPERTIES_INI := \
+    $(_BUILD_ROOT)/android/android-emu/android/avd/hardware-properties.ini
+
 QEMU_HW_CONFIG_DEFS_H := $(intermediates)/android/avd/hw-config-defs.h
-$(QEMU_HW_CONFIG_DEFS_H): PRIVATE_PATH := $(LOCAL_PATH)
-$(QEMU_HW_CONFIG_DEFS_H): PRIVATE_CUSTOM_TOOL = $(PRIVATE_PATH)/android/tools/gen-hw-config.py $< $@
-$(QEMU_HW_CONFIG_DEFS_H): $(QEMU_HARDWARE_PROPERTIES_INI) $(LOCAL_PATH)/android/tools/gen-hw-config.py
+$(QEMU_HW_CONFIG_DEFS_H): PRIVATE_PATH := $(_BUILD_ROOT)/android/tools
+$(QEMU_HW_CONFIG_DEFS_H): PRIVATE_CUSTOM_TOOL = $(PRIVATE_PATH)/gen-hw-config.py $< $@
+$(QEMU_HW_CONFIG_DEFS_H): $(QEMU_HARDWARE_PROPERTIES_INI) $(PRIVATE_CUSTOM_TOOL)
 	$(hide) rm -f $@
 	$(transform-generated-source)
 
@@ -123,7 +125,8 @@ endef
 
 endif  # BUILD_TARGET_OS == windows
 
-include $(LOCAL_PATH)/Makefile.android-emu.mk
+include $(LOCAL_PATH)/android/android-emu/Makefile.android-emu.mk
+include $(LOCAL_PATH)/android/android-emu/Makefile.crash-service.mk
 include $(LOCAL_PATH)/Makefile.qemu1-common.mk
 
 
@@ -151,10 +154,12 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
     $(call start-emulator-program, emulator)
 
     LOCAL_SRC_FILES := \
-        android/main-emulator.cpp \
+        android/android-emu/android/main-emulator.cpp \
 
     # Needed to compile the call to androidQtSetupEnv() in main-emulator.cpp
     LOCAL_CFLAGS += -DCONFIG_QT
+
+    LOCAL_C_INCLUDES += $(ANDROID_EMU_INCLUDES)
 
     # Need the build number as well
     LOCAL_CFLAGS += $(EMULATOR_VERSION_CFLAGS)
@@ -191,8 +196,8 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
         android/emulator-check/main-emulator-check.cpp \
         android/emulator-check/PlatformInfo.cpp \
 
+    LOCAL_C_INCLUDES += $(ANDROID_EMU_INCLUDES)
     LOCAL_STATIC_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES)
-
     LOCAL_LDLIBS := $(ANDROID_EMU_LDLIBS)
 
     LOCAL_IGNORE_BITNESS := true
@@ -210,8 +215,6 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
 
     $(call end-emulator-program)
 endif  # BUILD_TARGET_BITS == EMULATOR_PROGRAM_BITNESS
-
-include $(LOCAL_PATH)/Makefile.crash-service.mk
 
 ##############################################################################
 ##############################################################################
