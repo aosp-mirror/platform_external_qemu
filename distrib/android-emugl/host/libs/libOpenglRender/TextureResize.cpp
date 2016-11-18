@@ -17,10 +17,13 @@
 #include "TextureResize.h"
 
 #include "DispatchTables.h"
-
+#include "FrameBuffer.h"
 #include "android/utils/debug.h"
 
+#include "GLES2/gl2ext.h"
+
 #include <stdio.h>
+#include <string.h>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -196,6 +199,18 @@ TextureResize::TextureResize(GLuint width, GLuint height) :
         mFactor(1),
         mFBWidth({0,}),
         mFBHeight({0,}) {
+    // SwiftShader strictly follows the GLESv2 spec and doesn't allow rendering
+    // into full GL_FLOAT textures. Let's detect it and reduce the precision
+    // on demand. BTW, GL_HALF_FLOAT is also only present in GLESv3, so use the
+    // extension instead.
+    const char* vendor, *renderer, *version;
+    FrameBuffer::getFB()->getGLStrings(&vendor, &renderer, &version);
+    if (renderer && strstr(renderer, "SwiftShader")) {
+        mTextureDataType = GL_HALF_FLOAT_OES;
+    } else {
+        mTextureDataType = GL_FLOAT;
+    }
+
     s_gles2.glGenTextures(1, &mFBWidth.texture);
     s_gles2.glBindTexture(GL_TEXTURE_2D, mFBWidth.texture);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -284,15 +299,17 @@ void TextureResize::setupFramebuffers(unsigned int factor) {
     // Update the framebuffer sizes to match the new factor.
     s_gles2.glBindTexture(GL_TEXTURE_2D, mFBWidth.texture);
     s_gles2.glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_RGB, mWidth / factor, mHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+        GL_TEXTURE_2D, 0, GL_RGB, mWidth / factor, mHeight, 0, GL_RGB,
+                mTextureDataType, nullptr);
     s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBWidth.framebuffer);
     s_gles2.glFramebufferTexture2D(
         GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFBWidth.texture, 0);
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, mFBHeight.texture);
-    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mWidth / factor, mHeight / factor, 0, GL_RGB,
-        GL_UNSIGNED_BYTE, nullptr);
+    s_gles2.glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_RGB, mWidth / factor, mHeight / factor, 0, GL_RGB,
+                mTextureDataType, nullptr);
     s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBHeight.framebuffer);
     s_gles2.glFramebufferTexture2D(
