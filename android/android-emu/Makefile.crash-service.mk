@@ -19,6 +19,9 @@
 #       EMULATOR_PROGRAM_BITNESS.
 #
 
+OLD_LOCAL_PATH := $(LOCAL_PATH)
+LOCAL_PATH := $(call my-dir)
+
 $(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)-crash-service)
 $(call gen-hw-config-defs)
 
@@ -150,3 +153,5 @@ LOCAL_LDLIBS += \
 $(call local-link-static-c++lib)
 
 $(call end-emulator-program)
+
+LOCAL_PATH := $(OLD_LOCAL_PATH)
