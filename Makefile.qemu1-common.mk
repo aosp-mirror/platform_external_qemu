@@ -10,6 +10,10 @@
 # of these components.
 #
 
+QEMU1_OLD_LOCAL_PATH := $(LOCAL_PATH)
+
+LOCAL_PATH := $(call my-dir)
+
 QEMU1_COMMON_CFLAGS := \
     $(EMULATOR_COMMON_CFLAGS) \
 
@@ -133,6 +137,7 @@ LOCAL_GENERATED_SOURCES += $(QEMU_GDBSTUB_XML_C)
 
 LOCAL_C_INCLUDES += \
     $(QEMU1_COMMON_INCLUDES) \
+    $(ANDROID_EMU_INCLUDES) \
     $(LOCAL_PATH)/slirp-android \
     $(intermediates) \
     $(LIBJPEG_INCLUDES) \
@@ -305,3 +310,5 @@ $$(QEMU_HEADER_H): $$(LOCAL_PATH)/$$1 $$(LOCAL_PATH)/hxtool
 LOCAL_GENERATED_SOURCES += $$(QEMU_HEADER_H)
 LOCAL_C_INCLUDES += $$(intermediates)
 endef
+
+LOCAL_PATH := $(QEMU1_OLD_LOCAL_PATH)

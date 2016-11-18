@@ -25,7 +25,7 @@ sdk {
         item(fprops) {
             notice null
         }
-        item('android/avd/hardware-properties.ini') {
+        item('android/android-emu/android/avd/hardware-properties.ini') {
             into 'lib'
             notice null
         }
@@ -95,7 +95,7 @@ sdk {
         item(fprops) {
             notice null
         }
-        item('android/avd/hardware-properties.ini') {
+        item('android/android-emu/android/avd/hardware-properties.ini') {
             into 'lib'
             notice null
         }

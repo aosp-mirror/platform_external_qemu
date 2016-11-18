@@ -42,7 +42,9 @@
 
 _ANDROID_EMU_OLD_LOCAL_PATH := $(LOCAL_PATH)
 
-_ANDROID_EMU_ROOT := $(call my-dir)
+LOCAL_PATH := $(call my-dir)
+
+_ANDROID_EMU_ROOT := $(LOCAL_PATH)
 
 ###############################################################################
 #
@@ -669,7 +671,7 @@ EMULATOR_LIBUI_LDFLAGS += $(QT_LDFLAGS)
 EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
 
 # The skin support sources
-include $(LOCAL_PATH)/android/skin/sources.mk
+include $(_ANDROID_EMU_ROOT)/android/skin/sources.mk
 
 EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES)
 

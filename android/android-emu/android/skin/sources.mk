@@ -24,4 +24,4 @@ ANDROID_SKIN_SOURCES := \
 # enable MMX code for our skin scaler
 ANDROID_SKIN_CFLAGS += -DUSE_MMX=1 -mmmx
 
-include $(LOCAL_PATH)/android/skin/qt/sources.mk
+include $(_ANDROID_EMU_ROOT)/android/skin/qt/sources.mk

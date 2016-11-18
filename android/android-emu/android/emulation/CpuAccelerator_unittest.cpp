@@ -76,7 +76,7 @@ TEST(cpuAcceleratorGetHaxVersion, Test) {
     const char* kext_dir[] = {
         "this-directory-does-not-exist",
         "android", // this directory exists but doesn't contain the file
-        "android/emulation",
+        "android/android-emu/android/emulation",
     };
 
     // this is a real version from from HAXM 1.2.1
