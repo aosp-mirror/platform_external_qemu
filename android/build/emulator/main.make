@@ -63,7 +63,7 @@ clean: clean-intermediates
 distclean: clean clean-config
 
 # let's roll
-include Makefile.top.mk
+include $(_BUILD_CORE_DIR)/Makefile.top.mk
 
 libraries: $(_BUILD_LIBRARIES)
 executables: $(_BUILD_EXECUTABLES)
