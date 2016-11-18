@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "b010f8cf_deb025dd",
+        "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl.attrib",
+        "patchSetId": 23
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-11-18T22:54:56Z",
+      "side": 1,
+      "message": "Working on interface for guest now. Current plan:\n\n1. Argument to any GL command that is of pointer type can be flagged as a \"DMA\", meaning taht the data is transferred through goldfish DMA.\n\n2. Lock and write to dma region is done in the guest encoder. Also va-\u003epa translation to tell the host\u0027s DmaMap where to find it in guest physical memory.\n\n3. The region is not necessarily the same one as the pipe (like with gralloc), so the pipe instance in the guest can also be associated with some pipe fd for which the write actually happens (bindDma/unbindDma), otherwise it is the dma region associated with the rendering thread\u0027s pipe.\n\n5. The host works on it, and when it\u0027s done, unlocks region via IRQ.\n\n6. Note that if there are several buffers for one command, we will want to specify them through separate offsets into the dma region (so there should be an interface for that). As it\u0027s contiguous, virtual offset should correspond to physical offset.",
+      "parentUuid": "30ca486f_8242b70a",
+      "revId": "20dfc762ca77facd2c78d483760f836e83cee617",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30b088be_74ef51cf",
         "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl.in",
         "patchSetId": 23
