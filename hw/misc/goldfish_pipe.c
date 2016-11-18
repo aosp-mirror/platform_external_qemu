@@ -138,7 +138,9 @@ enum {
 enum {
     PIPE_DEVICE_VERSION = 2,
     PIPE_DEVICE_VERSION_v1 = 1,
-    MAX_SUPPORTED_DRIVER_VERSION = 2,
+    // Currently we only support v3 driver for v2 pipe device, and anything
+    // else for v1 device.
+    MAX_SUPPORTED_DRIVER_VERSION = 3,
     PIPE_DRIVER_VERSION_v1 = 0,  // used to not report its version at all
 };
 
