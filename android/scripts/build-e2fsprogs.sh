@@ -61,7 +61,7 @@ package_builder_parse_package_list
 
 # For windows we have already downloaded the executables
 # so just uncompress them to the correct directory in
-# preparation for android-rebuild.sh.
+# preparation for android/rebuild.sh.
 # $1: Destination directory of dependencies
 WINDOWS_DEPENDENCIES="e2fsprogs-windows cygwin libcom_err2\
     libe2p2 libblkid1 libuuid1 libext2fs2 libgcc1 libiconv2 libintl8"

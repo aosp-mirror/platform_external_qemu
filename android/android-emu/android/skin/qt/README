@@ -21,7 +21,7 @@ By default the emulator still uses a SDL2-based UI backend, the Qt one
 is still experimental but can be enabled with the --ui=qt command-line
 option, as in:
 
-  ./android-rebuild.sh --ui=qt <other-options>
+  ./android/rebuild.sh --ui=qt <other-options>
 
 Use 'objs/emulator <options>' as usual to start the emulator. The build
 script takes care of copying the Qt shared libraries to the correct location,

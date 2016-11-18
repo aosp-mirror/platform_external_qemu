@@ -200,7 +200,7 @@ end-emulator-program = \
 # A variant of start-emulator-program that also links the Google Benchmark
 # library to the final program. Use with end-emulator-benchmark.
 # NOTE: These are _not_ compiled by default, unless BUILD_BENCHMARKS is
-# set to 'true', which happens is you call android-configure.sh with the
+# set to 'true', which happens is you call android/configure.sh with the
 # --benchmarks option.
 start-emulator-benchmark = \
   $(call start-emulator-program,$1)

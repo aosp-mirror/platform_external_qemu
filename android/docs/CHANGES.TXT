@@ -102,7 +102,7 @@ IMPORTANT CHANGES:
 
 OTHER:
 
-- Add a '--static' option to both android-configure.sh and android-rebuild.sh
+- Add a '--static' option to both android/configure.sh and android/rebuild.sh
   in order to build a completely static executable. This is required to run
   the emulator in restricted environments. No audio and graphics in this mode
   so using '-no-window' is required.

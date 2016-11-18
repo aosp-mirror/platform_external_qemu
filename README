@@ -2,6 +2,8 @@ This directory contains the sources of the Android emulator,
 a QEMU-based program to emulate virtual devices running various
 releases of the Android platform image.
 
+To build the emulator, run android/rebuild.sh.
+
 See the android/docs/ directory for more documentation about this
 code base and the platforms it emulates.
 
