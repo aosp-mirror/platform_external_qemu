@@ -1432,9 +1432,9 @@ avdInfo_getCharmapFile( const AvdInfo* i, const char* charmapName )
 
 int avdInfo_getAdbdCommunicationMode( const AvdInfo* i )
 {
-    if (i->apiLevel < 16) {
+    if (i->apiLevel < 16 || i->apiLevel > 99) {
         // QEMU pipe for ADB communication was added in android-4.1.1_r1 API 16
-        D("API < 16, forcing ro.adb.qemud==0");
+        D("API < 16 or unknown, forcing ro.adb.qemud==0");
         return 0;
     }
 
