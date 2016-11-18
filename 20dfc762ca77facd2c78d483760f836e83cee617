@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "30ca486f_8242b70a",
+        "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl.attrib",
+        "patchSetId": 23
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-18T17:53:49Z",
+      "side": 1,
+      "message": "Well, IMO it should be a separate class, accessible from IOStream via a getter. This way it will be easy to decouple",
+      "parentUuid": "30ca486f_c2d3cfee",
+      "revId": "20dfc762ca77facd2c78d483760f836e83cee617",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30b088be_74ef51cf",
         "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl.in",
         "patchSetId": 23
