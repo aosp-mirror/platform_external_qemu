@@ -240,12 +240,15 @@ extern bool skin_winsys_is_window_fully_visible()
     return value;
 }
 
+extern "C" void qemu_system_shutdown_request(void);
+
 extern void skin_winsys_quit_request()
 {
     D(__FUNCTION__);
     auto window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
+        qemu_system_shutdown_request();
         return;
     }
     window->requestClose();
