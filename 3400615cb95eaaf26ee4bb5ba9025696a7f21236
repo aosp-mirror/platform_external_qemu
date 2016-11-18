@@ -1,0 +1,280 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30ca486f_c47afc29",
+        "filename": "android/emulation/DmaMap.cpp",
+        "patchSetId": 25
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-18T18:06:57Z",
+      "side": 1,
+      "message": "this comment should be in the header :)",
+      "range": {
+        "startLine": 45,
+        "startChar": 4,
+        "endLine": 47,
+        "endChar": 25
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30ca486f_e4a53887",
+        "filename": "android/emulation/DmaMap.cpp",
+        "patchSetId": 25
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-18T18:06:57Z",
+      "side": 1,
+      "message": "please move the lock to the point where you\u0027re accessing |mDmaBuffers|",
+      "range": {
+        "startLine": 65,
+        "startChar": 4,
+        "endLine": 65,
+        "endChar": 45
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30ca486f_c4df5cf5",
+        "filename": "android/emulation/DmaMap.cpp",
+        "patchSetId": 25
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-18T18:06:57Z",
+      "side": 1,
+      "message": "what\u0027s the purpose of delayed address mapping? I could understand if it was async(), but it\u0027s just on demand.",
+      "range": {
+        "startLine": 90,
+        "startChar": 12,
+        "endLine": 90,
+        "endChar": 31
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30ca486f_c2b82fcb",
+        "filename": "android/emulation/DmaMap.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-18T18:06:57Z",
+      "side": 1,
+      "message": "should this be a part of DmaMap class, inside it?",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 22
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30ca486f_a2ddf32f",
+        "filename": "android/emulation/DmaMap.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-18T18:06:57Z",
+      "side": 1,
+      "message": "please name it bufferSize",
+      "range": {
+        "startLine": 27,
+        "startChar": 13,
+        "endLine": 27,
+        "endChar": 15
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30ca486f_0215c7f1",
+        "filename": "android/emulation/DmaMap.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-18T18:06:57Z",
+      "side": 1,
+      "message": "I think that host address should be a void*, as we know it\u0027s an address in this application.",
+      "range": {
+        "startLine": 28,
+        "startChar": 4,
+        "endLine": 28,
+        "endChar": 12
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30ca486f_82d8f73f",
+        "filename": "android/emulation/DmaMap.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-18T18:06:57Z",
+      "side": 1,
+      "message": "Optional\u003cvoid*\u003e ?",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 2
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30ca486f_c2f10fb5",
+        "filename": "android/emulation/DmaMap.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-18T18:06:57Z",
+      "side": 1,
+      "message": "nit: just ()",
+      "range": {
+        "startLine": 43,
+        "startChar": 40,
+        "endLine": 43,
+        "endChar": 44
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30ca486f_029a275b",
+        "filename": "android/emulation/DmaMap.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-18T18:06:57Z",
+      "side": 1,
+      "message": "why everything is virtual? can you implement these in terms of private virtual functions and allow overriding only those?",
+      "range": {
+        "startLine": 40,
+        "startChar": 1,
+        "endLine": 43,
+        "endChar": 46
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30ca486f_a2ab336b",
+        "filename": "android/emulation/DmaMap.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-18T18:06:57Z",
+      "side": 1,
+      "message": "I\u0027d prefer if we passed the instance around explicitly instead of relying on a singleton. But that\u0027s something I just like more, not that important",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 39
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30ca486f_42ac1f87",
+        "filename": "android/emulation/DmaMap.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-18T18:06:57Z",
+      "side": 1,
+      "message": "why everything is virtual?",
+      "range": {
+        "startLine": 49,
+        "startChar": 4,
+        "endLine": 49,
+        "endChar": 11
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30ca486f_22c00336",
+        "filename": "android/emulation/DmaMap.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-18T18:06:57Z",
+      "side": 1,
+      "message": "\u003d 0 ?",
+      "range": {
+        "startLine": 54,
+        "startChar": 3,
+        "endLine": 57,
+        "endChar": 56
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
