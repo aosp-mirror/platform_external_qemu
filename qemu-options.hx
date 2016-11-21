@@ -1763,4 +1763,7 @@ DEF("snapshot-no-time-update", 0, QEMU_OPTION_snapshot_no_time_update, \
 DEF("skip-adb-auth", 0, QEMU_OPTION_android_skip_adb_auth, \
     "-skip-adb-auth Skip adb authentication dialogue\n")
 
+DEF("api-level", HAS_ARG, QEMU_OPTION_android_api_level, \
+    "-api-level Set Android API level\n")
+
 #endif /* ANDROID */

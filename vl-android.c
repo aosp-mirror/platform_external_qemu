@@ -1879,6 +1879,7 @@ int main(int argc, char **argv, char **envp)
     int show_vnc_port = 0;
     CIniFile *hw_ini = NULL;
     int adb_auth = 1;
+    int api_level = -1;
 
     /* Ensure Looper implementation for this thread is based on the QEMU
      * main loop. */
@@ -2733,6 +2734,9 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_android_skip_adb_auth:
                 adb_auth = 0;
                 break;
+            case QEMU_OPTION_android_api_level:
+                api_level = atoi((char*)optarg);
+                break;
             default:
                 os_parse_cmd_args(popt->index, optarg);
             }
@@ -3033,7 +3037,8 @@ int main(int argc, char **argv, char **envp)
         // the error in |opengl_broken| instead.
         if (android_initOpenglesEmulation() != 0 ||
             android_startOpenglesRenderer(android_hw->hw_lcd_width,
-                                          android_hw->hw_lcd_height) != 0)
+                                          android_hw->hw_lcd_height,
+                                          api_level) != 0)
         {
             opengl_broken = true;
         }

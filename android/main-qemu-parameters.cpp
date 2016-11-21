@@ -103,6 +103,7 @@ QemuParameters* qemu_parameters_create(const char* argv0,
     // Virtual tty setup. Note: this must be synced with the code in
     // android/main-kernel-parameters.cpp. See technical note in this file.
     int apiLevel = avdInfo_getApiLevel(avd);
+    params.addFormatRaw("-api-level %d", apiLevel);
     android::setupVirtualSerialPorts(nullptr, &params, apiLevel, targetArch,
                                      "",  // kernelSerialPrefix
                                      isQemu2, opts->show_kernel,
