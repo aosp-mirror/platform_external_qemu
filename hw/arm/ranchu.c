@@ -534,7 +534,7 @@ static void ranchu_init(MachineState *machine)
     create_simple_device(vbi, pic, RANCHU_GOLDFISH_PIPE, "goldfish_pipe",
                          "google,android-pipe\0"
                          "generic,android-pipe", 2, 0, 0);
-    create_simple_device(vbi, pic, RANCHU_GOLDFISH_SYNC, "goldfish-sync",
+    create_simple_device(vbi, pic, RANCHU_GOLDFISH_SYNC, "goldfish_sync",
                          "google,goldfish-sync\0"
                          "generic,goldfish-sync", 2, 0, 0);
 
