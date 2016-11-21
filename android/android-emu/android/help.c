@@ -1411,6 +1411,18 @@ help_wait_for_debugger(stralloc_t* out)
     );
 }
 
+static void
+help_cores(stralloc_t* out)
+{
+    PRINTF(
+    "  Request the emulator to simulate <count> virtual CPU cores. This is\n"
+    "  only useful when using accelerated CPU emulation, since it allows\n"
+    "  mapping virtual CPU cores to individual host ones for improved\n"
+    "  performance. Default value comes from your AVD configuration, and\n"
+    "  is typically 2.\n\n"
+    );
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper

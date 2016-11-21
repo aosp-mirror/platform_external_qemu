@@ -1756,6 +1756,25 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         stralloc_reset(newOption);
     }
 
+    // Virtual CPU core count.
+    if (opts->cores) {
+        if (is_qemu2) {
+            char* end = NULL;
+            long val = strtol(opts->cores, &end, 10);
+            if (*end != '\0' || val <= 0 || val > 64) {
+                derror("Invalid value for -cores <count> parameter: %s\n",
+                    "Valid values are decimal count between 1 and 64\n",
+                    opts->cores);
+                return false;
+            }
+            hw->hw_cpu_ncore = (int)val;
+        } else {
+            dwarning("Classic QEMU doesn't support -cores option, only one\n"
+                     "virtual CPU can be emulated with this engine.\n");
+            str_reset_null(&opts->cores);
+        }
+    }
+
     // Unix pipe paths
     {
         ParamList* opt = opts->unix_pipe;
