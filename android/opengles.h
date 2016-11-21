@@ -31,8 +31,12 @@ int android_initOpenglesEmulation(void);
 /* Tries to start the renderer process. Returns 0 on success, -1 on error.
  * At the moment, this must be done before the VM starts. The onPost callback
  * may be NULL.
+ *
+ * width and height: the framebuffer dimensions that will be reported
+ *                   to the guest display driver.
+ * guestApiLevel: API level of guest image (23 for mnc, 24 for nyc, etc)
  */
-int android_startOpenglesRenderer(int width, int height);
+int android_startOpenglesRenderer(int width, int height, int guestApiLevel);
 
 /* See the description in render_api.h. */
 typedef void (*OnPostFunc)(void* context, int width, int height, int ydir,

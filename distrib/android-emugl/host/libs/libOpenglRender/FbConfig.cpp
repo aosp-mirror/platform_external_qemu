@@ -14,6 +14,7 @@
 
 #include "FbConfig.h"
 
+#include "emugl/common/misc.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
 
 #include <stdio.h>
@@ -163,10 +164,16 @@ int FbConfigList::chooseConfig(const EGLint* attribs,
     // what it used by the current implementation, exclusively. This forces
     // the rewrite of |attribs| into a new array.
     bool hasSurfaceType = false;
+    bool wantSwapPreserved = false;
+    int surfaceTypeIdx = 0;
     int numAttribs = 0;
     while (attribs[numAttribs] != EGL_NONE) {
         if (attribs[numAttribs] == EGL_SURFACE_TYPE) {
             hasSurfaceType = true;
+            surfaceTypeIdx = numAttribs;
+            if (attribs[numAttribs+1] & EGL_SWAP_BEHAVIOR_PRESERVED_BIT) {
+                wantSwapPreserved = true;
+            }
         }
         numAttribs += 2;
     }
@@ -180,6 +187,15 @@ int FbConfigList::chooseConfig(const EGLint* attribs,
         newAttribs[numAttribs] = EGL_SURFACE_TYPE;
         newAttribs[numAttribs + 1] = 0;
         newAttribs[numAttribs + 2] = EGL_NONE;
+    } else if (wantSwapPreserved && emugl::getApiLevel() <= 19) {
+        // For api <= 19, there is a bug in some public system images
+        // that causes UI issue if the host rejects
+        // EGL_SWAP_BEHAVIOR_PRESERVED_BIT, while they are not using
+        // this feature.
+        // So we wipe it out.
+        newAttribs = new GLint[numAttribs+1];
+        memcpy(newAttribs, attribs, (numAttribs+1) * sizeof(GLint));
+        newAttribs[surfaceTypeIdx+1] &= ~(EGLint)EGL_SWAP_BEHAVIOR_PRESERVED_BIT;
     }
 
     if (s_egl.eglChooseConfig(mDisplay,
