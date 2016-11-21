@@ -18,9 +18,14 @@
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
+#include "emugl/common/misc.h"
 #include "emugl/common/sync_device.h"
 
 namespace emugl {
+
+void RenderLibImpl::setApiLevel(int api) {
+    emugl::setApiLevel(api);
+}
 
 void RenderLibImpl::setLogger(emugl_logger_struct logger) {
     set_emugl_logger(logger.coarse);

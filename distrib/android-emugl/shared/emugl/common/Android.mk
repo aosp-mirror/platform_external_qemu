@@ -9,6 +9,7 @@ commonSources := \
         crash_reporter.cpp \
         feature_control.cpp \
         logging.cpp \
+        misc.cpp \
         shared_library.cpp \
         stringparsing.cpp \
         sockets.cpp \
