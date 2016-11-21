@@ -4466,7 +4466,9 @@ int main(int argc, char** argv, char** envp)
     } else if (android_hw->hw_gpu_enabled) {
         if (android_initOpenglesEmulation() != 0 ||
             android_startOpenglesRenderer(android_hw->hw_lcd_width,
-                                          android_hw->hw_lcd_height) != 0) {
+                                          android_hw->hw_lcd_height,
+                                          avdInfo_getApiLevel(android_avdInfo))
+                != 0) {
             is_opengl_alive = 0;
         } else {
             goldfish_fb_set_use_host_gpu(1);
