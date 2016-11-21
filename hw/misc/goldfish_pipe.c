@@ -807,13 +807,17 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
 
         case PIPE_CMD_READ:
         case PIPE_CMD_WRITE: {
-            bool willModifyData = command == PIPE_CMD_READ;
+            const bool willModifyData = command == PIPE_CMD_READ;
             pipe->command_buffer->rw_params.consumed_size = 0;
             unsigned buffers_count =
                     pipe->command_buffer->rw_params.buffers_count;
             if (buffers_count > pipe->rw_params_max_count) {
                 buffers_count = pipe->rw_params_max_count;
             }
+
+            // This isn't supposed to happen, what's the puprose of calling
+            // us with no data?
+            assert(buffers_count);
 
             // We know that the |rw_params| fit into single page as of now, so
             // we're free to estimate the maximum size this way.
@@ -824,16 +828,35 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
             GoldfishPipeBuffer buffers[
                     COMMAND_BUFFER_SIZE / (sizeof(*rwPtrs) + sizeof(*rwSizes))];
 
-            unsigned i;
-            for (i = 0; i < buffers_count; ++i) {
-                buffers[i].size = rwSizes[i];
-                buffers[i].data = map_guest_buffer(
-                                      rwPtrs[i], rwSizes[i], willModifyData);
-                if (!buffers[i].data) {
-                    pipe->command_buffer->status = GOLDFISH_PIPE_ERROR_INVAL;
-                    goto done;
-                }
+            buffers[0].size = rwSizes[0];
+            buffers[0].data = map_guest_buffer(
+                                  rwPtrs[0], rwSizes[0], willModifyData);
+            if (!buffers[0].data) {
+                pipe->command_buffer->status = GOLDFISH_PIPE_ERROR_INVAL;
+                break;
             }
+            // All passed buffers are allocated in the same guest process, so
+            // know they all have the same offset from the host address.
+            const ptrdiff_t diffFromGuest =
+                    (intptr_t)buffers[0].data - (intptr_t)rwPtrs[0];
+            unsigned i;
+            for (i = 1; i < buffers_count; ++i) {
+                buffers[i].data = rwPtrs[i] + diffFromGuest;
+                buffers[i].size = rwSizes[i];
+                assert(buffers[i].data != NULL);
+                assert(buffers[i].size != 0);
+            }
+
+#ifndef NDEBUG
+            // Verify that our interpolated mappings are actually correct
+            for (i = 1; i < buffers_count; ++i) {
+                void* const mapping = map_guest_buffer(rwPtrs[i], rwSizes[i],
+                                                       willModifyData);
+                assert(mapping == buffers[i].data);
+                cpu_physical_memory_unmap(mapping, rwSizes[i],
+                                          willModifyData, rwSizes[i]);
+            }
+#endif
 
             pipe->command_buffer->status =
                     willModifyData
@@ -854,14 +877,8 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
                (willModifyData ? "READ" : "WRITE"), (int)pipe->id,
                (int)buffers_count, pipe->command_buffer->status);
 
-            // C doesn't allow a label on a declaration, so this has to be
-            // before the labelled statement.
-            unsigned j;
-        done:
-            for (j = 0; j < i; ++j) {
-                cpu_physical_memory_unmap(buffers[j].data, buffers[j].size,
-                                          willModifyData, buffers[j].size);
-            }
+            cpu_physical_memory_unmap(buffers[0].data, buffers[0].size,
+                                      willModifyData, buffers[0].size);
             break;
         }
 
