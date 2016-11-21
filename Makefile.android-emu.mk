@@ -281,6 +281,7 @@ LOCAL_SRC_FILES := \
     android/metrics/IniFileAutoFlusher.cpp \
     android/metrics/metrics_reporter.cpp \
     android/metrics/metrics_reporter_toolbar.cpp \
+    android/metrics/MetricsPaths.cpp \
     android/metrics/StudioConfig.cpp \
     android/misc/Random.cpp \
     android/multitouch-port.c \
