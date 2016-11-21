@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "90ecd40b_54db02d9",
+        "filename": "android/opengl/OpenglEsPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-21T15:35:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30b088be_119ddd41",
+      "range": {
+        "startLine": 303,
+        "startChar": 30,
+        "endLine": 303,
+        "endChar": 32
+      },
+      "revId": "5d5c154268aa67cbc99167f4003bc47a7bac3bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30b088be_bef7f8b3",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/ChannelStream.cpp",
         "patchSetId": 7
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "90ecd40b_7465e634",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ChannelStream.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-21T15:35:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30b088be_bef7f8b3",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 67,
+        "endChar": 28
+      },
+      "revId": "5d5c154268aa67cbc99167f4003bc47a7bac3bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30b088be_7eee6007",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/ChannelStream.cpp",
         "patchSetId": 7
@@ -59,6 +107,30 @@
       "writtenOn": "2016-11-16T17:27:55Z",
       "side": 1,
       "message": "ping about assert() instead of any code here with a comment that it can\u0027t be reached\nOr, you could restructure the code to make it reachable:\n\n    ...\n    if (result \u003d\u003d IoResult::Ok) {\n        mReadBufferLeft \u003d mReadBuffer.size();\n    } else {\n        if (count \u003e 0) {\n            // We\u0027ve got some data to return without blocking.\n            break;\n        }\n        // |result| can only be IoResult::TryAgain if readFromGuest() call was nonblocking; that\u0027s what we do if |count| \u003e 0, and we\u0027ve checked for it already.\n        assert(result \u003d\u003d IoResult::Error);\n        D(\"error while trying to read\");\n        return nullptr;\n    } // if\n} // while",
+      "range": {
+        "startLine": 85,
+        "startChar": 0,
+        "endLine": 85,
+        "endChar": 45
+      },
+      "revId": "5d5c154268aa67cbc99167f4003bc47a7bac3bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "90ecd40b_5462e22e",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ChannelStream.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-21T15:35:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30b088be_7eee6007",
       "range": {
         "startLine": 85,
         "startChar": 0,
@@ -117,6 +189,30 @@
     },
     {
       "key": {
+        "uuid": "90ecd40b_b47a2eda",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ChannelStream.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-21T15:35:16Z",
+      "side": 1,
+      "message": "Changed to mWriteBuffer :)",
+      "parentUuid": "30b088be_1e088c06",
+      "range": {
+        "startLine": 41,
+        "startChar": 26,
+        "endLine": 41,
+        "endChar": 30
+      },
+      "revId": "5d5c154268aa67cbc99167f4003bc47a7bac3bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30b088be_7e17402f",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderThread.cpp",
         "patchSetId": 7
@@ -128,6 +224,30 @@
       "writtenOn": "2016-11-16T17:27:55Z",
       "side": 1,
       "message": "please call IOStream\u0027s public non-virtual function here: I was trying to make the virtual functions implementation detail, bug forgot to move them out of \"public\" in ChannelStream.\nif (stream.read(\u0026flags, sizeof(flags)) !\u003d sizeof(flags) {\n   ...\n}",
+      "range": {
+        "startLine": 65,
+        "startChar": 16,
+        "endLine": 65,
+        "endChar": 20
+      },
+      "revId": "5d5c154268aa67cbc99167f4003bc47a7bac3bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "90ecd40b_346f5e17",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderThread.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-21T15:35:16Z",
+      "side": 1,
+      "message": "Done, but I had to rename the overriden method to readRaw() otherwise the compiler would always prefer it to the public read() method, for some reason :-/",
+      "parentUuid": "30b088be_7e17402f",
       "range": {
         "startLine": 65,
         "startChar": 16,
