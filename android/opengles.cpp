@@ -119,7 +119,7 @@ BAD_EXIT:
 }
 
 int
-android_startOpenglesRenderer(int width, int height)
+android_startOpenglesRenderer(int width, int height, int api)
 {
     if (!sRenderLib) {
         D("Can't start OpenGLES renderer without support libraries");
@@ -132,6 +132,7 @@ android_startOpenglesRenderer(int width, int height)
 
     android_init_opengl_logger();
 
+    sRenderLib->setApiLevel(api);
     sRenderLib->setCrashReporter(&crashhandler_die_format);
     sRenderLib->setFeatureController(&android::featurecontrol::isEnabled);
     sRenderLib->setSyncDevice(goldfish_sync_create_timeline,

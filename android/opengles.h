@@ -32,7 +32,7 @@ int android_initOpenglesEmulation(void);
  * At the moment, this must be done before the VM starts. The onPost callback
  * may be NULL.
  */
-int android_startOpenglesRenderer(int width, int height);
+int android_startOpenglesRenderer(int width, int height, int api);
 
 /* See the description in render_api.h. */
 typedef void (*OnPostFunc)(void* context, int width, int height, int ydir,
