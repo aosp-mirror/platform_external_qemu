@@ -224,12 +224,15 @@ if [ -z "$NO_TESTS" ]; then
         done
     fi
 
+    # NOTE: lib[64]OpenglRender_unittests are temporarily disabled because they
+    #       fail to run on our build servers, which use a different libstdc++
+    #       version :-/
+
     if [ "$RUN_32BIT_TESTS" ]; then
         echo "Running 32-bit unit test suite."
         for UNIT_TEST in android_emu_unittests emugl_common_host_unittests \
                          emulator_libui_unittests \
                          emulator_crashreport_unittests \
-                         libOpenglRender_unittests \
                          libGLcommon_unittests; do
             for TEST in $OUT_DIR/$UNIT_TEST$EXE_SUFFIX; do
                 echo "   - ${TEST#$OUT_DIR/}"
@@ -243,7 +246,6 @@ if [ -z "$NO_TESTS" ]; then
         for UNIT_TEST in android_emu64_unittests emugl64_common_host_unittests \
                          emulator64_libui_unittests \
                          emulator64_crashreport_unittests \
-                         lib64OpenglRender_unittests \
                          lib64GLcommon_unittests; do
              for TEST in $OUT_DIR/$UNIT_TEST$EXE_SUFFIX; do
                  echo "   - ${TEST#$OUT_DIR/}"
