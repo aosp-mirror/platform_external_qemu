@@ -17,7 +17,7 @@ $(call emugl-begin-static-library,libOpenglCodecCommon)
 
 LOCAL_SRC_FILES := $(host_commonSources)
 $(call emugl-import, libemugl_common)
-$(call emugl-export,C_INCLUDES,$(EMUGL_PATH)/host/include/libOpenglRender $(LOCAL_PATH))
+$(call emugl-export,C_INCLUDES,$(EMUGL_PATH)/host/include/OpenglRender $(LOCAL_PATH))
 $(call emugl-export,LDLIBS,$(host_commonLdLibs))
 $(call emugl-end-module)
 
