@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b010f8cf_9f2df606",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-11-22T06:41:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30b088be_94a0cdd8",
+      "range": {
+        "startLine": 270,
+        "startChar": 44,
+        "endLine": 270,
+        "endChar": 59
+      },
+      "revId": "12bf3dc75e3993d283da434e15f1c822b64e777b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30b088be_d47ac564",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
         "patchSetId": 29
@@ -36,6 +60,30 @@
       "writtenOn": "2016-11-17T07:03:14Z",
       "side": 1,
       "message": "parameter isn\u0027t really used",
+      "range": {
+        "startLine": 63,
+        "startChar": 30,
+        "endLine": 63,
+        "endChar": 34
+      },
+      "revId": "12bf3dc75e3993d283da434e15f1c822b64e777b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b010f8cf_7f100271",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-11-22T06:41:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30b088be_d47ac564",
       "range": {
         "startLine": 63,
         "startChar": 30,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "b010f8cf_5ffc1e00",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-11-22T06:41:28Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "30b088be_942bed44",
+      "range": {
+        "startLine": 91,
+        "startChar": 27,
+        "endLine": 91,
+        "endChar": 58
+      },
+      "revId": "12bf3dc75e3993d283da434e15f1c822b64e777b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30b088be_f47fc152",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
         "patchSetId": 29
@@ -82,6 +154,30 @@
       "writtenOn": "2016-11-17T07:03:14Z",
       "side": 1,
       "message": "why do you need any pixels here? as I understand, nullptr could be OK here, as this is an output, not input texture",
+      "range": {
+        "startLine": 109,
+        "startChar": 25,
+        "endLine": 109,
+        "endChar": 31
+      },
+      "revId": "12bf3dc75e3993d283da434e15f1c822b64e777b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b010f8cf_1f3c66d5",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-11-22T06:41:28Z",
+      "side": 1,
+      "message": "I was using them for testing purposes earlier. Removed",
+      "parentUuid": "30b088be_f47fc152",
       "range": {
         "startLine": 109,
         "startChar": 25,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "b010f8cf_ff407254",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-11-22T06:41:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30b088be_14e29d14",
+      "range": {
+        "startLine": 118,
+        "startChar": 30,
+        "endLine": 118,
+        "endChar": 36
+      },
+      "revId": "12bf3dc75e3993d283da434e15f1c822b64e777b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30b088be_f4582119",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
         "patchSetId": 29
@@ -128,6 +248,30 @@
       "writtenOn": "2016-11-17T07:03:14Z",
       "side": 1,
       "message": "can you use buffers instead of a texture here? it looked like mapping a buffer and memcpying into it is a faster operation",
+      "range": {
+        "startLine": 125,
+        "startChar": 12,
+        "endLine": 125,
+        "endChar": 27
+      },
+      "revId": "12bf3dc75e3993d283da434e15f1c822b64e777b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b010f8cf_bf531a2f",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-11-22T06:41:28Z",
+      "side": 1,
+      "message": "We definitely could---I\u0027ll work out the problems with PBO usage on Mac in the PBO CL.",
+      "parentUuid": "30b088be_f4582119",
       "range": {
         "startLine": 125,
         "startChar": 12,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "b010f8cf_1f7346c8",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-11-22T06:41:28Z",
+      "side": 1,
+      "message": "I find yuv.rgb to be confusing. I just put [0,1,2] here",
+      "parentUuid": "30b088be_141ffd24",
+      "range": {
+        "startLine": 181,
+        "startChar": 4,
+        "endLine": 183,
+        "endChar": 9
+      },
+      "revId": "12bf3dc75e3993d283da434e15f1c822b64e777b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30b088be_945d2d09",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
         "patchSetId": 29
@@ -174,6 +342,30 @@
       "writtenOn": "2016-11-17T07:03:14Z",
       "side": 1,
       "message": "just curious how fast are these. you definitely can move them out, but is it worth it?\nIt might be slow: http://stackoverflow.com/questions/29084720/glgetuniformlocation-using-a-lot-of-cpu",
+      "range": {
+        "startLine": 264,
+        "startChar": 0,
+        "endLine": 272,
+        "endChar": 74
+      },
+      "revId": "12bf3dc75e3993d283da434e15f1c822b64e777b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b010f8cf_5f909e9f",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-11-22T06:41:28Z",
+      "side": 1,
+      "message": "Good catch---moved them out.",
+      "parentUuid": "30b088be_945d2d09",
       "range": {
         "startLine": 264,
         "startChar": 0,
@@ -203,6 +395,24 @@
     },
     {
       "key": {
+        "uuid": "b010f8cf_1f8a266e",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-11-22T06:41:28Z",
+      "side": 1,
+      "message": "Not needed anymore",
+      "parentUuid": "30b088be_746431c9",
+      "revId": "12bf3dc75e3993d283da434e15f1c822b64e777b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30b088be_d40de51f",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/YUVConverter.h",
         "patchSetId": 29
@@ -214,6 +424,30 @@
       "writtenOn": "2016-11-17T07:03:14Z",
       "side": 1,
       "message": "typo",
+      "range": {
+        "startLine": 32,
+        "startChar": 34,
+        "endLine": 32,
+        "endChar": 40
+      },
+      "revId": "12bf3dc75e3993d283da434e15f1c822b64e777b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b010f8cf_9f13b67e",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/YUVConverter.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-11-22T06:41:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30b088be_d40de51f",
       "range": {
         "startLine": 32,
         "startChar": 34,
