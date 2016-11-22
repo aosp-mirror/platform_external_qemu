@@ -22,6 +22,30 @@
       "revId": "1f8c153b0964d2d7501bb2d393196c1b9b57bacd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "90ecd40b_91dcdc32",
+        "filename": "android/android-emu/android/skin/qt/README",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-22T18:02:57Z",
+      "side": 1,
+      "message": "No, this comment is obsolete, but it will be easier to update the document after all the moves / renames.",
+      "parentUuid": "30ca486f_226e43a9",
+      "range": {
+        "startLine": 24,
+        "startChar": 23,
+        "endLine": 24,
+        "endChar": 30
+      },
+      "revId": "1f8c153b0964d2d7501bb2d393196c1b9b57bacd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
