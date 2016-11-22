@@ -280,12 +280,17 @@ static bool setup_console_and_adb_ports(int console_port,
                                         int adb_port,
                                         bool legacy_adb,
                                         const AndroidConsoleAgents* agents) {
+    VERBOSE_PRINT(init,
+                  "(%s) trying console port %d, adb port %d (legacy: %s)",
+                  __func__,
+                  console_port, adb_port, legacy_adb ? "true" : "false");
+
     bool register_adb_service = false;
-    // The guest IP that ADB listens to in legacy mode.
-    uint32_t guest_ip;
-    inet_strtoip("10.0.2.15", &guest_ip);
 
     if (legacy_adb) {
+        // The guest IP that ADB listens to in legacy mode.
+        uint32_t guest_ip;
+        inet_strtoip("10.0.2.15", &guest_ip);
         agents->net->slirpRedir(false, adb_port, guest_ip, 5555);
     } else {
         if (adb_server_init(adb_port) < 0) {
@@ -324,6 +329,8 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
                    adb_host_port_str);
             return false;
         }
+        VERBOSE_PRINT(init, "(%s) using custom adb server port %d",
+                      __func__, android_adb_port);
     }
 
     if (android_op_port && android_op_ports) {

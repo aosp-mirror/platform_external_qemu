@@ -667,6 +667,9 @@ static void control_global_accept6(void* opaque,
 
 int android_console_start(int control_port,
                           const AndroidConsoleAgents* agents) {
+    VERBOSE_PRINT(init,
+                  "(%s) initializing on port %d", __func__, control_port);
+
     ControlGlobal global = &_g_global;
 
     memset( global, 0, sizeof(*global) );

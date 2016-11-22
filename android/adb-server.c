@@ -421,6 +421,8 @@ int
 adb_server_init(int port)
 {
     if (!_adb_server_initialized) {
+        VERBOSE_PRINT(init, "(%s) initializing on port %d", __func__, port);
+
         /* Initialize the descriptor. */
         memset(&_adb_server, 0, sizeof(_adb_server));
         alist_init(&_adb_server.adb_hosts);
