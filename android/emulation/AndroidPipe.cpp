@@ -319,14 +319,10 @@ struct PipeWakeCommand {
 class PipeWaker final : public DeviceContextRunner<PipeWakeCommand> {
 public:
     void signalWake(void* hwPipe, int wakeFlags) {
-        PipeWakeCommand wake_cmd {
-            .hwPipe = hwPipe,
-            .wakeFlags = wakeFlags,
-        };
-        queueDeviceOperation(wake_cmd);
+        queueDeviceOperation({ hwPipe, wakeFlags });
     }
     void closeFromHost(void* hwPipe) {
-        this->signalWake(hwPipe, PIPE_WAKE_CLOSED);
+        signalWake(hwPipe, PIPE_WAKE_CLOSED);
     }
 private:
     virtual void performDeviceOperation(const PipeWakeCommand& wake_cmd) {
