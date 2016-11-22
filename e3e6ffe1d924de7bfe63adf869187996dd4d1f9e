@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f027d048_5a5d3533",
+        "filename": "android/opengles.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-11-22T20:17:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b010f8cf_7fdfe252",
+      "range": {
+        "startLine": 122,
+        "startChar": 57,
+        "endLine": 122,
+        "endChar": 60
+      },
+      "revId": "e3e6ffe1d924de7bfe63adf869187996dd4d1f9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b010f8cf_edd9eb13",
         "filename": "android/opengles.h",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2016-11-22T04:02:38Z",
       "side": 1,
       "message": "please call it guestApiLevel and document the parameter. api in this context might mean anything from the our gl emulation library version to host\u0027s Opengl supported API version",
+      "range": {
+        "startLine": 35,
+        "startChar": 61,
+        "endLine": 35,
+        "endChar": 64
+      },
+      "revId": "e3e6ffe1d924de7bfe63adf869187996dd4d1f9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f027d048_ba77a9b0",
+        "filename": "android/opengles.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-11-22T20:17:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b010f8cf_edd9eb13",
       "range": {
         "startLine": 35,
         "startChar": 61,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "f027d048_7a81114c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FbConfig.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-11-22T20:17:15Z",
+      "side": 1,
+      "message": "0 is valid. We are expected to have this attribute even if it is 0.",
+      "parentUuid": "b010f8cf_822fd9e3",
+      "range": {
+        "startLine": 198,
+        "startChar": 40,
+        "endLine": 198,
+        "endChar": 80
+      },
+      "revId": "e3e6ffe1d924de7bfe63adf869187996dd4d1f9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b010f8cf_22adcd38",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FbConfig.cpp",
         "patchSetId": 4
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "f027d048_3a7b9994",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FbConfig.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-11-22T20:17:15Z",
+      "side": 1,
+      "message": "sorry, will remove this.",
+      "parentUuid": "b010f8cf_22adcd38",
+      "range": {
+        "startLine": 208,
+        "startChar": 7,
+        "endLine": 210,
+        "endChar": 24
+      },
+      "revId": "e3e6ffe1d924de7bfe63adf869187996dd4d1f9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b010f8cf_c2b4b184",
         "filename": "distrib/android-emugl/shared/emugl/common/Android.mk",
         "patchSetId": 4
@@ -105,6 +201,30 @@
       "writtenOn": "2016-11-22T04:02:38Z",
       "side": 1,
       "message": "\"misc\" is too generic name - people tend to pile up everything new there as anything can be put into \u0027misc\u0027. what about \"guest_info\" or \"guest_config\" ?",
+      "range": {
+        "startLine": 12,
+        "startChar": 8,
+        "endLine": 12,
+        "endChar": 12
+      },
+      "revId": "e3e6ffe1d924de7bfe63adf869187996dd4d1f9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f027d048_9aed0d0b",
+        "filename": "distrib/android-emugl/shared/emugl/common/Android.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-11-22T20:17:15Z",
+      "side": 1,
+      "message": "The guest API number I put into this file is so small that it does not worth an individual component (at least for now), and I actually want people to pile it with other small things. Agree? Disagree?",
+      "parentUuid": "b010f8cf_c2b4b184",
       "range": {
         "startLine": 12,
         "startChar": 8,
@@ -151,6 +271,54 @@
       "writtenOn": "2016-11-22T04:02:38Z",
       "side": 1,
       "message": "FYI: looks like we\u0027ve created a bad pattern here: any new configuration value is added into its own global variable in a separate source/header pair. I\u0027ll fix this, but for now keep it as it is",
+      "range": {
+        "startLine": 18,
+        "startChar": 4,
+        "endLine": 21,
+        "endChar": 29
+      },
+      "revId": "e3e6ffe1d924de7bfe63adf869187996dd4d1f9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f027d048_1ae25d15",
+        "filename": "distrib/android-emugl/shared/emugl/common/misc.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-11-22T20:17:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b010f8cf_82beb960",
+      "range": {
+        "startLine": 20,
+        "startChar": 4,
+        "endLine": 21,
+        "endChar": 29
+      },
+      "revId": "e3e6ffe1d924de7bfe63adf869187996dd4d1f9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f027d048_5ae8d5f6",
+        "filename": "distrib/android-emugl/shared/emugl/common/misc.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-11-22T20:17:15Z",
+      "side": 1,
+      "message": "Thanks.",
+      "parentUuid": "b010f8cf_42cfa116",
       "range": {
         "startLine": 18,
         "startChar": 4,
