@@ -521,7 +521,7 @@ EOF
 # from sources.
 
 cd \$(dirname "\$0") &&
-(cd qemu && ./android-rebuild.sh --ignore-audio "\$@") &&
+(cd qemu && ./android/rebuild.sh --ignore-audio "\$@") &&
 mkdir -p bin/ &&
 cp -rfp qemu/objs/emulator* bin/ &&
 echo "Emulator binaries are under \$(pwd -P)/bin/"
@@ -604,7 +604,7 @@ EOF
 
     dump "[$PKG_NAME] Copying license files."
     mkdir -p "$TEMP_PKG_DIR"/licenses/
-    cp COPYING COPYING.LIB "$TEMP_PKG_DIR"/licenses/
+    cp android/qemu1/COPYING android/qemu1/COPYING.LIB "$TEMP_PKG_DIR"/licenses/
 
     dump "[$PKG_NAME] Creating tarball."
     PKG_FILE=$PKG_DIR/$PKG_PREFIX-$PKG_REVISION-$SYSTEM.tar.bz2
@@ -728,7 +728,7 @@ build_darwin_binaries_on () {
     cat > $DARWIN_PKG_DIR/build.sh <<EOF
 #!/bin/bash -l
 cd $DARWIN_REMOTE_DIR/qemu &&
-./android-rebuild.sh $DARWIN_BUILD_FLAGS
+./android/rebuild.sh $DARWIN_BUILD_FLAGS
 EOF
     builder_run_remote_darwin_build "$DARWIN_PKG_DIR/build.sh" ||
         panic "Can't rebuild binaries on Darwin, use --verbose to see why!"
@@ -807,13 +807,13 @@ for SYSTEM in $(convert_host_list_to_os_list $LOCAL_HOST_SYSTEMS); do
 
     case $SYSTEM in
         windows)
-            run ./android-rebuild.sh --mingw $REBUILD_FLAGS ||
-                    panic "Use ./android-rebuild.sh --mingw to see why."
+            run ./android/rebuild.sh --mingw $REBUILD_FLAGS ||
+                    panic "Use ./android/rebuild.sh --mingw to see why."
             ;;
 
         *)
-            run ./android-rebuild.sh $REBUILD_FLAGS ||
-                    panic "Use ./android-rebuild.sh to see why."
+            run ./android/rebuild.sh $REBUILD_FLAGS ||
+                    panic "Use ./android/rebuild.sh to see why."
     esac
 
     create_binaries_package "$SYSTEM"
