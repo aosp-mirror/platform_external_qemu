@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b010f8cf_7fdfe252",
+        "filename": "android/opengles.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-22T04:02:38Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 122,
+        "startChar": 57,
+        "endLine": 122,
+        "endChar": 60
+      },
+      "revId": "e3e6ffe1d924de7bfe63adf869187996dd4d1f9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b010f8cf_edd9eb13",
+        "filename": "android/opengles.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-22T04:02:38Z",
+      "side": 1,
+      "message": "please call it guestApiLevel and document the parameter. api in this context might mean anything from the our gl emulation library version to host\u0027s Opengl supported API version",
+      "range": {
+        "startLine": 35,
+        "startChar": 61,
+        "endLine": 35,
+        "endChar": 64
+      },
+      "revId": "e3e6ffe1d924de7bfe63adf869187996dd4d1f9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b010f8cf_822fd9e3",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FbConfig.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-22T04:02:38Z",
+      "side": 1,
+      "message": "what if this becomes 0? is it valid or we need to remove the whole attribute pair?",
+      "range": {
+        "startLine": 198,
+        "startChar": 40,
+        "endLine": 198,
+        "endChar": 80
+      },
+      "revId": "e3e6ffe1d924de7bfe63adf869187996dd4d1f9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b010f8cf_22adcd38",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FbConfig.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-22T04:02:38Z",
+      "side": 1,
+      "message": "please make it a debug print instead",
+      "range": {
+        "startLine": 208,
+        "startChar": 7,
+        "endLine": 210,
+        "endChar": 24
+      },
+      "revId": "e3e6ffe1d924de7bfe63adf869187996dd4d1f9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b010f8cf_c2b4b184",
+        "filename": "distrib/android-emugl/shared/emugl/common/Android.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-22T04:02:38Z",
+      "side": 1,
+      "message": "\"misc\" is too generic name - people tend to pile up everything new there as anything can be put into \u0027misc\u0027. what about \"guest_info\" or \"guest_config\" ?",
+      "range": {
+        "startLine": 12,
+        "startChar": 8,
+        "endLine": 12,
+        "endChar": 12
+      },
+      "revId": "e3e6ffe1d924de7bfe63adf869187996dd4d1f9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b010f8cf_82beb960",
+        "filename": "distrib/android-emugl/shared/emugl/common/misc.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-22T04:02:38Z",
+      "side": 1,
+      "message": "no need to have \u0027extern\u0027 in C++ headers",
+      "range": {
+        "startLine": 20,
+        "startChar": 4,
+        "endLine": 21,
+        "endChar": 29
+      },
+      "revId": "e3e6ffe1d924de7bfe63adf869187996dd4d1f9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b010f8cf_42cfa116",
+        "filename": "distrib/android-emugl/shared/emugl/common/misc.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-11-22T04:02:38Z",
+      "side": 1,
+      "message": "FYI: looks like we\u0027ve created a bad pattern here: any new configuration value is added into its own global variable in a separate source/header pair. I\u0027ll fix this, but for now keep it as it is",
+      "range": {
+        "startLine": 18,
+        "startChar": 4,
+        "endLine": 21,
+        "endChar": 29
+      },
+      "revId": "e3e6ffe1d924de7bfe63adf869187996dd4d1f9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
