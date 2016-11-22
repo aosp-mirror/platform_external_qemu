@@ -144,6 +144,8 @@ RUN_EMUGEN_TESTS=true
 RUN_GEN_ENTRIES_TESTS=true
 
 TEST_SHELL=
+TEST_SETUP=
+TEST_SETUP64=
 EXE_SUFFIX=
 
 if [ "$HOST_OS" = "Linux" ]; then
@@ -176,6 +178,33 @@ if [ "$MINGW" ]; then
     fi
 
     RUN_32BIT_TESTS=true
+fi
+
+if [ "$HOST_OS" = "Linux" ]; then
+    # Ensure that our custom libstdc++.so is in LD_LIBRARY_PATH before
+    # trying to run our unit-test programs. Otherwise, they will fail to
+    # run on newer Linux distributions.
+    run_test32 () {
+        (
+            LD_LIBRARY_PATH=$OUT_DIR/lib/libstdc++:$LD_LIBRARY_PATH
+            run $TEST_SHELL "$@"
+        )
+    }
+
+    run_test64 () {
+        (
+            LD_LIBRARY_PATH=$OUT_DIR/lib64/libstdc++:$LD_LIBRARY_PATH
+            run $TEST_SHELL "$@"
+        )
+    }
+else
+    run_test32 () {
+        run $TEST_SHELL "$@"
+    }
+
+    run_test64 () {
+        run $TEST_SHELL "$@"
+    }
 fi
 
 # Return the minimum OS X version that a Darwin binary targets.
@@ -233,10 +262,11 @@ if [ -z "$NO_TESTS" ]; then
         for UNIT_TEST in android_emu_unittests emugl_common_host_unittests \
                          emulator_libui_unittests \
                          emulator_crashreport_unittests \
+                         libOpenglRender_unittests \
                          libGLcommon_unittests; do
             for TEST in $OUT_DIR/$UNIT_TEST$EXE_SUFFIX; do
                 echo "   - ${TEST#$OUT_DIR/}"
-                run $TEST_SHELL $TEST || FAILURES="$FAILURES ${TEST#$OUT_DIR/}"
+                run_test32 $TEST || FAILURES="$FAILURES ${TEST#$OUT_DIR/}"
             done
         done
     fi
@@ -246,10 +276,11 @@ if [ -z "$NO_TESTS" ]; then
         for UNIT_TEST in android_emu64_unittests emugl64_common_host_unittests \
                          emulator64_libui_unittests \
                          emulator64_crashreport_unittests \
+                         lib64OpenglRender_unittests \
                          lib64GLcommon_unittests; do
              for TEST in $OUT_DIR/$UNIT_TEST$EXE_SUFFIX; do
                  echo "   - ${TEST#$OUT_DIR/}"
-                 run $TEST_SHELL $TEST || FAILURES="$FAILURES ${TEST#$OUT_DIR/}"
+                 run_test64 $TEST || FAILURES="$FAILURES ${TEST#$OUT_DIR/}"
              done
         done
     fi
