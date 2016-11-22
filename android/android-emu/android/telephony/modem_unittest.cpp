@@ -101,7 +101,7 @@ TEST_F(ModemTest, CloseLogicalChannel) {
     ASSERT_FALSE(closeLogicalChannel(channel));
 }
 
-static const char* kValidReply = "+CGLA: 144,0,FF4026E224E116C11461ed377e85d386a8dfee6b864bd85b0bfaa5af81E30aDB080000000000000000\rOK";
+static const char* kValidReply = "+CGLA: 144,0,FF403eE23cE12eC11461ed377e85d386a8dfee6b864bd85b0bfaa5af81CA16616e64726f69642e636172726965726170692e637473E30aDB080000000000000000\rOK";
 static const char* kCmeError = "+CME ERROR: ";
 
 TEST_F(ModemTest, TransmitLogicalChannel) {

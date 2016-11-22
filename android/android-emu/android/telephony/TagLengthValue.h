@@ -60,6 +60,15 @@ class AidRefDo : public TagLengthValue {
     static const char kTag[];
 };
 
+// PKG-REF-DO, contains a package name string identifying a particular
+// application. If a package name is present the access rule only applies to the
+// package matching this name
+class PkgRefDo : public TagLengthValue {
+    static const char kTag[];
+public:
+    explicit PkgRefDo(const std::string& packageName);
+};
+
 // DeviceAppID-REF-DO, contains a unique app ID or hash of a certificate used
 // to sign an app.
 class DeviceAppIdRefDo : public TagLengthValue {
@@ -69,12 +78,17 @@ public:
     explicit DeviceAppIdRefDo(const std::string& stringData);
 };
 
-// REF-DO, Reference Data Object, contains an AID reference and DeviceAppID
-// reference that together uniquely identify an application
+// REF-DO, Reference Data Object, contains a DeviceAppID reference and
+// optionally either an AidRefDo or a PkgRefDo. This uniquely identifies an
+// application.
 class RefDo : public TagLengthValue {
     static const char kTag[];
 public:
-    RefDo(const AidRefDo& aidRefDo, const DeviceAppIdRefDo& deviceAppIdRefDo);
+    explicit RefDo(const DeviceAppIdRefDo& deviceAppIdRefDo);
+    RefDo(const AidRefDo& aidRefDo,
+          const DeviceAppIdRefDo& deviceAppIdRefDo);
+    RefDo(const DeviceAppIdRefDo& deviceAppIdRefDo,
+          const PkgRefDo& pkgRefDo);
 };
 
 // APDU-AR-DO, used to set access rules regarding APDU commands, can be used to
