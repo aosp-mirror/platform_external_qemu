@@ -11,6 +11,8 @@
 */
 #include "TagLengthValue.h"
 
+#include "android/utils/misc.h"
+
 #include <assert.h>
 #include <vector>
 #include <stdint.h>
@@ -29,6 +31,17 @@ namespace android {
 // Size: 0x21f3,  String: "8221f3"   -- 82 indicates 2 bytes needed
 // Size: 0x12345, String: "83012345" -- 83 indicates 3 bytes needed, zero padded
 static const uint32_t kMaxSingleByteSize = 0x80;
+
+// Convert a plain string to a string of hexadecimal values representing the
+// value of each character of the plain string. For example the string "FOO"
+// will be converted to "464F4F".
+static std::string stringToHexString(const std::string& str) {
+    std::string result(str.size() * 2, '0');
+    for (size_t i = 0; i < str.size(); ++i) {
+        int2hex(reinterpret_cast<uint8_t*>(&result[i * 2]), 2, str[i]);
+    }
+    return result;
+}
 
 void TagLengthValue::populateData(const char* tag,
         std::initializer_list<const TagLengthValue*> data) {
@@ -89,6 +102,7 @@ std::string TagLengthValue::createSizeString(size_t size) const {
 }
 
 const char AidRefDo::kTag[] = "4F";
+const char PkgRefDo::kTag[] = "CA";
 const char DeviceAppIdRefDo::kTag[] = "C1";
 const char RefDo::kTag[] = "E1";
 const char ApduArDo::kTag[] = "D0";
@@ -98,13 +112,27 @@ const char ArDo::kTag[] = "E3";
 const char RefArDo::kTag[] = "E2";
 const char AllRefArDo::kTag[] = "FF40";
 
+PkgRefDo::PkgRefDo(const std::string& packageName) {
+    std::string hexPackageName = stringToHexString(packageName);
+    populateData(kTag, { &hexPackageName });
+}
+
 DeviceAppIdRefDo::DeviceAppIdRefDo(const std::string& stringData) {
     populateData(kTag, { &stringData });
+}
+
+RefDo::RefDo(const DeviceAppIdRefDo& deviceAppIdRefDo) {
+    populateData(kTag, { &deviceAppIdRefDo });
 }
 
 RefDo::RefDo(const AidRefDo& aidRefDo,
              const DeviceAppIdRefDo& deviceAppIdRefDo) {
     populateData(kTag, { &aidRefDo, &deviceAppIdRefDo });
+}
+
+RefDo::RefDo(const DeviceAppIdRefDo& deviceAppIdRefDo,
+             const PkgRefDo& pkgRefDo) {
+    populateData(kTag, { &deviceAppIdRefDo, &pkgRefDo });
 }
 
 ApduArDo::ApduArDo(Allow rule) {
