@@ -393,6 +393,8 @@ static int _inited = 0;
     }
 
     if (!_inited) {
+        VERBOSE_PRINT(init, "(%s) initializing", __func__);
+
         /* Register main ADB service. */
         QemudService*  serv = qemud_service_register(SERVICE_NAME, 0, NULL,
                                                      _adb_service_connect,
