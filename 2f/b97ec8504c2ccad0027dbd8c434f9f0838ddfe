@@ -1,0 +1,7 @@
+Code-Review+2: Jim Kaye <jameskaye@google.com>
+Verified+1: Bjoern Johansson <bjoernj@google.com>
+Submitted-by: Bjoern Johansson <bjoernj@google.com>
+Submitted-at: Wed, 23 Nov 2016 20:21:30 +0000
+Reviewed-on: https://android-review.googlesource.com/306237
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
