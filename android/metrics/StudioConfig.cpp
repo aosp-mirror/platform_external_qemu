@@ -17,12 +17,14 @@
 #include "android/base/ArraySize.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/Optional.h"
+#include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
 #include "android/base/Version.h"
 #include "android/emulation/ConfigDirs.h"
+#include "android/metrics/MetricsPaths.h"
 #include "android/metrics/studio-config.h"
 #include "android/utils/debug.h"
 #include "android/utils/dirscanner.h"
@@ -37,6 +39,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+using android::base::LazyInstance;
 using android::base::Optional;
 using std::string;
 
@@ -48,9 +51,6 @@ using std::string;
 // These consts are replicated as macros in StudioHelper_unittest.cpp
 // changes to these will require equivalent changes to the unittests
 //
-static const char kAndroidStudioUuidDir[] = "JetBrains";
-static const char kAndroidStudioUuid[] = "PermanentUserID";
-
 #ifdef __APPLE__
 static const char kAndroidStudioDir[] = "AndroidStudio";
 #else   // ! ___APPLE__
@@ -60,16 +60,13 @@ static const char kAndroidStudioDirInfix[] = "config";
 
 static const char kAndroidStudioDirSuffix[] = "options";
 static const char kAndroidStudioDirPreview[] = "Preview";
-static const char kAndroidStudioUuidHexPattern[] =
-        "00000000-0000-0000-0000-000000000000";
 
 /***************************************************************************/
 
 namespace {
 // StudioXML describes the XML parameters we are seeking for in a
-// Studio preferences file. StudioXml structs are statically
-// defined and used in  android_studio_get_installation_id()
-// and android_studio_get_optins().
+// Studio preferences file. StudioXml structs are defined statically
+// in functions that call parseStudioXML().
 struct StudioXml {
     const char* filename;
     const char* nodename;
@@ -195,26 +192,6 @@ std::string pathToStudioXML(const std::string& studioPath,
     return PathUtils::recompose(vpath);
 }
 
-#ifdef _WIN32
-std::string pathToStudioUUIDWindows() {
-    System* sys = System::get();
-    std::string appDataPath = sys->getAppDataDirectory();
-
-    std::string retval;
-    if (!appDataPath.empty()) {
-        // build /path/to/APPDATA/subpath/to/StudioUUID file
-        std::vector<std::string> vpath;
-        vpath.push_back(appDataPath);
-        vpath.push_back(std::string(kAndroidStudioUuidDir));
-        vpath.push_back(std::string(kAndroidStudioUuid));
-
-        retval = PathUtils::recompose(vpath);
-    }
-
-    return retval;
-}
-#endif
-
 UpdateChannel updateChannel() {
     static const StudioXml channelInfo = {
             .filename = "updates.xml",
@@ -318,8 +295,7 @@ static Optional<string> parseStudioXML(const StudioXml* const match) {
     }
 
     // Find match->filename xml file under .AndroidStudio
-    std::string xml_path =
-            pathToStudioXML(studio, match->filename);
+    std::string xml_path = pathToStudioXML(studio, match->filename);
     if (xml_path.empty()) {
         D("Failed to find %s in %s", match->filename, studio.c_str());
         return retval;
@@ -339,118 +315,168 @@ static Optional<string> parseStudioXML(const StudioXml* const match) {
     return retval;
 }
 
-#ifdef _WIN32
-static std::string android_studio_get_Windows_uuid() {
-    // Appropriately sized container for UUID
-    std::string uuid_file_path = pathToStudioUUIDWindows();
-    std::string retval;
-
-    // Read UUID from file
-    std::ifstream uuid_file(uuid_file_path.c_str());
-    if (uuid_file) {
-        std::getline(uuid_file, retval);
+//
+// This is a simple ad-hoc JSON parser for the currently present values of the
+// Android Studio metrics configuration file.
+// Function doesn't try to be format-compliant or even implement more than we
+// currently need, it just allows one to parse basic name:value pairs and pass
+// a callback to handle the "value" part
+// |name| - the key to extract value for, without quotes
+// |extractValue| - a functor that's called with a whole rest of the current
+//  line as an argument, starting with the first non-whitespace character after
+//  ':'. E.g.:
+//
+//      "key" :   "value","otherkey":11
+//                ^-------------------^
+//                  |linePart|, inclusive.
+//
+template <class ValueType, class ValueExtractor>
+static Optional<ValueType> getStudioConfigJsonValue(
+        StringView name,
+        ValueExtractor extractValue) {
+    const std::string configPath = android::metrics::getSettingsFilePath();
+    std::ifstream in(configPath.c_str());
+    if (!in) {
+        return {};
     }
 
-    return retval;
+    // Parse JSON to extract the needed option
+    std::string line;
+    while (std::getline(in, line)) {
+        // All names start from a double quote character, so start with finding
+        // one.
+        for (auto it = std::find(line.begin(), line.end(), '\"');
+             it != line.end();
+             it = std::find(it + 1, line.end(), '\"')) {
+            auto itName = it + 1;
+            if (itName == line.end()) {
+                continue;
+            }
+            // Check if this is the right key...
+            if (strncmp(&*itName, name.data(), name.size()) != 0) {
+                continue;
+            }
+            auto itNameEnd = itName + name.size();
+            if (itNameEnd == line.end() || *itNameEnd != '\"') {
+                continue;
+            }
+
+            auto itNext = itNameEnd + 1;
+            // Skip the spaces before the colon...
+            while (itNext < line.end() && isspace(*itNext)) {
+                ++itNext;
+            }
+            // ... the colon itself...
+            if (itNext == line.end() || *itNext != ':') {
+                continue;
+            }
+            ++itNext;
+            // ... and spaces after it.
+            while (itNext < line.end() && isspace(*itNext)) {
+                ++itNext;
+            }
+            if (itNext == line.end()) {
+                continue;
+            }
+            // The value has to be somewhere in the remaining part of the line,
+            // pass it to someone who knows how to extract it.
+            auto val = extractValue(StringView(&*itNext, line.end() - itNext));
+            return val;
+        }
+    }
+    return {};
 }
-#endif  // _WIN32
+
+bool getUserMetricsOptIn() {
+    return getStudioConfigJsonValue<bool>(
+                   "hasOptedIn",
+                   [](StringView linePart) -> bool {
+                       static constexpr StringView trueValues[] = {"true", "1"};
+                       auto it = linePart.begin();
+                       for (const auto& trueVal : trueValues) {
+                           if (strncmp(trueVal.data(), &*it, trueVal.size())) {
+                               continue;
+                           }
+                           it += trueVal.size();
+                           // make sure the value ends here
+                           if (it == linePart.end()) {
+                               return true;
+                           }
+                           if (it < linePart.end() &&
+                               (isspace(*it) || ispunct(*it))) {
+                               return true;
+                           }
+                       }
+                       return false;
+                   })
+            .valueOr(false);
+}
+
+// Forward-declare a function to use here and in the unit test.
+std::string extractInstallationId();
+
+namespace {
+
+// A collection of cached configuration values - these aren't supposed to change
+// during the emulator run time, so we don't need to re-parse them on every
+// call.
+struct StaticValues {
+    std::string installationId;
+
+    StaticValues() {
+        installationId = extractInstallationId();
+    }
+};
+
+static LazyInstance<StaticValues> sStaticValues = {};
+
+}  // namespace
+
+// This is to be able to unit-test the implementation without hacking into the
+// LazyInstance<> code.
+std::string extractInstallationId() {
+    auto optionalId = getStudioConfigJsonValue<std::string>(
+            "userId", [](StringView linePart) -> std::string {
+                if (linePart.empty()) {
+                    return {};
+                }
+                auto it = linePart.begin();
+                if (*it == '\"') {
+                    // This is a quoted string.
+                    // BTW, it doesn't support escaping as there was no need
+                    // yet.
+                    ++it;
+                    auto itEnd = it;
+                    while (itEnd != linePart.end() && *itEnd != '\"') {
+                        ++itEnd;
+                    }
+                    return std::string(it, itEnd);
+                } else {
+                    // No quotes, just parse till the end of the value.
+                    auto itEnd = it;
+                    while (itEnd != linePart.end() && !isspace(*itEnd) &&
+                           *itEnd != ',') {
+                        ++itEnd;
+                    }
+                    return std::string(it, itEnd);
+                }
+            });
+    return optionalId.valueOr(std::string{});
+}
+
+const std::string& getInstallationId() {
+    return sStaticValues->installationId;
+}
 
 }  // namespace studio
 }  // namespace android
 
-/*****************************************************************************/
-
-// Get the status of user opt-in to crash reporting in AndroidStudio
-// preferences. Returns 1 only if the user has opted-in, 0 otherwise.
 int android_studio_get_optins() {
-    int retval = 0;
-
-    static const StudioXml optins = {
-            .filename = "usage.statistics.xml",
-            .nodename = "component",
-            .propname = "name",
-            .propvalue = "UsagesStatistic",
-            .keyname = "allowed",  // assuming "true"/"false" string values
-    };
-
-    const auto xmlVal = android::studio::parseStudioXML(&optins);
-    if (!xmlVal || xmlVal->empty()) {
-        D("Failed to parse %s preferences file %s", kAndroidStudioDir,
-          optins.filename);
-        D("Defaulting user crash-report opt-in to false");
-        return 0;
-    }
-
-    // return 0 if user has not opted in to crash reports
-    if (*xmlVal == "true") {
-        retval = 1;
-    } else if (*xmlVal == "false") {
-        retval = 0;
-    } else {
-        D("Invalid value set in %s preferences file %s", kAndroidStudioDir,
-          optins.filename);
-    }
-
-    return retval;
+    return android::studio::getUserMetricsOptIn();
 }
 
-static std::string android_studio_get_installation_id_legacy() {
-    std::string retval;
-#ifndef __WIN32
-    static const StudioXml uuid = {
-            .filename = "options.xml",
-            .nodename = "property",
-            .propname = "name",
-            .propvalue = "installation.uid",
-            .keyname = "value",  // assuming kAndroidStudioUuidHexPattern
-    };
-    const auto optional_retval = android::studio::parseStudioXML(&uuid);
-    if (!optional_retval || optional_retval->empty()) {
-        D("Failed to parse %s preferences file %s", kAndroidStudioDir,
-          uuid.filename);
-    } else {
-        retval = *optional_retval;
-    }
-#else
-    // In Microsoft Windows, getting Android Studio installation
-    // ID requires searching in completely different path than the
-    // rest of Studio preferences ...
-    retval = android::studio::android_studio_get_Windows_uuid();
-    if (retval.empty()) {
-        D("Failed to parse %s preferences file %s", kAndroidStudioDir,
-          kAndroidStudioUuid);
-    }
-#endif
-    return retval;
-}
-
-// Get the installation.id reported by Android Studio (string).
-// If there is no Android Studio installation or a value
-// cannot be retrieved, a fixed dummy UUID will be returned.  Caller is
-// responsible for freeing returned string.
 char* android_studio_get_installation_id() {
-    {
-        std::string uuid_path =
-                PathUtils::join(ConfigDirs::getUserDirectory(), "uid.txt");
-        std::ifstream uuid_file(uuid_path.c_str());
-        if (uuid_file) {
-            std::string line;
-            std::getline(uuid_file, line);
-            if (!line.empty()) {
-                return strDup(line);
-            }
-        }
-    }
-
-    // Couldn't find uuid in the android specific location. Try legacy uuid
-    // locations.
-    auto uuid = android_studio_get_installation_id_legacy();
-    if (!uuid.empty()) {
-        return strDup(uuid);
-    }
-
-    D("Defaulting to zero installation ID");
-    return strDup(kAndroidStudioUuidHexPattern);
+    return strDup(android::studio::getInstallationId());
 }
 
 // Keep in sync with backend enum in .../processed_logs.proto

@@ -29,9 +29,6 @@
 // changes to these will require equivalent changes to the unittests
 //
 
-#define ANDROID_STUDIO_UUID_DIR "JetBrains"
-#define ANDROID_STUDIO_UUID "PermanentUserID"
-
 #ifdef __APPLE__
 #define ANDROID_STUDIO_DIR "AndroidStudio"
 #else  // ! ___APPLE__
@@ -48,7 +45,7 @@ using namespace android::studio;
 using std::endl;
 using std::ofstream;
 
-TEST(DotAndroidStudio, androidStudioVersioning) {
+TEST(StudioConfigTest, androidStudioVersioning) {
     const char* str = NULL;
 
     str = ANDROID_STUDIO_DIR;
@@ -93,7 +90,7 @@ TEST(DotAndroidStudio, androidStudioVersioning) {
 #define FS "/"
 #endif
 
-TEST(DotAndroidStudio, androidStudioScanner) {
+TEST(StudioConfigTest, androidStudioScanner) {
     TestSystem testSys("/root", 32, "/root/home");
     TestTempDir* testDir = testSys.getTempRoot();
 
@@ -153,7 +150,7 @@ TEST(DotAndroidStudio, androidStudioScanner) {
     EXPECT_STREQ(foundStudioPath.c_str(), studioPath.c_str());
 }
 
-TEST(DotAndroidStudio, androidStudioXMLPathBuilder) {
+TEST(StudioConfigTest, androidStudioXMLPathBuilder) {
     TestSystem testSys("/root", 32, "/root/home", "root/home");
     TestTempDir* testDir = testSys.getTempRoot();
 
@@ -187,7 +184,11 @@ TEST(DotAndroidStudio, androidStudioXMLPathBuilder) {
     EXPECT_STREQ(foundStudioXMLPath.c_str(), studioXMLPath);
 }
 
-TEST(DotAndroidStudio, androidStudioUuid) {
+// Forward-declare the function that actually calculates the installation ID,
+// without using the cached value.
+namespace android { namespace studio { std::string extractInstallationId(); }}
+
+TEST(StudioConfigTest, androidStudioInstallationId) {
     TestSystem testSys("/root", 32);
     TestTempDir* testDir = testSys.getTempRoot();
     testSys.setHomeDirectory(std::string(testDir->path()).append("/root/home"));
@@ -198,40 +199,96 @@ TEST(DotAndroidStudio, androidStudioUuid) {
     testDir->makeSubDir("root/home");
     testDir->makeSubDir("root/home/.android");
 
-    char* zeroUuid = android_studio_get_installation_id();
-    EXPECT_STREQ("00000000-0000-0000-0000-000000000000", zeroUuid);
-    free(zeroUuid);
+    auto noUuid = extractInstallationId();
+    EXPECT_STREQ("", noUuid.c_str());
 
-#ifdef _WIN32
-    auto expectedLegacyUuid = "10101000-0000-0000-0000-000000000000";
-    testDir->makeSubDir("root/appdata");
-    testDir->makeSubDir("root/appdata/" ANDROID_STUDIO_UUID_DIR);
-    testDir->makeSubFile("root/appdata/" ANDROID_STUDIO_UUID_DIR
-                         "/" ANDROID_STUDIO_UUID);
+    testDir->makeSubFile("root/home/.android/analytics.settings");
 
-    auto legacyUuidFilePath =
-            std::string(testDir->path())
-                    .append("/root/appdata/" ANDROID_STUDIO_UUID_DIR
-                            "/" ANDROID_STUDIO_UUID);
-    ofstream legacyUuidFile(legacyUuidFilePath.c_str());
-    ASSERT_FALSE(legacyUuidFile.fail());
-    legacyUuidFile << expectedLegacyUuid << endl;
-    legacyUuidFile.close();
+    {
+        std::ofstream settings(testDir->pathString() +
+                               "/root/home/.android/analytics.settings",
+                               std::ios_base::trunc);
+        ASSERT_TRUE(!!settings);
+        settings << R"("userId":"1 2 3")";
+        settings.close();
+        auto settingsId = extractInstallationId();
+        EXPECT_STREQ("1 2 3", settingsId.c_str());
+    }
+    {
+        std::ofstream settings(testDir->pathString() +
+                               "/root/home/.android/analytics.settings",
+                               std::ios_base::trunc);
+        ASSERT_TRUE(!!settings);
+        settings << R"("userId":123)";
+        settings.close();
+        auto settingsId = extractInstallationId();
+        EXPECT_STREQ("123", settingsId.c_str());
+    }
+    {
+        std::ofstream settings(testDir->pathString() +
+                               "/root/home/.android/analytics.settings",
+                               std::ios_base::trunc);
+        ASSERT_TRUE(!!settings);
+        settings << R"("userId":1234,something:else)";
+        settings.close();
+        auto settingsId = extractInstallationId();
+        EXPECT_STREQ("1234", settingsId.c_str());
+    }
+}
 
-    char* legacyUuid = android_studio_get_installation_id();
-    EXPECT_STREQ(expectedLegacyUuid, legacyUuid);
-    free(legacyUuid);
-#endif  // _WIN32
+TEST(StudioConfigTest, metricsOptIn) {
+    TestSystem testSys("/root", 32);
+    TestTempDir* testDir = testSys.getTempRoot();
+    testSys.setHomeDirectory(std::string(testDir->path()).append("/root/home"));
+    testSys.setAppDataDirectory(
+            std::string(testDir->path()).append("/root/appdata"));
 
-    auto expectedUuid = "20220000-0000-0000-0000-000000000000";
-    auto uuidFilePath =
-            std::string(testDir->path()).append("/root/home/.android/uid.txt");
-    ofstream uuidFile(uuidFilePath.c_str());
-    ASSERT_FALSE(uuidFile.fail());
-    uuidFile << expectedUuid << endl;
-    uuidFile.close();
-
-    char* uuid = android_studio_get_installation_id();
-    EXPECT_STREQ(expectedUuid, uuid);
-    free(uuid);
+    testDir->makeSubDir("root");
+    testDir->makeSubDir("root/home");
+    testDir->makeSubDir("root/home/.android");
+    testDir->makeSubFile("root/home/.android/analytics.settings");
+    {
+        std::ofstream settings(testDir->pathString() +
+                               "/root/home/.android/analytics.settings",
+                               std::ios_base::trunc);
+        ASSERT_TRUE(!!settings);
+        settings << R"("hasOptedIn":true)";
+        settings.close();
+        EXPECT_TRUE(getUserMetricsOptIn());
+    }
+    {
+        std::ofstream settings(testDir->pathString() +
+                               "/root/home/.android/analytics.settings",
+                               std::ios_base::trunc);
+        ASSERT_TRUE(!!settings);
+        settings.close();
+        EXPECT_FALSE(getUserMetricsOptIn());
+    }
+    {
+        std::ofstream settings(testDir->pathString() +
+                               "/root/home/.android/analytics.settings",
+                               std::ios_base::trunc);
+        ASSERT_TRUE(!!settings);
+        settings << R"("hasOptedIn":1)";
+        settings.close();
+        EXPECT_TRUE(getUserMetricsOptIn());
+    }
+    {
+        std::ofstream settings(testDir->pathString() +
+                               "/root/home/.android/analytics.settings",
+                               std::ios_base::trunc);
+        ASSERT_TRUE(!!settings);
+        settings << R"("hasOptedIn":false)";
+        settings.close();
+        EXPECT_FALSE(getUserMetricsOptIn());
+    }
+    {
+        std::ofstream settings(testDir->pathString() +
+                               "/root/home/.android/analytics.settings",
+                               std::ios_base::trunc);
+        ASSERT_TRUE(!!settings);
+        settings << R"("hasOptedIn":blah)";
+        settings.close();
+        EXPECT_FALSE(getUserMetricsOptIn());
+    }
 }
