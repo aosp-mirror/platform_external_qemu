@@ -3033,7 +3033,9 @@ int main(int argc, char **argv, char **envp)
         // the error in |opengl_broken| instead.
         if (android_initOpenglesEmulation() != 0 ||
             android_startOpenglesRenderer(android_hw->hw_lcd_width,
-                                          android_hw->hw_lcd_height) != 0)
+                                          android_hw->hw_lcd_height,
+                                          avdInfo_getApiLevel(android_avdInfo))
+                != 0)
         {
             opengl_broken = true;
         }
