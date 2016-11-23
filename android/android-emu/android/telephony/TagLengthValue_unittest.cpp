@@ -24,12 +24,35 @@ TEST(TagLengthValue, ConstructDeviceAppIdRefDo) {
                  deviceAppIdRefDo.c_str());
 }
 
+TEST(TagLengthValue, ConstructPkgRefDo) {
+    PkgRefDo pkgRefDo("com.android.foo");
+
+    ASSERT_STREQ(/*tag*/ "CA" /*length*/ "0f"
+                 /*payload*/ "636f6d2e616e64726f69642e666f6f",
+                 pkgRefDo.c_str());
+}
+
 TEST(TagLengthValue, ConstructRefDo) {
-    RefDo refDo(AidRefDo(), DeviceAppIdRefDo("C0FFEE"));
+    RefDo refDo{DeviceAppIdRefDo("C0FFEE")};
+
+    ASSERT_STREQ(/*tag*/ "E1" /*length*/ "05" /*payload*/ "C103C0FFEE",
+                 refDo.c_str());
+}
+
+TEST(TagLengthValue, ConstructRefDoWithAidRefDo) {
+    RefDo refDo{AidRefDo(), DeviceAppIdRefDo("C0FFEE")};
 
     // Note that the AID-REF-DO does not end up in the payload because we
     // construct an empty object.
     ASSERT_STREQ(/*tag*/ "E1" /*length*/ "05" /*payload*/ "C103C0FFEE",
+                 refDo.c_str());
+}
+
+TEST(TagLengthValue, ConstructRefDoWithPkgRefDo) {
+    RefDo refDo{DeviceAppIdRefDo("C0FFEE"), PkgRefDo("foo")};
+
+    ASSERT_STREQ(/*tag*/ "E1" /*length*/ "0a"
+                 /*payload*/ "C103C0FFEECA03666f6f",
                  refDo.c_str());
 }
 
