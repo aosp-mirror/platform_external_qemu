@@ -11,12 +11,11 @@
 */
 #pragma once
 
+#include "qemu/osdep.h"
+#include "qemu-common.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
-
-#include "qemu/osdep.h"
-#include "qemu-common.h"
 
 /* open two connected character drivers that can be used to communicate by internal
  * QEMU components. For Android, this is used to connect an emulated serial port
