@@ -106,6 +106,9 @@ static void android_proxy_remove(void* connect_opaque) {
 }
 
 bool qemu_android_setup_http_proxy(const char* http_proxy) {
+    if (!http_proxy) {
+        return true;
+    }
     // Inject TCP proxy implementation into SLIRP stack.
     // Initialization of the proxy will happen later.
     static const SlirpProxyOps android_proxy_ops = {
