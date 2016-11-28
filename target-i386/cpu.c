@@ -3293,6 +3293,31 @@ static void x86_cpu_register_feature_bit_props(X86CPU *cpu,
     g_strfreev(names);
 }
 
+static void android_emulator_set_pmu_feature(X86CPU *cpu)
+{
+    char* intel_pmu_enabled =
+        getenv("ANDROID_EMU_FEATURE_IntelPerformanceMonitoringUnit");
+    if (kvm_enabled() &&
+        intel_pmu_enabled &&
+        !strcmp("on", intel_pmu_enabled)) {
+
+        CPUX86State *env = &cpu->env;
+        KVMState *s = kvm_state;
+
+        /* Use the host/KVM CPUID level in order to enable additional features
+         * supported by the host CPU, such as PMU. Cf. host_x86_cpu_initfn().
+         */
+        env->cpuid_level = kvm_arch_get_supported_cpuid(s, 0x0, 0, R_EAX);
+        env->cpuid_xlevel = kvm_arch_get_supported_cpuid(s, 0x80000000, 0,
+                                                         R_EAX);
+        env->cpuid_xlevel2 = kvm_arch_get_supported_cpuid(s, 0xC0000000, 0,
+                                                          R_EAX);
+
+        /* Enable PMU (this has no effect if env->cpuid_level < 0xA) */
+        object_property_set_bool(OBJECT(cpu), true, "pmu", &error_abort);
+    }
+}
+
 static void x86_cpu_initfn(Object *obj)
 {
     CPUState *cs = CPU(obj);
@@ -3339,6 +3364,8 @@ static void x86_cpu_initfn(Object *obj)
     }
 
     x86_cpu_load_def(cpu, xcc->cpu_def, &error_abort);
+
+    android_emulator_set_pmu_feature(cpu);
 }
 
 static int64_t x86_cpu_get_arch_id(CPUState *cs)
