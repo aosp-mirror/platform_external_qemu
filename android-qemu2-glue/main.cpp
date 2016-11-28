@@ -801,9 +801,6 @@ extern "C" int main(int argc, char **argv) {
         return 1;
     }
 
-    args[n++] = "-append";
-    args[n++] = kernel_parameters;
-
     // Support for changing default lcd-density
     std::string lcd_density;
     if (hw->hw_lcd_density) {
@@ -890,9 +887,19 @@ extern "C" int main(int argc, char **argv) {
     }
 
     /* append the options after -qemu */
+    std::string append_arg(kernel_parameters);
+    free(kernel_parameters);
     for (int i = 0; i < argc; ++i) {
-        args[n++] = argv[i];
+        if (!strcmp(argv[i], "-append")) {
+            if (++i < argc) {
+               android::base::StringAppendFormat(&append_arg, " %s", argv[i]);
+            }
+        } else {
+            args[n++] = argv[i];
+        }
     }
+    args[n++] = "-append";
+    args[n++] = ASTRDUP(append_arg.c_str());
 
     /* Generate a hardware-qemu.ini for this AVD. The real hardware
      * configuration is ususally stored in several files, e.g. the AVD's
