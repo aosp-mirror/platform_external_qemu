@@ -548,7 +548,8 @@ static void*
 _save_RGB32(void* rgb, uint8_t r, uint8_t g, uint8_t b)
 {
     uint8_t* rgb_ptr = (uint8_t*)rgb;
-    rgb_ptr[0] = r; rgb_ptr[1] = g; rgb_ptr[2] = b;
+    // For RGB32 we make the surface completely opaque with an alpha of 0xFF
+    rgb_ptr[0] = r; rgb_ptr[1] = g; rgb_ptr[2] = b; rgb_ptr[3] = 0xFF;
     return rgb_ptr + 4;
 }
 
@@ -566,7 +567,8 @@ static void*
 _save_BRG32(void* rgb, uint8_t r, uint8_t g, uint8_t b)
 {
     uint8_t* rgb_ptr = (uint8_t*)rgb;
-    rgb_ptr[2] = r; rgb_ptr[1] = g; rgb_ptr[0] = b;
+    // For BRG32 we make the surface completely opaque with an alpha of 0xFF
+    rgb_ptr[3] = 0xFF; rgb_ptr[2] = r; rgb_ptr[1] = g; rgb_ptr[0] = b;
     return rgb_ptr + 4;
 }
 
@@ -592,7 +594,7 @@ _save_RGB24(void* rgb, uint8_t r, uint8_t g, uint8_t b)
     return rgb_ptr + 3;
 }
 
-/* Loads R, G, and B colors from a BRG32 framebuffer.
+/* Loads R, G, and B colors from a BRG24 framebuffer.
  * Note that it's the caller's responsibility to ensure proper alignment of the
  * returned pointer at the line's break. */
 static const void*
