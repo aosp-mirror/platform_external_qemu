@@ -170,6 +170,10 @@ public:
     // the pipe. NOTE: This can be called from any thread.
     void closeFromHost();
 
+    // Method for canceling any pending wake() or close() that's scheduled for
+    // this pipe.
+    void abortPendingOperation();
+
     // Return the name of the AndroidPipe service.
     const char* name() const {
         return mService ? mService->name().c_str() : "<null>";
