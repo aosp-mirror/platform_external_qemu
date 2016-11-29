@@ -22,6 +22,30 @@
       "revId": "e91c9c81846505df1ad160727a703139d5aa07ae",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "702a0062_72ea652f",
+        "filename": "android/android-emu/android/emulation/DeviceContextRunner.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-11-29T03:58:31Z",
+      "side": 0,
+      "message": "if all the operations run on a single thread, it might be fine; not sure if that assumption is true",
+      "parentUuid": "702a0062_5d1f3723",
+      "range": {
+        "startLine": 129,
+        "startChar": 0,
+        "endLine": 130,
+        "endChar": 22
+      },
+      "revId": "e91c9c81846505df1ad160727a703139d5aa07ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
