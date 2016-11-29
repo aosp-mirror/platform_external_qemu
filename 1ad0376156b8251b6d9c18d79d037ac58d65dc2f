@@ -22,6 +22,30 @@
       "revId": "1ad0376156b8251b6d9c18d79d037ac58d65dc2f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "702a0062_a28f327e",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 570,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-11-29T00:49:24Z",
+      "side": 1,
+      "message": "Oh man, and I even corrected the copy/paste error below. The shame...",
+      "parentUuid": "702a0062_372c62a9",
+      "range": {
+        "startLine": 570,
+        "startChar": 11,
+        "endLine": 570,
+        "endChar": 16
+      },
+      "revId": "1ad0376156b8251b6d9c18d79d037ac58d65dc2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
