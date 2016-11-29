@@ -349,7 +349,7 @@ static void goldfish_fb_update_display(void *opaque)
         // CPU time on OSX; saving on other platforms may differ.
         if (s_use_host_gpu) return;
 
-        if (s->need_update) {
+        if (full_update) {
             framebuffer_update_memory_section(
                     &s->fbsection, get_system_memory(), s->fb_base,
                     src_height, src_width * source_bytes_per_pixel);
