@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "702a0062_5d1f3723",
+        "filename": "android/android-emu/android/emulation/DeviceContextRunner.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-11-29T01:39:35Z",
+      "side": 0,
+      "message": "I thought we needed this. Without, could we end up processing an item in |mPending| more than once?",
+      "range": {
+        "startLine": 129,
+        "startChar": 0,
+        "endLine": 130,
+        "endChar": 22
+      },
+      "revId": "e91c9c81846505df1ad160727a703139d5aa07ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
