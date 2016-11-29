@@ -56,9 +56,9 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
                        ToolWindow::UserActionsCounterPtr user_actions_counter)
     : QFrame(parent),
       mEmulatorWindow(window),
-      mExtendedWindow(android::base::makeCustomScopedPtr<ExtendedWindow*>(
+      mExtendedWindow(android::base::makeCustomScopedPtr<ExtendedWindow>(
               nullptr,
-              [](QObject* o) { o->deleteLater(); })),
+              +[](QObject* o) { o->deleteLater(); })),
       mUiEmuAgent(nullptr),
       mToolsUi(new Ui::ToolControls),
       mUIEventRecorder(event_recorder),
