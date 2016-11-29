@@ -103,6 +103,9 @@ public:
         D("%s", __func__);
         mIsWorking = false;
         mChannel->stop();
+        // Make sure there's no operation scheduled for this pipe instance to
+        // run on the main thread.
+        abortPendingOperation();
         delete this;
     }
 
