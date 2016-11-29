@@ -28,7 +28,7 @@
  *
  * Set to 0 otherwise.
  */
-#define WITH_LARGE_SUPPORT  1
+#define WITH_LARGE_SUPPORT  0
 
 // Set to 1 to ensure buffers passed to/from EGL/GL are properly aligned.
 // This prevents crashes with certain backends (e.g. OSMesa).
