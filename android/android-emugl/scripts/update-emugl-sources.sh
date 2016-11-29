@@ -99,7 +99,7 @@ AOSP_DIR=$(cd "$AOSP_DIR" && pwd -P)
 
 # Find the sources for the encoder:
 ENCODER_TOP_DIR=$AOSP_DIR/device/generic/goldfish-opengl/system
-DECODER_TOP_DIR=$PROGDIR/../android/android-emugl/host/libs
+DECODER_TOP_DIR=$PROGDIR/../../../android/android-emugl/host/libs
 
 if [ ! -d "$ENCODER_TOP_DIR" ]; then
     fatal "Missing encoder source directory: $ENCODER_TOP_DIR"
