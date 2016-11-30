@@ -209,7 +209,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
 
     if (tInfo && tInfo->currContext.get()) {
         const char *str = nullptr;
-        if (tInfo->currContext->isGL2()) {
+        if (tInfo->currContext->version() > 1) {
             str = (const char *)s_gles2.glGetString(name);
         }
         else {
@@ -324,9 +324,10 @@ static uint32_t rcCreateContext(uint32_t config,
         return 0;
     }
 
+    fprintf(stderr, "%s: version=%u\n", __FUNCTION__, glVersion);
     // To make it consistent with the guest, create GLES2 context when GL
     // version==2 or 3
-    HandleType ret = fb->createRenderContext(config, share, glVersion == 2 || glVersion == 3);
+    HandleType ret = fb->createRenderContext(config, share, glVersion);
     return ret;
 }
 

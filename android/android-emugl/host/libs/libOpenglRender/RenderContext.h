@@ -30,12 +30,11 @@ public:
     // |display| is the host EGLDisplay handle.
     // |config| is the host EGLConfig to use.
     // |sharedContext| is either EGL_NO_CONTEXT of a host EGLContext handle.
-    // |isGl2| is true iff the new context will be used with GLESv2, or
-    // GLESv1 otherwise.
+    // |version| specifies the GLES version ({1,2,3})
     static RenderContext *create(EGLDisplay display,
                                  EGLConfig config,
                                  EGLContext sharedContext,
-                                 bool isGL2 = false);
+                                 int version = 1);
 
     // Destructor.
     ~RenderContext();
@@ -46,8 +45,8 @@ public:
     // Retrieve emulated GLES1 context.
     void* getEmulatedGLES1Context() const { return mEmulatedGLES1Context; }
 
-    // Return true iff this is a GLESv2 context.
-    bool isGL2() const { return mIsGl2; }
+    // Return the actual underlying version used in this context.
+    int version() const { return mVersion; }
 
     // Retrieve GLDecoderContextData instance reference for this
     // RenderContext instance.
@@ -58,13 +57,13 @@ private:
 
     RenderContext(EGLDisplay display,
                   EGLContext context,
-                  bool isGl2,
+                  int version,
                   void* emulatedGLES1Context);
 
 private:
     EGLDisplay mDisplay;
     EGLContext mContext;
-    bool mIsGl2;
+    int mVersion;
     void* mEmulatedGLES1Context;
     GLDecoderContextData mContextData;
 };

@@ -766,7 +766,10 @@ EGLAPI EGLContext EGLAPIENTRY eglCreateContext(EGLDisplay display, EGLConfig con
         while(attrib_list[i] != EGL_NONE) {
             switch(attrib_list[i]) {
             case EGL_CONTEXT_CLIENT_VERSION:
-                if(attrib_list[i+1] == 2) {
+                if(attrib_list[i+1] == 3) {
+                    fprintf(stderr, "%s: asked for a GLES 3.x context\n", __FUNCTION__);
+                    version = GLES_3_0;
+                } else if(attrib_list[i+1] == 2) {
                     version = GLES_2_0;
                 } else {
                     version = GLES_1_1;

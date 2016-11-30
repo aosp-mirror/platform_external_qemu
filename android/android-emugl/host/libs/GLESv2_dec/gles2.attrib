@@ -593,3 +593,408 @@ glFinishRoundTrip
 	flag custom_decoder
 	flag not_api
 
+# GLES 3.0
+
+glGenVertexArrays
+	len arrays (n * sizeof(GLuint))
+	dir arrays out
+    param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; } 
+
+glDeleteVertexArrays
+	len arrays (n * sizeof(GLuint))
+    param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; } 
+
+glMapBufferRangeAEMU
+    dir mapped out
+    len mapped length
+    flag custom_decoder
+    flag not_api
+
+glUnmapBufferAEMU
+    dir guest_buffer in
+    len guest_buffer length
+    dir out_res out
+    len out_res (sizeof(GLboolean))
+    flag custom_decoder
+    flag not_api
+
+glFlushMappedBufferRangeAEMU
+    dir guest_buffer in
+    len guest_buffer length
+    flag custom_decoder
+    flag not_api
+
+glClearBufferiv
+    dir value in
+    len value glesv2_enc::clearBufferValLengthiv(buffer, drawBuffer)
+
+glClearBufferuiv
+    dir value in
+    len value glesv2_enc::clearBufferValLengthuiv(buffer, drawBuffer)
+
+glClearBufferfv
+    dir value in
+    len value glesv2_enc::clearBufferValLengthfv(buffer, drawBuffer)
+
+glGetUniformBlockIndex
+    len uniformBlockName (strlen(uniformBlockName) + 1)
+
+glGetUniformIndicesAEMU
+    dir packedUniformNames in
+	len packedUniformNames packedLen
+    dir uniformIndices out
+    len uniformIndices uniformCount
+	flag custom_decoder
+	flag not_api
+
+glUniform1uiv
+    len value (count * sizeof(GLuint))
+
+glUniform2uiv
+    len value (count * 2 * sizeof(GLuint))
+
+glUniform3uiv
+    len value (count * 3 * sizeof(GLuint))
+
+glUniform4uiv
+    len value (count * 4 * sizeof(GLuint))
+
+glUniformMatrix2x3fv
+    len value (count * 6 * sizeof(GLfloat))
+
+glUniformMatrix3x2fv
+    len value (count * 6 * sizeof(GLfloat))
+
+glUniformMatrix2x4fv
+    len value (count * 8 * sizeof(GLfloat))
+
+glUniformMatrix4x2fv
+    len value (count * 8 * sizeof(GLfloat))
+
+glUniformMatrix3x4fv
+    len value (count * 12 * sizeof(GLfloat))
+
+glUniformMatrix4x3fv
+    len value (count * 12 * sizeof(GLfloat))
+
+glGetUniformuiv
+    dir params out
+    len params glSizeof(glesv2_enc::uniformType(self, program, location))
+
+glGetActiveUniformsiv
+    len uniformIndices (uniformCount * sizeof(GLuint))
+    dir params out
+    len params (uniformCount * sizeof(GLint))
+
+glVertexAttribI4iv
+    len v (4 * sizeof(GLint))
+
+glVertexAttribI4uiv
+    len v (4 * sizeof(GLuint))
+
+glVertexAttribIPointerAEMU
+    flag custom_decoder
+    flag not_api
+
+glGetVertexAttribIiv
+    dir params out
+    len params (glUtilsParamSize(pname) * sizeof(GLint))
+
+glGetVertexAttribIuiv
+    dir params out
+    len params (glUtilsParamSize(pname) * sizeof(GLuint))
+
+glDrawElementsInstancedDataAEMU
+    len indices datalen
+    flag custom_decoder
+    flag not_api
+
+glDrawElementsInstancedOffsetAEMU
+    flag custom_decoder
+    flag not_api
+
+glDrawRangeElementsDataAEMU
+    len indices datalen
+    flag custom_decoder
+    flag not_api
+
+glDrawRangeElementsOffsetAEMU
+    flag custom_decoder
+    flag not_api
+
+glGetSynciv
+    dir length out
+    len length (sizeof(GLsizei))
+    dir values out
+    len values bufSize
+
+glDrawBuffers
+    len bufs n
+
+glInvalidateFramebuffer
+    len attachments (numAttachments * sizeof(GLenum))
+
+glInvalidateSubFramebuffer
+    len attachments (numAttachments * sizeof(GLenum))
+
+glGenTransformFeedbacks
+    dir ids out
+    len ids (n * sizeof(GLuint))
+
+glDeleteTransformFeedbacks
+    len ids (n * sizeof(GLuint))
+    param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; } 
+
+glTransformFeedbackVaryingsAEMU
+    dir packedVaryings in
+	len packedVaryings packedVaryingsLen
+    flag custom_decoder
+    flag not_api
+
+glGetTransformFeedbackVarying
+    dir name out
+    len name bufSize
+    var_flag name nullAllowed
+    dir length out
+    len length (sizeof(GLsizei))
+    var_flag length nullAllowed
+    dir size out
+    len size (sizeof(GLsizei))
+    var_flag type nullAllowed
+    dir type out
+    len type (sizeof(GLenum))
+    var_flag type nullAllowed
+
+glGenSamplers
+    dir samplers out
+    len samplers n 
+
+glDeleteSamplers
+    len samplers (n * sizeof(GLuint))
+    param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
+
+glSamplerParameterfv
+    len params (glUtilsParamSize(pname) * sizeof(GLfloat))
+    
+glSamplerParameteriv
+    len params (glUtilsParamSize(pname) * sizeof(GLint))
+
+glGetSamplerParameterfv
+    dir params out
+    len params (glUtilsParamSize(pname) * sizeof(GLfloat))
+
+glGetSamplerParameteriv
+    dir params out
+    len params (glUtilsParamSize(pname) * sizeof(GLint))
+
+glGenQueries
+    dir ids out
+    len ids n 
+
+glDeleteQueries
+    len ids (n * sizeof(GLuint))
+    param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
+
+glGetQueryiv
+    dir params out
+    len params (glUtilsParamSize(pname) * sizeof(GLint))
+
+glGetQueryObjectuiv
+    dir params out
+    len params (glUtilsParamSize(pname) * sizeof(GLuint))
+
+glProgramBinary
+    len binary length
+
+glGetProgramBinary
+    dir binary out
+    len binary bufSize
+    dir binaryFormat out
+    len binaryFormat (sizeof(GLenum))
+    dir length out
+    len length (sizeof(GLsizei))
+
+glGetFragDataLocation
+    len name (strlen(name) + 1)
+
+glGetInteger64v
+    dir data out
+    len data (glUtilsParamSize(pname) * sizeof(GLint64))
+
+# No need to account for custom sizes since indexed variants
+# are all on indxed buffers like transform feedback buffers,
+# UBOs, or SSBOs, and querying their sizes and offsets.
+glGetIntegeri_v
+    dir data out
+    len data (sizeof(GLint))
+
+glGetInteger64i_v
+    dir data out
+    len data (sizeof(GLint64))
+
+glTexImage3D
+	dir data in
+	len data glesv2_enc::pixelDataSize(self, width, height, depth, format, type, 0)
+	var_flag data nullAllowed isLarge
+
+glTexSubImage3D
+	len data glesv2_enc::pixelDataSize(self, width, height, depth, format, type, 0)
+    var_flag data nullAllowed isLarge
+
+glCompressedTexImage3D
+	len data imageSize
+    var_flag data nullAllowed isLarge
+
+glCompressedTexSubImage3D
+	len data imageSize
+    var_flag data nullAllowed isLarge
+
+# GLES 3.1
+
+glGetBooleani_v
+    dir data out
+    len data (sizeof(GLboolean))
+
+glGenProgramPipelines
+    dir pipelines out
+    len pipelines (n * sizeof(GLuint))
+
+glDeleteProgramPipelines
+    len pipelines (n * sizeof(GLuint))
+    param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; } 
+
+glGetProgramPipelineiv
+    dir params out
+    len params (glUtilsParamSize(pname) * sizeof(GLint))
+
+glGetProgramPipelineInfoLog
+	dir infoLog out
+	len infoLog bufSize
+	dir length out
+	len length sizeof(GLsizei)
+	var_flag length nullAllowed
+
+glCreateShaderProgramvAEMU
+    len packedStrings packedLen
+    flag custom_decoder
+    flag not_api
+
+glProgramUniform1fv
+	len value (count * sizeof(GLfloat))
+
+glProgramUniform2fv
+	len value (count * sizeof(GLfloat))
+
+glProgramUniform3fv
+	len value (count * sizeof(GLfloat))
+
+glProgramUniform4fv
+	len value (count * sizeof(GLfloat))
+
+glProgramUniform1iv
+	len value (count * sizeof(GLint))
+
+glProgramUniform2iv
+	len value (count * sizeof(GLint))
+
+glProgramUniform3iv
+	len value (count * sizeof(GLint))
+
+glProgramUniform4iv
+	len value (count * sizeof(GLint))
+
+glProgramUniform1uiv
+    len value (count * sizeof(GLuint))
+
+glProgramUniform2uiv
+    len value (count * sizeof(GLuint))
+
+glProgramUniform3uiv
+    len value (count * sizeof(GLuint))
+
+glProgramUniform4uiv
+    len value (count * sizeof(GLuint))
+
+glProgramUniformMatrix2fv
+	len value (count * 4 * sizeof(GLfloat))
+
+glProgramUniformMatrix3fv
+	len value (count * 9 * sizeof(GLfloat))
+
+glProgramUniformMatrix4fv
+	len value (count * 16 * sizeof(GLfloat))
+
+glProgramUniformMatrix2x3fv
+    len value (count * 6 * sizeof(GLfloat))
+
+glProgramUniformMatrix3x2fv
+    len value (count * 6 * sizeof(GLfloat))
+
+glProgramUniformMatrix2x4fv
+    len value (count * 8 * sizeof(GLfloat))
+
+glProgramUniformMatrix4x2fv
+    len value (count * 8 * sizeof(GLfloat))
+
+glProgramUniformMatrix3x4fv
+    len value (count * 12 * sizeof(GLfloat))
+
+glProgramUniformMatrix4x3fv
+    len value (count * 12 * sizeof(GLfloat))
+
+glGetProgramInterfaceiv
+    dir params out
+    len params (glUtilsParamSize(pname) * sizeof(GLint))
+
+glGetProgramResourceiv
+    dir params out
+    len params bufSize
+    dir length out
+    len length (sizeof(GLsizei))
+    len props (propCount * sizeof(GLenum))
+
+glGetProgramResourceIndex
+    len name (strlen(name) + 1)
+
+glGetProgramResourceLocation
+    len name (strlen(name) + 1)
+
+glGetProgramResourceName
+    dir name out
+    len name bufSize
+    dir length out
+    len length (sizeof(GLsizei))
+
+glDrawArraysIndirectDataAEMU
+    len indirect datalen
+    flag custom_decoder
+    flag not_api
+
+glDrawArraysIndirectOffsetAEMU
+    flag custom_decoder
+    flag not_api
+
+glDrawElementsIndirectDataAEMU
+    len indirect datalen
+    flag custom_decoder
+    flag not_api
+
+glDrawElementsIndirectOffsetAEMU
+    flag custom_decoder
+    flag not_api
+
+glGetMultisamplefv
+    dir val out
+    len val (glUtilsParamSize(pname) * sizeof(GLfloat))
+
+glGetFramebufferParameteriv
+    dir params out
+    len params (glUtilsParamSize(pname) * sizeof(GLint))
+
+glGetTexLevelParameterfv
+    dir params out
+    len params (glUtilsParamSize(pname) * sizeof(GLfloat))
+
+glGetTexLevelParameteriv
+    dir params out
+    len params (glUtilsParamSize(pname) * sizeof(GLint))

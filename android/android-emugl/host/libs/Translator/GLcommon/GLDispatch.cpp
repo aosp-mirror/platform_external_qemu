@@ -57,7 +57,6 @@ static GL_FUNC_PTR getGLFuncAddress(const char *funcName, GlLibrary* glLib) {
         } \
     } while (0);
 
-
 // Define dummy functions, only for non-extensions.
 
 #define RETURN_void return
@@ -114,7 +113,8 @@ void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
         LIST_GLES2_EXTENSIONS_FUNCTIONS(LOAD_GLEXT_FUNC)
     }
 
-    /* Load glGetStringi() if it is available, so use LOAD_GLEXT_FUNC */
+    /* Load OpenGL ES 3.x functions through 3.1. Not all are supported;
+     * leave it up to EGL to determine support level. */
     LIST_GLES3_ONLY_FUNCTIONS(LOAD_GLEXT_FUNC)
 
     m_isLoaded = true;
