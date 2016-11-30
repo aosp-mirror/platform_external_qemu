@@ -16,6 +16,46 @@
 #include "GLESv2Validate.h"
 #include <string.h>
 
+bool GLESv2Validate::bufferTarget(GLenum target, int glesMajorVersion, int glesMinorVersion) {
+    switch (target) {
+    case GL_ARRAY_BUFFER: // Vertex attributes
+    case GL_ELEMENT_ARRAY_BUFFER: // Vertex array indices
+        return true;
+        // GLES 3.0 buffers
+    case GL_COPY_READ_BUFFER: // Buffer copy source
+    case GL_COPY_WRITE_BUFFER: // Buffer copy destination
+    case GL_PIXEL_PACK_BUFFER: // Pixel read target
+    case GL_PIXEL_UNPACK_BUFFER: // Texture data source
+    case GL_TRANSFORM_FEEDBACK_BUFFER: // Transform feedback buffer
+    case GL_UNIFORM_BUFFER: // Uniform block storage
+        return glesMajorVersion >= 3;
+        // GLES 3.1 buffers
+    case GL_ATOMIC_COUNTER_BUFFER: // Atomic counter storage
+    case GL_DISPATCH_INDIRECT_BUFFER: // Indirect compute dispatch commands
+    case GL_DRAW_INDIRECT_BUFFER: // Indirect command arguments
+    case GL_SHADER_STORAGE_BUFFER: // Read-write storage for shaders
+        return glesMajorVersion >= 3 && glesMinorVersion >= 1;
+    default:
+        return false;
+    }
+}
+
+bool GLESv2Validate::bufferParam(GLenum pname, int glesMajorVersion, int glesMinorVersion) {
+    switch (pname) {
+    case GL_BUFFER_SIZE:
+    case GL_BUFFER_USAGE:
+        return true;
+    case GL_BUFFER_ACCESS_FLAGS:
+    case GL_BUFFER_MAPPED:
+    case GL_BUFFER_MAP_LENGTH:
+    case GL_BUFFER_MAP_OFFSET:
+        return glesMajorVersion >= 3;
+    default:
+        return false;
+    }
+}
+
+
 bool GLESv2Validate::blendEquationMode(GLenum mode){
     return mode == GL_FUNC_ADD             ||
            mode == GL_FUNC_SUBTRACT        ||
@@ -66,7 +106,22 @@ bool GLESv2Validate::blendDst(GLenum d) {
    return false;
 }
 
-bool GLESv2Validate::textureParams(GLenum param){
+bool GLESv2Validate::textureTarget(GLenum target, int glesMajorVersion, int glesMinorVersion) {
+    switch (target) {
+    case GL_TEXTURE_2D:
+    case GL_TEXTURE_CUBE_MAP:
+        return true;
+    case GL_TEXTURE_2D_ARRAY:
+    case GL_TEXTURE_3D:
+        return glesMajorVersion >= 3;
+    case GL_TEXTURE_2D_MULTISAMPLE:
+        return glesMajorVersion >= 3 && glesMinorVersion >= 1;
+    default:
+        return false;
+    }
+}
+
+bool GLESv2Validate::textureParams(GLenum param, int glesMajorVersion, int glesMinorVersion) {
     switch(param) {
     case GL_TEXTURE_MIN_FILTER:
     case GL_TEXTURE_MAG_FILTER:
@@ -74,6 +129,18 @@ bool GLESv2Validate::textureParams(GLenum param){
     case GL_TEXTURE_WRAP_T:
     case GL_TEXTURE_MAX_ANISOTROPY_EXT:
         return true;
+    case GL_TEXTURE_SWIZZLE_R:
+    case GL_TEXTURE_SWIZZLE_G:
+    case GL_TEXTURE_SWIZZLE_B:
+    case GL_TEXTURE_SWIZZLE_A:
+    case GL_TEXTURE_MIN_LOD:
+    case GL_TEXTURE_MAX_LOD:
+    case GL_TEXTURE_BASE_LEVEL:
+    case GL_TEXTURE_MAX_LEVEL:
+    case GL_TEXTURE_COMPARE_MODE:
+    case GL_TEXTURE_COMPARE_FUNC:
+    case GL_TEXTURE_WRAP_R:
+        return glesMajorVersion >= 3;
     default:
         return false;
     }
@@ -107,8 +174,23 @@ bool GLESv2Validate::capability(GLenum cap){
     return false;
 }
 
-bool GLESv2Validate::pixelStoreParam(GLenum param){
-    return param == GL_PACK_ALIGNMENT || param == GL_UNPACK_ALIGNMENT;
+bool GLESv2Validate::pixelStoreParam(GLenum param, int glesMajorVersion, int glesMinorVersion){
+    switch(param) {
+    case GL_PACK_ALIGNMENT:
+    case GL_UNPACK_ALIGNMENT:
+        return true;
+    case GL_PACK_ROW_LENGTH:
+    case GL_PACK_SKIP_PIXELS:
+    case GL_PACK_SKIP_ROWS:
+    case GL_UNPACK_ROW_LENGTH:
+    case GL_UNPACK_IMAGE_HEIGHT:
+    case GL_UNPACK_SKIP_PIXELS:
+    case GL_UNPACK_SKIP_ROWS:
+    case GL_UNPACK_SKIP_IMAGES:
+        return glesMajorVersion >= 3;
+    default:
+        return false;
+    }
 }
 
 bool GLESv2Validate::readPixelFrmt(GLenum format){
