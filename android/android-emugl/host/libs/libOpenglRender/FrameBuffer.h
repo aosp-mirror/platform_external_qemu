@@ -153,11 +153,10 @@ public:
     // Create a new RenderContext instance for this display instance.
     // |p_config| is the index of one of the configs returned by getConfigs().
     // |p_share| is either EGL_NO_CONTEXT or the handle of a shared context.
-    // |p_isGL2| is true to create a GLES 2.x context, or false for a GLES 1.x
-    // one.
+    // |version| specifies the GLES version as a GLESApi enum.
     // Return a new handle value, which will be 0 in case of error.
     HandleType createRenderContext(
-            int p_config, HandleType p_share, bool p_isGL2 = false);
+            int p_config, HandleType p_share, GLESApi version = GLESApi_CM);
 
     // Create a new WindowSurface instance from this display instance.
     // |p_config| is the index of one of the configs returned by getConfigs().
