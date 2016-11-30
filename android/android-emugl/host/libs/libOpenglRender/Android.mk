@@ -25,6 +25,7 @@ host_common_SRC_FILES := \
     FbConfig.cpp \
     FenceSync.cpp \
     FrameBuffer.cpp \
+    GLESVersionDetector.cpp \
     ReadBuffer.cpp \
     RenderChannelImpl.cpp \
     RenderContext.cpp \
