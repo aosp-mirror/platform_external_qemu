@@ -43,7 +43,7 @@ static void initGLESx();
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp);
 static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
-static GLEScontext* createGLESContext();
+static GLEScontext* createGLESContext(int maj, int min);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
 
 }
@@ -86,8 +86,8 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
      }
 }
 
-static GLEScontext* createGLESContext() {
-    return new GLEScmContext();
+static GLEScontext* createGLESContext(int maj, int min) {
+    return new GLEScmContext(maj, min);
 }
 
 static void deleteGLESContext(GLEScontext* ctx) {
