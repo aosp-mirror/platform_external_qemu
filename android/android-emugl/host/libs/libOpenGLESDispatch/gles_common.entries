@@ -72,3 +72,6 @@ void glPushAttrib( GLbitfield mask );
 void glPushClientAttrib( GLbitfield mask );
 void glPopAttrib( void );
 void glPopClientAttrib( void );
+
+# Utility functions specific to the emulator
+GLuint gl_dispatch_get_max_version( void );

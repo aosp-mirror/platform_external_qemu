@@ -40,6 +40,9 @@
 #define INSTRUMENT_TIMING_GUEST 0
 #define INSTRUMENT_TIMING_HOST 0
 
+// Set to 1 to print to logcat for every GL call encoded.
+#define DLOG_ALL_ENCODES 0
+
 EntryPoint * ApiGen::findEntryByName(const std::string & name)
 {
     EntryPoint * entry = NULL;
@@ -537,6 +540,9 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 
         e->print(fp, true, "_enc", /* classname + "::" */"", "void *self");
         fprintf(fp, "{\n");
+#if DLOG_ALL_ENCODES
+        fprintf(fp, "ALOGD(\"%%s: enter\", __FUNCTION__);\n");
+#endif
 
 #if INSTRUMENT_TIMING_GUEST
         fprintf(fp, "\tstruct timespec ts0, ts1;\n");
