@@ -22,6 +22,7 @@
 #include "OpenGLESDispatch/gles2_only_functions.h"
 #include "OpenGLESDispatch/gles2_extensions_functions.h"
 #include "OpenGLESDispatch/gles3_only_functions.h"
+#include "OpenGLESDispatch/gles31_only_functions.h"
 
 // As a special case, LIST_GLES3_ONLY_FUNCTIONS below uses the Y parameter
 // instead of the X one, meaning that the corresponding functions are
@@ -37,6 +38,7 @@
     LIST_GLES2_ONLY_FUNCTIONS(X) \
     LIST_GLES2_EXTENSIONS_FUNCTIONS(Y) \
     LIST_GLES3_ONLY_FUNCTIONS(Y) \
+    LIST_GLES31_ONLY_FUNCTIONS(Y) \
 
 #define LIST_GLES1_FUNCTIONS(X, Y) \
     LIST_GLES_COMMON_FUNCTIONS(X) \
@@ -50,4 +52,5 @@
     LIST_GLES2_ONLY_FUNCTIONS(X) \
     LIST_GLES2_EXTENSIONS_FUNCTIONS(Y) \
     LIST_GLES3_ONLY_FUNCTIONS(Y) \
+    LIST_GLES31_ONLY_FUNCTIONS(Y) \
 
