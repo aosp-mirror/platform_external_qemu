@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "702a0062_15be6198",
+        "filename": "android/android-emu/android/emulation/control/window_agent.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2016-11-30T17:27:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "103c64a3_53865ca5",
+      "revId": "e2835e9c6ceeacaab97855b8225b905efbb1febb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5056dcee_78b415b1",
         "filename": "android/android-emu/android/emulator-window.h",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2016-11-30T08:26:02Z",
       "side": 1,
       "message": "nit: since it is so specific, call this emulator_window_rotate_90_clockwise()",
+      "revId": "e2835e9c6ceeacaab97855b8225b905efbb1febb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "702a0062_f5b8edae",
+        "filename": "android/android-emu/android/emulator-window.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2016-11-30T17:27:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5056dcee_78b415b1",
       "revId": "e2835e9c6ceeacaab97855b8225b905efbb1febb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
