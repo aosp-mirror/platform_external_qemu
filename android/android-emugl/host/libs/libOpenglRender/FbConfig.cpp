@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "FbConfig.h"
+#include "GLESVersionDetector.h"
 
 #include "emugl/common/misc.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
@@ -109,6 +110,14 @@ FbConfig::FbConfig(EGLConfig hostConfig, EGLDisplay hostDisplay) :
         // them around host Pbuffers, so always report it to the guest.
         if (kConfigAttributes[i] == EGL_SURFACE_TYPE) {
             mAttribValues[i] |= EGL_WINDOW_BIT;
+        }
+
+        // Don't report ES3 renderable type if we don't support it.
+        if (kConfigAttributes[i] == EGL_RENDERABLE_TYPE) {
+            if (calcMaxVersionFromDispatch() < GLES_DISPATCH_MAX_VERSION_3_0 &&
+                mAttribValues[i] & EGL_OPENGL_ES3_BIT) {
+                mAttribValues[i] &= ~EGL_OPENGL_ES3_BIT;
+            }
         }
     }
 }
