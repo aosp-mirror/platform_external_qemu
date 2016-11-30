@@ -19,6 +19,10 @@
 #include <GLcommon/GLESmacros.h>
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#include <GLES3/gl3.h>
+#include <GLES3/gl31.h>
 #include <OpenglCodecCommon/ErrorLog.h>
 #include <GLcommon/GLESvalidate.h>
 #include <GLcommon/TextureUtils.h>
@@ -804,6 +808,15 @@ TextureTarget GLEScontext::GLTextureTargetToLocal(GLenum target) {
     case GL_TEXTURE_2D:
         value = TEXTURE_2D;
         break;
+    case GL_TEXTURE_2D_ARRAY:
+        value = TEXTURE_2D_ARRAY;
+        break;
+    case GL_TEXTURE_3D:
+        value = TEXTURE_3D;
+        break;
+    case GL_TEXTURE_2D_MULTISAMPLE:
+        value = TEXTURE_2D_MULTISAMPLE;
+        break;
     }
     return value;
 }
@@ -838,6 +851,15 @@ ObjectLocalName GLEScontext::getDefaultTextureName(GLenum target) {
         break;
     case TEXTURE_CUBE_MAP:
         name = INTERNAL_NAME(1);
+        break;
+    case TEXTURE_2D_ARRAY:
+        name = INTERNAL_NAME(2);
+        break;
+    case TEXTURE_3D:
+        name = INTERNAL_NAME(3);
+        break;
+    case TEXTURE_2D_MULTISAMPLE:
+        name = INTERNAL_NAME(4);
         break;
     default:
         name = 0;

@@ -24,10 +24,14 @@
 class GLESv2Context : public GLEScontext{
 public:
     virtual void init(GlLibrary* glLib);
+    GLESv2Context(int maj, int min);
     virtual ~GLESv2Context();
     void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct);
     int  getMaxCombinedTexUnits() override;
     int  getMaxTexUnits() override;
+    bool isPostGLESv2() const { return m_glesMajorVersion > 2; }
+    int getMajorVersion() const { return m_glesMajorVersion; }
+    int getMinorVersion() const { return m_glesMinorVersion; }
 
     // This whole att0 thing is about a incompatibility between GLES and OpenGL.
     // GLES allows a vertex shader attribute to be in location 0 and have a
