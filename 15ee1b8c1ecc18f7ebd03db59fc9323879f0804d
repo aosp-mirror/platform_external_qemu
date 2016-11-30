@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "702a0062_d09db742",
+        "filename": "android/android-emu/android/console.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2740,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2016-11-30T17:32:18Z",
+      "side": 1,
+      "message": "Changed name from do_rotate() to do_rotate_90_clockwise() to be more specific as well.",
+      "range": {
+        "startLine": 2740,
+        "startChar": 11,
+        "endLine": 2740,
+        "endChar": 33
+      },
+      "revId": "15ee1b8c1ecc18f7ebd03db59fc9323879f0804d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
