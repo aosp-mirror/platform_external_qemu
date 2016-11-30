@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "103c64a3_53865ca5",
+        "filename": "android/android-emu/android/emulation/control/window_agent.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-30T08:26:02Z",
+      "side": 1,
+      "message": "nit: call this rotate90Clockwise() instead to make it more explicit.",
+      "revId": "e2835e9c6ceeacaab97855b8225b905efbb1febb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5056dcee_78b415b1",
+        "filename": "android/android-emu/android/emulator-window.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-11-30T08:26:02Z",
+      "side": 1,
+      "message": "nit: since it is so specific, call this emulator_window_rotate_90_clockwise()",
+      "revId": "e2835e9c6ceeacaab97855b8225b905efbb1febb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
