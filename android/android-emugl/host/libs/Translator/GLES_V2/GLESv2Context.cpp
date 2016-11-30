@@ -36,6 +36,11 @@ void GLESv2Context::init(GlLibrary* glLib) {
     m_initialized = true;
 }
 
+GLESv2Context::GLESv2Context(int maj, int min) {
+    m_glesMajorVersion = maj;
+    m_glesMinorVersion = min;
+}
+
 GLESv2Context::~GLESv2Context()
 {
     delete[] m_att0Array;

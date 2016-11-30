@@ -25,16 +25,17 @@ extern GLESv1Dispatch s_gles1;
 RenderContext* RenderContext::create(EGLDisplay display,
                                      EGLConfig config,
                                      EGLContext sharedContext,
-                                     bool isGl2) {
+                                     GLESApi version) {
     void* emulatedGLES1Context = NULL;
 
     bool shouldEmulateGLES1 = s_gles1.underlying_gles2_api != NULL;
-    int clientVersion;
 
-    if (shouldEmulateGLES1) {
-        clientVersion = 2;
+    GLESApi clientVersion;
+
+    if (version == GLESApi_CM && shouldEmulateGLES1) {
+        clientVersion = GLESApi_2;
     } else {
-        clientVersion = isGl2 ? 2 : 1;
+        clientVersion = version;
     }
 
     const EGLint contextAttribs[] = {
@@ -48,10 +49,6 @@ RenderContext* RenderContext::create(EGLDisplay display,
         return NULL;
     }
 
-    if (isGl2) {
-        return new RenderContext(display, context, isGl2, NULL);
-    }
-
     if (shouldEmulateGLES1) {
         DBG("%s: should be creating a emulated gles1 context here\n", __FUNCTION__);
         if (sharedContext == EGL_NO_CONTEXT) {
@@ -61,18 +58,19 @@ RenderContext* RenderContext::create(EGLDisplay display,
         }
         emulatedGLES1Context = s_gles1.create_gles1_context(NULL, s_gles1.underlying_gles2_api);
         DBG("%s: created a emulated gles1 context @ %p\n", __FUNCTION__, emulatedGLES1Context);
+        return new RenderContext(display, context, clientVersion, emulatedGLES1Context);
+    } else {
+        return new RenderContext(display, context, clientVersion, NULL);
     }
-
-    return new RenderContext(display, context, isGl2, emulatedGLES1Context);
 }
 
 RenderContext::RenderContext(EGLDisplay display,
                              EGLContext context,
-                             bool isGl2,
+                             GLESApi version,
                              void* emulatedGLES1Context) :
         mDisplay(display),
         mContext(context),
-        mIsGl2(isGl2),
+        mVersion(version),
         mEmulatedGLES1Context(emulatedGLES1Context),
         mContextData() { }
 

@@ -29,6 +29,9 @@ typedef std::unordered_map<GLenum,GLESpointer*>  ArraysMap;
 enum TextureTarget {
 TEXTURE_2D,
 TEXTURE_CUBE_MAP,
+TEXTURE_2D_ARRAY,
+TEXTURE_3D,
+TEXTURE_2D_MULTISAMPLE,
 NUM_TEXTURE_TARGETS
 };
 
@@ -166,6 +169,9 @@ public:
     virtual bool glGetFloatv(GLenum pname, GLfloat *params);
     virtual bool glGetFixedv(GLenum pname, GLfixed *params);
 
+    int getGLESMajorVersion() const { return m_glesMajorVersion; }
+    int getGLESMinorVersion() const { return m_glesMinorVersion; }
+
 protected:
     static void buildStrings(const char* baseVendor, const char* baseRenderer, const char* baseVersion, const char* version);
     virtual bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id) = 0;
@@ -185,6 +191,8 @@ protected:
     static std::string*   s_glExtensions;
     static GLSupport      s_glSupport;
 
+    int m_glesMajorVersion = 1;
+    int m_glesMinorVersion = 0;
 private:
 
     virtual void setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride, GLboolean normalized, int pointsIndex = -1) = 0 ;
