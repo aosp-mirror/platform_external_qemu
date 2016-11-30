@@ -19,16 +19,21 @@
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+#include <GLES3/gl3.h>
+#include <GLES3/gl31.h>
 #include <GLcommon/GLESvalidate.h>
 
 struct GLESv2Validate:public GLESvalidate{
+static bool bufferTarget(GLenum target, int glesMajorVersion, int glesMinorVersion);
+static bool bufferParam(GLenum pname, int glesMajorVersion, int glesMinorVersion);
 static bool blendEquationMode(GLenum mode);
 static bool blendSrc(GLenum s);
 static bool blendDst(GLenum d);
-static bool textureParams(GLenum param);
+static bool textureTarget(GLenum param, int glesMajorVersion, int glesMinorVersion);
+static bool textureParams(GLenum param, int glesMajorVersion, int glesMinorVersion);
 static bool hintTargetMode(GLenum target,GLenum mode);
 static bool capability(GLenum cap);
-static bool pixelStoreParam(GLenum param);
+static bool pixelStoreParam(GLenum param, int glesMajorVersion, int glesMinorVersion);
 static bool readPixelFrmt(GLenum format);
 static bool shaderType(GLenum type);
 static bool precisionType(GLenum type);
