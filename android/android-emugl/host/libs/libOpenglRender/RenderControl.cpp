@@ -25,6 +25,7 @@
 #include "SyncThread.h"
 #include "ChecksumCalculatorThreadInfo.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
 
 #include "android/utils/debug.h"
 #include "android/base/StringView.h"
@@ -33,6 +34,7 @@
 #include "emugl/common/sync_device.h"
 #include "emugl/common/dma_device.h"
 #include "emugl/common/thread.h"
+#include "math.h"
 
 #include <atomic>
 #include <inttypes.h>
@@ -157,6 +159,12 @@ static constexpr android::base::StringView kAsyncSwapStr = "ANDROID_EMU_native_s
 // yv12 conversion on the GPU
 static constexpr android::base::StringView kDmaStr = "ANDROID_EMU_dma_v1";
 
+// GLESDynamicVersion: up to 3.0
+static constexpr android::base::StringView kGLESDynamicVersion_2 = "ANDROID_EMU_gles_max_version_2";
+static constexpr android::base::StringView kGLESDynamicVersion_3_0 = "ANDROID_EMU_gles_max_version_3_0";
+static constexpr android::base::StringView kGLESDynamicVersion_3_1 = "ANDROID_EMU_gles_max_version_3_1";
+static constexpr android::base::StringView kGLESDynamicVersion_3_2 = "ANDROID_EMU_gles_max_version_3_2";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -194,6 +202,9 @@ static EGLint rcQueryEGLString(EGLenum name, void* buffer, EGLint bufferSize)
     }
 
     std::string eglStr(str);
+    if (eglStr.find("EGL_KHR_create_context") == std::string::npos) {
+        eglStr += "EGL_KHR_create_context ";
+    }
 
     int len = eglStr.size() + 1;
     if (!buffer || len > bufferSize) {
@@ -202,6 +213,21 @@ static EGLint rcQueryEGLString(EGLenum name, void* buffer, EGLint bufferSize)
 
     strcpy((char *)buffer, eglStr.c_str());
     return len;
+}
+
+android::base::StringView maxGLESVersionToString(GLESDispatchMaxVersion version) {
+    switch (version) {
+        case GLES_DISPATCH_MAX_VERSION_2:
+            return kGLESDynamicVersion_2;
+        case GLES_DISPATCH_MAX_VERSION_3_0:
+            return kGLESDynamicVersion_3_0;
+        case GLES_DISPATCH_MAX_VERSION_3_1:
+            return kGLESDynamicVersion_3_1;
+        case GLES_DISPATCH_MAX_VERSION_3_2:
+            return kGLESDynamicVersion_3_2;
+        default:
+            return kGLESDynamicVersion_2;
+    }
 }
 
 static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
@@ -215,7 +241,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
 
     if (tInfo && tInfo->currContext.get()) {
         const char *str = nullptr;
-        if (tInfo->currContext->isGL2()) {
+        if (tInfo->currContext->version() > GLESApi_CM) {
             str = (const char *)s_gles2.glGetString(name);
         }
         else {
@@ -234,6 +260,8 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
         emugl_sync_device_exists();
     bool dmaEnabled =
         emugl_feature_is_enabled(android::featurecontrol::GLDMA);
+    bool glesDynamicVersionEnabled =
+        emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion);
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -247,6 +275,25 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
 
     if (dmaEnabled && name == GL_EXTENSIONS) {
         glStr += kDmaStr;
+        glStr += " ";
+    }
+
+    if (glesDynamicVersionEnabled && name == GL_EXTENSIONS) {
+        // Detect the version now; if the underlying glesv2 library
+        // also is on top of system OpenGL, we assume existence of a function
+        // called "gl_dispatch_get_max_version" which matches the return
+        // type of gles2_dispatch_get_max_version, and allows us to scale back
+        // if the underlying host machine doesn't suppport a particular
+        // GLES version.
+        GLESDispatchMaxVersion underlying_gles2_lib_max =
+            gles2_dispatch_get_max_version();
+        if (s_gles2.gl_dispatch_get_max_version) {
+            GLESDispatchMaxVersion underlying_gl_lib_max =
+                (GLESDispatchMaxVersion)s_gles2.gl_dispatch_get_max_version();
+            glStr += maxGLESVersionToString(std::min(underlying_gl_lib_max, underlying_gles2_lib_max));
+        } else {
+            glStr += maxGLESVersionToString(underlying_gles2_lib_max);
+        }
         glStr += " ";
     }
 
@@ -337,9 +384,7 @@ static uint32_t rcCreateContext(uint32_t config,
         return 0;
     }
 
-    // To make it consistent with the guest, create GLES2 context when GL
-    // version==2 or 3
-    HandleType ret = fb->createRenderContext(config, share, glVersion == 2 || glVersion == 3);
+    HandleType ret = fb->createRenderContext(config, share, (GLESApi)glVersion);
     return ret;
 }
 

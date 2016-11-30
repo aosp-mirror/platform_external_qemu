@@ -148,6 +148,21 @@ def gen_functions_header(entries, prefix_name, verbatim, filename, with_args):
     print "#endif  // %s_FUNCTIONS_H" % prefix_name
 
 
+# The purpose of gen_translator_passthrough()
+# is to quickly generate implementations on the host Translator,
+# which processes commands that just got onto the renderthread off goldfish pipe 
+# and are fed to system OpenGL.
+def gen_translator_passthrough(entries):
+    for entry in entries:
+        print "GL_APICALL %s GL_APIENTRY %s(%s) {" % (entry.return_type, entry.func_name, entry.parameters)
+        if (entry.return_type == "void"):
+            print "    GET_CTX_V2();"
+            print "    ctx->dispatcher().%s(%s);" % (entry.func_name, entry.call)
+        else:
+            print "    GET_CTX_V2_RET(0);"
+            print "    return ctx->dispatcher().%s(%s);" % (entry.func_name, entry.call)
+        print "}\n"
+
 def gen_dll_wrapper(entries, prefix_name, verbatim, filename):
     """Generate a C source file that contains functions that act as wrappers
        for entry points located in another shared library. This allows the
@@ -261,6 +276,8 @@ def parse_file(filename, lines, mode):
         gen_windows_def_file(entries)
     elif mode == 'sym':
         gen_unix_sym_file(entries)
+    elif mode == 'translator_passthrough':
+        gen_translator_passthrough(entries)
     elif mode == 'wrapper':
         gen_dll_wrapper(entries, prefix_name, verbatim, filename)
     elif mode == 'symbols':
@@ -275,7 +292,7 @@ def parse_file(filename, lines, mode):
 
 # List of valid --mode option values.
 mode_list = [
-    'def', 'sym', 'wrapper', 'symbols', '_symbols', 'functions', 'funcargs'
+    'def', 'sym', 'translator_passthrough', 'wrapper', 'symbols', '_symbols', 'functions', 'funcargs'
 ]
 
 # Argument parsing.
