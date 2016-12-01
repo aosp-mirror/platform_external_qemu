@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b010f8cf_8c64b5c9",
+        "filename": "android/emulation/DmaMap.cpp",
+        "patchSetId": 25
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-01T15:07:48Z",
+      "side": 1,
+      "message": "Done (since this was cribbed from vmlock, it\u0027s done there as well.)",
+      "parentUuid": "30ca486f_c47afc29",
+      "range": {
+        "startLine": 45,
+        "startChar": 4,
+        "endLine": 47,
+        "endChar": 25
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30ca486f_e4a53887",
         "filename": "android/emulation/DmaMap.cpp",
         "patchSetId": 25
@@ -36,6 +60,30 @@
       "writtenOn": "2016-11-18T18:06:57Z",
       "side": 1,
       "message": "please move the lock to the point where you\u0027re accessing |mDmaBuffers|",
+      "range": {
+        "startLine": 65,
+        "startChar": 4,
+        "endLine": 65,
+        "endChar": 45
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b010f8cf_cc462d1f",
+        "filename": "android/emulation/DmaMap.cpp",
+        "patchSetId": 25
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-01T15:07:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30ca486f_e4a53887",
       "range": {
         "startLine": 65,
         "startChar": 4,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "0d6b6b00_d70a9789",
+        "filename": "android/emulation/DmaMap.cpp",
+        "patchSetId": 25
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-01T15:07:48Z",
+      "side": 1,
+      "message": "Tried to put the createMappingLocked in one location only for simplicity, but IIRC it might have broke some stuff. Right now, createMappingLocked is done on region creation and getHostAddr if the mapping becomes invalidated in the middle",
+      "parentUuid": "30ca486f_c4df5cf5",
+      "range": {
+        "startLine": 90,
+        "startChar": 12,
+        "endLine": 90,
+        "endChar": 31
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30ca486f_c2b82fcb",
         "filename": "android/emulation/DmaMap.h",
         "patchSetId": 25
@@ -82,6 +154,30 @@
       "writtenOn": "2016-11-18T18:06:57Z",
       "side": 1,
       "message": "should this be a part of DmaMap class, inside it?",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 22
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b010f8cf_4cc0fd36",
+        "filename": "android/emulation/DmaMap.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-01T15:07:48Z",
+      "side": 1,
+      "message": "Nah, it\u0027s heavily used in the unit test code.",
+      "parentUuid": "30ca486f_c2b82fcb",
       "range": {
         "startLine": 25,
         "startChar": 0,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "b010f8cf_e78b4a00",
+        "filename": "android/emulation/DmaMap.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-01T15:07:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30ca486f_a2ddf32f",
+      "range": {
+        "startLine": 27,
+        "startChar": 13,
+        "endLine": 27,
+        "endChar": 15
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30ca486f_0215c7f1",
         "filename": "android/emulation/DmaMap.h",
         "patchSetId": 25
@@ -140,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "b010f8cf_c790462f",
+        "filename": "android/emulation/DmaMap.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-01T15:07:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30ca486f_0215c7f1",
+      "range": {
+        "startLine": 28,
+        "startChar": 4,
+        "endLine": 28,
+        "endChar": 12
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30ca486f_82d8f73f",
         "filename": "android/emulation/DmaMap.h",
         "patchSetId": 25
@@ -151,6 +295,30 @@
       "writtenOn": "2016-11-18T18:06:57Z",
       "side": 1,
       "message": "Optional\u003cvoid*\u003e ?",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 2
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b010f8cf_bfd1dae8",
+        "filename": "android/emulation/DmaMap.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-01T15:07:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30ca486f_82d8f73f",
       "range": {
         "startLine": 28,
         "startChar": 0,
@@ -209,6 +377,54 @@
     },
     {
       "key": {
+        "uuid": "b010f8cf_32f402d7",
+        "filename": "android/emulation/DmaMap.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-01T15:07:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30ca486f_c2f10fb5",
+      "range": {
+        "startLine": 43,
+        "startChar": 40,
+        "endLine": 43,
+        "endChar": 44
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b010f8cf_67b75ab7",
+        "filename": "android/emulation/DmaMap.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-01T15:07:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30ca486f_029a275b",
+      "range": {
+        "startLine": 40,
+        "startChar": 1,
+        "endLine": 43,
+        "endChar": 46
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30ca486f_a2ab336b",
         "filename": "android/emulation/DmaMap.h",
         "patchSetId": 25
@@ -220,6 +436,30 @@
       "writtenOn": "2016-11-18T18:06:57Z",
       "side": 1,
       "message": "I\u0027d prefer if we passed the instance around explicitly instead of relying on a singleton. But that\u0027s something I just like more, not that important",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 39
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b010f8cf_f2ed4a09",
+        "filename": "android/emulation/DmaMap.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-01T15:07:48Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "30ca486f_a2ab336b",
       "range": {
         "startLine": 45,
         "startChar": 0,
@@ -255,6 +495,30 @@
     },
     {
       "key": {
+        "uuid": "b010f8cf_d278066c",
+        "filename": "android/emulation/DmaMap.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-01T15:07:48Z",
+      "side": 1,
+      "message": "So I ended up making everything virtual because initially I made it follow VmLock where all methods except for get/set() were empties, but I realize now that only doMap/doUnmap really need to be virtual if the other methods are the final implementations :\u003e (Done)",
+      "parentUuid": "30ca486f_42ac1f87",
+      "range": {
+        "startLine": 49,
+        "startChar": 4,
+        "endLine": 49,
+        "endChar": 11
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30ca486f_22c00336",
         "filename": "android/emulation/DmaMap.h",
         "patchSetId": 25
@@ -266,6 +530,30 @@
       "writtenOn": "2016-11-18T18:06:57Z",
       "side": 1,
       "message": "\u003d 0 ?",
+      "range": {
+        "startLine": 54,
+        "startChar": 3,
+        "endLine": 57,
+        "endChar": 56
+      },
+      "revId": "3400615cb95eaaf26ee4bb5ba9025696a7f21236",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b010f8cf_b2b912cf",
+        "filename": "android/emulation/DmaMap.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-01T15:07:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30ca486f_22c00336",
       "range": {
         "startLine": 54,
         "startChar": 3,
