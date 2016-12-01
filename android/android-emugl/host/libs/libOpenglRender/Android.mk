@@ -72,5 +72,4 @@ LOCAL_SRC_FILES := \
     BufferQueue_unittest.cpp \
 
 $(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender libemugl_gtest)
-$(call local-link-static-c++lib)
 $(call emugl-end-module)
