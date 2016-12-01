@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b010f8cf_de2c97c5",
+        "filename": "android/main-kernel-parameters.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-01T15:07:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b010f8cf_59d0cf5a",
+      "range": {
+        "startLine": 83,
+        "startChar": 4,
+        "endLine": 88,
+        "endChar": 5
+      },
+      "revId": "24b4c04a292411261b291abd12b3ea7ace3e4d96",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b010f8cf_7984b35d",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderLibImpl.cpp",
         "patchSetId": 26
@@ -36,6 +60,30 @@
       "writtenOn": "2016-11-18T23:23:56Z",
       "side": 1,
       "message": "you could have a single C++ interface instead of a bunch of C function pointers here. Also, making it a constructor argument is safer",
+      "range": {
+        "startLine": 58,
+        "startChar": 0,
+        "endLine": 76,
+        "endChar": 1
+      },
+      "revId": "24b4c04a292411261b291abd12b3ea7ace3e4d96",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b010f8cf_6c7e2185",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderLibImpl.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-01T15:07:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b010f8cf_7984b35d",
       "range": {
         "startLine": 58,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "b010f8cf_ecc8d1b6",
+        "filename": "distrib/android-emugl/host/libs/renderControl_dec/renderControl.in",
+        "patchSetId": 26
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-01T15:07:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b010f8cf_59532f30",
+      "range": {
+        "startLine": 25,
+        "startChar": 143,
+        "endLine": 25,
+        "endChar": 144
+      },
+      "revId": "24b4c04a292411261b291abd12b3ea7ace3e4d96",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b010f8cf_1936d7f9",
         "filename": "distrib/android-emugl/host/tools/emugen/ApiGen.cpp",
         "patchSetId": 26
@@ -82,6 +154,30 @@
       "writtenOn": "2016-11-18T23:23:56Z",
       "side": 1,
       "message": "--- Very nit, very hypothetical, most probably overkill ---\n\nthis unlocking is too strict IMO - what if user wants to not copy the data at all until it\u0027s processed, and processing is async?\nWhat about creating a ScopedDmaReader\u003cT\u003e class and making parameter of type ScopedDmaReader\u003cT\u003e\u0026\u0026 ?\nthen you can just generate code like this:\n\nauto var_xxx_guest_paddr \u003d Unpack\u003c\u003e();\nScopedDmaReader\u003ctype\u003e var_xxx { stream-\u003egetDmaForReading(...) };\n...\ncallImpl(a, b, c, std::move(var_xxx), x, y, z);\n\nthis way callImpl() will be able to store the DmaReader for later use, and unlock DMA only when done. if it doesn\u0027t, it unlocks automatically when callImpl() returns\n\nThe only issue is that you would need to change codegen to generate ScopedDmaReader\u003cT\u003e\u0026\u0026 instead of T* for all these data types",
+      "range": {
+        "startLine": 1236,
+        "startChar": 51,
+        "endLine": 1236,
+        "endChar": 60
+      },
+      "revId": "24b4c04a292411261b291abd12b3ea7ace3e4d96",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b010f8cf_2ca6e9f6",
+        "filename": "distrib/android-emugl/host/tools/emugen/ApiGen.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 1236,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-01T15:07:48Z",
+      "side": 1,
+      "message": "Let\u0027s consider this one later; probably we would add OpenGL API bottom-halves and unlock the DMA after bottom-halves are done (if one exists)",
+      "parentUuid": "b010f8cf_1936d7f9",
       "range": {
         "startLine": 1236,
         "startChar": 51,
