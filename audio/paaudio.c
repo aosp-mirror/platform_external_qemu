@@ -697,7 +697,6 @@ static void qpa_fini_in (HWVoiceIn *hw)
     PAVoiceIn *pa = (PAVoiceIn *) hw;
 
     audio_pt_lock (&pa->pt, AUDIO_FUNC);
-    pa_stream_cork(pa->stream, 0, NULL, NULL);
     pa->done = 1;
     audio_pt_unlock_and_signal (&pa->pt, AUDIO_FUNC);
     audio_pt_join (&pa->pt, &ret, AUDIO_FUNC);
