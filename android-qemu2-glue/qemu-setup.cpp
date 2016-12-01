@@ -19,6 +19,7 @@
 #include "android/console.h"
 #include "android-qemu2-glue/emulation/android_pipe_device.h"
 #include "android-qemu2-glue/emulation/charpipe.h"
+#include "android-qemu2-glue/emulation/DmaMap.h"
 #include "android-qemu2-glue/emulation/goldfish_sync.h"
 #include "android-qemu2-glue/emulation/VmLock.h"
 #include "android-qemu2-glue/looper-qemu.h"
@@ -39,6 +40,7 @@ extern char* op_http_proxy;
 }  // extern "C"
 
 using android::VmLock;
+using android::DmaMap;
 
 bool qemu_android_emulation_early_setup() {
     // Ensure that the looper is set for the main thread and for any
@@ -56,6 +58,11 @@ bool qemu_android_emulation_early_setup() {
     VmLock* vmLock = new qemu2::VmLock();
     VmLock* prevVmLock = VmLock::set(vmLock);
     CHECK(prevVmLock == nullptr) << "Another VmLock was already installed!";
+
+    // Ensure the DmaMap implementation is setup.
+    DmaMap* dmaMap = new qemu2::DmaMap();
+    DmaMap* prevDmaMap = DmaMap::set(dmaMap);
+    CHECK(prevDmaMap == nullptr) << "Another DmaMap was already installed!";
 
     // Initialize host pipe service.
     if (!qemu_android_pipe_init(vmLock)) {

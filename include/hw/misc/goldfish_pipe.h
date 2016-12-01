@@ -36,9 +36,10 @@ typedef enum {
 /* List of bitflags used to call goldfish_pipe_signal_wake() and
  * guest_wake_on() */
 typedef enum {
-    GOLDFISH_PIPE_WAKE_CLOSED = (1 << 0),  /* emulator closed the pipe */
-    GOLDFISH_PIPE_WAKE_READ = (1 << 1),    /* pipe can now be read from */
-    GOLDFISH_PIPE_WAKE_WRITE = (1 << 2),   /* pipe can now be written to */
+    GOLDFISH_PIPE_WAKE_CLOSED = (1 << 0),     /* emulator closed the pipe */
+    GOLDFISH_PIPE_WAKE_READ = (1 << 1),       /* pipe can now be read from */
+    GOLDFISH_PIPE_WAKE_WRITE = (1 << 2),      /* pipe can now be written to */
+    GOLDFISH_PIPE_WAKE_UNLOCK_DMA  = (1 << 3),/* unlock this pipe's DMA buffer */
 } GoldfishPipeWakeFlags;
 
 /* List of error values possibly returned by guest_recv() and
@@ -117,6 +118,15 @@ typedef struct {
     // any of these events occur.
     void (*guest_wake_on)(GoldfishHostPipe *host_pipe,
                           GoldfishPipeWakeFlags wake_flags);
+    // called to register a new DMA buffer that can be mapped in guest + host.
+    void (*dma_add_buffer)(void* pipe, uint64_t guest_paddr, uint64_t);
+    // called when the guest is done with a particular DMA buffer.
+    void (*dma_remove_buffer)(uint64_t guest_paddr);
+    // called when host mappings change, such
+    // as on pipe save/load during snapshots.
+    void (*dma_invalidate_host_mappings)(void);
+    // called when device reboots and we need to reset pipe state completely.
+    void (*dma_reset_host_mappings)(void);
 } GoldfishPipeServiceOps;
 
 /* Called by the service implementation to register its callbacks.
