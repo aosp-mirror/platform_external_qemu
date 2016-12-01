@@ -284,6 +284,157 @@ registers:
     read the content of the params block, use its fields to perform the
     operation then write back the return value into params.status.
 
+  10/ v2 pipe: faster read/writes through command buffers and buffer lists
+
+    Batch access_params still only perform one buffer transfer at a time. This is OK
+    for applications that only use one page of memory in each transfer, but for
+    many latency/throughput-sensitive applications like OpenGL and ADB push/pull,
+    the one buffer/page per operation is not sufficient.
+
+    Ideally, if the guest wants to transfer a buffer, it should be done in
+    something as resembling one step as possible.
+
+    But, what can make this difficult is that guest pages tend to fragment all
+    over the place and not be physically contiguous.
+
+    The v2 Goldfish pipe driver and device change the register set and
+    device/pipe structs to allow for more buffers to be transferred per loop of
+    goldfish_pipe_read_write, increasing performance for all pipe users
+    in throughput-limited situations.
+
+    There are two key new structures to consider.
+
+    1. The v2 pipe adds a struct goldfish_pipe_command that represents the delivery of
+    multiple buffers in one I/O transaction:
+
+    /* A per-pipe command structure, shared with the host */
+    struct goldfish_pipe_command {
+    	s32 cmd;		/* PipeCmdCode, guest -> host */
+    	s32 id;			/* pipe id, guest -> host */
+    	s32 status;		/* command execution status, host -> guest */
+    	s32 reserved;	/* to pad to 64-bit boundary */
+    	union {
+    		/* Parameters for PIPE_CMD_{READ,WRITE} */
+    		struct {
+    			u64 ptrs[MAX_BUFFERS_PER_COMMAND]; 	/* buffer pointers, guest -> host */
+    			u32 sizes[MAX_BUFFERS_PER_COMMAND];	/* buffer sizes, guest -> host */
+    			u32 buffers_count;					/* number of buffers, guest -> host */
+    			s32 consumed_size;					/* number of consumed bytes, host -> guest */
+    		} rw_params;
+    	};
+    };
+
+    For each pipe fd, there is a corresponding goldfish_pipe_command structure
+    that can hold up to MAX_BUFFERS_PER_COMMAND (concretely, order of 10^2 so
+    far) buffers. The buffers comprising the data on the guest are tracked in
+    rw_params. Some effort is taken to ensure that the list is short as
+    possible (i.e., merge physically contiguous pages).
+
+    2. Previously, for host-triggered transfers, we walked through a linked
+    list of pipes that had pending actions (PIPE_WAKE_***), called the
+    "signaled pipes" list, and the interrupt handler would process roughly 1-3
+    such pipes each time a transfer was occurring. This is not ideal because a)
+    we are doing work in the interrupt handler and b) there can be a lot of
+    transitions between running the kernel driver in the guest versus running
+    the virtual device in the host (transitions are slow).
+
+    Hence, pipe v2 keeps a set of pipes to process from host IRQ raises:
+
+    /* Device-level set of buffers shared with the host */
+    struct goldfish_pipe_dev_buffers {
+    	struct open_command_param open_command_params;
+    	struct signalled_pipe_buffer signalled_pipe_buffers[MAX_SIGNALLED_PIPES];
+    };
+
+    and each interrupt handler can then process up to MAX_SIGNALLED_PIPES at a
+    time.  In addition, the work of waking up the signaled pipes is left to a
+    bottom-half handler and not done in interrupt context.
+
+  11/ goldfish_dma: directly accessing memory on guest from host
+
+    Sometimes, for applications that need both very high throughput and very
+    low latency, such as video playback, it can be useful to skip host/guest
+    transitions and gathering discontiguous buffers and write directly memory
+    that is also visible on the host machine.
+
+    To do this, goldfish_dma allows any pipe fd to have ioctls to allocate
+    a contiguous physical region in kernel space, and to mmap() from the guest
+    userspace into that physical region. These regions can also be shared
+    across processes, such as with gralloc.
+
+    The goldfish_dma kernel driver adds struct goldfish_dma_context to
+    all struct goldfish_pipe instances:
+
+    struct goldfish_dma_context {
+        struct kref kref; /* kref to safely free dma region */
+        struct device* pdev_dev; /* pointer to feed to dma_***_coherent */
+        void* dma_vaddr; /* kernel vaddr of dma region */
+        dma_addr_t dma_bus_addr; /* kernel dma_addr_t of dma region */
+        u64 dma_size; /* size of dma region */
+    	u64 phys_begin; /* paddr of dma region */
+    	unsigned long pfn; /* pfn of dma region */
+    	u64 phys_end; /* paddr of dma region + dma_size */
+    	bool locked; /* marks whether the region is currently in use */
+        unsigned long refcount; /* For debugging purposes only. */
+        struct goldfish_pipe_command* command_buffer; /* For safe freeing of DMA regions,
+        we need another pipe command buffer that lives longer than the pipe instance */
+    };
+
+    Interface (guest side):
+    
+    The guest user calls goldfish_dma_alloc (ioctls) and then mmap() on a
+    goldfish pipe fd, which means that it wants high-speed access to
+    host-visible memory.
+    
+    The guest can then write into the pointer returned by mmap(), and these
+    writes become immediately visible on the host without BQL or context
+    switching.
+    
+    The main data structure tracking state is struct goldfish_dma_context,
+    which is included as an extra pointer field in struct goldfish_pipe.  Each
+    such context is associated with possibly one physical address and size
+    describing the allocated DMA region, and only one allocation is allowed for
+    each pipe fd. Further allocations require more open()'s of pipe fd's.
+    
+    dma_alloc_coherent() is used to obtain contiguous physical memory regions,
+    and we allocate and interact with this region on both guest and host
+    through the following ioctls:
+
+    - LOCK: Lock the DMA region for data access.
+    - UNLOCK: Unlock the DMA region. This may also be done from the host
+      through WAKE_ON_UNLOCK_DMA.
+    - CREATE_REGION: initialize size info for a DMA region.
+    - GETOFF: send physical address to guest driver.
+    - (UN)MAPHOST: uses goldfish_pipe_cmd to tell the host to (un)map to the
+      guest physical address associated with the current dma context. This
+      makes the physically contiguous memory (in)visible to the host.
+    
+    Guest userspace obtains a pointer to the DMA memory using mmap(),
+    which also lazily allocates the memory with dma_alloc_coherent().
+    (On last pipe close(), the region is freed).
+
+    The mmaped() region can handle very high bandwidth transfers, and pipe
+    operations can be used at the same time to handle synchronization and command
+    communication.
+
+    The virtual device has these hooks into the kernel driver:
+
+    1. UNLOCK_DMA: This unlocks the DMA region from the host.
+    2. MAP/UNMAP_HOST: This is a pipe command used to tell the host machine
+    to obtain a host void* pointing at a particular guest RAM physical address.
+    It is triggered when a new DMA buffer is allocated in the guest kernel
+    with the ioctl(), and makes it so the host can also see into the same region.
+
+    The host will then call cpu_physical_memory_(un)map and track all currently
+    allocated regions in a global data structure (DmaMap). If we take
+    snapshots, we will need to remap those regions, something also handled by
+    DmaMap.
+
+    2. UNLOCK_DMA: This pipe command signals the guest kernel that the
+    host is done processing the DMA region. In most simple use cases, the guest
+    will first lock its DMA region and write to it, assuming that
+    the unlock will be triggered by the host after the processing is done.
+    UNLOCK_DMA is how the host triggers this unlocking.
 
 Available services:
 -------------------

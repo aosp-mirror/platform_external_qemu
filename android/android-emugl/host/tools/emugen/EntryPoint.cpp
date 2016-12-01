@@ -284,6 +284,8 @@ int EntryPoint::setAttribute(const std::string &line, size_t lc)
                     fprintf(stderr, "WARNING: %u: setting isLarge flag for a non-pointer variable %s\n",
                             (unsigned int) lc, v->name().c_str());
                 }
+            } else if (flag == "DMA") {
+                v->setDMA(true);
             } else {
                 fprintf(stderr, "WARNING: %u: unknow flag %s\n", (unsigned int)lc, flag.c_str());
             }

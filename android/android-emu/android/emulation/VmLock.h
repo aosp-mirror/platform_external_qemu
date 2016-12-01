@@ -61,6 +61,9 @@ public:
     virtual bool isLockedBySelf() const { return true; }
 
     // Return current VmLock instance. Cannot return nullptr.
+    // NOT thread-safe, but we don't expect multiple threads to call this
+    // concurrently at init time, and the worst that can happen is to leak
+    // a single instance.
     static VmLock* get();
 
     // Set new VmLock instance. Return old value, which cannot be nullptr and
