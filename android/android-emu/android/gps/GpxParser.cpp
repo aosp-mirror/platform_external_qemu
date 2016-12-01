@@ -88,6 +88,7 @@ static bool parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *result, string *
             if ((tmpStr = xmlNodeListGetString(doc, field->children, 1))) {
                 // Convert to a number
                 struct tm time;
+                time.tm_isdst = -1;
                 int results = sscanf((const char *)tmpStr,
                                      "%u-%u-%uT%u:%u:%u",
                                      &time.tm_year, &time.tm_mon, &time.tm_mday,
@@ -104,7 +105,8 @@ static bool parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *result, string *
                 time.tm_mon -= 1; // Months since January, 0-11
 
                 result->time = mktime(&time);
-
+                printf("%s\n", tmpStr);
+                printf("FIX: %d-%d-%dT%d:%d:%d --- %ld\n", time.tm_year, time.tm_mon+1, time.tm_mday, time.tm_hour, time.tm_min, time.tm_sec, result->time);
                 xmlFree(tmpStr); // Caller-freed
                 childCount++;
             }
