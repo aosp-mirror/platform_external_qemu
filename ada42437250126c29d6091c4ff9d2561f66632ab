@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "adbc1f98_4a6893d1",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1169,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-12-01T14:55:23Z",
+      "side": 1,
+      "message": "Yes, good idea. Done :)",
+      "parentUuid": "ed0297f6_88fc3450",
+      "range": {
+        "startLine": 1167,
+        "startChar": 3,
+        "endLine": 1169,
+        "endChar": 5
+      },
+      "revId": "ada42437250126c29d6091c4ff9d2561f66632ab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ed0297f6_2822c017",
         "filename": "android/android-emu/android/base/system/System.cpp",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2016-11-28T18:24:10Z",
       "side": 1,
       "message": "\u003d{} ?",
+      "range": {
+        "startLine": 1178,
+        "startChar": 15,
+        "endLine": 1178,
+        "endChar": 16
+      },
+      "revId": "ada42437250126c29d6091c4ff9d2561f66632ab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6dd9470d_b062d8ea",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1178,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-12-01T14:55:23Z",
+      "side": 1,
+      "message": "Ooops, right :) Done.",
+      "parentUuid": "ed0297f6_2822c017",
       "range": {
         "startLine": 1178,
         "startChar": 15,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "0dc44b28_0d5cf108",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1280,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-12-01T14:55:23Z",
+      "side": 1,
+      "message": "Right, since we don\u0027t need removing the trailing directory separator, I\u0027ve replaced this with:\n\n  Win32UnicodeString(mode).c_str()",
+      "parentUuid": "ed0297f6_0808248f",
+      "range": {
+        "startLine": 1280,
+        "startChar": 46,
+        "endLine": 1280,
+        "endChar": 55
+      },
+      "revId": "ada42437250126c29d6091c4ff9d2561f66632ab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ed0297f6_881f9477",
         "filename": "android/android-emu/android/base/system/System.cpp",
         "patchSetId": 4
@@ -82,6 +154,30 @@
       "writtenOn": "2016-11-28T18:24:10Z",
       "side": 1,
       "message": "to support symlinks we would need to:\n1. Call CreateFile()\n     a. with a flag FILE_FLAG_OPEN_REPARSE_POINT if we want to get symlink\n     b. without that flag to get target info\n2. Call GetFileInformationByHandle() with file handle from #1\n3.a Check for a symlink attribute FILE_ATTRIBUTE_REPARSE_POINT in the returned struct\u0027s dwFileAttributes field",
+      "range": {
+        "startLine": 1371,
+        "startChar": 20,
+        "endLine": 1371,
+        "endChar": 60
+      },
+      "revId": "ada42437250126c29d6091c4ff9d2561f66632ab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cdc95346_0bd93d41",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1371,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-12-01T14:55:23Z",
+      "side": 1,
+      "message": "This is the point of the following patch. It looks like this is a little more complicated though.",
+      "parentUuid": "ed0297f6_881f9477",
       "range": {
         "startLine": 1371,
         "startChar": 20,
