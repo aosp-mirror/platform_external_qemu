@@ -38,7 +38,7 @@ static void getPlanarYUVSizes(int width, int height,
     assert(cStride_out);
     assert(cHeight_out);
 
-    uint32_t align;
+    uint32_t align = 1;
     switch (format) {
     case FRAMEWORK_FORMAT_YV12:
         align = 16;
