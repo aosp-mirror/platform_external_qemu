@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0d6b6b00_9d42f55a",
+        "filename": "android/android-emu/android/gps/GpxParser.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-12-01T23:11:46Z",
+      "side": 1,
+      "message": "could you please add \"\u003d {}\" here, just in case?",
+      "range": {
+        "startLine": 90,
+        "startChar": 30,
+        "endLine": 90,
+        "endChar": 31
+      },
+      "revId": "4122b47c9351d65c9a8f0e4a335bd97a07387e96",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d6b6b00_5d485d7c",
+        "filename": "android/android-emu/android/gps/GpxParser.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-12-01T23:11:46Z",
+      "side": 1,
+      "message": "nope",
+      "range": {
+        "startLine": 108,
+        "startChar": 16,
+        "endLine": 109,
+        "endChar": 19
+      },
+      "revId": "4122b47c9351d65c9a8f0e4a335bd97a07387e96",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
