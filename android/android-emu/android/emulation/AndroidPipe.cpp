@@ -324,6 +324,12 @@ public:
     void closeFromHost(void* hwPipe) {
         signalWake(hwPipe, PIPE_WAKE_CLOSED);
     }
+    void abortPending(void* hwPipe) {
+        removeAllPendingOperations([hwPipe](const PipeWakeCommand& cmd) {
+            return cmd.hwPipe == hwPipe;
+        });
+    }
+
 private:
     virtual void performDeviceOperation(const PipeWakeCommand& wake_cmd) {
         void* hwPipe = wake_cmd.hwPipe;
@@ -419,6 +425,10 @@ void AndroidPipe::signalWake(int wakeFlags) {
 
 void AndroidPipe::closeFromHost() {
     sGlobals->pipeWaker.closeFromHost(mHwPipe);
+}
+
+void AndroidPipe::abortPendingOperation() {
+    sGlobals->pipeWaker.abortPending(mHwPipe);
 }
 
 // static

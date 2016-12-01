@@ -17,6 +17,7 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/emulation/VmLock.h"
 
+#include <algorithm>
 #include <functional>
 #include <memory>
 #include <vector>
@@ -88,8 +89,7 @@ public:
                 },
                 this));
         if (!mTimer.get()) {
-            LOG(WARNING) << "Failed to create a loop timer, falling back "
-                            "to regular locking!";
+            LOG(FATAL) << "Failed to create a loop timer in DeviceContextRunner";
         }
     }
 
@@ -120,26 +120,21 @@ protected:
         }
     }
 
+    // Remove all pending operations that match the passed predicate |op|.
+    template <class Predicate>
+    void removeAllPendingOperations(const Predicate& op) {
+        AutoLock lock(mLock);
+        mPending.erase(std::remove_if(mPending.begin(), mPending.end(), op),
+                       mPending.end());
+    }
+
 private:
     void onTimerEvent() {
-        // First, clear the current pending set of device commands
-        // and operate on each one in turn.
-        PendingList pending;
         AutoLock lock(mLock);
-        pending.swap(mPending);
-        lock.unlock();
-
-        for (const auto& elt : pending) {
+        for (const auto& elt : mPending) {
             performDeviceOperation(elt);
         }
-
-        // We need to do swap() above so that we can check if
-        // the timer needs to be re-armed.
-        // (if someone added an event during processing)
-        lock.lock();
-        if (mPending.size()) {
-            mTimer->startAbsolute(0);
-        }
+        mPending.clear();
     }
 
     VmLock* mVmLock = nullptr;
