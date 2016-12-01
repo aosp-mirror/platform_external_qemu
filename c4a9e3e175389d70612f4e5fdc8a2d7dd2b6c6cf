@@ -2,6 +2,176 @@
   "comments": [
     {
       "key": {
+        "uuid": "0d6b6b00_b27a80d8",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.attrib",
+        "patchSetId": 1
+      },
+      "lineNbr": 746,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-12-01T22:16:57Z",
+      "side": 1,
+      "message": "nit: space",
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d6b6b00_927f84c9",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.attrib",
+        "patchSetId": 1
+      },
+      "lineNbr": 770,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-12-01T22:16:57Z",
+      "side": 1,
+      "message": "nit: space",
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d6b6b00_f2635831",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.attrib",
+        "patchSetId": 1
+      },
+      "lineNbr": 778,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-12-01T22:16:57Z",
+      "side": 1,
+      "message": "nit: spaces. The space and tabs in this file is inconsistent. Please try to make them consistent, at least in the new code.",
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d6b6b00_d260dc27",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.attrib",
+        "patchSetId": 1
+      },
+      "lineNbr": 792,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-12-01T22:16:57Z",
+      "side": 1,
+      "message": "nit: space",
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d6b6b00_326e7019",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.attrib",
+        "patchSetId": 1
+      },
+      "lineNbr": 864,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-12-01T22:16:57Z",
+      "side": 1,
+      "message": "nit: space",
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d6b6b00_d2045c38",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.in",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-12-01T22:16:57Z",
+      "side": 1,
+      "message": "we currently only support a very small subset of ETC2 required by GLES3",
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d6b6b00_123a54f5",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.in",
+        "patchSetId": 1
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-12-01T22:16:57Z",
+      "side": 1,
+      "message": "nit: spaces",
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d6b6b00_521fac77",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.in",
+        "patchSetId": 1
+      },
+      "lineNbr": 494,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-12-01T22:16:57Z",
+      "side": 1,
+      "message": "nit: space",
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d6b6b00_9229449d",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.in",
+        "patchSetId": 1
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-12-01T22:16:57Z",
+      "side": 1,
+      "message": "nit: space",
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d6b6b00_b23d60d4",
+        "filename": "android/android-emugl/host/libs/libOpenGLESDispatch/gles3_only.entries",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-12-01T22:16:57Z",
+      "side": 1,
+      "message": "nit: trailing spaces across this file",
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d6b6b00_481382d4",
         "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
         "patchSetId": 1
