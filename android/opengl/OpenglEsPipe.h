@@ -11,9 +11,12 @@
 #pragma once
 
 #include "android/base/Compiler.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/emulation/android_pipe.h"
 
 #include "OpenglRender/RenderChannel.h"
+
+#include <memory>
 
 namespace android {
 
@@ -23,15 +26,20 @@ namespace android {
 // This class provides a
 class OpenglEsPipe {
 public:
+    using Ptr = std::shared_ptr<OpenglEsPipe>;
+
     ~OpenglEsPipe();
 
     // Registers the "opengles" pipe type.
     static void registerPipeType();
 
+    // Performs a guest wake operation, based on the |flags| parameter.
+    void wakeOperation(int flags);
+
 private:
     OpenglEsPipe(void* mHwpipe);
     // 2-phase initialization because of the ban of exceptions. Grrr.
-    bool initialize();
+    bool initialize(Ptr self);
 
     static const AndroidPipeFuncs kPipeFuncs;
 
@@ -57,6 +65,10 @@ private:
     int sendReadyStatus() const;
 
 private:
+    // Pipe is self-owned, so this is the pointer that keeps it alive. To delete
+    // the pipe, just reset it.
+    Ptr mThis;
+
     void* mHwpipe = nullptr;
     emugl::RenderChannelPtr mChannel;
 
@@ -67,8 +79,11 @@ private:
     bool mCareAboutWrite = false;
 
     // Set to |true| if the pipe is in working state, |false| means we're not
-    // initialized or the pipe is closed.
+    // initialized or the pipe is closed, so one may not call any functions
+    // taking |mHwpipe| as an argument.
     bool mIsWorking = false;
+    // Protects |mHwpipe| and |mIsWorking|.
+    base::Lock mPipeWorkingLock;
 
     // These two variables serve as a reading buffer for the guest.
     // Each time we get a read request, first we extract a single chunk from

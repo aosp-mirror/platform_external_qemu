@@ -46,6 +46,10 @@ namespace android {
 
 namespace {
 
+// Use this constant to store both 'close' and 'wake' action types in a single
+// int field.
+static const int kWakeFlagsClose = ~0;
+
 // PipeWaker - a class to run Android Pipe operations in a correct manner.
 //
 // Background:
@@ -84,13 +88,13 @@ namespace {
 //   duration of the operation.
 class PipeWaker final {
 public:
-    // Wake the |hwPipe|, setting its wake flags to |flags|.
+    // Wake the |pipe|, setting its wake flags to |flags|.
     // If |needsLock| is set, lock the global Qemu lock (VmLock) for the wake
     // call.
-    void wake(void* hwPipe, int flags, bool needsLock);
+    void wake(OpenglEsPipe::Ptr pipe, int flags, bool needsLock);
 
     // Same as the former, but close the pipe instead of waking it.
-    void close(void* hwPipe, bool needsLock);
+    void close(OpenglEsPipe::Ptr pipe, bool needsLock);
 
     // create() creates a static object instance, get() returns it.
     // |looper| - if set to non-null, schedule all operations on this looper's
@@ -104,16 +108,14 @@ private:
     PipeWaker(Looper* looper);
 
     void onWakeTimer();
-    static void performPipeOperation(void* pipe, int flags);
+    static void performPipeOperation(const OpenglEsPipe::Ptr& pipe, int flags);
 
 private:
     static PipeWaker* sThis;
 
     // This has to have all bits set to make sure it contains and overrides
     // all other possible flags - we don't need to wake a pipe if it's closed.
-    static const int kWakeFlagsClose = ~0;
-
-    std::unordered_map<void*, int> mWakeMap;  // HwPipe* -> wake/close flags
+    std::unordered_map<OpenglEsPipe::Ptr, int> mWakeMap;  // pipe -> wake/close flags
     base::Lock mWakeMapLock;                  // protects the mWakeMap
     LoopTimer* mWakeTimer = nullptr;
 
@@ -154,20 +156,16 @@ PipeWaker::~PipeWaker() {
     }
 }
 
-void PipeWaker::performPipeOperation(void* pipe, int flags) {
-    if (flags == kWakeFlagsClose) {
-        android_pipe_close(pipe);
-    } else {
-        android_pipe_wake(pipe, flags);
-    }
+void PipeWaker::performPipeOperation(const OpenglEsPipe::Ptr& pipe, int flags) {
+    pipe->wakeOperation(flags);
 }
 
-void PipeWaker::wake(void* pipe, int flags, bool needsLock) {
+void PipeWaker::wake(OpenglEsPipe::Ptr pipe, int flags, bool needsLock) {
     if (mWakeTimer) {
         base::AutoLock lock(mWakeMapLock);
         const bool startTimer = mWakeMap.empty();
         // 'close' flags have all bits set, so they override everything else
-        mWakeMap[pipe] |= flags;
+        mWakeMap[std::move(pipe)] |= flags;
         lock.unlock();
 
         if (startTimer) {
@@ -183,14 +181,14 @@ void PipeWaker::wake(void* pipe, int flags, bool needsLock) {
     }
 }
 
-void PipeWaker::close(void* pipe, bool needsLock) {
+void PipeWaker::close(OpenglEsPipe::Ptr pipe, bool needsLock) {
     wake(pipe, kWakeFlagsClose, needsLock);
 }
 
 void PipeWaker::onWakeTimer() {
     assert(mWakeTimer);
 
-    std::unordered_map<void*, int> wakeMap;
+    std::unordered_map<OpenglEsPipe::Ptr, int> wakeMap;
     base::AutoLock lock(mWakeMapLock);
     wakeMap.swap(mWakeMap);
     lock.unlock();
@@ -235,6 +233,26 @@ void OpenglEsPipe::registerPipeType() {
     android_pipe_add_type("opengles", nullptr, &OpenglEsPipe::kPipeFuncs);
 }
 
+void OpenglEsPipe::wakeOperation(int flags) {
+    // Protect the whole use of |mHwpipe| here, as it may be deleted right after
+    // the onCloseByGuest() return.
+    base::AutoLock lock(mPipeWorkingLock);
+    if (!mIsWorking) {
+        return; // Can't call into a non-working pipe.
+    }
+    if (!mHwpipe) {
+        return; // Nowhere to send.
+    }
+
+    if (flags == kWakeFlagsClose) {
+        android_pipe_close(mHwpipe);
+        // Don't allow any other operations on a closed pipe.
+        mHwpipe = nullptr;
+    } else {
+        android_pipe_wake(mHwpipe, flags);
+    }
+}
+
 void OpenglEsPipe::processIoEvents(bool lock) {
     int wakeFlags = 0;
 
@@ -249,14 +267,17 @@ void OpenglEsPipe::processIoEvents(bool lock) {
 
     /* Send wake signal to the guest if needed */
     if (wakeFlags != 0) {
-        PipeWaker::get().wake(mHwpipe, wakeFlags, lock);
+        PipeWaker::get().wake(mThis, wakeFlags, lock);
     }
 }
 
 void OpenglEsPipe::onCloseByGuest() {
     D("%s", __func__);
 
-    mIsWorking = false;
+    {
+        base::AutoLock lock(mPipeWorkingLock);
+        mIsWorking = false;
+    }
     mChannel->stop();
     // stop callback will call close() which deletes the pipe
 }
@@ -393,17 +414,17 @@ OpenglEsPipe* OpenglEsPipe::create(void* hwpipe) {
         return nullptr;
     }
 
-    std::unique_ptr<OpenglEsPipe> pipe(new OpenglEsPipe(hwpipe));
+    auto pipe = Ptr(new OpenglEsPipe(hwpipe));
     if (!pipe) {
         D("Out of memory when creating an OpenGLES pipe!");
         return nullptr;
     }
 
-    if (!pipe->initialize()) {
+    if (!pipe->initialize(pipe)) {
         return nullptr;
     }
 
-    return pipe.release();
+    return pipe.get();
 }
 
 OpenglEsPipe::OpenglEsPipe(void* hwpipe) : mHwpipe(hwpipe) {
@@ -412,8 +433,11 @@ OpenglEsPipe::OpenglEsPipe(void* hwpipe) : mHwpipe(hwpipe) {
     assert(hwpipe != nullptr);
 }
 
-bool OpenglEsPipe::initialize() {
+bool OpenglEsPipe::initialize(Ptr self) {
     D("%s", __FUNCTION__);
+
+    mThis = std::move(self);
+    assert(mThis.get());
 
     mChannel = android_getOpenglesRenderer()->createRenderChannel();
     if (!mChannel) {
@@ -471,17 +495,17 @@ void OpenglEsPipe::close(bool lock) {
     // If the pipe isn't in a working state, delete immediately.
     if (!mIsWorking) {
         mChannel->stop();
-        delete this;
+        mThis.reset();
         return;
     }
 
     // Force the closure of the channel - if a guest is blocked
     // waiting for a wake signal, it will receive an error.
     if (mHwpipe) {
-        PipeWaker::get().close(mHwpipe, lock);
-        mHwpipe = nullptr;
+        PipeWaker::get().close(mThis, lock);
     }
 
+    base::AutoLock autoLock(mPipeWorkingLock);
     mIsWorking = false;
 }
 
