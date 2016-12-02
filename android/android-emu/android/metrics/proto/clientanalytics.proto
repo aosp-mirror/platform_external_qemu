@@ -17,6 +17,7 @@
 
 syntax = "proto2";
 
+import "device_restriction_enum.proto";
 package wireless_android_play_playlog;
 
 option java_package = "com.google.wireless.android.play.playlog.proto";
@@ -234,9 +235,21 @@ message ExperimentIds {
   optional bool users_match = 3;
 }
 
+// Indicates non-standard device form factor, such as watch or automotive.
+//
+// Next tag: 3
+message AndroidDeviceType {
+  // This is a device dedicated to showing UI on a watch:
+  // getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
+  optional bool is_watch = 1;
+  // This is a device dedicated to showing UI on a vehicle headunit:
+  // getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
+  optional bool is_automotive = 2;
+}
+
 // Attributes specific to Android clients.
 //
-// Next tag: 23
+// Next tag: 25
 message AndroidClientInfo {
   // "Gservices" android ID.  Considered PII.  Never logged in archival logs.
   optional int64 android_id = 1;
@@ -293,7 +306,9 @@ message AndroidClientInfo {
   // android.content.pm.PackageInfo.versionCode of com.google.android.gms.
   // e.g., 6031030
   optional int32 gms_core_version_code = 19;
-  // Whether the device is a Sidewinder device. See go/sidewinder-summary.
+  // Whether the device is a Sidewinder device.  Deprecated, use
+  // device_restriction.
+  // TODO(b/31365869): Remove all references and mark bit as reserved.
   optional bool is_sidewinder_device = 20;
   // The Chimera module config info describing the module sets on the device
   // when the event is logged in the client.
@@ -305,6 +320,11 @@ message AndroidClientInfo {
   // This field is not set by the client, but by the server after parsing the
   // request.
   optional bool using_log_source_int = 22;
+  // Indicates restrictions for this device.
+  // See go/latchsky-tldr for more info.
+  optional .wireless_android_play_playlog.DeviceRestriction.Id device_restriction = 23;
+  // Indicates non-standard device form factor, such as watch or automotive.
+  optional .wireless_android_play_playlog.AndroidDeviceType android_device_type = 24;
 }
 
 // Next tag: 12
@@ -384,6 +404,7 @@ message BatchedLogRequest {
 //
 // Next tag: 14
 message LogRequest {
+  // LINT.IfChange
   enum LogSource {
     option allow_alias = true;
     UNKNOWN = -1;
@@ -480,6 +501,10 @@ message LogRequest {
     // Google Keyboard (http://go/google-keyboard)
     NEWS_WEATHER = 38;
     // News & Weather Android/iOS apps
+    NEWS_WEATHER_ANDROID_PRIMES = 458;
+    // News & Weather Android (go/newsandroid) App metric logging (go/primes)
+    NEWS_WEATHER_IOS_PRIMES = 459;
+    // News & Weather iOS (go/newsios) App metric logging (go/primes-ios)
     HANGOUT = 39;
     // Deprecated source for HangoutLogEntry (rtc-analytics-eng@)
     HANGOUT_LOG_REQUEST = 50;
@@ -487,7 +512,9 @@ message LogRequest {
     COPRESENCE = 40;
     // Copresence (http://go/whisper)
     SOCIAL_AFFINITY = 41;
-    // Social Affinity logs (go/disco-logging-v2).
+    // Social Affinity logs (go/affinity-logging).
+    SOCIAL_AFFINITY_PHOTOS = 465;
+    // Social Affinity logs for Photos (go/affinity-logging).
     PHOTOS = 42;
     // Google Photos (go/photos).
     GCM = 43;
@@ -593,7 +620,7 @@ message LogRequest {
     SETUP_WIZARD = 87;
     // Setup Wizard (go/suw)
     EMERGENCY_ASSIST = 88;
-    // Barton (go/barton-deprecation)
+    // Pomeroy (go/pomeroy)
     TRON = 89;
     // The event logs for Android Framework (go/tron, cwren@, khigaki@, tron-eng@).
     TRON_COUNTERS = 90;
@@ -1008,7 +1035,7 @@ message LogRequest {
     VOICE_ANDROID_PRIMES = 293;
     // Primes for Android Google Voice (go/googlevoice).
     PAISA = 294;
-    // NBU Paisa app (go/paisa)
+    // NBU Paisa Experimental apps (go/paisa)
     NAZDEEK_USER_ANDROID_PRIMES = 315;
     // Primes for Nazdeek User (go/nazdeek).
     NAZDEEK_CAB_ANDROID_PRIMES = 316;
@@ -1027,6 +1054,8 @@ message LogRequest {
     // YouTube Director App (go/youtube-director)
     WALLPAPER_PICKER = 299;
     // Event logs for Android wallpaper picker (go/magic-wallpapers)
+    WALLPAPER_PICKER_ANDROID_PRIMES = 466;
+    // Primes for Wallpapers (go/magic-wallpapers)
     CHIME = 300;
     // Chime (go/chime)
     BEACON_GCORE = 301;
@@ -1252,7 +1281,84 @@ message LogRequest {
     LEANBACK_LAUNCHER_PRIMES = 431;
     // Primes for Leanback Launcher on Android TV (go/atv-eng)
     DROIDGUARD = 432;
-    // Next enum tag: 433
+    CORP_IOS_DORY = 433;
+    // Logs for the internal Dory app (go/dory)
+    PLAY_MUSIC_ANDROID_APP_PRIMES = 434;
+    // Google Play Music Android (go/musicapp, go/gpm-primes)
+    GPOST_ANDROID_PRIMES = 436;
+    // GPost Android App PRIMES (go/gpost-android-analytics)
+    GPOST_CLIENT_LOGS = 437;
+    // GPost Client App Events (go/gpost-android-analytics)
+    DPANEL = 438;
+    // Logs for DPanel (go/dpanel-eng)
+    ADSENSE_ANDROID_PRIMES = 439;
+    // Google AdSense Android app (go/adsense-android-app)
+    PDM_COUNTERS = 440;
+    // Counters for Peer Download Manager (go/peer-download-manager)
+    EMERGENCY_ASSIST_PRIMES = 441;
+    // Primes for Pomeroy (go/pomeroy).
+    APPS_TELEPATH = 442;
+    // Logs for Telepath (http://go/telepath-project)
+    METALOG = 443;
+    // Metalogs for Clearcut
+    TELECOM_PLATFORM_STATS = 444;
+    // Logs for Telecom -- through PlatformStats (go/connectivity-site)
+    WIFI_PLATFORM_STATS = 445;
+    // Logs for WiFi -- through PlatformStats (go/connectivity-site)
+    GMA_SDK = 446;
+    // Logs for Google Mobile Ads SDK (go/gma-sdk)
+    GMA_SDK_COUNTERS = 447;
+    // Counters for Google Mobile Ads SDK (go/gma-sdk)
+    ANDROID_CREATIVE_PREVIEW_PRIMES = 448;
+    // Logs for Creative Preview (go/audition)
+    TELEPHONY_PLATFORM_STATS = 449;
+    // Logs for Telephony -- through PlatformStats (go/connectivity-site)
+    TESTDRIVE_PRIMES = 450;
+    // Logs for TestDrive (go/testdrive)
+    CARRIER_SERVICES = 451;
+    // Logs for cs.apk
+    CLOUD_CONSOLE_ANDROID_PRIMES = 452;
+    // Primes for Google Cloud Console app (go/vespa)
+    STREET_VIEW = 453;
+    // Street View app (go/svapp)
+    STAX = 454;
+    // Logs for Stax (go/stax-eng)
+    NEWSSTAND_ANDROID_PRIMES = 455;
+    // Google Play Newsstand Android PRIMES (go/dots)
+    PAISA_USER = 456;
+    // NBU Paisa User app (go/paisa)
+    CARRIER_SERVICES_ANDROID_PRIMES = 457;
+    // Primes logs for cs.apk
+    IPCONNECTIVITY_PLATFORM_STATS = 460;
+    // Logs for Networking -- through PlatformStats (go/connectivity-site)
+    FIREPERF_AUTOPUSH = 461;
+    // Firebase Performance (go/fireperf-backend) autopush instance
+    FIREPERF = 462;
+    // Firebase Performance (go/fireperf-backend) prod instance
+    ZAGAT_IOS_AUTHENTICATED = 463;
+    // Logs for the Zagat iOS app (go/burgundy)
+    ULR = 464;
+    // Logs for ULR (go/gcore-ulr)
+    PLAY_MOVIES_ANDROID_PRIMES = 467;
+    // Logs for system health metric for Play Movies Android (go/play-movies-android)
+    SMART_LOCK_IOS = 468;
+    // Logs for the Smart Lock iOS app go/smartlock-ios-design
+    ZAGAT_IOS_PSEUDONYMOUS = 469;
+    // Logs for the Zagat iOS app (go/burgundy)
+    TRAVEL_BOOKING = 470;
+    // Logs for travel-booking (go/travel-booking)
+    WESTINGHOUSE_ODYSSEY = 471;
+    // Odyssey logs for Westinghouse (go/westinghouse)
+    GMM_WEARABLE_PRIMES = 472;
+    // Logs for system health metric for GMM wearable (go/weargo)
+    HUDDLE_ANDROID = 473;
+    // (go/huddle-team)
+    DL_FONTS = 474;
+    // Logs for downloadable fonts (go/O-downloadable-fonts)
+    KEEP_ANDROID_PRIMES = 475;
+    // Logs for system health metric for Google Keep (go/keep)
+    CORP_ANDROID_CAMPUS = 476;
+    // Logs for the Campus v2 Android app
   }
   // Different types schedulers for log upload.
   enum SchedulerType {
@@ -1419,6 +1525,7 @@ message LogResponse {
   // 3. PlayLoggerContext.zwiebackCookie
   // 4. PlayLoggerContext.qosTier
   optional .wireless_android_play_playlog.LogSourceBatchingBlacklist log_source_batching_blacklist = 4;
+  extensions 1000 to 536870911;
 }
 
 

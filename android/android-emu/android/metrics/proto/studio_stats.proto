@@ -13,6 +13,7 @@ package android_studio;
 
 option java_package = "com.google.wireless.android.sdk.stats";
 option java_outer_classname = "AndroidStudioStats";
+option java_multiple_files = true;
 
 message AndroidStudioEvent {
   // Describes a group of event kinds related to each other.
@@ -69,6 +70,8 @@ message AndroidStudioEvent {
     TEST_RECORDER = 22;
     // the event is related to the Android Studio UI.
     STUDIO_UI = 23;
+    // the event is related to the layout editor
+    LAYOUT_EDITOR = 24;
   }
   // Specific kind of event, primary separation key of all Android Studio
   // related events.
@@ -262,6 +265,32 @@ message AndroidStudioEvent {
     STUDIO_PROCESS_STATS = 98;
     // Stats on Studio's performance
     STUDIO_PERFORMANCE_STATS = 99;
+    // Performance stats for LLDB operations.
+    LLDB_PERFORMANCE_STATS = 100;
+    // User opened a project in the IDE.
+    STUDIO_PROJECT_OPENED = 101;
+    // User closed a project in the IDE.
+    STUDIO_PROJECT_CLOSED = 102;
+    // Feature grouping of tutorials expanded.
+    FIREBASE_ASSISTANT_FEATURE_EXPANDED = 103;
+    // Tutorial opened.
+    FIREBASE_ASSISTANT_TUTORIAL_OPENED = 104;
+    // Tutorial closed via navigation.
+    FIREBASE_ASSISTANT_TUTORIAL_CLOSED = 105;
+    // Project update failed due to permissions issue.
+    FIREBASE_ASSISTANT_PROJECT_UPDATE_DENIED = 106;
+    // Terms of service accepted by user.
+    FIREBASE_ASSISTANT_TOS_ACCEPTED = 107;
+    // Dependency added.
+    FIREBASE_ASSISTANT_DEPENDENCY_ADDED = 108;
+    // Layout editor event
+    LAYOUT_EDITOR_EVENT = 109;
+    // Receive sync response and start to setup project in IDE.
+    GRADLE_SYNC_SETUP_STARTED = 110;
+    // For event from App Links Assistant.
+    APP_LINKS_ASSISTANT_STATS = 111;
+    // Emulator performance tracking.
+    EMULATOR_PERFORMANCE_STATS = 112;
   }
   // Represents different Performance Monitoring types.
   enum MonitorType {
@@ -463,10 +492,22 @@ message AndroidStudioEvent {
   optional .android_studio.MachineDetails machine_details = 35;
   // set when kind = STUDIO_PING
   optional .android_studio.JvmDetails jvm_details = 36;
-  // set when kind = STUDIO_PROCESS_STATS
+  // set when kind = STUDIO_PROCESS_STATS or kind = GRADLE_BUILD_PROFILE
   optional .android_studio.JavaProcessStats java_process_stats = 37;
   // set when kind = STUDIO_PERFORMANCE_STATS
   optional .android_studio.StudioPerformanceStats studio_performance_stats = 38;
+  // set when kind = LLDB_PERFORMANCE_STATS
+  optional .android_studio.LldbPerformanceStats lldb_performance_stats = 39;
+  // set when kind = STUDIO_PROJECT_OPENED or STUDIO_PROJECT_CLOSED
+  optional .android_studio.StudioProjectChange studio_project_change = 40;
+  // optionally set when kind = FIREBASE_ASSISTANT_* (except for errors).
+  optional .android_studio.FirebaseContextDetails firebase_context_details = 41;
+  // set when kind = LAYOUT_EDITOR_EVENT
+  optional .android_studio.LayoutEditorEvent layout_editor_event = 42;
+  // set when kind = APP_LINKS_ASSISTANT_STATS
+  optional .android_studio.AppLinksAssistantEvent app_links_assistant_event = 43;
+  // set when kind = EMULATOR_PERFORMANCE_STATS
+  optional .android_studio.EmulatorPerformanceStats emulator_performance_stats = 44;
 }
 
 // Describes a product, e.g. Android Studio or Emulator.
@@ -547,11 +588,9 @@ message DeviceInfo {
   optional string anonymized_serial_number = 1;
   // Tags used to build the android version on this device.
   // e.g. 'release-keys' or 'test-keys' or 'A100_V001'
-  // TODO(jvg): ask loglaunch folks: ST_SOFTWARE_ID datapol?
   optional string build_tags = 2;
   // Type of build this device is running.
   // e.g. 'user' or 'userdebug' or 'eng' or 'alphabuild'
-  // TODO(jvg): ask loglaunch folks: ST_SOFTWARE_ID datapol?
   optional string build_type = 3;
   // Android version e.g. '5.1.1'
   optional string build_version_release = 4;
@@ -613,6 +652,56 @@ message EmulatorGpuInfo {
 message EmulatorFeatures {
   optional bool gps = 1;
   optional bool sensors = 2;
+}
+
+// A description of a single file from an AVD.
+message EmulatorAvdFile {
+  enum EmulatorAvdFileLocation {
+    UNKNOWN_EMULATOR_AVD_FILE_LOCATION = 0;
+    STANDARD = 1;
+    CUSTOM = 2;
+  }
+  enum EmulatorAvdFileKind {
+    UNKNOWN_EMULATOR_AVD_FILE_KIND = 0;
+    KERNEL = 1;
+    SYSTEM = 2;
+    RAMDISK = 3;
+  }
+  // Kind of the file this report is about.
+  optional .android_studio.EmulatorAvdFile.EmulatorAvdFileKind kind = 1;
+  // Location of the file
+  optional .android_studio.EmulatorAvdFile.EmulatorAvdFileLocation location = 2;
+  // Size
+  optional int64 size = 3;
+  // Creation datetime, as a UTC unix timestamp
+  optional int64 creation_timestamp = 4;
+}
+
+// A description of an AVD Emulator has loaded.
+message EmulatorAvdInfo {
+  enum EmulatorAvdImageKind {
+    UNKNOWN_EMULATOR_AVD_IMAGE_KIND = 0;
+    AOSP = 1;
+    GOOGLE = 2;
+  }
+  // Name of the AVD.
+  optional string name = 1;
+  // Api level (23 = M, 24 = N, ...)
+  optional int64 api_level = 2;
+  // CPU architecture.
+  optional .android_studio.EmulatorDetails.GuestCpuArchitecture arch = 3;
+  // When was this AVD created, UTC Unix timespamp.
+  optional int64 creation_timestamp = 4;
+  // A build-id string from build.prop, something like 'sdk_google_phone 1231231
+  // 10-11-2012'.
+  optional string build_id = 5;
+  // Unix build UTC timestamp.
+  optional int64 build_timestamp = 6;
+  // Kind of the image (e.g. pure AOSP, with Google APIs, etc.).
+  optional .android_studio.EmulatorAvdInfo.EmulatorAvdImageKind image_kind = 7;
+  // A collection of files in the AVD
+  // (usually 3 entries: kernel, system & ramdisk).
+  repeated .android_studio.EmulatorAvdFile files = 8;
 }
 
 // Metrics related to the Emulator.
@@ -696,6 +785,8 @@ message EmulatorDetails {
   optional .android_studio.EmulatorDetails.EmulatorRenderer renderer = 16;
   // Flags for the used featurs.
   optional .android_studio.EmulatorFeatures used_features = 17;
+  // Information about the currently loaded AVD.
+  optional .android_studio.EmulatorAvdInfo avd_info = 18;
 }
 
 // Describes a user clicking on some part of the Emulator UI.
@@ -710,6 +801,10 @@ message EmulatorUiEvent {
     // Generated to report the index of an option selected by the user in a
     // drop-down menu / radio button etc.
     OPTION_SELECTED = 3;
+    // Generated on event processing end, |value| is time in microseconds.
+    // Is only sent if the processing time is considered 'long' in the emulator,
+    // which is determined in the emulator code itself.
+    LONG_PROCESSING_TIME_US = 4;
   }
   // Tracks the context of the Emulator UI.
   enum EmulatorUiEventContext {
@@ -717,8 +812,6 @@ message EmulatorUiEvent {
     EXTENDED_WINDOW_OPEN = 1;
   }
   // Id of the UI element, baked in the emulator binary.
-  // TODO(jvg): ask logs ticket folks what kind of datapol annotation
-  // it is not freeform, but we cannot make this an enum
   optional string element_id = 1;
   // The type of UI event
   optional .android_studio.EmulatorUiEvent.EmulatorUiEventType type = 2;
@@ -728,6 +821,26 @@ message EmulatorUiEvent {
   // is not specific here. e.g., |value| may represent a boolean, a "count", or
   // an index into the list of items in a drop down menu.
   optional int64 value = 4;
+}
+
+message EmulatorPercentileEstimator {
+  // Metric types that can be monitored.
+  enum EmulatorPerformanceMetric {
+    UI_EVENT_HANDLING_TIME_US = 0;
+  }
+  // Type of the performance metric.
+  optional .android_studio.EmulatorPercentileEstimator.EmulatorPerformanceMetric metric = 1;
+  // Per-metric type context, e.g. UI element name if this is an event handling
+  // time. Not set if there's no context for the specific metric type.
+  optional string context = 2;
+  // Estimator for metric.
+  optional .android_studio.PercentileEstimator estimator = 3;
+}
+
+// Estimations of percentiles of time spent on Emulator operations.
+message EmulatorPerformanceStats {
+  // Collection of estimations of performance metrics.
+  repeated .android_studio.EmulatorPercentileEstimator estimator = 1;
 }
 
 // Details about a single Gradle run.
@@ -751,6 +864,10 @@ message GradleBuildDetails {
   repeated .android_studio.GradleAndroidModule android_modules = 8;
   // per native android module metrics
   repeated .android_studio.GradleNativeAndroidModule native_android_modules = 9;
+  // The app_id is the id for the user's android app
+  // which we salt on the client (28 day rotation) then sha256
+  // so it is anonymized and is unique per user, but has a 1-N relation.
+  optional string app_id = 10;
 }
 
 // Per library Gradle metrics.
@@ -830,6 +947,7 @@ message InstantRun {
     WARM_SWAP = 6;
     NO_CHANGES = 7;
   }
+  // Historical, use InstantRunStatus.VerifierStatus instead.
   // The different reasons Instant Run had to do a full build.
   enum InstantRunBuildCause {
     UNKNOWN_INSTANT_RUN_BUILD_CAUSE = 0;
@@ -872,9 +990,11 @@ message InstantRun {
     APP_USES_MULTIPLE_PROCESSES = 11;
     INCREMENTAL_BUILD = 12;
     NO_INSTANT_RUN = 13;
+    ANDROID_TV_UNSUPPORTED = 14;
   }
   // What kind of Instant Run deployment was chosen.
   optional .android_studio.InstantRun.InstantRunDeploymentKind deployment_kind = 1;
+  // Historical, we had two enums tracking this, this one was never used.
   // what was the reason for chosing that kind of deployment from the gradle
   // side.
   optional .android_studio.InstantRun.InstantRunBuildCause instant_run_build_cause = 3;
@@ -887,6 +1007,9 @@ message InstantRun {
   // what was the reason for chosing that kind of deployment from the IDE
   // side.
   optional .android_studio.InstantRun.InstantRunIdeBuildCause ide_build_cause = 6;
+  // what was the reason for chosing that kind of deployment from the Gradle
+  // side.
+  optional .android_studio.InstantRunStatus.VerifierStatus gradle_build_cause = 7;
 }
 
 // describes Metrics on Metrics.
@@ -1008,8 +1131,10 @@ message GradleBuildProfile {
   // (after BuildListener#buildFinished(BuildResult) called.
   optional int64 build_time = 11;
   // The number of garbage collections during this build
+  // Historical: Used in Android Gradle Plugin 2.2.x, circa 2016-10
   optional int64 gc_count = 12;
   // The time spent garbage collecting during this build.
+  // Historical: Used in Android Gradle Plugin 2.2.x, circa 2016-10
   optional int64 gc_time = 13;
   // The projects that make up this multi-project build.
   repeated .android_studio.GradleBuildProject project = 14;
@@ -1127,11 +1252,17 @@ message GradleBuildVariant {
 
 message GradleBuildMemorySample {
   // Garbage collection time since the current daemon started.
+  // Historical: Used in Android Gradle Plugin 2.2.x, circa 2016-10
+  // Replaced by JavaProcessStats.
   optional int64 gc_time_ms = 1;
   // Garbage collection count since the current daemon started.
+  // Historical: Used in Android Gradle Plugin 2.2.x, circa 2016-10.
+  // Replaced by JavaProcessStats.
   optional int64 gc_count = 2;
   // Time that the memory stats were collected.
   optional int64 timestamp = 3;
+  // More detailed stats on the current running java process.
+  optional .android_studio.JavaProcessStats java_process_stats = 4;
 }
 
 // A single execution span from a build.
@@ -1285,6 +1416,12 @@ message GradleBuildProfileSpan {
   // The ID is not stable nor meaningful over multiple GradleBuildProfile.
   // See GradleBuildVariant.id
   optional int64 variant = 8;
+  // Thread that this execution occurs on.
+  // Generated by sequentially numbering java threads that do work that is
+  // recorded.
+  // Will not be populated for async recorded events,
+  // such as from the task execution listener.
+  optional int64 thread_id = 10;
 }
 
 message GradleTaskExecution {
@@ -1371,6 +1508,8 @@ message GradleTaskExecution {
     PACKAGE_INSTANT_APP = 79;
     PREPARE_ATOM = 80;
     PROCESS_INSTANT_APP_RESOURCES = 81;
+    CLEAN_BUILD_CACHE = 82;
+    RESOLVE_DEPENDENCIES = 83;
   }
   // The task implementing class.
   // Custom tasks are recorded as UNKNOWN_TASK_TYPE.
@@ -1412,6 +1551,7 @@ message GradleTransformExecution {
     DATA_BINDING_MERGE_ARTIFACTS = 19;
     INSTANT_RUN_VERIFIER = 20;
     STRIP_DEBUG_SYMBOL = 21;
+    LIBRARY_API = 22;
   }
   // The transform implementing class.
   // Custom transforms are recorded as UNKNOWN_TRANSFORM_TYPE.
@@ -1530,6 +1670,40 @@ message LLDBFrontendDetails {
 message FirebaseErrorDetails {
   // The error message presented to the user upon Firebase errors.
   optional string error_message = 1;
+}
+
+// Contextual details for Firebase Assistant events. This message acts as a
+// generic container for all events rather than having different messages for
+// each event type. While some fields will be knowingly blank/irrelevant for
+// some event types, frequency of logging is expected to be low enough that
+// this does not represent request/storage bloat.
+message FirebaseContextDetails {
+  enum ConnectStatus {
+    // Unable to determine connection status.
+    UNKNOWN_CONNECT_STATUS = 1;
+    // No modules connected.
+    NOT_CONNECTED = 2;
+    // 1 to N-1 modules were connected in a project with N modules.
+    PARTIALLY_CONNECTED = 3;
+    // All modules connected.
+    CONNECTED = 4;
+  }
+  // Public project id, used for attributing project growth to the plugin.
+  optional string project_id = 1;
+  // Secondary identifier for the project, also stored for more flexibility with
+  // joining the data with other sets.
+  optional string project_number = 2;
+  // Whether the action was performed while the user was logged in.
+  optional bool logged_in = 3;
+  // Whether the action was performed on while the related Studio project's
+  // modules were connected to a Firebase project.
+  optional .android_studio.FirebaseContextDetails.ConnectStatus connect_status = 4;
+  // Tutorial resource event relates to. Restricted to non PII such as the id
+  // of the tutorial that was opened.
+  optional string performed_on = 5;
+  // Time that an action took to be performed. A primary example is how long
+  // a tutorial was open before navigating away.
+  optional int64 duration = 6;
 }
 
 // Details on the GPU Debugger tracing run
@@ -1668,6 +1842,250 @@ message JvmDetails {
 message StudioPerformanceStats {
   // Time for which the UI was blocked in milliseconds
   optional int32 ui_freeze_time_ms = 1;
+}
+
+// One bucket of a PercentileEstimator.
+message PercentileBucket {
+  // The target percentile for this bucket.
+  optional double target_percentile = 1;
+  // Estimated value at this bucket.
+  optional double value = 2;
+  // Number of samples less than value.
+  optional uint64 count = 3;
+}
+
+// Estimation of target percentiles of a stream of data.
+message PercentileEstimator {
+  // Either raw_sample or bucket should be empty.
+  // Raw samples when there were not enough samples to interpolate.
+  repeated double raw_sample = 2;
+  // 2n + 3 buckets representing an estimation for n target percentiles.
+  repeated .android_studio.PercentileBucket bucket = 3;
+}
+
+message LldbPercentileEstimator {
+  // Metric types that can be monitored.
+  enum Metric {
+    ATTACH_TIME_MICROS = 0;
+    STEP_RESUME_RESPONSE_TIME_MICROS = 1;
+    GET_VARIABLES_TIME_MICROS = 2;
+    GET_VARIABLE_CHILDREN_RANGE_TIME_MICROS = 3;
+    GET_FRAMES_TIME_MICROS = 4;
+    ADD_SYMBOLIC_BREAKPOINT_TIME_MICROS = 5;
+    ADD_BREAKPOINT_TIME_MICROS = 6;
+  }
+  // Type of performance metric.
+  optional .android_studio.LldbPercentileEstimator.Metric metric = 1;
+  // Estimator for metric.
+  optional .android_studio.PercentileEstimator estimator = 2;
+}
+
+// Estimations of percentiles of time spent on LLDB operations.
+message LldbPerformanceStats {
+  // Collection of estimations of performance metrics.
+  repeated .android_studio.LldbPercentileEstimator estimator = 1;
+}
+
+// Details around user opening or closing projects.
+message StudioProjectChange {
+  // amount of projects open in same Android Studio instance.
+  optional int32 projects_open = 1;
+}
+
+// Layout editor state
+message LayoutEditorState {
+  // Layout editor mode
+  enum Mode {
+    UNKOWN_MODE = 0;
+    DESIGN_MODE = 1;
+    PREVIEW_MODE = 2;
+  }
+  // Layout type
+  enum Type {
+    UNKNOWN_TYPE = 0;
+    LAYOUT = 1;
+    DRAWABLE = 2;
+    MENU = 3;
+    PREFERENCE_SCREEN = 4;
+  }
+  // Layout orientation
+  enum Orientation {
+    UNKNOWN_ORIENTATION = 0;
+    PORTRAIT = 1;
+    LANDSCAPE = 2;
+  }
+  // Design surfaces currently displayed
+  enum Surfaces {
+    UNKNOWN_SURFACES = 0;
+    BOTH = 1;
+    SCREEN_SURFACE = 2;
+    BLUEPRINT_SURFACE = 3;
+  }
+  // layout editor preview or design mode
+  optional .android_studio.LayoutEditorState.Mode mode = 1;
+  // layout type currently being displayed (layout, menu, drawable...)
+  optional .android_studio.LayoutEditorState.Type type = 2;
+  // android api level  e.g. '23' or 'N'
+  optional string config_api_level = 3;
+  // current layout zoom level
+  optional int32 config_zoom_level = 4;
+  // current layout orientation
+  optional .android_studio.LayoutEditorState.Orientation config_orientation = 5;
+  // surfaces being displyaed
+  optional .android_studio.LayoutEditorState.Surfaces surfaces = 6;
+}
+
+// Layout editor render result (when type = RENDER)
+message LayoutEditorRenderResult {
+  enum Trigger {
+    UNKNOWN_TRIGGER = 0;
+    // Manual refresh triggered by the user
+    USER = 1;
+    // User layout edit
+    EDIT = 2;
+    // External resource change
+    RESOURCE_CHANGE = 3;
+    // Build
+    BUILD = 4;
+  }
+  // Action that triggered the render
+  optional .android_studio.LayoutEditorRenderResult.Trigger trigger = 1;
+  // Render result code
+  optional int32 result_code = 2;
+  // Full render time in ms
+  optional int64 total_render_time_ms = 4;
+  // Number of components rendered
+  optional int32 component_count = 5;
+  // Total number of issues (warnings + errors) in the error panel
+  optional int32 total_issue_count = 6;
+  // Errors displayed in the error panel
+  optional int32 error_count = 7;
+  // Fidelity warnings
+  optional int32 fidelity_warning_count = 8;
+}
+
+// Details for layout editor events
+message LayoutEditorEvent {
+  enum LayoutEditorEventType {
+    UNKNOWN_EVENT_TYPE = 0;
+    RENDER = 1;
+    ZOOM_IN = 2;
+    ZOOM_OUT = 3;
+    ZOOM_FIT = 4;
+    ZOOM_ACTUAL = 5;
+    SHOW_PAN_AND_ZOOM = 6;
+    SHOW_LINT_MESSAGES = 7;
+    LINT_TOOLTIP = 8;
+    RESTORE_ERROR_PANEL = 9;
+    MINIMIZE_ERROR_PANEL = 10;
+    SHOW_DESIGN_SURFACE = 11;
+    SHOW_BLUEPRINT_SURFACE = 12;
+    SHOW_BOTH_SURFACE = 13;
+    SWITCH_ORIENTATION = 14;
+    DEVICE_CHANGE = 15;
+    API_LEVEL_CHANGE = 16;
+    THEME_CHANGE = 17;
+    LANGUAGE_CHANGE = 18;
+    SHOW_CONSTRAINTS = 19;
+    HIDE_CONSTRAINTS = 20;
+    TURN_ON_AUTOCONNECT = 21;
+    TURN_OFF_AUTOCONNECT = 22;
+    CLEAR_ALL_CONSTRAINTS = 23;
+    INFER_CONSTRAINS = 24;
+    DEFAULT_MARGINS = 25;
+    PACK = 26;
+    ALIGN = 27;
+    ADD_VERTICAL_GUIDELINE = 28;
+    ADD_HORIZONTAL_GUIDELINE = 29;
+    SHOW_PALETTE = 30;
+    HIDE_PALETTE = 31;
+  }
+  // Type of event
+  optional .android_studio.LayoutEditorEvent.LayoutEditorEventType type = 1;
+  // Layout editor current state
+  optional .android_studio.LayoutEditorState state = 2;
+  // Result of the render when (type = RENDER)
+  optional .android_studio.LayoutEditorRenderResult render_result = 3;
+}
+
+// App links assistant user event detail.
+message AppLinksAssistantEvent {
+  // UI event source.
+  enum EventSource {
+    ASSISTANT_SIDE_PANEL = 1;
+    // UI elements of URL mapping panel.
+    URL_MAPPING_PANEL = 2;
+    URL_MAPPING_APP_LINK_ADD_DIALOG = 3;
+    URL_MAPPING_APP_LINK_ADD_ADVANCED_DIALOG = 4;
+    URL_MAPPING_APP_LINK_EDIT_DIALOG = 5;
+    URL_MAPPING_APP_LINK_DELETE_BUTTON = 6;
+    URL_MAPPING_CHECK_MAPPING_BUTTON = 7;
+    URL_MAPPING_OPEN_ANDROID_MANIFEST_BUTTON = 8;
+    // UI elements of code insert dialog.
+    CODE_INSERT_DIALOG = 9;
+    CODE_INSERT_DIALOG_INSERT_BUTTON = 10;
+    CODE_INSERT_DIALOG_LIST_SELECTION = 11;
+    // UI elements of DAL generation panel.
+    DAL_PANEL = 12;
+    DAL_PANEL_BROWSE_KEYSTORE_BUTTON = 13;
+    DAL_PANEL_GENERATE_BUTTON = 14;
+    DAL_PANEL_SAVE_BUTTON = 15;
+    DAL_PANEL_VERIFY_BUTTON = 16;
+    // UI elements of app links test panel.
+    APP_LINKS_TEST_PANEL = 17;
+    APP_LINKS_TEST_PANEL_MODULE_SELECTION = 18;
+    APP_LINKS_TEST_PANEL_RUN_TEST_BUTTON = 19;
+  }
+  // The state list of UI event source.
+  enum EventState {
+    // Generic state for panel opened, button clicked or list selection.
+    OPENED = 1;
+    // Generic state for button action completed.
+    COMPLETED = 2;
+    // Generic state for button action failed.
+    FAILED = 3;
+    // State to label user exiting from the panel or dialog by clicking the
+    // system close button, hide button or cancel button.
+    EXIT = 4;
+  }
+  // Url path type of a new added app link.
+  enum PathType {
+    // Corresponds to attribute android:path of <data> tag in Android Manifest
+    // File.
+    PATH = 1;
+    // Corresponds to attribute android:pathPrefix of <data> tag in
+    // Android Manifest File
+    PATH_PREFIX = 2;
+    // Corresponds to attribute android:pathPattern of <data> tag in
+    // Android Manifest File
+    PATH_PATTERN = 3;
+  }
+  // Client-side salted (rotating every 28 days), sha256 of the project id for
+  // counting projects using the assistant.
+  optional string project_id = 1;
+  // The app_id is the id for the user's android app
+  // which's salted on client-side (rotating every 28 days) then sha256
+  // so it is anonymized and is unique per user, but has a 1-N relation.
+  // It's for counting apps using the assistant.
+  optional string app_id = 2;
+  // The UI element source of event.
+  optional .android_studio.AppLinksAssistantEvent.EventSource event_source = 3;
+  // The state of the event.
+  optional .android_studio.AppLinksAssistantEvent.EventState event_state = 4;
+  // To check if there exists app links in the project
+  // before using app links assistant.
+  optional bool existing_app_links = 5;
+  // Duration time that app links assistant panel opens. Unit is nanoseconds.
+  optional int64 assistant_panel_open_duration = 6;
+  // Following three fields is for the new added app link.
+  // Set when event_source = URL_MAPPING_APP_LINK_ADD_DIALOG
+  // && event_state = COMPLETED
+  // Path type of new app link.
+  optional .android_studio.AppLinksAssistantEvent.PathType app_link_path_type = 7;
+  // Whether a new activity is linked by app link.
+  optional bool new_activity_linked = 8;
+  // Whether a new host is linked by app link.
+  optional bool new_host_linked = 9;
 }
 
 
