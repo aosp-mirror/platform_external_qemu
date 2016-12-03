@@ -97,13 +97,17 @@ struct LazyInstanceState {
     bool needConstruction();
     void doneConstructing();
 
-#ifdef _WIN32
+#ifdef _MSC_VER
+    // MSVC doesn't play well with volatile members and makes the whole class
+    // non-POD in that case.
+    typedef LONG AtomicType;
+#elif defined(_WIN32)
     typedef LONG volatile AtomicType;
 #else
     typedef int volatile AtomicType;
 #endif
 
-    volatile AtomicType mState;
+    AtomicType mState;
 };
 
 }  // namespace internal
