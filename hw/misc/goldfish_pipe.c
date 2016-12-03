@@ -841,7 +841,7 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
                     (intptr_t)buffers[0].data - (intptr_t)rwPtrs[0];
             unsigned i;
             for (i = 1; i < buffers_count; ++i) {
-                buffers[i].data = rwPtrs[i] + diffFromGuest;
+                buffers[i].data = (void*)(intptr_t)(rwPtrs[i] + diffFromGuest);
                 buffers[i].size = rwSizes[i];
                 assert(buffers[i].data != NULL);
                 assert(buffers[i].size != 0);
