@@ -323,6 +323,7 @@ LOCAL_SRC_FILES := \
     android/metrics/MetricsWriter.cpp \
     android/metrics/NullMetricsReporter.cpp \
     android/metrics/NullMetricsWriter.cpp \
+    android/metrics/Percentiles.cpp \
     android/metrics/PeriodicReporter.cpp \
     android/metrics/SyncMetricsReporter.cpp \
     android/metrics/StudioConfig.cpp \
@@ -639,6 +640,7 @@ LOCAL_SRC_FILES := \
   android/metrics/tests/MockMetricsReporter.cpp \
   android/metrics/tests/MockMetricsWriter.cpp \
   android/metrics/tests/NullMetricsClasses_unittest.cpp \
+  android/metrics/tests/Percentiles_unittest.cpp \
   android/metrics/tests/PeriodicReporter_unittest.cpp \
   android/metrics/tests/SyncMetricsReporter_unittest.cpp \
 
