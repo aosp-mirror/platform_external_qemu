@@ -132,6 +132,7 @@ typedef enum {
     kKeyCodeChannelUp               = KEY_CHANNELUP,
     kKeyCodeChannelDown             = KEY_CHANNELDOWN,
     kKeyCodeAppSwitch               = KEY_APPSWITCH,
+    kKeyCodeSleep                   = KEY_SLEEP,
 
 } SkinKeyCode;
 

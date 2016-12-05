@@ -139,6 +139,7 @@ SkinKeyCode skin_keycode_rotate(SkinKeyCode code, int  rotation) {
     _KEYSYM1_(REWIND) \
     _KEYSYM1_(FASTFORWARD) \
     _KEYSYM1_(APPSWITCH) \
+    _KEYSYM1_(SLEEP) \
 
 #define _KEYSYM_(x,y)   { KEY_##x, #y },
 static const struct { int  _sym; const char*  _str; }  keysym_names[] =

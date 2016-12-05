@@ -1128,6 +1128,7 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
     events_set_bit(s, EV_KEY, LINUX_KEY_SEARCH);
 
     events_set_bit(s, EV_KEY, ANDROID_KEY_APPSWITCH);
+    events_set_bit(s, EV_KEY, LINUX_KEY_SLEEP);
 
     if (s->have_dpad) {
         events_set_bit(s, EV_KEY, LINUX_KEY_DOWN);
