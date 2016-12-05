@@ -1,0 +1,9 @@
+Verified+1: Yurii Zubrytskyi <zyy@google.com>
+Code-Review+1: Yurii Zubrytskyi <zyy@google.com>
+Code-Review+2: Bo Hu <bohu@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Yurii Zubrytskyi <zyy@google.com>
+Submitted-at: Mon, 05 Dec 2016 22:30:36 +0000
+Reviewed-on: https://android-review.googlesource.com/309876
+Project: platform/external/qemu
+Branch: refs/heads/emu-2.2-release
