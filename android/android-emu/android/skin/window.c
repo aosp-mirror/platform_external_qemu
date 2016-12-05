@@ -1178,6 +1178,11 @@ skin_window_move_mouse( SkinWindow*  window,
                 case kKeyCodeChannelUp:
                 case kKeyCodeChannelDown:
                 case kKeyCodeAppSwitch:
+                case kKeyCodeStemPrimary:
+                case kKeyCodeStem1:
+                case kKeyCodeStem2:
+                case kKeyCodeStem3:
+                case kKeyCodeSleep:
                     break;
 
                 /* all the rest is assumed to be qwerty */
