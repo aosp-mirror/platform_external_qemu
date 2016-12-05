@@ -28,9 +28,12 @@ fatal () {
     exit 1
 }
 
-# Assume this is under $AOSP/external/qemu/android/third_party/
-AOSP_DIR=$PROGDIR/../../..
-AOSP_DIR=$(cd "$AOSP_DIR" && pwd -P)
+AOSP_DIR="$AOSP"
+if ! [ "$AOSP_DIR" ]; then
+    # Assume this is under $AOSP/external/qemu/android/third_party/
+    AOSP_DIR=$PROGDIR/../../..
+    AOSP_DIR=$(cd "$AOSP_DIR" && pwd -P)
+fi
 
 OPT_AOSP_DIR=
 OPT_EMUGEN=
@@ -79,7 +82,7 @@ if [ "$OPT_EMUGEN" ]; then
         fatal "Missing emugen binary: $EMUGEN"
     fi
 else
-    EMUGEN=$PROGDIR/../objs/build/intermediates64/emugen/emugen
+    EMUGEN=$PROGDIR/../../../objs/build/intermediates64/emugen/emugen
     if [ ! -f "$EMUGEN" ]; then
         fatal "Missing emugen binary: $EMUGEN, please build it or use --emugen=<program>"
     fi
