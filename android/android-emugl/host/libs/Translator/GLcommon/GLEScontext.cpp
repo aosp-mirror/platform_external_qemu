@@ -331,7 +331,7 @@ static void directToBytesRanges(GLint first,GLsizei count,GLESpointer* p,RangeLi
 
     int attribSize = p->getSize()*4; //4 is the sizeof GLfixed or GLfloat in bytes
     int stride = p->getStride()?p->getStride():attribSize;
-    int start  = p->getBufferOffset()+first*attribSize;
+    int start  = p->getBufferOffset()+first*stride;
     if(!p->getStride()) {
         list.addRange(Range(start,count*attribSize));
     } else {
@@ -394,7 +394,7 @@ void GLEScontext::convertDirectVBO(GLESConversionArrays& cArrs,GLint first,GLsiz
     GLuint* indices = NULL;
     int attribSize = p->getSize();
     int stride = p->getStride()?p->getStride():sizeof(GLfixed)*attribSize;
-    char* data = (char*)p->getBufferData() + (first*stride);
+    char* data = (char*)p->getBufferData();
 
     if(p->bufferNeedConversion()) {
         directToBytesRanges(first,count,p,ranges); //converting indices range to buffer bytes ranges by offset
