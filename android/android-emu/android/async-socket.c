@@ -671,8 +671,10 @@ _async_socket_cancel_all_io(AsyncSocket* as)
     loopTimer_stop(as->reconnect_timer);
 
     /* Stop read / write on the socket. */
-    loopIo_dontWantWrite(as->io);
-    loopIo_dontWantRead(as->io);
+    if (as->io) {
+        loopIo_dontWantWrite(as->io);
+        loopIo_dontWantRead(as->io);
+    }
 
     /* Cancel active readers and writers. */
     _async_socket_cancel_readers(as);
@@ -690,6 +692,7 @@ _async_socket_close_socket(AsyncSocket* as)
         T("ASocket %s: Socket handle %d is closed.",
           _async_socket_string(as), as->fd);
         loopIo_free(as->io);
+        as->io = NULL;
         socket_close(as->fd);
         as->fd = -1;
     }
