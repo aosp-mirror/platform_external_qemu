@@ -67,7 +67,7 @@ option_register_var "--target=<list>" OPT_TARGET \
 
 OPT_SRC_DIR=
 option_register_var "--src-dir=<dir>" OPT_SRC_DIR \
-        "Set qemu-android source directory [autodetect]"
+        "Set qemu2 source directory [autodetect]"
 
 OPT_DEBUG=
 option_register_var "--debug" OPT_DEBUG \
@@ -88,20 +88,20 @@ if [ "$PARAMETER_COUNT" != 0 ]; then
 fi
 
 if [ "$OPT_SRC_DIR" ]; then
-    QEMU_ANDROID=$OPT_SRC_DIR
+    QEMU_SRCDIR=$OPT_SRC_DIR
 else
-    DEFAULT_SRC_DIR=$(cd $(program_directory)/../../../qemu-android && pwd -P 2>/dev/null || true)
+    DEFAULT_SRC_DIR=$(cd $(program_directory)/../.. && pwd -P 2>/dev/null || true)
     if [ "$DEFAULT_SRC_DIR" ]; then
-        QEMU_ANDROID=$DEFAULT_SRC_DIR
-        log "Auto-config: --src-dir=$QEMU_ANDROID"
+        QEMU_SRCDIR=$DEFAULT_SRC_DIR
+        log "Auto-config: --src-dir=$QEMU_SRCDIR"
     else
         panic "Could not find qemu-android sources. Please use --src-dir=<dir>."
     fi
 fi
-if [ ! -f "$QEMU_ANDROID/include/qemu-common.h" ]; then
-    panic "Not a valid qemu-android source directory: $QEMU_ANDROID"
+if [ ! -f "$QEMU_SRCDIR/include/qemu-common.h" ]; then
+    panic "Not a valid qemu2 source directory: $QEMU_SRCDIR"
 fi
-QEMU_ANDROID=$(cd "$QEMU_ANDROID" && pwd -P)
+QEMU_SRCDIR=$(cd "$QEMU_SRCDIR" && pwd -P)
 
 prebuilts_dir_parse_option
 aosp_dir_parse_option
@@ -317,7 +317,7 @@ EOF
             DEBUG_FLAGS="--enable-debug"
         fi
 
-        run $QEMU_ANDROID/configure \
+        run $QEMU_SRCDIR/configure \
             $CROSS_PREFIX_FLAG \
             --target-list="$QEMU_TARGET_LIST" \
             --prefix=$PREFIX \
@@ -416,7 +416,7 @@ EOF
     for LINK_FILE in "$BUILD_DIR"/LINK-qemu-system-*; do
         sed \
             -e 's|'${PREBUILTS_DIR}'|@PREBUILTS_DIR@|g' \
-            -e 's|'${QEMU_ANDROID}'|@SRC_DIR@|g' \
+            -e 's|'${QEMU_SRCDIR}'|@SRC_DIR@|g' \
             -e 's|'${BUILD_DIR}'||g' \
             "$LINK_FILE" > $INSTALL_DIR/$1/$(basename "$LINK_FILE")
     done
@@ -432,7 +432,7 @@ if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     builder_prepare_remote_darwin_build \
             /tmp/$USER-rebuild-darwin-ssh-$$/qemu-android-build
 
-    copy_directory "$QEMU_ANDROID" "$DARWIN_PKG_DIR/qemu-android-src"
+    copy_directory "$QEMU_SRCDIR" "$DARWIN_PKG_DIR/qemu-src"
 
     run mkdir -p "$DARWIN_PKG_DIR/prebuilts"
     for SYSTEM in $DARWIN_SYSTEMS; do
@@ -442,7 +442,7 @@ if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
 
     var_append DARWIN_BUILD_FLAGS \
         --target=$(spaces_to_commas "$TARGETS") \
-        --src-dir=$DARWIN_REMOTE_DIR/qemu-android-src \
+        --src-dir=$DARWIN_REMOTE_DIR/qemu-src \
         --no-tests \
         --prebuilts-dir=$DARWIN_REMOTE_DIR/prebuilts \
         --install-dir=$DARWIN_REMOTE_DIR/prebuilts/qemu-android \

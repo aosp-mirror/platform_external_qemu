@@ -46,7 +46,7 @@ EMUGL_BACKEND_DIRS="gles_mesa gles_swiftshader gles_angle"
 ###
 
 # Get the name of a variable matching a directory name.
-# $1: subdirectory name (e.g. 'external/qemu-android')
+# $1: subdirectory name (e.g. 'external/qemu')
 # Out: variable name (e.g. 'AOSP_COMMIT_external_qemu_android')
 _get_aosp_subdir_varname () {
     local __aosp_subdir="$1"
@@ -348,10 +348,6 @@ OPT_CRASH_PROD=
 option_register_var "--crash-prod" OPT_CRASH_PROD \
        "Upload crashes to production."
 
-OPT_QEMU2_SRCDIR=$ANDROID_EMULATOR_QEMU2_SRCDIR
-option_register_var "--qemu2-src-dir" OPT_QEMU2_SRCDIR \
-      "Alternate QEMU2 source directory."
-
 package_builder_register_options
 aosp_prebuilts_dir_register_options
 prebuilts_dir_register_option
@@ -479,13 +475,8 @@ ln -s "$AOSP_ROOT"/prebuilts "$AOSP_TMPDIR"/prebuilts
 ln -s "$AOSP_ROOT"/external/qemu "$AOSP_TMPDIR"/external/qemu
 ln -s "$AOSP_ROOT"/external/gtest "$AOSP_TMPDIR"/external/gtest
 ln -s "$AOSP_ROOT"/external/google-benchmark "$AOSP_TMPDIR"/external/google-benchmark
-if [ "$OPT_QEMU2_SRCDIR" ]; then
-    ln -s $(realpath "$OPT_QEMU2_SRCDIR") "$AOSP_TMPDIR"/external/qemu-android
-else
-    ln -s "$AOSP_ROOT"/external/qemu-android "$AOSP_TMPDIR"/external/qemu-android
-fi
 
-AOSP_SOURCE_SUBDIRS="external/qemu external/qemu-android external/gtest external/google-benchmark"
+AOSP_SOURCE_SUBDIRS="external/qemu external/gtest external/google-benchmark"
 
 for AOSP_SUBDIR in $AOSP_SOURCE_SUBDIRS; do
     extract_subdir_git_history \
@@ -794,10 +785,6 @@ fi
 
 if [ "$OPT_PREBUILT_QEMU2" ]; then
     var_append REBUILD_FLAGS "--prebuilt-qemu2"
-fi
-
-if [ "$OPT_QEMU2_SRCDIR" ]; then
-    var_append REBUILD_FLAGS "--qemu2-src-dir=$OPT_QEMU2_SRCDIR"
 fi
 
 for SYSTEM in $(convert_host_list_to_os_list $LOCAL_HOST_SYSTEMS); do

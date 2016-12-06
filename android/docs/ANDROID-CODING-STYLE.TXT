@@ -47,7 +47,7 @@ It's important to understand when and how to apply this style guide.
 The 'classic' Android emulator code base lives under $AOSP/external/qemu/,
 with most of the Android-specific code under $AOSP/external/qemu/android/.
 
-The 'qemu2' Android emulator code base lives under $AOSP/external/qemu-android/
+The 'qemu2' Android emulator code base lives under $AOSP/external/qemu/
 and is *NOT* affected by this coding style guide.
 
   external/qemu/android/base/

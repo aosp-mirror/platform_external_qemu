@@ -2,7 +2,6 @@
 # are the following:
 #
 #  - the emulator-ui program (which is target-agnostic)
-#  - the target-specific qemu-android-$ARCH programs (headless emulation engines)
 #  - the "standalone" emulator programs (embed both UI and engine in a single
 #    binary and process), i.e. "emulator" for ARM and "emulator-x86" for x86.
 #
