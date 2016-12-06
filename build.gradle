@@ -100,9 +100,11 @@ sdk {
             notice null
         }
         item("$buildWindowsEmulator.output/emulator.exe") {
+            executable true
             builtBy buildWindowsEmulator
         }
         item("$buildWindowsEmulator.output/emulator-check.exe") {
+            executable true
             builtBy buildWindowsEmulator
         }
         item("$buildWindowsEmulator.output/bin") {
@@ -144,33 +146,41 @@ sdk {
         }
 
         item("$buildWindowsEmulator.output/emulator-arm.exe") {
+            executable true
             builtBy buildWindowsEmulator
         }
         item("$buildWindowsEmulator.output/emulator-mips.exe") {
+            executable true
             builtBy buildWindowsEmulator
         }
         item("$buildWindowsEmulator.output/emulator-x86.exe") {
+            executable true
             builtBy buildWindowsEmulator
         }
         item("$buildWindowsEmulator.output/emulator-crash-service.exe") {
+            executable true
             builtBy buildWindowsEmulator
         }
 
         item("$buildWindowsEmulator.output/emulator64-crash-service.exe") {
+            executable true
             builtBy buildWindowsEmulator
         }
 
 /*
 XAV(2014-06-17): DISABLE win64 exe until it's ready
         item("$buildWindowsEmulator.output/emulator64-arm.exe") {
+            executable true
             builtBy buildWindowsEmulator
         }
 
         item("$buildWindowsEmulator.output/emulator64-mips.exe") {
+            executable true
             builtBy buildWindowsEmulator
         }
 
         item("$buildWindowsEmulator.output/emulator64-x86.exe") {
+            executable true
             builtBy buildWindowsEmulator
         }
 
