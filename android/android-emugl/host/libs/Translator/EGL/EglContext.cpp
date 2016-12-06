@@ -60,13 +60,12 @@ EglContext::~EglContext()
     SurfacePtr currentDraw = currentCtx ? currentCtx->draw() : nullptr;
     // we need to make the context current before releasing GL resources.
     // create a dummy surface first
-    std::shared_ptr<EglPbufferSurface> pbSurface(new EglPbufferSurface(m_dpy,
-                                                                       m_config));
-    pbSurface->setAttrib(EGL_WIDTH, 1);
-    pbSurface->setAttrib(EGL_HEIGHT, 1);
+    EglPbufferSurface pbSurface(m_dpy, m_config);
+    pbSurface.setAttrib(EGL_WIDTH, 1);
+    pbSurface.setAttrib(EGL_HEIGHT, 1);
     EglOS::PbufferInfo pbInfo;
-    pbSurface->getDim(&pbInfo.width, &pbInfo.height, &pbInfo.largest);
-    pbSurface->getTexInfo(&pbInfo.target, &pbInfo.format);
+    pbSurface.getDim(&pbInfo.width, &pbInfo.height, &pbInfo.largest);
+    pbSurface.getTexInfo(&pbInfo.target, &pbInfo.format);
     pbInfo.hasMipmap = false;
     EglOS::Surface* pb = m_dpy->nativeType()->createPbufferSurface(
             m_config->nativeFormat(), &pbInfo);
@@ -75,17 +74,19 @@ EglContext::~EglContext()
         const bool res = m_dpy->nativeType()->makeCurrent(pb, pb, m_native);
         assert(res);
         (void)res;
-        pbSurface->setNativePbuffer(pb);
+        pbSurface.setNativePbuffer(pb);
     }
     //
     // release GL resources. m_shareGroup, m_mngr and m_glesContext hold
     // smart pointers to share groups. We must clean them up when the context
     // is current.
     //
-    m_shareGroup.reset();
+    g_eglInfo->getIface(version())->setShareGroup(m_glesContext, {});
     if (m_mngr) {
         m_mngr->deleteShareGroup(m_native);
     }
+    m_shareGroup.reset();
+
     //
     // call the client-api to remove the GLES context
     //
