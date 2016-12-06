@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2d32ef87_dce065b5",
+        "filename": "android/android-emu/android/metrics/Percentiles.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-06T18:35:32Z",
+      "side": 1,
+      "message": "div by 0? (also below)",
+      "range": {
+        "startLine": 185,
+        "startChar": 14,
+        "endLine": 185,
+        "endChar": 36
+      },
+      "revId": "d4c76b858efe084e0c7abebaed930285d13dc4d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
