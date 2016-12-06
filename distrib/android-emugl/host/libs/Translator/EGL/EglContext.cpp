@@ -48,6 +48,18 @@ EglContext::EglContext(EglDisplay *dpy,
 EglContext::~EglContext()
 {
     //
+    // Delete the ShareGroup first to make sure context still exists.
+    // If it's already removed, Mac driver crashes on null pointer access in
+    // eglDelete...() calls.
+    //
+    if (m_mngr)
+    {
+        m_mngr->deleteShareGroup(m_native);
+    }
+    g_eglInfo->getIface(version())->setShareGroup(m_glesContext, {});
+    m_shareGroup.reset();
+
+    //
     // remove the context in the underlying OS layer
     //
     m_dpy->nativeType()->destroyContext(m_native);
@@ -56,11 +68,6 @@ EglContext::~EglContext()
     // call the client-api to remove the GLES context
     // 
     g_eglInfo->getIface(version())->deleteGLESContext(m_glesContext);
-
-    if (m_mngr)
-    {
-        m_mngr->deleteShareGroup(m_native);
-    }
 }
 
 void EglContext::setSurfaces(SurfacePtr read,SurfacePtr draw)
