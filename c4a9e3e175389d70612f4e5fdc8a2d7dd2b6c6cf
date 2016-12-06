@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "0dd8cb6b_d51a3e55",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.attrib",
+        "patchSetId": 1
+      },
+      "lineNbr": 746,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-06T03:01:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d6b6b00_b27a80d8",
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d6b6b00_927f84c9",
         "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.attrib",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2016-12-01T22:16:57Z",
       "side": 1,
       "message": "nit: space",
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0dd8cb6b_b500d2e3",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.attrib",
+        "patchSetId": 1
+      },
+      "lineNbr": 770,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-06T03:01:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d6b6b00_927f84c9",
       "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "0dd8cb6b_95fdd6c0",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.attrib",
+        "patchSetId": 1
+      },
+      "lineNbr": 778,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-06T03:01:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d6b6b00_f2635831",
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d6b6b00_d260dc27",
         "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.attrib",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2016-12-01T22:16:57Z",
       "side": 1,
       "message": "nit: space",
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0dd8cb6b_750a6a02",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.attrib",
+        "patchSetId": 1
+      },
+      "lineNbr": 792,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-06T03:01:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d6b6b00_d260dc27",
       "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "0dd8cb6b_55076ef8",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.attrib",
+        "patchSetId": 1
+      },
+      "lineNbr": 864,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-06T03:01:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d6b6b00_326e7019",
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d6b6b00_d2045c38",
         "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.in",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2016-12-01T22:16:57Z",
       "side": 1,
       "message": "we currently only support a very small subset of ETC2 required by GLES3",
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0dd8cb6b_35f502d5",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.in",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-06T03:01:56Z",
+      "side": 1,
+      "message": "Ack!",
+      "parentUuid": "0d6b6b00_d2045c38",
       "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "0dd8cb6b_15fa06c4",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.in",
+        "patchSetId": 1
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-06T03:01:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d6b6b00_123a54f5",
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d6b6b00_521fac77",
         "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.in",
         "patchSetId": 1
@@ -132,6 +258,24 @@
       "writtenOn": "2016-12-01T22:16:57Z",
       "side": 1,
       "message": "nit: space",
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0dd8cb6b_f5ee5a03",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.in",
+        "patchSetId": 1
+      },
+      "lineNbr": 494,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-06T03:01:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d6b6b00_521fac77",
       "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "0dd8cb6b_d5f35eed",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.in",
+        "patchSetId": 1
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-06T03:01:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d6b6b00_9229449d",
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d6b6b00_b23d60d4",
         "filename": "android/android-emugl/host/libs/libOpenGLESDispatch/gles3_only.entries",
         "patchSetId": 1
@@ -172,6 +334,24 @@
     },
     {
       "key": {
+        "uuid": "0dd8cb6b_d560feb9",
+        "filename": "android/android-emugl/host/libs/libOpenGLESDispatch/gles3_only.entries",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-06T03:01:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d6b6b00_b23d60d4",
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d6b6b00_481382d4",
         "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
         "patchSetId": 1
@@ -183,6 +363,30 @@
       "writtenOn": "2016-12-01T19:06:30Z",
       "side": 1,
       "message": "please use some enum here instead. Otherwise it may easily become version() \u003d\u003d 4 -\u003e gles 3.1, 5 -\u003e gles 4, 6-\u003e vulkan\nIt\u0027s better to have names for those, still with some hidden integers behind them",
+      "range": {
+        "startLine": 277,
+        "startChar": 29,
+        "endLine": 277,
+        "endChar": 41
+      },
+      "revId": "c4a9e3e175389d70612f4e5fdc8a2d7dd2b6c6cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0dd8cb6b_b56692d1",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-06T03:01:56Z",
+      "side": 1,
+      "message": "Done; I left Vulkan out because even on Android apparently[1], Vulkan\u0027s swap chain and window system interface avoids the use of EGL (and thus a lot of libOpenglRender).\n\nAlso, Vulkan\u0027s multithreaded command submission doesn\u0027t fit with the current RenderThread/RenderContext organization, and there are probably different (or better) ways to blit colorbuffers / post them to the screen, so we\u0027d be looking at a pretty hardcore rewrite of libOpenGLRender.\n\n[1] https://github.com/googlesamples/android-vulkan-tutorials/blob/master/tutorial04_first_window/app/src/main/jni/VulkanMain.cpp",
+      "parentUuid": "0d6b6b00_481382d4",
       "range": {
         "startLine": 277,
         "startChar": 29,
