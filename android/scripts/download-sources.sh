@@ -19,32 +19,11 @@
 shell_import utils/emulator_prebuilts.shi
 shell_import utils/option_parser.shi
 shell_import utils/package_list_parser.shi
+shell_import utils/temp_dir.shi
 
 ###
 ###  Utilities
 ###
-
-# Create temporary directory and ensure it is destroyed on script exit.
-_cleanup_temp_dir () {
-    rm -rf "$TEMP_DIR"
-    exit $1
-}
-
-_TEMP_DIR=
-
-# Return a temporary directory for this script. This creates the directory
-# lazily and ensures it is always destroyed on script exit.
-# Out: temporary directory path.
-temp_dir () {
-    if [ -z "$_TEMP_DIR" ]; then
-        _TEMP_DIR=/tmp/$USER-download-sources-temp-$$
-        silent_run mkdir -p "$_TEMP_DIR" || panic "Could not create temporary directory: $_TEMP_DIR"
-        # Ensure temporary directory is deleted on script exit
-        trap "_cleanup_temp_dir 0" EXIT
-        trap "_cleanup_temp_dir \$?" QUIT INT HUP
-    fi
-    printf %s "$_TEMP_DIR"
-}
 
 # Download a file.
 # $1: Source URL
@@ -311,7 +290,7 @@ for PACKAGE in $(package_list_get_packages); do
             PKG_FILE=$(package_list_get_full_name $PACKAGE)
             PKG_BRANCH=$(package_list_get_version $PACKAGE)
             dump "Cloning $PKG_GIT - $PKG_BRANCH"
-            TEMP_DIR=$(temp_dir)
+            var_create_temp_dir TEMP_DIR download-sources-temp
             if [ -d "$TEMP_DIR/$PKG_FILE" ]; then
                 run rm -rf "$TEMP_DIR/$PKG_FILE"
             fi
