@@ -22,6 +22,30 @@
       "revId": "d4c76b858efe084e0c7abebaed930285d13dc4d8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2d32ef87_9cee6d03",
+        "filename": "android/android-emu/android/metrics/Percentiles.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-12-06T19:04:52Z",
+      "side": 1,
+      "message": "for double division it\u0027s OK",
+      "parentUuid": "2d32ef87_dce065b5",
+      "range": {
+        "startLine": 185,
+        "startChar": 14,
+        "endLine": 185,
+        "endChar": 36
+      },
+      "revId": "d4c76b858efe084e0c7abebaed930285d13dc4d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
