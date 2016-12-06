@@ -29,6 +29,7 @@ I.3) Checkout the sources with 'repo':
     cd emu-master-dev
     repo init -u https://android.googlesource.com/platform/manifest \
             -b emu-master-dev
+    repo sync
 
 Replace 'emu-master-dev' with another branch name if necessary.
 
@@ -191,20 +192,49 @@ To boot the generated system image:
 IV. Overall source layout:
 --------------------------
 
+IV.1) Common Android-emulation related sources:
+- - - - - - - - - - - - - - - - - - - - - - - -
+
+The following directories contain generic libraries used for Android
+emulation. By 'generic', it is meant that the corresponding sources
+do not depend on a specific emulation engine (e.g. QEMU1 or QEMU2 as
+described below).
+
+Under $TOP/external/qemu/ they are located at:
+
+  android/android-emu/
+    Android-specific code, used to implement a UI and functional layer on
+    top of the QEMU code base. Ideally, anything that shouldn't impact the
+    QEMU internals should be here.
+
+  android/android-emugl/
+    Android-specific GPU emulation library, also called "EmuGL".
+    Read the DESIGN.TXT file in this directory for more information
+    on its design and how it is used at runtime. Also read
+    android/docs/GPU-EMULATION.TXT.
+
+  android/third_party/
+    Contains various third-party libraries build scripts and/or sources that
+    the Android emulation libraries depend on (e.g. zlib, libpng, libSDL).
+
+
 IV.1) "Classic" emulator source layout:
 - - - - - - - - - - - - - - - - - - - -
 
 The 'classic' emulator programs are used to run legacy Android SDK system
 images (from Cupcake to Lollipop) and are based on a very ancient version of
-QEMU that has been drastically patched and altered.
+QEMU1 (1.10) that has been drastically patched and altered.
 
-Its sources lie under $TOP/external/qemu/, with the following
+Its sources lie under $TOP/external/qemu/android/qemu1/, with the following
 important sub-directories:
 
-  android/
-    Android-specific code, used to implement a UI and functional layer on
-    top of the QEMU code base. Ideally, anything that shouldn't impact the
-    QEMU internals should be here.
+  android-qemu1-glue/
+    Glue code between QEMU1 and the Android emulation libraries. Ideally,
+    it is the only part of the code that is supposed to know about both
+    android/android-emu/ and android/qemu1/ at the same time.
+    (In practice some of the android/qemu1/ includes android/android-emu/
+    headers directly, but since this is a mostly-deprecated version of
+    QEMU, we don't really bother about cleaning this up).
 
   include/hw/android/goldfish/
     Headers for the Android-specific goldfish virtual devices.
@@ -217,21 +247,9 @@ important sub-directories:
     Implementation files for the Android-specific virtual ARM and MIPS
     boards. For x86, the content of hw/i386/pc.c was modified instead.
 
-  android/third_party/
-    Contains various third-party libraries the emulator depends on
-    (e.g. zlib, libpng, libSDL).
-
   slirp-android/
     Modified version of the slirp/ directory, which adds various Android-specific
     features and modifications.
-
-  telephony/
-    GSM modem emulation code. Implemented as a QEMU CharDevice (probably
-    needs to be refactored then move to android/).
-
-  proxy/
-    A transparent HTTP rewriting proxy used to implement the -http-proxy option.
-    (need refactor + move to android/)
 
 Generally speaking, some QEMU source files have been rewritten in so signficant
 ways that they gained an -android prefix (e.g. vl-android.c versus vl.c). The
@@ -242,15 +260,17 @@ Note that these sources are considered 'legacy', i.e. there is no effort to
 port Android-specific changes here to upstream QEMU.
 
 
-IV.2) New 'qemu-android' emulator source layout:
+IV.2) New 'qemu2' emulator source layout:
 - - - - - - - - - - - - - - - - - - - - - - - - -
 
 The 'new' emulator programs are used to run more version Android system images
 (e.g. Lollipop on 64-bit ARM CPUs), and are based on a much more recent version
-of upstream QEMU (2.2.0 at this time), which has been slightly modified with
+of upstream QEMU (2.7.0 at this time), which has been slightly modified with
 Android-specific changes.
 
-The sources are under $TOP/external/qemu-android/
+The sources are under $TOP/external/qemu/, and match the upstream QEMU source
+tree layout, to ease future rebases and cherry-picks of upstream fixes. This
+is why all other sources are under $TOP/external/qemu/android/ too.
 
 Note that these sources will be periodically rebased on top of upstream QEMU
 changes / releases. It is our goal to ultimately send patches upstream to
@@ -269,18 +289,8 @@ they do not support the same virtual hardware.
 
 NOTE: 'ranchu' is still a work in progress and isn't completely documented
       yet, for full details, one should refer to the sources under
-      external/qemu-android as well as the android-goldfish-3.10 branch
+      external/qemu as well as the android-goldfish-3.10 branch
       found on https://android.googlesource.com/kernel/goldfish.git
-
-
-IV.3) GPU Emulation sources:
-- - - - - - - - - - - - - - -
-
-GPU emulation relies on a set of sophisticated shared libraries. For all
-details, read docs/GPU-EMULATION.TXT.
-
-The corresponding sources live under android/android-emugl/ and are rebuilt
-by each call to android/rebuild.sh
 
 
 V) Overview of all binaries:
@@ -317,8 +327,8 @@ of them:
                 64-bit host program to emulate 32-bit ARM CPUs.
 
     These are tagged as "classic" because they are generated from the
-    sources under external/qemu, and can be used to emulate old Android
-    system images (e.g. anything before the L release).
+    sources under external/qemu/android/qemu1, and can be used to emulate old
+    Android system images (e.g. anything before the L release).
 
   - CPU-specific "newer" QEMU2 emulation engines, based on a newer version
     of QEMU (2.2.0), located under:
@@ -330,7 +340,7 @@ of them:
     64-bit ARM CPUs).
 
     They are built by android/rebuild.sh from the sources under
-    external/qemu-android/
+    external/qemu/ that are _not_ under external/qemu/android/.
 
     Note that these are slightly-modified QEMU programs, and thus accept
     emulator-specific command-line options, not the original QEMU ones.
@@ -386,33 +396,31 @@ The emulator prebuilt binaries are stored in git repositories under:
 
   $TOP/prebuilts/android-emulator-build/
 
-This section explains how to update them, if necessary. For example, to
-add a new prebuilt library when adding a new emulator feature.
+In particular, this contains an 'archive' sub-directory:
 
-All the binaries are built from various scripts available under
-$STOP/external/qemu/android/scripts/, the most important files here
-are the following:
+  $TOP/prebuilts/android-emulator-build/archive/
+       A directory containing a PACKAGES.TXT file describing all source
+       tarballs needed to rebuild the prebuilts from scratch. The directory
+       also contains copies of said tarballs to avoid re-downloading them
+       from the Internet every time.
 
-   external/android/dependencies/PACKAGES.TXT
-       A list of source tarball and patch archives, with their original
-       download URL, expected SHA1SUM, and other information. Note that
-       the same directory contains patch tarballs for misc sources.
+  $TOP/prebuilts/android-emulator-build/<name>/
+
+    A directory containing the binaries for prebuilt dependency <name>.
+    These binaries are generated from the sources from .../archive/ through
+    scripts provided under $TOP/external/qemu/android/scripts/.
+
+The most important files here are the following:
 
    external/android/scripts/download-sources.sh:
        A script used to parse PACKAGES.TXT and download or check all
-       packages into the following directory:
+       packages into the .../archive one.
 
-          $TOP/prebuilts/android-emulator-build/archive/
-
-       If one wants to add a new prebuilt library, start by updated
+       If one wants to add a new prebuilt library, start by updating
        PACKAGES.TXT, then run download-sources.sh to update the
        .../archive/ content.
 
-       IMPORTANT: download-sources.sh copies the PACKAGES.TXT and associated
-                  patch files into .../archive/, which is the location used
-                  by all the build-<name>.sh scripts described below.
-
-                  In other words: IF YOU UPDATE PACKAGES.TXT, ALWAYS RUN
+       IMPORTANT: In other words: IF YOU UPDATE PACKAGES.TXT, ALWAYS RUN
                   download-sources.sh BEFORE RUNNING ONE OF THE BUILD
                   SCRIPTS BELOW.
 
@@ -447,7 +455,7 @@ are the following:
        This is another special exception because this script does not build
        something that is put on git repositories. The purpose of this script
        is to rebuild the QEMU2 binaries from sources under
-       $TOP/external/qemu-android, using the original QEMU2 configure/build
+       $TOP/external/qemu, using the original QEMU2 configure/build
        system (unlike android/rebuild.sh, which uses the emulator build
        system to compile them). The main difference is that said binaries
        cannot use the AndroidEmu library (see the documentation for it in
@@ -463,13 +471,13 @@ are the following:
        final QEMU2 binaries. These files are later processed by a helper
        script located under:
 
-          external/qemu-android/android-qemu2-glue/ \
+          external/qemu/android-qemu2-glue/ \
                   scripts/gen-qemu2-sources-mk.sh
 
        to generate the correspond Android .mk rules used with
        android/rebuild.sh, i.e.:
 
-          external/qemu-android/android-qemu2-glue/ \
+          external/qemu/android-qemu2-glue/ \
                   build/Makefile.qemu2-sources.mk
 
        The new QEMU2 binaries are copied into:

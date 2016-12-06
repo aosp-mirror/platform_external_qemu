@@ -14,7 +14,7 @@ two code bases:
   a really old version of QEMU 1.x, heavily patched, implementing a very large
   set of features.
 
-- The 'QEMU2' code-base, under $AOSP/external/qemu-android/, which is based
+- The 'QEMU2' code-base, under $AOSP/external/qemu/, which is based
   on a much more recent version of QEMU 2.x, very lightly patched at the moment,
   but which doesn't implement many Android-specific features to replace the
   classic emulator.

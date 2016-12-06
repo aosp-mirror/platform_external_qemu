@@ -9,7 +9,7 @@ These binaries typically come from third-party open-source projects,
 for example:
 
   - libffi, gettext, glib and other dependencies required by the code base
-    under external/qemu-android
+    under external/qemu
 
   - The LLVM and Mesa3D graphics libraries used to implement software-based
     GPU emulation.
@@ -162,7 +162,7 @@ to the correct location under $OUT_DIR/, which defaults to objs/
 
 In particular:
 
-  - qemu-android binaries must be placed under:
+  - qemu2 binaries must be placed under:
 
        $OUT_DIR/qemu/<system>/qemu-system-<qemu-arch>
 

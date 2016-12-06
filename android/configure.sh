@@ -1083,7 +1083,7 @@ if [ -z "$OPTION_QEMU2_SRCDIR" ]; then
     if [ -n "$QEMU2_TOP_DIR" ]; then
         log "QEMU2      : $QEMU2_TOP_DIR  [environment]"
     else
-        QEMU2_TOP_DIR=$PROGDIR/../../qemu-android
+        QEMU2_TOP_DIR=$PROGDIR/..
         log "QEMU2      : $QEMU2_TOP_DIR  [auto-detect]"
     fi
     if [ ! -d "$QEMU2_TOP_DIR" ]; then
