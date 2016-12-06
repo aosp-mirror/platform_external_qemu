@@ -180,7 +180,20 @@ if [ "$MINGW" ]; then
     RUN_32BIT_TESTS=true
 fi
 
-if [ "$HOST_OS" = "Linux" ]; then
+if [ "$MINGW" ]; then
+    # Ensure that libwinpthread-1.dll is in WINEPATH before
+    # trying to run our unit-test programs. Otherwise, those that are not
+    # statically linked will fail.
+    run_test32 () {
+        (export WINEPATH=$OUT_DIR/lib
+        run $TEST_SHELL "$@")
+    }
+
+    run_test64 () {
+        (export WINEPATH=$OUT_DIR/lib64
+        run $TEST_SHELL "$@")
+    }
+elif [ "$HOST_OS" = "Linux" ]; then
     # Ensure that our custom libstdc++.so is in LD_LIBRARY_PATH before
     # trying to run our unit-test programs. Otherwise, they will fail to
     # run on newer Linux distributions.
