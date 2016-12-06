@@ -297,7 +297,13 @@ static void thread_pool_init_one(ThreadPool *pool, AioContext *ctx)
     qemu_mutex_init(&pool->lock);
     qemu_cond_init(&pool->worker_stopped);
     qemu_sem_init(&pool->sem, 0);
+#if defined(_WIN32) && !defined(_WIN64)
+    /* Limit the number of worker thread on 32-bit Windows: usually we only
+     * have 2 GB of address space, and each thread costs us over 1 MB of it. */
+    pool->max_threads = 24;
+#else
     pool->max_threads = 64;
+#endif
     pool->new_thread_bh = aio_bh_new(ctx, spawn_thread_bh_fn, pool);
 
     QLIST_INIT(&pool->head);
