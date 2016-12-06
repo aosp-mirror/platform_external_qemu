@@ -56,6 +56,11 @@ public:
         if (mBoundSocket6) {
             mBoundSocket6->wantRead();
         }
+        mListening = true;
+    };
+
+    bool isListening() const {
+        return mListening;
     };
 
     virtual void stopListening() override {
@@ -65,6 +70,7 @@ public:
         if (mBoundSocket6) {
             mBoundSocket6->dontWantRead();
         }
+        mListening = false;
     };
 
     virtual LoopbackMode getListenMode() const override {
@@ -77,6 +83,13 @@ private:
     // a read event indicates a new client connection.
     static void onAccept(void* opaque, int fd, unsigned events) {
         auto server = reinterpret_cast<BaseSocketServer*>(opaque);
+        if (!server->isListening()) {
+            // If we listen on IPv4 and IPv6 both, then we could get onAccept from one socket
+            // even we've already called stopListening on another socket if we get connections
+            // from both sockets around same time. In such case, just ignore onAccept.
+            CHECK(server->getListenMode() == kIPv4AndIPv6) << "Hit onAccept after stopListening";
+            return;
+        }
         if (events & FdWatch::kEventRead) {
             int clientFd = socketAcceptAny(fd);
             if (clientFd < 0) {
@@ -103,6 +116,7 @@ private:
     ScopedSocketWatch mBoundSocket6;
     Looper* mLooper = nullptr;
     int mPort = 0;
+    bool mListening = false;
     ConnectCallback mConnectCallback;
 };
 
