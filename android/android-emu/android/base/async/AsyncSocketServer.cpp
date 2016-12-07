@@ -59,7 +59,7 @@ public:
         mListening = true;
     };
 
-    bool isListening() {
+    bool isListening() const {
         return mListening;
     };
 
