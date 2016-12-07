@@ -1,44 +1,55 @@
 // Auto-generated with: android/scripts/gen-entries.py --mode=translator_passthrough android/android-emugl/host/libs/libOpenGLESDispatch/gles3_only.entries --output=android/android-emugl/host/libs/Translator/GLES_V2/GLESv30Imp.cpp
 // This file is best left unedited.
-// Try to make changes through gen_translator_passthrough in gen-entries.py,
+// Try to make changes through gen_translator in gen-entries.py,
 // and/or parcel out custom functionality in separate code.
 extern "C" GL_APICALL GLconstubyteptr GL_APIENTRY glGetStringi(GLenum name, GLint index) {
     GET_CTX_V2_RET(0);
-    return ctx->dispatcher().glGetStringi(name, index);
+    GLconstubyteptr glGetStringiRET = ctx->dispatcher().glGetStringi(name, index);
+    return glGetStringiRET;
 }
 
 GL_APICALL void GL_APIENTRY glGenVertexArrays(GLsizei n, GLuint* arrays) {
     GET_CTX_V2();
     SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
     ctx->dispatcher().glGenVertexArrays(n, arrays);
+
+    ctx->addVertexArrayObjects(n, arrays);
+
 }
 
 GL_APICALL void GL_APIENTRY glBindVertexArray(GLuint array) {
     GET_CTX_V2();
+
+    ctx->setVertexArrayObject(array);
     ctx->dispatcher().glBindVertexArray(array);
 }
 
 GL_APICALL void GL_APIENTRY glDeleteVertexArrays(GLsizei n, const GLuint * arrays) {
     GET_CTX_V2();
     SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
+
+    ctx->removeVertexArrayObjects(n, arrays);
     ctx->dispatcher().glDeleteVertexArrays(n, arrays);
 }
 
 GL_APICALL GLboolean GL_APIENTRY glIsVertexArray(GLuint array) {
     GET_CTX_V2_RET(0);
-    return ctx->dispatcher().glIsVertexArray(array);
+    GLboolean glIsVertexArrayRET = ctx->dispatcher().glIsVertexArray(array);
+    return glIsVertexArrayRET;
 }
 
 GL_APICALL void * GL_APIENTRY glMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access) {
     GET_CTX_V2_RET(0);
     RET_AND_SET_ERROR_IF(!GLESv2Validate::bufferTarget(target, ctx->getMajorVersion(), ctx->getMinorVersion()),GL_INVALID_ENUM,0);
-    return ctx->dispatcher().glMapBufferRange(target, offset, length, access);
+    void * glMapBufferRangeRET = ctx->dispatcher().glMapBufferRange(target, offset, length, access);
+    return glMapBufferRangeRET;
 }
 
 GL_APICALL GLboolean GL_APIENTRY glUnmapBuffer(GLenum target) {
     GET_CTX_V2_RET(0);
     RET_AND_SET_ERROR_IF(!GLESv2Validate::bufferTarget(target, ctx->getMajorVersion(), ctx->getMinorVersion()),GL_INVALID_ENUM,0);
-    return ctx->dispatcher().glUnmapBuffer(target);
+    GLboolean glUnmapBufferRET = ctx->dispatcher().glUnmapBuffer(target);
+    return glUnmapBufferRET;
 }
 
 GL_APICALL void GL_APIENTRY glFlushMappedBufferRange(GLenum target, GLintptr offset, GLsizeiptr length) {
@@ -108,7 +119,8 @@ GL_APICALL GLuint GL_APIENTRY glGetUniformBlockIndex(GLuint program, const GLcha
     GET_CTX_V2_RET(0);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
-        return ctx->dispatcher().glGetUniformBlockIndex(globalProgramName, uniformBlockName);
+        GLuint glGetUniformBlockIndexRET = ctx->dispatcher().glGetUniformBlockIndex(globalProgramName, uniformBlockName);
+    return glGetUniformBlockIndexRET;
     } else return 0;
 }
 
@@ -279,12 +291,14 @@ GL_APICALL void GL_APIENTRY glDrawRangeElements(GLenum mode, GLuint start, GLuin
 
 GL_APICALL GLsync GL_APIENTRY glFenceSync(GLenum condition, GLbitfield flags) {
     GET_CTX_V2_RET(0);
-    return ctx->dispatcher().glFenceSync(condition, flags);
+    GLsync glFenceSyncRET = ctx->dispatcher().glFenceSync(condition, flags);
+    return glFenceSyncRET;
 }
 
 GL_APICALL GLenum GL_APIENTRY glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout) {
     GET_CTX_V2_RET(GL_WAIT_FAILED);
-    return ctx->dispatcher().glClientWaitSync(wait_on, flags, timeout);
+    GLenum glClientWaitSyncRET = ctx->dispatcher().glClientWaitSync(wait_on, flags, timeout);
+    return glClientWaitSyncRET;
 }
 
 GL_APICALL void GL_APIENTRY glWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout) {
@@ -299,7 +313,8 @@ GL_APICALL void GL_APIENTRY glDeleteSync(GLsync to_delete) {
 
 GL_APICALL GLboolean GL_APIENTRY glIsSync(GLsync sync) {
     GET_CTX_V2_RET(0);
-    return ctx->dispatcher().glIsSync(sync);
+    GLboolean glIsSyncRET = ctx->dispatcher().glIsSync(sync);
+    return glIsSyncRET;
 }
 
 GL_APICALL void GL_APIENTRY glGetSynciv(GLsync sync, GLenum pname, GLsizei bufSize, GLsizei * length, GLint * values) {
@@ -389,7 +404,8 @@ GL_APICALL void GL_APIENTRY glResumeTransformFeedback() {
 
 GL_APICALL GLboolean GL_APIENTRY glIsTransformFeedback(GLuint id) {
     GET_CTX_V2_RET(0);
-    return ctx->dispatcher().glIsTransformFeedback(id);
+    GLboolean glIsTransformFeedbackRET = ctx->dispatcher().glIsTransformFeedback(id);
+    return glIsTransformFeedbackRET;
 }
 
 extern "C" GL_APICALL void GL_APIENTRY glTransformFeedbackVaryings(GLuint program, GLsizei count, const char ** varyings, GLenum bufferMode) {
@@ -457,7 +473,8 @@ GL_APICALL void GL_APIENTRY glGetSamplerParameteriv(GLuint sampler, GLenum pname
 
 GL_APICALL GLboolean GL_APIENTRY glIsSampler(GLuint id) {
     GET_CTX_V2_RET(0);
-    return ctx->dispatcher().glIsSampler(id);
+    GLboolean glIsSamplerRET = ctx->dispatcher().glIsSampler(id);
+    return glIsSamplerRET;
 }
 
 GL_APICALL void GL_APIENTRY glGenQueries(GLsizei n, GLuint * ids) {
@@ -494,7 +511,8 @@ GL_APICALL void GL_APIENTRY glGetQueryObjectuiv(GLuint id, GLenum pname, GLuint 
 
 GL_APICALL GLboolean GL_APIENTRY glIsQuery(GLuint id) {
     GET_CTX_V2_RET(0);
-    return ctx->dispatcher().glIsQuery(id);
+    GLboolean glIsQueryRET = ctx->dispatcher().glIsQuery(id);
+    return glIsQueryRET;
 }
 
 GL_APICALL void GL_APIENTRY glProgramParameteri(GLuint program, GLenum pname, GLint value) {
@@ -525,7 +543,8 @@ GL_APICALL GLint GL_APIENTRY glGetFragDataLocation(GLuint program, const char * 
     GET_CTX_V2_RET(0);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
-        return ctx->dispatcher().glGetFragDataLocation(globalProgramName, name);
+        GLint glGetFragDataLocationRET = ctx->dispatcher().glGetFragDataLocation(globalProgramName, name);
+    return glGetFragDataLocationRET;
     } else return 0;
 }
 
