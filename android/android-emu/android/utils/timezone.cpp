@@ -1246,7 +1246,10 @@ int TimeZone::setAndroidTimeZoneUsingZdump()
     RunOptions runFlags = System::RunOptions::WaitForCompletion |
                            System::RunOptions::TerminateOnTimeout |
                            System::RunOptions::DumpOutputToFile;
-    System::Duration timeout = 1000;
+    // TODO(zyy@): HACK, increased timeout 1 -> 5 sec to make the test pass
+    //  on a slow buildbot. Fix this code to not run zdump but parse timezone
+    //  info in place.
+    System::Duration timeout = 5000;
     System::ProcessExitCode exitCode;
     const std::string outputFile = PathUtils::join(
             System::get()->getTempDir(),
