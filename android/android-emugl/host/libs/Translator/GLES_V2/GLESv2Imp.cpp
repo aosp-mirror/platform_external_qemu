@@ -383,7 +383,7 @@ GL_APICALL void  GL_APIENTRY glBufferData(GLenum target, GLsizeiptr size, const 
                      ctx->getMinorVersion()),
                  GL_INVALID_ENUM);
     SET_ERROR_IF(!ctx->isBindedBuffer(target),GL_INVALID_OPERATION);
-    SET_ERROR_IF(!GLESv2Validate::bufferUsage(usage),GL_INVALID_ENUM);
+    SET_ERROR_IF(!GLESv2Validate::bufferUsage(usage, ctx->getMajorVersion()),GL_INVALID_ENUM);
     ctx->setBufferData(target,size,data,usage);
     ctx->dispatcher().glBufferData(target, size, data, usage);
 }
@@ -822,8 +822,6 @@ GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum t
         }
 
         ctx->dispatcher().glDrawElements(mode,count,type,indices);
-
-
 
         ctx->validateAtt0PostDraw();
 
@@ -2538,6 +2536,32 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
                                                    prevFB);
         }
     }
+}
+
+// Extension: Vertex array objects
+GL_APICALL void GL_APIENTRY glGenVertexArraysOES(GLsizei n, GLuint* arrays) {
+    GET_CTX_V2();
+    SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
+    ctx->dispatcher().glGenVertexArrays(n, arrays);
+    ctx->addVertexArrayObjects(n, arrays);
+}
+
+GL_APICALL void GL_APIENTRY glBindVertexArrayOES(GLuint array) {
+    GET_CTX_V2();
+    ctx->setVertexArrayObject(array);
+    ctx->dispatcher().glBindVertexArray(array);
+}
+
+GL_APICALL void GL_APIENTRY glDeleteVertexArraysOES(GLsizei n, const GLuint * arrays) {
+    GET_CTX_V2();
+    SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
+    ctx->removeVertexArrayObjects(n, arrays);
+    ctx->dispatcher().glDeleteVertexArrays(n, arrays);
+}
+
+GL_APICALL GLboolean GL_APIENTRY glIsVertexArrayOES(GLuint array) {
+    GET_CTX_V2_RET(0);
+    return ctx->dispatcher().glIsVertexArray(array);
 }
 
 #include "GLESv30Imp.cpp"

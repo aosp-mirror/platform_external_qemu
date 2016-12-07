@@ -23,15 +23,16 @@ void GLESv2Context::init(GlLibrary* glLib) {
     if(!m_initialized) {
         s_glDispatch.dispatchFuncs(GLES_2_0, glLib);
         GLEScontext::init(glLib);
-        for(int i=0; i < s_glSupport.maxVertexAttribs;i++){
-            m_map[i] = new GLESpointer();
-        }
+        addVertexArrayObject(0);
+        setVertexArrayObject(0);
         setAttribute0value(0.0, 0.0, 0.0, 1.0);
 
         buildStrings((const char*)dispatcher().glGetString(GL_VENDOR),
                      (const char*)dispatcher().glGetString(GL_RENDERER),
                      (const char*)dispatcher().glGetString(GL_VERSION),
                      "OpenGL ES 2.0");
+
+        
     }
     m_initialized = true;
 }
@@ -104,7 +105,7 @@ void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
     ArraysMap::iterator it;
 
     //going over all clients arrays Pointers
-    for ( it=m_map.begin() ; it != m_map.end(); ++it) {
+    for ( it=m_currVaoState.begin() ; it != m_currVaoState.end(); ++it) {
         GLenum array_id   = (*it).first;
         GLESpointer* p = (*it).second;
         if(!p->isEnable()) continue;
