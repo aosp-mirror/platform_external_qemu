@@ -129,6 +129,7 @@ public:
     bool isBuffer(GLuint buffer);
     bool isBindedBuffer(GLenum target);
     GLvoid* getBindedBuffer(GLenum target);
+    GLuint getBuffer(GLenum target);
     void getBufferSize(GLenum target,GLint* param);
     void getBufferUsage(GLenum target,GLint* param);
     bool setBufferData(GLenum target,GLsizeiptr size,const GLvoid* data,GLenum usage);
@@ -187,7 +188,6 @@ protected:
 private:
 
     virtual void setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride, GLboolean normalized, int pointsIndex = -1) = 0 ;
-    GLuint getBuffer(GLenum target);
 
     ShareGroupPtr         m_shareGroup;
     GLenum                m_glError = GL_NO_ERROR;
