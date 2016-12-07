@@ -240,12 +240,19 @@ GL_APICALL void  GL_APIENTRY glBindBuffer(GLenum target, GLuint buffer){
         ctx->shareGroup()->setObjectData(NamedObjectType::VERTEXBUFFER, buffer,
                                          ObjectDataPtr(new GLESbuffer()));
     }
+
     ctx->bindBuffer(target,buffer);
     if (buffer) {
         GLESbuffer* vbo =
                 (GLESbuffer*)ctx->shareGroup()
                         ->getObjectData(NamedObjectType::VERTEXBUFFER, buffer);
         vbo->setBinded();
+        const GLuint globalBufferName = ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer);
+        ctx->dispatcher().glBindBuffer(target, globalBufferName);
+    }
+
+    if (!buffer) {
+        ctx->dispatcher().glBindBuffer(target, buffer);
     }
 }
 
@@ -364,6 +371,7 @@ GL_APICALL void  GL_APIENTRY glBufferData(GLenum target, GLsizeiptr size, const 
     SET_ERROR_IF(!GLESv2Validate::bufferUsage(usage),GL_INVALID_ENUM);
     SET_ERROR_IF(!ctx->isBindedBuffer(target),GL_INVALID_OPERATION);
     ctx->setBufferData(target,size,data,usage);
+    ctx->dispatcher().glBufferData(target, size, data, usage);
 }
 
 GL_APICALL void  GL_APIENTRY glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data){
@@ -371,6 +379,7 @@ GL_APICALL void  GL_APIENTRY glBufferSubData(GLenum target, GLintptr offset, GLs
     SET_ERROR_IF(!ctx->isBindedBuffer(target),GL_INVALID_OPERATION);
     SET_ERROR_IF(!GLESv2Validate::bufferTarget(target),GL_INVALID_ENUM);
     SET_ERROR_IF(!ctx->setBufferSubData(target,offset,size,data),GL_INVALID_VALUE);
+    ctx->dispatcher().glBufferSubData(target, offset, size, data);
 }
 
 
@@ -717,6 +726,11 @@ GL_APICALL void  GL_APIENTRY glDrawArrays(GLenum mode, GLint first, GLsizei coun
 
     ctx->drawValidate();
 
+    if (ctx->isBindedBuffer(GL_ARRAY_BUFFER)) {
+        ctx->dispatcher().glDrawArrays(mode,first,count);
+        return;
+    }
+
     GLESConversionArrays tmpArrs;
     ctx->setupArraysPointers(tmpArrs,first,count,0,NULL,true);
 
@@ -749,7 +763,10 @@ GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum t
     ctx->drawValidate();
 
     const GLvoid* indices = elementsIndices;
-    if(ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER)) { // if vbo is binded take the indices from the vbo
+    if(ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER)) { // if vbo is binded use the offset path
+        ctx->dispatcher().glDrawElements(mode,count,type,indices);
+        return;
+
         const unsigned char* buf = static_cast<unsigned char *>(ctx->getBindedBuffer(GL_ELEMENT_ARRAY_BUFFER));
         indices = buf + SafeUIntFromPointer(elementsIndices);
     }
@@ -2336,7 +2353,11 @@ GL_APICALL void  GL_APIENTRY glVertexAttribPointer(GLuint indx, GLint size, GLen
     GET_CTX();
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,indx)),GL_INVALID_VALUE);
     if (type == GL_HALF_FLOAT_OES) type = GL_HALF_FLOAT;
+
     ctx->setPointer(indx,size,type,stride,ptr,normalized);
+    if (ctx->isBindedBuffer(GL_ARRAY_BUFFER)) {
+        ctx->dispatcher().glVertexAttribPointer(indx, size, type, normalized, stride, ptr);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glViewport(GLint x, GLint y, GLsizei width, GLsizei height){
