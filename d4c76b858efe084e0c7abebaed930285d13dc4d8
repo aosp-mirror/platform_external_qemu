@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "2d32ef87_87b849c9",
+        "filename": "android/android-emu/android/metrics/Percentiles.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-12-07T19:30:31Z",
+      "side": 1,
+      "message": "it 404s for me as well, but I\u0027ve taken it from the corresponding Java code. I don\u0027t know if that\u0027s the same algorithm",
+      "parentUuid": "2d32ef87_9ccd0d76",
+      "range": {
+        "startLine": 34,
+        "startChar": 6,
+        "endLine": 34,
+        "endChar": 132
+      },
+      "revId": "d4c76b858efe084e0c7abebaed930285d13dc4d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2d32ef87_e7281d99",
         "filename": "android/android-emu/android/metrics/Percentiles.h",
         "patchSetId": 1
@@ -95,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "2d32ef87_a7b545d1",
+        "filename": "android/android-emu/android/metrics/Percentiles.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-12-07T19:30:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2d32ef87_e7281d99",
+      "range": {
+        "startLine": 49,
+        "startChar": 38,
+        "endLine": 49,
+        "endChar": 45
+      },
+      "revId": "d4c76b858efe084e0c7abebaed930285d13dc4d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2d32ef87_271ff578",
         "filename": "android/android-emu/android/metrics/Percentiles.h",
         "patchSetId": 1
@@ -106,6 +154,30 @@
       "writtenOn": "2016-12-07T15:39:01Z",
       "side": 1,
       "message": "empty",
+      "range": {
+        "startLine": 62,
+        "startChar": 60,
+        "endLine": 62,
+        "endChar": 65
+      },
+      "revId": "d4c76b858efe084e0c7abebaed930285d13dc4d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2d32ef87_47c23143",
+        "filename": "android/android-emu/android/metrics/Percentiles.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-12-07T19:30:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2d32ef87_271ff578",
       "range": {
         "startLine": 62,
         "startChar": 60,
