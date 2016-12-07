@@ -16,6 +16,24 @@
       "revId": "acf79c377f7c9f0a76398a4624587381b92a83e4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2d32ef87_0792f636",
+        "filename": "android/scripts/build-qt.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-12-07T19:03:08Z",
+      "side": 1,
+      "message": "For some reason, they only have snapshot for 5.7.0 in the archive: http://download.qt.io/archive/qt/5.7/\n\nIt\u0027s ok though, 5.7.1 is just a minor release and looking at the release notes, doesn\u0027t seem like it fixes any bugs that would affect us.",
+      "parentUuid": "2d32ef87_276db5e0",
+      "revId": "acf79c377f7c9f0a76398a4624587381b92a83e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
