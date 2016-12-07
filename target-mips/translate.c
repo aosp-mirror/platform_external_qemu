@@ -1778,7 +1778,8 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                     {
                         // EntryLo0
                         target_ulong rxi = CPU.gpr_reg[rt] & (CPU.CP0_PageGrain & (3u << CP0PG_XIE));
-                        CPU.CP0_EntryLo0 = (CPU.gpr_reg[rt] & 0x3FFFFFFF) | (rxi << (CP0EnLo_XI));
+                        CPU.CP0_EntryLo0 = (CPU.gpr_reg[rt] & ((env->PAMask >> 6) & 0x3FFFFFFF)) |
+                                           (rxi << (CP0EnLo_XI - 30));
                         DEBUG_DISSAS("mtc0 EntryLo0");
                         break;
                     }
@@ -1793,7 +1794,8 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                     {
                         // EntryLo1
                         target_ulong rxi = CPU.gpr_reg[rt] & (CPU.CP0_PageGrain & (3u << CP0PG_XIE));
-                        CPU.CP0_EntryLo1 = (CPU.gpr_reg[rt] & 0x3FFFFFFF) | (rxi << (CP0EnLo_XI));
+                        CPU.CP0_EntryLo1 = (CPU.gpr_reg[rt] & ((env->PAMask >> 6) & 0x3FFFFFFF)) |
+                                           (rxi << (CP0EnLo_XI - 30));
                         DEBUG_DISSAS("mtc0 EntryLo1");
                         break;
                     }
@@ -1916,7 +1918,7 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                     {
                         // EntryLo0
                         target_ulong rxi = CPU.gpr_reg[rt] & ((CPU.CP0_PageGrain & (3ull << CP0PG_XIE)) << 32);
-                        CPU.CP0_EntryLo0 = (CPU.gpr_reg[rt] & 0x3FFFFFFF) | rxi;
+                        CPU.CP0_EntryLo0 = (CPU.gpr_reg[rt] & (env->PAMask >> 6)) | rxi;
                         DEBUG_DISSAS("dmtc0 EntryLo0");
                         break;
 
@@ -1932,7 +1934,7 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                     {
                         // EntryLo1
                         target_ulong rxi = CPU.gpr_reg[rt] & ((CPU.CP0_PageGrain & (3ull << CP0PG_XIE)) << 32);
-                        CPU.CP0_EntryLo1 = (CPU.gpr_reg[rt] & 0x3FFFFFFF) | rxi;
+                        CPU.CP0_EntryLo1 = (CPU.gpr_reg[rt] & (env->PAMask >> 6)) | rxi;
                         DEBUG_DISSAS("dmtc0 EntryLo1");
                         break;
                     }
