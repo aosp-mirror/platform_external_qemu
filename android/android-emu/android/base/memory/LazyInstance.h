@@ -14,17 +14,24 @@
 
 #pragma once
 
-#ifdef _WIN32
-#  define WIN32_LEAN_AND_MEAN 1
-#  include <windows.h>
-#endif
-
+#include <atomic>
 #include <new>
 #include <type_traits>
 
 namespace android {
 namespace base {
 namespace internal {
+
+// Older GCC stdlib uses deprecated naming scheme has_xxx instead of is_xxx
+#if defined(__GNUC__) && !defined(__clang__)
+template <class T>
+using is_trivially_default_constructible =
+        std::has_trivial_default_constructor<T>;
+#else
+template <class T>
+using is_trivially_default_constructible =
+        std::is_trivially_default_constructible<T>;
+#endif
 
 // A LazyInstance is a helper template that can be used to perform
 // thread-safe lazy initialization of static C++ objects without forcing
@@ -87,28 +94,23 @@ namespace internal {
 // initialization and access without incurring the full cost of a mutex
 // lock/unlock.
 struct LazyInstanceState {
-    enum {
-        STATE_INIT = 0,
-        STATE_CONSTRUCTING = 1,
-        STATE_DONE = 2,
+    enum class State : char {
+        Init = 0,
+        Constructing = 1,
+        Done = 2,
     };
 
-    bool inInitState();
+    bool inInitState() const;
     bool needConstruction();
     void doneConstructing();
 
-#ifdef _MSC_VER
-    // MSVC doesn't play well with volatile members and makes the whole class
-    // non-POD in that case.
-    typedef LONG AtomicType;
-#elif defined(_WIN32)
-    typedef LONG volatile AtomicType;
-#else
-    typedef int volatile AtomicType;
-#endif
-
-    AtomicType mState;
+    std::atomic<State> mState;
 };
+
+static_assert(std::is_standard_layout<LazyInstanceState>::value,
+              "LazyInstanceState is not a standard layout type");
+static_assert(is_trivially_default_constructible<LazyInstanceState>::value,
+              "LazyInstanceState can't be trivially default constructed");
 
 }  // namespace internal
 
@@ -138,10 +140,8 @@ private:
     T* ptrInternal() const;
 
     using StorageT =
-            typename std::aligned_storage<
-                    sizeof(T),
-                    std::alignment_of<T>::value
-            >::type;
+            typename std::aligned_storage<sizeof(T),
+                                          std::alignment_of<T>::value>::type;
 
     alignas(double) mutable internal::LazyInstanceState mState;
     mutable StorageT mStorage;
@@ -149,19 +149,18 @@ private:
 
 // Initialization value, must resolve to all-0 to ensure the object
 // instance is actually placed in the .bss
-#define LAZY_INSTANCE_INIT  { }
+#define LAZY_INSTANCE_INIT \
+    {}
 
 template <class T>
 T* LazyInstance<T>::ptrInternal() const {
-    // make sure that LazyInstance<> instantiation remains POD
-    // NB: this can't go in a class scope - one needs a way of specifying
-    // current instantiation type without explicitly saying LazyInstance<T>
-    // which is a recursive instantiation and gives compiler error
-    // decltype(*this) is a way of doing it, but it only works in a function
-    static_assert(std::is_pod<
-                          typename std::decay<decltype(*this)>::type
-                  >::value,
-                  "LazyInstance<T> is not a POD type");
+    // Make sure that LazyInstance<> instantiation remains static.
+    // NB: this can't go in a class scope as class is still incomplete there.
+    static_assert(std::is_standard_layout<LazyInstance>::value,
+                  "LazyInstance<T> is not a standard layout type");
+    static_assert(
+            internal::is_trivially_default_constructible<LazyInstance>::value,
+            "LazyInstance<T> can't be trivially default constructed");
 
     if (mState.needConstruction()) {
         new (&mStorage) T();
