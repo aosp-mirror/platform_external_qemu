@@ -19,6 +19,10 @@
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+#include <GLES3/gl3.h>
+#include <GLES3/gl31.h>
+
+#include <string.h>
 
 static inline void* SafePointerFromUInt(GLuint value) {
   return (void*)(uintptr_t)value;
@@ -65,6 +69,9 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     glDrawElementsData = s_glDrawElementsData;
     glShaderString = s_glShaderString;
     glFinishRoundTrip = s_glFinishRoundTrip;
+    glMapBufferRangeAEMU = s_glMapBufferRangeAEMU;
+    glUnmapBufferAEMU = s_glUnmapBufferAEMU;
+    glFlushMappedBufferRangeAEMU = s_glFlushMappedBufferRangeAEMU;
     return 0;
 
 }
@@ -126,4 +133,43 @@ void GLESv2Decoder::s_glShaderString(void *self, GLuint shader, const GLchar* st
 {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glShaderSource(shader, 1, &string, NULL);
+}
+
+void GLESv2Decoder::s_glMapBufferRangeAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* mapped)
+{
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    if ((access & GL_MAP_READ_BIT) ||
+        ((access & GL_MAP_WRITE_BIT) &&
+         (!(access & GL_MAP_INVALIDATE_RANGE_BIT) &&
+          !(access & GL_MAP_INVALIDATE_BUFFER_BIT)))) {
+        void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
+        memcpy(mapped, gpu_ptr, length);
+        ctx->glUnmapBuffer(target);
+    } else {
+        // if writing while not wanting to preserve previous contents,
+        // let |mapped| stay as garbage.
+    }
+}
+
+void GLESv2Decoder::s_glUnmapBufferAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer, GLboolean* out_res)
+{
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    if (access & GL_MAP_WRITE_BIT) {
+        if (!guest_buffer) fprintf(stderr, "%s: error: wanted to write to a mapped buffer with NULL!\n", __FUNCTION__);
+        void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
+        if (!gpu_ptr) fprintf(stderr, "%s: could not get host gpu pointer!\n", __FUNCTION__);
+        memcpy(gpu_ptr, guest_buffer, length);
+        ctx->glUnmapBuffer(target);
+    }
+}
+
+void GLESv2Decoder::s_glFlushMappedBufferRangeAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    if (!guest_buffer) fprintf(stderr, "%s: error: wanted to write to a mapped buffer with NULL!\n", __FUNCTION__);
+    void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
+    memcpy(gpu_ptr, guest_buffer, length);
+    if (!gpu_ptr) fprintf(stderr, "%s: could not get host gpu pointer!\n", __FUNCTION__);
+    // |offset| was the absolute offset into the mapping, so just flush offset 0.
+    ctx->glFlushMappedBufferRange(target, 0, length);
+    ctx->glUnmapBuffer(target);
 }
