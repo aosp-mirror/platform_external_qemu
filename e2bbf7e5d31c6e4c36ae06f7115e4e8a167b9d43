@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2d32ef87_fd5bd8a2",
+        "filename": "android/android-emu/android/base/async/AsyncSocketServer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-12-07T16:34:27Z",
+      "side": 1,
+      "message": "nit: const",
+      "range": {
+        "startLine": 62,
+        "startChar": 22,
+        "endLine": 62,
+        "endChar": 23
+      },
+      "revId": "e2bbf7e5d31c6e4c36ae06f7115e4e8a167b9d43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
