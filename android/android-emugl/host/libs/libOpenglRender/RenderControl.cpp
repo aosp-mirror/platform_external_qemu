@@ -216,7 +216,7 @@ static EGLint rcQueryEGLString(EGLenum name, void* buffer, EGLint bufferSize)
     return len;
 }
 
-android::base::StringView maxGLESVersionToString(GLESDispatchMaxVersion version) {
+android::base::StringView maxVersionToFeatureString(GLESDispatchMaxVersion version) {
     switch (version) {
         case GLES_DISPATCH_MAX_VERSION_2:
             return kGLESDynamicVersion_2;
@@ -280,8 +280,15 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     }
 
     if (glesDynamicVersionEnabled && name == GL_EXTENSIONS) {
-        glStr += maxGLESVersionToString(calcMaxVersionFromDispatch());
+        GLESDispatchMaxVersion maxVersion = calcMaxVersionFromDispatch();
+        glStr += maxVersionToFeatureString(maxVersion);
         glStr += " ";
+
+        // If we have a GLES3 implementation, add the corresponding
+        // GLESv2 extensions as well.
+        if (maxVersion > GLES_DISPATCH_MAX_VERSION_2) {
+            glStr += "GL_OES_vertex_array_object ";
+        }
     }
 
     int nextBufferSize = glStr.size() + 1;
