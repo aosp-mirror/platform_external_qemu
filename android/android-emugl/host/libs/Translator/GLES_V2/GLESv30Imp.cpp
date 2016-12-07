@@ -1,6 +1,6 @@
 // Auto-generated with: android/scripts/gen-entries.py --mode=translator_passthrough android/android-emugl/host/libs/libOpenGLESDispatch/gles3_only.entries --output=android/android-emugl/host/libs/Translator/GLES_V2/GLESv30Imp.cpp
 // This file is best left unedited.
-// Try to make changes through gen_translator_passthrough in gen-entries.py,
+// Try to make changes through gen_translator in gen-entries.py,
 // and/or parcel out custom functionality in separate code.
 extern "C" GL_APICALL GLconstubyteptr GL_APIENTRY glGetStringi(GLenum name, GLint index) {
     GET_CTX_V2_RET(0);
@@ -10,17 +10,23 @@ extern "C" GL_APICALL GLconstubyteptr GL_APIENTRY glGetStringi(GLenum name, GLin
 GL_APICALL void GL_APIENTRY glGenVertexArrays(GLsizei n, GLuint* arrays) {
     GET_CTX_V2();
     SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
+
+    ctx->addVertexArrayObjects(n, arrays);
     ctx->dispatcher().glGenVertexArrays(n, arrays);
 }
 
 GL_APICALL void GL_APIENTRY glBindVertexArray(GLuint array) {
     GET_CTX_V2();
+
+    ctx->setVertexArrayObject(array);
     ctx->dispatcher().glBindVertexArray(array);
 }
 
 GL_APICALL void GL_APIENTRY glDeleteVertexArrays(GLsizei n, const GLuint * arrays) {
     GET_CTX_V2();
     SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
+
+    ctx->removeVertexArrayObjects(n, arrays);
     ctx->dispatcher().glDeleteVertexArrays(n, arrays);
 }
 

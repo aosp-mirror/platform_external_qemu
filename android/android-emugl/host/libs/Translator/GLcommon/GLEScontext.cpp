@@ -204,6 +204,48 @@ static GLuint getIndex(GLenum indices_type, const GLvoid* indices, unsigned int 
     }
 }
 
+void GLEScontext::addVertexArrayObjects(GLsizei n, GLuint* arrays) {
+    for (int i = 0; i < n; i++) {
+        addVertexArrayObject(arrays[i]);
+    }
+}
+
+void GLEScontext::removeVertexArrayObjects(GLsizei n, const GLuint* arrays) {
+    for (int i = 0; i < n; i++) {
+        removeVertexArrayObject(arrays[i]);
+    }
+}
+
+void GLEScontext::addVertexArrayObject(GLuint array) {
+    ArraysMap* map = new ArraysMap();
+    for (int i = 0; i < s_glSupport.maxVertexAttribs; i++) {
+        map->insert(
+                ArraysMap::value_type(
+                    i,
+                    new GLESpointer()));
+    }
+    m_vaoStateMap[array] = VAOState(0, 0, map);
+}
+
+void GLEScontext::removeVertexArrayObject(GLuint array) {
+    if (array == m_currVaoState.vaoId()) {
+        setVertexArrayObject(0);
+    }
+    ArraysMap* map = m_vaoStateMap[array].arraysMap;
+
+    for (int i = 0; i < s_glSupport.maxVertexAttribs; i++) {
+        if ((*map)[i]) delete (*map)[i];
+        (*map)[i] = NULL;
+    }
+    delete map;
+
+    m_vaoStateMap.erase(array);
+}
+
+void GLEScontext::setVertexArrayObject(GLuint array) {
+    m_currVaoState = VAOStateRef(m_vaoStateMap.find(array));
+}
+
 void GLEScontext::init(GlLibrary* glLib) {
 
     if (!s_glExtensions) {
@@ -245,42 +287,43 @@ void GLEScontext::setActiveTexture(GLenum tex) {
 }
 
 GLEScontext::~GLEScontext() {
-    for(ArraysMap::iterator it = m_map.begin(); it != m_map.end(); ++it) {
-        GLESpointer* p = (*it).second;
-        if(p) {
-            delete p;
-        }
+    std::vector<GLuint> vaos_to_remove;
+    for (VAOStateMap::iterator it = m_vaoStateMap.begin(); it != m_vaoStateMap.end(); ++it) {
+        vaos_to_remove.push_back(it->first);
+    }
+    for (auto vao : vaos_to_remove) {
+        removeVertexArrayObject(vao);
     }
     delete[] m_texState;
     m_texState = NULL;
 }
 
 const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data,bool normalize) {
-    GLuint bufferName = m_arrayBuffer;
+    GLuint bufferName = m_currVaoState.vboId();
     if(bufferName) {
         unsigned int offset = SafeUIntFromPointer(data);
         GLESbuffer* vbo = static_cast<GLESbuffer*>(
                 m_shareGroup
                         ->getObjectData(NamedObjectType::VERTEXBUFFER,
                                         bufferName));
-        m_map[arrType]->setBuffer(size,type,stride,vbo,bufferName,offset,normalize);
+        m_currVaoState[arrType]->setBuffer(size,type,stride,vbo,bufferName,offset,normalize);
         return  static_cast<const unsigned char*>(vbo->getData()) +  offset;
     }
-    m_map[arrType]->setArray(size,type,stride,data,normalize);
+    m_currVaoState[arrType]->setArray(size,type,stride,data,normalize);
     return data;
 }
 
 void GLEScontext::enableArr(GLenum arr,bool enable) {
-    m_map[arr]->enable(enable);
+    m_currVaoState[arr]->enable(enable);
 }
 
 bool GLEScontext::isArrEnabled(GLenum arr) {
-    return m_map[arr]->isEnable();
+    return m_currVaoState[arr]->isEnable();
 }
 
 const GLESpointer* GLEScontext::getPointer(GLenum arrType) {
-    const auto it = m_map.find(arrType);
-    return it != m_map.end() ? it->second : nullptr;
+    const auto it = m_currVaoState.find(arrType);
+    return it != m_currVaoState.end() ? it->second : nullptr;
 }
 
 static void convertFixedDirectLoop(const char* dataIn,unsigned int strideIn,void* dataOut,unsigned int nBytes,unsigned int strideOut,int attribSize) {
@@ -478,34 +521,34 @@ void GLEScontext::convertIndirectVBO(GLESConversionArrays& cArrs,GLsizei count,G
 
 void GLEScontext::bindBuffer(GLenum target,GLuint buffer) {
     if(target == GL_ARRAY_BUFFER) {
-        m_arrayBuffer = buffer;
+        m_currVaoState.vboId() = buffer;
     } else {
-       m_elementBuffer = buffer;
+        m_currVaoState.iboId() = buffer;
     }
 }
 
 void GLEScontext::unbindBuffer(GLuint buffer) {
-    if(m_arrayBuffer == buffer)
+    if(m_currVaoState.vboId() == buffer)
     {
-        m_arrayBuffer = 0;
+        m_currVaoState.vboId() = 0;
     }
-    if(m_elementBuffer == buffer)
+    if(m_currVaoState.iboId() == buffer)
     {
-        m_elementBuffer = 0;
+        m_currVaoState.iboId() = 0;
     }
 }
 
 //checks if any buffer is binded to target
 bool GLEScontext::isBindedBuffer(GLenum target) {
     if(target == GL_ARRAY_BUFFER) {
-        return m_arrayBuffer != 0;
+        return m_currVaoState.vboId() != 0;
     } else {
-        return m_elementBuffer != 0;
+        return m_currVaoState.iboId() != 0;
     }
 }
 
 GLuint GLEScontext::getBuffer(GLenum target) {
-    return target == GL_ARRAY_BUFFER ? m_arrayBuffer:m_elementBuffer;
+    return target == GL_ARRAY_BUFFER ? m_currVaoState.vboId():m_currVaoState.iboId();
 }
 
 GLvoid* GLEScontext::getBindedBuffer(GLenum target) {
@@ -756,11 +799,11 @@ bool GLEScontext::glGetIntegerv(GLenum pname, GLint *params)
     switch(pname)
     {
         case GL_ARRAY_BUFFER_BINDING:
-            *params = m_arrayBuffer;
+            *params = m_currVaoState.vboId();
             break;
 
         case GL_ELEMENT_ARRAY_BUFFER_BINDING:
-            *params = m_elementBuffer;
+            *params = m_currVaoState.iboId();
             break;
 
         case GL_TEXTURE_BINDING_CUBE_MAP:

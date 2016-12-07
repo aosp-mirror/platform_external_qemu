@@ -150,13 +150,32 @@ def gen_functions_header(entries, prefix_name, verbatim, filename, with_args):
     print "#endif  // %s_FUNCTIONS_H" % prefix_name
 
 
+
 # The purpose of gen_translator()
 # is to quickly generate implementations on the host Translator,
 # which processes commands that just got onto the renderthread off goldfish pipe
 # and are fed to system OpenGL.
+
+# Definitions for custom implementation bodies go in
+# android/scripts/gles3translatorgen/gles30_custom.py
+# android/scripts/gles3translatorgen/gles31_custom.py
+from gles3translatorgen import gles30_custom
+from gles3translatorgen import gles31_custom
+
 def gen_translator(entries):
-    translator_custom_validations = { }
+
+    translator_custom_share_processing = { }
+    for (k, v) in gles30_custom.custom_share_processing.items():
+        translator_custom_share_processing[k] = v
+    for (k, v) in gles31_custom.custom_share_processing.items():
+        translator_custom_share_processing[k] = v
+
     translator_custom_impl = { }
+    for (k, v) in gles30_custom.custom_impls.items():
+        translator_custom_impl[k] = v
+    for (k, v) in gles31_custom.custom_impls.items():
+        translator_custom_impl[k] = v
+
     translator_needexternc = {
             "glGetStringi": 1,
             "glUniform4ui": 1,
@@ -187,7 +206,7 @@ def gen_translator(entries):
         else:
             print "    GET_CTX_V2_RET(%s);" % get_fail_code(entry)
 
-    def gen_validations(entry):
+    def gen_validations_custom_impl(entry):
         isGen = entry.func_name.startswith("glGen")
         isDelete = entry.func_name.startswith("glDelete")
         isBufferOp = "Buffer" in entry.func_name
@@ -205,8 +224,8 @@ def gen_translator(entries):
             print "    %s;" % mySetError("n < 0", "GL_INVALID_VALUE");
         if (isBufferOp and hasTargetArg):
             print "    %s;" % mySetError("!GLESv2Validate::bufferTarget(target, ctx->getMajorVersion(), ctx->getMinorVersion())", "GL_INVALID_ENUM");
-        if translator_custom_validations.has_key(entry.func_name):
-            print "    %s;" % translator_custom_validations[entry.func_name]
+        if translator_custom_impl.has_key(entry.func_name):
+            print translator_custom_impl[entry.func_name],
 
     def gen_call_ret(entry):
         globalNameTypes = {
@@ -231,8 +250,8 @@ def gen_translator(entries):
 
         globalCall = ", ".join(map(lambda v: globalNames.get(v, v), entry.varnames))
 
-        if translator_custom_impl.has_key(entry.func_name):
-            print translator_custom_impl[entry.func_name]
+        if needsShareGroup and translator_custom_share_processing.has_key(entry.func_name):
+            print translator_custom_share_processing[entry.func_name],
 
         if (entry.return_type == "void"):
             if (needsShareGroup):
@@ -254,7 +273,7 @@ def gen_translator(entries):
     for entry in entries:
         print "%sGL_APICALL %s GL_APIENTRY %s(%s) {" % (needExternC(entry), entry.return_type, entry.func_name, entry.parameters)
         gen_cxt_getter(entry);
-        gen_validations(entry);
+        gen_validations_custom_impl(entry);
         gen_call_ret(entry);
         print "}\n"
 
