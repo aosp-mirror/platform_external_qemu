@@ -14,11 +14,7 @@
 
 #pragma once
 
-#ifdef _WIN32
-#  define WIN32_LEAN_AND_MEAN 1
-#  include <windows.h>
-#endif
-
+#include <atomic>
 #include <new>
 #include <type_traits>
 
@@ -87,28 +83,23 @@ namespace internal {
 // initialization and access without incurring the full cost of a mutex
 // lock/unlock.
 struct LazyInstanceState {
-    enum {
-        STATE_INIT = 0,
-        STATE_CONSTRUCTING = 1,
-        STATE_DONE = 2,
+    enum class State : char {
+        Init = 0,
+        Constructing = 1,
+        Done = 2,
     };
 
-    bool inInitState();
+    bool inInitState() const;
     bool needConstruction();
     void doneConstructing();
 
-#ifdef _MSC_VER
-    // MSVC doesn't play well with volatile members and makes the whole class
-    // non-POD in that case.
-    typedef LONG AtomicType;
-#elif defined(_WIN32)
-    typedef LONG volatile AtomicType;
-#else
-    typedef int volatile AtomicType;
-#endif
-
-    AtomicType mState;
+    std::atomic<State> mState;
 };
+
+static_assert(std::is_standard_layout<LazyInstanceState>::value,
+              "LazyInstanceState is not a standard layout type");
+static_assert(std::has_trivial_default_constructor<LazyInstanceState>::value,
+              "LazyInstanceState can't be trivially default constructed");
 
 }  // namespace internal
 
@@ -153,15 +144,19 @@ private:
 
 template <class T>
 T* LazyInstance<T>::ptrInternal() const {
-    // make sure that LazyInstance<> instantiation remains POD
+    // make sure that LazyInstance<> instantiation remains static
     // NB: this can't go in a class scope - one needs a way of specifying
     // current instantiation type without explicitly saying LazyInstance<T>
     // which is a recursive instantiation and gives compiler error
     // decltype(*this) is a way of doing it, but it only works in a function
-    static_assert(std::is_pod<
+    static_assert(std::is_standard_layout<
                           typename std::decay<decltype(*this)>::type
                   >::value,
-                  "LazyInstance<T> is not a POD type");
+                  "LazyInstance<T> is not a standard layout type");
+    static_assert(std::has_trivial_default_constructor<
+                          typename std::decay<decltype(*this)>::type
+                  >::value,
+                  "LazyInstance<T> can't be trivially default constructed");
 
     if (mState.needConstruction()) {
         new (&mStorage) T();
