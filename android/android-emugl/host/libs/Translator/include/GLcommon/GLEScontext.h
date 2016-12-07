@@ -21,8 +21,10 @@
 #include "GLESpointer.h"
 #include "objectNameManager.h"
 #include "emugl/common/mutex.h"
+
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 typedef std::unordered_map<GLenum,GLESpointer*>  ArraysMap;
 
@@ -80,11 +82,47 @@ struct GLSupport {
     bool GL_OES_RGB8_RGBA8 = false;
 };
 
-struct ArrayData{
+struct ArrayData {
     void*        data = nullptr;
     GLenum       type = 0;
     unsigned int stride = 0;
     bool         allocated = false;
+};
+
+struct VAOState {
+    VAOState() : VAOState(0, 0, NULL) { }
+    VAOState(GLuint vbo, GLuint ibo, ArraysMap* arr) :
+        array_buffer_binding(vbo),
+        element_array_buffer_binding(ibo),
+        arraysMap(arr) { }
+    GLuint array_buffer_binding;
+    GLuint element_array_buffer_binding;
+    ArraysMap* arraysMap;
+};
+
+typedef std::unordered_map<GLuint, VAOState> VAOStateMap;
+
+struct VAOStateRef {
+    VAOStateRef() { }
+    VAOStateRef(VAOStateMap::iterator iter) : it(iter) { }
+    GLuint vaoId() { return it->first; }
+    GLuint& vboId() { return it->second.array_buffer_binding; }
+    GLuint& iboId() { return it->second.element_array_buffer_binding; }
+
+    ArraysMap::iterator begin() {
+        return it->second.arraysMap->begin();
+    }
+    ArraysMap::iterator end() {
+        return it->second.arraysMap->end();
+    }
+    ArraysMap::iterator find(GLenum arrType) {
+        return it->second.arraysMap->find(arrType);
+    }
+    GLESpointer*& operator[](size_t k) {
+        ArraysMap* map = it->second.arraysMap;
+        return (*map)[k];
+    }
+    VAOStateMap::iterator it;
 };
 
 class GLESConversionArrays
@@ -124,9 +162,14 @@ public:
 
     bool  isArrEnabled(GLenum);
     void  enableArr(GLenum arr,bool enable);
+
+    void addVertexArrayObjects(GLsizei n, GLuint* arrays);
+    void removeVertexArrayObjects(GLsizei n, const GLuint* arrays);
+    void setVertexArrayObject(GLuint array);
     const GLvoid* setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data,bool normalize = false);
     virtual const GLESpointer* getPointer(GLenum arrType);
     virtual void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) = 0;
+
     void bindBuffer(GLenum target,GLuint buffer);
     void unbindBuffer(GLuint buffer);
     bool isBuffer(GLuint buffer);
@@ -174,6 +217,11 @@ public:
 
 protected:
     static void buildStrings(const char* baseVendor, const char* baseRenderer, const char* baseVersion, const char* version);
+
+    void freeVAOState();
+    void addVertexArrayObject(GLuint array);
+    void removeVertexArrayObject(GLuint array);
+
     virtual bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id) = 0;
     void convertDirect(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum array_id,GLESpointer* p);
     void convertDirectVBO(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum array_id,GLESpointer* p);
@@ -187,7 +235,21 @@ protected:
     bool                  m_initialized = false;
     unsigned int          m_activeTexture = 0;
     GLint                 m_unpackAlignment = 4;
-    ArraysMap             m_map;
+
+    VAOStateMap           m_vaoStateMap;
+    VAOStateRef           m_currVaoState;
+    // Buffer binding state
+    GLuint m_copyReadBuffer = 0;
+    GLuint m_copyWriteBuffer = 0;
+    GLuint m_pixelPackBuffer = 0;
+    GLuint m_pixelUnpackBuffer = 0;
+    GLuint m_transformFeedbackBuffer = 0;
+    GLuint m_uniformBuffer = 0;
+    GLuint m_atomicCounterBuffer = 0;
+    GLuint m_dispatchIndirectBuffer = 0;
+    GLuint m_drawIndirectBuffer = 0;
+    GLuint m_shaderStorageBuffer = 0;
+
     static std::string*   s_glExtensions;
     static GLSupport      s_glSupport;
 
