@@ -25,6 +25,7 @@
 
 struct GLESv2Validate:public GLESvalidate{
 static bool bufferTarget(GLenum target, int glesMajorVersion, int glesMinorVersion);
+static bool bufferUsage(GLenum usage, int glesMajorVersion);
 static bool bufferParam(GLenum pname, int glesMajorVersion, int glesMinorVersion);
 static bool blendEquationMode(GLenum mode);
 static bool blendSrc(GLenum s);
