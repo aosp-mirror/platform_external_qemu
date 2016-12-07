@@ -59,7 +59,7 @@ int getopt(int argc, char* const argv[], const char* ostr) {
     if (*place) {
         optarg = (char *)place;
     } else if (argc > ++optind) {
-        optarg = (char *)argv[optind];
+        optarg = (char *)argv[optind++];
     } else if (oindex[2] == ':') {
         // Optional argument is missing.
         place = kEmpty;
