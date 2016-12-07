@@ -14,6 +14,7 @@ LOCAL_C_INCLUDES := \
     $(PROTOBUF_INCLUDES) \
 
 LOCAL_PROTO_SOURCES := \
+    $(METRICS_DIR)/device_restriction_enum.proto \
     $(METRICS_DIR)/clientanalytics.proto \
     $(METRICS_DIR)/studio_stats.proto \
 
