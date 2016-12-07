@@ -40,6 +40,25 @@ bool GLESv2Validate::bufferTarget(GLenum target, int glesMajorVersion, int glesM
     }
 }
 
+bool GLESv2Validate::bufferUsage(GLenum usage, int glesMajorVersion) {
+    switch(usage) {
+        case GL_STREAM_DRAW:
+        case GL_STATIC_DRAW:
+        case GL_DYNAMIC_DRAW:
+            return true;
+        case GL_STREAM_READ:
+        case GL_STATIC_READ:
+        case GL_DYNAMIC_READ:
+        case GL_STREAM_COPY:
+        case GL_STATIC_COPY:
+        case GL_DYNAMIC_COPY:
+            return glesMajorVersion >= 3;
+    }
+    return false;
+
+}
+
+
 bool GLESv2Validate::bufferParam(GLenum pname, int glesMajorVersion, int glesMinorVersion) {
     switch (pname) {
     case GL_BUFFER_SIZE:
