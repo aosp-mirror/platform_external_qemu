@@ -163,6 +163,9 @@ BUILD_TARGET_CXXFLAGS := -Wno-invalid-offsetof
 # Needed to build block.c on Linux/x86_64.
 BUILD_TARGET_CFLAGS += -D_GNU_SOURCE=1
 
+# Copy the current target cflags into the host ones.
+BUILD_HOST_CFLAGS += $(BUILD_TARGET_CFLAGS)
+
 # A useful function that can be used to start the declaration of a host
 # module. Avoids repeating the same stuff again and again.
 # Usage:
