@@ -55,10 +55,10 @@ package_builder_parse_package_list
 ###
 ###  Download the source tarball if needed.
 ###
-QT_SRC_NAME=qt-everywhere-opensource-src-5.5.0
+QT_SRC_NAME=qt-everywhere-opensource-src-5.7.0
 QT_SRC_PACKAGE=$QT_SRC_NAME.tar.xz
-QT_SRC_URL=http://download.qt.io/archive/qt/5.5/5.5.0/single/$QT_SRC_PACKAGE
-QT_SRC_PACKAGE_SHA1=4409ef12d1017a9b5e6733ea27596a6ca637a88c
+QT_SRC_URL=http://download.qt.io/archive/qt/5.7/5.7.0/single/$QT_SRC_PACKAGE
+QT_SRC_PACKAGE_SHA1=bfc3d07ffba27d96cf070f74148f34a668646a19
 
 QT_SRC_PATCH_FOLDER=${QT_SRC_NAME}-patches
 QT_ARCHIVE_DIR=$(builder_archive_dir)
@@ -144,7 +144,6 @@ build_qt_package () {
     panic "Could not build and install $1"
 }
 
-build_disable_cxx11
 
 if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     # Perform remote Darwin build first.
@@ -195,19 +194,6 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             unpack_archive "$QT_ARCHIVE_DIR/$QT_SRC_PACKAGE" "$(builder_src_dir)" ||
                 panic "Failed to unpack source package: $QT_SRC_PACKAGE"
 
-            PATCHES_FOLDER=$QT_ARCHIVE_DIR/$QT_SRC_PATCH_FOLDER
-            cp -R "$PATCHES_FOLDER" "$(builder_src_dir)" ||
-                panic "Failed to copy Qt patches: $PATCHES_FOLDER"
-
-            PATCHES_DIR=$(builder_src_dir)/${QT_SRC_NAME}-patches
-            if [ ! -d "$PATCHES_DIR" ]; then
-                panic "Failed to find patches directory: $PATCHES_DIR"
-            fi
-            for PATCH in $(ls "$PATCHES_DIR"/*.patch 2>/dev/null); do
-                dump "Applying patch: $(basename $PATCH)"
-                (cd "$(builder_src_dir)"/$QT_SRC_NAME && patch -p1) < "$PATCH" ||
-                    panic "Could not apply patch: $PATCH"
-            done
 
             # Need to patch this file to avoid install syncqt.pl which will
             # fail horribly with an error like:
@@ -226,9 +212,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 -confirm-license \
                 -force-debug-info \
                 -release \
-                -no-c++11 \
                 -no-rpath \
-                -no-gtkstyle \
                 -shared \
                 -nomake examples \
                 -nomake tests \
@@ -278,8 +262,8 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                     -no-framework \
                     -sdk macosx
                 var_append CFLAGS -mmacosx-version-min=10.8
-                var_append CXXFLAGS -mmacosx-version-min=10.8
                 var_append LDFLAGS -mmacosx-version-min=10.8
+                var_append LDFLAGS -lc++
                 ;;
         esac
 
