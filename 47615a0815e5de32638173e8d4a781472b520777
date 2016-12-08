@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2d32ef87_50989b56",
+        "filename": "android/android-emu/android/metrics/metrics.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-08T18:42:39Z",
+      "side": 1,
+      "message": "nit: kNullopt or {}?",
+      "range": {
+        "startLine": 202,
+        "startChar": 11,
+        "endLine": 202,
+        "endChar": 13
+      },
+      "revId": "47615a0815e5de32638173e8d4a781472b520777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
