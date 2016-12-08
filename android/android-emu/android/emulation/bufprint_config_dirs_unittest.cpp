@@ -39,13 +39,20 @@ TEST(bufprint, AvdHomePathDefault) {
 #endif
 }
 
-TEST(bufprint, AvdHomePathWithAndroidAvdHome) {
+TEST(bufprint, AvdHomePathWithAndroidSdkHome) {
     TestSystem sys("/bin", 32);
-    sys.envSet("ANDROID_AVD_HOME", "/myhome");
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("sdksdk"));
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("sdksdk/.android"));
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("sdksdk/.android/avd"));
+    sys.envSet("ANDROID_SDK_HOME", "sdksdk");
     char buffer[32], *p = buffer, *end = buffer + sizeof(buffer);
     p = bufprint_avd_home_path(p, end);
-    EXPECT_EQ(buffer + 7, p);
-    EXPECT_STREQ("/myhome", buffer);
+    EXPECT_EQ(buffer + 19, p);
+#ifdef _WIN32
+    EXPECT_STREQ("sdksdk\\.android\\avd", buffer);
+#else
+    EXPECT_STREQ("sdksdk/.android/avd", buffer);
+#endif
 }
 
 TEST(bufprint, ConfigPathDefault) {

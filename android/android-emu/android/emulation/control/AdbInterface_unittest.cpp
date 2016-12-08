@@ -37,6 +37,7 @@ TEST(AdbInterface, freshAdbVersion) {
                       "/appdir");
     TestTempDir* dir = system.getTempRoot();
     ASSERT_TRUE(dir->makeSubDir("Sdk"));
+    ASSERT_TRUE(dir->makeSubDir("Sdk/platforms"));
     ASSERT_TRUE(dir->makeSubDir("Sdk/platform-tools"));
     ASSERT_TRUE(
             dir->makeSubFile(PathUtils::join("Sdk", "platform-tools",
@@ -65,6 +66,7 @@ TEST(AdbInterface, freshAdbVersionNoMinor) {
                       "/appdir");
     TestTempDir* dir = system.getTempRoot();
     ASSERT_TRUE(dir->makeSubDir("Sdk"));
+    ASSERT_TRUE(dir->makeSubDir("Sdk/platforms"));
     ASSERT_TRUE(dir->makeSubDir("Sdk/platform-tools"));
     ASSERT_TRUE(
             dir->makeSubFile(PathUtils::join("Sdk", "platform-tools",
