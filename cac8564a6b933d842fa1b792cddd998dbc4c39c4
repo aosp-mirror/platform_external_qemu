@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2d32ef87_1dd0fb5a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1010055
+      },
+      "writtenOn": "2016-12-08T20:50:07Z",
+      "side": 1,
+      "message": "Could someone explain the point of ANDROID_SDK_ROOT? Is it a test infrastructure only env variable? If so, could we make it ANDROID_TEST_SDK_ROOT or something?",
+      "range": {
+        "startLine": 9,
+        "startChar": 3,
+        "endLine": 9,
+        "endChar": 19
+      },
+      "revId": "cac8564a6b933d842fa1b792cddd998dbc4c39c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
