@@ -55,7 +55,8 @@ TEST(ConfigDirs, getUserDirectoryWithAndroidEmulatorHome) {
 TEST(ConfigDirs, getSdkRootDirectory) {
     TestSystem sys("", 32, "/myhome");
     ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Sdk"));
-    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Sdk/tools"));
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Sdk/platform-tools"));
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Sdk/platforms"));
     ASSERT_TRUE(sys.pathIsDir("Sdk"));
 
     sys.envSet("ANDROID_SDK_ROOT", "Sdk");
@@ -66,4 +67,45 @@ TEST(ConfigDirs, getSdkRootDirectory) {
 
     sys.envSet("ANDROID_SDK_ROOT", "");
     EXPECT_STRNE("Sdk", ConfigDirs::getSdkRootDirectory().c_str());
+
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Sdk2"));
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Sdk2/platform-tools"));
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Sdk2/platforms"));
+    ASSERT_TRUE(sys.pathIsDir("Sdk2"));
+
+    // ANDROID_HOME should take precedence over ANDROID_SDK_ROOT
+    sys.envSet("ANDROID_HOME", "Sdk2");
+    EXPECT_STREQ("Sdk2", ConfigDirs::getSdkRootDirectory().c_str());
+
+    // Bad ANDROID_HOME falls back to ANDROID_SDK_ROOT
+    sys.envSet("ANDROID_HOME", "bogus");
+    sys.envSet("ANDROID_SDK_ROOT", "Sdk");
+    EXPECT_STREQ("Sdk", ConfigDirs::getSdkRootDirectory().c_str());
+}
+
+
+TEST(ConfigDirs, getAvdRootDirectory) {
+    TestSystem sys("", 32, "/myhome");
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Area_1"));
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Area_1/.android"));
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Area_1/.android/avd"));
+    ASSERT_TRUE(sys.pathIsDir("Area_1"));
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Area_2"));
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Area_2/.android"));
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Area_2/.android/avd"));
+    ASSERT_TRUE(sys.pathIsDir("Area_2"));
+
+    sys.envSet("ANDROID_SDK_HOME", "/myhome/Area_1");
+    sys.envSet("USER_HOME", "/myhome/Area_2");
+    sys.envSet("ANDROID_EMULATOR_HOME", "bogus");
+    EXPECT_STREQ("/myhome/Area_1/.android/avd", ConfigDirs::getAvdRootDirectory().c_str());
+
+    sys.envSet("ANDROID_SDK_HOME", "/bogus");
+    EXPECT_STRNE("/myhome/Area_2/.android/avd", ConfigDirs::getAvdRootDirectory().c_str());
+
+    sys.envSet("ANDROID_EMULATOR_HOME", "/myhome/Area_1");
+    EXPECT_STRNE("/myhome/Area_2/.android/avd", ConfigDirs::getAvdRootDirectory().c_str());
+
+    sys.envSet("ANDROID_SDK_HOME", "bogus");
+    EXPECT_STRNE("/myhome/Area_1/.android/avd", ConfigDirs::getAvdRootDirectory().c_str());
 }

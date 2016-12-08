@@ -72,17 +72,14 @@ path_getAvdContentPath(const char* avdName)
             PATH_SEP "avd";
         const char* envName = "HOME";
         const char* searchDir = kHomeSearchDir;
-        if (getenv("ANDROID_AVD_HOME")) {
-            envName = "ANDROID_AVD_HOME";
-            searchDir = "$ANDROID_AVD_HOME";
-        } else if (getenv("ANDROID_SDK_HOME")) {
+        if (getenv("ANDROID_SDK_HOME")) {
             envName = "ANDROID_SDK_HOME";
             searchDir = kSdkHomeSearchDir;
         }
         APANIC("Unknown AVD name [%s], use -list-avds to see valid list.\n"
                "%s is defined but could not find %s.ini file in %s\n"
-               "(Note: avd is searched in the order of $ANDROID_AVD_HOME,"
-               "%s and %s)\n",
+               "(Note: Directories are searched in the order %s, "
+               "$ANDROID_EMULATOR_HOME, and %s)\n",
                avdName, envName, avdName, searchDir, kSdkHomeSearchDir,
                kHomeSearchDir);
     }
