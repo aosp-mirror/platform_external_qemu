@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2d32ef87_7a7b3569",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 743,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-12-08T20:07:15Z",
+      "side": 1,
+      "message": "you might want to have this enabled/disabled for your code",
+      "range": {
+        "startLine": 740,
+        "startChar": 0,
+        "endLine": 743,
+        "endChar": 5
+      },
+      "revId": "18c9a9d97c88c944af16f8426fedad1c48123dfd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2d32ef87_ba89cd45",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 793,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-12-08T20:07:15Z",
+      "side": 1,
+      "message": "same thing",
+      "range": {
+        "startLine": 790,
+        "startChar": 0,
+        "endLine": 793,
+        "endChar": 5
+      },
+      "revId": "18c9a9d97c88c944af16f8426fedad1c48123dfd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
