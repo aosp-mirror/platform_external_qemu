@@ -15,6 +15,7 @@
 #include "android/emulation/ConfigDirs.h"
 
 #include "android/base/files/PathUtils.h"
+#include "android/base/Log.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
@@ -64,6 +65,7 @@ std::string ConfigDirs::getAvdRootDirectory() {
 
 // static
 std::string ConfigDirs::getSdkRootDirectoryByEnv() {
+    static bool haveWarned = false;
     auto system = System::get();
     std::string sdkRoot = system->envGet("ANDROID_SDK_ROOT");
 
@@ -77,11 +79,27 @@ std::string ConfigDirs::getSdkRootDirectoryByEnv() {
             ScopedCPtr<char> buf(android::base::strDup(sdkRoot));
             sdkRoot.assign(buf.get() + 1, copySize);
         }
-        if (system->pathIsDir(sdkRoot) && system->pathCanRead(sdkRoot)) {
+        if (isValidSdkRoot(sdkRoot)) {
             return sdkRoot;
         }
     }
-    return std::string();
+
+    // ANDROID_SDK_ROOT is no good. Try ANDROID_HOME.
+    std::string alternateRoot = system->envGet("ANDROID_HOME");
+    if ( !isValidSdkRoot(alternateRoot) ) {
+        // ANDROID_HOME is no good. Give up.
+        alternateRoot = std::string();
+    }
+
+    if ( !haveWarned && !sdkRoot.empty() ) {
+        LOG(WARNING) <<
+                "ANDROID_SDK_ROOT is set to an invalid location: \"" << sdkRoot << "\"\n"
+                "    Please either leave this unset or set it to the location of your SDK.\n"
+                "    Defaulting to \"" << alternateRoot << "\"";
+        haveWarned = true;
+    }
+
+    return alternateRoot;
 }
 
 std::string ConfigDirs::getSdkRootDirectoryByPath() {
@@ -92,7 +110,7 @@ std::string ConfigDirs::getSdkRootDirectoryByPath() {
     PathUtils::simplifyComponents(&parts);
 
     std::string sdkRoot = PathUtils::recompose(parts);
-    if (system->pathIsDir(sdkRoot) && system->pathCanRead(sdkRoot)) {
+    if ( isValidSdkRoot(sdkRoot) ) {
         return sdkRoot;
     }
     return std::string();
@@ -107,6 +125,27 @@ std::string ConfigDirs::getSdkRootDirectory() {
 
     // Otherwise, infer from the path of the emulator's binary.
     return getSdkRootDirectoryByPath();
+}
+
+// static
+bool ConfigDirs::isValidSdkRoot(std::string rootPath) {
+    if (rootPath.empty()) {
+        return false;
+    }
+    System* system = System::get();
+    if ( !system->pathIsDir(rootPath) || !system->pathCanRead(rootPath) ) {
+        return false;
+    }
+    std::string platformsPath = PathUtils::join(rootPath, "platforms");
+    if ( !system->pathIsDir(platformsPath) ) {
+        return false;
+    }
+    std::string platformToolsPath = PathUtils::join(rootPath, "platform-tools");
+    if ( !system->pathIsDir(platformToolsPath) ) {
+        return false;
+    }
+
+    return true;
 }
 
 }  // namespace android

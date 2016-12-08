@@ -58,6 +58,12 @@ struct ConfigDirs {
     // - Otherwise, Sdk root is inferred from the path of the running emulator
     //   binary.
     static std::string getSdkRootDirectory();
+
+private:
+    // Check if the specified path is a valid SDK root path.
+    // It is considered valid if it has a 'platforms' subdirectory
+    // and a 'platform-tools' subdirectory.
+    static bool isValidSdkRoot(std::string rootPath);
 };
 
 }  // namespace android
