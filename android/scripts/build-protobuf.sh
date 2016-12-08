@@ -70,15 +70,21 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         builder_unpack_package_source googletest
         builder_unpack_package_source protobuf
 
-        # protobuf requires the autogen script to be run before it could be
-        # built. TODO(digit): Put the result in a patch, because this
-        # actually doesn't work for the remote build unless autotools are
-        # installed on the remote machine.
+        # The original protobuf source archive doesn't come with a 'configure'
+        # script, instead it relies on 'autogen.sh' to be called to generate
+        # it, but this requires the auto-tools package to be installed on the
+        # build machine. This is a problem when performing a remote Darwin
+        # build so we provide a patch that completes the source directory
+        # with 'configure' and other auto-generated files.
+        #
+        # Unfortunately, applying the patch uses 'patch' which cannot set
+        # the permission bits of the new files to executable, so change them
+        # here manually instead.
         (
             PKG_SRC_DIR=$(builder_src_dir)/$(package_list_get_src_dir protobuf)
             cd "$PKG_SRC_DIR"
-            run ./autogen.sh
-        ) || panic "Could not run autogen.sh required by protobuf!"
+            chmod a+x configure install-sh
+        ) || panic "Could not set 'configure' and 'install-sh' as executables"
 
         builder_build_autotools_package protobuf \
                 --disable-shared \
