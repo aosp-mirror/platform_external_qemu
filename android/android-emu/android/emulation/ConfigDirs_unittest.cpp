@@ -37,12 +37,8 @@ TEST(ConfigDirs, getUserDirectoryDefault) {
 TEST(ConfigDirs, getUserDirectoryWithAndroidSdkHome) {
     TestSystem sys("/bin", 32, "/myhome");
     sys.envSet("ANDROID_SDK_HOME", "/android-sdk");
-    EXPECT_STREQ("/android-sdk", ConfigDirs::getUserDirectory().c_str());
-
-    sys.getTempRoot()->makeSubDir("android-sdk");
-    sys.getTempRoot()->makeSubDir("android-sdk/.android");
-    EXPECT_STREQ(PathUtils::join("/android-sdk", ".android").c_str(),
-                 ConfigDirs::getUserDirectory().c_str());
+    static const char kExpected[] = "/android-sdk" SLASH ".android";
+    EXPECT_STREQ(kExpected, ConfigDirs::getUserDirectory().c_str());
 }
 
 TEST(ConfigDirs, getUserDirectoryWithAndroidEmulatorHome) {
