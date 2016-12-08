@@ -14,9 +14,12 @@
 #include "android/base/Log.h"
 
 #include <iomanip>
+#include <istream>
 #include <fstream>
-#include <string>
 #include <sstream>
+#include <streambuf>
+#include <string>
+#include <utility>
 
 #include <assert.h>
 #include <string.h>
@@ -31,7 +34,11 @@ using std::string;
 using std::to_string;
 using std::vector;
 
-void IniFile::setBackingFile(const string& filePath) {
+IniFile::IniFile(const char* data, int size) {
+    readFromMemory(StringView(data, size));
+}
+
+void IniFile::setBackingFile(StringView filePath) {
     // We have no idea what the new backing file contains.
     mDirty = true;
     mBackingFilePath = filePath;
@@ -65,14 +72,14 @@ static CIterator eat(CIterator citer, CIterator cend, Pred pred) {
     return citer;
 }
 
-void IniFile::parseFile(std::istream* inFile) {
+void IniFile::parseStream(std::istream* in) {
     string line;
     int lineno = 0;
     // This is the line number we'd print at if the IniFile were immediately
     // written back. Unlike |line|, this will not be incremented for invalid
     // lines, since they're completely dropped.
     int outputLineno = 0;
-    while (std::getline(*inFile, line)) {
+    while (std::getline(*in, line)) {
         ++lineno;
         ++outputLineno;
 
@@ -84,12 +91,12 @@ void IniFile::parseFile(std::istream* inFile) {
         // Handle empty lines, comments.
         if (citer == cend) {
             LOG(VERBOSE) << "Line " << lineno << ": Skipped empty line.";
-            mComments.push_back({outputLineno, line});
+            mComments.emplace_back(outputLineno, std::move(line));
             continue;
         }
         if (*citer == '#' || *citer == ';') {
             LOG(VERBOSE) << "Line " << lineno << ": Skipped comment line.";
-            mComments.push_back({outputLineno, line});
+            mComments.emplace_back(outputLineno, std::move(line));
             continue;
         }
 
@@ -137,8 +144,8 @@ void IniFile::parseFile(std::istream* inFile) {
         }
 
         // Everything parsed.
-        mKeys.push_back(key);
-        mData[key] = value;
+        mData[key] = std::move(value);
+        mKeys.push_back(std::move(key));
     }
 }
 
@@ -155,7 +162,7 @@ bool IniFile::read() {
 
     ifstream inFile(mBackingFilePath, ios_base::in | ios_base::ate);
     if (!inFile) {
-        LOG(WARNING) << "Failed to process .ini file " << mBackingFilePath
+        LOG(VERBOSE) << "Failed to process .ini file " << mBackingFilePath
                      << " for reading.";
         return false;
     }
@@ -174,7 +181,34 @@ bool IniFile::read() {
         return false;
     }
 
-    parseFile(&inFile);
+    parseStream(&inFile);
+    return true;
+}
+
+bool IniFile::readFromMemory(StringView data)
+{
+    mDirty = false;
+    mData.clear();
+    mKeys.clear();
+    mComments.clear();
+
+    // Create a streambuf that's able to do a single pass over an array only.
+    class OnePassIBuf : public std::streambuf {
+    public:
+        OnePassIBuf(StringView data) {
+            setg(const_cast<char*>(data.c_str()),
+                 const_cast<char*>(data.c_str()),
+                 const_cast<char*>(data.c_str()) + data.size());
+        }
+    };
+    OnePassIBuf ibuf(data);
+    std::istream in(&ibuf);
+    if (!in) {
+        LOG(WARNING) << "Failed to process input data for reading.";
+        return false;
+    }
+
+    parseStream(&in);
     return true;
 }
 
@@ -193,8 +227,7 @@ bool IniFile::writeCommon(bool discardEmpty) {
     }
 
     int lineno = 0;
-    vector<pair<int, string>>::const_iterator commentIter =
-            std::begin(mComments);
+    auto commentIter = std::begin(mComments);
     for (const auto& key : mKeys) {
         ++lineno;
 
@@ -232,7 +265,7 @@ int IniFile::size() const {
     return static_cast<int>(mData.size());
 }
 
-bool IniFile::hasKey(const string& key) const {
+bool IniFile::hasKey(StringView key) const {
     return mData.find(key) != std::end(mData);
 }
 
@@ -251,9 +284,9 @@ std::string IniFile::makeValidKey(StringView str) {
     return res.str();
 }
 
-string IniFile::getString(const string& key, const string& defaultValue) const {
+string IniFile::getString(const string& key, StringView defaultValue) const {
     auto citer = mData.find(key);
-    return (citer == std::end(mData)) ? defaultValue : citer->second;
+    return (citer == std::end(mData)) ? defaultValue : StringView(citer->second);
 }
 
 int IniFile::getInt(const string& key, int defaultValue) const {
@@ -307,13 +340,13 @@ double IniFile::getDouble(const string& key, double defaultValue) const {
     return result;
 }
 
-static bool isBoolTrue(const string& value) {
+static bool isBoolTrue(StringView value) {
     const char* cstr = value.c_str();
     return strcasecmp("yes", cstr) == 0 || strcasecmp("true", cstr) == 0 ||
            strcasecmp("1", cstr) == 0;
 }
 
-static bool isBoolFalse(const string& value) {
+static bool isBoolFalse(StringView value) {
     const char* cstr = value.c_str();
     return strcasecmp("no", cstr) == 0 || strcasecmp("false", cstr) == 0 ||
            strcasecmp("0", cstr) == 0;
@@ -336,14 +369,14 @@ bool IniFile::getBool(const string& key, bool defaultValue) const {
     }
 }
 
-bool IniFile::getBoolStr(const string& key, const string& defaultValue) const {
+bool IniFile::getBool(const string& key, StringView defaultValue) const {
     return getBool(key, isBoolTrue(defaultValue));
 }
 
 // If not nullptr, |*outMalformed| is set to true if |valueStr| is malformed.
-static IniFile::DiskSize parseDiskSize(const string& valueStr,
-                                              IniFile::DiskSize defaultValue,
-                                              bool* outMalformed) {
+static IniFile::DiskSize parseDiskSize(StringView valueStr,
+                                       IniFile::DiskSize defaultValue,
+                                       bool* outMalformed) {
     if(outMalformed) {
         *outMalformed = false;
     }
@@ -396,24 +429,26 @@ IniFile::DiskSize IniFile::getDiskSize(const string& key,
     return result;
 }
 
-IniFile::DiskSize IniFile::getDiskSizeStr(const string& key,
-                                          const string& defaultValueStr) const {
-    return getDiskSize(key, parseDiskSize(defaultValueStr, 0, nullptr));
+IniFile::DiskSize IniFile::getDiskSize(const string& key,
+                                       StringView defaultValue) const {
+    return getDiskSize(key, parseDiskSize(defaultValue, 0, nullptr));
 }
 
-void IniFile::updateData(const string& key, const string& value) {
+void IniFile::updateData(const string& key, string&& value) {
     mDirty = true;
+    // note: may not move here, as it's currently unspecified if failed
+    //  insertion moves from |value| or not.
     auto result = mData.emplace(key, value);
     if (result.second) {
        // New element was created.
        mKeys.push_back(key);
     } else {
         // emplace does not update an existing value.
-        result.first->second = value;
+        result.first->second = std::move(value);
     }
 }
 
-void IniFile::setString(const string& key, const string& value) {
+void IniFile::setString(const string& key, StringView value) {
     updateData(key, value);
 }
 
@@ -431,7 +466,7 @@ void IniFile::setDouble(const string& key, double value) {
 }
 
 void IniFile::setBool(const string& key, bool value) {
-    updateData(key, value ? "true" : "false");
+    updateData(key, value ? StringView("true") : "false");
 }
 
 void IniFile::setDiskSize(const string& key, int64_t value) {
@@ -455,7 +490,7 @@ void IniFile::setDiskSize(const string& key, int64_t value) {
     if (suffix) {
         valueStr += suffix;
     }
-    updateData(key, valueStr);
+    updateData(key, std::move(valueStr));
 }
 
 }  // namespace base

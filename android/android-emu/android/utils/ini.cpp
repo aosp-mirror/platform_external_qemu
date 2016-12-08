@@ -103,13 +103,13 @@ double iniFile_getDouble(CIniFile* f, const char* key, double defaultValue) {
 }
 
 int iniFile_getBoolean(CIniFile* f, const char* key, const char* defaultValue) {
-    return asBaseIniFile(f)->getBoolStr(key, defaultValue);
+    return asBaseIniFile(f)->getBool(key, defaultValue);
 }
 
 int64_t iniFile_getDiskSize(CIniFile* f,
                             const char* key,
                             const char* defaultValue) {
-    return asBaseIniFile(f)->getDiskSizeStr(key, defaultValue);
+    return asBaseIniFile(f)->getDiskSize(key, defaultValue);
 }
 
 int64_t iniFile_getInt64(CIniFile* f, const char* key, int64_t defaultValue) {
