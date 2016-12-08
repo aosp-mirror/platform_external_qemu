@@ -214,6 +214,13 @@ char*  avdInfo_getDataInitDirPath( const AvdInfo* i );
  */
 const FileData* avdInfo_getBootProperties(const AvdInfo* i);
 
+/* Return a reference to the build.prop file for this AVD, if any.
+ * The file contains information about the system image used in the AVD.
+ * Note that this never returns NULL, but the corresponding content can
+ * be empty.
+ */
+const FileData* avdInfo_getBuildProperties(const AvdInfo* i);
+
 /* Returns the path to a given AVD image file. This will return NULL if
  * the file cannot be found / does not exist.
  */
@@ -251,6 +258,9 @@ void         avdInfo_setImageFile( const AvdInfo*  i, AvdImageType  imageType, c
 
 /* Returns the content path of the virtual device */
 const char*  avdInfo_getContentPath( const AvdInfo*  i );
+
+/* Returns the root ini path of the virtual device */
+const char*  avdInfo_getRootIniPath( const AvdInfo*  i );
 
 /* Retrieve the AVD's specific skin information.
  * On exit:

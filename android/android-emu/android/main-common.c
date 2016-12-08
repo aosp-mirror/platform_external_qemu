@@ -1308,6 +1308,8 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         return false;
     }
 
+    android_cmdLineOptions = opts;
+
     opts->ranchu = is_qemu2;
 
     while ((*p_argc)-- > 1) {

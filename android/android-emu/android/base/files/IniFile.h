@@ -33,21 +33,25 @@ public:
 
     // Note that the constructor _does not_ read data from the backing file.
     // Call |Read| to read the data.
-    IniFile(const std::string& backingFilePath)
-        : mDirty(true), mBackingFilePath(backingFilePath) {}
     // When created without a backing file, all |read|/|write*| operations will
     // fail unless |setBackingFile| is called to point to a valid file path.
-    IniFile() : mDirty(true) {}
+    explicit IniFile(const std::string& backingFilePath = {})
+        : mBackingFilePath(backingFilePath) {}
+
+    // This constructor reads the data from memory at |data| of |size| bytes.
+    IniFile(const char* data, int size);
 
     // Set a new backing file. This does not read data from the file. Call
-    // |read|
-    // to refresh data from the new backing file.
-    void setBackingFile(const std::string& filePath);
+    // |read| to refresh data from the new backing file.
+    void setBackingFile(StringView filePath);
     const std::string& getBackingFile() const { return mBackingFilePath; }
 
     // Reads data into IniFile from the the backing file, overwriting any
     // existing data.
     bool read();
+    // Same thing, but parses an already read file data.
+    // Note: write operations fail unless there's a backing file set
+    bool readFromMemory(StringView data);
 
     // Write the current IniFile to the backing file.
     bool write();
@@ -67,7 +71,7 @@ public:
     // Gets the number of (key,value) pairs in the file.
     int size() const;
     // Check if a certain key exists in the file.
-    bool hasKey(const std::string& key) const;
+    bool hasKey(StringView key) const;
 
     // Make sure the string can be used as a valid key
     static std::string makeValidKey(StringView str);
@@ -86,7 +90,7 @@ public:
     // - The disadvantage is that behaviour is undefined if we fail to parse the
     //   default value.
     std::string getString(const std::string& key,
-                          const std::string& defaultValue) const;
+                          StringView defaultValue) const;
     int getInt(const std::string& key, int defaultValue) const;
     int64_t getInt64(const std::string& key, int64_t defaultValue) const;
     double getDouble(const std::string& key, double defaultValue) const;
@@ -94,19 +98,20 @@ public:
     //     True: "1", "yes", "YES".
     //     False: "0", "no", "NO".
     bool getBool(const std::string& key, bool defaultValue) const;
-    bool getBoolStr(const std::string& kye,
-                    const std::string& defaultValueStr) const;
+    bool getBool(const std::string& key, StringView defaultValueStr) const;
+    bool getBool(const std::string& key, const char* defaultValue) const {
+        return getBool(key, StringView(defaultValue));
+    }
     // Parses a string as disk size. The serialized format is [0-9]+[kKmMgG].
     // The
     // suffixes correspond to KiB, MiB and GiB multipliers.
     // Note: We consider 1K = 1024, not 1000.
     DiskSize getDiskSize(const std::string& key, DiskSize defaultValue) const;
-    DiskSize getDiskSizeStr(const std::string& key,
-                            const std::string& defaultValueStr) const;
+    DiskSize getDiskSize(const std::string& key, StringView defaultValue) const;
 
     // ///////////////////// Value Setters
     // //////////////////////////////////////
-    void setString(const std::string& key, const std::string& value);
+    void setString(const std::string& key, StringView value);
     void setInt(const std::string& key, int value);
     void setInt64(const std::string& key, int64_t value);
     void setDouble(const std::string& key, double value);
@@ -129,17 +134,16 @@ public:
     const_iterator end() const { return std::end(mKeys); }
 
 protected:
-    // Helper functions.
-    void parseFile(std::istream* inFile);
-    void updateData(const std::string& key, const std::string& value);
+    void parseStream(std::istream* inFile);
+    void updateData(const std::string& key, std::string&& value);
     bool writeCommon(bool discardEmpty);
 
 private:
-    bool mDirty;
     MapType mData;
     KeyListType mKeys;
     std::vector<std::pair<int, std::string>> mComments;
     std::string mBackingFilePath;
+    bool mDirty = true;
 
     DISALLOW_COPY_AND_ASSIGN(IniFile);
 };

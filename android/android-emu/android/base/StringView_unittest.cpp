@@ -114,6 +114,22 @@ TEST(StringView, OperatorAt) {
     }
 }
 
+TEST(StringView, IsNullTerminated) {
+    EXPECT_TRUE(StringView().isNullTerminated());
+    EXPECT_TRUE(StringView("blah").isNullTerminated());
+    EXPECT_FALSE(StringView("blah", 1).isNullTerminated());
+    EXPECT_TRUE(StringView("blah", 4).isNullTerminated());
+    auto sv = StringView{};
+    sv.set("blah");
+    EXPECT_TRUE(sv.isNullTerminated());
+    sv.set("blah", 2);
+    EXPECT_FALSE(sv.isNullTerminated());
+    sv.set("blah", 4);
+    EXPECT_TRUE(sv.isNullTerminated());
+    sv.set(nullptr);
+    EXPECT_TRUE(sv.isNullTerminated());
+}
+
 TEST(StringView, Iterators) {
     static const char kString[] = "What else?";
     static const size_t kStringLen = sizeof(kString) - 1;
