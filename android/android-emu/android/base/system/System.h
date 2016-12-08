@@ -16,6 +16,7 @@
 
 #include "android/base/Compiler.h"
 #include "android/base/EnumFlags.h"
+#include "android/base/Optional.h"
 #include "android/base/StringView.h"
 
 #include <string>
@@ -227,6 +228,12 @@ public:
     // Get the size of file at |path|.
     // Fails if path is not a file or not readable, and in case of other errors.
     virtual bool pathFileSize(StringView path, FileSize* outFileSize) const = 0;
+
+    // Gets the file creation timestamp as a Unix epoch time with microsecond
+    // resolution. Returns an empty optional for systems that don't support
+    // creation times (Linux) or if the operation failed.
+    virtual Optional<Duration> pathCreationTime(StringView path) const = 0;
+
     // Scan directory |dirPath| for entries, and return them as a sorted
     // vector or entries. If |fullPath| is true, then each item of the
     // result vector contains a full path.
@@ -340,6 +347,7 @@ protected:
     static bool pathCanExecInternal(StringView path);
     static bool deleteFileInternal(StringView path);
     static bool pathFileSizeInternal(StringView path, FileSize* outFileSize);
+    static Optional<Duration> pathCreationTimeInternal(StringView path);
 
 private:
     DISALLOW_COPY_AND_ASSIGN(System);
