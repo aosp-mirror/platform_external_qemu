@@ -259,6 +259,9 @@ void         avdInfo_setImageFile( const AvdInfo*  i, AvdImageType  imageType, c
 /* Returns the content path of the virtual device */
 const char*  avdInfo_getContentPath( const AvdInfo*  i );
 
+/* Returns the root ini path of the virtual device */
+const char*  avdInfo_getRootIniPath( const AvdInfo*  i );
+
 /* Retrieve the AVD's specific skin information.
  * On exit:
  *   '*pSkinName' points to the skin's name.
