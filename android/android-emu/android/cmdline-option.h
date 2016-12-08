@@ -34,6 +34,8 @@ typedef struct {
 #include "android/cmdline-options.h"
 } AndroidOptions;
 
+/* A global pointer to the current process' parsed options */
+extern const AndroidOptions* android_cmdLineOptions;
 
 /* Parse command-line arguments options and remove them from (argc,argv)
  * 'opt' will be set to the content of parsed options
