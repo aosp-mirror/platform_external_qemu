@@ -59,6 +59,8 @@ std::string ConfigDirs::getUserDirectory() {
 
 // static
 std::string ConfigDirs::getAvdRootDirectory() {
+    static const char kAndroidSubDir[] = ".android";
+    static const char kAvdSubDir[] = "avd";
     System* system = System::get();
 
     std::string avdRoot = system->envGet("ANDROID_AVD_HOME");
@@ -68,15 +70,12 @@ std::string ConfigDirs::getAvdRootDirectory() {
 
     // No luck with ANDROID_AVD_HOME, try ANDROID_SDK_HOME
     avdRoot = system->envGet("ANDROID_SDK_HOME");
+
     if ( !avdRoot.empty() ) {
         // ANDROID_SDK_HOME is defined
-        if (isValidAvdRoot(avdRoot)) {
-            // ANDROID_SDK_HOME is good
-            return PathUtils::join(avdRoot, kAvdSubDir);
-        }
         avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
         if (isValidAvdRoot(avdRoot)) {
-            // ANDROID_SDK_HOME/.android is good
+            // ANDROID_SDK_HOME is good
             return PathUtils::join(avdRoot, kAvdSubDir);
         }
         // ANDROID_SDK_HOME is defined but bad. In this case,
@@ -155,7 +154,7 @@ std::string ConfigDirs::getSdkRootDirectory() {
 }
 
 // static
-bool ConfigDirs::isValidSdkRoot(android::base::StringView rootPath) {
+bool ConfigDirs::isValidSdkRoot(const android::base::StringView& rootPath) {
     if (rootPath.empty()) {
         return false;
     }
@@ -176,7 +175,7 @@ bool ConfigDirs::isValidSdkRoot(android::base::StringView rootPath) {
 }
 
 // static
-bool ConfigDirs::isValidAvdRoot(android::base::StringView avdPath) {
+bool ConfigDirs::isValidAvdRoot(const android::base::StringView& avdPath) {
     if (avdPath.empty()) {
         return false;
     }
