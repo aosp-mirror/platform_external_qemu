@@ -608,6 +608,10 @@ public:
         return pathFileSizeInternal(path, outFileSize);
     }
 
+    virtual Optional<Duration> pathCreationTime(StringView path) const override {
+        return pathCreationTimeInternal(path);
+    }
+
     Times getProcessTimes() const override {
         Times res = {};
 
@@ -1331,6 +1335,26 @@ bool System::pathFileSizeInternal(StringView path, FileSize* outFileSize) {
     // play safe.
     *outFileSize = static_cast<FileSize>(st.st_size);
     return true;
+}
+
+// static
+Optional<System::Duration> System::pathCreationTimeInternal(StringView path) {
+#if defined(__linux__) || (defined(__APPLE__) && !defined(_DARWIN_FEATURE_64_BIT_INODE))
+    // TODO(zyy@): read the creation time directly from the ext4 attribute
+    // on Linux.
+    return {};
+#else
+    PathStat st;
+    if (pathStat(path, &st)) {
+        return {};
+    }
+#ifdef _WIN32
+    return st.st_ctime * 1000000ll;
+#else  // APPLE
+    return st.st_birthtimespec.tv_sec * 1000000ll +
+            st.st_birthtimespec.tv_nsec / 1000;
+#endif  // WIN32 && APPLE
+#endif  // Linux
 }
 
 // static

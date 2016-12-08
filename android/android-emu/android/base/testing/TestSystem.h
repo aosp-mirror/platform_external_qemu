@@ -219,6 +219,10 @@ public:
         return pathFileSizeInternal(toTempRoot(path), outFileSize);
     }
 
+    virtual Optional<Duration> pathCreationTime(StringView path) const override {
+        return pathCreationTimeInternal(toTempRoot(path));
+    }
+
     virtual std::vector<std::string> scanDirEntries(
             StringView dirPath,
             bool fullPath = false) const {
