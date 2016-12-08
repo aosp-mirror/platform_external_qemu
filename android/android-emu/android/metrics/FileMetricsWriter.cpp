@@ -49,7 +49,7 @@ static constexpr int kCommonOpenFlags = 0;
 
 // Extensions for an active temporary logging file and for the finalized one.
 static constexpr StringView kTempExtension = ".open";
-static constexpr StringView kFinalExtension = ".trx";
+static constexpr StringView kFinalExtension = ".trk";
 
 // A limit for a counter appended to the log filename to enable multiple files
 // with the same session ID.

@@ -37,7 +37,7 @@ namespace metrics {
 // |recordCountLimit| messages or |timeLimitMs| milliseconds (if there was at
 // least one message during that time).
 //
-// Android Studio's metrics sender monitors the spool directory for .trx files
+// Android Studio's metrics sender monitors the spool directory for .trk files
 // and sends them automatically if they aren't locked with Java's FileLock.
 // Java implements FileLock in some unspecified 'platform-native' way, so
 // instead of trying to mimic that, FileMetricsWriter uses a different approach:
@@ -45,9 +45,9 @@ namespace metrics {
 //   1. Create a file with a different extension, .open
 //   2. Lock that file with emulator's FileLock instead of the Java's one.
 //   3. When finalizing the file (e.g. opening a new one or stopping the writer)
-//      rename it .open -> .trx and unlock after that.
+//      rename it .open -> .trk and unlock after that.
 //   4. Provide a method to collect all 'abandoned' files that are not locked
-//      but arent .trx yet. This is to detect crashed emulator instances and
+//      but arent .trk yet. This is to detect crashed emulator instances and
 //      make sure their logs are sent.
 //   5. Include the session ID into the log file name to be able to report the
 //      crashed emulator's sessionID without parsing the file (or if it crashed
@@ -79,7 +79,7 @@ public:
                       base::System::Duration timeLimitMs);
 
     // Scans the |spoolDir| directory for unlocked non-finalzed log files
-    // (*.open), renames those to the correct .trx files and returns a set of
+    // (*.open), renames those to the correct .trk files and returns a set of
     // sessions that had such files. Useful for a cleanup or crash reporting
     // process.
     static AbandonedSessions finalizeAbandonedSessionFiles(

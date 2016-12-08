@@ -81,7 +81,7 @@ TEST_F(FileMetricsWriterTest, createDestroy) {
     files = mSystem.scanDirEntries(spoolDir());
     ASSERT_FALSE(files.empty());
     ASSERT_EQ(1, (int)files.size());
-    EXPECT_TRUE(PathUtils::extension(files[0]) == ".trx");
+    EXPECT_TRUE(PathUtils::extension(files[0]) == ".trk");
 }
 
 TEST_F(FileMetricsWriterTest, createDestroyWithTimer) {
@@ -109,7 +109,7 @@ TEST_F(FileMetricsWriterTest, createDestroyWithTimer) {
     files = mSystem.scanDirEntries(spoolDir());
     ASSERT_FALSE(files.empty());
     ASSERT_EQ(1, (int)files.size());
-    EXPECT_TRUE(PathUtils::extension(files[0]) == ".trx");
+    EXPECT_TRUE(PathUtils::extension(files[0]) == ".trk");
 
     // we should still have no timers
     EXPECT_EQ(0, mLooper->timers().size());
@@ -161,7 +161,7 @@ TEST_F(FileMetricsWriterTest, finalizeAbandonedSessionFilesManyFiles) {
     EXPECT_EQ(2 * sessions.size(), files.size());
 
     for (const auto& file : files) {
-        EXPECT_STREQ(PathUtils::extension(file).c_str(), ".trx");
+        EXPECT_STREQ(PathUtils::extension(file).c_str(), ".trk");
 
         // make sure all files have a known session ID in the name
         EXPECT_NE(sessions.end(),
@@ -178,7 +178,7 @@ TEST_F(FileMetricsWriterTest, finalizeAbandonedSessionFilesWrongNames) {
 
     // create some non-open-like files
     ASSERT_TRUE(mRoot->makeSubFile(
-            PathUtils::join(kSpoolDir, "emulator-metrics.trx")));
+            PathUtils::join(kSpoolDir, "emulator-metrics.trk")));
     ASSERT_TRUE(
             mRoot->makeSubFile(PathUtils::join(kSpoolDir, "emulator-metrics")));
     ASSERT_TRUE(mRoot->makeSubFile(
@@ -239,7 +239,7 @@ TEST_F(FileMetricsWriterTest, writeSimple) {
     // read the event back.
     auto files = mSystem.scanDirEntries(spoolDir(), true);
     ASSERT_EQ(1, files.size());
-    EXPECT_STREQ(PathUtils::extension(files[0]).c_str(), ".trx");
+    EXPECT_STREQ(PathUtils::extension(files[0]).c_str(), ".trk");
 
     std::ifstream in(files[0], std::ios_base::binary);
     EXPECT_TRUE(in);
@@ -275,7 +275,7 @@ TEST_F(FileMetricsWriterTest, writeMultiple) {
     // read the event back.
     auto files = mSystem.scanDirEntries(spoolDir(), true);
     ASSERT_EQ(1, files.size());
-    EXPECT_STREQ(PathUtils::extension(files[0]).c_str(), ".trx");
+    EXPECT_STREQ(PathUtils::extension(files[0]).c_str(), ".trk");
 
     std::ifstream in(files[0], std::ios_base::binary);
     EXPECT_TRUE(in);
@@ -317,7 +317,7 @@ TEST_F(FileMetricsWriterTest, writeLimited) {
         ASSERT_EQ(1, std::count_if(files.begin(), files.end(),
                                    [](const std::string& name) {
                                        return PathUtils::extension(name) ==
-                                              ".trx";
+                                              ".trk";
                                    }));
     }
 
@@ -339,7 +339,7 @@ TEST_F(FileMetricsWriterTest, writeLimited) {
     ASSERT_EQ(0, size);
 
     for (size_t i = 0; i < event.size(); ++i) {
-        EXPECT_STREQ(PathUtils::extension(files[i]).c_str(), ".trx");
+        EXPECT_STREQ(PathUtils::extension(files[i]).c_str(), ".trk");
         std::ifstream in(files[i], std::ios_base::binary);
         EXPECT_TRUE(in);
         wireless_android_play_playlog::LogEvent readEvent;
@@ -385,7 +385,7 @@ TEST_F(FileMetricsWriterTest, writeTimered) {
         ASSERT_EQ(0, std::count_if(files.begin(), files.end(),
                                    [](const std::string& name) {
                                        return PathUtils::extension(name) ==
-                                              ".trx";
+                                              ".trk";
                                    }));
     }
 
@@ -408,10 +408,10 @@ TEST_F(FileMetricsWriterTest, writeTimered) {
     ASSERT_EQ(1, std::count_if(files.begin(), files.end(),
                                [](const std::string& name) {
                                    return PathUtils::extension(name) ==
-                                          ".trx";
+                                          ".trk";
                                }));
 
-    EXPECT_STREQ(PathUtils::extension(files.front()).c_str(), ".trx");
+    EXPECT_STREQ(PathUtils::extension(files.front()).c_str(), ".trk");
 
     // read the event back and make sure they're correct.
     std::ifstream in(files.front(), std::ios_base::binary);
