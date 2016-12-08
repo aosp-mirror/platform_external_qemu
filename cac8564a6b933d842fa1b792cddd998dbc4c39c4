@@ -22,6 +22,23 @@
       "revId": "cac8564a6b933d842fa1b792cddd998dbc4c39c4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2d32ef87_60986205",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-12-08T21:42:17Z",
+      "side": 1,
+      "message": "check \"system-images\" as well ?\nsince we depend on having it to load system image and kernel etc. \"platforms\" is not as critical as \"system-images\" to emulator.",
+      "revId": "cac8564a6b933d842fa1b792cddd998dbc4c39c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
