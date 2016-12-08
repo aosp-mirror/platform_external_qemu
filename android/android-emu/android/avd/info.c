@@ -1456,6 +1456,10 @@ const FileData* avdInfo_getBootProperties(const AvdInfo* i) {
     return i->bootProperties;
 }
 
+const FileData* avdInfo_getBuildProperties(const AvdInfo* i) {
+    return i->buildProperties;
+}
+
 int avdInfo_getSysImgIncrementalVersion(const AvdInfo* i) {
     return i->incrementalVersion;
 }
