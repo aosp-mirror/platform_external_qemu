@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cd5233c6_e624a077",
+        "filename": "android/android-emu/android/base/files/IniFile.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-12-08T18:30:56Z",
+      "side": 1,
+      "message": "oh my :-)",
+      "revId": "87770ee688bba5b2b647ed5602dc37e8abca500b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd5233c6_46d25467",
+        "filename": "android/android-emu/android/base/files/IniFile.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-12-08T18:30:56Z",
+      "side": 1,
+      "message": "nit: is there a reason to use int instead of size_t here?",
+      "revId": "87770ee688bba5b2b647ed5602dc37e8abca500b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
