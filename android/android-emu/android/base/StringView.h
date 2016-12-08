@@ -88,6 +88,10 @@ public:
     //   is to make this overload a poorer choice for the case of an array. For
     //   the 'const char[]' argument both 'reference to an array' and 'pointer'
     //   overloads are tied, so compiler can't choose without help
+    // Note2: for all constructors and set() calls, |end| must be
+    //   dereferencable. It is notrequired to be '\0', but there has to be some
+    //   data there. One may not construct a StringView passing past-the-end
+    //   iterator as |end|! StringView will try to dereference it.
     template <class Char, class = enable_if<std::is_same<Char, char>>>
     constexpr StringView(const Char* const & string) :
             mString(string ? string : ""), mSize(string ? strlen(string) : 0) {}
@@ -116,6 +120,7 @@ public:
     constexpr const_iterator end() const { return mString + mSize; }
 
     constexpr bool empty() const { return !size(); }
+    constexpr bool isNullTerminated() const { return *end() == '\0'; }
 
     void clear() {
         mSize = 0;
