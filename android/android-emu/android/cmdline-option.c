@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+const AndroidOptions* android_cmdLineOptions = NULL;
+
 #define  _VERBOSE_TAG(x,y)   { #x, VERBOSE_##x, y },
 static const struct { const char*  name; int  flag; const char*  text; }
 debug_tags[] = {
