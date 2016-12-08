@@ -113,6 +113,7 @@ struct AvdInfo {
     char*     searchPaths[ MAX_SEARCH_PATHS ];
     int       numSearchPaths;
     char*     contentPath;
+    char*     rootIniPath;
     CIniFile* rootIni;   /* root <foo>.ini file, empty if missing */
     CIniFile* configIni; /* virtual device's config.ini, NULL if missing */
     CIniFile* skinHardwareIni; /* skin-specific hardware.ini */
@@ -172,6 +173,7 @@ avdInfo_free( AvdInfo*  i )
 
         AFREE(i->contentPath);
         AFREE(i->sdkRootPath);
+        AFREE(i->rootIniPath);
         AFREE(i->targetArch);
         AFREE(i->targetAbi);
 
@@ -424,17 +426,16 @@ _avdInfo_getSdkRoot( AvdInfo*  i )
 static int
 _avdInfo_getRootIni( AvdInfo*  i )
 {
-    char*  iniPath = path_getRootIniPath( i->deviceName );
+    i->rootIniPath = path_getRootIniPath( i->deviceName );
 
-    if (iniPath == NULL) {
+    if (i->rootIniPath == NULL) {
         derror("unknown virtual device name: '%s'", i->deviceName);
         return -1;
     }
 
-    D("Android virtual device file at: %s", iniPath);
+    D("Android virtual device file at: %s", i->rootIniPath);
 
-    i->rootIni = iniFile_newFromFile(iniPath);
-    AFREE(iniPath);
+    i->rootIni = iniFile_newFromFile(i->rootIniPath);
 
     if (i->rootIni == NULL) {
         derror("Corrupt virtual device config file!");
@@ -1250,6 +1251,12 @@ const char*
 avdInfo_getContentPath( const AvdInfo*  i )
 {
     return i->contentPath;
+}
+
+const char*
+avdInfo_getRootIniPath( const AvdInfo*  i )
+{
+    return i->rootIniPath;
 }
 
 int
