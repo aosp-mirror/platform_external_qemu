@@ -12,6 +12,7 @@
 #include "android/base/files/IniFile.h"
 
 #include "android/base/testing/TestTempDir.h"
+#include "android/base/ArraySize.h"
 
 #include <gtest/gtest.h>
 
@@ -470,9 +471,9 @@ TEST_F(IniFileTest, diskFileOrder) {
 
 TEST_F(IniFileTest, strDefaultValues) {
     ASSERT_EQ(0, mIni->size());
-    EXPECT_TRUE(mIni->getBoolStr("missingKey", "yes"));
-    EXPECT_FALSE(mIni->getBoolStr("missingKey", "no"));
-    EXPECT_EQ(1024ULL, mIni->getDiskSizeStr("missingKey", "1k"));
+    EXPECT_TRUE(mIni->getBool("missingKey", "yes"));
+    EXPECT_FALSE(mIni->getBool("missingKey", "no"));
+    EXPECT_EQ(1024ULL, mIni->getDiskSize("missingKey", "1k"));
 }
 
 TEST_F(IniFileTest, makeValidKey) {
@@ -482,6 +483,26 @@ TEST_F(IniFileTest, makeValidKey) {
     EXPECT_STREQ("_a.20sign.20.23", IniFile::makeValidKey("a sign #").c_str());
     EXPECT_STREQ("_some.20number.2010.20within",
                  IniFile::makeValidKey("some number 10 within").c_str());
+}
+
+TEST(IniFileTest2, parseInMemory) {
+    static const char data[] =
+R"(key1=val1
+key2=1011
+key3=false
+)";
+
+    IniFile ini;
+    ASSERT_TRUE(ini.readFromMemory(data));
+    EXPECT_STREQ("", ini.getBackingFile().c_str());
+
+    ASSERT_EQ(3, ini.size());
+    EXPECT_STREQ("val1", ini.getString("key1", "").c_str());
+    EXPECT_EQ(1011, ini.getInt64("key2", 1));
+    EXPECT_FALSE(ini.getBool("key3", true));
+
+    IniFile ini2(data, stringLiteralLength(data));
+    ASSERT_EQ(3, ini2.size());
 }
 
 }  // namespace base
