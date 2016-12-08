@@ -13,91 +13,35 @@
 // limitations under the License.
 
 #include "android/base/memory/LazyInstance.h"
-
-#ifdef _WIN32
-#  define WIN32_LEAN_AND_MEAN 1
-#  include <windows.h>
-#else
-#  include <sched.h>
-#endif
+#include "android/base/threads/Thread.h"
 
 namespace android {
 namespace base {
 namespace internal {
 
-typedef LazyInstanceState::AtomicType AtomicType;
-
-#if defined(__GNUC__)
-static inline void compilerBarrier() {
-    __asm__ __volatile__ ("" : : : "memory");
-}
-#else
-#error "Your compiler is not supported"
-#endif
-
-#if defined(__i386__) || defined(__x86_64__)
-#  define acquireBarrier() compilerBarrier()
-#  define releaseBarrier() compilerBarrier()
-#else
-#  error "Your CPU is not supported"
-#endif
-
-static inline AtomicType loadAcquire(AtomicType volatile* ptr) {
-    AtomicType ret = *ptr;
-    acquireBarrier();
-    return ret;
-}
-
-static inline void storeRelease(AtomicType volatile* ptr, AtomicType value) {
-    releaseBarrier();
-    *ptr = value;
-}
-
-static int atomicCompareAndSwap(AtomicType volatile* ptr,
-                                int expected,
-                                int value) {
-#ifdef _WIN32
-    return InterlockedCompareExchange(ptr, value, expected);
-#elif defined(__GNUC__)
-    return __sync_val_compare_and_swap(ptr, expected, value);
-#else
-#error "Your compiler is not supported"
-#endif
-}
-
-static void yieldThread() {
-#ifdef _WIN32
-    if (!::SwitchToThread()) {
-        ::Sleep(0);
-    }
-#else
-    sched_yield();
-#endif
-}
-
-bool LazyInstanceState::inInitState() {
-    return loadAcquire(&mState) == STATE_INIT;
+bool LazyInstanceState::inInitState() const {
+    return mState.load(std::memory_order_acquire) == State::Init;
 }
 
 bool LazyInstanceState::needConstruction() {
-    AtomicType state = loadAcquire(&mState);
-    if (mState == STATE_DONE)
-        return false;
-
-    state = atomicCompareAndSwap(&mState, STATE_INIT, STATE_CONSTRUCTING);
-    if (state == STATE_INIT)
+    auto state = State::Init;
+    if (mState.compare_exchange_strong(state,
+                                       State::Constructing,
+                                       std::memory_order_acq_rel,
+                                       std::memory_order_relaxed)) {
         return true;
+    }
 
-    do {
-        yieldThread();
-        state = loadAcquire(&mState);
-    } while (state != STATE_DONE);
+    while (state != State::Done) {
+        Thread::yield();
+        state = mState.load(std::memory_order_acquire);
+    }
 
     return false;
 }
 
 void LazyInstanceState::doneConstructing() {
-    storeRelease(&mState, STATE_DONE);
+    mState.store(State::Done, std::memory_order_release);
 }
 
 }  // namespace internal
