@@ -43,7 +43,7 @@ int getopt(int argc, char* const argv[], const char* ostr) {
     char* oindex = strchr(ostr, optopt);
     if (!oindex) {
         // Unsupported option.
-        (void)fprintf(stderr, "%s: illegal option -- %c\n", argv[0]);
+        (void)fprintf(stderr, "%s: illegal option -- %c\n", argv[0], optopt);
         return '?';
     }
     if (oindex[1] != ':') {
@@ -59,7 +59,7 @@ int getopt(int argc, char* const argv[], const char* ostr) {
     if (*place) {
         optarg = (char *)place;
     } else if (argc > ++optind) {
-        optarg = (char *)argv[optind];
+        optarg = (char *)argv[optind++];
     } else if (oindex[2] == ':') {
         // Optional argument is missing.
         place = kEmpty;
