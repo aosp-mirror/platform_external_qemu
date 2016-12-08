@@ -52,21 +52,61 @@ std::string ConfigDirs::getUserDirectory() {
 
 // static
 std::string ConfigDirs::getAvdRootDirectory() {
+    static const char kAndroidSubDir[] = ".android";
     static const char kAvdSubDir[] = "avd";
     System* system = System::get();
-    std::string home = system->envGet("ANDROID_AVD_HOME");
-    if (home.size()) {
-        return home;
+
+    std::string avdRoot = system->envGet("ANDROID_AVD_HOME");
+    if ( !avdRoot.empty() && system->pathIsDir(avdRoot) ) {
+        return avdRoot;
     }
-    std::string result = PathUtils::join(getUserDirectory(), kAvdSubDir);
-    return result;
+
+    // No luck with ANDROID_AVD_HOME, try ANDROID_SDK_HOME
+    avdRoot = system->envGet("ANDROID_SDK_HOME");
+
+    if ( !avdRoot.empty() ) {
+        // ANDROID_SDK_HOME is defined
+        avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
+        if (isValidAvdRoot(avdRoot)) {
+            // ANDROID_SDK_HOME is good
+            return PathUtils::join(avdRoot, kAvdSubDir);
+        }
+        // ANDROID_SDK_HOME is defined but bad. In this case,
+        // Android Studio tries $USER_HOME and $HOME. We'll
+        // do the same.
+        avdRoot = system->envGet("USER_HOME");
+        if ( !avdRoot.empty() ) {
+            avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
+            if (isValidAvdRoot(avdRoot)) {
+                return PathUtils::join(avdRoot, kAvdSubDir);
+            }
+        }
+        avdRoot = system->envGet("HOME");
+        if ( !avdRoot.empty() ) {
+            avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
+            if (isValidAvdRoot(avdRoot)) {
+                return PathUtils::join(avdRoot, kAvdSubDir);
+            }
+        }
+    }
+
+    // No luck with ANDROID_SDK_HOME / USER_HOME / HOME
+    // Try even more.
+    avdRoot = PathUtils::join(getUserDirectory(), kAvdSubDir);
+    return avdRoot;
 }
 
 // static
 std::string ConfigDirs::getSdkRootDirectoryByEnv() {
     auto system = System::get();
-    std::string sdkRoot = system->envGet("ANDROID_SDK_ROOT");
 
+    std::string sdkRoot = system->envGet("ANDROID_HOME");
+    if ( isValidSdkRoot(sdkRoot) ) {
+        return sdkRoot;
+    }
+
+    // ANDROID_HOME is not good. Try ANDROID_SDK_ROOT.
+    sdkRoot = system->envGet("ANDROID_SDK_ROOT");
     if (sdkRoot.size()) {
         // Unquote a possibly "quoted" path.
         if (sdkRoot[0] == '"') {
@@ -77,7 +117,7 @@ std::string ConfigDirs::getSdkRootDirectoryByEnv() {
             ScopedCPtr<char> buf(android::base::strDup(sdkRoot));
             sdkRoot.assign(buf.get() + 1, copySize);
         }
-        if (system->pathIsDir(sdkRoot) && system->pathCanRead(sdkRoot)) {
+        if (isValidSdkRoot(sdkRoot)) {
             return sdkRoot;
         }
     }
@@ -92,7 +132,7 @@ std::string ConfigDirs::getSdkRootDirectoryByPath() {
     PathUtils::simplifyComponents(&parts);
 
     std::string sdkRoot = PathUtils::recompose(parts);
-    if (system->pathIsDir(sdkRoot) && system->pathCanRead(sdkRoot)) {
+    if ( isValidSdkRoot(sdkRoot) ) {
         return sdkRoot;
     }
     return std::string();
@@ -107,6 +147,44 @@ std::string ConfigDirs::getSdkRootDirectory() {
 
     // Otherwise, infer from the path of the emulator's binary.
     return getSdkRootDirectoryByPath();
+}
+
+// static
+bool ConfigDirs::isValidSdkRoot(const android::base::StringView& rootPath) {
+    if (rootPath.empty()) {
+        return false;
+    }
+    System* system = System::get();
+    if ( !system->pathIsDir(rootPath) || !system->pathCanRead(rootPath) ) {
+        return false;
+    }
+    std::string platformsPath = PathUtils::join(rootPath, "platforms");
+    if ( !system->pathIsDir(platformsPath) ) {
+        return false;
+    }
+    std::string platformToolsPath = PathUtils::join(rootPath, "platform-tools");
+    if ( !system->pathIsDir(platformToolsPath) ) {
+        return false;
+    }
+
+    return true;
+}
+
+// static
+bool ConfigDirs::isValidAvdRoot(const android::base::StringView& avdPath) {
+    if (avdPath.empty()) {
+        return false;
+    }
+    System* system = System::get();
+    if ( !system->pathIsDir(avdPath) || !system->pathCanRead(avdPath) ) {
+        return false;
+    }
+    std::string avdAvdPath = PathUtils::join(avdPath, "avd");
+    if ( !system->pathIsDir(avdAvdPath) ) {
+        return false;
+    }
+
+    return true;
 }
 
 }  // namespace android
