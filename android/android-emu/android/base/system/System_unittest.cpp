@@ -215,7 +215,9 @@ TEST(System, pathOperations) {
     EXPECT_FALSE(sys->pathCanExec(fooPath));
     EXPECT_FALSE(sys->pathFileSize(fooPath, &fileSize));
 
+    const auto createTimeBefore = sys->getUnixTimeUs();
     make_subfile(tempDir.path(), "foo");
+    const auto createTimeAfter = sys->getUnixTimeUs();
 
     EXPECT_TRUE(sys->pathExists(fooPath));
     EXPECT_TRUE(sys->pathIsFile(fooPath));
@@ -292,6 +294,19 @@ TEST(System, pathOperations) {
     EXPECT_TRUE(sys->pathFileSize(fooPath, &fileSize));
     EXPECT_LT(0, fileSize);
 
+    // Test creation time getter.
+    auto createTime = sys->pathCreationTime(fooPath);
+#ifdef __linux__
+    EXPECT_FALSE(createTime);
+    // Just to make the variables used.
+    EXPECT_TRUE(createTimeBefore <= createTimeAfter);
+#else
+    ASSERT_TRUE(createTime);
+    // On Windows creation time only contains seconds, so we need to make sure
+    // we're comparing with the right precision.
+    EXPECT_GE(*createTime, createTimeBefore - (createTimeBefore % 1000000));
+    EXPECT_LE(*createTime, createTimeAfter);
+#endif
     // Test file deletion
     EXPECT_TRUE(sys->deleteFile(fooPath));
     EXPECT_FALSE(sys->pathFileSize(fooPath, &fileSize));
