@@ -39,6 +39,29 @@
       "revId": "cac8564a6b933d842fa1b792cddd998dbc4c39c4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2d32ef87_bde30719",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-12-09T19:38:41Z",
+      "side": 1,
+      "message": "StringView?",
+      "range": {
+        "startLine": 66,
+        "startChar": 31,
+        "endLine": 66,
+        "endChar": 42
+      },
+      "revId": "cac8564a6b933d842fa1b792cddd998dbc4c39c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
