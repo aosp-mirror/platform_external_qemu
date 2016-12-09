@@ -80,4 +80,6 @@ private:
     android::base::FunctorThread mCleanupThread;
 };
 
+extern bool gEmulatorShuttingDown;
+
 }  // namespace emugl
