@@ -41,7 +41,9 @@ enum SyncThreadOpCode {
     // A fence FD object in the guest is signaled.
     SYNC_THREAD_WAIT = 1,
     // Blocking command to clean up and exit the sync thread.
-    SYNC_THREAD_EXIT = 2
+    SYNC_THREAD_EXIT = 2,
+    // Command to exit the sync thread without GL cleanup.
+    SYNC_THREAD_EXIT_NO_GL_CLEANUP = 3
 };
 
 struct SyncThreadCmd {
@@ -71,7 +73,7 @@ public:
     // This is blocking; after this function returns, we're sure
     // the sync thread is gone.
     // - Triggers a |SyncThreadCmd| with op code |SYNC_THREAD_EXIT|
-    void cleanup();
+    void cleanup(bool doGlCleanup);
 
     // We assume the invariant that sync threads correspond 1:1
     // with render threads.
@@ -84,7 +86,7 @@ public:
     //   It is meant to be called whenever render threads exit or
     //   EGL contexts are destroyed.
     static SyncThread* getSyncThread();
-    static void destroySyncThread();
+    static void destroySyncThread(bool doGlCleanup = true);
 
 private:
     // |initSyncContext| creates an EGL context expressly for calling
@@ -118,7 +120,7 @@ private:
     GLint doSyncThreadCmd(SyncThreadCmd* cmd);
     void doSyncContextInit();
     void doSyncWait(SyncThreadCmd* cmd);
-    void doExit();
+    void doExit(bool doGlCleanup);
 
     // EGL objects / object handles specific to
     // a sync thread.

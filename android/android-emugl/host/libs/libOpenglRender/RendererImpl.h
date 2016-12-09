@@ -80,4 +80,5 @@ private:
     android::base::FunctorThread mCleanupThread;
 };
 
+extern bool gEmulatorExiting;
 }  // namespace emugl

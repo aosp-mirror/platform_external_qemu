@@ -17,6 +17,7 @@
 
 #include "ErrorLog.h"
 #include "FbConfig.h"
+#include "RendererImpl.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
@@ -86,6 +87,7 @@ GLuint WindowSurface::getWidth() const { return mWidth; }
 GLuint WindowSurface::getHeight() const { return mHeight; }
 
 bool WindowSurface::flushColorBuffer() {
+    if (emugl::gEmulatorExiting) return false;
     if (!mAttachedColorBuffer.get()) {
         return true;
     }
@@ -113,6 +115,7 @@ bool WindowSurface::flushColorBuffer() {
     const bool needToSet = prevContext != mDrawContext->getEGLContext() ||
                            prevReadSurf != mSurface || prevDrawSurf != mSurface;
     if (needToSet) {
+        if (emugl::gEmulatorExiting) return false;
         if (!s_egl.eglMakeCurrent(mDisplay,
                                   mSurface,
                                   mSurface,
@@ -126,6 +129,7 @@ bool WindowSurface::flushColorBuffer() {
 
     if (needToSet) {
         // restore current context/surface
+        if (emugl::gEmulatorExiting) return false;
         s_egl.eglMakeCurrent(mDisplay, prevDrawSurf, prevReadSurf, prevContext);
     }
 
@@ -134,6 +138,7 @@ bool WindowSurface::flushColorBuffer() {
 
 bool WindowSurface::resize(unsigned int p_width, unsigned int p_height)
 {
+    if (emugl::gEmulatorExiting) return false;
     if (mSurface && mWidth == p_width && mHeight == p_height) {
         // no need to resize
         return true;
@@ -148,6 +153,7 @@ bool WindowSurface::resize(unsigned int p_width, unsigned int p_height)
                               prevDrawSurf == mSurface);
 
     if (needRebindContext) {
+        if (emugl::gEmulatorExiting) return false;
         s_egl.eglMakeCurrent(
                 mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     }
@@ -179,6 +185,7 @@ bool WindowSurface::resize(unsigned int p_width, unsigned int p_height)
     mHeight = p_height;
 
     if (needRebindContext) {
+        if (emugl::gEmulatorExiting) return false;
         s_egl.eglMakeCurrent(
                 mDisplay,
                 (prevDrawSurf == prevPbuf) ? mSurface : prevDrawSurf,

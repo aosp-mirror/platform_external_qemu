@@ -43,6 +43,7 @@ namespace emugl {
 // Start with a smaller buffer to not waste memory on a low-used render threads.
 static constexpr int kStreamBufferSize = 128 * 1024;
 
+
 RenderThread::RenderThread(std::weak_ptr<RendererImpl> renderer,
                            std::shared_ptr<RenderChannelImpl> channel)
     : mChannel(channel), mRenderer(renderer) {}
@@ -205,20 +206,22 @@ intptr_t RenderThread::main() {
     }
 
     // exit sync thread, if any.
-    SyncThread::destroySyncThread();
+    SyncThread::destroySyncThread(!gEmulatorExiting);
 
-    //
-    // Release references to the current thread's context/surfaces if any
-    //
-    FrameBuffer::getFB()->bindContext(0, 0, 0);
-    if (tInfo.currContext || tInfo.currDrawSurf || tInfo.currReadSurf) {
-        fprintf(stderr,
-                "ERROR: RenderThread exiting with current context/surfaces\n");
+    if (!gEmulatorExiting) {
+        //
+        // Release references to the current thread's context/surfaces if any
+        //
+        FrameBuffer::getFB()->bindContext(0, 0, 0);
+        if (tInfo.currContext || tInfo.currDrawSurf || tInfo.currReadSurf) {
+            fprintf(stderr,
+                    "ERROR: RenderThread exiting with current context/surfaces\n");
+        }
+
+        FrameBuffer::getFB()->drainWindowSurface();
+        FrameBuffer::getFB()->drainRenderContext();
+
     }
-
-    FrameBuffer::getFB()->drainWindowSurface();
-    FrameBuffer::getFB()->drainRenderContext();
-
     DBG("Exited a RenderThread @%p\n", this);
 
     return 0;

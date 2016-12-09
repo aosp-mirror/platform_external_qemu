@@ -48,6 +48,8 @@ namespace emugl {
 //   thread, which may in turn be blocked on something else.
 static const bool kUseSubwindowThread = false;
 
+bool gEmulatorExiting = false;
+
 RendererImpl::RendererImpl()
     : mCleanupThread([this]() {
           while (const auto id = mCleanupProcessIds.receive()) {
@@ -90,6 +92,7 @@ void RendererImpl::stop() {
     auto threads = std::move(mThreads);
     lock.unlock();
 
+    gEmulatorExiting = true;
     for (const auto& t : threads) {
         if (const auto channel = t.second.lock()) {
             channel->stopFromHost();

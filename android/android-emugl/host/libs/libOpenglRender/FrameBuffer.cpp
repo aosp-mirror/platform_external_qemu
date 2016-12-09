@@ -18,6 +18,7 @@
 
 #include "DispatchTables.h"
 #include "NativeSubWindow.h"
+#include "RendererImpl.h"
 #include "RenderThreadInfo.h"
 #include "gles2_dec.h"
 
@@ -164,6 +165,7 @@ void FrameBuffer::finalize(){
     }
     m_windows.clear();
     m_contexts.clear();
+    if (emugl::gEmulatorExiting) return;
     s_egl.eglMakeCurrent(m_eglDisplay, NULL, NULL, NULL);
     s_egl.eglDestroyContext(m_eglDisplay, m_eglContext);
     s_egl.eglDestroyContext(m_eglDisplay, m_pbufContext);
@@ -623,6 +625,7 @@ bool FrameBuffer::removeSubWindow() {
     bool removed = false;
     emugl::Mutex::AutoLock mutex(m_lock);
     if (m_subWin) {
+        if (emugl::gEmulatorExiting) return false;
         s_egl.eglMakeCurrent(m_eglDisplay, NULL, NULL, NULL);
         s_egl.eglDestroySurface(m_eglDisplay, m_eglSurface);
         destroySubWindow(m_subWin);
@@ -1001,6 +1004,9 @@ bool FrameBuffer::bindContext(HandleType p_context,
                               HandleType p_drawSurface,
                               HandleType p_readSurface)
 {
+    if (emugl::gEmulatorExiting)
+        return false;
+
     emugl::Mutex::AutoLock mutex(m_lock);
 
     WindowSurfacePtr draw, read;
@@ -1156,6 +1162,7 @@ EGLBoolean FrameBuffer::destroyClientImage(HandleType image) {
 //
 bool FrameBuffer::bind_locked()
 {
+    if (emugl::gEmulatorExiting) return false;
     EGLContext prevContext = s_egl.eglGetCurrentContext();
     EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
     EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
@@ -1179,6 +1186,7 @@ bool FrameBuffer::bind_locked()
 
 bool FrameBuffer::bindSubwin_locked()
 {
+    if (emugl::gEmulatorExiting) return false;
     EGLContext prevContext = s_egl.eglGetCurrentContext();
     EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
     EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
@@ -1209,6 +1217,7 @@ bool FrameBuffer::bindSubwin_locked()
 
 bool FrameBuffer::unbind_locked()
 {
+    if (emugl::gEmulatorExiting) return false;
     EGLContext curContext = s_egl.eglGetCurrentContext();
     EGLSurface curReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
     EGLSurface curDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
@@ -1241,6 +1250,7 @@ void FrameBuffer::createTrivialContext(HandleType shared,
 
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind)
 {
+    if (emugl::gEmulatorExiting) return false;
     if (needLockAndBind) {
         m_lock.lock();
     }

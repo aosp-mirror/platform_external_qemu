@@ -83,10 +83,14 @@ void SyncThread::triggerWait(FenceSync* fenceSync,
     DPRINT("exit");
 }
 
-void SyncThread::cleanup() {
+void SyncThread::cleanup(bool doGlCleanup) {
     DPRINT("enter");
     SyncThreadCmd to_send;
-    to_send.opCode = SYNC_THREAD_EXIT;
+    if (doGlCleanup) {
+        to_send.opCode = SYNC_THREAD_EXIT;
+    } else {
+        to_send.opCode = SYNC_THREAD_EXIT_NO_GL_CLEANUP;
+    }
     sendAndWaitForResult(to_send);
     DPRINT("exit");
 }
@@ -125,7 +129,9 @@ intptr_t SyncThread::main() {
             DPRINT("sent result");
         }
 
-        if (cmd.opCode == SYNC_THREAD_EXIT) exiting = true;
+        if (cmd.opCode == SYNC_THREAD_EXIT ||
+            cmd.opCode == SYNC_THREAD_EXIT_NO_GL_CLEANUP)
+            exiting = true;
     }
 
     DPRINT("exited sync thread");
@@ -220,13 +226,15 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
     DPRINT("exit");
 }
 
-void SyncThread::doExit() {
+void SyncThread::doExit(bool doGlCleanup) {
     // This sequence parallels the exit sequence
     // in RenderThread.
-    FrameBuffer::getFB()->bindContext(0, 0, 0);
-    FrameBuffer::getFB()->drainWindowSurface();
-    FrameBuffer::getFB()->drainRenderContext();
-    delete mTLS;
+    if (doGlCleanup) {
+        FrameBuffer::getFB()->bindContext(0, 0, 0);
+        FrameBuffer::getFB()->drainWindowSurface();
+        FrameBuffer::getFB()->drainRenderContext();
+        delete mTLS;
+    }
 }
 
 int SyncThread::doSyncThreadCmd(SyncThreadCmd* cmd) {
@@ -242,7 +250,10 @@ int SyncThread::doSyncThreadCmd(SyncThreadCmd* cmd) {
         break;
     case SYNC_THREAD_EXIT:
         DPRINT("exec SYNC_THREAD_EXIT");
-        doExit();
+        doExit(true);
+    case SYNC_THREAD_EXIT_NO_GL_CLEANUP:
+        DPRINT("exec SYNC_THREAD_EXIT_NO_GL_CLEANUP");
+        doExit(false);
         break;
     }
     return result;
@@ -264,15 +275,16 @@ SyncThread* SyncThread::getSyncThread() {
 }
 
 /* static */
-void SyncThread::destroySyncThread() {
+void SyncThread::destroySyncThread(bool doGlCleanup) {
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
     DPRINT("exiting a sync thread for render thread info=%p.", tInfo);
 
     if (!tInfo->syncThread) return;
 
-    tInfo->syncThread->cleanup();
+    tInfo->syncThread->cleanup(doGlCleanup);
     intptr_t exitStatus;
     tInfo->syncThread->wait(&exitStatus);
+    DPRINT("exited sync thread for render thread info=%p.", tInfo);
     tInfo->syncThread.reset(nullptr);
 }
