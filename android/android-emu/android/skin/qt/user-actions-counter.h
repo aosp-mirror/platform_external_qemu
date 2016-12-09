@@ -61,7 +61,7 @@ private:
     static const char kReportMetricsProperty[];
     void startCountingAll(QObject* target);
     void startCountingMarked(QObject* target);
-    bool isMarked(const QObject* target);
+    static bool isMarked(const QObject* target);
     void processEvent(const QObject* target, const QEvent* event);
 
     const EventCapturer::EventTypeSet mEventTypes;

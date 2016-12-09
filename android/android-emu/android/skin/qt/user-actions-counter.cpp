@@ -39,8 +39,7 @@ void UserActionsCounter::startCountingAll(QObject* target) {
 
 void UserActionsCounter::startCountingMarked(QObject* target) {
     mTokens[target] = mEventCapturer->subscribeToEvents(
-            target, [this](const QObject* o) { return this->isMarked(o); },
-            mEventTypes,
+            target, &UserActionsCounter::isMarked, mEventTypes,
             [this](const QObject* target, const QEvent* event) {
                 this->processEvent(target, event);
             });
