@@ -18,6 +18,7 @@
 
 #include "DispatchTables.h"
 #include "NativeSubWindow.h"
+#include "RendererImpl.h"
 #include "RenderThreadInfo.h"
 #include "gles2_dec.h"
 
@@ -1156,6 +1157,8 @@ EGLBoolean FrameBuffer::destroyClientImage(HandleType image) {
 //
 bool FrameBuffer::bind_locked()
 {
+    if (emugl::gEmulatorShuttingDown) return false;
+
     EGLContext prevContext = s_egl.eglGetCurrentContext();
     EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
     EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
