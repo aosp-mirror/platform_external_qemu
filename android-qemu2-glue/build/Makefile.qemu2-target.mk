@@ -93,6 +93,7 @@ LOCAL_SRC_FILES += \
     hw/misc/goldfish_battery.c \
     hw/misc/goldfish_pipe.c \
     hw/misc/goldfish_sync.c \
+    hw/input/rotary-encoder.c \
     $(call qemu2-if-target,arm arm64,\
         hw/arm/ranchu.c) \
     $(call qemu2-if-target,mips mips64,\

@@ -16,6 +16,7 @@
 
 #include "qemu/osdep.h"
 #include "hw/input/goldfish_events.h"
+#include "hw/input/rotary-encoder.h"
 #include "ui/console.h"
 
 #include <stdbool.h>
@@ -43,7 +44,15 @@ static void user_event_keycode(int code) {
 }
 
 static void user_event_generic(int type, int code, int value) {
-    goldfish_event_send(type, code, value);
+    // DO NOT SUBMIT: this should be a separate method
+    if (type == 2) {
+        rotary_event_send(type, code, value);
+
+        // DO NOT SUBMIT: send an extra SYN event
+        rotary_event_send(0, 0, 0);
+    } else {
+        goldfish_event_send(type, code, value);
+    }
 }
 
 static void user_event_mouse(int dx, int dy, int dz, int buttonsState) {
