@@ -90,6 +90,7 @@ void RendererImpl::stop() {
     auto threads = std::move(mThreads);
     lock.unlock();
 
+    FrameBuffer::getFB()->setShuttingDown();
     for (const auto& t : threads) {
         if (const auto channel = t.second.lock()) {
             channel->stopFromHost();

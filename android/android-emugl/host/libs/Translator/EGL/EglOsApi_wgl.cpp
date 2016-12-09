@@ -964,7 +964,8 @@ public:
 
             int count = 100;
             while (!dispatch->wglMakeCurrent(hdcDraw, hdcContext)
-                   && --count > 0) {
+                   && --count > 0
+                   && !GetLastError()) {
                 Sleep(16);
             }
             if (count <= 0) {

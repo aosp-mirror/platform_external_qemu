@@ -338,6 +338,8 @@ public:
                               HandleType* contextOut,
                               HandleType* surfOut);
 
+    void setShuttingDown() { m_shuttingDown = true; }
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     ~FrameBuffer();
@@ -403,5 +405,8 @@ private:
     ProcOwnedColorBuffers m_procOwnedColorBuffers;
     ProcOwnedEGLImages m_procOwnedEGLImages;
     ProcOwnedRenderContexts m_procOwnedRenderContext;
+
+    // Flag set when emulator is shutting down.
+    bool m_shuttingDown = false;
 };
 #endif
