@@ -1164,7 +1164,7 @@ bool FrameBuffer::bind_locked()
         || prevDrawSurf != m_pbufSurface) {
         if (!s_egl.eglMakeCurrent(m_eglDisplay, m_pbufSurface,
                                   m_pbufSurface, m_pbufContext)) {
-            ERR("eglMakeCurrent failed\n");
+            if (!m_shuttingDown) ERR("eglMakeCurrent failed\n");
             return false;
         }
     } else {
