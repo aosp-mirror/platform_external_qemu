@@ -632,3 +632,75 @@ strip_libs () {
         fi
     done
 }
+
+# returns 0 iff the string in $2 matches the pattern in $1
+# $1: pattern
+# $2: string
+pattern_match () {
+    echo "$2" | grep -q -E -e "$1"
+}
+
+_SHU_CMD_init=
+
+# Download a file with either 'curl', 'wget' or 'scp'
+# $1: Source URL (e.g. http://foo.com, ssh://blah, /some/path
+# $2: Target file.
+download_file () {
+    if [ -z "$_SHU_CMD_init" ]; then
+        _SHU_CMD_WGET=$(find_program wget)
+        _SHU_CMD_CURL=$(find_program curl)
+        _SHU_CMD_SCP=$(find_program scp)
+        _SHU_CMD_init="true"
+    fi
+    # Is this HTTP, HTTPS or FTP ?
+    if pattern_match "^(http|https|ftp):.*" "$1"; then
+        if [ -n "$_SHU_CMD_WGET" ] ; then
+            run $_SHU_CMD_WGET -O $2 $1
+        elif [ -n "$_SHU_CMD_CURL" ] ; then
+            run $_SHU_CMD_CURL -o $2 $1
+        else
+            echo "Please install wget or curl on this machine"
+            exit 1
+        fi
+        return
+    fi
+
+    # Is this SSH ?
+    # Accept both ssh://<path> or <machine>:<path>
+    #
+    if pattern_match "^(ssh|[^:]+):.*" "$1"; then
+        if [ -n "$_SHU_CMD_SCP" ] ; then
+            scp_src=`echo $1 | sed -e s%ssh://%%g`
+            run $_SHU_CMD_SCP $scp_src $2
+        else
+            echo "Please install scp on this machine"
+            exit 1
+        fi
+        return
+    fi
+
+    # Is this a file copy ?
+    # Accept both file://<path> or /<path>
+    #
+    if pattern_match "^(file://|/).*" "$1"; then
+        cp_src=`echo $1 | sed -e s%^file://%%g`
+        run cp -f $cp_src $2
+        return
+    fi
+
+    # Unknown schema
+    echo "ERROR: Unsupported source URI: $1"
+    exit 1
+}
+
+# A variant of 'download_file' used to specify the target directory
+# $1: source URL
+# $2: target directory
+download_file_to ()
+{
+    local URL="$1"
+    local DIR="$2"
+    local DST="$DIR/`basename $URL`"
+    mkdir -p $DIR
+    download_file "$URL" "$DST"
+}
