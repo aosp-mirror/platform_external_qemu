@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa1b2f68_a1eee795",
+        "filename": "android/android-emu/android/avd/util.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1055888
+      },
+      "writtenOn": "2016-12-12T22:18:41Z",
+      "side": 0,
+      "message": "I don\u0027t think you can remove ANDROID_AVD_HOME, it\u0027s been in use for some time.",
+      "revId": "e4ab2c90e2b9f347c97d243dbb6b5070e5420eb0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

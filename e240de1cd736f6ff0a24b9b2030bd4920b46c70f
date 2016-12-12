@@ -2,6 +2,80 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa1b2f68_81f3eb7a",
+        "filename": "android/android-emu/android/avd/util.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1055888
+      },
+      "writtenOn": "2016-12-12T22:18:41Z",
+      "side": 1,
+      "message": "I don\u0027t see ANDROID_EMULATOR_HOME referenced here? Also, is that an existing env var?",
+      "revId": "e240de1cd736f6ff0a24b9b2030bd4920b46c70f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa1b2f68_e15f3f8e",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1055888
+      },
+      "writtenOn": "2016-12-12T22:18:41Z",
+      "side": 1,
+      "message": "ANDROID_AVD_HOME should be used in preference to ANDROID_SDK_HOME. Note that ANDROID_AVD_HOME points to ~/.android/avd, whereas ANDROID_SDK_HOME points to ~/.android.",
+      "revId": "e240de1cd736f6ff0a24b9b2030bd4920b46c70f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa1b2f68_41b27396",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1055888
+      },
+      "writtenOn": "2016-12-12T22:18:41Z",
+      "side": 1,
+      "message": "It doesn\u0027t seem to me like this should be here, since it\u0027s not used for this purpose by studio.",
+      "range": {
+        "startLine": 102,
+        "startChar": 0,
+        "endLine": 102,
+        "endChar": 49
+      },
+      "revId": "e240de1cd736f6ff0a24b9b2030bd4920b46c70f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa1b2f68_4164b33a",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1055888
+      },
+      "writtenOn": "2016-12-12T22:18:41Z",
+      "side": 1,
+      "message": "This check won\u0027t be correct for ANDROID_AVD_HOME, since ANDROID_AVD_HOME points to the avd dir itself. But we should always use it if set, so we wouldn\u0027t need the check in that case anyway.",
+      "revId": "e240de1cd736f6ff0a24b9b2030bd4920b46c70f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa1b2f68_c3456b68",
         "filename": "android/android-emu/android/emulation/ConfigDirs.h",
         "patchSetId": 3
