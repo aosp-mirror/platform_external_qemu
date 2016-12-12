@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa1b2f68_d5308444",
+        "filename": "android/android-emu/android/base/system/System.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-12-12T19:04:39Z",
+      "side": 1,
+      "message": "nit: could you please add a suffix here, \"Us\"\nIt\u0027s usually much better to have it vs relying on someone reading comments.",
+      "revId": "930d2c46023492ef36b37ad1706ef7b2d7220c77",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
