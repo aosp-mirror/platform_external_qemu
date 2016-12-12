@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa1b2f68_c3456b68",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-12-12T20:56:27Z",
+      "side": 1,
+      "message": "please use StringView for both functions",
+      "range": {
+        "startLine": 65,
+        "startChar": 31,
+        "endLine": 65,
+        "endChar": 42
+      },
+      "revId": "e240de1cd736f6ff0a24b9b2030bd4920b46c70f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
