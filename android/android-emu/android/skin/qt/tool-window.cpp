@@ -579,12 +579,20 @@ void ToolWindow::paintEvent(QPaintEvent*) {
     pen.setWidth(1);
     p.begin(this);
     p.setPen(pen);
+
     double dpr = 1.0;
     int primary_screen_idx = qApp->desktop()->screenNumber(this);
-    QScreen* primary_screen = QApplication::screens().at(primary_screen_idx);
-    if (primary_screen) {
-        dpr = primary_screen->devicePixelRatio();
+    if (primary_screen_idx < 0) {
+        primary_screen_idx = qApp->desktop()->primaryScreen();
     }
+    const auto screens = QApplication::screens();
+    if (primary_screen_idx >= 0 && primary_screen_idx < screens.size()) {
+        const QScreen* const primary_screen = screens.at(primary_screen_idx);
+        if (primary_screen) {
+            dpr = primary_screen->devicePixelRatio();
+        }
+    }
+
     if (dpr > 1.0) {
         // Normally you'd draw the border with a (0, 0 - w-1, h-1) rectangle.
         // However, there's some weirdness going on with high-density displays
