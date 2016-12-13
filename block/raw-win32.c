@@ -21,6 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
+/* Special case to include "qemu-options.h" here without issues */
+#undef POISON_CONFIG_ANDROID
+
 #include "qemu/osdep.h"
 #include "qapi/error.h"
 #include "qemu/cutils.h"
@@ -54,6 +58,10 @@ typedef struct BDRVRawState {
     int type;
     char drive_path[16]; /* format: "d:\" */
     QEMUWin32AIOState *aio;
+#ifdef CONFIG_ANDROID
+    QEMUTimer flush_timer;
+    bool flush_timer_running;
+#endif
 } BDRVRawState;
 
 /*
@@ -95,6 +103,18 @@ static size_t handle_aiocb_rw(RawWin32AIOData *aiocb)
     return offset;
 }
 
+#ifdef CONFIG_ANDROID
+
+#define FLUSH_TIMER_TIMEOUT (1000 * SCALE_MS / SCALE_NS)
+
+static void flush_timer_cb(void* opaque) {
+    BDRVRawState *s = opaque;
+    FlushFileBuffers(s->hfile);
+    s->flush_timer_running = false;
+}
+
+#endif
+
 static int aio_worker(void *arg)
 {
     RawWin32AIOData *aiocb = arg;
@@ -126,11 +146,21 @@ static int aio_worker(void *arg)
             ret = -EINVAL;
         }
         break;
-    case QEMU_AIO_FLUSH:
+    case QEMU_AIO_FLUSH: {
+#ifdef CONFIG_ANDROID
+        BDRVRawState *s = aiocb->bs->opaque;
+        if (!s->flush_timer_running) {
+            const long long now = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
+            timer_mod_ns(&s->flush_timer, now + FLUSH_TIMER_TIMEOUT);
+            s->flush_timer_running = true;
+        }
+#else  // !CONFIG_ANDROID
         if (!FlushFileBuffers(aiocb->hfile)) {
             return -EIO;
         }
+#endif
         break;
+    }
     default:
         fprintf(stderr, "invalid aio request (0x%x)\n", aiocb->aio_type);
         ret = -EINVAL;
@@ -366,6 +396,12 @@ static int raw_open(BlockDriverState *bs, QDict *options, int flags,
         win32_aio_attach_aio_context(s->aio, bdrv_get_aio_context(bs));
     }
 
+#ifdef CONFIG_ANDROID
+    aio_timer_init((bdrv_get_aio_context(bs)), &s->flush_timer,
+                   QEMU_CLOCK_REALTIME, SCALE_NS, flush_timer_cb, s);
+    s->flush_timer_running = false;
+#endif
+
     ret = 0;
 fail:
     qemu_opts_del(opts);
@@ -418,6 +454,14 @@ static void raw_close(BlockDriverState *bs)
         win32_aio_cleanup(s->aio);
         s->aio = NULL;
     }
+
+#ifdef CONFIG_ANDROID
+    timer_del(&s->flush_timer);
+    if (!(bs->open_flags & BDRV_O_TEMPORARY) && s->flush_timer_running) {
+        // force the last run if it was scheduled.
+        flush_timer_cb(s);
+    }
+#endif
 
     CloseHandle(s->hfile);
     if (bs->open_flags & BDRV_O_TEMPORARY) {
@@ -695,6 +739,12 @@ static int hdev_open(BlockDriverState *bs, QDict *options, int flags,
         error_setg_errno(errp, -ret, "Could not open device");
         goto done;
     }
+
+#ifdef CONFIG_ANDROID
+    aio_timer_init((bdrv_get_aio_context(bs)), &s->flush_timer,
+                   QEMU_CLOCK_REALTIME, SCALE_NS, flush_timer_cb, s);
+    s->flush_timer_running = false;
+#endif
 
 done:
     qemu_opts_del(opts);

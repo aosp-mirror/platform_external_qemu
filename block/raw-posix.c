@@ -21,6 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
+/* Special case to include "qemu-options.h" here without issues */
+#undef POISON_CONFIG_ANDROID
+
 #include "qemu/osdep.h"
 #include "qapi/error.h"
 #include "qemu/cutils.h"
@@ -136,6 +140,10 @@ typedef struct BDRVRawState {
     int type;
     int open_flags;
     size_t buf_align;
+#ifdef CONFIG_ANDROID
+    QEMUTimer flush_timer;
+    bool flush_timer_running;
+#endif
 
 #ifdef CONFIG_XFS
     bool is_xfs:1;
@@ -168,6 +176,18 @@ typedef struct RawPosixAIOData {
     off_t aio_offset;
     int aio_type;
 } RawPosixAIOData;
+
+#ifdef CONFIG_ANDROID
+
+#define FLUSH_TIMER_TIMEOUT (1000 * SCALE_MS / SCALE_NS)
+
+static void flush_timer_cb(void* opaque) {
+    BDRVRawState *s = opaque;
+    qemu_fdatasync(s->fd);
+    s->flush_timer_running = false;
+}
+
+#endif
 
 #if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
 static int cdrom_reopen(BlockDriverState *bs);
@@ -511,6 +531,12 @@ static int raw_open_common(BlockDriverState *bs, QDict *options,
     }
 #endif
 
+#ifdef CONFIG_ANDROID
+    aio_timer_init((bdrv_get_aio_context(bs)), &s->flush_timer,
+                   QEMU_CLOCK_REALTIME, SCALE_NS, flush_timer_cb, s);
+    s->flush_timer_running = false;
+#endif
+
     ret = 0;
 fail:
     if (filename && (bdrv_flags & BDRV_O_TEMPORARY)) {
@@ -762,12 +788,21 @@ static ssize_t handle_aiocb_ioctl(RawPosixAIOData *aiocb)
 
 static ssize_t handle_aiocb_flush(RawPosixAIOData *aiocb)
 {
+#ifdef CONFIG_ANDROID
+    BDRVRawState *s = aiocb->bs->opaque;
+    if (!s->flush_timer_running) {
+        const long long now = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
+        timer_mod_ns(&s->flush_timer, now + FLUSH_TIMER_TIMEOUT);
+        s->flush_timer_running = true;
+    }
+#else  // !CONFIG_ANDROID
     int ret;
 
     ret = qemu_fdatasync(aiocb->aio_fildes);
     if (ret == -1) {
         return -errno;
     }
+#endif
     return 0;
 }
 
@@ -1317,6 +1352,13 @@ static void raw_close(BlockDriverState *bs)
 {
     BDRVRawState *s = bs->opaque;
 
+#ifdef CONFIG_ANDROID
+    timer_del(&s->flush_timer);
+    if (!(bs->open_flags & BDRV_O_TEMPORARY) && s->flush_timer_running) {
+        // force the last run if it was scheduled.
+        flush_timer_cb(s);
+    }
+#endif
     if (s->fd >= 0) {
         qemu_close(s->fd);
         s->fd = -1;
