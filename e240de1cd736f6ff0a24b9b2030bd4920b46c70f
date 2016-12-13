@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa1b2f68_b795051f",
+        "filename": "android/android-emu/android/avd/util.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-12-13T00:28:42Z",
+      "side": 1,
+      "message": "Happily, ANDROID_EMULATOR_HOME is not new.\n\nIt is one of the options checked--in ConfigDirs::getUserDirectory().",
+      "parentUuid": "fa1b2f68_81f3eb7a",
+      "revId": "e240de1cd736f6ff0a24b9b2030bd4920b46c70f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa1b2f68_e15f3f8e",
         "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2016-12-12T22:18:41Z",
       "side": 1,
       "message": "ANDROID_AVD_HOME should be used in preference to ANDROID_SDK_HOME. Note that ANDROID_AVD_HOME points to ~/.android/avd, whereas ANDROID_SDK_HOME points to ~/.android.",
+      "revId": "e240de1cd736f6ff0a24b9b2030bd4920b46c70f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa1b2f68_57a4718b",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-12-13T00:28:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa1b2f68_e15f3f8e",
       "revId": "e240de1cd736f6ff0a24b9b2030bd4920b46c70f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -59,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "fa1b2f68_77cacd3f",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-12-13T00:28:42Z",
+      "side": 1,
+      "message": "Because it was checked previously, I\u0027d rather not remove it.\n\nI like giving ANDROID_HOME precedence, however.",
+      "parentUuid": "fa1b2f68_41b27396",
+      "range": {
+        "startLine": 102,
+        "startChar": 0,
+        "endLine": 102,
+        "endChar": 49
+      },
+      "revId": "e240de1cd736f6ff0a24b9b2030bd4920b46c70f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa1b2f68_4164b33a",
         "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
         "patchSetId": 3
@@ -76,6 +136,24 @@
     },
     {
       "key": {
+        "uuid": "fa1b2f68_37d335ef",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-12-13T00:28:42Z",
+      "side": 1,
+      "message": "Good point. ANDROID_AVD_HOME is only checked with \u0027pathIsDir()\u0027. It is not checked here.",
+      "parentUuid": "fa1b2f68_4164b33a",
+      "revId": "e240de1cd736f6ff0a24b9b2030bd4920b46c70f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa1b2f68_c3456b68",
         "filename": "android/android-emu/android/emulation/ConfigDirs.h",
         "patchSetId": 3
@@ -87,6 +165,30 @@
       "writtenOn": "2016-12-12T20:56:27Z",
       "side": 1,
       "message": "please use StringView for both functions",
+      "range": {
+        "startLine": 65,
+        "startChar": 31,
+        "endLine": 65,
+        "endChar": 42
+      },
+      "revId": "e240de1cd736f6ff0a24b9b2030bd4920b46c70f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa1b2f68_1ceaa0bf",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-12-13T00:28:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa1b2f68_c3456b68",
       "range": {
         "startLine": 65,
         "startChar": 31,
