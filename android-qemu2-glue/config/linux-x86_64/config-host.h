@@ -69,3 +69,4 @@
 #define CONFIG_TRACE_FILE trace
 #define CONFIG_IASL iasl
 #define HOST_DSOSUF ".so"
+#define CONFIG_BLOCK_DELAYED_FLUSH  1
