@@ -155,7 +155,7 @@ $(call start-emulator-program,qemu-upstream-$(QEMU2_TARGET_SYSTEM))
 
 LOCAL_WHOLE_STATIC_LIBRARIES += \
     libqemu2-system-$(QEMU2_TARGET_SYSTEM) \
-    libqemu2-common \
+    libqemu2-upstream-common \
 
 LOCAL_STATIC_LIBRARIES += \
     $(QEMU2_SYSTEM_STATIC_LIBRARIES) \

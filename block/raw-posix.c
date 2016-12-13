@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-/* Special case to include "qemu-options.h" here without issues */
+/* This file has some android-specific code */
 #undef POISON_CONFIG_ANDROID
 
 #include "qemu/osdep.h"
