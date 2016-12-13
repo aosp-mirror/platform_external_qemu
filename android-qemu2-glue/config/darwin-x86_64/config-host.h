@@ -42,3 +42,4 @@
 #define CONFIG_TRACE_LOG 1
 #define CONFIG_TRACE_FILE trace
 #define HOST_DSOSUF ".so"
+#define CONFIG_BLOCK_DELAYED_FLUSH  1
