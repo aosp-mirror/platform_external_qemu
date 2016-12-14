@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7adff7_83e706cb",
+        "filename": "android/android-emu/android/skin/qt/emulator-container.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-12-14T21:35:41Z",
+      "side": 1,
+      "message": "why do you need to do it again, there\u0027s the same code @ line 223",
+      "range": {
+        "startLine": 239,
+        "startChar": 4,
+        "endLine": 239,
+        "endChar": 39
+      },
+      "revId": "dd22196fa06f92eb7c174ec68999f3f0c7488b93",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
