@@ -212,6 +212,15 @@ gen_wrapper_program ()
         DST_PROG=$(basename "$DST_PROG")
     fi
 
+    if [ -f "${DST_PREFIX}gcc-$DST_PROG" ]; then
+        case $DST_PREFIX in
+            *-w64-mingw32*)
+                log "  Using gcc-$DST_PROG instead of $DST_PROG [GCC plugin support]"
+                DST_PROG=gcc-$DST_PROG
+                ;;
+        esac
+    fi
+
     if [ ! -f "${DST_PREFIX}$DST_PROG" ]; then
         log "  Skipping: ${SRC_PREFIX}$PROG  [missing destination program]"
         return

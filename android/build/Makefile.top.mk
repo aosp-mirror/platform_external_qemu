@@ -34,6 +34,10 @@ include-if-bitness-64 = \
         $(eval include $1))
 
 BUILD_TARGET_CFLAGS := -g -falign-functions
+
+BUILD_OPT_CFLAGS :=
+BUILD_OPT_LDFLAGS :=
+
 ifeq ($(BUILD_DEBUG),true)
     BUILD_OPT_CFLAGS += -O0
 else
@@ -46,6 +50,7 @@ else
     # We use a version of Clang that doesn't support these yet.
     ifneq ($(BUILD_TARGET_OS),darwin)
         BUILD_OPT_CFLAGS += -funroll-loops -flto -ftracer
+        BUILD_OPT_LDFLAGS += -flto
     endif
 endif
 BUILD_TARGET_CFLAGS += $(BUILD_OPT_CFLAGS)
@@ -79,7 +84,7 @@ BUILD_TARGET_LDLIBS :=
 BUILD_TARGET_LDLIBS32 :=
 BUILD_TARGET_LDLIBS64 :=
 
-BUILD_TARGET_LDFLAGS :=
+BUILD_TARGET_LDFLAGS := $(BUILD_OPT_LDFLAGS)
 BUILD_TARGET_LDFLAGS32 :=
 BUILD_TARGET_LDFLAGS64 :=
 
