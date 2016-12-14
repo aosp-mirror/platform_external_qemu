@@ -80,9 +80,9 @@ path_getAvdContentPath(const char* avdName)
             searchDir = kSdkHomeSearchDir;
         }
         APANIC("Unknown AVD name [%s], use -list-avds to see valid list.\n"
-               "%s is defined but could not find %s.ini file in %s\n"
-               "(Note: avd is searched in the order of $ANDROID_AVD_HOME,"
-               "%s and %s)\n",
+               "%s is defined but there is no file %s.ini in %s\n"
+               "(Note: Directories are searched in the order $ANDROID_AVD_HOME, "
+               "%s, and %s)\n",
                avdName, envName, avdName, searchDir, kSdkHomeSearchDir,
                kHomeSearchDir);
     }

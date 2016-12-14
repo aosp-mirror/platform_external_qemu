@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include "android/base/StringView.h"
+
 #include <string>
 
 namespace android {
@@ -36,15 +38,21 @@ struct ConfigDirs {
     // Return the root path containing all AVD sub-directories.
     // More specifically:
     //
-    // - If ANDROID_AVD_HOME is defined in the environment, its value is
-    //   returned.
+    // - If $ANDROID_AVD_HOME points to a directory, it is returned.
+    //
+    // - Else if $ANDROID_SDK_HOME/.android/avd is a valid root, it is returned.
+    //
+    // - Else if $ANDROID_SDK_HOME is defined but does not lead to a valid root
+    //   - $USER_HOME/.android/avd is returned if it is valid, or
+    //   - $HOME/.android/avd is returned if it is valid
     //
     // - Otherwise, a sub-directory named 'avd' of getUserDirectory()'s
     //   output is returned.
     static std::string getAvdRootDirectory();
 
-    // Returns the path to the root of the android sdk by checking if the
-    // ANDROID_SDK_ROOT environment variable is defined.
+    // Returns the path to the root of the android sdk by checking
+    // - ANDROID_HOME, then
+    // - ANDROID_SDK_ROOT
     static std::string getSdkRootDirectoryByEnv();
 
     // Returns the path to the root of the android sdk by inferring it from the
@@ -58,6 +66,16 @@ struct ConfigDirs {
     // - Otherwise, Sdk root is inferred from the path of the running emulator
     //   binary.
     static std::string getSdkRootDirectory();
+
+private:
+    // Check if the specified path is a valid AVD root path.
+    // It is considered valid if it has an 'avd' subdirectory
+    static bool isValidAvdRoot(const android::base::StringView& avdPath);
+
+    // Check if the specified path is a valid SDK root path.
+    // It is considered valid if it has a 'platforms' subdirectory
+    // and a 'platform-tools' subdirectory.
+    static bool isValidSdkRoot(const android::base::StringView& rootPath);
 };
 
 }  // namespace android
