@@ -16,7 +16,7 @@
  * code.
  *
  * For I/O memory, we use 0xff001000 and above.
- * For interrupts, we use lines 16 through 23.
+ * For interrupts, we use lines 16 through 24.
  */
 
 #ifndef ACPI_GOLDFISH_DEFS_H
@@ -56,5 +56,10 @@
 #define GOLDFISH_RTC_IOMEM_BASE       0xff016000
 #define GOLDFISH_RTC_IOMEM_SIZE       0x00001000
 #define GOLDFISH_RTC_IRQ              22
+
+/* goldfish rotary */
+#define GOLDFISH_ROTARY_IOMEM_BASE    0xff017000
+#define GOLDFISH_ROTARY_IOMEM_SIZE    0x00001000
+#define GOLDFISH_ROTARY_IRQ           23
 
 #endif  /* !ACPI_GOLDFISH_DEFS_H */
