@@ -22,6 +22,30 @@
       "revId": "dd22196fa06f92eb7c174ec68999f3f0c7488b93",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7adff7_2369fad2",
+        "filename": "android/android-emu/android/skin/qt/emulator-container.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-12-14T21:45:57Z",
+      "side": 1,
+      "message": "copy-paste artifact :)",
+      "parentUuid": "7a7adff7_83e706cb",
+      "range": {
+        "startLine": 239,
+        "startChar": 4,
+        "endLine": 239,
+        "endChar": 39
+      },
+      "revId": "dd22196fa06f92eb7c174ec68999f3f0c7488b93",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
