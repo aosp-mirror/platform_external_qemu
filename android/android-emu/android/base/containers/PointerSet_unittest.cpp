@@ -192,7 +192,7 @@ TEST(PointerSet, Iterator) {
         EXPECT_TRUE(iter.hasNext());
         Foo* foo = iter.next();
         EXPECT_TRUE(foo);
-        ASSERT_LT(foo->value(), kCount);
+        ASSERT_LT(foo->value(), (int)kCount);
         EXPECT_FALSE(flags[foo->value()]) << "Item #" << foo->value();
         flags[foo->value()] = true;
     }

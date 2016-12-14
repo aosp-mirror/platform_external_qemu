@@ -46,7 +46,7 @@ TEST(GpxParser, ParseFileEmpty) {
     std::string error;
     bool isOk = GpxParser::parseFile(path.c_str(), &locations, &error);
     EXPECT_TRUE(isOk);
-    EXPECT_EQ(0, locations.size());
+    EXPECT_EQ(0U, locations.size());
 }
 
 TEST(GpxParser, ParseFileEmptyRteTrk) {
@@ -74,7 +74,7 @@ TEST(GpxParser, ParseFileEmptyRteTrk) {
     std::string error;
     bool isOk = GpxParser::parseFile(path.c_str(), &locations, &error);
     EXPECT_TRUE(isOk);
-    EXPECT_EQ(0, locations.size());
+    EXPECT_EQ(0U, locations.size());
 }
 
 TEST(GpxParser, ParseFileValid) {
@@ -128,7 +128,7 @@ TEST(GpxParser, ParseFileValid) {
     std::string error;
     bool isOk = GpxParser::parseFile(path.c_str(), &locations, &error);
     EXPECT_TRUE(isOk);
-    ASSERT_EQ(8, locations.size());
+    ASSERT_EQ(8U, locations.size());
 
     EXPECT_EQ("Wpt 1", locations[0].name);
     EXPECT_EQ("Wpt 2", locations[1].name);
@@ -166,7 +166,7 @@ TEST(GpxParser, ParseFileNullAttribute) {
     // This test only checks if GpxParser doesn't crash on null attributes
     // So if we're here it's already Ok - these tests aren't that relevant.
     EXPECT_TRUE(isOk);
-    EXPECT_EQ(1, locations.size());
+    EXPECT_EQ(1U, locations.size());
     EXPECT_STREQ("", locations[0].name.c_str());
     EXPECT_TRUE(error.empty());
 }
@@ -244,7 +244,7 @@ TEST(GpxParser, ParseValidLocation) {
     std::string error;
     bool isOk = GpxParser::parseFile(path.c_str(), &locations, &error);
     EXPECT_TRUE(isOk);
-    EXPECT_EQ(1, locations.size());
+    EXPECT_EQ(1U, locations.size());
     const GpsFix& wpt = locations[0];
 
     EXPECT_EQ("Desc", wpt.description);
@@ -279,7 +279,7 @@ TEST(GpxParser, ParseValidLocationCommaLocale) {
     std::string error;
     bool isOk = GpxParser::parseFile(path.c_str(), &locations, &error);
     EXPECT_TRUE(isOk);
-    EXPECT_EQ(1, locations.size());
+    EXPECT_EQ(1U, locations.size());
     const GpsFix& wpt = locations[0];
 
     EXPECT_EQ("Desc", wpt.description);
@@ -338,7 +338,7 @@ TEST(GpxParser, ParseValidDocument) {
     std::string error;
     bool isOk = GpxParser::parseFile(path.c_str(), &locations, &error);
     EXPECT_TRUE(isOk);
-    EXPECT_EQ(8, locations.size());
+    EXPECT_EQ(8U, locations.size());
 
     EXPECT_EQ("Wpt 1", locations[0].name);
     EXPECT_EQ("Wpt 2", locations[1].name);

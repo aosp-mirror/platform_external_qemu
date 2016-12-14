@@ -413,15 +413,6 @@ int socketSetXReuseAddr(int socket) {
 #endif
 }
 
-#ifdef _WIN32
-int socketTcpConnect(int socket, const SockAddressStorage* addr) {
-    errno = 0;
-    int ret = ::connect(socket, &addr->generic, addr->size());
-    ON_SOCKET_ERROR_RETURN_M1(ret);
-    return ret;
-}
-#endif  // _WIN32
-
 int socketTcpBindAndListen(int socket, const SockAddressStorage* addr) {
     int kBacklog = 5;
 

@@ -112,7 +112,7 @@ public:
 
 private:
     void incrementBackIdx() {
-        if (mSize < mBuf.size()) {
+        if (mSize < static_cast<int>(mBuf.size())) {
             mSize++;
         } else {
            // Buffer is at full capacity, erase first

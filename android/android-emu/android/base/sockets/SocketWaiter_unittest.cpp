@@ -24,7 +24,7 @@ TEST(SocketWaiter, init) {
 
     unsigned events = ~0U;
     EXPECT_EQ(-1, waiter->nextPendingFd(&events));
-    EXPECT_EQ(0, events);
+    EXPECT_EQ(0U, events);
 }
 
 TEST(SocketWaiter, reset) {
@@ -67,9 +67,9 @@ TEST(SocketWaiter, update) {
     waiter->update(s1, SocketWaiter::kEventRead | SocketWaiter::kEventWrite);
     waiter->update(s2, SocketWaiter::kEventRead | SocketWaiter::kEventWrite);
     EXPECT_TRUE(waiter->hasFds());
-    EXPECT_EQ(SocketWaiter::kEventRead | SocketWaiter::kEventWrite,
+    EXPECT_EQ((unsigned)(SocketWaiter::kEventRead | SocketWaiter::kEventWrite),
               waiter->wantedEventsFor(s1));
-    EXPECT_EQ(SocketWaiter::kEventRead | SocketWaiter::kEventWrite,
+    EXPECT_EQ((unsigned)(SocketWaiter::kEventRead | SocketWaiter::kEventWrite),
               waiter->wantedEventsFor(s2));
 
     waiter->reset();
