@@ -50,20 +50,22 @@ TEST(AndroidPipe, PingPongPipeWritesAndReadsOfTheSameSize) {
 
         // Send buffer to service.
         EXPECT_EQ(PIPE_POLL_OUT, guest->poll());
-        EXPECT_EQ(size, guest->write(buffer.c_str(), size));
+        EXPECT_EQ(static_cast<ssize_t>(size),
+                  guest->write(buffer.c_str(), size));
         if (size > 0) {
-            EXPECT_EQ(PIPE_POLL_IN|PIPE_POLL_OUT, guest->poll());
+            EXPECT_EQ((unsigned)(PIPE_POLL_IN|PIPE_POLL_OUT), guest->poll());
             // Erase buffer, then receive data from service.
             memset(&buffer[0], '\xff', size);
-            EXPECT_EQ(size, guest->read(&buffer[0], size));
-            EXPECT_EQ(PIPE_POLL_OUT, guest->poll());
+            EXPECT_EQ(static_cast<ssize_t>(size),
+                      guest->read(&buffer[0], size));
+            EXPECT_EQ((unsigned)PIPE_POLL_OUT, guest->poll());
 
             // Check returned pattern
             for (size_t i = 0; i < size; ++i) {
                 EXPECT_EQ((char)(i + size), buffer[i]) << "# " << i << " / " << size;
             }
         } else {
-            EXPECT_EQ(PIPE_POLL_OUT, guest->poll());
+            EXPECT_EQ((unsigned)PIPE_POLL_OUT, guest->poll());
             EXPECT_GT(0, guest->read(&buffer[0], size));
         }
     }
@@ -81,22 +83,22 @@ TEST(AndroidPipe, PingPongPipeLargeWriteWithSmallReads) {
         buffer[i] = (char)i;
     }
 
-    EXPECT_EQ(size, guest->write(buffer.c_str(), size));
+    EXPECT_EQ(static_cast<ssize_t>(size), guest->write(buffer.c_str(), size));
 
     for (size_t i = 0; i < size; i++) {
         char tmp[1];
-        EXPECT_EQ(PIPE_POLL_IN|PIPE_POLL_OUT, guest->poll());
+        EXPECT_EQ((unsigned)(PIPE_POLL_IN|PIPE_POLL_OUT), guest->poll());
         EXPECT_EQ(1, guest->read(tmp, 1));
         EXPECT_EQ((char)i, tmp[0]) << "# " << i << " expected " << (char)i;
     }
-    EXPECT_EQ(PIPE_POLL_OUT, guest->poll());
+    EXPECT_EQ((unsigned)PIPE_POLL_OUT, guest->poll());
 }
 
 TEST(AndroidPipe, PingPongSmallWritesAndLargeRead) {
    PingPongPipeDevice dev;
     std::unique_ptr<Guest> guest(Guest::create());
     EXPECT_EQ(0, guest->connect("pingpong"));
-    EXPECT_EQ(PIPE_POLL_OUT, guest->poll());
+    EXPECT_EQ((unsigned)PIPE_POLL_OUT, guest->poll());
 
     const size_t size = 100000;
     std::string buffer(size, 'x');
@@ -106,16 +108,16 @@ TEST(AndroidPipe, PingPongSmallWritesAndLargeRead) {
 
     for (size_t i = 0; i < size; i++) {
         EXPECT_EQ(1, guest->write(&buffer[i], 1)) << "# " << i << " / " << size;
-        EXPECT_EQ(PIPE_POLL_IN|PIPE_POLL_OUT, guest->poll());
+        EXPECT_EQ((unsigned)(PIPE_POLL_IN|PIPE_POLL_OUT), guest->poll());
     }
 
     memset(&buffer[0], '\xff', size);
 
-    EXPECT_EQ(size, guest->read(&buffer[0], size));
-    EXPECT_EQ(PIPE_POLL_OUT, guest->poll());
+    EXPECT_EQ((ssize_t)size, guest->read(&buffer[0], size));
+    EXPECT_EQ((unsigned)PIPE_POLL_OUT, guest->poll());
 
     for (size_t i = 0; i < size; i++) {
         EXPECT_EQ((char)i, buffer[i]) << "# " << i << " / " << size;
     }
-    EXPECT_EQ(PIPE_POLL_OUT, guest->poll());
+    EXPECT_EQ((unsigned)PIPE_POLL_OUT, guest->poll());
 }

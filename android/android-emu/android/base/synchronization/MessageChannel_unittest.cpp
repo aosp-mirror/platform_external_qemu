@@ -117,7 +117,7 @@ TEST(MessageChannel, Stop) {
         EXPECT_NE(0, thread->join());
         EXPECT_EQ(android::base::kNullopt, state.in.receive());
         state.in.send("1");
-        EXPECT_EQ(0, state.in.size());
+        EXPECT_EQ(0U, state.in.size());
     }
 
     {

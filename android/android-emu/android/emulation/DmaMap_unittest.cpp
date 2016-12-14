@@ -32,7 +32,7 @@ TEST(DmaMap, Default) {
 TEST(DmaMap, CustomDmaMap) {
     TestDmaMap myMap;
     const DmaMapState& currState = myMap.dumpState();
-    EXPECT_EQ(currState.size(), 0);
+    EXPECT_EQ(currState.size(), 0U);
 }
 
 TEST(DmaMap, SingleMapAdd) {
@@ -42,8 +42,8 @@ TEST(DmaMap, SingleMapAdd) {
     const auto& it = currState.find(1);
     EXPECT_TRUE(it != currState.end());
     const DmaBufferInfo& info = it->second;
-    EXPECT_EQ(info.guestAddr, 1);
-    EXPECT_EQ(info.bufferSize, 2);
+    EXPECT_EQ(info.guestAddr, 1U);
+    EXPECT_EQ(info.bufferSize, 2U);
     EXPECT_TRUE(info.currHostAddr);
 }
 
@@ -64,8 +64,8 @@ TEST(DmaMap, SingleMapAddMulti) {
     myMap.addBuffer(nullptr, 1, 3);
     const DmaMapState& currState = myMap.dumpState();
     const DmaBufferInfo& info = currState.find(1)->second;
-    EXPECT_EQ(info.guestAddr, 1);
-    EXPECT_EQ(info.bufferSize, 3);
+    EXPECT_EQ(info.guestAddr, 1U);
+    EXPECT_EQ(info.bufferSize, 3U);
 }
 
 TEST(DmaMap, MultiMap) {
@@ -79,11 +79,11 @@ TEST(DmaMap, MultiMap) {
     EXPECT_TRUE(it3 != currState.end());
     const DmaBufferInfo& info1 = it1->second;
     const DmaBufferInfo& info3 = it3->second;
-    EXPECT_EQ(info1.guestAddr, 1);
-    EXPECT_EQ(info1.bufferSize, 2);
+    EXPECT_EQ(info1.guestAddr, 1U);
+    EXPECT_EQ(info1.bufferSize, 2U);
     EXPECT_TRUE(info1.currHostAddr);
-    EXPECT_EQ(info3.guestAddr, 3);
-    EXPECT_EQ(info3.bufferSize, 4);
+    EXPECT_EQ(info3.guestAddr, 3U);
+    EXPECT_EQ(info3.bufferSize, 4U);
     EXPECT_TRUE(info3.currHostAddr);
     myMap.removeBuffer(1);
     myMap.removeBuffer(3);
@@ -101,8 +101,8 @@ TEST(DmaMap, SingleMapHostRead) {
     const DmaMapState& currState = myMap.dumpState();
     const auto& it = currState.find(1);
     const DmaBufferInfo& info = it->second;
-    EXPECT_EQ(info.guestAddr, 1);
-    EXPECT_EQ(info.bufferSize, 2);
+    EXPECT_EQ(info.guestAddr, 1U);
+    EXPECT_EQ(info.bufferSize, 2U);
     EXPECT_TRUE(info.currHostAddr);
 
     myMap.getHostAddr(1);
@@ -119,8 +119,8 @@ TEST(DmaMap, SingleMapHostReadInvalidate) {
     const DmaMapState& currState = myMap.dumpState();
     const auto& it = currState.find(1);
     const DmaBufferInfo& info = it->second;
-    EXPECT_EQ(info.guestAddr, 1);
-    EXPECT_EQ(info.bufferSize, 2);
+    EXPECT_EQ(info.guestAddr, 1U);
+    EXPECT_EQ(info.bufferSize, 2U);
     EXPECT_FALSE(info.currHostAddr);
 }
 

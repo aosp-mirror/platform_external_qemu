@@ -23,28 +23,28 @@ namespace base {
 
 TEST(SmallVector, basic) {
     SmallFixedVector<char, 10> sv;
-    EXPECT_EQ(sv.size(), 0);
+    EXPECT_EQ(sv.size(), 0U);
     EXPECT_TRUE(sv.empty());
 
-    EXPECT_EQ(10, sv.capacity());
+    EXPECT_EQ(10U, sv.capacity());
     EXPECT_FALSE(sv.isAllocated());
 
     const int values[] = {1, 2, 3};
     sv = SmallFixedVector<char, 10>(values, values + 3);
-    EXPECT_EQ(3, sv.size());
+    EXPECT_EQ(3U, sv.size());
     EXPECT_FALSE(sv.empty());
-    EXPECT_EQ(10, sv.capacity());
+    EXPECT_EQ(10U, sv.capacity());
     EXPECT_FALSE(sv.isAllocated());
     EXPECT_TRUE(RangesMatch(values, sv));
 
     sv.clear();
-    EXPECT_EQ(0, sv.size());
+    EXPECT_EQ(0U, sv.size());
     EXPECT_TRUE(sv.empty());
 
     const char str[] = "this is a long string for insertion";
     sv = SmallFixedVector<char, 10>(str);
     EXPECT_EQ(sizeof(str), sv.size());
-    EXPECT_GT(sv.capacity(), 10);
+    EXPECT_GT(sv.capacity(), 10U);
     EXPECT_TRUE(sv.isAllocated());
     EXPECT_TRUE(RangesMatch(str, sv));
 
@@ -70,7 +70,7 @@ TEST(SmallVector, basic) {
 TEST(SmallVector, ctor) {
     {
         SmallFixedVector<int, 1> sv;
-        EXPECT_EQ(sv.size(), 0);
+        EXPECT_EQ(sv.size(), 0U);
     }
 
     {
@@ -135,61 +135,61 @@ TEST(SmallVector, dtor) {
 TEST(SmallVector, modifiers) {
     SmallFixedVector<unsigned, 5> sv;
 
-    EXPECT_EQ(0, sv.size());
-    EXPECT_EQ(5, sv.capacity());
+    EXPECT_EQ(0U, sv.size());
+    EXPECT_EQ(5U, sv.capacity());
 
-    sv.reserve(4);
-    EXPECT_EQ(0, sv.size());
-    EXPECT_EQ(5, sv.capacity());
+    sv.reserve(4U);
+    EXPECT_EQ(0U, sv.size());
+    EXPECT_EQ(5U, sv.capacity());
     EXPECT_FALSE(sv.isAllocated());
 
-    sv.reserve(6);
-    EXPECT_EQ(0, sv.size());
-    EXPECT_EQ(6, sv.capacity());
+    sv.reserve(6U);
+    EXPECT_EQ(0U, sv.size());
+    EXPECT_EQ(6U, sv.capacity());
     EXPECT_TRUE(sv.isAllocated());
 
-    sv.resize(3);
-    EXPECT_EQ(3, sv.size());
-    EXPECT_EQ(6, sv.capacity());
+    sv.resize(3U);
+    EXPECT_EQ(3U, sv.size());
+    EXPECT_EQ(6U, sv.capacity());
     EXPECT_TRUE(sv.isAllocated());
 
-    sv.resize(10);
-    EXPECT_EQ(10, sv.size());
-    EXPECT_GE(sv.capacity(), 10);
+    sv.resize(10U);
+    EXPECT_EQ(10U, sv.size());
+    EXPECT_GE(sv.capacity(), 10U);
     EXPECT_TRUE(sv.isAllocated());
 
     sv.push_back(1);
-    EXPECT_EQ(11, sv.size());
-    EXPECT_GE(sv.capacity(), 11);
+    EXPECT_EQ(11U, sv.size());
+    EXPECT_GE(sv.capacity(), 11U);
 
     sv.emplace_back(2);
-    EXPECT_EQ(12, sv.size());
-    EXPECT_GE(sv.capacity(), 12);
+    EXPECT_EQ(12U, sv.size());
+    EXPECT_GE(sv.capacity(), 12U);
 
     sv.clear();
-    EXPECT_EQ(0, sv.size());
-    EXPECT_GE(sv.capacity(), 12);
+    EXPECT_EQ(0U, sv.size());
+    EXPECT_GE(sv.capacity(), 12U);
 
     // resize_noinit() doesn't really have anything specific we can test
     // compared to resize()
     sv.resize_noinit(1);
-    EXPECT_EQ(1, sv.size());
-    EXPECT_GE(sv.capacity(), 12);
+    EXPECT_EQ(1U, sv.size());
+    EXPECT_GE(sv.capacity(), 12U);
 
     sv.resize_noinit(100);
-    EXPECT_EQ(100, sv.size());
-    EXPECT_GE(sv.capacity(), 100);
+    EXPECT_EQ(100U, sv.size());
+    EXPECT_GE(sv.capacity(), 100U);
 
     SmallFixedVector<std::string, 5> strings = {"a", "b", "c"};
     strings.emplace_back("d");
     strings.push_back("e");
-    EXPECT_EQ(5, strings.size());
-    EXPECT_EQ(5, strings.capacity());
+    EXPECT_EQ(5U, strings.size());
+    EXPECT_EQ(5U, strings.capacity());
     EXPECT_FALSE(strings.isAllocated());
 
     strings.push_back(std::string("e"));
-    EXPECT_EQ(6, strings.size());
-    EXPECT_GE(strings.capacity(), 6);
+    EXPECT_EQ(6U, strings.size());
+    EXPECT_GE(strings.capacity(), 6U);
     EXPECT_TRUE(strings.isAllocated());
 }
 
@@ -199,7 +199,7 @@ TEST(SmallVector, useThroughInterface) {
     EXPECT_TRUE(RangesMatch(sv, sfv));
     EXPECT_EQ(sv.isAllocated(), sfv.isAllocated());
 
-    sv.reserve(20);
+    sv.reserve(20U);
     EXPECT_TRUE(sv.isAllocated());
     EXPECT_EQ(sv.isAllocated(), sfv.isAllocated());
 

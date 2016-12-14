@@ -61,7 +61,7 @@ TEST(EmuglBackendList, init) {
     const size_t kExpectedLen = ARRAYLEN(kExpected);
 
     const std::vector<std::string>& names = list.names();
-    EXPECT_EQ(static_cast<int>(kExpectedLen), names.size());
+    EXPECT_EQ(kExpectedLen, names.size());
     for (size_t n = 0; n < kExpectedLen; ++n) {
         EXPECT_STREQ(kExpected[n], names[n].c_str()) << "#" << n;
         EXPECT_TRUE(list.contains(kExpected[n]));

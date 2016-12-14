@@ -27,7 +27,7 @@ namespace base {
 
 class IniFile {
 public:
-    typedef int64_t DiskSize;
+    typedef uint64_t DiskSize;
     typedef std::unordered_map<std::string, std::string> MapType;
     typedef std::vector<std::string> KeyListType;
 

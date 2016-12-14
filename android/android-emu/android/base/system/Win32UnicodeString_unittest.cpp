@@ -95,7 +95,7 @@ TEST(Win32UnicodeString, convertToUtf8) {
         char out[256];
         int len = Win32UnicodeString::convertToUtf8(out, sizeof(out),
                                                     kData[n].utf16);
-        EXPECT_EQ(strlen(kData[n].utf8) + 1, len);
+        EXPECT_EQ(strlen(kData[n].utf8) + 1U, (size_t)len);
         EXPECT_STREQ(kData[n].utf8, out);
 
         len = Win32UnicodeString::convertToUtf8(out, sizeof(out),

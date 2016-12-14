@@ -107,10 +107,10 @@ TEST(Version, ToString) {
 
 TEST(Version, Accessors) {
     Version ver(10,11,200,3030);
-    EXPECT_EQ(10, ver.component<Version::kMajor>());
-    EXPECT_EQ(11, ver.component<Version::kMinor>());
-    EXPECT_EQ(200, ver.component<Version::kMicro>());
-    EXPECT_EQ(3030, ver.component<Version::kBuild>());
+    EXPECT_EQ(10U, ver.component<Version::kMajor>());
+    EXPECT_EQ(11U, ver.component<Version::kMinor>());
+    EXPECT_EQ(200U, ver.component<Version::kMicro>());
+    EXPECT_EQ(3030U, ver.component<Version::kBuild>());
 }
 
 }  // namespace base
