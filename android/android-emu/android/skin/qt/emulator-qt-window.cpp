@@ -97,6 +97,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     : QFrame(parent),
       mLooper(android::qt::createLooper()),
       mStartupDialog(this),
+      mToolWindow(nullptr),
       mContainer(this),
       mOverlay(this, &mContainer),
       mZoomFactor(1.0),
