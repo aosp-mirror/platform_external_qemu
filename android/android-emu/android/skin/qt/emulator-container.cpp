@@ -58,6 +58,7 @@ EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
         this->horizontalScrollBar()->setStyle(style);
         QObject::connect(this, &QObject::destroyed, [style] { delete style; });
     }
+
 #endif  // __APPLE__
 
     mResizeTimer.setSingleShot(true);
@@ -221,6 +222,23 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
     WId wid = effectiveWinId();
     wid = (WId)getNSWindow((void*)wid);
     nsWindowHideWindowButtons((void*)wid);
+
+    // The following is an OS X specific hack.
+    // Explanation:
+    // move events aren't delivered to the window widget until
+    // AFTER the user has finished dragging the window. This means that the
+    // toolbar window will stay in its place as the user drags the main window,
+    // and will snap back to it after the drag operation finishes.
+    // The behavior we actually want is for the toolbar to follow the main window
+    // as it is being dragged (i.e. same as on Win and Linux).
+    // The only way to achieve this on OS X is apparently to make the tool window
+    // a "child" of the main window (using OS X's native API).
+    Q_ASSERT(mEmulatorWindow->toolWindow());
+    mEmulatorWindow->toolWindow()->showNormal(); // force creation of native window id
+    WId tool_wid = mEmulatorWindow->toolWindow()->effectiveWinId();
+    Q_ASSERT(tool_wid && wid);
+    tool_wid = (WId)getNSWindow((void*)tool_wid);
+    nsWindowAdopt((void*)wid, (void*)tool_wid);
 #endif // __APPLE__
 
     // showEvent() gets called when the emulator is minimized because we are

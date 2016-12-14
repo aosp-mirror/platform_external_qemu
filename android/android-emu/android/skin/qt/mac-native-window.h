@@ -18,3 +18,4 @@ extern "C"
 void* getNSWindow(void* ns_view);
 void nsWindowHideWindowButtons(void* ns_window);
 int numHeldMouseButtons();
+void nsWindowAdopt(void *parent, void *child);

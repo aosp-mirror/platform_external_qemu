@@ -43,3 +43,8 @@ void nsWindowHideWindowButtons(void* ns_window) {
 int numHeldMouseButtons() {
     return (int) [NSEvent pressedMouseButtons];
 }
+
+void nsWindowAdopt(void *ns_parent, void *ns_child) {
+    NSWindow *parent = (NSWindow*)ns_parent, *child = (NSWindow*)ns_child;
+    [parent addChildWindow:child ordered:NSWindowAbove];
+}
