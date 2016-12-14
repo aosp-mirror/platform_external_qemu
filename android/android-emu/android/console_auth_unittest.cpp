@@ -80,7 +80,7 @@ TEST(ConsoleAuth, get_auth_token_from_create) {
     for (int i = 0; i < kBase64Len; i++) {
         EXPECT_TRUE(isbase64(auth_token[i]));
     }
-    EXPECT_EQ(kBase64Len, auth_token.size());
+    EXPECT_EQ(static_cast<size_t>(kBase64Len), auth_token.size());
 
     tempfile_close(tf);
 }

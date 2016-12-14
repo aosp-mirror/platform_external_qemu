@@ -74,7 +74,7 @@ TEST(DeviceContextRunner, init) {
     TestDeviceContextRunner testRunner;
     testRunner.init(&testLock, testLooper.get());
 
-    EXPECT_EQ(0, getTestDevice()->requests.size());
+    EXPECT_EQ(0U, getTestDevice()->requests.size());
 
     resetTestDevice();
 };
@@ -94,7 +94,7 @@ TEST(DeviceContextRunner, oneRequest) {
     // We have the lock, so this should immediately
     // go to the device.
     testRunner.signal({ .request_code = 1 });
-    EXPECT_EQ(1, getTestDevice()->requests.size());
+    EXPECT_EQ(1U, getTestDevice()->requests.size());
 
     testLock.unlock();
 
@@ -119,7 +119,7 @@ TEST(DeviceContextRunner, oneRequestNeedWait) {
     testLooper->run();
     testLock.unlock();
 
-    EXPECT_EQ(1, getTestDevice()->requests.size());
+    EXPECT_EQ(1U, getTestDevice()->requests.size());
 
     resetTestDevice();
 }
@@ -149,7 +149,7 @@ TEST(DeviceContextRunner, multiRequests) {
     const std::vector<int>& results =
         getTestDevice()->requests;
     for (size_t i = 0; i < kNumRequests; i++) {
-        EXPECT_EQ(i, results[i]);
+        EXPECT_EQ((int)i, results[i]);
     }
 
     resetTestDevice();
@@ -178,7 +178,7 @@ TEST(DeviceContextRunner, multiRequestsNeedWait) {
     const std::vector<int>& results =
         getTestDevice()->requests;
     for (size_t i = 0; i < kNumRequests; i++) {
-        EXPECT_EQ(i, results[i]);
+        EXPECT_EQ((int)i, results[i]);
     }
 
     resetTestDevice();

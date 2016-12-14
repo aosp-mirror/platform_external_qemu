@@ -23,7 +23,7 @@ namespace base {
 namespace internal {
 
 // Older GCC stdlib uses deprecated naming scheme has_xxx instead of is_xxx
-#if defined(__GNUC__) && !defined(__clang__)
+#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ <= 4
 template <class T>
 using is_trivially_default_constructible =
         std::has_trivial_default_constructor<T>;

@@ -71,7 +71,7 @@ TEST(TailQueueList, front) {
     for (size_t n = 0; n < kCount; ++n) {
         list.pushBack(new Foo(n));
         EXPECT_TRUE(list.front()) << "Item #" << n;
-        EXPECT_EQ(0U, list.front()->value()) << "Item #" << n;
+        EXPECT_EQ(0, list.front()->value()) << "Item #" << n;
     }
 }
 
@@ -84,7 +84,7 @@ TEST(TailQueueList, last) {
     for (size_t n = 0; n < kCount; ++n) {
         list.pushBack(new Foo(n));
         EXPECT_TRUE(list.last()) << "Item #" << n;
-        EXPECT_EQ(n, list.last()->value()) << "Item #" << n;
+        EXPECT_EQ(static_cast<int>(n), list.last()->value()) << "Item #" << n;
     }
 }
 
@@ -94,7 +94,7 @@ TEST(TailQueueList, insertTail) {
 
     for (size_t n = 0; n < kCount; ++n) {
         list.pushBack(new Foo(n));
-        EXPECT_EQ(n + 1, list.size()) << "Item #" << n;
+        EXPECT_EQ(n + 1U, list.size()) << "Item #" << n;
     }
 
     EXPECT_EQ(kCount, list.size());
@@ -102,7 +102,7 @@ TEST(TailQueueList, insertTail) {
     size_t n = 0;
     Foo* foo = list.front();
     for (; n < kCount && foo; n++, foo = foo->next()) {
-        EXPECT_EQ(n, foo->value()) << "Item #" << n;
+        EXPECT_EQ(static_cast<int>(n), foo->value()) << "Item #" << n;
     }
 
     EXPECT_EQ(kCount, n);
@@ -123,7 +123,8 @@ TEST(TailQueueList, insertHead) {
     size_t n = 0;
     Foo* foo = list.front();
     for (; n < kCount && foo; n++, foo = foo->next()) {
-        EXPECT_EQ(kCount - 1 - n, foo->value()) << "Item #" << n;
+        EXPECT_EQ(static_cast<int>(kCount - 1 - n), foo->value())
+                << "Item #" << n;
     }
 
     EXPECT_EQ(kCount, n);
@@ -143,23 +144,23 @@ TEST(TailQueueList, insertBefore) {
     EXPECT_EQ(kCount + 1U, list.size());
 
     Foo* foo = list.front();
-    EXPECT_EQ(kCount + 1U, foo->value());
+    EXPECT_EQ(static_cast<int>(kCount + 1), foo->value());
 
     // Insert before second.
     foo = foo->next();
-    EXPECT_EQ(0U, foo->value()) << "Item #1";
+    EXPECT_EQ(0, foo->value()) << "Item #1";
 
     list.insertBefore(foo, new Foo(kCount + 2U));
     EXPECT_EQ(kCount + 2U, list.size());
 
     foo = list.front();
-    EXPECT_EQ(kCount + 1U, foo->value());
+    EXPECT_EQ(static_cast<int>(kCount + 1), foo->value());
     foo = foo->next();
-    EXPECT_EQ(kCount + 2U, foo->value());
+    EXPECT_EQ(static_cast<int>(kCount + 2), foo->value());
     foo = foo->next();
 
     for (size_t n = 0; n < kCount; ++n) {
-        EXPECT_EQ(n, foo->value()) << "Item #" << (n + 2u);
+        EXPECT_EQ(static_cast<int>(n), foo->value()) << "Item #" << (n + 2u);
         foo = foo->next();
     }
 }
@@ -177,35 +178,36 @@ TEST(TailQueueList, insertAfter) {
     EXPECT_EQ(kCount + 1U, list.size());
 
     Foo* foo = list.front();
-    EXPECT_EQ(0U, foo->value());
+    EXPECT_EQ(0, foo->value());
     foo = foo->next();
-    EXPECT_EQ(kCount + 1U, foo->value());
+    EXPECT_EQ(static_cast<int>(kCount + 1), foo->value());
     foo = foo->next();
 
     for (size_t n = 1; n < kCount - 1U; ++n) {
-        EXPECT_EQ(n, foo->value()) << "Item #" << (n + 2U);
+        EXPECT_EQ(static_cast<int>(n), foo->value()) << "Item #" << (n + 2U);
         foo = foo->next();
     }
 
-    EXPECT_EQ(kCount - 1U, foo->value()) << "Item #" << kCount - 1U;
+    EXPECT_EQ(static_cast<int>(kCount - 1), foo->value()) << "Item #"
+            << kCount - 1U;
 
     // Insert after last.
     list.insertAfter(foo, new Foo(kCount + 2U));
     foo = list.front();
-    EXPECT_EQ(0U, foo->value());
+    EXPECT_EQ(0, foo->value());
     foo = foo->next();
-    EXPECT_EQ(kCount + 1U, foo->value());
+    EXPECT_EQ(static_cast<int>(kCount + 1), foo->value());
     foo = foo->next();
 
     for (size_t n = 1; n < kCount - 1U; ++n) {
-        EXPECT_EQ(n, foo->value()) << "Item #" << (n + 1U);
+        EXPECT_EQ(static_cast<int>(n), foo->value()) << "Item #" << (n + 1U);
         foo = foo->next();
     }
 
-    EXPECT_EQ(kCount - 1U, foo->value());
+    EXPECT_EQ(static_cast<int>(kCount - 1), foo->value());
     foo = foo->next();
     EXPECT_TRUE(foo);
-    EXPECT_EQ(kCount + 2U, foo->value());
+    EXPECT_EQ(static_cast<int>(kCount + 2), foo->value());
 }
 
 TEST(TailQueueList, removeLinearFromHead) {
@@ -220,9 +222,9 @@ TEST(TailQueueList, removeLinearFromHead) {
     Foo* foo = list.front();
     for (size_t n = 0; n < kCount; ++n) {
         Foo* next = foo->next();
-        EXPECT_EQ(n, foo->value());
+        EXPECT_EQ(static_cast<int>(n), foo->value());
         list.remove(foo);
-        EXPECT_EQ(kCount - n - 1, list.size());
+        EXPECT_EQ(kCount - n - 1U, list.size());
         EXPECT_EQ(next, list.front());
         foo = next;
     }
@@ -246,7 +248,7 @@ TEST(TailQueueList, removeLinearFromTail) {
             foo = foo->next();
         }
         EXPECT_TRUE(foo);
-        EXPECT_EQ(pos - 1U, foo->value());
+        EXPECT_EQ(static_cast<int>(pos - 1U), foo->value());
         list.remove(foo);
         EXPECT_EQ(pos - 1U, list.size());
     }
@@ -265,7 +267,7 @@ TEST(TailQueueList, removeOddOnly) {
     Foo* foo = list.front()->next();
     for (size_t n = 0; n < kCount / 2U; ++n) {
         Foo* next = (n < kCount / 2U - 1U) ? foo->next()->next() : NULL;
-        EXPECT_EQ(n * 2U + 1U, foo->value());
+        EXPECT_EQ(static_cast<int>(n * 2U + 1U), foo->value());
         list.remove(foo);
         foo = next;
     }
@@ -275,7 +277,7 @@ TEST(TailQueueList, removeOddOnly) {
     foo = list.front();
     for (size_t n = 0; n < kCount / 2; ++n) {
         EXPECT_TRUE(foo);
-        EXPECT_EQ(n*2U, foo->value());
+        EXPECT_EQ(static_cast<int>(n * 2U), foo->value());
         foo = foo->next();
     }
 }
@@ -301,7 +303,7 @@ TEST(TailQueueList, nth) {
     for (size_t n = 0; n < kCount; ++n) {
         Foo* foo = list.nth(n);
         EXPECT_TRUE(foo);
-        EXPECT_EQ(n, foo->value());
+        EXPECT_EQ(static_cast<int>(n), foo->value());
     }
 
     EXPECT_FALSE(list.nth(kCount));
