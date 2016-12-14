@@ -232,7 +232,7 @@ TEST(ReadWriteLock, SyncReadWriteRandom) {
             delete threads[i];
         }
 
-        EXPECT_EQ(num_writers, p.counter);
+        EXPECT_EQ(num_writers, (size_t)p.counter);
         // Simultaneous reader threads can increment old versions
         // of read_counter, so this is allowed to be >=.
         EXPECT_GE(num_readers, (size_t)p.read_counter);

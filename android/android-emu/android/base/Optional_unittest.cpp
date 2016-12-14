@@ -286,13 +286,13 @@ TEST(Optional, Emplace) {
     o.emplace(3, 1);
     EXPECT_TRUE(o);
     EXPECT_EQ((std::vector<int>{1,1,1}), *o);
-    EXPECT_EQ(3, o->capacity());
+    EXPECT_EQ(3U, o->capacity());
 
     o.clear();
     o.emplace({1,2});
     EXPECT_TRUE(o);
     EXPECT_EQ((std::vector<int>{1,2}), *o);
-    EXPECT_EQ(2, o->capacity());
+    EXPECT_EQ(2U, o->capacity());
 }
 
 TEST(Optional, Reset) {
@@ -300,12 +300,12 @@ TEST(Optional, Reset) {
     o.reset(std::vector<int>{4,3});
     EXPECT_TRUE(o);
     EXPECT_EQ((std::vector<int>{4,3}), *o);
-    EXPECT_EQ(2, o->capacity());
+    EXPECT_EQ(2U, o->capacity());
 
     o.clear();
     o.reset(std::vector<int>{1});
     EXPECT_EQ((std::vector<int>{1}), *o);
-    EXPECT_EQ(1, o->capacity());
+    EXPECT_EQ(1U, o->capacity());
 }
 
 TEST(Optional, CompareEqual) {

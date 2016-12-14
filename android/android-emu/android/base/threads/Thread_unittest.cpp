@@ -213,7 +213,7 @@ public:
 };
 
 TEST(ThreadTest, id) {
-    EXPECT_NE(0, getCurrentThreadId());
+    EXPECT_NE(0U, getCurrentThreadId());
 
     TidSetterThread thread1;
     TidSetterThread thread2;
@@ -222,8 +222,8 @@ TEST(ThreadTest, id) {
     EXPECT_TRUE(thread2.start());
     EXPECT_TRUE(thread1.wait());
     EXPECT_TRUE(thread2.wait());
-    EXPECT_NE(0, thread1.mTid);
-    EXPECT_NE(0, thread2.mTid);
+    EXPECT_NE(0U, thread1.mTid);
+    EXPECT_NE(0U, thread2.mTid);
     EXPECT_NE(thread1.mTid, thread2.mTid);
 }
 

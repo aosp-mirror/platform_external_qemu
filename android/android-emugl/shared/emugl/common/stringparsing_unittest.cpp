@@ -36,15 +36,15 @@ TEST(StringParsing, Empty) {
         isolate_in_out(e, e, e, &err);
     EXPECT_FALSE(err);
 
-    EXPECT_EQ(0, isolate_inout_res.size());
+    EXPECT_EQ(0U, isolate_inout_res.size());
 
     std::vector<std::string> split_res =
         split(e, e);
-    EXPECT_EQ(0, split_res.size());
+    EXPECT_EQ(0U, split_res.size());
 
     std::vector<std::string> split_nonempty_delim_res =
         split(std::string("("), e);
-    EXPECT_EQ(0, split_res.size());
+    EXPECT_EQ(0U, split_res.size());
 }
 
 TEST(StringParsing, Simple) {
@@ -71,14 +71,14 @@ TEST(StringParsing, Simple) {
     std::vector<std::string> isolate_inout_res =
         isolate_in_out(e, "(", ")", &err);
     EXPECT_FALSE(err);
-    EXPECT_EQ(3, isolate_inout_res.size());
+    EXPECT_EQ(3U, isolate_inout_res.size());
     EXPECT_STREQ("1 2 3", isolate_inout_res[0].c_str());
     EXPECT_STREQ("4 5", isolate_inout_res[1].c_str());
     EXPECT_STREQ("6 7", isolate_inout_res[2].c_str());
 
     std::vector<std::string> split_res =
         split(" ", e);
-    EXPECT_EQ(9, split_res.size());
+    EXPECT_EQ(9U, split_res.size());
     EXPECT_STREQ("a", split_res[0].c_str());
     EXPECT_STREQ("b", split_res[1].c_str());
     EXPECT_STREQ("(1", split_res[2].c_str());
@@ -91,7 +91,7 @@ TEST(StringParsing, Simple) {
 
     // multi_find returns position of the last one
     size_t match_res = multi_find(e, split_res);
-    EXPECT_EQ(21, match_res);
+    EXPECT_EQ(21U, match_res);
 
     // multi_find returns std::string::npos
     // if there aren't any matches
@@ -104,16 +104,16 @@ TEST(StringParsing, Simple) {
 
     // Split with trailing delimiter
     split_res = split(" ", std::string("1 2 3 "));
-    EXPECT_EQ(3, split_res.size());
+    EXPECT_EQ(3U, split_res.size());
 
     // Split with multiple trailing delimiters
     split_res = split(" ", std::string("1 2 3  "));
-    EXPECT_EQ(4, split_res.size());
+    EXPECT_EQ(4U, split_res.size());
     EXPECT_STREQ("", split_res[3].c_str());
 
     // Split with multiple delimiters
     split_res = split(" ", std::string("1 2  3  "));
-    EXPECT_EQ(5, split_res.size());
+    EXPECT_EQ(5U, split_res.size());
     EXPECT_STREQ("", split_res[4].c_str());
 
     // Cases where we expect err = true:
@@ -122,7 +122,7 @@ TEST(StringParsing, Simple) {
     std::string f0("a b (1 2 3 (4 5) (6 7))");
     std::string f1("(a b");
     std::string f2("a b)");
-   
+
     err = false;
     remove_inout_res = remove_in_out(f0, "(", ")", &err);
     EXPECT_TRUE(err);
@@ -131,7 +131,7 @@ TEST(StringParsing, Simple) {
     err = false;
     isolate_inout_res = isolate_in_out(f0, "(", ")", &err);
     EXPECT_TRUE(err);
-    EXPECT_EQ(0, isolate_inout_res.size());
+    EXPECT_EQ(0U, isolate_inout_res.size());
 
     err = false;
     remove_inout_res = remove_in_out(f1, "(", ")", &err);

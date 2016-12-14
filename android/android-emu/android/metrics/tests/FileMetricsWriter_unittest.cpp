@@ -95,7 +95,7 @@ TEST_F(FileMetricsWriterTest, createDestroyWithTimer) {
 
     // make sure we have no timer, as it is only created on the first message
     // write.
-    EXPECT_EQ(0, mLooper->timers().size());
+    EXPECT_EQ(0U, mLooper->timers().size());
 
     // one of the files is the open metrics file, another one is the lock.
     EXPECT_TRUE(PathUtils::extension(files[0]) == ".lock" ||
@@ -112,7 +112,7 @@ TEST_F(FileMetricsWriterTest, createDestroyWithTimer) {
     EXPECT_TRUE(PathUtils::extension(files[0]) == ".trk");
 
     // we should still have no timers
-    EXPECT_EQ(0, mLooper->timers().size());
+    EXPECT_EQ(0U, mLooper->timers().size());
 }
 
 TEST_F(FileMetricsWriterTest, finalizeAbandonedSessionFilesNoDir) {
@@ -217,7 +217,7 @@ TEST_F(FileMetricsWriterTest, finalizeAbandonedSessionFilesLockedSession) {
     // check that now, when there's no lock, the only file left in the directory
     // is the open session file
     auto files = mSystem.scanDirEntries(spoolDir());
-    ASSERT_EQ(1, files.size());
+    ASSERT_EQ(1U, files.size());
     EXPECT_TRUE(openSessionName.find(files[0]) != std::string::npos)
             << "Expected file name '" << files[0] << "' to be a file name from"
                                                      " session file path '"
@@ -238,7 +238,7 @@ TEST_F(FileMetricsWriterTest, writeSimple) {
 
     // read the event back.
     auto files = mSystem.scanDirEntries(spoolDir(), true);
-    ASSERT_EQ(1, files.size());
+    ASSERT_EQ(1U, files.size());
     EXPECT_STREQ(PathUtils::extension(files[0]).c_str(), ".trk");
 
     std::ifstream in(files[0], std::ios_base::binary);
@@ -274,7 +274,7 @@ TEST_F(FileMetricsWriterTest, writeMultiple) {
 
     // read the event back.
     auto files = mSystem.scanDirEntries(spoolDir(), true);
-    ASSERT_EQ(1, files.size());
+    ASSERT_EQ(1U, files.size());
     EXPECT_STREQ(PathUtils::extension(files[0]).c_str(), ".trk");
 
     std::ifstream in(files[0], std::ios_base::binary);
@@ -330,13 +330,13 @@ TEST_F(FileMetricsWriterTest, writeLimited) {
 
     // read the events back and make sure they're correct.
     auto files = mSystem.scanDirEntries(spoolDir(), true);
-    ASSERT_EQ(3, files.size()) << std::accumulate(files.begin(), files.end(),
+    ASSERT_EQ(3U, files.size()) << std::accumulate(files.begin(), files.end(),
                                                   std::string());
     // the last file is an empty one: it's the file created for the following
     // event.
     System::FileSize size;
     ASSERT_TRUE(mSystem.pathFileSize(files.back(), &size));
-    ASSERT_EQ(0, size);
+    ASSERT_EQ(0U, size);
 
     for (size_t i = 0; i < event.size(); ++i) {
         EXPECT_STREQ(PathUtils::extension(files[i]).c_str(), ".trk");
@@ -361,7 +361,7 @@ TEST_F(FileMetricsWriterTest, writeTimered) {
                                         mLooper.get(),
                                         1000);  // 1 sec per file.
 
-    EXPECT_EQ(0, mLooper->timers().size());
+    EXPECT_EQ(0U, mLooper->timers().size());
 
     // create and write some event
     wireless_android_play_playlog::LogEvent event;
@@ -370,9 +370,9 @@ TEST_F(FileMetricsWriterTest, writeTimered) {
     event.set_source_extension("se");
     mWriter->write(event);
 
-    EXPECT_EQ(1, mLooper->timers().size());
-    EXPECT_EQ(1, mLooper->activeTimers().size());
-    EXPECT_EQ(0, mLooper->pendingTimers().size());
+    EXPECT_EQ(1U, mLooper->timers().size());
+    EXPECT_EQ(1U, mLooper->activeTimers().size());
+    EXPECT_EQ(0U, mLooper->pendingTimers().size());
 
     {
         auto files = mSystem.scanDirEntries(spoolDir());
@@ -394,9 +394,9 @@ TEST_F(FileMetricsWriterTest, writeTimered) {
     mLooper->runOneIterationWithDeadlineMs(2000);
 
     // there's still one active timer..
-    EXPECT_EQ(1, mLooper->timers().size());
-    EXPECT_EQ(1, mLooper->activeTimers().size());
-    EXPECT_EQ(0, mLooper->pendingTimers().size());
+    EXPECT_EQ(1U, mLooper->timers().size());
+    EXPECT_EQ(1U, mLooper->activeTimers().size());
+    EXPECT_EQ(0U, mLooper->pendingTimers().size());
 
     // now we should have one open and one finalized file as
     auto files = mSystem.scanDirEntries(spoolDir(), true);
@@ -428,7 +428,7 @@ TEST_F(FileMetricsWriterTest, writeTimered) {
     mWriter.reset();
 
     // no timers anymore
-    EXPECT_EQ(0, mLooper->timers().size());
-    EXPECT_EQ(0, mLooper->activeTimers().size());
-    EXPECT_EQ(0, mLooper->pendingTimers().size());
+    EXPECT_EQ(0U, mLooper->timers().size());
+    EXPECT_EQ(0U, mLooper->activeTimers().size());
+    EXPECT_EQ(0U, mLooper->pendingTimers().size());
 }

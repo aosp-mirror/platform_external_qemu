@@ -81,7 +81,7 @@ typedef signed int              int_fast16_t;
 #endif
 
 #ifndef always_inline
-#if !((__GNUC__ < 3) || defined(__APPLE__))
+#if !((__GNUC__ < 3) || defined(__APPLE__) || defined(__cplusplus))
 #ifdef __OPTIMIZE__
 #undef inline
 #define inline __attribute__ (( always_inline )) __inline__

@@ -40,7 +40,7 @@ TEST(DirScanner, scanEmptyDir) {
     TestTempDir myDir("DirScannerTest");
     DirScanner* scanner = dirScanner_new(myDir.path());
     EXPECT_TRUE(scanner);
-    EXPECT_EQ(0, dirScanner_numEntries(scanner));
+    EXPECT_EQ(0U, dirScanner_numEntries(scanner));
     EXPECT_FALSE(dirScanner_next(scanner));
     dirScanner_free(scanner);
 }

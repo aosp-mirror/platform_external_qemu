@@ -335,9 +335,11 @@ typedef enum {
     BODY_MODE_MAX
 } BodyMode;
 
+#if D_ACTIVE
 static const char* const  body_mode_str[BODY_MODE_MAX] = {
     "NONE", "KNOWN_LENGTH", "UNTIL_CLOSE", "CHUNKED"
 };
+#endif  // D_ACTIVE
 
 enum {
     CHUNK_HEADER,    // Waiting for a chunk header + CR LF

@@ -161,8 +161,9 @@ TEST_F(IniFileTest, readWrite) {
     mIni.reset(new IniFile(mIniFilePath));
     ASSERT_EQ(0, mIni->size());
     ASSERT_TRUE(mIni->read());
-    EXPECT_EQ(intData.size() + int64Data.size() + doubleData.size() +
-                      boolData.size() + diskSizeData.size(),
+    EXPECT_EQ(static_cast<int>(intData.size() + int64Data.size() +
+                               doubleData.size() +  boolData.size() +
+                               diskSizeData.size()),
               mIni->size());
 
     // Mix-up the order a bit.
@@ -188,7 +189,7 @@ TEST_F(IniFileTest, readWrite) {
     }
 }
 
-TEST_F(IniFileTest, duplicateAndMisingKeys) {
+TEST_F(IniFileTest, duplicateAndMissingKeys) {
     mIni->setInt("int", 0);
     mIni->setInt("int", 1);
     mIni->setInt64("int64", 0ULL);
@@ -207,16 +208,16 @@ TEST_F(IniFileTest, duplicateAndMisingKeys) {
     EXPECT_NE(0, mIni->size());
 
     EXPECT_EQ(1, mIni->getInt("int", 99));
-    EXPECT_EQ(1ULL, mIni->getInt64("int64", 99));
+    EXPECT_EQ(1LL, mIni->getInt64("int64", 99));
     EXPECT_EQ(1.1, mIni->getDouble("double", 99));
     EXPECT_EQ(true, mIni->getBool("bool", false));
     EXPECT_EQ(1ULL, mIni->getDiskSize("ds", 99ULL));
 
     EXPECT_EQ(-11, mIni->getInt("missing", -11));
-    EXPECT_EQ(22ULL, mIni->getInt64("missing", 22ULL));
+    EXPECT_EQ(22LL, mIni->getInt64("missing", 22LL));
     EXPECT_EQ(3.3, mIni->getDouble("missing", 3.3));
     EXPECT_EQ(true, mIni->getBool("missing", true));
-    EXPECT_EQ(44ULL, mIni->getInt("missing", 44ULL));
+    EXPECT_EQ(44ULL, mIni->getDiskSize("missing", 44ULL));
 }
 
 TEST_F(IniFileTest, valueFormat) {
@@ -226,7 +227,7 @@ TEST_F(IniFileTest, valueFormat) {
     writeIniFileData(fileData);
 
     ASSERT_TRUE(mIni->read());
-    EXPECT_EQ(fileData.size(), mIni->size());
+    EXPECT_EQ(fileData.size(), static_cast<size_t>(mIni->size()));
     EXPECT_EQ("value with spaces", mIni->getString("key1", ""));
     EXPECT_EQ("value with trailing spaces", mIni->getString("key2", ""));
     EXPECT_EQ("\"value with redundant quotes\"", mIni->getString("key3", ""));
@@ -263,7 +264,7 @@ TEST_F(IniFileTest, readMalformedFile) {
     writeIniFileData(fileData);
 
     ASSERT_TRUE(mIni->read());
-    EXPECT_EQ(validEntries.size(), mIni->size());
+    EXPECT_EQ(validEntries.size(), static_cast<size_t>(mIni->size()));
     for (const auto& keyval : validEntries) {
         EXPECT_TRUE(mIni->hasKey(keyval.first));
         EXPECT_EQ(keyval.second, mIni->getInt(keyval.first, defaultInt));
@@ -302,7 +303,7 @@ TEST_F(IniFileTest, boolFormat) {
     writeIniFileData(lines);
 
     ASSERT_TRUE(mIni->read());
-    EXPECT_EQ(lines.size(), mIni->size());
+    EXPECT_EQ(lines.size(), static_cast<size_t>(mIni->size()));
     for (const auto& keyval : validTrues) {
         EXPECT_TRUE(mIni->hasKey(keyval.first));
         EXPECT_TRUE(mIni->getBool(keyval.first, false));
@@ -340,7 +341,7 @@ TEST_F(IniFileTest, diskSizeFormat) {
     writeIniFileData(lines);
 
     ASSERT_TRUE(mIni->read());
-    EXPECT_EQ(lines.size(), mIni->size());
+    EXPECT_EQ(lines.size(), static_cast<size_t>(mIni->size()));
     EXPECT_EQ(30ULL, mIni->getDiskSize("ThirtyB", 99));
     EXPECT_EQ(1024ULL, mIni->getDiskSize("OneKilo", 99));
     EXPECT_EQ(1024 * 1024ULL, mIni->getDiskSize("OneMega", 99));
@@ -349,10 +350,10 @@ TEST_F(IniFileTest, diskSizeFormat) {
     EXPECT_EQ(5 * 1024 * 1024ULL, mIni->getDiskSize("FiveMega", 99));
     EXPECT_EQ(5 * 1024 * 1024 * 1024ULL, mIni->getDiskSize("FiveGiga", 99));
 
-    EXPECT_EQ(99L, mIni->getDiskSize("WrongUnit", 99L));
-    EXPECT_EQ(99L, mIni->getDiskSize("FractionalNumber", 99L));
-    EXPECT_EQ(99L, mIni->getDiskSize("FractionalKilo", 99L));
-    EXPECT_EQ(99L, mIni->getDiskSize("smiley_really", 99L));
+    EXPECT_EQ(99ULL, mIni->getDiskSize("WrongUnit", 99));
+    EXPECT_EQ(99ULL, mIni->getDiskSize("FractionalNumber", 99));
+    EXPECT_EQ(99ULL, mIni->getDiskSize("FractionalKilo", 99));
+    EXPECT_EQ(99ULL, mIni->getDiskSize("smiley_really", 99));
 }
 
 TEST_F(IniFileTest, discardEmpty) {
@@ -416,7 +417,7 @@ TEST_F(IniFileTest, iterator) {
     // Const iterators, also verify order.
     const IniFile& cIni = *mIni;
     vector<string> keys = {"firstKey", "secondKey"};
-    ASSERT_EQ(keys.size(), mIni->size());
+    ASSERT_EQ(keys.size(), static_cast<size_t>(mIni->size()));
     size_t i = 0;
     for (const auto& key : cIni) {
         EXPECT_EQ(keys[i], key);
@@ -461,7 +462,7 @@ TEST_F(IniFileTest, diskFileOrder) {
     // Test order of iteration in this complicated case.
     // Remeber we reversed the lines.
     vector<string> keys = {"lets", "fourth", "first", "extraKey"};
-    ASSERT_EQ(keys.size(), mIni->size());
+    ASSERT_EQ(keys.size(), static_cast<size_t>(mIni->size()));
     size_t i = 0;
     for (const auto& key : *mIni) {
         EXPECT_EQ(keys[i], key);

@@ -469,10 +469,10 @@ void IniFile::setBool(const string& key, bool value) {
     updateData(key, value ? StringView("true") : "false");
 }
 
-void IniFile::setDiskSize(const string& key, int64_t value) {
-    static const int64_t kKilo = 1024;
-    static const int64_t kMega = 1024 * kKilo;
-    static const int64_t kGiga = 1024 * kMega;
+void IniFile::setDiskSize(const string& key, DiskSize value) {
+    static const DiskSize kKilo = 1024;
+    static const DiskSize kMega = 1024 * kKilo;
+    static const DiskSize kGiga = 1024 * kMega;
 
     char suffix = 0;
     if (value >= kGiga && !(value % kGiga)) {
