@@ -16,6 +16,7 @@
 
 #include "qemu/osdep.h"
 #include "hw/input/goldfish_events.h"
+#include "hw/input/goldfish_rotary.h"
 #include "ui/console.h"
 
 #include <stdbool.h>
@@ -54,6 +55,14 @@ static void user_event_mouse(int dx, int dy, int dz, int buttonsState) {
     kbd_mouse_event(dx, dy, dz, buttonsState);
 }
 
+static void user_event_rotary(int value) {
+    if (VERBOSE_CHECK(keys)) {
+        printf(">> ROTARY [%d]\n", value);
+    }
+
+    goldfish_rotary_send_rotate(value);
+}
+
 static void on_new_event(void) {
     dpy_run_update(NULL);
 }
@@ -63,6 +72,7 @@ static const QAndroidUserEventAgent sQAndroidUserEventAgent = {
         .sendKeyCode = user_event_keycode,
         .sendKeyCodes = user_event_keycodes,
         .sendMouseEvent = user_event_mouse,
+        .sendRotaryEvent = user_event_rotary,
         .sendGenericEvent = user_event_generic,
         .onNewUserEvent = on_new_event
 };
