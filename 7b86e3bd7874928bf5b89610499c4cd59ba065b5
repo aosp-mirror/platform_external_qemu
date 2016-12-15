@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ba837754_d2e124b9",
+        "filename": "android/android-emu/android/base/files/IniFile.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-12-15T09:54:38Z",
+      "side": 1,
+      "message": "Because System::FileSize is also uint64_t and generally speaking a negative DiskSize value doesn\u0027t make sense. Also the unit-tests, for the most part, seem to expect ULL values for disk sizes.\n\nI understand though that signed values can help catch more runtime errors (due to unchecked arithmetic overflows). I can go either way, let me know what you prefer.",
+      "parentUuid": "7a7adff7_a3fdf1f9",
+      "range": {
+        "startLine": 30,
+        "startChar": 12,
+        "endLine": 30,
+        "endChar": 13
+      },
+      "revId": "7b86e3bd7874928bf5b89610499c4cd59ba065b5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7adff7_e3ee0944",
         "filename": "android/android-emu/android/base/system/.Win32UnicodeString_unittest.cpp.kate-swp",
         "patchSetId": 2
@@ -36,6 +60,24 @@
       "writtenOn": "2016-12-14T17:36:03Z",
       "side": 1,
       "message": "?",
+      "revId": "7b86e3bd7874928bf5b89610499c4cd59ba065b5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba837754_f2e6a8ce",
+        "filename": "android/android-emu/android/base/system/.Win32UnicodeString_unittest.cpp.kate-swp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-12-15T09:54:38Z",
+      "side": 1,
+      "message": "Ooops, I\u0027ll remove this. Thanks :)",
+      "parentUuid": "7a7adff7_e3ee0944",
       "revId": "7b86e3bd7874928bf5b89610499c4cd59ba065b5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
