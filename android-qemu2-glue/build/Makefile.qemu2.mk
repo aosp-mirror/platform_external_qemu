@@ -132,7 +132,6 @@ QEMU2_CFLAGS += \
         -Wno-unused-but-set-variable \
         -Wno-maybe-uninitialized \
         ) \
-    -UNDEBUG \
 
 #include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
 

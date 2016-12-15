@@ -929,7 +929,7 @@ static int create_qcow2_images(void) {
                 -1,
                 0,
                 &img_creation_error,
-                false);
+                true);
         }
         free(qcow2_image_path);
         if (img_creation_error) {

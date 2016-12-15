@@ -494,13 +494,9 @@ static void virtqueue_map_iovec(struct iovec *sg, hwaddr *addr,
      * are passing in num_sg values received over the network.
      */
     /* TODO: teach all callers that this can fail, and return failure instead
-     * of asserting here.
-     * When we do, we might be able to re-enable NDEBUG below.
+     * of aborting here.
      */
-#ifdef NDEBUG
-#error building with NDEBUG is not supported
-#endif
-    assert(*num_sg <= max_size);
+    if (!(*num_sg <= max_size)) abort();
 
     for (i = 0; i < *num_sg; i++) {
         len = sg[i].iov_len;

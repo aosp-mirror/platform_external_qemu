@@ -123,8 +123,8 @@ static const int kModifierTable[] = {
 
 static const int kLookup[8] = { 0, 1, 2, 3, -4, -3, -2, -1 };
 
-static inline etc1_byte clamp(int x) {
-    return (etc1_byte) (x >= 0 ? (x < 255 ? x : 255) : 0);
+static inline int clamp(int x) {
+    return (x >= 0 ? (x < 255 ? x : 255) : 0);
 }
 
 static
