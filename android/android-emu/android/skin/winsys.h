@@ -13,6 +13,7 @@
 #pragma once
 
 // Window system related definitions.
+#include "android/cmdline-option.h"
 #include "android/skin/rect.h"
 
 #include <stdbool.h>
@@ -52,7 +53,7 @@ bool skin_winsys_is_window_fully_visible(void);
 // Start main window support. |no_window| must be true to indicate that
 // no window needs to be shown, but that the GUI backend still needs to be
 // initialized.
-void skin_winsys_start(bool no_window);
+void skin_winsys_start(const AndroidOptions* opts);
 
 // Set the main window's icon.
 // |icon_data| is the start of the icon in PNG format.
