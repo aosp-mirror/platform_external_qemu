@@ -13,6 +13,7 @@
 #include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/extended-window-styles.h"
 
+#include "android/emulation/control/user_event_agent.h"
 #include "android/main-common.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-pages/common.h"
@@ -24,6 +25,8 @@
 #include "ui_extended.h"
 
 #include <QDesktopWidget>
+
+extern const QAndroidUserEventAgent* const gQAndroidUserEventAgent;
 
 ExtendedWindow::ExtendedWindow(
     EmulatorQtWindow *eW,
@@ -72,15 +75,16 @@ ExtendedWindow::ExtendedWindow(
         this, SLOT(switchToTheme(SettingsTheme)));
 
     mPaneButtonMap = {
-        {PANE_IDX_LOCATION,  mExtendedUi->locationButton},
-        {PANE_IDX_CELLULAR,  mExtendedUi->cellularButton},
-        {PANE_IDX_BATTERY,   mExtendedUi->batteryButton},
-        {PANE_IDX_TELEPHONE, mExtendedUi->telephoneButton},
-        {PANE_IDX_DPAD,      mExtendedUi->dpadButton},
-        {PANE_IDX_FINGER,    mExtendedUi->fingerButton},
+        {PANE_IDX_LOCATION,     mExtendedUi->locationButton},
+        {PANE_IDX_CELLULAR,     mExtendedUi->cellularButton},
+        {PANE_IDX_BATTERY,      mExtendedUi->batteryButton},
+        {PANE_IDX_TELEPHONE,    mExtendedUi->telephoneButton},
+        {PANE_IDX_DPAD,         mExtendedUi->dpadButton},
+        {PANE_IDX_MICROPHONE,   mExtendedUi->microphoneButton},
+        {PANE_IDX_FINGER,       mExtendedUi->fingerButton},
         {PANE_IDX_VIRT_SENSORS, mExtendedUi->virtSensorsButton},
-        {PANE_IDX_SETTINGS,  mExtendedUi->settingsButton},
-        {PANE_IDX_HELP,      mExtendedUi->helpButton},
+        {PANE_IDX_SETTINGS,     mExtendedUi->settingsButton},
+        {PANE_IDX_HELP,         mExtendedUi->helpButton},
     };
 
     setObjectName("ExtendedControls");
@@ -90,6 +94,7 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->batteryButton);
     mSidebarButtons.addButton(mExtendedUi->telephoneButton);
     mSidebarButtons.addButton(mExtendedUi->dpadButton);
+    mSidebarButtons.addButton(mExtendedUi->microphoneButton);
     mSidebarButtons.addButton(mExtendedUi->fingerButton);
     mSidebarButtons.addButton(mExtendedUi->virtSensorsButton);
     mSidebarButtons.addButton(mExtendedUi->settingsButton);
@@ -116,6 +121,7 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         mExtendedUi->telephonyPage->setTelephonyAgent(agentPtr->telephony);
         mExtendedUi->finger_page->setFingerAgent(agentPtr->finger);
         mExtendedUi->location_page->setLocationAgent(agentPtr->location);
+        mExtendedUi->microphonePage->setMicrophoneAgent(gQAndroidUserEventAgent);
         mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
     }
     // The ADB port is known now. Show it on the UI Help page.
@@ -186,6 +192,7 @@ void ExtendedWindow::on_dpadButton_clicked()        { adjustTabs(PANE_IDX_DPAD);
 void ExtendedWindow::on_fingerButton_clicked()      { adjustTabs(PANE_IDX_FINGER); }
 void ExtendedWindow::on_helpButton_clicked()        { adjustTabs(PANE_IDX_HELP); }
 void ExtendedWindow::on_locationButton_clicked()    { adjustTabs(PANE_IDX_LOCATION); }
+void ExtendedWindow::on_microphoneButton_clicked()  { adjustTabs(PANE_IDX_MICROPHONE); }
 void ExtendedWindow::on_settingsButton_clicked()    { adjustTabs(PANE_IDX_SETTINGS); }
 void ExtendedWindow::on_telephoneButton_clicked()   { adjustTabs(PANE_IDX_TELEPHONE); }
 void ExtendedWindow::on_virtSensorsButton_clicked() { adjustTabs(PANE_IDX_VIRT_SENSORS); }

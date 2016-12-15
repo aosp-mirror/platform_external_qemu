@@ -42,7 +42,7 @@ typedef enum {
  *         The Android "Menu" key is KEY_SOFT1, *not* KEY_MENU
  */
 /* NOTE: mingw's winnt.h define DELETE to constant
-   i586-mingw32msvc:       #define DELETE  0x00010000L
+   i586-mingw32msvc:       #define DELETE   0x00010000L
    x86_64-w64-mingw32-gcc: #define DELETE  (0x00010000L)
 
    KEY_CODE belows glues "KEY_" and "DELETE".
@@ -526,6 +526,18 @@ typedef enum {
     EVENT_ABS_LIST
 } EventAbsCode;
 #undef  ABS_CODE
+
+#define  EVENT_SW_LIST  \
+    SW_CODE(LID,               0)  \
+    SW_CODE(HEADPHONE_INSERT,  2)  \
+    SW_CODE(MICROPHONE_INSERT, 4)
+
+#define  SW_CODE(n,v)  GLUE(SW_,n) = v,
+
+typedef enum {
+    EVENT_SW_LIST
+} EventSWCode;
+#undef  SW_CODE
 
 /* convert an event string specification like <type>:<code>:<value>
  * into three integers. returns 0 on success, or -1 in case of error
