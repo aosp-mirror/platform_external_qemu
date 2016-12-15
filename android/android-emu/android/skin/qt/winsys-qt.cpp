@@ -18,6 +18,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/base/system/Win32UnicodeString.h"
+#include "android/cmdline-option.h"
 #include "android/qt/qt_path.h"
 #include "android/skin/rect.h"
 #include "android/skin/resource.h"
@@ -352,7 +353,7 @@ extern void skin_winsys_init_args(int argc, char** argv) {
     g->argv = argv;
 }
 
-extern void skin_winsys_start(bool no_window) {
+extern void skin_winsys_start(const AndroidOptions* opts) {
     GlobalState* g = globalState();
 #ifdef Q_OS_LINUX
     // This call is required to make doing OpenGL stuff on the UI
@@ -362,7 +363,7 @@ extern void skin_winsys_start(bool no_window) {
 #endif
     skin_winsys_setup_library_paths();
 
-    if (no_window) {
+    if (opts->no_window) {
         g->app = new QCoreApplication(g->argc, g->argv);
         EmulatorQtNoWindow::create();
     } else {
@@ -370,7 +371,7 @@ extern void skin_winsys_start(bool no_window) {
         g->app->setAttribute(Qt::AA_UseHighDpiPixmaps);
         androidQtDefaultInit();
 
-        EmulatorQtWindow::create();
+        EmulatorQtWindow::create(opts);
 #ifdef __APPLE__
         // On OS X, Qt automatically generates an application menu with a "Quit"
         // item. For whatever reason, the auto-generated "quit" does not work,

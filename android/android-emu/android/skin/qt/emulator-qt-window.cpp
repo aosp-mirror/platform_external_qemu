@@ -89,11 +89,11 @@ const StringView EmulatorQtWindow::kRemoteDownloadsDir = "/sdcard/Download/";
 const StringView EmulatorQtWindow::kRemoteDownloadsDirApi10 =
         "/sdcard/download/";
 
-void EmulatorQtWindow::create() {
-    sInstance.get() = Ptr(new EmulatorQtWindow());
+void EmulatorQtWindow::create(const AndroidOptions *opts) {
+    sInstance.get() = Ptr(new EmulatorQtWindow(opts));
 }
 
-EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
+EmulatorQtWindow::EmulatorQtWindow(const AndroidOptions *opts, QWidget* parent)
     : QFrame(parent),
       mLooper(android::qt::createLooper()),
       mStartupDialog(this),
@@ -150,7 +150,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mScreenCapturer(mAdbInterface.get()),
       mInstallDialog(this),
       mPushDialog(this),
-      mStartedAdbStopProcess(false) {
+      mStartedAdbStopProcess(false),
+      mRotaryInput(opts->rotary_input){
     android::base::ThreadLooper::setLooper(mLooper, true);
 
     // Start a timer. If the main window doesn't
@@ -1320,6 +1321,7 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
     skin_event->u.mouse.skip_sync = skipSync;
     skin_event->u.mouse.x = pos.x();
     skin_event->u.mouse.y = pos.y();
+    skin_event->u.mouse.scroll_wheel = false;
 
     skin_event->u.mouse.xrel = pos.x() - mPrevMousePosition.x();
     skin_event->u.mouse.yrel = pos.y() - mPrevMousePosition.y();
@@ -1660,14 +1662,20 @@ bool EmulatorQtWindow::mouseInside() {
 }
 
 void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
-    if (!mWheelScrollTimer.isActive()) {
-        handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft, event->pos());
-        mWheelScrollPos = event->pos();
-    }
+    if (mRotaryInput) {
+        SkinEvent* skin_event = createSkinEvent(kEventScrollWheelChanged);
+        skin_event->u.scroll_wheel.dy = event->delta();
+        queueSkinEvent(skin_event);
+    } else {
+        if (!mWheelScrollTimer.isActive()) {
+            handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft, event->pos());
+            mWheelScrollPos = event->pos();
+        }
 
-    mWheelScrollTimer.start();
-    mWheelScrollPos.setY(mWheelScrollPos.y() + event->delta() / 8);
-    handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mWheelScrollPos);
+        mWheelScrollTimer.start();
+        mWheelScrollPos.setY(mWheelScrollPos.y() + event->delta() / 8);
+        handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mWheelScrollPos);
+    }
 }
 
 void EmulatorQtWindow::wheelScrollTimeout() {
