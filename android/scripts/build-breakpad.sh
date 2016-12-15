@@ -68,7 +68,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         builder_unpack_package_source "breakpad"
         builder_unpack_package_source "linux-syscall-support"
-        builder_build_autotools_package breakpad "$@"
+        builder_build_autotools_package breakpad
 
         # Copy binaries necessary for the build itself as well as static
         # libraries.
