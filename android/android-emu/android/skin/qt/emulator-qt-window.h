@@ -15,6 +15,7 @@
 #include "android/base/containers/CircularBuffer.h"
 #include "android/base/StringView.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/cmdline-option.h"
 #include "android/emulation/control/ApkInstaller.h"
 #include "android/emulation/control/FilePusher.h"
 #include "android/emulation/control/ScreenCapturer.h"
@@ -79,10 +80,10 @@ public:
     using Ptr = std::shared_ptr<EmulatorQtWindow>;
 
 private:
-    explicit EmulatorQtWindow(QWidget* parent = 0);
+    explicit EmulatorQtWindow(const AndroidOptions* opts, QWidget* parent = 0);
 
 public:
-    static void create();
+    static void create(const AndroidOptions*);
     static EmulatorQtWindow* getInstance();
     static Ptr getInstancePtr();
 
@@ -376,6 +377,8 @@ private:
     QTimer mWheelScrollTimer;
     QPoint mWheelScrollPos;
     bool mStartedAdbStopProcess;
+
+    bool mRotaryInput;
 
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
 };
