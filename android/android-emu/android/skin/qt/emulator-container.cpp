@@ -17,6 +17,7 @@
 #include <QtCore>
 #include <QApplication>
 #include <QObject>
+#include <QProcessEnvironment>
 #include <QScrollBar>
 #include <QStyle>
 #include <QStyleFactory>
@@ -59,7 +60,13 @@ EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
         QObject::connect(this, &QObject::destroyed, [style] { delete style; });
     }
 #endif  // __APPLE__
-
+#ifdef __linux__
+    // on linux, only KDE needs the resize timer hack
+    mNeedsResizeTimer =
+        QProcessEnvironment::systemEnvironment().contains("KDE_FULL_SESSION");
+#else
+    mNeedsResizeTimer = true;
+#endif
     mResizeTimer.setSingleShot(true);
     QObject::connect(&mResizeTimer, SIGNAL(timeout()), this,
                      SLOT(slot_resizeDone()));
@@ -122,7 +129,7 @@ bool EmulatorContainer::event(QEvent* e) {
                 mEventBuffer[i + 2] == QEvent::FocusIn &&
                 mEventBuffer[i + 3] == QEvent::InputMethodQuery) {
                 mEventBuffer.clear();
-                mEmulatorWindow->doResize(this->size());
+               mEmulatorWindow->doResize(this->size());
 
                 // Kill the resize timer to avoid double resizes.
                 stopResizeTimer();
@@ -207,11 +214,13 @@ void EmulatorContainer::resizeEvent(QResizeEvent* event) {
     // not entered the window again. We use a longer timer on Linux because
     // the timer is not needed on non-KDE systems, so we want it to be less
     // noticeable.
+    if (mNeedsResizeTimer) {
 #ifdef __linux__
-    mResizeTimer.start(1000);
+      mResizeTimer.start(1000);
 #else
-    mResizeTimer.start(500);
+      mResizeTimer.start(500);
 #endif
+    }
 }
 
 void EmulatorContainer::showEvent(QShowEvent* event) {
