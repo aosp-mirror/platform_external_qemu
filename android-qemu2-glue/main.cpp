@@ -221,13 +221,17 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
 #else
     std::string driveParam;
 #endif
+    // Disable extra qcow2 checks as we're on its stable version.
+    driveParam += "overlap-check=none,";
+
     std::string deviceParam;
+    StringView filePath;
     switch (type) {
         case IMAGE_TYPE_SYSTEM:
+            filePath = avdContentPath;
             driveParam += StringFormat("index=%d,id=system,file=%s"
                                        PATH_SEP "system.img.qcow2",
-                                        idx++,
-                                        avdContentPath);
+                                        idx++, filePath);
             // API 15 and under images need a read+write
             // system image.
             if (apiLevel > 15) {
@@ -241,24 +245,27 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
                                        kTarget.storageDeviceType);
             break;
         case IMAGE_TYPE_CACHE:
+            filePath = hw->disk_cachePartition_path;
             driveParam += StringFormat("index=%d,id=cache,file=%s.qcow2",
                                       idx++,
-                                      hw->disk_cachePartition_path);
+                                      filePath);
             deviceParam = StringFormat("%s,drive=cache",
                                        kTarget.storageDeviceType);
             break;
         case IMAGE_TYPE_USER_DATA:
+            filePath = hw->disk_dataPartition_path;
             driveParam += StringFormat("index=%d,id=userdata,file=%s.qcow2",
                                       idx++,
-                                      hw->disk_dataPartition_path);
+                                      filePath);
             deviceParam = StringFormat("%s,drive=userdata",
                                        kTarget.storageDeviceType);
             break;
         case IMAGE_TYPE_SD_CARD:
             if (hw->hw_sdCard_path != NULL && strcmp(hw->hw_sdCard_path, "")) {
-               driveParam += StringFormat("index=%d,id=sdcard,file=%s.qcow2",
-                                         idx++, hw->hw_sdCard_path);
-               deviceParam = StringFormat("%s,drive=sdcard",
+                filePath = hw->hw_sdCard_path;
+                driveParam += StringFormat("index=%d,id=sdcard,file=%s.qcow2",
+                                          idx++, filePath);
+                deviceParam = StringFormat("%s,drive=sdcard",
                                           kTarget.storageDeviceType);
             } else {
                 /* no sdcard is defined */
@@ -268,10 +275,11 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
         case IMAGE_TYPE_ENCRYPTION_KEY:
             if (android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData) &&
                 hw->disk_encryptionKeyPartition_path != NULL && strcmp(hw->disk_encryptionKeyPartition_path, "")) {
-               driveParam += StringFormat("index=%d,id=encrypt,file=%s.qcow2",
-                                         idx++, hw->disk_encryptionKeyPartition_path);
-               deviceParam = StringFormat("%s,drive=encrypt",
-                                          kTarget.storageDeviceType);
+                filePath = hw->disk_encryptionKeyPartition_path;
+                driveParam += StringFormat("index=%d,id=encrypt,file=%s.qcow2",
+                                           idx++, filePath);
+                deviceParam = StringFormat("%s,drive=encrypt",
+                                           kTarget.storageDeviceType);
             } else {
                 /* no encryption partition is defined */
                 return;
@@ -281,6 +289,20 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
             dwarning("Unknown Image type %d\n", type);
             return;
     }
+
+    // Default qcow2's L2 cache size is up to 8GB. Let's increase it for
+    // larger images.
+    System::FileSize diskSize;
+    if (System::get()->pathFileSize(filePath, &diskSize)) {
+        // L2 cache size should be "disk_size_GB / 131072" as per QEMU docs
+        // with a default of 1MB. Round it up just in case.
+        const int l2CacheSize =
+                std::max<int>(
+                    (diskSize + (1024 * 1024 * 1024 - 1)) / (1024 * 1024 * 1024) * 131072,
+                    1024 * 1024);
+        driveParam += StringFormat(",l2-cache-size=%d", l2CacheSize);
+    }
+
     args[n++] = "-drive";
     args[n++] = ASTRDUP(driveParam.c_str());
     args[n++] = "-device";
