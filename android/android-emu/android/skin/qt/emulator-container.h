@@ -48,4 +48,5 @@ private:
     EmulatorQtWindow* mEmulatorWindow;
     QList<QEvent::Type> mEventBuffer;
     QTimer mResizeTimer;
+    bool mNeedsResizeTimer;
 };
