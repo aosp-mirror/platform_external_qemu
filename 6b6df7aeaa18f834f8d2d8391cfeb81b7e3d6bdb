@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1ac9e3ea_652ba6f4",
+        "filename": "include/hw/input/goldfish_events_util.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-12-16T10:45:48Z",
+      "side": 1,
+      "message": "nit: s/roatry/rotary/",
+      "revId": "6b6df7aeaa18f834f8d2d8391cfeb81b7e3d6bdb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1ac9e3ea_45282af6",
+        "filename": "include/hw/input/goldfish_events_util.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-12-16T10:45:48Z",
+      "side": 1,
+      "message": "I strongly recommend using a prefix like goldfish_events_ for these functions to avoid potential conflicts in the future.",
+      "revId": "6b6df7aeaa18f834f8d2d8391cfeb81b7e3d6bdb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1ac9e3ea_a5f3de7d",
+        "filename": "include/hw/input/goldfish_events_util.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-12-16T10:45:48Z",
+      "side": 1,
+      "message": "It\u0027s probably better to put this header directly under hw/input/, things in include/hw/... are more useful when they provide declarations that are accessed by the rest of the QEMU or glue code instead. This header seems to contain implementation details of the events/rotary devices that do not need to be exposed this way.",
+      "revId": "6b6df7aeaa18f834f8d2d8391cfeb81b7e3d6bdb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
