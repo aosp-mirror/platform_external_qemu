@@ -77,9 +77,5 @@ void StringAppendFormatWithArgs(std::string* string,
     }
 }
 
-const char* unpackFormatArg(StringView str) {
-    return str.c_str();
-}
-
 }  // namespace base
 }  // namespace android

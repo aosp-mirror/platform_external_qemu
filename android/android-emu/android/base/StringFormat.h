@@ -48,11 +48,12 @@ void StringAppendFormatWithArgs(std::string* string,
 
 // Anything which can be used to construct a string view goes here and unpacks
 // into a const char*
-const char* unpackFormatArg(StringView str);
-
+constexpr const char* unpackFormatArg(StringView str) {
+    return str.str();
+}
 // Forward all PODs as-is
 template <class T>
-T&& unpackFormatArg(T&& t,
+constexpr T&& unpackFormatArg(T&& t,
         typename std::enable_if<
                     std::is_pod<typename std::decay<T>::type>::value
                  >::type* = nullptr) {
@@ -62,12 +63,12 @@ T&& unpackFormatArg(T&& t,
 // These templated versions of StringFormat*() allow one to pass all kinds of
 // string objects into the argument list
 template <class... Args>
-std::string StringFormat(const char* format, Args&&... args) {
+constexpr std::string StringFormat(const char* format, Args&&... args) {
     return StringFormatRaw(format, unpackFormatArg(std::forward<Args>(args))...);
 }
 
 template <class... Args>
-void StringAppendFormat(std::string* string,
+constexpr void StringAppendFormat(std::string* string,
                         const char* format,
                         Args&&... args) {
     StringAppendFormatRaw(string, format,
