@@ -228,3 +228,7 @@ QAbstractSpinBox:down-button {
 QLineEdit[ColorGroup="InvalidInput"] {
     color: #ff0000;
 }
+QToolTip {
+    background-color: #ffffff;
+    color: #000000;
+}
