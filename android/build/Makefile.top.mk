@@ -34,6 +34,10 @@ include-if-bitness-64 = \
         $(eval include $1))
 
 BUILD_TARGET_CFLAGS := -g -falign-functions
+
+BUILD_OPT_CFLAGS :=
+BUILD_OPT_LDFLAGS :=
+
 ifeq ($(BUILD_DEBUG),true)
     BUILD_OPT_CFLAGS += -O0
 else
@@ -45,9 +49,15 @@ else
     endif
     # We use a version of Clang that doesn't support these yet.
     ifneq ($(BUILD_TARGET_OS),darwin)
-        BUILD_OPT_CFLAGS += -funroll-loops -flto -ftracer
+        BUILD_OPT_CFLAGS += -funroll-loops -ftracer
     endif
 endif
+
+ifeq (true,$(BUILD_ENABLE_LTO))
+BUILD_OPT_CFLAGS += -flto
+BUILD_OPT_LDFLAGS += -flto
+endif
+
 BUILD_TARGET_CFLAGS += $(BUILD_OPT_CFLAGS)
 
 # Generate position-independent binaries. Don't add -fPIC when targetting
@@ -79,7 +89,7 @@ BUILD_TARGET_LDLIBS :=
 BUILD_TARGET_LDLIBS32 :=
 BUILD_TARGET_LDLIBS64 :=
 
-BUILD_TARGET_LDFLAGS :=
+BUILD_TARGET_LDFLAGS := $(BUILD_OPT_LDFLAGS)
 BUILD_TARGET_LDFLAGS32 :=
 BUILD_TARGET_LDFLAGS64 :=
 
