@@ -72,6 +72,10 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     glMapBufferRangeAEMU = s_glMapBufferRangeAEMU;
     glUnmapBufferAEMU = s_glUnmapBufferAEMU;
     glFlushMappedBufferRangeAEMU = s_glFlushMappedBufferRangeAEMU;
+    glCompressedTexImage2DOffsetAEMU = s_glCompressedTexImage2DOffsetAEMU;
+    glCompressedTexSubImage2DOffsetAEMU = s_glCompressedTexSubImage2DOffsetAEMU;
+    glTexImage2DOffsetAEMU = s_glTexImage2DOffsetAEMU;
+    glTexSubImage2DOffsetAEMU = s_glTexSubImage2DOffsetAEMU;
     return 0;
 
 }
@@ -172,4 +176,21 @@ void GLESv2Decoder::s_glFlushMappedBufferRangeAEMU(void* self, GLenum target, GL
     // |offset| was the absolute offset into the mapping, so just flush offset 0.
     ctx->glFlushMappedBufferRange(target, 0, length);
     ctx->glUnmapBuffer(target);
+}
+
+void GLESv2Decoder::s_glCompressedTexImage2DOffsetAEMU(void* self, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, GLuint offset) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+	ctx->glCompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, SafePointerFromUInt(offset));
+}
+void GLESv2Decoder::s_glCompressedTexSubImage2DOffsetAEMU(void* self, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, GLuint offset) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+	ctx->glCompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize, SafePointerFromUInt(offset));
+}
+void GLESv2Decoder::s_glTexImage2DOffsetAEMU(void* self, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, GLuint offset) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+	ctx->glTexImage2D(target, level, internalformat, width, height, border, format, type, SafePointerFromUInt(offset));
+}
+void GLESv2Decoder::s_glTexSubImage2DOffsetAEMU(void* self, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, GLuint offset) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+	ctx->glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, SafePointerFromUInt(offset));
 }
