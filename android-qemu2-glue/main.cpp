@@ -222,7 +222,9 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
     std::string driveParam;
 #endif
     // Disable extra qcow2 checks as we're on its stable version.
-    driveParam += "overlap-check=none,";
+    // Disable cache flushes as well, as Android issues way too many flush
+    // commands for nothing.
+    driveParam += "overlap-check=none,cache=unsafe,";
 
     std::string deviceParam;
     StringView filePath;
@@ -266,7 +268,7 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
                 driveParam += StringFormat("index=%d,id=sdcard,file=%s.qcow2",
                                           idx++, filePath);
                 deviceParam = StringFormat("%s,drive=sdcard",
-                                          kTarget.storageDeviceType);
+                                           kTarget.storageDeviceType);
             } else {
                 /* no sdcard is defined */
                 return;
@@ -302,6 +304,10 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
                     1024 * 1024);
         driveParam += StringFormat(",l2-cache-size=%d", l2CacheSize);
     }
+
+    // Move the disk operations into the dedicated 'disk thread', and
+    // enable modern notification mode for the hosts that support it (Linux).
+    deviceParam += ",iothread=disk-iothread,modern-pio-notify";
 
     args[n++] = "-drive";
     args[n++] = ASTRDUP(driveParam.c_str());
@@ -844,6 +850,10 @@ extern "C" int main(int argc, char **argv) {
     // Ramdisk
     args[n++] = "-initrd";
     args[n++] = hw->disk_ramdisk_path;
+
+    // Dedicated IOThread for all disk IO
+    args[n++] = "-object";
+    args[n++] = "iothread,id=disk-iothread";
 
     /*
      * add partition parameters with the sequence
