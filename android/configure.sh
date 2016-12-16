@@ -242,6 +242,7 @@ OPTION_GLES=
 OPTION_SDK_REV=
 OPTION_SYMBOLS=no
 OPTION_BENCHMARKS=no
+OPTION_LTO=
 ANDROID_SDK_TOOLS_REVISION=
 ANDROID_SDK_TOOLS_BUILD_NUMBER=
 
@@ -330,6 +331,8 @@ for opt do
   ;;
   --benchmarks) OPTION_BENCHMARKS=yes
   ;;
+  --lto) OPTION_LTO=true
+  ;;
   *)
     echo "unknown option '$opt', use --help"
     exit 1
@@ -364,6 +367,7 @@ EOF
     echo "  --no-pcbios                 Disable copying of PC Bios files"
     echo "  --no-tests                  Don't run unit test suite"
     echo "  --benchmarks                Build benchmark programs."
+    echo "  --lto                       Force link-time optimization."
     echo ""
     exit 1
 fi
@@ -1010,6 +1014,10 @@ echo "BUILD_HOST_OBJCOPY    := $BUILD_OBJCOPY" >> $config_mk
 echo "BUILD_HOST_CFLAGS     := $BUILD_CFLAGS" >> $config_mk
 echo "BUILD_HOST_LDFLAGS    := $BUILD_LDFLAGS" >> $config_mk
 echo "BUILD_HOST_DUMPSYMS   := $DUMPSYMS" >> $config_mk
+
+if [ "$OPTION_LTO" = "true" ]; then
+    echo "BUILD_ENABLE_LTO      := true" >> $config_mk
+fi
 
 echo "CONFIG_COREAUDIO  := $PROBE_COREAUDIO" >> $config_mk
 echo "CONFIG_WINAUDIO   := $PROBE_WINAUDIO" >> $config_mk

@@ -47,7 +47,7 @@ TEST(Dns, ResolveUnknownHost) {
 
 TEST(Dns, GetSystemServerList) {
     Dns::AddressList list = Dns::getSystemServerList();
-    EXPECT_NE(0, list.size());
+    EXPECT_NE(0U, list.size());
     for (const auto& address : list) {
         LOG(INFO) << "DNS nameserver: " << address.toString();
     }
@@ -69,7 +69,7 @@ TEST(Dns, TestDnsResolver) {
     EXPECT_EQ(2U, list.size());
     EXPECT_TRUE(list[0].valid());
     EXPECT_TRUE(list[0].isIpv4());
-    EXPECT_EQ(0x0a000304, list[0].ipv4());
+    EXPECT_EQ(0x0a000304U, list[0].ipv4());
 
     static const uint8_t kExpected[16] = {0, 0, 0, 0, 0,  0, 0, 0,
                                           0, 0, 0, 0, 10, 0, 3, 4};

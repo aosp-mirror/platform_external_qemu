@@ -114,7 +114,7 @@ TEST_F(CrashSystemTest, getCrashServiceCmdLine) {
     std::string proc("procval");
     std::vector<std::string> tmp1 =
             CrashSystem::get()->getCrashServiceCmdLine(pipe, proc);
-    EXPECT_EQ(tmp1.size(), 7);
+    EXPECT_EQ(tmp1.size(), 7U);
     EXPECT_STREQ(tmp1[0].c_str(), getCrashServicePath().c_str());
     EXPECT_STREQ(tmp1[1].c_str(), "-pipe");
     EXPECT_STREQ(tmp1[2].c_str(), pipe.c_str());
@@ -123,7 +123,7 @@ TEST_F(CrashSystemTest, getCrashServiceCmdLine) {
     EXPECT_STREQ(tmp1[5].c_str(), "-data-dir");
     // check that argument of -data-dir starts with temp directory name
     const auto tempDir = System::get()->getTempDir();
-    EXPECT_TRUE(tmp1[6].size() > tempDir.size() + 2);
+    EXPECT_TRUE(tmp1[6].size() > tempDir.size() + 2U);
     EXPECT_EQ(std::string(tmp1[6].c_str(), tempDir.size()), tempDir);
     EXPECT_TRUE(PathUtils::isDirSeparator(tmp1[6][tempDir.size()]));
     EXPECT_FALSE(PathUtils::isDirSeparator(tmp1[6][tempDir.size() + 1]));

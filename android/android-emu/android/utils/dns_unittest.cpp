@@ -29,8 +29,8 @@ TEST(android_dns_parse_servers, IgnoreIpv6) {
     uint32_t addresses[kMaxAddresses] = {};
     const char kList[] = "127.0.0.1,::1,127.0.1.1";
     EXPECT_EQ(2, android_dns_parse_servers(kList, addresses, kMaxAddresses));
-    EXPECT_EQ(0x7f000001, addresses[0]);
-    EXPECT_EQ(0x7f000101, addresses[1]);
+    EXPECT_EQ(0x7f000001U, addresses[0]);
+    EXPECT_EQ(0x7f000101U, addresses[1]);
 }
 
 TEST(android_dns_get_system_servers, DumpList) {
@@ -38,7 +38,7 @@ TEST(android_dns_get_system_servers, DumpList) {
     uint32_t ips[kMaxServers];
     int count = android_dns_get_system_servers(ips, kMaxServers);
     EXPECT_GT(count, 0);
-    EXPECT_LT(count, kMaxServers);
+    EXPECT_LT(count, (int)kMaxServers);
     for (int n = 0; n < count; ++n) {
         LOG(INFO) << "DNS nameserver " << ipToString(ips[n]);
     }

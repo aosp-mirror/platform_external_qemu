@@ -285,14 +285,14 @@ TEST(System, pathOperations) {
 
     EXPECT_FALSE(sys->pathFileSize(fooPath, nullptr));
     EXPECT_TRUE(sys->pathFileSize(fooPath, &fileSize));
-    EXPECT_EQ(0, fileSize);
+    EXPECT_EQ(0U, fileSize);
 
     std::ofstream fooFile(fooPath);
     ASSERT_TRUE(bool(fooFile));
     fooFile << "Some non-zero data";
     fooFile.close();
     EXPECT_TRUE(sys->pathFileSize(fooPath, &fileSize));
-    EXPECT_LT(0, fileSize);
+    EXPECT_LT(0U, fileSize);
 
     // Test creation time getter.
     auto createTime = sys->pathCreationTime(fooPath);
@@ -414,8 +414,8 @@ TEST(System, runCommandTrue) {
     System::ProcessExitCode exitCode = 666;
     EXPECT_TRUE(System::get()->runCommand(cmd, RunOptions::WaitForCompletion,
                                           System::kInfinite, &exitCode, &pid));
-    EXPECT_EQ(0, exitCode);
-    EXPECT_GT(pid, 0);
+    EXPECT_EQ(0U, exitCode);
+    EXPECT_GT(pid, 0U);
 }
 
 TEST(System, runCommandTimeout) {
@@ -439,8 +439,8 @@ TEST(System, runCommandTimeout) {
 #endif
     EXPECT_TRUE(System::get()->runCommand(cmd, RunOptions::WaitForCompletion,
                                           System::kInfinite, &exitCode, &pid));
-    EXPECT_EQ(0, exitCode);
-    EXPECT_GT(pid, 0);
+    EXPECT_EQ(0U, exitCode);
+    EXPECT_GT(pid, 0U);
 }
 
 TEST(System, DISABLED_runCommandWithOutput) {

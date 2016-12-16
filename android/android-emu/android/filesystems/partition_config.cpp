@@ -266,7 +266,7 @@ static bool addNandImage(PartitionConfigState* state,
                                 state, "Missing %s partition image: %s",
                                 part_name, part_file);
                     }
-                    if (!state->backend->pathEmptyFile(part_file) < 0) {
+                    if (!state->backend->pathEmptyFile(part_file)) {
                         return partition_config_error(
                                 state, "Cannot create %s image file at %s: %s",
                                 part_name, part_file, strerror(errno));

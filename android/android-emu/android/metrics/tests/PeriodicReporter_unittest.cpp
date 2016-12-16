@@ -67,47 +67,47 @@ TEST_F(PeriodicReporterTest, startStop) {
 TEST_F(PeriodicReporterTest, addTask) {
     PeriodicReporter::get().addTask(
             100, [](android_studio::AndroidStudioEvent*) { return true; });
-    EXPECT_EQ(1, mLooper.timers().size());
+    EXPECT_EQ(1U, mLooper.timers().size());
     PeriodicReporter::get().addTask(
             1000, [](android_studio::AndroidStudioEvent*) { return true; });
-    EXPECT_EQ(2, mLooper.timers().size());
+    EXPECT_EQ(2U, mLooper.timers().size());
     PeriodicReporter::get().addTask(
             1000, [](android_studio::AndroidStudioEvent*) { return true; });
-    EXPECT_EQ(2, mLooper.timers().size());
+    EXPECT_EQ(2U, mLooper.timers().size());
 
-    EXPECT_EQ(2, mLooper.activeTimers().size());
+    EXPECT_EQ(2U, mLooper.activeTimers().size());
 }
 
 TEST_F(PeriodicReporterTest, addCancelableTask) {
     auto task1 = PeriodicReporter::get().addCancelableTask(
             100, [](android_studio::AndroidStudioEvent*) { return true; });
-    EXPECT_EQ(1, mLooper.timers().size());
+    EXPECT_EQ(1U, mLooper.timers().size());
     auto task2 = PeriodicReporter::get().addCancelableTask(
             1000, [](android_studio::AndroidStudioEvent*) { return true; });
-    EXPECT_EQ(2, mLooper.timers().size());
+    EXPECT_EQ(2U, mLooper.timers().size());
     auto task3 = PeriodicReporter::get().addCancelableTask(
             1000, [](android_studio::AndroidStudioEvent*) { return true; });
-    EXPECT_EQ(2, mLooper.timers().size());
+    EXPECT_EQ(2U, mLooper.timers().size());
 
-    EXPECT_EQ(2, mLooper.activeTimers().size());
+    EXPECT_EQ(2U, mLooper.activeTimers().size());
 
     task1.reset();
-    EXPECT_EQ(1, mLooper.timers().size());
+    EXPECT_EQ(1U, mLooper.timers().size());
     task2.reset();
-    EXPECT_EQ(1, mLooper.timers().size());
+    EXPECT_EQ(1U, mLooper.timers().size());
     task3.reset();
-    EXPECT_EQ(0, mLooper.timers().size());
+    EXPECT_EQ(0U, mLooper.timers().size());
 }
 
 TEST_F(PeriodicReporterTest, addTaskMixed) {
     PeriodicReporter::get().addTask(
             100, [](android_studio::AndroidStudioEvent*) { return true; });
-    EXPECT_EQ(1, mLooper.timers().size());
+    EXPECT_EQ(1U, mLooper.timers().size());
     auto task = PeriodicReporter::get().addCancelableTask(
             100, [](android_studio::AndroidStudioEvent*) { return true; });
-    EXPECT_EQ(1, mLooper.timers().size());
+    EXPECT_EQ(1U, mLooper.timers().size());
     task.reset();
-    EXPECT_EQ(1, mLooper.timers().size());
+    EXPECT_EQ(1U, mLooper.timers().size());
 }
 
 TEST_F(PeriodicReporterTest, runTask) {

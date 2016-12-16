@@ -25,7 +25,7 @@ TEST(KmlParser, ParseNonexistentFile) {
     GpsFixArray locations;
     std::string error;
     ASSERT_FALSE(KmlParser::parseFile("", &locations, &error));
-    ASSERT_EQ(0, locations.size());
+    ASSERT_EQ(0U, locations.size());
     EXPECT_EQ(std::string("KML document not parsed successfully."), error);
 }
 
@@ -45,7 +45,7 @@ TEST(KmlParser, ParseEmptyFile) {
         GpsFixArray locations;
         std::string error;
         ASSERT_TRUE(KmlParser::parseFile(path.c_str(), &locations, &error));
-        EXPECT_EQ(0, locations.size());
+        EXPECT_EQ(0U, locations.size());
         EXPECT_EQ("", error);
      }   // destructor removes temp directory and all files under it.
 }
@@ -73,7 +73,7 @@ TEST(KmlParser, ParseValidFile) {
         GpsFixArray locations;
         std::string error;
         ASSERT_TRUE(KmlParser::parseFile(path.c_str(), &locations, &error));
-        EXPECT_EQ(1, locations.size());
+        EXPECT_EQ(1U, locations.size());
         EXPECT_EQ("", error);
      }   // destructor removes temp directory and all files under it.
 }
@@ -143,7 +143,7 @@ TEST(KmlParser, ParseValidComplexFile) {
         std::string error;
         ASSERT_TRUE(KmlParser::parseFile(path.c_str(), &locations, &error));
         EXPECT_EQ("", error);
-        EXPECT_EQ(3, locations.size());
+        EXPECT_EQ(3U, locations.size());
 
         EXPECT_EQ("Tessellated", locations[0].name);
         EXPECT_EQ("Black line (10 pixels wide), height tracks terrain", locations[0].description);
@@ -182,7 +182,7 @@ TEST(KmlParser, ParseOneCoordinate) {
 
         ASSERT_TRUE(KmlParser::parseFile(path.c_str(), &locations, &error));
         EXPECT_EQ("", error);
-        EXPECT_EQ(1, locations.size());
+        EXPECT_EQ(1U, locations.size());
         EXPECT_FLOAT_EQ(-122.0822035425683, locations[0].longitude);
         EXPECT_FLOAT_EQ(37.42228990140251, locations[0].latitude);
         EXPECT_FLOAT_EQ(0.0, locations[0].elevation);
@@ -212,7 +212,7 @@ TEST(KmlParser, ParseMultipleCoordinates) {
 
         ASSERT_TRUE(KmlParser::parseFile(path.c_str(), &locations, &error));
         EXPECT_EQ("", error);
-        ASSERT_EQ(3, locations.size());
+        ASSERT_EQ(3U, locations.size());
 
         EXPECT_FLOAT_EQ(-122.0822035425683, locations[0].longitude);
         EXPECT_FLOAT_EQ(37.42228990140251, locations[0].latitude);
@@ -306,7 +306,7 @@ TEST(KmlParser, ParseLocationNormalMissingOptionalFields) {
 
     ASSERT_TRUE(KmlParser::parseFile(path.c_str(), &locations, &error));
     EXPECT_EQ("", error);
-    ASSERT_EQ(1, locations.size());
+    ASSERT_EQ(1U, locations.size());
 
     for (unsigned i = 0; i < locations.size(); ++i) {
         EXPECT_EQ("", locations[i].name);
@@ -364,7 +364,7 @@ TEST(KmlParser, ParseLocationNameOnlyFirst) {
     std::string error;
     EXPECT_TRUE(KmlParser::parseFile(path.c_str(), &locations, &error));
     EXPECT_EQ("", error);
-    ASSERT_EQ(2, locations.size());
+    ASSERT_EQ(2U, locations.size());
 
     EXPECT_EQ("Simple placemark", locations[0].name);
     EXPECT_EQ("Attached to the ground.", locations[0].description);
@@ -416,7 +416,7 @@ TEST(KmlParser, ParseMultipleLocations) {
     std::string error;
     EXPECT_TRUE(KmlParser::parseFile(path.c_str(), &locations, &error));
     EXPECT_EQ("", error);
-    ASSERT_EQ(4, locations.size());
+    ASSERT_EQ(4U, locations.size());
 
     for (unsigned i = 0; i < locations.size(); ++i) {
         if (i != 2) {
@@ -447,7 +447,7 @@ TEST(KmlParser, TraverseEmptyDoc) {
     std::string error;
     EXPECT_TRUE(KmlParser::parseFile(path.c_str(), &locations, &error));
     EXPECT_EQ("", error);
-    EXPECT_EQ(0, locations.size());
+    EXPECT_EQ(0U, locations.size());
 }
 
 TEST(KmlParser, TraverseDocNoPlacemarks) {
@@ -468,7 +468,7 @@ TEST(KmlParser, TraverseDocNoPlacemarks) {
     std::string error;
     EXPECT_TRUE(KmlParser::parseFile(path.c_str(), &locations, &error));
     EXPECT_EQ("", error);
-    EXPECT_EQ(0, locations.size());
+    EXPECT_EQ(0U, locations.size());
 }
 
 TEST(KmlParser, TraverseNestedDoc) {
@@ -509,7 +509,7 @@ TEST(KmlParser, TraverseNestedDoc) {
     std::string error;
     EXPECT_TRUE(KmlParser::parseFile(path.c_str(), &locations, &error));
     EXPECT_EQ("", error);
-    ASSERT_EQ(1, locations.size());
+    ASSERT_EQ(1U, locations.size());
 
     EXPECT_EQ("Simple placemark", locations[0].name);
     EXPECT_EQ("Attached to the ground.", locations[0].description);
@@ -541,7 +541,7 @@ TEST(KmlParser, ParsePlacemarkNullNameNoCrash) {
     GpsFixArray locations;
     std::string error;
     EXPECT_TRUE(KmlParser::parseFile(path.c_str(), &locations, &error));
-    ASSERT_EQ(1, locations.size());
+    ASSERT_EQ(1U, locations.size());
     EXPECT_STREQ("", locations.front().name.c_str());
     EXPECT_STREQ("", locations.front().description.c_str());
 }

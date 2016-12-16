@@ -155,7 +155,7 @@ static bool isRunningUnderWine() {
     }
 
     if (const auto wineGetVersion = reinterpret_cast<wineGetVersionFunc*>(
-                ::GetProcAddress(ntDll, "wine_get_version"))) {
+                ::GetProcAddress(ntDll, "wine_get_version")) != nullptr) {
         return true;
     }
     return false;

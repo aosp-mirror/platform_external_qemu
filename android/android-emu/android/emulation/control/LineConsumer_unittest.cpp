@@ -36,7 +36,7 @@ TEST(CannedCallbacks, LineConsumerMultiLine) {
     LineConsumer::Callback(lineConsumer.opaque(), kLine2, strlen(kLine2));
     LineConsumer::Callback(lineConsumer.opaque(), kLine3, strlen(kLine3));
 
-    EXPECT_EQ(4, lineConsumer.lines().size());
+    EXPECT_EQ(4U, lineConsumer.lines().size());
     EXPECT_STREQ(kLine0, lineConsumer.lines()[0].c_str());
     EXPECT_STREQ(kLine1, lineConsumer.lines()[1].c_str());
     EXPECT_STREQ(kLine2, lineConsumer.lines()[2].c_str());
@@ -52,7 +52,7 @@ TEST(CannedCallbacks, LineConsumerBadBuffers) {
     LineConsumer::Callback(lineConsumer.opaque(), kLongLine, 10);
     LineConsumer::Callback(lineConsumer.opaque(), kEndOfWorld, 5);
 
-    EXPECT_EQ(2, lineConsumer.lines().size());
+    EXPECT_EQ(2U, lineConsumer.lines().size());
     EXPECT_STREQ("abcdefghij", lineConsumer.lines()[0].c_str());
     EXPECT_STREQ("abcde", lineConsumer.lines()[1].c_str());
 }
@@ -71,6 +71,6 @@ TEST(CannedCallbacks, LineConsumerUseCase) {
     const char* kLine = {"This line"};
     LineConsumer lineConsumer;
     callCallback(lineConsumer.opaque(), &LineConsumer::Callback, kLine);
-    EXPECT_EQ(1, lineConsumer.lines().size());
+    EXPECT_EQ(1U, lineConsumer.lines().size());
     EXPECT_STREQ(kLine, lineConsumer.lines()[0].c_str());
 }

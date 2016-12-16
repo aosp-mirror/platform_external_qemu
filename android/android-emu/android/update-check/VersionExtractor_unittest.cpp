@@ -37,7 +37,7 @@ TEST(VersionExtractorTest, validVersion) {
             R"(</sdk:sdk-repository>)";
 
     auto ver = VersionExtractor().extractVersions(xml);
-    EXPECT_EQ(1, ver.size());
+    EXPECT_EQ(1U, ver.size());
     EXPECT_EQ(Version(1,2,3), ver[UpdateChannel::Canary]);
 }
 
@@ -57,7 +57,7 @@ TEST(VersionExtractorTest, withBuild) {
             R"(</sdk:sdk-repository>)";
 
     auto ver = VersionExtractor().extractVersions(xml);
-    EXPECT_EQ(1, ver.size());
+    EXPECT_EQ(1U, ver.size());
     EXPECT_EQ(Version(1,2,3,2665432), ver[UpdateChannel::Canary]);
 }
 
@@ -79,7 +79,7 @@ TEST(VersionExtractorTest, withChannel) {
             R"(</sdk:sdk-repository>)";
 
     auto ver = VersionExtractor().extractVersions(xml);
-    ASSERT_EQ(1, ver.size());
+    ASSERT_EQ(1U, ver.size());
     EXPECT_EQ(Version(1,2,3,2665432), ver[UpdateChannel::Stable]);
 }
 
@@ -110,7 +110,7 @@ TEST(VersionExtractorTest, pickMaxVersion) {
             R"(</sdk:sdk-repository>)";
 
     auto ver = VersionExtractor().extractVersions(xml);
-    EXPECT_EQ(1, ver.size());
+    EXPECT_EQ(1U, ver.size());
     EXPECT_EQ(Version(1,2,30), ver[UpdateChannel::Canary]);
 }
 
@@ -155,7 +155,7 @@ TEST(VersionExtractorTest, pickMaxVersionManyChannels) {
             R"(</sdk:sdk-repository>)";
 
     auto ver = VersionExtractor().extractVersions(xml);
-    ASSERT_EQ(2, ver.size());
+    ASSERT_EQ(2U, ver.size());
     EXPECT_EQ(Version(1,2,30), ver[UpdateChannel::Stable]);
     EXPECT_EQ(Version(2,0,0), ver[UpdateChannel::Beta]);
 }
@@ -175,7 +175,7 @@ TEST(VersionExtractorTest, badVersion) {
 
     {
         auto ver = VersionExtractor().extractVersions(xml);
-        EXPECT_EQ(0, ver.size());
+        EXPECT_EQ(0U, ver.size());
     }
 
     // no namespace
@@ -191,7 +191,7 @@ TEST(VersionExtractorTest, badVersion) {
 
     {
         auto ver = VersionExtractor().extractVersions(xml);
-        EXPECT_EQ(0, ver.size());
+        EXPECT_EQ(0U, ver.size());
     }
 
     // no 'tool' element
@@ -207,7 +207,7 @@ TEST(VersionExtractorTest, badVersion) {
 
     {
         auto ver = VersionExtractor().extractVersions(xml);
-        EXPECT_EQ(0, ver.size());
+        EXPECT_EQ(0U, ver.size());
     }
 
     // wrong namespace
@@ -223,7 +223,7 @@ TEST(VersionExtractorTest, badVersion) {
 
     {
         auto ver = VersionExtractor().extractVersions(xml);
-        EXPECT_EQ(0, ver.size());
+        EXPECT_EQ(0U, ver.size());
     }
 
     // no 'revision'
@@ -239,7 +239,7 @@ TEST(VersionExtractorTest, badVersion) {
 
     {
         auto ver = VersionExtractor().extractVersions(xml);
-        EXPECT_EQ(0, ver.size());
+        EXPECT_EQ(0U, ver.size());
     }
 
     // no major
@@ -254,7 +254,7 @@ TEST(VersionExtractorTest, badVersion) {
 
     {
         auto ver = VersionExtractor().extractVersions(xml);
-        EXPECT_EQ(0, ver.size());
+        EXPECT_EQ(0U, ver.size());
     }
 
     // no minor
@@ -269,7 +269,7 @@ TEST(VersionExtractorTest, badVersion) {
 
     {
         auto ver = VersionExtractor().extractVersions(xml);
-        EXPECT_EQ(0, ver.size());
+        EXPECT_EQ(0U, ver.size());
     }
 
     // no micro
@@ -284,7 +284,7 @@ TEST(VersionExtractorTest, badVersion) {
 
     {
         auto ver = VersionExtractor().extractVersions(xml);
-        EXPECT_EQ(0, ver.size());
+        EXPECT_EQ(0U, ver.size());
     }
 
     // bad number in version
@@ -300,7 +300,7 @@ TEST(VersionExtractorTest, badVersion) {
 
     {
         auto ver = VersionExtractor().extractVersions(xml);
-        EXPECT_EQ(0, ver.size());
+        EXPECT_EQ(0U, ver.size());
     }
 
     // bad number in version 2
@@ -316,6 +316,6 @@ TEST(VersionExtractorTest, badVersion) {
 
     {
         auto ver = VersionExtractor().extractVersions(xml);
-        EXPECT_EQ(0, ver.size());
+        EXPECT_EQ(0U, ver.size());
     }
 }

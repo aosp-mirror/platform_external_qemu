@@ -34,15 +34,15 @@ TEST(AndroidPipe,ZeroPipeWrites) {
     ZeroPipeDevice dev;
     std::unique_ptr<Guest> guest(Guest::create());
     EXPECT_EQ(0, guest->connect("zero"));
-    EXPECT_EQ(PIPE_POLL_IN|PIPE_POLL_OUT, guest->poll());
+    EXPECT_EQ((unsigned)(PIPE_POLL_IN|PIPE_POLL_OUT), guest->poll());
 
     static const size_t kSizes[] = {
         0, 100, 128, 256, 512, 1000, 2048, 8192, 655356,
     };
     for (size_t n = 0; n < ARRAY_SIZE(kSizes); n++) {
         std::string buffer('x', kSizes[n]);
-        EXPECT_EQ(PIPE_POLL_IN|PIPE_POLL_OUT, guest->poll());
-        EXPECT_EQ(buffer.size(),
+        EXPECT_EQ((unsigned)(PIPE_POLL_IN|PIPE_POLL_OUT), guest->poll());
+        EXPECT_EQ((ssize_t)buffer.size(),
                   guest->write(buffer.c_str(), buffer.size()));
     }
 }
@@ -51,15 +51,15 @@ TEST(AndroidPipe,ZeroPipeReads) {
     ZeroPipeDevice dev;
     std::unique_ptr<Guest> guest(Guest::create());
     EXPECT_EQ(0, guest->connect("zero"));
-    EXPECT_EQ(PIPE_POLL_IN|PIPE_POLL_OUT, guest->poll());
+    EXPECT_EQ((unsigned)(PIPE_POLL_IN|PIPE_POLL_OUT), guest->poll());
 
     static const size_t kSizes[] = {
         0, 100, 128, 256, 512, 1000, 2048, 8192, 655356,
     };
     for (size_t n = 0; n < ARRAY_SIZE(kSizes); n++) {
         std::string buffer('x', kSizes[n]);
-        EXPECT_EQ(PIPE_POLL_IN|PIPE_POLL_OUT, guest->poll());
-        EXPECT_EQ(buffer.size(),
+        EXPECT_EQ((unsigned)(PIPE_POLL_IN|PIPE_POLL_OUT), guest->poll());
+        EXPECT_EQ((ssize_t)buffer.size(),
                   guest->read(&buffer[0], buffer.size()));
         for (size_t i = 0; i < buffer.size(); ++i) {
             EXPECT_EQ('\0', buffer[i]) << "# "<< i << " / " << kSizes[n];

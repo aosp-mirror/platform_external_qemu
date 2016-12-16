@@ -37,7 +37,7 @@ TEST(IpAddress, ConstructorIpv4) {
     IpAddress addr1(0x12345678);
     EXPECT_TRUE(addr1.valid());
     EXPECT_TRUE(addr1.isIpv4());
-    EXPECT_EQ(0x12345678, addr1.ipv4());
+    EXPECT_EQ(0x12345678U, addr1.ipv4());
 }
 
 TEST(IpAddress, CopyOperations) {

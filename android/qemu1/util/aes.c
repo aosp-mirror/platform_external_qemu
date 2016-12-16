@@ -32,13 +32,13 @@
 #include "qemu/aes.h"
 #include "util/aes.h"
 
-static const u32 rcon[] = {
-	0x01000000, 0x02000000, 0x04000000, 0x08000000,
-	0x10000000, 0x20000000, 0x40000000, 0x80000000,
-	0x1B000000, 0x36000000, /* for 128-bit blocks, Rijndael never uses more than 10 rcon values */
-};
-
 #ifdef QEMU_USE_INTERNAL_OPENSSL
+
+static const u32 rcon[] = {
+        0x01000000, 0x02000000, 0x04000000, 0x08000000,
+        0x10000000, 0x20000000, 0x40000000, 0x80000000,
+        0x1B000000, 0x36000000, /* for 128-bit blocks, Rijndael never uses more than 10 rcon values */
+};
 
 /**
  * Expand the cipher key into the encryption key schedule.
