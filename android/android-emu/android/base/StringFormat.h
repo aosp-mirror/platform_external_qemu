@@ -63,12 +63,12 @@ constexpr T&& unpackFormatArg(T&& t,
 // These templated versions of StringFormat*() allow one to pass all kinds of
 // string objects into the argument list
 template <class... Args>
-constexpr std::string StringFormat(const char* format, Args&&... args) {
+std::string StringFormat(const char* format, Args&&... args) {
     return StringFormatRaw(format, unpackFormatArg(std::forward<Args>(args))...);
 }
 
 template <class... Args>
-constexpr void StringAppendFormat(std::string* string,
+void StringAppendFormat(std::string* string,
                         const char* format,
                         Args&&... args) {
     StringAppendFormatRaw(string, format,
