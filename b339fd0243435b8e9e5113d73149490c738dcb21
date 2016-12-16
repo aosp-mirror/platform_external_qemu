@@ -91,6 +91,23 @@
       "revId": "b339fd0243435b8e9e5113d73149490c738dcb21",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1ac9e3ea_255fee2c",
+        "filename": "android/android-emu/android/skin/winsys.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-12-16T17:43:38Z",
+      "side": 1,
+      "message": "I strongly advise against this, there is no need to add coupling between this part of the generic UI layer and the emulator\u0027s command-line options. It\u0027s much better to rely on specific flags passed to skin_winsys_start() instead.\n\nThis makes the UI code easier to understand in general, and more independent from other internal details of the emulator.",
+      "revId": "b339fd0243435b8e9e5113d73149490c738dcb21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
