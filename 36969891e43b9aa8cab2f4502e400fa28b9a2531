@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "5aba7b38_4f34cdee",
+        "filename": "hw/input/goldfish_events_util.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-12-16T20:45:53Z",
+      "side": 1,
+      "message": "Probably not, this is really QEMU2-specific code, so it\u0027s better for it to follow the QEMU2 coding style, which is different and looks like the code actually here. Will make upstreaming one day much easier if we want to.",
+      "parentUuid": "ba4b7745_0c8f4b0f",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 1
+      },
+      "revId": "36969891e43b9aa8cab2f4502e400fa28b9a2531",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba4b7745_ecc4c733",
         "filename": "hw/input/goldfish_rotary.c",
         "patchSetId": 5
