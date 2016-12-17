@@ -37,17 +37,20 @@ public:
                   GLenum type,
                   GLsizei stride,
                   const GLvoid* data,
-                  bool normalize = false);
+                  bool normalize = false,
+                  bool isInt = false);
     void setBuffer(GLint size,
                    GLenum type,
                    GLsizei stride,
                    GLESbuffer* buf,
                    GLuint bufferName,
                    int offset,
-                   bool normalize = false);
+                   bool normalize = false,
+                   bool isInt = false);
     bool isEnable() const;
     bool isNormalize() const;
     bool isVBO() const;
+    bool isIntPointer() const;
     void enable(bool b);
 
 private:
@@ -61,5 +64,6 @@ private:
     GLESbuffer* m_buffer = nullptr;
     GLuint m_bufferName = 0;
     unsigned int m_buffOffset = 0;
+    bool m_isInt = false;
 };
 #endif
