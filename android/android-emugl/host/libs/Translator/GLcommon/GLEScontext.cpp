@@ -271,6 +271,11 @@ void GLEScontext::init(GlLibrary* glLib) {
                 m_texState[i][j].enabled = GL_FALSE;
             }
         }
+
+        m_indexedTransformFeedbackBuffers.resize(getCaps()->maxTransformFeedbackSeparateAttribs);
+        m_indexedUniformBuffers.resize(getCaps()->maxUniformBufferBindings);
+        m_indexedAtomicCounterBuffers.resize(getCaps()->maxAtomicCounterBufferBindings);
+        m_indexedShaderStorageBuffers.resize(getCaps()->maxShaderStorageBufferBindings);
     }
 }
 
@@ -517,8 +522,6 @@ void GLEScontext::convertIndirectVBO(GLESConversionArrays& cArrs,GLsizei count,G
     cArrs.setArr(data,p->getStride(),GL_FLOAT);
 }
 
-
-
 void GLEScontext::bindBuffer(GLenum target,GLuint buffer) {
     switch(target) {
     case GL_ARRAY_BUFFER:
@@ -560,6 +563,37 @@ void GLEScontext::bindBuffer(GLenum target,GLuint buffer) {
     default:
         break;
     }
+}
+
+void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size) {
+    std::vector<BufferBinding>& which = m_indexedTransformFeedbackBuffers;
+
+    switch (target) {
+    case GL_TRANSFORM_FEEDBACK_BUFFER:
+        which = m_indexedTransformFeedbackBuffers;
+        break;
+    case GL_UNIFORM_BUFFER:
+        which = m_indexedUniformBuffers;
+        break;
+    case GL_ATOMIC_COUNTER_BUFFER:
+        which = m_indexedAtomicCounterBuffers;
+        break;
+    case GL_SHADER_STORAGE_BUFFER:
+        which = m_indexedShaderStorageBuffers;
+        break;
+    default:
+        return;
+    }
+
+    which[index].id = buffer;
+    which[index].offset = offset;
+    which[index].size = size;
+}
+
+void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer) {
+    GLint sz;
+    getBufferSizeById(buffer, &sz);
+    bindIndexedBuffer(target, index, buffer, 0, sz);
 }
 
 void GLEScontext::unbindBuffer(GLuint buffer) {
@@ -664,6 +698,11 @@ GLvoid* GLEScontext::getBindedBuffer(GLenum target) {
 
 void GLEScontext::getBufferSize(GLenum target,GLint* param) {
     GLuint bufferName = getBuffer(target);
+    getBufferSizeById(bufferName, param);
+}
+
+void GLEScontext::getBufferSizeById(GLuint bufferName, GLint* param) {
+    if (!bufferName) { *param = 0; return; }
     GLESbuffer* vbo = static_cast<GLESbuffer*>(
             m_shareGroup
                     ->getObjectData(NamedObjectType::VERTEXBUFFER, bufferName));
@@ -740,6 +779,12 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_UNITS,&s_glSupport.maxTexUnits);
     s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS,&s_glSupport.maxTexImageUnits);
     s_glDispatch.glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &s_glSupport.maxCombinedTexImageUnits);
+
+    s_glDispatch.glGetIntegerv(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS, &s_glSupport.maxTransformFeedbackSeparateAttribs);
+    s_glDispatch.glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &s_glSupport.maxUniformBufferBindings);
+    s_glDispatch.glGetIntegerv(GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS, &s_glSupport.maxAtomicCounterBufferBindings);
+    s_glDispatch.glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, &s_glSupport.maxShaderStorageBufferBindings);
+
     const GLubyte* glslVersion = s_glDispatch.glGetString(GL_SHADING_LANGUAGE_VERSION);
     s_glSupport.glslVersion = Version((const  char*)(glslVersion));
     const GLubyte* glVersion = s_glDispatch.glGetString(GL_VERSION);

@@ -349,8 +349,8 @@ bool GLESv2Validate::attribName(const GLchar* name){
            (found != name) ; // attrib name does not start with gl_
 }
 
-bool GLESv2Validate::attribIndex(int index){
-    return index >=0 && index < GL_MAX_VERTEX_ATTRIBS;
+bool GLESv2Validate::attribIndex(int index, int max){
+    return index >=0 && index < max;
 }
 
 bool GLESv2Validate::programParam(GLenum pname){
