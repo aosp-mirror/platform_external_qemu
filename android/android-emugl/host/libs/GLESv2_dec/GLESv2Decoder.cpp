@@ -72,6 +72,7 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     glMapBufferRangeAEMU = s_glMapBufferRangeAEMU;
     glUnmapBufferAEMU = s_glUnmapBufferAEMU;
     glFlushMappedBufferRangeAEMU = s_glFlushMappedBufferRangeAEMU;
+    glGetUniformIndicesAEMU = s_glGetUniformIndicesAEMU;
     return 0;
 
 }
@@ -172,4 +173,31 @@ void GLESv2Decoder::s_glFlushMappedBufferRangeAEMU(void* self, GLenum target, GL
     // |offset| was the absolute offset into the mapping, so just flush offset 0.
     ctx->glFlushMappedBufferRange(target, 0, length);
     ctx->glUnmapBuffer(target);
+}
+
+static const char* const kNameDelimiter = ";";
+
+void GLESv2Decoder::s_glGetUniformIndicesAEMU(void* self, GLuint program, GLsizei uniformCount, const GLchar* packedNames, GLsizei packedLen, GLuint* uniformIndices) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+
+    GLchar** unpackedNames = new GLchar*[uniformCount];
+    GLsizei current = 0;
+
+    while (current < uniformCount) {
+        GLchar* delimPos = (GLchar*)strstr(packedNames, kNameDelimiter);
+        size_t nameLen = delimPos - packedNames + 1;
+        unpackedNames[current] = new GLchar[nameLen];
+        memcpy(unpackedNames[current], packedNames, nameLen - 1);
+        unpackedNames[current][nameLen - 1] = '\0';
+        packedNames = delimPos + 1;
+        current++;
+    }
+
+    ctx->glGetUniformIndices(program, uniformCount, (const GLchar**)unpackedNames, uniformIndices);
+
+    for (int i = 0; i < uniformCount; i++) {
+        delete [] unpackedNames[i];
+    }
+
+    delete [] unpackedNames;
 }
