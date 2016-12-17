@@ -303,7 +303,7 @@ GLEScontext::~GLEScontext() {
     m_texState = NULL;
 }
 
-const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data,bool normalize) {
+const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data,bool normalize, bool isInt) {
     GLuint bufferName = m_currVaoState.vboId();
     if(bufferName) {
         unsigned int offset = SafeUIntFromPointer(data);
@@ -311,10 +311,10 @@ const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsi
                 m_shareGroup
                         ->getObjectData(NamedObjectType::VERTEXBUFFER,
                                         bufferName));
-        m_currVaoState[arrType]->setBuffer(size,type,stride,vbo,bufferName,offset,normalize);
+        m_currVaoState[arrType]->setBuffer(size,type,stride,vbo,bufferName,offset,normalize, isInt);
         return  static_cast<const unsigned char*>(vbo->getData()) +  offset;
     }
-    m_currVaoState[arrType]->setArray(size,type,stride,data,normalize);
+    m_currVaoState[arrType]->setArray(size,type,stride,data,normalize,isInt);
     return data;
 }
 
