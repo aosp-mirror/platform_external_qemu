@@ -683,7 +683,7 @@ glGetUniformIndicesAEMU
 
 glGetActiveUniformBlockiv
     dir params out
-    len params (glUtilsParamSize(pname) * sizeof(GLint))
+    len params (glesv2_enc::glActiveUniformBlockivParamSize(self, program, uniformBlockIndex, pname) * sizeof(GLint))
 
 glGetActiveUniformBlockName
     dir uniformBlockName out
