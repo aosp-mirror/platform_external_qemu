@@ -71,7 +71,7 @@ GLEScmContext::~GLEScmContext(){
 
 
 //setting client side arr
-void GLEScmContext::setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int index){
+void GLEScmContext::setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int index, bool isInt){
     if( arr == NULL) return;
     switch(arrayType) {
         case GL_VERTEX_ARRAY:
