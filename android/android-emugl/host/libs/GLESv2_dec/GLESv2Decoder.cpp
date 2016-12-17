@@ -77,6 +77,8 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     glTexImage2DOffsetAEMU = s_glTexImage2DOffsetAEMU;
     glTexSubImage2DOffsetAEMU = s_glTexSubImage2DOffsetAEMU;
     glGetUniformIndicesAEMU = s_glGetUniformIndicesAEMU;
+    glVertexAttribIPointerDataAEMU = s_glVertexAttribIPointerDataAEMU;
+    glVertexAttribIPointerOffsetAEMU = s_glVertexAttribIPointerOffsetAEMU;
     return 0;
 
 }
@@ -221,4 +223,21 @@ void GLESv2Decoder::s_glGetUniformIndicesAEMU(void* self, GLuint program, GLsize
     }
 
     delete [] unpackedNames;
+}
+
+void GLESv2Decoder::s_glVertexAttribIPointerDataAEMU(void *self, GLuint indx, GLint size, GLenum type, GLsizei stride, void * data, GLuint datalen)
+{
+    GLESv2Decoder *ctx = (GLESv2Decoder *) self;
+    if (ctx->m_contextData != NULL) {
+        ctx->m_contextData->storePointerData(indx, data, datalen);
+        // note - the stride of the data is always zero when it comes out of the codec.
+        // See gl2.attrib for the packing function call.
+        ctx->glVertexAttribIPointer(indx, size, type, 0, ctx->m_contextData->pointerData(indx));
+    }
+}
+
+void GLESv2Decoder::s_glVertexAttribIPointerOffsetAEMU(void *self, GLuint indx, GLint size, GLenum type, GLsizei stride, GLuint data)
+{
+    GLESv2Decoder *ctx = (GLESv2Decoder *) self;
+    ctx->glVertexAttribIPointer(indx, size, type, stride, SafePointerFromUInt(data));
 }
