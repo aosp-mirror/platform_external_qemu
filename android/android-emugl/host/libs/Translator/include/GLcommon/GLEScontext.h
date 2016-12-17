@@ -65,6 +65,12 @@ struct GLSupport {
     int  maxTexImageUnits = 0;
     int  maxTexSize = 0;
     int  maxCombinedTexImageUnits = 0;
+
+    int  maxTransformFeedbackSeparateAttribs = 0;
+    int  maxUniformBufferBindings = 0;
+    int  maxAtomicCounterBufferBindings = 0;
+    int  maxShaderStorageBufferBindings = 0;
+
     Version glslVersion;
     bool GL_EXT_TEXTURE_FORMAT_BGRA8888 = false;
     bool GL_EXT_FRAMEBUFFER_OBJECT = false;
@@ -171,12 +177,15 @@ public:
     virtual void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) = 0;
 
     void bindBuffer(GLenum target,GLuint buffer);
+    void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size);
+    void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer);
     void unbindBuffer(GLuint buffer);
     bool isBuffer(GLuint buffer);
     bool isBindedBuffer(GLenum target);
     GLvoid* getBindedBuffer(GLenum target);
     GLuint getBuffer(GLenum target);
     void getBufferSize(GLenum target,GLint* param);
+    void getBufferSizeById(GLuint buffer,GLint* param);
     void getBufferUsage(GLenum target,GLint* param);
     bool setBufferData(GLenum target,GLsizeiptr size,const GLvoid* data,GLenum usage);
     bool setBufferSubData(GLenum target,GLintptr offset,GLsizeiptr size,const GLvoid* data);
@@ -249,6 +258,17 @@ protected:
     GLuint m_dispatchIndirectBuffer = 0;
     GLuint m_drawIndirectBuffer = 0;
     GLuint m_shaderStorageBuffer = 0;
+
+    struct BufferBinding {
+        GLuint id = 0;
+        GLintptr offset = 0;
+        GLsizeiptr size = 0;
+    };
+
+    std::vector<BufferBinding> m_indexedTransformFeedbackBuffers;
+    std::vector<BufferBinding> m_indexedUniformBuffers;
+    std::vector<BufferBinding> m_indexedAtomicCounterBuffers;
+    std::vector<BufferBinding> m_indexedShaderStorageBuffers;
 
     static std::string*   s_glExtensions;
     static GLSupport      s_glSupport;
