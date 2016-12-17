@@ -271,6 +271,11 @@ void GLEScontext::init(GlLibrary* glLib) {
                 m_texState[i][j].enabled = GL_FALSE;
             }
         }
+
+        m_indexedTransformFeedbackBuffers.resize(getCaps()->maxTransformFeedbackSeparateAttribs);
+        m_indexedUniformBuffers.resize(getCaps()->maxUniformBufferBindings);
+        m_indexedAtomicCounterBuffers.resize(getCaps()->maxAtomicCounterBufferBindings);
+        m_indexedShaderStorageBuffers.resize(getCaps()->maxShaderStorageBufferBindings);
     }
 }
 
@@ -517,8 +522,6 @@ void GLEScontext::convertIndirectVBO(GLESConversionArrays& cArrs,GLsizei count,G
     cArrs.setArr(data,p->getStride(),GL_FLOAT);
 }
 
-
-
 void GLEScontext::bindBuffer(GLenum target,GLuint buffer) {
     switch(target) {
     case GL_ARRAY_BUFFER:
@@ -560,6 +563,43 @@ void GLEScontext::bindBuffer(GLenum target,GLuint buffer) {
     default:
         break;
     }
+}
+
+void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size, GLintptr stride) {
+    switch (target) {
+    case GL_TRANSFORM_FEEDBACK_BUFFER:
+        m_indexedTransformFeedbackBuffers[index].buffer = buffer;
+        m_indexedTransformFeedbackBuffers[index].offset = offset;
+        m_indexedTransformFeedbackBuffers[index].size = size;
+        m_indexedTransformFeedbackBuffers[index].stride = stride;
+        break;
+    case GL_UNIFORM_BUFFER:
+        m_indexedUniformBuffers[index].buffer = buffer;
+        m_indexedUniformBuffers[index].offset = offset;
+        m_indexedUniformBuffers[index].size = size;
+        m_indexedUniformBuffers[index].stride = stride;
+        break;
+    case GL_ATOMIC_COUNTER_BUFFER:
+        m_indexedAtomicCounterBuffers[index].buffer = buffer;
+        m_indexedAtomicCounterBuffers[index].offset = offset;
+        m_indexedAtomicCounterBuffers[index].size = size;
+        m_indexedAtomicCounterBuffers[index].stride = stride;
+        break;
+    case GL_SHADER_STORAGE_BUFFER:
+        m_indexedShaderStorageBuffers[index].buffer = buffer;
+        m_indexedShaderStorageBuffers[index].offset = offset;
+        m_indexedShaderStorageBuffers[index].size = size;
+        m_indexedShaderStorageBuffers[index].stride = stride;
+        break;
+    default:
+        return;
+    }
+}
+
+void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer) {
+    GLint sz;
+    getBufferSizeById(buffer, &sz);
+    bindIndexedBuffer(target, index, buffer, 0, sz);
 }
 
 void GLEScontext::unbindBuffer(GLuint buffer) {
@@ -664,6 +704,11 @@ GLvoid* GLEScontext::getBindedBuffer(GLenum target) {
 
 void GLEScontext::getBufferSize(GLenum target,GLint* param) {
     GLuint bufferName = getBuffer(target);
+    getBufferSizeById(bufferName, param);
+}
+
+void GLEScontext::getBufferSizeById(GLuint bufferName, GLint* param) {
+    if (!bufferName) { *param = 0; return; }
     GLESbuffer* vbo = static_cast<GLESbuffer*>(
             m_shareGroup
                     ->getObjectData(NamedObjectType::VERTEXBUFFER, bufferName));
@@ -740,6 +785,12 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_UNITS,&s_glSupport.maxTexUnits);
     s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS,&s_glSupport.maxTexImageUnits);
     s_glDispatch.glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &s_glSupport.maxCombinedTexImageUnits);
+
+    s_glDispatch.glGetIntegerv(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS, &s_glSupport.maxTransformFeedbackSeparateAttribs);
+    s_glDispatch.glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &s_glSupport.maxUniformBufferBindings);
+    s_glDispatch.glGetIntegerv(GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS, &s_glSupport.maxAtomicCounterBufferBindings);
+    s_glDispatch.glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, &s_glSupport.maxShaderStorageBufferBindings);
+
     const GLubyte* glslVersion = s_glDispatch.glGetString(GL_SHADING_LANGUAGE_VERSION);
     s_glSupport.glslVersion = Version((const  char*)(glslVersion));
     const GLubyte* glVersion = s_glDispatch.glGetString(GL_VERSION);
