@@ -39,6 +39,7 @@ host_common_SRC_FILES := \
     TextureDraw.cpp \
     TextureResize.cpp \
     WindowSurface.cpp \
+    YUVConverter.cpp \
 
 ### host libOpenglRender #################################################
 $(call emugl-begin-shared-library,lib$(BUILD_TARGET_SUFFIX)OpenglRender)
@@ -62,4 +63,14 @@ LOCAL_SYMBOL_FILE := render_api.entries
 
 $(call emugl-export,CFLAGS,$(EMUGL_USER_CFLAGS))
 
+$(call emugl-end-module)
+
+### OpenglRender unittests
+$(call emugl-begin-executable,lib$(BUILD_TARGET_SUFFIX)OpenglRender_unittests)
+
+LOCAL_SRC_FILES := \
+    BufferQueue_unittest.cpp \
+
+$(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender libemugl_gtest)
+$(call local-link-static-c++lib)
 $(call emugl-end-module)

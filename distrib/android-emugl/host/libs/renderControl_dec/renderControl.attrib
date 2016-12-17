@@ -43,6 +43,12 @@ rcUpdateColorBuffer
     len pixels (((glUtilsPixelBitSize(format, type) * width) >> 3) * height)
     var_flag pixels isLarge
 
+rcUpdateColorBufferDMA
+    dir pixels in
+    len pixels pixels_size
+    var_flag pixels DMA
+    flag flushOnEncode
+
 rcCloseColorBuffer
     flag flushOnEncode
 

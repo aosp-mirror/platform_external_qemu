@@ -14,7 +14,9 @@
 * limitations under the License.
 */
 #pragma once
-#include "IOStream.h"
+#include "OpenglRender/IOStream.h"
+
+namespace emugl {
 
 class ReadBuffer {
 public:
@@ -30,3 +32,5 @@ private:
     size_t m_size;
     size_t m_validData;
 };
+
+}  // namespace emugl

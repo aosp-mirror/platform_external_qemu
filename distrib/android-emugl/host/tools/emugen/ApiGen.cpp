@@ -337,9 +337,10 @@ int ApiGen::genEncoderHeader(const std::string &filename)
     fprintf(fp, "\tChecksumCalculator *m_checksumCalculator;\n\n");
 
     fprintf(fp, "\t%s(IOStream *stream, ChecksumCalculator *checksumCalculator);\n", classname.c_str());
+    fprintf(fp, "\tvirtual uint64_t lockAndWriteDma(void* data, uint32_t sz) { return 0; }\n");
     fprintf(fp, "};\n\n");
 
-    fprintf(fp, "#endif  // GUARD_%s", classname.c_str());
+    fprintf(fp, "#endif  // GUARD_%s\n", classname.c_str());
 
     fclose(fp);
     return 0;
@@ -352,13 +353,17 @@ int ApiGen::genEncoderHeader(const std::string &filename)
 //
 // Returns 1 if the variable is a pointer, 0 otherwise
 //
-static int getVarEncodingSizeExpression(Var&  var, EntryPoint* e, char* buff, size_t bufflen)
+static int getVarEncodingSizeExpression(Var&  var, EntryPoint* e, char* buff, size_t bufflen, bool dmaPtrOnly)
 {
     int ret = 0;
     if (!var.isPointer()) {
         snprintf(buff, bufflen, "%u", (unsigned int) var.type()->bytes());
     } else {
         ret = 1;
+        if (dmaPtrOnly) {
+            snprintf(buff, bufflen, "8");
+            return ret;
+        }
         const char* lenExpr = var.lenExpression().c_str();
         const char* varname = var.name().c_str();
         if (e != NULL && lenExpr[0] == '\0') {
@@ -381,6 +386,11 @@ static int writeVarEncodingSize(Var& var, bool includeOut, FILE* fp)
         fprintf(fp, "%u", (unsigned int) var.type()->bytes());
     } else {
         ret = 1;
+        if (var.isDMA()) {
+            fprintf(fp, "8");
+            return ret;
+        }
+
         if (var.pointerDir() == Var::POINTER_OUT && !includeOut) {
             fprintf(fp, "0");
         } else {
@@ -398,24 +408,28 @@ static void writeVarEncodingExpression(Var& var, FILE* fp)
 
     if (var.isPointer()) {
         // encode a pointer header
-        fprintf(fp, "\t*(unsigned int *)(ptr) = __size_%s; ptr += 4;\n", varname);
+        if (var.isDMA()) {
+            fprintf(fp, "\t*(uint64_t *)(ptr) = ctx->lockAndWriteDma(%s, __size_%s); ptr += 8;\n", varname, varname);
+        } else {
+            fprintf(fp, "\t*(unsigned int *)(ptr) = __size_%s; ptr += 4;\n", varname);
 
-        Var::PointerDir dir = var.pointerDir();
-        if (dir == Var::POINTER_INOUT || dir == Var::POINTER_IN) {
-            if (var.nullAllowed()) {
-                fprintf(fp, "\tif (%s != NULL) ", varname);
-            } else {
-                fprintf(fp, "\t");
+            Var::PointerDir dir = var.pointerDir();
+            if (dir == Var::POINTER_INOUT || dir == Var::POINTER_IN) {
+                if (var.nullAllowed()) {
+                    fprintf(fp, "\tif (%s != NULL) ", varname);
+                } else {
+                    fprintf(fp, "\t");
+                }
+
+                if (var.packExpression().size() != 0) {
+                    fprintf(fp, "%s;", var.packExpression().c_str());
+                } else {
+                    fprintf(fp, "memcpy(ptr, %s, __size_%s);",
+                            varname, varname);
+                }
+
+                fprintf(fp, "ptr += __size_%s;\n", varname);
             }
-
-            if (var.packExpression().size() != 0) {
-                fprintf(fp, "%s;", var.packExpression().c_str());
-            } else {
-                fprintf(fp, "memcpy(ptr, %s, __size_%s);",
-                        varname, varname);
-            }
-
-            fprintf(fp, "ptr += __size_%s;\n", varname);
         }
     } else {
         // encode a non pointer variable
@@ -538,10 +552,12 @@ int ApiGen::genEncoderImpl(const std::string &filename)
             if (!var.isPointer())
                 continue;
 
+            // Don't define the __size_*** for DMA pointers;
+            // they will not go through the pipe.
             const char* varname = var.name().c_str();
             fprintf(fp, "\tconst unsigned int __size_%s = ", varname);
 
-            getVarEncodingSizeExpression(var, e, buff, sizeof(buff));
+            getVarEncodingSizeExpression(var, e, buff, sizeof(buff), false);
             fprintf(fp, "%s;\n", buff);
         }
 
@@ -659,7 +675,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
         size_t npointers = 0;
         fprintf(fp, "\t const size_t sizeWithoutChecksum = 8");
         for (size_t j = 0; j < nvars; j++) {
-            npointers += getVarEncodingSizeExpression(evars[j],e,buff,sizeof(buff));
+            npointers += getVarEncodingSizeExpression(evars[j],e,buff,sizeof(buff), evars[j].isDMA());
             fprintf(fp, " + %s", buff);
         }
         fprintf(fp, " + %u * 4;\n", (unsigned int) npointers);
@@ -803,7 +819,7 @@ int ApiGen::genDecoderHeader(const std::string &filename)
     fprintf(fp, "\n#ifndef GUARD_%s\n", classname.c_str());
     fprintf(fp, "#define GUARD_%s\n\n", classname.c_str());
 
-    fprintf(fp, "#include \"IOStream.h\"\n");
+    fprintf(fp, "#include \"OpenglRender/IOStream.h\"\n");
     fprintf(fp, "#include \"ChecksumCalculator.h\"\n");
     fprintf(fp, "#include \"%s_%s_context.h\"\n\n\n", m_basename.c_str(), sideString(SERVER_SIDE));
     fprintf(fp, "#include \"emugl/common/logging.h\"\n");
@@ -1022,6 +1038,23 @@ R"(        // Do this on every iteration, as some commands may change the checks
                     fprintf(fp, ", ");
                 }
 
+                if (v->isPointer() && v->isDMA()) {
+                    if (pass == PASS_VariableDeclarations) {
+                        fprintf(fp,
+                                "\t\t\tuint64_t var_%s_guest_paddr = Unpack<uint64_t,uint64_t>(ptr + %s);\n"
+                                "\t\t\t%s var_%s = stream->getDmaForReading(var_%s_guest_paddr);\n",
+                                var_name,
+                                varoffset.c_str(),
+                                var_type_name,
+                                var_name,
+                                var_name);
+                    }
+                    if (pass == PASS_FunctionCall) {
+                        fprintf(fp, "var_%s", var_name);
+                    }
+                    varoffset += " + 8";
+                }
+
                 if (!v->isPointer()) {
                     if (pass == PASS_VariableDeclarations) {
                         fprintf(fp,
@@ -1048,6 +1081,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
                             varoffset.c_str());
                 }
 
+                if (!v->isDMA()) {
                 if (v->pointerDir() == Var::POINTER_IN ||
                     v->pointerDir() == Var::POINTER_INOUT) {
                     if (pass == PASS_VariableDeclarations) {
@@ -1188,6 +1222,8 @@ R"(        // Do this on every iteration, as some commands may change the checks
                 }
             }
 
+
+            } 
             if (pass == PASS_Protocol) {
                 fprintf(fp,
                         "\t\t\tif (useChecksum) {\n"
@@ -1208,6 +1244,22 @@ R"(        // Do this on every iteration, as some commands may change the checks
             if (pass == PASS_FunctionCall ||
                 pass == PASS_DebugPrint) {
                 fprintf(fp, ");\n");
+
+                if (pass == PASS_FunctionCall) {
+                    // unlock all dma buffers that have been passed
+                    for (size_t j = 0; j < evars.size(); j++) {
+                        Var *v = & evars[j];
+                        if (v->isVoid()) {
+                            continue;
+                        }
+                        const char* var_name = v->name().c_str();
+                        if (v->isDMA()) {
+                            fprintf(fp,
+                                    "\t\t\tstream->unlockDma(var_%s_guest_paddr);\n",
+                                    var_name);
+                        }
+                    }
+                }
             }
 
             if (pass == PASS_TmpBuffAlloc) {

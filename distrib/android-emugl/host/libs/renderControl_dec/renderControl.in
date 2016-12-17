@@ -30,5 +30,7 @@ GL_ENTRY(void, rcSelectChecksumHelper, uint32_t newProtocol, uint32_t reserved)
 GL_ENTRY(void, rcCreateSyncKHR, EGLenum type, EGLint* attribs, uint32_t num_attribs, int destroy_when_signaled, uint64_t* glsync_out, uint64_t* syncthread_out)
 GL_ENTRY(EGLint, rcClientWaitSyncKHR, uint64_t sync, EGLint flags, uint64_t timeout)
 GL_ENTRY(void, rcFlushWindowColorBufferAsync, uint32_t windowSurface)
-GL_ENTRY(int, rcDestroySyncKHR, uint64_t sync);
-GL_ENTRY(void, rcSetPuid, uint64_t puid);
+GL_ENTRY(int, rcDestroySyncKHR, uint64_t sync)
+GL_ENTRY(void, rcSetPuid, uint64_t puid)
+GL_ENTRY(int, rcUpdateColorBufferDMA, uint32_t colorbuffer, GLint x, GLint y, GLint width, GLint height, GLenum format, GLenum type, void* pixels, uint32_t pixels_size)
+GL_ENTRY(uint32_t, rcCreateColorBufferDMA, uint32_t width, uint32_t height, GLenum internalFormat, int frameworkFormat)
