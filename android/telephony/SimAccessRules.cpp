@@ -27,8 +27,8 @@ namespace android {
 static AllRefArDo kCtsAppCertificateHash {
     RefArDo {
         RefDo {
-            AidRefDo {},
-            DeviceAppIdRefDo { "61ed377e85d386a8dfee6b864bd85b0bfaa5af81" }
+            DeviceAppIdRefDo { "61ed377e85d386a8dfee6b864bd85b0bfaa5af81" },
+            PkgRefDo { "android.carrierapi.cts" }
         },
         ArDo {
             PermArDo { "0000000000000000" }
