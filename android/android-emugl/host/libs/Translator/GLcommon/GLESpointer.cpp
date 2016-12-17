@@ -67,6 +67,10 @@ bool GLESpointer::isVBO() const {
     return m_isVBO;
 }
 
+bool GLESpointer::isIntPointer() const {
+    return m_isInt;
+}
+
 void GLESpointer::enable(bool b) {
     m_enabled = b;
 }
@@ -75,7 +79,8 @@ void GLESpointer::setArray(GLint size,
                            GLenum type,
                            GLsizei stride,
                            const GLvoid* data,
-                           bool normalize) {
+                           bool normalize,
+                           bool isInt) {
     m_size = size;
     m_type = type;
     m_stride = stride;
@@ -84,6 +89,7 @@ void GLESpointer::setArray(GLint size,
     m_bufferName = 0;
     m_normalize = normalize;
     m_isVBO = false;
+    m_isInt = isInt;
 }
 
 void GLESpointer::setBuffer(GLint size,
@@ -92,7 +98,8 @@ void GLESpointer::setBuffer(GLint size,
                             GLESbuffer* buf,
                             GLuint bufferName,
                             int offset,
-                            bool normalize) {
+                            bool normalize,
+                            bool isInt) {
     m_size = size;
     m_type = type;
     m_stride = stride;
@@ -102,6 +109,7 @@ void GLESpointer::setBuffer(GLint size,
     m_buffOffset = offset;
     m_normalize = normalize;
     m_isVBO = true;
+    m_isInt = isInt;
 }
 
 void GLESpointer::getBufferConversions(const RangeList& rl, RangeList& rlOut) {

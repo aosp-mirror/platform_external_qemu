@@ -14,11 +14,19 @@ custom_preprocesses = {
     ctx->bindBuffer(target, buffer);
     ctx->bindIndexedBuffer(target, index, buffer);
 """,
+        "glVertexAttribIPointer" : """
+    SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
+    ctx->setPointer(index,size,type,stride,pointer,false,true);
+    if (ctx->isBindedBuffer(GL_ARRAY_BUFFER)) {
+""",
 }
 
 custom_postprocesses = {
         "glGenVertexArrays" : """
     ctx->addVertexArrayObjects(n, arrays);
+""",
+        "glVertexAttribIPointer" : """
+    }
 """,
 }
 

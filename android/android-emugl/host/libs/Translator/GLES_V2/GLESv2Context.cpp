@@ -115,19 +115,22 @@ void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
         if(needConvert(cArrs,first,count,type,indices,direct,p,array_id)){
             //conversion has occured
             ArrayData currentArr = cArrs.getCurrentArray();
-            setupArr(currentArr.data,array_id,currentArr.type,size,currentArr.stride, p->getNormalized());
+            setupArr(currentArr.data,array_id,currentArr.type,size,currentArr.stride, p->getNormalized(), -1, p->isIntPointer());
             ++cArrs;
         } else {
             setupArr(p->getData(),array_id,p->getType(),
-                     size,p->getStride(), p->getNormalized());
+                     size,p->getStride(), p->getNormalized(), -1, p->isIntPointer());
         }
     }
 }
 
 //setting client side arr
-void GLESv2Context::setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int index){
-     if(arr == NULL) return;
-     s_glDispatch.glVertexAttribPointer(arrayType,size,dataType,normalized,stride,arr);
+void GLESv2Context::setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int index, bool isInt){
+    if(arr == NULL) return;
+    if (isInt)
+        s_glDispatch.glVertexAttribIPointer(arrayType,size,dataType,stride,arr);
+    else
+        s_glDispatch.glVertexAttribPointer(arrayType,size,dataType,normalized,stride,arr);
 }
 
 bool GLESv2Context::needConvert(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id) {
