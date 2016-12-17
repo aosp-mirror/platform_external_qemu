@@ -677,7 +677,7 @@ glGetUniformIndicesAEMU
     dir packedUniformNames in
     len packedUniformNames packedLen
     dir uniformIndices out
-    len uniformIndices uniformCount
+    len uniformIndices (uniformCount * sizeof(GLuint))
     flag custom_decoder
     flag not_api
 
