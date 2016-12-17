@@ -630,6 +630,9 @@ glFlushMappedBufferRangeAEMU
     flag custom_decoder
     flag not_api
 
+glCopyBufferSubData
+    flag flushOnEncode
+
 glClearBufferiv
     dir value in
     len value glesv2_enc::clearBufferNumElts(self, buffer)
