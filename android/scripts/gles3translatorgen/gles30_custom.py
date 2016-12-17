@@ -19,6 +19,10 @@ custom_preprocesses = {
     ctx->setPointer(index,size,type,stride,pointer,false,true);
     if (ctx->isBindedBuffer(GL_ARRAY_BUFFER)) {
 """,
+        "glVertexAttribDivisor" : """
+    SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
+    ctx->setDivisor(index,divisor);
+""",
 }
 
 custom_postprocesses = {
