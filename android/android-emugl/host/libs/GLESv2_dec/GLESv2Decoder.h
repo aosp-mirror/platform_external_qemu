@@ -55,5 +55,8 @@ private:
     static void gles2_APIENTRY s_glTexSubImage2DOffsetAEMU(void* self, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, GLuint offset);
 
     static void gles2_APIENTRY s_glGetUniformIndicesAEMU(void* self, GLuint program, GLsizei uniformCount, const GLchar* packedNames, GLsizei packedLen, GLuint* uniformIndices);
+    static void gles2_APIENTRY s_glVertexAttribIPointerDataAEMU(void *self, GLuint indx, GLint size, GLenum type, GLsizei stride, void * data, GLuint datalen);
+    static void gles2_APIENTRY s_glVertexAttribIPointerOffsetAEMU(void *self, GLuint indx, GLint size, GLenum type, GLsizei stride,  GLuint offset);
+
 };
 #endif
