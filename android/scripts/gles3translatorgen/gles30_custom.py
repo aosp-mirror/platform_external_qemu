@@ -6,6 +6,14 @@ custom_preprocesses = {
         "glDeleteVertexArrays" : """
     ctx->removeVertexArrayObjects(n, arrays);
 """,
+        "glBindBufferRange" : """
+    ctx->bindBuffer(target, buffer);
+    ctx->bindIndexedBuffer(target, index, buffer, offset, size);
+""",
+        "glBindBufferBase" : """
+    ctx->bindBuffer(target, buffer);
+    ctx->bindIndexedBuffer(target, index, buffer);
+""",
 }
 
 custom_postprocesses = {

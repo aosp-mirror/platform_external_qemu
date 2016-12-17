@@ -61,13 +61,25 @@ GL_APICALL void GL_APIENTRY glFlushMappedBufferRange(GLenum target, GLintptr off
 GL_APICALL void GL_APIENTRY glBindBufferRange(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size) {
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::bufferTarget(target, ctx->getMajorVersion(), ctx->getMinorVersion()),GL_INVALID_ENUM);
-    ctx->dispatcher().glBindBufferRange(target, index, buffer, offset, size);
+
+    ctx->bindBuffer(target, buffer);
+    ctx->bindIndexedBuffer(target, index, buffer, offset, size);
+    if (ctx->shareGroup().get()) {
+        const GLuint globalBufferName = ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer);
+        ctx->dispatcher().glBindBufferRange(target, index, globalBufferName, offset, size);
+    }
 }
 
 GL_APICALL void GL_APIENTRY glBindBufferBase(GLenum target, GLuint index, GLuint buffer) {
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::bufferTarget(target, ctx->getMajorVersion(), ctx->getMinorVersion()),GL_INVALID_ENUM);
-    ctx->dispatcher().glBindBufferBase(target, index, buffer);
+
+    ctx->bindBuffer(target, buffer);
+    ctx->bindIndexedBuffer(target, index, buffer);
+    if (ctx->shareGroup().get()) {
+        const GLuint globalBufferName = ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer);
+        ctx->dispatcher().glBindBufferBase(target, index, globalBufferName);
+    }
 }
 
 GL_APICALL void GL_APIENTRY glCopyBufferSubData(GLenum readtarget, GLenum writetarget, GLintptr readoffset, GLintptr writeoffset, GLsizeiptr size) {
