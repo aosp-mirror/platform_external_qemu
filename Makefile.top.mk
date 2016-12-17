@@ -37,8 +37,12 @@ BUILD_TARGET_CFLAGS := -g -falign-functions
 ifeq ($(BUILD_DEBUG),true)
     BUILD_OPT_CFLAGS += -O0
 else
-    BUILD_OPT_CFLAGS += -O3 -DNDEBUG=1
-
+    ifneq (windows,$(BUILD_TARGET_OS))
+        BUILD_OPT_CFLAGS += -O3 -DNDEBUG=1
+    else
+    # for windows, qemu1 will crash with O3, lets stay with O2 until qemu1 is gone
+        BUILD_OPT_CFLAGS += -O2 -DNDEBUG=1
+    endif
     # We use a version of Clang that doesn't support these yet.
     ifneq ($(BUILD_TARGET_OS),darwin)
         BUILD_OPT_CFLAGS += -funroll-loops -flto -ftracer
