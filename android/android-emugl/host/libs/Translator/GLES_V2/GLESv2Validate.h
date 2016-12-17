@@ -45,7 +45,7 @@ static bool pixelItnlFrmt(GLEScontext* ctx, GLenum internalformat);
 static bool pixelSizedFrmt(GLEScontext* ctx, GLenum internalformat,
                            GLenum format, GLenum type);
 static bool attribName(const GLchar* name);
-static bool attribIndex(int index);
+static bool attribIndex(int index, int max);
 static bool programParam(GLenum pname);
 static bool textureIsCubeMap(GLenum target);
 };

@@ -218,7 +218,7 @@ GL_APICALL void  GL_APIENTRY glAttachShader(GLuint program, GLuint shader){
 GL_APICALL void  GL_APIENTRY glBindAttribLocation(GLuint program, GLuint index, const GLchar* name){
     GET_CTX();
     SET_ERROR_IF(!GLESv2Validate::attribName(name),GL_INVALID_OPERATION);
-    SET_ERROR_IF(!GLESv2Validate::attribIndex(index),GL_INVALID_VALUE);
+    SET_ERROR_IF(!GLESv2Validate::attribIndex(index, ctx->getCaps()->maxVertexAttribs),GL_INVALID_VALUE);
     if(ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
