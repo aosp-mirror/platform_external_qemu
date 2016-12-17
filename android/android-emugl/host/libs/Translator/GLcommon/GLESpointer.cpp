@@ -112,6 +112,10 @@ void GLESpointer::setBuffer(GLint size,
     m_isInt = isInt;
 }
 
+void GLESpointer::setDivisor(GLuint divisor) {
+    m_divisor = divisor;
+}
+
 void GLESpointer::getBufferConversions(const RangeList& rl, RangeList& rlOut) {
     m_buffer->getConversions(rl, rlOut);
 }
