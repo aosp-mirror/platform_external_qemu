@@ -353,7 +353,7 @@ bool GLESv2Validate::attribIndex(int index, int max){
     return index >=0 && index < max;
 }
 
-bool GLESv2Validate::programParam(GLenum pname){
+bool GLESv2Validate::programParam(GLenum pname, int glesMajorVersion){
     switch(pname){
         case GL_DELETE_STATUS:
         case GL_LINK_STATUS:
@@ -365,6 +365,13 @@ bool GLESv2Validate::programParam(GLenum pname){
         case GL_ACTIVE_UNIFORMS:
         case GL_ACTIVE_UNIFORM_MAX_LENGTH:
             return true;
+        case GL_ACTIVE_UNIFORM_BLOCKS:
+        case GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH:
+        case GL_PROGRAM_BINARY_RETRIEVABLE_HINT:
+        case GL_TRANSFORM_FEEDBACK_BUFFER_MODE:
+        case GL_TRANSFORM_FEEDBACK_VARYINGS:
+        case GL_TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH:
+            return glesMajorVersion >= 3;
     }
     return false;
 }

@@ -1428,8 +1428,8 @@ GL_APICALL void  GL_APIENTRY glGetRenderbufferParameteriv(GLenum target, GLenum 
 
 
 GL_APICALL void  GL_APIENTRY glGetProgramiv(GLuint program, GLenum pname, GLint* params){
-    GET_CTX();
-    SET_ERROR_IF(!GLESv2Validate::programParam(pname),GL_INVALID_ENUM);
+    GET_CTX_V2();
+    SET_ERROR_IF(!GLESv2Validate::programParam(pname, ctx->getMajorVersion()),GL_INVALID_ENUM);
     if(ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
