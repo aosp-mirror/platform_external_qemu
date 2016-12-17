@@ -42,10 +42,12 @@ class Entry:
         self.func_name = func_name
         self.return_type = return_type
         self.parameters = ""
+        self.vartypes = []
         self.varnames = []
         self.call = ""
         comma = ""
         for param in parameters:
+            self.vartypes.append(param[0])
             self.varnames.append(param[1])
             self.parameters += "%s%s %s" % (comma, param[0], param[1])
             self.call += "%s%s" % (comma, param[1])
@@ -235,26 +237,29 @@ def gen_translator(entries):
 
     def gen_call_ret(entry):
         globalNameTypes = {
-                "program" : "NamedObjectType::SHADER_OR_PROGRAM",
-                "texture" : "NamedObjectType::TEXTURE",
+                ("GLuint", "program") : "NamedObjectType::SHADER_OR_PROGRAM",
+                ("GLuint", "texture") : "NamedObjectType::TEXTURE",
+                ("GLuint", "buffer") : "NamedObjectType::VERTEXBUFFER",
         }
         globalNames = {
-                "program" : "globalProgramName",
-                "texture" : "globalTextureName",
+                ("GLuint", "program") : "globalProgramName",
+                ("GLuint", "texture") : "globalTextureName",
+                ("GLuint", "buffer") : "globalBufferName",
         }
 
         needsShareGroup = False
-        for v in entry.varnames:
-            if v in ["program", "texture"]:
+        for v in zip(entry.vartypes, entry.varnames):
+            if v in globalNameTypes.keys():
                 needsShareGroup = True
 
         if needsShareGroup:
             print "    if (ctx->shareGroup().get()) {"
-            for v in entry.varnames:
-                if globalNames.has_key(v):
-                    print "        const GLuint %s = ctx->shareGroup()->getGlobalName(%s, %s);" % (globalNames[v], globalNameTypes[v], v)
+            for key in zip(entry.vartypes, entry.varnames):
+                vartype, varname = key
+                if globalNames.has_key(key):
+                    print "        const GLuint %s = ctx->shareGroup()->getGlobalName(%s, %s);" % (globalNames[key], globalNameTypes[key], varname)
 
-        globalCall = ", ".join(map(lambda v: globalNames.get(v, v), entry.varnames))
+        globalCall = ", ".join(map(lambda k: globalNames.get(k, k[1]), zip(entry.vartypes, entry.varnames)))
 
         if needsShareGroup and translator_custom_share_processing.has_key(entry.func_name):
             print translator_custom_share_processing[entry.func_name],
