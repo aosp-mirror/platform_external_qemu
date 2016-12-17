@@ -47,6 +47,7 @@ public:
                    int offset,
                    bool normalize = false,
                    bool isInt = false);
+    void setDivisor(GLuint divisor);
     bool isEnable() const;
     bool isNormalize() const;
     bool isVBO() const;
@@ -65,5 +66,6 @@ private:
     GLuint m_bufferName = 0;
     unsigned int m_buffOffset = 0;
     bool m_isInt = false;
+    GLuint m_divisor = 0;
 };
 #endif

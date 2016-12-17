@@ -133,6 +133,10 @@ void GLESv2Context::setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,
         s_glDispatch.glVertexAttribPointer(arrayType,size,dataType,normalized,stride,arr);
 }
 
+void GLESv2Context::setDivisor(GLuint index, GLuint divisor) {
+    m_currVaoState[index]->setDivisor(divisor);
+}
+
 bool GLESv2Context::needConvert(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id) {
 
     bool usingVBO = p->isVBO();
