@@ -343,7 +343,7 @@ extern void skin_winsys_init_args(int argc, char** argv) {
     g->argv = argv;
 }
 
-extern void skin_winsys_start(bool no_window) {
+extern void skin_winsys_start(bool no_window, bool rotary_input) {
     GlobalState* g = globalState();
 #ifdef Q_OS_LINUX
     // This call is required to make doing OpenGL stuff on the UI
@@ -361,7 +361,7 @@ extern void skin_winsys_start(bool no_window) {
         g->app->setAttribute(Qt::AA_UseHighDpiPixmaps);
         androidQtDefaultInit();
 
-        EmulatorQtWindow::create();
+        EmulatorQtWindow::create(rotary_input);
 #ifdef __APPLE__
         // On OS X, Qt automatically generates an application menu with a "Quit"
         // item. For whatever reason, the auto-generated "quit" does not work,

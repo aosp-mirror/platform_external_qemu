@@ -1933,6 +1933,10 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
             }
         }
         break;
+    case kEventScrollWheelChanged:
+        // If there's anything to do for the window
+        window->win_funcs->scroll_wheel_event(ev->u.scroll_wheel.dx, ev->u.scroll_wheel.dy);
+        break;
 
     case kEventScreenChanged:
         // Re-setup the OpenGL ES subwindow with a potentially different

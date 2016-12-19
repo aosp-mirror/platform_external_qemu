@@ -321,7 +321,11 @@ bool skin_ui_process_events(SkinUI* ui) {
                                                        ev.u.scroll.y, ev.u.scroll.ymax);
             }
             break;
-
+        case kEventScrollWheelChanged:
+            DE("EVENT: kEventScrollWheelChanged dx=%d dy=%d\n",
+               ev.u.scroll_wheel.dx, ev.u.scroll_wheel.dy);
+            skin_window_process_event(ui->window, &ev);
+            break;
         case kEventSetScale:
             DE("EVENT: kEventSetScale scale=%f\n", ev.u.window.scale);
             ignoreScroll = true;
