@@ -61,6 +61,33 @@ custom_preprocesses = {
         sPrepareTexImage2D(target, i, (GLint)internalformat, width, height, 0, format, type, NULL, &type, (GLint*)&internalformat, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
 """,
+
+"glTexStorage2D" : """
+    GLint err = GL_NO_ERROR;
+    GLenum format, type;
+    GLESv2Validate::getCompatibleFormatTypeForInternalFormat(internalformat, &format, &type);
+    for (GLsizei i = 0; i < levels; i++)
+        sPrepareTexImage2D(target, i, (GLint)internalformat, width, height, 0, format, type, NULL, &type, (GLint*)&internalformat, &err);
+    SET_ERROR_IF(err != GL_NO_ERROR, err);
+""",
+
+"glGenSamplers" : """
+    if(ctx->shareGroup().get()) {
+        for(int i=0; i<n ;i++) {
+            samplers[i] = ctx->shareGroup()->genName(NamedObjectType::SAMPLER,
+                                                     0, true);
+        }
+    }
+""",
+
+"glDeleteSamplers" : """
+    if(ctx->shareGroup().get()) {
+        for(int i=0; i<n ;i++) {
+            ctx->shareGroup()->deleteName(NamedObjectType::SAMPLER, samplers[i]);
+        }
+    }
+""",
+
 }
 
 custom_postprocesses = {
@@ -84,4 +111,9 @@ custom_postprocesses = {
 
 custom_share_processing = {
 
+}
+
+no_passthrough = {
+    "glGenSamplers": True,
+    "glDeleteSamplers": True,
 }

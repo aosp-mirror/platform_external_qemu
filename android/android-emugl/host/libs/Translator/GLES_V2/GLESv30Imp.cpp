@@ -487,12 +487,25 @@ GL_APICALL void GL_APIENTRY glGetTransformFeedbackVarying(GLuint program, GLuint
 GL_APICALL void GL_APIENTRY glGenSamplers(GLsizei n, GLuint * samplers) {
     GET_CTX_V2();
     SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
+
+    if(ctx->shareGroup().get()) {
+        for(int i=0; i<n ;i++) {
+            samplers[i] = ctx->shareGroup()->genName(NamedObjectType::SAMPLER,
+                                                     0, true);
+        }
+    }
     ctx->dispatcher().glGenSamplers(n, samplers);
 }
 
 GL_APICALL void GL_APIENTRY glDeleteSamplers(GLsizei n, const GLuint * samplers) {
     GET_CTX_V2();
     SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
+
+    if(ctx->shareGroup().get()) {
+        for(int i=0; i<n ;i++) {
+            ctx->shareGroup()->deleteName(NamedObjectType::SAMPLER, samplers[i]);
+        }
+    }
     ctx->dispatcher().glDeleteSamplers(n, samplers);
 }
 

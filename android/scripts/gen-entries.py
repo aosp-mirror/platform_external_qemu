@@ -165,7 +165,6 @@ def gen_translator(entries):
     from gles3translatorgen import gles30_custom
     from gles3translatorgen import gles31_custom
 
-
     translator_custom_share_processing = { }
     for (k, v) in gles30_custom.custom_share_processing.items():
         translator_custom_share_processing[k] = v
@@ -183,6 +182,12 @@ def gen_translator(entries):
         translator_custom_post[k] = v
     for (k, v) in gles31_custom.custom_postprocesses.items():
         translator_custom_post[k] = v
+
+    translator_no_passthrough = {}
+    for (k, v) in gles30_custom.no_passthrough.items():
+        translator_no_passthrough[k] = v
+    for (k, v) in gles31_custom.no_passthrough.items():
+        translator_no_passthrough[k] = v
 
     translator_needexternc = {
             "glGetStringi": 1,
