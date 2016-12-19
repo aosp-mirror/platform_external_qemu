@@ -32,6 +32,11 @@ typedef struct QAndroidUserEventAgent {
     // Mouse event.
     void (*sendMouseEvent)(int dx, int dy, int dz, int buttonsState);
 
+    // Rotary encoder events
+    // value is a positive or negative value indicating the size or rotation
+    // delta.
+    void (*sendRotaryEvent)(int value);
+
     // Send generic input events.
     void (*sendGenericEvent)(int type, int code, int value);
 
