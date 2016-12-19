@@ -91,6 +91,9 @@ NamedObject::~NamedObject() {
     case NamedObjectType::SAMPLER:
         GLEScontext::dispatcher().glDeleteSamplers(1, &m_globalName);
         break;
+    case NamedObjectType::QUERY:
+        GLEScontext::dispatcher().glDeleteQueries(1, &m_globalName);
+        break;
     default:
         break;
     }
