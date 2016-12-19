@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "773d9abc_30724852",
+        "filename": "hw/input/goldfish_events.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1026713
+      },
+      "writtenOn": "2016-12-19T11:08:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba4b7745_61638023",
+      "range": {
+        "startLine": 23,
+        "startChar": 35,
+        "endLine": 23,
+        "endChar": 39
+      },
+      "revId": "36969891e43b9aa8cab2f4502e400fa28b9a2531",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba4b7745_0c8f4b0f",
         "filename": "hw/input/goldfish_events_util.c",
         "patchSetId": 5
@@ -83,6 +107,30 @@
       "writtenOn": "2016-12-16T17:51:27Z",
       "side": 1,
       "message": "what is this name?",
+      "range": {
+        "startLine": 85,
+        "startChar": 0,
+        "endLine": 87,
+        "endChar": 26
+      },
+      "revId": "36969891e43b9aa8cab2f4502e400fa28b9a2531",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b73712da_5296f42b",
+        "filename": "hw/input/goldfish_rotary.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1026713
+      },
+      "writtenOn": "2016-12-19T11:08:32Z",
+      "side": 1,
+      "message": "Oops. This is the name of a real hardware device I was mimicking. Changed to goldfish_rotary.",
+      "parentUuid": "ba4b7745_ecc4c733",
       "range": {
         "startLine": 85,
         "startChar": 0,
