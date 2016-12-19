@@ -16,6 +16,141 @@
 #include "GLESv2Validate.h"
 #include <string.h>
 
+#define LIST_VALID_TEXFORMATS(f) \
+    f(GL_DEPTH_COMPONENT) \
+    f(GL_DEPTH_STENCIL) \
+    f(GL_RED) \
+    f(GL_RED_INTEGER) \
+    f(GL_RG) \
+    f(GL_RGB) \
+    f(GL_RGBA) \
+    f(GL_RGBA_INTEGER) \
+    f(GL_RGB_INTEGER) \
+    f(GL_RG_INTEGER) \
+
+#define LIST_VALID_TEXTYPES(f) \
+    f(GL_BYTE) \
+    f(GL_FLOAT) \
+    f(GL_FLOAT_32_UNSIGNED_INT_24_8_REV) \
+    f(GL_HALF_FLOAT) \
+    f(GL_INT) \
+    f(GL_SHORT) \
+    f(GL_UNSIGNED_BYTE) \
+    f(GL_UNSIGNED_INT) \
+    f(GL_UNSIGNED_INT_10F_11F_11F_REV) \
+    f(GL_UNSIGNED_INT_2_10_10_10_REV) \
+    f(GL_UNSIGNED_INT_24_8) \
+    f(GL_UNSIGNED_INT_5_9_9_9_REV) \
+    f(GL_UNSIGNED_SHORT) \
+    f(GL_UNSIGNED_SHORT_4_4_4_4) \
+    f(GL_UNSIGNED_SHORT_5_5_5_1) \
+    f(GL_UNSIGNED_SHORT_5_6_5) \
+
+#define LIST_VALID_TEXFORMAT_COMBINATIONS(f) \
+    f(GL_R8, GL_RED, GL_UNSIGNED_BYTE) \
+    f(GL_R8_SNORM, GL_RED, GL_BYTE) \
+    f(GL_R16F, GL_RED, GL_FLOAT) \
+    f(GL_R16F, GL_RED, GL_HALF_FLOAT) \
+    f(GL_R32F, GL_RED, GL_FLOAT) \
+    f(GL_R8UI, GL_RED_INTEGER, GL_UNSIGNED_BYTE) \
+    f(GL_R8I, GL_RED_INTEGER, GL_BYTE) \
+    f(GL_R16UI, GL_RED_INTEGER, GL_UNSIGNED_SHORT) \
+    f(GL_R16I, GL_RED_INTEGER, GL_SHORT) \
+    f(GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT) \
+    f(GL_R32I, GL_RED_INTEGER, GL_INT) \
+    f(GL_RG8, GL_RG, GL_UNSIGNED_BYTE) \
+    f(GL_RG8_SNORM, GL_RG, GL_BYTE) \
+    f(GL_RG16F, GL_RG, GL_HALF_FLOAT) \
+    f(GL_RG16F, GL_RG, GL_FLOAT) \
+    f(GL_RG32F, GL_RG, GL_FLOAT) \
+    f(GL_RG8UI, GL_RG_INTEGER, GL_UNSIGNED_BYTE) \
+    f(GL_RG8I, GL_RG_INTEGER, GL_BYTE) \
+    f(GL_RG16UI, GL_RG_INTEGER, GL_UNSIGNED_SHORT) \
+    f(GL_RG16I, GL_RG_INTEGER, GL_SHORT) \
+    f(GL_RG32UI, GL_RG_INTEGER, GL_UNSIGNED_INT) \
+    f(GL_RG32I, GL_RG_INTEGER, GL_INT) \
+    f(GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE) \
+    f(GL_SRGB8, GL_RGB, GL_UNSIGNED_BYTE) \
+    f(GL_RGB565, GL_RGB, GL_UNSIGNED_BYTE) \
+    f(GL_RGB565, GL_RGB, GL_UNSIGNED_SHORT_5_6_5) \
+    f(GL_RGB8_SNORM, GL_RGB, GL_BYTE) \
+    f(GL_R11F_G11F_B10F, GL_RGB, GL_UNSIGNED_INT_10F_11F_11F_REV) \
+    f(GL_R11F_G11F_B10F, GL_RGB, GL_HALF_FLOAT) \
+    f(GL_R11F_G11F_B10F, GL_RGB, GL_FLOAT) \
+    f(GL_RGB9_E5, GL_RGB, GL_UNSIGNED_INT_5_9_9_9_REV) \
+    f(GL_RGB9_E5, GL_RGB, GL_HALF_FLOAT) \
+    f(GL_RGB9_E5, GL_RGB, GL_FLOAT) \
+    f(GL_RGB16F, GL_RGB, GL_HALF_FLOAT) \
+    f(GL_RGB16F, GL_RGB, GL_FLOAT) \
+    f(GL_RGB32F, GL_RGB, GL_FLOAT) \
+    f(GL_RGB8UI, GL_RGB_INTEGER, GL_UNSIGNED_BYTE) \
+    f(GL_RGB8I, GL_RGB_INTEGER, GL_BYTE) \
+    f(GL_RGB16UI, GL_RGB_INTEGER, GL_UNSIGNED_SHORT) \
+    f(GL_RGB16I, GL_RGB_INTEGER, GL_SHORT) \
+    f(GL_RGB32UI, GL_RGB_INTEGER, GL_UNSIGNED_INT) \
+    f(GL_RGB32I, GL_RGB_INTEGER, GL_INT) \
+    f(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE) \
+    f(GL_SRGB8_ALPHA8, GL_RGBA, GL_UNSIGNED_BYTE) \
+    f(GL_RGBA8_SNORM, GL_RGBA, GL_BYTE) \
+    f(GL_RGB5_A1, GL_RGBA, GL_UNSIGNED_BYTE) \
+    f(GL_RGB5_A1, GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1) \
+    f(GL_RGB5_A1, GL_RGBA, GL_UNSIGNED_INT_2_10_10_10_REV) \
+    f(GL_RGBA4, GL_RGBA, GL_UNSIGNED_BYTE) \
+    f(GL_RGBA4, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4) \
+    f(GL_RGB10_A2, GL_RGBA, GL_UNSIGNED_INT_2_10_10_10_REV) \
+    f(GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT) \
+    f(GL_RGBA16F, GL_RGBA, GL_FLOAT) \
+    f(GL_RGBA32F, GL_RGBA, GL_FLOAT) \
+    f(GL_RGBA8UI, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE) \
+    f(GL_RGBA8I, GL_RGBA_INTEGER, GL_BYTE) \
+    f(GL_RGB10_A2UI, GL_RGBA_INTEGER, GL_UNSIGNED_INT_2_10_10_10_REV) \
+    f(GL_RGBA16UI, GL_RGBA_INTEGER, GL_UNSIGNED_SHORT) \
+    f(GL_RGBA16I, GL_RGBA_INTEGER, GL_SHORT) \
+    f(GL_RGBA32I, GL_RGBA_INTEGER, GL_INT) \
+    f(GL_RGBA32UI, GL_RGBA_INTEGER, GL_UNSIGNED_INT) \
+    f(GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT) \
+    f(GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT) \
+    f(GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT) \
+    f(GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT) \
+    f(GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8) \
+    f(GL_DEPTH32F_STENCIL8, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV) \
+    f(GL_COMPRESSED_R11_EAC, GL_RED, GL_NONE) \
+    f(GL_COMPRESSED_SIGNED_R11_EAC, GL_RED, GL_NONE) \
+    f(GL_COMPRESSED_RG11_EAC, GL_RG, GL_NONE) \
+    f(GL_COMPRESSED_SIGNED_RG11_EAC, GL_RG, GL_NONE) \
+    f(GL_COMPRESSED_RGB8_ETC2, GL_RGB, GL_NONE) \
+    f(GL_COMPRESSED_SRGB8_ETC2, GL_RGB, GL_NONE) \
+    f(GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2, GL_RGBA, GL_NONE) \
+    f(GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2, GL_RGBA, GL_NONE) \
+    f(GL_COMPRESSED_RGBA8_ETC2_EAC, GL_RGBA, GL_NONE) \
+    f(GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC, GL_RGBA, GL_NONE) \
+
+bool GLESv2Validate::framebufferAttachment(GLenum attachment, int glesMajorVersion) {
+    switch (attachment) {
+    case GL_COLOR_ATTACHMENT0:
+    case GL_DEPTH_ATTACHMENT:
+    case GL_STENCIL_ATTACHMENT:
+        return true;
+    case GL_COLOR_ATTACHMENT1:
+    case GL_COLOR_ATTACHMENT2:
+    case GL_COLOR_ATTACHMENT3:
+    case GL_COLOR_ATTACHMENT4:
+    case GL_COLOR_ATTACHMENT5:
+    case GL_COLOR_ATTACHMENT6:
+    case GL_COLOR_ATTACHMENT7:
+    case GL_COLOR_ATTACHMENT8:
+    case GL_COLOR_ATTACHMENT9:
+    case GL_COLOR_ATTACHMENT10:
+    case GL_COLOR_ATTACHMENT11:
+    case GL_COLOR_ATTACHMENT12:
+    case GL_COLOR_ATTACHMENT13:
+    case GL_COLOR_ATTACHMENT14:
+    case GL_COLOR_ATTACHMENT15:
+        return glesMajorVersion >= 3;
+    }
+    return false;
+}
+
 bool GLESv2Validate::bufferTarget(GLenum target, int glesMajorVersion, int glesMinorVersion) {
     switch (target) {
     case GL_ARRAY_BUFFER: // Vertex attributes
@@ -256,27 +391,54 @@ bool GLESv2Validate::arrayIndex(GLEScontext * ctx,GLuint index) {
 #define GL_R11F_G11F_B10F                   0x8C3A
 #define GL_UNSIGNED_INT_10F_11F_11F_REV     0x8C3B
 
-bool GLESv2Validate::pixelType(GLEScontext * ctx,GLenum type) {
-    if(type == GL_UNSIGNED_SHORT || type == GL_UNSIGNED_INT
-            || type == GL_UNSIGNED_INT_10F_11F_11F_REV)
-        return true;
+bool GLESv2Validate::pixelType(GLEScontext * ctx,GLenum type,int glesMajorVersion) {
+    if (glesMajorVersion < 3) {
+        if(type == GL_UNSIGNED_SHORT || type == GL_UNSIGNED_INT
+                || type == GL_UNSIGNED_INT_10F_11F_11F_REV)
+            return true;
 
-    return GLESvalidate::pixelType(ctx, type);
+        return GLESvalidate::pixelType(ctx, type);
+    }
+
+#define GLES3_TYPE_CASE(type) \
+    case type: \
+
+    switch (type) {
+        LIST_VALID_TEXTYPES(GLES3_TYPE_CASE)
+            return glesMajorVersion >= 3;
+        default:
+            break;
+    }
+
+    return false;
 }
 
-bool GLESv2Validate::pixelFrmt(GLEScontext* ctx,GLenum format) {
+bool GLESv2Validate::pixelFrmt(GLEScontext* ctx,GLenum format, int glesMajorVersion) {
+    if (glesMajorVersion < 3) {
+        switch (format) {
+            case GL_DEPTH_COMPONENT:
+                // GLES3 compatible
+                // Required in dEQP
+            case GL_RED:
+            case GL_RG:
+                return true;
+        }
+        return GLESvalidate::pixelFrmt(ctx, format);
+    }
+
+#define GLES3_FORMAT_CASE(format) \
+    case format:
+
     switch (format) {
-    case GL_DEPTH_COMPONENT:
-    // GLES3 compatible
-    // Required in dEQP
-    case GL_RED:
-    case GL_RG:
-        return true;
+        LIST_VALID_TEXFORMATS(GLES3_FORMAT_CASE)
+            return glesMajorVersion >= 3;
+        default:
+            break;
     }
     return GLESvalidate::pixelFrmt(ctx, format);
 }
 
-bool GLESv2Validate::pixelItnlFrmt(GLEScontext* ctx ,GLenum internalformat) {
+bool GLESv2Validate::pixelItnlFrmt(GLEScontext* ctx ,GLenum internalformat, int glesMajorVersion) {
     switch (internalformat) {
     case GL_R8:
     case GL_RG8:
@@ -286,63 +448,162 @@ bool GLESv2Validate::pixelItnlFrmt(GLEScontext* ctx ,GLenum internalformat) {
     case GL_RGB16F:
     case GL_R11F_G11F_B10F:
         return true;
+    case GL_R8_SNORM:
+    case GL_R32F:
+    case GL_R8UI:
+    case GL_R8I:
+    case GL_R16UI:
+    case GL_R16I:
+    case GL_R32UI:
+    case GL_R32I:
+    case GL_RG8_SNORM:
+    case GL_RG32F:
+    case GL_RG8UI:
+    case GL_RG8I:
+    case GL_RG16UI:
+    case GL_RG16I:
+    case GL_RG32UI:
+    case GL_RG32I:
+    case GL_RGB8:
+    case GL_SRGB8:
+    case GL_RGB565:
+    case GL_RGB8_SNORM:
+    case GL_RGB9_E5:
+    case GL_RGB32F:
+    case GL_RGB8UI:
+    case GL_RGB8I:
+    case GL_RGB16UI:
+    case GL_RGB16I:
+    case GL_RGB32UI:
+    case GL_RGB32I:
+    case GL_RGBA8:
+    case GL_SRGB8_ALPHA8:
+    case GL_RGBA8_SNORM:
+    case GL_RGB5_A1:
+    case GL_RGBA4:
+    case GL_RGB10_A2:
+    case GL_RGBA32F:
+    case GL_RGBA8UI:
+    case GL_RGBA8I:
+    case GL_RGB10_A2UI:
+    case GL_RGBA16UI:
+    case GL_RGBA16I:
+    case GL_RGBA32I:
+    case GL_RGBA32UI:
+    case GL_DEPTH_COMPONENT16:
+    case GL_DEPTH_COMPONENT24:
+    case GL_DEPTH_COMPONENT32F:
+    case GL_DEPTH24_STENCIL8:
+    case GL_DEPTH32F_STENCIL8:
+    case GL_COMPRESSED_R11_EAC:
+    case GL_COMPRESSED_SIGNED_R11_EAC:
+    case GL_COMPRESSED_RG11_EAC:
+    case GL_COMPRESSED_SIGNED_RG11_EAC:
+    case GL_COMPRESSED_RGB8_ETC2:
+    case GL_COMPRESSED_SRGB8_ETC2:
+    case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+    case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+    case GL_COMPRESSED_RGBA8_ETC2_EAC:
+    case GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC:
+        if (glesMajorVersion >= 3) {
+            return true;
+        }
+        break;
     }
-    return pixelFrmt(ctx, internalformat);
+    return pixelFrmt(ctx, internalformat, glesMajorVersion);
 }
 
 bool GLESv2Validate::pixelSizedFrmt(GLEScontext* ctx, GLenum internalformat,
-                                    GLenum format, GLenum type) {
+                                    GLenum format, GLenum type, int glesMajorVersion) {
     if (internalformat == format) {
         return true;
     }
-    switch (format) {
-        case GL_RED:
-            switch (type) {
-                case GL_UNSIGNED_BYTE:
-                    return internalformat == GL_R8;
-                case GL_HALF_FLOAT:
-                case GL_FLOAT:
-                    return internalformat == GL_R16F;
-                default:
-                    return false;
-            }
-            break;
-        case GL_RG:
-            switch (type) {
-                case GL_UNSIGNED_BYTE:
-                    return internalformat == GL_RG8;
-                case GL_HALF_FLOAT:
-                case GL_FLOAT:
-                    return internalformat == GL_RG16F;
-                default:
-                    return false;
-            }
-            break;
-        case GL_RGB:
-            switch (type) {
-                case GL_HALF_FLOAT:
-                case GL_FLOAT:
-                    return internalformat == GL_RGB16F
+
+    if (glesMajorVersion < 3) {
+        switch (format) {
+            case GL_RED:
+                switch (type) {
+                    case GL_UNSIGNED_BYTE:
+                        return internalformat == GL_R8;
+                    case GL_HALF_FLOAT:
+                    case GL_FLOAT:
+                        return internalformat == GL_R16F;
+                    case GL_BYTE:
+                        return internalformat == GL_R8_SNORM;
+                    default:
+                        return false;
+                }
+                break;
+            case GL_RG:
+                switch (type) {
+                    case GL_UNSIGNED_BYTE:
+                        return internalformat == GL_RG8;
+                    case GL_HALF_FLOAT:
+                    case GL_FLOAT:
+                        return internalformat == GL_RG16F;
+                    default:
+                        return false;
+                }
+                break;
+            case GL_RGB:
+                switch (type) {
+                    case GL_HALF_FLOAT:
+                    case GL_FLOAT:
+                        return internalformat == GL_RGB16F
                             || internalformat == GL_R11F_G11F_B10F;
-                case GL_UNSIGNED_INT_10F_11F_11F_REV:
-                    return internalformat == GL_R11F_G11F_B10F;
-                default:
-                    return false;
-            }
-            break;
-        case GL_RGBA:
-            switch (type) {
-                case GL_HALF_FLOAT:
-                case GL_FLOAT:
-                    return internalformat == GL_RGBA16F;
-                default:
-                    return false;
-            }
-            break;
+                    case GL_UNSIGNED_INT_10F_11F_11F_REV:
+                        return internalformat == GL_R11F_G11F_B10F;
+                    default:
+                        return false;
+                }
+                break;
+            case GL_RGBA:
+                switch (type) {
+                    case GL_HALF_FLOAT:
+                    case GL_FLOAT:
+                        return internalformat == GL_RGBA16F;
+                    default:
+                        return false;
+                }
+                break;
+        }
+    }
+
+#define VALIDATE_FORMAT_COMBINATION(x, y, z) \
+    if (internalformat == x && format == y && type == z) return true; \
+
+    LIST_VALID_TEXFORMAT_COMBINATIONS(VALIDATE_FORMAT_COMBINATION)
+
+    return false;
+}
+
+bool GLESv2Validate::isCompressedFormat(GLenum format) {
+    switch (format) {
+        case GL_COMPRESSED_R11_EAC:
+        case GL_COMPRESSED_SIGNED_R11_EAC:
+        case GL_COMPRESSED_RG11_EAC:
+        case GL_COMPRESSED_SIGNED_RG11_EAC:
+        case GL_COMPRESSED_RGB8_ETC2:
+        case GL_COMPRESSED_SRGB8_ETC2:
+        case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+        case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+        case GL_COMPRESSED_RGBA8_ETC2_EAC:
+        case GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC:
+            return true;
     }
     return false;
 }
 
+void GLESv2Validate::getCompatibleFormatTypeForInternalFormat(GLenum internalformat, GLenum* format_out, GLenum* type_out) {
+#define RETURN_COMPATIBLE_FORMAT(x, y, z) \
+    if (internalformat == x) { \
+        *format_out = y; \
+        *type_out = z; \
+        return; \
+    } \
+
+    LIST_VALID_TEXFORMAT_COMBINATIONS(RETURN_COMPATIBLE_FORMAT)
+}
 bool GLESv2Validate::attribName(const GLchar* name){
     const GLchar* found = strstr(name,"gl_");
     return (!found) ||

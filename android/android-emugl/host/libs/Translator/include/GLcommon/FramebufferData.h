@@ -28,7 +28,7 @@ public:
     NamedObjectPtr eglImageGlobalTexObject = 0;
 };
 
-const int MAX_ATTACH_POINTS = 3;
+const int MAX_ATTACH_POINTS = 18;
 
 class FramebufferData : public ObjectData
 {
