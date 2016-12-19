@@ -371,19 +371,57 @@ GL_APICALL void GL_APIENTRY glInvalidateSubFramebuffer(GLenum target, GLsizei nu
 
 GL_APICALL void GL_APIENTRY glFramebufferTextureLayer(GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer) {
     GET_CTX_V2();
+
+    GLenum textarget = GL_TEXTURE_2D_ARRAY;
+    SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(target) &&
+                   GLESv2Validate::framebufferAttachment(
+                       attachment, ctx->getMajorVersion())), GL_INVALID_ENUM);
+    if (texture) {
+        SET_ERROR_IF(ctx->getBindedTexture(GL_TEXTURE_2D_ARRAY) != texture &&
+                     ctx->getBindedTexture(GL_TEXTURE_3D) != texture,
+                     GL_INVALID_OPERATION);
+        if (texture == ctx->getBindedTexture(GL_TEXTURE_2D_ARRAY))
+            textarget = GL_TEXTURE_2D_ARRAY;
+        if (texture == ctx->getBindedTexture(GL_TEXTURE_3D))
+            textarget = GL_TEXTURE_3D;
+        if (!ctx->shareGroup()->isObject(NamedObjectType::TEXTURE, texture)) {
+            ctx->shareGroup()->genName(NamedObjectType::TEXTURE, texture);
+        }
+    }
     if (ctx->shareGroup().get()) {
         const GLuint globalTextureName = ctx->shareGroup()->getGlobalName(NamedObjectType::TEXTURE, texture);
         ctx->dispatcher().glFramebufferTextureLayer(target, attachment, globalTextureName, level, layer);
     }
+
+    GLuint fbName = ctx->getFramebufferBinding();
+    auto fbObj = ctx->shareGroup()->getObjectData(
+            NamedObjectType::FRAMEBUFFER, fbName);
+    if (fbObj) {
+        FramebufferData *fbData = (FramebufferData *)fbObj;
+        fbData->setAttachment(attachment, textarget,
+                              texture, ObjectDataPtr());
+    }
+
 }
 
 GL_APICALL void GL_APIENTRY glRenderbufferStorageMultisample(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) {
     GET_CTX_V2();
+
+    GLint err = GL_NO_ERROR;
+    internalformat = sPrepareRenderbufferStorage(internalformat, &err);
+    SET_ERROR_IF(err != GL_NO_ERROR, err);
     ctx->dispatcher().glRenderbufferStorageMultisample(target, samples, internalformat, width, height);
 }
 
 GL_APICALL void GL_APIENTRY glTexStorage2D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height) {
     GET_CTX_V2();
+
+    GLint err = GL_NO_ERROR;
+    GLenum format, type;
+    GLESv2Validate::getCompatibleFormatTypeForInternalFormat(internalformat, &format, &type);
+    for (GLsizei i = 0; i < levels; i++)
+        sPrepareTexImage2D(target, i, (GLint)internalformat, width, height, 0, format, type, NULL, &type, (GLint*)&internalformat, &err);
+    SET_ERROR_IF(err != GL_NO_ERROR, err);
     ctx->dispatcher().glTexStorage2D(target, levels, internalformat, width, height);
 }
 
