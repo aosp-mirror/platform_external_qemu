@@ -23,31 +23,35 @@
 #include <GLES3/gl31.h>
 #include <GLcommon/GLESvalidate.h>
 
-struct GLESv2Validate:public GLESvalidate{
-static bool bufferTarget(GLenum target, int glesMajorVersion, int glesMinorVersion);
-static bool bufferUsage(GLenum usage, int glesMajorVersion);
-static bool bufferParam(GLenum pname, int glesMajorVersion, int glesMinorVersion);
-static bool blendEquationMode(GLenum mode);
-static bool blendSrc(GLenum s);
-static bool blendDst(GLenum d);
-static bool textureTarget(GLenum param, int glesMajorVersion, int glesMinorVersion);
-static bool textureParams(GLenum param, int glesMajorVersion, int glesMinorVersion);
-static bool hintTargetMode(GLenum target,GLenum mode);
-static bool capability(GLenum cap);
-static bool pixelStoreParam(GLenum param, int glesMajorVersion, int glesMinorVersion);
-static bool readPixelFrmt(GLenum format);
-static bool shaderType(GLenum type);
-static bool precisionType(GLenum type);
-static bool arrayIndex(GLEScontext * ctx,GLuint index);
-static bool pixelType(GLEScontext * ctx,GLenum type);
-static bool pixelFrmt(GLEScontext* ctx,GLenum format);
-static bool pixelItnlFrmt(GLEScontext* ctx, GLenum internalformat);
-static bool pixelSizedFrmt(GLEScontext* ctx, GLenum internalformat,
-                           GLenum format, GLenum type);
-static bool attribName(const GLchar* name);
-static bool attribIndex(int index, int max);
-static bool programParam(GLenum pname, int glesMajorVersion);
-static bool textureIsCubeMap(GLenum target);
+struct GLESv2Validate : public GLESvalidate {
+
+    static bool framebufferAttachment(GLenum attachment, int glesMajorVersion);
+    static bool bufferTarget(GLenum target, int glesMajorVersion, int glesMinorVersion);
+    static bool bufferUsage(GLenum usage, int glesMajorVersion);
+    static bool bufferParam(GLenum pname, int glesMajorVersion, int glesMinorVersion);
+    static bool blendEquationMode(GLenum mode);
+    static bool blendSrc(GLenum s);
+    static bool blendDst(GLenum d);
+    static bool textureTarget(GLenum param, int glesMajorVersion, int glesMinorVersion);
+    static bool textureParams(GLenum param, int glesMajorVersion, int glesMinorVersion);
+    static bool hintTargetMode(GLenum target,GLenum mode);
+    static bool capability(GLenum cap);
+    static bool pixelStoreParam(GLenum param, int glesMajorVersion, int glesMinorVersion);
+    static bool readPixelFrmt(GLenum format);
+    static bool shaderType(GLenum type);
+    static bool precisionType(GLenum type);
+    static bool arrayIndex(GLEScontext * ctx,GLuint index);
+    static bool pixelType(GLEScontext * ctx,GLenum type,int glesMajorVersion);
+    static bool pixelFrmt(GLEScontext* ctx,GLenum format, int glesMajorVersion);
+    static bool pixelItnlFrmt(GLEScontext* ctx, GLenum internalformat, int glesMajorVersion);
+    static bool pixelSizedFrmt(GLEScontext* ctx, GLenum internalformat,
+            GLenum format, GLenum type, int glesMajorVersion);
+    static bool isCompressedFormat(GLenum format);
+    static void getCompatibleFormatTypeForInternalFormat(GLenum internalformat, GLenum* format_out, GLenum* type_out);
+    static bool attribName(const GLchar* name);
+    static bool attribIndex(int index, int max);
+    static bool programParam(GLenum pname, int glesMajorVersion);
+    static bool textureIsCubeMap(GLenum target);
 };
 
 #endif
