@@ -250,6 +250,8 @@ static void pc_init1(MachineState *machine,
                          gsi[GOLDFISH_RTC_IRQ]);
     sysbus_create_simple("goldfish_sync", GOLDFISH_SYNC_IOMEM_BASE,
                          gsi[GOLDFISH_SYNC_IRQ]);
+    sysbus_create_simple("goldfish_rotary", GOLDFISH_ROTARY_IOMEM_BASE,
+                         gsi[GOLDFISH_ROTARY_IRQ]);
 #endif  // CONFIG_ANDROID
 
     pc_vga_init(isa_bus, pcmc->pci_enabled ? pci_bus : NULL);
