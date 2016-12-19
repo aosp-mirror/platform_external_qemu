@@ -837,6 +837,7 @@ glGetTransformFeedbackVarying
 glGenSamplers
     dir samplers out
     len samplers (n * sizeof(GLuint))
+    param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
 glDeleteSamplers
     len samplers (n * sizeof(GLuint))
@@ -859,6 +860,7 @@ glGetSamplerParameteriv
 glGenQueries
     dir ids out
     len ids (n * sizeof(GLuint))
+    param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
 glDeleteQueries
     len ids (n * sizeof(GLuint))
