@@ -88,6 +88,8 @@ LOCAL_SRC_FILES += \
         hw/display/framebuffer.c \
         ) \
     hw/input/goldfish_events.c \
+    hw/input/goldfish_events_common.c \
+    hw/input/goldfish_rotary.c \
     hw/intc/goldfish_pic.c \
     hw/timer/goldfish_timer.c \
     hw/misc/goldfish_battery.c \

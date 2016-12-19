@@ -20,40 +20,15 @@
 #include "ui/console.h"
 #include "hw/input/android_keycodes.h"
 #include "hw/input/linux_keycodes.h"
+#include "hw/input/goldfish_events_common.h"
 
 #include "hw/input/goldfish_events.h"
-
-#define MAX_EVENTS (256 * 4)
 
 typedef struct {
     const char *name;
     int value;
 } GoldfishEventCodeInfo;
 
-/* Absolute axes */
-#define ABS_X                   0x00
-#define ABS_Y                   0x01
-#define ABS_Z                   0x02
-#define ABS_MT_SLOT             0x2f    /* MT slot being modified */
-#define ABS_MT_TOUCH_MAJOR      0x30    /* Major axis of touching ellipse */
-#define ABS_MT_TOUCH_MINOR      0x31    /* Minor axis (omit if circular) */
-#define ABS_MT_WIDTH_MAJOR      0x32    /* Major axis of approaching ellipse */
-#define ABS_MT_WIDTH_MINOR      0x33    /* Minor axis (omit if circular) */
-#define ABS_MT_ORIENTATION      0x34    /* Ellipse orientation */
-#define ABS_MT_POSITION_X       0x35    /* Center X ellipse position */
-#define ABS_MT_POSITION_Y       0x36    /* Center Y ellipse position */
-#define ABS_MT_TOOL_TYPE        0x37    /* Type of touching device */
-#define ABS_MT_BLOB_ID          0x38    /* Group a set of packets as a blob */
-#define ABS_MT_TRACKING_ID      0x39    /* Unique ID of initiated contact */
-#define ABS_MT_PRESSURE         0x3a    /* Pressure on contact area */
-#define ABS_MT_DISTANCE         0x3b    /* Contact hover distance */
-#define ABS_MAX                 0x3f
-
-#define BTN_TOUCH 0x14a
-#define BTN_MOUSE 0x110
-
-#define EV_CODE(_code)    {#_code, (_code)}
-#define EV_CODE_END     {NULL, 0}
 static const GoldfishEventCodeInfo ev_abs_codes_table[] = {
     EV_CODE(ABS_X),
     EV_CODE(ABS_Y),
@@ -75,19 +50,12 @@ static const GoldfishEventCodeInfo ev_abs_codes_table[] = {
     EV_CODE_END,
 };
 
-/* Relative axes */
-#define REL_X                   0x00
-#define REL_Y                   0x01
 static const GoldfishEventCodeInfo ev_rel_codes_table[] = {
     EV_CODE(REL_X),
     EV_CODE(REL_Y),
     EV_CODE_END,
 };
 
-/* Switches */
-#define SW_LID               0
-#define SW_HEADPHONE_INSERT  2
-#define SW_MICROPHONE_INSERT 4
 static const GoldfishEventCodeInfo ev_sw_codes_table[] = {
     EV_CODE(SW_LID),
     EV_CODE(SW_HEADPHONE_INSERT),
@@ -95,76 +63,6 @@ static const GoldfishEventCodeInfo ev_sw_codes_table[] = {
     EV_CODE_END,
 };
 
-#define BTN_MISC 0x100
-#define BTN_0 0x100
-#define BTN_1 0x101
-#define BTN_2 0x102
-#define BTN_3 0x103
-#define BTN_4 0x104
-#define BTN_5 0x105
-#define BTN_6 0x106
-#define BTN_7 0x107
-#define BTN_8 0x108
-#define BTN_9 0x109
-#define BTN_MOUSE 0x110
-#define BTN_LEFT 0x110
-#define BTN_RIGHT 0x111
-#define BTN_MIDDLE 0x112
-#define BTN_SIDE 0x113
-#define BTN_EXTRA 0x114
-#define BTN_FORWARD 0x115
-#define BTN_BACK 0x116
-#define BTN_TASK 0x117
-#define BTN_JOYSTICK 0x120
-#define BTN_TRIGGER 0x120
-#define BTN_THUMB 0x121
-#define BTN_THUMB2 0x122
-#define BTN_TOP 0x123
-#define BTN_TOP2 0x124
-#define BTN_PINKIE 0x125
-#define BTN_BASE 0x126
-#define BTN_BASE2 0x127
-#define BTN_BASE3 0x128
-#define BTN_BASE4 0x129
-#define BTN_BASE5 0x12a
-#define BTN_BASE6 0x12b
-#define BTN_DEAD 0x12f
-#define BTN_GAMEPAD 0x130
-#define BTN_A 0x130
-#define BTN_B 0x131
-#define BTN_C 0x132
-#define BTN_X 0x133
-#define BTN_Y 0x134
-#define BTN_Z 0x135
-#define BTN_TL 0x136
-#define BTN_TR 0x137
-#define BTN_TL2 0x138
-#define BTN_TR2 0x139
-#define BTN_SELECT 0x13a
-#define BTN_START 0x13b
-#define BTN_MODE 0x13c
-#define BTN_THUMBL 0x13d
-#define BTN_THUMBR 0x13e
-#define BTN_DIGI 0x140
-#define BTN_TOOL_PEN 0x140
-#define BTN_TOOL_RUBBER 0x141
-#define BTN_TOOL_BRUSH 0x142
-#define BTN_TOOL_PENCIL 0x143
-#define BTN_TOOL_AIRBRUSH 0x144
-#define BTN_TOOL_FINGER 0x145
-#define BTN_TOOL_MOUSE 0x146
-#define BTN_TOOL_LENS 0x147
-#define BTN_TOUCH 0x14a
-#define BTN_STYLUS 0x14b
-#define BTN_STYLUS2 0x14c
-#define BTN_TOOL_DOUBLETAP 0x14d
-#define BTN_TOOL_TRIPLETAP 0x14e
-#define BTN_WHEEL 0x150
-#define BTN_GEAR_DOWN 0x150
-#define BTN_GEAR_UP  0x151
-
-#define KEY_CODE(_name, _val) {#_name, _val}
-#define BTN_CODE(_code) {#_code, (_code)}
 static const GoldfishEventCodeInfo ev_key_codes_table[] = {
     KEY_CODE(KEY_ESC, LINUX_KEY_ESC),
     KEY_CODE(KEY_1, LINUX_KEY_1),
@@ -485,23 +383,6 @@ typedef struct {
     const GoldfishEventCodeInfo *codes;
 } GoldfishEventTypeInfo;
 
-/* Event types (as per Linux input event layer) */
-#define EV_SYN                  0x00
-#define EV_KEY                  0x01
-#define EV_REL                  0x02
-#define EV_ABS                  0x03
-#define EV_MSC                  0x04
-#define EV_SW                   0x05
-#define EV_LED                  0x11
-#define EV_SND                  0x12
-#define EV_REP                  0x14
-#define EV_FF                   0x15
-#define EV_PWR                  0x16
-#define EV_FF_STATUS            0x17
-#define EV_MAX                  0x1f
-
-#define EV_TYPE(_type, _codes)    {#_type, (_type), _codes}
-#define EV_TYPE_END     {NULL, 0}
 static const GoldfishEventTypeInfo ev_type_table[] = {
     EV_TYPE(EV_SYN, NULL),
     EV_TYPE(EV_KEY, ev_key_codes_table),
@@ -519,74 +400,11 @@ static const GoldfishEventTypeInfo ev_type_table[] = {
     EV_TYPE_END
 };
 
-enum {
-    REG_READ        = 0x00,
-    REG_SET_PAGE    = 0x00,
-    REG_LEN         = 0x04,
-    REG_DATA        = 0x08,
-
-    PAGE_NAME       = 0x00000,
-    PAGE_EVBITS     = 0x10000,
-    PAGE_ABSDATA    = 0x20000 | EV_ABS,
-};
-
-/* These corresponds to the state of the driver.
- * Unfortunately, we have to buffer events coming
- * from the UI, since the kernel driver is not
- * capable of receiving them until XXXXXX
- */
-enum {
-    STATE_INIT = 0,  /* The device is initialized */
-    STATE_BUFFERED,  /* Events have been buffered, but no IRQ raised yet */
-    STATE_LIVE       /* Events can be sent directly to the kernel */
-};
-
 /* NOTE: The ev_bits arrays are used to indicate to the kernel
  *       which events can be sent by the emulated hardware.
  */
 
 #define TYPE_GOLDFISHEVDEV "goldfish-events"
-#define GOLDFISHEVDEV(obj) \
-    OBJECT_CHECK(GoldfishEvDevState, (obj), TYPE_GOLDFISHEVDEV)
-
-typedef struct GoldfishEvDevState {
-    /*< private >*/
-    SysBusDevice parent_obj;
-    /*< public >*/
-
-    MemoryRegion iomem;
-    qemu_irq irq;
-
-    /* Device properties */
-    bool have_dpad;
-    bool have_trackball;
-    bool have_camera;
-    bool have_keyboard;
-    bool have_keyboard_lid;
-    bool have_touch;
-    bool have_multitouch;
-
-    /* Actual device state */
-    int32_t page;
-    uint32_t events[MAX_EVENTS];
-    uint32_t first;
-    uint32_t last;
-    uint32_t state;
-
-    uint32_t modifier_state;
-
-    /* All data below here is set up at realize and not modified thereafter */
-
-    const char *name;
-
-    struct {
-        size_t   len;
-        uint8_t *bits;
-    } ev_bits[EV_MAX + 1];
-
-    int32_t *abs_info;
-    size_t abs_info_count;
-} GoldfishEvDevState;
 
 /* Bitfield meanings for modifier_state. */
 #define MODSTATE_SHIFT (1 << 0)
@@ -618,187 +436,23 @@ void goldfish_events_enable_multitouch(
     s_multitouch_funcs = funcs;
 }
 
-static const VMStateDescription vmstate_goldfish_evdev = {
-    .name = "goldfish-events",
-    .version_id = 1,
-    .minimum_version_id = 1,
-    .fields = (VMStateField[]) {
-        VMSTATE_INT32(page, GoldfishEvDevState),
-        VMSTATE_UINT32_ARRAY(events, GoldfishEvDevState, MAX_EVENTS),
-        VMSTATE_UINT32(first, GoldfishEvDevState),
-        VMSTATE_UINT32(last, GoldfishEvDevState),
-        VMSTATE_UINT32(state, GoldfishEvDevState),
-        VMSTATE_UINT32(modifier_state, GoldfishEvDevState),
-        VMSTATE_END_OF_LIST()
-    }
-};
-
-static void enqueue_event(GoldfishEvDevState *s,
-                          unsigned int type, unsigned int code, int value)
-{
-    int  enqueued = s->last - s->first;
-
-    if (enqueued < 0) {
-        enqueued += MAX_EVENTS;
-    }
-
-    if (enqueued + 3 > MAX_EVENTS) {
-        fprintf(stderr, "##KBD: Full queue, lose event\n");
-        return;
-    }
-
-    if (s->first == s->last) {
-        if (s->state == STATE_LIVE) {
-            qemu_irq_raise(s->irq);
-        } else {
-            s->state = STATE_BUFFERED;
-        }
-    }
-
-    s->events[s->last] = type;
-    s->last = (s->last + 1) & (MAX_EVENTS-1);
-    s->events[s->last] = code;
-    s->last = (s->last + 1) & (MAX_EVENTS-1);
-    s->events[s->last] = value;
-    s->last = (s->last + 1) & (MAX_EVENTS-1);
-
-}
-
-static unsigned dequeue_event(GoldfishEvDevState *s)
-{
-    unsigned n;
-
-    if (s->first == s->last) {
-        return 0;
-    }
-
-    n = s->events[s->first];
-
-    s->first = (s->first + 1) & (MAX_EVENTS - 1);
-
-    if (s->first == s->last) {
-        qemu_irq_lower(s->irq);
-    }
-#ifdef TARGET_I386
-    /*
-     * Adding the logic to handle edge-triggered interrupts for x86
-     * because the exisiting goldfish events device basically provides
-     * level-trigger interrupts only.
-     *
-     * Logic: When an event (including the type/code/value) is fetched
-     * by the driver, if there is still another event in the event
-     * queue, the goldfish event device will re-assert the IRQ so that
-     * the driver can be notified to fetch the event again.
-     */
-    else if (((s->first + 2) & (MAX_EVENTS - 1)) < s->last ||
-               (s->first & (MAX_EVENTS - 1)) > s->last) {
-        /* if there still is an event */
-        qemu_irq_lower(s->irq);
-        qemu_irq_raise(s->irq);
-    }
-#endif
-    return n;
-}
-
-static int get_page_len(GoldfishEvDevState *s)
-{
-    int page = s->page;
-    if (page == PAGE_NAME) {
-        const char *name = s->name;
-        return strlen(name);
-    }
-    if (page >= PAGE_EVBITS && page <= PAGE_EVBITS + EV_MAX) {
-        return s->ev_bits[page - PAGE_EVBITS].len;
-    }
-    if (page == PAGE_ABSDATA) {
-        return s->abs_info_count * sizeof(s->abs_info[0]);
-    }
-    return 0;
-}
-
-static int get_page_data(GoldfishEvDevState *s, int offset)
-{
-    int page_len = get_page_len(s);
-    int page = s->page;
-    if (offset > page_len) {
-        return 0;
-    }
-    if (page == PAGE_NAME) {
-        const char *name = s->name;
-        return name[offset];
-    }
-    if (page >= PAGE_EVBITS && page <= PAGE_EVBITS + EV_MAX) {
-        return s->ev_bits[page - PAGE_EVBITS].bits[offset];
-    }
-    if (page == PAGE_ABSDATA) {
-        return s->abs_info[offset / sizeof(s->abs_info[0])];
-    }
-    return 0;
-}
+static const VMStateDescription vmstate_goldfish_evdev =
+        GOLDFISHEVDEV_VM_STATE_DESCRIPTION("goldfish-events");
 
 int goldfish_event_send(int type, int code, int value)
 {
     GoldfishEvDevState *dev = s_evdev;
 
     if (dev) {
-        enqueue_event(dev, type, code, value);
+        goldfish_enqueue_event(dev, type, code, value);
     }
 
     return 0;
 }
 
-static uint64_t events_read(void *opaque, hwaddr offset, unsigned size)
-{
-    GoldfishEvDevState *s = (GoldfishEvDevState *)opaque;
-
-    /* This gross hack below is used to ensure that we
-     * only raise the IRQ when the kernel driver is
-     * properly ready! If done before this, the driver
-     * becomes confused and ignores all input events
-     * as soon as one was buffered!
-     */
-    if (offset == REG_LEN && s->page == PAGE_ABSDATA) {
-        if (s->state == STATE_BUFFERED) {
-            qemu_irq_raise(s->irq);
-        }
-        s->state = STATE_LIVE;
-    }
-
-    switch (offset) {
-    case REG_READ:
-        return dequeue_event(s);
-    case REG_LEN:
-        return get_page_len(s);
-    default:
-        if (offset >= REG_DATA) {
-            return get_page_data(s, offset - REG_DATA);
-        }
-        qemu_log_mask(LOG_GUEST_ERROR,
-                      "goldfish events device read: bad offset %x\n",
-                      (int)offset);
-        return 0;
-    }
-}
-
-static void events_write(void *opaque, hwaddr offset,
-                         uint64_t val, unsigned size)
-{
-    GoldfishEvDevState *s = (GoldfishEvDevState *)opaque;
-    switch (offset) {
-    case REG_SET_PAGE:
-        s->page = val;
-        break;
-    default:
-        qemu_log_mask(LOG_GUEST_ERROR,
-                      "goldfish events device write: bad offset %x\n",
-                      (int)offset);
-        break;
-    }
-}
-
 static const MemoryRegionOps goldfish_evdev_ops = {
-    .read = events_read,
-    .write = events_write,
+    .read = goldfish_events_read,
+    .write = goldfish_events_write,
     .endianness = DEVICE_NATIVE_ENDIAN,
 };
 
@@ -818,70 +472,18 @@ static void goldfish_evdev_put_mouse(void *opaque,
     }
 
     if (s->have_touch  &&  dz == 0) {
-        enqueue_event(s, EV_ABS, ABS_X, dx);
-        enqueue_event(s, EV_ABS, ABS_Y, dy);
-        enqueue_event(s, EV_ABS, ABS_Z, dz);
-        enqueue_event(s, EV_KEY, BTN_TOUCH, buttons_state & 1);
-        enqueue_event(s, EV_SYN, 0, 0);
+        goldfish_enqueue_event(s, EV_ABS, ABS_X, dx);
+        goldfish_enqueue_event(s, EV_ABS, ABS_Y, dy);
+        goldfish_enqueue_event(s, EV_ABS, ABS_Z, dz);
+        goldfish_enqueue_event(s, EV_KEY, BTN_TOUCH, buttons_state & 1);
+        goldfish_enqueue_event(s, EV_SYN, 0, 0);
         return;
     }
     if (s->have_trackball  &&  dz == 1) {
-        enqueue_event(s, EV_REL, REL_X, dx);
-        enqueue_event(s, EV_REL, REL_Y, dy);
-        enqueue_event(s, EV_SYN, 0, 0);
+        goldfish_enqueue_event(s, EV_REL, REL_X, dx);
+        goldfish_enqueue_event(s, EV_REL, REL_Y, dy);
+        goldfish_enqueue_event(s, EV_SYN, 0, 0);
         return;
-    }
-}
-
-/* set bits [bitl..bith] in the ev_bits[type] array
- */
-static void
-events_set_bits(GoldfishEvDevState *s, int type, int bitl, int bith)
-{
-    uint8_t *bits;
-    uint8_t maskl, maskh;
-    int il, ih;
-    il = bitl / 8;
-    ih = bith / 8;
-    if (ih >= s->ev_bits[type].len) {
-        bits = g_malloc0(ih + 1);
-        if (bits == NULL) {
-            return;
-        }
-        memcpy(bits, s->ev_bits[type].bits, s->ev_bits[type].len);
-        g_free(s->ev_bits[type].bits);
-        s->ev_bits[type].bits = bits;
-        s->ev_bits[type].len = ih + 1;
-    } else {
-        bits = s->ev_bits[type].bits;
-    }
-    maskl = 0xffU << (bitl & 7);
-    maskh = 0xffU >> (7 - (bith & 7));
-    if (il >= ih) {
-        maskh &= maskl;
-    } else {
-        bits[il] |= maskl;
-        while (++il < ih) {
-            bits[il] = 0xff;
-        }
-    }
-    bits[ih] |= maskh;
-}
-
-static void
-events_set_bit(GoldfishEvDevState *s, int  type, int  bit)
-{
-    events_set_bits(s, type, bit, bit);
-}
-
-static void
-events_clr_bit(GoldfishEvDevState *s, int type, int bit)
-{
-    int ii = bit / 8;
-    if (ii < s->ev_bits[type].len) {
-        uint8_t *bits = s->ev_bits[type].bits;
-        uint8_t  mask = 0x01U << (bit & 7);
-        bits[ii] &= ~mask;
     }
 }
 
@@ -897,7 +499,7 @@ static void goldfish_evdev_handle_keyevent(DeviceState *dev, QemuConsole *src,
                                            InputEvent *evt)
 {
 
-    GoldfishEvDevState *s = GOLDFISHEVDEV(dev);
+    GoldfishEvDevState *s = GOLDFISHEVDEV(dev, TYPE_GOLDFISHEVDEV);
     int lkey = 0;
     int mod;
 
@@ -907,7 +509,7 @@ static void goldfish_evdev_handle_keyevent(DeviceState *dev, QemuConsole *src,
 
     int qcode = kv->u.qcode.data;
 
-    enqueue_event(s, EV_KEY, qcode, evt->u.key.data->down);
+    goldfish_enqueue_event(s, EV_KEY, qcode, evt->u.key.data->down);
 
     int qemu2_qcode = qemu_input_key_value_to_qcode(evt->u.key.data->key);
 
@@ -943,7 +545,7 @@ static void goldfish_evdev_handle_keyevent(DeviceState *dev, QemuConsole *src,
     }
 
     if (lkey) {
-        enqueue_event(s, EV_KEY, lkey, evt->u.key.data->down);
+        goldfish_enqueue_event(s, EV_KEY, lkey, evt->u.key.data->down);
     }
 }
 
@@ -1068,7 +670,7 @@ static QemuInputHandler goldfish_evdev_key_input_handler = {
 
 static void goldfish_evdev_init(Object *obj)
 {
-    GoldfishEvDevState *s = GOLDFISHEVDEV(obj);
+    GoldfishEvDevState *s = GOLDFISHEVDEV(obj, TYPE_GOLDFISHEVDEV);
     DeviceState *dev = DEVICE(obj);
     SysBusDevice *sbd = SYS_BUS_DEVICE(obj);
 
@@ -1087,7 +689,7 @@ static void goldfish_evdev_init(Object *obj)
 static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
 {
 
-    GoldfishEvDevState *s = GOLDFISHEVDEV(dev);
+    GoldfishEvDevState *s = GOLDFISHEVDEV(dev, TYPE_GOLDFISHEVDEV);
 
     /* Initialize the device ID so the event dev can be looked up duringi
      * monitor commands.
@@ -1121,39 +723,39 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
      * BTN_MOUSE is sent when the trackball is pressed
      * BTN_TOUCH is sent when the touchscreen is pressed
      */
-    events_set_bit(s, EV_SYN, EV_KEY);
+    goldfish_events_set_bit(s, EV_SYN, EV_KEY);
 
-    events_set_bit(s, EV_KEY, LINUX_KEY_HOME);
-    events_set_bit(s, EV_KEY, LINUX_KEY_BACK);
-    events_set_bit(s, EV_KEY, LINUX_KEY_SEND);
-    events_set_bit(s, EV_KEY, LINUX_KEY_END);
-    events_set_bit(s, EV_KEY, LINUX_KEY_SOFT1);
-    events_set_bit(s, EV_KEY, LINUX_KEY_VOLUMEUP);
-    events_set_bit(s, EV_KEY, LINUX_KEY_VOLUMEDOWN);
-    events_set_bit(s, EV_KEY, LINUX_KEY_SOFT2);
-    events_set_bit(s, EV_KEY, LINUX_KEY_POWER);
-    events_set_bit(s, EV_KEY, LINUX_KEY_SEARCH);
+    goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_HOME);
+    goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_BACK);
+    goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_SEND);
+    goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_END);
+    goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_SOFT1);
+    goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_VOLUMEUP);
+    goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_VOLUMEDOWN);
+    goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_SOFT2);
+    goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_POWER);
+    goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_SEARCH);
 
-    events_set_bit(s, EV_KEY, ANDROID_KEY_APPSWITCH);
+    goldfish_events_set_bit(s, EV_KEY, ANDROID_KEY_APPSWITCH);
 
     if (s->have_dpad) {
-        events_set_bit(s, EV_KEY, LINUX_KEY_DOWN);
-        events_set_bit(s, EV_KEY, LINUX_KEY_UP);
-        events_set_bit(s, EV_KEY, LINUX_KEY_LEFT);
-        events_set_bit(s, EV_KEY, LINUX_KEY_RIGHT);
-        events_set_bit(s, EV_KEY, LINUX_KEY_CENTER);
+        goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_DOWN);
+        goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_UP);
+        goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_LEFT);
+        goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_RIGHT);
+        goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_CENTER);
     }
 
     if (s->have_trackball) {
-        events_set_bit(s, EV_KEY, BTN_MOUSE);
+        goldfish_events_set_bit(s, EV_KEY, BTN_MOUSE);
     }
     if (s->have_touch) {
-        events_set_bit(s, EV_KEY, BTN_TOUCH);
+        goldfish_events_set_bit(s, EV_KEY, BTN_TOUCH);
     }
 
     if (s->have_camera) {
         /* Camera emulation is enabled. */
-        events_set_bit(s, EV_KEY, LINUX_KEY_CAMERA);
+        goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_CAMERA);
     }
 
     if (s->have_keyboard) {
@@ -1168,8 +770,8 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
          *
          * see "linux_keycodes.h" for the list of events codes.
          */
-        events_set_bits(s, EV_KEY, 1, 0xff);
-        events_set_bits(s, EV_KEY, 0x160, 0x1ff);
+        goldfish_events_set_bits(s, EV_KEY, 1, 0xff);
+        goldfish_events_set_bits(s, EV_KEY, 0x160, 0x1ff);
 
         /* If there is a keyboard, but no DPad, we need to clear the
          * corresponding bit. Doing this is simpler than trying to exclude
@@ -1180,7 +782,7 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
          * keyboard would not include those keys.
          */
         if (!s->have_dpad) {
-            events_clr_bit(s, EV_KEY, LINUX_KEY_CENTER);
+            goldfish_events_clr_bit(s, EV_KEY, LINUX_KEY_CENTER);
         }
     }
 
@@ -1189,8 +791,8 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
      * EV_REL events are sent when the trackball is moved
      */
     if (s->have_trackball) {
-        events_set_bit(s, EV_SYN, EV_REL);
-        events_set_bits(s, EV_REL, REL_X, REL_Y);
+        goldfish_events_set_bit(s, EV_SYN, EV_REL);
+        goldfish_events_set_bits(s, EV_REL, REL_X, REL_Y);
     }
 
     /* configure EV_ABS array.
@@ -1200,8 +802,8 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
     if (s->have_touch || s->have_multitouch) {
         ABSEntry *abs_values;
 
-        events_set_bit(s, EV_SYN, EV_ABS);
-        events_set_bits(s, EV_ABS, ABS_X, ABS_Z);
+        goldfish_events_set_bit(s, EV_SYN, EV_ABS);
+        goldfish_events_set_bits(s, EV_ABS, ABS_X, ABS_Z);
         /* Allocate the absinfo to report the min/max bounds for each
          * absolute dimension. The array must contain 3, or ABS_MAX tuples
          * of (min,max,fuzz,flat) 32-bit values.
@@ -1229,12 +831,12 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
             /*
              * Setup multitouch.
              */
-            events_set_bit(s, EV_ABS, ABS_MT_SLOT);
-            events_set_bit(s, EV_ABS, ABS_MT_POSITION_X);
-            events_set_bit(s, EV_ABS, ABS_MT_POSITION_Y);
-            events_set_bit(s, EV_ABS, ABS_MT_TRACKING_ID);
-            events_set_bit(s, EV_ABS, ABS_MT_TOUCH_MAJOR);
-            events_set_bit(s, EV_ABS, ABS_MT_PRESSURE);
+            goldfish_events_set_bit(s, EV_ABS, ABS_MT_SLOT);
+            goldfish_events_set_bit(s, EV_ABS, ABS_MT_POSITION_X);
+            goldfish_events_set_bit(s, EV_ABS, ABS_MT_POSITION_Y);
+            goldfish_events_set_bit(s, EV_ABS, ABS_MT_TRACKING_ID);
+            goldfish_events_set_bit(s, EV_ABS, ABS_MT_TOUCH_MAJOR);
+            goldfish_events_set_bit(s, EV_ABS, ABS_MT_PRESSURE);
 
             if (s_multitouch_funcs) {
                 abs_values[ABS_MT_SLOT].max =
@@ -1259,12 +861,12 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
      * closed (done when we switch layouts through KP-7
      * or KP-9).
      */
-    events_set_bit(s, EV_SYN, EV_SW);
-    events_set_bit(s, EV_SW, SW_HEADPHONE_INSERT);
-    events_set_bit(s, EV_SW, SW_MICROPHONE_INSERT);
+    goldfish_events_set_bit(s, EV_SYN, EV_SW);
+    goldfish_events_set_bit(s, EV_SW, SW_HEADPHONE_INSERT);
+    goldfish_events_set_bit(s, EV_SW, SW_MICROPHONE_INSERT);
 
     if (s->have_keyboard && s->have_keyboard_lid) {
-        events_set_bit(s, EV_SW, SW_LID);
+        goldfish_events_set_bit(s, EV_SW, SW_LID);
     }
 
     /* Register global variable. */
@@ -1274,7 +876,7 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
 
 static void goldfish_evdev_reset(DeviceState *dev)
 {
-    GoldfishEvDevState *s = GOLDFISHEVDEV(dev);
+    GoldfishEvDevState *s = GOLDFISHEVDEV(dev, TYPE_GOLDFISHEVDEV);
 
     s->state = STATE_INIT;
     s->first = 0;
