@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b73712da_32ddb0fc",
+        "filename": "android-qemu2-glue/qemu-user-event-agent-impl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1026713
+      },
+      "writtenOn": "2016-12-19T11:47:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba4b7745_61b2a02e",
+      "range": {
+        "startLine": 59,
+        "startChar": 8,
+        "endLine": 60,
+        "endChar": 42
+      },
+      "revId": "b339fd0243435b8e9e5113d73149490c738dcb21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba4b7745_e118505f",
         "filename": "android-qemu2-glue/qemu-user-event-agent-impl.c",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2016-12-16T17:12:36Z",
       "side": 1,
       "message": "please also implement something like this (or at least an empty function) for qemu1-glue",
+      "range": {
+        "startLine": 74,
+        "startChar": 43,
+        "endLine": 75,
+        "endChar": 45
+      },
+      "revId": "b339fd0243435b8e9e5113d73149490c738dcb21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b73712da_f2d608df",
+        "filename": "android-qemu2-glue/qemu-user-event-agent-impl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1026713
+      },
+      "writtenOn": "2016-12-19T11:47:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba4b7745_e118505f",
       "range": {
         "startLine": 74,
         "startChar": 43,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "b73712da_52e8349a",
+        "filename": "android/android-emu/android/help.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1430,
+      "author": {
+        "id": 1026713
+      },
+      "writtenOn": "2016-12-19T11:47:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba4b7745_c1c18c94",
+      "range": {
+        "startLine": 1430,
+        "startChar": 27,
+        "endLine": 1430,
+        "endChar": 31
+      },
+      "revId": "b339fd0243435b8e9e5113d73149490c738dcb21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba4b7745_41b59c13",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 4
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "b73712da_52bf1492",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1026713
+      },
+      "writtenOn": "2016-12-19T11:47:18Z",
+      "side": 1,
+      "message": "Done. Running clang-format on all modified files ended up reformatting way too many lines, so I manually picked up formatting fixes from clang-format.",
+      "parentUuid": "ba4b7745_41b59c13",
+      "range": {
+        "startLine": 92,
+        "startChar": 50,
+        "endLine": 92,
+        "endChar": 52
+      },
+      "revId": "b339fd0243435b8e9e5113d73149490c738dcb21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1ac9e3ea_255fee2c",
         "filename": "android/android-emu/android/skin/winsys.h",
         "patchSetId": 4
@@ -105,6 +201,24 @@
       "writtenOn": "2016-12-16T17:43:38Z",
       "side": 1,
       "message": "I strongly advise against this, there is no need to add coupling between this part of the generic UI layer and the emulator\u0027s command-line options. It\u0027s much better to rely on specific flags passed to skin_winsys_start() instead.\n\nThis makes the UI code easier to understand in general, and more independent from other internal details of the emulator.",
+      "revId": "b339fd0243435b8e9e5113d73149490c738dcb21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b73712da_72ba18a4",
+        "filename": "android/android-emu/android/skin/winsys.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1026713
+      },
+      "writtenOn": "2016-12-19T11:47:18Z",
+      "side": 1,
+      "message": "Done.\nDo you think I should introduce some struct for those booleans?",
+      "parentUuid": "1ac9e3ea_255fee2c",
       "revId": "b339fd0243435b8e9e5113d73149490c738dcb21",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
