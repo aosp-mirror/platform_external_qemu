@@ -58,5 +58,7 @@ private:
     static void gles2_APIENTRY s_glVertexAttribIPointerDataAEMU(void *self, GLuint indx, GLint size, GLenum type, GLsizei stride, void * data, GLuint datalen);
     static void gles2_APIENTRY s_glVertexAttribIPointerOffsetAEMU(void *self, GLuint indx, GLint size, GLenum type, GLsizei stride,  GLuint offset);
 
+    static void gles2_APIENTRY s_glTransformFeedbackVaryingsAEMU(void* self, GLuint program, GLsizei count, const char* packedVaryings, GLuint packedVaryingsLen, GLenum bufferMode);
+
 };
 #endif

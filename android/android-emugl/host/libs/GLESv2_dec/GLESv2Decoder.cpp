@@ -22,6 +22,9 @@
 #include <GLES3/gl3.h>
 #include <GLES3/gl31.h>
 
+#include <string>
+#include <vector>
+
 #include <string.h>
 
 static inline void* SafePointerFromUInt(GLuint value) {
@@ -79,6 +82,8 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     glGetUniformIndicesAEMU = s_glGetUniformIndicesAEMU;
     glVertexAttribIPointerDataAEMU = s_glVertexAttribIPointerDataAEMU;
     glVertexAttribIPointerOffsetAEMU = s_glVertexAttribIPointerOffsetAEMU;
+    glTransformFeedbackVaryingsAEMU = s_glTransformFeedbackVaryingsAEMU;
+
     return 0;
 
 }
@@ -200,29 +205,39 @@ void GLESv2Decoder::s_glTexSubImage2DOffsetAEMU(void* self, GLenum target, GLint
 
 static const char* const kNameDelimiter = ";";
 
-void GLESv2Decoder::s_glGetUniformIndicesAEMU(void* self, GLuint program, GLsizei uniformCount, const GLchar* packedNames, GLsizei packedLen, GLuint* uniformIndices) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
-
-    GLchar** unpackedNames = new GLchar*[uniformCount];
+static std::vector<std::string> sUnpackVarNames(GLsizei count, const char* packedNames) {
+    std::vector<std::string> unpacked;
     GLsizei current = 0;
 
-    while (current < uniformCount) {
-        GLchar* delimPos = (GLchar*)strstr(packedNames, kNameDelimiter);
-        size_t nameLen = delimPos - packedNames + 1;
-        unpackedNames[current] = new GLchar[nameLen];
-        memcpy(unpackedNames[current], packedNames, nameLen - 1);
-        unpackedNames[current][nameLen - 1] = '\0';
+    while (current < count) {
+        const char* delimPos = strstr(packedNames, kNameDelimiter);
+        size_t nameLen = delimPos - packedNames;
+        std::string next;
+        next.resize(nameLen);
+        memcpy(&next[0], packedNames, nameLen);
+        unpacked.push_back(next);
         packedNames = delimPos + 1;
         current++;
     }
 
-    ctx->glGetUniformIndices(program, uniformCount, (const GLchar**)unpackedNames, uniformIndices);
+    return unpacked;
+}
 
-    for (int i = 0; i < uniformCount; i++) {
-        delete [] unpackedNames[i];
+void GLESv2Decoder::s_glGetUniformIndicesAEMU(void* self, GLuint program, GLsizei uniformCount, const GLchar* packedNames, GLsizei packedLen, GLuint* uniformIndices) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+
+    std::vector<std::string> unpacked = sUnpackVarNames(uniformCount, packedNames);
+
+    GLchar** unpackedArray = new GLchar*[unpacked.size()];
+    GLsizei i = 0;
+    for (auto& elt : unpacked) {
+        unpackedArray[i] = (GLchar*)&elt[0];
+        i++;
     }
 
-    delete [] unpackedNames;
+    ctx->glGetUniformIndices(program, uniformCount, (const GLchar**)unpackedArray, uniformIndices);
+
+    delete [] unpackedArray;
 }
 
 void GLESv2Decoder::s_glVertexAttribIPointerDataAEMU(void *self, GLuint indx, GLint size, GLenum type, GLsizei stride, void * data, GLuint datalen)
@@ -240,4 +255,22 @@ void GLESv2Decoder::s_glVertexAttribIPointerOffsetAEMU(void *self, GLuint indx, 
 {
     GLESv2Decoder *ctx = (GLESv2Decoder *) self;
     ctx->glVertexAttribIPointer(indx, size, type, stride, SafePointerFromUInt(data));
+}
+
+void GLESv2Decoder::s_glTransformFeedbackVaryingsAEMU(void* self, GLuint program, GLsizei count, const char* packedVaryings, GLuint packedVaryingsLen, GLenum bufferMode) {
+
+    GLESv2Decoder *ctx = (GLESv2Decoder *) self;
+
+    std::vector<std::string> unpacked = sUnpackVarNames(count, packedVaryings);
+
+    char** unpackedArray = new char*[unpacked.size()];
+    GLsizei i = 0;
+    for (auto& elt : unpacked) {
+        unpackedArray[i] = &elt[0];
+        i++;
+    }
+
+    ctx->glTransformFeedbackVaryings(program, count, (const char**)unpackedArray, bufferMode);
+
+    delete [] unpackedArray;
 }
