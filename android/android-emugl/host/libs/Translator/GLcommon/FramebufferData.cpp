@@ -15,6 +15,7 @@
 */
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+#include <GLES3/gl3.h>
 #include <GLcommon/FramebufferData.h>
 #include <GLcommon/GLEScontext.h>
 
@@ -76,6 +77,36 @@ int FramebufferData::attachmentPointIndex(GLenum attachment)
         return 1;
     case GL_STENCIL_ATTACHMENT_OES:
         return 2;
+    case GL_COLOR_ATTACHMENT1:
+        return 3;
+    case GL_COLOR_ATTACHMENT2:
+        return 4;
+    case GL_COLOR_ATTACHMENT3:
+        return 5;
+    case GL_COLOR_ATTACHMENT4:
+        return 6;
+    case GL_COLOR_ATTACHMENT5:
+        return 7;
+    case GL_COLOR_ATTACHMENT6:
+        return 8;
+    case GL_COLOR_ATTACHMENT7:
+        return 9;
+    case GL_COLOR_ATTACHMENT8:
+        return 10;
+    case GL_COLOR_ATTACHMENT9:
+        return 11;
+    case GL_COLOR_ATTACHMENT10:
+        return 12;
+    case GL_COLOR_ATTACHMENT11:
+        return 13;
+    case GL_COLOR_ATTACHMENT12:
+        return 14;
+    case GL_COLOR_ATTACHMENT13:
+        return 15;
+    case GL_COLOR_ATTACHMENT14:
+        return 16;
+    case GL_COLOR_ATTACHMENT15:
+        return 17;
     default:
         return MAX_ATTACH_POINTS;
     }
