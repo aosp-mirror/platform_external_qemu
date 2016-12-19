@@ -57,6 +57,9 @@ NamedObject::NamedObject(GenNameInfo genNameInfo,
                 break;
         }
         break;
+    case NamedObjectType::SAMPLER:
+        GLEScontext::dispatcher().glGenSamplers(1, &m_globalName);
+        break;
     default:
         m_globalName = 0;
     }
@@ -84,6 +87,9 @@ NamedObject::~NamedObject() {
         } else {
             GLEScontext::dispatcher().glDeleteShader(m_globalName);
         }
+        break;
+    case NamedObjectType::SAMPLER:
+        GLEScontext::dispatcher().glDeleteSamplers(1, &m_globalName);
         break;
     default:
         break;
