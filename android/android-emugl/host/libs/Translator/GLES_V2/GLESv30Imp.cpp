@@ -572,12 +572,25 @@ GL_APICALL GLboolean GL_APIENTRY glIsSampler(GLuint id) {
 GL_APICALL void GL_APIENTRY glGenQueries(GLsizei n, GLuint * ids) {
     GET_CTX_V2();
     SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
+
+    if(ctx->shareGroup().get()) {
+        for(int i=0; i<n ;i++) {
+            ids[i] = ctx->shareGroup()->genName(NamedObjectType::QUERY,
+                                                     0, true);
+        }
+    }
     ctx->dispatcher().glGenQueries(n, ids);
 }
 
 GL_APICALL void GL_APIENTRY glDeleteQueries(GLsizei n, const GLuint * ids) {
     GET_CTX_V2();
     SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
+
+    if(ctx->shareGroup().get()) {
+        for(int i=0; i<n ;i++) {
+            ctx->shareGroup()->deleteName(NamedObjectType::QUERY, ids[i]);
+        }
+    }
     ctx->dispatcher().glDeleteQueries(n, ids);
 }
 
