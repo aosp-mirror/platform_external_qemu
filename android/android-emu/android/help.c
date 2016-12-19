@@ -1437,6 +1437,15 @@ help_hostfwd(stralloc_t* out)
     );
 }
 
+static void
+help_rotary_input(stralloc_t*  out)
+{
+    PRINTF(
+    "  Use '-rotary-input' to send rotary encoder events to the emulator on mouse scroll wheel.\n"
+    "  If this flag is not set, swipe events will be used instead.\n\n"
+    );
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper

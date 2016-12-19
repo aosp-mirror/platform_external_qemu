@@ -176,6 +176,7 @@ OPT_FLAG(wait_for_debugger, "Pause on launch and wait for a debugger process to 
 OPT_FLAG(skip_adb_auth, "Skip adb authentication dialogue")
 
 OPT_PARAM(hostfwd, "[tcp|udp]:[hostaddr]:hostport-:guestport", "Redirect incoming TCP or UDP connections on Host to emulator eth0")
+CFG_FLAG( rotary_input, "Enable rotary encoder input to emulator on scrollwheel motion.")
 
 #undef CFG_FLAG
 #undef CFG_PARAM
