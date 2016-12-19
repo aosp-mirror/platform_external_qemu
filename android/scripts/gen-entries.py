@@ -165,7 +165,6 @@ def gen_translator(entries):
     from gles3translatorgen import gles30_custom
     from gles3translatorgen import gles31_custom
 
-
     translator_custom_share_processing = { }
     for (k, v) in gles30_custom.custom_share_processing.items():
         translator_custom_share_processing[k] = v
@@ -183,6 +182,12 @@ def gen_translator(entries):
         translator_custom_post[k] = v
     for (k, v) in gles31_custom.custom_postprocesses.items():
         translator_custom_post[k] = v
+
+    translator_no_passthrough = {}
+    for (k, v) in gles30_custom.no_passthrough.items():
+        translator_no_passthrough[k] = v
+    for (k, v) in gles31_custom.no_passthrough.items():
+        translator_no_passthrough[k] = v
 
     translator_needexternc = {
             "glGetStringi": 1,
@@ -240,11 +245,13 @@ def gen_translator(entries):
                 ("GLuint", "program") : "NamedObjectType::SHADER_OR_PROGRAM",
                 ("GLuint", "texture") : "NamedObjectType::TEXTURE",
                 ("GLuint", "buffer") : "NamedObjectType::VERTEXBUFFER",
+                ("GLuint", "sampler") : "NamedObjectType::SAMPLER",
         }
         globalNames = {
                 ("GLuint", "program") : "globalProgramName",
                 ("GLuint", "texture") : "globalTextureName",
                 ("GLuint", "buffer") : "globalBufferName",
+                ("GLuint", "sampler") : "globalSampler",
         }
 
         needsShareGroup = False
@@ -267,7 +274,10 @@ def gen_translator(entries):
         if (entry.return_type == "void"):
             if (needsShareGroup):
                 print "   ",
-            print "    ctx->dispatcher().%s(%s);" % (entry.func_name, globalCall)
+
+            if not translator_no_passthrough.has_key(entry.func_name):
+                print "    ctx->dispatcher().%s(%s);" % (entry.func_name, globalCall)
+
             if needsShareGroup:
                 print "    }"
             if translator_custom_post.has_key(entry.func_name):
@@ -275,7 +285,10 @@ def gen_translator(entries):
         else:
             if (needsShareGroup):
                 print "   ",
-            print "    %s %s = ctx->dispatcher().%s(%s);" % (entry.return_type, entry.func_name + "RET", entry.func_name, globalCall)
+            if not translator_no_passthrough.has_key(entry.func_name):
+                print "    %s %s = ctx->dispatcher().%s(%s);" % (entry.return_type, entry.func_name + "RET", entry.func_name, globalCall)
+            else:
+                print "    %s %s = %s" % (entry.return_type, entry_func_name + "RET", get_fail_code(entry))
 
             if translator_custom_post.has_key(entry.func_name):
                 print translator_custom_post[entry.func_name];
