@@ -572,21 +572,37 @@ GL_APICALL GLboolean GL_APIENTRY glIsSampler(GLuint sampler) {
     } else return 0;
 }
 
-GL_APICALL void GL_APIENTRY glGenQueries(GLsizei n, GLuint * ids) {
+GL_APICALL void GL_APIENTRY glGenQueries(GLsizei n, GLuint * queries) {
     GET_CTX_V2();
     SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
+
+    if(ctx->shareGroup().get()) {
+        for(int i=0; i<n ;i++) {
+            queries[i] = ctx->shareGroup()->genName(NamedObjectType::QUERY,
+                                                     0, true);
+        }
+    }
     ctx->dispatcher().glGenQueries(n, ids);
 }
 
-GL_APICALL void GL_APIENTRY glDeleteQueries(GLsizei n, const GLuint * ids) {
+GL_APICALL void GL_APIENTRY glDeleteQueries(GLsizei n, const GLuint * queries) {
     GET_CTX_V2();
     SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
+
+    if(ctx->shareGroup().get()) {
+        for(int i=0; i<n ;i++) {
+            ctx->shareGroup()->deleteName(NamedObjectType::QUERY, queries[i]);
+        }
+    }
     ctx->dispatcher().glDeleteQueries(n, ids);
 }
 
-GL_APICALL void GL_APIENTRY glBeginQuery(GLenum target, GLuint id) {
+GL_APICALL void GL_APIENTRY glBeginQuery(GLenum target, GLuint query) {
     GET_CTX_V2();
-    ctx->dispatcher().glBeginQuery(target, id);
+    if (ctx->shareGroup().get()) {
+        const GLuint globalQuery = ctx->shareGroup()->getGlobalName(NamedObjectType::QUERY, query);
+        ctx->dispatcher().glBeginQuery(target, globalQuery);
+    }
 }
 
 GL_APICALL void GL_APIENTRY glEndQuery(GLenum target) {
@@ -599,15 +615,21 @@ GL_APICALL void GL_APIENTRY glGetQueryiv(GLenum target, GLenum pname, GLint * pa
     ctx->dispatcher().glGetQueryiv(target, pname, params);
 }
 
-GL_APICALL void GL_APIENTRY glGetQueryObjectuiv(GLuint id, GLenum pname, GLuint * params) {
+GL_APICALL void GL_APIENTRY glGetQueryObjectuiv(GLuint query, GLenum pname, GLuint * params) {
     GET_CTX_V2();
-    ctx->dispatcher().glGetQueryObjectuiv(id, pname, params);
+    if (ctx->shareGroup().get()) {
+        const GLuint globalQuery = ctx->shareGroup()->getGlobalName(NamedObjectType::QUERY, query);
+        ctx->dispatcher().glGetQueryObjectuiv(globalQuery, pname, params);
+    }
 }
 
-GL_APICALL GLboolean GL_APIENTRY glIsQuery(GLuint id) {
+GL_APICALL GLboolean GL_APIENTRY glIsQuery(GLuint query) {
     GET_CTX_V2_RET(0);
-    GLboolean glIsQueryRET = ctx->dispatcher().glIsQuery(id);
+    if (ctx->shareGroup().get()) {
+        const GLuint globalQuery = ctx->shareGroup()->getGlobalName(NamedObjectType::QUERY, query);
+        GLboolean glIsQueryRET = ctx->dispatcher().glIsQuery(globalQuery);
     return glIsQueryRET;
+    } else return 0;
 }
 
 GL_APICALL void GL_APIENTRY glProgramParameteri(GLuint program, GLenum pname, GLint value) {

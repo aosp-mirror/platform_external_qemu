@@ -246,12 +246,14 @@ def gen_translator(entries):
                 ("GLuint", "texture") : "NamedObjectType::TEXTURE",
                 ("GLuint", "buffer") : "NamedObjectType::VERTEXBUFFER",
                 ("GLuint", "sampler") : "NamedObjectType::SAMPLER",
+                ("GLuint", "query") : "NamedObjectType::QUERY",
         }
         globalNames = {
                 ("GLuint", "program") : "globalProgramName",
                 ("GLuint", "texture") : "globalTextureName",
                 ("GLuint", "buffer") : "globalBufferName",
                 ("GLuint", "sampler") : "globalSampler",
+                ("GLuint", "query") : "globalQuery",
         }
 
         needsShareGroup = False

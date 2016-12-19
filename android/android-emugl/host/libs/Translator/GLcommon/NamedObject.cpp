@@ -60,6 +60,9 @@ NamedObject::NamedObject(GenNameInfo genNameInfo,
     case NamedObjectType::SAMPLER:
         GLEScontext::dispatcher().glGenSamplers(1, &m_globalName);
         break;
+    case NamedObjectType::QUERY:
+        GLEScontext::dispatcher().glGenQueries(1, &m_globalName);
+        break;
     default:
         m_globalName = 0;
     }
@@ -90,6 +93,9 @@ NamedObject::~NamedObject() {
         break;
     case NamedObjectType::SAMPLER:
         GLEScontext::dispatcher().glDeleteSamplers(1, &m_globalName);
+        break;
+    case NamedObjectType::QUERY:
+        GLEScontext::dispatcher().glDeleteQueries(1, &m_globalName);
         break;
     default:
         break;
