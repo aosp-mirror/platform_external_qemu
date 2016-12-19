@@ -88,6 +88,24 @@ custom_preprocesses = {
     }
 """,
 
+"glGenQueries" : """
+    if(ctx->shareGroup().get()) {
+        for(int i=0; i<n ;i++) {
+            ids[i] = ctx->shareGroup()->genName(NamedObjectType::QUERY,
+                                                     0, true);
+        }
+    }
+""",
+
+"glDeleteQueries" : """
+    if(ctx->shareGroup().get()) {
+        for(int i=0; i<n ;i++) {
+            ctx->shareGroup()->deleteName(NamedObjectType::QUERY, ids[i]);
+        }
+    }
+""",
+
+
 }
 
 custom_postprocesses = {
@@ -116,4 +134,6 @@ custom_share_processing = {
 no_passthrough = {
     "glGenSamplers": True,
     "glDeleteSamplers": True,
+    "glGenQueries": True,
+    "glDeleteQueries": True,
 }
