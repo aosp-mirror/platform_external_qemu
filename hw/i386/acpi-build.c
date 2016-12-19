@@ -1250,6 +1250,11 @@ static void build_goldfish_aml(Aml *table)
                               GOLDFISH_RTC_IOMEM_SIZE,
                               GOLDFISH_RTC_IRQ);
 
+    build_goldfish_device_aml(scope, "GFRO", "GFSH0008", "goldfish rotary",
+                              GOLDFISH_ROTARY_IOMEM_BASE,
+                              GOLDFISH_ROTARY_IOMEM_SIZE,
+                              GOLDFISH_ROTARY_IRQ);
+
     aml_append(table, scope);
 }
 #endif  /* CONFIG_ANDROID */
