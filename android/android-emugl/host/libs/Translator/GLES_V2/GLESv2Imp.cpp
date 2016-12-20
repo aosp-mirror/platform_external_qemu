@@ -511,6 +511,22 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat, GLsize
     }
 }
 
+void s_glInitTexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border){
+    GET_CTX();
+
+    if (ctx->shareGroup().get() && level == 0){
+        TextureData *texData = getTextureTargetData(target);
+        if(texData) {
+            texData->width = width;
+            texData->height = height;
+            texData->depth = depth;
+            texData->border = border;
+            texData->internalFormat = internalformat;
+            texData->target = target;
+        }
+    }
+}
+
 GL_APICALL void  GL_APIENTRY glCopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border){
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::pixelFrmt(ctx,internalformat,ctx->getMajorVersion()) &&
