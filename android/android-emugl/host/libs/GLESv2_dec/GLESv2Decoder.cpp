@@ -253,3 +253,13 @@ void GLESv2Decoder::s_glTransformFeedbackVaryingsAEMU(void* self, GLuint program
 
     delete [] unpackedArray;
 }
+
+void GLESv2Decoder::s_glDrawElementsInstancedOffsetAEMU(void* self, GLenum mode, GLsizei count, GLenum type, GLuint offset, GLsizei primcount) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDrawElementsInstanced(mode, count, type, SafePointerFromUInt(offset), primcount);
+}
+
+void GLESv2Decoder::s_glDrawElementsInstancedDataAEMU(void* self, GLenum mode, GLsizei count, GLenum type, const void* indices, GLsizei primcount, GLuint datalen) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDrawElementsInstanced(mode, count, type, indices, primcount);
+}

@@ -56,5 +56,8 @@ private:
 
     static void gles2_APIENTRY s_glTransformFeedbackVaryingsAEMU(void* self, GLuint program, GLsizei count, const char* packedVaryings, GLuint packedVaryingsLen, GLenum bufferMode);
 
+    static void gles2_APIENTRY s_glDrawElementsInstancedOffsetAEMU(void* self, GLenum mode, GLsizei count, GLenum type, GLuint offset, GLsizei primcount);
+    static void gles2_APIENTRY s_glDrawElementsInstancedDataAEMU(void* self, GLenum mode, GLsizei count, GLenum type, const void* indices, GLsizei primcount, GLuint datalen);
+
 };
 #endif

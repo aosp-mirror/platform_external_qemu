@@ -298,16 +298,59 @@ GL_APICALL void GL_APIENTRY glVertexAttribDivisor(GLuint index, GLuint divisor) 
 
 GL_APICALL void GL_APIENTRY glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei primcount) {
     GET_CTX_V2();
+
+    SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
+    SET_ERROR_IF(!(GLESv2Validate::drawMode(mode)),GL_INVALID_ENUM);
+    s_glDrawPre(ctx, mode);
+    if (ctx->isBindedBuffer(GL_ARRAY_BUFFER)) {
+        ctx->dispatcher().glDrawArraysInstanced(mode, first, count, primcount);
+    } else {
+        GLESConversionArrays tmpArrs;
+        s_glDrawSetupArraysPre(ctx, tmpArrs, first, count, 0, NULL, true);
+        ctx->dispatcher().glDrawArrays(mode,first,count);
+        s_glDrawSetupArraysPost(ctx);
+    }
+    s_glDrawPost(ctx, mode);
     ctx->dispatcher().glDrawArraysInstanced(mode, first, count, primcount);
 }
 
 GL_APICALL void GL_APIENTRY glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, const void * indices, GLsizei primcount) {
     GET_CTX_V2();
+
+    SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
+    SET_ERROR_IF(!(GLESv2Validate::drawMode(mode) && GLESv2Validate::drawType(type)),GL_INVALID_ENUM);
+    s_glDrawPre(ctx, mode);
+    if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER)) {
+        ctx->dispatcher().glDrawElementsInstanced(mode,count,type,indices, primcount);
+    } else {
+        s_glDrawEmulateClientArraysPre(ctx);
+        GLESConversionArrays tmpArrs;
+        s_glDrawSetupArraysPre(ctx,tmpArrs,0,count,type,indices,false);
+        ctx->dispatcher().glDrawElementsInstanced(mode,count,type,indices, primcount);
+        s_glDrawSetupArraysPost(ctx);
+        s_glDrawEmulateClientArraysPost(ctx);
+    }
+    s_glDrawPost(ctx, mode);
     ctx->dispatcher().glDrawElementsInstanced(mode, count, type, indices, primcount);
 }
 
 GL_APICALL void GL_APIENTRY glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid * indices) {
     GET_CTX_V2();
+
+    SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
+    SET_ERROR_IF(!(GLESv2Validate::drawMode(mode) && GLESv2Validate::drawType(type)),GL_INVALID_ENUM);
+    s_glDrawPre(ctx, mode);
+    if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER)) {
+        ctx->dispatcher().glDrawRangeElements(mode,start,end,count,type,indices);
+    } else {
+        s_glDrawEmulateClientArraysPre(ctx);
+        GLESConversionArrays tmpArrs;
+        s_glDrawSetupArraysPre(ctx,tmpArrs,0,count,type,indices,false);
+        ctx->dispatcher().glDrawRangeElements(mode,start,end,count,type,indices);
+        s_glDrawSetupArraysPost(ctx);
+        s_glDrawEmulateClientArraysPost(ctx);
+    }
+    s_glDrawPost(ctx, mode);
     ctx->dispatcher().glDrawRangeElements(mode, start, end, count, type, indices);
 }
 
