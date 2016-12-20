@@ -106,6 +106,54 @@ custom_preprocesses = {
     }
 """,
 
+"glDrawArraysInstanced" : """
+    SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
+    SET_ERROR_IF(!(GLESv2Validate::drawMode(mode)),GL_INVALID_ENUM);
+    s_glDrawPre(ctx, mode);
+    if (ctx->isBindedBuffer(GL_ARRAY_BUFFER)) {
+        ctx->dispatcher().glDrawArraysInstanced(mode, first, count, primcount);
+    } else {
+        GLESConversionArrays tmpArrs;
+        s_glDrawSetupArraysPre(ctx, tmpArrs, first, count, 0, NULL, true);
+        ctx->dispatcher().glDrawArrays(mode,first,count);
+        s_glDrawSetupArraysPost(ctx);
+    }
+    s_glDrawPost(ctx, mode);
+""",
+
+"glDrawElementsInstanced" : """
+    SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
+    SET_ERROR_IF(!(GLESv2Validate::drawMode(mode) && GLESv2Validate::drawType(type)),GL_INVALID_ENUM);
+    s_glDrawPre(ctx, mode);
+    if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER)) {
+        ctx->dispatcher().glDrawElementsInstanced(mode,count,type,indices, primcount);
+    } else {
+        s_glDrawEmulateClientArraysPre(ctx);
+        GLESConversionArrays tmpArrs;
+        s_glDrawSetupArraysPre(ctx,tmpArrs,0,count,type,indices,false);
+        ctx->dispatcher().glDrawElementsInstanced(mode,count,type,indices, primcount);
+        s_glDrawSetupArraysPost(ctx);
+        s_glDrawEmulateClientArraysPost(ctx);
+    }
+    s_glDrawPost(ctx, mode);
+""",
+
+"glDrawRangeElements" : """
+    SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
+    SET_ERROR_IF(!(GLESv2Validate::drawMode(mode) && GLESv2Validate::drawType(type)),GL_INVALID_ENUM);
+    s_glDrawPre(ctx, mode);
+    if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER)) {
+        ctx->dispatcher().glDrawRangeElements(mode,start,end,count,type,indices);
+    } else {
+        s_glDrawEmulateClientArraysPre(ctx);
+        GLESConversionArrays tmpArrs;
+        s_glDrawSetupArraysPre(ctx,tmpArrs,0,count,type,indices,false);
+        ctx->dispatcher().glDrawRangeElements(mode,start,end,count,type,indices);
+        s_glDrawSetupArraysPost(ctx);
+        s_glDrawEmulateClientArraysPost(ctx);
+    }
+    s_glDrawPost(ctx, mode);
+""",
 }
 
 custom_postprocesses = {

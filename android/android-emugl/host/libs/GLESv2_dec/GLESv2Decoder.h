@@ -64,6 +64,8 @@ private:
     static void gles2_APIENTRY s_glTexSubImage3DOffsetAEMU(void* self, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, GLuint offset);
     static void gles2_APIENTRY s_glCompressedTexImage3DOffsetAEMU(void* self, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, GLuint offset);
     static void gles2_APIENTRY s_glCompressedTexSubImage3DOffsetAEMU(void* self, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, GLuint offset);
+    static void gles2_APIENTRY s_glDrawElementsInstancedOffsetAEMU(void* self, GLenum mode, GLsizei count, GLenum type, GLuint offset, GLsizei primcount);
+    static void gles2_APIENTRY s_glDrawElementsInstancedDataAEMU(void* self, GLenum mode, GLsizei count, GLenum type, const void* indices, GLsizei primcount, GLsizei datalen);
 
 };
 #endif
