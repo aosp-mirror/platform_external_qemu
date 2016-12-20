@@ -87,6 +87,8 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     glTexSubImage3DOffsetAEMU = s_glTexSubImage3DOffsetAEMU;
     glCompressedTexImage3DOffsetAEMU = s_glCompressedTexImage3DOffsetAEMU;
     glCompressedTexSubImage3DOffsetAEMU = s_glCompressedTexSubImage3DOffsetAEMU;
+    glDrawElementsInstancedOffsetAEMU = s_glDrawElementsInstancedOffsetAEMU;
+    glDrawElementsInstancedDataAEMU = s_glDrawElementsInstancedDataAEMU;
 
     return 0;
 
@@ -294,4 +296,14 @@ void GLESv2Decoder::gles2_APIENTRY s_glCompressedTexImage3DOffsetAEMU(void* self
 void GLESv2Decoder::gles2_APIENTRY s_glCompressedTexSubImage3DOffsetAEMU(void* self, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, GLuint offset) {
     GLESv2Decoder *ctx = (GLESv2Decoder *) self;
 	ctx->glCompressedTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, imageSize, SafePointerFromUInt(offset));
+}
+
+void GLESv2Decoder::s_glDrawElementsInstancedOffsetAEMU(void* self, GLenum mode, GLsizei count, GLenum type, GLuint offset, GLsizei primcount) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDrawElementsInstanced(mode, count, type, SafePointerFromUInt(offset), primcount);
+}
+
+void GLESv2Decoder::s_glDrawElementsInstancedDataAEMU(void* self, GLenum mode, GLsizei count, GLenum type, const void* indices, GLsizei primcount, GLsizei datalen) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDrawElementsInstanced(mode, count, type, indices, primcount);
 }
