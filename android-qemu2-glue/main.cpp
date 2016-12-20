@@ -98,6 +98,7 @@ enum ImageType {
     IMAGE_TYPE_USER_DATA,
     IMAGE_TYPE_SD_CARD,
     IMAGE_TYPE_ENCRYPTION_KEY,
+    IMAGE_TYPE_CHROMEOS,
 };
 
 const int kMaxPartitions = 5;
@@ -294,6 +295,12 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
                 return;
             }
             break;
+        case IMAGE_TYPE_CHROMEOS:
+            filePath = avdInfo_getContentPath(avd);
+            driveParam = StringFormat("index=%d,id=system,media=disk,file=%s"
+                                      PATH_SEP "system.img.qcow2",
+                                      idx++, filePath);
+            break;
         default:
             dwarning("Unknown Image type %d\n", type);
             return;
@@ -312,20 +319,22 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
         driveParam += StringFormat(",l2-cache-size=%d", l2CacheSize);
     }
 
-    // Move the disk operations into the dedicated 'disk thread', and
-    // enable modern notification mode for the hosts that support it (Linux).
-#if defined(TARGET_X86_64) || defined(TARGET_I386)
-#ifdef CONFIG_LINUX
-    // eventfd is required for this, and only available on kvm.
-    deviceParam += ",iothread=disk-iothread";
-#endif
-    deviceParam += ",modern-pio-notify";
-#endif
-
     args[n++] = "-drive";
     args[n++] = ASTRDUP(driveParam.c_str());
-    args[n++] = "-device";
-    args[n++] = ASTRDUP(deviceParam.c_str());
+    if (!deviceParam.empty()) {
+        // Move the disk operations into the dedicated 'disk thread', and
+        // enable modern notification mode for the hosts that support it (Linux).
+#if defined(TARGET_X86_64) || defined(TARGET_I386)
+#ifdef CONFIG_LINUX
+        // eventfd is required for this, and only available on kvm.
+        deviceParam += ",iothread=disk-iothread";
+#endif
+        deviceParam += ",modern-pio-notify";
+#endif
+
+        args[n++] = "-device";
+        args[n++] = ASTRDUP(deviceParam.c_str());
+    }
     /* update the index */
     *argsPosition = n;
     *driveIndex = idx;
@@ -853,13 +862,15 @@ extern "C" int main(int argc, char **argv) {
         args[n++] = lcd_density.c_str();
     }
 
-    // Kernel image
-    args[n++] = "-kernel";
-    args[n++] = hw->kernel_path;
+    if (!hw->hw_arc) {
+        // Kernel image
+        args[n++] = "-kernel";
+        args[n++] = hw->kernel_path;
 
-    // Ramdisk
-    args[n++] = "-initrd";
-    args[n++] = hw->disk_ramdisk_path;
+        // Ramdisk
+        args[n++] = "-initrd";
+        args[n++] = hw->disk_ramdisk_path;
+    }
 
     // Dedicated IOThread for all disk IO
     args[n++] = "-object";
@@ -869,17 +880,23 @@ extern "C" int main(int argc, char **argv) {
     // won't appreciate it.
     args[n++] = "-nodefaults";
 
-    /*
-     * add partition parameters with the sequence
-     * pre-defined in targetInfo.imagePartitionTypes
-     */
-    int s;
-    int drvIndex = 0;
-    for (s = 0; s < kMaxPartitions; s++) {
-        bool writable = (kTarget.imagePartitionTypes[s] == IMAGE_TYPE_SYSTEM) ?
-                    android_op_writable_system : true;
-        makePartitionCmd(args, &n, &drvIndex, hw,
-                         kTarget.imagePartitionTypes[s], writable, apiLevel, avd);
+    if (!hw->hw_arc) {
+        /*
+         * add partition parameters with the sequence
+         * pre-defined in targetInfo.imagePartitionTypes
+         */
+        int s;
+        int drvIndex = 0;
+        for (s = 0; s < kMaxPartitions; s++) {
+            bool writable = (kTarget.imagePartitionTypes[s] == IMAGE_TYPE_SYSTEM) ?
+                        android_op_writable_system : true;
+            makePartitionCmd(args, &n, &drvIndex, hw,
+                             kTarget.imagePartitionTypes[s], writable, apiLevel, avd);
+        }
+    } else { /* hw->hw_arc: ChromeOS single disk image */
+        int drvIndex = 0;
+        makePartitionCmd(args, &n, &drvIndex, hw, IMAGE_TYPE_CHROMEOS,
+                         true , apiLevel, avd);
     }
 
     // Network
@@ -1035,8 +1052,10 @@ extern "C" int main(int argc, char **argv) {
                 args[n++] = argv[i];
             }
         }
-        args[n++] = "-append";
-        args[n++] = ASTRDUP(append_arg.c_str());
+        if (!hw->hw_arc) {
+            args[n++] = "-append";
+            args[n++] = ASTRDUP(append_arg.c_str());
+        }
     }
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGENERAL);
