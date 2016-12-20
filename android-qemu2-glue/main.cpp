@@ -928,6 +928,11 @@ extern "C" int main(int argc, char **argv) {
     for (int idx = 0; kTarget.qemuExtraArgs[idx] != NULL; idx++) {
         args[n++] = kTarget.qemuExtraArgs[idx];
     }
+    if (hw->hw_arc) {
+        /* HACK: force display emulation by overriding '-vga none' */
+        args[n++] = "-vga";
+        args[n++] = "virtio";
+    }
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGPU);
 
