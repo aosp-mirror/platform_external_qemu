@@ -96,6 +96,15 @@ custom_preprocesses = {
     }
 """,
 
+"glTexImage3D" : """
+    s_glInitTexImage3D(target, level, internalFormat, width, height, depth, border);
+""",
+
+"glTexStorage3D" : """
+    for (int i = 0; i < levels; i++) {
+        s_glInitTexImage3D(target, i, internalformat, width, height, depth, 0);
+    }
+""",
 
 }
 

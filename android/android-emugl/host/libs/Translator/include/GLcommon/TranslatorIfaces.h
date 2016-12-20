@@ -43,6 +43,7 @@ public:
     TextureData():  ObjectData(TEXTURE_DATA),
                     width(0),
                     height(0),
+                    depth(0),
                     border(0),
                     internalFormat(GL_RGBA),
                     sourceEGLImage(0),
@@ -54,6 +55,7 @@ public:
 
     unsigned int width;
     unsigned int height;
+    unsigned int depth;
     unsigned int border;
     unsigned int internalFormat;
     unsigned int sourceEGLImage;
