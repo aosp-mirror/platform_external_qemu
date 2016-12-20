@@ -83,6 +83,10 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     glVertexAttribIPointerDataAEMU = s_glVertexAttribIPointerDataAEMU;
     glVertexAttribIPointerOffsetAEMU = s_glVertexAttribIPointerOffsetAEMU;
     glTransformFeedbackVaryingsAEMU = s_glTransformFeedbackVaryingsAEMU;
+    glTexImage3DOffsetAEMU = s_glTexImage3DOffsetAEMU;
+    glTexSubImage3DOffsetAEMU = s_glTexSubImage3DOffsetAEMU;
+    glCompressedTexImage3DOffsetAEMU = s_glCompressedTexImage3DOffsetAEMU;
+    glCompressedTexSubImage3DOffsetAEMU = s_glCompressedTexSubImage3DOffsetAEMU;
 
     return 0;
 
@@ -273,4 +277,21 @@ void GLESv2Decoder::s_glTransformFeedbackVaryingsAEMU(void* self, GLuint program
     ctx->glTransformFeedbackVaryings(program, count, (const char**)unpackedArray, bufferMode);
 
     delete [] unpackedArray;
+}
+
+void GLESv2Decoder::s_glTexImage3DOffsetAEMU(void* self, GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, GLuint offset) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *) self;
+	ctx->glTexImage3D(target, level, internalFormat, width, height, depth, border, format, type, SafePointerFromUInt(offset));
+}
+void GLESv2Decoder::s_glTexSubImage3DOffsetAEMU(void* self, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, GLuint offset) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *) self;
+	ctx->glTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, SafePointerFromUInt(offset));
+}
+void GLESv2Decoder::s_glCompressedTexImage3DOffsetAEMU(void* self, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, GLuint offset) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *) self;
+	ctx->glCompressedTexImage3D(target, level, internalformat, width, height, depth, border, imageSize, SafePointerFromUInt(offset));
+}
+void GLESv2Decoder::s_glCompressedTexSubImage3DOffsetAEMU(void* self, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, GLuint offset) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *) self;
+	ctx->glCompressedTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, imageSize, SafePointerFromUInt(offset));
 }
