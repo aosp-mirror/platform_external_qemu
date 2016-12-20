@@ -682,11 +682,17 @@ GL_APICALL void GL_APIENTRY glGetInteger64i_v(GLenum target, GLuint index, GLint
 
 GL_APICALL void GL_APIENTRY glTexImage3D(GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid * data) {
     GET_CTX_V2();
+
+    s_glInitTexImage3D(target, level, internalFormat, width, height, depth, border);
     ctx->dispatcher().glTexImage3D(target, level, internalFormat, width, height, depth, border, format, type, data);
 }
 
 GL_APICALL void GL_APIENTRY glTexStorage3D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth) {
     GET_CTX_V2();
+
+    for (int i = 0; i < levels; i++) {
+        s_glInitTexImage3D(target, i, internalformat, width, height, depth, 0);
+    }
     ctx->dispatcher().glTexStorage3D(target, levels, internalformat, width, height, depth);
 }
 
