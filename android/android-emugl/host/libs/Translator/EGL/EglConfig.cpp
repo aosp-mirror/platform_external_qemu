@@ -42,6 +42,7 @@ EglConfig::EglConfig(EGLint     red_size,
                      EGLint     trans_green_val,
                      EGLint     trans_blue_val,
                      EGLBoolean recordable_android,
+                     EGLBoolean framebuffer_target_android,
                      EglOS::PixelFormat* frmt):
         m_buffer_size(red_size + green_size + blue_size + alpha_size),
         m_red_size(red_size),
@@ -75,6 +76,7 @@ EglConfig::EglConfig(EGLint     red_size,
         m_trans_green_val(trans_green_val),
         m_trans_blue_val(trans_blue_val),
         m_recordable_android(recordable_android),
+        m_framebuffer_target_android(framebuffer_target_android),
         m_conformant(conformant),
         m_nativeFormat(frmt),
         m_color_buffer_type(EGL_RGB_BUFFER) {}
@@ -135,6 +137,7 @@ EglConfig::EglConfig(EGLint     red_size,
         m_trans_green_val(trans_green_val),
         m_trans_blue_val(trans_blue_val),
         m_recordable_android(recordable_android),
+        m_framebuffer_target_android((m_buffer_size == 16 || m_buffer_size == 32) ? EGL_TRUE : EGL_FALSE),
         m_conformant(((red_size + green_size + blue_size + alpha_size > 0)  &&
                      (caveat != EGL_NON_CONFORMANT_CONFIG)) ?
                      m_renderable_type : 0),
@@ -175,6 +178,7 @@ EglConfig::EglConfig(const EglConfig& conf) :
         m_trans_green_val(conf.m_trans_green_val),
         m_trans_blue_val(conf.m_trans_blue_val),
         m_recordable_android(conf.m_recordable_android),
+        m_framebuffer_target_android(conf.m_framebuffer_target_android),
         m_conformant(conf.m_conformant),
         m_nativeFormat(conf.m_nativeFormat->clone()),
         m_color_buffer_type(EGL_RGB_BUFFER) {}
@@ -218,6 +222,7 @@ EglConfig::EglConfig(const EglConfig& conf,
         m_trans_green_val(conf.m_trans_green_val),
         m_trans_blue_val(conf.m_trans_blue_val),
         m_recordable_android(conf.m_recordable_android),
+        m_framebuffer_target_android((m_buffer_size == 16 || m_buffer_size == 32) ? EGL_TRUE : EGL_FALSE),
         m_conformant(conf.m_conformant),
         m_nativeFormat(conf.m_nativeFormat->clone()),
         m_color_buffer_type(EGL_RGB_BUFFER) {};
@@ -319,6 +324,9 @@ bool EglConfig::getConfAttrib(EGLint attrib,EGLint* val) const {
         break;
     case EGL_RECORDABLE_ANDROID:
         *val = m_recordable_android;
+        break;
+    case EGL_FRAMEBUFFER_TARGET_ANDROID:
+        *val = m_framebuffer_target_android;
         break;
     default:
         return false;
@@ -522,6 +530,13 @@ bool EglConfig::chosen(const EglConfig& dummy) const {
    if(dummy.m_renderable_type != EGL_DONT_CARE &&
       ((dummy.m_renderable_type & m_renderable_type) != dummy.m_renderable_type)) {
        CHOOSE_CONFIG_DLOG("m_renderable_type does not match.");
+       return false;
+   }
+
+   if ((EGLint)(dummy.m_framebuffer_target_android) != EGL_DONT_CARE &&
+       dummy.m_framebuffer_target_android !=
+       m_framebuffer_target_android) {
+       CHOOSE_CONFIG_DLOG("m_framebuffer_target_android does not match.");
        return false;
    }
 

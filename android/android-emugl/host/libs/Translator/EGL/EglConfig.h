@@ -106,6 +106,7 @@ public:
               EGLint trans_green_val,
               EGLint trans_blue_val,
               EGLBoolean recordable_android,
+              EGLBoolean framebuffer_target_android,
               EglOS::PixelFormat* frmt);
 
     EglConfig(EGLint red_size,
@@ -197,6 +198,7 @@ private:
     const EGLint      m_trans_green_val;
     const EGLint      m_trans_blue_val;
     const EGLBoolean  m_recordable_android;
+    const EGLBoolean  m_framebuffer_target_android;
     const EGLenum     m_conformant;
 
     EglOS::PixelFormat*  m_nativeFormat;
