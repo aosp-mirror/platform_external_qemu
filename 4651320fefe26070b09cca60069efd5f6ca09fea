@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "37b082be_49272fe4",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglConfig.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2016-12-21T07:45:30Z",
+      "side": 1,
+      "message": "\u0026\u0026 -\u003e || ?",
+      "range": {
+        "startLine": 225,
+        "startChar": 57,
+        "endLine": 225,
+        "endChar": 59
+      },
+      "revId": "4651320fefe26070b09cca60069efd5f6ca09fea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
