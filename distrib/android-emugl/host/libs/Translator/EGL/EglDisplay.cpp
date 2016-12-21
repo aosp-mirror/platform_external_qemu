@@ -536,6 +536,7 @@ EglOS::Context* EglDisplay::getGlobalSharedContext() const {
 // static
 void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
     EglDisplay* display = static_cast<EglDisplay*>(opaque);
+
     EglConfig* config = new EglConfig(
             info->red_size,
             info->green_size,
