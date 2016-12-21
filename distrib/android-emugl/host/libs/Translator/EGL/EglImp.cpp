@@ -345,6 +345,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
         EGLint      conformant         = 0;
 
         EGLBoolean  recordable_android = EGL_FALSE;
+        EGLBoolean  framebuffer_target_android = EGL_DONT_CARE;
 
         EGLint luminance_size = 0;
         EGLint wanted_buffer_size = EGL_DONT_CARE;
@@ -584,6 +585,8 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
                 wanted_attribs.push_back(EGL_RECORDABLE_ANDROID);
                 break;
             case EGL_FRAMEBUFFER_TARGET_ANDROID:
+                framebuffer_target_android = attrib_list[i+1];
+                wanted_attribs.push_back(EGL_FRAMEBUFFER_TARGET_ANDROID);
                 break;
             default:
                 CHOOSE_CONFIG_DLOG("EGL_BAD_ATTRIBUTE: Unknown attribute key 0x%x", attrib_list[i]);
@@ -609,7 +612,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
     EglConfig dummy(red_size,green_size,blue_size,alpha_size,caveat,conformant,config_id,depth_size,
                     frame_buffer_level,0,0,0,native_renderable,renderable_type,0,native_visual_type,
                     sample_buffers_num, samples_per_pixel,stencil_size,luminance_size,wanted_buffer_size,
-                    surface_type,transparent_type,trans_red_val,trans_green_val,trans_blue_val,recordable_android,
+                    surface_type,transparent_type,trans_red_val,trans_green_val,trans_blue_val,recordable_android, framebuffer_target_android,
                     NULL);
     for (size_t i = 0; i < wanted_attribs.size(); i++) {
         dummy.addWantedAttrib(wanted_attribs[i]);
