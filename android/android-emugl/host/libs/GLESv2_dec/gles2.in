@@ -91,6 +91,7 @@ GL_ENTRY(void, glLinkProgram, GLuint program)
 GL_ENTRY(void, glPixelStorei, GLenum pname, GLint param)
 GL_ENTRY(void, glPolygonOffset, GLfloat factor, GLfloat units)
 GL_ENTRY(void, glReadPixels, GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels)
+GL_ENTRY(void, glReadPixelsOffsetAEMU, GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLuint offset)
 GL_ENTRY(void, glReleaseShaderCompiler, void)
 GL_ENTRY(void, glRenderbufferStorage, GLenum target, GLenum internalformat, GLsizei width, GLsizei height)
 GL_ENTRY(void, glSampleCoverage, GLclampf value, GLboolean invert)
@@ -438,6 +439,9 @@ GL_ENTRY(void, glCompressedTexImage3DOffsetAEMU, GLenum target, GLint level, GLe
 GL_ENTRY(void, glCompressedTexSubImage3D, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const GLvoid * data);
 GL_ENTRY(void, glCompressedTexSubImage3DOffsetAEMU, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, GLuint data);
 GL_ENTRY(void, glCopyTexSubImage3D, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height)
+
+# glGetStringi
+GL_ENTRY(const GLubyte*, glGetStringi, GLenum name, GLuint index);
 
 # GLES 3.1:
 

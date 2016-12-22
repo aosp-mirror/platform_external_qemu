@@ -89,6 +89,7 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     glCompressedTexSubImage3DOffsetAEMU = s_glCompressedTexSubImage3DOffsetAEMU;
     glDrawElementsInstancedOffsetAEMU = s_glDrawElementsInstancedOffsetAEMU;
     glDrawElementsInstancedDataAEMU = s_glDrawElementsInstancedDataAEMU;
+    glReadPixelsOffsetAEMU = s_glReadPixelsOffsetAEMU;
 
     return 0;
 
@@ -306,4 +307,9 @@ void GLESv2Decoder::s_glDrawElementsInstancedOffsetAEMU(void* self, GLenum mode,
 void GLESv2Decoder::s_glDrawElementsInstancedDataAEMU(void* self, GLenum mode, GLsizei count, GLenum type, const void* indices, GLsizei primcount, GLsizei datalen) {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glDrawElementsInstanced(mode, count, type, indices, primcount);
+}
+
+void GLESv2Decoder::s_glReadPixelsOffsetAEMU(void* self, GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLuint offset) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glReadPixels(x, y, width, height, format, type, SafePointerFromUInt(offset));
 }

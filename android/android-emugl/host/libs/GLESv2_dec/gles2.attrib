@@ -19,11 +19,13 @@ glBufferSubData
 #void glCompressedTexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, GLvoid *data)
 glCompressedTexImage2D
     len data imageSize
+    param_check imageSize if(imageSize<0){ ctx->setError(GL_INVALID_VALUE); return; }
     var_flag data nullAllowed isLarge
 
 #void glCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, GLvoid *data)
 glCompressedTexSubImage2D
     len data imageSize
+    param_check imageSize if(imageSize<0){ ctx->setError(GL_INVALID_VALUE); return; }
     var_flag data nullAllowed isLarge
 
 #void glDeleteBuffers(GLsizei n, GLuint *buffers)
@@ -76,6 +78,7 @@ glGenTextures
 
 #void glGetActiveAttrib(GLuint program, GLuint index, GLsizei bufsize, GLsizei *length, GLint *size, GLenum *type, GLchar *name)
 glGetActiveAttrib
+    param_check bufsize if(bufsize<0){ ctx->setError(GL_INVALID_VALUE); return; }
     len name bufsize
     dir name out
     var_flag name nullAllowed
@@ -91,6 +94,7 @@ glGetActiveAttrib
 
 #void glGetActiveUniform(GLuint program, GLuint index, GLsizei bufsize, GLsizei *length, GLint *size, GLenum *type, GLchar *name)
 glGetActiveUniform
+    param_check bufsize if(bufsize<0){ ctx->setError(GL_INVALID_VALUE); return; }
     len name bufsize
     dir name out
       var_flag name nullAllowed
@@ -153,6 +157,7 @@ glGetProgramiv
 glGetProgramInfoLog
     dir infolog out
     len infolog bufsize
+    param_check bufsize if(bufsize<0){ ctx->setError(GL_INVALID_VALUE); return; }
     dir length out
     len length sizeof(GLsizei)
     var_flag length nullAllowed
@@ -176,6 +181,7 @@ glGetShaderInfoLog
     var_flag length nullAllowed
     dir infolog out
     len infolog bufsize
+    param_check bufsize if(bufsize<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
 #void glGetShaderPrecisionFormat(GLenum shadertype, GLenum precisiontype, GLint *range, GLint *precision)
 glGetShaderPrecisionFormat
@@ -191,6 +197,7 @@ glGetShaderSource
     var_flag length nullAllowed
     dir source out
     len source bufsize
+    param_check bufsize if(bufsize<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
 #GLubyte* glGetString(GLenum name)
 glGetString
@@ -238,6 +245,10 @@ glGetVertexAttribiv
 glReadPixels
     dir pixels out
     len pixels glesv2_enc::pixelDataSize(self, width, height, format, type, 1)
+
+glReadPixelsOffsetAEMU
+    flag custom_decoder
+    flag not_api
 
 #void glShaderBinary(GLsizei n, GLuint *shaders, GLenum binaryformat, GLvoid *binary, GLsizei length)
 glShaderBinary
@@ -349,11 +360,13 @@ glTexSubImage3DOES
 #void glCompressedTexImage3DOES(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, GLvoid *data)
 glCompressedTexImage3DOES
     len data imageSize
+    param_check imageSize if(imageSize<0){ ctx->setError(GL_INVALID_VALUE); return; }
     var_flag data nullAllowed isLarge
 
 #void glCompressedTexSubImage3DOES(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, GLvoid *data)
 glCompressedTexSubImage3DOES
     len data imageSize
+    param_check imageSize if(imageSize<0){ ctx->setError(GL_INVALID_VALUE); return; }
     var_flag data nullAllowed isLarge
 
 #void glDeleteVertexArraysOES(GLsizei n, GLuint *arrays)
@@ -651,15 +664,15 @@ glCopyBufferSubData
 
 glClearBufferiv
     dir value in
-    len value glesv2_enc::clearBufferNumElts(self, buffer)
+    len value (sizeof(GLint) * glesv2_enc::clearBufferNumElts(self, buffer))
 
 glClearBufferuiv
     dir value in
-    len value glesv2_enc::clearBufferNumElts(self, buffer)
+    len value (sizeof(GLuint) * glesv2_enc::clearBufferNumElts(self, buffer))
 
 glClearBufferfv
     dir value in
-    len value glesv2_enc::clearBufferNumElts(self, buffer)
+    len value (sizeof(GLfloat) * glesv2_enc::clearBufferNumElts(self, buffer))
 
 glGetBufferParameteri64v
     flag unsupported
@@ -688,6 +701,7 @@ glGetActiveUniformBlockiv
 glGetActiveUniformBlockName
     dir uniformBlockName out
     len uniformBlockName bufSize
+    param_check bufSize if(bufSize<0){ ctx->setError(GL_INVALID_VALUE); return; }
     var_flag uniformBlockName nullAllowed
     dir length out
     len length (sizeof(GLsizei))
@@ -806,6 +820,7 @@ glInvalidateSubFramebuffer
 glGenTransformFeedbacks
     dir ids out
     len ids (n * sizeof(GLuint))
+    param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
 glDeleteTransformFeedbacks
     len ids (n * sizeof(GLuint))
@@ -823,6 +838,7 @@ glTransformFeedbackVaryingsAEMU
 glGetTransformFeedbackVarying
     dir name out
     len name bufSize
+    param_check bufSize if(bufSize<0){ ctx->setError(GL_INVALID_VALUE); return; }
     var_flag name nullAllowed
     dir length out
     len length (sizeof(GLsizei))
@@ -878,6 +894,7 @@ glProgramBinary
     len binary length
 
 glGetProgramBinary
+    param_check bufSize if(bufSize<0){ ctx->setError(GL_INVALID_VALUE); return; }
     dir binary out
     len binary bufSize
     dir binaryFormat out
@@ -922,6 +939,7 @@ glTexSubImage3DOffsetAEMU
 
 glCompressedTexImage3D
     len data imageSize
+    param_check imageSize if(imageSize<0){ ctx->setError(GL_INVALID_VALUE); return; }
     var_flag data nullAllowed isLarge
 
 glCompressedTexImage3DOffsetAEMU
@@ -929,12 +947,16 @@ glCompressedTexImage3DOffsetAEMU
     flag not_api
 
 glCompressedTexSubImage3D
+    param_check imageSize if(imageSize<0){ ctx->setError(GL_INVALID_VALUE); return; }
     len data imageSize
     var_flag data nullAllowed isLarge
 
 glCompressedTexSubImage3DOffsetAEMU
     flag custom_decoder
     flag not_api
+
+glGetStringi
+    flag unsupported
 
 # GLES 3.1
 
@@ -957,6 +979,7 @@ glGetProgramPipelineiv
 glGetProgramPipelineInfoLog
     dir infoLog out
     len infoLog bufSize
+    param_check bufSize if(bufSize<0){ ctx->setError(GL_INVALID_VALUE); return; }
     dir length out
     len length sizeof(GLsizei)
     var_flag length nullAllowed
@@ -1054,6 +1077,7 @@ glGetProgramResourceLocation
 glGetProgramResourceName
     dir name out
     len name bufSize
+    param_check bufSize if(bufSize<0){ ctx->setError(GL_INVALID_VALUE); return; }
     dir length out
     len length (sizeof(GLsizei))
 
