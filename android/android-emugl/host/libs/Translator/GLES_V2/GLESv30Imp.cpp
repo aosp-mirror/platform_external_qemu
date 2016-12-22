@@ -232,8 +232,17 @@ GL_APICALL void GL_APIENTRY glUniformMatrix4x3fv(GLint location, GLsizei count, 
 
 GL_APICALL void GL_APIENTRY glGetUniformuiv(GLuint program, GLint location, GLuint * params) {
     GET_CTX_V2();
+
+    SET_ERROR_IF(location < 0,GL_INVALID_OPERATION);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
+
+        SET_ERROR_IF(globalProgramName==0, GL_INVALID_VALUE);
+        auto objData = ctx->shareGroup()->getObjectData(
+                NamedObjectType::SHADER_OR_PROGRAM, program);
+        SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
+        ProgramData* pData = (ProgramData *)objData;
+        SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION);
         ctx->dispatcher().glGetUniformuiv(globalProgramName, location, params);
     }
 }
@@ -416,27 +425,22 @@ GL_APICALL void GL_APIENTRY glFramebufferTextureLayer(GLenum target, GLenum atta
     GET_CTX_V2();
 
     GLenum textarget = GL_TEXTURE_2D_ARRAY;
-    SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(target) &&
+    SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(target, ctx->getMajorVersion()) &&
                    GLESv2Validate::framebufferAttachment(
                        attachment, ctx->getMajorVersion())), GL_INVALID_ENUM);
     if (texture) {
-        SET_ERROR_IF(ctx->getBindedTexture(GL_TEXTURE_2D_ARRAY) != texture &&
-                     ctx->getBindedTexture(GL_TEXTURE_3D) != texture,
-                     GL_INVALID_OPERATION);
-        if (texture == ctx->getBindedTexture(GL_TEXTURE_2D_ARRAY))
-            textarget = GL_TEXTURE_2D_ARRAY;
-        if (texture == ctx->getBindedTexture(GL_TEXTURE_3D))
-            textarget = GL_TEXTURE_3D;
         if (!ctx->shareGroup()->isObject(NamedObjectType::TEXTURE, texture)) {
             ctx->shareGroup()->genName(NamedObjectType::TEXTURE, texture);
         }
+        TextureData* texData = getTextureData(texture);
+        textarget = texData->target;
     }
     if (ctx->shareGroup().get()) {
         const GLuint globalTextureName = ctx->shareGroup()->getGlobalName(NamedObjectType::TEXTURE, texture);
         ctx->dispatcher().glFramebufferTextureLayer(target, attachment, globalTextureName, level, layer);
     }
 
-    GLuint fbName = ctx->getFramebufferBinding();
+    GLuint fbName = ctx->getFramebufferBinding(target);
     auto fbObj = ctx->shareGroup()->getObjectData(
             NamedObjectType::FRAMEBUFFER, fbName);
     if (fbObj) {
@@ -454,6 +458,11 @@ GL_APICALL void GL_APIENTRY glRenderbufferStorageMultisample(GLenum target, GLsi
     internalformat = sPrepareRenderbufferStorage(internalformat, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
     ctx->dispatcher().glRenderbufferStorageMultisample(target, samples, internalformat, width, height);
+}
+
+GL_APICALL void GL_APIENTRY glGetInternalformativ(GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint * params) {
+    GET_CTX_V2();
+    ctx->dispatcher().glGetInternalformativ(target, internalformat, pname, bufSize, params);
 }
 
 GL_APICALL void GL_APIENTRY glTexStorage2D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height) {
@@ -554,6 +563,8 @@ GL_APICALL void GL_APIENTRY glBindSampler(GLuint unit, GLuint sampler) {
     GET_CTX_V2();
     if (ctx->shareGroup().get()) {
         const GLuint globalSampler = ctx->shareGroup()->getGlobalName(NamedObjectType::SAMPLER, sampler);
+
+        SET_ERROR_IF(sampler && !globalSampler, GL_INVALID_OPERATION);
         ctx->dispatcher().glBindSampler(unit, globalSampler);
     }
 }
@@ -625,7 +636,6 @@ GL_APICALL void GL_APIENTRY glGenQueries(GLsizei n, GLuint * queries) {
                                                      0, true);
         }
     }
-    ctx->dispatcher().glGenQueries(n, ids);
 }
 
 GL_APICALL void GL_APIENTRY glDeleteQueries(GLsizei n, const GLuint * queries) {
@@ -637,7 +647,6 @@ GL_APICALL void GL_APIENTRY glDeleteQueries(GLsizei n, const GLuint * queries) {
             ctx->shareGroup()->deleteName(NamedObjectType::QUERY, queries[i]);
         }
     }
-    ctx->dispatcher().glDeleteQueries(n, ids);
 }
 
 GL_APICALL void GL_APIENTRY glBeginQuery(GLenum target, GLuint query) {
@@ -711,16 +720,23 @@ GL_APICALL GLint GL_APIENTRY glGetFragDataLocation(GLuint program, const char * 
 GL_APICALL void GL_APIENTRY glGetInteger64v(GLenum pname, GLint64 * data) {
     GET_CTX_V2();
     ctx->dispatcher().glGetInteger64v(pname, data);
+
+    s_glStateQueryTv<GLint64>(true, pname, data, s_glGetInteger64v_wrapper);
+
 }
 
 GL_APICALL void GL_APIENTRY glGetIntegeri_v(GLenum target, GLuint index, GLint * data) {
     GET_CTX_V2();
-    ctx->dispatcher().glGetIntegeri_v(target, index, data);
+
+    s_glStateQueryTi_v<GLint>(target, index, data, s_glGetIntegeri_v_wrapper);
+
 }
 
 GL_APICALL void GL_APIENTRY glGetInteger64i_v(GLenum target, GLuint index, GLint64 * data) {
     GET_CTX_V2();
-    ctx->dispatcher().glGetInteger64i_v(target, index, data);
+
+    s_glStateQueryTi_v<GLint64>(target, index, data, s_glGetInteger64i_v_wrapper);
+
 }
 
 GL_APICALL void GL_APIENTRY glTexImage3D(GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid * data) {

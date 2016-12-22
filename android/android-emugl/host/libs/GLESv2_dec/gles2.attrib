@@ -248,6 +248,10 @@ glReadPixels
     dir pixels out
     len pixels glesv2_enc::pixelDataSize(self, width, height, format, type, 1)
 
+glReadPixelsOffsetAEMU
+    flag custom_decoder
+    flag not_api
+
 #void glShaderBinary(GLsizei n, GLuint *shaders, GLenum binaryformat, GLvoid *binary, GLsizei length)
 glShaderBinary
     flag unsupported

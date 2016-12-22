@@ -4477,7 +4477,7 @@ int main(int argc, char** argv, char** envp)
     }
     if (qemu_gles) {
         char  tmp[64];
-        snprintf(tmp, sizeof(tmp), "%d", 0x20000);
+        snprintf(tmp, sizeof(tmp), "%d", 0x30000);
         boot_property_add("ro.opengles.version", tmp);
     }
 
