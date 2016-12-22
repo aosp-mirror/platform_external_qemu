@@ -430,7 +430,9 @@ static int os_host_main_loop_wait(int64_t timeout)
     int polled_count = 0;
     nfds = pollfds_fill(gpollfds, fds, ARRAY_SIZE(fds), &polled_count);
     if (polled_count > 0) {
+        qemu_mutex_unlock_iothread();
         poll_ret = WSAPoll(fds, nfds, 0);
+        qemu_mutex_lock_iothread();
         if (poll_ret != 0) {
             timeout = 0;
         }

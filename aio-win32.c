@@ -18,6 +18,7 @@
 #include "qemu/osdep.h"
 #include "qemu-common.h"
 #include "block/block.h"
+#include "qemu/main-loop.h"
 #include "qemu/queue.h"
 #include "qemu/sockets.h"
 
@@ -177,8 +178,23 @@ bool aio_prepare(AioContext *ctx)
         return false;
     }
 
+    // aio_prepare() is called very often on Windows, and every call takes
+    // at least 5 us, with most coming closer to 20 us.
+    // Let's make sure we don't prevent all other vCPUs from running during
+    // this time.
+    const bool had_iothread_lock = qemu_mutex_iothread_locked();
+    if (had_iothread_lock) {
+        qemu_mutex_unlock_iothread();
+    }
+
     const int fds_count = i;
-    if (WSAPoll(fds, fds_count, 0) > 0) {
+    const int poll_res = WSAPoll(fds, fds_count, 0);
+
+    if (had_iothread_lock) {
+        qemu_mutex_lock_iothread();
+    }
+
+    if (poll_res > 0) {
         i = 0;
         QLIST_FOREACH(node, &ctx->aio_handlers, node) {
             node->pfd.revents = 0;
