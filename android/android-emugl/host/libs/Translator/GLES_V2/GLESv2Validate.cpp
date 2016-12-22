@@ -125,6 +125,35 @@
     f(GL_COMPRESSED_RGBA8_ETC2_EAC, GL_RGBA, GL_NONE) \
     f(GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC, GL_RGBA, GL_NONE) \
 
+bool GLESv2Validate::renderbufferParam(GLenum pname, int glesMajorVersion){
+    switch(pname){
+    case GL_RENDERBUFFER_WIDTH:
+    case GL_RENDERBUFFER_HEIGHT:
+    case GL_RENDERBUFFER_INTERNAL_FORMAT:
+    case GL_RENDERBUFFER_RED_SIZE:
+    case GL_RENDERBUFFER_GREEN_SIZE:
+    case GL_RENDERBUFFER_BLUE_SIZE:
+    case GL_RENDERBUFFER_ALPHA_SIZE:
+    case GL_RENDERBUFFER_DEPTH_SIZE:
+    case GL_RENDERBUFFER_STENCIL_SIZE:
+        return true;
+    case GL_RENDERBUFFER_SAMPLES:
+        return glesMajorVersion >= 3;
+    }
+    return false;
+}
+
+bool GLESv2Validate::framebufferTarget(GLenum target, int glesMajorVersion) {
+    switch (target) {
+    case GL_FRAMEBUFFER:
+        return true;
+    case GL_DRAW_FRAMEBUFFER:
+    case GL_READ_FRAMEBUFFER:
+        return glesMajorVersion >= 3;
+    }
+    return false;
+}
+
 bool GLESv2Validate::framebufferAttachment(GLenum attachment, int glesMajorVersion) {
     switch (attachment) {
     case GL_COLOR_ATTACHMENT0:
@@ -146,6 +175,7 @@ bool GLESv2Validate::framebufferAttachment(GLenum attachment, int glesMajorVersi
     case GL_COLOR_ATTACHMENT13:
     case GL_COLOR_ATTACHMENT14:
     case GL_COLOR_ATTACHMENT15:
+    case GL_DEPTH_STENCIL_ATTACHMENT:
         return glesMajorVersion >= 3;
     }
     return false;
@@ -210,10 +240,17 @@ bool GLESv2Validate::bufferParam(GLenum pname, int glesMajorVersion, int glesMin
 }
 
 
-bool GLESv2Validate::blendEquationMode(GLenum mode){
-    return mode == GL_FUNC_ADD             ||
-           mode == GL_FUNC_SUBTRACT        ||
-           mode == GL_FUNC_REVERSE_SUBTRACT;
+bool GLESv2Validate::blendEquationMode(GLenum mode, int glesMajorVersion){
+    switch (mode) {
+    case GL_FUNC_ADD:
+    case GL_FUNC_SUBTRACT:
+    case GL_FUNC_REVERSE_SUBTRACT:
+        return true;
+    case GL_MIN:
+    case GL_MAX:
+        return glesMajorVersion >= 3;
+    }
+    return false;
 }
 
 bool GLESv2Validate::blendSrc(GLenum s) {
@@ -255,6 +292,7 @@ bool GLESv2Validate::blendDst(GLenum d) {
    case GL_ONE_MINUS_CONSTANT_COLOR:
    case GL_CONSTANT_ALPHA:
    case GL_ONE_MINUS_CONSTANT_ALPHA:
+   case GL_SRC_ALPHA_SATURATE:
         return true;
    }
    return false;
@@ -294,6 +332,8 @@ bool GLESv2Validate::textureParams(GLenum param, int glesMajorVersion, int glesM
     case GL_TEXTURE_COMPARE_MODE:
     case GL_TEXTURE_COMPARE_FUNC:
     case GL_TEXTURE_WRAP_R:
+    case GL_TEXTURE_IMMUTABLE_FORMAT:
+    case GL_TEXTURE_IMMUTABLE_LEVELS:
         return glesMajorVersion >= 3;
     default:
         return false;
@@ -629,6 +669,7 @@ bool GLESv2Validate::programParam(GLenum pname, int glesMajorVersion){
         case GL_ACTIVE_UNIFORM_BLOCKS:
         case GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH:
         case GL_PROGRAM_BINARY_RETRIEVABLE_HINT:
+        case GL_PROGRAM_BINARY_LENGTH:
         case GL_TRANSFORM_FEEDBACK_BUFFER_MODE:
         case GL_TRANSFORM_FEEDBACK_VARYINGS:
         case GL_TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH:
