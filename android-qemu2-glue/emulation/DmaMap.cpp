@@ -31,10 +31,14 @@ void* DmaMap::doMap(uint64_t addr, uint64_t sz) {
     uint64_t sz_reg = sz;
     void* res = cpu_physical_memory_map(addr, &sz_reg, 1);
     if (sz_reg != sz) {
-        fprintf(stderr, "ERROR: DmaMap::doMap wanted %llu bytes, got %llu\n",
+        fprintf(stderr, "ERROR: DmaMap::doMap(0x0%llx) wanted %llu bytes, got %llu\n",
                 (unsigned long long)addr,
-                (unsigned long long)sz);
-        return NULL;
+                (unsigned long long)sz,
+                (unsigned long long)sz_reg);
+        if (res) {
+            cpu_physical_memory_unmap(res, sz_reg, 1, sz_reg);
+        }
+        return nullptr;
     }
     return res;
 }
