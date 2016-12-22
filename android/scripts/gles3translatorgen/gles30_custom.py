@@ -36,7 +36,7 @@ custom_preprocesses = {
 
 "glFramebufferTextureLayer" : """
     GLenum textarget = GL_TEXTURE_2D_ARRAY;
-    SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(target) &&
+    SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(target, ctx->getMajorVersion()) &&
                    GLESv2Validate::framebufferAttachment(
                        attachment, ctx->getMajorVersion())), GL_INVALID_ENUM);
     if (texture) {
@@ -154,6 +154,10 @@ custom_preprocesses = {
     }
     s_glDrawPost(ctx, mode);
 """,
+
+"glGetUniformuiv" : """
+    SET_ERROR_IF(location < 0,GL_INVALID_OPERATION);
+""",
 }
 
 custom_postprocesses = {
@@ -164,7 +168,7 @@ custom_postprocesses = {
     }
 """,
 "glFramebufferTextureLayer" : """
-    GLuint fbName = ctx->getFramebufferBinding();
+    GLuint fbName = ctx->getFramebufferBinding(target);
     auto fbObj = ctx->shareGroup()->getObjectData(
             NamedObjectType::FRAMEBUFFER, fbName);
     if (fbObj) {
@@ -176,7 +180,14 @@ custom_postprocesses = {
 }
 
 custom_share_processing = {
-
+"glGetUniformuiv" : """
+        SET_ERROR_IF(globalProgramName==0, GL_INVALID_VALUE);
+        auto objData = ctx->shareGroup()->getObjectData(
+                NamedObjectType::SHADER_OR_PROGRAM, program);
+        SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
+        ProgramData* pData = (ProgramData *)objData;
+        SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION);
+""",
 }
 
 no_passthrough = {

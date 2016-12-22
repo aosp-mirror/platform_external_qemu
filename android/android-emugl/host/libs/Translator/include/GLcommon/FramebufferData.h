@@ -48,6 +48,14 @@ public:
 
     void validate(class GLEScontext* ctx);
 
+    void setBoundAtLeastOnce() {
+        m_hasBeenBound = true;
+    }
+
+    bool hasBeenBoundAtLeastOnce() const {
+        return m_hasBeenBound;
+    }
+
 private:
     inline int attachmentPointIndex(GLenum attachment);
     void detachObject(int idx);
@@ -61,6 +69,7 @@ private:
         bool owned;
     } m_attachPoints[MAX_ATTACH_POINTS+1] = {};
     bool m_dirty = false;
+    bool m_hasBeenBound = false;
 };
 
 #endif
