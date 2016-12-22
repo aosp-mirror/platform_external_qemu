@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "37b082be_58fb6355",
+        "filename": "kvm-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1584,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-12-22T22:01:57Z",
+      "side": 1,
+      "message": "nit: do you need to add const and then free it ?",
+      "range": {
+        "startLine": 1584,
+        "startChar": 10,
+        "endLine": 1584,
+        "endChar": 20
+      },
+      "revId": "aefa6061c23cf4940b9f3153fe2c8a96c0089dd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
