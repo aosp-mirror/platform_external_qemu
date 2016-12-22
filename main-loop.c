@@ -433,7 +433,9 @@ static int os_host_main_loop_wait(int64_t timeout)
     FD_ZERO(&xfds);
     nfds = pollfds_fill(gpollfds, &rfds, &wfds, &xfds);
     if (nfds >= 0) {
+        qemu_mutex_unlock_iothread();
         select_ret = select(nfds + 1, &rfds, &wfds, &xfds, &tv0);
+        qemu_mutex_lock_iothread();
         if (select_ret != 0) {
             timeout = 0;
         }
