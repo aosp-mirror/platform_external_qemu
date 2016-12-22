@@ -1581,7 +1581,11 @@ static int kvm_init(MachineState *ms)
 #endif
     QLIST_INIT(&s->kvm_parked_vcpus);
     s->vmfd = -1;
-    s->fd = qemu_open("/dev/kvm", O_RDWR);
+    const char* kvm_device = getenv("ANDROID_EMULATOR_KVM_DEVICE");
+    if (NULL == kvm_device) {
+        kvm_device = "/dev/kvm";
+    }
+    s->fd = qemu_open(kvm_device, O_RDWR);
     if (s->fd == -1) {
         fprintf(stderr, "Could not access KVM kernel module: %m\n");
         ret = -errno;
