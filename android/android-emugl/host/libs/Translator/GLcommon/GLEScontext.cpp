@@ -228,9 +228,13 @@ void GLEScontext::addVertexArrayObject(GLuint array) {
 }
 
 void GLEScontext::removeVertexArrayObject(GLuint array) {
+    if (array == 0) return;
+    if (m_vaoStateMap.find(array) == m_vaoStateMap.end())
+        return;
     if (array == m_currVaoState.vaoId()) {
         setVertexArrayObject(0);
     }
+
     ArraysMap* map = m_vaoStateMap[array].arraysMap;
 
     for (int i = 0; i < s_glSupport.maxVertexAttribs; i++) {
@@ -243,7 +247,9 @@ void GLEScontext::removeVertexArrayObject(GLuint array) {
 }
 
 void GLEScontext::setVertexArrayObject(GLuint array) {
-    m_currVaoState = VAOStateRef(m_vaoStateMap.find(array));
+    VAOStateMap::iterator it = m_vaoStateMap.find(array);
+    if (it != m_vaoStateMap.end())
+        m_currVaoState = VAOStateRef(m_vaoStateMap.find(array));
 }
 
 void GLEScontext::init(GlLibrary* glLib) {
@@ -1059,11 +1065,11 @@ ObjectLocalName GLEScontext::getDefaultTextureName(GLenum target) {
 
 void GLEScontext::drawValidate(void)
 {
-    if(m_framebuffer == 0)
+    if(m_drawFramebuffer == 0)
         return;
 
     auto fbObj = m_shareGroup->getObjectData(
-            NamedObjectType::FRAMEBUFFER, m_framebuffer);
+            NamedObjectType::FRAMEBUFFER, m_drawFramebuffer);
     if (!fbObj)
         return;
 
