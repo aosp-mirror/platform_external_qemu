@@ -25,6 +25,7 @@
 
 struct GLESv2Validate : public GLESvalidate {
 
+    static bool framebufferTarget(GLenum target, int glesMajorVersion);
     static bool framebufferAttachment(GLenum attachment, int glesMajorVersion);
     static bool bufferTarget(GLenum target, int glesMajorVersion, int glesMinorVersion);
     static bool bufferUsage(GLenum usage, int glesMajorVersion);

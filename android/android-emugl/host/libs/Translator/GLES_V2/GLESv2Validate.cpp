@@ -125,6 +125,17 @@
     f(GL_COMPRESSED_RGBA8_ETC2_EAC, GL_RGBA, GL_NONE) \
     f(GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC, GL_RGBA, GL_NONE) \
 
+bool GLESv2Validate::framebufferTarget(GLenum target, int glesMajorVersion) {
+    switch (target) {
+    case GL_FRAMEBUFFER:
+        return true;
+    case GL_DRAW_FRAMEBUFFER:
+    case GL_READ_FRAMEBUFFER:
+        return glesMajorVersion >= 3;
+    }
+    return false;
+}
+
 bool GLESv2Validate::framebufferAttachment(GLenum attachment, int glesMajorVersion) {
     switch (attachment) {
     case GL_COLOR_ATTACHMENT0:
@@ -146,6 +157,7 @@ bool GLESv2Validate::framebufferAttachment(GLenum attachment, int glesMajorVersi
     case GL_COLOR_ATTACHMENT13:
     case GL_COLOR_ATTACHMENT14:
     case GL_COLOR_ATTACHMENT15:
+    case GL_DEPTH_STENCIL_ATTACHMENT:
         return glesMajorVersion >= 3;
     }
     return false;
@@ -629,6 +641,7 @@ bool GLESv2Validate::programParam(GLenum pname, int glesMajorVersion){
         case GL_ACTIVE_UNIFORM_BLOCKS:
         case GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH:
         case GL_PROGRAM_BINARY_RETRIEVABLE_HINT:
+        case GL_PROGRAM_BINARY_LENGTH:
         case GL_TRANSFORM_FEEDBACK_BUFFER_MODE:
         case GL_TRANSFORM_FEEDBACK_VARYINGS:
         case GL_TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH:
