@@ -22,6 +22,30 @@
       "revId": "bfecd9357acce3c4f5510c1927fd3b7fa121840c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_6752412c",
+        "filename": "audio/audio.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1543,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-12-22T17:11:48Z",
+      "side": 0,
+      "message": "maybe, maybe not\naudio_reset_timer() is called after every timer run (otherwise it won\u0027t run next time), so |prevtime| will be overwritten for sure. But just for the sake of safety...",
+      "parentUuid": "37b082be_5e111972",
+      "range": {
+        "startLine": 1543,
+        "startChar": 8,
+        "endLine": 1543,
+        "endChar": 28
+      },
+      "revId": "bfecd9357acce3c4f5510c1927fd3b7fa121840c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
