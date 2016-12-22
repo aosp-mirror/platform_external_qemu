@@ -36,20 +36,15 @@ custom_preprocesses = {
 
 "glFramebufferTextureLayer" : """
     GLenum textarget = GL_TEXTURE_2D_ARRAY;
-    SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(target) &&
+    SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(target, ctx->getMajorVersion()) &&
                    GLESv2Validate::framebufferAttachment(
                        attachment, ctx->getMajorVersion())), GL_INVALID_ENUM);
     if (texture) {
-        SET_ERROR_IF(ctx->getBindedTexture(GL_TEXTURE_2D_ARRAY) != texture &&
-                     ctx->getBindedTexture(GL_TEXTURE_3D) != texture,
-                     GL_INVALID_OPERATION);
-        if (texture == ctx->getBindedTexture(GL_TEXTURE_2D_ARRAY))
-            textarget = GL_TEXTURE_2D_ARRAY;
-        if (texture == ctx->getBindedTexture(GL_TEXTURE_3D))
-            textarget = GL_TEXTURE_3D;
         if (!ctx->shareGroup()->isObject(NamedObjectType::TEXTURE, texture)) {
             ctx->shareGroup()->genName(NamedObjectType::TEXTURE, texture);
         }
+        TextureData* texData = getTextureData(texture);
+        textarget = texData->target;
     }
 """,
 
@@ -97,6 +92,9 @@ custom_preprocesses = {
 """,
 
 "glTexImage3D" : """
+    SET_ERROR_IF(!GLESv2Validate::isCompressedFormat(internalFormat) &&
+                 !GLESv2Validate::pixelSizedFrmt(ctx, internalFormat, format, type, ctx->getMajorVersion()),
+                 GL_INVALID_OPERATION);
     s_glInitTexImage3D(target, level, internalFormat, width, height, depth, border);
 """,
 
@@ -154,6 +152,10 @@ custom_preprocesses = {
     }
     s_glDrawPost(ctx, mode);
 """,
+
+"glGetUniformuiv" : """
+    SET_ERROR_IF(location < 0,GL_INVALID_OPERATION);
+""",
 }
 
 custom_postprocesses = {
@@ -164,7 +166,7 @@ custom_postprocesses = {
     }
 """,
 "glFramebufferTextureLayer" : """
-    GLuint fbName = ctx->getFramebufferBinding();
+    GLuint fbName = ctx->getFramebufferBinding(target);
     auto fbObj = ctx->shareGroup()->getObjectData(
             NamedObjectType::FRAMEBUFFER, fbName);
     if (fbObj) {
@@ -173,10 +175,29 @@ custom_postprocesses = {
                               texture, ObjectDataPtr());
     }
 """,
+"glGetInteger64v" : """
+    s_glStateQueryTv<GLint64>(true, pname, data, s_glGetInteger64v_wrapper);
+""",
+"glGetIntegeri_v" : """
+    s_glStateQueryTi_v<GLint>(target, index, data, s_glGetIntegeri_v_wrapper);
+""",
+"glGetInteger64i_v" : """
+    s_glStateQueryTi_v<GLint64>(target, index, data, s_glGetInteger64i_v_wrapper);
+""",
 }
 
 custom_share_processing = {
-
+"glBindSampler" : """
+        SET_ERROR_IF(sampler && !globalSampler, GL_INVALID_OPERATION);
+""",
+"glGetUniformuiv" : """
+        SET_ERROR_IF(globalProgramName==0, GL_INVALID_VALUE);
+        auto objData = ctx->shareGroup()->getObjectData(
+                NamedObjectType::SHADER_OR_PROGRAM, program);
+        SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
+        ProgramData* pData = (ProgramData *)objData;
+        SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION);
+""",
 }
 
 no_passthrough = {
@@ -184,4 +205,7 @@ no_passthrough = {
     "glDeleteSamplers": True,
     "glGenQueries": True,
     "glDeleteQueries": True,
+    "glGetInteger64_v": True,
+    "glGetIntegeri_v": True,
+    "glGetInteger64i_v": True,
 }

@@ -26,7 +26,7 @@
 class ShaderParser : public ObjectData {
 public:
     ShaderParser(GLenum type = 0);
-    void           setSrc(const Version& ver,GLsizei count,const GLchar* const* strings,const GLint* length);
+    void           setSrc(int glesMajorVersion,int glesMinorVersion,GLsizei count,const GLchar* const* strings,const GLint* length);
     const std::string& getOriginalSrc() const;
     const GLchar** parsedLines();
     void           clear();
@@ -52,7 +52,7 @@ public:
     bool hasAttachedPrograms() const {return m_programs.size()>0;}
 
 private:
-    void convertESSLToGLSL();
+    void convertESSLToGLSL(int glesMajorVersion, int glesMinorVersion);
 
     std::string m_originalSrc;
     std::string m_src;
