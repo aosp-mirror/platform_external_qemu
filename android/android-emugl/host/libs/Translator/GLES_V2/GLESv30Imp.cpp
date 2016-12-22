@@ -232,8 +232,17 @@ GL_APICALL void GL_APIENTRY glUniformMatrix4x3fv(GLint location, GLsizei count, 
 
 GL_APICALL void GL_APIENTRY glGetUniformuiv(GLuint program, GLint location, GLuint * params) {
     GET_CTX_V2();
+
+    SET_ERROR_IF(location < 0,GL_INVALID_OPERATION);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
+
+        SET_ERROR_IF(globalProgramName==0, GL_INVALID_VALUE);
+        auto objData = ctx->shareGroup()->getObjectData(
+                NamedObjectType::SHADER_OR_PROGRAM, program);
+        SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
+        ProgramData* pData = (ProgramData *)objData;
+        SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION);
         ctx->dispatcher().glGetUniformuiv(globalProgramName, location, params);
     }
 }
@@ -416,27 +425,22 @@ GL_APICALL void GL_APIENTRY glFramebufferTextureLayer(GLenum target, GLenum atta
     GET_CTX_V2();
 
     GLenum textarget = GL_TEXTURE_2D_ARRAY;
-    SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(target) &&
+    SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(target, ctx->getMajorVersion()) &&
                    GLESv2Validate::framebufferAttachment(
                        attachment, ctx->getMajorVersion())), GL_INVALID_ENUM);
     if (texture) {
-        SET_ERROR_IF(ctx->getBindedTexture(GL_TEXTURE_2D_ARRAY) != texture &&
-                     ctx->getBindedTexture(GL_TEXTURE_3D) != texture,
-                     GL_INVALID_OPERATION);
-        if (texture == ctx->getBindedTexture(GL_TEXTURE_2D_ARRAY))
-            textarget = GL_TEXTURE_2D_ARRAY;
-        if (texture == ctx->getBindedTexture(GL_TEXTURE_3D))
-            textarget = GL_TEXTURE_3D;
         if (!ctx->shareGroup()->isObject(NamedObjectType::TEXTURE, texture)) {
             ctx->shareGroup()->genName(NamedObjectType::TEXTURE, texture);
         }
+        TextureData* texData = getTextureData(texture);
+        textarget = texData->target;
     }
     if (ctx->shareGroup().get()) {
         const GLuint globalTextureName = ctx->shareGroup()->getGlobalName(NamedObjectType::TEXTURE, texture);
         ctx->dispatcher().glFramebufferTextureLayer(target, attachment, globalTextureName, level, layer);
     }
 
-    GLuint fbName = ctx->getFramebufferBinding();
+    GLuint fbName = ctx->getFramebufferBinding(target);
     auto fbObj = ctx->shareGroup()->getObjectData(
             NamedObjectType::FRAMEBUFFER, fbName);
     if (fbObj) {
@@ -622,7 +626,6 @@ GL_APICALL void GL_APIENTRY glGenQueries(GLsizei n, GLuint * ids) {
                                                      0, true);
         }
     }
-    ctx->dispatcher().glGenQueries(n, ids);
 }
 
 GL_APICALL void GL_APIENTRY glDeleteQueries(GLsizei n, const GLuint * ids) {
@@ -634,7 +637,6 @@ GL_APICALL void GL_APIENTRY glDeleteQueries(GLsizei n, const GLuint * ids) {
             ctx->shareGroup()->deleteName(NamedObjectType::QUERY, ids[i]);
         }
     }
-    ctx->dispatcher().glDeleteQueries(n, ids);
 }
 
 GL_APICALL void GL_APIENTRY glBeginQuery(GLenum target, GLuint id) {
