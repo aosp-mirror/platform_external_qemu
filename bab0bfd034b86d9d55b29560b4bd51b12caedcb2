@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "37b082be_1ea1612f",
+        "filename": "android/android-emu/android/crashreport/CrashService.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-22T03:35:16Z",
+      "side": 1,
+      "message": "nit: rename to shouldDeleteCrashDataOnExit?",
+      "range": {
+        "startLine": 173,
+        "startChar": 9,
+        "endLine": 173,
+        "endChar": 30
+      },
+      "revId": "bab0bfd034b86d9d55b29560b4bd51b12caedcb2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
