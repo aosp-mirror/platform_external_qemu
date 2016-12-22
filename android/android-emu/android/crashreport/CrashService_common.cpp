@@ -114,6 +114,10 @@ CrashService::CrashService(const std::string& version,
 };
 
 CrashService::~CrashService() {
+    if (!mDeleteCrashDataOnExit) {
+        return;
+    }
+
     if (validDumpFile()) {
         remove(mDumpFile.c_str());
     }
@@ -505,6 +509,10 @@ UserSuggestions::UserSuggestions(google_breakpad::ProcessState* process_state) {
     // the thread requesting dump.
 
     int crashed_thread_id = process_state->requesting_thread();
+    if (crashed_thread_id < 0 ||
+        crashed_thread_id >= (int)process_state->threads()->size()) {
+        return;
+    }
     google_breakpad::CallStack* crashed_stack =
             process_state->threads()->at(crashed_thread_id);
     if (!crashed_stack) {
