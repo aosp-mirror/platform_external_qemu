@@ -25,11 +25,13 @@
 
 struct GLESv2Validate : public GLESvalidate {
 
+    static bool renderbufferParam(GLenum param, int glesMajorVersion);
+    static bool framebufferTarget(GLenum target, int glesMajorVersion);
     static bool framebufferAttachment(GLenum attachment, int glesMajorVersion);
     static bool bufferTarget(GLenum target, int glesMajorVersion, int glesMinorVersion);
     static bool bufferUsage(GLenum usage, int glesMajorVersion);
     static bool bufferParam(GLenum pname, int glesMajorVersion, int glesMinorVersion);
-    static bool blendEquationMode(GLenum mode);
+    static bool blendEquationMode(GLenum mode, int glesMajorVersion);
     static bool blendSrc(GLenum s);
     static bool blendDst(GLenum d);
     static bool textureTarget(GLenum param, int glesMajorVersion, int glesMinorVersion);

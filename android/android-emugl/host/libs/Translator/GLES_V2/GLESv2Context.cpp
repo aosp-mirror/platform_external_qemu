@@ -31,8 +31,12 @@ void GLESv2Context::init(GlLibrary* glLib) {
                      (const char*)dispatcher().glGetString(GL_RENDERER),
                      (const char*)dispatcher().glGetString(GL_VERSION),
                      "OpenGL ES 2.0");
-
-        
+        if (m_glesMajorVersion > 2) {
+#define GL_FRAMEBUFFER_SRGB 0x8DB9
+#define GL_TEXTURE_CUBE_MAP_SEAMLESS 0x884F
+            dispatcher().glEnable(GL_FRAMEBUFFER_SRGB);
+            dispatcher().glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+        }
     }
     m_initialized = true;
 }
