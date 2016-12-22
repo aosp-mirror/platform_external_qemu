@@ -31,8 +31,16 @@ void GLESv2Context::init(GlLibrary* glLib) {
                      (const char*)dispatcher().glGetString(GL_RENDERER),
                      (const char*)dispatcher().glGetString(GL_VERSION),
                      "OpenGL ES 2.0");
-
-        
+        if (m_glesMajorVersion > 2) {
+#define GL_FRAMEBUFFER_SRGB 0x8DB9
+#define GL_TEXTURE_CUBE_MAP_SEAMLESS 0x884F
+            // TODO: This is too aggressive, and can result in the wrong colors in some cases.
+            // (see EGL color clear tests).
+            // But, it's needed for SRGB blits to work.
+            dispatcher().glEnable(GL_FRAMEBUFFER_SRGB);
+            // OpenGL ES seems to assume this is activated 100% of the time.
+            dispatcher().glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+        }
     }
     m_initialized = true;
 }
