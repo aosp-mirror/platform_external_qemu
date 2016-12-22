@@ -17,6 +17,6 @@
 
 namespace ANGLEShaderParser {
     bool globalInitialize();
-    bool translate(const char* src, GLenum shaderType,
+    bool translate(int glesMajorVersion, int glesMinorVersion, const char* src, GLenum shaderType,
                    std::string* outInfolog, std::string* outObjCode);
 }

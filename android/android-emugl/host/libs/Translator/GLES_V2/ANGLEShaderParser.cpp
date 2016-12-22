@@ -22,8 +22,14 @@ namespace ANGLEShaderParser {
 ShBuiltInResources kResources;
 bool kInitialized = false;
 
-ShHandle kVertCompiler = nullptr;
-ShHandle kFragCompiler = nullptr;
+ShHandle kVertCompilerCompat = nullptr;
+ShHandle kFragCompilerCompat = nullptr;
+
+ShHandle kVertCompilerES30 = nullptr;
+ShHandle kFragCompilerES30 = nullptr;
+
+ShHandle kVertCompilerES31 = nullptr;
+ShHandle kFragCompilerES31 = nullptr;
 
 android::base::Lock kCompilerLock;
 
@@ -41,7 +47,7 @@ void initializeResources() {
     kResources.MaxTextureImageUnits = 32; // Defaulted to 8
     kResources.MaxFragmentUniformVectors = 1024; // Defaulted to 16
 
-    kResources.MaxDrawBuffers = 1;
+    kResources.MaxDrawBuffers = 8;
     kResources.MaxDualSourceDrawBuffers = 1;
 
     kResources.OES_standard_derivatives = 0;
@@ -50,10 +56,10 @@ void initializeResources() {
     kResources.FragmentPrecisionHigh = 1;
 }
 
-ShHandle createShaderCompiler(GLenum shaderType) {
+ShHandle createShaderCompiler(GLenum shaderType, ShShaderOutput glslout) {
     ShHandle handle = ShConstructCompiler(shaderType,
                                           SH_GLES3_SPEC,
-                                          SH_GLSL_COMPATIBILITY_OUTPUT,
+                                          glslout,
                                           &kResources);
     return handle;
 }
@@ -65,22 +71,48 @@ bool globalInitialize() {
     }
     initializeResources();
 
-    kVertCompiler = createShaderCompiler(GL_VERTEX_SHADER);
-    if (!kVertCompiler) {
-        fprintf(stderr, "Failed to initialize ANGLE vertex shader compiler.\n");
-        return false;
-    }
-    kFragCompiler = createShaderCompiler(GL_FRAGMENT_SHADER);
-    if (!kFragCompiler) {
-        fprintf(stderr, "Failed to initialize ANGLE fragment shader compiler.\n");
+    kVertCompilerCompat = createShaderCompiler(GL_VERTEX_SHADER, SH_GLSL_COMPATIBILITY_OUTPUT);
+    if (!kVertCompilerCompat) {
+        fprintf(stderr, "Failed to initialize ANGLE Compat vertex shader compiler.\n");
         return false;
     }
 
+    kFragCompilerCompat = createShaderCompiler(GL_FRAGMENT_SHADER, SH_GLSL_COMPATIBILITY_OUTPUT);
+    if (!kFragCompilerCompat) {
+        fprintf(stderr, "Failed to initialize ANGLE Compat fragment shader compiler.\n");
+        return false;
+    }
+
+    kVertCompilerES30 = createShaderCompiler(GL_VERTEX_SHADER, SH_GLSL_150_CORE_OUTPUT);
+    if (!kVertCompilerES30) {
+        fprintf(stderr, "Failed to initialize ANGLE ES 3.0 vertex shader compiler.\n");
+        return false;
+    }
+
+    kFragCompilerES30 = createShaderCompiler(GL_FRAGMENT_SHADER, SH_GLSL_150_CORE_OUTPUT);
+    if (!kFragCompilerES30) {
+        fprintf(stderr, "Failed to initialize ANGLE ES 3.0 fragment shader compiler.\n");
+        return false;
+    }
+
+    kVertCompilerES31 = createShaderCompiler(GL_VERTEX_SHADER, SH_GLSL_150_CORE_OUTPUT);
+    if (!kVertCompilerES31) {
+        fprintf(stderr, "Failed to initialize ANGLE ES 3.1 vertex shader compiler.\n");
+        return false;
+    }
+
+    kFragCompilerES31 = createShaderCompiler(GL_FRAGMENT_SHADER, SH_GLSL_150_CORE_OUTPUT);
+    if (!kFragCompilerES31) {
+        fprintf(stderr, "Failed to initialize ANGLE ES 3.1 fragment shader compiler.\n");
+        return false;
+    }
     kInitialized = true;
     return true;
 }
 
-bool translate(const char* src, GLenum shaderType,
+bool translate(int glesMajorVersion,
+               int glesMinorVersion,
+               const char* src, GLenum shaderType,
                                 std::string* outInfolog,
                                 std::string* outObjCode) {
     if (!kInitialized) {
@@ -92,7 +124,17 @@ bool translate(const char* src, GLenum shaderType,
     android::base::AutoLock autolock(kCompilerLock);
 
     ShHandle compilerHandle = (shaderType == GL_VERTEX_SHADER ?
-                                   kVertCompiler : kFragCompiler);
+                                   kVertCompilerCompat : kFragCompilerCompat);
+
+    switch (glesMajorVersion) {
+    case 3:
+        compilerHandle =
+            (shaderType == GL_VERTEX_SHADER ? kVertCompilerES30 : kFragCompilerES30);
+        break;
+    default:
+        break;
+    }
+
     if (!compilerHandle) {
         return false;
     }
