@@ -18,6 +18,29 @@
 
 #include <string.h>
 
+static const char* const kGLES20StringPart = "OpenGL ES 2.0";
+static const char* const kGLES30StringPart = "OpenGL ES 3.0";
+static const char* const kGLES31StringPart = "OpenGL ES 3.1";
+
+static const char* sPickVersionStringPart(int maj, int min) {
+    switch (maj) {
+        case 2:
+            return kGLES20StringPart;
+        case 3:
+            switch (min) {
+                case 0:
+                    return kGLES30StringPart;
+                case 1:
+                    return kGLES31StringPart;
+                default:
+                    return NULL;
+            }
+        default:
+            return NULL;
+    }
+    return NULL;
+
+}
 void GLESv2Context::init(GlLibrary* glLib) {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(!m_initialized) {
@@ -30,9 +53,27 @@ void GLESv2Context::init(GlLibrary* glLib) {
         buildStrings((const char*)dispatcher().glGetString(GL_VENDOR),
                      (const char*)dispatcher().glGetString(GL_RENDERER),
                      (const char*)dispatcher().glGetString(GL_VERSION),
-                     "OpenGL ES 2.0");
-
-        
+                     sPickVersionStringPart(m_glesMajorVersion, m_glesMinorVersion));
+        if (m_glesMajorVersion > 2) {
+#define GL_FRAMEBUFFER_SRGB 0x8DB9
+#define GL_TEXTURE_CUBE_MAP_SEAMLESS 0x884F
+            // OpenGL ES assumes that colors computed by / given to shaders will be converted to / from SRGB automatically
+            // by the underlying implementation.
+            // Desktop OpenGL makes no such assumption, and requires glEnable(GL_FRAMEBUFFER_SRGB) for the automatic conversion
+            // to work.
+            // This should work in most cases: just glEnable(GL_FRAMEBUFFER_SRGB) for every context.
+            // But, that's not the whole story:
+            // TODO: For dEQP tests standalone, we can just glEnable GL_FRAMEBUFFER_SRGB from the beginning and
+            // pass all the framebuffer blit tests. However with CTS dEQP, EGL gets failures in color clear
+            // and some dEQP-GLES3 framebuffer blit tests fail.
+            // So we need to start out each context with GL_FRAMEBUFFER_SRGB disabled, and then enable it depending on
+            // whether or not the current draw or read framebuffer has a SRGB texture color attachment.
+            dispatcher().glDisable(GL_FRAMEBUFFER_SRGB);
+            // Desktop OpenGL allows one to make cube maps seamless _or not_, but
+            // OpenGL ES assumes seamless cubemaps are activated 100% of the time.
+            // Many dEQP cube map tests fail without this enable.
+            dispatcher().glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+        }
     }
     m_initialized = true;
 }

@@ -228,9 +228,13 @@ void GLEScontext::addVertexArrayObject(GLuint array) {
 }
 
 void GLEScontext::removeVertexArrayObject(GLuint array) {
+    if (array == 0) return;
+    if (m_vaoStateMap.find(array) == m_vaoStateMap.end())
+        return;
     if (array == m_currVaoState.vaoId()) {
         setVertexArrayObject(0);
     }
+
     ArraysMap* map = m_vaoStateMap[array].arraysMap;
 
     for (int i = 0; i < s_glSupport.maxVertexAttribs; i++) {
@@ -243,7 +247,9 @@ void GLEScontext::removeVertexArrayObject(GLuint array) {
 }
 
 void GLEScontext::setVertexArrayObject(GLuint array) {
-    m_currVaoState = VAOStateRef(m_vaoStateMap.find(array));
+    VAOStateMap::iterator it = m_vaoStateMap.find(array);
+    if (it != m_vaoStateMap.end())
+        m_currVaoState = VAOStateRef(m_vaoStateMap.find(array));
 }
 
 void GLEScontext::init(GlLibrary* glLib) {
@@ -692,6 +698,22 @@ GLuint GLEScontext::getBuffer(GLenum target) {
     }
 }
 
+GLuint GLEScontext::getIndexedBuffer(GLenum target, GLuint index) {
+    switch (target) {
+    case GL_TRANSFORM_FEEDBACK_BUFFER:
+        return m_indexedTransformFeedbackBuffers[index].buffer;
+    case GL_UNIFORM_BUFFER:
+        return m_indexedUniformBuffers[index].buffer;
+    case GL_ATOMIC_COUNTER_BUFFER:
+        return m_indexedAtomicCounterBuffers[index].buffer;
+    case GL_SHADER_STORAGE_BUFFER:
+        return m_indexedShaderStorageBuffers[index].buffer;
+    default:
+        return m_currVaoState.bufferBindings()[index].buffer;
+    }
+}
+
+
 GLvoid* GLEScontext::getBindedBuffer(GLenum target) {
     GLuint bufferName = getBuffer(target);
     if(!bufferName) return NULL;
@@ -1065,11 +1087,11 @@ ObjectLocalName GLEScontext::getDefaultTextureName(GLenum target) {
 
 void GLEScontext::drawValidate(void)
 {
-    if(m_framebuffer == 0)
+    if(m_drawFramebuffer == 0)
         return;
 
     auto fbObj = m_shareGroup->getObjectData(
-            NamedObjectType::FRAMEBUFFER, m_framebuffer);
+            NamedObjectType::FRAMEBUFFER, m_drawFramebuffer);
     if (!fbObj)
         return;
 
