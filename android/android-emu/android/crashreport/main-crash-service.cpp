@@ -133,6 +133,7 @@ int main(int argc, char** argv) {
     if (dump_file &&
         ::android::crashreport::CrashSystem::get()->isDump(dump_file)) {
         crashservice->setDumpFile(dump_file);
+        crashservice->shouldDeleteCrashDataOnExit(false);
     } else if (service_arg && ppid) {
         if (!crashservice->startCrashServer(service_arg)) {
             return 1;

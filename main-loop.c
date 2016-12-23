@@ -356,50 +356,50 @@ void qemu_fd_register(int fd)
                    FD_CONNECT | FD_WRITE | FD_OOB);
 }
 
-static int pollfds_fill(GArray *pollfds, fd_set *rfds, fd_set *wfds,
-                        fd_set *xfds)
+static int pollfds_fill(GArray *pollfds, WSAPOLLFD fds[], int fds_count, int* sockets_count)
 {
-    int nfds = -1;
     int i;
-
-    for (i = 0; i < pollfds->len; i++) {
+    *sockets_count = 0;
+    for (i = 0; i < pollfds->len && i < fds_count; i++) {
         GPollFD *pfd = &g_array_index(pollfds, GPollFD, i);
-        int fd = pfd->fd;
         int events = pfd->events;
+        fds[i].events = 0;
         if (events & G_IO_IN) {
-            FD_SET(fd, rfds);
-            nfds = MAX(nfds, fd);
+            fds[i].events |= POLLRDNORM;
         }
         if (events & G_IO_OUT) {
-            FD_SET(fd, wfds);
-            nfds = MAX(nfds, fd);
+            fds[i].events |= POLLOUT;
         }
         if (events & G_IO_PRI) {
-            FD_SET(fd, xfds);
-            nfds = MAX(nfds, fd);
+            fds[i].events |= POLLRDBAND;
+        }
+
+        if (fds[i].events == 0) {
+            fds[i].fd = -1; // ignore this one
+        } else {
+            ++*sockets_count;
+            fds[i].fd = pfd->fd;
         }
     }
-    return nfds;
+    return i;
 }
 
-static void pollfds_poll(GArray *pollfds, int nfds, fd_set *rfds,
-                         fd_set *wfds, fd_set *xfds)
+static void pollfds_poll(GArray *pollfds, const WSAPOLLFD fds[], int fds_count)
 {
     int i;
-
     for (i = 0; i < pollfds->len; i++) {
         GPollFD *pfd = &g_array_index(pollfds, GPollFD, i);
-        int fd = pfd->fd;
         int revents = 0;
-
-        if (FD_ISSET(fd, rfds)) {
-            revents |= G_IO_IN;
-        }
-        if (FD_ISSET(fd, wfds)) {
-            revents |= G_IO_OUT;
-        }
-        if (FD_ISSET(fd, xfds)) {
-            revents |= G_IO_PRI;
+        if (i < fds_count && fds[i].fd >= 0) {
+            if (fds[i].revents & POLLRDNORM) {
+                revents |= G_IO_IN;
+            }
+            if (fds[i].revents & POLLWRNORM) {
+                revents |= G_IO_OUT;
+            }
+            if (fds[i].revents & (POLLERR | POLLHUP | POLLPRI | POLLRDBAND)) {
+                revents |= G_IO_PRI;
+            }
         }
         pfd->revents = revents & pfd->events;
     }
@@ -408,15 +408,13 @@ static void pollfds_poll(GArray *pollfds, int nfds, fd_set *rfds,
 static int os_host_main_loop_wait(int64_t timeout)
 {
     GMainContext *context = g_main_context_default();
-    GPollFD poll_fds[1024 * 2]; /* this is probably overkill */
-    int select_ret = 0;
+    GPollFD poll_fds[256]; /* Windows can't wait on more than 64 handles anyway */
+    int poll_ret = 0;
     int g_poll_ret, ret, i, n_poll_fds;
     PollingEntry *pe;
     WaitObjects *w = &wait_objects;
     gint poll_timeout;
     int64_t poll_timeout_ns;
-    static struct timeval tv0;
-    fd_set rfds, wfds, xfds;
     int nfds;
 
     /* XXX: need to suppress polling by better using win32 events */
@@ -428,17 +426,18 @@ static int os_host_main_loop_wait(int64_t timeout)
         return ret;
     }
 
-    FD_ZERO(&rfds);
-    FD_ZERO(&wfds);
-    FD_ZERO(&xfds);
-    nfds = pollfds_fill(gpollfds, &rfds, &wfds, &xfds);
-    if (nfds >= 0) {
-        select_ret = select(nfds + 1, &rfds, &wfds, &xfds, &tv0);
-        if (select_ret != 0) {
+    WSAPOLLFD fds[128];
+    int polled_count = 0;
+    nfds = pollfds_fill(gpollfds, fds, ARRAY_SIZE(fds), &polled_count);
+    if (polled_count > 0) {
+        qemu_mutex_unlock_iothread();
+        poll_ret = WSAPoll(fds, nfds, 0);
+        qemu_mutex_lock_iothread();
+        if (poll_ret != 0) {
             timeout = 0;
         }
-        if (select_ret > 0) {
-            pollfds_poll(gpollfds, nfds, &rfds, &wfds, &xfds);
+        if (poll_ret > 0) {
+            pollfds_poll(gpollfds, fds, nfds);
         }
     }
 
@@ -479,7 +478,7 @@ static int os_host_main_loop_wait(int64_t timeout)
         g_main_context_dispatch(context);
     }
 
-    return select_ret || g_poll_ret;
+    return poll_ret || g_poll_ret;
 }
 #endif
 

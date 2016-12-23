@@ -18,6 +18,7 @@
 #include "qemu/osdep.h"
 #include "qemu-common.h"
 #include "block/block.h"
+#include "qemu/main-loop.h"
 #include "qemu/queue.h"
 #include "qemu/sockets.h"
 
@@ -152,35 +153,62 @@ void aio_set_event_notifier(AioContext *ctx,
 
 bool aio_prepare(AioContext *ctx)
 {
-    static struct timeval tv0;
     AioHandler *node;
+    WSAPOLLFD fds[128];
     bool have_select_revents = false;
-    fd_set rfds, wfds;
 
-    /* fill fd sets */
-    FD_ZERO(&rfds);
-    FD_ZERO(&wfds);
+    int i = 0;
+    int polled_count = 0;
     QLIST_FOREACH(node, &ctx->aio_handlers, node) {
-        if (node->io_read) {
-            FD_SET ((SOCKET)node->pfd.fd, &rfds);
+        if (i >= sizeof(fds) / sizeof(*fds)) {
+            break;
         }
-        if (node->io_write) {
-            FD_SET ((SOCKET)node->pfd.fd, &wfds);
+
+        if (!node->io_read && !node->io_write) {
+            fds[i].fd = -1; // ignore
+        } else {
+            fds[i].fd = node->pfd.fd;
+            fds[i].events = (node->io_read ? POLLIN : 0) | (node->io_write ? POLLOUT : 0);
+            ++polled_count;
         }
+        ++i;
     }
 
-    if (select(0, &rfds, &wfds, NULL, &tv0) > 0) {
+    if (polled_count == 0) {
+        return false;
+    }
+
+    // aio_prepare() is called very often on Windows, and every call takes
+    // at least 5 us, with most coming closer to 20 us.
+    // Let's make sure we don't prevent all other vCPUs from running during
+    // this time.
+    const bool had_iothread_lock = qemu_mutex_iothread_locked();
+    if (had_iothread_lock) {
+        qemu_mutex_unlock_iothread();
+    }
+
+    const int fds_count = i;
+    const int poll_res = WSAPoll(fds, fds_count, 0);
+
+    if (had_iothread_lock) {
+        qemu_mutex_lock_iothread();
+    }
+
+    if (poll_res > 0) {
+        i = 0;
         QLIST_FOREACH(node, &ctx->aio_handlers, node) {
             node->pfd.revents = 0;
-            if (FD_ISSET(node->pfd.fd, &rfds)) {
-                node->pfd.revents |= G_IO_IN;
-                have_select_revents = true;
+            if (i < fds_count && fds[i].fd >= 0) {
+                if (fds[i].revents & POLLIN) {
+                    node->pfd.revents |= G_IO_IN;
+                    have_select_revents = true;
+                }
+                if (fds[i].revents & POLLOUT) {
+                    node->pfd.revents |= G_IO_OUT;
+                    have_select_revents = true;
+                }
             }
-
-            if (FD_ISSET(node->pfd.fd, &wfds)) {
-                node->pfd.revents |= G_IO_OUT;
-                have_select_revents = true;
-            }
+            ++i;
         }
     }
 

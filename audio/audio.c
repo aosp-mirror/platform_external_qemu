@@ -39,6 +39,10 @@
 
 #define SW_NAME(sw) (sw)->name ? (sw)->name : "unknown"
 
+#ifdef DEBUG_POLL
+static double prevtime;
+#endif
+
 
 /* Order of CONFIG_AUDIO_DRIVERS is import.
    The 1st one is the one used by default, that is the reason
@@ -1118,6 +1122,14 @@ static void audio_reset_timer (AudioState *s)
     else {
         timer_del (s->ts);
     }
+#ifdef DEBUG_POLL
+    struct timeval tv;
+    if (gettimeofday(&tv, NULL)) {
+        perror ("audio_reset_timer: gettimeofday");
+        return;
+    }
+    prevtime = tv.tv_sec + tv.tv_usec * 1e-6;
+#endif
 }
 
 static void audio_timer (void *opaque)
@@ -1529,7 +1541,6 @@ void audio_run (const char *msg)
     audio_run_capture (s);
 #ifdef DEBUG_POLL
     {
-        static double prevtime;
         double currtime;
         struct timeval tv;
 
@@ -1539,7 +1550,9 @@ void audio_run (const char *msg)
         }
 
         currtime = tv.tv_sec + tv.tv_usec * 1e-6;
-        dolog ("Elapsed since last %s: %f\n", msg, currtime - prevtime);
+        if (currtime - prevtime > 0.02) {
+            dolog ("Elapsed since last %s: %f\n", msg, currtime - prevtime);
+        }
         prevtime = currtime;
     }
 #endif

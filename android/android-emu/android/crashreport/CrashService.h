@@ -168,6 +168,12 @@ public:
     // command
     virtual void collectProcessList();
 
+    // Changes the behavior on exit - should the object delete all associated
+    // crash data from the disk?
+    void shouldDeleteCrashDataOnExit(bool deleteData = true) {
+        mDeleteCrashDataOnExit = deleteData;
+    }
+
 protected:
     // Initialize serverstate
     void initCrashServer();
@@ -218,6 +224,7 @@ private:
     std::unique_ptr<google_breakpad::Minidump> mMinidump;
 
     bool mDidCrashOnExit;
+    bool mDeleteCrashDataOnExit = true;
 };
 
 }  // namespace crashreport
