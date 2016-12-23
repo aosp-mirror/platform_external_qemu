@@ -53,6 +53,10 @@ void aio_set_fd_handler(AioContext *ctx,
     /* Are we deleting the fd handler? */
     if (!io_read && !io_write) {
         if (node) {
+            assert(!node->io_notify);
+            /* Detach the event */
+            WSAEventSelect(node->pfd.fd, NULL, 0);
+
             /* If the lock is held, just mark the node as deleted */
             if (ctx->walking_handlers) {
                 node->deleted = 1;
@@ -94,8 +98,8 @@ void aio_set_fd_handler(AioContext *ctx,
 
         event = event_notifier_get_handle(&ctx->notifier);
         WSAEventSelect(node->pfd.fd, event,
-                       FD_READ | FD_ACCEPT | FD_CLOSE |
-                       FD_CONNECT | FD_WRITE | FD_OOB);
+                       (io_read ? FD_READ : 0) | FD_ACCEPT | FD_CLOSE |
+                       FD_CONNECT | (io_write ? FD_WRITE : 0) | FD_OOB);
     }
 
     aio_notify(ctx);
@@ -157,6 +161,8 @@ bool aio_prepare(AioContext *ctx)
     WSAPOLLFD fds[128];
     bool have_select_revents = false;
 
+    ctx->walking_handlers++;
+
     int i = 0;
     int polled_count = 0;
     QLIST_FOREACH(node, &ctx->aio_handlers, node) {
@@ -164,7 +170,7 @@ bool aio_prepare(AioContext *ctx)
             break;
         }
 
-        if (!node->io_read && !node->io_write) {
+        if (node->deleted || (!node->io_read && !node->io_write)) {
             fds[i].fd = -1; // ignore
         } else {
             fds[i].fd = node->pfd.fd;
@@ -175,6 +181,7 @@ bool aio_prepare(AioContext *ctx)
     }
 
     if (polled_count == 0) {
+        ctx->walking_handlers--;
         return false;
     }
 
@@ -211,6 +218,8 @@ bool aio_prepare(AioContext *ctx)
             ++i;
         }
     }
+
+    ctx->walking_handlers--;
 
     return have_select_revents;
 }
@@ -276,9 +285,12 @@ static bool aio_dispatch_handlers(AioContext *ctx, HANDLE event)
             }
 
             /* if the next select() will return an event, we have progressed */
-            if (event == event_notifier_get_handle(&ctx->notifier)) {
+            if (event == event_notifier_get_handle(&ctx->notifier) ||
+                (event == INVALID_HANDLE_VALUE && node->e == &ctx->notifier)) {
                 WSANETWORKEVENTS ev;
-                WSAEnumNetworkEvents(node->pfd.fd, event, &ev);
+                WSAEnumNetworkEvents(node->pfd.fd,
+                                     event_notifier_get_handle(&ctx->notifier),
+                                     &ev);
                 if (ev.lNetworkEvents) {
                     progress = true;
                 }
