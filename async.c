@@ -310,15 +310,26 @@ void aio_notify(AioContext *ctx)
     smp_mb();
     if (ctx->notify_me) {
         event_notifier_set(&ctx->notifier);
+#ifndef _WIN32
+        /* Se the aio_notify_accept() comment regarding the event notifier */
         atomic_mb_set(&ctx->notified, true);
+#endif
     }
 }
 
 void aio_notify_accept(AioContext *ctx)
 {
+#ifdef _WIN32
+    /* In Windows we use event notifier's internal event also for notification
+     * of socket events. This means even if ctx->notified is false, we should
+     * reset the notifier as we know that we've processed the events already.
+     */
+    event_notifier_test_and_clear(&ctx->notifier);
+#else
     if (atomic_xchg(&ctx->notified, false)) {
         event_notifier_test_and_clear(&ctx->notifier);
     }
+#endif
 }
 
 static void aio_timerlist_notify(void *opaque)

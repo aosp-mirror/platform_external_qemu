@@ -32,6 +32,8 @@
 #include "qemu/main-loop.h"
 #include "block/aio.h"
 
+#define DEBUG_MAIN_LOOP_PERF 0
+
 static MainLoopPollCallback main_loop_poll_callback;
 
 void main_loop_register_poll_callback(MainLoopPollCallback poll_func)
@@ -510,6 +512,23 @@ int main_loop_wait(int nonblocking)
                                           &main_loop_tlg));
 
     ret = os_host_main_loop_wait(timeout_ns);
+
+#if DEBUG_MAIN_LOOP_PERF
+    static int iter_count = 0;
+    static struct timespec lastreport;
+    if (++iter_count == 3000) {
+        iter_count = 0;
+        struct timespec now;
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        if (lastreport.tv_sec != 0) {
+            long long diff = (now.tv_sec - lastreport.tv_sec)*1000000000ll +
+                             now.tv_nsec - lastreport.tv_nsec;
+            printf("%s: 3k iterations in %06.04f ms\n", __func__, diff / 1000000.0);
+        }
+        lastreport = now;
+    }
+#endif
+
 #ifdef CONFIG_SLIRP
     slirp_pollfds_poll(gpollfds, (ret < 0));
 #endif
