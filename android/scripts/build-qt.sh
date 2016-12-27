@@ -184,23 +184,13 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         esac
 
         # Unpacking the sources if needed.
-        QT_SRC_TIMESTAMP=$TEMP_DIR/timestamp-$QT_SRC_NAME
-        if [ "$OPT_FORCE" ]; then
-            rm -f "$QT_SRC_TIMESTAMP"
-        fi
-        if [ ! -f "$QT_SRC_TIMESTAMP" ]; then
-            dump "Unpacking $QT_SRC_NAME sources."
-            run mkdir -p "$(builder_src_dir)" &&
-            unpack_archive "$QT_ARCHIVE_DIR/$QT_SRC_PACKAGE" "$(builder_src_dir)" ||
-                panic "Failed to unpack source package: $QT_SRC_PACKAGE"
-
-
-            # Need to patch this file to avoid install syncqt.pl which will
-            # fail horribly with an error like:
-            #  ..../<binprefix>-strip:.../bin/syncqt.pl: File format not recognized
-            # because the generated Makefile tries to strip a Perl script.
-            run sed -i 's|^INSTALLS += syncqt|#INSTALLS += syncqt|g' $(builder_src_dir)/$QT_SRC_NAME/qtbase/qtbase.pro
-            touch "$QT_SRC_TIMESTAMP"
+        PKG_NAME=$(package_list_get_unpack_src_dir "qt")
+        ARCHIVE_DIR=$(builder_archive_dir)
+        SRC_DIR=$(builder_src_dir)
+        TIMESTAMP=$SRC_DIR/timestamp-$PKG_NAME
+        if [ ! -f "$TIMESTAMP" -o "$OPT_FORCE" ]; then
+            package_list_unpack_and_patch "qt" "$ARCHIVE_DIR" "$SRC_DIR"
+            touch $TIMESTAMP
         fi
 
         # Configuring the build. This takes a lot of time due to QMake.
