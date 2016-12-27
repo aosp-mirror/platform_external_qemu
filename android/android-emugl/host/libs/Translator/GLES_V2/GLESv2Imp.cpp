@@ -66,6 +66,7 @@ static GLESiface  s_glesIface = {
     .deleteGLESContext = deleteGLESContext,
     .flush             = (FUNCPTR_NO_ARGS_RET_VOID)glFlush,
     .finish            = (FUNCPTR_NO_ARGS_RET_VOID)glFinish,
+    .getError          = (FUNCPTR_NO_ARGS_RET_INT)glGetError,
     .setShareGroup     = setShareGroup,
     .getProcAddress    = getProcAddress,
     .fenceSync         = (FUNCPTR_FENCE_SYNC)glFenceSync,
