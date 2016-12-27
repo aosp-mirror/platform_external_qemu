@@ -69,7 +69,7 @@ unpack_windows_dependencies () {
     local DEP DSTDIR
     DSTDIR=$1
     for DEP in $WINDOWS_DEPENDENCIES; do
-        #run mkdir -p "$(builder_src_dir)/$(package_list_get_unpack_src_dir $DEP)"
+        run mkdir -p "$(builder_src_dir)/$(package_list_get_unpack_src_dir $DEP)"
         builder_unpack_package_source "$DEP"
     done
 
