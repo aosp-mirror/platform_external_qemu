@@ -13,7 +13,6 @@
 
 #include "android/android.h"
 #include "android/base/system/System.h"
-#include "android/emulation/ConfigDirs.h"
 #include "android/globals.h"
 #include "android/update-check/UpdateChecker.h"
 #include "android/update-check/VersionExtractor.h"
@@ -178,8 +177,7 @@ static const char* updateChannelName(android::studio::UpdateChannel channel) {
 
 void LatestVersionLoadTask::run() {
     // Get latest version that is available online
-    android::update_check::UpdateChecker upCheck(
-            android::ConfigDirs::getUserDirectory().c_str());
+    android::update_check::UpdateChecker upCheck;
     const auto latestVersion = upCheck.getLatestVersion();
     QString latestVerString;
     if (!latestVersion) {
