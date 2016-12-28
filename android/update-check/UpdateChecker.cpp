@@ -99,7 +99,7 @@ public:
         if (!mCoreVersion.empty()) {
             const ScopedCPtr<char> id(android_studio_get_installation_id());
             url += Uri::FormatEncodeArguments(
-                    "?tool=emulator&uid=%s&os=%s", id.get(),
+                    "?tool=emulator&uid=%s&os=%s&", id.get(),
                     toString(System::get()->getOsType()));
             // append the fields which may change from run to run: version and
             // core version
