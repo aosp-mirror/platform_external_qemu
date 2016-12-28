@@ -40,7 +40,7 @@ struct GLESv2Validate : public GLESvalidate {
     static bool capability(GLenum cap);
     static bool pixelStoreParam(GLenum param, int glesMajorVersion, int glesMinorVersion);
     static bool readPixelFrmt(GLenum format);
-    static bool shaderType(GLenum type);
+    static bool shaderType(GLenum type, int glesMajorVersion, int glesMinorVersion);
     static bool precisionType(GLenum type);
     static bool arrayIndex(GLEScontext * ctx,GLuint index);
     static bool pixelType(GLEScontext * ctx,GLenum type,int glesMajorVersion);
