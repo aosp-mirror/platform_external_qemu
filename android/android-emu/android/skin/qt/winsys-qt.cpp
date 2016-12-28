@@ -336,13 +336,11 @@ void skin_winsys_setup_library_paths() {
     // What's even more interesting is that adding the plugin path here is not
     // enough in itself. It also has to be set through the environment variable
     // or extended unicode characters won't work
-    std::string qtLibPath = androidQtGetLibraryDir();
     std::string qtPluginsPath = androidQtGetPluginsDir();
     QStringList pathList;
-    pathList.append(QString::fromUtf8(qtLibPath.c_str()));
     pathList.append(QString::fromUtf8(qtPluginsPath.c_str()));
     QApplication::setLibraryPaths(pathList);
-    D("Qt lib path: %s\n", qtLibPath.c_str());
+    D("Qt lib path: %s\n", androidQtGetLibraryDir().c_str());
     D("Qt plugin path: %s\n", qtPluginsPath.c_str());
 }
 

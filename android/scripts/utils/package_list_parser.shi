@@ -429,7 +429,7 @@ package_list_unpack_and_patch () {
     local SRC_DIR="$2"
     local DST_DIR="$3"
     local PKG_VERSION PKG_PACKAGE PKG_PATCHES_DIR PKG_PATCHES_PACKAGE
-    local PKG_DIR PKG_DST_DIR PATCH PKG_FULLNAME
+    local PKG_DIR PKG_DST_DIR PATCH PKG_FULLNAME PKG_FILENAME
     PKG_VERSION=$(package_list_get_version $PKG_NAME)
     if [ -z "$PKG_VERSION" ]; then
         panic "Cannot find version for package $PKG_NAME!"
@@ -440,23 +440,38 @@ package_list_unpack_and_patch () {
     mkdir -p "$DST_DIR" &&
     unpack_archive "$SRC_DIR/$PKG_FILE" "$DST_DIR" ||
             panic "Could not unpack $PKG_FULLNAME"
-    PKG_DIR=$DST_DIR/$(package_list_get_unpack_src_dir $PKG_NAME)
+    PKG_FILENAME="$(package_list_get_unpack_src_dir $PKG_NAME)"
+    PKG_DIR="$DST_DIR/$PKG_FILENAME"
+    local PKG_STANDARD_NAME=1
     if [ ! -d "$PKG_DIR" ]; then
-        panic "Missing extracted directory: $PKG_DIR"
+        # Try the archive name instead
+        local ARCHIVE_FILENAME=$(basename "$PKG_FILE")
+        if [ -d "$DST_DIR/${ARCHIVE_FILENAME%.tar.*}" ]; then
+            PKG_FILENAME="${ARCHIVE_FILENAME%.tar.*}"
+            PKG_DIR="$DST_DIR/$PKG_FILENAME"
+            PKG_STANDARD_NAME=0
+        else
+            panic "Missing extracted directory: $PKG_DIR"
+        fi
     fi
     PKG_PATCHES_DIR=$PKG_FULLNAME-patches
     PKG_PATCHES_FILE=$SRC_DIR/${PKG_PATCHES_DIR}.tar.xz
+    if [ ! -f "$PKG_PATCHES_FILE" ]; then
+        PKG_PATCHES_DIR=$PKG_FILENAME-patches
+        PKG_PATCHES_FILE=$SRC_DIR/${PKG_PATCHES_DIR}.tar.xz
+    fi
+
     if [ -f "$PKG_PATCHES_FILE" ]; then
         log "Patching $PKG_FULLNAME"
         unpack_archive "$PKG_PATCHES_FILE" "$DST_DIR"
         for PATCH in $(cd "$DST_DIR" && ls "$PKG_PATCHES_DIR"/*.patch); do
             log "Applying patch: $PATCH"
-            (cd "$PKG_DIR" && run patch -p1 < "../$PATCH") ||
+            (cd "$PKG_DIR" && run patch -p1 < "$DST_DIR/$PATCH") ||
                     panic "Could not apply $PATCH"
         done
     fi
     PKG_DST_DIR=$DST_DIR/$(package_list_get_src_dir $PKG_NAME)
-    if [ "$PKG_DST_DIR" != "$PKG_DIR" ]; then
+    if [ "$PKG_DST_DIR" != "$PKG_DIR" -a "$PKG_STANDARD_NAME" != 0 ]; then
         log "Copying sources from $PKG_DIR into $PKG_DST_DIR"
         copy_directory "$PKG_DIR" "$PKG_DST_DIR"
     fi
