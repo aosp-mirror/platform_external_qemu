@@ -786,14 +786,14 @@ extern "C" int main(int argc, char **argv) {
             hw->hw_cpu_ncore = 16;
         }
 #endif
-        ncores = StringFormat("cores=%ld", hw->hw_cpu_ncore);
+        ncores = StringFormat("cores=%d", hw->hw_cpu_ncore);
         args[n++] = ncores.c_str();
     }
 #endif  // !TARGET_X86_64 && !TARGET_I386
 
     // Memory size
     args[n++] = "-m";
-    std::string memorySize = StringFormat("%ld", hw->hw_ramSize);
+    std::string memorySize = StringFormat("%d", hw->hw_ramSize);
     args[n++] = memorySize.c_str();
 
     // Kernel command-line parameters.
