@@ -98,7 +98,7 @@ public:
         if (!mCoreVersion.empty()) {
             const auto& id = android::studio::getInstallationId();
             url += Uri::FormatEncodeArguments(
-                    "?tool=emulator&uid=%s&os=%s", id,
+                    "?tool=emulator&uid=%s&os=%s&", id,
                     toString(System::get()->getOsType()));
             // append the fields which may change from run to run: version and
             // core version
