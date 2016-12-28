@@ -62,7 +62,15 @@ public:
                             AddressList* out) override {
         std::string hostname = dns_server_name;
         struct addrinfo* res;
-        int ret = ::getaddrinfo(hostname.c_str(), nullptr, nullptr, &res);
+        struct addrinfo* pHints = nullptr;
+#ifdef _WIN32
+        struct addrinfo hints = {};
+        hints.ai_family = AF_UNSPEC;
+        hints.ai_socktype = SOCK_STREAM;
+        hints.ai_protocol = IPPROTO_TCP;
+        pHints = &hints;
+#endif
+        int ret = ::getaddrinfo(hostname.c_str(), nullptr, pHints, &res);
         if (ret != 0) {
             DLOG(ERROR) << "getaddrinfo('" << dns_server_name << "') returned "
                         << ret;
