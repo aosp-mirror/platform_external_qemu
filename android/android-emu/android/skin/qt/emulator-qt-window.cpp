@@ -151,6 +151,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mInstallDialog(this),
       mPushDialog(this),
       mStartedAdbStopProcess(false) {
+    qRegisterMetaType<QPainter::CompositionMode>("QPainter::CompositionMode");
+
     android::base::ThreadLooper::setLooper(mLooper, true);
 
     // Start a timer. If the main window doesn't
@@ -656,16 +658,14 @@ void EmulatorQtWindow::startThread(StartFunction f, int argc, char** argv) {
 }
 
 void EmulatorQtWindow::slot_blit(QImage* src,
-                                 QRect* srcRect,
+                                 QRect srcRect,
                                  QImage* dst,
-                                 QPoint* dstPos,
-                                 QPainter::CompositionMode* op,
+                                 QPoint dstPos,
+                                 QPainter::CompositionMode op,
                                  QSemaphore* semaphore) {
     QPainter painter(dst);
-    painter.setCompositionMode(*op);
-    painter.drawImage(*dstPos, *src, *srcRect);
-
-    painter.setCompositionMode(QPainter::CompositionMode_Source);
+    painter.setCompositionMode(op);
+    painter.drawImage(dstPos, *src, srcRect);
     if (semaphore != NULL)
         semaphore->release();
 }
@@ -700,11 +700,11 @@ void EmulatorQtWindow::slot_createBitmap(SkinSurface* s,
 }
 
 void EmulatorQtWindow::slot_fill(SkinSurface* s,
-                                 const QRect* rect,
-                                 const QColor* color,
+                                 QRect rect,
+                                 QColor color,
                                  QSemaphore* semaphore) {
     QPainter painter(s->bitmap);
-    painter.fillRect(*rect, *color);
+    painter.fillRect(rect, color);
     if (semaphore != NULL)
         semaphore->release();
 }
@@ -873,6 +873,7 @@ void EmulatorQtWindow::slot_releaseBitmap(SkinSurface* s,
         mBackingSurface = NULL;
     }
     delete s->bitmap;
+    delete s;
     if (semaphore != NULL)
         semaphore->release();
 }
@@ -884,24 +885,23 @@ void EmulatorQtWindow::slot_requestClose(QSemaphore* semaphore) {
         semaphore->release();
 }
 
-void EmulatorQtWindow::slot_requestUpdate(const QRect* rect,
+void EmulatorQtWindow::slot_requestUpdate(QRect rect,
                                           QSemaphore* semaphore) {
     if (!mBackingSurface)
         return;
 
-    QRect r(rect->x() * mBackingSurface->w / mBackingSurface->original_w,
-            rect->y() * mBackingSurface->h / mBackingSurface->original_h,
-            rect->width() * mBackingSurface->w / mBackingSurface->original_w,
-            rect->height() * mBackingSurface->h / mBackingSurface->original_h);
+    QRect r(rect.x() * mBackingSurface->w / mBackingSurface->original_w,
+            rect.y() * mBackingSurface->h / mBackingSurface->original_h,
+            rect.width() * mBackingSurface->w / mBackingSurface->original_w,
+            rect.height() * mBackingSurface->h / mBackingSurface->original_h);
     update(r);
     if (semaphore != NULL)
         semaphore->release();
 }
 
-void EmulatorQtWindow::slot_setDeviceGeometry(const QRect* rect,
+void EmulatorQtWindow::slot_setDeviceGeometry(QRect rect,
                                               QSemaphore* semaphore) {
-    mDeviceGeometry =
-            QRect(rect->x(), rect->y(), rect->width(), rect->height());
+    mDeviceGeometry = rect;
     if (semaphore != NULL)
         semaphore->release();
 }
@@ -923,9 +923,9 @@ void EmulatorQtWindow::slot_setWindowIcon(const unsigned char* data,
         semaphore->release();
 }
 
-void EmulatorQtWindow::slot_setWindowTitle(const QString* title,
+void EmulatorQtWindow::slot_setWindowTitle(QString title,
                                            QSemaphore* semaphore) {
-    mContainer.setWindowTitle(*title);
+    mContainer.setWindowTitle(title);
 
     // This is the first time that we know the android_serial_number_port
     // has been set. This port ensures AdbInterface can identify the correct
@@ -936,12 +936,12 @@ void EmulatorQtWindow::slot_setWindowTitle(const QString* title,
 }
 
 void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
-                                       const QRect* rect,
+                                       QRect rect,
                                        QSemaphore* semaphore) {
     mBackingSurface = surface;
 
     showNormal();
-    setFixedSize(rect->size());
+    setFixedSize(rect.size());
 
     // If this was the result of a zoom, don't change the overall window size,
     // and adjust the
@@ -950,7 +950,7 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
         mContainer.stopResizeTimer();
         recenterFocusPoint();
     } else if (!mNextIsZoom) {
-        mContainer.resize(rect->size());
+        mContainer.resize(rect.size());
     }
     mNextIsZoom = false;
 

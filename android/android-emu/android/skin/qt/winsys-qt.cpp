@@ -204,15 +204,13 @@ extern void skin_winsys_get_window_pos(int *x, int *y)
 }
 
 extern void skin_winsys_set_device_geometry(const SkinRect* rect) {
-    QSemaphore semaphore;
     EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
     }
     QRect qrect(rect->pos.x, rect->pos.y, rect->size.w, rect->size.h);
-    window->setDeviceGeometry(&qrect, &semaphore);
-    semaphore.acquire();
+    window->setDeviceGeometry(qrect, nullptr);
 }
 
 extern void skin_winsys_save_window_pos() {
@@ -287,23 +285,18 @@ extern void skin_winsys_set_window_pos(int x, int y)
         D("%s: Could not get window handle", __FUNCTION__);
         return;
     }
-    QSemaphore semaphore;
-    window->setWindowPos(x, y, &semaphore);
-    semaphore.acquire();
+    window->setWindowPos(x, y, nullptr);
 }
 
 extern void skin_winsys_set_window_title(const char *title)
 {
     D("skin_winsys_set_window_title [%s]", title);
-    QSemaphore semaphore;
     EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
     }
-    QString qtitle(title);
-    window->setTitle(&qtitle, &semaphore);
-    semaphore.acquire();
+    window->setTitle(QString(title), nullptr);
 }
 
 extern void skin_winsys_spawn_thread(bool no_window,

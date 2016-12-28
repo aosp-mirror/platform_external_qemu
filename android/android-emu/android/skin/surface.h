@@ -92,7 +92,7 @@ typedef struct {
 extern void    skin_surface_update(SkinSurface* surface, SkinRect* rect);
 
 extern void    skin_surface_upload(SkinSurface* surface,
-                                   SkinRect* rect,
+                                   const SkinRect* rect,
                                    const void* pixels,
                                    int pitch);
 
