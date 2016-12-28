@@ -573,13 +573,22 @@ GL_APICALL GLuint GL_APIENTRY glCreateProgram(void){
 
 GL_APICALL GLuint GL_APIENTRY glCreateShader(GLenum type){
     GET_CTX_V2_RET(0);
-    RET_AND_SET_ERROR_IF(!GLESv2Validate::shaderType(type),GL_INVALID_ENUM,0);
+    RET_AND_SET_ERROR_IF(!GLESv2Validate::shaderType(type, ctx->getMajorVersion(), ctx->getMinorVersion()),GL_INVALID_ENUM,0);
     if(ctx->shareGroup().get()) {
         ShaderProgramType shaderProgramType;
-        if (type == GL_VERTEX_SHADER) {
+        switch (type) {
+        case GL_VERTEX_SHADER:
             shaderProgramType = ShaderProgramType::VERTEX_SHADER;
-        } else {
+            break;
+        case GL_FRAGMENT_SHADER:
             shaderProgramType = ShaderProgramType::FRAGMENT_SHADER;
+            break;
+        case GL_COMPUTE_SHADER:
+            shaderProgramType = ShaderProgramType::COMPUTE_SHADER;
+            break;
+        default:
+            shaderProgramType = ShaderProgramType::VERTEX_SHADER;
+            break;
         }
         const GLuint localShaderName = ctx->shareGroup()->genName(
                                                 shaderProgramType, 0, true);
@@ -1764,7 +1773,7 @@ GL_APICALL void  GL_APIENTRY glGetShaderInfoLog(GLuint shader, GLsizei bufsize, 
 
 GL_APICALL void  GL_APIENTRY glGetShaderPrecisionFormat(GLenum shadertype, GLenum precisiontype, GLint* range, GLint* precision){
     GET_CTX_V2();
-    SET_ERROR_IF(!(GLESv2Validate::shaderType(shadertype) && GLESv2Validate::precisionType(precisiontype)),GL_INVALID_ENUM);
+    SET_ERROR_IF(!(GLESv2Validate::shaderType(shadertype, ctx->getMajorVersion(), ctx->getMinorVersion()) && GLESv2Validate::precisionType(precisiontype)),GL_INVALID_ENUM);
 
     switch (precisiontype) {
     case GL_LOW_INT:

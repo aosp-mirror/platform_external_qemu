@@ -398,8 +398,15 @@ bool GLESv2Validate::readPixelFrmt(GLenum format){
 }
 
 
-bool GLESv2Validate::shaderType(GLenum type){
-    return type == GL_VERTEX_SHADER || type == GL_FRAGMENT_SHADER;
+bool GLESv2Validate::shaderType(GLenum type, int glesMajorVersion, int glesMinorVersion){
+    switch (type) {
+    case GL_VERTEX_SHADER:
+    case GL_FRAGMENT_SHADER:
+        return true;
+    case GL_COMPUTE_SHADER:
+        return glesMajorVersion >= 3 && glesMinorVersion >= 1;
+    }
+    return false;
 }
 
 bool GLESv2Validate::precisionType(GLenum type){
