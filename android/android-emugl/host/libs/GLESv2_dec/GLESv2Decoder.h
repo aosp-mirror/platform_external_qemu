@@ -69,5 +69,7 @@ private:
 
     static void gles2_APIENTRY s_glReadPixelsOffsetAEMU(void* self, GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLuint offset);
 
+    static GLuint gles2_APIENTRY s_glCreateShaderProgramvAEMU(void* self, GLenum type, GLsizei count, const char* packedStrings, GLuint packedLen);
+
 };
 #endif
