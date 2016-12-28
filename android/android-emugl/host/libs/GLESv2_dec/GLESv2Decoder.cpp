@@ -91,6 +91,7 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     glDrawElementsInstancedDataAEMU = s_glDrawElementsInstancedDataAEMU;
     glReadPixelsOffsetAEMU = s_glReadPixelsOffsetAEMU;
 
+    glCreateShaderProgramvAEMU = s_glCreateShaderProgramvAEMU;
     return 0;
 
 }
@@ -312,4 +313,9 @@ void GLESv2Decoder::s_glDrawElementsInstancedDataAEMU(void* self, GLenum mode, G
 void GLESv2Decoder::s_glReadPixelsOffsetAEMU(void* self, GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLuint offset) {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glReadPixels(x, y, width, height, format, type, SafePointerFromUInt(offset));
+}
+
+GLuint GLESv2Decoder::s_glCreateShaderProgramvAEMU(void* self, GLenum type, GLsizei count, const char* packedStrings, GLuint packedLen) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    return ctx->glCreateShaderProgramv(type, 1, &packedStrings);
 }

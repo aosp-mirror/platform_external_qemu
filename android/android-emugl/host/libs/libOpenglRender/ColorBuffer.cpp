@@ -319,8 +319,8 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
 
         // If the read buffer is multisampled, we need to resolve.
         GLint samples;
-        glGetFramebufferParameteriv(GL_READ_FRAMEBUFFER, GL_SAMPLE_BUFFERS, &samples);
-        if (samples > 0) {
+        s_gles2.glGetIntegerv(GL_SAMPLE_BUFFERS, &samples);
+        if (false) {
             s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
 
             GLuint resolve_fbo;
