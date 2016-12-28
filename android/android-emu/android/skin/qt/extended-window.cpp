@@ -100,9 +100,11 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->settingsButton);
     mSidebarButtons.addButton(mExtendedUi->helpButton);
 
+#ifdef __APPLE__
     for (QWidget* w : findChildren<QWidget*>()) {
         w->setAttribute(Qt::WA_MacShowFocusRect, false);
     }
+#endif
 
     connect(mExtendedUi->virtualSensorsPage,
             SIGNAL(coarseOrientationChanged(SkinRotation)),
