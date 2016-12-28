@@ -58,73 +58,49 @@ rotate_image(void* data,
         return NULL;
     }
 
-    switch (rotation & 3) {
+    rotation &= 3;
+    switch (rotation) {
         case SKIN_ROTATION_0:
-            memcpy((char*)result, (const char*)data, width * height *4);
+            memcpy((char*)result, (const char*)data, width * height * 4);
             break;
 
+        case SKIN_ROTATION_90:
         case SKIN_ROTATION_270: {
-            unsigned*  start    = (unsigned*)data;
-            unsigned*  src_line = start + (width - 1);
-            unsigned*  dst_line = (unsigned*)result;
-            unsigned   hh;
+            unsigned* start = (unsigned*)data;
+            unsigned* dst = (unsigned*)result;
+            unsigned* src_line;
+            int diff_src_line;
+            int diff_src_step;
+            if (rotation == SKIN_ROTATION_90) {
+                src_line = start + width * (height - 1);
+                diff_src_line = 1;
+                diff_src_step = -width;
+            } else {
+                src_line = start + width - 1;
+                diff_src_line = -1;
+                diff_src_step = width;
+            }
 
-            for (hh = width; hh > 0; hh--)
-            {
-                unsigned*  src   = src_line;
-                unsigned*  dst   = dst_line;
-                unsigned   count = height;
-
-                for ( ; count > 0; count-- ) {
-                    dst[0] = src[0];
-                    dst += 1;
-                    src += width;
+            unsigned hh;
+            for (hh = width; hh != 0; hh--) {
+                unsigned* src = src_line;
+                unsigned count;
+                for (count = height; count != 0; count--) {
+                    *dst++ = *src;
+                    src += diff_src_step;
                 }
 
-                src_line -= 1;
-                dst_line += height;
+                src_line += diff_src_line;
             }
             break;
         }
 
         case SKIN_ROTATION_180: {
-            unsigned*  start    = (unsigned*)data;
-            unsigned*  src_line = start + width * (height - 1);
-            unsigned*  dst_line = (unsigned*)result;
-            unsigned   hh;
-
-            for (hh = height; hh > 0; hh--) {
-                unsigned*  src = src_line + (width - 1);
-                unsigned*  dst = dst_line;
-
-                while (src >= src_line) {
-                    *dst++ = *src--;
-                }
-                dst_line += width;
-                src_line -= width;
-            }
-            break;
-        }
-
-        case SKIN_ROTATION_90: {
-            unsigned*  start    = (unsigned*)data;
-            unsigned*  src_line = start + width * (height - 1);
-            unsigned*  dst_line = (unsigned*)result;
-            unsigned   hh;
-
-            for (hh = width; hh > 0; hh--) {
-                unsigned*  src = src_line;
-                unsigned*  dst = dst_line;
-                unsigned   count;
-
-                for (count = height; count > 0; count--) {
-                    dst[0] = src[0];
-                    dst   += 1;
-                    src   -= width;
-                }
-
-                dst_line += height;
-                src_line += 1;
+            unsigned* const start = (unsigned*)data;
+            unsigned* src = start + width * height;
+            unsigned* dst = (unsigned*)result;
+            while (src != start) {
+                *dst++ = *--src;
             }
             break;
         }
