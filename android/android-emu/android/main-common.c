@@ -1733,7 +1733,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     // DNS server support. Validate the option if any, find the DNS
     // server IP addresses, then rewrite the option value with the
     // results.
-    if (is_qemu2) {
+    if (is_qemu2 && opts->dns_server) {
         // Nothing to do here, everything will be handled by the glue
         // code (see android-qemu2-glue/qemu-setup-dns-servers.cpp).
     } else {
