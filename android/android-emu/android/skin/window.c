@@ -1371,23 +1371,25 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
 
     /* Check that the window is fully visible */
     if (enable_scale && !skin_winsys_is_window_fully_visible()) {
-        int win_x, win_y, win_w, win_h;
         int new_x, new_y;
 
-        skin_winsys_get_window_pos(&win_x, &win_y);
-        win_w = skin_surface_width(window->surface);
-        win_h = skin_surface_height(window->surface);
+        if (VERBOSE_CHECK(init)) {
+            int win_x, win_y, win_w, win_h;
+            skin_winsys_get_window_pos(&win_x, &win_y);
+            win_w = skin_surface_width(window->surface);
+            win_h = skin_surface_height(window->surface);
 
-        VERBOSE_PRINT(init, "Window was not fully visible: "
-                "monitor=[%d,%d,%d,%d] window=[%d,%d,%d,%d]",
-                monitor.pos.x,
-                monitor.pos.y,
-                monitor.size.w,
-                monitor.size.h,
-                win_x,
-                win_y,
-                win_w,
-                win_h);
+            dprint("Window was not fully visible: "
+                    "monitor=[%d,%d,%d,%d] window=[%d,%d,%d,%d]",
+                    monitor.pos.x,
+                    monitor.pos.y,
+                    monitor.size.w,
+                    monitor.size.h,
+                    win_x,
+                    win_y,
+                    win_w,
+                    win_h);
+        }
 
         /* First, we recenter the window */
         new_x = (monitor.size.w - win_w)/2;

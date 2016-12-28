@@ -61,19 +61,10 @@ extern SkinSurface *skin_surface_create(int w, int h, int original_w, int origin
     return  s;
 }
 
-extern SkinSurface *skin_surface_create(int w, int h)
-{
-    D("skin_surface_create %d, %d", w, h);
-    return skin_surface_create(w, h, w, h);
-}
-
 static void skin_surface_free(SkinSurface *s)
 {
     D("skin_surface_free %d", s->id);
-    QSemaphore semaphore;
-    s->window->releaseBitmap(s, &semaphore);
-    semaphore.acquire();
-    delete s;
+    s->window->releaseBitmap(s, nullptr);
 }
 
 extern int skin_surface_height(SkinSurface *s)
@@ -132,12 +123,10 @@ extern void skin_surface_create_window(SkinSurface* surface,
                                        int w,
                                        int h) {
     D("skin_surface_create_window  %d, %d, %d, %d", x, y, w, h);
-    QSemaphore semaphore;
     EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) return;
     QRect rect(x, y, w, h);
-    window->showWindow(surface, &rect, &semaphore);
-    semaphore.acquire();
+    window->showWindow(surface, rect, nullptr);
     D("ID of backing bitmap surface is %d", surface->id);
 }
 
@@ -147,9 +136,7 @@ extern void skin_surface_update(SkinSurface *surface, SkinRect *rect)
     D("skin_surface_update %d: %d,%d,%d,%d", surface->id, rect->pos.x, rect->pos.y, rect->size.w, rect->size.h);
 #endif
     QRect qrect(rect->pos.x, rect->pos.y, rect->size.w, rect->size.h);
-    QSemaphore semaphore;
-    surface->window->requestUpdate(&qrect, &semaphore);
-    semaphore.acquire();
+    surface->window->requestUpdate(qrect, nullptr);
 }
 
 extern void skin_surface_blit(SkinSurface *dst, SkinPos *pos, SkinSurface *src, SkinRect *rect, SkinBlitOp op)
@@ -169,9 +156,7 @@ extern void skin_surface_blit(SkinSurface *dst, SkinPos *pos, SkinSurface *src, 
             qop = QPainter::CompositionMode_SourceOver;
             break;
     }
-    QSemaphore semaphore;
-    dst->window->blit(src->bitmap, &qrect, dst->bitmap, &qpos, &qop, &semaphore);
-    semaphore.acquire();
+    dst->window->blit(src->bitmap, qrect, dst->bitmap, qpos, qop, nullptr);
 }
 
 extern void skin_surface_fill(SkinSurface *dst, SkinRect *rect, uint32_t argb_premul)
@@ -179,26 +164,26 @@ extern void skin_surface_fill(SkinSurface *dst, SkinRect *rect, uint32_t argb_pr
     D("skin_surface_fill %d: %d, %d, %d, %d: %x", dst->id, rect->pos.x, rect->pos.y, rect->size.w, rect->size.h, argb_premul);
     QRect qrect(rect->pos.x, rect->pos.y, rect->size.w, rect->size.h);
     QColor color(argb_premul);
-    QSemaphore semaphore;
-    dst->window->fill(dst, &qrect, &color, &semaphore);
-    semaphore.acquire();
+    dst->window->fill(dst, qrect, color, nullptr);
 }
 
-extern void skin_surface_upload(SkinSurface *surface, SkinRect *rect, const void *pixels, int pitch)
+extern void skin_surface_upload(SkinSurface *surface, const SkinRect *rect, const void *pixels, int pitch)
 {
-#if 0
     D("skin_surface_upload %d: %d,%d,%d,%d", surface->id, rect->pos.x, rect->pos.y, rect->size.w, rect->size.h);
-#endif
-    uint32_t *src = ((uint32_t*)pixels);
-    uint32_t *dst = ((uint32_t*)surface->bitmap->bits()) + surface->w * rect->pos.y;
-    int num = 0;
-    for (int y = rect->pos.y; y < rect->pos.y + rect->size.h; y++) {
-        for (int x = rect->pos.x; x < rect->pos.x + rect->size.w; x++) {
-            *(dst + x) = *(src + x -rect->pos.x);
-            num++;
+    if (rect->pos.x == 0 && rect->pos.y == 0 &&
+        rect->size.h == surface->h && rect->size.w == surface->w &&
+        pitch == surface->w * 4) {
+        memcpy(surface->bitmap->bits(), pixels, surface->h * surface->w * 4);
+    } else {
+        const uint32_t *src = (const uint32_t*)pixels;
+        uint32_t *dst = ((uint32_t*)surface->bitmap->bits()) + surface->w * rect->pos.y;
+        for (int y = rect->pos.y; y < rect->pos.y + rect->size.h; y++) {
+            for (int x = rect->pos.x; x < rect->pos.x + rect->size.w; x++) {
+                *(dst + x) = *(src + x - rect->pos.x);
+            }
+            src += pitch / sizeof(uint32_t);
+            dst += surface->w;
         }
-        src += pitch / sizeof(uint32_t);
-        dst += surface->w;
     }
 }
 

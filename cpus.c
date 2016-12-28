@@ -1296,6 +1296,14 @@ static void qemu_cpu_kick_thread(CPUState *cpu)
         return;
     }
     cpu->thread_kicked = true;
+#ifdef CONFIG_HAX
+    if (hax_enabled() && hax_ug_platform()) {
+        assert(!qemu_cpu_is_self(cpu));
+        cpu_exit(cpu);
+        hax_raise_event(cpu);
+        return;
+    }
+#endif /* CONFIG_HAX */
     if (!qemu_cpu_is_self(cpu)) {
         CONTEXT tcgContext;
 

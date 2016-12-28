@@ -138,18 +138,18 @@ public:
      */
 signals:
     void blit(QImage* src,
-              QRect* srcRect,
+              QRect srcRect,
               QImage* dst,
-              QPoint* dstPos,
-              QPainter::CompositionMode* op,
+              QPoint dstPos,
+              QPainter::CompositionMode op,
               QSemaphore* semaphore = NULL);
     void createBitmap(SkinSurface* s,
                       int w,
                       int h,
                       QSemaphore* semaphore = NULL);
     void fill(SkinSurface* s,
-              const QRect* rect,
-              const QColor* color,
+              QRect rect,
+              QColor color,
               QSemaphore* semaphore = NULL);
     void getBitmapInfo(SkinSurface* s,
                        SkinSurfacePixels* pix,
@@ -161,15 +161,15 @@ signals:
     void isWindowFullyVisible(bool* out_value, QSemaphore* semaphore = NULL);
     void releaseBitmap(SkinSurface* s, QSemaphore* sempahore = NULL);
     void requestClose(QSemaphore* semaphore = NULL);
-    void requestUpdate(const QRect* rect, QSemaphore* semaphore = NULL);
-    void setDeviceGeometry(const QRect* rect, QSemaphore* sempahore = NULL);
+    void requestUpdate(QRect rect, QSemaphore* semaphore = NULL);
+    void setDeviceGeometry(QRect rect, QSemaphore* sempahore = NULL);
     void setWindowIcon(const unsigned char* data,
                        int size,
                        QSemaphore* semaphore = NULL);
     void setWindowPos(int x, int y, QSemaphore* semaphore = NULL);
-    void setTitle(const QString* title, QSemaphore* semaphore = NULL);
+    void setTitle(QString title, QSemaphore* semaphore = NULL);
     void showWindow(SkinSurface* surface,
-                    const QRect* rect,
+                    QRect rect,
                     QSemaphore* semaphore = NULL);
 
     // Qt doesn't support function pointers in signals/slots natively, but
@@ -226,10 +226,10 @@ public slots:
 private slots:
     void slot_adbWarningMessageAccepted();
     void slot_blit(QImage* src,
-                   QRect* srcRect,
+                   QRect srcRect,
                    QImage* dst,
-                   QPoint* dstPos,
-                   QPainter::CompositionMode* op,
+                   QPoint dstPos,
+                   QPainter::CompositionMode op,
                    QSemaphore* semaphore = NULL);
     void slot_clearInstance();
     void slot_createBitmap(SkinSurface* s,
@@ -237,8 +237,8 @@ private slots:
                            int h,
                            QSemaphore* semaphore = NULL);
     void slot_fill(SkinSurface* s,
-                   const QRect* rect,
-                   const QColor* color,
+                   QRect rect,
+                   QColor color,
                    QSemaphore* semaphore = NULL);
     void slot_getBitmapInfo(SkinSurface* s,
                             SkinSurfacePixels* pix,
@@ -253,17 +253,17 @@ private slots:
                                    QSemaphore* semaphore = NULL);
     void slot_releaseBitmap(SkinSurface* s, QSemaphore* sempahore = NULL);
     void slot_requestClose(QSemaphore* semaphore = NULL);
-    void slot_requestUpdate(const QRect* rect, QSemaphore* semaphore = NULL);
-    void slot_setDeviceGeometry(const QRect* rect,
+    void slot_requestUpdate(QRect rect, QSemaphore* semaphore = NULL);
+    void slot_setDeviceGeometry(QRect rect,
                                 QSemaphore* semaphore = NULL);
     void slot_setWindowIcon(const unsigned char* data,
                             int size,
                             QSemaphore* semaphore = NULL);
     void slot_setWindowPos(int x, int y, QSemaphore* semaphore = NULL);
-    void slot_setWindowTitle(const QString* title,
+    void slot_setWindowTitle(QString title,
                              QSemaphore* semaphore = NULL);
     void slot_showWindow(SkinSurface* surface,
-                         const QRect* rect,
+                         QRect rect,
                          QSemaphore* semaphore = NULL);
     void slot_runOnUiThread(SkinGenericFunction* f,
                             void* data,
