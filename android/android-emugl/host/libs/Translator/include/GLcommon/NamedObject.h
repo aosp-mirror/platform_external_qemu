@@ -33,7 +33,8 @@ enum class NamedObjectType {
 enum class ShaderProgramType {
     PROGRAM,
     VERTEX_SHADER,
-    FRAGMENT_SHADER
+    FRAGMENT_SHADER,
+    COMPUTE_SHADER,
 };
 
 //
