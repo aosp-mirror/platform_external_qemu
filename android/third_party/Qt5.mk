@@ -24,7 +24,12 @@ else
 endif
 
 QT_INCLUDE_DIR := $(QT_PREBUILTS_DIR)/common/include
+QT_TARGET_INCLUDE_DIR := $(QT_TOP_DIR)/include.system
+# Make sure the target-specific include directory is first one here, as that's
+# where target-specific headers are.
 QT_INCLUDES := \
+    $(QT_TARGET_INCLUDE_DIR) \
+    $(QT_TARGET_INCLUDE_DIR)/QtCore \
     $(QT_INCLUDE_DIR) \
     $(QT_INCLUDE_DIR)/QtCore \
     $(QT_INCLUDE_DIR)/QtGui \

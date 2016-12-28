@@ -356,6 +356,12 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         (cd "$INSTALL_DIR/$SYSTEM" && rm -f include && ln -sf ../common/include include)
 
+        # Move qconfig.h into its platform-specific directory now
+        run mkdir -p "$INSTALL_DIR/$SYSTEM"/include.system/QtCore/
+        run mv -f \
+            "$INSTALL_DIR"/common/include/QtCore/qconfig.h \
+            "$INSTALL_DIR/$SYSTEM"/include.system/QtCore/ \
+            || panic "[$SYSTEM] Failed to move the platform-specific config file 'include/QtCore/qconfig.h'"
     ) || panic "[$SYSTEM] Could not build Qt!"
 
 done
