@@ -282,6 +282,7 @@ void GLEScontext::init(GlLibrary* glLib) {
         m_indexedUniformBuffers.resize(getCaps()->maxUniformBufferBindings);
         m_indexedAtomicCounterBuffers.resize(getCaps()->maxAtomicCounterBufferBindings);
         m_indexedShaderStorageBuffers.resize(getCaps()->maxShaderStorageBufferBindings);
+        m_indexedVertexAttribBuffers.resize(getCaps()->maxVertexAttribBindings);
     }
 }
 
@@ -567,11 +568,12 @@ void GLEScontext::bindBuffer(GLenum target,GLuint buffer) {
         m_shaderStorageBuffer = buffer;
         break;
     default:
+        m_currVaoState.vboId() = buffer;
         break;
     }
 }
 
-void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size) {
+void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size, GLintptr stride) {
     std::vector<BufferBinding>& which = m_indexedTransformFeedbackBuffers;
 
     switch (target) {
@@ -588,12 +590,14 @@ void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer, 
         which = m_indexedShaderStorageBuffers;
         break;
     default:
-        return;
+        which = m_indexedVertexAttribBuffers;
+        break;
     }
 
     which[index].id = buffer;
     which[index].offset = offset;
     which[index].size = size;
+    which[index].stride = stride;
 }
 
 void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer) {
@@ -657,7 +661,7 @@ bool GLEScontext::isBindedBuffer(GLenum target) {
     case GL_SHADER_STORAGE_BUFFER:
         return m_shaderStorageBuffer != 0;
     default:
-        return false;
+        return m_currVaoState.vboId() != 0;
     }
 }
 
@@ -688,7 +692,7 @@ GLuint GLEScontext::getBuffer(GLenum target) {
     case GL_SHADER_STORAGE_BUFFER:
         return m_shaderStorageBuffer;
     default:
-        return 0;
+        return m_currVaoState.vboId();
     }
 }
 
@@ -790,6 +794,7 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     s_glDispatch.glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &s_glSupport.maxUniformBufferBindings);
     s_glDispatch.glGetIntegerv(GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS, &s_glSupport.maxAtomicCounterBufferBindings);
     s_glDispatch.glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, &s_glSupport.maxShaderStorageBufferBindings);
+    s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_ATTRIB_BINDINGS, &s_glSupport.maxVertexAttribBindings);
 
     const GLubyte* glslVersion = s_glDispatch.glGetString(GL_SHADING_LANGUAGE_VERSION);
     s_glSupport.glslVersion = Version((const  char*)(glslVersion));

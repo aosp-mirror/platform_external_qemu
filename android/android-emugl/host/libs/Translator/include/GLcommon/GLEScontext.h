@@ -70,6 +70,7 @@ struct GLSupport {
     int  maxUniformBufferBindings = 0;
     int  maxAtomicCounterBufferBindings = 0;
     int  maxShaderStorageBufferBindings = 0;
+    int  maxVertexAttribBindings = 0;
 
     Version glslVersion;
     bool GL_EXT_TEXTURE_FORMAT_BGRA8888 = false;
@@ -177,7 +178,7 @@ public:
     virtual void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) = 0;
 
     void bindBuffer(GLenum target,GLuint buffer);
-    void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size);
+    void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size, GLintptr stride = 0);
     void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer);
     void unbindBuffer(GLuint buffer);
     bool isBuffer(GLuint buffer);
@@ -288,12 +289,15 @@ protected:
         GLuint id = 0;
         GLintptr offset = 0;
         GLsizeiptr size = 0;
+        GLintptr stride = 0;
+        GLuint divisor = 0;
     };
 
     std::vector<BufferBinding> m_indexedTransformFeedbackBuffers;
     std::vector<BufferBinding> m_indexedUniformBuffers;
     std::vector<BufferBinding> m_indexedAtomicCounterBuffers;
     std::vector<BufferBinding> m_indexedShaderStorageBuffers;
+    std::vector<BufferBinding> m_indexedVertexAttribBuffers;
 
     static std::string*   s_glExtensions;
     static GLSupport      s_glSupport;
