@@ -30,6 +30,8 @@ ShHandle kFragCompilerES30 = nullptr;
 
 ShHandle kVertCompilerES31 = nullptr;
 ShHandle kFragCompilerES31 = nullptr;
+// TODO
+// ShHandle kComputeCompilerES31 = nullptr;
 
 android::base::Lock kCompilerLock;
 
