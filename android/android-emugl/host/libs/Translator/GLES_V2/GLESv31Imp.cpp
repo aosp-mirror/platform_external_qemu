@@ -443,6 +443,12 @@ GL_APICALL void GL_APIENTRY glDrawElementsIndirect(GLenum mode, GLenum type, con
 
 GL_APICALL void GL_APIENTRY glTexStorage2DMultisample(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, GLboolean fixedsamplelocations) {
     GET_CTX_V2();
+
+    GLint err = GL_NO_ERROR;
+    GLenum format, type;
+    GLESv2Validate::getCompatibleFormatTypeForInternalFormat(internalformat, &format, &type);
+    sPrepareTexImage2D(target, 0, (GLint)internalformat, width, height, 0, format, type, NULL, &type, (GLint*)&internalformat, &err);
+    SET_ERROR_IF(err != GL_NO_ERROR, err);
     ctx->dispatcher().glTexStorage2DMultisample(target, samples, internalformat, width, height, fixedsamplelocations);
 }
 
