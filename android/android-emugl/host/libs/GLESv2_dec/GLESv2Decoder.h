@@ -71,5 +71,10 @@ private:
 
     static GLuint gles2_APIENTRY s_glCreateShaderProgramvAEMU(void* self, GLenum type, GLsizei count, const char* packedStrings, GLuint packedLen);
 
+    static void gles2_APIENTRY s_glDrawArraysIndirectDataAEMU(void* self, GLenum mode, const void* indirect, GLuint datalen);
+    static void gles2_APIENTRY s_glDrawArraysIndirectOffsetAEMU(void* self, GLenum mode, GLuint offset);
+
+    static void gles2_APIENTRY s_glDrawElementsIndirectDataAEMU(void* self, GLenum mode, GLenum type, const void* indirect, GLuint datalen);
+    static void gles2_APIENTRY s_glDrawElementsIndirectOffsetAEMU(void* self, GLenum mode, GLenum type, GLuint offset);
 };
 #endif
