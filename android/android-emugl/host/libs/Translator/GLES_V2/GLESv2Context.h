@@ -27,7 +27,9 @@ public:
     GLESv2Context(int maj, int min);
     virtual ~GLESv2Context();
     void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct);
-    void setDivisor(GLuint index, GLuint divisor);
+    void setVertexAttribDivisor(GLuint bindingindex, GLuint divisor);
+    void setVertexAttribBindingIndex(GLuint attribindex, GLuint bindingindex);
+    void setVertexAttribFormat(GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint reloffset, bool isInt = false);
     int  getMaxCombinedTexUnits() override;
     int  getMaxTexUnits() override;
     bool isPostGLESv2() const { return m_glesMajorVersion > 2; }

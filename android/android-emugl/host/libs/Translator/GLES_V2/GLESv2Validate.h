@@ -54,6 +54,8 @@ struct GLESv2Validate : public GLESvalidate {
     static bool attribIndex(int index, int max);
     static bool programParam(GLenum pname, int glesMajorVersion);
     static bool textureIsCubeMap(GLenum target);
+
+    static int sizeOfType(GLenum type);
 };
 
 #endif

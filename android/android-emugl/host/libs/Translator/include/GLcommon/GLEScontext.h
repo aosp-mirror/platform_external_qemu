@@ -70,6 +70,7 @@ struct GLSupport {
     int  maxUniformBufferBindings = 0;
     int  maxAtomicCounterBufferBindings = 0;
     int  maxShaderStorageBufferBindings = 0;
+    int  maxVertexAttribBindings = 0;
 
     int maxDrawBuffers = 1;
 
@@ -97,15 +98,26 @@ struct ArrayData {
     bool         allocated = false;
 };
 
+struct BufferBinding {
+    GLuint buffer = 0;
+    GLintptr offset = 0;
+    GLsizeiptr size = 0;
+    GLintptr stride = 0;
+    GLuint divisor = 0;
+};
+
+typedef std::vector<BufferBinding> VertexAttribBindingVector;
+
 struct VAOState {
-    VAOState() : VAOState(0, 0, NULL) { }
-    VAOState(GLuint vbo, GLuint ibo, ArraysMap* arr) :
-        array_buffer_binding(vbo),
+    VAOState() : VAOState(0, NULL, 0) { }
+    VAOState(GLuint ibo, ArraysMap* arr, int numVertexAttribBindings) :
         element_array_buffer_binding(ibo),
-        arraysMap(arr) { }
-    GLuint array_buffer_binding;
+        arraysMap(arr),
+        bindingState(numVertexAttribBindings) { }
     GLuint element_array_buffer_binding;
     ArraysMap* arraysMap;
+    VertexAttribBindingVector bindingState;
+    bool bufferBacked;
 };
 
 typedef std::unordered_map<GLuint, VAOState> VAOStateMap;
@@ -114,7 +126,6 @@ struct VAOStateRef {
     VAOStateRef() { }
     VAOStateRef(VAOStateMap::iterator iter) : it(iter) { }
     GLuint vaoId() { return it->first; }
-    GLuint& vboId() { return it->second.array_buffer_binding; }
     GLuint& iboId() { return it->second.element_array_buffer_binding; }
 
     ArraysMap::iterator begin() {
@@ -129,6 +140,9 @@ struct VAOStateRef {
     GLESpointer*& operator[](size_t k) {
         ArraysMap* map = it->second.arraysMap;
         return (*map)[k];
+    }
+    VertexAttribBindingVector& bufferBindings() {
+        return it->second.bindingState;
     }
     VAOStateMap::iterator it;
 };
@@ -149,6 +163,7 @@ private:
     std::unordered_map<GLenum,ArrayData> m_arrays;
     unsigned int m_current = 0;
 };
+
 
 class GLEScontext{
 public:
@@ -174,12 +189,14 @@ public:
     void addVertexArrayObjects(GLsizei n, GLuint* arrays);
     void removeVertexArrayObjects(GLsizei n, const GLuint* arrays);
     void setVertexArrayObject(GLuint array);
+    GLuint getVertexArrayObject();
+    bool vertexAttributesBufferBacked();
     const GLvoid* setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data,bool normalize = false, bool isInt = false);
     virtual const GLESpointer* getPointer(GLenum arrType);
     virtual void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) = 0;
 
     void bindBuffer(GLenum target,GLuint buffer);
-    void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size);
+    void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size, GLintptr stride = 0);
     void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer);
     void unbindBuffer(GLuint buffer);
     bool isBuffer(GLuint buffer);
@@ -286,17 +303,11 @@ protected:
     GLuint m_dispatchIndirectBuffer = 0;
     GLuint m_drawIndirectBuffer = 0;
     GLuint m_shaderStorageBuffer = 0;
-
-    struct BufferBinding {
-        GLuint id = 0;
-        GLintptr offset = 0;
-        GLsizeiptr size = 0;
-    };
-
     std::vector<BufferBinding> m_indexedTransformFeedbackBuffers;
     std::vector<BufferBinding> m_indexedUniformBuffers;
     std::vector<BufferBinding> m_indexedAtomicCounterBuffers;
     std::vector<BufferBinding> m_indexedShaderStorageBuffers;
+    std::vector<BufferBinding> m_indexedVertexAttribBuffers;
 
     static std::string*   s_glExtensions;
     static GLSupport      s_glSupport;
