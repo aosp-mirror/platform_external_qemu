@@ -82,7 +82,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     // Additional memory for software renderers (e.g., SwiftShader)
     const int extraCma =
         glesFramebufferCMA +
-        (isQemu2 && android::featurecontrol::isEnabled(android::featurecontrol::GLDMA) ? 256 : 4);
+        (isQemu2 && android::featurecontrol::isEnabled(android::featurecontrol::GLDMA) ? 256 : 0);
     if (extraCma) {
         params.addFormat("cma=%" PRIu64 "M", glesFramebufferCMA + extraCma);
     }
