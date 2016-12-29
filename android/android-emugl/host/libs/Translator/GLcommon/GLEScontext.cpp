@@ -224,7 +224,7 @@ void GLEScontext::addVertexArrayObject(GLuint array) {
                     i,
                     new GLESpointer()));
     }
-    m_vaoStateMap[array] = VAOState(0, 0, map);
+    m_vaoStateMap[array] = VAOState(0, map, std::max(s_glSupport.maxVertexAttribs, s_glSupport.maxVertexAttribBindings));
 }
 
 void GLEScontext::removeVertexArrayObject(GLuint array) {
@@ -250,6 +250,20 @@ void GLEScontext::setVertexArrayObject(GLuint array) {
     VAOStateMap::iterator it = m_vaoStateMap.find(array);
     if (it != m_vaoStateMap.end())
         m_currVaoState = VAOStateRef(m_vaoStateMap.find(array));
+}
+
+GLuint GLEScontext::getVertexArrayObject() {
+    return m_currVaoState.vaoId();
+}
+
+bool GLEScontext::vertexAttributesBufferBacked() {
+    for (int i = 0; i < s_glSupport.maxVertexAttribs; i++) {
+        if (m_currVaoState[i]->isEnable() &&
+            !m_currVaoState.bufferBindings()[m_currVaoState[i]->getBindingIndex()].buffer) {
+            return false;
+        }
+    }
+    return true;
 }
 
 void GLEScontext::init(GlLibrary* glLib) {
@@ -310,7 +324,7 @@ GLEScontext::~GLEScontext() {
 }
 
 const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data,bool normalize, bool isInt) {
-    GLuint bufferName = m_currVaoState.vboId();
+    GLuint bufferName = m_arrayBuffer;
     if(bufferName) {
         unsigned int offset = SafeUIntFromPointer(data);
         GLESbuffer* vbo = static_cast<GLESbuffer*>(
@@ -531,7 +545,7 @@ void GLEScontext::convertIndirectVBO(GLESConversionArrays& cArrs,GLsizei count,G
 void GLEScontext::bindBuffer(GLenum target,GLuint buffer) {
     switch(target) {
     case GL_ARRAY_BUFFER:
-        m_currVaoState.vboId() = buffer;
+        m_arrayBuffer = buffer;
         break;
     case GL_ELEMENT_ARRAY_BUFFER:
         m_currVaoState.iboId() = buffer;
@@ -567,6 +581,7 @@ void GLEScontext::bindBuffer(GLenum target,GLuint buffer) {
         m_shaderStorageBuffer = buffer;
         break;
     default:
+        m_arrayBuffer = buffer;
         break;
     }
 }
@@ -598,6 +613,10 @@ void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer, 
         m_indexedShaderStorageBuffers[index].stride = stride;
         break;
     default:
+        m_currVaoState.bufferBindings()[index].buffer = buffer;
+        m_currVaoState.bufferBindings()[index].offset = offset;
+        m_currVaoState.bufferBindings()[index].size = size;
+        m_currVaoState.bufferBindings()[index].stride = stride;
         return;
     }
 }
@@ -609,8 +628,8 @@ void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer) 
 }
 
 void GLEScontext::unbindBuffer(GLuint buffer) {
-    if (m_currVaoState.vboId() == buffer)
-         m_currVaoState.vboId() = 0;
+    if (m_arrayBuffer == buffer)
+        m_arrayBuffer = 0;
     if (m_currVaoState.iboId() == buffer)
         m_currVaoState.iboId() = 0;
     if (m_copyReadBuffer == buffer)
@@ -639,7 +658,7 @@ void GLEScontext::unbindBuffer(GLuint buffer) {
 bool GLEScontext::isBindedBuffer(GLenum target) {
     switch(target) {
     case GL_ARRAY_BUFFER:
-        return m_currVaoState.vboId() != 0;
+        return m_arrayBuffer != 0;
     case GL_ELEMENT_ARRAY_BUFFER:
         return m_currVaoState.iboId() != 0;
     case GL_COPY_READ_BUFFER:
@@ -663,14 +682,14 @@ bool GLEScontext::isBindedBuffer(GLenum target) {
     case GL_SHADER_STORAGE_BUFFER:
         return m_shaderStorageBuffer != 0;
     default:
-        return false;
+        return m_arrayBuffer != 0;
     }
 }
 
 GLuint GLEScontext::getBuffer(GLenum target) {
     switch(target) {
     case GL_ARRAY_BUFFER:
-        return m_currVaoState.vboId();
+        return m_arrayBuffer;
     case GL_ELEMENT_ARRAY_BUFFER:
         return m_currVaoState.iboId();
     case GL_COPY_READ_BUFFER:
@@ -694,7 +713,7 @@ GLuint GLEScontext::getBuffer(GLenum target) {
     case GL_SHADER_STORAGE_BUFFER:
         return m_shaderStorageBuffer;
     default:
-        return 0;
+        return m_arrayBuffer;
     }
 }
 
@@ -812,6 +831,7 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     s_glDispatch.glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &s_glSupport.maxUniformBufferBindings);
     s_glDispatch.glGetIntegerv(GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS, &s_glSupport.maxAtomicCounterBufferBindings);
     s_glDispatch.glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, &s_glSupport.maxShaderStorageBufferBindings);
+    s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_ATTRIB_BINDINGS, &s_glSupport.maxVertexAttribBindings);
 
     const GLubyte* glslVersion = s_glDispatch.glGetString(GL_SHADING_LANGUAGE_VERSION);
     s_glSupport.glslVersion = Version((const  char*)(glslVersion));
@@ -973,7 +993,7 @@ bool GLEScontext::glGetIntegerv(GLenum pname, GLint *params)
     switch(pname)
     {
         case GL_ARRAY_BUFFER_BINDING:
-            *params = m_currVaoState.vboId();
+            *params = m_arrayBuffer;
             break;
 
         case GL_ELEMENT_ARRAY_BUFFER_BINDING:
