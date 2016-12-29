@@ -1,6 +1,6 @@
 // Auto-generated with: android/scripts/gen-entries.py --mode=translator_passthrough android/android-emugl/host/libs/libOpenGLESDispatch/gles31_only.entries --output=android/android-emugl/host/libs/Translator/GLES_V2/GLESv31Imp.cpp
 // This file is best left unedited.
-// Try to make changes through gen_translator_passthrough in gen-entries.py,
+// Try to make changes through gen_translator in gen-entries.py,
 // and/or parcel out custom functionality in separate code.
 GL_APICALL void GL_APIENTRY glGetBooleani_v(GLenum target, GLuint index, GLboolean * data) {
     GET_CTX_V2();
@@ -51,7 +51,8 @@ GL_APICALL void GL_APIENTRY glValidateProgramPipeline(GLuint pipeline) {
 
 GL_APICALL GLboolean GL_APIENTRY glIsProgramPipeline(GLuint pipeline) {
     GET_CTX_V2_RET(0);
-    return ctx->dispatcher().glIsProgramPipeline(pipeline);
+    GLboolean glIsProgramPipelineRET = ctx->dispatcher().glIsProgramPipeline(pipeline);
+    return glIsProgramPipelineRET;
 }
 
 GL_APICALL void GL_APIENTRY glUseProgramStages(GLuint pipeline, GLbitfield stages, GLuint program) {
@@ -64,7 +65,8 @@ GL_APICALL void GL_APIENTRY glUseProgramStages(GLuint pipeline, GLbitfield stage
 
 extern "C" GL_APICALL GLuint GL_APIENTRY glCreateShaderProgramv(GLenum type, GLsizei count, const char ** strings) {
     GET_CTX_V2_RET(0);
-    return ctx->dispatcher().glCreateShaderProgramv(type, count, strings);
+    GLuint glCreateShaderProgramvRET = ctx->dispatcher().glCreateShaderProgramv(type, count, strings);
+    return glCreateShaderProgramvRET;
 }
 
 GL_APICALL void GL_APIENTRY glProgramUniform1f(GLuint program, GLint location, GLfloat v0) {
@@ -351,7 +353,8 @@ GL_APICALL GLuint GL_APIENTRY glGetProgramResourceIndex(GLuint program, GLenum p
     GET_CTX_V2_RET(0);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
-        return ctx->dispatcher().glGetProgramResourceIndex(globalProgramName, programInterface, name);
+        GLuint glGetProgramResourceIndexRET = ctx->dispatcher().glGetProgramResourceIndex(globalProgramName, programInterface, name);
+    return glGetProgramResourceIndexRET;
     } else return 0;
 }
 
@@ -359,7 +362,8 @@ GL_APICALL GLint GL_APIENTRY glGetProgramResourceLocation(GLuint program, GLenum
     GET_CTX_V2_RET(0);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
-        return ctx->dispatcher().glGetProgramResourceLocation(globalProgramName, programInterface, name);
+        GLint glGetProgramResourceLocationRET = ctx->dispatcher().glGetProgramResourceLocation(globalProgramName, programInterface, name);
+    return glGetProgramResourceLocationRET;
     } else return 0;
 }
 
@@ -391,26 +395,39 @@ GL_APICALL void GL_APIENTRY glDispatchComputeIndirect(GLintptr indirect) {
 
 extern "C" GL_APICALL void GL_APIENTRY glBindVertexBuffer(GLuint bindingindex, GLuint buffer, GLintptr offset, GLintptr stride) {
     GET_CTX_V2();
-    ctx->dispatcher().glBindVertexBuffer(bindingindex, buffer, offset, stride);
+
+    ctx->bindIndexedBuffer(0, bindingindex, buffer, offset, 0, stride);
+    if (ctx->shareGroup().get()) {
+        const GLuint globalBufferName = ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer);
+        ctx->dispatcher().glBindVertexBuffer(bindingindex, globalBufferName, offset, stride);
+    }
 }
 
 GL_APICALL void GL_APIENTRY glVertexAttribBinding(GLuint attribindex, GLuint bindingindex) {
     GET_CTX_V2();
+
+    ctx->setVertexAttribBindingIndex(attribindex, bindingindex);
     ctx->dispatcher().glVertexAttribBinding(attribindex, bindingindex);
 }
 
 GL_APICALL void GL_APIENTRY glVertexAttribFormat(GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint relativeoffset) {
     GET_CTX_V2();
+
+    ctx->setVertexAttribFormat(attribindex, size, type, normalized, relativeoffset, false);
     ctx->dispatcher().glVertexAttribFormat(attribindex, size, type, normalized, relativeoffset);
 }
 
 GL_APICALL void GL_APIENTRY glVertexAttribIFormat(GLuint attribindex, GLint size, GLenum type, GLuint relativeoffset) {
     GET_CTX_V2();
+
+    ctx->setVertexAttribFormat(attribindex, size, type, GL_FALSE, relativeoffset, true);
     ctx->dispatcher().glVertexAttribIFormat(attribindex, size, type, relativeoffset);
 }
 
 GL_APICALL void GL_APIENTRY glVertexBindingDivisor(GLuint bindingindex, GLuint divisor) {
     GET_CTX_V2();
+
+    ctx->setVertexAttribDivisor(bindingindex, divisor);
     ctx->dispatcher().glVertexBindingDivisor(bindingindex, divisor);
 }
 
