@@ -5,6 +5,7 @@ include $(LOCAL_PATH)/android/third_party/zlib.mk
 include $(LOCAL_PATH)/android/third_party/libcurl.mk
 include $(LOCAL_PATH)/android/third_party/libuuid.mk
 include $(LOCAL_PATH)/android/third_party/libxml2.mk
+include $(LOCAL_PATH)/android/third_party/mman-win32/libmman-win32.mk
 include $(LOCAL_PATH)/android/third_party/libsparse/sources.mk
 include $(LOCAL_PATH)/android/third_party/libselinux/sources.mk
 include $(LOCAL_PATH)/android/third_party/libwebp/sources.mk
@@ -57,6 +58,7 @@ endif
 EMULATOR_COMMON_INCLUDES := \
     $(BUILD_OBJS_DIR)/build \
     $(generated-proto-sources-dir) \
+    $(LIBMMAN_WIN32_INCLUDES) \
 
 EMUGL_SRCDIR := $(LOCAL_PATH)/android/android-emugl
 EMUGL_INCLUDES := $(EMUGL_SRCDIR)/host/include
