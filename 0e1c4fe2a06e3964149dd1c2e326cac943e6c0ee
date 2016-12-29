@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "37b082be_d8cdfa1f",
+        "filename": "android/android-emu/android/utils/path.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-29T06:45:47Z",
+      "side": 1,
+      "message": "Any way we can speed up the other platforms as well by tuning this?",
+      "range": {
+        "startLine": 296,
+        "startChar": 8,
+        "endLine": 296,
+        "endChar": 23
+      },
+      "revId": "0e1c4fe2a06e3964149dd1c2e326cac943e6c0ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
