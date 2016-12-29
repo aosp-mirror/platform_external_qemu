@@ -279,7 +279,7 @@ GL_APICALL void GL_APIENTRY glVertexAttribIPointer(GLuint index, GLint size, GLe
     GET_CTX_V2();
 
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
-    ctx->setPointer(index,size,type,stride,pointer,false,true);
+    s_glPrepareVertexAttribPointer(ctx, index, size, type, false, stride, pointer, true);
     if (ctx->isBindedBuffer(GL_ARRAY_BUFFER)) {
     ctx->dispatcher().glVertexAttribIPointer(index, size, type, stride, pointer);
 
@@ -301,7 +301,8 @@ GL_APICALL void GL_APIENTRY glVertexAttribDivisor(GLuint index, GLuint divisor) 
     GET_CTX_V2();
 
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
-    ctx->setDivisor(index,divisor);
+    ctx->setVertexAttribBindingIndex(index, index);
+    ctx->setVertexAttribDivisor(index, divisor);
     ctx->dispatcher().glVertexAttribDivisor(index, divisor);
 }
 
