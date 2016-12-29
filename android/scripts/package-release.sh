@@ -454,7 +454,7 @@ cd $QEMU_DIR
 if [ ! -d "$QEMU_DIR"/.git ]; then
     panic "This directory must be a checkout of \$AOSP/platform/external/qemu!"
 fi
-UNCHECKED_FILES=$(git ls-files -o -x objs/)
+UNCHECKED_FILES=$(git ls-files -o --exclude-standard)
 if [ "$UNCHECKED_FILES" ]; then
     dump "ERROR: There are unchecked files in the current directory!"
     dump "Please remove them:"
