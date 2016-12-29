@@ -192,11 +192,9 @@ package_builder_process_options () {
         log "Auto-config: --darwin-ssh=$DARWIN_SSH  [ANDROID_EMULATOR_DARWIN_SSH]"
     fi
 
-    # Add darwin to the host systems list if we got DARWIN_SSH set.
-    # Exception: if DARWIN_SSH is set from the environment (automatically) but
-    # HOST_SYSTEMS are coming from the command line, don't do anything.
-    if [ -n "$DARWIN_SSH" -a ! '(' -z "$OPT_DARWIN_SSH" -a -n "$OPT_HOST" ')' ]; then
-        HAS_DARWIN=
+    # Detect if we've been asked to build on Mac.
+    HAS_DARWIN=
+    if [ -n "$DARWIN_SSH" ]; then
         for SYSTEM in $(commas_to_spaces "$HOST_SYSTEMS"); do
             case $SYSTEM in
                 darwin-*)
@@ -204,11 +202,15 @@ package_builder_process_options () {
                     ;;
             esac
         done
-        if [ -z "$HAS_DARWIN" ]; then
-            HAS_DARWIN=true
-            var_append HOST_SYSTEMS "darwin-x86_64"
-            log "Auto-config: --host=$(spaces_to_commas "$HOST_SYSTEMS")'  [darwin-ssh!]"
-        fi
+    fi
+
+    # Add darwin to the host systems list if we got DARWIN_SSH set.
+    # Exception: if DARWIN_SSH is set from the environment (automatically)
+    # but HOST_SYSTEMS are coming from the command line, don't do anything.
+    if [ -z "$HAS_DARWIN" -a ! '(' -z "$OPT_DARWIN_SSH" -a -n "$OPT_HOST" ')' ]; then
+        HAS_DARWIN=true
+        var_append HOST_SYSTEMS "darwin-x86_64"
+        log "Auto-config: --host=$(spaces_to_commas "$HOST_SYSTEMS")'  [darwin-ssh!]"
     fi
 
     if [ -z "$HAS_DARWIN" ]; then
