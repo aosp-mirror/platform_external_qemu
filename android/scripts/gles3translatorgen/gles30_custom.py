@@ -19,13 +19,14 @@ custom_preprocesses = {
 
 "glVertexAttribIPointer" : """
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
-    ctx->setPointer(index,size,type,stride,pointer,false,true);
+    s_glPrepareVertexAttribPointer(ctx, index, size, type, false, stride, pointer, true);
     if (ctx->isBindedBuffer(GL_ARRAY_BUFFER)) {
 """,
 
 "glVertexAttribDivisor" : """
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
-    ctx->setDivisor(index,divisor);
+    ctx->setVertexAttribBindingIndex(index, index);
+    ctx->setVertexAttribDivisor(index, divisor);
 """,
 
 "glRenderbufferStorageMultisample" : """
