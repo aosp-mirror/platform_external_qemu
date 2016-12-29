@@ -92,6 +92,12 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     glReadPixelsOffsetAEMU = s_glReadPixelsOffsetAEMU;
 
     glCreateShaderProgramvAEMU = s_glCreateShaderProgramvAEMU;
+
+    glDrawArraysIndirectDataAEMU = s_glDrawArraysIndirectDataAEMU;
+    glDrawArraysIndirectOffsetAEMU = s_glDrawArraysIndirectOffsetAEMU;
+
+    glDrawElementsIndirectDataAEMU = s_glDrawElementsIndirectDataAEMU;
+    glDrawElementsIndirectOffsetAEMU = s_glDrawElementsIndirectOffsetAEMU;
     return 0;
 
 }
@@ -318,4 +324,24 @@ void GLESv2Decoder::s_glReadPixelsOffsetAEMU(void* self, GLint x, GLint y, GLsiz
 GLuint GLESv2Decoder::s_glCreateShaderProgramvAEMU(void* self, GLenum type, GLsizei count, const char* packedStrings, GLuint packedLen) {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     return ctx->glCreateShaderProgramv(type, 1, &packedStrings);
+}
+
+void GLESv2Decoder::s_glDrawArraysIndirectDataAEMU(void* self, GLenum mode, const void* indirect, GLuint datalen) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDrawArraysIndirect(mode, indirect);
+}
+
+void GLESv2Decoder::s_glDrawArraysIndirectOffsetAEMU(void* self, GLenum mode, GLuint offset) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDrawArraysIndirect(mode, SafePointerFromUInt(offset));
+}
+
+void GLESv2Decoder::s_glDrawElementsIndirectDataAEMU(void* self, GLenum mode, GLenum type, const void* indirect, GLuint datalen) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDrawElementsIndirect(mode, type, indirect);
+}
+
+void GLESv2Decoder::s_glDrawElementsIndirectOffsetAEMU(void* self, GLenum mode, GLenum type, GLuint offset) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDrawElementsIndirect(mode, type, SafePointerFromUInt(offset));
 }
