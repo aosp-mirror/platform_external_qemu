@@ -44,6 +44,10 @@
 #include <signal.h>
 #endif
 
+#ifdef __APPLE__
+#include <copyfile.h>
+#endif
+
 #define  D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
 
 #ifdef _WIN32
@@ -268,33 +272,48 @@ path_empty_file( const char*  path )
 APosixStatus
 path_copy_file( const char*  dest, const char*  source )
 {
-    int  fd, fs, result = -1;
-
-    /* if the destination doesn't exist, create it */
-    if (android_access(source, F_OK) < 0 || path_empty_file(dest) < 0) {
-        return -1;
-    }
-
     if (android_access(source, R_OK) < 0) {
         D("%s: source file is un-readable: %s\n",
           __FUNCTION__, source);
+
+        // If the |source| exists but unreadable, create empty |dest| before
+        // failing.
+        if (android_access(source, F_OK) == 0) {
+            path_empty_file(dest);
+        }
+
         return -1;
     }
 
 #ifdef _WIN32
-    fd = android_open(dest, _O_RDWR | _O_BINARY);
-    fs = android_open(source, _O_RDONLY |  _O_BINARY);
-#else
-    fd = creat(dest, S_IRUSR | S_IWUSR);
-    fs = open(source, S_IREAD);
-#endif
+    if (!::CopyFileW(Win32UnicodeString(source).c_str(),
+                     Win32UnicodeString(dest).c_str(), false)) {
+        D("Failed to copy '%s' to '%s': %u", source, dest, ::GetLastError());
+        return -1;
+    }
+    return 0;
+#elif defined(__APPLE__)
+    if (copyfile(source, dest, nullptr, COPYFILE_DATA) != 0) {
+        D("Failed to copy '%s' to '%s': %s (%d)",
+               source, dest, strerror(errno), errno);
+        return -1;
+    }
+    return 0;
+#else  // linux
+    int result = -1;
+    const int fd = creat(dest, S_IRUSR | S_IWUSR);
+    const int fs = open(source, S_IREAD);
     if (fs >= 0 && fd >= 0) {
-        char buf[4096];
-        ssize_t total = 0;
+        struct stat st;
+        if (HANDLE_EINTR(fstat(fs, &st)) == 0) {
+            posix_fadvise(fs, 0, st.st_size, POSIX_FADV_WILLNEED);
+            posix_fadvise(fs, 0, st.st_size, POSIX_FADV_SEQUENTIAL);
+        }
+        char buf[65536];
         ssize_t n;
         result = 0; /* success */
-        while ((n = read(fs, buf, 4096)) > 0) {
-            if (write(fd, buf, n) != n) {
+        while ((n = HANDLE_EINTR(read(fs, buf, sizeof(buf)))) != 0) {
+            if (HANDLE_EINTR(write(fd, buf, n)) != n) {
                 /* write failed. Make it return -1 so that an
                  * empty file be created. */
                 D("Failed to copy '%s' to '%s': %s (%d)",
@@ -302,7 +321,6 @@ path_copy_file( const char*  dest, const char*  source )
                 result = -1;
                 break;
             }
-            total += n;
         }
     }
 
@@ -313,6 +331,7 @@ path_copy_file( const char*  dest, const char*  source )
         close(fd);
     }
     return result;
+#endif
 }
 
 
