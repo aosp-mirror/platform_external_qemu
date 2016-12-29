@@ -25,7 +25,8 @@ custom_preprocesses = {
 
 "glVertexAttribDivisor" : """
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
-    ctx->setDivisor(index,divisor);
+    ctx->setVertexAttribBindingIndex(index, index);
+    ctx->setVertexAttribDivisor(index, divisor);
 """,
 
 "glRenderbufferStorageMultisample" : """

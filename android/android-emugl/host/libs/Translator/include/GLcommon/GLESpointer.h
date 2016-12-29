@@ -48,6 +48,11 @@ public:
                    bool normalize = false,
                    bool isInt = false);
     void setDivisor(GLuint divisor);
+    void setBindingIndex(GLuint bindingindex);
+    void setFormat(GLint size, GLenum type,
+                   bool normalize,
+                   GLuint reloffset,
+                   bool isInt);
     bool isEnable() const;
     bool isNormalize() const;
     bool isVBO() const;
@@ -67,5 +72,7 @@ private:
     unsigned int m_buffOffset = 0;
     bool m_isInt = false;
     GLuint m_divisor = 0;
+    GLuint m_bindingIndex = 0;
+    GLuint m_reloffset = 0;
 };
 #endif
