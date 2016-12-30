@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "37b082be_64e77b29",
+        "filename": "aio-win32.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-12-30T00:49:38Z",
+      "side": 1,
+      "message": "I\u0027m having trouble getting it; is this saying we should still call aio_notify on removal?",
+      "range": {
+        "startLine": 108,
+        "startChar": 58,
+        "endLine": 109,
+        "endChar": 68
+      },
+      "revId": "94a3b3e14fd20a8c90d88c3a54e3411a65e35b37",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
