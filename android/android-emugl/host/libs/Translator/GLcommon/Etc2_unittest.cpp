@@ -24,7 +24,7 @@ protected:
     static const int cEncodedSize = 8;
     void decodeTest(const etc1_byte* bytesEncoded, const etc1_byte* expectedDecoded) {
         etc1_byte decoded[cPatchSize];
-        etc2_decode_block(bytesEncoded, decoded);
+        etc2_decode_rgb_block(bytesEncoded, decoded);
         for (int i=0; i<cPatchSize; i++) {
             EXPECT_EQ(expectedDecoded[i], decoded[i]);
         }
