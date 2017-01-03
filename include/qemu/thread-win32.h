@@ -3,6 +3,15 @@
 
 #include <windows.h>
 
+#ifdef CONFIG_WIN32_VISTA_SYNCHRONIZATION
+struct QemuMutex {
+    SRWLOCK lock;
+};
+
+struct QemuCond {
+    CONDITION_VARIABLE cv;
+};
+#else
 struct QemuMutex {
     CRITICAL_SECTION lock;
     LONG owner;
@@ -13,6 +22,7 @@ struct QemuCond {
     HANDLE sema;
     HANDLE continue_event;
 };
+#endif
 
 struct QemuSemaphore {
     HANDLE sema;
