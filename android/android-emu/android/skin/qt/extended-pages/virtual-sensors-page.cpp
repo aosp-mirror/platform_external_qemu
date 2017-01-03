@@ -94,7 +94,6 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     connect(this, &VirtualSensorsPage::updateResultingValuesRequired,
             this, &VirtualSensorsPage::updateResultingValues);
 
-
     connect(&mAccelerationTimer, SIGNAL(timeout()),
             this, SLOT(updateLinearAcceleration()));
     mAccelerationTimer.setInterval(100);
@@ -180,6 +179,12 @@ void VirtualSensorsPage::resetAccelerometerRotationFromSkinLayout(
         default:
             assert(0);
         }
+        // Rotation reset handler notifies the subscribers, and one of the
+        // subscribers is the main window which handles that as a regular
+        // rotation command. As we're already handling a rotation command, that
+        // would make us to handle it again for the second time, which is
+        // very CPU-intensive.
+        QSignalBlocker blockSignals(this);
         resetAccelerometerRotation(
                 QQuaternion::fromAxisAndAngle(
                     0.0, 0.0, 1.0, rot));
@@ -189,7 +194,7 @@ void VirtualSensorsPage::resetAccelerometerRotation(const QQuaternion& rotation)
     if (!mFirstShow) mVirtualSensorsUsed = true;
     mUi->accelWidget->setPosition(QVector2D(0.0, 0.0));
     mUi->accelWidget->setRotation(rotation);
-    mUi->accelWidget->renderFrame();
+    mUi->accelWidget->update();
     onPhoneRotationChanged();
     onPhonePositionChanged();
 }
@@ -301,7 +306,7 @@ void VirtualSensorsPage::setAccelerometerRotationFromSliders() {
             mUi->rollSlider->getValue(),
             mUi->yawSlider->getValue()));
     updateAccelerometerValues();
-    mUi->accelWidget->renderFrame();
+    mUi->accelWidget->update();
 }
 
 void VirtualSensorsPage::on_yawSlider_valueChanged(double) {
@@ -321,7 +326,7 @@ void VirtualSensorsPage::setPhonePositionFromSliders() {
                                  mUi->positionYSlider->getValue(),
                                  0.0);
     mUi->accelWidget->setPosition(mCurrentPosition.toVector2D());
-    mUi->accelWidget->renderFrame();
+    mUi->accelWidget->update();
 }
 
 void VirtualSensorsPage::on_positionXSlider_valueChanged(double) {
@@ -392,7 +397,13 @@ void VirtualSensorsPage::updateAccelerometerValues() {
     // Emit a signal to update the UI. We cannot just update
     // the UI here because the current function is sometimes
     // called from a non-Qt thread.
-    emit updateResultingValuesRequired(acceleration, device_magnetic_vector);
+    // We only block signals for this widget if it's running on the Qt thread,
+    // so it's Ok to call the connected function directly.
+    if (signalsBlocked()) {
+        updateResultingValues(acceleration, device_magnetic_vector);
+    } else {
+        emit updateResultingValuesRequired(acceleration, device_magnetic_vector);
+    }
 }
 
 void VirtualSensorsPage::updateResultingValues(QVector3D acceleration,
