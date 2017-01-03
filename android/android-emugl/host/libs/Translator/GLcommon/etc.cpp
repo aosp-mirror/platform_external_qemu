@@ -111,7 +111,7 @@
      page 289
  */
 
-static const int kModifierTable[] = {
+static const int kRGBModifierTable[] = {
 /* 0 */2, 8, -2, -8,
 /* 1 */5, 17, -5, -17,
 /* 2 */9, 29, -9, -29,
@@ -120,6 +120,25 @@ static const int kModifierTable[] = {
 /* 5 */24, 80, -24, -80,
 /* 6 */33, 106, -33, -106,
 /* 7 */47, 183, -47, -183 };
+
+static const int kAlphaModifierTable[] = {
+/* 0 */ -3, -6, -9, -15, 2, 5, 8, 14,
+/* 1 */ -3, -7, -10, -13, 2, 6, 9, 12,
+/* 2 */ -2, -5, -8, -13, 1, 4, 7, 12,
+/* 3 */ -2, -4, -6, -13, 1, 3, 5, 12,
+/* 4 */ -3, -6, -8, -12, 2, 5, 7, 11,
+/* 5 */ -3, -7, -9, -11, 2, 6, 8, 10,
+/* 6 */ -4, -7, -8, -11, 3, 6, 7, 10,
+/* 7 */ -3, -5, -8, -11, 2, 4, 7, 10,
+/* 8 */ -2, -6, -8, -10, 1, 5, 7, 9,
+/* 9 */ -2, -5, -8, -10, 1, 4, 7, 9,
+/* 10 */ -2, -4, -8, -10, 1, 3, 7, 9,
+/* 11 */ -2, -5, -7, -10, 1, 4, 6, 9,
+/* 12 */ -3, -4, -7, -10, 2, 3, 6, 9,
+/* 13 */ -1, -2, -3, -10, 0, 1, 2, 9,
+/* 14 */ -4, -6, -8, -9, 3, 5, 7, 8,
+/* 15 */ -3, -5, -7, -9, 2, 4, 6 8
+};
 
 static const int kLookup[8] = { 0, 1, 2, 3, -4, -3, -2, -1 };
 
@@ -319,7 +338,7 @@ static void etc2_decode_block_P(etc1_uint32 high, etc1_uint32 low,
 //     from https://www.khronos.org/registry/gles/specs/3.0/es_spec_3.0.4.pdf
 //     page 289
 
-void etc2_decode_block(const etc1_byte* pIn, etc1_byte* pOut) {
+void etc2_decode_rgb_block(const etc1_byte* pIn, etc1_byte* pOut) {
     etc1_uint32 high = (pIn[0] << 24) | (pIn[1] << 16) | (pIn[2] << 8) | pIn[3];
     etc1_uint32 low = (pIn[4] << 24) | (pIn[5] << 16) | (pIn[6] << 8) | pIn[7];
     int r1, r2, g1, g2, b1, b2;
@@ -357,11 +376,17 @@ void etc2_decode_block(const etc1_byte* pIn, etc1_byte* pOut) {
     }
     int tableIndexA = 7 & (high >> 5);
     int tableIndexB = 7 & (high >> 2);
-    const int* tableA = kModifierTable + tableIndexA * 4;
-    const int* tableB = kModifierTable + tableIndexB * 4;
+    const int* tableA = kRGBModifierTable + tableIndexA * 4;
+    const int* tableB = kRGBModifierTable + tableIndexB * 4;
     bool flipped = (high & 1) != 0;
     decode_subblock(pOut, r1, g1, b1, tableA, low, false, flipped);
     decode_subblock(pOut, r2, g2, b2, tableB, low, true, flipped);
+}
+
+void etc2_decode_alpha_block(const etc1_byte* pIn, etc1_byte* pOut) {
+    int base_codeword = pIn[0];
+    int multiplier = pIn[1] >> 4;
+    int tblIdx = pIn[1] & 15;
 }
 
 typedef struct {
@@ -576,7 +601,7 @@ void etc_encode_block_helper(const etc1_byte* pIn, etc1_uint32 inMask,
 
     int originalHigh = pCompressed->high;
 
-    const int* pModifierTable = kModifierTable;
+    const int* pModifierTable = kRGBModifierTable;
     for (int i = 0; i < 8; i++, pModifierTable += 4) {
         etc_compressed temp;
         temp.score = 0;
@@ -586,7 +611,7 @@ void etc_encode_block_helper(const etc1_byte* pIn, etc1_uint32 inMask,
                 pBaseColors, pModifierTable);
         take_best(pCompressed, &temp);
     }
-    pModifierTable = kModifierTable;
+    pModifierTable = kRGBModifierTable;
     etc_compressed firstHalf = *pCompressed;
     for (int i = 0; i < 8; i++, pModifierTable += 4) {
         etc_compressed temp;
@@ -720,7 +745,7 @@ int etc2_decode_image(const etc1_byte* pIn, etc1_byte* pOut,
             if (xEnd > 4) {
                 xEnd = 4;
             }
-            etc2_decode_block(pIn, block);
+            etc2_decode_rgbs_block(pIn, block);
             pIn += ETC1_ENCODED_BLOCK_SIZE;
             for (etc1_uint32 cy = 0; cy < yEnd; cy++) {
                 const etc1_byte* q = block + (cy * 4) * 3;
