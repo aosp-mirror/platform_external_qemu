@@ -111,7 +111,7 @@
      page 289
  */
 
-static const int kModifierTable[] = {
+static const int kRGBModifierTable[] = {
 /* 0 */2, 8, -2, -8,
 /* 1 */5, 17, -5, -17,
 /* 2 */9, 29, -9, -29,
@@ -120,6 +120,25 @@ static const int kModifierTable[] = {
 /* 5 */24, 80, -24, -80,
 /* 6 */33, 106, -33, -106,
 /* 7 */47, 183, -47, -183 };
+
+static const int kAlphaModifierTable[] = {
+/* 0 */ -3, -6, -9, -15, 2, 5, 8, 14,
+/* 1 */ -3, -7, -10, -13, 2, 6, 9, 12,
+/* 2 */ -2, -5, -8, -13, 1, 4, 7, 12,
+/* 3 */ -2, -4, -6, -13, 1, 3, 5, 12,
+/* 4 */ -3, -6, -8, -12, 2, 5, 7, 11,
+/* 5 */ -3, -7, -9, -11, 2, 6, 8, 10,
+/* 6 */ -4, -7, -8, -11, 3, 6, 7, 10,
+/* 7 */ -3, -5, -8, -11, 2, 4, 7, 10,
+/* 8 */ -2, -6, -8, -10, 1, 5, 7, 9,
+/* 9 */ -2, -5, -8, -10, 1, 4, 7, 9,
+/* 10 */ -2, -4, -8, -10, 1, 3, 7, 9,
+/* 11 */ -2, -5, -7, -10, 1, 4, 6, 9,
+/* 12 */ -3, -4, -7, -10, 2, 3, 6, 9,
+/* 13 */ -1, -2, -3, -10, 0, 1, 2, 9,
+/* 14 */ -4, -6, -8, -9, 3, 5, 7, 8,
+/* 15 */ -3, -5, -7, -9, 2, 4, 6, 8
+};
 
 static const int kLookup[8] = { 0, 1, 2, 3, -4, -3, -2, -1 };
 
@@ -319,7 +338,7 @@ static void etc2_decode_block_P(etc1_uint32 high, etc1_uint32 low,
 //     from https://www.khronos.org/registry/gles/specs/3.0/es_spec_3.0.4.pdf
 //     page 289
 
-void etc2_decode_block(const etc1_byte* pIn, etc1_byte* pOut) {
+void etc2_decode_rgb_block(const etc1_byte* pIn, etc1_byte* pOut) {
     etc1_uint32 high = (pIn[0] << 24) | (pIn[1] << 16) | (pIn[2] << 8) | pIn[3];
     etc1_uint32 low = (pIn[4] << 24) | (pIn[5] << 16) | (pIn[6] << 8) | pIn[7];
     int r1, r2, g1, g2, b1, b2;
@@ -357,11 +376,34 @@ void etc2_decode_block(const etc1_byte* pIn, etc1_byte* pOut) {
     }
     int tableIndexA = 7 & (high >> 5);
     int tableIndexB = 7 & (high >> 2);
-    const int* tableA = kModifierTable + tableIndexA * 4;
-    const int* tableB = kModifierTable + tableIndexB * 4;
+    const int* tableA = kRGBModifierTable + tableIndexA * 4;
+    const int* tableB = kRGBModifierTable + tableIndexB * 4;
     bool flipped = (high & 1) != 0;
     decode_subblock(pOut, r1, g1, b1, tableA, low, false, flipped);
     decode_subblock(pOut, r2, g2, b2, tableB, low, true, flipped);
+}
+
+void etc2_decode_alpha_block(const etc1_byte* pIn, etc1_byte* pOut) {
+    int base_codeword = pIn[0];
+    int multiplier = pIn[1] >> 4;
+    int tblIdx = pIn[1] & 15;
+    const int* table = kAlphaModifierTable + tblIdx * 8;
+    const etc1_byte* p = pIn + 2;
+    // position (within a byte) of the least significant bit of the next index
+    int bitOffset = 5;
+    for (int i = 0; i < 16; i ++) {
+        int modifier = 0;
+        if (bitOffset < 0) { // (Part of) the index is in the next byte.
+            modifier += p[0] << (-bitOffset);
+            p ++;
+            bitOffset += 8;
+        }
+        modifier += p[0] >> bitOffset;
+        modifier &= 7;
+        bitOffset -= 3; // move to the next index
+        *pOut = clamp(base_codeword + table[modifier] * multiplier);
+        pOut ++;
+    }
 }
 
 typedef struct {
@@ -576,7 +618,7 @@ void etc_encode_block_helper(const etc1_byte* pIn, etc1_uint32 inMask,
 
     int originalHigh = pCompressed->high;
 
-    const int* pModifierTable = kModifierTable;
+    const int* pModifierTable = kRGBModifierTable;
     for (int i = 0; i < 8; i++, pModifierTable += 4) {
         etc_compressed temp;
         temp.score = 0;
@@ -586,7 +628,7 @@ void etc_encode_block_helper(const etc1_byte* pIn, etc1_uint32 inMask,
                 pBaseColors, pModifierTable);
         take_best(pCompressed, &temp);
     }
-    pModifierTable = kModifierTable;
+    pModifierTable = kRGBModifierTable;
     etc_compressed firstHalf = *pCompressed;
     for (int i = 0; i < 8; i++, pModifierTable += 4) {
         etc_compressed temp;
@@ -636,6 +678,10 @@ void etc1_encode_block(const etc1_byte* pIn, etc1_uint32 inMask,
 
 etc1_uint32 etc1_get_encoded_data_size(etc1_uint32 width, etc1_uint32 height) {
     return (((width + 3) & ~3) * ((height + 3) & ~3)) >> 1;
+}
+
+etc1_uint32 etc2_get_encoded_data_size_rgba8(etc1_uint32 width, etc1_uint32 height) {
+    return ((width + 3) & ~3) * ((height + 3) & ~3);
 }
 
 // Encode an entire image.
@@ -699,16 +745,17 @@ int etc1_encode_image(const etc1_byte* pIn, etc1_uint32 width, etc1_uint32 heigh
 //        large enough to store entire image.
 
 
-int etc2_decode_image(const etc1_byte* pIn, etc1_byte* pOut,
+int etc2_decode_image(const etc1_byte* pIn, bool isWithAlpha,
+        etc1_byte* pOut,
         etc1_uint32 width, etc1_uint32 height,
-        etc1_uint32 pixelSize, etc1_uint32 stride) {
-    if (pixelSize < 2 || pixelSize > 3) {
-        return -1;
-    }
+        etc1_uint32 stride) {
     etc1_byte block[ETC1_DECODED_BLOCK_SIZE];
+    etc1_byte alphaBlock[ETC2_DECODED_ALPHA_BLOCK_SIZE];
 
     etc1_uint32 encodedWidth = (width + 3) & ~3;
     etc1_uint32 encodedHeight = (height + 3) & ~3;
+
+    int pixelSize = isWithAlpha ? 4 : 3;
 
     for (etc1_uint32 y = 0; y < encodedHeight; y += 4) {
         etc1_uint32 yEnd = height - y;
@@ -720,22 +767,27 @@ int etc2_decode_image(const etc1_byte* pIn, etc1_byte* pOut,
             if (xEnd > 4) {
                 xEnd = 4;
             }
-            etc2_decode_block(pIn, block);
+            if (isWithAlpha) {
+                etc2_decode_alpha_block(pIn, alphaBlock);
+                pIn += ETC2_ENCODE_ALPHA_BLOCK_SIZE;
+            }
+            etc2_decode_rgb_block(pIn, block);
             pIn += ETC1_ENCODED_BLOCK_SIZE;
             for (etc1_uint32 cy = 0; cy < yEnd; cy++) {
                 const etc1_byte* q = block + (cy * 4) * 3;
                 etc1_byte* p = pOut + pixelSize * x + stride * (y + cy);
-                if (pixelSize == 3) {
-                    memcpy(p, q, xEnd * 3);
-                } else {
+                if (isWithAlpha) {
+                    const etc1_byte* qa = alphaBlock + cy * 4;
                     for (etc1_uint32 cx = 0; cx < xEnd; cx++) {
-                        etc1_byte r = *q++;
-                        etc1_byte g = *q++;
-                        etc1_byte b = *q++;
-                        etc1_uint32 pixel = ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3);
-                        *p++ = (etc1_byte) pixel;
-                        *p++ = (etc1_byte) (pixel >> 8);
+                        // copy rgb data
+                        memcpy(p, q, 3);
+                        p += 3;
+                        q += 3;
+                        // copy alpha
+                        *p++ += *qa++;
                     }
+                } else {
+                    memcpy(p, q, xEnd * 3);
                 }
             }
         }
