@@ -1,0 +1,6 @@
+This directory contains mmap() implementation for Windows, taken from:
+
+https://code.google.com/archive/p/mman-win32/
+https://github.com/witwall/mman-win32 (mirror)
+
+on 2016-12-29.

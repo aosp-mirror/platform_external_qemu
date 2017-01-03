@@ -42,7 +42,8 @@ LOCAL_STATIC_LIBRARIES := \
     emulator-libext4_utils \
     emulator-libsparse \
     emulator-libselinux \
-    emulator-zlib
+    emulator-zlib \
+    $(LIBMMAN_WIN32_STATIC_LIBRARIES)
 $(call end-emulator-program)
 
 LOCAL_PATH := $(OLD_LOCAL_PATH)

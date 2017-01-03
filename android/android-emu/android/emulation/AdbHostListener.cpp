@@ -48,7 +48,7 @@ bool AdbHostListener::reset(int adbPort) {
         }
         mServer = AsyncSocketServer::createTcpLoopbackServer(
                 adbPort,
-                [this](int port) { return this->onHostServerConnection(port); },
+                [this](int socket) { return onHostServerConnection(socket); },
                 mode,
                 android::base::ThreadLooper::get());
         if (!mServer) {

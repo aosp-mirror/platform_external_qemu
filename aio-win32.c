@@ -52,23 +52,25 @@ void aio_set_fd_handler(AioContext *ctx,
 
     /* Are we deleting the fd handler? */
     if (!io_read && !io_write) {
-        if (node) {
-            assert(!node->io_notify);
-            /* Detach the event */
-            WSAEventSelect(node->pfd.fd, NULL, 0);
+        if (!node) {
+            return;
+        }
 
-            /* If the lock is held, just mark the node as deleted */
-            if (ctx->walking_handlers) {
-                node->deleted = 1;
-                node->pfd.revents = 0;
-            } else {
-                /* Otherwise, delete it for real.  We can't just mark it as
-                 * deleted because deleted nodes are only cleaned up after
-                 * releasing the walking_handlers lock.
-                 */
-                QLIST_REMOVE(node, node);
-                g_free(node);
-            }
+        assert(!node->io_notify);
+        /* Detach the event */
+        WSAEventSelect(node->pfd.fd, NULL, 0);
+
+        /* If the lock is held, just mark the node as deleted */
+        if (ctx->walking_handlers) {
+            node->deleted = 1;
+            node->pfd.revents = 0;
+        } else {
+            /* Otherwise, delete it for real.  We can't just mark it as
+             * deleted because deleted nodes are only cleaned up after
+             * releasing the walking_handlers lock.
+             */
+            QLIST_REMOVE(node, node);
+            g_free(node);
         }
     } else {
         HANDLE event;
@@ -100,9 +102,13 @@ void aio_set_fd_handler(AioContext *ctx,
         WSAEventSelect(node->pfd.fd, event,
                        (io_read ? FD_READ : 0) | FD_ACCEPT | FD_CLOSE |
                        FD_CONNECT | (io_write ? FD_WRITE : 0) | FD_OOB);
-    }
 
-    aio_notify(ctx);
+        /* Only notify the context if we've added a new event. For the removed
+         * one the worst thing that can happen if we don't notify it is that
+         * it's the one that wakes context from waiting - but that's exactly
+         * what would happen if we call aio_notify() on removals. */
+        aio_notify(ctx);
+    }
 }
 
 void aio_set_event_notifier(AioContext *ctx,

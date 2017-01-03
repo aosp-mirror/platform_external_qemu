@@ -24,6 +24,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -35,9 +36,10 @@
 #include "sparse_format.h"
 
 #ifndef USE_MINGW
-#include <sys/mman.h>
 #define O_BINARY 0
 #else
+#define NOMINMAX
+#include <windows.h>
 #define ftruncate64 ftruncate
 #endif
 
@@ -64,6 +66,7 @@ struct output_file_ops {
 	int (*skip)(struct output_file *, int64_t);
 	int (*pad)(struct output_file *, int64_t);
 	int (*write)(struct output_file *, void *, int);
+	int (*resize)(struct output_file *, int64_t);
 	void (*close)(struct output_file *);
 };
 
@@ -101,6 +104,7 @@ struct output_file_gz {
 struct output_file_normal {
 	struct output_file out;
 	int fd;
+	int sparse;
 };
 
 #define to_output_file_normal(_o) \
@@ -120,6 +124,17 @@ static int file_open(struct output_file *out, int fd)
 	struct output_file_normal *outn = to_output_file_normal(out);
 
 	outn->fd = fd;
+#ifdef USE_MINGW
+	// Try to make the file sparse on Windows: we know that it will contain
+	// lots of zeroes, so it's not worth writing them all out.
+	HANDLE h = (HANDLE)_get_osfhandle(outn->fd);
+	DWORD dummy;
+	FILE_SET_SPARSE_BUFFER setSparse = { TRUE };
+	if (DeviceIoControl(h, FSCTL_SET_SPARSE, &setSparse, sizeof(setSparse),
+						NULL, 0, &dummy, NULL)) {
+		outn->sparse = 1;
+	}
+#endif
 	return 0;
 }
 
@@ -138,37 +153,61 @@ static int file_skip(struct output_file *out, int64_t cnt)
 
 static int file_pad(struct output_file *out, int64_t len)
 {
-	int ret;
 	struct output_file_normal *outn = to_output_file_normal(out);
 #ifdef USE_MINGW
-	/* mingw-w64 does free space check before enlarge file, that check
-	 * doesn't work on wine of Ubuntu 14.04. As a work around, we always
-	 * make sure the actual file size is larger than len so mingw will
-	 * bypass that free space check. */
-	ret = lseek64(outn->fd, len, SEEK_SET);
-	/* It seems lseek64 doesn't work on windows, in this case, just
-	 * ignore the error */
-	if (ret >= 0) {
-		char c = '\0';
-		ret = write(outn->fd, &c, 1);
-		if (ret < 0) {
-			error_errno("write");
-			return -1;
-		}
+	HANDLE h = (HANDLE)_get_osfhandle(outn->fd);
+	LARGE_INTEGER li;
+	li.HighPart = 0;
+	li.LowPart = SetFilePointer(h, 0, &li.HighPart, FILE_CURRENT);
+	if (li.LowPart == 0xffffffffUL && GetLastError() != NO_ERROR) {
+		return -(errno = EIO);
 	}
-#endif
-	ret = ftruncate64(outn->fd, len);
+
+	LONG high = len >> 32;
+	if (!SetFilePointer(h, (DWORD) len, &high, FILE_BEGIN)) {
+		return -(errno = EIO);
+	}
+	const BOOL res = SetEndOfFile(h);
+
+	// Try to restore the old position unconditionally.
+	SetFilePointer(h, li.LowPart, &li.HighPart, FILE_BEGIN);
+	return res ? 0 : -(errno = EIO);
+#else
+	int ret = ftruncate64(outn->fd, len);
 	if (ret < 0) {
 		return -errno;
 	}
 
 	return 0;
+#endif
 }
+
+#ifdef USE_MINGW
+
+static bool is_zeroed(void* ptr, int len) {
+	const char* data = ptr;
+	const char* const end = data + len;
+	for (; data != end; ++data) {
+		if (*data != 0) {
+			return false;
+		}
+	}
+	return true;
+}
+#endif
 
 static int file_write(struct output_file *out, void *data, int len)
 {
 	int ret;
 	struct output_file_normal *outn = to_output_file_normal(out);
+
+#ifdef USE_MINGW
+	if (outn->sparse && is_zeroed(data, len)) {
+		// Files are written in sequential order, so we know this range is
+		// already empty and we can skip it.
+		return file_skip(out, len);
+	}
+#endif
 
 	ret = write(outn->fd, data, len);
 	if (ret < 0) {
@@ -194,6 +233,7 @@ static struct output_file_ops file_ops = {
 	.skip = file_skip,
 	.pad = file_pad,
 	.write = file_write,
+	.resize = file_pad,
 	.close = file_close,
 };
 
@@ -606,6 +646,10 @@ static int output_file_init(struct output_file *out, int block_size,
 		if (ret < 0) {
 			goto err_write;
 		}
+	} else if (out->ops->resize) {
+		// Preallocate the disk space if file supports resize().
+		// Don't worry if it fails - that's just an optimization attempt.
+		(void)out->ops->resize(out, ALIGN(out->len, out->block_size));
 	}
 
 	return 0;
@@ -714,46 +758,22 @@ int write_fd_chunk(struct output_file *out, unsigned int len,
 	int ret;
 	int64_t aligned_offset;
 	int aligned_diff;
-	int buffer_size;
 	char *ptr;
 
 	aligned_offset = offset & ~(4096 - 1);
 	aligned_diff = offset - aligned_offset;
-	buffer_size = len + aligned_diff;
 
-#ifndef USE_MINGW
+	int buffer_size = len + aligned_diff;
 	char *data = mmap64(NULL, buffer_size, PROT_READ, MAP_SHARED, fd,
 			aligned_offset);
 	if (data == MAP_FAILED) {
 		return -errno;
 	}
 	ptr = data + aligned_diff;
-#else
-	off64_t pos;
-	char *data = malloc(len);
-	if (!data) {
-		return -errno;
-	}
-	pos = lseek64(fd, offset, SEEK_SET);
-	if (pos < 0) {
-                free(data);
-		return -errno;
-	}
-	ret = read_all(fd, data, len);
-	if (ret < 0) {
-                free(data);
-		return ret;
-	}
-	ptr = data;
-#endif
 
 	ret = out->sparse_ops->write_data_chunk(out, len, ptr);
 
-#ifndef USE_MINGW
 	munmap(data, buffer_size);
-#else
-	free(data);
-#endif
 
 	return ret;
 }

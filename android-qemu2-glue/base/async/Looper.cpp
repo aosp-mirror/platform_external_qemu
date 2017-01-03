@@ -100,7 +100,7 @@ public:
 
         virtual ~FdWatch() {
             clearPending();
-            qemu_set_fd_handler(mFd, NULL, NULL, NULL);
+            updateEvents(0);
         }
 
         virtual void addEvents(unsigned events) {
@@ -132,9 +132,13 @@ public:
 
     private:
         void updateEvents(unsigned events) {
+            if (events == mWantedEvents) {
+                return;
+            }
             IOHandler* cbRead = (events & kEventRead) ? handleRead : NULL;
             IOHandler* cbWrite = (events & kEventWrite) ? handleWrite : NULL;
-            qemu_set_fd_handler(mFd, cbRead, cbWrite, this);
+            qemu_set_fd_handler(mFd, cbRead, cbWrite,
+                                (cbRead || cbWrite) ? this : nullptr);
             mWantedEvents = events;
         }
 
