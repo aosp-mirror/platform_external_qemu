@@ -1,0 +1,515 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "37b082be_63768746",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ANGLEShaderParser.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "lazy instances to make sure we don\u0027t create what we don\u0027t use?",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 34
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_a36c7f77",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ANGLEShaderParser.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "should this be a different constant?",
+      "range": {
+        "startLine": 98,
+        "startChar": 63,
+        "endLine": 98,
+        "endChar": 86
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_23788f2b",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ANGLEShaderParser.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "move it into the \u0027default\u0027?",
+      "range": {
+        "startLine": 126,
+        "startChar": 4,
+        "endLine": 127,
+        "endChar": 78
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_a3955f1f",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "const char[] is just more natural, plus it doesn\u0027t require compiler to create a separate pointer variable",
+      "range": {
+        "startLine": 21,
+        "startChar": 17,
+        "endLine": 21,
+        "endChar": 25
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_a3bebf93",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "nit: AFAIK we don\u0027t use prefixes for function names",
+      "range": {
+        "startLine": 25,
+        "startChar": 19,
+        "endLine": 25,
+        "endChar": 20
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_23a16f7b",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "nit: nullptr",
+      "range": {
+        "startLine": 36,
+        "startChar": 27,
+        "endLine": 36,
+        "endChar": 31
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_231c0fdc",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "nit: you could check for 0 |fbo| here and avoid complicated conditions at the callsite",
+      "range": {
+        "startLine": 263,
+        "startChar": 3,
+        "endLine": 264,
+        "endChar": 47
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_23aacf4f",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "nit: some common constant?",
+      "range": {
+        "startLine": 296,
+        "startChar": 0,
+        "endLine": 297,
+        "endChar": 34
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_830dc3b1",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "isn\u0027t just \"sShouldEnableSRGB(ctx, read_fbo) || sShouldEnableSRGB(ctx, draw_fbo)\" ?",
+      "range": {
+        "startLine": 300,
+        "startChar": 8,
+        "endLine": 303,
+        "endChar": 43
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_636c4745",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "just curious if it\u0027s possible that these two are equal",
+      "range": {
+        "startLine": 302,
+        "startChar": 32,
+        "endLine": 303,
+        "endChar": 38
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_835f038e",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 332,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "should this go inside the \"if(!globalname)\" condition? and you\u0027ve already got a pointer to framebuffer data there",
+      "range": {
+        "startLine": 328,
+        "startChar": 7,
+        "endLine": 332,
+        "endChar": 38
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_e357d76e",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 971,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "nit",
+      "range": {
+        "startLine": 971,
+        "startChar": 85,
+        "endLine": 971,
+        "endChar": 100
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_a34b1fca",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 1401,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "this looks like remains of something that\u0027s gone",
+      "range": {
+        "startLine": 1396,
+        "startChar": 0,
+        "endLine": 1401,
+        "endChar": 26
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_23b08f8c",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 1405,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "break?",
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_63ae8737",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 1426,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "break?",
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_033c7320",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 1433,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "nit: please add () - ((x) ? GL_TRUE : GL_FALSE);",
+      "range": {
+        "startLine": 1433,
+        "startChar": 14,
+        "endLine": 1433,
+        "endChar": 36
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_43ab4b26",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 1514,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "break?",
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_83caa306",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 1582,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 1582,
+        "startChar": 0,
+        "endLine": 1582,
+        "endChar": 52
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_a331df1e",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 2351,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "FYI: you can return an std::pair\u003cint, int\u003e here.\nit would be like:\n{\n ...\n return {major, minor};\n}",
+      "range": {
+        "startLine": 2351,
+        "startChar": 7,
+        "endLine": 2351,
+        "endChar": 11
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_63520756",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 2367,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "1. this code is very inefficient, it calls strstr 3 times, twice for the same value.\n2. FYI: you can check the pattern in sscanf():\n\nif (sscanf(ver, \"%*s#version[ \\t]%d%*s\\n%n\", \u0026ver, \u0026count) !\u003d 2) { ... }",
+      "range": {
+        "startLine": 2365,
+        "startChar": 4,
+        "endLine": 2367,
+        "endChar": 51
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_233defec",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "there are so many of these, it looks to me like it\u0027s worth to making a GlVersion class to encapsulate them",
+      "range": {
+        "startLine": 29,
+        "startChar": 26,
+        "endLine": 29,
+        "endChar": 67
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_e336f70f",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "nit: this line is totally worthless",
+      "range": {
+        "startLine": 242,
+        "startChar": 0,
+        "endLine": 242,
+        "endChar": 25
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37b082be_23064f41",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 1,
+      "message": "|it| ?",
+      "range": {
+        "startLine": 252,
+        "startChar": 37,
+        "endLine": 252,
+        "endChar": 62
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

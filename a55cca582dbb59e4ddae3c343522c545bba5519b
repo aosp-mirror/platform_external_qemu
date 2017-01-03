@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "37b082be_63fd27f6",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 11
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-03T21:34:22Z",
+      "side": 0,
+      "message": "please comment it out with HUGE DO NOT SUBMIT instead of just removing",
+      "range": {
+        "startLine": 75,
+        "startChar": 0,
+        "endLine": 77,
+        "endChar": 5
+      },
+      "revId": "a55cca582dbb59e4ddae3c343522c545bba5519b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
