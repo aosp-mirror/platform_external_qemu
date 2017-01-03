@@ -54,25 +54,28 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
     switch (internalformat) {
         case GL_COMPRESSED_RGB8_ETC2:
         case GL_ETC1_RGB8_OES:
+        case GL_COMPRESSED_RGBA8_ETC2_EAC:
             {
-                GLint format = GL_RGB;
+                bool withAlpha = (internalformat == GL_COMPRESSED_RGBA8_ETC2_EAC);
+                int pixelSize = withAlpha ? 4 : 3;
+                GLint format = withAlpha ? GL_RGB : GL_RGBA;
                 GLint type = GL_UNSIGNED_BYTE;
 
-                GLsizei compressedSize = etc1_get_encoded_data_size(width, height);
+                GLsizei compressedSize = withAlpha ? etc2_get_encoded_data_size_rgba8(width, height)
+                            : etc1_get_encoded_data_size(width, height);
                 SET_ERROR_IF((compressedSize > imageSize), GL_INVALID_VALUE);
                 SET_ERROR_IF(!data,GL_INVALID_OPERATION);
 
                 const int32_t align = ctx->getUnpackAlignment()-1;
-                const int32_t bpr = ((width * 3) + align) & ~align;
+                const int32_t bpr = ((width * pixelSize) + align) & ~align;
                 const size_t size = bpr * height;
 
                 std::unique_ptr<etc1_byte[]> pOut(new etc1_byte[size]);
-                int res = etc2_decode_image((const etc1_byte*)data, pOut.get(), width, height, 3, bpr);
+                int res = etc2_decode_image((const etc1_byte*)data, withAlpha, pOut.get(), width, height, bpr);
                 SET_ERROR_IF(res!=0, GL_INVALID_VALUE);
                 glTexImage2DPtr(target,level,format,width,height,border,format,type,pOut.get());
             }
             break;
-            
         case GL_PALETTE4_RGB8_OES:
         case GL_PALETTE4_RGBA8_OES:
         case GL_PALETTE4_R5_G6_B5_OES:
