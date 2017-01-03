@@ -9,6 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android/base/ArraySize.h"
 #include "android/base/StringView.h"
 
 #include <gtest/gtest.h>
@@ -35,6 +36,15 @@ TEST(StringView, InitWithConstBuffer) {
     EXPECT_STREQ(kString, view.str());
     EXPECT_FALSE(view.empty());
     EXPECT_EQ(strlen(kString), view.size());
+}
+
+TEST(StringView, InitWithMutableBuffer) {
+    char string[128] = "Hello";
+    ASSERT_NE(stringLiteralLength(string), strlen(string));
+    StringView view(string);
+    EXPECT_STREQ(string, view.str());
+    EXPECT_FALSE(view.empty());
+    EXPECT_EQ(strlen(string), view.size());
 }
 
 namespace {

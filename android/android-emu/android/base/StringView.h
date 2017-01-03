@@ -81,6 +81,13 @@ public:
     constexpr StringView(const char (&buf)[size]) :
         mString(buf), mSize(size - 1) {}
 
+    // Ctor for non-const arrays, AKA buffers. These usually contain some
+    // string formatted at runtime, so call strlen() instead of using the
+    // buffer size.
+    template <size_t size>
+    constexpr StringView(char (&buf)[size]) :
+        mString(buf), mSize(strlen(buf)) {}
+
     // Constructor from a const char pointer. It has to be templated to make
     // sure the array-based one is chosen for an array - otherwise non-templated
     // overload always wins
