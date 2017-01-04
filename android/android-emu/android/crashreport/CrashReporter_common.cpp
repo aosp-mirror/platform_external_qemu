@@ -189,7 +189,7 @@ bool CrashReporter::attachFile(StringView sourceFullName,
     char fullName[PATH_MAX + 1];
     formatDataFileName(fullName, destBaseName);
 
-    return path_copy_file(fullName, sourceFullName.c_str()) >= 0;
+    return path_copy_file_safe(fullName, sourceFullName.c_str()) >= 0;
 }
 
 static void attachUptime() {

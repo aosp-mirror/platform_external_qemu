@@ -86,8 +86,9 @@ private:
 
     EGLState* mEGLState;
     bool mValid;
+    bool mEnableAA;
+    bool mFirstShow = true;
 
     std::unique_ptr<GLCanvas> mCanvas;
     std::unique_ptr<TextureDraw> mTextureDraw;
-    bool mEnableAA;
 };

@@ -134,7 +134,7 @@ bool HostCrashService::getHWInfo() {
 bool HostCrashService::getMemInfo() {
     // /proc/meminfo contains all the details we need so just upload that
     std::string file_path = PathUtils::join(getDataDirectory(), kMemInfoName);
-    return path_copy_file(file_path.c_str(), "/proc/meminfo") == 0;
+    return path_copy_file_safe(file_path.c_str(), "/proc/meminfo") == 0;
 }
 
 }  // namespace crashreport

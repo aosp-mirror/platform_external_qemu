@@ -252,24 +252,24 @@ void GLWidget::renderFrame() {
 
 void GLWidget::paintEvent(QPaintEvent*) {
     if (ensureInit()) {
-      renderFrame();
+        renderFrame();
     }
 }
 
 void GLWidget::showEvent(QShowEvent*) {
-    // When the widget first becomes visible, we render a frame,
+    // When the widget first becomes visible, we ask it to render a frame,
     // which will force the necessary initialization.
     // It is important to make sure that the widget is actually
     // visible on screen (at least for OS X) before doing any
     // initialization at all.
     // However, show events may be delivered when the widget
     // isn't visible yet, so we need an additional check.
-    if (isVisible() && !visibleRegion().isNull()) {
-        if (ensureInit()) {
-            renderFrame();
-        }
+    if (isVisible() && !visibleRegion().isNull() && mFirstShow) {
+        mFirstShow = false;
+        connect(window()->windowHandle(), SIGNAL(screenChanged(QScreen*)),
+                this, SLOT(handleScreenChange(QScreen*)));
+        update();
     }
-    connect(window()->windowHandle(), SIGNAL(screenChanged(QScreen*)), this, SLOT(handleScreenChange(QScreen*)));
 }
 
 void GLWidget::resizeEvent(QResizeEvent* e) {
@@ -288,7 +288,7 @@ void GLWidget::resizeEvent(QResizeEvent* e) {
             mGLES2));
         resizeGL(e->size().width() * devicePixelRatio(),
                  e->size().height() * devicePixelRatio());
-        renderFrame();
+        update();
     }
 }
 

@@ -9,6 +9,7 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+#include "android/base/ArraySize.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/utils/bufprint.h"
@@ -51,6 +52,7 @@
 #define  D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
 
 #ifdef _WIN32
+using android::base::arraySize;
 using android::base::Win32UnicodeString;
 #endif  // _WIN32
 
@@ -269,6 +271,60 @@ path_empty_file( const char*  path )
     return -1;
 }
 
+template <int BufferSize>
+APosixStatus path_copy_file_impl(const char*  dest, const char*  source) {
+    int result = -1;
+#ifdef _WIN32
+    int fs, fd;
+    {
+        wchar_t wideSrc[PATH_MAX + 1], wideDest[PATH_MAX + 1];
+        if (Win32UnicodeString::convertFromUtf8(wideSrc, arraySize(wideSrc),
+                                                source) < 0) {
+            return -1;
+        }
+        if (Win32UnicodeString::convertFromUtf8(wideDest, arraySize(wideDest),
+                                                dest) < 0) {
+            return -1;
+        }
+        fs = _wopen(wideSrc, _O_RDONLY | _O_BINARY);
+        fd = _wopen(wideDest, _O_RDWR | _O_BINARY);
+    }
+#else  // !_WIN32
+    const int fd = creat(dest, S_IRUSR | S_IWUSR);
+    const int fs = open(source, S_IREAD);
+#endif  // !_WIN32
+    if (fs >= 0 && fd >= 0) {
+#ifdef __linux__
+        struct stat st;
+        if (HANDLE_EINTR(fstat(fs, &st)) == 0) {
+            posix_fadvise(fs, 0, st.st_size, POSIX_FADV_WILLNEED);
+            posix_fadvise(fs, 0, st.st_size, POSIX_FADV_SEQUENTIAL);
+        }
+#endif  // __linux__
+        char buf[BufferSize];
+        ssize_t n;
+        result = 0; /* success */
+        while ((n = HANDLE_EINTR(read(fs, buf, sizeof(buf)))) != 0) {
+            if (HANDLE_EINTR(write(fd, buf, n)) != n) {
+                /* write failed. Make it return -1 so that an
+                 * empty file be created. */
+                D("Failed to copy '%s' to '%s': %s (%d)",
+                       source, dest, strerror(errno), errno);
+                result = -1;
+                break;
+            }
+        }
+    }
+
+    if (fs >= 0) {
+        close(fs);
+    }
+    if (fd >= 0) {
+        close(fd);
+    }
+    return result;
+}
+
 APosixStatus
 path_copy_file( const char*  dest, const char*  source )
 {
@@ -300,40 +356,14 @@ path_copy_file( const char*  dest, const char*  source )
     }
     return 0;
 #else  // linux
-    int result = -1;
-    const int fd = creat(dest, S_IRUSR | S_IWUSR);
-    const int fs = open(source, S_IREAD);
-    if (fs >= 0 && fd >= 0) {
-        struct stat st;
-        if (HANDLE_EINTR(fstat(fs, &st)) == 0) {
-            posix_fadvise(fs, 0, st.st_size, POSIX_FADV_WILLNEED);
-            posix_fadvise(fs, 0, st.st_size, POSIX_FADV_SEQUENTIAL);
-        }
-        char buf[65536];
-        ssize_t n;
-        result = 0; /* success */
-        while ((n = HANDLE_EINTR(read(fs, buf, sizeof(buf)))) != 0) {
-            if (HANDLE_EINTR(write(fd, buf, n)) != n) {
-                /* write failed. Make it return -1 so that an
-                 * empty file be created. */
-                D("Failed to copy '%s' to '%s': %s (%d)",
-                       source, dest, strerror(errno), errno);
-                result = -1;
-                break;
-            }
-        }
-    }
-
-    if (fs >= 0) {
-        close(fs);
-    }
-    if (fd >= 0) {
-        close(fd);
-    }
-    return result;
+    return path_copy_file_impl<65536>(dest, source);
 #endif
 }
 
+APosixStatus path_copy_file_safe(const char* dest, const char* source)
+{
+    return path_copy_file_impl<1024>(dest, source);
+}
 
 APosixStatus
 path_delete_file( const char*  path )

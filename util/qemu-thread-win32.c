@@ -43,6 +43,55 @@ static void error_exit(int err, const char *msg)
     qemu_abort("qemu: %s: %s\n", msg, pstr);
 }
 
+#ifdef CONFIG_WIN32_VISTA_SYNCHRONIZATION
+void qemu_mutex_init(QemuMutex *mutex)
+{
+    InitializeSRWLock(&mutex->lock);
+}
+
+void qemu_mutex_destroy(QemuMutex *mutex)
+{
+}
+
+void qemu_mutex_lock(QemuMutex *mutex)
+{
+    AcquireSRWLockExclusive(&mutex->lock);
+}
+
+int qemu_mutex_trylock(QemuMutex *mutex)
+{
+    return !TryAcquireSRWLockExclusive(&mutex->lock);
+}
+
+void qemu_mutex_unlock(QemuMutex *mutex)
+{
+    ReleaseSRWLockExclusive(&mutex->lock);
+}
+
+void qemu_cond_init(QemuCond *cond)
+{
+    InitializeConditionVariable(&cond->cv);
+}
+
+void qemu_cond_destroy(QemuCond *cond)
+{
+}
+
+void qemu_cond_signal(QemuCond *cond)
+{
+    WakeConditionVariable(&cond->cv);
+}
+
+void qemu_cond_broadcast(QemuCond *cond)
+{
+    WakeAllConditionVariable(&cond->cv);
+}
+
+void qemu_cond_wait(QemuCond *cond, QemuMutex *mutex)
+{
+    SleepConditionVariableSRW(&cond->cv, &mutex->lock, INFINITE, 0);
+}
+#else // !CONFIG_WIN32_VISTA_SYNCHRONIZATION
 void qemu_mutex_init(QemuMutex *mutex)
 {
     mutex->owner = 0;
@@ -207,6 +256,7 @@ void qemu_cond_wait(QemuCond *cond, QemuMutex *mutex)
 
     qemu_mutex_lock(mutex);
 }
+#endif  // !CONFIG_WIN32_VISTA_SYNCHRONIZATION
 
 void qemu_sem_init(QemuSemaphore *sem, int init)
 {
@@ -337,7 +387,7 @@ struct QemuThreadData {
     /* Only used for joinable threads. */
     bool              exited;
     void             *ret;
-    CRITICAL_SECTION  cs;
+    QemuMutex         mtx;
 };
 
 static bool atexit_registered;
@@ -390,9 +440,9 @@ void qemu_thread_exit(void *arg)
     notifier_list_notify(&data->exit, NULL);
     if (data->mode == QEMU_THREAD_JOINABLE) {
         data->ret = arg;
-        EnterCriticalSection(&data->cs);
+        qemu_mutex_lock(&data->mtx);
         data->exited = true;
-        LeaveCriticalSection(&data->cs);
+        qemu_mutex_unlock(&data->mtx);
     } else {
         g_free(data);
     }
@@ -423,7 +473,7 @@ void *qemu_thread_join(QemuThread *thread)
         CloseHandle(handle);
     }
     ret = data->ret;
-    DeleteCriticalSection(&data->cs);
+    qemu_mutex_destroy(&data->mtx);
     g_free(data);
     return ret;
 }
@@ -443,7 +493,7 @@ void qemu_thread_create(QemuThread *thread, const char *name,
     notifier_list_init(&data->exit);
 
     if (data->mode != QEMU_THREAD_DETACHED) {
-        InitializeCriticalSection(&data->cs);
+        qemu_mutex_init(&data->mtx);
     }
 
     hThread = (HANDLE) _beginthreadex(NULL, 0, win32_start_routine,
@@ -471,14 +521,14 @@ HANDLE qemu_thread_get_handle(QemuThread *thread)
         return NULL;
     }
 
-    EnterCriticalSection(&data->cs);
+    qemu_mutex_lock(&data->mtx);
     if (!data->exited) {
         handle = OpenThread(SYNCHRONIZE | THREAD_SUSPEND_RESUME, FALSE,
                             thread->tid);
     } else {
         handle = NULL;
     }
-    LeaveCriticalSection(&data->cs);
+    qemu_mutex_unlock(&data->mtx);
     return handle;
 }
 

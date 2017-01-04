@@ -168,6 +168,14 @@ extern APosixStatus   path_empty_file( const char*  path );
  * (error code in errno). Does not work on directories */
 extern APosixStatus   path_copy_file( const char*  dest, const char*  source );
 
+/* this version of path_copy_file() function is safe to call in an unstable
+ * environment, e.g. when handling a crash. It uses much smaller buffer for
+ * reading/writing files, so there's much lower chance of getting a second
+ * crash from stack overflow or page fault while trying to map a new stack page
+*/
+extern APosixStatus   path_copy_file_safe(const char* dest,
+                                          const char* source);
+
 /* unlink/delete a given file. Note that on Win32, this will
  * fail if the program has an opened handle to the file
  */

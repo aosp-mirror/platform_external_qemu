@@ -91,4 +91,29 @@ private:
     VmLock* mVmLock;
 };
 
+// Another convenience class for a code that may run either under a lock or not
+// but needs to ensure that some part of it runs without a VmLock.
+class ScopedVmUnlock {
+public:
+    ScopedVmUnlock(VmLock* vmLock = VmLock::get()) {
+        if (vmLock->isLockedBySelf()) {
+            mVmLock = vmLock;
+            mVmLock->unlock();
+        } else {
+            mVmLock = nullptr;
+        }
+    }
+
+    ~ScopedVmUnlock() {
+        if (mVmLock) {
+            mVmLock->lock();
+        }
+    }
+
+    DISALLOW_COPY_ASSIGN_AND_MOVE(ScopedVmUnlock);
+
+private:
+    VmLock* mVmLock;
+};
+
 }  // namespace android

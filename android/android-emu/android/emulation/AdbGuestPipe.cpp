@@ -18,6 +18,7 @@
 #include "android/base/Log.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/StringView.h"
+#include "android/emulation/VmLock.h"
 #include "android/utils/debug.h"
 
 #include <algorithm>
@@ -314,13 +315,21 @@ int AdbGuestPipe::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
         size_t dataSize = buffers[0].size;
         DD("%s: [%p] dataSize=%d", __func__, this, (int)dataSize);
         while (dataSize > 0) {
-            ssize_t len = android::base::socketRecv(mHostSocket->fd(), data,
-                                                    dataSize);
+            ssize_t len;
+            {
+                ScopedVmUnlock unlockBql;
+                len = android::base::socketRecv(mHostSocket->fd(),
+                                                data, dataSize);
+            }
             if (len > 0) {
                 data += len;
                 dataSize -= len;
                 result += static_cast<int>(len);
-                continue;
+                if (dataSize != 0) {
+                    return result; // got less than requested -> no more data.
+                } else {
+                    break;
+                }
             }
             if (len < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
                 if (result == 0) {
@@ -357,13 +366,21 @@ int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
         const uint8_t* data = buffers[0].data;
         size_t dataSize = buffers[0].size;
         while (dataSize > 0) {
-            ssize_t len = android::base::socketSend(mHostSocket->fd(), data,
-                                                    dataSize);
+            ssize_t len;
+            {
+                ScopedVmUnlock unlockBql;
+                len = android::base::socketSend(mHostSocket->fd(),
+                                                data, dataSize);
+            }
             if (len > 0) {
                 data += len;
                 dataSize -= len;
                 result += static_cast<int>(len);
-                continue;
+                if (dataSize != 0) {
+                    return result; // sent less than requested -> no more room.
+                } else {
+                    break;
+                }
             }
             if (len < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
                 if (result == 0) {
