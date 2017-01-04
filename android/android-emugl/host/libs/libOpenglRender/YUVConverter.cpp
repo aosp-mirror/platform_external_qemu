@@ -197,19 +197,15 @@ static void subUpdateYUVGLTex(GLenum texture_unit,
 
 // createYUVGLShader() defines the vertex/fragment
 // shader that does the actual work of converting
-// YUV to RGB. The resulting shaders and program
-// are stored in |vshader_out|, |fshader_out|,
-// and |program_out|.
-static void createYUVGLShader(GLuint* vshader_out,
-                              GLuint* fshader_out,
-                              GLuint* program_out,
+// YUV to RGB. The resulting program is stored in |program_out|.
+static void createYUVGLShader(GLuint* program_out,
                               GLint* ywidthcutoffloc_out,
                               GLint* cwidthcutoffloc_out,
                               GLint* ysamplerloc_out,
                               GLint* usamplerloc_out,
-                              GLint* vsamplerloc_out) {
-    assert(vshader_out);
-    assert(fshader_out);
+                              GLint* vsamplerloc_out,
+                              GLint* incoordloc_out,
+                              GLint* posloc_out) {
     assert(program_out);
 
     static const char kVShader[] = R"(
@@ -263,28 +259,31 @@ void main(void) {
     const GLchar* const kFShaders =
         static_cast<const GLchar*>(kFShader);
 
-    *vshader_out = s_gles2.glCreateShader(GL_VERTEX_SHADER);
-    *fshader_out = s_gles2.glCreateShader(GL_FRAGMENT_SHADER);
+    GLuint vshader = s_gles2.glCreateShader(GL_VERTEX_SHADER);
+    GLuint fshader = s_gles2.glCreateShader(GL_FRAGMENT_SHADER);
 
     const GLint vtextLen = strlen(kVShader);
     const GLint ftextLen = strlen(kFShader);
-    s_gles2.glShaderSource(*vshader_out, 1, &kVShaders, &vtextLen);
-    s_gles2.glShaderSource(*fshader_out, 1, &kFShaders, &ftextLen);
-    s_gles2.glCompileShader(*vshader_out);
-    s_gles2.glCompileShader(*fshader_out);
+    s_gles2.glShaderSource(vshader, 1, &kVShaders, &vtextLen);
+    s_gles2.glShaderSource(fshader, 1, &kFShaders, &ftextLen);
+    s_gles2.glCompileShader(vshader);
+    s_gles2.glCompileShader(fshader);
 
     *program_out = s_gles2.glCreateProgram();
-    s_gles2.glAttachShader(*program_out, *vshader_out);
-    s_gles2.glAttachShader(*program_out, *fshader_out);
+    s_gles2.glAttachShader(*program_out, vshader);
+    s_gles2.glAttachShader(*program_out, fshader);
     s_gles2.glLinkProgram(*program_out);
 
-    s_gles2.glUseProgram(*program_out);
     *ywidthcutoffloc_out = s_gles2.glGetUniformLocation(*program_out, "yWidthCutoff");
     *cwidthcutoffloc_out = s_gles2.glGetUniformLocation(*program_out, "cWidthCutoff");
     *ysamplerloc_out = s_gles2.glGetUniformLocation(*program_out, "ysampler");
     *usamplerloc_out = s_gles2.glGetUniformLocation(*program_out, "usampler");
     *vsamplerloc_out = s_gles2.glGetUniformLocation(*program_out, "vsampler");
-    s_gles2.glUseProgram(0);
+    *posloc_out = s_gles2.glGetAttribLocation(*program_out, "position");
+    *incoordloc_out = s_gles2.glGetAttribLocation(*program_out, "inCoord");
+
+    s_gles2.glDeleteShader(vshader);
+    s_gles2.glDeleteShader(fshader);
 }
 
 // When converting YUV to RGB with shaders,
@@ -335,6 +334,8 @@ static void doYUVConversionDraw(GLuint program,
                                 GLint ySamplerLoc,
                                 GLint uSamplerLoc,
                                 GLint vSamplerLoc,
+                                GLint inCoordLoc,
+                                GLint posLoc,
                                 GLuint vbuf, GLuint ibuf,
                                 int width, int ywidth,
                                 int halfwidth, int cwidth,
@@ -347,9 +348,6 @@ static void doYUVConversionDraw(GLuint program,
 
     s_gles2.glUseProgram(program);
 
-    GLint posLoc = s_gles2.glGetAttribLocation(program, "position");
-    GLint coordLoc = s_gles2.glGetAttribLocation(program, "inCoord");
-
     s_gles2.glUniform1f(yWidthCutoffLoc, yWidthCutoff);
     s_gles2.glUniform1f(cWidthCutoffLoc, cWidthCutoff);
 
@@ -359,12 +357,12 @@ static void doYUVConversionDraw(GLuint program,
 
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, vbuf);
     s_gles2.glEnableVertexAttribArray(posLoc);
-    s_gles2.glEnableVertexAttribArray(coordLoc);
+    s_gles2.glEnableVertexAttribArray(inCoordLoc);
 
     s_gles2.glVertexAttribPointer(posLoc, 3, GL_FLOAT, false,
                                   kVertexAttribStride,
                                   kVertexAttribPosOffset);
-    s_gles2.glVertexAttribPointer(coordLoc, 2, GL_FLOAT, false,
+    s_gles2.glVertexAttribPointer(inCoordLoc, 2, GL_FLOAT, false,
                                   kVertexAttribStride,
                                   kVertexAttribCoordOffset);
 
@@ -372,7 +370,7 @@ static void doYUVConversionDraw(GLuint program,
     s_gles2.glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
 
     s_gles2.glDisableVertexAttribArray(posLoc);
-    s_gles2.glDisableVertexAttribArray(coordLoc);
+    s_gles2.glDisableVertexAttribArray(inCoordLoc);
 }
 
 // initialize(): allocate GPU memory for YUV components,
@@ -394,13 +392,14 @@ YUVConverter::YUVConverter(int width, int height, FrameworkFormat format) : mFor
     createYUVGLTex(GL_TEXTURE1, cwidth, cheight, &mUtex);
     createYUVGLTex(GL_TEXTURE2, cwidth, cheight, &mVtex);
 
-    createYUVGLShader(&mVshader, &mFshader,
-                      &mProgram,
+    createYUVGLShader(&mProgram,
                       &mYWidthCutoffLoc,
                       &mCWidthCutoffLoc,
                       &mYSamplerLoc,
                       &mUSamplerLoc,
-                      &mVSamplerLoc);
+                      &mVSamplerLoc,
+                      &mInCoordLoc,
+                      &mPosLoc);
 
     createYUVGLFullscreenQuad(&mVbuf, &mIbuf, width, ywidth);
 }
@@ -440,6 +439,8 @@ void YUVConverter::drawConvert(int x, int y,
                         mYSamplerLoc,
                         mUSamplerLoc,
                         mVSamplerLoc,
+                        mInCoordLoc,
+                        mPosLoc,
                         mVbuf, mIbuf,
                         width, ywidth,
                         width / 2, cwidth,
@@ -467,8 +468,6 @@ YUVConverter::~YUVConverter() {
     if (mIbuf) s_gles2.glDeleteBuffers(1, &mIbuf);
     if (mVbuf) s_gles2.glDeleteBuffers(1, &mVbuf);
     if (mProgram) s_gles2.glDeleteProgram(mProgram);
-    if (mFshader) s_gles2.glDeleteShader(mFshader);
-    if (mVshader) s_gles2.glDeleteShader(mVshader);
     if (mYtex) s_gles2.glDeleteTextures(1, &mYtex);
     if (mUtex) s_gles2.glDeleteTextures(1, &mUtex);
     if (mVtex) s_gles2.glDeleteTextures(1, &mVtex);
