@@ -204,6 +204,12 @@ static EGLint rcQueryEGLString(EGLenum name, void* buffer, EGLint bufferSize)
     return len;
 }
 
+static bool shouldEnableAsyncSwap() {
+    return emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap) &&
+           emugl_sync_device_exists() &&
+           sizeof(void*) == 8;
+}
+
 static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
 {
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
@@ -229,9 +235,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     // We add the maximum supported GL protocol number into GL_EXTENSIONS
     bool isChecksumEnabled =
         emugl_feature_is_enabled(android::featurecontrol::GLPipeChecksum);
-    bool asyncSwapEnabled =
-        emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap) &&
-        emugl_sync_device_exists();
+    bool asyncSwapEnabled = shouldEnableAsyncSwap();
     bool dmaEnabled =
         emugl_feature_is_enabled(android::featurecontrol::GLDMA);
 
