@@ -57,8 +57,6 @@ private:
     void updateCutoffs(float width, float ywidth, float halfwidth, float cwidth);
     FrameworkFormat mFormat;
     // We need the following GL objects:
-    GLuint mVshader = 0;
-    GLuint mFshader = 0; // Fragment shader (does actual conversion)
     GLuint mProgram = 0;
     GLuint mVbuf = 0;
     GLuint mIbuf = 0;
@@ -72,6 +70,8 @@ private:
     GLint mYSamplerLoc = -1;
     GLint mUSamplerLoc = -1;
     GLint mVSamplerLoc = -1;
+    GLint mInCoordLoc = -1;
+    GLint mPosLoc = -1;
     float mYWidthCutoff = 1.0;
     float mCWidthCutoff = 1.0;
 };

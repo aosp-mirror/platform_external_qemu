@@ -207,8 +207,6 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     case FRAMEWORK_FORMAT_YUV_420_888:
         cb->m_yuv_converter.reset(new YUVConverter(p_width, p_height, cb->m_frameworkFormat));
         break;
-        cb->m_yuv_converter.reset(new YUVConverter(p_width, p_height, cb->m_frameworkFormat));
-        break;
     default:
         break;
     }
