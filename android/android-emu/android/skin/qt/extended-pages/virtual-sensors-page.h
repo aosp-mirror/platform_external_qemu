@@ -52,7 +52,7 @@ private slots:
         updateAccelerometerValues();
         mAccelerationTimer.stop();
     }
-    void onSkinLayoutChange(bool next);
+    void onSkinLayoutChange(SkinRotation rot);
 
 signals:
     void coarseOrientationChanged(SkinRotation);
@@ -83,7 +83,7 @@ private:
     void showEvent(QShowEvent*) override;
 
     void resetAccelerometerRotation(const QQuaternion&);
-    void resetAccelerometerRotationFromSkinLayout(const SkinLayout*);
+    void resetAccelerometerRotationFromSkinLayout(SkinRotation orientation);
     void setAccelerometerRotationFromSliders();
     void setPhonePositionFromSliders();
     void updateAccelerometerValues();

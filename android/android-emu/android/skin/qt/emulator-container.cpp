@@ -205,14 +205,8 @@ void EmulatorContainer::resizeEvent(QResizeEvent* event) {
 
     // To solve some resizing edge cases on OSX/Windows/KDE, start a short
     // timer that will attempt to trigger a resize in case the user's mouse has
-    // not entered the window again. We use a longer timer on Linux because
-    // the timer is not needed on non-KDE systems, so we want it to be less
-    // noticeable.
-#ifdef __linux__
-    mResizeTimer.start(1000);
-#else
-    mResizeTimer.start(500);
-#endif
+    // not entered the window again.
+    startResizeTimer();
 }
 
 void EmulatorContainer::showEvent(QShowEvent* event) {
@@ -309,14 +303,13 @@ void EmulatorContainer::slot_resizeDone() {
 // we'll only do a resize if no mouse buttons are held down.
 #if defined(__APPLE__) || defined(_WIN32)
     // A hacky way of determining if the user is still holding down for a
-    // resize.
-    // This queries the global event state to see if any mouse buttons are held
-    // down.
-    // If there are, then the user must not be done resizing yet.
+    // resize. This queries the global event state to see if any mouse buttons
+    // are held down. If there are, then the user must not be done resizing
+    // yet.
     if (numHeldMouseButtons() == 0) {
         mEmulatorWindow->doResize(this->size());
     } else {
-        mResizeTimer.start(500);
+        startResizeTimer();
     }
 #endif
 
@@ -324,5 +317,15 @@ void EmulatorContainer::slot_resizeDone() {
 // if they are, oh well.
 #ifdef __linux__
     mEmulatorWindow->doResize(this->size());
+#endif
+}
+
+void EmulatorContainer::startResizeTimer() {
+    // We use a longer timer on Linux because it is not needed on non-KDE
+    // systems, so we want it to be less noticeable.
+#ifdef __linux__
+    mResizeTimer.start(1000);
+#else
+    mResizeTimer.start(500);
 #endif
 }

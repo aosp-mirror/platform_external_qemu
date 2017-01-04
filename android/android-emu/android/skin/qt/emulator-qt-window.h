@@ -177,7 +177,7 @@ signals:
     void runOnUiThread(SkinGenericFunction* f,
                        void* data,
                        QSemaphore* semaphore = NULL);
-    void layoutChanged(bool next);
+    void layoutChanged(SkinRotation rot);
 
 public:
     void pollEvent(SkinEvent* event,

@@ -21,6 +21,7 @@
 #include "android/base/system/System.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/control/clipboard_agent.h"
+#include "android/emulator-window.h"
 #include "android/globals.h"
 #include "android/main-common.h"
 #include "android/skin/event.h"
@@ -350,37 +351,15 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         case QtUICommand::ROTATE_RIGHT:
         case QtUICommand::ROTATE_LEFT:
             if (down) {
-                // TODO: remove this after we preserve zoom after rotate
-                if (mEmulatorWindow->isInZoomMode()) {
-                    mToolsUi->zoom_button->click();
+                const auto emulatorWindow = emulator_window_get();
+                assert(emulatorWindow);
+                if (const SkinUI* const ui = emulatorWindow->ui) {
+                    const SkinLayout* layout =
+                        (cmd == QtUICommand::ROTATE_RIGHT
+                         ? skin_ui_get_next_layout
+                         : skin_ui_get_prev_layout)(ui);
+                    mEmulatorWindow->rotateSkin(layout->orientation);
                 }
-
-                // Rotating the emulator preserves size, but this can be a
-                // problem
-                // if, for example, a very-wide emulator in landscape is rotated
-                // to
-                // portrait. To avoid this situation (which makes the scroll
-                // bars
-                // appear), force a resize to the new size.
-                QSize containerSize = mEmulatorWindow->containerSize();
-                mEmulatorWindow->doResize(
-                        QSize(containerSize.height(), containerSize.width()),
-                        true, true);
-
-                SkinEvent* skin_event = new SkinEvent();
-                skin_event->type = cmd == QtUICommand::ROTATE_RIGHT
-                                           ? kEventLayoutNext
-                                           : kEventLayoutPrev;
-
-                // TODO(grigoryj): debug output needed for investigating the
-                // rotation
-                // bug.
-                if (VERBOSE_CHECK(rotation)) {
-                    qWarning("Queuing skin event for %s",
-                             cmd == QtUICommand::ROTATE_RIGHT ? "ROTATE_RIGHT"
-                                                              : "ROTATE_LEFT");
-                }
-                mEmulatorWindow->queueSkinEvent(skin_event);
             }
             break;
         case QtUICommand::TOGGLE_TRACKBALL:

@@ -274,20 +274,6 @@ bool skin_ui_process_events(SkinUI* ui) {
                ev.u.mouse.button);
             skin_window_process_event(ui->window, &ev);
             break;
-        case kEventLayoutNext:
-            DE("EVENT: kEventLayoutNext\n");
-            if (VERBOSE_CHECK(rotation)) {
-                fprintf(stderr, "Polled event: LayoutNext\n");
-            }
-            _skin_ui_handle_rotate_key_command(ui, true);
-            break;
-        case kEventLayoutPrev:
-            DE("EVENT: kEventLayoutPrev\n");
-            if (VERBOSE_CHECK(rotation)) {
-                fprintf(stderr, "Polled event: LayoutPrev\n");
-            }
-            _skin_ui_handle_rotate_key_command(ui, false);
-            break;
         case kEventLayoutRotate:
             {
                 SkinRotation rot = ev.u.layout_rotation.rotation;
