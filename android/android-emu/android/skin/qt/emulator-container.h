@@ -45,6 +45,8 @@ private slots:
     void slot_resizeDone();
 
 private:
+    void startResizeTimer();
+
     EmulatorQtWindow* mEmulatorWindow;
     QList<QEvent::Type> mEventBuffer;
     QTimer mResizeTimer;

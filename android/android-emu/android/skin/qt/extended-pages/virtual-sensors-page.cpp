@@ -17,7 +17,6 @@
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/skin/ui.h"
 
-
 #include <QDesktopServices>
 #include <QQuaternion>
 
@@ -133,63 +132,59 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
 }
 
 void VirtualSensorsPage::showEvent(QShowEvent*) {
-  resetAccelerometerRotationFromSkinLayout(
-      skin_ui_get_current_layout(emulator_window_get()->ui));
-  mFirstShow = false;
+    auto layout = skin_ui_get_current_layout(emulator_window_get()->ui);
+    if (layout) {
+        resetAccelerometerRotationFromSkinLayout(layout->orientation);
+    }
+    mFirstShow = false;
 }
 
 void VirtualSensorsPage::setLayoutChangeNotifier(
         QObject* layout_change_notifier) {
-    connect(layout_change_notifier, SIGNAL(layoutChanged(bool)),
-            this, SLOT(onSkinLayoutChange(bool)));
+    connect(layout_change_notifier, SIGNAL(layoutChanged(SkinRotation)),
+            this, SLOT(onSkinLayoutChange(SkinRotation)));
 }
 
-void VirtualSensorsPage::onSkinLayoutChange(bool next) {
-    const SkinUI* ui = emulator_window_get()->ui;
-    if (ui) {
-        const SkinLayout* layout =
-            (next ? skin_ui_get_next_layout : skin_ui_get_prev_layout)(ui);
-        resetAccelerometerRotationFromSkinLayout(layout);
-    }
+void VirtualSensorsPage::onSkinLayoutChange(SkinRotation rot) {
+    resetAccelerometerRotationFromSkinLayout(rot);
 }
 
 void VirtualSensorsPage::resetAccelerometerRotationFromSkinLayout(
-        const SkinLayout* layout) {
-    if (layout) {
-        float rot = 0.0;
+        SkinRotation orientation) {
+    float rot = 0.0;
 
-        // NOTE: the "incorrect" angle values
-        // stem from the fact that QQuaternion and SKIN_ROTATION_*
-        // disagree on which direction is "positive" (skin uses
-        // a different coordinate system with origin at top left
-        // and X and Y axis pointing right and down respectively).
-        switch (layout->orientation) {
-        case SKIN_ROTATION_0:
-            rot = 0.0;
-            break;
-        case SKIN_ROTATION_90:
-            rot = -90.0;
-            break;
-        case SKIN_ROTATION_180:
-            rot = 180.0;
-            break;
-        case SKIN_ROTATION_270:
-            rot = 90.0;
-            break;
-        default:
-            assert(0);
-        }
-        // Rotation reset handler notifies the subscribers, and one of the
-        // subscribers is the main window which handles that as a regular
-        // rotation command. As we're already handling a rotation command, that
-        // would make us to handle it again for the second time, which is
-        // very CPU-intensive.
-        QSignalBlocker blockSignals(this);
-        resetAccelerometerRotation(
-                QQuaternion::fromAxisAndAngle(
-                    0.0, 0.0, 1.0, rot));
+    // NOTE: the "incorrect" angle values
+    // stem from the fact that QQuaternion and SKIN_ROTATION_*
+    // disagree on which direction is "positive" (skin uses
+    // a different coordinate system with origin at top left
+    // and X and Y axis pointing right and down respectively).
+    switch (orientation) {
+    case SKIN_ROTATION_0:
+        rot = 0.0;
+        break;
+    case SKIN_ROTATION_90:
+        rot = -90.0;
+        break;
+    case SKIN_ROTATION_180:
+        rot = 180.0;
+        break;
+    case SKIN_ROTATION_270:
+        rot = 90.0;
+        break;
+    default:
+        assert(0);
     }
+    // Rotation reset handler notifies the subscribers, and one of the
+    // subscribers is the main window which handles that as a regular
+    // rotation command. As we're already handling a rotation command, that
+    // would make us to handle it again for the second time, which is
+    // very CPU-intensive.
+    QSignalBlocker blockSignals(this);
+    resetAccelerometerRotation(
+            QQuaternion::fromAxisAndAngle(
+                0.0, 0.0, 1.0, rot));
 }
+
 void VirtualSensorsPage::resetAccelerometerRotation(const QQuaternion& rotation) {
     if (!mFirstShow) mVirtualSensorsUsed = true;
     mUi->accelWidget->setPosition(QVector2D(0.0, 0.0));

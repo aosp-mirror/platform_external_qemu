@@ -11,11 +11,13 @@
  */
 
 #include "android/skin/qt/emulator-qt-window.h"
+
 #include "android/android.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/Optional.h"
 #include "android/base/threads/Async.h"
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/CrashReporter.h"
@@ -802,19 +804,17 @@ void EmulatorQtWindow::pollEvent(SkinEvent* event,
         lock.unlock();
         *hasEvent = true;
 
-        // TODO(grigoryj): debug output needed for investigating the rotation
-        // bug.
-        if (VERBOSE_CHECK(rotation) && (newEvent->type == kEventLayoutNext ||
-                                        newEvent->type == kEventLayoutPrev)) {
-            qWarning("Dequed event Layout%s",
-                     newEvent->type == kEventLayoutNext ? "Next" : "Prev");
-        }
         memcpy(event, newEvent, sizeof(SkinEvent));
         delete newEvent;
     }
 }
 
 void EmulatorQtWindow::queueSkinEvent(SkinEvent* event) {
+    const auto rotationEventLayout =
+            event->type == kEventLayoutRotate
+                ? makeOptional(event->u.layout_rotation.rotation)
+                : kNullopt;
+
     android::base::AutoLock lock(mSkinEventQueueLock);
     const bool firstEvent = mSkinEventQueue.isEmpty();
 
@@ -842,14 +842,6 @@ void EmulatorQtWindow::queueSkinEvent(SkinEvent* event) {
     if (!replaced) {
         mSkinEventQueue.enqueue(event);
         lock.unlock();
-
-        // TODO(grigoryj): debug output needed for investigating the
-        // rotation bug.
-        if (VERBOSE_CHECK(rotation) && (type == kEventLayoutNext ||
-                                        type == kEventLayoutPrev)) {
-            qWarning("Enqueued Layout%s event",
-                     type == kEventLayoutNext ? "Next" : "Prev");
-        }
     }
 
     const auto uiAgent = mToolWindow->getUiEmuAgent();
@@ -860,10 +852,8 @@ void EmulatorQtWindow::queueSkinEvent(SkinEvent* event) {
         // if this event is the first one.
         uiAgent->userEvents->onNewUserEvent();
     }
-    if (type == kEventLayoutNext) {
-        emit(layoutChanged(true));
-    } else if (type == kEventLayoutPrev) {
-        emit(layoutChanged(false));
+    if (rotationEventLayout) {
+        emit(layoutChanged(*rotationEventLayout));
     }
 }
 
@@ -1430,11 +1420,9 @@ void EmulatorQtWindow::simulateSetZoom(double zoom) {
     }
 
     // Qt Widgets do not get properly sized unless they appear at least once.
-    // The
-    // scroll bars
-    // *must* be properly sized in order for zoom to create the correct GLES
-    // subwindow, so this
-    // ensures they will be. This is reset as soon as the window is shown.
+    // The scroll bars *must* be properly sized in order for zoom to create the
+    // correct GLES subwindow, so this ensures they will be. This is reset as
+    // soon as the window is shown.
     mContainer.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 

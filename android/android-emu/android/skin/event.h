@@ -25,8 +25,6 @@ typedef enum {
     kEventKeyDown,
     kEventKeyUp,
     kEventTextInput,
-    kEventLayoutNext,
-    kEventLayoutPrev,
     kEventMouseButtonDown,
     kEventMouseButtonUp,
     kEventMouseMotion,
