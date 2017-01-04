@@ -13,6 +13,7 @@
 
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/tool-window.h"
+#include "android/utils/debug.h"
 
 #include <QtCore>
 #include <QApplication>
@@ -183,10 +184,18 @@ void EmulatorContainer::resizeEvent(QResizeEvent* event) {
     mEmulatorWindow->toolWindow()->dockMainWindow();
     mEmulatorWindow->simulateZoomedWindowResized(this->viewportSize());
 
-    // To solve some resizing edge cases on OSX/Windows/KDE, start a short
-    // timer that will attempt to trigger a resize in case the user's mouse has
-    // not entered the window again.
-    startResizeTimer();
+    if (mRotating) {
+        // Rotation event also generate a resize, but it shouldn't recalculate
+        // the sizes via scaling - scale is already correct, we've rotatated
+        // from a correct shape.
+        VERBOSE_PRINT(rotation, "Ignored a resize event on rotation");
+        mRotating = false;
+    } else {
+        // To solve some resizing edge cases on OSX/Windows/KDE, start a short
+        // timer that will attempt to trigger a resize in case the user's mouse has
+        // not entered the window again.
+        startResizeTimer();
+    }
 }
 
 void EmulatorContainer::showEvent(QShowEvent* event) {
@@ -274,14 +283,28 @@ QSize EmulatorContainer::viewportSize() const {
     return output;
 }
 
+#ifdef __linux__
+// X11 doesn't have a getter for current mouse button state. Use the Qt's
+// synchronous mouse state tracking that might be a little bit off.
+static int numHeldMouseButtons() {
+    const auto buttons = QApplication::mouseButtons();
+    int numButtons = 0;
+    if (buttons & Qt::LeftButton) {
+        ++numButtons;
+    }
+    if (buttons & Qt::RightButton) {
+        ++numButtons;
+    }
+    return numButtons;
+}
+#endif
+
 void EmulatorContainer::slot_resizeDone() {
     if (mEmulatorWindow->isInZoomMode()) {
         return;
     }
 
-// Windows and Apple have convenient ways of checking global mouse state, so
-// we'll only do a resize if no mouse buttons are held down.
-#if defined(__APPLE__) || defined(_WIN32)
+    // Only do a resize if no mouse buttons are held down.
     // A hacky way of determining if the user is still holding down for a
     // resize. This queries the global event state to see if any mouse buttons
     // are held down. If there are, then the user must not be done resizing
@@ -291,13 +314,6 @@ void EmulatorContainer::slot_resizeDone() {
     } else {
         startResizeTimer();
     }
-#endif
-
-// X11 doesn't. Hope that the user isn't still holding down a mouse button, and
-// if they are, oh well.
-#ifdef __linux__
-    mEmulatorWindow->doResize(this->size());
-#endif
 }
 
 void EmulatorContainer::startResizeTimer() {

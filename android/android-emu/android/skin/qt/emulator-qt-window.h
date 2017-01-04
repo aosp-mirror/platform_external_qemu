@@ -191,8 +191,7 @@ public:
     QRect deviceGeometry() const;
 
     void doResize(const QSize& size,
-                  bool isKbdShortcut = false,
-                  bool flipDimensions = false);
+                  bool isKbdShortcut = false);
     void handleMouseEvent(SkinEventType type,
                           SkinMouseButtonType button,
                           const QPoint& pos,

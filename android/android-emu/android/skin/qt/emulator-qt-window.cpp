@@ -1261,18 +1261,15 @@ SkinEvent* EmulatorQtWindow::createSkinEvent(SkinEventType type) {
 }
 
 void EmulatorQtWindow::doResize(const QSize& size,
-                                bool isKbdShortcut,
-                                bool flipDimensions) {
+                                bool isKbdShortcut) {
     if (!mBackingSurface)
         return;
 
-    int originalWidth = flipDimensions ? mBackingSurface->original_h
-                                       : mBackingSurface->original_w;
-    int originalHeight = flipDimensions ? mBackingSurface->original_w
-                                        : mBackingSurface->original_h;
+    int originalWidth = mBackingSurface->original_w;
+    int originalHeight = mBackingSurface->original_h;
 
-    QSize newSize(originalWidth, originalHeight);
-    newSize.scale(size, Qt::KeepAspectRatio);
+    auto newSize = QSize(originalWidth,
+                         originalHeight).scaled(size, Qt::KeepAspectRatio);
 
     // Make sure the new size is always a little bit smaller than the
     // screen to prevent keyboard shortcut scaling from making a window
@@ -1718,6 +1715,11 @@ void EmulatorQtWindow::runAdbShellStopAndQuit() {
 }
 
 void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
+    // Hack. Notify the parent container that we're rotating, so it doesn't
+    // start a regular scaling timer: we know that the scale is correct as
+    // it was correct before the rotation.
+    mContainer.prepareForRotation();
+
     SkinEvent* event = createSkinEvent(kEventLayoutRotate);
     event->u.layout_rotation.rotation = rot;
     queueSkinEvent(event);

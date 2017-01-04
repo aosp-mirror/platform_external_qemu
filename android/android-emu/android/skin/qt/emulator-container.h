@@ -41,6 +41,8 @@ public:
     void stopResizeTimer();
     QSize viewportSize() const;
 
+    void prepareForRotation() { mRotating = true; }
+
 private slots:
     void slot_resizeDone();
 
@@ -50,4 +52,5 @@ private:
     EmulatorQtWindow* mEmulatorWindow;
     QList<QEvent::Type> mEventBuffer;
     QTimer mResizeTimer;
+    bool mRotating = false;
 };
