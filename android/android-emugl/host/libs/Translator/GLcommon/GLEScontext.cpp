@@ -259,6 +259,15 @@ const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsi
                 m_shareGroup
                         ->getObjectData(NamedObjectType::VERTEXBUFFER,
                                         bufferName));
+        if (!vbo && bufferName) {
+            vbo = new GLESbuffer();
+            if (!m_shareGroup->isObject(NamedObjectType::VERTEXBUFFER, bufferName)) {
+                m_shareGroup->genName(NamedObjectType::VERTEXBUFFER, bufferName);
+            }
+            m_shareGroup->setObjectData(NamedObjectType::VERTEXBUFFER, bufferName, ObjectDataPtr(new GLESbuffer()));
+        } else if (!vbo && !bufferName) {
+            vbo = new GLESbuffer();
+        }
         m_map[arrType]->setBuffer(size,type,stride,vbo,bufferName,offset,normalize);
         return  static_cast<const unsigned char*>(vbo->getData()) +  offset;
     }
