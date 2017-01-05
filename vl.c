@@ -3205,6 +3205,7 @@ static bool android_reporting_setup(void)
     if (!is_opengl_alive) {
         derror("Could not initialize OpenglES emulation, "
                "use '-gpu off' to disable it.");
+        android_teardown_metrics();
         return false;
     }
 
