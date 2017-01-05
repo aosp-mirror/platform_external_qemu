@@ -177,7 +177,7 @@ signals:
     void runOnUiThread(SkinGenericFunction* f,
                        void* data,
                        QSemaphore* semaphore = NULL);
-    void layoutChanged(bool next);
+    void layoutChanged(SkinRotation rot);
 
 public:
     void pollEvent(SkinEvent* event,
@@ -191,8 +191,7 @@ public:
     QRect deviceGeometry() const;
 
     void doResize(const QSize& size,
-                  bool isKbdShortcut = false,
-                  bool flipDimensions = false);
+                  bool isKbdShortcut = false);
     void handleMouseEvent(SkinEventType type,
                           SkinMouseButtonType button,
                           const QPoint& pos,

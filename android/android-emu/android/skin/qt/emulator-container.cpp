@@ -13,6 +13,7 @@
 
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/tool-window.h"
+#include "android/utils/debug.h"
 
 #include <QtCore>
 #include <QApplication>
@@ -20,6 +21,8 @@
 #include <QScrollBar>
 #include <QStyle>
 #include <QStyleFactory>
+
+#include <algorithm>
 
 #if defined(__APPLE__)
 #include "android/skin/qt/mac-native-window.h"
@@ -29,8 +32,11 @@
 #include "android/skin/qt/windows-native-window.h"
 #endif
 
+static constexpr int kEventBufferSize = 8;
+
 EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
-    : QScrollArea(), mEmulatorWindow(window) {
+    : mEmulatorWindow(window) {
+    mEventBuffer.reserve(kEventBufferSize);
     setFrameShape(QFrame::NoFrame);
     setWidget(window);
 
@@ -79,70 +85,45 @@ bool EmulatorContainer::event(QEvent* e) {
         return QScrollArea::event(e);
     }
 
-    // Add to the event buffer, but keep it a reasonable size - a few events,
-    // such as repaint,
-    // can occur in between resizes but before the release happens
-    mEventBuffer.push_back(e->type());
-    if (mEventBuffer.size() > 8) {
-        mEventBuffer.removeFirst();
+    if (mEventBuffer.size() < kEventBufferSize) {
+        mEventBuffer.push_back(e->type());
+    } else {
+        // Overwrite the first element and move it to the back to avoid extra
+        // allocations.
+        mEventBuffer.first() = e->type();
+        mEventBuffer.move(0, mEventBuffer.size() - 1);
     }
 
     // Scan to see if a resize event happened recently
-    bool foundResize = false;
-    int i = 0;
-    for (; i < mEventBuffer.size(); i++) {
-        if (mEventBuffer[i] == QEvent::Resize) {
-            foundResize = true;
-            i++;
-            break;
-        }
-    }
+    const auto resizeIt =
+            std::find(mEventBuffer.begin(), mEventBuffer.end(), QEvent::Resize);
+    if (resizeIt != mEventBuffer.end()) {
+        // Determining resize-over is OS specific
+        // Do so by scanning the remainder of the event buffer for specific
+        // combinations
 
-    // Determining resize-over is OS specific
-    // Do so by scanning the remainder of the event buffer for specific
-    // combinations
-    if (foundResize) {
 #ifdef _WIN32
-
-        for (; i < mEventBuffer.size() - 1; i++) {
-            if (mEventBuffer[i] == QEvent::NonClientAreaMouseButtonRelease) {
-                mEventBuffer.clear();
-                mEmulatorWindow->doResize(this->size());
-
-                // Kill the resize timer to avoid double resizes.
-                stopResizeTimer();
-                break;
-            }
-        }
-
-#elif __linux__
-
-        for (; i < mEventBuffer.size() - 3; i++) {
-            if (mEventBuffer[i] == QEvent::WindowActivate &&
-                mEventBuffer[i + 1] == QEvent::ActivationChange &&
-                mEventBuffer[i + 2] == QEvent::FocusIn &&
-                mEventBuffer[i + 3] == QEvent::InputMethodQuery) {
-                mEventBuffer.clear();
-                mEmulatorWindow->doResize(this->size());
-
-                // Kill the resize timer to avoid double resizes.
-                stopResizeTimer();
-                break;
-            }
-        }
-
-#elif __APPLE__
-
+        if (std::find(std::next(resizeIt), mEventBuffer.end(),
+                      QEvent::NonClientAreaMouseButtonRelease) !=
+            mEventBuffer.end()) {
+#elif defined(__linux__)
+        static constexpr QEvent::Type sequence[] = {QEvent::WindowActivate,
+                                                    QEvent::ActivationChange,
+                                                    QEvent::FocusIn};
+        if (std::search(std::next(resizeIt), mEventBuffer.end(),
+                        std::begin(sequence),
+                        std::end(sequence)) != mEventBuffer.end()) {
+#elif defined(__APPLE__)
         if (e->type() == QEvent::NonClientAreaMouseMove ||
             e->type() == QEvent::Enter || e->type() == QEvent::Leave) {
-            mEventBuffer.clear();
+#endif
+            // clear() deallocates internal buffer, but we need it.
+            mEventBuffer.erase(mEventBuffer.begin(), mEventBuffer.end());
             mEmulatorWindow->doResize(this->size());
 
             // Kill the resize timer to avoid double resizes.
             stopResizeTimer();
         }
-
-#endif
     }
 
     return QScrollArea::event(e);
@@ -203,16 +184,18 @@ void EmulatorContainer::resizeEvent(QResizeEvent* event) {
     mEmulatorWindow->toolWindow()->dockMainWindow();
     mEmulatorWindow->simulateZoomedWindowResized(this->viewportSize());
 
-    // To solve some resizing edge cases on OSX/Windows/KDE, start a short
-    // timer that will attempt to trigger a resize in case the user's mouse has
-    // not entered the window again. We use a longer timer on Linux because
-    // the timer is not needed on non-KDE systems, so we want it to be less
-    // noticeable.
-#ifdef __linux__
-    mResizeTimer.start(1000);
-#else
-    mResizeTimer.start(500);
-#endif
+    if (mRotating) {
+        // Rotation event also generate a resize, but it shouldn't recalculate
+        // the sizes via scaling - scale is already correct, we've rotatated
+        // from a correct shape.
+        VERBOSE_PRINT(rotation, "Ignored a resize event on rotation");
+        mRotating = false;
+    } else {
+        // To solve some resizing edge cases on OSX/Windows/KDE, start a short
+        // timer that will attempt to trigger a resize in case the user's mouse has
+        // not entered the window again.
+        startResizeTimer();
+    }
 }
 
 void EmulatorContainer::showEvent(QShowEvent* event) {
@@ -300,29 +283,45 @@ QSize EmulatorContainer::viewportSize() const {
     return output;
 }
 
+#ifdef __linux__
+// X11 doesn't have a getter for current mouse button state. Use the Qt's
+// synchronous mouse state tracking that might be a little bit off.
+static int numHeldMouseButtons() {
+    const auto buttons = QApplication::mouseButtons();
+    int numButtons = 0;
+    if (buttons & Qt::LeftButton) {
+        ++numButtons;
+    }
+    if (buttons & Qt::RightButton) {
+        ++numButtons;
+    }
+    return numButtons;
+}
+#endif
+
 void EmulatorContainer::slot_resizeDone() {
     if (mEmulatorWindow->isInZoomMode()) {
         return;
     }
 
-// Windows and Apple have convenient ways of checking global mouse state, so
-// we'll only do a resize if no mouse buttons are held down.
-#if defined(__APPLE__) || defined(_WIN32)
+    // Only do a resize if no mouse buttons are held down.
     // A hacky way of determining if the user is still holding down for a
-    // resize.
-    // This queries the global event state to see if any mouse buttons are held
-    // down.
-    // If there are, then the user must not be done resizing yet.
+    // resize. This queries the global event state to see if any mouse buttons
+    // are held down. If there are, then the user must not be done resizing
+    // yet.
     if (numHeldMouseButtons() == 0) {
         mEmulatorWindow->doResize(this->size());
     } else {
-        mResizeTimer.start(500);
+        startResizeTimer();
     }
-#endif
+}
 
-// X11 doesn't. Hope that the user isn't still holding down a mouse button, and
-// if they are, oh well.
+void EmulatorContainer::startResizeTimer() {
+    // We use a longer timer on Linux because it is not needed on non-KDE
+    // systems, so we want it to be less noticeable.
 #ifdef __linux__
-    mEmulatorWindow->doResize(this->size());
+    mResizeTimer.start(1000);
+#else
+    mResizeTimer.start(500);
 #endif
 }
