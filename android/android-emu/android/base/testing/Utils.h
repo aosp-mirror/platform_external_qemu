@@ -33,6 +33,8 @@ inline auto setScopedCommaLocale() ->
     static constexpr char commaLocaleName[] = "fr_FR.UTF-8";
 #endif
 
+    system("locale -a");
+
     // Set up a locale with comma as a decimal mark.
     auto oldLocale = setlocale(LC_ALL, nullptr);
     EXPECT_NE(nullptr, oldLocale);
