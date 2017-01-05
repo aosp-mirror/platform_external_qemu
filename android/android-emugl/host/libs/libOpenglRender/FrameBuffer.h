@@ -345,9 +345,10 @@ public:
 
     void setShuttingDown() { m_shuttingDown = true; }
 
+    ~FrameBuffer();
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
-    ~FrameBuffer();
     HandleType genHandle();
 
     bool bindSubwin_locked();
@@ -375,7 +376,7 @@ private:
     FbConfigList* m_configs = nullptr;
     FBNativeWindowType m_nativeWindow = 0;
     FrameBufferCaps m_caps = {};
-    EGLDisplay m_eglDisplay = nullptr;
+    EGLDisplay m_eglDisplay = EGL_NO_DISPLAY;
     RenderContextMap m_contexts;
     WindowSurfaceMap m_windows;
     ColorBufferMap m_colorbuffers;
