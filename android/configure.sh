@@ -742,13 +742,14 @@ if [ -d $ANGLE_PREBUILTS_DIR ]; then
                 fi
                 ANGLE_LIBNAME=$ANGLE_PREFIX$LIBNAME$ANGLE_SUFFIX
                 ANGLE_SRCDIR=$ANGLE_PREBUILTS_DIR/$ANGLE_HOST-$ANGLE_ARCH
-
-                ANGLE_DSTDIR="$OUT_DIR/$ANGLE_LIBDIR/gles_angle"
-                ANGLE_DSTLIB="$ANGLE_LIBNAME"
-                if [ -f "$ANGLE_SRCDIR/lib/$ANGLE_LIBNAME" ]; then
-                    install_prebuilt_dll "$ANGLE_SRCDIR/lib/$ANGLE_LIBNAME" \
-                                     "$ANGLE_DSTDIR/$ANGLE_DSTLIB"
-                fi
+                for ANGLE_DX in 9 11; do
+                    ANGLE_DSTDIR="$OUT_DIR/$ANGLE_LIBDIR/gles_angle$ANGLE_DX"
+                    ANGLE_DSTLIB="$ANGLE_LIBNAME"
+                    if [ -f "$ANGLE_SRCDIR/lib/dx$ANGLE_DX/$ANGLE_LIBNAME" ]; then
+                        install_prebuilt_dll "$ANGLE_SRCDIR/lib/dx$ANGLE_DX/$ANGLE_LIBNAME" \
+                                         "$ANGLE_DSTDIR/$ANGLE_DSTLIB"
+                    fi
+                done
             done
         done
     fi
