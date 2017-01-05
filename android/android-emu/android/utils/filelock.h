@@ -36,6 +36,10 @@ ANDROID_BEGIN_HEADER
  ** You can call filelock_release() to release a file lock explicitely. otherwise
  ** all file locks are automatically released when the program exits.
  ** It is safe to delete the originally locked file while the lock is held.
+ **
+ ** Note: filelock_release() doesn't free the memory used for FileLock object,
+ **     it merely cleans up some extra buffers. This is needed to maintain a
+ **     linked list of locks to be released in atexit() handler.
  **/
 
 extern void filelock_init();

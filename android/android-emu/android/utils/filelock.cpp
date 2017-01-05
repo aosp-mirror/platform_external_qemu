@@ -398,6 +398,8 @@ filelock_release( FileLock*  lock )
 #else
         unlink( (char*)lock->lock );
 #endif
+        free((char*)lock->file);
+        lock->file = lock->lock = lock->temp = nullptr;
         lock->locked = 0;
     }
 }
@@ -405,11 +407,9 @@ filelock_release( FileLock*  lock )
 static void
 filelock_atexit( void )
 {
-  FileLock*  lock;
-
   android_lock_acquire(_all_filelocks_tl);
   if (!_is_exiting) {
-    for (lock = _all_filelocks; lock != NULL; ) {
+    for (FileLock* lock = _all_filelocks; lock != NULL; ) {
         filelock_release(lock);
         FileLock* const prev = lock;
         lock = lock->next;
@@ -434,11 +434,12 @@ filelock_create( const char*  file )
 #else
     int    temp_len = file_len + sizeof(TEMP_NAME);
 #endif
-    int    total_len = sizeof(FileLock) + file_len + lock_len + temp_len + 3;
+    const int paths_len = file_len + lock_len + temp_len + 3;
 
-    FileLock* lock = (FileLock*)malloc(total_len);
+    FileLock* const lock = (FileLock*)malloc(sizeof(*lock));
+    char* const paths = (char*)malloc(paths_len);
 
-    lock->file = (const char*)(lock + 1);
+    lock->file = paths;
     memcpy( (char*)lock->file, file, file_len+1 );
 
     lock->lock = lock->file + file_len + 1;
@@ -455,6 +456,7 @@ filelock_create( const char*  file )
     lock->locked = 0;
 
     if (filelock_lock(lock) < 0) {
+        free(paths);
         free(lock);
         return NULL;
     }
