@@ -23,6 +23,7 @@
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
+#include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "emugl/common/logging.h"
 
@@ -149,7 +150,7 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy)
     if (!s_egl.eglMakeCurrent(p_dpy, NULL, NULL, NULL)) {
         ERR("%s: Could not unbind context. Please try updating graphics card driver!\n", __FUNCTION__);
         free(extString);
-        return NULL;
+        extString = NULL;
     }
     s_egl.eglDestroyContext(p_dpy, ctx);
     s_egl.eglDestroySurface(p_dpy, surface);
@@ -164,10 +165,22 @@ void FrameBuffer::finalize(){
     }
     m_windows.clear();
     m_contexts.clear();
-    s_egl.eglMakeCurrent(m_eglDisplay, NULL, NULL, NULL);
-    s_egl.eglDestroyContext(m_eglDisplay, m_eglContext);
-    s_egl.eglDestroyContext(m_eglDisplay, m_pbufContext);
-    s_egl.eglDestroySurface(m_eglDisplay, m_pbufSurface);
+    if (m_eglDisplay != EGL_NO_DISPLAY) {
+        s_egl.eglMakeCurrent(m_eglDisplay, NULL, NULL, NULL);
+        if (m_eglContext != EGL_NO_CONTEXT) {
+            s_egl.eglDestroyContext(m_eglDisplay, m_eglContext);
+            m_eglContext = EGL_NO_CONTEXT;
+        }
+        if (m_pbufContext != EGL_NO_CONTEXT) {
+            s_egl.eglDestroyContext(m_eglDisplay, m_pbufContext);
+            m_pbufContext = EGL_NO_CONTEXT;
+        }
+        if (m_pbufSurface != EGL_NO_SURFACE) {
+            s_egl.eglDestroySurface(m_eglDisplay, m_pbufSurface);
+            m_pbufSurface = EGL_NO_SURFACE;
+        }
+        m_eglDisplay = EGL_NO_DISPLAY;
+    }
 }
 
 bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
@@ -180,7 +193,8 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     //
     // allocate space for the FrameBuffer object
     //
-    FrameBuffer *fb = new FrameBuffer(width, height, useSubWindow);
+    std::unique_ptr<FrameBuffer> fb(
+                new FrameBuffer(width, height, useSubWindow));
     if (!fb) {
         ERR("Failed to create fb\n");
         return false;
@@ -192,7 +206,6 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     fb->m_eglDisplay = s_egl.eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (fb->m_eglDisplay == EGL_NO_DISPLAY) {
         ERR("Failed to Initialize backend EGL display\n");
-        delete fb;
         return false;
     }
 
@@ -202,7 +215,6 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
                              &fb->m_caps.eglMinor)) {
         ERR("Failed to eglInitialize\n");
         GL_LOG("Failed to eglInitialize");
-        delete fb;
         return false;
     }
 
@@ -214,12 +226,11 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     // if GLES2 plugin has loaded - try to make GLES2 context and
     // get GLES2 extension string
     //
-    char* gles2Extensions = NULL;
-    gles2Extensions = getGLES2ExtensionString(fb->m_eglDisplay);
+    android::base::ScopedCPtr<char> gles2Extensions(
+                getGLES2ExtensionString(fb->m_eglDisplay));
     if (!gles2Extensions) {
         // Could not create GLES2 context - drop GL2 capability
         ERR("Failed to obtain GLES 2.x extensions string!\n");
-        delete fb;
         return false;
     }
 
@@ -257,8 +268,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
                           total_num_configs,
                           &total_egl_compatible_configs);
 
-    uint32_t total_exact_matches = 0;
-    std::vector<EGLint> exact_match_indices;
+    EGLint exact_match_index = -1;
     for (EGLint i = 0; i < total_egl_compatible_configs; i++) {
         EGLint r,g,b,a;
         EGLConfig c = all_configs[i];
@@ -271,19 +281,17 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
             g == wantedGreenSize &&
             b == wantedBlueSize &&
             a == wantedAlphaSize) {
-            total_exact_matches++;
-            exact_match_indices.push_back(i);
+            exact_match_index = i;
+            break;
         }
     }
 
-    if (exact_match_indices.size() == 0) {
+    if (exact_match_index < 0) {
         ERR("Failed on eglChooseConfig\n");
-        free(gles2Extensions);
-        delete fb;
         return false;
     }
 
-    fb->m_eglConfig = all_configs[exact_match_indices[0]];
+    fb->m_eglConfig = all_configs[exact_match_index];
 
     static const GLint glContextAttribs[] = {
         EGL_CONTEXT_CLIENT_VERSION, 2,
@@ -297,8 +305,6 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
                                               glContextAttribs);
     if (fb->m_eglContext == EGL_NO_CONTEXT) {
         ERR("Failed to create context 0x%x\n", s_egl.eglGetError());
-        free(gles2Extensions);
-        delete fb;
         return false;
     }
 
@@ -317,8 +323,6 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
                                                glContextAttribs);
     if (fb->m_pbufContext == EGL_NO_CONTEXT) {
         ERR("Failed to create Pbuffer Context 0x%x\n", s_egl.eglGetError());
-        free(gles2Extensions);
-        delete fb;
         return false;
     }
 
@@ -339,18 +343,14 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
                                                       pbufAttribs);
     if (fb->m_pbufSurface == EGL_NO_SURFACE) {
         ERR("Failed to create pbuf surface for FB 0x%x\n", s_egl.eglGetError());
-        free(gles2Extensions);
-        delete fb;
         return false;
     }
 
     GL_LOG("attempting to make context current");
     // Make the context current
-    ScopedBind bind(fb);
+    ScopedBind bind(fb.get());
     if (!bind.isValid()) {
         ERR("Failed to make current\n");
-        free(gles2Extensions);
-        delete fb;
         return false;
     }
     GL_LOG("context-current successful");
@@ -358,31 +358,21 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     //
     // Initilize framebuffer capabilities
     //
-    //const char* gles2Extensions = (const char *)s_gles2.glGetString(GL_EXTENSIONS);
-    bool has_gl_oes_image = false;
+    const bool has_gl_oes_image =
+            strstr(gles2Extensions.get(), "GL_OES_EGL_image") != NULL;
+    gles2Extensions.reset();
 
-//     printf("GLES2 [%s]\n", gles2Extensions);
-
-    has_gl_oes_image = true;
-
+    fb->m_caps.has_eglimage_texture_2d = false;
+    fb->m_caps.has_eglimage_renderbuffer = false;
     if (has_gl_oes_image) {
-        has_gl_oes_image &= strstr(gles2Extensions, "GL_OES_EGL_image") != NULL;
-    }
-    free((void*)gles2Extensions);
-    gles2Extensions = NULL;
-
-    const char *eglExtensions = s_egl.eglQueryString(fb->m_eglDisplay,
-                                                     EGL_EXTENSIONS);
-
-    if (eglExtensions && has_gl_oes_image) {
-        fb->m_caps.has_eglimage_texture_2d =
-             strstr(eglExtensions, "EGL_KHR_gl_texture_2D_image") != NULL;
-        fb->m_caps.has_eglimage_renderbuffer =
-             strstr(eglExtensions, "EGL_KHR_gl_renderbuffer_image") != NULL;
-    }
-    else {
-        fb->m_caps.has_eglimage_texture_2d = false;
-        fb->m_caps.has_eglimage_renderbuffer = false;
+        const char* const eglExtensions =
+                s_egl.eglQueryString(fb->m_eglDisplay, EGL_EXTENSIONS);
+        if (eglExtensions != nullptr) {
+            fb->m_caps.has_eglimage_texture_2d =
+                 strstr(eglExtensions, "EGL_KHR_gl_texture_2D_image") != NULL;
+            fb->m_caps.has_eglimage_renderbuffer =
+                 strstr(eglExtensions, "EGL_KHR_gl_renderbuffer_image") != NULL;
+        }
     }
 
     //
@@ -393,8 +383,6 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     //
     if (!fb->m_caps.has_eglimage_texture_2d) {
         ERR("Failed: Missing egl_image related extension(s)\n");
-        bind.release();
-        delete fb;
         return false;
     }
 
@@ -405,8 +393,6 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     fb->m_configs = new FbConfigList(fb->m_eglDisplay);
     if (fb->m_configs->empty()) {
         ERR("Failed: Initialize set of configs\n");
-        bind.release();
-        delete fb;
         return false;
     }
 
@@ -435,8 +421,6 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     //
     if (nGLConfigs + nGL2Configs == 0) {
         ERR("Failed: No GLES 2.x configs found!\n");
-        bind.release();
-        delete fb;
         return false;
     }
 
@@ -453,18 +437,13 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     fb->m_textureDraw = new TextureDraw();
     if (!fb->m_textureDraw) {
         ERR("Failed: creation of TextureDraw instance\n");
-        bind.release();
-        delete fb;
         return false;
     }
-
-    // release the FB context
-    bind.release();
 
     //
     // Keep the singleton framebuffer pointer
     //
-    s_theFrameBuffer = fb;
+    s_theFrameBuffer = fb.release();
     GL_LOG("basic EGL initialization successful");
     return true;
 }
@@ -479,6 +458,8 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow) :
     m_colorBufferHelper(new ColorBufferHelper(this)) {}
 
 FrameBuffer::~FrameBuffer() {
+    finalize();
+
     delete m_textureDraw;
     delete m_configs;
     delete m_colorBufferHelper;
@@ -1281,9 +1262,6 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind)
         //
         // render the color buffer to the window
         //
-        if (m_zRot != 0.0f) {
-            s_gles2.glClear(GL_COLOR_BUFFER_BIT);
-        }
         ret = (*c).second.cb->post(m_zRot, dx, dy);
         if (ret) {
             s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
