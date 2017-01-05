@@ -30,7 +30,7 @@ inline auto setScopedCommaLocale() ->
 #ifdef _WIN32
     static constexpr char commaLocaleName[] = "French";
 #else
-    static constexpr char commaLocaleName[] = "fr_FR.UTF-8";
+    static constexpr char commaLocaleName[] = "fr_FR.utf8";
 #endif
 
     // Set up a locale with comma as a decimal mark.
