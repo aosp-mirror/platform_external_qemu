@@ -337,8 +337,12 @@ private:
     QProgressDialog mStartupDialog;
 
     SkinSurface* mBackingSurface;
+    QPixmap mScaledBackingBitmap;
+    bool mBackingBitmapChanged = true;
+
     QQueue<SkinEvent*> mSkinEventQueue;
     android::base::Lock mSkinEventQueueLock;
+
     ToolWindow* mToolWindow;
     EmulatorContainer mContainer;
     EmulatorOverlay mOverlay;
