@@ -292,8 +292,10 @@ public:
 
     // Change the rotation of the displayed GPU sub-window.
     void setDisplayRotation(float zRot) {
-        m_zRot = zRot;
-        repost();
+        if (zRot != m_zRot) {
+            m_zRot = zRot;
+            repost();
+        }
     }
 
     // Changes what coordinate of this framebuffer will be displayed at the
@@ -303,11 +305,14 @@ public:
     // framebuffer with the top right of the sub-window. Intermediate values
     // interpolate between these states.
     void setDisplayTranslation(float px, float py) {
-
         // Sanity check the values to ensure they are between 0 and 1
-        m_px = px > 1 ? 1 : (px < 0 ? 0 : px);
-        m_py = py > 1 ? 1 : (py < 0 ? 0 : py);
-        repost();
+        const float x = px > 1.f ? 1.f : (px < 0.f ? 0.f : px);
+        const float y = py > 1.f ? 1.f : (py < 0.f ? 0.f : py);
+        if (x != m_px || y != m_py) {
+            m_px = x;
+            m_py = y;
+            repost();
+        }
     }
 
     // Return a TextureDraw instance that can be used with this surfaces
