@@ -3629,6 +3629,7 @@ int main(int argc, char **argv, char **envp)
     if (opengl_broken) {
         derror("Could not initialize OpenglES emulation, use '-gpu off' "
                "to disable it.");
+        android_teardown_metrics();
         return 1;
     }
 
