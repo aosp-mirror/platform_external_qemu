@@ -459,6 +459,8 @@ filelock_create( const char*  file )
     android_lock_acquire(_all_filelocks_tl);
     if (_is_exiting) {
         android_lock_release(_all_filelocks_tl);
+        filelock_release(lock);
+        free(lock);
         return NULL;
     }
 
