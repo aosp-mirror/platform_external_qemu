@@ -136,6 +136,12 @@ FileMetricsWriter::finalizeAbandonedSessionFiles(StringView spoolDir) {
             continue;
         }
 
+        if (!System::get()->pathIsFile(PathUtils::join(spoolDir, file))) {
+            D("Saw a ghost file right before it disappeared from the file "
+              "system; most probably a rename: '%s'", file.c_str());
+            continue;
+        }
+
         // parse the file name to get session ID and the filename counter
         int filenameCounter = 0;
         std::string sessionId = Uuid::nullUuidStr;
@@ -235,6 +241,7 @@ void FileMetricsWriter::openNewFileNoLock() {
         E("memory allocation failed");
         close(fd);
         HANDLE_EINTR(unlink(newName.c_str()));
+        mActiveFileLock.reset();
         return;
     }
     mActiveFile->SetCloseOnDelete(true);
