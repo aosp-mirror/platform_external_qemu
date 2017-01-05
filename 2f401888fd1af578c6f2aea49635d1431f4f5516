@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "57a6d6c4_a07eb153",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-05T21:15:40Z",
+      "side": 1,
+      "message": "Update comment? Am assuming new metrics reporter is not using file lock at this point which seems to be the original reason for the leaking",
+      "range": {
+        "startLine": 421,
+        "startChar": 0,
+        "endLine": 423,
+        "endChar": 49
+      },
+      "revId": "2f401888fd1af578c6f2aea49635d1431f4f5516",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
