@@ -40,6 +40,8 @@ EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
     setFrameShape(QFrame::NoFrame);
     setWidget(window);
 
+    setMinimumSize({200, 200});
+
     // The following hints prevent the minimize/maximize/close buttons from
     // appearing.
     setWindowFlags(Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::Window);
