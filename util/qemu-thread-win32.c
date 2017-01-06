@@ -15,6 +15,7 @@
 #include "qemu/abort.h"
 #include "qemu/thread.h"
 #include "qemu/notify.h"
+#include "sysemu/sysemu.h"
 #include <process.h>
 
 static bool name_threads;
@@ -390,24 +391,12 @@ struct QemuThreadData {
     QemuMutex         mtx;
 };
 
-static bool atexit_registered;
-static NotifierList main_thread_exit;
-
 static __thread QemuThreadData *qemu_thread_data;
-
-static void run_main_thread_exit(void)
-{
-    notifier_list_notify(&main_thread_exit, NULL);
-}
 
 void qemu_thread_atexit_add(Notifier *notifier)
 {
     if (!qemu_thread_data) {
-        if (!atexit_registered) {
-            atexit_registered = true;
-            atexit(run_main_thread_exit);
-        }
-        notifier_list_add(&main_thread_exit, notifier);
+        qemu_add_exit_notifier(notifier);
     } else {
         notifier_list_add(&qemu_thread_data->exit, notifier);
     }
