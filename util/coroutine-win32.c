@@ -25,6 +25,7 @@
 #include "qemu/osdep.h"
 #include "qemu-common.h"
 #include "qemu/coroutine_int.h"
+#include "qemu/thread_local.h"
 
 typedef struct
 {
@@ -34,8 +35,8 @@ typedef struct
     CoroutineAction action;
 } CoroutineWin32;
 
-static __thread CoroutineWin32 leader;
-static __thread Coroutine *current;
+QEMU_THREAD_LOCAL_DECLARE(CoroutineWin32, leader);
+QEMU_THREAD_LOCAL_DECLARE(Coroutine*, current);
 
 /* This function is marked noinline to prevent GCC from inlining it
  * into coroutine_trampoline(). If we allow it to do that then it
@@ -52,7 +53,7 @@ qemu_coroutine_switch(Coroutine *from_, Coroutine *to_,
     CoroutineWin32 *from = DO_UPCAST(CoroutineWin32, base, from_);
     CoroutineWin32 *to = DO_UPCAST(CoroutineWin32, base, to_);
 
-    current = to_;
+    QEMU_THREAD_LOCAL_SET(current, to_);
 
     to->action = action;
     SwitchToFiber(to->fiber);
@@ -89,14 +90,18 @@ void qemu_coroutine_delete(Coroutine *co_)
 
 Coroutine *qemu_coroutine_self(void)
 {
-    if (!current) {
-        current = &leader.base;
-        leader.fiber = ConvertThreadToFiber(NULL);
+    Coroutine* res = QEMU_THREAD_LOCAL_GET(current);
+    if (!res) {
+        CoroutineWin32* pleader = QEMU_THREAD_LOCAL_GET_PTR(leader);
+        res = &pleader->base;
+        QEMU_THREAD_LOCAL_SET(current, res);
+        pleader->fiber = ConvertThreadToFiber(NULL);
     }
-    return current;
+    return res;
 }
 
 bool qemu_in_coroutine(void)
 {
-    return current && current->caller;
+    Coroutine* res = QEMU_THREAD_LOCAL_GET(current);
+    return res && res->caller;
 }

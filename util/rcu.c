@@ -61,7 +61,7 @@ static inline int rcu_gp_ongoing(unsigned long *ctr)
 /* Written to only by each individual reader. Read by both the reader and the
  * writers.
  */
-__thread struct rcu_reader_data rcu_reader;
+QEMU_THREAD_LOCAL_DECLARE(struct rcu_reader_data, rcu_reader);
 
 /* Protected by rcu_registry_lock.  */
 typedef QLIST_HEAD(, rcu_reader_data) ThreadList;
@@ -287,16 +287,16 @@ void call_rcu1(struct rcu_head *node, void (*func)(struct rcu_head *node))
 
 void rcu_register_thread(void)
 {
-    assert(rcu_reader.ctr == 0);
+    assert(QEMU_THREAD_LOCAL_GET_PTR(rcu_reader)->ctr == 0);
     qemu_mutex_lock(&rcu_registry_lock);
-    QLIST_INSERT_HEAD(&registry, &rcu_reader, node);
+    QLIST_INSERT_HEAD(&registry, QEMU_THREAD_LOCAL_GET_PTR(rcu_reader), node);
     qemu_mutex_unlock(&rcu_registry_lock);
 }
 
 void rcu_unregister_thread(void)
 {
     qemu_mutex_lock(&rcu_registry_lock);
-    QLIST_REMOVE(&rcu_reader, node);
+    QLIST_REMOVE(QEMU_THREAD_LOCAL_GET_PTR(rcu_reader), node);
     qemu_mutex_unlock(&rcu_registry_lock);
 }
 
