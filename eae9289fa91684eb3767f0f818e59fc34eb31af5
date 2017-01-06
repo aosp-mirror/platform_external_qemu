@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "77e75a57_156ab4cc",
+        "filename": "android/scripts/build-ffmpeg.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-06T22:17:01Z",
+      "side": 1,
+      "message": "on Mac we use clang, could you please double check that this parameter is OK?",
+      "range": {
+        "startLine": 100,
+        "startChar": 21,
+        "endLine": 100,
+        "endChar": 24
+      },
+      "revId": "eae9289fa91684eb3767f0f818e59fc34eb31af5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77e75a57_b53828fc",
+        "filename": "android/scripts/utils/package_builder.shi",
+        "patchSetId": 1
+      },
+      "lineNbr": 800,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-06T22:17:01Z",
+      "side": 1,
+      "message": "this whole function differs from the old one builder_build_autotools_package_full_install () by a single line - missing $_SHU_BUILDER_GNU_CONFIG_HOST_FLAG\n\nCan you make a \u0027more generic\u0027 version of builder_build_autotools_package_full_install () with an additional argument, like builder_build_autotools_package_full_install_optional_host()\nwith $3 controlling if it passes host argument or not",
+      "range": {
+        "startLine": 752,
+        "startChar": 0,
+        "endLine": 800,
+        "endChar": 1
+      },
+      "revId": "eae9289fa91684eb3767f0f818e59fc34eb31af5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
