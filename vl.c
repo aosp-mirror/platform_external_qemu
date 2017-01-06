@@ -2909,6 +2909,7 @@ void qemu_remove_exit_notifier(Notifier *notify)
 static void qemu_run_exit_notifiers(void)
 {
     notifier_list_notify(&exit_notifiers, NULL);
+    notifier_list_init(&exit_notifiers);
 }
 
 static bool machine_init_done;
@@ -5328,6 +5329,9 @@ int main(int argc, char** argv, char** envp)
     audio_cleanup();
     monitor_cleanup();
     qemu_chr_cleanup();
+
+    /* make sure we run the exit notifiers deterministically if we can */
+    qemu_run_exit_notifiers();
 
     return 0;
 }
