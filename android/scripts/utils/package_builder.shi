@@ -460,7 +460,6 @@ builder_prepare_for_host_no_binprefix () {
     _shu_builder_prepare_for_host "$1" "$2" "none" "$3"
 }
 
-
 # Generate a small shell script that can be sourced to prepare the
 # build for a given host system.
 # $1: Host system name (e.g. linux-x86_64)
@@ -745,6 +744,61 @@ builder_build_autotools_package_full_install () {
     touch "$PKG_TIMESTAMP"
 }
 
+# Build a given autotools based package and run customized install commands
+#
+# $1: Package basename
+# $2: Make commands, e.g. install
+# $3+: Additional configure options.
+builder_build_autotools_package_full_install_ffmpeg () {
+    local PKG_NAME=$(package_list_get_src_dir $1)
+    local INSTALL_COMMANDS="$2"
+    local PKG_SRC_DIR=$(builder_src_dir)/$PKG_NAME
+    local PKG_BUILD_DIR=$(builder_build_dir)/$PKG_NAME
+    local PKG_TIMESTAMP=${PKG_BUILD_DIR}-timestamp
+
+    shift; shift;
+
+    if [ -f "$PKG_TIMESTAMP" -a -z "$OPT_FORCE" ]; then
+        # Return early if the package was already built.
+        return 0
+    fi
+
+    case $_SHU_BUILDER_CURRENT_HOST in
+        darwin*)
+            # Required for proper Autotools builds on Darwin
+            builder_disable_verbose_install
+            ;;
+    esac
+
+    local PKG_FULLNAME="$(basename $PKG_NAME)"
+    dump "$(builder_text) Building $PKG_FULLNAME"
+
+    local INSTALL_FLAGS
+    if [ -z "$_SHU_BUILDER_DISABLE_PARALLEL_INSTALL" ]; then
+        var_append INSTALL_FLAGS "-j$NUM_JOBS"
+    fi
+    if [ -z "$_SHU_BUILDER_DISABLE_VERBOSE_INSTALL" ]; then
+        var_append INSTALL_FLAGS "V=1";
+    fi
+    (
+        run mkdir -p "$PKG_BUILD_DIR" &&
+        run cd "$PKG_BUILD_DIR" &&
+        export LDFLAGS="-L$_SHU_BUILDER_PREFIX/lib" &&
+        export CPPFLAGS="-I$_SHU_BUILDER_PREFIX/include" &&
+        export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
+        export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
+        run "$PKG_SRC_DIR"/configure \
+            --prefix=$_SHU_BUILDER_PREFIX \
+            $_SHU_BUILDER_CONFIGURE_FLAGS \
+            "$@" &&
+        run make -j$NUM_JOBS V=1 &&
+        run make $INSTALL_COMMANDS $INSTALL_FLAGS
+    ) ||
+    panic "Could not build and install $PKG_FULLNAME"
+
+    touch "$PKG_TIMESTAMP"
+}
+
 # Build with the default 'make install' command in the end
 #
 # $1: Package basename
@@ -753,4 +807,14 @@ builder_build_autotools_package() {
     local FIRST="$1"
     shift;
     builder_build_autotools_package_full_install "$FIRST" install "$@"
+}
+
+# Build with the default 'make install' command in the end
+#
+# $1: Package basename
+# $2+: Additional configure options.
+builder_build_autotools_package_ffmpeg() {
+    local FIRST="$1"
+    shift;
+    builder_build_autotools_package_full_install_ffmpeg "$FIRST" install "$@"
 }
