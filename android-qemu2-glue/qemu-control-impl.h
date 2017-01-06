@@ -19,6 +19,7 @@
 #include "android/emulation/control/clipboard_agent.h"
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
+#include "android/emulation/control/opengl_agent.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/net_agent.h"
 #include "android/emulation/control/sensors_agent.h"
@@ -45,6 +46,9 @@ extern const QAndroidClipboardAgent* const gQAndroidClipboardAgent;
 
 // Defined in android/qemu-finger-agent.c
 extern const QAndroidFingerAgent* const gQAndroidFingerAgent;
+
+// Defined in android/qemu-opengl-agent.c
+extern const QAndroidOpenglAgent* const gQAndroidOpenglAgent;
 
 // Defined in android/qemu-location-agent.c
 extern const QAndroidLocationAgent* const gQAndroidLocationAgent;

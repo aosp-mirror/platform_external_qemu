@@ -89,6 +89,7 @@ bool qemu_android_emulation_setup() {
             gQAndroidUserEventAgent,
             gQAndroidVmOperations,
             gQAndroidNetAgent,
+            gQAndroidOpenglAgent,
     };
 
     if (!qemu_android_setup_http_proxy(op_http_proxy)) {
