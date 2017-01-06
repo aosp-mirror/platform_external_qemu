@@ -133,6 +133,8 @@ static bool retry(Func func, int tries = 4, int timeoutMs = 100) {
 
 static bool delete_file(const android::base::Win32UnicodeString& name) {
     return retry([&name]() {
+        // Make sure the file isn't marked readonly, or deletion may fail.
+        SetFileAttributesW(name.c_str(), FILE_ATTRIBUTE_NORMAL);
         return ::DeleteFileW(name.c_str()) != 0 ||
                ::GetLastError() == ERROR_FILE_NOT_FOUND;
     });
@@ -177,8 +179,15 @@ static int filelock_lock(FileLock* lock) {
                     FILE_SHARE_READ,  // allow others to read the file, but not
                                       // to write to it or not to delete it
                     nullptr,          // no special security attributes
-                    CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY,
+                    CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,
                     nullptr);  // no template file
+            if (lockHandle == INVALID_HANDLE_VALUE &&
+                GetLastError() == ERROR_ACCESS_DENIED) {
+                // Sometimes a previous file gets readonly attribute even when
+                // its parent process has exited; that prevents us from opening
+                // it for writing.
+                SetFileAttributesW(unicodeName.c_str(), FILE_ATTRIBUTE_NORMAL);
+            }
             return lockHandle != INVALID_HANDLE_VALUE;
         },
         5,      // tries
