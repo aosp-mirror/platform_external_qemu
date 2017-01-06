@@ -49,12 +49,11 @@ typedef enum {
 typedef struct {
     uint32_t keycode;
     uint32_t mod;
-    //uint32_t unicode;
 } SkinEventKeyData;
 
 typedef struct {
-    bool down;
     uint8_t text[32];
+    bool down;
 } SkinEventTextInputData;
 
 typedef struct {
@@ -67,7 +66,7 @@ typedef struct {
 } SkinEventMouseData;
 
 typedef struct {
-  SkinRotation rotation;
+    SkinRotation rotation;
 } SkinEventLayoutRotateData;
 
 typedef struct {

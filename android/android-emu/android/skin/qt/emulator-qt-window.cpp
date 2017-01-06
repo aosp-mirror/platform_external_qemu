@@ -186,8 +186,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                      &EmulatorQtWindow::slot_getDevicePixelRatio);
     QObject::connect(this, &EmulatorQtWindow::getScreenDimensions, this,
                      &EmulatorQtWindow::slot_getScreenDimensions);
-    QObject::connect(this, &EmulatorQtWindow::getWindowId, this,
-                     &EmulatorQtWindow::slot_getWindowId);
     QObject::connect(this, &EmulatorQtWindow::getWindowPos, this,
                      &EmulatorQtWindow::slot_getWindowPos);
     QObject::connect(this, &EmulatorQtWindow::isWindowFullyVisible, this,
@@ -569,25 +567,22 @@ void EmulatorQtWindow::mouseReleaseEvent(QMouseEvent* event) {
 void EmulatorQtWindow::paintEvent(QPaintEvent*) {
     QPainter painter(this);
     QRect bg(QPoint(0, 0), this->size());
-
     painter.fillRect(bg, Qt::black);
 
-    // Ensure we actually have a valid bitmap before attempting to
-    // rescale
     if (mBackingSurface && !mBackingSurface->bitmap->isNull()) {
         QRect r(0, 0, mBackingSurface->w, mBackingSurface->h);
-        // Rescale with smooth transformation to avoid aliasing
-        QImage scaled_bitmap = mBackingSurface->bitmap->scaled(
-                r.size() * devicePixelRatio(), Qt::KeepAspectRatio,
-                Qt::SmoothTransformation);
-        if (!scaled_bitmap.isNull()) {
-            scaled_bitmap.setDevicePixelRatio(devicePixelRatio());
-            painter.drawImage(r, scaled_bitmap);
-        } else {
-            qWarning("Failed to scale the skin bitmap");
+        if (mBackingBitmapChanged) {
+            const auto pixmap = QPixmap::fromImage(*mBackingSurface->bitmap);
+            mScaledBackingBitmap = pixmap.scaled(r.size() * devicePixelRatio(),
+                                                 Qt::KeepAspectRatio,
+                                                 Qt::SmoothTransformation);
+            mBackingBitmapChanged = false;
         }
-    } else {
-        D("Painting emulator window, but no backing bitmap");
+
+        if (!mScaledBackingBitmap.isNull()) {
+            mScaledBackingBitmap.setDevicePixelRatio(devicePixelRatio());
+            painter.drawPixmap(r, mScaledBackingBitmap);
+        }
     }
 }
 
@@ -665,6 +660,9 @@ void EmulatorQtWindow::slot_blit(QImage* src,
                                  QPoint dstPos,
                                  QPainter::CompositionMode op,
                                  QSemaphore* semaphore) {
+    if (mBackingSurface && dst == mBackingSurface->bitmap) {
+        mBackingBitmapChanged = true;
+    }
     QPainter painter(dst);
     painter.setCompositionMode(op);
     painter.drawImage(dstPos, *src, srcRect);
@@ -753,16 +751,14 @@ void EmulatorQtWindow::slot_getScreenDimensions(QRect* out_rect,
         semaphore->release();
 }
 
-void EmulatorQtWindow::slot_getWindowId(WId* out_id, QSemaphore* semaphore) {
+WId EmulatorQtWindow::getWindowId() {
     WId wid = effectiveWinId();
     D("Effective win ID is %lx", wid);
 #if defined(__APPLE__)
     wid = (WId)getNSWindow((void*)wid);
     D("After finding parent, win ID is %lx", wid);
 #endif
-    *out_id = wid;
-    if (semaphore != NULL)
-        semaphore->release();
+    return wid;
 }
 
 void EmulatorQtWindow::slot_getWindowPos(int* xx,
@@ -861,6 +857,7 @@ void EmulatorQtWindow::slot_releaseBitmap(SkinSurface* s,
                                           QSemaphore* semaphore) {
     if (mBackingSurface == s) {
         mBackingSurface = NULL;
+        mBackingBitmapChanged = true;
     }
     delete s->bitmap;
     delete s;
@@ -928,7 +925,10 @@ void EmulatorQtWindow::slot_setWindowTitle(QString title,
 void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
                                        QRect rect,
                                        QSemaphore* semaphore) {
-    mBackingSurface = surface;
+    if (surface != mBackingSurface) {
+        mBackingBitmapChanged = true;
+        mBackingSurface = surface;
+    }
 
     showNormal();
     setFixedSize(rect.size());

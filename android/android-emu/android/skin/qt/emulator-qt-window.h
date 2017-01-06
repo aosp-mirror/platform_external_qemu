@@ -156,7 +156,6 @@ signals:
                        QSemaphore* semaphore = NULL);
     void getDevicePixelRatio(double* out_dpr, QSemaphore* semaphore = NULL);
     void getScreenDimensions(QRect* out_rect, QSemaphore* semaphore = NULL);
-    void getWindowId(WId* out_id, QSemaphore* semaphore = NULL);
     void getWindowPos(int* x, int* y, QSemaphore* semaphore = NULL);
     void isWindowFullyVisible(bool* out_value, QSemaphore* semaphore = NULL);
     void releaseBitmap(SkinSurface* s, QSemaphore* sempahore = NULL);
@@ -182,6 +181,8 @@ signals:
 public:
     void pollEvent(SkinEvent* event,
                    bool* hasEvent);
+
+    WId getWindowId();
 
     android::emulation::AdbInterface* getAdbInterface() const;
     bool isInZoomMode() const;
@@ -246,7 +247,6 @@ private slots:
                                   QSemaphore* semaphore = NULL);
     void slot_getScreenDimensions(QRect* out_rect,
                                   QSemaphore* semaphore = NULL);
-    void slot_getWindowId(WId* out_id, QSemaphore* semaphore = NULL);
     void slot_getWindowPos(int* x, int* y, QSemaphore* semaphore = NULL);
     void slot_isWindowFullyVisible(bool* out_value,
                                    QSemaphore* semaphore = NULL);
@@ -337,8 +337,12 @@ private:
     QProgressDialog mStartupDialog;
 
     SkinSurface* mBackingSurface;
+    QPixmap mScaledBackingBitmap;
+    bool mBackingBitmapChanged = true;
+
     QQueue<SkinEvent*> mSkinEventQueue;
     android::base::Lock mSkinEventQueueLock;
+
     ToolWindow* mToolWindow;
     EmulatorContainer mContainer;
     EmulatorOverlay mOverlay;
