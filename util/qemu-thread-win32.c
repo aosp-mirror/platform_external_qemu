@@ -14,6 +14,7 @@
 #include "qemu-common.h"
 #include "qemu/abort.h"
 #include "qemu/thread.h"
+#include "qemu/thread_local.h"
 #include "qemu/notify.h"
 #include "sysemu/sysemu.h"
 #include <process.h>
@@ -391,14 +392,15 @@ struct QemuThreadData {
     QemuMutex         mtx;
 };
 
-static __thread QemuThreadData *qemu_thread_data;
+static QEMU_THREAD_LOCAL_DECLARE(QemuThreadData*, qemu_thread_data);
 
 void qemu_thread_atexit_add(Notifier *notifier)
 {
-    if (!qemu_thread_data) {
+    QemuThreadData* thread_data = QEMU_THREAD_LOCAL_GET(qemu_thread_data);
+    if (!thread_data) {
         qemu_add_exit_notifier(notifier);
     } else {
-        notifier_list_add(&qemu_thread_data->exit, notifier);
+        notifier_list_add(&thread_data->exit, notifier);
     }
 }
 
@@ -413,7 +415,7 @@ static unsigned __stdcall win32_start_routine(void *arg)
     void *(*start_routine)(void *) = data->start_routine;
     void *thread_arg = data->arg;
 
-    qemu_thread_data = data;
+    QEMU_THREAD_LOCAL_SET(qemu_thread_data, data);
 
     if (thread_setup_func)
         (*thread_setup_func)();
@@ -424,7 +426,7 @@ static unsigned __stdcall win32_start_routine(void *arg)
 
 void qemu_thread_exit(void *arg)
 {
-    QemuThreadData *data = qemu_thread_data;
+    QemuThreadData *data = QEMU_THREAD_LOCAL_GET(qemu_thread_data);
 
     notifier_list_notify(&data->exit, NULL);
     if (data->mode == QEMU_THREAD_JOINABLE) {
@@ -496,7 +498,7 @@ void qemu_thread_create(QemuThread *thread, const char *name,
 
 void qemu_thread_get_self(QemuThread *thread)
 {
-    thread->data = qemu_thread_data;
+    thread->data = QEMU_THREAD_LOCAL_GET(qemu_thread_data);
     thread->tid = GetCurrentThreadId();
 }
 
