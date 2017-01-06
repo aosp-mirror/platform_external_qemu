@@ -1067,9 +1067,9 @@ glGetProgramInterfaceiv
 
 glGetProgramResourceiv
     dir params out
-    len params bufSize
     len params (bufSize * sizeof(GLint))
     param_check bufSize if(bufSize<0){ ctx->setError(GL_INVALID_VALUE); return; }
+    var_flag length nullAllowed
     dir length out
     len length (sizeof(GLsizei))
     len props (propCount * sizeof(GLenum))
@@ -1084,6 +1084,7 @@ glGetProgramResourceName
     dir name out
     len name bufSize
     param_check bufSize if(bufSize<0){ ctx->setError(GL_INVALID_VALUE); return; }
+    var_flag length nullAllowed
     dir length out
     len length (sizeof(GLsizei))
 

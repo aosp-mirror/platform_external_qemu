@@ -31,15 +31,22 @@ RenderContext* RenderContext::create(EGLDisplay display,
     bool shouldEmulateGLES1 = s_gles1.underlying_gles2_api != NULL;
 
     GLESApi clientVersion;
+    int majorVersion = clientVersion;
+    int minorVersion = 0;
 
     if (version == GLESApi_CM && shouldEmulateGLES1) {
         clientVersion = GLESApi_2;
-    } else {
-        clientVersion = version;
+    } else if (version == GLESApi_3_0) {
+        majorVersion = 3;
+        minorVersion = 0;
+    } else if (version == GLESApi_3_1) {
+        majorVersion = 3;
+        minorVersion = 1;
     }
 
     const EGLint contextAttribs[] = {
-        EGL_CONTEXT_CLIENT_VERSION, clientVersion,
+        EGL_CONTEXT_CLIENT_VERSION, majorVersion,
+        EGL_CONTEXT_MINOR_VERSION_KHR, minorVersion,
         EGL_NONE
     };
     EGLContext context = s_egl.eglCreateContext(

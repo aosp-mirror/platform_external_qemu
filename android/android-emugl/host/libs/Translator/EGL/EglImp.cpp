@@ -268,6 +268,17 @@ EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, E
         }
         initGLESx(GLES_3_0);
     }
+    if(!g_eglInfo->getIface(GLES_3_1)) {
+        func  = loadIfaces(LIB_GLES_V2_NAME, error, sizeof(error));
+        if (func) {
+            renderableType |= EGL_OPENGL_ES2_BIT | EGL_OPENGL_ES3_BIT;
+            g_eglInfo->setIface(func(&s_eglIface),GLES_3_1);
+        } else {
+           fprintf(stderr, "%s: Could not find ifaces for GLES 3.x [%s]\n",
+                   __FUNCTION__, error);
+        }
+        initGLESx(GLES_3_1);
+    }
     dpy->initialize(renderableType);
     return EGL_TRUE;
 }
@@ -794,8 +805,7 @@ EGLAPI EGLContext EGLAPIENTRY eglCreateContext(EGLDisplay display, EGLConfig con
                 minor_version = attrib_val;
                 if (version == GLES_3_0 &&
                     minor_version == 1) {
-                    fprintf(stderr, "%s: GLES 3.1 unimplemented!\n", __func__);
-                    RETURN_ERROR(EGL_NO_CONTEXT, EGL_BAD_ATTRIBUTE);
+                    version = GLES_3_1;
                 }
                 break;
             case EGL_CONTEXT_FLAGS_KHR:

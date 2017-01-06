@@ -335,6 +335,8 @@ bool GLESv2Validate::textureParams(GLenum param, int glesMajorVersion, int glesM
     case GL_TEXTURE_IMMUTABLE_FORMAT:
     case GL_TEXTURE_IMMUTABLE_LEVELS:
         return glesMajorVersion >= 3;
+    case GL_DEPTH_STENCIL_TEXTURE_MODE:
+        return glesMajorVersion >= 3 && glesMinorVersion >= 1;
     default:
         return false;
     }

@@ -2259,26 +2259,44 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA, GL_INVALID_OPERATION);
+
         ProgramData* programData = (ProgramData*)objData;
         GLint fragmentShader   = programData->getAttachedFragmentShader();
         GLint vertexShader =  programData->getAttachedVertexShader();
+        GLint computeShader =  programData->getAttachedComputeShader();
+
         if (vertexShader != 0 && fragmentShader!=0) {
-            /* validating that the fragment & vertex shaders were compiled successfuly*/
             GLint fCompileStatus = GL_FALSE;
             GLint vCompileStatus = GL_FALSE;
+
             GLuint fragmentShaderGlobal = ctx->shareGroup()->getGlobalName(
                     NamedObjectType::SHADER_OR_PROGRAM, fragmentShader);
             GLuint vertexShaderGlobal = ctx->shareGroup()->getGlobalName(
                     NamedObjectType::SHADER_OR_PROGRAM, vertexShader);
+
             ctx->dispatcher().glGetShaderiv(fragmentShaderGlobal,GL_COMPILE_STATUS,&fCompileStatus);
             ctx->dispatcher().glGetShaderiv(vertexShaderGlobal,GL_COMPILE_STATUS,&vCompileStatus);
 
-            if(fCompileStatus != 0 && vCompileStatus != 0){
+            if(fCompileStatus != 0 && vCompileStatus != 0) {
+                ctx->dispatcher().glLinkProgram(globalProgramName);
+                ctx->dispatcher().glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
+            }
+        } 
+
+        if (computeShader != 0) {
+            GLint cCompileStatus = GL_FALSE;
+            GLuint computeShaderGlobal = ctx->shareGroup()->getGlobalName(
+                    NamedObjectType::SHADER_OR_PROGRAM, computeShader);
+            ctx->dispatcher().glGetShaderiv(computeShaderGlobal,GL_COMPILE_STATUS,&cCompileStatus);
+
+            if (cCompileStatus != 0) {
                 ctx->dispatcher().glLinkProgram(globalProgramName);
                 ctx->dispatcher().glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
             }
         }
+
         programData->setLinkStatus(linkStatus);
+
 
         GLsizei infoLogLength=0;
         GLchar* infoLog;

@@ -17,6 +17,9 @@
 
 #include <GLSLANG/ShaderLang.h>
 
+#define SH_GLES31_SPEC 0x8B88
+#define GL_COMPUTE_SHADER 0x91B9
+
 namespace ANGLEShaderParser {
 
 ShBuiltInResources kResources;
@@ -30,8 +33,7 @@ ShHandle kFragCompilerES30 = nullptr;
 
 ShHandle kVertCompilerES31 = nullptr;
 ShHandle kFragCompilerES31 = nullptr;
-// TODO
-// ShHandle kComputeCompilerES31 = nullptr;
+ShHandle kComputeCompilerES31 = nullptr;
 
 android::base::Lock kCompilerLock;
 
@@ -70,34 +72,13 @@ void initializeResources(
 
     kResources.MaxDualSourceDrawBuffers = maxDualSourceDrawBuffers;
 
-
     kResources.OES_standard_derivatives = 0;
     kResources.OES_EGL_image_external = 0;
-
-
-    // The following are set to pass:
-    // dEQP-GLES2.functional.shaders.builtin_variable.*
-    // On a Linux machine with an Nvidia Quadro K2200
-    // kResources.MaxVertexAttribs = 16; // Defaulted to 8
-    // kResources.MaxVertexUniformVectors = 1024; // Defaulted to 128
-    // kResources.MaxVaryingVectors = 31; // Defaulted to 8
-    // kResources.MaxVertexTextureImageUnits = 32; // Defaulted to 0
-    // kResources.MaxCombinedTextureImageUnits = 32; // Defaulted to 8
-    // kResources.MaxTextureImageUnits = 32; // Defaulted to 8
-    // kResources.MaxFragmentUniformVectors = 1024; // Defaulted to 16
-
-    // kResources.MaxDrawBuffers = 8;
-    // kResources.MaxDualSourceDrawBuffers = 1;
-
-    // kResources.OES_standard_derivatives = 0;
-    // kResources.OES_EGL_image_external = 0;
-
-    // kResources.FragmentPrecisionHigh = 1;
 }
 
-ShHandle createShaderCompiler(GLenum shaderType, ShShaderOutput glslout) {
+ShHandle createShaderCompiler(GLenum shaderType, int esSpec, ShShaderOutput glslout) {
     ShHandle handle = ShConstructCompiler(shaderType,
-                                          SH_GLES3_SPEC,
+                                          (ShShaderSpec)esSpec,
                                           glslout,
                                           &kResources);
     return handle;
@@ -138,39 +119,44 @@ bool globalInitialize(
             maxProgramTexelOffset,
             maxDualSourceDrawBuffers);
 
-    kVertCompilerCompat = createShaderCompiler(GL_VERTEX_SHADER, SH_GLSL_COMPATIBILITY_OUTPUT);
+    kVertCompilerCompat = createShaderCompiler(GL_VERTEX_SHADER, SH_GLES3_SPEC, SH_GLSL_COMPATIBILITY_OUTPUT);
     if (!kVertCompilerCompat) {
         fprintf(stderr, "Failed to initialize ANGLE Compat vertex shader compiler.\n");
         return false;
     }
 
-    kFragCompilerCompat = createShaderCompiler(GL_FRAGMENT_SHADER, SH_GLSL_COMPATIBILITY_OUTPUT);
+    kFragCompilerCompat = createShaderCompiler(GL_FRAGMENT_SHADER, SH_GLES3_SPEC, SH_GLSL_COMPATIBILITY_OUTPUT);
     if (!kFragCompilerCompat) {
         fprintf(stderr, "Failed to initialize ANGLE Compat fragment shader compiler.\n");
         return false;
     }
 
-    kVertCompilerES30 = createShaderCompiler(GL_VERTEX_SHADER, SH_GLSL_150_CORE_OUTPUT);
+    kVertCompilerES30 = createShaderCompiler(GL_VERTEX_SHADER, SH_GLES3_SPEC, SH_GLSL_150_CORE_OUTPUT);
     if (!kVertCompilerES30) {
         fprintf(stderr, "Failed to initialize ANGLE ES 3.0 vertex shader compiler.\n");
         return false;
     }
 
-    kFragCompilerES30 = createShaderCompiler(GL_FRAGMENT_SHADER, SH_GLSL_150_CORE_OUTPUT);
+    kFragCompilerES30 = createShaderCompiler(GL_FRAGMENT_SHADER, SH_GLES3_SPEC, SH_GLSL_150_CORE_OUTPUT);
     if (!kFragCompilerES30) {
         fprintf(stderr, "Failed to initialize ANGLE ES 3.0 fragment shader compiler.\n");
         return false;
     }
 
-    kVertCompilerES31 = createShaderCompiler(GL_VERTEX_SHADER, SH_GLSL_150_CORE_OUTPUT);
+    kVertCompilerES31 = createShaderCompiler(GL_VERTEX_SHADER, SH_GLES31_SPEC, SH_GLSL_430_CORE_OUTPUT);
     if (!kVertCompilerES31) {
         fprintf(stderr, "Failed to initialize ANGLE ES 3.1 vertex shader compiler.\n");
         return false;
     }
 
-    kFragCompilerES31 = createShaderCompiler(GL_FRAGMENT_SHADER, SH_GLSL_150_CORE_OUTPUT);
+    kFragCompilerES31 = createShaderCompiler(GL_FRAGMENT_SHADER, SH_GLES31_SPEC, SH_GLSL_430_CORE_OUTPUT);
     if (!kFragCompilerES31) {
         fprintf(stderr, "Failed to initialize ANGLE ES 3.1 fragment shader compiler.\n");
+        return false;
+    }
+    kComputeCompilerES31 = createShaderCompiler(GL_COMPUTE_SHADER, SH_GLES31_SPEC, SH_GLSL_430_CORE_OUTPUT);
+    if (!kComputeCompilerES31) {
+        fprintf(stderr, "Failed to initialize ANGLE ES 3.1 compute shader compiler.\n");
         return false;
     }
     kInitialized = true;
@@ -193,27 +179,50 @@ bool translate(int glesMajorVersion,
     ShHandle compilerHandle = (shaderType == GL_VERTEX_SHADER ?
                                    kVertCompilerCompat : kFragCompilerCompat);
 
-    switch (glesMajorVersion) {
-    case 3:
+    if (glesMajorVersion == 3 && glesMinorVersion == 0) {
         compilerHandle =
             (shaderType == GL_VERTEX_SHADER ? kVertCompilerES30 : kFragCompilerES30);
-        break;
-    default:
-        break;
+
+    } else if (glesMajorVersion == 3 && glesMinorVersion == 1) {
+        fprintf(stderr, "%s: using 3.1 ANGLE shader translator\n", __func__);
+        if (shaderType == GL_COMPUTE_SHADER)
+            fprintf(stderr, "%s: is compute shader as well\n", __func__);
+        switch (shaderType) {
+            case GL_VERTEX_SHADER:
+                compilerHandle = kVertCompilerES31;
+                break;
+            case GL_FRAGMENT_SHADER:
+                compilerHandle = kFragCompilerES31;
+                break;
+            case GL_COMPUTE_SHADER:
+                compilerHandle = kComputeCompilerES31;
+                break;
+            default:
+                compilerHandle = 0;
+                break;
+        }
     }
 
     if (!compilerHandle) {
+        fprintf(stderr, "%s: no compiler handle\n", __FUNCTION__);
         return false;
     }
 
     // Pass in the entire src as 1 string, ask for compiled GLSL object code
     // to be saved.
+    if (shaderType == GL_COMPUTE_SHADER) {
+        fprintf(stderr, "%s: **** Compute shader INPUT ****\n%s\n", __FUNCTION__, src);
+    }
     int res = ShCompile(compilerHandle, &src, 1, SH_OBJECT_CODE);
 
     // The compilers return references that may not be valid in the future,
     // and we manually clear them immediately anyway.
     *outInfolog = std::string(ShGetInfoLog(compilerHandle));
     *outObjCode = std::string(ShGetObjectCode(compilerHandle));
+    if (shaderType == GL_COMPUTE_SHADER) {
+        fprintf(stderr, "%s: **** Compute shader INFOLOG ****\n%s\n", __FUNCTION__, outInfolog->c_str());
+        fprintf(stderr, "%s: **** Compute shader OUTPUT ****\n%s\n", __FUNCTION__, outObjCode->c_str());
+    }
     ShClearResults(compilerHandle);
 
 

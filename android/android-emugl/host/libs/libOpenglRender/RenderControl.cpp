@@ -373,6 +373,9 @@ static EGLint rcGetFBParam(EGLint param)
 static uint32_t rcCreateContext(uint32_t config,
                                 uint32_t share, uint32_t glVersion)
 {
+    if (glVersion == 4) {
+        fprintf(stderr, "%s: GLES 3.1\n", __FUNCTION__);
+    }
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return 0;
