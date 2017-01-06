@@ -22,6 +22,30 @@
       "revId": "13ee5cd1af9f87266cf4b41bb1e0a3362aae5a9b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77e75a57_f5a910c8",
+        "filename": "include/qemu/thread_local.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-06T22:21:15Z",
+      "side": 1,
+      "message": "we don\u0027t allocate memory for big variables at first, but only on first set() or get_ptr()\notherwise get() just returns an empty value",
+      "parentUuid": "77e75a57_95588473",
+      "range": {
+        "startLine": 103,
+        "startChar": 0,
+        "endLine": 105,
+        "endChar": 11
+      },
+      "revId": "13ee5cd1af9f87266cf4b41bb1e0a3362aae5a9b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
