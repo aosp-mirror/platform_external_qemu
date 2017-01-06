@@ -25,6 +25,7 @@
 
 
 #include "qemu/thread.h"
+#include "qemu/thread_local.h"
 #include "qemu/queue.h"
 #include "qemu/atomic.h"
 
@@ -67,11 +68,11 @@ struct rcu_reader_data {
     QLIST_ENTRY(rcu_reader_data) node;
 };
 
-extern __thread struct rcu_reader_data rcu_reader;
+QEMU_THREAD_LOCAL_EXTERN(struct rcu_reader_data, rcu_reader);
 
 static inline void rcu_read_lock(void)
 {
-    struct rcu_reader_data *p_rcu_reader = &rcu_reader;
+    struct rcu_reader_data *p_rcu_reader = QEMU_THREAD_LOCAL_GET_PTR(rcu_reader);
     unsigned ctr;
 
     if (p_rcu_reader->depth++ > 0) {
@@ -84,7 +85,7 @@ static inline void rcu_read_lock(void)
 
 static inline void rcu_read_unlock(void)
 {
-    struct rcu_reader_data *p_rcu_reader = &rcu_reader;
+    struct rcu_reader_data *p_rcu_reader = QEMU_THREAD_LOCAL_GET_PTR(rcu_reader);
 
     assert(p_rcu_reader->depth != 0);
     if (--p_rcu_reader->depth > 0) {
