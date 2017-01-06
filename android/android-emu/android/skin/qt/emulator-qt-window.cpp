@@ -186,8 +186,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                      &EmulatorQtWindow::slot_getDevicePixelRatio);
     QObject::connect(this, &EmulatorQtWindow::getScreenDimensions, this,
                      &EmulatorQtWindow::slot_getScreenDimensions);
-    QObject::connect(this, &EmulatorQtWindow::getWindowId, this,
-                     &EmulatorQtWindow::slot_getWindowId);
     QObject::connect(this, &EmulatorQtWindow::getWindowPos, this,
                      &EmulatorQtWindow::slot_getWindowPos);
     QObject::connect(this, &EmulatorQtWindow::isWindowFullyVisible, this,
@@ -753,16 +751,14 @@ void EmulatorQtWindow::slot_getScreenDimensions(QRect* out_rect,
         semaphore->release();
 }
 
-void EmulatorQtWindow::slot_getWindowId(WId* out_id, QSemaphore* semaphore) {
+WId EmulatorQtWindow::getWindowId() {
     WId wid = effectiveWinId();
     D("Effective win ID is %lx", wid);
 #if defined(__APPLE__)
     wid = (WId)getNSWindow((void*)wid);
     D("After finding parent, win ID is %lx", wid);
 #endif
-    *out_id = wid;
-    if (semaphore != NULL)
-        semaphore->release();
+    return wid;
 }
 
 void EmulatorQtWindow::slot_getWindowPos(int* xx,

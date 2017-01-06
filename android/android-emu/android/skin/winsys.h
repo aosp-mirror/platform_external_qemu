@@ -24,8 +24,8 @@ extern "C" {
 // Init args.
 void skin_winsys_init_args(int argc, char** argv);
 
-// Return window handle of main UI.
-void* skin_winsys_get_window_handle(void);
+// Return window handle of main UI. MUST BE CALLED FROM THE MAIN UI THREAD.
+void* skin_winsys_get_window_handle();
 
 // Return rectangle of current monitor in pixels.
 void skin_winsys_get_monitor_rect(SkinRect* rect);

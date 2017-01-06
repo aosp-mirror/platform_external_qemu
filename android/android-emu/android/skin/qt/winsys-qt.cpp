@@ -167,18 +167,15 @@ extern int skin_winsys_get_device_pixel_ratio(double *dpr)
     return 0;
 }
 
-extern void *skin_winsys_get_window_handle(void)
+extern void *skin_winsys_get_window_handle()
 {
     D("skin_winsys_get_window_handle");
-    WId handle;
-    QSemaphore semaphore;
     EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return NULL;
     }
-    window->getWindowId(&handle, &semaphore);
-    semaphore.acquire();
+    const WId handle = window->getWindowId();
     D("%s: result = 0x%p", __FUNCTION__, (void*)handle);
     return (void*)handle;
 }

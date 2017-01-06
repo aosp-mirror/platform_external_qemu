@@ -1235,12 +1235,10 @@ static void
 skin_window_hide_opengles( SkinWindow* window )
 {
     window->win_funcs->opengles_hide();
-    //android_hideOpenglesWindow();
 }
 
 typedef struct {
     SkinWindow* window;
-    void* handle;
     int wx;
     int wy;
     int ww;
@@ -1253,7 +1251,7 @@ typedef struct {
 
 static void skin_window_run_opengles_show(void* p) {
     const gles_show_data* data = (const gles_show_data*)p;
-    data->window->win_funcs->opengles_show(data->handle,
+    data->window->win_funcs->opengles_show(skin_winsys_get_window_handle(),
                                            data->wx,
                                            data->wy,
                                            data->ww,
@@ -1303,22 +1301,16 @@ static void
 skin_window_show_opengles( SkinWindow* window )
 {
     ADisplay* disp = window->layout.displays;
-    void* winhandle = skin_winsys_get_window_handle();
 
     gles_show_data data;
     skin_window_setup_opengles_subwindow(window, &data);
-
-    data.handle = winhandle;
     data.rot = disp->rotation * 90.;
 
     skin_winsys_run_ui_update(&skin_window_run_opengles_show, &data);
 }
 
-static void
-skin_window_redraw_opengles( SkinWindow* window )
-{
+static void skin_window_redraw_opengles(SkinWindow* window) {
     window->win_funcs->opengles_redraw();
-    //android_redrawOpenglesWindow();
 }
 
 static int  skin_window_reset_internal (SkinWindow*, SkinLayout*);
@@ -1592,7 +1584,7 @@ skin_window_resize( SkinWindow*  window, int resize_container )
     window->framebuffer.w = drect.size.w;
     window->framebuffer.h = drect.size.h;
 
-    if (skin_window_recompute_subwindow_rect(window, &drect) && resize_container) {
+    if (skin_window_recompute_subwindow_rect(window, &drect)) {
         skin_window_show_opengles(window);
     }
 }
@@ -1688,7 +1680,6 @@ skin_window_zoomed_window_resized( SkinWindow* window, int dx, int dy, int w, in
 
     if (skin_window_recompute_subwindow_rect(window, &subwindow)) {
         skin_window_show_opengles(window);
-        skin_window_redraw_opengles(window);
     }
 }
 
