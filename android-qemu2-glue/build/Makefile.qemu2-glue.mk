@@ -31,6 +31,7 @@ LOCAL_SRC_FILES := \
     qemu-clipboard-agent-impl.cpp \
     qemu-display-agent-impl.cpp \
     qemu-finger-agent-impl.c \
+    qemu-opengl-agent-impl.c \
     qemu-location-agent-impl.c \
     qemu-net-agent-impl.c \
     qemu-sensors-agent-impl.c \
