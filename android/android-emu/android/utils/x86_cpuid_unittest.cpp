@@ -80,11 +80,12 @@ TEST(x86_cpuid, android_get_x86_cpuid_vendor_id_is_vmhost) {
 }
 
 TEST(x86_cpuid, android_get_x86_cpuid_vmx_support) {
-    // These might fail if you have an AMD, Atom processor or an incredibly
-    // old Intel processor
     EXPECT_LE(0x80000001, android_get_x86_cpuid_extended_function_max());
-    EXPECT_TRUE(android_get_x86_cpuid_vmx_support() ||
-                android_get_x86_cpuid_svm_support());
+    // We can't really expect anything here: e.g. some buildbots have the
+    // virtualization support disabled. So just call these to make sure they
+    // don't crash.
+    android_get_x86_cpuid_vmx_support();
+    android_get_x86_cpuid_svm_support();
     EXPECT_TRUE(android_get_x86_cpuid_nx_support());
 }
 
