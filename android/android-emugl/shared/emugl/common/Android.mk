@@ -11,6 +11,7 @@ commonSources := \
         feature_control.cpp \
         logging.cpp \
         misc.cpp \
+        OpenGLDispatchHelper.cpp \
         shared_library.cpp \
         stringparsing.cpp \
         sockets.cpp \
