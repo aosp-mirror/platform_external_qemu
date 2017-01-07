@@ -16,7 +16,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/windows-native-window.cpp
 endif
 
-ANDROID_SKIN_INCLUDES += $(EMUGL_INCLUDES) $(ANDROID_EMU_INCLUDES)
+ANDROID_SKIN_INCLUDES += $(EMUGL_INCLUDES) $(EMUGL_SRCDIR)/shared $(ANDROID_EMU_INCLUDES)
 
 # gl-widget.cpp needs to call XInitThreads() directly to work around
 # a Qt bug. This implies a direct dependency to libX11.so
@@ -31,7 +31,7 @@ endif
 # cases.
 ANDROID_SKIN_STATIC_LIBRARIES += \
     libOpenGLESDispatch \
-    libemugl_common
+    libemugl_common \
 
 ANDROID_SKIN_SOURCES += \
     android/skin/qt/accelerometer-3d-widget.cpp \
