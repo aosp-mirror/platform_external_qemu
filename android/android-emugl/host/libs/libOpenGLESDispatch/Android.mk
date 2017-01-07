@@ -10,5 +10,7 @@ LOCAL_C_INCLUDES += $(EMUGL_PATH)/shared
 
 LOCAL_SRC_FILES := EGLDispatch.cpp \
                    GLESv2Dispatch.cpp \
-                   GLESv1Dispatch.cpp
+                   GLESv1Dispatch.cpp \
+				   OpenGLDispatchHelper.cpp \
+
 $(call emugl-end-module)
