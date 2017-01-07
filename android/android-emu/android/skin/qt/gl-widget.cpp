@@ -18,72 +18,7 @@
 #include <QtGlobal>
 #include <QWindow>
 
-// Note that this header must come after ALL Qt headers.
-// Including any Qt headers after it will cause compilation
-// to fail spectacularly. This is because EGL indirectly
-// includes X11 headers which define stuff that conflicts
-// with Qt's own macros. It is a known issue.
-#include "OpenGLESDispatch/EGLDispatch.h"
-#include "OpenGLESDispatch/GLESv2Dispatch.h"
-
-namespace {
-
-// Helper class to hold a global GLESv2Dispatch that is initialized lazily
-// in a thread-safe way. The instance is leaked on program exit.
-struct MyGLESv2Dispatch : public GLESv2Dispatch {
-    // Return pointer to global GLESv2Dispatch instance, or nullptr if there
-    // was an error when trying to initialize/load the library.
-    static const GLESv2Dispatch* get();
-
-    MyGLESv2Dispatch() { mValid = gles2_dispatch_init(&mDispatch); }
-
-private:
-    GLESv2Dispatch mDispatch;
-    bool mValid;
-};
-
-// Must be declared outside of MyGLESv2Dispatch scope due to the use of
-// sizeof(T) within the template definition.
-android::base::LazyInstance<MyGLESv2Dispatch> sGLESv2Dispatch =
-        LAZY_INSTANCE_INIT;
-
-// static
-const GLESv2Dispatch* MyGLESv2Dispatch::get() {
-    MyGLESv2Dispatch* instance = sGLESv2Dispatch.ptr();
-    if (instance->mValid) {
-        return &instance->mDispatch;
-    } else {
-        return nullptr;
-    }
-}
-
-// Helper class used to lazily initialize the global EGL dispatch table
-// in a thread safe way. Note that the dispatch table is provided by
-// libOpenGLESDispatch as the 's_egl' global variable.
-struct MyEGLDispatch : public EGLDispatch {
-    // Return pointer to EGLDispatch table, or nullptr if there was
-    // an error when trying to initialize/load the library.
-    static const EGLDispatch* get();
-
-    MyEGLDispatch() { mValid = init_egl_dispatch(); }
-
-private:
-    bool mValid;
-};
-
-android::base::LazyInstance<MyEGLDispatch> sEGLDispatch = LAZY_INSTANCE_INIT;
-
-// static
-const EGLDispatch* MyEGLDispatch::get() {
-    MyEGLDispatch* instance = sEGLDispatch.ptr();
-    if (instance->mValid) {
-        return &s_egl;
-    } else {
-        return nullptr;
-    }
-}
-
-}  // namespace
+#include "emugl/common/OpenGLDispatchLoader.h"
 
 struct EGLState {
     EGLDisplay display;
@@ -101,8 +36,8 @@ static int nearestPOT(int value) {
 
 GLWidget::GLWidget(QWidget* parent) :
         QWidget(parent),
-        mEGL(MyEGLDispatch::get()),
-        mGLES2(MyGLESv2Dispatch::get()),
+        mEGL(LazyLoadedEGLDispatch::get()),
+        mGLES2(LazyLoadedGLESv2Dispatch::get()),
         mEGLState(nullptr),
         mValid(false),
         mEnableAA(false) {

@@ -33,12 +33,9 @@ EGLDispatch s_egl;
     if (!s_egl.function_name || !s_egl.eglGetProcAddress) \
             RENDER_EGL_LOAD_FIELD(return_type, function_name, signature)
 
-bool init_egl_dispatch()
-{
-
+bool init_egl_dispatch() {
     const char *libName = getenv("ANDROID_EGL_LIB");
     if (!libName) libName = DEFAULT_EGL_LIB;
-
     char error[256];
     emugl::SharedLibrary *lib = emugl::SharedLibrary::open(libName, error, sizeof(error));
     if (!lib) {
