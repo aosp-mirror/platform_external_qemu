@@ -21,6 +21,10 @@
 #include <GLcommon/GLEScontext.h>
 #include <GLcommon/objectNameManager.h>
 
+// Extra desktop-specific OpenGL enums that we need to properly emulate OpenGL ES.
+#define GL_FRAMEBUFFER_SRGB 0x8DB9
+#define GL_TEXTURE_CUBE_MAP_SEAMLESS 0x884F
+
 class GLESv2Context : public GLEScontext{
 public:
     virtual void init(GlLibrary* glLib);
