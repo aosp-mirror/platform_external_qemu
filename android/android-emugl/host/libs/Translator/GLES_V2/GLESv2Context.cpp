@@ -18,6 +18,29 @@
 
 #include <string.h>
 
+static const char* const kGLES20StringPart = "OpenGL ES 2.0";
+static const char* const kGLES30StringPart = "OpenGL ES 3.0";
+static const char* const kGLES31StringPart = "OpenGL ES 3.1";
+
+static const char* sPickVersionStringPart(int maj, int min) {
+    switch (maj) {
+        case 2:
+            return kGLES20StringPart;
+        case 3:
+            switch (min) {
+                case 0:
+                    return kGLES30StringPart;
+                case 1:
+                    return kGLES31StringPart;
+                default:
+                    return NULL;
+            }
+        default:
+            return NULL;
+    }
+    return NULL;
+
+}
 void GLESv2Context::init(GlLibrary* glLib) {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(!m_initialized) {
@@ -31,9 +54,14 @@ void GLESv2Context::init(GlLibrary* glLib) {
         buildStrings((const char*)dispatcher().glGetString(GL_VENDOR),
                      (const char*)dispatcher().glGetString(GL_RENDERER),
                      (const char*)dispatcher().glGetString(GL_VERSION),
-                     "OpenGL ES 2.0");
+                     sPickVersionStringPart(m_glesMajorVersion, m_glesMinorVersion));
     }
     m_initialized = true;
+}
+
+GLESv2Context::GLESv2Context(int maj, int min) {
+    m_glesMajorVersion = maj;
+    m_glesMinorVersion = min;
 }
 
 GLESv2Context::~GLESv2Context()

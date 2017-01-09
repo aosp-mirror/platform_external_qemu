@@ -28,6 +28,8 @@ EglDisplay::EglDisplay(EGLNativeDisplayType dpy,
 {
     m_manager[GLES_1_1] = new ObjectNameManager(&m_globalNameSpace);
     m_manager[GLES_2_0] = new ObjectNameManager(&m_globalNameSpace);
+    m_manager[GLES_3_0] = new ObjectNameManager(&m_globalNameSpace);
+    m_manager[GLES_3_1] = new ObjectNameManager(&m_globalNameSpace);
 };
 
 EglDisplay::~EglDisplay() {
