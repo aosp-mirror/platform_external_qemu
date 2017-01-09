@@ -153,6 +153,11 @@ if [ "$HOST_OS" = "Linux" ]; then
     RUN_32BIT_TESTS=
 fi
 
+echo "Locales installed:"
+locale -a
+whoami
+cat /usr/share/i18n/SUPPORTED
+
 if [ "$MINGW" ]; then
     TEST_SHELL=wine
     EXE_SUFFIX=.exe

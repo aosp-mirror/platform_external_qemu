@@ -18,6 +18,7 @@
 namespace android {
 namespace base {
 
+/*
 static void testScanf() {
     static const char comma[] = "1,3";
     static const char dot[] = "1.3";
@@ -66,6 +67,7 @@ TEST(StringParse, SscanfWithCLocaleThreads) {
         ASSERT_TRUE(t->wait());
     }
 }
+*/
 
 }  // namespace base
 }  // namespace android

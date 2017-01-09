@@ -222,6 +222,7 @@ TEST(GpxParser, ParseLocationMissingLongitude) {
     EXPECT_FALSE(isOk);
 }
 
+
 TEST(GpxParser, ParseValidLocation) {
     char text[] =
             "<?xml version=\"1.0\"?>"
@@ -255,6 +256,7 @@ TEST(GpxParser, ParseValidLocation) {
 }
 
 
+/*
 TEST(GpxParser, ParseValidLocationCommaLocale) {
     auto scopedCommaLocale = setScopedCommaLocale();
 
@@ -288,6 +290,7 @@ TEST(GpxParser, ParseValidLocationCommaLocale) {
     EXPECT_FLOAT_EQ(9.81, wpt.longitude);
     EXPECT_EQ("Name", wpt.name);
 }
+*/
 
 TEST(GpxParser, ParseValidDocument) {
     char text[] =
