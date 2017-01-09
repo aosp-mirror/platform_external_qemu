@@ -55,6 +55,10 @@ NamedObject::NamedObject(GenNameInfo genNameInfo,
                 m_globalName = GLEScontext::dispatcher().glCreateShader(
                                     GL_FRAGMENT_SHADER);
                 break;
+            case ShaderProgramType::COMPUTE_SHADER:
+                m_globalName = GLEScontext::dispatcher().glCreateShader(
+                                    GL_COMPUTE_SHADER);
+                break;
         }
         break;
     default:
