@@ -1047,6 +1047,15 @@ TextureTarget GLEScontext::GLTextureTargetToLocal(GLenum target) {
     case GL_TEXTURE_2D:
         value = TEXTURE_2D;
         break;
+    case GL_TEXTURE_2D_ARRAY:
+        value = TEXTURE_2D_ARRAY;
+        break;
+    case GL_TEXTURE_3D:
+        value = TEXTURE_3D;
+        break;
+    case GL_TEXTURE_2D_MULTISAMPLE:
+        value = TEXTURE_2D_MULTISAMPLE;
+        break;
     }
     return value;
 }
@@ -1081,6 +1090,15 @@ ObjectLocalName GLEScontext::getDefaultTextureName(GLenum target) {
         break;
     case TEXTURE_CUBE_MAP:
         name = INTERNAL_NAME(1);
+        break;
+    case TEXTURE_2D_ARRAY:
+        name = INTERNAL_NAME(2);
+        break;
+    case TEXTURE_3D:
+        name = INTERNAL_NAME(3);
+        break;
+    case TEXTURE_2D_MULTISAMPLE:
+        name = INTERNAL_NAME(4);
         break;
     default:
         name = 0;
