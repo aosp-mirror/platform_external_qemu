@@ -24,6 +24,7 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <GLES3/gl3.h>
+#include <GLES3/gl31.h>
 
 #include <OpenglCodecCommon/ErrorLog.h>
 #include <GLcommon/TranslatorIfaces.h>
@@ -47,7 +48,8 @@ static void initGLESx();
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp);
 static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
-static GLEScontext* createGLESContext();
+static GLEScontext* createGLESContext(void);
+static GLEScontext* createGLESxContext(int maj, int min);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
 
 }
@@ -60,11 +62,12 @@ ProcTableMap *s_glesExtensions = NULL;
 static EGLiface*  s_eglIface = NULL;
 static GLESiface  s_glesIface = {
     .initGLESx         = initGLESx,
-    .createGLESContext = createGLESContext,
+    .createGLESContext = createGLESxContext,
     .initContext       = initContext,
     .deleteGLESContext = deleteGLESContext,
     .flush             = (FUNCPTR_NO_ARGS_RET_VOID)glFlush,
     .finish            = (FUNCPTR_NO_ARGS_RET_VOID)glFinish,
+    .getError          = (FUNCPTR_NO_ARGS_RET_INT)glGetError,
     .setShareGroup     = setShareGroup,
     .getProcAddress    = getProcAddress,
     .fenceSync         = (FUNCPTR_FENCE_SYNC)glFenceSync,
@@ -88,8 +91,12 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
         glBindTexture(GL_TEXTURE_CUBE_MAP,0);
     }
 }
+
 static GLEScontext* createGLESContext() {
-    return new GLESv2Context();
+    return new GLESv2Context(2, 0);
+}
+static GLEScontext* createGLESxContext(int maj, int min) {
+    return new GLESv2Context(maj, min);
 }
 
 static void deleteGLESContext(GLEScontext* ctx) {
