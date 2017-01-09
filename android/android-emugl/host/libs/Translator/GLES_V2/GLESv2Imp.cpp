@@ -2937,26 +2937,31 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
     }
 }
 
-GL_APICALL GLsync GL_APIENTRY glFenceSync(GLenum condition, GLbitfield flags)
-{
-    GET_CTX_V2_RET(NULL);
-    return ctx->dispatcher().glFenceSync(condition, flags);
-}
-
-GL_APICALL GLenum GL_APIENTRY glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout)
-{
-    GET_CTX_V2_RET(GL_WAIT_FAILED);
-    return ctx->dispatcher().glClientWaitSync(wait_on, flags, timeout);
-}
-
-GL_APICALL void GL_APIENTRY glWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout)
-{
+// Extension: Vertex array objects
+GL_APICALL void GL_APIENTRY glGenVertexArraysOES(GLsizei n, GLuint* arrays) {
     GET_CTX_V2();
-    ctx->dispatcher().glWaitSync(wait_on, flags, timeout);
+    SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
+    ctx->dispatcher().glGenVertexArrays(n, arrays);
+    ctx->addVertexArrayObjects(n, arrays);
 }
 
-GL_APICALL void GL_APIENTRY glDeleteSync(GLsync to_delete)
-{
+GL_APICALL void GL_APIENTRY glBindVertexArrayOES(GLuint array) {
     GET_CTX_V2();
-    ctx->dispatcher().glDeleteSync(to_delete);
+    ctx->setVertexArrayObject(array);
+    ctx->dispatcher().glBindVertexArray(array);
 }
+
+GL_APICALL void GL_APIENTRY glDeleteVertexArraysOES(GLsizei n, const GLuint * arrays) {
+    GET_CTX_V2();
+    SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
+    ctx->removeVertexArrayObjects(n, arrays);
+    ctx->dispatcher().glDeleteVertexArrays(n, arrays);
+}
+
+GL_APICALL GLboolean GL_APIENTRY glIsVertexArrayOES(GLuint array) {
+    GET_CTX_V2_RET(0);
+    return ctx->dispatcher().glIsVertexArray(array);
+}
+
+#include "GLESv30Imp.cpp"
+#include "GLESv31Imp.cpp"
