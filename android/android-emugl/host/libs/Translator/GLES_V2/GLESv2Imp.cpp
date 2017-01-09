@@ -225,7 +225,7 @@ GL_APICALL void  GL_APIENTRY glAttachShader(GLuint program, GLuint shader){
 GL_APICALL void  GL_APIENTRY glBindAttribLocation(GLuint program, GLuint index, const GLchar* name){
     GET_CTX();
     SET_ERROR_IF(!GLESv2Validate::attribName(name),GL_INVALID_OPERATION);
-    SET_ERROR_IF(!GLESv2Validate::attribIndex(index),GL_INVALID_VALUE);
+    SET_ERROR_IF(!GLESv2Validate::attribIndex(index, ctx->getCaps()->maxVertexAttribs),GL_INVALID_VALUE);
     if(ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
@@ -239,8 +239,8 @@ GL_APICALL void  GL_APIENTRY glBindAttribLocation(GLuint program, GLuint index, 
 }
 
 GL_APICALL void  GL_APIENTRY glBindBuffer(GLenum target, GLuint buffer){
-    GET_CTX();
-    SET_ERROR_IF(!GLESv2Validate::bufferTarget(target),GL_INVALID_ENUM);
+    GET_CTX_V2();
+    SET_ERROR_IF(!GLESv2Validate::bufferTarget(ctx, target), GL_INVALID_ENUM);
     //if buffer wasn't generated before,generate one
     if (buffer && ctx->shareGroup().get() &&
         !ctx->shareGroup()->isObject(NamedObjectType::VERTEXBUFFER, buffer)) {
@@ -318,8 +318,8 @@ static void sSetSRGBEnable(GLESv2Context* ctx, GLuint framebuffer, GLenum target
 }
 
 GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer){
-    GET_CTX();
-    SET_ERROR_IF(!GLESv2Validate::framebufferTarget(target),GL_INVALID_ENUM);
+    GET_CTX_V2();
+    SET_ERROR_IF(!GLESv2Validate::framebufferTarget(ctx, target),GL_INVALID_ENUM);
 
     GLuint globalFrameBufferName = framebuffer;
     if(framebuffer && ctx->shareGroup().get()){
@@ -374,8 +374,8 @@ GL_APICALL void  GL_APIENTRY glBindRenderbuffer(GLenum target, GLuint renderbuff
 }
 
 GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
-    GET_CTX();
-    SET_ERROR_IF(!GLESv2Validate::textureTarget(target),GL_INVALID_ENUM)
+    GET_CTX_V2();
+    SET_ERROR_IF(!GLESv2Validate::textureTarget(ctx, target), GL_INVALID_ENUM);
 
     //for handling default texture (0)
     ObjectLocalName localTexName = TextureLocalName(target,texture);
@@ -408,14 +408,15 @@ GL_APICALL void  GL_APIENTRY glBlendColor(GLclampf red, GLclampf green, GLclampf
 }
 
 GL_APICALL void  GL_APIENTRY glBlendEquation( GLenum mode ){
-    GET_CTX();
-    SET_ERROR_IF(!GLESv2Validate::blendEquationMode(mode),GL_INVALID_ENUM)
+    GET_CTX_V2();
+    SET_ERROR_IF(!GLESv2Validate::blendEquationMode(ctx, mode), GL_INVALID_ENUM);
     ctx->dispatcher().glBlendEquation(mode);
 }
 
 GL_APICALL void  GL_APIENTRY glBlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha){
-    GET_CTX();
-    SET_ERROR_IF(!(GLESv2Validate::blendEquationMode(modeRGB) && GLESv2Validate::blendEquationMode(modeAlpha)),GL_INVALID_ENUM);
+    GET_CTX_V2();
+    SET_ERROR_IF(!(GLESv2Validate::blendEquationMode(ctx, modeRGB) &&
+                   GLESv2Validate::blendEquationMode(ctx, modeAlpha)), GL_INVALID_ENUM);
     ctx->dispatcher().glBlendEquationSeparate(modeRGB,modeAlpha);
 }
 
@@ -433,27 +434,28 @@ GL_APICALL void  GL_APIENTRY glBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB, G
 }
 
 GL_APICALL void  GL_APIENTRY glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage){
-    GET_CTX();
-    SET_ERROR_IF(!GLESv2Validate::bufferTarget(target),GL_INVALID_ENUM);
-    SET_ERROR_IF(!GLESv2Validate::bufferUsage(usage),GL_INVALID_ENUM);
+    GET_CTX_V2();
+    SET_ERROR_IF(!GLESv2Validate::bufferTarget(ctx, target), GL_INVALID_ENUM);
     SET_ERROR_IF(!ctx->isBindedBuffer(target),GL_INVALID_OPERATION);
+    SET_ERROR_IF(!GLESv2Validate::bufferUsage(ctx, usage), GL_INVALID_ENUM);
     ctx->setBufferData(target,size,data,usage);
     ctx->dispatcher().glBufferData(target, size, data, usage);
 }
 
 GL_APICALL void  GL_APIENTRY glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data){
-    GET_CTX();
+    GET_CTX_V2();
+    SET_ERROR_IF(!GLESv2Validate::bufferTarget(ctx, target), GL_INVALID_ENUM);
     SET_ERROR_IF(!ctx->isBindedBuffer(target),GL_INVALID_OPERATION);
-    SET_ERROR_IF(!GLESv2Validate::bufferTarget(target),GL_INVALID_ENUM);
     SET_ERROR_IF(!ctx->setBufferSubData(target,offset,size,data),GL_INVALID_VALUE);
     ctx->dispatcher().glBufferSubData(target, offset, size, data);
 }
 
 
 GL_APICALL GLenum GL_APIENTRY glCheckFramebufferStatus(GLenum target){
-    GET_CTX_RET(GL_FRAMEBUFFER_COMPLETE);
-    RET_AND_SET_ERROR_IF(!GLESv2Validate::framebufferTarget(target),GL_INVALID_ENUM,GL_FRAMEBUFFER_COMPLETE);
-    ctx->drawValidate();
+    GET_CTX_V2_RET(GL_FRAMEBUFFER_COMPLETE);
+    RET_AND_SET_ERROR_IF(!GLESv2Validate::framebufferTarget(ctx, target), GL_INVALID_ENUM, GL_FRAMEBUFFER_COMPLETE);
+    // We used to issue ctx->drawValidate() here, but it can corrupt the status of
+    // separately bound draw/read framebuffer objects. So we just don't call it now.
     return ctx->dispatcher().glCheckFramebufferStatusEXT(target);
 }
 
@@ -560,9 +562,27 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat, GLsize
     }
 }
 
-GL_APICALL void  GL_APIENTRY glCopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border){
+void s_glInitTexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border){
     GET_CTX();
-    SET_ERROR_IF(!(GLESv2Validate::pixelFrmt(ctx,internalformat) && GLESv2Validate::textureTargetEx(target)),GL_INVALID_ENUM);
+
+    if (ctx->shareGroup().get() && level == 0){
+        TextureData *texData = getTextureTargetData(target);
+        if(texData) {
+            texData->width = width;
+            texData->height = height;
+            texData->depth = depth;
+            texData->border = border;
+            texData->internalFormat = internalformat;
+            texData->target = target;
+        }
+    }
+}
+
+GL_APICALL void  GL_APIENTRY glCopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border){
+    GET_CTX_V2();
+    SET_ERROR_IF(!(GLESv2Validate::pixelFrmt(ctx,internalformat) &&
+                   (GLESv2Validate::textureTarget(ctx, target) ||
+                    GLESv2Validate::textureTargetEx(target))), GL_INVALID_ENUM);
     SET_ERROR_IF((GLESv2Validate::textureIsCubeMap(target) && width != height), GL_INVALID_VALUE);
     SET_ERROR_IF(border != 0,GL_INVALID_VALUE);
     s_glInitTexImage2D(target,level,internalformat,width,height,border);
@@ -570,8 +590,9 @@ GL_APICALL void  GL_APIENTRY glCopyTexImage2D(GLenum target, GLint level, GLenum
 }
 
 GL_APICALL void  GL_APIENTRY glCopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height){
-    GET_CTX();
-    SET_ERROR_IF(!GLESv2Validate::textureTargetEx(target),GL_INVALID_ENUM);
+    GET_CTX_V2();
+    SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) ||
+                   GLESv2Validate::textureTargetEx(target)), GL_INVALID_ENUM);
     ctx->dispatcher().glCopyTexSubImage2D(target,level,xoffset,yoffset,x,y,width,height);
 }
 
@@ -629,6 +650,7 @@ GL_APICALL GLuint GL_APIENTRY glCreateShader(GLenum type){
                 maxProgramTexelOffset,
                 maxDualSourceDrawBuffers);
     }
+    RET_AND_SET_ERROR_IF(!GLESv2Validate::shaderType(ctx, type), GL_INVALID_ENUM, 0);
     if(ctx->shareGroup().get()) {
         ShaderProgramType shaderProgramType;
         switch (type) {
@@ -973,10 +995,10 @@ GL_APICALL void  GL_APIENTRY glFlush(void){
 
 
 GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer){
-    GET_CTX();
-    SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(target)              &&
+    GET_CTX_V2();
+    SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(ctx, target) &&
                    GLESv2Validate::renderbufferTarget(renderbuffertarget) &&
-                   GLESv2Validate::framebufferAttachment(attachment)),GL_INVALID_ENUM);
+                   GLESv2Validate::framebufferAttachment(ctx, attachment)), GL_INVALID_ENUM);
     SET_ERROR_IF(!ctx->shareGroup().get(), GL_INVALID_OPERATION);
 
     GLuint globalRenderbufferName = 0;
@@ -1032,11 +1054,11 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
 }
 
 GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level){
-    GET_CTX();
-    SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(target) &&
+    GET_CTX_V2();
+    SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(ctx, target) &&
                    GLESv2Validate::textureTargetEx(textarget)  &&
-                   GLESv2Validate::framebufferAttachment(attachment)),GL_INVALID_ENUM);
-    SET_ERROR_IF(level != 0, GL_INVALID_VALUE);
+                   GLESv2Validate::framebufferAttachment(ctx, attachment)), GL_INVALID_ENUM);
+    SET_ERROR_IF(ctx->getMajorVersion() < 3 && level != 0, GL_INVALID_VALUE);
     SET_ERROR_IF(!ctx->shareGroup().get(), GL_INVALID_OPERATION);
 
     GLuint globalTextureName = 0;
@@ -1088,17 +1110,19 @@ GL_APICALL void  GL_APIENTRY glGenBuffers(GLsizei n, GLuint* buffers){
 }
 
 GL_APICALL void  GL_APIENTRY glGenerateMipmap(GLenum target){
-    GET_CTX();
-    SET_ERROR_IF(!GLESvalidate::textureTarget(target), GL_INVALID_ENUM);
+    GET_CTX_V2();
+    SET_ERROR_IF(!GLESv2Validate::textureTarget(ctx, target), GL_INVALID_ENUM);
     if (ctx->shareGroup().get()) {
         TextureData *texData = getTextureTargetData(target);
         if (texData) {
             unsigned int width = texData->width;
             unsigned int height = texData->height;
-            // set error code if either the width or height is not a power of two.
-            SET_ERROR_IF(width == 0 || height == 0 ||
-                         (width & (width - 1)) != 0 || (height & (height - 1)) != 0,
-                         GL_INVALID_OPERATION);
+            if (ctx->getMajorVersion() < 3) {
+                // set error code if either the width or height is not a power of two.
+                SET_ERROR_IF(width == 0 || height == 0 ||
+                        (width & (width - 1)) != 0 || (height & (height - 1)) != 0,
+                        GL_INVALID_OPERATION);
+            }
         }
     }
     ctx->dispatcher().glGenerateMipmapEXT(target);
@@ -1428,9 +1452,6 @@ GL_APICALL void  GL_APIENTRY glGetIntegerv(GLenum pname, GLint* params){
 
 GL_APICALL void  GL_APIENTRY glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment, GLenum pname, GLint* params){
     GET_CTX_V2();
-    SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(target)         &&
-                   GLESv2Validate::framebufferAttachment(attachment) &&
-                   GLESv2Validate::framebufferAttachmentParams(pname)),GL_INVALID_ENUM);
 
     //
     // Take the attachment attribute from our state - if available
@@ -1470,8 +1491,9 @@ GL_APICALL void  GL_APIENTRY glGetFramebufferAttachmentParameteriv(GLenum target
 }
 
 GL_APICALL void  GL_APIENTRY glGetRenderbufferParameteriv(GLenum target, GLenum pname, GLint* params){
-    GET_CTX();
-    SET_ERROR_IF(!(GLESv2Validate::renderbufferTarget(target) && GLESv2Validate::renderbufferParams(pname)),GL_INVALID_ENUM);
+    GET_CTX_V2();
+    SET_ERROR_IF(!(GLESv2Validate::renderbufferTarget(target) &&
+                   GLESv2Validate::renderbufferParam(ctx, pname)), GL_INVALID_ENUM);
 
     //
     // If this is a renderbuffer which is eglimage's target, we
@@ -1533,8 +1555,8 @@ GL_APICALL void  GL_APIENTRY glGetRenderbufferParameteriv(GLenum target, GLenum 
 
 
 GL_APICALL void  GL_APIENTRY glGetProgramiv(GLuint program, GLenum pname, GLint* params){
-    GET_CTX();
-    SET_ERROR_IF(!GLESv2Validate::programParam(pname),GL_INVALID_ENUM);
+    GET_CTX_V2();
+    SET_ERROR_IF(!GLESv2Validate::programParam(ctx, pname), GL_INVALID_ENUM);
     if(ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
@@ -1589,7 +1611,7 @@ GL_APICALL void  GL_APIENTRY glGetProgramiv(GLuint program, GLenum pname, GLint*
             GLint logLength = strlen(programData->getInfoLog());
             params[0] = (logLength > 0) ? logLength + 1 : 0;
             }
-            break;   
+            break;
         default:
             ctx->dispatcher().glGetProgramiv(globalProgramName,pname,params);
         }
@@ -1617,7 +1639,7 @@ GL_APICALL void  GL_APIENTRY glGetProgramInfoLog(GLuint program, GLsizei bufsize
 
         GLsizei logLength;
         logLength = strlen(programData->getInfoLog());
-        
+
         GLsizei returnLength=0;
         if (infolog) {
             returnLength = bufsize-1 < logLength ? bufsize-1 : logLength;
@@ -1699,7 +1721,7 @@ GL_APICALL void  GL_APIENTRY glGetShaderInfoLog(GLuint shader, GLsizei bufsize, 
 
         GLsizei logLength;
         logLength = strlen(sp->getInfoLog());
-        
+
         GLsizei returnLength=0;
         if (infolog) {
             returnLength = bufsize-1 <logLength ? bufsize-1 : logLength;
@@ -1714,13 +1736,18 @@ GL_APICALL void  GL_APIENTRY glGetShaderInfoLog(GLuint shader, GLsizei bufsize, 
 
 GL_APICALL void  GL_APIENTRY glGetShaderPrecisionFormat(GLenum shadertype, GLenum precisiontype, GLint* range, GLint* precision){
     GET_CTX_V2();
-    SET_ERROR_IF(!(GLESv2Validate::shaderType(shadertype) && GLESv2Validate::precisionType(precisiontype)),GL_INVALID_ENUM);
+    SET_ERROR_IF(!(GLESv2Validate::shaderType(ctx, shadertype) &&
+                   GLESv2Validate::precisionType(precisiontype)),GL_INVALID_ENUM);
 
     switch (precisiontype) {
     case GL_LOW_INT:
     case GL_MEDIUM_INT:
+        // range[0] = range[1] = 16;
+        // *precision = 0;
+        // break;
     case GL_HIGH_INT:
-        range[0] = range[1] = 16;
+        range[0] = 31;
+        range[1] = 30;
         *precision = 0;
         break;
 
@@ -1784,14 +1811,18 @@ GL_APICALL const GLubyte* GL_APIENTRY glGetString(GLenum name){
 }
 
 GL_APICALL void  GL_APIENTRY glGetTexParameterfv(GLenum target, GLenum pname, GLfloat* params){
-    GET_CTX();
-    SET_ERROR_IF(!(GLESv2Validate::textureTarget(target) && GLESv2Validate::textureParams(pname)),GL_INVALID_ENUM);
+    GET_CTX_V2();
+    SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
+                   GLESv2Validate::textureParams(ctx, pname)),
+                 GL_INVALID_ENUM);
     ctx->dispatcher().glGetTexParameterfv(target,pname,params);
 
 }
 GL_APICALL void  GL_APIENTRY glGetTexParameteriv(GLenum target, GLenum pname, GLint* params){
-    GET_CTX();
-    SET_ERROR_IF(!(GLESv2Validate::textureTarget(target) && GLESv2Validate::textureParams(pname)),GL_INVALID_ENUM);
+    GET_CTX_V2();
+    SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
+                   GLESv2Validate::textureParams(ctx, pname)),
+                 GL_INVALID_ENUM);
     ctx->dispatcher().glGetTexParameteriv(target,pname,params);
 }
 
@@ -1954,7 +1985,6 @@ GL_APICALL void  GL_APIENTRY glHint(GLenum target, GLenum mode){
 
 GL_APICALL GLboolean    GL_APIENTRY glIsEnabled(GLenum cap){
     GET_CTX_RET(GL_FALSE);
-    RET_AND_SET_ERROR_IF(!GLESv2Validate::capability(cap),GL_INVALID_ENUM,GL_FALSE);
     return ctx->dispatcher().glIsEnabled(cap);
 }
 
@@ -2091,10 +2121,18 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
 }
 
 GL_APICALL void  GL_APIENTRY glPixelStorei(GLenum pname, GLint param){
-    GET_CTX();
-    SET_ERROR_IF(!GLESv2Validate::pixelStoreParam(pname),GL_INVALID_ENUM);
-    SET_ERROR_IF(!((param==1)||(param==2)||(param==4)||(param==8)), GL_INVALID_VALUE);
-    ctx->setUnpackAlignment(param);
+    GET_CTX_V2();
+    SET_ERROR_IF(!GLESv2Validate::pixelStoreParam(ctx, pname), GL_INVALID_ENUM);
+    switch (pname) {
+    case GL_PACK_ALIGNMENT:
+    case GL_UNPACK_ALIGNMENT:
+        SET_ERROR_IF(!((param==1)||(param==2)||(param==4)||(param==8)), GL_INVALID_VALUE);
+        ctx->setUnpackAlignment(param);
+        break;
+    default:
+        SET_ERROR_IF(param < 0, GL_INVALID_VALUE);
+        break;
+    }
     ctx->dispatcher().glPixelStorei(pname,param);
 }
 
@@ -2104,9 +2142,7 @@ GL_APICALL void  GL_APIENTRY glPolygonOffset(GLfloat factor, GLfloat units){
 }
 
 GL_APICALL void  GL_APIENTRY glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels){
-    GET_CTX();
-    SET_ERROR_IF(!(GLESv2Validate::readPixelFrmt(format) && GLESv2Validate::pixelType(ctx,type)),GL_INVALID_ENUM);
-    SET_ERROR_IF((width < 0 || height < 0),GL_INVALID_VALUE);
+    GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::pixelOp(format,type)),GL_INVALID_OPERATION);
     SET_ERROR_IF(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE, GL_INVALID_FRAMEBUFFER_OPERATION);
     ctx->dispatcher().glReadPixels(x,y,width,height,format,type,pixels);
@@ -2136,29 +2172,32 @@ GL_APICALL void  GL_APIENTRY glReleaseShaderCompiler(void){
 #endif // !__APPLE__
 }
 
-GL_APICALL void  GL_APIENTRY glRenderbufferStorage(GLenum target, GLenum internalformat, GLsizei width, GLsizei height){
-    GET_CTX();
+static GLenum sPrepareRenderbufferStorage(GLenum internalformat, GLint* err) {
+    GET_CTX_V2_RET(GL_NONE);
     GLenum internal = internalformat;
-    switch (internalformat) {
-    case GL_RGB565:
-        internal = GL_RGB;
-        break;
-    case GL_RGB5_A1:
-        internal = GL_RGBA;
-        break;
-    default:
-        internal = internalformat;
-        break;
+    if (ctx->getMajorVersion() < 3) {
+        switch (internalformat) {
+            case GL_RGB565:
+                internal = GL_RGB;
+                break;
+            case GL_RGB5_A1:
+                internal = GL_RGBA;
+                break;
+            default:
+                break;
+        }
     }
+
 
     // Get current bounded renderbuffer
     // raise INVALID_OPERATIOn if no renderbuffer is bounded
     GLuint rb = ctx->getRenderbufferBinding();
-    SET_ERROR_IF(rb == 0,GL_INVALID_OPERATION);
-    auto objData =
-            ctx->shareGroup()->getObjectData(NamedObjectType::RENDERBUFFER, rb);
+    if (!rb) { *err = GL_INVALID_OPERATION; return GL_NONE; }
+    auto objData = ctx->shareGroup()->getObjectData(NamedObjectType::RENDERBUFFER, rb);
     RenderbufferData *rbData = (RenderbufferData *)objData;
-    SET_ERROR_IF(!rbData,GL_INVALID_OPERATION);
+    if (!rbData) { *err = GL_INVALID_OPERATION; return GL_NONE; }
+
+    rbData->internalformat = internalformat;
 
     //
     // if the renderbuffer was an eglImage target, release
@@ -2166,7 +2205,17 @@ GL_APICALL void  GL_APIENTRY glRenderbufferStorage(GLenum target, GLenum interna
     //
     rbData->eglImageGlobalTexObject.reset();
 
-    ctx->dispatcher().glRenderbufferStorageEXT(target,internal,width,height);
+    *err = GL_NO_ERROR;
+
+    return internal;
+}
+
+GL_APICALL void  GL_APIENTRY glRenderbufferStorage(GLenum target, GLenum internalformat, GLsizei width, GLsizei height){
+    GET_CTX();
+    GLint err = GL_NO_ERROR;
+    internalformat = sPrepareRenderbufferStorage(internalformat, &err);
+    SET_ERROR_IF(err != GL_NO_ERROR, err);
+    ctx->dispatcher().glRenderbufferStorageEXT(target,internalformat,width,height);
 }
 
 GL_APICALL void  GL_APIENTRY glSampleCoverage(GLclampf value, GLboolean invert){
@@ -2269,58 +2318,109 @@ GL_APICALL void  GL_APIENTRY glStencilOpSeparate(GLenum face, GLenum fail, GLenu
 
 #define GL_RGBA32F                        0x8814
 #define GL_RGB32F                         0x8815
-GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid* pixels){
-    GET_CTX();
-    SET_ERROR_IF(!(GLESv2Validate::textureTargetEx(target) &&
-                   GLESv2Validate::pixelFrmt(ctx,format)&&
-                   GLESv2Validate::pixelType(ctx,type)),GL_INVALID_ENUM);
 
-    SET_ERROR_IF(!GLESv2Validate::pixelItnlFrmt(ctx,internalformat), GL_INVALID_VALUE);
-    SET_ERROR_IF((GLESv2Validate::textureIsCubeMap(target) && width != height), GL_INVALID_VALUE);
-    SET_ERROR_IF((format == GL_DEPTH_COMPONENT || internalformat == GL_DEPTH_COMPONENT) &&
-                    (type != GL_UNSIGNED_SHORT && type != GL_UNSIGNED_INT), GL_INVALID_OPERATION);
+static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalformat,
+                               GLsizei width, GLsizei height, GLint border,
+                               GLenum format, GLenum type, const GLvoid* pixels,
+                               GLenum* type_out,
+                               GLint* internalformat_out,
+                               GLint* err_out) {
+    GET_CTX_V2();
 
-    SET_ERROR_IF((type == GL_UNSIGNED_SHORT || type == GL_UNSIGNED_INT) &&
-                    (format != GL_DEPTH_COMPONENT || internalformat != GL_DEPTH_COMPONENT), GL_INVALID_OPERATION);
+#define VALIDATE(cond, err) do { if (cond) { *err_out = err; fprintf(stderr, "%s:%d failed validation\n", __FUNCTION__, __LINE__); return; } } while(0) \
 
-    SET_ERROR_IF(!GLESv2Validate::pixelOp(format,type) && internalformat == ((GLint)format),GL_INVALID_OPERATION);
-    SET_ERROR_IF(!GLESv2Validate::pixelSizedFrmt(ctx, internalformat, format, type), GL_INVALID_OPERATION);
-    SET_ERROR_IF(border != 0,GL_INVALID_VALUE);
+    bool isCompressedFormat =
+        GLESv2Validate::isCompressedFormat(internalformat);
+
+    if (!isCompressedFormat) {
+        VALIDATE(!(GLESv2Validate::textureTarget(ctx, target) ||
+                   GLESv2Validate::textureTargetEx(target)), GL_INVALID_ENUM);
+        VALIDATE(!GLESv2Validate::pixelFrmt(ctx, format), GL_INVALID_ENUM);
+        VALIDATE(!GLESv2Validate::pixelType(ctx, type), GL_INVALID_ENUM);
+
+        VALIDATE(!GLESv2Validate::pixelItnlFrmt(ctx,internalformat), GL_INVALID_VALUE);
+        VALIDATE((GLESv2Validate::textureIsCubeMap(target) && width != height), GL_INVALID_VALUE);
+        VALIDATE(ctx->getMajorVersion() < 3 &&
+                (format == GL_DEPTH_COMPONENT || internalformat == GL_DEPTH_COMPONENT) &&
+                (type != GL_UNSIGNED_SHORT && type != GL_UNSIGNED_INT), GL_INVALID_OPERATION);
+
+        VALIDATE(ctx->getMajorVersion() < 3 &&
+                (type == GL_UNSIGNED_SHORT || type == GL_UNSIGNED_INT) &&
+                (format != GL_DEPTH_COMPONENT || internalformat != GL_DEPTH_COMPONENT), GL_INVALID_OPERATION);
+
+        VALIDATE(!GLESv2Validate::pixelOp(format,type) && internalformat == ((GLint)format),GL_INVALID_OPERATION);
+        VALIDATE(!GLESv2Validate::pixelSizedFrmt(ctx, internalformat, format, type), GL_INVALID_OPERATION);
+    }
+
+    VALIDATE(border != 0,GL_INVALID_VALUE);
 
     s_glInitTexImage2D(target,level,internalformat,width,height,border);
-    if (type==GL_HALF_FLOAT_OES)
-        type = GL_HALF_FLOAT_NV;
-    if (pixels==NULL && type==GL_UNSIGNED_SHORT_5_5_5_1)
-        type = GL_UNSIGNED_SHORT;
-    if (type == GL_FLOAT)
-        internalformat = (format == GL_RGBA) ? GL_RGBA32F : GL_RGB32F;
+
+    if (!isCompressedFormat && ctx->getMajorVersion() < 3) {
+        if (type==GL_HALF_FLOAT_OES)
+            type = GL_HALF_FLOAT_NV;
+        if (pixels==NULL && type==GL_UNSIGNED_SHORT_5_5_5_1)
+            type = GL_UNSIGNED_SHORT;
+        if (type == GL_FLOAT)
+            internalformat = (format == GL_RGBA) ? GL_RGBA32F : GL_RGB32F;
+    }
+
+    *type_out = type;
+    *internalformat_out = internalformat;
+    *err_out = GL_NO_ERROR;
+}
+
+GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid* pixels){
+    GET_CTX_V2();
+    // clear previous error
+    GLint err = ctx->dispatcher().glGetError();
+    if (err != GL_NO_ERROR) {
+        fprintf(stderr, "%s: got err pre :( 0x%x internal 0x%x format 0x%x type 0x%x\n", __func__, err, internalformat, format, type);
+    }
+    sPrepareTexImage2D(target, level, internalformat, width, height, border, format, type, pixels, &type, &internalformat, &err);
+    SET_ERROR_IF(err != GL_NO_ERROR, err);
     ctx->dispatcher().glTexImage2D(target,level,internalformat,width,height,border,format,type,pixels);
+    err = ctx->dispatcher().glGetError();
+    if (err != GL_NO_ERROR) {
+        fprintf(stderr, "%s: got err :( 0x%x internal 0x%x format 0x%x type 0x%x\n", __func__, err, internalformat, format, type);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glTexParameterf(GLenum target, GLenum pname, GLfloat param){
-    GET_CTX();
-    SET_ERROR_IF(!(GLESv2Validate::textureTarget(target) && GLESv2Validate::textureParams(pname)),GL_INVALID_ENUM);
+    GET_CTX_V2();
+    SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
+                   GLESv2Validate::textureParams(ctx, pname)),
+                 GL_INVALID_ENUM);
     ctx->dispatcher().glTexParameterf(target,pname,param);
 }
 GL_APICALL void  GL_APIENTRY glTexParameterfv(GLenum target, GLenum pname, const GLfloat* params){
-    GET_CTX();
-    SET_ERROR_IF(!(GLESv2Validate::textureTarget(target) && GLESv2Validate::textureParams(pname)),GL_INVALID_ENUM);
+    GET_CTX_V2();
+    SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
+                   GLESv2Validate::textureParams(ctx, pname)),
+                 GL_INVALID_ENUM);
     ctx->dispatcher().glTexParameterfv(target,pname,params);
 }
 GL_APICALL void  GL_APIENTRY glTexParameteri(GLenum target, GLenum pname, GLint param){
-    GET_CTX();
-    SET_ERROR_IF(!(GLESv2Validate::textureTarget(target) && GLESv2Validate::textureParams(pname)),GL_INVALID_ENUM);
+    GET_CTX_V2();
+    SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
+                   GLESv2Validate::textureParams(ctx, pname)),
+                 GL_INVALID_ENUM);
     ctx->dispatcher().glTexParameteri(target,pname,param);
 }
 GL_APICALL void  GL_APIENTRY glTexParameteriv(GLenum target, GLenum pname, const GLint* params){
-    GET_CTX();
-    SET_ERROR_IF(!(GLESv2Validate::textureTarget(target) && GLESv2Validate::textureParams(pname)),GL_INVALID_ENUM);
+    GET_CTX_V2();
+    SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
+                   GLESv2Validate::textureParams(ctx, pname)),
+                 GL_INVALID_ENUM);
     ctx->dispatcher().glTexParameteriv(target,pname,params);
 }
 
 GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels){
-    GET_CTX();
-    SET_ERROR_IF(!(GLESv2Validate::textureTargetEx(target)), GL_INVALID_ENUM);
+    GET_CTX_V2();
+    SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) ||
+                   GLESv2Validate::textureTargetEx(target)), GL_INVALID_ENUM);
+    SET_ERROR_IF(!GLESv2Validate::pixelFrmt(ctx,format), GL_INVALID_ENUM);
+    SET_ERROR_IF(!GLESv2Validate::pixelType(ctx,type),GL_INVALID_ENUM);
     // set an error if level < 0 or level > log 2 max
     SET_ERROR_IF(level < 0 || 1<<level > ctx->getMaxTexSize(), GL_INVALID_VALUE);
     SET_ERROR_IF(xoffset < 0 || yoffset < 0 || width < 0 || height < 0, GL_INVALID_VALUE);
@@ -2332,10 +2432,10 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
                      GL_INVALID_VALUE);
         }
     }
-    SET_ERROR_IF(!(GLESv2Validate::pixelFrmt(ctx,format)&&
+    SET_ERROR_IF(!(GLESv2Validate::pixelFrmt(ctx,format) &&
                    GLESv2Validate::pixelType(ctx,type)),GL_INVALID_ENUM);
     SET_ERROR_IF(!GLESv2Validate::pixelOp(format,type),GL_INVALID_OPERATION);
-    SET_ERROR_IF(!pixels,GL_INVALID_OPERATION);
+    SET_ERROR_IF(!pixels && !ctx->isBindedBuffer(GL_PIXEL_UNPACK_BUFFER),GL_INVALID_OPERATION);
     if (type==GL_HALF_FLOAT_OES)
         type = GL_HALF_FLOAT_NV;
 
@@ -2415,20 +2515,23 @@ GL_APICALL void  GL_APIENTRY glUniform4iv(GLint location, GLsizei count, const G
 }
 
 GL_APICALL void  GL_APIENTRY glUniformMatrix2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value){
-    GET_CTX();
-    SET_ERROR_IF(transpose != GL_FALSE,GL_INVALID_VALUE);
+    GET_CTX_V2();
+    SET_ERROR_IF(ctx->getMajorVersion() < 3 &&
+                 transpose != GL_FALSE,GL_INVALID_VALUE);
     ctx->dispatcher().glUniformMatrix2fv(location,count,transpose,value);
 }
 
 GL_APICALL void  GL_APIENTRY glUniformMatrix3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value){
-    GET_CTX();
-    SET_ERROR_IF(transpose != GL_FALSE,GL_INVALID_VALUE);
+    GET_CTX_V2();
+    SET_ERROR_IF(ctx->getMajorVersion() < 3 &&
+                 transpose != GL_FALSE,GL_INVALID_VALUE);
     ctx->dispatcher().glUniformMatrix3fv(location,count,transpose,value);
 }
 
 GL_APICALL void  GL_APIENTRY glUniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value){
-    GET_CTX();
-    SET_ERROR_IF(transpose != GL_FALSE,GL_INVALID_VALUE);
+    GET_CTX_V2();
+    SET_ERROR_IF(ctx->getMajorVersion() < 3 &&
+                 transpose != GL_FALSE,GL_INVALID_VALUE);
     ctx->dispatcher().glUniformMatrix4fv(location,count,transpose,value);
 }
 
