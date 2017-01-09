@@ -13,76 +13,162 @@
 
 #include "android/base/synchronization/Lock.h"
 
+#include <map>
 #include <string>
 
 #include <GLSLANG/ShaderLang.h>
+
+#define SH_GLES31_SPEC ((ShShaderSpec)0x8B88)
+#define GL_COMPUTE_SHADER 0x91B9
 
 namespace ANGLEShaderParser {
 
 ShBuiltInResources kResources;
 bool kInitialized = false;
 
-ShHandle kVertCompiler = nullptr;
-ShHandle kFragCompiler = nullptr;
+struct ShaderSpecKey {
+    GLenum shaderType;
+    int esslVersion;
+};
+
+static ShShaderSpec sInputSpecForVersion(int esslVersion) {
+    switch (esslVersion) {
+        case 100:
+            return SH_GLES2_SPEC;
+        case 300:
+            return SH_GLES3_SPEC;
+        case 310:
+            return SH_GLES31_SPEC;
+    }
+    return SH_GLES31_SPEC;
+}
+
+static ShShaderOutput sOutputSpecForVersion(int esslVersion) {
+    switch (esslVersion) {
+        case 100:
+            return SH_GLSL_COMPATIBILITY_OUTPUT;
+        case 300:
+            return SH_GLSL_150_CORE_OUTPUT;
+        case 310:
+            return SH_GLSL_430_CORE_OUTPUT;
+    }
+    return SH_GLSL_430_CORE_OUTPUT;
+}
+
+struct ShaderSpecKeyCompare {
+    bool operator() (const ShaderSpecKey& a,
+                     const ShaderSpecKey& b) const {
+        if (a.shaderType != b.shaderType)
+            return a.shaderType < b.shaderType;
+        if (a.esslVersion != b.esslVersion)
+            return a.esslVersion < b.esslVersion;
+        return false;
+    }
+};
+
+typedef std::map<ShaderSpecKey, ShHandle, ShaderSpecKeyCompare> ShaderCompilerMap;
+static ShaderCompilerMap sCompilerMap;
+
+static ShHandle getShaderCompiler(ShaderSpecKey key) {
+    if (sCompilerMap.find(key) == sCompilerMap.end()) {
+        sCompilerMap[key] =
+            ShConstructCompiler(
+                    key.shaderType,
+                    sInputSpecForVersion(key.esslVersion),
+                    sOutputSpecForVersion(key.esslVersion),
+                    &kResources);
+    }
+    return sCompilerMap[key];
+}
 
 android::base::Lock kCompilerLock;
 
-void initializeResources() {
+void initializeResources(
+            int attribs,
+            int uniformVectors,
+            int varyingVectors,
+            int vertexTextureImageUnits,
+            int combinedTexImageUnits,
+            int textureImageUnits,
+            int fragmentUniformVectors,
+            int drawBuffers,
+            int fragmentPrecisionHigh,
+            int vertexOutputComponents,
+            int fragmentInputComponents,
+            int minProgramTexelOffset,
+            int maxProgramTexelOffset,
+            int maxDualSourceDrawBuffers) {
     ShInitBuiltInResources(&kResources);
 
-    // The following are set to pass:
-    // dEQP-GLES2.functional.shaders.builtin_variable.*
-    // On a Linux machine with an Nvidia Quadro K2200
-    kResources.MaxVertexAttribs = 16; // Defaulted to 8
-    kResources.MaxVertexUniformVectors = 1024; // Defaulted to 128
-    kResources.MaxVaryingVectors = 31; // Defaulted to 8
-    kResources.MaxVertexTextureImageUnits = 32; // Defaulted to 0
-    kResources.MaxCombinedTextureImageUnits = 32; // Defaulted to 8
-    kResources.MaxTextureImageUnits = 32; // Defaulted to 8
-    kResources.MaxFragmentUniformVectors = 1024; // Defaulted to 16
+    kResources.MaxVertexAttribs = attribs; // Defaulted to 8
+    kResources.MaxVertexUniformVectors = uniformVectors; // Defaulted to 128
+    kResources.MaxVaryingVectors = varyingVectors; // Defaulted to 8
+    kResources.MaxVertexTextureImageUnits = vertexTextureImageUnits; // Defaulted to 0
+    kResources.MaxCombinedTextureImageUnits = combinedTexImageUnits; // Defaulted to 8
+    kResources.MaxTextureImageUnits = textureImageUnits; // Defaulted to 8
+    kResources.MaxFragmentUniformVectors = fragmentUniformVectors; // Defaulted to 16
 
-    kResources.MaxDrawBuffers = 1;
-    kResources.MaxDualSourceDrawBuffers = 1;
+    kResources.MaxDrawBuffers = drawBuffers;
+    kResources.FragmentPrecisionHigh = fragmentPrecisionHigh;
+
+    kResources.MaxVertexOutputVectors = vertexOutputComponents / 4;
+    kResources.MaxFragmentInputVectors = fragmentInputComponents / 4;
+    kResources.MinProgramTexelOffset = minProgramTexelOffset;
+    kResources.MaxProgramTexelOffset = maxProgramTexelOffset;
+
+    kResources.MaxDualSourceDrawBuffers = maxDualSourceDrawBuffers;
 
     kResources.OES_standard_derivatives = 0;
     kResources.OES_EGL_image_external = 0;
-
-    kResources.FragmentPrecisionHigh = 1;
+    kResources.EXT_gpu_shader5 = 1;
 }
 
-ShHandle createShaderCompiler(GLenum shaderType) {
-    ShHandle handle = ShConstructCompiler(shaderType,
-                                          SH_GLES2_SPEC,
-                                          SH_GLSL_COMPATIBILITY_OUTPUT,
-                                          &kResources);
-    return handle;
-}
+bool globalInitialize(
+            int attribs,
+            int uniformVectors,
+            int varyingVectors,
+            int vertexTextureImageUnits,
+            int combinedTexImageUnits,
+            int textureImageUnits,
+            int fragmentUniformVectors,
+            int drawBuffers,
+            int fragmentPrecisionHigh,
+            int vertexOutputComponents,
+            int fragmentInputComponents,
+            int minProgramTexelOffset,
+            int maxProgramTexelOffset,
+            int maxDualSourceDrawBuffers) {
 
-bool globalInitialize() {
     if (!ShInitialize()) {
         fprintf(stderr, "Global ANGLE shader compiler initialzation failed.\n");
         return false;
     }
-    initializeResources();
 
-    kVertCompiler = createShaderCompiler(GL_VERTEX_SHADER);
-    if (!kVertCompiler) {
-        fprintf(stderr, "Failed to initialize ANGLE vertex shader compiler.\n");
-        return false;
-    }
-    kFragCompiler = createShaderCompiler(GL_FRAGMENT_SHADER);
-    if (!kFragCompiler) {
-        fprintf(stderr, "Failed to initialize ANGLE fragment shader compiler.\n");
-        return false;
-    }
+    initializeResources(
+            attribs,
+            uniformVectors,
+            varyingVectors,
+            vertexTextureImageUnits,
+            combinedTexImageUnits,
+            textureImageUnits,
+            fragmentUniformVectors,
+            drawBuffers,
+            fragmentPrecisionHigh,
+            vertexOutputComponents,
+            fragmentInputComponents,
+            minProgramTexelOffset,
+            maxProgramTexelOffset,
+            maxDualSourceDrawBuffers);
 
     kInitialized = true;
     return true;
 }
 
-bool translate(const char* src, GLenum shaderType,
-                                std::string* outInfolog,
-                                std::string* outObjCode) {
+bool translate(int esslVersion,
+               const char* src,
+               GLenum shaderType,
+               std::string* outInfolog,
+               std::string* outObjCode) {
     if (!kInitialized) {
         return false;
     }
@@ -91,9 +177,17 @@ bool translate(const char* src, GLenum shaderType,
     // at the same time.
     android::base::AutoLock autolock(kCompilerLock);
 
-    ShHandle compilerHandle = (shaderType == GL_VERTEX_SHADER ?
-                                   kVertCompiler : kFragCompiler);
+    ShaderSpecKey key;
+    key.shaderType = shaderType;
+    key.esslVersion = esslVersion;
+
+    ShHandle compilerHandle = getShaderCompiler(key);
+
     if (!compilerHandle) {
+        fprintf(stderr, "%s: no compiler handle for shader type 0x%x, ESSL version %d\n",
+                __FUNCTION__,
+                shaderType,
+                esslVersion);
         return false;
     }
 
