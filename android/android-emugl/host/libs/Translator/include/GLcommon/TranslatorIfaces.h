@@ -81,11 +81,12 @@ class GLEScontext;
 
 typedef struct {
     void                                            (*initGLESx)();
-    GLEScontext*                                    (*createGLESContext)();
+    GLEScontext*                                    (*createGLESContext)(int majorVersion, int minorVersion);
     void                                            (*initContext)(GLEScontext*,ShareGroupPtr);
     void                                            (*deleteGLESContext)(GLEScontext*);
     void                                            (*flush)();
     void                                            (*finish)();
+    int                                             (*getError)();
     void                                            (*setShareGroup)(GLEScontext*,ShareGroupPtr);
     __translatorMustCastToProperFunctionPointerType (*getProcAddress)(const char*);
     GLsync                                          (*fenceSync)(GLenum, GLbitfield);
