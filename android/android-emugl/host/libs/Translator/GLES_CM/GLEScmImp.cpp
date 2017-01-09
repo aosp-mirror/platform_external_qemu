@@ -2274,7 +2274,7 @@ GL_API void GL_APIENTRY glGetTexGenxvOES (GLenum coord, GLenum pname, GLfixed *p
     else
         ctx->dispatcher().glGetTexGenfv(coord,pname,tmpParams);
 
-    params[0] = F2X(tmpParams[1]);
+    params[0] = F2X(tmpParams[0]);
 }
 
 template <class T, GLenum TypeName>
