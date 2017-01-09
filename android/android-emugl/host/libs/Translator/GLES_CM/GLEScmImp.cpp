@@ -43,7 +43,7 @@ static void initGLESx();
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp);
 static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
-static GLEScontext* createGLESContext();
+static GLEScontext* createGLESContext(int maj, int min);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
 
 }
@@ -61,6 +61,7 @@ static GLESiface  s_glesIface = {
     .deleteGLESContext = deleteGLESContext,
     .flush             = (FUNCPTR_NO_ARGS_RET_VOID)glFlush,
     .finish            = (FUNCPTR_NO_ARGS_RET_VOID)glFinish,
+    .getError          = (FUNCPTR_NO_ARGS_RET_INT)glGetError,
     .setShareGroup     = setShareGroup,
     .getProcAddress    = getProcAddress,
     .fenceSync         = NULL,
@@ -86,8 +87,8 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
      }
 }
 
-static GLEScontext* createGLESContext() {
-    return new GLEScmContext();
+static GLEScontext* createGLESContext(int maj, int min) {
+    return new GLEScmContext(maj, min);
 }
 
 static void deleteGLESContext(GLEScontext* ctx) {
