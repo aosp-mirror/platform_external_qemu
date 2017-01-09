@@ -79,9 +79,6 @@ static GLESiface  s_glesIface = {
 
 extern "C" {
 
-static void initGLESx() {
-    ANGLEShaderParser::globalInitialize();
-}
 
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
     if (!ctx->isInitialized()) {
@@ -98,6 +95,10 @@ static GLEScontext* createGLESContext() {
 static GLEScontext* createGLESxContext(int maj, int min) {
     return new GLESv2Context(maj, min);
 }
+
+static bool shaderParserInitialized = false;
+
+static void initGLESx() { }
 
 static void deleteGLESContext(GLEScontext* ctx) {
     delete ctx;
@@ -528,13 +529,59 @@ GL_APICALL GLuint GL_APIENTRY glCreateProgram(void){
 
 GL_APICALL GLuint GL_APIENTRY glCreateShader(GLenum type){
     GET_CTX_V2_RET(0);
-    RET_AND_SET_ERROR_IF(!GLESv2Validate::shaderType(type),GL_INVALID_ENUM,0);
+    // Lazy init so we can catch the caps.
+    if (!shaderParserInitialized) {
+        shaderParserInitialized = true;
+
+        GLint maxVertexAttribs; ctx->dispatcher().glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttribs);
+        GLint maxVertexUniformVectors; ctx->dispatcher().glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, &maxVertexUniformVectors);
+        GLint maxVaryingVectors; ctx->dispatcher().glGetIntegerv(GL_MAX_VARYING_VECTORS, &maxVaryingVectors);
+        GLint maxVertexTextureImageUnits; ctx->dispatcher().glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &maxVertexTextureImageUnits);
+        GLint maxCombinedTexImageUnits; ctx->dispatcher().glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxCombinedTexImageUnits);
+        GLint maxTextureImageUnits; ctx->dispatcher().glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureImageUnits);
+        GLint maxFragmentUniformVectors; ctx->dispatcher().glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, &maxFragmentUniformVectors);
+        GLint maxDrawBuffers; ctx->dispatcher().glGetIntegerv(GL_MAX_DRAW_BUFFERS, &maxDrawBuffers);
+
+        GLint fragmentPrecisionHigh = 1;
+
+        GLint maxVertexOutputVectors; ctx->dispatcher().glGetIntegerv(GL_MAX_VERTEX_OUTPUT_COMPONENTS, &maxVertexOutputVectors);
+        GLint maxFragmentInputVectors; ctx->dispatcher().glGetIntegerv(GL_MAX_FRAGMENT_INPUT_COMPONENTS, &maxFragmentInputVectors);
+        GLint minProgramTexelOffset; ctx->dispatcher().glGetIntegerv(GL_MIN_PROGRAM_TEXEL_OFFSET, &minProgramTexelOffset);
+        GLint maxProgramTexelOffset; ctx->dispatcher().glGetIntegerv(GL_MAX_PROGRAM_TEXEL_OFFSET, &maxProgramTexelOffset);
+
+        GLint maxDualSourceDrawBuffers = 1;
+
+        ANGLEShaderParser::globalInitialize(
+                maxVertexAttribs,
+                maxVertexUniformVectors,
+                maxVaryingVectors,
+                maxVertexTextureImageUnits,
+                maxCombinedTexImageUnits,
+                maxTextureImageUnits,
+                maxFragmentUniformVectors,
+                maxDrawBuffers,
+                fragmentPrecisionHigh,
+                maxVertexOutputVectors,
+                maxFragmentInputVectors,
+                minProgramTexelOffset,
+                maxProgramTexelOffset,
+                maxDualSourceDrawBuffers);
+    }
     if(ctx->shareGroup().get()) {
         ShaderProgramType shaderProgramType;
-        if (type == GL_VERTEX_SHADER) {
+        switch (type) {
+        case GL_VERTEX_SHADER:
             shaderProgramType = ShaderProgramType::VERTEX_SHADER;
-        } else {
+            break;
+        case GL_FRAGMENT_SHADER:
             shaderProgramType = ShaderProgramType::FRAGMENT_SHADER;
+            break;
+        case GL_COMPUTE_SHADER:
+            shaderProgramType = ShaderProgramType::COMPUTE_SHADER;
+            break;
+        default:
+            shaderProgramType = ShaderProgramType::VERTEX_SHADER;
+            break;
         }
         const GLuint localShaderName = ctx->shareGroup()->genName(
                                                 shaderProgramType, 0, true);
@@ -1904,27 +1951,45 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA, GL_INVALID_OPERATION);
+
         ProgramData* programData = (ProgramData*)objData;
         GLint fragmentShader   = programData->getAttachedFragmentShader();
         GLint vertexShader =  programData->getAttachedVertexShader();
+        GLint computeShader =  programData->getAttachedComputeShader();
+
         if (vertexShader != 0 && fragmentShader!=0) {
-            /* validating that the fragment & vertex shaders were compiled successfuly*/
             GLint fCompileStatus = GL_FALSE;
             GLint vCompileStatus = GL_FALSE;
+
             GLuint fragmentShaderGlobal = ctx->shareGroup()->getGlobalName(
                     NamedObjectType::SHADER_OR_PROGRAM, fragmentShader);
             GLuint vertexShaderGlobal = ctx->shareGroup()->getGlobalName(
                     NamedObjectType::SHADER_OR_PROGRAM, vertexShader);
+
             ctx->dispatcher().glGetShaderiv(fragmentShaderGlobal,GL_COMPILE_STATUS,&fCompileStatus);
             ctx->dispatcher().glGetShaderiv(vertexShaderGlobal,GL_COMPILE_STATUS,&vCompileStatus);
 
-            if(fCompileStatus != 0 && vCompileStatus != 0){
+            if(fCompileStatus != 0 && vCompileStatus != 0) {
                 ctx->dispatcher().glLinkProgram(globalProgramName);
                 ctx->dispatcher().glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
             }
         }
+
+        if (computeShader != 0) {
+            GLint cCompileStatus = GL_FALSE;
+            GLuint computeShaderGlobal = ctx->shareGroup()->getGlobalName(
+                    NamedObjectType::SHADER_OR_PROGRAM, computeShader);
+            ctx->dispatcher().glGetShaderiv(computeShaderGlobal,GL_COMPILE_STATUS,&cCompileStatus);
+
+            if (cCompileStatus != 0) {
+                ctx->dispatcher().glLinkProgram(globalProgramName);
+                ctx->dispatcher().glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
+            }
+        }
+
         programData->setLinkStatus(linkStatus);
-        
+
+
         GLsizei infoLogLength=0;
         GLchar* infoLog;
         ctx->dispatcher().glGetProgramiv(globalProgramName,GL_INFO_LOG_LENGTH,&infoLogLength);
@@ -2038,6 +2103,22 @@ GL_APICALL void  GL_APIENTRY glShaderBinary(GLsizei n, const GLuint* shaders, GL
     }
 }
 
+static int sDetectShaderESSLVersion(GLESv2Context* ctx, const GLchar* const* strings) {
+    // Just look at the first line of the first string for now
+    const char* pos = ((const char* const*)strings)[0];
+    const char* linePos = strstr(pos, "\n");
+    const char* versionPos = strstr(pos, "#version");
+    if (!linePos || !versionPos) {
+        // default to ESSL 100
+        return 100;
+    }
+
+    const char* version_end = versionPos + strlen("#version");
+    int wantedESSLVersion;
+    sscanf(version_end, " %d", &wantedESSLVersion);
+    return wantedESSLVersion;
+}
+
 GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const GLchar* const* string, const GLint* length){
     GET_CTX_V2();
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE);
@@ -2051,7 +2132,8 @@ GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const 
         SET_ERROR_IF(objData->getDataType() != SHADER_DATA,
                      GL_INVALID_OPERATION);
         ShaderParser* sp = (ShaderParser*)objData;
-        sp->setSrc(ctx->glslVersion(), count, string, length);
+        int esslVersion = sDetectShaderESSLVersion(ctx, string);
+        sp->setSrc(esslVersion, count, string, length);
         ctx->dispatcher().glShaderSource(globalShaderName, 1, sp->parsedLines(),
                                          NULL);
         sp->clear();
