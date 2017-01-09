@@ -18,6 +18,8 @@ include $(LOCAL_PATH)/android/third_party/mini-glib/sources.make
 include $(LOCAL_PATH)/android/third_party/googletest/Android.mk
 include $(LOCAL_PATH)/android/third_party/libANGLEtranslation.mk
 include $(LOCAL_PATH)/android/third_party/Protobuf.mk
+include $(LOCAL_PATH)/android/third_party/libffmpeg.mk
+include $(LOCAL_PATH)/android/third_party/libx264.mk
 
 ifeq (true,$(BUILD_BENCHMARKS))
 include $(LOCAL_PATH)/android/third_party/regex-win32/sources.mk
