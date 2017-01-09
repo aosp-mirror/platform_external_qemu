@@ -27,10 +27,10 @@
 
 ShaderParser::ShaderParser(GLenum type) : ObjectData(SHADER_DATA), m_type(type) {}
 
-void ShaderParser::convertESSLToGLSL() {
+void ShaderParser::convertESSLToGLSL(int esslVersion) {
     std::string infolog;
     std::string parsedSource;
-    m_valid = ANGLEShaderParser::translate(m_originalSrc.c_str(), m_type, &infolog, &parsedSource);
+    m_valid = ANGLEShaderParser::translate(esslVersion, m_originalSrc.c_str(), m_type, &infolog, &parsedSource);
 
     if (!m_valid) {
         m_infoLog = static_cast<const GLchar*>(infolog.c_str());
@@ -39,7 +39,7 @@ void ShaderParser::convertESSLToGLSL() {
     }
 }
 
-void ShaderParser::setSrc(const Version& ver, GLsizei count, const GLchar* const* strings, const GLint* length){
+void ShaderParser::setSrc(int esslVersion, GLsizei count, const GLchar* const* strings, const GLint* length){
     m_src.clear();
     for(int i = 0;i<count;i++){
         const size_t strLen =
@@ -51,7 +51,7 @@ void ShaderParser::setSrc(const Version& ver, GLsizei count, const GLchar* const
     //  std::string in GCC's STL - we need a deep copy here.
     m_originalSrc.assign(m_src.c_str(), m_src.size());
 
-    convertESSLToGLSL();
+    convertESSLToGLSL(esslVersion);
 }
 
 const GLchar** ShaderParser::parsedLines() {
