@@ -261,6 +261,62 @@ GL_APICALL void  GL_APIENTRY glBindBuffer(GLenum target, GLuint buffer){
     }
 }
 
+static bool sShouldEnableSRGB(GLESv2Context* ctx, GLuint fbo) {
+    auto fbObj = ctx->shareGroup()->getObjectData(
+            NamedObjectType::FRAMEBUFFER, fbo);
+    if (fbObj == NULL) { return false; }
+
+    FramebufferData *fbData = (FramebufferData *)fbObj;
+    GLenum target;
+    for (int i = 0; i < ctx->getCaps()->maxDrawBuffers; i++) {
+        GLuint name = fbData->getAttachment(GL_COLOR_ATTACHMENT0 + i, &target, NULL);
+        if (target == GL_TEXTURE_2D ||
+                target == GL_TEXTURE_CUBE_MAP ||
+                target == GL_TEXTURE_CUBE_MAP_POSITIVE_X ||
+                target == GL_TEXTURE_CUBE_MAP_POSITIVE_Y ||
+                target == GL_TEXTURE_CUBE_MAP_POSITIVE_Z ||
+                target == GL_TEXTURE_CUBE_MAP_NEGATIVE_X ||
+                target == GL_TEXTURE_CUBE_MAP_NEGATIVE_Y ||
+                target == GL_TEXTURE_CUBE_MAP_NEGATIVE_Z ||
+                target == GL_TEXTURE_2D_ARRAY ||
+                target == GL_TEXTURE_3D ||
+                target == GL_TEXTURE_2D_MULTISAMPLE) {
+            TextureData* tex = getTextureData(name);
+            if (tex) {
+                GLenum tex_internalformat = tex->internalFormat;
+                if (tex_internalformat == GL_SRGB8_ALPHA8) {
+                    return true;
+                }
+            }
+        } else if (target == GL_RENDERBUFFER) {
+            auto objData = ctx->shareGroup()->getObjectData(
+                    NamedObjectType::RENDERBUFFER, name);
+            RenderbufferData* rbData = (RenderbufferData*)objData;
+            if (rbData) {
+                GLenum rb_internalformat = rbData->internalformat;
+                if (rb_internalformat == GL_SRGB8_ALPHA8) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+// Enable GL_FRAMEBUFFER_SRGB when:
+// 1. draw framebuffer is default and read framebuffer has a SRGB texture attachment (or vice versa).
+// 2. Either draw or read framebuffer has a SRGB texture attachment.
+static void sSetSRGBEnable(GLESv2Context* ctx, GLuint framebuffer, GLenum target) {
+    GLuint read_fbo = ctx->getFramebufferBinding(GL_READ_FRAMEBUFFER);
+    GLuint draw_fbo = ctx->getFramebufferBinding(GL_DRAW_FRAMEBUFFER);
+    if (sShouldEnableSRGB(ctx, read_fbo) ||
+        sShouldEnableSRGB(ctx, draw_fbo)) {
+        ctx->dispatcher().glEnable(GL_FRAMEBUFFER_SRGB);
+    } else {
+        ctx->dispatcher().glDisable(GL_FRAMEBUFFER_SRGB);
+    }
+}
+
 GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer){
     GET_CTX();
     SET_ERROR_IF(!GLESv2Validate::framebufferTarget(target),GL_INVALID_ENUM);
@@ -288,6 +344,8 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
     ctx->dispatcher().glBindFramebufferEXT(target,globalFrameBufferName);
     // update framebuffer binding state
     ctx->setFramebufferBinding(target, framebuffer);
+    // update SRGB enable
+    sSetSRGBEnable(ctx, framebuffer, target);
 }
 
 GL_APICALL void  GL_APIENTRY glBindRenderbuffer(GLenum target, GLuint renderbuffer){
@@ -969,6 +1027,8 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
     }
 
     ctx->dispatcher().glFramebufferRenderbufferEXT(target,attachment,renderbuffertarget,globalRenderbufferName);
+    // update SRGB enable
+    sSetSRGBEnable(ctx, fbName, target);
 }
 
 GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level){
@@ -1001,6 +1061,9 @@ GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attach
         fbData->setAttachment(attachment, textarget,
                               texture, ObjectDataPtr());
     }
+
+    // update SRGB enable
+    sSetSRGBEnable(ctx, fbName, target);
 }
 
 
