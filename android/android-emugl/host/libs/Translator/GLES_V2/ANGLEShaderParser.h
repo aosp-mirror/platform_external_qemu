@@ -16,7 +16,21 @@
 #include <GLES2/gl2.h>
 
 namespace ANGLEShaderParser {
-    bool globalInitialize();
-    bool translate(const char* src, GLenum shaderType,
+    bool globalInitialize(
+            int attribs,
+            int uniformVectors,
+            int varyingVectors,
+            int vertexTextureImageUnits,
+            int combinedTexImageUnits,
+            int textureImageUnits,
+            int fragmentUniformVectors,
+            int drawBuffers,
+            int fragmentPrecisionHigh,
+            int vertexOutputComponents,
+            int fragmentInputComponents,
+            int minProgramTexelOffset,
+            int maxProgramTexelOffset,
+            int maxDualSourceDrawBuffers);
+    bool translate(int esslVersion, const char* src, GLenum shaderType,
                    std::string* outInfolog, std::string* outObjCode);
 }
