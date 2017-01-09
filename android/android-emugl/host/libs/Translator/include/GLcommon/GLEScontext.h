@@ -220,8 +220,33 @@ public:
 
     void setRenderbufferBinding(GLuint rb) { m_renderbuffer = rb; }
     GLuint getRenderbufferBinding() const { return m_renderbuffer; }
-    void setFramebufferBinding(GLuint fb) { m_framebuffer = fb; }
-    GLuint getFramebufferBinding() const { return m_framebuffer; }
+    void setFramebufferBinding(GLenum target, GLuint fb) {
+        switch (target) {
+        case GL_READ_FRAMEBUFFER:
+            m_readFramebuffer = fb;
+            break;
+        case GL_DRAW_FRAMEBUFFER:
+            m_drawFramebuffer = fb;
+            break;
+        case GL_FRAMEBUFFER:
+            m_readFramebuffer = fb;
+            m_drawFramebuffer = fb;
+            break;
+        default:
+            m_drawFramebuffer = fb;
+            break;
+        }
+    }
+    GLuint getFramebufferBinding(GLenum target) const {
+        switch (target) {
+        case GL_READ_FRAMEBUFFER:
+            return m_readFramebuffer;
+        case GL_DRAW_FRAMEBUFFER:
+        case GL_FRAMEBUFFER:
+            return m_drawFramebuffer;
+        }
+        return m_drawFramebuffer;
+    }
 
     static GLDispatch& dispatcher(){return s_glDispatch;};
 
@@ -295,7 +320,8 @@ private:
     unsigned int          m_arrayBuffer = 0;
     unsigned int          m_elementBuffer = 0;
     GLuint                m_renderbuffer = 0;
-    GLuint                m_framebuffer = 0;
+    GLuint                m_drawFramebuffer = 0;
+    GLuint                m_readFramebuffer = 0;
 
     static std::string    s_glVendor;
     static std::string    s_glRenderer;

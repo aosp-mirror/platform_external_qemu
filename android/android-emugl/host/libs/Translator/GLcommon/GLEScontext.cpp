@@ -1091,11 +1091,11 @@ ObjectLocalName GLEScontext::getDefaultTextureName(GLenum target) {
 
 void GLEScontext::drawValidate(void)
 {
-    if(m_framebuffer == 0)
+    if(m_drawFramebuffer == 0)
         return;
 
     auto fbObj = m_shareGroup->getObjectData(
-            NamedObjectType::FRAMEBUFFER, m_framebuffer);
+            NamedObjectType::FRAMEBUFFER, m_drawFramebuffer);
     if (!fbObj)
         return;
 

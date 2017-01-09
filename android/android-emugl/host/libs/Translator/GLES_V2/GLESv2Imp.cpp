@@ -272,18 +272,22 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
         //if framebuffer wasn't generated before,generate one
         if(!globalFrameBufferName){
             ctx->shareGroup()->genName(NamedObjectType::FRAMEBUFFER,
-                                       framebuffer);
+                    framebuffer);
             ctx->shareGroup()->setObjectData(
                     NamedObjectType::FRAMEBUFFER, framebuffer,
                     ObjectDataPtr(new FramebufferData(framebuffer)));
             globalFrameBufferName = ctx->shareGroup()->getGlobalName(
                     NamedObjectType::FRAMEBUFFER, framebuffer);
         }
+        // set that this framebuffer has been bound before
+        auto fbObj = ctx->shareGroup()->getObjectData(
+                NamedObjectType::FRAMEBUFFER, framebuffer);
+        FramebufferData *fbData = (FramebufferData *)fbObj;
+        fbData->setBoundAtLeastOnce();
     }
     ctx->dispatcher().glBindFramebufferEXT(target,globalFrameBufferName);
-
     // update framebuffer binding state
-    ctx->setFramebufferBinding(framebuffer);
+    ctx->setFramebufferBinding(target, framebuffer);
 }
 
 GL_APICALL void  GL_APIENTRY glBindRenderbuffer(GLenum target, GLuint renderbuffer){
@@ -622,26 +626,46 @@ GL_APICALL void  GL_APIENTRY glDeleteFramebuffers(GLsizei n, const GLuint* frame
 }
 
 static void s_detachFromFramebuffer(NamedObjectType bufferType,
-                                    GLuint texture) {
+                                    GLuint texture,
+                                    GLenum target) {
     GET_CTX();
-    GLuint fbName = ctx->getFramebufferBinding();
+    GLuint fbName = ctx->getFramebufferBinding(target);
     if (!fbName) return;
     auto fbObj = ctx->shareGroup()->getObjectData(
             NamedObjectType::FRAMEBUFFER, fbName);
     if (fbObj == NULL) return;
     FramebufferData *fbData = (FramebufferData *)fbObj;
-    GLenum target;
-    const GLenum kAttachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT};
+    const GLenum kAttachments[] = {
+        GL_COLOR_ATTACHMENT0,
+        GL_COLOR_ATTACHMENT1,
+        GL_COLOR_ATTACHMENT2,
+        GL_COLOR_ATTACHMENT3,
+        GL_COLOR_ATTACHMENT4,
+        GL_COLOR_ATTACHMENT5,
+        GL_COLOR_ATTACHMENT6,
+        GL_COLOR_ATTACHMENT7,
+        GL_COLOR_ATTACHMENT8,
+        GL_COLOR_ATTACHMENT9,
+        GL_COLOR_ATTACHMENT10,
+        GL_COLOR_ATTACHMENT11,
+        GL_COLOR_ATTACHMENT12,
+        GL_COLOR_ATTACHMENT13,
+        GL_COLOR_ATTACHMENT14,
+        GL_COLOR_ATTACHMENT15,
+        GL_DEPTH_ATTACHMENT,
+        GL_STENCIL_ATTACHMENT,
+        GL_DEPTH_STENCIL_ATTACHMENT };
     const size_t sizen = sizeof(kAttachments)/sizeof(GLenum);
+    GLenum textarget;
     for (size_t i = 0; i < sizen; ++i ) {
-        GLuint name = fbData->getAttachment(kAttachments[i], &target, NULL);
+        GLuint name = fbData->getAttachment(kAttachments[i], &textarget, NULL);
         if (name != texture) continue;
         if (NamedObjectType::TEXTURE == bufferType &&
-            GLESv2Validate::textureTargetEx(target)) {
-            glFramebufferTexture2D(GL_FRAMEBUFFER, kAttachments[i], target, 0, 0);
+            GLESv2Validate::textureTargetEx(textarget)) {
+            glFramebufferTexture2D(GL_FRAMEBUFFER, kAttachments[i], textarget, 0, 0);
         } else if (NamedObjectType::RENDERBUFFER == bufferType &&
-                   GLESv2Validate::renderbufferTarget(target)) {
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, kAttachments[i], target, 0);
+                   GLESv2Validate::renderbufferTarget(textarget)) {
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, kAttachments[i], textarget, 0);
         }
     }
 }
@@ -654,7 +678,9 @@ GL_APICALL void  GL_APIENTRY glDeleteRenderbuffers(GLsizei n, const GLuint* rend
             ctx->shareGroup()->deleteName(NamedObjectType::RENDERBUFFER,
                                           renderbuffers[i]);
             s_detachFromFramebuffer(NamedObjectType::RENDERBUFFER,
-                                    renderbuffers[i]);
+                                    renderbuffers[i], GL_DRAW_FRAMEBUFFER);
+            s_detachFromFramebuffer(NamedObjectType::RENDERBUFFER,
+                                    renderbuffers[i], GL_READ_FRAMEBUFFER);
         }
     }
 }
@@ -669,7 +695,8 @@ GL_APICALL void  GL_APIENTRY glDeleteTextures(GLsizei n, const GLuint* textures)
                     ctx->setBindedTexture(GL_TEXTURE_2D,0);
                 if (ctx->getBindedTexture(GL_TEXTURE_CUBE_MAP) == textures[i])
                     ctx->setBindedTexture(GL_TEXTURE_CUBE_MAP,0);
-                s_detachFromFramebuffer(NamedObjectType::TEXTURE, textures[i]);
+                s_detachFromFramebuffer(NamedObjectType::TEXTURE, textures[i], GL_DRAW_FRAMEBUFFER);
+                s_detachFromFramebuffer(NamedObjectType::TEXTURE, textures[i], GL_READ_FRAMEBUFFER);
                 ctx->shareGroup()->deleteName(NamedObjectType::TEXTURE,
                                               textures[i]);
             }
@@ -917,7 +944,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
     }
 
     // Update the the current framebuffer object attachment state
-    GLuint fbName = ctx->getFramebufferBinding();
+    GLuint fbName = ctx->getFramebufferBinding(target);
     auto fbObj = ctx->shareGroup()->getObjectData(
             NamedObjectType::FRAMEBUFFER, fbName);
     if (fbObj != NULL) {
@@ -966,12 +993,12 @@ GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attach
     ctx->dispatcher().glFramebufferTexture2DEXT(target,attachment,textarget,globalTextureName,level);
 
     // Update the the current framebuffer object attachment state
-    GLuint fbName = ctx->getFramebufferBinding();
+    GLuint fbName = ctx->getFramebufferBinding(target);
     auto fbObj = ctx->shareGroup()->getObjectData(
             NamedObjectType::FRAMEBUFFER, fbName);
     if (fbObj) {
         FramebufferData *fbData = (FramebufferData *)fbObj;
-        fbData->setAttachment(attachment, textarget, 
+        fbData->setAttachment(attachment, textarget,
                               texture, ObjectDataPtr());
     }
 }
@@ -1337,7 +1364,7 @@ GL_APICALL void  GL_APIENTRY glGetIntegerv(GLenum pname, GLint* params){
 }
 
 GL_APICALL void  GL_APIENTRY glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment, GLenum pname, GLint* params){
-    GET_CTX();
+    GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(target)         &&
                    GLESv2Validate::framebufferAttachment(attachment) &&
                    GLESv2Validate::framebufferAttachmentParams(pname)),GL_INVALID_ENUM);
@@ -1345,8 +1372,7 @@ GL_APICALL void  GL_APIENTRY glGetFramebufferAttachmentParameteriv(GLenum target
     //
     // Take the attachment attribute from our state - if available
     //
-    GLuint fbName = ctx->getFramebufferBinding();
-    SET_ERROR_IF (!fbName, GL_INVALID_OPERATION);
+    GLuint fbName = ctx->getFramebufferBinding(target);
     if (fbName) {
         auto fbObj = ctx->shareGroup()->getObjectData(
                 NamedObjectType::FRAMEBUFFER, fbName);
@@ -1883,11 +1909,13 @@ GL_APICALL GLboolean    GL_APIENTRY glIsBuffer(GLuint buffer){
 GL_APICALL GLboolean    GL_APIENTRY glIsFramebuffer(GLuint framebuffer){
     GET_CTX_RET(GL_FALSE)
     if(framebuffer && ctx->shareGroup().get()){
-        return (ctx->shareGroup()->isObject(NamedObjectType::FRAMEBUFFER,
-                                            framebuffer) &&
-                ctx->getFramebufferBinding() == framebuffer)
-                       ? GL_TRUE
-                       : GL_FALSE;
+        if (!ctx->shareGroup()->isObject(NamedObjectType::FRAMEBUFFER, framebuffer))
+            return GL_FALSE;
+        auto fbObj = ctx->shareGroup()->getObjectData(
+                NamedObjectType::FRAMEBUFFER, framebuffer);
+        if (!fbObj) return GL_FALSE;
+        FramebufferData *fbData = (FramebufferData *)fbObj;
+        return fbData->hasBeenBoundAtLeastOnce() ? GL_TRUE : GL_FALSE;
     }
     return GL_FALSE;
 }
@@ -2528,7 +2556,7 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
     if (rbData->attachedFB) {
         // update the framebuffer attachment point to the
         // underlying texture of the img
-        GLuint prevFB = ctx->getFramebufferBinding();
+        GLuint prevFB = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
         if (prevFB != rbData->attachedFB) {
             ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,
                                                    rbData->attachedFB);

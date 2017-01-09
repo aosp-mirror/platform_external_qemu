@@ -1736,7 +1736,7 @@ GL_API void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target, GL
     if (rbData->attachedFB) {
         // update the framebuffer attachment point to the
         // underlying texture of the img
-        GLuint prevFB = ctx->getFramebufferBinding();
+        GLuint prevFB = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
         if (prevFB != rbData->attachedFB) {
             ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,
                                                    rbData->attachedFB);
@@ -1957,7 +1957,7 @@ GL_API void GLAPIENTRY glBindFramebufferOES(GLenum target, GLuint framebuffer) {
     ctx->dispatcher().glBindFramebufferEXT(target,globalBufferName);
 
     // update framebuffer binding state
-    ctx->setFramebufferBinding(framebuffer);
+    ctx->setFramebufferBinding(GL_FRAMEBUFFER_EXT, framebuffer);
 }
 
 GL_API void GLAPIENTRY glDeleteFramebuffersOES(GLsizei n, const GLuint *framebuffers) {
@@ -2011,7 +2011,7 @@ GL_API void GLAPIENTRY glFramebufferTexture2DOES(GLenum target, GLenum attachmen
     ctx->dispatcher().glFramebufferTexture2DEXT(target,attachment,textarget,globalTexName,level);
 
     // Update the the current framebuffer object attachment state
-    GLuint fbName = ctx->getFramebufferBinding();
+    GLuint fbName = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
     auto fbObj = ctx->shareGroup()->getObjectData(
             NamedObjectType::FRAMEBUFFER, fbName);
     if (fbObj) {
@@ -2052,7 +2052,7 @@ GL_API void GLAPIENTRY glFramebufferRenderbufferOES(GLenum target, GLenum attach
     }
 
     // Update the the current framebuffer object attachment state
-    GLuint fbName = ctx->getFramebufferBinding();
+    GLuint fbName = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
     auto fbObj = ctx->shareGroup()->getObjectData(
             NamedObjectType::FRAMEBUFFER, fbName);
     if (fbObj) {
@@ -2088,7 +2088,7 @@ GL_API void GLAPIENTRY glGetFramebufferAttachmentParameterivOES(GLenum target, G
     //
     // Take the attachment attribute from our state - if available
     //
-    GLuint fbName = ctx->getFramebufferBinding();
+    GLuint fbName = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
     if (fbName) {
         auto fbObj = ctx->shareGroup()->getObjectData(
                 NamedObjectType::FRAMEBUFFER, fbName);
