@@ -22,6 +22,30 @@
       "revId": "54e67f73906813ceb64d0205be05a00e193fd8dd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "97b4ce48_b117a05e",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/Etc2_unittest.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-01-09T10:34:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "77e75a57_1e41285d",
+      "range": {
+        "startLine": 98,
+        "startChar": 29,
+        "endLine": 98,
+        "endChar": 32
+      },
+      "revId": "54e67f73906813ceb64d0205be05a00e193fd8dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
