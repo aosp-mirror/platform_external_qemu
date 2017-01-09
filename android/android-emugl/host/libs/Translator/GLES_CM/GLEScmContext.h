@@ -33,7 +33,7 @@ class GLEScmContext: public GLEScontext
 {
 public:
     virtual void init(GlLibrary* glLib);
-    GLEScmContext();
+    GLEScmContext(int maj, int min);
     void setActiveTexture(GLenum tex);
     void  setClientActiveTexture(GLenum tex);
     GLenum  getActiveTexture() { return GL_TEXTURE0 + m_activeTexture;};
