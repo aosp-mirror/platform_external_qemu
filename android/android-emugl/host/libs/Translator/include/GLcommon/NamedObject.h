@@ -25,6 +25,8 @@ enum class NamedObjectType {
     RENDERBUFFER,
     FRAMEBUFFER,
     SHADER_OR_PROGRAM,
+    SAMPLER,
+    QUERY,
     NUM_OBJECT_TYPES  // Must be last
 };
 
