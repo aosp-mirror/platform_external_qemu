@@ -26,6 +26,7 @@ public:
     GLuint attachedFB = 0;
     GLenum attachedPoint = 0;
     NamedObjectPtr eglImageGlobalTexObject = 0;
+    GLenum internalformat = GL_RGBA8;
 };
 
 const int MAX_ATTACH_POINTS = 18;

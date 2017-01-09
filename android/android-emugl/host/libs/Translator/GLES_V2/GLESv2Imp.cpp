@@ -307,6 +307,8 @@ static bool sShouldEnableSRGB(GLESv2Context* ctx, GLuint fbo) {
 // 1. draw framebuffer is default and read framebuffer has a SRGB texture attachment (or vice versa).
 // 2. Either draw or read framebuffer has a SRGB texture attachment.
 static void sSetSRGBEnable(GLESv2Context* ctx, GLuint framebuffer, GLenum target) {
+    if (ctx->getMajorVersion() < 3) return;
+
     GLuint read_fbo = ctx->getFramebufferBinding(GL_READ_FRAMEBUFFER);
     GLuint draw_fbo = ctx->getFramebufferBinding(GL_DRAW_FRAMEBUFFER);
     if (sShouldEnableSRGB(ctx, read_fbo) ||
@@ -394,12 +396,25 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
         if (texData->target==0)
             texData->target = target;
         //if texture was already bound to another target
+
+        if (ctx->GLTextureTargetToLocal(texData->target) != ctx->GLTextureTargetToLocal(target)) {
+            fprintf(stderr, "%s: Set invalid operation!\n", __func__);
+        }
         SET_ERROR_IF(ctx->GLTextureTargetToLocal(texData->target) != ctx->GLTextureTargetToLocal(target), GL_INVALID_OPERATION);
         texData->wasBound = true;
     }
 
     ctx->setBindedTexture(target,texture);
     ctx->dispatcher().glBindTexture(target,globalTextureName);
+
+    if (ctx->getMajorVersion() < 3) return;
+
+    // OpenGL ES assumes that rendered depth textures shade as (v, 0, 0, 1)
+    // when coming out of the fragment shader.
+    // Desktop OpenGL assumes (v, v, v, 1).
+    // GL_DEPTH_TEXTURE_MODE can be set to GL_RED to follow the OpenGL ES behavior.
+#define GL_DEPTH_TEXTURE_MODE 0x884B
+    ctx->dispatcher().glTexParameteri(target,GL_DEPTH_TEXTURE_MODE,GL_RED);
 }
 
 GL_APICALL void  GL_APIENTRY glBlendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha){
@@ -775,6 +790,12 @@ GL_APICALL void  GL_APIENTRY glDeleteTextures(GLsizei n, const GLuint* textures)
                     ctx->setBindedTexture(GL_TEXTURE_2D,0);
                 if (ctx->getBindedTexture(GL_TEXTURE_CUBE_MAP) == textures[i])
                     ctx->setBindedTexture(GL_TEXTURE_CUBE_MAP,0);
+                if (ctx->getBindedTexture(GL_TEXTURE_2D_ARRAY) == textures[i])
+                    ctx->setBindedTexture(GL_TEXTURE_2D_ARRAY,0);
+                if (ctx->getBindedTexture(GL_TEXTURE_3D) == textures[i])
+                    ctx->setBindedTexture(GL_TEXTURE_3D,0);
+                if (ctx->getBindedTexture(GL_TEXTURE_2D_MULTISAMPLE) == textures[i])
+                    ctx->setBindedTexture(GL_TEXTURE_2D_MULTISAMPLE,0);
                 s_detachFromFramebuffer(NamedObjectType::TEXTURE, textures[i], GL_DRAW_FRAMEBUFFER);
                 s_detachFromFramebuffer(NamedObjectType::TEXTURE, textures[i], GL_READ_FRAMEBUFFER);
                 ctx->shareGroup()->deleteName(NamedObjectType::TEXTURE,
@@ -1551,6 +1572,9 @@ GL_APICALL void  GL_APIENTRY glGetRenderbufferParameteriv(GLenum target, GLenum 
     }
 
     ctx->dispatcher().glGetRenderbufferParameterivEXT(target,pname,params);
+    if (pname == GL_RENDERBUFFER_INTERNAL_FORMAT && *params == GL_RGBA) {
+        *params = GL_RGBA4;
+    }
 }
 
 
