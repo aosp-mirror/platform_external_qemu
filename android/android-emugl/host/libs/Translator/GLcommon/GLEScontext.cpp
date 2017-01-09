@@ -19,6 +19,10 @@
 #include <GLcommon/GLESmacros.h>
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#include <GLES3/gl3.h>
+#include <GLES3/gl31.h>
 #include <OpenglCodecCommon/ErrorLog.h>
 #include <GLcommon/GLESvalidate.h>
 #include <GLcommon/TextureUtils.h>
@@ -200,6 +204,67 @@ static GLuint getIndex(GLenum indices_type, const GLvoid* indices, unsigned int 
     }
 }
 
+void GLEScontext::addVertexArrayObjects(GLsizei n, GLuint* arrays) {
+    for (int i = 0; i < n; i++) {
+        addVertexArrayObject(arrays[i]);
+    }
+}
+
+void GLEScontext::removeVertexArrayObjects(GLsizei n, const GLuint* arrays) {
+    for (int i = 0; i < n; i++) {
+        removeVertexArrayObject(arrays[i]);
+    }
+}
+
+void GLEScontext::addVertexArrayObject(GLuint array) {
+    ArraysMap* map = new ArraysMap();
+    for (int i = 0; i < s_glSupport.maxVertexAttribs; i++) {
+        map->insert(
+                ArraysMap::value_type(
+                    i,
+                    new GLESpointer()));
+    }
+    m_vaoStateMap[array] = VAOState(0, map, std::max(s_glSupport.maxVertexAttribs, s_glSupport.maxVertexAttribBindings));
+}
+
+void GLEScontext::removeVertexArrayObject(GLuint array) {
+    if (array == 0) return;
+    if (m_vaoStateMap.find(array) == m_vaoStateMap.end())
+        return;
+    if (array == m_currVaoState.vaoId()) {
+        setVertexArrayObject(0);
+    }
+
+    ArraysMap* map = m_vaoStateMap[array].arraysMap;
+
+    for (int i = 0; i < s_glSupport.maxVertexAttribs; i++) {
+        if ((*map)[i]) delete (*map)[i];
+    }
+    delete map;
+
+    m_vaoStateMap.erase(array);
+}
+
+void GLEScontext::setVertexArrayObject(GLuint array) {
+    VAOStateMap::iterator it = m_vaoStateMap.find(array);
+    if (it != m_vaoStateMap.end())
+        m_currVaoState = VAOStateRef(it);
+}
+
+GLuint GLEScontext::getVertexArrayObject() {
+    return m_currVaoState.vaoId();
+}
+
+bool GLEScontext::vertexAttributesBufferBacked() {
+    for (int i = 0; i < s_glSupport.maxVertexAttribs; i++) {
+        if (m_currVaoState[i]->isEnable() &&
+            !m_currVaoState.bufferBindings()[m_currVaoState[i]->getBindingIndex()].buffer) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void GLEScontext::init(GlLibrary* glLib) {
 
     if (!s_glExtensions) {
@@ -225,6 +290,11 @@ void GLEScontext::init(GlLibrary* glLib) {
                 m_texState[i][j].enabled = GL_FALSE;
             }
         }
+
+        m_indexedTransformFeedbackBuffers.resize(getCaps()->maxTransformFeedbackSeparateAttribs);
+        m_indexedUniformBuffers.resize(getCaps()->maxUniformBufferBindings);
+        m_indexedAtomicCounterBuffers.resize(getCaps()->maxAtomicCounterBufferBindings);
+        m_indexedShaderStorageBuffers.resize(getCaps()->maxShaderStorageBufferBindings);
     }
 }
 
@@ -241,17 +311,18 @@ void GLEScontext::setActiveTexture(GLenum tex) {
 }
 
 GLEScontext::~GLEScontext() {
-    for(ArraysMap::iterator it = m_map.begin(); it != m_map.end(); ++it) {
-        GLESpointer* p = (*it).second;
-        if(p) {
-            delete p;
-        }
+    std::vector<GLuint> vaos_to_remove;
+    for (VAOStateMap::iterator it = m_vaoStateMap.begin(); it != m_vaoStateMap.end(); ++it) {
+        vaos_to_remove.push_back(it->first);
+    }
+    for (auto vao : vaos_to_remove) {
+        removeVertexArrayObject(vao);
     }
     delete[] m_texState;
     m_texState = NULL;
 }
 
-const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data,bool normalize) {
+const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data,bool normalize, bool isInt) {
     GLuint bufferName = m_arrayBuffer;
     if(bufferName) {
         unsigned int offset = SafeUIntFromPointer(data);
@@ -259,24 +330,24 @@ const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsi
                 m_shareGroup
                         ->getObjectData(NamedObjectType::VERTEXBUFFER,
                                         bufferName));
-        m_map[arrType]->setBuffer(size,type,stride,vbo,bufferName,offset,normalize);
+        m_currVaoState[arrType]->setBuffer(size,type,stride,vbo,bufferName,offset,normalize, isInt);
         return  static_cast<const unsigned char*>(vbo->getData()) +  offset;
     }
-    m_map[arrType]->setArray(size,type,stride,data,normalize);
+    m_currVaoState[arrType]->setArray(size,type,stride,data,normalize,isInt);
     return data;
 }
 
 void GLEScontext::enableArr(GLenum arr,bool enable) {
-    m_map[arr]->enable(enable);
+    m_currVaoState[arr]->enable(enable);
 }
 
 bool GLEScontext::isArrEnabled(GLenum arr) {
-    return m_map[arr]->isEnable();
+    return m_currVaoState[arr]->isEnable();
 }
 
 const GLESpointer* GLEScontext::getPointer(GLenum arrType) {
-    const auto it = m_map.find(arrType);
-    return it != m_map.end() ? it->second : nullptr;
+    const auto it = m_currVaoState.find(arrType);
+    return it != m_currVaoState.end() ? it->second : nullptr;
 }
 
 static void convertFixedDirectLoop(const char* dataIn,unsigned int strideIn,void* dataOut,unsigned int nBytes,unsigned int strideOut,int attribSize) {
@@ -470,39 +541,196 @@ void GLEScontext::convertIndirectVBO(GLESConversionArrays& cArrs,GLsizei count,G
     cArrs.setArr(data,p->getStride(),GL_FLOAT);
 }
 
-
-
 void GLEScontext::bindBuffer(GLenum target,GLuint buffer) {
-    if(target == GL_ARRAY_BUFFER) {
+    switch(target) {
+    case GL_ARRAY_BUFFER:
         m_arrayBuffer = buffer;
-    } else {
-       m_elementBuffer = buffer;
+        break;
+    case GL_ELEMENT_ARRAY_BUFFER:
+        m_currVaoState.iboId() = buffer;
+        break;
+    case GL_COPY_READ_BUFFER:
+        m_copyReadBuffer = buffer;
+        break;
+    case GL_COPY_WRITE_BUFFER:
+        m_copyWriteBuffer = buffer;
+        break;
+    case GL_PIXEL_PACK_BUFFER:
+        m_pixelPackBuffer = buffer;
+        break;
+    case GL_PIXEL_UNPACK_BUFFER:
+        m_pixelUnpackBuffer = buffer;
+        break;
+    case GL_TRANSFORM_FEEDBACK_BUFFER:
+        m_transformFeedbackBuffer = buffer;
+        break;
+    case GL_UNIFORM_BUFFER:
+        m_uniformBuffer = buffer;
+        break;
+    case GL_ATOMIC_COUNTER_BUFFER:
+        m_atomicCounterBuffer = buffer;
+        break;
+    case GL_DISPATCH_INDIRECT_BUFFER:
+        m_dispatchIndirectBuffer = buffer;
+        break;
+    case GL_DRAW_INDIRECT_BUFFER:
+        m_drawIndirectBuffer = buffer;
+        break;
+    case GL_SHADER_STORAGE_BUFFER:
+        m_shaderStorageBuffer = buffer;
+        break;
+    default:
+        m_arrayBuffer = buffer;
+        break;
     }
 }
 
+void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size, GLintptr stride) {
+    switch (target) {
+    case GL_TRANSFORM_FEEDBACK_BUFFER:
+        m_indexedTransformFeedbackBuffers[index].buffer = buffer;
+        m_indexedTransformFeedbackBuffers[index].offset = offset;
+        m_indexedTransformFeedbackBuffers[index].size = size;
+        m_indexedTransformFeedbackBuffers[index].stride = stride;
+        break;
+    case GL_UNIFORM_BUFFER:
+        m_indexedUniformBuffers[index].buffer = buffer;
+        m_indexedUniformBuffers[index].offset = offset;
+        m_indexedUniformBuffers[index].size = size;
+        m_indexedUniformBuffers[index].stride = stride;
+        break;
+    case GL_ATOMIC_COUNTER_BUFFER:
+        m_indexedAtomicCounterBuffers[index].buffer = buffer;
+        m_indexedAtomicCounterBuffers[index].offset = offset;
+        m_indexedAtomicCounterBuffers[index].size = size;
+        m_indexedAtomicCounterBuffers[index].stride = stride;
+        break;
+    case GL_SHADER_STORAGE_BUFFER:
+        m_indexedShaderStorageBuffers[index].buffer = buffer;
+        m_indexedShaderStorageBuffers[index].offset = offset;
+        m_indexedShaderStorageBuffers[index].size = size;
+        m_indexedShaderStorageBuffers[index].stride = stride;
+        break;
+    default:
+        m_currVaoState.bufferBindings()[index].buffer = buffer;
+        m_currVaoState.bufferBindings()[index].offset = offset;
+        m_currVaoState.bufferBindings()[index].size = size;
+        m_currVaoState.bufferBindings()[index].stride = stride;
+        return;
+    }
+}
+
+void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer) {
+    GLint sz;
+    getBufferSizeById(buffer, &sz);
+    bindIndexedBuffer(target, index, buffer, 0, sz);
+}
+
 void GLEScontext::unbindBuffer(GLuint buffer) {
-    if(m_arrayBuffer == buffer)
-    {
+    if (m_arrayBuffer == buffer)
         m_arrayBuffer = 0;
-    }
-    if(m_elementBuffer == buffer)
-    {
-        m_elementBuffer = 0;
-    }
+    if (m_currVaoState.iboId() == buffer)
+        m_currVaoState.iboId() = 0;
+    if (m_copyReadBuffer == buffer)
+        m_copyReadBuffer = 0;
+    if (m_copyWriteBuffer == buffer)
+        m_copyWriteBuffer = 0;
+    if (m_pixelPackBuffer == buffer)
+        m_pixelPackBuffer = 0;
+    if (m_pixelUnpackBuffer == buffer)
+        m_pixelUnpackBuffer = 0;
+    if (m_transformFeedbackBuffer == buffer)
+        m_transformFeedbackBuffer = 0;
+    if (m_uniformBuffer == buffer)
+        m_uniformBuffer = 0;
+    if (m_atomicCounterBuffer == buffer)
+        m_atomicCounterBuffer = 0;
+    if (m_dispatchIndirectBuffer == buffer)
+        m_dispatchIndirectBuffer = 0;
+    if (m_drawIndirectBuffer == buffer)
+        m_drawIndirectBuffer = 0;
+    if (m_shaderStorageBuffer == buffer)
+        m_shaderStorageBuffer = 0;
 }
 
 //checks if any buffer is binded to target
 bool GLEScontext::isBindedBuffer(GLenum target) {
-    if(target == GL_ARRAY_BUFFER) {
+    switch(target) {
+    case GL_ARRAY_BUFFER:
         return m_arrayBuffer != 0;
-    } else {
-        return m_elementBuffer != 0;
+    case GL_ELEMENT_ARRAY_BUFFER:
+        return m_currVaoState.iboId() != 0;
+    case GL_COPY_READ_BUFFER:
+        return m_copyReadBuffer != 0;
+    case GL_COPY_WRITE_BUFFER:
+        return m_copyWriteBuffer != 0;
+    case GL_PIXEL_PACK_BUFFER:
+        return m_pixelPackBuffer != 0;
+    case GL_PIXEL_UNPACK_BUFFER:
+        return m_pixelUnpackBuffer != 0;
+    case GL_TRANSFORM_FEEDBACK_BUFFER:
+        return m_transformFeedbackBuffer != 0;
+    case GL_UNIFORM_BUFFER:
+        return m_uniformBuffer != 0;
+    case GL_ATOMIC_COUNTER_BUFFER:
+        return m_atomicCounterBuffer != 0;
+    case GL_DISPATCH_INDIRECT_BUFFER:
+        return m_dispatchIndirectBuffer != 0;
+    case GL_DRAW_INDIRECT_BUFFER:
+        return m_drawIndirectBuffer != 0;
+    case GL_SHADER_STORAGE_BUFFER:
+        return m_shaderStorageBuffer != 0;
+    default:
+        return m_arrayBuffer != 0;
     }
 }
 
 GLuint GLEScontext::getBuffer(GLenum target) {
-    return target == GL_ARRAY_BUFFER ? m_arrayBuffer:m_elementBuffer;
+    switch(target) {
+    case GL_ARRAY_BUFFER:
+        return m_arrayBuffer;
+    case GL_ELEMENT_ARRAY_BUFFER:
+        return m_currVaoState.iboId();
+    case GL_COPY_READ_BUFFER:
+        return m_copyReadBuffer;
+    case GL_COPY_WRITE_BUFFER:
+        return m_copyWriteBuffer;
+    case GL_PIXEL_PACK_BUFFER:
+        return m_pixelPackBuffer;
+    case GL_PIXEL_UNPACK_BUFFER:
+        return m_pixelUnpackBuffer;
+    case GL_TRANSFORM_FEEDBACK_BUFFER:
+        return m_transformFeedbackBuffer;
+    case GL_UNIFORM_BUFFER:
+        return m_uniformBuffer;
+    case GL_ATOMIC_COUNTER_BUFFER:
+        return m_atomicCounterBuffer;
+    case GL_DISPATCH_INDIRECT_BUFFER:
+        return m_dispatchIndirectBuffer;
+    case GL_DRAW_INDIRECT_BUFFER:
+        return m_drawIndirectBuffer;
+    case GL_SHADER_STORAGE_BUFFER:
+        return m_shaderStorageBuffer;
+    default:
+        return m_arrayBuffer;
+    }
 }
+
+GLuint GLEScontext::getIndexedBuffer(GLenum target, GLuint index) {
+    switch (target) {
+    case GL_TRANSFORM_FEEDBACK_BUFFER:
+        return m_indexedTransformFeedbackBuffers[index].buffer;
+    case GL_UNIFORM_BUFFER:
+        return m_indexedUniformBuffers[index].buffer;
+    case GL_ATOMIC_COUNTER_BUFFER:
+        return m_indexedAtomicCounterBuffers[index].buffer;
+    case GL_SHADER_STORAGE_BUFFER:
+        return m_indexedShaderStorageBuffers[index].buffer;
+    default:
+        return m_currVaoState.bufferBindings()[index].buffer;
+    }
+}
+
 
 GLvoid* GLEScontext::getBindedBuffer(GLenum target) {
     GLuint bufferName = getBuffer(target);
@@ -516,6 +744,11 @@ GLvoid* GLEScontext::getBindedBuffer(GLenum target) {
 
 void GLEScontext::getBufferSize(GLenum target,GLint* param) {
     GLuint bufferName = getBuffer(target);
+    getBufferSizeById(bufferName, param);
+}
+
+void GLEScontext::getBufferSizeById(GLuint bufferName, GLint* param) {
+    if (!bufferName) { *param = 0; return; }
     GLESbuffer* vbo = static_cast<GLESbuffer*>(
             m_shareGroup
                     ->getObjectData(NamedObjectType::VERTEXBUFFER, bufferName));
@@ -592,6 +825,16 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_UNITS,&s_glSupport.maxTexUnits);
     s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS,&s_glSupport.maxTexImageUnits);
     s_glDispatch.glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &s_glSupport.maxCombinedTexImageUnits);
+
+    s_glDispatch.glGetIntegerv(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS, &s_glSupport.maxTransformFeedbackSeparateAttribs);
+    s_glDispatch.glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &s_glSupport.maxUniformBufferBindings);
+    s_glDispatch.glGetIntegerv(GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS, &s_glSupport.maxAtomicCounterBufferBindings);
+    s_glDispatch.glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, &s_glSupport.maxShaderStorageBufferBindings);
+    s_glDispatch.glGetIntegerv(GL_MAX_DRAW_BUFFERS, &s_glSupport.maxDrawBuffers);
+    s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_ATTRIB_BINDINGS, &s_glSupport.maxVertexAttribBindings);
+    // Clear GL error in case these enums not supported.
+    s_glDispatch.glGetError();
+
     const GLubyte* glslVersion = s_glDispatch.glGetString(GL_SHADING_LANGUAGE_VERSION);
     s_glSupport.glslVersion = Version((const  char*)(glslVersion));
     const GLubyte* glVersion = s_glDispatch.glGetString(GL_VERSION);
@@ -756,7 +999,7 @@ bool GLEScontext::glGetIntegerv(GLenum pname, GLint *params)
             break;
 
         case GL_ELEMENT_ARRAY_BUFFER_BINDING:
-            *params = m_elementBuffer;
+            *params = m_currVaoState.iboId();
             break;
 
         case GL_TEXTURE_BINDING_CUBE_MAP:

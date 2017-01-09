@@ -21,8 +21,10 @@
 #include "GLESpointer.h"
 #include "objectNameManager.h"
 #include "emugl/common/mutex.h"
+
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 typedef std::unordered_map<GLenum,GLESpointer*>  ArraysMap;
 
@@ -60,6 +62,15 @@ struct GLSupport {
     int  maxTexImageUnits = 0;
     int  maxTexSize = 0;
     int  maxCombinedTexImageUnits = 0;
+
+    int  maxTransformFeedbackSeparateAttribs = 0;
+    int  maxUniformBufferBindings = 0;
+    int  maxAtomicCounterBufferBindings = 0;
+    int  maxShaderStorageBufferBindings = 0;
+    int  maxVertexAttribBindings = 0;
+
+    int maxDrawBuffers = 1;
+
     Version glslVersion;
     bool GL_EXT_TEXTURE_FORMAT_BGRA8888 = false;
     bool GL_EXT_FRAMEBUFFER_OBJECT = false;
@@ -77,11 +88,60 @@ struct GLSupport {
     bool GL_OES_RGB8_RGBA8 = false;
 };
 
-struct ArrayData{
+struct ArrayData {
     void*        data = nullptr;
     GLenum       type = 0;
     unsigned int stride = 0;
     bool         allocated = false;
+};
+
+struct BufferBinding {
+    GLuint buffer = 0;
+    GLintptr offset = 0;
+    GLsizeiptr size = 0;
+    GLintptr stride = 0;
+    GLuint divisor = 0;
+};
+
+typedef std::vector<BufferBinding> VertexAttribBindingVector;
+
+struct VAOState {
+    VAOState() : VAOState(0, NULL, 0) { }
+    VAOState(GLuint ibo, ArraysMap* arr, int numVertexAttribBindings) :
+        element_array_buffer_binding(ibo),
+        arraysMap(arr),
+        bindingState(numVertexAttribBindings) { }
+    GLuint element_array_buffer_binding;
+    ArraysMap* arraysMap;
+    VertexAttribBindingVector bindingState;
+    bool bufferBacked;
+};
+
+typedef std::unordered_map<GLuint, VAOState> VAOStateMap;
+
+struct VAOStateRef {
+    VAOStateRef() { }
+    VAOStateRef(VAOStateMap::iterator iter) : it(iter) { }
+    GLuint vaoId() { return it->first; }
+    GLuint& iboId() { return it->second.element_array_buffer_binding; }
+
+    ArraysMap::iterator begin() {
+        return it->second.arraysMap->begin();
+    }
+    ArraysMap::iterator end() {
+        return it->second.arraysMap->end();
+    }
+    ArraysMap::iterator find(GLenum arrType) {
+        return it->second.arraysMap->find(arrType);
+    }
+    GLESpointer*& operator[](size_t k) {
+        ArraysMap* map = it->second.arraysMap;
+        return (*map)[k];
+    }
+    VertexAttribBindingVector& bufferBindings() {
+        return it->second.bindingState;
+    }
+    VAOStateMap::iterator it;
 };
 
 class GLESConversionArrays
@@ -122,16 +182,27 @@ public:
 
     bool  isArrEnabled(GLenum);
     void  enableArr(GLenum arr,bool enable);
-    const GLvoid* setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data,bool normalize = false);
+
+    void addVertexArrayObjects(GLsizei n, GLuint* arrays);
+    void removeVertexArrayObjects(GLsizei n, const GLuint* arrays);
+    void setVertexArrayObject(GLuint array);
+    GLuint getVertexArrayObject();
+    bool vertexAttributesBufferBacked();
+    const GLvoid* setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data,bool normalize = false, bool isInt = false);
     virtual const GLESpointer* getPointer(GLenum arrType);
     virtual void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) = 0;
+
     void bindBuffer(GLenum target,GLuint buffer);
+    void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size, GLintptr stride = 0);
+    void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer);
     void unbindBuffer(GLuint buffer);
     bool isBuffer(GLuint buffer);
     bool isBindedBuffer(GLenum target);
     GLvoid* getBindedBuffer(GLenum target);
     GLuint getBuffer(GLenum target);
+    GLuint getIndexedBuffer(GLenum target, GLuint index);
     void getBufferSize(GLenum target,GLint* param);
+    void getBufferSizeById(GLuint buffer,GLint* param);
     void getBufferUsage(GLenum target,GLint* param);
     bool setBufferData(GLenum target,GLsizeiptr size,const GLvoid* data,GLenum usage);
     bool setBufferSubData(GLenum target,GLintptr offset,GLsizeiptr size,const GLvoid* data);
@@ -172,6 +243,11 @@ public:
 
 protected:
     static void buildStrings(const char* baseVendor, const char* baseRenderer, const char* baseVersion, const char* version);
+
+    void freeVAOState();
+    void addVertexArrayObject(GLuint array);
+    void removeVertexArrayObject(GLuint array);
+
     virtual bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id) = 0;
     void convertDirect(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum array_id,GLESpointer* p);
     void convertDirectVBO(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum array_id,GLESpointer* p);
@@ -185,7 +261,25 @@ protected:
     bool                  m_initialized = false;
     unsigned int          m_activeTexture = 0;
     GLint                 m_unpackAlignment = 4;
-    ArraysMap             m_map;
+
+    VAOStateMap           m_vaoStateMap;
+    VAOStateRef           m_currVaoState;
+    // Buffer binding state
+    GLuint m_copyReadBuffer = 0;
+    GLuint m_copyWriteBuffer = 0;
+    GLuint m_pixelPackBuffer = 0;
+    GLuint m_pixelUnpackBuffer = 0;
+    GLuint m_transformFeedbackBuffer = 0;
+    GLuint m_uniformBuffer = 0;
+    GLuint m_atomicCounterBuffer = 0;
+    GLuint m_dispatchIndirectBuffer = 0;
+    GLuint m_drawIndirectBuffer = 0;
+    GLuint m_shaderStorageBuffer = 0;
+    std::vector<BufferBinding> m_indexedTransformFeedbackBuffers;
+    std::vector<BufferBinding> m_indexedUniformBuffers;
+    std::vector<BufferBinding> m_indexedAtomicCounterBuffers;
+    std::vector<BufferBinding> m_indexedShaderStorageBuffers;
+
     static std::string*   s_glExtensions;
     static GLSupport      s_glSupport;
 
@@ -193,7 +287,7 @@ protected:
     int m_glesMinorVersion = 0;
 private:
 
-    virtual void setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride, GLboolean normalized, int pointsIndex = -1) = 0 ;
+    virtual void setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride, GLboolean normalized, int pointsIndex = -1, bool isInt = false) = 0 ;
 
     ShareGroupPtr         m_shareGroup;
     GLenum                m_glError = GL_NO_ERROR;

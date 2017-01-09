@@ -24,6 +24,7 @@ public:
     GLenum getType() const;
     GLint getSize() const;
     GLsizei getStride() const;
+    // get*Data, getBufferName all only for legacy (GLES_CM or buffer->client array converseion) setups.
     const GLvoid* getArrayData() const;
     GLvoid* getBufferData() const;
     GLuint getBufferName() const;
@@ -37,17 +38,29 @@ public:
                   GLenum type,
                   GLsizei stride,
                   const GLvoid* data,
-                  bool normalize = false);
+                  bool normalize = false,
+                  bool isInt = false);
     void setBuffer(GLint size,
                    GLenum type,
                    GLsizei stride,
                    GLESbuffer* buf,
                    GLuint bufferName,
                    int offset,
-                   bool normalize = false);
+                   bool normalize = false,
+                   bool isInt = false);
+    void setDivisor(GLuint divisor);
+    void setBindingIndex(GLuint bindingindex);
+    void setFormat(GLint size, GLenum type,
+                   bool normalize,
+                   GLuint reloffset,
+                   bool isInt);
+    GLuint getBindingIndex() const {
+        return m_bindingIndex;
+    }
     bool isEnable() const;
     bool isNormalize() const;
     bool isVBO() const;
+    bool isIntPointer() const;
     void enable(bool b);
 
 private:
@@ -61,5 +74,9 @@ private:
     GLESbuffer* m_buffer = nullptr;
     GLuint m_bufferName = 0;
     unsigned int m_buffOffset = 0;
+    bool m_isInt = false;
+    GLuint m_divisor = 0;
+    GLuint m_bindingIndex = 0;
+    GLuint m_reloffset = 0;
 };
 #endif
