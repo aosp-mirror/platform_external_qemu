@@ -31,6 +31,9 @@ typedef std::unordered_map<GLenum,GLESpointer*>  ArraysMap;
 enum TextureTarget {
 TEXTURE_2D,
 TEXTURE_CUBE_MAP,
+TEXTURE_2D_ARRAY,
+TEXTURE_3D,
+TEXTURE_2D_MULTISAMPLE,
 NUM_TEXTURE_TARGETS
 };
 
