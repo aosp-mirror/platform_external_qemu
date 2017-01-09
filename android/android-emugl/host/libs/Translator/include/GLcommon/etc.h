@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef __etc1_h__
-#define __etc1_h__
+#pragma once
 
 #define MAX_ETC_SUPPORTED 1
 
@@ -57,10 +56,14 @@ void etc1_encode_block(const etc1_byte* pIn, etc1_uint32 validPixelMask, etc1_by
 
 void etc2_decode_rgb_block(const etc1_byte* pIn, etc1_byte* pOut);
 
-// Decode a block of alpha pixels
+// Decode a block of single channel pixels
+// This is used when decoding the alpha channel of RGBA8_ETC2_EAC format, or
+// when decoding R11_EAC format
+// decodedElementBytes: number of bits per element after decoding.
+// For RGBA8_ETC2_EAC it must be 1, for R11_EAC it must be 2
 
-void etc2_decode_alpha_block(const etc1_byte* pIn, etc1_byte* pOut);
-
+void eac_decode_single_channel_block(const etc1_byte* pIn,
+									  int decodedElementBytes, etc1_byte* pOut);
 
 // Return the size of the encoded image data (does not include size of PKM header).
 
@@ -113,6 +116,4 @@ etc1_uint32 etc1_pkm_get_height(const etc1_byte* pHeader);
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

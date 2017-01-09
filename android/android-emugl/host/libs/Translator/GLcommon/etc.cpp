@@ -14,9 +14,12 @@
 
 #include <GLcommon/etc.h>
 
+#include <assert.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdio.h>
+
+typedef uint16_t etc1_uint16;
 
 /* From http://www.khronos.org/registry/gles/extensions/OES/OES_compressed_ETC1_RGB8_texture.txt
 
@@ -383,7 +386,9 @@ void etc2_decode_rgb_block(const etc1_byte* pIn, etc1_byte* pOut) {
     decode_subblock(pOut, r2, g2, b2, tableB, low, true, flipped);
 }
 
-void etc2_decode_alpha_block(const etc1_byte* pIn, etc1_byte* pOut) {
+void eac_decode_single_channel_block(const etc1_byte* pIn,
+                                     int decodedElementBytes, etc1_byte* pOut) {
+    assert(decodedElementBytes == 1 || decodedElementBytes == 2);
     int base_codeword = pIn[0];
     int multiplier = pIn[1] >> 4;
     int tblIdx = pIn[1] & 15;
@@ -401,8 +406,20 @@ void etc2_decode_alpha_block(const etc1_byte* pIn, etc1_byte* pOut) {
         modifier += p[0] >> bitOffset;
         modifier &= 7;
         bitOffset -= 3; // move to the next index
-        *pOut = clamp(base_codeword + table[modifier] * multiplier);
-        pOut ++;
+        int modifierValue = table[modifier];
+        int decoded = base_codeword + modifierValue * multiplier;
+        if (decodedElementBytes == 1) {
+            *pOut = clamp(decoded);
+        } else { // decodedElementBytes == 2
+            etc1_uint16* out = (etc1_uint16*)pOut;
+            decoded = decoded << 3 | 100; // shift to 11bits
+            if (multiplier == 0) {
+                decoded += modifierValue;
+            }
+            decoded = (decoded << 5) + (decoded >> 6); //convert to 16bits
+            *out = decoded;
+        }
+        pOut += decodedElementBytes;
     }
 }
 
@@ -768,7 +785,7 @@ int etc2_decode_image(const etc1_byte* pIn, bool isWithAlpha,
                 xEnd = 4;
             }
             if (isWithAlpha) {
-                etc2_decode_alpha_block(pIn, alphaBlock);
+                eac_decode_single_channel_block(pIn, 1, alphaBlock);
                 pIn += ETC2_ENCODE_ALPHA_BLOCK_SIZE;
             }
             etc2_decode_rgb_block(pIn, block);
