@@ -31,9 +31,10 @@ protected:
             EXPECT_EQ(expectedDecoded[i], decoded[i]);
         }
     }
-    void decodeAlphaTest(const etc1_byte* bytesEncoded, const etc1_byte* expectedDecoded) {
-        etc1_byte decoded[cAlphaPatchSize];
-        etc2_decode_alpha_block(bytesEncoded, decoded);
+    void decodeEacTest(const etc1_byte* bytesEncoded, int decodedElementBytes,
+                       const etc1_byte* expectedDecoded) {
+        etc1_byte decoded[cAlphaPatchSize * decodedElementBytes];
+        eac_decode_single_channel_block(bytesEncoded, decodedElementBytes, decoded);
         for (int i=0; i<cAlphaPatchSize; i++) {
             EXPECT_EQ(expectedDecoded[i], decoded[i]);
         }
@@ -83,5 +84,5 @@ TEST_F(Etc2Test, ETC2Alpha) {
         73, 61, 61, 49, 
         89, 73, 61, 61, 
         89, 89, 89, 61};
-    decodeAlphaTest((const etc1_byte*)encoded, (const etc1_byte*)expectedDecoded);
+    decodeEacTest((const etc1_byte*)encoded, 1, (const etc1_byte*)expectedDecoded);
 }
