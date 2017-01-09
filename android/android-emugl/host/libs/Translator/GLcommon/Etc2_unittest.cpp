@@ -31,10 +31,11 @@ protected:
             EXPECT_EQ(expectedDecoded[i], decoded[i]);
         }
     }
-    void decodeAlphaTest(const etc1_byte* bytesEncoded, const etc1_byte* expectedDecoded) {
-        etc1_byte decoded[cAlphaPatchSize];
-        etc2_decode_alpha_block(bytesEncoded, decoded);
-        for (int i=0; i<cAlphaPatchSize; i++) {
+    void decodeEacTest(const etc1_byte* bytesEncoded, int decodedElementBytes,
+                       bool isSigned, const etc1_byte* expectedDecoded) {
+        etc1_byte decoded[cAlphaPatchSize * decodedElementBytes];
+        eac_decode_single_channel_block(bytesEncoded, decodedElementBytes, isSigned, decoded);
+        for (int i=0; i<cAlphaPatchSize * decodedElementBytes; i++) {
             EXPECT_EQ(expectedDecoded[i], decoded[i]);
         }
     }
@@ -75,13 +76,56 @@ TEST_F(Etc2Test, ETC2P) {
     decodeRgbTest((const etc1_byte*)encoded, (const etc1_byte*)expectedDecoded);
 }
 
-// ETC2 alpha decoder tests.
-TEST_F(Etc2Test, ETC2Alpha) {
-    const unsigned char encoded[cAlphaEncodedSize] = {101, 65, 229, 178, 147, 5, 32, 2};
+// EAC alpha decoder tests.
+TEST_F(Etc2Test, EAC_Alpha) {
+    const unsigned char encoded[cAlphaEncodedSize]
+                            = {101, 65, 229, 178, 147, 5, 32, 2};
     const unsigned char expectedDecoded[cAlphaPatchSize] = {
-        149, 73, 49, 49, 
-        73, 61, 61, 49, 
-        89, 73, 61, 61, 
+        149, 73, 49, 49,
+        73, 61, 61, 49,
+        89, 73, 61, 61,
         89, 89, 89, 61};
-    decodeAlphaTest((const etc1_byte*)encoded, (const etc1_byte*)expectedDecoded);
+    decodeEacTest((const etc1_byte*)encoded, 1, false,
+                  (const etc1_byte*)expectedDecoded);
 }
+
+// EAC 16bit decoder tess.
+TEST_F(Etc2Test, EAC_R11_0) {
+    const int elementBytes = 2;
+    const unsigned char encoded[cAlphaEncodedSize]
+                            = {0, 0, 36, 146, 73, 36, 146, 73};
+    const unsigned char expectedDecoded[cAlphaPatchSize * elementBytes] = {
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0};
+    decodeEacTest((const etc1_byte*)encoded, elementBytes, false,
+                  (const etc1_byte*)expectedDecoded);
+}
+
+TEST_F(Etc2Test, EAC_R11_NonZero) {
+    const int elementBytes = 2;
+    const unsigned char encoded[cAlphaEncodedSize]
+                            = {45, 16, 23, 116, 38, 100, 86, 208};
+    const unsigned char expectedDecoded[cAlphaPatchSize * elementBytes] = {
+        133, 42, 134, 50, 134, 53, 135, 59,
+        132, 36, 133, 42, 133, 47, 134, 53,
+        131, 30, 132, 39, 133, 42, 134, 50,
+        131, 30, 131, 30, 132, 36, 133, 42};
+    decodeEacTest((const etc1_byte*)encoded, elementBytes, false,
+                  (const etc1_byte*)expectedDecoded);
+}
+
+TEST_F(Etc2Test, EAC_SIGNED_R11) {
+    const int elementBytes = 2;
+    const unsigned char encoded[cAlphaEncodedSize]
+                            = {198, 123, 74, 150, 120, 104, 6, 137};
+    const unsigned char expectedDecoded[cAlphaPatchSize * elementBytes] = {
+        230, 148, 230, 148, 249, 225, 233, 162,
+        1, 128, 233, 162, 1, 5, 238, 183,
+        1, 128, 230, 148, 238, 183, 238, 183,
+        1, 128, 230, 148, 233, 162, 233, 162};
+    decodeEacTest((const etc1_byte*)encoded, elementBytes, true,
+                  (const etc1_byte*)expectedDecoded);
+}
+
