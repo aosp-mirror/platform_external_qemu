@@ -1120,7 +1120,7 @@ GL_APICALL void GL_APIENTRY glGetProgramResourceiv (GLuint program, GLenum progr
 GL_APICALL GLint GL_APIENTRY glGetProgramResourceLocation (GLuint program, GLenum programInterface, const GLchar *name);
 GL_APICALL void GL_APIENTRY glUseProgramStages (GLuint pipeline, GLbitfield stages, GLuint program);
 GL_APICALL void GL_APIENTRY glActiveShaderProgram (GLuint pipeline, GLuint program);
-GL_APICALL GLuint GL_APIENTRY glCreateShaderProgramv (GLenum type, GLsizei count, const GLchar *const*strings);
+// GL_APICALL GLuint GL_APIENTRY glCreateShaderProgramv (GLenum type, GLsizei count, const GLchar *const*strings);
 GL_APICALL void GL_APIENTRY glBindProgramPipeline (GLuint pipeline);
 GL_APICALL void GL_APIENTRY glDeleteProgramPipelines (GLsizei n, const GLuint *pipelines);
 GL_APICALL void GL_APIENTRY glGenProgramPipelines (GLsizei n, GLuint *pipelines);
@@ -1131,9 +1131,9 @@ GL_APICALL void GL_APIENTRY glProgramUniform2i (GLuint program, GLint location, 
 GL_APICALL void GL_APIENTRY glProgramUniform3i (GLuint program, GLint location, GLint v0, GLint v1, GLint v2);
 GL_APICALL void GL_APIENTRY glProgramUniform4i (GLuint program, GLint location, GLint v0, GLint v1, GLint v2, GLint v3);
 GL_APICALL void GL_APIENTRY glProgramUniform1ui (GLuint program, GLint location, GLuint v0);
-GL_APICALL void GL_APIENTRY glProgramUniform2ui (GLuint program, GLint location, GLuint v0, GLuint v1);
-GL_APICALL void GL_APIENTRY glProgramUniform3ui (GLuint program, GLint location, GLuint v0, GLuint v1, GLuint v2);
-GL_APICALL void GL_APIENTRY glProgramUniform4ui (GLuint program, GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3);
+// GL_APICALL void GL_APIENTRY glProgramUniform2ui (GLuint program, GLint location, GLuint v0, GLuint v1);
+// GL_APICALL void GL_APIENTRY glProgramUniform3ui (GLuint program, GLint location, GLuint v0, GLuint v1, GLuint v2);
+// GL_APICALL void GL_APIENTRY glProgramUniform4ui (GLuint program, GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3);
 GL_APICALL void GL_APIENTRY glProgramUniform1f (GLuint program, GLint location, GLfloat v0);
 GL_APICALL void GL_APIENTRY glProgramUniform2f (GLuint program, GLint location, GLfloat v0, GLfloat v1);
 GL_APICALL void GL_APIENTRY glProgramUniform3f (GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
@@ -1170,7 +1170,7 @@ GL_APICALL void GL_APIENTRY glGetMultisamplefv (GLenum pname, GLuint index, GLfl
 GL_APICALL void GL_APIENTRY glSampleMaski (GLuint maskNumber, GLbitfield mask);
 GL_APICALL void GL_APIENTRY glGetTexLevelParameteriv (GLenum target, GLint level, GLenum pname, GLint *params);
 GL_APICALL void GL_APIENTRY glGetTexLevelParameterfv (GLenum target, GLint level, GLenum pname, GLfloat *params);
-GL_APICALL void GL_APIENTRY glBindVertexBuffer (GLuint bindingindex, GLuint buffer, GLintptr offset, GLsizei stride);
+// GL_APICALL void GL_APIENTRY glBindVertexBuffer (GLuint bindingindex, GLuint buffer, GLintptr offset, GLsizei stride);
 GL_APICALL void GL_APIENTRY glVertexAttribFormat (GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint relativeoffset);
 GL_APICALL void GL_APIENTRY glVertexAttribIFormat (GLuint attribindex, GLint size, GLenum type, GLuint relativeoffset);
 GL_APICALL void GL_APIENTRY glVertexAttribBinding (GLuint attribindex, GLuint bindingindex);

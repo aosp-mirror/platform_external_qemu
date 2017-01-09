@@ -24,6 +24,7 @@
 class GLESv2Context : public GLEScontext{
 public:
     virtual void init(GlLibrary* glLib);
+    GLESv2Context(int maj, int min);
     virtual ~GLESv2Context();
     void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct);
     int  getMaxCombinedTexUnits() override;

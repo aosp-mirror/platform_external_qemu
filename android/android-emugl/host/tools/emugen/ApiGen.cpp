@@ -40,6 +40,12 @@
 #define INSTRUMENT_TIMING_GUEST 0
 #define INSTRUMENT_TIMING_HOST 0
 
+// Set to 1 to print to logcat for every GL call encoded.
+#define DLOG_ALL_ENCODES 0
+
+// Set to 1 to check GL errors before and after every decoder call.
+#define DECODER_CHECK_GL_ERRORS 0
+
 EntryPoint * ApiGen::findEntryByName(const std::string & name)
 {
     EntryPoint * entry = NULL;
@@ -537,6 +543,9 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 
         e->print(fp, true, "_enc", /* classname + "::" */"", "void *self");
         fprintf(fp, "{\n");
+#if DLOG_ALL_ENCODES
+        fprintf(fp, "ALOGD(\"%%s: enter\", __FUNCTION__);\n");
+#endif
 
 #if INSTRUMENT_TIMING_GUEST
         fprintf(fp, "\tstruct timespec ts0, ts1;\n");
@@ -932,11 +941,14 @@ int ApiGen::genDecoderImpl(const std::string &filename)
             "#endif\n\n");
 
     fprintf(fp,
-            "#ifdef CHECK_GLERROR\n"
+#if DECODER_CHECK_GL_ERRORS
+            "#define CHECK_GL_ERRORS\n"
+#endif
+            "#ifdef CHECK_GL_ERRORS\n"
             "#  define SET_LASTCALL(name)  sprintf(lastCall, #name)\n"
             "#else\n"
-            "#  define SET_LASTCALL(name)  ((void)0)\n"
-            "#endif\n\n");
+            "#  define SET_LASTCALL(name)\n"
+            "#endif\n");
 
     // helper templates
     fprintf(fp, "using namespace emugl;\n\n");
@@ -945,7 +957,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
     fprintf(fp, "size_t %s::decode(void *buf, size_t len, IOStream *stream, ChecksumCalculator* checksumCalc) {\n", classname.c_str());
     fprintf(fp,
 "\tif (len < 8) return 0; \n\
-#ifdef CHECK_GL_ERROR\n\
+#ifdef CHECK_GL_ERRORS\n\
 \tchar lastCall[256] = {0};\n\
 #endif\n\
 \tunsigned char *ptr = (unsigned char *)buf;\n\
@@ -1028,6 +1040,13 @@ R"(        // Do this on every iteration, as some commands may change the checks
                     fprintf(fp, "this"); // add a context to the call
                 }
             } else if (pass == PASS_DebugPrint) {
+                if (strstr(m_basename.c_str(), "gl")) {
+                    fprintf(fp, "\t\t#ifdef CHECK_GL_ERRORS\n");
+                    fprintf(fp, "\t\tGLint err = this->glGetError();\n");
+                    fprintf(fp, "\t\tif (err) fprintf(stderr, \"%s Error (pre-call): 0x%%X before %s\\n\", err);\n",
+                            m_basename.c_str(), e->name().c_str());
+                    fprintf(fp, "\t\t#endif\n");
+                }
                 fprintf(fp,
                         "\t\t\tDEBUG(\"%s(%%p): %s(%s)\\n\", stream",
                         m_basename.c_str(),
@@ -1069,7 +1088,8 @@ R"(        // Do this on every iteration, as some commands may change the checks
                                 var_name,
                                 var_name);
                     }
-                    if (pass == PASS_FunctionCall) {
+                    if (pass == PASS_FunctionCall ||
+                        pass == PASS_DebugPrint) {
                         fprintf(fp, "var_%s", var_name);
                     }
                     varoffset += " + 8";
@@ -1332,10 +1352,10 @@ R"(        // Do this on every iteration, as some commands may change the checks
     fprintf(fp, "\t\t\treturn ptr - (unsigned char*)buf;\n");
     fprintf(fp, "\t\t} //switch\n");
     if (strstr(m_basename.c_str(), "gl")) {
-        fprintf(fp, "#ifdef CHECK_GL_ERROR\n");
-        fprintf(fp, "\t\tint err = lastCall[0] ? this->glGetError() : GL_NO_ERROR;\n");
-        fprintf(fp, "\t\tif (err) fprintf(stderr, \"%s Error: 0x%%X in %%s\\n\", err, lastCall);\n", m_basename.c_str());
-        fprintf(fp, "#endif\n");
+        fprintf(fp, "\t\t#ifdef CHECK_GL_ERRORS\n");
+        fprintf(fp, "\t\tGLint err = this->glGetError();\n");
+        fprintf(fp, "\t\tif (err) fprintf(stderr, \"%s Error (post-call): 0x%%X in %%s\\n\", err, lastCall);\n", m_basename.c_str());
+        fprintf(fp, "\t\t#endif\n");
     }
 
     fprintf(fp, "\t\tptr += packetLen;\n");

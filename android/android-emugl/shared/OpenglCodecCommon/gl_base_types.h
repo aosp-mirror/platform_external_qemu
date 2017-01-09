@@ -47,6 +47,9 @@ typedef khronos_ssize_t  GLsizeiptr;
 typedef char *GLstr;
 /* JR XXX Treating this as an in handle - is this correct? */
 typedef void * GLeglImageOES;
+typedef struct __GLsync *GLsync;
+typedef khronos_int64_t GLint64;
+typedef khronos_uint64_t GLuint64;
 
 /* ErrorCode */
 #ifndef GL_INVALID_ENUM

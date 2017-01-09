@@ -39,11 +39,9 @@ void GLEScmContext::init(GlLibrary* glLib) {
     m_initialized = true;
 }
 
-GLEScmContext::GLEScmContext() {
-    m_map[GL_COLOR_ARRAY]          = new GLESpointer();
-    m_map[GL_NORMAL_ARRAY]         = new GLESpointer();
-    m_map[GL_VERTEX_ARRAY]         = new GLESpointer();
-    m_map[GL_POINT_SIZE_ARRAY_OES] = new GLESpointer();
+GLEScmContext::GLEScmContext(int maj, int min) {
+    m_glesMajorVersion = maj;
+    m_glesMinorVersion = min;
 }
 
 

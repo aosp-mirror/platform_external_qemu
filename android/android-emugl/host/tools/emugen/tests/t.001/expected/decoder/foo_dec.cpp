@@ -22,17 +22,16 @@ typedef unsigned int tsize_t; // Target "size_t", which is 32-bit for now. It ma
 #  define DEBUG(...)  ((void)0)
 #endif
 
-#ifdef CHECK_GLERROR
+#ifdef CHECK_GL_ERRORS
 #  define SET_LASTCALL(name)  sprintf(lastCall, #name)
 #else
-#  define SET_LASTCALL(name)  ((void)0)
+#  define SET_LASTCALL(name)
 #endif
-
 using namespace emugl;
 
 size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream, ChecksumCalculator* checksumCalc) {
 	if (len < 8) return 0; 
-#ifdef CHECK_GL_ERROR
+#ifdef CHECK_GL_ERRORS
 	char lastCall[256] = {0};
 #endif
 	unsigned char *ptr = (unsigned char *)buf;

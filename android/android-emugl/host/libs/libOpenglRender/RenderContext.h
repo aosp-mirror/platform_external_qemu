@@ -21,6 +21,15 @@
 
 #include <EGL/egl.h>
 
+// Tracks all the possible OpenGL ES API versions.
+enum GLESApi {
+    GLESApi_CM = 1,
+    GLESApi_2 = 2,
+    GLESApi_3_0 = 3,
+    GLESApi_3_1 = 4,
+    GLESApi_3_2 = 5,
+};
+
 // A class used to model a guest EGLContext. This simply wraps a host
 // EGLContext, associated with an GLDecoderContextData instance that is
 // used to store copies of guest-side arrays.
@@ -30,12 +39,11 @@ public:
     // |display| is the host EGLDisplay handle.
     // |config| is the host EGLConfig to use.
     // |sharedContext| is either EGL_NO_CONTEXT of a host EGLContext handle.
-    // |isGl2| is true iff the new context will be used with GLESv2, or
-    // GLESv1 otherwise.
+    // |version| specifies the GLES version as a GLESApi.
     static RenderContext *create(EGLDisplay display,
                                  EGLConfig config,
                                  EGLContext sharedContext,
-                                 bool isGL2 = false);
+                                 GLESApi = GLESApi_CM);
 
     // Destructor.
     ~RenderContext();
@@ -46,8 +54,8 @@ public:
     // Retrieve emulated GLES1 context.
     void* getEmulatedGLES1Context() const { return mEmulatedGLES1Context; }
 
-    // Return true iff this is a GLESv2 context.
-    bool isGL2() const { return mIsGl2; }
+    // Return the actual underlying version used in this context.
+    GLESApi version() const { return mVersion; }
 
     // Retrieve GLDecoderContextData instance reference for this
     // RenderContext instance.
@@ -58,13 +66,13 @@ private:
 
     RenderContext(EGLDisplay display,
                   EGLContext context,
-                  bool isGl2,
+                  GLESApi version,
                   void* emulatedGLES1Context);
 
 private:
     EGLDisplay mDisplay;
     EGLContext mContext;
-    bool mIsGl2;
+    GLESApi mVersion;
     void* mEmulatedGLES1Context;
     GLDecoderContextData mContextData;
 };

@@ -309,7 +309,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
     // then call glCopyTexSubImage2D().
     GLuint tmpTex;
     GLint currTexBind;
-    if (tInfo->currContext->isGL2()) {
+    if (tInfo->currContext->version() > GLESApi_CM) {
         s_gles2.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
         s_gles2.glGenTextures(1,&tmpTex);
         s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
@@ -362,7 +362,7 @@ bool ColorBuffer::bindToTexture() {
     if (!tInfo->currContext.get()) {
         return false;
     }
-    if (tInfo->currContext->isGL2()) {
+    if (tInfo->currContext->version() > GLESApi_CM) {
         s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
     }
     else {
@@ -379,7 +379,7 @@ bool ColorBuffer::bindToRenderbuffer() {
     if (!tInfo->currContext.get()) {
         return false;
     }
-    if (tInfo->currContext->isGL2()) {
+    if (tInfo->currContext->version() > GLESApi_CM) {
         s_gles2.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES, m_eglImage);
     }
     else {
