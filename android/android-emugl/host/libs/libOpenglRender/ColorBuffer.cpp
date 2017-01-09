@@ -314,8 +314,29 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
         s_gles2.glGenTextures(1,&tmpTex);
         s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
         s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
-        s_gles2.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0,
-                                  m_width, m_height);
+
+        // If the read buffer is multisampled, we need to resolve.
+        GLint samples;
+        s_gles2.glGetIntegerv(GL_SAMPLE_BUFFERS, &samples);
+        if (samples > 0) {
+            s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
+
+            GLuint resolve_fbo;
+            GLint prev_draw_fbo;
+            s_gles2.glGenFramebuffers(1, &resolve_fbo);
+            s_gles2.glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prev_draw_fbo);
+
+            s_gles2.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, resolve_fbo);
+            s_gles2.glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tmpTex, 0);
+            s_gles2.glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, m_width, m_height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+            s_gles2.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, (GLuint)prev_draw_fbo);
+
+            s_gles2.glDeleteFramebuffers(1, &resolve_fbo);
+            s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
+        } else {
+            s_gles2.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0,
+                    m_width, m_height);
+        }
         s_gles2.glDeleteTextures(1, &tmpTex);
         s_gles2.glBindTexture(GL_TEXTURE_2D, currTexBind);
     }
