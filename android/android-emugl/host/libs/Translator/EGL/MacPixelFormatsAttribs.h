@@ -19,5 +19,6 @@
 
 #include <Cocoa/Cocoa.h>
 NSOpenGLPixelFormatAttribute** getPixelFormatsAttributes(int* size);
+NSOpenGLPixelFormatAttribute** getPixelFormatVariants(int* size);
 
 #endif

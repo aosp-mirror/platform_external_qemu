@@ -18,9 +18,6 @@
 
 static NSOpenGLPixelFormatAttribute attrs32_1[] =
 {
-    NSOpenGLPFADoubleBuffer,
-    NSOpenGLPFAWindow,
-    NSOpenGLPFAPixelBuffer,
     NSOpenGLPFAColorSize   ,32,
     NSOpenGLPFADepthSize   ,24,
     NSOpenGLPFAStencilSize ,8,
@@ -29,9 +26,6 @@ static NSOpenGLPixelFormatAttribute attrs32_1[] =
 
 static NSOpenGLPixelFormatAttribute attrs32_2[] =
 {
-    NSOpenGLPFADoubleBuffer,
-    NSOpenGLPFAWindow,
-    NSOpenGLPFAPixelBuffer,
     NSOpenGLPFAColorSize   ,32,
     NSOpenGLPFAAlphaSize   ,8,
     NSOpenGLPFADepthSize   ,24,
@@ -41,9 +35,6 @@ static NSOpenGLPixelFormatAttribute attrs32_2[] =
 
 static NSOpenGLPixelFormatAttribute attrs32_3[] =
 {
-    NSOpenGLPFADoubleBuffer,
-    NSOpenGLPFAWindow,
-    NSOpenGLPFAPixelBuffer,
     NSOpenGLPFAColorSize   ,32,
     NSOpenGLPFAAlphaSize   ,8,
     0
@@ -51,18 +42,12 @@ static NSOpenGLPixelFormatAttribute attrs32_3[] =
 
 static NSOpenGLPixelFormatAttribute attrs32_4[] =
 {
-    NSOpenGLPFADoubleBuffer,
-    NSOpenGLPFAWindow,
-    NSOpenGLPFAPixelBuffer,
     NSOpenGLPFAColorSize   ,32,
     0
 };
 
 static NSOpenGLPixelFormatAttribute attrs32_5[] =
 {
-    NSOpenGLPFADoubleBuffer,
-    NSOpenGLPFAWindow,
-    NSOpenGLPFAPixelBuffer,
     NSOpenGLPFAColorSize   ,32,
     NSOpenGLPFADepthSize   ,24,
     NSOpenGLPFASamples     ,2,
@@ -71,9 +56,6 @@ static NSOpenGLPixelFormatAttribute attrs32_5[] =
 
 static NSOpenGLPixelFormatAttribute attrs32_6[] =
 {
-    NSOpenGLPFADoubleBuffer,
-    NSOpenGLPFAWindow,
-    NSOpenGLPFAPixelBuffer,
     NSOpenGLPFAColorSize   ,32,
     NSOpenGLPFADepthSize   ,24,
     NSOpenGLPFASamples     ,4,
@@ -82,9 +64,6 @@ static NSOpenGLPixelFormatAttribute attrs32_6[] =
 
 static NSOpenGLPixelFormatAttribute attrs32_7[] =
 {
-    NSOpenGLPFADoubleBuffer,
-    NSOpenGLPFAWindow,
-    NSOpenGLPFAPixelBuffer,
     NSOpenGLPFAColorSize   ,32,
     NSOpenGLPFAAlphaSize   ,8,
     NSOpenGLPFADepthSize   ,24,
@@ -95,9 +74,6 @@ static NSOpenGLPixelFormatAttribute attrs32_7[] =
 
 static NSOpenGLPixelFormatAttribute attrs16_1[] =
 {
-    NSOpenGLPFADoubleBuffer,
-    NSOpenGLPFAWindow,
-    NSOpenGLPFAPixelBuffer,
     NSOpenGLPFAColorSize   ,16,
     NSOpenGLPFADepthSize   ,24,
     0
@@ -105,9 +81,6 @@ static NSOpenGLPixelFormatAttribute attrs16_1[] =
 
 static NSOpenGLPixelFormatAttribute attrs16_2[] =
 {
-    NSOpenGLPFADoubleBuffer,
-    NSOpenGLPFAWindow,
-    NSOpenGLPFAPixelBuffer,
     NSOpenGLPFAColorSize   ,16,
     NSOpenGLPFADepthSize   ,24,
     NSOpenGLPFAStencilSize ,8,
@@ -116,9 +89,6 @@ static NSOpenGLPixelFormatAttribute attrs16_2[] =
 
 static NSOpenGLPixelFormatAttribute attrs64_1[] =
 {
-    NSOpenGLPFADoubleBuffer,
-    NSOpenGLPFAWindow,
-    NSOpenGLPFAPixelBuffer,
     NSOpenGLPFAColorSize   ,64,
     NSOpenGLPFAAlphaSize   ,16,
     0
@@ -126,9 +96,6 @@ static NSOpenGLPixelFormatAttribute attrs64_1[] =
 
 static NSOpenGLPixelFormatAttribute attrs64_2[] =
 {
-    NSOpenGLPFADoubleBuffer,
-    NSOpenGLPFAWindow,
-    NSOpenGLPFAPixelBuffer,
     NSOpenGLPFAColorSize   ,64,
     NSOpenGLPFAAlphaSize   ,16,
     NSOpenGLPFADepthSize   ,24,
@@ -138,9 +105,6 @@ static NSOpenGLPixelFormatAttribute attrs64_2[] =
 
 static NSOpenGLPixelFormatAttribute attrs64_3[] =
 {
-    NSOpenGLPFADoubleBuffer,
-    NSOpenGLPFAWindow,
-    NSOpenGLPFAPixelBuffer,
     NSOpenGLPFAColorSize   ,64,
     NSOpenGLPFAAlphaSize   ,16,
     NSOpenGLPFADepthSize   ,24,
@@ -149,9 +113,6 @@ static NSOpenGLPixelFormatAttribute attrs64_3[] =
 
 static NSOpenGLPixelFormatAttribute attrs64_4[] =
 {
-    NSOpenGLPFADoubleBuffer,
-    NSOpenGLPFAWindow,
-    NSOpenGLPFAPixelBuffer,
     NSOpenGLPFAColorSize   ,64,
     NSOpenGLPFADepthSize   ,24,
     0
@@ -159,9 +120,6 @@ static NSOpenGLPixelFormatAttribute attrs64_4[] =
 
 static NSOpenGLPixelFormatAttribute attrs64_5[] =
 {
-    NSOpenGLPFADoubleBuffer,
-    NSOpenGLPFAWindow,
-    NSOpenGLPFAPixelBuffer,
     NSOpenGLPFAColorSize   ,64,
     NSOpenGLPFADepthSize   ,24,
     NSOpenGLPFAStencilSize ,8,
@@ -170,9 +128,6 @@ static NSOpenGLPixelFormatAttribute attrs64_5[] =
 
 static NSOpenGLPixelFormatAttribute attrs128_1[] =
 {
-    NSOpenGLPFADoubleBuffer,
-    NSOpenGLPFAWindow,
-    NSOpenGLPFAPixelBuffer,
     NSOpenGLPFAColorSize   ,128,
     NSOpenGLPFAAlphaSize   ,32,
     0
@@ -180,9 +135,6 @@ static NSOpenGLPixelFormatAttribute attrs128_1[] =
 
 static NSOpenGLPixelFormatAttribute attrs128_2[] =
 {
-    NSOpenGLPFADoubleBuffer,
-    NSOpenGLPFAWindow,
-    NSOpenGLPFAPixelBuffer,
     NSOpenGLPFAColorSize   ,128,
     NSOpenGLPFAAlphaSize   ,32,
     NSOpenGLPFADepthSize   ,24,
@@ -208,6 +160,33 @@ static NSOpenGLPixelFormatAttribute* arr[] =
     attrs64_5,
     attrs128_1,
     attrs128_2
+};
+    *size = sizeof(arr)/sizeof(arr[0]);
+    return arr;
+}
+
+// Variants
+static NSOpenGLPixelFormatAttribute Legacy[] =
+{
+    NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersionLegacy,
+    NSOpenGLPFADoubleBuffer,
+    NSOpenGLPFAWindow,
+    NSOpenGLPFAPixelBuffer,
+    0
+};
+
+static NSOpenGLPixelFormatAttribute Core3_2[] =
+{
+    NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
+    NSOpenGLPFADoubleBuffer,
+    0
+};
+
+NSOpenGLPixelFormatAttribute** getPixelFormatVariants(int* size){
+static NSOpenGLPixelFormatAttribute* arr[] =
+{
+    Legacy,
+    Core3_2,
 };
     *size = sizeof(arr)/sizeof(arr[0]);
     return arr;
