@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "77e75a57_629b7603",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ANGLEShaderParser.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "37b082be_63768746",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 34
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "37b082be_a36c7f77",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ANGLEShaderParser.cpp",
         "patchSetId": 11
@@ -36,6 +60,30 @@
       "writtenOn": "2017-01-03T21:34:22Z",
       "side": 1,
       "message": "should this be a different constant?",
+      "range": {
+        "startLine": 98,
+        "startChar": 63,
+        "endLine": 98,
+        "endChar": 86
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77e75a57_42a0f22b",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ANGLEShaderParser.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "37b082be_a36c7f77",
       "range": {
         "startLine": 98,
         "startChar": 63,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "77e75a57_829afaf9",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ANGLEShaderParser.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "37b082be_23788f2b",
+      "range": {
+        "startLine": 126,
+        "startChar": 4,
+        "endLine": 127,
+        "endChar": 78
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "37b082be_a3955f1f",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
         "patchSetId": 11
@@ -82,6 +154,30 @@
       "writtenOn": "2017-01-03T21:34:22Z",
       "side": 1,
       "message": "const char[] is just more natural, plus it doesn\u0027t require compiler to create a separate pointer variable",
+      "range": {
+        "startLine": 21,
+        "startChar": 17,
+        "endLine": 21,
+        "endChar": 25
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77e75a57_4b8758fb",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "37b082be_a3955f1f",
       "range": {
         "startLine": 21,
         "startChar": 17,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "77e75a57_ab77043f",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "s* seems consistent with the rest though",
+      "parentUuid": "37b082be_a3bebf93",
+      "range": {
+        "startLine": 25,
+        "startChar": 19,
+        "endLine": 25,
+        "endChar": 20
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "37b082be_23a16f7b",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
         "patchSetId": 11
@@ -128,6 +248,30 @@
       "writtenOn": "2017-01-03T21:34:22Z",
       "side": 1,
       "message": "nit: nullptr",
+      "range": {
+        "startLine": 36,
+        "startChar": 27,
+        "endLine": 36,
+        "endChar": 31
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77e75a57_2b8494f4",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "37b082be_23a16f7b",
       "range": {
         "startLine": 36,
         "startChar": 27,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "77e75a57_d8d7bc0b",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "37b082be_231c0fdc",
+      "range": {
+        "startLine": 263,
+        "startChar": 3,
+        "endLine": 264,
+        "endChar": 47
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "37b082be_23aacf4f",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
         "patchSetId": 11
@@ -174,6 +342,30 @@
       "writtenOn": "2017-01-03T21:34:22Z",
       "side": 1,
       "message": "nit: some common constant?",
+      "range": {
+        "startLine": 296,
+        "startChar": 0,
+        "endLine": 297,
+        "endChar": 34
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77e75a57_58e60c2c",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "37b082be_23aacf4f",
       "range": {
         "startLine": 296,
         "startChar": 0,
@@ -232,6 +424,54 @@
     },
     {
       "key": {
+        "uuid": "77e75a57_78f950a4",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "37b082be_830dc3b1",
+      "range": {
+        "startLine": 300,
+        "startChar": 8,
+        "endLine": 303,
+        "endChar": 43
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77e75a57_f80560c4",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "hmm, seems like they are (I think I had an earlier version where they weren\u0027t)",
+      "parentUuid": "37b082be_636c4745",
+      "range": {
+        "startLine": 302,
+        "startChar": 32,
+        "endLine": 303,
+        "endChar": 38
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "37b082be_835f038e",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
         "patchSetId": 11
@@ -243,6 +483,30 @@
       "writtenOn": "2017-01-03T21:34:22Z",
       "side": 1,
       "message": "should this go inside the \"if(!globalname)\" condition? and you\u0027ve already got a pointer to framebuffer data there",
+      "range": {
+        "startLine": 328,
+        "startChar": 7,
+        "endLine": 332,
+        "endChar": 38
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77e75a57_f8b720d4",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 332,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "Nah, that\u0027s only for if it doesn\u0027t exist yet as tracked in the share group.",
+      "parentUuid": "37b082be_835f038e",
       "range": {
         "startLine": 328,
         "startChar": 7,
@@ -278,6 +542,30 @@
     },
     {
       "key": {
+        "uuid": "77e75a57_b81d984c",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 971,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "37b082be_e357d76e",
+      "range": {
+        "startLine": 971,
+        "startChar": 85,
+        "endLine": 971,
+        "endChar": 100
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "37b082be_a34b1fca",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
         "patchSetId": 11
@@ -301,6 +589,30 @@
     },
     {
       "key": {
+        "uuid": "77e75a57_38b18828",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 1401,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "37b082be_a34b1fca",
+      "range": {
+        "startLine": 1396,
+        "startChar": 0,
+        "endLine": 1401,
+        "endChar": 26
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "37b082be_23b08f8c",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
         "patchSetId": 11
@@ -312,6 +624,24 @@
       "writtenOn": "2017-01-03T21:34:22Z",
       "side": 1,
       "message": "break?",
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77e75a57_d8185c5e",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 1405,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "37b082be_23b08f8c",
       "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -375,6 +705,24 @@
     },
     {
       "key": {
+        "uuid": "77e75a57_38c22843",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 1514,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "37b082be_43ab4b26",
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "37b082be_83caa306",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
         "patchSetId": 11
@@ -386,6 +734,30 @@
       "writtenOn": "2017-01-03T21:34:22Z",
       "side": 1,
       "message": "?",
+      "range": {
+        "startLine": 1582,
+        "startChar": 0,
+        "endLine": 1582,
+        "endChar": 52
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77e75a57_6b6dfc71",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 1582,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "That validation was wrong since we can in fact get framebuffer attachment params on default fbo (Comment removed)",
+      "parentUuid": "37b082be_83caa306",
       "range": {
         "startLine": 1582,
         "startChar": 0,
@@ -421,6 +793,30 @@
     },
     {
       "key": {
+        "uuid": "77e75a57_78c15093",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 2351,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "changed to ESSL version",
+      "parentUuid": "37b082be_a331df1e",
+      "range": {
+        "startLine": 2351,
+        "startChar": 7,
+        "endLine": 2351,
+        "endChar": 11
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "37b082be_63520756",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
         "patchSetId": 11
@@ -432,6 +828,30 @@
       "writtenOn": "2017-01-03T21:34:22Z",
       "side": 1,
       "message": "1. this code is very inefficient, it calls strstr 3 times, twice for the same value.\n2. FYI: you can check the pattern in sscanf():\n\nif (sscanf(ver, \"%*s#version[ \\t]%d%*s\\n%n\", \u0026ver, \u0026count) !\u003d 2) { ... }",
+      "range": {
+        "startLine": 2365,
+        "startChar": 4,
+        "endLine": 2367,
+        "endChar": 51
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77e75a57_d8c69caa",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 2367,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "37b082be_63520756",
       "range": {
         "startLine": 2365,
         "startChar": 4,
@@ -467,6 +887,30 @@
     },
     {
       "key": {
+        "uuid": "77e75a57_ab90a42c",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "I just put it back in the GLEScontext when referencing version. plus, this has been changed to ESSL version",
+      "parentUuid": "37b082be_233defec",
+      "range": {
+        "startLine": 29,
+        "startChar": 26,
+        "endLine": 29,
+        "endChar": 67
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "37b082be_e336f70f",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
         "patchSetId": 11
@@ -490,6 +934,30 @@
     },
     {
       "key": {
+        "uuid": "77e75a57_cbc40835",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "37b082be_e336f70f",
+      "range": {
+        "startLine": 242,
+        "startChar": 0,
+        "endLine": 242,
+        "endChar": 25
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "37b082be_23064f41",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
         "patchSetId": 11
@@ -501,6 +969,30 @@
       "writtenOn": "2017-01-03T21:34:22Z",
       "side": 1,
       "message": "|it| ?",
+      "range": {
+        "startLine": 252,
+        "startChar": 37,
+        "endLine": 252,
+        "endChar": 62
+      },
+      "revId": "49b585d05e7798ad7f08b1801cc85ce9d0292622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77e75a57_0bd8b008",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-10T22:25:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "37b082be_23064f41",
       "range": {
         "startLine": 252,
         "startChar": 37,
