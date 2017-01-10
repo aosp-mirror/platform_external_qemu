@@ -251,16 +251,23 @@ void GLESv2Decoder::s_glVertexAttribPointerData(void *self, GLuint indx, GLint s
 {
     GLESv2Decoder *ctx = (GLESv2Decoder *) self;
     if (ctx->m_contextData != NULL) {
-        ctx->m_contextData->storePointerData(indx, data, datalen);
+        if (ctx->m_contextData->pointerData(indx) == nullptr) {
+            GLuint VBO;
+            ctx->glGenBuffers(1, &VBO);
+            ctx->m_contextData->storePointerData(indx, (void *)&VBO, sizeof(VBO));
+        }
+        ctx->glBindBuffer(GL_ARRAY_BUFFER, *(GLuint*)ctx->m_contextData->pointerData(indx));
+        ctx->glBufferData(GL_ARRAY_BUFFER, datalen, data, GL_STATIC_DRAW);
         // note - the stride of the data is always zero when it comes out of the codec.
         // See gl2.attrib for the packing function call.
-        if ((void*)ctx->glVertexAttribPointerWithDataSize != gles2_unimplemented) {
-            ctx->glVertexAttribPointerWithDataSize(indx, size, type, normalized,
-                    0, ctx->m_contextData->pointerData(indx), datalen);
-        } else {
-            ctx->glVertexAttribPointer(indx, size, type, normalized, 0,
-                    ctx->m_contextData->pointerData(indx));
-        }
+//         if ((void*)ctx->glVertexAttribPointerWithDataSize != gles2_unimplemented) {
+//             ctx->glVertexAttribPointerWithDataSize(indx, size, type, normalized,
+//                     0, ctx->m_contextData->pointerData(indx), datalen);
+//         } else {
+//             ctx->glVertexAttribPointer(indx, size, type, normalized, 0,
+//                     ctx->m_contextData->pointerData(indx));
+//         }
+        ctx->glVertexAttribPointer(indx, size, type, normalized, 0, (GLvoid*)0);
     }
 }
 
