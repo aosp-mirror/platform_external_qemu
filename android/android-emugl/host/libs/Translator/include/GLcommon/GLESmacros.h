@@ -4,32 +4,38 @@
 #define GET_CTX() \
             if(!s_eglIface) return; \
             GLEScontext *ctx = s_eglIface->getGLESContext(); \
-            if(!ctx) return;
+            if(!ctx) return; \
+            ScopedGLContextChecker ctx_checker (ctx, __FUNCTION__);
 
 #define GET_CTX_CM() \
             if(!s_eglIface) return; \
             GLEScmContext *ctx = static_cast<GLEScmContext *>(s_eglIface->getGLESContext()); \
-            if(!ctx) return;
+            if(!ctx) return; \
+            ScopedGLContextChecker ctx_checker (ctx, __FUNCTION__);
 
 #define GET_CTX_V2() \
             if(!s_eglIface) return; \
             GLESv2Context *ctx = static_cast<GLESv2Context *>(s_eglIface->getGLESContext()); \
-            if(!ctx) return;
+            if(!ctx) return; \
+            ScopedGLContextChecker ctx_checker (ctx, __FUNCTION__);
 
 #define GET_CTX_RET(failure_ret) \
             if(!s_eglIface) return failure_ret; \
             GLEScontext *ctx = s_eglIface->getGLESContext(); \
-            if(!ctx) return failure_ret;
+            if(!ctx) return failure_ret; \
+            ScopedGLContextChecker ctx_checker (ctx, __FUNCTION__);
 
 #define GET_CTX_CM_RET(failure_ret) \
             if(!s_eglIface) return failure_ret; \
             GLEScmContext *ctx = static_cast<GLEScmContext *>(s_eglIface->getGLESContext()); \
-            if(!ctx) return failure_ret;
+            if(!ctx) return failure_ret; \
+            ScopedGLContextChecker ctx_checker (ctx, __FUNCTION__);
 
 #define GET_CTX_V2_RET(failure_ret) \
             if(!s_eglIface) return failure_ret; \
             GLESv2Context *ctx = static_cast<GLESv2Context *>(s_eglIface->getGLESContext()); \
-            if(!ctx) return failure_ret;
+            if(!ctx) return failure_ret; \
+            ScopedGLContextChecker ctx_checker (ctx, __FUNCTION__);
 
 
 #define SET_ERROR_IF(condition,err) if((condition)) {                            \
