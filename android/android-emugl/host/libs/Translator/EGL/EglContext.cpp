@@ -171,6 +171,12 @@ bool EglContext::getAttrib(EGLint attrib,EGLint* value) {
     return true;
 }
 
+void EglContext::onPreSave() {
+    // Save gles context first
+    assert(m_glesContext);
+    m_glesContext->preSaveDetachFbos();
+}
+
 void EglContext::onSave(android::base::Stream* stream) {
     // Save gles context first
     assert(m_glesContext);

@@ -334,13 +334,14 @@ void GlobalNameSpace::preSaveAddTex(TextureData* texture) {
 void GlobalNameSpace::onSave(android::base::Stream* stream,
                              const ITextureSaverPtr& textureSaver,
                              SaveableTexture::saver_t saver) {
+    int i = 0;
 #if SNAPSHOT_PROFILE > 1
     int cleanTexs = 0;
     int dirtyTexs = 0;
 #endif // SNAPSHOT_PROFILE > 1
     saveCollection(
             stream, m_textureMap,
-            [saver, &textureSaver
+            [saver, &textureSaver, &i, this
 #if SNAPSHOT_PROFILE > 1
             , &cleanTexs, &dirtyTexs
 #endif // SNAPSHOT_PROFILE > 1
@@ -356,6 +357,9 @@ void GlobalNameSpace::onSave(android::base::Stream* stream,
                     cleanTexs ++;
                 }
 #endif // SNAPSHOT_PROFILE > 1
+
+                fprintf(stdout, "save texture %d of %zu\n", i, m_textureMap.size());
+                ++i;
                 textureSaver->saveTexture(
                         tex.first,
                         [saver, &tex](android::base::Stream* stream,

@@ -1588,6 +1588,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglPreSaveContext(EGLDisplay display, EGLContext c
     if (!iface || !iface->saveTexture) return EGL_TRUE;
     VALIDATE_DISPLAY(display);
     VALIDATE_CONTEXT(contex);
+    ctx->onPreSave();
     ctx->getShareGroup()->preSave(dpy->getGlobalNameSpace());
     return EGL_TRUE;
 }
@@ -1635,6 +1636,7 @@ EGLAPI EGLConfig EGLAPIENTRY eglLoadConfig(EGLDisplay display, EGLStream stream)
 EGLAPI EGLBoolean EGLAPIENTRY eglSaveAllImages(EGLDisplay display,
                                                EGLStream stream,
                                                const void* textureSaver) {
+    fprintf(stderr, "%s: call\n", __func__);
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     assert(iface->saveTexture);
     if (!iface || !iface->saveTexture)
@@ -1646,6 +1648,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSaveAllImages(EGLDisplay display,
             *static_cast<const android::snapshot::ITextureSaverPtr*>(textureSaver),
             iface->saveTexture,
             iface->restoreTexture);
+    fprintf(stderr, "%s: call done\n", __func__);
     return EGL_TRUE;
 }
 

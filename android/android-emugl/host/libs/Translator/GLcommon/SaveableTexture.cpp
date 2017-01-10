@@ -546,17 +546,33 @@ void SaveableTexture::onSave(
                     // Snapshot texture data
                     buffer.clear();
                     buffer.resize_noinit(
+                            std::max(
+                                (uint32_t)8,
                             s_texImageSize(m_format, m_type, 1, width, height) *
-                            depth);
+                            depth));
                     if (!buffer.empty()) {
                         GLenum neededBufferFormat = m_format;
                         if (isCoreProfile()) {
                             neededBufferFormat =
                                 getCoreProfileEmulatedFormat(m_format);
                         }
+                        if (!m_fboAttachment) {
+
+                        fprintf(stdout,
+                                "%s: begin %u 0x%x (fbo: %u) %u (%u) 0x%x (0x%x) 0x%x %d "
+                                "x %d x %d bytes: %zu @ %p\n",
+                                __func__, getGlobalName(), target, m_fboAttachment, level,
+                                numLevels, m_format, neededBufferFormat, m_type,
+                                width, height, depth, buffer.size(),
+                                buffer.data());
+                        // usleep(100 * 1000);
                         dispatcher.glGetTexImage(target, level,
                                 neededBufferFormat, m_type,
                                 buffer.data());
+                        }
+                        // usleep(100 * 1000);
+                        fprintf(stdout, "%s: end GetTexImage\n", __func__);
+                        // usleep(100 * 1000);
                     }
                 }
             }
@@ -888,6 +904,10 @@ void SaveableTexture::fillEglImage(EglImage* eglImage) {
 
 void SaveableTexture::makeDirty() {
     m_isDirty = true;
+}
+
+void SaveableTexture::setFboAttachment() {
+    m_fboAttachment = 1;
 }
 
 bool SaveableTexture::isDirty() const {

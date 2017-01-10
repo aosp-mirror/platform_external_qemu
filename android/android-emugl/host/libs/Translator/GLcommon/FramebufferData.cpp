@@ -101,6 +101,7 @@ FramebufferData::~FramebufferData() {
 }
 
 void FramebufferData::onSave(android::base::Stream* stream, unsigned int globalName) const {
+    fprintf(stderr, "%s: call.********************************************************************************\n", __func__);
     ObjectData::onSave(stream, globalName);
     stream->putBe32(m_fbName);
     stream->putBe32(MAX_ATTACH_POINTS);

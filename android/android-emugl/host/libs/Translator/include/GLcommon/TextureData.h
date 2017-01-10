@@ -87,6 +87,7 @@ public:
     void setTexParam(GLenum pname, GLint param);
     GLenum getSwizzle(GLenum component) const;
 
+    void setFboAttachment();
     void makeDirty();
     void setTarget(GLenum _target);
     void setMipmapLevelAtLeast(unsigned int level);

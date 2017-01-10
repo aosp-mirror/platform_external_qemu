@@ -129,6 +129,11 @@ GLenum TextureData::getSwizzle(GLenum component) const {
     }
 }
 
+void TextureData::setFboAttachment() {
+    assert(m_saveableTexture);
+    m_saveableTexture->setFboAttachment();
+}
+
 void TextureData::makeDirty() {
     assert(m_saveableTexture);
     m_saveableTexture->makeDirty();

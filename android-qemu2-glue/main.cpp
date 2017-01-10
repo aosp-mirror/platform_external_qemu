@@ -603,6 +603,7 @@ static void enter_qemu_main_loop(int argc, char** argv) {
 #endif
 
     D("Starting QEMU main loop");
+    fprintf(stderr, "Starting QEMU main loop\n");
     run_qemu_main(argc, (const char**)argv, [] {
         skin_winsys_run_ui_update(
                 [](void*) {
@@ -613,7 +614,7 @@ static void enter_qemu_main_loop(int argc, char** argv) {
                 },
                 nullptr, false);
     });
-    D("Done with QEMU main loop");
+    fprintf(stderr, "Done with QEMU main loop\n");
 
     if (android_init_error_occurred()) {
         skin_winsys_error_dialog(android_init_error_get_message(), "Error");

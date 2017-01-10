@@ -2021,7 +2021,9 @@ void FrameBuffer::onSave(Stream* stream,
     // TODO: skip reading from GPU even for texture objects.
     saveCollection(stream, m_contexts,
                    [](Stream* s, const RenderContextMap::value_type& pair) {
+                   fprintf(stderr, "%s: save cxt\n", __func__);
         pair.second->onSave(s);
+                   fprintf(stderr, "%s: save cxt done\n", __func__);
     });
 
     // We don't need to save |m_colorBufferCloseTsMap| here - there's enough
@@ -2047,6 +2049,7 @@ void FrameBuffer::onSave(Stream* stream,
     saveProcOwnedCollection(stream, m_procOwnedRenderContext);
 
     if (s_egl.eglPostSaveContext) {
+                   fprintf(stderr, "%s: post save cxt\n", __func__);
         for (const auto& ctx : m_contexts) {
             s_egl.eglPostSaveContext(m_eglDisplay, ctx.second->getEGLContext(),
                     stream);
@@ -2059,6 +2062,7 @@ void FrameBuffer::onSave(Stream* stream,
         if (m_pbufContext != EGL_NO_CONTEXT) {
             s_egl.eglPostSaveContext(m_eglDisplay, m_pbufContext, stream);
         }
+                   fprintf(stderr, "%s: post save cxt done\n", __func__);
     }
 }
 

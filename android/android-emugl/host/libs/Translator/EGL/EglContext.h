@@ -58,6 +58,7 @@ public:
     unsigned int getHndl() { return m_hndl; }
 
     ~EglContext();
+    void onPreSave();
     void onSave(android::base::Stream* stream);
     void postSave(android::base::Stream* stream);
 

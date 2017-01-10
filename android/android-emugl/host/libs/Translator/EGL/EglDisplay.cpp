@@ -658,11 +658,14 @@ void EglDisplay::onSaveAllImages(android::base::Stream* stream,
     // but it would introduce overheads because not all share groups need to be
     // saved
     emugl::Mutex::AutoLock mutex(m_lock);
+    int i = 0;
     for (auto& image : m_eglImages) {
         // In case we loaded textures from a previous snapshot and have not
         // yet restore them to GPU, we do the restoration here.
         // TODO: skip restoration and write saveableTexture directly to the
         // new snapshot for better performance
+        fprintf(stdout, "%s: touching image %d of %zu\n", __func__, i, m_eglImages.size());
+        ++i;
         touchEglImage(image.second.get(), restorer);
         getGlobalNameSpace()->preSaveAddEglImage(image.second.get());
     }

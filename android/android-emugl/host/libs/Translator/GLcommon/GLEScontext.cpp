@@ -605,6 +605,10 @@ void GLEScontext::postLoad() {
             });
 }
 
+void GLEScontext::preSaveDetachFbos() {
+
+}
+
 void GLEScontext::onSave(android::base::Stream* stream) const {
     stream->putByte(m_initialized);
     stream->putBe32(m_glesMajorVersion);

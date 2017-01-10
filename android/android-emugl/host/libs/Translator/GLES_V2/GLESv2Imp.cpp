@@ -159,6 +159,7 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp) {
 
 GL_APICALL void  GL_APIENTRY glVertexAttribPointerWithDataSize(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize);
 GL_APICALL void  GL_APIENTRY glVertexAttribIPointerWithDataSize(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid* ptr, GLsizei dataSize);
+GL_APICALL void GL_APIENTRY glGetTexImage(GLenum target, GLint level, GLenum format, GLenum type, GLvoid* pixels);
 
 
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName) {
@@ -175,6 +176,7 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
         (*s_glesExtensions)["glEGLImageTargetRenderbufferStorageOES"]=(__translatorMustCastToProperFunctionPointerType)glEGLImageTargetRenderbufferStorageOES;
         (*s_glesExtensions)["glVertexAttribPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glVertexAttribPointerWithDataSize;
         (*s_glesExtensions)["glVertexAttribIPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glVertexAttribIPointerWithDataSize;
+        (*s_glesExtensions)["glGetTexImage"] = (__translatorMustCastToProperFunctionPointerType)glGetTexImage;
     }
     __translatorMustCastToProperFunctionPointerType ret=NULL;
     ProcTableMap::iterator val = s_glesExtensions->find(procName);
@@ -1419,6 +1421,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attach
         TextureData* texData = getTextureData(texname);
         if (texData) {
             texData->makeDirty();
+            texData->setFboAttachment();
         }
     }
 
@@ -3801,6 +3804,12 @@ GL_APICALL GLboolean GL_APIENTRY glIsVertexArrayOES(GLuint array) {
     // TODO: Figure out how to answer this completely in software.
     // Currently, state gets weird so we need to ask the GPU directly.
     return ctx->dispatcher().glIsVertexArray(ctx->getVAOGlobalName(array));
+}
+
+GL_APICALL void GL_APIENTRY glGetTexImage(GLenum target, GLint level, GLenum format, GLenum type, GLvoid* pixels) {
+    fprintf(stderr, "%s: call\n", __func__);
+    GET_CTX_V2();
+    ctx->dispatcher().glGetTexImage(target, level, format, type, pixels);
 }
 
 #include "GLESv30Imp.cpp"

@@ -415,4 +415,49 @@ TEST_F(FrameBufferTest, ReplaceContentsTest) {
     mFb->closeColorBuffer(handle);
 }
 
+// TEST_F(FrameBufferTest, GetRGBPixel) {
+// 
+//     HandleType handle =
+//         mFb->createColorBuffer(1, 1, GL_RGB, FRAMEWORK_FORMAT_GL_COMPATIBLE);
+// 
+//     TestTexture forUpdate = createTestPatternRGB888(1, 1);
+//     mFb->updateColorBuffer(handle, 0, 0, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, forUpdate.data());
+// 
+//     saveSnapshot();
+//     loadSnapshot();
+// 
+//     TestTexture forRead = createTestTextureRGBA8888SingleColor(1, 1, 0.0f, 0.0f, 0.0f, 0.0f);
+//     mFb->readColorBuffer(handle, 0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, forRead.data());
+// 
+//     EXPECT_TRUE(ImageMatches(1, 1, 3, 1, forUpdate.data(), forRead.data()));
+// 
+//     mFb->closeColorBuffer(handle);
+// }
+
+TEST_F(FrameBufferTest, GetRGBPixel) {
+    HandleType context = mFb->createRenderContext(0, 0, GLESApi_3_0);
+    HandleType surface = mFb->createWindowSurface(0, mWidth, mHeight);
+    EXPECT_TRUE(mFb->bindContext(context, surface, surface));
+
+    auto gl = LazyLoadedGLESv2Dispatch::get();
+
+    GLuint tex;
+    GLuint fbo;
+    gl->glGenTextures(1, &tex);
+    gl->glGenFramebuffers(1, &fbo);
+
+    gl->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+
+    gl->glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
+    gl->glClear(GL_COLOR_BUFFER_BIT);
+
+    char stuff[8];
+    gl->glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    gl->glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, stuff);
+
+    gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    gl->glDeleteFramebuffers(1, &fbo);
+}
+
 }  // namespace emugl

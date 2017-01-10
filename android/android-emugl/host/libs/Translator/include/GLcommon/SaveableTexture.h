@@ -73,6 +73,7 @@ public:
     void fillEglImage(EglImage* eglImage);
     void loadFromStream(android::base::Stream* stream);
     void makeDirty();
+    void setFboAttachment();
     bool isDirty() const;
     void setTarget(GLenum target);
     void setMipmapLevelAtLeast(unsigned int level);
@@ -84,6 +85,7 @@ public:
     void restore();
 
 private:
+    unsigned int m_fboAttachment = 0;
     unsigned int m_target = GL_TEXTURE_2D;
     unsigned int m_width = 0;
     unsigned int m_height = 0;

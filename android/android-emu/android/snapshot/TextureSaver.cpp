@@ -59,19 +59,15 @@ void TextureSaver::done() {
     mIndex.startPosInFile = ftello64(mStream.get());
     writeIndex();
     mEndTime = System::get()->getHighResTimeUs();
-#if SNAPSHOT_PROFILE > 1
     printf("Texture saving time: %.03f\n",
            (mEndTime - mStartTime) / 1000.0);
-#endif
     mHasError = ferror(mStream.get()) != 0;
     mFinished = true;
     mStream.close();
 }
 
 void TextureSaver::writeIndex() {
-#if SNAPSHOT_PROFILE > 1
     auto start = ftello64(mStream.get());
-#endif
 
     mStream.putBe32(static_cast<uint32_t>(mIndex.version));
     mStream.putBe32(static_cast<uint32_t>(mIndex.textures.size()));
@@ -81,9 +77,7 @@ void TextureSaver::writeIndex() {
     }
     auto end = ftello64(mStream.get());
     mDiskSize = uint64_t(end);
-#if SNAPSHOT_PROFILE > 1
     printf("texture: index size: %d\n", int(end - start));
-#endif
 
     fseeko64(mStream.get(), 0, SEEK_SET);
     mStream.putBe64(static_cast<uint64_t>(mIndex.startPosInFile));

@@ -177,10 +177,8 @@ void RamSaver::savePage(int64_t blockOffset,
 
     if (mLastBlockIndex < 0) {
         mLastBlockIndex = 0;
-#if SNAPSHOT_PROFILE > 1
         printf("From ctor to first savePage: %.03f\n",
                 (mSystem->getHighResTimeUs() - mStartTime) / 1000.0);
-#endif
     }
 
     assert(!mIndex.blocks.empty());
@@ -462,9 +460,7 @@ void RamSaver::passToSaveHandler(QueuedPageInfo&& pi) {
 
         mEndTime = System::get()->getHighResTimeUs();
 
-#if SNAPSHOT_PROFILE > 1
         printf("RAM saving time: %.03f\n", (mEndTime - mStartTime) / 1000.0);
-#endif
     }
 }
 
