@@ -18,6 +18,7 @@
 
 #define ETC1_ENCODED_BLOCK_SIZE 8
 #define ETC1_DECODED_BLOCK_SIZE 48
+#define ETC2_DECODED_RGB8A1_BLOCK_SIZE 64
 #define EAC_ENCODE_ALPHA_BLOCK_SIZE 8
 #define EAC_DECODED_ALPHA_BLOCK_SIZE 16
 #define EAC_ENCODE_R11_BLOCK_SIZE 8
@@ -33,7 +34,7 @@ typedef int etc1_bool;
 typedef unsigned int etc1_uint32;
 
 enum ETC2ImageFormat {
-	EtcRGB8, EtcRGBA8, EtcR11, EtcSignedR11, EtcRG11, EtcSignedRG11
+	EtcRGB8, EtcRGBA8, EtcR11, EtcSignedR11, EtcRG11, EtcSignedRG11, EtcRGB8A1
 };
 
 #ifdef __cplusplus
@@ -61,7 +62,7 @@ void etc1_encode_block(const etc1_byte* pIn, etc1_uint32 validPixelMask, etc1_by
 // 4 x 4 square of 3-byte pixels in form R, G, B. Byte (3 * (x + 4 * y) is the R
 // value of pixel (x, y).
 
-void etc2_decode_rgb_block(const etc1_byte* pIn, etc1_byte* pOut);
+void etc2_decode_rgb_block(const etc1_byte* pIn, bool isPunchthroughAlpha, etc1_byte* pOut);
 
 // Decode a block of single channel pixels
 // This is used when decoding the alpha channel of RGBA8_ETC2_EAC format, or
