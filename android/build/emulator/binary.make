@@ -93,6 +93,14 @@ $(foreach src,$(LOCAL_QT_RESOURCES), \
     $(eval $(call compile-qt-resources,$(src))) \
 )
 
+# Build dynamic resources only for 64-bit binaries: dynamic resources are the
+# same for all bitnesses anyway.
+ifeq ($(LOCAL_BITS),64)
+    $(foreach src,$(LOCAL_QT_DYNAMIC_RESOURCES), \
+        $(eval $(call compile-qt-dynamic-resources,$(src))) \
+    )
+endif
+
 $(foreach src,$(LOCAL_QT_UI_SRC_FILES), \
     $(eval $(call compile-qt-uic-source,$(src))) \
 )

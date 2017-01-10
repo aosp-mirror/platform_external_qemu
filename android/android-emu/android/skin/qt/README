@@ -52,9 +52,12 @@ automated scanning of all sources for Q_OBJECT macros).
 
 The build system also supports running the 'rcc' tool to translate resource
 files (*.qrc) into auto-generated C++ sources that are automatically compiled
-into the current module, with something like:
+into the current module (non-DYNAMIC version), or a separate .rcc file
+(DYNAMIC version), with something like:
 
     ANDROID_SKIN_QT_RESOURCES := \
+        android/skin/qt/static_resources.qrc
+    ANDROID_SKIN_QT_DYNAMIC_RESOURCES := \
         android/skin/qt/resources.qrc
 
 Note that the file's basename is used to invoke 'rcc' with the --name <name>
