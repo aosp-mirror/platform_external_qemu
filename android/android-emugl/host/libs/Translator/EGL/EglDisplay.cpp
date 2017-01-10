@@ -215,7 +215,8 @@ public:
 void EglDisplay::addSimplePixelFormat(int red_size,
                                       int green_size,
                                       int blue_size,
-                                      int alpha_size) {
+                                      int alpha_size,
+                                      int renderable_type) {
     std::sort(m_configs.begin(), m_configs.end(), CompareEglConfigs::StaticCompare());
 
     EGLConfig match;
@@ -232,7 +233,7 @@ void EglDisplay::addSimplePixelFormat(int red_size,
                     EGL_DONT_CARE,
                     EGL_DONT_CARE,
                     EGL_DONT_CARE,
-                    EGL_DONT_CARE,
+                    renderable_type,
                     EGL_DONT_CARE,
                     EGL_DONT_CARE,
                     EGL_DONT_CARE,
@@ -277,10 +278,15 @@ void EglDisplay::addSimplePixelFormat(int red_size,
 }
 
 void EglDisplay::addMissingConfigs() {
-    addSimplePixelFormat(5, 6, 5, 0); // RGB_565
-    addSimplePixelFormat(8, 8, 8, 0); // RGB_888
-    // (Host GPUs that are newer may not list RGB_888
-    // out of the box.)
+
+    static int renderableTypes[] = {EGL_OPENGL_ES_BIT, EGL_OPENGL_ES2_BIT | EGL_OPENGL_ES_BIT};
+    for (int i = 0; i < sizeof(renderableTypes)/sizeof(renderableTypes[0]); i ++) {
+        int renderableType = renderableTypes[i];
+        addSimplePixelFormat(5, 6, 5, 0, renderableType); // RGB_565
+        addSimplePixelFormat(8, 8, 8, 0, renderableType); // RGB_888
+        // (Host GPUs that are newer may not list RGB_888
+        // out of the box.)
+    }
 }
 
 void EglDisplay::initConfigurations(int renderableType) {

@@ -63,26 +63,53 @@
 }
 @end
 
+int getAttrListLength(NSOpenGLPixelFormatAttribute* list) {
+    int count = 0;
+    while (list[count++] != 0) {}
+    return count;
+
+}
 int getNumPixelFormats(){
-    int size;
+    int size, variants;
     NSOpenGLPixelFormatAttribute** attrib_lists = getPixelFormatsAttributes(&size);
-    return size;
+    NSOpenGLPixelFormatAttribute** variant_lists = getPixelFormatVariants(&variants);
+    return size*variants;
 }
 
 void* getPixelFormat(int i){
-    int size;
+    int size, variants;
     NSOpenGLPixelFormatAttribute** attrib_lists = getPixelFormatsAttributes(&size);
-    return [[NSOpenGLPixelFormat alloc] initWithAttributes:attrib_lists[i]];
+    NSOpenGLPixelFormatAttribute** variant_lists = getPixelFormatVariants(&variants);
+
+    int attributes_num = i % size;
+    int variant_num = i / size;
+    NSOpenGLPixelFormatAttribute* attrib_list = attrib_lists[attributes_num];
+    NSOpenGLPixelFormatAttribute* variant_list = variant_lists[variant_num];
+
+    int attrib_size = getAttrListLength(attrib_list);
+    int variant_size = getAttrListLength(variant_list);
+    int new_size = attrib_size + variant_size - 1;
+
+    NSOpenGLPixelFormatAttribute* newattr = malloc(sizeof(NSOpenGLPixelFormatAttribute)*new_size);
+
+    memcpy (newattr, attrib_list, sizeof(NSOpenGLPixelFormatAttribute)*attrib_size);
+    memcpy (&(newattr[attrib_size-1]), variant_list, sizeof(NSOpenGLPixelFormatAttribute)*variant_size);
+    //Generate new attributelist by combining the two
+    void * pixelFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes:newattr];
+    free(newattr);
+    return pixelFormat;
 }
 
 int getPixelFormatDefinitionAlpha(int i) {
-    int size;
+    int size, variants;
     NSOpenGLPixelFormatAttribute** attrib_lists = getPixelFormatsAttributes(&size);
-    NSOpenGLPixelFormatAttribute* attribs = attrib_lists[i];
+    int attributes_num = i % size;
+    NSOpenGLPixelFormatAttribute* attribs = attrib_lists[attributes_num];
     while (*attribs) {
         switch (*attribs) {
         // These are the ones that take a value, according to the current
         // NSOpenGLPixelFormat docs
+        case NSOpenGLPFAOpenGLProfile:
         case NSOpenGLPFAAuxBuffers:
         case NSOpenGLPFAColorSize:
         case NSOpenGLPFADepthSize:
