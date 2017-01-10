@@ -48,6 +48,7 @@ public:
     void validateAtt0PostDraw(void);
     const float* getAtt0(void) const {return m_attribute0value;}
 
+    int getDefaultVAO() const { return m_defaultVAO; }
 protected:
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
 private:
@@ -59,6 +60,8 @@ private:
     GLfloat* m_att0Array = nullptr;
     unsigned int m_att0ArrayLength = 0;
     bool m_att0NeedsDisable = false;
+
+    GLuint m_defaultVAO;
 };
 
 #endif
