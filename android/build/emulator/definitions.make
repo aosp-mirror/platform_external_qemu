@@ -80,6 +80,9 @@ local-symbol-install-path = $(subst $(BUILD_OBJS_DIR),$(_BUILD_SYMBOLS_DIR),$(1)
 # Location of final debug info file based on final executable/shared library path
 local-debug-info-install-path = $(subst $(BUILD_OBJS_DIR),$(_BUILD_DEBUG_INFO_DIR),$(1))$(if $(findstring darwin,$(BUILD_TARGET_OS)),.dSYM)
 
+# Location of resource files
+local-resource-install-path = $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)resources/$(1)
+
 ldlibs_start_whole := -Wl,--whole-archive
 ldlibs_end_whole := -Wl,--no-whole-archive
 ldlibs_force_load := -Wl,-force_load,
@@ -242,11 +245,23 @@ define transform-generated-source
 $(hide) $(PRIVATE_CUSTOM_TOOL)
 endef
 
+# Installs a file to a new destination
+define install-file
+_SRC := $(1)
+_DST := $(2)
+LOCAL_ADDITIONAL_DEPENDENCIES += $$(_DST)
+$$(_DST): PRIVATE_DST := $$(_DST)
+$$(_DST): PRIVATE_SRC := $$(_SRC)
+$$(_DST): $$(_SRC)
+	@mkdir -p $$(dir $$(PRIVATE_DST))
+	@echo "Install: $$(PRIVATE_DST)"
+	$(hide) cp -f $$(PRIVATE_SRC) $$(PRIVATE_DST)
+endef
+
 # Installs a binary to a new destination
 # If required, will strip the binary
 define install-binary
 _SRC := $(1)
-_SRC1 := $$(notdir $$(_SRC))
 _DST := $(2)
 _BUILD_EXECUTABLES += $$(_DST)
 $$(_DST): PRIVATE_DST := $$(_DST)
@@ -417,7 +432,7 @@ $$(MOC_SRC): $$(PRIVATE_SRC) $$(MOC_TOOL)
 $$(eval $$(call compile-generated-cxx-source,$$(MOC_SRC)))
 endef
 
-# Generate and compile a Qt resource source file through the 'rcc' tool.
+# Generate and compile a static Qt resource source file through the 'rcc' tool.
 # NOTE: This expects QT_RCC_TOOL to be defined.
 define compile-qt-resources
 SRC := $(1)
@@ -430,10 +445,29 @@ $$(RCC_SRC): PRIVATE_DST := $$(RCC_SRC)
 $$(RCC_SRC): PRIVATE_NAME := $$(notdir $$(SRC:%.qrc=%))
 $$(RCC_SRC): $$(PRIVATE_SRC) $$(QT_RCC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
-	@echo "Qt rcc: $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
+	@echo "Qt rcc (static): $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
 	$(hide) $$(QT_RCC_TOOL) -o $$(PRIVATE_DST) --name $$(PRIVATE_NAME) $$(PRIVATE_SRC)
 
 $$(eval $$(call compile-generated-cxx-source,$$(RCC_SRC)))
+endef
+
+# Generate and install a separate Qt resource file through the 'rcc' tool.
+# NOTE: This expects QT_RCC_TOOL to be defined.
+define compile-qt-dynamic-resources
+SRC := $(1)
+RCC_OUT := $$(LOCAL_OBJS_DIR)/$$(notdir $$(SRC:%.qrc=%.rcc))
+ifeq (,$$(strip $$(QT_RCC_TOOL)))
+$$(error QT_RCC_TOOL is not defined when trying to generate $$(RCC_OUT) !!)
+endif
+$$(RCC_OUT): PRIVATE_SRC := $$(LOCAL_PATH)/$$(SRC)
+$$(RCC_OUT): PRIVATE_DST := $$(RCC_OUT)
+$$(RCC_OUT): PRIVATE_NAME := $$(notdir $$(SRC:%.qrc=%))
+$$(RCC_OUT): $$(PRIVATE_SRC) $$(QT_RCC_TOOL)
+	@mkdir -p $$(dir $$(PRIVATE_DST))
+	@echo "Qt rcc (dynamic): $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
+	$(hide) $$(QT_RCC_TOOL) -binary -o $$(PRIVATE_DST) --name $$(PRIVATE_NAME) $$(PRIVATE_SRC)
+
+$$(eval $$(call install-file,$$(RCC_OUT),$$(call local-resource-install-path,$$(notdir $$(RCC_OUT)))))
 endef
 
 # Process a Qt .ui source file through the 'uic' tool to generate a header.
