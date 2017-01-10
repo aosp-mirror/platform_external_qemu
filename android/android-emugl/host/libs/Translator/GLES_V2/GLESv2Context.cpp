@@ -80,7 +80,9 @@ void GLESv2Context::init(GlLibrary* glLib) {
             // Many dEQP cube map tests fail without this enable.
             dispatcher().glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         }
-
+        //Generate default VAO
+        glGenVertexArrays(1, &m_defaultVAO);
+        glBindVertexArray(getDefaultVAO());
     }
     m_initialized = true;
 }
