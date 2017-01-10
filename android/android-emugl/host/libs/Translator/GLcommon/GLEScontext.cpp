@@ -835,21 +835,33 @@ void GLEScontext::releaseGlobalLock() {
 void GLEScontext::initCapsLocked(const GLubyte * extensionString)
 {
     const char* cstring = (const char*)extensionString;
-
+    fprintf(stderr, "%s %s\n", __FUNCTION__, "GL_MAX_VERTEX_ATTRIBS");
     s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,&s_glSupport.maxVertexAttribs);
+    fprintf(stderr, "%s %s\n", __FUNCTION__, "GL_MAX_CLIP_PLANES");
     s_glDispatch.glGetIntegerv(GL_MAX_CLIP_PLANES,&s_glSupport.maxClipPlane);
-    s_glDispatch.glGetIntegerv(GL_MAX_LIGHTS,&s_glSupport.maxLights);
+    //fprintf(stderr, "%s %s\n", __FUNCTION__, "GL_MAX_LIGHTS");
+    //s_glDispatch.glGetIntegerv(GL_MAX_LIGHTS,&s_glSupport.maxLights);
+    fprintf(stderr, "%s %s\n", __FUNCTION__, "GL_MAX_TEXTURE_SIZE");
     s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_SIZE,&s_glSupport.maxTexSize);
-    s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_UNITS,&s_glSupport.maxTexUnits);
+    //fprintf(stderr, "%s %s\n", __FUNCTION__, "GL_MAX_TEXTURE_UNITS");
+    //s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_UNITS,&s_glSupport.maxTexUnits);
+    fprintf(stderr, "%s %s\n", __FUNCTION__, "GL_MAX_TEXTURE_IMAGE_UNITS");
     s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS,&s_glSupport.maxTexImageUnits);
+    fprintf(stderr, "%s %s\n", __FUNCTION__, "GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS");
     s_glDispatch.glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &s_glSupport.maxCombinedTexImageUnits);
 
+    fprintf(stderr, "%s %s\n", __FUNCTION__, "GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS");
     s_glDispatch.glGetIntegerv(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS, &s_glSupport.maxTransformFeedbackSeparateAttribs);
+    fprintf(stderr, "%s %s\n", __FUNCTION__, "GL_MAX_UNIFORM_BUFFER_BINDINGS");
     s_glDispatch.glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &s_glSupport.maxUniformBufferBindings);
-    s_glDispatch.glGetIntegerv(GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS, &s_glSupport.maxAtomicCounterBufferBindings);
-    s_glDispatch.glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, &s_glSupport.maxShaderStorageBufferBindings);
+    //fprintf(stderr, "%s %s\n", __FUNCTION__, "GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS");
+    //s_glDispatch.glGetIntegerv(GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS, &s_glSupport.maxAtomicCounterBufferBindings);
+    //fprintf(stderr, "%s %s\n", __FUNCTION__, "GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS");
+    //s_glDispatch.glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, &s_glSupport.maxShaderStorageBufferBindings);
+    fprintf(stderr, "%s %s\n", __FUNCTION__, "GL_MAX_DRAW_BUFFERS");
     s_glDispatch.glGetIntegerv(GL_MAX_DRAW_BUFFERS, &s_glSupport.maxDrawBuffers);
-    s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_ATTRIB_BINDINGS, &s_glSupport.maxVertexAttribBindings);
+    //fprintf(stderr, "%s %s\n", __FUNCTION__, "GL_MAX_VERTEX_ATTRIB_BINDINGS");
+    //s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_ATTRIB_BINDINGS, &s_glSupport.maxVertexAttribBindings);
 
     // Clear GL error in case these enums not supported.
     s_glDispatch.glGetError();
