@@ -14,6 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# you need to install yasm
+# on Linux: sudo apt-get install yams
+# on MAC: 
+# (1) ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+# (2) brew install yams
+
 . $(dirname "$0")/utils/common.shi
 
 shell_import utils/aosp_dir.shi

@@ -78,13 +78,13 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             MY_FLAGS="--extra-ldflags=\"-ldl\""
             ;;
         linux-x86)
-            MY_FLAGS="--target-os=linux --arch=x86 --enable-cross-compile --extra-ldflags=\"-ldl\""
+            MY_FLAGS="--target-os=linux --arch=x86 --enable-cross-compile --cc=gcc --extra-ldflags=\"-ldl\""
             ;;
         windows-x86)
-            MY_FLAGS="--target-os=mingw32 --arch=x86 --enable-cross-compile"
+            MY_FLAGS="--target-os=mingw32 --arch=x86 --enable-cross-compile --cc=gcc"
             ;;
         windows-x86_64)
-            MY_FLAGS="--target-os=mingw32 --arch=x86_64 --enable-cross-compile"
+            MY_FLAGS="--target-os=mingw32 --arch=x86_64 --enable-cross-compile --cc=gcc "
             ;;
         darwin-*)
             # Use host compiler.
@@ -97,7 +97,6 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         builder_build_autotools_package_ffmpeg ffmpeg \
                 $MY_FLAGS \
-                --cc=gcc \
                 --extra-cflags=\"-I$PREBUILTS_DIR/common/x264/$SYSTEM/include\" \
                 --extra-ldflags=\"-L$PREBUILTS_DIR/common/x264/$SYSTEM/lib\" \
                 --enable-static \

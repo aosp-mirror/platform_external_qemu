@@ -618,6 +618,16 @@ probe_prebuilts_dir "Qt" QT_PREBUILTS_DIR qt
 ###
 probe_prebuilts_dir "e2fsprogs" E2FSPROGS_PREBUILTS_DIR common/e2fsprogs
 
+###
+###  ffmpeg probe
+###
+probe_prebuilts_dir "ffmpeg" FFMPEG_PREBUILTS_DIR common/ffmpeg
+
+###
+###  x264 probe
+###
+probe_prebuilts_dir "x264" X264_PREBUILTS_DIR common/x264
+
 # create the objs directory that is going to contain all generated files
 # including the configuration ones
 #
@@ -1047,6 +1057,8 @@ echo "BREAKPAD_PREBUILTS_DIR := $BREAKPAD_PREBUILTS_DIR" >> $config_mk
 # libuuid is a part of e2fsprogs package
 echo "LIBUUID_PREBUILTS_DIR := $E2FSPROGS_PREBUILTS_DIR" >> $config_mk
 echo "PROTOBUF_PREBUILTS_DIR := $PROTOBUF_PREBUILTS_DIR" >> $config_mk
+echo "FFMPEG_PREBUILTS_DIR := $FFMPEG_PREBUILTS_DIR" >> $config_mk
+echo "X264_PREBUILTS_DIR := $X264_PREBUILTS_DIR" >> $config_mk
 
 if [ $OPTION_DEBUG = "yes" ] ; then
     echo "BUILD_DEBUG := true" >> $config_mk
