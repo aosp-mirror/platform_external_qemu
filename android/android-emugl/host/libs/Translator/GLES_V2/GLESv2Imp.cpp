@@ -3074,6 +3074,9 @@ GL_APICALL void GL_APIENTRY glGenVertexArraysOES(GLsizei n, GLuint* arrays) {
 
 GL_APICALL void GL_APIENTRY glBindVertexArrayOES(GLuint array) {
     GET_CTX_V2();
+    if (!array) {
+        array = ctx->getDefaultVAO();
+    }
     ctx->setVertexArrayObject(array);
     ctx->dispatcher().glBindVertexArray(array);
 }
