@@ -879,6 +879,15 @@ extern "C" int main(int argc, char **argv) {
     std::string netDevice =
             StringFormat("%s,netdev=mynet", kTarget.networkDeviceType);
     args[n++] = netDevice.c_str();
+ 
+    // add 2nd nic as eth1
+    args[n++] = "-netdev";
+    args[n++] = "user,id=mynet2,net=10.0.3.0/24";
+    args[n++] = "-device";
+    std::string netDevice2 =
+            StringFormat("%s,netdev=mynet2", kTarget.networkDeviceType);
+    args[n++] = netDevice2.c_str();
+
     args[n++] = "-show-cursor";
 
     // TODO: the following *should* re-enable -tcpdump in QEMU2 when we have
