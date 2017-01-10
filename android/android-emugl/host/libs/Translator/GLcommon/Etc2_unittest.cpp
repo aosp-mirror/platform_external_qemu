@@ -21,13 +21,21 @@ namespace {
 class Etc2Test : public ::testing::Test {
 protected:
     static const int cRgbPatchSize = 48;
+    static const int cRgb8A1PatchSize = 64;
     static const int cRgbEncodedSize = 8;
     static const int cAlphaPatchSize = 16;
     static const int cAlphaEncodedSize = 8;
     void decodeRgbTest(const etc1_byte* bytesEncoded, const etc1_byte* expectedDecoded) {
         etc1_byte decoded[cRgbPatchSize];
-        etc2_decode_rgb_block(bytesEncoded, decoded);
+        etc2_decode_rgb_block(bytesEncoded, false, decoded);
         for (int i=0; i<cRgbPatchSize; i++) {
+            EXPECT_EQ(expectedDecoded[i], decoded[i]);
+        }
+    }
+    void decodeRgb8A1Test(const etc1_byte* bytesEncoded, const etc1_byte* expectedDecoded) {
+        etc1_byte decoded[cRgb8A1PatchSize];
+        etc2_decode_rgb_block(bytesEncoded, true, decoded);
+        for (int i=0; i<cRgb8A1PatchSize; i++) {
             EXPECT_EQ(expectedDecoded[i], decoded[i]);
         }
     }
@@ -89,7 +97,7 @@ TEST_F(Etc2Test, EAC_Alpha) {
                   (const etc1_byte*)expectedDecoded);
 }
 
-// EAC 16bit decoder tess.
+// EAC 16bit decoder tests.
 TEST_F(Etc2Test, EAC_R11_0) {
     const int elementBytes = 2;
     const unsigned char encoded[cAlphaEncodedSize]
@@ -129,3 +137,13 @@ TEST_F(Etc2Test, EAC_SIGNED_R11) {
                   (const etc1_byte*)expectedDecoded);
 }
 
+// ETC2 RGB8A1 and sRGB8A1 tests.
+TEST_F(Etc2Test, ETC2RGB8A1_All0) {
+    const unsigned char encoded[cRgbEncodedSize] = {0, 0, 0, 0, 255, 255, 0, 0};
+    const unsigned char expectedDecoded[cRgb8A1PatchSize] = {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    decodeRgb8A1Test((const etc1_byte*)encoded, (const etc1_byte*)expectedDecoded);
+}
