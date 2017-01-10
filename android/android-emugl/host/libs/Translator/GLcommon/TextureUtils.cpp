@@ -112,6 +112,16 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
                         format = GL_RG16_SNORM;
                         type = GL_SHORT;
                         break;
+                    case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+                        convertedInternalFormat = GL_RGBA8;
+                        etcFormat = EtcRGB8A1;
+                        format = GL_RGBA;
+                        break;
+                    case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+                        convertedInternalFormat = GL_SRGB8_ALPHA8;
+                        etcFormat = EtcRGB8A1;
+                        format = GL_RGBA;
+                        break;
                 }
 
                 int pixelSize = etc_get_decoded_pixel_size(etcFormat);
