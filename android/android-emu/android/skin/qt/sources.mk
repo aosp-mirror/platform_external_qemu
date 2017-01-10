@@ -98,6 +98,9 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/user-actions-counter.h
 
 ANDROID_SKIN_QT_RESOURCES := \
+    android/skin/qt/static_resources.qrc \
+
+ANDROID_SKIN_QT_DYNAMIC_RESOURCES := \
     android/skin/qt/resources.qrc \
 
 ANDROID_SKIN_QT_UI_SRC_FILES := \

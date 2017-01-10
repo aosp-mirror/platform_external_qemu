@@ -11,8 +11,6 @@
 -->
 <RCC>
     <qresource prefix="/">
-        <!-- Qt wants an extra 'qt/' in this path name -->
-        <file alias="qt/etc/qt.conf">etc/qt.conf</file>
         <file alias="styles/stylesheet_template.css">styles/stylesheet_template.css</file>
         <file alias="styles/fonts_stylesheet_template.css">styles/fonts_stylesheet_template.css</file>
     </qresource>
