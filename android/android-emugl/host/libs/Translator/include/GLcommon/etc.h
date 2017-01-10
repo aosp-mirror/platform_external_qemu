@@ -61,7 +61,7 @@ void etc1_encode_block(const etc1_byte* pIn, etc1_uint32 validPixelMask, etc1_by
 // 4 x 4 square of 3-byte pixels in form R, G, B. Byte (3 * (x + 4 * y) is the R
 // value of pixel (x, y).
 
-void etc2_decode_rgb_block(const etc1_byte* pIn, etc1_byte* pOut);
+void etc2_decode_rgb_block(const etc1_byte* pIn, bool isPunchthroughAlpha, etc1_byte* pOut);
 
 // Decode a block of single channel pixels
 // This is used when decoding the alpha channel of RGBA8_ETC2_EAC format, or
