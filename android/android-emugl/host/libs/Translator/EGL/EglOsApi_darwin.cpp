@@ -124,16 +124,18 @@ void pixelFormatToConfig(int index,
     if (!doubleBuffer) {
         return; //pixel double buffer
     }
+    EGLint openGLProfile;
+    getPixelFormatAttrib(frmt, MAC_OPENGL_PROFILE, &openGLProfile);
 
     EGLint window = 0, pbuffer = 0;
     getPixelFormatAttrib(frmt, MAC_DRAW_TO_WINDOW, &window);
     getPixelFormatAttrib(frmt, MAC_DRAW_TO_PBUFFER, &pbuffer);
 
     info.surface_type = 0;
-    if (window) {
-        info.surface_type |= EGL_WINDOW_BIT;
+    if (window || openGLProfile & MAC_OPENGL_PROFILE_3_2) {
+      info.surface_type |= EGL_WINDOW_BIT;
     }
-    if (pbuffer) {
+    if (pbuffer || openGLProfile & MAC_OPENGL_PROFILE_3_2) {
         info.surface_type |= EGL_PBUFFER_BIT;
     }
     if (!info.surface_type) {
@@ -145,7 +147,11 @@ void pixelFormatToConfig(int index,
     info.native_visual_type = EGL_NONE;
     info.caveat = EGL_NONE;
     info.native_renderable = EGL_FALSE;
-    info.renderable_type = renderableType;
+    if (openGLProfile == MAC_OPENGL_PROFILE_LEGACY) {
+        info.renderable_type = EGL_OPENGL_ES_BIT;
+    } else {
+        info.renderable_type = EGL_OPENGL_ES2_BIT | EGL_OPENGL_ES3_BIT;
+    }
     info.max_pbuffer_width = PBUFFER_MAX_WIDTH;
     info.max_pbuffer_height = PBUFFER_MAX_HEIGHT;
     info.max_pbuffer_size = PBUFFER_MAX_PIXELS;
