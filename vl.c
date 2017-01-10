@@ -5603,6 +5603,8 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         on_main_loop_done();
     }
 
+    fprintf(stderr, "%s: main loop done\n", __func__);
+
     res_free();
 #ifdef CONFIG_TPM
     tpm_cleanup();
@@ -5625,6 +5627,8 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     migration_object_finalize();
     /* TODO: unref root container, check all devices are ok */
 
+    fprintf(stderr, "%s: machine teardown begin\n", __func__);
+
     /* bug: 120951634 Eagerly tear down the MemoryRegion here */
     {
         MachineClass *mc;
@@ -5633,6 +5637,8 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             mc->teardown();
         }
     }
+
+    fprintf(stderr, "%s: machine teardown end\n", __func__);
 
     if (qemu_mutex_iothread_locked()) {
         qemu_mutex_unlock_iothread();
@@ -5646,5 +5652,6 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #ifdef CONFIG_ANDROID
     handle_emulator_restart();
 #endif
+    fprintf(stderr, "%s: exit vl.c main\n", __func__);
     return 0;
 }
