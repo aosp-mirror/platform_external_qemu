@@ -527,5 +527,36 @@ private:
     NameSpace* m_vaoNameSpace = nullptr;
 };
 
+class ScopedGLContextChecker{
+    public:
+    ScopedGLContextChecker (GLEScontext * ctx, const char * func_name) :
+        mCtx(ctx), mFuncName(func_name) {
+        GLuint err = mCtx->dispatcher().glGetError();
+        if (err != GL_NO_ERROR) {
+            fprintf(stderr, "GL dispatch Error 0x%x already exists when calling %s\n", err, mFuncName);
+        }
+        err = mCtx->getGLerror();
+        if (err != GL_NO_ERROR) {
+            fprintf(stderr, "GL Error 0x%x already exists when calling %s\n", err, mFuncName);
+        }
+    }
+
+    ~ScopedGLContextChecker () {
+         GLuint err = mCtx->dispatcher().glGetError();
+        if (err != GL_NO_ERROR) {
+            fprintf(stderr, "GL dispatch Error 0x%x generated during calling %s\n", err, mFuncName);
+        }
+        err = mCtx->getGLerror();
+        if (err != GL_NO_ERROR) {
+            fprintf(stderr, "GL Error 0x%x generated during calling %s\n", err, mFuncName);
+        }
+
+    }
+    private:
+    GLEScontext * mCtx;
+    const char * mFuncName;
+    DISALLOW_COPY_AND_ASSIGN(ScopedGLContextChecker);
+};
+
 #endif
 
