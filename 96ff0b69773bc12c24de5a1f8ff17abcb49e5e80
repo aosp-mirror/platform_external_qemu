@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "77e75a57_02a1b88b",
+        "filename": "android/scripts/build-x264.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-01-10T17:44:46Z",
+      "side": 1,
+      "message": "space",
+      "range": {
+        "startLine": 19,
+        "startChar": 9,
+        "endLine": 19,
+        "endChar": 10
+      },
+      "revId": "96ff0b69773bc12c24de5a1f8ff17abcb49e5e80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
