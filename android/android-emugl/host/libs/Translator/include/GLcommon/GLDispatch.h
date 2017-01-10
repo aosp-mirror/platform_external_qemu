@@ -25,6 +25,8 @@
 #include "GLutils.h"
 
 #include "emugl/common/mutex.h"
+#include <cstring>
+#include <type_traits>
 
 #define GLAPIENTRY GL_APIENTRY
 typedef void (*FUNCPTR_NO_ARGS_RET_VOID)();
@@ -35,8 +37,11 @@ typedef void (*FUNCPTR_DELETE_SYNC)(GLsync);
 
 class GlLibrary;
 
+#define GLES_DECLARE_PRIV_METHOD(return_type, function_name, signature, args) \
+    static GL_APICALL return_type (GL_APIENTRY *function_name##_priv) signature;
+
 #define GLES_DECLARE_METHOD(return_type, function_name, signature, args) \
-    static GL_APICALL return_type (GL_APIENTRY *function_name) signature;
+    static return_type function_name signature;
 
 class GLDispatch {
 public:
@@ -46,6 +51,7 @@ public:
     bool isInitialized() const;
     void dispatchFuncs(GLESVersion version, GlLibrary* glLib);
 
+    LIST_GLES_FUNCTIONS(GLES_DECLARE_PRIV_METHOD, GLES_DECLARE_PRIV_METHOD)
     LIST_GLES_FUNCTIONS(GLES_DECLARE_METHOD, GLES_DECLARE_METHOD)
 
 private:
@@ -68,4 +74,49 @@ enum GLDispatchMaxGLESVersion {
 
 extern "C" GL_APICALL GLDispatchMaxGLESVersion GL_APIENTRY gl_dispatch_get_max_version();
 
+class GLDispatchChecker {
+public:
+    GLDispatchChecker(const char * funcName):
+            mFuncName(funcName) {
+        if (strcmp(funcName, "glGetError")) {
+            GLuint err = GLDispatch::glGetError();
+            if (err != GL_NO_ERROR) {
+                fprintf (stderr, "GLDispatch error 0x%x existed before running %s\n", err, mFuncName);
+            }
+            fprintf (stderr, "GLDispatch calling %s (", funcName);
+        }
+    }
+
+    void printArgs() {
+        if (strcmp(mFuncName, "glGetError")) {
+            fprintf(stderr, ")\n");
+        }
+    }
+
+    template <typename T, typename...Ts>
+    void printArgs(const T &first, const Ts&... rest) {
+        const int n = sizeof...(Ts);
+        if (strcmp(mFuncName, "glGetError")) {
+            const char *fmt = "0x%x%s";
+            if(std::is_same<T,GLuint>::value ||
+               std::is_same<T,GLint>::value) {
+                fmt = "%d%s";
+            } else if (std::is_same<T,GLenum>::value) {
+                fmt = "%04X%s";
+            } else if (std::is_same<T,double>::value) {
+                fmt = "%f%s";
+            } else if (std::is_same<T,GLfloat>::value) {
+                fmt = "%f%s";
+            } else if (std::is_same<T,GLvoid>::value) {
+                fmt = "%p%s";
+            }
+            fprintf(stderr, fmt, first, n?", ":"");
+            printArgs(rest...);
+        }
+    }
+
+    ~GLDispatchChecker();
+private:
+    const char * mFuncName;
+};
 #endif  // GL_DISPATCH_H
