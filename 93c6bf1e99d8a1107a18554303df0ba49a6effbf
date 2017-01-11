@@ -22,6 +22,30 @@
       "revId": "93c6bf1e99d8a1107a18554303df0ba49a6effbf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "037501b9_fcccbd43",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 638,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-11T23:02:54Z",
+      "side": 1,
+      "message": "Good catch! Done (+ GL_DEPTH_STENCIL_ATTACHMENT)",
+      "parentUuid": "f7c18ac3_64c44a4f",
+      "range": {
+        "startLine": 638,
+        "startChar": 17,
+        "endLine": 638,
+        "endChar": 29
+      },
+      "revId": "93c6bf1e99d8a1107a18554303df0ba49a6effbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
