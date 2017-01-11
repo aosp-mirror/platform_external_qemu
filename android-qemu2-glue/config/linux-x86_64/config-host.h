@@ -20,7 +20,6 @@
     NULL
 #define CONFIG_BDRV_RO_WHITELIST\
     NULL
-#define CONFIG_VNC 1
 #define CONFIG_FNMATCH 1
 #define QEMU_VERSION "2.7.0"
 #define CONFIG_SDL 1
@@ -65,8 +64,7 @@
 #define CONFIG_INT128 1
 #define CONFIG_TPM 1
 #define CONFIG_TPM_PASSTHROUGH 1
-#define CONFIG_TRACE_LOG 1
+#define CONFIG_TRACE_NOP 1
 #define CONFIG_TRACE_FILE trace
 #define CONFIG_IASL iasl
 #define HOST_DSOSUF ".so"
-#define CONFIG_BLOCK_DELAYED_FLUSH  1
