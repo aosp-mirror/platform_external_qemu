@@ -201,14 +201,14 @@ struct IntelHDAState {
     OBJECT_CHECK(IntelHDAState, (obj), TYPE_INTEL_HDA_GENERIC)
 
 struct IntelHDAReg {
-    const char *name;      /* register name */
-    uint32_t   size;       /* size in bytes */
-    uint32_t   reset;      /* reset value */
-    uint32_t   wmask;      /* write mask */
-    uint32_t   wclear;     /* write 1 to clear bits */
-    uint32_t   offset;     /* location in IntelHDAState */
-    uint32_t   shift;      /* byte access entries for dwords */
-    uint32_t   stream;
+    const char *name;        /* register name */
+    uint16_t   offset : 12;  /* location in IntelHDAState */
+    uint16_t   size : 4;     /* size in bytes */
+    uint8_t    shift;        /* byte access entries for dwords */
+    uint8_t    stream;
+    uint32_t   reset;        /* reset value */
+    uint32_t   wmask;        /* write mask */
+    uint32_t   wclear;       /* write 1 to clear bits */
     void       (*whandler)(IntelHDAState *d, const IntelHDAReg *reg, uint32_t old);
     void       (*rhandler)(IntelHDAState *d, const IntelHDAReg *reg);
 };
