@@ -31,6 +31,7 @@
 
 #include "android/telephony/modem_driver.h"
 
+#include "android/ffmpeg-muxer.h"
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
@@ -156,6 +157,34 @@ static void _emulator_window_on_gpu_frame(void* context,
     skin_ui_update_gpu_frame(emulator->ui, width, height, pixels);
 }
 
+static struct ffmpeg_recorder *g_ffmpeg_recorder = NULL;
+static int g_ffmpeg_done = 0;
+// Used as an emugl callback to get each frame of GPU display.
+static void _recording_callback_on_gpu_frame(void* context,
+                                          int width,
+                                          int height,
+                                          const void* pixels) {
+    static int count = 0;
+    //EmulatorWindow* emulator = (EmulatorWindow*)context;
+    printf("_recording_callback_on_gpu_frame(width=%d, height=%d)\n", width, height);
+    if (!g_ffmpeg_done) {
+	    if (g_ffmpeg_recorder == NULL) {
+		g_ffmpeg_recorder = ffmpeg_create_recorder("test2.mp4");
+                if (g_ffmpeg_recorder)
+                    ffmpeg_add_video_track(g_ffmpeg_recorder, width, height, 4*1024*1024, 60);
+            }
+	    if (count < 4000)
+	    	ffmpeg_encode_video_frame(g_ffmpeg_recorder, (const uint8_t *)pixels, width * height * 4);
+
+	    if (count > 4000) {
+		ffmpeg_delete_recorder(g_ffmpeg_recorder);
+		g_ffmpeg_done = 1;
+	    }
+    }
+ 
+    count ++;
+}
+
 static void
 emulator_window_setup( EmulatorWindow*  emulator )
 {
@@ -257,6 +286,10 @@ emulator_window_setup( EmulatorWindow*  emulator )
                                     _emulator_window_on_gpu_frame);
     }
 
+    gpu_frame_set_post_callback(looper_getForThread(),
+                                    emulator,
+                                    _recording_callback_on_gpu_frame);
+
     skin_ui_reset_title(emulator->ui);
 }
 
@@ -327,6 +360,8 @@ static int emulator_window_framebuffer_get_depth(void* opaque) {
     return fb->bits_per_pixel;
 }
 
+int test_muxer(int argc, char **argv);
+
 int emulator_window_init(EmulatorWindow* emulator,
                          const AConfig* aconfig,
                          const char* basepath,
@@ -342,6 +377,9 @@ int emulator_window_init(EmulatorWindow* emulator,
     };
 
     emulator->aconfig = aconfig;
+
+//char *argv[] = {"ffmeg", "test.mp4", NULL};
+//test_muxer(2, argv);
 
     // if not building for a gui-less window, create a skin layout file,
     // else skip as no skin will be displayed

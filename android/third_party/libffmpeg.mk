@@ -6,7 +6,7 @@ LOCAL_PATH := $(call my-dir)
 FFMPEG_TOP_DIR := $(FFMPEG_PREBUILTS_DIR)/$(BUILD_TARGET_TAG)
 
 $(call define-emulator-prebuilt-library,\
-    emulator-avcodec,\
+    emulator-libavcodec,\
     $(FFMPEG_TOP_DIR)/lib/libavcodec.a)
 
 $(call define-emulator-prebuilt-library,\
@@ -39,11 +39,11 @@ $(call define-emulator-prebuilt-library,\
 
 FFMPEG_INCLUDES := $(FFMPEG_TOP_DIR)/include
 FFMPEG_STATIC_LIBRARIES := \
-    emulator-avformat \
-    emulator-avfilter \
-    emulator-avcodec \
-    emulator-swresample \
-    emulator-swscale \
-    emulator-avutil \
+    emulator-libavformat \
+    emulator-libavfilter \
+    emulator-libavcodec \
+    emulator-libswresample \
+    emulator-libswscale \
+    emulator-libavutil \
 
 LOCAL_PATH := $(FFMPEG_OLD_LOCAL_PATH)
