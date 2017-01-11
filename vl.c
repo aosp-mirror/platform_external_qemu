@@ -267,9 +267,6 @@ int icount_align_option;
 uint8_t qemu_uuid[16];
 bool qemu_uuid_set;
 
-static NotifierList exit_notifiers =
-    NOTIFIER_LIST_INITIALIZER(exit_notifiers);
-
 static NotifierList machine_init_done_notifiers =
     NOTIFIER_LIST_INITIALIZER(machine_init_done_notifiers);
 
@@ -2896,22 +2893,6 @@ static MachineClass *machine_parse(const char *name)
     return NULL;
 }
 
-void qemu_add_exit_notifier(Notifier *notify)
-{
-    notifier_list_add(&exit_notifiers, notify);
-}
-
-void qemu_remove_exit_notifier(Notifier *notify)
-{
-    notifier_remove(notify);
-}
-
-static void qemu_run_exit_notifiers(void)
-{
-    notifier_list_notify(&exit_notifiers, NULL);
-    notifier_list_init(&exit_notifiers);
-}
-
 static bool machine_init_done;
 
 void qemu_add_machine_init_done_notifier(Notifier *notify)
@@ -3267,7 +3248,6 @@ int main(int argc, char** argv, char** envp)
     qemu_init_cpu_loop();
     qemu_mutex_lock_iothread();
 
-    atexit(qemu_run_exit_notifiers);
     error_set_progname(argv[0]);
     qemu_init_exec_dir(argv[0]);
 
@@ -5333,7 +5313,7 @@ int main(int argc, char** argv, char** envp)
     qemu_chr_cleanup();
 
     /* make sure we run the exit notifiers deterministically if we can */
-    qemu_run_exit_notifiers();
+    qemu_exit_notifiers_notify();
 
     return 0;
 }
