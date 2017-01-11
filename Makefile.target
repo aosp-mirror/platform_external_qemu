@@ -151,7 +151,7 @@ obj-$(call lnot,$(CONFIG_XEN_I386)) += xen-hvm-stub.o
 
 # HAX support, only when targetting i386 or x86_64
 ifeq (y,$(CONFIG_HAX))
-ifneq (,$(filter i386 x86_64,$(TARGET_NAME))
+ifneq (,$(filter i386 x86_64,$(TARGET_NAME)))
 obj-y += target-i386/hax-all.o target-i386/hax-slot.o
 obj-$(CONFIG_WIN32) += target-i386/hax-windows.o
 obj-$(CONFIG_DARWIN) += target-i386/hax-darwin.o
