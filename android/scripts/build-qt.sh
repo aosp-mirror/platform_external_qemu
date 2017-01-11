@@ -148,8 +148,7 @@ build_qt_package () {
 if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     # Perform remote Darwin build first.
     dump "Remote Qt build for: $DARWIN_SYSTEMS"
-    builder_prepare_remote_darwin_build \
-            "/tmp/$USER-rebuild-darwin-ssh-$$/qt-build"
+    builder_prepare_remote_darwin_build
 
     builder_run_remote_darwin_build
 
