@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f7c18ac3_47b5d0aa",
+        "filename": "android/android-emugl/host/include/GLES3/gl3.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 866,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-01-11T07:18:55Z",
+      "side": 1,
+      "message": "why are they commented out?",
+      "revId": "2cdc82175a8360540ba7a2f4545787cabd15464e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f7c18ac3_67b8cca4",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/gles2.in",
+        "patchSetId": 29
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-01-11T07:18:55Z",
+      "side": 1,
+      "message": "nit: trailing spaces",
+      "range": {
+        "startLine": 250,
+        "startChar": 67,
+        "endLine": 250,
+        "endChar": 77
+      },
+      "revId": "2cdc82175a8360540ba7a2f4545787cabd15464e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
