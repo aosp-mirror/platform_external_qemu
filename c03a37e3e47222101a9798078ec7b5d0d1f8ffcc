@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "037501b9_df8e8ec0",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/etc.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 883,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-11T19:41:20Z",
+      "side": 1,
+      "message": "this one seemed to need to be calculated this way, it was doing cy * 4 * 3 before and I didn\u0027t really get what was going on there.",
+      "range": {
+        "startLine": 882,
+        "startChar": 0,
+        "endLine": 883,
+        "endChar": 122
+      },
+      "revId": "c03a37e3e47222101a9798078ec7b5d0d1f8ffcc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
