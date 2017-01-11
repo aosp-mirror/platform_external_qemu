@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f7c18ac3_27aed464",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-01-11T07:09:33Z",
+      "side": 1,
+      "message": "nit: could we keep the lines shorter here?",
+      "revId": "e79db4b2741c391c3123238ae4685ba2ff04aa90",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
