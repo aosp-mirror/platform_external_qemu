@@ -202,7 +202,7 @@ list_files_under () {
 # $2: Source directory
 # $3+: List of files/directories to package.
 package_archive_files () {
-    local PKG_FILE PKG_DIR TMP_FILE_LIST TARFLAGS RET FILTER FILE FILES
+    local PKG_FILE PKG_DIR TMP_FILE_LIST SEPTARFLAGS TARFLAGS RET FILTER FILE FILES
     PKG_FILE=$1
     PKG_DIR=$2
     shift; shift;
@@ -216,13 +216,25 @@ package_archive_files () {
             TARFLAGS=""
             ;;
         *.tar.gz)
-            TARFLAGS=z
+            if ! type "pigz" &>/dev/null ; then
+                TARFLAGS=z
+            else
+                SEPTARFLAGS="-I pigz"
+            fi
             ;;
         *.tar.bz2)
-            TARFLAGS=j
+            if ! type "pbzip2" &>/dev/null ; then
+                TARFLAGS=j
+            else
+                SEPTARFLAGS="-I pbzip2"
+            fi
             ;;
         *.tar.xz)
-            TARFLAGS=J
+            if ! type "pxz" &>/dev/null ; then
+                TARFLAGS=J
+            else
+                SEPTARFLAGS="-I pxz"
+            fi
             ;;
         *)
             panic "Don't know how to create package: $PKG_FILE"
@@ -233,7 +245,7 @@ package_archive_files () {
     fi
 
     RET=0
-    run tar c${TARFLAGS}f "$PKG_FILE" \
+    run tar ${SEPTARFLAGS} -c${TARFLAGS}f "$PKG_FILE" \
             -C "$PKG_DIR" \
             -T "$TMP_FILE_LIST" \
             --owner=android \
