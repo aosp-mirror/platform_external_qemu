@@ -61,6 +61,12 @@ package_builder_register_options () {
   OPT_SSH_WRAPPER=
   option_register_var "--ssh-wrapper=<command>" OPT_SSH_WRAPPER "Prefix <command> to all SSH commands."
 
+  local PROGRAM_NAME=$(program_name)
+  DEFAULT_SSH_TMP_DIR=/tmp/$USER-android-emulator-$$/ssh-${PROGRAM_NAME%.*}
+  OPT_SSH_TMP_DIR=
+  option_register_var "--ssh-tmp-dir=<list>" OPT_SSH_TMP_DIR \
+          "Temp directory for SSH build [$DEFAULT_SSH_TMP_DIR]"
+
   OPT_FORCE=
   option_register_var "--force" OPT_FORCE "Always rebuild all."
 
@@ -192,6 +198,15 @@ package_builder_process_options () {
         log "Auto-config: --darwin-ssh=$DARWIN_SSH  [ANDROID_EMULATOR_DARWIN_SSH]"
     fi
 
+    if [ "$OPT_SSH_TMP_DIR" ]; then
+        SSH_TMP_DIR=$OPT_SSH_TMP_DIR
+        log "SSH build temp directory: $SSH_TMP_DIR"
+    else
+        SSH_TMP_DIR=$DEFAULT_SSH_TMP_DIR
+        log "Auto-config: --ssh-tmp-dir=$SSH_TMP_DIR"
+    fi
+
+
     # Detect if we've been asked to build on Mac.
     HAS_DARWIN=
     if [ -n "$DARWIN_SSH" ]; then
@@ -318,8 +333,8 @@ builder_remote_darwin_retrieve_install_dir () {
         $DARWIN_SSH:$DARWIN_REMOTE_DIR/install-prefix/$1 "$2"
 }
 
-# Prepare for a remote darwin build. This takes as a parameter the
-# name of a temporary directory, e..g '/tmp/foo/bar/'.
+# Prepare for a remote darwin build. This takes the name of a temporary
+# directory, from $SSH_TMP_DIR.
 # This function populates the directory with some scripts and
 # prebuilt toolchain binaries if necessary, then defines the
 # following variables:
@@ -334,13 +349,12 @@ builder_remote_darwin_retrieve_install_dir () {
 #
 # NOTE: Only call this when --darwin-ssh or equivalent is used.
 #
-# $1: Package directory (e.g. '/tmp/foo/bar')
-# $2: Optional archive directory.
+# $1: Optional archive directory.
 #
 builder_prepare_remote_darwin_build () {
-    local PKG_DIR=${1%%/}
+    local PKG_DIR="$SSH_TMP_DIR"
     local PKG_NAME=$(basename "$PKG_DIR")
-    local ARCHIVE_DIR="${2:-$(builder_archive_dir)}"
+    local ARCHIVE_DIR="${1:-$(builder_archive_dir)}"
     DARWIN_PKG_NAME=$PKG_NAME
     DARWIN_PKG_DIR="$PKG_DIR"
     DARWIN_REMOTE_DIR=/tmp/$PKG_NAME
@@ -431,6 +445,7 @@ EOF
     builder_remote_darwin_run rm -rf $DARWIN_REMOTE_DIR
 
     log "Copying files to remote darwin host."
+    log "COMMAND: tar cf - -C $DARWIN_PKG_DIR/.. $DARWIN_PKG_NAME"
     (tar cf - -C "$DARWIN_PKG_DIR"/.. "$DARWIN_PKG_NAME") |
         (builder_remote_darwin_run tar xf - -C /tmp) ||
             panic "Could not send files to remote darwin host"
