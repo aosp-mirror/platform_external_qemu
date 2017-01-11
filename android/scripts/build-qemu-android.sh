@@ -73,9 +73,9 @@ OPT_DEBUG=
 option_register_var "--debug" OPT_DEBUG \
         "Generate debuggable binaries."
 
-OPT_NO_TESTS=
-option_register_var "--no-tests" OPT_NO_TESTS \
-        "Don't run QEMU2 tests to speed up build."
+OPT_TESTS=
+option_register_var "--tests" OPT_TESTS \
+        "Build and run QEMU2 tests."
 
 prebuilts_dir_register_option
 aosp_dir_register_option
@@ -246,7 +246,7 @@ build_qemu_android () {
             linux-*)
                 # Use PulseAudio on Linux because the default backend,
                 # OSS, does not work
-                AUDIO_BACKENDS_FLAG="--audio-drv-list=sdl"
+                AUDIO_BACKENDS_FLAG="--audio-drv-list=pa"
                 ;;
             windows-*)
                 # Prefer winaudio on Windows over dsound.
@@ -327,6 +327,7 @@ EOF
             $AUDIO_BACKENDS_FLAG \
             --disable-attr \
             --disable-blobs \
+            --disable-bzip2 \
             --disable-cap-ng \
             --disable-cocoa \
             --disable-curl \
@@ -346,10 +347,13 @@ EOF
             --disable-vde \
             --disable-vhdx \
             --disable-vhost-net \
+            --disable-vnc \
             --disable-vnc-sasl \
             --disable-werror \
+            --enable-winvista \
             --enable-sdl \
             --with-sdlabi=2.0 \
+            --enable-trace-backends=nop \
             &&
 
             case $1 in
@@ -376,7 +380,7 @@ EOF
                 fi
             done
 
-            if [ -z "$OPT_NO_TESTS" ]; then
+            if [ -n "$OPT_TESTS" ]; then
                 if ! run make -j$NUM_JOBS $BUILD_FLAGS check GTESTER_FLAGS="-m quick -k"
                 then
                     panic "$(builder_text) Failure when running qemu2 unittests!!"
@@ -429,8 +433,7 @@ EOF
 
 if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     dump "Remote build for: $DARWIN_SYSTEMS"
-    builder_prepare_remote_darwin_build \
-            /tmp/$USER-rebuild-darwin-ssh-$$/qemu-android-build
+    builder_prepare_remote_darwin_build
 
     copy_directory "$QEMU_SRCDIR" "$DARWIN_PKG_DIR/qemu-src"
 
@@ -450,12 +453,12 @@ if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     builder_run_remote_darwin_build
 
     for SYSTEM in $DARWIN_SYSTEMS; do
-        local BINARY_DIR="$INSTALL_DIR/$SYSTEM"
+        BINARY_DIR="$INSTALL_DIR/$SYSTEM"
         dump "[$SYSTEM] Retrieving remote darwin binaries."
         run mkdir -p "$BINARY_DIR" ||
                 panic "Could not create installation directory: $BINARY_DIR"
 
-        local REMOTE_SRCDIR="$DARWIN_SSH:$DARWIN_REMOTE_DIR/prebuilts/qemu-android/$SYSTEM"
+        REMOTE_SRCDIR="$DARWIN_SSH:$DARWIN_REMOTE_DIR/prebuilts/qemu-android/$SYSTEM"
         builder_remote_darwin_scp -r \
             "$REMOTE_SRCDIR"/qemu-system-* \
             "$REMOTE_SRCDIR"/LINK-qemu-system-* \
