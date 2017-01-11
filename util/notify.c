@@ -16,6 +16,7 @@
 #include "qemu/osdep.h"
 #include "qemu-common.h"
 #include "qemu/notify.h"
+#include "sysemu/sysemu.h"
 
 void notifier_list_init(NotifierList *list)
 {
@@ -69,4 +70,29 @@ int notifier_with_return_list_notify(NotifierWithReturnList *list, void *data)
         }
     }
     return ret;
+}
+
+/* Implement exit notifiers here to make sure they are available for
+ * library users.
+ */
+static NotifierList exit_notifiers =
+    NOTIFIER_LIST_INITIALIZER(exit_notifiers);
+
+void qemu_exit_notifiers_notify(void)
+{
+    notifier_list_notify(&exit_notifiers, NULL);
+    notifier_list_init(&exit_notifiers);
+}
+
+void qemu_add_exit_notifier(Notifier *notify)
+{
+    if (exit_notifiers.notifiers.lh_first == NULL) {
+        atexit(qemu_exit_notifiers_notify);
+    }
+    notifier_list_add(&exit_notifiers, notify);
+}
+
+void qemu_remove_exit_notifier(Notifier *notify)
+{
+    notifier_remove(notify);
 }
