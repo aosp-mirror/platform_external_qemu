@@ -198,8 +198,7 @@ build_package_openssl () {
 if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     # Perform remote Darwin build first.
     dump "Remote curl build for: $DARWIN_SYSTEMS"
-    builder_prepare_remote_darwin_build \
-            "/tmp/$USER-rebuild-darwin-ssh-$$/curl-build"
+    builder_prepare_remote_darwin_build
 
     builder_run_remote_darwin_build
 
