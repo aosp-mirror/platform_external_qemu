@@ -51,6 +51,7 @@ else
     ifneq ($(BUILD_TARGET_OS),darwin)
         BUILD_OPT_CFLAGS += -funroll-loops -ftracer
     endif
+    BUILD_OPT_CFLAGS += -fvisibility=hidden
 endif
 
 ifeq (true,$(BUILD_ENABLE_LTO))
@@ -209,8 +210,19 @@ start-emulator-program = \
     $(eval LOCAL_MODULE_CLASS := EXECUTABLES) \
     $(eval LOCAL_BUILD_FILE := $(BUILD_HOST_EXECUTABLE))
 
-# A varient of end-emulator-library for host programs instead
+# A variant of end-emulator-library for host programs instead
 end-emulator-program = \
+    $(eval LOCAL_LDLIBS += $(QEMU_SYSTEM_LDLIBS)) \
+    $(eval $(end-emulator-module-ev)) \
+
+# Same thing for shared libraries
+start-emulator-shared-lib = \
+    $(call start-emulator-library,$1) \
+    $(eval LOCAL_MODULE_CLASS := SHARED_LIBRARIES) \
+    $(eval LOCAL_BUILD_FILE := $(BUILD_HOST_SHARED_LIBRARY)) \
+
+# A varient of end-emulator-library for host programs instead
+end-emulator-shared-lib = \
     $(eval LOCAL_LDLIBS += $(QEMU_SYSTEM_LDLIBS)) \
     $(eval $(end-emulator-module-ev)) \
 
