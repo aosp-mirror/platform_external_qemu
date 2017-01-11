@@ -36,3 +36,14 @@ GLstr* 32 0x%08x
 GLvoidptr* 32 0x%08x
 GLchar*const* 32 0x%08x
 GLvoid*const* 32 0x%08x
+GLsync 64 %p
+GLint32 32 0x%08x
+GLint32* 32 %p
+GLint64 64 0x%016lx
+GLint64* 32 %p
+GLuint32 32 0x%08x
+GLuint32* 32 %p
+GLuint64 64 0x%016lx
+GLuint64* 32 %p
+char* 32 0x%08x
+char** 32 0x%08x

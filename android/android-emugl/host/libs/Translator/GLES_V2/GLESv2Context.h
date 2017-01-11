@@ -21,11 +21,19 @@
 #include <GLcommon/GLEScontext.h>
 #include <GLcommon/objectNameManager.h>
 
+// Extra desktop-specific OpenGL enums that we need to properly emulate OpenGL ES.
+#define GL_FRAMEBUFFER_SRGB 0x8DB9
+#define GL_TEXTURE_CUBE_MAP_SEAMLESS 0x884F
+
 class GLESv2Context : public GLEScontext{
 public:
     virtual void init(GlLibrary* glLib);
+    GLESv2Context(int maj, int min);
     virtual ~GLESv2Context();
     void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct);
+    void setVertexAttribDivisor(GLuint bindingindex, GLuint divisor);
+    void setVertexAttribBindingIndex(GLuint attribindex, GLuint bindingindex);
+    void setVertexAttribFormat(GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint reloffset, bool isInt = false);
     int  getMaxCombinedTexUnits() override;
     int  getMaxTexUnits() override;
 
@@ -42,7 +50,7 @@ public:
 protected:
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
 private:
-    void setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int pointsIndex = -1);
+    void setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int pointsIndex = -1, bool isInt = false);
     void initExtensionString();
 
     float m_attribute0value[4] = {};

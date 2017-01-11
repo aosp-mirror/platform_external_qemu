@@ -25,13 +25,16 @@ enum class NamedObjectType {
     RENDERBUFFER,
     FRAMEBUFFER,
     SHADER_OR_PROGRAM,
+    SAMPLER,
+    QUERY,
     NUM_OBJECT_TYPES  // Must be last
 };
 
 enum class ShaderProgramType {
     PROGRAM,
     VERTEX_SHADER,
-    FRAGMENT_SHADER
+    FRAGMENT_SHADER,
+    COMPUTE_SHADER,
 };
 
 //

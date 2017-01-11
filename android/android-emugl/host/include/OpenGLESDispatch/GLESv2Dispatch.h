@@ -39,3 +39,16 @@ bool gles2_dispatch_init(GLESv2Dispatch* dispatch_table);
 
 // Used to initialize the decoder.
 void* gles2_dispatch_get_proc_func(const char* name, void* userData);
+
+// Used to query max GLES version support based on what the dispatch mechanism
+// has found in the GLESv2 library.
+// First, a enum for tracking the detected GLES version based on dispatch.
+// We support 2 minimally.
+enum GLESDispatchMaxVersion {
+    GLES_DISPATCH_MAX_VERSION_2 = 0,
+    GLES_DISPATCH_MAX_VERSION_3_0 = 1,
+    GLES_DISPATCH_MAX_VERSION_3_1 = 2,
+    GLES_DISPATCH_MAX_VERSION_3_2 = 3,
+};
+
+GLESDispatchMaxVersion gles2_dispatch_get_max_version();

@@ -4479,6 +4479,8 @@ int main(int argc, char** argv, char** envp)
     }
     if (qemu_gles) {
         char  tmp[64];
+        // change to '3' to run cts deqp /
+        // when we're ES 3.x conformant
         snprintf(tmp, sizeof(tmp), "%d", 0x20000);
         boot_property_add("ro.opengles.version", tmp);
     }

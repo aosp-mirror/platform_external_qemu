@@ -257,6 +257,28 @@ EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, E
         }
         initGLESx(GLES_2_0);
     }
+    if(!g_eglInfo->getIface(GLES_3_0)) {
+        func  = loadIfaces(LIB_GLES_V2_NAME, error, sizeof(error));
+        if (func) {
+            renderableType |= EGL_OPENGL_ES2_BIT | EGL_OPENGL_ES3_BIT;
+            g_eglInfo->setIface(func(&s_eglIface),GLES_3_0);
+        } else {
+           fprintf(stderr, "%s: Could not find ifaces for GLES 3.x [%s]\n",
+                   __FUNCTION__, error);
+        }
+        initGLESx(GLES_3_0);
+    }
+    if(!g_eglInfo->getIface(GLES_3_1)) {
+        func  = loadIfaces(LIB_GLES_V2_NAME, error, sizeof(error));
+        if (func) {
+            renderableType |= EGL_OPENGL_ES2_BIT | EGL_OPENGL_ES3_BIT;
+            g_eglInfo->setIface(func(&s_eglIface),GLES_3_1);
+        } else {
+           fprintf(stderr, "%s: Could not find ifaces for GLES 3.x [%s]\n",
+                   __FUNCTION__, error);
+        }
+        initGLESx(GLES_3_1);
+    }
     dpy->initialize(renderableType);
     return EGL_TRUE;
 }
@@ -763,28 +785,95 @@ EGLAPI EGLContext EGLAPIENTRY eglCreateContext(EGLDisplay display, EGLConfig con
     VALIDATE_DISPLAY_RETURN(display,EGL_NO_CONTEXT);
     VALIDATE_CONFIG_RETURN(config,EGL_NO_CONTEXT);
 
-    GLESVersion version = GLES_1_1;
+    EGLint major_version = 0;
+    EGLint minor_version = 0;
+    EGLint context_flags = 0;
+    EGLint profile_mask = 0;
+    EGLint reset_notification_strategy = 0;
     if(!EglValidate::noAttribs(attrib_list)) {
         int i = 0;
         while(attrib_list[i] != EGL_NONE) {
+            EGLint attrib_val = attrib_list[i + 1];
             switch(attrib_list[i]) {
-            case EGL_CONTEXT_CLIENT_VERSION:
-                if(attrib_list[i+1] == 2) {
-                    version = GLES_2_0;
+            case EGL_CONTEXT_MAJOR_VERSION_KHR:
+                major_version = attrib_val;
+                break;
+            case EGL_CONTEXT_MINOR_VERSION_KHR:
+                minor_version = attrib_val;
+                break;
+            case EGL_CONTEXT_FLAGS_KHR:
+                if ((attrib_val | EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR) ||
+                    (attrib_val | EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE_BIT_KHR)  ||
+                    (attrib_val | EGL_CONTEXT_OPENGL_ROBUST_ACCESS_BIT_KHR)) {
+                    context_flags = attrib_val;
                 } else {
-                    version = GLES_1_1;
+                    fprintf(stderr, "%s: wrong context flags, return\n", __func__);
+                    RETURN_ERROR(EGL_NO_CONTEXT,EGL_BAD_ATTRIBUTE);
                 }
                 break;
+            case EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR:
+                if ((attrib_val | EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR) ||
+                    (attrib_val | EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT_KHR)) {
+                    profile_mask = attrib_val;
+                } else {
+                    fprintf(stderr, "%s: wrong profile mask, return\n", __func__);
+                    RETURN_ERROR(EGL_NO_CONTEXT,EGL_BAD_ATTRIBUTE);
+                }
+                break;
+            case EGL_CONTEXT_OPENGL_RESET_NOTIFICATION_STRATEGY_KHR:
+                switch (attrib_val) {
+                case EGL_NO_RESET_NOTIFICATION_KHR:
+                case EGL_LOSE_CONTEXT_ON_RESET_KHR:
+                    break;
+                default:
+                    fprintf(stderr, "%s: wrong reset notif strat, return\n", __func__);
+                    RETURN_ERROR(EGL_NO_CONTEXT,EGL_BAD_ATTRIBUTE);
+                }
+                reset_notification_strategy = attrib_val;
+                break;
             default:
+                fprintf(stderr, "%s: unknown attrib 0x%x\n", __func__, attrib_list[i]);
                 RETURN_ERROR(EGL_NO_CONTEXT,EGL_BAD_ATTRIBUTE);
             }
             i+=2;
         }
     }
-    const GLESiface* iface = g_eglInfo->getIface(version);
+
+    // TODO: Investigate these ignored flags and see which are needed
+    (void)context_flags;
+    (void)profile_mask;
+    (void)reset_notification_strategy;
+
+    GLESVersion glesVersion;
+    switch (major_version) {
+     case 1:
+         glesVersion = GLES_1_1;
+         break;
+     case 2:
+         glesVersion = GLES_2_0;
+         break;
+     case 3:
+         switch (minor_version) {
+         case 0:
+             glesVersion = GLES_3_0;
+             break;
+         case 1:
+             glesVersion = GLES_3_1;
+             break;
+         default:
+             RETURN_ERROR(EGL_NO_CONTEXT, EGL_BAD_ATTRIBUTE);
+             break;
+         }
+         break;
+     default:
+         RETURN_ERROR(EGL_NO_CONTEXT, EGL_BAD_ATTRIBUTE);
+         break;
+    }
+
+    const GLESiface* iface = g_eglInfo->getIface(glesVersion);
     GLEScontext* glesCtx = NULL;
     if(iface) {
-        glesCtx = iface->createGLESContext();
+        glesCtx = iface->createGLESContext(major_version, minor_version);
     } else { // there is no interface for this gles version
                 RETURN_ERROR(EGL_NO_CONTEXT,EGL_BAD_ATTRIBUTE);
     }
@@ -802,7 +891,7 @@ EGLAPI EGLContext EGLAPIENTRY eglCreateContext(EGLDisplay display, EGLConfig con
             cfg->nativeFormat(), globalSharedContext);
 
     if(nativeContext) {
-        ContextPtr ctx(new EglContext(dpy, nativeContext,sharedCtxPtr,cfg,glesCtx,version,dpy->getManager(version)));
+        ContextPtr ctx(new EglContext(dpy, nativeContext,sharedCtxPtr,cfg,glesCtx,glesVersion,dpy->getManager(glesVersion)));
         return dpy->addContext(ctx);
     } else {
         iface->deleteGLESContext(glesCtx);
