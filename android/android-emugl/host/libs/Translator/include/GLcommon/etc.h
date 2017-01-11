@@ -12,15 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef __etc1_h__
-#define __etc1_h__
+#pragma once
 
 #define MAX_ETC_SUPPORTED 12
 
 #define ETC1_ENCODED_BLOCK_SIZE 8
 #define ETC1_DECODED_BLOCK_SIZE 48
-#define ETC2_ENCODE_ALPHA_BLOCK_SIZE 8
-#define ETC2_DECODED_ALPHA_BLOCK_SIZE 16
+#define EAC_ENCODE_ALPHA_BLOCK_SIZE 8
+#define EAC_DECODED_ALPHA_BLOCK_SIZE 16
+#define EAC_ENCODE_R11_BLOCK_SIZE 8
+#define EAC_DECODED_R11_BLOCK_SIZE 64
+#define EAC_DECODED_RG11_BLOCK_SIZE (EAC_DECODED_R11_BLOCK_SIZE*2)
 
 #ifndef ETC1_RGB8_OES
 #define ETC1_RGB8_OES 0x8D64
@@ -29,6 +31,10 @@
 typedef unsigned char etc1_byte;
 typedef int etc1_bool;
 typedef unsigned int etc1_uint32;
+
+enum ETC2ImageFormat {
+	EtcRGB8, EtcRGBA8, EtcR11, EtcSignedR11, EtcRG11, EtcSignedRG11
+};
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,16 +63,23 @@ void etc1_encode_block(const etc1_byte* pIn, etc1_uint32 validPixelMask, etc1_by
 
 void etc2_decode_rgb_block(const etc1_byte* pIn, etc1_byte* pOut);
 
-// Decode a block of alpha pixels
+// Decode a block of single channel pixels
+// This is used when decoding the alpha channel of RGBA8_ETC2_EAC format, or
+// when decoding R11_EAC format
+// decodedElementBytes: number of bits per element after decoding.
+// For RGBA8_ETC2_EAC it must be 1, for R11_EAC it must be 2
 
-void etc2_decode_alpha_block(const etc1_byte* pIn, etc1_byte* pOut);
-
+void eac_decode_single_channel_block(const etc1_byte* pIn,
+									 int decodedElementBytes, bool isSigned,
+									 etc1_byte* pOut);
 
 // Return the size of the encoded image data (does not include size of PKM header).
 
 etc1_uint32 etc1_get_encoded_data_size(etc1_uint32 width, etc1_uint32 height);
 
-etc1_uint32 etc2_get_encoded_data_size_rgba8(etc1_uint32 width, etc1_uint32 height);
+etc1_uint32 etc_get_encoded_data_size(ETC2ImageFormat format, etc1_uint32 width,
+								      etc1_uint32 height);
+etc1_uint32 etc_get_decoded_pixel_size(ETC2ImageFormat format);
 
 // Encode an entire image.
 // pIn - pointer to the image data. Formatted such that
@@ -86,7 +99,7 @@ int etc1_encode_image(const etc1_byte* pIn, etc1_uint32 width, etc1_uint32 heigh
 //        (pixelSize=3 for rgb images, pixelSize=4 for images with alpha channel)
 // returns non-zero if there is an error.
 
-int etc2_decode_image(const etc1_byte* pIn, bool isWithAlpha,
+int etc2_decode_image(const etc1_byte* pIn, ETC2ImageFormat format,
         etc1_byte* pOut,
         etc1_uint32 width, etc1_uint32 height,
         etc1_uint32 stride);
@@ -113,6 +126,4 @@ etc1_uint32 etc1_pkm_get_height(const etc1_byte* pHeader);
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

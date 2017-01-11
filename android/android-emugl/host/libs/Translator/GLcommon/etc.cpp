@@ -14,9 +14,13 @@
 
 #include <GLcommon/etc.h>
 
+#include <algorithm>
+#include <assert.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdio.h>
+
+typedef uint16_t etc1_uint16;
 
 /* From http://www.khronos.org/registry/gles/extensions/OES/OES_compressed_ETC1_RGB8_texture.txt
 
@@ -144,6 +148,14 @@ static const int kLookup[8] = { 0, 1, 2, 3, -4, -3, -2, -1 };
 
 static inline int clamp(int x) {
     return (x >= 0 ? (x < 255 ? x : 255) : 0);
+}
+
+static inline int clamp2047(int x) {
+    return (x >= 0 ? (x < 2047 ? x : 2047) : 0);
+}
+
+static inline int clampSigned1023(int x) {
+    return (x >= -1023 ? (x < 1023 ? x : 1023) : -1023);
 }
 
 static
@@ -383,8 +395,13 @@ void etc2_decode_rgb_block(const etc1_byte* pIn, etc1_byte* pOut) {
     decode_subblock(pOut, r2, g2, b2, tableB, low, true, flipped);
 }
 
-void etc2_decode_alpha_block(const etc1_byte* pIn, etc1_byte* pOut) {
-    int base_codeword = pIn[0];
+void eac_decode_single_channel_block(const etc1_byte* pIn,
+                                     int decodedElementBytes, bool isSigned,
+                                     etc1_byte* pOut) {
+    assert(decodedElementBytes == 1 || decodedElementBytes == 2 || decodedElementBytes == 4);
+    int base_codeword = isSigned ? reinterpret_cast<const char*>(pIn)[0]
+                                 : pIn[0];
+    if (base_codeword == -128) base_codeword = -127;
     int multiplier = pIn[1] >> 4;
     int tblIdx = pIn[1] & 15;
     const int* table = kAlphaModifierTable + tblIdx * 8;
@@ -392,6 +409,10 @@ void etc2_decode_alpha_block(const etc1_byte* pIn, etc1_byte* pOut) {
     // position (within a byte) of the least significant bit of the next index
     int bitOffset = 5;
     for (int i = 0; i < 16; i ++) {
+        // flip x, y in output
+        int outIdx = (i % 4) * 4 + i / 4;
+        etc1_byte* q = pOut + outIdx * decodedElementBytes;
+
         int modifier = 0;
         if (bitOffset < 0) { // (Part of) the index is in the next byte.
             modifier += p[0] << (-bitOffset);
@@ -401,8 +422,24 @@ void etc2_decode_alpha_block(const etc1_byte* pIn, etc1_byte* pOut) {
         modifier += p[0] >> bitOffset;
         modifier &= 7;
         bitOffset -= 3; // move to the next index
-        *pOut = clamp(base_codeword + table[modifier] * multiplier);
-        pOut ++;
+        int modifierValue = table[modifier];
+        int decoded = base_codeword + modifierValue * multiplier;
+        if (decodedElementBytes == 1) {
+            *q = clamp(decoded);
+        } else { // decodedElementBytes == 4
+            decoded *= 8;
+            if (multiplier == 0) {
+                decoded += modifierValue;
+            }
+            if (isSigned) {
+                decoded = clampSigned1023(decoded);
+                reinterpret_cast<float*>(q)[0] = (float)decoded / 1023.0;
+            } else {
+                decoded += 4;
+                decoded = clamp2047(decoded);
+                reinterpret_cast<float*>(q)[0] = (float)decoded / 2047.0;
+            }
+        }
     }
 }
 
@@ -680,8 +717,40 @@ etc1_uint32 etc1_get_encoded_data_size(etc1_uint32 width, etc1_uint32 height) {
     return (((width + 3) & ~3) * ((height + 3) & ~3)) >> 1;
 }
 
-etc1_uint32 etc2_get_encoded_data_size_rgba8(etc1_uint32 width, etc1_uint32 height) {
-    return ((width + 3) & ~3) * ((height + 3) & ~3);
+etc1_uint32 etc_get_encoded_data_size(ETC2ImageFormat format, etc1_uint32 width,
+                                      etc1_uint32 height) {
+    etc1_uint32 size = ((width + 3) & ~3) * ((height + 3) & ~3);
+    switch (format) {
+        case EtcRGB8:
+        case EtcR11:
+        case EtcSignedR11:
+            return size >> 1;
+        case EtcRG11:
+        case EtcSignedRG11:
+        case EtcRGBA8:
+            return size;
+        default:
+            assert(0);
+            return 0;
+    }
+}
+
+etc1_uint32 etc_get_decoded_pixel_size(ETC2ImageFormat format) {
+    switch (format) {
+        case EtcRGB8:
+            return 3;
+        case EtcRGBA8:
+            return 4;
+        case EtcR11:
+        case EtcSignedR11:
+            return 4;
+        case EtcRG11:
+        case EtcSignedRG11:
+            return 8;
+        default:
+            assert(0);
+            return 0;
+    }
 }
 
 // Encode an entire image.
@@ -745,17 +814,20 @@ int etc1_encode_image(const etc1_byte* pIn, etc1_uint32 width, etc1_uint32 heigh
 //        large enough to store entire image.
 
 
-int etc2_decode_image(const etc1_byte* pIn, bool isWithAlpha,
+int etc2_decode_image(const etc1_byte* pIn, ETC2ImageFormat format,
         etc1_byte* pOut,
         etc1_uint32 width, etc1_uint32 height,
         etc1_uint32 stride) {
-    etc1_byte block[ETC1_DECODED_BLOCK_SIZE];
-    etc1_byte alphaBlock[ETC2_DECODED_ALPHA_BLOCK_SIZE];
+    etc1_byte block[std::max({ETC1_DECODED_BLOCK_SIZE,
+                              EAC_DECODED_R11_BLOCK_SIZE,
+                              EAC_DECODED_RG11_BLOCK_SIZE})];
+    etc1_byte alphaBlock[EAC_DECODED_ALPHA_BLOCK_SIZE];
 
     etc1_uint32 encodedWidth = (width + 3) & ~3;
     etc1_uint32 encodedHeight = (height + 3) & ~3;
 
-    int pixelSize = isWithAlpha ? 4 : 3;
+    int pixelSize = etc_get_decoded_pixel_size(format);
+    bool isSigned = (format == EtcSignedR11 || format == EtcSignedRG11);
 
     for (etc1_uint32 y = 0; y < encodedHeight; y += 4) {
         etc1_uint32 yEnd = height - y;
@@ -767,27 +839,74 @@ int etc2_decode_image(const etc1_byte* pIn, bool isWithAlpha,
             if (xEnd > 4) {
                 xEnd = 4;
             }
-            if (isWithAlpha) {
-                etc2_decode_alpha_block(pIn, alphaBlock);
-                pIn += ETC2_ENCODE_ALPHA_BLOCK_SIZE;
+            switch (format) {
+                case EtcRGBA8:
+                    eac_decode_single_channel_block(pIn, 1, false, alphaBlock);
+                    pIn += EAC_ENCODE_ALPHA_BLOCK_SIZE;
+                    // Do not break
+                    // Fall through to EtcRGB8 to decode the RGB part
+                case EtcRGB8:
+                    etc2_decode_rgb_block(pIn, block);
+                    pIn += ETC1_ENCODED_BLOCK_SIZE;
+                    break;
+                case EtcR11:
+                case EtcSignedR11:
+                    eac_decode_single_channel_block(pIn, 4, isSigned, block);
+                    pIn += EAC_ENCODE_R11_BLOCK_SIZE;
+                    break;
+                case EtcRG11:
+                case EtcSignedRG11:
+                    // r channel
+                    eac_decode_single_channel_block(pIn, 4, isSigned, block);
+                    pIn += EAC_ENCODE_R11_BLOCK_SIZE;
+                    // g channel
+                    eac_decode_single_channel_block(pIn, 4, isSigned,
+                            block + EAC_DECODED_R11_BLOCK_SIZE);
+                    pIn += EAC_ENCODE_R11_BLOCK_SIZE;
+                    break;
+                default:
+                    assert(0);
             }
-            etc2_decode_rgb_block(pIn, block);
-            pIn += ETC1_ENCODED_BLOCK_SIZE;
             for (etc1_uint32 cy = 0; cy < yEnd; cy++) {
-                const etc1_byte* q = block + (cy * 4) * 3;
                 etc1_byte* p = pOut + pixelSize * x + stride * (y + cy);
-                if (isWithAlpha) {
-                    const etc1_byte* qa = alphaBlock + cy * 4;
-                    for (etc1_uint32 cx = 0; cx < xEnd; cx++) {
-                        // copy rgb data
-                        memcpy(p, q, 3);
-                        p += 3;
-                        q += 3;
-                        // copy alpha
-                        *p++ += *qa++;
-                    }
-                } else {
-                    memcpy(p, q, xEnd * 3);
+                switch (format) {
+                    case EtcRGB8:
+                    case EtcR11:
+                    case EtcSignedR11: {
+                            const etc1_byte* q = block + (cy * 4) * pixelSize;
+                            memcpy(p, q, xEnd * pixelSize);
+                        }
+                        break;
+                    case EtcRG11:
+                    case EtcSignedRG11: {
+                            const etc1_byte* r = block + cy * EAC_DECODED_R11_BLOCK_SIZE / 4;
+                            const etc1_byte* g = block + cy * EAC_DECODED_R11_BLOCK_SIZE / 4 + EAC_DECODED_R11_BLOCK_SIZE;
+                            int channelSize = pixelSize / 2;
+                            for (etc1_uint32 cx = 0; cx < xEnd; cx++) {
+                                memcpy(p, r, channelSize);
+                                p += channelSize;
+                                r += channelSize;
+                                memcpy(p, g, channelSize);
+                                p += channelSize;
+                                g += channelSize;
+                            }
+                        }
+                        break;
+                    case EtcRGBA8: {
+                            const etc1_byte* q = block + (cy * 4) * 3;
+                            const etc1_byte* qa = alphaBlock + cy * 4;
+                            for (etc1_uint32 cx = 0; cx < xEnd; cx++) {
+                                // copy rgb data
+                                memcpy(p, q, 3);
+                                p += 3;
+                                q += 3;
+                                // copy alpha
+                                *p++ += *qa++;
+                            }
+                        }
+                        break;
+                    default:
+                        assert(0);
                 }
             }
         }
