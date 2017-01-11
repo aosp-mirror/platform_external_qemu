@@ -95,6 +95,7 @@ QEMU2_COMMON_SOURCES := \
     hw/acpi/bios-linker-loader.c \
     hw/audio/ac97.c \
     hw/audio/es1370.c \
+    hw/audio/goldfish_audio.c \
     hw/audio/hda-codec.c \
     hw/audio/intel-hda.c \
     hw/block/block.c \
@@ -125,6 +126,8 @@ QEMU2_COMMON_SOURCES := \
     hw/core/qdev.c \
     hw/core/register.c \
     hw/core/sysbus.c \
+    hw/display/framebuffer.c \
+    hw/display/goldfish_fb.c \
     hw/display/vga-pci.c \
     hw/i2c/core.c \
     hw/i2c/smbus.c \
@@ -311,15 +314,6 @@ QEMU2_COMMON_SOURCES := \
     ui/input.c \
     ui/keymaps.c \
     ui/qemu-pixman.c \
-    ui/vnc-auth-vencrypt.c \
-    ui/vnc-enc-hextile.c \
-    ui/vnc-enc-tight.c \
-    ui/vnc-enc-zlib.c \
-    ui/vnc-enc-zrle.c \
-    ui/vnc-jobs.c \
-    ui/vnc-palette.c \
-    ui/vnc-ws.c \
-    ui/vnc.c \
     ui/x_keymap.c \
 
 QEMU2_COMMON_SOURCES_darwin-x86_64 := \
@@ -387,6 +381,7 @@ QEMU2_TARGET_SOURCES := \
     gdbstub.c \
     hw/block/dataplane/virtio-blk.c \
     hw/block/virtio-blk.c \
+    hw/char/goldfish_tty.c \
     hw/char/virtio-serial-bus.c \
     hw/core/nmi.c \
     hw/cpu/core.c \
@@ -394,11 +389,17 @@ QEMU2_TARGET_SOURCES := \
     hw/display/virtio-gpu-3d.c \
     hw/display/virtio-gpu-pci.c \
     hw/display/virtio-gpu.c \
+    hw/input/goldfish_events.c \
+    hw/intc/goldfish_pic.c \
     hw/misc/edu.c \
+    hw/misc/goldfish_battery.c \
+    hw/misc/goldfish_pipe.c \
+    hw/misc/goldfish_sync.c \
     hw/net/vhost_net.c \
     hw/net/virtio-net.c \
     hw/scsi/virtio-scsi-dataplane.c \
     hw/scsi/virtio-scsi.c \
+    hw/timer/goldfish_timer.c \
     hw/virtio/virtio-balloon.c \
     hw/virtio/virtio.c \
     ioport.c \
@@ -459,6 +460,7 @@ QEMU2_TARGET_aarch64_SOURCES := \
     hw/arm/pxa2xx.c \
     hw/arm/pxa2xx_gpio.c \
     hw/arm/pxa2xx_pic.c \
+    hw/arm/ranchu.c \
     hw/arm/raspi.c \
     hw/arm/realview.c \
     hw/arm/sabrelite.c \
@@ -504,7 +506,6 @@ QEMU2_TARGET_aarch64_SOURCES := \
     hw/display/blizzard.c \
     hw/display/dpcd.c \
     hw/display/exynos4210_fimd.c \
-    hw/display/framebuffer.c \
     hw/display/omap_dss.c \
     hw/display/omap_lcdc.c \
     hw/display/pl110.c \
@@ -695,6 +696,7 @@ QEMU2_TARGET_arm_SOURCES := \
     hw/arm/pxa2xx.c \
     hw/arm/pxa2xx_gpio.c \
     hw/arm/pxa2xx_pic.c \
+    hw/arm/ranchu.c \
     hw/arm/raspi.c \
     hw/arm/realview.c \
     hw/arm/sabrelite.c \
@@ -737,7 +739,6 @@ QEMU2_TARGET_arm_SOURCES := \
     hw/display/bcm2835_fb.c \
     hw/display/blizzard.c \
     hw/display/exynos4210_fimd.c \
-    hw/display/framebuffer.c \
     hw/display/omap_dss.c \
     hw/display/omap_lcdc.c \
     hw/display/pl110.c \
@@ -1028,6 +1029,7 @@ QEMU2_TARGET_mips64el_SOURCES := \
     hw/mips/mips_malta.c \
     hw/mips/mips_mipssim.c \
     hw/mips/mips_r4k.c \
+    hw/mips/mips_ranchu.c \
     hw/misc/mips_cmgcr.c \
     hw/misc/mips_cpc.c \
     hw/misc/mips_itu.c \
@@ -1096,6 +1098,7 @@ QEMU2_TARGET_mipsel_SOURCES := \
     hw/mips/mips_malta.c \
     hw/mips/mips_mipssim.c \
     hw/mips/mips_r4k.c \
+    hw/mips/mips_ranchu.c \
     hw/misc/mips_cmgcr.c \
     hw/misc/mips_cpc.c \
     hw/misc/mips_itu.c \
@@ -1258,6 +1261,9 @@ QEMU2_TARGET_arm_SOURCES_windows-x86_64 := \
 
 QEMU2_TARGET_i386_SOURCES_darwin-x86_64 := \
     kvm-stub.c \
+    target-i386/hax-all.c \
+    target-i386/hax-darwin.c \
+    target-i386/hax-slot.c \
     target-i386/kvm-stub.c \
 
 QEMU2_TARGET_i386_SOURCES_linux-x86_64 := \
@@ -1286,10 +1292,16 @@ QEMU2_TARGET_i386_SOURCES_linux-x86_64 := \
 
 QEMU2_TARGET_i386_SOURCES_windows-x86 := \
     kvm-stub.c \
+    target-i386/hax-all.c \
+    target-i386/hax-slot.c \
+    target-i386/hax-windows.c \
     target-i386/kvm-stub.c \
 
 QEMU2_TARGET_i386_SOURCES_windows-x86_64 := \
     kvm-stub.c \
+    target-i386/hax-all.c \
+    target-i386/hax-slot.c \
+    target-i386/hax-windows.c \
     target-i386/kvm-stub.c \
 
 QEMU2_TARGET_mips64el_SOURCES_darwin-x86_64 := \
@@ -1334,6 +1346,9 @@ QEMU2_TARGET_mipsel_SOURCES_windows-x86_64 := \
 
 QEMU2_TARGET_x86_64_SOURCES_darwin-x86_64 := \
     kvm-stub.c \
+    target-i386/hax-all.c \
+    target-i386/hax-darwin.c \
+    target-i386/hax-slot.c \
     target-i386/kvm-stub.c \
 
 QEMU2_TARGET_x86_64_SOURCES_linux-x86_64 := \
@@ -1362,9 +1377,15 @@ QEMU2_TARGET_x86_64_SOURCES_linux-x86_64 := \
 
 QEMU2_TARGET_x86_64_SOURCES_windows-x86 := \
     kvm-stub.c \
+    target-i386/hax-all.c \
+    target-i386/hax-slot.c \
+    target-i386/hax-windows.c \
     target-i386/kvm-stub.c \
 
 QEMU2_TARGET_x86_64_SOURCES_windows-x86_64 := \
     kvm-stub.c \
+    target-i386/hax-all.c \
+    target-i386/hax-slot.c \
+    target-i386/hax-windows.c \
     target-i386/kvm-stub.c \
 
