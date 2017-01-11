@@ -125,6 +125,16 @@ static const int kRGBModifierTable[] = {
 /* 6 */33, 106, -33, -106,
 /* 7 */47, 183, -47, -183 };
 
+static const int kRGBOpaqueModifierTable[] = {
+/* 0 */0, 8, 0, -8,
+/* 1 */0, 17, 0, -17,
+/* 2 */0, 29, 0, -29,
+/* 3 */0, 42, 0, -42,
+/* 4 */0, 60, 0, -60,
+/* 5 */0, 80, 0, -80,
+/* 6 */0, 106, 0, -106,
+/* 7 */0, 183, 0, -183 };
+
 static const int kAlphaModifierTable[] = {
 /* 0 */ -3, -6, -9, -15, 2, 5, 8, 14,
 /* 1 */ -3, -7, -10, -13, 2, 6, 9, 12,
@@ -211,9 +221,11 @@ int isOverflowed(int base, int diff) {
 
 static
 void decode_subblock(etc1_byte* pOut, int r, int g, int b, const int* table,
-        etc1_uint32 low, bool second, bool flipped) {
+        etc1_uint32 low, bool second, bool flipped, bool isPunchthroughAlpha,
+        bool opaque) {
     int baseX = 0;
     int baseY = 0;
+    int channels = isPunchthroughAlpha ? 4 : 3;
     if (second) {
         if (flipped) {
             baseY = 2;
@@ -231,24 +243,47 @@ void decode_subblock(etc1_byte* pOut, int r, int g, int b, const int* table,
             y = baseY + (i & 3);
         }
         int k = y + (x * 4);
-        int offset = ((low >> k) & 1) | ((low >> (k + 15)) & 2);
-        int delta = table[offset];
-        etc1_byte* q = pOut + 3 * (x + 4 * y);
-        *q++ = clamp(r + delta);
-        *q++ = clamp(g + delta);
-        *q++ = clamp(b + delta);
+        int msb = ((low >> (k + 15)) & 2);
+        int lsb = ((low >> k) & 1);
+        etc1_byte* q = pOut + channels * (x + 4 * y);
+        if (isPunchthroughAlpha && !opaque && msb && !lsb) {
+            // rgba all 0
+            memset(q, 0, 4);
+            q += 4;
+        } else {
+            int offset = lsb | msb;
+            int delta = table[offset];
+            *q++ = clamp(r + delta);
+            *q++ = clamp(g + delta);
+            *q++ = clamp(b + delta);
+            if (isPunchthroughAlpha) {
+                *q++ = 255;
+            }
+        }
     }
 }
 
 static void etc2_T_H_index(const int* clrTable, etc1_uint32 low,
+                           bool isPunchthroughAlpha, bool opaque,
                            etc1_byte* pOut) {
     etc1_byte* q = pOut;
     for (int y = 0; y < 4; y++) {
         for (int x = 0; x < 4; x++) {
             int k = y + x * 4;
-            int offset = ((low >> k) & 1) | ((low >> (k + 15)) & 2);
-            for (int c = 0; c < 3; c++) {
-                *q++ = clrTable[offset*3 + c];
+            int msb = (low >> (k + 15)) & 2;
+            int lsb = (low >> k) & 1;
+            if (isPunchthroughAlpha && !opaque && msb && !lsb) {
+                // rgba all 0
+                memset(q, 0, 4);
+                q += 4;
+            } else {
+                int offset = lsb | msb;
+                for (int c = 0; c < 3; c++) {
+                    *q++ = clrTable[offset*3 + c];
+                }
+                if (isPunchthroughAlpha) {
+                    *q++ = 255;
+                }
             }
         }
     }
@@ -259,7 +294,7 @@ static void etc2_T_H_index(const int* clrTable, etc1_uint32 low,
 //     page 289
 
 static void etc2_decode_block_T(etc1_uint32 high, etc1_uint32 low,
-        etc1_byte* pOut) {
+        bool isPunchthroughAlpha, bool opaque, etc1_byte* pOut) {
     const int LUT[] = {3, 6, 11, 16, 23, 32, 41, 64};
     int r1, r2, g1, g2, b1, b2;
     r1 = convert4To8((((high >> 27) & 3) << 2) | ((high >> 24) & 3));
@@ -284,11 +319,11 @@ static void etc2_decode_block_T(etc1_uint32 high, etc1_uint32 low,
     clrTable[9] = clamp(r2 - intenseMod);
     clrTable[10] = clamp(g2 - intenseMod);
     clrTable[11] = clamp(b2 - intenseMod);
-    etc2_T_H_index(clrTable, low, pOut);
+    etc2_T_H_index(clrTable, low, isPunchthroughAlpha, opaque, pOut);
 }
 
 static void etc2_decode_block_H(etc1_uint32 high, etc1_uint32 low,
-        etc1_byte* pOut) {
+        bool isPunchthroughAlpha, bool opaque, etc1_byte* pOut) {
     const int LUT[] = {3, 6, 11, 16, 23, 32, 41, 64};
     int r1, r2, g1, g2, b1, b2;
     r1 = convert4To8(high >> 27);
@@ -315,11 +350,11 @@ static void etc2_decode_block_H(etc1_uint32 high, etc1_uint32 low,
     clrTable[9] = clamp(r2 - intenseMod);
     clrTable[10] = clamp(g2 - intenseMod);
     clrTable[11] = clamp(b2 - intenseMod);
-    etc2_T_H_index(clrTable, low, pOut);
+    etc2_T_H_index(clrTable, low, isPunchthroughAlpha, opaque, pOut);
 }
 
 static void etc2_decode_block_P(etc1_uint32 high, etc1_uint32 low,
-        etc1_byte* pOut) {
+        bool isPunchthroughAlpha, etc1_byte* pOut) {
     int ro, go, bo, rh, gh, bh, rv, gv, bv;
     uint64_t data = high;
     data = data << 32 | low;
@@ -341,6 +376,7 @@ static void etc2_decode_block_P(etc1_uint32 high, etc1_uint32 low,
         *q++ = clamp((x * (rh - ro) + y * (rv - ro) + 4 * ro + 2) >> 2);
         *q++ = clamp((x * (gh - go) + y * (gv - go) + 4 * go + 2) >> 2);
         *q++ = clamp((x * (bh - bo) + y * (bv - bo) + 4 * bo + 2) >> 2);
+        if (isPunchthroughAlpha) *q++ = 255;
     }
 }
 
@@ -350,25 +386,27 @@ static void etc2_decode_block_P(etc1_uint32 high, etc1_uint32 low,
 //     from https://www.khronos.org/registry/gles/specs/3.0/es_spec_3.0.4.pdf
 //     page 289
 
-void etc2_decode_rgb_block(const etc1_byte* pIn, etc1_byte* pOut) {
+void etc2_decode_rgb_block(const etc1_byte* pIn, bool isPunchthroughAlpha,
+                           etc1_byte* pOut) {
     etc1_uint32 high = (pIn[0] << 24) | (pIn[1] << 16) | (pIn[2] << 8) | pIn[3];
     etc1_uint32 low = (pIn[4] << 24) | (pIn[5] << 16) | (pIn[6] << 8) | pIn[7];
+    bool opaque = (high >> 1) & 1;
     int r1, r2, g1, g2, b1, b2;
-    if (high & 2) {
+    if (isPunchthroughAlpha || high & 2) {
         // differential
         int rBase = high >> 27;
         int gBase = high >> 19;
         int bBase = high >> 11;
         if (isOverflowed(rBase, high >> 24)) {
-            etc2_decode_block_T(high, low, pOut);
+            etc2_decode_block_T(high, low, isPunchthroughAlpha, opaque, pOut);
             return;
         }
         if (isOverflowed(gBase, high >> 16)) {
-            etc2_decode_block_H(high, low, pOut);
+            etc2_decode_block_H(high, low, isPunchthroughAlpha, opaque, pOut);
             return;
         }
         if (isOverflowed(bBase, high >> 8)) {
-            etc2_decode_block_P(high, low, pOut);
+            etc2_decode_block_P(high, low, isPunchthroughAlpha, pOut);
             return;
         }
         r1 = convert5To8(rBase);
@@ -388,11 +426,15 @@ void etc2_decode_rgb_block(const etc1_byte* pIn, etc1_byte* pOut) {
     }
     int tableIndexA = 7 & (high >> 5);
     int tableIndexB = 7 & (high >> 2);
-    const int* tableA = kRGBModifierTable + tableIndexA * 4;
-    const int* tableB = kRGBModifierTable + tableIndexB * 4;
+    const int* rgbModifierTable = opaque || !isPunchthroughAlpha ?
+                                  kRGBModifierTable : kRGBOpaqueModifierTable;
+    const int* tableA = rgbModifierTable + tableIndexA * 4;
+    const int* tableB = rgbModifierTable + tableIndexB * 4;
     bool flipped = (high & 1) != 0;
-    decode_subblock(pOut, r1, g1, b1, tableA, low, false, flipped);
-    decode_subblock(pOut, r2, g2, b2, tableB, low, true, flipped);
+    decode_subblock(pOut, r1, g1, b1, tableA, low, false, flipped,
+                    isPunchthroughAlpha, opaque);
+    decode_subblock(pOut, r2, g2, b2, tableB, low, true, flipped,
+                    isPunchthroughAlpha, opaque);
 }
 
 void eac_decode_single_channel_block(const etc1_byte* pIn,
@@ -722,6 +764,7 @@ etc1_uint32 etc_get_encoded_data_size(ETC2ImageFormat format, etc1_uint32 width,
     etc1_uint32 size = ((width + 3) & ~3) * ((height + 3) & ~3);
     switch (format) {
         case EtcRGB8:
+        case EtcRGB8A1:
         case EtcR11:
         case EtcSignedR11:
             return size >> 1;
@@ -741,6 +784,7 @@ etc1_uint32 etc_get_decoded_pixel_size(ETC2ImageFormat format) {
             return 3;
         case EtcRGBA8:
             return 4;
+        case EtcRGB8A1:
         case EtcR11:
         case EtcSignedR11:
             return 4;
@@ -819,6 +863,7 @@ int etc2_decode_image(const etc1_byte* pIn, ETC2ImageFormat format,
         etc1_uint32 width, etc1_uint32 height,
         etc1_uint32 stride) {
     etc1_byte block[std::max({ETC1_DECODED_BLOCK_SIZE,
+                              ETC2_DECODED_RGB8A1_BLOCK_SIZE,
                               EAC_DECODED_R11_BLOCK_SIZE,
                               EAC_DECODED_RG11_BLOCK_SIZE})];
     etc1_byte alphaBlock[EAC_DECODED_ALPHA_BLOCK_SIZE];
@@ -846,7 +891,11 @@ int etc2_decode_image(const etc1_byte* pIn, ETC2ImageFormat format,
                     // Do not break
                     // Fall through to EtcRGB8 to decode the RGB part
                 case EtcRGB8:
-                    etc2_decode_rgb_block(pIn, block);
+                    etc2_decode_rgb_block(pIn, false, block);
+                    pIn += ETC1_ENCODED_BLOCK_SIZE;
+                    break;
+                case EtcRGB8A1:
+                    etc2_decode_rgb_block(pIn, true, block);
                     pIn += ETC1_ENCODED_BLOCK_SIZE;
                     break;
                 case EtcR11:
@@ -871,6 +920,7 @@ int etc2_decode_image(const etc1_byte* pIn, ETC2ImageFormat format,
                 etc1_byte* p = pOut + pixelSize * x + stride * (y + cy);
                 switch (format) {
                     case EtcRGB8:
+                    case EtcRGB8A1:
                     case EtcR11:
                     case EtcSignedR11: {
                             const etc1_byte* q = block + (cy * 4) * pixelSize;

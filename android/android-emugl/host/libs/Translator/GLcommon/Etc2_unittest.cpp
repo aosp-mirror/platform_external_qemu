@@ -21,13 +21,21 @@ namespace {
 class Etc2Test : public ::testing::Test {
 protected:
     static const int cRgbPatchSize = 48;
+    static const int cRgb8A1PatchSize = 64;
     static const int cRgbEncodedSize = 8;
     static const int cAlphaPatchSize = 16;
     static const int cAlphaEncodedSize = 8;
     void decodeRgbTest(const etc1_byte* bytesEncoded, const etc1_byte* expectedDecoded) {
         etc1_byte decoded[cRgbPatchSize];
-        etc2_decode_rgb_block(bytesEncoded, decoded);
+        etc2_decode_rgb_block(bytesEncoded, false, decoded);
         for (int i=0; i<cRgbPatchSize; i++) {
+            EXPECT_EQ(expectedDecoded[i], decoded[i]);
+        }
+    }
+    void decodeRgb8A1Test(const etc1_byte* bytesEncoded, const etc1_byte* expectedDecoded) {
+        etc1_byte decoded[cRgb8A1PatchSize];
+        etc2_decode_rgb_block(bytesEncoded, true, decoded);
+        for (int i=0; i<cRgb8A1PatchSize; i++) {
             EXPECT_EQ(expectedDecoded[i], decoded[i]);
         }
     }
@@ -129,3 +137,93 @@ TEST_F(Etc2Test, DISABLED_EAC_SIGNED_R11) {
                   (const etc1_byte*)expectedDecoded);
 }
 
+// ETC2 RGB8A1 and sRGB8A1 tests.
+TEST_F(Etc2Test, ETC2RGB8A1_All0) {
+    const unsigned char encoded[cRgbEncodedSize] = {0, 0, 0, 0, 255, 255, 0, 0};
+    const unsigned char expectedDecoded[cRgb8A1PatchSize] = {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    decodeRgb8A1Test((const etc1_byte*)encoded, (const etc1_byte*)expectedDecoded);
+}
+
+TEST_F(Etc2Test, ETC2RGB8A1_OP1_diff_flipped) {
+    const unsigned char encoded[cRgbEncodedSize] = {76, 206, 232, 35, 126, 232, 34, 21};
+    unsigned char expectedDecoded[cRgb8A1PatchSize] = {
+        91, 223, 255, 255, 91, 223, 255, 255, 79, 211, 244, 255, 69, 201, 234, 255,
+        79, 211, 244, 255, 69, 201, 234, 255, 57, 189, 222, 255, 57, 189, 222, 255,
+        49, 197, 247, 255, 39, 187, 237, 255, 39, 187, 237, 255, 39, 187, 237, 255,
+        39, 187, 237, 255, 39, 187, 237, 255, 39, 187, 237, 255, 43, 191, 241, 255};
+    decodeRgb8A1Test((const etc1_byte*)encoded, (const etc1_byte*)expectedDecoded);    
+}
+
+TEST_F(Etc2Test, ETC2RGB8A1_OP1_T) {
+    const unsigned char encoded[cRgbEncodedSize] = {4, 90, 75, 238, 98, 49, 81, 32};
+    unsigned char expectedDecoded[cRgb8A1PatchSize] = {
+        68, 187, 238, 255, 68, 187, 238, 255, 109, 228, 255, 255, 109, 228, 255, 255,
+        0, 85, 170, 255, 27, 146, 197, 255, 68, 187, 238, 255, 68, 187, 238, 255,
+        0, 85, 170, 255, 0, 85, 170, 255, 0, 85, 170, 255, 27, 146, 197, 255,
+        0, 85, 170, 255, 0, 85, 170, 255, 0, 85, 170, 255, 0, 85, 170, 255};
+    decodeRgb8A1Test((const etc1_byte*)encoded, (const etc1_byte*)expectedDecoded);
+}
+
+TEST_F(Etc2Test, ETC2RGB8A1_OP1_H) {
+    const unsigned char encoded[cRgbEncodedSize] = {54, 251, 38, 114, 55, 126, 64, 133};
+    unsigned char expectedDecoded[cRgb8A1PatchSize] = {
+        96, 215, 232, 255, 74, 210, 244, 255, 74, 210, 244, 255, 74, 210, 244, 255,
+        74, 210, 244, 255, 74, 210, 244, 255, 74, 210, 244, 255, 74, 210, 244, 255,
+        62, 198, 232, 255, 74, 210, 244, 255, 74, 210, 244, 255, 96, 215, 232, 255,
+        74, 210, 244, 255, 96, 215, 232, 255, 108, 227, 244, 255, 108, 227, 244, 255};
+    decodeRgb8A1Test((const etc1_byte*)encoded, (const etc1_byte*)expectedDecoded);
+}
+
+TEST_F(Etc2Test, ETC2RGB8A1_OP1_Planar) {
+    const unsigned char encoded[cRgbEncodedSize] = {133, 15, 243, 23, 187, 211, 189, 62};
+    unsigned char expectedDecoded[cRgb8A1PatchSize] = {
+        8, 143, 219, 255, 17, 154, 223, 255, 26, 165, 227, 255, 35, 176, 231, 255,
+        35, 166, 227, 255, 44, 177, 231, 255, 53, 188, 235, 255, 62, 199, 239, 255,
+        63, 188, 235, 255, 72, 199, 239, 255, 81, 210, 243, 255, 90, 221, 247, 255,
+        90, 211, 243, 255, 99, 222, 247, 255, 108, 233, 251, 255, 117, 244, 255, 255};
+    decodeRgb8A1Test((const etc1_byte*)encoded, (const etc1_byte*)expectedDecoded);
+}
+
+TEST_F(Etc2Test, ETC2RGB8A1_OP0_diff_noflipped) {
+    const unsigned char encoded[cRgbEncodedSize] = {118, 223, 240, 4, 193, 19, 210, 0};
+    unsigned char expectedDecoded[cRgb8A1PatchSize] = {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 116, 231, 255, 255,
+        0, 0, 0, 0, 115, 222, 247, 255, 116, 231, 255, 255, 99, 214, 247, 255,
+        115, 222, 247, 255, 115, 222, 247, 255, 99, 214, 247, 255, 82, 197, 230, 255,
+        115, 222, 247, 255, 115, 222, 247, 255, 99, 214, 247, 255, 82, 197, 230, 255};
+    decodeRgb8A1Test((const etc1_byte*)encoded, (const etc1_byte*)expectedDecoded);
+}
+
+TEST_F(Etc2Test, ETC2RGB8A1_OP0_T) {
+    const unsigned char encoded[cRgbEncodedSize] = {6, 173, 5, 168, 230, 102, 76, 128};
+    unsigned char expectedDecoded[cRgb8A1PatchSize] = {
+        34, 170, 221, 255, 34, 170, 221, 255, 34, 170, 221, 255, 34, 170, 221, 255,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 62, 147, 255, 0, 62, 147, 255,
+        34, 170, 221, 255, 23, 108, 193, 255, 23, 108, 193, 255, 0, 0, 0, 0};
+    decodeRgb8A1Test((const etc1_byte*)encoded, (const etc1_byte*)expectedDecoded);
+}
+
+TEST_F(Etc2Test, ETC2RGB8A1_OP0_H) {
+    const unsigned char encoded[cRgbEncodedSize] = {149, 14, 131, 89, 19, 55, 117, 81};
+    unsigned char expectedDecoded[cRgb8A1PatchSize] = {
+        0, 86, 171, 255, 0, 86, 171, 255, 0, 86, 171, 255, 0, 86, 171, 255,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 154, 205, 255,
+        0, 0, 0, 0, 18, 154, 205, 255, 18, 154, 205, 255, 18, 154, 205, 255,
+        50, 186, 237, 255, 50, 186, 237, 255, 50, 186, 237, 255, 50, 186, 237, 255};
+    decodeRgb8A1Test((const etc1_byte*)encoded, (const etc1_byte*)expectedDecoded);
+}
+
+TEST_F(Etc2Test, ETC2RGB8A1_OP0_Planer) {
+    const unsigned char encoded[cRgbEncodedSize] = {35, 73, 249, 152, 191, 212, 60, 253};
+    unsigned char expectedDecoded[cRgb8A1PatchSize] = {
+        69, 201, 239, 255, 64, 199, 238, 255, 59, 196, 237, 255, 53, 194, 236, 255,
+        85, 209, 241, 255, 80, 206, 240, 255, 75, 204, 239, 255, 70, 201, 238, 255,
+        102, 216, 243, 255, 96, 214, 242, 255, 91, 211, 241, 255, 86, 209, 240, 255,
+        118, 224, 245, 255, 113, 221, 244, 255, 107, 219, 243, 255, 102, 216, 242, 255};
+    decodeRgb8A1Test((const etc1_byte*)encoded, (const etc1_byte*)expectedDecoded);
+}

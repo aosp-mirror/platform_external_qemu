@@ -77,6 +77,8 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
         case GL_COMPRESSED_SIGNED_R11_EAC:
         case GL_COMPRESSED_RG11_EAC:
         case GL_COMPRESSED_SIGNED_RG11_EAC:
+        case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+        case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
             {
                 GLint format = GL_RGB;
                 GLint type = GL_UNSIGNED_BYTE;
@@ -122,6 +124,16 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
                         etcFormat = EtcSignedRG11;
                         format = GL_RG;
                         type = GL_FLOAT;
+                        break;
+                    case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+                        convertedInternalFormat = GL_RGBA8;
+                        etcFormat = EtcRGB8A1;
+                        format = GL_RGBA;
+                        break;
+                    case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+                        convertedInternalFormat = GL_SRGB8_ALPHA8;
+                        etcFormat = EtcRGB8A1;
+                        format = GL_RGBA;
                         break;
                 }
 
