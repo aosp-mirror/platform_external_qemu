@@ -177,7 +177,7 @@ bool aio_prepare(AioContext *ctx)
         }
 
         if (node->deleted || (!node->io_read && !node->io_write)) {
-            fds[i].fd = -1; // ignore
+            fds[i].fd = INVALID_SOCKET; // ignore
         } else {
             fds[i].fd = node->pfd.fd;
             fds[i].events = (node->io_read ? POLLIN : 0) | (node->io_write ? POLLOUT : 0);
@@ -211,7 +211,7 @@ bool aio_prepare(AioContext *ctx)
         i = 0;
         QLIST_FOREACH(node, &ctx->aio_handlers, node) {
             node->pfd.revents = 0;
-            if (i < fds_count && fds[i].fd >= 0) {
+            if (i < fds_count && fds[i].fd != INVALID_SOCKET) {
                 if (fds[i].revents & POLLIN) {
                     node->pfd.revents |= G_IO_IN;
                     have_select_revents = true;
