@@ -1,0 +1,412 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "037501b9_cb324bc7",
+        "filename": "android/android-emu/android/ffmpeg-muxer.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-11T23:55:00Z",
+      "side": 1,
+      "message": "Our code guidelines state that new code needs to be C++, not C. Could you please change it to C++?",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 58
+      },
+      "revId": "6e6b7dd5c5f6ba8adacec23c69304eb36931b9b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "037501b9_eb7ce760",
+        "filename": "android/android-emu/android/ffmpeg-muxer.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-11T23:55:00Z",
+      "side": 1,
+      "message": "looks like this comment isn\u0027t relevant to emulator codebase",
+      "range": {
+        "startLine": 36,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 3
+      },
+      "revId": "6e6b7dd5c5f6ba8adacec23c69304eb36931b9b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "037501b9_2b489f1d",
+        "filename": "android/android-emu/android/ffmpeg-muxer.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-11T23:55:00Z",
+      "side": 1,
+      "message": "1. We use \u003c\u003e only for stdlib and C++ STL headers (well, try to)\n2. Include order is:\n   this source\u0027s header\n   local headers\n   3rdparty headers\n   c++ stl headers\n   C stdlib headers\n\n3. Just double checking that all these are in our prebuilts directory and not the system libs",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 37
+      },
+      "revId": "6e6b7dd5c5f6ba8adacec23c69304eb36931b9b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "037501b9_2b0f3fe9",
+        "filename": "android/android-emu/android/ffmpeg-muxer.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-11T23:55:00Z",
+      "side": 1,
+      "message": "please use \"android/base/debug.h\" for this kind of logging, and don\u0027t print anything unconditionally",
+      "range": {
+        "startLine": 103,
+        "startChar": 4,
+        "endLine": 103,
+        "endChar": 10
+      },
+      "revId": "6e6b7dd5c5f6ba8adacec23c69304eb36931b9b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "037501b9_abb02fe8",
+        "filename": "android/android-emu/android/ffmpeg-muxer.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-11T23:55:00Z",
+      "side": 1,
+      "message": "this is a huge no-no big applications:\n1. It\u0027s OK to disable screen capturing if it failed to initialize, but it\u0027s not OK to kill the whole emulator\n2. exit() is very poorly works with multithreaded apps, as other threads could easily try accessing some data that\u0027s destroyed in atexit() handler. We\u0027ve seen tons of such crashes, and still getting some",
+      "range": {
+        "startLine": 134,
+        "startChar": 8,
+        "endLine": 134,
+        "endChar": 12
+      },
+      "revId": "6e6b7dd5c5f6ba8adacec23c69304eb36931b9b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "037501b9_2ba41fa5",
+        "filename": "android/android-emu/android/ffmpeg-muxer.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-11T23:55:00Z",
+      "side": 1,
+      "message": "should this be configurable?",
+      "range": {
+        "startLine": 149,
+        "startChar": 7,
+        "endLine": 150,
+        "endChar": 31
+      },
+      "revId": "6e6b7dd5c5f6ba8adacec23c69304eb36931b9b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "037501b9_0e8291eb",
+        "filename": "android/android-emu/android/ffmpeg-muxer.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 620,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-11T23:55:00Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 620,
+        "startChar": 0,
+        "endLine": 620,
+        "endChar": 23
+      },
+      "revId": "6e6b7dd5c5f6ba8adacec23c69304eb36931b9b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "037501b9_aedcbdf9",
+        "filename": "android/android-emu/android/ffmpeg-muxer.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 700,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-11T23:55:00Z",
+      "side": 1,
+      "message": "should you free() the |muxer| as well?",
+      "revId": "6e6b7dd5c5f6ba8adacec23c69304eb36931b9b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "037501b9_4e9f2941",
+        "filename": "android/android-emu/android/ffmpeg-muxer.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 739,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-11T23:55:00Z",
+      "side": 1,
+      "message": "is this a part of a test application?",
+      "range": {
+        "startLine": 739,
+        "startChar": 0,
+        "endLine": 739,
+        "endChar": 37
+      },
+      "revId": "6e6b7dd5c5f6ba8adacec23c69304eb36931b9b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "037501b9_ebd5c726",
+        "filename": "android/android-emu/android/ffmpeg-muxer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-11T23:55:00Z",
+      "side": 1,
+      "message": "nit: 2017 only, I think :)",
+      "range": {
+        "startLine": 1,
+        "startChar": 25,
+        "endLine": 1,
+        "endChar": 26
+      },
+      "revId": "6e6b7dd5c5f6ba8adacec23c69304eb36931b9b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "037501b9_eb162772",
+        "filename": "android/android-emu/android/ffmpeg-muxer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-11T23:55:00Z",
+      "side": 1,
+      "message": "as per code guidelines, please use C++-style comments",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 3
+      },
+      "revId": "6e6b7dd5c5f6ba8adacec23c69304eb36931b9b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "037501b9_8bff73ee",
+        "filename": "android/android-emu/android/ffmpeg-muxer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-11T23:55:00Z",
+      "side": 1,
+      "message": "#pragma once",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 18
+      },
+      "revId": "6e6b7dd5c5f6ba8adacec23c69304eb36931b9b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "037501b9_eb34e7ff",
+        "filename": "android/android-emu/android/ffmpeg-muxer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-11T23:55:00Z",
+      "side": 1,
+      "message": "#include \"android/utils/compiler.h\"\n\nANDROID_BEGIN_HEADER\n...\nANDROID_END_HEADER",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 6
+      },
+      "revId": "6e6b7dd5c5f6ba8adacec23c69304eb36931b9b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "037501b9_cb9faba3",
+        "filename": "android/android-emu/android/ffmpeg-muxer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-11T23:55:00Z",
+      "side": 1,
+      "message": "please include \u003cstdbool.h\u003e and use bool type for such parameters",
+      "range": {
+        "startLine": 26,
+        "startChar": 96,
+        "endLine": 26,
+        "endChar": 99
+      },
+      "revId": "6e6b7dd5c5f6ba8adacec23c69304eb36931b9b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "037501b9_ebd0674f",
+        "filename": "android/android-emu/android/ffmpeg-muxer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-11T23:55:00Z",
+      "side": 1,
+      "message": "nit: typo anable-\u003eenable",
+      "range": {
+        "startLine": 26,
+        "startChar": 100,
+        "endLine": 26,
+        "endChar": 112
+      },
+      "revId": "6e6b7dd5c5f6ba8adacec23c69304eb36931b9b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "037501b9_2bf5ffd3",
+        "filename": "android/android-emu/android/ffmpeg-muxer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-11T23:55:00Z",
+      "side": 1,
+      "message": "very nit: I would prefer to have \"ffmpeg_\" prefix for all functions here, just to make it easy to discover and read:\n\nffmpeg_create_recorder()\nffmpeg_encode_frame()\netc",
+      "range": {
+        "startLine": 26,
+        "startChar": 7,
+        "endLine": 26,
+        "endChar": 28
+      },
+      "revId": "6e6b7dd5c5f6ba8adacec23c69304eb36931b9b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "037501b9_8b99b3bf",
+        "filename": "android/android-emu/android/ffmpeg-muxer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-11T23:55:00Z",
+      "side": 1,
+      "message": "nit: start/stop -\u003e create/destroy?\nIt\u0027s a little bit weird to see a start() function that returns a new pointer",
+      "range": {
+        "startLine": 26,
+        "startChar": 7,
+        "endLine": 26,
+        "endChar": 28
+      },
+      "revId": "6e6b7dd5c5f6ba8adacec23c69304eb36931b9b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "037501b9_cbb80b2a",
+        "filename": "android/android-emu/android/ffmpeg-muxer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-11T23:55:00Z",
+      "side": 1,
+      "message": "could you please add some comments about these functions: thread safety, return values, some info about the parameters?\nAlso, void* isn\u0027t the best type to use as a handle here, as anything could be passed as |recorder| by mistake.\nWhat about forward-declaring a struct and using it instead?\n\ntypedef struct ffmpeg_recorder ffmpeg_recorder;\nffmpeg_recorder* start_ffmpeg_recorder(...)\n?",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 84
+      },
+      "revId": "6e6b7dd5c5f6ba8adacec23c69304eb36931b9b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
