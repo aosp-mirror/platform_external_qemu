@@ -146,10 +146,6 @@ QEMU2_COMMON_SOURCES := \
     hw/ipack/tpci200.c \
     hw/isa/isa-bus.c \
     hw/misc/pci-testdev.c \
-    hw/net/e1000.c \
-    hw/net/e1000e.c \
-    hw/net/e1000e_core.c \
-    hw/net/e1000x_common.c \
     hw/net/eepro100.c \
     hw/net/ne2000.c \
     hw/net/net_rx_pkt.c \
