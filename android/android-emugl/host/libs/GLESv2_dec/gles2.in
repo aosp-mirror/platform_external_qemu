@@ -368,6 +368,13 @@ GL_ENTRY(void, glDeleteSync, GLsync to_delete)
 GL_ENTRY(GLboolean, glIsSync, GLsync sync)
 GL_ENTRY(void, glGetSynciv, GLsync sync, GLenum pname, GLsizei bufSize, GLsizei *length, GLint *values)
 
+GL_ENTRY(uint64_t, glFenceSyncAEMU, GLenum condition, GLbitfield flags)
+GL_ENTRY(GLenum, glClientWaitSyncAEMU, uint64_t wait_on, GLbitfield flags, GLuint64 timeout)
+GL_ENTRY(void, glWaitSyncAEMU, uint64_t wait_on, GLbitfield flags, GLuint64 timeout)
+GL_ENTRY(void, glDeleteSyncAEMU, uint64_t to_delete)
+GL_ENTRY(GLboolean, glIsSyncAEMU, uint64_t sync)
+GL_ENTRY(void, glGetSyncivAEMU, uint64_t sync, GLenum pname, GLsizei bufSize, GLsizei *length, GLint *values)
+
 # MRT / MSAA render buffer
 GL_ENTRY(void, glDrawBuffers, GLsizei n, const GLenum *bufs);
 GL_ENTRY(void, glReadBuffer, GLenum src);

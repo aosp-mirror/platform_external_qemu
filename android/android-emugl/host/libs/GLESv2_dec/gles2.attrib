@@ -803,7 +803,47 @@ glDrawRangeElementsOffsetAEMU
     flag custom_decoder
     flag not_api
 
+glFenceSync
+    flag unsupported
+
+glClientWaitSync
+    flag unsupported
+
+glWaitSync
+    flag unsupported
+
+glDeleteSync
+    flag unsupported
+
+glIsSync
+    flag unsupported
+
 glGetSynciv
+    flag unsupported
+
+glFenceSyncAEMU
+    flag custom_decoder
+    flag not_api
+
+glClientWaitSyncAEMU
+    flag custom_decoder
+    flag not_api
+
+glWaitSyncAEMU
+    flag custom_decoder
+    flag not_api
+
+glDeleteSyncAEMU
+    flag custom_decoder
+    flag not_api
+
+glIsSyncAEMU
+    flag custom_decoder
+    flag not_api
+
+glGetSyncivAEMU
+    flag custom_decoder
+    flag not_api
     dir length out
     len length (sizeof(GLsizei))
     dir values out

@@ -37,6 +37,7 @@ GLvoidptr* 32 0x%08x
 GLchar*const* 32 0x%08x
 GLvoid*const* 32 0x%08x
 GLsync 64 %p
+uint64_t 64 0x%016lx
 GLint32 32 0x%08x
 GLint32* 32 %p
 GLint64 64 0x%016lx
