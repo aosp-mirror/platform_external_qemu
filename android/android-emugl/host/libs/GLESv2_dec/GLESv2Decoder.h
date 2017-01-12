@@ -76,5 +76,13 @@ private:
 
     static void gles2_APIENTRY s_glDrawElementsIndirectDataAEMU(void* self, GLenum mode, GLenum type, const void* indirect, GLuint datalen);
     static void gles2_APIENTRY s_glDrawElementsIndirectOffsetAEMU(void* self, GLenum mode, GLenum type, GLuint offset);
+
+    static uint64_t gles2_APIENTRY s_glFenceSyncAEMU(void* self, GLenum condition, GLbitfield flags);
+    static GLenum gles2_APIENTRY s_glClientWaitSyncAEMU(void* self, uint64_t wait_on, GLbitfield flags, GLuint64 timeout);
+    static void gles2_APIENTRY s_glWaitSyncAEMU(void* self, uint64_t wait_on, GLbitfield flags, GLuint64 timeout);
+    static void gles2_APIENTRY s_glDeleteSyncAEMU(void* self, uint64_t to_delete);
+    static GLboolean gles2_APIENTRY s_glIsSyncAEMU(void* self, uint64_t sync);
+    static void gles2_APIENTRY s_glGetSyncivAEMU(void* self, uint64_t sync, GLenum pname, GLsizei bufSize, GLsizei *length, GLint *values);
+
 };
 #endif

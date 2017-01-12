@@ -98,6 +98,13 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
 
     glDrawElementsIndirectDataAEMU = s_glDrawElementsIndirectDataAEMU;
     glDrawElementsIndirectOffsetAEMU = s_glDrawElementsIndirectOffsetAEMU;
+
+    glFenceSyncAEMU = s_glFenceSyncAEMU;
+    glClientWaitSyncAEMU = s_glClientWaitSyncAEMU;
+    glWaitSyncAEMU = s_glWaitSyncAEMU;
+    glIsSyncAEMU = s_glIsSyncAEMU;
+    glGetSyncivAEMU = s_glGetSyncivAEMU;
+
     return 0;
 
 }
@@ -344,4 +351,34 @@ void GLESv2Decoder::s_glDrawElementsIndirectDataAEMU(void* self, GLenum mode, GL
 void GLESv2Decoder::s_glDrawElementsIndirectOffsetAEMU(void* self, GLenum mode, GLenum type, GLuint offset) {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glDrawElementsIndirect(mode, type, SafePointerFromUInt(offset));
+}
+
+uint64_t GLESv2Decoder::s_glFenceSyncAEMU(void* self, GLenum condition, GLbitfield flags) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    return (uint64_t)(uintptr_t)ctx->glFenceSync(condition, flags);
+}
+
+GLenum GLESv2Decoder::s_glClientWaitSyncAEMU(void* self, uint64_t wait_on, GLbitfield flags, GLuint64 timeout) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    return ctx->glClientWaitSync((GLsync)(uintptr_t)wait_on, flags, timeout);
+}
+
+void GLESv2Decoder::s_glWaitSyncAEMU(void* self, uint64_t wait_on, GLbitfield flags, GLuint64 timeout) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glWaitSync((GLsync)(uintptr_t)wait_on, flags, timeout);
+}
+
+void GLESv2Decoder::s_glDeleteSyncAEMU(void* self, uint64_t to_delete) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDeleteSync((GLsync)(uintptr_t)to_delete);
+}
+
+GLboolean GLESv2Decoder::s_glIsSyncAEMU(void* self, uint64_t sync) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    return ctx->glIsSync((GLsync)(uintptr_t)sync);
+}
+
+void GLESv2Decoder::s_glGetSyncivAEMU(void* self, uint64_t sync, GLenum pname, GLsizei bufSize, GLsizei *length, GLint *values) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glGetSynciv((GLsync)(uintptr_t)sync, pname, bufSize, length, values);
 }
