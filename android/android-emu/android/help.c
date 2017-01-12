@@ -1423,6 +1423,20 @@ help_cores(stralloc_t* out)
     );
 }
 
+static void
+help_hostfwd(stralloc_t* out)
+{
+    PRINTF(
+    "  Redirect incoming TCP or UDP connections to the host port to the guest\n"
+    "  eth0 on port guestport. By specifying hostaddr, the rule can be bound\n"
+    "  to a specific host interface. If no connection type is set, TCP is\n"
+    "  used.\n"
+    "  This example redirects telnet connections from host port 5555 to\n"
+    "  telnet port on the guest\n"
+    "      hostfwd tcp::5555-:23\n\n"
+    );
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
