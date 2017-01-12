@@ -222,7 +222,8 @@ package_builder_process_options () {
     # Add darwin to the host systems list if we got DARWIN_SSH set.
     # Exception: if DARWIN_SSH is set from the environment (automatically)
     # but HOST_SYSTEMS are coming from the command line, don't do anything.
-    if [ -z "$HAS_DARWIN" -a ! '(' -z "$OPT_DARWIN_SSH" -a -n "$OPT_HOST" ')' ]; then
+    if [ -n "$DARWIN_SSH" -a -z "$HAS_DARWIN" \
+            -a ! '(' -z "$OPT_DARWIN_SSH" -a -n "$OPT_HOST" ')' ]; then
         HAS_DARWIN=true
         var_append HOST_SYSTEMS "darwin-x86_64"
         log "Auto-config: --host=$(spaces_to_commas "$HOST_SYSTEMS")'  [darwin-ssh!]"

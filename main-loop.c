@@ -377,7 +377,7 @@ static int pollfds_fill(GArray *pollfds, WSAPOLLFD fds[], int fds_count, int* so
         }
 
         if (fds[i].events == 0) {
-            fds[i].fd = -1; // ignore this one
+            fds[i].fd = INVALID_SOCKET; // ignore this one
         } else {
             ++*sockets_count;
             fds[i].fd = pfd->fd;
@@ -392,7 +392,7 @@ static void pollfds_poll(GArray *pollfds, const WSAPOLLFD fds[], int fds_count)
     for (i = 0; i < pollfds->len; i++) {
         GPollFD *pfd = &g_array_index(pollfds, GPollFD, i);
         int revents = 0;
-        if (i < fds_count && fds[i].fd >= 0) {
+        if (i < fds_count && fds[i].fd != INVALID_SOCKET) {
             if (fds[i].revents & POLLRDNORM) {
                 revents |= G_IO_IN;
             }
