@@ -19,37 +19,34 @@
 #include <QMouseEvent>
 #include <QResizeEvent>
 
-#include <cassert>
-
 void serializeEventToStream(std::ostream& str, const QEvent* event) {
     switch (event->type()) {
     case QEvent::Enter:
         {
-            const QEnterEvent* enter_event = dynamic_cast<const QEnterEvent*>(event);
-            assert(enter_event);
-            str << enter_event->localPos().x() << " " << enter_event->localPos().y() << " "
-                << enter_event->windowPos().x() << " " << enter_event->windowPos().y() << " "
-                << enter_event->screenPos().x() << " " << enter_event->screenPos().y() << " ";
+            const auto enter_event = static_cast<const QEnterEvent*>(event);
+            str << enter_event->localPos().x() << ' ' << enter_event->localPos().y() << ' '
+                << enter_event->windowPos().x() << ' ' << enter_event->windowPos().y() << ' '
+                << enter_event->screenPos().x() << ' ' << enter_event->screenPos().y() << ' ';
             break;
         }
     case QEvent::MouseButtonPress:
     case QEvent::MouseButtonRelease:
         {
-            const QMouseEvent* mouse_event = dynamic_cast<const QMouseEvent*>(event);
+            const auto mouse_event = static_cast<const QMouseEvent*>(event);
             assert(mouse_event);
-            str << mouse_event->localPos().x() << " " << mouse_event->localPos().y() << " "
-                << mouse_event->windowPos().x() << " " << mouse_event->windowPos().y() << " "
-                << mouse_event->screenPos().x() << " " << mouse_event->screenPos().y() << " "
-                << mouse_event->buttons() << " "
-                << mouse_event->modifiers() << " ";
+            str << mouse_event->localPos().x() << ' ' << mouse_event->localPos().y() << ' '
+                << mouse_event->windowPos().x() << ' ' << mouse_event->windowPos().y() << ' '
+                << mouse_event->screenPos().x() << ' ' << mouse_event->screenPos().y() << ' '
+                << mouse_event->buttons() << ' '
+                << mouse_event->modifiers() << ' ';
             break;
         }
     case QEvent::Resize:
         {
-            const QResizeEvent* resize_event = dynamic_cast<const QResizeEvent*>(event);
+            const auto resize_event = static_cast<const QResizeEvent*>(event);
             assert(resize_event);
-            str << resize_event->size().width() << " " << resize_event->size().height() << " "
-                << resize_event->oldSize().width() << " " << resize_event->oldSize().height() << " ";
+            str << resize_event->size().width() << ' ' << resize_event->size().height() << ' '
+                << resize_event->oldSize().width() << ' ' << resize_event->oldSize().height() << ' ';
             break;
         }
     case QEvent::Close:
@@ -61,5 +58,5 @@ void serializeEventToStream(std::ostream& str, const QEvent* event) {
     default:
         str << "<unsupported by serializer>";
     }
-    str << "\n";
+    str << '\n';
 }
