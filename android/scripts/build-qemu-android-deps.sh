@@ -448,8 +448,7 @@ fi
 if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     # Perform remote Darwin build first.
     dump "Remote qemu-android-deps build for: $DARWIN_SYSTEMS"
-    builder_prepare_remote_darwin_build \
-            "/tmp/$USER-rebuild-darwin-ssh-$$/qemu-android-deps-build"
+    builder_prepare_remote_darwin_build
 
     if [ "$OPT_FORCE" ]; then
         var_append DARWIN_BUILD_FLAGS "--force"

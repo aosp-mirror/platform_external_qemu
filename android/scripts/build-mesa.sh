@@ -102,8 +102,7 @@ if [ "$DARWIN_SYSTEMS" -a "$DARWIN_SSH" ]; then
         var_append DARWIN_BUILD_FLAGS "--osmesa"
     fi
 
-    builder_prepare_remote_darwin_build \
-            "/tmp/$USER-rebuild-darwin-ssh-$$/mesa-build"
+    builder_prepare_remote_darwin_build
 
     run mkdir -p "$DARWIN_PKG_DIR/prebuilts"
     for SYSTEM in $DARWIN_SYSTEMS; do

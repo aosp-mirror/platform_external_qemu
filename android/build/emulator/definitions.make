@@ -105,6 +105,8 @@ local-static-libraries-ldlibs-linux = $(strip \
 
 local-static-libraries-ldlibs-windows =  $(local-static-libraries-ldlibs-linux)
 
+# TODO(zyy): add -Wl,--start-group / end-group here for gcc builds after
+# migrating our Mac build to LLVM linker.
 local-static-libraries-ldlibs = $(local-static-libraries-ldlibs-$(BUILD_TARGET_OS))
 
 # Expand to a shell statement that changes the runtime library search path.
