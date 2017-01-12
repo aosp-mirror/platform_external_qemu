@@ -321,6 +321,7 @@ vhdx=""
 numa=""
 tcmalloc="no"
 jemalloc="no"
+winvista="no"
 
 # parse CC options first
 for opt do
@@ -701,7 +702,7 @@ fi
 if test "$mingw32" = "yes" ; then
   EXESUF=".exe"
   DSOSUF=".dll"
-  QEMU_CFLAGS="-DWIN32_LEAN_AND_MEAN -DWINVER=0x501 $QEMU_CFLAGS"
+  QEMU_CFLAGS="-DWIN32_LEAN_AND_MEAN $QEMU_CFLAGS"
   # enable C99/POSIX format strings (needs mingw32-runtime 3.15 or later)
   QEMU_CFLAGS="-D__USE_MINGW_ANSI_STDIO=1 $QEMU_CFLAGS"
   # MinGW needs -mthreads for TLS and macro _MT.
@@ -720,6 +721,7 @@ if test "$mingw32" = "yes" ; then
   local_statedir=
   confsuffix=""
   libs_qga="-lws2_32 -lwinmm -lpowrprof -liphlpapi -lnetapi32 $libs_qga"
+  hax="yes"
 fi
 
 werror=""
@@ -1156,6 +1158,10 @@ for opt do
   ;;
   --enable-jemalloc) jemalloc="yes"
   ;;
+  --disable-winvista) winvista="no"
+  ;;
+  --enable-winvista) winvista="yes"
+  ;;
   *)
       echo "ERROR: unknown option $opt"
       echo "Try '$0 --help' for more information"
@@ -1163,6 +1169,15 @@ for opt do
   ;;
   esac
 done
+
+if test "$mingw32" == "yes" ; then
+    if test "$winvista" = "yes" ; then
+      WINVER=0x0600
+    else
+      WINVER=0x0501
+    fi
+    QEMU_CFLAGS="-DWINVER=$WINVER -D_WIN32_WINNT=$WINVER $QEMU_CFLAGS"
+fi
 
 if ! has $python; then
   error_exit "Python not found. Use --python=/path/to/python"
@@ -1387,6 +1402,7 @@ disabled with --disable-FEATURE, default is enabled if available:
   numa            libnuma support
   tcmalloc        tcmalloc support
   jemalloc        jemalloc support
+  winvista        use of Windows APIs available on Vista+ versions
 
 NOTE: The object files are built at the place where configure is launched
 EOF
@@ -4920,6 +4936,7 @@ echo "NUMA host support $numa"
 echo "tcmalloc support  $tcmalloc"
 echo "jemalloc support  $jemalloc"
 echo "avx2 optimization $avx2_opt"
+echo "Win Vista+ APIs   $winvista"
 
 if test "$sdl_too_old" = "yes"; then
 echo "-> Your SDL version is too old - please upgrade to have SDL support"

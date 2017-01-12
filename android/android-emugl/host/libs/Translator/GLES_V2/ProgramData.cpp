@@ -13,13 +13,14 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#include <GLES2/gl2.h>
+#include <GLES3/gl31.h>
 #include <GLcommon/objectNameManager.h>
 #include "ProgramData.h"
 
 ProgramData::ProgramData() :  ObjectData(PROGRAM_DATA),
                               AttachedVertexShader(0),
                               AttachedFragmentShader(0),
+                              AttachedComputeShader(0),
                               LinkStatus(GL_FALSE),
                               IsInUse(false),
                               DeleteStatus(false) {}
@@ -40,6 +41,10 @@ GLuint ProgramData::getAttachedFragmentShader() const {
     return AttachedFragmentShader;
 }
 
+GLuint ProgramData::getAttachedComputeShader() const {
+    return AttachedComputeShader;
+}
+
 GLuint ProgramData::getAttachedShader(GLenum type) const {
     GLuint shader = 0;
     switch (type) {
@@ -48,6 +53,9 @@ GLuint ProgramData::getAttachedShader(GLenum type) const {
         break;
     case GL_FRAGMENT_SHADER:
         shader = AttachedFragmentShader;
+        break;
+    case GL_COMPUTE_SHADER:
+        shader = AttachedComputeShader;
         break;
     }
     return shader;
@@ -62,11 +70,17 @@ bool ProgramData::attachShader(GLuint shader,GLenum type) {
         AttachedFragmentShader=shader;
         return true;
     }
+    else if (type==GL_COMPUTE_SHADER && AttachedComputeShader==0) {
+        AttachedComputeShader=shader;
+        return true;
+    }
     return false;
 }
 
 bool ProgramData::isAttached(GLuint shader) const {
-    return (AttachedFragmentShader==shader || AttachedVertexShader==shader);
+    return AttachedFragmentShader == shader ||
+           AttachedVertexShader == shader ||
+           AttachedComputeShader == shader;
 }
 
 bool ProgramData::detachShader(GLuint shader) {
@@ -76,6 +90,10 @@ bool ProgramData::detachShader(GLuint shader) {
     }
     else if (AttachedFragmentShader==shader) {
         AttachedFragmentShader = 0;
+        return true;
+    }
+    else if (AttachedComputeShader==shader) {
+        AttachedComputeShader = 0;
         return true;
     }
     return false;

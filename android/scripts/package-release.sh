@@ -202,7 +202,7 @@ list_files_under () {
 # $2: Source directory
 # $3+: List of files/directories to package.
 package_archive_files () {
-    local PKG_FILE PKG_DIR TMP_FILE_LIST TARFLAGS RET FILTER FILE FILES
+    local PKG_FILE PKG_DIR TMP_FILE_LIST SEPTARFLAGS TARFLAGS RET FILTER FILE FILES
     PKG_FILE=$1
     PKG_DIR=$2
     shift; shift;
@@ -216,13 +216,25 @@ package_archive_files () {
             TARFLAGS=""
             ;;
         *.tar.gz)
-            TARFLAGS=z
+            if ! type "pigz" &>/dev/null ; then
+                TARFLAGS=z
+            else
+                SEPTARFLAGS="-I pigz"
+            fi
             ;;
         *.tar.bz2)
-            TARFLAGS=j
+            if ! type "pbzip2" &>/dev/null ; then
+                TARFLAGS=j
+            else
+                SEPTARFLAGS="-I pbzip2"
+            fi
             ;;
         *.tar.xz)
-            TARFLAGS=J
+            if ! type "pxz" &>/dev/null ; then
+                TARFLAGS=J
+            else
+                SEPTARFLAGS="-I pxz"
+            fi
             ;;
         *)
             panic "Don't know how to create package: $PKG_FILE"
@@ -233,7 +245,7 @@ package_archive_files () {
     fi
 
     RET=0
-    run tar c${TARFLAGS}f "$PKG_FILE" \
+    run tar ${SEPTARFLAGS} -c${TARFLAGS}f "$PKG_FILE" \
             -C "$PKG_DIR" \
             -T "$TMP_FILE_LIST" \
             --owner=android \
@@ -626,16 +638,12 @@ build_darwin_binaries_on () {
     fi
 
     # Where to do the work on the remote host.
-    builder_prepare_remote_darwin_build \
-            /tmp/$USER-android-emulator/$PKG_FILE_PREFIX
+    builder_prepare_remote_darwin_build
 
     AOSP_BUILD_PREBUILTS=$AOSP_PREBUILTS_DIR/android-emulator-build
     DARWIN_BUILD_PREBUILTS=$DARWIN_PKG_DIR/aosp/prebuilts/android-emulator-build
     AOSP_KERNEL_PREBUILTS=$AOSP_PREBUILTS_DIR/qemu-kernel
     DARWIN_KERNEL_PREBUILTS=$DARWIN_PKG_DIR/aosp/prebuilts/qemu-kernel
-
-    copy_directory "$AOSP_BUILD_PREBUILTS"/curl/darwin-x86_64 \
-            "$DARWIN_BUILD_PREBUILTS"/curl/darwin-x86_64
 
     if [ ! -d "$AOSP_KERNEL_PREBUILTS/x86/pc-bios" ]; then
         panic "Missing pc-bios prebuilts!"
@@ -643,52 +651,25 @@ build_darwin_binaries_on () {
     copy_directory "$AOSP_KERNEL_PREBUILTS"/x86/pc-bios \
             "$DARWIN_KERNEL_PREBUILTS"/x86/pc-bios
 
-    copy_directory "$AOSP_BUILD_PREBUILTS"/qemu-android-deps/darwin-x86_64 \
-            "$DARWIN_BUILD_PREBUILTS"/qemu-android-deps/darwin-x86_64
-
-    if [ ! -d "$AOSP_BUILD_PREBUILTS/common/e2fsprogs/darwin-x86_64" ]; then
-        panic "Missing e2fsprogs prebuilts!"
-    fi
-    copy_directory "$AOSP_BUILD_PREBUILTS"/common/e2fsprogs/darwin-x86_64 \
-            "$DARWIN_BUILD_PREBUILTS"/common/e2fsprogs/darwin-x86_64
-
-    if [ ! -d "$AOSP_BUILD_PREBUILTS/common/libxml2/darwin-x86_64" ]; then
-        panic "Missing Darwin libxml2 prebuilts!"
-    fi
-    copy_directory "$AOSP_BUILD_PREBUILTS"/common/libxml2/darwin-x86_64 \
-            "$DARWIN_BUILD_PREBUILTS"/common/libxml2/darwin-x86_64
-
-    if [ ! -d "$AOSP_BUILD_PREBUILTS/common/breakpad/darwin-x86_64" ]; then
-        panic "Missing Darwin breakpad prebuilts!"
-    fi
-    copy_directory "$AOSP_BUILD_PREBUILTS"/common/breakpad/darwin-x86_64 \
-            "$DARWIN_BUILD_PREBUILTS"/common/breakpad/darwin-x86_64
-
-    if [ ! -d "$AOSP_BUILD_PREBUILTS"/qt/darwin-x86_64 ]; then
-        panic "Missing Darwin Qt prebuilts required by --ui=qt !!"
-    fi
-
+    for LIB in qemu-android-deps curl common/e2fsprogs common/libxml2 \
+            common/breakpad qt common/ANGLE common/x264 common/ffmpeg; do
+        if [ ! -d "$AOSP_BUILD_PREBUILTS/$LIB/darwin-x86_64" ]; then
+            panic "Missing $LIB Darwin prebuilts!"
+        fi
+        copy_directory "$AOSP_BUILD_PREBUILTS"/$LIB/darwin-x86_64 \
+                "$DARWIN_BUILD_PREBUILTS"/$LIB/darwin-x86_64
+    done
+    
     copy_directory "$AOSP_BUILD_PREBUILTS"/qt/common \
             "$DARWIN_BUILD_PREBUILTS"/qt/common
-
-    copy_directory "$AOSP_BUILD_PREBUILTS"/qt/darwin-x86_64 \
-            "$DARWIN_BUILD_PREBUILTS"/qt/darwin-x86_64
-
-    if [ ! -d "$AOSP_BUILD_PREBUILTS"/common/ANGLE/darwin-x86_64 ]; then
-        panic "Missing Darwin ANGLE prebuilts!"
-    fi
-
-    copy_directory "$AOSP_BUILD_PREBUILTS"/common/ANGLE/darwin-x86_64 \
-            "$DARWIN_BUILD_PREBUILTS"/common/ANGLE/darwin-x86_64
 
     if [ ! -d "$AOSP_BUILD_PREBUILTS"/protobuf ]; then
         panic "Missing Darwin protobuf prebuilts!"
     fi
-
     copy_directory "$AOSP_BUILD_PREBUILTS"/protobuf \
             "$DARWIN_BUILD_PREBUILTS"/protobuf
 
-    run tar xf "$PKG_FILE" -C "$DARWIN_PKG_DIR"/..
+    run tar xf "$PKG_FILE" -C "$DARWIN_PKG_DIR" --strip-components 1
 
     if [ "$AOSP_PREBUILTS_DIR" ]; then
         var_append DARWIN_BUILD_FLAGS "--aosp-prebuilts-dir=$DARWIN_REMOTE_DIR/aosp/prebuilts"

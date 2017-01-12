@@ -33,7 +33,8 @@ include-if-bitness-64 = \
     $(if $(strip $(LOCAL_IGNORE_BITNESS)$(filter true,$(LOCAL_HOST_BUILD))$(EMULATOR_BUILD_64BITS)),\
         $(eval include $1))
 
-BUILD_TARGET_CFLAGS := -g -falign-functions
+BUILD_TARGET_CFLAGS := -g -falign-functions -fno-exceptions -fno-unwind-tables
+BUILD_TARGET_CXXFLAGS := -fno-rtti -DGOOGLE_PROTOBUF_NO_RTTI
 
 BUILD_OPT_CFLAGS :=
 BUILD_OPT_LDFLAGS :=
@@ -51,6 +52,7 @@ else
     ifneq ($(BUILD_TARGET_OS),darwin)
         BUILD_OPT_CFLAGS += -funroll-loops -ftracer
     endif
+    BUILD_OPT_CFLAGS += -fvisibility=hidden
 endif
 
 ifeq (true,$(BUILD_ENABLE_LTO))
@@ -168,13 +170,14 @@ endif
 BUILD_TARGET_CFLAGS += \
     -Wall $(GCC_W_NO_MISSING_FIELD_INITIALIZERS) -Wno-strict-overflow
 
-BUILD_TARGET_CXXFLAGS := -Wno-invalid-offsetof
+BUILD_TARGET_CXXFLAGS += -Wno-invalid-offsetof
 
 # Needed to build block.c on Linux/x86_64.
 BUILD_TARGET_CFLAGS += -D_GNU_SOURCE=1
 
 # Copy the current target cflags into the host ones.
 BUILD_HOST_CFLAGS += $(BUILD_TARGET_CFLAGS)
+BUILD_HOST_CXXFLAGS += $(BUILD_TARGET_CXXFLAGS)
 
 # A useful function that can be used to start the declaration of a host
 # module. Avoids repeating the same stuff again and again.
@@ -209,8 +212,19 @@ start-emulator-program = \
     $(eval LOCAL_MODULE_CLASS := EXECUTABLES) \
     $(eval LOCAL_BUILD_FILE := $(BUILD_HOST_EXECUTABLE))
 
-# A varient of end-emulator-library for host programs instead
+# A variant of end-emulator-library for host programs instead
 end-emulator-program = \
+    $(eval LOCAL_LDLIBS += $(QEMU_SYSTEM_LDLIBS)) \
+    $(eval $(end-emulator-module-ev)) \
+
+# Same thing for shared libraries
+start-emulator-shared-lib = \
+    $(call start-emulator-library,$1) \
+    $(eval LOCAL_MODULE_CLASS := SHARED_LIBRARIES) \
+    $(eval LOCAL_BUILD_FILE := $(BUILD_HOST_SHARED_LIBRARY)) \
+
+# A varient of end-emulator-library for host programs instead
+end-emulator-shared-lib = \
     $(eval LOCAL_LDLIBS += $(QEMU_SYSTEM_LDLIBS)) \
     $(eval $(end-emulator-module-ev)) \
 

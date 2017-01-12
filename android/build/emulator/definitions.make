@@ -105,6 +105,8 @@ local-static-libraries-ldlibs-linux = $(strip \
 
 local-static-libraries-ldlibs-windows =  $(local-static-libraries-ldlibs-linux)
 
+# TODO(zyy): add -Wl,--start-group / end-group here for gcc builds after
+# migrating our Mac build to LLVM linker.
 local-static-libraries-ldlibs = $(local-static-libraries-ldlibs-$(BUILD_TARGET_OS))
 
 # Expand to a shell statement that changes the runtime library search path.
@@ -205,7 +207,7 @@ SRC:=$(1)
 OBJ:=$$(LOCAL_OBJS_DIR)/$$(call local-cxx-src-to-obj,$$(notdir $$(SRC)))
 LOCAL_OBJECTS += $$(OBJ)
 _BUILD_DEPENDENCY_DIRS += $$(dir $$(OBJ))
-$$(OBJ): PRIVATE_CFLAGS := $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
+$$(OBJ): PRIVATE_CFLAGS := $$(LOCAL_CFLAGS) $$(LOCAL_CXXFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
 $$(OBJ): PRIVATE_CXX    := $$(LOCAL_CXX)
 $$(OBJ): PRIVATE_OBJ    := $$(OBJ)
 $$(OBJ): PRIVATE_MODULE := $$(LOCAL_MODULE)
