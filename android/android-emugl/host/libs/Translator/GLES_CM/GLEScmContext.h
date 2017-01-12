@@ -33,7 +33,7 @@ class GLEScmContext: public GLEScontext
 {
 public:
     virtual void init(GlLibrary* glLib);
-    GLEScmContext();
+    GLEScmContext(int maj, int min);
     void setActiveTexture(GLenum tex);
     void  setClientActiveTexture(GLenum tex);
     GLenum  getActiveTexture() { return GL_TEXTURE0 + m_activeTexture;};
@@ -55,7 +55,7 @@ protected:
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
 private:
     void setupArrayPointerHelper(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLenum array_id,GLESpointer* p);
-    void setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int pointsIndex = -1);
+    void setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int pointsIndex = -1, bool isInt = false);
     void drawPoints(PointSizeIndices* points);
     void drawPointsData(GLESConversionArrays& arrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices_in,bool isElemsDraw);
     void initExtensionString();

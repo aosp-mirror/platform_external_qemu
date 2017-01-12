@@ -29,7 +29,7 @@ void GLEScmContext::init(GlLibrary* glLib) {
         GLEScontext::init(glLib);
 
         m_texCoords = new GLESpointer[s_glSupport.maxTexUnits];
-        m_map[GL_TEXTURE_COORD_ARRAY]  = &m_texCoords[m_clientActiveTexture];
+        m_currVaoState[GL_TEXTURE_COORD_ARRAY]  = &m_texCoords[m_clientActiveTexture];
 
         buildStrings((const char*)dispatcher().glGetString(GL_VENDOR),
                      (const char*)dispatcher().glGetString(GL_RENDERER),
@@ -39,11 +39,16 @@ void GLEScmContext::init(GlLibrary* glLib) {
     m_initialized = true;
 }
 
-GLEScmContext::GLEScmContext() {
-    m_map[GL_COLOR_ARRAY]          = new GLESpointer();
-    m_map[GL_NORMAL_ARRAY]         = new GLESpointer();
-    m_map[GL_VERTEX_ARRAY]         = new GLESpointer();
-    m_map[GL_POINT_SIZE_ARRAY_OES] = new GLESpointer();
+GLEScmContext::GLEScmContext(int maj, int min) {
+    m_glesMajorVersion = maj;
+    m_glesMinorVersion = min;
+    addVertexArrayObject(0);
+    setVertexArrayObject(0);
+
+    m_currVaoState[GL_COLOR_ARRAY]          = new GLESpointer();
+    m_currVaoState[GL_NORMAL_ARRAY]         = new GLESpointer();
+    m_currVaoState[GL_VERTEX_ARRAY]         = new GLESpointer();
+    m_currVaoState[GL_POINT_SIZE_ARRAY_OES] = new GLESpointer();
 }
 
 
@@ -53,7 +58,7 @@ void GLEScmContext::setActiveTexture(GLenum tex) {
 
 void GLEScmContext::setClientActiveTexture(GLenum tex) {
    m_clientActiveTexture = tex - GL_TEXTURE0;
-   m_map[GL_TEXTURE_COORD_ARRAY] = &m_texCoords[m_clientActiveTexture];
+   m_currVaoState[GL_TEXTURE_COORD_ARRAY] = &m_texCoords[m_clientActiveTexture];
 }
 
 GLEScmContext::~GLEScmContext(){
@@ -61,12 +66,12 @@ GLEScmContext::~GLEScmContext(){
         delete[] m_texCoords;
         m_texCoords = NULL;
     }
-    m_map[GL_TEXTURE_COORD_ARRAY] = NULL;
+    m_currVaoState[GL_TEXTURE_COORD_ARRAY] = NULL;
 }
 
 
 //setting client side arr
-void GLEScmContext::setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int index){
+void GLEScmContext::setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int index, bool isInt){
     if( arr == NULL) return;
     switch(arrayType) {
         case GL_VERTEX_ARRAY:
@@ -107,7 +112,7 @@ void GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
     m_pointsIndex = -1;
 
     //going over all clients arrays Pointers
-    for ( it=m_map.begin() ; it != m_map.end(); ++it) {
+    for ( it=m_currVaoState.begin() ; it != m_currVaoState.end(); ++it) {
 
         GLenum array_id   = (*it).first;
         GLESpointer* p = (*it).second;
@@ -130,7 +135,7 @@ void GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
         s_glDispatch.glClientActiveTexture(tex);
 
         GLenum array_id   = GL_TEXTURE_COORD_ARRAY;
-        GLESpointer* p = m_map[array_id];
+        GLESpointer* p = m_currVaoState[array_id];
         if(!p->isEnable()) continue;
         setupArrayPointerHelper(cArrs,first,count,type,indices,direct,array_id,p);
     }
@@ -142,7 +147,7 @@ void GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
 void  GLEScmContext::drawPointsData(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices_in,bool isElemsDraw) {
     const char  *pointsArr =  NULL;
     int stride = 0;
-    GLESpointer* p = m_map[GL_POINT_SIZE_ARRAY_OES];
+    GLESpointer* p = m_currVaoState[GL_POINT_SIZE_ARRAY_OES];
 
     //choosing the right points sizes array source
     if(m_pointsIndex >= 0) { //point size array was converted

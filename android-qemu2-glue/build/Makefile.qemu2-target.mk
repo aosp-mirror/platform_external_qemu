@@ -80,24 +80,6 @@ LOCAL_SRC_FILES += \
     $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES) \
     $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES_$(BUILD_TARGET_TAG))
 
-LOCAL_SRC_FILES += \
-    hw/audio/goldfish_audio.c \
-    hw/char/goldfish_tty.c \
-    hw/display/goldfish_fb.c \
-    $(call qemu2-if-target,arm arm64,, \
-        hw/display/framebuffer.c \
-        ) \
-    hw/input/goldfish_events.c \
-    hw/intc/goldfish_pic.c \
-    hw/timer/goldfish_timer.c \
-    hw/misc/goldfish_battery.c \
-    hw/misc/goldfish_pipe.c \
-    hw/misc/goldfish_sync.c \
-    $(call qemu2-if-target,arm arm64,\
-        hw/arm/ranchu.c) \
-    $(call qemu2-if-target,mips mips64,\
-        hw/mips/mips_ranchu.c) \
-
 ifeq (arm64,$(QEMU2_TARGET))
 LOCAL_GENERATED_SOURCES += $(QEMU2_AUTO_GENERATED_DIR)/gdbstub-xml-arm64.c
 else ifeq (arm,$(QEMU2_TARGET))
@@ -124,22 +106,9 @@ LOCAL_SRC_FILES += \
         stubs/vhost.c \
         ) \
 
-# HAX support.
-HAX_COMMON_SOURCES := \
-    target-i386/hax-all.c \
-    target-i386/hax-slot.c \
-
 LOCAL_SRC_FILES += \
     $(call qemu2-if-target,x86 x86_64, \
-        $(call qemu2-if-windows, \
-            $(HAX_COMMON_SOURCES) \
-            target-i386/hax-windows.c) \
-        $(call qemu2-if-darwin, \
-            $(HAX_COMMON_SOURCES) \
-            target-i386/hax-darwin.c) \
-	$(call qemu2-if-linux, \
-	    hax-stub.c) \
-    , \
+        $(call qemu2-if-linux, hax-stub.c), \
         hax-stub.c \
     ) \
 

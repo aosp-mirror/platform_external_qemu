@@ -43,6 +43,7 @@ public:
     TextureData():  ObjectData(TEXTURE_DATA),
                     width(0),
                     height(0),
+                    depth(0),
                     border(0),
                     internalFormat(GL_RGBA),
                     sourceEGLImage(0),
@@ -54,6 +55,7 @@ public:
 
     unsigned int width;
     unsigned int height;
+    unsigned int depth;
     unsigned int border;
     unsigned int internalFormat;
     unsigned int sourceEGLImage;
@@ -81,11 +83,12 @@ class GLEScontext;
 
 typedef struct {
     void                                            (*initGLESx)();
-    GLEScontext*                                    (*createGLESContext)();
+    GLEScontext*                                    (*createGLESContext)(int majorVersion, int minorVersion);
     void                                            (*initContext)(GLEScontext*,ShareGroupPtr);
     void                                            (*deleteGLESContext)(GLEScontext*);
     void                                            (*flush)();
     void                                            (*finish)();
+    int                                             (*getError)();
     void                                            (*setShareGroup)(GLEScontext*,ShareGroupPtr);
     __translatorMustCastToProperFunctionPointerType (*getProcAddress)(const char*);
     GLsync                                          (*fenceSync)(GLenum, GLbitfield);

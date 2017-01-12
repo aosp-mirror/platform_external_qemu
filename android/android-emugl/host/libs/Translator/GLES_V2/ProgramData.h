@@ -24,6 +24,7 @@ public:
 
     GLuint getAttachedVertexShader() const;
     GLuint getAttachedFragmentShader() const;
+    GLuint getAttachedComputeShader() const;
     GLuint getAttachedShader(GLenum type) const;
 
     bool attachShader(GLuint shader,GLenum type);
@@ -44,6 +45,7 @@ public:
 private:
     GLuint AttachedVertexShader;
     GLuint AttachedFragmentShader;
+    GLuint AttachedComputeShader;
     std::unique_ptr<const GLchar[]> infoLog;
     GLint  LinkStatus;
     bool    IsInUse;

@@ -36,9 +36,25 @@ int getCompressedFormats(int* formats){
         formats[9] = GL_PALETTE8_R5_G6_B5_OES;
         //ETC
         formats[MAX_SUPPORTED_PALETTE] = GL_ETC1_RGB8_OES;
+        formats[MAX_SUPPORTED_PALETTE + 1] = GL_COMPRESSED_RGB8_ETC2;
+        formats[MAX_SUPPORTED_PALETTE + 2] = GL_COMPRESSED_SIGNED_R11_EAC;
+        formats[MAX_SUPPORTED_PALETTE + 3] = GL_COMPRESSED_RG11_EAC;
+        formats[MAX_SUPPORTED_PALETTE + 4] = GL_COMPRESSED_SIGNED_RG11_EAC;
+        formats[MAX_SUPPORTED_PALETTE + 5] = GL_COMPRESSED_RGB8_ETC2;
+        formats[MAX_SUPPORTED_PALETTE + 6] = GL_COMPRESSED_SRGB8_ETC2;
+        formats[MAX_SUPPORTED_PALETTE + 7] = GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2;
+        formats[MAX_SUPPORTED_PALETTE + 8] = GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2;
+        formats[MAX_SUPPORTED_PALETTE + 9] = GL_COMPRESSED_RGBA8_ETC2_EAC;
+        formats[MAX_SUPPORTED_PALETTE + 10] = GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
+        formats[MAX_SUPPORTED_PALETTE + 11] = GL_COMPRESSED_R11_EAC;
     }
     return MAX_SUPPORTED_PALETTE + MAX_ETC_SUPPORTED;
 }
+
+#define GL_R16                            0x822A
+#define GL_RG16                           0x822C
+#define GL_R16_SNORM                      0x8F98
+#define GL_RG16_SNORM                     0x8F99
 
 void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level, 
                                           GLenum internalformat, GLsizei width, 
@@ -57,31 +73,72 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
         case GL_COMPRESSED_SRGB8_ETC2:
         case GL_COMPRESSED_RGBA8_ETC2_EAC:
         case GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC:
+        case GL_COMPRESSED_R11_EAC:
+        case GL_COMPRESSED_SIGNED_R11_EAC:
+        case GL_COMPRESSED_RG11_EAC:
+        case GL_COMPRESSED_SIGNED_RG11_EAC:
+        case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+        case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
             {
-                bool withAlpha = (internalformat == GL_COMPRESSED_RGBA8_ETC2_EAC ||
-                                  internalformat == GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC);
-                int pixelSize = withAlpha ? 4 : 3;
-                GLint format = withAlpha ? GL_RGBA : GL_RGB;
+                GLint format = GL_RGB;
                 GLint type = GL_UNSIGNED_BYTE;
                 GLint convertedInternalFormat = GL_RGB8;
+                ETC2ImageFormat etcFormat = EtcRGB8;
                 switch (internalformat) {
                     case GL_COMPRESSED_RGB8_ETC2:
                     case GL_ETC1_RGB8_OES:
-                        convertedInternalFormat = GL_RGB8;
                         break;
                     case GL_COMPRESSED_RGBA8_ETC2_EAC:
                         convertedInternalFormat = GL_RGBA8;
+                        etcFormat = EtcRGBA8;
+                        format = GL_RGBA;
                         break;
                     case GL_COMPRESSED_SRGB8_ETC2:
                         convertedInternalFormat = GL_SRGB8;
                         break;
                     case GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC:
                         convertedInternalFormat = GL_SRGB8_ALPHA8;
+                        etcFormat = EtcRGBA8;
+                        format = GL_RGBA;
+                        break;
+                    case GL_COMPRESSED_R11_EAC:
+                        convertedInternalFormat = GL_R32F;
+                        etcFormat = EtcR11;
+                        format = GL_RED;
+                        type = GL_FLOAT;
+                        break;
+                    case GL_COMPRESSED_SIGNED_R11_EAC:
+                        convertedInternalFormat = GL_R32F;
+                        etcFormat = EtcSignedR11;
+                        format = GL_RED;
+                        type = GL_FLOAT;
+                        break;
+                    case GL_COMPRESSED_RG11_EAC:
+                        convertedInternalFormat = GL_RG32F;
+                        etcFormat = EtcRG11;
+                        format = GL_RG;
+                        type = GL_FLOAT;
+                        break;
+                    case GL_COMPRESSED_SIGNED_RG11_EAC:
+                        convertedInternalFormat = GL_RG32F;
+                        etcFormat = EtcSignedRG11;
+                        format = GL_RG;
+                        type = GL_FLOAT;
+                        break;
+                    case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+                        convertedInternalFormat = GL_RGBA8;
+                        etcFormat = EtcRGB8A1;
+                        format = GL_RGBA;
+                        break;
+                    case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+                        convertedInternalFormat = GL_SRGB8_ALPHA8;
+                        etcFormat = EtcRGB8A1;
+                        format = GL_RGBA;
                         break;
                 }
 
-                GLsizei compressedSize = withAlpha ? etc2_get_encoded_data_size_rgba8(width, height)
-                            : etc1_get_encoded_data_size(width, height);
+                int pixelSize = etc_get_decoded_pixel_size(etcFormat);
+                GLsizei compressedSize = etc_get_encoded_data_size(etcFormat, width, height);
                 SET_ERROR_IF((compressedSize > imageSize), GL_INVALID_VALUE);
                 SET_ERROR_IF(!data,GL_INVALID_OPERATION);
 
@@ -90,8 +147,9 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
                 const size_t size = bpr * height;
 
                 std::unique_ptr<etc1_byte[]> pOut(new etc1_byte[size]);
-                int res = etc2_decode_image((const etc1_byte*)data, withAlpha, pOut.get(), width, height, bpr);
+                int res = etc2_decode_image((const etc1_byte*)data, etcFormat, pOut.get(), width, height, bpr);
                 SET_ERROR_IF(res!=0, GL_INVALID_VALUE);
+
                 glTexImage2DPtr(target,level,convertedInternalFormat,width,height,border,format,type,pOut.get());
             }
             break;

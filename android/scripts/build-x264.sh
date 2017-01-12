@@ -56,8 +56,7 @@ package_builder_parse_package_list
 if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     # Perform remote Darwin build first.
     dump "Remote x264 build for: $DARWIN_SYSTEMS"
-    builder_prepare_remote_darwin_build \
-            "/tmp/$USER-rebuild-darwin-ssh-$$/x264-build"
+    builder_prepare_remote_darwin_build 
 
     builder_run_remote_darwin_build
 

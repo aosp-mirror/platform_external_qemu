@@ -55,7 +55,17 @@ NamedObject::NamedObject(GenNameInfo genNameInfo,
                 m_globalName = GLEScontext::dispatcher().glCreateShader(
                                     GL_FRAGMENT_SHADER);
                 break;
+            case ShaderProgramType::COMPUTE_SHADER:
+                m_globalName = GLEScontext::dispatcher().glCreateShader(
+                                    GL_COMPUTE_SHADER);
+                break;
         }
+        break;
+    case NamedObjectType::SAMPLER:
+        GLEScontext::dispatcher().glGenSamplers(1, &m_globalName);
+        break;
+    case NamedObjectType::QUERY:
+        GLEScontext::dispatcher().glGenQueries(1, &m_globalName);
         break;
     default:
         m_globalName = 0;
@@ -84,6 +94,12 @@ NamedObject::~NamedObject() {
         } else {
             GLEScontext::dispatcher().glDeleteShader(m_globalName);
         }
+        break;
+    case NamedObjectType::SAMPLER:
+        GLEScontext::dispatcher().glDeleteSamplers(1, &m_globalName);
+        break;
+    case NamedObjectType::QUERY:
+        GLEScontext::dispatcher().glDeleteQueries(1, &m_globalName);
         break;
     default:
         break;

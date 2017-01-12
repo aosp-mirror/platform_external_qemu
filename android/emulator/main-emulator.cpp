@@ -992,10 +992,12 @@ static int getApiLevel(const char* avdName) {
 
     // for api 10 arm system images, there is no "ro.build.version.sdk"
     // so, return -1;
-    try {
-        return std::stoi(api_level);
-    } catch (const std::exception& e) {
-        D("Warning: Cannot find the api level for this AVD: %s\n", e.what());
+    errno = 0;
+    char* end;
+    long res = strtol(api_level.c_str(), &end, 10);
+    if (errno || *end || res < 0 || res > INT_MAX) {
+        D("Warning: Cannot find the api level for this AVD\n");
         return -1;
     }
+    return (int)res;
 }

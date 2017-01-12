@@ -657,7 +657,7 @@ HandleType FrameBuffer::createColorBuffer(int p_width, int p_height,
 }
 
 HandleType FrameBuffer::createRenderContext(int p_config, HandleType p_share,
-                                            bool p_isGL2)
+                                            GLESApi version)
 {
     emugl::Mutex::AutoLock mutex(m_lock);
     emugl::ReadWriteMutex::AutoWriteLock contextLock(m_contextStructureLock);
@@ -680,7 +680,7 @@ HandleType FrameBuffer::createRenderContext(int p_config, HandleType p_share,
             share.get() ? share->getEGLContext() : EGL_NO_CONTEXT;
 
     RenderContextPtr rctx(RenderContext::create(
-        m_eglDisplay, config->getEglConfig(), sharedContext, p_isGL2));
+        m_eglDisplay, config->getEglConfig(), sharedContext, version));
     if (rctx.get() != NULL) {
         ret = genHandle();
         m_contexts[ret] = rctx;
@@ -1074,7 +1074,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
     tinfo->currDrawSurf = draw;
     tinfo->currReadSurf = read;
     if (ctx) {
-        if (ctx->isGL2()) tinfo->m_gl2Dec.setContextData(&ctx->decoderContextData());
+        if (ctx->version() > GLESApi_CM) tinfo->m_gl2Dec.setContextData(&ctx->decoderContextData());
         else tinfo->m_glDec.setContextData(&ctx->decoderContextData());
     }
     else {
@@ -1214,7 +1214,7 @@ void FrameBuffer::createTrivialContext(HandleType shared,
     assert(contextOut);
     assert(surfOut);
 
-    *contextOut = createRenderContext(0, shared, true);
+    *contextOut = createRenderContext(0, shared, GLESApi_2);
     // Zero size is formally allowed here, but SwiftShader doesn't like it and
     // fails.
     *surfOut = createWindowSurface(0, 1, 1);
