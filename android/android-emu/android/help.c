@@ -1423,6 +1423,17 @@ help_cores(stralloc_t* out)
     );
 }
 
+static void
+help_hostfwd(stralloc_t* out)
+{
+    PRINTF(
+    "  Redirect incoming TCP or UDP connections to the host port to the guest\n"
+    "  eth0 on port guestport. By specifying hostaddr, the rule can be bound\n"
+    "  to a specific host interface. If no connection type is set, TCP is\n"
+    "  used.\n\n"
+    );
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
