@@ -33,7 +33,7 @@ include-if-bitness-64 = \
     $(if $(strip $(LOCAL_IGNORE_BITNESS)$(filter true,$(LOCAL_HOST_BUILD))$(EMULATOR_BUILD_64BITS)),\
         $(eval include $1))
 
-BUILD_TARGET_CFLAGS := -g -falign-functions
+BUILD_TARGET_CFLAGS := -g -falign-functions -fno-exceptions -fno-unwind-tables
 
 BUILD_OPT_CFLAGS :=
 BUILD_OPT_LDFLAGS :=
