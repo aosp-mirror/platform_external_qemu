@@ -29,6 +29,13 @@ IGNORED_OBJECTS = [
     'gdbstub-xml.o',
     'hw/i386/acpi-build.o',
     'hw/i386/pc_piix.o',
+
+    # these aren't used in the emulator but add 1MB+ to binary size
+    '../hw/net/e1000.o',
+    '../hw/net/e1000e.o',
+    '../hw/net/e1000e_core.o',
+    '../hw/net/e1000x_common.o',
+
     '../qmp-introspect.o',
     '../qmp-marshal.o',
     'trace/generated-helpers.o',
