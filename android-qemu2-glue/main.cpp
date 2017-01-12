@@ -1037,6 +1037,12 @@ extern "C" int main(int argc, char **argv) {
         /* We don't use goldfish_fb in cros. just use virtio vga now */
         args[n++] = "-vga";
         args[n++] = "virtio";
+
+        /* We don't use goldfish_events in cros. just use usb devices now */
+        args[n++] = "-usbdevice";
+        args[n++] = "tablet";
+        args[n++] = "-usbdevice";
+        args[n++] = "keyboard";
     }
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGPU);
