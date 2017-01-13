@@ -103,6 +103,7 @@
         <file alias="play_arrow_disabled">images/light/ic_play_arrow_BEE_48dp.svg</file>
         <file alias="radio_off">images/light/ic_radio_button_unchecked_777_24dp.svg</file>
         <file alias="radio_on">images/light/ic_radio_button_checked_0BA_24dp.svg</file>
+        <file alias="record_screen">images/light/ic_videocam_678_48dp.svg</file>
         <file alias="remove">images/light/ic_remove_0BA_48dp.svg</file>
         <file alias="remove_disabled">images/light/ic_remove_BEE_48dp.svg</file>
         <file alias="send">images/light/ic_send_0BA_48dp.svg</file>
@@ -198,6 +199,7 @@
         <file alias="play_arrow_disabled">images/dark/ic_play_arrow_155_48dp.svg</file>
         <file alias="radio_off">images/dark/ic_radio_button_unchecked_BCC_24dp.svg</file>
         <file alias="radio_on">images/dark/ic_radio_button_checked_0BA_24dp.svg</file>
+        <file alias="record_screen">images/dark/ic_videocam_677_48dp.svg</file>
         <file alias="remove">images/dark/ic_remove_0BA_48dp.svg</file>
         <file alias="remove_disabled">images/dark/ic_remove_155_48dp.svg</file>
         <file alias="send">images/dark/ic_send_0BA_48dp.svg</file>

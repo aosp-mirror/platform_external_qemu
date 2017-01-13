@@ -71,6 +71,7 @@ font-family: &quot;Roboto&quot;</string>
    <widget class="DPadPage" name="dpadPage"/>
    <widget class="MicrophonePage" name="microphonePage"/>
    <widget class="FingerPage" name="finger_page"/>
+   <widget class="RecordScreenPage" name="recordScreenPage"/>
    <widget class="SettingsPage" name="settingsPage"/>
    <widget class="HelpPage" name="helpPage"/>
    <widget class="QWidget" name="page">
@@ -601,7 +602,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>352</y>
+     <y>396</y>
      <width>194</width>
      <height>42</height>
     </rect>
@@ -685,7 +686,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>396</y>
+     <y>440</y>
      <width>194</width>
      <height>42</height>
     </rect>
@@ -887,8 +888,59 @@ font-family: &quot;Roboto&quot;</string>
     <string>MajorTab</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="recordScreenButton">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>352</y>
+     <width>194</width>
+     <height>42</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
+   </property>
+   <property name="text">
+    <string>  Record Screen</string>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/record_screen</normaloff>:/light/record_screen</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string>record_screen</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>MajorTab</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+  </widget>
   <zorder>spacer2Button</zorder>
   <zorder>spacer1Button</zorder>
+  <zorder>recordScreenButton</zorder>
   <zorder>settingsButton</zorder>
   <zorder>helpButton</zorder>
   <zorder>fingerButton</zorder>
@@ -965,6 +1017,12 @@ font-family: &quot;Roboto&quot;</string>
    <header>android/skin/qt/extended-pages/virtual-sensors-page.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>RecordScreenPage</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/extended-pages/record-screen-page.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>cellularButton</tabstop>
@@ -978,6 +1036,7 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>helpButton</tabstop>
   <tabstop>spacer1Button</tabstop>
   <tabstop>settingsButton</tabstop>
+  <tabstop>recordScreenButton</tabstop>
   <tabstop>locationButton</tabstop>
   <tabstop>cell_delayBox</tabstop>
   <tabstop>set_keyboardBox</tabstop>

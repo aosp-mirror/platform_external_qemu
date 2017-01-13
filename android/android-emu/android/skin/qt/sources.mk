@@ -57,6 +57,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/extended-pages/help-page.cpp \
     android/skin/qt/extended-pages/location-page.cpp \
     android/skin/qt/extended-pages/microphone-page.cpp \
+    android/skin/qt/extended-pages/record-screen-page.cpp \
     android/skin/qt/extended-pages/settings-page.cpp \
     android/skin/qt/extended-pages/telephony-page.cpp \
     android/skin/qt/extended-pages/virtual-sensors-page.cpp \
@@ -87,6 +88,7 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/extended-pages/help-page.h \
     android/skin/qt/extended-pages/location-page.h \
     android/skin/qt/extended-pages/microphone-page.h \
+    android/skin/qt/extended-pages/record-screen-page.h \
     android/skin/qt/extended-pages/settings-page.h \
     android/skin/qt/extended-pages/telephony-page.h \
     android/skin/qt/extended-pages/virtual-sensors-page.h \
@@ -109,9 +111,10 @@ ANDROID_SKIN_QT_UI_SRC_FILES := \
     android/skin/qt/extended-pages/cellular-page.ui \
     android/skin/qt/extended-pages/dpad-page.ui \
     android/skin/qt/extended-pages/finger-page.ui \
+    android/skin/qt/extended-pages/help-page.ui \
     android/skin/qt/extended-pages/location-page.ui \
     android/skin/qt/extended-pages/microphone-page.ui \
-    android/skin/qt/extended-pages/help-page.ui \
+    android/skin/qt/extended-pages/record-screen-page.ui \
     android/skin/qt/extended-pages/settings-page.ui \
     android/skin/qt/extended-pages/telephony-page.ui \
     android/skin/qt/extended-pages/virtual-sensors-page.ui \
