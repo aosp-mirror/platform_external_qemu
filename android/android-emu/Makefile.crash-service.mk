@@ -33,27 +33,34 @@ LOCAL_SRC_FILES := \
     android/resource.c \
     android/skin/resource.c \
 
+LOCAL_SHARED_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES)
+
 LOCAL_STATIC_LIBRARIES := \
-    $(ANDROID_EMU_STATIC_LIBRARIES) \
     emulator-libui \
     $(EMULATOR_LIBUI_STATIC_LIBRARIES) \
     $(BREAKPAD_STATIC_LIBRARIES) \
+    $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
+    $(LIBCURL_STATIC_LIBRARIES) \
 
 LOCAL_QT_MOC_SRC_FILES := \
     android/crashreport/ui/ConfirmDialog.h \
 
 LOCAL_LDFLAGS :=
+LOCAL_LDLIBS :=
 ifeq ($(BUILD_TARGET_OS),windows)
 LOCAL_LDFLAGS += -L$(QT_TOP_DIR)/bin
+# For GetPerformanceInfo in CrashService_windows.cpp
+LOCAL_LDLIBS += -lpsapi
 else
 LOCAL_LDFLAGS += $(EMULATOR_LIBUI_LDFLAGS)
 endif
 
-LOCAL_LDLIBS := \
+LOCAL_LDLIBS += \
     $(EMULATOR_LIBUI_LDLIBS) \
     $(ANDROID_EMU_LDLIBS) \
     $(BREAKPAD_LDLIBS) \
     $(CXX_STD_LIB) \
+    $(LIBCURL_LDLIBS)
 
 LOCAL_CFLAGS := \
     -DCONFIG_QT \
@@ -100,9 +107,11 @@ LOCAL_CFLAGS += -O0
 LOCAL_SRC_FILES += \
     android/crashreport/testing/main-test-crasher.cpp \
 
+LOCAL_SHARED_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES) \
+
 LOCAL_STATIC_LIBRARIES += \
-    $(ANDROID_EMU_STATIC_LIBRARIES) \
     $(BREAKPAD_STATIC_LIBRARIES) \
+    $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
 
 LOCAL_LDLIBS += \
     $(ANDROID_EMU_LDLIBS) \
@@ -139,13 +148,21 @@ LOCAL_SRC_FILES := \
     android/crashreport/CrashService_unittest.cpp \
     android/crashreport/CrashSystem_unittest.cpp \
 
+LOCAL_SHARED_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES) \
+
 LOCAL_STATIC_LIBRARIES += \
-    $(ANDROID_EMU_STATIC_LIBRARIES) \
     $(BREAKPAD_STATIC_LIBRARIES) \
+    $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
     emulator-libgtest \
 
 LOCAL_LDLIBS += \
     $(ANDROID_EMU_LDLIBS) \
+    
+ifeq ($(BUILD_TARGET_OS),windows)
+# For GetPerformanceInfo in CrashService_windows.cpp
+LOCAL_LDLIBS += -lpsapi
+endif
+
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
 # cannot pick up our custom versions of the library from

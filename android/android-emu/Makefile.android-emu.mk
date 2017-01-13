@@ -68,7 +68,7 @@ ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES)
 
 $(call start-emulator-library,android-emu-base)
 
-LOCAL_CFLAGS := $(EMULATOR_COMMON_CFLAGS)
+LOCAL_CFLAGS := $(EMULATOR_COMMON_CFLAGS) -fvisibility=default
 
 LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
@@ -194,12 +194,13 @@ $(call end-emulator-benchmark)
 #        tests.
 #
 
-$(call start-emulator-library,android-emu)
+$(call start-emulator-shared-lib,android-emu)
 
 LOCAL_CFLAGS := \
     $(EMULATOR_COMMON_CFLAGS) \
     $(LIBCURL_CFLAGS) \
     $(LIBXML2_CFLAGS) \
+    -fvisibility=default
 
 LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
@@ -400,8 +401,44 @@ ifeq ($(BUILD_TARGET_OS),windows)
 
 endif
 
+LOCAL_WHOLE_STATIC_LIBRARIES := \
+    android-emu-base \
+    $(METRICS_PROTO_STATIC_LIBRARIES) \
+
+LOCAL_STATIC_LIBRARIES := \
+    $(LIBUUID_STATIC_LIBRARIES) \
+    $(LIBCURL_STATIC_LIBRARIES) \
+    $(LIBXML2_STATIC_LIBRARIES) \
+    $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
+    emulator-libext4_utils \
+    emulator-libsparse \
+    emulator-libselinux \
+    emulator-libjpeg \
+    emulator-libpng \
+    emulator-zlib \
+    $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
+    $(PROTOBUF_STATIC_LIBRARIES)
+
+LOCAL_LDLIBS := \
+    $(ANDROID_EMU_BASE_LDLIBS) \
+    $(LIBCURL_LDLIBS) \
+    $(BREAKPAD_CLIENT_LDLIBS) \
+    $(CXX_STD_LIB) \
+    $(LIBUUID_LDLIBS)
+
+ifeq ($(BUILD_TARGET_OS),windows)
+# For capCreateCaptureWindow used in camera-capture-windows.cpp
+LOCAL_LDLIBS += -lvfw32
+# For GetPerformanceInfo in CrashReporter_windows.cpp
+LOCAL_LDLIBS += -lpsapi
+# Winsock functions
+LOCAL_LDLIBS += -lws2_32
+# GetNetworkParams() for android/utils/dns.c
+LOCAL_LDLIBS += -liphlpapi
+endif
+
 $(call gen-hw-config-defs)
-$(call end-emulator-library)
+$(call end-emulator-shared-lib)
 
 # List of static libraries that anything that depends on the base libraries
 # should use.
@@ -412,37 +449,7 @@ ANDROID_EMU_BASE_STATIC_LIBRARIES := \
 ANDROID_EMU_BASE_LDLIBS := \
     $(LIBUUID_LDLIBS) \
 
-ANDROID_EMU_STATIC_LIBRARIES := \
-    android-emu \
-    $(ANDROID_EMU_BASE_STATIC_LIBRARIES) \
-    $(LIBCURL_STATIC_LIBRARIES) \
-    $(LIBXML2_STATIC_LIBRARIES) \
-    $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
-    emulator-libext4_utils \
-    emulator-libsparse \
-    emulator-libselinux \
-    emulator-libjpeg \
-    emulator-libpng \
-    emulator-libwebp \
-    emulator-zlib \
-    $(METRICS_PROTO_STATIC_LIBRARIES) \
-    $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
-
-ANDROID_EMU_LDLIBS := \
-    $(ANDROID_EMU_BASE_LDLIBS) \
-    $(LIBCURL_LDLIBS) \
-    $(BREAKPAD_CLIENT_LDLIBS) \
-
-ifeq ($(BUILD_TARGET_OS),windows)
-# For capCreateCaptureWindow used in camera-capture-windows.cpp
-ANDROID_EMU_LDLIBS += -lvfw32
-# For GetPerformanceInfo in CrashService_windows.cpp
-ANDROID_EMU_LDLIBS += -lpsapi
-# Winsock functions
-ANDROID_EMU_LDLIBS += -lws2_32
-# GetNetworkParams() for android/utils/dns.c
-ANDROID_EMU_LDLIBS += -liphlpapi
-endif
+ANDROID_EMU_STATIC_LIBRARIES := android-emu
 
 ###############################################################################
 #
@@ -605,8 +612,9 @@ endif
 LOCAL_CFLAGS += -O0
 
 LOCAL_STATIC_LIBRARIES += \
-    $(ANDROID_EMU_STATIC_LIBRARIES) \
     emulator-libgtest \
+
+LOCAL_SHARED_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES)
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
 # cannot pick up our custom versions of the library from
@@ -648,8 +656,10 @@ LOCAL_SRC_FILES := \
 LOCAL_CFLAGS += -O0
 
 LOCAL_STATIC_LIBRARIES += \
-    $(ANDROID_EMU_STATIC_LIBRARIES) \
     emulator-libgtest \
+    $(PROTOBUF_STATIC_LIBRARIES)
+
+LOCAL_SHARED_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES)
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
 # cannot pick up our custom versions of the library from
@@ -732,7 +742,8 @@ LOCAL_CFLAGS += -O0
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
     emulator-libgtest \
-    $(ANDROID_EMU_STATIC_LIBRARIES) \
+
+LOCAL_SHARED_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES) \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
 # cannot pick up our custom versions of the library from

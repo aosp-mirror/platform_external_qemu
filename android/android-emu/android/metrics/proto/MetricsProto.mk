@@ -23,4 +23,3 @@ $(call end-emulator-library)
 METRICS_PROTO_INCLUDES := $(PROTOBUF_INCLUDES)
 METRICS_PROTO_STATIC_LIBRARIES := \
     libmetrics_proto \
-    $(PROTOBUF_STATIC_LIBRARIES)

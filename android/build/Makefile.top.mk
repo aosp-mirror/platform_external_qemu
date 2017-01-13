@@ -33,7 +33,7 @@ include-if-bitness-64 = \
     $(if $(strip $(LOCAL_IGNORE_BITNESS)$(filter true,$(LOCAL_HOST_BUILD))$(EMULATOR_BUILD_64BITS)),\
         $(eval include $1))
 
-BUILD_TARGET_CFLAGS := -g -falign-functions -fno-exceptions -fno-unwind-tables
+BUILD_TARGET_CFLAGS := -g -falign-functions -fno-exceptions -fno-unwind-tables -fvisibility=default
 BUILD_TARGET_CXXFLAGS := -fno-rtti -DGOOGLE_PROTOBUF_NO_RTTI
 
 BUILD_OPT_CFLAGS :=
@@ -52,7 +52,6 @@ else
     ifneq ($(BUILD_TARGET_OS),darwin)
         BUILD_OPT_CFLAGS += -funroll-loops -ftracer
     endif
-    BUILD_OPT_CFLAGS += -fvisibility=hidden
 endif
 
 ifeq (true,$(BUILD_ENABLE_LTO))

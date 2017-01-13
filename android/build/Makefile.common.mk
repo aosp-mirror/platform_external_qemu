@@ -108,6 +108,8 @@ gen-hw-config-defs = \
   $(eval LOCAL_GENERATED_SOURCES += $(QEMU_HW_CONFIG_DEFS_H))\
   $(eval LOCAL_C_INCLUDES += $(QEMU_HW_CONFIG_DEFS_INCLUDES))
 
+include $(LOCAL_PATH)/android/android-emu/Makefile.android-emu.mk
+
 ifeq ($(BUILD_TARGET_OS),windows)
   # on Windows, link the icon file as well into the executable
   # unfortunately, our build system doesn't help us much, so we need
@@ -120,16 +122,28 @@ EMULATOR_ICON_OBJ := $(BUILD_OBJS_DIR)/build/emulator_icon$(BUILD_TARGET_BITS).o
 $(EMULATOR_ICON_OBJ): PRIVATE_TARGET := $(WINDRES_CPU_$(BUILD_TARGET_BITS))
 $(EMULATOR_ICON_OBJ): $(LOCAL_PATH)/android/images/emulator_icon.rc
 	@echo "Windres ($(PRIVATE_TARGET)): $@"
-	$(hide) $(BUILD_TARGET_WINDRES) --target=pe-$(PRIVATE_TARGET) $< -I $(LOCAL_PATH)/android/images -o $@
+	$(hide) $(BUILD_TARGET_WINDRES) --target=pe-$(PRIVATE_TARGET) $< \
+		-I $(LOCAL_PATH)/android/images -I $(LOCAL_PATH)/android/android-emu -o $@
 
 # Usage: $(eval $(call insert-windows-icon))
 define insert-windows-icon
     LOCAL_PREBUILT_OBJ_FILES += $(EMULATOR_ICON_OBJ)
 endef
 
+EMULATOR_MANIFEST_OBJ := $(BUILD_OBJS_DIR)/build/emulator_manifest$(BUILD_TARGET_BITS).o
+$(EMULATOR_MANIFEST_OBJ): PRIVATE_TARGET_BITS := $(BUILD_TARGET_BITS)
+$(EMULATOR_MANIFEST_OBJ): PRIVATE_TARGET := $(WINDRES_CPU_$(BUILD_TARGET_BITS))
+$(EMULATOR_MANIFEST_OBJ): $(LOCAL_PATH)/android/emulator/emulator.rc $(LOCAL_PATH)/android/emulator/manifest32.xml $(LOCAL_PATH)/android/emulator/manifest32.xml
+	@echo "Windres ($(PRIVATE_TARGET)): $@"
+	$(hide) $(BUILD_TARGET_WINDRES) --target=pe-$(PRIVATE_TARGET) $< \
+		-DEMULATOR_MANIFEST_NAME="manifest$(PRIVATE_TARGET_BITS).xml" -o $@
+
+define insert-windows-manifest
+    LOCAL_PREBUILT_OBJ_FILES += $(EMULATOR_MANIFEST_OBJ)
+endef
+
 endif  # BUILD_TARGET_OS == windows
 
-include $(LOCAL_PATH)/android/android-emu/Makefile.android-emu.mk
 include $(LOCAL_PATH)/android/android-emu/Makefile.crash-service.mk
 
 include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-common.mk
@@ -168,7 +182,7 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
     # Need the build number as well
     LOCAL_CFLAGS += $(EMULATOR_VERSION_CFLAGS)
 
-    LOCAL_STATIC_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES)
+    LOCAL_SHARED_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES)
 
     LOCAL_LDLIBS += $(ANDROID_EMU_LDLIBS)
 
@@ -176,7 +190,12 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
     LOCAL_IGNORE_BITNESS := true
 
     ifeq ($(BUILD_TARGET_OS),windows)
-    $(eval $(call insert-windows-icon))
+        $(eval $(call insert-windows-icon))
+        $(eval $(call insert-windows-manifest))
+    endif
+    
+    ifeq ($(BUILD_TARGET_OS),linux)
+        LOCAL_LDFLAGS += -Wl,-rpath='$$ORIGIN'/lib$(BUILD_TARGET_SUFFIX)
     endif
 
     # To avoid runtime linking issues on Linux and Windows, a custom copy of the
@@ -201,13 +220,14 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
         android/emulator-check/PlatformInfo.cpp \
 
     LOCAL_C_INCLUDES += $(ANDROID_EMU_INCLUDES)
-    LOCAL_STATIC_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES)
+    LOCAL_SHARED_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES)
     LOCAL_LDLIBS := $(ANDROID_EMU_LDLIBS)
 
     LOCAL_IGNORE_BITNESS := true
 
     ifeq ($(BUILD_TARGET_OS),windows)
         $(eval $(call insert-windows-icon))
+        $(eval $(call insert-windows-manifest))
     endif
 
     ifeq ($(BUILD_TARGET_OS),linux)

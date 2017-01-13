@@ -1,0 +1,4 @@
+#include <winver.h>
+#include <winuser.h>
+
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST EMULATOR_MANIFEST_NAME
