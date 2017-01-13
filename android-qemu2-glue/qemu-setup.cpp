@@ -17,6 +17,7 @@
 #include "android/android.h"
 #include "android/base/Log.h"
 #include "android/console.h"
+#include "android/skin/LibuiAgent.h"
 #include "android-qemu2-glue/emulation/android_pipe_device.h"
 #include "android-qemu2-glue/emulation/charpipe.h"
 #include "android-qemu2-glue/emulation/DmaMap.h"
@@ -86,6 +87,7 @@ bool qemu_android_emulation_setup() {
             gQAndroidFingerAgent,    gQAndroidLocationAgent,
             gQAndroidTelephonyAgent, gQAndroidUserEventAgent,
             gQAndroidVmOperations,   gQAndroidNetAgent,
+            gQAndroidLibuiAgent,
     };
 
     if (!qemu_android_setup_http_proxy(op_http_proxy)) {
