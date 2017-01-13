@@ -107,9 +107,7 @@ public:
             }
             push_pairs.push_back(std::make_pair(f.first, "/tmp"));
         }
-        mFilePusher->pushFiles(
-            push_pairs.begin(),
-            push_pairs.end());
+        mFilePusher->pushFiles(push_pairs);
     }
 
 protected:

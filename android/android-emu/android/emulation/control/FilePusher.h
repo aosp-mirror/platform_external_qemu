@@ -19,7 +19,6 @@
 #include "android/base/threads/ParallelTask.h"
 #include "android/emulation/control/AdbInterface.h"
 
-#include <algorithm>
 #include <functional>
 #include <deque>
 #include <memory>
@@ -53,17 +52,12 @@ public:
     // |enqueue|ing more files can cause the progress to decrease.
     using ProgressCallback = std::function<void(double, bool)>;
 
-    explicit FilePusher(AdbInterface* adb,
-                        ResultCallback resultCallback,
-                        ProgressCallback progressCallback);
+    FilePusher(AdbInterface* adb,
+               ResultCallback resultCallback,
+               ProgressCallback progressCallback);
     ~FilePusher();
 
-    void pushFile(const PushItem& item);
-
-    template <typename PushItemIt>
-    void pushFiles(PushItemIt start, PushItemIt end) {
-        std::for_each(start, end, [this](const PushItem& i) { pushFile(i); });
-    }
+    void pushFiles(const std::vector<PushItem>& files);
 
     // Cancel all outstanding pushes. Note that we do not cancel currently
     // active push.

@@ -1126,7 +1126,7 @@ void EmulatorQtWindow::runAdbPush(const QList<QUrl>& urls) {
                 std::make_pair(url.toLocalFile().toStdString(), remoteFile));
     }
 
-    mFilePusher.pushFiles(file_paths.begin(), file_paths.end());
+    mFilePusher.pushFiles(file_paths);
 }
 
 void EmulatorQtWindow::slot_adbPushCanceled() {
