@@ -120,6 +120,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --disable-profile \
                 --disable-testio-debug \
                 --disable-rpath \
+                CFLAGS="-O2 -fpic" \
 
         case $SYSTEM in
             windows-x86)
