@@ -33,8 +33,6 @@
 #include "android/network/constants.h"
 #include "android/network/globals.h"
 #include "android/shaper.h"
-#include "android/skin/charmap.h"
-#include "android/skin/keycode-buffer.h"
 #include "android/tcpdump.h"
 #include "android/telephony/modem_driver.h"
 #include "android/utils/bufprint.h"
@@ -2051,58 +2049,18 @@ do_event_codes( ControlClient  client, char*  args )
     return 0;
 }
 
-static __inline__ int
-utf8_next( unsigned char* *pp, unsigned char*  end )
-{
-    unsigned char*  p      = *pp;
-    int             result = -1;
-
-    if (p < end) {
-        int  c= *p++;
-        if (c >= 128) {
-            if ((c & 0xe0) == 0xc0)
-                c &= 0x1f;
-            else if ((c & 0xf0) == 0xe0)
-                c &= 0x0f;
-            else
-                c &= 0x07;
-
-            while (p < end && (p[0] & 0xc0) == 0x80) {
-                c = (c << 6) | (p[0] & 0x3f);
-            }
-        }
-        result = c;
-        *pp    = p;
-    }
-    return result;
-}
-
 static int
 do_event_text( ControlClient  client, char*  args )
 {
-    SkinKeycodeBuffer keycodes;
-    unsigned char*  p   = (unsigned char*) args;
-    unsigned char*  end = p + strlen(args);
-    int             textlen;
-    const SkinCharmap* charmap;
-
     if (!args) {
         control_write( client, "KO: argument missing, try 'event text <message>'\r\n" );
         return -1;
     }
 
-    /* Get active charmap. */
-    charmap = skin_charmap_get();
-    if (charmap == NULL) {
-        control_write( client, "KO: no character map active in current device layout/config\r\n" );
-        return -1;
-    }
-
-    skin_keycode_buffer_init(&keycodes,
-                             client->global->user_event_agent->sendKeyCodes);
+    unsigned char*  p   = (unsigned char*) args;
+    int             textlen = strlen(args);
 
     /* un-secape message text into proper utf-8 (conversion happens in-site) */
-    textlen = strlen((char*)p);
     textlen = sms_utf8_from_message_str( args, textlen, (unsigned char*)p, textlen );
     if (textlen < 0) {
         control_write( client, "message must be utf8 and can use the following escapes:\r\n"
@@ -2115,17 +2073,12 @@ do_event_text( ControlClient  client, char*  args )
         return -1;
     }
 
-    end = p + textlen;
-    while (p < end) {
-        int  c = utf8_next( &p, end );
-        if (c <= 0)
-            break;
-
-        skin_charmap_reverse_map_unicode( NULL, (unsigned)c, 1, &keycodes );
-        skin_charmap_reverse_map_unicode( NULL, (unsigned)c, 0, &keycodes );
-        skin_keycode_buffer_flush( &keycodes );
+    if (!client->global->libui_agent->convertUtf8ToKeyCodeEvents(p, textlen,
+        (LibuiKeyCodeSendFunc)client->global->user_event_agent->sendKeyCodes)) {
+        control_write( client, "KO: device is unable to recieve text input now\r\n" );
+        return -1;
     }
-
+    
     return 0;
 }
 

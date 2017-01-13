@@ -20,6 +20,7 @@
 #include "android/base/Log.h"
 #include "android/console.h"
 #include "android/emulation/AndroidPipe.h"
+#include "android/skin/LibuiAgent.h"
 
 extern "C" {
 #include "qemu-common.h"
@@ -33,6 +34,7 @@ bool qemu_android_emulation_setup() {
       gQAndroidFingerAgent,    gQAndroidLocationAgent,
       gQAndroidTelephonyAgent, gQAndroidUserEventAgent,
       gQAndroidVmOperations,   gQAndroidNetAgent,
+      gQAndroidLibuiAgent,
   };
 
   VmLock* vmLock = new qemu::VmLock();

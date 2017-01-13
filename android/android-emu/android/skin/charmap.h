@@ -15,6 +15,10 @@
 #include "android/skin/keycode.h"
 #include "android/skin/keycode-buffer.h"
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 /* this defines a structure used to describe an Android keyboard charmap */
 typedef struct SkinKeyEntry {
     unsigned short  code;
@@ -93,3 +97,5 @@ skin_charmap_reverse_map_unicode(const SkinCharmap* cmap,
  * Otherwise, return a pointer to the default charmap.
  */
 const SkinCharmap* skin_charmap_get(void);
+
+ANDROID_END_HEADER

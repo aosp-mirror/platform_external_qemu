@@ -107,7 +107,7 @@ build_zlib_package () {
         run cd "$BUILD_DIR/zlib-$ZLIB_VERSION" &&
         export PKG_CONFIG_PATH=$(builder_install_prefix)/lib/pkgconfig &&
         export CROSS_PREFIX=$(builder_gnu_config_host_prefix) &&
-        run ./configure --prefix=$(builder_install_prefix) &&
+        run ./configure --prefix=$(builder_install_prefix) -fPIC &&
         run make -j$NUM_JOBS &&
         run make install &&
         unset PKG_CONFIG_PATH &&
@@ -146,10 +146,10 @@ build_package_openssl () {
 
       case $(builder_host) in
         linux-x86_64)
-          CONFIG_FLAGS="linux-x86_64"
+          CONFIG_FLAGS="linux-x86_64 -fPIC"
           ;;
         linux-x86)
-          CONFIG_FLAGS="linux-generic32 386 -m32"
+          CONFIG_FLAGS="linux-generic32 386 -m32 -fPIC"
           ;;
         windows-x86)
           CONFIG_FLAGS="mingw 386 -m32"
@@ -168,7 +168,7 @@ build_package_openssl () {
       esac
 
       # NOTE: Parallel builds sometimes fail on Darwin and Linux.
-      NUM_JOBS=1
+      local NUM_JOBS=1
 
       (
         run mkdir -p "$PKG_BUILD_DIR" &&
@@ -277,7 +277,8 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             --without-libssh2 \
             --without-librtmp \
             --without-libidn \
-            --without-winidn
+            --without-winidn \
+            CFLAGS="-O2 -fpic -fvisibility=default" \
 
         # Copy libraries and header files
         copy_directory_files \

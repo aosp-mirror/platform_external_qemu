@@ -697,6 +697,7 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_SRC_FILES += \
     $(ANDROID_SKIN_SOURCES) \
+    android/skin/LibuiAgent.cpp \
     android/gpu_frame.cpp \
     android/emulator-window.c \
     android/main-common-ui.c \

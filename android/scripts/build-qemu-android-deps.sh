@@ -143,7 +143,7 @@ do_zlib_package () {
     (
         run cd "$BUILD_DIR/zlib-$ZLIB_VERSION" &&
         export CROSS_PREFIX=$(builder_gnu_config_host_prefix) &&
-        run ./configure --prefix=$(builder_install_prefix) &&
+        (export CFLAGS="-O3 -fPIC"; run ./configure --prefix=$(builder_install_prefix)) &&
         run make -j$NUM_JOBS &&
         run make install
     )

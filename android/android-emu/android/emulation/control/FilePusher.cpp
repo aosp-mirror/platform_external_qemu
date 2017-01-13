@@ -28,8 +28,26 @@ using android::base::System;
 using std::string;
 using std::vector;
 
+FilePusher::FilePusher(AdbInterface* adb,
+        FilePusher::ResultCallback resultCallback,
+        FilePusher::ProgressCallback progressCallback) :
+    mAdb(adb),
+    mProgressCallback(progressCallback),
+    mResultCallback(resultCallback) {}
+
 FilePusher::~FilePusher() {
     cancel();
+}
+
+void FilePusher::pushFile(const FilePusher::PushItem& item) {
+    mPushQueue.push_back(item);
+    ++mNumQueued;
+    if (!mCurrentPushCommand) {
+        if (mProgressCallback) {
+            mProgressCallback(0, false);
+        }
+        pushNextItem();
+    }
 }
 
 void FilePusher::cancel() {

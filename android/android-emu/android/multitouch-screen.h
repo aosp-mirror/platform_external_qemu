@@ -20,6 +20,9 @@
 #include "android/emulation/control/display_agent.h"
 #include "android/sdk-controller-socket.h"
 #include "android/multitouch-port.h"
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
 
 /*
  * Encapsulates functionality of multi-touch screen. Main task of this component
@@ -117,3 +120,5 @@ extern void multitouch_refresh_screen(void);
 
 /* Framebuffer update has been handled by the device. */
 extern void multitouch_fb_updated(void);
+
+ANDROID_END_HEADER

@@ -19,6 +19,7 @@
 #include "android/base/threads/ParallelTask.h"
 #include "android/emulation/control/AdbInterface.h"
 
+#include <algorithm>
 #include <functional>
 #include <deque>
 #include <memory>
@@ -54,24 +55,14 @@ public:
 
     explicit FilePusher(AdbInterface* adb,
                         ResultCallback resultCallback,
-                        ProgressCallback progressCallback) :
-                            mAdb(adb),
-                            mProgressCallback(progressCallback),
-                            mResultCallback(resultCallback) {}
+                        ProgressCallback progressCallback);
     ~FilePusher();
 
+    void pushFile(const PushItem& item);
+
     template <typename PushItemIt>
-    bool pushFiles(PushItemIt start,
-                   PushItemIt end) {
-        mPushQueue.insert(mPushQueue.end(), start, end);
-        mNumQueued += std::distance(start, end);
-        if (!mCurrentPushCommand) {
-            if (mProgressCallback) {
-                mProgressCallback(0, false);
-            }
-            pushNextItem();
-        }
-        return true;
+    void pushFiles(PushItemIt start, PushItemIt end) {
+        std::for_each(start, end, [this](const PushItem& i) { pushFile(i); });
     }
 
     // Cancel all outstanding pushes. Note that we do not cancel currently

@@ -88,6 +88,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         builder_build_autotools_package protobuf \
                 --disable-shared \
                 --without-zlib \
+                --with-pic \
 
         copy_directory \
                 "$(builder_install_prefix)" \
