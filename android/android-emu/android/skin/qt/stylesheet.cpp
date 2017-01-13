@@ -51,6 +51,7 @@ static QString loDensityFontStylesheet;
 //   "SliderLabel":      The label on a slider
 //   "SmsBox":           The one item that has a border on all four sides
 //   "GradientDivider":  The vertical line to the right of the main tabs
+//   "Overlay"         The overlay widget on the recording screen
 //   <Normal>:         Text in the main part of the window
 //
 // These are identified by the value of their "ColorGroup" or "class"
@@ -59,47 +60,49 @@ static QString loDensityFontStylesheet;
 // These are the colors used in the two themes
 
 QHash<QString, QString> lightValues {
-    {"BOX_COLOR",               "#e0e0e0"},  // Boundary around SMS text area
-    {"BKG_COLOR",               "#f0f0f0"},  // Main page background
-    {"DISABLED_PULLDOWN_COLOR", "#c0c0c0"},  // Text in disabled combo box
-    {"DISABLED_TOOL_COLOR",     "#baeae4"},  // Grayed-out button text
-    {"DIVIDER_COLOR",           "#e0e0e0"},  // Line between items
-    {"EDIT_COLOR",              "#e0e0e0"},  // Line under editable fields
-    {"LARGE_DIVIDER_COLOR",     "#ebebeb"},  // Start of large divider's gradient
-    {MAJOR_TAB_COLOR_VAR,       "#91a4ad"},  // Text of major tabs
-    {"MAJOR_TITLE_COLOR",       "#617d8a"},  // Text of major tab separators
-    {"SCROLL_BKG_COLOR",        "#f6f6f6"},  // Background of scroll bar
-    {"SCROLL_HANDLE_COLOR",     "#d9d9d9"},  // Handle of scroller
-    {TAB_BKG_COLOR_VAR,         "#ffffff"},  // Background of major tabs
-    {TAB_SELECTED_COLOR_VAR,    "#f5f5f5"},  // Background of the selected major tab
-    {"TAB_DARKENED_COLOR",      "#e6e6e6"},
-    {"TABLE_BOTTOM_COLOR",      "#e0e0e0"},
-    {"TEXT_COLOR",              "#212121"},  // Main page text
-    {"TITLE_COLOR",             "#757575"},  // Main page titles
-    {"TOOL_COLOR",              "#00bea4"},  // Checkboxes, sliders, etc.
-    {THEME_PATH_VAR,              "light"},  // Icon directory under images/
+    {"BOX_COLOR",                       "#e0e0e0"},  // Boundary around SMS text area
+    {"BKG_COLOR",                       "#f0f0f0"},  // Main page background
+    {"BKG_COLOR_OVERLAY", "rgba(236,236,236,255)"},  // Overlay background
+    {"DISABLED_PULLDOWN_COLOR",         "#c0c0c0"},  // Text in disabled combo box
+    {"DISABLED_TOOL_COLOR",             "#baeae4"},  // Grayed-out button text
+    {"DIVIDER_COLOR",                   "#e0e0e0"},  // Line between items
+    {"EDIT_COLOR",                      "#e0e0e0"},  // Line under editable fields
+    {"LARGE_DIVIDER_COLOR",             "#ebebeb"},  // Start of large divider's gradient
+    {MAJOR_TAB_COLOR_VAR,               "#91a4ad"},  // Text of major tabs
+    {"MAJOR_TITLE_COLOR",               "#617d8a"},  // Text of major tab separators
+    {"SCROLL_BKG_COLOR",                "#f6f6f6"},  // Background of scroll bar
+    {"SCROLL_HANDLE_COLOR",             "#d9d9d9"},  // Handle of scroller
+    {TAB_BKG_COLOR_VAR,                 "#ffffff"},  // Background of major tabs
+    {TAB_SELECTED_COLOR_VAR,            "#f5f5f5"},  // Background of the selected major tab
+    {"TAB_DARKENED_COLOR",              "#e6e6e6"},
+    {"TABLE_BOTTOM_COLOR",              "#e0e0e0"},
+    {"TEXT_COLOR",                      "#212121"},  // Main page text
+    {"TITLE_COLOR",                     "#757575"},  // Main page titles
+    {"TOOL_COLOR",                      "#00bea4"},  // Checkboxes, sliders, etc.
+    {THEME_PATH_VAR,                      "light"},  // Icon directory under images/
 };
 
 QHash<QString, QString> darkValues {
-    {"BOX_COLOR",               "#414a50"},
-    {"BKG_COLOR",               "#273238"},
-    {"DISABLED_PULLDOWN_COLOR", "#808080"},
-    {"DISABLED_TOOL_COLOR",     "#1b5c58"},
-    {"DIVIDER_COLOR",           "#e0e0e0"},
-    {"EDIT_COLOR",              "#808080"},
-    {"LARGE_DIVIDER_COLOR",     "#1f282d"},
-    {MAJOR_TAB_COLOR_VAR,       "#bdc0c3"},
-    {"MAJOR_TITLE_COLOR",       "#e5e6e7"},
-    {"SCROLL_BKG_COLOR",        "#333b43"},
-    {"SCROLL_HANDLE_COLOR",     "#1d272c"},
-    {TAB_BKG_COLOR_VAR,         "#394249"},
-    {TAB_SELECTED_COLOR_VAR,    "#313c42"},
-    {"TAB_DARKENED_COLOR",      "#20292e"},
-    {"TABLE_BOTTOM_COLOR",      "#1d272c"},
-    {"TEXT_COLOR",              "#eeeeee"},
-    {"TITLE_COLOR",             "#bec1c3"},
-    {"TOOL_COLOR",              "#00bea4"},
-    {THEME_PATH_VAR,               "dark"},
+    {"BOX_COLOR",                    "#414a50"},
+    {"BKG_COLOR",                    "#273238"},
+    {"BKG_COLOR_OVERLAY", "rgba(35,46,52,255)"},
+    {"DISABLED_PULLDOWN_COLOR",      "#808080"},
+    {"DISABLED_TOOL_COLOR",          "#1b5c58"},
+    {"DIVIDER_COLOR",                "#e0e0e0"},
+    {"EDIT_COLOR",                   "#808080"},
+    {"LARGE_DIVIDER_COLOR",          "#1f282d"},
+    {MAJOR_TAB_COLOR_VAR,            "#bdc0c3"},
+    {"MAJOR_TITLE_COLOR",            "#e5e6e7"},
+    {"SCROLL_BKG_COLOR",             "#333b43"},
+    {"SCROLL_HANDLE_COLOR",          "#1d272c"},
+    {TAB_BKG_COLOR_VAR,              "#394249"},
+    {TAB_SELECTED_COLOR_VAR,         "#313c42"},
+    {"TAB_DARKENED_COLOR",           "#20292e"},
+    {"TABLE_BOTTOM_COLOR",           "#1d272c"},
+    {"TEXT_COLOR",                   "#eeeeee"},
+    {"TITLE_COLOR",                  "#bec1c3"},
+    {"TOOL_COLOR",                   "#00bea4"},
+    {THEME_PATH_VAR,                    "dark"},
 };
 
 QHash<QString, QString> hiDensityValues {

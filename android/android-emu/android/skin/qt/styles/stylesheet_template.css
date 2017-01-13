@@ -34,6 +34,9 @@
     background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 %%LARGE_DIVIDER_COLOR%%, stop: 1 %%BKG_COLOR%%);
     border: 0px;
 }
+*[ColorGroup="Overlay"] {
+    background: %%BKG_COLOR_OVERLAY%%;
+}
 *{
     color: %%TEXT_COLOR%%;
     background-color: %%BKG_COLOR%%;
