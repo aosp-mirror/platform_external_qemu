@@ -143,7 +143,7 @@ do_zlib_package () {
     (
         run cd "$BUILD_DIR/zlib-$ZLIB_VERSION" &&
         export CROSS_PREFIX=$(builder_gnu_config_host_prefix) &&
-        (export CFLAGS="-O3 -fPIC"; run ./configure --prefix=$(builder_install_prefix)) &&
+        (export CFLAGS="-g -O3 -fPIC"; run ./configure --prefix=$(builder_install_prefix)) &&
         run make -j$NUM_JOBS &&
         run make install
     )
@@ -224,8 +224,19 @@ do_windows_glib_package () {
 # $1: package name, unversioned and unsuffixed (e.g. 'libpng')
 # $2+: extra configuration flags
 do_autotools_package () {
+    # build position-independent code for non-Windows (Windows is always PIC)
+    local PIC_FLAG
+    case $(builder_host) in
+        windows-*)
+            PIC_FLAG=
+            ;;
+        *)
+            PIC_FLAG=--with-pic
+            ;;
+    esac
+
     builder_unpack_package_source $1
-    builder_build_autotools_package "$@" --disable-shared --with-pic
+    builder_build_autotools_package "$@" --disable-shared $PIC_FLAG
 }
 
 do_dtc_package () {
@@ -373,7 +384,15 @@ build_qemu_android_deps () {
         --disable-libpng
 
     # Handle SDL2
-    do_autotools_package SDL2
+    local SDL_FLAGS=
+    case $1 in
+        windows*)
+            # DirectX sources assume __FUNCTION__ is a macro, but on GCC it isn't.
+            SDL_FLAGS=--disable-directx
+            ;;
+    esac
+
+    do_autotools_package SDL2 $SDL_FLAGS
     SDL_CONFIG=$PREFIX/bin/sdl2-config
 
     # default sdl2.pc libs doesn't work with our cross-compiler,

@@ -78,7 +78,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --without-iconv \
                 --without-python \
                 --with-minimum \
-                CFLAGS="-O2 -fpic" \
+                CFLAGS="-g -O2 -fpic" \
 
         # Copy binaries necessary for the build itself as well as static
         # libraries.

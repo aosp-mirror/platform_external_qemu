@@ -120,7 +120,6 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --disable-profile \
                 --disable-testio-debug \
                 --disable-rpath \
-                CFLAGS="-O2 -fpic" \
 
         case $SYSTEM in
             windows-x86)
@@ -134,7 +133,8 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
                 builder_build_autotools_package_full_install e2fsprogs \
                         "install install-libs" \
-                        $CONFIGURE_FLAGS
+                        $CONFIGURE_FLAGS \
+                        'CFLAGS=-g -O2 -fpic' \
 
                 # Copy binaries necessary for the build itself as well as static
                 # libraries.
