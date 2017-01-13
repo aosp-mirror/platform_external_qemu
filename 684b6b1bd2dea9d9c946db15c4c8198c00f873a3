@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "037501b9_6f44435d",
+        "filename": "android/android-emu/android/ffmpeg-muxer.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-13T04:27:56Z",
+      "side": 1,
+      "message": "please use clang-format from android/docs/ANDROID-CODING-STYLE.TXT, as it\u0027s much simpler than doing it manually",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 4
+      },
+      "revId": "684b6b1bd2dea9d9c946db15c4c8198c00f873a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "037501b9_8fee7f3c",
+        "filename": "android/android-emu/android/ffmpeg-muxer.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 463,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-13T04:27:56Z",
+      "side": 1,
+      "message": "is it OK to call av_register_all() from multiple threads?\nif two threads call ffmpeg_create_recorder() for the first time, it\u0027s very possible that both of them end up calling av_register_all()",
+      "range": {
+        "startLine": 463,
+        "startChar": 8,
+        "endLine": 463,
+        "endChar": 23
+      },
+      "revId": "684b6b1bd2dea9d9c946db15c4c8198c00f873a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "037501b9_2f296bb7",
+        "filename": "android/android-emu/android/ffmpeg-muxer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-13T04:27:56Z",
+      "side": 1,
+      "message": "nit: copy-paste",
+      "range": {
+        "startLine": 94,
+        "startChar": 0,
+        "endLine": 94,
+        "endChar": 29
+      },
+      "revId": "684b6b1bd2dea9d9c946db15c4c8198c00f873a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
