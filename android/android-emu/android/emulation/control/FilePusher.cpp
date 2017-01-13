@@ -29,23 +29,25 @@ using std::string;
 using std::vector;
 
 FilePusher::FilePusher(AdbInterface* adb,
-        FilePusher::ResultCallback resultCallback,
-        FilePusher::ProgressCallback progressCallback) :
-    mAdb(adb),
-    mProgressCallback(progressCallback),
-    mResultCallback(resultCallback) {}
+                       FilePusher::ResultCallback resultCallback,
+                       FilePusher::ProgressCallback progressCallback)
+    : mAdb(adb),
+      mProgressCallback(progressCallback
+                                ? std::move(progressCallback)
+                                : ProgressCallback([](double, bool) {})),
+      mResultCallback(resultCallback
+                              ? std::move(resultCallback)
+                              : ResultCallback([](StringView, Result) {})) {}
 
 FilePusher::~FilePusher() {
     cancel();
 }
 
-void FilePusher::pushFile(const FilePusher::PushItem& item) {
-    mPushQueue.push_back(item);
-    ++mNumQueued;
+void FilePusher::pushFiles(const std::vector<FilePusher::PushItem>& files) {
+    mPushQueue.insert(mPushQueue.end(), files.begin(), files.end());
+    mNumQueued += files.size();
     if (!mCurrentPushCommand) {
-        if (mProgressCallback) {
-            mProgressCallback(0, false);
-        }
+        mProgressCallback(0, false);
         pushNextItem();
     }
 }
@@ -89,12 +91,8 @@ void FilePusher::pushNextItem() {
 void FilePusher::pushDone(const Result& result) {
     bool allDone = mPushQueue.empty();
     ++mNumPushed;
-    if (mResultCallback) {
-        mResultCallback(mCurrentItem.first, result);
-    }
-    if (mProgressCallback) {
-        mProgressCallback(static_cast<double>(mNumPushed) / mNumQueued, allDone);
-    }
+    mResultCallback(mCurrentItem.first, result);
+    mProgressCallback(static_cast<double>(mNumPushed) / mNumQueued, allDone);
     if (!allDone) {
         pushNextItem();
     } else {
