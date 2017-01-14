@@ -1267,6 +1267,7 @@ static void goldfish_pipe_save_v2(QEMUFile* file, PipeDevice* dev) {
         }
         qemu_put_be32(file, pipe->id);
         qemu_put_be64(file, pipe->command_buffer_addr);
+        qemu_put_be32(file, pipe->rw_params_max_count);
         qemu_put_byte(file, pipe->closed);
         qemu_put_byte(file, pipe->wanted);
         service_ops->guest_save(pipe->host_pipe, file);
@@ -1469,6 +1470,7 @@ static int goldfish_pipe_load_v2(QEMUFile* file, PipeDevice* dev) {
             hwpipe_free(pipe);
             goto done;
         }
+        pipe->rw_params_max_count = qemu_get_be32(file);
         pipe->closed = qemu_get_byte(file);
         pipe->wanted = qemu_get_byte(file);
 
@@ -1516,6 +1518,9 @@ static int goldfish_pipe_load_v2(QEMUFile* file, PipeDevice* dev) {
     }
 
     res = 0;
+
+    /* Invalidate all guest DMA buffer -> host ptr mappings. */
+    service_ops->dma_invalidate_host_mappings();
 
 done:
     free(force_closed_pipes);
