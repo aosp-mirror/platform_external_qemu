@@ -278,7 +278,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             --without-librtmp \
             --without-libidn \
             --without-winidn \
-            CFLAGS="-O2 -fpic -fvisibility=default" \
+            CFLAGS="-g -O2 -fpic -fvisibility=default" \
 
         # Copy libraries and header files
         copy_directory_files \
