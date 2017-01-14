@@ -378,8 +378,8 @@ void ConfirmDialog::setSwGpu() {
             std::string unused;
             bool isOK = PathUtils::split(diskPartDir, &outputDir, &unused);
             if (isOK) {
-                std::string hwQemuPath = PathUtils::
-                        join(outputDir, CORE_CONFIG_INI).c_str();
+                std::string hwQemuPath =
+                        PathUtils::join(outputDir, CORE_CONFIG_INI);
                 // We have the path to config.ini
                 // Read that
                 IniFile hwQemuIniF(hwQemuPath);

@@ -20,19 +20,33 @@
 /* the global variable containing the hardware config for this device */
 AndroidHwConfig   android_hw[1];
 
-static int
-stringToBoolean( const char* value )
-{
+static int stringToBoolean(const char* value) {
     if (!strcmp(value,"1")    ||
         !strcmp(value,"yes")  ||
         !strcmp(value,"YES")  ||
         !strcmp(value,"true") ||
-        !strcmp(value,"TRUE"))
-    {
+        !strcmp(value,"TRUE")) {
         return 1;
     }
-    else
+
+    return 0;
+}
+
+static int stringToTribool(const char* value) {
+    if (stringToBoolean(value)) {
+        return 1;
+    }
+
+    // stringToBoolean() returns 0 for any non-"true" value. Let's see if it's
+    // exact "false" or something in between.
+    if (!strcmp(value,"0")    ||
+        !strcmp(value,"no")  ||
+        !strcmp(value,"NO")  ||
+        !strcmp(value,"false") ||
+        !strcmp(value,"FALSE")) {
         return 0;
+    }
+    return -1;
 }
 
 static int64_t
@@ -447,21 +461,11 @@ int androidHwConfig_getMinVmHeapSize(AndroidHwConfig* config, int apiLevel) {
 }
 
 int androidHwConfig_getKernelDeviceNaming(AndroidHwConfig* config) {
-    if (!strcmp(config->kernel_newDeviceNaming, "no"))
-        return 0;
-    if (!strcmp(config->kernel_newDeviceNaming, "yes"))
-        return 1;
-    return -1;
+    return stringToTribool(config->kernel_newDeviceNaming);
 }
 
-int
-androidHwConfig_getKernelYaffs2Support( AndroidHwConfig* config )
-{
-    if (!strcmp(config->kernel_supportsYaffs2, "no"))
-        return 0;
-    if (!strcmp(config->kernel_supportsYaffs2, "yes"))
-        return 1;
-    return -1;
+int androidHwConfig_getKernelYaffs2Support(AndroidHwConfig* config) {
+    return stringToTribool(config->kernel_supportsYaffs2);
 }
 
 const char* androidHwConfig_getKernelSerialPrefix(AndroidHwConfig* config )
