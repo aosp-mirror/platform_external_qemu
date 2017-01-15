@@ -166,7 +166,6 @@ $(call end-emulator-program)
 $(call start-emulator-program,qemu-system-$(QEMU2_TARGET_SYSTEM))
 
 LOCAL_WHOLE_STATIC_LIBRARIES += \
-    libqemu2-glue \
     libqemu2-system-$(QEMU2_TARGET_SYSTEM) \
     libqemu2-common \
 
