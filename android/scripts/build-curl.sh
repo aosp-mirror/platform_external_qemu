@@ -226,6 +226,21 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         builder_unpack_package_source curl
 
+        # Libcurl has a libssl check in its configure script that assumes
+        # openssl is a dynamic library, so it brings all its library
+        # dependencies.
+        # But we build it only as a static library, that's why we need to add
+        # explicit arguments for each platform.
+        CURL_LIBS=
+        case $SYSTEM in
+            windows-*)
+                CURL_LIBS=LIBS="-lcrypt32"
+                ;;
+            *)
+                CURL_LIBS=LIBS="-ldl"
+                ;;
+        esac
+
         builder_build_autotools_package curl \
             --enable-debug \
             --enable-optimize \
@@ -264,10 +279,10 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             --disable-tls-srp \
             --enable-cookies \
             --disable-soname-bump \
-            --with-zlib="$builder_install_prefix" \
+            --with-zlib="$(builder_install_prefix)" \
             --without-winssl \
             --without-darwinssl \
-            --with-ssl="$builder_install_prefix" \
+            --with-ssl="$(builder_install_prefix)" \
             --without-gnutls \
             --without-polarssl \
             --without-cyassl \
@@ -279,6 +294,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             --without-libidn \
             --without-winidn \
             CFLAGS="-g -O2 -fpic -fvisibility=default" \
+            "$CURL_LIBS" \
 
         # Copy libraries and header files
         copy_directory_files \
