@@ -55,18 +55,18 @@ ProcTableMap *s_glesExtensions = NULL;
 
 static EGLiface*  s_eglIface = NULL;
 static GLESiface  s_glesIface = {
-    .initGLESx         = initGLESx,
-    .createGLESContext = createGLESContext,
-    .initContext       = initContext,
-    .deleteGLESContext = deleteGLESContext,
-    .flush             = (FUNCPTR_NO_ARGS_RET_VOID)glFlush,
-    .finish            = (FUNCPTR_NO_ARGS_RET_VOID)glFinish,
-    .getError          = (FUNCPTR_NO_ARGS_RET_INT)glGetError,
-    .setShareGroup     = setShareGroup,
-    .getProcAddress    = getProcAddress,
-    .fenceSync         = NULL,
-    .clientWaitSync    = NULL,
-    .deleteSync        = NULL,
+    .initGLESx                   = initGLESx,
+    .createGLESContext           = createGLESContext,
+    .initContext                 = initContext,
+    .deleteGLESContext           = deleteGLESContext,
+    .flush                       = (FUNCPTR_NO_ARGS_RET_VOID)glFlush,
+    .finish                      = (FUNCPTR_NO_ARGS_RET_VOID)glFinish,
+    .getError                    = (FUNCPTR_NO_ARGS_RET_INT)glGetError,
+    .setShareGroup               = setShareGroup,
+    .getProcAddress              = getProcAddress,
+    .fenceSync                   = NULL,
+    .clientWaitSync              = NULL,
+    .deleteSync                  = NULL,
 };
 
 #include <GLcommon/GLESmacros.h>
@@ -102,6 +102,7 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp) {
         ctx->setShareGroup(grp);
     }
 }
+
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName) {
     GET_CTX_RET(NULL)
     ctx->getGlobalLock();
@@ -887,6 +888,17 @@ GL_API void GL_APIENTRY  glGetIntegerv( GLenum pname, GLint *params) {
 
     switch(pname)
     {
+    case GL_READ_BUFFER:
+    case GL_DRAW_BUFFER0:
+        if (ctx->shareGroup().get()) {
+            ctx->dispatcher().glGetIntegerv(pname, &i);
+            GLenum target = pname == GL_READ_BUFFER ? GL_READ_FRAMEBUFFER : GL_DRAW_FRAMEBUFFER;
+            if (ctx->isDefaultFBOBound(target) && (GLint)i == GL_COLOR_ATTACHMENT0) {
+                i = GL_BACK;
+            }
+            *params = i;
+        }
+        break;
     case GL_TEXTURE_GEN_STR_OES:
         ctx->dispatcher().glGetIntegerv(GL_TEXTURE_GEN_S,&params[0]);
         break;
@@ -1353,6 +1365,10 @@ GL_API void GL_APIENTRY  glReadPixels( GLint x, GLint y, GLsizei width, GLsizei 
     GET_CTX()
     SET_ERROR_IF(!(GLEScmValidate::pixelFrmt(ctx,format) && GLEScmValidate::pixelType(ctx,type)),GL_INVALID_ENUM);
     SET_ERROR_IF(!(GLEScmValidate::pixelOp(format,type)),GL_INVALID_OPERATION);
+
+    // Just stop allowing glReadPixels on multisampled default FBO for now.
+    SET_ERROR_IF(ctx->isDefaultFBOBound(GL_FRAMEBUFFER_EXT) &&
+                 ctx->getDefaultFBOMultisamples(), GL_INVALID_OPERATION);
 
     ctx->dispatcher().glReadPixels(x,y,width,height,format,type,pixels);
 }
@@ -1950,7 +1966,7 @@ GL_API void GLAPIENTRY glBindFramebufferOES(GLenum target, GLuint framebuffer) {
             (framebuffer != 0)
                     ? ctx->shareGroup()->getGlobalName(
                               NamedObjectType::FRAMEBUFFER, framebuffer)
-                    : 0;
+                    : ctx->getDefaultFBOGlobalName();
     ctx->dispatcher().glBindFramebufferEXT(target,globalBufferName);
 
     // update framebuffer binding state
@@ -1960,7 +1976,10 @@ GL_API void GLAPIENTRY glBindFramebufferOES(GLenum target, GLuint framebuffer) {
 GL_API void GLAPIENTRY glDeleteFramebuffersOES(GLsizei n, const GLuint *framebuffers) {
     GET_CTX()
     SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION);
+    GLuint fbName = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
     for (int i=0;i<n;++i) {
+        if (framebuffers[i] == fbName)
+            glBindFramebufferOES(GL_FRAMEBUFFER_EXT, 0);
         ctx->shareGroup()->deleteName(NamedObjectType::FRAMEBUFFER,
                                       framebuffers[i]);
     }
@@ -1994,6 +2013,7 @@ GL_API void GLAPIENTRY glFramebufferTexture2DOES(GLenum target, GLenum attachmen
     SET_ERROR_IF(!GLEScmValidate::framebufferTarget(target) || !GLEScmValidate::framebufferAttachment(attachment) ||
                  !GLEScmValidate::textureTargetEx(textarget),GL_INVALID_ENUM);
     SET_ERROR_IF(!ctx->shareGroup().get(), GL_INVALID_OPERATION);
+    SET_ERROR_IF(ctx->isDefaultFBOBound(target), GL_INVALID_OPERATION);
 
     GLuint globalTexName = 0;
     if(texture) {
@@ -2024,8 +2044,8 @@ GL_API void GLAPIENTRY glFramebufferRenderbufferOES(GLenum target, GLenum attach
     SET_ERROR_IF(!GLEScmValidate::framebufferTarget(target) || 
                  !GLEScmValidate::framebufferAttachment(attachment) ||
                  !GLEScmValidate::renderbufferTarget(renderbuffertarget), GL_INVALID_ENUM);
-
     SET_ERROR_IF(!ctx->shareGroup().get(), GL_INVALID_OPERATION);
+    SET_ERROR_IF(ctx->isDefaultFBOBound(target), GL_INVALID_OPERATION);
 
     GLuint globalBufferName = 0;
     ObjectDataPtr obj;
@@ -2104,7 +2124,28 @@ GL_API void GLAPIENTRY glGetFramebufferAttachmentParameterivOES(GLenum target, G
         }
     }
 
+    if (ctx->isDefaultFBOBound(target)) {
+        SET_ERROR_IF(
+            attachment == GL_DEPTH_ATTACHMENT ||
+            attachment == GL_STENCIL_ATTACHMENT ||
+            attachment == GL_DEPTH_STENCIL_ATTACHMENT ||
+            (attachment >= GL_COLOR_ATTACHMENT0 &&
+             attachment <= GL_COLOR_ATTACHMENT15), GL_INVALID_OPERATION);
+        SET_ERROR_IF(pname == GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, GL_INVALID_ENUM);
+
+        if (attachment == GL_BACK)
+            attachment = GL_COLOR_ATTACHMENT0;
+        if (attachment == GL_DEPTH)
+            attachment = GL_DEPTH_ATTACHMENT;
+        if (attachment == GL_STENCIL)
+            attachment = GL_STENCIL_ATTACHMENT;
+    }
+
     ctx->dispatcher().glGetFramebufferAttachmentParameterivEXT(target,attachment,pname,params);
+
+    if (ctx->isDefaultFBOBound(target) && *params == GL_RENDERBUFFER) {
+        *params = GL_FRAMEBUFFER_DEFAULT;
+    }
 }
 
 GL_API void GL_APIENTRY glGenerateMipmapOES(GLenum target) {

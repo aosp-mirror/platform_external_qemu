@@ -770,6 +770,9 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroySurface(EGLDisplay display, EGLSurface s
         RETURN_ERROR(EGL_FALSE,EGL_BAD_SURFACE);
     }
 
+    const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+    iface->deleteRbo(srfc->glRboColor);
+    iface->deleteRbo(srfc->glRboDepth);
     dpy->removeSurface(surface);
     return EGL_TRUE;
 }
@@ -1027,6 +1030,48 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         thread->updateInfo(newCtx,dpy,newCtx->getGlesContext(),newCtx->getShareGroup(),dpy->getManager(newCtx->version()));
         newCtx->setSurfaces(newReadSrfc,newDrawSrfc);
         g_eglInfo->getIface(newCtx->version())->initContext(newCtx->getGlesContext(),newCtx->getShareGroup());
+
+        if (newDrawPtr->type() == EglSurface::PBUFFER) {
+            EGLint width,height;
+            EglPbufferSurface* tmpPbSurfacePtr =
+                static_cast<EglPbufferSurface*>(newDrawPtr);
+            tmpPbSurfacePtr->getAttrib(EGL_WIDTH, &width);
+            tmpPbSurfacePtr->getAttrib(EGL_HEIGHT, &height);
+
+            EGLint r, g, b, a, d, s, ms;
+
+            tmpPbSurfacePtr->getAttrib(EGL_RED_SIZE, &r);
+            tmpPbSurfacePtr->getAttrib(EGL_GREEN_SIZE, &g);
+            tmpPbSurfacePtr->getAttrib(EGL_BLUE_SIZE, &b);
+            tmpPbSurfacePtr->getAttrib(EGL_ALPHA_SIZE, &a);
+            tmpPbSurfacePtr->getAttrib(EGL_DEPTH_SIZE, &d);
+            tmpPbSurfacePtr->getAttrib(EGL_STENCIL_SIZE, &s);
+            tmpPbSurfacePtr->getAttrib(EGL_SAMPLES, &ms);
+
+            GLint glColorFormat, glDepthStencilFormat, glMultisamples;
+
+            glMultisamples = ms;
+
+            glDepthStencilFormat = GL_DEPTH24_STENCIL8;
+
+            // Synthesize gl color format depending on the EGL config,
+            // or things will not work right (alpha == 0 vs != 0, multisampling, etc)
+            if (r == 8 && g == 8 && b == 8 && a == 8) {
+                glColorFormat = GL_RGBA8;
+            }
+            if (r == 8 && g == 8 && b == 8 && a == 0) {
+                glColorFormat = GL_RGB8;
+            }
+            if (r == 5 && g == 6 && b == 5 && a == 0) {
+                glColorFormat = GL_RGB565;
+            }
+
+            newCtx->getGlesContext()->initDefaultFBO(
+                    width, height,
+                    glColorFormat, glDepthStencilFormat, glMultisamples,
+                    &tmpPbSurfacePtr->glRboColor,
+                    &tmpPbSurfacePtr->glRboDepth);
+        }
 
         // Initialize the GLES extension function table used in
         // eglGetProcAddress for the context's GLES version if not

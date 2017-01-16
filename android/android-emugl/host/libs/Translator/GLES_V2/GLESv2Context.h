@@ -56,6 +56,13 @@ public:
     virtual ObjectDataPtr loadObject(NamedObjectType type,
             ObjectLocalName localName, android::base::Stream* stream) const
             override;
+
+    virtual void initDefaultFBO(GLint width, GLint height,
+                                GLint colorFormat, GLint depthstencilFormat,
+                                GLint multisamples,
+                                GLuint* eglSurfaceRBColorId,
+                                GLuint* eglSurfaceRBDepthId) override;
+
 protected:
     virtual void postLoadRestoreCtx();
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
