@@ -78,6 +78,7 @@ void GLESv2Context::init(GlLibrary* glLib) {
             // Many dEQP cube map tests fail without this enable.
             dispatcher().glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         }
+
     }
     m_initialized = true;
 }
@@ -108,8 +109,92 @@ GLESv2Context::GLESv2Context(int maj, int min, android::base::Stream* stream,
     }
 }
 
+void GLESv2Context::initDefaultFBO(GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+        GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId) {
+
+
+    // if (!(*eglSurfaceRBColorId)) {
+    // }
+
+    if (!m_defaultFBO) {
+        dispatcher().glGenFramebuffers(1, &m_defaultFBO);
+    }
+
+    if (!(*eglSurfaceRBColorId)) {
+        // fprintf(stderr, "%s: new per-context FBO %u (surface rbo color %u)\n", __func__, m_defaultFBO, *eglSurfaceRBColorId);
+        // dispatcher().glGenRenderbuffers(1, &m_defaultRBColor);
+        // dispatcher().glGenRenderbuffers(1, &m_defaultRBDepth); 
+        dispatcher().glGenRenderbuffers(1, eglSurfaceRBColorId);
+        dispatcher().glGenRenderbuffers(1, eglSurfaceRBDepthId); 
+        // fprintf(stderr, "%s: new shared RBO %u\n", __func__, *eglSurfaceRBColorId);
+    }
+
+    // if (width == m_defaultFBOWidth &&
+    //     height == m_defaultFBOHeight) {
+    //     return;
+    // }
+
+    m_defaultFBOWidth=width;
+    m_defaultFBOHeight=height;
+
+
+    GLint prevRbo;
+    dispatcher().glGetIntegerv(GL_RENDERBUFFER_BINDING, &prevRbo);
+
+    GLint prevGlobalDrawFbo;
+    GLint prevGlobalReadFbo;
+    dispatcher().glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prevGlobalDrawFbo);
+    dispatcher().glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &prevGlobalReadFbo);
+    dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
+
+    // if (reallocRbo) {
+        // fprintf(stderr, "%s: realloc rbo\n", __func__);
+
+        // Reallocate RBOs.
+
+        dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, *eglSurfaceRBColorId);
+        // dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, m_defaultRBColor);
+        if (multisamples) {
+            dispatcher().glRenderbufferStorageMultisample(GL_RENDERBUFFER, multisamples, colorFormat, width, height);
+        } else {
+            dispatcher().glRenderbufferStorage(GL_RENDERBUFFER, colorFormat, width, height);
+        }
+        dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, *eglSurfaceRBColorId);
+        // dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_defaultRBColor);
+
+        // if (!depthstencilFormat) return;
+
+        // dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, m_defaultRBDepth);
+        dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, *eglSurfaceRBDepthId);
+        if (multisamples) {
+            dispatcher().glRenderbufferStorageMultisample(GL_RENDERBUFFER, multisamples, depthstencilFormat, width, height);
+        } else {
+            dispatcher().glRenderbufferStorage(GL_RENDERBUFFER, depthstencilFormat, width, height);
+        }
+        dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, *eglSurfaceRBDepthId);
+        dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, *eglSurfaceRBDepthId);
+        // dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_defaultRBDepth);
+        // dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_defaultRBDepth);
+    // }
+
+    /// dispatcher().glFramebufferRenderbuffer(GL_FR/;/AMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, *m_defaultRBColor);
+    /// dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, *m_defaultRBDepth);
+    /// dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, *m_defaultRBDepth);
+
+    dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, prevRbo);
+
+    if (prevGlobalDrawFbo) {
+        dispatcher().glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevGlobalDrawFbo);
+    }
+    if (prevGlobalReadFbo) {
+        dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, prevGlobalReadFbo);
+    }
+}
+
+
 GLESv2Context::~GLESv2Context()
 {
+    // glDeleteFramebuffers(1, &m_defaultFBO);
     delete[] m_att0Array;
 }
 

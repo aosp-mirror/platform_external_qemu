@@ -18,6 +18,8 @@
 
 #include "EglSurface.h"
 
+#include <GLES2/gl2.h>
+
 class EglDisplay;
 
 class EglPbufferSurface:public EglSurface {
@@ -28,6 +30,10 @@ public:
                                          m_texTarget(EGL_NO_TEXTURE),
                                          m_texMipmap(EGL_FALSE),
                                          m_largest(EGL_FALSE){};
+    ~EglPbufferSurface() {
+        // if (glRboColor) glDeleteRenderbuffers(1, &glRboColor);
+        // if (glRboDepth) glDeleteRenderbuffers(1, &glRboDepth);
+    }
 
     void  setNativePbuffer(EglOS::Surface* srfc) { m_native = srfc; }
     bool  setAttrib(EGLint attrib,EGLint val);
@@ -40,10 +46,17 @@ public:
 
     void getTexInfo(EGLint* format,EGLint* target){ *format = m_texFormat; *target = m_texTarget;}
 
+    // Shared backing GL renderbuffer
+    GLuint glRboColor = 0;
+    GLuint glRboDepth = 0;
+    GLint glRboColorFormat = 0;
+    GLint glRboDepthStencilFormat = 0;
+
 private:
     EGLint               m_texFormat;
     EGLint               m_texTarget;
     EGLint               m_texMipmap;
     EGLint               m_largest;
+
 };
 #endif

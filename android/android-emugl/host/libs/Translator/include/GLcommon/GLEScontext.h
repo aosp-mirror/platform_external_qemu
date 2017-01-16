@@ -230,6 +230,8 @@ public:
     virtual int getMaxTexUnits() = 0;
     virtual int getMaxCombinedTexUnits() { return getMaxTexUnits(); }
     virtual void drawValidate(void);
+    virtual void initDefaultFBO(GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+                                GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId) {};
 
     void setRenderbufferBinding(GLuint rb) { m_renderbuffer = rb; }
     GLuint getRenderbufferBinding() const { return m_renderbuffer; }
@@ -358,11 +360,13 @@ protected:
 
     int m_glesMajorVersion = 1;
     int m_glesMinorVersion = 0;
+
+    ShareGroupPtr         m_shareGroup;
+
 private:
 
     virtual void setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride, GLboolean normalized, int pointsIndex = -1, bool isInt = false) = 0 ;
 
-    ShareGroupPtr         m_shareGroup;
     GLenum                m_glError = GL_NO_ERROR;
     int                   m_maxTexUnits;
     unsigned int          m_maxUsedTexUnit = 0;
