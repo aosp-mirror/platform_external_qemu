@@ -316,6 +316,15 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
             s_gles2.glDeleteFramebuffers(1, &resolve_fbo);
             s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
         } else {
+            GLenum completeness = s_gles2.glCheckFramebufferStatus(GL_READ_FRAMEBUFFER);
+            GLint readfbo, drawfbo;
+            s_gles2.glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readfbo);
+            s_gles2.glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawfbo);
+            if (completeness != GL_FRAMEBUFFER_COMPLETE) {
+                fprintf(stderr, "%s: incomplete read fbo! 0x%x bindings: read %u draw %u\n", __func__, completeness,
+                        readfbo, drawfbo);
+            }
+
             s_gles2.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_width,
                                         m_height);
         }

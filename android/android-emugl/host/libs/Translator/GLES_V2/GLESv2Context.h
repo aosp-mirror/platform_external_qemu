@@ -52,6 +52,11 @@ public:
     virtual ObjectDataPtr loadObject(NamedObjectType type,
             ObjectLocalName localName, android::base::Stream* stream) const
             override;
+    GLuint getDefaultFBOGlobalName() const { return m_defaultFBO; }
+    bool isDefaultFBOBound(GLenum target) const { return !getFramebufferBinding(target); }
+    bool hasEmulatedDefaultFBO() const { return m_defaultFBO != 0; }
+    void initDefaultFBO(GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples) override;
+    bool isInDefaultFBOInit() const { return m_defaultFBOInit; }
 protected:
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
 private:
@@ -63,6 +68,18 @@ private:
     GLfloat* m_att0Array = nullptr;
     unsigned int m_att0ArrayLength = 0;
     bool m_att0NeedsDisable = false;
+
+    bool m_defaultFBOInit = false;
+    GLuint m_defaultVAO = 0;
+    GLuint m_defaultFBO = 0;
+
+    GLuint m_defaultRBColor = 0;
+    GLuint m_defaultRBDepth = 0;
+    GLuint m_defaultRBStencil = 0;
+
+    GLint m_defaultFBOWidth;
+    GLint m_defaultFBOHeight;
+    GLint m_defaultFBOTextureFormat;
 };
 
 #endif

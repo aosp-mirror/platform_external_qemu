@@ -78,6 +78,7 @@ void GLESv2Context::init(GlLibrary* glLib) {
             // Many dEQP cube map tests fail without this enable.
             dispatcher().glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         }
+
     }
     m_initialized = true;
 }
@@ -98,8 +99,63 @@ GLESv2Context::GLESv2Context(int maj, int min, android::base::Stream* stream,
     }
 }
 
+void GLESv2Context::initDefaultFBO(GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples) {
+
+    if (!m_defaultFBO) {
+        dispatcher().glGenFramebuffers(1, &m_defaultFBO);
+        dispatcher().glGenRenderbuffers(1, &m_defaultRBColor);
+        dispatcher().glGenRenderbuffers(1, &m_defaultRBDepth);
+        dispatcher().glGenRenderbuffers(1, &m_defaultRBStencil);
+    }
+
+    if (width == m_defaultFBOWidth &&
+        height == m_defaultFBOHeight) {
+        return;
+    }
+
+    m_defaultFBOWidth=width;
+    m_defaultFBOHeight=height;
+
+    GLint prevRbo;
+    dispatcher().glGetIntegerv(GL_RENDERBUFFER_BINDING, &prevRbo);
+
+    dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, getDefaultFBOGlobalName());
+
+    dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, m_defaultRBColor);
+    if (multisamples && m_glesMajorVersion > 2) {
+        dispatcher().glRenderbufferStorageMultisample(GL_RENDERBUFFER, multisamples, colorFormat, width, height);
+    } else {
+        dispatcher().glRenderbufferStorage(GL_RENDERBUFFER, colorFormat, width, height);
+    }
+    dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_defaultRBColor);
+
+    dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, m_defaultRBDepth);
+    if (multisamples && m_glesMajorVersion > 2) {
+        dispatcher().glRenderbufferStorageMultisample(GL_RENDERBUFFER, multisamples, depthstencilFormat, width, height);
+    } else {
+        dispatcher().glRenderbufferStorage(GL_RENDERBUFFER, depthstencilFormat, width, height);
+    }
+    dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_defaultRBDepth);
+    dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_defaultRBDepth);
+
+    dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, prevRbo);
+
+    GLint err = glGetError();
+    if (err != GL_NO_ERROR) {
+        fprintf(stderr, "ERROR: GL error initializing default FBO: err 0x%04x\n", err);
+    }
+    GLuint ret = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (ret != GL_FRAMEBUFFER_COMPLETE) {
+        fprintf(stderr, "ERROR:%s:%d Default Framebuffer incomplete err 0x%04x\n", __func__, __LINE__, ret);
+    }
+}
+
+
 GLESv2Context::~GLESv2Context()
 {
+    // glDeleteRenderbuffers(1, &m_defaultRB);
+    // glDeleteTextures(1, &m_defaultRBTexture);
+    // glDeleteFramebuffers(1, &m_defaultFBO);
     delete[] m_att0Array;
 }
 

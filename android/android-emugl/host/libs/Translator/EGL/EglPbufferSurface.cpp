@@ -69,7 +69,7 @@ bool EglPbufferSurface::getAttrib(EGLint attrib,EGLint* val) {
         *val = m_texMipmap;
         break;
     default:
-        return false;
+        *val = m_config->getConfAttrib(attrib);
     }
     return true;
 }
