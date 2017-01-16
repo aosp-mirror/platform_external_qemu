@@ -433,6 +433,7 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
     //for handling default texture (0)
     ObjectLocalName localTexName = TextureLocalName(target,texture);
     GLuint globalTextureName = localTexName;
+    if (globalTextureName) {
     if(ctx->shareGroup().get()){
         globalTextureName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::TEXTURE, localTexName);
@@ -453,6 +454,7 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
         }
         SET_ERROR_IF(ctx->GLTextureTargetToLocal(texData->target) != ctx->GLTextureTargetToLocal(target), GL_INVALID_OPERATION);
         texData->wasBound = true;
+    }
     }
 
     ctx->setBindedTexture(target,texture);
