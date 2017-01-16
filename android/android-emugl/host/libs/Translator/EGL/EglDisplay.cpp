@@ -550,6 +550,17 @@ void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
         return;
     }
 
+    fprintf(stderr, "%s: rgba, ds, ms %d %d %d %d, %d %d, %d\n", __func__,
+            info->red_size,
+            info->green_size,
+            info->blue_size,
+            info->alpha_size,
+
+            info->depth_size,
+            info->stencil_size,
+
+            info->samples_per_pixel);
+
     EglConfig* config = new EglConfig(
             info->red_size,
             info->green_size,

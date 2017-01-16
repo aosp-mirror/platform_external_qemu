@@ -71,7 +71,8 @@ typedef struct {
     void                                            (*deleteSync)(GLsync);
     void                                            (*saveTexture)(SaveableTexture*, android::base::Stream*);
     SaveableTexture*                                (*loadTexture)(android::base::Stream*, GlobalNameSpace*);
-}GLESiface;
+    void                                            (*deleteRbo)(GLuint);
+} GLESiface;
 
 class GlLibrary;
 

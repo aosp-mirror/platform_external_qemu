@@ -231,6 +231,19 @@ public:
     virtual int getMaxCombinedTexUnits() { return getMaxTexUnits(); }
     virtual void drawValidate(void);
 
+    // Default FBO emulation
+    virtual void initDefaultFBO(GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+                                GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId) = 0;
+
+    GLuint getDefaultFBOGlobalName() const { return m_defaultFBO; }
+    bool isDefaultFBOBound(GLenum target) const { return !getFramebufferBinding(target); }
+    bool hasEmulatedDefaultFBO() const { return m_defaultFBO != 0; }
+
+    int getDefaultFBOColorFormat() const { return m_defaultFBOColorFormat; }
+    int getDefaultFBOWidth() const { return m_defaultFBOWidth; }
+    int getDefaultFBOHeight() const { return m_defaultFBOHeight; }
+    int getDefaultFBOMultisamples() const { return m_defaultFBOSamples; }
+
     void setRenderbufferBinding(GLuint rb) { m_renderbuffer = rb; }
     GLuint getRenderbufferBinding() const { return m_renderbuffer; }
     void setFramebufferBinding(GLenum target, GLuint fb) {
@@ -358,11 +371,22 @@ protected:
 
     int m_glesMajorVersion = 1;
     int m_glesMinorVersion = 0;
+
+    ShareGroupPtr         m_shareGroup;
+
+    // Default FBO per-context state
+    GLuint m_defaultFBO = 0;
+    GLuint m_defaultRBColor = 0;
+    GLuint m_defaultRBDepth = 0;
+    GLint m_defaultFBOWidth = 0;
+    GLint m_defaultFBOHeight = 0;
+    GLint m_defaultFBOColorFormat = 0;
+    GLint m_defaultFBOSamples = 0;
+
 private:
 
     virtual void setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride, GLboolean normalized, int pointsIndex = -1, bool isInt = false) = 0 ;
 
-    ShareGroupPtr         m_shareGroup;
     GLenum                m_glError = GL_NO_ERROR;
     int                   m_maxTexUnits;
     unsigned int          m_maxUsedTexUnit = 0;

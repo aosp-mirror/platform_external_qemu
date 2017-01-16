@@ -45,5 +45,6 @@ private:
     EGLint               m_texTarget;
     EGLint               m_texMipmap;
     EGLint               m_largest;
+
 };
 #endif

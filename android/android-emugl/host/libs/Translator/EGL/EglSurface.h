@@ -22,6 +22,7 @@
 #include "emugl/common/smart_ptr.h"
 
 #include <EGL/egl.h>
+#include <GLES2/gl2.h>
 
 class EglSurface;
 typedef emugl::SmartPtr<EglSurface> SurfacePtr;
@@ -53,6 +54,10 @@ public:
     unsigned int getHndl() const { return m_hndl; }
 
     virtual ~EglSurface();
+
+    // Shared backing GL renderbuffer
+    GLuint glRboColor = 0;
+    GLuint glRboDepth = 0;
 
 private:
     static unsigned int s_nextSurfaceHndl;
