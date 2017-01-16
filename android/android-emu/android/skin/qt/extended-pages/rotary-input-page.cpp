@@ -13,11 +13,13 @@
 
 #include "android/globals.h"
 #include "android/skin/event.h"
+#include "android/skin/qt/emulator-qt-window.h"
 #include "android/utils/debug.h"
 
 RotaryInputPage::RotaryInputPage(QWidget *parent) :
     QWidget(parent),
-    mUi(new Ui::RotaryInputPage())
+    mUi(new Ui::RotaryInputPage()),
+    mEmulatorWindow(NULL)
 {
     mUi->setupUi(this);
     mValue = mUi->dial->value();
@@ -25,11 +27,20 @@ RotaryInputPage::RotaryInputPage(QWidget *parent) :
         [this](int value) { onValueChanged(value); });
 }
 
+void RotaryInputPage::setEmulatorWindow(EmulatorQtWindow* eW)
+{
+    mEmulatorWindow = eW;
+}
+
 void RotaryInputPage::onValueChanged(const int value) {
     int delta = dialDeltaToRotaryInputDelta(value, mValue);
-
-    // TODO: Send a SkinEvent with the delta
     VERBOSE_PRINT(keys, "Rotary input value change: %d", delta);
+    if (mEmulatorWindow) {
+        SkinEvent* skin_event = new SkinEvent();
+        skin_event->type = kEventRotaryInput;
+        skin_event->u.rotary_input.delta = delta;
+        mEmulatorWindow->queueSkinEvent(skin_event);
+    }
 
     mValue = value;
 }
