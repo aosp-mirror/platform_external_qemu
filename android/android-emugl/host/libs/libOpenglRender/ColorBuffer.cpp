@@ -137,6 +137,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     int nComp = (texInternalFormat == GL_RGB ? 3 : 4);
 
     unsigned long bufsize = nComp * p_width * p_height;
+    if (!bufsize) { fprintf(stderr, "%s: heh, empty color buffer\n", __func__); }
     char* initialImage = static_cast<char*>(::malloc(bufsize));
     memset(initialImage, 0xff, bufsize);
 
@@ -316,6 +317,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
             s_gles2.glDeleteFramebuffers(1, &resolve_fbo);
             s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
         } else {
+
             s_gles2.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_width,
                                         m_height);
         }
