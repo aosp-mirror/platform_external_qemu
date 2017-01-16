@@ -454,7 +454,7 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
     //for handling default texture (0)
     ObjectLocalName localTexName = ctx->getTextureLocalName(target,texture);
     GLuint globalTextureName = localTexName;
-    if (ctx->shareGroup().get()) {
+    if (globalTextureName && ctx->shareGroup().get()) {
         globalTextureName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::TEXTURE, localTexName);
         //if texture wasn't generated before,generate one
