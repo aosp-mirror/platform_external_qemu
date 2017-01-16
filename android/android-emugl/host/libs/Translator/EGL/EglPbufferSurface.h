@@ -18,6 +18,8 @@
 
 #include "EglSurface.h"
 
+#include <GLES2/gl2.h>
+
 class EglDisplay;
 
 class EglPbufferSurface:public EglSurface {
@@ -40,10 +42,17 @@ public:
 
     void getTexInfo(EGLint* format,EGLint* target){ *format = m_texFormat; *target = m_texTarget;}
 
+    // Shared backing GL renderbuffer
+    GLuint glRboColor = 0;
+    GLuint glRboDepth = 0;
+    GLint glRboColorFormat = 0;
+    GLint glRboDepthStencilFormat = 0;
+
 private:
     EGLint               m_texFormat;
     EGLint               m_texTarget;
     EGLint               m_texMipmap;
     EGLint               m_largest;
+
 };
 #endif

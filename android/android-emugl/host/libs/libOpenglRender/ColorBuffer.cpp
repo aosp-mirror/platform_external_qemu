@@ -325,6 +325,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
             s_gles2.glDeleteFramebuffers(1, &resolve_fbo);
             s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
         } else {
+
             s_gles2.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_width,
                                         m_height);
         }
