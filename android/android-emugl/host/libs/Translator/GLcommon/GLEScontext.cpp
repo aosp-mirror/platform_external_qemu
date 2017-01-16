@@ -1182,6 +1182,7 @@ void GLEScontext::releaseGlobalLock() {
 void GLEScontext::initCapsLocked(const GLubyte * extensionString)
 {
     const char* cstring = (const char*)extensionString;
+    fprintf(stderr, "%s: call\n", __func__);
 
     s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,&s_glSupport.maxVertexAttribs);
     s_glDispatch.glGetIntegerv(GL_MAX_CLIP_PLANES,&s_glSupport.maxClipPlane);
@@ -1495,3 +1496,5 @@ void GLEScontext::drawValidate(void)
 
     fbData->validate(this);
 }
+
+
