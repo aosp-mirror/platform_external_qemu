@@ -16,17 +16,21 @@
 #include <QWidget>
 #include <memory>
 
+class EmulatorQtWindow;
+
 class RotaryInputPage : public QWidget
 {
     Q_OBJECT
 
 public:
     explicit RotaryInputPage(QWidget *parent = 0);
+    void setEmulatorWindow(EmulatorQtWindow* eW);
 
 private:
     void onValueChanged(const int value);
 private:
     int dialDeltaToRotaryInputDelta(int newDialValue, int oldDialValue);
     std::unique_ptr<Ui::RotaryInputPage> mUi;
+    EmulatorQtWindow* mEmulatorWindow;
     int mValue;
 };
