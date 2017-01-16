@@ -78,8 +78,15 @@ void GLESv2Context::init(GlLibrary* glLib) {
             // Many dEQP cube map tests fail without this enable.
             dispatcher().glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         }
+
     }
     m_initialized = true;
+}
+
+void GLESv2Context::initDefaultFBO(GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples, GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId) {
+    GLEScontext::initDefaultFBO(
+            width, height, colorFormat, depthstencilFormat, multisamples,
+            eglSurfaceRBColorId, eglSurfaceRBDepthId);
 }
 
 GLESv2Context::GLESv2Context(int maj, int min, android::base::Stream* stream,

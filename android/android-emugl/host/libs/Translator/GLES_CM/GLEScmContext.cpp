@@ -39,6 +39,12 @@ void GLEScmContext::init(GlLibrary* glLib) {
     m_initialized = true;
 }
 
+void GLEScmContext::initDefaultFBO(GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples, GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId) {
+    GLEScontext::initDefaultFBO(
+            width, height, colorFormat, depthstencilFormat, multisamples,
+            eglSurfaceRBColorId, eglSurfaceRBDepthId);
+}
+
 GLEScmContext::GLEScmContext(int maj, int min) {
     m_glesMajorVersion = maj;
     m_glesMinorVersion = min;

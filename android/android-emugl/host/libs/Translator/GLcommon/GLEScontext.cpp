@@ -1503,3 +1503,72 @@ void GLEScontext::drawValidate(void)
 
     fbData->validate(this);
 }
+
+void GLEScontext::initDefaultFBO(
+        GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+        GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId) {
+
+    if (!m_defaultFBO) {
+        dispatcher().glGenFramebuffers(1, &m_defaultFBO);
+    }
+
+    bool needReallocateRbo = false;
+
+    if (!(*eglSurfaceRBColorId)) {
+        dispatcher().glGenRenderbuffers(1, eglSurfaceRBColorId);
+        dispatcher().glGenRenderbuffers(1, eglSurfaceRBDepthId);
+        needReallocateRbo = true;
+    }
+
+    m_defaultFBOColorFormat = colorFormat;
+    m_defaultFBOWidth = width;
+    m_defaultFBOHeight = height;
+    m_defaultFBOSamples = multisamples;
+
+    GLint prevRbo;
+    dispatcher().glGetIntegerv(GL_RENDERBUFFER_BINDING, &prevRbo);
+
+    GLint prevGlobalDrawFbo;
+    GLint prevGlobalReadFbo;
+    dispatcher().glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prevGlobalDrawFbo);
+    dispatcher().glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &prevGlobalReadFbo);
+    dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
+
+    if (needReallocateRbo) {
+        dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, *eglSurfaceRBColorId);
+        if (multisamples) {
+            dispatcher().glRenderbufferStorageMultisample(GL_RENDERBUFFER, multisamples, colorFormat, width, height);
+            GLint err = dispatcher().glGetError();
+            if (err != GL_NO_ERROR) {
+                fprintf(stderr, "%s: error setting up multisampled RBO! 0x%x\n", __func__, err);
+            }
+        } else {
+            dispatcher().glRenderbufferStorage(GL_RENDERBUFFER, colorFormat, width, height);
+        }
+
+        dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, *eglSurfaceRBDepthId);
+        if (multisamples) {
+            dispatcher().glRenderbufferStorageMultisample(GL_RENDERBUFFER, multisamples, depthstencilFormat, width, height);
+            GLint err = dispatcher().glGetError();
+            if (err != GL_NO_ERROR) {
+                fprintf(stderr, "%s: error setting up multisampled RBO! 0x%x\n", __func__, err);
+            }
+        } else {
+            dispatcher().glRenderbufferStorage(GL_RENDERBUFFER, depthstencilFormat, width, height);
+        }
+    }
+
+    dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, *eglSurfaceRBColorId);
+    dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, *eglSurfaceRBDepthId);
+    dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, *eglSurfaceRBDepthId);
+
+    dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, prevRbo);
+    if (prevGlobalDrawFbo) {
+        dispatcher().glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevGlobalDrawFbo);
+    }
+    if (prevGlobalReadFbo) {
+        dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, prevGlobalReadFbo);
+    }
+}
+
+
