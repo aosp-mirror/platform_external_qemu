@@ -371,6 +371,9 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::framebufferTarget(ctx, target),GL_INVALID_ENUM);
 
+    if (!framebuffer) {
+       framebuffer = ctx->getDefaultFBO();
+    }
     GLuint globalFrameBufferName = framebuffer;
     if(framebuffer && ctx->shareGroup().get()){
         globalFrameBufferName = ctx->shareGroup()->getGlobalName(
@@ -785,10 +788,16 @@ GL_APICALL void  GL_APIENTRY glDeleteBuffers(GLsizei n, const GLuint* buffers){
 }
 
 GL_APICALL void  GL_APIENTRY glDeleteFramebuffers(GLsizei n, const GLuint* framebuffers){
-    GET_CTX();
+    GET_CTX_V2();
     SET_ERROR_IF(n < 0, GL_INVALID_VALUE);
     if (ctx->shareGroup().get()) {
         for (int i = 0; i < n; i++) {
+            if (ctx->getFramebufferBinding(GL_FRAMEBUFFER) == framebuffers[i]) {
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            }
+            else if (ctx->getFramebufferBinding(GL_READ_FRAMEBUFFER) == framebuffers[i]) {
+                glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+            }
             ctx->shareGroup()->deleteName(NamedObjectType::FRAMEBUFFER,
                                           framebuffers[i]);
         }

@@ -49,6 +49,11 @@ public:
     const float* getAtt0(void) const {return m_attribute0value;}
 
     int getDefaultVAO() const { return m_defaultVAO; }
+    int getDefaultFBO() const { return m_defaultFBO; }
+    int getDefaultRB() const { return m_defaultRB; }
+    int getDefaultRBTexture() const { return m_defaultRBTexture; }
+    void initDefaultFBO(GLint width, GLint height, GLint textureFormat) override;
+
 protected:
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
 private:
@@ -62,6 +67,13 @@ private:
     bool m_att0NeedsDisable = false;
 
     GLuint m_defaultVAO;
+    GLuint m_defaultFBO;
+    GLuint m_defaultRB;
+    GLuint m_defaultRBTexture;
+
+    GLuint m_defaultFBOWidth;
+    GLuint m_defaultFBOHeight;
+    GLuint m_defaultFBOTextureFormat;
 };
 
 #endif

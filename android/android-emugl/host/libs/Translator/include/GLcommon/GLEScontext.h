@@ -222,6 +222,7 @@ public:
     virtual int getMaxTexUnits() = 0;
     virtual int getMaxCombinedTexUnits() { return getMaxTexUnits(); }
     virtual void drawValidate(void);
+    virtual void initDefaultFBO(GLint width, GLint height, GLint textureFormat) {};
 
     void setRenderbufferBinding(GLuint rb) { m_renderbuffer = rb; }
     GLuint getRenderbufferBinding() const { return m_renderbuffer; }
