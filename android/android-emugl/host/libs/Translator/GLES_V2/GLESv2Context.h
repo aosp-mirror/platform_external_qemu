@@ -56,7 +56,15 @@ public:
     virtual ObjectDataPtr loadObject(NamedObjectType type,
             ObjectLocalName localName, android::base::Stream* stream) const
             override;
+
     virtual void restore();
+
+    GLuint getDefaultFBOGlobalName() const { return m_defaultFBO; }
+    bool isDefaultFBOBound(GLenum target) const { return !getFramebufferBinding(target); }
+    bool hasEmulatedDefaultFBO() const { return m_defaultFBO != 0; }
+    void initDefaultFBO(GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+                        GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId) override;
+
 protected:
     virtual void postLoadRestoreCtx();
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
@@ -72,6 +80,13 @@ private:
 
     GLuint m_useProgram = 0;
     ObjectDataPtr m_useProgramData = {};
+
+    GLuint m_defaultFBO = 0;
+    GLuint m_defaultRBColor = 0;
+    GLuint m_defaultRBDepth = 0;
+    GLuint m_defaultVAO = 0;
+    GLint m_defaultFBOWidth = 0;
+    GLint m_defaultFBOHeight = 0;
 };
 
 #endif
