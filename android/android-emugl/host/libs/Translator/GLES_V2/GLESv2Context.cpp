@@ -78,8 +78,58 @@ void GLESv2Context::init(GlLibrary* glLib) {
         //Generate default VAO
         glGenVertexArrays(1, &m_defaultVAO);
         glBindVertexArray(getDefaultVAO());
+        m_defaultFBO = 0;
+        m_defaultRB = 0;
+        m_defaultRBTexture = 0;
+
     }
     m_initialized = true;
+}
+
+void GLESv2Context::initDefaultFBO(GLint width, GLint height, GLint textureFormat) {
+    if (!m_defaultFBO) {
+        //Generate default FBO/RB/Tex
+        glGenFramebuffers(1, &m_defaultFBO);
+        glGenRenderbuffers(1, &m_defaultRB);
+        glGenTextures(1, &m_defaultRBTexture);
+    }
+
+    if (width == m_defaultFBOWidth &&
+        height == m_defaultFBOHeight &&
+        textureFormat == m_defaultFBOTextureFormat) {
+        return;
+    }
+
+    m_defaultFBOWidth=width;
+    m_defaultFBOHeight=height;
+    m_defaultFBOTextureFormat=textureFormat;
+
+    GLint prevTexture;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTexture);
+    glBindFramebuffer(GL_FRAMEBUFFER, getDefaultFBO());
+    glBindTexture(GL_TEXTURE_2D, getDefaultRBTexture());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D,
+                     0,
+                     textureFormat,
+                     width,
+                     height,
+                     0,
+                     textureFormat,
+                     GL_UNSIGNED_BYTE,
+                     NULL);
+    glBindTexture(GL_TEXTURE_2D, prevTexture);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, getDefaultRBTexture(), 0);
+    glBindRenderbuffer(GL_RENDERBUFFER, getDefaultRB());
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, getDefaultRB());
+    GLuint ret = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (ret != GL_FRAMEBUFFER_COMPLETE) {
+        fprintf(stderr, "ERROR: Default Framebuffer incomplete err 0x%04x\n", ret);
+    }
 }
 
 GLESv2Context::GLESv2Context(int maj, int min) {
@@ -90,6 +140,9 @@ GLESv2Context::GLESv2Context(int maj, int min) {
 GLESv2Context::~GLESv2Context()
 {
     glDeleteVertexArrays(1, &m_defaultVAO);
+    glDeleteRenderbuffers(1, &m_defaultRB);
+    glDeleteTextures(1, &m_defaultRBTexture);
+    glDeleteFramebuffers(1, &m_defaultFBO);
     delete[] m_att0Array;
 }
 
