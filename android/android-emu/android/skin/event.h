@@ -30,6 +30,7 @@ typedef enum {
     kEventMouseMotion,
     kEventQuit,
     kEventScrollBarChanged,
+    kEventRotaryInput,
     kEventSetScale,
     kEventSetZoom,
     kEventForceRedraw,
@@ -63,6 +64,7 @@ typedef struct {
     int yrel;
     int button;
     int skip_sync;
+    bool scroll_wheel;
 } SkinEventMouseData;
 
 typedef struct {
@@ -85,11 +87,16 @@ typedef struct {
 } SkinEventScrollData;
 
 typedef struct {
+    int delta; // Positive or negative relative rotation
+} SkinEventRotaryInputData;
+
+typedef struct {
     SkinEventType type;
     union {
         SkinEventKeyData key;
         SkinEventMouseData mouse;
         SkinEventScrollData scroll;
+        SkinEventRotaryInputData rotary_input;
         SkinEventTextInputData text;
         SkinEventWindowData window;
         SkinEventLayoutRotateData layout_rotation;
