@@ -1734,31 +1734,36 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     // server IP addresses, then rewrite the option value with the
     // results.
     if (is_qemu2 && opts->dns_server) {
-        // When dns server is provided after '-dns-server', qemu2 handles it in the glue
-        // code (see android-qemu2-glue/qemu-setup-dns-servers.cpp).
-        // If there are no dns servers provided for qemu2, take the dns servers of the
-        // host as fall back.
+        // When dns server is provided after '-dns-server', qemu2 handles it in
+        // the glue code (see android-qemu2-glue/qemu-setup-dns-servers.cpp).
+        // If there are no dns servers provided for qemu2, take the dns servers
+        // of the host as fall back.
     } else {
         // qemu1: QEMU1 only supports IPv4 DNS servers, so use
-        // android_dns_get_servers() that filters out any IPv6 server
-        // from the -dns-server list.
-        // qemu2: the opts->dns_server is NULL, just get the dns servers of the host
+        //  android_dns_get_servers() that filters out any IPv6 server
+        //  from the -dns-server list.
+        // qemu2: the opts->dns_server is NULL, just get the dns servers of the
+        //  host.
         uint32_t dnsServers[ANDROID_MAX_DNS_SERVERS] = {};
         int dnsCount = android_dns_get_servers(opts->dns_server, dnsServers);
         if (dnsCount < 0) {
             return false;
         }
-        // Rewrite the option with DNS server IPs.
-        STRALLOC_DEFINE(newOption);
-        int n;
-        for (n = 0; n < dnsCount; ++n) {
-            uint32_t ip = dnsServers[n];
-            stralloc_add_format(newOption, "%s%d.%d.%d.%d", (n > 0) ? "," : "",
-                                (uint8_t)(ip >> 24), (uint8_t)(ip >> 16),
-                                (uint8_t)(ip >> 8), (uint8_t)(ip));
+        if (dnsCount > 0) {
+            // If there's at least one server, rewrite the option with
+            // its IP(s). Otherwise our engine is on its own.
+            STRALLOC_DEFINE(newOption);
+            int n;
+            for (n = 0; n < dnsCount; ++n) {
+                uint32_t ip = dnsServers[n];
+                stralloc_add_format(newOption, "%s%d.%d.%d.%d",
+                                    (n > 0) ? "," : "",
+                                    (uint8_t)(ip >> 24), (uint8_t)(ip >> 16),
+                                    (uint8_t)(ip >> 8), (uint8_t)(ip));
+            }
+            str_reset(&opts->dns_server, stralloc_cstr(newOption));
+            stralloc_reset(newOption);
         }
-        str_reset(&opts->dns_server, stralloc_cstr(newOption));
-        stralloc_reset(newOption);
     }
 
     // Virtual CPU core count.
