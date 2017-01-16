@@ -263,3 +263,8 @@ void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
         SET_ERROR_IF(1, GL_INVALID_ENUM);
     }
 }
+
+void deleteRenderbufferGlobal(GLuint rbo) {
+    if (rbo)
+        GLEScontext::dispatcher().glDeleteRenderbuffers(1, &rbo);
+}

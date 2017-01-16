@@ -65,20 +65,21 @@ ProcTableMap *s_glesExtensions = NULL;
 
 static EGLiface*  s_eglIface = NULL;
 static GLESiface  s_glesIface = {
-    .initGLESx         = initGLESx,
-    .createGLESContext = createGLESxContext,
-    .initContext       = initContext,
-    .deleteGLESContext = deleteGLESContext,
-    .flush             = (FUNCPTR_NO_ARGS_RET_VOID)glFlush,
-    .finish            = (FUNCPTR_NO_ARGS_RET_VOID)glFinish,
-    .getError          = (FUNCPTR_NO_ARGS_RET_INT)glGetError,
-    .setShareGroup     = setShareGroup,
-    .getProcAddress    = getProcAddress,
-    .fenceSync         = (FUNCPTR_FENCE_SYNC)glFenceSync,
-    .clientWaitSync    = (FUNCPTR_CLIENT_WAIT_SYNC)glClientWaitSync,
-    .deleteSync        = (FUNCPTR_DELETE_SYNC)glDeleteSync,
-    .saveTexture       = saveTexture,
-    .loadTexture       = loadTexture,
+    .initGLESx                  = initGLESx,
+    .createGLESContext          = createGLESxContext,
+    .initContext                = initContext,
+    .deleteGLESContext          = deleteGLESContext,
+    .flush                      = (FUNCPTR_NO_ARGS_RET_VOID)glFlush,
+    .finish                     = (FUNCPTR_NO_ARGS_RET_VOID)glFinish,
+    .getError                   = (FUNCPTR_NO_ARGS_RET_INT)glGetError,
+    .setShareGroup              = setShareGroup,
+    .getProcAddress             = getProcAddress,
+    .fenceSync                  = (FUNCPTR_FENCE_SYNC)glFenceSync,
+    .clientWaitSync             = (FUNCPTR_CLIENT_WAIT_SYNC)glClientWaitSync,
+    .deleteSync                 = (FUNCPTR_DELETE_SYNC)glDeleteSync,
+    .saveTexture                = saveTexture,
+    .loadTexture                = loadTexture,
+    .deleteRbo                  = deleteRenderbufferGlobal,
 };
 
 #include <GLcommon/GLESmacros.h>
@@ -392,29 +393,36 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::framebufferTarget(ctx, target),GL_INVALID_ENUM);
 
-    GLuint globalFrameBufferName = framebuffer;
-    if(framebuffer && ctx->shareGroup().get()){
-        globalFrameBufferName = ctx->shareGroup()->getGlobalName(
-                NamedObjectType::FRAMEBUFFER, framebuffer);
-        //if framebuffer wasn't generated before,generate one
-        if(!globalFrameBufferName){
-            ctx->shareGroup()->genName(NamedObjectType::FRAMEBUFFER,
-                    framebuffer);
-            ctx->shareGroup()->setObjectData(
-                    NamedObjectType::FRAMEBUFFER, framebuffer,
-                    ObjectDataPtr(new FramebufferData(framebuffer)));
+    GLuint globalFrameBufferName;
+    bool isDefaultFBO = !framebuffer;
+    if (isDefaultFBO) {
+       globalFrameBufferName = ctx->getDefaultFBOGlobalName();
+       ctx->dispatcher().glBindFramebufferEXT(target, globalFrameBufferName);
+       ctx->setFramebufferBinding(target, 0);
+    } else {
+        globalFrameBufferName = framebuffer;
+        if(framebuffer && ctx->shareGroup().get()){
             globalFrameBufferName = ctx->shareGroup()->getGlobalName(
                     NamedObjectType::FRAMEBUFFER, framebuffer);
+            //if framebuffer wasn't generated before,generate one
+            if(!globalFrameBufferName){
+                ctx->shareGroup()->genName(NamedObjectType::FRAMEBUFFER,
+                        framebuffer);
+                ctx->shareGroup()->setObjectData(
+                        NamedObjectType::FRAMEBUFFER, framebuffer,
+                        ObjectDataPtr(new FramebufferData(framebuffer)));
+                globalFrameBufferName = ctx->shareGroup()->getGlobalName(
+                        NamedObjectType::FRAMEBUFFER, framebuffer);
+            }
+            // set that this framebuffer has been bound before
+            auto fbObj = ctx->shareGroup()->getObjectData(
+                    NamedObjectType::FRAMEBUFFER, framebuffer);
+            FramebufferData *fbData = (FramebufferData *)fbObj;
+            fbData->setBoundAtLeastOnce();
         }
-        // set that this framebuffer has been bound before
-        auto fbObj = ctx->shareGroup()->getObjectData(
-                NamedObjectType::FRAMEBUFFER, framebuffer);
-        FramebufferData *fbData = (FramebufferData *)fbObj;
-        fbData->setBoundAtLeastOnce();
+        ctx->dispatcher().glBindFramebufferEXT(target,globalFrameBufferName);
+        ctx->setFramebufferBinding(target, framebuffer);
     }
-    ctx->dispatcher().glBindFramebufferEXT(target,globalFrameBufferName);
-    // update framebuffer binding state
-    ctx->setFramebufferBinding(target, framebuffer);
 
     sUpdateFboEmulation(ctx);
 }
@@ -451,7 +459,7 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
     //for handling default texture (0)
     ObjectLocalName localTexName = ctx->getTextureLocalName(target,texture);
     GLuint globalTextureName = localTexName;
-    if(ctx->shareGroup().get()){
+    if (ctx->shareGroup().get()) {
         globalTextureName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::TEXTURE, localTexName);
         //if texture wasn't generated before,generate one
@@ -834,10 +842,16 @@ GL_APICALL void  GL_APIENTRY glDeleteBuffers(GLsizei n, const GLuint* buffers){
 }
 
 GL_APICALL void  GL_APIENTRY glDeleteFramebuffers(GLsizei n, const GLuint* framebuffers){
-    GET_CTX();
+    GET_CTX_V2();
     SET_ERROR_IF(n < 0, GL_INVALID_VALUE);
     if (ctx->shareGroup().get()) {
         for (int i = 0; i < n; i++) {
+            if (ctx->getFramebufferBinding(GL_FRAMEBUFFER) == framebuffers[i]) {
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            }
+            else if (ctx->getFramebufferBinding(GL_READ_FRAMEBUFFER) == framebuffers[i]) {
+                glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+            }
             ctx->shareGroup()->deleteName(NamedObjectType::FRAMEBUFFER,
                                           framebuffers[i]);
         }
@@ -1162,6 +1176,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
                    GLESv2Validate::renderbufferTarget(renderbuffertarget) &&
                    GLESv2Validate::framebufferAttachment(ctx, attachment)), GL_INVALID_ENUM);
     SET_ERROR_IF(!ctx->shareGroup().get(), GL_INVALID_OPERATION);
+    SET_ERROR_IF(ctx->isDefaultFBOBound(target), GL_INVALID_OPERATION);
 
     GLuint globalRenderbufferName = 0;
     ObjectDataPtr obj;
@@ -1222,6 +1237,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attach
                    GLESv2Validate::framebufferAttachment(ctx, attachment)), GL_INVALID_ENUM);
     SET_ERROR_IF(ctx->getMajorVersion() < 3 && level != 0, GL_INVALID_VALUE);
     SET_ERROR_IF(!ctx->shareGroup().get(), GL_INVALID_OPERATION);
+    SET_ERROR_IF(ctx->isDefaultFBOBound(target), GL_INVALID_OPERATION);
 
     GLuint globalTextureName = 0;
 
@@ -1446,6 +1462,17 @@ static void s_glStateQueryTv(bool es2, GLenum pname, T* params, GLStateQueryFunc
                     NamedObjectType::RENDERBUFFER, i);
         }
         break;
+    case GL_READ_BUFFER:
+    case GL_DRAW_BUFFER0:
+        if (ctx->shareGroup().get()) {
+            getter(pname, &i);
+            GLenum target = pname == GL_READ_BUFFER ? GL_READ_FRAMEBUFFER : GL_DRAW_FRAMEBUFFER;
+            if (ctx->isDefaultFBOBound(target) && (GLint)i == GL_COLOR_ATTACHMENT0) {
+                i = (T)GL_BACK;
+            }
+            *params = i;
+        }
+        break;
     case GL_ARRAY_BUFFER_BINDING:
         *params = ctx->getBuffer(GL_ARRAY_BUFFER);
         break;
@@ -1608,7 +1635,7 @@ static void s_glStateQueryTi_v(GLenum pname, GLuint index, T* params, GLStateQue
 }
 
 GL_APICALL void  GL_APIENTRY glGetBooleanv(GLenum pname, GLboolean* params){
-    GET_CTX();
+    GET_CTX_V2();
 #define TO_GLBOOL(params, x) \
     *params = x ? GL_TRUE : GL_FALSE; \
 
@@ -1824,7 +1851,28 @@ GL_APICALL void  GL_APIENTRY glGetFramebufferAttachmentParameteriv(GLenum target
         }
     }
 
+    if (ctx->isDefaultFBOBound(target)) {
+        SET_ERROR_IF(
+            attachment == GL_DEPTH_ATTACHMENT ||
+            attachment == GL_STENCIL_ATTACHMENT ||
+            attachment == GL_DEPTH_STENCIL_ATTACHMENT ||
+            (attachment >= GL_COLOR_ATTACHMENT0 &&
+             attachment <= GL_COLOR_ATTACHMENT15), GL_INVALID_OPERATION);
+        SET_ERROR_IF(pname == GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, GL_INVALID_ENUM);
+
+        if (attachment == GL_BACK)
+            attachment = GL_COLOR_ATTACHMENT0;
+        if (attachment == GL_DEPTH)
+            attachment = GL_DEPTH_ATTACHMENT;
+        if (attachment == GL_STENCIL)
+            attachment = GL_STENCIL_ATTACHMENT;
+    }
+
     ctx->dispatcher().glGetFramebufferAttachmentParameterivEXT(target,attachment,pname,params);
+
+    if (ctx->isDefaultFBOBound(target) && *params == GL_RENDERBUFFER) {
+        *params = GL_FRAMEBUFFER_DEFAULT;
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glGetRenderbufferParameteriv(GLenum target, GLenum pname, GLint* params){
@@ -2506,7 +2554,54 @@ GL_APICALL void  GL_APIENTRY glReadPixels(GLint x, GLint y, GLsizei width, GLsiz
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::pixelOp(format,type)),GL_INVALID_OPERATION);
     SET_ERROR_IF(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE, GL_INVALID_FRAMEBUFFER_OPERATION);
-    ctx->dispatcher().glReadPixels(x,y,width,height,format,type,pixels);
+
+    if (ctx->isDefaultFBOBound(GL_READ_FRAMEBUFFER) &&
+        ctx->getDefaultFBOMultisamples()) {
+
+        GLint prev_bound_rbo;
+        GLint prev_bound_draw_fbo;
+
+        glGetIntegerv(GL_RENDERBUFFER_BINDING, &prev_bound_rbo);
+        glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prev_bound_draw_fbo);
+
+        GLuint resolve_fbo;
+        GLuint resolve_rbo;
+        glGenFramebuffers(1, &resolve_fbo);
+        glGenRenderbuffers(1, &resolve_rbo);
+
+        int fboFormat = ctx->getDefaultFBOColorFormat();
+        int fboWidth = ctx->getDefaultFBOWidth();
+        int fboHeight = ctx->getDefaultFBOHeight();
+
+        glBindRenderbuffer(GL_RENDERBUFFER, resolve_rbo);
+        glRenderbufferStorage(GL_RENDERBUFFER, fboFormat, fboWidth, fboHeight);
+        glBindFramebuffer(GL_FRAMEBUFFER, resolve_fbo);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, resolve_rbo);
+
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, resolve_fbo);
+
+        bool scissorEnabled = glIsEnabled(GL_SCISSOR_TEST);
+
+        if (scissorEnabled) glDisable(GL_SCISSOR_TEST);
+        glBlitFramebuffer(0, 0, fboWidth, fboHeight, 0, 0, fboWidth, fboHeight,
+                          GL_COLOR_BUFFER_BIT, GL_LINEAR);
+        if (scissorEnabled) glEnable(GL_SCISSOR_TEST);
+
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, resolve_fbo);
+
+        ctx->dispatcher().glReadPixels(x,y,width,height,format,type,pixels);
+
+        glDeleteRenderbuffers(1, &resolve_rbo);
+        glDeleteFramebuffers(1, &resolve_fbo);
+
+        glBindRenderbuffer(GL_RENDERBUFFER, prev_bound_rbo);
+
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prev_bound_draw_fbo);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    } else {
+        ctx->dispatcher().glReadPixels(x,y,width,height,format,type,pixels);
+    }
 }
 
 
@@ -3082,7 +3177,7 @@ GL_APICALL void  GL_APIENTRY glViewport(GLint x, GLint y, GLsizei width, GLsizei
 
 GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image)
 {
-    GET_CTX();
+    GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::textureTargetLimited(target),GL_INVALID_ENUM);
     unsigned int imagehndl = SafeUIntFromPointer(image);
     ImagePtr img = s_eglIface->getEGLImage(imagehndl);

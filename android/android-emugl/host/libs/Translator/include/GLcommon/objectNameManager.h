@@ -154,6 +154,7 @@ public:
             ObjectLocalName p_localName, android::base::Stream* stream)>
                 loadObject_t;
     bool needRestore();
+
 private:
     explicit ShareGroup(GlobalNameSpace *globalNameSpace,
                         uint64_t sharedGroupID,
