@@ -24,6 +24,7 @@
 // Extra desktop-specific OpenGL enums that we need to properly emulate OpenGL ES.
 #define GL_FRAMEBUFFER_SRGB 0x8DB9
 #define GL_TEXTURE_CUBE_MAP_SEAMLESS 0x884F
+#define GL_DEPTH_CLAMP 0x864F
 
 class GLESv2Context : public GLEScontext{
 public:

@@ -54,6 +54,7 @@ struct GLESv2Validate : public GLESvalidate {
     static bool attribIndex(int index, int max);
     static bool programParam(GLEScontext* ctx, GLenum pname);
     static bool textureIsCubeMap(GLenum target);
+    static bool textureTargetEx(GLEScontext* ctx, GLenum textarget);
 
     static int sizeOfType(GLenum type);
 };

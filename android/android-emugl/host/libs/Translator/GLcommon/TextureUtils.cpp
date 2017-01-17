@@ -140,17 +140,27 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
                 int pixelSize = etc_get_decoded_pixel_size(etcFormat);
                 GLsizei compressedSize = etc_get_encoded_data_size(etcFormat, width, height);
                 SET_ERROR_IF((compressedSize > imageSize), GL_INVALID_VALUE);
-                SET_ERROR_IF(!data,GL_INVALID_OPERATION);
+
+                bool emulateCompressedData = false;
+                if (!data) {
+                    emulateCompressedData = true;
+                    data = new char[compressedSize];
+                }
 
                 const int32_t align = ctx->getUnpackAlignment()-1;
                 const int32_t bpr = ((width * pixelSize) + align) & ~align;
                 const size_t size = bpr * height;
 
                 std::unique_ptr<etc1_byte[]> pOut(new etc1_byte[size]);
+
                 int res = etc2_decode_image((const etc1_byte*)data, etcFormat, pOut.get(), width, height, bpr);
                 SET_ERROR_IF(res!=0, GL_INVALID_VALUE);
 
                 glTexImage2DPtr(target,level,convertedInternalFormat,width,height,border,format,type,pOut.get());
+
+                if (emulateCompressedData) {
+                    delete [] (char*)data;
+                }
             }
             break;
         case GL_PALETTE4_RGB8_OES:

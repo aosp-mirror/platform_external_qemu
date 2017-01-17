@@ -37,6 +37,22 @@ GL_APICALL void GL_APIENTRY glBindProgramPipeline(GLuint pipeline) {
 GL_APICALL void GL_APIENTRY glGetProgramPipelineiv(GLuint pipeline, GLenum pname, GLint * params) {
     GET_CTX_V2();
     ctx->dispatcher().glGetProgramPipelineiv(pipeline, pname, params);
+
+    switch (pname) {
+    case GL_ACTIVE_PROGRAM:
+    case GL_VERTEX_SHADER:
+    case GL_FRAGMENT_SHADER:
+    case GL_COMPUTE_SHADER: {
+        GLint programName = *params;
+        GLint localProgramName =
+            ctx->shareGroup()->getLocalName(NamedObjectType::SHADER_OR_PROGRAM, programName);
+        *params = localProgramName;
+        fprintf(stderr, "%s: global %d local %d\n", __func__, programName, localProgramName);
+        break;
+    }
+    default:
+        break;
+    }
 }
 
 GL_APICALL void GL_APIENTRY glGetProgramPipelineInfoLog(GLuint pipeline, GLsizei bufSize, GLsizei * length, GLchar * infoLog) {
@@ -63,10 +79,36 @@ GL_APICALL void GL_APIENTRY glUseProgramStages(GLuint pipeline, GLbitfield stage
     }
 }
 
+GL_APICALL void GL_APIENTRY glActiveShaderProgram(GLuint pipeline, GLuint program) {
+    GET_CTX_V2();
+    if (ctx->shareGroup().get()) {
+        const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
+        ctx->dispatcher().glActiveShaderProgram(pipeline, globalProgramName);
+    }
+}
+
 extern "C" GL_APICALL GLuint GL_APIENTRY glCreateShaderProgramv(GLenum type, GLsizei count, const char ** strings) {
     GET_CTX_V2_RET(0);
+
     GLuint glCreateShaderProgramvRET = ctx->dispatcher().glCreateShaderProgramv(type, count, strings);
-    return glCreateShaderProgramvRET;
+
+    GLint sep = GL_FALSE;
+    GLint linkstatus = GL_FALSE;
+    ctx->dispatcher().glGetProgramiv(glCreateShaderProgramvRET, GL_PROGRAM_SEPARABLE, &sep);
+    ctx->dispatcher().glGetProgramiv(glCreateShaderProgramvRET, GL_LINK_STATUS, &linkstatus);
+
+    fprintf(stderr, "%s sep 0x%x linkstatus 0x%x\n", __func__, sep, linkstatus);
+
+    const GLuint localProgramName =
+        ctx->shareGroup()->genName(ShaderProgramType::PROGRAM, 0, true, glCreateShaderProgramvRET);
+
+    ProgramData* progdata = new ProgramData();
+    progdata->setLinkStatus(GL_TRUE);
+
+    ctx->shareGroup()->setObjectData(NamedObjectType::SHADER_OR_PROGRAM, localProgramName, ObjectDataPtr(progdata));
+
+    fprintf(stderr, "%s: %u sep=%d localname %u\n", __func__, glCreateShaderProgramvRET,sep,localProgramName);
+    return localProgramName;
 }
 
 GL_APICALL void GL_APIENTRY glProgramUniform1f(GLuint program, GLint location, GLfloat v0) {
@@ -470,5 +512,67 @@ GL_APICALL void GL_APIENTRY glFramebufferParameteri(GLenum target, GLenum pname,
 GL_APICALL void GL_APIENTRY glGetFramebufferParameteriv(GLenum target, GLenum pname, GLint * params) {
     GET_CTX_V2();
     ctx->dispatcher().glGetFramebufferParameteriv(target, pname, params);
+}
+
+GL_APICALL void GL_APIENTRY glGetTexLevelParameterfv(GLenum target, GLint level, GLenum pname, GLfloat * params) {
+    GET_CTX_V2();
+    ctx->dispatcher().glGetTexLevelParameterfv(target, level, pname, params);
+
+    if (!ctx->shareGroup().get()) return;
+
+    TextureData* texData = getTextureTargetData(target);
+
+    if (!texData) return;
+
+    switch (pname) {
+    case GL_TEXTURE_INTERNAL_FORMAT:
+        // Need the correct internal format if the texture has not been initialized at all yet.
+        if (!texData->hasStorage) {
+            *params = texData->internalFormat;
+        }
+
+        if (texData->compressed) {
+            *params = texData->compressedFormat;
+        }
+        break;
+    case GL_TEXTURE_COMPRESSED:
+        if (texData->compressed) {
+            *params = GL_TRUE;
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+GL_APICALL void GL_APIENTRY glGetTexLevelParameteriv(GLenum target, GLint level, GLenum pname, GLint * params) {
+    GET_CTX_V2();
+    ctx->dispatcher().glGetTexLevelParameteriv(target, level, pname, params);
+
+    if (!ctx->shareGroup().get()) return;
+
+    TextureData* texData = getTextureTargetData(target);
+
+    if (!texData) return;
+
+    switch (pname) {
+    case GL_TEXTURE_INTERNAL_FORMAT:
+        // Need the correct internal format if the texture has not been initialized at all yet.
+        if (!texData->hasStorage) {
+            *params = texData->internalFormat;
+        }
+
+        if (texData->compressed) {
+            *params = texData->compressedFormat;
+        }
+        break;
+    case GL_TEXTURE_COMPRESSED:
+        if (texData->compressed) {
+            *params = GL_TRUE;
+        }
+        break;
+    default:
+        break;
+    }
 }
 

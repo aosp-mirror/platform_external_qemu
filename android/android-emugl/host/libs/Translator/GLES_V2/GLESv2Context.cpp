@@ -24,6 +24,7 @@ static const char kGLES31StringPart[] = "OpenGL ES 3.1";
 static const char kGLES32StringPart[] = "OpenGL ES 3.2";
 
 static const char* sPickVersionStringPart(int maj, int min) {
+    return kGLES31StringPart;
     switch (maj) {
         case 2:
             return kGLES20StringPart;
