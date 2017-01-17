@@ -22,6 +22,30 @@
       "revId": "3c0af5f062e2993d36d60e5706327d8aeb553810",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a3ed1509_1fed8fcf",
+        "filename": "android/scripts/utils/package_builder.shi",
+        "patchSetId": 1
+      },
+      "lineNbr": 607,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-17T17:22:35Z",
+      "side": 1,
+      "message": "yes, this case branch is for x86, the next one handles x64 where it uses \"bin\" instead\nregarding the directory name, it\u0027s \"prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8/x86_64-w64-mingw32\" - there\u0027s extra subdir in the end, and aosp_prebuilt_toolchain_sysroot_subdir_for() takes care of that",
+      "parentUuid": "e3846d26_4dd62dd8",
+      "range": {
+        "startLine": 607,
+        "startChar": 104,
+        "endLine": 607,
+        "endChar": 109
+      },
+      "revId": "3c0af5f062e2993d36d60e5706327d8aeb553810",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
