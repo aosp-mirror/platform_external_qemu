@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a3ed1509_8aa93f69",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-glue.mk",
+        "patchSetId": 8
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-17T17:58:18Z",
+      "side": 1,
+      "message": "Done. (removed the circular dep)",
+      "parentUuid": "a3ed1509_df05c7f9",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 5
+      },
+      "revId": "2bc3353ba6f46d5996368f571b31cbfe1af80091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a3ed1509_ffe76b24",
         "filename": "android/android-emu/android/skin/qt/gl-widget.cpp",
         "patchSetId": 8
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "a3ed1509_8a17ffbf",
+        "filename": "android/android-emu/android/skin/qt/gl-widget.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-17T17:58:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a3ed1509_ffe76b24",
+      "range": {
+        "startLine": 21,
+        "startChar": 37,
+        "endLine": 21,
+        "endChar": 43
+      },
+      "revId": "2bc3353ba6f46d5996368f571b31cbfe1af80091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a3ed1509_1fd34f43",
         "filename": "android/android-emugl/host/libs/libOpenglRender/OpenGLTestUtils.cpp",
         "patchSetId": 8
@@ -59,6 +107,30 @@
       "writtenOn": "2017-01-17T17:08:56Z",
       "side": 1,
       "message": ";)",
+      "range": {
+        "startLine": 17,
+        "startChar": 20,
+        "endLine": 17,
+        "endChar": 25
+      },
+      "revId": "2bc3353ba6f46d5996368f571b31cbfe1af80091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a3ed1509_4af8f752",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/OpenGLTestUtils.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-17T17:58:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a3ed1509_1fd34f43",
       "range": {
         "startLine": 17,
         "startChar": 20,
@@ -117,6 +189,30 @@
     },
     {
       "key": {
+        "uuid": "a3ed1509_6a95fbcd",
+        "filename": "android/android-emugl/shared/emugl/common/OpenGLDispatchHelper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-17T17:58:18Z",
+      "side": 1,
+      "message": "I think this is all right---this path was extensively tested in the gl widget, and if in unit test (which themselves are currently optional to avoid autorunning in weird envs), we want to crash early.",
+      "parentUuid": "a3ed1509_1f7a2f63",
+      "range": {
+        "startLine": 30,
+        "startChar": 15,
+        "endLine": 30,
+        "endChar": 22
+      },
+      "revId": "2bc3353ba6f46d5996368f571b31cbfe1af80091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a3ed1509_5f70b782",
         "filename": "android/android-emugl/shared/emugl/common/OpenGLDispatchHelper.h",
         "patchSetId": 8
@@ -128,6 +224,30 @@
       "writtenOn": "2017-01-17T17:08:56Z",
       "side": 1,
       "message": "MyXXX name was OK for an internal class, but I don\u0027t think it\u0027s a good public name. What about \"LazyLoadedGLESv2Dispatch\"?",
+      "range": {
+        "startLine": 24,
+        "startChar": 7,
+        "endLine": 24,
+        "endChar": 23
+      },
+      "revId": "2bc3353ba6f46d5996368f571b31cbfe1af80091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a3ed1509_aabd2377",
+        "filename": "android/android-emugl/shared/emugl/common/OpenGLDispatchHelper.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-17T17:58:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a3ed1509_5f70b782",
       "range": {
         "startLine": 24,
         "startChar": 7,
