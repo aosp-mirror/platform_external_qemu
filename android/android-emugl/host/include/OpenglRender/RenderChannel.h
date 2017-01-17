@@ -15,11 +15,14 @@
 
 #include "android/base/containers/SmallVector.h"
 #include "android/base/EnumFlags.h"
+#include "android/base/files/Stream.h"
 
 #include <functional>
 #include <memory>
 
 namespace emugl {
+
+class RenderThread;
 
 // Turn the RenderChannel::State enum into flags.
 using namespace ::android::base::EnumFlags;
@@ -91,6 +94,8 @@ public:
     // Get the current state flags.
     virtual State state() const = 0;
 
+    virtual void setRenderThread(RenderThread* renderThread) = 0;
+
     // Try to writes the data in |buffer| into the channel. On success,
     // return IoResult::Ok and moves |buffer|. On failure, return
     // IoResult::TryAgain if the channel was full, or IoResult::Error
@@ -107,6 +112,11 @@ public:
     // Once a channel is stopped, it cannot be re-started.
     virtual void stop() = 0;
 
+    // Callback function when snapshotting the virtual machine.
+    virtual void onSave(android::base::Stream* stream) = 0;
+
+    // Callback function when restoring a snapshot
+    virtual bool onLoad(android::base::Stream* stream) = 0;
 protected:
     ~RenderChannel() = default;
 };

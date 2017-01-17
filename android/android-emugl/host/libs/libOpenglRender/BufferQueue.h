@@ -15,6 +15,8 @@
 
 #include "OpenglRender/RenderChannel.h"
 #include "android/base/Compiler.h"
+#include "android/base/files/Stream.h"
+#include "android/base/files/StreamSerializing.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/synchronization/MessageChannel.h"
 
@@ -87,7 +89,7 @@ public:
     // move |buffer| into the queue and return IoResult::Ok. On failure,
     // return IoResult::Error meaning the queue was closed.
     IoResult pushLocked(Buffer&& buffer) {
-        while (mCount == mCapacity) {
+        while (mCount == mCapacity && !mNeedSnapshot) {
             if (mClosed) {
                 return IoResult::Error;
             }
@@ -102,7 +104,7 @@ public:
     // empty but not close.
     IoResult tryPopLocked(Buffer* buffer) {
         if (mCount == 0) {
-            return mClosed ? IoResult::Error : IoResult::TryAgain;
+            return mClosed || mNeedSnapshot ? IoResult::Error : IoResult::TryAgain;
         }
         *buffer = std::move(mBuffers[mPos]);
         size_t pos = mPos + 1;
@@ -120,7 +122,7 @@ public:
     // move item into |*buffer| and return IoResult::Ok. On failure,
     // return IoResult::Error to indicate the queue was closed.
     IoResult popLocked(Buffer* buffer) {
-        while (mCount == 0) {
+        while (mCount == 0 && !mNeedSnapshot) {
             if (mClosed) {
                 // Closed queue is empty.
                 return IoResult::Error;
@@ -146,6 +148,55 @@ public:
         }
     }
 
+    // Save to a snapshot file
+    void onSaveLocked(android::base::Stream* stream) {
+        stream->putBe32(mClosed);
+        if (!mClosed) {
+            stream->putBe32(mCapacity);
+            stream->putBe32(mPos);
+            stream->putBe32(mCount);
+            for (int i = 0; i < mCount; i++) {
+                android::base::onSaveBuffer(stream, mBuffers[i]);
+            }
+        }
+        mNeedSnapshot = false;
+    }
+
+    bool onLoadLocked(android::base::Stream* stream) {
+        mClosed = stream->getBe32();
+        if (!mClosed) {
+            int newCapacity = stream->getBe32();
+            mPos = stream->getBe32();
+            mCount = stream->getBe32();
+            if (mCapacity != newCapacity) {
+                mCapacity = newCapacity;
+                mBuffers.reset(new Buffer[mCapacity]);
+            }
+            for (int i=0; i<mCount; i++) {
+                if (!android::base::onLoadBuffer(stream, mBuffers[i])) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    // Boardcast signals to unblock waiters for snapshot
+    void preSaveLocked() {
+        mNeedSnapshot = true;
+        if (!mClosed) {
+            if (mCount == mCapacity) {
+                printf("push_signal\n");
+                mCanPush.broadcast();
+                printf("push_signal done\n");
+            }
+            if (mCount == 0) {
+                printf("pop_signal\n");
+                mCanPop.broadcast();
+                printf("pop_signal done\n");
+            }
+        }
+    }
 private:
     size_t mCapacity = 0;
     size_t mPos = 0;
@@ -156,6 +207,7 @@ private:
     Lock& mLock;
     ConditionVariable mCanPush;
     ConditionVariable mCanPop;
+    bool mNeedSnapshot = false;
 
     // This will force the same for SyncBufferQueue and RenderChannelImpl
     DISALLOW_COPY_ASSIGN_AND_MOVE(BufferQueue);

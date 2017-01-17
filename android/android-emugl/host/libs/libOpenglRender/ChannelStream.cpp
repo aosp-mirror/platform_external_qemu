@@ -22,6 +22,10 @@
 #include <assert.h>
 #include <memory.h>
 
+#include <execinfo.h>
+#include <stdio.h>
+
+
 namespace emugl {
 
 using IoResult = RenderChannel::IoResult;
