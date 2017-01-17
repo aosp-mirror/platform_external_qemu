@@ -15,6 +15,8 @@
 
 #include "OpenglRender/RenderChannel.h"
 #include "android/base/Compiler.h"
+#include "android/base/files/Stream.h"
+#include "android/base/files/StreamSerializing.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/synchronization/MessageChannel.h"
 
@@ -146,6 +148,37 @@ public:
         }
     }
 
+    // Save to a snapshot file
+    void onSaveLocked(android::base::Stream* stream) {
+        stream->putBe32(mClosed);
+        if (!mClosed) {
+            stream->putBe32(mCapacity);
+            stream->putBe32(mPos);
+            stream->putBe32(mCount);
+            for (int i = 0; i < mCount; i++) {
+                android::base::onSaveBuffer(stream, mBuffers[i]);
+            }
+        }
+    }
+
+    bool onLoadLocked(android::base::Stream* stream) {
+        mClosed = stream->getBe32();
+        if (!mClosed) {
+            int newCapacity = stream->getBe32();
+            mPos = stream->getBe32();
+            mCount = stream->getBe32();
+            if (mCapacity != newCapacity) {
+                mCapacity = newCapacity;
+                mBuffers.reset(new Buffer[mCapacity]);
+            }
+            for (int i=0; i<mCount; i++) {
+                if (!android::base::onLoadBuffer(stream, mBuffers[i])) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 private:
     size_t mCapacity = 0;
     size_t mPos = 0;

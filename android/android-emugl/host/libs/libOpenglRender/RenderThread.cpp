@@ -79,6 +79,7 @@ intptr_t RenderThread::main() {
     tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, NULL);
     initRenderControlContext(&tInfo.m_rcDec);
 
+    // TODO: snapshot readBuf
     ReadBuffer readBuf(kStreamBufferSize);
 
     int stats_totalBytes = 0;

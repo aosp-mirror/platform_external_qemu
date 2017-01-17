@@ -149,4 +149,27 @@ void RenderChannelImpl::notifyStateChangeLocked() {
     }
 }
 
+void RenderChannelImpl::onSave(android::base::Stream* stream) {
+    // TODO: handle the situation when it is writing to the guest and
+    // get blocked
+    D("enter");
+    AutoLock lock(mLock);
+    stream->putBe32(static_cast<uint32_t>(mState));
+    stream->putBe32(static_cast<uint32_t>(mWantedEvents));
+    mFromGuest.onSaveLocked(stream);
+    mToGuest.onSaveLocked(stream);
+}
+
+bool RenderChannelImpl::onLoad(android::base::Stream* stream) {
+    D("enter");
+    AutoLock lock(mLock);
+    mState = static_cast<State>(stream->getBe32());
+    mWantedEvents = static_cast<State>(stream->getBe32());
+    if (!mFromGuest.onLoadLocked(stream)) return false;
+    if (!mToGuest.onLoadLocked(stream)) return false;
+    updateStateLocked();
+    notifyStateChangeLocked();
+    return true;
+}
+
 }  // namespace emugl
