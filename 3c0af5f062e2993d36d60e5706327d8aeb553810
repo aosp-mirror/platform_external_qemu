@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e3846d26_4dd62dd8",
+        "filename": "android/scripts/utils/package_builder.shi",
+        "patchSetId": 1
+      },
+      "lineNbr": 607,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-01-17T03:05:08Z",
+      "side": 1,
+      "message": "I am not sure but the naming of the folder looks inconsistent. In x86 it is called lib32, and in x64 it is called bin. Also, I cannot find this folder (prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8/lib32) in my computer",
+      "range": {
+        "startLine": 607,
+        "startChar": 104,
+        "endLine": 607,
+        "endChar": 109
+      },
+      "revId": "3c0af5f062e2993d36d60e5706327d8aeb553810",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
