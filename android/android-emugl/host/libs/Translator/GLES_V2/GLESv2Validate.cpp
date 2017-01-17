@@ -687,6 +687,7 @@ bool GLESv2Validate::attribIndex(int index, int max){
 
 bool GLESv2Validate::programParam(GLEScontext* ctx, GLenum pname){
     int glesMajorVersion = ctx->getMajorVersion();
+    int glesMinorVersion = ctx->getMinorVersion();
     switch(pname){
         case GL_DELETE_STATUS:
         case GL_LINK_STATUS:
@@ -705,7 +706,11 @@ bool GLESv2Validate::programParam(GLEScontext* ctx, GLenum pname){
         case GL_TRANSFORM_FEEDBACK_BUFFER_MODE:
         case GL_TRANSFORM_FEEDBACK_VARYINGS:
         case GL_TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH:
+        case GL_PROGRAM_SEPARABLE:
             return glesMajorVersion >= 3;
+        case GL_ACTIVE_ATOMIC_COUNTER_BUFFERS:
+        case GL_COMPUTE_WORK_GROUP_SIZE:
+            return glesMajorVersion >= 3 && glesMinorVersion >= 1;
     }
     return false;
 }
@@ -721,6 +726,17 @@ bool GLESv2Validate::textureIsCubeMap(GLenum target){
             return true;
     }
     return false;
+}
+
+bool GLESv2Validate::textureTargetEx(GLEScontext* ctx, GLenum textarget) {
+    int glesMajorVersion = ctx->getMajorVersion();
+    int glesMinorVersion = ctx->getMinorVersion();
+    switch (textarget) {
+    case GL_TEXTURE_2D_MULTISAMPLE:
+        return glesMajorVersion >= 3 && glesMinorVersion >= 1;
+    default:
+        return GLESvalidate::textureTargetEx(textarget);
+    }
 }
 
 int GLESv2Validate::sizeOfType(GLenum type) {

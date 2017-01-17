@@ -289,6 +289,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
         // GLESv2 extensions as well.
         if (maxVersion > GLES_DISPATCH_MAX_VERSION_2) {
             glStr += "GL_OES_vertex_array_object ";
+            glStr += "GL_OES_standard_derivatives ";
         }
     }
 

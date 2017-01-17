@@ -69,7 +69,7 @@ public:
     //           overload for generating non-shader object
     ObjectLocalName genName(NamedObjectType namedObjectType, ObjectLocalName p_localName = 0, bool genLocal= false);
     //           overload for generating shader / program object
-    ObjectLocalName genName(ShaderProgramType shaderProgramType, ObjectLocalName p_localName = 0, bool genLocal= false);
+    ObjectLocalName genName(ShaderProgramType shaderProgramType, ObjectLocalName p_localName = 0, bool genLocal= false, GLuint existingGlobal = 0);
 
     //
     // getGlobalName - retrieves the "global" name of an object or 0 if the

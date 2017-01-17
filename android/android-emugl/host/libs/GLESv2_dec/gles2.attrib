@@ -151,9 +151,7 @@ glGetIntegerv
 #void glGetProgramiv(GLuint program, GLenum pname, GLint *params)
 glGetProgramiv
     dir params out
-    len params sizeof(GLint)
-#XXX - might change if extension constants that return more then one value
-
+    len params (glUtilsParamSize(pname) * sizeof(GLint))
 
 #void glGetProgramInfoLog(GLuint program, GLsizei bufsize, GLsizei *length, GLchar *infolog)
 glGetProgramInfoLog
@@ -844,11 +842,12 @@ glIsSyncAEMU
 glGetSyncivAEMU
     flag custom_decoder
     flag not_api
+    param_check bufSize if(bufSize<0){ ctx->setError(GL_INVALID_VALUE); return; }
     dir length out
     len length (sizeof(GLsizei))
+    var_flag length nullAllowed
     dir values out
-    len values bufSize
-    param_check bufSize if(bufSize<0){ ctx->setError(GL_INVALID_VALUE); return; }
+    len values (bufSize * sizeof(GLint))
 
 glGetInternalformativ
     dir params out
@@ -945,6 +944,7 @@ glGetProgramBinary
     len binary bufSize
     dir binaryFormat out
     len binaryFormat (sizeof(GLenum))
+    var_flag length nullAllowed
     dir length out
     len length (sizeof(GLsizei))
 
@@ -1042,37 +1042,37 @@ glProgramUniform1fv
     len value (count * sizeof(GLfloat))
 
 glProgramUniform2fv
-    len value (count * sizeof(GLfloat))
+    len value (count * 2 * sizeof(GLfloat))
 
 glProgramUniform3fv
-    len value (count * sizeof(GLfloat))
+    len value (count * 3 * sizeof(GLfloat))
 
 glProgramUniform4fv
-    len value (count * sizeof(GLfloat))
+    len value (count * 4 * sizeof(GLfloat))
 
 glProgramUniform1iv
     len value (count * sizeof(GLint))
 
 glProgramUniform2iv
-    len value (count * sizeof(GLint))
+    len value (count * 2 * sizeof(GLint))
 
 glProgramUniform3iv
-    len value (count * sizeof(GLint))
+    len value (count * 3 * sizeof(GLint))
 
 glProgramUniform4iv
-    len value (count * sizeof(GLint))
+    len value (count * 4 * sizeof(GLint))
 
 glProgramUniform1uiv
     len value (count * sizeof(GLuint))
 
 glProgramUniform2uiv
-    len value (count * sizeof(GLuint))
+    len value (count * 2 * sizeof(GLuint))
 
 glProgramUniform3uiv
-    len value (count * sizeof(GLuint))
+    len value (count * 3 * sizeof(GLuint))
 
 glProgramUniform4uiv
-    len value (count * sizeof(GLuint))
+    len value (count * 4 * sizeof(GLuint))
 
 glProgramUniformMatrix2fv
     len value (count * 4 * sizeof(GLfloat))
