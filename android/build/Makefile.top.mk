@@ -129,6 +129,8 @@ ifeq ($(BUILD_TARGET_OS),darwin)
     BUILD_TARGET_CFLAGS += -D_DARWIN_C_SOURCE=1
     # Clang complains about this flag being not useful anymore.
     BUILD_TARGET_CFLAGS := $(filter-out -falign-functions,$(BUILD_TARGET_CFLAGS))
+    BUILD_TARGET_LDFLAGS32 += -w
+    BUILD_TARGET_LDFLAGS64 += -w
 endif
 
 # NOTE: The following definitions are only used by the standalone build.
