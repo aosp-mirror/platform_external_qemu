@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a3ed1509_e4e6c2f8",
+        "filename": "android/android-emu/android/skin/qt/sources.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-17T14:35:51Z",
+      "side": 1,
+      "message": "I\u0027d like some help on this---unless I do this repetition here, I get link errors on Linux saying that either OpenGLDispatchHelper is missing s_egl (and other OpenGLESDispatch symbols), or that OpenGLESDispatch is missing emugl_common symbols. :(",
+      "range": {
+        "startLine": 33,
+        "startChar": 0,
+        "endLine": 36,
+        "endChar": 21
+      },
+      "revId": "85f67ee6c2af41f11b60a4dc8ef4befa9ad4b644",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
