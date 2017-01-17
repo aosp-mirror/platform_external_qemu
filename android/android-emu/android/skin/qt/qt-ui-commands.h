@@ -18,6 +18,7 @@ enum class QtUICommand {
     SHOW_PANE_CELLULAR,
     SHOW_PANE_BATTERY,
     SHOW_PANE_PHONE,
+    SHOW_PANE_MICROPHONE,
     SHOW_PANE_VIRTSENSORS,
     SHOW_PANE_DPAD,
     SHOW_PANE_FINGER,
@@ -50,6 +51,7 @@ static const std::pair<QString, QtUICommand> NameToQtUICmd[] = {
         NAME_TO_CMD(SHOW_PANE_CELLULAR),
         NAME_TO_CMD(SHOW_PANE_BATTERY),
         NAME_TO_CMD(SHOW_PANE_PHONE),
+        NAME_TO_CMD(SHOW_PANE_MICROPHONE),
         NAME_TO_CMD(SHOW_PANE_VIRTSENSORS),
         NAME_TO_CMD(SHOW_PANE_DPAD),
         NAME_TO_CMD(SHOW_PANE_FINGER),
@@ -73,7 +75,7 @@ static const std::pair<QString, QtUICommand> NameToQtUICmd[] = {
         NAME_TO_CMD(HOME),
         NAME_TO_CMD(BACK),
         NAME_TO_CMD(OVERVIEW),
-        NAME_TO_CMD(TOGGLE_TRACKBALL),};
+};
 #undef NAME_TO_CMD
 
 #define CMD_TO_DESC(x, y) {QtUICommand::x, qApp->translate("QtUICommand", y)}
@@ -82,6 +84,7 @@ static const std::pair<QtUICommand, QString> QtUICmdToDesc[] = {
         CMD_TO_DESC(SHOW_PANE_CELLULAR, "Cellular"),
         CMD_TO_DESC(SHOW_PANE_BATTERY, "Battery"),
         CMD_TO_DESC(SHOW_PANE_PHONE, "Phone"),
+        CMD_TO_DESC(SHOW_PANE_MICROPHONE, "Microphone"),
         CMD_TO_DESC(SHOW_PANE_VIRTSENSORS, "Virtual sensors"),
         CMD_TO_DESC(SHOW_PANE_DPAD, "D-Pad"),
         CMD_TO_DESC(SHOW_PANE_FINGER, "Fingerprint"),
@@ -106,8 +109,7 @@ static const std::pair<QtUICommand, QString> QtUICmdToDesc[] = {
         CMD_TO_DESC(VOLUME_DOWN, "Volume down"), CMD_TO_DESC(POWER, "Power"),
         CMD_TO_DESC(HOME, "Home"), CMD_TO_DESC(BACK, "Back"),
         CMD_TO_DESC(MENU, "Menu"), CMD_TO_DESC(OVERVIEW, "Overview"),
-        CMD_TO_DESC(TOGGLE_TRACKBALL, "Toggle trackball mode (if AVD is configured for it)"),
-                    CMD_TO_DESC(TOGGLE_TRACKBALL, "Toggle Trackball"),};
+};
 #undef CMD_TO_DESC
 
 bool parseQtUICommand(const QString& string, QtUICommand* command);
