@@ -118,7 +118,7 @@ void initializeResources(
 
     kResources.MaxDualSourceDrawBuffers = maxDualSourceDrawBuffers;
 
-    kResources.OES_standard_derivatives = 0;
+    kResources.OES_standard_derivatives = 1;
     kResources.OES_EGL_image_external = 0;
     kResources.EXT_gpu_shader5 = 1;
 }

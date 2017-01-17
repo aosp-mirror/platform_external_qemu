@@ -330,6 +330,7 @@ void GLESv2Decoder::s_glReadPixelsOffsetAEMU(void* self, GLint x, GLint y, GLsiz
 
 GLuint GLESv2Decoder::s_glCreateShaderProgramvAEMU(void* self, GLenum type, GLsizei count, const char* packedStrings, GLuint packedLen) {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    fprintf(stderr, "%s: call underlying\n", __FUNCTION__);
     return ctx->glCreateShaderProgramv(type, 1, &packedStrings);
 }
 

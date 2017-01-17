@@ -472,6 +472,7 @@ GL_ENTRY(GLboolean, glIsProgramPipeline, GLuint pipeline);
 GL_ENTRY(void, glUseProgramStages, GLuint pipeline, GLbitfield stages, GLuint program)
 
 # Separable shader programs - may need to change how program objects are represented and shared!
+GL_ENTRY(void, glActiveShaderProgram, GLuint pipeline, GLuint program);
 GL_ENTRY(GLuint, glCreateShaderProgramv, GLenum type, GLsizei count, const char ** strings)
 GL_ENTRY(GLuint, glCreateShaderProgramvAEMU, GLenum type, GLsizei count, const char *packedStrings, GLuint packedLen)
 # Uniforms should work easily if any program object representation problems are solved.

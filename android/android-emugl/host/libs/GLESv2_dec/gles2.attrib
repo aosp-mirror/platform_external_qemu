@@ -945,6 +945,7 @@ glGetProgramBinary
     len binary bufSize
     dir binaryFormat out
     len binaryFormat (sizeof(GLenum))
+    var_flag length nullAllowed
     dir length out
     len length (sizeof(GLsizei))
 
@@ -1042,37 +1043,37 @@ glProgramUniform1fv
     len value (count * sizeof(GLfloat))
 
 glProgramUniform2fv
-    len value (count * sizeof(GLfloat))
+    len value (count * 2 * sizeof(GLfloat))
 
 glProgramUniform3fv
-    len value (count * sizeof(GLfloat))
+    len value (count * 3 * sizeof(GLfloat))
 
 glProgramUniform4fv
-    len value (count * sizeof(GLfloat))
+    len value (count * 4 * sizeof(GLfloat))
 
 glProgramUniform1iv
     len value (count * sizeof(GLint))
 
 glProgramUniform2iv
-    len value (count * sizeof(GLint))
+    len value (count * 2 * sizeof(GLint))
 
 glProgramUniform3iv
-    len value (count * sizeof(GLint))
+    len value (count * 3 * sizeof(GLint))
 
 glProgramUniform4iv
-    len value (count * sizeof(GLint))
+    len value (count * 4 * sizeof(GLint))
 
 glProgramUniform1uiv
     len value (count * sizeof(GLuint))
 
 glProgramUniform2uiv
-    len value (count * sizeof(GLuint))
+    len value (count * 2 * sizeof(GLuint))
 
 glProgramUniform3uiv
-    len value (count * sizeof(GLuint))
+    len value (count * 3 * sizeof(GLuint))
 
 glProgramUniform4uiv
-    len value (count * sizeof(GLuint))
+    len value (count * 4 * sizeof(GLuint))
 
 glProgramUniformMatrix2fv
     len value (count * 4 * sizeof(GLfloat))
