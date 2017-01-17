@@ -3098,6 +3098,21 @@ static bool set_memory_options(uint64_t *ram_slots, ram_addr_t *maxram_size,
         return false;
     }
 #ifdef CONFIG_HAX
+    uint64_t hax_max_ram = 0;
+    if (hax_get_max_ram(&hax_max_ram) == 0 && hax_max_ram > 0) {
+        /* make sure we preserve the alignment if we need to adjust it */
+        hax_max_ram = QEMU_ALIGN_DOWN(hax_max_ram, 8192);
+        if (ram_size > hax_max_ram) {
+            const int requested_meg = ram_size / (1024 * 1024);
+            const int actual_meg = hax_max_ram / (1024 * 1024);
+            fprintf(stderr,
+                    "Warning: requested RAM size %dM is too big, "
+                    "reducing to maximum supported size %dM\n",
+                    requested_meg, actual_meg);
+            ram_size = hax_max_ram;
+        }
+    }
+
     hax_pre_init(ram_size);
 #endif
     /* store value for the future use */
@@ -4786,18 +4801,6 @@ int main(int argc, char** argv, char** envp)
         error_report("could not acquire pid file: %s", strerror(errno));
         return 1;
     }
-#ifdef CONFIG_HAX
-    uint64_t hax_max_ram = 0;
-    if (hax_get_max_ram(&hax_max_ram) == 0 && hax_max_ram > 0) {
-        if (ram_size > hax_max_ram) {
-            const int requested_meg = ram_size / (1024 * 1024);
-            const int actual_meg = hax_max_ram / (1024 * 1024);
-            fprintf(stderr, "Warning: requested ram_size %dM too big, reduced to %dM\n",
-                    requested_meg, actual_meg);
-            ram_size = hax_max_ram;
-        }
-    }
-#endif /* CONFIG_HAX */
 
     if (qemu_opts_foreach(qemu_find_opts("device"),
                           device_help_func, NULL, NULL)) {
