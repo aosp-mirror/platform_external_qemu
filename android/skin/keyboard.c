@@ -89,23 +89,23 @@ skin_keyboard_key_to_code(SkinKeyboard*  keyboard,
     /* special case for keypad keys, ignore them here if numlock is on */
     if ((mod & kKeyModNumLock) != 0) {
         switch ((int)code) {
-            case KEY_KP0:
-            case KEY_KP1:
-            case KEY_KP2:
-            case KEY_KP3:
-            case KEY_KP4:
-            case KEY_KP5:
-            case KEY_KP6:
-            case KEY_KP7:
-            case KEY_KP8:
-            case KEY_KP9:
-            case KEY_KPPLUS:
-            case KEY_KPMINUS:
-            case KEY_KPASTERISK:
-            case KEY_KPSLASH:
-            case KEY_KPEQUAL:
-            case KEY_KPDOT:
-            case KEY_KPENTER:
+            case LINUX_KEY_KP0:
+            case LINUX_KEY_KP1:
+            case LINUX_KEY_KP2:
+            case LINUX_KEY_KP3:
+            case LINUX_KEY_KP4:
+            case LINUX_KEY_KP5:
+            case LINUX_KEY_KP6:
+            case LINUX_KEY_KP7:
+            case LINUX_KEY_KP8:
+            case LINUX_KEY_KP9:
+            case LINUX_KEY_KPPLUS:
+            case LINUX_KEY_KPMINUS:
+            case LINUX_KEY_KPASTERISK:
+            case LINUX_KEY_KPSLASH:
+            case LINUX_KEY_KPEQUAL:
+            case LINUX_KEY_KPDOT:
+            case LINUX_KEY_KPENTER:
                 return 0;
             default:
                 ;
@@ -158,14 +158,13 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             return;
         }
 
-        if (code == KEY_APPSWITCH   || code == KEY_PLAYPAUSE  ||
-            code == KEY_BACK        || code == KEY_POWER      ||
-            code == KEY_BACKSPACE   || code == KEY_SOFT1      ||
-            code == KEY_CENTER      || code == KEY_REWIND     ||
-            code == KEY_ENTER       || code == KEY_VOLUMEDOWN ||
-            code == KEY_FASTFORWARD || code == KEY_VOLUMEUP   ||
-            code == KEY_HOME                                     )
-        {
+        if (code == KEY_APPSWITCH || code == LINUX_KEY_PLAYPAUSE ||
+            code == LINUX_KEY_BACK || code == LINUX_KEY_POWER ||
+            code == LINUX_KEY_BACKSPACE || code == LINUX_KEY_SOFT1 ||
+            code == LINUX_KEY_CENTER || code == LINUX_KEY_REWIND ||
+            code == LINUX_KEY_ENTER || code == LINUX_KEY_VOLUMEDOWN ||
+            code == LINUX_KEY_FASTFORWARD || code == LINUX_KEY_VOLUMEUP ||
+            code == LINUX_KEY_HOME) {
             skin_keyboard_add_key_event(kb, code, down);
             skin_keyboard_flush(kb);
             return;

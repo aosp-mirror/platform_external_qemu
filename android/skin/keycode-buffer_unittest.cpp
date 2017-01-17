@@ -45,10 +45,10 @@ TEST(keycode_buffer,skin_keycode_buffer_flush) {
         unsigned code;
         bool down;
     } kData[] = {
-        { KEY_F1|0x400, KEY_F1, true },
-        { KEY_F1, KEY_F1, false },
-        { KEY_COMPOSE, KEY_COMPOSE, false },
-        { KEY_COMPOSE|0x400, KEY_COMPOSE, true },
+            {LINUX_KEY_F1 | 0x400, LINUX_KEY_F1, true},
+            {LINUX_KEY_F1, LINUX_KEY_F1, false},
+            {LINUX_KEY_COMPOSE, LINUX_KEY_COMPOSE, false},
+            {LINUX_KEY_COMPOSE | 0x400, LINUX_KEY_COMPOSE, true},
     };
     const size_t kDataLen = ARRAYLEN(kData);
 
