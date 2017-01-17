@@ -69,7 +69,8 @@ bool ApkInstaller::parseOutputForFailure(std::ifstream& stream,
 
     string line;
     while (getline(stream, line)) {
-        if (!line.compare(0, 7, "Failure")) {
+        if (!line.compare(0, 7, "Failure") ||
+            !line.compare(0, 6, "Failed")) {
             auto openBrace = line.find("[");
             auto closeBrace = line.find("]", openBrace + 1);
             if (openBrace != string::npos && closeBrace != string::npos) {
@@ -99,7 +100,7 @@ AdbCommandPtr ApkInstaller::install(
     mInstallCommand = mAdb->runAdbCommand(
             installCommand,
             [resultCallback, this](const OptionalAdbCommandResult& result) {
-                if (!result || result->exit_code) {
+                if (!result) {
                     resultCallback(Result::kAdbConnectionFailed, "");
                 } else {
                     std::string errorString;
