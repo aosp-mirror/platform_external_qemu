@@ -19,6 +19,7 @@
   X(void, glValidateProgramPipeline, (GLuint pipeline), (pipeline)) \
   X(GLboolean, glIsProgramPipeline, (GLuint pipeline), (pipeline)) \
   X(void, glUseProgramStages, (GLuint pipeline, GLbitfield stages, GLuint program), (pipeline, stages, program)) \
+  X(void, glActiveShaderProgram, (GLuint pipeline, GLuint program), (pipeline, program)) \
   X(GLuint, glCreateShaderProgramv, (GLenum type, GLsizei count, const char ** strings), (type, count, strings)) \
   X(void, glProgramUniform1f, (GLuint program, GLint location, GLfloat v0), (program, location, v0)) \
   X(void, glProgramUniform2f, (GLuint program, GLint location, GLfloat v0, GLfloat v1), (program, location, v0, v1)) \

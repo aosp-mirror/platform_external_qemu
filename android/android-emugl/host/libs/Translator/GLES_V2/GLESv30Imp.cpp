@@ -688,6 +688,7 @@ GL_APICALL void GL_APIENTRY glProgramParameteri(GLuint program, GLenum pname, GL
     GET_CTX_V2();
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
+        fprintf(stderr, "%s: %u %u %u\n", __func__, program, pname, value);
         ctx->dispatcher().glProgramParameteri(globalProgramName, pname, value);
     }
 }
@@ -766,6 +767,15 @@ GL_APICALL void GL_APIENTRY glTexSubImage3D(GLenum target, GLint level, GLint xo
 GL_APICALL void GL_APIENTRY glCompressedTexImage3D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid * data) {
     GET_CTX_V2();
     ctx->dispatcher().glCompressedTexImage3D(target, level, internalformat, width, height, depth, border, imageSize, data);
+    if (ctx->shareGroup().get()) {
+        TextureData *texData = getTextureTargetData(target);
+
+        if (texData) {
+            texData->hasStorage = true;
+            texData->compressed = true;
+            texData->compressedFormat = internalformat;
+        }
+    }
 }
 
 GL_APICALL void GL_APIENTRY glCompressedTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const GLvoid * data) {

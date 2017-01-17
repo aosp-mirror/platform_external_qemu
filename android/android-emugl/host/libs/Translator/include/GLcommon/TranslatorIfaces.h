@@ -47,8 +47,11 @@ public:
                     border(0),
                     internalFormat(GL_RGBA),
                     sourceEGLImage(0),
+                    hasStorage(false),
                     wasBound(false),
                     requiresAutoMipmap(false),
+                    compressed(false),
+                    compressedFormat(0),
                     target(0) {
         memset(crop_rect,0,4*sizeof(int));
     };
@@ -59,8 +62,11 @@ public:
     unsigned int border;
     unsigned int internalFormat;
     unsigned int sourceEGLImage;
+    bool hasStorage;
     bool wasBound;
     bool requiresAutoMipmap;
+    bool compressed;
+    unsigned int compressedFormat;
     int          crop_rect[4];
     GLenum target;
 };

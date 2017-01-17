@@ -104,6 +104,7 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     glWaitSyncAEMU = s_glWaitSyncAEMU;
     glIsSyncAEMU = s_glIsSyncAEMU;
     glGetSyncivAEMU = s_glGetSyncivAEMU;
+    glDeleteSyncAEMU = s_glDeleteSyncAEMU;
 
     return 0;
 
@@ -187,12 +188,14 @@ void GLESv2Decoder::s_glMapBufferRangeAEMU(void* self, GLenum target, GLintptr o
 void GLESv2Decoder::s_glUnmapBufferAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer, GLboolean* out_res)
 {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    *out_res = GL_TRUE;
+
     if (access & GL_MAP_WRITE_BIT) {
         if (!guest_buffer) fprintf(stderr, "%s: error: wanted to write to a mapped buffer with NULL!\n", __FUNCTION__);
         void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
         if (!gpu_ptr) fprintf(stderr, "%s: could not get host gpu pointer!\n", __FUNCTION__);
         memcpy(gpu_ptr, guest_buffer, length);
-        ctx->glUnmapBuffer(target);
+        *out_res = ctx->glUnmapBuffer(target);
     }
 }
 
@@ -330,6 +333,7 @@ void GLESv2Decoder::s_glReadPixelsOffsetAEMU(void* self, GLint x, GLint y, GLsiz
 
 GLuint GLESv2Decoder::s_glCreateShaderProgramvAEMU(void* self, GLenum type, GLsizei count, const char* packedStrings, GLuint packedLen) {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    fprintf(stderr, "%s: call underlying\n", __FUNCTION__);
     return ctx->glCreateShaderProgramv(type, 1, &packedStrings);
 }
 
@@ -379,6 +383,9 @@ GLboolean GLESv2Decoder::s_glIsSyncAEMU(void* self, uint64_t sync) {
 }
 
 void GLESv2Decoder::s_glGetSyncivAEMU(void* self, uint64_t sync, GLenum pname, GLsizei bufSize, GLsizei *length, GLint *values) {
+    fprintf(stderr, "%s: pname 0x%x bufsize %d len %p\n", __func__, pname, bufSize, length);
+    if (length) fprintf(stderr, "%s: len %d\n", __func__, *length);
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glGetSynciv((GLsync)(uintptr_t)sync, pname, bufSize, length, values);
+    fprintf(stderr, "%s: val %d\n", __func__, *values);
 }
