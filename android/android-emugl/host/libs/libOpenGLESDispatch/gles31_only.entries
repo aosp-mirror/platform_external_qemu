@@ -26,6 +26,8 @@ GLboolean glIsProgramPipeline(GLuint pipeline);
 void glUseProgramStages(GLuint pipeline, GLbitfield stages, GLuint program);
 
 ## Separable shader programs
+void glActiveShaderProgram(GLuint pipeline, GLuint program);
+
 GLuint glCreateShaderProgramv(GLenum type, GLsizei count, const char **strings);
 
 void glProgramUniform1f(GLuint program, GLint location, GLfloat v0);

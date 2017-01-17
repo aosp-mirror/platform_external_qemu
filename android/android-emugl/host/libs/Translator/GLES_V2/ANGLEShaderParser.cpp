@@ -118,7 +118,7 @@ void initializeResources(
 
     kResources.MaxDualSourceDrawBuffers = maxDualSourceDrawBuffers;
 
-    kResources.OES_standard_derivatives = 0;
+    kResources.OES_standard_derivatives = 1;
     kResources.OES_EGL_image_external = 0;
     kResources.EXT_gpu_shader5 = 1;
 }
@@ -173,8 +173,23 @@ bool translate(int esslVersion,
     // Leverage ARB_ES3_1_compatibility for ESSL 310 for now.
     // Use translator after rest of dEQP-GLES31.functional is in a better state.
     if (esslVersion == 310) {
-        *outObjCode = std::string(src);
-        return true;
+        if (shaderType != GL_COMPUTE_SHADER) {
+            *outObjCode = std::string(src);
+            return true;
+        } else {
+            // At least on NVIDIA Quadro K2200 Linux (361.xx),
+            // ARB_ES3_1_compatibility seems to assume incorrectly
+            // that atomic_uint must catch a precision qualifier in ESSL 310.
+            std::string origSrc(src);
+            size_t versionStart = origSrc.find("#version");
+            size_t versionEnd = origSrc.find("\n", versionStart);
+            std::string versionPart = origSrc.substr(versionStart, versionEnd - versionStart + 1);
+            std::string src2 =
+                versionPart + "precision highp atomic_uint;\n" +
+                origSrc.substr(versionEnd + 1, origSrc.size() - (versionEnd + 1));
+            *outObjCode = src2;
+            return true;
+        }
     }
 
     if (!kInitialized) {

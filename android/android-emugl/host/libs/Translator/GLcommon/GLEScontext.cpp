@@ -626,6 +626,18 @@ void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer) 
     bindIndexedBuffer(target, index, buffer, 0, sz);
 }
 
+static void sClearIndexedBufferBinding(GLuint id, std::vector<BufferBinding>& bindings) {
+    for (size_t i = 0; i < bindings.size(); i++) {
+        if (bindings[i].buffer == id) {
+            bindings[i].offset = 0;
+            bindings[i].size = 0;
+            bindings[i].stride = 0;
+            bindings[i].buffer = 0;
+            bindings[i].divisor = 0;
+        }
+    }
+}
+
 void GLEScontext::unbindBuffer(GLuint buffer) {
     if (m_arrayBuffer == buffer)
         m_arrayBuffer = 0;
@@ -651,6 +663,12 @@ void GLEScontext::unbindBuffer(GLuint buffer) {
         m_drawIndirectBuffer = 0;
     if (m_shaderStorageBuffer == buffer)
         m_shaderStorageBuffer = 0;
+
+    sClearIndexedBufferBinding(buffer, m_indexedTransformFeedbackBuffers);
+    sClearIndexedBufferBinding(buffer, m_indexedUniformBuffers);
+    sClearIndexedBufferBinding(buffer, m_indexedAtomicCounterBuffers);
+    sClearIndexedBufferBinding(buffer, m_indexedShaderStorageBuffers);
+    sClearIndexedBufferBinding(buffer, m_currVaoState.bufferBindings());
 }
 
 //checks if any buffer is binded to target
@@ -832,6 +850,7 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     s_glDispatch.glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, &s_glSupport.maxShaderStorageBufferBindings);
     s_glDispatch.glGetIntegerv(GL_MAX_DRAW_BUFFERS, &s_glSupport.maxDrawBuffers);
     s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_ATTRIB_BINDINGS, &s_glSupport.maxVertexAttribBindings);
+
     // Clear GL error in case these enums not supported.
     s_glDispatch.glGetError();
 
