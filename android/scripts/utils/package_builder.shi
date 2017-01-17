@@ -517,7 +517,7 @@ _shu_builder_prepare_for_host () {
             _SHU_BUILDER_GNU_CONFIG_HOST=
             ;;
         *)
-            panic "Host system '$CURRENT_HOST' is not supported by this script!"
+            panic "Host system '$_SHU_BUILDER_CURRENT_HOST' is not supported by this script!"
             ;;
     esac
 
@@ -570,7 +570,7 @@ _shu_builder_prepare_for_host () {
 
     cat > "$_SHU_BUILDER_ENV_SH" <<EOF
 # Auto-generated - DO NOT EDIT!
-# Source this shell script to prepare the build for $CURRENT_HOST systems.
+# Source this shell script to prepare the build for $_SHU_BUILDER_CURRENT_HOST systems.
 _SHU_BUILDER_CURRENT_HOST="$_SHU_BUILDER_CURRENT_HOST"
 _SHU_BUILDER_CURRENT_TEXT="$_SHU_BUILDER_CURRENT_TEXT"
 _SHU_BUILDER_GNU_CONFIG_HOST=$_SHU_BUILDER_GNU_CONFIG_HOST
@@ -593,6 +593,27 @@ export PATH \
     _SHU_BUILDER_PKG_CONFIG_PATH \
     _SHU_BUILDER_CONFIGURE_FLAGS
 EOF
+
+    # Some configure scripts try to run the generated app to detect compiler
+    # features. This means that for Windows cross-builds we need to make sure
+    # the generated binaries can run, using Wine of course.
+    # Mingw's thread support library needs to be added to Wine path to make this
+    # happen.
+    local EXTRA_WINEPATH=
+    if type "winepath" > /dev/null; then
+        case $_SHU_BUILDER_CURRENT_HOST in
+            windows-x86)
+                EXTRA_WINEPATH=`winepath -w \
+                    "$AOSP_DIR/$(aosp_prebuilt_toolchain_sysroot_subdir_for $_SHU_BUILDER_CURRENT_HOST)/lib32"`
+                ;;
+            windows-x86_64)
+                EXTRA_WINEPATH=`winepath -w \
+                    "$AOSP_DIR/$(aosp_prebuilt_toolchain_sysroot_subdir_for $_SHU_BUILDER_CURRENT_HOST)/bin"`
+                ;;
+        esac
+        log "$_SHU_BUILDER_CURRENT_TEXT EXTRA_WINEPATH=$EXTRA_WINEPATH"
+    fi
+
     TOOLCHAIN_WRAPPER_DIR=$_SHU_BUILDER_BUILD_DIR/toolchain-wrapper
     log "$_SHU_BUILDER_CURRENT_TEXT Generating $_SHU_BUILDER_GNU_CONFIG_HOST wrapper toolchain in $TOOLCHAIN_WRAPPER_DIR"
     local EXTRA_FLAGS
@@ -615,9 +636,11 @@ EOF
             $TOOLCHAIN_WRAPPER_DIR ||
             panic "Cannot generate toolchain wrapper!"
     cat >> "$_SHU_BUILDER_ENV_SH" <<EOF
+WINEPATH=$(printf '%q' "$EXTRA_WINEPATH")\;\$WINEPATH
 PATH=$TOOLCHAIN_WRAPPER_DIR:\$PATH
-export PATH
+export PATH WINEPATH
 EOF
+
     PATH=$TOOLCHAIN_WRAPPER_DIR:$PATH
     log "$_SHU_BUILDER_CURRENT_TEXT Path: $(echo \"$PATH\" | tr ' ' '\n')"
 
