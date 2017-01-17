@@ -1022,6 +1022,25 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         newCtx->setSurfaces(newReadSrfc,newDrawSrfc);
         g_eglInfo->getIface(newCtx->version())->initContext(newCtx->getGlesContext(),newCtx->getShareGroup());
 
+        if (newDrawPtr->type() == EglSurface::PBUFFER && newCtx->version()) {
+            EGLint width,height,eglTexFormat, glTexFormat;
+            EglPbufferSurface* tmpPbSurfacePtr =
+                static_cast<EglPbufferSurface*>(newDrawPtr);
+            tmpPbSurfacePtr->getAttrib(EGL_WIDTH, &width);
+            tmpPbSurfacePtr->getAttrib(EGL_HEIGHT, &height);
+            tmpPbSurfacePtr->getAttrib(EGL_TEXTURE_FORMAT, &eglTexFormat);
+            switch (eglTexFormat) {
+                case EGL_TEXTURE_RGB:
+                    glTexFormat = GL_RGB;
+                    break;
+                case EGL_TEXTURE_RGBA:
+                default:
+                    glTexFormat = GL_RGBA;
+                    break;
+            }
+            newCtx->getGlesContext()->initDefaultFBO(width,height,glTexFormat);
+        }
+
         // Initialize the GLES extension function table used in
         // eglGetProcAddress for the context's GLES version if not
         // yet initialized. We initialize it here to make sure we call the
