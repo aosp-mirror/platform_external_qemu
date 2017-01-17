@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "43aa999c_261efcda",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-17T22:02:41Z",
+      "side": 1,
+      "message": "just a regular BUILD_TARGET_LDFLAGS should work, this is how the final ldflags are calculated:\n\nLOCAL_LDFLAGS :\u003d \\\n    $(call local-build-var,LDFLAGS$(LOCAL_BITS)) \\\n    $(call local-build-var,LDFLAGS) \\\n    $(LOCAL_LDFLAGS)",
+      "range": {
+        "startLine": 132,
+        "startChar": 0,
+        "endLine": 133,
+        "endChar": 32
+      },
+      "revId": "6fa5e5f7074784f84e71671d78311b6f279cf78e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
