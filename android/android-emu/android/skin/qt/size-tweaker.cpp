@@ -19,11 +19,11 @@ SizeTweaker::SizeTweaker(QWidget* widget) :
         mCurrentScaleFactor(1.0, 1.0) {
 //We don't need size tweaking on OS X, but we need
 // it for Windows/Linux.
-#ifndef Q_OS_MAC
+//#ifndef Q_OS_MAC
     if (mSubject) {
         mSubject->installEventFilter(this);
     }
-#endif
+//#endif
 }
 
 bool SizeTweaker::eventFilter(QObject* o, QEvent* event) {
@@ -33,7 +33,7 @@ bool SizeTweaker::eventFilter(QObject* o, QEvent* event) {
     return QObject::eventFilter(o, event);
 }
 
-#ifndef Q_OS_MAC
+//#ifndef Q_OS_MAC
 static QString getTweakedStylesheet(const QVector2D& scale_factor) {
     // KLUDGE: We have customized several controls via QSS.
     // Their stylesheets need to be adjusted to properly react to DPI
@@ -109,10 +109,10 @@ static void scaleWidgetBy(QWidget* widget, const QVector2D& scale_by) {
         widget->setFont(f);
     }
 }
-#endif
+//#endif
 
 void SizeTweaker::adjustSizesAndPositions() {
-#ifndef Q_OS_MAC
+//#ifndef Q_OS_MAC
     if (!mSubject) {
         return;
     }
@@ -178,6 +178,6 @@ void SizeTweaker::adjustSizesAndPositions() {
         scaleWidgetBy(w, scale_by);
         w->move(w->x() * scale_by.x(), w->y() * scale_by.y());
     }
-#endif
+//#endif
 }
 

@@ -17,17 +17,12 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/StringFormat.h"
 #include "android/base/system/System.h"
-#include "android/base/threads/Async.h"
 
 namespace android {
 namespace emulation {
 
-using android::base::Looper;
-using android::base::ParallelTask;
 using android::base::StringView;
 using android::base::System;
-using std::string;
-using std::vector;
 
 // static
 const System::Duration ScreenCapturer::kPullTimeoutMs = 5000;
@@ -47,10 +42,11 @@ ScreenCapturer::~ScreenCapturer() {
     }
 }
 
-void ScreenCapturer::capture(android::base::StringView outputDirectoryPath,
+bool ScreenCapturer::capture(StringView outputDirectoryPath,
                              ResultCallback resultCallback) {
     if (mCaptureCommand || mPullCommand) {
         resultCallback(Result::kOperationInProgress);
+        return false;
     }
     std::string out_path = outputDirectoryPath;
     mCaptureCommand =
@@ -66,10 +62,11 @@ void ScreenCapturer::capture(android::base::StringView outputDirectoryPath,
             },
             kScreenCaptureTimeoutMs,
             false);
+    return true;
 }
 
 void ScreenCapturer::pullScreencap(ResultCallback resultCallback,
-                                   android::base::StringView outputDirectoryPath) {
+                                   StringView outputDirectoryPath) {
     if (!System::get()->pathIsDir(outputDirectoryPath) ||
         !System::get()->pathCanWrite(outputDirectoryPath)) {
         resultCallback(Result::kSaveLocationInvalid);

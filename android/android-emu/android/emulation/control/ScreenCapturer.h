@@ -49,7 +49,9 @@ public:
     // |outputDirectoryPath| should specify the path to the directory
     // to which the screenshot will be written. |resultCallback| will
     // be invoked upon completion.
-    void capture(android::base::StringView outputDirectoryPath,
+    // Returns |true| if it started the capture process, |false| if there was
+    // some issue that prevents it (is still calls |resultCallback| though).
+    bool capture(android::base::StringView outputDirectoryPath,
                  ResultCallback resultCallback);
 
 private:

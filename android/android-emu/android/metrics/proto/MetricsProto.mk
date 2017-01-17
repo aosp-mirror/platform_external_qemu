@@ -8,7 +8,7 @@ METRICS_DIR := $(METRICS_DIR:$(LOCAL_PATH)/%=%)
 
 $(call start-emulator-library,libmetrics_proto)
 
-LOCAL_CFLAGS := $(EMULATOR_COMMON_CFLAGS)
+LOCAL_CFLAGS := $(EMULATOR_COMMON_CFLAGS) -fvisibility=default
 
 LOCAL_C_INCLUDES := \
     $(PROTOBUF_INCLUDES) \

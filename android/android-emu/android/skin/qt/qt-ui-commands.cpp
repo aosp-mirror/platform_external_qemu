@@ -11,7 +11,9 @@
 
 
 #include "android/skin/qt/qt-ui-commands.h"
-#include <map>
+
+#include <algorithm>
+#include <utility>
 
 bool parseQtUICommand(const QString& string, QtUICommand* command) {
     auto it = std::find_if(std::begin(NameToQtUICmd),

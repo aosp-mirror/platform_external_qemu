@@ -292,8 +292,8 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
             return;
     }
 
-    // Default qcow2's L2 cache size is up to 8GB. Let's increase it for
-    // larger images.
+    // Default qcow2's L2 cache size is only good for disks of up to 8GB.
+    // Let's increase it for larger images.
     System::FileSize diskSize;
     if (System::get()->pathFileSize(filePath, &diskSize)) {
         // L2 cache size should be "disk_size_GB / 131072" as per QEMU docs
@@ -307,7 +307,7 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
 
     // Move the disk operations into the dedicated 'disk thread', and
     // enable modern notification mode for the hosts that support it (Linux).
-    deviceParam += ",iothread=disk-iothread";
+    deviceParam += ",iothread=disk-iothread,num-queues=2";
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
     deviceParam += ",modern-pio-notify";
 #endif
@@ -885,6 +885,9 @@ extern "C" int main(int argc, char **argv) {
     args[n++] = "-device";
     std::string netDevice =
             StringFormat("%s,netdev=mynet", kTarget.networkDeviceType);
+#if defined(TARGET_X86_64) || defined(TARGET_I386)
+        netDevice += ",ioeventfd,modern-pio-notify";
+#endif
     args[n++] = netDevice.c_str();
 
     // add 2nd nic as eth1
@@ -893,6 +896,9 @@ extern "C" int main(int argc, char **argv) {
     args[n++] = "-device";
     std::string netDevice2 =
             StringFormat("%s,netdev=mynet2", kTarget.networkDeviceType);
+#if defined(TARGET_X86_64) || defined(TARGET_I386)
+        netDevice2 += ",ioeventfd,modern-pio-notify";
+#endif
     args[n++] = netDevice2.c_str();
 
     args[n++] = "-show-cursor";
