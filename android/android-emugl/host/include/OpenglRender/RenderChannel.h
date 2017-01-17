@@ -15,11 +15,14 @@
 
 #include "android/base/containers/SmallVector.h"
 #include "android/base/EnumFlags.h"
+#include "android/base/files/Stream.h"
 
 #include <functional>
 #include <memory>
 
 namespace emugl {
+
+class RenderThread;
 
 // Turn the RenderChannel::State enum into flags.
 using namespace ::android::base::EnumFlags;
@@ -63,10 +66,12 @@ public:
     // |TryAgain| means the operation could not be performed and should be
     // tried later.
     // |Error| means an error happened (i.e. the channel is stopped).
+    // |Snapshot| means the channel received a snapshot request
     enum class IoResult {
         Ok = 0,
         TryAgain = 1,
         Error = 2,
+        Snapshot = 3,
     };
 
     // Type of a callback used to tell the guest when the RenderChannel
@@ -91,6 +96,8 @@ public:
     // Get the current state flags.
     virtual State state() const = 0;
 
+    virtual void setRenderThread(RenderThread* renderThread) = 0;
+
     // Try to writes the data in |buffer| into the channel. On success,
     // return IoResult::Ok and moves |buffer|. On failure, return
     // IoResult::TryAgain if the channel was full, or IoResult::Error
@@ -107,6 +114,11 @@ public:
     // Once a channel is stopped, it cannot be re-started.
     virtual void stop() = 0;
 
+    // Callback function when snapshotting the virtual machine.
+    virtual void onSave(android::base::Stream* stream) = 0;
+
+    // Callback function when restoring a snapshot
+    virtual bool onLoad(android::base::Stream* stream) = 0;
 protected:
     ~RenderChannel() = default;
 };
