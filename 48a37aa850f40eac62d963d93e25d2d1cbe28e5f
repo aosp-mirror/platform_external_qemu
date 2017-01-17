@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a3ed1509_9f3bbfa2",
+        "filename": "android/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-17T17:19:24Z",
+      "side": 1,
+      "message": "Is is possible to move it out of RenderChannel? We could even have android/base/files/StreamSerializing.{h/cpp} to put them all together",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 5
+      },
+      "revId": "48a37aa850f40eac62d963d93e25d2d1cbe28e5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a3ed1509_df5827f6",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/BufferQueue.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-17T17:19:24Z",
+      "side": 1,
+      "message": "buffer queue design is that it requires external locking for all methods. Please rename these to xxxLocked and make sure the queue lock is held when they\u0027re called",
+      "range": {
+        "startLine": 151,
+        "startChar": 1,
+        "endLine": 151,
+        "endChar": 48
+      },
+      "revId": "48a37aa850f40eac62d963d93e25d2d1cbe28e5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a3ed1509_3f4293fd",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/BufferQueue.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-17T17:19:24Z",
+      "side": 1,
+      "message": "the queue has two places where external waiters can be blocked - pushLocked() and popLocked(). It means we need to make sure they\u0027re unblocked to see the new contents after loading, and we need to think what should happen during saving. E.g. if there was someone who wanted to push new data buffer, we must ensure consistency - either this buffer will be resent by the guest after loading the snapshot, or we need to drain the push requests before saving",
+      "range": {
+        "startLine": 151,
+        "startChar": 4,
+        "endLine": 151,
+        "endChar": 46
+      },
+      "revId": "48a37aa850f40eac62d963d93e25d2d1cbe28e5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
