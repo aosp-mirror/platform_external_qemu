@@ -15,6 +15,7 @@
 
 #include "android/base/containers/SmallVector.h"
 #include "android/base/EnumFlags.h"
+#include "android/base/files/Stream.h"
 
 #include <functional>
 #include <memory>
@@ -45,6 +46,21 @@ public:
     // of 512 was selected after profiling existing traffic, including
     // the one used in protocol-heavy benchmark like Antutu3D.
     using Buffer = android::base::SmallFixedVector<char, 512>;
+
+    // Snapshot a buffer
+    static void onSaveBuffer(android::base::Stream* stream, const Buffer& buffer) {
+        stream->putBe32(buffer.size());
+        stream->write(buffer.data(),
+                sizeof(Buffer::value_type) * buffer.size());
+    }
+    // Load a buffer from snapshot
+    static bool onLoadBuffer(android::base::Stream* stream, Buffer& buffer) {
+        int32_t len = stream->getBe32();
+        buffer.resize_noinit(len);
+        int ret = (int)stream->read(buffer.begin(),
+                                    len * sizeof(Buffer::value_type));
+        return ret == len * sizeof(Buffer::value_type);
+    }
 
     // Bit-flags for the channel state.
     // |CanRead| means there is data from the host to read.
@@ -107,6 +123,11 @@ public:
     // Once a channel is stopped, it cannot be re-started.
     virtual void stop() = 0;
 
+    // Callback function when snapshotting the virtual machine.
+    virtual void onSave(android::base::Stream* stream) = 0;
+
+    // Callback function when restoring a snapshot
+    virtual bool onLoad(android::base::Stream* stream) = 0;
 protected:
     ~RenderChannel() = default;
 };

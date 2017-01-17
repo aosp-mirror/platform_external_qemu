@@ -74,7 +74,24 @@ public:
         }
 
         // Really cannot save/load these pipes' state.
-        virtual bool canLoad() const override { return false; }
+        virtual bool canLoad() const override { return true; }
+        virtual AndroidPipe* load(void* hwPipe,
+                              const char* args,
+                              android::base::Stream* stream) override {
+            auto renderer = android_getOpenglesRenderer();
+            if (!renderer) {
+                // This would happen when loading an incompatible snapshot
+                D("Trying to open the OpenGLES pipe without GPU emulation!");
+                return nullptr;
+            }
+
+            EmuglPipe* pipe = new EmuglPipe(hwPipe, this, renderer);
+            if (!pipe->mIsWorking || !pipe->onLoad(stream)) {
+                delete pipe;
+                return nullptr;
+            }
+            return pipe;
+        }
     };
 
     /////////////////////////////////////////////////////////////////////////
@@ -257,6 +274,24 @@ public:
             DD("%s: waiting for events %d", __func__, (int)wanted);
             mChannel->setWantedEvents(wanted);
         }
+    }
+
+    virtual void onSave(android::base::Stream* stream) override {
+        DD("%s: saving GLES pipe state for hwpipe=%p", __FUNCTION__, mHwPipe);
+        stream->putBe32(mIsWorking);
+        RenderChannel::onSaveBuffer(stream, mDataForReading);
+        stream->putBe32(mDataForReadingLeft);
+
+        mChannel->onSave(stream);
+    }
+
+    bool onLoad(android::base::Stream* stream) {
+        DD("%s: loading GLES pipe state for hwpipe=%p", __FUNCTION__, mHwPipe);
+        mIsWorking = (bool)stream->getBe32();
+        RenderChannel::onLoadBuffer(stream, mDataForReading);
+        mDataForReadingLeft = static_cast<size_t>(stream->getBe32());
+
+        return mChannel->onLoad(stream);
     }
 
 private:

@@ -149,4 +149,15 @@ void RenderChannelImpl::notifyStateChangeLocked() {
     }
 }
 
+void RenderChannelImpl::onSave(android::base::Stream* stream) {
+    stream->putBe32(static_cast<uint32_t>(mState));
+    stream->putBe32(static_cast<uint32_t>(mWantedEvents));
+    // TODO
+}
+
+bool RenderChannelImpl::onLoad(android::base::Stream* stream) {
+    // TODO
+    return true;
+}
+
 }  // namespace emugl
