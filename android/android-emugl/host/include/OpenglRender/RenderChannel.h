@@ -15,6 +15,7 @@
 
 #include "android/base/containers/SmallVector.h"
 #include "android/base/EnumFlags.h"
+#include "android/base/files/Stream.h"
 
 #include <functional>
 #include <memory>
@@ -107,6 +108,11 @@ public:
     // Once a channel is stopped, it cannot be re-started.
     virtual void stop() = 0;
 
+    // Callback function when snapshotting the virtual machine.
+    virtual void onSave(android::base::Stream* stream) = 0;
+
+    // Callback function when restoring a snapshot
+    virtual bool onLoad(android::base::Stream* stream) = 0;
 protected:
     ~RenderChannel() = default;
 };

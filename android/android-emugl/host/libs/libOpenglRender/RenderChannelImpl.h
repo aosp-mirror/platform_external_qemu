@@ -71,6 +71,11 @@ public:
     // Close the channel from the host.
     void stopFromHost();
 
+    // Callback function when snapshotting the virtual machine.
+    virtual void onSave(android::base::Stream* stream) override {/* TODO */};
+
+    // Callback function when restoring a snapshot
+    virtual bool onLoad(android::base::Stream* stream) override {/* TODO */};
 private:
     void updateStateLocked();
     void notifyStateChangeLocked();
