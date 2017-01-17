@@ -14,6 +14,7 @@
 * limitations under the License.
 */
 #pragma once
+#include "android/base/files/Stream.h"
 #include "OpenglRender/IOStream.h"
 
 namespace emugl {
@@ -26,11 +27,23 @@ public:
     unsigned char *buf() { return m_readPtr; } // return the next read location
     size_t validData() { return m_validData; } // return the amount of valid data in readptr
     void consume(size_t amount); // notify that 'amount' data has been consumed;
+
+    // set ready for snapshot
+    // after setSnapshot, getData will return once it is unblocked, so that
+    // the caller can trigger a snapshot
+    void setSnapshot();
+    // unset snapshot, please call it once snapshot is done
+    void unsetSnapshot();
+    // Load snapshot
+    void onLoad(android::base::Stream* stream);
+    // Save snapshot.
+    void onSave(android::base::Stream* stream);
 private:
     unsigned char *m_buf;
     unsigned char *m_readPtr;
     size_t m_size;
     size_t m_validData;
+    bool m_isSetSnapshot = false;
 };
 
 }  // namespace emugl

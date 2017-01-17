@@ -100,6 +100,7 @@ void RendererImpl::stop() {
     }
     // We're stopping the renderer, so there's no need to clean up resources
     // of some pending processes: we'll destroy everything soon.
+    // TODO: finish cleaning up for snapshot
     mCleanupProcessIds.stop();
 
     for (const auto& t : threads) {
