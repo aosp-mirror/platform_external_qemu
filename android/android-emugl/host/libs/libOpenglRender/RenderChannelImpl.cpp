@@ -61,6 +61,10 @@ RenderChannel::State RenderChannelImpl::state() const {
     return mState;
 }
 
+void RenderChannelImpl::setRenderThread(RenderThread* renderThread) {
+    mRenderThread = renderThread;
+}
+
 IoResult RenderChannelImpl::tryWrite(Buffer&& buffer) {
     D("buffer size=%d", (int)buffer.size());
     AutoLock lock(mLock);
@@ -93,7 +97,7 @@ bool RenderChannelImpl::writeToGuest(Buffer&& buffer) {
     AutoLock lock(mLock);
     IoResult result = mToGuest.pushLocked(std::move(buffer));
     updateStateLocked();
-    DD("mToGuest.pushLocked() returned %d, state %d", (int)result, (int)mState);
+    D("mToGuest.pushLocked() returned %d, state %d", (int)result, (int)mState);
     notifyStateChangeLocked();
     return result == IoResult::Ok;
 }
@@ -147,6 +151,70 @@ void RenderChannelImpl::notifyStateChangeLocked() {
         mWantedEvents &= ~mState;
         mEventCallback(available);
     }
+}
+
+void RenderChannelImpl::onSave(android::base::Stream* stream) {
+    // TODO: handle the situation where snapshots happens when it is writing
+    // to the guest and gets blocked
+    D("enter");
+    assert(!mRenderThread->isFinished());
+    bool isReadingHeader = mRenderThread->isReadHeader();
+    stream->putBe32(static_cast<uint32_t>(isReadingHeader));
+
+    if (!isReadingHeader) {
+        {
+            // Assuming the render thread is blocked by read
+            // TODO: what if it is blocked by write?
+            AutoLock lock(mLock);
+            // Set up RenderThread to be ready for snapshot
+            mRenderThread->setSnapshot(stream);
+            // Unblock RenderThread to do snapshot
+            mFromGuest.preSaveLocked();
+        }
+        // wait for the snapshot
+        mRenderThread->waitSnapshot();
+    }
+
+    {
+        AutoLock lock(mLock);
+        stream->putBe32(static_cast<uint32_t>(mState));
+        stream->putBe32(static_cast<uint32_t>(mWantedEvents));
+
+        mFromGuest.onSaveLocked(stream);
+        mToGuest.onSaveLocked(stream);
+    }
+    mRenderThread->resumeAfterSnapshot();
+}
+
+bool RenderChannelImpl::onLoad(android::base::Stream* stream) {
+    D("enter");
+    {
+        bool isReadingHeader = static_cast<bool>(stream->getBe32());
+        if (!isReadingHeader) {
+            {
+                AutoLock lock(mLock);
+                // recover render thread state
+                // it is unused so we don't set its contents
+                mRenderThread->setRestore(stream);
+                // Fake the header
+                Buffer buffer;
+                buffer.resize(4);
+                mFromGuest.pushLocked(std::move(buffer));
+            }
+            mRenderThread->waitRestore();
+        }
+    }
+
+    {
+        AutoLock lock(mLock);
+        mState = static_cast<State>(stream->getBe32());
+        mWantedEvents = static_cast<State>(stream->getBe32());
+        if (!mFromGuest.onLoadLocked(stream)) return false;
+        if (!mToGuest.onLoadLocked(stream)) return false;
+        updateStateLocked();
+        notifyStateChangeLocked();
+    }
+    return true;
 }
 
 }  // namespace emugl

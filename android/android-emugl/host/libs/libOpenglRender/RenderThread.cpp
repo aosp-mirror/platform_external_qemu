@@ -45,7 +45,9 @@ static constexpr int kStreamBufferSize = 128 * 1024;
 
 RenderThread::RenderThread(std::weak_ptr<RendererImpl> renderer,
                            std::shared_ptr<RenderChannelImpl> channel)
-    : mChannel(channel), mRenderer(renderer) {}
+    : mChannel(channel), mRenderer(renderer) {
+        mChannel->setRenderThread(this);
+    }
 
 RenderThread::~RenderThread() = default;
 
@@ -57,13 +59,50 @@ std::unique_ptr<RenderThread> RenderThread::create(
             new RenderThread(renderer, channel));
 }
 
+void RenderThread::setSnapshot(android::base::Stream* stream) {
+    mSnapshotLock.lock();
+    mResume = false;
+    m_snapshotStream = stream;
+    assert(mReadBuffer);
+    mReadBuffer->setSnapshot();
+}
+
+void RenderThread::waitSnapshot() {
+    while (m_snapshotStream) {
+        mFinishedSnapshot.wait(&mSnapshotLock);
+    }
+    mSnapshotLock.unlock();
+}
+
+void RenderThread::resumeAfterSnapshot(){
+    android::base::AutoLock lock(mResumeLock);
+    mResume = true;
+    mResumeAfterSnapshot.signalAndUnlock(&lock);
+}
+
+void RenderThread::setRestore(android::base::Stream* stream) {
+    mRestoreLock.lock();
+    m_restoreStream = stream;
+}
+
+void RenderThread::waitRestore() {
+    while (m_restoreStream) {
+        mFinishedRestore.wait(&mRestoreLock);
+    }
+    mRestoreLock.unlock();
+}
+
 intptr_t RenderThread::main() {
     ChannelStream stream(mChannel, RenderChannel::Buffer::kSmallSize);
+
+    ReadBuffer readBuf(kStreamBufferSize);
+    mReadBuffer = &readBuf;
 
     uint32_t flags = 0;
     if (stream.read(&flags, sizeof(flags)) != sizeof(flags)) {
         return 0;
     }
+    mIsReadHeader = false;
 
     // |flags| used to have something, now they're not used.
     (void)flags;
@@ -79,7 +118,15 @@ intptr_t RenderThread::main() {
     tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, NULL);
     initRenderControlContext(&tInfo.m_rcDec);
 
-    ReadBuffer readBuf(kStreamBufferSize);
+    {
+        // load from snapshot if necessary
+        android::base::AutoLock lock(mRestoreLock);
+        if (m_restoreStream) {
+            readBuf.onLoad(m_restoreStream);
+            m_restoreStream = nullptr;
+            mFinishedRestore.signalAndUnlock(&mRestoreLock);
+        }
+    }
 
     int stats_totalBytes = 0;
     long long stats_t0 = android::base::System::get()->getHighResTimeUs() / 1000;
@@ -115,10 +162,28 @@ intptr_t RenderThread::main() {
 
         // We should've processed the packet on the previous iteration if it
         // was already in the buffer.
-        assert(packetSize > (int)readBuf.validData());
+         assert(packetSize > (int)readBuf.validData());
 
         const int stat = readBuf.getData(&stream, packetSize);
+        // we are in the middle of a snapshot
         if (stat <= 0) {
+            {
+                android::base::AutoLock lock(mSnapshotLock);
+                if (m_snapshotStream) {
+                    readBuf.onSave(m_snapshotStream);
+                    readBuf.unsetSnapshot();
+                    m_snapshotStream = nullptr;
+                    mFinishedSnapshot.signalAndUnlock(&lock);
+                    // TODO: snapshot GLES translator, and pause it until the whole system
+                    // finishes snapshotting
+                    mResumeLock.lock();
+                    while (!mResume) {
+                        mResumeAfterSnapshot.wait(&mResumeLock);
+                    }
+                    mResumeLock.unlock();
+                    continue;
+                }
+            }
             D("Warning: render thread could not read data from stream");
             break;
         }
@@ -220,6 +285,7 @@ intptr_t RenderThread::main() {
     FrameBuffer::getFB()->drainRenderContext();
 
     DBG("Exited a RenderThread @%p\n", this);
+    mReadBuffer = nullptr;
 
     return 0;
 }

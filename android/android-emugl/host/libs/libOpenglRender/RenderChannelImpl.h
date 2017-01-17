@@ -44,6 +44,8 @@ public:
     // Return the current channel state relative to the guest.
     virtual State state() const override final;
 
+    virtual void setRenderThread(RenderThread* renderThread) override;
+
     // Try to send a buffer from the guest to the host render thread.
     virtual IoResult tryWrite(Buffer&& buffer) override final;
 
@@ -71,6 +73,11 @@ public:
     // Close the channel from the host.
     void stopFromHost();
 
+    // Callback function when snapshotting the virtual machine.
+    virtual void onSave(android::base::Stream* stream) override;
+
+    // Callback function when restoring a snapshot
+    virtual bool onLoad(android::base::Stream* stream) override;
 private:
     void updateStateLocked();
     void notifyStateChangeLocked();
@@ -84,6 +91,8 @@ private:
     State mWantedEvents = State::Empty;
     BufferQueue mFromGuest;
     BufferQueue mToGuest;
+
+    RenderThread* mRenderThread = nullptr;
 };
 
 }  // namespace emugl
