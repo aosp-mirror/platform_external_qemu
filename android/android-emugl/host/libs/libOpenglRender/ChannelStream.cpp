@@ -76,9 +76,9 @@ const unsigned char* ChannelStream::readRaw(void* buf, size_t* inout_len) {
         if (count > 0) {  // There is some data to return.
             break;
         }
-        // Result can only be IoResult::Error if |count == 0| since |blocking|
-        // was true, it cannot be IoResult::TryAgain.
-        assert(result == IoResult::Error);
+        // Result can only be IoResult::Error or IoResult::Snapshot if |count == 0|
+        // since |blocking| was true, it cannot be IoResult::TryAgain.
+        assert(result == IoResult::Error || result == IoResult::Snapshot);
         D("error while trying to read");
         return nullptr;
     }

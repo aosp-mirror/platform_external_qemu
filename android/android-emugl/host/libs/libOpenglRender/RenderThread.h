@@ -15,6 +15,9 @@
 */
 #pragma once
 
+#include "android/base/files/Stream.h"
+#include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/synchronization/Lock.h"
 #include "emugl/common/mutex.h"
 #include "emugl/common/thread.h"
 
@@ -24,6 +27,7 @@ namespace emugl {
 
 class RenderChannelImpl;
 class RendererImpl;
+class ReadBuffer;
 
 // A class used to model a thread of the RenderServer. Each one of them
 // handles a single guest client / protocol byte stream.
@@ -39,7 +43,24 @@ public:
     // Returns true iff the thread has finished.
     // Note that this also means that the thread's stack has been
     bool isFinished() { return tryWait(NULL); }
+    bool isReadHeader() { return mIsReadHeader; }
 
+    // Functions for snapshot
+    // Used by RenderChannelImpl
+    // RenderChannelImpl firstly calls setSnapshot(),
+    // then it wakes up the read buffer to unblock RenderThread
+    // RenderChannelImpl then calls waitSnapshot() to wait for
+    // RenderThread finishes snapshotting.
+    // RenderChannelImpl shall call postSnapshot after it
+    // finishes snapshot and sets back ChannelStream to normal
+    // states.
+    void setSnapshot(android::base::Stream* stream);
+    void waitSnapshot();
+    void postSnapshot();
+
+    // Functions for restoring from a snapshot
+    void setRestore(android::base::Stream* stream);
+    void waitRestore();
 private:
     RenderThread(std::weak_ptr<RendererImpl> renderer,
                  std::shared_ptr<RenderChannelImpl> channel);
@@ -48,6 +69,26 @@ private:
 
     std::shared_ptr<RenderChannelImpl> mChannel;
     std::weak_ptr<RendererImpl> mRenderer;
+
+    ReadBuffer* mReadBuffer = nullptr;
+    bool mResume = true;
+    bool mIsReadHeader = true;
+
+    // m_snapshotStream is where we write to when there is a snapshot request
+    // it is reset to null after snapshotting of the rendering thread is done
+    android::base::Stream* m_snapshotStream = nullptr;
+    android::base::ConditionVariable mFinishedSnapshot;
+    android::base::Lock mSnapshotLock;
+    // mResumeAfterSnapshot is signaled when the render channel finishes
+    // snapshot and the render thread can resume
+    android::base::ConditionVariable mPostSnapshot;
+    android::base::Lock mPostSnapshotLock;
+
+    // m_restoreStream is where we read from when recovering from a snapshot
+    // it is reset to null after recovering of the rendering thread is done
+    android::base::Stream* m_restoreStream = nullptr;
+    android::base::ConditionVariable mFinishedRestore;
+    android::base::Lock mRestoreLock;
 };
 
 }  // namespace emugl
