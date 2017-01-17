@@ -31,7 +31,7 @@
 
 #include "android/base/system/System.h"
 
-#define EMUGL_DEBUG_LEVEL 0
+#define EMUGL_DEBUG_LEVEL 1
 #include "emugl/common/debug.h"
 
 #include <assert.h>
@@ -45,7 +45,9 @@ static constexpr int kStreamBufferSize = 128 * 1024;
 
 RenderThread::RenderThread(std::weak_ptr<RendererImpl> renderer,
                            std::shared_ptr<RenderChannelImpl> channel)
-    : mChannel(channel), mRenderer(renderer) {}
+    : mChannel(channel), mRenderer(renderer) {
+        mChannel->setRenderThread(this);
+    }
 
 RenderThread::~RenderThread() = default;
 
@@ -57,13 +59,36 @@ std::unique_ptr<RenderThread> RenderThread::create(
             new RenderThread(renderer, channel));
 }
 
+void RenderThread::setSnapshot(android::base::Stream* stream) {
+    mSnapshotLock.lock();
+    mResume = false;
+    m_snapshotStream = stream;
+}
+
+void RenderThread::waitSnapshot() {
+    while (m_snapshotStream) {
+        mFinishedSnapshot.wait(&mSnapshotLock);
+    }
+    mSnapshotLock.unlock();
+}
+
+void RenderThread::resumeAfterSnapshot(){
+    android::base::AutoLock lock(mResumeLock);
+    mResume = true;
+    mResumeAfterSnapshot.signalAndUnlock(&lock);
+}
+
 intptr_t RenderThread::main() {
     ChannelStream stream(mChannel, RenderChannel::Buffer::kSmallSize);
 
     uint32_t flags = 0;
+    printf("render thead ready to read flags\n");
     if (stream.read(&flags, sizeof(flags)) != sizeof(flags)) {
+        printf("render thead boot failure\n");
         return 0;
     }
+    mIsReadHeader = true;
+    printf("render thead started\n");
 
     // |flags| used to have something, now they're not used.
     (void)flags;
@@ -79,7 +104,9 @@ intptr_t RenderThread::main() {
     tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, NULL);
     initRenderControlContext(&tInfo.m_rcDec);
 
+    // TODO: snapshot readBuf
     ReadBuffer readBuf(kStreamBufferSize);
+    readBuf.m_snapshotStream = &m_snapshotStream;
 
     int stats_totalBytes = 0;
     long long stats_t0 = android::base::System::get()->getHighResTimeUs() / 1000;
@@ -115,10 +142,29 @@ intptr_t RenderThread::main() {
 
         // We should've processed the packet on the previous iteration if it
         // was already in the buffer.
-        assert(packetSize > (int)readBuf.validData());
+         assert(packetSize > (int)readBuf.validData());
 
         const int stat = readBuf.getData(&stream, packetSize);
+        // we are in the middle of a snapshot
         if (stat <= 0) {
+            {
+                android::base::AutoLock lock(mSnapshotLock);
+                if (m_snapshotStream) {
+                    printf("RenderThread snapshot\n");
+                    readBuf.onSave();
+                    m_snapshotStream = nullptr;
+                    mFinishedSnapshot.signalAndUnlock(&lock);
+                    // TODO: snapshot GLES translator, and pause it until the whole system
+                    // finishes snapshotting
+                    mResumeLock.lock();
+                    while (!mResume) {
+                        mResumeAfterSnapshot.wait(&mResumeLock);
+                    }
+                    mResumeLock.unlock();
+                    printf("resumed render thread %p\n", this);
+                    continue;
+                }
+            }
             D("Warning: render thread could not read data from stream");
             break;
         }

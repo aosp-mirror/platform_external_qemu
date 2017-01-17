@@ -15,6 +15,9 @@
 */
 #pragma once
 
+#include "android/base/files/Stream.h"
+#include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/synchronization/Lock.h"
 #include "emugl/common/mutex.h"
 #include "emugl/common/thread.h"
 
@@ -39,7 +42,17 @@ public:
     // Returns true iff the thread has finished.
     // Note that this also means that the thread's stack has been
     bool isFinished() { return tryWait(NULL); }
+    bool isReadHeader() { return mIsReadHeader; }
 
+    // Functions for snapshot
+    // Used by RenderChannelImpl
+    // RenderChannelImpl firstly calls setSnapshot(),
+    // then it wakes up the read buffer to unblock RenderThread
+    // RenderChannelImpl then calls waitSnapshot() to wait for
+    // RenderThread finishes snapshotting.
+    void setSnapshot(android::base::Stream* stream);
+    void waitSnapshot();
+    void resumeAfterSnapshot();
 private:
     RenderThread(std::weak_ptr<RendererImpl> renderer,
                  std::shared_ptr<RenderChannelImpl> channel);
@@ -48,6 +61,17 @@ private:
 
     std::shared_ptr<RenderChannelImpl> mChannel;
     std::weak_ptr<RendererImpl> mRenderer;
+
+    bool mNeedSnapshot = false;
+    bool mResume = true;
+    bool mIsReadHeader = false;
+    android::base::ConditionVariable mFinishedSnapshot;
+    android::base::ConditionVariable mResumeAfterSnapshot;
+    android::base::Lock mSnapshotLock;
+    android::base::Lock mResumeLock;
+    // m_snapshotStream is set to a snapshot stream when there is a snapshot request
+    // it is reset to null after snapshotting of the rendering thread is done
+    android::base::Stream* m_snapshotStream = nullptr;
 };
 
 }  // namespace emugl

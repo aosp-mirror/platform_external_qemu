@@ -26,6 +26,8 @@ namespace emugl {
 #define EMUGL_DEBUG_LEVEL 0
 #include "emugl/common/debug.h"
 
+#define D0(...) (printf("%s:%d:%s: ", __FILE__, __LINE__, __func__), printf(__VA_ARGS__), printf("\n"), fflush(stdout))
+
 using Buffer = RenderChannel::Buffer;
 using IoResult = RenderChannel::IoResult;
 using State = RenderChannel::State;
@@ -61,6 +63,10 @@ RenderChannel::State RenderChannelImpl::state() const {
     return mState;
 }
 
+void RenderChannelImpl::setRenderThread(RenderThread* renderThread) {
+    mRenderThread = renderThread;
+}
+
 IoResult RenderChannelImpl::tryWrite(Buffer&& buffer) {
     D("buffer size=%d", (int)buffer.size());
     AutoLock lock(mLock);
@@ -93,7 +99,7 @@ bool RenderChannelImpl::writeToGuest(Buffer&& buffer) {
     AutoLock lock(mLock);
     IoResult result = mToGuest.pushLocked(std::move(buffer));
     updateStateLocked();
-    DD("mToGuest.pushLocked() returned %d, state %d", (int)result, (int)mState);
+    D("mToGuest.pushLocked() returned %d, state %d", (int)result, (int)mState);
     notifyStateChangeLocked();
     return result == IoResult::Ok;
 }
@@ -147,6 +153,59 @@ void RenderChannelImpl::notifyStateChangeLocked() {
         mWantedEvents &= ~mState;
         mEventCallback(available);
     }
+}
+
+void RenderChannelImpl::onSave(android::base::Stream* stream) {
+    // TODO: handle the situation where snapshots happens when it is writing
+    // to the guest and gets blocked
+    D0("enter %p %p", this, mRenderThread);
+    bool needRenderThread = 
+        (!mRenderThread->isFinished()
+        && mRenderThread->isReadHeader());
+    stream->putBe32(static_cast<uint32_t>(needRenderThread));
+
+    if (needRenderThread) {
+        {
+            AutoLock lock(mLock);
+            // Set up RenderThread to be ready for snapshot
+            D0("setSnapshot");
+            mRenderThread->setSnapshot(stream);
+            // Unblock RenderThread to do snapshot
+            D0("preSaveLocked");
+            mFromGuest.preSaveLocked();
+            //mState |= State::CanRead;
+            //notifyStateChangeLocked();
+            // Wait for the snapshot
+        }
+        D0("waitSnapshot");
+        mRenderThread->waitSnapshot();
+        D0("render thread done");
+        // TODO: what if the RenderThread is blocked by write?
+    }
+
+    {
+        AutoLock lock(mLock);
+        stream->putBe32(static_cast<uint32_t>(mState));
+        stream->putBe32(static_cast<uint32_t>(mWantedEvents));
+
+        mFromGuest.onSaveLocked(stream);
+        mToGuest.onSaveLocked(stream);
+        D0("snapshot done %p %p", this, mRenderThread);
+    }
+    mRenderThread->resumeAfterSnapshot();
+}
+
+bool RenderChannelImpl::onLoad(android::base::Stream* stream) {
+    D("enter");
+    AutoLock lock(mLock);
+    // TODO: load RenderThread and block it
+    mState = static_cast<State>(stream->getBe32());
+    mWantedEvents = static_cast<State>(stream->getBe32());
+    if (!mFromGuest.onLoadLocked(stream)) return false;
+    if (!mToGuest.onLoadLocked(stream)) return false;
+    updateStateLocked();
+    notifyStateChangeLocked();
+    return true;
 }
 
 }  // namespace emugl

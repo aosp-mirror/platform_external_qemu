@@ -37,6 +37,10 @@ ReadBuffer::~ReadBuffer() {
 }
 
 int ReadBuffer::getData(IOStream* stream, int minSize) {
+    if (m_snapshotStream && *m_snapshotStream) {
+        onSave();
+        return -1;
+    }
     assert(stream);
     assert(minSize > (int)m_validData);
 
@@ -85,6 +89,14 @@ int ReadBuffer::getData(IOStream* stream, int minSize) {
         const size_t readNow = stream->read(m_readPtr + m_validData,
                                             maxSizeToRead - readTotal);
         if (!readNow) {
+            if (m_snapshotStream && *m_snapshotStream) {
+                if (readTotal>0) {
+                    return readTotal;
+                } else {
+                    return -1;
+                }
+            }
+            printf("read failed!\n");
             return -1;
         }
         readTotal += readNow;
@@ -98,6 +110,21 @@ void ReadBuffer::consume(size_t amount) {
     assert(amount <= m_validData);
     m_validData -= amount;
     m_readPtr += amount;
+}
+
+void ReadBuffer::onSave() {
+    android::base::Stream* stream = *m_snapshotStream;
+    stream->putBe32(m_size);
+    stream->putBe32(m_validData);
+    stream->write(m_readPtr, m_validData);
+}
+
+void ReadBuffer::onLoad(android::base::Stream* stream) {
+    m_size = stream->getBe32();
+    m_buf = (unsigned char *)realloc(m_buf, m_size);
+    m_readPtr = m_buf;
+    m_validData = stream->getBe32();
+    stream->read(m_readPtr, m_validData);
 }
 
 }  // namespace emugl
