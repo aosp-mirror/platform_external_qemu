@@ -4476,7 +4476,7 @@ int main(int argc, char** argv, char** envp)
         char  tmp[64];
         // change to '3' to run cts deqp /
         // when we're ES 3.x conformant
-        snprintf(tmp, sizeof(tmp), "%d", 0x20000);
+        snprintf(tmp, sizeof(tmp), "%d", 0x30001);
         boot_property_add("ro.opengles.version", tmp);
     }
 

@@ -24,24 +24,25 @@ static const char kGLES31StringPart[] = "OpenGL ES 3.1";
 static const char kGLES32StringPart[] = "OpenGL ES 3.2";
 
 static const char* sPickVersionStringPart(int maj, int min) {
-    switch (maj) {
-        case 2:
-            return kGLES20StringPart;
-        case 3:
-            switch (min) {
-                case 0:
-                    return kGLES30StringPart;
-                case 1:
-                    return kGLES31StringPart;
-                case 2:
-                    return kGLES32StringPart;
-                default:
-                    return nullptr;
-            }
-        default:
-            return nullptr;
-    }
-    return nullptr;
+    return kGLES31StringPart;
+    // switch (maj) {
+    //     case 2:
+    //         return kGLES20StringPart;
+    //     case 3:
+    //         switch (min) {
+    //             case 0:
+    //                 return kGLES30StringPart;
+    //             case 1:
+    //                 return kGLES31StringPart;
+    //             case 2:
+    //                 return kGLES32StringPart;
+    //             default:
+    //                 return nullptr;
+    //         }
+    //     default:
+    //         return nullptr;
+    // }
+    // return nullptr;
 }
 
 void GLESv2Context::init(GlLibrary* glLib) {

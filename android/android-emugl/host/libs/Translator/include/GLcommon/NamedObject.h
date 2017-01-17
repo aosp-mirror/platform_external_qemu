@@ -57,15 +57,20 @@ struct GenNameInfo {
     NamedObjectType m_type = (NamedObjectType)0;
     // only used for NamedObjectType::SHADER_OR_PROGRAM
     ShaderProgramType m_shaderProgramType = (ShaderProgramType)0;
+    // only used for NamedObjectType::SHADER_OR_PROGRAM, so far.
+    GLuint m_existingGlobal = 0;
+
     GenNameInfo() = delete;
     // constructor for generating non-shader object
     explicit GenNameInfo(NamedObjectType type) : m_type(type) {
         assert(type != NamedObjectType::SHADER_OR_PROGRAM);
     }
     // constructor for generating shader object
-    explicit GenNameInfo(ShaderProgramType shaderProgramType) :
+    explicit GenNameInfo(ShaderProgramType shaderProgramType,
+                         GLuint existingGlobal = 0) :
         m_type(NamedObjectType::SHADER_OR_PROGRAM),
-        m_shaderProgramType(shaderProgramType) {}
+        m_shaderProgramType(shaderProgramType),
+        m_existingGlobal(existingGlobal) {}
 };
 
 

@@ -832,6 +832,7 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     s_glDispatch.glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, &s_glSupport.maxShaderStorageBufferBindings);
     s_glDispatch.glGetIntegerv(GL_MAX_DRAW_BUFFERS, &s_glSupport.maxDrawBuffers);
     s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_ATTRIB_BINDINGS, &s_glSupport.maxVertexAttribBindings);
+
     // Clear GL error in case these enums not supported.
     s_glDispatch.glGetError();
 
