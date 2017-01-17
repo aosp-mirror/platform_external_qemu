@@ -116,6 +116,7 @@
         <file alias="toggle_on">images/light/toggle_on_light.png</file>
         <file alias="toggle_on_disabled">images/light/toggle_on_disabled_light.png</file>
         <file alias="virtSensors">images/light/Virtual_Sensors_678.svg</file>
+        <file alias="recordCircle">images/light/ic_record_circle_F43_24dp.svg</file>
     </qresource>
     <qresource prefix="/dark">
         <!-- Main list of tool buttons -->

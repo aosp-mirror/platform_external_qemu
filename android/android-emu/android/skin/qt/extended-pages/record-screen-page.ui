@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QWidget" name="recordOverlayWidget" native="true">
+  <widget class="QWidget" name="rec_recordOverlayWidget" native="true">
    <property name="geometry">
     <rect>
      <x>161</x>
@@ -61,25 +61,87 @@
      <bool>false</bool>
     </property>
    </widget>
-   <widget class="QLabel" name="rec_timeElapsedLabel">
+   <widget class="QWidget" name="rec_timeElapsedWidget" native="true">
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>220</y>
+      <y>218</y>
       <width>300</width>
-      <height>15</height>
+      <height>20</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background: rgba(0,0,0,0);</string>
+     <string notr="true">background:rgba(0,0,0,0);</string>
     </property>
-    <property name="text">
-     <string>15s Recording...</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
+    <layout class="QGridLayout" name="gridLayout_3">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <property name="horizontalSpacing">
+      <number>0</number>
+     </property>
+     <item row="0" column="0">
+      <layout class="QGridLayout" name="gridLayout_2">
+       <property name="horizontalSpacing">
+        <number>10</number>
+       </property>
+       <property name="verticalSpacing">
+        <number>0</number>
+       </property>
+       <item row="0" column="1">
+        <widget class="QLabel" name="rec_timeElapsedLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>15s Recording...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="rec_recordDotLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>8</width>
+           <height>8</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="pixmap">
+          <pixmap resource="../resources.qrc">:/light/recordCircle</pixmap>
+         </property>
+         <property name="scaledContents">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
    </widget>
+   <zorder>rec_recordButton</zorder>
+   <zorder>rec_recordDotLabel_2</zorder>
+   <zorder>rec_timeElapsedWidget</zorder>
   </widget>
   <widget class="RaisedMaterialButton" name="rec_playStopButton">
    <property name="geometry">
@@ -186,6 +248,12 @@
     <string>21s / 1920 x 1080</string>
    </property>
   </widget>
+  <zorder>recordOverlayWidget</zorder>
+  <zorder>rec_playStopButton</zorder>
+  <zorder>rec_formatSwitch</zorder>
+  <zorder>rec_saveButton</zorder>
+  <zorder>rec_timeResLabel</zorder>
+  <zorder>rec_recordDotLabel</zorder>
  </widget>
  <customwidgets>
   <customwidget>
