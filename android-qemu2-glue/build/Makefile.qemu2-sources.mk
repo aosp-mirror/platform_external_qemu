@@ -386,6 +386,8 @@ QEMU2_TARGET_SOURCES := \
     hw/display/virtio-gpu-pci.c \
     hw/display/virtio-gpu.c \
     hw/input/goldfish_events.c \
+    hw/input/goldfish_events_common.c \
+    hw/input/goldfish_rotary.c \
     hw/intc/goldfish_pic.c \
     hw/misc/edu.c \
     hw/misc/goldfish_battery.c \
