@@ -63,6 +63,10 @@ sdk {
             builtBy buildDefaultEmulator
             debug true
         }
+        item("$buildDefaultEmulator.output/resources") {
+            into 'resources'
+            builtBy buildDefaultEmulator
+        }
         item("$project.rootDir/../prebuilts/qemu-kernel/x86/pc-bios/bios.bin") {
             into 'lib/pc-bios'
         }
@@ -137,6 +141,10 @@ sdk {
             into 'lib64'
             builtBy buildWindowsEmulator
             debug true
+        }
+        item("$buildWindowsEmulator.output/resources") {
+            into 'resources'
+            builtBy buildWindowsEmulator
         }
         item("$project.rootDir/../prebuilts/qemu-kernel/x86/pc-bios/bios.bin") {
             into 'lib/pc-bios'
