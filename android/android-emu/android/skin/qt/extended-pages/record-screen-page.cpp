@@ -18,7 +18,80 @@ RecordScreenPage::RecordScreenPage(QWidget *parent) :
     mUi(new Ui::RecordScreenPage)
 {
     mUi->setupUi(this);
+    setRecordState(RecordState::Ready);
+
+    QObject::connect(&mTimer, &QTimer::timeout, this, &RecordScreenPage::updateElapsedTime);
 }
 
 RecordScreenPage::~RecordScreenPage() {
+}
+
+void RecordScreenPage::setRecordState(RecordState newState) {
+	mState = newState;
+
+	switch(mState) {
+	case RecordState::Ready:
+		mUi->rec_recordOverlayWidget->show();
+		mUi->rec_timeElapsedWidget->hide();
+		mUi->rec_playStopButton->hide();
+		mUi->rec_formatSwitch->hide();
+		mUi->rec_saveButton->hide();
+		mUi->rec_timeResLabel->hide();
+		mUi->rec_recordButton->setText(QString("START RECORDING"));
+		break;
+	case RecordState::Recording:
+		mUi->rec_recordOverlayWidget->show();
+		mUi->rec_timeElapsedLabel->setText("0s Recording...");
+		mUi->rec_timeElapsedWidget->show();
+		mUi->rec_playStopButton->hide();
+		mUi->rec_formatSwitch->hide();
+		mUi->rec_saveButton->hide();
+		mUi->rec_timeResLabel->hide();
+		mUi->rec_recordButton->setText(QString("STOP RECORDING"));
+
+		// Update every second
+		mSec = 0;
+		//connect(mTimer, SIGNAL(timeout()), this, SLOT(updateElapsedTime()));
+		mTimer.start(1000);
+		break;
+	case RecordState::Stopped:
+		mTimer.stop();
+                // TODO: Need to only show this when hovering over the video
+                // widget, which we don't have yet.
+		//mUi->rec_recordOverlayWidget->hide();
+                mUi->rec_recordOverlayWidget->show();
+		mUi->rec_timeElapsedWidget->hide();
+		mUi->rec_playStopButton->show();
+		mUi->rec_formatSwitch->show();
+		mUi->rec_saveButton->show();
+		mUi->rec_timeResLabel->show();
+		mUi->rec_recordButton->setText(QString("RECORD AGAIN"));
+		break;
+	default:;
+	}
+}
+
+void RecordScreenPage::updateElapsedTime() {
+	QString qs = QString("%1s Recording...").arg(++mSec);
+	mUi->rec_timeElapsedLabel->setText(qs);
+	mTimer.start(1000);
+}
+
+void RecordScreenPage::on_rec_recordButton_clicked() {
+	RecordState newState = RecordState::Ready;
+
+	switch(mState) {
+	case RecordState::Ready:
+		newState = RecordState::Recording;
+		break;
+	case RecordState::Recording:
+		newState = RecordState::Stopped;
+		break;
+	case RecordState::Stopped:
+		newState = RecordState::Recording;
+		break;
+	default:;
+	}
+
+	setRecordState(newState);
 }
