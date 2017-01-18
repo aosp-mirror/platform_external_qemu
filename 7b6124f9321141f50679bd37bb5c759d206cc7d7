@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6854da0e_2c68b79a",
+        "filename": "audio/paaudio.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 703,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-18T22:50:27Z",
+      "side": 1,
+      "message": "I remember that we had a similar CL for audio out, and it caused crashes on exit. Can we make sure there will be on user of audio when we actually destroy it?",
+      "range": {
+        "startLine": 703,
+        "startChar": 4,
+        "endLine": 703,
+        "endChar": 18
+      },
+      "revId": "7b6124f9321141f50679bd37bb5c759d206cc7d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
