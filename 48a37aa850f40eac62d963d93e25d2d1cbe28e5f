@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "2345a536_8c66e790",
+        "filename": "android/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-01-18T07:07:42Z",
+      "side": 1,
+      "message": "nvm, we can replace our current stream writer with an xml writer if we have to.",
+      "parentUuid": "a3cef5ed_0842c7a5",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 5
+      },
+      "revId": "48a37aa850f40eac62d963d93e25d2d1cbe28e5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a3ed1509_df5827f6",
         "filename": "android/android-emugl/host/libs/libOpenglRender/BufferQueue.h",
         "patchSetId": 2
