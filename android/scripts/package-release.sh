@@ -574,6 +574,10 @@ create_binaries_package () {
         dump "[$PKG_NAME] Copying 64-bit libraries."
         copy_directory objs/lib64 "$TEMP_PKG_DIR"/tools/lib64
     fi
+    if [ -d "objs/resources" ]; then
+        dump "[$PKG_NAME] Copying resources."
+        copy_directory objs/resources "$TEMP_PKG_DIR"/tools/resources
+    fi
     if [ -d "objs/qemu" ]; then
         QEMU_BINARIES=$(list_files_under objs/qemu \
                 "$SYSTEM-*/qemu-system-*" "$SYSTEM-*/qemu-upstream-*")
