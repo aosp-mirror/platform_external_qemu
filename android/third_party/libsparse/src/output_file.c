@@ -156,21 +156,22 @@ static int file_pad(struct output_file *out, int64_t len)
 	struct output_file_normal *outn = to_output_file_normal(out);
 #ifdef USE_MINGW
 	HANDLE h = (HANDLE)_get_osfhandle(outn->fd);
-	LARGE_INTEGER li;
-	li.HighPart = 0;
-	li.LowPart = SetFilePointer(h, 0, &li.HighPart, FILE_CURRENT);
-	if (li.LowPart == 0xffffffffUL && GetLastError() != NO_ERROR) {
+	LARGE_INTEGER prevPos;
+	LARGE_INTEGER newPos = {};
+	if (!SetFilePointerEx(h, newPos, &prevPos, FILE_CURRENT)) {
 		return -(errno = EIO);
 	}
-
-	LONG high = len >> 32;
-	if (!SetFilePointer(h, (DWORD) len, &high, FILE_BEGIN)) {
-		return -(errno = EIO);
+	if (prevPos.QuadPart != len) {
+		newPos.QuadPart = len;
+		if (!SetFilePointerEx(h, newPos, NULL, FILE_BEGIN)) {
+			return -(errno = EIO);
+		}
 	}
 	const BOOL res = SetEndOfFile(h);
-
-	// Try to restore the old position unconditionally.
-	SetFilePointer(h, li.LowPart, &li.HighPart, FILE_BEGIN);
+	if (prevPos.QuadPart != len) {
+		// Try to restore the old position unconditionally.
+		SetFilePointerEx(h, prevPos, NULL, FILE_BEGIN);
+	}
 	return res ? 0 : -(errno = EIO);
 #else
 	int ret = ftruncate64(outn->fd, len);
