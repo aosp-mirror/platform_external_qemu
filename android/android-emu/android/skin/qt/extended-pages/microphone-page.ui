@@ -119,7 +119,6 @@
    <property name="font">
     <font>
      <family>Roboto</family>
-     <pointsize>10</pointsize>
      <weight>75</weight>
      <bold>true</bold>
     </font>
@@ -162,7 +161,6 @@
    <property name="font">
     <font>
      <family>Roboto</family>
-     <pointsize>10</pointsize>
      <weight>75</weight>
      <bold>true</bold>
     </font>

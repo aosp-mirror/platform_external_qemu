@@ -25,7 +25,6 @@
    <property name="font">
     <font>
      <family>Roboto</family>
-     <pointsize>10</pointsize>
     </font>
    </property>
    <property name="styleSheet">
@@ -166,7 +165,6 @@
    <property name="font">
     <font>
      <family>Roboto</family>
-     <pointsize>10</pointsize>
     </font>
    </property>
    <property name="styleSheet">
@@ -213,7 +211,6 @@
    <property name="font">
     <font>
      <family>Roboto</family>
-     <pointsize>10</pointsize>
     </font>
    </property>
    <property name="styleSheet">
@@ -260,7 +257,6 @@
    <property name="font">
     <font>
      <family>Roboto</family>
-     <pointsize>10</pointsize>
     </font>
    </property>
    <property name="styleSheet">
