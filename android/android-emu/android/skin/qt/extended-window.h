@@ -74,6 +74,7 @@ private slots:
     void on_batteryButton_clicked();
     void on_cellularButton_clicked();
     void on_dpadButton_clicked();
+    void on_rotaryInputButton_clicked();
     void on_fingerButton_clicked();
     void on_helpButton_clicked();
     void on_locationButton_clicked();
@@ -81,7 +82,6 @@ private slots:
     void on_settingsButton_clicked();
     void on_telephoneButton_clicked();
     void on_virtSensorsButton_clicked();
-    void on_recordScreenButton_clicked();
 
 private:
     void closeEvent(QCloseEvent* ce) override;

@@ -14,6 +14,7 @@
 #include "android/skin/qt/extended-window-styles.h"
 
 #include "android/emulation/control/user_event_agent.h"
+#include "android/globals.h"
 #include "android/main-common.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-pages/common.h"
@@ -75,17 +76,17 @@ ExtendedWindow::ExtendedWindow(
         this, SLOT(switchToTheme(SettingsTheme)));
 
     mPaneButtonMap = {
-        {PANE_IDX_LOCATION,      mExtendedUi->locationButton},
-        {PANE_IDX_CELLULAR,      mExtendedUi->cellularButton},
-        {PANE_IDX_BATTERY,       mExtendedUi->batteryButton},
-        {PANE_IDX_TELEPHONE,     mExtendedUi->telephoneButton},
-        {PANE_IDX_DPAD,          mExtendedUi->dpadButton},
-        {PANE_IDX_MICROPHONE,    mExtendedUi->microphoneButton},
-        {PANE_IDX_FINGER,        mExtendedUi->fingerButton},
-        {PANE_IDX_VIRT_SENSORS,  mExtendedUi->virtSensorsButton},
-        {PANE_IDX_SETTINGS,      mExtendedUi->settingsButton},
-        {PANE_IDX_HELP,          mExtendedUi->helpButton},
-        {PANE_IDX_RECORD_SCREEN, mExtendedUi->recordScreenButton},
+        {PANE_IDX_LOCATION,     mExtendedUi->locationButton},
+        {PANE_IDX_CELLULAR,     mExtendedUi->cellularButton},
+        {PANE_IDX_BATTERY,      mExtendedUi->batteryButton},
+        {PANE_IDX_TELEPHONE,    mExtendedUi->telephoneButton},
+        {PANE_IDX_DPAD,         mExtendedUi->dpadButton},
+        {PANE_IDX_ROTARY,       mExtendedUi->rotaryInputButton},
+        {PANE_IDX_MICROPHONE,   mExtendedUi->microphoneButton},
+        {PANE_IDX_FINGER,       mExtendedUi->fingerButton},
+        {PANE_IDX_VIRT_SENSORS, mExtendedUi->virtSensorsButton},
+        {PANE_IDX_SETTINGS,     mExtendedUi->settingsButton},
+        {PANE_IDX_HELP,         mExtendedUi->helpButton},
     };
 
     setObjectName("ExtendedControls");
@@ -95,10 +96,14 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->batteryButton);
     mSidebarButtons.addButton(mExtendedUi->telephoneButton);
     mSidebarButtons.addButton(mExtendedUi->dpadButton);
+    if (android_hw->hw_rotaryInput) {
+        mSidebarButtons.addButton(mExtendedUi->rotaryInputButton);
+    } else {
+        mExtendedUi->rotaryInputButton->hide();
+    }
     mSidebarButtons.addButton(mExtendedUi->microphoneButton);
     mSidebarButtons.addButton(mExtendedUi->fingerButton);
     mSidebarButtons.addButton(mExtendedUi->virtSensorsButton);
-    mSidebarButtons.addButton(mExtendedUi->recordScreenButton);
     mSidebarButtons.addButton(mExtendedUi->settingsButton);
     mSidebarButtons.addButton(mExtendedUi->helpButton);
 
@@ -127,7 +132,6 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         mExtendedUi->location_page->setLocationAgent(agentPtr->location);
         mExtendedUi->microphonePage->setMicrophoneAgent(gQAndroidUserEventAgent);
         mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
-//        mExtendedUi->recordScreenPage->setRecordScreenAgent(agentPtr->recordScreen);
     }
     // The ADB port is known now. Show it on the UI Help page.
     mExtendedUi->helpPage->setAdbPort();
@@ -191,17 +195,17 @@ void ExtendedWindow::keyPressEvent(QKeyEvent* e) {
 }
 
 // Tab buttons. Each raises its stacked pane to the top.
-void ExtendedWindow::on_batteryButton_clicked()      { adjustTabs(PANE_IDX_BATTERY); }
-void ExtendedWindow::on_cellularButton_clicked()     { adjustTabs(PANE_IDX_CELLULAR); }
-void ExtendedWindow::on_dpadButton_clicked()         { adjustTabs(PANE_IDX_DPAD); }
-void ExtendedWindow::on_fingerButton_clicked()       { adjustTabs(PANE_IDX_FINGER); }
-void ExtendedWindow::on_helpButton_clicked()         { adjustTabs(PANE_IDX_HELP); }
-void ExtendedWindow::on_locationButton_clicked()     { adjustTabs(PANE_IDX_LOCATION); }
-void ExtendedWindow::on_microphoneButton_clicked()   { adjustTabs(PANE_IDX_MICROPHONE); }
-void ExtendedWindow::on_settingsButton_clicked()     { adjustTabs(PANE_IDX_SETTINGS); }
-void ExtendedWindow::on_telephoneButton_clicked()    { adjustTabs(PANE_IDX_TELEPHONE); }
-void ExtendedWindow::on_virtSensorsButton_clicked()  { adjustTabs(PANE_IDX_VIRT_SENSORS); }
-void ExtendedWindow::on_recordScreenButton_clicked() { adjustTabs(PANE_IDX_RECORD_SCREEN); }
+void ExtendedWindow::on_batteryButton_clicked()     { adjustTabs(PANE_IDX_BATTERY); }
+void ExtendedWindow::on_cellularButton_clicked()    { adjustTabs(PANE_IDX_CELLULAR); }
+void ExtendedWindow::on_dpadButton_clicked()        { adjustTabs(PANE_IDX_DPAD); }
+void ExtendedWindow::on_rotaryInputButton_clicked() { adjustTabs(PANE_IDX_ROTARY); }
+void ExtendedWindow::on_fingerButton_clicked()      { adjustTabs(PANE_IDX_FINGER); }
+void ExtendedWindow::on_helpButton_clicked()        { adjustTabs(PANE_IDX_HELP); }
+void ExtendedWindow::on_locationButton_clicked()    { adjustTabs(PANE_IDX_LOCATION); }
+void ExtendedWindow::on_microphoneButton_clicked()  { adjustTabs(PANE_IDX_MICROPHONE); }
+void ExtendedWindow::on_settingsButton_clicked()    { adjustTabs(PANE_IDX_SETTINGS); }
+void ExtendedWindow::on_telephoneButton_clicked()   { adjustTabs(PANE_IDX_TELEPHONE); }
+void ExtendedWindow::on_virtSensorsButton_clicked() { adjustTabs(PANE_IDX_VIRT_SENSORS); }
 
 
 void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
