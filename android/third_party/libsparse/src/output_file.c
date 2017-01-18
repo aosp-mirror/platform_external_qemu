@@ -182,32 +182,33 @@ static int file_pad(struct output_file *out, int64_t len)
 #endif
 }
 
-#ifdef USE_MINGW
-
-static bool is_zeroed(void* ptr, int len) {
-	const char* data = ptr;
-	const char* const end = data + len;
-	for (; data != end; ++data) {
-		if (*data != 0) {
-			return false;
-		}
-	}
-	return true;
-}
-#endif
+//#ifdef USE_MINGW
+//
+//static bool is_zeroed(void* ptr, int len) {
+//    const char* data = ptr;
+//    const char* const end = data + len;
+//    for (; data != end; ++data) {
+//        if (*data != 0) {
+//            return false;
+//        }
+//    }
+//    return true;
+//}
+//
+//#endif
 
 static int file_write(struct output_file *out, void *data, int len)
 {
 	int ret;
 	struct output_file_normal *outn = to_output_file_normal(out);
 
-#ifdef USE_MINGW
-	if (outn->sparse && is_zeroed(data, len)) {
-		// Files are written in sequential order, so we know this range is
-		// already empty and we can skip it.
-		return file_skip(out, len);
-	}
-#endif
+//#ifdef USE_MINGW
+//	if (outn->sparse && is_zeroed(data, len)) {
+//		// Files are written in sequential order, so we know this range is
+//		// already empty and we can skip it.
+//		return file_skip(out, len);
+//	}
+//#endif
 
 	ret = write(outn->fd, data, len);
 	if (ret < 0) {
