@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a3cef5ed_0842c7a5",
+        "filename": "android/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-01-18T06:36:13Z",
+      "side": 1,
+      "message": "Sure, sounds good. Actually I am considering wrapping up the saving / loading of basic types, so that we could later replace it with an xml writer. Do you think that is a good / bad idea?",
+      "parentUuid": "a3ed1509_9f3bbfa2",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 5
+      },
+      "revId": "48a37aa850f40eac62d963d93e25d2d1cbe28e5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a3ed1509_df5827f6",
         "filename": "android/android-emugl/host/libs/libOpenglRender/BufferQueue.h",
         "patchSetId": 2
@@ -59,6 +83,30 @@
       "writtenOn": "2017-01-17T17:19:24Z",
       "side": 1,
       "message": "the queue has two places where external waiters can be blocked - pushLocked() and popLocked(). It means we need to make sure they\u0027re unblocked to see the new contents after loading, and we need to think what should happen during saving. E.g. if there was someone who wanted to push new data buffer, we must ensure consistency - either this buffer will be resent by the guest after loading the snapshot, or we need to drain the push requests before saving",
+      "range": {
+        "startLine": 151,
+        "startChar": 4,
+        "endLine": 151,
+        "endChar": 46
+      },
+      "revId": "48a37aa850f40eac62d963d93e25d2d1cbe28e5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a3cef5ed_484cbfd7",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/BufferQueue.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-01-18T06:36:13Z",
+      "side": 1,
+      "message": "Yup, I am also worrying what would happen when we try to snapshot but it is blocked. I will try to print a warning message for now, and come back to it later.",
+      "parentUuid": "a3ed1509_3f4293fd",
       "range": {
         "startLine": 151,
         "startChar": 4,
