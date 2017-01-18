@@ -182,35 +182,76 @@ static int file_pad(struct output_file *out, int64_t len)
 #endif
 }
 
-//#ifdef USE_MINGW
-//
-//static bool is_zeroed(void* ptr, int len) {
-//    const char* data = ptr;
-//    const char* const end = data + len;
-//    for (; data != end; ++data) {
-//        if (*data != 0) {
-//            return false;
-//        }
-//    }
-//    return true;
-//}
-//
-//#endif
+#ifdef USE_MINGW
+
+static bool is_zeroed(void* ptr, int len) {
+    const char* data = ptr;
+    const char* const end = data + len;
+    for (; data != end; ++data) {
+        if (*data != 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+static bool write_zeros(struct output_file *out, int len) {
+    if (!len) {
+        return true;
+    }
+
+    struct output_file_normal * const outn = to_output_file_normal(out);
+    const int fd = outn->fd;
+
+    const HANDLE h = (HANDLE)_get_osfhandle(fd);
+    LARGE_INTEGER size;
+    if (!GetFileSizeEx(h, &size)) {
+        return false;
+    }
+    const LARGE_INTEGER zero = {};
+    LARGE_INTEGER pos;
+    if (!SetFilePointerEx(h, zero, &pos, FILE_CURRENT)) {
+        return false;
+    }
+
+    // Calculate the amount of data we need to overwrite with zeroes first.
+    // |FSCTL_SET_ZERO_DATA| can't extend the file, so we cap the size used with
+    // the current file size.
+    const int toZeroOut = min(len, size.QuadPart - pos.QuadPart);
+    if (toZeroOut > 0) {
+        DWORD dummy;
+        FILE_ZERO_DATA_INFORMATION setZero;
+        setZero.FileOffset = pos;
+        setZero.BeyondFinalZero.QuadPart = pos.QuadPart + toZeroOut;
+        if (!DeviceIoControl(h, FSCTL_SET_ZERO_DATA, &setZero, sizeof(setZero),
+                             NULL, 0, &dummy, NULL)) {
+            return false;
+        }
+        // |FSCTL_SET_ZERO_DATA| doesn't move file pointer, so we will need to
+        // seek for the full requested |len|, not just for the part we did
+        // overwrite with zeroes.
+    }
+    // Extend the file to zero out for the whole |len|.
+    return file_skip(out, len) == 0;
+}
+
+#endif
 
 static int file_write(struct output_file *out, void *data, int len)
 {
 	int ret;
 	struct output_file_normal *outn = to_output_file_normal(out);
 
-//#ifdef USE_MINGW
-//	if (outn->sparse && is_zeroed(data, len)) {
-//		// Files are written in sequential order, so we know this range is
-//		// already empty and we can skip it.
-//		return file_skip(out, len);
-//	}
-//#endif
+#ifdef USE_MINGW
+    if (outn->sparse && is_zeroed(data, len)) {
+        if (write_zeros(out, len)) {
+            return 0;
+        }
+        // otherwise just use a regular write() code to write physical zeroes
+    }
+#endif
 
-	ret = write(outn->fd, data, len);
+    ret = write(outn->fd, data, len);
 	if (ret < 0) {
 		error_errno("write");
 		return -1;
