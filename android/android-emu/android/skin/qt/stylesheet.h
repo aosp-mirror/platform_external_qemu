@@ -25,6 +25,9 @@ const QString& stylesheetForTheme(SettingsTheme theme);
 // |hi_density| should be true for Retina displays.
 const QString& fontStylesheet(bool hi_density);
 
+// Returns a string representing font size value in a style sheet.
+const QString& stylesheetFontSize(bool large);
+
 // Returns a mapping of stylesheet template variable names to their
 // values in a given theme.
 const QHash<QString, QString>& stylesheetValues(SettingsTheme theme);

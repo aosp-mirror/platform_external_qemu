@@ -17,6 +17,8 @@
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/skin/ui.h"
 
+#include "android/skin/qt/stylesheet.h"
+
 #include <QDesktopServices>
 #include <QQuaternion>
 
@@ -420,7 +422,8 @@ void VirtualSensorsPage::updateResultingValues(QVector3D acceleration,
     table_html_stream.setRealNumberNotation(QTextStream::FixedNotation);
     table_html_stream
         << "<table border=\"0\""
-        << "       cellpadding=\"3\" style=\"font-size:8pt\">"
+        << "       cellpadding=\"3\" style=\"font-size:" <<
+           Ui::stylesheetFontSize(false) << "\">"
         << "<tr>"
         << "<td>" << tr("Accelerometer (m/s<sup>2</sup>)") << ":</td>"
         << "<td align=left>" << acceleration.x() << "</td>"
