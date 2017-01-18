@@ -695,6 +695,13 @@ static void qpa_fini_in (HWVoiceIn *hw)
 {
     void *ret;
     PAVoiceIn *pa = (PAVoiceIn *) hw;
+    paaudio *g = pa->g;
+
+    //Resume audio input as a read may be in progress waiting for more data
+    //Setting the second arg of pa_stream_cork to 0 resumes the audio stream
+    pa_threaded_mainloop_lock (g->mainloop);
+    pa_stream_cork(pa->stream, 0, NULL, NULL);
+    pa_threaded_mainloop_unlock (g->mainloop);
 
     audio_pt_lock (&pa->pt, AUDIO_FUNC);
     pa->done = 1;
