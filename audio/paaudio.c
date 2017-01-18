@@ -111,13 +111,13 @@ static inline int PA_STREAM_IS_GOOD(pa_stream_state_t x)
 
 static int qpa_simple_read (PAVoiceIn *p, void *data, size_t length, int *rerror)
 {
+    int remaining = length;
     paaudio *g = p->g;
 
     pa_threaded_mainloop_lock (g->mainloop);
 
     CHECK_DEAD_GOTO (g, p->stream, rerror, unlock_and_fail);
-
-    while (length > 0) {
+    while (!pa_stream_is_corked(p->stream) && remaining > 0) {
         size_t l;
 
         while (!p->read_data) {
@@ -134,11 +134,11 @@ static int qpa_simple_read (PAVoiceIn *p, void *data, size_t length, int *rerror
             }
         }
 
-        l = p->read_length < length ? p->read_length : length;
+        l = p->read_length < remaining ? p->read_length : remaining;
         memcpy (data, (const uint8_t *) p->read_data+p->read_index, l);
 
         data = (uint8_t *) data + l;
-        length -= l;
+        remaining -= l;
 
         p->read_index += l;
         p->read_length -= l;
@@ -156,7 +156,7 @@ static int qpa_simple_read (PAVoiceIn *p, void *data, size_t length, int *rerror
     }
 
     pa_threaded_mainloop_unlock (g->mainloop);
-    return 0;
+    return length - remaining;
 
 unlock_and_fail:
     pa_threaded_mainloop_unlock (g->mainloop);
@@ -331,15 +331,21 @@ static void *qpa_thread_in (void *arg)
             int chunk = audio_MIN (to_grab, hw->samples - wpos);
             void *buf = advance (pa->pcm_buf, wpos);
 
-            if (qpa_simple_read (pa, buf,
-                                 chunk << hw->info.shift, &error) < 0) {
+            int bytes = qpa_simple_read (pa, buf,
+                                 chunk << hw->info.shift, &error);
+            if (bytes < 0) {
                 qpa_logerr (error, "pa_simple_read failed\n");
                 return NULL;
             }
 
-            hw->conv (hw->conv_buf + wpos, buf, chunk);
-            wpos = (wpos + chunk) % hw->samples;
-            to_grab -= chunk;
+            if (bytes == 0) {
+                break;
+            }
+
+            int readchunk = bytes >> hw->info.shift;
+            hw->conv (hw->conv_buf + wpos, buf, readchunk);
+            wpos = (wpos + readchunk) % hw->samples;
+            to_grab -= readchunk;
         }
 
         if (audio_pt_lock (&pa->pt, AUDIO_FUNC)) {
@@ -695,6 +701,13 @@ static void qpa_fini_in (HWVoiceIn *hw)
 {
     void *ret;
     PAVoiceIn *pa = (PAVoiceIn *) hw;
+    paaudio *g = pa->g;
+
+    //Resume audio input as a read may be in progress waiting for more data
+    //Setting the second arg of pa_stream_cork to 0 resumes the audio stream
+    pa_threaded_mainloop_lock (g->mainloop);
+    pa_stream_cork(pa->stream, 0, NULL, NULL);
+    pa_threaded_mainloop_unlock (g->mainloop);
 
     audio_pt_lock (&pa->pt, AUDIO_FUNC);
     pa->done = 1;
