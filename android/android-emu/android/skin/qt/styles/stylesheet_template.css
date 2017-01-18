@@ -89,11 +89,16 @@ QPushButton:pressed[helpButton=true] {
     border: none;
     background: %%TAB_DARKENED_COLOR%%;
 }
+QWidget[ColorGroup="MajorTab"] {
+    border: none;
+    background: %%TAB_BKG_COLOR%%;
+}
 QPushButton[ColorGroup="MajorTab"] {
     border: none;
     text-align: left;
     color: %%MAJOR_TAB_COLOR%%;
     background: %%TAB_BKG_COLOR%%;
+    padding: 10px 0px 10px 16px;
 }
 QPushButton[ColorGroup="MajorTabTitle"] {
     border: none;
