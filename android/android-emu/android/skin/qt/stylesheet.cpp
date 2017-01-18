@@ -11,12 +11,15 @@
 
 #include "android/skin/qt/stylesheet.h"
 
-#include <atomic>
+#include "android/base/memory/LazyInstance.h"
+
 #include <QFile>
+#include <QFont>
 #include <QHash>
-#include <QMutex>
 #include <QTextStream>
 #include <QtGlobal>
+
+#include <math.h>
 
 namespace Ui {
 
@@ -29,7 +32,8 @@ static QString darkStylesheet;
 static QString lightStylesheet;
 
 static QString hiDensityFontStylesheet;
-static QString loDensityFontStylesheet;
+// As of now low density font stylesheet is exactly the same.
+// static QString loDensityFontStylesheet;
 
 // We have two styles: one for the light-colored theme and one for
 // the dark-colored theme.
@@ -105,15 +109,35 @@ QHash<QString, QString> darkValues {
     {THEME_PATH_VAR,                    "dark"},
 };
 
-QHash<QString, QString> hiDensityValues {
-    {"FONT_MEDIUM", "8pt"},
-    {"FONT_LARGE", "10pt"},
+struct FontSizeMapLoader {
+    FontSizeMapLoader() {
+        QFont font; // Default ctor populates all values from the system.
+        if (font.pointSizeF() > 0) {
+            const auto largeSize = font.pointSizeF();
+            const auto medSize = largeSize * 8 / 10;
+            fontMap = {
+                {"FONT_MEDIUM", QString("%1pt").arg(medSize) },
+                {"FONT_LARGE", QString("%1pt").arg(largeSize) }
+            };
+        } else if (font.pixelSize() > 0) {
+            const auto largeSize = font.pixelSize();
+            const auto medSize = largeSize * 8 / 10;
+            fontMap = {
+                {"FONT_MEDIUM", QString("%1px").arg(medSize) },
+                {"FONT_LARGE", QString("%1px").arg(largeSize) }
+            };
+        } else {
+            fontMap = {
+                {"FONT_MEDIUM", "8pt"},
+                {"FONT_LARGE", "10pt"},
+            };
+        }
+    }
+
+    QHash<QString, QString> fontMap;
 };
 
-QHash<QString, QString> loDensityValues {
-    {"FONT_MEDIUM", "8pt"},
-    {"FONT_LARGE", "10pt"},
-};
+static android::base::LazyInstance<FontSizeMapLoader> sFontSizeMapLoader = {};
 
 // Encapsulates parsing a stylesheet template and generating a stylesheet
 // from template.
@@ -268,31 +292,26 @@ static bool initializeStylesheets() {
     }
 
     QTextStream hi_font_stylesheet_stream(&hiDensityFontStylesheet);
-    if (!font_tpl.render(hiDensityValues, &hi_font_stylesheet_stream)) {
-        return false;
-    }
-
-    QTextStream lo_font_stylesheet_stream(&loDensityFontStylesheet);
-    if (!font_tpl.render(loDensityValues, &lo_font_stylesheet_stream)) {
+    if (!font_tpl.render(sFontSizeMapLoader->fontMap, &hi_font_stylesheet_stream)) {
         return false;
     }
 
     return true;
 }
 
-const QString& stylesheetForTheme(SettingsTheme theme) {
-    static std::atomic<bool> stylesheets_initialized(false);
-    static QMutex init_mutex;
-    if (!stylesheets_initialized) {
-        init_mutex.lock();
-        if (!stylesheets_initialized) {
-            if (!initializeStylesheets()) {
-                qWarning("Failed to initialize UI stylesheets!");
-            }
+struct StylesheetInitializer {
+    StylesheetInitializer() {
+        if (!initializeStylesheets()) {
+            qWarning("Failed to initialize UI stylesheets!");
         }
-        stylesheets_initialized = true;
-        init_mutex.unlock();
     }
+};
+
+static android::base::LazyInstance<StylesheetInitializer>
+        sStylesheetInitializer = {};
+
+const QString& stylesheetForTheme(SettingsTheme theme) {
+    sStylesheetInitializer.get();   // Make sure it's initialized.
 
     switch (theme) {
     case SETTINGS_THEME_DARK:
@@ -305,7 +324,7 @@ const QString& stylesheetForTheme(SettingsTheme theme) {
 }
 
 const QString& fontStylesheet(bool hi_density) {
-    return hi_density ? hiDensityFontStylesheet : loDensityFontStylesheet;
+    return hiDensityFontStylesheet;
 }
 
 
