@@ -46,6 +46,30 @@
       "revId": "7b6124f9321141f50679bd37bb5c759d206cc7d7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6854da0e_40d732d4",
+        "filename": "audio/paaudio.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 703,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2017-01-19T01:12:05Z",
+      "side": 1,
+      "message": "*mainloop thread lock",
+      "parentUuid": "6854da0e_d5a1a696",
+      "range": {
+        "startLine": 703,
+        "startChar": 4,
+        "endLine": 703,
+        "endChar": 18
+      },
+      "revId": "7b6124f9321141f50679bd37bb5c759d206cc7d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
