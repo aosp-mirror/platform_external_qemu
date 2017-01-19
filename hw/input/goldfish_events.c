@@ -306,10 +306,6 @@ static const GoldfishEventCodeInfo ev_key_codes_table[] = {
     KEY_CODE(KEY_NOTIFICATION, LINUX_KEY_NOTIFICATION),
 
     KEY_CODE(KEY_APPSWITCH, ANDROID_KEY_APPSWITCH),
-    KEY_CODE(KEY_STEM_PRIMARY, ANDROID_KEY_STEM_PRIMARY),
-    KEY_CODE(KEY_STEM_1, ANDROID_KEY_STEM_1),
-    KEY_CODE(KEY_STEM_2, ANDROID_KEY_STEM_2),
-    KEY_CODE(KEY_STEM_3, ANDROID_KEY_STEM_3),
 
     BTN_CODE(BTN_MISC),
     BTN_CODE(BTN_0),
@@ -739,13 +735,8 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
     goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_SOFT2);
     goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_POWER);
     goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_SEARCH);
-    goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_SLEEP);
 
     goldfish_events_set_bit(s, EV_KEY, ANDROID_KEY_APPSWITCH);
-    goldfish_events_set_bit(s, EV_KEY, ANDROID_KEY_STEM_PRIMARY);
-    goldfish_events_set_bit(s, EV_KEY, ANDROID_KEY_STEM_1);
-    goldfish_events_set_bit(s, EV_KEY, ANDROID_KEY_STEM_2);
-    goldfish_events_set_bit(s, EV_KEY, ANDROID_KEY_STEM_3);
 
     if (s->have_dpad) {
         goldfish_events_set_bit(s, EV_KEY, LINUX_KEY_DOWN);

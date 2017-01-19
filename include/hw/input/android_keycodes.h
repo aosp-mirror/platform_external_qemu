@@ -18,10 +18,3 @@
 // Note: qemu-user-event-agent-impl.c limits key values to 0x3ff (1023)
 
 #define ANDROID_KEY_APPSWITCH    580
-
-// Keycodes added to android.view.KeyEvent in API 24, to support hardware
-// buttons on Android Wear devices
-#define ANDROID_KEY_STEM_PRIMARY 264
-#define ANDROID_KEY_STEM_1 265
-#define ANDROID_KEY_STEM_2 266
-#define ANDROID_KEY_STEM_3 267
