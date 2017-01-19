@@ -245,13 +245,11 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     EGLint wantedRedSize = 8;
     EGLint wantedGreenSize = 8;
     EGLint wantedBlueSize = 8;
-    EGLint wantedAlphaSize = 0;
 
     const GLint configAttribs[] = {
         EGL_RED_SIZE, wantedRedSize,
         EGL_GREEN_SIZE, wantedGreenSize,
         EGL_BLUE_SIZE, wantedBlueSize,
-        EGL_ALPHA_SIZE, wantedAlphaSize,
         EGL_SURFACE_TYPE, surfaceType,
         EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
         EGL_NONE
@@ -270,17 +268,15 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
 
     EGLint exact_match_index = -1;
     for (EGLint i = 0; i < total_egl_compatible_configs; i++) {
-        EGLint r,g,b,a;
+        EGLint r,g,b;
         EGLConfig c = all_configs[i];
         s_egl.eglGetConfigAttrib(fb->m_eglDisplay, c, EGL_RED_SIZE, &r);
         s_egl.eglGetConfigAttrib(fb->m_eglDisplay, c, EGL_GREEN_SIZE, &g);
         s_egl.eglGetConfigAttrib(fb->m_eglDisplay, c, EGL_BLUE_SIZE, &b);
-        s_egl.eglGetConfigAttrib(fb->m_eglDisplay, c, EGL_ALPHA_SIZE, &a);
 
         if (r == wantedRedSize &&
             g == wantedGreenSize &&
-            b == wantedBlueSize &&
-            a == wantedAlphaSize) {
+            b == wantedBlueSize) {
             exact_match_index = i;
             break;
         }
