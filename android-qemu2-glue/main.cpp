@@ -874,19 +874,12 @@ extern "C" int main(int argc, char **argv) {
 
     // Network
     args[n++] = "-netdev";
-    std::string hostfwd;
-    if (opts->hostfwd) {
-        hostfwd = StringFormat("user,id=mynet,hostfwd=%s", opts->hostfwd);
-    }
-    else {
-        hostfwd = StringFormat("user,id=mynet");
-    }
-    args[n++] = hostfwd.c_str();
+    args[n++] = "user,id=mynet";
     args[n++] = "-device";
     std::string netDevice =
             StringFormat("%s,netdev=mynet", kTarget.networkDeviceType);
     args[n++] = netDevice.c_str();
-
+ 
     // add 2nd nic as eth1
     args[n++] = "-netdev";
     args[n++] = "user,id=mynet2,net=10.0.3.0/24";
