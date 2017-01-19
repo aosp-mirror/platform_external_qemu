@@ -68,9 +68,30 @@ $(call emugl-end-module)
 
 ### OpenglRender unittests
 $(call emugl-begin-executable,lib$(BUILD_TARGET_SUFFIX)OpenglRender_unittests)
+$(call emugl-import,libOpenglCodecCommon)
+
+$(call emugl-export,C_INCLUDES,$(EMUGL_PATH)/host/include)
+$(call emugl-export,C_INCLUDES,$(LOCAL_PATH))
+$(call emugl-export,LDLIBS,-lm)
+
+# use Translator's egl/gles headers
+LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/Translator/include
+LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/Translator/GLES_V2/
+LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/libOpenGLESDispatch
+LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/include/OpenGLESDispatch
+LOCAL_C_INCLUDES += $(ANGLE_TRANSLATION_INCLUDES)
+LOCAL_STATIC_LIBRARIES += $(ANGLE_TRANSLATION_STATIC_LIBRARIES)
+LOCAL_STATIC_LIBRARIES += libOpenGLESDispatch
+LOCAL_STATIC_LIBRARIES += libemugl_common
+LOCAL_STATIC_LIBRARIES += android-emu-base
+
+LOCAL_SYMBOL_FILE := render_api.entries
 
 LOCAL_SRC_FILES := \
     BufferQueue_unittest.cpp \
+    ../Translator/GLES_V2/ANGLEShaderParser.cpp \
+    OpenGLTestContext.cpp \
+    OpenGL_unittest.cpp \
 
 $(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender libemugl_gtest)
 $(call emugl-end-module)

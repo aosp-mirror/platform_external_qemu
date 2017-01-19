@@ -12,7 +12,6 @@
 
 #include "android/skin/qt/gl-canvas.h"
 #include "android/skin/qt/gl-texture-draw.h"
-#include "OpenGLESDispatch/GLESv2Dispatch.h"
 
 #include <cmath>
 #include <memory>
