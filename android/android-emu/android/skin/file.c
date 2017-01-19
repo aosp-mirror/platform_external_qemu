@@ -224,11 +224,6 @@ static unsigned translate_button_name(const char* name) {
         { "channel-up",   kKeyCodeChannelUp },
         { "channel-down", kKeyCodeChannelDown },
         { "app-switch",   kKeyCodeAppSwitch },
-        { "sleep",        kKeyCodeSleep },
-        { "stem-primary", kKeyCodeStemPrimary },
-        { "stem1",        kKeyCodeStem1 },
-        { "stem2",        kKeyCodeStem2 },
-        { "stem3",        kKeyCodeStem3 },
         { 0, 0 },
     };
 
