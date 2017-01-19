@@ -22,6 +22,30 @@
       "revId": "7b6124f9321141f50679bd37bb5c759d206cc7d7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6854da0e_d5a1a696",
+        "filename": "audio/paaudio.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 703,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2017-01-19T01:11:00Z",
+      "side": 1,
+      "message": "The issue with that CL was that I had called pa_stream_cork without holding the mainloop thread.",
+      "parentUuid": "6854da0e_2c68b79a",
+      "range": {
+        "startLine": 703,
+        "startChar": 4,
+        "endLine": 703,
+        "endChar": 18
+      },
+      "revId": "7b6124f9321141f50679bd37bb5c759d206cc7d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
