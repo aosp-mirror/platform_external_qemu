@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "88902e0b_bf263783",
+        "filename": "android/android-emu/android/skin/android_keycodes.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-01-19T16:52:26Z",
+      "side": 1,
+      "message": "nit: Can you add a minimum amount of documentation explaining what these correspond to? The term \"stem\" is soooo generic.",
+      "revId": "c6be4056087ae68a231b5db12fa31432c77db908",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88902e0b_ff1cbf34",
+        "filename": "include/hw/input/android_keycodes.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-01-19T16:52:26Z",
+      "side": 1,
+      "message": "nit: Same here, to keep both files consistent.",
+      "revId": "c6be4056087ae68a231b5db12fa31432c77db908",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
