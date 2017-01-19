@@ -82,8 +82,7 @@ EglConfig::EglConfig(EGLint     red_size,
         m_color_buffer_type(EGL_RGB_BUFFER) {}
 
 
-#define FB_TARGET_ANDROID_BUF_SIZE(size) \
-    (size == 16 || size == 24 || size == 32) ? EGL_TRUE : EGL_FALSE
+#define FB_TARGET_ANDROID_BUF_SIZE(size) (size == 16  || size == 32) ? EGL_TRUE : EGL_FALSE
 
 EglConfig::EglConfig(EGLint     red_size,
                      EGLint     green_size,
