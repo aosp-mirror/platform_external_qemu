@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6854da0e_17f178e7",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThread.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-19T18:31:09Z",
+      "side": 1,
+      "message": "this just doesn\u0027t look right to me. Why can\u0027t we stop the render thread and start a new one instead? Snapshots in general aren\u0027t loaded in the same configuration as they were saved, so there may be more render threads, may be less, some of them could be completely unrelated etc",
+      "range": {
+        "startLine": 51,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 31
+      },
+      "revId": "7294f543b924da80fede588fd10b291969904caa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
