@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "88902e0b_7fe8afc4",
+        "filename": "android/android-emu/android/skin/android_keycodes.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1026713
+      },
+      "writtenOn": "2017-01-19T17:30:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "88902e0b_bf263783",
+      "revId": "c6be4056087ae68a231b5db12fa31432c77db908",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "88902e0b_ff1cbf34",
         "filename": "include/hw/input/android_keycodes.h",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2017-01-19T16:52:26Z",
       "side": 1,
       "message": "nit: Same here, to keep both files consistent.",
+      "revId": "c6be4056087ae68a231b5db12fa31432c77db908",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88902e0b_3fe227e5",
+        "filename": "include/hw/input/android_keycodes.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1026713
+      },
+      "writtenOn": "2017-01-19T17:30:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "88902e0b_ff1cbf34",
       "revId": "c6be4056087ae68a231b5db12fa31432c77db908",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
