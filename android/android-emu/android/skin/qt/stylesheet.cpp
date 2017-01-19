@@ -23,15 +23,11 @@
 
 namespace Ui {
 
-const char* THEME_PATH_VAR = "PATH";
-const char* MAJOR_TAB_COLOR_VAR = "MAJOR_TAB_COLOR";
-const char* TAB_BKG_COLOR_VAR = "TAB_BKG_COLOR";
-const char* TAB_SELECTED_COLOR_VAR = "TAB_SELECTED_COLOR";
+const char THEME_PATH_VAR[] = "PATH";
+const char MAJOR_TAB_COLOR_VAR[] = "MAJOR_TAB_COLOR";
+const char TAB_BKG_COLOR_VAR[] = "TAB_BKG_COLOR";
+const char TAB_SELECTED_COLOR_VAR[] = "TAB_SELECTED_COLOR";
 
-static QString darkStylesheet;
-static QString lightStylesheet;
-
-static QString hiDensityFontStylesheet;
 // As of now low density font stylesheet is exactly the same.
 // static QString loDensityFontStylesheet;
 
@@ -61,54 +57,6 @@ static QString hiDensityFontStylesheet;
 // These are identified by the value of their "ColorGroup" or "class"
 // property.
 
-// These are the colors used in the two themes
-
-QHash<QString, QString> lightValues {
-    {"BOX_COLOR",                       "#e0e0e0"},  // Boundary around SMS text area
-    {"BKG_COLOR",                       "#f0f0f0"},  // Main page background
-    {"BKG_COLOR_OVERLAY", "rgba(236,236,236,255)"},  // Overlay background
-    {"DISABLED_PULLDOWN_COLOR",         "#c0c0c0"},  // Text in disabled combo box
-    {"DISABLED_TOOL_COLOR",             "#baeae4"},  // Grayed-out button text
-    {"DIVIDER_COLOR",                   "#e0e0e0"},  // Line between items
-    {"EDIT_COLOR",                      "#e0e0e0"},  // Line under editable fields
-    {"LARGE_DIVIDER_COLOR",             "#ebebeb"},  // Start of large divider's gradient
-    {MAJOR_TAB_COLOR_VAR,               "#91a4ad"},  // Text of major tabs
-    {"MAJOR_TITLE_COLOR",               "#617d8a"},  // Text of major tab separators
-    {"SCROLL_BKG_COLOR",                "#f6f6f6"},  // Background of scroll bar
-    {"SCROLL_HANDLE_COLOR",             "#d9d9d9"},  // Handle of scroller
-    {TAB_BKG_COLOR_VAR,                 "#ffffff"},  // Background of major tabs
-    {TAB_SELECTED_COLOR_VAR,            "#f5f5f5"},  // Background of the selected major tab
-    {"TAB_DARKENED_COLOR",              "#e6e6e6"},
-    {"TABLE_BOTTOM_COLOR",              "#e0e0e0"},
-    {"TEXT_COLOR",                      "#212121"},  // Main page text
-    {"TITLE_COLOR",                     "#757575"},  // Main page titles
-    {"TOOL_COLOR",                      "#00bea4"},  // Checkboxes, sliders, etc.
-    {THEME_PATH_VAR,                      "light"},  // Icon directory under images/
-};
-
-QHash<QString, QString> darkValues {
-    {"BOX_COLOR",                    "#414a50"},
-    {"BKG_COLOR",                    "#273238"},
-    {"BKG_COLOR_OVERLAY", "rgba(35,46,52,255)"},
-    {"DISABLED_PULLDOWN_COLOR",      "#808080"},
-    {"DISABLED_TOOL_COLOR",          "#1b5c58"},
-    {"DIVIDER_COLOR",                "#e0e0e0"},
-    {"EDIT_COLOR",                   "#808080"},
-    {"LARGE_DIVIDER_COLOR",          "#1f282d"},
-    {MAJOR_TAB_COLOR_VAR,            "#bdc0c3"},
-    {"MAJOR_TITLE_COLOR",            "#e5e6e7"},
-    {"SCROLL_BKG_COLOR",             "#333b43"},
-    {"SCROLL_HANDLE_COLOR",          "#1d272c"},
-    {TAB_BKG_COLOR_VAR,              "#394249"},
-    {TAB_SELECTED_COLOR_VAR,         "#313c42"},
-    {"TAB_DARKENED_COLOR",           "#20292e"},
-    {"TABLE_BOTTOM_COLOR",           "#1d272c"},
-    {"TEXT_COLOR",                   "#eeeeee"},
-    {"TITLE_COLOR",                  "#bec1c3"},
-    {"TOOL_COLOR",                   "#00bea4"},
-    {THEME_PATH_VAR,                    "dark"},
-};
-
 // MacOS has some very different font sizes in points, so our default 8/10pt
 // look really tiny. Let's load the system sizes first before falling back
 // to defaults.
@@ -117,6 +65,9 @@ static const char kFontLargeName[] = "FONT_LARGE";
 
 struct FontSizeMapLoader {
     FontSizeMapLoader() {
+// Windows takes care of the font sizes, and if we try loading them from the
+// system here the result is actually worse compared to hardcoded 8/10pt.
+#ifndef _WIN32
         QFont font; // Default ctor populates all values from the system.
         if (font.pointSizeF() > 0) {
             const auto largeSize = font.pointSizeF();
@@ -132,7 +83,9 @@ struct FontSizeMapLoader {
                 {kFontMediumName, QString("%1px").arg(medSize) },
                 {kFontLargeName, QString("%1px").arg(largeSize) }
             };
-        } else {
+        } else
+#endif // !_WIN32
+        {
             fontMap = {
                 {kFontMediumName, "8pt"},
                 {kFontLargeName, "10pt"},
@@ -274,68 +227,117 @@ private:
     bool mOk;
 };
 
-static bool initializeStylesheets() {
-    StylesheetTemplate tpl(":/styles/stylesheet_template.css");
-    if (!tpl.isOk()) {
-        qWarning("Failed to load stylesheet template!");
-        return false;
-    }
+struct StylesheetValues {
+    QString darkStylesheet;
+    QString lightStylesheet;
+    QString hiDensityFontStylesheet;
 
-    QTextStream dark_stylesheet_stream(&darkStylesheet);
-    if (!tpl.render(darkValues, &dark_stylesheet_stream)) {
-        return false;
-    }
+    // These are the colors used in the two themes
+    QHash<QString, QString> lightValues = {
+        {"BOX_COLOR",                       "#e0e0e0"},  // Boundary around SMS text area
+        {"BKG_COLOR",                       "#f0f0f0"},  // Main page background
+        {"BKG_COLOR_OVERLAY", "rgba(236,236,236,255)"},  // Overlay background
+        {"DISABLED_PULLDOWN_COLOR",         "#c0c0c0"},  // Text in disabled combo box
+        {"DISABLED_TOOL_COLOR",             "#baeae4"},  // Grayed-out button text
+        {"DIVIDER_COLOR",                   "#e0e0e0"},  // Line between items
+        {"EDIT_COLOR",                      "#e0e0e0"},  // Line under editable fields
+        {"LARGE_DIVIDER_COLOR",             "#ebebeb"},  // Start of large divider's gradient
+        {MAJOR_TAB_COLOR_VAR,               "#91a4ad"},  // Text of major tabs
+        {"MAJOR_TITLE_COLOR",               "#617d8a"},  // Text of major tab separators
+        {"SCROLL_BKG_COLOR",                "#f6f6f6"},  // Background of scroll bar
+        {"SCROLL_HANDLE_COLOR",             "#d9d9d9"},  // Handle of scroller
+        {TAB_BKG_COLOR_VAR,                 "#ffffff"},  // Background of major tabs
+        {TAB_SELECTED_COLOR_VAR,            "#f5f5f5"},  // Background of the selected major tab
+        {"TAB_DARKENED_COLOR",              "#e6e6e6"},
+        {"TABLE_BOTTOM_COLOR",              "#e0e0e0"},
+        {"TEXT_COLOR",                      "#212121"},  // Main page text
+        {"TITLE_COLOR",                     "#757575"},  // Main page titles
+        {"TOOL_COLOR",                      "#00bea4"},  // Checkboxes, sliders, etc.
+        {THEME_PATH_VAR,                      "light"},  // Icon directory under images/
+    };
 
-    QTextStream light_stylesheet_stream(&lightStylesheet);
-    if (!tpl.render(lightValues, &light_stylesheet_stream)) {
-        return false;
-    }
+    QHash<QString, QString> darkValues = {
+        {"BOX_COLOR",                    "#414a50"},
+        {"BKG_COLOR",                    "#273238"},
+        {"BKG_COLOR_OVERLAY", "rgba(35,46,52,255)"},
+        {"DISABLED_PULLDOWN_COLOR",      "#808080"},
+        {"DISABLED_TOOL_COLOR",          "#1b5c58"},
+        {"DIVIDER_COLOR",                "#e0e0e0"},
+        {"EDIT_COLOR",                   "#808080"},
+        {"LARGE_DIVIDER_COLOR",          "#1f282d"},
+        {MAJOR_TAB_COLOR_VAR,            "#bdc0c3"},
+        {"MAJOR_TITLE_COLOR",            "#e5e6e7"},
+        {"SCROLL_BKG_COLOR",             "#333b43"},
+        {"SCROLL_HANDLE_COLOR",          "#1d272c"},
+        {TAB_BKG_COLOR_VAR,              "#394249"},
+        {TAB_SELECTED_COLOR_VAR,         "#313c42"},
+        {"TAB_DARKENED_COLOR",           "#20292e"},
+        {"TABLE_BOTTOM_COLOR",           "#1d272c"},
+        {"TEXT_COLOR",                   "#eeeeee"},
+        {"TITLE_COLOR",                  "#bec1c3"},
+        {"TOOL_COLOR",                   "#00bea4"},
+        {THEME_PATH_VAR,                    "dark"},
+    };
 
-    StylesheetTemplate font_tpl(":/styles/fonts_stylesheet_template.css");
-    if (!font_tpl.isOk()) {
-        qWarning("Failed to load font stylesheet template!");
-        return false;
-    }
-
-    QTextStream hi_font_stylesheet_stream(&hiDensityFontStylesheet);
-    if (!font_tpl.render(sFontSizeMapLoader->fontMap, &hi_font_stylesheet_stream)) {
-        return false;
-    }
-
-    return true;
-}
-
-struct StylesheetInitializer {
-    StylesheetInitializer() {
+    StylesheetValues() {
         if (!initializeStylesheets()) {
             qWarning("Failed to initialize UI stylesheets!");
         }
     }
+
+private:
+    bool initializeStylesheets() {
+        StylesheetTemplate tpl(":/styles/stylesheet_template.css");
+        if (!tpl.isOk()) {
+            qWarning("Failed to load stylesheet template!");
+            return false;
+        }
+
+        QTextStream dark_stylesheet_stream(&darkStylesheet);
+        if (!tpl.render(darkValues, &dark_stylesheet_stream)) {
+            return false;
+        }
+
+        QTextStream light_stylesheet_stream(&lightStylesheet);
+        if (!tpl.render(lightValues, &light_stylesheet_stream)) {
+            return false;
+        }
+
+        StylesheetTemplate font_tpl(":/styles/fonts_stylesheet_template.css");
+        if (!font_tpl.isOk()) {
+            qWarning("Failed to load font stylesheet template!");
+            return false;
+        }
+
+        QTextStream hi_font_stylesheet_stream(&hiDensityFontStylesheet);
+        if (!font_tpl.render(sFontSizeMapLoader->fontMap, &hi_font_stylesheet_stream)) {
+            return false;
+        }
+
+        return true;
+    }
 };
 
-static android::base::LazyInstance<StylesheetInitializer>
-        sStylesheetInitializer = {};
+static android::base::LazyInstance<StylesheetValues> sStylesheetValues = {};
 
 const QString& stylesheetForTheme(SettingsTheme theme) {
-    sStylesheetInitializer.get();   // Make sure it's initialized.
-
     switch (theme) {
     case SETTINGS_THEME_DARK:
-        return darkStylesheet;
+        return sStylesheetValues->darkStylesheet;
     case SETTINGS_THEME_LIGHT:
-        return lightStylesheet;
     default:
-        return lightStylesheet;
+        return sStylesheetValues->lightStylesheet;
     }
 }
 
 const QString& fontStylesheet(bool hi_density) {
-    return hiDensityFontStylesheet;
+    return sStylesheetValues->hiDensityFontStylesheet;
 }
 
 
 const QHash<QString, QString>& stylesheetValues(SettingsTheme theme) {
-    return theme == SETTINGS_THEME_LIGHT ? lightValues : darkValues;
+    return theme == SETTINGS_THEME_LIGHT
+            ? sStylesheetValues->lightValues : sStylesheetValues->darkValues;
 }
 
 const QString& stylesheetFontSize(bool large) {
