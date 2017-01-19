@@ -592,7 +592,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>396</y>
+     <y>352</y>
      <width>194</width>
      <height>42</height>
     </rect>
@@ -675,7 +675,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>440</y>
+     <y>396</y>
      <width>194</width>
      <height>42</height>
     </rect>
@@ -875,6 +875,9 @@ font-family: &quot;Roboto&quot;</string>
    </property>
   </widget>
   <widget class="QPushButton" name="recordScreenButton">
+   <property name="visible">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -1021,7 +1024,7 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>helpButton</tabstop>
   <tabstop>spacer1Button</tabstop>
   <tabstop>settingsButton</tabstop>
-  <tabstop>recordScreenButton</tabstop>
+  <!--<tabstop>recordScreenButton</tabstop>-->
   <tabstop>locationButton</tabstop>
   <tabstop>cell_delayBox</tabstop>
   <tabstop>set_keyboardBox</tabstop>
