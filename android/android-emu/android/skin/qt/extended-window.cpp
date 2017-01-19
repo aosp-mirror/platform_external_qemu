@@ -218,6 +218,7 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
 void ExtendedWindow::switchOnTop(bool isOnTop) {
     mEmulatorWindow->setOnTop(isOnTop);
     setFrameOnTop(this, isOnTop);
+    mToolWindow->notifySwitchOnTop();
 }
 
 void ExtendedWindow::switchToTheme(SettingsTheme theme) {
