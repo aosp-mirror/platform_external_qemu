@@ -131,12 +131,8 @@ typedef enum {
     kKeyCodeCycleWindows = LINUX_KEY_CYCLEWINDOWS,
     kKeyCodeChannelUp = LINUX_KEY_CHANNELUP,
     kKeyCodeChannelDown = LINUX_KEY_CHANNELDOWN,
-    kKeyCodeSleep = LINUX_KEY_SLEEP,
-    kKeyCodeStemPrimary = KEY_STEM_PRIMARY,
-    kKeyCodeStem1 = KEY_STEM_1,
-    kKeyCodeStem2 = KEY_STEM_2,
-    kKeyCodeStem3 = KEY_STEM_3,
     kKeyCodeAppSwitch = KEY_APPSWITCH,
+
 } SkinKeyCode;
 
 /* This function is used to rotate D-Pad keycodes, while leaving other ones
