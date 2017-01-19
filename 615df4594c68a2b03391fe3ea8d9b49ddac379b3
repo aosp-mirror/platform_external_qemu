@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "88902e0b_3f2547cc",
+        "filename": "android/android-emu/android/avd/hardware-properties.ini",
+        "patchSetId": 4
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1136238
+      },
+      "writtenOn": "2017-01-19T12:52:27Z",
+      "side": 1,
+      "message": "nit: add eg. a rotating watch crown",
+      "range": {
+        "startLine": 124,
+        "startChar": 37,
+        "endLine": 124,
+        "endChar": 43
+      },
+      "revId": "615df4594c68a2b03391fe3ea8d9b49ddac379b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
