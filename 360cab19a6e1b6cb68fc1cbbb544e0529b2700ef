@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6854da0e_c0332216",
+        "filename": "audio/paaudio.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-19T01:31:25Z",
+      "side": 1,
+      "message": "this is pretty dangerous - the value you were passing was guaranteed to be divisible by 2^shift, but the returned value isn\u0027t. if some chunk wasn\u0027t passed completely, you won\u0027t add it at all here.\nIf I understand the code correctly, the only possible return of bytes !\u003d length is when the stream was corked. Did you just want to exit there?",
+      "range": {
+        "startLine": 345,
+        "startChar": 12,
+        "endLine": 345,
+        "endChar": 52
+      },
+      "revId": "360cab19a6e1b6cb68fc1cbbb544e0529b2700ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
