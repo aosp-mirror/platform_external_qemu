@@ -19,9 +19,16 @@
 #include "qemu/thread.h"
 #include "qemu/atomic.h"
 #include "qemu/notify.h"
+#include "sysemu/sysemu.h"
+
+#include <stdbool.h>
+
+/* |is_qemu_thread| is |true| if the current thread was launched with
+ * qemu_thread_create().
+ * The main thread is the only thread that's supposed to not be like that. */
+static __thread bool is_qemu_thread = false;
 
 static bool name_threads;
-
 static QemuThreadSetupFunc thread_setup_func;
 
 void qemu_thread_register_setup_callback(QemuThreadSetupFunc setup_func)
@@ -417,18 +424,28 @@ QEMU_BUILD_BUG_ON(sizeof(union NotifierThreadData) != sizeof(void *));
 
 void qemu_thread_atexit_add(Notifier *notifier)
 {
-    union NotifierThreadData ntd;
-    ntd.ptr = pthread_getspecific(exit_key);
-    notifier_list_add(&ntd.list, notifier);
-    pthread_setspecific(exit_key, ntd.ptr);
+    if (is_qemu_thread) {
+        union NotifierThreadData ntd;
+        ntd.ptr = pthread_getspecific(exit_key);
+        notifier_list_add(&ntd.list, notifier);
+        pthread_setspecific(exit_key, ntd.ptr);
+    } else {
+        /* this is a main thread, use the main QEMU notifier list */
+        qemu_add_exit_notifier(notifier);
+    }
 }
 
 void qemu_thread_atexit_remove(Notifier *notifier)
 {
-    union NotifierThreadData ntd;
-    ntd.ptr = pthread_getspecific(exit_key);
-    notifier_remove(notifier);
-    pthread_setspecific(exit_key, ntd.ptr);
+    if (is_qemu_thread) {
+        union NotifierThreadData ntd;
+        ntd.ptr = pthread_getspecific(exit_key);
+        notifier_remove(notifier);
+        pthread_setspecific(exit_key, ntd.ptr);
+    } else {
+        /* this is a main thread, use the main QEMU notifier list */
+        qemu_remove_exit_notifier(notifier);
+    }
 }
 
 static void qemu_thread_atexit_run(void *arg)
@@ -471,6 +488,8 @@ typedef struct {
 } ThreadStartData;
 
 static void* qemu_thread_trampoline(void* data_) {
+    is_qemu_thread = true;
+
     /* Copy heap-allocated data to stack then release it. */
     ThreadStartData data = *(ThreadStartData*)data_;
     free(data_);
@@ -479,7 +498,21 @@ static void* qemu_thread_trampoline(void* data_) {
         (*thread_setup_func)();
 
     /* Start the thread. */
-    return (*data.start_routine)(data.arg);
+    void* res = (*data.start_routine)(data.arg);
+
+    /* Run the atexit notifiers deterministically, to make sure all the thread-
+     * local variables are still alive (it's very easy to refer to some
+     * __thread or pthread-specific variable from an exit notifier, and we
+     * don't want to crash because of that). */
+    void* tls_notifiers = pthread_getspecific(exit_key);
+    qemu_thread_atexit_run(tls_notifiers);
+
+    /* Make sure that the following call from the TLS destructor does nothing,
+     * even if some notifier tried to add another one. I hope nobody actually
+     * does anything like that. */
+    pthread_setspecific(exit_key, NULL);
+
+    return res;
 }
 
 void qemu_thread_create(QemuThread *thread, const char *name,
