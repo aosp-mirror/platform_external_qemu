@@ -81,6 +81,8 @@ typedef struct { float a, b, c; } SensorValues;
 
 typedef struct { float x, y, z; } Acceleration;
 
+typedef struct { float x, y, z; } Gyroscope;
+
 typedef struct { float x, y, z; } MagneticField;
 
 typedef struct {
@@ -110,6 +112,7 @@ typedef struct {
     union {
         SensorValues value;
         Acceleration acceleration;
+        Gyroscope gyroscope;
         MagneticField magnetic;
         Orientation orientation;
         Temperature temperature;
@@ -318,6 +321,13 @@ static void serializeSensorValue(Sensor* sensor, AndroidSensor sensor_id) {
             }
             break;
         }
+        case ANDROID_SENSOR_GYROSCOPE: {
+            sensor->serialized.length = snprintf(
+                    sensor->serialized.value, sizeof(sensor->serialized.value),
+                    "gyroscope:%g:%g:%g", sensor->u.gyroscope.x,
+                    sensor->u.gyroscope.y, sensor->u.gyroscope.z);
+            break;
+        }
         case ANDROID_SENSOR_MAGNETIC_FIELD:
             /* NOTE: sensors HAL expects "magnetic", not * "magnetic-field"
              * name here.
@@ -353,11 +363,11 @@ static void serializeSensorValue(Sensor* sensor, AndroidSensor sensor_id) {
                     sensor->serialized.value, sizeof(sensor->serialized.value),
                     "pressure:%g", sensor->u.pressure.value);
             break;
-        case ANDROID_SENSOR_HUMIDITY:
-            sensor->serialized.length = snprintf(
-                    sensor->serialized.value, sizeof(sensor->serialized.value),
-                    "humidity:%g", sensor->u.humidity.value);
-            break;
+        // case ANDROID_SENSOR_HUMIDITY:
+        //     sensor->serialized.length = snprintf(
+        //             sensor->serialized.value, sizeof(sensor->serialized.value),
+        //             "humidity:%g", sensor->u.humidity.value);
+        //     break;
         default:
             assert(false);  // should never happen
             return;
@@ -442,8 +452,9 @@ static void _hwSensorClient_receive(HwSensorClient* cl,
         int nn;
 
         for (nn = 0; nn < MAX_SENSORS; nn++) {
-            if (hw->sensors[nn].enabled)
+            if (hw->sensors[nn].enabled) {
                 mask |= (1 << nn);
+            }
         }
 
         const int len = snprintf(buff, sizeof buff, "%d", mask);
@@ -595,6 +606,11 @@ static void _hwSensors_save(Stream* f, QemudService* sv, void* opaque) {
                 stream_put_float(f, s->u.acceleration.y);
                 stream_put_float(f, s->u.acceleration.z);
                 break;
+            case ANDROID_SENSOR_GYROSCOPE:
+                stream_put_float(f, s->u.gyroscope.x);
+                stream_put_float(f, s->u.gyroscope.y);
+                stream_put_float(f, s->u.gyroscope.z);
+                break;
             case ANDROID_SENSOR_MAGNETIC_FIELD:
                 stream_put_float(f, s->u.magnetic.x);
                 stream_put_float(f, s->u.magnetic.y);
@@ -617,9 +633,9 @@ static void _hwSensors_save(Stream* f, QemudService* sv, void* opaque) {
             case ANDROID_SENSOR_PRESSURE:
                 stream_put_float(f, s->u.pressure.value);
                 break;
-            case ANDROID_SENSOR_HUMIDITY:
-                stream_put_float(f, s->u.humidity.value);
-                break;
+            // case ANDROID_SENSOR_HUMIDITY:
+            //     stream_put_float(f, s->u.humidity.value);
+            //     break;
 
             case MAX_SENSORS:
                 break;
@@ -653,6 +669,11 @@ static int _hwSensors_load(Stream* f, QemudService* s, void* opaque) {
                 s->u.acceleration.y = stream_get_float(f);
                 s->u.acceleration.z = stream_get_float(f);
                 break;
+            case ANDROID_SENSOR_GYROSCOPE:
+                s->u.gyroscope.x = stream_get_float(f);
+                s->u.gyroscope.y = stream_get_float(f);
+                s->u.gyroscope.z = stream_get_float(f);
+                break;
             case ANDROID_SENSOR_MAGNETIC_FIELD:
                 s->u.magnetic.x = stream_get_float(f);
                 s->u.magnetic.y = stream_get_float(f);
@@ -675,9 +696,9 @@ static int _hwSensors_load(Stream* f, QemudService* s, void* opaque) {
             case ANDROID_SENSOR_PRESSURE:
                 s->u.pressure.value = stream_get_float(f);
                 break;
-            case ANDROID_SENSOR_HUMIDITY:
-                s->u.humidity.value = stream_get_float(f);
-                break;
+            // case ANDROID_SENSOR_HUMIDITY:
+            //     s->u.humidity.value = stream_get_float(f);
+            //     break;
             case MAX_SENSORS:
                 break;
         }
@@ -782,6 +803,10 @@ static void _hwSensors_init(HwSensors* h) {
         h->sensors[ANDROID_SENSOR_ACCELERATION].enabled = true;
     }
 
+    if (android_hw->hw_gyroscope) {
+        h->sensors[ANDROID_SENSOR_GYROSCOPE].enabled = true;
+    }
+
     if (android_hw->hw_sensors_proximity) {
         h->sensors[ANDROID_SENSOR_PROXIMITY].enabled = true;
     }
@@ -806,9 +831,9 @@ static void _hwSensors_init(HwSensors* h) {
         h->sensors[ANDROID_SENSOR_PRESSURE].enabled = true;
     }
 
-    if (android_hw->hw_sensors_humidity) {
-        h->sensors[ANDROID_SENSOR_HUMIDITY].enabled = true;
-    }
+    // if (android_hw->hw_sensors_humidity) {
+    //     h->sensors[ANDROID_SENSOR_HUMIDITY].enabled = true;
+    // }
 
     /* XXX: TODO: Add other tests when we add the corresponding
         * properties to hardware-properties.ini et al. */
@@ -914,8 +939,9 @@ extern int android_sensors_set(int sensor_id, float a, float b, float c) {
     if (hw->service != NULL) {
         if (!hw->sensors[sensor_id].enabled)
             return SENSOR_STATUS_DISABLED;
-    } else
+    } else {
         return SENSOR_STATUS_NO_SERVICE;
+    }
 
     _hwSensors_setSensorValue(hw, sensor_id, a, b, c);
 

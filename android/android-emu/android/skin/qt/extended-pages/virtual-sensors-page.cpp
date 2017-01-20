@@ -263,7 +263,7 @@ void VirtualSensorsPage::on_pressureSensorValueWidget_valueChanged(
 void VirtualSensorsPage::on_humiditySensorValueWidget_valueChanged(
     double value) {
     if (!mFirstShow) mVirtualSensorsUsed = true;
-    setSensorValue(mSensorsAgent, ANDROID_SENSOR_HUMIDITY, value);
+    // setSensorValue(mSensorsAgent, ANDROID_SENSOR_HUMIDITY, value);
 }
 
 void VirtualSensorsPage::onMagVectorChanged() {
@@ -292,6 +292,7 @@ void VirtualSensorsPage::onPhoneRotationChanged() {
     mUi->pitchSlider->setValue(x, false);
     mUi->rollSlider->setValue(y, false);
     updateAccelerometerValues();
+    updateGyroscopeValues();
 }
 
 void VirtualSensorsPage::setAccelerometerRotationFromSliders() {
@@ -332,6 +333,17 @@ void VirtualSensorsPage::on_positionXSlider_valueChanged(double) {
 
 void VirtualSensorsPage::on_positionYSlider_valueChanged(double) {
     setPhonePositionFromSliders();
+}
+
+void VirtualSensorsPage::updateGyroscopeValues() {
+    if (!mFirstShow) mVirtualSensorsUsed = true;
+    QQuaternion rotationDelta =
+        mUi->accelWidget->rotationDelta();
+    float dx, dy, dz;
+    rotationDelta.getEulerAngles(&dx, &dy, &dz);
+    setSensorValue(mSensorsAgent,
+                   ANDROID_SENSOR_GYROSCOPE,
+                   dx, dy, dz);
 }
 
 void VirtualSensorsPage::updateAccelerometerValues() {
