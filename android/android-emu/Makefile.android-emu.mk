@@ -679,7 +679,7 @@ EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
 # The skin support sources
 include $(_ANDROID_EMU_ROOT)/android/skin/sources.mk
 
-EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES)
+EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES) $(FFMPEG_STATIC_LIBRARIES) $(LIBX264_STATIC_LIBRARIES)
 
 $(call start-emulator-library, emulator-libui)
 
@@ -691,9 +691,18 @@ LOCAL_CFLAGS += \
     $(ANDROID_SKIN_CFLAGS) \
     $(LIBXML2_CFLAGS) \
 
+# ffmpeg targets C, so it doesn't care that C++11 requres a space bewteen
+# string literals which are being glued together
+ifeq ($(BUILD_TARGET_OS),darwin)
+    LOCAL_CXXFLAGS += -Wno-reserved-user-defined-literal
+else
+    LOCAL_CXXFLAGS += -Wno-literal-suffix
+endif
+
 LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
     $(EMULATOR_LIBUI_INCLUDES) \
+    $(FFMPEG_INCLUDES) \
 
 LOCAL_SRC_FILES += \
     $(ANDROID_SKIN_SOURCES) \
@@ -702,6 +711,7 @@ LOCAL_SRC_FILES += \
     android/emulator-window.c \
     android/main-common-ui.c \
     android/resource.c \
+    android/ffmpeg-muxer.cpp \
 
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
 LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
