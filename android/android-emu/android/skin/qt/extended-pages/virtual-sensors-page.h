@@ -86,6 +86,7 @@ private:
     void resetAccelerometerRotationFromSkinLayout(SkinRotation orientation);
     void setAccelerometerRotationFromSliders();
     void setPhonePositionFromSliders();
+    void updateGyroscopeValues();
     void updateAccelerometerValues();
 
     std::unique_ptr<Ui::VirtualSensorsPage> mUi;
