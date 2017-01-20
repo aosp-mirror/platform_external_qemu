@@ -22,6 +22,40 @@
       "revId": "615df4594c68a2b03391fe3ea8d9b49ddac379b3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6854da0e_60a45548",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/rotary-input-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-01-20T17:17:07Z",
+      "side": 1,
+      "message": "Nit: Because of the final negation, I think the result is (-180, 180]. Aka [-179, 180]",
+      "revId": "615df4594c68a2b03391fe3ea8d9b49ddac379b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6854da0e_80fbd101",
+        "filename": "android/android-emu/android/skin/qt/extended-window.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-01-20T17:17:07Z",
+      "side": 1,
+      "message": "Nit: These are mostly alphabetical. Could you move \u0027rotary\u0027 and \u0027record\u0027 to their right locations?",
+      "revId": "615df4594c68a2b03391fe3ea8d9b49ddac379b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
