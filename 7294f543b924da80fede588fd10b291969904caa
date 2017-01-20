@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e831aa17_a2a19e97",
+        "filename": "android/android-emu/android/base/files/StreamSerializing.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-01-20T02:30:36Z",
+      "side": 1,
+      "message": "oops, let\u0027s blame my text editor.\n\nSomehow clang-format is not working properly on my current machine and I don\u0027t bother fixing it. I will reformat it manually.",
+      "parentUuid": "6854da0e_77e30c1a",
+      "range": {
+        "startLine": 21,
+        "startChar": 4,
+        "endLine": 21,
+        "endChar": 5
+      },
+      "revId": "7294f543b924da80fede588fd10b291969904caa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6854da0e_573b70a1",
         "filename": "android/android-emu/android/base/files/StreamSerializing.h",
         "patchSetId": 4
@@ -82,6 +106,30 @@
       "writtenOn": "2017-01-19T18:31:09Z",
       "side": 1,
       "message": "this just doesn\u0027t look right to me. Why can\u0027t we stop the render thread and start a new one instead? Snapshots in general aren\u0027t loaded in the same configuration as they were saved, so there may be more render threads, may be less, some of them could be completely unrelated etc",
+      "range": {
+        "startLine": 51,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 31
+      },
+      "revId": "7294f543b924da80fede588fd10b291969904caa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e831aa17_a2b87ed3",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThread.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-01-20T02:30:36Z",
+      "side": 1,
+      "message": "This code is to inform / interrupt the render thread while taking snapshot. The code to restore a snapshot is not here yet (and yes it will have a mechanism to kill all old threads and start new ones)\n\nThe resumeAfterSnapshot is a bad name... I will probably remove it.",
+      "parentUuid": "6854da0e_17f178e7",
       "range": {
         "startLine": 51,
         "startChar": 0,
