@@ -46,6 +46,30 @@
       "revId": "ac8103f5f7784c56788453ed1952e4356969c1b7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6854da0e_00efe139",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-01-20T00:33:05Z",
+      "side": 1,
+      "message": "I tried that first, but toolwindow-\u003efocusinevent() is called by the qt library after everything is finished. We end up raising the tool window there, so doing it here does nothing. BTW this only happens on windows.",
+      "parentUuid": "6854da0e_009361ec",
+      "range": {
+        "startLine": 221,
+        "startChar": 4,
+        "endLine": 221,
+        "endChar": 37
+      },
+      "revId": "ac8103f5f7784c56788453ed1952e4356969c1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
