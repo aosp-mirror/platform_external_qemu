@@ -292,6 +292,7 @@ void VirtualSensorsPage::onPhoneRotationChanged() {
     mUi->pitchSlider->setValue(x, false);
     mUi->rollSlider->setValue(y, false);
     updateAccelerometerValues();
+    updateGyroscopeValues();
 }
 
 void VirtualSensorsPage::setAccelerometerRotationFromSliders() {
@@ -334,6 +335,44 @@ void VirtualSensorsPage::on_positionYSlider_valueChanged(double) {
     setPhonePositionFromSliders();
 }
 
+void VirtualSensorsPage::updateGyroscopeValues() {
+    if (!mFirstShow) mVirtualSensorsUsed = true;
+    QQuaternion rotationDelta =
+        mUi->accelWidget->rotationDelta();
+
+    float dx, dy, dz;
+    rotationDelta.getEulerAngles(&dx, &dy, &dz);
+
+    QQuaternion currRotation = mUi->accelWidget->rotation();
+
+    QVector3D rawDelta(dx, dy, dz);
+    QVector3D deviceDelta =
+        currRotation.conjugate().rotatedVector(rawDelta);
+
+    float pi = 3.141592653589793238;
+    float radiansX, radiansY, radiansZ;
+    radiansX = deviceDelta.x() * pi / 180.0;
+    radiansY = deviceDelta.y() * pi / 180.0;
+    radiansZ = deviceDelta.z() * pi / 180.0;
+
+    float simulatedHz = 10.0;
+
+    float gyroX, gyroY, gyroZ;
+
+    // switch handedness of the X rotation. gyroscope expects
+    // handedness to be that of OpenGL / most math/physics textbook
+    // rotation where CCW = positive.
+    gyroX = -radiansX / simulatedHz;
+    gyroY = radiansY / simulatedHz;
+    gyroZ = radiansZ / simulatedHz;
+
+    setSensorValue(mSensorsAgent, ANDROID_SENSOR_GYROSCOPE, gyroX, gyroY, gyroZ);
+
+    fprintf(stderr, "%s: raw %f %f %f gyro %f %f %f\n", __func__,
+            dx, dy, dz,
+            gyroX, gyroY, gyroZ);
+}
+
 void VirtualSensorsPage::updateAccelerometerValues() {
     if (!mFirstShow) mVirtualSensorsUsed = true;
     // Gravity and magnetic vector in the device's frame of
@@ -364,6 +403,13 @@ void VirtualSensorsPage::updateAccelerometerValues() {
 
     setSensorValue(mSensorsAgent,
                    ANDROID_SENSOR_MAGNETIC_FIELD,
+                   device_magnetic_vector.x(),
+                   device_magnetic_vector.y(),
+                   device_magnetic_vector.z());
+
+    // same val for now
+    setSensorValue(mSensorsAgent,
+                   ANDROID_SENSOR_MAGNETIC_FIELD_UNCALIBRATED,
                    device_magnetic_vector.x(),
                    device_magnetic_vector.y(),
                    device_magnetic_vector.z());
