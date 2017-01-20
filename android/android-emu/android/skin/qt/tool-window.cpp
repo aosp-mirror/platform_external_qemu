@@ -199,6 +199,15 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 
 ToolWindow::~ToolWindow() {}
 
+void ToolWindow::raise() {
+    QFrame::raise();
+    if (mTopSwitched) {
+        mExtendedWindow->raise();
+        mExtendedWindow->activateWindow();
+        mTopSwitched = false;
+    }
+}
+
 void ToolWindow::hide() {
     QFrame::hide();
 
@@ -588,4 +597,10 @@ void ToolWindow::paintEvent(QPaintEvent*) {
         p.drawRect(QRect(0, 0, width() - 1, height() - 1));
     }
     p.end();
+}
+
+void ToolWindow::notifySwitchOnTop() {
+#ifdef _WIN32
+    mTopSwitched = true;
+#endif
 }

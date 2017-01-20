@@ -78,6 +78,13 @@ public:
 
     void closeExtendedWindow();
 
+    // Observed only on Windows:
+    // Whenever we set the window flags for the EmulatorContainer,
+    // we receive a focusInEvent, which raises the tool window. We
+    // need to raise the extended window after the tool window is
+    // raised, which is what this function is for.
+    void notifySwitchOnTop();
+
     // The designers want a gap between the main emulator
     // window and the tool bar. This is how big that gap is.
     static const int toolGap = 10;
@@ -121,6 +128,10 @@ private:
     UIEventRecorderPtr mUIEventRecorder;
     UserActionsCounterPtr mUserActionsCounter;
     SizeTweaker mSizeTweaker;
+    bool mTopSwitched = false;
+
+public slots:
+    void raise();
 
 private slots:
     void on_back_button_pressed();
