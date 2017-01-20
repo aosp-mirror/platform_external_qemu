@@ -332,21 +332,6 @@ void LocationPage::locationPlaybackStart()
         return;
     }
 
-    // Validate all the values in the table.
-    QString outErrorMessage;
-    for (int row = 0; row < mUi->loc_pathTable->rowCount(); row++) {
-        for (int col = 0; col < mUi->loc_pathTable->columnCount(); col++) {
-            if (!validateCell(mUi->loc_pathTable, row, col, &outErrorMessage)) {
-                mUi->loc_pathTable->setCurrentCell(row, col);
-                showErrorDialog(tr("The table contains errors.No locations "
-                                   "were sent.<br/>Error: %1")
-                                        .arg(outErrorMessage),
-                                tr("GPS Playback"));
-                return;
-            }
-        }
-    }
-
     mRowToSend = std::max(0, mUi->loc_pathTable->currentRow());
 
     SettingsTheme theme = getSelectedTheme();
@@ -401,6 +386,21 @@ void LocationPage::timeout() {
         // No more to send. Same as clicking Stop.
         locationPlaybackStop();
         return;
+    }
+
+    // Validate the current cell.
+    QString outErrorMessage;
+    for (int col = 0; col < mUi->loc_pathTable->columnCount(); col++) {
+        if (!validateCell(mUi->loc_pathTable, mRowToSend, col, &outErrorMessage)) {
+            mUi->loc_pathTable->setCurrentCell(mRowToSend, col);
+            showErrorDialog(tr("This entry contains errors. The location "
+                               "was not sent.<br/>Error: %1")
+                                    .arg(outErrorMessage),
+                            tr("GPS Playback"));
+            // Stop the playback here
+            locationPlaybackStop();
+            return;
+        }
     }
 
     // Get the data for the point we're about to send.
