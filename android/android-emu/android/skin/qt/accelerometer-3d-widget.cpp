@@ -8,6 +8,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android/base/system/System.h"
 #include "android/skin/qt/accelerometer-3d-widget.h"
 #include "android/skin/qt/gl-common.h"
 #include "android/skin/qt/wavefront-obj-parser.h"
@@ -347,12 +348,51 @@ static float clamp(float a, float b, float x) {
     return std::max(a, std::min(b, x));
 }
 
+void Accelerometer3DWidget::recalcRotationUpdateInterval() {
+    uint64_t currTimeMs =
+        (uint64_t)android::base::System::get()->getHighResTimeUs() / 1000;
+
+    if (currTimeMs - mLastRotationUpdateMs > ROTATION_UPDATE_RESET_TIME_MS) {
+        std::fill(mLastUpdateIntervals.begin(),
+                  mLastUpdateIntervals.end(), 0);
+    }
+
+    mLastUpdateIntervals[mRotationUpdateTimeWindowElt] =
+        (currTimeMs - mLastRotationUpdateMs);
+    mRotationUpdateTimeWindowElt++;
+
+    if (mRotationUpdateTimeWindowElt >= ROTATION_UPDATE_TIME_WINDOW_SIZE) {
+        mRotationUpdateTimeWindowElt = 0;
+    }
+
+    mUpdateIntervalMs = 0;
+
+    // Filter out window entries where the update interval is
+    // still calculated as 0 due to not being initialized yet.
+    uint64_t nontrivialUpdateIntervals = 0;
+    for (const auto& elt: mLastUpdateIntervals) {
+        mUpdateIntervalMs += elt;
+        if (elt) nontrivialUpdateIntervals++;
+    }
+
+    if (nontrivialUpdateIntervals)
+        mUpdateIntervalMs /= nontrivialUpdateIntervals;
+
+    mLastRotationUpdateMs = currTimeMs;
+}
+
 void Accelerometer3DWidget::mouseMoveEvent(QMouseEvent *event) {
+    mDQuat = QQuaternion();
+
     if (mTracking && mOperationMode == OperationMode::Rotate) {
         int diff_x = event->x() - mPrevMouseX,
             diff_y = event->y() - mPrevMouseY;
         QQuaternion q = QQuaternion::fromAxisAndAngle(1.0, 0.0, 0.0, diff_y) *
                         QQuaternion::fromAxisAndAngle(0.0, 1.0, 0.0, diff_x);
+        mDQuat = q;
+
+        recalcRotationUpdateInterval();
+
         mQuat = q * mQuat;
         renderFrame();
         emit(rotationChanged());
@@ -402,4 +442,6 @@ void Accelerometer3DWidget::mouseReleaseEvent(QMouseEvent* event) {
         mDragging = false;
         emit(dragStopped());
     }
+    resetRotationDelta();
+    emit(rotationChanged());
 }

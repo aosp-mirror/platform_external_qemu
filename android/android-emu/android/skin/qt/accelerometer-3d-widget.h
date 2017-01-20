@@ -17,13 +17,14 @@
 #include <QMouseEvent>
 #include <QVector3D>
 
+#include <array>
 #include <string>
 
 // A widget that displays a 3D model of a device and lets the user
 // manipulate its rotation and position.
 // The changes in rotation and position can be used to
-// derive the values which should be reported by the virtual accelerometer
-// and magnetometer.
+// derive the values which should be reported by the virtual accelerometer,
+// gyroscope, and magnetometer.
 class Accelerometer3DWidget : public GLWidget {
     Q_OBJECT
     Q_PROPERTY(QQuaternion rotation READ rotation WRITE setRotation NOTIFY rotationChanged USER true);
@@ -52,7 +53,13 @@ signals:
 
 public slots:
     // Sets the rotation quaternion.
-    void setRotation(const QQuaternion& quat) { mQuat = quat; }
+    void setRotation(const QQuaternion& quat) {
+        mDQuat = QQuaternion();
+
+        mDQuat = quat * mQuat.conjugate();
+        recalcRotationUpdateInterval();
+        mQuat = quat;
+    }
 
     // Sets the X and Y coordinates of the model's origin;
     void setPosition(const QVector2D& pos) { mTranslation = pos; }
@@ -62,8 +69,16 @@ public slots:
     void setOperationMode(OperationMode mode) { mOperationMode = mode; }
 
 public:
-    // Returns the rotation quaternion.
+    // Getters for the rotation quaternion and delta.
     const QQuaternion& rotation() const { return mQuat; }
+    const QQuaternion& rotationDelta() const { return mDQuat; }
+    void resetRotationDelta() { mDQuat = QQuaternion(); }
+
+    // Returns milliseconds since last rotation update.
+    float rotationUpdateIntervalSecs() const {
+        if (mUpdateIntervalMs < 16) return 0.016; // 16 ms
+        return mUpdateIntervalMs / 1000.0f;
+    }
 
     // Returns the X and Y coordinates of the model's origin.
     const QVector2D& position() const { return mTranslation; }
@@ -99,6 +114,19 @@ private:
     QVector2D screenToXYPlane(int x, int y) const;
 
     QQuaternion mQuat;
+
+    // Tracking and timing rates of rotation change
+    // (for gyroscope)
+    QQuaternion mDQuat;
+    uint64_t mUpdateIntervalMs = 0;
+    uint64_t mLastRotationUpdateMs = 0;
+    static const uint64_t ROTATION_UPDATE_RESET_TIME_MS = 100;
+    static const size_t ROTATION_UPDATE_TIME_WINDOW_SIZE = 8;
+    std::array<uint64_t, ROTATION_UPDATE_TIME_WINDOW_SIZE>
+        mLastUpdateIntervals = {};
+    size_t mRotationUpdateTimeWindowElt = 0;
+    void recalcRotationUpdateInterval();
+
     QVector2D mTranslation;
     QMatrix4x4 mPerspective;
     QMatrix4x4 mCameraTransform;
