@@ -31,10 +31,11 @@
 // THE SOFTWARE.
 //
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "android/ffmpeg-muxer.h"
+
+#include "android/utils/debug.h"
+
+extern "C" {
 
 #include "libavformat/avformat.h"
 #include "libavutil/avassert.h"
@@ -44,6 +45,34 @@
 #include "libavutil/timestamp.h"
 #include "libswresample/swresample.h"
 #include "libswscale/swscale.h"
+
+}  // extern "C"
+
+#include <string>
+
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// FFMpeg defines a set of macros for the same purpose, but those don't
+// compile in C++ mode.
+// Let's define regular C++ functions for it.
+
+static std::string avTs2Str(int64_t ts) {
+    char res[AV_TS_MAX_STRING_SIZE] = {};
+    return av_ts_make_string(res, ts);
+}
+
+static std::string avTs2TimeStr(int64_t ts, AVRational *tb) {
+    char res[AV_TS_MAX_STRING_SIZE] = {};
+    return av_ts_make_time_string(res, ts, tb);
+}
+
+static std::string avErr2Str(int errnum) {
+    char res[AV_ERROR_MAX_STRING_SIZE] = {};
+    return av_make_error_string(res, AV_ERROR_MAX_STRING_SIZE, errnum);
+}
 
 #include "android/ffmpeg-muxer.h"
 #include "android/utils/debug.h"
@@ -107,12 +136,12 @@ typedef struct ffmpeg_recorder {
 static void log_packet(const AVFormatContext *fmt_ctx, const AVPacket *pkt) {
   AVRational *time_base = &fmt_ctx->streams[pkt->stream_index]->time_base;
 
-  dprint(
+  VERBOSE_PRINT(capture,
       "pts:%s pts_time:%s dts:%s dts_time:%s duration:%s duration_time:%s "
       "stream_index:%d\n",
-      av_ts2str(pkt->pts), av_ts2timestr(pkt->pts, time_base),
-      av_ts2str(pkt->dts), av_ts2timestr(pkt->dts, time_base),
-      av_ts2str(pkt->duration), av_ts2timestr(pkt->duration, time_base),
+      avTs2Str(pkt->pts).c_str(), avTs2TimeStr(pkt->pts, time_base).c_str(),
+      avTs2Str(pkt->dts).c_str(), avTs2TimeStr(pkt->dts, time_base).c_str(),
+      avTs2Str(pkt->duration).c_str(), avTs2TimeStr(pkt->duration, time_base).c_str(),
       pkt->stream_index);
 }
 
@@ -169,7 +198,7 @@ static int open_audio(AVFormatContext *oc, AVCodec *codec,
   ret = avcodec_open2(c, codec, &opt);
   av_dict_free(&opt);
   if (ret < 0) {
-    derror("Could not open audio codec: %s\n", av_err2str(ret));
+    derror("Could not open audio codec: %s\n", avErr2Str(ret).c_str());
     return -1;
   }
 
@@ -291,15 +320,14 @@ static int write_audio_frame(AVFormatContext *oc, AudioOutputStream *ost)
 
     ret = avcodec_encode_audio2(c, &pkt, frame, &got_packet);
     if (ret < 0) {
-        derror("Error encoding audio frame: %s\n", av_err2str(ret));
+        derror("Error encoding audio frame: %s\n", avErr2Str(ret).c_str());
         return ret;
     }
 
     if (got_packet) {
         ret = write_frame(oc, &c->time_base, ost->st, &pkt);
         if (ret < 0) {
-            derror("Error while writing audio frame: %s\n",
-                    av_err2str(ret));
+            derror("Error while writing audio frame: %s\n", avErr2Str(ret).c_str());
             return ret;
         }
     }
@@ -344,7 +372,7 @@ static int open_video(AVFormatContext *oc, AVCodec *codec,
   ret = avcodec_open2(c, codec, &opt);
   av_dict_free(&opt);
   if (ret < 0) {
-    derror("Could not open video codec: %s\n", av_err2str(ret));
+    derror("Could not open video codec: %s\n", avErr2Str(ret).c_str());
     return ret;
   }
 
@@ -403,7 +431,7 @@ static int write_video_frame(AVFormatContext *oc, VideoOutputStream *ost,
     // encode the frame
     ret = avcodec_encode_video2(c, &pkt, frame, &got_packet);
     if (ret < 0) {
-      derror("Error encoding video frame: %s\n", av_err2str(ret));
+      derror("Error encoding video frame: %s\n", avErr2Str(ret).c_str());
       return ret;
     }
 
@@ -415,7 +443,7 @@ static int write_video_frame(AVFormatContext *oc, VideoOutputStream *ost,
   }
 
   if (ret < 0) {
-    derror("Error while writing video frame: %s\n", av_err2str(ret));
+    derror("Error while writing video frame: %s\n", avErr2Str(ret).c_str());
     return ret;
   }
 
@@ -516,7 +544,7 @@ static int start_recording(ffmpeg_recorder *recorder) {
   if (!(fmt->flags & AVFMT_NOFILE)) {
     ret = avio_open(&oc->pb, recorder->path, AVIO_FLAG_WRITE);
     if (ret < 0) {
-      derror("Could not open '%s': %s\n", recorder->path, av_err2str(ret));
+      derror("Could not open '%s': %s\n", recorder->path, avErr2Str(ret).c_str());
       free(recorder);
       return ret;
     }
@@ -525,7 +553,7 @@ static int start_recording(ffmpeg_recorder *recorder) {
   // Write the stream header, if any.
   ret = avformat_write_header(oc, &opt);
   if (ret < 0) {
-    derror("Error occurred when opening output file: %s\n", av_err2str(ret));
+    derror("Error occurred when opening output file: %s\n", avErr2Str(ret).c_str());
     free(recorder);
     return ret;
   }
