@@ -22,8 +22,8 @@
 // A widget that displays a 3D model of a device and lets the user
 // manipulate its rotation and position.
 // The changes in rotation and position can be used to
-// derive the values which should be reported by the virtual accelerometer
-// and magnetometer.
+// derive the values which should be reported by the virtual accelerometer,
+// gyroscope, and magnetometer.
 class Accelerometer3DWidget : public GLWidget {
     Q_OBJECT
     Q_PROPERTY(QQuaternion rotation READ rotation WRITE setRotation NOTIFY rotationChanged USER true);
@@ -64,6 +64,7 @@ public slots:
 public:
     // Returns the rotation quaternion.
     const QQuaternion& rotation() const { return mQuat; }
+    const QQuaternion& rotationDelta() const { return mDQuat; }
 
     // Returns the X and Y coordinates of the model's origin.
     const QVector2D& position() const { return mTranslation; }
@@ -98,6 +99,7 @@ private:
     // that corresponds to the given point on the screen.
     QVector2D screenToXYPlane(int x, int y) const;
 
+    QQuaternion mDQuat;
     QQuaternion mQuat;
     QVector2D mTranslation;
     QMatrix4x4 mPerspective;

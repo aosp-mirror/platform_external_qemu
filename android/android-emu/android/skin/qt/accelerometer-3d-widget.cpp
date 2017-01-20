@@ -348,11 +348,14 @@ static float clamp(float a, float b, float x) {
 }
 
 void Accelerometer3DWidget::mouseMoveEvent(QMouseEvent *event) {
+    mDQuat = QQuaternion();
+
     if (mTracking && mOperationMode == OperationMode::Rotate) {
         int diff_x = event->x() - mPrevMouseX,
             diff_y = event->y() - mPrevMouseY;
         QQuaternion q = QQuaternion::fromAxisAndAngle(1.0, 0.0, 0.0, diff_y) *
                         QQuaternion::fromAxisAndAngle(0.0, 1.0, 0.0, diff_x);
+        mDQuat = q;
         mQuat = q * mQuat;
         renderFrame();
         emit(rotationChanged());
@@ -402,4 +405,6 @@ void Accelerometer3DWidget::mouseReleaseEvent(QMouseEvent* event) {
         mDragging = false;
         emit(dragStopped());
     }
+    mDQuat = QQuaternion();
+    emit(rotationChanged());
 }
