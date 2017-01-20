@@ -22,6 +22,30 @@
       "revId": "ac8103f5f7784c56788453ed1952e4356969c1b7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6854da0e_400cb961",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-20T00:29:50Z",
+      "side": 1,
+      "message": "Actually, only this-\u003eraise(). ToolWindow is a part of the main emulator window",
+      "parentUuid": "6854da0e_009361ec",
+      "range": {
+        "startLine": 221,
+        "startChar": 4,
+        "endLine": 221,
+        "endChar": 37
+      },
+      "revId": "ac8103f5f7784c56788453ed1952e4356969c1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
