@@ -140,6 +140,7 @@ QTextBrowser, QTableWidget {
     gridline-color: %%TAB_BKG_COLOR%%;
     background: %%TAB_BKG_COLOR%%;
     border: 1px solid %%EDIT_COLOR%%;
+    alternate-background-color: %%BKG_COLOR%%;
 }
 QTableView::item {
     padding-left: 16;
