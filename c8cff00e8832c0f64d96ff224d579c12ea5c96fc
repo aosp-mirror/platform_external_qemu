@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6854da0e_f868e49c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-01-20T22:15:39Z",
+      "side": 1,
+      "message": "Maybe \"This row contains errors. \" ...\nor \"This entry contains errors. \"\nOr leave it. Your choice.",
+      "revId": "c8cff00e8832c0f64d96ff224d579c12ea5c96fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
