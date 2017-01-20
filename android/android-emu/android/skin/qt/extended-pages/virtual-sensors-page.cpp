@@ -292,6 +292,7 @@ void VirtualSensorsPage::onPhoneRotationChanged() {
     mUi->pitchSlider->setValue(x, false);
     mUi->rollSlider->setValue(y, false);
     updateAccelerometerValues();
+    updateGyroscopeValues();
 }
 
 void VirtualSensorsPage::setAccelerometerRotationFromSliders() {
@@ -334,6 +335,37 @@ void VirtualSensorsPage::on_positionYSlider_valueChanged(double) {
     setPhonePositionFromSliders();
 }
 
+void VirtualSensorsPage::updateGyroscopeValues() {
+    if (!mFirstShow) mVirtualSensorsUsed = true;
+    QQuaternion rotationDelta =
+        mUi->accelWidget->rotationDelta();
+
+    float dx, dy, dz;
+    rotationDelta.getEulerAngles(&dx, &dy, &dz);
+
+    QVector3D rawDelta(dx, dy, dz);
+
+    QQuaternion currRotation = mUi->accelWidget->rotation();
+    QVector3D deviceDelta = currRotation.conjugate().rotatedVector(rawDelta);
+
+    float radiansX, radiansY, radiansZ;
+    radiansX = deviceDelta.x() * M_PI / 180.0;
+    radiansY = deviceDelta.y() * M_PI / 180.0;
+    radiansZ = deviceDelta.z() * M_PI / 180.0;
+
+    float simulatedUpdateRate = mUi->accelWidget->rotationUpdateIntervalSecs();
+
+    if (!simulatedUpdateRate) return;
+
+    float gyroX, gyroY, gyroZ;
+
+    gyroX = radiansX / simulatedUpdateRate;
+    gyroY = radiansY / simulatedUpdateRate;
+    gyroZ = radiansZ / simulatedUpdateRate;
+
+    setSensorValue(mSensorsAgent, ANDROID_SENSOR_GYROSCOPE, gyroX, gyroY, gyroZ);
+}
+
 void VirtualSensorsPage::updateAccelerometerValues() {
     if (!mFirstShow) mVirtualSensorsUsed = true;
     // Gravity and magnetic vector in the device's frame of
@@ -364,6 +396,13 @@ void VirtualSensorsPage::updateAccelerometerValues() {
 
     setSensorValue(mSensorsAgent,
                    ANDROID_SENSOR_MAGNETIC_FIELD,
+                   device_magnetic_vector.x(),
+                   device_magnetic_vector.y(),
+                   device_magnetic_vector.z());
+
+    // same val for now
+    setSensorValue(mSensorsAgent,
+                   ANDROID_SENSOR_MAGNETIC_FIELD_UNCALIBRATED,
                    device_magnetic_vector.x(),
                    device_magnetic_vector.y(),
                    device_magnetic_vector.z());
