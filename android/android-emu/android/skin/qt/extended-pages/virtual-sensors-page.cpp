@@ -45,58 +45,55 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     mUi->magEastWidget->setLocale(QLocale::c());
     mUi->magVerticalWidget->setLocale(QLocale::c());
 
-    updateAccelerometerValues();
+    updateSensorValues();
 
-    connect(mUi->magNorthWidget,
-            SIGNAL(editingFinished()),
-            this,
-            SLOT(onMagVectorChanged()));
-    connect(mUi->magEastWidget,
-            SIGNAL(editingFinished()),
-            this,
-            SLOT(onMagVectorChanged()));
-    connect(mUi->magVerticalWidget,
-            SIGNAL(editingFinished()),
-            this,
-            SLOT(onMagVectorChanged()));
-    connect(mUi->accelWidget,
-            SIGNAL(rotationChanged()),
-            this,
-            SLOT(onPhoneRotationChanged()));
-    connect(mUi->accelWidget,
-            SIGNAL(positionChanged()),
-            this,
-            SLOT(onPhonePositionChanged()));
-    connect(mUi->accelWidget,
-            SIGNAL(dragStopped()),
-            this,
-            SLOT(onDragStopped()));
-    connect(mUi->accelWidget,
-            SIGNAL(dragStarted()),
-            this,
-            SLOT(onDragStarted()));
-    connect(mUi->positionXSlider,
-            SIGNAL(sliderPressed()),
-            this,
-            SLOT(onDragStarted()));
-    connect(mUi->positionXSlider,
-            SIGNAL(sliderReleased()),
-            this,
-            SLOT(onDragStopped()));
-    connect(mUi->positionYSlider,
-            SIGNAL(sliderPressed()),
-            this,
-            SLOT(onDragStarted()));
-    connect(mUi->positionYSlider,
-            SIGNAL(sliderReleased()),
-            this,
-            SLOT(onDragStopped()));
+    connect(mUi->magNorthWidget, SIGNAL(editingFinished()),
+            this, SLOT(onMagVectorChanged()));
+    connect(mUi->magEastWidget, SIGNAL(editingFinished()),
+            this, SLOT(onMagVectorChanged()));
+    connect(mUi->magVerticalWidget, SIGNAL(editingFinished()),
+            this, SLOT(onMagVectorChanged()));
+
+    connect(mUi->accelWidget, SIGNAL(rotationChanged()),
+            this, SLOT(onPhoneRotationChanged()));
+    connect(mUi->accelWidget, SIGNAL(positionChanged()),
+            this, SLOT(onPhonePositionChanged()));
+
+    connect(mUi->accelWidget, SIGNAL(dragStopped()),
+            this, SLOT(onDragStopped()));
+    connect(mUi->accelWidget, SIGNAL(dragStarted()),
+            this, SLOT(onDragStarted()));
+
+    connect(mUi->positionXSlider, SIGNAL(sliderPressed()),
+            this, SLOT(onDragStarted()));
+    connect(mUi->positionXSlider, SIGNAL(sliderReleased()),
+            this, SLOT(onDragStopped()));
+
+    connect(mUi->positionYSlider, SIGNAL(sliderPressed()),
+            this, SLOT(onDragStarted()));
+    connect(mUi->positionYSlider, SIGNAL(sliderReleased()),
+            this, SLOT(onDragStopped()));
+
+    connect(mUi->yawSlider, SIGNAL(sliderPressed()),
+            this, SLOT(onDragStarted()));
+    connect(mUi->yawSlider, SIGNAL(sliderReleased()),
+            this, SLOT(onDragStopped()));
+
+    connect(mUi->pitchSlider, SIGNAL(sliderPressed()),
+            this, SLOT(onDragStarted()));
+    connect(mUi->pitchSlider, SIGNAL(sliderReleased()),
+            this, SLOT(onDragStopped()));
+
+    connect(mUi->rollSlider, SIGNAL(sliderPressed()),
+            this, SLOT(onDragStarted()));
+    connect(mUi->rollSlider, SIGNAL(sliderReleased()),
+            this, SLOT(onDragStopped()));
 
     connect(this, &VirtualSensorsPage::updateResultingValuesRequired,
             this, &VirtualSensorsPage::updateResultingValues);
 
     connect(&mAccelerationTimer, SIGNAL(timeout()),
-            this, SLOT(updateLinearAcceleration()));
+            this, SLOT(updateAccelerations()));
     mAccelerationTimer.setInterval(100);
     mAccelerationTimer.stop();
 
@@ -191,6 +188,7 @@ void VirtualSensorsPage::resetAccelerometerRotation(const QQuaternion& rotation)
     if (!mFirstShow) mVirtualSensorsUsed = true;
     mUi->accelWidget->setPosition(QVector2D(0.0, 0.0));
     mUi->accelWidget->setRotation(rotation);
+    mUi->accelWidget->resetRotationDelta();
     mUi->accelWidget->update();
     onPhoneRotationChanged();
     onPhonePositionChanged();
@@ -219,7 +217,7 @@ void VirtualSensorsPage::setSensorsAgent(const QAndroidSensorsAgent* agent) {
     mSensorsAgent = agent;
 
     // Update the agent with current values.
-    updateAccelerometerValues();
+    updateSensorValues();
 }
 
 // Helper function
@@ -267,7 +265,7 @@ void VirtualSensorsPage::on_humiditySensorValueWidget_valueChanged(
 }
 
 void VirtualSensorsPage::onMagVectorChanged() {
-    updateAccelerometerValues();
+    updateSensorValues();
 }
 
 void VirtualSensorsPage::onPhoneRotationChanged() {
@@ -291,7 +289,7 @@ void VirtualSensorsPage::onPhoneRotationChanged() {
     mUi->yawSlider->setValue(z, false);
     mUi->pitchSlider->setValue(x, false);
     mUi->rollSlider->setValue(y, false);
-    updateAccelerometerValues();
+    updateSensorValues();
 }
 
 void VirtualSensorsPage::setAccelerometerRotationFromSliders() {
@@ -302,7 +300,7 @@ void VirtualSensorsPage::setAccelerometerRotationFromSliders() {
             mUi->pitchSlider->getValue(),
             mUi->rollSlider->getValue(),
             mUi->yawSlider->getValue()));
-    updateAccelerometerValues();
+    updateSensorValues();
     mUi->accelWidget->update();
 }
 
@@ -334,7 +332,7 @@ void VirtualSensorsPage::on_positionYSlider_valueChanged(double) {
     setPhonePositionFromSliders();
 }
 
-void VirtualSensorsPage::updateAccelerometerValues() {
+void VirtualSensorsPage::updateSensorValues() {
     if (!mFirstShow) mVirtualSensorsUsed = true;
     // Gravity and magnetic vector in the device's frame of
     // reference.
@@ -345,6 +343,10 @@ void VirtualSensorsPage::updateAccelerometerValues() {
             mUi->magVerticalWidget->value());
 
     QQuaternion device_rotation_quat = mUi->accelWidget->rotation();
+    QQuaternion rotationDelta =
+        mUi->accelWidget->rotationDelta();
+    float dx, dy, dz;
+    rotationDelta.getEulerAngles(&dx, &dy, &dz);
 
     // Gravity and magnetic vectors as observed by the device.
     // Note how we're applying the *inverse* of the transformation
@@ -356,14 +358,31 @@ void VirtualSensorsPage::updateAccelerometerValues() {
         device_rotation_quat.conjugate().rotatedVector(magnetic_vector);
     QVector3D acceleration = device_gravity_vector - mLinearAcceleration;
 
+    float gyroUpdateRate = mUi->accelWidget->rotationUpdateIntervalSecs();
+
+    // Convert raw UI pitch/roll/yaw delta
+    // to device-space rotation in radians per second.
+    QVector3D gyroscope =
+        device_rotation_quat.conjugate().rotatedVector(
+            QVector3D(dx, dy, dz)) * M_PI / 180.0 / gyroUpdateRate;
+
     setSensorValue(mSensorsAgent,
                    ANDROID_SENSOR_ACCELERATION,
                    acceleration.x(),
                    acceleration.y(),
                    acceleration.z());
 
+    setSensorValue(mSensorsAgent, ANDROID_SENSOR_GYROSCOPE,
+                   gyroscope.x(), gyroscope.y(), gyroscope.z());
+
     setSensorValue(mSensorsAgent,
                    ANDROID_SENSOR_MAGNETIC_FIELD,
+                   device_magnetic_vector.x(),
+                   device_magnetic_vector.y(),
+                   device_magnetic_vector.z());
+
+    setSensorValue(mSensorsAgent,
+                   ANDROID_SENSOR_MAGNETIC_FIELD_UNCALIBRATED,
                    device_magnetic_vector.x(),
                    device_magnetic_vector.y(),
                    device_magnetic_vector.z());
@@ -397,13 +416,15 @@ void VirtualSensorsPage::updateAccelerometerValues() {
     // We only block signals for this widget if it's running on the Qt thread,
     // so it's Ok to call the connected function directly.
     if (signalsBlocked()) {
-        updateResultingValues(acceleration, device_magnetic_vector);
+        updateResultingValues(acceleration, gyroscope, device_magnetic_vector);
     } else {
-        emit updateResultingValuesRequired(acceleration, device_magnetic_vector);
+        emit updateResultingValuesRequired(
+                acceleration, gyroscope, device_magnetic_vector);
     }
 }
 
 void VirtualSensorsPage::updateResultingValues(QVector3D acceleration,
+                                               QVector3D gyroscope,
                                                QVector3D device_magnetic_vector) {
 
     static const QString rotation_labels[] = {
@@ -430,6 +451,11 @@ void VirtualSensorsPage::updateResultingValues(QVector3D acceleration,
         << "<td align=left>" << acceleration.y() << "</td>"
         << "<td align=left>" << acceleration.z() << "</td></tr>"
         << "<tr>"
+        << "<td>" << tr("Gyroscope (rad/s)") << ":</td>"
+        << "<td align=left>" << gyroscope.x() << "</td>"
+        << "<td align=left>" << gyroscope.y() << "</td>"
+        << "<td align=left>" << gyroscope.z() << "</td></tr>"
+        << "<tr>"
         << "<td>" << tr("Magnetometer (&mu;T)") << ":</td>"
         << "<td align=left>" << device_magnetic_vector.x() << "</td>"
         << "<td align=left>" << device_magnetic_vector.y() << "</td>"
@@ -449,7 +475,7 @@ void VirtualSensorsPage::onPhonePositionChanged() {
     mUi->positionYSlider->setValue(pos.y(), false);
 }
 
-void VirtualSensorsPage::updateLinearAcceleration() {
+void VirtualSensorsPage::updateAccelerations() {
     static const float k = 100.0;
     static const float mass = 1.0;
     static const float meters_per_unit = 0.0254;
@@ -459,7 +485,15 @@ void VirtualSensorsPage::updateLinearAcceleration() {
             meters_per_unit * (mCurrentPosition - mPrevPosition));
     mLinearAcceleration = delta * k / mass;
     mPrevPosition = mCurrentPosition;
-    updateAccelerometerValues();
+
+    mUi->accelWidget->setRotation(
+        QQuaternion::fromEulerAngles(
+            mUi->pitchSlider->getValue(),
+            mUi->rollSlider->getValue(),
+            mUi->yawSlider->getValue()));
+    updateSensorValues();
+
+    mUi->accelWidget->resetRotationDelta();
 }
 
 void VirtualSensorsPage::on_accelModeRotate_toggled() {
