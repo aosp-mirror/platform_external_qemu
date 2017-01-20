@@ -647,6 +647,9 @@ GL_APICALL GLuint GL_APIENTRY glCreateShader(GLenum type){
         GLint minProgramTexelOffset; ctx->dispatcher().glGetIntegerv(GL_MIN_PROGRAM_TEXEL_OFFSET, &minProgramTexelOffset);
         GLint maxProgramTexelOffset; ctx->dispatcher().glGetIntegerv(GL_MAX_PROGRAM_TEXEL_OFFSET, &maxProgramTexelOffset);
 
+        // Clear GL errors if the underlying GL doesn't have those enums.
+        ctx->dispatcher().glGetError();
+
         GLint maxDualSourceDrawBuffers = 1;
 
         ANGLEShaderParser::globalInitialize(
