@@ -81,6 +81,8 @@ typedef struct { float a, b, c; } SensorValues;
 
 typedef struct { float x, y, z; } Acceleration;
 
+typedef struct { float x, y, z; } Gyroscope;
+
 typedef struct { float x, y, z; } MagneticField;
 
 typedef struct {
@@ -110,6 +112,7 @@ typedef struct {
     union {
         SensorValues value;
         Acceleration acceleration;
+        Gyroscope gyroscope;
         MagneticField magnetic;
         Orientation orientation;
         Temperature temperature;
@@ -117,6 +120,7 @@ typedef struct {
         Light light;
         Pressure pressure;
         Humidity humidity;
+        MagneticField magnetic_uncalibrated;
     } u;
     SerializedSensor serialized;
 } Sensor;
@@ -318,14 +322,30 @@ static void serializeSensorValue(Sensor* sensor, AndroidSensor sensor_id) {
             }
             break;
         }
+        case ANDROID_SENSOR_GYROSCOPE: {
+            sensor->serialized.length = snprintf(
+                    sensor->serialized.value, sizeof(sensor->serialized.value),
+                    "gyroscope:%g:%g:%g", sensor->u.gyroscope.x,
+                    sensor->u.gyroscope.y, sensor->u.gyroscope.z);
+            break;
+        }
         case ANDROID_SENSOR_MAGNETIC_FIELD:
-            /* NOTE: sensors HAL expects "magnetic", not * "magnetic-field"
+            /* NOTE: sensors HAL expects "magnetic", not "magnetic-field"
              * name here.
              */
             sensor->serialized.length = snprintf(
                     sensor->serialized.value, sizeof(sensor->serialized.value),
                     "magnetic:%g:%g:%g", sensor->u.magnetic.x,
                     sensor->u.magnetic.y, sensor->u.magnetic.z);
+            break;
+        case ANDROID_SENSOR_MAGNETIC_FIELD_UNCALIBRATED:
+            /* NOTE: sensors HAL expects "magnetic-uncalibrated",
+             * not "magnetic-field-uncalibrated" name here.
+             */
+            sensor->serialized.length = snprintf(
+                    sensor->serialized.value, sizeof(sensor->serialized.value),
+                    "magnetic-uncalibrated:%g:%g:%g", sensor->u.magnetic_uncalibrated.x,
+                    sensor->u.magnetic_uncalibrated.y, sensor->u.magnetic_uncalibrated.z);
             break;
         case ANDROID_SENSOR_ORIENTATION:
             sensor->serialized.length = snprintf(
@@ -414,10 +434,10 @@ static void _hwSensorClient_tick(void* opaque, LoopTimer* unused) {
     //  the host and execution of the tick function. 1ms is enough, as the
     //  overhead is very small; on the other hand, it's always present - that's
     //  why we can't just have (delay_ms) here.
-    // Note2: Let's cap the minimal tick interval to 5ms, to make sure we never
+    // Note2: Let's cap the minimal tick interval to 10ms, to make sure we never
     //  overload the main QEMU loop. Upper limit is just some reasonable value.
-    if (delay_ms < 5) {
-        delay_ms = 5;
+    if (delay_ms < 10) {
+        delay_ms = 10;
     } else if (delay_ms > 60 * 60 * 1000) {
         delay_ms = 60 * 60 * 1000;
     }
@@ -442,8 +462,9 @@ static void _hwSensorClient_receive(HwSensorClient* cl,
         int nn;
 
         for (nn = 0; nn < MAX_SENSORS; nn++) {
-            if (hw->sensors[nn].enabled)
+            if (hw->sensors[nn].enabled) {
                 mask |= (1 << nn);
+            }
         }
 
         const int len = snprintf(buff, sizeof buff, "%d", mask);
@@ -595,10 +616,20 @@ static void _hwSensors_save(Stream* f, QemudService* sv, void* opaque) {
                 stream_put_float(f, s->u.acceleration.y);
                 stream_put_float(f, s->u.acceleration.z);
                 break;
+            case ANDROID_SENSOR_GYROSCOPE:
+                stream_put_float(f, s->u.gyroscope.x);
+                stream_put_float(f, s->u.gyroscope.y);
+                stream_put_float(f, s->u.gyroscope.z);
+                break;
             case ANDROID_SENSOR_MAGNETIC_FIELD:
                 stream_put_float(f, s->u.magnetic.x);
                 stream_put_float(f, s->u.magnetic.y);
                 stream_put_float(f, s->u.magnetic.z);
+                break;
+            case ANDROID_SENSOR_MAGNETIC_FIELD_UNCALIBRATED:
+                stream_put_float(f, s->u.magnetic_uncalibrated.x);
+                stream_put_float(f, s->u.magnetic_uncalibrated.y);
+                stream_put_float(f, s->u.magnetic_uncalibrated.z);
                 break;
             case ANDROID_SENSOR_ORIENTATION:
                 stream_put_float(f, s->u.orientation.azimuth);
@@ -653,10 +684,20 @@ static int _hwSensors_load(Stream* f, QemudService* s, void* opaque) {
                 s->u.acceleration.y = stream_get_float(f);
                 s->u.acceleration.z = stream_get_float(f);
                 break;
+            case ANDROID_SENSOR_GYROSCOPE:
+                s->u.gyroscope.x = stream_get_float(f);
+                s->u.gyroscope.y = stream_get_float(f);
+                s->u.gyroscope.z = stream_get_float(f);
+                break;
             case ANDROID_SENSOR_MAGNETIC_FIELD:
                 s->u.magnetic.x = stream_get_float(f);
                 s->u.magnetic.y = stream_get_float(f);
                 s->u.magnetic.z = stream_get_float(f);
+                break;
+            case ANDROID_SENSOR_MAGNETIC_FIELD_UNCALIBRATED:
+                s->u.magnetic_uncalibrated.x = stream_get_float(f);
+                s->u.magnetic_uncalibrated.y = stream_get_float(f);
+                s->u.magnetic_uncalibrated.z = stream_get_float(f);
                 break;
             case ANDROID_SENSOR_ORIENTATION:
                 s->u.orientation.azimuth = stream_get_float(f);
@@ -782,12 +823,20 @@ static void _hwSensors_init(HwSensors* h) {
         h->sensors[ANDROID_SENSOR_ACCELERATION].enabled = true;
     }
 
+    if (android_hw->hw_gyroscope) {
+        h->sensors[ANDROID_SENSOR_GYROSCOPE].enabled = true;
+    }
+
     if (android_hw->hw_sensors_proximity) {
         h->sensors[ANDROID_SENSOR_PROXIMITY].enabled = true;
     }
 
     if (android_hw->hw_sensors_magnetic_field) {
         h->sensors[ANDROID_SENSOR_MAGNETIC_FIELD].enabled = true;
+    }
+
+    if (android_hw->hw_sensors_magnetic_field_uncalibrated) {
+        h->sensors[ANDROID_SENSOR_MAGNETIC_FIELD_UNCALIBRATED].enabled = true;
     }
 
     if (android_hw->hw_sensors_orientation) {
@@ -914,8 +963,9 @@ extern int android_sensors_set(int sensor_id, float a, float b, float c) {
     if (hw->service != NULL) {
         if (!hw->sensors[sensor_id].enabled)
             return SENSOR_STATUS_DISABLED;
-    } else
+    } else {
         return SENSOR_STATUS_NO_SERVICE;
+    }
 
     _hwSensors_setSensorValue(hw, sensor_id, a, b, c);
 
