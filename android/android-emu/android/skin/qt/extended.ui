@@ -469,7 +469,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>264</y>
+     <y>222</y>
      <width>194</width>
      <height>42</height>
     </rect>
@@ -592,7 +592,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>352</y>
+     <y>310</y>
      <width>194</width>
      <height>42</height>
     </rect>
@@ -675,7 +675,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>396</y>
+     <y>354</y>
      <width>194</width>
      <height>42</height>
     </rect>
@@ -758,7 +758,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>348</y>
+     <y>306</y>
      <width>194</width>
      <height>4</height>
     </rect>
@@ -780,7 +780,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>306</y>
+     <y>264</y>
      <width>194</width>
      <height>42</height>
     </rect>
@@ -826,6 +826,9 @@ font-family: &quot;Roboto&quot;</string>
    </property>
   </widget>
   <widget class="QPushButton" name="microphoneButton">
+   <property name="visible">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -881,7 +884,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>352</y>
+     <y>310</y>
      <width>194</width>
      <height>42</height>
     </rect>
@@ -1017,7 +1020,7 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>batteryButton</tabstop>
   <tabstop>telephoneButton</tabstop>
   <tabstop>dpadButton</tabstop>
-  <tabstop>microphoneButton</tabstop>
+  <!--<tabstop>microphoneButton</tabstop>-->
   <tabstop>fingerButton</tabstop>
   <tabstop>virtSensorsButton</tabstop>
   <tabstop>spacer2Button</tabstop>
