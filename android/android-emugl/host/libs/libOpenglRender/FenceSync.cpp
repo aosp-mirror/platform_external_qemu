@@ -60,6 +60,10 @@ EGLint FenceSync::wait(uint64_t timeout) {
     return wait_res;
 }
 
+void FenceSync::waitAsync() {
+    s_egl.eglWaitSyncKHR(mDisplay, mSync, 0);
+}
+
 void FenceSync::signaledNativeFd() {
     if (!decRef() && mDestroyWhenSignaled) {
         decRef();
