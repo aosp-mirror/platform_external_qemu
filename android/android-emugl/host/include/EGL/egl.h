@@ -58,6 +58,7 @@ typedef void *EGLDisplay;
 typedef void *EGLConfig;
 typedef void *EGLSurface;
 typedef void *EGLContext;
+typedef void *EGLStream;
 typedef void (*__eglMustCastToProperFunctionPointerType)(void);
 #define EGL_ALPHA_SIZE                    0x3021
 #define EGL_BAD_ACCESS                    0x3002

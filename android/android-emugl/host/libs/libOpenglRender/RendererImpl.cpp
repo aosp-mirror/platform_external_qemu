@@ -100,13 +100,24 @@ void RendererImpl::stop() {
     }
     // We're stopping the renderer, so there's no need to clean up resources
     // of some pending processes: we'll destroy everything soon.
-    // TODO: finish cleaning up for snapshot
     mCleanupProcessIds.stop();
 
     for (const auto& t : threads) {
         t.first->wait();
     }
     mCleanupThread.wait();
+}
+
+void RendererImpl::cleanupRenderThreads() {
+    android::base::AutoLock lock(mThreadVectorLock);
+    for (const auto& t : mThreads) {
+        if (const auto channel = t.second.lock()) {
+            channel->stopFromHost();
+        }
+    }
+    for (const auto& t : mThreads) {
+        t.first->wait();
+    }
 }
 
 RenderChannelPtr RendererImpl::createRenderChannel() {

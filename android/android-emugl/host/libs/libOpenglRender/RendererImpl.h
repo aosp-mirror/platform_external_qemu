@@ -39,7 +39,7 @@ public:
     bool initialize(int width, int height, bool useSubWindow);
 
     void stop();
-
+    void cleanupRenderThreads();
 public:
     RenderChannelPtr createRenderChannel() final;
     HardwareStrings getHardwareStrings() final;

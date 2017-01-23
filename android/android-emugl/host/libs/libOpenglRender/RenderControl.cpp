@@ -433,7 +433,7 @@ static uint32_t rcCreateContext(uint32_t config,
         return 0;
     }
 
-    HandleType ret = fb->createRenderContext(config, share, (GLESApi)glVersion);
+    HandleType ret = fb->createRenderContext(config, share, 0, (GLESApi)glVersion);
     return ret;
 }
 
