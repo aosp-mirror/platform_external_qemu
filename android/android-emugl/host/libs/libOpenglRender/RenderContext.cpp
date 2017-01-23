@@ -15,10 +15,12 @@
 */
 #include "RenderContext.h"
 
+#include "android/base/files/Stream.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
 
 #include <OpenglCodecCommon/ErrorLog.h>
+#include <stdio.h>
 
 extern GLESv1Dispatch s_gles1;
 
@@ -26,6 +28,14 @@ RenderContext* RenderContext::create(EGLDisplay display,
                                      EGLConfig config,
                                      EGLContext sharedContext,
                                      GLESApi version) {
+    return createImpl(display, config, sharedContext, version, nullptr);
+}
+
+RenderContext* RenderContext::createImpl(EGLDisplay display,
+                                     EGLConfig config,
+                                     EGLContext sharedContext,
+                                     GLESApi version,
+                                     android::base::Stream *stream) {
     void* emulatedGLES1Context = NULL;
 
     bool shouldEmulateGLES1 = s_gles1.underlying_gles2_api != NULL;
@@ -49,8 +59,13 @@ RenderContext* RenderContext::create(EGLDisplay display,
         EGL_CONTEXT_MINOR_VERSION_KHR, minorVersion,
         EGL_NONE
     };
-    EGLContext context = s_egl.eglCreateContext(
+    EGLContext context;
+    if (stream) {
+        context = s_egl.eglLoadContext(display, contextAttribs, stream);
+    } else {
+        context = s_egl.eglCreateContext(
             display, config, sharedContext, contextAttribs);
+    }
     if (context == EGL_NO_CONTEXT) {
         fprintf(stderr, "%s: failed to create context (EGL_NO_CONTEXT result)\n", __func__);
         return NULL;
@@ -90,3 +105,17 @@ RenderContext::~RenderContext() {
         mEmulatedGLES1Context = NULL;
     }
 }
+
+void RenderContext::onSave(android::base::Stream* stream) {
+    stream->putBe32(static_cast<uint32_t>(mVersion));
+
+    s_egl.eglSaveContext(mDisplay, mContext, static_cast<EGLStream>(stream));
+}
+
+RenderContext *RenderContext::onLoad(android::base::Stream* stream,
+            EGLDisplay display) {
+    GLESApi version = static_cast<GLESApi>(stream->getBe32());
+
+    return createImpl(display, (EGLConfig)0, EGL_NO_CONTEXT, version, stream);
+}
+
