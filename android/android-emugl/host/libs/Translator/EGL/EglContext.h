@@ -16,15 +16,17 @@
 #ifndef EGL_CONTEXT_H
 #define EGL_CONTEXT_H
 
+#include "android/base/files/Stream.h"
+
 #include "EglConfig.h"
 #include "EglOsApi.h"
 #include "EglSurface.h"
 
+#include "emugl/common/smart_ptr.h"
+
 #include <GLcommon/GLutils.h>
 #include <GLcommon/TranslatorIfaces.h>
 #include <GLcommon/objectNameManager.h>
-
-#include "emugl/common/smart_ptr.h"
 
 #include <EGL/egl.h>
 
@@ -36,12 +38,12 @@ class EglDisplay;
 class EglContext {
 public:
     EglContext(EglDisplay* dpy,
-               EglOS::Context* context,
-               ContextPtr shared_context,
+               uint64_t shareGroupId,
                EglConfig* config,
                GLEScontext* glesCtx,
                GLESVersion ver,
-               ObjectNameManager* mngr);
+               ObjectNameManager* mngr,
+               android::base::Stream* stream);
     bool usingSurface(SurfacePtr surface);
     EglOS::Context* nativeType() const { return m_native; }
     bool getAttrib(EGLint attrib, EGLint* value);
@@ -55,7 +57,11 @@ public:
     unsigned int getHndl() { return m_hndl; }
 
     ~EglContext();
-
+    void onSave(android::base::Stream* stream);
+    // TODO: return an EglContext instead of simply reading back the data
+    static bool onLoad(android::base::Stream* stream,
+                       EGLint& configId,
+                       uint64_t& shareGroupId);
 private:
     static unsigned int s_nextContextHndl;
     EglDisplay* m_dpy = nullptr;

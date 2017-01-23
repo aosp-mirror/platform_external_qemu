@@ -29,22 +29,31 @@ bool EglContext::usingSurface(SurfacePtr surface) {
 }
 
 EglContext::EglContext(EglDisplay *dpy,
-                       EglOS::Context* context,
-                       ContextPtr shared_context,
+                       uint64_t shareGroupId,
                        EglConfig* config,
                        GLEScontext* glesCtx,
                        GLESVersion ver,
-                       ObjectNameManager* mngr) :
+                       ObjectNameManager* mngr,
+                       android::base::Stream* stream) :
         m_dpy(dpy),
-        m_native(context),
         m_config(config),
         m_glesContext(glesCtx),
         m_version(ver),
         m_mngr(mngr) {
-    m_shareGroup = shared_context.get()?
-                   mngr->attachShareGroup(context,shared_context->nativeType()):
-                   mngr->createShareGroup(context);
-    m_hndl = ++s_nextContextHndl;
+    if (stream) {
+        EGLint configId = EGLint(stream->getBe32());
+        m_config = dpy->getConfig(configId);
+        shareGroupId = static_cast<uint64_t>(stream->getBe64());
+    }
+    EglOS::Context* globalSharedContext = dpy->getGlobalSharedContext();
+    m_native = dpy->nativeType()->createContext(
+            m_config->nativeFormat(), globalSharedContext);
+    if (m_native) {
+        m_shareGroup = mngr->attachOrCreateShareGroup(m_native, shareGroupId);
+        m_hndl = ++s_nextContextHndl;
+    } else {
+        m_hndl = 0;
+    }
 }
 
 EglContext::~EglContext()
@@ -125,3 +134,17 @@ bool EglContext::getAttrib(EGLint attrib,EGLint* value) {
     return true;
 }
 
+void EglContext::onSave(android::base::Stream* stream) {
+    // We save the information that
+    // is needed to restore the contexts.
+    // That means (1) context configurations (2) shared group IDs.
+
+    // Save the config.
+    // The current implementation is pretty hacky. It stores the config id.
+    // It almost only works when snapshot saving and loading happens on the
+    // same system with the same GPU driver and hardware.
+    // TODO: make it more general
+    stream->putBe32(getConfig()->id());
+    // Save shared group ID
+    stream->putBe64(m_shareGroup->getId());
+}

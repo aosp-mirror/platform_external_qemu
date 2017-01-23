@@ -16,10 +16,15 @@
 #ifndef _LIBRENDER_RENDER_CONTEXT_H
 #define _LIBRENDER_RENDER_CONTEXT_H
 
+#include "android/base/files/Stream.h"
 #include "emugl/common/smart_ptr.h"
 #include "GLDecoderContextData.h"
 
 #include <EGL/egl.h>
+
+// Type of handles, a.k.a. "object names" in the GL specification.
+// These are integers used to uniquely identify a resource of a given type.
+typedef uint32_t HandleType;
 
 // Tracks all the possible OpenGL ES API versions.
 enum GLESApi {
@@ -43,6 +48,7 @@ public:
     static RenderContext *create(EGLDisplay display,
                                  EGLConfig config,
                                  EGLContext sharedContext,
+                                 HandleType hndl,
                                  GLESApi = GLESApi_CM);
 
     // Destructor.
@@ -61,17 +67,33 @@ public:
     // RenderContext instance.
     GLDecoderContextData& decoderContextData() { return mContextData; }
 
+    HandleType getHndl() const { return mHndl; }
+
+    void onSave(android::base::Stream* stream);
+    static RenderContext *onLoad(android::base::Stream* stream,
+            EGLDisplay display);
 private:
     RenderContext();
 
     RenderContext(EGLDisplay display,
                   EGLContext context,
+                  HandleType hndl,
                   GLESApi version,
                   void* emulatedGLES1Context);
 
+    // Implementation of create
+    // |stream| is the stream to load from when restoring a snapshot,
+    // set |stream| to nullptr if it is not loading from a snapshot
+    static RenderContext *createImpl(EGLDisplay display,
+                                 EGLConfig config,
+                                 EGLContext sharedContext,
+                                 HandleType hndl,
+                                 GLESApi version,
+                                 android::base::Stream *stream);
 private:
     EGLDisplay mDisplay;
     EGLContext mContext;
+    HandleType mHndl;
     GLESApi mVersion;
     void* mEmulatedGLES1Context;
     GLDecoderContextData mContextData;

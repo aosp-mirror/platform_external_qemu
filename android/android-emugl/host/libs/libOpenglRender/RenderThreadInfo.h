@@ -16,6 +16,7 @@
 #ifndef _LIB_OPENGL_RENDER_THREAD_INFO_H
 #define _LIB_OPENGL_RENDER_THREAD_INFO_H
 
+#include "android/base/files/Stream.h"
 #include "RenderContext.h"
 #include "WindowSurface.h"
 #include "GLESv1Decoder.h"
@@ -43,6 +44,8 @@ struct RenderThreadInfo {
     static RenderThreadInfo* get();
 
     // Current EGL context, draw surface and read surface.
+    // TODO: implement get / set methods so that currContext
+    // and currContextHndl always matches
     RenderContextPtr currContext;
     WindowSurfacePtr currDrawSurf;
     WindowSurfacePtr currReadSurf;
@@ -65,6 +68,11 @@ struct RenderThreadInfo {
 
     // The unique id of owner guest process of this render thread
     uint64_t                        m_puid = 0;
+
+    // Functions to save / load a snapshot
+    // They must be called after Framebuffer snapshot
+    void onSave(android::base::Stream* stream);
+    bool onLoad(android::base::Stream* stream);
 };
 
 #endif

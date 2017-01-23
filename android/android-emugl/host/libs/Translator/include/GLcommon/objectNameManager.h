@@ -23,6 +23,7 @@
 
 #include <atomic>
 #include <unordered_map>
+#include <unordered_set>
 
 enum ObjectDataType {
     SHADER_DATA,
@@ -115,9 +116,10 @@ public:
     //
     ObjectData* getObjectData(NamedObjectType p_type, ObjectLocalName p_localName);
     ObjectDataPtr getObjectDataPtr(NamedObjectType p_type, ObjectLocalName p_localName);
-
+    uint64_t getId() const {return m_sharedGroupID;}
 private:
-    explicit ShareGroup(GlobalNameSpace *globalNameSpace);
+    explicit ShareGroup(GlobalNameSpace *globalNameSpace,
+                        uint64_t sharedGroupID);
 
     void lockObjectData();
     void unlockObjectData();
@@ -138,9 +140,13 @@ private:
     // TODO(zyy@): Create a common spinlock class.
     std::atomic_flag m_objectsDataLock = ATOMIC_FLAG_INIT;
     void *m_objectsData = nullptr;
+    // The ID of this shared group
+    // It is unique within its ObjectNameManager
+    uint64_t m_sharedGroupID;
 };
 
 typedef emugl::SmartPtr<ShareGroup> ShareGroupPtr;
+// TODO: refactor ShareGroupsMap so that it is indexed by share group id
 typedef std::unordered_map<void*, ShareGroupPtr> ShareGroupsMap;
 
 //
@@ -160,15 +166,20 @@ public:
     //
     // createShareGroup - create a new ShareGroup object and attach it with
     //                    the "name" specified by p_groupName.
-    //
-    ShareGroupPtr createShareGroup(void *p_groupName);
+    //      sharedGroupID : the ID of the shared group. While loading from a
+    //                      snapshot, please use the ID from the snapshot file.
+    //                      In all other situations, use 0 to auto-generate a
+    //                      new ID.
+
+    ShareGroupPtr createShareGroup(void *p_groupName, uint64_t sharedGroupID);
 
     //
-    // attachShareGroup - find the ShareGroup object attached to the name
-    //    specified in p_existingGroupName and attach p_groupName to the same
+    // attachShareGroup - find the ShareGroup object attached to the ID
+    //    specified in p_existingGroupID and attach p_groupName to the same
     //    ShareGroup instance.
     //
     ShareGroupPtr attachShareGroup(void *p_groupName, void *p_existingGroupName);
+    ShareGroupPtr attachOrCreateShareGroup(void *p_groupName, uint64_t p_existingGroupID);
 
     //
     // getShareGroup - retreive a ShareGroup object based on its "name"
@@ -191,9 +202,13 @@ public:
     void *getGlobalContext();
 
 private:
+    // TODO: refactor share group map so that it is indexed by share group ID
     ShareGroupsMap m_groups;
     emugl::Mutex m_lock;
     GlobalNameSpace *m_globalNameSpace = nullptr;
+    // m_usedSharedGroupIDs is used to assign new IDs to new shared groups
+    std::unordered_set<uint64_t> m_usedSharedGroupIDs;
+    uint64_t m_nextSharedGroupID = 1;
 };
 
 #endif

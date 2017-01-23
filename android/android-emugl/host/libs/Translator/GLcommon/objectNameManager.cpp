@@ -17,6 +17,7 @@
 #include <GLcommon/ObjectNameSpace.h>
 #include <GLcommon/GLEScontext.h>
 
+#include "android/base/containers/Lookup.h"
 #include "android/base/memory/LazyInstance.h"
 
 #include <array>
@@ -30,7 +31,9 @@ using ObjectDataMap =
     std::array<std::unordered_map<ObjectLocalName, ObjectDataPtr>,
                toIndex(NamedObjectType::NUM_OBJECT_TYPES)>;
 
-ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace) {
+ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
+                       uint64_t sharedGroupID) :
+                       m_sharedGroupID(sharedGroupID) {
     for (int i = 0; i < toIndex(NamedObjectType::NUM_OBJECT_TYPES);
          i++) {
         m_nameSpace[i] =
@@ -244,13 +247,27 @@ ObjectNameManager::ObjectNameManager(GlobalNameSpace *globalNameSpace) :
     m_globalNameSpace(globalNameSpace) {}
 
 ShareGroupPtr
-ObjectNameManager::createShareGroup(void *p_groupName)
+ObjectNameManager::createShareGroup(void *p_groupName, uint64_t sharedGroupID)
 {
     emugl::Mutex::AutoLock lock(m_lock);
 
     ShareGroupPtr& shareGroupReturn = m_groups[p_groupName];
     if (!shareGroupReturn) {
-        shareGroupReturn.reset(new ShareGroup(m_globalNameSpace));
+        if (!sharedGroupID) {
+            while (m_nextSharedGroupID == 0 ||
+                   android::base::contains(m_usedSharedGroupIDs,
+                                           m_nextSharedGroupID)) {
+                m_nextSharedGroupID ++;
+            }
+            sharedGroupID = m_nextSharedGroupID;
+        } else {
+            assert(!m_usedSharedGroupIDs.count(sharedGroupID));
+        }
+        shareGroupReturn.reset(
+            new ShareGroup(m_globalNameSpace, sharedGroupID));
+    } else {
+        assert(sharedGroupID == 0
+            || sharedGroupID == shareGroupReturn->getId());
     }
 
     return shareGroupReturn;
@@ -288,6 +305,21 @@ ObjectNameManager::attachShareGroup(void *p_groupName,
         m_groups.emplace(p_groupName, shareGroupReturn);
     }
     return shareGroupReturn;
+}
+
+ShareGroupPtr ObjectNameManager::attachOrCreateShareGroup(void *p_groupName,
+                                    uint64_t p_existingGroupID) {
+    assert(m_groups.find(p_groupName) == m_groups.end());
+    ShareGroupsMap::iterator ite = p_existingGroupID ? m_groups.begin()
+                                                     : m_groups.end();
+    while (ite != m_groups.end() && ite->second->getId() != p_existingGroupID) {
+        ++ite;
+    }
+    if (ite == m_groups.end()) {
+        return createShareGroup(p_groupName, p_existingGroupID);
+    } else {
+        return attachShareGroup(p_groupName, ite->first);
+    }
 }
 
 void
