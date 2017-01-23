@@ -32,6 +32,7 @@ typedef int (*FUNCPTR_NO_ARGS_RET_INT)();
 typedef GLsync (*FUNCPTR_FENCE_SYNC)(GLenum, GLbitfield);
 typedef GLenum (*FUNCPTR_CLIENT_WAIT_SYNC)(GLsync, GLbitfield, GLuint64);
 typedef void (*FUNCPTR_DELETE_SYNC)(GLsync);
+typedef void (*FUNCPTR_WAIT_SYNC)(GLsync, GLbitfield, GLuint64);
 
 class GlLibrary;
 
