@@ -73,6 +73,7 @@ static GLESiface  s_glesIface = {
     .fenceSync         = (FUNCPTR_FENCE_SYNC)glFenceSync,
     .clientWaitSync    = (FUNCPTR_CLIENT_WAIT_SYNC)glClientWaitSync,
     .deleteSync        = (FUNCPTR_DELETE_SYNC)glDeleteSync,
+    .waitSync          = (FUNCPTR_WAIT_SYNC)glWaitSync,
 };
 
 #include <GLcommon/GLESmacros.h>

@@ -67,6 +67,7 @@ static GLESiface  s_glesIface = {
     .fenceSync         = NULL,
     .clientWaitSync    = NULL,
     .deleteSync        = NULL,
+    .waitSync          = NULL,
 };
 
 #include <GLcommon/GLESmacros.h>
