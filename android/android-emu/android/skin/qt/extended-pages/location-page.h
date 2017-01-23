@@ -83,7 +83,7 @@ private:
         const QString& error_message,
         bool ignore_error);
 
-    void populateTable(GpsFixArray *fixes);
+    bool populateTable(const GpsFixArray& fixes);
     static bool validateCell(QTableWidget* table,
                              int row,
                              int col,
