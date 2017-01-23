@@ -62,9 +62,9 @@ LocationPage::LocationPage(QWidget *parent) :
             settings.value(Ui::Settings::LOCATION_ENTERED_LATITUDE, kGplexLat).toDouble());
     mUi->loc_playbackSpeed->setCurrentIndex(
             settings.value(Ui::Settings::LOCATION_PLAYBACK_SPEED, 0).toInt());
+    mUi->loc_pathTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     QString location_data_file =
         settings.value(Ui::Settings::LOCATION_PLAYBACK_FILE, "").toString();
-    mUi->loc_pathTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     mGeoDataLoader = GeoDataLoaderThread::newInstance(
             this,
             SLOT(geoDataThreadStarted()),
@@ -93,6 +93,8 @@ LocationPage::~LocationPage() {
         mGeoDataLoader->blockSignals(true);
         mGeoDataLoader->wait();
     }
+    mUi->loc_pathTable->blockSignals(true);
+    mUi->loc_pathTable->clear();
 }
 
 void LocationPage::setLocationAgent(const QAndroidLocationAgent* agent) {
@@ -285,18 +287,24 @@ static QTableWidgetItem* itemForTable(const QString& text) {
     return item;
 }
 
-void LocationPage::populateTable(GpsFixArray* fixes)
+bool LocationPage::populateTable(const GpsFixArray& fixes)
 {
     // Delete all rows in table
     mUi->loc_pathTable->setRowCount(0);
 
-    if (fixes->size() > 0) {
+    if (fixes.size() > 0) {
         // Special case, the first row will have delay 0
-        time_t previousTime = fixes->at(0).time;
-        mUi->loc_pathTable->setRowCount(fixes->size());
+        time_t previousTime = fixes[0].time;
+        mUi->loc_pathTable->setRowCount(fixes.size());
         mUi->loc_pathTable->blockSignals(true);
-        for (unsigned i = 0; !mGeoDataLoadingStopRequested && i < fixes->size(); i++) {
-            GpsFix &fix = fixes->at(i);
+        for (unsigned i = 0; i < fixes.size(); i++) {
+            if (mGeoDataLoadingStopRequested) {
+                // Abort immediately - this actually means the dtor has been
+                // already called!
+                return false;
+            }
+
+            const GpsFix& fix = fixes[i];
             time_t delay = fix.time - previousTime; // In seconds
 
             // Ensure all other delays are > 0, even if multiple points have the same timestamp
@@ -311,19 +319,21 @@ void LocationPage::populateTable(GpsFixArray* fixes)
             mUi->loc_pathTable->setItem(i, 4, itemForTable(QString::fromStdString(fix.name)));
             mUi->loc_pathTable->setItem(i, 5, itemForTable(QString::fromStdString(fix.description)));
 
+            previousTime = fix.time;
+
             // If the fixes array contains a lot of elements, this loop can cause
             // a lag in the UI. Just make sure we let the application handle UI
             // events for every few rows we add.
             if (i % 100 == 0) {
                 qApp->processEvents();
             }
-            previousTime = fix.time;
         }
         mUi->loc_pathTable->blockSignals(false);
         setButtonEnabled(mUi->loc_playStopButton, getSelectedTheme(), true);
     } else {
         setButtonEnabled(mUi->loc_playStopButton, getSelectedTheme(), false);
     }
+    return true;
 }
 
 void LocationPage::locationPlaybackStart()
@@ -466,7 +476,9 @@ void LocationPage::finishGeoDataLoading(
     if (ok) {
         QSettings settings;
         settings.setValue(Ui::Settings::LOCATION_PLAYBACK_FILE, file_name);
-        populateTable(&mGpsFixesArray);
+        if (!populateTable(mGpsFixesArray)) {
+            return;
+        }
     } else if (!ignore_error) {
         showErrorDialog(error_message, tr("Geo Data Parser"));
     }
