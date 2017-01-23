@@ -100,6 +100,11 @@ gen_functions_header \
         "$OPENGLES_DISPATCH_INCLUDE"/RenderEGL_extensions_functions.h \
         "$GEN_ENTRIES"
 
+gen_functions_header \
+        "$OPENGLES_DISPATCH_SRCDIR"/render_egl_snapshot.entries \
+        "$OPENGLES_DISPATCH_INCLUDE"/RenderEGL_snapshot_functions.h \
+        "$GEN_ENTRIES"
+
 GLES_ENTRIES="gles_common gles_extensions gles1_only gles1_extensions gles2_only \
 gles2_extensions gles3_only"
 

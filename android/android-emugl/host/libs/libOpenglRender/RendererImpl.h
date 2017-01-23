@@ -38,7 +38,7 @@ public:
     bool initialize(int width, int height, bool useSubWindow);
 
     void stop();
-
+    void cleanupRenderThreads();
 public:
     RenderChannelPtr createRenderChannel(android::base::Stream* loadStream) final;
     HardwareStrings getHardwareStrings() final;
