@@ -30,7 +30,7 @@ public:
 
     void setLocationAgent(const QAndroidLocationAgent* agent);
     bool isLoadingGeoData() const { return mNowLoadingGeoData; }
-    void requestStopLoadingGeoData() { mGeoDataLoadingStopRequested = true; }
+    void requestStopLoadingGeoData() { mGpsNextPopulateIndex = mGpsFixesArray.size(); }
 
     static void getDeviceLocation(const QAndroidLocationAgent* locAgent,
                                   double* pOutLatitude,
@@ -42,8 +42,8 @@ public:
                                      double altitude);
 
 signals:
-    void geoDataLoadingFinished();
     void locationUpdateRequired(double latitude, double longitude, double altitude);
+    void populateNextGeoDataChunk();
 
 private slots:
     void on_loc_GpxKmlButton_clicked();
@@ -66,6 +66,10 @@ private slots:
     // between threads.
     void geoDataThreadFinished(QString file_name, bool ok, QString error);
 
+    // Takes the loaded geodata and populates UI table chunk-by-chunk, allowing
+    // UI to process other events while loading.
+    void populateTableByChunks();
+
     // Same as above, but only works for the initial invokation of the geo data
     // loader thread (the one that occurs when the widget is first constructed)
     void startupGeoDataThreadFinished(QString file_name, bool ok, QString error);
@@ -83,7 +87,8 @@ private:
         const QString& error_message,
         bool ignore_error);
 
-    void populateTable(GpsFixArray *fixes);
+    void updateControlsAfterLoading();
+
     static bool validateCell(QTableWidget* table,
                              int row,
                              int col,
@@ -93,13 +98,13 @@ private:
     const QAndroidLocationAgent* mLocationAgent;
     QDoubleValidator mAltitudeValidator;
     GpsFixArray          mGpsFixesArray;
+    int                  mGpsNextPopulateIndex = 0;
     GeoDataLoaderThread* mGeoDataLoader;
     QTimer mTimer;
-    bool mNowPlaying;
-    bool mNowLoadingGeoData;
-    bool mGeoDataLoadingStopRequested;
-    int mRowToSend;
+    bool mNowPlaying = false;
+    bool mNowLoadingGeoData = false;
     bool mLocationUsed = false;
+    int mRowToSend;
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
 };
 
@@ -110,7 +115,6 @@ public:
     // by file_name into the GpsFixArray pointed to
     // by fixes
     void loadGeoDataFromFile(const QString& file_name, GpsFixArray* fixes);
-
 
     static GeoDataLoaderThread* newInstance(
             const QObject* handler,
@@ -125,7 +129,7 @@ protected:
     void run() override;
 
 private:
-    GeoDataLoaderThread() : mFixes(nullptr) {}
+    GeoDataLoaderThread() = default;
     QString mFileName;
-    GpsFixArray* mFixes;
+    GpsFixArray* mFixes = nullptr;
 };
