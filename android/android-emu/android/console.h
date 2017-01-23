@@ -15,6 +15,7 @@
 #pragma once
 
 #include "android/emulation/control/battery_agent.h"
+#include "android/emulation/control/car_data_agent.h"
 #include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/net_agent.h"
@@ -37,7 +38,8 @@ ANDROID_BEGIN_HEADER
    X(QAndroidTelephonyAgent, telephony) \
    X(QAndroidUserEventAgent, user_event) \
    X(QAndroidVmOperations, vm) \
-   X(QAndroidNetAgent, net)
+   X(QAndroidNetAgent, net) \
+   X(QCarDataAgent, car)
 
 // A structure used to group pointers to all agent interfaces used by the
 // Android console.

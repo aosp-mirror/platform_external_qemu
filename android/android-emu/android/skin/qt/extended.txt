@@ -63,6 +63,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="currentIndex">
     <number>0</number>
    </property>
+
    <widget class="LocationPage" name="location_page"/>
    <widget class="CellularPage" name="cellular_page"/>
    <widget class="BatteryPage" name="batteryPage"/>
@@ -72,7 +73,7 @@ font-family: &quot;Roboto&quot;</string>
    <widget class="FingerPage" name="finger_page"/>
    <widget class="SettingsPage" name="settingsPage"/>
    <widget class="HelpPage" name="helpPage"/>
-   <widget class="CarDataPage" name="carDataPage"/>
+
    <widget class="QWidget" name="page">
     <widget class="QGroupBox" name="locationGroup_4">
      <property name="geometry">
@@ -270,6 +271,8 @@ font-family: &quot;Roboto&quot;</string>
     </widget>
    </widget>
   </widget>
+
+
   <widget class="QPushButton" name="telephoneButton">
    <property name="geometry">
     <rect>
@@ -372,6 +375,7 @@ font-family: &quot;Roboto&quot;</string>
     <string>MajorTab</string>
    </property>
   </widget>
+
   <widget class="QPushButton" name="locationButton">
    <property name="geometry">
     <rect>
@@ -422,6 +426,7 @@ font-family: &quot;Roboto&quot;</string>
     <string>MajorTab</string>
    </property>
   </widget>
+
   <widget class="QPushButton" name="cellularButton">
    <property name="geometry">
     <rect>
@@ -731,58 +736,56 @@ font-family: &quot;Roboto&quot;</string>
     <bool>false</bool>
    </property>
   </widget>
-
-    <widget class="QPushButton" name="carDataButton">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>394</y>
-       <width>194</width>
-       <height>42</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>10</pointsize>
-      </font>
-     </property>
-     <property name="autoFillBackground">
-      <bool>false</bool>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
-     </property>
-     <property name="text">
-      <string>  Car data</string>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/light/settings</normaloff>:/light/settings</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>20</width>
-       <height>20</height>
-      </size>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-     <property name="themeIconName" stdset="0">
-      <string>car</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>MajorTab</string>
-     </property>
-     <property name="report_metrics" stdset="0">
-      <bool>false</bool>
-     </property>
-    </widget>
-
+   <widget class="QPushButton" name="carDataButton">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>394</y>
+             <width>194</width>
+             <height>42</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <family>Roboto</family>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
+           <property name="autoFillBackground">
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
+           </property>
+           <property name="text">
+            <string>  Car Data</string>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/light/car</normaloff>:/light/car</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>20</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+           <property name="report_metrics" stdset="0">
+            <bool>false</bool>
+           </property>
+           <property name="themeIconName" stdset="0">
+            <string>car</string>
+           </property>
+           <property name="ColorGroup" stdset="0">
+            <string>MajorTab</string>
+           </property>
+          </widget>
   <widget class="QPushButton" name="spacer1Button">
    <property name="enabled">
     <bool>false</bool>
@@ -891,8 +894,8 @@ font-family: &quot;Roboto&quot;</string>
   </widget>
   <zorder>spacer2Button</zorder>
   <zorder>spacer1Button</zorder>
-  <zorder>carDataButton</zorder>
   <zorder>settingsButton</zorder>
+  <zorder>carDataButton</zorder>
   <zorder>helpButton</zorder>
   <zorder>fingerButton</zorder>
   <zorder>dpadButton</zorder>
@@ -906,6 +909,12 @@ font-family: &quot;Roboto&quot;</string>
   <zorder>virtSensorsButton</zorder>
  </widget>
  <customwidgets>
+   <customwidget>
+    <class>CarDataPage</class>
+    <extends>QWidget</extends>
+    <header>android/skin/qt/extended-pages/car-data-page.h</header>
+    <container>1</container>
+   </customwidget>
   <customwidget>
    <class>CellularPage</class>
    <extends>QWidget</extends>
@@ -936,12 +945,6 @@ font-family: &quot;Roboto&quot;</string>
    <header>android/skin/qt/extended-pages/help-page.h</header>
    <container>1</container>
   </customwidget>
-    <customwidget>
-     <class>CarDataPage</class>
-     <extends>QWidget</extends>
-     <header>android/skin/qt/extended-pages/car-data-page.h</header>
-     <container>1</container>
-    </customwidget>
   <customwidget>
    <class>DPadPage</class>
    <extends>QWidget</extends>

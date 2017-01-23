@@ -24,6 +24,7 @@
 #include "android/globals.h"
 #include "android/hw-fingerprint.h"
 #include "android/hw-sensors.h"
+#include "android/car.h"
 #include "android/opengles-pipe.h"
 #include "android/proxy/proxy_setup.h"
 #include "android/utils/debug.h"
@@ -391,6 +392,9 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
 
     /* initialize sensors, this must be done here due to timer issues */
     android_hw_sensors_init();
+
+    D("Yao init car");
+    android_car_init();
 
     /* initilize fingperprint here */
     android_hw_fingerprint_init();
