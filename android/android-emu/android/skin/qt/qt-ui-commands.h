@@ -18,7 +18,6 @@ enum class QtUICommand {
     SHOW_PANE_CELLULAR,
     SHOW_PANE_BATTERY,
     SHOW_PANE_PHONE,
-    SHOW_PANE_MICROPHONE,
     SHOW_PANE_VIRTSENSORS,
     SHOW_PANE_DPAD,
     SHOW_PANE_FINGER,
@@ -45,13 +44,13 @@ enum class QtUICommand {
     TOGGLE_TRACKBALL,
 };
 
-#define NAME_TO_CMD(x) {#x, QtUICommand::x}
+#define NAME_TO_CMD(x) \
+    { #x, QtUICommand::x }
 static const std::pair<QString, QtUICommand> NameToQtUICmd[] = {
         NAME_TO_CMD(SHOW_PANE_LOCATION),
         NAME_TO_CMD(SHOW_PANE_CELLULAR),
         NAME_TO_CMD(SHOW_PANE_BATTERY),
         NAME_TO_CMD(SHOW_PANE_PHONE),
-        NAME_TO_CMD(SHOW_PANE_MICROPHONE),
         NAME_TO_CMD(SHOW_PANE_VIRTSENSORS),
         NAME_TO_CMD(SHOW_PANE_DPAD),
         NAME_TO_CMD(SHOW_PANE_FINGER),
@@ -78,13 +77,13 @@ static const std::pair<QString, QtUICommand> NameToQtUICmd[] = {
 };
 #undef NAME_TO_CMD
 
-#define CMD_TO_DESC(x, y) {QtUICommand::x, qApp->translate("QtUICommand", y)}
+#define CMD_TO_DESC(x, y) \
+    { QtUICommand::x, qApp->translate("QtUICommand", y) }
 static const std::pair<QtUICommand, QString> QtUICmdToDesc[] = {
         CMD_TO_DESC(SHOW_PANE_LOCATION, "Location"),
         CMD_TO_DESC(SHOW_PANE_CELLULAR, "Cellular"),
         CMD_TO_DESC(SHOW_PANE_BATTERY, "Battery"),
         CMD_TO_DESC(SHOW_PANE_PHONE, "Phone"),
-        CMD_TO_DESC(SHOW_PANE_MICROPHONE, "Microphone"),
         CMD_TO_DESC(SHOW_PANE_VIRTSENSORS, "Virtual sensors"),
         CMD_TO_DESC(SHOW_PANE_DPAD, "D-Pad"),
         CMD_TO_DESC(SHOW_PANE_FINGER, "Fingerprint"),
@@ -106,9 +105,12 @@ static const std::pair<QtUICommand, QString> QtUICmdToDesc[] = {
         CMD_TO_DESC(PAN_LEFT, "Pan left (when in zoom mode)"),
         CMD_TO_DESC(PAN_RIGHT, "Pan right (when in zoom mode)"),
         CMD_TO_DESC(VOLUME_UP, "Volume up"),
-        CMD_TO_DESC(VOLUME_DOWN, "Volume down"), CMD_TO_DESC(POWER, "Power"),
-        CMD_TO_DESC(HOME, "Home"), CMD_TO_DESC(BACK, "Back"),
-        CMD_TO_DESC(MENU, "Menu"), CMD_TO_DESC(OVERVIEW, "Overview"),
+        CMD_TO_DESC(VOLUME_DOWN, "Volume down"),
+        CMD_TO_DESC(POWER, "Power"),
+        CMD_TO_DESC(HOME, "Home"),
+        CMD_TO_DESC(BACK, "Back"),
+        CMD_TO_DESC(MENU, "Menu"),
+        CMD_TO_DESC(OVERVIEW, "Overview"),
 };
 #undef CMD_TO_DESC
 
