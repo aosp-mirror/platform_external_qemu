@@ -105,6 +105,16 @@ void RendererImpl::stop() {
     mCleanupThread.wait();
 }
 
+void RendererImpl::cleanupRenderThreads() {
+    android::base::AutoLock lock(mChannelsLock);
+    for (const auto& c : mChannels) {
+        c->stopFromHost();
+    }
+    for (const auto& c : mChannels) {
+        c->renderThread()->wait();
+    }
+}
+
 RenderChannelPtr RendererImpl::createRenderChannel(
         android::base::Stream* loadStream) {
     const auto channel = std::make_shared<RenderChannelImpl>(loadStream);

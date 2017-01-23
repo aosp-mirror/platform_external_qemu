@@ -18,6 +18,7 @@
 
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/thread_store.h"
+#include "FrameBuffer.h"
 
 namespace {
 
@@ -40,4 +41,20 @@ RenderThreadInfo::~RenderThreadInfo() {
 
 RenderThreadInfo* RenderThreadInfo::get() {
     return static_cast<RenderThreadInfo*>(s_tls->get());
+}
+
+void RenderThreadInfo::onSave(android::base::Stream* stream) {
+    if (currContext) {
+        stream->putBe32(currContext->getHndl());
+    } else {
+        stream->putBe32(0);
+    }
+    // TODO: save other stuff
+}
+
+bool RenderThreadInfo::onLoad(android::base::Stream* stream) {
+    HandleType ctxHndl = stream->getBe32();
+    currContext = FrameBuffer::getFB()->getContext(ctxHndl);
+    // TODO: load other stuff
+    return true;
 }

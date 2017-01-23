@@ -18,6 +18,7 @@
 #define EGLAPI __declspec(dllexport)
 #endif
 
+#include "android/base/files/Stream.h"
 #include "ThreadInfo.h"
 #include <GLcommon/GLEScontext.h>
 #include <GLcommon/TranslatorIfaces.h>
@@ -107,6 +108,13 @@ static const int s_eglExtensionsSize =
 
 /****************************************************************************************************************************************/
 //macros for accessing global egl info & tls objects
+
+// TODO: write some comments
+
+extern "C" {
+EGLAPI EGLBoolean EGLAPIENTRY eglSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream);
+EGLAPI EGLContext EGLAPIENTRY eglLoadContext(EGLDisplay display, const EGLint *attrib_list, EGLStream stream);
+}
 
 #define CURRENT_THREAD() do {} while (0);
 
@@ -779,11 +787,24 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSurfaceAttrib(EGLDisplay display, EGLSurface su
    return EGL_TRUE;
 }
 
-EGLAPI EGLContext EGLAPIENTRY eglCreateContext(EGLDisplay display, EGLConfig config,
+// eglCreateOrLoadContext is the implementation of eglCreateContext and
+// eglLoadContext.
+// |stream| is the snapshot file to load from when calling from eglLoadContext
+// when |stream| is available, config and share group ID will be loaded from stream
+
+static EGLContext eglCreateOrLoadContext(EGLDisplay display, EGLConfig config,
                 EGLContext share_context,
-                const EGLint *attrib_list) {
+                const EGLint *attrib_list,
+                android::base::Stream *stream) {
+    assert(share_context == EGL_NO_CONTEXT || stream == nullptr);
     VALIDATE_DISPLAY_RETURN(display,EGL_NO_CONTEXT);
-    VALIDATE_CONFIG_RETURN(config,EGL_NO_CONTEXT);
+
+    uint64_t shareGroupId = 0;
+    EglConfig* cfg = nullptr;
+    if (!stream) {
+        cfg = dpy->getConfig(config);
+        if (!cfg) return EGL_NO_CONTEXT;
+    }
 
     EGLint major_version = 0;
     EGLint minor_version = 0;
@@ -878,26 +899,39 @@ EGLAPI EGLContext EGLAPIENTRY eglCreateContext(EGLDisplay display, EGLConfig con
                 RETURN_ERROR(EGL_NO_CONTEXT,EGL_BAD_ATTRIBUTE);
     }
 
-    ContextPtr sharedCtxPtr;
     if(share_context != EGL_NO_CONTEXT) {
+        ContextPtr sharedCtxPtr;
         sharedCtxPtr = dpy->getContext(share_context);
         if(!sharedCtxPtr.get()) {
             RETURN_ERROR(EGL_NO_CONTEXT,EGL_BAD_CONTEXT);
         }
+        shareGroupId = dpy->getManager(glesVersion)
+                        ->getShareGroup(sharedCtxPtr->nativeType())->getId();
     }
 
-    EglOS::Context* globalSharedContext = dpy->getGlobalSharedContext();
-    EglOS::Context* nativeContext = dpy->nativeType()->createContext(
-            cfg->nativeFormat(), globalSharedContext);
+    ContextPtr ctx(new EglContext(dpy, shareGroupId, cfg,
+                              glesCtx, glesVersion,
+                              dpy->getManager(glesVersion),
+                              stream));
 
-    if(nativeContext) {
-        ContextPtr ctx(new EglContext(dpy, nativeContext,sharedCtxPtr,cfg,glesCtx,glesVersion,dpy->getManager(glesVersion)));
+    if(ctx->nativeType()) {
         return dpy->addContext(ctx);
     } else {
         iface->deleteGLESContext(glesCtx);
     }
 
-return EGL_NO_CONTEXT;
+    return EGL_NO_CONTEXT;
+}
+
+EGLAPI EGLContext EGLAPIENTRY eglCreateContext(EGLDisplay display, EGLConfig config,
+                EGLContext share_context,
+                const EGLint *attrib_list) {
+    return eglCreateOrLoadContext(display, config, share_context, attrib_list, nullptr);
+}
+
+EGLAPI EGLContext EGLAPIENTRY eglLoadContext(EGLDisplay display, const EGLint *attrib_list,
+                                             android::base::Stream *stream) {
+    return eglCreateOrLoadContext(display, (EGLConfig)0, (EGLContext)0, attrib_list, stream);
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroyContext(EGLDisplay display, EGLContext context) {
@@ -1222,3 +1256,14 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync)
 }
 
 /*********************************************************************************/
+
+EGLAPI EGLBoolean EGLAPIENTRY eglSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream) {
+    VALIDATE_DISPLAY(display);
+    VALIDATE_CONTEXT(contex);
+    ctx->onSave((android::base::Stream*)stream);
+    return EGL_TRUE;
+}
+
+EGLAPI EGLContext EGLAPIENTRY eglLoadContext(EGLDisplay display, const EGLint *attrib_list, EGLStream stream) {
+    return eglCreateOrLoadContext(display, (EGLConfig)0, EGL_NO_CONTEXT, attrib_list, (android::base::Stream*)stream);
+}

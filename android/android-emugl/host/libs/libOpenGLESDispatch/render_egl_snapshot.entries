@@ -1,0 +1,6 @@
+# The list of EGL functions used for GPU snapshot
+
+!Render_EGL_snapshot
+
+EGLBoolean eglSaveContext(EGLDisplay display, EGLContext context, EGLStream stream);
+EGLContext eglLoadContext(EGLDisplay display, const EGLint *attrib_list, EGLStream stream);

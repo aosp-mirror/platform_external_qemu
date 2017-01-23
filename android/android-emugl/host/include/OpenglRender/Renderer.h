@@ -140,7 +140,8 @@ public:
     // killed). Such resources include color buffer handles and EglImage handles.
     virtual void cleanupProcGLObjects(uint64_t puid) = 0;
 
-    // Stops all channels and render threads.
+    // Stops all channels and render threads. The renderer cannot be used after
+    // stopped.
     virtual void stop() = 0;
 
     // Pauses all channels to prepare for snapshot saving.
@@ -149,6 +150,8 @@ public:
     // Resumes all channels after snapshot saving or loading.
     virtual void resumeAll() = 0;
 
+    // Wait for all render thread exits
+    virtual void cleanupRenderThreads() = 0;
 protected:
     ~Renderer() = default;
 };
