@@ -20,13 +20,20 @@
 #include "EglOsApi.h"
 #include "EglSurface.h"
 
+#include "emugl/common/stream.h"
+#include "emugl/common/smart_ptr.h"
+
 #include <GLcommon/GLutils.h>
 #include <GLcommon/TranslatorIfaces.h>
 #include <GLcommon/objectNameManager.h>
 
-#include "emugl/common/smart_ptr.h"
-
 #include <EGL/egl.h>
+
+namespace android {
+    namespace base {
+        class Stream;
+    }
+}
 
 class EglContext;
 typedef emugl::SmartPtr<EglContext> ContextPtr;
@@ -37,7 +44,7 @@ class EglContext {
 public:
     EglContext(EglDisplay* dpy,
                EglOS::Context* context,
-               ContextPtr shared_context,
+               uint64_t shareGroupId,
                EglConfig* config,
                GLEScontext* glesCtx,
                GLESVersion ver,
@@ -55,7 +62,11 @@ public:
     unsigned int getHndl() { return m_hndl; }
 
     ~EglContext();
-
+    void onSave(emugl::Stream* stream);
+    // TODO: return an EglContext instead of simply reading back the data
+    static bool onLoad(emugl::Stream* stream,
+                       EGLint& configId,
+                       uint64_t& shareGroupId);
 private:
     static unsigned int s_nextContextHndl;
     EglDisplay* m_dpy = nullptr;

@@ -81,6 +81,7 @@ void RenderThread::postSnapshot(){
 }
 
 void RenderThread::setRestore(android::base::Stream* stream) {
+    printf("restoring render thread\n");
     mRestoreLock.lock();
     m_restoreStream = stream;
 }
@@ -123,6 +124,7 @@ intptr_t RenderThread::main() {
         android::base::AutoLock lock(mRestoreLock);
         if (m_restoreStream) {
             readBuf.onLoad(m_restoreStream);
+            tInfo.onLoad(m_restoreStream);
             m_restoreStream = nullptr;
             mFinishedRestore.signalAndUnlock(&mRestoreLock);
         }
@@ -172,6 +174,7 @@ intptr_t RenderThread::main() {
                 if (m_snapshotStream) {
                     readBuf.onSave(m_snapshotStream);
                     readBuf.unsetSnapshot();
+                    tInfo.onSave(m_snapshotStream);
                     m_snapshotStream = nullptr;
                     mFinishedSnapshot.signalAndUnlock(&lock);
                     // TODO: snapshot GLES translator, and pause it until the whole system
