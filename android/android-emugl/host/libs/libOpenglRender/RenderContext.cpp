@@ -15,6 +15,7 @@
 */
 #include "RenderContext.h"
 
+#include "android/base/files/Stream.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
 
@@ -90,3 +91,31 @@ RenderContext::~RenderContext() {
         mEmulatedGLES1Context = NULL;
     }
 }
+
+void RenderContext::onSave(android::base::Stream* stream) {
+    stream->putBe32(static_cast<uint32_t>(mVersion));
+
+    // We do not save the contexts. Instead, we save the information that
+    // is needed to restore the contexts.
+    // That means (1) context configurations (2) shared group IDs.
+
+    //ContextPtr eglCtx = mDisplay->getContext(mContext);
+    // Save the config.
+    // The current implementation is pretty hacky. It stores the config id.
+    // It almost only works when snapshot saving and loading happens on the
+    // same system with the same GPU driver and hardware.
+    // TODO: make it more general
+    //stream->putBe32(eglCtx->getConfig()->id());
+    // Save shared group ID
+    //stream->putBe32(eglCtx->)
+}
+
+RenderContext *RenderContext::onLoad(android::base::Stream* stream,
+            EGLDisplay display, EGLContext sharedContext) {
+    // TODO
+    //GLESApi version = static_cast<GLESApi>(stream->getBe32());
+    //EGLint configId = static_cast<EGLint>(stream->getBe32());
+    //return create(display, display->getConfig(configId), sharedContext, version);
+    return nullptr;
+}
+

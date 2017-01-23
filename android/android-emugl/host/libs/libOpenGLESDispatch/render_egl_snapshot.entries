@@ -1,0 +1,5 @@
+# The list of EGL functions used for GPU snapshot
+
+!Render_EGL_snapshot
+
+void eglSaveContext(EGLContext context);

@@ -30,6 +30,12 @@ enum GLESApi {
     GLESApi_3_2 = 5,
 };
 
+namespace android {
+    namespace base {
+        class Stream;
+    }
+}
+
 // A class used to model a guest EGLContext. This simply wraps a host
 // EGLContext, associated with an GLDecoderContextData instance that is
 // used to store copies of guest-side arrays.
@@ -61,6 +67,9 @@ public:
     // RenderContext instance.
     GLDecoderContextData& decoderContextData() { return mContextData; }
 
+    void onSave(android::base::Stream* stream);
+    static RenderContext *onLoad(android::base::Stream* stream,
+            EGLDisplay display, EGLContext sharedContext);
 private:
     RenderContext();
 

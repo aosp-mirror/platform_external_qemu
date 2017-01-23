@@ -30,7 +30,9 @@ using ObjectDataMap =
     std::array<std::unordered_map<ObjectLocalName, ObjectDataPtr>,
                toIndex(NamedObjectType::NUM_OBJECT_TYPES)>;
 
-ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace) {
+ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
+                       uint64_t sharedGroupID) :
+                       m_sharedGroupID(sharedGroupID) {
     for (int i = 0; i < toIndex(NamedObjectType::NUM_OBJECT_TYPES);
          i++) {
         m_nameSpace[i] =
@@ -243,13 +245,25 @@ ObjectNameManager::ObjectNameManager(GlobalNameSpace *globalNameSpace) :
     m_globalNameSpace(globalNameSpace) {}
 
 ShareGroupPtr
-ObjectNameManager::createShareGroup(void *p_groupName)
+ObjectNameManager::createShareGroup(void *p_groupName, uint64_t sharedGroupID)
 {
     emugl::Mutex::AutoLock lock(m_lock);
 
     ShareGroupPtr& shareGroupReturn = m_groups[p_groupName];
     if (!shareGroupReturn) {
-        shareGroupReturn.reset(new ShareGroup(m_globalNameSpace));
+        if (!sharedGroupID) {
+            sharedGroupID = 1;
+            while (m_usedSharedGroupIDs.count(sharedGroupID)) {
+                sharedGroupID ++;
+            }
+        } else {
+            assert(!m_usedSharedGroupIDs.count(sharedGroupID));
+        }
+        shareGroupReturn.reset(
+            new ShareGroup(m_globalNameSpace, sharedGroupID));
+    } else {
+        assert(sharedGroupID == 0
+            || sharedGroupID == shareGroupReturn->getID());
     }
 
     return shareGroupReturn;

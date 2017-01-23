@@ -43,7 +43,7 @@ EglContext::EglContext(EglDisplay *dpy,
         m_mngr(mngr) {
     m_shareGroup = shared_context.get()?
                    mngr->attachShareGroup(context,shared_context->nativeType()):
-                   mngr->createShareGroup(context);
+                   mngr->createShareGroup(context, 0);
     m_hndl = ++s_nextContextHndl;
 }
 

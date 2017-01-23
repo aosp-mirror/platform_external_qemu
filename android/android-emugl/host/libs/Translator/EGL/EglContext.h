@@ -28,6 +28,12 @@
 
 #include <EGL/egl.h>
 
+namespace android {
+    namespace base {
+        class Stream;
+    }
+}
+
 class EglContext;
 typedef emugl::SmartPtr<EglContext> ContextPtr;
 
@@ -55,7 +61,8 @@ public:
     unsigned int getHndl() { return m_hndl; }
 
     ~EglContext();
-
+    void onSave(android::base::Stream* stream);
+    static EglContext * onLoad(android::base::Stream* stream);
 private:
     static unsigned int s_nextContextHndl;
     EglDisplay* m_dpy = nullptr;
