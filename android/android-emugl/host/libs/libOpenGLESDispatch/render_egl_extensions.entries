@@ -11,6 +11,6 @@ EGLImageKHR eglCreateImageKHR(EGLDisplay display, EGLContext context, EGLenum ta
 EGLBoolean eglDestroyImageKHR(EGLDisplay display, EGLImageKHR image);
 EGLSyncKHR eglCreateSyncKHR(EGLDisplay display, EGLenum type, const EGLint* attribs);
 EGLint eglClientWaitSyncKHR(EGLDisplay display, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout);
+EGLint eglWaitSyncKHR(EGLDisplay display, EGLSyncKHR sync, EGLint flags);
 EGLBoolean eglDestroySyncKHR(EGLDisplay display, EGLSyncKHR sync);
-
 EGLint eglGetMaxGLESVersion(EGLDisplay display);
