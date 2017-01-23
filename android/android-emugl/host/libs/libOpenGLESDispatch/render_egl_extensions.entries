@@ -11,8 +11,8 @@ EGLImageKHR eglCreateImageKHR(EGLDisplay display, EGLContext context, EGLenum ta
 EGLBoolean eglDestroyImageKHR(EGLDisplay display, EGLImageKHR image);
 EGLSyncKHR eglCreateSyncKHR(EGLDisplay display, EGLenum type, const EGLint* attribs);
 EGLint eglClientWaitSyncKHR(EGLDisplay display, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout);
+EGLint eglWaitSyncKHR(EGLDisplay display, EGLSyncKHR sync, EGLint flags);
 EGLBoolean eglDestroySyncKHR(EGLDisplay display, EGLSyncKHR sync);
-
 void eglGetGlobalReadDrawRbo(EGLDisplay display, EGLint* drawRbo, EGLint* readRbo);
 void eglCreateBindFbos(EGLDisplay display, EGLint drawRbo, EGLint readRbo, EGLint* drawFbo, EGLint* readFbo);
 void eglDestroyFbos(EGLDisplay display, EGLint drawFbo, EGLint readFbo);

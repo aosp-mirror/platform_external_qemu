@@ -77,6 +77,7 @@ static GLESiface  s_glesIface = {
     .getProcAddress             = getProcAddress,
     .fenceSync                  = (FUNCPTR_FENCE_SYNC)glFenceSync,
     .clientWaitSync             = (FUNCPTR_CLIENT_WAIT_SYNC)glClientWaitSync,
+    .waitSync                   = (FUNCPTR_WAIT_SYNC)glWaitSync,
     .deleteSync                 = (FUNCPTR_DELETE_SYNC)glDeleteSync,
     .saveTexture                = saveTexture,
     .loadTexture                = loadTexture,

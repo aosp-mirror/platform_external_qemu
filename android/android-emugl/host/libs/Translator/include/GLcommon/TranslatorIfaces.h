@@ -68,6 +68,7 @@ typedef struct {
     __translatorMustCastToProperFunctionPointerType (*getProcAddress)(const char*);
     GLsync                                          (*fenceSync)(GLenum, GLbitfield);
     GLenum                                          (*clientWaitSync)(GLsync, GLbitfield, GLuint64);
+    void                                            (*waitSync)(GLsync, GLbitfield, GLuint64);
     void                                            (*deleteSync)(GLsync);
     void                                            (*saveTexture)(SaveableTexture*, android::base::Stream*);
     SaveableTexture*                                (*loadTexture)(android::base::Stream*, GlobalNameSpace*);
