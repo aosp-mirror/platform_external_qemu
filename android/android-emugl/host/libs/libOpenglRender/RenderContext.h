@@ -16,6 +16,7 @@
 #ifndef _LIBRENDER_RENDER_CONTEXT_H
 #define _LIBRENDER_RENDER_CONTEXT_H
 
+#include "emugl/common/stream.h"
 #include "emugl/common/smart_ptr.h"
 #include "GLDecoderContextData.h"
 
@@ -61,6 +62,9 @@ public:
     // RenderContext instance.
     GLDecoderContextData& decoderContextData() { return mContextData; }
 
+    void onSave(emugl::Stream* stream);
+    static RenderContext *onLoad(emugl::Stream* stream,
+            EGLDisplay display);
 private:
     RenderContext();
 
@@ -69,6 +73,14 @@ private:
                   GLESApi version,
                   void* emulatedGLES1Context);
 
+    // Implementation of create
+    // |stream| is the stream to load from when restoring a snapshot,
+    // set |stream| to nullptr if it is not loading from a snapshot
+    static RenderContext *createImpl(EGLDisplay display,
+                                 EGLConfig config,
+                                 EGLContext sharedContext,
+                                 GLESApi,
+                                 emugl::Stream *stream);
 private:
     EGLDisplay mDisplay;
     EGLContext mContext;
