@@ -17,6 +17,7 @@
 
 #include "OpenGLESDispatch/RenderEGL_functions.h"
 #include "OpenGLESDispatch/RenderEGL_extensions_functions.h"
+#include "OpenGLESDispatch/RenderEGL_snapshot_functions.h"
 
 // This header is used to define the EGLDispatch structure that contains
 // pointers to the EGL shared library used by libOpenglRender. Normally,
@@ -39,11 +40,13 @@
 // Define function typedefs.
 LIST_RENDER_EGL_FUNCTIONS(RENDER_EGL_DEFINE_TYPE)
 LIST_RENDER_EGL_EXTENSIONS_FUNCTIONS(RENDER_EGL_DEFINE_TYPE)
+LIST_RENDER_EGL_SNAPSHOT_FUNCTIONS(RENDER_EGL_DEFINE_TYPE)
 
 // Define EGLDispatch structure.
 struct EGLDispatch {
     LIST_RENDER_EGL_FUNCTIONS(RENDER_EGL_DECLARE_MEMBER)
     LIST_RENDER_EGL_EXTENSIONS_FUNCTIONS(RENDER_EGL_DECLARE_MEMBER)
+    LIST_RENDER_EGL_SNAPSHOT_FUNCTIONS(RENDER_EGL_DECLARE_MEMBER)
 };
 
 // Initialize EGLDispatch function. Return true on success, false on failure.

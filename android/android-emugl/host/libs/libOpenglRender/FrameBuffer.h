@@ -16,6 +16,8 @@
 #ifndef _LIBRENDER_FRAMEBUFFER_H
 #define _LIBRENDER_FRAMEBUFFER_H
 
+#include "android/base/files/Stream.h"
+
 #include "ColorBuffer.h"
 #include "emugl/common/mutex.h"
 #include "FbConfig.h"
@@ -153,10 +155,12 @@ public:
     // Create a new RenderContext instance for this display instance.
     // |p_config| is the index of one of the configs returned by getConfigs().
     // |p_share| is either EGL_NO_CONTEXT or the handle of a shared context.
+    // |handle| is the handle to be used for the new context, set it to 0
+    // to generate a new handle.
     // |version| specifies the GLES version as a GLESApi enum.
     // Return a new handle value, which will be 0 in case of error.
-    HandleType createRenderContext(
-            int p_config, HandleType p_share, GLESApi version = GLESApi_CM);
+    HandleType createRenderContext(int p_config, HandleType p_share, 
+        int handle, GLESApi version = GLESApi_CM);
 
     // Create a new WindowSurface instance from this display instance.
     // |p_config| is the index of one of the configs returned by getConfigs().
@@ -346,6 +350,8 @@ public:
 
     ~FrameBuffer();
 
+    void onSave(android::base::Stream* stream);
+    bool onLoad(android::base::Stream* stream);
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle();
@@ -413,5 +419,6 @@ private:
 
     // Flag set when emulator is shutting down.
     bool m_shuttingDown = false;
+
 };
 #endif

@@ -20,6 +20,7 @@
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
 #include "emugl/common/misc.h"
+#include "emugl/common/stream.h"
 #include "emugl/common/sync_device.h"
 
 namespace emugl {
@@ -78,4 +79,12 @@ RendererPtr RenderLibImpl::initRenderer(int width, int height,
     return res;
 }
 
+void RenderLibImpl::onSave(android::base::Stream* stream) {
+    // TODO
+}
+
+bool RenderLibImpl::onLoad(android::base::Stream* stream) {
+    // TODO
+    return true;
+}
 }  // namespace emugl
