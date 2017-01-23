@@ -178,46 +178,10 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
         return;
     }
 
-    EGLint wait_result = 0x0;
-
     DPRINT("wait on sync obj: %p", cmd->fenceSync);
-    wait_result = cmd->fenceSync->wait(kDefaultTimeoutNsecs);
-
-    DPRINT("done waiting, with wait result=0x%x. "
-           "increment timeline (and signal fence)",
-           wait_result);
-
-    if (wait_result != EGL_CONDITION_SATISFIED_KHR) {
-        DPRINT("error: eglClientWaitSync abnormal exit 0x%x\n",
-               wait_result);
-    }
+    cmd->fenceSync->waitAsync();
 
     DPRINT("issue timeline increment");
-
-    // We always unconditionally increment timeline at this point, even
-    // if the call to eglClientWaitSync returned abnormally.
-    // There are three cases to consider:
-    // - EGL_CONDITION_SATISFIED_KHR: either the sync object is already
-    //   signaled and we need to increment this timeline immediately, or
-    //   we have waited until the object is signaled, and then
-    //   we increment the timeline.
-    // - EGL_TIMEOUT_EXPIRED_KHR: the fence command we put in earlier
-    //   in the OpenGL stream is not actually ever signaled, and we
-    //   end up blocking in the above eglClientWaitSyncKHR call until
-    //   our timeout runs out. In this case, provided we have waited
-    //   for |kDefaultTimeoutNsecs|, the guest will have received all
-    //   relevant error messages about fence fd's not being signaled
-    //   in time, so we are properly emulating bad behavior even if
-    //   we now increment the timeline.
-    // - EGL_FALSE (error): chances are, the underlying EGL implementation
-    //   on the host doesn't actually support fence objects. In this case,
-    //   we should fail safe: 1) It must be only very old or faulty
-    //   graphics drivers / GPU's that don't support fence objects.
-    //   2) The consequences of signaling too early are generally, out of
-    //   order frames and scrambled textures in some apps. But, not
-    //   incrementing the timeline means that the app's rendering freezes.
-    //   So, despite the faulty GPU driver, not incrementing is too heavyweight a response.
-
     emugl_sync_timeline_inc(cmd->timeline, kTimelineInterval);
     cmd->fenceSync->signaledNativeFd();
 

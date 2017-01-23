@@ -89,6 +89,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR
 EGLAPI EGLSyncKHR EGLAPIENTRY eglCreateSyncKHR(EGLDisplay display, EGLenum type, const EGLint* attribs);
 EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay display, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout);
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroySyncKHR(EGLDisplay display, EGLSyncKHR sync);
+EGLAPI EGLint EGLAPIENTRY eglWaitSyncKHR(EGLDisplay display, EGLSyncKHR sync, EGLint flags);
 }  // extern "C"
 
 static const ExtensionDescriptor s_eglExtensions[] = {
@@ -102,6 +103,8 @@ static const ExtensionDescriptor s_eglExtensions[] = {
                 (__eglMustCastToProperFunctionPointerType)eglClientWaitSyncKHR },
         {"eglDestroySyncKHR",
                 (__eglMustCastToProperFunctionPointerType)eglDestroySyncKHR },
+        {"eglWaitSyncKHR",
+                (__eglMustCastToProperFunctionPointerType)eglWaitSyncKHR },
 };
 
 static const int s_eglExtensionsSize =
@@ -1358,6 +1361,12 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync)
 
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     iface->deleteSync((GLsync)sync);
+    return EGL_TRUE;
+}
+
+EGLAPI EGLint EGLAPIENTRY eglWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags) {
+    const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+    iface->waitSync((GLsync)sync, 0, -1);
     return EGL_TRUE;
 }
 

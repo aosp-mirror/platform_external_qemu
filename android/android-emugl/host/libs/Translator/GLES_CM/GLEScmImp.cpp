@@ -67,7 +67,12 @@ static GLESiface  s_glesIface = {
     .getProcAddress              = getProcAddress,
     .fenceSync                   = NULL,
     .clientWaitSync              = NULL,
+    .waitSync                    = NULL,
     .deleteSync                  = NULL,
+    .saveTexture                 = NULL,
+    .loadTexture                 = NULL,
+    .deleteRbo                   = NULL,
+    .createFbosFromRbos          = NULL,
 };
 
 #include <GLcommon/GLESmacros.h>
