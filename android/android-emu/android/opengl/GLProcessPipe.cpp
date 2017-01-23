@@ -37,7 +37,7 @@ public:
     // The pipe service class for this implementation.
     class Service : public AndroidPipe::Service {
     public:
-        Service() : AndroidPipe::Service("GLProcessPipe") {}
+        Service() : AndroidPipe::Service("__GLProcessPipe") {}
 
         virtual AndroidPipe* create(void* mHwPipe, const char* args) override {
             return new GLProcessPipe(mHwPipe, this);

@@ -78,6 +78,7 @@ void android_cleanupProcGLObjects(uint64_t puid);
 
 #ifdef __cplusplus
 const emugl::RendererPtr& android_getOpenglesRenderer();
+
 #endif
 
 ANDROID_END_HEADER

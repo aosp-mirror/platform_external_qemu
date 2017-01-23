@@ -30,6 +30,10 @@
 #include <stdio.h>
 #include <string.h>
 
+//extern "C" {
+//#include "migration/vmstate.h"
+//}
+
 namespace {
 
 // Helper class to call the bind_locked() / unbind_locked() properly.
@@ -657,8 +661,13 @@ HandleType FrameBuffer::createColorBuffer(int p_width, int p_height,
 }
 
 HandleType FrameBuffer::createRenderContext(int p_config, HandleType p_share,
-                                            GLESApi version)
+                                            int handle, GLESApi version)
 {
+    // The handle should be unused (or 0)
+    if (handle && (m_contexts.find(handle) != m_contexts.end() ||
+             m_windows.find(handle) != m_windows.end())) {
+        return 0;
+    }
     emugl::Mutex::AutoLock mutex(m_lock);
     emugl::ReadWriteMutex::AutoWriteLock contextLock(m_contextStructureLock);
     HandleType ret = 0;
@@ -682,7 +691,11 @@ HandleType FrameBuffer::createRenderContext(int p_config, HandleType p_share,
     RenderContextPtr rctx(RenderContext::create(
         m_eglDisplay, config->getEglConfig(), sharedContext, version));
     if (rctx.get() != NULL) {
-        ret = genHandle();
+        if (!handle) {
+            ret = genHandle();
+        } else {
+            ret = handle;
+        }
         m_contexts[ret] = rctx;
         RenderThreadInfo *tinfo = RenderThreadInfo::get();
         uint64_t puid = tinfo->m_puid;
@@ -1214,7 +1227,7 @@ void FrameBuffer::createTrivialContext(HandleType shared,
     assert(contextOut);
     assert(surfOut);
 
-    *contextOut = createRenderContext(0, shared, GLESApi_2);
+    *contextOut = createRenderContext(0, shared, 0, GLESApi_2);
     // Zero size is formally allowed here, but SwiftShader doesn't like it and
     // fails.
     *surfOut = createWindowSurface(0, 1, 1);
@@ -1318,3 +1331,76 @@ bool FrameBuffer::repost() {
     }
     return false;
 }
+
+void FrameBuffer::onSave(android::base::Stream* stream) {
+    printf("FB: onSave\n");
+    stream->putBe32(m_x);
+    stream->putBe32(m_y);
+    stream->putBe32(m_framebufferWidth);
+    stream->putBe32(m_framebufferHeight);
+    stream->putBe32(m_windowWidth);
+    stream->putBe32(m_windowHeight);
+    stream->putFloat(m_dpr);
+
+    stream->putBe32(m_useSubWindow);
+    stream->putBe32(m_eglContextInitialized);
+
+    stream->putBe32(m_fpsStats);
+    stream->putBe32(m_statsNumFrames);
+    stream->putBe64(m_statsStartTime);
+
+    // snapshot contexts
+    stream->putBe32(m_contexts.size());
+    for (const auto& ctx : m_contexts) {
+        stream->putBe32(ctx.first);
+        ctx.second->onSave(stream);
+    }
+    printf("FB: onSave done\n");
+
+    // TODO: snapshot color buffers and window surfaces
+    // TODO: snapshot memory management
+}
+
+bool FrameBuffer::onLoad(android::base::Stream* stream) {
+    m_x = stream->getBe32();
+    m_y = stream->getBe32();
+    m_framebufferWidth = stream->getBe32();
+    m_framebufferHeight = stream->getBe32();
+    m_windowWidth = stream->getBe32();
+    m_windowHeight = stream->getBe32();
+    m_dpr = stream->getFloat();
+    // TODO: resize the window
+
+    m_useSubWindow = stream->getBe32();
+    m_eglContextInitialized = stream->getBe32();
+
+    m_fpsStats = stream->getBe32();
+    m_statsNumFrames = stream->getBe32();
+    m_statsStartTime = stream->getBe64();
+
+    // restore contexts
+    assert(m_contexts.size() == 0);
+    size_t numContexts = stream->getBe32();
+    for (size_t i = 0; i < numContexts; i ++) {
+        size_t id = stream->getBe32();
+        RenderContextPtr ctx(RenderContext::onLoad(stream, m_eglDisplay));
+        m_contexts[id] = ctx;
+    }
+
+    // TODO: wire up the contex pointer in RenderThreadInfo
+    //       we can either do it here or have a post-load function
+    // TODO: restore color buffers and window surfaces
+    // TODO: restore memory management
+}
+
+/*#define FRAMEBUFFER_SAVE_VERSION 5
+
+static void FrameBufferSave(QEMUFile* f, void* opaque) {
+    android::base::Stream* stream = stream_from_qemufile(f);
+    FrameBuffer::getFB()->onSave(stream);
+    stream_free(stream);
+}
+
+static int FrameBufferLoad(QEMUFile* f, void* opaque, int version) {
+}
+*/
