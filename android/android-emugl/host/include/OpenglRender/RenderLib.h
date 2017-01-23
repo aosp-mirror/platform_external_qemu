@@ -18,6 +18,12 @@
 #include "OpenglRender/Renderer.h"
 #include "OpenglRender/render_api_types.h"
 
+namespace android {
+    namespace base {
+        class Stream;
+    }
+}
+
 namespace emugl {
 
 // RenderLib - root interface for the GPU emulation library
@@ -57,6 +63,8 @@ public:
     virtual RendererPtr initRenderer(int width, int height,
                                      bool useSubWindow) = 0;
 
+    virtual void save(android::base::Stream* stream) = 0;
+    virtual bool load(android::base::Stream* stream, int version) = 0;
 };
 
 using RenderLibPtr = std::unique_ptr<RenderLib>;
