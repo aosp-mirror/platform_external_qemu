@@ -12,6 +12,7 @@
   X(EGLBoolean, eglDestroyImageKHR, (EGLDisplay display, EGLImageKHR image)) \
   X(EGLSyncKHR, eglCreateSyncKHR, (EGLDisplay display, EGLenum type, const EGLint* attribs)) \
   X(EGLint, eglClientWaitSyncKHR, (EGLDisplay display, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout)) \
+  X(EGLint, eglWaitSyncKHR, (EGLDisplay display, EGLSyncKHR sync, EGLint flags)) \
   X(EGLBoolean, eglDestroySyncKHR, (EGLDisplay display, EGLSyncKHR sync)) \
   X(void, eglGetGlobalReadDrawRbo, (EGLDisplay display, EGLint* drawRbo, EGLint* readRbo)) \
   X(void, eglCreateBindFbos, (EGLDisplay display, EGLint drawRbo, EGLint readRbo, EGLint* drawFbo, EGLint* readFbo)) \
