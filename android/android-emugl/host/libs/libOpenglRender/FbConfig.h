@@ -152,6 +152,8 @@ public:
     // On success, this returns
     EGLint packConfigs(GLuint bufferByteSize, GLuint* buffer) const;
 
+    //void onSave(android::base::Stream* stream);
+    //bool onLoad(android::base::Stream* stream);
 private:
     FbConfigList(const FbConfigList& other) = delete;
 

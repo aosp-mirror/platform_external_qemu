@@ -165,6 +165,7 @@ int main(int argc, char **argv)
 #include "android/version.h"
 #include "android/wear-agent/android_wear_agent.h"
 #include "android-qemu2-glue/android_qemud.h"
+#include "android-qemu2-glue/android_renderer.h"
 #include "android-qemu2-glue/looper-qemu.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
 #include "android-qemu2-glue/qemu-setup.h"
@@ -4455,6 +4456,7 @@ int main(int argc, char** argv, char** envp)
         } else {
             goldfish_fb_set_use_host_gpu(1);
             qemu_gles = 1;   // Using emugl
+            android_qemu2_register_opengl_snapshot();
         }
     }
     if (qemu_gles) {
