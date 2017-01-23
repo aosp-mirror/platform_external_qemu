@@ -257,7 +257,7 @@ SyncThread* SyncThread::getSyncThread() {
     if (!tInfo->syncThread.get()) {
         DPRINT("starting a sync thread for render thread info=%p", tInfo);
         tInfo->syncThread.reset(
-                new SyncThread(s_egl.eglGetCurrentContext()));
+                new SyncThread(tInfo->currContext->getEGLContext()));
     }
 
     return tInfo->syncThread.get();

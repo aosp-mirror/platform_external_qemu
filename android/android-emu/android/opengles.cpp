@@ -11,6 +11,7 @@
 */
 
 #include "android/opengles.h"
+#include "android/opengl-snapshot.h"
 
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/GoldfishDma.h"
@@ -117,6 +118,16 @@ BAD_EXIT:
     derror("OpenGLES emulation library could not be initialized!");
     adynamicLibrary_close(rendererSo);
     return -1;
+}
+
+void android_saveOpenglRenderer(android::base::Stream* stream) {
+    assert(sRenderLib);
+    sRenderLib->save(stream);
+}
+
+int android_loadOpenglRenderer(android::base::Stream* stream, int version) {
+    assert(sRenderLib);
+    return sRenderLib->load(stream, version);
 }
 
 int
