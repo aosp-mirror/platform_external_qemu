@@ -30,7 +30,7 @@ bool EglContext::usingSurface(SurfacePtr surface) {
 
 EglContext::EglContext(EglDisplay *dpy,
                        EglOS::Context* context,
-                       ContextPtr shared_context,
+                       uint64_t shareGroupId,
                        EglConfig* config,
                        GLEScontext* glesCtx,
                        GLESVersion ver,
@@ -41,9 +41,7 @@ EglContext::EglContext(EglDisplay *dpy,
         m_glesContext(glesCtx),
         m_version(ver),
         m_mngr(mngr) {
-    m_shareGroup = shared_context.get()?
-                   mngr->attachShareGroup(context,shared_context->nativeType()):
-                   mngr->createShareGroup(context);
+    m_shareGroup = mngr->attachOrCreateShareGroup(context, shareGroupId);
     m_hndl = ++s_nextContextHndl;
 }
 
@@ -122,6 +120,31 @@ bool EglContext::getAttrib(EGLint attrib,EGLint* value) {
     default:
         return false;
     }
+    return true;
+}
+
+void EglContext::onSave(emugl::Stream* stream) {
+    // We save the information that
+    // is needed to restore the contexts.
+    // That means (1) context configurations (2) shared group IDs.
+
+    // Save the config.
+    // The current implementation is pretty hacky. It stores the config id.
+    // It almost only works when snapshot saving and loading happens on the
+    // same system with the same GPU driver and hardware.
+    // TODO: make it more general
+    printf("EglContext: onSave\n");
+    stream->putBe64(getConfig()->id());
+    // Save shared group ID
+    stream->putBe64(m_shareGroup->getId());
+    printf("EglContext: onSave done\n");
+}
+
+bool EglContext::onLoad(emugl::Stream* stream,
+                        EGLint& configId,
+                        uint64_t& shareGroupId) {
+    configId = EGLint(stream->getBe64());
+    shareGroupId = static_cast<uint64_t>(stream->getBe64());
     return true;
 }
 

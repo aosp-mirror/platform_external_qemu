@@ -20,7 +20,10 @@
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
 #include "emugl/common/misc.h"
+#include "emugl/common/stream.h"
 #include "emugl/common/sync_device.h"
+
+#include "FrameBuffer.h"
 
 namespace emugl {
 
@@ -76,6 +79,20 @@ RendererPtr RenderLibImpl::initRenderer(int width, int height,
     }
     mRenderer = res;
     return res;
+}
+
+void RenderLibImpl::save(android::base::Stream* stream) {
+    FrameBuffer* fb = FrameBuffer::getFB();
+    assert(fb);
+    fb->onSave(stream);
+}
+
+bool RenderLibImpl::load(android::base::Stream* stream, int version) {
+    (void)version;
+    FrameBuffer* fb = FrameBuffer::getFB();
+    assert(fb);
+    printf("RenderLibImpl::load\n");
+    return fb->onLoad(stream);
 }
 
 }  // namespace emugl

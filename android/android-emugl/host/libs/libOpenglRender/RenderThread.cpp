@@ -81,6 +81,7 @@ void RenderThread::postSnapshot(){
 }
 
 void RenderThread::setRestore(android::base::Stream* stream) {
+    printf("restoring render thread\n");
     mRestoreLock.lock();
     m_restoreStream = stream;
 }
