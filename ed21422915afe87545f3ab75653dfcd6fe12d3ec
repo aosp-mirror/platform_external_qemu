@@ -22,6 +22,30 @@
       "revId": "ed21422915afe87545f3ab75653dfcd6fe12d3ec",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6854da0e_ba624ebc",
+        "filename": "android/android-emu/android/skin/qt/qt-ui-commands.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-01-23T22:01:26Z",
+      "side": 1,
+      "message": "I don\u0027t know.\nIt seems like an add thing to do explicitly.",
+      "parentUuid": "6854da0e_c48bef43",
+      "range": {
+        "startLine": 75,
+        "startChar": 30,
+        "endLine": 75,
+        "endChar": 32
+      },
+      "revId": "ed21422915afe87545f3ab75653dfcd6fe12d3ec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
