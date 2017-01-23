@@ -69,6 +69,7 @@ static GLESiface  s_glesIface = {
     .getProcAddress              = getProcAddress,
     .fenceSync                   = NULL,
     .clientWaitSync              = NULL,
+    .waitSync                    = NULL,
     .deleteSync                  = NULL,
 };
 

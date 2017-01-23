@@ -70,6 +70,9 @@ public:
     // in case there is a concurrent call to eglDestroySyncKHR (1).
     EGLint wait(uint64_t timeout);
 
+    // waitAsync wraps eglWaitSyncKHR.
+    void waitAsync();
+
     // signaledNativeFd(): upon when the native fence fd
     // is signaled due to the sync object being signaled,
     // this method does the following:
