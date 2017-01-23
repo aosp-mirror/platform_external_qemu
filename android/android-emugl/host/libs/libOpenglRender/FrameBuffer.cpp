@@ -657,8 +657,13 @@ HandleType FrameBuffer::createColorBuffer(int p_width, int p_height,
 }
 
 HandleType FrameBuffer::createRenderContext(int p_config, HandleType p_share,
-                                            GLESApi version)
+                                            int handle, GLESApi version)
 {
+    // The handle should be unused (or 0)
+    if (handle && (m_contexts.find(handle) != m_contexts.end() ||
+             m_windows.find(handle) != m_windows.end())) {
+        return 0;
+    }
     emugl::Mutex::AutoLock mutex(m_lock);
     emugl::ReadWriteMutex::AutoWriteLock contextLock(m_contextStructureLock);
     HandleType ret = 0;
@@ -682,7 +687,11 @@ HandleType FrameBuffer::createRenderContext(int p_config, HandleType p_share,
     RenderContextPtr rctx(RenderContext::create(
         m_eglDisplay, config->getEglConfig(), sharedContext, version));
     if (rctx.get() != NULL) {
-        ret = genHandle();
+        if (!handle) {
+            ret = genHandle();
+        } else {
+            ret = handle;
+        }
         m_contexts[ret] = rctx;
         RenderThreadInfo *tinfo = RenderThreadInfo::get();
         uint64_t puid = tinfo->m_puid;
@@ -991,13 +1000,8 @@ bool FrameBuffer::bindContext(HandleType p_context,
     // if this is not an unbind operation - make sure all handles are good
     //
     if (p_context || p_drawSurface || p_readSurface) {
-        RenderContextMap::iterator r( m_contexts.find(p_context) );
-        if (r == m_contexts.end()) {
-            // bad context handle
-            return false;
-        }
-
-        ctx = (*r).second;
+        ctx = getContext(p_context);
+        if (!ctx) return false;
         WindowSurfaceMap::iterator w( m_windows.find(p_drawSurface) );
         if (w == m_windows.end()) {
             // bad surface handle
@@ -1071,6 +1075,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
     // update thread info with current bound context
     //
     tinfo->currContext = ctx;
+    tinfo->currContextHndl = ctx ? p_context : 0;
     tinfo->currDrawSurf = draw;
     tinfo->currReadSurf = read;
     if (ctx) {
@@ -1082,6 +1087,16 @@ bool FrameBuffer::bindContext(HandleType p_context,
         tinfo->m_gl2Dec.setContextData(NULL);
     }
     return true;
+}
+
+RenderContextPtr FrameBuffer::getContext(HandleType p_context) {
+    RenderContextMap::iterator r( m_contexts.find(p_context) );
+    if (r == m_contexts.end()) {
+        // bad context handle
+        return RenderContextPtr();
+    } else {
+        return r->second;
+    }
 }
 
 HandleType FrameBuffer::createClientImage(HandleType context, EGLenum target, GLuint buffer)
@@ -1214,7 +1229,7 @@ void FrameBuffer::createTrivialContext(HandleType shared,
     assert(contextOut);
     assert(surfOut);
 
-    *contextOut = createRenderContext(0, shared, GLESApi_2);
+    *contextOut = createRenderContext(0, shared, 0, GLESApi_2);
     // Zero size is formally allowed here, but SwiftShader doesn't like it and
     // fails.
     *surfOut = createWindowSurface(0, 1, 1);
@@ -1317,4 +1332,64 @@ bool FrameBuffer::repost() {
         return post(m_lastPostedColorBuffer);
     }
     return false;
+}
+
+void FrameBuffer::onSave(android::base::Stream* stream) {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    stream->putBe32(m_x);
+    stream->putBe32(m_y);
+    stream->putBe32(m_framebufferWidth);
+    stream->putBe32(m_framebufferHeight);
+    stream->putBe32(m_windowWidth);
+    stream->putBe32(m_windowHeight);
+    stream->putFloat(m_dpr);
+
+    stream->putBe32(m_useSubWindow);
+    stream->putBe32(m_eglContextInitialized);
+
+    stream->putBe32(m_fpsStats);
+    stream->putBe32(m_statsNumFrames);
+    stream->putBe64(m_statsStartTime);
+
+    // snapshot contexts
+    stream->putBe32(m_contexts.size());
+    for (const auto& ctx : m_contexts) {
+        stream->putBe32(ctx.first);
+        ctx.second->onSave(stream);
+    }
+
+    // TODO: snapshot color buffers and window surfaces
+    // TODO: snapshot memory management
+}
+
+bool FrameBuffer::onLoad(android::base::Stream* stream) {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    m_x = stream->getBe32();
+    m_y = stream->getBe32();
+    m_framebufferWidth = stream->getBe32();
+    m_framebufferHeight = stream->getBe32();
+    m_windowWidth = stream->getBe32();
+    m_windowHeight = stream->getBe32();
+    m_dpr = stream->getFloat();
+    // TODO: resize the window
+
+    m_useSubWindow = stream->getBe32();
+    m_eglContextInitialized = stream->getBe32();
+
+    m_fpsStats = stream->getBe32();
+    m_statsNumFrames = stream->getBe32();
+    m_statsStartTime = stream->getBe64();
+
+    // restore contexts
+    assert(m_contexts.size() == 0);
+    size_t numContexts = stream->getBe32();
+    for (size_t i = 0; i < numContexts; i ++) {
+        HandleType hndl = stream->getBe32();
+        RenderContextPtr ctx(RenderContext::onLoad(stream, m_eglDisplay));
+        assert(ctx);
+        m_contexts[hndl] = ctx;
+    }
+    return true;
+    // TODO: restore color buffers and window surfaces
+    // TODO: restore memory management
 }

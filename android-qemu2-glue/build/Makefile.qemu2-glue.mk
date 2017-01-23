@@ -13,6 +13,7 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_SRC_FILES := \
     android_qemud.cpp \
+    android_renderer.cpp \
     base/async/Looper.cpp \
     base/files/QemuFileStream.cpp \
     display.cpp \
