@@ -18,6 +18,7 @@
 
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/thread_store.h"
+#include "FrameBuffer.h"
 
 namespace {
 
@@ -40,4 +41,17 @@ RenderThreadInfo::~RenderThreadInfo() {
 
 RenderThreadInfo* RenderThreadInfo::get() {
     return static_cast<RenderThreadInfo*>(s_tls->get());
+}
+
+void RenderThreadInfo::onSave(emugl::Stream* stream) {
+    stream->putBe32(currContextHndl);
+    // TODO: save other stuff
+}
+
+bool RenderThreadInfo::onLoad(emugl::Stream* stream) {
+    currContextHndl = stream->getBe32();
+    currContext = FrameBuffer::getFB()->getContext(currContextHndl);
+    assert(!currContextHndl || currContext);
+    // TODO: load other stuff
+    return true;
 }
