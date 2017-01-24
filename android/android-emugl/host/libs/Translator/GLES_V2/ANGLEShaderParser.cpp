@@ -169,6 +169,14 @@ bool translate(int esslVersion,
                GLenum shaderType,
                std::string* outInfolog,
                std::string* outObjCode) {
+
+    // Leverage ARB_ES3_1_compatibility for ESSL 310 for now.
+    // Use translator after rest of dEQP-GLES31.functional is in a better state.
+    if (esslVersion == 310) {
+        *outObjCode = std::string(src);
+        return true;
+    }
+
     if (!kInitialized) {
         return false;
     }
