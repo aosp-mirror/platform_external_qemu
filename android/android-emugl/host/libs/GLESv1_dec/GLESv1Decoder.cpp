@@ -66,6 +66,20 @@ int GLESv1Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     glDrawElementsData = s_glDrawElementsData;
     glFinishRoundTrip = s_glFinishRoundTrip;
 
+    glGenBuffers_dec = s_glGenBuffers;
+    glGenTextures_dec = s_glGenTextures;
+
+    glGenFramebuffersOES_dec = s_glGenFramebuffersOES;
+    glGenRenderbuffersOES_dec = s_glGenRenderbuffersOES;
+
+    glGenVertexArraysOES_dec = s_glGenVertexArraysOES;
+
+    glDeleteBuffers_dec = s_glDeleteBuffers;
+    glDeleteTextures_dec = s_glDeleteTextures;
+    glDeleteRenderbuffersOES_dec = s_glDeleteRenderbuffersOES;
+    glDeleteFramebuffersOES_dec = s_glDeleteFramebuffersOES;
+    glDeleteVertexArraysOES_dec = s_glDeleteVertexArraysOES;
+
     return 0;
 }
 
@@ -208,6 +222,66 @@ void GLESv1Decoder::s_glGetCompressedTextureFormats(void *self, GLint count, GLi
 {
     GLESv1Decoder *ctx = (GLESv1Decoder *) self;
     ctx->glGetIntegerv(GL_COMPRESSED_TEXTURE_FORMATS, data);
+}
+
+void GLESv1Decoder::s_glGenBuffers(void* self, GLsizei n, GLuint* buffers) {
+    GLESv1Decoder *ctx = (GLESv1Decoder *)self;
+    ctx->glGenBuffers(n, buffers);
+    // TODO: Snapshot names
+}
+
+void GLESv1Decoder::s_glGenTextures(void* self, GLsizei n, GLuint* textures) {
+    GLESv1Decoder *ctx = (GLESv1Decoder *)self;
+    ctx->glGenTextures(n, textures);
+    // TODO: Snapshot names
+}
+
+void GLESv1Decoder::s_glGenRenderbuffersOES(void* self, GLsizei n, GLuint* renderbuffers) {
+    GLESv1Decoder *ctx = (GLESv1Decoder *)self;
+    ctx->glGenRenderbuffersOES(n, renderbuffers);
+    // TODO: Snapshot names
+}
+
+void GLESv1Decoder::s_glGenFramebuffersOES(void* self, GLsizei n, GLuint* framebuffers) {
+    GLESv1Decoder *ctx = (GLESv1Decoder *)self;
+    ctx->glGenFramebuffersOES(n, framebuffers);
+    // TODO: Snapshot names
+}
+
+void GLESv1Decoder::s_glGenVertexArraysOES(void* self, GLsizei n, GLuint* arrays) {
+    GLESv1Decoder *ctx = (GLESv1Decoder *)self;
+    ctx->glGenVertexArraysOES(n, arrays);
+    // TODO: Snapshot names
+}
+
+void GLESv1Decoder::s_glDeleteBuffers(void* self, GLsizei n, const GLuint *buffers) {
+    GLESv1Decoder *ctx = (GLESv1Decoder *)self;
+    ctx->glDeleteBuffers(n, buffers);
+    // TODO: Snapshot names
+}
+
+void GLESv1Decoder::s_glDeleteTextures(void* self, GLsizei n, const GLuint *textures) {
+    GLESv1Decoder *ctx = (GLESv1Decoder *)self;
+    ctx->glDeleteTextures(n, textures);
+    // TODO: Snapshot names
+}
+
+void GLESv1Decoder::s_glDeleteRenderbuffersOES(void* self, GLsizei n, const GLuint* renderbuffers) {
+    GLESv1Decoder *ctx = (GLESv1Decoder *)self;
+    ctx->glDeleteRenderbuffersOES(n, renderbuffers);
+    // TODO: Snapshot names
+}
+
+void GLESv1Decoder::s_glDeleteFramebuffersOES(void* self, GLsizei n, const GLuint* framebuffers) {
+    GLESv1Decoder *ctx = (GLESv1Decoder *)self;
+    ctx->glDeleteFramebuffersOES(n, framebuffers);
+    // TODO: Snapshot names
+}
+
+void GLESv1Decoder::s_glDeleteVertexArraysOES(void* self, GLsizei n, const GLuint *arrays) {
+    GLESv1Decoder *ctx = (GLESv1Decoder *)self;
+    ctx->glDeleteVertexArraysOES(n, arrays);
+    // TODO: Snapshot names
 }
 
 void *GLESv1Decoder::s_getProc(const char *name, void *userData)

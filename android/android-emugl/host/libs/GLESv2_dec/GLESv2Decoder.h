@@ -21,6 +21,8 @@
 #include "GLDecoderContextData.h"
 #include "emugl/common/shared_library.h"
 
+#include "GLSnapshot.h"
+
 class GLESv2Decoder : public gles2_decoder_context_t
 {
 public:
@@ -29,6 +31,8 @@ public:
     ~GLESv2Decoder();
     int initGL(get_proc_func_t getProcFunc, void *getProcFuncData);
     void setContextData(GLDecoderContextData *contextData) { m_contextData = contextData; }
+protected:
+    GLSnapshot::GLSnapshotState *m_snapshot;
 private:
     GLDecoderContextData *m_contextData;
     emugl::SharedLibrary* m_GL2library;
@@ -83,6 +87,44 @@ private:
     static void gles2_APIENTRY s_glDeleteSyncAEMU(void* self, uint64_t to_delete);
     static GLboolean gles2_APIENTRY s_glIsSyncAEMU(void* self, uint64_t sync);
     static void gles2_APIENTRY s_glGetSyncivAEMU(void* self, uint64_t sync, GLenum pname, GLsizei bufSize, GLsizei *length, GLint *values);
+
+    static GLuint gles2_APIENTRY s_glCreateShader(void* self, GLenum shaderType);
+    static GLuint gles2_APIENTRY s_glCreateProgram(void* self);
+
+    static void gles2_APIENTRY s_glGenBuffers(void* self, GLsizei n, GLuint* buffers);
+
+    static void gles2_APIENTRY s_glGenFramebuffers(void* self, GLsizei n, GLuint* framebuffers);
+    static void gles2_APIENTRY s_glGenRenderbuffers(void* self, GLsizei n, GLuint* renderbuffers);
+    static void gles2_APIENTRY s_glGenTextures(void* self, GLsizei n, GLuint* textures);
+
+    static void gles2_APIENTRY s_glGenVertexArraysOES(void* self, GLsizei n, GLuint* arrays);
+    static void gles2_APIENTRY s_glGenVertexArrays(void* self, GLsizei n, GLuint* arrays);
+
+    static void gles2_APIENTRY s_glGenTransformFeedbacks(void* self, GLsizei n, GLuint* transformFeedbacks);
+
+    static void gles2_APIENTRY s_glGenSamplers(void* self, GLsizei n, GLuint* samplers);
+
+    static void gles2_APIENTRY s_glGenQueries(void* self, GLsizei n, GLuint* queries);
+
+    static GLuint gles2_APIENTRY s_glCreateShaderProgramv(void* self, GLenum type, GLsizei count, const char** strings);
+
+    static void gles2_APIENTRY s_glGenProgramPipelines(void* self, GLsizei n, GLuint* pipelines);
+
+    static void gles2_APIENTRY s_glDeleteShader(void* self, GLuint shader);
+    static void gles2_APIENTRY s_glDeleteProgram(void* self, GLuint program);
+
+    static void gles2_APIENTRY s_glDeleteBuffers(void* self, GLsizei n, const GLuint *buffers);
+    static void gles2_APIENTRY s_glDeleteFramebuffers(void* self, GLsizei n, const GLuint *framebuffers);
+    static void gles2_APIENTRY s_glDeleteRenderbuffers(void* self, GLsizei n, const GLuint *renderbuffers);
+    static void gles2_APIENTRY s_glDeleteTextures(void* self, GLsizei n, const GLuint *textures);
+
+    static void gles2_APIENTRY s_glDeleteVertexArraysOES(void* self, GLsizei n, const GLuint *arrays);
+    static void gles2_APIENTRY s_glDeleteVertexArrays(void* self, GLsizei n, const GLuint *arrays);
+
+    static void gles2_APIENTRY s_glDeleteTransformFeedbacks(void* self, GLsizei n, const GLuint *transformfeedbacks);
+    static void gles2_APIENTRY s_glDeleteSamplers(void* self, GLsizei n, const GLuint *samplers);
+    static void gles2_APIENTRY s_glDeleteQueries(void* self, GLsizei n, const GLuint *queries);
+    static void gles2_APIENTRY s_glDeleteProgramPipelines(void* self, GLsizei n, const GLuint *pipelines);
 
 };
 #endif
