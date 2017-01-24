@@ -35,6 +35,7 @@ GLESv2Decoder::GLESv2Decoder()
 {
     m_contextData = NULL;
     m_GL2library = NULL;
+    m_snapshot = NULL;
 }
 
 GLESv2Decoder::~GLESv2Decoder()
@@ -70,7 +71,6 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
 
     glDrawElementsOffset = s_glDrawElementsOffset;
     glDrawElementsData = s_glDrawElementsData;
-    glShaderString = s_glShaderString;
     glFinishRoundTrip = s_glFinishRoundTrip;
     glMapBufferRangeAEMU = s_glMapBufferRangeAEMU;
     glUnmapBufferAEMU = s_glUnmapBufferAEMU;
@@ -105,6 +105,44 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     glIsSyncAEMU = s_glIsSyncAEMU;
     glGetSyncivAEMU = s_glGetSyncivAEMU;
     glDeleteSyncAEMU = s_glDeleteSyncAEMU;
+
+    glCreateShader_dec = s_glCreateShader;
+    glCreateProgram_dec = s_glCreateProgram;
+
+    glGenBuffers_dec = s_glGenBuffers;
+
+    glGenFramebuffers_dec = s_glGenFramebuffers;
+    glGenRenderbuffers_dec = s_glGenRenderbuffers;
+    glGenTextures_dec = s_glGenTextures;
+
+    glGenVertexArraysOES_dec = s_glGenVertexArraysOES;
+    glGenVertexArrays_dec = s_glGenVertexArrays;
+
+    glGenTransformFeedbacks_dec = s_glGenTransformFeedbacks;
+    glGenSamplers_dec = s_glGenSamplers;
+    glGenQueries_dec = s_glGenQueries;
+    glGenProgramPipelines_dec = s_glGenProgramPipelines;
+
+    glDeleteShader_dec = s_glDeleteShader;
+    glDeleteProgram_dec = s_glDeleteProgram;
+
+    glDeleteBuffers_dec = s_glDeleteBuffers;
+    glDeleteFramebuffers_dec = s_glDeleteFramebuffers;
+    glDeleteRenderbuffers_dec = s_glDeleteRenderbuffers;
+    glDeleteTextures_dec = s_glDeleteTextures;
+
+    glDeleteVertexArraysOES_dec = s_glDeleteVertexArraysOES;
+    glDeleteVertexArrays_dec = s_glDeleteVertexArrays;
+
+    glDeleteTransformFeedbacks_dec = s_glDeleteTransformFeedbacks;
+    glDeleteSamplers_dec = s_glDeleteSamplers;
+    glDeleteQueries_dec = s_glDeleteQueries;
+    glDeleteProgramPipelines_dec = s_glDeleteProgramPipelines;
+
+    glShaderString = s_glShaderString;
+    glCompileShader_dec = s_glCompileShader;
+    glAttachShader_dec = s_glAttachShader;
+    glLinkProgram_dec = s_glLinkProgram;
 
     return 0;
 
@@ -161,12 +199,6 @@ void GLESv2Decoder::s_glDrawElementsOffset(void *self, GLenum mode, GLsizei coun
 {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glDrawElements(mode, count, type, SafePointerFromUInt(offset));
-}
-
-void GLESv2Decoder::s_glShaderString(void *self, GLuint shader, const GLchar* string, GLsizei len)
-{
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
-    ctx->glShaderSource(shader, 1, &string, NULL);
 }
 
 void GLESv2Decoder::s_glMapBufferRangeAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* mapped)
@@ -333,8 +365,8 @@ void GLESv2Decoder::s_glReadPixelsOffsetAEMU(void* self, GLint x, GLint y, GLsiz
 
 GLuint GLESv2Decoder::s_glCreateShaderProgramvAEMU(void* self, GLenum type, GLsizei count, const char* packedStrings, GLuint packedLen) {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
-    fprintf(stderr, "%s: call underlying\n", __FUNCTION__);
     return ctx->glCreateShaderProgramv(type, 1, &packedStrings);
+    // TODO: Snapshot names
 }
 
 void GLESv2Decoder::s_glDrawArraysIndirectDataAEMU(void* self, GLenum mode, const void* indirect, GLuint datalen) {
@@ -383,9 +415,177 @@ GLboolean GLESv2Decoder::s_glIsSyncAEMU(void* self, uint64_t sync) {
 }
 
 void GLESv2Decoder::s_glGetSyncivAEMU(void* self, uint64_t sync, GLenum pname, GLsizei bufSize, GLsizei *length, GLint *values) {
-    fprintf(stderr, "%s: pname 0x%x bufsize %d len %p\n", __func__, pname, bufSize, length);
-    if (length) fprintf(stderr, "%s: len %d\n", __func__, *length);
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glGetSynciv((GLsync)(uintptr_t)sync, pname, bufSize, length, values);
-    fprintf(stderr, "%s: val %d\n", __func__, *values);
 }
+
+GLuint GLESv2Decoder::s_glCreateShader(void* self, GLenum shaderType) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    GLuint shader = ctx->glCreateShader(shaderType);
+    
+    if (ctx->m_snapshot) {
+        GLuint emuName = ctx->m_snapshot->createShader(shader, shaderType);
+        return emuName;
+    }
+
+    return shader;
+}
+
+GLuint GLESv2Decoder::s_glCreateProgram(void* self) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    return ctx->glCreateProgram();
+}
+
+void GLESv2Decoder::s_glGenBuffers(void* self, GLsizei n, GLuint* buffers) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glGenBuffers(n, buffers);
+
+    if (ctx->m_snapshot) {
+        ctx->m_snapshot->genBuffers(n, buffers);
+    }
+}
+
+void GLESv2Decoder::s_glGenFramebuffers(void* self, GLsizei n, GLuint* framebuffers) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glGenFramebuffers(n, framebuffers);
+    // TODO: Snapshot names
+}
+
+void GLESv2Decoder::s_glGenRenderbuffers(void* self, GLsizei n, GLuint* renderbuffers) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glGenRenderbuffers(n, renderbuffers);
+    // TODO: Snapshot names
+}
+
+void GLESv2Decoder::s_glGenTextures(void* self, GLsizei n, GLuint* textures) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glGenTextures(n, textures);
+    // TODO: Snapshot names
+}
+
+void GLESv2Decoder::s_glGenVertexArraysOES(void* self, GLsizei n, GLuint* arrays) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glGenVertexArraysOES(n, arrays);
+    // TODO: Snapshot names
+}
+
+void GLESv2Decoder::s_glGenVertexArrays(void* self, GLsizei n, GLuint* arrays) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glGenVertexArrays(n, arrays);
+    // TODO: Snapshot names
+}
+
+void GLESv2Decoder::s_glGenTransformFeedbacks(void* self, GLsizei n, GLuint* transformFeedbacks) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glGenTransformFeedbacks(n, transformFeedbacks);
+    // TODO: Snapshot names
+}
+
+void GLESv2Decoder::s_glGenSamplers(void* self, GLsizei n, GLuint* samplers) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glGenSamplers(n, samplers);
+    // TODO: Snapshot names
+
+}
+
+void GLESv2Decoder::s_glGenQueries(void* self, GLsizei n, GLuint* queries) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glGenQueries(n, queries);
+    // TODO: Snapshot names
+
+}
+
+void GLESv2Decoder::s_glGenProgramPipelines(void* self, GLsizei n, GLuint* pipelines) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glGenProgramPipelines(n, pipelines);
+    // TODO: Snapshot names
+}
+
+void GLESv2Decoder::s_glDeleteShader(void* self, GLuint shader) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDeleteShader(shader);
+    // TODO: Snapshot names
+}
+
+void GLESv2Decoder::s_glDeleteProgram(void* self, GLuint program) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDeleteProgram(program);
+    // TODO: Snapshot names
+}
+
+void GLESv2Decoder::s_glDeleteBuffers(void* self, GLsizei n, const GLuint *buffers) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDeleteBuffers(n, buffers);
+    // TODO: Snapshot names
+}
+
+void GLESv2Decoder::s_glDeleteFramebuffers(void* self, GLsizei n, const GLuint *framebuffers) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDeleteFramebuffers(n, framebuffers);
+    // TODO: Snapshot names
+}
+
+void GLESv2Decoder::s_glDeleteRenderbuffers(void* self, GLsizei n, const GLuint *renderbuffers) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDeleteRenderbuffers(n, renderbuffers);
+    // TODO: Snapshot names
+}
+
+void GLESv2Decoder::s_glDeleteTextures(void* self, GLsizei n, const GLuint *textures) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDeleteTextures(n, textures);
+    // TODO: Snapshot names
+}
+
+
+void GLESv2Decoder::s_glDeleteVertexArraysOES(void* self, GLsizei n, const GLuint *arrays) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDeleteVertexArraysOES(n, arrays);
+    // TODO: Snapshot names
+}
+
+void GLESv2Decoder::s_glDeleteVertexArrays(void* self, GLsizei n, const GLuint *arrays) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDeleteVertexArrays(n, arrays);
+    // TODO: Snapshot names
+}
+
+
+void GLESv2Decoder::s_glDeleteTransformFeedbacks(void* self, GLsizei n, const GLuint *transformFeedbacks) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDeleteTransformFeedbacks(n, transformFeedbacks);
+    // TODO: Snapshot names
+}
+
+void GLESv2Decoder::s_glDeleteSamplers(void* self, GLsizei n, const GLuint *samplers) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDeleteSamplers(n, samplers);
+    // TODO: Snapshot names
+}
+
+void GLESv2Decoder::s_glDeleteQueries(void* self, GLsizei n, const GLuint *queries) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDeleteQueries(n, queries);
+    // TODO: Snapshot names
+}
+
+void GLESv2Decoder::s_glDeleteProgramPipelines(void* self, GLsizei n, const GLuint *pipelines) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDeleteProgramPipelines(n, pipelines);
+    // TODO: Snapshot names
+}
+
+void GLESv2Decoder::s_glShaderString(void *self, GLuint shader, const GLchar* string, GLsizei len)
+{
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glShaderSource(shader, 1, &string, NULL);
+
+    if (ctx->m_snapshot) {
+        ctx->m_snapshot->shaderString(shader, string);
+    }
+}
+
+void GLESv2Decoder::s_glCompileShader(void* self, GLuint shader) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+}
+

@@ -59,7 +59,21 @@ private:
 
     static int gles1_APIENTRY s_glFinishRoundTrip(void *self);
 
-    static void * s_getProc(const char *name, void *userData);
+    static void gles1_APIENTRY s_glGenBuffers(void* self, GLsizei n, GLuint* buffers);
+    static void gles1_APIENTRY s_glGenTextures(void* self, GLsizei n, GLuint* textures);
+    static void gles1_APIENTRY s_glGenRenderbuffersOES(void* self, GLsizei n, GLuint* renderbuffers);
+    static void gles1_APIENTRY s_glGenFramebuffersOES(void* self, GLsizei n, GLuint* framebuffers);
+    static void gles1_APIENTRY s_glGenVertexArraysOES(void* self, GLsizei n, GLuint* arrays);
+
+    static void gles1_APIENTRY s_glDeleteBuffers(void* self, GLsizei n, const GLuint *buffers);
+    static void gles1_APIENTRY s_glDeleteTextures(void* self, GLsizei n, const GLuint *textures);
+
+    static void gles1_APIENTRY s_glDeleteRenderbuffersOES(void* self, GLsizei n, const GLuint* renderbuffers);
+    static void gles1_APIENTRY s_glDeleteFramebuffersOES(void* self, GLsizei n, const GLuint* framebuffers);
+
+    static void gles1_APIENTRY s_glDeleteVertexArraysOES(void* self, GLsizei n, const GLuint *arrays);
+
+        static void * s_getProc(const char *name, void *userData);
 
     GLDecoderContextData *m_contextData;
     emugl::SharedLibrary* m_glesDso;

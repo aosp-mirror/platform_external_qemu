@@ -102,11 +102,13 @@ glCompressedTexSubImage2D
 
 #void glDeleteBuffers(GLsizei n, GLuint *buffers)
 glDeleteBuffers
+    flag custom_decoder
 	len buffers (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; } 
 
 #void glDeleteTextures(GLsizei n, GLuint *textures)
 glDeleteTextures
+    flag custom_decoder
 	len textures (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; } 
 
@@ -133,12 +135,14 @@ glGetBufferParameteriv
 
 #void glGenBuffers(GLsizei n, GLuint *buffers)
 glGenBuffers
+    flag custom_decoder
 	len buffers (n * sizeof(GLuint))
 	dir buffers out
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; } 
 
 #void glGenTextures(GLsizei n, GLuint *textures)
 glGenTextures
+    flag custom_decoder
 	len textures (n * sizeof(GLuint))
 	dir textures out
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; } 
@@ -473,12 +477,14 @@ glTexParameterxvOES
 
 #void glDeleteRenderbuffersOES(GLsizei n, GLuint *renderbuffers)
 glDeleteRenderbuffersOES
+    flag custom_decoder
 	dir renderbuffers in
 	len renderbuffers (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; } 
 
 #void glGenRenderbuffersOES(GLsizei n, GLuint *renderbuffers)
 glGenRenderbuffersOES
+    flag custom_decoder
 	dir renderbuffers out 
 	len renderbuffers (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; } 
@@ -490,12 +496,14 @@ glGetRenderbufferParameterivOES
 
 #void glDeleteFramebuffersOES(GLsizei n, GLuint *framebuffers)
 glDeleteFramebuffersOES
+    flag custom_decoder
 	dir framebuffers in
 	len framebuffers (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; } 
 
 #void glGenFramebuffersOES(GLsizei n, GLuint *framebuffers)
 glGenFramebuffersOES
+    flag custom_decoder
 	dir framebuffers out
 	len framebuffers (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; } 
@@ -571,12 +579,14 @@ glGetTexGenxvOES
 
 #void glDeleteVertexArraysOES(GLsizei n, const GLuint *arrays)
 glDeleteVertexArraysOES
+    flag custom_decoder
 	dir arrays in
 	len arrays (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; } 
 
 #void glGenVertexArraysOES(GLsizei n, GLuint *arrays)
 glGenVertexArraysOES
+    flag custom_decoder
 	dir arrays out
 	len arrays (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; } 

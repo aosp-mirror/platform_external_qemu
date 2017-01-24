@@ -105,6 +105,23 @@ int ApiGen::genProcTypes(const std::string &filename, SideType side)
             }
         }
         fprintf(fp, ");\n");
+
+        if (side == SERVER_SIDE && e->customDecoder() && !e->notApi()) {
+            fprintf(fp, "typedef ");
+            e->retval().printType(fp);
+            fprintf(fp, " (%s_APIENTRY *%s_dec_%s_proc_t) (", basename, e->name().c_str(), sideString(side));
+
+            VarsArray & evars = e->vars();
+            size_t n = evars.size();
+
+            for (size_t j = 0; j < n; j++) {
+                if (!evars[j].isVoid()) {
+                    if (j != 0) fprintf(fp, ", ");
+                    evars[j].printType(fp);
+                }
+            }
+            fprintf(fp, ");\n");
+        }
     }
     fprintf(fp, "\n\n#endif\n");
     return 0;
@@ -170,7 +187,12 @@ int ApiGen::genContext(const std::string & filename, SideType side)
     // API entry points
     for (size_t i = 0; i < size(); i++) {
         EntryPoint *e = &at(i);
-        fprintf(fp, "\t%s_%s_proc_t %s;\n", e->name().c_str(), sideString(side), e->name().c_str());
+        if (side == SERVER_SIDE && e->customDecoder() && !e->notApi()) {
+            fprintf(fp, "\t%s_dec_%s_proc_t %s;\n", e->name().c_str(), sideString(side), e->name().c_str());
+            fprintf(fp, "\t%s_%s_proc_t %s_dec;\n", e->name().c_str(), sideString(side), e->name().c_str());
+        } else {
+            fprintf(fp, "\t%s_%s_proc_t %s;\n", e->name().c_str(), sideString(side), e->name().c_str());
+        }
     }
 
     // virtual destructor
@@ -889,11 +911,19 @@ int ApiGen::genContextImpl(const std::string &filename, SideType side)
     fprintf(fp, "int %s::initDispatchByName(void *(*getProc)(const char *, void *userData), void *userData)\n{\n", classname.c_str());
     for (size_t i = 0; i < n; i++) {
         EntryPoint *e = &at(i);
-        fprintf(fp, "\t%s = (%s_%s_proc_t) getProc(\"%s\", userData);\n",
-                e->name().c_str(),
-                e->name().c_str(),
-                sideString(side),
-                e->name().c_str());
+        if (e->customDecoder() && !e->notApi()) {
+            fprintf(fp, "\t%s = (%s_dec_%s_proc_t) getProc(\"%s\", userData);\n",
+                    e->name().c_str(),
+                    e->name().c_str(),
+                    sideString(side),
+                    e->name().c_str());
+        } else {
+            fprintf(fp, "\t%s = (%s_%s_proc_t) getProc(\"%s\", userData);\n",
+                    e->name().c_str(),
+                    e->name().c_str(),
+                    sideString(side),
+                    e->name().c_str());
+        }
     }
     fprintf(fp, "\treturn 0;\n");
     fprintf(fp, "}\n\n");
@@ -1035,7 +1065,11 @@ R"(        // Do this on every iteration, as some commands may change the checks
             }
 
             if (pass == PASS_FunctionCall) {
-                fprintf(fp, "\t\t\tthis->%s(", e->name().c_str());
+                if (e->customDecoder() && !e->notApi()) {
+                    fprintf(fp, "\t\t\tthis->%s_dec(", e->name().c_str());
+                } else {
+                    fprintf(fp, "\t\t\tthis->%s(", e->name().c_str());
+                }
                 if (e->customDecoder()) {
                     fprintf(fp, "this"); // add a context to the call
                 }
