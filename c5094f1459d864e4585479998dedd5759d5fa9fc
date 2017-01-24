@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "26ea9127_d572ceb9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-01-24T15:55:31Z",
+      "side": 1,
+      "message": "Can this check be moved to after calling processEvents()?",
+      "range": {
+        "startLine": 301,
+        "startChar": 12,
+        "endLine": 305,
+        "endChar": 13
+      },
+      "revId": "c5094f1459d864e4585479998dedd5759d5fa9fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "284bc29d_9cddda24",
         "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
         "patchSetId": 1
