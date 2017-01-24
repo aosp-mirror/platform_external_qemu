@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 
 #include "OpenGLTestContext.h"
+#include "GLSnapshot.h"
 
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
@@ -57,6 +58,53 @@ GLTEST(OpenGL, CreateContext) {
     EGLConfig config = createConfig(dpy, 8, 8, 8, 8, 24, 8, 0);
     EGLSurface surf = pbufferSurface(dpy, config, 512, 512);
     EGLContext context = createContext(dpy, config, 2, 0);
+
+    destroyContext(dpy, context);
+    destroySurface(dpy, surf);
+    destroyDisplay(dpy);
+}
+
+GLTEST(OpenGL, StateRestore_ClearColor) {
+    const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+    const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+
+    EXPECT_TRUE(egl != nullptr);
+    EXPECT_TRUE(gl != nullptr);
+    GLSnapshot::GLSnapshotState snap(gl);
+
+    EGLDisplay dpy = getDisplay();
+    EGLConfig config = createConfig(dpy, 8, 8, 8, 8, 24, 8, 0);
+    EGLSurface surf = pbufferSurface(dpy, config, 512, 512);
+    EGLContext context = createContext(dpy, config, 2, 0);
+
+    egl->eglMakeCurrent(dpy, surf, surf, context);
+
+    gl->glClearColor(0.0, 1.0, 0.0, 1.0);
+
+    snap.save();
+
+    egl->eglMakeCurrent(dpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+    destroyContext(dpy, context);
+    destroySurface(dpy, surf);
+
+    surf = pbufferSurface(dpy, config, 512, 512);
+    context = createContext(dpy, config, 2, 0);
+
+    egl->eglMakeCurrent(dpy, surf, surf, context);
+
+    snap.restore();
+
+    GLfloat restoredClearColor[4];
+
+    gl->glGetFloatv(GL_COLOR_CLEAR_VALUE, restoredClearColor);
+
+    EXPECT_TRUE(restoredClearColor[0] == 0.0);
+    EXPECT_TRUE(restoredClearColor[1] == 1.0);
+    EXPECT_TRUE(restoredClearColor[2] == 0.0);
+    EXPECT_TRUE(restoredClearColor[3] == 1.0);
+
+    egl->eglMakeCurrent(dpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
     destroyContext(dpy, context);
     destroySurface(dpy, surf);
