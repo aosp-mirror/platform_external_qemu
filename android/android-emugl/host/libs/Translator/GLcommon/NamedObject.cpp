@@ -28,47 +28,51 @@ NamedObject::NamedObject(GenNameInfo genNameInfo,
     m_globalNameSpace = globalNameSpace;
     emugl::Mutex::AutoLock _lock(m_globalNameSpace->m_lock);
     m_type = genNameInfo.m_type;
-
-    switch (genNameInfo.m_type) {
-    case NamedObjectType::VERTEXBUFFER:
-        GLEScontext::dispatcher().glGenBuffers(1,&m_globalName);
-        break;
-    case NamedObjectType::TEXTURE:
-        GLEScontext::dispatcher().glGenTextures(1,&m_globalName);
-        break;
-    case NamedObjectType::RENDERBUFFER:
-        GLEScontext::dispatcher().glGenRenderbuffersEXT(1, &m_globalName);
-        break;
-    case NamedObjectType::FRAMEBUFFER:
-        GLEScontext::dispatcher().glGenFramebuffersEXT(1,&m_globalName);
-        break;
-    case NamedObjectType::SHADER_OR_PROGRAM:
-        switch (genNameInfo.m_shaderProgramType) {
-            case ShaderProgramType::PROGRAM:
-                m_globalName = GLEScontext::dispatcher().glCreateProgram();
+    if (genNameInfo.m_existingGlobal) {
+        fprintf(stderr, "%s: global name %u exists already\n", __func__, genNameInfo.m_existingGlobal);
+        m_globalName = genNameInfo.m_existingGlobal;
+    } else {
+        switch (genNameInfo.m_type) {
+            case NamedObjectType::VERTEXBUFFER:
+                GLEScontext::dispatcher().glGenBuffers(1,&m_globalName);
                 break;
-            case ShaderProgramType::VERTEX_SHADER:
-                m_globalName = GLEScontext::dispatcher().glCreateShader(
-                                    GL_VERTEX_SHADER);
+            case NamedObjectType::TEXTURE:
+                GLEScontext::dispatcher().glGenTextures(1,&m_globalName);
                 break;
-            case ShaderProgramType::FRAGMENT_SHADER:
-                m_globalName = GLEScontext::dispatcher().glCreateShader(
-                                    GL_FRAGMENT_SHADER);
+            case NamedObjectType::RENDERBUFFER:
+                GLEScontext::dispatcher().glGenRenderbuffersEXT(1, &m_globalName);
                 break;
-            case ShaderProgramType::COMPUTE_SHADER:
-                m_globalName = GLEScontext::dispatcher().glCreateShader(
-                                    GL_COMPUTE_SHADER);
+            case NamedObjectType::FRAMEBUFFER:
+                GLEScontext::dispatcher().glGenFramebuffersEXT(1,&m_globalName);
                 break;
+            case NamedObjectType::SHADER_OR_PROGRAM:
+                switch (genNameInfo.m_shaderProgramType) {
+                    case ShaderProgramType::PROGRAM:
+                        m_globalName = GLEScontext::dispatcher().glCreateProgram();
+                        break;
+                    case ShaderProgramType::VERTEX_SHADER:
+                        m_globalName = GLEScontext::dispatcher().glCreateShader(
+                                GL_VERTEX_SHADER);
+                        break;
+                    case ShaderProgramType::FRAGMENT_SHADER:
+                        m_globalName = GLEScontext::dispatcher().glCreateShader(
+                                GL_FRAGMENT_SHADER);
+                        break;
+                    case ShaderProgramType::COMPUTE_SHADER:
+                        m_globalName = GLEScontext::dispatcher().glCreateShader(
+                                GL_COMPUTE_SHADER);
+                        break;
+                }
+                break;
+            case NamedObjectType::SAMPLER:
+                GLEScontext::dispatcher().glGenSamplers(1, &m_globalName);
+                break;
+            case NamedObjectType::QUERY:
+                GLEScontext::dispatcher().glGenQueries(1, &m_globalName);
+                break;
+            default:
+                m_globalName = 0;
         }
-        break;
-    case NamedObjectType::SAMPLER:
-        GLEScontext::dispatcher().glGenSamplers(1, &m_globalName);
-        break;
-    case NamedObjectType::QUERY:
-        GLEScontext::dispatcher().glGenQueries(1, &m_globalName);
-        break;
-    default:
-        m_globalName = 0;
     }
 }
 

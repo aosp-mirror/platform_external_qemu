@@ -339,6 +339,15 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
         }
         s_gles2.glDeleteTextures(1, &tmpTex);
         s_gles2.glBindTexture(GL_TEXTURE_2D, currTexBind);
+
+        // clear GL errors, because its possible that the fbo format does not match
+        // the format of the read buffer, in the case of OpenGL ES 3.1 and integer
+        // RGBA formats.
+        s_gles2.glGetError();
+        // This is currently for dEQP purposes only; if we actually want these
+        // integer FBO formats to actually serve to display something for human consumption,
+        // we need to change the egl image to be of the same format,
+        // or we get some really psychedelic patterns.
     }
     else {
         s_gles1.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);

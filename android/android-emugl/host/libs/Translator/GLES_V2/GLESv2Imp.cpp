@@ -479,7 +479,7 @@ GL_APICALL void  GL_APIENTRY glClear(GLbitfield mask){
     GLbitfield allowed_bits = GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT;
     GLbitfield has_disallowed_bits = (mask & ~allowed_bits);
     SET_ERROR_IF(has_disallowed_bits, GL_INVALID_VALUE);
-    ctx->drawValidate();
+    // ctx->drawValidate();
 
     ctx->dispatcher().glClear(mask);
 }
@@ -530,17 +530,28 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
 GL_APICALL void  GL_APIENTRY glCompressedTexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data)
 {
     GET_CTX();
-    SET_ERROR_IF(!GLESv2Validate::textureTargetEx(target),GL_INVALID_ENUM);
+    SET_ERROR_IF(!GLESv2Validate::textureTargetEx(ctx, target),GL_INVALID_ENUM);
     SET_ERROR_IF(level < 0 || imageSize < 0, GL_INVALID_VALUE);
+
 
     doCompressedTexImage2D(ctx, target, level, internalformat,
                                 width, height, border,
                                 imageSize, data, (void*)glTexImage2D);
+
+    if (ctx->shareGroup().get()) {
+        TextureData *texData = getTextureTargetData(target);
+
+        if (texData) {
+            texData->hasStorage = true;
+            texData->compressed = true;
+            texData->compressedFormat = internalformat;
+        }
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data){
     GET_CTX();
-    SET_ERROR_IF(!GLESv2Validate::textureTargetEx(target),GL_INVALID_ENUM);
+    SET_ERROR_IF(!GLESv2Validate::textureTargetEx(ctx, target),GL_INVALID_ENUM);
     SET_ERROR_IF(!data,GL_INVALID_OPERATION);
     ctx->dispatcher().glCompressedTexSubImage2D(target,level,xoffset,yoffset,width,height,format,imageSize,data);
 }
@@ -548,9 +559,14 @@ GL_APICALL void  GL_APIENTRY glCompressedTexSubImage2D(GLenum target, GLint leve
 void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border){
     GET_CTX();
 
-    if (ctx->shareGroup().get() && level == 0){
+    if (ctx->shareGroup().get()) {
         TextureData *texData = getTextureTargetData(target);
-        if(texData) {
+
+        if (texData) {
+            texData->hasStorage = true;
+        }
+
+        if (texData && level == 0) {
             texData->width = width;
             texData->height = height;
             texData->border = border;
@@ -565,24 +581,30 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat, GLsize
                 //
                 unsigned int tex = ctx->getBindedTexture(target);
                 ctx->shareGroup()->genName(NamedObjectType::TEXTURE, tex,
-                                           false);
+                        false);
                 unsigned int globalTextureName =
-                        ctx->shareGroup()->getGlobalName(
-                                NamedObjectType::TEXTURE, tex);
+                    ctx->shareGroup()->getGlobalName(
+                            NamedObjectType::TEXTURE, tex);
                 ctx->dispatcher().glBindTexture(GL_TEXTURE_2D,
-                                                globalTextureName);
+                        globalTextureName);
                 texData->sourceEGLImage = 0;
             }
         }
     }
+
 }
 
 void s_glInitTexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border){
     GET_CTX();
 
-    if (ctx->shareGroup().get() && level == 0){
+    if (ctx->shareGroup().get()){
         TextureData *texData = getTextureTargetData(target);
-        if(texData) {
+
+        if (texData) {
+            texData->hasStorage = true;
+        }
+
+        if (texData && level == 0) {
             texData->width = width;
             texData->height = height;
             texData->depth = depth;
@@ -597,7 +619,7 @@ GL_APICALL void  GL_APIENTRY glCopyTexImage2D(GLenum target, GLint level, GLenum
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::pixelFrmt(ctx,internalformat) &&
                    (GLESv2Validate::textureTarget(ctx, target) ||
-                    GLESv2Validate::textureTargetEx(target))), GL_INVALID_ENUM);
+                    GLESv2Validate::textureTargetEx(ctx, target))), GL_INVALID_ENUM);
     SET_ERROR_IF((GLESv2Validate::textureIsCubeMap(target) && width != height), GL_INVALID_VALUE);
     SET_ERROR_IF(border != 0,GL_INVALID_VALUE);
     s_glInitTexImage2D(target,level,internalformat,width,height,border);
@@ -607,7 +629,7 @@ GL_APICALL void  GL_APIENTRY glCopyTexImage2D(GLenum target, GLint level, GLenum
 GL_APICALL void  GL_APIENTRY glCopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height){
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) ||
-                   GLESv2Validate::textureTargetEx(target)), GL_INVALID_ENUM);
+                   GLESv2Validate::textureTargetEx(ctx, target)), GL_INVALID_ENUM);
     ctx->dispatcher().glCopyTexSubImage2D(target,level,xoffset,yoffset,x,y,width,height);
 }
 
@@ -759,7 +781,7 @@ static void s_detachFromFramebuffer(NamedObjectType bufferType,
         GLuint name = fbData->getAttachment(kAttachments[i], &textarget, NULL);
         if (name != texture) continue;
         if (NamedObjectType::TEXTURE == bufferType &&
-            GLESv2Validate::textureTargetEx(textarget)) {
+            GLESv2Validate::textureTargetEx(ctx, textarget)) {
             glFramebufferTexture2D(GL_FRAMEBUFFER, kAttachments[i], textarget, 0, 0);
         } else if (NamedObjectType::RENDERBUFFER == bufferType &&
                    GLESv2Validate::renderbufferTarget(textarget)) {
@@ -859,6 +881,7 @@ GL_APICALL void  GL_APIENTRY glDepthMask(GLboolean flag){
     GET_CTX();
     ctx->dispatcher().glDepthMask(flag);
 }
+
 GL_APICALL void  GL_APIENTRY glDepthRangef(GLclampf zNear, GLclampf zFar){
     GET_CTX();
     ctx->dispatcher().glDepthRange(zNear,zFar);
@@ -903,7 +926,7 @@ GL_APICALL void  GL_APIENTRY glDisableVertexAttribArray(GLuint index){
 
 
 static void s_glDrawPre(GLESv2Context* ctx, GLenum mode) {
-    ctx->drawValidate();
+    // ctx->drawValidate();
 
     if (mode == GL_POINTS) {
         //Enable texture generation for GL_POINTS and gl_PointSize shader variable
@@ -1093,7 +1116,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
 GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level){
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(ctx, target) &&
-                   GLESv2Validate::textureTargetEx(textarget)  &&
+                   GLESv2Validate::textureTargetEx(ctx, textarget)  &&
                    GLESv2Validate::framebufferAttachment(ctx, attachment)), GL_INVALID_ENUM);
     SET_ERROR_IF(ctx->getMajorVersion() < 3 && level != 0, GL_INVALID_VALUE);
     SET_ERROR_IF(!ctx->shareGroup().get(), GL_INVALID_OPERATION);
@@ -1479,6 +1502,11 @@ static void s_glStateQueryTi_v(GLenum pname, GLuint index, T* params, GLStateQue
         break;
     case GL_SHADER_STORAGE_BUFFER_BINDING:
         *params = ctx->getIndexedBuffer(GL_SHADER_STORAGE_BUFFER, index);
+        break;
+    case GL_IMAGE_BINDING_NAME:
+        // Need the local name here.
+        getter(pname, index, params);
+        *params = ctx->shareGroup()->getLocalName(NamedObjectType::TEXTURE, *params);
         break;
     default:
         getter(pname, index, params);
@@ -1973,8 +2001,11 @@ GL_APICALL void  GL_APIENTRY glGetShaderSource(GLuint shader, GLsizei bufsize, G
 
 
 GL_APICALL const GLubyte* GL_APIENTRY glGetString(GLenum name){
-    GET_CTX_RET(NULL)
+    GET_CTX_V2_RET(NULL)
     static const GLubyte SHADING[] = "OpenGL ES GLSL ES 1.0.17";
+    static const GLubyte SHADING30[] = "OpenGL ES GLSL ES 3.00";
+    static const GLubyte SHADING31[] = "OpenGL ES GLSL ES 3.10";
+    static const GLubyte SHADING32[] = "OpenGL ES GLSL ES 3.20";
     switch(name) {
         case GL_VENDOR:
             return (const GLubyte*)ctx->getVendorString();
@@ -1983,7 +2014,21 @@ GL_APICALL const GLubyte* GL_APIENTRY glGetString(GLenum name){
         case GL_VERSION:
             return (const GLubyte*)ctx->getVersionString();
         case GL_SHADING_LANGUAGE_VERSION:
-            return SHADING;
+            switch (ctx->getMajorVersion()) {
+            case 3:
+                switch (ctx->getMinorVersion()) {
+                case 0:
+                    return SHADING30;
+                case 1:
+                    return SHADING31;
+                case 2:
+                    return SHADING32;
+                default:
+                    return SHADING31;
+                }
+            default:
+                return SHADING;
+             }
         case GL_EXTENSIONS:
             return (const GLubyte*)ctx->getExtensionString();
         default:
@@ -2242,7 +2287,7 @@ GL_APICALL void  GL_APIENTRY glLineWidth(GLfloat width){
 }
 
 GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
-    GET_CTX();
+    GET_CTX_V2();
     GLint linkStatus = GL_FALSE;
     if(ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(
@@ -2257,40 +2302,31 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
         ProgramData* programData = (ProgramData*)objData;
         GLint fragmentShader   = programData->getAttachedFragmentShader();
         GLint vertexShader =  programData->getAttachedVertexShader();
-        GLint computeShader =  programData->getAttachedComputeShader();
 
-        if (vertexShader != 0 && fragmentShader!=0) {
-            GLint fCompileStatus = GL_FALSE;
-            GLint vCompileStatus = GL_FALSE;
+        if (ctx->getMajorVersion() >= 3 && ctx->getMinorVersion() >= 1) {
+            ctx->dispatcher().glLinkProgram(globalProgramName);
+            ctx->dispatcher().glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
+        } else {
+            if (vertexShader != 0 && fragmentShader!=0) {
+                GLint fCompileStatus = GL_FALSE;
+                GLint vCompileStatus = GL_FALSE;
 
-            GLuint fragmentShaderGlobal = ctx->shareGroup()->getGlobalName(
-                    NamedObjectType::SHADER_OR_PROGRAM, fragmentShader);
-            GLuint vertexShaderGlobal = ctx->shareGroup()->getGlobalName(
-                    NamedObjectType::SHADER_OR_PROGRAM, vertexShader);
+                GLuint fragmentShaderGlobal = ctx->shareGroup()->getGlobalName(
+                        NamedObjectType::SHADER_OR_PROGRAM, fragmentShader);
+                GLuint vertexShaderGlobal = ctx->shareGroup()->getGlobalName(
+                        NamedObjectType::SHADER_OR_PROGRAM, vertexShader);
 
-            ctx->dispatcher().glGetShaderiv(fragmentShaderGlobal,GL_COMPILE_STATUS,&fCompileStatus);
-            ctx->dispatcher().glGetShaderiv(vertexShaderGlobal,GL_COMPILE_STATUS,&vCompileStatus);
+                ctx->dispatcher().glGetShaderiv(fragmentShaderGlobal,GL_COMPILE_STATUS,&fCompileStatus);
+                ctx->dispatcher().glGetShaderiv(vertexShaderGlobal,GL_COMPILE_STATUS,&vCompileStatus);
 
-            if(fCompileStatus != 0 && vCompileStatus != 0) {
-                ctx->dispatcher().glLinkProgram(globalProgramName);
-                ctx->dispatcher().glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
-            }
-        }
-
-        if (computeShader != 0) {
-            GLint cCompileStatus = GL_FALSE;
-            GLuint computeShaderGlobal = ctx->shareGroup()->getGlobalName(
-                    NamedObjectType::SHADER_OR_PROGRAM, computeShader);
-            ctx->dispatcher().glGetShaderiv(computeShaderGlobal,GL_COMPILE_STATUS,&cCompileStatus);
-
-            if (cCompileStatus != 0) {
-                ctx->dispatcher().glLinkProgram(globalProgramName);
-                ctx->dispatcher().glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
+                if(fCompileStatus != 0 && vCompileStatus != 0) {
+                    ctx->dispatcher().glLinkProgram(globalProgramName);
+                    ctx->dispatcher().glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
+                }
             }
         }
 
         programData->setLinkStatus(linkStatus);
-
 
         GLsizei infoLogLength=0;
         GLchar* infoLog;
@@ -2515,7 +2551,7 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
 
     if (!isCompressedFormat) {
         VALIDATE(!(GLESv2Validate::textureTarget(ctx, target) ||
-                   GLESv2Validate::textureTargetEx(target)), GL_INVALID_ENUM);
+                   GLESv2Validate::textureTargetEx(ctx, target)), GL_INVALID_ENUM);
         VALIDATE(!GLESv2Validate::pixelFrmt(ctx, format), GL_INVALID_ENUM);
         VALIDATE(!GLESv2Validate::pixelType(ctx, type), GL_INVALID_ENUM);
 
@@ -2599,7 +2635,7 @@ GL_APICALL void  GL_APIENTRY glTexParameteriv(GLenum target, GLenum pname, const
 GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels){
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) ||
-                   GLESv2Validate::textureTargetEx(target)), GL_INVALID_ENUM);
+                   GLESv2Validate::textureTargetEx(ctx, target)), GL_INVALID_ENUM);
     SET_ERROR_IF(!GLESv2Validate::pixelFrmt(ctx,format), GL_INVALID_ENUM);
     SET_ERROR_IF(!GLESv2Validate::pixelType(ctx,type),GL_INVALID_ENUM);
     // set an error if level < 0 or level > log 2 max
