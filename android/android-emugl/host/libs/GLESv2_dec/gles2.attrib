@@ -4,6 +4,7 @@ GLOBAL
 
 #void glBindAttribLocation(GLuint program, GLuint index, GLchar *name)
 glBindAttribLocation
+    flag custom_decoder
     len name (strlen(name) + 1)
 
 #void glBufferData(GLenum target, GLsizeiptr size, GLvoid *data, GLenum usage)
@@ -30,23 +31,33 @@ glCompressedTexSubImage2D
     var_flag data nullAllowed isLarge
     param_check imageSize if(imageSize<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
+glDeleteShader
+    flag custom_decoder
+
+glDeleteProgram
+    flag custom_decoder
+
 #void glDeleteBuffers(GLsizei n, GLuint *buffers)
 glDeleteBuffers
+    flag custom_decoder
     len buffers (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
 #void glDeleteFramebuffers(GLsizei n, GLuint *framebuffers)
 glDeleteFramebuffers
+    flag custom_decoder
     len framebuffers (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
 #void glDeleteRenderbuffers(GLsizei n, GLuint *renderbuffers)
 glDeleteRenderbuffers
+    flag custom_decoder
     len renderbuffers (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
 #void glDeleteTextures(GLsizei n, GLuint *textures)
 glDeleteTextures
+    flag custom_decoder
     len textures (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
@@ -54,26 +65,51 @@ glDeleteTextures
 glDrawElements
     flag unsupported
 
+glCreateShader
+    flag custom_decoder
+
+glCompileShader
+    flag custom_decoder
+
+glAttachShader
+    flag custom_decoder
+
+glDetachShader
+    flag custom_decoder
+
+glIsShader
+    flag custom_decoder
+
+glLinkProgram
+    flag custom_decoder
+
+glCreateProgram
+    flag custom_decoder
+
 #void glGenBuffers(GLsizei n, GLuint *buffers)
 glGenBuffers
+    flag custom_decoder
     len buffers (n * sizeof(GLuint))
     dir buffers out
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
 #void glGenFramebuffers(GLsizei n, GLuint *framebuffers)
 glGenFramebuffers
+    flag custom_decoder
     len framebuffers (n * sizeof(GLuint))
     dir framebuffers out
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
 #void glGenRenderbuffers(GLsizei n, GLuint *renderbuffers)
 glGenRenderbuffers
+    flag custom_decoder
     len renderbuffers (n * sizeof(GLuint))
     dir renderbuffers out
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
 #void glGenTextures(GLsizei n, GLuint *textures)
 glGenTextures
+    flag custom_decoder
     len textures (n * sizeof(GLuint))
     dir textures out
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
@@ -150,6 +186,7 @@ glGetIntegerv
 
 #void glGetProgramiv(GLuint program, GLenum pname, GLint *params)
 glGetProgramiv
+    flag custom_decoder
     dir params out
     len params (glUtilsParamSize(pname) * sizeof(GLint))
 
@@ -170,12 +207,14 @@ glGetRenderbufferParameteriv
 
 #void glGetShaderiv(GLuint shader, GLenum pname, GLint *params)
 glGetShaderiv
+    flag custom_decoder
     dir params out
     len params sizeof(GLint)
 # XXX - might change if pname with value larger then one is added
 
 #void glGetShaderInfoLog(GLuint shader, GLsizei bufsize, GLsizei *length, GLchar *infolog)
 glGetShaderInfoLog
+    flag custom_decoder
     dir length out
     len length (sizeof(GLsizei))
     var_flag length nullAllowed
@@ -192,6 +231,7 @@ glGetShaderPrecisionFormat
 
 #void glGetShaderSource(GLuint shader, GLsizei bufsize, GLsizei *length, GLchar *source)
 glGetShaderSource
+    flag custom_decoder
     dir length out
     len length (sizeof(GLsizei))
     var_flag length nullAllowed
@@ -371,11 +411,13 @@ glCompressedTexSubImage3DOES
 
 #void glDeleteVertexArraysOES(GLsizei n, GLuint *arrays)
 glDeleteVertexArraysOES
+    flag custom_decoder
     len arrays (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
 #void glGenVertexArraysOES(GLsizei n, GLuint *arrays)
 glGenVertexArraysOES
+    flag custom_decoder
     len arrays (n * sizeof(GLuint))
     dir arrays out
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
@@ -605,11 +647,13 @@ glFinishRoundTrip
 # GLES 3.0
 
 glGenVertexArrays
+    flag custom_decoder
     len arrays (n * sizeof(GLuint))
     dir arrays out
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
 glDeleteVertexArrays
+    flag custom_decoder
     len arrays (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
@@ -863,11 +907,13 @@ glInvalidateSubFramebuffer
     len attachments (numAttachments * sizeof(GLenum))
 
 glGenTransformFeedbacks
+    flag custom_decoder
     dir ids out
     len ids (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
 glDeleteTransformFeedbacks
+    flag custom_decoder
     len ids (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
@@ -896,11 +942,13 @@ glGetTransformFeedbackVarying
     var_flag type nullAllowed
 
 glGenSamplers
+    flag custom_decoder
     dir samplers out
     len samplers (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
 glDeleteSamplers
+    flag custom_decoder
     len samplers (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
@@ -919,11 +967,13 @@ glGetSamplerParameteriv
     len params (glUtilsParamSize(pname) * sizeof(GLint))
 
 glGenQueries
+    flag custom_decoder
     dir queries out
     len queries (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
 glDeleteQueries
+    flag custom_decoder
     len queries (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
@@ -1011,10 +1061,12 @@ glGetBooleani_v
     len data (sizeof(GLboolean))
 
 glGenProgramPipelines
+    flag custom_decoder
     dir pipelines out
     len pipelines (n * sizeof(GLuint))
 
 glDeleteProgramPipelines
+    flag custom_decoder
     len pipelines (n * sizeof(GLuint))
     param_check n if(n<0){ ctx->setError(GL_INVALID_VALUE); return; }
 
