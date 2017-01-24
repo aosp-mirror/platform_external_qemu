@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5f62f877_f2079b2d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-01-24T22:11:45Z",
+      "side": 1,
+      "message": "This one overwritten by updateControlsAfterLoading()",
+      "range": {
+        "startLine": 339,
+        "startChar": 8,
+        "endLine": 340,
+        "endChar": 50
+      },
+      "revId": "d911f4c5fddea0b0aa590e704161b98a69885736",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
