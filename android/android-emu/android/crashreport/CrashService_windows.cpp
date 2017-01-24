@@ -155,8 +155,7 @@ bool HostCrashService::getHWInfo() {
 }
 
 // Convenience function to convert a value to a value in kilobytes
-template<typename T>
-static T toKB(T value) {
+static uint64_t toKB(uint64_t value) {
     return value / 1024;
 }
 
