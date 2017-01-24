@@ -88,5 +88,6 @@ include $(EMUGL_PATH)/host/libs/libOpenGLESDispatch/Android.mk
 # Host shared libraries
 include $(EMUGL_PATH)/host/libs/libOpenglRender/Android.mk
 include $(EMUGL_PATH)/host/libs/libGLES12Translator/Android.mk
+include $(EMUGL_PATH)/host/libs/libGLSnapshot/Android.mk
 
 LOCAL_PATH := $(EMUGL_OLD_LOCAL_PATH)

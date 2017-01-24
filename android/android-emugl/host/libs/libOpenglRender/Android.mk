@@ -59,6 +59,7 @@ LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/libOpenGLESDispatch
 
 LOCAL_STATIC_LIBRARIES += libemugl_common
 LOCAL_STATIC_LIBRARIES += libOpenGLESDispatch
+LOCAL_STATIC_LIBRARIES += libGLSnapshot
 
 LOCAL_SYMBOL_FILE := render_api.entries
 
@@ -79,9 +80,11 @@ LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/Translator/include
 LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/Translator/GLES_V2/
 LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/libOpenGLESDispatch
 LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/include/OpenGLESDispatch
+LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/libGLSnapshot
 LOCAL_C_INCLUDES += $(ANGLE_TRANSLATION_INCLUDES)
 LOCAL_STATIC_LIBRARIES += $(ANGLE_TRANSLATION_STATIC_LIBRARIES)
 LOCAL_STATIC_LIBRARIES += libOpenGLESDispatch
+LOCAL_STATIC_LIBRARIES += libGLSnapshot
 LOCAL_STATIC_LIBRARIES += libemugl_common
 LOCAL_STATIC_LIBRARIES += android-emu-base
 
