@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 
 #include "OpenGLTestContext.h"
+#include "GLSnapshot.h"
 
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
@@ -61,6 +62,92 @@ GLTEST(OpenGL, CreateContext) {
     destroyContext(dpy, context);
     destroySurface(dpy, surf);
     destroyDisplay(dpy);
+}
+
+class SnapshotContext {
+public:
+    SnapshotContext() : mSnap(LazyLoadedGLESv2Dispatch::get()) {
+        mWidth = 512;
+        mHeight = 512;
+        mMajorVersion = 2;
+        mMinorVersion = 0;
+
+        mEGL = LazyLoadedEGLDispatch::get();
+        EXPECT_TRUE(mEGL != nullptr);
+        mDpy = getDisplay();
+        mConfig = createConfig(mDpy, 8, 8, 8, 8, 24, 8, 0);
+        mSurf = pbufferSurface(mDpy, mConfig, mWidth, mHeight);
+        mContext = createContext(mDpy, mConfig, mMajorVersion, mMinorVersion);
+
+        mEGL->eglMakeCurrent(mDpy, mSurf, mSurf, mContext);
+    }
+
+    void doSnapshot() {
+        mSnap.save();
+        mEGL->eglMakeCurrent(mDpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+        destroyContext(mDpy, mContext);
+        destroySurface(mDpy, mSurf);
+        mSurf = pbufferSurface(mDpy, mConfig, mWidth, mHeight);
+        mContext = createContext(mDpy, mConfig, mMajorVersion, mMinorVersion);
+        mEGL->eglMakeCurrent(mDpy, mSurf, mSurf, mContext);
+        mSnap.restore();
+    }
+
+    ~SnapshotContext() {
+        mEGL->eglMakeCurrent(mDpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+        destroyContext(mDpy, mContext);
+        destroySurface(mDpy, mSurf);
+        destroyDisplay(mDpy);
+    }
+
+private:
+    int mWidth;
+    int mHeight;
+    int mMajorVersion;
+    int mMinorVersion;
+    const EGLDispatch* mEGL;
+
+    GLSnapshot::GLSnapshotState mSnap;
+    EGLDisplay mDpy;
+    EGLConfig mConfig;
+    EGLSurface mSurf;
+    EGLContext mContext;
+};
+
+GLTEST(OpenGL, StateRestore_ClearColor) {
+    const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+    EXPECT_TRUE(gl != nullptr);
+
+    SnapshotContext snap;
+
+    gl->glClearColor(0.0, 1.0, 0.0, 1.0);
+
+    snap.doSnapshot();
+
+    GLfloat restoredClearColor[4];
+
+    gl->glGetFloatv(GL_COLOR_CLEAR_VALUE, restoredClearColor);
+
+    EXPECT_TRUE(restoredClearColor[0] == 0.0);
+    EXPECT_TRUE(restoredClearColor[1] == 1.0);
+    EXPECT_TRUE(restoredClearColor[2] == 0.0);
+    EXPECT_TRUE(restoredClearColor[3] == 1.0);
+}
+
+GLTEST(OpenGL, StateRestore_ActiveTexture) {
+    const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+    EXPECT_TRUE(gl != nullptr);
+
+    SnapshotContext snap;
+
+    gl->glActiveTexture(GL_TEXTURE4);
+
+    snap.doSnapshot();
+
+    GLint restoredActiveTexture;
+    gl->glGetIntegerv(GL_ACTIVE_TEXTURE, &restoredActiveTexture);
+
+    EXPECT_TRUE(restoredActiveTexture == GL_TEXTURE4);
 }
 
 }  // namespace emugl
