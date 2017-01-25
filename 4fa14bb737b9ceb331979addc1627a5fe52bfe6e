@@ -22,6 +22,29 @@
       "revId": "4fa14bb737b9ceb331979addc1627a5fe52bfe6e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "836a270e_7b4d38ef",
+        "filename": "android/android-emu/android/skin/qt/qt-settings.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-25T21:08:01Z",
+      "side": 1,
+      "message": "#1, #2 and #3 are in. #2 is called \"ANGLE11\" in the enum, but shows up as \"ANGLE\" to the user, since I think the -gpu angle11 auto falls back to 9 if 11 cannot be achieved (huans@: please confirm this is how it works)\n\nI\u0027m thinking about #4, but given the above, then that would mean the only case #4 would be useful is to confirm that your GPU in fact doesn\u0027t support DX11. Perhaps we would not need #4?",
+      "range": {
+        "startLine": 61,
+        "startChar": 37,
+        "endLine": 61,
+        "endChar": 38
+      },
+      "revId": "4fa14bb737b9ceb331979addc1627a5fe52bfe6e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
