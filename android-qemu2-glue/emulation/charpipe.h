@@ -11,11 +11,12 @@
 */
 #pragma once
 
-#include "qemu/osdep.h"
-#include "qemu-common.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
+
+/* Forward-declare it as qemu-common.h doesn't like to be included here */
+typedef struct CharDriverState CharDriverState;
 
 /* open two connected character drivers that can be used to communicate by internal
  * QEMU components. For Android, this is used to connect an emulated serial port
