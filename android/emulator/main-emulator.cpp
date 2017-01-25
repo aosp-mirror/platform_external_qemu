@@ -50,6 +50,8 @@
 #include "android/utils/win32_cmdline_quote.h"
 #include "android/version.h"
 
+#include "android/skin/winsys.h"
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -640,22 +642,6 @@ int main(int argc, char** argv)
     // Detect if this is google API's
     bool googleApis = checkForGoogleAPIs(avdName);
     int apiLevel = getApiLevel(avdName);
-    EmuglConfig config;
-
-    if (!androidEmuglConfigInit(&config,
-                                avdName,
-                                avdArch,
-                                apiLevel,
-                                googleApis,
-                                gpu,
-                                wantedBitness,
-                                noWindow)) {
-        fprintf(stderr, "ERROR: %s\n", config.status);
-        return 1;
-    }
-    D("%s\n", config.status);
-
-    emuglConfig_setupEnv(&config);
 
     /* Add <lib>/qt/ to the library search path. */
     androidQtSetupEnv(wantedBitness, progDir.c_str());
@@ -862,6 +848,22 @@ static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs, const
                fullPath);
     }
 
+    D("Adding library search path: '%s'\n", fullPath);
+    add_library_search_dir(fullPath);
+
+    bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s/%s", launcherDir, libSubDir, "gles_swiftshader");
+    D("Adding library search path: '%s'\n", fullPath);
+    add_library_search_dir(fullPath);
+
+    bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s/%s", launcherDir, libSubDir, "gles_angle");
+    D("Adding library search path: '%s'\n", fullPath);
+    add_library_search_dir(fullPath);
+
+    bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s/%s", launcherDir, libSubDir, "gles_angle9");
+    D("Adding library search path: '%s'\n", fullPath);
+    add_library_search_dir(fullPath);
+
+    bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s/%s", launcherDir, libSubDir, "gles_angle11");
     D("Adding library search path: '%s'\n", fullPath);
     add_library_search_dir(fullPath);
 
