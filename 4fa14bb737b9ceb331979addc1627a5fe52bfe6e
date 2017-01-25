@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d9c2f09e_ec5b5c7b",
+        "filename": "android/android-emu/android/skin/qt/qt-settings.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1136078
+      },
+      "writtenOn": "2017-01-25T18:58:26Z",
+      "side": 1,
+      "message": "We need several options:\n1. auto select\n2. force Angle but auto select 9 or 11.\n3. force Angle 9\n4. force Angle 11 if needed",
+      "range": {
+        "startLine": 61,
+        "startChar": 37,
+        "endLine": 61,
+        "endChar": 38
+      },
+      "revId": "4fa14bb737b9ceb331979addc1627a5fe52bfe6e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
