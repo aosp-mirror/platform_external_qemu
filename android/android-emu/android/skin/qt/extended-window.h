@@ -76,6 +76,7 @@ private slots:
     void on_dpadButton_clicked();
     void on_fingerButton_clicked();
     void on_helpButton_clicked();
+    void on_carDataButton_clicked();
     void on_locationButton_clicked();
     void on_settingsButton_clicked();
     void on_telephoneButton_clicked();

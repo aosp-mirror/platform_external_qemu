@@ -24,6 +24,7 @@
 #include "android/globals.h"
 #include "android/hw-fingerprint.h"
 #include "android/hw-sensors.h"
+#include "android/car.h"
 #include "android/opengles-pipe.h"
 #include "android/proxy/proxy_setup.h"
 #include "android/utils/debug.h"
@@ -252,6 +253,8 @@ static int report_console(const char* proto_port, int console_port) {
 
 static int qemu_android_console_start(int port,
                                       const AndroidConsoleAgents* agents) {
+
+    D("Yao: start console");
     return android_console_start(port, agents);
 }
 
@@ -278,6 +281,8 @@ static bool setup_console_and_adb_ports(int console_port,
         }
         register_adb_service = true;
     }
+
+    D("Yao: qemu_android_console_start");
     if (qemu_android_console_start(console_port, agents) < 0) {
         if (legacy_adb) {
             agents->net->slirpUnredir(false, adb_port);
@@ -299,6 +304,7 @@ static bool setup_console_and_adb_ports(int console_port,
  */
 bool android_emulation_setup(const AndroidConsoleAgents* agents) {
 
+    D("Yao emulation setup");
     // Register Android pipe services.
     android_pipe_add_type_zero();
     android_pipe_add_type_pingpong();
@@ -318,7 +324,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
     int adb_port = -1;
     int base_port = ANDROID_CONSOLE_BASEPORT;
     int legacy_adb = avdInfo_getAdbdCommunicationMode(android_avdInfo) ? 0 : 1;
-
+D("Yao emulation setup 1");
     if (android_op_ports) {
         int console_port = -1;
         if (!android_parse_ports_option(android_op_ports,
@@ -363,6 +369,8 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
         }
     }
 
+    D("Yao emulation setup 2");
+
     /* Save base port and ADB port. */
     android_base_port = base_port;
     android_serial_number_port = adb_port - 1;
@@ -391,6 +399,10 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
 
     /* initialize sensors, this must be done here due to timer issues */
     android_hw_sensors_init();
+
+    D("Yao emulation setup 3");
+
+    android_car_init();
 
     /* initilize fingperprint here */
     android_hw_fingerprint_init();

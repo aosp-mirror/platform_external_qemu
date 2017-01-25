@@ -668,14 +668,18 @@ static void control_global_accept6(void* opaque,
 
 int android_console_start(int control_port,
                           const AndroidConsoleAgents* agents) {
+
+    DINIT("Yao: in console.c start");
     ControlGlobal global = &_g_global;
 
     memset( global, 0, sizeof(*global) );
     // Copy the QEMU specific interfaces passed in to make lifetime management
     // simpler.
+
 #define ANDROID_CONSOLE_COPY_AGENT(type, name) \
         global-> name ## _agent [0] = agents-> name [0];
     ANDROID_CONSOLE_AGENTS_LIST(ANDROID_CONSOLE_COPY_AGENT)
+
 
     int console_auth_status = android_console_auth_get_status();
     if (console_auth_status == CONSOLE_AUTH_STATUS_ERROR) {
@@ -689,6 +693,7 @@ int android_console_start(int control_port,
                 emulator_console_auth_token_path);
         free(emulator_console_auth_token_path);
     }
+
 
 
     Socket fd4 = socket_loopback4_server(control_port, SOCKET_STREAM);

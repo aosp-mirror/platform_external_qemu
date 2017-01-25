@@ -55,6 +55,13 @@ include $(_ANDROID_EMU_ROOT)/android/metrics/proto/MetricsProto.mk
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
 ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES)
 
+##############################################################################
+
+include $(_ANDROID_EMU_ROOT)/android/emulation/proto/VehicleHalProto.mk
+
+
+
+
 ###############################################################################
 #
 #  android-emu-base
@@ -303,6 +310,7 @@ LOCAL_SRC_FILES := \
     android/hw-lcd.c \
     android/hw-qemud.cpp \
     android/hw-sensors.c \
+    android/car.cpp \
     android/jpeg-compress.c \
     android/kernel/kernel_utils.cpp \
     android/loadpng.c \
@@ -423,6 +431,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-libwebp \
     emulator-zlib \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
+    $(VEHICLE_PROTO_STATIC_LIBRARIES)
 
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \
