@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0b500c1c_7bb66030",
+        "filename": "android/android-emu/android/opengl/EmuglBackendList.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-01-25T22:25:17Z",
+      "side": 1,
+      "message": "turn off DEBUG?",
+      "range": {
+        "startLine": 19,
+        "startChar": 14,
+        "endLine": 19,
+        "endChar": 15
+      },
+      "revId": "a3f5b199ed10a88c955f116ad83c4e84319fc52f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2548a8ef_5aff4580",
+        "filename": "android/android-emu/android/opengl/EmuglBackendList.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-01-25T22:25:17Z",
+      "side": 1,
+      "message": "clean the printout",
+      "range": {
+        "startLine": 90,
+        "startChar": 0,
+        "endLine": 90,
+        "endChar": 4
+      },
+      "revId": "a3f5b199ed10a88c955f116ad83c4e84319fc52f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a51869d0_b1072938",
+        "filename": "android/android-emu/android/opengl/EmuglBackendList.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-01-25T22:25:17Z",
+      "side": 1,
+      "message": "clean printout",
+      "revId": "a3f5b199ed10a88c955f116ad83c4e84319fc52f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f4f0ea41_91f46ecd",
+        "filename": "android/android-emu/android/opengl/emugl_config.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-01-25T22:25:17Z",
+      "side": 1,
+      "message": "\"angle\" and \"angle11\" actually represents the same --- default ANGLE backend, which chooses DX11 by default, otherwise falls back to DX9 if DX11 is not supported.\nCan we only keep \"angle\", removing \"angle11\" option here?",
+      "revId": "a3f5b199ed10a88c955f116ad83c4e84319fc52f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
