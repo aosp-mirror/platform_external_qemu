@@ -101,6 +101,10 @@ SelectedRenderer emuglConfig_get_renderer(const char* gpu_mode) {
         return SELECTED_RENDERER_SWIFTSHADER;
     } else if (!strcmp(gpu_mode, "angle")) {
         return SELECTED_RENDERER_ANGLE;
+    } else if (!strcmp(gpu_mode, "angle11")) {
+        return SELECTED_RENDERER_ANGLE11;
+    } else if (!strcmp(gpu_mode, "angle9")) {
+        return SELECTED_RENDERER_ANGLE9;
     } else if (!strcmp(gpu_mode, "error")) {
         return SELECTED_RENDERER_ERROR;
     } else {
@@ -235,6 +239,11 @@ bool emuglConfig_init(EmuglConfig* config,
                 return true;
             }
         } else {
+            // Otherwise, use preference value from Qt settings.
+            //
+
+            // fprintf(stderr, "%s: ui backend pref %d\n", __func__, getUiBackendPref());
+
             D("%s: 'host' mode auto-selected\n", __FUNCTION__);
             gpu_mode = "host";
         }
