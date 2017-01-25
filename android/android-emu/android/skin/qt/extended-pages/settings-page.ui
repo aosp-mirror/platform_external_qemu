@@ -416,6 +416,82 @@
     </property>
    </item>
   </widget>
+  <widget class="QGroupBox" name="set_glesBackendTitle">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>242</y>
+     <width>261</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: 0px;</string>
+   </property>
+   <property name="title">
+    <string>OpenGL ES renderer (requires restart)</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Title</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="set_glesBackendPrefComboBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>260</y>
+     <width>280</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">padding: 3px 3px 3px 3px;</string>
+   </property>
+   <property name="editable">
+    <bool>false</bool>
+   </property>
+   <property name="currentText">
+    <string>Autodetect based on host (default)</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+   <item>
+    <property name="text">
+     <string>Autodetect based on host (default)</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>ANGLE (D3D11)</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>ANGLE (D3D9)</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>SwiftShader</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Desktop native OpenGL</string>
+    </property>
+   </item>
+  </widget>
   <zorder>kbdShortcutsTitle</zorder>
   <zorder>set_crashReprotPrefTitle</zorder>
   <zorder>set_onTop</zorder>
@@ -431,6 +507,8 @@
   <zorder>autoFindAdbTitle</zorder>
   <zorder>set_crashReportPrefComboBox</zorder>
   <zorder>set_forwardShortcutsToDevice</zorder>
+  <zorder>set_glesBackendTitle</zorder>
+  <zorder>set_glesBackendPrefComboBox</zorder>
  </widget>
  <tabstops>
   <tabstop>set_themeBox</tabstop>

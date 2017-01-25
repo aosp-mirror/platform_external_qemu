@@ -47,6 +47,7 @@
 #include "android/utils/win32_cmdline_quote.h"
 
 #include "android/skin/winsys.h"
+#include "android/skin/qt/init-qt.h"
 
 #include "config-target.h"
 
@@ -1055,6 +1056,8 @@ extern "C" int main(int argc, char **argv) {
     if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
         return 1;
     }
+
+    doGpuConfig(opts, hw, skin_winsys_get_preferred_gles_backend());
 
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, n, (char**)args);
     skin_winsys_enter_main_loop(opts->no_window);
