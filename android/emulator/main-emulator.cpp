@@ -50,6 +50,8 @@
 #include "android/utils/win32_cmdline_quote.h"
 #include "android/version.h"
 
+#include "android/skin/winsys.h"
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -218,12 +220,10 @@ int main(int argc, char** argv)
 {
     const char* avdName = NULL;
     const char* avdArch = NULL;
-    const char* gpu = NULL;
     const char* engine = NULL;
     bool doAccelCheck = false;
     bool doListAvds = false;
     bool force32bit = false;
-    bool noWindow = false;
     bool useSystemLibs = false;
     bool forceEngineLaunch = false;
     bool queryVersion = false;
@@ -303,7 +303,6 @@ int main(int argc, char** argv)
         }
 
         if (!strcmp(opt,"-gpu") && nn + 1 < argc) {
-            gpu = argv[nn + 1];
             nn++;
             continue;
         }
@@ -325,7 +324,6 @@ int main(int argc, char** argv)
         }
 
         if (!strcmp(opt,"-no-window")) {
-            noWindow = true;
             continue;
         }
 
@@ -637,26 +635,6 @@ int main(int argc, char** argv)
      * and modify either LD_LIBRARY_PATH or PATH accordingly
      */
 
-    // Detect if this is google API's
-    bool googleApis = checkForGoogleAPIs(avdName);
-    int apiLevel = getApiLevel(avdName);
-    EmuglConfig config;
-
-    if (!androidEmuglConfigInit(&config,
-                                avdName,
-                                avdArch,
-                                apiLevel,
-                                googleApis,
-                                gpu,
-                                wantedBitness,
-                                noWindow)) {
-        fprintf(stderr, "ERROR: %s\n", config.status);
-        return 1;
-    }
-    D("%s\n", config.status);
-
-    emuglConfig_setupEnv(&config);
-
     /* Add <lib>/qt/ to the library search path. */
     androidQtSetupEnv(wantedBitness, progDir.c_str());
 
@@ -862,6 +840,22 @@ static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs, const
                fullPath);
     }
 
+    D("Adding library search path: '%s'\n", fullPath);
+    add_library_search_dir(fullPath);
+
+    bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s/%s", launcherDir, libSubDir, "gles_swiftshader");
+    D("Adding library search path: '%s'\n", fullPath);
+    add_library_search_dir(fullPath);
+
+    bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s/%s", launcherDir, libSubDir, "gles_angle");
+    D("Adding library search path: '%s'\n", fullPath);
+    add_library_search_dir(fullPath);
+
+    bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s/%s", launcherDir, libSubDir, "gles_angle9");
+    D("Adding library search path: '%s'\n", fullPath);
+    add_library_search_dir(fullPath);
+
+    bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s/%s", launcherDir, libSubDir, "gles_angle11");
     D("Adding library search path: '%s'\n", fullPath);
     add_library_search_dir(fullPath);
 
