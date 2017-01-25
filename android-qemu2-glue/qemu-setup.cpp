@@ -18,6 +18,7 @@
 #include "android/base/Log.h"
 #include "android/console.h"
 #include "android/skin/LibuiAgent.h"
+#include "android/skin/winsys.h"
 #include "android-qemu2-glue/emulation/android_pipe_device.h"
 #include "android-qemu2-glue/emulation/charpipe.h"
 #include "android-qemu2-glue/emulation/DmaMap.h"
@@ -48,6 +49,9 @@ bool qemu_android_emulation_early_setup() {
     // future thread created by QEMU.
     qemu_looper_setForThread();
     qemu_thread_register_setup_callback(qemu_looper_setForThread);
+
+    // Make sure we override the ctrl-C handler as soon as possible.
+    qemu_set_ctrlc_handler(&skin_winsys_quit_request);
 
     // Ensure charpipes i/o are handled properly.
     main_loop_register_poll_callback(qemu_charpipe_poll);
