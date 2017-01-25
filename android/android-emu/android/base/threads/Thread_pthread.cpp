@@ -45,8 +45,9 @@ private:
 
 }  // namespace
 
-Thread::Thread(ThreadFlags flags) :
+Thread::Thread(ThreadFlags flags, int stackSize) :
     mThread((pthread_t)NULL),
+    mStackSize(stackSize),
     mFlags(flags) {
     pthread_mutex_init(&mLock, NULL);
 }
@@ -68,13 +69,26 @@ bool Thread::start() {
 
     bool ret = true;
     mStarted = true;
-    if (pthread_create(&mThread, NULL, thread_main, this)) {
+
+    pthread_attr_t attr;
+    if (mStackSize != 0) {
+        pthread_attr_init(&attr);
+        pthread_attr_setstacksize(&attr, mStackSize);
+    }
+
+    if (pthread_create(&mThread, mStackSize ? &attr : nullptr,
+                       thread_main, this)) {
         ret = false;
         // We _do not_ need to guard this access to |mFinished| because we're
         // sure that the launched thread failed, so there can't be parallel
         // access.
         mFinished = true;
     }
+
+    if (mStackSize != 0) {
+        pthread_attr_destroy(&attr);
+    }
+
     return ret;
 }
 
