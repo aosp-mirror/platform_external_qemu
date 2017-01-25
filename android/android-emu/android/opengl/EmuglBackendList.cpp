@@ -16,7 +16,7 @@
 #include "android/base/system/System.h"
 #include "android/opengl/EmuglBackendScanner.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG
 #  include <stdio.h>
@@ -87,6 +87,8 @@ bool EmuglBackendList::getBackendLibPath(const char* name,
                                          Library library,
                                          std::string* libPath) {
 
+    fprintf(stderr, "%s: %s\n", __func__, name);
+
     const char* libraryName = NULL;
     if (library == LIBRARY_EGL) {
         libraryName = "EGL";
@@ -100,6 +102,7 @@ bool EmuglBackendList::getBackendLibPath(const char* name,
         return false;
     }
 
+    fprintf(stderr, "%s: %s/%s%s%s\n", __func__, getLibDirPath(name).c_str(), kLibPrefix,libraryName,kLibSuffix);
     std::string path = android::base::StringFormat(
             "%s/%s%s%s",
             getLibDirPath(name),

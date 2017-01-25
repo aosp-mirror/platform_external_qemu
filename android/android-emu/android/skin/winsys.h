@@ -49,6 +49,9 @@ void skin_winsys_set_window_title(const char* title);
 // Return true iff the main window is fully visible
 bool skin_winsys_is_window_fully_visible(void);
 
+// Returns current preferred gles backend specified through the emulator UI.
+int skin_winsys_get_preferred_gles_backend();
+
 // Start main window support. |no_window| must be true to indicate that
 // no window needs to be shown, but that the GUI backend still needs to be
 // initialized.
