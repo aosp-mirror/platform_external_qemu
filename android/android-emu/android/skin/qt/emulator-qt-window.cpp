@@ -466,7 +466,9 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         // |skin_window_free| is called, especially
         // on Windows!
         android_stopOpenglesRenderer();
+        mToolWindow->hide();
         mToolWindow->closeExtendedWindow();
+        hide();
         event->accept();
     }
 }
