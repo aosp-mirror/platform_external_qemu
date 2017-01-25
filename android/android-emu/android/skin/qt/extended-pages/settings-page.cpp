@@ -101,6 +101,36 @@ SettingsPage::SettingsPage(QWidget* parent)
         default:
             break;
     }
+
+    Ui::Settings::GLESBACKEND_PREFERENCE_VALUE glesbackend_pref =
+        static_cast<Ui::Settings::GLESBACKEND_PREFERENCE_VALUE>(
+            settings.value(Ui::Settings::GLESBACKEND_PREFERENCE, 0).toInt());
+
+    switch (glesbackend_pref) {
+    case Ui::Settings::GLESBACKEND_PREFERENCE_AUTO:
+        mUi->set_glesBackendPrefComboBox->setCurrentIndex(
+                Ui::Settings::GLESBACKEND_PREFERENCE_AUTO);
+        break;
+    case Ui::Settings::GLESBACKEND_PREFERENCE_ANGLE:
+        mUi->set_glesBackendPrefComboBox->setCurrentIndex(
+                Ui::Settings::GLESBACKEND_PREFERENCE_ANGLE);
+        break;
+    case Ui::Settings::GLESBACKEND_PREFERENCE_ANGLE9:
+        mUi->set_glesBackendPrefComboBox->setCurrentIndex(
+                Ui::Settings::GLESBACKEND_PREFERENCE_ANGLE9);
+        break;
+    case Ui::Settings::GLESBACKEND_PREFERENCE_SWIFTSHADER:
+        mUi->set_glesBackendPrefComboBox->setCurrentIndex(
+                Ui::Settings::GLESBACKEND_PREFERENCE_SWIFTSHADER);
+        break;
+    case Ui::Settings::GLESBACKEND_PREFERENCE_NATIVEGL:
+        mUi->set_glesBackendPrefComboBox->setCurrentIndex(
+                Ui::Settings::GLESBACKEND_PREFERENCE_NATIVEGL);
+        break;
+    default:
+        break;
+    }
+
 }
 
 void SettingsPage::setAdbInterface(android::emulation::AdbInterface* adb) {
@@ -278,5 +308,24 @@ void SettingsPage::on_set_crashReportPrefComboBox_currentIndexChanged(int index)
         set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_NEVER);
     } else if (index == Ui::Settings::CRASHREPORT_COMBOBOX_ASK) {
         set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_ASK);
+    }
+}
+
+static void set_glesBackend_to(Ui::Settings::GLESBACKEND_PREFERENCE_VALUE v) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::GLESBACKEND_PREFERENCE, v);
+}
+
+void SettingsPage::on_set_glesBackendPrefComboBox_currentIndexChanged(int index) {
+    switch (index) {
+    case Ui::Settings::GLESBACKEND_PREFERENCE_AUTO:
+    case Ui::Settings::GLESBACKEND_PREFERENCE_ANGLE:
+    case Ui::Settings::GLESBACKEND_PREFERENCE_ANGLE9:
+    case Ui::Settings::GLESBACKEND_PREFERENCE_SWIFTSHADER:
+    case Ui::Settings::GLESBACKEND_PREFERENCE_NATIVEGL:
+        set_glesBackend_to((Ui::Settings::GLESBACKEND_PREFERENCE_VALUE)index);
+        break;
+    default:
+        break;
     }
 }

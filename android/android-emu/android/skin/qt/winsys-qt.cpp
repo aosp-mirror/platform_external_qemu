@@ -25,6 +25,7 @@
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/emulator-qt-no-window.h"
 #include "android/skin/qt/init-qt.h"
+#include "android/skin/qt/qt-settings.h"
 #include "android/utils/setenv.h"
 #include "android/main-common-ui.h"
 
@@ -233,6 +234,13 @@ extern bool skin_winsys_is_window_fully_visible()
     semaphore.acquire();
     D("%s: result = %s", __FUNCTION__, value ? "true" : "false");
     return value;
+}
+
+extern int skin_winsys_get_preferred_gles_backend()
+{
+    D("skin_winsys_get_preferred_gles_backend");
+    QSettings settings;
+    return settings.value(Ui::Settings::GLESBACKEND_PREFERENCE, 0).toInt();
 }
 
 extern void skin_winsys_quit_request()

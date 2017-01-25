@@ -28,7 +28,8 @@ bool androidEmuglConfigInit(EmuglConfig* config,
                             bool hasGoogleApis,
                             const char* gpuOption,
                             int wantedBitness,
-                            bool noWindow) {
+                            bool noWindow,
+                            int uiPreferredBackend) {
     bool gpuEnabled = false;
     ScopedCPtr<char> gpuMode;
 
@@ -87,7 +88,7 @@ bool androidEmuglConfigInit(EmuglConfig* config,
 
     bool result = emuglConfig_init(
             config, gpuEnabled, gpuMode.get(), gpuOption, wantedBitness,
-            noWindow, blacklisted, hasGuestRenderer);
+            noWindow, blacklisted, hasGuestRenderer, uiPreferredBackend);
 
     return result;
 }
