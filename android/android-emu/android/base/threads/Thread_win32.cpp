@@ -42,7 +42,8 @@ private:
 
 }  // namespace
 
-Thread::Thread(ThreadFlags flags) :
+Thread::Thread(ThreadFlags flags, int stackSize) :
+    mStackSize(stackSize),
     mFlags(flags) {
     InitializeCriticalSection(&mLock);
 }
@@ -63,9 +64,10 @@ bool Thread::start() {
     ScopedLocker locker(&mLock);
     bool ret = true;
     mStarted = true;
-    mThread = CreateThread(NULL, 0, &Thread::thread_main, this, 0, &mThreadId);
+    mThread = CreateThread(NULL, mStackSize,
+                           &Thread::thread_main, this, 0, &mThreadId);
     if (!mThread) {
-        // don't reset mStarted here: we're artifically limiting the user's
+        // don't reset mStarted: we're artifically limiting the user's
         // ability to retry the failed starts here.
         ret = false;
         mFinished = false;
