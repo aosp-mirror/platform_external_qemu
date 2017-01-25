@@ -303,6 +303,7 @@ LOCAL_SRC_FILES := \
     android/hw-lcd.c \
     android/hw-qemud.cpp \
     android/hw-sensors.c \
+    android/car.c \
     android/jpeg-compress.c \
     android/kernel/kernel_utils.cpp \
     android/loadpng.c \

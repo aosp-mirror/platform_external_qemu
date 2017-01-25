@@ -81,6 +81,7 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_VIRT_SENSORS, mExtendedUi->virtSensorsButton},
         {PANE_IDX_SETTINGS,  mExtendedUi->settingsButton},
         {PANE_IDX_HELP,      mExtendedUi->helpButton},
+        {PANE_IDX_CAR,      mExtendedUi->carDataButton},
     };
 
     setObjectName("ExtendedControls");
@@ -94,6 +95,7 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->virtSensorsButton);
     mSidebarButtons.addButton(mExtendedUi->settingsButton);
     mSidebarButtons.addButton(mExtendedUi->helpButton);
+    mSidebarButtons.addButton(mExtendedUi->carDataButton);
 
     for (QWidget* w : findChildren<QWidget*>()) {
         w->setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -117,6 +119,7 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         mExtendedUi->finger_page->setFingerAgent(agentPtr->finger);
         mExtendedUi->location_page->setLocationAgent(agentPtr->location);
         mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
+        mExtendedUi->carDataPage->setCarDataAgent(agentPtr->car);
     }
     // The ADB port is known now. Show it on the UI Help page.
     mExtendedUi->helpPage->setAdbPort();
@@ -185,6 +188,7 @@ void ExtendedWindow::on_cellularButton_clicked()    { adjustTabs(PANE_IDX_CELLUL
 void ExtendedWindow::on_dpadButton_clicked()        { adjustTabs(PANE_IDX_DPAD); }
 void ExtendedWindow::on_fingerButton_clicked()      { adjustTabs(PANE_IDX_FINGER); }
 void ExtendedWindow::on_helpButton_clicked()        { adjustTabs(PANE_IDX_HELP); }
+void ExtendedWindow::on_carDataButton_clicked()        { adjustTabs(PANE_IDX_CAR); }
 void ExtendedWindow::on_locationButton_clicked()    { adjustTabs(PANE_IDX_LOCATION); }
 void ExtendedWindow::on_settingsButton_clicked()    { adjustTabs(PANE_IDX_SETTINGS); }
 void ExtendedWindow::on_telephoneButton_clicked()   { adjustTabs(PANE_IDX_TELEPHONE); }
