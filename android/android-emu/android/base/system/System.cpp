@@ -404,8 +404,9 @@ public:
 
 
     virtual int getHostBitness() const {
-#ifdef _WIN32
-
+#ifdef __x86_64__
+        return 64;
+#elif defined(_WIN32)
         // Retrieves the path of the WOW64 system directory, which doesn't
         // exist on 32-bit systems.
         // NB: we don't really need the directory, we just want to see if
@@ -421,27 +422,30 @@ public:
             return 64;
         }
 
-#else // !_WIN32
-    /*
-        This function returns 64 if host is running 64-bit OS, or 32 otherwise.
-
-        It uses the same technique in ndk/build/core/ndk-common.sh.
-        Here are comments from there:
-
-        ## On Linux or Darwin, a 64-bit kernel (*) doesn't mean that the
-        ## user-land is always 32-bit, so use "file" to determine the bitness
-        ## of the shell that invoked us. The -L option is used to de-reference
-        ## symlinks.
-        ##
-        ## Note that on Darwin, a single executable can contain both x86 and
-        ## x86_64 machine code, so just look for x86_64 (darwin) or x86-64
-        ## (Linux) in the output.
-
-        (*) ie. The following code doesn't always work:
-            struct utsname u;
-            int host_runs_64bit_OS = (uname(&u) == 0 &&
-                                     strcmp(u.machine, "x86_64") == 0);
-    */
+#else  // !__x86_64__ && !_WIN32
+        // This function returns 64 if host is running 64-bit OS, or 32 otherwise.
+        //
+        // It uses the same technique in ndk/build/core/ndk-common.sh.
+        // Here are comments from there:
+        //
+        // ## On Linux or Darwin, a 64-bit kernel (*) doesn't mean that the
+        // ## user-land is always 32-bit, so use "file" to determine the bitness
+        // ## of the shell that invoked us. The -L option is used to de-reference
+        // ## symlinks.
+        // ##
+        // ## Note that on Darwin, a single executable can contain both x86 and
+        // ## x86_64 machine code, so just look for x86_64 (darwin) or x86-64
+        // ## (Linux) in the output.
+        //
+        // (*) ie. The following code doesn't always work:
+        //     struct utsname u;
+        //     int host_runs_64bit_OS = (uname(&u) == 0 &&
+        //                              strcmp(u.machine, "x86_64") == 0);
+        //
+        // Note: system() call on MacOS disables SIGINT signal and fails
+        //  to restore it back. As of now we don't have 32-bit Darwin binaries
+        //  so this code path won't ever happen, but you've been warned.
+        //
         if (system("file -L \"$SHELL\" | grep -q \"x86[_-]64\"") == 0) {
                 return 64;
         } else if (system("file -L \"$SHELL\" > /dev/null")) {
@@ -449,7 +453,6 @@ public:
                     "$SHELL is not properly defined; 32 bits assumed.\n");
         }
         return 32;
-
 #endif // !_WIN32
     }
 
