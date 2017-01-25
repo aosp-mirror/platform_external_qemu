@@ -22,6 +22,29 @@
       "revId": "d911f4c5fddea0b0aa590e704161b98a69885736",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30360043_012a2d7f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-25T01:05:06Z",
+      "side": 1,
+      "message": "yes, just like it was in the old code. Will remove",
+      "range": {
+        "startLine": 339,
+        "startChar": 8,
+        "endLine": 340,
+        "endChar": 50
+      },
+      "revId": "d911f4c5fddea0b0aa590e704161b98a69885736",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
