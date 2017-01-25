@@ -22,7 +22,11 @@
 #include "qemu/coroutine_int.h"
 
 enum {
+#if defined(_WIN32) && !defined(_WIN64)
+    POOL_BATCH_SIZE = 8,
+#else
     POOL_BATCH_SIZE = 64,
+#endif
 };
 
 /** Free list to speed up creation */
