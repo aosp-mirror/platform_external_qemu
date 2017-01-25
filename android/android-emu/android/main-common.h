@@ -55,6 +55,8 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
                                             AvdInfo** the_avd,
                                             int* exit_status);
 
+bool doGpuConfig(AndroidOptions* opt, AndroidHwConfig* hw, int uiPreferredBackend);
+
 // HACK: Value will be true if emulator_parseCommonCommandLineOptions()
 //       has seen a network-related option (e.g. -netspeed). This is
 //       unfortunately used by the Qt UI code.

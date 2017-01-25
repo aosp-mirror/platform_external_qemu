@@ -101,6 +101,8 @@ SelectedRenderer emuglConfig_get_renderer(const char* gpu_mode) {
         return SELECTED_RENDERER_SWIFTSHADER;
     } else if (!strcmp(gpu_mode, "angle")) {
         return SELECTED_RENDERER_ANGLE;
+    } else if (!strcmp(gpu_mode, "angle9")) {
+        return SELECTED_RENDERER_ANGLE9;
     } else if (!strcmp(gpu_mode, "error")) {
         return SELECTED_RENDERER_ERROR;
     } else {
@@ -120,6 +122,17 @@ void free_emugl_host_gpu_props(emugl_host_gpu_prop_list proplist) {
     delete [] proplist.props;
 }
 
+// Should match android/android-emu/android/skin/qt/qt-settings.h's
+// GLESBACKEND_PREFERENCE_VALUE
+
+enum UIPreferredBackend {
+    UIPREFERREDBACKEND_AUTO = 0,
+    UIPREFERREDBACKEND_ANGLE = 1,
+    UIPREFERREDBACKEND_ANGLE9 = 2,
+    UIPREFERREDBACKEND_SWIFTSHADER = 3,
+    UIPREFERREDBACKEND_NATIVEGL = 4,
+};
+
 bool emuglConfig_init(EmuglConfig* config,
                       bool gpu_enabled,
                       const char* gpu_mode,
@@ -127,7 +140,8 @@ bool emuglConfig_init(EmuglConfig* config,
                       int bitness,
                       bool no_window,
                       bool blacklisted,
-                      bool has_guest_renderer) {
+                      bool has_guest_renderer,
+                      int uiPreferredBackend) {
     D("%s: blacklisted=%d has_guest_renderer=%d\n",
       __FUNCTION__,
       blacklisted,
@@ -136,8 +150,10 @@ bool emuglConfig_init(EmuglConfig* config,
     // zero all fields first.
     memset(config, 0, sizeof(*config));
 
-    // The value of '-gpu <mode>' overrides the hardware properties,
-    // except if <mode> is 'auto'.
+    bool hasUiPreference = uiPreferredBackend != UIPREFERREDBACKEND_AUTO;
+
+    // The value of '-gpu <mode>' overrides both the hardware properties
+    // and the UI setting, except if <mode> is 'auto'.
     if (gpu_option) {
         if (!strcmp(gpu_option, "on") || !strcmp(gpu_option, "enable")) {
             gpu_enabled = true;
@@ -170,6 +186,11 @@ bool emuglConfig_init(EmuglConfig* config,
         gpu_enabled = false;
     }
 
+    if (!gpu_option && hasUiPreference) {
+        gpu_enabled = true;
+        gpu_mode = "auto";
+    }
+
     if (!gpu_enabled) {
         config->enabled = false;
         snprintf(config->backend, sizeof(config->backend), "%s", gpu_mode);
@@ -181,6 +202,7 @@ bool emuglConfig_init(EmuglConfig* config,
     if (!bitness) {
         bitness = System::get()->getProgramBitness();
     }
+
     config->bitness = bitness;
     resetBackendList(bitness);
 
@@ -208,12 +230,13 @@ bool emuglConfig_init(EmuglConfig* config,
             gpu_mode = "swiftshader";
         }
 #ifdef _WIN32
-        else if (!no_window && async_query_host_gpu_AngleWhitelisted()) {
+        else if (!no_window && async_query_host_gpu_AngleWhitelisted() &&
+                 !hasUiPreference) {
                 gpu_mode = "angle";
                 D("%s use Angle for Intel GPU HD 3000\n", __FUNCTION__);
         }
 #endif
-        else if (no_window || blacklisted) {
+        else if (no_window || (blacklisted && !hasUiPreference)) {
             if (stringVectorContains(sBackendList->names(), "swiftshader")) {
                 D("%s: Headless (-no-window) mode (or blacklisted GPU driver)"
                   ", using Swiftshader backend\n",
@@ -242,8 +265,25 @@ bool emuglConfig_init(EmuglConfig* config,
                 return true;
             }
         } else {
-            D("%s: 'host' mode auto-selected\n", __FUNCTION__);
-            gpu_mode = "host";
+            switch (uiPreferredBackend) {
+                case UIPREFERREDBACKEND_ANGLE:
+                    gpu_mode = "angle";
+                    break;
+                case UIPREFERREDBACKEND_ANGLE9:
+                    gpu_mode = "angle9";
+                    break;
+                case UIPREFERREDBACKEND_SWIFTSHADER:
+                    gpu_mode = "swiftshader";
+                    break;
+                case UIPREFERREDBACKEND_NATIVEGL:
+                    gpu_mode = "host";
+                    break;
+                default:
+                    gpu_mode = "host";
+                    break;
+            }
+            D("%s: auto-selected %s based on conditions and UI preference %d\n",
+              __func__, gpu_mode, uiPreferredBackend);
         }
     }
 
