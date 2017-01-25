@@ -300,7 +300,7 @@ static void thread_pool_init_one(ThreadPool *pool, AioContext *ctx)
 #if defined(_WIN32) && !defined(_WIN64)
     /* Limit the number of worker thread on 32-bit Windows: usually we only
      * have 2 GB of address space, and each thread costs us over 1 MB of it. */
-    pool->max_threads = 24;
+    pool->max_threads = 8;
 #else
     pool->max_threads = 64;
 #endif
