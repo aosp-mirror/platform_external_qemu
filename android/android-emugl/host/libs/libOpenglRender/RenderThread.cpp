@@ -45,7 +45,8 @@ static constexpr int kStreamBufferSize = 128 * 1024;
 
 RenderThread::RenderThread(std::weak_ptr<RendererImpl> renderer,
                            std::shared_ptr<RenderChannelImpl> channel)
-    : mChannel(channel), mRenderer(renderer) {}
+    : emugl::Thread(android::base::ThreadFlags::MaskSignals, 2 * 1024 * 1024),
+      mChannel(channel), mRenderer(renderer) {}
 
 RenderThread::~RenderThread() = default;
 
