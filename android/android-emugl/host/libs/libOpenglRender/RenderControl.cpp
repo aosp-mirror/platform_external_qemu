@@ -234,6 +234,23 @@ android::base::StringView maxVersionToFeatureString(GLESDispatchMaxVersion versi
     }
 }
 
+std::string replaceESVersionString(const std::string& prev, android::base::StringView newver) {
+    std::string res;
+
+    if (prev.find("ES-CM") != std::string::npos) {
+        return prev;
+    }
+
+    size_t esStart = prev.find("ES ");
+    size_t esEnd = prev.find(" ", esStart + 3);
+
+    res += prev.substr(0, esStart + 3);
+    res += newver;
+    res += prev.substr(esEnd);
+
+    return res;
+}
+
 static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
 {
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
@@ -290,6 +307,20 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
         if (maxVersion > GLES_DISPATCH_MAX_VERSION_2) {
             glStr += "GL_OES_vertex_array_object ";
             glStr += "GL_OES_standard_derivatives ";
+        }
+    }
+
+    if (glesDynamicVersionEnabled && name == GL_VERSION) {
+        GLESDispatchMaxVersion maxVersion = calcMaxVersionFromDispatch();
+        switch (maxVersion) {
+            case GLES_DISPATCH_MAX_VERSION_3_0:
+                glStr = replaceESVersionString(glStr, "3.0");
+                break;
+            case GLES_DISPATCH_MAX_VERSION_3_1:
+                glStr = replaceESVersionString(glStr, "3.1");
+                break;
+            default:
+                break;
         }
     }
 
