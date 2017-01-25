@@ -53,9 +53,9 @@ static const uint32_t kTimelineInterval = 1;
 static const uint64_t kDefaultTimeoutNsecs = 5ULL * 1000ULL * 1000ULL * 1000ULL;
 
 SyncThread::SyncThread(EGLContext parentContext) :
+    emugl::Thread(android::base::ThreadFlags::MaskSignals, 512 * 1024),
     mDisplay(EGL_NO_DISPLAY),
     mContext(0), mSurf(0) {
-
     if (parentContext == EGL_NO_CONTEXT) {
         emugl_crash_reporter(
                 "ERROR: attempted to start a SyncThread "
@@ -73,7 +73,7 @@ SyncThread::SyncThread(EGLContext parentContext) :
 void SyncThread::triggerWait(FenceSync* fenceSync,
                              uint64_t timeline) {
     DPRINT("fenceSyncInfo=0x%llx timeline=0x%lx ...",
-            fenceSyncInfo, timeline);
+            fenceSync, timeline);
     SyncThreadCmd to_send;
     to_send.opCode = SYNC_THREAD_WAIT;
     to_send.fenceSync = fenceSync;
@@ -144,7 +144,7 @@ int SyncThread::sendAndWaitForResult(SyncThreadCmd& cmd) {
 
 void SyncThread::sendAsync(SyncThreadCmd& cmd) {
     DPRINT("send with opcode=%u fenceSyncInfo=0x%llx",
-           cmd.opCode, cmd.fenceSyncInfo);
+           cmd.opCode, cmd.fenceSync);
     cmd.needReply = false;
     mInput.send(cmd);
 }
