@@ -61,7 +61,7 @@ class Thread {
 
 public:
     // Public constructor.
-    Thread(ThreadFlags flags = ThreadFlags::MaskSignals);
+    Thread(ThreadFlags flags = ThreadFlags::MaskSignals, int stackSize = 0);
 
     // Virtual destructor.
     virtual ~Thread();
@@ -115,6 +115,7 @@ private:
     pthread_t mThread;
     pthread_mutex_t mLock;
 #endif
+    int mStackSize;
     // Access guarded by |mLock|.
     intptr_t mExitStatus = 0;
     const ThreadFlags mFlags;
