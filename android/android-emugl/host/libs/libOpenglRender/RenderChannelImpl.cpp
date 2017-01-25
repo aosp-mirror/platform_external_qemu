@@ -35,7 +35,13 @@ using AutoLock = android::base::AutoLock;
 // used by each RenderChannelImpl instance. Benchmarking shows that
 // it's important to have a large queue for guest -> host transfers,
 // but a much smaller one works for host -> guest ones.
+// Note: 32-bit Windows just doesn't have enough RAM to allocate optimal
+// capacity.
+#if defined(_WIN32) && !defined(_WIN64)
+static constexpr size_t kGuestToHostQueueCapacity = 32U;
+#else
 static constexpr size_t kGuestToHostQueueCapacity = 1024U;
+#endif
 static constexpr size_t kHostToGuestQueueCapacity = 16U;
 
 RenderChannelImpl::RenderChannelImpl()
