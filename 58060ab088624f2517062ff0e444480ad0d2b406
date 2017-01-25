@@ -16,6 +16,23 @@
       "revId": "58060ab088624f2517062ff0e444480ad0d2b406",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6f67e4c_58fa7506",
+        "filename": "android/android-emu/android/emulation/control/user_event_agent.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1026713
+      },
+      "writtenOn": "2017-01-25T16:47:38Z",
+      "side": 1,
+      "message": "Done",
+      "revId": "58060ab088624f2517062ff0e444480ad0d2b406",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
