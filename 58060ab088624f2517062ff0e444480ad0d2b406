@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed57a99c_9fb39a5f",
+        "filename": "android/android-emu/android/emulation/control/user_event_agent.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-01-25T16:27:51Z",
+      "side": 1,
+      "message": "Could you indicate that this is in degrees?\nAlso good to note that a positive delta indicates a counter-clockwise rotation of the UI control.",
+      "revId": "58060ab088624f2517062ff0e444480ad0d2b406",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
