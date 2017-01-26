@@ -19,7 +19,7 @@
 #include "android/emulation/GoldfishDma.h"
 #include "android/emulation/VmLock.h"
 #include "android/utils/stream.h"
-#include "android-qemu2-glue/utils/stream.h"
+#include "android-qemu2-glue/base/files/QemuFileStream.h"
 
 #include <assert.h>
 #include <memory>
@@ -43,33 +43,12 @@ extern "C" {
 // qemu_android_pipe_init() is used to inject all callbacks at setup time
 // and initialize the threading mode of AndroidPipe (see below).
 //
-namespace {
 
-// Convenience class used to wrap a QEMUFile inside a ::Stream instance
-// which will be usable by the generic AndroidPipe service.
-class ScopedStream {
-public:
-    explicit ScopedStream(QEMUFile* file)
-        : mStream(stream_from_qemufile(file)) {}
+using android::qemu::QemuFileStream;
 
-    ~ScopedStream() { close(); }
-
-    void close() {
-        if (mStream) {
-            stream_free(mStream);
-            mStream = nullptr;
-        }
-    }
-
-    ::Stream* get() const { return mStream; }
-
-    DISALLOW_COPY_ASSIGN_AND_MOVE(ScopedStream);
-
-private:
-    ::Stream* mStream;
-};
-
-}  // namespace
+static ::Stream* asCStream(android::base::Stream* stream) {
+    return reinterpret_cast<::Stream*>(stream);
+}
 
 // These callbacks are called from the virtual device into the pipe service.
 static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
@@ -78,21 +57,40 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
             return static_cast<GoldfishHostPipe*>(
                     android_pipe_guest_open(hwPipe));
         },
+        // guest_close()
+        [](GoldfishHostPipe* hostPipe) { android_pipe_guest_close(hostPipe); },
+        // guest_pre_load()
+        [](QEMUFile* file) {
+            QemuFileStream stream(file);
+            android_pipe_guest_pre_load(asCStream(&stream));
+        },
+        // guest_post_load()
+        [](QEMUFile* file) {
+            QemuFileStream stream(file);
+            android_pipe_guest_post_load(asCStream(&stream));
+        },
+        // guest_pre_save()
+        [](QEMUFile* file) {
+            QemuFileStream stream(file);
+            android_pipe_guest_pre_save(asCStream(&stream));
+        },
+        // guest_post_save()
+        [](QEMUFile* file) {
+            QemuFileStream stream(file);
+            android_pipe_guest_post_save(asCStream(&stream));
+        },
         // guest_load()
         [](QEMUFile* file,
            GoldfishHwPipe* hwPipe,
            char* force_close) -> GoldfishHostPipe* {
-            ScopedStream stream(file);
-            return static_cast<GoldfishHostPipe*>(
-                    android_pipe_guest_load(stream.get(), hwPipe, force_close));
-
+            QemuFileStream stream(file);
+            return static_cast<GoldfishHostPipe*>(android_pipe_guest_load(
+                    asCStream(&stream), hwPipe, force_close));
         },
-        // guest_close()
-        [](GoldfishHostPipe* hostPipe) { android_pipe_guest_close(hostPipe); },
         // guest_save()
         [](GoldfishHostPipe* hostPipe, QEMUFile* file) {
-            ScopedStream stream(file);
-            android_pipe_guest_save(hostPipe, stream.get());
+            QemuFileStream stream(file);
+            android_pipe_guest_save(hostPipe, asCStream(&stream));
         },
         // guest_poll()
         [](GoldfishHostPipe* hostPipe) {
@@ -143,17 +141,11 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
             android_goldfish_dma_ops.add_buffer(pipe, paddr, sz);
         },
         // dma_remove_buffer()
-        [](uint64_t paddr) {
-            android_goldfish_dma_ops.remove_buffer(paddr);
-        },
+        [](uint64_t paddr) { android_goldfish_dma_ops.remove_buffer(paddr); },
         // dma_invalidate_host_mappings()
-        []() {
-            android_goldfish_dma_ops.invalidate_host_mappings();
-        },
+        []() { android_goldfish_dma_ops.invalidate_host_mappings(); },
         // dma_reset_host_mappings()
-        []() {
-            android_goldfish_dma_ops.reset_host_mappings();
-        },
+        []() { android_goldfish_dma_ops.reset_host_mappings(); },
 };
 
 // These callbacks are called from the pipe service into the virtual device.
@@ -176,7 +168,8 @@ static const AndroidPipeHwFuncs android_pipe_hw_funcs = {
                           "Invalid PIPE_WAKE_READ values");
             static_assert((int)GOLDFISH_PIPE_WAKE_WRITE == (int)PIPE_WAKE_WRITE,
                           "Invalid PIPE_WAKE_WRITE values");
-            static_assert((int)GOLDFISH_PIPE_WAKE_UNLOCK_DMA == (int)PIPE_WAKE_UNLOCK_DMA,
+            static_assert((int)GOLDFISH_PIPE_WAKE_UNLOCK_DMA ==
+                                  (int)PIPE_WAKE_UNLOCK_DMA,
                           "Invalid PIPE_WAKE_WRITE values");
 
             goldfish_pipe_signal_wake(
