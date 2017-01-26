@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "deb1f257_a3c91869",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-26T02:05:19Z",
+      "side": 1,
+      "message": "now it should be a template parameter.\ninitializer_list and vector both have begin/end, and that\u0027s all you need",
+      "range": {
+        "startLine": 285,
+        "startChar": 29,
+        "endLine": 285,
+        "endChar": 49
+      },
+      "revId": "5f4014baba332d9668a009920dc3aee8fb45af80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1d63450f_e456b1e8",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-26T02:05:19Z",
+      "side": 1,
+      "message": "std::vector\u003cGLenum\u003e colorAttachments(ctx-\u003egetCaps()-\u003emaxDrawBuffers);\nstd::iota(colorAttachments.begin(), colorAttachments.end(), GL_COLOR_ATTACHMENT0);",
+      "range": {
+        "startLine": 344,
+        "startChar": 0,
+        "endLine": 347,
+        "endChar": 5
+      },
+      "revId": "5f4014baba332d9668a009920dc3aee8fb45af80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
