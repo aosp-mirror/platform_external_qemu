@@ -752,7 +752,8 @@ if [ -d $ANGLE_PREBUILTS_DIR ]; then
                 fi
                 ANGLE_LIBNAME=$ANGLE_PREFIX$LIBNAME$ANGLE_SUFFIX
                 ANGLE_SRCDIR=$ANGLE_PREBUILTS_DIR/$ANGLE_HOST-$ANGLE_ARCH
-                for ANGLE_DX in 9 11; do
+                for ANGLE_VERSION in angle9 angle; do
+                    ANGLE_DX=${ANGLE_VERSION:5:1}
                     ANGLE_DSTDIR="$OUT_DIR/$ANGLE_LIBDIR/gles_angle$ANGLE_DX"
                     ANGLE_DSTLIB="$ANGLE_LIBNAME"
                     if [ -f "$ANGLE_SRCDIR/lib/dx$ANGLE_DX/$ANGLE_LIBNAME" ]; then
