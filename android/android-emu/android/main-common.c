@@ -1750,7 +1750,6 @@ bool doGpuConfig(AndroidOptions* opts, AndroidHwConfig* hw,
         derror("%s", config.status);
         return false;
     }
-    fprintf(stderr, "%s:%s:%d emugl config\n", __FILE__, __func__, __LINE__);
 
     // If the user is using -gpu off (not -gpu guest),
     // or if the API level is lower than 14 (Ice Cream Sandwich)
