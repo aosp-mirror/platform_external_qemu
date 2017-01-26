@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "766b7555_2b2e1aad",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-26T01:12:56Z",
+      "side": 1,
+      "message": "Done",
+      "range": {
+        "startLine": 237,
+        "startChar": 60,
+        "endLine": 237,
+        "endChar": 95
+      },
+      "revId": "a010e72772ab8d477b8bb397e0207aa61acc400a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b98992f_d3b4ff3e",
         "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 3
@@ -48,6 +71,29 @@
     },
     {
       "key": {
+        "uuid": "9b80fe58_ed6ac737",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-26T01:12:56Z",
+      "side": 1,
+      "message": "Done",
+      "range": {
+        "startLine": 247,
+        "startChar": 4,
+        "endLine": 247,
+        "endChar": 11
+      },
+      "revId": "a010e72772ab8d477b8bb397e0207aa61acc400a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "650662a8_4aa7dd03",
         "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 3
@@ -59,6 +105,29 @@
       "writtenOn": "2017-01-26T00:05:17Z",
       "side": 1,
       "message": "could you please add a short comment explaining the patterns and how the string usually looks like? E.g. why \"ES-CM\" disables everything?",
+      "range": {
+        "startLine": 240,
+        "startChar": 2,
+        "endLine": 249,
+        "endChar": 30
+      },
+      "revId": "a010e72772ab8d477b8bb397e0207aa61acc400a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6074429_bfda682c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-26T01:12:56Z",
+      "side": 1,
+      "message": "Done",
       "range": {
         "startLine": 240,
         "startChar": 2,
