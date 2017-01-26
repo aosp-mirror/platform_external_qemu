@@ -71,6 +71,19 @@ typedef struct {
     // goldfish_pipe_reset().
     GoldfishHostPipe* (*guest_open)(GoldfishHwPipe *hw_pipe);
 
+    // Close and free a pipe. |host_pipe| must be the result of a previous
+    // guest_open() or guest_load() call, or the second parameter to
+    // goldfish_pipe_reset().
+    void (*guest_close)(GoldfishHostPipe *host_pipe);
+
+    // A set of hooks to prepare and cleanup save/load operations. These are
+    // called once per each snapshot operation, as opposed to the following
+    // guest_load()/guest_save().
+    void (*guest_pre_load)(QEMUFile *file);
+    void (*guest_post_load)(QEMUFile *file);
+    void (*guest_pre_save)(QEMUFile *file);
+    void (*guest_post_save)(QEMUFile *file);
+
     // Load the state of a  pipe from a stream. |file| is the input stream,
     // |hw_pipe| is the hardware-side pipe descriptor. On success, return a new
     // internal pipe instance (similar to one returned by guest_open()), and
@@ -79,11 +92,6 @@ typedef struct {
     // preserve state into streams). Return NULL on faillure.
     GoldfishHostPipe* (*guest_load)(QEMUFile *file, GoldfishHwPipe *hw_pipe,
                                     char *force_close);
-
-    // Close and free a pipe. |host_pipe| must be the result of a previous
-    // guest_open() or guest_load() call, or the second parameter to
-    // goldfish_pipe_reset().
-    void (*guest_close)(GoldfishHostPipe *host_pipe);
 
     // Save the state of a pipe to a stream. |host_pipe| is the pipe
     // instance from guest_open() or guest_load(). and |file| is the
