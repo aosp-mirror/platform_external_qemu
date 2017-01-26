@@ -234,9 +234,23 @@ android::base::StringView maxVersionToFeatureString(GLESDispatchMaxVersion versi
     }
 }
 
-std::string replaceESVersionString(const std::string& prev, android::base::StringView newver) {
-    std::string res;
+// OpenGL ES 3.x support involves changing the GL_VERSION string, which is assumed
+// to be formatted in the following way:
+// "OpenGL ES-CM 1.m <vendor-info>" or
+// "OpenGL ES M.m <vendor-info>"
+// where M is the major version number and m is minor version number.
+// If the GL_VERSION string doesn't reflect the maximum available version of
+// OpenGL ES, many apps will not be able to detect support.
+// We need to mess with the version string in the first place since the underlying
+// backend (whether it is Translator, SwiftShader, ANGLE, et al) may not advertise
+// a GL_VERSION string reflecting their maximum capabilities.
+std::string replaceESVersionString(const std::string& prev,
+                                   android::base::StringView newver) {
 
+    // There is no need to fiddle with the string
+    // if we are in a ES 1.x context.
+    // Such contexts are considered as a special case that must
+    // be untouched.
     if (prev.find("ES-CM") != std::string::npos) {
         return prev;
     }
@@ -244,7 +258,7 @@ std::string replaceESVersionString(const std::string& prev, android::base::Strin
     size_t esStart = prev.find("ES ");
     size_t esEnd = prev.find(" ", esStart + 3);
 
-    res += prev.substr(0, esStart + 3);
+    std::string res = prev.substr(0, esStart + 3);
     res += newver;
     res += prev.substr(esEnd);
 
