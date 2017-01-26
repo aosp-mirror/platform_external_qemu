@@ -39,6 +39,7 @@
 
 #include <stdio.h>
 
+#include <numeric>
 #include <unordered_map>
 
 extern "C" {
@@ -261,120 +262,69 @@ GL_APICALL void  GL_APIENTRY glBindBuffer(GLenum target, GLuint buffer){
     }
 }
 
-static bool sShouldEnableSRGB(GLESv2Context* ctx, GLuint fbo) {
-    auto fbObj = ctx->shareGroup()->getObjectData(
-            NamedObjectType::FRAMEBUFFER, fbo);
-    if (fbObj == NULL) { return false; }
+static bool sIsFboTextureTarget(GLenum target) {
+    switch (target) {
+    case GL_TEXTURE_2D:
+    case GL_TEXTURE_CUBE_MAP:
+    case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
+    case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+    case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+    case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
+    case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
+    case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+    case GL_TEXTURE_2D_ARRAY:
+    case GL_TEXTURE_3D:
+    case GL_TEXTURE_2D_MULTISAMPLE:
+        return true;
+    default:
+        return false;
+    }
+}
 
-    FramebufferData *fbData = (FramebufferData *)fbObj;
+template <class T>
+static void sEmulateFbo(GLESv2Context* ctx,
+                        FramebufferData* fbData,
+                        const T& triggerAttachments,
+                        const T triggerFormats,
+                        GLenum desktopGLFeature) {
+
+    bool shouldEnable = false;
     GLenum target;
-    for (int i = 0; i < ctx->getCaps()->maxDrawBuffers; i++) {
-        GLuint name = fbData->getAttachment(GL_COLOR_ATTACHMENT0 + i, &target, NULL);
-        if (target == GL_TEXTURE_2D ||
-                target == GL_TEXTURE_CUBE_MAP ||
-                target == GL_TEXTURE_CUBE_MAP_POSITIVE_X ||
-                target == GL_TEXTURE_CUBE_MAP_POSITIVE_Y ||
-                target == GL_TEXTURE_CUBE_MAP_POSITIVE_Z ||
-                target == GL_TEXTURE_CUBE_MAP_NEGATIVE_X ||
-                target == GL_TEXTURE_CUBE_MAP_NEGATIVE_Y ||
-                target == GL_TEXTURE_CUBE_MAP_NEGATIVE_Z ||
-                target == GL_TEXTURE_2D_ARRAY ||
-                target == GL_TEXTURE_3D ||
-                target == GL_TEXTURE_2D_MULTISAMPLE) {
-            TextureData* tex = getTextureData(name);
-            if (tex) {
-                GLenum tex_internalformat = tex->internalFormat;
-                if (tex_internalformat == GL_SRGB8_ALPHA8) {
-                    return true;
-                }
-            }
-        } else if (target == GL_RENDERBUFFER) {
+
+    for (auto attachment : triggerAttachments) {
+        GLuint name = fbData->getAttachment(attachment, &target, NULL);
+        if (target == GL_RENDERBUFFER) {
             auto objData = ctx->shareGroup()->getObjectData(
                     NamedObjectType::RENDERBUFFER, name);
             RenderbufferData* rbData = (RenderbufferData*)objData;
             if (rbData) {
                 GLenum rb_internalformat = rbData->internalformat;
-                if (rb_internalformat == GL_SRGB8_ALPHA8) {
-                    return true;
+                for (auto triggerFormat : triggerFormats) {
+                    if (rb_internalformat == triggerFormat) {
+                        shouldEnable = true;
+                        break;
+                    }
                 }
             }
-        }
-    }
-    return false;
-}
-
-// Enable GL_FRAMEBUFFER_SRGB when:
-// 1. draw framebuffer is default and read framebuffer has a SRGB texture attachment (or vice versa).
-// 2. Either draw or read framebuffer has a SRGB texture attachment.
-static void sSetSRGBEnable(GLESv2Context* ctx, GLuint framebuffer, GLenum target) {
-    if (ctx->getMajorVersion() < 3) return;
-
-    GLuint read_fbo = ctx->getFramebufferBinding(GL_READ_FRAMEBUFFER);
-    GLuint draw_fbo = ctx->getFramebufferBinding(GL_DRAW_FRAMEBUFFER);
-    if (sShouldEnableSRGB(ctx, read_fbo) ||
-        sShouldEnableSRGB(ctx, draw_fbo)) {
-        ctx->dispatcher().glEnable(GL_FRAMEBUFFER_SRGB);
-    } else {
-        ctx->dispatcher().glDisable(GL_FRAMEBUFFER_SRGB);
-    }
-}
-
-static bool sShouldEnableDepthClamp(GLESv2Context* ctx, GLuint fbo) {
-    auto fbObj = ctx->shareGroup()->getObjectData(
-            NamedObjectType::FRAMEBUFFER, fbo);
-    if (fbObj == nullptr) { return false; }
-
-    FramebufferData *fbData = (FramebufferData *)fbObj;
-    for (auto type : {GL_DEPTH_ATTACHMENT, GL_DEPTH_STENCIL_ATTACHMENT}) {
-        GLenum target;
-        GLuint name = fbData->getAttachment(type, &target, nullptr);
-        if (target == GL_TEXTURE_2D ||
-            target == GL_TEXTURE_CUBE_MAP ||
-            target == GL_TEXTURE_CUBE_MAP_POSITIVE_X ||
-            target == GL_TEXTURE_CUBE_MAP_POSITIVE_Y ||
-            target == GL_TEXTURE_CUBE_MAP_POSITIVE_Z ||
-            target == GL_TEXTURE_CUBE_MAP_NEGATIVE_X ||
-            target == GL_TEXTURE_CUBE_MAP_NEGATIVE_Y ||
-            target == GL_TEXTURE_CUBE_MAP_NEGATIVE_Z ||
-            target == GL_TEXTURE_2D_ARRAY ||
-            target == GL_TEXTURE_3D ||
-            target == GL_TEXTURE_2D_MULTISAMPLE) {
+        } else if (sIsFboTextureTarget(target)) {
             TextureData* tex = getTextureData(name);
             if (tex) {
                 GLenum tex_internalformat = tex->internalFormat;
-                if (tex_internalformat == GL_DEPTH_COMPONENT32F ||
-                    tex_internalformat == GL_DEPTH32F_STENCIL8) {
-                    return true;
+                for (auto triggerFormat : triggerFormats) {
+                    if (tex_internalformat == triggerFormat) {
+                        shouldEnable = true;
+                        break;
+                    }
                 }
             }
-        } else if (target == GL_RENDERBUFFER) {
-            auto objData = ctx->shareGroup()->getObjectData(
-                    NamedObjectType::RENDERBUFFER, name);
-            RenderbufferData* rbData = (RenderbufferData*)objData;
-            if (rbData) {
-                GLenum rb_internalformat = rbData->internalformat;
-                if (rb_internalformat == GL_DEPTH_COMPONENT32F ||
-                    rb_internalformat == GL_DEPTH32F_STENCIL8) {
-                    return true;
-                }
-            }
+
         }
     }
-    return false;
-}
 
-// Enable GL_DEPTH_CLAMP when:
-// - GL_DEPTH_ATTACHMENT or GL_DEPTH_STENCIL_ATTACHMENT is of internal format
-//   GL_DEPTH_COMPONENT32F or GL_DEPTH32F_STENCIL8.
-static void sSetDepthClampEnable(GLESv2Context* ctx, GLuint framebuffer, GLenum target) {
-    if (ctx->getMajorVersion() < 3) return;
-    GLuint read_fbo = ctx->getFramebufferBinding(GL_READ_FRAMEBUFFER);
-    GLuint draw_fbo = ctx->getFramebufferBinding(GL_DRAW_FRAMEBUFFER);
-    if (sShouldEnableDepthClamp(ctx, read_fbo) ||
-        sShouldEnableDepthClamp(ctx, draw_fbo)) {
-        ctx->dispatcher().glEnable(GL_DEPTH_CLAMP);
+    if (shouldEnable) {
+        ctx->dispatcher().glEnable(desktopGLFeature);
     } else {
-        ctx->dispatcher().glDisable(GL_DEPTH_CLAMP);
+        ctx->dispatcher().glDisable(desktopGLFeature);
     }
 }
 
@@ -383,10 +333,35 @@ static void sSetDepthClampEnable(GLESv2Context* ctx, GLuint framebuffer, GLenum 
 // than that of OpenGL ES. In OpenGL ES, some implicit operations can happen
 // depending on the internal format and attachment combinations of the
 // framebuffer object.
+static void sUpdateFboEmulation(GLESv2Context* ctx) {
+    if (ctx->getMajorVersion() < 3) return;
 
-static void sUpdateFboEmulation(GLESv2Context* ctx, GLuint framebuffer, GLenum target) {
-    sSetSRGBEnable(ctx, framebuffer, target);
-    sSetDepthClampEnable(ctx, framebuffer, target);
+    std::vector<GLenum> colorAttachments(ctx->getCaps()->maxDrawBuffers);
+    std::iota(colorAttachments.begin(), colorAttachments.end(), GL_COLOR_ATTACHMENT0);
+    std::vector<GLenum> depthAttachments =
+        {GL_DEPTH_ATTACHMENT, GL_DEPTH_STENCIL_ATTACHMENT};
+
+    GLuint read_fbo = ctx->getFramebufferBinding(GL_READ_FRAMEBUFFER);
+    GLuint draw_fbo = ctx->getFramebufferBinding(GL_DRAW_FRAMEBUFFER);
+
+    for (auto fbObj : {ctx->shareGroup()->getObjectData(NamedObjectType::FRAMEBUFFER, read_fbo),
+                       ctx->shareGroup()->getObjectData(NamedObjectType::FRAMEBUFFER, draw_fbo)}) {
+
+        if (fbObj == nullptr) { continue; }
+
+        FramebufferData *fbData = (FramebufferData *)fbObj;
+
+        // Enable GL_FRAMEBUFFER_SRGB when framebuffer has SRGB color attachment.
+        sEmulateFbo(ctx, fbData, colorAttachments,
+                    {GL_SRGB8_ALPHA8}, GL_FRAMEBUFFER_SRGB);
+
+        // Enable GL_DEPTH_CLAMP when:
+        // - GL_DEPTH_ATTACHMENT or GL_DEPTH_STENCIL_ATTACHMENT is of internal format
+        //   GL_DEPTH_COMPONENT32F or GL_DEPTH32F_STENCIL8.
+        sEmulateFbo(ctx, fbData, depthAttachments,
+                    {GL_DEPTH_COMPONENT32F, GL_DEPTH32F_STENCIL8}, GL_DEPTH_CLAMP);
+    }
+
 }
 
 GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer){
@@ -417,7 +392,7 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
     // update framebuffer binding state
     ctx->setFramebufferBinding(target, framebuffer);
 
-    sUpdateFboEmulation(ctx, framebuffer, target);
+    sUpdateFboEmulation(ctx);
 }
 
 GL_APICALL void  GL_APIENTRY glBindRenderbuffer(GLenum target, GLuint renderbuffer){
@@ -1180,8 +1155,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
 
     ctx->dispatcher().glFramebufferRenderbufferEXT(target,attachment,renderbuffertarget,globalRenderbufferName);
 
-    // update SRGB enable
-    sUpdateFboEmulation(ctx, fbName, target);
+    sUpdateFboEmulation(ctx);
 }
 
 GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level){
@@ -1215,8 +1189,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attach
                               texture, ObjectDataPtr());
     }
 
-    // update SRGB enable
-    sUpdateFboEmulation(ctx, fbName, target);
+    sUpdateFboEmulation(ctx);
 }
 
 
