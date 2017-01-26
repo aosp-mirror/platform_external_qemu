@@ -57,7 +57,7 @@ public:
 
         // Create a new EmuglPipe instance.
         virtual AndroidPipe* create(void* mHwPipe, const char* args) override {
-            auto renderer = android_getOpenglesRenderer();
+            const auto& renderer = android_getOpenglesRenderer();
             if (!renderer) {
                 // This should never happen, unless there is a bug in the
                 // emulator's initialization, or the system image.
