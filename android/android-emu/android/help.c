@@ -1264,6 +1264,8 @@ help_gpu(stralloc_t* out)
     "     enabled  -> same as 'on'\n"
     "     disabled -> same as 'off'\n"
     "     guest    -> use guest-side OpenGL ES implementation\n\n"
+    "     angle    -> use ANGLE (OPENGL to DirectX) translator on Windows\n\n"
+    "     angle9   -> use ANGLE (OPENGL to DirectX9) translator on Windows\n\n"
 
     "  Note that enabling GPU emulation if the system image does not support it\n"
     "  will prevent the proper display of the emulated framebuffer.\n\n"
