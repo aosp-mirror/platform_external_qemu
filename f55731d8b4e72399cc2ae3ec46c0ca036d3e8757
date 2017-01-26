@@ -22,6 +22,29 @@
       "revId": "f55731d8b4e72399cc2ae3ec46c0ca036d3e8757",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f32843c9_7c16570c",
+        "filename": "android/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 755,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-26T21:51:51Z",
+      "side": 1,
+      "message": "it won\u0027t work in \"/dx$ANGLE_DX\"",
+      "range": {
+        "startLine": 755,
+        "startChar": 0,
+        "endLine": 755,
+        "endChar": 40
+      },
+      "revId": "f55731d8b4e72399cc2ae3ec46c0ca036d3e8757",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
