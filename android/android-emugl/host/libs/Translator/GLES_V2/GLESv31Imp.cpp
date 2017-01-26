@@ -47,7 +47,6 @@ GL_APICALL void GL_APIENTRY glGetProgramPipelineiv(GLuint pipeline, GLenum pname
         GLint localProgramName =
             ctx->shareGroup()->getLocalName(NamedObjectType::SHADER_OR_PROGRAM, programName);
         *params = localProgramName;
-        fprintf(stderr, "%s: global %d local %d\n", __func__, programName, localProgramName);
         break;
     }
     default:
@@ -97,8 +96,6 @@ extern "C" GL_APICALL GLuint GL_APIENTRY glCreateShaderProgramv(GLenum type, GLs
     ctx->dispatcher().glGetProgramiv(glCreateShaderProgramvRET, GL_PROGRAM_SEPARABLE, &sep);
     ctx->dispatcher().glGetProgramiv(glCreateShaderProgramvRET, GL_LINK_STATUS, &linkstatus);
 
-    fprintf(stderr, "%s sep 0x%x linkstatus 0x%x\n", __func__, sep, linkstatus);
-
     const GLuint localProgramName =
         ctx->shareGroup()->genName(ShaderProgramType::PROGRAM, 0, true, glCreateShaderProgramvRET);
 
@@ -107,7 +104,6 @@ extern "C" GL_APICALL GLuint GL_APIENTRY glCreateShaderProgramv(GLenum type, GLs
 
     ctx->shareGroup()->setObjectData(NamedObjectType::SHADER_OR_PROGRAM, localProgramName, ObjectDataPtr(progdata));
 
-    fprintf(stderr, "%s: %u sep=%d localname %u\n", __func__, glCreateShaderProgramvRET,sep,localProgramName);
     return localProgramName;
 }
 
