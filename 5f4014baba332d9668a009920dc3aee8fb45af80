@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "acb24006_43251cf0",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-26T02:08:28Z",
+      "side": 1,
+      "message": "it could be sightly more efficient to have this block of code out of this function, so it\u0027s done only once",
+      "range": {
+        "startLine": 288,
+        "startChar": 0,
+        "endLine": 296,
+        "endChar": 96
+      },
+      "revId": "5f4014baba332d9668a009920dc3aee8fb45af80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1d63450f_e456b1e8",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
         "patchSetId": 3
