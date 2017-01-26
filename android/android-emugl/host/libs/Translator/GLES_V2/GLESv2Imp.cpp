@@ -322,15 +322,12 @@ static void sSetSRGBEnable(GLESv2Context* ctx, GLuint framebuffer, GLenum target
 static bool sShouldEnableDepthClamp(GLESv2Context* ctx, GLuint fbo) {
     auto fbObj = ctx->shareGroup()->getObjectData(
             NamedObjectType::FRAMEBUFFER, fbo);
-    if (fbObj == NULL) { return false; }
+    if (fbObj == nullptr) { return false; }
 
     FramebufferData *fbData = (FramebufferData *)fbObj;
-    GLenum target;
-    std::vector<GLenum> attachmentsToTest;
-    attachmentsToTest.push_back(GL_DEPTH_ATTACHMENT);
-    attachmentsToTest.push_back(GL_DEPTH_STENCIL_ATTACHMENT);
-    for (auto it : attachmentsToTest) {
-        GLuint name = fbData->getAttachment(it, &target, NULL);
+    for (auto type : {GL_DEPTH_ATTACHMENT, GL_DEPTH_STENCIL_ATTACHMENT}) {
+        GLenum target;
+        GLuint name = fbData->getAttachment(type, &target, nullptr);
         if (target == GL_TEXTURE_2D ||
             target == GL_TEXTURE_CUBE_MAP ||
             target == GL_TEXTURE_CUBE_MAP_POSITIVE_X ||
