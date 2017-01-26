@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "16c1b6be_683a2942",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-26T02:22:40Z",
+      "side": 1,
+      "message": "Done. BTW looks a expression with just { } fed to it makes it unable to resolve template arguments",
+      "range": {
+        "startLine": 285,
+        "startChar": 29,
+        "endLine": 285,
+        "endChar": 49
+      },
+      "revId": "5f4014baba332d9668a009920dc3aee8fb45af80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "acb24006_43251cf0",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
         "patchSetId": 3
@@ -48,6 +71,29 @@
     },
     {
       "key": {
+        "uuid": "6d7170a8_83381711",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-26T02:22:40Z",
+      "side": 1,
+      "message": "Done",
+      "range": {
+        "startLine": 288,
+        "startChar": 0,
+        "endLine": 296,
+        "endChar": 96
+      },
+      "revId": "5f4014baba332d9668a009920dc3aee8fb45af80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1d63450f_e456b1e8",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
         "patchSetId": 3
@@ -59,6 +105,29 @@
       "writtenOn": "2017-01-26T02:05:19Z",
       "side": 1,
       "message": "std::vector\u003cGLenum\u003e colorAttachments(ctx-\u003egetCaps()-\u003emaxDrawBuffers);\nstd::iota(colorAttachments.begin(), colorAttachments.end(), GL_COLOR_ATTACHMENT0);",
+      "range": {
+        "startLine": 344,
+        "startChar": 0,
+        "endLine": 347,
+        "endChar": 5
+      },
+      "revId": "5f4014baba332d9668a009920dc3aee8fb45af80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "03e3b744_ed51f18a",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-26T02:22:40Z",
+      "side": 1,
+      "message": ":D",
       "range": {
         "startLine": 344,
         "startChar": 0,
