@@ -88,6 +88,12 @@ public:
         // return nullptr on error.
         virtual AndroidPipe* create(void* hwPipe, const char* args) = 0;
 
+        // Called once per whole vm save/load operation.
+        virtual void preLoad(android::base::Stream* stream) {}
+        virtual void postLoad(android::base::Stream* stream) {}
+        virtual void preSave(android::base::Stream* stream) {}
+        virtual void postSave(android::base::Stream* stream) {}
+
         // Returns true if loading pipe instances from a stream is
         // supported. If true, the load() method will be called to load
         // every pipe instance state from the stream, if false, the

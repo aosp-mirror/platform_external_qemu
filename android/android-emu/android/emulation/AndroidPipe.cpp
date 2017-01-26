@@ -507,6 +507,34 @@ void android_pipe_guest_close(void* internalPipe) {
     }
 }
 
+void android_pipe_guest_pre_load(CStream* stream) {
+    CHECK_VM_STATE_LOCK();
+    for (const auto& service : android::sGlobals->services) {
+        service->preLoad(asBaseStream(stream));
+    }
+}
+
+void android_pipe_guest_post_load(CStream* stream) {
+    CHECK_VM_STATE_LOCK();
+    for (const auto& service : android::sGlobals->services) {
+        service->postLoad(asBaseStream(stream));
+    }
+}
+
+void android_pipe_guest_pre_save(CStream* stream) {
+    CHECK_VM_STATE_LOCK();
+    for (const auto& service : android::sGlobals->services) {
+        service->preSave(asBaseStream(stream));
+    }
+}
+
+void android_pipe_guest_post_save(CStream* stream) {
+    CHECK_VM_STATE_LOCK();
+    for (const auto& service : android::sGlobals->services) {
+        service->postSave(asBaseStream(stream));
+    }
+}
+
 void android_pipe_guest_save(void* internalPipe, CStream* stream) {
     CHECK_VM_STATE_LOCK();
     auto pipe = static_cast<android::AndroidPipe*>(internalPipe);
