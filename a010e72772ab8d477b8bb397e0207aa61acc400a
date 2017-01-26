@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c8618d70_bc3fd211",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-26T00:05:17Z",
+      "side": 1,
+      "message": "nit: format the CL please",
+      "range": {
+        "startLine": 237,
+        "startChar": 60,
+        "endLine": 237,
+        "endChar": 95
+      },
+      "revId": "a010e72772ab8d477b8bb397e0207aa61acc400a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b98992f_d3b4ff3e",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-26T00:05:17Z",
+      "side": 1,
+      "message": "nit: res +\u003d -\u003e std::string res \u003d \n?",
+      "range": {
+        "startLine": 247,
+        "startChar": 4,
+        "endLine": 247,
+        "endChar": 11
+      },
+      "revId": "a010e72772ab8d477b8bb397e0207aa61acc400a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "650662a8_4aa7dd03",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-26T00:05:17Z",
+      "side": 1,
+      "message": "could you please add a short comment explaining the patterns and how the string usually looks like? E.g. why \"ES-CM\" disables everything?",
+      "range": {
+        "startLine": 240,
+        "startChar": 2,
+        "endLine": 249,
+        "endChar": 30
+      },
+      "revId": "a010e72772ab8d477b8bb397e0207aa61acc400a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
