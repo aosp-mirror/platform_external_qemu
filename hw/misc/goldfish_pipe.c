@@ -173,15 +173,25 @@ static GoldfishHostPipe *null_guest_load(QEMUFile *file,
     return NULL;
 }
 
-static const GoldfishPipeServiceOps  s_null_service_ops = {
+static void null_guest_pre_post_save_load(QEMUFile *file) {
+    E("Trying to save/load a pipe before service registration!\n"
+      "Please call goldfish_pipe_set_service_ops() at setup time!");
+    (void)file;
+}
+
+static const GoldfishPipeServiceOps s_null_service_ops = {
     .guest_open = null_guest_open,
     .guest_load = null_guest_load,
+    .guest_pre_load = null_guest_pre_post_save_load,
+    .guest_post_load = null_guest_pre_post_save_load,
+    .guest_pre_save = null_guest_pre_post_save_load,
+    .guest_post_save = null_guest_pre_post_save_load,
 };
 
 static const GoldfishPipeServiceOps* service_ops = &s_null_service_ops;
 
 void goldfish_pipe_set_service_ops(const GoldfishPipeServiceOps* ops) {
-    service_ops = ops;
+    service_ops = ops ? ops : &s_null_service_ops;
 }
 
 /* from AOSP version include/hw/android/goldfish/device.h
@@ -1192,7 +1202,9 @@ enum {
 static void goldfish_pipe_save(QEMUFile* f, void* opaque) {
     GoldfishPipeState* s = opaque;
     PipeDevice* dev = s->dev;
+    service_ops->guest_pre_save(f);
     dev->ops->save(f, dev);
+    service_ops->guest_post_save(f);
 }
 
 static void goldfish_pipe_save_v1(QEMUFile* file, PipeDevice* dev) {
@@ -1530,7 +1542,9 @@ done:
 static int goldfish_pipe_load(QEMUFile* f, void* opaque, int version_id) {
     GoldfishPipeState* s = opaque;
     PipeDevice* dev = s->dev;
+    service_ops->guest_pre_load(f);
     int res = goldfish_pipe_load_v2(f, dev);
+    service_ops->guest_post_load(f);
     return res;
 }
 
