@@ -45,6 +45,29 @@
       "revId": "f55731d8b4e72399cc2ae3ec46c0ca036d3e8757",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f13dd31a_088f153f",
+        "filename": "android/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 755,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-01-26T21:54:41Z",
+      "side": 1,
+      "message": "Ah, I see now. Never mind!",
+      "range": {
+        "startLine": 755,
+        "startChar": 0,
+        "endLine": 755,
+        "endChar": 40
+      },
+      "revId": "f55731d8b4e72399cc2ae3ec46c0ca036d3e8757",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
