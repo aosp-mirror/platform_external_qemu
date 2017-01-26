@@ -688,7 +688,6 @@ GL_APICALL void GL_APIENTRY glProgramParameteri(GLuint program, GLenum pname, GL
     GET_CTX_V2();
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
-        fprintf(stderr, "%s: %u %u %u\n", __func__, program, pname, value);
         ctx->dispatcher().glProgramParameteri(globalProgramName, pname, value);
     }
 }
