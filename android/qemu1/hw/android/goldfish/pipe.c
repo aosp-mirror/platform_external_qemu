@@ -566,6 +566,8 @@ goldfish_pipe_save( QEMUFile* file, void* opaque )
     PipeDevice* dev = opaque;
 
     Stream* stream = stream_from_qemufile(file);
+    
+    android_pipe_guest_pre_save(stream);
 
     stream_put_be64(stream, dev->address);
     stream_put_be32(stream, dev->size);
@@ -586,6 +588,8 @@ goldfish_pipe_save( QEMUFile* file, void* opaque )
     for (pipe = dev->pipes; pipe; pipe = pipe->next) {
         hwpipe_save(pipe, stream);
     }
+
+    android_pipe_guest_post_save(stream);
     stream_free(stream);
 }
 
@@ -603,6 +607,8 @@ goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
     }
 
     Stream* stream = stream_from_qemufile(file);
+
+    android_pipe_guest_pre_load(stream);
 
     dev->address = stream_get_be64(stream);
     dev->size    = stream_get_be32(stream);
@@ -637,6 +643,8 @@ goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
         }
     }
 
+    android_pipe_guest_post_load(stream);
+    
     stream_free(stream);
     return 0;
 }
