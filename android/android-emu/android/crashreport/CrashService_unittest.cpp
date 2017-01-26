@@ -107,7 +107,7 @@ TEST(CrashService, startAttachWaitCrash) {
 
     int pid = CrashSystem::spawnService(cmdline);
     EXPECT_GT(pid, 0);
-    int64_t waitduration = crash->waitForDumpFile(pid, 10000);
+    int64_t waitduration = crash->waitForDumpFile(pid, 20000);
     EXPECT_NE(waitduration, -1);
     EXPECT_TRUE(CrashSystem::isDump(crash->getDumpFile()));
     crash->processCrash();
