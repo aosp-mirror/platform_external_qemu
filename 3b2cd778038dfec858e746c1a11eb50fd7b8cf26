@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8fc34b54_775ef9e9",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-26T01:59:50Z",
+      "side": 1,
+      "message": "nit: why this \u0027s\u0027 prefix?",
+      "range": {
+        "startLine": 264,
+        "startChar": 12,
+        "endLine": 264,
+        "endChar": 13
+      },
+      "revId": "3b2cd778038dfec858e746c1a11eb50fd7b8cf26",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ef85a6ec_51eb058c",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-26T01:59:50Z",
+      "side": 1,
+      "message": "nit: unreached",
+      "range": {
+        "startLine": 281,
+        "startChar": 0,
+        "endLine": 281,
+        "endChar": 17
+      },
+      "revId": "3b2cd778038dfec858e746c1a11eb50fd7b8cf26",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba9c3507_4dff0a68",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-26T01:59:50Z",
+      "side": 1,
+      "message": "please use std::initializer_list\u003c\u003e instead, and pass it by value",
+      "range": {
+        "startLine": 285,
+        "startChar": 30,
+        "endLine": 285,
+        "endChar": 49
+      },
+      "revId": "3b2cd778038dfec858e746c1a11eb50fd7b8cf26",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3469e6ce_a00a9ee0",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-26T01:59:50Z",
+      "side": 1,
+      "message": "nit: nullptr",
+      "range": {
+        "startLine": 297,
+        "startChar": 21,
+        "endLine": 297,
+        "endChar": 25
+      },
+      "revId": "3b2cd778038dfec858e746c1a11eb50fd7b8cf26",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64248f27_393c3fc6",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-26T01:59:50Z",
+      "side": 1,
+      "message": "you can break from the whole loop here (or just call glEnable() and return) and in the following foreach()",
+      "range": {
+        "startLine": 310,
+        "startChar": 28,
+        "endLine": 310,
+        "endChar": 48
+      },
+      "revId": "3b2cd778038dfec858e746c1a11eb50fd7b8cf26",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd925765_6cf27a5c",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-26T01:59:50Z",
+      "side": 1,
+      "message": "IMO this if should be first as it\u0027s a faster one",
+      "range": {
+        "startLine": 313,
+        "startChar": 19,
+        "endLine": 313,
+        "endChar": 50
+      },
+      "revId": "3b2cd778038dfec858e746c1a11eb50fd7b8cf26",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
