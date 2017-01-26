@@ -443,7 +443,7 @@ void AndroidPipe::saveToStream(BaseStream* stream) {
         stream->putString(mService->name());
     }
     writeOptionalString(stream, mArgs.c_str());
-
+    
     // Save pipe-specific state now.
     onSave(stream);
 }
@@ -504,6 +504,34 @@ void android_pipe_guest_close(void* internalPipe) {
     if (pipe) {
         D("%s: host=%p [%s]", __FUNCTION__, pipe, pipe->name());
         pipe->onGuestClose();
+    }
+}
+
+void android_pipe_guest_pre_load(CStream* stream) {
+    CHECK_VM_STATE_LOCK();
+    for (const auto& service : android::sGlobals->services) {
+        service->preLoad(asBaseStream(stream));
+    }
+}
+
+void android_pipe_guest_post_load(CStream* stream) {
+    CHECK_VM_STATE_LOCK();
+    for (const auto& service : android::sGlobals->services) {
+        service->postLoad(asBaseStream(stream));
+    }
+}
+
+void android_pipe_guest_pre_save(CStream* stream) {
+    CHECK_VM_STATE_LOCK();
+    for (const auto& service : android::sGlobals->services) {
+        service->preSave(asBaseStream(stream));
+    }
+}
+
+void android_pipe_guest_post_save(CStream* stream) {
+    CHECK_VM_STATE_LOCK();
+    for (const auto& service : android::sGlobals->services) {
+        service->postSave(asBaseStream(stream));
     }
 }
 

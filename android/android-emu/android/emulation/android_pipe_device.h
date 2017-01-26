@@ -116,6 +116,12 @@ extern void* android_pipe_guest_open(void* hwpipe);
 // instead.
 extern void android_pipe_guest_close(void* internal_pipe);
 
+// Hooks for a start/end of save/load operations, called once per each snapshot.
+extern void android_pipe_guest_pre_load(Stream* file);
+extern void android_pipe_guest_post_load(Stream* file);
+extern void android_pipe_guest_pre_save(Stream* file);
+extern void android_pipe_guest_post_save(Stream* file);
+
 // Save the state of an Android pipe to a stream. |internal_pipe| is the pipe
 // instance from android_pipe_guest_open() or android_pipe_guest_load(), and
 // |file| is the
