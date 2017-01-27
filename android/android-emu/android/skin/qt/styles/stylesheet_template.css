@@ -21,6 +21,9 @@
 *[ColorGroup="Title"] {
     color: %%TITLE_COLOR%%;
 }
+*[ColorGroup="Instruction"] {
+    color: %%INSTRUCTION_COLOR%%;
+}
 *::disabled[ColorGroup="Button"] { color: %%DISABLED_BUTTON_COLOR%%; background: %%BUTTON_BKG_COLOR%% }
 *[ColorGroup="Button"] { color: %%BUTTON_COLOR%%; background: %%BUTTON_BKG_COLOR%% }
 
