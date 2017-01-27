@@ -282,7 +282,7 @@ static bool sIsFboTextureTarget(GLenum target) {
 }
 
 template <class T>
-static void sEmulateFbo(const GLESv2Context* ctx,
+static bool sEmulateFbo(const GLESv2Context* ctx,
                         FramebufferData* fbData,
                         const T& triggerAttachments,
                         const std::initializer_list<GLenum> triggerFormats,
@@ -298,7 +298,7 @@ static void sEmulateFbo(const GLESv2Context* ctx,
                 for (auto triggerFormat : triggerFormats) {
                     if (rb_internalformat == triggerFormat) {
                         ctx->dispatcher().glEnable(desktopGLFeature);
-                        return;
+                        return true;
                     }
                 }
             }
@@ -308,7 +308,7 @@ static void sEmulateFbo(const GLESv2Context* ctx,
                 for (auto triggerFormat : triggerFormats) {
                     if (tex_internalformat == triggerFormat) {
                         ctx->dispatcher().glEnable(desktopGLFeature);
-                        return;
+                        return true;
                     }
                 }
             }
@@ -317,6 +317,7 @@ static void sEmulateFbo(const GLESv2Context* ctx,
 
     // Disable the feature if we reached this point.
     ctx->dispatcher().glDisable(desktopGLFeature);
+    return false;
 }
 
 // Framebuffer format workarounds:
@@ -335,6 +336,9 @@ static void sUpdateFboEmulation(GLESv2Context* ctx) {
     GLuint read_fbo = ctx->getFramebufferBinding(GL_READ_FRAMEBUFFER);
     GLuint draw_fbo = ctx->getFramebufferBinding(GL_DRAW_FRAMEBUFFER);
 
+    bool checkSRGB = true;
+    bool checkDepth32f = true;
+
     for (auto fbObj : {ctx->shareGroup()->getObjectData(NamedObjectType::FRAMEBUFFER, read_fbo),
                        ctx->shareGroup()->getObjectData(NamedObjectType::FRAMEBUFFER, draw_fbo)}) {
 
@@ -342,15 +346,20 @@ static void sUpdateFboEmulation(GLESv2Context* ctx) {
 
         FramebufferData *fbData = (FramebufferData *)fbObj;
 
-        // Enable GL_FRAMEBUFFER_SRGB when framebuffer has SRGB color attachment.
-        sEmulateFbo(ctx, fbData, colorAttachments,
-                    {GL_SRGB8_ALPHA8}, GL_FRAMEBUFFER_SRGB);
+        // Enable GL_FRAMEBUFFER_SRGB when any framebuffer has SRGB color attachment.
+        if (checkSRGB) {
+            checkSRGB = !sEmulateFbo(ctx, fbData, colorAttachments,
+                                     {GL_SRGB8_ALPHA8}, GL_FRAMEBUFFER_SRGB);
+        }
 
-        // Enable GL_DEPTH_CLAMP when:
-        // - GL_DEPTH_ATTACHMENT or GL_DEPTH_STENCIL_ATTACHMENT is of internal format
-        //   GL_DEPTH_COMPONENT32F or GL_DEPTH32F_STENCIL8.
-        sEmulateFbo(ctx, fbData, depthAttachments,
-                    {GL_DEPTH_COMPONENT32F, GL_DEPTH32F_STENCIL8}, GL_DEPTH_CLAMP);
+        // Enable GL_DEPTH_CLAMP when any fbo's
+        // GL_DEPTH_ATTACHMENT or GL_DEPTH_STENCIL_ATTACHMENT is of internal format
+        // GL_DEPTH_COMPONENT32F or GL_DEPTH32F_STENCIL8.
+        if (checkDepth32f) {
+            checkDepth32f =
+                !sEmulateFbo(ctx, fbData, depthAttachments,
+                             {GL_DEPTH_COMPONENT32F, GL_DEPTH32F_STENCIL8}, GL_DEPTH_CLAMP);
+        }
     }
 
 }
