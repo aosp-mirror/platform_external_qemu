@@ -897,6 +897,9 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     if (strstr(cstring,"GL_ARB_texture_non_power_of_two")!=NULL)
         s_glSupport.GL_OES_TEXTURE_NPOT = true;
 
+    if (strstr(cstring,"GL_ARB_color_buffer_float")!=NULL)
+        s_glSupport.GL_EXT_color_buffer_float = true;
+
     if (!(Version((const char*)glVersion) < Version("3.0")) || strstr(cstring,"GL_OES_rgb8_rgba8")!=NULL)
         s_glSupport.GL_OES_RGB8_RGBA8 = true;
 
