@@ -260,6 +260,7 @@ void ExtendedWindow::switchToTheme(SettingsTheme theme) {
     // and to the main tool-bar.
     this->setStyleSheet(styleString);
     mToolWindow->setStyleSheet(styleString);
+    mExtendedUi->rotaryInputPage->updateTheme();
 
     // Force a re-draw to make the new style take effect
     this->style()->unpolish(mExtendedUi->stackedWidget);

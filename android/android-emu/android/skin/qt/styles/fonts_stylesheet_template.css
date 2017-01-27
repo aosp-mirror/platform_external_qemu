@@ -23,6 +23,10 @@ QComboBox, QLineEdit, QPlainTextEdit, QPushButton, QRadioButton, QAbstractSpinBo
     font-weight: bold;
     font-size: %%FONT_MEDIUM%%;
 }
+*[ColorGroup="Instruction"] {
+    font-weight: regular;
+    font-size: %%FONT_LARGE%%;
+}
 * {
     font-size: %%FONT_MEDIUM%%;
 }
