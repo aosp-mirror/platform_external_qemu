@@ -448,7 +448,9 @@ void eac_decode_single_channel_block(const etc1_byte* pIn,
     int tblIdx = pIn[1] & 15;
     const int* table = kAlphaModifierTable + tblIdx * 8;
     const etc1_byte* p = pIn + 2;
-    // position (within a byte) of the least significant bit of the next index
+    // position in a byte of the next 3-bit index:
+    // | a a a | b b b | c c c | d d d ...
+    // | byte               | byte...
     int bitOffset = 5;
     for (int i = 0; i < 16; i ++) {
         // flip x, y in output
@@ -457,13 +459,17 @@ void eac_decode_single_channel_block(const etc1_byte* pIn,
 
         int modifier = 0;
         if (bitOffset < 0) { // (Part of) the index is in the next byte.
-            modifier += p[0] << (-bitOffset);
+            modifier += ((int*)p)[0] << (-bitOffset);
             p ++;
             bitOffset += 8;
         }
         modifier += p[0] >> bitOffset;
         modifier &= 7;
         bitOffset -= 3; // move to the next index
+        if (bitOffset == -3) {
+            bitOffset = 5;
+            p++;
+        }
         int modifierValue = table[modifier];
         int decoded = base_codeword + modifierValue * multiplier;
         if (decodedElementBytes == 1) {
@@ -950,8 +956,7 @@ int etc2_decode_image(const etc1_byte* pIn, ETC2ImageFormat format,
                                 memcpy(p, q, 3);
                                 p += 3;
                                 q += 3;
-                                // copy alpha
-                                *p++ += *qa++;
+                                *p++ = *qa++;
                             }
                         }
                         break;
