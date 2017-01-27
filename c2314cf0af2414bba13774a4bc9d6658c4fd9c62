@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "50ae481c_3d866b30",
+        "filename": "android-qemu2-glue/audio-capturer.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T22:09:27Z",
+      "side": 1,
+      "message": "well, it\u0027s not a singleton in its current implementation: one can create as many instances as they need.",
+      "range": {
+        "startLine": 21,
+        "startChar": 33,
+        "endLine": 21,
+        "endChar": 42
+      },
+      "revId": "c2314cf0af2414bba13774a4bc9d6658c4fd9c62",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b04ad0d6_c50700fa",
+        "filename": "android-qemu2-glue/audio-capturer.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T22:09:27Z",
+      "side": 1,
+      "message": "nit: please wrap at 80 chars",
+      "range": {
+        "startLine": 26,
+        "startChar": 68,
+        "endLine": 26,
+        "endChar": 108
+      },
+      "revId": "c2314cf0af2414bba13774a4bc9d6658c4fd9c62",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6204cfee_2678d8f1",
+        "filename": "android/android-emu/android/emulation/AudioCapture.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T22:09:27Z",
+      "side": 1,
+      "message": "please update to use the interface name",
+      "range": {
+        "startLine": 28,
+        "startChar": 14,
+        "endLine": 28,
+        "endChar": 36
+      },
+      "revId": "c2314cf0af2414bba13774a4bc9d6658c4fd9c62",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e8a12456_d89c79e2",
+        "filename": "android/android-emu/android/emulation/AudioCaptureEngine.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T22:09:27Z",
+      "side": 1,
+      "message": "also mention here that set() has to be called at the point where no races are possible",
+      "range": {
+        "startLine": 31,
+        "startChar": 1,
+        "endLine": 32,
+        "endChar": 52
+      },
+      "revId": "c2314cf0af2414bba13774a4bc9d6658c4fd9c62",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d779e1e_812bb7f8",
+        "filename": "android/android-emu/android/emulation/AudioCaptureEngine.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T22:09:27Z",
+      "side": 1,
+      "message": "nit: You -\u003e Your",
+      "range": {
+        "startLine": 34,
+        "startChar": 40,
+        "endLine": 34,
+        "endChar": 43
+      },
+      "revId": "c2314cf0af2414bba13774a4bc9d6658c4fd9c62",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
