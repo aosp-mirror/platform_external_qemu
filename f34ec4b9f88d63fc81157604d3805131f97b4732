@@ -1,0 +1,343 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "697e0476_b7db90a6",
+        "filename": "android-qemu2-glue/audio-capturer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T19:43:57Z",
+      "side": 1,
+      "message": "nit: please sort the includes",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 49
+      },
+      "revId": "f34ec4b9f88d63fc81157604d3805131f97b4732",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a83d441_623a802b",
+        "filename": "android-qemu2-glue/audio-capturer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T19:43:57Z",
+      "side": 1,
+      "message": "please don\u0027t do \"using namespace\" in headers.\nIt\u0027s preferable to not use it at all, as it may bring some unexpected new name later and that would replace the function you called previously. But in a header this would spread out into different places and do strange thing there",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 35
+      },
+      "revId": "f34ec4b9f88d63fc81157604d3805131f97b4732",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4181080_43edb668",
+        "filename": "android-qemu2-glue/audio-capturer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T19:43:57Z",
+      "side": 1,
+      "message": "this won\u0027t help: header with classes can\u0027t be used in .c files, and ANDROID_XXX_HEADER is just for that",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 20
+      },
+      "revId": "f34ec4b9f88d63fc81157604d3805131f97b4732",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9f2c4346_a659cbb6",
+        "filename": "android-qemu2-glue/audio-capturer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T19:43:57Z",
+      "side": 1,
+      "message": "please add namespace android::qemu",
+      "revId": "f34ec4b9f88d63fc81157604d3805131f97b4732",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "beac1a5a_5358a193",
+        "filename": "android-qemu2-glue/audio-capturer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T19:43:57Z",
+      "side": 1,
+      "message": "nit: typo, sign -\u003e sing",
+      "range": {
+        "startLine": 22,
+        "startChar": 39,
+        "endLine": 22,
+        "endChar": 48
+      },
+      "revId": "f34ec4b9f88d63fc81157604d3805131f97b4732",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9233069_ce16e7a2",
+        "filename": "android-qemu2-glue/audio-capturer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T19:43:57Z",
+      "side": 1,
+      "message": "nit: \u003d default instead of {}",
+      "range": {
+        "startLine": 25,
+        "startChar": 30,
+        "endLine": 25,
+        "endChar": 32
+      },
+      "revId": "f34ec4b9f88d63fc81157604d3805131f97b4732",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9cec82f8_751b4709",
+        "filename": "android-qemu2-glue/audio-capturer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T19:43:57Z",
+      "side": 1,
+      "message": "nit: extra space",
+      "range": {
+        "startLine": 25,
+        "startChar": 4,
+        "endLine": 25,
+        "endChar": 5
+      },
+      "revId": "f34ec4b9f88d63fc81157604d3805131f97b4732",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "973af0e0_1760b921",
+        "filename": "android-qemu2-glue/audio-capturer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T19:43:57Z",
+      "side": 1,
+      "message": "add \"override\" to make sure you\u0027re actually overriding it",
+      "range": {
+        "startLine": 28,
+        "startChar": 47,
+        "endLine": 28,
+        "endChar": 48
+      },
+      "revId": "f34ec4b9f88d63fc81157604d3805131f97b4732",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fc8bbac7_34c19ff8",
+        "filename": "android/android-emu/android/emulation/AudioCapture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T19:43:57Z",
+      "side": 1,
+      "message": "Could you please add a small comment about the purpose of this class and how it\u0027s supposed to be used",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 21
+      },
+      "revId": "f34ec4b9f88d63fc81157604d3805131f97b4732",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3eef9a2d_8e5b4065",
+        "filename": "android/android-emu/android/emulation/AudioCapture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T19:43:57Z",
+      "side": 1,
+      "message": "nit: no need to make it explicit if there\u0027s more than one argument (well, it may help in C++14, but not required)",
+      "range": {
+        "startLine": 24,
+        "startChar": 4,
+        "endLine": 24,
+        "endChar": 12
+      },
+      "revId": "f34ec4b9f88d63fc81157604d3805131f97b4732",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b8821793_7cb59ad9",
+        "filename": "android/android-emu/android/emulation/AudioCapture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T19:43:57Z",
+      "side": 1,
+      "message": "nit: \u003d default",
+      "range": {
+        "startLine": 31,
+        "startChar": 29,
+        "endLine": 31,
+        "endChar": 31
+      },
+      "revId": "f34ec4b9f88d63fc81157604d3805131f97b4732",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8263cc47_101909a8",
+        "filename": "android/android-emu/android/emulation/AudioCaptureEngine.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T19:43:57Z",
+      "side": 1,
+      "message": "typo",
+      "range": {
+        "startLine": 24,
+        "startChar": 34,
+        "endLine": 24,
+        "endChar": 43
+      },
+      "revId": "f34ec4b9f88d63fc81157604d3805131f97b4732",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5bc9ad95_16bd0129",
+        "filename": "android/android-emu/android/emulation/AudioCaptureEngine.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T19:43:57Z",
+      "side": 1,
+      "message": "this comment doesn\u0027t really explain anything, it just mimics the class name. What about adding a small example of how to use it?\nAlso, these classes often assume some specific thread safety rules and what thread they\u0027re called on (device CPU thread, main qemu loop, UI thread etc.). All this information is very helpful later",
+      "range": {
+        "startLine": 24,
+        "startChar": 3,
+        "endLine": 24,
+        "endChar": 32
+      },
+      "revId": "f34ec4b9f88d63fc81157604d3805131f97b4732",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5f13aec6_7fa5c4e4",
+        "filename": "android/android-emu/android/emulation/AudioCaptureEngine.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T19:43:57Z",
+      "side": 1,
+      "message": "what about an assert here to make sure it\u0027s set when get() is called? Or it\u0027s ok for it to be null?",
+      "range": {
+        "startLine": 43,
+        "startChar": 16,
+        "endLine": 43,
+        "endChar": 25
+      },
+      "revId": "f34ec4b9f88d63fc81157604d3805131f97b4732",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f033223b_5f9961c3",
+        "filename": "android/android-emu/android/emulation/AudioCaptureEngine.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T19:43:57Z",
+      "side": 1,
+      "message": "where is this static variable defined?",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 41
+      },
+      "revId": "f34ec4b9f88d63fc81157604d3805131f97b4732",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
