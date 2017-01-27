@@ -282,12 +282,12 @@ static bool sIsFboTextureTarget(GLenum target) {
 }
 
 template <class T>
-static void sEmulateFbo(const GLESv2Context* ctx,
-                        FramebufferData* fbData,
-                        const T& triggerAttachments,
-                        const std::initializer_list<GLenum> triggerFormats,
-                        GLenum desktopGLFeature) {
-    for (auto attachment : triggerAttachments) {
+static bool sHasAttachmentWithFormat(const GLESv2Context* ctx,
+                                     FramebufferData* fbData,
+                                     const T& attachments,
+                                     const std::initializer_list<GLenum> formats) {
+
+    for (auto attachment : attachments) {
         GLenum target;
         GLuint name = fbData->getAttachment(attachment, &target, NULL);
         if (target == GL_RENDERBUFFER) {
@@ -295,28 +295,33 @@ static void sEmulateFbo(const GLESv2Context* ctx,
                     NamedObjectType::RENDERBUFFER, name);
             if (auto rbData = (RenderbufferData*)objData) {
                 GLenum rb_internalformat = rbData->internalformat;
-                for (auto triggerFormat : triggerFormats) {
+                for (auto triggerFormat : formats) {
                     if (rb_internalformat == triggerFormat) {
-                        ctx->dispatcher().glEnable(desktopGLFeature);
-                        return;
+                        return true;
                     }
                 }
             }
         } else if (sIsFboTextureTarget(target)) {
             if (TextureData* tex = getTextureData(name)) {
                 GLenum tex_internalformat = tex->internalFormat;
-                for (auto triggerFormat : triggerFormats) {
+                for (auto triggerFormat : formats) {
                     if (tex_internalformat == triggerFormat) {
-                        ctx->dispatcher().glEnable(desktopGLFeature);
-                        return;
+                        return true;
                     }
                 }
             }
         }
     }
 
-    // Disable the feature if we reached this point.
-    ctx->dispatcher().glDisable(desktopGLFeature);
+    return false;
+}
+
+
+static void sSetDesktopGLEnable(const GLESv2Context* ctx, bool enable, GLenum cap) {
+    if (enable)
+        ctx->dispatcher().glEnable(cap);
+    else
+        ctx->dispatcher().glDisable(cap);
 }
 
 // Framebuffer format workarounds:
@@ -335,6 +340,9 @@ static void sUpdateFboEmulation(GLESv2Context* ctx) {
     GLuint read_fbo = ctx->getFramebufferBinding(GL_READ_FRAMEBUFFER);
     GLuint draw_fbo = ctx->getFramebufferBinding(GL_DRAW_FRAMEBUFFER);
 
+    bool enableSRGB = false;
+    bool enableDepth32fClamp = false;
+
     for (auto fbObj : {ctx->shareGroup()->getObjectData(NamedObjectType::FRAMEBUFFER, read_fbo),
                        ctx->shareGroup()->getObjectData(NamedObjectType::FRAMEBUFFER, draw_fbo)}) {
 
@@ -342,17 +350,21 @@ static void sUpdateFboEmulation(GLESv2Context* ctx) {
 
         FramebufferData *fbData = (FramebufferData *)fbObj;
 
-        // Enable GL_FRAMEBUFFER_SRGB when framebuffer has SRGB color attachment.
-        sEmulateFbo(ctx, fbData, colorAttachments,
-                    {GL_SRGB8_ALPHA8}, GL_FRAMEBUFFER_SRGB);
+        // Enable GL_FRAMEBUFFER_SRGB when any framebuffer has SRGB color attachment.
+        if (sHasAttachmentWithFormat(ctx, fbData,
+                    colorAttachments, {GL_SRGB8_ALPHA8}))
+            enableSRGB = true;
 
-        // Enable GL_DEPTH_CLAMP when:
-        // - GL_DEPTH_ATTACHMENT or GL_DEPTH_STENCIL_ATTACHMENT is of internal format
-        //   GL_DEPTH_COMPONENT32F or GL_DEPTH32F_STENCIL8.
-        sEmulateFbo(ctx, fbData, depthAttachments,
-                    {GL_DEPTH_COMPONENT32F, GL_DEPTH32F_STENCIL8}, GL_DEPTH_CLAMP);
+        // Enable GL_DEPTH_CLAMP when any fbo's
+        // GL_DEPTH_ATTACHMENT or GL_DEPTH_STENCIL_ATTACHMENT is of internal format
+        // GL_DEPTH_COMPONENT32F or GL_DEPTH32F_STENCIL8.
+        if (sHasAttachmentWithFormat(ctx, fbData,
+                    depthAttachments, {GL_DEPTH_COMPONENT32F, GL_DEPTH32F_STENCIL8}))
+            enableDepth32fClamp = true;
     }
 
+    sSetDesktopGLEnable(ctx, enableSRGB, GL_FRAMEBUFFER_SRGB);
+    sSetDesktopGLEnable(ctx, enableDepth32fClamp, GL_DEPTH_CLAMP);
 }
 
 GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer){
