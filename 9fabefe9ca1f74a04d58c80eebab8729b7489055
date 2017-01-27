@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "73648e36_dbf4ced0",
+        "filename": "android/android-emu/android/skin/qt/resources.qrc",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T20:11:33Z",
+      "side": 1,
+      "message": "nit: tab",
+      "revId": "9fabefe9ca1f74a04d58c80eebab8729b7489055",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f0a679a8_f2cf022d",
+        "filename": "android/android-emu/android/skin/qt/resources.qrc",
+        "patchSetId": 1
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T20:11:33Z",
+      "side": 1,
+      "message": "tab",
+      "range": {
+        "startLine": 178,
+        "startChar": 0,
+        "endLine": 178,
+        "endChar": 1
+      },
+      "revId": "9fabefe9ca1f74a04d58c80eebab8729b7489055",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
