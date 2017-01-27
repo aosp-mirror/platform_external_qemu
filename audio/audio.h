@@ -139,7 +139,7 @@ uint64_t AUD_get_elapsed_usec_in (SWVoiceIn *sw, QEMUAudioTimeStamp *ts);
 
 static inline void *advance (void *p, int incr)
 {
-    uint8_t *d = p;
+    uint8_t *d = (uint8_t *)p;
     return (d + incr);
 }
 
