@@ -479,7 +479,9 @@ GL_APICALL void  GL_APIENTRY glClear(GLbitfield mask){
     GLbitfield allowed_bits = GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT;
     GLbitfield has_disallowed_bits = (mask & ~allowed_bits);
     SET_ERROR_IF(has_disallowed_bits, GL_INVALID_VALUE);
-    ctx->drawValidate();
+
+    if (ctx->getMajorVersion() < 3)
+        ctx->drawValidate();
 
     ctx->dispatcher().glClear(mask);
 }
@@ -903,7 +905,8 @@ GL_APICALL void  GL_APIENTRY glDisableVertexAttribArray(GLuint index){
 
 
 static void s_glDrawPre(GLESv2Context* ctx, GLenum mode) {
-    ctx->drawValidate();
+    if (ctx->getMajorVersion() < 3)
+        ctx->drawValidate();
 
     if (mode == GL_POINTS) {
         //Enable texture generation for GL_POINTS and gl_PointSize shader variable
