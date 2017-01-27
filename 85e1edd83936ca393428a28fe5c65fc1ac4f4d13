@@ -45,6 +45,29 @@
       "revId": "85e1edd83936ca393428a28fe5c65fc1ac4f4d13",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "32465870_50fa5b5f",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T18:24:03Z",
+      "side": 1,
+      "message": "nit: In general, our coding style requires {} for all block statements, including single-line ones\nAlso, it bans prefixes for anything other than member variables and global variables. I\u0027d prefer us to stick to the guide instead of slowly floating pieces of our code base away.\nOn the other hand, let\u0027s not add any renamings/refactorings in the same CL",
+      "range": {
+        "startLine": 358,
+        "startChar": 0,
+        "endLine": 362,
+        "endChar": 9
+      },
+      "revId": "85e1edd83936ca393428a28fe5c65fc1ac4f4d13",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
