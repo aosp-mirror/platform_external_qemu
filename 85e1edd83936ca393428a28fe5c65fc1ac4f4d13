@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "79fe5e6c_df50c69e",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-01-27T16:39:19Z",
+      "side": 1,
+      "message": "function returns |true| if one needs to enable the feature.\nWhat about having the code like this:\n\nbool enable \u003d false;\nfor () {\n   if (!enable) { enable \u003d check(); }\n}\nenable ? glEnable() : glDisable();\n\nThis way the check() function is a pure predicate that doesn\u0027t change any state, and we\u0027ve an explicit enable/disable in the end.\nAlso, that \u0027not\u0027 operation in \"val \u003d !check()\" is a little bit confusing to me, I didn\u0027t get it right at first glance. I hope this pattern is more readable",
+      "range": {
+        "startLine": 339,
+        "startChar": 0,
+        "endLine": 340,
+        "endChar": 30
+      },
+      "revId": "85e1edd83936ca393428a28fe5c65fc1ac4f4d13",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
