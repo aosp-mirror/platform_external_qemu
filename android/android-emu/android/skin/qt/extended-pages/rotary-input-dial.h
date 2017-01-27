@@ -9,28 +9,26 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#pragma once
+#ifndef ROTARY_INPUT_DIAL_H
+#define ROTARY_INPUT_DIAL_H
 
-#include "ui_rotary-input-page.h"
+#include <QDial>
+#include <QSvgRenderer>
 
-#include <QWidget>
-#include <memory>
-
-class EmulatorQtWindow;
-
-class RotaryInputPage : public QWidget
+// A QDial with a custom rotating SVG instead of the standard styling.
+class RotaryInputDial : public QDial
 {
     Q_OBJECT
 
 public:
-    explicit RotaryInputPage(QWidget *parent = 0);
-    void setEmulatorWindow(EmulatorQtWindow* eW);
-    void updateTheme();
+    RotaryInputDial(QWidget* parent = nullptr);
+    void setImage(const QString& file);
+    // Rotates the image set by setImage by 'angle' degrees clockwise.
+    void setImageAngleOffset(int angle);
+
 private:
-    void onValueChanged(const int value);
-private:
-    int dialDeltaToRotaryInputDelta(int newDialValue, int oldDialValue);
-    std::unique_ptr<Ui::RotaryInputPage> mUi;
-    EmulatorQtWindow* mEmulatorWindow;
-    int mValue;
+    virtual void paintEvent(QPaintEvent*) override;
+    QSvgRenderer mSvgRenderer;
+    int mImageAngleOffset;
 };
+#endif // ROTARY_INPUT_DIAL_H

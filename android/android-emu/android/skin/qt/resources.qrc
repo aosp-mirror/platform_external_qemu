@@ -95,12 +95,15 @@
         <file alias="play_arrow_disabled">images/light/ic_play_arrow_BEE_48dp.svg</file>
         <file alias="radio_off">images/light/ic_radio_button_unchecked_777_24dp.svg</file>
         <file alias="radio_on">images/light/ic_radio_button_checked_0BA_24dp.svg</file>
+        <file alias="recordCircle">images/light/ic_record_circle_F43_24dp.svg</file>
         <file alias="record_screen">images/light/ic_videocam_678_48dp.svg</file>
         <file alias="remove">images/light/ic_remove_0BA_48dp.svg</file>
         <file alias="remove_disabled">images/light/ic_remove_BEE_48dp.svg</file>
         <file alias="rotary_input">images/light/ic_rotary_input.svg</file>
+        <file alias="rotary_input_control">images/light/rotary_input_control.svg</file>
         <file alias="send">images/light/ic_send_777_48dp.svg</file>
         <file alias="settings">images/light/ic_settings_678_48dp.svg</file>
+        <file alias="side_on_watch">images/light/side_on_watch.svg</file>
         <file alias="signal_cellular_3_bar">images/light/ic_signal_cellular_3_bar_678_48dp.svg</file>
         <file alias="stop">images/light/ic_stop_0BA_48dp.svg</file>
         <file alias="stop_disabled">images/light/ic_stop_BEE_48dp.svg</file>
@@ -109,7 +112,6 @@
         <file alias="toggle_on">images/light/toggle_on_light.png</file>
         <file alias="toggle_on_disabled">images/light/toggle_on_disabled_light.png</file>
         <file alias="virtSensors">images/light/Virtual_Sensors_678.svg</file>
-        <file alias="recordCircle">images/light/ic_record_circle_F43_24dp.svg</file>
     </qresource>
     <qresource prefix="/dark">
         <!-- Main list of tool buttons -->
@@ -189,6 +191,7 @@
         <file alias="remove">images/dark/ic_remove_0BA_48dp.svg</file>
         <file alias="remove_disabled">images/dark/ic_remove_155_48dp.svg</file>
         <file alias="rotary_input">images/dark/ic_rotary_input.svg</file>
+        <file alias="rotary_input_control">images/dark/rotary_input_control.svg</file>
         <file alias="send">images/dark/ic_send_BCC_48dp.svg</file>
         <file alias="settings">images/dark/ic_settings_677_48dp.svg</file>
         <file alias="signal_cellular_3_bar">images/dark/ic_signal_cellular_3_bar_677_48dp.svg</file>

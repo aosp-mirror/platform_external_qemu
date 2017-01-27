@@ -58,6 +58,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/extended-pages/location-page.cpp \
     android/skin/qt/extended-pages/microphone-page.cpp \
     android/skin/qt/extended-pages/record-screen-page.cpp \
+    android/skin/qt/extended-pages/rotary-input-dial.cpp \
     android/skin/qt/extended-pages/rotary-input-page.cpp \
     android/skin/qt/extended-pages/settings-page.cpp \
     android/skin/qt/extended-pages/telephony-page.cpp \
@@ -90,6 +91,7 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/extended-pages/location-page.h \
     android/skin/qt/extended-pages/microphone-page.h \
     android/skin/qt/extended-pages/record-screen-page.h \
+    android/skin/qt/extended-pages/rotary-input-dial.h \
     android/skin/qt/extended-pages/rotary-input-page.h \
     android/skin/qt/extended-pages/settings-page.h \
     android/skin/qt/extended-pages/telephony-page.h \
