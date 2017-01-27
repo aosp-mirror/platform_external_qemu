@@ -14,6 +14,7 @@
 #include "android/globals.h"
 #include "android/skin/event.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/stylesheet.h"
 #include "android/utils/debug.h"
 
 RotaryInputPage::RotaryInputPage(QWidget *parent) :
@@ -25,11 +26,22 @@ RotaryInputPage::RotaryInputPage(QWidget *parent) :
     mValue = mUi->dial->value();
     connect(mUi->dial, &QDial::valueChanged,
         [this](int value) { onValueChanged(value); });
+    // Source image is 90 degrees off expected angle.
+    mUi->dial->setImageAngleOffset(-90);
+    updateTheme();
 }
 
 void RotaryInputPage::setEmulatorWindow(EmulatorQtWindow* eW)
 {
     mEmulatorWindow = eW;
+}
+
+void RotaryInputPage::updateTheme()
+{
+    mUi->dial->setImage(QString(
+        ":/"
+        + Ui::stylesheetValues(getSelectedTheme())[Ui::THEME_PATH_VAR]
+        + "/rotary_input_control"));
 }
 
 void RotaryInputPage::onValueChanged(const int value) {
