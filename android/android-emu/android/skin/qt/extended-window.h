@@ -67,6 +67,7 @@ public:
     void showPane(ExtendedWindowPane pane);
 
 private slots:
+    void switchFrameAlways(bool showFrame);
     void switchOnTop(bool isOntop);
     void switchToTheme(SettingsTheme theme);
 
