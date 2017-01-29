@@ -791,17 +791,19 @@ button_redraw(Button* button, SkinRect* rect, SkinSurface* surface)
 
 
 typedef struct {
-    char      tracking;
-    char      inside;
-    SkinPos   pos;
+    char       tracking;
+    char       inside;
+    char       at_corner;
+    SkinPos    pos;
     ADisplay*  display;
 } FingerState;
 
 static void
 finger_state_reset( FingerState*  finger )
 {
-    finger->tracking = 0;
-    finger->inside   = 0;
+    finger->tracking  = 0;
+    finger->inside    = 0;
+    finger->at_corner = 0;
 }
 
 typedef struct {
@@ -1038,6 +1040,10 @@ struct SkinWindow {
     int           y_pos;
     double        scale;
 
+    // For dragging the window
+    int           drag_x_pos;
+    int           drag_y_pos;
+
     // Zoom-related parameters
     double        zoom;
     SkinRect      subwindow;
@@ -1064,7 +1070,8 @@ skin_window_find_finger( SkinWindow*  window,
 {
     /* find the display that contains this movement */
     finger->display = NULL;
-    finger->inside  = 0;
+    finger->inside = 0;
+    finger->at_corner = 0;
 
     if (!window->enable_touch)
         return;
@@ -1077,6 +1084,12 @@ skin_window_find_finger( SkinWindow*  window,
             finger->pos.y    = y - disp->origin.y;
 
             skin_pos_rotate( &finger->pos, &finger->pos, disp->rotation );
+            break;
+        }
+        if (   (x < disp->rect.pos.x || x >= disp->rect.pos.x + disp->rect.size.w)
+            && (y < disp->rect.pos.y || x >= disp->rect.pos.y + disp->rect.size.h) )
+        {
+            finger->at_corner = 1;
             break;
         }
     LAYOUT_LOOP_END_DISPLAYS
@@ -1344,6 +1357,9 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
     window->y_pos = y;
     window->scroll_h = 0;
 
+    window->drag_x_pos = 0;
+    window->drag_y_pos = 0;
+
     SkinRect  monitor;
     int       win_w = slayout->size.w;
     int       win_h = slayout->size.h;
@@ -1556,7 +1572,7 @@ skin_window_resize( SkinWindow*  window, int resize_container )
     }
 
     // Attempt to resize the window surface. If it doesn't exist, a new one will be
-    // allocated. If it does exist, but it's original dimensions do not match the new
+    // allocated. If it does exist, but its original dimensions do not match the new
     // ones, it will be de-allocated and a new one will be returned.
     window->surface = skin_surface_resize(window->surface,
                                           window_w, window_h,
@@ -1858,12 +1874,18 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
                window->finger.pos.y, window->finger.inside);
 #endif
         if (finger->inside) {
+            // The click is inside the touch screen
             finger->tracking = 1;
             add_finger_event(window,
                              finger->pos.x,
                              finger->pos.y,
                              button_state);
         } else {
+            // The click is outside the touch screen.
+            // Drag or resize the device window.
+            window->drag_x_pos = ev->u.mouse.x;
+            window->drag_y_pos = ev->u.mouse.y;
+
             window->button.pressed = NULL;
             button = window->button.hover;
             if(button) {
@@ -1878,6 +1900,10 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
         break;
 
     case kEventMouseButtonUp:
+
+        window->drag_x_pos = 0;
+        window->drag_y_pos = 0;
+
         if ( window->ball.tracking ) {
             skin_window_trackball_press( window, 0 );
             break;
@@ -1909,6 +1935,20 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
         break;
 
     case kEventMouseMotion:
+
+        if (window->drag_x_pos != 0  &&  window->drag_y_pos != 0) {
+            // Drag
+            // The user is dragging the window
+            // TODO: if (finger->at_corner), need to resize rather than drag
+            // TODO: Try to handle the drag and resize events more directly
+            //       in Qt, rather than passing them back and forth.
+            int posX, posY;
+            skin_winsys_get_frame_pos(&posX, &posY);
+            posX += ev->u.mouse.x - window->drag_x_pos;
+            posY += ev->u.mouse.y - window->drag_y_pos;
+            skin_winsys_set_window_pos(posX, posY);
+        }
+
         if ( window->ball.tracking ) {
             skin_window_trackball_move(window,
                                        ev->u.mouse.xrel,

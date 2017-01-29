@@ -156,6 +156,7 @@ signals:
                        QSemaphore* semaphore = NULL);
     void getDevicePixelRatio(double* out_dpr, QSemaphore* semaphore = NULL);
     void getScreenDimensions(QRect* out_rect, QSemaphore* semaphore = NULL);
+    void getFramePos(int* x, int* y, QSemaphore* semaphore = NULL);
     void getWindowPos(int* x, int* y, QSemaphore* semaphore = NULL);
     void isWindowFullyVisible(bool* out_value, QSemaphore* semaphore = NULL);
     void releaseBitmap(SkinSurface* s, QSemaphore* sempahore = NULL);
@@ -205,6 +206,7 @@ public:
     void scaleDown();
     void scaleUp();
     void screenshot();
+    void setFrameAlways(bool showFrame);
     void setOnTop(bool onTop);
     void simulateKeyPress(int keyCode, int modifiers);
     void simulateScrollBarChanged(int x, int y);
@@ -247,6 +249,7 @@ private slots:
                                   QSemaphore* semaphore = NULL);
     void slot_getScreenDimensions(QRect* out_rect,
                                   QSemaphore* semaphore = NULL);
+    void slot_getFramePos(int* x, int* y, QSemaphore* semaphore = NULL);
     void slot_getWindowPos(int* x, int* y, QSemaphore* semaphore = NULL);
     void slot_isWindowFullyVisible(bool* out_value,
                                    QSemaphore* semaphore = NULL);
@@ -317,6 +320,7 @@ private:
     SkinEvent* createSkinEvent(SkinEventType type);
     void forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event);
     void handleKeyEvent(SkinEventType type, QKeyEvent* event);
+    void maskWindowFrame();
 
     void screenshotDone(android::emulation::ScreenCapturer::Result result);
 
@@ -347,6 +351,16 @@ private:
     EmulatorContainer mContainer;
     EmulatorOverlay mOverlay;
     QRect mDeviceGeometry;
+
+    // Window flags to use for frameless and framed appearance
+
+    static constexpr Qt::WindowFlags FRAMELESS_WINDOW_FLAGS  = (Qt::Window |
+                                                                Qt::FramelessWindowHint);
+    static constexpr Qt::WindowFlags FRAMED_WINDOW_FLAGS     = (Qt::Window               |
+                                                                Qt::WindowTitleHint      |
+                                                                Qt::CustomizeWindowHint    );
+    static constexpr Qt::WindowFlags FRAME_WINDOW_FLAGS_MASK = (FRAMELESS_WINDOW_FLAGS |
+                                                                FRAMED_WINDOW_FLAGS     );
 
     QPointF mFocus;
     QPoint mViewportFocus;
@@ -379,6 +393,10 @@ private:
     QTimer mWheelScrollTimer;
     QPoint mWheelScrollPos;
     bool mStartedAdbStopProcess;
+
+    bool         mFrameAlways;       // true = no floating emulator
+    bool         mHaveBeenFrameless;
+    SkinRotation mOrientation;       // Rotation of the main window
 
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
 };

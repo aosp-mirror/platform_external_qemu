@@ -40,6 +40,9 @@ void skin_winsys_set_window_pos(int window_x, int window_y);
 // Get main window position.
 void skin_winsys_get_window_pos(int* window_x, int* window_y);
 
+// Get the main window's frame's position.
+void skin_winsys_get_frame_pos(int* window_x, int* window_y);
+
 // Inform the main window of the subwindow geometry
 void skin_winsys_set_device_geometry(const SkinRect* rect);
 
