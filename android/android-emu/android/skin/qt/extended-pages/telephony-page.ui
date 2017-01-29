@@ -93,7 +93,7 @@
     <string>phone_button</string>
    </property>
    <property name="ColorGroup" stdset="0">
-    <string>Tool</string>
+    <string>Button</string>
    </property>
    <property name="themeIconName_disabled" stdset="0">
     <string>phone_disabled</string>
@@ -172,7 +172,7 @@
     <string>send</string>
    </property>
    <property name="ColorGroup" stdset="0">
-    <string>Tool</string>
+    <string>Button</string>
    </property>
    <property name="report_metrics" stdset="0">
     <bool>false</bool>
@@ -224,7 +224,7 @@
     <string>phone_paused_disabled</string>
    </property>
    <property name="ColorGroup" stdset="0">
-    <string>Tool</string>
+    <string>Button</string>
    </property>
    <property name="report_metrics" stdset="0">
     <bool>false</bool>

@@ -113,26 +113,16 @@
       </font>
      </property>
      <property name="styleSheet">
-      <string notr="true">Text-align:left; padding:8px</string>
+      <string notr="true"/>
      </property>
      <property name="text">
       <string>DOCUMENTATION</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../resources.qrc">
-       <normaloff>:/light/documentation</normaloff>:/light/documentation</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>20</width>
-       <height>20</height>
-      </size>
      </property>
      <property name="flat">
       <bool>true</bool>
      </property>
      <property name="ColorGroup" stdset="0">
-      <string>Tool</string>
+      <string>Button</string>
      </property>
      <property name="report_metrics" stdset="0">
       <bool>false</bool>
@@ -155,26 +145,16 @@
       </font>
      </property>
      <property name="styleSheet">
-      <string notr="true">Text-align:left; padding:8px</string>
+      <string notr="true"/>
      </property>
      <property name="text">
       <string>FILE A BUG</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../resources.qrc">
-       <normaloff>:/light/android_bug</normaloff>:/light/android_bug</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>20</width>
-       <height>20</height>
-      </size>
      </property>
      <property name="flat">
       <bool>true</bool>
      </property>
      <property name="ColorGroup" stdset="0">
-      <string>Tool</string>
+      <string>Button</string>
      </property>
      <property name="report_metrics" stdset="0">
       <bool>false</bool>
@@ -197,26 +177,16 @@
       </font>
      </property>
      <property name="styleSheet">
-      <string notr="true">Text-align:left; padding:8px</string>
+      <string notr="true"/>
      </property>
      <property name="text">
       <string>SEND FEEDBACK</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../resources.qrc">
-       <normaloff>:/light/feedback</normaloff>:/light/feedback</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>20</width>
-       <height>20</height>
-      </size>
      </property>
      <property name="flat">
       <bool>true</bool>
      </property>
      <property name="ColorGroup" stdset="0">
-      <string>Tool</string>
+      <string>Button</string>
      </property>
      <property name="report_metrics" stdset="0">
       <bool>false</bool>
