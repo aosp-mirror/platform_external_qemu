@@ -33,6 +33,7 @@ constexpr char ADB_PATH[] = "set/adbPath";
 constexpr char AUTO_FIND_ADB[] = "set/autoFindAdb";
 constexpr char ALWAYS_ON_TOP[] = "set/alwaysOnTop";
 constexpr char FORWARD_SHORTCUTS_TO_DEVICE[] = "set/forwardShortcutsToDevice";
+constexpr char FRAME_ALWAYS[] = "set/frameAlways";
 constexpr char SAVE_PATH[] = "set/savePath";
 constexpr char UI_THEME[] = "set/theme";
 
