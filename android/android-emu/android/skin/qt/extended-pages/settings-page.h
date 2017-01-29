@@ -28,12 +28,14 @@ public:
     void setAdbInterface(android::emulation::AdbInterface* adb);
 
 signals:
+    void frameAlwaysChanged(bool showFrame);
     void onForwardShortcutsToDeviceChanged(int index);
     void onTopChanged(bool isOnTop);
     void themeChanged(SettingsTheme new_theme);
 
 private slots:
     void on_set_forwardShortcutsToDevice_currentIndexChanged(int index);
+    void on_set_frameAlways_toggled(bool checked);
     void on_set_onTop_toggled(bool checked);
     void on_set_autoFindAdb_toggled(bool checked);
     void on_set_saveLocBox_textEdited(const QString&);
