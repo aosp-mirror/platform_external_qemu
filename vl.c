@@ -2718,6 +2718,14 @@ static int serial_parse(const char *devname)
                      " to character backend '%s'", devname);
         return -1;
     }
+#ifdef CONFIG_ANDROID
+    // Restore the terminal input echo in case it was disabled: it won't get
+    // undone on crash, and Mac's default terminal is dumb enough to never
+    // restore it by itself.
+    if (!strcmp(devname, "stdio")) {
+        qemu_chr_fe_set_echo(serial_hds[index], true);
+    }
+#endif
     index++;
     return 0;
 }
