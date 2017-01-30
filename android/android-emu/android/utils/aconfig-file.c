@@ -20,6 +20,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+#include <stdio.h>
 
 AConfig*
 aconfig_node(const char *name, const char *value)
@@ -294,6 +295,7 @@ parse_block(cstate *cs, AConfig *node)
             continue;
 
         case T_CBRACE:
+            fprintf(stderr, "%s: closing brace\n", __func__);
             return 0;
 
         default:
@@ -321,7 +323,10 @@ parse_expr(cstate *cs, AConfig *node)
                     return 0;
 
                 case T_OBRACE:
-                    return parse_block(cs, node);
+                    fprintf(stderr, "%s: start parse block %p\n", __func__, node);
+                    int res = parse_block(cs, node);
+                    fprintf(stderr, "%s: done parse block %p\n", __func__, node);
+                    return res;
 
                 default:
                     return -1;
@@ -329,9 +334,11 @@ parse_expr(cstate *cs, AConfig *node)
     }
 }
 
+
 void
 aconfig_load(AConfig *root, char *data)
 {
+    fprintf(stderr, "%s: root %p data=%s\n", __func__, root, data);
     if(data != 0) {
         cstate cs;
         cs.data = data;
@@ -352,6 +359,7 @@ aconfig_load(AConfig *root, char *data)
 int
 aconfig_load_file(AConfig *root, const char *fn)
 {
+    fprintf(stderr, "%s: fn=%s\n", __func__, fn);
     char *data;
     data = path_load_file(fn, NULL);
     if (data == NULL)

@@ -152,7 +152,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mScreenCapturer(mAdbInterface.get()),
       mInstallDialog(this),
       mPushDialog(this),
-      mStartedAdbStopProcess(false) {
+      mStartedAdbStopProcess(false),
+      mAdditionalDisplays(0) {
     qRegisterMetaType<QPainter::CompositionMode>("QPainter::CompositionMode");
 
     android::base::ThreadLooper::setLooper(mLooper, true);
@@ -763,6 +764,15 @@ WId EmulatorQtWindow::getWindowId() {
     return wid;
 }
 
+WId EmulatorQtWindow::getWindowId(int display) {
+    WId wid = mAdditionalDisplays[display].effectiveWinId();
+#if defined(__APPLE__)
+    wid = (WId)getNSWindow((void*)wid);
+    D("After finding parent, win ID is %lx", wid);
+#endif
+    return wid;
+}
+
 void EmulatorQtWindow::slot_getWindowPos(int* xx,
                                          int* yy,
                                          QSemaphore* semaphore) {
@@ -977,6 +987,7 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
 }
 
 void EmulatorQtWindow::slot_screenChanged() {
+    fprintf(stderr, "%s: screenChanged\n", __func__);
     queueSkinEvent(createSkinEvent(kEventScreenChanged));
 }
 
@@ -1619,6 +1630,17 @@ void EmulatorQtWindow::zoomTo(const QPoint& focus, const QSize& rectSize) {
                              (double)(rectSize.height() + 20);
 
     simulateSetZoom(std::min({idealWidthZoom, idealHeightZoom, maxZoom}));
+}
+
+void EmulatorQtWindow::addDisplay(int id, int w, int h) {
+    if (mAdditionalDisplays.find(id) == mAdditionalDisplays.end()) {
+        mAdditionalDisplays[id].resize(w, h);
+        mAdditionalDisplays[id].show();
+    }
+}
+
+void EmulatorQtWindow::removeDisplay(int id) {
+    mAdditionalDisplays.erase(id);
 }
 
 void EmulatorQtWindow::panHorizontal(bool left) {

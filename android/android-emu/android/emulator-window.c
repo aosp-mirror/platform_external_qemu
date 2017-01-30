@@ -163,6 +163,7 @@ static void _emulator_window_on_gpu_frame(void* context,
 static void
 emulator_window_setup( EmulatorWindow*  emulator )
 {
+    fprintf(stderr, "%s: emuwindow %p\n", __func__, emulator);
     user_event_agent = emulator->uiEmuAgent->userEvents;
 
     static const SkinWindowFuncs my_window_funcs = {
@@ -268,6 +269,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
 static void
 emulator_window_fb_update( void*   _emulator, int  x, int  y, int  w, int  h )
 {
+    fprintf(stderr, "%s: call\n", __func__);
     EmulatorWindow*  emulator = _emulator;
 
     if (emulator->opts->no_window) {
@@ -286,6 +288,7 @@ emulator_window_fb_update( void*   _emulator, int  x, int  y, int  w, int  h )
 static void
 emulator_window_fb_rotate( void*  _emulator, int  rotation )
 {
+    fprintf(stderr, "%s: call\n", __func__);
     EmulatorWindow*  emulator = _emulator;
 
     emulator_window_setup( emulator );
@@ -339,6 +342,9 @@ int emulator_window_init(EmulatorWindow* emulator,
                          int y,
                          const AndroidOptions* opts,
                          const UiEmuAgent* uiEmuAgent) {
+
+    fprintf(stderr, "%s: call emuwindow %p\n", __func__, emulator);
+
     static const SkinFramebufferFuncs skin_fb_funcs = {
         .create_framebuffer = &emulator_window_framebuffer_create,
         .free_framebuffer = &emulator_window_framebuffer_free,
@@ -366,7 +372,18 @@ int emulator_window_init(EmulatorWindow* emulator,
         SKIN_FILE_LOOP_PARTS(emulator->layout_file, part)
         SkinDisplay*  disp = part->display;
         if (disp->valid) {
+            fprintf(stderr, "%s: display 1 fb %p\n", __func__, disp->framebuffer);
             qframebuffer_add_client( disp->framebuffer,
+                                    emulator,
+                                    emulator_window_fb_update,
+                                    emulator_window_fb_rotate,
+                                    emulator_window_fb_poll,
+                                    NULL );
+        }
+        SkinDisplay* disp2 = part->display + 1;
+        if (disp2->valid) {
+            fprintf(stderr, "%s: display 2 fb %p\n", __func__, disp2->framebuffer);
+            qframebuffer_add_client( disp2->framebuffer,
                                     emulator,
                                     emulator_window_fb_update,
                                     emulator_window_fb_rotate,

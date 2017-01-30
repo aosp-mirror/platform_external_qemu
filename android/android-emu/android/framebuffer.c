@@ -12,6 +12,7 @@
 #include "android/framebuffer.h"
 #include <memory.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 typedef struct {
     /* client fields, these correspond to code that waits for updates before displaying them */
@@ -79,6 +80,7 @@ qframebuffer_init( QFrameBuffer*       qfbuff,
                    int                 rotation,
                    QFrameBufferFormat  format )
 {
+    fprintf(stderr, "%s: init %p\n", __func__, qfbuff);
     int   pitch, bytes_per_pixel, bits_per_pixel;
 
     rotation &= 3;
@@ -152,8 +154,10 @@ qframebuffer_update( QFrameBuffer*  qfbuff, int  x, int  y, int  w, int  h )
 {
     QFrameBufferExtra*  extra = qfbuff->extra;
 
-    if (extra->fb_update)
+    if (extra->fb_update) {
+        fprintf(stderr, "%s: fb %p fbup\n", __func__, qfbuff);
         extra->fb_update( extra->fb_opaque, x, y, w, h );
+    }
 }
 
 

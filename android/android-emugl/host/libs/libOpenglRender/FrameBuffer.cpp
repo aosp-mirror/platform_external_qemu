@@ -495,6 +495,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                                  int subwindowId) {
     bool success = false;
 
+    fprintf(stderr, "%s: %ld subwinId %d\n", __func__, (long)p_window, subwindowId);
     if (!m_useSubWindow) {
         ERR("%s: Cannot create native sub-window in this configuration\n",
             __FUNCTION__);

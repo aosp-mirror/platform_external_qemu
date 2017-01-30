@@ -27,6 +27,12 @@ void skin_winsys_init_args(int argc, char** argv);
 // Return window handle of main UI. MUST BE CALLED FROM THE MAIN UI THREAD.
 void* skin_winsys_get_window_handle();
 
+// Return window handle of main UI. MUST BE CALLED FROM THE MAIN UI THREAD.
+void* skin_winsys_get_window_handle_by_display(int displayId);
+
+void skin_winsys_add_display(int displayId, int width, int height);
+void skin_winsys_remove_display(int displayId);
+
 // Return rectangle of current monitor in pixels.
 void skin_winsys_get_monitor_rect(SkinRect* rect);
 

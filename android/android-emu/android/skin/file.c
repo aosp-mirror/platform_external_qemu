@@ -19,6 +19,7 @@
 #include "android/utils/system.h"
 #include "android/utils/debug.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 /** UTILITY ROUTINES
@@ -86,6 +87,7 @@ skin_display_done(SkinDisplay*  display)
     }
 }
 
+
 static int skin_display_init_from(SkinDisplay* display,
                                   const AConfig* node,
                                   const SkinFramebufferFuncs* fb_funcs) {
@@ -102,6 +104,7 @@ static int skin_display_init_from(SkinDisplay* display,
     if (display->valid && fb_funcs) {
         SkinRect  r;
         skin_rect_rotate( &r, &display->rect, -display->rotation );
+        fprintf(stderr, "%s: create fb for display %p\n", __func__, display);
         display->framebuffer = fb_funcs->create_framebuffer(
                 r.size.w,
                 r.size.h,
@@ -323,6 +326,7 @@ static SkinPart* skin_part_create_from_v1(
         const AConfig* root,
         const char* basepath,
         const SkinFramebufferFuncs* fb_funcs) {
+    fprintf(stderr, "%s: call\n", __func__);
     SkinPart* part;
     const AConfig* node;
     SkinBox box;
@@ -334,9 +338,19 @@ static SkinPart* skin_part_create_from_v1(
     if (node)
         skin_background_init_from(part->background, node, basepath);
 
+    fprintf(stderr, "%s: aconfig: dispaly\n", __func__);
     node = aconfig_find_const(root, "display");
-    if (node)
+    if (node) {
+        fprintf(stderr, "%s: found display\n", __func__);
         skin_display_init_from(part->display, node, fb_funcs);
+    }
+
+    fprintf(stderr, "%s: aconfig: dispaly2\n", __func__);
+    node = aconfig_find_const(root, "display2");
+    if (node) {
+        fprintf(stderr, "%s: found display 2\n", __func__);
+        skin_display_init_from(part->display + 1, node, fb_funcs);
+    }
 
     node = aconfig_find_const(root, "button");
     if (node) {
@@ -376,6 +390,7 @@ static SkinPart* skin_part_create_from_v2(
         const AConfig* root,
         const char* basepath,
         const SkinFramebufferFuncs* fb_funcs) {
+    fprintf(stderr, "%s: call\n", __func__);
     SkinPart* part;
     const AConfig* node;
     SkinBox box;
@@ -388,8 +403,16 @@ static SkinPart* skin_part_create_from_v2(
         skin_background_init_from(part->background, node, basepath);
 
     node = aconfig_find_const(root, "display");
-    if (node)
+    if (node) {
+        fprintf(stderr, "%s: display\n", __func__);
         skin_display_init_from(part->display, node, fb_funcs);
+    }
+
+    node = aconfig_find_const(root, "display2");
+    if (node) {
+        fprintf(stderr, "%s: display2\n", __func__);
+        skin_display_init_from(part->display + 1, node, fb_funcs);
+    }
 
     node = aconfig_find_const(root, "buttons");
     if (node) {
@@ -811,6 +834,7 @@ static int skin_file_load_from_v1(SkinFile* file,
     SkinLocation*  location;
     int            nn;
 
+    fprintf(stderr, "%s: call basepath %s aconfig %p\n", __func__, basepath, aconfig);
     file->parts = part = skin_part_create_from_v1(
             aconfig, basepath, fb_funcs);
     if (part == NULL)
@@ -881,6 +905,7 @@ static int skin_file_load_from_v2(SkinFile* file,
                                   const AConfig* aconfig,
                                   const char* basepath,
                                   const SkinFramebufferFuncs* fb_funcs) {
+    fprintf(stderr, "%s: call basepath %s\n", __func__, basepath);
     /* first, load all parts */
     const AConfig* node = aconfig_find_const(aconfig, "parts");
     if (node == NULL)

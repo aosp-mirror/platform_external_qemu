@@ -30,7 +30,7 @@
 #if DEBUG
 #include "android/utils/debug.h"
 
-#define  D(...)   VERBOSE_PRINT(surface,__VA_ARGS__)
+#define  D(fmt,...)   fprintf(stderr, fmt "\n", ##__VA_ARGS__);
 #else
 #define  D(...)   ((void)0)
 #endif
@@ -53,7 +53,7 @@ extern SkinSurface *skin_surface_create(int w, int h, int original_w, int origin
         s->original_h = original_h;
         s->id = next_id++;
         s->window = window;
-        D("Created surface %d %d w,%d h, original %d, %d", s->id, w, h, original_w, original_h);
+        D("Created surface %p: id %d %d w,%d h, original %d, %d", s, s->id, w, h, original_w, original_h);
     }
     else {
         D( "not enough memory to allocate new skin surface !" );

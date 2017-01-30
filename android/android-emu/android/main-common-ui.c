@@ -41,7 +41,7 @@
 #include <signal.h>
 #include <unistd.h>
 
-#define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
+#define  D(...)  do {  dprint(__VA_ARGS__); } while (0)
 
 /***  CONFIGURATION
  ***/
@@ -170,8 +170,12 @@ parse_skin_files(const char*      skinDirPath,
             }
 
             snprintf(tmp, sizeof tmp,
-                    "display {\n  width %d\n  height %d\n bpp %d}\n",
-                    width, height,bpp);
+                    "display {\n  width %d\n  height %d\n bpp %d\n}\n"
+                    "display2 {\n  width %d\n  height %d\n bpp %d\n}\n",
+                    width, height,bpp,
+                    width, height,bpp
+                    );
+            fprintf(stderr, "found magic skin width=%d height=%d bpp=%d\n", width, height, bpp);
             aconfig_load(root, strdup(tmp));
             path = ":";
             D("found magic skin width=%d height=%d bpp=%d\n", width, height, bpp);
@@ -273,6 +277,7 @@ DEFAULT_SKIN:
         base[layout_size] = 0;
 
         D("parsing built-in skin layout file (%d bytes)", (int)layout_size);
+        fprintf(stderr, "parsing built-in skin layout file (%d bytes)", (int)layout_size);
         aconfig_load(root, base);
         path = ":";
     }

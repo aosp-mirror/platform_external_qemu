@@ -114,6 +114,7 @@ static int adisplay_init(ADisplay* disp,
                          SkinDisplay* sdisp,
                          SkinLocation* loc,
                          SkinRect* frame) {
+    fprintf(stderr, "%s: sdisp %p disp %p\n", __func__, sdisp, disp);
     skin_rect_rotate( &disp->rect, &sdisp->rect, loc->rotation );
     disp->rect.pos.x += loc->anchor.x;
     disp->rect.pos.y += loc->anchor.y;
@@ -161,6 +162,7 @@ static int adisplay_init(ADisplay* disp,
 
     disp->gpu_frame = NULL;
 
+    fprintf(stderr, "%s: create skin surface\n", __func__);
     disp->surface = skin_surface_create(disp->rect.size.w,
                                         disp->rect.size.h,
                                         disp->rect.size.w,
@@ -581,6 +583,7 @@ static uint8_t* local_calloc(int size) {
 // display surface, i.e. (0,0) is always the top-left corner.
 static void adisplay_update_surface(ADisplay* disp,
                                     SkinRect* rect) {
+        fprintf(stderr, "%s: update disp %p\n", __func__, disp);
     int x = rect->pos.x;
     int y = rect->pos.y;
     int w = rect->size.w;
@@ -660,6 +663,7 @@ static void adisplay_redraw(ADisplay* disp,
                             SkinRect* rect,
                             SkinSurface* surface,
                             bool using_emugl_subwindow) {
+        fprintf(stderr, "%s: update disp %p\n", __func__, disp);
     SkinRect  r;
 
     if (!skin_rect_intersect(&r, rect, &disp->rect)) {
@@ -910,7 +914,7 @@ typedef struct Layout {
 
 
 static void
-layout_done( Layout*  layout )
+layout_dealloc( Layout*  layout )
 {
     int  nn;
 
@@ -957,6 +961,8 @@ layout_init( Layout*  layout, SkinLayout*  slayout )
             n_backgrounds += 1;
         if ( part->display->valid )
             n_displays += 1;
+        if ( (part->display + 1)->valid )
+            n_displays += 1;
 
         SKIN_PART_LOOP_BUTTONS(part, sbutton)
             n_buttons += 1;
@@ -1000,6 +1006,13 @@ layout_init( Layout*  layout, SkinLayout*  slayout )
             n_displays += 1;
         }
 
+        SkinDisplay* disp2 = part->display + 1;
+        if ( disp2->valid) {
+            ADisplay*  disp = layout->displays + n_displays;
+            adisplay_init( disp, disp2, loc, &layout->rect);
+            n_displays += 1;
+        }
+
         SKIN_PART_LOOP_BUTTONS(part, sbutton)
             Button*  button = layout->buttons + n_buttons;
             button_init( button, sbutton, loc, back, &layout->rect, slayout );
@@ -1010,9 +1023,18 @@ layout_init( Layout*  layout, SkinLayout*  slayout )
     return 0;
 
 Fail:
-    layout_done(layout);
+    layout_dealloc(layout);
     return -1;
 }
+
+typedef struct DisplayParams {
+    double        zoom;
+    SkinRect      subwindow;
+    SkinPos       subwindow_original;
+    SkinSize      framebuffer;
+    SkinSize      container;
+    int           scroll_h; // Needed for OSX
+} DisplayParams;
 
 struct SkinWindow {
     const SkinWindowFuncs* win_funcs;
@@ -1038,13 +1060,8 @@ struct SkinWindow {
     int           y_pos;
     double        scale;
 
-    // Zoom-related parameters
-    double        zoom;
-    SkinRect      subwindow;
-    SkinPos       subwindow_original;
-    SkinSize      framebuffer;
-    SkinSize      container;
-    int           scroll_h; // Needed for OSX
+    // Zoom-related parameters - per display
+    DisplayParams displayParams[ANDROID_SKIN_MAX_DISPLAYS];
 };
 
 static void
@@ -1252,7 +1269,7 @@ typedef struct {
 
 static void skin_window_run_opengles_show(void* p) {
     const gles_show_data* data = (const gles_show_data*)p;
-    void* windowHandle = skin_winsys_get_window_handle();
+    void* windowHandle = skin_winsys_get_window_handle_by_display(data->subwindowId);
 
     data->window->win_funcs->opengles_show(windowHandle,
                                            data->wx,
@@ -1267,16 +1284,17 @@ static void skin_window_run_opengles_show(void* p) {
 }
 
 static void
-skin_window_setup_opengles_subwindow( SkinWindow* window, gles_show_data* data)
+skin_window_setup_opengles_subwindow( SkinWindow* window, gles_show_data* data, int subwindowId)
 {
+    subwindowId = 0;
     data->window = window;
-    data->wx = window->subwindow.pos.x;
-    data->wy = window->subwindow.pos.y;
-    data->ww = window->subwindow.size.w;
-    data->wh = window->subwindow.size.h;
+    data->wx = window->displayParams[subwindowId].subwindow.pos.x;
+    data->wy = window->displayParams[subwindowId].subwindow.pos.y;
+    data->ww = window->displayParams[subwindowId].subwindow.size.w;
+    data->wh = window->displayParams[subwindowId].subwindow.size.h;
 
-    data->fbw = window->framebuffer.w;
-    data->fbh = window->framebuffer.h;
+    data->fbw = window->displayParams[subwindowId].framebuffer.w;
+    data->fbh = window->displayParams[subwindowId].framebuffer.h;
     data->dpr = 1.0;
 
 #if defined(__APPLE__)
@@ -1295,23 +1313,43 @@ skin_window_setup_opengles_subwindow( SkinWindow* window, gles_show_data* data)
     // affects the relative coordinate system inside the window, it must be taken into account
     // as well. At the end of this function, data->wy will equal the bottom coordinate of the
     // subwindow (in units from the bottom of the overall window) if this is the Qt OSX emulator.
-    data->wy = window->container.h - (data->wy + data->wh);
-    data->wy += window->scroll_h;
+    data->wy = window->displayParams[subwindowId].container.h - (data->wy + data->wh);
+    data->wy += window->displayParams[subwindowId].scroll_h;
 #endif  // __APPLE__
 }
 
+
 /* Show the OpenGL ES framebuffer window */
+static void
+skin_window_show_opengles2( SkinWindow* window, ADisplay* disp, int dispid )
+{
+    fprintf(stderr, "%s: show opengl for disp %p\n", __func__, disp);
+
+    gles_show_data data;
+    skin_window_setup_opengles_subwindow(window, &data, dispid);
+    data.rot = disp->rotation * 90.;
+    data.subwindowId = dispid;
+
+    skin_winsys_run_ui_update(&skin_window_run_opengles_show, &data);
+}
+
 static void
 skin_window_show_opengles( SkinWindow* window )
 {
-    ADisplay* disp = window->layout.displays;
+            ADisplay*  disp = window->layout.displays;
+            ADisplay*  end  = disp + window->layout.num_displays;
+            int dispid = 0;
+            for (; disp < end; disp++) {
+                fprintf(stderr, "%s: show opengl for disp %p\n", __func__, disp);
 
-    gles_show_data data;
-    skin_window_setup_opengles_subwindow(window, &data);
-    data.rot = disp->rotation * 90.;
-    data.subwindowId = 0;
+                gles_show_data data;
+                skin_window_setup_opengles_subwindow(window, &data, dispid);
+                data.rot = disp->rotation * 90.;
+                data.subwindowId = dispid;
 
-    skin_winsys_run_ui_update(&skin_window_run_opengles_show, &data);
+                skin_winsys_run_ui_update(&skin_window_run_opengles_show, &data);
+                dispid++;
+            }
 }
 
 static void skin_window_redraw_opengles(SkinWindow* window) {
@@ -1342,7 +1380,7 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
 
     window->x_pos = x;
     window->y_pos = y;
-    window->scroll_h = 0;
+    window->displayParams[0].scroll_h = 0;
 
     SkinRect  monitor;
     int       win_w = slayout->size.w;
@@ -1364,7 +1402,9 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
         skin_window_free(window);
         return NULL;
     }
+
     skin_winsys_set_window_pos(x, y);
+
 
     /* Check that the window is fully visible */
     if (enable_scale && !skin_winsys_is_window_fully_visible()) {
@@ -1403,7 +1443,7 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
         dprint( "emulator window was out of view and was recentered\n" );
     }
 
-    skin_window_show_opengles(window);
+    // skin_window_show_opengles(window);
 
     return window;
 }
@@ -1456,8 +1496,8 @@ skin_window_recompute_subwindow_rect( SkinWindow* window, SkinRect* subwindow )
     SkinRect container;
     container.pos.x = 0;
     container.pos.y = 0;
-    container.size.w = window->container.w;
-    container.size.h = window->container.h;
+    container.size.w = window->displayParams[0].container.w;
+    container.size.h = window->displayParams[0].container.h;
 
     // If the emulator window is so small that the native subwindow wouldn't even appear,
     // force the subwindow to at least have positive size, else the native window managers
@@ -1467,16 +1507,21 @@ skin_window_recompute_subwindow_rect( SkinWindow* window, SkinRect* subwindow )
         result.size.h = 1;
     }
 
-    if (skin_rect_equals(&window->subwindow, &result)) {
+    if (skin_rect_equals(&window->displayParams[0].subwindow, &result)) {
         return 0;
     }
 
-    window->subwindow.pos.x = result.pos.x;
-    window->subwindow.pos.y = result.pos.y;
-    window->subwindow.size.w = result.size.w;
-    window->subwindow.size.h = result.size.h;
+    window->displayParams[0].subwindow.pos.x = result.pos.x;
+    window->displayParams[0].subwindow.pos.y = result.pos.y;
+    window->displayParams[0].subwindow.size.w = result.size.w;
+    window->displayParams[0].subwindow.size.h = result.size.h;
 
-    skin_winsys_set_device_geometry(&window->subwindow);
+    fprintf(stderr, "%s: set to %d %d %d %d\n", __func__,
+            window->displayParams[0].subwindow.pos.x,
+            window->displayParams[0].subwindow.pos.y,
+            window->displayParams[0].subwindow.size.w,
+            window->displayParams[0].subwindow.size.h);
+    skin_winsys_set_device_geometry(&window->displayParams[0].subwindow);
 
     return 1;
 }
@@ -1484,21 +1529,23 @@ skin_window_recompute_subwindow_rect( SkinWindow* window, SkinRect* subwindow )
 void
 skin_window_scroll_updated( SkinWindow* window, int dx, int xmax, int dy, int ymax )
 {
+    fprintf(stderr, "%s: call\n", __func__);
+    return;
     // Pretend the subwindow has moved by the appropriate amount
     SkinRect subwindow;
-    subwindow.pos.x = window->subwindow_original.x - dx;
-    subwindow.pos.y = window->subwindow_original.y - dy;
-    subwindow.size.w = window->framebuffer.w;
-    subwindow.size.h = window->framebuffer.h;
+    subwindow.pos.x = window->displayParams[0].subwindow_original.x - dx;
+    subwindow.pos.y = window->displayParams[0].subwindow_original.y - dy;
+    subwindow.size.w = window->displayParams[0].framebuffer.w;
+    subwindow.size.h = window->displayParams[0].framebuffer.h;
 
     skin_window_recompute_subwindow_rect(window, &subwindow);
     skin_window_show_opengles(window);
 
     // Compute the margins around the sub-window, then transform the current scroll values
     // to take into account these margins.
-    int left_buf = window->subwindow_original.x;
+    int left_buf = window->displayParams[0].subwindow_original.x;
     int right_buf = skin_surface_width(window->surface)
-                        - (window->framebuffer.w + left_buf);
+                        - (window->displayParams[0].framebuffer.w + left_buf);
     float px;
     if (left_buf + right_buf >= xmax) {
         // The subwindow fits entirely in the container, so there are no intermediate translations
@@ -1507,9 +1554,9 @@ skin_window_scroll_updated( SkinWindow* window, int dx, int xmax, int dy, int ym
         px = (float) (dx - left_buf) / (float) (xmax - (left_buf + right_buf));
     }
 
-    int top_buf = window->subwindow_original.y;
+    int top_buf = window->displayParams[0].subwindow_original.y;
     int bottom_buf = skin_surface_height(window->surface)
-                         - (window->framebuffer.h + top_buf);
+                         - (window->displayParams[0].framebuffer.h + top_buf);
     float py;
     if (top_buf + bottom_buf >= ymax) {
         // The subwindow fits entirely in the container, so there are no intermediate translations
@@ -1532,6 +1579,7 @@ skin_window_scroll_updated( SkinWindow* window, int dx, int xmax, int dy, int ym
 static void
 skin_window_resize( SkinWindow*  window, int resize_container )
 {
+    fprintf(stderr, "%s: call\n", __func__);
     int           layout_w = window->layout.rect.size.w;
     int           layout_h = window->layout.rect.size.h;
     int           window_w = layout_w;
@@ -1542,12 +1590,12 @@ skin_window_resize( SkinWindow*  window, int resize_container )
 
     // Pre-record the container dimensions
     if (resize_container) {
-        window->container.w = (int) ceil(layout_w * scale);
-        window->container.h = (int) ceil(layout_h * scale);
+        window->displayParams[0].container.w = (int) ceil(layout_w * scale);
+        window->displayParams[0].container.h = (int) ceil(layout_h * scale);
     }
 
-    if (window->zoom != 1.0) {
-        scale *= window->zoom;
+    if (window->displayParams[0].zoom != 1.0) {
+        scale *= window->displayParams[0].zoom;
     }
 
     if (scale != 1.0) {
@@ -1579,18 +1627,24 @@ skin_window_resize( SkinWindow*  window, int resize_container )
 
     // Calculate the framebuffer and window sizes and locations
     ADisplay* disp = window->layout.displays;
-    SkinRect drect = disp->rect;
-    skin_surface_get_scaled_rect(window->surface, &drect, &drect);
+    ADisplay* disp_end = disp + window->layout.num_displays;
 
-    // Store original values to use for scrolling later
-    window->subwindow_original.x = drect.pos.x;
-    window->subwindow_original.y = drect.pos.y;
+    int dispid = 0;
+    for (; disp < disp_end; disp++) {
+        SkinRect drect = disp->rect;
+        skin_surface_get_scaled_rect(window->surface, &drect, &drect);
 
-    window->framebuffer.w = drect.size.w;
-    window->framebuffer.h = drect.size.h;
+        fprintf(stderr, "%s: disp id %d pos %d %d\n", __func__, dispid, drect.pos.x, drect.pos.y);
+        // Store original values to use for scrolling later
+        window->displayParams[0].subwindow_original.x = drect.pos.x;
+        window->displayParams[0].subwindow_original.y = drect.pos.y;
 
-    if (skin_window_recompute_subwindow_rect(window, &drect)) {
-        skin_window_show_opengles(window);
+        window->displayParams[0].framebuffer.w = drect.size.w;
+        window->displayParams[0].framebuffer.h = drect.size.h;
+
+        skin_window_recompute_subwindow_rect(window, &drect);
+        skin_window_show_opengles2(window, disp, dispid);
+        dispid++;
     }
 }
 
@@ -1600,27 +1654,29 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
     Layout         layout;
     ADisplay*      disp;
 
+    fprintf(stderr, "%s: call\n", __func__);
+
     if ( layout_init( &layout, slayout ) < 0 )
         return -1;
 
-    layout_done( &window->layout );
+    layout_dealloc( &window->layout );
     window->layout = layout;
 
     // Reset viewport parameters
-    window->zoom = 1.0;
-    window->scroll_h = 0;
-    window->framebuffer.w = 0;
-    window->framebuffer.h = 0;
+    window->displayParams[0].zoom = 1.0;
+    window->displayParams[0].scroll_h = 0;
+    window->displayParams[0].framebuffer.w = 0;
+    window->displayParams[0].framebuffer.h = 0;
 
     // Resetting the subwindow parameters ensures that a proper resizing of
     // the native subwindow actually occurs. Without this, it is possible for
     // a rotation to not reach the subwindow (for example, in the case of a
     // square watch skin, which might have two layouts with *exactly* the same
     // subwindow).
-    window->subwindow.pos.x = -1;
-    window->subwindow.pos.y = -1;
-    window->subwindow.size.w = 0;
-    window->subwindow.size.h = 0;
+    window->displayParams[0].subwindow.pos.x = -1;
+    window->displayParams[0].subwindow.pos.y = -1;
+    window->displayParams[0].subwindow.size.w = 0;
+    window->displayParams[0].subwindow.size.h = 0;
 
     disp = window->layout.displays;
     if (disp != NULL) {
@@ -1639,7 +1695,19 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
         }
     }
 
+    fprintf(stderr, "%s: call. # displays: %d\n", __func__, window->layout.num_displays);
+    if (window->layout.num_displays > 1) {
+        int i = 1;
+        for (; i < window->layout.num_displays; i++) {
+            skin_winsys_add_display(
+                    i,
+                    window->layout.displays[i].rect.size.w,
+                    window->layout.displays[i].rect.size.h);
+        }
+    }
+
     skin_window_resize(window, 1);
+
 
     finger_state_reset( &window->finger );
     finger_state_reset( &window->secondary_finger );
@@ -1672,16 +1740,18 @@ skin_window_reset ( SkinWindow*  window, SkinLayout*  slayout )
 void
 skin_window_zoomed_window_resized( SkinWindow* window, int dx, int dy, int w, int h, int scroll_h )
 {
+    return;
     // Pretend the subwindow has moved by the appropriate amount
+    //
     SkinRect subwindow;
-    subwindow.pos.x = window->subwindow_original.x - dx;
-    subwindow.pos.y = window->subwindow_original.y - dy;
-    subwindow.size.w = window->framebuffer.w;
-    subwindow.size.h = window->framebuffer.h;
+    subwindow.pos.x = window->displayParams[0].subwindow_original.x - dx;
+    subwindow.pos.y = window->displayParams[0].subwindow_original.y - dy;
+    subwindow.size.w = window->displayParams[0].framebuffer.w;
+    subwindow.size.h = window->displayParams[0].framebuffer.h;
 
-    window->container.w = w;
-    window->container.h = h;
-    window->scroll_h = scroll_h;
+    window->displayParams[0].container.w = w;
+    window->displayParams[0].container.h = h;
+    window->displayParams[0].scroll_h = scroll_h;
 
     if (skin_window_recompute_subwindow_rect(window, &subwindow)) {
         skin_window_show_opengles(window);
@@ -1709,7 +1779,7 @@ skin_window_free( SkinWindow*  window )
             skin_image_unref(&window->onion);
             window->onion_rotation = SKIN_ROTATION_0;
         }
-        layout_done( &window->layout );
+        layout_dealloc( &window->layout );
         AFREE(window);
     }
 }
@@ -1742,8 +1812,8 @@ skin_window_set_scale(SkinWindow* window, double scale)
 
     // The scroll bars *will* be gone if this function is called, so make sure
     // they are not taken into account when resizing the window.
-    window->scroll_h = 0;
-    window->zoom = 1.0;      // Scaling the window should reset all "viewport" parameters
+    window->displayParams[0].scroll_h = 0;
+    window->displayParams[0].zoom = 1.0;      // Scaling the window should reset all "viewport" parameters
 
     skin_window_resize( window, 1 );
     skin_window_redraw( window, NULL );
@@ -1753,10 +1823,10 @@ void
 skin_window_set_zoom(SkinWindow* window, double zoom, int dw, int dh, int scroll_h)
 {
     // Pre-record the container dimensions
-    window->container.w = dw;
-    window->container.h = dh;
-    window->scroll_h = scroll_h;
-    window->zoom = zoom;
+    window->displayParams[0].container.w = dw;
+    window->displayParams[0].container.h = dh;
+    window->displayParams[0].scroll_h = scroll_h;
+    window->displayParams[0].zoom = zoom;
 
     skin_window_resize( window, 0 );
     skin_window_redraw( window, NULL );
@@ -1765,6 +1835,7 @@ skin_window_set_zoom(SkinWindow* window, double zoom, int dw, int dh, int scroll
 void
 skin_window_redraw( SkinWindow*  window, SkinRect*  rect )
 {
+    fprintf(stderr, "%s: call\n", __func__);
     if (window != NULL && window->surface != NULL) {
         Layout*  layout = &window->layout;
 
@@ -1792,6 +1863,7 @@ skin_window_redraw( SkinWindow*  window, SkinRect*  rect )
             ADisplay*  disp = layout->displays;
             ADisplay*  end  = disp + layout->num_displays;
             for (; disp < end; disp++) {
+                fprintf(stderr, "%s: redraw disp %p\n", __func__, disp);
                 adisplay_redraw(disp, rect, window->surface,
                                 window->use_emugl_subwindow);
             }
@@ -1971,6 +2043,7 @@ skin_window_update_display( SkinWindow*  window, int  x, int  y, int  w, int  h 
         r.pos.x += disp->origin.x;
         r.pos.y += disp->origin.y;
 
+        fprintf(stderr, "%s: update disp %p\n", __func__, disp);
         adisplay_redraw(disp, &r, window->surface, window->use_emugl_subwindow);
     }
 }
@@ -1985,6 +2058,7 @@ void skin_window_update_gpu_frame(SkinWindow* window,
     }
 
     ADisplay* disp = skin_window_display(window);
+   fprintf(stderr, "%s: update disp %p\n", __func__, disp);
     if (!disp || disp->datasize.w != w || disp->datasize.h != h) {
         fprintf(stderr, "%s: bad values!\n", __FUNCTION__);
         return;

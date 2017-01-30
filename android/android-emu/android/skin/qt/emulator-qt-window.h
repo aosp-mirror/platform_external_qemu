@@ -47,6 +47,7 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace Ui {
@@ -183,6 +184,7 @@ public:
                    bool* hasEvent);
 
     WId getWindowId();
+    WId getWindowId(int display);
 
     android::emulation::AdbInterface* getAdbInterface() const;
     bool isInZoomMode() const;
@@ -219,6 +221,9 @@ public:
     void zoomOut(const QPoint& focus, const QPoint& viewportFocus);
     void zoomReset();
     void zoomTo(const QPoint& focus, const QSize& rectSize);
+
+    void addDisplay(int id, int w, int h);
+    void removeDisplay(int id);
 
 public slots:
     void rotateSkin(SkinRotation rot);
@@ -381,6 +386,8 @@ private:
     bool mStartedAdbStopProcess;
 
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
+
+    std::unordered_map<int, QWidget> mAdditionalDisplays;
 };
 
 struct SkinSurface {

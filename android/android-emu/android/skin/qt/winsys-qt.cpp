@@ -181,6 +181,33 @@ extern void *skin_winsys_get_window_handle()
     return (void*)handle;
 }
 
+extern void *skin_winsys_get_window_handle_by_display(int displayId) {
+    D("skin_winsys_get_window_handle");
+    if (displayId == 0) {
+        return skin_winsys_get_window_handle();
+    }
+
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    if (window == NULL) {
+        D("%s: Could not get window handle", __FUNCTION__);
+        return NULL;
+    }
+    const WId handle = window->getWindowId(displayId);
+    D("%s: result = 0x%p", __FUNCTION__, (void*)handle);
+    return (void*)handle;
+}
+
+extern void skin_winsys_add_display(int displayId, int w, int h) {
+    fprintf(stderr, "%s: id %d w h %d %d\n", __func__, displayId, w, h);
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    window->addDisplay(displayId, w, h);
+}
+
+extern void skin_winsys_remove_display(int displayId) {
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    window->removeDisplay(displayId);
+}
+
 extern void skin_winsys_get_window_pos(int *x, int *y)
 {
     D("skin_winsys_get_window_pos");
