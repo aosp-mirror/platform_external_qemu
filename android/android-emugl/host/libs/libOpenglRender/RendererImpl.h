@@ -53,7 +53,8 @@ public:
                                      int fbw,
                                      int fbh,
                                      float dpr,
-                                     float zRot) final;
+                                     float zRot,
+                                     int subwindowId);
     bool destroyOpenGLSubwindow() final;
     void setOpenGLDisplayRotation(float zRot) final;
     void setOpenGLDisplayTranslation(float px, float py) final;

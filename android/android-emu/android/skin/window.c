@@ -1247,11 +1247,14 @@ typedef struct {
     int fbh;
     float dpr;
     float rot;
+    int subwindowId;
 } gles_show_data;
 
 static void skin_window_run_opengles_show(void* p) {
     const gles_show_data* data = (const gles_show_data*)p;
-    data->window->win_funcs->opengles_show(skin_winsys_get_window_handle(),
+    void* windowHandle = skin_winsys_get_window_handle();
+
+    data->window->win_funcs->opengles_show(windowHandle,
                                            data->wx,
                                            data->wy,
                                            data->ww,
@@ -1259,7 +1262,8 @@ static void skin_window_run_opengles_show(void* p) {
                                            data->fbw,
                                            data->fbh,
                                            data->dpr,
-                                           data->rot);
+                                           data->rot,
+                                           data->subwindowId);
 }
 
 static void
@@ -1305,6 +1309,7 @@ skin_window_show_opengles( SkinWindow* window )
     gles_show_data data;
     skin_window_setup_opengles_subwindow(window, &data);
     data.rot = disp->rotation * 90.;
+    data.subwindowId = 0;
 
     skin_winsys_run_ui_update(&skin_window_run_opengles_show, &data);
 }

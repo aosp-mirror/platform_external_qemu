@@ -240,14 +240,14 @@ android_stopOpenglesRenderer(void)
 
 int
 android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
-                           int fbw, int fbh, float dpr, float rotation)
+                           int fbw, int fbh, float dpr, float rotation, int subwindowId)
 {
     if (!sRenderer) {
         return -1;
     }
     FBNativeWindowType win = (FBNativeWindowType)(uintptr_t)window;
     bool success = sRenderer->showOpenGLSubwindow(
-            win, wx, wy, ww, wh, fbw, fbh, dpr, rotation);
+            win, wx, wy, ww, wh, fbw, fbh, dpr, rotation, subwindowId);
     return success ? 0 : -1;
 }
 

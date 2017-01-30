@@ -54,11 +54,13 @@ typedef struct SkinButton {
     unsigned            keycode;
 } SkinButton;
 
+#define ANDROID_SKIN_MAX_DISPLAYS 8
+
 typedef struct SkinPart {
     struct SkinPart*   next;
     const char*        name;
     SkinBackground     background[1];
-    SkinDisplay        display[1];
+    SkinDisplay        display[ANDROID_SKIN_MAX_DISPLAYS];
     SkinButton*        buttons;
     SkinRect           rect;    /* bounding box of all parts */
 } SkinPart;
