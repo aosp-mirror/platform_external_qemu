@@ -100,7 +100,8 @@ public:
                         int fbw,
                         int fbh,
                         float dpr,
-                        float rotation);
+                        float rotation,
+                        int subwindowId);
 
     // Remove the sub-window created by calling setupSubWindow().
     // Note that this doesn't discard the content of the emulated framebuffer,

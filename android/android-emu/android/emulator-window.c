@@ -120,9 +120,9 @@ static void emulator_window_keyboard_event(void* opaque, SkinKeyCode keycode, in
 }
 
 static int emulator_window_opengles_show_window(
-    void* window, int x, int y, int vw, int vh, int w, int h, float dpr, float rotation) {
+    void* window, int x, int y, int vw, int vh, int w, int h, float dpr, float rotation, int subwindowId) {
     if (s_use_emugl_subwindow) {
-        return android_showOpenglesWindow(window, x, y, vw, vh, w, h, dpr, rotation);
+        return android_showOpenglesWindow(window, x, y, vw, vh, w, h, dpr, rotation, subwindowId);
     } else {
         return 0;
     }

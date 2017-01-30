@@ -30,6 +30,7 @@
 
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 #include <stdint.h>
 
@@ -109,7 +110,8 @@ public:
     bool setupSubWindow(FBNativeWindowType p_window,
                         int wx, int wy,
                         int ww, int wh,
-                        int fbw, int fbh, float dpr, float zRot);
+                        int fbw, int fbh, float dpr, float zRot,
+                        int which);
 
     // Remove the sub-window created by setupSubWindow(), if any.
     // Return true on success, false otherwise.
@@ -350,9 +352,22 @@ private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle();
 
-    bool bindSubwin_locked();
+    bool bindSubwin_locked(int which);
 
 private:
+
+    struct SubWindowProps {
+    int m_x = 0;
+    int m_y = 0;
+    int m_windowWidth = 0;
+    int m_windowHeight = 0;
+    FBNativeWindowType m_nativeWindow = 0;
+    EGLSurface m_eglSurface = EGL_NO_SURFACE;
+    float      m_zRot = 0;
+    float      m_px = 0;
+    float      m_py = 0;
+    float m_dpr = 0;
+    };
     static FrameBuffer *s_theFrameBuffer;
     static HandleType s_nextHandle;
     int m_x = 0;
@@ -389,7 +404,8 @@ private:
     EGLContext m_prevContext = EGL_NO_CONTEXT;
     EGLSurface m_prevReadSurf = EGL_NO_SURFACE;
     EGLSurface m_prevDrawSurf = EGL_NO_SURFACE;
-    EGLNativeWindowType m_subWin = {};
+    std::vector<EGLNativeWindowType> m_subWin = {};
+    std::vector<SubWindowProps> m_subWindowProps = {};
     TextureDraw* m_textureDraw = nullptr;
     EGLConfig  m_eglConfig = nullptr;
     HandleType m_lastPostedColorBuffer = 0;

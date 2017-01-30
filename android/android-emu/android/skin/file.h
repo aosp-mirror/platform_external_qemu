@@ -58,7 +58,7 @@ typedef struct SkinPart {
     struct SkinPart*   next;
     const char*        name;
     SkinBackground     background[1];
-    SkinDisplay        display[1];
+    SkinDisplay        display[4];
     SkinButton*        buttons;
     SkinRect           rect;    /* bounding box of all parts */
 } SkinPart;
