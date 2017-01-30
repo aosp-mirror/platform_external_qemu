@@ -952,35 +952,6 @@ extern "C" int main(int argc, char **argv) {
     args[n++] = "-append";
     args[n++] = ASTRDUP(append_arg.c_str());
 
-    qemu2_android_serialline_init();
-
-    static UiEmuAgent uiEmuAgent;
-    uiEmuAgent.battery = gQAndroidBatteryAgent;
-    uiEmuAgent.cellular = gQAndroidCellularAgent;
-    uiEmuAgent.clipboard = gQAndroidClipboardAgent;
-    uiEmuAgent.finger = gQAndroidFingerAgent;
-    uiEmuAgent.location = gQAndroidLocationAgent;
-    uiEmuAgent.sensors = gQAndroidSensorsAgent;
-    uiEmuAgent.telephony = gQAndroidTelephonyAgent;
-    uiEmuAgent.userEvents = gQAndroidUserEventAgent;
-    uiEmuAgent.window = gQAndroidEmulatorWindowAgent;
-
-    // for now there's no uses of SettingsAgent, so we don't set it
-    uiEmuAgent.settings = NULL;
-
-    /* Setup SDL UI just before calling the code */
-#ifndef _WIN32
-    sigset_t set;
-    sigfillset(&set);
-    pthread_sigmask(SIG_SETMASK, &set, NULL);
-#endif  // !_WIN32
-    skin_winsys_init_args(argc, argv);
-    if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
-        return 1;
-    }
-
-    doGpuConfig(opts, hw, skin_winsys_get_preferred_gles_backend());
-
     /* Generate a hardware-qemu.ini for this AVD. The real hardware
      * configuration is ususally stored in several files, e.g. the AVD's
      * config.ini plus the skin-specific hardware.ini.
@@ -1058,6 +1029,35 @@ extern "C" int main(int argc, char **argv) {
         }
         printf("\n");
     }
+
+    qemu2_android_serialline_init();
+
+    static UiEmuAgent uiEmuAgent;
+    uiEmuAgent.battery = gQAndroidBatteryAgent;
+    uiEmuAgent.cellular = gQAndroidCellularAgent;
+    uiEmuAgent.clipboard = gQAndroidClipboardAgent;
+    uiEmuAgent.finger = gQAndroidFingerAgent;
+    uiEmuAgent.location = gQAndroidLocationAgent;
+    uiEmuAgent.sensors = gQAndroidSensorsAgent;
+    uiEmuAgent.telephony = gQAndroidTelephonyAgent;
+    uiEmuAgent.userEvents = gQAndroidUserEventAgent;
+    uiEmuAgent.window = gQAndroidEmulatorWindowAgent;
+
+    // for now there's no uses of SettingsAgent, so we don't set it
+    uiEmuAgent.settings = NULL;
+
+    /* Setup SDL UI just before calling the code */
+#ifndef _WIN32
+    sigset_t set;
+    sigfillset(&set);
+    pthread_sigmask(SIG_SETMASK, &set, NULL);
+#endif  // !_WIN32
+    skin_winsys_init_args(argc, argv);
+    if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
+        return 1;
+    }
+
+    doGpuConfig(opts, hw, skin_winsys_get_preferred_gles_backend());
 
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, n, (char**)args);
     skin_winsys_enter_main_loop(opts->no_window);
