@@ -1700,8 +1700,46 @@ GL_APICALL void  GL_APIENTRY glGetIntegerv(GLenum pname, GLint* params){
             return;
     }
 
+    // For non-int64 glGetIntegerv, the following params have precision issues,
+    // so just use glGetFloatv straight away:
+    GLfloat floatVals[4];
+    switch (pname) {
+    case GL_DEPTH_RANGE:
+    case GL_BLEND_COLOR:
+    case GL_COLOR_CLEAR_VALUE:
+    case GL_DEPTH_CLEAR_VALUE:
+        ctx->dispatcher().glGetFloatv(pname, floatVals);
+    default:
+        break;
+    }
+
+    int converted_float_params = 0;
+
+    switch (pname) {
+    case GL_DEPTH_RANGE:
+        converted_float_params = 2;
+        break;
+    case GL_BLEND_COLOR:
+    case GL_COLOR_CLEAR_VALUE:
+        converted_float_params = 4;
+        break;
+    case GL_DEPTH_CLEAR_VALUE:
+        converted_float_params = 1;
+        break;
+    default:
+        break;
+    }
+
+    if (converted_float_params) {
+        for (int i = 0; i < converted_float_params; i++) {
+            params[i] = (GLint)((GLint64)(floatVals[i] * 2147483647.0));
+        }
+        return;
+    }
+
     bool es2 = ctx->getCaps()->GL_ARB_ES2_COMPATIBILITY;
     s_glStateQueryTv<GLint>(es2, pname, params, s_glGetIntegerv_wrapper);
+
     if (destroyCtx)
         deleteGLESContext(ctx);
 }
