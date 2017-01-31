@@ -14,6 +14,7 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_SRC_FILES := \
     android_qemud.cpp \
+    audio-capturer.cpp \
     base/async/Looper.cpp \
     base/files/QemuFileStream.cpp \
     display.cpp \
