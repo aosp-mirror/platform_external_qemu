@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "06910517_70b680cb",
+        "filename": "android/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 755,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-01-31T23:21:55Z",
+      "side": 1,
+      "message": "the treehug does not support string substitution operation",
+      "range": {
+        "startLine": 755,
+        "startChar": 38,
+        "endLine": 755,
+        "endChar": 40
+      },
+      "revId": "29c4268026a910ec587508784031adfa9b4aaedb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
