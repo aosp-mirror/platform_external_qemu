@@ -1728,11 +1728,9 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     return true;
 }
 
-bool doGpuConfig(AndroidOptions* opts, AndroidHwConfig* hw,
+bool doGpuConfig(AvdInfo* avd, AndroidOptions* opts, AndroidHwConfig* hw,
                  int uiPreferredBackend)
 {
-    int inAndroidBuild = 0;
-    AvdInfo* avd = createAVD(opts, &inAndroidBuild);
     EmuglConfig config;
 
     int api_level = avdInfo_getApiLevel(avd);
