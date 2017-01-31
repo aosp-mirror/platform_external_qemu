@@ -139,7 +139,7 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
 
                 int pixelSize = etc_get_decoded_pixel_size(etcFormat);
                 GLsizei compressedSize = etc_get_encoded_data_size(etcFormat, width, height);
-                SET_ERROR_IF((compressedSize > imageSize), GL_INVALID_VALUE);
+                SET_ERROR_IF((compressedSize != imageSize), GL_INVALID_VALUE);
 
                 bool emulateCompressedData = false;
                 if (!data) {
