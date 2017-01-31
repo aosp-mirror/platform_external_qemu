@@ -797,47 +797,7 @@ extern "C" int main(int argc, char **argv) {
     std::string memorySize = StringFormat("%d", hw->hw_ramSize);
     args[n++] = memorySize.c_str();
 
-    // Kernel command-line parameters.
-    AndroidGlesEmulationMode glesMode = kAndroidGlesEmulationOff;
-    if (!strcmp(hw->hw_gpu_mode, "guest")) {
-        glesMode = kAndroidGlesEmulationGuest;
-    } else if (hw->hw_gpu_enabled) {
-        glesMode = kAndroidGlesEmulationHost;
-    }
-
-    uint64_t glesFramebufferCMA = 0ULL;
-    if ((glesMode == kAndroidGlesEmulationGuest) ||
-        (opts->gpu && !strcmp(opts->gpu, "guest")) ||
-        !hw->hw_gpu_enabled) {
-        // Set CMA (continguous memory allocation) to values that depend on
-        // the desired resolution.
-        // We will assume a double buffered 32-bit framebuffer
-        // in the calculation.
-        int framebuffer_width = hw->hw_lcd_width;
-        int framebuffer_height = hw->hw_lcd_height;
-        uint64_t bytes = framebuffer_width * framebuffer_height * 4;
-        const uint64_t one_MB = 1024ULL * 1024;
-        glesFramebufferCMA = (2 * bytes + one_MB - 1) / one_MB;
-        VERBOSE_PRINT(init, "Adjusting Contiguous Memory Allocation "
-                            "of %dx%d framebuffer for software renderer to %"
-                            PRIu64 "MB.", framebuffer_width, framebuffer_height,
-                            glesFramebufferCMA);
-    } else {
-        VERBOSE_PRINT(init, "Using default value for kernel "
-                            "Contiguous Memory Allocation.");
-    }
-
-
     int apiLevel = avd ? avdInfo_getApiLevel(avd) : 1000;
-
-    char* kernel_parameters = emulator_getKernelParameters(
-            opts, kTarget.androidArch, apiLevel, kTarget.ttyPrefix,
-            hw->kernel_parameters, glesMode, glesFramebufferCMA,
-            true  // isQemu2
-            );
-    if (!kernel_parameters) {
-        return 1;
-    }
 
     // Support for changing default lcd-density
     std::string lcd_density;
@@ -937,20 +897,94 @@ extern "C" int main(int argc, char **argv) {
         args[n++] = kTarget.qemuExtraArgs[idx];
     }
 
-    /* append the options after -qemu */
-    std::string append_arg(kernel_parameters);
-    free(kernel_parameters);
-    for (int i = 0; i < argc; ++i) {
-        if (!strcmp(argv[i], "-append")) {
-            if (++i < argc) {
-               android::base::StringAppendFormat(&append_arg, " %s", argv[i]);
-            }
-        } else {
-            args[n++] = argv[i];
+    static UiEmuAgent uiEmuAgent;
+
+    // Setup GPU acceleration. This needs to go along with user interface
+    // initialization, because we need the selected backend from Qt settings.
+    {
+        qemu2_android_serialline_init();
+
+        uiEmuAgent.battery = gQAndroidBatteryAgent;
+        uiEmuAgent.cellular = gQAndroidCellularAgent;
+        uiEmuAgent.clipboard = gQAndroidClipboardAgent;
+        uiEmuAgent.finger = gQAndroidFingerAgent;
+        uiEmuAgent.location = gQAndroidLocationAgent;
+        uiEmuAgent.sensors = gQAndroidSensorsAgent;
+        uiEmuAgent.telephony = gQAndroidTelephonyAgent;
+        uiEmuAgent.userEvents = gQAndroidUserEventAgent;
+        uiEmuAgent.window = gQAndroidEmulatorWindowAgent;
+
+        // for now there's no uses of SettingsAgent, so we don't set it
+        uiEmuAgent.settings = NULL;
+
+        /* Setup SDL UI just before calling the code */
+#ifndef _WIN32
+        sigset_t set;
+        sigfillset(&set);
+        pthread_sigmask(SIG_SETMASK, &set, NULL);
+#endif  // !_WIN32
+        skin_winsys_init_args(argc, argv);
+        if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
+            return 1;
         }
+
+        doGpuConfig(avd, opts, hw, skin_winsys_get_preferred_gles_backend());
+
+        // Kernel command-line parameters.
+        AndroidGlesEmulationMode glesMode = kAndroidGlesEmulationOff;
+        if (!strcmp(hw->hw_gpu_mode, "guest")) {
+            glesMode = kAndroidGlesEmulationGuest;
+        } else if (hw->hw_gpu_enabled) {
+            glesMode = kAndroidGlesEmulationHost;
+        }
+
+        uint64_t glesFramebufferCMA = 0ULL;
+        if ((glesMode == kAndroidGlesEmulationGuest) ||
+                (opts->gpu && !strcmp(opts->gpu, "guest")) ||
+                !hw->hw_gpu_enabled) {
+            // Set CMA (continguous memory allocation) to values that depend on
+            // the desired resolution.
+            // We will assume a double buffered 32-bit framebuffer
+            // in the calculation.
+            int framebuffer_width = hw->hw_lcd_width;
+            int framebuffer_height = hw->hw_lcd_height;
+            uint64_t bytes = framebuffer_width * framebuffer_height * 4;
+            const uint64_t one_MB = 1024ULL * 1024;
+            glesFramebufferCMA = (2 * bytes + one_MB - 1) / one_MB;
+            VERBOSE_PRINT(init, "Adjusting Contiguous Memory Allocation "
+                    "of %dx%d framebuffer for software renderer to %"
+                    PRIu64 "MB.", framebuffer_width, framebuffer_height,
+                    glesFramebufferCMA);
+        } else {
+            VERBOSE_PRINT(init, "Using default value for kernel "
+                    "Contiguous Memory Allocation.");
+        }
+
+        char* kernel_parameters = emulator_getKernelParameters(
+                opts, kTarget.androidArch, apiLevel, kTarget.ttyPrefix,
+                hw->kernel_parameters, glesMode, glesFramebufferCMA,
+                true  // isQemu2
+                );
+
+        if (!kernel_parameters) {
+            return 1;
+        }
+
+        /* append the kernel parameters after -qemu */
+        std::string append_arg(kernel_parameters);
+        free(kernel_parameters);
+        for (int i = 0; i < argc; ++i) {
+            if (!strcmp(argv[i], "-append")) {
+                if (++i < argc) {
+                    android::base::StringAppendFormat(&append_arg, " %s", argv[i]);
+                }
+            } else {
+                args[n++] = argv[i];
+            }
+        }
+        args[n++] = "-append";
+        args[n++] = ASTRDUP(append_arg.c_str());
     }
-    args[n++] = "-append";
-    args[n++] = ASTRDUP(append_arg.c_str());
 
     /* Generate a hardware-qemu.ini for this AVD. The real hardware
      * configuration is ususally stored in several files, e.g. the AVD's
@@ -1029,35 +1063,6 @@ extern "C" int main(int argc, char **argv) {
         }
         printf("\n");
     }
-
-    qemu2_android_serialline_init();
-
-    static UiEmuAgent uiEmuAgent;
-    uiEmuAgent.battery = gQAndroidBatteryAgent;
-    uiEmuAgent.cellular = gQAndroidCellularAgent;
-    uiEmuAgent.clipboard = gQAndroidClipboardAgent;
-    uiEmuAgent.finger = gQAndroidFingerAgent;
-    uiEmuAgent.location = gQAndroidLocationAgent;
-    uiEmuAgent.sensors = gQAndroidSensorsAgent;
-    uiEmuAgent.telephony = gQAndroidTelephonyAgent;
-    uiEmuAgent.userEvents = gQAndroidUserEventAgent;
-    uiEmuAgent.window = gQAndroidEmulatorWindowAgent;
-
-    // for now there's no uses of SettingsAgent, so we don't set it
-    uiEmuAgent.settings = NULL;
-
-    /* Setup SDL UI just before calling the code */
-#ifndef _WIN32
-    sigset_t set;
-    sigfillset(&set);
-    pthread_sigmask(SIG_SETMASK, &set, NULL);
-#endif  // !_WIN32
-    skin_winsys_init_args(argc, argv);
-    if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
-        return 1;
-    }
-
-    doGpuConfig(opts, hw, skin_winsys_get_preferred_gles_backend());
 
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, n, (char**)args);
     skin_winsys_enter_main_loop(opts->no_window);
