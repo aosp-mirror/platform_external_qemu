@@ -32,6 +32,8 @@
 //
 
 #include "android/ffmpeg-muxer.h"
+#include "android/ffmpeg-audio-capture.h"
+#include "android/emulation/AudioCaptureEngine.h"
 #include "android/utils/debug.h"
 
 extern "C" {
@@ -51,8 +53,8 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 
-#define STREAM_DURATION 10.0
-#define STREAM_FRAME_RATE 25              /* 25 images/s */
+#include <pthread.h>
+
 #define STREAM_PIX_FMT AV_PIX_FMT_YUV420P /* default pix_fmt */
 
 #define SCALE_FLAGS SWS_BICUBIC
@@ -93,18 +95,24 @@ typedef struct AudioOutputStream {
   AVFrame *tmp_frame;
 
   float t, tincr, tincr2;
+  
+  uint8_t *audio_leftover;
+  int audio_leftover_len;
 
   struct SwrContext *swr_ctx;
 } AudioOutputStream;
 
 typedef struct ffmpeg_recorder {
   char *path;
+  FfmpegAudioCapturer *audio_capturer;
   AVFormatContext *oc;
   VideoOutputStream video_st;
   AudioOutputStream audio_st;
+  pthread_mutex_t out_pkt_lock;
   bool have_video;
   bool have_audio;
   bool started;
+  uint64_t start_time;
 } ffmpeg_recorder;
 
 // FFMpeg defines a set of macros for the same purpose, but those don't
@@ -125,6 +133,18 @@ static std::string avErr2Str(int errnum) {
     return av_make_error_string(res, AV_ERROR_MAX_STRING_SIZE, errnum);
 }
 
+// return system up time in micro sec, taken from android source, system\libutils\Timers.cpp
+static uint64_t systemTimeInUS()
+{
+    struct timespec t;
+
+    t.tv_sec = t.tv_nsec = 0;
+    
+    clock_gettime(CLOCK_MONOTONIC, &t);
+
+    return ((uint64_t)(t.tv_sec))*1000000LL + t.tv_nsec / 1000L;
+}
+
 static void log_packet(const AVFormatContext *fmt_ctx, const AVPacket *pkt) {
     AVRational *time_base = &fmt_ctx->streams[pkt->stream_index]->time_base;
 
@@ -137,7 +157,7 @@ static void log_packet(const AVFormatContext *fmt_ctx, const AVPacket *pkt) {
       pkt->stream_index);
 }
 
-static int write_frame(AVFormatContext *fmt_ctx, const AVRational *time_base,
+static int write_frame(ffmpeg_recorder *recorder, AVFormatContext *fmt_ctx, const AVRational *time_base,
                        AVStream *st, AVPacket *pkt) {
   // rescale output packet timestamp values from codec to stream timebase
   av_packet_rescale_ts(pkt, *time_base, st->time_base);
@@ -145,7 +165,11 @@ static int write_frame(AVFormatContext *fmt_ctx, const AVRational *time_base,
 
   // Write the compressed frame to the media file.
   log_packet(fmt_ctx, pkt);
-  return av_interleaved_write_frame(fmt_ctx, pkt);
+  pthread_mutex_lock(&recorder->out_pkt_lock);
+  int rc = av_interleaved_write_frame(fmt_ctx, pkt);
+  pthread_mutex_unlock(&recorder->out_pkt_lock);
+
+  return rc;
 }
 
 // audio output
@@ -237,17 +261,12 @@ static int open_audio(AVFormatContext *oc, AVCodec *codec,
 // generate some dummy audio for testing purpose
 // Prepare a 16 bit dummy audio frame of 'frame_size' samples and
 // nb_channels' channels.
-#if 0
+/*
 static AVFrame *get_audio_frame(AudioOutputStream *ost)
 {
     AVFrame *frame = ost->tmp_frame;
     int j, i, v;
     int16_t *q = (int16_t*)frame->data[0];
-
-    // check if we want to generate more frames
-    if (av_compare_ts(ost->next_pts, ost->st->codec->time_base,
-                      STREAM_DURATION, (AVRational){ 1, 1 }) >= 0)
-        return NULL;
 
     for (j = 0; j <frame->nb_samples; j++) {
         v = (int)(sin(ost->t) * 10000);
@@ -262,24 +281,22 @@ static AVFrame *get_audio_frame(AudioOutputStream *ost)
 
     return frame;
 }
+*/
 
 //
 // encode one audio frame and send it to the recorder
 // return 1 when encoding is finished, 0 otherwise
 //
-static int write_audio_frame(AVFormatContext *oc, AudioOutputStream *ost)
+static int write_audio_frame(ffmpeg_recorder *recorder, AVFormatContext *oc, AudioOutputStream *ost, AVFrame *frame)
 {
     AVCodecContext *c;
     AVPacket pkt = { 0 }; // data and size must be 0;
-    AVFrame *frame;
     int ret;
     int got_packet;
     int dst_nb_samples;
 
     av_init_packet(&pkt);
     c = ost->st->codec;
-
-    frame = get_audio_frame(ost);
 
     if (frame) {
         // convert samples from native format to destination codec format, using the resampler
@@ -317,7 +334,7 @@ static int write_audio_frame(AVFormatContext *oc, AudioOutputStream *ost)
     }
 
     if (got_packet) {
-        ret = write_frame(oc, &c->time_base, ost->st, &pkt);
+        ret = write_frame(recorder, oc, &c->time_base, ost->st, &pkt);
         if (ret < 0) {
             derror("Error while writing audio frame: %s\n",
                     avErr2Str(ret).c_str());
@@ -327,8 +344,6 @@ static int write_audio_frame(AVFormatContext *oc, AudioOutputStream *ost)
 
     return (frame || got_packet) ? 0 : 1;
 }
-
-#endif
 
 // video output
 static AVFrame *alloc_picture(enum AVPixelFormat pix_fmt, int width,
@@ -393,7 +408,7 @@ static int open_video(AVFormatContext *oc, AVCodec *codec,
 
 // encode one video frame and send it to the recorder
 // return 1 when encoding is finished, 0 otherwise, negative if failed
-static int write_video_frame(AVFormatContext *oc, VideoOutputStream *ost,
+static int write_video_frame(ffmpeg_recorder *recorder, AVFormatContext *oc, VideoOutputStream *ost,
                              AVFrame *frame) {
   int ret;
   AVCodecContext *c;
@@ -415,8 +430,9 @@ static int write_video_frame(AVFormatContext *oc, VideoOutputStream *ost,
 
     pkt.pts = pkt.dts = frame->pts;
     av_packet_rescale_ts(&pkt, c->time_base, ost->st->time_base);
-
+    pthread_mutex_lock(&recorder->out_pkt_lock);
     ret = av_interleaved_write_frame(oc, &pkt);
+    pthread_mutex_unlock(&recorder->out_pkt_lock);
   } else {
     AVPacket pkt = {0};
     av_init_packet(&pkt);
@@ -429,7 +445,7 @@ static int write_video_frame(AVFormatContext *oc, VideoOutputStream *ost,
     }
 
     if (got_packet) {
-      ret = write_frame(oc, &c->time_base, ost->st, &pkt);
+      ret = write_frame(recorder, oc, &c->time_base, ost->st, &pkt);
     } else {
       ret = 0;
     }
@@ -472,6 +488,12 @@ ffmpeg_recorder *ffmpeg_create_recorder(const char *path) {
   memset(recorder, 0, sizeof(ffmpeg_recorder));
   recorder->path = strdup(path);
 
+  // initialize the out_pkt_lock
+  if (pthread_mutex_init(&recorder->out_pkt_lock, NULL) != 0)
+  {
+      derror("mutex init failed");        
+  }
+
   // Initialize libavcodec, and register all codecs and formats.
   if (!registered) {
     av_register_all();
@@ -486,6 +508,7 @@ ffmpeg_recorder *ffmpeg_create_recorder(const char *path) {
   }
 
   recorder->oc = oc;
+  recorder->start_time = systemTimeInUS();
 
   return recorder;
 }
@@ -506,12 +529,21 @@ void ffmpeg_delete_recorder(ffmpeg_recorder *recorder) {
   if (recorder->have_audio)
     close_audio_stream(recorder->oc, &recorder->audio_st);
 
+  if (recorder->audio_capturer != NULL) {
+    AudioCaptureEngine *engine = AudioCaptureEngine::get();
+    if (engine != NULL)
+      engine->stop(recorder->audio_capturer);
+    delete recorder->audio_capturer;
+  }
+
   // Close the output file.
   if (!(recorder->oc->oformat->flags & AVFMT_NOFILE))
     avio_closep(&recorder->oc->pb);
 
   // free the stream
   avformat_free_context(recorder->oc);
+
+  pthread_mutex_destroy(&recorder->out_pkt_lock);
 
   if (recorder->path) free(recorder->path);
 
@@ -549,6 +581,14 @@ static int start_recording(ffmpeg_recorder *recorder) {
     derror("Error occurred when opening output file: %s\n", avErr2Str(ret).c_str());
     free(recorder);
     return ret;
+  }
+
+printf("recorder->audio_capturer=%p\n", recorder->audio_capturer);
+  if (recorder->audio_capturer != NULL) {
+    AudioCaptureEngine *engine = AudioCaptureEngine::get();
+printf("engine=%p\n", engine);
+    if (engine != NULL)
+      engine->start(recorder->audio_capturer);
   }
 
   recorder->started = true;
@@ -589,8 +629,7 @@ int ffmpeg_add_audio_track(ffmpeg_recorder *recorder, int bit_rate,
     return -1;
   }
 
-  c->sample_fmt =
-      codec->sample_fmts ? codec->sample_fmts[0] : AV_SAMPLE_FMT_FLTP;
+  c->sample_fmt = codec->sample_fmts ? codec->sample_fmts[0] : AV_SAMPLE_FMT_FLTP;
   c->bit_rate = bit_rate;
   c->sample_rate = sample_rate;
 
@@ -613,7 +652,11 @@ int ffmpeg_add_audio_track(ffmpeg_recorder *recorder, int bit_rate,
   }
 
   c->channels = av_get_channel_layout_nb_channels(c->channel_layout);
-  ost->st->time_base = (AVRational){1, c->sample_rate};
+  ost->st->time_base = (AVRational){1, 1000000/*c->sample_rate*/};
+
+  c->time_base = ost->st->time_base;
+
+printf("c->sample_fmt=%d, c->channels=%d, ost->st->time_base.den=%d\n", c->sample_fmt, c->channels, ost->st->time_base.den);
 
   // Some formats want stream headers to be separate.
   if (oc->oformat->flags & AVFMT_GLOBALHEADER)
@@ -626,6 +669,11 @@ int ffmpeg_add_audio_track(ffmpeg_recorder *recorder, int bit_rate,
 
   AVDictionary *opt = NULL;
   int ret = open_audio(oc, codec, &recorder->audio_st, opt);
+
+  // start audio capture, this informs QEMU to send audio to our muxer
+  if (ret == 0 && recorder->audio_capturer == NULL) {
+      recorder->audio_capturer = new FfmpegAudioCapturer(recorder, sample_rate, 16, 2);     
+  }
 
   return ret;
 }
@@ -677,7 +725,11 @@ int ffmpeg_add_video_track(ffmpeg_recorder *recorder, int width, int height,
   // of which frame timestamps are represented. For fixed-fps content,
   // timebase should be 1/framerate and timestamp increments should be
   // identical to 1.
-  ost->st->time_base = (AVRational){1, STREAM_FRAME_RATE};
+  //ost->st->time_base = (AVRational){1, ost->fps};
+  ost->st->time_base = (AVRational){1, 1000000}; // microsecond timebase
+  //ost->st->time_base.den = 1000000; // microsecond timebase
+  //ost->st->time_base.num = 1;
+
   c->time_base = ost->st->time_base;
 
   c->gop_size = 12;  // emit one intra frame every twelve frames at most
@@ -730,10 +782,12 @@ int ffmpeg_encode_video_frame(ffmpeg_recorder *recorder,
 
   VideoOutputStream *ost = &recorder->video_st;
   AVCodecContext *c = ost->st->codec;
+  
+  uint64_t elapseUS = systemTimeInUS() - recorder->start_time;
 
   if (ost->sws_ctx == NULL) {
     ost->sws_ctx = sws_getContext(c->width, c->height,
-                                  AV_PIX_FMT_RGBA,  // AV_PIX_FMT_RGB24,
+                                  AV_PIX_FMT_RGBA,
                                   c->width, c->height, c->pix_fmt, SCALE_FLAGS,
                                   NULL, NULL, NULL);
     if (ost->sws_ctx == NULL) {
@@ -746,9 +800,90 @@ int ffmpeg_encode_video_frame(ffmpeg_recorder *recorder,
   sws_scale(ost->sws_ctx, (const uint8_t *const *)&rgb_pixels, linesize, 0,
             c->height, ost->frame->data, ost->frame->linesize);
 
-  ost->frame->pts = ost->next_pts++;
-
-  rc = write_video_frame(recorder->oc, ost, ost->frame);
+  //ost->frame->pts = ost->next_pts++;
+  ost->frame->pts = (int64_t)(((double)elapseUS * ost->st->time_base.den) / 1000000.00);
+  rc = write_video_frame(recorder, recorder->oc, ost, ost->frame);
 
   return rc;
+}
+
+// Encode and write a video frame (in 32-bit RGBA format) to the recoder
+// params:
+//    recorder - the recorder instance
+//    buffer - the byte array for the audio buffer in PCM format
+//    size - the audio buffer size
+// return:
+//   0    if successful
+//   < 0  if failed
+//
+// this method is thread safe
+int ffmpeg_encode_audio_frame(ffmpeg_recorder *recorder, uint8_t *buffer, int size)
+{
+    if (recorder == NULL) return -1;
+
+    int rc = start_recording(recorder);
+    if (rc < 0) return rc;
+
+    AudioOutputStream *ost = &recorder->audio_st;
+     if (ost->st == NULL)
+        return -1;
+
+    if (recorder->oc == NULL)
+        return -1;
+
+    uint64_t elapseUS = systemTimeInUS() - recorder->start_time;
+
+    int64_t pts = (int64_t)(((double)elapseUS * ost->st->time_base.den) / 1000000.00);
+
+    //AVFrame *frame = get_audio_frame(ost);
+    //write_audio_frame(recorder, recorder->oc, ost, frame);
+    //return 0;
+
+    AVFrame *frame = ost->tmp_frame;
+    int frame_size = frame->nb_samples * ost->st->codec->channels * sizeof(int16_t); // 16-bit
+
+    // we need to split into frames
+    int remaining = size;
+    uint8_t *buf = buffer;
+
+    if (ost->audio_leftover_len > 0)
+    {
+        if (ost->audio_leftover_len + size >= frame_size) {
+            memcpy(ost->audio_leftover + ost->audio_leftover_len, buf, frame_size - ost->audio_leftover_len);
+            memcpy(frame->data[0], ost->audio_leftover, frame_size);
+            //frame->pts = ost->next_pts;
+            //ost->next_pts += frame->nb_samples;
+            frame->pts = pts;
+	    write_audio_frame(recorder, recorder->oc, ost, frame);
+            buf += (frame_size - ost->audio_leftover_len);
+	    remaining -= (frame_size - ost->audio_leftover_len);
+	    ost->audio_leftover_len = 0;
+        } else { // not enough for one frame yet
+            memcpy(ost->audio_leftover + ost->audio_leftover_len, buf, size);
+            ost->audio_leftover_len += size;
+            remaining = 0;
+        }
+     }
+
+     while (remaining >= frame_size)
+     {
+         memcpy(frame->data[0], buf, frame_size);
+         //frame->pts = ost->next_pts;
+         //ost->next_pts += frame->nb_samples; 
+         frame->pts = pts;
+         write_audio_frame(recorder, recorder->oc, ost, frame);
+         buf += frame_size;
+         remaining -= frame_size;
+     }
+	
+     if (remaining > 0)
+     {
+         if (ost->audio_leftover == NULL)
+             ost->audio_leftover = (uint8_t *)malloc(frame_size);
+
+         memcpy(ost->audio_leftover, buf, remaining);
+         ost->audio_leftover_len = remaining;
+     }
+
+     return 0;
 }
