@@ -73,12 +73,12 @@ void ffmpeg_delete_recorder(ffmpeg_recorder *recorder);
 int ffmpeg_add_audio_track(ffmpeg_recorder *recorder, int bit_rate,
                            int sample_rate);
 
-// Add a video track from the specified format, video track is required in order
-// to generate a correct mp4 file
+// Add a video track from the specified format, video track is required in
+// order to generate a correct mp4 file
 // params:
 //   recorder - the recorder instance
-//   width/height - the video size which determine the rgb pixel array size used
-//   in ffmpeg_encode_video_frame() method
+//   width/height - the video size which determine the rgb pixel array size
+//   used in ffmpeg_encode_video_frame() method
 //   bit_rate - the video recording bit rate, the higher this number is, the
 //   better the quality and the larger video file size.
 //              for example, 512 * 1024 * 1024. It should be higher than audio
@@ -102,7 +102,7 @@ int ffmpeg_add_video_track(ffmpeg_recorder *recorder, int width, int height,
 //   < 0  if failed
 //
 // this method is thread safe
-int ffmpeg_encode_audio_frame(ffmpeg_recorder *recorder, uint8_t *buffer,
+int ffmpeg_encode_audio_frame(ffmpeg_recorder *recorder, uint8_t *buffer, 
                               int size);
 
 // Encode and write a video frame (in 32-bit RGBA format) to the recoder
