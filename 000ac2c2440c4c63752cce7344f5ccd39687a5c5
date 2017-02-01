@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "23ec2ac8_782a5df4",
+        "filename": "android-qemu2-glue/android_renderer.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-01T22:30:05Z",
+      "side": 1,
+      "message": "sounds good to me, will get it done",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 15
+      },
+      "revId": "000ac2c2440c4c63752cce7344f5ccd39687a5c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "76deb33d_b20f9b24",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
         "patchSetId": 18
@@ -36,6 +59,29 @@
       "writtenOn": "2017-02-01T21:12:08Z",
       "side": 1,
       "message": "1. android/base/containers/Lookup.h, contains()\n2. this will be quite slow operation, we\u0027ll need something better",
+      "range": {
+        "startLine": 257,
+        "startChar": 19,
+        "endLine": 257,
+        "endChar": 39
+      },
+      "revId": "000ac2c2440c4c63752cce7344f5ccd39687a5c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6fd15ceb_16bc4440",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-01T22:30:05Z",
+      "side": 1,
+      "message": "I will implement a always increasing nextID for better performance.",
       "range": {
         "startLine": 257,
         "startChar": 19,
@@ -71,6 +117,29 @@
     },
     {
       "key": {
+        "uuid": "167863b3_b43852dd",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-01T22:30:05Z",
+      "side": 1,
+      "message": "I will probably refactor this part to index share groups by their ID. But that is on my TODO list and won\u0027t go into this CL.",
+      "range": {
+        "startLine": 312,
+        "startChar": 0,
+        "endLine": 314,
+        "endChar": 5
+      },
+      "revId": "000ac2c2440c4c63752cce7344f5ccd39687a5c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3bf240d8_7a6e181c",
         "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/objectNameManager.h",
         "patchSetId": 18
@@ -82,6 +151,29 @@
       "writtenOn": "2017-02-01T21:12:08Z",
       "side": 1,
       "message": "const",
+      "range": {
+        "startLine": 119,
+        "startChar": 20,
+        "endLine": 119,
+        "endChar": 21
+      },
+      "revId": "000ac2c2440c4c63752cce7344f5ccd39687a5c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eea470ff_de74327a",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/objectNameManager.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-01T22:30:05Z",
+      "side": 1,
+      "message": "Done",
       "range": {
         "startLine": 119,
         "startChar": 20,
@@ -117,6 +209,29 @@
     },
     {
       "key": {
+        "uuid": "fb49c6cd_66f5e630",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 1095,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-01T22:30:05Z",
+      "side": 1,
+      "message": "will do",
+      "range": {
+        "startLine": 1089,
+        "startChar": 4,
+        "endLine": 1095,
+        "endChar": 5
+      },
+      "revId": "000ac2c2440c4c63752cce7344f5ccd39687a5c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e37fb6df_9e256c03",
         "filename": "android/android-emugl/host/libs/libOpenglRender/RenderLibImpl.cpp",
         "patchSetId": 18
@@ -128,6 +243,29 @@
       "writtenOn": "2017-02-01T21:12:08Z",
       "side": 1,
       "message": "this is bad as it would block for quite a long time. All old render threads will die and exit anyway as their pipes are force-closed.",
+      "range": {
+        "startLine": 93,
+        "startChar": 8,
+        "endLine": 93,
+        "endChar": 41
+      },
+      "revId": "000ac2c2440c4c63752cce7344f5ccd39687a5c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5ca05666_bbdd46c3",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderLibImpl.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-01T22:30:05Z",
+      "side": 1,
+      "message": "we will need to wait for all of them to exit and release resources completely before loading framebuffer, since their cleanup paths mess up the context map. if we don\u0027t wait for thread exit, we need to set a flag asking the threads not to clean up. Are you OK with that?",
       "range": {
         "startLine": 93,
         "startChar": 8,
@@ -163,6 +301,29 @@
     },
     {
       "key": {
+        "uuid": "84dd2e91_d43fe7aa",
+        "filename": "android/android-emugl/shared/emugl/common/stream.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-01T22:30:05Z",
+      "side": 1,
+      "message": "will do",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 37
+      },
+      "revId": "000ac2c2440c4c63752cce7344f5ccd39687a5c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ed6bcf2e_178de3ca",
         "filename": "android/data/advancedFeatures.ini",
         "patchSetId": 18
@@ -174,6 +335,23 @@
       "writtenOn": "2017-02-01T21:12:08Z",
       "side": 1,
       "message": "is this because we don\u0027t save the calculator state?",
+      "revId": "000ac2c2440c4c63752cce7344f5ccd39687a5c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ef0e845b_17d740c1",
+        "filename": "android/data/advancedFeatures.ini",
+        "patchSetId": 18
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-01T22:30:05Z",
+      "side": 1,
+      "message": "I will remove this. And yes, we would need calculator snapshot before we can use this flag with snapshot.",
       "revId": "000ac2c2440c4c63752cce7344f5ccd39687a5c5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
