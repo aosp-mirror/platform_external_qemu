@@ -103,6 +103,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  GLenum p_internalFormat,
                                  FrameworkFormat p_frameworkFormat,
                                  bool has_eglimage_texture_2d,
+                                 HandleType hndl,
                                  Helper* helper) {
     GLenum texInternalFormat = 0;
 
@@ -128,7 +129,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
         return NULL;
     }
 
-    ColorBuffer* cb = new ColorBuffer(p_display, helper);
+    ColorBuffer* cb = new ColorBuffer(p_display, hndl, helper);
 
     s_gles2.glGenTextures(1, &cb->m_tex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
@@ -194,8 +195,8 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     return cb;
 }
 
-ColorBuffer::ColorBuffer(EGLDisplay display, Helper* helper)
-    : m_display(display), m_helper(helper) {}
+ColorBuffer::ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper)
+    : m_display(display), m_helper(helper), mHndl(hndl) {}
 
 ColorBuffer::~ColorBuffer() {
     ScopedHelperContext context(m_helper);
@@ -421,7 +422,12 @@ void ColorBuffer::readback(unsigned char* img) {
     }
 }
 
+HandleType ColorBuffer::getHndl() const {
+    return mHndl;
+}
+
 void ColorBuffer::onSave(android::base::Stream* stream) {
+    stream->putBe32(getHndl());
     stream->putBe32(static_cast<uint32_t>(m_width));
     stream->putBe32(static_cast<uint32_t>(m_height));
     stream->putBe32(static_cast<uint32_t>(m_internalFormat));
@@ -432,11 +438,12 @@ ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
                                  EGLDisplay p_display,
                                  bool has_eglimage_texture_2d,
                                  Helper* helper) {
+    HandleType hndl = static_cast<HandleType>(stream->getBe32());
     GLuint width = static_cast<GLuint>(stream->getBe32());
     GLuint height = static_cast<GLuint>(stream->getBe32());
     GLenum internalFormat = static_cast<GLenum>(stream->getBe32());
     FrameworkFormat frameworkFormat =
             static_cast<FrameworkFormat>(stream->getBe32());
     return create(p_display, width, height, internalFormat, frameworkFormat,
-                  has_eglimage_texture_2d, helper);
+                  has_eglimage_texture_2d, hndl, helper);
 }
