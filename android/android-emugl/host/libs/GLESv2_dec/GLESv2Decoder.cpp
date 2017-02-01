@@ -499,7 +499,7 @@ GLuint GLESv2Decoder::s_glCreateShader(void* self, GLenum shaderType) {
     GLuint shader = ctx->glCreateShader(shaderType);
     
     if (ctx->m_snapshot) {
-        GLuint emuName = ctx->m_snapshot->createShader(shader, shaderType);
+        GLuint emuName = ctx->m_snapshot->glCreateShader(shader, shaderType);
         return emuName;
     }
 
@@ -516,7 +516,7 @@ void GLESv2Decoder::s_glGenBuffers(void* self, GLsizei n, GLuint* buffers) {
     ctx->glGenBuffers(n, buffers);
 
     if (ctx->m_snapshot) {
-        ctx->m_snapshot->genBuffers(n, buffers);
+        ctx->m_snapshot->glGenBuffers(n, buffers);
     }
 }
 
@@ -650,50 +650,72 @@ void GLESv2Decoder::s_glDeleteProgramPipelines(void* self, GLsizei n, const GLui
     // TODO: Snapshot names
 }
 
-#define SNAPSHOT_PROGRAM_NAME(x) \
+#define SNAPSHOT_NAME(type, x) \
     GLESv2Decoder *ctx = (GLESv2Decoder *)self; \
-    if (ctx->m_snapshot) { x = ctx->m_snapshot->getProgramName(x); } \
+    if (ctx->m_snapshot) { x = ctx->m_snapshot->getName(type, x); } \
 
 #define SNAPSHOT_PROGRAM_NAME2(x,y) \
     GLESv2Decoder *ctx = (GLESv2Decoder *)self; \
     if (ctx->m_snapshot) { \
-        x = ctx->m_snapshot->getProgramName(x); \
-        y = ctx->m_snapshot->getProgramName(y); \
+        x = ctx->m_snapshot->getName(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, x); \
+        y = ctx->m_snapshot->getName(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, y); \
     } \
 
 #define SNAPSHOT_SHADER_CALL(funcname,argtypes,args) \
 void GLESv2Decoder::s_##funcname argtypes { \
-    SNAPSHOT_PROGRAM_NAME(shader) \
+    SNAPSHOT_NAME(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, shader) \
     ctx-> funcname args ; \
 } \
 
 #define SNAPSHOT_PROGRAM_CALL(funcname,argtypes,args) \
 void GLESv2Decoder::s_##funcname argtypes  { \
-    SNAPSHOT_PROGRAM_NAME(program) \
+    SNAPSHOT_NAME(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, program) \
     ctx-> funcname args ; \
 } \
 
 #define SNAPSHOT_PROGRAM_CALL_RET(rettype, funcname, argtypes, args) \
 rettype GLESv2Decoder::s_##funcname argtypes  { \
-    SNAPSHOT_PROGRAM_NAME(program) \
+    SNAPSHOT_NAME(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, program) \
     return ctx-> funcname args; \
 } \
 
+#define SNAPSHOT_PROGRAM_CALL_STATEUPDATE(funcname,argtypes,args) \
+void GLESv2Decoder::s_##funcname argtypes  { \
+    SNAPSHOT_NAME(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, program) \
+    ctx-> funcname args ; \
+    if (ctx->m_snapshot) { \
+        ctx->m_snapshot-> funcname args ; \
+    } \
+} \
+
+#define SNAPSHOT_PROGRAM_CALL_RET_STATEUPDATE(rettype, funcname, argtypes, args) \
+rettype GLESv2Decoder::s_##funcname argtypes  { \
+    SNAPSHOT_NAME(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, program) \
+    rettype phys_val = ctx-> funcname args ; \
+    if (ctx->m_snapshot) { \
+        ctx-> m_snapshot-> funcname args; \
+    } \
+    return phys_val; \
+} \
 
 void GLESv2Decoder::s_glShaderString(void *self, GLuint shader, const GLchar* string, GLsizei len)
 {
-    SNAPSHOT_PROGRAM_NAME(shader);
+    SNAPSHOT_NAME(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, shader);
 
     ctx->glShaderSource(shader, 1, &string, NULL);
 
     if (ctx->m_snapshot) {
-        ctx->m_snapshot->shaderString(shader, string);
+        ctx->m_snapshot->glShaderString(shader, string);
     }
 }
 
 void GLESv2Decoder::s_glAttachShader(void* self, GLuint program, GLuint shader) {
     SNAPSHOT_PROGRAM_NAME2(program, shader)
     ctx->glAttachShader(program, shader);
+
+    if (ctx->m_snapshot) {
+        ctx->m_snapshot->glAttachShader(program, shader);
+    }
 }
 
 void GLESv2Decoder::s_glDetachShader(void* self, GLuint program, GLuint shader) {
@@ -702,12 +724,12 @@ void GLESv2Decoder::s_glDetachShader(void* self, GLuint program, GLuint shader) 
 }
 
 GLboolean GLESv2Decoder::s_glIsShader(void* self, GLuint shader) {
-    SNAPSHOT_PROGRAM_NAME(shader);
+    SNAPSHOT_NAME(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, shader);
     return ctx->glIsShader(shader);
 }
 
 GLboolean GLESv2Decoder::s_glIsProgram(void* self, GLuint program) {
-    SNAPSHOT_PROGRAM_NAME(program);
+    SNAPSHOT_NAME(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, program);
     return ctx->glIsProgram(program);
 }
 

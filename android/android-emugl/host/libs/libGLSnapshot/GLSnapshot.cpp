@@ -63,6 +63,14 @@ void GLSnapshotState::getGlobalStateEnable(GLenum name) {
     mEnables[name] = mGL->glIsEnabled(name) == GL_TRUE;
 }
 
+GLuint GLSnapshotState::toPhysName(ObjectType type, GLuint name) {
+    return mNames[type][name];
+}
+
+GLuint GLSnapshotState::toVirtName(ObjectType type, GLuint name) {
+    return mNamesBack[type][name];
+}
+
 void GLSnapshotState::save() {
     getGlobalStateEnable(GL_DEPTH_TEST);
 
@@ -79,7 +87,7 @@ void GLSnapshotState::restore() {
         }
     }
 
-    for (auto& it: mProgramNames) {
+    for (auto& it: mNames[ObjectType::PROGRAM]) {
         GLShaderState& shaderState = mShaderState[it.first];
         it.second = mGL->glCreateShader(shaderState.type);
         if (shaderState.source.size()) {
@@ -99,32 +107,39 @@ void GLSnapshotState::restore() {
     mGL->glActiveTexture(mGlobals[GL_ACTIVE_TEXTURE].ints[0]);
 }
 
-GLuint GLSnapshotState::createShader(GLuint shader, GLenum shaderType) {
-    GLuint shaderName = mProgramCounter++;
-    mProgramNames[shaderName] = shader;
-    mProgramNamesBack[shader] = shaderName;
-    mShaderState[shaderName].type = shaderType;
-    mShaderState[shaderName].source = "";
-    mShaderState[shaderName].compileStatus = false;
+GLuint GLSnapshotState::glCreateShader(GLuint shader, GLenum shaderType) {
+    GLuint shaderName = nextName(ObjectType::PROGRAM);
+    remapName(ObjectType::PROGRAM, shaderName, shader);
+    GLShaderState state;
+    state.type = shaderType;
+    mShaderState[shaderName] = state;
     return shaderName;
 }
 
-GLuint GLSnapshotState::createProgram(GLuint program) {
-    return program;
+GLuint GLSnapshotState::glCreateProgram(GLuint program) {
+    GLuint programName = nextName(ObjectType::PROGRAM);
+    remapName(ObjectType::PROGRAM, programName, program);
+    mProgramState[programName] = GLProgramState();
+    return programName;
 }
 
-
-void GLSnapshotState::shaderString(GLuint shader, const GLchar* string) {
-    mShaderState[mProgramNamesBack[shader]].source = std::string(string);
-    
+void GLSnapshotState::glShaderString(GLuint shader, const GLchar* string) {
+    mShaderState[toVirtName(ObjectType::PROGRAM, shader)].source = std::string(string);
 }
 
-void GLSnapshotState::genBuffers(GLsizei n, GLuint* buffers) {
+void GLSnapshotState::glAttachShader(GLuint program, GLuint shader) {
+    GLuint program_v = toVirtName(ObjectType::PROGRAM, program);
+    GLuint shader_v = toVirtName(ObjectType::PROGRAM, shader);
+    GLenum shaderType = mShaderState[shader_v].type;
+    mProgramState[program_v].linkage[shaderType] = shader_v;
+}
+
+void GLSnapshotState::glGenBuffers(GLsizei n, GLuint* buffers) {
     return;
 }
 
-GLuint GLSnapshotState::getProgramName(GLuint name) {
-    return mProgramNames[name];
+GLuint GLSnapshotState::getName(GLSnapshotState::ObjectType type, GLuint name) {
+    return mNames[type][name];
 }
 
 } // namespace GLSnapshot
