@@ -161,6 +161,13 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     OVERRIDE_DEC(glGetActiveUniform)
     OVERRIDE_DEC(glGetAttachedShaders)
     OVERRIDE_DEC(glGetAttribLocation)
+
+    OVERRIDE_DEC(glUniform1i)
+    OVERRIDE_DEC(glUniform1f)
+    OVERRIDE_DEC(glUniform4f)
+    OVERRIDE_DEC(glUniform4fv)
+    OVERRIDE_DEC(glUniformMatrix4fv)
+
     OVERRIDE_DEC(glGetUniformfv)
     OVERRIDE_DEC(glGetUniformiv)
     OVERRIDE_DEC(glGetUniformLocation)
@@ -218,6 +225,16 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     OVERRIDE_DEC(glGetProgramResourceIndex)
     OVERRIDE_DEC(glGetProgramResourceLocation)
     OVERRIDE_DEC(glGetProgramResourceName)
+
+    OVERRIDE_DEC(glBindBuffer)
+    OVERRIDE_DEC(glBufferData)
+    OVERRIDE_DEC(glBufferSubData)
+
+    OVERRIDE_DEC(glBindTexture)
+    OVERRIDE_DEC(glActiveTexture)
+    OVERRIDE_DEC(glPixelStorei)
+    OVERRIDE_DEC(glTexImage2D)
+    OVERRIDE_DEC(glTexSubImage2D)
 
     return 0;
 
@@ -499,7 +516,7 @@ GLuint GLESv2Decoder::s_glCreateShader(void* self, GLenum shaderType) {
     GLuint shader = ctx->glCreateShader(shaderType);
     
     if (ctx->m_snapshot) {
-        GLuint emuName = ctx->m_snapshot->createShader(shader, shaderType);
+        GLuint emuName = ctx->m_snapshot->glCreateShader(shader, shaderType);
         return emuName;
     }
 
@@ -516,7 +533,7 @@ void GLESv2Decoder::s_glGenBuffers(void* self, GLsizei n, GLuint* buffers) {
     ctx->glGenBuffers(n, buffers);
 
     if (ctx->m_snapshot) {
-        ctx->m_snapshot->genBuffers(n, buffers);
+        ctx->m_snapshot->glGenBuffers(n, buffers);
     }
 }
 
@@ -650,50 +667,76 @@ void GLESv2Decoder::s_glDeleteProgramPipelines(void* self, GLsizei n, const GLui
     // TODO: Snapshot names
 }
 
-#define SNAPSHOT_PROGRAM_NAME(x) \
+#define SNAPSHOT_NAME(type, x) \
     GLESv2Decoder *ctx = (GLESv2Decoder *)self; \
-    if (ctx->m_snapshot) { x = ctx->m_snapshot->getProgramName(x); } \
+    if (ctx->m_snapshot) { x = ctx->m_snapshot->getName(type, x); } \
 
 #define SNAPSHOT_PROGRAM_NAME2(x,y) \
     GLESv2Decoder *ctx = (GLESv2Decoder *)self; \
     if (ctx->m_snapshot) { \
-        x = ctx->m_snapshot->getProgramName(x); \
-        y = ctx->m_snapshot->getProgramName(y); \
+        x = ctx->m_snapshot->getName(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, x); \
+        y = ctx->m_snapshot->getName(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, y); \
     } \
 
 #define SNAPSHOT_SHADER_CALL(funcname,argtypes,args) \
 void GLESv2Decoder::s_##funcname argtypes { \
-    SNAPSHOT_PROGRAM_NAME(shader) \
+    SNAPSHOT_NAME(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, shader) \
     ctx-> funcname args ; \
 } \
 
 #define SNAPSHOT_PROGRAM_CALL(funcname,argtypes,args) \
 void GLESv2Decoder::s_##funcname argtypes  { \
-    SNAPSHOT_PROGRAM_NAME(program) \
+    SNAPSHOT_NAME(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, program) \
     ctx-> funcname args ; \
 } \
 
 #define SNAPSHOT_PROGRAM_CALL_RET(rettype, funcname, argtypes, args) \
 rettype GLESv2Decoder::s_##funcname argtypes  { \
-    SNAPSHOT_PROGRAM_NAME(program) \
+    SNAPSHOT_NAME(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, program) \
     return ctx-> funcname args; \
 } \
 
+#define SNAPSHOT_CALL_STATEUPDATE(funcname,argtypes,args) \
+void GLESv2Decoder::s_##funcname argtypes  { \
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self; \
+    ctx-> funcname args ; \
+    if (ctx->m_snapshot) { \
+        ctx->m_snapshot-> funcname args ; \
+    } \
+} \
+
+#define SNAPSHOT_PROGRAM_CALL_STATEUPDATE(funcname,argtypes,args) \
+void GLESv2Decoder::s_##funcname argtypes  { \
+    SNAPSHOT_NAME(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, program) \
+    ctx-> funcname args ; \
+    if (ctx->m_snapshot) { \
+        ctx->m_snapshot-> funcname args ; \
+    } \
+} \
+
+#define SNAPSHOT_PROGRAM_CALL_RET_STATEUPDATE(rettype, funcname, argtypes, args) \
+rettype GLESv2Decoder::s_##funcname argtypes  { \
+    SNAPSHOT_NAME(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, program) \
+    rettype phys_val = ctx-> funcname args ; \
+    if (ctx->m_snapshot) { \
+        ctx-> m_snapshot-> funcname args; \
+    } \
+    return phys_val; \
+} \
 
 void GLESv2Decoder::s_glShaderString(void *self, GLuint shader, const GLchar* string, GLsizei len)
 {
-    SNAPSHOT_PROGRAM_NAME(shader);
-
+    SNAPSHOT_NAME(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, shader);
     ctx->glShaderSource(shader, 1, &string, NULL);
-
-    if (ctx->m_snapshot) {
-        ctx->m_snapshot->shaderString(shader, string);
-    }
+    if (ctx->m_snapshot)
+        ctx->m_snapshot->glShaderString(shader, string);
 }
 
 void GLESv2Decoder::s_glAttachShader(void* self, GLuint program, GLuint shader) {
     SNAPSHOT_PROGRAM_NAME2(program, shader)
     ctx->glAttachShader(program, shader);
+    if (ctx->m_snapshot)
+        ctx->m_snapshot->glAttachShader(program, shader);
 }
 
 void GLESv2Decoder::s_glDetachShader(void* self, GLuint program, GLuint shader) {
@@ -702,25 +745,101 @@ void GLESv2Decoder::s_glDetachShader(void* self, GLuint program, GLuint shader) 
 }
 
 GLboolean GLESv2Decoder::s_glIsShader(void* self, GLuint shader) {
-    SNAPSHOT_PROGRAM_NAME(shader);
+    SNAPSHOT_NAME(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, shader);
     return ctx->glIsShader(shader);
 }
 
 GLboolean GLESv2Decoder::s_glIsProgram(void* self, GLuint program) {
-    SNAPSHOT_PROGRAM_NAME(program);
+    SNAPSHOT_NAME(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, program);
     return ctx->glIsProgram(program);
 }
 
-SNAPSHOT_SHADER_CALL(glCompileShader, (void* self,  GLuint shader), (shader))
+void GLESv2Decoder::s_glCompileShader(void* self, GLuint shader) {
+    SNAPSHOT_NAME(GLSnapshot::GLSnapshotState::ObjectType::PROGRAM, shader)
+    ctx->glCompileShader(shader);
+    if (ctx->m_snapshot)
+        ctx->m_snapshot->glCompileShader(shader);
+}
+
+SNAPSHOT_PROGRAM_CALL_STATEUPDATE(glLinkProgram, (void* self,  GLuint program), (program))
+SNAPSHOT_PROGRAM_CALL_STATEUPDATE(glUseProgram, (void* self,  GLuint program), (program))
+SNAPSHOT_PROGRAM_CALL_STATEUPDATE(glBindAttribLocation, (void* self,  GLuint program, GLuint index, const GLchar* name), (program, index, name))
+
+SNAPSHOT_CALL_STATEUPDATE(glUniform1i, (void* self, GLint location, GLint x), (location, x))
+SNAPSHOT_CALL_STATEUPDATE(glUniform1f, (void* self, GLint location, GLfloat x), (location, x))
+SNAPSHOT_CALL_STATEUPDATE(glUniform4f, (void* self, GLint location, GLfloat x, GLfloat y, GLfloat z, GLfloat w), (location, x, y, z, w))
+SNAPSHOT_CALL_STATEUPDATE(glUniform4fv, (void* self, GLint location, GLsizei count, const GLfloat* vals), (location, count, vals))
+SNAPSHOT_CALL_STATEUPDATE(glUniformMatrix4fv, (void* self, GLint location, GLsizei count, GLboolean transpose, const GLfloat* value), (location, count, transpose, value))
+
+void GLESv2Decoder::s_glBindBuffer(void* self, GLenum target, GLuint buffer) {
+    SNAPSHOT_NAME(GLSnapshot::GLSnapshotState::ObjectType::BUFFER, buffer);
+    ctx->glBindBuffer(target, buffer);
+    if (ctx->m_snapshot)
+        ctx->m_snapshot->glBindBuffer(target, buffer);
+}
+
+void GLESv2Decoder::s_glBufferData(void* self, GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glBufferData(target, size, data, usage);
+    if (ctx->m_snapshot)
+        ctx->m_snapshot->glBufferData(target, size, data, usage);
+}
+
+void GLESv2Decoder::s_glBufferSubData(void* self, GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glBufferSubData(target, offset, size, data);
+    if (ctx->m_snapshot)
+        ctx->m_snapshot->glBufferSubData(target, offset, size, data);
+}
+
+void GLESv2Decoder::s_glBindTexture(void* self, GLenum target, GLuint texture) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glBindTexture(target, texture);
+    if (ctx->m_snapshot)
+        ctx->m_snapshot->glBindTexture(target, texture);
+}
+
+void GLESv2Decoder::s_glActiveTexture(void* self, GLenum unit) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glActiveTexture(unit);
+    if (ctx->m_snapshot)
+        ctx->m_snapshot->glActiveTexture(unit);
+}
+
+void GLESv2Decoder::s_glPixelStorei(void* self, GLenum pname, GLint param) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glPixelStorei(pname, param);
+    if (ctx->m_snapshot)
+        ctx->m_snapshot->glPixelStorei(pname, param);
+}
+
+void GLESv2Decoder::s_glTexImage2D(
+        void* self, GLenum target, GLint level, GLint internalformat,
+        GLsizei width, GLsizei height,
+        GLint border, GLenum format, GLenum type, const GLvoid* pixels) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+    if (ctx->m_snapshot)
+        ctx->m_snapshot->glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+}
+
+void GLESv2Decoder::s_glTexSubImage2D(
+        void* self, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
+    if (ctx->m_snapshot)
+        ctx->m_snapshot->glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
+}
+
+// Unused / passthrough / NYI below
+
 SNAPSHOT_SHADER_CALL(glGetShaderiv, (void* self,  GLuint shader, GLenum pname, GLint* params), (shader, pname, params))
 SNAPSHOT_SHADER_CALL(glGetShaderInfoLog, (void* self,  GLuint shader, GLsizei bufsize, GLsizei* length, GLchar* infolog), (shader, bufsize, length, infolog))
 SNAPSHOT_SHADER_CALL(glGetShaderSource, (void* self,  GLuint shader, GLsizei bufsize, GLsizei* length, GLchar* source), (shader, bufsize, length, source))
-SNAPSHOT_PROGRAM_CALL(glLinkProgram, (void* self,  GLuint program), (program))
-SNAPSHOT_PROGRAM_CALL(glUseProgram, (void* self,  GLuint program), (program))
+
 SNAPSHOT_PROGRAM_CALL(glValidateProgram, (void* self,  GLuint program), (program))
 SNAPSHOT_PROGRAM_CALL(glGetProgramiv, (void* self,  GLuint program, GLenum pname, GLint* params), (program, pname, params))
 SNAPSHOT_PROGRAM_CALL(glGetProgramInfoLog, (void* self,  GLuint program, GLsizei bufsize, GLsizei* length, GLchar* infolog), (program, bufsize, length, infolog))
-SNAPSHOT_PROGRAM_CALL(glBindAttribLocation, (void* self,  GLuint program, GLuint index, const GLchar* name), (program, index, name))
 SNAPSHOT_PROGRAM_CALL(glGetActiveAttrib, (void* self,  GLuint program, GLuint index, GLsizei bufsize, GLsizei* length, GLint* size, GLenum* type, GLchar* name), (program, index, bufsize, length, size, type, name))
 SNAPSHOT_PROGRAM_CALL(glGetActiveUniform, (void* self,  GLuint program, GLuint index, GLsizei bufsize, GLsizei* length, GLint* size, GLenum* type, GLchar* name), (program, index, bufsize, length, size, type, name))
 SNAPSHOT_PROGRAM_CALL(glGetAttachedShaders, (void* self,  GLuint program, GLsizei maxcount, GLsizei* count, GLuint* shaders), (program, maxcount, count, shaders))
@@ -782,3 +901,4 @@ SNAPSHOT_PROGRAM_CALL(glGetProgramResourceiv, (void* self,  GLuint program, GLen
 SNAPSHOT_PROGRAM_CALL_RET(GLuint, glGetProgramResourceIndex, (void* self, GLuint program, GLenum programInterface, const char * name), (program, programInterface, name))
 SNAPSHOT_PROGRAM_CALL_RET(GLint, glGetProgramResourceLocation, (void* self, GLuint program, GLenum programInterface, const char * name), (program, programInterface, name))
 SNAPSHOT_PROGRAM_CALL(glGetProgramResourceName, (void* self,  GLuint program, GLenum programInterface, GLuint index, GLsizei bufSize, GLsizei* length, char* name), (program, programInterface, index, bufSize, length, name))
+

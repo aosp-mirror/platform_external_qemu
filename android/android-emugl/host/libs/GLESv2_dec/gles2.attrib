@@ -1412,4 +1412,37 @@ glGetProgramResourceLocation
 glGetProgramResourceName
     flag custom_decoder
 
+glBindBuffer
+    flag custom_decoder
 
+glBufferData
+    flag custom_decoder
+
+glBufferSubData
+    flag custom_decoder
+
+glBindTexture
+    flag custom_decoder
+
+glActiveTexture
+    flag custom_decoder
+
+glPixelStorei
+    flag custom_decoder
+
+glTexImage2D
+    flag custom_decoder
+
+glTexSubImage2D
+    flag custom_decoder
+
+glUniform1i
+    flag custom_decoder
+glUniform1f
+    flag custom_decoder
+glUniform4fv
+    flag custom_decoder
+glUniform4f
+    flag custom_decoder
+glUniformMatrix4fv
+    flag custom_decoder

@@ -73,6 +73,22 @@ private:
 
     static void gles1_APIENTRY s_glDeleteVertexArraysOES(void* self, GLsizei n, const GLuint *arrays);
 
+    static void gles1_APIENTRY s_glBindBuffer(void* self, GLenum target, GLuint buffer);
+    static void gles1_APIENTRY s_glBufferData(void* self, GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage);
+    static void gles1_APIENTRY s_glBufferSubData(void* self, GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data);
+
+    static void gles1_APIENTRY s_glBindTexture(void* self, GLenum target, GLuint texture);
+    static void gles1_APIENTRY s_glActiveTexture(void* self, GLenum unit);
+    static void gles1_APIENTRY s_glPixelStorei(void* self, GLenum pname, GLint param);
+    static void gles1_APIENTRY s_glTexImage2D(
+            void* self, GLenum target, GLint level, GLint internalformat,
+            GLsizei width, GLsizei height,
+            GLint border, GLenum format, GLenum type, const GLvoid* pixels);
+    static void gles1_APIENTRY s_glTexSubImage2D(
+            void* self, GLenum target, GLint level,
+            GLint xoffset, GLint yoffset, GLsizei width, GLsizei height,
+            GLenum format, GLenum type, const GLvoid* pixels);
+
         static void * s_getProc(const char *name, void *userData);
 
     GLDecoderContextData *m_contextData;
