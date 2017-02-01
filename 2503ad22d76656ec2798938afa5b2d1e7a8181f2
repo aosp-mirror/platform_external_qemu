@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e526a249_4b91f95f",
+        "filename": "android/android-emugl/host/libs/libGLSnapshot/GLSnapshot.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T20:51:56Z",
+      "side": 1,
+      "message": "please don\u0027t, this is slow",
+      "range": {
+        "startLine": 29,
+        "startChar": 22,
+        "endLine": 29,
+        "endChar": 28
+      },
+      "revId": "2503ad22d76656ec2798938afa5b2d1e7a8181f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1472aac6_f2054021",
+        "filename": "android/android-emugl/host/libs/libGLSnapshot/GLSnapshot.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T20:51:56Z",
+      "side": 1,
+      "message": "why not std::array\u003cGLNameMap, NUM_OBJECT_TYPES\u003e ?",
+      "range": {
+        "startLine": 71,
+        "startChar": 27,
+        "endLine": 71,
+        "endChar": 71
+      },
+      "revId": "2503ad22d76656ec2798938afa5b2d1e7a8181f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5993de50_53cf21fc",
+        "filename": "android/android-emugl/host/libs/libGLSnapshot/GLSnapshot.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T20:51:56Z",
+      "side": 1,
+      "message": "GLuint mNextName[NUM_OBJECT_TYPES] \u003d {}; ?",
+      "range": {
+        "startLine": 94,
+        "startChar": 0,
+        "endLine": 102,
+        "endChar": 30
+      },
+      "revId": "2503ad22d76656ec2798938afa5b2d1e7a8181f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
