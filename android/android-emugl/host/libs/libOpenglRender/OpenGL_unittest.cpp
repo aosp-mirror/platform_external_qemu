@@ -158,13 +158,68 @@ GLTEST(OpenGL, Snapshot_DepthTest) {
     EXPECT_TRUE(gl.glIsEnabled(GL_DEPTH_TEST) == GL_TRUE);
 }
 
-GLTEST(OpenGL, Snapshot_CreateShader0) {
+GLTEST(OpenGL, Snapshot_CreateShader) {
     SnapshotContext gl;
 
     GLuint shader = gl.glCreateShader_dec(&gl, GL_VERTEX_SHADER);
     gl.doSnapshot();
 
     EXPECT_TRUE(gl.glIsShader(shader) == GL_TRUE);
+}
+
+GLTEST(OpenGL, Snapshot_ShaderSource) {
+    SnapshotContext gl;
+
+    GLuint shader = gl.glCreateShader_dec(&gl, GL_VERTEX_SHADER);
+    const GLchar* vshadersource =
+        "#version 100\n"
+        "void main() {\n"
+        "gl_Position = vec4(1.0, 1.0, 1.0, 1.0);\n"
+        "}\n";
+    unsigned int srcDataLen = strlen(vshadersource) + 1;
+
+    gl.glShaderString(&gl, shader, vshadersource, srcDataLen);
+
+    gl.doSnapshot();
+
+    EXPECT_TRUE(gl.glIsShader(shader) == GL_TRUE);
+
+    GLchar* outSrc = new GLchar[srcDataLen];
+    gl.glGetShaderSource(shader, srcDataLen, NULL, outSrc);
+
+    EXPECT_TRUE(!strcmp(outSrc, vshadersource));
+}
+
+GLTEST(OpenGL, Snapshot_CompileShader) {
+    SnapshotContext gl;
+
+    GLuint shader = gl.glCreateShader_dec(&gl, GL_VERTEX_SHADER);
+    const GLchar* vshadersource =
+        "#version 100\n"
+        "void main() {\n"
+        "gl_Position = vec4(1.0, 1.0, 1.0, 1.0);\n"
+        "}\n";
+    unsigned int srcDataLen = strlen(vshadersource) + 1;
+
+    gl.glShaderString(&gl, shader, vshadersource, srcDataLen);
+    gl.glCompileShader_dec(&gl, shader);
+
+    GLint compileStatusBefore;
+    gl.glGetShaderiv_dec(&gl, shader, GL_COMPILE_STATUS, &compileStatusBefore);
+
+    gl.doSnapshot();
+
+    EXPECT_TRUE(gl.glIsShader(shader) == GL_TRUE);
+
+    GLchar* outSrc = new GLchar[srcDataLen];
+    gl.glGetShaderSource(shader, srcDataLen, NULL, outSrc);
+
+    EXPECT_TRUE(!strcmp(outSrc, vshadersource));
+
+    GLint compileStatusAfter;
+    gl.glGetShaderiv_dec(&gl, shader, GL_COMPILE_STATUS, &compileStatusAfter);
+
+    EXPECT_TRUE(compileStatusBefore == compileStatusAfter);
 }
 
 }  // namespace emugl
