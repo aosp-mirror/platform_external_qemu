@@ -139,6 +139,11 @@ SkinKeyCode skin_keycode_rotate(SkinKeyCode code, int  rotation) {
     _KEYSYM1_(PLAYPAUSE)                  \
     _KEYSYM1_(REWIND)                     \
     _KEYSYM1_(FASTFORWARD)                \
+    _KEYSYM1_(SLEEP)                      \
+    _KEYSYM1_ANDROID_(STEM_1)             \
+    _KEYSYM1_ANDROID_(STEM_2)             \
+    _KEYSYM1_ANDROID_(STEM_3)             \
+    _KEYSYM1_ANDROID_(STEM_PRIMARY)       \
     _KEYSYM1_ANDROID_(APPSWITCH)
 
 #define _KEYSYM_(x, y) {LINUX_KEY_##x, #y},
