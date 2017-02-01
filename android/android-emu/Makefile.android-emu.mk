@@ -83,6 +83,7 @@ LOCAL_SRC_FILES := \
     android/base/files/PathUtils.cpp \
     android/base/files/StdioStream.cpp \
     android/base/files/Stream.cpp \
+    android/base/files/StreamSerializing.cpp \
     android/base/files/IniFile.cpp \
     android/base/misc/FileUtils.cpp \
     android/base/misc/HttpUtils.cpp \
@@ -484,6 +485,7 @@ LOCAL_SRC_FILES := \
   android/base/files/ScopedFd_unittest.cpp \
   android/base/files/ScopedStdioFile_unittest.cpp \
   android/base/files/Stream_unittest.cpp \
+  android/base/files/StreamSerializing_unittest.cpp \
   android/base/Log_unittest.cpp \
   android/base/memory/LazyInstance_unittest.cpp \
   android/base/memory/MallocUsableSize_unittest.cpp \
