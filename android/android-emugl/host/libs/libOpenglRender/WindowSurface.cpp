@@ -17,11 +17,12 @@
 
 #include "ErrorLog.h"
 #include "FbConfig.h"
+#include "FrameBuffer.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
+#include <assert.h>
 #include <GLES/glext.h>
-
 #include <stdio.h>
 #include <string.h>
 
@@ -187,4 +188,30 @@ bool WindowSurface::resize(unsigned int p_width, unsigned int p_height)
     }
 
     return true;
+}
+
+void WindowSurface::onSave(android::base::Stream* stream) const {
+    // TODO: save color buffer
+    stream->putBe32(mReadContext->getHndl());
+    stream->putBe32(mDrawContext->getHndl());
+    stream->putBe32(mWidth);
+    stream->putBe32(mHeight);
+    s_egl.eglSaveConfig(mDisplay, mConfig, stream);
+}
+
+WindowSurface * WindowSurface::onLoad(android::base::Stream* stream,
+            EGLDisplay display) {
+    // TODO: load color buffer
+    FrameBuffer* fb = FrameBuffer::getFB();
+    uint32_t readCtx = stream->getBe32();
+    uint32_t drawCtx = stream->getBe32();
+
+    GLuint width = stream->getBe32();
+    GLuint height = stream->getBe32();
+    EGLConfig config = s_egl.eglLoadConfig(display, stream);
+    WindowSurface* ret = create(display, config, width, height);
+    assert(ret);
+    ret->mReadContext = fb->getContext(readCtx);
+    ret->mDrawContext = fb->getContext(drawCtx);
+    return ret;
 }
