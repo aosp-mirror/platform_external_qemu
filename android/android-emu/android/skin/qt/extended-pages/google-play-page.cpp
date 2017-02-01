@@ -23,3 +23,6 @@ GooglePlayPage::~GooglePlayPage() {
 
 void GooglePlayPage::on_goog_updateServicesButton_clicked() {
 }
+
+void GooglePlayPage::on_goog_updateStoreButton_clicked() {
+}
