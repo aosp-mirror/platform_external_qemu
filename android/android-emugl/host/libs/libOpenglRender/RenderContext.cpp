@@ -125,4 +125,3 @@ RenderContext *RenderContext::onLoad(android::base::Stream* stream,
     return createImpl(display, (EGLConfig)0, EGL_NO_CONTEXT, hndl, version,
                       stream);
 }
-

@@ -1267,3 +1267,14 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSaveContext(EGLDisplay display, EGLContext cont
 EGLAPI EGLContext EGLAPIENTRY eglLoadContext(EGLDisplay display, const EGLint *attrib_list, EGLStream stream) {
     return eglCreateOrLoadContext(display, (EGLConfig)0, EGL_NO_CONTEXT, attrib_list, (android::base::Stream*)stream);
 }
+
+EGLAPI EGLBoolean EGLAPIENTRY eglSaveConfig(EGLDisplay display,
+        EGLConfig config, EGLStream stream) {
+    
+    return true;
+}
+
+EGLAPI EGLConfig eglLoadConfig(EGLDisplay display, EGLStream stream) {
+    // TODO
+    return (EGLConfig)0;
+}
