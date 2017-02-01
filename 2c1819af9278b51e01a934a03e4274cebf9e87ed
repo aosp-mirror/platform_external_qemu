@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "17f2cd38_9d977910",
+        "filename": "android/android-emugl/host/libs/libGLSnapshot/GLSnapshot.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T23:02:52Z",
+      "side": 1,
+      "message": "bash it all the way!",
+      "range": {
+        "startLine": 45,
+        "startChar": 29,
+        "endLine": 45,
+        "endChar": 31
+      },
+      "revId": "2c1819af9278b51e01a934a03e4274cebf9e87ed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
