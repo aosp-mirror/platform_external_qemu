@@ -50,13 +50,23 @@ public:
             return new GLProcessPipe(hwPipe, this, stream);
         }
 
+        static bool isLoading() { return s_isLoading; }
+
         void preLoad(base::Stream* stream) override {
             GLProcessPipe::s_headId.store(stream->getBe64());
+            s_isLoading = true;
+        }
+
+        void postLoad(base::Stream* stream) override {
+            s_isLoading = false;
         }
 
         void preSave(base::Stream* stream) override {
             stream->putBe64(GLProcessPipe::s_headId.load());
         }
+
+    private:
+        static bool s_isLoading;
     };
 
     GLProcessPipe(void* hwPipe, Service* service,
@@ -75,7 +85,9 @@ public:
 
     void onGuestClose() override {
         // process died on the guest, cleanup gralloc memory on the host
-        android_cleanupProcGLObjects(m_uniqueId);
+        if (Service::isLoading()) {
+            android_cleanupProcGLObjects(m_uniqueId);
+        }
     }
 
     unsigned onGuestPoll() const override {
@@ -112,6 +124,7 @@ private:
 
 };
 
+bool GLProcessPipe::Service::s_isLoading = false;
 std::atomic<uint64_t> GLProcessPipe::s_headId {0};
 
 }

@@ -82,6 +82,9 @@ public:
     GLuint getWidth() const;
     GLuint getHeight() const;
 
+    void onSave(android::base::Stream* stream) const;
+    static WindowSurface *onLoad(android::base::Stream* stream,
+            EGLDisplay display);
 private:
     WindowSurface(const WindowSurface& other) = delete;
 

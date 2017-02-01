@@ -1310,12 +1310,21 @@ void FrameBuffer::onSave(android::base::Stream* stream) {
         ctx.second->onSave(stream);
     }
 
-    // TODO: snapshot color buffers and window surfaces
+    // snapshot color buffers
     stream->putBe32(m_colorbuffers.size());
     for (const auto& cb : m_colorbuffers) {
         stream->putBe32(cb.first);
         cb.second.cb->onSave(stream);
     }
+
+    // snapshot window surfaces
+    stream->putBe32(m_windows.size());
+    for (const auto& windows : m_windows) {
+        stream->putBe32(windows.first);
+        windows.second.first->onSave(stream);
+        stream->putBe32(windows.second.second);
+    }
+
     // TODO: snapshot memory management
 }
 
@@ -1344,9 +1353,8 @@ bool FrameBuffer::onLoad(android::base::Stream* stream) {
         RenderContextPtr ctx(RenderContext::onLoad(stream, m_eglDisplay));
         m_contexts[ctx->getHndl()] = ctx;
     }
-    m_windows.clear();
+
     m_colorbuffers.clear();
-    // TODO: restore color buffers and window surfaces
     size_t numColorBuffers = stream->getBe32();
     for (size_t i = 0; i < numColorBuffers; i++) {
         HandleType hndl = stream->getBe32();
@@ -1358,6 +1366,19 @@ bool FrameBuffer::onLoad(android::base::Stream* stream) {
             m_colorbuffers[hndl].refcount = 1;
         }
     }
+
+    // restore window surfaces
+    m_windows.clear();
+    size_t numWindows = stream->getBe32();
+    for (size_t i = 0; i < numWindows; i ++) {
+        HandleType wHndl = stream->getBe32();
+        WindowSurfacePtr window(WindowSurface::onLoad(stream, m_eglDisplay));
+        HandleType cbHndl = stream->getBe32();
+        m_windows.emplace(std::make_pair(wHndl,
+                            std::make_pair(std::move(window), cbHndl)));
+    }
+
+    return true;
     // TODO: restore memory management
     return true;
 }
