@@ -2,7 +2,7 @@
 
 #include "GLESv2Dispatch.h"
 
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -21,34 +21,89 @@ struct GLValue {
     std::vector<uint64_t> int64s;
 };
 
-typedef std::map<GLenum, GLValue> GlobalStateMap;
-typedef std::map<GLenum, bool> GlobalEnables;
+typedef std::unordered_map<GLenum, GLValue> GlobalStateMap;
+typedef std::unordered_map<GLenum, bool> GlobalEnables;
 
 struct GLShaderState {
-    GLenum type;
-    std::string source;
-    bool compileStatus;
+    GLenum type = GL_NONE;
+    std::string source = "";
+    bool compileStatus = false;
 };
 
 struct GLProgramState {
-    std::map<GLenum, GLuint> linkage;
-    bool linkStatus;
+    std::unordered_map<GLenum, GLuint> linkage = {};
+    bool linkStatus = false;
+};
+
+struct GLBufferState {
+    void* data = nullptr;
+    uint64_t size = 0;;
+    GLenum usage = GL_NONE;
+    bool mapped = false;
+    uint32_t mappedAccess = 0;;
+    uint64_t mappedOffset = 0;;
+    uint64_t mappedLength = 0;;
+};
+
+struct GLFBOState {
+    std::unordered_map<GLenum, GLuint> attachments;
+    std::unordered_map<GLenum, GLenum> attachmentTypes;
+};
+
+// level 0 only for now
+// client arrays only for now
+struct GLTextureState {
+    void* data = nullptr;
+    uint64_t nbytes = 0;
+    GLenum internalformat = GL_RGBA8;
+    GLenum format = GL_RGBA;
+    GLenum type = GL_UNSIGNED_BYTE;
+    GLuint width = 0;
+    GLuint height = 0;
 };
 
 class GLSnapshotState {
 public:
+    enum ObjectType {
+        PROGRAM = 0,
+        BUFFER = 1,
+        FRAMEBUFFER = 2,
+        RENDERBUFFER = 3,
+        TEXTURE = 4,
+        VERTEXARRAYOBJECT = 5,
+        TRANSFORMFEEDBACK = 6,
+        SAMPLER = 7,
+        QUERY = 8,
+        NUM_OBJECT_TYPES = 9,
+    };
     GLSnapshotState(const GLESv2Dispatch* gl);
     void save();
     void restore();
 
-    // Shaders
-    GLuint createShader(GLuint shader, GLenum shaderType);
-    GLuint createProgram(GLuint program);
-    void shaderString(GLuint shader, const GLchar* string);
-    void genBuffers(GLsizei n, GLuint* buffers);
-    GLuint getProgramName(GLuint name);
+    // Gen/deletes
+    GLuint glCreateShader(GLuint shader, GLenum shaderType);
+    GLuint glCreateProgram(GLuint program);
+    void glGenBuffers(GLsizei n, GLuint* buffers);
+    void glGenFramebuffers(GLsizei n, GLuint* fbos);
+    void glGenTextures(GLsizei n, GLuint* textures);
+
+    void glDeleteShader(GLuint shader);
+    void glDeleteProgram(GLuint program);
+    void glDeleteBuffers(GLsizei n, GLuint* buffers);
+    void glDeleteFramebuffers(GLsizei n, GLuint* fbox);
+    void glDeleteTextures(GLsizei n, GLuint* textures);
+
+    // Shader state
+    void glShaderString(GLuint shader, const GLchar* string);
+    void glAttachShader(GLuint program, GLuint shader);
+
+    GLuint getName(ObjectType type, GLuint name);
 
 private:
+
+    using GLNameMap = std::unordered_map<GLuint, GLuint>;
+    using GLTypedNameMap = std::unordered_map<unsigned int, GLNameMap>;
+
     void getGlobalStateEnum(GLenum name, int size);
     void getGlobalStateByte(GLenum name, int size);
     void getGlobalStateInt(GLenum name, int size);
@@ -57,17 +112,67 @@ private:
 
     void getGlobalStateEnable(GLenum name);
 
+    GLuint toPhysName(ObjectType, GLuint name);
+    GLuint toVirtName(ObjectType, GLuint name);
+
     const GLESv2Dispatch* mGL;
     GlobalStateMap mGlobals;
     GlobalEnables mEnables;
 
-    GLuint mProgramCounter = 1;
+    // |mNames| maps virtual GL names to "physical" GL names
+    // (i.e., those used by the underlying GLES implementation).
+    // Virtual GL names stay constant across snapshots.
+    GLTypedNameMap mNames;
+    GLTypedNameMap mNamesBack; // Map from physical to virtual.
 
-    std::map<GLuint, GLuint> mProgramNames;
-    std::map<GLuint, GLuint> mProgramNamesBack;
-    std::map<GLuint, GLShaderState> mShaderState;
-    std::map<GLuint, GLProgramState> mShaderProgramState;
+    GLuint mNextProgramName = 1;
+    GLuint mNextBufferName = 1;
+    GLuint mNextFramebufferName = 1;
+    GLuint mNextRenderbufferName = 1;
+    GLuint mNextTextureName = 1;
+    GLuint mNextVertexArrayObjectName = 1;
+    GLuint mNextTransformFeedbackName = 1;
+    GLuint mNextSamplerName = 1;
+    GLuint mNextQueryName = 1;
 
+    GLuint nextName(ObjectType type) {
+        switch (type) {
+            case ObjectType::PROGRAM:
+                return mNextProgramName++;
+            case ObjectType::BUFFER:
+                return mNextBufferName++;
+            case ObjectType::FRAMEBUFFER:
+                return mNextFramebufferName++;
+            case ObjectType::RENDERBUFFER:
+                return mNextRenderbufferName++;
+            case ObjectType::TEXTURE:
+                return mNextTextureName++;
+            case ObjectType::VERTEXARRAYOBJECT:
+                return mNextVertexArrayObjectName++;
+            case ObjectType::TRANSFORMFEEDBACK:
+                return mNextTransformFeedbackName++;
+            case ObjectType::SAMPLER:
+                return mNextSamplerName++;
+            case ObjectType::QUERY:
+                return mNextQueryName++;
+            default:
+                return 0;
+        }
+    }
+    void remapName(ObjectType type, GLuint v, GLuint p) {
+        mNames[type][v] = p;
+        mNamesBack[type][p] = v;
+    }
+    void unmapName(ObjectType type, GLuint v, GLuint p) {
+        mNames[type].erase(v);
+        mNamesBack[type].erase(p);
+    }
+
+    std::unordered_map<GLuint, GLShaderState> mShaders;
+    std::unordered_map<GLuint, GLProgramState> mPrograms;
+    std::unordered_map<GLuint, GLBufferState> mBuffers;
+    std::unordered_map<GLuint, GLFBOState> mFBOs;
+    std::unordered_map<GLuint, GLTextureState> mTextures;
 };
 
 } // namespace GLSnapshot
