@@ -278,6 +278,29 @@
     },
     {
       "key": {
+        "uuid": "77865cd0_2f136995",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderLibImpl.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-01T23:59:51Z",
+      "side": 1,
+      "message": "Actually let\u0027s keep it here for now and remove it in a later CL. Because we will need to orphan many states issues when removing this.",
+      "range": {
+        "startLine": 93,
+        "startChar": 8,
+        "endLine": 93,
+        "endChar": 41
+      },
+      "revId": "000ac2c2440c4c63752cce7344f5ccd39687a5c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8dd47d03_b409d6ce",
         "filename": "android/android-emugl/shared/emugl/common/stream.h",
         "patchSetId": 18
