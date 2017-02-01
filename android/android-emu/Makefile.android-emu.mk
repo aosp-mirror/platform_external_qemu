@@ -79,6 +79,7 @@ LOCAL_SRC_FILES := \
     android/base/containers/PointerSet.cpp \
     android/base/containers/HashUtils.cpp \
     android/base/Debug.cpp \
+    android/base/files/MemStream.cpp \
     android/base/files/PathUtils.cpp \
     android/base/files/StdioStream.cpp \
     android/base/files/Stream.cpp \
@@ -478,6 +479,7 @@ LOCAL_SRC_FILES := \
   android/base/containers/TailQueueList_unittest.cpp \
   android/base/EintrWrapper_unittest.cpp \
   android/base/files/IniFile_unittest.cpp \
+  android/base/files/MemStream_unittest.cpp \
   android/base/files/PathUtils_unittest.cpp \
   android/base/files/ScopedFd_unittest.cpp \
   android/base/files/ScopedStdioFile_unittest.cpp \
