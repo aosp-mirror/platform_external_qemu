@@ -52,6 +52,8 @@ RendererImpl::RendererImpl()
     : mCleanupThread([this]() {
           while (const auto id = mCleanupProcessIds.receive()) {
               FrameBuffer::getFB()->cleanupProcGLObjects(*id);
+              // TODO: resolve potential race condition during a snapshot
+              // b/35064372
           }
       }) {
     mCleanupThread.start();
@@ -97,8 +99,6 @@ void RendererImpl::stop() {
         c->stopFromHost();
     }
 
-    // TODO: finish cleaning up for snapshot
-
     // We're stopping the renderer, so there's no need to clean up resources
     // of some pending processes: we'll destroy everything soon.
     mCleanupProcessIds.stop();
@@ -116,6 +116,9 @@ void RendererImpl::cleanupRenderThreads() {
         // loading from a snapshot, and the newly loaded guest should not
         // be notified for those behavior.
         c->stop();
+    }
+    for (const auto& c : channels) {
+        c->renderThread()->wait();
     }
 }
 
@@ -188,6 +191,7 @@ bool RendererImpl::load(android::base::Stream* stream) {
     }
     auto fb = FrameBuffer::getFB();
     assert(fb);
+    mCleanupProcessIds.waitForEmpty();
     return fb->onLoad(stream);
 }
 
