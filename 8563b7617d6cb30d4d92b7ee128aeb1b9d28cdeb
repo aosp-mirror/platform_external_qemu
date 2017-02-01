@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "d50132d9_21e0b8af",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThread.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-01T18:40:20Z",
+      "side": 1,
+      "message": "maybe leave a comment here saying that the ordering of those operations matters?",
+      "revId": "8563b7617d6cb30d4d92b7ee128aeb1b9d28cdeb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "789f159e_28cac8ce",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThread.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-01T18:40:20Z",
+      "side": 1,
+      "message": "I will implement threadInfo.load in the render context snapshot CL. checksumCalc is super far away on my TODO list...",
+      "revId": "8563b7617d6cb30d4d92b7ee128aeb1b9d28cdeb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a29d7bec_c45b5c59",
         "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThread.cpp",
         "patchSetId": 1
