@@ -1,0 +1,636 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9fc7ff28_6b130e6b",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "nit: please format (we write \"Type*\" per our coding style)",
+      "range": {
+        "startLine": 28,
+        "startChar": 37,
+        "endLine": 28,
+        "endChar": 39
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2d1840ec_9f8d33b0",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "nit: don\u0027t use \"typedef struct\" in C++",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 10
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a5686df8_5546e68a",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "please don\u0027t use std::map\u003c\u003e, use std::unordered_map\u003c\u003e unless you actually need a specific ordering",
+      "range": {
+        "startLine": 32,
+        "startChar": 12,
+        "endLine": 32,
+        "endChar": 15
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22fb1bfd_2d5de82c",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "can MyState be here by value instead of heap allocation?",
+      "range": {
+        "startLine": 32,
+        "startChar": 53,
+        "endLine": 32,
+        "endChar": 62
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "33e83f26_a775ad00",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "class-typed globals are dangerous. Use android/base/memory/LazyInstance if you need one",
+      "range": {
+        "startLine": 32,
+        "startChar": 7,
+        "endLine": 32,
+        "endChar": 79
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b87d14b9_4f40b7a1",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "nit: auto",
+      "range": {
+        "startLine": 47,
+        "startChar": 5,
+        "endLine": 47,
+        "endChar": 13
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6dd525a1_e3a6b7ad",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "\u0027struct\u0027 here is not needed.\nbtw, should the variable be const?",
+      "range": {
+        "startLine": 67,
+        "startChar": 7,
+        "endLine": 67,
+        "endChar": 13
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c0e304bb_159c1db4",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "some debug prints would help you to debug it later, I think",
+      "range": {
+        "startLine": 88,
+        "startChar": 0,
+        "endLine": 92,
+        "endChar": 18
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "414d4206_a5a3477d",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "derror() ?",
+      "range": {
+        "startLine": 116,
+        "startChar": 8,
+        "endLine": 116,
+        "endChar": 49
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "01f75388_c6b83e8e",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "please don\u0027t use goto in c++ code. Use smart pointers and RAII in general instead",
+      "range": {
+        "startLine": 117,
+        "startChar": 8,
+        "endLine": 117,
+        "endChar": 24
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "71766f11_3f375367",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "if you change the map to be \u003cAudioCapturer*, MyState\u003e, then the code would look like:\n\nMyState\u0026 state \u003d g_capturer_maps[capturer];\nstate.bits \u003d ...;",
+      "range": {
+        "startLine": 107,
+        "startChar": 4,
+        "endLine": 124,
+        "endChar": 38
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2c05d8a1_ba9af122",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "should this function remove it from the map?",
+      "range": {
+        "startLine": 135,
+        "startChar": 21,
+        "endLine": 135,
+        "endChar": 36
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "90bdd2f2_952bfd9f",
+        "filename": "android/android-emu/android/ffmpeg-audio-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "please don\u0027t use namespaces in headers",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 35
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "15b4d9c9_3bcaa981",
+        "filename": "android/android-emu/android/ffmpeg-audio-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "no need in this, it won\u0027t compile in .c file anyway",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 20
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fe24c42b_3c1b7b27",
+        "filename": "android/android-emu/android/ffmpeg-audio-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "should this be in namespace android::emulation?",
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e482cf95_b90f6688",
+        "filename": "android/android-emu/android/ffmpeg-audio-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "please add a comment that this class doesn\u0027t own the |recorder|.\nBTW, maybe it should?",
+      "range": {
+        "startLine": 26,
+        "startChar": 5,
+        "endLine": 26,
+        "endChar": 57
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "384c654f_e01434dc",
+        "filename": "android/android-emu/android/ffmpeg-audio-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "please add \u0027override\u0027",
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "161804c1_14497aa7",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "1. ffmpeg-muxer.h needs to be the first include, as it\u0027s the current cpp\u0027s file header\n2. please sort the rest of the includes alphabetically",
+      "range": {
+        "startLine": 36,
+        "startChar": 0,
+        "endLine": 36,
+        "endChar": 33
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "afae0884_7145e23e",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "It isn\u0027t a good idea to rely on OS-specific headers. Use android/base/system/System.h instead",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 20
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e7f9ccc7_d4a6d278",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "std::unique_ptr\u003c\u003e, or even android::base::Optional\u003c\u003e if you don\u0027t need a dynamic type",
+      "range": {
+        "startLine": 108,
+        "startChar": 2,
+        "endLine": 108,
+        "endChar": 22
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fdbf7851_241c215e",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "this comment looks out of place here",
+      "range": {
+        "startLine": 112,
+        "startChar": 0,
+        "endLine": 113,
+        "endChar": 76
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6022f27_86313052",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "just \"using android::base::AutoLock\"",
+      "range": {
+        "startLine": 121,
+        "startChar": 0,
+        "endLine": 121,
+        "endChar": 41
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "75bbceea_2300f2fd",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "System::get()-\u003egetHighResTimeUs()\n?",
+      "range": {
+        "startLine": 142,
+        "startChar": 0,
+        "endLine": 151,
+        "endChar": 1
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "657816ca_015e4605",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 583,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "VERBOSE_PRINT(capture, ...) ?",
+      "range": {
+        "startLine": 583,
+        "startChar": 0,
+        "endLine": 583,
+        "endChar": 6
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3615c52a_c5587280",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 728,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "please cleanup this commented code.",
+      "range": {
+        "startLine": 725,
+        "startChar": 0,
+        "endLine": 728,
+        "endChar": 31
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3085fd39_23a9bfa7",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 821,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "should we call start_recording() on each frame? is there a corresponding stop()?",
+      "range": {
+        "startLine": 821,
+        "startChar": 13,
+        "endLine": 821,
+        "endChar": 28
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "18f59511_d41de931",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 854,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "nit: tabs",
+      "range": {
+        "startLine": 854,
+        "startChar": 0,
+        "endLine": 854,
+        "endChar": 5
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "134ac40f_b6fd3863",
+        "filename": "android/android-emu/android/ffmpeg-muxer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T18:55:05Z",
+      "side": 1,
+      "message": "we have a line limit of 80 chars, unfortunately",
+      "range": {
+        "startLine": 105,
+        "startChar": 74,
+        "endLine": 105,
+        "endChar": 84
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
