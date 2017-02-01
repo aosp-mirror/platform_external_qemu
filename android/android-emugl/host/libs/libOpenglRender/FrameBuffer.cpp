@@ -605,12 +605,12 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
     emugl::Mutex::AutoLock mutex(m_lock);
     HandleType ret = 0;
 
+    ret = genHandle();
     ColorBufferPtr cb(ColorBuffer::create(getDisplay(), p_width, p_height,
                                           p_internalFormat, p_frameworkFormat,
                                           getCaps().has_eglimage_texture_2d,
-                                          m_colorBufferHelper));
+                                          ret, m_colorBufferHelper));
     if (cb.get() != NULL) {
-        ret = genHandle();
         m_colorbuffers[ret].cb = cb;
         m_colorbuffers[ret].refcount = 1;
 
@@ -680,10 +680,10 @@ HandleType FrameBuffer::createWindowSurface(int p_config,
         return ret;
     }
 
+    ret = genHandle();
     WindowSurfacePtr win(WindowSurface::create(
-            getDisplay(), config->getEglConfig(), p_width, p_height));
+            getDisplay(), config->getEglConfig(), p_width, p_height, ret));
     if (win.get() != NULL) {
-        ret = genHandle();
         m_windows[ret] = std::pair<WindowSurfacePtr, HandleType>(win, 0);
         RenderThreadInfo* tinfo = RenderThreadInfo::get();
         tinfo->m_windowSet.insert(ret);
@@ -808,6 +808,10 @@ void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer) {
 
 void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
     emugl::Mutex::AutoLock mutex(m_lock);
+    cleanupProcGLObjects_locked(puid);
+}
+
+void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid) {
     // Clean up color buffers.
     // A color buffer needs to be closed as many times as it is opened by
     // the guest process, to give the correct reference count.
@@ -1065,6 +1069,25 @@ RenderContextPtr FrameBuffer::getContext(HandleType p_context) {
                                         RenderContextPtr());
 }
 
+ColorBufferPtr FrameBuffer::getColorBuffer(HandleType p_colorBuffer) {
+    ColorBufferRef* cb = android::base::find(m_colorbuffers, p_colorBuffer);
+    if (!cb) {
+        return nullptr;
+    } else {
+        return cb->cb;
+    }
+}
+
+WindowSurfacePtr FrameBuffer::getWindowSurface(HandleType p_windowsurface) {
+    std::pair<WindowSurfacePtr, HandleType>* windowSurface = 
+            android::base::find(m_windows, p_windowsurface);
+    if (!windowSurface) {
+        return nullptr;
+    } else {
+        return windowSurface->first;
+    }
+}
+
 HandleType FrameBuffer::createClientImage(HandleType context,
                                           EGLenum target,
                                           GLuint buffer) {
@@ -1299,6 +1322,14 @@ bool FrameBuffer::repost() {
 }
 
 void FrameBuffer::onSave(android::base::Stream* stream) {
+    // Things we do not need to snapshot:
+    //     m_eglSurface
+    //     m_eglContext
+    //     m_pbufSurface
+    //     m_pbufContext
+    //     m_prevContext
+    //     m_prevReadSurf
+    //     m_prevDrawSurf
     emugl::Mutex::AutoLock mutex(m_lock);
     stream->putBe32(m_x);
     stream->putBe32(m_y);
@@ -1321,17 +1352,37 @@ void FrameBuffer::onSave(android::base::Stream* stream) {
         ctx.second->onSave(stream);
     }
 
-    // TODO: snapshot color buffers and window surfaces
+    // snapshot color buffers
     stream->putBe32(m_colorbuffers.size());
     for (const auto& cb : m_colorbuffers) {
-        stream->putBe32(cb.first);
         cb.second.cb->onSave(stream);
+        stream->putBe32(cb.second.refcount);
     }
+    stream->putBe32(m_lastPostedColorBuffer);
+
+    // snapshot window surfaces
+    stream->putBe32(m_windows.size());
+    for (const auto& windows : m_windows) {
+        windows.second.first->onSave(stream);
+        stream->putBe32(windows.second.second);
+    }
+
     // TODO: snapshot memory management
 }
 
 bool FrameBuffer::onLoad(android::base::Stream* stream) {
     emugl::Mutex::AutoLock mutex(m_lock);
+    // cleanups
+    while (m_procOwnedColorBuffers.size()) {
+        cleanupProcGLObjects_locked(m_procOwnedColorBuffers.begin()->first);
+    }
+    while (m_procOwnedEGLImages.size()) {
+        cleanupProcGLObjects_locked(m_procOwnedEGLImages.begin()->first);
+    }
+    while (m_procOwnedRenderContext.size()) {
+        cleanupProcGLObjects_locked(m_procOwnedRenderContext.begin()->first);
+    }
+
     m_x = stream->getBe32();
     m_y = stream->getBe32();
     m_framebufferWidth = stream->getBe32();
@@ -1349,7 +1400,7 @@ bool FrameBuffer::onLoad(android::base::Stream* stream) {
     m_statsStartTime = stream->getBe64();
 
     // restore contexts
-    m_contexts.clear();
+    assert(m_contexts.size() == 0);
     size_t numContexts = stream->getBe32();
     for (size_t i = 0; i < numContexts; i++) {
         RenderContextPtr ctx(RenderContext::onLoad(stream, m_eglDisplay));
@@ -1357,20 +1408,31 @@ bool FrameBuffer::onLoad(android::base::Stream* stream) {
             m_contexts[ctx->getHndl()] = ctx;
         }
     }
-    m_windows.clear();
-    m_colorbuffers.clear();
-    // TODO: restore color buffers and window surfaces
+
+    assert(m_colorbuffers.size() == 0);
     size_t numColorBuffers = stream->getBe32();
     for (size_t i = 0; i < numColorBuffers; i++) {
-        HandleType hndl = stream->getBe32();
         ColorBufferPtr cb(ColorBuffer::onLoad(stream, m_eglDisplay,
                                               getCaps().has_eglimage_texture_2d,
                                               m_colorBufferHelper));
-        if (cb.get() != NULL) {
-            m_colorbuffers[hndl].cb = cb;
-            m_colorbuffers[hndl].refcount = 1;
-        }
+        assert(cb);
+        HandleType hndl = cb->getHndl();
+        ColorBufferRef cbRef = {cb, stream->getBe32()};
+        m_colorbuffers.emplace(std::make_pair(hndl, std::move(cbRef)));
     }
-    // TODO: restore memory management
+    m_lastPostedColorBuffer = static_cast<HandleType>(stream->getBe32());
+
+    // restore window surfaces
+    assert(m_windows.size() == 0);
+    size_t numWindows = stream->getBe32();
+    for (size_t i = 0; i < numWindows; i ++) {
+        WindowSurfacePtr window(WindowSurface::onLoad(stream, m_eglDisplay));
+        HandleType hndl = window->getHndl();
+        HandleType cbHndl = stream->getBe32();
+        m_windows.emplace(std::make_pair(hndl,
+                            std::make_pair(std::move(window), cbHndl)));
+    }
+
     return true;
+    // TODO: restore memory management
 }

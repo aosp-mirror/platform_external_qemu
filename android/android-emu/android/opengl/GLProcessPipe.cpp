@@ -57,6 +57,7 @@ public:
         void preSave(base::Stream* stream) override {
             stream->putBe64(GLProcessPipe::s_headId.load());
         }
+
     };
 
     GLProcessPipe(void* hwPipe, Service* service,
