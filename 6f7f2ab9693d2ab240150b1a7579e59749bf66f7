@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f2bc2f03_3afd1c25",
+        "filename": "android/android-emugl/host/include/OpenglRender/Renderer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-01T15:32:44Z",
+      "side": 1,
+      "message": "nit",
+      "range": {
+        "startLine": 148,
+        "startChar": 0,
+        "endLine": 148,
+        "endChar": 4
+      },
+      "revId": "6f7f2ab9693d2ab240150b1a7579e59749bf66f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "75227f5d_fd40e28c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RendererImpl.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-01T15:32:44Z",
+      "side": 1,
+      "message": "nit: Wow, this seemed to have worked on the PSQ, but maybe put a space anyways? Idk",
+      "range": {
+        "startLine": 73,
+        "startChar": 49,
+        "endLine": 73,
+        "endChar": 51
+      },
+      "revId": "6f7f2ab9693d2ab240150b1a7579e59749bf66f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
