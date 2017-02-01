@@ -30,8 +30,7 @@
 
 namespace emugl {
 
-class RendererImpl final : public Renderer,
-                           public std::enable_shared_from_this<RendererImpl> {
+class RendererImpl final : public Renderer {
 public:
     RendererImpl();
     ~RendererImpl();
@@ -41,7 +40,7 @@ public:
     void stop();
 
 public:
-    RenderChannelPtr createRenderChannel() final;
+    RenderChannelPtr createRenderChannel(android::base::Stream* loadStream) final;
     HardwareStrings getHardwareStrings() final;
     void setPostCallback(OnPostCallback onPost,
                                  void* context) final;
@@ -59,18 +58,19 @@ public:
     void setOpenGLDisplayTranslation(float px, float py) final;
     void repaintOpenGLDisplay() final;
     void cleanupProcGLObjects(uint64_t puid) final;
+
+    void pauseAllPreSave() final;
+    void resumeAll() final;
+
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RendererImpl);
 
 private:
     std::unique_ptr<RenderWindow> mRenderWindow;
 
-    android::base::Lock mThreadVectorLock;
+    android::base::Lock mChannelsLock;
 
-    using ThreadWithChannel = std::pair<std::unique_ptr<RenderThread>,
-                                        std::weak_ptr<RenderChannelImpl>>;
-
-    std::vector<ThreadWithChannel> mThreads;
+    std::vector<std::shared_ptr<RenderChannelImpl>> mChannels;
     bool mStopped = false;
 
     // A message channel and a cleanup thread for GL resources of finished
