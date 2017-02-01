@@ -2,7 +2,10 @@
 
 #include "GLESv2Dispatch.h"
 
-#include <map>
+#include "android/base/files/Stream.h"
+
+#include <array>
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -19,36 +22,288 @@ struct GLValue {
     std::vector<uint32_t> ints;
     std::vector<float> floats;
     std::vector<uint64_t> int64s;
+
+    void toStream(android::base::Stream* stream) const;
+    void fromStream(android::base::Stream* stream);
 };
 
-typedef std::map<GLenum, GLValue> GlobalStateMap;
-typedef std::map<GLenum, bool> GlobalEnables;
+enum GLValueType {
+    VALTYPE_1I,
+    VALTYPE_1F,
+    VALTYPE_2I,
+    VALTYPE_2F,
+    VALTYPE_3I,
+    VALTYPE_3F,
+    VALTYPE_4I,
+    VALTYPE_4F,
+
+    VALTYPE_1FV,
+    VALTYPE_2FV,
+    VALTYPE_3FV,
+    VALTYPE_4FV,
+
+    VALTYPE_M1FV,
+    VALTYPE_M2FV,
+    VALTYPE_M3FV,
+    VALTYPE_M4FV,
+
+    VALTYPE_1UI,
+    VALTYPE_2UI,
+    VALTYPE_3UI,
+    VALTYPE_4UI,
+    VALTYPE_1UIV,
+    VALTYPE_2UIV,
+    VALTYPE_3UIV,
+    VALTYPE_4UIV,
+
+    VALTYPE_M23FV,
+    VALTYPE_M32FV,
+    VALTYPE_M34FV,
+    VALTYPE_M43FV,
+
+    VALTYPE_MAX,
+};
+
+typedef std::unordered_map<GLenum, GLValue> GlobalStateMap;
+typedef std::unordered_map<GLenum, bool> GlobalEnables;
 
 struct GLShaderState {
-    GLenum type;
-    std::string source;
-    bool compileStatus;
+    GLenum type = GL_NONE;
+    std::string source = "";
+    bool compileStatus = false;
+
+    void toStream(android::base::Stream* stream) const;
+    void fromStream(android::base::Stream* stream);
+};
+
+struct GLUniformDesc {
+    GLsizei count = 0;
+    GLboolean transpose = GL_FALSE;
+    GLValueType valtype = VALTYPE_MAX;
+    GLValue val;
+
+    void toStream(android::base::Stream* stream) const;
+    void fromStream(android::base::Stream* stream);
 };
 
 struct GLProgramState {
-    std::map<GLenum, GLuint> linkage;
-    bool linkStatus;
+    std::unordered_map<GLenum, GLuint> linkage = {};
+    std::unordered_map<GLint, std::string> boundAttribLocs = {};
+    std::unordered_map<GLint, GLUniformDesc> uniformDescs = {};
+    bool linkStatus = false;
+
+    void toStream(android::base::Stream* stream) const;
+    void fromStream(android::base::Stream* stream);
+};
+
+struct GLBufferState {
+    uint64_t size = 0;
+    void* data = nullptr;
+    GLenum usage = GL_NONE;
+    bool mapped = false;
+    uint32_t mappedAccess = 0;
+    uint64_t mappedOffset = 0;
+    uint64_t mappedLength = 0;
+
+    void toStream(android::base::Stream* stream) const;
+    void fromStream(android::base::Stream* stream);
+};
+
+struct GLTextureAttachmentInfo {
+    GLenum textarget;
+    GLuint texture;
+    GLint level;
+    GLint samples;
+    void toStream(android::base::Stream* stream) const;
+    void fromStream(android::base::Stream* stream);
+};
+
+struct GLRenderbufferAttachmentInfo {
+    GLenum internalformat;
+    GLsizei width;
+    GLsizei height;
+    GLint samples;
+
+    void toStream(android::base::Stream* stream) const;
+    void fromStream(android::base::Stream* stream);
+};
+
+struct GLFBOAttachmentInfo {
+    GLenum type;
+    union {
+        GLTextureAttachmentInfo texture;
+        GLRenderbufferAttachmentInfo renderbuffer;
+    };
+
+    void toStream(android::base::Stream* stream) const;
+    void fromStream(android::base::Stream* stream);
+};
+
+struct GLFBOState {
+    std::unordered_map<GLenum, GLFBOAttachmentInfo> attachments;
+
+    void toStream(android::base::Stream* stream) const;
+    void fromStream(android::base::Stream* stream);
+};
+
+#define SNAPSHOT_MAX_TEXTURE_UNITS 8
+
+// level 0 only for now
+// client arrays only for now
+#define SNAPSHOT_MAX_TEXTURE_LEVELS 14
+
+struct GLTextureState {
+    GLTextureState() {
+        memset((void**)data, 0, sizeof(void*) * SNAPSHOT_MAX_TEXTURE_LEVELS);
+        memset(nbytes, 0, sizeof(uint64_t) * SNAPSHOT_MAX_TEXTURE_LEVELS);
+        memset(width, 0, sizeof(GLuint) * SNAPSHOT_MAX_TEXTURE_LEVELS);
+        memset(height, 0, sizeof(GLuint) * SNAPSHOT_MAX_TEXTURE_LEVELS);
+    }
+
+    uint32_t nbytes[SNAPSHOT_MAX_TEXTURE_LEVELS];
+    GLuint width[SNAPSHOT_MAX_TEXTURE_LEVELS];
+    GLuint height[SNAPSHOT_MAX_TEXTURE_LEVELS];
+
+    void* data[SNAPSHOT_MAX_TEXTURE_LEVELS];
+
+    GLenum internalformat = GL_RGBA8;
+    GLenum format = GL_RGBA;
+    GLenum type = GL_UNSIGNED_BYTE;
+
+    GLint magFilter;
+    GLint minFilter;
+    GLint wrapS;
+    GLint wrapT;
+
+    GLenum boundTarget = GL_TEXTURE_2D;
+
+    // GL_UNPACK_ALIGNMENT at the time storage was specified.
+    // Needed for snapshot.
+    uint32_t unpackAlignment;
+
+    void toStream(android::base::Stream* stream) const;
+    void fromStream(android::base::Stream* stream);
+};
+
+struct GLVertexAttribState {
+    bool enabled = false;
+
+    GLint size = 0;
+    GLenum type = 0;
+    GLboolean normalized = 0;
+    GLsizei stride = 0;
+
+    // GL_ARRAY_BUFFER binding @ the time it was called
+    GLuint arrayBuffer = 0;
+    uint32_t offset = 0;
+
+    uint32_t datalen = 0;
+    void* data = nullptr;
+
+    void toStream(android::base::Stream* stream) const;
+    void fromStream(android::base::Stream* stream);
+};
+
+#define SNAPSHOT_MAX_VERTEX_ATTRIBS 16
+struct GLVAOState {
+    GLVertexAttribState attribs[SNAPSHOT_MAX_VERTEX_ATTRIBS];
+
+    void toStream(android::base::Stream* stream) const;
+    void fromStream(android::base::Stream* stream);
 };
 
 class GLSnapshotState {
 public:
+    enum ObjectType {
+        PROGRAM = 0,
+        BUFFER = 1,
+        FRAMEBUFFER = 2,
+        RENDERBUFFER = 3,
+        TEXTURE = 4,
+        VERTEXARRAYOBJECT = 5,
+        TRANSFORMFEEDBACK = 6,
+        SAMPLER = 7,
+        QUERY = 8,
+        NUM_OBJECT_TYPES = 9,
+    };
+
+    GLSnapshotState();
     GLSnapshotState(const GLESv2Dispatch* gl);
+
+    // Functions to save / load a snapshot
+    // They must be called after Framebuffer snapshot
+    void onSave(android::base::Stream* stream);
+    bool onLoad(android::base::Stream* stream);
+    
     void save();
     void restore();
 
-    // Shaders
-    GLuint createShader(GLuint shader, GLenum shaderType);
-    GLuint createProgram(GLuint program);
-    void shaderString(GLuint shader, const GLchar* string);
-    void genBuffers(GLsizei n, GLuint* buffers);
-    GLuint getProgramName(GLuint name);
+    GLuint getName(ObjectType type, GLuint name);
+
+    // Gen/deletes
+    GLuint glCreateShader(GLuint shader, GLenum shaderType);
+    GLuint glCreateProgram(GLuint program);
+    void glGenBuffers(GLsizei n, GLuint* buffers);
+    void glGenFramebuffers(GLsizei n, GLuint* fbos);
+    void glGenTextures(GLsizei n, GLuint* textures);
+
+    void glDeleteShader(GLuint shader);
+    void glDeleteProgram(GLuint program);
+    void glDeleteBuffers(GLsizei n, const GLuint* buffers);
+    void glDeleteFramebuffers(GLsizei n, const GLuint* fbox);
+    void glDeleteTextures(GLsizei n, const GLuint* textures);
+    // TODO: Transform feedbacks, queries, samplers, program pipelines
+
+    // Shader state
+    void glShaderString(GLuint shader, const GLchar* string);
+    void glAttachShader(GLuint program, GLuint shader);
+    void glCompileShader(GLuint shader);
+    void glLinkProgram(GLuint shader);
+    void glUseProgram(GLuint program);
+    void glBindAttribLocation(GLuint program, GLint index, const GLchar* name);
+    // TODO: Separable shader objects, program pipelines
+
+    void glUniform1i(GLint location, GLint x);
+    void glUniform1f(GLint location, GLfloat x);
+    void glUniform4f(GLint location, GLfloat x, GLfloat y, GLfloat z, GLfloat w);
+    void glUniform4fv(GLint location, GLsizei count, const GLfloat* vals);
+    void glUniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+    // TODO: Fast uniform save/restore path
+    // TODO: All other uniforms, separate program uniforms
+
+    // Buffer state
+    void glBindBuffer(GLenum target, GLuint buffer);
+    void glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage);
+    void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data);
+    // TODO: Mapped buffers
+
+    // Texture state
+    void glBindTexture(GLenum target, GLuint texture);
+    void glActiveTexture(GLenum param);
+    void glPixelStorei(GLenum pname, GLint param);
+    void glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid* pixels);
+    void glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels);
+    void glTexParameteri(GLenum target, GLenum pname, GLint param);
+    // TODO: storage in GL_PIXEL_UNPACK_BUFFER not client array
+    // TODO: compressed/3D/array textures
+
+    // FBO
+    void glBindFramebuffer(GLenum target, GLuint framebuffer);
+    void glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
+    // TODO: Renderbuffers, separate draw/read targets
+
+    // VAO
+    void glEnableVertexAttribArray(GLuint index);
+    void glDisableVertexAttribArray(GLuint index);
+    void glVertexAttribPointerOffset(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, GLuint offset);
+    void glVertexAttribPointerData(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, void* data, GLuint datalen);
+    // TODO: VAO interface
 
 private:
+
+    using GLNameMap = std::unordered_map<GLuint, GLuint>;
+    using GLTypedNameMap = std::array<GLNameMap, ObjectType::NUM_OBJECT_TYPES>;
+
     void getGlobalStateEnum(GLenum name, int size);
     void getGlobalStateByte(GLenum name, int size);
     void getGlobalStateInt(GLenum name, int size);
@@ -57,17 +312,115 @@ private:
 
     void getGlobalStateEnable(GLenum name);
 
+    void saveUniform(GLint location, const GLsizei count, const GLboolean transpose, const GLValueType& type, const GLValue& value);
+    void restoreUniform(GLint location, const GLUniformDesc& desc);
+
+    GLuint toPhysName(ObjectType, GLuint name);
+    GLuint toVirtName(ObjectType, GLuint name);
+
     const GLESv2Dispatch* mGL;
+
+    GLuint nextName(ObjectType type) {
+        return mNextName[type]++;
+    }
+
+    GLuint genName(ObjectType type, GLuint p, bool isProgram = false) {
+        GLuint v = nextName(type);
+        mNames[type][v] = p;
+        mNamesBack[type][p] = v;
+        switch (type) {
+            // shaders/programs should never share the same name.
+            case ObjectType::PROGRAM:
+                if (isProgram)
+                    mPrograms[v] = GLProgramState();
+                else
+                    mShaders[v] = GLShaderState();
+                break;
+            case ObjectType::BUFFER:
+                mBuffers[v] = GLBufferState();
+                break;
+            case ObjectType::FRAMEBUFFER:
+                mFBOs[v] = GLFBOState();
+                break;
+            case ObjectType::TEXTURE:
+                mTextures[v] = GLTextureState();
+                break;
+            default:
+                break;
+        }
+        return v;
+    }
+
+    void genMulti(ObjectType type, GLsizei n, GLuint* in, GLuint* out) {
+        for (int i = 0; i < n; i++) {
+            out[i] = genName(type, in[i]);
+        }
+    }
+
+    void cleanupName(ObjectType type, GLuint p) {
+        GLuint v = toVirtName(type, p);
+        mNames[type].erase(v);
+        mNamesBack[type].erase(p);
+        switch (type) {
+            // shaders/programs should never share the same name.
+            case ObjectType::PROGRAM:
+                mShaders.erase(v);
+                mPrograms.erase(v);
+                break;
+            case ObjectType::BUFFER:
+                mBuffers.erase(v);
+                break;
+            case ObjectType::FRAMEBUFFER:
+                mFBOs.erase(v);
+                break;
+            case ObjectType::TEXTURE:
+                mTextures.erase(v);
+                break;
+            default:
+                break;
+        }
+    }
+
+    void cleanupMulti(ObjectType type, GLsizei n, const GLuint* todo) {
+        for (int i = 0; i < n; i++)
+            cleanupName(type, todo[i]);
+    }
+
+    void refreshName(ObjectType type, GLuint v, GLuint newp) {
+        mNamesBack[type].erase(toPhysName(type, v));
+        mNames[type].erase(v);
+        mNames[type][v] = newp;
+        mNamesBack[type][newp] = v;
+    }
+
+    // All the state to be serialized is below
     GlobalStateMap mGlobals;
     GlobalEnables mEnables;
 
-    GLuint mProgramCounter = 1;
+    // |mNames| maps virtual GL names to "physical" GL names
+    // (i.e., those used by the underlying GLES implementation).
+    // Virtual GL names stay constant across snapshots.
+    GLTypedNameMap mNames;
+    GLTypedNameMap mNamesBack; // Map from physical to virtual.
 
-    std::map<GLuint, GLuint> mProgramNames;
-    std::map<GLuint, GLuint> mProgramNamesBack;
-    std::map<GLuint, GLShaderState> mShaderState;
-    std::map<GLuint, GLProgramState> mShaderProgramState;
+    GLuint mNextName[ObjectType::NUM_OBJECT_TYPES] = {};
 
+    uint32_t mCurrentProgram = 0;
+    uint32_t mPackAlignment = 4;
+    uint32_t mUnpackAlignment = 4;
+    GLenum mActiveTexture = GL_TEXTURE0;
+    GLuint mCurrVAO = 0;
+
+    std::unordered_map<GLenum, GLuint> mBufferBindings;
+    std::unordered_map<GLenum, GLuint> mTextureBindings[SNAPSHOT_MAX_TEXTURE_UNITS];
+    std::unordered_map<GLenum, GLuint> mFBOBindings;
+
+    std::unordered_map<GLuint, GLShaderState> mShaders;
+    std::unordered_map<GLuint, GLProgramState> mPrograms;
+    std::unordered_map<GLuint, GLBufferState> mBuffers;
+    std::unordered_map<GLuint, GLFBOState> mFBOs;
+    std::unordered_map<GLuint, GLTextureState> mTextures;
+    std::unordered_map<GLuint, GLVAOState> mVAOs;
 };
 
 } // namespace GLSnapshot

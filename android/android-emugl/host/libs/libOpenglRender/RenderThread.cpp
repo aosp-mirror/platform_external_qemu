@@ -18,6 +18,7 @@
 #include "ChannelStream.h"
 #include "ErrorLog.h"
 #include "FrameBuffer.h"
+#include "GLSnapshot.h"
 #include "ReadBuffer.h"
 #include "RenderControl.h"
 #include "RendererImpl.h"
@@ -46,6 +47,7 @@ struct RenderThread::SnapshotObjects {
     ChecksumCalculator* checksumCalc;
     ChannelStream* channelStream;
     ReadBuffer* readBuffer;
+    GLSnapshot::GLSnapshotState* glState;
 };
 
 // Start with a smaller buffer to not waste memory on a low-used render threads.
@@ -133,6 +135,7 @@ void RenderThread::loadImpl(AutoLock* lock, const SnapshotObjects& objects) {
         objects.channelStream->load(&*mStream);
         objects.checksumCalc->load(&*mStream);
         objects.threadInfo->onLoad(&*mStream);
+        if (objects.glState) objects.glState->onLoad(&*mStream);
     });
 }
 
@@ -142,6 +145,7 @@ void RenderThread::saveImpl(AutoLock* lock, const SnapshotObjects& objects) {
         objects.channelStream->save(&*mStream);
         objects.checksumCalc->save(&*mStream);
         objects.threadInfo->onSave(&*mStream);
+        if (objects.glState) objects.glState->onSave(&*mStream);
     });
 }
 
@@ -171,19 +175,21 @@ intptr_t RenderThread::main() {
     RenderThreadInfo tInfo;
     ChecksumCalculatorThreadInfo tChecksumInfo;
     ChecksumCalculator& checksumCalc = tChecksumInfo.get();
+    GLSnapshot::GLSnapshotState snapshotState;
 
     //
     // initialize decoders
     //
     tInfo.m_glDec.initGL(gles1_dispatch_get_proc_func, nullptr);
     tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, nullptr);
+    tInfo.m_gl2Dec.m_snapshot = &snapshotState;
     initRenderControlContext(&tInfo.m_rcDec);
 
     ChannelStream stream(mChannel, RenderChannel::Buffer::kSmallSize);
     ReadBuffer readBuf(kStreamBufferSize);
 
     const SnapshotObjects snapshotObjects = {
-        &tInfo, &checksumCalc, &stream, &readBuf
+        &tInfo, &checksumCalc, &stream, &readBuf, &snapshotState
     };
 
     // This is the only place where we try loading from snapshot.
