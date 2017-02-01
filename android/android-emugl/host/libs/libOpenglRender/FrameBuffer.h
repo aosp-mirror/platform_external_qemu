@@ -218,6 +218,9 @@ public:
     // Return a render context pointer from its handle
     RenderContextPtr getContext(HandleType p_context);
 
+    // Return a color buffer pointer from its handle
+    ColorBufferPtr getColorBuffer(HandleType p_context);
+
     // Attach a ColorBuffer to a WindowSurface instance.
     // See the documentation for WindowSurface::setColorBuffer().
     // |p_surface| is the target WindowSurface's handle value.
