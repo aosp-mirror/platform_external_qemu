@@ -83,6 +83,7 @@ LOCAL_SRC_FILES := \
     android/base/files/PathUtils.cpp \
     android/base/files/StdioStream.cpp \
     android/base/files/Stream.cpp \
+    android/base/files/StreamSerializing.cpp \
     android/base/files/IniFile.cpp \
     android/base/misc/FileUtils.cpp \
     android/base/misc/HttpUtils.cpp \
