@@ -16,6 +16,7 @@
 #pragma once
 
 #include "ErrorLog.h"
+#include "android/base/files/Stream.h"
 
 #include <assert.h>
 #include <inttypes.h>
@@ -29,6 +30,7 @@ protected:
     ~IOStream() {
         // NOTE: m_buf was owned by the child class thus we expect it to be
         // released and flushed before the object destruction.
+        // TODO(zyy): uncomment this after all GL state is restored on snapshot
         assert(!m_buf || m_free == m_bufsize);
     }
 
@@ -73,6 +75,18 @@ public:
         return stat;
     }
 
+    void save(android::base::Stream* stream) {
+        stream->putBe32(m_bufsize);
+        stream->putBe32(m_free);
+        onSave(stream);
+    }
+
+    void load(android::base::Stream* stream) {
+        m_bufsize = stream->getBe32();
+        m_free = stream->getBe32();
+        m_buf = onLoad(stream);
+    }
+
     virtual void* getDmaForReading(uint64_t guest_paddr) = 0;
     virtual void unlockDma(uint64_t guest_paddr) = 0;
 
@@ -80,6 +94,8 @@ protected:
     virtual void *allocBuffer(size_t minSize) = 0;
     virtual int commitBuffer(size_t size) = 0;
     virtual const unsigned char *readRaw(void *buf, size_t *inout_len) = 0;
+    virtual void onSave(android::base::Stream* stream) = 0;
+    virtual unsigned char* onLoad(android::base::Stream* stream) = 0;
 
 private:
     unsigned char* m_buf = nullptr;
