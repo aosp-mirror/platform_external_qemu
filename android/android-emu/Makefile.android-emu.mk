@@ -79,6 +79,7 @@ LOCAL_SRC_FILES := \
     android/base/containers/PointerSet.cpp \
     android/base/containers/HashUtils.cpp \
     android/base/Debug.cpp \
+    android/base/files/MemStream.cpp \
     android/base/files/PathUtils.cpp \
     android/base/files/StdioStream.cpp \
     android/base/files/Stream.cpp \
