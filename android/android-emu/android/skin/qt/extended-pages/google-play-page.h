@@ -23,6 +23,7 @@ public:
 
 private slots:
     void on_goog_updateServicesButton_clicked();
+    void on_goog_updateStoreButton_clicked();
 
 private:
     std::unique_ptr<Ui::GooglePlayPage> mUi;
