@@ -1,0 +1,182 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ea071b2_1fcb4ef5",
+        "filename": "android-qemu2-glue/android_renderer.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T21:12:08Z",
+      "side": 1,
+      "message": "I think this should go into RendererImpl\nWe\u0027ve already got hooks for preSave in OpenglEsPipe.cpp, if we add preLoad renderer function then it\u0027s pretty simple to handle everything there\nit would also keep whole snapshotting code in our libgl directories",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 15
+      },
+      "revId": "000ac2c2440c4c63752cce7344f5ccd39687a5c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76deb33d_b20f9b24",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T21:12:08Z",
+      "side": 1,
+      "message": "1. android/base/containers/Lookup.h, contains()\n2. this will be quite slow operation, we\u0027ll need something better",
+      "range": {
+        "startLine": 257,
+        "startChar": 19,
+        "endLine": 257,
+        "endChar": 39
+      },
+      "revId": "000ac2c2440c4c63752cce7344f5ccd39687a5c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d29a1c55_5dc9ae95",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T21:12:08Z",
+      "side": 1,
+      "message": "same thing, linear scans are slow\nps. ite++ -\u003e ++ite",
+      "range": {
+        "startLine": 312,
+        "startChar": 0,
+        "endLine": 314,
+        "endChar": 5
+      },
+      "revId": "000ac2c2440c4c63752cce7344f5ccd39687a5c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3bf240d8_7a6e181c",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/objectNameManager.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T21:12:08Z",
+      "side": 1,
+      "message": "const",
+      "range": {
+        "startLine": 119,
+        "startChar": 20,
+        "endLine": 119,
+        "endChar": 21
+      },
+      "revId": "000ac2c2440c4c63752cce7344f5ccd39687a5c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4779fbd9_99ad0802",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 1095,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T21:12:08Z",
+      "side": 1,
+      "message": "Lookup.h, findOrDefault()",
+      "range": {
+        "startLine": 1089,
+        "startChar": 4,
+        "endLine": 1095,
+        "endChar": 5
+      },
+      "revId": "000ac2c2440c4c63752cce7344f5ccd39687a5c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e37fb6df_9e256c03",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderLibImpl.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T21:12:08Z",
+      "side": 1,
+      "message": "this is bad as it would block for quite a long time. All old render threads will die and exit anyway as their pipes are force-closed.",
+      "range": {
+        "startLine": 93,
+        "startChar": 8,
+        "endLine": 93,
+        "endChar": 41
+      },
+      "revId": "000ac2c2440c4c63752cce7344f5ccd39687a5c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8dd47d03_b409d6ce",
+        "filename": "android/android-emugl/shared/emugl/common/stream.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T21:12:08Z",
+      "side": 1,
+      "message": "it\u0027s better to use android::base versions directly, other headers like this one are just for compatibility with old code that had copies of everything in this namespace",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 37
+      },
+      "revId": "000ac2c2440c4c63752cce7344f5ccd39687a5c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed6bcf2e_178de3ca",
+        "filename": "android/data/advancedFeatures.ini",
+        "patchSetId": 18
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T21:12:08Z",
+      "side": 1,
+      "message": "is this because we don\u0027t save the calculator state?",
+      "revId": "000ac2c2440c4c63752cce7344f5ccd39687a5c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
