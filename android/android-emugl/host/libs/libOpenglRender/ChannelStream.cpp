@@ -26,8 +26,7 @@ namespace emugl {
 
 using IoResult = RenderChannel::IoResult;
 
-ChannelStream::ChannelStream(std::shared_ptr<RenderChannelImpl> channel,
-                             size_t bufSize)
+ChannelStream::ChannelStream(RenderChannelImpl* channel, size_t bufSize)
     : IOStream(bufSize), mChannel(channel) {
     mWriteBuffer.resize_noinit(bufSize);
 }
@@ -76,8 +75,8 @@ const unsigned char* ChannelStream::readRaw(void* buf, size_t* inout_len) {
         if (count > 0) {  // There is some data to return.
             break;
         }
-        // Result can only be IoResult::Error if |count == 0| since |blocking|
-        // was true, it cannot be IoResult::TryAgain.
+        // Result can only be IoResult::Error if |count| == 0
+        // since |blocking| was true, it cannot be IoResult::TryAgain.
         assert(result == IoResult::Error);
         D("error while trying to read");
         return nullptr;
@@ -97,6 +96,24 @@ void ChannelStream::unlockDma(uint64_t guest_paddr) {
 
 void ChannelStream::forceStop() {
     mChannel->stopFromHost();
+}
+
+void ChannelStream::onSave(android::base::Stream* stream) {
+    // Write only the data that's left in read buffer, but in the same format
+    // as saveBuffer() does.
+    stream->putBe32(mReadBufferLeft);
+    stream->write(mReadBuffer.data() + mReadBuffer.size() - mReadBufferLeft,
+                  mReadBufferLeft);
+    android::base::saveBuffer(stream, mWriteBuffer);
+}
+
+unsigned char* ChannelStream::onLoad(android::base::Stream* stream) {
+    android::base::loadBuffer(stream, &mReadBuffer);
+    mReadBufferLeft = mReadBuffer.size();
+    android::base::loadBuffer(stream, &mWriteBuffer);
+    return mWriteBuffer.empty()
+                   ? nullptr
+                   : reinterpret_cast<unsigned char*>(mWriteBuffer.data());
 }
 
 }  // namespace emugl

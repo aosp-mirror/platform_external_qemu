@@ -24,7 +24,7 @@ namespace emugl {
 // wrap a RenderChannelImpl channel.
 class ChannelStream final : public IOStream {
 public:
-    ChannelStream(std::shared_ptr<RenderChannelImpl> channel, size_t bufSize);
+    ChannelStream(RenderChannelImpl* channel, size_t bufSize);
 
     void forceStop();
 
@@ -36,8 +36,11 @@ protected:
     virtual void* getDmaForReading(uint64_t guest_paddr) override final;
     virtual void unlockDma(uint64_t guest_paddr) override final;
 
+    void onSave(android::base::Stream* stream) override;
+    unsigned char* onLoad(android::base::Stream* stream) override;
+
 private:
-    std::shared_ptr<RenderChannelImpl> mChannel;
+    RenderChannelImpl* mChannel;
     RenderChannel::Buffer mWriteBuffer;
     RenderChannel::Buffer mReadBuffer;
     size_t mReadBufferLeft = 0;
