@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "616e9eda_96cf6151",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/BufferQueue.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-01T15:23:28Z",
+      "side": 1,
+      "message": "FOr readability, Perhaps move assert from below here as snapshotmode \u0026\u0026  mCount \u003d\u003d mBuffers.size(), the incrementing logic making the assert hold is closer to the assert.",
+      "range": {
+        "startLine": 85,
+        "startChar": 8,
+        "endLine": 86,
+        "endChar": 32
+      },
+      "revId": "240c764096813aa2e26cf465867ccc879b047758",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a32b15cc_b1bbf42e",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/BufferQueue.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-01T15:23:28Z",
+      "side": 1,
+      "message": "add comment that say something like, mCount always only increments by 1, and this check is always at the same time of that, so this invariant holds.",
+      "range": {
+        "startLine": 192,
+        "startChar": 0,
+        "endLine": 192,
+        "endChar": 47
+      },
+      "revId": "240c764096813aa2e26cf465867ccc879b047758",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
