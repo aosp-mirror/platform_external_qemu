@@ -80,6 +80,17 @@ int GLESv1Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     glDeleteFramebuffersOES_dec = s_glDeleteFramebuffersOES;
     glDeleteVertexArraysOES_dec = s_glDeleteVertexArraysOES;
 
+    glBindBuffer_dec = s_glBindBuffer;
+    glBufferData_dec = s_glBufferData;
+    glBufferSubData_dec = s_glBufferSubData;
+
+    glBindTexture_dec = s_glBindTexture;
+    glActiveTexture_dec = s_glActiveTexture;
+    glPixelStorei_dec = s_glPixelStorei;
+    glTexImage2D_dec = s_glTexImage2D;
+    glTexSubImage2D_dec = s_glTexSubImage2D;
+    glTexParameteri_dec = s_glTexParameteri;
+
     return 0;
 }
 
@@ -282,6 +293,64 @@ void GLESv1Decoder::s_glDeleteVertexArraysOES(void* self, GLsizei n, const GLuin
     GLESv1Decoder *ctx = (GLESv1Decoder *)self;
     ctx->glDeleteVertexArraysOES(n, arrays);
     // TODO: Snapshot names
+}
+
+void GLESv1Decoder::s_glBindBuffer(void* self, GLenum target, GLuint buffer) {
+    GLESv1Decoder *ctx = (GLESv1Decoder *)self;
+    ctx->glBindBuffer(target, buffer);
+    // TODO: Snapshot
+}
+
+void GLESv1Decoder::s_glBufferData(void* self, GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage) {
+    GLESv1Decoder *ctx = (GLESv1Decoder *)self;
+    ctx->glBufferData(target, size, data, usage);
+    // TODO: Snapshot
+}
+
+void GLESv1Decoder::s_glBufferSubData(void* self, GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data) {
+    GLESv1Decoder *ctx = (GLESv1Decoder *)self;
+    ctx->glBufferSubData(target, offset, size, data);
+    // TODO: Snapshot
+}
+
+void GLESv1Decoder::s_glBindTexture(void* self, GLenum target, GLuint texture) {
+    GLESv1Decoder *ctx = (GLESv1Decoder *)self;
+    ctx->glBindTexture(target, texture);
+}
+
+void GLESv1Decoder::s_glActiveTexture(void* self, GLenum unit) {
+    GLESv1Decoder *ctx = (GLESv1Decoder *)self;
+    ctx->glActiveTexture(unit);
+}
+
+void GLESv1Decoder::s_glPixelStorei(void* self, GLenum pname, GLint param) {
+    GLESv1Decoder *ctx = (GLESv1Decoder *)self;
+    ctx->glPixelStorei(pname, param);
+    // TODO: Snapshot
+}
+
+void GLESv1Decoder::s_glTexImage2D(
+        void* self, GLenum target, GLint level, GLint internalformat,
+        GLsizei width, GLsizei height,
+        GLint border, GLenum format, GLenum type, const GLvoid* pixels) {
+    GLESv1Decoder *ctx = (GLESv1Decoder *)self;
+    ctx->glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+    // TODO: Snapshot
+}
+
+void GLESv1Decoder::s_glTexSubImage2D(
+        void* self, GLenum target, GLint level,
+        GLint xoffset, GLint yoffset, GLsizei width, GLsizei height,
+        GLenum format, GLenum type, const GLvoid* pixels) {
+    GLESv1Decoder *ctx = (GLESv1Decoder *)self;
+    ctx->glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
+    // TODO: Snapshot
+}
+
+void GLESv1Decoder::s_glTexParameteri(void* self, GLenum target, GLenum pname, GLint param) {
+    GLESv1Decoder *ctx = (GLESv1Decoder *)self;
+    ctx->glTexParameteri(target, pname, param);
+    // TODO: Snapshot
 }
 
 void *GLESv1Decoder::s_getProc(const char *name, void *userData)
