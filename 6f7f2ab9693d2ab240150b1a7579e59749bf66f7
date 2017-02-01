@@ -45,6 +45,29 @@
       "revId": "6f7f2ab9693d2ab240150b1a7579e59749bf66f7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "473d0136_3ba7eae4",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RendererImpl.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-01T16:26:43Z",
+      "side": 1,
+      "message": "It\u0027s legal since c++11, and most of the compilers supported it as an extension even before that.",
+      "range": {
+        "startLine": 73,
+        "startChar": 49,
+        "endLine": 73,
+        "endChar": 51
+      },
+      "revId": "6f7f2ab9693d2ab240150b1a7579e59749bf66f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
