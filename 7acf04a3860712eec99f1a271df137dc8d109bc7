@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa9d8204_cbbae489",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-01T15:28:05Z",
+      "side": 1,
+      "message": "nit",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 4
+      },
+      "revId": "7acf04a3860712eec99f1a271df137dc8d109bc7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
