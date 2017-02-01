@@ -97,8 +97,6 @@ void RendererImpl::stop() {
         c->stopFromHost();
     }
 
-    // TODO: finish cleaning up for snapshot
-
     // We're stopping the renderer, so there's no need to clean up resources
     // of some pending processes: we'll destroy everything soon.
     mCleanupProcessIds.stop();
@@ -116,6 +114,9 @@ void RendererImpl::cleanupRenderThreads() {
         // loading from a snapshot, and the newly loaded guest should not
         // be notified for those behavior.
         c->stop();
+    }
+    for (const auto& c : channels) {
+        c->renderThread()->wait();
     }
 }
 

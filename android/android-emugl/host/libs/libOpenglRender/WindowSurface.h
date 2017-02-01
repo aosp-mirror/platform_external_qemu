@@ -36,7 +36,8 @@ public:
     static WindowSurface* create(EGLDisplay display,
                                  EGLConfig config,
                                  int width,
-                                 int height);
+                                 int height,
+                                 HandleType hndl);
 
     // Destructor.
     ~WindowSurface();
@@ -82,10 +83,14 @@ public:
     GLuint getWidth() const;
     GLuint getHeight() const;
 
+    void onSave(android::base::Stream* stream) const;
+    static WindowSurface *onLoad(android::base::Stream* stream,
+            EGLDisplay display);
+    HandleType getHndl() const;
 private:
     WindowSurface(const WindowSurface& other) = delete;
 
-    WindowSurface(EGLDisplay display, EGLConfig config);
+    WindowSurface(EGLDisplay display, EGLConfig config, HandleType hndl);
 
     bool resize(unsigned int p_width, unsigned int p_height);
 
@@ -98,6 +103,7 @@ private:
     GLuint mHeight = 0;
     EGLConfig mConfig = nullptr;
     EGLDisplay mDisplay = EGL_NO_DISPLAY;
+    HandleType mHndl;
 };
 
 typedef emugl::SmartPtr<WindowSurface> WindowSurfacePtr;
