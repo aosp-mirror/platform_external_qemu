@@ -30,45 +30,144 @@
 #include "../../../shared/OpenglCodecCommon/ChecksumCalculatorThreadInfo.h"
 
 #include "android/base/system/System.h"
+#include "android/base/files/StreamSerializing.h"
 
 #define EMUGL_DEBUG_LEVEL 0
 #include "emugl/common/debug.h"
 
 #include <assert.h>
-#include <stdio.h>
-#include <string.h>
+
+using android::base::AutoLock;
 
 namespace emugl {
+
+struct RenderThread::SnapshotObjects {
+    RenderThreadInfo* threadInfo;
+    ChecksumCalculator* checksumCalc;
+    ChannelStream* channelStream;
+    ReadBuffer* readBuffer;
+};
 
 // Start with a smaller buffer to not waste memory on a low-used render threads.
 static constexpr int kStreamBufferSize = 128 * 1024;
 
-RenderThread::RenderThread(std::weak_ptr<RendererImpl> renderer,
-                           std::shared_ptr<RenderChannelImpl> channel)
+RenderThread::RenderThread(RenderChannelImpl* channel,
+                           android::base::Stream* loadStream)
     : emugl::Thread(android::base::ThreadFlags::MaskSignals, 2 * 1024 * 1024),
-      mChannel(channel), mRenderer(renderer) {}
+      mChannel(channel) {
+    if (loadStream) {
+        mStream.emplace(0);
+        android::base::loadStream(loadStream, &*mStream);
+        mState = SnapshotState::StartLoading;
+    }
+}
 
 RenderThread::~RenderThread() = default;
 
-// static
-std::unique_ptr<RenderThread> RenderThread::create(
-        std::weak_ptr<RendererImpl> renderer,
-        std::shared_ptr<RenderChannelImpl> channel) {
-    return std::unique_ptr<RenderThread>(
-            new RenderThread(renderer, channel));
+void RenderThread::pausePreSnapshot() {
+    AutoLock lock(mLock);
+    assert(mState == SnapshotState::Empty);
+    mStream.emplace();
+    mState = SnapshotState::StartSaving;
+    mChannel->pausePreSnapshot();
+    mCondVar.broadcastAndUnlock(&lock);
+}
+
+void RenderThread::resume() {
+    AutoLock lock(mLock);
+    // This function can be called for a thread from pre-snapshot loading
+    // state; it doesn't need to do anything.
+    if (mState != SnapshotState::InProgress &&
+        mState != SnapshotState::Finished &&
+        mState != SnapshotState::StartLoading) {
+        return;
+    }
+    waitForSnapshotCompletion(&lock);
+    mStream.clear();
+    mState = SnapshotState::Empty;
+    mChannel->resume();
+    mCondVar.broadcastAndUnlock(&lock);
+}
+
+void RenderThread::save(android::base::Stream* stream) {
+    {
+        AutoLock lock(mLock);
+        assert(mState == SnapshotState::StartSaving ||
+               mState == SnapshotState::InProgress ||
+               mState == SnapshotState::Finished);
+        waitForSnapshotCompletion(&lock);
+    }
+
+    assert(mStream);
+    android::base::saveStream(stream, *mStream);
+}
+
+void RenderThread::waitForSnapshotCompletion(AutoLock* lock) {
+    while (mState != SnapshotState::Finished) {
+        mCondVar.wait(lock);
+    }
+}
+
+template <class OpImpl>
+void RenderThread::snapshotOperation(AutoLock* lock, OpImpl&& implFunc) {
+    assert(isPausedForSnapshotLocked());
+    mState = SnapshotState::InProgress;
+    mCondVar.broadcastAndUnlock(lock);
+
+    implFunc();
+
+    lock->lock();
+
+    mState = SnapshotState::Finished;
+    mCondVar.broadcast();
+
+    // Only return after we're allowed to proceed.
+    while (isPausedForSnapshotLocked()) {
+        mCondVar.wait(lock);
+    }
+}
+
+void RenderThread::loadImpl(AutoLock* lock, const SnapshotObjects& objects) {
+    snapshotOperation(lock, [this, &objects] {
+        objects.readBuffer->onLoad(&*mStream);
+        objects.channelStream->load(&*mStream);
+        // TODO: load objects.checksumCalc
+        // TODO: load objects.threadInfo
+    });
+}
+
+void RenderThread::saveImpl(AutoLock* lock, const SnapshotObjects& objects) {
+    snapshotOperation(lock, [this, &objects] {
+        objects.readBuffer->onSave(&*mStream);
+        objects.channelStream->save(&*mStream);
+        // TODO: save objects.checksumCalc
+        // TODO: save objects.threadInfo
+    });
+}
+
+bool RenderThread::isPausedForSnapshotLocked() const {
+    return mState != SnapshotState::Empty;
+}
+
+bool RenderThread::doSnapshotOperation(const SnapshotObjects& objects,
+                                       SnapshotState state) {
+    AutoLock lock(mLock);
+    if (mState == state) {
+        switch (state) {
+            case SnapshotState::StartLoading:
+                loadImpl(&lock, objects);
+                return true;
+            case SnapshotState::StartSaving:
+                saveImpl(&lock, objects);
+                return true;
+            default:
+                return false;
+        }
+    }
+    return false;
 }
 
 intptr_t RenderThread::main() {
-    ChannelStream stream(mChannel, RenderChannel::Buffer::kSmallSize);
-
-    uint32_t flags = 0;
-    if (stream.read(&flags, sizeof(flags)) != sizeof(flags)) {
-        return 0;
-    }
-
-    // |flags| used to have something, now they're not used.
-    (void)flags;
-
     RenderThreadInfo tInfo;
     ChecksumCalculatorThreadInfo tChecksumInfo;
     ChecksumCalculator& checksumCalc = tChecksumInfo.get();
@@ -76,20 +175,43 @@ intptr_t RenderThread::main() {
     //
     // initialize decoders
     //
-    tInfo.m_glDec.initGL(gles1_dispatch_get_proc_func, NULL);
-    tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, NULL);
+    tInfo.m_glDec.initGL(gles1_dispatch_get_proc_func, nullptr);
+    tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, nullptr);
     initRenderControlContext(&tInfo.m_rcDec);
 
+    ChannelStream stream(mChannel, RenderChannel::Buffer::kSmallSize);
     ReadBuffer readBuf(kStreamBufferSize);
 
+    const SnapshotObjects snapshotObjects = {
+        &tInfo, &checksumCalc, &stream, &readBuf
+    };
+
+    // This is the only place where we try loading from snapshot.
+    if (doSnapshotOperation(snapshotObjects, SnapshotState::StartLoading)) {
+        DBG("Loaded RenderThread @%p from snapshot\n", this);
+    } else {
+        // Not loading from a snapshot: continue regular startup, read
+        // the |flags|.
+        uint32_t flags = 0;
+        while (stream.read(&flags, sizeof(flags)) != sizeof(flags)) {
+            // Stream read may fail because of a pending snapshot.
+            if (!doSnapshotOperation(snapshotObjects, SnapshotState::StartSaving)) {
+                return 0;
+            }
+        }
+
+        // |flags| used to mean something, now they're not used.
+        (void)flags;
+    }
+
     int stats_totalBytes = 0;
-    long long stats_t0 = android::base::System::get()->getHighResTimeUs() / 1000;
+    auto stats_t0 = android::base::System::get()->getHighResTimeUs() / 1000;
 
     //
     // open dump file if RENDER_DUMP_DIR is defined
     //
     const char* dump_dir = getenv("RENDERER_DUMP_DIR");
-    FILE* dumpFP = NULL;
+    FILE* dumpFP = nullptr;
     if (dump_dir) {
         size_t bsize = strlen(dump_dir) + 32;
         char* fname = new char[bsize];
@@ -114,15 +236,19 @@ intptr_t RenderThread::main() {
             packetSize = 8;
         }
 
-        // We should've processed the packet on the previous iteration if it
-        // was already in the buffer.
-        assert(packetSize > (int)readBuf.validData());
-
-        const int stat = readBuf.getData(&stream, packetSize);
-        if (stat <= 0) {
-            D("Warning: render thread could not read data from stream");
-            break;
+        int stat = 0;
+        if (packetSize > (int)readBuf.validData()) {
+            stat = readBuf.getData(&stream, packetSize);
+            if (stat <= 0) {
+                if (doSnapshotOperation(snapshotObjects, SnapshotState::StartSaving)) {
+                    continue;
+                } else {
+                    D("Warning: render thread could not read data from stream");
+                    break;
+                }
+            }
         }
+
         DD("render thread read %d bytes, op %d, packet size %d",
            (int)readBuf.validData(), *(int32_t*)readBuf.buf(),
            *(int32_t*)(readBuf.buf() + 4));
@@ -131,7 +257,7 @@ intptr_t RenderThread::main() {
         // log received bandwidth statistics
         //
         stats_totalBytes += readBuf.validData();
-        long long dt = android::base::System::get()->getHighResTimeUs() / 1000 - stats_t0;
+        auto dt = android::base::System::get()->getHighResTimeUs() / 1000 - stats_t0;
         if (dt > 1000) {
             // float dts = (float)dt / 1000.0f;
             // printf("Used Bandwidth %5.3f MB/s\n", ((float)stats_totalBytes /
@@ -205,12 +331,13 @@ intptr_t RenderThread::main() {
         fclose(dumpFP);
     }
 
+    // Don't check for snapshots here: if we're already exiting then snapshot
+    // should not contain this thread information at all.
+
     // exit sync thread, if any.
     SyncThread::destroySyncThread();
 
-    //
     // Release references to the current thread's context/surfaces if any
-    //
     FrameBuffer::getFB()->bindContext(0, 0, 0);
     if (tInfo.currContext || tInfo.currDrawSurf || tInfo.currReadSurf) {
         fprintf(stderr,

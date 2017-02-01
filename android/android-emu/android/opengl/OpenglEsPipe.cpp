@@ -11,6 +11,7 @@
 #include "android/opengl/OpenglEsPipe.h"
 
 #include "android/base/async/Looper.h"
+#include "android/base/files/StreamSerializing.h"
 #include "android/opengles.h"
 #include "android/opengles-pipe.h"
 #include "android/opengl/GLProcessPipe.h"
@@ -56,40 +57,80 @@ public:
         Service() : AndroidPipe::Service("opengles") {}
 
         // Create a new EmuglPipe instance.
-        virtual AndroidPipe* create(void* mHwPipe, const char* args) override {
+        AndroidPipe* create(void* hwPipe, const char* args) override {
+            return createPipe(hwPipe, this, args);
+        }
+
+        bool canLoad() const override { return true; }
+
+        void postLoad(android::base::Stream* stream) override {
+            if (const auto& renderer = android_getOpenglesRenderer()) {
+                renderer->resumeAll();
+            }
+        }
+
+        void preSave(android::base::Stream* stream) override {
+            if (const auto& renderer = android_getOpenglesRenderer()) {
+                renderer->pauseAllPreSave();
+            }
+        }
+
+        void postSave(android::base::Stream* stream) override {
+            if (const auto& renderer = android_getOpenglesRenderer()) {
+                renderer->resumeAll();
+            }
+        }
+
+        virtual AndroidPipe* load(void* hwPipe,
+                              const char* args,
+                              android::base::Stream* stream) override {
+            return createPipe(hwPipe, this, args, stream);
+        }
+
+    private:
+        static AndroidPipe* createPipe(
+                void* hwPipe, Service* service,
+                const char* args, android::base::Stream* loadStream = nullptr) {
             const auto& renderer = android_getOpenglesRenderer();
             if (!renderer) {
                 // This should never happen, unless there is a bug in the
-                // emulator's initialization, or the system image.
+                // emulator's initialization, or the system image, or we're
+                // loading from an incompatible snapshot.
                 D("Trying to open the OpenGLES pipe without GPU emulation!");
                 return nullptr;
             }
 
-            EmuglPipe* pipe = new EmuglPipe(mHwPipe, this, renderer);
+            auto pipe = new EmuglPipe(hwPipe, service, renderer, loadStream);
             if (!pipe->mIsWorking) {
                 delete pipe;
                 pipe = nullptr;
             }
             return pipe;
         }
-
-        // Really cannot save/load these pipes' state.
-        virtual bool canLoad() const override { return false; }
     };
 
     /////////////////////////////////////////////////////////////////////////
     // Constructor, check that |mIsWorking| is true after this call to verify
     // that everything went well.
     EmuglPipe(void* hwPipe, Service* service,
-              const emugl::RendererPtr& renderer)
+              const emugl::RendererPtr& renderer,
+              android::base::Stream* loadStream = nullptr)
         : AndroidPipe(hwPipe, service) {
-        mChannel = renderer->createRenderChannel();
+        bool isWorking = true;
+        if (loadStream) {
+            DD("%s: loading GLES pipe state for hwpipe=%p", __func__, mHwPipe);
+            isWorking = (bool)loadStream->getBe32();
+            android::base::loadBuffer(loadStream, &mDataForReading);
+            mDataForReadingLeft = loadStream->getBe32();
+        }
+
+        mChannel = renderer->createRenderChannel(loadStream);
         if (!mChannel) {
             D("Failed to create an OpenGLES pipe channel!");
             return;
         }
 
-        mIsWorking = true;
+        mIsWorking = isWorking;
         mChannel->setEventCallback(
                 [this](RenderChannel::State events) {
                     this->onChannelHostEvent(events);
@@ -259,6 +300,15 @@ public:
         }
     }
 
+    virtual void onSave(android::base::Stream* stream) override {
+        DD("%s: saving GLES pipe state for hwpipe=%p", __FUNCTION__, mHwPipe);
+        stream->putBe32(mIsWorking);
+        android::base::saveBuffer(stream, mDataForReading);
+        stream->putBe32(mDataForReadingLeft);
+
+        mChannel->onSave(stream);
+    }
+
 private:
     // Called to signal the guest that read/write wake events occured.
     // Note: this can be called from either the guest or host render
@@ -278,10 +328,13 @@ private:
 
     // Called when an i/o event occurs on the render channel
     void onChannelHostEvent(ChannelState state) {
-        D("%s: events %d", __func__, (int)state);
+        D("%s: events %d (working %d)", __func__, (int)state, (int)mIsWorking);
         // NOTE: This is called from the host-side render thread.
         // but closeFromHost() and signalWake() can be called from
         // any thread.
+        if (!mIsWorking) {
+            return;
+        }
         if ((state & ChannelState::Stopped) != 0) {
             this->closeFromHost();
             return;

@@ -19,13 +19,15 @@
 
 namespace emugl {
 
+class RenderThread;
+
 // Implementation of the RenderChannel interface that connects a guest
 // client thread (really an AndroidPipe implementation) to a host
 // RenderThread instance.
 class RenderChannelImpl final : public RenderChannel {
 public:
-    // Default constructor.
-    RenderChannelImpl();
+    explicit RenderChannelImpl(android::base::Stream* loadStream = nullptr);
+    ~RenderChannelImpl();
 
     /////////////////////////////////////////////////////////////////
     // RenderChannel overriden methods. These are called from the guest
@@ -53,8 +55,11 @@ public:
     // Close the channel from the guest.
     virtual void stop() override final;
 
+    // Callback function when snapshotting the virtual machine.
+    virtual void onSave(android::base::Stream* stream) override;
+
     /////////////////////////////////////////////////////////////////
-    // These functions are called from the host render thread.
+    // These functions are called from the host render thread or renderer.
 
     // Send a buffer to the guest, this call is blocking. On success,
     // move |buffer| into the channel and return true. On failure, return
@@ -71,11 +76,28 @@ public:
     // Close the channel from the host.
     void stopFromHost();
 
+    // Check if either guest or host stopped the channel.
+    bool isStopped() const;
+
+    // Return the underlying render thread object.
+    RenderThread* renderThread() const;
+
+    // Pause normal operations and enter the snapshot mode. In snapshot mode
+    // RenderChannel is supposed to allow everyone to write data into the
+    // channel, but it should not return any data back. This way we can make
+    // sure all data at the snapshot time is here and is saved, and we won't
+    // miss some important rendering call.
+    void pausePreSnapshot();
+
+    // Resume the normal operation after saving or loading a snapshot.
+    void resume();
+
 private:
     void updateStateLocked();
     void notifyStateChangeLocked();
 
     EventCallback mEventCallback;
+    std::unique_ptr<RenderThread> mRenderThread;
 
     // A single lock to protect the state and the two buffer queues at the
     // same time. NOTE: This needs to appear before the BufferQueue instances.
