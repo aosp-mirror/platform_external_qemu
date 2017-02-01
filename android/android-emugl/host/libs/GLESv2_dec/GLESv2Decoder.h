@@ -223,5 +223,23 @@ private:
     static GLint gles2_APIENTRY s_glGetProgramResourceLocation(void* self, GLuint program, GLenum programInterface, const char * name);
     static void gles2_APIENTRY s_glGetProgramResourceName(void* self, GLuint program, GLenum programInterface, GLuint index, GLsizei bufSize, GLsizei * length, char * name);
 
+    // Buffer state===============================================
+    static void gles2_APIENTRY s_glBindBuffer(void* self, GLenum target, GLuint buffer);
+    static void gles2_APIENTRY s_glBufferData(void* self, GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage);
+    static void gles2_APIENTRY s_glBufferSubData(void* self, GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data);
+
+    // Textures===================================================
+    static void gles2_APIENTRY s_glBindTexture(void* self, GLenum target, GLuint texture);
+    static void gles2_APIENTRY s_glActiveTexture(void* self, GLenum unit);
+    static void gles2_APIENTRY s_glPixelStorei(void* self, GLenum pname, GLint param);
+    static void gles2_APIENTRY s_glTexImage2D(
+            void* self, GLenum target, GLint level, GLint internalformat,
+            GLsizei width, GLsizei height,
+            GLint border, GLenum format, GLenum type, const GLvoid* pixels);
+    static void gles2_APIENTRY s_glTexSubImage2D(
+            void* self, GLenum target, GLint level,
+            GLint xoffset, GLint yoffset, GLsizei width, GLsizei height,
+            GLenum format, GLenum type, const GLvoid* pixels);
+
 };
 #endif
