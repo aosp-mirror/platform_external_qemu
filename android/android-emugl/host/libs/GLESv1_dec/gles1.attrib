@@ -702,3 +702,27 @@ glExtGetProgramsQCOM
 #void glExtGetProgramBinarySourceQCOM(GLuint program, GLenum shadertype, GLchar *source, GLint *length)
 glExtGetProgramBinarySourceQCOM
 	flag unsupported
+
+glBindBuffer
+    flag custom_decoder
+
+glBufferData
+    flag custom_decoder
+
+glBufferSubData
+    flag custom_decoder
+
+glBindTexture
+    flag custom_decoder
+
+glActiveTexture
+    flag custom_decoder
+
+glPixelStorei
+    flag custom_decoder
+
+glTexImage2D
+    flag custom_decoder
+
+glTexSubImage2D
+    flag custom_decoder
