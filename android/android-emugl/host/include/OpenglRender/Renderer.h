@@ -15,6 +15,7 @@
 
 #include "OpenglRender/RenderChannel.h"
 #include "OpenglRender/render_api_platform_types.h"
+#include "android/base/files/Stream.h"
 
 #include <functional>
 #include <memory>
@@ -31,7 +32,11 @@ public:
     // This call instantiates a new object that waits for the serialized data
     // from the guest, deserializes it, executes the passed GL commands and
     // returns the results back.
-    virtual RenderChannelPtr createRenderChannel() = 0;
+    // |loadStream| - if not NULL, RenderChannel uses it to load saved state
+    //   asynchronously on its own thread. |loadStream| can be used right after
+    //   the call as all the required data is copied here synchronously.
+    virtual RenderChannelPtr createRenderChannel(
+            android::base::Stream* loadStream = nullptr) = 0;
 
     // getHardwareStrings - describe the GPU hardware and driver.
     // The underlying GL's vendor/renderer/version strings are returned to the
@@ -137,6 +142,13 @@ public:
 
     // Stops all channels and render threads.
     virtual void stop() = 0;
+
+    // Pauses all channels to prepare for snapshot saving.
+    virtual void pauseAllPreSave() = 0;
+
+    // Resumes all channels after snapshot saving or loading.
+    virtual void resumeAll() = 0;
+
 protected:
     ~Renderer() = default;
 };

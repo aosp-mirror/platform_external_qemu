@@ -85,64 +85,75 @@ bool RendererImpl::initialize(int width, int height, bool useSubWindow) {
 }
 
 void RendererImpl::stop() {
-    android::base::AutoLock lock(mThreadVectorLock);
+    android::base::AutoLock lock(mChannelsLock);
     mStopped = true;
-    auto threads = std::move(mThreads);
+    auto channels = std::move(mChannels);
     lock.unlock();
 
     if (const auto fb = FrameBuffer::getFB()) {
         fb->setShuttingDown();
     }
-    for (const auto& t : threads) {
-        if (const auto channel = t.second.lock()) {
-            channel->stopFromHost();
-        }
+    for (const auto& c : channels) {
+        c->stopFromHost();
     }
+
+    // TODO: finish cleaning up for snapshot
+
     // We're stopping the renderer, so there's no need to clean up resources
     // of some pending processes: we'll destroy everything soon.
     mCleanupProcessIds.stop();
-
-    for (const auto& t : threads) {
-        t.first->wait();
-    }
     mCleanupThread.wait();
 }
 
-RenderChannelPtr RendererImpl::createRenderChannel() {
-    const auto channel = std::make_shared<RenderChannelImpl>();
-
-    std::unique_ptr<RenderThread> rt(RenderThread::create(
-            shared_from_this(), channel));
-    if (!rt) {
-        fprintf(stderr, "Failed to create RenderThread\n");
-        return nullptr;
-    }
-
+RenderChannelPtr RendererImpl::createRenderChannel(
+        android::base::Stream* loadStream) {
+    const auto channel = std::make_shared<RenderChannelImpl>(loadStream);
     {
-        android::base::AutoLock lock(mThreadVectorLock);
+        android::base::AutoLock lock(mChannelsLock);
 
-        if (mStopped) return nullptr;
-
-        if (!rt->start()) {
-            fprintf(stderr, "Failed to start RenderThread\n");
+        if (mStopped) {
             return nullptr;
         }
 
-        // clean up the threads that are no longer running
-        mThreads.erase(std::remove_if(mThreads.begin(), mThreads.end(),
-                                      [](const ThreadWithChannel& t) {
-                                          return t.second.expired() ||
-                                                 t.first->isFinished();
-                                      }),
-                       mThreads.end());
+        // Clean up the stopped channels.
+        mChannels.erase(
+                std::remove_if(mChannels.begin(), mChannels.end(),
+                               [](const std::shared_ptr<RenderChannelImpl>& c) {
+                                   return c->renderThread()->isFinished();
+                               }),
+                mChannels.end());
+        mChannels.emplace_back(channel);
 
         DBG("Started new RenderThread (total %" PRIu64 ") @%p\n",
-            static_cast<uint64_t>(mThreads.size() + 1), rt.get());
-
-        mThreads.emplace_back(std::move(rt), channel);
+            static_cast<uint64_t>(mChannels.size()), channel->renderThread());
     }
 
     return channel;
+}
+
+void RendererImpl::pauseAllPreSave() {
+    android::base::AutoLock lock(mChannelsLock);
+    if (mStopped) {
+        return;
+    }
+    for (const auto& c : mChannels) {
+        c->renderThread()->pausePreSnapshot();
+    }
+    lock.unlock();
+
+    // Make sure we've cleaned up all resources for exited processes before
+    // we start saving the GL states.
+    mCleanupProcessIds.waitForEmpty();
+}
+
+void RendererImpl::resumeAll() {
+    android::base::AutoLock lock(mChannelsLock);
+    if (mStopped) {
+        return;
+    }
+    for (const auto& c : mChannels) {
+        c->renderThread()->resume();
+    }
 }
 
 RendererImpl::HardwareStrings RendererImpl::getHardwareStrings() {
