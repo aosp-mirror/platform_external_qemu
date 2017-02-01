@@ -115,9 +115,114 @@
     <bool>false</bool>
    </property>
   </widget>
+  <widget class="QGroupBox" name="goog_playStoreTitle">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>123</y>
+     <width>181</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: 0px;</string>
+   </property>
+   <property name="title">
+    <string>Google Play Store Version</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Title</string>
+   </property>
+  </widget>
+  <widget class="QPlainTextEdit" name="goog_playStoreVersionBox">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>141</y>
+     <width>280</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+    </font>
+   </property>
+   <property name="verticalScrollBarPolicy">
+    <enum>Qt::ScrollBarAlwaysOff</enum>
+   </property>
+   <property name="horizontalScrollBarPolicy">
+    <enum>Qt::ScrollBarAlwaysOff</enum>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+   <property name="plainText">
+    <string notr="true">7.3.07.K-all [0] [PR] 139935798</string>
+   </property>
+  </widget>
+  <widget class="RaisedMaterialButton" name="goog_updateStoreButton">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>165</y>
+     <width>132</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">Text-align:left; padding:8px</string>
+   </property>
+   <property name="text">
+    <string>UPDATE</string>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>:/light/update</normaloff>:/light/update</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Tool</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+  </widget>
   <zorder>goog_playServicesTitle</zorder>
   <zorder>goog_playServicesVersionBox</zorder>
   <zorder>goog_playServicesUpdateButton</zorder>
+  <zorder>goog_playStoreTitle</zorder>
+  <zorder>goog_playStoreVersionBox</zorder>
+  <zorder>goog_playStoreUpdateButton</zorder>
  </widget>
  <customwidgets>
   <customwidget>
@@ -128,6 +233,7 @@
  </customwidgets>
  <tabstops>
   <tabstop>goog_updateServicesButton</tabstop>
+  <tabstop>goog_updateStoreButton</tabstop>
  </tabstops>
  <resources>
   <include location="../resources.qrc"/>
