@@ -15,6 +15,10 @@
 */
 #pragma once
 
+#include "android/base/files/MemStream.h"
+#include "android/base/Optional.h"
+#include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/synchronization/Lock.h"
 #include "emugl/common/mutex.h"
 #include "emugl/common/thread.h"
 
@@ -24,15 +28,17 @@ namespace emugl {
 
 class RenderChannelImpl;
 class RendererImpl;
+class ReadBuffer;
 
 // A class used to model a thread of the RenderServer. Each one of them
 // handles a single guest client / protocol byte stream.
 class RenderThread : public emugl::Thread {
+    using MemStream = android::base::MemStream;
+
 public:
     // Create a new RenderThread instance.
-    static std::unique_ptr<RenderThread> create(
-            std::weak_ptr<RendererImpl> renderer,
-            std::shared_ptr<RenderChannelImpl> channel);
+    explicit RenderThread(RenderChannelImpl* channel,
+                          android::base::Stream* loadStream = nullptr);
 
     virtual ~RenderThread();
 
@@ -40,14 +46,40 @@ public:
     // Note that this also means that the thread's stack has been
     bool isFinished() { return tryWait(NULL); }
 
-private:
-    RenderThread(std::weak_ptr<RendererImpl> renderer,
-                 std::shared_ptr<RenderChannelImpl> channel);
+    void pausePreSnapshot();
+    void resume();
+    void save(android::base::Stream* stream);
 
+private:
     virtual intptr_t main();
 
-    std::shared_ptr<RenderChannelImpl> mChannel;
-    std::weak_ptr<RendererImpl> mRenderer;
+    // Snapshot support.
+    enum class SnapshotState {
+        Empty,
+        StartSaving,
+        StartLoading,
+        InProgress,
+        Finished,
+    };
+
+    template <class OpImpl>
+    void snapshotOperation(android::base::AutoLock* lock, OpImpl&& impl);
+
+    struct SnapshotObjects;
+
+    bool doSnapshotOperation(const SnapshotObjects& objects,
+                             SnapshotState operation);
+    void waitForSnapshotCompletion(android::base::AutoLock* lock);
+    void loadImpl(android::base::AutoLock* lock, const SnapshotObjects& objects);
+    void saveImpl(android::base::AutoLock* lock, const SnapshotObjects& objects);
+
+    bool isPausedForSnapshotLocked() const;
+
+    RenderChannelImpl* mChannel = nullptr;
+    SnapshotState mState = SnapshotState::Empty;
+    android::base::Lock mLock;
+    android::base::ConditionVariable mCondVar;
+    android::base::Optional<android::base::MemStream> mStream;
 };
 
 }  // namespace emugl
