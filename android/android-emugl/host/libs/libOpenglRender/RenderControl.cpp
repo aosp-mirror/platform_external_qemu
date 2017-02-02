@@ -273,6 +273,15 @@ std::string replaceESVersionString(const std::string& prev,
     return res;
 }
 
+// If the GLES3 feature is disabled, we also want to splice out
+// OpenGL extensions that should not appear in a GLES2 system.
+void removeExtension(std::string& currExts, const std::string& toRemove) {
+    size_t pos = currExts.find(toRemove);
+
+    if (pos != std::string::npos)
+        currExts.erase(pos, toRemove.length());
+}
+
 static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
 {
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
@@ -319,8 +328,8 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
         glStr += " ";
     }
 
-    if (glesDynamicVersionEnabled && name == GL_EXTENSIONS) {
-        GLESDispatchMaxVersion maxVersion = calcMaxVersionFromDispatch();
+    GLESDispatchMaxVersion maxVersion = calcMaxVersionFromDispatch();
+    if (name == GL_EXTENSIONS && glesDynamicVersionEnabled) {
         glStr += maxVersionToFeatureString(maxVersion);
         glStr += " ";
 
@@ -330,6 +339,12 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
             glStr += "GL_OES_vertex_array_object ";
             glStr += "GL_OES_standard_derivatives ";
         }
+    }
+
+    if (name == GL_EXTENSIONS &&
+        (!glesDynamicVersionEnabled ||
+         maxVersion < GLES_DISPATCH_MAX_VERSION_3_0)) {
+        removeExtension(glStr, "GL_EXT_color_buffer_float ");
     }
 
     if (glesDynamicVersionEnabled && name == GL_VERSION) {
