@@ -59,6 +59,8 @@ ExtendedWindow::ExtendedWindow(
     mExtendedUi->setupUi(this);
     mExtendedUi->helpPage->initialize(shortcuts);
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
+    mExtendedUi->googlePlayPage->setAdbInterface(
+            mEmulatorWindow->getAdbInterface());
     mExtendedUi->rotaryInputPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->settingsPage->setAdbInterface(
             mEmulatorWindow->getAdbInterface());
