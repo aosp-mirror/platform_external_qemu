@@ -23,8 +23,6 @@
 #include "emugl/common/misc.h"
 #include "emugl/common/sync_device.h"
 
-#include "FrameBuffer.h"
-
 namespace emugl {
 
 void RenderLibImpl::setApiLevel(int api) {
@@ -79,24 +77,6 @@ RendererPtr RenderLibImpl::initRenderer(int width, int height,
     }
     mRenderer = res;
     return res;
-}
-
-void RenderLibImpl::save(android::base::Stream* stream) {
-    FrameBuffer* fb = FrameBuffer::getFB();
-    assert(fb);
-    fb->onSave(stream);
-}
-
-bool RenderLibImpl::load(android::base::Stream* stream, int version) {
-    (void)version;
-    if (auto renderer = mRenderer.lock()) {
-        renderer->cleanupRenderThreads();
-    } else { // the renderer is dead?
-        return false;
-    }
-    FrameBuffer* fb = FrameBuffer::getFB();
-    assert(fb);
-    return fb->onLoad(stream);
 }
 
 }  // namespace emugl

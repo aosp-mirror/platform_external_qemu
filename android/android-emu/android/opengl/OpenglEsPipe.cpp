@@ -67,8 +67,18 @@ public:
         bool canLoad() const override { return true; }
 
         virtual void preLoad(android::base::Stream* stream) override {
+            const bool hasRenderer = stream->getByte();
+            const auto& renderer = android_getOpenglesRenderer();
+            if (hasRenderer != (bool)renderer) {
+                // die?
+                return;
+            }
+            if (!hasRenderer) {
+                return;
+            }
             int version = stream->getBe32();
-            android_loadOpenglRenderer(stream, version);
+            (void)version;
+            renderer->load(stream);
         }
 
         void postLoad(android::base::Stream* stream) override {
@@ -80,9 +90,12 @@ public:
         void preSave(android::base::Stream* stream) override {
             if (const auto& renderer = android_getOpenglesRenderer()) {
                 renderer->pauseAllPreSave();
+                stream->putByte(1);
+                stream->putBe32(OPENGL_SAVE_VERSION);
+                renderer->save(stream);
+            } else {
+                stream->putByte(0);
             }
-            stream->putBe32(OPENGL_SAVE_VERSION);
-            android_saveOpenglRenderer(stream);
         }
 
         void postSave(android::base::Stream* stream) override {

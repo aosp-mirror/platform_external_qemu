@@ -150,8 +150,9 @@ public:
     // Resumes all channels after snapshot saving or loading.
     virtual void resumeAll() = 0;
 
-    // Wait for all render thread exits
-    virtual void cleanupRenderThreads() = 0;
+    virtual void save(android::base::Stream* stream) = 0;
+    virtual bool load(android::base::Stream* stream) = 0;
+
 protected:
     ~Renderer() = default;
 };

@@ -107,11 +107,11 @@ void RendererImpl::stop() {
 
 void RendererImpl::cleanupRenderThreads() {
     android::base::AutoLock lock(mChannelsLock);
-    for (const auto& c : mChannels) {
+    const auto channels = std::move(mChannels);
+    assert(mChannels.empty());
+    lock.unlock();
+    for (const auto& c : channels) {
         c->stopFromHost();
-    }
-    for (const auto& c : mChannels) {
-        c->renderThread()->wait();
     }
 }
 
@@ -166,9 +166,30 @@ void RendererImpl::resumeAll() {
     }
 }
 
+void RendererImpl::save(android::base::Stream* stream) {
+    stream->putByte(mStopped);
+    if (mStopped) {
+        return;
+    }
+    auto fb = FrameBuffer::getFB();
+    assert(fb);
+    fb->onSave(stream);
+}
+
+bool RendererImpl::load(android::base::Stream* stream) {
+    cleanupRenderThreads();
+    mStopped = stream->getByte();
+    if (mStopped) {
+        return true;
+    }
+    auto fb = FrameBuffer::getFB();
+    assert(fb);
+    return fb->onLoad(stream);
+}
+
 RendererImpl::HardwareStrings RendererImpl::getHardwareStrings() {
     assert(mRenderWindow);
-
+    
     const char* vendor = nullptr;
     const char* renderer = nullptr;
     const char* version = nullptr;

@@ -57,9 +57,6 @@ public:
     // There might be only one renderer.
     virtual RendererPtr initRenderer(int width, int height,
                                      bool useSubWindow) = 0;
-
-    virtual void save(android::base::Stream* stream) = 0;
-    virtual bool load(android::base::Stream* stream, int version) = 0;
 };
 
 using RenderLibPtr = std::unique_ptr<RenderLib>;
