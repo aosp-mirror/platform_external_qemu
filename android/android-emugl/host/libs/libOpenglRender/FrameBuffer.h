@@ -16,6 +16,8 @@
 #ifndef _LIBRENDER_FRAMEBUFFER_H
 #define _LIBRENDER_FRAMEBUFFER_H
 
+#include "android/base/files/Stream.h"
+
 #include "ColorBuffer.h"
 #include "emugl/common/mutex.h"
 #include "FbConfig.h"
@@ -32,10 +34,6 @@
 #include <unordered_set>
 
 #include <stdint.h>
-
-// Type of handles, a.k.a. "object names" in the GL specification.
-// These are integers used to uniquely identify a resource of a given type.
-typedef uint32_t HandleType;
 
 struct ColorBufferRef {
     ColorBufferPtr cb;
@@ -155,8 +153,8 @@ public:
     // |p_share| is either EGL_NO_CONTEXT or the handle of a shared context.
     // |version| specifies the GLES version as a GLESApi enum.
     // Return a new handle value, which will be 0 in case of error.
-    HandleType createRenderContext(
-            int p_config, HandleType p_share, GLESApi version = GLESApi_CM);
+    HandleType createRenderContext(int p_config, HandleType p_share, 
+        GLESApi version = GLESApi_CM);
 
     // Create a new WindowSurface instance from this display instance.
     // |p_config| is the index of one of the configs returned by getConfigs().
@@ -216,6 +214,9 @@ public:
     bool  bindContext(HandleType p_context,
                       HandleType p_drawSurface,
                       HandleType p_readSurface);
+
+    // Return a render context pointer from its handle
+    RenderContextPtr getContext(HandleType p_context);
 
     // Attach a ColorBuffer to a WindowSurface instance.
     // See the documentation for WindowSurface::setColorBuffer().
@@ -346,6 +347,8 @@ public:
 
     ~FrameBuffer();
 
+    void onSave(android::base::Stream* stream);
+    bool onLoad(android::base::Stream* stream);
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle();

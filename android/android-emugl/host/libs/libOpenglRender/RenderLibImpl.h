@@ -42,6 +42,8 @@ public:
                                      int height,
                                      bool useSubWindow) override;
 
+    virtual void save(android::base::Stream* stream);
+    virtual bool load(android::base::Stream* stream, int version);
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RenderLibImpl);
 

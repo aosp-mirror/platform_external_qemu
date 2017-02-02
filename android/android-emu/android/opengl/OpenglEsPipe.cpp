@@ -13,6 +13,7 @@
 #include "android/base/async/Looper.h"
 #include "android/base/files/StreamSerializing.h"
 #include "android/opengles.h"
+#include "android/opengl-snapshot.h"
 #include "android/opengles-pipe.h"
 #include "android/opengl/GLProcessPipe.h"
 
@@ -43,6 +44,8 @@ using emugl::RenderChannelPtr;
 using ChannelState = emugl::RenderChannel::State;
 using IoResult = emugl::RenderChannel::IoResult;
 
+#define OPENGL_SAVE_VERSION 1
+
 namespace android {
 namespace opengl {
 
@@ -63,6 +66,11 @@ public:
 
         bool canLoad() const override { return true; }
 
+        virtual void preLoad(android::base::Stream* stream) override {
+            int version = stream->getBe32();
+            android_loadOpenglRenderer(stream, version);
+        }
+
         void postLoad(android::base::Stream* stream) override {
             if (const auto& renderer = android_getOpenglesRenderer()) {
                 renderer->resumeAll();
@@ -73,6 +81,8 @@ public:
             if (const auto& renderer = android_getOpenglesRenderer()) {
                 renderer->pauseAllPreSave();
             }
+            stream->putBe32(OPENGL_SAVE_VERSION);
+            android_saveOpenglRenderer(stream);
         }
 
         void postSave(android::base::Stream* stream) override {
