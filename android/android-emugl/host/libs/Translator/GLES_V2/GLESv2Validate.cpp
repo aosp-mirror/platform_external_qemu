@@ -14,6 +14,7 @@
 * limitations under the License.
 */
 #include "GLESv2Validate.h"
+
 #include <string.h>
 
 #define LIST_VALID_TEXFORMATS(f) \
@@ -518,8 +519,13 @@ bool GLESv2Validate::pixelItnlFrmt(GLEScontext* ctx ,GLenum internalformat) {
     case GL_RGB8:
     case GL_RGBA8:
         return true;
-    case GL_R8_SNORM:
     case GL_R32F:
+    case GL_RG32F:
+    case GL_RGB32F:
+    case GL_RGBA32F:
+        return ctx->getMajorVersion() >= 3 ||
+               ctx->getCaps()->GL_EXT_color_buffer_float;
+    case GL_R8_SNORM:
     case GL_R8UI:
     case GL_R8I:
     case GL_R16UI:
@@ -527,7 +533,6 @@ bool GLESv2Validate::pixelItnlFrmt(GLEScontext* ctx ,GLenum internalformat) {
     case GL_R32UI:
     case GL_R32I:
     case GL_RG8_SNORM:
-    case GL_RG32F:
     case GL_RG8UI:
     case GL_RG8I:
     case GL_RG16UI:
@@ -538,7 +543,6 @@ bool GLESv2Validate::pixelItnlFrmt(GLEScontext* ctx ,GLenum internalformat) {
     case GL_RGB565:
     case GL_RGB8_SNORM:
     case GL_RGB9_E5:
-    case GL_RGB32F:
     case GL_RGB8UI:
     case GL_RGB8I:
     case GL_RGB16UI:
@@ -550,7 +554,6 @@ bool GLESv2Validate::pixelItnlFrmt(GLEScontext* ctx ,GLenum internalformat) {
     case GL_RGB5_A1:
     case GL_RGBA4:
     case GL_RGB10_A2:
-    case GL_RGBA32F:
     case GL_RGBA8UI:
     case GL_RGBA8I:
     case GL_RGB10_A2UI:
@@ -589,6 +592,7 @@ bool GLESv2Validate::pixelSizedFrmt(GLEScontext* ctx, GLenum internalformat,
     }
 
     if (glesMajorVersion < 3) {
+        bool support = true;
         switch (format) {
             case GL_RED:
                 switch (type) {
@@ -596,7 +600,11 @@ bool GLESv2Validate::pixelSizedFrmt(GLEScontext* ctx, GLenum internalformat,
                         return internalformat == GL_R8;
                     case GL_HALF_FLOAT:
                     case GL_FLOAT:
-                        return internalformat == GL_R16F;
+                        support = internalformat == GL_R16F;
+                        if (ctx->getCaps()->GL_EXT_color_buffer_float) {
+                            support = support || internalformat == GL_R32F;
+                        }
+                        return support;
                     case GL_BYTE:
                         return internalformat == GL_R8_SNORM;
                     default:
@@ -609,7 +617,11 @@ bool GLESv2Validate::pixelSizedFrmt(GLEScontext* ctx, GLenum internalformat,
                         return internalformat == GL_RG8;
                     case GL_HALF_FLOAT:
                     case GL_FLOAT:
-                        return internalformat == GL_RG16F;
+                        support = internalformat == GL_RG16F;
+                        if (ctx->getCaps()->GL_EXT_color_buffer_float) {
+                            support = support || internalformat == GL_RG32F;
+                        }
+                        return support;
                     default:
                         return false;
                 }
@@ -618,8 +630,12 @@ bool GLESv2Validate::pixelSizedFrmt(GLEScontext* ctx, GLenum internalformat,
                 switch (type) {
                     case GL_HALF_FLOAT:
                     case GL_FLOAT:
-                        return internalformat == GL_RGB16F
-                            || internalformat == GL_R11F_G11F_B10F;
+                        support = internalformat == GL_RGB16F
+                                  || internalformat == GL_R11F_G11F_B10F;
+                        if (ctx->getCaps()->GL_EXT_color_buffer_float) {
+                            support = support || internalformat == GL_RGB32F;
+                        }
+                        return support;
                     case GL_UNSIGNED_INT_10F_11F_11F_REV:
                         return internalformat == GL_R11F_G11F_B10F;
                     default:
@@ -631,7 +647,11 @@ bool GLESv2Validate::pixelSizedFrmt(GLEScontext* ctx, GLenum internalformat,
                 switch (type) {
                     case GL_HALF_FLOAT:
                     case GL_FLOAT:
-                        return internalformat == GL_RGBA16F;
+                        support = internalformat == GL_RGBA16F;
+                        if (ctx->getCaps()->GL_EXT_color_buffer_float) {
+                            support = support || internalformat == GL_RGBA32F;
+                        }
+                        return support;
                     default:
                         return internalformat == GL_RGBA8 ||
                                internalformat == GL_RGBA;
