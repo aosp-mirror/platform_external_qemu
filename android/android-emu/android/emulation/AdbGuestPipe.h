@@ -82,9 +82,6 @@ public:
         // Create a new AdbGuestPipe instance.
         virtual AndroidPipe* create(void* mHwPipe, const char* args) override;
 
-        // Can't save their state to disk.
-        virtual bool canLoad() const override { return false; }
-
         // Overridden AdbGuestAgent method.
         virtual void onHostConnection(ScopedSocket&& socket) override;
 
