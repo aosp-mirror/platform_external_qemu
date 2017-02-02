@@ -29,6 +29,8 @@
 #define LOG_CHECKSUMHELPER(x...)
 #endif
 
+namespace android { namespace base { class Stream; } }
+
 // ChecksumCalculator adds checksum as an array of bytes to GL pipe communication, which
 // size depends on the protocol version. Each pipe should use one ChecksumCalculator.
 // It can:
@@ -167,7 +169,11 @@ public:
     // Will reset the list of buffers by calling resetChecksum.
     bool validate(const void* expectedChecksum, size_t expectedChecksumLen);
 
-protected:
+    // Snapshot support.
+    void save(android::base::Stream* stream);
+    void load(android::base::Stream* stream);
+
+private:
     static constexpr size_t kVersion1ChecksumSize = 8;  // 2 x uint32_t
 
     static_assert(kVersion1ChecksumSize <= kMaxChecksumLength,
@@ -185,7 +191,7 @@ protected:
     uint32_t m_numWrite = 0;
     // m_isEncodingChecksum is true when between addBuffer and writeChecksum
     bool m_isEncodingChecksum = false;
-private:
+
     // Compute a 32bit checksum
     // Used in protocol v1
     uint32_t computeV1Checksum() const;
