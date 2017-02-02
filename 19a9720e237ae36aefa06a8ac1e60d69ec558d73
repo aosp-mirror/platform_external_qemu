@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2297d8ef_1940af34",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-02T23:44:33Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 192,
+        "startChar": 0,
+        "endLine": 192,
+        "endChar": 4
+      },
+      "revId": "19a9720e237ae36aefa06a8ac1e60d69ec558d73",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "03222f60_a0f94419",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RendererImpl.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-02T23:44:33Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 63,
+        "endChar": 4
+      },
+      "revId": "19a9720e237ae36aefa06a8ac1e60d69ec558d73",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
