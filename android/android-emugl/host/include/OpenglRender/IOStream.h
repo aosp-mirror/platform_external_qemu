@@ -30,7 +30,6 @@ protected:
     ~IOStream() {
         // NOTE: m_buf was owned by the child class thus we expect it to be
         // released and flushed before the object destruction.
-        // TODO(zyy): uncomment this after all GL state is restored on snapshot
         assert(!m_buf || m_free == m_bufsize);
     }
 
