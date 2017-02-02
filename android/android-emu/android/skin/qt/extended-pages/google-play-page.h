@@ -10,21 +10,33 @@
 // GNU General Public License for more details.
 #pragma once
 
+#include "android/emulation/control/GooglePlayServices.h"
 #include "ui_google-play-page.h"
+
 #include <QWidget>
 #include <memory>
 
-class GooglePlayPage : public QWidget
-{
+class GooglePlayPage : public QWidget {
     Q_OBJECT
 public:
-    explicit GooglePlayPage(QWidget *parent = 0);
+    explicit GooglePlayPage(QWidget* parent = 0);
     ~GooglePlayPage();
+
+    void setAdbInterface(android::emulation::AdbInterface* adb);
+
+private:
+    void playStoreSettings();
+    void playStoreSettingsDone(
+            android::emulation::GooglePlayServices::Result result);
+    void playServicesPage();
+    void playServicesPageDone(
+            android::emulation::GooglePlayServices::Result result);
 
 private slots:
     void on_goog_updateServicesButton_clicked();
     void on_goog_updateStoreButton_clicked();
 
 private:
+    android::emulation::GooglePlayServices mGooglePlayServices;
     std::unique_ptr<Ui::GooglePlayPage> mUi;
 };
