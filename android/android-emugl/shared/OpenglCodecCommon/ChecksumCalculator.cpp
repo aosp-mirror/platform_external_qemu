@@ -16,6 +16,8 @@
 
 #include "ChecksumCalculator.h"
 
+#include "android/base/files/Stream.h"
+
 #include <string>
 #include <vector>
 
@@ -137,4 +139,34 @@ uint32_t ChecksumCalculator::computeV1Checksum() const {
     revLen = (revLen & 0xcccccccc) >> 2 | (revLen & 0x33333333) << 2;
     revLen = (revLen & 0xaaaaaaaa) >> 1 | (revLen & 0x55555555) << 1;
     return revLen;
+}
+
+void ChecksumCalculator::save(android::base::Stream* stream) {
+    assert(!m_isEncodingChecksum);
+    switch (m_version) {
+    case 1:
+        assert(m_v1BufferTotalLength == 0);
+        break;
+    }
+
+    // Our checksum should never become > 255 bytes. Ever.
+    assert((uint8_t)m_checksumSize == m_checksumSize);
+    stream->putByte(m_checksumSize);
+    stream->putBe32(m_version);
+    stream->putBe32(m_numRead);
+    stream->putBe32(m_numWrite);
+}
+
+void ChecksumCalculator::load(android::base::Stream* stream) {
+    assert(!m_isEncodingChecksum);
+    switch (m_version) {
+    case 1:
+        assert(m_v1BufferTotalLength == 0);
+        break;
+    }
+
+    m_checksumSize = stream->getByte();
+    m_version = stream->getBe32();
+    m_numRead = stream->getBe32();
+    m_numWrite = stream->getBe32();
 }
