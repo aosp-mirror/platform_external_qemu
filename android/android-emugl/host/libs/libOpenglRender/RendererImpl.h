@@ -36,9 +36,8 @@ public:
     ~RendererImpl();
 
     bool initialize(int width, int height, bool useSubWindow);
-
     void stop();
-    void cleanupRenderThreads() override;
+
 public:
     RenderChannelPtr createRenderChannel(android::base::Stream* loadStream) final;
     HardwareStrings getHardwareStrings() final;
@@ -62,10 +61,16 @@ public:
     void pauseAllPreSave() final;
     void resumeAll() final;
 
+    void save(android::base::Stream* stream) override;
+    bool load(android::base::Stream* stream) override;
+
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RendererImpl);
 
 private:
+    // Stop all render threads and wait until they exit.
+    void cleanupRenderThreads();
+
     std::unique_ptr<RenderWindow> mRenderWindow;
 
     android::base::Lock mChannelsLock;

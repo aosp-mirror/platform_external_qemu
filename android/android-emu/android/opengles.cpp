@@ -120,16 +120,6 @@ BAD_EXIT:
     return -1;
 }
 
-void android_saveOpenglRenderer(android::base::Stream* stream) {
-    assert(sRenderLib);
-    sRenderLib->save(stream);
-}
-
-int android_loadOpenglRenderer(android::base::Stream* stream, int version) {
-    assert(sRenderLib);
-    return sRenderLib->load(stream, version);
-}
-
 int
 android_startOpenglesRenderer(int width, int height, int guestApiLevel)
 {
