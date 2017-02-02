@@ -22,6 +22,30 @@
       "revId": "c7560e359d3cfa52ebc9e4d5a7bd61a3c3b55e17",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e0f02305_223b9512",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 348,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-02T21:47:37Z",
+      "side": 1,
+      "message": "Too messy; it\u0027d mean importing the feature control and version detector into Translator, essentially.",
+      "parentUuid": "c9e9693f_375e4d6b",
+      "range": {
+        "startLine": 344,
+        "startChar": 0,
+        "endLine": 348,
+        "endChar": 5
+      },
+      "revId": "c7560e359d3cfa52ebc9e4d5a7bd61a3c3b55e17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
