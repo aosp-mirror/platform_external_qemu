@@ -131,7 +131,7 @@ void RenderThread::loadImpl(AutoLock* lock, const SnapshotObjects& objects) {
     snapshotOperation(lock, [this, &objects] {
         objects.readBuffer->onLoad(&*mStream);
         objects.channelStream->load(&*mStream);
-        // TODO: load objects.checksumCalc
+        objects.checksumCalc->load(&*mStream);
         // TODO: load objects.threadInfo
     });
 }
@@ -140,7 +140,7 @@ void RenderThread::saveImpl(AutoLock* lock, const SnapshotObjects& objects) {
     snapshotOperation(lock, [this, &objects] {
         objects.readBuffer->onSave(&*mStream);
         objects.channelStream->save(&*mStream);
-        // TODO: save objects.checksumCalc
+        objects.checksumCalc->save(&*mStream);
         // TODO: save objects.threadInfo
     });
 }
