@@ -22,7 +22,7 @@ namespace opengl {
 namespace {
 
 // GLProcessPipe is a pipe service that is used for releasing graphics resources
-// per guest process. At the time being, guest processes can acquires host color
+// per guest process. At the time being, guest processes can acquire host color
 // buffer handles / EGLImage handles and they need to be properly released when
 // guest process exits unexpectedly. This class is used to detect if guest
 // process exits, so that a proper cleanup function can be called.
@@ -39,27 +39,55 @@ public:
     public:
         Service() : AndroidPipe::Service("GLProcessPipe") {}
 
-        virtual AndroidPipe* create(void* mHwPipe, const char* args) override {
-            return new GLProcessPipe(mHwPipe, this);
+        bool canLoad() const override { return true; }
+
+        AndroidPipe* create(void* hwPipe, const char* args) override {
+            return new GLProcessPipe(hwPipe, this);
+        }
+
+        AndroidPipe* load(void* hwPipe, const char* args,
+                         base::Stream* stream) override {
+            return new GLProcessPipe(hwPipe, this, stream);
+        }
+
+        void preLoad(base::Stream* stream) override {
+            GLProcessPipe::s_headId.store(stream->getBe64());
+        }
+
+        void preSave(base::Stream* stream) override {
+            stream->putBe64(GLProcessPipe::s_headId.load());
         }
     };
 
-    GLProcessPipe(void* hwPipe, Service* service) : AndroidPipe(hwPipe, service) {
-        m_uniqueId = ++s_headId;
+    GLProcessPipe(void* hwPipe, Service* service,
+                  base::Stream* loadStream = nullptr)
+        : AndroidPipe(hwPipe, service) {
+        if (loadStream) {
+            m_uniqueId = loadStream->getBe64();
+        } else {
+            m_uniqueId = ++s_headId;
+        }
+    }
+
+    void onSave(base::Stream* stream) override {
+        stream->putBe64(m_uniqueId);
     }
 
     void onGuestClose() override {
         // process died on the guest, cleanup gralloc memory on the host
         android_cleanupProcGLObjects(m_uniqueId);
     }
+
     unsigned onGuestPoll() const override {
         return PIPE_POLL_IN | PIPE_POLL_OUT;
     }
+
     int onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) override {
         assert(buffers[0].size >= 8);
         memcpy(buffers[0].data, (const char*)&m_uniqueId, sizeof(m_uniqueId));
         return sizeof(m_uniqueId);
     }
+
     int onGuestSend(const AndroidPipeBuffer* buffers,
                             int numBuffers) override {
         // The guest is supposed to send us a confirm code first. The code is
@@ -70,7 +98,9 @@ public:
         (void)confirmInt;
         return buffers[0].size;
     }
+
     void onGuestWantWakeOn(int flags) override {}
+
 private:
     // An identifier for the guest process corresponding to this pipe.
     // With very high probability, all currently-active processes have unique
@@ -78,10 +108,11 @@ private:
     // space.
     // Please change it if you ever have a use case that exhausts them
     uint64_t m_uniqueId;
-    static std::atomic_ullong s_headId;
+    static std::atomic<uint64_t> s_headId;
+
 };
 
-std::atomic_ullong GLProcessPipe::s_headId(0);
+std::atomic<uint64_t> GLProcessPipe::s_headId {0};
 
 }
 
