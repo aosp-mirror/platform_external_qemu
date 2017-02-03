@@ -156,12 +156,21 @@ public:
         mIsWorking = isWorking;
         mChannel->setEventCallback(
                 [this](RenderChannel::State events) {
-                    this->onChannelHostEvent(events);
+                    onChannelHostEvent(events);
                 });
     }
 
     //////////////////////////////////////////////////////////////////////////
     // Overriden AndroidPipe methods
+
+    virtual void onSave(android::base::Stream* stream) override {
+        DD("%s: saving GLES pipe state for hwpipe=%p", __FUNCTION__, mHwPipe);
+        stream->putBe32(mIsWorking);
+        android::base::saveBuffer(stream, mDataForReading);
+        stream->putBe32(mDataForReadingLeft);
+
+        mChannel->onSave(stream);
+    }
 
     virtual void onGuestClose() override {
         D("%s", __func__);
@@ -321,15 +330,6 @@ public:
             DD("%s: waiting for events %d", __func__, (int)wanted);
             mChannel->setWantedEvents(wanted);
         }
-    }
-
-    virtual void onSave(android::base::Stream* stream) override {
-        DD("%s: saving GLES pipe state for hwpipe=%p", __FUNCTION__, mHwPipe);
-        stream->putBe32(mIsWorking);
-        android::base::saveBuffer(stream, mDataForReading);
-        stream->putBe32(mDataForReadingLeft);
-
-        mChannel->onSave(stream);
     }
 
 private:

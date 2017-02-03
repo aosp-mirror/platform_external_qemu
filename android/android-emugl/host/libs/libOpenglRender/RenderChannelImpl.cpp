@@ -53,6 +53,12 @@ RenderChannelImpl::RenderChannelImpl(android::base::Stream* loadStream)
         mToGuest.onLoadLocked(loadStream);
         mState = (State)loadStream->getBe32();
         mWantedEvents = (State)loadStream->getBe32();
+#ifndef NDEBUG
+        // Make sure we're in a consistent state after loading.
+        const auto state = mState;
+        updateStateLocked();
+        assert(state == mState);
+#endif
     } else {
         updateStateLocked();
     }
@@ -62,6 +68,7 @@ RenderChannelImpl::RenderChannelImpl(android::base::Stream* loadStream)
 
 void RenderChannelImpl::setEventCallback(EventCallback&& callback) {
     mEventCallback = std::move(callback);
+    notifyStateChangeLocked();
 }
 
 void RenderChannelImpl::setWantedEvents(State state) {
