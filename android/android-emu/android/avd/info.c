@@ -1081,9 +1081,15 @@ avdInfo_getRanchuKernelPath( const AvdInfo*  i )
          * for our target architecture.
          */
         char temp[PATH_MAX], *p = temp, *end = p + sizeof(temp);
+        const char* suffix = "";
 
-        p = bufprint(temp, end, "%s/prebuilts/qemu-kernel/%s/ranchu/kernel-qemu",
-                     i->androidBuildRoot, i->targetArch);
+        if (!strcmp(i->targetAbi, "mips32r6")) {
+            /* mips/ranchu holds distinct images for mips & mips32r6 */
+            suffix = "-mips32r6";
+        }
+
+        p = bufprint(temp, end, "%s/prebuilts/qemu-kernel/%s/ranchu/kernel-qemu%s",
+                     i->androidBuildRoot, i->targetArch, suffix);
         if (p >= end || !path_exists(temp)) {
             /* arm64 and mips64 are special: their kernel-qemu is actually kernel-ranchu */
             if (!strcmp(i->targetArch, "arm64") || !strcmp(i->targetArch, "mips64")) {

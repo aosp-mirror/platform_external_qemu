@@ -742,7 +742,12 @@ extern "C" int main(int argc, char **argv) {
 
     // Make sure we always use the custom Android CPU definition.
     args[n++] = "-cpu";
+#if defined(TARGET_MIPS)
+    args[n++] = (hw->hw_cpu_model && hw->hw_cpu_model[0]) ? hw->hw_cpu_model
+                                                          : kTarget.qemuCpu;
+#else
     args[n++] = kTarget.qemuCpu;
+#endif
 
     // Set env var to "on" for Intel PMU if the feature is enabled.
     // cpu.c will then read that.
