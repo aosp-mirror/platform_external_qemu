@@ -449,18 +449,19 @@ static const mips_def_t mips_defs[] =
         .CP0_Config0 = MIPS_CONFIG0 | (0x2 << CP0C0_AR) |
                        (MMU_TYPE_R4000 << CP0C0_MT),
         .CP0_Config1 = MIPS_CONFIG1 | (1 << CP0C1_FP) | (31 << CP0C1_MMU) |
-                       (2 << CP0C1_IS) | (4 << CP0C1_IL) | (3 << CP0C1_IA) |
-                       (2 << CP0C1_DS) | (4 << CP0C1_DL) | (3 << CP0C1_DA) |
+                       (2 << CP0C1_IS) | (3 << CP0C1_IL) | (3 << CP0C1_IA) |
+                       (2 << CP0C1_DS) | (3 << CP0C1_DL) | (3 << CP0C1_DA) |
                        (0 << CP0C1_PC) | (1 << CP0C1_WR) | (1 << CP0C1_EP),
         .CP0_Config2 = MIPS_CONFIG2,
         .CP0_Config3 = MIPS_CONFIG3 | (1 << CP0C3_BP) | (1 << CP0C3_BI) |
                        (2 << CP0C3_ISA) | (1 << CP0C3_ULRI) |
-                       (1 << CP0C3_RXI) | (1U << CP0C3_M),
+                       (1 << CP0C3_RXI) | (1 << CP0C3_MSAP) |
+                       (1U << CP0C3_M),
         .CP0_Config4 = MIPS_CONFIG4 | (0xfc << CP0C4_KScrExist) |
                        (3 << CP0C4_IE) | (1U << CP0C4_M),
         .CP0_Config5 = MIPS_CONFIG5 | (1 << CP0C5_XNP) | (1 << CP0C5_LLB),
         .CP0_Config5_rw_bitmask = (1 << CP0C5_SBRI) | (1 << CP0C5_FRE) |
-                                  (1 << CP0C5_UFE),
+                                  (1 << CP0C5_UFE) | (1 << CP0C5_MSAEn),
         .CP0_LLAddr_rw_bitmask = 0,
         .CP0_LLAddr_shift = 0,
         .SYNCI_Step = 32,
@@ -476,7 +477,7 @@ static const mips_def_t mips_defs[] =
         .CP1_fcr31_rw_bitmask = 0x0103FFFF,
         .SEGBITS = 32,
         .PABITS = 32,
-        .insn_flags = CPU_MIPS32R6 | ASE_MICROMIPS,
+        .insn_flags = CPU_MIPS32R6 | ASE_MICROMIPS | ASE_MSA,
         .mmu_type = MMU_TYPE_R4000,
     },
 #if defined(TARGET_MIPS64)
@@ -671,13 +672,13 @@ static const mips_def_t mips_defs[] =
         .mmu_type = MMU_TYPE_R4000,
     },
     {
-        .name = "I6400",
-        .CP0_PRid = 0x1A900,
+        .name = "MIPS64R6-generic",
+        .CP0_PRid = 0x00010000,
         .CP0_Config0 = MIPS_CONFIG0 | (0x2 << CP0C0_AR) | (0x2 << CP0C0_AT) |
                        (MMU_TYPE_R4000 << CP0C0_MT),
-        .CP0_Config1 = MIPS_CONFIG1 | (1 << CP0C1_FP) | (15 << CP0C1_MMU) |
-                       (2 << CP0C1_IS) | (5 << CP0C1_IL) | (3 << CP0C1_IA) |
-                       (2 << CP0C1_DS) | (5 << CP0C1_DL) | (3 << CP0C1_DA) |
+        .CP0_Config1 = MIPS_CONFIG1 | (1 << CP0C1_FP) | (0x1F << CP0C1_MMU) |
+                       (2 << CP0C1_IS) | (3 << CP0C1_IL) | (3 << CP0C1_IA) |
+                       (2 << CP0C1_DS) | (3 << CP0C1_DL) | (3 << CP0C1_DA) |
                        (0 << CP0C1_PC) | (1 << CP0C1_WR) | (1 << CP0C1_EP),
         .CP0_Config2 = MIPS_CONFIG2,
         .CP0_Config3 = MIPS_CONFIG3 | (1U << CP0C3_M) |

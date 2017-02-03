@@ -477,14 +477,16 @@ static inline void tlb_exception_interpreter_prepare(CPUMIPSState *env, target_u
 {
     env->CP0_BadVAddr = address;
     env->CP0_Context = (env->CP0_Context & ~0x007fffff) |
-                    ((address >> 9) &   0x007ffff0);
-    env->CP0_EntryHi =
-        (env->CP0_EntryHi & 0xFF) | (address & (TARGET_PAGE_MASK << 1));
+                       ((address >> 9) & 0x007ffff0);
+    env->CP0_EntryHi = (env->CP0_EntryHi & env->CP0_EntryHi_ASID_mask) |
+                       (env->CP0_EntryHi & (1 << CP0EnHi_EHINV)) |
+                       (address & (TARGET_PAGE_MASK << 1));
 #if defined(TARGET_MIPS64)
     env->CP0_EntryHi &= env->SEGMask;
-    env->CP0_XContext = (env->CP0_XContext & ((~0ULL) << (env->SEGBITS - 7))) |
-                        ((address & 0xC00000000000ULL) >> (55 - env->SEGBITS)) |
-                        ((address & ((1ULL << env->SEGBITS) - 1) & 0xFFFFFFFFFFFFE000ULL) >> 9);
+    env->CP0_XContext =
+        /* PTEBase */   (env->CP0_XContext & ((~0ULL) << (env->SEGBITS - 7))) |
+        /* R */         (extract64(address, 62, 2) << (env->SEGBITS - 9)) |
+        /* BadVPN2 */   (extract64(address, 13, env->SEGBITS - 13) << 4);
 #endif
 
     CPU.pc = 0;
