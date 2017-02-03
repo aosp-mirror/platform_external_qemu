@@ -158,6 +158,9 @@ void avdInfo_getFullApiName(int apiLevel, char* nameStr, int strLen);
 /* Returns true if the AVD is on Google APIs. */
 bool   avdInfo_isGoogleApis( const AvdInfo*  i );
 
+/* Returns true if is a phone API. */
+bool   avdInfo_isPhoneApi( const AvdInfo*  i );
+
 /* Returns the path to various images corresponding to a given AVD.
  * NULL if the image cannot be found. Returned strings must be freed
  * by the caller.

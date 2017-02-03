@@ -25,7 +25,7 @@ class RenderLibImpl final : public RenderLib {
 public:
     RenderLibImpl() = default;
 
-    virtual void setApiLevel(int api) override;
+    virtual void setAvdInfo(bool phone, int api) override;
     virtual void setLogger(emugl_logger_struct logger) override;
     virtual void setCrashReporter(emugl_crash_reporter_t reporter) override;
     virtual void setFeatureController(emugl_feature_is_enabled_t featureController) override;

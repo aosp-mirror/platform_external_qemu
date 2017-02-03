@@ -111,6 +111,11 @@ char* propertyFile_getTargetArch(const FileData* data);
  */
 int propertyFile_getApiLevel(const FileData* data);
 
+/* Determine whether a system image is for phone. */
+/* TODO: remove after we redo all the feature flags to be
+ * on the guest. */
+bool propertyFile_isPhoneApi(const FileData* data);
+
 /* Determine whether a Google API's system image is used. */
 bool propertyFile_isGoogleApis(const FileData* data);
 

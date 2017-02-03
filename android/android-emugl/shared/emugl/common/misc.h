@@ -16,7 +16,6 @@
 
 namespace emugl {
     // Set and get API version of system image.
-    // setApiVersion should only be called once when initializing RenderLib
-    void setApiLevel(int api);
-    int getApiLevel();
+    void setAvdInfo(bool isPhoneApi, int apiLevel);
+    void getAvdInfo(bool* isPhoneApi, int* apiLevel);
 }
