@@ -43,8 +43,7 @@ bool bindFbo(GLuint* fbo, GLuint tex) {
 
     s_gles2.glGenFramebuffers(1, fbo);
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, *fbo);
-    s_gles2.glFramebufferTexture2D(GL_FRAMEBUFFER,
-                                   GL_COLOR_ATTACHMENT0_OES,
+    s_gles2.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_OES,
                                    GL_TEXTURE_2D, tex, 0);
     GLenum status = s_gles2.glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE_OES) {
@@ -82,9 +81,7 @@ public:
 
     bool isOk() const { return mHelper != NULL; }
 
-    ~ScopedHelperContext() {
-        release();
-    }
+    ~ScopedHelperContext() { release(); }
 
     void release() {
         if (mHelper) {
@@ -92,6 +89,7 @@ public:
             mHelper = NULL;
         }
     }
+
 private:
     ColorBuffer::Helper* mHelper;
 };
@@ -130,7 +128,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
         return NULL;
     }
 
-    ColorBuffer *cb = new ColorBuffer(p_display, helper);
+    ColorBuffer* cb = new ColorBuffer(p_display, helper);
 
     s_gles2.glGenTextures(1, &cb->m_tex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
@@ -141,15 +139,8 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     char* initialImage = static_cast<char*>(::malloc(bufsize));
     memset(initialImage, 0xff, bufsize);
 
-    s_gles2.glTexImage2D(GL_TEXTURE_2D,
-                         0,
-                         texInternalFormat,
-                         p_width,
-                         p_height,
-                         0,
-                         texInternalFormat,
-                         GL_UNSIGNED_BYTE,
-                         initialImage);
+    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, texInternalFormat, p_width, p_height,
+                         0, texInternalFormat, GL_UNSIGNED_BYTE, initialImage);
     ::free(initialImage);
 
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -162,15 +153,8 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     //
     s_gles2.glGenTextures(1, &cb->m_blitTex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_blitTex);
-    s_gles2.glTexImage2D(GL_TEXTURE_2D,
-                         0,
-                         texInternalFormat,
-                         p_width,
-                         p_height,
-                         0,
-                         texInternalFormat,
-                         GL_UNSIGNED_BYTE,
-                         NULL);
+    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, texInternalFormat, p_width, p_height,
+                         0, texInternalFormat, GL_UNSIGNED_BYTE, NULL);
 
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -183,41 +167,35 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
 
     if (has_eglimage_texture_2d) {
         cb->m_eglImage = s_egl.eglCreateImageKHR(
-                p_display,
-                s_egl.eglGetCurrentContext(),
-                EGL_GL_TEXTURE_2D_KHR,
-                (EGLClientBuffer)SafePointerFromUInt(cb->m_tex),
-                NULL);
+                p_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
+                (EGLClientBuffer)SafePointerFromUInt(cb->m_tex), NULL);
 
         cb->m_blitEGLImage = s_egl.eglCreateImageKHR(
-                p_display,
-                s_egl.eglGetCurrentContext(),
-                EGL_GL_TEXTURE_2D_KHR,
-                (EGLClientBuffer)SafePointerFromUInt(cb->m_blitTex),
-                NULL);
+                p_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
+                (EGLClientBuffer)SafePointerFromUInt(cb->m_blitTex), NULL);
     }
 
     cb->m_resizer = new TextureResize(p_width, p_height);
 
     cb->m_frameworkFormat = p_frameworkFormat;
     switch (cb->m_frameworkFormat) {
-    case FRAMEWORK_FORMAT_GL_COMPATIBLE:
-        break;
-    case FRAMEWORK_FORMAT_YV12:
-    case FRAMEWORK_FORMAT_YUV_420_888:
-        cb->m_yuv_converter.reset(new YUVConverter(p_width, p_height, cb->m_frameworkFormat));
-        break;
-    default:
-        break;
+        case FRAMEWORK_FORMAT_GL_COMPATIBLE:
+            break;
+        case FRAMEWORK_FORMAT_YV12:
+        case FRAMEWORK_FORMAT_YUV_420_888:
+            cb->m_yuv_converter.reset(
+                    new YUVConverter(p_width, p_height, cb->m_frameworkFormat));
+            break;
+        default:
+            break;
     }
 
     s_gles2.glFinish();
     return cb;
 }
 
-ColorBuffer::ColorBuffer(EGLDisplay display, Helper* helper) :
-        m_display(display),
-        m_helper(helper) {}
+ColorBuffer::ColorBuffer(EGLDisplay display, Helper* helper)
+    : m_display(display), m_helper(helper) {}
 
 ColorBuffer::~ColorBuffer() {
     ScopedHelperContext context(m_helper);
@@ -290,15 +268,13 @@ void ColorBuffer::subUpdate(int x,
     } else {
         s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
         s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        s_gles2.glTexSubImage2D(
-                GL_TEXTURE_2D, 0, x, y, width, height, p_format, p_type, pixels);
+        s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, p_format,
+                                p_type, pixels);
     }
 }
 
-
-bool ColorBuffer::blitFromCurrentReadBuffer()
-{
-    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+bool ColorBuffer::blitFromCurrentReadBuffer() {
+    RenderThreadInfo* tInfo = RenderThreadInfo::get();
     if (!tInfo->currContext.get()) {
         // no Current context
         return false;
@@ -311,7 +287,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
     GLint currTexBind;
     if (tInfo->currContext->version() > GLESApi_CM) {
         s_gles2.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
-        s_gles2.glGenTextures(1,&tmpTex);
+        s_gles2.glGenTextures(1, &tmpTex);
         s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
         s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
 
@@ -327,35 +303,42 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
             s_gles2.glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prev_draw_fbo);
 
             s_gles2.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, resolve_fbo);
-            s_gles2.glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tmpTex, 0);
-            s_gles2.glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, m_width, m_height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-            s_gles2.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, (GLuint)prev_draw_fbo);
+            s_gles2.glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
+                                           GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                                           tmpTex, 0);
+            s_gles2.glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, m_width,
+                                      m_height, GL_COLOR_BUFFER_BIT,
+                                      GL_NEAREST);
+            s_gles2.glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
+                                      (GLuint)prev_draw_fbo);
 
             s_gles2.glDeleteFramebuffers(1, &resolve_fbo);
             s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
         } else {
-            s_gles2.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0,
-                    m_width, m_height);
+            s_gles2.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_width,
+                                        m_height);
         }
         s_gles2.glDeleteTextures(1, &tmpTex);
         s_gles2.glBindTexture(GL_TEXTURE_2D, currTexBind);
 
-        // clear GL errors, because its possible that the fbo format does not match
-        // the format of the read buffer, in the case of OpenGL ES 3.1 and integer
+        // clear GL errors, because its possible that the fbo format does not
+        // match
+        // the format of the read buffer, in the case of OpenGL ES 3.1 and
+        // integer
         // RGBA formats.
         s_gles2.glGetError();
         // This is currently for dEQP purposes only; if we actually want these
-        // integer FBO formats to actually serve to display something for human consumption,
+        // integer FBO formats to actually serve to display something for human
+        // consumption,
         // we need to change the egl image to be of the same format,
         // or we get some really psychedelic patterns.
-    }
-    else {
+    } else {
         s_gles1.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
-        s_gles1.glGenTextures(1,&tmpTex);
+        s_gles1.glGenTextures(1, &tmpTex);
         s_gles1.glBindTexture(GL_TEXTURE_2D, tmpTex);
         s_gles1.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
-        s_gles1.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0,
-                                 m_width, m_height);
+        s_gles1.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_width,
+                                    m_height);
         s_gles1.glDeleteTextures(1, &tmpTex);
         s_gles1.glBindTexture(GL_TEXTURE_2D, currTexBind);
     }
@@ -370,7 +353,9 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
     }
 
     // Save current viewport and match it to the current colorbuffer size.
-    GLint vport[4] = { 0, };
+    GLint vport[4] = {
+            0,
+    };
     s_gles2.glGetIntegerv(GL_VIEWPORT, vport);
     s_gles2.glViewport(0, 0, m_width, m_height);
 
@@ -388,14 +373,13 @@ bool ColorBuffer::bindToTexture() {
     if (!m_eglImage) {
         return false;
     }
-    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    RenderThreadInfo* tInfo = RenderThreadInfo::get();
     if (!tInfo->currContext.get()) {
         return false;
     }
     if (tInfo->currContext->version() > GLESApi_CM) {
         s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
-    }
-    else {
+    } else {
         s_gles1.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
     }
     return true;
@@ -405,22 +389,24 @@ bool ColorBuffer::bindToRenderbuffer() {
     if (!m_eglImage) {
         return false;
     }
-    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    RenderThreadInfo* tInfo = RenderThreadInfo::get();
     if (!tInfo->currContext.get()) {
         return false;
     }
     if (tInfo->currContext->version() > GLESApi_CM) {
-        s_gles2.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES, m_eglImage);
-    }
-    else {
-        s_gles1.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES, m_eglImage);
+        s_gles2.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES,
+                                                       m_eglImage);
+    } else {
+        s_gles1.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES,
+                                                       m_eglImage);
     }
     return true;
 }
 
 bool ColorBuffer::post(float rotation, float dx, float dy) {
     // NOTE: Do not call m_helper->setupContext() here!
-    return m_helper->getTextureDraw()->draw(m_resizer->update(m_tex), rotation, dx, dy);
+    return m_helper->getTextureDraw()->draw(m_resizer->update(m_tex), rotation,
+                                            dx, dy);
 }
 
 void ColorBuffer::readback(unsigned char* img) {
@@ -429,8 +415,28 @@ void ColorBuffer::readback(unsigned char* img) {
         return;
     }
     if (bindFbo(&m_fbo, m_tex)) {
-        s_gles2.glReadPixels(
-                0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE, img);
+        s_gles2.glReadPixels(0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE,
+                             img);
         unbindFbo();
     }
+}
+
+void ColorBuffer::onSave(android::base::Stream* stream) {
+    stream->putBe32(static_cast<uint32_t>(m_width));
+    stream->putBe32(static_cast<uint32_t>(m_height));
+    stream->putBe32(static_cast<uint32_t>(m_internalFormat));
+    stream->putBe32(static_cast<uint32_t>(m_frameworkFormat));
+}
+
+ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
+                                 EGLDisplay p_display,
+                                 bool has_eglimage_texture_2d,
+                                 Helper* helper) {
+    GLuint width = static_cast<GLuint>(stream->getBe32());
+    GLuint height = static_cast<GLuint>(stream->getBe32());
+    GLenum internalFormat = static_cast<GLenum>(stream->getBe32());
+    FrameworkFormat frameworkFormat =
+            static_cast<FrameworkFormat>(stream->getBe32());
+    return create(p_display, width, height, internalFormat, frameworkFormat,
+                  has_eglimage_texture_2d, helper);
 }

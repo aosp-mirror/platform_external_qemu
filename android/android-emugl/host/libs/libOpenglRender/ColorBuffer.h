@@ -19,6 +19,7 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <GLES/gl.h>
+#include "android/base/files/Stream.h"
 #include "emugl/common/smart_ptr.h"
 
 #include <memory>
@@ -73,12 +74,14 @@ public:
     // Create a new ColorBuffer instance.
     // |p_display| is the host EGLDisplay handle.
     // |p_width| and |p_height| are the buffer's dimensions in pixels.
-    // |p_internalFormat| is the internal OpenGL pixel format to use, valid values
+    // |p_internalFormat| is the internal OpenGL pixel format to use, valid
+    // values
     // are: GL_RGB, GL_RGB565, GL_RGBA, GL_RGB5_A1_OES and GL_RGBA4_OES.
     // Implementation is free to use something else though.
     // |p_frameworkFormat| specifies the original format of the guest
     // color buffer so that we know how to convert to |p_internalFormat|,
-    // if necessary (otherwise, p_frameworkFormat == FRAMEWORK_FORMAT_GL_COMPATIBLE).
+    // if necessary (otherwise, p_frameworkFormat ==
+    // FRAMEWORK_FORMAT_GL_COMPATIBLE).
     // |has_eglimage_texture_2d| should be true iff the display supports
     // the EGL_KHR_gl_texture_2D_image extension.
     // Returns NULL on failure.
@@ -104,7 +107,7 @@ public:
                     int height,
                     GLenum p_format,
                     GLenum p_type,
-                    void *pixels);
+                    void* pixels);
 
     // Update the ColorBuffer instance's pixel values from host memory.
     // |p_format / p_type| are the desired OpenGL color buffer format
@@ -117,7 +120,7 @@ public:
                    int height,
                    GLenum p_format,
                    GLenum p_type,
-                   void *pixels);
+                   void* pixels);
 
     // Draw a ColorBuffer instance, i.e. blit it to the current guest
     // framebuffer object / window surface. This doesn't display anything.
@@ -147,11 +150,16 @@ public:
     // |img| must be a buffer large enough (i.e. width * height * 4).
     void readback(unsigned char* img);
 
+    void onSave(android::base::Stream* stream);
+    static ColorBuffer* onLoad(android::base::Stream* stream,
+                               EGLDisplay p_display,
+                               bool has_eglimage_texture_2d,
+                               Helper* helper);
+
 private:
     ColorBuffer(EGLDisplay display, Helper* helper);
 
 private:
-
     GLuint m_tex = 0;
     GLuint m_blitTex = 0;
     EGLImageKHR m_eglImage = nullptr;
@@ -164,7 +172,7 @@ private:
     Helper* m_helper = nullptr;
     TextureResize* m_resizer = nullptr;
     FrameworkFormat m_frameworkFormat;
-    GLuint m_yuv_conversion_fbo = 0; // FBO to offscreen-convert YUV to RGB
+    GLuint m_yuv_conversion_fbo = 0;  // FBO to offscreen-convert YUV to RGB
     std::unique_ptr<YUVConverter> m_yuv_converter;
 };
 
