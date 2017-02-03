@@ -28,8 +28,7 @@ public:
     virtual ~RenderLib() = default;
 
     // Tell emugl the API version of the system image
-    // Please extend it to setAvd, if more avd info is needed in future.
-    virtual void setApiLevel(int api) = 0;
+    virtual void setAvdInfo(bool phone, int api) = 0;
     virtual void setLogger(emugl_logger_struct logger) = 0;
     virtual void setCrashReporter(emugl_crash_reporter_t reporter) = 0;
     virtual void setFeatureController(emugl_feature_is_enabled_t featureController) = 0;

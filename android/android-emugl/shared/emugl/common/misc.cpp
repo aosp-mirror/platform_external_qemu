@@ -14,12 +14,15 @@
 
 #include "emugl/common/misc.h"
 
-static int s_api = -1;
+static int s_apiLevel = -1;
+static bool s_isPhoneApi = false;
 
-void emugl::setApiLevel(int api) {
-    s_api = api;
+void emugl::setAvdInfo(bool phone, int apiLevel) {
+    s_isPhoneApi = phone;
+    s_apiLevel = apiLevel;
 }
 
-int emugl::getApiLevel() {
-    return s_api;
+void emugl::getAvdInfo(bool* phone, int* apiLevel) {
+    if (phone) *phone = s_isPhoneApi;
+    if (apiLevel) *apiLevel = s_apiLevel;
 }
