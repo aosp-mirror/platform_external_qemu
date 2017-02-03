@@ -121,6 +121,7 @@ struct AvdInfo {
     /* for both */
     int       apiLevel;
     int       incrementalVersion;
+    bool      isPhoneApi;
     bool      isGoogleApis;
     char*     skinName;     /* skin name */
     char*     skinDirPath;  /* skin directory */
@@ -560,6 +561,11 @@ avdInfo_isGoogleApis(const AvdInfo* i) {
     return i->isGoogleApis;
 }
 
+bool
+avdInfo_isPhoneApi(const AvdInfo* i) {
+    return i->isPhoneApi;
+}
+
 int
 avdInfo_getApiLevel(const AvdInfo* i) {
     return i->apiLevel;
@@ -800,6 +806,7 @@ _avdInfo_extractBuildProperties(AvdInfo* i) {
             i->apiLevel);
         }
     }
+    i->isPhoneApi = propertyFile_isPhoneApi(i->buildProperties);
     i->isGoogleApis = propertyFile_isGoogleApis(i->buildProperties);
     i->incrementalVersion = propertyFile_getInt(
         i->buildProperties,

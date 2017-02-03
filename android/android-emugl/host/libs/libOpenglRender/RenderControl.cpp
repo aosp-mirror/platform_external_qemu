@@ -33,6 +33,7 @@
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/sync_device.h"
 #include "emugl/common/dma_device.h"
+#include "emugl/common/misc.h"
 #include "emugl/common/thread.h"
 #include "math.h"
 
@@ -216,8 +217,11 @@ static EGLint rcQueryEGLString(EGLenum name, void* buffer, EGLint bufferSize)
 }
 
 static bool shouldEnableAsyncSwap() {
+    bool isPhoneApi;
+    emugl::getAvdInfo(&isPhoneApi, NULL);
     return emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap) &&
            emugl_sync_device_exists() &&
+           isPhoneApi &&
            sizeof(void*) == 8;
 }
 

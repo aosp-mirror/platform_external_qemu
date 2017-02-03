@@ -24,8 +24,8 @@
 
 namespace emugl {
 
-void RenderLibImpl::setApiLevel(int api) {
-    emugl::setApiLevel(api);
+void RenderLibImpl::setAvdInfo(bool phone, int api) {
+    emugl::setAvdInfo(phone, api);
 }
 
 void RenderLibImpl::setLogger(emugl_logger_struct logger) {

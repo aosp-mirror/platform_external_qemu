@@ -4472,6 +4472,7 @@ int main(int argc, char** argv, char** envp)
         if (android_initOpenglesEmulation() != 0 ||
             android_startOpenglesRenderer(android_hw->hw_lcd_width,
                                           android_hw->hw_lcd_height,
+                                          avdInfo_isPhoneApi(android_avdInfo),
                                           avdInfo_getApiLevel(android_avdInfo))
                 != 0) {
             is_opengl_alive = 0;
