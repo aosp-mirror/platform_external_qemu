@@ -210,6 +210,21 @@ propertyFile_getApiLevel(const FileData* data) {
 }
 
 bool
+propertyFile_isPhoneApi(const FileData* data) {
+    char* prop = propertyFile_getValue(
+                    (const char*)data->data,
+                    data->size,
+                    "ro.product.name");
+    if (!prop) { return false; }
+    if (strstr(prop, "phone")) {
+        free(prop);
+        return true;
+    }
+    free(prop);
+    return false;
+}
+
+bool
 propertyFile_isGoogleApis(const FileData* data) {
     char* prop = propertyFile_getValue(
                     (const char*)data->data,
