@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4e72735b_18936cd3",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1356,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-03T17:55:36Z",
+      "side": 1,
+      "message": "Please try to create and return the color buffer in onLoad as well. Or you can merge it with ColorBuffer::create",
+      "range": {
+        "startLine": 1356,
+        "startChar": 21,
+        "endLine": 1356,
+        "endChar": 27
+      },
+      "revId": "b50c75c99340f7d4d35351d25b09f86466910c98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
