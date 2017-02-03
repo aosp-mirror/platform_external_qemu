@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0c4fad4b_25ef77b0",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1358,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-03T21:43:06Z",
+      "side": 1,
+      "message": "eventually we would need to snapshot this number. but we can leave it for another patch.",
+      "range": {
+        "startLine": 1358,
+        "startChar": 33,
+        "endLine": 1358,
+        "endChar": 41
+      },
+      "revId": "0db6474f3f979d56ef217b5f907c284da55a61c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
