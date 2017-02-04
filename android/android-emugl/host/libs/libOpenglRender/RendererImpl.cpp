@@ -111,7 +111,11 @@ void RendererImpl::cleanupRenderThreads() {
     assert(mChannels.empty());
     lock.unlock();
     for (const auto& c : channels) {
-        c->stopFromHost();
+        // Please DO NOT notify the guest about this event (DO NOT call
+        // stopFromHost() ), because this is used to kill old threads when
+        // loading from a snapshot, and the newly loaded guest should not
+        // be notified for those behavior.
+        c->stop();
     }
 }
 
