@@ -111,7 +111,7 @@ void RendererImpl::cleanupRenderThreads() {
     assert(mChannels.empty());
     lock.unlock();
     for (const auto& c : channels) {
-        c->stopFromHost();
+        c->stop();
     }
 }
 
