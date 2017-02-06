@@ -161,6 +161,9 @@ bool   avdInfo_isGoogleApis( const AvdInfo*  i );
 /* Returns true if is a phone API. */
 bool   avdInfo_isPhoneApi( const AvdInfo*  i );
 
+/* Returns true if the AVD is running Android Auto. */
+bool avdInfo_isAndroidAuto(const AvdInfo* i);
+
 /* Returns the path to various images corresponding to a given AVD.
  * NULL if the image cannot be found. Returned strings must be freed
  * by the caller.
