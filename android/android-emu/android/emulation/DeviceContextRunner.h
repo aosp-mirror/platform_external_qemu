@@ -128,6 +128,13 @@ protected:
                        mPending.end());
     }
 
+    // Run the passed functor |op| for all pending operations.
+    template <class Func>
+    void forEachPendingOperation(const Func& op) const {
+        AutoLock lock(mLock);
+        for (const auto& p : mPending) { op(p); }
+    }
+
 private:
     void onTimerEvent() {
         AutoLock lock(mLock);
@@ -139,7 +146,7 @@ private:
 
     VmLock* mVmLock = nullptr;
 
-    Lock mLock;
+    mutable Lock mLock;
     PendingList mPending;
     std::unique_ptr<Looper::Timer> mTimer;
 };

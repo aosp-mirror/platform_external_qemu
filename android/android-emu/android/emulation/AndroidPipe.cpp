@@ -330,6 +330,16 @@ public:
         });
     }
 
+    int getPendingFlags(void* hwPipe) const {
+        int flags = 0;
+        forEachPendingOperation([hwPipe, &flags](const PipeWakeCommand& cmd) {
+            if (cmd.hwPipe == hwPipe) {
+                flags |= cmd.wakeFlags;
+            }
+        });
+        return flags;
+    }
+
 private:
     virtual void performDeviceOperation(const PipeWakeCommand& wake_cmd) {
         void* hwPipe = wake_cmd.hwPipe;
@@ -390,6 +400,14 @@ AndroidPipe* loadPipeFromStreamCommon(BaseStream* stream,
         DD("%s: force-closing hwpipe=%p", __FUNCTION__, hwPipe);
         *pForceClose = 1;
     }
+
+    const int pendingFlags = stream->getBe32();
+    if (pendingFlags && pipe && !*pForceClose) {
+        sGlobals->pipeWaker.signalWake(hwPipe, pendingFlags);
+        DD("%s: singalled wake flags %d for pipe hwpipe=%p", __func__,
+           hwPipe, pendingFlags);
+    }
+
     return pipe;
 }
 
@@ -446,6 +464,10 @@ void AndroidPipe::saveToStream(BaseStream* stream) {
 
     // Save pipe-specific state now.
     onSave(stream);
+
+    // Save the pending wake or close operations as well.
+    const int pendingFlags = sGlobals->pipeWaker.getPendingFlags(mHwPipe);
+    stream->putBe32(pendingFlags);
 }
 
 // static
