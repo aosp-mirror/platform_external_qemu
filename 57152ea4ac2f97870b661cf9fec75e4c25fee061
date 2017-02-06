@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "31b97828_9fe7dab1",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-06T23:45:15Z",
+      "side": 1,
+      "message": "do we need to put it in preLoad as well?",
+      "revId": "57152ea4ac2f97870b661cf9fec75e4c25fee061",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
