@@ -65,6 +65,7 @@ public:
         }
     }
 
+    unsigned int mElementIndexBuffer;
 private:
     static const int kMaxVertexAttributes = 64;
 
