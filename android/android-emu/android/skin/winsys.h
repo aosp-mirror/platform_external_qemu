@@ -52,6 +52,9 @@ bool skin_winsys_is_window_fully_visible(void);
 // Returns current preferred gles backend specified through the emulator UI.
 int skin_winsys_get_preferred_gles_backend();
 
+// Returns current preferred gles api level specified through the emulator UI.
+int skin_winsys_get_preferred_gles_apilevel();
+
 // Start main window support. |no_window| must be true to indicate that
 // no window needs to be shown, but that the GUI backend still needs to be
 // initialized.
