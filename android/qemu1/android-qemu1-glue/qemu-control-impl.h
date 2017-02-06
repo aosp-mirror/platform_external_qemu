@@ -15,6 +15,7 @@
 #pragma once
 
 #include "android/emulation/control/battery_agent.h"
+#include "android/emulation/control/car_data_agent.h"
 #include "android/emulation/control/cellular_agent.h"
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
@@ -60,6 +61,9 @@ extern const QAndroidNetAgent* const gQAndroidNetAgent;
 
 // Defined in android-qemu1-glue/qemu-display-agent-impl.cpp
 extern const QAndroidDisplayAgent* const gQAndroidDisplayAgent;
+
+// Defined in android-qemu1-glue/qemu-car-data-agent-impl.cpp
+extern const QCarDataAgent* const gQCarDataAgent;
 
 // Called by hw/android/goldfish/events_device.c to initialize generic event
 // handling.
