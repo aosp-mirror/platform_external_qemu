@@ -77,6 +77,7 @@ ExtendedWindow::ExtendedWindow(
         this, SLOT(switchToTheme(SettingsTheme)));
 
     mPaneButtonMap = {
+        {PANE_IDX_CAR,           mExtendedUi->carDataButton},
         {PANE_IDX_LOCATION,      mExtendedUi->locationButton},
         {PANE_IDX_CELLULAR,      mExtendedUi->cellularButton},
         {PANE_IDX_BATTERY,       mExtendedUi->batteryButton},
@@ -87,8 +88,8 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_FINGER,        mExtendedUi->fingerButton},
         {PANE_IDX_VIRT_SENSORS,  mExtendedUi->virtSensorsButton},
         {PANE_IDX_SETTINGS,      mExtendedUi->settingsButton},
-        {PANE_IDX_HELP,          mExtendedUi->helpButton},
         {PANE_IDX_RECORD_SCREEN, mExtendedUi->recordScreenButton},
+        {PANE_IDX_HELP,          mExtendedUi->helpButton},
         {PANE_IDX_GOOGLE_PLAY,   mExtendedUi->googlePlayButton},
     };
 
@@ -109,12 +110,13 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->virtSensorsButton);
     mSidebarButtons.addButton(mExtendedUi->recordScreenButton);
     mSidebarButtons.addButton(mExtendedUi->settingsButton);
-    mSidebarButtons.addButton(mExtendedUi->helpButton);
+//    mSidebarButtons.addButton(mExtendedUi->helpButton);
     // TODO(joshuaduong): This tab should only be used when running
     // Google API images with the play store. This condition will
     // rely on two factors: the minimum API level we support play
     // store for and whether it is a Google API image.
     mSidebarButtons.addButton(mExtendedUi->googlePlayButton);
+    mSidebarButtons.addButton(mExtendedUi->carDataButton);
 
 #ifdef __APPLE__
     for (QWidget* w : findChildren<QWidget*>()) {
@@ -141,6 +143,7 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         mExtendedUi->location_page->setLocationAgent(agentPtr->location);
         mExtendedUi->microphonePage->setMicrophoneAgent(gQAndroidUserEventAgent);
         mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
+        mExtendedUi->carDataPage->setCarDataAgent(agentPtr->car);
 //        mExtendedUi->recordScreenPage->setRecordScreenAgent(agentPtr->recordScreen);
     }
     // The ADB port is known now. Show it on the UI Help page.
@@ -218,7 +221,7 @@ void ExtendedWindow::on_telephoneButton_clicked()    { adjustTabs(PANE_IDX_TELEP
 void ExtendedWindow::on_virtSensorsButton_clicked()  { adjustTabs(PANE_IDX_VIRT_SENSORS); }
 void ExtendedWindow::on_recordScreenButton_clicked() { adjustTabs(PANE_IDX_RECORD_SCREEN); }
 void ExtendedWindow::on_googlePlayButton_clicked() { adjustTabs(PANE_IDX_GOOGLE_PLAY); }
-
+void ExtendedWindow::on_carDataButton_clicked()        { adjustTabs(PANE_IDX_CAR); }
 
 void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
     auto it = mPaneButtonMap.find(thisIndex);
