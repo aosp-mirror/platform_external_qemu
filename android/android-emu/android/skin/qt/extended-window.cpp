@@ -77,6 +77,7 @@ ExtendedWindow::ExtendedWindow(
         this, SLOT(switchToTheme(SettingsTheme)));
 
     mPaneButtonMap = {
+        {PANE_IDX_CAR,           mExtendedUi->carDataButton},
         {PANE_IDX_LOCATION,      mExtendedUi->locationButton},
         {PANE_IDX_CELLULAR,      mExtendedUi->cellularButton},
         {PANE_IDX_BATTERY,       mExtendedUi->batteryButton},
@@ -116,6 +117,11 @@ ExtendedWindow::ExtendedWindow(
     // store for and whether it is a Google API image.
     mSidebarButtons.addButton(mExtendedUi->googlePlayButton);
 
+    if (avdInfo_isAndroidAuto(android_avdInfo)) {
+        mSidebarButtons.addButton(mExtendedUi->carDataButton);
+        mExtendedUi->carDataButton->setVisible(true);
+    }
+
 #ifdef __APPLE__
     for (QWidget* w : findChildren<QWidget*>()) {
         w->setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -141,6 +147,9 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         mExtendedUi->location_page->setLocationAgent(agentPtr->location);
         mExtendedUi->microphonePage->setMicrophoneAgent(gQAndroidUserEventAgent);
         mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
+        if (avdInfo_isAndroidAuto(android_avdInfo)) {
+            mExtendedUi->carDataPage->setCarDataAgent(agentPtr->car);
+        }
 //        mExtendedUi->recordScreenPage->setRecordScreenAgent(agentPtr->recordScreen);
     }
     // The ADB port is known now. Show it on the UI Help page.
@@ -218,7 +227,7 @@ void ExtendedWindow::on_telephoneButton_clicked()    { adjustTabs(PANE_IDX_TELEP
 void ExtendedWindow::on_virtSensorsButton_clicked()  { adjustTabs(PANE_IDX_VIRT_SENSORS); }
 void ExtendedWindow::on_recordScreenButton_clicked() { adjustTabs(PANE_IDX_RECORD_SCREEN); }
 void ExtendedWindow::on_googlePlayButton_clicked() { adjustTabs(PANE_IDX_GOOGLE_PLAY); }
-
+void ExtendedWindow::on_carDataButton_clicked()        { adjustTabs(PANE_IDX_CAR); }
 
 void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
     auto it = mPaneButtonMap.find(thisIndex);
