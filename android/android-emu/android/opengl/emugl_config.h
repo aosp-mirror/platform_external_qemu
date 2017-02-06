@@ -17,6 +17,8 @@
 
 ANDROID_BEGIN_HEADER
 
+#include "android/skin/winsys.h"
+
 // A small structure used to model the EmuGL configuration
 // to use.
 // |enabled| is true if GPU emulation is enabled, false otherwise.
@@ -100,7 +102,7 @@ bool emuglConfig_init(EmuglConfig* config,
                       bool no_window,
                       bool blacklisted,
                       bool google_apis,
-                      int uiPreferredBackend);
+                      enum WinsysPreferredGlesBackend uiPreferredBackend);
 
 // Setup GPU emulation according to a given |backend|.
 // |bitness| is the host bitness, and can be 0 (autodetect), 32 or 64.

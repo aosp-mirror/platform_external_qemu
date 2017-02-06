@@ -236,11 +236,18 @@ extern bool skin_winsys_is_window_fully_visible()
     return value;
 }
 
-extern int skin_winsys_get_preferred_gles_backend()
+extern enum WinsysPreferredGlesBackend skin_winsys_get_preferred_gles_backend()
 {
     D("skin_winsys_get_preferred_gles_backend");
     QSettings settings;
-    return settings.value(Ui::Settings::GLESBACKEND_PREFERENCE, 0).toInt();
+    return (enum WinsysPreferredGlesBackend)settings.value(Ui::Settings::GLESBACKEND_PREFERENCE, 0).toInt();
+}
+
+extern enum WinsysPreferredGlesApiLevel skin_winsys_get_preferred_gles_apilevel()
+{
+    D("skin_winsys_get_preferred_gles_apilevel");
+    QSettings settings;
+    return (enum WinsysPreferredGlesApiLevel)settings.value(Ui::Settings::GLESAPILEVEL_PREFERENCE, 0).toInt();
 }
 
 extern void skin_winsys_quit_request()
