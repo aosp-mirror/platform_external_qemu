@@ -1745,7 +1745,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
 }
 
 bool doGpuConfig(AvdInfo* avd, AndroidOptions* opts, AndroidHwConfig* hw,
-                 int uiPreferredBackend)
+                 enum WinsysPreferredGlesBackend uiPreferredBackend)
 {
     EmuglConfig config;
 
