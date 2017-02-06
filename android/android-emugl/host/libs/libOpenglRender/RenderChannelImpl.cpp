@@ -190,7 +190,7 @@ void RenderChannelImpl::updateStateLocked() {
 
 void RenderChannelImpl::notifyStateChangeLocked() {
     // Always report stop events, event if not explicitly asked for.
-    State available = mState & (mWantedEvents | State::Stopped);
+    State available = mState & (mWantedEvents );
     if (available != 0) {
         D("callback with %d", (int)available);
         mWantedEvents &= ~mState;

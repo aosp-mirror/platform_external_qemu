@@ -243,6 +243,13 @@ extern int skin_winsys_get_preferred_gles_backend()
     return settings.value(Ui::Settings::GLESBACKEND_PREFERENCE, 0).toInt();
 }
 
+extern int skin_winsys_get_preferred_gles_apilevel()
+{
+    D("skin_winsys_get_preferred_gles_apilevel");
+    QSettings settings;
+    return settings.value(Ui::Settings::GLESAPILEVEL_PREFERENCE, 0).toInt();
+}
+
 extern void skin_winsys_quit_request()
 {
     D(__FUNCTION__);

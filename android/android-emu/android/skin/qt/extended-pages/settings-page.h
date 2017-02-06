@@ -43,6 +43,7 @@ private slots:
     void on_set_themeBox_currentIndexChanged(int index);
     void on_set_crashReportPrefComboBox_currentIndexChanged(int index);
     void on_set_glesBackendPrefComboBox_currentIndexChanged(int index);
+    void on_set_glesApiLevelPrefComboBox_currentIndexChanged(int index);
 
 private:
     bool eventFilter (QObject* object, QEvent* event) override;
