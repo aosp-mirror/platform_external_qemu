@@ -43,8 +43,7 @@ public:
     virtual ~RenderThread();
 
     // Returns true iff the thread has finished.
-    // Note that this also means that the thread's stack has been
-    bool isFinished() { return tryWait(NULL); }
+    bool isFinished() const { return mFinished; }
 
     void pausePreSnapshot();
     void resume();
@@ -77,6 +76,7 @@ private:
 
     RenderChannelImpl* mChannel = nullptr;
     SnapshotState mState = SnapshotState::Empty;
+    bool mFinished = false;
     android::base::Lock mLock;
     android::base::ConditionVariable mCondVar;
     android::base::Optional<android::base::MemStream> mStream;

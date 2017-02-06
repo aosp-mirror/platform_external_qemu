@@ -56,9 +56,14 @@ RenderThread::RenderThread(RenderChannelImpl* channel,
     : emugl::Thread(android::base::ThreadFlags::MaskSignals, 2 * 1024 * 1024),
       mChannel(channel) {
     if (loadStream) {
-        mStream.emplace(0);
-        android::base::loadStream(loadStream, &*mStream);
-        mState = SnapshotState::StartLoading;
+        const bool success = loadStream->getByte();
+        if (success) {
+            mStream.emplace(0);
+            android::base::loadStream(loadStream, &*mStream);
+            mState = SnapshotState::StartLoading;
+        } else {
+            mFinished = true;
+        }
     }
 }
 
@@ -77,9 +82,7 @@ void RenderThread::resume() {
     AutoLock lock(mLock);
     // This function can be called for a thread from pre-snapshot loading
     // state; it doesn't need to do anything.
-    if (mState != SnapshotState::InProgress &&
-        mState != SnapshotState::Finished &&
-        mState != SnapshotState::StartLoading) {
+    if (mState == SnapshotState::Empty) {
         return;
     }
     waitForSnapshotCompletion(&lock);
@@ -90,20 +93,27 @@ void RenderThread::resume() {
 }
 
 void RenderThread::save(android::base::Stream* stream) {
+    bool success;
     {
         AutoLock lock(mLock);
         assert(mState == SnapshotState::StartSaving ||
                mState == SnapshotState::InProgress ||
                mState == SnapshotState::Finished);
         waitForSnapshotCompletion(&lock);
+        success = mState == SnapshotState::Finished;
     }
 
-    assert(mStream);
-    android::base::saveStream(stream, *mStream);
+    if (success) {
+        assert(mStream);
+        stream->putByte(1);
+        android::base::saveStream(stream, *mStream);
+    } else {
+        stream->putByte(0);
+    }
 }
 
 void RenderThread::waitForSnapshotCompletion(AutoLock* lock) {
-    while (mState != SnapshotState::Finished) {
+    while (mState != SnapshotState::Finished && !mFinished) {
         mCondVar.wait(lock);
     }
 }
@@ -168,6 +178,10 @@ bool RenderThread::doSnapshotOperation(const SnapshotObjects& objects,
 }
 
 intptr_t RenderThread::main() {
+    if (mFinished) {
+        return 0;
+    }
+
     RenderThreadInfo tInfo;
     ChecksumCalculatorThreadInfo tChecksumInfo;
     ChecksumCalculator& checksumCalc = tChecksumInfo.get();
@@ -325,6 +339,16 @@ intptr_t RenderThread::main() {
                 progress = true;
             }
         } while (progress);
+    }
+
+    {
+        // Make sure it never happens that we wait forever for the thread to
+        // save to snapshot while it was not even going to.
+        AutoLock lock(mLock);
+        mFinished = true;
+        if (mState != SnapshotState::Empty) {
+            mCondVar.broadcastAndUnlock(&lock);
+        }
     }
 
     if (dumpFP) {

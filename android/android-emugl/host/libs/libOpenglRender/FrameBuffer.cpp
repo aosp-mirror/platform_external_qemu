@@ -1342,7 +1342,9 @@ bool FrameBuffer::onLoad(android::base::Stream* stream) {
     size_t numContexts = stream->getBe32();
     for (size_t i = 0; i < numContexts; i++) {
         RenderContextPtr ctx(RenderContext::onLoad(stream, m_eglDisplay));
-        m_contexts[ctx->getHndl()] = ctx;
+        if (ctx) {
+            m_contexts[ctx->getHndl()] = ctx;
+        }
     }
     m_windows.clear();
     m_colorbuffers.clear();

@@ -1554,11 +1554,7 @@ static void goldfish_pipe_post_load(void* opaque) {
      * problems.
      */
     PipeDevice* dev = ((GoldfishPipeState*)opaque)->dev;
-    if (dev->wanted_pipes_first) {
-        qemu_set_irq(dev->ps->irq, 1);
-    } else {
-        qemu_set_irq(dev->ps->irq, 0);
-    }
+    qemu_set_irq(dev->ps->irq, 1);
 }
 
 static void goldfish_pipe_realize(DeviceState* dev, Error** errp) {

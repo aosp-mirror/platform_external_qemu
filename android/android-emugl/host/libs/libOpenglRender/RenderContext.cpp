@@ -61,7 +61,7 @@ RenderContext* RenderContext::createImpl(EGLDisplay display,
         EGL_NONE
     };
     EGLContext context;
-    if (stream) {
+    if (stream && s_egl.eglLoadContext) {
         context = s_egl.eglLoadContext(display, contextAttribs, stream);
     } else {
         context = s_egl.eglCreateContext(
@@ -113,8 +113,9 @@ void RenderContext::onSave(android::base::Stream* stream) {
     stream->putBe32(mHndl);
     stream->putBe32(static_cast<uint32_t>(mVersion));
     assert(s_egl.eglCreateContext);
-    assert(s_egl.eglSaveContext);
-    s_egl.eglSaveContext(mDisplay, mContext, static_cast<EGLStream>(stream));
+    if (s_egl.eglSaveContext) {
+        s_egl.eglSaveContext(mDisplay, mContext, static_cast<EGLStream>(stream));
+    }
 }
 
 RenderContext *RenderContext::onLoad(android::base::Stream* stream,

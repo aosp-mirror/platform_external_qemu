@@ -531,6 +531,9 @@ void android_pipe_guest_close(void* internalPipe) {
 
 void android_pipe_guest_pre_load(CStream* stream) {
     CHECK_VM_STATE_LOCK();
+    // We may not call qemu_set_irq() until the snapshot is loaded.
+    android::sGlobals->pipeWaker.setContextRunMode(
+                android::ContextRunMode::DeferAlways);
     for (const auto& service : android::sGlobals->services) {
         service->preLoad(asBaseStream(stream));
     }
@@ -541,6 +544,8 @@ void android_pipe_guest_post_load(CStream* stream) {
     for (const auto& service : android::sGlobals->services) {
         service->postLoad(asBaseStream(stream));
     }
+    android::sGlobals->pipeWaker.setContextRunMode(
+                android::ContextRunMode::DeferIfNotLocked);
 }
 
 void android_pipe_guest_pre_save(CStream* stream) {
