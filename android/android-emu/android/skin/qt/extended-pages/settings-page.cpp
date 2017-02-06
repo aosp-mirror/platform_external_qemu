@@ -102,6 +102,10 @@ SettingsPage::SettingsPage(QWidget* parent)
             break;
     }
 
+#ifndef _WIN32
+    mUi->set_glesBackendPrefComboBox->removeItem(Ui::Settings::GLESBACKEND_PREFERENCE_ANGLE9);
+    mUi->set_glesBackendPrefComboBox->removeItem(Ui::Settings::GLESBACKEND_PREFERENCE_ANGLE);
+#endif
     Ui::Settings::GLESBACKEND_PREFERENCE_VALUE glesbackend_pref =
         static_cast<Ui::Settings::GLESBACKEND_PREFERENCE_VALUE>(
             settings.value(Ui::Settings::GLESBACKEND_PREFERENCE, 0).toInt());
@@ -131,6 +135,22 @@ SettingsPage::SettingsPage(QWidget* parent)
         break;
     }
 
+    Ui::Settings::GLESAPILEVEL_PREFERENCE_VALUE glesapilevel_pref =
+        static_cast<Ui::Settings::GLESAPILEVEL_PREFERENCE_VALUE>(
+            settings.value(Ui::Settings::GLESAPILEVEL_PREFERENCE, 0).toInt());
+
+    switch (glesapilevel_pref) {
+    case Ui::Settings::GLESAPILEVEL_PREFERENCE_GLES20:
+        mUi->set_glesApiLevelPrefComboBox->setCurrentIndex(
+                Ui::Settings::GLESAPILEVEL_PREFERENCE_GLES20);
+        break;
+    case Ui::Settings::GLESAPILEVEL_PREFERENCE_MAX:
+        mUi->set_glesApiLevelPrefComboBox->setCurrentIndex(
+                Ui::Settings::GLESAPILEVEL_PREFERENCE_MAX);
+        break;
+    default:
+        break;
+    }
 }
 
 void SettingsPage::setAdbInterface(android::emulation::AdbInterface* adb) {
@@ -316,6 +336,11 @@ static void set_glesBackend_to(Ui::Settings::GLESBACKEND_PREFERENCE_VALUE v) {
     settings.setValue(Ui::Settings::GLESBACKEND_PREFERENCE, v);
 }
 
+static void set_glesApiLevel_to(Ui::Settings::GLESAPILEVEL_PREFERENCE_VALUE v) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::GLESAPILEVEL_PREFERENCE, v);
+}
+
 void SettingsPage::on_set_glesBackendPrefComboBox_currentIndexChanged(int index) {
     switch (index) {
     case Ui::Settings::GLESBACKEND_PREFERENCE_AUTO:
@@ -324,6 +349,17 @@ void SettingsPage::on_set_glesBackendPrefComboBox_currentIndexChanged(int index)
     case Ui::Settings::GLESBACKEND_PREFERENCE_SWIFTSHADER:
     case Ui::Settings::GLESBACKEND_PREFERENCE_NATIVEGL:
         set_glesBackend_to((Ui::Settings::GLESBACKEND_PREFERENCE_VALUE)index);
+        break;
+    default:
+        break;
+    }
+}
+
+void SettingsPage::on_set_glesApiLevelPrefComboBox_currentIndexChanged(int index) {
+    switch (index) {
+    case Ui::Settings::GLESAPILEVEL_PREFERENCE_GLES20:
+    case Ui::Settings::GLESAPILEVEL_PREFERENCE_MAX:
+        set_glesApiLevel_to((Ui::Settings::GLESAPILEVEL_PREFERENCE_VALUE)index);
         break;
     default:
         break;
