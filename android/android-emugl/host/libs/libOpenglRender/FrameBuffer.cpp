@@ -148,7 +148,7 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
 void FrameBuffer::finalize() {
     m_colorbuffers.clear();
     if (m_useSubWindow) {
-        removeSubWindow();
+        removeSubWindow_locked();
     }
     m_windows.clear();
     m_contexts.clear();
@@ -565,8 +565,17 @@ bool FrameBuffer::removeSubWindow() {
             __FUNCTION__);
         return false;
     }
-    bool removed = false;
     emugl::Mutex::AutoLock mutex(m_lock);
+    return removeSubWindow_locked();
+}
+
+bool FrameBuffer::removeSubWindow_locked() {
+    if (!m_useSubWindow) {
+        ERR("%s: Cannot remove native sub-window in this configuration\n",
+            __FUNCTION__);
+        return false;
+    }
+    bool removed = false;
     if (m_subWin) {
         s_egl.eglMakeCurrent(m_eglDisplay, NULL, NULL, NULL);
         s_egl.eglDestroySurface(m_eglDisplay, m_eglSurface);
@@ -815,14 +824,16 @@ void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
 
     // Clean up EGLImage handles
     {
-        // Bind context before potentially triggering any gl calls
-        ScopedBind bind(this);
         auto procIte = m_procOwnedEGLImages.find(puid);
         if (procIte != m_procOwnedEGLImages.end()) {
-            for (auto eglImg : procIte->second) {
-                s_egl.eglDestroyImageKHR(
-                        m_eglDisplay,
-                        reinterpret_cast<EGLImageKHR>((HandleType)eglImg));
+            if (!procIte->second.empty()) {
+                // Bind context before potentially triggering any gl calls.
+                ScopedBind bind(this);
+                for (auto eglImg : procIte->second) {
+                    s_egl.eglDestroyImageKHR(
+                            m_eglDisplay,
+                            reinterpret_cast<EGLImageKHR>((HandleType)eglImg));
+                }
             }
             m_procOwnedEGLImages.erase(procIte);
         }
@@ -1123,7 +1134,7 @@ bool FrameBuffer::bind_locked() {
             return false;
         }
     } else {
-        ERR("Nested %s call detected, should never happen", __func__);
+        ERR("Nested %s call detected, should never happen\n", __func__);
     }
 
     m_prevContext = prevContext;
@@ -1145,7 +1156,7 @@ bool FrameBuffer::bindSubwin_locked() {
             return false;
         }
     } else {
-        ERR("Nested %s call detected, should never happen", __func__);
+        ERR("Nested %s call detected, should never happen\n", __func__);
     }
 
     //
