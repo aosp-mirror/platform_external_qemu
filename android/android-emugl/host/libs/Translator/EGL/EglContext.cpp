@@ -29,6 +29,7 @@ bool EglContext::usingSurface(SurfacePtr surface) {
 }
 
 EglContext::EglContext(EglDisplay *dpy,
+                       const ContextPtr& shared_context,
                        uint64_t shareGroupId,
                        EglConfig* config,
                        GLEScontext* glesCtx,
@@ -39,20 +40,27 @@ EglContext::EglContext(EglDisplay *dpy,
         m_config(config),
         m_glesContext(glesCtx),
         m_version(ver),
-        m_mngr(mngr) {
+        m_mngr(mngr)
+{
+
+    EglOS::Context* globalSharedContext = dpy->getGlobalSharedContext();
+    m_native = dpy->nativeType()->createContext(
+            m_config->nativeFormat(), globalSharedContext);
     if (stream) {
         EGLint configId = EGLint(stream->getBe32());
         m_config = dpy->getConfig(configId);
         shareGroupId = static_cast<uint64_t>(stream->getBe64());
     }
-    EglOS::Context* globalSharedContext = dpy->getGlobalSharedContext();
-    m_native = dpy->nativeType()->createContext(
-            m_config->nativeFormat(), globalSharedContext);
-    if (m_native) {
-        m_shareGroup = mngr->attachOrCreateShareGroup(m_native, shareGroupId);
+    if (shared_context.get()) {
+        m_shareGroup = mngr->attachShareGroup(m_native,shared_context->nativeType());
         m_hndl = ++s_nextContextHndl;
     } else {
-        m_hndl = 0;
+        if (m_native) {
+            m_shareGroup = mngr->attachOrCreateShareGroup(m_native, shareGroupId);
+            m_hndl = ++s_nextContextHndl;
+        } else {
+            m_hndl = 0;
+        }
     }
 }
 
