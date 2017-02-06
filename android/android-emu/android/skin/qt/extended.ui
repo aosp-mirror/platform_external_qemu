@@ -76,6 +76,7 @@ font-family: &quot;Roboto&quot;</string>
    <widget class="GooglePlayPage" name="googlePlayPage"/>
    <widget class="SettingsPage" name="settingsPage"/>
    <widget class="HelpPage" name="helpPage"/>
+   <widget class="CarDataPage" name="carDataPage"/>
    <widget class="QWidget" name="page">
     <widget class="QGroupBox" name="locationGroup_4">
      <property name="geometry">
@@ -759,6 +760,57 @@ padding: 10px 0px 10px 16px;</string>
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="carDataButton">
+        <property name="font">
+          <font>
+           <family>Roboto</family>
+         </font>
+        </property>
+        <!-- Default invisible, will change to visible programmatically when running Android Auto
+             system image -->
+        <property name="visible">
+         <bool>false</bool>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">/* overridden by stylesheet_template.css */
+border: none;
+text-align: left;
+padding: 10px 0px 10px 16px;</string>
+        </property>
+        <property name="text">
+         <string>  Car data</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/light/android_auto</normaloff>:/light/android_auto</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+        <property name="themeIconName" stdset="0">
+         <string>android_auto</string>
+        </property>
+        <property name="ColorGroup" stdset="0">
+         <string>MajorTab</string>
+        </property>
+        <property name="report_metrics" stdset="0">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="Line" name="line">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -1080,6 +1132,12 @@ padding: 10px 0px 10px 16px;</string>
    <header>android/skin/qt/extended-pages/google-play-page.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>CarDataPage</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/extended-pages/car-data-page.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>locationButton</tabstop>
@@ -1093,6 +1151,7 @@ padding: 10px 0px 10px 16px;</string>
   <tabstop>virtSensorsButton</tabstop>
   <!-- TODO(joshuaduong): Enable once gplay is ready. -->
   <!-- <tabstop>googlePlayButton</tabstop> -->
+  <tabstop>carDataButton</tabstop>
   <tabstop>settingsButton</tabstop>
   <!-- <tabstop>recordScreenButton</tabstop> -->
   <tabstop>helpButton</tabstop>

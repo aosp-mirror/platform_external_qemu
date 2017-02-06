@@ -119,6 +119,21 @@ bool propertyFile_isPhoneApi(const FileData* data);
 /* Determine whether a Google API's system image is used. */
 bool propertyFile_isGoogleApis(const FileData* data);
 
+/* Return whether an Android Auto system image is used. */
+bool propertyFile_isAndroidAuto(const FileData* data);
+
+/* Return whether the product name in property file has a substring matching any
+ * of the the given ones.
+ *
+ * |productNames| is a list of product names to compare to.
+ * |len| is the number of product names.
+ * |prefix| is whether the given product name needs to be the prefix.
+ */
+bool propertyFile_findProductName(const FileData* data,
+                                  const char *productNames[],
+                                  int len,
+                                  bool prefix);
+
 /* Retrieve the mode describing how the ADB daemon is communicating with
  * the emulator from inside the guest.
  * Return 0 for legacy mode, which uses TCP port 5555.
