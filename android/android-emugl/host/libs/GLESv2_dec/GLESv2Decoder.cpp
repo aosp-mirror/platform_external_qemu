@@ -282,7 +282,17 @@ void GLESv2Decoder::s_glVertexAttribPointerOffset(void *self, GLuint indx, GLint
 void GLESv2Decoder::s_glDrawElementsData(void *self, GLenum mode, GLsizei count, GLenum type, void * data, GLuint datalen)
 {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
-    ctx->glDrawElements(mode, count, type, data);
+
+    GLuint prevElemArrayBuffer;
+    ctx->glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, (GLint *)&prevElemArrayBuffer);
+
+    if (ctx->m_contextData->mElementIndexBuffer == 0) {
+        ctx->glGenBuffers(1, &ctx->m_contextData->mElementIndexBuffer);
+    }
+    ctx->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ctx->m_contextData->mElementIndexBuffer);
+    ctx->glBufferData(GL_ELEMENT_ARRAY_BUFFER, datalen, data, GL_STATIC_DRAW);
+    ctx->glDrawElements(mode, count, type, (GLvoid*)0);
+    ctx->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prevElemArrayBuffer);
 }
 
 
