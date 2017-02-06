@@ -78,11 +78,8 @@ private:
     std::vector<std::shared_ptr<RenderChannelImpl>> mChannels;
     bool mStopped = false;
 
-    // A message channel and a cleanup thread for GL resources of finished
-    // guest processes. Cleanup takes time, so we should offload it into a
-    // worker thread.
-    android::base::MessageChannel<uint64_t, 64> mCleanupProcessIds;
-    android::base::FunctorThread mCleanupThread;
+    class ProcessCleanupThread;
+    std::unique_ptr<ProcessCleanupThread> mCleanupThread;
 };
 
 }  // namespace emugl
