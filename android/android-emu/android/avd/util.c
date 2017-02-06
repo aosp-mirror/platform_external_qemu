@@ -211,6 +211,21 @@ propertyFile_isGoogleApis(const FileData* data) {
     return false;
 }
 
+bool propertyFile_isAndroidAuto(const FileData* data) {
+    char* prop = propertyFile_getValue(
+                    (const char*)data->data,
+                    data->size,
+                    "ro.product.name");
+
+    if (!prop) { return false; }
+    if (strlen(prop) >= 7 && strncmp("car_emu", prop, 7) == 0) {
+        free(prop);
+        return true;
+    }
+    free(prop);
+    return false;
+}
+
 char* path_getBuildBuildProp(const char* androidOut) {
     char temp[MAX_PATH], *p = temp, *end = p + sizeof(temp);
     p = bufprint(temp, end, "%s/system/build.prop", androidOut);

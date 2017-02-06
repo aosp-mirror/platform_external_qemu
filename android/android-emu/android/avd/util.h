@@ -114,6 +114,9 @@ int propertyFile_getApiLevel(const FileData* data);
 /* Determine whether a Google API's system image is used. */
 bool propertyFile_isGoogleApis(const FileData* data);
 
+/* Return whether an Android Auto system image is used. */
+bool propertyFile_isAndroidAuto(const FileData* data);
+
 /* Retrieve the mode describing how the ADB daemon is communicating with
  * the emulator from inside the guest.
  * Return 0 for legacy mode, which uses TCP port 5555.

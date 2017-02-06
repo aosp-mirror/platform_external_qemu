@@ -122,6 +122,7 @@ struct AvdInfo {
     int       apiLevel;
     int       incrementalVersion;
     bool      isGoogleApis;
+    bool      isAndroidAuto;
     char*     skinName;     /* skin name */
     char*     skinDirPath;  /* skin directory */
     char*     coreHardwareIniPath;  /* core hardware.ini path */
@@ -560,6 +561,11 @@ avdInfo_isGoogleApis(const AvdInfo* i) {
     return i->isGoogleApis;
 }
 
+bool
+avdInfo_isAndroidAuto(const AvdInfo* i) {
+    return i->isAndroidAuto;
+}
+
 int
 avdInfo_getApiLevel(const AvdInfo* i) {
     return i->apiLevel;
@@ -801,6 +807,7 @@ _avdInfo_extractBuildProperties(AvdInfo* i) {
         }
     }
     i->isGoogleApis = propertyFile_isGoogleApis(i->buildProperties);
+    i->isAndroidAuto = propertyFile_isAndroidAuto(i->buildProperties);
     i->incrementalVersion = propertyFile_getInt(
         i->buildProperties,
         "ro.build.version.incremental",
