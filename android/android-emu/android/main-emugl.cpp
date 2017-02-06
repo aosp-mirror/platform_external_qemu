@@ -29,7 +29,7 @@ bool androidEmuglConfigInit(EmuglConfig* config,
                             const char* gpuOption,
                             int wantedBitness,
                             bool noWindow,
-                            int uiPreferredBackend) {
+                            enum WinsysPreferredGlesBackend uiPreferredBackend) {
     bool gpuEnabled = false;
     ScopedCPtr<char> gpuMode;
 
