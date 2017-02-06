@@ -354,6 +354,7 @@ private:
     HandleType genHandle();
 
     bool bindSubwin_locked();
+    bool removeSubWindow_locked();
 
 private:
     static FrameBuffer *s_theFrameBuffer;
