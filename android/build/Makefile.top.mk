@@ -179,6 +179,7 @@ BUILD_TARGET_CFLAGS += \
     -Wall $(GCC_W_NO_MISSING_FIELD_INITIALIZERS) -Wno-strict-overflow
 
 BUILD_TARGET_CXXFLAGS += -Wno-invalid-offsetof
+BUILD_TARGET_CXXFLAGS += -std=c++11
 
 # Needed to build block.c on Linux/x86_64.
 BUILD_TARGET_CFLAGS += -D_GNU_SOURCE=1
