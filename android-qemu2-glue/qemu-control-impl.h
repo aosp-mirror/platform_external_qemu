@@ -15,6 +15,7 @@
 #pragma once
 
 #include "android/emulation/control/battery_agent.h"
+#include "android/emulation/control/car_data_agent.h"
 #include "android/emulation/control/cellular_agent.h"
 #include "android/emulation/control/clipboard_agent.h"
 #include "android/emulation/control/display_agent.h"
@@ -65,6 +66,8 @@ extern const QAndroidNetAgent* const gQAndroidNetAgent;
 extern const QAndroidDisplayAgent* const gQAndroidDisplayAgent;
 
 extern const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;
+
+extern const QCarDataAgent* const gQCarDataAgent;
 
 // Called by hw/android/goldfish/events_device.c to initialize generic event
 // handling.
