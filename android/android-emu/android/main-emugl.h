@@ -12,6 +12,7 @@
 #pragma once
 
 #include "android/opengl/emugl_config.h"
+#include "android/skin/winsys.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
@@ -37,6 +38,6 @@ bool androidEmuglConfigInit(EmuglConfig* config,
                             const char* gpuOption,
                             int wantedBitness,
                             bool noWindow,
-                            int uiPreferredBackend);
+                            enum WinsysPreferredGlesBackend uiPreferredBackend);
 
 ANDROID_END_HEADER
