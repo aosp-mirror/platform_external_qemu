@@ -14,6 +14,8 @@
 // restoring user settings associated with the Qt-based UI.
 #pragma once
 
+#include "android/skin/winsys.h"
+
 #include <QString>
 
 namespace Ui {
@@ -55,13 +57,7 @@ const int CRASHREPORT_COMBOBOX_NEVER = 1;
 const int CRASHREPORT_COMBOBOX_ASK = 2;
 
 const QString GLESBACKEND_PREFERENCE("set/glesBackendPreference");
-enum GLESBACKEND_PREFERENCE_VALUE {
-    GLESBACKEND_PREFERENCE_AUTO = 0,
-    GLESBACKEND_PREFERENCE_ANGLE = 1,
-    GLESBACKEND_PREFERENCE_ANGLE9 = 2,
-    GLESBACKEND_PREFERENCE_SWIFTSHADER = 3,
-    GLESBACKEND_PREFERENCE_NATIVEGL = 4,
-};
+const QString GLESAPILEVEL_PREFERENCE("set/glesApiLevelPreference");
 
 const QString LOCATION_ENTERED_ALTITUDE("loc/altitude");
 const QString LOCATION_ENTERED_LATITUDE("loc/latitude");
