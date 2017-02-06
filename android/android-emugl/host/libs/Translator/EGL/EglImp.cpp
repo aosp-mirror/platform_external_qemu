@@ -899,8 +899,8 @@ static EGLContext eglCreateOrLoadContext(EGLDisplay display, EGLConfig config,
                 RETURN_ERROR(EGL_NO_CONTEXT,EGL_BAD_ATTRIBUTE);
     }
 
-    if(share_context != EGL_NO_CONTEXT) {
         ContextPtr sharedCtxPtr;
+    if(share_context != EGL_NO_CONTEXT) {
         sharedCtxPtr = dpy->getContext(share_context);
         if(!sharedCtxPtr.get()) {
             RETURN_ERROR(EGL_NO_CONTEXT,EGL_BAD_CONTEXT);
@@ -909,7 +909,7 @@ static EGLContext eglCreateOrLoadContext(EGLDisplay display, EGLConfig config,
                         ->getShareGroup(sharedCtxPtr->nativeType())->getId();
     }
 
-    ContextPtr ctx(new EglContext(dpy, shareGroupId, cfg,
+    ContextPtr ctx(new EglContext(dpy, sharedCtxPtr, shareGroupId, cfg,
                               glesCtx, glesVersion,
                               dpy->getManager(glesVersion),
                               stream));
