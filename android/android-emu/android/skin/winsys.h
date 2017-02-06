@@ -49,8 +49,25 @@ void skin_winsys_set_window_title(const char* title);
 // Return true iff the main window is fully visible
 bool skin_winsys_is_window_fully_visible(void);
 
+enum WinsysPreferredGlesBackend {
+    WINSYS_GLESBACKEND_PREFERENCE_AUTO = 0,
+    WINSYS_GLESBACKEND_PREFERENCE_ANGLE = 1,
+    WINSYS_GLESBACKEND_PREFERENCE_ANGLE9 = 2,
+    WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER = 3,
+    WINSYS_GLESBACKEND_PREFERENCE_NATIVEGL = 4,
+    WINSYS_GLESBACKEND_PREFERENCE_NUM = 5,
+};
+
+enum WinsysPreferredGlesApiLevel {
+    WINSYS_GLESAPILEVEL_PREFERENCE_GLES20 = 0,
+    WINSYS_GLESAPILEVEL_PREFERENCE_MAX = 1,
+    WINSYS_GLESAPILEVEL_PREFERENCE_NUM = 2,
+};
+
 // Returns current preferred gles backend specified through the emulator UI.
-int skin_winsys_get_preferred_gles_backend();
+enum WinsysPreferredGlesBackend skin_winsys_get_preferred_gles_backend();
+// Returns current preferred gles api level specified through the emulator UI.
+enum WinsysPreferredGlesApiLevel skin_winsys_get_preferred_gles_apilevel();
 
 // Start main window support. |no_window| must be true to indicate that
 // no window needs to be shown, but that the GUI backend still needs to be

@@ -16,6 +16,7 @@
 #include "android/base/system/System.h"
 #include "android/globals.h"
 #include "android/opengl/EmuglBackendList.h"
+#include "android/skin/winsys.h"
 
 #include <string>
 
@@ -122,17 +123,6 @@ void free_emugl_host_gpu_props(emugl_host_gpu_prop_list proplist) {
     delete [] proplist.props;
 }
 
-// Should match android/android-emu/android/skin/qt/qt-settings.h's
-// GLESBACKEND_PREFERENCE_VALUE
-
-enum UIPreferredBackend {
-    UIPREFERREDBACKEND_AUTO = 0,
-    UIPREFERREDBACKEND_ANGLE = 1,
-    UIPREFERREDBACKEND_ANGLE9 = 2,
-    UIPREFERREDBACKEND_SWIFTSHADER = 3,
-    UIPREFERREDBACKEND_NATIVEGL = 4,
-};
-
 bool emuglConfig_init(EmuglConfig* config,
                       bool gpu_enabled,
                       const char* gpu_mode,
@@ -141,7 +131,7 @@ bool emuglConfig_init(EmuglConfig* config,
                       bool no_window,
                       bool blacklisted,
                       bool has_guest_renderer,
-                      int uiPreferredBackend) {
+                      enum WinsysPreferredGlesBackend uiPreferredBackend) {
     D("%s: blacklisted=%d has_guest_renderer=%d\n",
       __FUNCTION__,
       blacklisted,
@@ -150,7 +140,7 @@ bool emuglConfig_init(EmuglConfig* config,
     // zero all fields first.
     memset(config, 0, sizeof(*config));
 
-    bool hasUiPreference = uiPreferredBackend != UIPREFERREDBACKEND_AUTO;
+    bool hasUiPreference = uiPreferredBackend != WINSYS_GLESBACKEND_PREFERENCE_AUTO;
 
     // The value of '-gpu <mode>' overrides both the hardware properties
     // and the UI setting, except if <mode> is 'auto'.
@@ -266,16 +256,16 @@ bool emuglConfig_init(EmuglConfig* config,
             }
         } else {
             switch (uiPreferredBackend) {
-                case UIPREFERREDBACKEND_ANGLE:
+                case WINSYS_GLESBACKEND_PREFERENCE_ANGLE:
                     gpu_mode = "angle";
                     break;
-                case UIPREFERREDBACKEND_ANGLE9:
+                case WINSYS_GLESBACKEND_PREFERENCE_ANGLE9:
                     gpu_mode = "angle9";
                     break;
-                case UIPREFERREDBACKEND_SWIFTSHADER:
+                case WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER:
                     gpu_mode = "swiftshader";
                     break;
-                case UIPREFERREDBACKEND_NATIVEGL:
+                case WINSYS_GLESBACKEND_PREFERENCE_NATIVEGL:
                     gpu_mode = "host";
                     break;
                 default:

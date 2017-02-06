@@ -492,6 +492,67 @@
     </property>
    </item>
   </widget>
+  <widget class="QGroupBox" name="set_glesApiLevelTitle">
+   <property name="geometry">
+    <rect>
+     <x>324</x>
+     <y>242</y>
+     <width>261</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: 0px;</string>
+   </property>
+   <property name="title">
+    <string>OpenGL ES API Level (requires restart)</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Title</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="set_glesApiLevelPrefComboBox">
+   <property name="geometry">
+    <rect>
+     <x>324</x>
+     <y>260</y>
+     <width>280</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">padding: 3px 3px 3px 3px;</string>
+   </property>
+   <property name="editable">
+    <bool>false</bool>
+   </property>
+   <property name="currentText">
+    <string>OpenGL ES 2.0 (default)</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+   <item>
+    <property name="text">
+     <string>OpenGL ES 2.0 (default)</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Renderer maximum (up to OpenGL ES 3.1)</string>
+    </property>
+   </item>
+  </widget>
   <zorder>kbdShortcutsTitle</zorder>
   <zorder>set_crashReprotPrefTitle</zorder>
   <zorder>set_onTop</zorder>
@@ -509,6 +570,8 @@
   <zorder>set_forwardShortcutsToDevice</zorder>
   <zorder>set_glesBackendTitle</zorder>
   <zorder>set_glesBackendPrefComboBox</zorder>
+  <zorder>set_glesApiLevelTitle</zorder>
+  <zorder>set_glesApiLevelPrefComboBox</zorder>
  </widget>
  <tabstops>
   <tabstop>set_themeBox</tabstop>

@@ -929,6 +929,13 @@ extern "C" int main(int argc, char **argv) {
             return 1;
         }
 
+        // Should enable OpenGL ES 3.x?
+        if (!android::featurecontrol::isEnabled(android::featurecontrol::GLESDynamicVersion) &&
+            skin_winsys_get_preferred_gles_apilevel() == WINSYS_GLESAPILEVEL_PREFERENCE_MAX) {
+            android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::GLESDynamicVersion, true);
+        }
+
         doGpuConfig(avd, opts, hw, skin_winsys_get_preferred_gles_backend());
 
         // Kernel command-line parameters.
