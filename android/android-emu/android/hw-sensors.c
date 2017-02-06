@@ -821,6 +821,7 @@ static HwSensors _sensorsState[1] = {};
 
 void android_hw_sensors_init(void) {
     HwSensors* hw = _sensorsState;
+    D("Yao: init sensors");
 
     if (hw->service == NULL) {
         _hwSensors_init(hw);

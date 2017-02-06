@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#define D(...) VERBOSE_PRINT(init,__VA_ARGS__)
+#define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
 /* Return the path to the AVD's root configuration .ini file. it is located in
  * ~/.android/avd/<name>.ini or Windows equivalent
@@ -204,6 +204,22 @@ propertyFile_isGoogleApis(const FileData* data) {
     if (!prop) { return false; }
     if (strstr(prop, "sdk_google") ||
         strstr(prop, "google_sdk")) {
+        free(prop);
+        return true;
+    }
+    free(prop);
+    return false;
+}
+
+bool propertyFile_isAndroidAuto(const FileData* data) {
+    char* prop = propertyFile_getValue(
+                    (const char*)data->data,
+                    data->size,
+                    "ro.product.name");
+
+    if (!prop) { return false; }
+    D("Yao: product name: %s ", prop);
+    if (strlen(prop) > 7 && strncmp("car_emu", prop, 7) == 0) {
         free(prop);
         return true;
     }

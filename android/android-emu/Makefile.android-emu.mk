@@ -55,6 +55,13 @@ include $(_ANDROID_EMU_ROOT)/android/metrics/proto/MetricsProto.mk
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
 ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES)
 
+##############################################################################
+
+include $(_ANDROID_EMU_ROOT)/android/emulation/proto/VehicleHalProto.mk
+
+
+
+
 ###############################################################################
 #
 #  android-emu-base
@@ -164,6 +171,7 @@ LOCAL_SRC_FILES += \
 
 endif
 
+LOCAL_CXXFLAGS += -std=c++11
 $(call end-emulator-library)
 
 ####
@@ -305,6 +313,7 @@ LOCAL_SRC_FILES := \
     android/hw-lcd.c \
     android/hw-qemud.cpp \
     android/hw-sensors.c \
+    android/car.cpp \
     android/jpeg-compress.c \
     android/kernel/kernel_utils.cpp \
     android/loadpng.c \
@@ -382,6 +391,7 @@ LOCAL_SRC_FILES := \
     android/wear-agent/WearAgent.cpp \
     android/wear-agent/PairUpWearPhone.cpp \
 
+
 # Platform-specific camera capture
 ifeq ($(BUILD_TARGET_OS),linux)
     LOCAL_SRC_FILES += \
@@ -427,6 +437,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-zlib \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
+    $(VEHICLE_PROTO_STATIC_LIBRARIES)
 
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \
