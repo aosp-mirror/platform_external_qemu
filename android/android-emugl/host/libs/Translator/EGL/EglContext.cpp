@@ -42,15 +42,14 @@ EglContext::EglContext(EglDisplay *dpy,
         m_version(ver),
         m_mngr(mngr)
 {
-
-    EglOS::Context* globalSharedContext = dpy->getGlobalSharedContext();
-    m_native = dpy->nativeType()->createContext(
-            m_config->nativeFormat(), globalSharedContext);
     if (stream) {
         EGLint configId = EGLint(stream->getBe32());
         m_config = dpy->getConfig(configId);
         shareGroupId = static_cast<uint64_t>(stream->getBe64());
     }
+    EglOS::Context* globalSharedContext = dpy->getGlobalSharedContext();
+    m_native = dpy->nativeType()->createContext(
+            m_config->nativeFormat(), globalSharedContext);
     if (shared_context.get()) {
         m_shareGroup = mngr->attachShareGroup(m_native,shared_context->nativeType());
         m_hndl = ++s_nextContextHndl;
