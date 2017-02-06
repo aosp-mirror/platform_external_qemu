@@ -46,7 +46,7 @@ static ShShaderSpec sInputSpecForVersion(int esslVersion) {
 static ShShaderOutput sOutputSpecForVersion(int esslVersion) {
     switch (esslVersion) {
         case 100:
-            return SH_GLSL_COMPATIBILITY_OUTPUT;
+            return SH_GLSL_150_CORE_OUTPUT;
         case 300:
             return SH_GLSL_150_CORE_OUTPUT;
         case 310:
@@ -211,7 +211,7 @@ bool translate(int esslVersion,
 
     // Pass in the entire src as 1 string, ask for compiled GLSL object code
     // to be saved.
-    int res = ShCompile(compilerHandle, &src, 1, SH_OBJECT_CODE);
+    int res = ShCompile(compilerHandle, &src, 1, SH_OBJECT_CODE | SH_VARIABLES);
 
     // The compilers return references that may not be valid in the future,
     // and we manually clear them immediately anyway.
