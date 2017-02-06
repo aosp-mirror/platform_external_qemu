@@ -56,6 +56,12 @@ namespace android {
 //   and run later. Hence the void return type of
 //   queueDeviceOperation; it is run asynchronously, so
 //   you cannot expect a return value.
+
+enum class ContextRunMode {
+    DeferIfNotLocked,
+    DeferAlways
+};
+
 template <typename T>
 class DeviceContextRunner {
 public:
@@ -93,6 +99,11 @@ public:
         }
     }
 
+    void setContextRunMode(ContextRunMode mode) {
+        AutoLock lock(mLock);
+        mContextRunMode = mode;
+    }
+
 protected:
     // To be implemented by the class that derives DeviceContextRunner:
     // the method that actually touches the virtual device.
@@ -103,7 +114,8 @@ protected:
     // Otherwise, we need to add the request to a pending
     // set of requests, to be finished later when we do have the VM lock.
     void queueDeviceOperation(const T& op) {
-        if (mVmLock->isLockedBySelf()) {
+        if (mContextRunMode == ContextRunMode::DeferIfNotLocked &&
+            mVmLock->isLockedBySelf()) {
             // Perform the operation correctly since the current thread
             // already holds the lock that protects the global VM state.
             performDeviceOperation(op);
@@ -145,6 +157,7 @@ private:
     }
 
     VmLock* mVmLock = nullptr;
+    ContextRunMode mContextRunMode = ContextRunMode::DeferIfNotLocked;
 
     mutable Lock mLock;
     PendingList mPending;
