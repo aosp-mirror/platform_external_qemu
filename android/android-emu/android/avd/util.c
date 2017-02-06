@@ -211,31 +211,48 @@ propertyFile_getApiLevel(const FileData* data) {
 
 bool
 propertyFile_isPhoneApi(const FileData* data) {
-    char* prop = propertyFile_getValue(
-                    (const char*)data->data,
-                    data->size,
-                    "ro.product.name");
-    if (!prop) { return false; }
-    if (strstr(prop, "phone")) {
-        free(prop);
-        return true;
-    }
-    free(prop);
-    return false;
+    const char *phone_names[] = {"phone"};
+    return propertyFile_findProductName(data, phone_names, 1 /*len*/, false /*prefix*/);
 }
 
 bool
 propertyFile_isGoogleApis(const FileData* data) {
+    const char *google_names[] = {"sdk_google", "google_sdk"};
+    return propertyFile_findProductName(data, google_names, 2 /*len*/, false /*prefix*/);
+}
+
+bool propertyFile_isAndroidAuto(const FileData* data) {
+    const char *car_names[] = {"car_emu"};
+    return propertyFile_findProductName(data, car_names, 1 /*len*/, true /*prefix*/);
+}
+
+bool propertyFile_findProductName(const FileData* data,
+    const char *productNames[], int count, bool prefix) {
     char* prop = propertyFile_getValue(
                     (const char*)data->data,
                     data->size,
                     "ro.product.name");
+
     if (!prop) { return false; }
-    if (strstr(prop, "sdk_google") ||
-        strstr(prop, "google_sdk")) {
-        free(prop);
-        return true;
+    if (!prefix) {
+        int i;
+        for(i = 0; i < count; i++) {
+            if (strstr(prop, productNames[i])) {
+                free(prop);
+                return true;
+            }
+        }
+    } else {
+        int i;
+        for (i = 0; i < count; i++) {
+            int len = strlen(productNames[i]);
+            if (strlen(prop) >= len && strncmp(productNames[i], prop, len) == 0) {
+                free(prop);
+                return true;
+            }
+        }
     }
+
     free(prop);
     return false;
 }
