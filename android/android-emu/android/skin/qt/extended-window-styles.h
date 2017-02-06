@@ -32,4 +32,5 @@ enum ExtendedWindowPane {
     PANE_IDX_GOOGLE_PLAY,
     PANE_IDX_SETTINGS,
     PANE_IDX_HELP,
+    PANE_IDX_CAR,
 };
