@@ -86,6 +86,7 @@ static void apic_sync_vapic(APICCommonState *s, int sync_type)
     if (!s->vapic_paddr) {
         return;
     }
+    fprintf(stderr, "%s: vapic paddr 0x%llx\n", __func__, s->vapic_paddr);
     if (sync_type & SYNC_FROM_VAPIC) {
         cpu_physical_memory_read(s->vapic_paddr, &vapic_state,
                                  sizeof(vapic_state));
@@ -131,6 +132,7 @@ static void apic_vapic_base_update(APICCommonState *s)
 
 static void apic_local_deliver(APICCommonState *s, int vector)
 {
+    // fprintf(stderr, "%s: call\n", __func__);
     uint32_t lvt = s->lvt[vector];
     int trigger_mode;
 
@@ -141,14 +143,17 @@ static void apic_local_deliver(APICCommonState *s, int vector)
 
     switch ((lvt >> 8) & 7) {
     case APIC_DM_SMI:
+        // fprintf(stderr, "%s:%d deliver\n", __func__, __LINE__);
         cpu_interrupt(CPU(s->cpu), CPU_INTERRUPT_SMI);
         break;
 
     case APIC_DM_NMI:
+        // fprintf(stderr, "%s:%d deliver\n", __func__, __LINE__);
         cpu_interrupt(CPU(s->cpu), CPU_INTERRUPT_NMI);
         break;
 
     case APIC_DM_EXTINT:
+        // fprintf(stderr, "%s:%d deliver\n", __func__, __LINE__);
         cpu_interrupt(CPU(s->cpu), CPU_INTERRUPT_HARD);
         break;
 
@@ -210,6 +215,7 @@ static void apic_bus_deliver(const uint32_t *deliver_bitmask,
                              uint8_t delivery_mode, uint8_t vector_num,
                              uint8_t trigger_mode)
 {
+    // fprintf(stderr, "%s:%d start\n", __func__, __LINE__);
     APICCommonState *apic_iter;
 
     switch (delivery_mode) {
@@ -237,18 +243,21 @@ static void apic_bus_deliver(const uint32_t *deliver_bitmask,
             break;
 
         case APIC_DM_SMI:
+            // fprintf(stderr, "%s:%d deliver\n", __func__, __LINE__);
             foreach_apic(apic_iter, deliver_bitmask,
                 cpu_interrupt(CPU(apic_iter->cpu), CPU_INTERRUPT_SMI)
             );
             return;
 
         case APIC_DM_NMI:
+            // fprintf(stderr, "%s:%d deliver\n", __func__, __LINE__);
             foreach_apic(apic_iter, deliver_bitmask,
                 cpu_interrupt(CPU(apic_iter->cpu), CPU_INTERRUPT_NMI)
             );
             return;
 
         case APIC_DM_INIT:
+            // fprintf(stderr, "%s:%d deliver\n", __func__, __LINE__);
             /* normal INIT IPI sent to processors */
             foreach_apic(apic_iter, deliver_bitmask,
                          cpu_interrupt(CPU(apic_iter->cpu),
@@ -363,8 +372,10 @@ static void apic_update_irq(APICCommonState *s)
 
     cpu = CPU(s->cpu);
     if (!qemu_cpu_is_self(cpu)) {
+        // fprintf(stderr, "%s:%d deliver\n", __func__, __LINE__);
         cpu_interrupt(cpu, CPU_INTERRUPT_POLL);
     } else if (apic_irq_pending(s) > 0) {
+        // fprintf(stderr, "%s:%d deliver\n", __func__, __LINE__);
         cpu_interrupt(cpu, CPU_INTERRUPT_HARD);
     } else if (!apic_accept_pic_intr(dev) || !pic_get_output(isa_pic)) {
         cpu_reset_interrupt(cpu, CPU_INTERRUPT_HARD);
@@ -473,6 +484,7 @@ static void apic_get_delivery_bitmask(uint32_t *deliver_bitmask,
 
 static void apic_startup(APICCommonState *s, int vector_num)
 {
+    fprintf(stderr, "%s:%d deliver\n", __func__, __LINE__);
     s->sipi_vector = vector_num;
     cpu_interrupt(CPU(s->cpu), CPU_INTERRUPT_SIPI);
 }
@@ -481,6 +493,7 @@ void apic_sipi(DeviceState *dev)
 {
     APICCommonState *s = APIC_COMMON(dev);
 
+    fprintf(stderr, "%s: call\n", __func__);
     cpu_reset_interrupt(CPU(s->cpu), CPU_INTERRUPT_SIPI);
 
     if (!s->wait_for_sipi)
@@ -664,6 +677,7 @@ static uint32_t apic_mem_readl(void *opaque, hwaddr addr)
         return 0;
     }
     s = APIC_COMMON(dev);
+    fprintf(stderr, "%s: call. state: %p opaque %p dev %p\n", __func__, s, opaque, dev);
 
     index = (addr >> 4) & 0xff;
     switch(index) {
@@ -716,13 +730,17 @@ static uint32_t apic_mem_readl(void *opaque, hwaddr addr)
         val = s->icr[index & 1];
         break;
     case 0x32 ... 0x37:
+        fprintf(stderr, "%s:%d timer update\n", __func__, __LINE__);
         val = s->lvt[index - 0x32];
         break;
     case 0x38:
+        fprintf(stderr, "%s:%d timer update\n", __func__, __LINE__);
         val = s->initial_count;
         break;
     case 0x39:
         val = apic_get_current_count(s);
+        fprintf(stderr, "%s:%d the curr timer count is %d form page %d\n", __func__, __LINE__, val, (uint32_t)(s->vmx_apic_page[0x390]));
+        // abort();
         break;
     case 0x3e:
         val = s->divide_conf;
@@ -767,6 +785,8 @@ static void apic_mem_writel(void *opaque, hwaddr addr, uint32_t val)
         return;
     }
     s = APIC_COMMON(dev);
+
+    fprintf(stderr, "%s: call. state: %p\n", __func__, s);
 
     trace_apic_mem_writel(addr, val);
 
@@ -816,6 +836,7 @@ static void apic_mem_writel(void *opaque, hwaddr addr, uint32_t val)
         break;
     case 0x32 ... 0x37:
         {
+            fprintf(stderr, "%s:%d timer update\n", __func__, __LINE__);
             int n = index - 0x32;
             s->lvt[n] = val;
             if (n == APIC_LVT_TIMER) {
@@ -826,11 +847,13 @@ static void apic_mem_writel(void *opaque, hwaddr addr, uint32_t val)
         }
         break;
     case 0x38:
+        fprintf(stderr, "%s:%d timer update\n", __func__, __LINE__);
         s->initial_count = val;
         s->initial_count_load_time = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
         apic_timer_update(s, s->initial_count_load_time);
         break;
     case 0x39:
+        fprintf(stderr, "%s:%d tried to set the curr timer count to %d\n", __func__, __LINE__, val);
         break;
     case 0x3e:
         {
@@ -880,6 +903,10 @@ static void apic_realize(DeviceState *dev, Error **errp)
 
     memory_region_init_io(&s->io_memory, OBJECT(s), &apic_io_ops, s, "apic-msi",
                           APIC_SPACE_SIZE);
+
+    fprintf(stderr, "%s: apic mem region: [0x%llx 0x%llx]\n", __func__,
+            (unsigned long long)s->io_memory.addr,
+            (unsigned long long)(s->io_memory.addr + APIC_SPACE_SIZE));
 
     s->timer = timer_new_ns(QEMU_CLOCK_VIRTUAL, apic_timer, s);
     local_apics[s->id] = s;
