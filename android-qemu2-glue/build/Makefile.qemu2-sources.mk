@@ -1263,6 +1263,14 @@ QEMU2_TARGET_i386_SOURCES_darwin-x86_64 := \
     target-i386/hax-darwin.c \
     target-i386/hax-slot.c \
     target-i386/kvm-stub.c \
+    target-i386/hvf-utils/x86.c \
+    target-i386/hvf-utils/x86_descr.c \
+    target-i386/hvf-utils/x86_mmu.c \
+    target-i386/hvf-utils/x86_decode.c \
+    target-i386/hvf-utils/x86_flags.c \
+    target-i386/hvf-utils/x86_emu.c \
+    target-i386/hvf-utils/x86hvf.c \
+    target-i386/hvf-all.c \
 
 QEMU2_TARGET_i386_SOURCES_linux-x86_64 := \
     hw/i386/kvm/apic.c \
