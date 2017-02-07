@@ -29,8 +29,7 @@ protected:
 
     ~IOStream() {
         // NOTE: m_buf was owned by the child class thus we expect it to be
-        // released and flushed before the object destruction.
-        assert(!m_buf || m_free == m_bufsize);
+        // released before the object destruction.
     }
 
 public:
