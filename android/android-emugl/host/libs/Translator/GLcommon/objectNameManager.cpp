@@ -260,6 +260,8 @@ ObjectNameManager::createShareGroup(void *p_groupName, uint64_t sharedGroupID)
                 m_nextSharedGroupID ++;
             }
             sharedGroupID = m_nextSharedGroupID;
+            m_usedSharedGroupIDs.insert(sharedGroupID);
+            ++m_nextSharedGroupID;
         } else {
             assert(!m_usedSharedGroupIDs.count(sharedGroupID));
         }
@@ -326,7 +328,11 @@ void
 ObjectNameManager::deleteShareGroup(void *p_groupName)
 {
     emugl::Mutex::AutoLock lock(m_lock);
-    m_groups.erase(p_groupName);
+    auto sharedGroup = m_groups.find(p_groupName);
+    if (sharedGroup->second.use_count() == 1) {
+        m_usedSharedGroupIDs.erase(sharedGroup->second->getId());
+    }
+    m_groups.erase(sharedGroup);
 }
 
 void *ObjectNameManager::getGlobalContext()
