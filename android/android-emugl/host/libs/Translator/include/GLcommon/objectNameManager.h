@@ -207,7 +207,7 @@ private:
     emugl::Mutex m_lock;
     GlobalNameSpace *m_globalNameSpace = nullptr;
     // m_usedSharedGroupIDs is used to assign new IDs to new shared groups
-    std::unordered_set<uint64_t> m_usedSharedGroupIDs;
+    std::unordered_multiset<uint64_t> m_usedSharedGroupIDs;
     uint64_t m_nextSharedGroupID = 1;
 };
 
