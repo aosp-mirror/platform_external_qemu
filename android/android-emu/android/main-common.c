@@ -1239,8 +1239,17 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
                             "\nHardware-accelerated emulation may not work"
                             " properly!\n", abi, buf);
                 }
+                // And then, select HVF on Mac if available and we are running
+                // on a verified abi.
+                const bool* supported_accels = androidCpuAcceleration_getSupportedAccelerators();
+                if (supported_accels[ANDROID_CPU_ACCELERATOR_HVF] &&
+                        strncmp(abi, "x86_64", 6)) {  // TODO: Fix x86_64 support in HVF
+                    *accel_mode = ACCEL_HVF;
+                }
             }
+
         }
+
         AFREE(abi);
     }
     return accel_ok;

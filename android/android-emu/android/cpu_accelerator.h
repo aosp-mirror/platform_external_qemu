@@ -47,6 +47,13 @@ typedef enum {
     ANDROID_HYPERV_ERROR        = 100,  // Failed to detect status
 } AndroidHyperVStatus;
 
+// For any possible Android Studio Hypervisor.framework detection
+typedef enum {
+    ANDROID_HVF_UNSUPPORTED = 0, // No Hypervisor.framework support on host system
+    ANDROID_HVF_SUPPORTED = 1, // Hypervisor.framework is supported
+    ANDROID_HVF_ERROR = 100, // Failed to detect status
+} AndroidHVFStatus;
+
 // +1, cpu info
 typedef enum {
     ANDROID_CPU_INFO_FAILED = 0,    // this is the value to return if something
@@ -71,5 +78,20 @@ typedef enum {
  * the status of acceleration, to be freed by the caller.
  */
 AndroidCpuAcceleration androidCpuAcceleration_getStatus(char** status);
+
+typedef enum {
+    ANDROID_CPU_ACCELERATOR_NONE = 0,
+    ANDROID_CPU_ACCELERATOR_KVM,
+    ANDROID_CPU_ACCELERATOR_HAX,
+    ANDROID_CPU_ACCELERATOR_HVF,
+    ANDROID_CPU_ACCELERATOR_MAX,
+} AndroidCpuAccelerator;
+
+/* Returns the auto-selected CPU accelerator. */
+AndroidCpuAccelerator androidCpuAcceleration_getAccelerator();
+
+/* Returns support status of all possible accelerator types
+ * on the current machine. */
+const bool* androidCpuAcceleration_getSupportedAccelerators();
 
 ANDROID_END_HEADER

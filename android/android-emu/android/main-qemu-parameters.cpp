@@ -163,6 +163,7 @@ QemuParameters* qemu_parameters_create(const char* argv0,
         CpuAccelMode accel_mode = ACCEL_AUTO;
         bool accel_ok = handleCpuAcceleration(opts, avd, &accel_mode, &accel_status);
 
+        fprintf(stderr, "%s: from main qemu params\n", __func__);
         // CPU acceleration only works for x86 and x86_64 system images.
         if (accel_mode == ACCEL_OFF && accel_ok) {
             params.add(kDisableAccelerator);

@@ -3270,6 +3270,16 @@ virtualization support on OS X and Windows.  This option
 is only available if HAX support is enabled when compiling.
 ETEXI
 
+DEF("enable-hvf", 0, QEMU_OPTION_enable_hvf, \
+    "-enable-hvf     enable Hypervisor.framework virtualization support\n", QEMU_ARCH_I386)
+STEXI
+@item -enable-hvf
+@findex -enable-hvf
+Enable Mac Hypervisor.framework (HVF) support, used for full
+virtualization support on OS X.  This option
+is only available if HVF support is enabled when compiling.
+ETEXI
+
 DEF("xen-domid", HAS_ARG, QEMU_OPTION_xen_domid,
     "-xen-domid id   specify xen guest domain id\n", QEMU_ARCH_ALL)
 DEF("xen-create", 0, QEMU_OPTION_xen_create,

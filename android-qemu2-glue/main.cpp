@@ -772,7 +772,14 @@ extern "C" int main(int argc, char **argv) {
         if (accel_ok) {
             args[n++] = ASTRDUP(kEnableAccelerator);
         }
-    } // else accel is off and we don't need to add anything else
+    }
+    else if (accel_mode == ACCEL_HVF) {
+#if CONFIG_HVF
+        args[n++] = ASTRDUP(kEnableAcceleratorHVF);
+#endif
+    } // else, add other special situations to enable particular
+      // acceleration backends (e.g., HyperV/KVM on Windows,
+      // KVM on Mac, etc.)
 
     AFREE(accel_status);
 #else   // !TARGET_X86_64 && !TARGET_I386

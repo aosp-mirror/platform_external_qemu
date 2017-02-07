@@ -91,6 +91,7 @@ int main(int argc, char **argv)
 #include "sysemu/cpus.h"
 #include "sysemu/kvm.h"
 #include "sysemu/hax.h"
+#include "sysemu/hvf.h"
 #include "qapi/qmp/qjson.h"
 #include "qemu/option.h"
 #include "qemu/config-file.h"
@@ -3106,22 +3107,23 @@ static bool set_memory_options(uint64_t *ram_slots, ram_addr_t *maxram_size,
         return false;
     }
 #ifdef CONFIG_HAX
-    uint64_t hax_max_ram = 0;
-    if (hax_get_max_ram(&hax_max_ram) == 0 && hax_max_ram > 0) {
-        /* make sure we preserve the alignment if we need to adjust it */
-        hax_max_ram = QEMU_ALIGN_DOWN(hax_max_ram, 8192);
-        if (ram_size > hax_max_ram) {
-            const int requested_meg = ram_size / (1024 * 1024);
-            const int actual_meg = hax_max_ram / (1024 * 1024);
-            fprintf(stderr,
-                    "Warning: requested RAM size %dM is too big, "
-                    "reducing to maximum supported size %dM\n",
-                    requested_meg, actual_meg);
-            ram_size = hax_max_ram;
+    if (hax_enabled()) {
+        uint64_t hax_max_ram = 0;
+        if (hax_get_max_ram(&hax_max_ram) == 0 && hax_max_ram > 0) {
+            /* make sure we preserve the alignment if we need to adjust it */
+            hax_max_ram = QEMU_ALIGN_DOWN(hax_max_ram, 8192);
+            if (ram_size > hax_max_ram) {
+                const int requested_meg = ram_size / (1024 * 1024);
+                const int actual_meg = hax_max_ram / (1024 * 1024);
+                fprintf(stderr,
+                        "Warning: requested RAM size %dM is too big, "
+                        "reducing to maximum supported size %dM\n",
+                        requested_meg, actual_meg);
+                ram_size = hax_max_ram;
+            }
         }
+        hax_pre_init(ram_size);
     }
-
-    hax_pre_init(ram_size);
 #endif
     /* store value for the future use */
     qemu_opt_set_number(opts, "size", ram_size, &error_abort);
@@ -3975,6 +3977,13 @@ int main(int argc, char** argv, char** envp)
                 hax_disable(0);
                 break;
 #endif /* CONFIG_HAX */
+#ifdef CONFIG_HVF
+            case QEMU_OPTION_enable_hvf:
+                olist = qemu_find_opts("machine");
+                qemu_opts_parse_noisily(olist, "accel=hvf", false);
+                hvf_disable(0);
+                break;
+#endif /* CONFIG_HVF */
             case QEMU_OPTION_M:
             case QEMU_OPTION_machine:
                 olist = qemu_find_opts("machine");
