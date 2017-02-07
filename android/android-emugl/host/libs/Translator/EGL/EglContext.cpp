@@ -29,7 +29,6 @@ bool EglContext::usingSurface(SurfacePtr surface) {
 }
 
 EglContext::EglContext(EglDisplay *dpy,
-                       const ContextPtr& shared_context,
                        uint64_t shareGroupId,
                        EglConfig* config,
                        GLEScontext* glesCtx,
@@ -50,16 +49,11 @@ EglContext::EglContext(EglDisplay *dpy,
     EglOS::Context* globalSharedContext = dpy->getGlobalSharedContext();
     m_native = dpy->nativeType()->createContext(
             m_config->nativeFormat(), globalSharedContext);
-    if (shared_context.get()) {
-        m_shareGroup = mngr->attachShareGroup(m_native,shared_context->nativeType());
+    if (m_native) {
+        m_shareGroup = mngr->attachOrCreateShareGroup(m_native, shareGroupId);
         m_hndl = ++s_nextContextHndl;
     } else {
-        if (m_native) {
-            m_shareGroup = mngr->attachOrCreateShareGroup(m_native, shareGroupId);
-            m_hndl = ++s_nextContextHndl;
-        } else {
-            m_hndl = 0;
-        }
+        m_hndl = 0;
     }
 }
 

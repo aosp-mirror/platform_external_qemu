@@ -38,7 +38,6 @@ class EglDisplay;
 class EglContext {
 public:
     EglContext(EglDisplay* dpy,
-               const ContextPtr& shared_context,
                uint64_t shareGroupId,
                EglConfig* config,
                GLEScontext* glesCtx,
