@@ -41,6 +41,7 @@ void qemu_set_irq(qemu_irq irq, int level)
     if (!irq)
         return;
 
+    // if (irq->n && level) fprintf(stderr, "%s: set irq of 0x%x to 0x%x\n", __func__, irq->n, level);
     irq->handler(irq->opaque, irq->n, level);
 }
 
@@ -73,6 +74,8 @@ qemu_irq qemu_allocate_irq(qemu_irq_handler handler, void *opaque, int n)
     irq->handler = handler;
     irq->opaque = opaque;
     irq->n = n;
+
+    fprintf(stderr, "%s: allocated new irq: 0x%x\n", __func__, irq->n);
 
     return irq;
 }

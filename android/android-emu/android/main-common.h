@@ -89,9 +89,15 @@ typedef enum {
     static const char kEnableAccelerator[] = "-enable-kvm";
     static const char kDisableAccelerator[] = "-disable-kvm";
 #else
+#ifdef _WIN32
     static const char kAccelerator[] = "Intel HAXM";
     static const char kEnableAccelerator[] = "-enable-hax";
     static const char kDisableAccelerator[] = "-disable-hax";
+#else
+    static const char kAccelerator[] = "Apple Hypervisor.framework";
+    static const char kEnableAccelerator[] = "-enable-hvf";
+    static const char kDisableAccelerator[] = "-disable-hvf";
+#endif
 #endif
 
 /*

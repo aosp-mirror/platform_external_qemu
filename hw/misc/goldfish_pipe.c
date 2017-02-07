@@ -925,6 +925,7 @@ static void pipe_dev_write(void* opaque,
                            hwaddr offset,
                            uint64_t value,
                            unsigned size) {
+    fprintf(stderr, "%s: call\n", __func__);
     GoldfishPipeState* state = opaque;
     PipeDevice* dev = state->dev;
 
@@ -938,6 +939,7 @@ static void pipe_dev_write(void* opaque,
 }
 
 static uint64_t pipe_dev_read(void* opaque, hwaddr offset, unsigned size) {
+    fprintf(stderr, "%s: call\n", __func__);
     GoldfishPipeState* s = (GoldfishPipeState*)opaque;
     PipeDevice* dev = s->dev;
     if (offset == PIPE_REG_VERSION) {
