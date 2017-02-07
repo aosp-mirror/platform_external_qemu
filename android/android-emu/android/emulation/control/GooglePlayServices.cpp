@@ -17,10 +17,14 @@
 namespace android {
 namespace emulation {
 
+using android::base::StringView;
 using android::base::System;
+using std::string;
 
 // static
 const System::Duration GooglePlayServices::kAdbCommandTimeoutMs = 5000;
+constexpr StringView GooglePlayServices::kPlayStorePkgName;
+constexpr StringView GooglePlayServices::kPlayServicesPkgName;
 
 GooglePlayServices::~GooglePlayServices() {
     if (mStoreSettingsCommand) {
@@ -29,6 +33,87 @@ GooglePlayServices::~GooglePlayServices() {
     if (mServicesPageCommand) {
         mServicesPageCommand->cancel();
     }
+    if (mStoreVersionCommand) {
+        mStoreVersionCommand->cancel();
+    }
+    if (mServicesVersionCommand) {
+        mServicesVersionCommand->cancel();
+    }
+    if (mGetpropCommand) {
+        mGetpropCommand->cancel();
+    }
+}
+
+// static
+bool GooglePlayServices::parseOutputForVersion(std::istream& stream,
+                                               string* outString) {
+    // Only accept output in the form of
+    //
+    //     <W>versionName=<version>
+    //
+    // Where <W> can be any number/kind of whitespace characters.
+
+    const StringView keystr = "versionName=";
+    string line;
+
+    // "dumpsys package <pkgname>" may return more than one version
+    // name, depending on if there were any updates installed. In
+    // these cases, we only need the latest version name, which is
+    // on the first line returned. If there is no output, or no
+    // value for versionName, we can assume that this package is
+    // not installed.
+
+    if (!stream || !outString) {
+        return false;
+    }
+
+    while (getline(stream, line)) {
+        auto keyPos = line.find(keystr);
+        if (keyPos != string::npos && keyPos + keystr.size() < line.length()) {
+            // Make sure everything before is only whitespace.
+            bool isValid = true;
+            for (size_t i = 0; i < keyPos; ++i) {
+                if (!std::isspace(static_cast<unsigned char>(line[i]))) {
+                    isValid = false;
+                    break;
+                }
+            }
+            if (isValid) {
+                *outString =
+                        line.substr(keyPos + keystr.size(),
+                                    line.length() - (keyPos + keystr.size()));
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void GooglePlayServices::getSystemProperty(
+        android::base::StringView sysProp,
+        ResultOutputCallback resultCallback) {
+    if (!mAdb) {
+        return;
+    }
+
+    if (mGetpropCommand) {
+        resultCallback(Result::OperationInProgress, "");
+        return;
+    }
+    std::vector<std::string> getpropCommand{"shell", "getprop", sysProp};
+    mGetpropCommand = mAdb->runAdbCommand(
+            getpropCommand,
+            [resultCallback, this](const OptionalAdbCommandResult& result) {
+                string line;
+                if (result && result->output &&
+                    getline(*(result->output), line)) {
+                    resultCallback(Result::Success, line);
+                } else {
+                    resultCallback(Result::UnknownError, "");
+                }
+                mGetpropCommand.reset();
+            },
+            kAdbCommandTimeoutMs, true);
 }
 
 void GooglePlayServices::showPlayStoreSettings(ResultCallback resultCallback) {
@@ -42,8 +127,8 @@ void GooglePlayServices::showPlayStoreSettings(ResultCallback resultCallback) {
     }
     mStoreSettingsCommand = mAdb->runAdbCommand(
             {"shell", "am start", "-n",
-             "com.android.vending/"
-             "com.google.android.finsky.activities.SettingsActivity"},
+             std::string(kPlayStorePkgName) +
+                     "/com.google.android.finsky.activities.SettingsActivity"},
             [this, resultCallback](const OptionalAdbCommandResult& result) {
                 resultCallback((!result || result->exit_code)
                                        ? Result::UnknownError
@@ -64,7 +149,7 @@ void GooglePlayServices::showPlayServicesPage(ResultCallback resultCallback) {
     }
     mServicesPageCommand = mAdb->runAdbCommand(
             {"shell", "am start", "-a", "android.intent.action.VIEW", "-d",
-             "'market://details?id=com.google.android.gms'"},
+             "'market://details?id=" + std::string(kPlayServicesPkgName) + "'"},
             [this, resultCallback](const OptionalAdbCommandResult& result) {
                 resultCallback((!result || result->exit_code)
                                        ? Result::UnknownError
@@ -72,6 +157,62 @@ void GooglePlayServices::showPlayServicesPage(ResultCallback resultCallback) {
                 mServicesPageCommand.reset();
             },
             kAdbCommandTimeoutMs, false);
+}
+
+void GooglePlayServices::getPlayStoreVersion(
+        ResultOutputCallback resultCallback) {
+    if (!mAdb) {
+        return;
+    }
+
+    if (mStoreVersionCommand) {
+        resultCallback(Result::OperationInProgress, "");
+        return;
+    }
+    mStoreVersionCommand = mAdb->runAdbCommand(
+            {"shell", "dumpsys", "package", kPlayStorePkgName},
+            [this, resultCallback](const OptionalAdbCommandResult& result) {
+                if (!result || result->exit_code) {
+                    resultCallback(Result::UnknownError, "");
+                } else {
+                    string outString;
+                    const bool parseResult = parseOutputForVersion(
+                            *(result->output), &outString);
+                    resultCallback(parseResult ? Result::Success
+                                               : Result::AppNotInstalled,
+                                   outString);
+                }
+                mStoreVersionCommand.reset();
+            },
+            kAdbCommandTimeoutMs, true);
+}
+
+void GooglePlayServices::getPlayServicesVersion(
+        ResultOutputCallback resultCallback) {
+    if (!mAdb) {
+        return;
+    }
+
+    if (mServicesVersionCommand) {
+        resultCallback(Result::OperationInProgress, "");
+        return;
+    }
+    mServicesVersionCommand = mAdb->runAdbCommand(
+            {"shell", "dumpsys", "package", kPlayServicesPkgName},
+            [this, resultCallback](const OptionalAdbCommandResult& result) {
+                if (!result || result->exit_code) {
+                    resultCallback(Result::UnknownError, "");
+                } else {
+                    string outString;
+                    const bool parseResult = parseOutputForVersion(
+                            *(result->output), &outString);
+                    resultCallback(parseResult ? Result::Success
+                                               : Result::AppNotInstalled,
+                                   outString);
+                }
+                mServicesVersionCommand.reset();
+            },
+            kAdbCommandTimeoutMs, true);
 }
 
 }  // namespace emulation

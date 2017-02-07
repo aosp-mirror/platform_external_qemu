@@ -13,6 +13,7 @@
 
 #include "android/skin/qt/error-dialog.h"
 
+using android::base::StringView;
 using android::emulation::GooglePlayServices;
 
 #define PAGE_TO_DESC(x, y) \
@@ -26,15 +27,56 @@ const std::pair<GooglePlayPage::PlayPages, const char*>
 };
 #undef PAGE_TO_DESC
 
+#define APP_TO_DESC(x, y) \
+    { GooglePlayPage::PlayApps::x, y }
+// static
+const std::pair<GooglePlayPage::PlayApps, const char*>
+        GooglePlayPage::PlayAppToDesc[] = {
+                APP_TO_DESC(PlayStore, "Google Play Store"),
+                APP_TO_DESC(PlayServices, "Google Play services"),
+};
+#undef APP_TO_DESC
+
 GooglePlayPage::GooglePlayPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::GooglePlayPage) {
     mUi->setupUi(this);
+    QObject::connect(&mTimer, &QTimer::timeout, this,
+                     &GooglePlayPage::getBootCompletionProperty);
+    mTimer.setSingleShot(true);
+    mTimer.setInterval(5000);  // 5 sec
 }
 
 GooglePlayPage::~GooglePlayPage() {}
 
-void GooglePlayPage::setAdbInterface(android::emulation::AdbInterface* adb) {
+void GooglePlayPage::initialize(android::emulation::AdbInterface* adb) {
     mGooglePlayServices.reset(new android::emulation::GooglePlayServices(adb));
+    mTimer.start();
+}
+
+void GooglePlayPage::getBootCompletionProperty() {
+    // TODO: Really wish we had some kind of guest property to do
+    // asynchronous waiting.
+    const StringView boot_property = "sys.boot_completed";
+    // Ran in a timer. We have to wait for the package manager
+    // to start in order to query the versionName of the Play
+    // Store and Play Services.
+    mGooglePlayServices->getSystemProperty(
+            boot_property,
+            [this](GooglePlayServices::Result result, StringView outString) {
+                GooglePlayPage::bootCompletionPropertyDone(result, outString);
+            });
+}
+
+void GooglePlayPage::bootCompletionPropertyDone(
+        GooglePlayServices::Result result,
+        StringView outString) {
+    if (result == GooglePlayServices::Result::Success && outString == "1") {
+        getPlayStoreVersion();
+        getPlayServicesVersion();
+    } else {
+        // Continue to wait until it is finished booting.
+        mTimer.start();
+    }
 }
 
 QString GooglePlayPage::getPlayPageDescription(PlayPages page) {
@@ -50,10 +92,30 @@ QString GooglePlayPage::getPlayPageDescription(PlayPages page) {
     return result;
 }
 
+QString GooglePlayPage::getPlayAppDescription(PlayApps app) {
+    QString result;
+    auto it = std::find_if(std::begin(PlayAppToDesc), std::end(PlayAppToDesc),
+                           [app](const std::pair<PlayApps, QString>& value) {
+                               return value.first == app;
+                           });
+    if (it != std::end(PlayAppToDesc)) {
+        result = qApp->translate("PlayApps", it->second);
+    }
+
+    return result;
+}
+
 void GooglePlayPage::showPlayStoreSettings() {
     mGooglePlayServices->showPlayStoreSettings([this](
             GooglePlayServices::Result result) {
         GooglePlayPage::playPageDone(result, PlayPages::StoreSettingsPage);
+    });
+}
+
+void GooglePlayPage::showPlayServicesPage() {
+    mGooglePlayServices->showPlayServicesPage([this](
+            GooglePlayServices::Result result) {
+        GooglePlayPage::playPageDone(result, PlayPages::ServicesDetailsPage);
     });
 }
 
@@ -76,11 +138,57 @@ void GooglePlayPage::playPageDone(GooglePlayServices::Result result,
     showErrorDialog(msg, getPlayPageDescription(page));
 }
 
-void GooglePlayPage::showPlayServicesPage() {
-    mGooglePlayServices->showPlayServicesPage([this](
-            GooglePlayServices::Result result) {
-        GooglePlayPage::playPageDone(result, PlayPages::ServicesDetailsPage);
+void GooglePlayPage::getPlayStoreVersion() {
+    mGooglePlayServices->getPlayStoreVersion([this](
+            GooglePlayServices::Result result, StringView outString) {
+        GooglePlayPage::playVersionDone(result, PlayApps::PlayStore, outString);
     });
+}
+
+void GooglePlayPage::getPlayServicesVersion() {
+    mGooglePlayServices->getPlayServicesVersion(
+            [this](GooglePlayServices::Result result, StringView outString) {
+                GooglePlayPage::playVersionDone(result, PlayApps::PlayServices,
+                                                outString);
+            });
+}
+
+void GooglePlayPage::playVersionDone(GooglePlayServices::Result result,
+                                     PlayApps app,
+                                     StringView outString) {
+    QString msg;
+    QPlainTextEdit* textEdit = nullptr;
+
+    switch (app) {
+        case PlayApps::PlayStore:
+            textEdit = mUi->goog_playStoreVersionBox;
+            break;
+        case PlayApps::PlayServices:
+            textEdit = mUi->goog_playServicesVersionBox;
+            break;
+    }
+
+    switch (result) {
+        case GooglePlayServices::Result::Success:
+            textEdit->setPlainText(QString(outString.c_str()));
+            return;
+
+        case GooglePlayServices::Result::AppNotInstalled:
+            msg = tr("It doesn't look like you have %1 "
+                     "installed.")
+                          .arg(getPlayAppDescription(app));
+            break;
+        case GooglePlayServices::Result::OperationInProgress:
+            msg = tr("Still waiting for %1 version.<br/>"
+                     "Please try again later.")
+                          .arg(getPlayAppDescription(app));
+            break;
+        default:
+            msg = tr("There was an unknown error while getting %1"
+                     " version.")
+                          .arg(getPlayAppDescription(app));
+    }
+    showErrorDialog(msg, tr("%1 Version").arg(getPlayAppDescription(app)));
 }
 
 void GooglePlayPage::on_goog_updateServicesButton_clicked() {
