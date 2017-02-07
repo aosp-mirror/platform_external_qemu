@@ -64,12 +64,15 @@ static int accel_init_machine(AccelClass *acc, MachineState *ms)
 {
     ObjectClass *oc = OBJECT_CLASS(acc);
     const char *cname = object_class_get_name(oc);
+    fprintf(stderr, "%s: init machine! cname=%s\n", __func__, cname);
+
     AccelState *accel = ACCEL(object_new(cname));
     int ret;
     ms->accelerator = accel;
     *(acc->allowed) = true;
     ret = acc->init_machine(ms);
     if (ret < 0) {
+        fprintf(stderr, "%s: wtf?\n", __func__);
         ms->accelerator = NULL;
         *(acc->allowed) = false;
         object_unref(OBJECT(accel));
@@ -88,7 +91,7 @@ int configure_accelerator(MachineState *ms)
 
     p = qemu_opt_get(qemu_get_machine_opts(), "accel");
     if (p == NULL) {
-        /* Use the default "accelerator", tcg */
+        /* Use the default "accelerator", hvf */
         p = "tcg";
     }
 
