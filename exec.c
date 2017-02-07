@@ -31,9 +31,11 @@
 #include "hw/xen/xen.h"
 #endif
 #include "sysemu/kvm.h"
+
 #ifdef CONFIG_HAX
 #include "sysemu/hax.h"
 #endif /* CONFIG_HAX */
+
 #include "sysemu/sysemu.h"
 #include "qemu/timer.h"
 #include "qemu/config-file.h"
@@ -1596,6 +1598,11 @@ static void ram_block_add(RAMBlock *new_block, Error **errp)
                     return;
                 }
             }
+#endif
+#ifdef CONFIG_HVF
+            fprintf(stderr, "%s: maybe should hvf populate ram?????? [0x%llx 0x%llx]\n", __func__,
+                    (unsigned long long)(uintptr_t)(new_block->host),
+                    (unsigned long long)(uintptr_t)(new_block->host + new_block->max_length));
 #endif
             memory_try_enable_merging(new_block->host, new_block->max_length);
         }

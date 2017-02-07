@@ -481,6 +481,7 @@ void apic_sipi(DeviceState *dev)
 {
     APICCommonState *s = APIC_COMMON(dev);
 
+    fprintf(stderr, "%s: call\n", __func__);
     cpu_reset_interrupt(CPU(s->cpu), CPU_INTERRUPT_SIPI);
 
     if (!s->wait_for_sipi)
