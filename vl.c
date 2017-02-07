@@ -91,6 +91,7 @@ int main(int argc, char **argv)
 #include "sysemu/cpus.h"
 #include "sysemu/kvm.h"
 #include "sysemu/hax.h"
+#include "sysemu/hvf.h"
 #include "qapi/qmp/qjson.h"
 #include "qemu/option.h"
 #include "qemu/config-file.h"
@@ -3975,6 +3976,13 @@ int main(int argc, char** argv, char** envp)
                 hax_disable(0);
                 break;
 #endif /* CONFIG_HAX */
+#ifdef CONFIG_HVF
+            case QEMU_OPTION_enable_hvf:
+                olist = qemu_find_opts("machine");
+                qemu_opts_parse_noisily(olist, "accel=hvf", false);
+                hvf_disable(0);
+                break;
+#endif /* CONFIG_HVF */
             case QEMU_OPTION_M:
             case QEMU_OPTION_machine:
                 olist = qemu_find_opts("machine");
