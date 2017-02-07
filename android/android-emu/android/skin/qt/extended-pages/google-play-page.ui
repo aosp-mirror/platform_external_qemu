@@ -70,7 +70,7 @@
     <bool>true</bool>
    </property>
    <property name="plainText">
-    <string notr="true">10.0.84 (470-137749526)</string>
+    <string notr="true">Loading...</string>
    </property>
   </widget>
   <widget class="RaisedMaterialButton" name="goog_updateServicesButton">
@@ -172,7 +172,7 @@
     <bool>true</bool>
    </property>
    <property name="plainText">
-    <string notr="true">7.3.07.K-all [0] [PR] 139935798</string>
+    <string notr="true">Loading...</string>
    </property>
   </widget>
   <widget class="RaisedMaterialButton" name="goog_updateStoreButton">
