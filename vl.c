@@ -91,6 +91,7 @@ int main(int argc, char **argv)
 #include "sysemu/cpus.h"
 #include "sysemu/kvm.h"
 #include "sysemu/hax.h"
+#include "sysemu/hvf.h"
 #include "qapi/qmp/qjson.h"
 #include "qemu/option.h"
 #include "qemu/config-file.h"
@@ -3970,11 +3971,20 @@ int main(int argc, char** argv, char** envp)
                 break;
 #ifdef CONFIG_HAX
             case QEMU_OPTION_enable_hax:
+                fprintf(stderr, "%s: QEMU_OPTION_enable_hax!\n", __func__);
                 olist = qemu_find_opts("machine");
                 qemu_opts_parse_noisily(olist, "accel=hax", false);
                 hax_disable(0);
                 break;
 #endif /* CONFIG_HAX */
+#ifdef CONFIG_HVF
+            case QEMU_OPTION_enable_hvf:
+                fprintf(stderr, "%s: QEMU_OPTION_enable_hvf!\n", __func__);
+                olist = qemu_find_opts("machine");
+                qemu_opts_parse_noisily(olist, "accel=hvf", false);
+                hvf_disable(0);
+                break;
+#endif /* CONFIG_HVF */
             case QEMU_OPTION_M:
             case QEMU_OPTION_machine:
                 olist = qemu_find_opts("machine");
@@ -5286,6 +5296,9 @@ int main(int argc, char** argv, char** envp)
     }
 
     os_setup_post();
+#ifndef CONFIG_HVF
+    fprintf(stderr, "%s: hvf disabled\n", __func__);
+#endif
 
 #ifdef CONFIG_ANDROID
     // Initialize reporting right before entering main loop.

@@ -354,6 +354,7 @@ int hax_init_vcpu(CPUState * cpu)
 
 struct hax_vm *hax_vm_create(struct hax_state *hax)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     struct hax_vm *vm;
     int vm_id = 0, ret;
 
