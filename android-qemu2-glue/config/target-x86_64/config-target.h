@@ -3,10 +3,21 @@
 #define TARGET_NAME "x86_64"
 #define TARGET_I386 1
 #ifdef __linux__
+
 #define CONFIG_KVM 1
-#else
+
+#else // __linux__
+
 #define CONFIG_HAX 1
-#endif
+
+#ifdef __APPLE__
+
+#define CONFIG_HVF 1
+
+#endif // __APPLE__
+
+#endif // __linux__
+
 #define CONFIG_SOFTMMU 1
 #define CONFIG_I386_DIS 1
 #define CONFIG_I386_DIS 1

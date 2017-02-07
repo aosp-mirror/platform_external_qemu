@@ -20,7 +20,9 @@
 
 #include "android/utils/system.h"
 
-extern "C" AndroidCpuAcceleration androidCpuAcceleration_getStatus(
+extern "C" {
+
+AndroidCpuAcceleration androidCpuAcceleration_getStatus(
         char** status_p) {
     AndroidCpuAcceleration result = android::GetCurrentCpuAcceleratorStatusCode();
 
@@ -31,3 +33,13 @@ extern "C" AndroidCpuAcceleration androidCpuAcceleration_getStatus(
 
     return result;
 }
+
+AndroidCpuAccelerator androidCpuAcceleration_getAccelerator() {
+    return (AndroidCpuAccelerator)android::GetCurrentCpuAccelerator();
+}
+
+const bool* androidCpuAcceleration_getSupportedAccelerators() {
+    return android::GetCurrentSupportedCpuAccelerators();
+}
+
+} // extern "C"

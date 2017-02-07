@@ -82,6 +82,9 @@ typedef enum {
     ACCEL_OFF = 0,
     ACCEL_ON = 1,
     ACCEL_AUTO = 2,
+    ACCEL_KVM = 3,
+    ACCEL_HAX = 4,
+    ACCEL_HVF = 5,
 } CpuAccelMode;
 
 #ifdef __linux__
@@ -89,9 +92,18 @@ typedef enum {
     static const char kEnableAccelerator[] = "-enable-kvm";
     static const char kDisableAccelerator[] = "-disable-kvm";
 #else
+#ifdef _WIN32
     static const char kAccelerator[] = "Intel HAXM";
     static const char kEnableAccelerator[] = "-enable-hax";
     static const char kDisableAccelerator[] = "-disable-hax";
+#else
+    static const char kAccelerator[] = "Intel HAXM";
+    static const char kEnableAccelerator[] = "-enable-hax";
+    static const char kDisableAccelerator[] = "-disable-hax";
+    static const char kAcceleratorHVF[] = "Apple Hypervisor.framework";
+    static const char kEnableAcceleratorHVF[] = "-enable-hvf";
+    static const char kDisableAcceleratorHVF[] = "-disable-hvf";
+#endif
 #endif
 
 /*
