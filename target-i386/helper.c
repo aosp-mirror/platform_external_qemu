@@ -1124,6 +1124,7 @@ typedef struct MCEInjectionParams {
 
 static void do_inject_x86_mce(void *data)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     MCEInjectionParams *params = data;
     CPUX86State *cenv = &params->cpu->env;
     CPUState *cpu = CPU(params->cpu);

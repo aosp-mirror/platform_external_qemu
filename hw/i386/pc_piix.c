@@ -304,6 +304,7 @@ static void pc_init1(MachineState *machine,
         I2CBus *smbus;
 
         smi_irq = qemu_allocate_irq(pc_acpi_smi_interrupt, first_cpu, 0);
+        fprintf(stderr, "%s:%d smi irq: 0x%x\n", __func__, __LINE__, gsi);
         /* TODO: Populate SPD eeprom data.  */
         smbus = piix4_pm_init(pci_bus, piix3_devfn + 3, 0xb100,
                               gsi[9], smi_irq,

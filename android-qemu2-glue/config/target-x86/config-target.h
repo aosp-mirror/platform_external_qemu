@@ -5,7 +5,11 @@
 #ifdef __linux__
 #define CONFIG_KVM 1
 #else
+#ifdef _WIN32
 #define CONFIG_HAX 1
+#else
+#define CONFIG_HVF 1
+#endif
 #endif
 #define CONFIG_SOFTMMU 1
 #define CONFIG_I386_DIS 1
