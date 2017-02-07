@@ -195,8 +195,10 @@ static void pc_init1(MachineState *machine,
         kvm_pc_setup_irq_routing(pcmc->pci_enabled);
         gsi = qemu_allocate_irqs(kvm_pc_gsi_handler, gsi_state,
                                  GSI_NUM_PINS);
+        fprintf(stderr, "%s:%d gsi irq: 0x%x\n", __func__, __LINE__, gsi);
     } else {
         gsi = qemu_allocate_irqs(gsi_handler, gsi_state, GSI_NUM_PINS);
+        fprintf(stderr, "%s:%d gsi irq: 0x%x\n", __func__, __LINE__, gsi);
     }
 
     if (pcmc->pci_enabled) {
@@ -304,6 +306,7 @@ static void pc_init1(MachineState *machine,
         I2CBus *smbus;
 
         smi_irq = qemu_allocate_irq(pc_acpi_smi_interrupt, first_cpu, 0);
+        fprintf(stderr, "%s:%d smi irq: 0x%x\n", __func__, __LINE__, gsi);
         /* TODO: Populate SPD eeprom data.  */
         smbus = piix4_pm_init(pci_bus, piix3_devfn + 3, 0xb100,
                               gsi[9], smi_irq,

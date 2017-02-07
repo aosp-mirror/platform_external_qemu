@@ -131,6 +131,7 @@ static void apic_vapic_base_update(APICCommonState *s)
 
 static void apic_local_deliver(APICCommonState *s, int vector)
 {
+    // fprintf(stderr, "%s: call\n", __func__);
     uint32_t lvt = s->lvt[vector];
     int trigger_mode;
 
@@ -141,14 +142,17 @@ static void apic_local_deliver(APICCommonState *s, int vector)
 
     switch ((lvt >> 8) & 7) {
     case APIC_DM_SMI:
+        // fprintf(stderr, "%s:%d deliver\n", __func__, __LINE__);
         cpu_interrupt(CPU(s->cpu), CPU_INTERRUPT_SMI);
         break;
 
     case APIC_DM_NMI:
+        // fprintf(stderr, "%s:%d deliver\n", __func__, __LINE__);
         cpu_interrupt(CPU(s->cpu), CPU_INTERRUPT_NMI);
         break;
 
     case APIC_DM_EXTINT:
+        // fprintf(stderr, "%s:%d deliver\n", __func__, __LINE__);
         cpu_interrupt(CPU(s->cpu), CPU_INTERRUPT_HARD);
         break;
 
@@ -210,6 +214,7 @@ static void apic_bus_deliver(const uint32_t *deliver_bitmask,
                              uint8_t delivery_mode, uint8_t vector_num,
                              uint8_t trigger_mode)
 {
+    // fprintf(stderr, "%s:%d start\n", __func__, __LINE__);
     APICCommonState *apic_iter;
 
     switch (delivery_mode) {
@@ -237,18 +242,21 @@ static void apic_bus_deliver(const uint32_t *deliver_bitmask,
             break;
 
         case APIC_DM_SMI:
+            // fprintf(stderr, "%s:%d deliver\n", __func__, __LINE__);
             foreach_apic(apic_iter, deliver_bitmask,
                 cpu_interrupt(CPU(apic_iter->cpu), CPU_INTERRUPT_SMI)
             );
             return;
 
         case APIC_DM_NMI:
+            // fprintf(stderr, "%s:%d deliver\n", __func__, __LINE__);
             foreach_apic(apic_iter, deliver_bitmask,
                 cpu_interrupt(CPU(apic_iter->cpu), CPU_INTERRUPT_NMI)
             );
             return;
 
         case APIC_DM_INIT:
+            // fprintf(stderr, "%s:%d deliver\n", __func__, __LINE__);
             /* normal INIT IPI sent to processors */
             foreach_apic(apic_iter, deliver_bitmask,
                          cpu_interrupt(CPU(apic_iter->cpu),
@@ -363,8 +371,10 @@ static void apic_update_irq(APICCommonState *s)
 
     cpu = CPU(s->cpu);
     if (!qemu_cpu_is_self(cpu)) {
+        // fprintf(stderr, "%s:%d deliver\n", __func__, __LINE__);
         cpu_interrupt(cpu, CPU_INTERRUPT_POLL);
     } else if (apic_irq_pending(s) > 0) {
+        // fprintf(stderr, "%s:%d deliver\n", __func__, __LINE__);
         cpu_interrupt(cpu, CPU_INTERRUPT_HARD);
     } else if (!apic_accept_pic_intr(dev) || !pic_get_output(isa_pic)) {
         cpu_reset_interrupt(cpu, CPU_INTERRUPT_HARD);
@@ -473,6 +483,7 @@ static void apic_get_delivery_bitmask(uint32_t *deliver_bitmask,
 
 static void apic_startup(APICCommonState *s, int vector_num)
 {
+    fprintf(stderr, "%s:%d deliver\n", __func__, __LINE__);
     s->sipi_vector = vector_num;
     cpu_interrupt(CPU(s->cpu), CPU_INTERRUPT_SIPI);
 }
@@ -481,6 +492,7 @@ void apic_sipi(DeviceState *dev)
 {
     APICCommonState *s = APIC_COMMON(dev);
 
+    fprintf(stderr, "%s: call\n", __func__);
     cpu_reset_interrupt(CPU(s->cpu), CPU_INTERRUPT_SIPI);
 
     if (!s->wait_for_sipi)

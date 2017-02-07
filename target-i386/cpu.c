@@ -2292,7 +2292,9 @@ static void x86_cpu_load_def(X86CPU *cpu, X86CPUDefinition *def, Error **errp)
 
 X86CPU *cpu_x86_init(const char *cpu_model)
 {
-    return X86_CPU(cpu_generic_init(TYPE_X86_CPU, cpu_model));
+    X86CPU* res = X86_CPU(cpu_generic_init(TYPE_X86_CPU, cpu_model));
+    fprintf(stderr, "%s: creating X86CPU obj @ %p\n", __func__, res);
+    return res;
 }
 
 static void x86_cpu_cpudef_class_init(ObjectClass *oc, void *data)
@@ -2881,6 +2883,7 @@ static void x86_cpu_apic_create(X86CPU *cpu, Error **errp)
         apic_type = "xen-apic";
     }
 
+    fprintf(stderr, "%s: asdf. apic type: %s\n", __func__, apic_type);
     cpu->apic_state = DEVICE(object_new(apic_type));
 
     object_property_add_child(OBJECT(cpu), "lapic",
@@ -3400,6 +3403,9 @@ static bool x86_cpu_has_work(CPUState *cs)
 {
     X86CPU *cpu = X86_CPU(cs);
     CPUX86State *env = &cpu->env;
+
+    apic_poll_irq(cpu->apic_state);
+    cpu_reset_interrupt(cs, CPU_INTERRUPT_POLL);
 
     return ((cs->interrupt_request & (CPU_INTERRUPT_HARD |
                                       CPU_INTERRUPT_POLL)) &&

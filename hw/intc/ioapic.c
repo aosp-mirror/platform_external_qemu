@@ -68,6 +68,7 @@ struct ioapic_entry_info {
 
 static void ioapic_entry_parse(uint64_t entry, struct ioapic_entry_info *info)
 {
+    fprintf(stderr, "%s: enter\n", __func__);
     memset(info, 0, sizeof(*info));
     info->masked = (entry >> IOAPIC_LVT_MASKED_SHIFT) & 1;
     info->trig_mode = (entry >> IOAPIC_LVT_TRIGGER_MODE_SHIFT) & 1;
@@ -97,6 +98,7 @@ static void ioapic_entry_parse(uint64_t entry, struct ioapic_entry_info *info)
 
 static void ioapic_service(IOAPICCommonState *s)
 {
+    fprintf(stderr, "%s: enter\n", __func__);
     AddressSpace *ioapic_as = PC_MACHINE(qdev_get_machine())->ioapic_as;
     struct ioapic_entry_info info;
     uint8_t i;
@@ -187,6 +189,7 @@ static void ioapic_set_irq(void *opaque, int vector, int level)
 
 static void ioapic_update_kvm_routes(IOAPICCommonState *s)
 {
+    fprintf(stderr, "%s: enter\n", __func__);
 #ifdef CONFIG_KVM
     int i;
 
@@ -208,6 +211,7 @@ static void ioapic_update_kvm_routes(IOAPICCommonState *s)
 static void ioapic_iec_notifier(void *private, bool global,
                                 uint32_t index, uint32_t mask)
 {
+    fprintf(stderr, "%s: enter\n", __func__);
     IOAPICCommonState *s = (IOAPICCommonState *)private;
     /* For simplicity, we just update all the routes */
     ioapic_update_kvm_routes(s);
@@ -216,6 +220,7 @@ static void ioapic_iec_notifier(void *private, bool global,
 
 void ioapic_eoi_broadcast(int vector)
 {
+    fprintf(stderr, "%s: enter\n", __func__);
     IOAPICCommonState *s;
     uint64_t entry;
     int i, n;
@@ -240,6 +245,7 @@ void ioapic_eoi_broadcast(int vector)
 
 void ioapic_dump_state(Monitor *mon, const QDict *qdict)
 {
+    fprintf(stderr, "%s: enter\n", __func__);
     int i;
 
     for (i = 0; i < MAX_IOAPICS; i++) {
@@ -252,6 +258,7 @@ void ioapic_dump_state(Monitor *mon, const QDict *qdict)
 static uint64_t
 ioapic_mem_read(void *opaque, hwaddr addr, unsigned int size)
 {
+    fprintf(stderr, "%s: enter\n", __func__);
     IOAPICCommonState *s = opaque;
     int index;
     uint32_t val = 0;
@@ -311,6 +318,7 @@ ioapic_mem_read(void *opaque, hwaddr addr, unsigned int size)
 static inline void
 ioapic_fix_edge_remote_irr(uint64_t *entry)
 {
+    fprintf(stderr, "%s: enter\n", __func__);
     if (!(*entry & IOAPIC_LVT_TRIGGER_MODE)) {
         /* Edge-triggered interrupts, make sure remote IRR is zero */
         *entry &= ~((uint64_t)IOAPIC_LVT_REMOTE_IRR);
@@ -321,6 +329,7 @@ static void
 ioapic_mem_write(void *opaque, hwaddr addr, uint64_t val,
                  unsigned int size)
 {
+    fprintf(stderr, "%s: enter\n", __func__);
     IOAPICCommonState *s = opaque;
     int index;
 
@@ -379,6 +388,7 @@ static const MemoryRegionOps ioapic_io_ops = {
 
 static void ioapic_machine_done_notify(Notifier *notifier, void *data)
 {
+    fprintf(stderr, "%s: enter\n", __func__);
 #ifdef CONFIG_KVM
     IOAPICCommonState *s = container_of(notifier, IOAPICCommonState,
                                         machine_done);
@@ -397,6 +407,7 @@ static void ioapic_machine_done_notify(Notifier *notifier, void *data)
 
 static void ioapic_realize(DeviceState *dev, Error **errp)
 {
+    fprintf(stderr, "%s: enter\n", __func__);
     IOAPICCommonState *s = IOAPIC_COMMON(dev);
 
     if (s->version != 0x11 && s->version != 0x20) {

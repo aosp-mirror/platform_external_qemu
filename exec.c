@@ -31,9 +31,11 @@
 #include "hw/xen/xen.h"
 #endif
 #include "sysemu/kvm.h"
+
 #ifdef CONFIG_HAX
 #include "sysemu/hax.h"
 #endif /* CONFIG_HAX */
+
 #include "sysemu/sysemu.h"
 #include "qemu/timer.h"
 #include "qemu/config-file.h"
@@ -1597,6 +1599,11 @@ static void ram_block_add(RAMBlock *new_block, Error **errp)
                 }
             }
 #endif
+#ifdef CONFIG_HVF
+            fprintf(stderr, "%s: maybe should hvf populate ram?????? [0x%llx 0x%llx]\n", __func__,
+                    (unsigned long long)(uintptr_t)(new_block->host),
+                    (unsigned long long)(uintptr_t)(new_block->host + new_block->max_length));
+#endif
             memory_try_enable_merging(new_block->host, new_block->max_length);
         }
     }
@@ -2051,6 +2058,7 @@ static void check_watchpoint(int offset, int len, MemTxAttrs attrs, int flags)
         /* We re-entered the check after replacing the TB. Now raise
          * the debug interrupt so that is will trigger after the
          * current instruction. */
+        fprintf(stderr, "%s: create debug interrupt\n", __func__);
         cpu_interrupt(cpu, CPU_INTERRUPT_DEBUG);
         return;
     }

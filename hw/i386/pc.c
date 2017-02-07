@@ -182,16 +182,17 @@ static void pic_irq_request(void *opaque, int irq, int level)
     CPUState *cs = first_cpu;
     X86CPU *cpu = X86_CPU(cs);
 
-    DPRINTF("pic_irqs: %s irq %d\n", level? "raise" : "lower", irq);
     if (cpu->apic_state) {
         CPU_FOREACH(cs) {
             cpu = X86_CPU(cs);
             if (apic_accept_pic_intr(cpu->apic_state)) {
+                // fprintf(stderr, "%s:%d execute\n", __func__, __LINE__);
                 apic_deliver_pic_intr(cpu->apic_state, level);
             }
         }
     } else {
         if (level) {
+            // fprintf(stderr, "%s:%d execute\n", __func__, __LINE__);
             cpu_interrupt(cs, CPU_INTERRUPT_HARD);
         } else {
             cpu_reset_interrupt(cs, CPU_INTERRUPT_HARD);
@@ -1084,8 +1085,10 @@ DeviceState *cpu_get_current_apic(void)
 void pc_acpi_smi_interrupt(void *opaque, int irq, int level)
 {
     X86CPU *cpu = opaque;
+    fprintf(stderr, "%s: call. irq: 0x%x\n", __func__, irq);
 
     if (level) {
+        fprintf(stderr, "%s:%d execute\n", __func__, __LINE__);
         cpu_interrupt(CPU(cpu), CPU_INTERRUPT_SMI);
     }
 }
@@ -1657,6 +1660,7 @@ void pc_pci_device_init(PCIBus *pci_bus)
 
 void ioapic_init_gsi(GSIState *gsi_state, const char *parent_name)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     DeviceState *dev;
     SysBusDevice *d;
     unsigned int i;
@@ -1675,6 +1679,7 @@ void ioapic_init_gsi(GSIState *gsi_state, const char *parent_name)
     sysbus_mmio_map(d, 0, IO_APIC_DEFAULT_ADDRESS);
 
     for (i = 0; i < IOAPIC_NUM_PINS; i++) {
+        fprintf(stderr, "%s: get irq for pin %d\n", __func__, i);
         gsi_state->ioapic_irq[i] = qdev_get_gpio_in(dev, i);
     }
 }
@@ -2265,6 +2270,7 @@ static HotpluggableCPUList *pc_query_hotpluggable_cpus(MachineState *machine)
 
 static void x86_nmi(NMIState *n, int cpu_index, Error **errp)
 {
+            fprintf(stderr, "%s:%d execute\n", __func__, __LINE__);
     /* cpu index isn't used */
     CPUState *cs;
 
@@ -2272,8 +2278,10 @@ static void x86_nmi(NMIState *n, int cpu_index, Error **errp)
         X86CPU *cpu = X86_CPU(cs);
 
         if (!cpu->apic_state) {
+            fprintf(stderr, "%s:%d execute\n", __func__, __LINE__);
             cpu_interrupt(cs, CPU_INTERRUPT_NMI);
         } else {
+            fprintf(stderr, "%s:%d execute\n", __func__, __LINE__);
             apic_deliver_nmi(cpu->apic_state);
         }
     }

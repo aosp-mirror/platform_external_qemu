@@ -580,6 +580,7 @@ void x86_cpu_set_a20(X86CPU *cpu, int a20_state)
         CPUState *cs = CPU(cpu);
 
         qemu_log_mask(CPU_LOG_MMU, "A20 update: a20=%d\n", a20_state);
+        fprintf(stderr, "%s: A20 update: a20=%d\n", __func__, a20_state);
         /* if the cpu is currently executing code, we must unlink it and
            all the potentially executing TB */
         cpu_interrupt(cs, CPU_INTERRUPT_EXITTB);
@@ -1124,6 +1125,7 @@ typedef struct MCEInjectionParams {
 
 static void do_inject_x86_mce(void *data)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     MCEInjectionParams *params = data;
     CPUX86State *cenv = &params->cpu->env;
     CPUState *cpu = CPU(params->cpu);
@@ -1182,6 +1184,7 @@ static void do_inject_x86_mce(void *data)
         banks[3] = params->misc;
         cenv->mcg_status = params->mcg_status;
         banks[1] = params->status;
+        fprintf(stderr, "%s: interrupt cpu mce\n", __func__);
         cpu_interrupt(cpu, CPU_INTERRUPT_MCE);
     } else if (!(banks[1] & MCI_STATUS_VAL)
                || !(banks[1] & MCI_STATUS_UC)) {
@@ -1253,12 +1256,14 @@ void cpu_x86_inject_mce(Monitor *mon, X86CPU *cpu, int bank,
 
 void cpu_report_tpr_access(CPUX86State *env, TPRAccess access)
 {
+        fprintf(stderr, "%s: tpr access START\n", __func__);
     X86CPU *cpu = x86_env_get_cpu(env);
     CPUState *cs = CPU(cpu);
 
     if (kvm_enabled()) {
         env->tpr_access_type = access;
 
+        fprintf(stderr, "%s: tpr access interrupt report!\n", __func__);
         cpu_interrupt(cs, CPU_INTERRUPT_TPR);
     } else {
         cpu_restore_state(cs, cs->mem_io_pc);
