@@ -31,17 +31,27 @@ namespace android {
 //  which can be installed on Windows and OS X machines running on an
 //  Intel processor.
 //
+//  CPU_ACCELERATOR_HVF means Apple's Hypervisor.framework, which
+//  requres an Intel Mac running OS X 10.10+.
+//
 enum CpuAccelerator {
     CPU_ACCELERATOR_NONE = 0,
     CPU_ACCELERATOR_KVM,
     CPU_ACCELERATOR_HAX,
+    CPU_ACCELERATOR_HVF,
+    CPU_ACCELERATOR_MAX,
 };
 
 // Return the CPU accelerator technology usable on the current machine.
-// This only returns CPU_ACCELERATOR_KVM or CPU_ACCELERATOR_HAX if the
-// corresponding accelerator can be used properly. Otherwise it will
-// return CPU_ACCELERATOR_NONE.
+// This only returns a non-CPU_ACCELERATOR_NONE if corresponding accelerator
+// can be used properly. Otherwise it will return CPU_ACCELERATOR_NONE.
 CpuAccelerator  GetCurrentCpuAccelerator();
+
+// Returns an array of bools indicating whether or not
+// each accelerator type listed in the enum CpuAccelerator is supported
+// on the current system., i.e., if we want kvm support,
+// we query the array at index CPU_ACCELERATOR_KVM.
+const bool* GetCurrentSupportedCpuAccelerators();
 
 // Return an ASCII string describing the state of the current CPU
 // acceleration on this machine. If GetCurrentCpuAccelerator() returns
