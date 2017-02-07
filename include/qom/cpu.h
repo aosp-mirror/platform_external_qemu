@@ -233,6 +233,10 @@ struct kvm_run;
 struct hax_vcpu_state;
 #endif
 
+struct hvf_vcpu_caps;
+struct hvf_vcpu_state;
+struct hvf_x86_state;
+
 #define TB_JMP_CACHE_BITS 12
 #define TB_JMP_CACHE_SIZE (1 << TB_JMP_CACHE_BITS)
 
@@ -285,6 +289,7 @@ struct qemu_work_item {
  * @mem_io_pc: Host Program Counter at which the memory was accessed.
  * @mem_io_vaddr: Target virtual address at which the memory was accessed.
  * @kvm_fd: vCPU file descriptor for KVM.
+ * @hvf_fd: vCPU file descriptor for HVF.
  * @work_mutex: Lock to prevent multiple access to queued_work_*.
  * @queued_work_first: First asynchronous work pending.
  * @trace_dstate: Dynamic tracing state of events for this vCPU (bitmask).
@@ -383,6 +388,14 @@ struct CPUState {
     bool hax_vcpu_dirty;
     struct hax_vcpu_state *hax_vcpu;
 #endif
+
+    // HVF
+    bool hvf_vcpu_dirty;
+    uint64_t hvf_fd;
+    struct hvf_vcpu_caps* hvf_caps;
+    struct hvf_vcpu_state* hvf_vcpu;
+    // x86 support for HVF
+    struct hvf_x86_state* hvf_x86;
 };
 
 QTAILQ_HEAD(CPUTailQ, CPUState);

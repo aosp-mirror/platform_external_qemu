@@ -31,9 +31,11 @@
 #include "hw/xen/xen.h"
 #endif
 #include "sysemu/kvm.h"
+
 #ifdef CONFIG_HAX
 #include "sysemu/hax.h"
 #endif /* CONFIG_HAX */
+
 #include "sysemu/sysemu.h"
 #include "qemu/timer.h"
 #include "qemu/config-file.h"
