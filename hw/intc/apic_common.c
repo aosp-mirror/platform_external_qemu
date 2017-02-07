@@ -33,6 +33,7 @@ bool apic_report_tpr_access;
 
 void cpu_set_apic_base(DeviceState *dev, uint64_t val)
 {
+    fprintf(stderr, "%s: call. deviceState %p val %llu\n", __func__, dev, (unsigned long long)val);
     trace_cpu_set_apic_base(val);
 
     if (dev) {
