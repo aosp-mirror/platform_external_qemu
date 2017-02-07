@@ -31,8 +31,7 @@
 
 #define X86_CPU_CLASS(klass) \
     OBJECT_CLASS_CHECK(X86CPUClass, (klass), TYPE_X86_CPU)
-#define X86_CPU(obj) \
-    OBJECT_CHECK(X86CPU, (obj), TYPE_X86_CPU)
+#define X86_CPU(obj) ((X86CPU*)obj)
 #define X86_CPU_GET_CLASS(obj) \
     OBJECT_GET_CLASS(X86CPUClass, (obj), TYPE_X86_CPU)
 
