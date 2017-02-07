@@ -48,13 +48,42 @@ namespace emugl {
 //   thread, which may in turn be blocked on something else.
 static const bool kUseSubwindowThread = false;
 
-RendererImpl::RendererImpl()
-    : mCleanupThread([this]() {
-          while (const auto id = mCleanupProcessIds.receive()) {
-              FrameBuffer::getFB()->cleanupProcGLObjects(*id);
-          }
-      }) {
-    mCleanupThread.start();
+// This object manages the cleanup of guest process resources when the process
+// exits. It runs the cleanup in a separate thread to never block the main
+// render thread for a low-priority task.
+class RendererImpl::ProcessCleanupThread {
+public:
+    ProcessCleanupThread()
+        : mCleanupThread([this]() {
+              while (const auto id = mCleanupProcessIds.receive()) {
+                  FrameBuffer::getFB()->cleanupProcGLObjects(*id);
+              }
+          }) {
+        mCleanupThread.start();
+    }
+
+    ~ProcessCleanupThread() {
+        mCleanupProcessIds.stop();
+        mCleanupThread.wait();
+    }
+
+    void cleanup(uint64_t processId) {
+        mCleanupProcessIds.send(processId);
+    }
+
+    void waitForCleanup() {
+        mCleanupProcessIds.waitForEmpty();
+    }
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(ProcessCleanupThread);
+
+    android::base::MessageChannel<uint64_t, 64> mCleanupProcessIds;
+    android::base::FunctorThread mCleanupThread;
+};
+
+RendererImpl::RendererImpl() {
+    mCleanupThread.reset(new ProcessCleanupThread());
 }
 
 RendererImpl::~RendererImpl() {
@@ -97,12 +126,9 @@ void RendererImpl::stop() {
         c->stopFromHost();
     }
 
-    // TODO: finish cleaning up for snapshot
-
     // We're stopping the renderer, so there's no need to clean up resources
     // of some pending processes: we'll destroy everything soon.
-    mCleanupProcessIds.stop();
-    mCleanupThread.wait();
+    mCleanupThread.reset();
 }
 
 void RendererImpl::cleanupRenderThreads() {
@@ -117,6 +143,13 @@ void RendererImpl::cleanupRenderThreads() {
         // be notified for those behavior.
         c->stop();
     }
+}
+
+void RendererImpl::waitForProcessCleanup() {
+    mCleanupThread->waitForCleanup();
+    // Recreate it to make sure we've started from scratch and that we've
+    // finished all in-progress cleanups as well.
+    mCleanupThread.reset(new ProcessCleanupThread());
 }
 
 RenderChannelPtr RendererImpl::createRenderChannel(
@@ -154,10 +187,7 @@ void RendererImpl::pauseAllPreSave() {
         c->renderThread()->pausePreSnapshot();
     }
     lock.unlock();
-
-    // Make sure we've cleaned up all resources for exited processes before
-    // we start saving the GL states.
-    mCleanupProcessIds.waitForEmpty();
+    waitForProcessCleanup();
 }
 
 void RendererImpl::resumeAll() {
@@ -182,6 +212,8 @@ void RendererImpl::save(android::base::Stream* stream) {
 
 bool RendererImpl::load(android::base::Stream* stream) {
     cleanupRenderThreads();
+    waitForProcessCleanup();
+
     mStopped = stream->getByte();
     if (mStopped) {
         return true;
@@ -248,7 +280,7 @@ void RendererImpl::repaintOpenGLDisplay() {
 }
 
 void RendererImpl::cleanupProcGLObjects(uint64_t puid) {
-    mCleanupProcessIds.send(puid);
+    mCleanupThread->cleanup(puid);
 }
 
 }  // namespace emugl

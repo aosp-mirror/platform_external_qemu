@@ -61,8 +61,8 @@ public:
     void pauseAllPreSave() final;
     void resumeAll() final;
 
-    void save(android::base::Stream* stream) override;
-    bool load(android::base::Stream* stream) override;
+    void save(android::base::Stream* stream) final;
+    bool load(android::base::Stream* stream) final;
 
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RendererImpl);
@@ -70,6 +70,8 @@ private:
 private:
     // Stop all render threads and wait until they exit.
     void cleanupRenderThreads();
+    // Wait for process cleanup to complete.
+    void waitForProcessCleanup();
 
     std::unique_ptr<RenderWindow> mRenderWindow;
 
@@ -78,11 +80,8 @@ private:
     std::vector<std::shared_ptr<RenderChannelImpl>> mChannels;
     bool mStopped = false;
 
-    // A message channel and a cleanup thread for GL resources of finished
-    // guest processes. Cleanup takes time, so we should offload it into a
-    // worker thread.
-    android::base::MessageChannel<uint64_t, 64> mCleanupProcessIds;
-    android::base::FunctorThread mCleanupThread;
+    class ProcessCleanupThread;
+    std::unique_ptr<ProcessCleanupThread> mCleanupThread;
 };
 
 }  // namespace emugl
