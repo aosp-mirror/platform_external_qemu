@@ -595,7 +595,7 @@ padding: 10px 0px 10px 16px;</string>
         </property>
         <property name="icon">
          <iconset resource="resources.qrc">
-          <normaloff>:/light/dpad</normaloff>:/light/dpad</iconset>
+          <normaloff>:/light/rotary_input</normaloff>:/light/rotary_input</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -613,7 +613,7 @@ padding: 10px 0px 10px 16px;</string>
          <bool>false</bool>
         </property>
         <property name="themeIconName" stdset="0">
-         <string>dpad</string>
+         <string>rotary_input</string>
         </property>
         <property name="ColorGroup" stdset="0">
          <string>MajorTab</string>
