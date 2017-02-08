@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "262da91a_8f15655d",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-08T17:51:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bfb7df7d_0f750024",
+      "range": {
+        "startLine": 333,
+        "startChar": 31,
+        "endLine": 333,
+        "endChar": 41
+      },
+      "revId": "3e44bd253d32a9374fc9c50d9dd7a008e9fa0162",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e9271c3b_0426d696",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-08T07:11:08Z",
       "side": 1,
       "message": "this erase doesn\u0027t use any refcount if I understand it properly, so the very first delete() call would remove the group from |m_groups|, while usedSharedGroupIDs would be fine and keep track of all ID counts.",
+      "range": {
+        "startLine": 334,
+        "startChar": 3,
+        "endLine": 334,
+        "endChar": 32
+      },
+      "revId": "3e44bd253d32a9374fc9c50d9dd7a008e9fa0162",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "686e2acd_ec8958a2",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-08T17:51:39Z",
+      "side": 1,
+      "message": "Not sure if I understand your question correctly. m_groups holds a mapping from egl contexts to their shared group (which is a smart pointer). The real ShareGroup destructor only happens when the last egl context of the same share group calls this function.",
+      "parentUuid": "e9271c3b_0426d696",
       "range": {
         "startLine": 334,
         "startChar": 3,
