@@ -2856,6 +2856,25 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
     if (err != GL_NO_ERROR) {
         fprintf(stderr, "%s: got err pre :( 0x%x internal 0x%x format 0x%x type 0x%x\n", __func__, err, internalformat, format, type);
     }
+
+    if (format == GL_ALPHA && internalformat == GL_ALPHA) {
+        format = GL_RED;
+        internalformat = GL_RED;
+
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_R, GL_ZERO);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_G, GL_ZERO);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_B, GL_ZERO);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_A, GL_RED);
+    } else if (format == GL_LUMINANCE && internalformat == GL_LUMINANCE) {
+        format = GL_RED;
+        internalformat = GL_RED;
+
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_R, GL_RED);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_G, GL_RED);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_B, GL_RED);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_A, GL_ONE);
+    }
+
     sPrepareTexImage2D(target, level, internalformat, width, height, border, format, type, pixels, &type, &internalformat, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
     ctx->dispatcher().glTexImage2D(target,level,internalformat,width,height,border,format,type,pixels);
@@ -2908,6 +2927,23 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
                    GLESv2Validate::textureTargetEx(ctx, target)), GL_INVALID_ENUM);
     SET_ERROR_IF(!GLESv2Validate::pixelFrmt(ctx,format), GL_INVALID_ENUM);
     SET_ERROR_IF(!GLESv2Validate::pixelType(ctx,type),GL_INVALID_ENUM);
+
+    if (format == GL_ALPHA) {
+        format = GL_RED;
+
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_R, GL_ZERO);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_G, GL_ZERO);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_B, GL_ZERO);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_A, GL_RED);
+    } else if (format == GL_LUMINANCE) {
+        format = GL_RED;
+
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_R, GL_RED);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_G, GL_RED);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_B, GL_RED);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_A, GL_ONE);
+    }
+
     // set an error if level < 0 or level > log 2 max
     SET_ERROR_IF(level < 0 || 1<<level > ctx->getMaxTexSize(), GL_INVALID_VALUE);
     SET_ERROR_IF(xoffset < 0 || yoffset < 0 || width < 0 || height < 0, GL_INVALID_VALUE);
