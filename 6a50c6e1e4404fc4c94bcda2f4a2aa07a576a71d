@@ -16,6 +16,24 @@
       "revId": "6a50c6e1e4404fc4c94bcda2f4a2aa07a576a71d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eaacefbc_f5440f10",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-02-08T19:02:24Z",
+      "side": 1,
+      "message": "Done. I feel like there must be a good reason why it defaults to 1000. Waiting for digit@\u0027s response. Will just explicitly check for 1000 for now.",
+      "parentUuid": "2de2c8be_e4ff05fb",
+      "revId": "6a50c6e1e4404fc4c94bcda2f4a2aa07a576a71d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
