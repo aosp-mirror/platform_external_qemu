@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2de2c8be_e4ff05fb",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-08T15:31:47Z",
+      "side": 1,
+      "message": "If getApiLevel() fails, it returns 1000. Maybe you should check for this case.\n(Too bad the error value isn\u0027t 0. That would eliminate this issue.)",
+      "revId": "6a50c6e1e4404fc4c94bcda2f4a2aa07a576a71d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
