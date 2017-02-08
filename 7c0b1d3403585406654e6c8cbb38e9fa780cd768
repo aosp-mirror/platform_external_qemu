@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1da77ab0_3ae7c6fc",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/GLESv2Decoder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 695,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-08T07:29:15Z",
+      "side": 1,
+      "message": "std::vector\u003cGLuint\u003e temp(buffers, buffers + n);",
+      "range": {
+        "startLine": 695,
+        "startChar": 4,
+        "endLine": 695,
+        "endChar": 32
+      },
+      "revId": "7c0b1d3403585406654e6c8cbb38e9fa780cd768",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "89bcf2cf_853d2a21",
+        "filename": "android/android-emugl/host/libs/libGLSnapshot/GLSnapshot.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-08T07:29:15Z",
+      "side": 1,
+      "message": "aaaaaaaaaa!!!111one",
+      "range": {
+        "startLine": 32,
+        "startChar": 27,
+        "endLine": 32,
+        "endChar": 32
+      },
+      "revId": "7c0b1d3403585406654e6c8cbb38e9fa780cd768",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d29f6ecf_10fd8794",
+        "filename": "android/android-emugl/host/libs/libGLSnapshot/GLSnapshot.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-08T07:29:15Z",
+      "side": 1,
+      "message": "ref?",
+      "range": {
+        "startLine": 54,
+        "startChar": 59,
+        "endLine": 54,
+        "endChar": 61
+      },
+      "revId": "7c0b1d3403585406654e6c8cbb38e9fa780cd768",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
