@@ -113,7 +113,6 @@
         <file alias="toggle_off_disabled">images/light/toggle_off_disabled_light.png</file>
         <file alias="toggle_on">images/light/toggle_on_light.png</file>
         <file alias="toggle_on_disabled">images/light/toggle_on_disabled_light.png</file>
-        <file alias="update">images/light/ic_update_0BA_48dp.svg</file>
         <file alias="virtSensors">images/light/Virtual_Sensors_678.svg</file>
     </qresource>
     <qresource prefix="/dark">
@@ -205,7 +204,6 @@
         <file alias="toggle_off_disabled">images/dark/toggle_off_disabled_dark.png</file>
         <file alias="toggle_on">images/dark/toggle_on_dark.png</file>
         <file alias="toggle_on_disabled">images/dark/toggle_on_disabled_dark.png</file>
-        <file alias="update">images/dark/ic_update_0BA_48dp.svg</file>
         <file alias="virtSensors">images/dark/Virtual_Sensors_677.svg</file>
     </qresource>
     <qresource prefix="/cursor">
