@@ -1,0 +1,9 @@
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Code-Review+2: Bo Hu <bohu@google.com>
+Autosubmit+1: Bo Hu <bohu@google.com>
+Verified+1: Joshua Lang <joshualang@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Wed, 08 Feb 2017 22:21:26 +0000
+Reviewed-on: https://android-review.googlesource.com/335100
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
