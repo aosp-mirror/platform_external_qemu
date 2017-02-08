@@ -42,6 +42,7 @@ public:
 
     virtual ~RenderThread();
 
+    void setFinished();
     // Returns true iff the thread has finished.
     bool isFinished() const { return mFinished; }
 
