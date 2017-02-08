@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3b3846da_f4f1453c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-02-08T18:08:07Z",
+      "side": 1,
+      "message": "Done. Changing to \"Google Play Store\".",
+      "parentUuid": "5d30d5fc_091ed736",
+      "revId": "6cc6a6912e947a58e5186f7ee71ace2eb7cc6a69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f4081a38_595f4a9c",
         "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.cpp",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2017-02-08T16:02:21Z",
       "side": 1,
       "message": "\"Play services\" or \"Google Play services\"",
+      "revId": "6cc6a6912e947a58e5186f7ee71ace2eb7cc6a69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a21f9d9_1ea4d465",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-02-08T18:08:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f4081a38_595f4a9c",
       "revId": "6cc6a6912e947a58e5186f7ee71ace2eb7cc6a69",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
