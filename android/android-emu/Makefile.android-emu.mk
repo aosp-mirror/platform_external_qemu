@@ -215,6 +215,12 @@ LOCAL_C_INCLUDES := \
     $(LIBPNG_INCLUDES) \
     $(ZLIB_INCLUDES) \
 
+ifeq ($(BUILD_TARGET_OS),windows)
+LOCAL_LDLIBS += -lshlwapi
+LOCAL_STATIC_LIBRARIES += $(REGEX_WIN32_STATIC_LIBRARIES)
+LOCAL_C_INCLUDES += $(REGEX_WIN32_INCLUDES)
+endif
+
 LOCAL_SRC_FILES := \
     android/adb-server.cpp \
     android/avd/hw-config.c \
@@ -445,6 +451,8 @@ ANDROID_EMU_LDLIBS += -lpsapi
 ANDROID_EMU_LDLIBS += -lws2_32
 # GetNetworkParams() for android/utils/dns.c
 ANDROID_EMU_LDLIBS += -liphlpapi
+# custom regex library
+ANDROID_EMU_STATIC_LIBRARIES += $(REGEX_WIN32_STATIC_LIBRARIES)
 endif
 
 ###############################################################################
