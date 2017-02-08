@@ -51,6 +51,7 @@ public:
 
 private:
     virtual intptr_t main();
+    void setFinished();
 
     // Snapshot support.
     enum class SnapshotState {

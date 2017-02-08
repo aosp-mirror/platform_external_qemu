@@ -177,6 +177,16 @@ bool RenderThread::doSnapshotOperation(const SnapshotObjects& objects,
     return false;
 }
 
+void RenderThread::setFinished() {
+    // Make sure it never happens that we wait forever for the thread to
+    // save to snapshot while it was not even going to.
+    AutoLock lock(mLock);
+    mFinished = true;
+    if (mState != SnapshotState::Empty) {
+        mCondVar.broadcastAndUnlock(&lock);
+    }
+}
+
 intptr_t RenderThread::main() {
     if (mFinished) {
         return 0;
@@ -210,6 +220,7 @@ intptr_t RenderThread::main() {
         while (stream.read(&flags, sizeof(flags)) != sizeof(flags)) {
             // Stream read may fail because of a pending snapshot.
             if (!doSnapshotOperation(snapshotObjects, SnapshotState::StartSaving)) {
+                setFinished();
                 return 0;
             }
         }
@@ -341,15 +352,7 @@ intptr_t RenderThread::main() {
         } while (progress);
     }
 
-    {
-        // Make sure it never happens that we wait forever for the thread to
-        // save to snapshot while it was not even going to.
-        AutoLock lock(mLock);
-        mFinished = true;
-        if (mState != SnapshotState::Empty) {
-            mCondVar.broadcastAndUnlock(&lock);
-        }
-    }
+    setFinished();
 
     if (dumpFP) {
         fclose(dumpFP);
