@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "b5af43a4_48deeac0",
+        "filename": "android/android-emu/android/opengl/GLProcessPipe.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-08T18:00:51Z",
+      "side": 1,
+      "message": "I should be safe to remove this now?",
+      "range": {
+        "startLine": 88,
+        "startChar": 22,
+        "endLine": 88,
+        "endChar": 31
+      },
+      "revId": "0abe4345bb780263c39144c2d289ac0ef4e9587e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "808fd733_a72e274f",
         "filename": "android/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
         "patchSetId": 13
@@ -13,6 +36,30 @@
       "writtenOn": "2017-02-08T07:18:44Z",
       "side": 1,
       "message": "this is called in the renderThread\u0027s destructor, so no need to wait explicitly",
+      "range": {
+        "startLine": 146,
+        "startChar": 4,
+        "endLine": 148,
+        "endChar": 5
+      },
+      "revId": "0abe4345bb780263c39144c2d289ac0ef4e9587e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "655c5f2a_a3d510e4",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-08T18:00:51Z",
+      "side": 1,
+      "message": "I believe this is called by RendererImpl::load? Removing this line will result in an assert failure:\n bool FrameBuffer::onLoad(android::base::Stream*): Assertion `m_contexts.size() \u003d\u003d 0\u0027 failed.",
+      "parentUuid": "808fd733_a72e274f",
       "range": {
         "startLine": 146,
         "startChar": 4,
