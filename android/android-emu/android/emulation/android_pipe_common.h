@@ -30,26 +30,34 @@ typedef struct AndroidPipeBuffer {
 
 /* List of bitflags returned in status of CMD_POLL command */
 enum PipePollFlags {
-	PIPE_POLL_IN	= 1 << 0,
-	PIPE_POLL_OUT	= 1 << 1,
-	PIPE_POLL_HUP	= 1 << 2
+    PIPE_POLL_IN  = 1 << 0,
+    PIPE_POLL_OUT = 1 << 1,
+    PIPE_POLL_HUP = 1 << 2
 };
 
 /* Possible status values used to signal errors - see goldfish_pipe_error_convert */
 enum PipeErrors {
-	PIPE_ERROR_INVAL  = -1,
-	PIPE_ERROR_AGAIN  = -2,
-	PIPE_ERROR_NOMEM  = -3,
-	PIPE_ERROR_IO     = -4
+    PIPE_ERROR_INVAL  = -1,
+    PIPE_ERROR_AGAIN  = -2,
+    PIPE_ERROR_NOMEM  = -3,
+    PIPE_ERROR_IO     = -4
 };
 
 /* Bit-flags used to signal events from the emulator */
 enum PipeWakeFlags {
-	PIPE_WAKE_CLOSED = 1 << 0,  /* emulator closed pipe */
-	PIPE_WAKE_READ   = 1 << 1,  /* pipe can now be read from */
-	PIPE_WAKE_WRITE  = 1 << 2,  /* pipe can now be written to */
-	PIPE_WAKE_UNLOCK_DMA  = 1 << 3,  /* unlock this pipe's DMA buffer */
-	PIPE_WAKE_UNLOCK_DMA_SHARED  = 1 << 4,  /* unlock DMA buffer of the pipe shared to this pipe */
+    PIPE_WAKE_CLOSED = 1 << 0,  /* emulator closed pipe */
+    PIPE_WAKE_READ   = 1 << 1,  /* pipe can now be read from */
+    PIPE_WAKE_WRITE  = 1 << 2,  /* pipe can now be written to */
+    PIPE_WAKE_UNLOCK_DMA  = 1 << 3,  /* unlock this pipe's DMA buffer */
+    PIPE_WAKE_UNLOCK_DMA_SHARED  = 1 << 4,  /* unlock DMA buffer of the pipe shared to this pipe */
 };
+
+/* Possible pipe closing reasons */
+typedef enum PipeCloseReason {
+    PIPE_CLOSE_GRACEFUL = 0,      /* guest sent a close command */
+    PIPE_CLOSE_REBOOT   = 1,      /* guest rebooted, we're closing the pipes */
+    PIPE_CLOSE_LOAD_SNAPSHOT = 2, /* close old pipes on snapshot load */
+    PIPE_CLOSE_ERROR    = 3,      /* some unrecoverable error on the pipe */
+} PipeCloseReason;
 
 ANDROID_END_HEADER

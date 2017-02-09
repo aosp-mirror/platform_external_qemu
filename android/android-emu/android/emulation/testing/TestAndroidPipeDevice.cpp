@@ -69,7 +69,7 @@ public:
     virtual void close() override {
         if (!mClosed) {
             mClosed = true;
-            android_pipe_guest_close(mPipe);
+            android_pipe_guest_close(mPipe, PIPE_CLOSE_GRACEFUL);
         }
     }
 

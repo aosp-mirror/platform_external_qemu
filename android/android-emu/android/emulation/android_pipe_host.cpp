@@ -34,7 +34,7 @@ public:
 
     const AndroidPipeFuncs* getFuncs() const;
 
-    virtual void onGuestClose() override {
+    virtual void onGuestClose(PipeCloseReason reason) override {
         auto funcs = getFuncs();
         if (funcs->close) {
             funcs->close(mInstance);

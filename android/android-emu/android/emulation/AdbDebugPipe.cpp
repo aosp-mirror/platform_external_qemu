@@ -33,7 +33,7 @@ AndroidPipe* AdbDebugPipe::Service::load(void* hwPipe,
     return create(hwPipe, args);
 }
 
-void AdbDebugPipe::onGuestClose() {
+void AdbDebugPipe::onGuestClose(PipeCloseReason reason) {
     // Nothing to do here
 }
 

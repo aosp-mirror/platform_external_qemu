@@ -133,7 +133,7 @@ public:
     // Called from the device thread to close the pipe entirely.
     // The pipe management code will never access the instance after this call,
     // which means the method is free to delete it before returning.
-    virtual void onGuestClose() = 0;
+    virtual void onGuestClose(PipeCloseReason reason) = 0;
 
     // Called from the device thread to poll the pipe state. Must return a
     // combination of PIPE_POLL_IN, PIPE_POLL_OUT and PIPE_POLL_HUP.

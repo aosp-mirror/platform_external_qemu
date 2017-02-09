@@ -43,7 +43,7 @@
 
 #define E(...) fprintf(stderr, "ERROR:" __VA_ARGS__), fprintf(stderr, "\n")
 
-#define DINIT(...) do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
+#define DINIT(...) do { if (DEBUG || VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
 namespace android {
 namespace emulation {
@@ -127,21 +127,22 @@ void AdbGuestPipe::Service::onPipeClose(AdbGuestPipe* pipe) {
 }
 
 void AdbGuestPipe::Service::searchForActivePipe() {
-    if (!mActivePipe) {
-        for (auto pipe : mPipes) {
-            if (pipe->mState == State::WaitingForHostAdbConnection) {
-                mActivePipe = pipe;
-                // Tell the agent to start listening again.
-                mHostAgent->startListening();
-
-                // Also notify the server that an emulator instance is waiting
-                // for a connection. This is useful when the ADB Server was
-                // restarted on the host, but could not see the current emulator
-                // instance because it's listening on a 'non-standard' ADB port.
-                mHostAgent->notifyServer();
-                break;
-            }
-        }
+    if (mActivePipe) {
+        return;
+    }
+    const auto pipeIt = std::find_if(
+            mPipes.begin(), mPipes.end(), [](const AdbGuestPipe* pipe) {
+                return pipe->mState == State::WaitingForHostAdbConnection;
+            });
+    if (pipeIt != mPipes.end()) {
+        mActivePipe = *pipeIt;
+        // Tell the agent to start listening again.
+        mHostAgent->startListening();
+        // Also notify the server that an emulator instance is waiting
+        // for a connection. This is useful when the ADB Server was
+        // restarted on the host, but could not see the current emulator
+        // instance because it's listening on a 'non-standard' ADB port.
+        mHostAgent->notifyServer();
     }
 }
 
@@ -150,7 +151,7 @@ AdbGuestPipe::~AdbGuestPipe() {
     CHECK(mState == State::ClosedByGuest);
 }
 
-void AdbGuestPipe::onGuestClose() {
+void AdbGuestPipe::onGuestClose(PipeCloseReason reason) {
     DD("%s: [%p]", __func__, this);
     mState = State::ClosedByGuest;
     DINIT("%s: [%p] Adb closed by guest",__func__, this);
@@ -234,6 +235,7 @@ int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
 }
 
 void AdbGuestPipe::onGuestWantWakeOn(int flags) {
+    DD("%s: [%p] flags=%x (%d)", __func__, this, (unsigned)flags, flags);
     if (flags & PIPE_WAKE_READ) {
         if (mHostSocket.get()) {
             mHostSocket->wantRead();
@@ -291,6 +293,7 @@ const char* AdbGuestPipe::toString(AdbGuestPipe::State state) {
 
 // Called whenever an i/o event occurs on the host socket.
 void AdbGuestPipe::onHostSocketEvent(unsigned events) {
+    DD("%s: [%p] events=%x (%u)", __func__, this, events, events);
     int wakeFlags = 0;
     if ((events & FdWatch::kEventRead) != 0) {
         wakeFlags |= PIPE_WAKE_READ;
@@ -462,7 +465,8 @@ int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
             mBufferPos += avail;
             if (mBufferPos == mBufferSize) {
                 // Expected command was received.
-                DD("%s: [%p] command validated", __func__, this);
+                DD("%s: [%p] command '%.*s' validated", __func__, this,
+                   (int)mBufferSize, mBuffer);
                 if (mState == State::WaitingForGuestAcceptCommand) {
                     waitForHostConnection();
                 } else if (mState == State::WaitingForGuestStartCommand) {
@@ -477,6 +481,8 @@ int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
         numBuffers--;
         buffers++;
     }
+    DD("%s: [%p] returning %d with buffer pos/size %d/%d", __func__, this,
+       result, (int)mBufferPos, (int)mBufferSize);
     return result;
 }
 
