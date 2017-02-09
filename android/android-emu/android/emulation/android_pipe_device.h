@@ -114,7 +114,8 @@ extern void* android_pipe_guest_open(void* hwpipe);
 // android_pipe_reset().
 // This must *not* be called from the host side, see android_pipe_host_close()
 // instead.
-extern void android_pipe_guest_close(void* internal_pipe);
+extern void android_pipe_guest_close(void* internal_pipe,
+                                     PipeCloseReason reason);
 
 // Hooks for a start/end of save/load operations, called once per each snapshot.
 extern void android_pipe_guest_pre_load(Stream* file);

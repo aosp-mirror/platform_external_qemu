@@ -107,10 +107,10 @@ public:
         DD("%s: Creating new ConnectorPipe hwpipe=%p", __FUNCTION__, mHwPipe);
     }
 
-    virtual void onGuestClose() override {
+    virtual void onGuestClose(PipeCloseReason reason) override {
         // nothing to do here
-        DD("%s: closing ConnectorPipe hwpipe=%p prematurily!", __FUNCTION__,
-           mHwPipe);
+        DD("%s: closing ConnectorPipe hwpipe=%p prematurily (reason=%d)!",
+           __func__, mHwPipe, (int)reason);
     }
 
     virtual unsigned onGuestPoll() const override {
@@ -520,12 +520,13 @@ void* android_pipe_guest_open(void* hwpipe) {
     return android::sGlobals->connectorService.create(hwpipe, nullptr);
 }
 
-void android_pipe_guest_close(void* internalPipe) {
+void android_pipe_guest_close(void* internalPipe, PipeCloseReason reason) {
     CHECK_VM_STATE_LOCK();
     auto pipe = static_cast<android::AndroidPipe*>(internalPipe);
     if (pipe) {
-        D("%s: host=%p [%s]", __FUNCTION__, pipe, pipe->name());
-        pipe->onGuestClose();
+        D("%s: host=%p [%s] reason=%d", __FUNCTION__, pipe, pipe->name(),
+            (int)reason);
+        pipe->onGuestClose(reason);
     }
 }
 

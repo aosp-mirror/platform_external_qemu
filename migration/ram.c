@@ -2458,6 +2458,8 @@ static int ram_load(QEMUFile *f, void *opaque, int version_id)
         ret = -EINVAL;
     }
 
+    migrate_decompress_threads_create();
+
     /* This RCU critical section can be very long running.
      * When RCU reclaims in the code start to become numerous,
      * it will be necessary to reduce the granularity of this
@@ -2573,6 +2575,9 @@ static int ram_load(QEMUFile *f, void *opaque, int version_id)
 
     wait_for_decompress_done();
     rcu_read_unlock();
+
+    migrate_decompress_threads_join();
+
     DPRINTF("Completed load of VM with exit code %d seq iteration "
             "%" PRIu64 "\n", ret, seq_iter);
     return ret;

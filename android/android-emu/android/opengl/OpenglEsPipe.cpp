@@ -172,7 +172,7 @@ public:
         mChannel->onSave(stream);
     }
 
-    virtual void onGuestClose() override {
+    virtual void onGuestClose(PipeCloseReason reason) override {
         D("%s", __func__);
         mIsWorking = false;
         mChannel->stop();

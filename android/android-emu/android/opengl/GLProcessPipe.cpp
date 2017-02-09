@@ -73,8 +73,7 @@ public:
         stream->putBe64(m_uniqueId);
     }
 
-    void onGuestClose() override {
-        // process died on the guest, cleanup gralloc memory on the host
+    void onGuestClose(PipeCloseReason reason) override {
         android_cleanupProcGLObjects(m_uniqueId);
     }
 

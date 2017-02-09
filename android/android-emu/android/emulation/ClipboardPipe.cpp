@@ -38,7 +38,7 @@ static android::base::LazyInstance<ClipboardPipeInstance> sInstance = {};
 ClipboardPipe::ClipboardPipe(void* hwPipe, Service* svc)
     : AndroidPipe(hwPipe, svc) {}
 
-void ClipboardPipe::onGuestClose() {
+void ClipboardPipe::onGuestClose(PipeCloseReason reason) {
     ClipboardPipe::Service::closePipe();
 }
 
