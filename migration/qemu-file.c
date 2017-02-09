@@ -569,52 +569,63 @@ void qemu_file_reset_rate_limit(QEMUFile *f)
     f->bytes_xfer = 0;
 }
 
+static unsigned int swap_endianness_16(unsigned short v)
+{
+    return ((v & 0xff00) >> 8) | (v << 8);
+}
+
+static unsigned int swap_endianness_32(unsigned int v)
+{
+    return ((v & 0xff000000) >> 24) | ((v & 0xff0000) >> 8) |
+           ((v & 0xff00) << 8) | v << 24;
+}
+
+static uint64_t swap_endianness_64(uint64_t v)
+{
+    return ((v & 0xff00000000000000ull) >> 56) |
+           ((v & 0xff000000000000ull) >> 40) |
+           ((v & 0xff0000000000ull) >> 24) | ((v & 0xff00000000ull) >> 8) |
+           ((v & 0xff000000ull) << 8) | ((v & 0xff0000ull) << 24) |
+           ((v & 0xff00) << 40) | v << 56;
+}
+
 void qemu_put_be16(QEMUFile *f, unsigned int v)
 {
-    v = ((v & 0xff00) >> 8) | (v << 8);
+    v = swap_endianness_16(v);
     qemu_put_buffer(f, (const uint8_t*)&v, 2);
 }
 
 void qemu_put_be32(QEMUFile *f, unsigned int v)
 {
-    v = ((v & 0xff000000) >> 24) | ((v & 0xff0000) >> 8) |
-        ((v & 0xff00) << 8) | v << 24;
+    v = swap_endianness_32(v);
     qemu_put_buffer(f, (const uint8_t*)&v, 4);
 }
 
 void qemu_put_be64(QEMUFile *f, uint64_t v)
 {
-    v = ((v & 0xff00000000000000ull) >> 56) | ((v & 0xff000000000000ull) >> 40) |
-        ((v & 0xff0000000000ull) >> 24) | ((v & 0xff00000000ull) >> 8) |
-        ((v & 0xff000000ull) << 8) | ((v & 0xff0000ull) << 24) |
-        ((v & 0xff00) << 40) | v << 56;
+    v = swap_endianness_64(v);
     qemu_put_buffer(f, (const uint8_t*)&v, 8);
 }
 
 unsigned int qemu_get_be16(QEMUFile *f)
 {
-    unsigned int v;
-    v = qemu_get_byte(f) << 8;
-    v |= qemu_get_byte(f);
-    return v;
+    unsigned short v;
+    qemu_get_buffer(f, (uint8_t*)&v, 2);
+    return swap_endianness_16(v);
 }
 
 unsigned int qemu_get_be32(QEMUFile *f)
 {
     unsigned int v;
-    v = (unsigned int)qemu_get_byte(f) << 24;
-    v |= qemu_get_byte(f) << 16;
-    v |= qemu_get_byte(f) << 8;
-    v |= qemu_get_byte(f);
-    return v;
+    qemu_get_buffer(f, (uint8_t*)&v, 4);
+    return swap_endianness_32(v);
 }
 
 uint64_t qemu_get_be64(QEMUFile *f)
 {
     uint64_t v;
-    v = (uint64_t)qemu_get_be32(f) << 32;
-    v |= qemu_get_be32(f);
-    return v;
+    qemu_get_buffer(f, (uint8_t*)&v, 8);
+    return swap_endianness_64(v);
 }
 
 /* Compress size bytes of data start at p with specific compression
