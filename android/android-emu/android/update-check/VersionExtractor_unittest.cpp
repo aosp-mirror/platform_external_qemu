@@ -41,6 +41,67 @@ TEST(VersionExtractorTest, validVersion) {
     EXPECT_EQ(Version(1,2,3), ver[UpdateChannel::Canary]);
 }
 
+TEST(VersionExtractorTest, toolsToEmulatorPackageChange) {
+    {
+        std::string xml =
+                R"(<sdk:sdk-repository
+                    xmlns:common="http://schemas.android.com/repository/android/common/01"
+                    xmlns:generic="http://schemas.android.com/repository/android/generic/01"
+                    xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/01"
+                    xmlns:sdk-common="http://schemas.android.com/sdk/android/repo/common/01"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"> )"
+                R"(<remotePackage path="tools">)"
+                R"(<revision>)"
+                R"(<major>25</major>)"
+                R"(<minor>3</minor>)"
+                R"(<micro>3</micro>)"
+                R"(</revision>)"
+                R"(</remotePackage>)"
+                R"(<remotePackage path="emulator">)"
+                R"(<revision>)"
+                R"(<major>25</major>)"
+                R"(<minor>3</minor>)"
+                R"(<micro>2</micro>)"
+                R"(</revision>)"
+                R"(</remotePackage>)"
+                R"(</sdk:sdk-repository>)";
+
+        auto ver = VersionExtractor().extractVersions(xml);
+        EXPECT_EQ(1U, ver.size());
+        // It should pick the version from "emulator" package as it's >=25.3.
+        EXPECT_EQ(Version(25, 3, 2), ver[UpdateChannel::Canary]);
+    }
+    {
+        std::string xml =
+                R"(<sdk:sdk-repository
+                    xmlns:common="http://schemas.android.com/repository/android/common/01"
+                    xmlns:generic="http://schemas.android.com/repository/android/generic/01"
+                    xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/01"
+                    xmlns:sdk-common="http://schemas.android.com/sdk/android/repo/common/01"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"> )"
+                R"(<remotePackage path="tools">)"
+                R"(<revision>)"
+                R"(<major>24</major>)"
+                R"(<minor>3</minor>)"
+                R"(<micro>1</micro>)"
+                R"(</revision>)"
+                R"(</remotePackage>)"
+                R"(<remotePackage path="emulator">)"
+                R"(<revision>)"
+                R"(<major>24</major>)"
+                R"(<minor>3</minor>)"
+                R"(<micro>2</micro>)"
+                R"(</revision>)"
+                R"(</remotePackage>)"
+                R"(</sdk:sdk-repository>)";
+
+        auto ver = VersionExtractor().extractVersions(xml);
+        EXPECT_EQ(1U, ver.size());
+        // It should pick the version from "tools" package as it's <25.3.
+        EXPECT_EQ(Version(24, 3, 1), ver[UpdateChannel::Canary]);
+    }
+}
+
 TEST(VersionExtractorTest, withBuild) {
     std::string xml =
             R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repo/repository2/01"> )"
