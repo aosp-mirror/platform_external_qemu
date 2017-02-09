@@ -101,8 +101,9 @@ static HwPipe* hwpipe_new(uint64_t channel, struct PipeDevice* device) {
 }
 
 static void hwpipe_free(HwPipe* hwp) {
-  android_pipe_guest_close(hwp->pipe);
-  free(hwp);
+    /* All legacy pipes are OK with a single 'graceful' reason. */
+    android_pipe_guest_close(hwp->pipe, PIPE_CLOSE_GRACEFUL);
+    free(hwp);
 }
 
 static HwPipe** hwpipe_findp_by_channel(HwPipe** list, uint64_t channel) {
