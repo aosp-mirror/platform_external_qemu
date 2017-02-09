@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "419b023a_bcf4966a",
+        "filename": "android/android-emu/android/skin/qt/resources.qrc",
+        "patchSetId": 2
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1136238
+      },
+      "writtenOn": "2017-02-09T14:49:26Z",
+      "side": 1,
+      "message": "no alias for this one?",
+      "revId": "3bec1fd2ab7334bc02245df72dd4eb1a5178e9fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
