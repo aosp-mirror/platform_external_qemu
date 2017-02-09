@@ -78,9 +78,7 @@ static std::string getTestCrasher() {
 }
 
 static std::vector<std::string> getTestCrasherCmdLine(std::string pipe) {
-    // Delaying crash for 500 ms to avoid tests waiting on this crash to be
-    // flaky
-    const std::vector<std::string> cmdline = {getTestCrasher(), "-pipe", pipe, "-delay_ms", "500"};
+    const std::vector<std::string> cmdline = {getTestCrasher(), "-pipe", pipe};
     return cmdline;
 }
 
