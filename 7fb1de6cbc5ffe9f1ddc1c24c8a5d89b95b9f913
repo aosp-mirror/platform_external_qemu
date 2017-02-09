@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "69d7866d_8861cce5",
+        "filename": "android/android-emu/android/avd/util.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-09T16:20:01Z",
+      "side": 1,
+      "message": "now we have 3 functions that dig into ro.product.name and do some string operation, suggest factoring out the common parts into a common procedure.",
+      "range": {
+        "startLine": 243,
+        "startChar": 0,
+        "endLine": 243,
+        "endChar": 30
+      },
+      "revId": "7fb1de6cbc5ffe9f1ddc1c24c8a5d89b95b9f913",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3949d0e5_2d9e4e40",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-09T16:20:01Z",
+      "side": 1,
+      "message": "It could be confusing whether this is to set any callback or just for the car. Can you add \"android_car\" (or similar) as prefix to both the |_callback| and |set_call_back|?",
+      "range": {
+        "startLine": 101,
+        "startChar": 0,
+        "endLine": 102,
+        "endChar": 25
+      },
+      "revId": "7fb1de6cbc5ffe9f1ddc1c24c8a5d89b95b9f913",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
