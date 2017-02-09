@@ -1314,8 +1314,6 @@ static int goldfish_pipe_load_v1(QEMUFile* file, PipeDevice* dev) {
     dev->wakes = qemu_get_be32(file);
     dev->params_addr = qemu_get_be64(file);
 
-    /* Clean up old pipe objects. */
-    dev->ops->close_all(dev, GOLDFISH_PIPE_CLOSE_LOAD_SNAPSHOT);
     dev->ops = &pipe_ops_v1;
 
     /* Restore pipes. */
@@ -1448,9 +1446,6 @@ static int goldfish_pipe_load_v2(QEMUFile* file, PipeDevice* dev) {
         goto done;
     }
 
-    /* Clean up old pipe objects. */
-    dev->wanted_pipes_first = NULL;
-    dev->ops->close_all(dev, GOLDFISH_PIPE_CLOSE_LOAD_SNAPSHOT);
     dev->ops = &pipe_ops_v2;
 
     int pipes_capacity = qemu_get_be32(file);
@@ -1542,6 +1537,14 @@ done:
 static int goldfish_pipe_load(QEMUFile* f, void* opaque, int version_id) {
     GoldfishPipeState* s = opaque;
     PipeDevice* dev = s->dev;
+
+    /* As a first step close all old pipes to make sure they don't interfere
+     * with the loading process.
+     */
+    dev->wanted_pipes_first = NULL;
+    dev->wanted_pipe_after_channel_high = NULL;
+    dev->ops->close_all(dev, GOLDFISH_PIPE_CLOSE_LOAD_SNAPSHOT);
+
     service_ops->guest_pre_load(f);
     int res = goldfish_pipe_load_v2(f, dev);
     service_ops->guest_post_load(f);
