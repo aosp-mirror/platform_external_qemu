@@ -22,6 +22,30 @@
       "revId": "8057c086d32caa4aff6b750e3d26c56ac3a3ec81",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "afa45221_7b76bfd5",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-09T16:02:17Z",
+      "side": 1,
+      "message": "Ack. That std::find_if\u0027s pretty cool, something else to use everywhere :)",
+      "parentUuid": "72018b0b_f2eea2e4",
+      "range": {
+        "startLine": 130,
+        "startChar": 0,
+        "endLine": 146,
+        "endChar": 5
+      },
+      "revId": "8057c086d32caa4aff6b750e3d26c56ac3a3ec81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
