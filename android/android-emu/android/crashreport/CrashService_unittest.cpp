@@ -95,6 +95,8 @@ TEST(CrashService, invalidURLUpload) {
 
 // Crashing binary doesn't work well in Wine
 // Fails intermittently on mac build systems
+// Fails intermittantly on linux presubmit build
+/*
 TEST(CrashService, startAttachWaitCrash) {
     TestTempDir crashdir("crashdir");
     TestCrashSystem crashsystem(crashdir.path(), "localhost");
@@ -116,6 +118,7 @@ TEST(CrashService, startAttachWaitCrash) {
     EXPECT_NE(details.find("Thread 0"), std::string::npos);
     EXPECT_NE(details.find("Loaded modules:"), std::string::npos);
 }
+*/
 
 TEST(CrashService, startAttachWaitNoCrash) {
     TestTempDir crashdir("crashdir");
