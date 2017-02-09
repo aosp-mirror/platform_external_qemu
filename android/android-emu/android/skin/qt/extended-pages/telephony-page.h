@@ -16,6 +16,15 @@
 #include <QWidget>
 #include <memory>
 
+class TelephonyEvent : public QEvent {
+public:
+    TelephonyEvent(QEvent::Type type, int theCode) :
+        QEvent(type),
+        code(theCode) { }
+public:
+    int code;
+};
+
 struct QAndroidTelephonyAgent;
 class TelephonyPage : public QWidget
 {
@@ -23,13 +32,17 @@ class TelephonyPage : public QWidget
 
 public:
     explicit TelephonyPage(QWidget *parent = 0);
+    ~TelephonyPage();
 
     void setTelephonyAgent(const QAndroidTelephonyAgent* agent);
+    void eventLauncher(int);
 
 private slots:
     void on_tel_startEndButton_clicked();
     void on_tel_holdCallButton_clicked();
     void on_sms_sendButton_clicked();
+
+    void customEvent(QEvent*);
 
 private:
     class PhoneNumberValidator : public QValidator
@@ -50,4 +63,5 @@ private:
     const QAndroidTelephonyAgent* mTelephonyAgent;
     CallActivity mCallActivity;
     QString mPhoneNumber;
+    QEvent::Type mCustomEventType;
 };

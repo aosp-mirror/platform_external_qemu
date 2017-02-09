@@ -345,6 +345,12 @@ typedef struct AModemRec_
 
     const char *emergency_numbers[MAX_EMERGENCY_NUMBERS];
 
+    /*
+     * Call-back function to receive notifications of
+     * changes in status
+     */
+    ModemCallback* notify_call_back;
+
     /* Logical channels */
     struct {
         char* df_name;
@@ -363,6 +369,11 @@ typedef struct SIM_APDU {
     uint8_t param3;
     char* data;
 } SIM_APDU;
+
+
+void amodem_set_notification_callback(AModem modem, ModemCallback* callback_func) {
+    modem->notify_call_back = callback_func;
+}
 
 static bool parseHexCharsToBuffer(const char* str, int length, char* output) {
     int i;
@@ -943,6 +954,9 @@ amodem_alloc_call( AModem   modem )
         call->modem   = modem;
 
         modem->call_count += 1;
+        if (modem->notify_call_back) {
+            modem->notify_call_back(modem->call_count);
+        }
     }
     return call;
 }
@@ -974,6 +988,9 @@ amodem_free_call( AModem  modem, AVoiceCall  call )
              (modem->call_count - 1 - nn)*sizeof(*call) );
 
     modem->call_count -= 1;
+    if (modem->notify_call_back) {
+        modem->notify_call_back(modem->call_count);
+    }
 }
 
 
