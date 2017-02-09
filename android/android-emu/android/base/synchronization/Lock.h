@@ -150,6 +150,8 @@ public:
         mLocked = false;
     }
 
+    bool isLocked() const { return mLocked; }
+
     ~AutoLock() {
         if (mLocked) {
             mLock.unlock();
