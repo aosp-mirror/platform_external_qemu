@@ -16,6 +16,7 @@
 
 #include "android/base/async/Looper.h"
 #include "android/base/testing/TestLooper.h"
+#include "android/base/testing/TestThread.h"
 
 #include <gtest/gtest.h>
 
@@ -23,6 +24,7 @@
 
 using android::base::Looper;
 using android::base::TestLooper;
+using android::base::TestThread;
 using android::base::RecurrentTask;
 using std::unique_ptr;
 
@@ -109,7 +111,7 @@ TEST(RecurrentTaskTest, deleteStartedObject) {
 }
 
 static bool stopAndReturn(RecurrentTask* task, int* count) {
-    task->stop();
+    task->stopAsync();
     // Let's not overflow and succeed flakily.
     if (*count < 10) {
         ++(*count);
@@ -129,4 +131,33 @@ TEST(RecurrentTaskTest, stopFromCallback) {
     EXPECT_TRUE(task.inFlight());
     looper.runWithTimeoutMs(50);
     EXPECT_EQ(1, count);
+}
+
+TEST(RecurrentTaskTest, stopAndWait) {
+    TestLooper looper;
+    int count = 0;
+    RecurrentTask task(&looper,
+                       [&count]() {
+                           ++count;
+                           return true;
+                       },
+                       0);
+    task.start();
+    EXPECT_TRUE(task.inFlight());
+
+    TestThread runner([](void* param) -> void* {
+        auto looper = (TestLooper*)param;
+        EXPECT_EQ(EWOULDBLOCK,
+                  looper->runWithDeadlineMs(Looper::kDurationInfinite));
+        return nullptr;
+    }, &looper);
+
+    // If there's any but with the task's stop method, the test would hang in
+    // the next call forever as looper won't be able to break out of its run()
+    // call.
+    task.stopAndWait();
+    runner.join();
+
+    // It's possible that the task won't run even once.
+    EXPECT_GE(count, 0);
 }
