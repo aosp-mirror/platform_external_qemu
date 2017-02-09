@@ -1,0 +1,95 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2add6174_1c44c1c3",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/rotary-input-dial.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-09T15:36:08Z",
+      "side": 1,
+      "message": "Copyright notice",
+      "revId": "94b05a7e0fc15d5c1e6e32f6477b7c1acd625ad5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c39022d2_7aaf1b94",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/rotary-input-dial.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-09T15:36:08Z",
+      "side": 1,
+      "message": "Should paste in the standard copyright notice (with 2017)",
+      "revId": "94b05a7e0fc15d5c1e6e32f6477b7c1acd625ad5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1fc7bffb_b08969b0",
+        "filename": "android/android-emu/android/skin/qt/resources.qrc",
+        "patchSetId": 4
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-09T15:36:08Z",
+      "side": 1,
+      "message": "Please move these to be alphabetical by alias.",
+      "range": {
+        "startLine": 114,
+        "startChar": 8,
+        "endLine": 117,
+        "endChar": 3
+      },
+      "revId": "94b05a7e0fc15d5c1e6e32f6477b7c1acd625ad5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b664102_2960cfe3",
+        "filename": "android/android-emu/android/skin/qt/resources.qrc",
+        "patchSetId": 4
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-09T15:36:08Z",
+      "side": 1,
+      "message": "Please move to be alphabetical",
+      "revId": "94b05a7e0fc15d5c1e6e32f6477b7c1acd625ad5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "14b36217_fbd1c7ee",
+        "filename": "android/android-emu/android/skin/qt/resources.qrc",
+        "patchSetId": 4
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-09T15:36:08Z",
+      "side": 1,
+      "message": "Do we need a dark version of side_on_watch?",
+      "revId": "94b05a7e0fc15d5c1e6e32f6477b7c1acd625ad5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
