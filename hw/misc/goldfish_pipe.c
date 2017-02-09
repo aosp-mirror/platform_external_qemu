@@ -235,7 +235,7 @@ union access_params {
 /* A set of version-specific pipe operations */
 typedef struct {
     void (*wanted_list_add)(PipeDevice* dev, GoldfishHwPipe* pipe);
-    void (*close_all)(PipeDevice* dev);
+    void (*close_all)(PipeDevice* dev, GoldfishPipeCloseReason reason);
     void (*save)(QEMUFile* file, PipeDevice* dev);
 
     void (*dev_write)(PipeDevice* dev, hwaddr offset, uint64_t value);
@@ -441,9 +441,9 @@ static HwPipe* hwpipe_new(uint32_t id, uint64_t channel, PipeDevice* dev) {
     return pipe;
 }
 
-static void hwpipe_free(HwPipe* pipe) {
+static void hwpipe_free(HwPipe* pipe, GoldfishPipeCloseReason reason) {
     if (pipe->host_pipe)
-        service_ops->guest_close(pipe->host_pipe);
+        service_ops->guest_close(pipe->host_pipe, reason);
 
     g_free(pipe);
 }
@@ -567,23 +567,23 @@ static void unmap_command_buffer(void* buffer) {
                               COMMAND_BUFFER_SIZE);
 }
 
-static void close_all_pipes_v1(PipeDevice* dev) {
+static void close_all_pipes_v1(PipeDevice* dev, GoldfishPipeCloseReason reason) {
     HwPipe* pipe = dev->pipes_list;
     while (pipe) {
         HwPipe* next = pipe->next;
-        hwpipe_free(pipe);
+        hwpipe_free(pipe, reason);
         pipe = next;
     }
     dev->pipes_list = NULL;
 }
 
-static void close_all_pipes_v2(PipeDevice* dev) {
+static void close_all_pipes_v2(PipeDevice* dev, GoldfishPipeCloseReason reason) {
     int i = 0;
     for (; i < dev->pipes_capacity; ++i) {
         HwPipe* pipe = dev->pipes[i];
         if (pipe) {
             unmap_command_buffer(pipe->command_buffer);
-            hwpipe_free(pipe);
+            hwpipe_free(pipe, reason);
             dev->pipes[i] = NULL;
         }
     }
@@ -623,7 +623,7 @@ static void pipeDevice_doCommand_v1(PipeDevice* dev, uint32_t command) {
         }
         pipe = hwpipe_new(0, dev->channel, dev);
         if (!pipe->host_pipe) {
-            hwpipe_free(pipe);
+            hwpipe_free(pipe, GOLDFISH_PIPE_CLOSE_ERROR);
             dev->status = GOLDFISH_PIPE_ERROR_INVAL;
             break;
         }
@@ -654,7 +654,7 @@ static void pipeDevice_doCommand_v1(PipeDevice* dev, uint32_t command) {
                             hash_cast_key_from_channel(&pipe->channel));
         wanted_pipes_remove_v1(dev, pipe);
 
-        hwpipe_free(pipe);
+        hwpipe_free(pipe, GOLDFISH_PIPE_CLOSE_GRACEFUL);
         break;
     }
 
@@ -770,7 +770,7 @@ static void pipeDevice_doOpenClose_v2(PipeDevice* dev, uint32_t id) {
 
     HwPipe* pipe = hwpipe_new(id, 0, dev);
     if (!pipe || !pipe->host_pipe) {
-        hwpipe_free(pipe);
+        hwpipe_free(pipe, GOLDFISH_PIPE_CLOSE_ERROR);
         commandBuffer->status = GOLDFISH_PIPE_ERROR_NOMEM;
         unmap_command_buffer(commandBuffer);
         return;
@@ -804,7 +804,7 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
             wanted_pipes_remove_v2(dev, pipe);
             pipe->command_buffer->status = 0;
             unmap_command_buffer(pipe->command_buffer);
-            hwpipe_free(pipe);
+            hwpipe_free(pipe, GOLDFISH_PIPE_CLOSE_GRACEFUL);
             break;
         }
 
@@ -944,7 +944,7 @@ static uint64_t pipe_dev_read(void* opaque, hwaddr offset, unsigned size) {
         // PIPE_REG_VERSION is issued on probe, which means that
         // we should clean up all existing stale pipes.
         // This helps keep the right state on rebooting.
-        dev->ops->close_all(dev);
+        dev->ops->close_all(dev, GOLDFISH_PIPE_CLOSE_REBOOT);
         reset_pipe_device(dev);
         if (dev->driver_version < MAX_SUPPORTED_DRIVER_VERSION) {
             // Old driver used to not report its version at all.
@@ -1315,7 +1315,7 @@ static int goldfish_pipe_load_v1(QEMUFile* file, PipeDevice* dev) {
     dev->params_addr = qemu_get_be64(file);
 
     /* Clean up old pipe objects. */
-    dev->ops->close_all(dev);
+    dev->ops->close_all(dev, GOLDFISH_PIPE_CLOSE_LOAD_SNAPSHOT);
     dev->ops = &pipe_ops_v1;
 
     /* Restore pipes. */
@@ -1342,7 +1342,7 @@ static int goldfish_pipe_load_v1(QEMUFile* file, PipeDevice* dev) {
             pipe->closed = 1;
             force_closed_pipes[force_closed_pipes_count++] = pipe->channel;
         } else if (!pipe->host_pipe) {
-            hwpipe_free(pipe);
+            hwpipe_free(pipe, GOLDFISH_PIPE_CLOSE_LOAD_SNAPSHOT);
             free(force_closed_pipes);
             return -EIO;
         }
@@ -1450,7 +1450,7 @@ static int goldfish_pipe_load_v2(QEMUFile* file, PipeDevice* dev) {
 
     /* Clean up old pipe objects. */
     dev->wanted_pipes_first = NULL;
-    dev->ops->close_all(dev);
+    dev->ops->close_all(dev, GOLDFISH_PIPE_CLOSE_LOAD_SNAPSHOT);
     dev->ops = &pipe_ops_v2;
 
     int pipes_capacity = qemu_get_be32(file);
@@ -1479,7 +1479,7 @@ static int goldfish_pipe_load_v2(QEMUFile* file, PipeDevice* dev) {
         pipe->command_buffer = (PipeCommand*)map_guest_buffer(
                 pipe->command_buffer_addr, COMMAND_BUFFER_SIZE, /*is_write*/1);
         if (!pipe->command_buffer) {
-            hwpipe_free(pipe);
+            hwpipe_free(pipe, GOLDFISH_PIPE_CLOSE_ERROR);
             goto done;
         }
         pipe->rw_params_max_count = qemu_get_be32(file);
@@ -1498,13 +1498,13 @@ static int goldfish_pipe_load_v2(QEMUFile* file, PipeDevice* dev) {
             force_closed_pipes[force_closed_pipes_count++] = pipe->id;
         } else if (!pipe->host_pipe) {
             unmap_command_buffer(pipe->command_buffer);
-            hwpipe_free(pipe);
+            hwpipe_free(pipe, GOLDFISH_PIPE_CLOSE_LOAD_SNAPSHOT);
             goto done;
         }
 
         if (dev->pipes[pipe->id]) {
             unmap_command_buffer(pipe->command_buffer);
-            hwpipe_free(pipe);
+            hwpipe_free(pipe, GOLDFISH_PIPE_CLOSE_ERROR);
             goto done;
         }
         dev->pipes[pipe->id] = pipe;

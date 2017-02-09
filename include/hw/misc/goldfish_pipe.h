@@ -51,6 +51,14 @@ typedef enum {
     GOLDFISH_PIPE_ERROR_IO = -4,
 } GoldfishPipeError;
 
+/* List of reasons why pipe is closed. */
+typedef enum {
+    GOLDFISH_PIPE_CLOSE_GRACEFUL = 0,
+    GOLDFISH_PIPE_CLOSE_REBOOT = 1,
+    GOLDFISH_PIPE_CLOSE_LOAD_SNAPSHOT = 2,
+    GOLDFISH_PIPE_CLOSE_ERROR = 3,
+} GoldfishPipeCloseReason;
+
 /* Opaque type of the hardware-side view of a pipe connection. This structure
  * is implemented by the virtual device and is hidden from the host service
  * implementation. */
@@ -73,8 +81,9 @@ typedef struct {
 
     // Close and free a pipe. |host_pipe| must be the result of a previous
     // guest_open() or guest_load() call, or the second parameter to
-    // goldfish_pipe_reset().
-    void (*guest_close)(GoldfishHostPipe *host_pipe);
+    // goldfish_pipe_reset(). |reason| is why the pipe was closed.
+    void (*guest_close)(GoldfishHostPipe *host_pipe,
+                        GoldfishPipeCloseReason reason);
 
     // A set of hooks to prepare and cleanup save/load operations. These are
     // called once per each snapshot operation, as opposed to the following
