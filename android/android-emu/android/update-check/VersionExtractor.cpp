@@ -204,13 +204,21 @@ IVersionExtractor::Versions VersionExtractor::extractVersions(
             channelMap[std::string(reinterpret_cast<const char*>(id.get()))] =
                     channel;
         } else if (xmlStrcmp(node->name, BAD_CAST "remotePackage") == 0) {
-            // <remotePackage path="tools">
+            // <remotePackage path="emulator|tools">
             //  !version
             //  !channel info
             //  !build info
-            // </revotePachage>
+            // </remotePachage>
             xmlAutoPtr<xmlChar> pathVal(xmlGetProp(node, BAD_CAST "path"));
-            if (!pathVal || xmlStrcmp(pathVal.get(), BAD_CAST "tools") != 0) {
+            if (!pathVal) {
+                continue;
+            }
+
+            const bool isEmulatorPackage =
+                    xmlStrcmp(pathVal.get(), BAD_CAST "emulator") == 0;
+            const bool isToolsPackage = !isEmulatorPackage &&
+                    xmlStrcmp(pathVal.get(), BAD_CAST "tools") == 0;
+            if (!isEmulatorPackage && !isToolsPackage) {
                 continue;
             }
 
@@ -218,6 +226,13 @@ IVersionExtractor::Versions VersionExtractor::extractVersions(
             std::string channelName;
             std::tie(nodeVer, channelName) = parseVersion(node);
             if (!nodeVer.isValid()) {
+                continue;
+            }
+            // Emulator used to be a part of "tools" package until version 25.3.
+            // Skip all "tools" packages after that one, and don't care about
+            // the "emulator" packages before 25.3 as well.
+            if ((isEmulatorPackage && nodeVer < Version(25, 3, 0)) ||
+                (isToolsPackage && !(nodeVer < Version(25, 3, 0)))) {
                 continue;
             }
 
