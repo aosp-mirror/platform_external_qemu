@@ -58,7 +58,23 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
                     android_pipe_guest_open(hwPipe));
         },
         // guest_close()
-        [](GoldfishHostPipe* hostPipe) { android_pipe_guest_close(hostPipe); },
+        [](GoldfishHostPipe* hostPipe, GoldfishPipeCloseReason reason) {
+            static_assert((int)GOLDFISH_PIPE_CLOSE_GRACEFUL ==
+                                  (int)PIPE_CLOSE_GRACEFUL,
+                          "Invalid PIPE_CLOSE_GRACEFUL value");
+            static_assert(
+                    (int)GOLDFISH_PIPE_CLOSE_REBOOT == (int)PIPE_CLOSE_REBOOT,
+                    "Invalid PIPE_CLOSE_REBOOT value");
+            static_assert((int)GOLDFISH_PIPE_CLOSE_LOAD_SNAPSHOT ==
+                                  (int)PIPE_CLOSE_LOAD_SNAPSHOT,
+                          "Invalid PIPE_CLOSE_LOAD_SNAPSHOT value");
+            static_assert(
+                    (int)GOLDFISH_PIPE_CLOSE_ERROR == (int)PIPE_CLOSE_ERROR,
+                    "Invalid PIPE_CLOSE_ERROR value");
+
+            android_pipe_guest_close(hostPipe,
+                                     static_cast<PipeCloseReason>(reason));
+        },
         // guest_pre_load()
         [](QEMUFile* file) {
             QemuFileStream stream(file);
