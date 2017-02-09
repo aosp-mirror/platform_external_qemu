@@ -186,6 +186,24 @@
       "revId": "94b05a7e0fc15d5c1e6e32f6477b7c1acd625ad5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31be115e_4cd4a909",
+        "filename": "android/android-emu/android/skin/qt/resources.qrc",
+        "patchSetId": 4
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-09T15:53:47Z",
+      "side": 1,
+      "message": "I think it\u0027s OK.",
+      "parentUuid": "144aad87_39139fd2",
+      "revId": "94b05a7e0fc15d5c1e6e32f6477b7c1acd625ad5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
