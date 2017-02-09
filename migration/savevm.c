@@ -1170,6 +1170,10 @@ static int qemu_savevm_state(QEMUFile *f, Error **errp)
     MigrationStatus status;
     ms->to_dst_file = f;
 
+    if (ms->enabled_capabilities[MIGRATION_CAPABILITY_COMPRESS]) {
+        migrate_compress_threads_create();
+    }
+
     if (migration_is_blocked(errp)) {
         ret = -EINVAL;
         goto done;
@@ -1203,6 +1207,9 @@ done:
         status = MIGRATION_STATUS_COMPLETED;
     }
     migrate_set_state(&ms->state, MIGRATION_STATUS_SETUP, status);
+    if (ms->enabled_capabilities[MIGRATION_CAPABILITY_COMPRESS]) {
+        migrate_compress_threads_join();
+    }
     return ret;
 }
 
