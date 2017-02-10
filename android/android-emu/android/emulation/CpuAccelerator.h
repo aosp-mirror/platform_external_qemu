@@ -47,11 +47,9 @@ enum CpuAccelerator {
 // can be used properly. Otherwise it will return CPU_ACCELERATOR_NONE.
 CpuAccelerator  GetCurrentCpuAccelerator();
 
-// Returns an array of bools indicating whether or not
-// each accelerator type listed in the enum CpuAccelerator is supported
-// on the current system., i.e., if we want kvm support,
-// we query the array at index CPU_ACCELERATOR_KVM.
-const bool* GetCurrentSupportedCpuAccelerators();
+// Returns whether or not the accelerator |type| is suppored
+// on the current system.
+bool GetCurrentAcceleratorSupport(CpuAccelerator type);
 
 // Return an ASCII string describing the state of the current CPU
 // acceleration on this machine. If GetCurrentCpuAccelerator() returns
