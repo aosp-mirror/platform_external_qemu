@@ -90,8 +90,7 @@ typedef enum {
 /* Returns the auto-selected CPU accelerator. */
 AndroidCpuAccelerator androidCpuAcceleration_getAccelerator();
 
-/* Returns support status of all possible accelerator types
- * on the current machine. */
-const bool* androidCpuAcceleration_getSupportedAccelerators();
+/* Returns support status of the cpu accelerator |type| on the current machine. */
+bool androidCpuAcceleration_isAcceleratorSupported(AndroidCpuAccelerator type);
 
 ANDROID_END_HEADER

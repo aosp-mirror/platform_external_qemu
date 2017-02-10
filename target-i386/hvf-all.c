@@ -35,6 +35,7 @@
 #include "exec/ioport.h"
 #include "hw/i386/apic_internal.h"
 #include "qemu/main-loop.h"
+#include "qemu/abort.h"
 #include "strings.h"
 #include "sysemu/accel.h"
 #include "sysemu/sysemu.h"
@@ -100,24 +101,24 @@ void assert_hvf_ok(int r) {
 
     switch (r) {
         case HV_SUCCESS:
-            fprintf(stderr, "FATAL: HVF error: HV_SUCCESS\n", __func__); break;
+            fprintf(stderr, "FATAL: HVF error: HV_SUCCESS\n", r); break;
         case HV_ERROR:
-            fprintf(stderr, "FATAL: HVF error: HV_ERROR\n", __func__); break;
+            fprintf(stderr, "FATAL: HVF error: HV_ERROR\n", r); break;
         case HV_BUSY:
-            fprintf(stderr, "FATAL: HVF error: HV_BUSY\n", __func__); break;
+            fprintf(stderr, "FATAL: HVF error: HV_BUSY\n", r); break;
         case HV_BAD_ARGUMENT:
-            fprintf(stderr, "FATAL: HVF error: HV_BAD_ARGUMENT\n", __func__); break;
+            fprintf(stderr, "FATAL: HVF error: HV_BAD_ARGUMENT\n", r); break;
         case HV_NO_RESOURCES:
-            fprintf(stderr, "FATAL: HVF error: HV_NO_RESOURCES\n", __func__); break;
+            fprintf(stderr, "FATAL: HVF error: HV_NO_RESOURCES\n", r); break;
         case HV_NO_DEVICE:
-            fprintf(stderr, "FATAL: HVF error: HV_NO_DEVICE\n", __func__); break;
+            fprintf(stderr, "FATAL: HVF error: HV_NO_DEVICE\n", r); break;
         case HV_UNSUPPORTED:
-            fprintf(stderr, "FATAL: HVF error: HV_UNSUPPORTED\n", __func__); break;
+            fprintf(stderr, "FATAL: HVF error: HV_UNSUPPORTED\n", r); break;
         default:
-            fprintf(stderr, "FATAL: HVF Unknown error heh\n", __func__); break;
+            fprintf(stderr, "FATAL: HVF Unknown error heh\n", r); break;
             break;
     }
-    abort();
+    qemu_abort("HVF fatal error\n");
 }
 // Memory slots/////////////////////////////////////////////////////////////////
 
@@ -166,7 +167,7 @@ int __hvf_set_memory(hvf_slot *slot) {
     }
 
     flags = HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC;
-    
+
     macslot->present = 1;
     macslot->gpa_start = slot->start;
     macslot->size = slot->size;
@@ -197,12 +198,11 @@ void hvf_set_phys_mem(MemoryRegionSection* section, bool add) {
             return; // Same region was attempted to register, go away.
     }
 
-    // Region needs to be reset. set the size to 0 and remap it. 
+    // Region needs to be reset. set the size to 0 and remap it.
     if (mem) {
         mem->size = 0;
         if (__hvf_set_memory(mem)) {
-            // DPRINTF("error re-registering memory\n");
-            abort();
+            qemu_abort("%s: Failed to reset overlapping slot\n", __func__);
         }
     }
 
@@ -218,8 +218,7 @@ void hvf_set_phys_mem(MemoryRegionSection* section, bool add) {
     }
 
     if (x == hvf_state->num_slots) {
-        DPRINTF("no free slots\n");
-        abort();
+        qemu_abort("%s: no free slots\n", __func__);
     }
 
     mem->size = int128_get64(section->size);
@@ -227,8 +226,7 @@ void hvf_set_phys_mem(MemoryRegionSection* section, bool add) {
     mem->start = section->offset_within_address_space;
 
     if (__hvf_set_memory(mem)) {
-        // DPRINTF("error registering memory\n");
-        abort();
+        qemu_abort("%s: error regsitering new memory slot\n", __func__);
     }
 }
 
@@ -264,11 +262,7 @@ static MemoryListener hvf_io_listener = {
 
 int hvf_enabled() { return !hvf_disabled; }
 void hvf_disable(int shouldDisable) {
-    if (shouldDisable) {
-        hvf_disabled = 1;
-    } else {
-        hvf_disabled = 0;
-    }
+    hvf_disabled = shouldDisable;
 }
 
 void vmx_reset_vcpu(CPUState *cpu) {
@@ -321,7 +315,7 @@ void vmx_reset_vcpu(CPUState *cpu) {
     wvmcs(cpu->hvf_fd, VMCS_GUEST_TR_LIMIT, 0);
     wvmcs(cpu->hvf_fd, VMCS_GUEST_TR_ACCESS_RIGHTS, 0x83);
     wvmcs(cpu->hvf_fd, VMCS_GUEST_TR_BASE, 0);
-    
+
     wvmcs(cpu->hvf_fd, VMCS_GUEST_GDTR_LIMIT, 0);
     wvmcs(cpu->hvf_fd, VMCS_GUEST_GDTR_BASE, 0);
 
@@ -355,7 +349,7 @@ int hvf_init_vcpu(CPUState * cpu) {
     DPRINTF("%s: entry. cpu: %p\n", __func__, cpu);
 
     X86CPU *x86cpu;
-    
+
     int r;
     init_emu(cpu);
     init_decoder(cpu);
@@ -370,13 +364,13 @@ int hvf_init_vcpu(CPUState * cpu) {
     assert_hvf_ok(r);
 
 	if (hv_vmx_read_capability(HV_VMX_CAP_PINBASED, &cpu->hvf_caps->vmx_cap_pinbased))
-		abort();
+		qemu_abort("%s: error getting vmx capability HV_VMX_CAP_PINBASED\n", __func__);
 	if (hv_vmx_read_capability(HV_VMX_CAP_PROCBASED, &cpu->hvf_caps->vmx_cap_procbased))
-		abort();
+		qemu_abort("%s: error getting vmx capability HV_VMX_CAP_PROCBASED\n", __func__);
 	if (hv_vmx_read_capability(HV_VMX_CAP_PROCBASED2, &cpu->hvf_caps->vmx_cap_procbased2))
-		abort();
+		qemu_abort("%s: error getting vmx capability HV_VMX_CAP_PROCBASED2\n", __func__);
 	if (hv_vmx_read_capability(HV_VMX_CAP_ENTRY, &cpu->hvf_caps->vmx_cap_entry))
-		abort();
+		qemu_abort("%s: error getting vmx capability HV_VMX_CAP_ENTRY\n", __func__);
 
 	/* set VMCS control fields */
     wvmcs(cpu->hvf_fd, VMCS_PIN_BASED_CTLS, cap2ctrl(cpu->hvf_caps->vmx_cap_pinbased, 0));
@@ -411,7 +405,7 @@ int hvf_init_vcpu(CPUState * cpu) {
     hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_IA32_SYSENTER_CS, 1);
     hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_IA32_SYSENTER_EIP, 1);
     hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_IA32_SYSENTER_ESP, 1);
-    
+
     return 0;
 }
 
@@ -522,7 +516,6 @@ static bool ept_emulation_fault(uint64_t ept_qual)
 	return true;
 }
 
- 
 // TODO: taskswitch handling
 static void save_state_to_tss32(CPUState *cpu, struct x86_tss_segment32 *tss)
 {
@@ -768,32 +761,30 @@ int hvf_vcpu_exec(CPUState* cpu) {
     }
 
 again:
+
+    qemu_mutex_unlock_iothread();
+
     do {
         if (cpu->hvf_vcpu_dirty) {
             hvf_put_registers(cpu);
             cpu->hvf_vcpu_dirty = false;
         }
-        
+
         cpu->hvf_x86->interruptable =
             !(rvmcs(cpu->hvf_fd, VMCS_GUEST_INTERRUPTIBILITY) &
             (VMCS_INTERRUPTIBILITY_STI_BLOCKING | VMCS_INTERRUPTIBILITY_MOVSS_BLOCKING));
-        
+
         hvf_inject_interrupts(cpu);
         vmx_update_tpr(cpu);
-        
-        
+
         while (!cpu_is_bsp(X86_CPU(cpu)) && cpu->halted) {
-            qemu_mutex_lock_iothread();
             return EXCP_HLT;
         }
-        
-        qemu_mutex_unlock_iothread();
+
         int r  = hv_vcpu_run(cpu->hvf_fd);
-        qemu_mutex_lock_iothread();
 
         if (r) {
-            DPRINTF("%ld: run failed with %x\n", rip, r);
-            abort();
+            qemu_abort("%s: %ld: run failed with %x\n", rip, r);
         }
 
         /* handle VMEXIT */
@@ -805,10 +796,9 @@ again:
         RFLAGS(cpu) = rreg(cpu->hvf_fd, HV_X86_RFLAGS);
         env->eflags = RFLAGS(cpu);
 
-        
         update_apic_tpr(cpu);
         current_cpu = cpu;
-        
+
         ret = 0;
         switch (exit_reason) {
             case EXIT_REASON_HLT: {
@@ -829,18 +819,18 @@ again:
             {
                 hvf_slot *slot;
                 addr_t gpa = rvmcs(cpu->hvf_fd, VMCS_GUEST_PHYSICAL_ADDRESS);
-                
+
                 if ((idtvec_info & VMCS_IDT_VEC_VALID) == 0 && (exit_qual & EXIT_QUAL_NMIUDTI) != 0)
                     vmx_set_nmi_blocking(cpu);
-                
+
                 slot = hvf_find_overlap_slot(gpa, gpa);
                 // mmio
                 if (ept_emulation_fault(exit_qual) && !slot) {
                     struct x86_decode decode;
-                    
+
                     load_regs(cpu);
                     cpu->hvf_x86->fetch_rip = rip;
-                    
+
                     decode_instruction(cpu, &decode);
 #if 0
                     DPRINTF("%llx: fetched %s, %x %x modrm %x len %d, gpa %lx\n", rip, decode_cmd_to_string(decode.cmd),
@@ -858,7 +848,7 @@ again:
                         break;
                     int flags = HV_MEMORY_READ | HV_MEMORY_EXEC;
                     if (write) flags |= HV_MEMORY_WRITE;
-                    
+
                     pthread_rwlock_wrlock(&mem_lock);
                     if (write)
                         mark_slot_page_dirty(slot, gpa);
@@ -875,7 +865,7 @@ again:
                 uint32_t string =  (exit_qual & 16) != 0;
                 uint32_t port =  exit_qual >> 16;
                 uint32_t rep = (exit_qual & 0x20) != 0;
-                
+
 #if 1
                 if (!string && in) {
                     uint64_t val = 0;
@@ -896,15 +886,15 @@ again:
                 }
 #endif
                 struct x86_decode decode;
-                
+
                 load_regs(cpu);
                 cpu->hvf_x86->fetch_rip = rip;
-                
+
                 decode_instruction(cpu, &decode);
                 VM_PANIC_ON(ins_len != decode.len);
                 exec_instruction(cpu, &decode);
                 store_regs(cpu);
-                
+
                 break;
             }
             case EXIT_REASON_CPUID: {
@@ -912,14 +902,14 @@ again:
                 uint32_t rbx = (uint32_t)rreg(cpu->hvf_fd, HV_X86_RBX);
                 uint32_t rcx = (uint32_t)rreg(cpu->hvf_fd, HV_X86_RCX);
                 uint32_t rdx = (uint32_t)rreg(cpu->hvf_fd, HV_X86_RDX);
-               
+
                 get_cpuid_func(cpu, rax, rcx, &rax, &rbx, &rcx, &rdx);
-                
+
                 wreg(cpu->hvf_fd, HV_X86_RAX, rax);
                 wreg(cpu->hvf_fd, HV_X86_RBX, rbx);
                 wreg(cpu->hvf_fd, HV_X86_RCX, rcx);
                 wreg(cpu->hvf_fd, HV_X86_RDX, rdx);
-                
+
                 macvm_set_rip(cpu, rip + ins_len);
                 break;
             }
@@ -929,7 +919,7 @@ again:
                 uint32_t eax = (uint32_t)rreg(cpu->hvf_fd, HV_X86_RAX);
                 uint32_t ecx = (uint32_t)rreg(cpu->hvf_fd, HV_X86_RCX);
                 uint32_t edx = (uint32_t)rreg(cpu->hvf_fd, HV_X86_RDX);
-                
+
                 if (ecx) {
                     DPRINTF("xsetbv: invalid index %d\n", ecx);
                     macvm_set_rip(cpu, rip + ins_len);
@@ -960,18 +950,18 @@ again:
                     simulate_rdmsr(cpu);
                 else
                     simulate_wrmsr(cpu);
-                RIP(cpu) += rvmcs(cpu->hvf_fd, VMCS_EXIT_INSTRUCTION_LENGTH); 
+                RIP(cpu) += rvmcs(cpu->hvf_fd, VMCS_EXIT_INSTRUCTION_LENGTH);
                 store_regs(cpu);
                 break;
             }
             case EXIT_REASON_CR_ACCESS: {
                 int cr;
                 int reg;
-                
+
                 load_regs(cpu);
                 cr = exit_qual & 15;
                 reg = (exit_qual >> 8) & 15;
-                
+
                 DPRINTF("%lx: mov cr %d from %d %llx\n", rip, cr, reg, RXX(cpu, reg));
                 switch (cr) {
                     case 0x0: {
@@ -995,7 +985,7 @@ again:
                         break;
                     }
                     default:
-                        abort();
+                        qemu_abort("%s: Unrecognized CR %d\n", __func__, cr);
                 }
                 RIP(cpu) += ins_len;
                 store_regs(cpu);
@@ -1003,10 +993,10 @@ again:
             }
             case EXIT_REASON_APIC_ACCESS: { // TODO
                 struct x86_decode decode;
-                
+
                 load_regs(cpu);
                 cpu->hvf_x86->fetch_rip = rip;
-                
+
                 decode_instruction(cpu, &decode);
                 DPRINTF("apic fetched %s, %x %x len %d\n", decode_cmd_to_string(decode.cmd), decode.opcode[0], decode.opcode[1], decode.len);
                 exec_instruction(cpu, &decode);
@@ -1026,7 +1016,7 @@ again:
             }
             case EXIT_REASON_TRIPLE_FAULT: {
                 addr_t gpa = rvmcs(cpu->hvf_fd, VMCS_GUEST_PHYSICAL_ADDRESS);
-                
+
                 DPRINTF("triple fault at %llx (%llx, %llx), cr0 %llx, qual %llx, gpa %llx, ins len %d, cpu %p\n",
                         linear_rip(cpu, rip), RIP(cpu), linear_addr(cpu, rip, REG_SEG_CS),
                         rvmcs(cpu->hvf_fd, VMCS_GUEST_CR0), exit_qual, gpa, ins_len, cpu);
@@ -1045,7 +1035,7 @@ again:
                 // if (g_hypervisor_iface) {
                 //     load_regs(cpu);
                 //     g_hypervisor_iface->hypercall_handler(cpu);
-                //     RIP(cpu) += rvmcs(cpu->hvf_fd, VMCS_EXIT_INSTRUCTION_LENGTH); 
+                //     RIP(cpu) += rvmcs(cpu->hvf_fd, VMCS_EXIT_INSTRUCTION_LENGTH);
                 //     store_regs(cpu);
                 // }
                 break;
@@ -1053,7 +1043,9 @@ again:
                 fprintf(stderr, "%llx: unhandled exit %llx\n", rip, exit_reason);
         }
     } while (ret == 0);
-    
+
+    qemu_mutex_lock_iothread();
+
     return ret;
 }
 

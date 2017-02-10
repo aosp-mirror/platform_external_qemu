@@ -305,12 +305,13 @@ prepare_build_for_host () {
 	CLANG_BINDIR=
     case $CURRENT_HOST in
         darwin-*)
-            # Ensure we use the 10.8 SDK or else.
+            # Ensure we use the 10.10 SDK or else.
             OSX_VERSION=$(sw_vers -productVersion)
             OSX_DEPLOYMENT_TARGET=10.8
-            OSX_SDK_SUPPORTED="10.6 10.7 10.8 10.9"
+            OSX_SDK_TARGET_MINOR_VERSION=10
             OSX_SDK_INSTALLED_LIST=$(xcodebuild -showsdks 2>/dev/null | \
-                    grep --color=never macosx | sed -e "s/.*macosx10\.//g" | sort -n | \
+                grep --color=never macosx | sed -e "s/.*macosx10\.//g" | sort -n | \
+                    grep $OSX_SDK_TARGET_MINOR_VERSION | \
                     tr '\n' ' ' | sed -e 's/^/10./g')
             if [ -z "$OSX_SDK_INSTALLED_LIST" ]; then
                 panic "Please install XCode on this machine!"
