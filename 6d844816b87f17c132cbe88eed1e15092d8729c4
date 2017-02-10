@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "744e3ccb_6edd16ca",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-sources.mk",
+        "patchSetId": 24
+      },
+      "lineNbr": 1262,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T22:06:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "51f3ff96_981ae24c",
+      "range": {
+        "startLine": 1262,
+        "startChar": 0,
+        "endLine": 1262,
+        "endChar": 1
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c7c02f93_ffd8062f",
         "filename": "android-qemu2-glue/build/Makefile.qemu2-sources.mk",
         "patchSetId": 24
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-10T19:00:11Z",
       "side": 1,
       "message": "ditto",
+      "range": {
+        "startLine": 1356,
+        "startChar": 0,
+        "endLine": 1356,
+        "endChar": 1
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5fa03594_d48d20be",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-sources.mk",
+        "patchSetId": 24
+      },
+      "lineNbr": 1356,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T22:06:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c7c02f93_ffd8062f",
       "range": {
         "startLine": 1356,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "974a94e4_6274f275",
+        "filename": "android/android-emu/android/cpu_accelerator.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T22:06:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "04d20174_03d180cc",
+      "range": {
+        "startLine": 95,
+        "startChar": 0,
+        "endLine": 95,
+        "endChar": 11
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c69e8382_bb04c625",
         "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
         "patchSetId": 24
@@ -82,6 +154,30 @@
       "writtenOn": "2017-02-10T19:00:11Z",
       "side": 1,
       "message": "makeCustomScopedPtr()?",
+      "range": {
+        "startLine": 655,
+        "startChar": 14,
+        "endLine": 655,
+        "endChar": 28
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09914d78_f338089b",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 655,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T22:06:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c69e8382_bb04c625",
       "range": {
         "startLine": 655,
         "startChar": 14,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "dfa93813_b5f6535f",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 684,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T22:06:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b71568dc_d69f560c",
+      "range": {
+        "startLine": 677,
+        "startChar": 0,
+        "endLine": 684,
+        "endChar": 46
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9aeaf07b_4143a6c7",
         "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
         "patchSetId": 24
@@ -128,6 +248,30 @@
       "writtenOn": "2017-02-10T19:00:11Z",
       "side": 1,
       "message": "memset?",
+      "range": {
+        "startLine": 712,
+        "startChar": 0,
+        "endLine": 714,
+        "endChar": 5
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "444c807a_777b7303",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 714,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T22:06:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9aeaf07b_4143a6c7",
       "range": {
         "startLine": 712,
         "startChar": 0,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "4e318408_6a9441ef",
+        "filename": "android/android-emu/android/main-qemu-parameters.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T22:06:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c6374574_556ca400",
+      "range": {
+        "startLine": 166,
+        "startChar": 0,
+        "endLine": 166,
+        "endChar": 65
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "672ddc85_6f8e4feb",
         "filename": "cpus.c",
         "patchSetId": 24
@@ -174,6 +342,30 @@
       "writtenOn": "2017-02-10T19:00:11Z",
       "side": 1,
       "message": "please remove",
+      "range": {
+        "startLine": 1003,
+        "startChar": 0,
+        "endLine": 1003,
+        "endChar": 47
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d7595b8d_e828f26b",
+        "filename": "cpus.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 1003,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T22:06:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "672ddc85_6f8e4feb",
       "range": {
         "startLine": 1003,
         "startChar": 0,
@@ -209,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "51b21550_46a03f30",
+        "filename": "cpus.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 1298,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T22:06:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7ce9744f_f68d3842",
+      "range": {
+        "startLine": 1298,
+        "startChar": 24,
+        "endLine": 1298,
+        "endChar": 53
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "299e319c_cbee83ab",
         "filename": "include/sysemu/hvf.h",
         "patchSetId": 24
@@ -232,6 +448,30 @@
     },
     {
       "key": {
+        "uuid": "6a0895e8_60e6412a",
+        "filename": "include/sysemu/hvf.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T22:06:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "299e319c_cbee83ab",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 39
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1e39a59f_27684c43",
         "filename": "include/sysemu/hvf.h",
         "patchSetId": 24
@@ -243,6 +483,30 @@
       "writtenOn": "2017-02-10T19:00:11Z",
       "side": 1,
       "message": "could you please move the includes to the top?",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 24
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22ff8490_93067ecf",
+        "filename": "include/sysemu/hvf.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T22:06:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1e39a59f_27684c43",
       "range": {
         "startLine": 40,
         "startChar": 0,
@@ -301,6 +565,30 @@
     },
     {
       "key": {
+        "uuid": "f5ba01f6_124cfea7",
+        "filename": "target-i386/hvf-all.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T22:06:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8ededf4e_be4a2df8",
+      "range": {
+        "startLine": 103,
+        "startChar": 62,
+        "endLine": 103,
+        "endChar": 70
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9e9b4396_ff411025",
         "filename": "target-i386/hvf-all.c",
         "patchSetId": 24
@@ -324,6 +612,30 @@
     },
     {
       "key": {
+        "uuid": "fd62254d_bc261b52",
+        "filename": "target-i386/hvf-all.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T22:06:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9e9b4396_ff411025",
+      "range": {
+        "startLine": 205,
+        "startChar": 0,
+        "endLine": 205,
+        "endChar": 20
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7214f8fd_b99393ed",
         "filename": "target-i386/hvf-all.c",
         "patchSetId": 24
@@ -335,6 +647,30 @@
       "writtenOn": "2017-02-10T19:00:11Z",
       "side": 1,
       "message": "hvf_disabled \u003d shouldDisable\n?",
+      "range": {
+        "startLine": 267,
+        "startChar": 0,
+        "endLine": 271,
+        "endChar": 5
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3bfc3e8c_e85410f0",
+        "filename": "target-i386/hvf-all.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T22:06:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7214f8fd_b99393ed",
       "range": {
         "startLine": 267,
         "startChar": 0,
