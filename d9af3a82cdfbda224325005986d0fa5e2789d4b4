@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "064b6a62_1398859a",
+        "filename": "target-i386/cpu.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 1023,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-10T17:46:40Z",
+      "side": 0,
+      "message": "I thought they are actually x64-specific. Aren\u0027t they?",
+      "range": {
+        "startLine": 1023,
+        "startChar": 0,
+        "endLine": 1023,
+        "endChar": 20
+      },
+      "revId": "d9af3a82cdfbda224325005986d0fa5e2789d4b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
