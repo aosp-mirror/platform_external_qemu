@@ -29,6 +29,7 @@
 #include "android/base/Compiler.h"
 #include "android/base/files/ScopedFd.h"
 #include "android/base/Log.h"
+#include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/FileUtils.h"
 #include "android/base/StringFormat.h"
 #include "android/base/system/System.h"
@@ -650,19 +651,38 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
 
 using android::base::System;
 
+// Technically, we need  rdmsr to detect ept/ug support,
+// but that instruction is only available
+// as root. So just say yes if the processor has features that were
+// only introduced the same time as the feature.
+// EPT: popcnt
+// UG: aes
+static bool cpuCanRunHVF() {
+    uint32_t cpuid_function1_ecx;
+    android_get_x86_cpuid(1, 0, NULL, NULL, &cpuid_function1_ecx, NULL);
+
+    uint32_t popcnt_support = 1 << 23;
+    uint32_t aes_support = 1 << 25;
+
+    bool eptSupport = cpuid_function1_ecx & popcnt_support;
+    bool ugSupport = cpuid_function1_ecx & aes_support;
+
+    return eptSupport && ugSupport;
+}
+
 AndroidCpuAcceleration ProbeHVF(std::string* status) {
     AndroidCpuAcceleration res = ANDROID_CPU_ACCELERATION_NO_CPU_SUPPORT;
-    TempFile* versionNumFile = tempfile_create();
-    int tempfileFd = -1;
-    std::string tempPath;
-    std::string contents;
-    int exitCode, maj, min, versionParseRes;
+    const auto versionNumFile =
+        android::base::makeCustomScopedPtr(
+                tempfile_create(),
+                tempfile_close);
 
     if (!versionNumFile) return res;
 
-    tempPath = tempfile_path(versionNumFile);
+    std::string tempPath = tempfile_path(versionNumFile.get());
 
     System::Pid pid;
+    int exitCode;
     System::get()->runCommand(
             {"sw_vers", "-productVersion"},
             System::RunOptions::WaitForCompletion |
@@ -672,24 +692,29 @@ AndroidCpuAcceleration ProbeHVF(std::string* status) {
             &exitCode,
             &pid,
             tempPath);
-    if (exitCode) goto cleanup_tempfile;
+    if (exitCode) return res;
 
-    tempfileFd = open(tempPath.c_str(), O_RDONLY);
-    if (tempfileFd < 0) goto cleanup_tempfile;
+    ScopedFd tempfileFd(open(tempPath.c_str(), O_RDONLY));
+    if (!tempfileFd.valid()) return res;
 
-    android::readFileIntoString(tempfileFd, &contents);
-    if (!contents.length()) goto cleanup_fd;
+    std::string contents;
+    android::readFileIntoString(tempfileFd.get(), &contents);
+    if (!contents.length()) return res;
 
+    int maj, min, versionParseRes;
     versionParseRes = sscanf(&contents[0], "%d.%d", &maj, &min);
-    if (versionParseRes != 2) goto cleanup_fd;
+    if (versionParseRes != 2) return res;
+
+    // Need same virtualization features as required by HAXM.
+    std::string haxStatus;
+    if (ProbeHaxCpu(&haxStatus) != ANDROID_CPU_ACCELERATION_READY) return res;
+
+    // Also need EPT and UG
+    if (!cpuCanRunHVF()) return res;
 
     // Hypervisor.framework is only supported on OS X 10.10 and above.
     if (maj >= 10 && min >= 10) res = ANDROID_CPU_ACCELERATION_READY;
 
-cleanup_fd:
-    close(tempfileFd);
-cleanup_tempfile:
-    tempfile_close(versionNumFile);
     return res;
 }
 #endif // HAVE_HVF
@@ -709,9 +734,7 @@ CpuAccelerator GetCurrentCpuAccelerator() {
         return g->accel;
     }
 
-    for (int i = 0; i < CPU_ACCELERATOR_MAX; i++) {
-        g->supported_accelerators[i] = false;
-    }
+    memset(g->supported_accelerators, 0, CPU_ACCELERATOR_MAX * sizeof(bool));
 
     std::string status;
 #if HAVE_KVM
@@ -749,7 +772,7 @@ CpuAccelerator GetCurrentCpuAccelerator() {
     return g->accel;
 }
 
-const bool* GetCurrentSupportedCpuAccelerators() {
+bool GetCurrentAcceleratorSupport(CpuAccelerator type) {
     GlobalState *g = &gGlobals;
 
     if (!g->probed && !g->testing) {
@@ -757,7 +780,7 @@ const bool* GetCurrentSupportedCpuAccelerators() {
         GetCurrentCpuAccelerator();
     }
 
-    return g->supported_accelerators;
+    return g->supported_accelerators[type];
 }
 
 std::string GetCurrentCpuAcceleratorStatus() {

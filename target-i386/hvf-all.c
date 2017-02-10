@@ -35,6 +35,7 @@
 #include "exec/ioport.h"
 #include "hw/i386/apic_internal.h"
 #include "qemu/main-loop.h"
+#include "qemu/abort.h"
 #include "strings.h"
 #include "sysemu/accel.h"
 #include "sysemu/sysemu.h"
@@ -100,24 +101,24 @@ void assert_hvf_ok(int r) {
 
     switch (r) {
         case HV_SUCCESS:
-            fprintf(stderr, "FATAL: HVF error: HV_SUCCESS\n", __func__); break;
+            fprintf(stderr, "FATAL: HVF error: HV_SUCCESS\n", r); break;
         case HV_ERROR:
-            fprintf(stderr, "FATAL: HVF error: HV_ERROR\n", __func__); break;
+            fprintf(stderr, "FATAL: HVF error: HV_ERROR\n", r); break;
         case HV_BUSY:
-            fprintf(stderr, "FATAL: HVF error: HV_BUSY\n", __func__); break;
+            fprintf(stderr, "FATAL: HVF error: HV_BUSY\n", r); break;
         case HV_BAD_ARGUMENT:
-            fprintf(stderr, "FATAL: HVF error: HV_BAD_ARGUMENT\n", __func__); break;
+            fprintf(stderr, "FATAL: HVF error: HV_BAD_ARGUMENT\n", r); break;
         case HV_NO_RESOURCES:
-            fprintf(stderr, "FATAL: HVF error: HV_NO_RESOURCES\n", __func__); break;
+            fprintf(stderr, "FATAL: HVF error: HV_NO_RESOURCES\n", r); break;
         case HV_NO_DEVICE:
-            fprintf(stderr, "FATAL: HVF error: HV_NO_DEVICE\n", __func__); break;
+            fprintf(stderr, "FATAL: HVF error: HV_NO_DEVICE\n", r); break;
         case HV_UNSUPPORTED:
-            fprintf(stderr, "FATAL: HVF error: HV_UNSUPPORTED\n", __func__); break;
+            fprintf(stderr, "FATAL: HVF error: HV_UNSUPPORTED\n", r); break;
         default:
-            fprintf(stderr, "FATAL: HVF Unknown error heh\n", __func__); break;
+            fprintf(stderr, "FATAL: HVF Unknown error heh\n", r); break;
             break;
     }
-    abort();
+    qemu_abort("HVF fatal error\n");
 }
 // Memory slots/////////////////////////////////////////////////////////////////
 
@@ -166,7 +167,7 @@ int __hvf_set_memory(hvf_slot *slot) {
     }
 
     flags = HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC;
-    
+
     macslot->present = 1;
     macslot->gpa_start = slot->start;
     macslot->size = slot->size;
@@ -201,8 +202,7 @@ void hvf_set_phys_mem(MemoryRegionSection* section, bool add) {
     if (mem) {
         mem->size = 0;
         if (__hvf_set_memory(mem)) {
-            // DPRINTF("error re-registering memory\n");
-            abort();
+            qemu_abort("%s: Failed to reset overlapping slot\n", __func__);
         }
     }
 
@@ -218,8 +218,7 @@ void hvf_set_phys_mem(MemoryRegionSection* section, bool add) {
     }
 
     if (x == hvf_state->num_slots) {
-        DPRINTF("no free slots\n");
-        abort();
+        qemu_abort("%s: no free slots\n", __func__);
     }
 
     mem->size = int128_get64(section->size);
@@ -227,8 +226,7 @@ void hvf_set_phys_mem(MemoryRegionSection* section, bool add) {
     mem->start = section->offset_within_address_space;
 
     if (__hvf_set_memory(mem)) {
-        // DPRINTF("error registering memory\n");
-        abort();
+        qemu_abort("%s: error regsitering new memory slot\n", __func__);
     }
 }
 
@@ -264,11 +262,7 @@ static MemoryListener hvf_io_listener = {
 
 int hvf_enabled() { return !hvf_disabled; }
 void hvf_disable(int shouldDisable) {
-    if (shouldDisable) {
-        hvf_disabled = 1;
-    } else {
-        hvf_disabled = 0;
-    }
+    hvf_disabled = shouldDisable;
 }
 
 void vmx_reset_vcpu(CPUState *cpu) {
@@ -370,13 +364,13 @@ int hvf_init_vcpu(CPUState * cpu) {
     assert_hvf_ok(r);
 
 	if (hv_vmx_read_capability(HV_VMX_CAP_PINBASED, &cpu->hvf_caps->vmx_cap_pinbased))
-		abort();
+		qemu_abort("%s: error getting vmx capability HV_VMX_CAP_PINBASED\n", __func__);
 	if (hv_vmx_read_capability(HV_VMX_CAP_PROCBASED, &cpu->hvf_caps->vmx_cap_procbased))
-		abort();
+		qemu_abort("%s: error getting vmx capability HV_VMX_CAP_PROCBASED\n", __func__);
 	if (hv_vmx_read_capability(HV_VMX_CAP_PROCBASED2, &cpu->hvf_caps->vmx_cap_procbased2))
-		abort();
+		qemu_abort("%s: error getting vmx capability HV_VMX_CAP_PROCBASED2\n", __func__);
 	if (hv_vmx_read_capability(HV_VMX_CAP_ENTRY, &cpu->hvf_caps->vmx_cap_entry))
-		abort();
+		qemu_abort("%s: error getting vmx capability HV_VMX_CAP_ENTRY\n", __func__);
 
 	/* set VMCS control fields */
     wvmcs(cpu->hvf_fd, VMCS_PIN_BASED_CTLS, cap2ctrl(cpu->hvf_caps->vmx_cap_pinbased, 0));
@@ -792,8 +786,7 @@ again:
         qemu_mutex_lock_iothread();
 
         if (r) {
-            DPRINTF("%ld: run failed with %x\n", rip, r);
-            abort();
+            qemu_abort("%s: %ld: run failed with %x\n", rip, r);
         }
 
         /* handle VMEXIT */
@@ -995,7 +988,7 @@ again:
                         break;
                     }
                     default:
-                        abort();
+                        qemu_abort("%s: Unrecognized CR %d\n", __func__, cr);
                 }
                 RIP(cpu) += ins_len;
                 store_regs(cpu);

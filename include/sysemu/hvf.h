@@ -15,6 +15,11 @@
 #include "config-host.h"
 #include "qemu/osdep.h"
 #include "qemu-common.h"
+#ifdef CONFIG_HVF
+#include "hw/hw.h"
+#include "qemu/bitops.h"
+#include "exec/memory.h"
+#endif
 
 /* Returns 1 if HVF is available and enabled, 0 otherwise. */
 int hvf_enabled(void);
@@ -30,30 +35,15 @@ void hvf_disable(int disable);
  * "real mode" (paging disabled, typically at boot time), or MMIO operations. */
 // int hvf_ug_platform(void); does not apply to HVF; assume we must be in UG mode
 
-int hvf_pre_init(uint64_t ram_size);
-
 int hvf_sync_vcpus(void);
 
-/* get the max hvf ram even before hvf library is initialized */
-int hvf_get_max_ram(uint64_t *max_ram);
-
 #ifdef CONFIG_HVF
-
-#include "hw/hw.h"
-#include "qemu/bitops.h"
-#include "exec/memory.h"
-
 int hvf_init_vcpu(CPUState *cpu);
 int hvf_vcpu_exec(CPUState *cpu);
 int hvf_smp_cpu_exec(CPUState *cpu);
 void hvf_cpu_synchronize_state(CPUState *cpu);
 void hvf_cpu_synchronize_post_reset(CPUState *cpu);
 void hvf_cpu_synchronize_post_init(CPUState *cpu);
-
-// TODO: Maybe use TCG?
-// int hvf_vcpu_emulation_mode(CPUState *cpu);
-// int hvf_stop_emulation(CPUState *cpu);
-// int hvf_stop_translate(CPUState *cpu);
 
 int hvf_vcpu_destroy(CPUState *cpu);
 void hvf_raise_event(CPUState *cpu);
