@@ -22,6 +22,30 @@
       "revId": "d9af3a82cdfbda224325005986d0fa5e2789d4b4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6007e8dc_df6046d8",
+        "filename": "target-i386/cpu.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 1023,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T18:02:13Z",
+      "side": 0,
+      "message": "Yeah, it\u0027s just that the x86 emulation code also needs to be flagged with TARGET_X86_64 for all possible x64-specific paths.",
+      "parentUuid": "064b6a62_1398859a",
+      "range": {
+        "startLine": 1023,
+        "startChar": 0,
+        "endLine": 1023,
+        "endChar": 20
+      },
+      "revId": "d9af3a82cdfbda224325005986d0fa5e2789d4b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
