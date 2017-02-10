@@ -676,6 +676,9 @@ DEF("enable-kvm", 0, QEMU_OPTION_enable_kvm, \
 DEF("enable-hax", 0, QEMU_OPTION_enable_hax, \
 "-enable-hax     enable HAX virtualization support\n", QEMU_ARCH_I386)
 
+DEF("enable-hvf", 0, QEMU_OPTION_enable_hvf, \
+"-enable-hvf     enable Hypervisor.framework virtualization support\n", QEMU_ARCH_I386)
+
 DEF("xen-domid", HAS_ARG, QEMU_OPTION_xen_domid,
 "-xen-domid id   specify xen guest domain id\n", QEMU_ARCH_ALL)
 DEF("xen-create", 0, QEMU_OPTION_xen_create,

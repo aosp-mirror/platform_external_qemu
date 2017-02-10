@@ -609,6 +609,7 @@ Darwin)
   bsd="yes"
   darwin="yes"
   hax="yes"
+  hvf="yes"
   LDFLAGS_SHARED="-bundle -undefined dynamic_lookup"
   if [ "$cpu" = "x86_64" ] ; then
     QEMU_CFLAGS="-arch x86_64 $QEMU_CFLAGS"
@@ -5844,6 +5845,13 @@ if test "$hax" = "yes" ; then
     ;;
     esac
   fi
+fi
+if test "$hvf" = "yes" ; then
+  case "$target_name" in
+  i386|x86_64)
+    echo "CONFIG_HVF=y" >> $config_target_mak
+  ;;
+  esac
 fi
 if test "$target_bigendian" = "yes" ; then
   echo "TARGET_WORDS_BIGENDIAN=y" >> $config_target_mak

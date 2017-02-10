@@ -29,12 +29,14 @@
 #include "android/base/Compiler.h"
 #include "android/base/files/ScopedFd.h"
 #include "android/base/Log.h"
+#include "android/base/misc/FileUtils.h"
 #include "android/base/StringFormat.h"
 #include "android/base/system/System.h"
 #include "android/cpu_accelerator.h"
 #include "android/utils/file_data.h"
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
+#include "android/utils/tempfile.h"
 #include "android/utils/x86_cpuid.h"
 
 #ifdef _WIN32
@@ -58,6 +60,11 @@
 #elif defined(_WIN32) || defined(__APPLE__)
 #  define HAVE_KVM 0
 #  define HAVE_HAX 1
+
+#if defined(__APPLE__)
+#  define HAVE_HVF 1
+#endif
+
 #else
 #  error "Unsupported host platform!"
 #endif
@@ -75,13 +82,15 @@ struct GlobalState {
     CpuAccelerator accel;
     char status[256];
     AndroidCpuAcceleration status_code;
+    bool supported_accelerators[CPU_ACCELERATOR_MAX];
 };
 
 GlobalState gGlobals = {false,
                         false,
                         CPU_ACCELERATOR_NONE,
                         {'\0'},
-                        ANDROID_CPU_ACCELERATION_ERROR};
+                        ANDROID_CPU_ACCELERATION_ERROR,
+                        {}};
 
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
@@ -628,6 +637,63 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
     return ANDROID_CPU_ACCELERATION_READY;
 }
 
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////
+/////  Darwin Hypervisor.framework support.
+/////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+#if HAVE_HVF
+
+using android::base::System;
+
+AndroidCpuAcceleration ProbeHVF(std::string* status) {
+    AndroidCpuAcceleration res = ANDROID_CPU_ACCELERATION_NO_CPU_SUPPORT;
+    TempFile* versionNumFile = tempfile_create();
+    int tempfileFd = -1;
+    std::string tempPath;
+    std::string contents;
+    int exitCode, maj, min, versionParseRes;
+
+    if (!versionNumFile) return res;
+
+    tempPath = tempfile_path(versionNumFile);
+
+    System::Pid pid;
+    System::get()->runCommand(
+            {"sw_vers", "-productVersion"},
+            System::RunOptions::WaitForCompletion |
+            System::RunOptions::TerminateOnTimeout |
+            System::RunOptions::DumpOutputToFile,
+            1000 /* timeout ms */,
+            &exitCode,
+            &pid,
+            tempPath);
+    if (exitCode) goto cleanup_tempfile;
+
+    tempfileFd = open(tempPath.c_str(), O_RDONLY);
+    if (tempfileFd < 0) goto cleanup_tempfile;
+
+    android::readFileIntoString(tempfileFd, &contents);
+    if (!contents.length()) goto cleanup_fd;
+
+    versionParseRes = sscanf(&contents[0], "%d.%d", &maj, &min);
+    if (versionParseRes != 2) goto cleanup_fd;
+
+    // Hypervisor.framework is only supported on OS X 10.10 and above.
+    if (maj >= 10 && min >= 10) res = ANDROID_CPU_ACCELERATION_READY;
+
+cleanup_fd:
+    close(tempfileFd);
+cleanup_tempfile:
+    tempfile_close(versionNumFile);
+    return res;
+}
+#endif // HAVE_HVF
+
 #else   // !_WIN32 && !__APPLE__
 #error "Unsupported HAX host platform"
 #endif  // !_WIN32 && !__APPLE__
@@ -643,17 +709,34 @@ CpuAccelerator GetCurrentCpuAccelerator() {
         return g->accel;
     }
 
+    for (int i = 0; i < CPU_ACCELERATOR_MAX; i++) {
+        g->supported_accelerators[i] = false;
+    }
+
     std::string status;
 #if HAVE_KVM
     AndroidCpuAcceleration status_code = ProbeKVM(&status);
     if (status_code == ANDROID_CPU_ACCELERATION_READY) {
         g->accel = CPU_ACCELERATOR_KVM;
+        g->supported_accelerators[CPU_ACCELERATOR_KVM] = true;
     }
-#elif HAVE_HAX
+#elif HAVE_HAX || HAVE_HVF
     AndroidCpuAcceleration status_code = ProbeHAX(&status);
     if (status_code == ANDROID_CPU_ACCELERATION_READY) {
         g->accel = CPU_ACCELERATOR_HAX;
+        g->supported_accelerators[CPU_ACCELERATOR_HAX] = true;
     }
+#if HAVE_HVF
+    AndroidCpuAcceleration status_code_HVF = ProbeHVF(&status);
+    if (status_code_HVF == ANDROID_CPU_ACCELERATION_READY) {
+        g->supported_accelerators[CPU_ACCELERATOR_HVF] = true;
+    }
+    // TODO: Switch to HVF as default option if/when appropriate.
+    // if (status_code == ANDROID_CPU_ACCELERATION_READY) {
+    //     g->accel = CPU_ACCELERATOR_HVF;
+    // }
+#endif
+
 #else
     status = "This system does not support CPU acceleration.";
 #endif
@@ -664,6 +747,17 @@ CpuAccelerator GetCurrentCpuAccelerator() {
     ::snprintf(g->status, sizeof(g->status), "%s", status.c_str());
 
     return g->accel;
+}
+
+const bool* GetCurrentSupportedCpuAccelerators() {
+    GlobalState *g = &gGlobals;
+
+    if (!g->probed && !g->testing) {
+        // Force detection of the current CPU accelerator.
+        GetCurrentCpuAccelerator();
+    }
+
+    return g->supported_accelerators;
 }
 
 std::string GetCurrentCpuAcceleratorStatus() {
