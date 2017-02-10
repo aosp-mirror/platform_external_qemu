@@ -22,6 +22,30 @@
       "revId": "a3312acea2472d3f5fd4efd11c97b6ca8869ac8d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8c5ace2a_b3cdf62f",
+        "filename": "android/android-emu/android/skin/qt/extended.ui",
+        "patchSetId": 2
+      },
+      "lineNbr": 784,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-10T22:07:02Z",
+      "side": 1,
+      "message": "Yes, all other menu items have the 2 spaces padding in front.",
+      "parentUuid": "a372fd3a_c51debf4",
+      "range": {
+        "startLine": 784,
+        "startChar": 18,
+        "endLine": 784,
+        "endChar": 19
+      },
+      "revId": "a3312acea2472d3f5fd4efd11c97b6ca8869ac8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
