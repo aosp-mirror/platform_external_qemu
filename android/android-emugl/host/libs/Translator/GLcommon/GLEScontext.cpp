@@ -16,6 +16,7 @@
 
 #include <GLcommon/GLEScontext.h>
 #include <GLcommon/GLconversion_macros.h>
+#include <GLcommon/GLSnapshotUtils.h>
 #include <GLcommon/GLESmacros.h>
 #include <GLES/gl.h>
 #include <GLES/glext.h>
@@ -35,6 +36,30 @@ static void convertFixedDirectLoop(const char* dataIn,unsigned int strideIn,void
 static void convertFixedIndirectLoop(const char* dataIn,unsigned int strideIn,void* dataOut,GLsizei count,GLenum indices_type,const GLvoid* indices,unsigned int strideOut,int attribSize);
 static void convertByteDirectLoop(const char* dataIn,unsigned int strideIn,void* dataOut,unsigned int nBytes,unsigned int strideOut,int attribSize);
 static void convertByteIndirectLoop(const char* dataIn,unsigned int strideIn,void* dataOut,GLsizei count,GLenum indices_type,const GLvoid* indices,unsigned int strideOut,int attribSize);
+
+void BufferBinding::onLoad(android::base::Stream* stream) {
+    buffer = stream->getBe32();
+    offset = stream->getBe32();
+    size = stream->getBe32();
+    stride = stream->getBe32();
+    divisor = stream->getBe32();
+}
+
+void BufferBinding::onSave(android::base::Stream* stream) const {
+    stream->putBe32(buffer);
+    stream->putBe32(offset);
+    stream->putBe32(size);
+    stream->putBe32(stride);
+    stream->putBe32(divisor);
+}
+
+VAOState::VAOState(android::base::Stream* stream) {
+    // TODO
+}
+
+void VAOState::onSave(android::base::Stream* stream) const {
+    // TODO
+}
 
 GLESConversionArrays::~GLESConversionArrays() {
     for(auto it = m_arrays.begin(); it != m_arrays.end(); ++it) {
@@ -204,6 +229,8 @@ static GLuint getIndex(GLenum indices_type, const GLvoid* indices, unsigned int 
     }
 }
 
+
+
 void GLEScontext::addVertexArrayObjects(GLsizei n, GLuint* arrays) {
     for (int i = 0; i < n; i++) {
         addVertexArrayObject(arrays[i]);
@@ -251,7 +278,7 @@ void GLEScontext::setVertexArrayObject(GLuint array) {
         m_currVaoState = VAOStateRef(it);
 }
 
-GLuint GLEScontext::getVertexArrayObject() {
+GLuint GLEScontext::getVertexArrayObject() const {
     return m_currVaoState.vaoId();
 }
 
@@ -281,9 +308,9 @@ void GLEScontext::init(GlLibrary* glLib) {
     if (!m_initialized) {
         initExtensionString();
 
-        int maxTexUnits = getMaxCombinedTexUnits();
-        m_texState = new textureUnitState[maxTexUnits];
-        for (int i=0;i<maxTexUnits;++i) {
+        m_maxTexUnits = getMaxCombinedTexUnits();
+        m_texState = new textureUnitState[m_maxTexUnits];
+        for (int i=0;i<m_maxTexUnits;++i) {
             for (int j=0;j<NUM_TEXTURE_TARGETS;++j)
             {
                 m_texState[i][j].texture = 0;
@@ -310,6 +337,53 @@ void GLEScontext::setActiveTexture(GLenum tex) {
    m_activeTexture = tex - GL_TEXTURE0;
 }
 
+GLEScontext::GLEScontext() {}
+
+GLEScontext::GLEScontext(android::base::Stream* stream, GlLibrary* glLib) {
+    // TODO: load from stream
+    if (stream) {
+        m_initialized = stream->getBe32();
+        if (m_initialized) {
+            m_activeTexture = (GLuint)stream->getBe32();
+            m_unpackAlignment = (GLuint)stream->getBe32();
+
+            loadNameMap<VAOStateMap>(stream, m_vaoStateMap);
+            uint32_t vaoId = stream->getBe32();
+            setVertexArrayObject(vaoId);
+
+            m_copyReadBuffer = static_cast<GLuint>(stream->getBe32());
+            m_copyWriteBuffer = static_cast<GLuint>(stream->getBe32());
+            m_pixelPackBuffer = static_cast<GLuint>(stream->getBe32());
+            m_pixelUnpackBuffer = static_cast<GLuint>(stream->getBe32());
+            m_transformFeedbackBuffer = static_cast<GLuint>(stream->getBe32());
+            m_uniformBuffer = static_cast<GLuint>(stream->getBe32());
+            m_atomicCounterBuffer = static_cast<GLuint>(stream->getBe32());
+            m_dispatchIndirectBuffer = static_cast<GLuint>(stream->getBe32());
+            m_drawIndirectBuffer = static_cast<GLuint>(stream->getBe32());
+            m_shaderStorageBuffer = static_cast<GLuint>(stream->getBe32());
+
+            loadContainer(stream, m_indexedTransformFeedbackBuffers);
+            loadContainer(stream, m_indexedUniformBuffers);
+            loadContainer(stream, m_indexedAtomicCounterBuffers);
+            loadContainer(stream, m_indexedShaderStorageBuffers);
+
+            // TODO: handle the case where the loaded size and the supported
+            // side does not match
+
+            //int sharegroupId = stream->getBe32(); // TODO: setup share group
+            m_glError = static_cast<GLenum>(stream->getBe32());
+            m_maxTexUnits = static_cast<int>(stream->getBe32());
+            m_texState = new textureUnitState[m_maxTexUnits];
+            stream->read(m_texState, sizeof(textureTargetState) * m_maxTexUnits);
+            m_arrayBuffer = static_cast<unsigned int>(stream->getBe32());
+            m_elementBuffer = static_cast<unsigned int>(stream->getBe32());
+            m_renderbuffer = static_cast<GLuint>(stream->getBe32());
+            m_drawFramebuffer = static_cast<GLuint>(stream->getBe32());
+            m_readFramebuffer = static_cast<GLuint>(stream->getBe32());
+        }
+    }
+}
+
 GLEScontext::~GLEScontext() {
     std::vector<GLuint> vaos_to_remove;
     for (VAOStateMap::iterator it = m_vaoStateMap.begin(); it != m_vaoStateMap.end(); ++it) {
@@ -320,6 +394,43 @@ GLEScontext::~GLEScontext() {
     }
     delete[] m_texState;
     m_texState = NULL;
+}
+
+void GLEScontext::onSave(android::base::Stream* stream) const {
+    stream->putBe32(m_initialized);
+    if (m_initialized) {
+        stream->putBe32(m_activeTexture);
+        stream->putBe32(m_unpackAlignment);
+
+        saveNameMap(stream, m_vaoStateMap);
+        stream->putBe32(getVertexArrayObject());
+
+        stream->putBe32(m_copyReadBuffer);
+        stream->putBe32(m_copyWriteBuffer);
+        stream->putBe32(m_pixelPackBuffer);
+        stream->putBe32(m_pixelUnpackBuffer);
+        stream->putBe32(m_transformFeedbackBuffer);
+        stream->putBe32(m_uniformBuffer);
+        stream->putBe32(m_atomicCounterBuffer);
+        stream->putBe32(m_dispatchIndirectBuffer);
+        stream->putBe32(m_drawIndirectBuffer);
+        stream->putBe32(m_shaderStorageBuffer);
+
+        saveContainer(stream, m_indexedTransformFeedbackBuffers);
+        saveContainer(stream, m_indexedUniformBuffers);
+        saveContainer(stream, m_indexedAtomicCounterBuffers);
+        saveContainer(stream, m_indexedShaderStorageBuffers);
+
+        //stream->putBe32(m_shareGroup->getId());
+        stream->putBe32(m_glError);
+        stream->putBe32(m_maxTexUnits);
+        stream->write(m_texState, sizeof(textureTargetState) * m_maxTexUnits);
+        stream->putBe32(m_arrayBuffer);
+        stream->putBe32(m_elementBuffer);
+        stream->putBe32(m_renderbuffer);
+        stream->putBe32(m_drawFramebuffer);
+        stream->putBe32(m_readFramebuffer);
+    }
 }
 
 const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data,bool normalize, bool isInt) {

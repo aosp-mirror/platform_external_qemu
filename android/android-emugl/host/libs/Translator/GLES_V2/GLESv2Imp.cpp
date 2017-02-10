@@ -50,7 +50,7 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp);
 static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(void);
-static GLEScontext* createGLESxContext(int maj, int min);
+static GLEScontext* createGLESxContext(int maj, int min, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
 
 }
@@ -91,10 +91,10 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
 }
 
 static GLEScontext* createGLESContext() {
-    return new GLESv2Context(2, 0);
+    return new GLESv2Context(2, 0, nullptr, nullptr);
 }
-static GLEScontext* createGLESxContext(int maj, int min) {
-    return new GLESv2Context(maj, min);
+static GLEScontext* createGLESxContext(int maj, int min, android::base::Stream* stream) {
+    return new GLESv2Context(maj, min, stream, s_eglIface->eglGetGlLibrary());
 }
 
 static bool shaderParserInitialized = false;
