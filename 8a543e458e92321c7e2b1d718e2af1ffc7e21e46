@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "764bac15_8e88e5e7",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-10T19:05:59Z",
+      "side": 1,
+      "message": "Those are for debug. I will remove them when the patch is ready.",
+      "parentUuid": "7d963bc2_320b6d18",
+      "range": {
+        "startLine": 82,
+        "startChar": 0,
+        "endLine": 83,
+        "endChar": 19
+      },
+      "revId": "8a543e458e92321c7e2b1d718e2af1ffc7e21e46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "41ba6949_a4bb77fa",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-10T19:02:02Z",
       "side": 1,
       "message": "1. let\u0027s use the smallest possible size instead of 32-bit everywhere.\n2. why is there a need in mag_beg/end?",
+      "range": {
+        "startLine": 105,
+        "startChar": 0,
+        "endLine": 109,
+        "endChar": 1
+      },
+      "revId": "8a543e458e92321c7e2b1d718e2af1ffc7e21e46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0643e253_bc343296",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-10T19:05:59Z",
+      "side": 1,
+      "message": "Sure. mag_beg/end are debug info and will be removed later.",
+      "parentUuid": "41ba6949_a4bb77fa",
       "range": {
         "startLine": 105,
         "startChar": 0,
