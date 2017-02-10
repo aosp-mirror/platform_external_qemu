@@ -47,8 +47,11 @@ for OPT; do
 done
 
 panic () {
-    echo "ERROR: $@"
-    exit 1
+    # don't print error message if we just came back from printing the help message
+   if [ "$VERBOSE" -ne 2 ]; then
+       echo "ERROR: $@"
+   fi
+   exit 1
 }
 
 run () {
@@ -74,8 +77,8 @@ case $HOST_OS in
         HOST_NUM_CPUS=`cat /proc/cpuinfo | grep processor | wc -l`
         ;;
     Darwin|FreeBSD)
-        HOST_NUM_CPUS=`sysctl -n hw.ncpu`
-        ;;
+	echo "$HOST_NUM_CPUS"
+	;;
     CYGWIN*|*_NT-*)
         HOST_NUM_CPUS=$NUMBER_OF_PROCESSORS
         ;;
@@ -124,7 +127,11 @@ fi
 # Build the binaries from sources.
 cd "$PROGDIR"/..
 rm -rf "$OUT_DIR"
-echo "Configuring build."
+# If the user only wants to print the help message and exit
+# there is no point of printing Configuring Build
+if [ "$VERBOSE" -ne 2 ]; then
+    echo "Configuring build."
+fi
 export IN_ANDROID_REBUILD_SH=1
 run android/configure.sh --out-dir=$OUT_DIR "$@" ||
     panic "Configuration error, please run ./android/configure.sh to see why."
