@@ -38,8 +38,8 @@ AndroidCpuAccelerator androidCpuAcceleration_getAccelerator() {
     return (AndroidCpuAccelerator)android::GetCurrentCpuAccelerator();
 }
 
-const bool* androidCpuAcceleration_getSupportedAccelerators() {
-    return android::GetCurrentSupportedCpuAccelerators();
+bool androidCpuAcceleration_isAcceleratorSupported(AndroidCpuAccelerator type) {
+    return android::GetCurrentAcceleratorSupport((android::CpuAccelerator)type);
 }
 
 } // extern "C"
