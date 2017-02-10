@@ -20,6 +20,8 @@
 #include "EglPbufferSurface.h"
 #include "ThreadInfo.h"
 
+#include <GLcommon/GLEScontext.h>
+
 unsigned int EglContext::s_nextContextHndl = 0;
 
 extern EglGlobalInfo* g_eglInfo; // defined in EglImp.cpp
@@ -136,6 +138,9 @@ bool EglContext::getAttrib(EGLint attrib,EGLint* value) {
 }
 
 void EglContext::onSave(android::base::Stream* stream) {
+    // Save gles context first
+    assert(m_glesContext);
+    m_glesContext->onSave(stream);
     // We save the information that
     // is needed to restore the contexts.
     // That means (1) context configurations (2) shared group IDs.

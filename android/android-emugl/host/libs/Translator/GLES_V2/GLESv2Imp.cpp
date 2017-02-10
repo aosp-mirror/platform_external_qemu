@@ -50,7 +50,7 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp);
 static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(void);
-static GLEScontext* createGLESxContext(int maj, int min);
+static GLEScontext* createGLESxContext(int maj, int min, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
 
 }
@@ -91,10 +91,10 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
 }
 
 static GLEScontext* createGLESContext() {
-    return new GLESv2Context(2, 0);
+    return new GLESv2Context(2, 0, nullptr, nullptr);
 }
-static GLEScontext* createGLESxContext(int maj, int min) {
-    return new GLESv2Context(maj, min);
+static GLEScontext* createGLESxContext(int maj, int min, android::base::Stream* stream) {
+    return new GLESv2Context(maj, min, stream, s_eglIface->eglGetGlLibrary());
 }
 
 static bool shaderParserInitialized = false;
@@ -111,6 +111,8 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp) {
     }
 }
 
+GL_APICALL void  GL_APIENTRY glVertexAttribPointerWithDataSize(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize);
+
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName) {
     GET_CTX_RET(NULL)
     ctx->getGlobalLock();
@@ -123,6 +125,7 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
             s_glesExtensions->clear();
         (*s_glesExtensions)["glEGLImageTargetTexture2DOES"] = (__translatorMustCastToProperFunctionPointerType)glEGLImageTargetTexture2DOES;
         (*s_glesExtensions)["glEGLImageTargetRenderbufferStorageOES"]=(__translatorMustCastToProperFunctionPointerType)glEGLImageTargetRenderbufferStorageOES;
+        (*s_glesExtensions)["glVertexAttribPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glVertexAttribPointerWithDataSize;
     }
     __translatorMustCastToProperFunctionPointerType ret=NULL;
     ProcTableMap::iterator val = s_glesExtensions->find(procName);
@@ -2974,6 +2977,19 @@ static void s_glPrepareVertexAttribPointer(GLESv2Context* ctx, GLuint index, GLi
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr){
+    GET_CTX_V2();
+    SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
+    if (type == GL_HALF_FLOAT_OES) type = GL_HALF_FLOAT;
+
+    s_glPrepareVertexAttribPointer(ctx, index, size, type, normalized, stride, ptr, false);
+    if (ctx->isBindedBuffer(GL_ARRAY_BUFFER)) {
+        ctx->dispatcher().glVertexAttribPointer(index, size, type, normalized, stride, ptr);
+    }
+}
+
+GL_APICALL void  GL_APIENTRY glVertexAttribPointerWithDataSize(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize) {
+    (void)dataSize;
+    printf("datasize code path\n");
     GET_CTX_V2();
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     if (type == GL_HALF_FLOAT_OES) type = GL_HALF_FLOAT;

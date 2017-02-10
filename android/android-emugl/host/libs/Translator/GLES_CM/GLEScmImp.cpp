@@ -43,7 +43,7 @@ static void initGLESx();
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp);
 static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
-static GLEScontext* createGLESContext(int maj, int min);
+static GLEScontext* createGLESContext(int maj, int min, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
 
 }
@@ -87,7 +87,9 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
      }
 }
 
-static GLEScontext* createGLESContext(int maj, int min) {
+static GLEScontext* createGLESContext(int maj, int min,
+                                      android::base::Stream* stream) {
+    (void)stream;
     return new GLEScmContext(maj, min);
 }
 

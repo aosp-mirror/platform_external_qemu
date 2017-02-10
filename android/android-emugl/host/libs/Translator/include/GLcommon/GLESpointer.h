@@ -16,6 +16,7 @@
 #ifndef GLES_POINTER_H
 #define GLES_POINTER_H
 
+#include <android/base/files/Stream.h>
 #include <GLES/gl.h>
 #include "GLESbuffer.h"
 
@@ -63,6 +64,7 @@ public:
     bool isIntPointer() const;
     void enable(bool b);
 
+    void onSave(android::base::Stream* stream) const;
 private:
     GLint m_size = 4;
     GLenum m_type = GL_FLOAT;

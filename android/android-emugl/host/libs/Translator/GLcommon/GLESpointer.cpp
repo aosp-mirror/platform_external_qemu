@@ -135,3 +135,22 @@ void GLESpointer::setFormat(GLint size, GLenum type,
 void GLESpointer::getBufferConversions(const RangeList& rl, RangeList& rlOut) {
     m_buffer->getConversions(rl, rlOut);
 }
+
+void GLESpointer::onSave(android::base::Stream* stream) const {
+    stream->putBe32(m_size);
+    stream->putBe32(m_type);
+    stream->putBe32(m_stride);
+    stream->putBe32(m_enabled);
+    stream->putBe32(m_normalize);
+    stream->putBe32(m_isVBO);
+    stream->putBe32(m_bufferName);
+    if (!m_bufferName) {
+        //stream->write()
+    }
+    stream->putBe32(m_size);
+    stream->putBe32(m_size);
+    stream->putBe32(m_size);
+    stream->putBe32(m_size);
+    stream->putBe32(m_size);
+    
+}
