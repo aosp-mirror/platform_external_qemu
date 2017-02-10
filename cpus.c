@@ -1000,7 +1000,6 @@ void async_run_on_cpu(CPUState *cpu, void (*func)(void *data), void *data)
     wi->done = false;
     qemu_mutex_unlock(&cpu->work_mutex);
 
-    // fprintf(stderr, "%s: kick\n", __func__);
     qemu_cpu_kick(cpu);
 }
 
@@ -1446,10 +1445,10 @@ void qemu_cpu_kick(CPUState *cpu)
      *
      * - TCG is being used without HAX, then qemu_cpu_kick_no_halt() can be
      *   called directly.
-     * 
+     *
      * - TCG is being used with HAX, then kicking the thread with a signal (on Posix)
      *   or with a thread suspend/resume (on Win32) is still needed.
-     * 
+     *
      * - TCG is not being used, kick the thread with a signal or suspend/resume.
      */
 #if CONFIG_HAX
@@ -1779,7 +1778,7 @@ void qemu_init_vcpu(CPUState *cpu)
 #ifdef CONFIG_HAX
     } else if (hax_enabled() && hax_ug_platform()) {
         qemu_hax_start_vcpu(cpu);
-#endif 
+#endif
 #ifdef CONFIG_HVF
     } else if (hvf_enabled()) {
         qemu_hvf_start_vcpu(cpu);
