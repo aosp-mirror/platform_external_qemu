@@ -79,14 +79,34 @@ void GLESv2Context::init(GlLibrary* glLib) {
     m_initialized = true;
 }
 
-GLESv2Context::GLESv2Context(int maj, int min) {
-    m_glesMajorVersion = maj;
-    m_glesMinorVersion = min;
+GLESv2Context::GLESv2Context(int maj, int min, android::base::Stream* stream,
+        GlLibrary* glLib) : GLEScontext(stream, glLib) {
+    if (stream) {
+        assert(maj == m_glesMajorVersion);
+        assert(min == m_glesMinorVersion);
+        stream->read(m_attribute0value, sizeof(m_attribute0value));
+        m_attribute0valueChanged = stream->getByte();
+        m_att0ArrayLength = stream->getBe32();
+        stream->read(m_att0Array, sizeof(GLfloat) * 4 * m_att0ArrayLength);
+        m_att0NeedsDisable = stream->getByte();
+    } else {
+        m_glesMajorVersion = maj;
+        m_glesMinorVersion = min;
+    }
 }
 
 GLESv2Context::~GLESv2Context()
 {
     delete[] m_att0Array;
+}
+
+void GLESv2Context::onSave(android::base::Stream* stream) const {
+    GLEScontext::onSave(stream);
+    stream->write(m_attribute0value, sizeof(m_attribute0value));
+    stream->putByte(m_attribute0valueChanged);
+    stream->putBe32(m_att0ArrayLength);
+    stream->write(m_att0Array, sizeof(GLfloat) * 4 * m_att0ArrayLength);
+    stream->putByte(m_att0NeedsDisable);
 }
 
 void GLESv2Context::setAttribute0value(float x, float y, float z, float w)

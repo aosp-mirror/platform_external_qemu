@@ -896,7 +896,7 @@ static EGLContext eglCreateOrLoadContext(EGLDisplay display, EGLConfig config,
     const GLESiface* iface = g_eglInfo->getIface(glesVersion);
     GLEScontext* glesCtx = NULL;
     if(iface) {
-        glesCtx = iface->createGLESContext(major_version, minor_version);
+        glesCtx = iface->createGLESContext(major_version, minor_version, stream);
     } else { // there is no interface for this gles version
                 RETURN_ERROR(EGL_NO_CONTEXT,EGL_BAD_ATTRIBUTE);
     }
@@ -914,6 +914,9 @@ static EGLContext eglCreateOrLoadContext(EGLDisplay display, EGLConfig config,
                               glesCtx, glesVersion,
                               dpy->getManager(glesVersion),
                               stream));
+    if (stream) {
+        iface->setShareGroup(glesCtx, ctx->getShareGroup());
+    }
     if(ctx->nativeType()) {
         return dpy->addContext(ctx);
     } else {
