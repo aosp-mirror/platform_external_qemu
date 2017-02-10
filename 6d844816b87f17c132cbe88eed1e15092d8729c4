@@ -1,0 +1,349 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "51f3ff96_981ae24c",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-sources.mk",
+        "patchSetId": 24
+      },
+      "lineNbr": 1262,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-10T19:00:11Z",
+      "side": 1,
+      "message": "nit: tab",
+      "range": {
+        "startLine": 1262,
+        "startChar": 0,
+        "endLine": 1262,
+        "endChar": 1
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c7c02f93_ffd8062f",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-sources.mk",
+        "patchSetId": 24
+      },
+      "lineNbr": 1356,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-10T19:00:11Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 1356,
+        "startChar": 0,
+        "endLine": 1356,
+        "endChar": 1
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04d20174_03d180cc",
+        "filename": "android/android-emu/android/cpu_accelerator.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-10T19:00:11Z",
+      "side": 1,
+      "message": "I\u0027m curious what this can mean. Could you please describe the way of returning supported accelerators, or just provide an argument to the function - array to fill in with supported ones",
+      "range": {
+        "startLine": 95,
+        "startChar": 0,
+        "endLine": 95,
+        "endChar": 11
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c69e8382_bb04c625",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 655,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-10T19:00:11Z",
+      "side": 1,
+      "message": "makeCustomScopedPtr()?",
+      "range": {
+        "startLine": 655,
+        "startChar": 14,
+        "endLine": 655,
+        "endChar": 28
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b71568dc_d69f560c",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 684,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-10T19:00:11Z",
+      "side": 1,
+      "message": "android::base::ScopedFd ?",
+      "range": {
+        "startLine": 677,
+        "startChar": 0,
+        "endLine": 684,
+        "endChar": 46
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9aeaf07b_4143a6c7",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 714,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-10T19:00:11Z",
+      "side": 1,
+      "message": "memset?",
+      "range": {
+        "startLine": 712,
+        "startChar": 0,
+        "endLine": 714,
+        "endChar": 5
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c6374574_556ca400",
+        "filename": "android/android-emu/android/main-qemu-parameters.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-10T19:00:11Z",
+      "side": 1,
+      "message": "VERBOSE_PRINT(...) ?",
+      "range": {
+        "startLine": 166,
+        "startChar": 0,
+        "endLine": 166,
+        "endChar": 65
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "672ddc85_6f8e4feb",
+        "filename": "cpus.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 1003,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-10T19:00:11Z",
+      "side": 1,
+      "message": "please remove",
+      "range": {
+        "startLine": 1003,
+        "startChar": 0,
+        "endLine": 1003,
+        "endChar": 47
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7ce9744f_f68d3842",
+        "filename": "cpus.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 1298,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-10T19:00:11Z",
+      "side": 1,
+      "message": "do we even check for it for hvf?",
+      "range": {
+        "startLine": 1298,
+        "startChar": 24,
+        "endLine": 1298,
+        "endChar": 53
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "299e319c_cbee83ab",
+        "filename": "include/sysemu/hvf.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-10T19:00:11Z",
+      "side": 1,
+      "message": "haxm limits max ram during installation. AFAIK that\u0027s not the hax for hvf, so I think we can skip this.",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 39
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1e39a59f_27684c43",
+        "filename": "include/sysemu/hvf.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-10T19:00:11Z",
+      "side": 1,
+      "message": "could you please move the includes to the top?",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 24
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "92bcf4d5_df7428a4",
+        "filename": "target-i386/hvf-all.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-10T19:00:11Z",
+      "side": 1,
+      "message": "Impressive",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 6,
+        "endChar": 2
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ededf4e_be4a2df8",
+        "filename": "target-i386/hvf-all.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-10T19:00:11Z",
+      "side": 1,
+      "message": "__func__ will always be \"assert_hvf_ok\" here. I doubt this is the intent :)",
+      "range": {
+        "startLine": 103,
+        "startChar": 62,
+        "endLine": 103,
+        "endChar": 70
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9e9b4396_ff411025",
+        "filename": "target-i386/hvf-all.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-10T19:00:11Z",
+      "side": 1,
+      "message": "we have some callback in qemu that calls into our crash reporter. let\u0027s use that instead of abort() to get some diagnostics - qemu_abort() from qemu/include/qemu/abort.h",
+      "range": {
+        "startLine": 205,
+        "startChar": 0,
+        "endLine": 205,
+        "endChar": 20
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7214f8fd_b99393ed",
+        "filename": "target-i386/hvf-all.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-10T19:00:11Z",
+      "side": 1,
+      "message": "hvf_disabled \u003d shouldDisable\n?",
+      "range": {
+        "startLine": 267,
+        "startChar": 0,
+        "endLine": 271,
+        "endChar": 5
+      },
+      "revId": "6d844816b87f17c132cbe88eed1e15092d8729c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
