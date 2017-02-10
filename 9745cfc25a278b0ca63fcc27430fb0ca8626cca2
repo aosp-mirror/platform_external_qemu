@@ -1,0 +1,259 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e413131f_6b04a7ea",
+        "filename": "cpus.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1093,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-02-10T10:20:33Z",
+      "side": 1,
+      "message": "duplicated code, guarded by CONFIGHVF instead of CONFIG_HVF, is that a typo?",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4af1389a_3503dc8e",
+        "filename": "cpus.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1468,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-02-10T10:20:33Z",
+      "side": 1,
+      "message": "Are you sure about TCG being usable with HVF? See below.",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30013415_d09dea8d",
+        "filename": "cpus.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1614,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-02-10T10:20:33Z",
+      "side": 1,
+      "message": "please remove :)",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f5f0585e_d5a7564b",
+        "filename": "cpus.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1725,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-02-10T10:20:33Z",
+      "side": 1,
+      "message": "It doesn\u0027t seem you support running HVF with TCG, so remove this comment?",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9fd07709_bd8e9878",
+        "filename": "cpus.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1732,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-02-10T10:20:33Z",
+      "side": 1,
+      "message": "CPU %d/HVF instead?",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a676e266_053a617c",
+        "filename": "hw/i386/pc_piix.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-02-10T10:20:33Z",
+      "side": 1,
+      "message": "please remove?",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "32b6d4f2_9b0d0d01",
+        "filename": "include/qom/cpu.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-02-10T10:20:33Z",
+      "side": 1,
+      "message": "#ifdef CONFIG_HVF, maybe?",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0232864d_01e8ea23",
+        "filename": "include/sysemu/hvf.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-02-10T10:20:33Z",
+      "side": 1,
+      "message": "It might be nice to clarify that HVF \u003d\u003d HyperVisor Framework here.",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b502df7_b6716146",
+        "filename": "target-i386/cpu-qom.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-02-10T10:20:33Z",
+      "side": 1,
+      "message": "why is this necessary?",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "60da52ac_c8f7cca6",
+        "filename": "target-i386/cpu.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 1128,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-02-10T10:20:33Z",
+      "side": 1,
+      "message": "I recommend making the changes to target-i386/cpu.h and cpu.h that are independent of HVF part of a different patch. This will make it easier to rebase / send the changes upstream.",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4262e681_11462ae9",
+        "filename": "target-i386/helper.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1127,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-02-10T10:20:33Z",
+      "side": 1,
+      "message": "please remove.",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "653cd5f7_59815556",
+        "filename": "target-i386/hvf-i386.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-02-10T10:20:33Z",
+      "side": 1,
+      "message": "Probably change this line?",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99334066_9fd4dfe8",
+        "filename": "vl.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 3974,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-02-10T10:20:33Z",
+      "side": 1,
+      "message": "please remove.",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f4cd311a_1a36bb16",
+        "filename": "vl.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 3982,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-02-10T10:20:33Z",
+      "side": 1,
+      "message": "please remove",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f661bbc_59257a62",
+        "filename": "vl.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 5300,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-02-10T10:20:33Z",
+      "side": 1,
+      "message": "and here :)",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
