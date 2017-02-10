@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a372fd3a_c51debf4",
+        "filename": "android/android-emu/android/skin/qt/extended.ui",
+        "patchSetId": 2
+      },
+      "lineNbr": 784,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-10T20:51:13Z",
+      "side": 1,
+      "message": "is is supposed to start with spaces?",
+      "range": {
+        "startLine": 784,
+        "startChar": 18,
+        "endLine": 784,
+        "endChar": 19
+      },
+      "revId": "a3312acea2472d3f5fd4efd11c97b6ca8869ac8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
