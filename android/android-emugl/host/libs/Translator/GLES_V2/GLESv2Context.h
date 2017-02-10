@@ -29,7 +29,7 @@
 class GLESv2Context : public GLEScontext{
 public:
     virtual void init(GlLibrary* glLib);
-    GLESv2Context(int maj, int min);
+    GLESv2Context(int maj, int min, android::base::Stream* stream, GlLibrary* glLib);
     virtual ~GLESv2Context();
     void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct);
     void setVertexAttribDivisor(GLuint bindingindex, GLuint divisor);
@@ -48,6 +48,7 @@ public:
     void validateAtt0PostDraw(void);
     const float* getAtt0(void) const {return m_attribute0value;}
 
+    virtual void onSave(android::base::Stream* stream) const override;
 protected:
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
 private:
