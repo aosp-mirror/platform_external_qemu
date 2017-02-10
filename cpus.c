@@ -1000,7 +1000,6 @@ void async_run_on_cpu(CPUState *cpu, void (*func)(void *data), void *data)
     wi->done = false;
     qemu_mutex_unlock(&cpu->work_mutex);
 
-    // fprintf(stderr, "%s: kick\n", __func__);
     qemu_cpu_kick(cpu);
 }
 
