@@ -8,6 +8,7 @@
   X(void, glGetShaderPrecisionFormat, (GLenum shadertype, GLenum precisiontype, GLint* range, GLint* precision), (shadertype, precisiontype, range, precision)) \
   X(void, glReleaseShaderCompiler, (), ()) \
   X(void, glShaderBinary, (GLsizei n, const GLuint* shaders, GLenum binaryformat, const GLvoid* binary, GLsizei length), (n, shaders, binaryformat, binary, length)) \
+  X(void, glVertexAttribPointerWithDataSize, (GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize), (indx, size, type, normalized, stride, ptr, dataSize)) \
 
 
 #endif  // GLES2_EXTENSIONS_FUNCTIONS_H
