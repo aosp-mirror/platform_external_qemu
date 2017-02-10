@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6cb0bbd5_245e29a8",
+        "filename": "cpus.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1093,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T15:11:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e413131f_6b04a7ea",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4af1389a_3503dc8e",
         "filename": "cpus.c",
         "patchSetId": 19
@@ -30,6 +48,24 @@
       "writtenOn": "2017-02-10T10:20:33Z",
       "side": 1,
       "message": "Are you sure about TCG being usable with HVF? See below.",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a5b959c_b42e4d90",
+        "filename": "cpus.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1468,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T15:11:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4af1389a_3503dc8e",
       "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "719af621_bab6fb61",
+        "filename": "cpus.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1614,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T15:11:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30013415_d09dea8d",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f5f0585e_d5a7564b",
         "filename": "cpus.c",
         "patchSetId": 19
@@ -64,6 +118,24 @@
       "writtenOn": "2017-02-10T10:20:33Z",
       "side": 1,
       "message": "It doesn\u0027t seem you support running HVF with TCG, so remove this comment?",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "35ee9092_d25e0e6e",
+        "filename": "cpus.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1725,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T15:11:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f5f0585e_d5a7564b",
       "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "f012a051_097d831a",
+        "filename": "cpus.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1732,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T15:11:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9fd07709_bd8e9878",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a676e266_053a617c",
         "filename": "hw/i386/pc_piix.c",
         "patchSetId": 19
@@ -98,6 +188,24 @@
       "writtenOn": "2017-02-10T10:20:33Z",
       "side": 1,
       "message": "please remove?",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b48c7805_b195c222",
+        "filename": "hw/i386/pc_piix.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T15:11:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a676e266_053a617c",
       "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "6ca8b830_7043da8e",
+        "filename": "include/qom/cpu.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T15:11:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "32b6d4f2_9b0d0d01",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0232864d_01e8ea23",
         "filename": "include/sysemu/hvf.h",
         "patchSetId": 19
@@ -132,6 +258,24 @@
       "writtenOn": "2017-02-10T10:20:33Z",
       "side": 1,
       "message": "It might be nice to clarify that HVF \u003d\u003d HyperVisor Framework here.",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc63fc28_cf80f5cd",
+        "filename": "include/sysemu/hvf.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T15:11:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0232864d_01e8ea23",
       "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "26832687_8deb2556",
+        "filename": "target-i386/cpu-qom.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T15:11:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7b502df7_b6716146",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "60da52ac_c8f7cca6",
         "filename": "target-i386/cpu.h",
         "patchSetId": 19
@@ -166,6 +328,24 @@
       "writtenOn": "2017-02-10T10:20:33Z",
       "side": 1,
       "message": "I recommend making the changes to target-i386/cpu.h and cpu.h that are independent of HVF part of a different patch. This will make it easier to rebase / send the changes upstream.",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1d0ad4fb_2bc6bd9a",
+        "filename": "target-i386/cpu.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 1128,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T15:11:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "60da52ac_c8f7cca6",
       "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "224291be_7c84d37d",
+        "filename": "target-i386/helper.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1127,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T15:11:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4262e681_11462ae9",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "653cd5f7_59815556",
         "filename": "target-i386/hvf-i386.h",
         "patchSetId": 19
@@ -200,6 +398,24 @@
       "writtenOn": "2017-02-10T10:20:33Z",
       "side": 1,
       "message": "Probably change this line?",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2bad7a1c_aeab8b0d",
+        "filename": "target-i386/hvf-i386.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T15:11:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "653cd5f7_59815556",
       "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "c9baf3d2_ec5adad8",
+        "filename": "vl.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 3974,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T15:11:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "99334066_9fd4dfe8",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f4cd311a_1a36bb16",
         "filename": "vl.c",
         "patchSetId": 19
@@ -240,6 +474,24 @@
     },
     {
       "key": {
+        "uuid": "7119ee08_4fa46ee4",
+        "filename": "vl.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 3982,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T15:11:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f4cd311a_1a36bb16",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f661bbc_59257a62",
         "filename": "vl.c",
         "patchSetId": 19
@@ -251,6 +503,24 @@
       "writtenOn": "2017-02-10T10:20:33Z",
       "side": 1,
       "message": "and here :)",
+      "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2bb2ff94_ebe43c63",
+        "filename": "vl.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 5300,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-10T15:11:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4f661bbc_59257a62",
       "revId": "9745cfc25a278b0ca63fcc27430fb0ca8626cca2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
