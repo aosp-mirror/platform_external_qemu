@@ -43,7 +43,7 @@ static void initGLESx();
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp);
 static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
-static GLEScontext* createGLESContext(int maj, int min);
+static GLEScontext* createGLESContext(int maj, int min, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
 
 }
@@ -87,7 +87,9 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
      }
 }
 
-static GLEScontext* createGLESContext(int maj, int min) {
+static GLEScontext* createGLESContext(int maj, int min,
+                                      android::base::Stream* stream) {
+    (void)stream;
     return new GLEScmContext(maj, min);
 }
 
@@ -453,7 +455,7 @@ GL_API void GL_APIENTRY  glColorPointer( GLint size, GLenum type, GLsizei stride
     GET_CTX()
     SET_ERROR_IF(!GLEScmValidate::colorPointerParams(size,stride),GL_INVALID_VALUE);
     SET_ERROR_IF(!GLEScmValidate::colorPointerType(type),GL_INVALID_ENUM);
-    ctx->setPointer(GL_COLOR_ARRAY,size,type,stride,pointer);
+    ctx->setPointer(GL_COLOR_ARRAY,size,type,stride,pointer, 0);
 }
 
 GL_API void GL_APIENTRY  glCompressedTexImage2D( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data) {
@@ -1271,7 +1273,7 @@ GL_API void GL_APIENTRY  glNormalPointer( GLenum type, GLsizei stride, const GLv
     GET_CTX()
     SET_ERROR_IF(stride < 0,GL_INVALID_VALUE);
     SET_ERROR_IF(!GLEScmValidate::normalPointerType(type),GL_INVALID_ENUM);
-    ctx->setPointer(GL_NORMAL_ARRAY,3,type,stride,pointer);//3 normal verctor
+    ctx->setPointer(GL_NORMAL_ARRAY,3,type,stride,pointer, 0);//3 normal verctor
 }
 
 GL_API void GL_APIENTRY  glOrthof( GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar) {
@@ -1324,7 +1326,7 @@ GL_API void GL_APIENTRY  glPointSizePointerOES( GLenum type, GLsizei stride, con
     GET_CTX()
     SET_ERROR_IF(stride < 0,GL_INVALID_VALUE);
     SET_ERROR_IF(!GLEScmValidate::pointPointerType(type),GL_INVALID_ENUM);
-    ctx->setPointer(GL_POINT_SIZE_ARRAY_OES,1,type,stride,pointer);
+    ctx->setPointer(GL_POINT_SIZE_ARRAY_OES,1,type,stride,pointer, 0);
 }
 
 GL_API void GL_APIENTRY  glPointSizex( GLfixed size) {
@@ -1420,7 +1422,7 @@ GL_API void GL_APIENTRY  glTexCoordPointer( GLint size, GLenum type, GLsizei str
     GET_CTX()
     SET_ERROR_IF(!GLEScmValidate::texCoordPointerParams(size,stride),GL_INVALID_VALUE);
     SET_ERROR_IF(!GLEScmValidate::texCoordPointerType(type),GL_INVALID_ENUM);
-    ctx->setPointer(GL_TEXTURE_COORD_ARRAY,size,type,stride,pointer);
+    ctx->setPointer(GL_TEXTURE_COORD_ARRAY,size,type,stride,pointer, 0);
 }
 
 GL_API void GL_APIENTRY  glTexEnvf( GLenum target, GLenum pname, GLfloat param) {
@@ -1669,7 +1671,7 @@ GL_API void GL_APIENTRY  glVertexPointer( GLint size, GLenum type, GLsizei strid
     GET_CTX()
     SET_ERROR_IF(!GLEScmValidate::vertexPointerParams(size,stride),GL_INVALID_VALUE);
     SET_ERROR_IF(!GLEScmValidate::vertexPointerType(type),GL_INVALID_ENUM);
-    ctx->setPointer(GL_VERTEX_ARRAY,size,type,stride,pointer);
+    ctx->setPointer(GL_VERTEX_ARRAY,size,type,stride,pointer, 0);
 }
 
 GL_API void GL_APIENTRY  glViewport( GLint x, GLint y, GLsizei width, GLsizei height) {

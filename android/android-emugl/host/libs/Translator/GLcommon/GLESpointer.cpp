@@ -44,6 +44,7 @@ const GLvoid* GLESpointer::getData() const {
 }
 
 void GLESpointer::redirectPointerData() {
+    m_ownData.resize(0);
     m_data = getBufferData();
 }
 
@@ -79,11 +80,14 @@ void GLESpointer::setArray(GLint size,
                            GLenum type,
                            GLsizei stride,
                            const GLvoid* data,
+                           GLsizei dataSize,
                            bool normalize,
                            bool isInt) {
+    m_ownData.resize(0);
     m_size = size;
     m_type = type;
     m_stride = stride;
+    m_dataSize = dataSize;
     m_data = data;
     m_buffer = nullptr;
     m_bufferName = 0;
@@ -101,9 +105,11 @@ void GLESpointer::setBuffer(GLint size,
                             int offset,
                             bool normalize,
                             bool isInt) {
+    m_ownData.clear();
     m_size = size;
     m_type = type;
     m_stride = stride;
+    m_dataSize = 0;
     m_data = nullptr;
     m_buffer = buf;
     m_bufferName = bufferName;
@@ -134,4 +140,44 @@ void GLESpointer::setFormat(GLint size, GLenum type,
 
 void GLESpointer::getBufferConversions(const RangeList& rl, RangeList& rlOut) {
     m_buffer->getConversions(rl, rlOut);
+}
+
+GLESpointer::GLESpointer(android::base::Stream* stream) {
+    m_size = stream->getBe32();
+    m_type = stream->getBe32();
+    m_stride = stream->getBe32();
+    m_enabled = stream->getByte();
+    m_normalize = stream->getByte();
+    m_isVBO = stream->getByte();
+    m_bufferName = stream->getBe32();
+    if (!m_bufferName) {
+        m_dataSize = stream->getBe32();
+        m_ownData.resize(m_dataSize);
+        stream->read(m_ownData.data(), m_dataSize);
+        m_data = m_ownData.data();
+    }
+    m_buffOffset = stream->getBe32();
+    m_isInt = stream->getByte();
+    m_divisor = stream->getBe32();
+    m_bindingIndex = stream->getBe32();
+    m_reloffset = stream->getBe32();
+}
+
+void GLESpointer::onSave(android::base::Stream* stream) const {
+    stream->putBe32(m_size);
+    stream->putBe32(m_type);
+    stream->putBe32(m_stride);
+    stream->putByte(m_enabled);
+    stream->putByte(m_normalize);
+    stream->putByte(m_isVBO);
+    stream->putBe32(m_bufferName);
+    if (!m_bufferName) {
+        stream->putBe32(m_dataSize);
+        stream->write(m_data, m_dataSize);
+    }
+    stream->putBe32(m_buffOffset);
+    stream->putByte(m_isInt);
+    stream->putBe32(m_divisor);
+    stream->putBe32(m_bindingIndex);
+    stream->putBe32(m_reloffset);
 }

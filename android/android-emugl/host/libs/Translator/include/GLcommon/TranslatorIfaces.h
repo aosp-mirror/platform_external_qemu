@@ -18,6 +18,8 @@
 
 #include "GLcommon/objectNameManager.h"
 
+#include "android/base/files/Stream.h"
+
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
 #include <GLES3/gl3.h>
@@ -89,7 +91,7 @@ class GLEScontext;
 
 typedef struct {
     void                                            (*initGLESx)();
-    GLEScontext*                                    (*createGLESContext)(int majorVersion, int minorVersion);
+    GLEScontext*                                    (*createGLESContext)(int majorVersion, int minorVersion, android::base::Stream* stream);
     void                                            (*initContext)(GLEScontext*,ShareGroupPtr);
     void                                            (*deleteGLESContext)(GLEScontext*);
     void                                            (*flush)();

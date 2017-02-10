@@ -16,11 +16,16 @@
 #ifndef GLES_POINTER_H
 #define GLES_POINTER_H
 
+#include <android/base/files/Stream.h>
 #include <GLES/gl.h>
 #include "GLESbuffer.h"
 
+#include <vector>
+
 class GLESpointer {
 public:
+    GLESpointer() = default;
+    GLESpointer(android::base::Stream* stream);
     GLenum getType() const;
     GLint getSize() const;
     GLsizei getStride() const;
@@ -38,6 +43,7 @@ public:
                   GLenum type,
                   GLsizei stride,
                   const GLvoid* data,
+                  GLsizei dataSize,
                   bool normalize = false,
                   bool isInt = false);
     void setBuffer(GLint size,
@@ -62,7 +68,7 @@ public:
     bool isVBO() const;
     bool isIntPointer() const;
     void enable(bool b);
-
+    void onSave(android::base::Stream* stream) const;
 private:
     GLint m_size = 4;
     GLenum m_type = GL_FLOAT;
@@ -70,6 +76,7 @@ private:
     bool m_enabled = false;
     bool m_normalize = false;
     bool m_isVBO = false;
+    GLsizei m_dataSize = 0;
     const GLvoid* m_data = nullptr;
     GLESbuffer* m_buffer = nullptr;
     GLuint m_bufferName = 0;
@@ -78,5 +85,7 @@ private:
     GLuint m_divisor = 0;
     GLuint m_bindingIndex = 0;
     GLuint m_reloffset = 0;
+    // m_ownData is only used when loading from a snapshot
+    std::vector<unsigned char> m_ownData;
 };
 #endif
