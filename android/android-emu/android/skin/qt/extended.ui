@@ -781,7 +781,7 @@ text-align: left;
 padding: 10px 0px 10px 16px;</string>
         </property>
         <property name="text">
-         <string>  Car Data</string>
+         <string>  Car data</string>
         </property>
         <property name="icon">
          <iconset resource="resources.qrc">
