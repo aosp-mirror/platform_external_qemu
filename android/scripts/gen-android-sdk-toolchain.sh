@@ -308,16 +308,16 @@ prepare_build_for_host () {
             # Ensure we use the 10.8 SDK or else.
             OSX_VERSION=$(sw_vers -productVersion)
             OSX_DEPLOYMENT_TARGET=10.8
-            OSX_SDK_SUPPORTED="10.6 10.7 10.8 10.9"
+            OSX_SDK_SUPPORTED="10.10"
             OSX_SDK_INSTALLED_LIST=$(xcodebuild -showsdks 2>/dev/null | \
                     grep --color=never macosx | sed -e "s/.*macosx10\.//g" | sort -n | \
-                    tr '\n' ' ' | sed -e 's/^/10./g')
+                    sed -e 's/^/10./g' | tr '\n' ' ')
             if [ -z "$OSX_SDK_INSTALLED_LIST" ]; then
                 panic "Please install XCode on this machine!"
             fi
             log "OSX: Installed SDKs: $OSX_SDK_INSTALLED_LIST"
 
-            OSX_SDK_VERSION=$(echo "$OSX_SDK_INSTALLED_LIST" | tr ' ' '\n' | head -1)
+            OSX_SDK_VERSION=$(echo "$OSX_SDK_INSTALLED_LIST" | tr ' ' '\n' | grep $OSX_SDK_SUPPORTED | head -1)
             log "OSX: Using SDK version $OSX_SDK_VERSION"
 
             XCODE_PATH=$(xcode-select -print-path 2>/dev/null)
