@@ -37,7 +37,7 @@
     border: 0px;
 }
 *[ColorGroup="GradientDivider"] {
-    background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 %%LARGE_DIVIDER_COLOR%%, stop: 1 %%BKG_COLOR%%);
+    background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 %%LARGE_DIVIDER_COLOR%%, stop: 1 rgba(0, 0, 0, 0));
     border: 0px;
 }
 *[ColorGroup="Overlay"] {

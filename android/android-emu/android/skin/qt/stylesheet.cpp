@@ -245,7 +245,7 @@ struct StylesheetValues {
         {"DIVIDER_COLOR",                   "#e0e0e0"},  // Line between items
         {"EDIT_COLOR",                      "#e0e0e0"},  // Line under editable fields
         {"INSTRUCTION_COLOR",               "#91a4ad"},  // Large instruction string
-        {"LARGE_DIVIDER_COLOR",             "#ebebeb"},  // Start of large divider's gradient
+        {"LARGE_DIVIDER_COLOR",    "rgba(0,0,0,2.1%)"},  // Start of large divider's gradient
         {MAJOR_TAB_COLOR_VAR,               "#91a4ad"},  // Text of major tabs
         {"MAJOR_TITLE_COLOR",               "#617d8a"},  // Text of major tab separators
         {"SCROLL_BKG_COLOR",                "#f6f6f6"},  // Background of scroll bar
@@ -272,7 +272,7 @@ struct StylesheetValues {
         {"DIVIDER_COLOR",                "#e0e0e0"},
         {"EDIT_COLOR",                   "#808080"},
         {"INSTRUCTION_COLOR",            "#ffffff"},
-        {"LARGE_DIVIDER_COLOR",          "#1f282d"},
+        {"LARGE_DIVIDER_COLOR",  "rgba(0,0,0,20%)"},
         {MAJOR_TAB_COLOR_VAR,            "#bdc0c3"},
         {"MAJOR_TITLE_COLOR",            "#e5e6e7"},
         {"SCROLL_BKG_COLOR",             "#333b43"},
