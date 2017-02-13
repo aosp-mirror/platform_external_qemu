@@ -1326,7 +1326,6 @@ void FrameBuffer::onSave(android::base::Stream* stream) {
     //     m_eglSurface
     //     m_eglContext
     //     m_pbufSurface
-    //     m_pbufContext
     //     m_prevContext
     //     m_prevReadSurf
     //     m_prevDrawSurf
@@ -1346,7 +1345,13 @@ void FrameBuffer::onSave(android::base::Stream* stream) {
     stream->putBe32(m_statsNumFrames);
     stream->putBe64(m_statsStartTime);
 
+    if (s_egl.eglSaveNamespaces) {
+        s_egl.eglSaveNamespaces(m_eglDisplay, stream);
+    }
     // snapshot contexts
+    if (s_egl.eglSaveContext) {
+        s_egl.eglSaveContext(m_eglDisplay, m_pbufContext, stream);
+    }
     stream->putBe32(m_contexts.size());
     for (const auto& ctx : m_contexts) {
         ctx.second->onSave(stream);
@@ -1399,10 +1404,26 @@ bool FrameBuffer::onLoad(android::base::Stream* stream) {
     m_statsNumFrames = stream->getBe32();
     m_statsStartTime = stream->getBe64();
 
+    if (s_egl.eglLoadContext) {
+        s_egl.eglDestroyContext(m_eglDisplay, m_pbufContext);
+    }
+
+    if (s_egl.eglLoadNamespaces) {
+        s_egl.eglLoadNamespaces(m_eglDisplay, stream);
+    }
     // restore contexts
+    if (s_egl.eglLoadContext) {
+        static const GLint glContextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2,
+                                             EGL_NONE};
+        m_pbufContext = s_egl.eglLoadContext(m_eglDisplay, glContextAttribs,
+                stream);
+    }
     assert(m_contexts.size() == 0);
     size_t numContexts = stream->getBe32();
     for (size_t i = 0; i < numContexts; i++) {
+        // RenderContext::onLoad cannot run in parallel for now,
+        // since the sharegroup will be loaded by the first context
+        // in the sharegroup.
         RenderContextPtr ctx(RenderContext::onLoad(stream, m_eglDisplay));
         if (ctx) {
             m_contexts[ctx->getHndl()] = ctx;
@@ -1431,6 +1452,10 @@ bool FrameBuffer::onLoad(android::base::Stream* stream) {
         HandleType cbHndl = stream->getBe32();
         m_windows.emplace(std::make_pair(hndl,
                             std::make_pair(std::move(window), cbHndl)));
+    }
+
+    if (s_egl.eglPostLoadNamespaces) {
+        s_egl.eglPostLoadNamespaces(m_eglDisplay, stream);
     }
 
     return true;

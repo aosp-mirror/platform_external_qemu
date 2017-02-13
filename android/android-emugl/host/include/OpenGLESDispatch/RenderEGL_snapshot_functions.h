@@ -5,10 +5,13 @@
 #define RENDER_EGL_SNAPSHOT_FUNCTIONS_H
 
 #define LIST_RENDER_EGL_SNAPSHOT_FUNCTIONS(X) \
-  X(EGLBoolean, eglSaveConfig, (EGLDisplay display, EGLConfig config, EGLStream stream)) \
-  X(EGLBoolean, eglSaveContext, (EGLDisplay display, EGLContext context, EGLStream stream)) \
   X(EGLConfig, eglLoadConfig, (EGLDisplay display, EGLStream stream)) \
   X(EGLContext, eglLoadContext, (EGLDisplay display, const EGLint * attrib_list, EGLStream stream)) \
+  X(EGLBoolean, eglLoadNamespaces, (EGLDisplay display, EGLStream stream)) \
+  X(EGLBoolean, eglSaveNamespaces, (EGLDisplay display, EGLStream stream)) \
+  X(EGLBoolean, eglSaveConfig, (EGLDisplay display, EGLConfig config, EGLStream stream)) \
+  X(EGLBoolean, eglSaveContext, (EGLDisplay display, EGLContext context, EGLStream stream)) \
+  X(EGLBoolean, eglPostLoadNamespaces, (EGLDisplay display, EGLStream stream)) \
 
 
 #endif  // RENDER_EGL_SNAPSHOT_FUNCTIONS_H

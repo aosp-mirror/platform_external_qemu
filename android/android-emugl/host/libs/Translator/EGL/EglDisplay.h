@@ -89,6 +89,9 @@ public:
     bool destroyImageKHR(EGLImageKHR img);
     EglOS::Context* getGlobalSharedContext() const;
 
+    void onSaveNamespaces(android::base::Stream* stream) const;
+    void onLoadNamespaces(android::base::Stream* stream);
+    void postLoadNamespaces(android::base::Stream* stream);
 private:
    static void addConfig(void* opaque, const EglOS::ConfigInfo* configInfo);
 
