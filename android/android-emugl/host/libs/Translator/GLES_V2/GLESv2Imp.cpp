@@ -2399,6 +2399,13 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
                 GLint fCompileStatus = GL_FALSE;
                 GLint vCompileStatus = GL_FALSE;
 
+                auto fragObjData = ctx->shareGroup()->getObjectData(
+                        NamedObjectType::SHADER_OR_PROGRAM, fragmentShader);
+                auto vertObjData = ctx->shareGroup()->getObjectData(
+                        NamedObjectType::SHADER_OR_PROGRAM, vertexShader);
+                ShaderParser* fragSp = (ShaderParser*)fragObjData;
+                ShaderParser* vertSp = (ShaderParser*)vertObjData;
+
                 GLuint fragmentShaderGlobal = ctx->shareGroup()->getGlobalName(
                         NamedObjectType::SHADER_OR_PROGRAM, fragmentShader);
                 GLuint vertexShaderGlobal = ctx->shareGroup()->getGlobalName(
@@ -2408,8 +2415,14 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
                 ctx->dispatcher().glGetShaderiv(vertexShaderGlobal,GL_COMPILE_STATUS,&vCompileStatus);
 
                 if(fCompileStatus != 0 && vCompileStatus != 0) {
-                    ctx->dispatcher().glLinkProgram(globalProgramName);
-                    ctx->dispatcher().glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
+                    if (programData->validateLink(fragSp, vertSp)) {
+                        ctx->dispatcher().glLinkProgram(globalProgramName);
+                        ctx->dispatcher().glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
+                    } else {
+                        programData->setLinkStatus(GL_FALSE);
+                        programData->setErrInfoLog();
+                        return;
+                    }
                 }
             }
         }

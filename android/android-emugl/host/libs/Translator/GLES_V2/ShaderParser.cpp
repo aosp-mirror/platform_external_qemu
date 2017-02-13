@@ -19,8 +19,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ANGLEShaderParser.h"
-
 #include <memory>
 #include <string>
 #include <vector>
@@ -30,7 +28,10 @@ ShaderParser::ShaderParser(GLenum type) : ObjectData(SHADER_DATA), m_type(type) 
 void ShaderParser::convertESSLToGLSL(int esslVersion) {
     std::string infolog;
     std::string parsedSource;
-    m_valid = ANGLEShaderParser::translate(esslVersion, m_originalSrc.c_str(), m_type, &infolog, &parsedSource);
+    m_valid =
+        ANGLEShaderParser::translate(
+            esslVersion, m_originalSrc.c_str(), m_type,
+            &infolog, &parsedSource, &m_shaderLinkInfo);
 
     if (!m_valid) {
         m_infoLog = static_cast<const GLchar*>(infolog.c_str());

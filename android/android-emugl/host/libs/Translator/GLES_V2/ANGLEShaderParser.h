@@ -12,25 +12,61 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #include <GLES2/gl2.h>
+#include <GLSLANG/ShaderLang.h>
 
 namespace ANGLEShaderParser {
-    bool globalInitialize(
-            int attribs,
-            int uniformVectors,
-            int varyingVectors,
-            int vertexTextureImageUnits,
-            int combinedTexImageUnits,
-            int textureImageUnits,
-            int fragmentUniformVectors,
-            int drawBuffers,
-            int fragmentPrecisionHigh,
-            int vertexOutputComponents,
-            int fragmentInputComponents,
-            int minProgramTexelOffset,
-            int maxProgramTexelOffset,
-            int maxDualSourceDrawBuffers);
-    bool translate(int esslVersion, const char* src, GLenum shaderType,
-                   std::string* outInfolog, std::string* outObjCode);
+
+// Convenient to query those
+extern ShBuiltInResources kResources;
+
+// 6 shader types:
+// vertex
+// fragment
+// compute
+// geometry
+// tessellation control
+// tessellation evaluation
+#define MAX_NUM_SHADER_TYPES 6
+int getShaderTypeIndex(GLenum shaderType);
+
+enum VarPrecision {
+    PRECISION_LOWP,
+    PRECISION_MEDIUMP,
+    PRECISION_HIGHP,
+    PRECISION_UNDEFINED,
+    PRECISION_MAX,
+};
+
+// For performing link-time validation of shader programs.
+struct ShaderLinkInfo {
+    std::vector<sh::Uniform> uniforms;
+    std::vector<sh::Varying> varyings;
+    std::vector<sh::Attribute> attributes;
+    std::vector<sh::OutputVariable> outputVars;
+    std::vector<sh::InterfaceBlock> interfaceBlocks;
+};
+
+bool globalInitialize(
+        int attribs,
+        int uniformVectors,
+        int varyingVectors,
+        int vertexTextureImageUnits,
+        int combinedTexImageUnits,
+        int textureImageUnits,
+        int fragmentUniformVectors,
+        int drawBuffers,
+        int fragmentPrecisionHigh,
+        int vertexOutputComponents,
+        int fragmentInputComponents,
+        int minProgramTexelOffset,
+        int maxProgramTexelOffset,
+        int maxDualSourceDrawBuffers);
+
+bool translate(int esslVersion, const char* src, GLenum shaderType,
+               std::string* outInfolog, std::string* outObjCode,
+               ShaderLinkInfo* outShaderLinkInfo);
 }

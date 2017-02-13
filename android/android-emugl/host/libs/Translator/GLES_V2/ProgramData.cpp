@@ -17,6 +17,8 @@
 #include <GLcommon/objectNameManager.h>
 #include "ProgramData.h"
 
+#include <string.h>
+
 ProgramData::ProgramData() :  ObjectData(PROGRAM_DATA),
                               AttachedVertexShader(0),
                               AttachedFragmentShader(0),
@@ -24,7 +26,11 @@ ProgramData::ProgramData() :  ObjectData(PROGRAM_DATA),
                               LinkStatus(GL_FALSE),
                               IsInUse(false),
                               DeleteStatus(false) {}
-
+void ProgramData::setErrInfoLog() {
+    GLchar* errInfoLog = new GLchar[validationInfoLog.length() + 1];
+    memcpy(errInfoLog, &validationInfoLog[0], validationInfoLog.length() + 1);
+    infoLog.reset(errInfoLog);
+}
 void ProgramData::setInfoLog(const GLchar* log) {
     infoLog.reset(log);
 }
@@ -99,6 +105,36 @@ bool ProgramData::detachShader(GLuint shader) {
     return false;
 }
 
+// Link-time validation
+void ProgramData::appendValidationErrMsg(std::ostringstream& ss) {
+    validationInfoLog += "Error: " + ss.str() + "\n";
+}
+static bool sCheckUndecl(ProgramData* pData,
+                         const ANGLEShaderParser::ShaderLinkInfo* fragLinkInfo,
+                         const ANGLEShaderParser::ShaderLinkInfo* vertLinkInfo);
+static bool sCheckLimits(ProgramData* pData,
+                         const ShBuiltInResources& resources,
+                         const ANGLEShaderParser::ShaderLinkInfo* fragLinkInfo,
+                         const ANGLEShaderParser::ShaderLinkInfo* vertLinkInfo);
+static bool sCheckVariables(ProgramData* pData,
+                            const ANGLEShaderParser::ShaderLinkInfo* a,
+                            const ANGLEShaderParser::ShaderLinkInfo* b);
+bool ProgramData::validateLink(ShaderParser* frag, ShaderParser* vert) {
+    const ANGLEShaderParser::ShaderLinkInfo* fragLinkInfo = frag->getShaderLinkInfo();
+    const ANGLEShaderParser::ShaderLinkInfo* vertLinkInfo = vert->getShaderLinkInfo();
+
+    bool res = true;
+
+    res = res && sCheckUndecl(this, fragLinkInfo, vertLinkInfo);
+    res = res && sCheckLimits(this, ANGLEShaderParser::kResources, fragLinkInfo, vertLinkInfo);
+    res = res && sCheckVariables(this, fragLinkInfo, vertLinkInfo);
+
+    if (!res) {
+        fprintf(stderr, "%s: link failed: %s\n", __func__, validationInfoLog.c_str());
+    }
+    return res;
+}
+
 void ProgramData::setLinkStatus(GLint status) {
     LinkStatus = status;
 }
@@ -106,3 +142,157 @@ void ProgramData::setLinkStatus(GLint status) {
 GLint ProgramData::getLinkStatus() const {
     return LinkStatus;
 }
+
+static const char kDifferentPrecisionErr[] = "specified with different precision in different shaders.";
+static const char kDifferentTypeErr[] = "specified with different type in different shaders.";
+static const char kDifferentLayoutQualifierErr[] = "specified with different layout qualifiers in different shaders.";
+static const char kExceededMaxVertexAttribs[] = "exceeded max vertex attribs.";
+static const char kUsedUndeclaredErr[] = "used, but not declared.";
+
+static bool sVarCheck(ProgramData* pData,
+                      const std::string& varType,
+                      const sh::ShaderVariable& a,
+                      const sh::ShaderVariable& b) {
+    bool res = true;
+
+    if (varType == "uniform" && a.precision != b.precision) {
+        std::ostringstream err;
+        err << varType << " " << a.name << " ";
+        err << kDifferentPrecisionErr;
+        pData->appendValidationErrMsg(err);
+        res = false;
+    }
+
+    if (a.isStruct() != b.isStruct() ||
+        a.type != b.type) {
+        std::ostringstream err;
+        err << varType << " " << a.name << " ";
+        err << kDifferentTypeErr;
+        pData->appendValidationErrMsg(err);
+        res = false;
+    }
+
+    if (a.isStruct()) {
+        for (const auto& afield : a.fields) {
+            for (const auto& bfield : b.fields) {
+                if (afield.name != bfield.name) continue;
+                res = res && sVarCheck(pData, varType, afield, bfield);
+            }
+        }
+    }
+
+    return res;
+}
+
+static bool sInterfaceBlockCheck(ProgramData* pData,
+                                 const sh::InterfaceBlock& a,
+                                 const sh::InterfaceBlock& b) {
+    bool res = true;
+
+    if (a.layout != b.layout ||
+        a.isRowMajorLayout != b.isRowMajorLayout) {
+        std::ostringstream err;
+        err << "interface block " << a.name << " ";
+        err << kDifferentLayoutQualifierErr;
+        pData->appendValidationErrMsg(err);
+        res = false;
+    }
+
+    if (a.fields.size() != b.fields.size()) {
+        std::ostringstream err;
+        err << "interface block " << a.name << " ";
+        err << kDifferentTypeErr;
+        pData->appendValidationErrMsg(err);
+        res = false;
+    }
+
+    for (const auto& afield : a.fields) {
+        for (const auto& bfield : b.fields) {
+            if (afield.name != bfield.name) continue;
+            res = res && sVarCheck(pData, "varying", afield, bfield);
+            if (afield.isRowMajorLayout != bfield.isRowMajorLayout) {
+                std::ostringstream err;
+                err << "interface block field " << a.name << "." << afield.name << " ";
+                err << kDifferentLayoutQualifierErr;
+                pData->appendValidationErrMsg(err);
+                res = false;
+            }
+        }
+    }
+    return res;
+}
+
+static bool sCheckUndecl(ProgramData* pData,
+                         const ANGLEShaderParser::ShaderLinkInfo* fragLinkInfo,
+                         const ANGLEShaderParser::ShaderLinkInfo* vertLinkInfo) {
+    bool res = true;
+    for (const auto& felt : fragLinkInfo->varyings) {
+        if (felt.isBuiltIn()) continue;
+
+        bool declaredInVertShader = false;
+        for (const auto& velt : vertLinkInfo->varyings) {
+            if (velt.name == felt.name)
+                declaredInVertShader = true;
+        }
+
+        if (!declaredInVertShader && felt.staticUse) {
+            std::ostringstream err;
+            err << "varying " << felt.name << " ";
+            err << kUsedUndeclaredErr;
+            pData->appendValidationErrMsg(err);
+            res = false;
+        }
+    }
+    return res;
+}
+
+static bool sCheckLimits(ProgramData* pData,
+                         const ShBuiltInResources& resources,
+                         const ANGLEShaderParser::ShaderLinkInfo* fragShaderLinkInfo,
+                         const ANGLEShaderParser::ShaderLinkInfo* vertShaderLinkInfo) {
+    bool res = true;
+
+    size_t maxAttribs = (size_t)resources.MaxVertexAttribs;
+
+    if (vertShaderLinkInfo->attributes.size() > maxAttribs) {
+        std::ostringstream err;
+        err << kExceededMaxVertexAttribs;
+        err << " Wanted (from vertex shader): " << vertShaderLinkInfo->attributes.size() << " ";
+        err << " Limit: " << maxAttribs << " ";
+        pData->appendValidationErrMsg(err);
+        res = false;
+    }
+
+    return res;
+}
+
+static bool sCheckVariables(ProgramData* pData,
+                            const ANGLEShaderParser::ShaderLinkInfo* a,
+                            const ANGLEShaderParser::ShaderLinkInfo* b) {
+    bool res = true;
+
+    for (const auto& aelt : a->uniforms) {
+        for (const auto& belt : b->uniforms) {
+            if (aelt.name != belt.name) continue;
+            res = res && sVarCheck(pData, "uniform", aelt, belt);
+        }
+    }
+
+    for (const auto& aelt : a->varyings) {
+        for (const auto& belt : b->varyings) {
+            if (aelt.name != belt.name) continue;
+            res = res && sVarCheck(pData, "varying", aelt, belt);
+        }
+    }
+
+    for (const auto& aelt : a->interfaceBlocks) {
+        for (const auto& belt : b->interfaceBlocks) {
+            if (aelt.name != belt.name) continue;
+            res = res && sInterfaceBlockCheck(pData, aelt, belt);
+        }
+    }
+
+    return res;
+}
+
+
