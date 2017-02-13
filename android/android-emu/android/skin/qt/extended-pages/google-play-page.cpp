@@ -133,16 +133,22 @@ void GooglePlayPage::playStoreVersionDone(GooglePlayServices::Result result,
             return;
 
         case GooglePlayServices::Result::kAppNotInstalled:
+            mUi->goog_playStoreVersionBox->setPlainText(
+                    tr("Not Installed"));
             msg =
                     tr("It doesn't look like you have Google Play Store "
                        "installed.");
             break;
         case GooglePlayServices::Result::kOperationInProgress:
+            mUi->goog_playStoreVersionBox->setPlainText(
+                    tr("Loading..."));
             msg =
                     tr("Still waiting for Google Play Store version.<br/>"
                        "Please try again later.");
             break;
         default:
+            mUi->goog_playStoreVersionBox->setPlainText(
+                    tr("Unknown Error"));
             msg =
                     tr("There was an unknown error while getting Google "
                        "Play Store version.");
@@ -167,16 +173,22 @@ void GooglePlayPage::playServicesVersionDone(GooglePlayServices::Result result,
             return;
 
         case GooglePlayServices::Result::kAppNotInstalled:
+            mUi->goog_playStoreVersionBox->setPlainText(
+                    tr("Not Installed"));
             msg =
                     tr("It doesn't look like you have Google Play services "
                        "installed.");
             break;
         case GooglePlayServices::Result::kOperationInProgress:
+            mUi->goog_playStoreVersionBox->setPlainText(
+                    tr("Loading..."));
             msg =
                     tr("Still waiting for Google Play services version.<br/>"
                        "Please try again later.");
             break;
         default:
+            mUi->goog_playStoreVersionBox->setPlainText(
+                    tr("Unknown Error"));
             msg =
                     tr("There was an unknown error while getting the "
                        "Google Play services version.");
