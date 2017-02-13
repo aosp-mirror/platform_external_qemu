@@ -1368,6 +1368,13 @@ void FrameBuffer::onSave(android::base::Stream* stream) {
     }
 
     // TODO: snapshot memory management
+
+    if (s_egl.eglPostSaveContext) {
+        for (const auto& ctx : m_contexts) {
+            s_egl.eglPostSaveContext(m_eglDisplay, ctx.second->getEGLContext(),
+                    stream);
+        }
+    }
 }
 
 bool FrameBuffer::onLoad(android::base::Stream* stream) {
@@ -1403,6 +1410,9 @@ bool FrameBuffer::onLoad(android::base::Stream* stream) {
     assert(m_contexts.size() == 0);
     size_t numContexts = stream->getBe32();
     for (size_t i = 0; i < numContexts; i++) {
+        // RenderContext::onLoad cannot run in parallel for now,
+        // since the sharegroup will be loaded by the first context
+        // in the sharegroup.
         RenderContextPtr ctx(RenderContext::onLoad(stream, m_eglDisplay));
         if (ctx) {
             m_contexts[ctx->getHndl()] = ctx;

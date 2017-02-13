@@ -16,6 +16,7 @@
 #ifndef _OBJECT_NAME_MANAGER_H
 #define _OBJECT_NAME_MANAGER_H
 
+#include "android/base/files/Stream.h"
 #include "emugl/common/mutex.h"
 #include "emugl/common/smart_ptr.h"
 #include "GLcommon/NamedObject.h"
@@ -109,7 +110,8 @@ public:
     //
     // Assign object global data to a names object
     //
-    void setObjectData(NamedObjectType p_type, ObjectLocalName p_localName, ObjectDataPtr data);
+    void setObjectData(NamedObjectType p_type, ObjectLocalName p_localName,
+            ObjectDataPtr data);
 
     //
     // Retrieve object global data
@@ -117,12 +119,18 @@ public:
     ObjectData* getObjectData(NamedObjectType p_type, ObjectLocalName p_localName);
     ObjectDataPtr getObjectDataPtr(NamedObjectType p_type, ObjectLocalName p_localName);
     uint64_t getId() const {return m_sharedGroupID;}
+    void onSave(android::base::Stream* stream);
+    void postSave(android::base::Stream* stream);
+    void postLoadInit();
 private:
     explicit ShareGroup(GlobalNameSpace *globalNameSpace,
-                        uint64_t sharedGroupID);
+                        uint64_t sharedGroupID,
+                        android::base::Stream* stream);
 
     void lockObjectData();
     void unlockObjectData();
+    void setObjectDataLocked(NamedObjectType p_type,
+            ObjectLocalName p_localName, ObjectDataPtr&& data);
 
     // A RAII autolock class for the objectData spinlock.
     struct ObjectDataAutoLock;
@@ -143,6 +151,8 @@ private:
     // The ID of this shared group
     // It is unique within its ObjectNameManager
     uint64_t m_sharedGroupID;
+    bool m_isSaved = false;
+    bool m_needLoadInit = false;
 };
 
 typedef emugl::SmartPtr<ShareGroup> ShareGroupPtr;
@@ -171,7 +181,8 @@ public:
     //                      In all other situations, use 0 to auto-generate a
     //                      new ID.
 
-    ShareGroupPtr createShareGroup(void *p_groupName, uint64_t sharedGroupID);
+    ShareGroupPtr createShareGroup(void *p_groupName, uint64_t sharedGroupID,
+        android::base::Stream* stream);
 
     //
     // attachShareGroup - find the ShareGroup object attached to the ID
@@ -179,7 +190,8 @@ public:
     //    ShareGroup instance.
     //
     ShareGroupPtr attachShareGroup(void *p_groupName, void *p_existingGroupName);
-    ShareGroupPtr attachOrCreateShareGroup(void *p_groupName, uint64_t p_existingGroupID);
+    ShareGroupPtr attachOrCreateShareGroup(void *p_groupName,
+        uint64_t p_existingGroupID, android::base::Stream* stream);
 
     //
     // getShareGroup - retreive a ShareGroup object based on its "name"
@@ -200,7 +212,6 @@ public:
     //                       new context needs to share with.
     //
     void *getGlobalContext();
-
 private:
     // TODO: refactor share group map so that it is indexed by share group ID
     ShareGroupsMap m_groups;
