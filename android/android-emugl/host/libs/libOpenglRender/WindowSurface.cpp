@@ -17,19 +17,22 @@
 
 #include "ErrorLog.h"
 #include "FbConfig.h"
+#include "FrameBuffer.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
+#include <assert.h>
 #include <GLES/glext.h>
-
 #include <stdio.h>
 #include <string.h>
 
 
 WindowSurface::WindowSurface(EGLDisplay display,
-                             EGLConfig config) :
+                             EGLConfig config,
+                             HandleType hndl) :
         mConfig(config),
-        mDisplay(display) {}
+        mDisplay(display),
+        mHndl(hndl) {}
 
 WindowSurface::~WindowSurface() {
     if (mSurface) {
@@ -40,9 +43,10 @@ WindowSurface::~WindowSurface() {
 WindowSurface *WindowSurface::create(EGLDisplay display,
                                      EGLConfig config,
                                      int p_width,
-                                     int p_height) {
+                                     int p_height,
+                                     HandleType hndl) {
     // allocate space for the WindowSurface object
-    WindowSurface *win = new WindowSurface(display, config);
+    WindowSurface *win = new WindowSurface(display, config, hndl);
     if (!win) {
         return NULL;
     }
@@ -187,4 +191,46 @@ bool WindowSurface::resize(unsigned int p_width, unsigned int p_height)
     }
 
     return true;
+}
+
+HandleType WindowSurface::getHndl() const {
+    return mHndl;
+}
+
+void WindowSurface::onSave(android::base::Stream* stream) const {
+    stream->putBe32(getHndl());
+    if (mAttachedColorBuffer) {
+        stream->putBe32(mAttachedColorBuffer->getHndl());
+    } else {
+        stream->putBe32(0);
+    }
+    stream->putBe32(mReadContext->getHndl());
+    stream->putBe32(mDrawContext->getHndl());
+    stream->putBe32(mWidth);
+    stream->putBe32(mHeight);
+    if (s_egl.eglSaveConfig) {
+        s_egl.eglSaveConfig(mDisplay, mConfig, stream);
+    }
+}
+
+WindowSurface * WindowSurface::onLoad(android::base::Stream* stream,
+            EGLDisplay display) {
+    FrameBuffer* fb = FrameBuffer::getFB();
+    HandleType hndl = stream->getBe32();
+    HandleType cb = stream->getBe32();
+    HandleType readCtx = stream->getBe32();
+    HandleType drawCtx = stream->getBe32();
+
+    GLuint width = stream->getBe32();
+    GLuint height = stream->getBe32();
+    EGLConfig config = 0;
+    if (s_egl.eglLoadConfig) {
+        config = s_egl.eglLoadConfig(display, stream);
+    }
+    WindowSurface* ret = create(display, config, width, height, hndl);
+    assert(ret);
+    ret->mAttachedColorBuffer = fb->getColorBuffer(cb);
+    ret->mReadContext = fb->getContext(readCtx);
+    ret->mDrawContext = fb->getContext(drawCtx);
+    return ret;
 }

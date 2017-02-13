@@ -112,6 +112,8 @@ static const int s_eglExtensionsSize =
 // TODO: write some comments
 
 extern "C" {
+EGLAPI EGLBoolean EGLAPIENTRY eglSaveConfig(EGLDisplay display, EGLConfig config, EGLStream stream);
+EGLAPI EGLConfig eglLoadConfig(EGLDisplay display, EGLStream stream);
 EGLAPI EGLBoolean EGLAPIENTRY eglSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream);
 EGLAPI EGLContext EGLAPIENTRY eglLoadContext(EGLDisplay display, const EGLint *attrib_list, EGLStream stream);
 }
@@ -1264,4 +1266,20 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSaveContext(EGLDisplay display, EGLContext cont
 
 EGLAPI EGLContext EGLAPIENTRY eglLoadContext(EGLDisplay display, const EGLint *attrib_list, EGLStream stream) {
     return eglCreateOrLoadContext(display, (EGLConfig)0, EGL_NO_CONTEXT, attrib_list, (android::base::Stream*)stream);
+}
+
+EGLAPI EGLBoolean EGLAPIENTRY eglSaveConfig(EGLDisplay display,
+        EGLConfig config, EGLStream stream) {
+    VALIDATE_DISPLAY(display);
+    VALIDATE_CONFIG(config);
+    android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
+    stm->putBe32(cfg->id());
+    return true;
+}
+
+EGLAPI EGLConfig eglLoadConfig(EGLDisplay display, EGLStream stream) {
+    VALIDATE_DISPLAY(display);
+    android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
+    EGLint cfgId = stm->getBe32();
+    return static_cast<EGLConfig>(dpy->getConfig(cfgId));
 }

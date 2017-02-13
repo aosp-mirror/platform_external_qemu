@@ -218,6 +218,12 @@ public:
     // Return a render context pointer from its handle
     RenderContextPtr getContext(HandleType p_context);
 
+    // Return a color buffer pointer from its handle
+    ColorBufferPtr getColorBuffer(HandleType p_colorBuffer);
+
+    // Return a color buffer pointer from its handle
+    WindowSurfacePtr getWindowSurface(HandleType p_windowsurface);
+
     // Attach a ColorBuffer to a WindowSurface instance.
     // See the documentation for WindowSurface::setColorBuffer().
     // |p_surface| is the target WindowSurface's handle value.
@@ -355,6 +361,7 @@ private:
 
     bool bindSubwin_locked();
     bool removeSubWindow_locked();
+    void cleanupProcGLObjects_locked(uint64_t puid);
 
 private:
     static FrameBuffer *s_theFrameBuffer;

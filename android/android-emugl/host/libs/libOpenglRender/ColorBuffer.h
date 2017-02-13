@@ -21,6 +21,7 @@
 #include <GLES/gl.h>
 #include "android/base/files/Stream.h"
 #include "emugl/common/smart_ptr.h"
+#include "RenderContext.h"
 
 #include <memory>
 
@@ -91,6 +92,7 @@ public:
                                GLenum p_internalFormat,
                                FrameworkFormat p_frameworkFormat,
                                bool has_eglimage_texture_2d,
+                               HandleType hndl,
                                Helper* helper);
 
     // Destructor.
@@ -156,8 +158,9 @@ public:
                                bool has_eglimage_texture_2d,
                                Helper* helper);
 
+    HandleType getHndl() const;
 private:
-    ColorBuffer(EGLDisplay display, Helper* helper);
+    ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper);
 
 private:
     GLuint m_tex = 0;
@@ -174,6 +177,7 @@ private:
     FrameworkFormat m_frameworkFormat;
     GLuint m_yuv_conversion_fbo = 0;  // FBO to offscreen-convert YUV to RGB
     std::unique_ptr<YUVConverter> m_yuv_converter;
+    HandleType mHndl;
 };
 
 typedef emugl::SmartPtr<ColorBuffer> ColorBufferPtr;

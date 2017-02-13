@@ -44,8 +44,6 @@ struct RenderThreadInfo {
     static RenderThreadInfo* get();
 
     // Current EGL context, draw surface and read surface.
-    // TODO: implement get / set methods so that currContext
-    // and currContextHndl always matches
     RenderContextPtr currContext;
     WindowSurfacePtr currDrawSurf;
     WindowSurfacePtr currReadSurf;

@@ -49,12 +49,28 @@ void RenderThreadInfo::onSave(android::base::Stream* stream) {
     } else {
         stream->putBe32(0);
     }
+    if (currDrawSurf) {
+        stream->putBe32(currDrawSurf->getHndl());
+    } else {
+        stream->putBe32(0);
+    }
+    if (currReadSurf) {
+        stream->putBe32(currReadSurf->getHndl());
+    } else {
+        stream->putBe32(0);
+    }
     // TODO: save other stuff
 }
 
 bool RenderThreadInfo::onLoad(android::base::Stream* stream) {
+    FrameBuffer* fb = FrameBuffer::getFB();
+    assert(fb);
     HandleType ctxHndl = stream->getBe32();
-    currContext = FrameBuffer::getFB()->getContext(ctxHndl);
+    HandleType drawSurf = stream->getBe32();
+    HandleType readSurf = stream->getBe32();
+    currContext = fb->getContext(ctxHndl);
+    currDrawSurf = fb->getWindowSurface(drawSurf);
+    currReadSurf = fb->getWindowSurface(readSurf);
     // TODO: load other stuff
     return true;
 }

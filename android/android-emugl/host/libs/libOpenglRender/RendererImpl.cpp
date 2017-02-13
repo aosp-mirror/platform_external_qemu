@@ -143,6 +143,9 @@ void RendererImpl::cleanupRenderThreads() {
         // be notified for those behavior.
         c->stop();
     }
+    for (const auto& c : channels) {
+        c->renderThread()->wait();
+    }
 }
 
 void RendererImpl::waitForProcessCleanup() {
