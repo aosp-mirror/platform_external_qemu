@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aec8b56_5c1e1b32",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/WindowSurface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-13T22:21:46Z",
+      "side": 1,
+      "message": "nit: static",
+      "range": {
+        "startLine": 201,
+        "startChar": 0,
+        "endLine": 201,
+        "endChar": 4
+      },
+      "revId": "99e2f36b26a2106e64ee3ba2c126ae52ed87d1b2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
