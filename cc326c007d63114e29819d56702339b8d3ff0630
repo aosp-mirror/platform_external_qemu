@@ -2,6 +2,98 @@
   "comments": [
     {
       "key": {
+        "uuid": "5e9a6552_2fe64f71",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ANGLEShaderParser.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-13T22:43:20Z",
+      "side": 1,
+      "message": "this look dangerous to me. Is it guaranteed to never return nullptr?",
+      "range": {
+        "startLine": 167,
+        "startChar": 25,
+        "endLine": 167,
+        "endChar": 27
+      },
+      "revId": "cc326c007d63114e29819d56702339b8d3ff0630",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f7e0c78b_32a25d3c",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ANGLEShaderParser.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-13T22:43:20Z",
+      "side": 1,
+      "message": "could you please update the comment to explain the new flag?",
+      "range": {
+        "startLine": 220,
+        "startChar": 7,
+        "endLine": 221,
+        "endChar": 18
+      },
+      "revId": "cc326c007d63114e29819d56702339b8d3ff0630",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b38f165e_9aa9c7be",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ANGLEShaderParser.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-13T22:43:20Z",
+      "side": 1,
+      "message": "where do you need it?",
+      "range": {
+        "startLine": 15,
+        "startChar": 10,
+        "endLine": 15,
+        "endChar": 23
+      },
+      "revId": "cc326c007d63114e29819d56702339b8d3ff0630",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5519bc72_fd57fdee",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ANGLEShaderParser.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-13T22:43:20Z",
+      "side": 1,
+      "message": "const int ... ?",
+      "range": {
+        "startLine": 33,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 30
+      },
+      "revId": "cc326c007d63114e29819d56702339b8d3ff0630",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e5a2e96b_f8deba8a",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
         "patchSetId": 3
@@ -18,6 +110,167 @@
         "startChar": 37,
         "endLine": 2421,
         "endChar": 49
+      },
+      "revId": "cc326c007d63114e29819d56702339b8d3ff0630",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ff65f662_f7b7a1a6",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2426,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-13T22:43:20Z",
+      "side": 1,
+      "message": "does this set glGetError() code as well?",
+      "range": {
+        "startLine": 2425,
+        "startChar": 0,
+        "endLine": 2426,
+        "endChar": 53
+      },
+      "revId": "cc326c007d63114e29819d56702339b8d3ff0630",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db4a3955_ef1ff8b0",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-13T22:43:20Z",
+      "side": 1,
+      "message": "nit: you could reset it directly into |infoLog|",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 30
+      },
+      "revId": "cc326c007d63114e29819d56702339b8d3ff0630",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6575fb5e_9263a643",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-13T22:43:20Z",
+      "side": 1,
+      "message": "why should we print it? AFAIK emulator usually runs without console anyway, but when it isn\u0027t, does it really help?",
+      "range": {
+        "startLine": 143,
+        "startChar": 0,
+        "endLine": 144,
+        "endChar": 43
+      },
+      "revId": "cc326c007d63114e29819d56702339b8d3ff0630",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4291162c_aca7a353",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-13T22:43:20Z",
+      "side": 1,
+      "message": "should this be the type of the field, or type of the variable?",
+      "range": {
+        "startLine": 195,
+        "startChar": 46,
+        "endLine": 195,
+        "endChar": 53
+      },
+      "revId": "cc326c007d63114e29819d56702339b8d3ff0630",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6f09f19b_8c7282d4",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-13T22:43:20Z",
+      "side": 1,
+      "message": "break? + {} block",
+      "range": {
+        "startLine": 252,
+        "startChar": 3,
+        "endLine": 253,
+        "endChar": 44
+      },
+      "revId": "cc326c007d63114e29819d56702339b8d3ff0630",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db00272b_686d30a4",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-13T22:43:20Z",
+      "side": 1,
+      "message": "this is a double search in map. What about android::base::find() from Lookup.h ?",
+      "range": {
+        "startLine": 279,
+        "startChar": 12,
+        "endLine": 281,
+        "endChar": 68
+      },
+      "revId": "cc326c007d63114e29819d56702339b8d3ff0630",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c48c557_d77095a7",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-13T22:43:20Z",
+      "side": 1,
+      "message": "nit: return a reference instead of a pointer?",
+      "range": {
+        "startLine": 57,
+        "startChar": 43,
+        "endLine": 57,
+        "endChar": 44
       },
       "revId": "cc326c007d63114e29819d56702339b8d3ff0630",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
