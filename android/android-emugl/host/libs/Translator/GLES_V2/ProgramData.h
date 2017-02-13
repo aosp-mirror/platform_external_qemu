@@ -16,7 +16,12 @@
 #ifndef PROGRAM_DATA_H
 #define PROGRAM_DATA_H
 
+#include "ShaderParser.h"
+
 #include <memory>
+#include <sstream>
+#include <string>
+#include <unordered_map>
 
 class ProgramData:public ObjectData{
 public:
@@ -30,10 +35,14 @@ public:
     bool attachShader(GLuint shader,GLenum type);
     bool isAttached(GLuint shader) const;
     bool detachShader(GLuint shader);
+    void bindAttribLocation(const std::string& var, GLuint loc);
 
+    void appendValidationErrMsg(std::ostringstream& ss);
+    bool validateLink(ShaderParser* frag, ShaderParser* vert);
     void setLinkStatus(GLint status);
     GLint getLinkStatus() const;
 
+    void setErrInfoLog();
     void setInfoLog(const GLchar *log);
     const GLchar* getInfoLog() const;
 
@@ -42,10 +51,14 @@ public:
 
     bool getDeleteStatus() const { return DeleteStatus; }
     void setDeleteStatus(bool status) { DeleteStatus = status; }
+
+    std::unordered_map<std::string, GLuint> boundAttribLocs;
+
 private:
     GLuint AttachedVertexShader;
     GLuint AttachedFragmentShader;
     GLuint AttachedComputeShader;
+    std::string validationInfoLog;
     std::unique_ptr<const GLchar[]> infoLog;
     GLint  LinkStatus;
     bool    IsInUse;
