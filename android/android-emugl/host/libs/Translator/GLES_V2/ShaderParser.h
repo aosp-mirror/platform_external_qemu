@@ -17,9 +17,9 @@
 #ifndef SHADER_PARSER_H
 #define SHADER_PARSER_H
 
+#include "ANGLEShaderParser.h"
 #include "GLESv2Context.h"
 #include <string>
-#include <GLES2/gl2.h>
 #include <GLcommon/objectNameManager.h>
 #include <unordered_set>
 
@@ -54,6 +54,8 @@ public:
     void detachProgram(GLuint program) {m_programs.erase(program);}
     bool hasAttachedPrograms() const {return m_programs.size()>0;}
 
+    const ANGLEShaderParser::ShaderLinkInfo& getShaderLinkInfo() const { return m_shaderLinkInfo; }
+
 private:
     void convertESSLToGLSL(int esslVersion);
 
@@ -66,5 +68,6 @@ private:
     GLenum      m_type = 0;
     bool        m_deleteStatus = false;
     bool        m_valid = true;
+    ANGLEShaderParser::ShaderLinkInfo m_shaderLinkInfo;
 };
 #endif
