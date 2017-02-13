@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "514e064b_32888792",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/WindowSurface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-13T22:24:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aec8b56_5c1e1b32",
+      "range": {
+        "startLine": 201,
+        "startChar": 0,
+        "endLine": 201,
+        "endChar": 4
+      },
+      "revId": "99e2f36b26a2106e64ee3ba2c126ae52ed87d1b2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bab6476a_e9e0e449",
         "filename": "android/android-emugl/host/libs/libOpenglRender/WindowSurface.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-13T22:22:26Z",
       "side": 1,
       "message": "do these work correctly and return nullptr for 0 handles?",
+      "range": {
+        "startLine": 237,
+        "startChar": 0,
+        "endLine": 239,
+        "endChar": 48
+      },
+      "revId": "99e2f36b26a2106e64ee3ba2c126ae52ed87d1b2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ebdb0ec0_df37f455",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/WindowSurface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-13T22:24:52Z",
+      "side": 1,
+      "message": "Yes, they all know to return null pointers.",
+      "parentUuid": "bab6476a_e9e0e449",
       "range": {
         "startLine": 237,
         "startChar": 0,
