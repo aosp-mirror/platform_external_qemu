@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d06c3f38_c9ea2aef",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 937,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-13T18:01:47Z",
+      "side": 1,
+      "message": "could you please use constants instead of defines?",
+      "range": {
+        "startLine": 937,
+        "startChar": 0,
+        "endLine": 937,
+        "endChar": 39
+      },
+      "revId": "adc0708e1c4cda3cd08098ab2238f305fb26f561",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "50f47e4c_199ab865",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-13T18:01:47Z",
+      "side": 1,
+      "message": "nit: do we need it?",
+      "range": {
+        "startLine": 151,
+        "startChar": 0,
+        "endLine": 152,
+        "endChar": 14
+      },
+      "revId": "adc0708e1c4cda3cd08098ab2238f305fb26f561",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f1c741bf_b16f5c8b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/settings-page.ui",
+        "patchSetId": 4
+      },
+      "lineNbr": 525,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-13T18:01:47Z",
+      "side": 1,
+      "message": "all these sizes in pixels can become an issue on high-dpi displays on mac/windows. Could you please double check it?",
+      "range": {
+        "startLine": 523,
+        "startChar": 0,
+        "endLine": 525,
+        "endChar": 24
+      },
+      "revId": "adc0708e1c4cda3cd08098ab2238f305fb26f561",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9ae58ef_4f59dca9",
+        "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-13T18:01:47Z",
+      "side": 1,
+      "message": "nit: do we have an enum for this? IMO it\u0027s better to always use enums when the set of options is limited",
+      "range": {
+        "startLine": 246,
+        "startChar": 7,
+        "endLine": 246,
+        "endChar": 10
+      },
+      "revId": "adc0708e1c4cda3cd08098ab2238f305fb26f561",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
