@@ -197,15 +197,20 @@ HandleType WindowSurface::getHndl() const {
     return mHndl;
 }
 
-void WindowSurface::onSave(android::base::Stream* stream) const {
-    stream->putBe32(getHndl());
-    if (mAttachedColorBuffer) {
-        stream->putBe32(mAttachedColorBuffer->getHndl());
+template <class obj_t>
+static void saveHndlOrNull(obj_t obj, android::base::Stream* stream) {
+    if (obj) {
+        stream->putBe32(obj->getHndl());
     } else {
         stream->putBe32(0);
     }
-    stream->putBe32(mReadContext->getHndl());
-    stream->putBe32(mDrawContext->getHndl());
+}
+
+void WindowSurface::onSave(android::base::Stream* stream) const {
+    stream->putBe32(getHndl());
+    saveHndlOrNull(mAttachedColorBuffer, stream);
+    saveHndlOrNull(mReadContext, stream);
+    saveHndlOrNull(mDrawContext, stream);
     stream->putBe32(mWidth);
     stream->putBe32(mHeight);
     if (s_egl.eglSaveConfig) {
