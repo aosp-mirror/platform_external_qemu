@@ -30,6 +30,9 @@ bool EglContext::usingSurface(SurfacePtr surface) {
   return surface.get() == m_read.get() || surface.get() == m_draw.get();
 }
 
+#define MAGIC_BEG 201
+#define MAGIC_END 203
+
 EglContext::EglContext(EglDisplay *dpy,
                        uint64_t shareGroupId,
                        EglConfig* config,
@@ -44,6 +47,7 @@ EglContext::EglContext(EglDisplay *dpy,
         m_mngr(mngr)
 {
     if (stream) {
+        assert(stream->getBe32() == MAGIC_BEG);
         EGLint configId = EGLint(stream->getBe32());
         m_config = dpy->getConfig(configId);
         shareGroupId = static_cast<uint64_t>(stream->getBe64());
@@ -52,10 +56,17 @@ EglContext::EglContext(EglDisplay *dpy,
     m_native = dpy->nativeType()->createContext(
             m_config->nativeFormat(), globalSharedContext);
     if (m_native) {
-        m_shareGroup = mngr->attachOrCreateShareGroup(m_native, shareGroupId);
+        // When loading from a snapshot, the first context within a shared group
+        // will load share group data.
+        m_shareGroup = mngr->attachOrCreateShareGroup(m_native, shareGroupId,
+                stream);
         m_hndl = ++s_nextContextHndl;
     } else {
         m_hndl = 0;
+    }
+
+    if (stream) {
+        assert(stream->getBe32() == MAGIC_END);
     }
 }
 
@@ -141,6 +152,7 @@ void EglContext::onSave(android::base::Stream* stream) {
     // Save gles context first
     assert(m_glesContext);
     m_glesContext->onSave(stream);
+    stream->putBe32(MAGIC_BEG);
     // We save the information that
     // is needed to restore the contexts.
     // That means (1) context configurations (2) shared group IDs.
@@ -153,4 +165,10 @@ void EglContext::onSave(android::base::Stream* stream) {
     stream->putBe32(getConfig()->id());
     // Save shared group ID
     stream->putBe64(m_shareGroup->getId());
+    m_shareGroup->onSave(stream);
+    stream->putBe32(MAGIC_END);
+}
+
+void EglContext::postSave(android::base::Stream* stream) {
+    m_shareGroup->postSave(stream);
 }
