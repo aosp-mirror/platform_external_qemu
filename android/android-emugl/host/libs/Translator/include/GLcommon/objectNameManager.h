@@ -16,6 +16,7 @@
 #ifndef _OBJECT_NAME_MANAGER_H
 #define _OBJECT_NAME_MANAGER_H
 
+#include "android/base/files/Stream.h"
 #include "emugl/common/mutex.h"
 #include "emugl/common/smart_ptr.h"
 #include "GLcommon/NamedObject.h"
@@ -109,7 +110,8 @@ public:
     //
     // Assign object global data to a names object
     //
-    void setObjectData(NamedObjectType p_type, ObjectLocalName p_localName, ObjectDataPtr data);
+    void setObjectData(NamedObjectType p_type, ObjectLocalName p_localName,
+            ObjectDataPtr data);
 
     //
     // Retrieve object global data
@@ -117,12 +119,17 @@ public:
     ObjectData* getObjectData(NamedObjectType p_type, ObjectLocalName p_localName);
     ObjectDataPtr getObjectDataPtr(NamedObjectType p_type, ObjectLocalName p_localName);
     uint64_t getId() const {return m_sharedGroupID;}
+    void onSave(android::base::Stream* stream);
+    void postLoadInit();
 private:
     explicit ShareGroup(GlobalNameSpace *globalNameSpace,
-                        uint64_t sharedGroupID);
+                        uint64_t sharedGroupID,
+                        android::base::Stream* stream);
 
     void lockObjectData();
     void unlockObjectData();
+    void setObjectDataLocked(NamedObjectType p_type,
+            ObjectLocalName p_localName, ObjectDataPtr&& data);
 
     // A RAII autolock class for the objectData spinlock.
     struct ObjectDataAutoLock;
@@ -143,6 +150,7 @@ private:
     // The ID of this shared group
     // It is unique within its ObjectNameManager
     uint64_t m_sharedGroupID;
+    bool m_needLoadInit = false;
 };
 
 typedef emugl::SmartPtr<ShareGroup> ShareGroupPtr;
@@ -179,7 +187,8 @@ public:
     //    ShareGroup instance.
     //
     ShareGroupPtr attachShareGroup(void *p_groupName, void *p_existingGroupName);
-    ShareGroupPtr attachOrCreateShareGroup(void *p_groupName, uint64_t p_existingGroupID);
+    ShareGroupPtr attachOrCreateShareGroup(void *p_groupName,
+        uint64_t p_existingGroupID);
 
     //
     // getShareGroup - retreive a ShareGroup object based on its "name"
@@ -200,14 +209,20 @@ public:
     //                       new context needs to share with.
     //
     void *getGlobalContext();
-
+    void onSave(android::base::Stream* stream) const;
+    void onLoad(android::base::Stream* stream);
+    void postLoad(android::base::Stream* stream);
 private:
     // TODO: refactor share group map so that it is indexed by share group ID
     ShareGroupsMap m_groups;
+    // A mapping from shared group ID to share group weak pointer (and its
+    // counting)
+    std::unordered_map<uint64_t, std::weak_ptr<ShareGroup>> m_id2groups;
+    // m_groupsForLoad is used during a snapshot loading
+    std::unordered_map<uint64_t, ShareGroupPtr> m_groupsForLoad;
     emugl::Mutex m_lock;
     GlobalNameSpace *m_globalNameSpace = nullptr;
-    // m_usedSharedGroupIDs is used to assign new IDs to new shared groups
-    std::unordered_multiset<uint64_t> m_usedSharedGroupIDs;
+    // m_nextSharedGroupID is used to assign new IDs to new shared groups
     uint64_t m_nextSharedGroupID = 1;
 };
 

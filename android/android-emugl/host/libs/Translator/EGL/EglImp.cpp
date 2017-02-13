@@ -113,9 +113,14 @@ static const int s_eglExtensionsSize =
 
 extern "C" {
 EGLAPI EGLBoolean EGLAPIENTRY eglSaveConfig(EGLDisplay display, EGLConfig config, EGLStream stream);
-EGLAPI EGLConfig eglLoadConfig(EGLDisplay display, EGLStream stream);
+EGLAPI EGLConfig EGLAPIENTRY eglLoadConfig(EGLDisplay display, EGLStream stream);
+
 EGLAPI EGLBoolean EGLAPIENTRY eglSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream);
 EGLAPI EGLContext EGLAPIENTRY eglLoadContext(EGLDisplay display, const EGLint *attrib_list, EGLStream stream);
+
+EGLAPI EGLBoolean EGLAPIENTRY eglSaveNamespaces(EGLDisplay display, EGLStream stream);
+EGLAPI EGLBoolean EGLAPIENTRY eglLoadNamespaces(EGLDisplay display, EGLStream stream);
+EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadNamespaces(EGLDisplay display, EGLStream stream);
 }
 
 #define CURRENT_THREAD() do {} while (0);
@@ -1024,6 +1029,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         thread->updateInfo(newCtx,dpy,newCtx->getGlesContext(),newCtx->getShareGroup(),dpy->getManager(newCtx->version()));
         newCtx->setSurfaces(newReadSrfc,newDrawSrfc);
         g_eglInfo->getIface(newCtx->version())->initContext(newCtx->getGlesContext(),newCtx->getShareGroup());
+        newCtx->getShareGroup()->postLoadInit();
 
         // Initialize the GLES extension function table used in
         // eglGetProcAddress for the context's GLES version if not
@@ -1280,9 +1286,27 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSaveConfig(EGLDisplay display,
     return true;
 }
 
-EGLAPI EGLConfig eglLoadConfig(EGLDisplay display, EGLStream stream) {
+EGLAPI EGLConfig EGLAPIENTRY eglLoadConfig(EGLDisplay display, EGLStream stream) {
     VALIDATE_DISPLAY(display);
     android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
     EGLint cfgId = stm->getBe32();
     return static_cast<EGLConfig>(dpy->getConfig(cfgId));
+}
+
+EGLAPI EGLBoolean EGLAPIENTRY eglSaveNamespaces(EGLDisplay display, EGLStream stream) {
+    VALIDATE_DISPLAY(display);
+    dpy->onSaveNamespaces(static_cast<android::base::Stream*>(stream));
+    return true;
+}
+
+EGLAPI EGLBoolean EGLAPIENTRY eglLoadNamespaces(EGLDisplay display, EGLStream stream) {
+    VALIDATE_DISPLAY(display);
+    dpy->onLoadNamespaces(static_cast<android::base::Stream*>(stream));
+    return true;
+}
+
+EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadNamespaces(EGLDisplay display, EGLStream stream) {
+    VALIDATE_DISPLAY(display);
+    dpy->postLoadNamespaces(static_cast<android::base::Stream*>(stream));
+    return true;
 }

@@ -573,3 +573,37 @@ void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
 
     display->m_configs.emplace_back(config);
 }
+
+void EglDisplay::onSaveNamespaces(android::base::Stream* stream) const {
+    stream->putBe32(MAX_GLES_VERSION);
+    for (auto& manager : m_manager) {
+        if (manager) {
+            stream->putByte(true);
+            manager->onSave(stream);
+        } else {
+            stream->putByte(false);
+        }
+    }
+}
+
+void EglDisplay::onLoadNamespaces(android::base::Stream* stream) {
+    assert(MAX_GLES_VERSION == stream->getBe32());
+    for (auto& manager : m_manager) {
+        bool isManager = stream->getByte();
+        if (isManager) {
+            if (!manager) {
+                manager = new ObjectNameManager(&m_globalNameSpace);
+            }
+            manager->onLoad(stream);
+        }
+    }
+}
+
+void EglDisplay::postLoadNamespaces(android::base::Stream* stream) {
+    for (auto& manager : m_manager) {
+        if (manager) {
+            manager->postLoad(stream);
+        }
+    }
+}
+

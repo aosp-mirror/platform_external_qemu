@@ -52,6 +52,8 @@ EglContext::EglContext(EglDisplay *dpy,
     m_native = dpy->nativeType()->createContext(
             m_config->nativeFormat(), globalSharedContext);
     if (m_native) {
+        // When loading from a snapshot, the first context within a shared group
+        // will load share group data.
         m_shareGroup = mngr->attachOrCreateShareGroup(m_native, shareGroupId);
         m_hndl = ++s_nextContextHndl;
     } else {
@@ -94,10 +96,10 @@ EglContext::~EglContext()
     // is current.
     //
     g_eglInfo->getIface(version())->setShareGroup(m_glesContext, {});
+    m_shareGroup.reset();
     if (m_mngr) {
         m_mngr->deleteShareGroup(m_native);
     }
-    m_shareGroup.reset();
 
     //
     // call the client-api to remove the GLES context
