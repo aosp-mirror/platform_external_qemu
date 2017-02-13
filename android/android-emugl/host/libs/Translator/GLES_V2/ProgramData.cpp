@@ -17,6 +17,8 @@
 #include <GLcommon/objectNameManager.h>
 #include "ProgramData.h"
 
+#include <string.h>
+
 ProgramData::ProgramData() :  ObjectData(PROGRAM_DATA),
                               AttachedVertexShader(0),
                               AttachedFragmentShader(0),
@@ -24,7 +26,11 @@ ProgramData::ProgramData() :  ObjectData(PROGRAM_DATA),
                               LinkStatus(GL_FALSE),
                               IsInUse(false),
                               DeleteStatus(false) {}
-
+void ProgramData::setErrInfoLog() {
+    GLchar* errInfoLog = new GLchar[validationInfoLog.length() + 1];
+    memcpy(errInfoLog, &validationInfoLog[0], validationInfoLog.length() + 1);
+    infoLog.reset(errInfoLog);
+}
 void ProgramData::setInfoLog(const GLchar* log) {
     infoLog.reset(log);
 }
@@ -99,6 +105,27 @@ bool ProgramData::detachShader(GLuint shader) {
     return false;
 }
 
+// Link-time validation
+void ProgramData::appendValidationErrMsg(std::ostringstream& ss) {
+    validationInfoLog += "Error: " + ss.str() + "\n";
+}
+static bool sCheckVariables(ProgramData* pData,
+                            const ANGLEShaderParser::ShaderLinkInfo* a,
+                            const ANGLEShaderParser::ShaderLinkInfo* b);
+bool ProgramData::validateLink(ShaderParser* frag, ShaderParser* vert) {
+    const ANGLEShaderParser::ShaderLinkInfo* fragLinkInfo = frag->getShaderLinkInfo();
+    const ANGLEShaderParser::ShaderLinkInfo* vertLinkInfo = vert->getShaderLinkInfo();
+
+    bool res = true;
+
+    res = res && sCheckVariables(this, fragLinkInfo, vertLinkInfo);
+
+    if (!res) {
+        fprintf(stderr, "%s: link failed: %s\n", __func__, validationInfoLog.c_str());
+    }
+    return res;
+}
+
 void ProgramData::setLinkStatus(GLint status) {
     LinkStatus = status;
 }
@@ -106,3 +133,65 @@ void ProgramData::setLinkStatus(GLint status) {
 GLint ProgramData::getLinkStatus() const {
     return LinkStatus;
 }
+
+static const char kDifferentPrecisionErr[] = "specified with different precision in different shaders.";
+static const char kDifferentTypeErr[] = "specified with different type in different shaders.";
+
+static bool sVarCheck(ProgramData* pData,
+                      const std::string& varType,
+                      const sh::ShaderVariable& a,
+                      const sh::ShaderVariable& b) {
+    bool res = true;
+
+    if (varType == "uniform" && a.precision != b.precision) {
+        std::ostringstream err;
+        err << varType << " " << a.name << " ";
+        err << kDifferentPrecisionErr;
+        pData->appendValidationErrMsg(err);
+        res = false;
+    }
+
+    if (a.isStruct() != b.isStruct() ||
+        a.type != b.type) {
+        std::ostringstream err;
+        err << varType << " " << a.name << " ";
+        err << kDifferentTypeErr;
+        pData->appendValidationErrMsg(err);
+        res = false;
+    }
+
+    if (a.isStruct()) {
+        for (const auto& afield : a.fields) {
+            for (const auto& bfield : b.fields) {
+                if (afield.name != bfield.name) continue;
+                res = res && sVarCheck(pData, varType, afield, bfield);
+            }
+        }
+    }
+
+    return res;
+}
+
+static bool sCheckVariables(ProgramData* pData,
+                            const ANGLEShaderParser::ShaderLinkInfo* a,
+                            const ANGLEShaderParser::ShaderLinkInfo* b) {
+    bool res = true;
+
+    for (const auto& aelt : a->uniforms) {
+        for (const auto& belt : b->uniforms) {
+            if (aelt.name != belt.name) continue;
+            res = res && sVarCheck(pData, "uniform", aelt, belt);
+        }
+    }
+
+    for (const auto& aelt : a->varyings) {
+        for (const auto& belt : b->varyings) {
+            if (aelt.name != belt.name) continue;
+            res = res && sVarCheck(pData, "varying", aelt, belt);
+        }
+    }
+
+    return res;
+}
+
+

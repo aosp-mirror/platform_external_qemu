@@ -16,7 +16,11 @@
 #ifndef PROGRAM_DATA_H
 #define PROGRAM_DATA_H
 
+#include "ShaderParser.h"
+
 #include <memory>
+#include <sstream>
+#include <string>
 
 class ProgramData:public ObjectData{
 public:
@@ -31,9 +35,12 @@ public:
     bool isAttached(GLuint shader) const;
     bool detachShader(GLuint shader);
 
+    void appendValidationErrMsg(std::ostringstream& ss);
+    bool validateLink(ShaderParser* frag, ShaderParser* vert);
     void setLinkStatus(GLint status);
     GLint getLinkStatus() const;
 
+    void setErrInfoLog();
     void setInfoLog(const GLchar *log);
     const GLchar* getInfoLog() const;
 
@@ -46,6 +53,7 @@ private:
     GLuint AttachedVertexShader;
     GLuint AttachedFragmentShader;
     GLuint AttachedComputeShader;
+    std::string validationInfoLog;
     std::unique_ptr<const GLchar[]> infoLog;
     GLint  LinkStatus;
     bool    IsInUse;
