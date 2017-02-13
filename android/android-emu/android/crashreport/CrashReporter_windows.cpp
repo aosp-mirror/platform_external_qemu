@@ -121,7 +121,7 @@ static void attachMemoryInfo()
     if (::GetProcessMemoryInfo(::GetCurrentProcess(),
                 reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&memCounters),
                 sizeof(memCounters))) {
-        bufptr += snprintf(bufptr, (int)sizeof(buf) - (buf - bufptr) - 1,
+        bufptr += snprintf(bufptr, (int)sizeof(buf) - (bufptr - buf) - 1,
             "PageFaultCount: %" PRIu64 "\n"
             "PeakWorkingSetSize: %" PRIu64 " kB\n"
             "WorkingSetSize: %" PRIu64 " kB\n"
@@ -142,11 +142,15 @@ static void attachMemoryInfo()
                 ? memCounters.PagefileUsage
                 : memCounters.PrivateUsage),
             toKB(memCounters.PeakPagefileUsage));
+    } else {
+        bufptr += snprintf(bufptr, (int)sizeof(buf) - (bufptr - buf) - 1,
+                           "\nGetProcessMemoryInfo() failed with error %u\n",
+                           (unsigned)::GetLastError());
     }
 
     MEMORYSTATUSEX mem = {sizeof(mem)};
     if (::GlobalMemoryStatusEx(&mem)) {
-        bufptr += snprintf(bufptr, (int)sizeof(buf) - (buf - bufptr) - 1,
+        bufptr += snprintf(bufptr, (int)sizeof(buf) - (bufptr - buf) - 1,
           "\n"
           "TotalPhys: %" PRIu64 " kB\n"
           "AvailPhys: %" PRIu64 " kB\n"
@@ -160,6 +164,10 @@ static void attachMemoryInfo()
           toKB(mem.ullAvailPageFile),
           toKB(mem.ullTotalVirtual),
           toKB(mem.ullAvailVirtual));
+    } else {
+        bufptr += snprintf(bufptr, (int)sizeof(buf) - (bufptr - buf) - 1,
+                           "\nGlobalMemoryStatusEx() failed with error %u\n",
+                           (unsigned)::GetLastError());
     }
 
     if (bufptr > buf) {
