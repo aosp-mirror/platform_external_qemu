@@ -1,0 +1,486 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a9490f0_ffe00237",
+        "filename": "android/android-emu/android/avd/util.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "ARRAY_SIZE(phone_names) ?",
+      "range": {
+        "startLine": 215,
+        "startChar": 59,
+        "endLine": 215,
+        "endChar": 60
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "38bc26f6_402d1bbe",
+        "filename": "android/android-emu/android/avd/util.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 221,
+        "startChar": 60,
+        "endLine": 221,
+        "endChar": 61
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "55808885_19643e45",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "please add the copyright header",
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea76e108_d36bc628",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "please don\u0027t use the whole namespace, write explicit \"using Class\" instead. This way the code won\u0027t start using some new names accidentally when they\u0027re added into the namespace",
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b8ad9e1a_bb9a68a2",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "nit: \"typedef struct\" is purely a C construct and isn\u0027t needed in C++",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 14
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "349b03c3_1738893e",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "is it possible to have it allocated dynamically and passed via callback? Mutable globals aren\u0027t good thing: they often break when code becomes multi-threaded",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 26
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd2c9333_6aae6b23",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 45
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ed4b896_f09aead6",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "nit: please use clang-format",
+      "range": {
+        "startLine": 46,
+        "startChar": 80,
+        "endLine": 46,
+        "endChar": 89
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b68a3376_56feffed",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "nit: use __func__ and nullptr instead of __FUNCTION__ and NULL",
+      "range": {
+        "startLine": 47,
+        "startChar": 27,
+        "endLine": 47,
+        "endChar": 39
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a0a9da95_a47486d4",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "is it possible that _car_callback isn\u0027t nullptr but _car_callback-\u003ecallback is?",
+      "range": {
+        "startLine": 48,
+        "startChar": 7,
+        "endLine": 48,
+        "endChar": 28
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "253b2ba6_86491725",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "nit: tab character",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 1
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "68f824be_fc96b94a",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "nit: these comments aren\u0027t really adding anything, function name is self-explaining",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 35
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2fb65dd5_da7dfb18",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "Generally we prefer to add new raw pipe services instead of using Qemud. Qemud was created originally to abstract out two interfaces: old serial port and new qemu pipe. Now, when nobody uses emulated serial ports for communication, qemud mostly adds unneeded overhead to the services.\nConsider writing a raw pipe service if you expect any performance-critical or latency-critical communication here.\nYou can take a look at Opengl pipe or AdbGuestPipe as an example",
+      "range": {
+        "startLine": 77,
+        "startChar": 7,
+        "endLine": 77,
+        "endChar": 18
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e9fb4a39_bb99700f",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "can you just overwrite |callback| and |context| members instead of delete/new pair?",
+      "range": {
+        "startLine": 107,
+        "startChar": 4,
+        "endLine": 111,
+        "endChar": 42
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c6f4b351_a5f0e3d0",
+        "filename": "android/android-emu/android/car.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "please add the copyright header",
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "201deafe_ba92a392",
+        "filename": "android/android-emu/android/emulation/control/car_data_agent.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "could you please add a comment explaining the interface here? It\u0027s not obvious if the car data function sending to or from car",
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "782d85d4_62646b43",
+        "filename": "android/android-emu/android/emulation/proto/VehicleHalProto.proto",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "Do we have this file somewhere else in the Android source tree? Can we have a script to copy it from there to be able to sync quickly, or a readme file explaining where is the second copy?",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 2
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a97924d4_478e4130",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "same thing with \u0027using namespace\u0027 - use \u0027using class\u0027 instead.",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 25
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8303aa03_12eac02e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "why is it on heap? Looks like it\u0027s only needed in this function.\nIf you need it to be dynamic, consider using std::unique_ptr\u003c\u003e.",
+      "range": {
+        "startLine": 50,
+        "startChar": 35,
+        "endLine": 50,
+        "endChar": 38
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "946f5ae2_c9d1dd56",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "nit: clang-format can fix formatting for the whole CL",
+      "range": {
+        "startLine": 22,
+        "startChar": 32,
+        "endLine": 22,
+        "endChar": 34
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ed146e2_78aba916",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "please initialize it to nullptr here",
+      "range": {
+        "startLine": 34,
+        "startChar": 38,
+        "endLine": 34,
+        "endChar": 39
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aa92362_ec961835",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T22:37:48Z",
+      "side": 1,
+      "message": "const ref?",
+      "range": {
+        "startLine": 35,
+        "startChar": 28,
+        "endLine": 35,
+        "endChar": 35
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
