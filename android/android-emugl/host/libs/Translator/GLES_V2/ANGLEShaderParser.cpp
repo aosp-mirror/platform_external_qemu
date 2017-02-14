@@ -16,8 +16,6 @@
 #include <map>
 #include <string>
 
-#include <GLSLANG/ShaderLang.h>
-
 #define SH_GLES31_SPEC ((ShShaderSpec)0x8B88)
 #define GL_COMPUTE_SHADER 0x91B9
 
@@ -164,11 +162,27 @@ bool globalInitialize(
     return true;
 }
 
+static void getShaderLinkInfo(ShHandle compilerHandle,
+                              ShaderLinkInfo* linkInfo) {
+    auto uniforms = ShGetUniforms(compilerHandle);
+    auto varyings = ShGetVaryings(compilerHandle);
+    auto attributes = ShGetAttributes(compilerHandle);
+    auto outputVars = ShGetOutputVariables(compilerHandle);
+    auto interfaceBlocks = ShGetInterfaceBlocks(compilerHandle);
+
+    if (uniforms) linkInfo->uniforms = *uniforms;
+    if (varyings) linkInfo->varyings = *varyings;
+    if (attributes) linkInfo->attributes = *attributes;
+    if (outputVars) linkInfo->outputVars = *outputVars;
+    if (interfaceBlocks) linkInfo->interfaceBlocks = *interfaceBlocks;
+}
+
 bool translate(int esslVersion,
                const char* src,
                GLenum shaderType,
                std::string* outInfolog,
-               std::string* outObjCode) {
+               std::string* outObjCode,
+               ShaderLinkInfo* outShaderLinkInfo) {
 
     // Leverage ARB_ES3_1_compatibility for ESSL 310 for now.
     // Use translator after rest of dEQP-GLES31.functional is in a better state.
@@ -210,13 +224,16 @@ bool translate(int esslVersion,
     }
 
     // Pass in the entire src as 1 string, ask for compiled GLSL object code
-    // to be saved.
-    int res = ShCompile(compilerHandle, &src, 1, SH_OBJECT_CODE);
+    // and information about all compiled variables.
+    int res = ShCompile(compilerHandle, &src, 1, SH_OBJECT_CODE | SH_VARIABLES);
 
     // The compilers return references that may not be valid in the future,
     // and we manually clear them immediately anyway.
     *outInfolog = std::string(ShGetInfoLog(compilerHandle));
     *outObjCode = std::string(ShGetObjectCode(compilerHandle));
+
+    if (outShaderLinkInfo) getShaderLinkInfo(compilerHandle, outShaderLinkInfo);
+
     ShClearResults(compilerHandle);
 
     return res;
