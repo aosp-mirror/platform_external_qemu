@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "6c6701ed_101752e0",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglContext.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T16:29:11Z",
+      "side": 1,
+      "message": "Well, this means we have to make it happen eventually to make sure the mapping is always by ID, don\u0027t we? On the other hand, we can change this whole serialization technique at that time. It\u0027s up to you to decide, it just felt to me like a simpler design, but this one is fine too.",
+      "parentUuid": "449c1945_a7ca0141",
+      "range": {
+        "startLine": 159,
+        "startChar": 4,
+        "endLine": 159,
+        "endChar": 33
+      },
+      "revId": "d4478953126b59d0589342df6e1996475063eea0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "75f5645a_a4be5fbe",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
         "patchSetId": 2
