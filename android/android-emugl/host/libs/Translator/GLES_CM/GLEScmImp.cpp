@@ -28,6 +28,7 @@
 
 #include <GLcommon/GLDispatch.h>
 #include <GLcommon/GLconversion_macros.h>
+#include <GLcommon/TextureData.h>
 #include <GLcommon/TranslatorIfaces.h>
 #include <GLcommon/FramebufferData.h>
 
