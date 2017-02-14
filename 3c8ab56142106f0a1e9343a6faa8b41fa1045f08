@@ -93,6 +93,30 @@
       "revId": "3c8ab56142106f0a1e9343a6faa8b41fa1045f08",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a348ebe_0487607e",
+        "filename": "android/android-emugl/host/libs/libOpenGLESDispatch/gles2_extensions.entries",
+        "patchSetId": 6
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-14T02:33:18Z",
+      "side": 1,
+      "message": "ahhhh! What about if we also have a method getBufferDataSize() or something in GLESpointer so as to avoid change in protocol?",
+      "parentUuid": "df657a28_ce7ea29b",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 152
+      },
+      "revId": "3c8ab56142106f0a1e9343a6faa8b41fa1045f08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
