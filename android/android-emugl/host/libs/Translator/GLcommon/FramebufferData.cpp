@@ -19,12 +19,28 @@
 #include <GLcommon/FramebufferData.h>
 #include <GLcommon/GLEScontext.h>
 
+RenderbufferData::RenderbufferData(android::base::Stream* stream) {
+    // TODO
+}
+
+void RenderbufferData::onSave(android::base::Stream* stream) const {
+    // TODO
+}
+
 FramebufferData::FramebufferData(GLuint name) : m_fbName(name) {}
+
+FramebufferData::FramebufferData(android::base::Stream* stream) {
+    // TODO
+}
 
 FramebufferData::~FramebufferData() {
     for (int i=0; i<MAX_ATTACH_POINTS; i++) {
         detachObject(i);
     }
+}
+
+void FramebufferData::onSave(android::base::Stream* stream) const {
+    // TODO
 }
 
 void FramebufferData::setAttachment(GLenum attachment,

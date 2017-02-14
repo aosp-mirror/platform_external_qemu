@@ -53,3 +53,11 @@ GLESbuffer::~GLESbuffer() {
         delete [] m_data;
     }
 }
+
+GLESbuffer::GLESbuffer(android::base::Stream* stream) {
+    // TODO
+}
+
+void GLESbuffer::onSave(android::base::Stream* stream) const {
+    // TODO
+}

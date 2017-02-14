@@ -44,7 +44,8 @@ struct ShareGroup::ObjectDataAutoLock {
 
 ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
                        uint64_t sharedGroupID,
-                       android::base::Stream* stream) :
+                       android::base::Stream* stream,
+                       loadObject_t loadObject) :
                        m_sharedGroupID(sharedGroupID) {
     for (int i = 0; i < toIndex(NamedObjectType::NUM_OBJECT_TYPES);
          i++) {
@@ -62,8 +63,10 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
                     ObjectLocalName localName = stream->getBe32();
                     (void)localName;
                     // TODO: load m_objectsData
-                    //ObjectDataPtr data(nullptr);
-                    //setObjectDataLocked((NamedObjectType)objType, localName, data);
+                    ObjectDataPtr data = loadObject((NamedObjectType)objType,
+                            localName, stream);
+                    setObjectDataLocked((NamedObjectType)objType, localName,
+                            data);
                 }
             }
             // we do not initialize hardware GL state and m_nameSpace when
@@ -311,7 +314,7 @@ ObjectNameManager::ObjectNameManager(GlobalNameSpace *globalNameSpace) :
 
 ShareGroupPtr
 ObjectNameManager::createShareGroup(void *p_groupName, uint64_t sharedGroupID,
-        android::base::Stream* stream)
+        android::base::Stream* stream, ShareGroup::loadObject_t loadObject)
 {
     emugl::Mutex::AutoLock lock(m_lock);
 
@@ -330,7 +333,7 @@ ObjectNameManager::createShareGroup(void *p_groupName, uint64_t sharedGroupID,
             assert(!m_usedSharedGroupIDs.count(sharedGroupID));
         }
         shareGroupReturn.reset(
-            new ShareGroup(m_globalNameSpace, sharedGroupID, stream));
+            new ShareGroup(m_globalNameSpace, sharedGroupID, stream, loadObject));
     } else {
         assert(sharedGroupID == 0
             || sharedGroupID == shareGroupReturn->getId());
@@ -375,7 +378,8 @@ ObjectNameManager::attachShareGroup(void *p_groupName,
 }
 
 ShareGroupPtr ObjectNameManager::attachOrCreateShareGroup(void *p_groupName,
-        uint64_t p_existingGroupID, android::base::Stream* stream) {
+        uint64_t p_existingGroupID, android::base::Stream* stream,
+        ShareGroup::loadObject_t loadObject) {
     assert(m_groups.find(p_groupName) == m_groups.end());
     ShareGroupsMap::iterator ite = p_existingGroupID ? m_groups.begin()
                                                      : m_groups.end();
@@ -383,7 +387,8 @@ ShareGroupPtr ObjectNameManager::attachOrCreateShareGroup(void *p_groupName,
         ++ite;
     }
     if (ite == m_groups.end()) {
-        return createShareGroup(p_groupName, p_existingGroupID, stream);
+        return createShareGroup(p_groupName, p_existingGroupID, stream,
+                loadObject);
     } else {
         return attachShareGroup(p_groupName, ite->first);
     }

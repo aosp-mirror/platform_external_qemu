@@ -23,6 +23,9 @@
 class RenderbufferData : public ObjectData
 {
 public:
+    RenderbufferData() = default;
+    RenderbufferData(android::base::Stream* stream);
+    virtual void onSave(android::base::Stream* stream) const override;
     GLuint attachedFB = 0;
     GLenum attachedPoint = 0;
     NamedObjectPtr eglImageGlobalTexObject = 0;
@@ -35,6 +38,7 @@ class FramebufferData : public ObjectData
 {
 public:
     explicit FramebufferData(GLuint name);
+    FramebufferData(android::base::Stream* stream);
     ~FramebufferData();
 
     void setAttachment(GLenum attachment,
@@ -57,6 +61,7 @@ public:
         return m_hasBeenBound;
     }
 
+    virtual void onSave(android::base::Stream* stream) const override;
 private:
     inline int attachmentPointIndex(GLenum attachment);
     void detachObject(int idx);
