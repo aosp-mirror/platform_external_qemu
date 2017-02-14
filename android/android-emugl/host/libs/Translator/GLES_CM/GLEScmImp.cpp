@@ -2325,7 +2325,7 @@ void glDrawTexOES (T x, T y, T z, T width, T height) {
     ctx->dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
 
     //disable clip planes
-    ctx->dispatcher().glGetIntegerv(GL_MAX_CLIP_PLANES,&numClipPlanes);
+    glGetIntegerv(GL_MAX_CLIP_PLANES,&numClipPlanes);
     for (int i=0;i<numClipPlanes;++i)
         ctx->dispatcher().glDisable(GL_CLIP_PLANE0+i);
 
