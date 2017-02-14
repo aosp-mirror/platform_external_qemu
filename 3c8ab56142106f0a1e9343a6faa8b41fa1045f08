@@ -22,6 +22,29 @@
       "revId": "3c8ab56142106f0a1e9343a6faa8b41fa1045f08",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bbcf6295_e2823e98",
+        "filename": "android/android-emugl/host/libs/libOpenGLESDispatch/gles2_extensions.entries",
+        "patchSetId": 6
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-14T02:07:06Z",
+      "side": 1,
+      "message": "Can you explain why this is needed?\n\nHere is my take on it:\n\n1. We only know the real data size on glDrawElements, so not really sure how this works in the first place.\n2. Before glDrawElements, we don\u0027t need to know the data size if it\u0027s a client array, since we are not at glDrawElements yet.\n3. After glDrawElements, we still don\u0027t need to know, since the guest will just send it again.\n4. If the guest is in the middle of sendVertexAttributes, before VertexAttribPointerData, we still don\u0027t know the size.\n5. If in the middle of sendVertexAttributes but after VertexAttribPointerData, we already know the size and it\u0027s in the GLESpointer object, which we can restore by itself on load and everything else should just work.",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 152
+      },
+      "revId": "3c8ab56142106f0a1e9343a6faa8b41fa1045f08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
