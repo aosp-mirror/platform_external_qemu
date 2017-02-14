@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "a1782bec_a0bf8471",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglContext.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-14T18:58:21Z",
+      "side": 1,
+      "message": "Speaking of which, I do have a TODO item to index them by ID. I will add an ID -\u003e share group weak ptr mapping, then we can save all share groups before contexts.",
+      "parentUuid": "6c6701ed_101752e0",
+      "range": {
+        "startLine": 159,
+        "startChar": 4,
+        "endLine": 159,
+        "endChar": 33
+      },
+      "revId": "d4478953126b59d0589342df6e1996475063eea0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "75f5645a_a4be5fbe",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
         "patchSetId": 2
