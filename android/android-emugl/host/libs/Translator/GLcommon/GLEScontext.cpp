@@ -18,6 +18,7 @@
 #include <GLcommon/GLconversion_macros.h>
 #include <GLcommon/GLSnapshotSerializers.h>
 #include <GLcommon/GLESmacros.h>
+#include <GLcommon/TextureData.h>
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 #include <GLES2/gl2.h>
@@ -456,6 +457,22 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         stream->putBe32(m_renderbuffer);
         stream->putBe32(m_drawFramebuffer);
         stream->putBe32(m_readFramebuffer);
+    }
+}
+
+ObjectDataPtr GLEScontext::loadObject(NamedObjectType type,
+            ObjectLocalName localName, android::base::Stream* stream) const {
+    switch (type) {
+        case NamedObjectType::VERTEXBUFFER:
+            return ObjectDataPtr(new GLESbuffer(stream));
+        case NamedObjectType::TEXTURE:
+            return ObjectDataPtr(new TextureData(stream));
+        case NamedObjectType::FRAMEBUFFER:
+            return ObjectDataPtr(new FramebufferData(stream));
+        case NamedObjectType::RENDERBUFFER:
+            return ObjectDataPtr(new RenderbufferData(stream));
+        default:
+            return {};
     }
 }
 
