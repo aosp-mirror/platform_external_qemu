@@ -1252,6 +1252,7 @@ static int assigned_device_pci_cap_init(PCIDevice *pci_dev, Error **errp)
             error_propagate(errp, local_err);
             return -ENOTSUP;
         }
+        dev->dev.cap_present |= QEMU_PCI_CAP_MSI;
         dev->cap.available |= ASSIGNED_DEVICE_CAP_MSI;
         /* Only 32-bit/no-mask currently supported */
         ret = pci_add_capability2(pci_dev, PCI_CAP_ID_MSI, pos, 10,
@@ -1286,6 +1287,7 @@ static int assigned_device_pci_cap_init(PCIDevice *pci_dev, Error **errp)
             error_propagate(errp, local_err);
             return -ENOTSUP;
         }
+        dev->dev.cap_present |= QEMU_PCI_CAP_MSIX;
         dev->cap.available |= ASSIGNED_DEVICE_CAP_MSIX;
         ret = pci_add_capability2(pci_dev, PCI_CAP_ID_MSIX, pos, 12,
                                   &local_err);
@@ -1649,6 +1651,7 @@ static void assigned_dev_register_msix_mmio(AssignedDevice *dev, Error **errp)
         dev->msix_table = NULL;
         return;
     }
+    dev->dev.msix_table = (uint8_t *)dev->msix_table;
 
     assigned_dev_msix_reset(dev);
 
@@ -1666,6 +1669,7 @@ static void assigned_dev_unregister_msix_mmio(AssignedDevice *dev)
         error_report("error unmapping msix_table! %s", strerror(errno));
     }
     dev->msix_table = NULL;
+    dev->dev.msix_table = NULL;
 }
 
 static const VMStateDescription vmstate_assigned_device = {

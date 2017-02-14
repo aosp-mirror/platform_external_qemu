@@ -123,6 +123,7 @@ int main(int argc, char **argv)
 #include "crypto/init.h"
 #include "sysemu/replay.h"
 #include "qapi/qmp/qerror.h"
+#include "sysemu/iothread.h"
 
 #ifdef CONFIG_ANDROID
 
@@ -3046,6 +3047,19 @@ static bool object_create_initial(const char *type)
         return false;
     }
 
+    /* Memory allocation by backends needs to be done
+     * after configure_accelerator() (due to the tcg_enabled()
+     * checks at memory_region_init_*()).
+     *
+     * Also, allocation of large amounts of memory may delay
+     * chardev initialization for too long, and trigger timeouts
+     * on software that waits for a monitor socket to be created
+     * (e.g. libvirt).
+     */
+    if (g_str_has_prefix(type, "memory-backend-")) {
+        return false;
+    }
+
     return true;
 }
 
@@ -5308,6 +5322,7 @@ int main(int argc, char** argv, char** envp)
     trace_init_vcpu_events();
     main_loop();
     replay_disable_events();
+    iothread_stop_all();
 
 #ifdef CONFIG_ANDROID
     crashhandler_exitmode("after main_loop");
