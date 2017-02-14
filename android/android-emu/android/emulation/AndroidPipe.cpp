@@ -23,10 +23,13 @@
 #include "android/emulation/DeviceContextRunner.h"
 #include "android/emulation/VmLock.h"
 
+#include <algorithm>
 #include <memory>
 #include <string>
 #include <vector>
-#include <unordered_map>
+#include <unordered_set>
+
+#include <assert.h>
 
 #define DEBUG 0
 
@@ -358,13 +361,29 @@ struct Globals {
     ConnectorService connectorService;
     PipeWaker pipeWaker;
 
-    Service* findServiceByName(const char* name) const {
-        for (const auto& service : services) {
-            if (service->name() == name) {
-                return service.get();
-            }
+    // Searches for a service position in the |services| list and returns the
+    // index. |startPosHint| is a _hint_ and suggests where to start from.
+    // Returns the index of the service or -1 if there's no |name| service.
+    int findServicePositionByName(const char* name,
+                                  const int startPosHint = 0) const {
+        const auto searchByNameFunc =
+                [name](const std::unique_ptr<Service>& service) {
+                    return service->name() == name;
+                };
+
+        // First, try to search starting from the hint position.
+        auto end = services.end();
+        auto it = std::find_if(services.begin() + startPosHint, end,
+                               searchByNameFunc);
+
+        // If there was a hint that didn't help, continue searching from the
+        // beginning of the contatiner to check the rest of it.
+        if (it == end && startPosHint > 0) {
+            end = services.begin() + startPosHint;
+            it = std::find_if(services.begin(), end, searchByNameFunc);
         }
-        return nullptr;
+
+        return it == end ? -1 : it - services.begin();
     }
 
     Service* loadServiceByName(BaseStream* stream) {
@@ -374,14 +393,15 @@ struct Globals {
             return &connectorService;
         }
         DD("%s: found [%s]", __FUNCTION__, serviceName->c_str());
-        return this->findServiceByName(serviceName->c_str());
+        return findServiceByName(serviceName->c_str());
     }
 };
 
 android::base::LazyInstance<Globals> sGlobals = LAZY_INSTANCE_INIT;
 
 Service* findServiceByName(const char* name) {
-    return sGlobals->findServiceByName(name);
+    const int pos = sGlobals->findServicePositionByName(name);
+    return pos < 0 ? nullptr : sGlobals->services[pos].get();
 }
 
 AndroidPipe* loadPipeFromStreamCommon(BaseStream* stream,
@@ -530,37 +550,77 @@ void android_pipe_guest_close(void* internalPipe, PipeCloseReason reason) {
     }
 }
 
+template <class Func>
+static void forEachServiceToStream(CStream* stream, Func&& func) {
+    BaseStream* const bs = asBaseStream(stream);
+    bs->putBe16(android::sGlobals->services.size());
+    for (const auto& service : android::sGlobals->services) {
+        bs->putString(service->name());
+        func(service.get(), bs);
+    }
+}
+
+template <class Func>
+static void forEachServiceFromStream(CStream* stream, Func&& func) {
+    const auto& services = android::sGlobals->services;
+    BaseStream* const bs = asBaseStream(stream);
+    const int count = bs->getBe16();
+    int servicePos = -1;
+    std::unordered_set<Service*> missingServices;
+    for (const auto& service : services) {
+        missingServices.insert(service.get());
+    }
+    for (int i = 0; i < count; ++i) {
+        const auto name = bs->getString();
+        servicePos = android::sGlobals->findServicePositionByName(
+                                 name.c_str(), servicePos + 1);
+        assert(servicePos >= 0);
+        const auto& service = services[servicePos];
+        func(service.get(), bs);
+        missingServices.erase(service.get());
+    }
+
+    // Now call the same function for all services that weren't in the snapshot.
+    // Pass |nullptr| instead of the stream pointer to make sure they know
+    // that while we're loading from a snapshot these services aren't part
+    // of it.
+    for (const auto service : missingServices) {
+        func(service, nullptr);
+    }
+}
+
 void android_pipe_guest_pre_load(CStream* stream) {
     CHECK_VM_STATE_LOCK();
     // We may not call qemu_set_irq() until the snapshot is loaded.
     android::sGlobals->pipeWaker.setContextRunMode(
                 android::ContextRunMode::DeferAlways);
-    for (const auto& service : android::sGlobals->services) {
-        service->preLoad(asBaseStream(stream));
-    }
+    forEachServiceFromStream(stream, [](Service* service, BaseStream* bs) {
+        service->preLoad(bs);
+    });
 }
 
 void android_pipe_guest_post_load(CStream* stream) {
     CHECK_VM_STATE_LOCK();
-    for (const auto& service : android::sGlobals->services) {
-        service->postLoad(asBaseStream(stream));
-    }
+    forEachServiceFromStream(stream, [](Service* service, BaseStream* bs) {
+        service->postLoad(bs);
+    });
+    // Restore the regular handling of pipe interrupt requests.
     android::sGlobals->pipeWaker.setContextRunMode(
                 android::ContextRunMode::DeferIfNotLocked);
 }
 
 void android_pipe_guest_pre_save(CStream* stream) {
     CHECK_VM_STATE_LOCK();
-    for (const auto& service : android::sGlobals->services) {
-        service->preSave(asBaseStream(stream));
-    }
+    forEachServiceToStream(stream, [](Service* service, BaseStream* bs) {
+        service->preSave(bs);
+    });
 }
 
 void android_pipe_guest_post_save(CStream* stream) {
     CHECK_VM_STATE_LOCK();
-    for (const auto& service : android::sGlobals->services) {
-        service->postSave(asBaseStream(stream));
-    }
+    forEachServiceToStream(stream, [](Service* service, BaseStream* bs) {
+        service->postSave(bs);
+    });
 }
 
 void android_pipe_guest_save(void* internalPipe, CStream* stream) {
