@@ -1010,17 +1010,19 @@ void EmulatorQtWindow::screenshot() {
         return;
     }
 
-    mScreenCapturer.capture(savePath.toStdString(),
-                            [this](ScreenCapturer::Result result) {
-                                EmulatorQtWindow::screenshotDone(result);
-                            });
+    mScreenCapturer.capture(
+            savePath.toStdString(),
+            [this](ScreenCapturer::Result result, StringView filePath) {
+                EmulatorQtWindow::screenshotDone(result, filePath);
+            });
 
     // Display the flash animation immediately as feedback - if it fails, an
     // error dialog will indicate as such.
     mOverlay.showAsFlash();
 }
 
-void EmulatorQtWindow::screenshotDone(ScreenCapturer::Result result) {
+void EmulatorQtWindow::screenshotDone(ScreenCapturer::Result result,
+                                      StringView filePath) {
     QString msg;
     switch (result) {
         case ScreenCapturer::Result::kSuccess:

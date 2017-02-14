@@ -28,6 +28,7 @@
 #include <string>
 #include <vector>
 
+using android::base::StringView;
 using android::base::System;
 using android::emulation::ScreenCapturer;
 using android::emulation::TestAdbInterface;
@@ -130,7 +131,8 @@ TEST_F(ScreenCapturerTest, screenshotCaptureFailure) {
     mCaptureMustSucceed = false;
     mPullMustSucceed = false;
     mCapturer->capture("ScreencapOut",
-                       [this] (ScreenCapturer::Result result) { resultSaver(result); });
+                       [this](ScreenCapturer::Result result,
+                              StringView filePath) { resultSaver(result); });
     while (!mHaveResult) {
         looperAdvance();
     }
@@ -142,7 +144,8 @@ TEST_F(ScreenCapturerTest, adbPullFailure) {
     mCaptureMustSucceed = true;
     mPullMustSucceed = false;
     mCapturer->capture("ScreencapOut",
-                       [this] (ScreenCapturer::Result result) { resultSaver(result); });
+                       [this](ScreenCapturer::Result result,
+                              StringView filePath) { resultSaver(result); });
     while (!mHaveResult) {
         looperAdvance();
     }
@@ -154,7 +157,8 @@ TEST_F(ScreenCapturerTest, success) {
     mCaptureMustSucceed = true;
     mPullMustSucceed = true;
     mCapturer->capture("ScreencapOut",
-                       [this] (ScreenCapturer::Result result) { resultSaver(result); });
+                       [this](ScreenCapturer::Result result,
+                              StringView filePath) { resultSaver(result); });
     while (!mHaveResult) {
         looperAdvance();
     }
@@ -164,8 +168,10 @@ TEST_F(ScreenCapturerTest, success) {
 
 TEST_F(ScreenCapturerTest, synchronousFailures) {
     mCapturer->capture("ScreencapOut",
-                       [this] (ScreenCapturer::Result result) { resultSaver(result); });
+                       [this](ScreenCapturer::Result result,
+                              StringView filePath) { resultSaver(result); });
     mCapturer->capture("ScreencapOut",
-                       [this] (ScreenCapturer::Result result) { resultSaver(result); });
+                       [this](ScreenCapturer::Result result,
+                              StringView filePath) { resultSaver(result); });
     EXPECT_EQ(Result::kOperationInProgress, mResult);
 }

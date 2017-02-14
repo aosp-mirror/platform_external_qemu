@@ -47,10 +47,10 @@ ScreenCapturer::~ScreenCapturer() {
     }
 }
 
-void ScreenCapturer::capture(android::base::StringView outputDirectoryPath,
+void ScreenCapturer::capture(StringView outputDirectoryPath,
                              ResultCallback resultCallback) {
     if (mCaptureCommand || mPullCommand) {
-        resultCallback(Result::kOperationInProgress);
+        resultCallback(Result::kOperationInProgress, nullptr);
     }
     std::string out_path = outputDirectoryPath;
     mCaptureCommand =
@@ -58,7 +58,7 @@ void ScreenCapturer::capture(android::base::StringView outputDirectoryPath,
             {"shell", "screencap", "-p", kRemoteScreenshotFilePath },
             [this, resultCallback, out_path](const OptionalAdbCommandResult& result) {
                 if (!result || result->exit_code) {
-                    resultCallback(Result::kCaptureFailed);
+                    resultCallback(Result::kCaptureFailed, nullptr);
                 } else {
                     pullScreencap(resultCallback, out_path);
                 }
@@ -69,29 +69,28 @@ void ScreenCapturer::capture(android::base::StringView outputDirectoryPath,
 }
 
 void ScreenCapturer::pullScreencap(ResultCallback resultCallback,
-                                   android::base::StringView outputDirectoryPath) {
+                                   StringView outputDirectoryPath) {
     if (!System::get()->pathIsDir(outputDirectoryPath) ||
         !System::get()->pathCanWrite(outputDirectoryPath)) {
-        resultCallback(Result::kSaveLocationInvalid);
+        resultCallback(Result::kSaveLocationInvalid, nullptr);
     } else {
         auto fileName =
             android::base::StringFormat(
                 "Screenshot_%lu.png",
                 static_cast<unsigned long>(System::get()->getUnixTime()));
         auto filePath =
-            android::base::PathUtils::join(outputDirectoryPath, fileName);
-        mPullCommand =
-            mAdb->runAdbCommand(
+                android::base::PathUtils::join(outputDirectoryPath, fileName);
+        mPullCommand = mAdb->runAdbCommand(
                 {"pull", kRemoteScreenshotFilePath, filePath},
-                [this, resultCallback](const OptionalAdbCommandResult& result) {
-                    resultCallback(
-                        (!result || result->exit_code)
-                            ? Result::kPullFailed
-                            : Result::kSuccess);
+                [this, resultCallback,
+                 filePath](const OptionalAdbCommandResult& result) {
+                    resultCallback((!result || result->exit_code)
+                                           ? Result::kPullFailed
+                                           : Result::kSuccess,
+                                   filePath);
                     mPullCommand.reset();
                 },
-                kPullTimeoutMs,
-                false);
+                kPullTimeoutMs, false);
     }
 }
 

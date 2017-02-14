@@ -318,7 +318,8 @@ private:
     void forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event);
     void handleKeyEvent(SkinEventType type, QKeyEvent* event);
 
-    void screenshotDone(android::emulation::ScreenCapturer::Result result);
+    void screenshotDone(android::emulation::ScreenCapturer::Result result,
+                        android::base::StringView filePath);
 
     void runAdbInstall(const QString& path);
     void installDone(android::emulation::ApkInstaller::Result result,
