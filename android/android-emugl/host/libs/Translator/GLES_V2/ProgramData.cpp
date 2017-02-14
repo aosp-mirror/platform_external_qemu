@@ -25,6 +25,38 @@ ProgramData::ProgramData() :  ObjectData(PROGRAM_DATA),
                               IsInUse(false),
                               DeleteStatus(false) {}
 
+ProgramData::ProgramData(android::base::Stream* stream) :
+    ObjectData(stream) {
+    AttachedVertexShader = stream->getBe32();
+    AttachedFragmentShader = stream->getBe32();
+    AttachedComputeShader = stream->getBe32();
+
+    std::string infoLogRead = stream->getString();
+    size_t infoSize = infoLogRead.length();
+    if (infoSize) {
+        GLchar* info = new GLchar[infoSize + 1];
+        memcpy(info, infoLogRead.c_str(), infoSize + 1);
+        infoLog.reset(info);
+    }
+    LinkStatus = stream->getBe32();
+    IsInUse = stream->getByte();
+    DeleteStatus = stream->getByte();
+}
+
+void ProgramData::onSave(android::base::Stream* stream) const {
+    // The first byte is used to distinguish between program and shader object.
+    // It will be loaded outside of this class
+    stream->putByte(1);
+    ObjectData::onSave(stream);
+    stream->putBe32(AttachedVertexShader);
+    stream->putBe32(AttachedFragmentShader);
+    stream->putBe32(AttachedComputeShader);
+    stream->putString(infoLog.get());
+    stream->putBe32(LinkStatus);
+    stream->putByte(IsInUse);
+    stream->putByte(DeleteStatus);
+}
+
 void ProgramData::setInfoLog(const GLchar* log) {
     infoLog.reset(log);
 }
