@@ -117,6 +117,30 @@
       "revId": "3c8ab56142106f0a1e9343a6faa8b41fa1045f08",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0682ae09_7769f425",
+        "filename": "android/android-emugl/host/libs/libOpenGLESDispatch/gles2_extensions.entries",
+        "patchSetId": 6
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-14T02:39:05Z",
+      "side": 1,
+      "message": "GLESpointer never actually knows the data size before this function tells it... This is not going to change the protocol between host and guest. It will only change the interface between decoder and translator. And we can avoid calling this function when working with angle and swiftshader.",
+      "parentUuid": "2a348ebe_0487607e",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 152
+      },
+      "revId": "3c8ab56142106f0a1e9343a6faa8b41fa1045f08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
