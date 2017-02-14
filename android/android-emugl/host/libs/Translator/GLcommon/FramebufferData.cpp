@@ -19,12 +19,56 @@
 #include <GLcommon/FramebufferData.h>
 #include <GLcommon/GLEScontext.h>
 
+RenderbufferData::RenderbufferData(android::base::Stream* stream) :
+    ObjectData(stream) {
+    attachedFB = stream->getBe32();
+    attachedPoint = stream->getBe32();
+    // TODO: load eglImageGlobalTexObject
+    internalformat = stream->getBe32();
+}
+
+void RenderbufferData::onSave(android::base::Stream* stream) const {
+    ObjectData::onSave(stream);
+    stream->putBe32(attachedFB);
+    stream->putBe32(attachedPoint);
+    // TODO: snapshot eglImageGlobalTexObject
+    stream->putBe32(internalformat);
+}
+
 FramebufferData::FramebufferData(GLuint name) : m_fbName(name) {}
+
+FramebufferData::FramebufferData(android::base::Stream* stream) :
+    ObjectData(stream) {
+    m_fbName = stream->getBe32();
+    assert(stream->getBe32() == MAX_ATTACH_POINTS);
+    for (auto& attachPoint : m_attachPoints) {
+        attachPoint.target = stream->getBe32();
+        attachPoint.name = stream->getBe32();
+        // TODO: restore obj
+        attachPoint.owned = stream->getByte();
+    }
+    m_dirty = stream->getByte();
+    m_hasBeenBound = stream->getByte();
+}
 
 FramebufferData::~FramebufferData() {
     for (int i=0; i<MAX_ATTACH_POINTS; i++) {
         detachObject(i);
     }
+}
+
+void FramebufferData::onSave(android::base::Stream* stream) const {
+    ObjectData::onSave(stream);
+    stream->putBe32(m_fbName);
+    stream->putBe32(MAX_ATTACH_POINTS);
+    for (auto& attachPoint : m_attachPoints) {
+        stream->putBe32(attachPoint.target);
+        stream->putBe32(attachPoint.name);
+        // TODO: snapshot obj
+        stream->putByte(attachPoint.owned);
+    }
+    stream->putByte(m_dirty);
+    stream->putByte(m_hasBeenBound);
 }
 
 void FramebufferData::setAttachment(GLenum attachment,

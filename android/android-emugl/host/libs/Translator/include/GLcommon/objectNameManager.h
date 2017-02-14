@@ -38,8 +38,12 @@ class ObjectData
 {
 public:
     ObjectData(ObjectDataType type = UNDEFINED_DATA): m_dataType(type) {}
+    ObjectData(android::base::Stream* stream);
     ObjectDataType getDataType() { return m_dataType; };
     virtual ~ObjectData() = default;
+    virtual void onSave(android::base::Stream* stream) const = 0;
+    // restore(): restore hardware GPU state after loading from a snapshot
+    virtual void restore() {}
 private:
     ObjectDataType m_dataType;
 };
@@ -122,10 +126,14 @@ public:
     void onSave(android::base::Stream* stream);
     void postSave(android::base::Stream* stream);
     void postLoadInit();
+    typedef std::function<ObjectDataPtr(NamedObjectType p_type,
+            ObjectLocalName p_localName, android::base::Stream* stream)>
+                loadObject_t;
 private:
     explicit ShareGroup(GlobalNameSpace *globalNameSpace,
                         uint64_t sharedGroupID,
-                        android::base::Stream* stream);
+                        android::base::Stream* stream,
+                        loadObject_t loadObject);
 
     void lockObjectData();
     void unlockObjectData();
@@ -182,7 +190,7 @@ public:
     //                      new ID.
 
     ShareGroupPtr createShareGroup(void *p_groupName, uint64_t sharedGroupID,
-        android::base::Stream* stream);
+        android::base::Stream* stream, ShareGroup::loadObject_t loadObject);
 
     //
     // attachShareGroup - find the ShareGroup object attached to the ID
@@ -191,7 +199,8 @@ public:
     //
     ShareGroupPtr attachShareGroup(void *p_groupName, void *p_existingGroupName);
     ShareGroupPtr attachOrCreateShareGroup(void *p_groupName,
-        uint64_t p_existingGroupID, android::base::Stream* stream);
+        uint64_t p_existingGroupID, android::base::Stream* stream,
+        ShareGroup::loadObject_t loadObject);
 
     //
     // getShareGroup - retreive a ShareGroup object based on its "name"
