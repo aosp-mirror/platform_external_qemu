@@ -313,6 +313,30 @@
     },
     {
       "key": {
+        "uuid": "2cd0ec1b_a7c21047",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T23:27:03Z",
+      "side": 1,
+      "message": "Sure then. Qemud adds some framing overhead, it also needs to allocate separate buffers to hold the data before sending etc. If you send big and fast (as GPU virtualization), it\u0027s won\u0027t work. For anything simple it\u0027s OK.",
+      "parentUuid": "e33cc049_bb0a9df9",
+      "range": {
+        "startLine": 77,
+        "startChar": 7,
+        "endLine": 77,
+        "endChar": 18
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e9fb4a39_bb99700f",
         "filename": "android/android-emu/android/car.cpp",
         "patchSetId": 3
