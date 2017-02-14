@@ -49,6 +49,9 @@ public:
     const float* getAtt0(void) const {return m_attribute0value;}
 
     virtual void onSave(android::base::Stream* stream) const override;
+    virtual ObjectDataPtr loadObject(NamedObjectType type,
+            ObjectLocalName localName, android::base::Stream* stream) const
+            override;
 protected:
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
 private:
