@@ -26,6 +26,8 @@
 class ProgramData:public ObjectData{
 public:
     ProgramData();
+    ProgramData(android::base::Stream* stream);
+    virtual void onSave(android::base::Stream* stream) const override;
 
     GLuint getAttachedVertexShader() const;
     GLuint getAttachedFragmentShader() const;
