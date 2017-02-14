@@ -16,6 +16,7 @@
 #ifndef GLES_BUFFER_H
 #define GLES_BUFFER_H
 
+#include <android/base/files/Stream.h>
 #include <stdio.h>
 #include <GLES/gl.h>
 #include <GLcommon/objectNameManager.h>
@@ -24,6 +25,8 @@
 class GLESbuffer: public ObjectData {
 public:
    GLESbuffer():ObjectData(BUFFER_DATA) {}
+   GLESbuffer(android::base::Stream* stream);
+   virtual void onSave(android::base::Stream* stream) const override;
    GLuint getSize(){return m_size;};
    GLuint getUsage(){return m_usage;};
    GLvoid* getData(){ return m_data;}

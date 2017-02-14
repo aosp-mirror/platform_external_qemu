@@ -18,8 +18,6 @@
 
 #include "GLcommon/objectNameManager.h"
 
-#include "android/base/files/Stream.h"
-
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
 #include <GLES3/gl3.h>
@@ -38,40 +36,6 @@ typedef struct {
   const char*                                     name;
   __translatorMustCastToProperFunctionPointerType address;
 } ExtensionDescriptor;
-
-class TextureData : public ObjectData
-{
-public:
-    TextureData():  ObjectData(TEXTURE_DATA),
-                    width(0),
-                    height(0),
-                    depth(0),
-                    border(0),
-                    internalFormat(GL_RGBA),
-                    sourceEGLImage(0),
-                    hasStorage(false),
-                    wasBound(false),
-                    requiresAutoMipmap(false),
-                    compressed(false),
-                    compressedFormat(0),
-                    target(0) {
-        memset(crop_rect,0,4*sizeof(int));
-    };
-
-    unsigned int width;
-    unsigned int height;
-    unsigned int depth;
-    unsigned int border;
-    unsigned int internalFormat;
-    unsigned int sourceEGLImage;
-    bool hasStorage;
-    bool wasBound;
-    bool requiresAutoMipmap;
-    bool compressed;
-    unsigned int compressedFormat;
-    int          crop_rect[4];
-    GLenum target;
-};
 
 struct EglImage
 {

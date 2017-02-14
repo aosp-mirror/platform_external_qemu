@@ -53,3 +53,28 @@ GLESbuffer::~GLESbuffer() {
         delete [] m_data;
     }
 }
+
+GLESbuffer::GLESbuffer(android::base::Stream* stream) : ObjectData(stream) {
+    m_size = stream->getBe32();
+    m_usage = stream->getBe32();
+    if (m_size) {
+        m_data = new unsigned char[m_size];
+        stream->read(m_data, m_size);
+        // TODO: m_conversionManager loading
+        m_conversionManager.addRange(Range(0,m_size));
+    }
+    m_wasBound = stream->getByte();
+}
+
+void GLESbuffer::onSave(android::base::Stream* stream) const {
+    ObjectData::onSave(stream);
+    stream->putBe32(m_size);
+    stream->putBe32(m_usage);
+    stream->write(m_data, m_size);
+    // TODO: m_conversionManager
+    //
+    // Treat it as a low priority issue for now because in GLES2 this is only
+    // used for fix point vertex buffers. We are very unlikely to hit it
+    // when snapshotting home screen.
+    stream->putByte(m_wasBound);
+}
