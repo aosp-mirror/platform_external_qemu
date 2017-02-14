@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ac22ed6c_c4bf920f",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-14T02:30:21Z",
+      "side": 1,
+      "message": "they are stored and saved in the base class. I will put in the verification.",
+      "parentUuid": "9f87a710_7567c43e",
+      "range": {
+        "startLine": 91,
+        "startChar": 0,
+        "endLine": 92,
+        "endChar": 33
+      },
+      "revId": "3c8ab56142106f0a1e9343a6faa8b41fa1045f08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bbcf6295_e2823e98",
         "filename": "android/android-emugl/host/libs/libOpenGLESDispatch/gles2_extensions.entries",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-14T02:07:06Z",
       "side": 1,
       "message": "Can you explain why this is needed?\n\nHere is my take on it:\n\n1. We only know the real data size on glDrawElements, so not really sure how this works in the first place.\n2. Before glDrawElements, we don\u0027t need to know the data size if it\u0027s a client array, since we are not at glDrawElements yet.\n3. After glDrawElements, we still don\u0027t need to know, since the guest will just send it again.\n4. If the guest is in the middle of sendVertexAttributes, before VertexAttribPointerData, we still don\u0027t know the size.\n5. If in the middle of sendVertexAttributes but after VertexAttribPointerData, we already know the size and it\u0027s in the GLESpointer object, which we can restore by itself on load and everything else should just work.",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 152
+      },
+      "revId": "3c8ab56142106f0a1e9343a6faa8b41fa1045f08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df657a28_ce7ea29b",
+        "filename": "android/android-emugl/host/libs/libOpenGLESDispatch/gles2_extensions.entries",
+        "patchSetId": 6
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-14T02:30:21Z",
+      "side": 1,
+      "message": "Yeah this is for case 5, when the guest just finished VertexAttribPointerData but does not yet get to glDrawElements_enc. In such situation GLESpointer needs to know the buffer size. And (the bad boy is) the existing GLESpointer.getSize() does not mean the buffer size. It actually means the number of channels. (Yeah horrible naming in GL spec)\n\nSo we don\u0027t actually have a buffer size in GLESpointer. The purpose of this function is to tell GLESpointer the buffer size so that we can correctly snapshot the buffer.",
+      "parentUuid": "bbcf6295_e2823e98",
       "range": {
         "startLine": 7,
         "startChar": 0,
