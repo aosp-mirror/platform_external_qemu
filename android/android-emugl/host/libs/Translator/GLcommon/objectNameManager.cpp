@@ -31,6 +31,32 @@ using ObjectDataMap =
     std::array<std::unordered_map<ObjectLocalName, ObjectDataPtr>,
                toIndex(NamedObjectType::NUM_OBJECT_TYPES)>;
 
+NamedObjectType ObjectDataType2NamedObjectType(ObjectDataType objDataType) {
+    switch (objDataType) {
+        case SHADER_DATA:
+        case PROGRAM_DATA:
+            return NamedObjectType::SHADER_OR_PROGRAM;
+        case TEXTURE_DATA:
+            return NamedObjectType::TEXTURE;
+        case BUFFER_DATA:
+            return NamedObjectType::VERTEXBUFFER;
+        default:
+            return NamedObjectType::NULLTYPE;
+    }
+}
+
+ObjectData::ObjectData(android::base::Stream* stream) {
+    m_dataType = (ObjectDataType)stream->getBe32();
+}
+
+void ObjectData::onSave(android::base::Stream* stream) const {
+    stream->putBe32(m_dataType);
+}
+
+void ObjectData::postLoad(getObjDataPtr_t getObjDataPtr) {
+    (void)getObjDataPtr;
+}
+
 struct ShareGroup::ObjectDataAutoLock {
     ObjectDataAutoLock(ShareGroup* self) : self(self) {
         self->lockObjectData();
@@ -42,9 +68,13 @@ struct ShareGroup::ObjectDataAutoLock {
     ShareGroup* self;
 };
 
+#define MAG_BEG 101
+#define MAG_END 102
+
 ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
                        uint64_t sharedGroupID,
-                       android::base::Stream* stream) :
+                       android::base::Stream* stream,
+                       loadObject_t loadObject) :
                        m_sharedGroupID(sharedGroupID) {
     for (int i = 0; i < toIndex(NamedObjectType::NUM_OBJECT_TYPES);
          i++) {
@@ -56,14 +86,30 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
         bool isMap = stream->getByte();
         if (isMap) {
             size_t mapSize = stream->getBe32();
+            // Notes: TextureData can be shared across different share groups.
+            // The current implementation does not handle this case correctly.
+            // b/35390502
             for (size_t objType = 0; objType < mapSize; objType++) {
+                assert(MAG_BEG == stream->getBe32());
                 size_t typeSize = stream->getBe32();
                 for (size_t obj = 0; obj < typeSize; obj++) {
+                    printf("loading %lu: %lu\n",objType, obj);
                     ObjectLocalName localName = stream->getBe32();
-                    (void)localName;
-                    // TODO: load m_objectsData
-                    //ObjectDataPtr data(nullptr);
-                    //setObjectDataLocked((NamedObjectType)objType, localName, data);
+                    ObjectDataPtr data = loadObject((NamedObjectType)objType,
+                            localName, stream);
+                    setObjectDataLocked((NamedObjectType)objType, localName,
+                            data);
+                }
+                assert(MAG_END == stream->getBe32());
+            }
+            ObjectDataMap *map = (ObjectDataMap *)m_objectsData;
+            assert(map);
+            for (const auto& objType : *map) {
+                for (const auto& obj : objType) {
+                    obj.second->postLoad([this](NamedObjectType p_type,
+                            ObjectLocalName p_localName) {
+                                    return this->getObjectDataPtrNoLock(p_type, p_localName);
+                            });
                 }
             }
             // we do not initialize hardware GL state and m_nameSpace when
@@ -85,12 +131,13 @@ void ShareGroup::onSave(android::base::Stream* stream) {
         stream->putByte(true);
         stream->putBe32(map->size());
         for (const auto& objType : *map) {
+            stream->putBe32(MAG_BEG);
             stream->putBe32(objType.size());
             for (const auto& obj : objType) {
                 stream->putBe32(obj.first);
-                // TODO: save m_objectsData
-                //obj.second->onSave(stream);
+                obj.second->onSave(stream);
             }
+            stream->putBe32(MAG_END);
         }
     } else {
         stream->putByte(false);
@@ -311,7 +358,7 @@ ObjectNameManager::ObjectNameManager(GlobalNameSpace *globalNameSpace) :
 
 ShareGroupPtr
 ObjectNameManager::createShareGroup(void *p_groupName, uint64_t sharedGroupID,
-        android::base::Stream* stream)
+        android::base::Stream* stream, ShareGroup::loadObject_t loadObject)
 {
     emugl::Mutex::AutoLock lock(m_lock);
 
@@ -330,7 +377,7 @@ ObjectNameManager::createShareGroup(void *p_groupName, uint64_t sharedGroupID,
             assert(!m_usedSharedGroupIDs.count(sharedGroupID));
         }
         shareGroupReturn.reset(
-            new ShareGroup(m_globalNameSpace, sharedGroupID, stream));
+            new ShareGroup(m_globalNameSpace, sharedGroupID, stream, loadObject));
     } else {
         assert(sharedGroupID == 0
             || sharedGroupID == shareGroupReturn->getId());
@@ -375,7 +422,8 @@ ObjectNameManager::attachShareGroup(void *p_groupName,
 }
 
 ShareGroupPtr ObjectNameManager::attachOrCreateShareGroup(void *p_groupName,
-        uint64_t p_existingGroupID, android::base::Stream* stream) {
+        uint64_t p_existingGroupID, android::base::Stream* stream,
+        ShareGroup::loadObject_t loadObject) {
     assert(m_groups.find(p_groupName) == m_groups.end());
     ShareGroupsMap::iterator ite = p_existingGroupID ? m_groups.begin()
                                                      : m_groups.end();
@@ -383,7 +431,8 @@ ShareGroupPtr ObjectNameManager::attachOrCreateShareGroup(void *p_groupName,
         ++ite;
     }
     if (ite == m_groups.end()) {
-        return createShareGroup(p_groupName, p_existingGroupID, stream);
+        return createShareGroup(p_groupName, p_existingGroupID, stream,
+                loadObject);
     } else {
         return attachShareGroup(p_groupName, ite->first);
     }

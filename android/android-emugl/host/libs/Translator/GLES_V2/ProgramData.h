@@ -21,6 +21,8 @@
 class ProgramData:public ObjectData{
 public:
     ProgramData();
+    ProgramData(android::base::Stream* stream);
+    virtual void onSave(android::base::Stream* stream) const override;
 
     GLuint getAttachedVertexShader() const;
     GLuint getAttachedFragmentShader() const;
@@ -46,7 +48,7 @@ private:
     GLuint AttachedVertexShader;
     GLuint AttachedFragmentShader;
     GLuint AttachedComputeShader;
-    std::unique_ptr<const GLchar[]> infoLog;
+    std::unique_ptr<const GLchar[]> infoLog = {};
     GLint  LinkStatus;
     bool    IsInUse;
     bool    DeleteStatus;
