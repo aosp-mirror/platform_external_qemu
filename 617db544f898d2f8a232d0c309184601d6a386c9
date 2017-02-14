@@ -22,6 +22,30 @@
       "revId": "617db544f898d2f8a232d0c309184601d6a386c9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "175ef6c1_1e508e50",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-14T01:20:32Z",
+      "side": 1,
+      "message": "Done (replaced with enum)",
+      "parentUuid": "c266bb89_84023771",
+      "range": {
+        "startLine": 166,
+        "startChar": 28,
+        "endLine": 166,
+        "endChar": 40
+      },
+      "revId": "617db544f898d2f8a232d0c309184601d6a386c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
