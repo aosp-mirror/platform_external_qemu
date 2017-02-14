@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d9e302a8_7d1a14c1",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglContext.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T01:19:10Z",
+      "side": 1,
+      "message": "is it possible to loop over all share groups in some paretn object first and save them, and only save the ids here to make it more deterministic?",
+      "range": {
+        "startLine": 159,
+        "startChar": 4,
+        "endLine": 159,
+        "endChar": 33
+      },
+      "revId": "d4478953126b59d0589342df6e1996475063eea0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "75f5645a_a4be5fbe",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T01:19:10Z",
+      "side": 1,
+      "message": "EGLAPIENTRY?",
+      "range": {
+        "startLine": 116,
+        "startChar": 17,
+        "endLine": 116,
+        "endChar": 30
+      },
+      "revId": "d4478953126b59d0589342df6e1996475063eea0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2de1dfeb_86080d65",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T01:19:10Z",
+      "side": 1,
+      "message": "EGLAPIENTRY?\nI think it matters only on Windows",
+      "range": {
+        "startLine": 119,
+        "startChar": 18,
+        "endLine": 119,
+        "endChar": 36
+      },
+      "revId": "d4478953126b59d0589342df6e1996475063eea0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d8ee05ed_84fe03a4",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/objectNameManager.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T01:19:10Z",
+      "side": 1,
+      "message": "nit: use \"\" for non-system includes",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 38
+      },
+      "revId": "d4478953126b59d0589342df6e1996475063eea0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "61a363c0_f5831564",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/objectNameManager.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-14T01:19:10Z",
+      "side": 1,
+      "message": "nit: pass ObjectDataPtr\u0026\u0026 here and std::move() it from setObjectData() call\nThis way we get rid on an extra interlocked ++/-- pair. It matters: before the GL code cleanup just that was taking more than 2% of the CPU time",
+      "range": {
+        "startLine": 133,
+        "startChar": 41,
+        "endLine": 133,
+        "endChar": 54
+      },
+      "revId": "d4478953126b59d0589342df6e1996475063eea0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
