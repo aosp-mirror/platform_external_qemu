@@ -30,11 +30,60 @@ ProgramData::ProgramData() :  ObjectData(PROGRAM_DATA),
                               LinkStatus(GL_FALSE),
                               IsInUse(false),
                               DeleteStatus(false) {}
+
+ProgramData::ProgramData(android::base::Stream* stream) :
+    ObjectData(stream) {
+    size_t attribLocNum = stream->getBe32();
+    for (size_t attribLoc = 0; attribLoc < attribLocNum; attribLoc ++) {
+        std::string attrib = stream->getString();
+        GLuint loc = stream->getBe32();
+        boundAttribLocs.emplace(std::move(attrib), loc);
+    }
+
+    AttachedVertexShader = stream->getBe32();
+    AttachedFragmentShader = stream->getBe32();
+    AttachedComputeShader = stream->getBe32();
+    validationInfoLog = stream->getString();
+
+    std::string infoLogRead = stream->getString();
+    size_t infoSize = infoLogRead.length();
+    if (infoSize) {
+        GLchar* info = new GLchar[infoSize + 1];
+        memcpy(info, infoLogRead.c_str(), infoSize + 1);
+        infoLog.reset(info);
+    }
+    LinkStatus = stream->getBe32();
+    IsInUse = stream->getByte();
+    DeleteStatus = stream->getByte();
+}
+
+void ProgramData::onSave(android::base::Stream* stream) const {
+    // The first byte is used to distinguish between program and shader object.
+    // It will be loaded outside of this class
+    stream->putByte(LOAD_PROGRAM);
+    ObjectData::onSave(stream);
+    stream->putBe32(boundAttribLocs.size());
+    for (const auto& attribLocs : boundAttribLocs) {
+        stream->putString(attribLocs.first);
+        stream->putBe32(attribLocs.second);
+    }
+
+    stream->putBe32(AttachedVertexShader);
+    stream->putBe32(AttachedFragmentShader);
+    stream->putBe32(AttachedComputeShader);
+    stream->putString(validationInfoLog);
+    stream->putString(infoLog.get());
+    stream->putBe32(LinkStatus);
+    stream->putByte(IsInUse);
+    stream->putByte(DeleteStatus);
+}
+
 void ProgramData::setErrInfoLog() {
     size_t bytes = validationInfoLog.length() + 1;
     infoLog.reset(new GLchar[bytes]);
     memcpy((char*)infoLog.get(), &validationInfoLog[0], bytes);
 }
+
 void ProgramData::setInfoLog(const GLchar* log) {
     infoLog.reset(log);
 }

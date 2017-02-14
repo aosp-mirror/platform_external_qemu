@@ -26,6 +26,8 @@
 class ShaderParser : public ObjectData {
 public:
     ShaderParser(GLenum type = 0);
+    ShaderParser(android::base::Stream* stream);
+    virtual void onSave(android::base::Stream* stream) const override;
     void           setSrc(int esslVersion,
                           GLsizei count,
                           const GLchar* const* strings,
