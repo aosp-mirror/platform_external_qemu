@@ -46,6 +46,7 @@
 - (id) initWithFormat:(NSOpenGLPixelFormat *)pixelFormat shareContext:(NSOpenGLContext *)share
 {
     self = [super initWithFormat:pixelFormat shareContext:share];
+    assert (self != nil);
     if (self != nil) {
         boundToPbuffer = 0;
         boundToWin = 0;

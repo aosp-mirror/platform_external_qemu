@@ -16,6 +16,21 @@
 
 #include "android/base/memory/LazyInstance.h"
 
+// Must be declared outside of LazyLoadedGLESv1Dispatch scope due to the use of
+// sizeof(T) within the template definition.
+android::base::LazyInstance<LazyLoadedGLESv1Dispatch> sGLESv1Dispatch =
+        LAZY_INSTANCE_INIT;
+
+// static
+const GLESv1Dispatch* LazyLoadedGLESv1Dispatch::get() {
+    LazyLoadedGLESv1Dispatch* instance = sGLESv1Dispatch.ptr();
+    if (instance->mValid) {
+        return &instance->mDispatch;
+    } else {
+        return nullptr;
+    }
+}
+
 // Must be declared outside of LazyLoadedGLESv2Dispatch scope due to the use of
 // sizeof(T) within the template definition.
 android::base::LazyInstance<LazyLoadedGLESv2Dispatch> sGLESv2Dispatch =

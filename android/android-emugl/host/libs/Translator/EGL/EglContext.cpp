@@ -46,7 +46,7 @@ EglContext::EglContext(EglDisplay *dpy,
         m_config = dpy->getConfig(configId);
         shareGroupId = static_cast<uint64_t>(stream->getBe64());
     }
-    EglOS::Context* globalSharedContext = dpy->getGlobalSharedContext();
+    EglOS::Context* globalSharedContext = dpy->getGlobalSharedContext(ver);
     m_native = dpy->nativeType()->createContext(
             m_config->nativeFormat(), globalSharedContext);
     if (m_native) {

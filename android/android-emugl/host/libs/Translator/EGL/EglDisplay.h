@@ -87,7 +87,7 @@ public:
     ImagePtr getImage(EGLImageKHR img) const;
     EGLImageKHR addImageKHR(ImagePtr);
     bool destroyImageKHR(EGLImageKHR img);
-    EglOS::Context* getGlobalSharedContext() const;
+    EglOS::Context* getGlobalSharedContext(GLESVersion ver) const;
 
 private:
    static void addConfig(void* opaque, const EglOS::ConfigInfo* configInfo);
