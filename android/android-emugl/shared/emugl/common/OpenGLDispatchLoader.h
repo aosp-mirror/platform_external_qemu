@@ -17,7 +17,24 @@
 #include "android/base/system/System.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
+#include "OpenGLESDispatch/GLESv1Dispatch.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
+
+// Helper class to hold a global GLESv1Dispatch that is initialized lazily
+// in a thread-safe way. The instance is leaked on program exit.
+struct LazyLoadedGLESv1Dispatch : public GLESv1Dispatch {
+    // Return pointer to global GLESv1Dispatch instance, or nullptr if there
+    // was an error when trying to initialize/load the library.
+    static const GLESv1Dispatch* get();
+
+    LazyLoadedGLESv1Dispatch() {
+        mValid = gles1_dispatch_init(&mDispatch);
+    }
+
+private:
+    GLESv1Dispatch mDispatch;
+    bool mValid;
+};
 
 // Helper class to hold a global GLESv2Dispatch that is initialized lazily
 // in a thread-safe way. The instance is leaked on program exit.
