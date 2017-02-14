@@ -23,8 +23,10 @@ namespace gltest {
 
 EGLDisplay getDisplay();
 EGLConfig createConfig(EGLDisplay dpy, EGLint r, EGLint g, EGLint b, EGLint a, EGLint d, EGLint s, EGLint ms);
+EGLConfig createConfig(EGLDisplay dpy, EGLint gles, EGLint r, EGLint g, EGLint b, EGLint a, EGLint d, EGLint s, EGLint ms);
 EGLSurface pbufferSurface(EGLDisplay dpy, ::EGLConfig config, EGLint w, EGLint h);
 EGLContext createContext(EGLDisplay dpy, EGLConfig config, EGLint maj, EGLint min);
+EGLContext createContext(EGLDisplay dpy, GLint version, EGLConfig config, EGLint maj, EGLint min);
 void destroyContext(EGLDisplay dpy, EGLContext cxt);
 void destroySurface(EGLDisplay dpy, EGLSurface surface);
 void destroyDisplay(EGLDisplay dpy);

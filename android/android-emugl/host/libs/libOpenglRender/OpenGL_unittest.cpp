@@ -65,6 +65,41 @@ GLTEST(OpenGL, CreateContext) {
     destroyDisplay(dpy);
 }
 
+GLTEST(OpenGL, CreateMultiContext) {
+    //Test if we can create different gles context versions
+    const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+    const GLESv1Dispatch* gl1 = LazyLoadedGLESv1Dispatch::get();
+    const GLESv2Dispatch* gl2 = LazyLoadedGLESv2Dispatch::get();
+    EXPECT_TRUE(egl != nullptr);
+    EXPECT_TRUE(gl1 != nullptr);
+    EXPECT_TRUE(gl2 != nullptr);
+
+    EGLDisplay dpy = getDisplay();
+
+    // Create Context 1
+    EGLConfig config1 = createConfig(dpy, EGL_OPENGL_ES_BIT, 8, 8, 8, 8, 24, 8, 0);
+    EGLSurface surf1 = pbufferSurface(dpy, config1, 512, 512);
+    EGLContext context1 = createContext(dpy, 1, config1, 2, 0);
+    egl->eglMakeCurrent(dpy, surf1, surf1, context1);
+    gl1->glClear(GL_COLOR_BUFFER_BIT);
+
+    // Create Context 2
+    EGLConfig config2 = createConfig(dpy, EGL_OPENGL_ES2_BIT, 8, 8, 8, 8, 24, 8, 0);
+    EGLSurface surf2 = pbufferSurface(dpy, config2, 512, 512);
+    EGLContext context2 = createContext(dpy, 2, config2, 2, 0);
+    egl->eglMakeCurrent(dpy, surf2, surf2, context2);
+    gl2->glClear(GL_COLOR_BUFFER_BIT);
+
+    egl->eglMakeCurrent(dpy, surf1, surf1, context1);
+    gl1->glClear(GL_COLOR_BUFFER_BIT);
+
+    destroyContext(dpy, context1);
+    destroySurface(dpy, surf1);
+    destroyContext(dpy, context2);
+    destroySurface(dpy, surf2);
+    destroyDisplay(dpy);
+}
+
 class SnapshotContext : public GLESv2Decoder{
 public:
     SnapshotContext() : mSnap(LazyLoadedGLESv2Dispatch::get()) {

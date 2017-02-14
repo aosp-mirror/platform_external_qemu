@@ -36,10 +36,13 @@ EGLDisplay getDisplay() {
 }
 
 EGLConfig createConfig(EGLDisplay dpy, EGLint r, EGLint g, EGLint b, EGLint a, EGLint d, EGLint s, EGLint ms) {
+    return createConfig (dpy, EGL_OPENGL_ES2_BIT, r, g, b, a, d, s, ms);
+}
+EGLConfig createConfig(EGLDisplay dpy, EGLint gles, EGLint r, EGLint g, EGLint b, EGLint a, EGLint d, EGLint s, EGLint ms) {
     const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
     const EGLint configAttribs[] = {
         EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
-        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+        EGL_RENDERABLE_TYPE, gles,
         EGL_RED_SIZE, r,
         EGL_GREEN_SIZE, g,
         EGL_BLUE_SIZE, b,
@@ -80,8 +83,12 @@ EGLSurface pbufferSurface(EGLDisplay dpy, ::EGLConfig config, EGLint w, EGLint h
 }
 
 EGLContext createContext(EGLDisplay dpy, ::EGLConfig config, EGLint maj, EGLint min) {
+    return createContext(dpy, 2, config, maj, min);
+}
+
+EGLContext createContext(EGLDisplay dpy, GLint version, ::EGLConfig config, EGLint maj, EGLint min) {
     const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
-    const EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
+    const EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, version, EGL_NONE };
     EGLContext cxt = egl->eglCreateContext(dpy, config, EGL_NO_CONTEXT, contextAttribs);
     EXPECT_TRUE(cxt != EGL_NO_CONTEXT);
     return cxt;
