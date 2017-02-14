@@ -289,6 +289,30 @@
     },
     {
       "key": {
+        "uuid": "e33cc049_bb0a9df9",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-14T23:21:44Z",
+      "side": 1,
+      "message": "this pipe service is for communicating car data (e.g., gear, speed, hardware key event), which is very compact and only for manual testing through UI.  Performance and latency are not big issues here. Can I keep the qemud implementation? Or do you prefer me to switch to raw pipe?",
+      "parentUuid": "2fb65dd5_da7dfb18",
+      "range": {
+        "startLine": 77,
+        "startChar": 7,
+        "endLine": 77,
+        "endChar": 18
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e9fb4a39_bb99700f",
         "filename": "android/android-emu/android/car.cpp",
         "patchSetId": 3
