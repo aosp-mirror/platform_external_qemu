@@ -88,7 +88,7 @@ public:
 
         // Make sure we wait for the pending task to complete if it was running.
         while (mInTimerCallback) {
-            mInTimerCondition.wait(&lock);
+            mInTimerCondition.wait(&mLock);
         }
     }
 
