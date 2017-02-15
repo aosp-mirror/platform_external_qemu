@@ -53,7 +53,12 @@ namespace {
 struct InstanceData {
     android::metrics::AdbLivenessChecker::Ptr livenessChecker;
 
-    void reset() { livenessChecker.reset(); }
+    void reset() {
+        if (livenessChecker) {
+            livenessChecker->stop();
+            livenessChecker.reset();
+        }
+    }
 };
 
 static android::base::LazyInstance<InstanceData> sGlobalData = {};
