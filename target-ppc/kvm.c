@@ -79,6 +79,7 @@ static int cap_ppc_watchdog;
 static int cap_papr;
 static int cap_htab_fd;
 static int cap_fixup_hcalls;
+static int cap_htm;             /* Hardware transactional memory support */
 
 static uint32_t debug_inst_opcode;
 
@@ -121,6 +122,7 @@ int kvm_arch_init(MachineState *ms, KVMState *s)
      * only activated after this by kvmppc_set_papr() */
     cap_htab_fd = kvm_check_extension(s, KVM_CAP_PPC_HTAB_FD);
     cap_fixup_hcalls = kvm_check_extension(s, KVM_CAP_PPC_FIXUP_HCALL);
+    cap_htm = kvm_vm_check_extension(s, KVM_CAP_PPC_HTM);
 
     if (!cap_interrupt_level) {
         fprintf(stderr, "KVM: Couldn't find level irq capability. Expect the "
@@ -427,6 +429,7 @@ static void kvm_fixup_page_sizes(PowerPCCPU *cpu)
     CPUPPCState *env = &cpu->env;
     long rampagesize;
     int iq, ik, jq, jk;
+    bool has_64k_pages = false;
 
     /* We only handle page sizes for 64-bit server guests for now */
     if (!(env->mmu_model & POWERPC_MMU_64)) {
@@ -470,6 +473,9 @@ static void kvm_fixup_page_sizes(PowerPCCPU *cpu)
                                      ksps->enc[jk].page_shift)) {
                 continue;
             }
+            if (ksps->enc[jk].page_shift == 16) {
+                has_64k_pages = true;
+            }
             qsps->enc[jq].page_shift = ksps->enc[jk].page_shift;
             qsps->enc[jq].pte_enc = ksps->enc[jk].pte_enc;
             if (++jq >= PPC_PAGE_SIZES_MAX_SZ) {
@@ -483,6 +489,9 @@ static void kvm_fixup_page_sizes(PowerPCCPU *cpu)
     env->slb_nr = smmu_info.slb_size;
     if (!(smmu_info.flags & KVM_PPC_1T_SEGMENTS)) {
         env->mmu_model &= ~POWERPC_MMU_1TSEG;
+    }
+    if (!has_64k_pages) {
+        env->mmu_model &= ~POWERPC_MMU_64K;
     }
 }
 #else /* defined (TARGET_PPC64) */
@@ -2337,6 +2346,11 @@ bool kvmppc_has_cap_htab_fd(void)
 bool kvmppc_has_cap_fixup_hcalls(void)
 {
     return cap_fixup_hcalls;
+}
+
+bool kvmppc_has_cap_htm(void)
+{
+    return cap_htm;
 }
 
 static PowerPCCPUClass *ppc_cpu_get_family_class(PowerPCCPUClass *pcc)

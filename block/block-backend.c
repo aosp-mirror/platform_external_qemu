@@ -1296,6 +1296,11 @@ void blk_eject(BlockBackend *blk, bool eject_flag)
     if (bs) {
         bdrv_eject(bs, eject_flag);
     }
+
+    /* Whether or not we ejected on the backend,
+     * the frontend experienced a tray event. */
+    qapi_event_send_device_tray_moved(blk_name(blk),
+                                      eject_flag, &error_abort);
 }
 
 int blk_get_flags(BlockBackend *blk)
@@ -1622,28 +1627,6 @@ int blk_commit_all(void)
         aio_context_release(aio_context);
     }
     return 0;
-}
-
-int blk_flush_all(void)
-{
-    BlockBackend *blk = NULL;
-    int result = 0;
-
-    while ((blk = blk_all_next(blk)) != NULL) {
-        AioContext *aio_context = blk_get_aio_context(blk);
-        int ret;
-
-        aio_context_acquire(aio_context);
-        if (blk_is_inserted(blk)) {
-            ret = blk_flush(blk);
-            if (ret < 0 && !result) {
-                result = ret;
-            }
-        }
-        aio_context_release(aio_context);
-    }
-
-    return result;
 }
 
 
