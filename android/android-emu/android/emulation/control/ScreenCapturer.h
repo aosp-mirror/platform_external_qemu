@@ -39,7 +39,9 @@ public:
         kUnknownError
     };
 
-    using ResultCallback = std::function<void(Result result)>;
+    using ResultCallback =
+            std::function<void(Result result,
+                               android::base::StringView filePath)>;
 
     explicit ScreenCapturer(AdbInterface* adb) : mAdb(adb) {}
     ~ScreenCapturer();
