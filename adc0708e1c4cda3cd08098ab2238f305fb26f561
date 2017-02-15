@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a951925a_299cc4ff",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 937,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-15T18:50:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d06c3f38_c9ea2aef",
+      "range": {
+        "startLine": 937,
+        "startChar": 0,
+        "endLine": 937,
+        "endChar": 39
+      },
+      "revId": "adc0708e1c4cda3cd08098ab2238f305fb26f561",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "50f47e4c_199ab865",
         "filename": "android/android-emu/android/skin/qt/extended-pages/settings-page.cpp",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-13T18:01:47Z",
       "side": 1,
       "message": "nit: do we need it?",
+      "range": {
+        "startLine": 151,
+        "startChar": 0,
+        "endLine": 152,
+        "endChar": 14
+      },
+      "revId": "adc0708e1c4cda3cd08098ab2238f305fb26f561",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed794b42_a54b788d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-15T18:50:45Z",
+      "side": 1,
+      "message": "Probably not, but I added some warning prints in there in case something actually worked out to unknown values.",
+      "parentUuid": "50f47e4c_199ab865",
       "range": {
         "startLine": 151,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "02c21e06_43350d4b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/settings-page.ui",
+        "patchSetId": 4
+      },
+      "lineNbr": 525,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-15T18:50:45Z",
+      "side": 1,
+      "message": "The width/height  here (280, 31) is from just directly typing in the width/height of other combo boxes. I think it should work for high-DPI displays as well, but the scale could be 2x off or something.\n\nIt also looks like the width/height settings are (correctly) in \"device independent pixels\", since when I run the emulator on OS X, all combo boxes seem to consist of like 4x the pixels vs pixels of 280x31.",
+      "parentUuid": "f1c741bf_b16f5c8b",
+      "range": {
+        "startLine": 523,
+        "startChar": 0,
+        "endLine": 525,
+        "endChar": 24
+      },
+      "revId": "adc0708e1c4cda3cd08098ab2238f305fb26f561",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a9ae58ef_4f59dca9",
         "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
         "patchSetId": 4
@@ -82,6 +154,30 @@
       "writtenOn": "2017-02-13T18:01:47Z",
       "side": 1,
       "message": "nit: do we have an enum for this? IMO it\u0027s better to always use enums when the set of options is limited",
+      "range": {
+        "startLine": 246,
+        "startChar": 7,
+        "endLine": 246,
+        "endChar": 10
+      },
+      "revId": "adc0708e1c4cda3cd08098ab2238f305fb26f561",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7928b5a2_c7ec1619",
+        "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-15T18:50:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a9ae58ef_4f59dca9",
       "range": {
         "startLine": 246,
         "startChar": 7,
