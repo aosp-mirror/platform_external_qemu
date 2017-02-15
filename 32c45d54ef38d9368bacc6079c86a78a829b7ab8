@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b78fa919_290a6469",
+        "filename": "android/android-emu/android/avd/util.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-15T19:26:17Z",
+      "side": 1,
+      "message": "no, ARRAY_SIZE() doesn\u0027t work for pointers, it need to be used for the array type. Please use it at the calling side, and pass the size into the function.\nIn C arrays decay to pointers when passed into functions, and even if you write the parameter type as foo[], it\u0027s still passed as foo*",
+      "range": {
+        "startLine": 236,
+        "startChar": 16,
+        "endLine": 236,
+        "endChar": 26
+      },
+      "revId": "32c45d54ef38d9368bacc6079c86a78a829b7ab8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
