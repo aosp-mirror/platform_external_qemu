@@ -22,6 +22,30 @@
       "revId": "32c45d54ef38d9368bacc6079c86a78a829b7ab8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db5db57c_3e07e607",
+        "filename": "android/android-emu/android/avd/util.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T21:51:07Z",
+      "side": 1,
+      "message": "Done. Thanks!",
+      "parentUuid": "b78fa919_290a6469",
+      "range": {
+        "startLine": 236,
+        "startChar": 16,
+        "endLine": 236,
+        "endChar": 26
+      },
+      "revId": "32c45d54ef38d9368bacc6079c86a78a829b7ab8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
