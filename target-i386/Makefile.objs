@@ -10,3 +10,14 @@ obj-y += hax-all.o hax-slot.o
 obj-$(CONFIG_WIN32) += hax-windows.o
 obj-$(CONFIG_DARWIN) += hax-darwin.o
 endif
+ifeq (y,$(CONFIG_HVF))
+obj-y += hvf-all.o
+obj-y += hvf-utils/x86.o
+obj-y += hvf-utils/x86_cpuid.o
+obj-y += hvf-utils/x86_decode.o
+obj-y += hvf-utils/x86_descr.o
+obj-y += hvf-utils/x86_emu.o
+obj-y += hvf-utils/x86_flags.o
+obj-y += hvf-utils/x86_mmu.o
+obj-y += hvf-utils/x86hvf.o
+endif
