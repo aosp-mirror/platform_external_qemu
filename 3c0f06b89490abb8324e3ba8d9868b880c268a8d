@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "990b9fce_5b74908d",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglContext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-15T01:18:27Z",
+      "side": 1,
+      "message": "please list the captured variables explicitly",
+      "range": {
+        "startLine": 57,
+        "startChar": 41,
+        "endLine": 57,
+        "endChar": 42
+      },
+      "revId": "3c0f06b89490abb8324e3ba8d9868b880c268a8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e1c612dc_0abba88e",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-15T01:18:27Z",
+      "side": 1,
+      "message": "this is brutal :)",
+      "range": {
+        "startLine": 130,
+        "startChar": 19,
+        "endLine": 130,
+        "endChar": 28
+      },
+      "revId": "3c0f06b89490abb8324e3ba8d9868b880c268a8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "befb9b19_430c59ef",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-15T01:18:27Z",
+      "side": 1,
+      "message": "nit: when returning shared_ptr\u003c\u003e, prefer use {} instead of nullptr. nullptr forces the shared_ptr\u003c\u003e to allocate a reference count, while {} would just zero-initialize it",
+      "range": {
+        "startLine": 475,
+        "startChar": 19,
+        "endLine": 475,
+        "endChar": 26
+      },
+      "revId": "3c0f06b89490abb8324e3ba8d9868b880c268a8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9257cee_992eec4c",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-15T01:18:27Z",
+      "side": 1,
+      "message": "remove?",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 65,
+        "endChar": 47
+      },
+      "revId": "3c0f06b89490abb8324e3ba8d9868b880c268a8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "90efdd71_01ac5e06",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/objectNameManager.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-15T01:18:27Z",
+      "side": 1,
+      "message": "\u003d 0 to force overriding it in derived classes?",
+      "range": {
+        "startLine": 43,
+        "startChar": 61,
+        "endLine": 43,
+        "endChar": 63
+      },
+      "revId": "3c0f06b89490abb8324e3ba8d9868b880c268a8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
