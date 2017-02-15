@@ -121,6 +121,30 @@
     },
     {
       "key": {
+        "uuid": "60c25ce5_2b42f69e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-15T23:25:46Z",
+      "side": 1,
+      "message": "That\u0027s an option. Another option would be to create a common top-level qemu-hvf.h header, and based on CONFIG_HVF either make it include all HVF headers or include nothing.\nThen use only that header in the rest of QEMU code.",
+      "parentUuid": "1b971a7e_82dbf77b",
+      "range": {
+        "startLine": 9,
+        "startChar": 26,
+        "endLine": 9,
+        "endChar": 50
+      },
+      "revId": "a7e34a3551329bb8b574f26c4fa097d004d9ac11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3c17852_2b102353",
         "filename": "configure",
         "patchSetId": 1
