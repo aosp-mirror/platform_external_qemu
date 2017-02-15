@@ -97,12 +97,16 @@ bool AdbLivenessChecker::adbCheckRequest() {
 
     // NOTE: Capture a shared_ptr to |this| to guarantee object lifetime while
     // the parallel task is running.
-    auto shared_this = shared_from_this();
-    auto taskFunction = [shared_this](CheckResult* outResult) {
-        shared_this->runCheckBlocking(outResult);
+    auto weakSelf = std::weak_ptr<AdbLivenessChecker>(shared_from_this());
+    auto taskFunction = [weakSelf](CheckResult* outResult) {
+        if (const auto self = weakSelf.lock()) {
+            self->runCheckBlocking(outResult);
+        }
     };
-    auto taskDoneFunction = [shared_this](const CheckResult& result) {
-        shared_this->reportCheckResult(result);
+    auto taskDoneFunction = [weakSelf](const CheckResult& result) {
+        if (const auto self = weakSelf.lock()) {
+            self->reportCheckResult(result);
+        }
     };
     if (!android::base::runParallelTask<CheckResult>(mLooper, taskFunction,
                                                      taskDoneFunction)) {
