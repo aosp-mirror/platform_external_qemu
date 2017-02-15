@@ -81,7 +81,7 @@ void AdbLivenessChecker::start() {
 }
 
 void AdbLivenessChecker::stop() {
-    mRecurrentTask.stop();
+    mRecurrentTask.stopAndWait();
 }
 
 bool AdbLivenessChecker::adbCheckRequest() {
