@@ -210,6 +210,30 @@
       "revId": "3c0f06b89490abb8324e3ba8d9868b880c268a8d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "065c9aca_312de159",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/objectNameManager.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-15T01:31:04Z",
+      "side": 1,
+      "message": "It can be both \u003d0 and implemented :)\nDerived class would need to call it explicitly if it needs the base behavior, and it would still have to override it.",
+      "parentUuid": "ea46e2b9_821f7a02",
+      "range": {
+        "startLine": 43,
+        "startChar": 61,
+        "endLine": 43,
+        "endChar": 63
+      },
+      "revId": "3c0f06b89490abb8324e3ba8d9868b880c268a8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
