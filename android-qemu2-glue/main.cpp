@@ -15,6 +15,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/StringFormat.h"
 #include "android/base/system/System.h"
+#include "android/base/threads/Thread.h"
 
 #include "android/android.h"
 #include "android/avd/hw-config.h"
@@ -913,32 +914,28 @@ extern "C" int main(int argc, char **argv) {
         args[n++] = kTarget.qemuExtraArgs[idx];
     }
 
-    static UiEmuAgent uiEmuAgent;
-
     // Setup GPU acceleration. This needs to go along with user interface
     // initialization, because we need the selected backend from Qt settings.
+    const UiEmuAgent uiEmuAgent = {
+            gQAndroidBatteryAgent,
+            gQAndroidCellularAgent,
+            gQAndroidClipboardAgent,
+            gQAndroidEmulatorWindowAgent,
+            gQAndroidFingerAgent,
+            gQAndroidLocationAgent,
+            gQAndroidSensorsAgent,
+            gQAndroidTelephonyAgent,
+            gQAndroidUserEventAgent,
+            nullptr  // For now there's no uses of SettingsAgent, so we
+                     // don't set it.
+    };
+
     {
         qemu2_android_serialline_init();
 
-        uiEmuAgent.battery = gQAndroidBatteryAgent;
-        uiEmuAgent.cellular = gQAndroidCellularAgent;
-        uiEmuAgent.clipboard = gQAndroidClipboardAgent;
-        uiEmuAgent.finger = gQAndroidFingerAgent;
-        uiEmuAgent.location = gQAndroidLocationAgent;
-        uiEmuAgent.sensors = gQAndroidSensorsAgent;
-        uiEmuAgent.telephony = gQAndroidTelephonyAgent;
-        uiEmuAgent.userEvents = gQAndroidUserEventAgent;
-        uiEmuAgent.window = gQAndroidEmulatorWindowAgent;
-
-        // for now there's no uses of SettingsAgent, so we don't set it
-        uiEmuAgent.settings = NULL;
-
         /* Setup SDL UI just before calling the code */
-#ifndef _WIN32
-        sigset_t set;
-        sigfillset(&set);
-        pthread_sigmask(SIG_SETMASK, &set, NULL);
-#endif  // !_WIN32
+        android::base::Thread::maskAllSignals();
+
         skin_winsys_init_args(argc, argv);
         if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
             return 1;
