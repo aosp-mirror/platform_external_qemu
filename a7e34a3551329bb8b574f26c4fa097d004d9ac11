@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f1a614e8_1dd2900b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-02-15T22:33:49Z",
+      "side": 1,
+      "message": "We are including hvf.h, so we get linker errors:\n\nUndefined symbols for architecture x86_64:\n  \"_hvf_cpu_synchronize_post_init\", referenced from:\n      _cpu_synchronize_all_post_init in cpus.o\n  \"_hvf_cpu_synchronize_post_reset\", referenced from:\n      _cpu_synchronize_all_post_reset in cpus.o\n  \"_hvf_cpu_synchronize_state\", referenced from:\n      _cpu_synchronize_all_states in cpus.o\n  \"_hvf_enabled\", referenced from:\n      _cpu_synchronize_all_states in cpus.o\n      _cpu_synchronize_all_post_reset in cpus.o\n      _cpu_synchronize_all_post_init in cpus.o\n      _qemu_cpu_kick_thread in cpus.o\n      _qemu_mutex_lock_iothread in cpus.o\n      _qemu_init_vcpu in cpus.o\n      _qemu_hvf_cpu_thread_fn in cpus.o\n      ...\n  \"_hvf_init_vcpu\", referenced from:\n      _qemu_hvf_cpu_thread_fn in cpus.o\n  \"_hvf_vcpu_destroy\", referenced from:\n      _qemu_hvf_cpu_thread_fn in cpus.o\n  \"_hvf_vcpu_exec\", referenced from:\n      _qemu_hvf_cpu_thread_fn in cpus.o\nld: symbol(s) not found for architecture x86_64\n\nbecause:\n\n- We don\u0027t include the .c files defining the things in hvf.h\n- We don\u0027t link against hypervisor framework.\n\nShould these be guarded by CONFIG_XXX?",
+      "parentUuid": "07c3f50f_cc3399a8",
+      "range": {
+        "startLine": 9,
+        "startChar": 26,
+        "endLine": 9,
+        "endChar": 50
+      },
+      "revId": "a7e34a3551329bb8b574f26c4fa097d004d9ac11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3c17852_2b102353",
         "filename": "configure",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-15T20:30:11Z",
       "side": 1,
       "message": "should configure detect if it\u0027s available before adding it? AFAIK it requires OSX 10.10+ SDK",
+      "range": {
+        "startLine": 621,
+        "startChar": 22,
+        "endLine": 621,
+        "endChar": 43
+      },
+      "revId": "a7e34a3551329bb8b574f26c4fa097d004d9ac11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4536426_dcf2e8ab",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 621,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-02-15T22:33:49Z",
+      "side": 1,
+      "message": "Let me update the check and set hvf accordingly.",
+      "parentUuid": "e3c17852_2b102353",
       "range": {
         "startLine": 621,
         "startChar": 22,
