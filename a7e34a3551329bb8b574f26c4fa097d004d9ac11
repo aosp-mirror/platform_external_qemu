@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "1b971a7e_82dbf77b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-15T23:23:26Z",
+      "side": 1,
+      "message": "Hmm, many of the target-i386/hvf-all and target-i386/hvf-utils include Hypervisor/***.h and would fail to compile. OTOH, HAXM can compile successfully it seems even if CONFIG_HAX isn\u0027t defined.\n\nGiven that there are not that many entry points to Hypervisor.framework, how about if the HVF entry points are stubbed out if CONFIG_HVF is not set?",
+      "parentUuid": "5264f038_2b5249e8",
+      "range": {
+        "startLine": 9,
+        "startChar": 26,
+        "endLine": 9,
+        "endChar": 50
+      },
+      "revId": "a7e34a3551329bb8b574f26c4fa097d004d9ac11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3c17852_2b102353",
         "filename": "configure",
         "patchSetId": 1
