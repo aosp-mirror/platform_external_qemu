@@ -39,10 +39,6 @@ namespace {
 
 class HostCrashReporter : public CrashReporter {
 public:
-    HostCrashReporter() : CrashReporter(), mHandler() {}
-
-    virtual ~HostCrashReporter() {}
-
     bool attachCrashHandler(const CrashSystem::CrashPipe& crashpipe) override {
         if (mHandler) {
             return false;
@@ -113,14 +109,19 @@ bool HostCrashReporter::exceptionFilterCallback(
     return CrashReporter::get()->onCrash();
 }
 
+static uint64_t toKB(uint64_t value) {
+    return value / 1024;
+}
+
 static void attachMemoryInfo()
 {
     PROCESS_MEMORY_COUNTERS_EX memCounters = {sizeof(memCounters)};
+    char buf[1024] = {};
+    char* bufptr = buf;
     if (::GetProcessMemoryInfo(::GetCurrentProcess(),
                 reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&memCounters),
                 sizeof(memCounters))) {
-        char buf[1024] = {};
-        snprintf(buf, sizeof(buf) - 1,
+        bufptr += snprintf(bufptr, (int)sizeof(buf) - (bufptr - buf) - 1,
             "PageFaultCount: %" PRIu64 "\n"
             "PeakWorkingSetSize: %" PRIu64 " kB\n"
             "WorkingSetSize: %" PRIu64 " kB\n"
@@ -131,17 +132,45 @@ static void attachMemoryInfo()
             "PagefileUsage (commit): %" PRIu64 " kB\n"
             "PeakPagefileUsage: %" PRIu64 " kB\n",
             uint64_t(memCounters.PageFaultCount),
-            uint64_t(memCounters.PeakWorkingSetSize / 1024),
-            uint64_t(memCounters.WorkingSetSize / 1024),
-            uint64_t(memCounters.QuotaPeakPagedPoolUsage / 1024),
-            uint64_t(memCounters.QuotaPagedPoolUsage / 1024),
-            uint64_t(memCounters.QuotaPeakNonPagedPoolUsage / 1024),
-            uint64_t(memCounters.QuotaNonPagedPoolUsage / 1024),
-            uint64_t((memCounters.PagefileUsage
+            toKB(memCounters.PeakWorkingSetSize),
+            toKB(memCounters.WorkingSetSize),
+            toKB(memCounters.QuotaPeakPagedPoolUsage),
+            toKB(memCounters.QuotaPagedPoolUsage),
+            toKB(memCounters.QuotaPeakNonPagedPoolUsage),
+            toKB(memCounters.QuotaNonPagedPoolUsage),
+            toKB(memCounters.PagefileUsage
                 ? memCounters.PagefileUsage
-                : memCounters.PrivateUsage) / 1024),
-            uint64_t(memCounters.PeakPagefileUsage / 1024));
+                : memCounters.PrivateUsage),
+            toKB(memCounters.PeakPagefileUsage));
+    } else {
+        bufptr += snprintf(bufptr, (int)sizeof(buf) - (bufptr - buf) - 1,
+                           "\nGetProcessMemoryInfo() failed with error %u\n",
+                           (unsigned)::GetLastError());
+    }
 
+    MEMORYSTATUSEX mem = {sizeof(mem)};
+    if (::GlobalMemoryStatusEx(&mem)) {
+        bufptr += snprintf(bufptr, (int)sizeof(buf) - (bufptr - buf) - 1,
+          "\n"
+          "TotalPhys: %" PRIu64 " kB\n"
+          "AvailPhys: %" PRIu64 " kB\n"
+          "TotalPageFile: %" PRIu64 " kB\n"
+          "AvailPageFile: %" PRIu64 " kB\n"
+          "TotalVirtual: %" PRIu64 " kB\n"
+          "AvailVirtual: %" PRIu64 " kB\n",
+          toKB(mem.ullTotalPhys),
+          toKB(mem.ullAvailPhys),
+          toKB(mem.ullTotalPageFile),
+          toKB(mem.ullAvailPageFile),
+          toKB(mem.ullTotalVirtual),
+          toKB(mem.ullAvailVirtual));
+    } else {
+        bufptr += snprintf(bufptr, (int)sizeof(buf) - (bufptr - buf) - 1,
+                           "\nGlobalMemoryStatusEx() failed with error %u\n",
+                           (unsigned)::GetLastError());
+    }
+
+    if (bufptr > buf) {
         CrashReporter::get()->attachData(
                     CrashReporter::kProcessMemoryInfoFileName, buf);
     }
