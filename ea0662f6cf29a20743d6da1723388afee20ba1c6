@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "dbac5bce_e6a23a6b",
+        "filename": "android/android-emu/android/avd/util.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a9490f0_ffe00237",
+      "range": {
+        "startLine": 215,
+        "startChar": 59,
+        "endLine": 215,
+        "endChar": 60
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "38bc26f6_402d1bbe",
         "filename": "android/android-emu/android/avd/util.c",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-14T22:37:48Z",
       "side": 1,
       "message": "ditto",
+      "range": {
+        "startLine": 221,
+        "startChar": 60,
+        "endLine": 221,
+        "endChar": 61
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad212fc4_b56a49c5",
+        "filename": "android/android-emu/android/avd/util.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "38bc26f6_402d1bbe",
       "range": {
         "startLine": 221,
         "startChar": 60,
@@ -65,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "3fc7f73b_7a58faef",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "55808885_19643e45",
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea76e108_d36bc628",
         "filename": "android/android-emu/android/car.cpp",
         "patchSetId": 3
@@ -82,6 +148,24 @@
     },
     {
       "key": {
+        "uuid": "cac6a305_f8192e03",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea76e108_d36bc628",
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b8ad9e1a_bb9a68a2",
         "filename": "android/android-emu/android/car.cpp",
         "patchSetId": 3
@@ -93,6 +177,30 @@
       "writtenOn": "2017-02-14T22:37:48Z",
       "side": 1,
       "message": "nit: \"typedef struct\" is purely a C construct and isn\u0027t needed in C++",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 14
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcbe6d28_d479b3ca",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b8ad9e1a_bb9a68a2",
       "range": {
         "startLine": 32,
         "startChar": 0,
@@ -128,6 +236,30 @@
     },
     {
       "key": {
+        "uuid": "72a92c5f_304ee5ff",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "this will only be set once during init(). The qemud callbacks passes this back. But I don\u0027t want to pass it to the UI component for sending data to guest.",
+      "parentUuid": "349b03c3_1738893e",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 26
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cd2c9333_6aae6b23",
         "filename": "android/android-emu/android/car.cpp",
         "patchSetId": 3
@@ -139,6 +271,30 @@
       "writtenOn": "2017-02-14T22:37:48Z",
       "side": 1,
       "message": "ditto",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 45
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5249dab4_ec18a598",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "Done. I merged the callback to the HwCar",
+      "parentUuid": "cd2c9333_6aae6b23",
       "range": {
         "startLine": 39,
         "startChar": 0,
@@ -174,6 +330,30 @@
     },
     {
       "key": {
+        "uuid": "72432c6c_609f65b7",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2ed4b896_f09aead6",
+      "range": {
+        "startLine": 46,
+        "startChar": 80,
+        "endLine": 46,
+        "endChar": 89
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b68a3376_56feffed",
         "filename": "android/android-emu/android/car.cpp",
         "patchSetId": 3
@@ -185,6 +365,30 @@
       "writtenOn": "2017-02-14T22:37:48Z",
       "side": 1,
       "message": "nit: use __func__ and nullptr instead of __FUNCTION__ and NULL",
+      "range": {
+        "startLine": 47,
+        "startChar": 27,
+        "endLine": 47,
+        "endChar": 39
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8a39cf9_9eb36029",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b68a3376_56feffed",
       "range": {
         "startLine": 47,
         "startChar": 27,
@@ -220,6 +424,30 @@
     },
     {
       "key": {
+        "uuid": "5f2b01d8_d1ef7f1d",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "Added sanity check here and in set_call_back.",
+      "parentUuid": "a0a9da95_a47486d4",
+      "range": {
+        "startLine": 48,
+        "startChar": 7,
+        "endLine": 48,
+        "endChar": 28
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "253b2ba6_86491725",
         "filename": "android/android-emu/android/car.cpp",
         "patchSetId": 3
@@ -243,6 +471,30 @@
     },
     {
       "key": {
+        "uuid": "928b6b69_38a5907c",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "253b2ba6_86491725",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 1
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "68f824be_fc96b94a",
         "filename": "android/android-emu/android/car.cpp",
         "patchSetId": 3
@@ -254,6 +506,30 @@
       "writtenOn": "2017-02-14T22:37:48Z",
       "side": 1,
       "message": "nit: these comments aren\u0027t really adding anything, function name is self-explaining",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 35
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48e85f49_c6eb9c91",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "68f824be_fc96b94a",
       "range": {
         "startLine": 57,
         "startChar": 0,
@@ -360,6 +636,30 @@
     },
     {
       "key": {
+        "uuid": "01b65e44_41054af2",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e9fb4a39_bb99700f",
+      "range": {
+        "startLine": 107,
+        "startChar": 4,
+        "endLine": 111,
+        "endChar": 42
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c6f4b351_a5f0e3d0",
         "filename": "android/android-emu/android/car.h",
         "patchSetId": 3
@@ -371,6 +671,24 @@
       "writtenOn": "2017-02-14T22:37:48Z",
       "side": 1,
       "message": "please add the copyright header",
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb164e86_c78e677f",
+        "filename": "android/android-emu/android/car.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c6f4b351_a5f0e3d0",
       "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -394,6 +712,24 @@
     },
     {
       "key": {
+        "uuid": "380ecefb_3a665dfe",
+        "filename": "android/android-emu/android/emulation/control/car_data_agent.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "201deafe_ba92a392",
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "782d85d4_62646b43",
         "filename": "android/android-emu/android/emulation/proto/VehicleHalProto.proto",
         "patchSetId": 3
@@ -405,6 +741,30 @@
       "writtenOn": "2017-02-14T22:37:48Z",
       "side": 1,
       "message": "Do we have this file somewhere else in the Android source tree? Can we have a script to copy it from there to be able to sync quickly, or a readme file explaining where is the second copy?",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 2
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "10560cf5_08da526b",
+        "filename": "android/android-emu/android/emulation/proto/VehicleHalProto.proto",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "Added a readme file for the original copy path.",
+      "parentUuid": "782d85d4_62646b43",
       "range": {
         "startLine": 1,
         "startChar": 0,
@@ -440,6 +800,30 @@
     },
     {
       "key": {
+        "uuid": "75b8bcf4_9375dfc9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a97924d4_478e4130",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 25
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8303aa03_12eac02e",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.cpp",
         "patchSetId": 3
@@ -451,6 +835,30 @@
       "writtenOn": "2017-02-14T22:37:48Z",
       "side": 1,
       "message": "why is it on heap? Looks like it\u0027s only needed in this function.\nIf you need it to be dynamic, consider using std::unique_ptr\u003c\u003e.",
+      "range": {
+        "startLine": 50,
+        "startChar": 35,
+        "endLine": 50,
+        "endChar": 38
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2c88b1a0_83f2acf2",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8303aa03_12eac02e",
       "range": {
         "startLine": 50,
         "startChar": 35,
@@ -486,6 +894,30 @@
     },
     {
       "key": {
+        "uuid": "5ac63f56_cef87442",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "946f5ae2_c9d1dd56",
+      "range": {
+        "startLine": 22,
+        "startChar": 32,
+        "endLine": 22,
+        "endChar": 34
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6ed146e2_78aba916",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.h",
         "patchSetId": 3
@@ -509,6 +941,30 @@
     },
     {
       "key": {
+        "uuid": "c858b807_fb2c40b2",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6ed146e2_78aba916",
+      "range": {
+        "startLine": 34,
+        "startChar": 38,
+        "endLine": 34,
+        "endChar": 39
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5aa92362_ec961835",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.h",
         "patchSetId": 3
@@ -520,6 +976,30 @@
       "writtenOn": "2017-02-14T22:37:48Z",
       "side": 1,
       "message": "const ref?",
+      "range": {
+        "startLine": 35,
+        "startChar": 28,
+        "endLine": 35,
+        "endChar": 35
+      },
+      "revId": "ea0662f6cf29a20743d6da1723388afee20ba1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bcc2f68d_b2c1d560",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-15T18:54:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5aa92362_ec961835",
       "range": {
         "startLine": 35,
         "startChar": 28,
