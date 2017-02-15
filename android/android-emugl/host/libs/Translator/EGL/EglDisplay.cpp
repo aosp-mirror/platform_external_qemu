@@ -127,7 +127,7 @@ public:
         EGLint aConformant = a->getConfAttrib(EGL_CONFORMANT);
         EGLint bConformant = b->getConfAttrib(EGL_CONFORMANT);
 
-        if (aConformant != bConformant) {
+        if (aConformant != bConformant && (aConformant == 0 || bConformant == 0)) {
             return aConformant != 0;
         }
 
