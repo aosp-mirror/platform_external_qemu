@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "88e8483d_24e596ef",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-15T23:25:18Z",
+      "side": 1,
+      "message": "Never mind, I see the scheme in Makefile.objs now---if that works I\u0027d say go for that since it follows the CONFIG_HAX pattern.",
+      "parentUuid": "1b971a7e_82dbf77b",
+      "range": {
+        "startLine": 9,
+        "startChar": 26,
+        "endLine": 9,
+        "endChar": 50
+      },
+      "revId": "a7e34a3551329bb8b574f26c4fa097d004d9ac11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3c17852_2b102353",
         "filename": "configure",
         "patchSetId": 1
