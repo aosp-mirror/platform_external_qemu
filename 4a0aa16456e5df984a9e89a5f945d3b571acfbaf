@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c3dc27c7_572d2d38",
+        "filename": "android/android-emu/android/opengl/emugl_config.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-15T22:38:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "af0d59b5_4ac81b63",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 32
+      },
+      "revId": "4a0aa16456e5df984a9e89a5f945d3b571acfbaf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1fe7b1a4_2647c51f",
         "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-15T20:38:37Z",
       "side": 1,
       "message": "nit: in C++ it should work without \u0027enum\u0027 prefix",
+      "range": {
+        "startLine": 239,
+        "startChar": 7,
+        "endLine": 239,
+        "endChar": 11
+      },
+      "revId": "4a0aa16456e5df984a9e89a5f945d3b571acfbaf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b36e9aec_37242a90",
+        "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-15T22:38:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1fe7b1a4_2647c51f",
       "range": {
         "startLine": 239,
         "startChar": 7,
