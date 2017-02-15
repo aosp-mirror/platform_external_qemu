@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2b4480b1_c0ba3321",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglContext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-15T01:29:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "990b9fce_5b74908d",
+      "range": {
+        "startLine": 57,
+        "startChar": 41,
+        "endLine": 57,
+        "endChar": 42
+      },
+      "revId": "3c0f06b89490abb8324e3ba8d9868b880c268a8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e1c612dc_0abba88e",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
         "patchSetId": 1
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "fcc6cf03_6525e322",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-15T01:29:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "befb9b19_430c59ef",
+      "range": {
+        "startLine": 475,
+        "startChar": 19,
+        "endLine": 475,
+        "endChar": 26
+      },
+      "revId": "3c0f06b89490abb8324e3ba8d9868b880c268a8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d9257cee_992eec4c",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
         "patchSetId": 1
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "ab59e832_9f5b7af5",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-15T01:29:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d9257cee_992eec4c",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 65,
+        "endChar": 47
+      },
+      "revId": "3c0f06b89490abb8324e3ba8d9868b880c268a8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "90efdd71_01ac5e06",
         "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/objectNameManager.h",
         "patchSetId": 1
@@ -105,6 +177,30 @@
       "writtenOn": "2017-02-15T01:18:27Z",
       "side": 1,
       "message": "\u003d 0 to force overriding it in derived classes?",
+      "range": {
+        "startLine": 43,
+        "startChar": 61,
+        "endLine": 43,
+        "endChar": 63
+      },
+      "revId": "3c0f06b89490abb8324e3ba8d9868b880c268a8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea46e2b9_821f7a02",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/objectNameManager.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-15T01:29:46Z",
+      "side": 1,
+      "message": "We might need to put something into this function. We can decide later if we need \u003d0.",
+      "parentUuid": "90efdd71_01ac5e06",
       "range": {
         "startLine": 43,
         "startChar": 61,
