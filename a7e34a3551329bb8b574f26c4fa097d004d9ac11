@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "5264f038_2b5249e8",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-15T23:20:06Z",
+      "side": 1,
+      "message": "Yes, unless CONFIG_HVF isn\u0027t defined we shouldn\u0027t do anything related: no includes, no extra linker flags, no .c files compiled. Could you please make the #include conditional instead of forcing HVF everywhere?",
+      "parentUuid": "f1a614e8_1dd2900b",
+      "range": {
+        "startLine": 9,
+        "startChar": 26,
+        "endLine": 9,
+        "endChar": 50
+      },
+      "revId": "a7e34a3551329bb8b574f26c4fa097d004d9ac11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3c17852_2b102353",
         "filename": "configure",
         "patchSetId": 1
