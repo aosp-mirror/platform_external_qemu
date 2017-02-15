@@ -831,6 +831,10 @@ extern "C" int main(int argc, char **argv) {
     args[n++] = "-object";
     args[n++] = "iothread,id=disk-iothread";
 
+    // Don't create the default CD drive and floppy disk devices - Android
+    // won't appreciate it.
+    args[n++] = "-nodefaults";
+
     /*
      * add partition parameters with the sequence
      * pre-defined in targetInfo.imagePartitionTypes
