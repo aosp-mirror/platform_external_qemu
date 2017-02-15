@@ -125,6 +125,13 @@ void RendererImpl::stop() {
     for (const auto& c : channels) {
         c->stopFromHost();
     }
+    // Each render channel is referenced in the corresponing pipe object, so
+    // even if we clear the |channels| vector they could still be alive
+    // for a while. This means we need to make sure to wait for render thread
+    // exit explicitly.
+    for (const auto& c : channels) {
+        c->renderThread()->wait();
+    }
 
     // We're stopping the renderer, so there's no need to clean up resources
     // of some pending processes: we'll destroy everything soon.
