@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "77b2b095_d46c9b98",
+        "filename": "android/android-emu/android/skin/winsys.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-15T22:38:06Z",
+      "side": 1,
+      "message": "The qt-settings.h can\u0027t be included here, since qt-settings.h has Qt includes and winsys.h is used places that don\u0027t pull in Qt as part of the build.",
+      "parentUuid": "bfa19951_53426544",
+      "range": {
+        "startLine": 52,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 31
+      },
+      "revId": "4a0aa16456e5df984a9e89a5f945d3b571acfbaf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "41a83ea8_8b071746",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
         "patchSetId": 7
@@ -82,6 +106,30 @@
       "writtenOn": "2017-02-15T20:38:37Z",
       "side": 1,
       "message": "is this a part of the same CL?",
+      "range": {
+        "startLine": 609,
+        "startChar": 0,
+        "endLine": 620,
+        "endChar": 5
+      },
+      "revId": "4a0aa16456e5df984a9e89a5f945d3b571acfbaf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8205a097_f1da541a",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 620,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-15T22:38:06Z",
+      "side": 1,
+      "message": "Oops, removed.",
+      "parentUuid": "41a83ea8_8b071746",
       "range": {
         "startLine": 609,
         "startChar": 0,
