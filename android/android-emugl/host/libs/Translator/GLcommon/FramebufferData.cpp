@@ -24,6 +24,8 @@ RenderbufferData::RenderbufferData(android::base::Stream* stream) :
     attachedFB = stream->getBe32();
     attachedPoint = stream->getBe32();
     // TODO: load eglImageGlobalTexObject
+    width = stream->getBe32();
+    height = stream->getBe32();
     internalformat = stream->getBe32();
 }
 
@@ -36,10 +38,27 @@ void RenderbufferData::onSave(android::base::Stream* stream) const {
         fprintf(stderr, "RenderbufferData::onSave: warning:"
                 " EglImage snapshot unimplemented. \n");
     }
+    stream->putBe32(width);
+    stream->putBe32(height);
     stream->putBe32(internalformat);
 }
 
-FramebufferData::FramebufferData(GLuint name) : m_fbName(name) {}
+void RenderbufferData::restore(ObjectLocalName localName,
+           getGlobalName_t getGlobalName) {
+    int globalName = getGlobalName(NamedObjectType::FRAMEBUFFER,
+            localName);
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+    dispatcher.glBindRenderbuffer(GL_RENDERBUFFER, globalName);
+    dispatcher.glRenderbufferStorageEXT(GL_RENDERBUFFER, internalformat, width,
+            height);
+    printf("%s:%s:%d GL error %d\n", __FILE__, __FUNCTION__, __LINE__, dispatcher.glGetError());
+}
+
+static GLenum s_index2Attachment(int idx);
+
+FramebufferData::FramebufferData(GLuint name) : ObjectData(RENDERBUFFER_DATA)
+        , m_fbName(name) {
+}
 
 FramebufferData::FramebufferData(android::base::Stream* stream) :
     ObjectData(stream) {
@@ -89,10 +108,56 @@ void FramebufferData::postLoad(getObjDataPtr_t getObjDataPtr) {
         if (NamedObjectType::NULLTYPE != attachPoint.objType) {
             attachPoint.obj = getObjDataPtr(attachPoint.objType,
                     attachPoint.name);
+            if (!attachPoint.obj) {
+                fprintf(stderr, "FramebufferData::postLoad: warning: "
+                        "bound render buffer restore failed.\n");
+                attachPoint.obj.reset(new RenderbufferData);
+            }
         } else {
             attachPoint.obj = {};
         }
     }
+}
+
+void FramebufferData::restore(ObjectLocalName localName,
+           getGlobalName_t getGlobalName) {
+    if (!hasBeenBoundAtLeastOnce()) return;
+    int globalName = getGlobalName(NamedObjectType::FRAMEBUFFER,
+            localName);
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+    dispatcher.glBindFramebuffer(GL_FRAMEBUFFER, globalName);
+    for (int i = 0; i < MAX_ATTACH_POINTS; i++) {
+        auto& attachPoint = m_attachPoints[i];
+        if (!attachPoint.name) continue; // bound to nothing
+        if (attachPoint.obj) { // binding a render buffer
+            assert(attachPoint.obj->getDataType()
+                    == RENDERBUFFER_DATA);
+            RenderbufferData *rbData = (RenderbufferData*)attachPoint.obj.get();
+            if (rbData->eglImageGlobalTexObject) {
+                fprintf(stderr, "FramebufferData::restore: warning: "
+                        "binding egl image unsupported\n");
+            } else {
+                assert(attachPoint.target == GL_RENDERBUFFER);
+                dispatcher.glFramebufferRenderbufferEXT(
+                        GL_FRAMEBUFFER,
+                        s_index2Attachment(i),
+                        attachPoint.target,
+                        getGlobalName(NamedObjectType::RENDERBUFFER,
+                                attachPoint.name)
+                        );
+            }
+        } else { // binding a texture
+            int texGlobalName = getGlobalName(NamedObjectType::TEXTURE,
+                    attachPoint.name);
+            assert(texGlobalName);
+            dispatcher.glFramebufferTexture2DEXT(GL_FRAMEBUFFER,
+                    s_index2Attachment(i),
+                    attachPoint.target,
+                    texGlobalName,
+                    0);
+        }
+    }
+    printf("%s:%s:%d GL error %d\n", __FILE__, __FUNCTION__, __LINE__, dispatcher.glGetError());
 }
 
 void FramebufferData::setAttachment(GLenum attachment,
@@ -177,6 +242,49 @@ int FramebufferData::attachmentPointIndex(GLenum attachment)
         return 17;
     default:
         return MAX_ATTACH_POINTS;
+    }
+}
+
+static GLenum s_index2Attachment(int idx) {
+    switch (idx) {
+    case 0:
+        return GL_COLOR_ATTACHMENT0_OES;
+    case 1:
+        return GL_DEPTH_ATTACHMENT_OES;
+    case 2:
+        return GL_STENCIL_ATTACHMENT_OES;
+    case 3:
+        return GL_COLOR_ATTACHMENT1;
+    case 4:
+        return GL_COLOR_ATTACHMENT2;
+    case 5:
+        return GL_COLOR_ATTACHMENT3;
+    case 6:
+        return GL_COLOR_ATTACHMENT4;
+    case 7:
+        return GL_COLOR_ATTACHMENT5;
+    case 8:
+        return GL_COLOR_ATTACHMENT6;
+    case 9:
+        return GL_COLOR_ATTACHMENT7;
+    case 10:
+        return GL_COLOR_ATTACHMENT8;
+    case 11:
+        return GL_COLOR_ATTACHMENT9;
+    case 12:
+        return GL_COLOR_ATTACHMENT10;
+    case 13:
+        return GL_COLOR_ATTACHMENT11;
+    case 14:
+        return GL_COLOR_ATTACHMENT12;
+    case 15:
+        return GL_COLOR_ATTACHMENT13;
+    case 16:
+        return GL_COLOR_ATTACHMENT14;
+    case 17:
+        return GL_COLOR_ATTACHMENT15;
+    default:
+        return (GLenum)0;
     }
 }
 

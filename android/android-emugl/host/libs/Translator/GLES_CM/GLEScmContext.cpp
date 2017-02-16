@@ -23,6 +23,7 @@
 #include <GLES/glext.h>
 
 void GLEScmContext::init(GlLibrary* glLib) {
+    printf("%s\n", __FUNCTION__);
     emugl::Mutex::AutoLock mutex(s_lock);
     if(!m_initialized) {
         s_glDispatch.dispatchFuncs(GLES_1_1, glLib);

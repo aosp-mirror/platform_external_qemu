@@ -82,6 +82,19 @@ void GLESv2Context::init(GlLibrary* glLib) {
     m_initialized = true;
 }
 
+void GLESv2Context::restore() {
+    // TODO: load glLib
+    emugl::Mutex::AutoLock mutex(s_lock);
+    if (m_needRestoreFromSnapshot) {
+        printf("%s:%d GL error %d\n", __FUNCTION__, __LINE__, dispatcher().glGetError());
+        postLoadRestoreShareGroup();
+        printf("%s:%d GL error %d\n", __FUNCTION__, __LINE__, dispatcher().glGetError());
+        postLoadRestoreCtx();
+        printf("%s:%d GL error %d\n", __FUNCTION__, __LINE__, dispatcher().glGetError());
+        m_needRestoreFromSnapshot = false;
+    }    
+}
+
 GLESv2Context::GLESv2Context(int maj, int min, android::base::Stream* stream,
         GlLibrary* glLib) : GLEScontext(stream, glLib) {
     if (stream) {
@@ -110,6 +123,11 @@ void GLESv2Context::onSave(android::base::Stream* stream) const {
     stream->putBe32(m_att0ArrayLength);
     stream->write(m_att0Array, sizeof(GLfloat) * 4 * m_att0ArrayLength);
     stream->putByte(m_att0NeedsDisable);
+}
+
+void GLESv2Context::postLoadRestoreCtx() {
+    GLEScontext::postLoadRestoreCtx();
+    // TODO: implement this
 }
 
 ObjectDataPtr GLESv2Context::loadObject(NamedObjectType type,
@@ -260,6 +278,18 @@ bool GLESv2Context::needConvert(GLESConversionArrays& cArrs,GLint first,GLsizei 
         }
     }
     return true;
+}
+
+void GLESv2Context::setUseProgram(GLuint program,
+        const ObjectDataPtr& programData) {
+    m_useProgram = program;
+    assert(!programData ||
+            programData->getDataType() == ObjectDataType::PROGRAM_DATA);
+    m_useProgramData = programData;
+}
+
+ProgramData* GLESv2Context::getUseProgram() {
+    return (ProgramData*)m_useProgramData.get();
 }
 
 void GLESv2Context::initExtensionString() {

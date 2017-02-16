@@ -40,6 +40,10 @@ NamedObjectType ObjectDataType2NamedObjectType(ObjectDataType objDataType) {
             return NamedObjectType::TEXTURE;
         case BUFFER_DATA:
             return NamedObjectType::VERTEXBUFFER;
+        case RENDERBUFFER_DATA:
+            return NamedObjectType::RENDERBUFFER;
+        case FRAMEBUFFER_DATA:
+            return NamedObjectType::FRAMEBUFFER;
         default:
             return NamedObjectType::NULLTYPE;
     }
@@ -68,6 +72,9 @@ struct ShareGroup::ObjectDataAutoLock {
     ShareGroup* self;
 };
 
+#define MAG_BEG 101
+#define MAG_END 102
+
 ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
                        uint64_t sharedGroupID,
                        android::base::Stream* stream,
@@ -87,6 +94,7 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
             // The current implementation does not handle this case correctly.
             // b/35390502
             for (size_t objType = 0; objType < mapSize; objType++) {
+                assert(MAG_BEG == stream->getBe32());
                 size_t typeSize = stream->getBe32();
                 for (size_t obj = 0; obj < typeSize; obj++) {
                     ObjectLocalName localName = stream->getBe32();
@@ -95,6 +103,7 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
                     setObjectDataLocked((NamedObjectType)objType, localName,
                             std::move(data));
                 }
+                assert(MAG_END == stream->getBe32());
             }
             // set the references between GL objects
             ObjectDataMap *map = (ObjectDataMap *)m_objectsData;
@@ -111,7 +120,7 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
             // loading from a snapshot. We initialize them the first time
             // when eglMakeCurrent.
             // Set the flag for lazy initialization
-            m_needLoadInit = true;
+            m_needLoadRestore = true;
         }
     }
 }
@@ -126,11 +135,13 @@ void ShareGroup::onSave(android::base::Stream* stream) {
         stream->putByte(true);
         stream->putBe32(map->size());
         for (const auto& objType : *map) {
+            stream->putBe32(MAG_BEG);
             stream->putBe32(objType.size());
             for (const auto& obj : objType) {
                 stream->putBe32(obj.first);
                 obj.second->onSave(stream);
             }
+            stream->putBe32(MAG_END);
         }
     } else {
         stream->putByte(false);
@@ -142,11 +153,61 @@ void ShareGroup::postSave(android::base::Stream* stream) {
     m_isSaved = false;
 }
 
-void ShareGroup::postLoadInit() {
-    if (m_needLoadInit) {
-        // TODO: get global names
-        // TODO: load all obj data into hardware GPU
-        m_needLoadInit = false;
+void ShareGroup::postLoadRestore() {
+    if (m_needLoadRestore) {
+        GLenum err = 0;
+        GLDispatch& dispatcher = GLEScontext::dispatcher();
+        ObjectDataMap *map = (ObjectDataMap *)m_objectsData;
+        static_assert(ObjectDataType::SHADER_DATA
+                < ObjectDataType::PROGRAM_DATA,
+                "Shader data must be loaded before program");
+        for (int i = 0; i <  ObjectDataType::MAX_TYPE_DATA; i++) {
+            NamedObjectType objType = ObjectDataType2NamedObjectType(
+                    ObjectDataType(i));
+            for (const auto& obj : (*map)[i]) {
+                _DEBUG_ERR
+                // get global names
+                switch (ObjectDataType(i)) {
+                    case SHADER_DATA:
+                    {
+                        ShaderProgramType shaderProgramType;
+                        switch (obj.second->getType()) {
+                        case GL_VERTEX_SHADER:
+                            shaderProgramType = ShaderProgramType::VERTEX_SHADER;
+                            break;
+                        case GL_FRAGMENT_SHADER:
+                            shaderProgramType = ShaderProgramType::FRAGMENT_SHADER;
+                            break;
+                        case GL_COMPUTE_SHADER:
+                            shaderProgramType = ShaderProgramType::COMPUTE_SHADER;
+                            break;
+                        default:
+                            shaderProgramType = ShaderProgramType::VERTEX_SHADER;
+                            break;
+                        }
+                        genName(shaderProgramType, obj.first, false);
+                        break;
+                    }
+                    case PROGRAM_DATA:
+                        genName(ShaderProgramType::PROGRAM, obj.first, false);
+                        break;
+                    default:
+                        genName(objType, obj.first, false);
+                        break;
+                }
+                err = dispatcher.glGetError();
+                if (err) {
+                    printf("%s:%s:%d type %d GL error %d\n", __FILE__,
+                            __FUNCTION__, __LINE__, i,
+                        err);
+                }
+                obj.second->restore(obj.first, [this](NamedObjectType p_type,
+                            ObjectLocalName p_localName) {
+                                return getGlobalName(p_type, p_localName);
+                        });
+            }
+        }
+        m_needLoadRestore = false;
     }
 }
 

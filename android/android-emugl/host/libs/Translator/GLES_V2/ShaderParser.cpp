@@ -58,6 +58,17 @@ void ShaderParser::onSave(android::base::Stream* stream) const {
     stream->putByte(m_valid);
 }
 
+void ShaderParser::restore(ObjectLocalName localName,
+           getGlobalName_t getGlobalName) {
+    int globalName = getGlobalName(NamedObjectType::SHADER_OR_PROGRAM,
+            localName);
+    if (!m_parsedSrc.empty()) {
+        GLEScontext::dispatcher().glShaderSource(globalName, 1, parsedLines(),
+                                        NULL);
+        printf("%s:%s:%d GL error %d\n", __FILE__, __FUNCTION__, __LINE__, GLEScontext::dispatcher().glGetError());
+    }
+}
+
 void ShaderParser::convertESSLToGLSL(int esslVersion) {
     std::string infolog;
     std::string parsedSource;

@@ -341,10 +341,14 @@ void GLEScontext::init(GlLibrary* glLib) {
         m_indexedAtomicCounterBuffers.resize(getCaps()->maxAtomicCounterBufferBindings);
         m_indexedShaderStorageBuffers.resize(getCaps()->maxShaderStorageBufferBindings);
     }
+}
+
+void GLEScontext::restore() {
     if (m_needRestoreFromSnapshot) {
-        // TODO: restore host GL states
+        postLoadRestoreShareGroup();
+        postLoadRestoreCtx();
         m_needRestoreFromSnapshot = false;
-    }
+    }    
 }
 
 GLenum GLEScontext::getGLerror() {
@@ -458,6 +462,35 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         stream->putBe32(m_drawFramebuffer);
         stream->putBe32(m_readFramebuffer);
     }
+}
+
+void GLEScontext::postLoadRestoreShareGroup() {
+    printf("restoring shared groups\n");
+    m_shareGroup->postLoadRestore();
+}
+
+void GLEScontext::postLoadRestoreCtx() {
+    printf("restoring contexts\n");
+    // buffer bindings
+    auto bindBuffer = [this](GLenum target, GLuint buffer) {
+        dispatcher().glBindBuffer(target,
+                m_shareGroup->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer));
+    };
+    bindBuffer(GL_ARRAY_BUFFER, m_arrayBuffer);
+    bindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_currVaoState.iboId());
+    // TODO: GLES3: bind other buffers and other vao
+
+    // framebuffer binding
+    auto bindFrameBuffer = [this](GLenum target, GLuint buffer) {
+        dispatcher().glBindFramebufferEXT(target,
+                m_shareGroup->getGlobalName(NamedObjectType::FRAMEBUFFER, buffer));
+    };
+    bindFrameBuffer(GL_READ_FRAMEBUFFER, m_readFramebuffer);
+    bindFrameBuffer(GL_DRAW_FRAMEBUFFER, m_drawFramebuffer);
+
+    dispatcher().glActiveTexture(m_activeTexture);
+
+    // TODO: glEnable list
 }
 
 ObjectDataPtr GLEScontext::loadObject(NamedObjectType type,

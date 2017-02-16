@@ -18,3 +18,60 @@
 bool isPowerOf2(int num) {
     return (num & (num -1)) == 0;
 }
+
+uint32_t texAlign(uint32_t v, uint32_t align) {
+
+    uint32_t rem = v % align;
+    return rem ? (v + (align - rem)) : v;
+
+}
+
+uint32_t texPixelSize(GLenum internalformat,
+                              GLenum type) {
+    uint32_t reps = 3;
+    switch (internalformat) {
+    case GL_ALPHA:
+        reps = 1;
+        break;
+    case GL_RGB:
+        if (type == GL_UNSIGNED_SHORT_5_6_5)
+            reps = 1;
+        else
+            reps = 3;
+        break;
+    case GL_RGBA:
+        reps = 4;
+        break;
+    default:
+        break;
+    }
+
+    uint32_t eltSize = 1;
+
+    switch (type) {
+    case GL_UNSIGNED_SHORT_5_6_5:
+        eltSize = 2;
+        break;
+    case GL_UNSIGNED_BYTE:
+        eltSize = 1;
+        break;
+    default:
+        break;
+    }
+
+    uint32_t pixelSize = reps * eltSize;
+
+    return pixelSize;
+}
+
+uint32_t texImageSize(GLenum internalformat,
+                              GLenum type,
+                              int unpackAlignment,
+                              GLsizei width, GLsizei height) {
+
+    uint32_t alignedWidth = texAlign(width, unpackAlignment);
+    uint32_t pixelSize = texPixelSize(internalformat, type);
+    uint32_t totalSize = pixelSize * alignedWidth * height;
+
+    return totalSize;
+}

@@ -17,6 +17,7 @@
 #define GL_UTILS_H
 
 #include <assert.h>
+#include <GLES2/gl2.h>
 #include <inttypes.h>
 #include <stdio.h>
 
@@ -29,6 +30,10 @@ typedef enum {
 } GLESVersion;
 
 bool isPowerOf2(int num);
+uint32_t texAlign(uint32_t v, uint32_t align);
+uint32_t texPixelSize(GLenum internalformat, GLenum type);
+uint32_t texImageSize(GLenum internalformat, GLenum type,
+        int unpackAlignment, GLsizei width, GLsizei height);
 
 // <EGL/egl.h> defines many types as 'void*' while they're really
 // implemented as unsigned integers. These convenience template functions
