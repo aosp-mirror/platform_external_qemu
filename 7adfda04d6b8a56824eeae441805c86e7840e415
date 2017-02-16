@@ -201,6 +201,30 @@
       "revId": "7adfda04d6b8a56824eeae441805c86e7840e415",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2850c929_39b0c8e3",
+        "filename": "android/android-emu/android/skin/window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1948,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-16T00:07:54Z",
+      "side": 1,
+      "message": "Well, as of now Qt UI is forwarding all mouse move events to the skin event loop, and only there we translate those into kEventMouseMotion to handle. I was asking if it\u0027s possible to handle the dragging directly in Qt when it gets the MouseMove event, instead of forwarding it here, handling and then notifying Qt to change window position.\nIt just feels like a more straightforward way, and more performant one for sure",
+      "parentUuid": "0f42f677_957fed62",
+      "range": {
+        "startLine": 1939,
+        "startChar": 0,
+        "endLine": 1948,
+        "endChar": 9
+      },
+      "revId": "7adfda04d6b8a56824eeae441805c86e7840e415",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
