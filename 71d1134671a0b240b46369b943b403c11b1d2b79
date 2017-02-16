@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed223076_60290426",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-16T21:33:05Z",
+      "side": 1,
+      "message": "nit: what about keeping it by value here, and checking if there\u0027s a callback set using the |CarDataCallback::callback| function pointer? One less allocation is always good IMO",
+      "range": {
+        "startLine": 44,
+        "startChar": 19,
+        "endLine": 44,
+        "endChar": 20
+      },
+      "revId": "71d1134671a0b240b46369b943b403c11b1d2b79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b3e9d48_08cc3e92",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-16T21:33:05Z",
+      "side": 1,
+      "message": "|callback-\u003ecallback| looks strange to me, what about renaming CarDataCallback::callback -\u003e func ?",
+      "range": {
+        "startLine": 45,
+        "startChar": 12,
+        "endLine": 45,
+        "endChar": 20
+      },
+      "revId": "71d1134671a0b240b46369b943b403c11b1d2b79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
