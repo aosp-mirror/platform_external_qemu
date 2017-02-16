@@ -78,6 +78,11 @@ void ProgramData::onSave(android::base::Stream* stream) const {
     stream->putByte(DeleteStatus);
 }
 
+void ProgramData::restore(ObjectLocalName localName,
+           getGlobalName_t getGlobalName) {
+    
+}
+
 void ProgramData::setErrInfoLog() {
     size_t bytes = validationInfoLog.length() + 1;
     infoLog.reset(new GLchar[bytes]);

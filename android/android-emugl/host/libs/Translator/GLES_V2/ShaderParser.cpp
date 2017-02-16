@@ -58,6 +58,11 @@ void ShaderParser::onSave(android::base::Stream* stream) const {
     stream->putByte(m_valid);
 }
 
+void ShaderParser::restore(ObjectLocalName localName,
+           getGlobalName_t getGlobalName) {
+    
+}
+
 void ShaderParser::convertESSLToGLSL(int esslVersion) {
     std::string infolog;
     std::string parsedSource;

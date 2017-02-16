@@ -16,6 +16,9 @@
 
 #include "GLcommon/TextureData.h"
 
+#include "android/base/files/StreamSerializing.h"
+#include "GLcommon/GLEScontext.h"
+
 TextureData::TextureData(android::base::Stream* stream) : ObjectData(stream) {
     // The current TextureData structure is wrong when dealing with mipmaps.
     width = stream->getBe32();
@@ -23,6 +26,9 @@ TextureData::TextureData(android::base::Stream* stream) : ObjectData(stream) {
     depth = stream->getBe32();
     border = stream->getBe32();
     internalFormat = stream->getBe32();
+    format = stream->getBe32();
+    type = stream->getBe32();
+    loadBuffer(stream, &data);
     sourceEGLImage = stream->getBe32();
     hasStorage = stream->getByte();
     wasBound = stream->getByte();
@@ -41,6 +47,10 @@ void TextureData::onSave(android::base::Stream* stream) const {
     stream->putBe32(depth);
     stream->putBe32(border);
     stream->putBe32(internalFormat);
+    stream->putBe32(format);
+    stream->putBe32(type);
+    // consider getting data with glGetTexImage
+    saveBuffer(stream, data);
     stream->putBe32(sourceEGLImage);
     if (sourceEGLImage) {
         fprintf(stderr, "TextureData::onSave: warning: snapshotting EglImage,"
@@ -53,4 +63,17 @@ void TextureData::onSave(android::base::Stream* stream) const {
     stream->putBe32(compressedFormat);
     stream->write(crop_rect, sizeof(crop_rect));
     stream->putBe32(target);
+}
+
+void TextureData::restore(ObjectLocalName localName,
+            getGlobalName_t getGlobalName) {
+    int globalName = getGlobalName(NamedObjectType::TEXTURE, localName);
+    GLEScontext::dispatcher().glBindTexture(target, globalName);
+    // TODO: snapshot mipmaps
+    // TODO: snapshot glTexParameter stuff
+    // TODO: handle glCopyTexImage2D
+    GLEScontext::dispatcher().glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    const void* pixels = data.empty() ? nullptr : data.data();
+    GLEScontext::dispatcher().glTexImage2D(target, 0, internalFormat, width,
+            height, border, format, type, pixels);
 }

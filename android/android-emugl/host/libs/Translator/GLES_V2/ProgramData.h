@@ -28,6 +28,9 @@ public:
     ProgramData();
     ProgramData(android::base::Stream* stream);
     virtual void onSave(android::base::Stream* stream) const override;
+    // restore() in ProgramData must be executed after shaders
+    virtual void restore(ObjectLocalName localName,
+           getGlobalName_t getGlobalName) override;
 
     GLuint getAttachedVertexShader() const;
     GLuint getAttachedFragmentShader() const;

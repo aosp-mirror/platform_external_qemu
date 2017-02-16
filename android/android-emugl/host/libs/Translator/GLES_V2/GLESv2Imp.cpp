@@ -53,7 +53,7 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(void);
 static GLEScontext* createGLESxContext(int maj, int min, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
-
+//static void postLoadRestoreContext(GLEScontext* ctx);
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -75,6 +75,7 @@ static GLESiface  s_glesIface = {
     .fenceSync         = (FUNCPTR_FENCE_SYNC)glFenceSync,
     .clientWaitSync    = (FUNCPTR_CLIENT_WAIT_SYNC)glClientWaitSync,
     .deleteSync        = (FUNCPTR_DELETE_SYNC)glDeleteSync,
+    //.postLoadRestoreContext = postLoadRestoreContext,
 };
 
 #include <GLcommon/GLESmacros.h>
@@ -136,6 +137,10 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
 
     return ret;
 }
+
+//static void postLoadRestoreContext(GLEScontext* ctx) {
+    // TODO
+//}
 
 GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
 
@@ -613,7 +618,9 @@ GL_APICALL void  GL_APIENTRY glCompressedTexSubImage2D(GLenum target, GLint leve
     ctx->dispatcher().glCompressedTexSubImage2D(target,level,xoffset,yoffset,width,height,format,imageSize,data);
 }
 
-void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border){
+void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
+        GLsizei width, GLsizei height, GLint border, GLenum* format,
+        GLenum* type){
     GET_CTX();
 
     if (ctx->shareGroup().get()) {
@@ -624,11 +631,13 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat, GLsize
         }
 
         if (texData && level == 0) {
+            texData->target = target;
+            texData->internalFormat = internalformat;
             texData->width = width;
             texData->height = height;
             texData->border = border;
-            texData->internalFormat = internalformat;
-            texData->target = target;
+            if (format) texData->format = *format;
+            if (type) texData->type = *type;
 
             if (texData->sourceEGLImage != 0) {
                 //
@@ -679,7 +688,8 @@ GL_APICALL void  GL_APIENTRY glCopyTexImage2D(GLenum target, GLint level, GLenum
                     GLESv2Validate::textureTargetEx(ctx, target))), GL_INVALID_ENUM);
     SET_ERROR_IF((GLESv2Validate::textureIsCubeMap(target) && width != height), GL_INVALID_VALUE);
     SET_ERROR_IF(border != 0,GL_INVALID_VALUE);
-    s_glInitTexImage2D(target,level,internalformat,width,height,border);
+    s_glInitTexImage2D(target, level, internalformat, width, height, border,
+            nullptr, nullptr);
     ctx->dispatcher().glCopyTexImage2D(target,level,internalformat,x,y,width,height,border);
 }
 
@@ -2679,8 +2689,6 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
 
     VALIDATE(border != 0,GL_INVALID_VALUE);
 
-    s_glInitTexImage2D(target,level,internalformat,width,height,border);
-
     if (!isCompressedFormat && ctx->getMajorVersion() < 3) {
         if (type==GL_HALF_FLOAT_OES)
             type = GL_HALF_FLOAT_NV;
@@ -2690,9 +2698,41 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
             internalformat = (format == GL_RGBA) ? GL_RGBA32F : GL_RGB32F;
     }
 
+    s_glInitTexImage2D(target, level, internalformat, width, height, border,
+            &format, &type);
+
     *type_out = type;
     *internalformat_out = internalformat;
     *err_out = GL_NO_ERROR;
+}
+
+static void s_updateTexData(GLenum target, GLenum internalFormat, GLint xoffset,
+        GLint yoffset, GLsizei width, GLsizei height, GLenum type,
+        const GLvoid * pixels) {
+    GET_CTX_V2();
+    TextureData *texData = getTextureTargetData(target);
+    uint32_t srcPixelSize = texPixelSize(internalFormat, type);
+    uint32_t dstPixelSize = texPixelSize(texData->internalFormat, texData->type);
+    if (!internalFormat == texData->internalFormat) {
+        printf("warning: texture update internal format does not match\n");
+    }
+
+    uint32_t alignedSrcWidth = texAlign(width, ctx->getUnpackAlignment())
+            * srcPixelSize;
+    uint32_t alignedDstWidth = texAlign(texData->width, 1) * dstPixelSize;
+
+    uint32_t dstSize = texImageSize(texData->internalFormat, texData->type,
+            1, texData->width, texData->height);
+    texData->data.resize(dstSize);
+
+    const unsigned char* src = (const unsigned char*)pixels;
+    unsigned char* dst = texData->data.data();
+    for (int y = 0; y < height; y++) {
+        unsigned char* dstRowStart = dst + (yoffset + y) * alignedDstWidth
+                + xoffset * dstPixelSize;
+        const unsigned char* srcRowStart = src + y * alignedSrcWidth;
+        memcpy(dstRowStart, srcRowStart, alignedSrcWidth);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid* pixels){
@@ -2708,6 +2748,13 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
     err = ctx->dispatcher().glGetError();
     if (err != GL_NO_ERROR) {
         fprintf(stderr, "%s: got err :( 0x%x internal 0x%x format 0x%x type 0x%x\n", __func__, err, internalformat, format, type);
+    } else {
+        if (pixels) {
+            s_updateTexData(target, internalformat, 0, 0, width, height, type,
+                    pixels);
+        } else {
+            getTextureTargetData(target)->data.clear();
+        }
     }
 }
 
@@ -2765,7 +2812,11 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
         type = GL_HALF_FLOAT_NV;
 
     ctx->dispatcher().glTexSubImage2D(target,level,xoffset,yoffset,width,height,format,type,pixels);
-
+    if (level == 0) {
+        // mipmaps not supported for now
+        s_updateTexData(target, format, xoffset, yoffset, width, height, type,
+                pixels);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glUniform1f(GLint location, GLfloat x){

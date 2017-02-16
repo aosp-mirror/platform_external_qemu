@@ -342,7 +342,8 @@ void GLEScontext::init(GlLibrary* glLib) {
         m_indexedShaderStorageBuffers.resize(getCaps()->maxShaderStorageBufferBindings);
     }
     if (m_needRestoreFromSnapshot) {
-        // TODO: restore host GL states
+        postLoadRestoreShareGroup();
+        postLoadRestoreCtx();
         m_needRestoreFromSnapshot = false;
     }
 }
@@ -458,6 +459,14 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         stream->putBe32(m_drawFramebuffer);
         stream->putBe32(m_readFramebuffer);
     }
+}
+
+void GLEScontext::postLoadRestoreCtx() {
+    // TODO
+}
+
+void GLEScontext::postLoadRestoreShareGroup() {
+    m_shareGroup->postLoadRestore();
 }
 
 ObjectDataPtr GLEScontext::loadObject(NamedObjectType type,

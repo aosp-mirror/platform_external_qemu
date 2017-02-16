@@ -46,7 +46,7 @@ static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(int maj, int min, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
-
+static void postLoadRestoreContext(GLEScontext* ctx);
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -68,6 +68,7 @@ static GLESiface  s_glesIface = {
     .fenceSync         = NULL,
     .clientWaitSync    = NULL,
     .deleteSync        = NULL,
+    .postLoadRestoreContext = postLoadRestoreContext,
 };
 
 #include <GLcommon/GLESmacros.h>
@@ -174,6 +175,10 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
     ctx->releaseGlobalLock();
 
     return ret;
+}
+
+static void postLoadRestoreContext(GLEScontext* ctx) {
+    // TODO
 }
 
 GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);

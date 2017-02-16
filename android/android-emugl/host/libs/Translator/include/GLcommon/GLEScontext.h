@@ -283,6 +283,9 @@ public:
     virtual ObjectDataPtr loadObject(NamedObjectType type,
             ObjectLocalName localName, android::base::Stream* stream) const;
 protected:
+    virtual void postLoadRestoreCtx();
+    virtual void postLoadRestoreShareGroup();
+
     static void buildStrings(const char* baseVendor, const char* baseRenderer, const char* baseVersion, const char* version);
 
     void freeVAOState();
