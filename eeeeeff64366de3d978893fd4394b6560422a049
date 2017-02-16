@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8a86897c_52eb612a",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLESpointer.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-16T23:26:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "97baba39_a6aae5a3",
+      "range": {
+        "startLine": 47,
+        "startChar": 13,
+        "endLine": 47,
+        "endChar": 24
+      },
+      "revId": "eeeeeff64366de3d978893fd4394b6560422a049",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a209fe31_a9816dfd",
         "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLSnapshotUtils.h",
         "patchSetId": 9
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-16T22:26:52Z",
       "side": 1,
       "message": "generally, \"utils\" is a bad word to use in file/class names - too generic.\nIMHO GLSnapshotSerializers.h is a better name, preventing people from putting non-serializing functions here.",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 2
+      },
+      "revId": "eeeeeff64366de3d978893fd4394b6560422a049",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "14c4e1e1_69de9698",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLSnapshotUtils.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-16T23:26:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a209fe31_a9816dfd",
       "range": {
         "startLine": 1,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "0c1c44a4_e62b4960",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLSnapshotUtils.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-16T23:26:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f2da690f_4567a27f",
+      "range": {
+        "startLine": 23,
+        "startChar": 9,
+        "endLine": 23,
+        "endChar": 13
+      },
+      "revId": "eeeeeff64366de3d978893fd4394b6560422a049",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c360fab7_b8293e22",
         "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLSnapshotUtils.h",
         "patchSetId": 9
@@ -82,6 +154,30 @@
       "writtenOn": "2017-02-16T22:26:52Z",
       "side": 1,
       "message": "you don\u0027t need to use std::make_pair() here, and, actually, it makes it worse: emplace() accepts arguments to construct the value inplace, and pair\u003c\u003e can be constructed from two values. make_pair() creates a temporary map that\u0027s move-constructed into the container - so that\u0027s an extra operation.",
+      "range": {
+        "startLine": 35,
+        "startChar": 24,
+        "endLine": 35,
+        "endChar": 39
+      },
+      "revId": "eeeeeff64366de3d978893fd4394b6560422a049",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9e2a0971_da0c744a",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLSnapshotUtils.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-16T23:26:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c360fab7_b8293e22",
       "range": {
         "startLine": 35,
         "startChar": 24,
