@@ -1282,7 +1282,14 @@ static void goldfish_pipe_save_v2(QEMUFile* file, PipeDevice* dev) {
         qemu_put_be32(file, pipe->rw_params_max_count);
         qemu_put_byte(file, pipe->closed);
         qemu_put_byte(file, pipe->wanted);
-        service_ops->guest_save(pipe->host_pipe, file);
+        // It's possible to get a 'save' command right after the 'load' one,
+        // when some force-closed pipes are still on the list.
+        if (pipe->host_pipe) {
+            qemu_put_byte(file, 1);
+            service_ops->guest_save(pipe->host_pipe, file);
+        } else {
+            qemu_put_byte(file, 0);
+        }
     }
 
     /* Save wanted pipes list. */
@@ -1482,7 +1489,12 @@ static int goldfish_pipe_load_v2(QEMUFile* file, PipeDevice* dev) {
         pipe->wanted = qemu_get_byte(file);
 
         char force_close = 0;
-        pipe->host_pipe = service_ops->guest_load(file, pipe, &force_close);
+        char has_host_pipe = qemu_get_byte(file);
+        if (has_host_pipe) {
+            pipe->host_pipe = service_ops->guest_load(file, pipe, &force_close);
+        } else {
+            force_close = 1;
+        }
 
         // |pipe| might be NULL in case it couldn't be saved. However,
         // in that case |force_close| will be set by goldfish_pipe_guest_load,
