@@ -111,7 +111,7 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
             // loading from a snapshot. We initialize them the first time
             // when eglMakeCurrent.
             // Set the flag for lazy initialization
-            m_needLoadInit = true;
+            m_needLoadRestore = true;
         }
     }
 }
@@ -142,11 +142,11 @@ void ShareGroup::postSave(android::base::Stream* stream) {
     m_isSaved = false;
 }
 
-void ShareGroup::postLoadInit() {
-    if (m_needLoadInit) {
+void ShareGroup::postLoadRestore() {
+    if (m_needLoadRestore) {
         // TODO: get global names
         // TODO: load all obj data into hardware GPU
-        m_needLoadInit = false;
+        m_needLoadRestore = false;
     }
 }
 
