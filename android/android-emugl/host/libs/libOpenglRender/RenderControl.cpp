@@ -56,6 +56,7 @@ using android::base::Lock;
 #define GRSYNC_DPRINT RENDERCONTROL_DPRINT
 #else
 #define GRSYNC_DPRINT(...)
+//fprintf(stderr, __VA_ARGS__);
 #endif
 
 #if DEBUG_EGL_SYNC

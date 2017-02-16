@@ -1361,6 +1361,7 @@ void FrameBuffer::onSave(Stream* stream) {
     //     m_prevReadSurf
     //     m_prevDrawSurf
     emugl::Mutex::AutoLock mutex(m_lock);
+    bind_locked();
     stream->putBe32(m_x);
     stream->putBe32(m_y);
     stream->putBe32(m_framebufferWidth);
@@ -1404,6 +1405,7 @@ void FrameBuffer::onSave(Stream* stream) {
                     stream);
         }
     }
+    unbind_locked();
 }
 
 bool FrameBuffer::onLoad(Stream* stream) {

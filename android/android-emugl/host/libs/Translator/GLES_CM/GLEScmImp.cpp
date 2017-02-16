@@ -46,7 +46,7 @@ static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(int maj, int min, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
-
+static void postLoadRestoreContext(GLEScontext* ctx);
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -68,6 +68,7 @@ static GLESiface  s_glesIface = {
     .fenceSync         = NULL,
     .clientWaitSync    = NULL,
     .deleteSync        = NULL,
+    .postLoadRestoreContext = postLoadRestoreContext,
 };
 
 #include <GLcommon/GLESmacros.h>
@@ -174,6 +175,10 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
     ctx->releaseGlobalLock();
 
     return ret;
+}
+
+static void postLoadRestoreContext(GLEScontext* ctx) {
+    // TODO
 }
 
 GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
@@ -1291,7 +1296,7 @@ GL_API void GL_APIENTRY  glPixelStorei( GLenum pname, GLint param) {
     GET_CTX()
     SET_ERROR_IF(!(pname == GL_PACK_ALIGNMENT || pname == GL_UNPACK_ALIGNMENT),GL_INVALID_ENUM);
     SET_ERROR_IF(!((param==1)||(param==2)||(param==4)||(param==8)), GL_INVALID_VALUE);
-    ctx->setUnpackAlignment(param);
+    ctx->setPixelStorei(pname, param);
     ctx->dispatcher().glPixelStorei(pname,param);
 }
 
