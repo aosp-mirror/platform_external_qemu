@@ -22,6 +22,7 @@
 #include "android/base/system/System.h"
 #include "android/base/Uuid.h"
 #include "android/cmdline-option.h"
+#include "android/emulation/CpuAccelerator.h"
 #include "android/globals.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
@@ -305,5 +306,16 @@ void android_metrics_report_common_info(bool openglAlive) {
         }
 
         fillAvdMetrics(event);
+
+        event->mutable_emulator_host()->set_os_bit_count(
+                    System::get()->getHostBitness());
+        const AndroidCpuInfoFlags cpuFlags = android::GetCpuInfo().first;
+        event->mutable_emulator_host()->set_virt_support(
+                    cpuFlags & ANDROID_CPU_INFO_VIRT_SUPPORTED);
+        event->mutable_emulator_host()->set_running_in_vm(
+                    cpuFlags & ANDROID_CPU_INFO_VM);
+        event->mutable_emulator_host()->set_cpu_manufacturer(
+                    (cpuFlags & ANDROID_CPU_INFO_INTEL) ? "INTEL" :
+                    (cpuFlags & ANDROID_CPU_INFO_AMD) ? "AMD" : "OTHER");
     });
 }
