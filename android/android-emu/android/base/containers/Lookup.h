@@ -84,13 +84,13 @@ typename T::mapped_type* find(T& map, const typename T::key_type& key) {
 // Version with a default, returns a _copy_ because of the possible fallback
 // to a default - it might be destroyed after the call.
 template <class T,
-          class U,
+          class U = typename T::mapped_type,
           class = enable_if_c<
                   is_any_map<T>::value &&
                   std::is_convertible<U, typename T::mapped_type>::value>>
 typename T::mapped_type findOrDefault(const T& map,
                                       const typename T::key_type& key,
-                                      U&& defaultVal) {
+                                      U&& defaultVal = {}) {
     if (auto valPtr = find(map, key)) {
         return *valPtr;
     }
