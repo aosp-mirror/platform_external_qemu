@@ -15,6 +15,9 @@
 */
 
 #include <GLcommon/GLEScontext.h>
+
+#include "android/base/files/StreamSerializing.h"
+
 #include <GLcommon/GLconversion_macros.h>
 #include <GLcommon/GLSnapshotSerializers.h>
 #include <GLcommon/GLESmacros.h>
@@ -341,10 +344,14 @@ void GLEScontext::init(GlLibrary* glLib) {
         m_indexedAtomicCounterBuffers.resize(getCaps()->maxAtomicCounterBufferBindings);
         m_indexedShaderStorageBuffers.resize(getCaps()->maxShaderStorageBufferBindings);
     }
+}
+
+void GLEScontext::restore() {
     if (m_needRestoreFromSnapshot) {
-        // TODO: restore host GL states
+        postLoadRestoreShareGroup();
+        postLoadRestoreCtx();
         m_needRestoreFromSnapshot = false;
-    }
+    }    
 }
 
 GLenum GLEScontext::getGLerror() {
@@ -357,6 +364,7 @@ void GLEScontext::setGLerror(GLenum err) {
 
 void GLEScontext::setActiveTexture(GLenum tex) {
    m_activeTexture = tex - GL_TEXTURE0;
+   m_maxUsedTexUnit = std::max(m_activeTexture, m_maxUsedTexUnit);
 }
 
 GLEScontext::GLEScontext() {}
@@ -393,9 +401,28 @@ GLEScontext::GLEScontext(android::base::Stream* stream, GlLibrary* glLib) {
             // TODO: handle the case where the loaded size and the supported
             // side does not match
 
-            //int sharegroupId = stream->getBe32(); // TODO: setup share group
+            m_viewportX = static_cast<GLint>(stream->getBe32());
+            m_viewportY = static_cast<GLint>(stream->getBe32());
+            m_viewportWidth = static_cast<GLsizei>(stream->getBe32());
+            m_viewportHeight = static_cast<GLsizei>(stream->getBe32());
+
+            m_scissorX = static_cast<GLint>(stream->getBe32());
+            m_scissorY = static_cast<GLint>(stream->getBe32());
+            m_scissorWidth = static_cast<GLsizei>(stream->getBe32());
+            m_scissorHeight = static_cast<GLsizei>(stream->getBe32());
+
+            loadCollection(stream, &m_glEnableList,
+                    [](android::base::Stream* stream) {
+                        GLenum item = stream->getBe32();
+                        bool enabled = stream->getByte();
+                        return std::make_pair(item, enabled);
+            });
+            // share group is supposed to be loaded by EglContext and reset
+            // when loading EglContext
+            //int sharegroupId = stream->getBe32();
             m_glError = static_cast<GLenum>(stream->getBe32());
             m_maxTexUnits = static_cast<int>(stream->getBe32());
+            m_maxUsedTexUnit = static_cast<int>(stream->getBe32());
             m_texState = new textureUnitState[m_maxTexUnits];
             stream->read(m_texState, sizeof(textureTargetState) * m_maxTexUnits);
             m_arrayBuffer = static_cast<unsigned int>(stream->getBe32());
@@ -448,9 +475,27 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         saveContainer(stream, m_indexedAtomicCounterBuffers);
         saveContainer(stream, m_indexedShaderStorageBuffers);
 
+        stream->putBe32(m_viewportX);
+        stream->putBe32(m_viewportY);
+        stream->putBe32(m_viewportWidth);
+        stream->putBe32(m_viewportHeight);
+
+        stream->putBe32(m_scissorX);
+        stream->putBe32(m_scissorY);
+        stream->putBe32(m_scissorWidth);
+        stream->putBe32(m_scissorHeight);
+
+        saveCollection(stream, m_glEnableList, [](android::base::Stream* stream,
+                const std::pair<const GLenum, bool>& enableItem) {
+                    stream->putBe32(enableItem.first);
+                    stream->putByte(enableItem.second);
+        });
+
+        // share group is supposed to be saved by EglContext
         //stream->putBe32(m_shareGroup->getId());
         stream->putBe32(m_glError);
         stream->putBe32(m_maxTexUnits);
+        stream->putBe32(m_maxUsedTexUnit);
         stream->write(m_texState, sizeof(textureTargetState) * m_maxTexUnits);
         stream->putBe32(m_arrayBuffer);
         stream->putBe32(m_elementBuffer);
@@ -458,6 +503,80 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         stream->putBe32(m_drawFramebuffer);
         stream->putBe32(m_readFramebuffer);
     }
+}
+
+void GLEScontext::postLoadRestoreShareGroup() {
+    printf("restoring shared groups\n");
+    m_shareGroup->postLoadRestore();
+}
+
+void GLEScontext::postLoadRestoreCtx() {
+    printf("restoring contexts\n");
+    GLenum err = 0;
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+
+    // buffer bindings
+    auto bindBuffer = [this](GLenum target, GLuint buffer) {
+        this->dispatcher().glBindBuffer(target,
+                m_shareGroup->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer));
+    };
+    bindBuffer(GL_ARRAY_BUFFER, m_arrayBuffer);
+    bindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_currVaoState.iboId());
+    _DEBUG_ERR
+    // TODO: GLES3: bind other buffers and other vao
+
+    // framebuffer binding
+    auto bindFrameBuffer = [this](GLenum target, GLuint buffer) {
+        this->dispatcher().glBindFramebufferEXT(target,
+                m_shareGroup->getGlobalName(NamedObjectType::FRAMEBUFFER, buffer));
+    };
+    bindFrameBuffer(GL_READ_FRAMEBUFFER, m_readFramebuffer);
+    _DEBUG_ERR
+    bindFrameBuffer(GL_DRAW_FRAMEBUFFER, m_drawFramebuffer);
+    _DEBUG_ERR
+
+    for (unsigned int i = 0; i < m_maxUsedTexUnit; i++) {
+        // snapshot only support GL_TEXTURE_2D for now
+        textureTargetState& texState = m_texState[i][TEXTURE_2D];
+        if (texState.texture || texState.enabled) {
+            this->dispatcher().glActiveTexture(i + GL_TEXTURE0);
+            this->dispatcher().glBindTexture(
+                    GL_TEXTURE_2D,
+                    m_shareGroup->getGlobalName(
+                        NamedObjectType::TEXTURE, texState.texture));
+            // The following is only useful for GLES1
+            if (texState.enabled) {
+                // TODO: change GL_TEXTURE_2D to other stuff when other texture
+                // formats are supported
+                dispatcher.glEnable(GL_TEXTURE_2D);
+            } else {
+                dispatcher.glDisable(GL_TEXTURE_2D);
+            }
+            _DEBUG_ERR
+        }
+    }
+    dispatcher.glActiveTexture(m_activeTexture + GL_TEXTURE0);
+    _DEBUG_ERR
+
+    // viewport & scissor
+    dispatcher.glViewport(m_viewportX, m_viewportY,
+            m_viewportWidth, m_viewportHeight);
+    dispatcher.glScissor(m_scissorX, m_scissorY,
+            m_scissorWidth, m_scissorHeight);
+
+    for (auto item : m_glEnableList) {
+        if (item.second) {
+            dispatcher.glEnable(item.first);
+        } else {
+            dispatcher.glDisable(item.first);
+        }
+    }
+    _DEBUG_ERR
+    // TODO: remove the following debug code
+    dispatcher.glClearColor(1.0, 0.0, 1.0, 0.0);
+    dispatcher.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    dispatcher.glFlush();
+    dispatcher.glClearColor(0.0, 0.0, 0.0, 0.0);
 }
 
 ObjectDataPtr GLEScontext::loadObject(NamedObjectType type,
@@ -952,6 +1071,24 @@ bool GLEScontext::setBufferSubData(GLenum target,GLintptr offset,GLsizeiptr size
             m_shareGroup
                     ->getObjectData(NamedObjectType::VERTEXBUFFER, bufferName));
     return vbo->setSubBuffer(offset,size,data);
+}
+
+void GLEScontext::setViewport(GLint x, GLint y, GLsizei width, GLsizei height) {
+    m_viewportX = x;
+    m_viewportY = y;
+    m_viewportWidth = width;
+    m_viewportHeight = height;
+}
+
+void GLEScontext::setScissor(GLint x, GLint y, GLsizei width, GLsizei height) {
+    m_scissorX = x;
+    m_scissorY = y;
+    m_scissorWidth = width;
+    m_scissorHeight = height;
+}
+
+void GLEScontext::setEnable(GLenum item, bool isEnable) {
+    m_glEnableList[item] = isEnable;
 }
 
 const char * GLEScontext::getExtensionString() {
