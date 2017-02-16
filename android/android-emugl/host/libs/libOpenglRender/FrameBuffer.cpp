@@ -24,12 +24,15 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 
 #include "android/base/containers/Lookup.h"
+#include "android/base/files/StreamSerializing.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "emugl/common/logging.h"
 
 #include <stdio.h>
 #include <string.h>
+
+using android::base::Stream;
 
 namespace {
 
@@ -611,8 +614,7 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
                                           getCaps().has_eglimage_texture_2d,
                                           ret, m_colorBufferHelper));
     if (cb.get() != NULL) {
-        m_colorbuffers[ret].cb = cb;
-        m_colorbuffers[ret].refcount = 1;
+        m_colorbuffers[ret] = { std::move(cb), 1 };
 
         RenderThreadInfo* tInfo = RenderThreadInfo::get();
         uint64_t puid = tInfo->m_puid;
@@ -684,7 +686,7 @@ HandleType FrameBuffer::createWindowSurface(int p_config,
     WindowSurfacePtr win(WindowSurface::create(
             getDisplay(), config->getEglConfig(), p_width, p_height, ret));
     if (win.get() != NULL) {
-        m_windows[ret] = std::pair<WindowSurfacePtr, HandleType>(win, 0);
+        m_windows[ret] = { win, 0 };
         RenderThreadInfo* tinfo = RenderThreadInfo::get();
         tinfo->m_windowSet.insert(ret);
     }
@@ -1062,8 +1064,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
 }
 
 RenderContextPtr FrameBuffer::getContext(HandleType p_context) {
-    return android::base::findOrDefault(m_contexts, p_context,
-                                        RenderContextPtr());
+    return android::base::findOrDefault(m_contexts, p_context);
 }
 
 ColorBufferPtr FrameBuffer::getColorBuffer(HandleType p_colorBuffer) {
@@ -1318,7 +1319,39 @@ bool FrameBuffer::repost() {
     return false;
 }
 
-void FrameBuffer::onSave(android::base::Stream* stream) {
+template <class Collection>
+static void saveProcOwnedCollection(Stream* stream, const Collection& c) {
+    // Exclude empty handle lists from saving as they add no value but only
+    // increase the snapshot size; keep the format compatible with
+    // android::base::saveCollection() though.
+    const int count =
+            std::count_if(c.begin(), c.end(),
+                          [](const typename Collection::value_type& pair) {
+                              return !pair.second.empty();
+                          });
+    stream->putBe32(count);
+    for (const auto& pair : c) {
+        if (pair.second.empty()) {
+            continue;
+        }
+        stream->putBe64(pair.first);
+        saveCollection(stream, pair.second,
+                       [](Stream* s, HandleType h) { s->putBe32(h); });
+    }
+}
+
+template <class Collection>
+static void loadProcOwnedCollection(Stream* stream, Collection* c) {
+    loadCollection(stream, c,
+                   [](Stream* stream) -> typename Collection::value_type {
+        const int processId = stream->getBe64();
+        typename Collection::mapped_type handles;
+        loadCollection(stream, &handles, [](Stream* s) { return s->getBe32(); });
+        return { processId, std::move(handles) };
+    });
+}
+
+void FrameBuffer::onSave(Stream* stream) {
     // Things we do not need to snapshot:
     //     m_eglSurface
     //     m_eglContext
@@ -1343,31 +1376,30 @@ void FrameBuffer::onSave(android::base::Stream* stream) {
     stream->putBe32(m_statsNumFrames);
     stream->putBe64(m_statsStartTime);
 
-    // snapshot contexts
-    stream->putBe32(m_contexts.size());
-    for (const auto& ctx : m_contexts) {
-        ctx.second->onSave(stream);
-    }
-
-    // snapshot color buffers
-    stream->putBe32(m_colorbuffers.size());
-    for (const auto& cb : m_colorbuffers) {
-        cb.second.cb->onSave(stream);
-        stream->putBe32(cb.second.refcount);
-    }
+    saveCollection(stream, m_contexts,
+                   [](Stream* s, const RenderContextMap::value_type& pair) {
+        pair.second->onSave(s);
+    });
+    saveCollection(stream, m_colorbuffers,
+                   [](Stream* s, const ColorBufferMap::value_type& pair) {
+        pair.second.cb->onSave(s);
+        s->putBe32(pair.second.refcount);
+    });
     stream->putBe32(m_lastPostedColorBuffer);
+    saveCollection(stream, m_windows,
+                   [](Stream* s, const WindowSurfaceMap::value_type& pair) {
+        pair.second.first->onSave(s);
+        s->putBe32(pair.second.second); // Color buffer handle.
+    });
 
-    // snapshot window surfaces
-    stream->putBe32(m_windows.size());
-    for (const auto& windows : m_windows) {
-        windows.second.first->onSave(stream);
-        stream->putBe32(windows.second.second);
-    }
+    saveProcOwnedCollection(stream, m_procOwnedColorBuffers);
+    saveProcOwnedCollection(stream, m_procOwnedEGLImages);
+    saveProcOwnedCollection(stream, m_procOwnedRenderContext);
 
     // TODO: snapshot memory management
 }
 
-bool FrameBuffer::onLoad(android::base::Stream* stream) {
+bool FrameBuffer::onLoad(Stream* stream) {
     emugl::Mutex::AutoLock mutex(m_lock);
     // cleanups
     while (m_procOwnedColorBuffers.size()) {
@@ -1396,39 +1428,38 @@ bool FrameBuffer::onLoad(android::base::Stream* stream) {
     m_statsNumFrames = stream->getBe32();
     m_statsStartTime = stream->getBe64();
 
-    // restore contexts
-    assert(m_contexts.size() == 0);
-    size_t numContexts = stream->getBe32();
-    for (size_t i = 0; i < numContexts; i++) {
+    loadCollection(stream, &m_contexts,
+                   [this](Stream* stream) -> RenderContextMap::value_type {
         RenderContextPtr ctx(RenderContext::onLoad(stream, m_eglDisplay));
-        if (ctx) {
-            m_contexts[ctx->getHndl()] = ctx;
-        }
-    }
+        return { ctx ? ctx->getHndl() : 0, ctx };
+    });
+    // Handle 0 is invalid: remove it.
+    // TODO: allow loadCollection() to skip some loaded elements instead of
+    //   manually fixing the things up.
+    m_contexts.erase(0);
 
-    assert(m_colorbuffers.size() == 0);
-    size_t numColorBuffers = stream->getBe32();
-    for (size_t i = 0; i < numColorBuffers; i++) {
+    loadCollection(stream, &m_colorbuffers,
+                   [this](Stream* stream) -> ColorBufferMap::value_type {
         ColorBufferPtr cb(ColorBuffer::onLoad(stream, m_eglDisplay,
                                               getCaps().has_eglimage_texture_2d,
                                               m_colorBufferHelper));
-        assert(cb);
-        HandleType hndl = cb->getHndl();
-        ColorBufferRef cbRef = {cb, stream->getBe32()};
-        m_colorbuffers.emplace(std::make_pair(hndl, std::move(cbRef)));
-    }
+        const HandleType handle = cb->getHndl();
+        const unsigned refCount = stream->getBe32();
+        return { handle, { std::move(cb), refCount } };
+    });
     m_lastPostedColorBuffer = static_cast<HandleType>(stream->getBe32());
 
-    // restore window surfaces
-    assert(m_windows.size() == 0);
-    size_t numWindows = stream->getBe32();
-    for (size_t i = 0; i < numWindows; i ++) {
+    loadCollection(stream, &m_windows,
+                   [this](Stream* stream) -> WindowSurfaceMap::value_type {
         WindowSurfacePtr window(WindowSurface::onLoad(stream, m_eglDisplay));
-        HandleType hndl = window->getHndl();
-        HandleType cbHndl = stream->getBe32();
-        m_windows.emplace(std::make_pair(hndl,
-                            std::make_pair(std::move(window), cbHndl)));
-    }
+        HandleType handle = window->getHndl();
+        HandleType colorBufferHandle = stream->getBe32();
+        return { handle, { std::move(window), colorBufferHandle } };
+    });
+
+    loadProcOwnedCollection(stream, &m_procOwnedColorBuffers);
+    loadProcOwnedCollection(stream, &m_procOwnedEGLImages);
+    loadProcOwnedCollection(stream, &m_procOwnedRenderContext);
 
     return true;
     // TODO: restore memory management
