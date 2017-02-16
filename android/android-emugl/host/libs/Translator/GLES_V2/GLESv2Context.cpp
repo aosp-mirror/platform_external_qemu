@@ -82,6 +82,17 @@ void GLESv2Context::init(GlLibrary* glLib) {
     m_initialized = true;
 }
 
+void GLESv2Context::restore() {
+    // TODO: make sure glLib is loaded
+    // TODO: do we need the lock?
+    //emugl::Mutex::AutoLock mutex(s_lock);
+    if (m_needRestoreFromSnapshot) {
+        postLoadRestoreShareGroup();
+        postLoadRestoreCtx();
+        m_needRestoreFromSnapshot = false;
+    }    
+}
+
 GLESv2Context::GLESv2Context(int maj, int min, android::base::Stream* stream,
         GlLibrary* glLib) : GLEScontext(stream, glLib) {
     if (stream) {
@@ -92,6 +103,7 @@ GLESv2Context::GLESv2Context(int maj, int min, android::base::Stream* stream,
         m_att0ArrayLength = stream->getBe32();
         stream->read(m_att0Array, sizeof(GLfloat) * 4 * m_att0ArrayLength);
         m_att0NeedsDisable = stream->getByte();
+        m_useProgram = stream->getBe32();
     } else {
         m_glesMajorVersion = maj;
         m_glesMinorVersion = min;
@@ -110,6 +122,20 @@ void GLESv2Context::onSave(android::base::Stream* stream) const {
     stream->putBe32(m_att0ArrayLength);
     stream->write(m_att0Array, sizeof(GLfloat) * 4 * m_att0ArrayLength);
     stream->putByte(m_att0NeedsDisable);
+    stream->putBe32(m_useProgram);
+}
+
+void GLESv2Context::postLoadRestoreCtx() {
+    GLEScontext::postLoadRestoreCtx();
+    GLenum err = 0;
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+    _DEBUG_ERR
+    m_useProgramData = shareGroup()->getObjectDataPtr(
+            NamedObjectType::SHADER_OR_PROGRAM, m_useProgram);
+    const GLuint globalProgramName = shareGroup()->getGlobalName(
+            NamedObjectType::SHADER_OR_PROGRAM, m_useProgram);
+    dispatcher.glUseProgram(globalProgramName);
+    _DEBUG_ERR
 }
 
 ObjectDataPtr GLESv2Context::loadObject(NamedObjectType type,
@@ -260,6 +286,18 @@ bool GLESv2Context::needConvert(GLESConversionArrays& cArrs,GLint first,GLsizei 
         }
     }
     return true;
+}
+
+void GLESv2Context::setUseProgram(GLuint program,
+        const ObjectDataPtr& programData) {
+    m_useProgram = program;
+    assert(!programData ||
+            programData->getDataType() == ObjectDataType::PROGRAM_DATA);
+    m_useProgramData = programData;
+}
+
+ProgramData* GLESv2Context::getUseProgram() {
+    return (ProgramData*)m_useProgramData.get();
 }
 
 void GLESv2Context::initExtensionString() {

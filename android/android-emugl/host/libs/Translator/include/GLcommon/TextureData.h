@@ -19,6 +19,8 @@
 #include "android/base/files/Stream.h"
 #include "GLcommon/objectNameManager.h"
 
+#include <vector>
+
 class TextureData : public ObjectData
 {
 public:
@@ -28,6 +30,8 @@ public:
                     depth(0),
                     border(0),
                     internalFormat(GL_RGBA),
+                    format(GL_RGBA),
+                    type(GL_UNSIGNED_BYTE),
                     sourceEGLImage(0),
                     hasStorage(false),
                     wasBound(false),
@@ -44,6 +48,9 @@ public:
     unsigned int depth;
     unsigned int border;
     unsigned int internalFormat;
+    unsigned int format;
+    unsigned int type;
+    std::vector<unsigned char> data;
     unsigned int sourceEGLImage;
     bool hasStorage;
     bool wasBound;
@@ -53,4 +60,7 @@ public:
     int          crop_rect[4];
     GLenum target;
     virtual void onSave(android::base::Stream* stream) const override;
+    virtual void restore(ObjectLocalName localName,
+            getGlobalName_t getGlobalName) override;
+protected:
 };

@@ -188,7 +188,8 @@ public:
     bool isTextureUnitEnabled(GLenum unit);
     void setTextureEnabled(GLenum target, GLenum enable);
     ObjectLocalName getDefaultTextureName(GLenum target);
-    bool isInitialized() { return m_initialized; };
+    bool isInitialized() { return m_initialized || m_needRestoreFromSnapshot; };
+    bool needRestore() {return m_needRestoreFromSnapshot;}
     void setUnpackAlignment(GLint param){ m_unpackAlignment = param; };
     GLint getUnpackAlignment(){ return m_unpackAlignment; };
 
@@ -282,7 +283,11 @@ public:
     virtual void onSave(android::base::Stream* stream) const;
     virtual ObjectDataPtr loadObject(NamedObjectType type,
             ObjectLocalName localName, android::base::Stream* stream) const;
+    virtual void restore();
 protected:
+    virtual void postLoadRestoreShareGroup();
+    virtual void postLoadRestoreCtx();
+
     static void buildStrings(const char* baseVendor, const char* baseRenderer, const char* baseVersion, const char* version);
 
     void freeVAOState();
@@ -334,6 +339,7 @@ private:
     ShareGroupPtr         m_shareGroup;
     GLenum                m_glError = GL_NO_ERROR;
     int                   m_maxTexUnits;
+    unsigned int          m_maxUsedTexUnit = 0;
     textureUnitState*     m_texState = nullptr;
     unsigned int          m_arrayBuffer = 0;
     unsigned int          m_elementBuffer = 0;
