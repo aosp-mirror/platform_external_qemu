@@ -177,6 +177,30 @@
       "revId": "7adfda04d6b8a56824eeae441805c86e7840e415",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0f42f677_957fed62",
+        "filename": "android/android-emu/android/skin/window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1948,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-16T00:03:23Z",
+      "side": 1,
+      "message": "I don\u0027t know what you mean about moving this into the Qt UI.\n\nCan you say more?",
+      "parentUuid": "acc5917c_67c2c46d",
+      "range": {
+        "startLine": 1939,
+        "startChar": 0,
+        "endLine": 1948,
+        "endChar": 9
+      },
+      "revId": "7adfda04d6b8a56824eeae441805c86e7840e415",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
