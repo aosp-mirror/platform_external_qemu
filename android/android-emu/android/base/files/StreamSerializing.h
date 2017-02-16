@@ -56,5 +56,21 @@ bool loadBuffer(Stream* stream, SmallVector<T>* buffer) {
     return ret == len * sizeof(T);
 }
 
+template <class Collection, class SaveFunc>
+void saveCollection(Stream* stream, const Collection& c, SaveFunc&& saver) {
+    stream->putBe32(c.size());
+    for (const auto& val : c) {
+        saver(stream, val);
+    }
+}
+
+template <class Collection, class LoadFunc>
+void loadCollection(Stream* stream, Collection* c, LoadFunc&& loader) {
+    const int size = stream->getBe32();
+    for (int i = 0; i < size; ++i) {
+        c->emplace(loader(stream));
+    }
+}
+
 }  // namespace base
 }  // namespace android
