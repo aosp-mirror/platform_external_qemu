@@ -71,10 +71,10 @@ const char kVertexShaderSource[] =
 // Similarly, just interpolate texture coordinates.
 const char kFragmentShaderSource[] =
     "varying lowp vec2 outCoord;\n"
-    "uniform sampler2D texture;\n"
+    "uniform sampler2D tex;\n"
 
     "void main(void) {\n"
-    "  gl_FragColor = texture2D(texture, outCoord);\n"
+    "  gl_FragColor = texture2D(tex, outCoord);\n"
     "}\n";
 
 // Hard-coded arrays of vertex information.
