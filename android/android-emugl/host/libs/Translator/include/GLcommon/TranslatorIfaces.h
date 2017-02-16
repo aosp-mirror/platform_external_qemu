@@ -66,6 +66,7 @@ typedef struct {
     GLsync                                          (*fenceSync)(GLenum, GLbitfield);
     GLenum                                          (*clientWaitSync)(GLsync, GLbitfield, GLuint64);
     void                                            (*deleteSync)(GLsync);
+    void                                            (*postLoadRestoreContext)(GLEScontext*);
 }GLESiface;
 
 class GlLibrary;

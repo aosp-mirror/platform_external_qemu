@@ -91,6 +91,7 @@ GLuint WindowSurface::getHeight() const { return mHeight; }
 
 bool WindowSurface::flushColorBuffer() {
     if (!mAttachedColorBuffer.get()) {
+        fprintf(stderr, "warnign: color buffer not attached\n");
         return true;
     }
     if (!mWidth || !mHeight) {

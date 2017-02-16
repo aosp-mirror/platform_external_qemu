@@ -455,7 +455,7 @@ GL_APICALL void GL_APIENTRY glRenderbufferStorageMultisample(GLenum target, GLsi
     GET_CTX_V2();
 
     GLint err = GL_NO_ERROR;
-    internalformat = sPrepareRenderbufferStorage(internalformat, &err);
+    internalformat = sPrepareRenderbufferStorage(internalformat, width, height, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
     ctx->dispatcher().glRenderbufferStorageMultisample(target, samples, internalformat, width, height);
 }
