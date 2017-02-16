@@ -111,7 +111,7 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
             // loading from a snapshot. We initialize them the first time
             // when eglMakeCurrent.
             // Set the flag for lazy initialization
-            m_needLoadInit = true;
+            m_needLoadRestore = true;
         }
     }
 }
@@ -142,11 +142,25 @@ void ShareGroup::postSave(android::base::Stream* stream) {
     m_isSaved = false;
 }
 
-void ShareGroup::postLoadInit() {
-    if (m_needLoadInit) {
-        // TODO: get global names
-        // TODO: load all obj data into hardware GPU
-        m_needLoadInit = false;
+void ShareGroup::postLoadRestore() {
+    if (m_needLoadRestore) {
+        ObjectDataMap *map = (ObjectDataMap *)m_objectsData;
+        static_assert(ObjectDataType::SHADER_DATA
+                < ObjectDataType::PROGRAM_DATA,
+                "Shader data must be loaded before program");
+        for (int i = 0; i <  ObjectDataType::MAX_TYPE_DATA; i++) {
+            NamedObjectType objType = ObjectDataType2NamedObjectType(
+                    ObjectDataType(i));
+            for (const auto& obj : (*map)[i]) {
+                // get global names
+                genName(objType, obj.first, false);
+                obj.second->restore(obj.first, [this](NamedObjectType p_type,
+                            ObjectLocalName p_localName) {
+                                return getGlobalName(p_type, p_localName);
+                        });
+            }
+        }
+        m_needLoadRestore = false;
     }
 }
 

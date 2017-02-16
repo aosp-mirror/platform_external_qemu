@@ -26,6 +26,8 @@ public:
     RenderbufferData() = default;
     RenderbufferData(android::base::Stream* stream);
     virtual void onSave(android::base::Stream* stream) const override;
+    virtual void restore(ObjectLocalName localName,
+           getGlobalName_t getGlobalName) override;
     GLuint attachedFB = 0;
     GLenum attachedPoint = 0;
     NamedObjectPtr eglImageGlobalTexObject = 0;
@@ -42,6 +44,8 @@ public:
     ~FramebufferData();
     virtual void onSave(android::base::Stream* stream) const override;
     virtual void postLoad(getObjDataPtr_t getObjDataPtr) override;
+    virtual void restore(ObjectLocalName localName,
+           getGlobalName_t getGlobalName) override;
 
     void setAttachment(GLenum attachment,
                        GLenum target,

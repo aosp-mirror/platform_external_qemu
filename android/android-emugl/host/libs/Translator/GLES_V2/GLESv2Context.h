@@ -26,6 +26,8 @@
 #define GL_TEXTURE_CUBE_MAP_SEAMLESS 0x884F
 #define GL_DEPTH_CLAMP 0x864F
 
+class ProgramData;
+
 class GLESv2Context : public GLEScontext{
 public:
     virtual void init(GlLibrary* glLib);
@@ -47,6 +49,8 @@ public:
     void validateAtt0PreDraw(unsigned int count);
     void validateAtt0PostDraw(void);
     const float* getAtt0(void) const {return m_attribute0value;}
+    void setUseProgram(GLuint program, const ObjectDataPtr& programData);
+    ProgramData* getUseProgram();
 
     virtual void onSave(android::base::Stream* stream) const override;
     virtual ObjectDataPtr loadObject(NamedObjectType type,
@@ -63,6 +67,10 @@ private:
     GLfloat* m_att0Array = nullptr;
     unsigned int m_att0ArrayLength = 0;
     bool m_att0NeedsDisable = false;
+
+    // TODO: snapshot the following
+    GLuint m_useProgram = 0;
+    ObjectDataPtr m_useProgramData = {};
 };
 
 #endif

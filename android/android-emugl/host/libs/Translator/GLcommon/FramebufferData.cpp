@@ -39,6 +39,11 @@ void RenderbufferData::onSave(android::base::Stream* stream) const {
     stream->putBe32(internalformat);
 }
 
+void RenderbufferData::restore(ObjectLocalName localName,
+           getGlobalName_t getGlobalName) {
+    
+}
+
 FramebufferData::FramebufferData(GLuint name) : m_fbName(name) {}
 
 FramebufferData::FramebufferData(android::base::Stream* stream) :
@@ -82,6 +87,11 @@ void FramebufferData::onSave(android::base::Stream* stream) const {
     }
     stream->putByte(m_dirty);
     stream->putByte(m_hasBeenBound);
+}
+
+void FramebufferData::restore(ObjectLocalName localName,
+           getGlobalName_t getGlobalName) {
+    
 }
 
 void FramebufferData::postLoad(getObjDataPtr_t getObjDataPtr) {

@@ -31,7 +31,8 @@ enum ObjectDataType {
     PROGRAM_DATA,
     TEXTURE_DATA,
     BUFFER_DATA,
-    UNDEFINED_DATA
+    UNDEFINED_DATA,
+    MAX_TYPE_DATA
 };
 
 enum LoadShaderOrProgram {
@@ -54,9 +55,16 @@ public:
     virtual void onSave(android::base::Stream* stream) const = 0;
     typedef std::function<const ObjectDataPtr(NamedObjectType,
             ObjectLocalName)> getObjDataPtr_t;
-    // postLoad(): setup references after loading all ObjectData from snapshot
-    //in one share group
+    typedef std::function<int(NamedObjectType, ObjectLocalName)>
+            getGlobalName_t;
+    // postLoad: setup references after loading all ObjectData from snapshot
+    // in one share group
     virtual void postLoad(getObjDataPtr_t getObjDataPtr);
+    // restore: restore object data back to hardware GPU.
+    //          It must be called before restoring hardware context states,
+    //          because it messes up hardware object bindings.
+    virtual void restore(ObjectLocalName localName,
+            getGlobalName_t getGlobalName) = 0;
 private:
     ObjectDataType m_dataType;
 };
@@ -137,7 +145,8 @@ public:
     uint64_t getId() const {return m_sharedGroupID;}
     void onSave(android::base::Stream* stream);
     void postSave(android::base::Stream* stream);
-    void postLoadInit();
+    // postLoadRestore() restores resources on hardware GPU
+    void postLoadRestore();
     typedef std::function<ObjectDataPtr(NamedObjectType p_type,
             ObjectLocalName p_localName, android::base::Stream* stream)>
                 loadObject_t;
@@ -172,7 +181,7 @@ private:
     // It is unique within its ObjectNameManager
     uint64_t m_sharedGroupID;
     bool m_isSaved = false;
-    bool m_needLoadInit = false;
+    bool m_needLoadRestore = false;
 };
 
 typedef emugl::SmartPtr<ShareGroup> ShareGroupPtr;
