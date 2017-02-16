@@ -24,11 +24,11 @@
 #include "renderControl_dec.h"
 #include "SyncThread.h"
 
-#include <set>
+#include <unordered_set>
 
 typedef uint32_t HandleType;
-typedef std::set<HandleType> ThreadContextSet;
-typedef std::set<HandleType> WindowSurfaceSet;
+typedef std::unordered_set<HandleType> ThreadContextSet;
+typedef std::unordered_set<HandleType> WindowSurfaceSet;
 
 // A class used to model the state of each RenderThread related
 struct RenderThreadInfo {
