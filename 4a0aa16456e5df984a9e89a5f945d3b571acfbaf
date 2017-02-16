@@ -167,6 +167,30 @@
     },
     {
       "key": {
+        "uuid": "fca69a0d_10e90a64",
+        "filename": "android/android-emu/android/skin/winsys.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-16T01:52:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1d741b95_e40d5094",
+      "range": {
+        "startLine": 52,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 31
+      },
+      "revId": "4a0aa16456e5df984a9e89a5f945d3b571acfbaf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "41a83ea8_8b071746",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
         "patchSetId": 7
