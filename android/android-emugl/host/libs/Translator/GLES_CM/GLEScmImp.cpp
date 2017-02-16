@@ -46,7 +46,6 @@ static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(int maj, int min, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
-
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -185,11 +184,6 @@ GLESiface* __translator_getIfaces(EGLiface* eglIface) {
 
 }
 
-static ObjectLocalName TextureLocalName(GLenum target, unsigned int tex) {
-    GET_CTX_RET(0);
-    return (tex!=0? tex : ctx->getDefaultTextureName(target));
-}
-
 static TextureData* getTextureData(ObjectLocalName tex){
     GET_CTX_RET(NULL);
 
@@ -213,7 +207,7 @@ static TextureData* getTextureData(ObjectLocalName tex){
 static TextureData* getTextureTargetData(GLenum target){
     GET_CTX_RET(NULL);
     unsigned int tex = ctx->getBindedTexture(target);
-    return getTextureData(TextureLocalName(target,tex));
+    return getTextureData(ctx->getTextureLocalName(target,tex));
 }
 
 GL_API GLboolean GL_APIENTRY glIsBuffer(GLuint buffer) {
@@ -327,7 +321,7 @@ GL_API void GL_APIENTRY  glBindTexture( GLenum target, GLuint texture) {
     SET_ERROR_IF(!GLEScmValidate::textureTarget(target),GL_INVALID_ENUM)
 
     //for handling default texture (0)
-    ObjectLocalName localTexName = TextureLocalName(target,texture);
+    ObjectLocalName localTexName = ctx->getTextureLocalName(target,texture);
 
     GLuint globalTextureName = localTexName;
     if(ctx->shareGroup().get()){
@@ -1291,7 +1285,7 @@ GL_API void GL_APIENTRY  glPixelStorei( GLenum pname, GLint param) {
     GET_CTX()
     SET_ERROR_IF(!(pname == GL_PACK_ALIGNMENT || pname == GL_UNPACK_ALIGNMENT),GL_INVALID_ENUM);
     SET_ERROR_IF(!((param==1)||(param==2)||(param==4)||(param==8)), GL_INVALID_VALUE);
-    ctx->setUnpackAlignment(param);
+    ctx->setPixelStorei(pname, param);
     ctx->dispatcher().glPixelStorei(pname,param);
 }
 
@@ -1691,7 +1685,7 @@ GL_API void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOE
         // flag to the OpenGL layer to skip the image creation and map the
         // current binded texture object to the existing global object.
         if (ctx->shareGroup().get()) {
-            ObjectLocalName tex = TextureLocalName(target,ctx->getBindedTexture(target));
+            ObjectLocalName tex = ctx->getTextureLocalName(target,ctx->getBindedTexture(target));
             // replace mapping and bind the new global object
             ctx->shareGroup()->replaceGlobalObject(NamedObjectType::TEXTURE, tex,
                                                    img->globalTexObj);
@@ -2006,7 +2000,7 @@ GL_API void GLAPIENTRY glFramebufferTexture2DOES(GLenum target, GLenum attachmen
         if (!ctx->shareGroup()->isObject(NamedObjectType::TEXTURE, texture)) {
             ctx->shareGroup()->genName(NamedObjectType::TEXTURE, texture);
         }
-        ObjectLocalName texname = TextureLocalName(textarget,texture);
+        ObjectLocalName texname = ctx->getTextureLocalName(textarget,texture);
         globalTexName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::TEXTURE, texname);
     }
@@ -2337,7 +2331,7 @@ void glDrawTexOES (T x, T y, T z, T width, T height) {
         if (ctx->isTextureUnitEnabled(GL_TEXTURE0+i)) {
             TextureData * texData = NULL;
             unsigned int texname = ctx->getBindedTexture(GL_TEXTURE0+i,GL_TEXTURE_2D);
-            ObjectLocalName tex = TextureLocalName(GL_TEXTURE_2D,texname);
+            ObjectLocalName tex = ctx->getTextureLocalName(GL_TEXTURE_2D,texname);
             ctx->dispatcher().glClientActiveTexture(GL_TEXTURE0+i);
             auto objData = ctx->shareGroup()->getObjectData(
                     NamedObjectType::TEXTURE, tex);

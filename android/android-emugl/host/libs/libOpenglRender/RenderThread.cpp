@@ -213,6 +213,13 @@ intptr_t RenderThread::main() {
     // This is the only place where we try loading from snapshot.
     if (doSnapshotOperation(snapshotObjects, SnapshotState::StartLoading)) {
         DBG("Loaded RenderThread @%p from snapshot\n", this);
+        HandleType ctx = tInfo.currContext ? tInfo.currContext->getHndl()
+                : 0;
+        HandleType draw = tInfo.currDrawSurf ? tInfo.currDrawSurf->getHndl()
+                : 0;
+        HandleType read = tInfo.currReadSurf ? tInfo.currReadSurf->getHndl()
+                : 0;
+        FrameBuffer::getFB()->bindContext(ctx, draw, read);
     } else {
         // Not loading from a snapshot: continue regular startup, read
         // the |flags|.
