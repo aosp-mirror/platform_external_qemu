@@ -22,6 +22,30 @@
       "revId": "aa21dd119ff41d489f3bdcc791aaa04cbb90a36b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0dd5e0db_92d033b3",
+        "filename": "android/android-emu/android/metrics/metrics.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-16T01:53:20Z",
+      "side": 1,
+      "message": "Great idea. It needs a change in the protobuf definition, so let it be in a different CL though.",
+      "parentUuid": "411cedba_665ed46e",
+      "range": {
+        "startLine": 314,
+        "startChar": 20,
+        "endLine": 314,
+        "endChar": 62
+      },
+      "revId": "aa21dd119ff41d489f3bdcc791aaa04cbb90a36b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
