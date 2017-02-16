@@ -693,39 +693,36 @@ HandleType FrameBuffer::createWindowSurface(int p_config,
 }
 
 void FrameBuffer::drainRenderContext() {
+    RenderThreadInfo* const tinfo = RenderThreadInfo::get();
+    if (tinfo->m_contextSet.empty()) {
+        return;
+    }
+
     emugl::Mutex::AutoLock mutex(m_lock);
     emugl::ReadWriteMutex::AutoWriteLock contextLock(m_contextStructureLock);
-    RenderThreadInfo* tinfo = RenderThreadInfo::get();
-    if (tinfo->m_contextSet.empty())
-        return;
-    for (std::set<HandleType>::iterator it = tinfo->m_contextSet.begin();
-         it != tinfo->m_contextSet.end(); ++it) {
-        HandleType contextHandle = *it;
+    for (const HandleType contextHandle : tinfo->m_contextSet) {
         m_contexts.erase(contextHandle);
     }
     tinfo->m_contextSet.clear();
 }
 
 void FrameBuffer::drainWindowSurface() {
-    emugl::Mutex::AutoLock mutex(m_lock);
-    RenderThreadInfo* tinfo = RenderThreadInfo::get();
-    if (tinfo->m_windowSet.empty())
+    RenderThreadInfo* const tinfo = RenderThreadInfo::get();
+    if (tinfo->m_windowSet.empty()) {
         return;
-    for (std::set<HandleType>::iterator it = tinfo->m_windowSet.begin();
-         it != tinfo->m_windowSet.end(); ++it) {
-        HandleType windowHandle = *it;
-        if (m_windows.find(windowHandle) != m_windows.end()) {
-            HandleType oldColorBufferHandle = m_windows[windowHandle].second;
-            if (oldColorBufferHandle) {
-                ColorBufferMap::iterator cit(
-                        m_colorbuffers.find(oldColorBufferHandle));
-                if (cit != m_colorbuffers.end()) {
-                    if (--(*cit).second.refcount == 0) {
-                        m_colorbuffers.erase(cit);
-                    }
+    }
+
+    emugl::Mutex::AutoLock mutex(m_lock);
+    for (const HandleType winHandle : tinfo->m_windowSet) {
+        const auto winIt = m_windows.find(winHandle);
+        if (winIt != m_windows.end()) {
+            if (const HandleType oldColorBufferHandle = winIt->second.second) {
+                const auto cit = m_colorbuffers.find(oldColorBufferHandle);
+                if (cit != m_colorbuffers.end() && --cit->second.refcount == 0) {
+                    m_colorbuffers.erase(cit);
                 }
             }
-            m_windows.erase(windowHandle);
+            m_windows.erase(winIt);
         }
     }
     tinfo->m_windowSet.clear();

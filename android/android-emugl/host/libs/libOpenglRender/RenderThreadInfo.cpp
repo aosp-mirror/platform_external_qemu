@@ -16,9 +16,13 @@
 
 #include "RenderThreadInfo.h"
 
+#include "android/base/files/StreamSerializing.h"
+
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/thread_store.h"
 #include "FrameBuffer.h"
+
+using android::base::Stream;
 
 namespace {
 
@@ -43,7 +47,7 @@ RenderThreadInfo* RenderThreadInfo::get() {
     return static_cast<RenderThreadInfo*>(s_tls->get());
 }
 
-void RenderThreadInfo::onSave(android::base::Stream* stream) {
+void RenderThreadInfo::onSave(Stream* stream) {
     if (currContext) {
         stream->putBe32(currContext->getHndl());
     } else {
@@ -59,10 +63,18 @@ void RenderThreadInfo::onSave(android::base::Stream* stream) {
     } else {
         stream->putBe32(0);
     }
-    // TODO: save other stuff
+
+    saveCollection(stream, m_contextSet, [](Stream* stream, HandleType val) {
+        stream->putBe32(val);
+    });
+    saveCollection(stream, m_windowSet, [](Stream* stream, HandleType val) {
+        stream->putBe32(val);
+    });
+
+    // TODO: save the remaining members.
 }
 
-bool RenderThreadInfo::onLoad(android::base::Stream* stream) {
+bool RenderThreadInfo::onLoad(Stream* stream) {
     FrameBuffer* fb = FrameBuffer::getFB();
     assert(fb);
     HandleType ctxHndl = stream->getBe32();
@@ -71,6 +83,15 @@ bool RenderThreadInfo::onLoad(android::base::Stream* stream) {
     currContext = fb->getContext(ctxHndl);
     currDrawSurf = fb->getWindowSurface(drawSurf);
     currReadSurf = fb->getWindowSurface(readSurf);
-    // TODO: load other stuff
+
+    loadCollection(stream, &m_contextSet, [](Stream* stream) {
+        return stream->getBe32();
+    });
+    loadCollection(stream, &m_windowSet, [](Stream* stream) {
+        return stream->getBe32();
+    });
+
+    // TODO: load the remaining members.
+
     return true;
 }
