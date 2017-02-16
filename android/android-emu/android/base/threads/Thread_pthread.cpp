@@ -187,7 +187,7 @@ unsigned long getCurrentThreadId() {
     pthread_t tid = pthread_self();
     // POSIX doesn't require pthread_t to be a numeric type.
     // Instead, just pick up the first sizeof(long) bytes as the "id".
-    static_assert(sizeof(tid) >= 4,
+    static_assert(sizeof(tid) >= sizeof(long),
                   "Expected pthread_t to be at least sizeof(long) wide");
     return *reinterpret_cast<unsigned long*>(&tid);
 }
