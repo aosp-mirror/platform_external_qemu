@@ -52,6 +52,7 @@ public:
     // postLoad(): setup references after loading all ObjectData from snapshot
     //in one share group
     virtual void postLoad(getObjDataPtr_t getObjDataPtr);
+    //virtual void restore();
 private:
     ObjectDataType m_dataType;
 };
@@ -132,7 +133,8 @@ public:
     uint64_t getId() const {return m_sharedGroupID;}
     void onSave(android::base::Stream* stream);
     void postSave(android::base::Stream* stream);
-    void postLoadInit();
+    // postLoadRestore() restores resources on hardware GPU
+    void postLoadRestore();
     typedef std::function<ObjectDataPtr(NamedObjectType p_type,
             ObjectLocalName p_localName, android::base::Stream* stream)>
                 loadObject_t;
@@ -167,7 +169,7 @@ private:
     // It is unique within its ObjectNameManager
     uint64_t m_sharedGroupID;
     bool m_isSaved = false;
-    bool m_needLoadInit = false;
+    bool m_needLoadRestore = false;
 };
 
 typedef emugl::SmartPtr<ShareGroup> ShareGroupPtr;
