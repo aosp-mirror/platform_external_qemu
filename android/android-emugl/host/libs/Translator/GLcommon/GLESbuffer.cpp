@@ -14,6 +14,7 @@
 * limitations under the License.
 */
 #include <GLcommon/GLESbuffer.h>
+#include <GLcommon/GLEScontext.h>
 #include <string.h>
 
 bool  GLESbuffer::setBuffer(GLuint size,GLuint usage,const GLvoid* data) {
@@ -77,4 +78,13 @@ void GLESbuffer::onSave(android::base::Stream* stream) const {
     // used for fix point vertex buffers. We are very unlikely to hit it
     // when snapshotting home screen.
     stream->putByte(m_wasBound);
+}
+
+void GLESbuffer::restore(ObjectLocalName localName,
+        getGlobalName_t getGlobalName) {
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+    int globalName = getGlobalName(NamedObjectType::VERTEXBUFFER, localName);
+    // We bind to GL_ARRAY_BUFFER just for uploading buffer data
+    dispatcher.glBindBuffer(GL_ARRAY_BUFFER, globalName);
+    dispatcher.glBufferData(GL_ARRAY_BUFFER, m_size, m_data, m_usage);
 }

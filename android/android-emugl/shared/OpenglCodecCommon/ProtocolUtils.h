@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define CHECK_GL_ERRORS
+
 namespace emugl {
 
 // A helper template to extract values form the wire protocol stream

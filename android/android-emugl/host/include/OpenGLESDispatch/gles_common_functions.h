@@ -49,6 +49,7 @@ typedef const GLubyte* GLconstubyteptr;
   X(GLconstubyteptr, glGetString, (GLenum name), (name)) \
   X(void, glTexParameterf, (GLenum target, GLenum pname, GLfloat param), (target, pname, param)) \
   X(void, glTexParameterfv, (GLenum target, GLenum pname, const GLfloat * params), (target, pname, params)) \
+  X(void, glGetTexImage, (GLenum target, GLint level, GLenum format, GLenum type, GLvoid * pixels), (target, level, format, type, pixels)) \
   X(void, glGetTexParameterfv, (GLenum target, GLenum pname, GLfloat * params), (target, pname, params)) \
   X(void, glGetTexParameteriv, (GLenum target, GLenum pname, GLint * params), (target, pname, params)) \
   X(void, glGetTexLevelParameteriv, (GLenum target, GLint level, GLenum pname, GLint * params), (target, level, pname, params)) \
