@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "198e2b53_cee882b1",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-17T19:02:09Z",
+      "side": 1,
+      "message": "should this got away, or at least be debug-only abort (\u003d\u003d assert(false)) instead?",
+      "range": {
+        "startLine": 131,
+        "startChar": 0,
+        "endLine": 133,
+        "endChar": 28
+      },
+      "revId": "dae8b302cbd7aab47907d3c7fc4de3ae6b9b36bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
