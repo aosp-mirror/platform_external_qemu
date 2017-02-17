@@ -66,6 +66,9 @@ void *GLESv2Decoder::s_getProc(const char *name, void *userData)
 int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
 {
     this->initDispatchByName(getProcFunc, getProcFuncData);
+    glVertexAttribPointerWithDataSize =
+            (glVertexAttribPointerWithDataSize_server_proc_t)
+            getProcFunc("glVertexAttribPointerWithDataSize", getProcFuncData);
 
     glGetCompressedTextureFormats = s_glGetCompressedTextureFormats;
     glVertexAttribPointerData = s_glVertexAttribPointerData;
@@ -251,7 +254,13 @@ void GLESv2Decoder::s_glVertexAttribPointerData(void *self, GLuint indx, GLint s
         ctx->m_contextData->storePointerData(indx, data, datalen);
         // note - the stride of the data is always zero when it comes out of the codec.
         // See gl2.attrib for the packing function call.
-        ctx->glVertexAttribPointer(indx, size, type, normalized, 0, ctx->m_contextData->pointerData(indx));
+        if (ctx->glVertexAttribPointerWithDataSize) {
+            ctx->glVertexAttribPointerWithDataSize(indx, size, type, normalized,
+                    0, ctx->m_contextData->pointerData(indx), datalen);
+        } else {
+            ctx->glVertexAttribPointer(indx, size, type, normalized, 0,
+                    ctx->m_contextData->pointerData(indx));
+        }
     }
 }
 

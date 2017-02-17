@@ -17,6 +17,7 @@
 #ifndef GLES_CONTEXT_H
 #define GLES_CONTEXT_H
 
+#include "android/base/files/Stream.h"
 #include "GLDispatch.h"
 #include "GLESpointer.h"
 #include "objectNameManager.h"
@@ -106,6 +107,8 @@ struct BufferBinding {
     GLsizeiptr size = 0;
     GLintptr stride = 0;
     GLuint divisor = 0;
+    void onLoad(android::base::Stream* stream);
+    void onSave(android::base::Stream* stream) const;
 };
 
 typedef std::vector<BufferBinding> VertexAttribBindingVector;
@@ -116,10 +119,12 @@ struct VAOState {
         element_array_buffer_binding(ibo),
         arraysMap(arr),
         bindingState(numVertexAttribBindings) { }
+    VAOState(android::base::Stream* stream);
     GLuint element_array_buffer_binding;
     ArraysMap* arraysMap;
     VertexAttribBindingVector bindingState;
     bool bufferBacked;
+    void onSave(android::base::Stream* stream) const;
 };
 
 typedef std::unordered_map<GLuint, VAOState> VAOStateMap;
@@ -127,7 +132,7 @@ typedef std::unordered_map<GLuint, VAOState> VAOStateMap;
 struct VAOStateRef {
     VAOStateRef() { }
     VAOStateRef(VAOStateMap::iterator iter) : it(iter) { }
-    GLuint vaoId() { return it->first; }
+    GLuint vaoId() const { return it->first; }
     GLuint& iboId() { return it->second.element_array_buffer_binding; }
 
     ArraysMap::iterator begin() {
@@ -169,6 +174,8 @@ private:
 
 class GLEScontext{
 public:
+    GLEScontext();
+    GLEScontext(android::base::Stream* stream, GlLibrary* glLib);
     virtual void init(GlLibrary* glLib);
     GLenum getGLerror();
     void setGLerror(GLenum err);
@@ -191,9 +198,9 @@ public:
     void addVertexArrayObjects(GLsizei n, GLuint* arrays);
     void removeVertexArrayObjects(GLsizei n, const GLuint* arrays);
     void setVertexArrayObject(GLuint array);
-    GLuint getVertexArrayObject();
+    GLuint getVertexArrayObject() const;
     bool vertexAttributesBufferBacked();
-    const GLvoid* setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data,bool normalize = false, bool isInt = false);
+    const GLvoid* setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data, GLsizei dataSize, bool normalize = false, bool isInt = false);
     virtual const GLESpointer* getPointer(GLenum arrType);
     virtual void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) = 0;
 
@@ -271,6 +278,8 @@ public:
     int getMajorVersion() const { return m_glesMajorVersion; }
     int getMinorVersion() const { return m_glesMinorVersion; }
 
+    // Snapshot save
+    virtual void onSave(android::base::Stream* stream) const;
 protected:
     static void buildStrings(const char* baseVendor, const char* baseRenderer, const char* baseVersion, const char* version);
 
@@ -286,6 +295,7 @@ protected:
     void initCapsLocked(const GLubyte * extensionString);
     virtual void initExtensionString() =0;
 
+    bool                  m_needRestoreFromSnapshot = false;
     static emugl::Mutex   s_lock;
     static GLDispatch     s_glDispatch;
     bool                  m_initialized = false;
@@ -321,6 +331,7 @@ private:
 
     ShareGroupPtr         m_shareGroup;
     GLenum                m_glError = GL_NO_ERROR;
+    int                   m_maxTexUnits;
     textureUnitState*     m_texState = nullptr;
     unsigned int          m_arrayBuffer = 0;
     unsigned int          m_elementBuffer = 0;
