@@ -259,7 +259,7 @@ build_qemu_android () {
         case $1 in
             windows-*)
                 # Use the host version, or the build will freeze.
-                PKG_CONFIG=pkg-config
+                PKG_CONFIG=`which pkg-config`
                 ;;
             *)
                 PKG_CONFIG=$PREFIX/bin/pkg-config
@@ -446,7 +446,6 @@ if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     var_append DARWIN_BUILD_FLAGS \
         --target=$(spaces_to_commas "$TARGETS") \
         --src-dir=$DARWIN_REMOTE_DIR/qemu-src \
-        --no-tests \
         --prebuilts-dir=$DARWIN_REMOTE_DIR/prebuilts \
         --install-dir=$DARWIN_REMOTE_DIR/prebuilts/qemu-android \
 
