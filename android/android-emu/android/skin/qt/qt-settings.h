@@ -1,4 +1,4 @@
-/* Copyright (C) 2015-2016 The Android Open Source Project
+/* Copyright (C) 2015-2017 The Android Open Source Project
  **
  ** This software is licensed under the terms of the GNU General Public
  ** License version 2, as published by the Free Software Foundation, and
@@ -14,58 +14,55 @@
 // restoring user settings associated with the Qt-based UI.
 #pragma once
 
-#include "android/skin/winsys.h"
-
-#include <QString>
-
 namespace Ui {
 namespace Settings {
 
-const QString ORG_NAME("Android Open Source Project");
-const QString ORG_DOMAIN("android.com");
-const QString APP_NAME("Emulator");
+constexpr char ORG_NAME[] = "Android Open Source Project";
+constexpr char ORG_DOMAIN[] = "android.com";
+constexpr char APP_NAME[] = "Emulator";
 
-const QString SHOW_ADB_WARNING("showAdbWarning");
-const QString SHOW_AVD_ARCH_WARNING("showAvdArchWarning");
-const QString SHOW_GPU_WARNING("showGpuWarning");
+constexpr char SHOW_ADB_WARNING[] = "showAdbWarning";
+constexpr char SHOW_AVD_ARCH_WARNING[] = "showAvdArchWarning";
+constexpr char SHOW_GPU_WARNING[] = "showGpuWarning";
 
 // Note: The "set/" here is because these settings are
 //       associated with "settings-page", not because
 //       we're in "namespace Settings".
 
-const QString ADB_PATH("set/adbPath");
-const QString AUTO_FIND_ADB("set/autoFindAdb");
-const QString ALWAYS_ON_TOP("set/alwaysOnTop");
-const QString FORWARD_SHORTCUTS_TO_DEVICE("set/forwardShortcutsToDevice");
-const QString SAVE_PATH("set/savePath");
-const QString UI_THEME("set/theme");
+constexpr char ADB_PATH[] = "set/adbPath";
+constexpr char AUTO_FIND_ADB[] = "set/autoFindAdb";
+constexpr char ALWAYS_ON_TOP[] = "set/alwaysOnTop";
+constexpr char FORWARD_SHORTCUTS_TO_DEVICE[] = "set/forwardShortcutsToDevice";
+constexpr char SAVE_PATH[] = "set/savePath";
+constexpr char UI_THEME[] = "set/theme";
 
-const QString CELLULAR_NETWORK_TYPE   ("cell/network_type");
-const QString CELLULAR_SIGNAL_STRENGTH("cell/signal_strength");
-const QString CELLULAR_VOICE_STATUS   ("cell/voice_status");
-const QString CELLULAR_DATA_STATUS    ("cell/data_status");
+constexpr char CELLULAR_NETWORK_TYPE[]    = "cell/network_type";
+constexpr char CELLULAR_SIGNAL_STRENGTH[] = "cell/signal_strength";
+constexpr char CELLULAR_VOICE_STATUS[]    = "cell/voice_status";
+constexpr char CELLULAR_DATA_STATUS[]     = "cell/data_status";
 
-const QString CRASHREPORT_PREFERENCE("set/crashReportPreference");
+constexpr char CRASHREPORT_PREFERENCE[] = "set/crashReportPreference";
 enum CRASHREPORT_PREFERENCE_VALUE {
     CRASHREPORT_PREFERENCE_ASK = 0,
     CRASHREPORT_PREFERENCE_ALWAYS = 1,
     CRASHREPORT_PREFERENCE_NEVER = 2
 };
-const QString CRASHREPORT_SAVEPREFERENCE_CHECKED("set/crashReportSavePreferenceChecked");
-const int CRASHREPORT_COMBOBOX_ALWAYS = 0;
-const int CRASHREPORT_COMBOBOX_NEVER = 1;
-const int CRASHREPORT_COMBOBOX_ASK = 2;
+constexpr char CRASHREPORT_SAVEPREFERENCE_CHECKED[] = "set/crashReportSavePreferenceChecked";
+constexpr int CRASHREPORT_COMBOBOX_ALWAYS = 0;
+constexpr int CRASHREPORT_COMBOBOX_NEVER = 1;
+constexpr int CRASHREPORT_COMBOBOX_ASK = 2;
 
-const QString GLESBACKEND_PREFERENCE("set/glesBackendPreference");
-const QString GLESAPILEVEL_PREFERENCE("set/glesApiLevelPreference");
+constexpr char GLESBACKEND_PREFERENCE[] = "set/glesBackendPreference";
+constexpr char GLESAPILEVEL_PREFERENCE[] ="set/glesApiLevelPreference";
 
-const QString LOCATION_ENTERED_ALTITUDE("loc/altitude");
-const QString LOCATION_ENTERED_LATITUDE("loc/latitude");
-const QString LOCATION_ENTERED_LONGITUDE("loc/longitude");
-const QString LOCATION_PLAYBACK_FILE("loc/playback_file_path");
-const QString LOCATION_PLAYBACK_SPEED("loc/playback_speed");
-const QString LOCATION_RECENT_ALTITUDE("loc/recent_altitude");
-const QString LOCATION_RECENT_LATITUDE("loc/recent_latitude");
-const QString LOCATION_RECENT_LONGITUDE("loc/recent_longitude");
-}
-}
+constexpr char LOCATION_ENTERED_ALTITUDE[] = "loc/altitude";
+constexpr char LOCATION_ENTERED_LATITUDE[] = "loc/latitude";
+constexpr char LOCATION_ENTERED_LONGITUDE[] = "loc/longitude";
+constexpr char LOCATION_PLAYBACK_FILE[] = "loc/playback_file_path";
+constexpr char LOCATION_PLAYBACK_SPEED[] = "loc/playback_speed";
+constexpr char LOCATION_RECENT_ALTITUDE[] = "loc/recent_altitude";
+constexpr char LOCATION_RECENT_LATITUDE[] = "loc/recent_latitude";
+constexpr char LOCATION_RECENT_LONGITUDE[] = "loc/recent_longitude";
+
+}  // namespace Settings
+}  // namespace Ui
