@@ -22,6 +22,9 @@
 #include "PaletteTexture.h"
 #include "etc.h"
 
+ETC2ImageFormat getEtcFormat(GLenum internalformat);
+bool isEtcFormat(GLenum internalformat);
+bool isPaletteFormat(GLenum internalformat);
 int getCompressedFormats(int* formats);
 void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level, 
                                           GLenum internalformat, GLsizei width, 
