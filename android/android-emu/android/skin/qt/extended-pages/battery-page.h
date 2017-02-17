@@ -12,11 +12,11 @@
 
 #include "ui_battery-page.h"
 #include <QWidget>
+#include <initializer_list>
 #include <memory>
 
 struct QAndroidBatteryAgent;
-class BatteryPage : public QWidget
-{
+class BatteryPage : public QWidget {
     Q_OBJECT
 
 public:
@@ -30,15 +30,9 @@ private slots:
     void on_bat_statusBox_activated(int index);
 
 private:
-    template <class T>
     void populateListBox(
-        const std::vector<std::pair<T, std::string>>& associations,
-        QComboBox* list) {
-        list->clear();
-        for (const auto& a : associations) {
-            list->addItem(tr(a.second.c_str()), a.first);
-        }
-    }
+            QComboBox* list,
+            std::initializer_list<std::pair<int, const char*>> associations);
 
 private:
     std::unique_ptr<Ui::BatteryPage> mUi;
