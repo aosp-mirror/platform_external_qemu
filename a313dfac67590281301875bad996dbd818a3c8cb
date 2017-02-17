@@ -22,6 +22,30 @@
       "revId": "a313dfac67590281301875bad996dbd818a3c8cb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9d979caf_39a29218",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-17T20:27:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ae8e19b5_25a39ad1",
+      "range": {
+        "startLine": 131,
+        "startChar": 40,
+        "endLine": 131,
+        "endChar": 41
+      },
+      "revId": "a313dfac67590281301875bad996dbd818a3c8cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
