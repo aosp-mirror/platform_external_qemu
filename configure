@@ -609,7 +609,6 @@ Darwin)
   bsd="yes"
   darwin="yes"
   hax="yes"
-  hvf="yes"
   LDFLAGS_SHARED="-bundle -undefined dynamic_lookup"
   if [ "$cpu" = "x86_64" ] ; then
     QEMU_CFLAGS="-arch x86_64 $QEMU_CFLAGS"
@@ -4552,6 +4551,21 @@ if compile_prog "" "" ; then
 fi
 
 #################################################
+# Check to see if we have the Hypervisor framework
+if [ "$darwin" == "yes" ] ; then
+  cat > $TMPC << EOF
+#include <Hypervisor/hv.h>
+int main() { return 0;}
+EOF
+  if ! compile_object ""; then
+    hvf='no'
+  else
+    hvf='yes'
+    LDFLAGS="-framework Hypervisor $LDFLAGS"
+  fi
+fi
+
+#################################################
 # Sparc implicitly links with --relax, which is
 # incompatible with -r, so --no-relax should be
 # given. It does no harm to give it on other
@@ -4841,6 +4855,7 @@ echo "strip binaries    $strip_opt"
 echo "profiler          $profiler"
 echo "static build      $static"
 if test "$darwin" = "yes" ; then
+    echo "HVF support       $hvf"
     echo "Cocoa support     $cocoa"
 fi
 echo "pixman            $pixman"
