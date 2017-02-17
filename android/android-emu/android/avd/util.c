@@ -13,6 +13,7 @@
 #include "android/avd/util.h"
 
 #include "android/android.h"
+#include "android/base/ArraySize.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
@@ -209,33 +210,54 @@ propertyFile_getApiLevel(const FileData* data) {
     return level;
 }
 
-bool
-propertyFile_isPhoneApi(const FileData* data) {
-    char* prop = propertyFile_getValue(
-                    (const char*)data->data,
-                    data->size,
-                    "ro.product.name");
-    if (!prop) { return false; }
-    if (strstr(prop, "phone")) {
-        free(prop);
-        return true;
-    }
-    free(prop);
-    return false;
+bool propertyFile_isPhoneApi(const FileData* data) {
+    const char* phone_names[] = {"phone"};
+    return propertyFile_findProductName(
+            data, phone_names, ARRAY_SIZE(phone_names), false /*prefix*/);
 }
 
-bool
-propertyFile_isGoogleApis(const FileData* data) {
-    char* prop = propertyFile_getValue(
-                    (const char*)data->data,
-                    data->size,
-                    "ro.product.name");
-    if (!prop) { return false; }
-    if (strstr(prop, "sdk_google") ||
-        strstr(prop, "google_sdk")) {
-        free(prop);
-        return true;
+bool propertyFile_isGoogleApis(const FileData* data) {
+    const char* google_names[] = {"sdk_google", "google_sdk"};
+    return propertyFile_findProductName(
+            data, google_names, ARRAY_SIZE(google_names), false /*prefix*/);
+}
+
+bool propertyFile_isAndroidAuto(const FileData* data) {
+    const char* car_names[] = {"car_emu"};
+    return propertyFile_findProductName(data, car_names, ARRAY_SIZE(car_names),
+                                         true /*prefix*/);
+}
+
+
+bool propertyFile_findProductName(const FileData* data,
+                                  const char* productNames[],
+                                  int count,
+                                  bool prefix) {
+    char* prop = propertyFile_getValue((const char*)data->data, data->size,
+                                       "ro.product.name");
+    if (!prop) {
+        return false;
     }
+    if (!prefix) {
+        int i;
+        for (i = 0; i < count; i++) {
+            if (strstr(prop, productNames[i])) {
+                free(prop);
+                return true;
+            }
+        }
+    } else {
+        int i;
+        for (i = 0; i < count; i++) {
+            int len = strlen(productNames[i]);
+            if (strlen(prop) >= len &&
+                strncmp(productNames[i], prop, len) == 0) {
+                free(prop);
+                return true;
+            }
+        }
+    }
+
     free(prop);
     return false;
 }
