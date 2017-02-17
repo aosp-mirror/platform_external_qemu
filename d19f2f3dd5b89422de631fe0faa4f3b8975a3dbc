@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "482df4a3_0f6dc8a7",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 672,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-17T18:19:57Z",
+      "side": 1,
+      "message": "so when the name should be actually cleared?",
+      "range": {
+        "startLine": 672,
+        "startChar": 7,
+        "endLine": 672,
+        "endChar": 33
+      },
+      "revId": "d19f2f3dd5b89422de631fe0faa4f3b8975a3dbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
