@@ -11,6 +11,7 @@
 #pragma once
 
 #include "android/base/TypeTraits.h"
+#include "android/base/memory/LazyInstance.h"
 #include "android/skin/qt/event-subscriber.h"
 
 #include <QEvent>
@@ -31,6 +32,13 @@ struct EventRecord {
     std::unique_ptr<QEvent> event;
     std::string target_name;
 };
+
+struct EventSetHolder {
+    EventSetHolder();
+    EventCapturer::EventTypeSet events;
+};
+
+extern android::base::LazyInstance<EventSetHolder> sEventRecorderEventsHolder;
 
 // This class intercepts various UI events via EventCapturer
 // and stores their serialized representations in a container.
@@ -60,7 +68,7 @@ private:
     bool objectPredicate(const QObject*) const override { return true; }
 
     const EventCapturer::EventTypeSet& eventTypes() const override {
-        return mEventTypes;
+        return sEventRecorderEventsHolder->events;
     }
 
     void processEvent(const QObject* target, const QEvent* event) override {
@@ -99,26 +107,11 @@ private:
     }
 
     template <class T>
-    std::unique_ptr<QEvent> cloneEventHelper(const QEvent* e, enable_if_convertible<T*, QEvent*> = nullptr) {
+    std::unique_ptr<QEvent> cloneEventHelper(
+            const QEvent* e, enable_if_convertible<T*, QEvent*> = nullptr) {
         return std::unique_ptr<QEvent>(new T(*static_cast<const T*>(e)));
     }
 
 private:
     ContainerType mContainer;
-    static EventCapturer::EventTypeSet mEventTypes;
 };
-
-
-template <template<class T, class A = std::allocator<T>> class EventContainer>
-EventCapturer::EventTypeSet UIEventRecorder<EventContainer>::mEventTypes = {
-    QEvent::Close,
-    QEvent::Enter,
-    QEvent::Leave,
-    QEvent::FocusIn,
-    QEvent::FocusOut,
-    QEvent::Hide,
-    QEvent::MouseButtonPress,
-    QEvent::MouseButtonRelease,
-    QEvent::Resize
-};
-

@@ -20,6 +20,7 @@
 #include <memory>
 
 enum class NamedObjectType {
+    NULLTYPE,
     VERTEXBUFFER,
     TEXTURE,
     RENDERBUFFER,

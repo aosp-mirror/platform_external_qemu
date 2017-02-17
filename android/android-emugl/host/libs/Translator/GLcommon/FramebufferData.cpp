@@ -19,11 +19,79 @@
 #include <GLcommon/FramebufferData.h>
 #include <GLcommon/GLEScontext.h>
 
+RenderbufferData::RenderbufferData(android::base::Stream* stream) :
+    ObjectData(stream) {
+    attachedFB = stream->getBe32();
+    attachedPoint = stream->getBe32();
+    // TODO: load eglImageGlobalTexObject
+    internalformat = stream->getBe32();
+}
+
+void RenderbufferData::onSave(android::base::Stream* stream) const {
+    ObjectData::onSave(stream);
+    stream->putBe32(attachedFB);
+    stream->putBe32(attachedPoint);
+    // TODO: snapshot eglImageGlobalTexObject
+    if (eglImageGlobalTexObject) {
+        fprintf(stderr, "RenderbufferData::onSave: warning:"
+                " EglImage snapshot unimplemented. \n");
+    }
+    stream->putBe32(internalformat);
+}
+
 FramebufferData::FramebufferData(GLuint name) : m_fbName(name) {}
+
+FramebufferData::FramebufferData(android::base::Stream* stream) :
+    ObjectData(stream) {
+    m_fbName = stream->getBe32();
+    int attachNum = stream->getBe32();
+    (void)attachNum;
+    assert(attachNum == MAX_ATTACH_POINTS);
+    for (auto& attachPoint : m_attachPoints) {
+        attachPoint.target = stream->getBe32();
+        attachPoint.name = stream->getBe32();
+        attachPoint.objType = (NamedObjectType)stream->getBe32();
+        // attachPoint.obj will be set up in postLoad
+        attachPoint.owned = stream->getByte();
+    }
+    m_dirty = stream->getByte();
+    m_hasBeenBound = stream->getByte();
+}
 
 FramebufferData::~FramebufferData() {
     for (int i=0; i<MAX_ATTACH_POINTS; i++) {
         detachObject(i);
+    }
+}
+
+void FramebufferData::onSave(android::base::Stream* stream) const {
+    ObjectData::onSave(stream);
+    stream->putBe32(m_fbName);
+    stream->putBe32(MAX_ATTACH_POINTS);
+    for (auto& attachPoint : m_attachPoints) {
+        stream->putBe32(attachPoint.target);
+        stream->putBe32(attachPoint.name);
+        // do not save attachPoint.obj
+        if (attachPoint.obj) {
+            stream->putBe32((uint32_t)ObjectDataType2NamedObjectType(
+                    attachPoint.obj->getDataType()));
+        } else {
+            stream->putBe32((uint32_t)NamedObjectType::NULLTYPE);
+        }
+        stream->putByte(attachPoint.owned);
+    }
+    stream->putByte(m_dirty);
+    stream->putByte(m_hasBeenBound);
+}
+
+void FramebufferData::postLoad(getObjDataPtr_t getObjDataPtr) {
+    for (auto& attachPoint : m_attachPoints) {
+        if (NamedObjectType::NULLTYPE != attachPoint.objType) {
+            attachPoint.obj = getObjDataPtr(attachPoint.objType,
+                    attachPoint.name);
+        } else {
+            attachPoint.obj = {};
+        }
     }
 }
 

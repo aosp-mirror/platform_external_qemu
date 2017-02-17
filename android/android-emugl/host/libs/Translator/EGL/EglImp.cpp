@@ -21,6 +21,7 @@
 #include "android/base/files/Stream.h"
 #include "ThreadInfo.h"
 #include <GLcommon/GLEScontext.h>
+#include <GLcommon/TextureData.h>
 #include <GLcommon/TranslatorIfaces.h>
 #include "emugl/common/shared_library.h"
 #include <OpenglCodecCommon/ErrorLog.h>
@@ -916,9 +917,6 @@ static EGLContext eglCreateOrLoadContext(EGLDisplay display, EGLConfig config,
                               glesCtx, glesVersion,
                               dpy->getManager(glesVersion),
                               stream));
-    if (stream) {
-        iface->setShareGroup(glesCtx, ctx->getShareGroup());
-    }
     if(ctx->nativeType()) {
         return dpy->addContext(ctx);
     } else {
