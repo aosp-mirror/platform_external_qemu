@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "605d7086_08679ea2",
+        "filename": "android/android-emu/android/opengl/emugl_config.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-17T16:33:28Z",
+      "side": 1,
+      "message": "nit: ANGLE -\u003e Angle. Our coding style asks to use Pascal Style Casing for all abbreviations or anything similar, e.g. Id, Gpu etc.",
+      "range": {
+        "startLine": 234,
+        "startChar": 40,
+        "endLine": 234,
+        "endChar": 45
+      },
+      "revId": "cfcee51e089bdde043be5521d7c8ab860ae1b913",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b18f0048_53e8eb42",
+        "filename": "android/android-emu/android/opengl/emugl_config.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-17T16:33:28Z",
+      "side": 1,
+      "message": "please write this also into |config-\u003estatus| for a -verbose print and potentially simpler debugging later",
+      "range": {
+        "startLine": 236,
+        "startChar": 17,
+        "endLine": 236,
+        "endChar": 72
+      },
+      "revId": "cfcee51e089bdde043be5521d7c8ab860ae1b913",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "27791a69_b59693ee",
+        "filename": "android/android-emu/android/opengl/gpuinfo.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-17T16:33:28Z",
+      "side": 1,
+      "message": "android::base::arraySize() from android/base/ArraySize.h",
+      "range": {
+        "startLine": 203,
+        "startChar": 3,
+        "endLine": 203,
+        "endChar": 53
+      },
+      "revId": "cfcee51e089bdde043be5521d7c8ab860ae1b913",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "32b0e609_0e5f274b",
+        "filename": "android/android-emu/android/opengl/gpuinfo.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 393,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-17T16:33:28Z",
+      "side": 1,
+      "message": "nit: if feels to me that enum here would be more readable. Otherwise a single typo would leave it silently broken",
+      "range": {
+        "startLine": 393,
+        "startChar": 36,
+        "endLine": 393,
+        "endChar": 44
+      },
+      "revId": "cfcee51e089bdde043be5521d7c8ab860ae1b913",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "92de516a_9af4721b",
+        "filename": "android/android-emu/android/opengl/gpuinfo.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-17T16:33:28Z",
+      "side": 1,
+      "message": "this could be present for all platforms, but return |false| for non-windows. This way #ifdef could only be in the implementation, and you can get rid of it at the callsite.",
+      "range": {
+        "startLine": 38,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 6
+      },
+      "revId": "cfcee51e089bdde043be5521d7c8ab860ae1b913",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "194a51d3_0d3dc9a4",
+        "filename": "android/android-emu/android/opengl/gpuinfo.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-17T16:33:28Z",
+      "side": 1,
+      "message": "this just looks funny :)\nBTW, in modern C++ it\u0027s preferable to use the new syntax: using WhitelistEntry \u003d BlacklistEntry;\nI\u0027d prefer to have \u0027black\u0027 out of the name of the struct and call it GpuInfoView, then create aliases for both blacklist and whitelist entries.",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 6
+      },
+      "revId": "cfcee51e089bdde043be5521d7c8ab860ae1b913",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2614d335_f2cfdd71",
+        "filename": "android/android-emu/android/opengl/gpuinfo.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-17T16:33:28Z",
+      "side": 1,
+      "message": "it\u0027s OK to have it for all platforms, initialized to |false| here. it fills the alignment padding anyway.",
+      "range": {
+        "startLine": 92,
+        "startChar": 0,
+        "endLine": 94,
+        "endChar": 6
+      },
+      "revId": "cfcee51e089bdde043be5521d7c8ab860ae1b913",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
