@@ -13,7 +13,6 @@
 #include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/extended-window-styles.h"
 
-#include "android/emulation/control/user_event_agent.h"
 #include "android/globals.h"
 #include "android/main-common.h"
 #include "android/skin/qt/emulator-qt-window.h"
@@ -26,8 +25,6 @@
 #include "ui_extended.h"
 
 #include <QDesktopWidget>
-
-extern const QAndroidUserEventAgent* const gQAndroidUserEventAgent;
 
 ExtendedWindow::ExtendedWindow(
     EmulatorQtWindow *eW,
@@ -145,7 +142,7 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         mExtendedUi->telephonyPage->setTelephonyAgent(agentPtr->telephony);
         mExtendedUi->finger_page->setFingerAgent(agentPtr->finger);
         mExtendedUi->location_page->setLocationAgent(agentPtr->location);
-        mExtendedUi->microphonePage->setMicrophoneAgent(gQAndroidUserEventAgent);
+        mExtendedUi->microphonePage->setMicrophoneAgent(agentPtr->userEvents);
         mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
         if (avdInfo_isAndroidAuto(android_avdInfo)) {
             mExtendedUi->carDataPage->setCarDataAgent(agentPtr->car);
@@ -254,11 +251,7 @@ void ExtendedWindow::switchToTheme(SettingsTheme theme) {
 
     // The first part is based on the display's pixel density.
     // Most displays give 1.0; high density displays give 2.0.
-    double densityFactor = 1.0;
-    if (skin_winsys_get_device_pixel_ratio(&densityFactor) != 0) {
-        // Failed: use 1.0
-        densityFactor = 1.0;
-    }
+    const double densityFactor = devicePixelRatio();
     QString styleString = Ui::fontStylesheet(densityFactor > 1.5);
 
     // The second part is based on the theme
