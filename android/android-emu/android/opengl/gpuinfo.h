@@ -31,17 +31,13 @@
 // describing all GPU's on the system.
 std::string load_gpu_info();
 
-// parse_and_query_blacklist() takes the string
-// describing GPU information, attempts to parse it,
-// and returns true or false depending on
-// whether the GPU information provided
-// matches a known unreliable GPU/GPU driver.
-bool parse_and_query_blacklist(const std::string& contents);
-
 // host_gpu_blacklisted_async() does the two steps above,
 // but on a different thread, with a timeout in case
 // the started processes hang or what not.
 bool async_query_host_gpu_blacklisted();
+#ifdef _WIN32
+bool async_query_host_gpu_ANGLEWhitelisted();
+#endif
 
 // Below is the implementation.
 
@@ -54,7 +50,12 @@ struct BlacklistEntry {
     const char* revision_id;
     const char* version;
     const char* renderer;
+    const char* os;
 };
+
+#ifdef _WIN32
+typedef struct BlacklistEntry WhitelistEntry;
+#endif
 
 // GpuInfo/GpuInfoList are the representation of parsed information
 // about the system's GPU.s
@@ -74,6 +75,7 @@ public:
     std::string renderer;
 
     std::vector<std::string> dlls;
+    std::string os;
 };
 
 class GpuInfoList {
@@ -87,6 +89,9 @@ public:
     static GpuInfoList* get(); // For the global GpuInfoList
     std::vector<GpuInfo> infos;
     bool blacklist_status;
+#ifdef _WIN32
+    bool ANGLElist_status;
+#endif
     DISALLOW_COPY_ASSIGN_AND_MOVE(GpuInfoList);
 };
 
