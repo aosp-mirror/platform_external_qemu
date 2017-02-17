@@ -1,0 +1,36 @@
+Auto-config: --src-dir=/usr/local/google/home/jansene/src/emu-master-dev/external/qemu
+Auto-config: --prebuilts-dir=/usr/local/google/home/jansene/src/emu-master-dev/prebuilts/android-emulator-build  [default]
+Auto-config: --aosp-dir=/usr/local/google/home/jansene/src/emu-master-dev  [auto-detect]
+Auto-config: --install-dir=/usr/local/google/home/jansene/src/emu-master-dev/prebuilts/android-emulator-build/qemu-android  [default]
+Auto-config: --build-dir=/tmp/jansene-build-qemu-android-139676
+COMMAND: mkdir -p /tmp/jansene-build-qemu-android-139676
+Auto-config: --jobs=48
+Auto-config: --ccache=/usr/bin/ccache
+Auto-config: --ssh-tmp-dir=/tmp/jansene-android-emulator-139676/ssh-build-qemu-android
+Auto-config: --target='arm arm64 mips mips64 x86 x86_64'
+Found pkg-config at: /usr/bin/pkg-config
+Auto-config: --build-dir=/tmp/jansene-build-temp-140518
+COMMAND: mkdir -p /tmp/jansene-build-temp-140518
+Auto-config: --jobs=48
+Auto-config: --ccache=/usr/bin/ccache
+Auto-config: --ssh-tmp-dir=/tmp/jansene-android-emulator-140518/ssh-build-qemu-android-deps
+Using AOSP dir: /usr/local/google/home/jansene/src/emu-master-dev
+Using prebuilts dir: /usr/local/google/home/jansene/src/emu-master-dev/prebuilts/android-emulator-build
+Auto-config: --install-dir=/usr/local/google/home/jansene/src/emu-master-dev/prebuilts/android-emulator-build/qemu-android-deps  [default]
+Found pkg-config at: /usr/bin/pkg-config
+[windows-x86_64] Already built.
+Done building qemu-android dependencies.
+[windows-x86_64] Using binprefix [x86_64-w64-mingw32-]
+[windows-x86_64] Creating build directory: /tmp/jansene-build-qemu-android-139676/build-windows-x86_64
+COMMAND: mkdir -p /tmp/jansene-build-qemu-android-139676/build-windows-x86_64
+[windows-x86_64] Using toolchain build prefix: /tmp/jansene-build-qemu-android-139676/install-windows-x86_64
+[windows-x86_64] EXTRA_WINEPATH=Z:\usr\local\google\home\jansene\src\emu-master-dev\prebuilts\gcc\linux-x86\host\x86_64-w64-mingw32-4.8\x86_64-w64-mingw32\bin
+[windows-x86_64] Generating x86_64-w64-mingw32 wrapper toolchain in /tmp/jansene-build-qemu-android-139676/build-windows-x86_64/toolchain-wrapper
+COMMAND: ./android/scripts/gen-android-sdk-toolchain.sh --aosp-dir=/usr/local/google/home/jansene/src/emu-master-dev --host=windows-x86_64 --binprefix=x86_64-w64-mingw32- --ccache=/usr/bin/ccache --prefix=/tmp/jansene-build-qemu-android-139676/install-windows-x86_64 --cxx11 /tmp/jansene-build-qemu-android-139676/build-windows-x86_64/toolchain-wrapper
+[windows-x86_64] Path: "/tmp/jansene-build-qemu-android-139676/build-windows-x86_64/toolchain-wrapper:/usr/local/google/home/jansene/Android/Sdk//platform-tools:/usr/local/google/home/jansene/Android/Sdk//build-tools/24.0.3::/usr/local/bin:/usr/local/google/home/jansene/.vimpkg/bin:/usr/local/google/home/jansene/bin:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/lib/google-golang/bin:/usr/lib/jvm/java-8-openjdk-amd64/bin:/usr/sbin:/opt/wine-1.8.5/bin:/usr/local/google/home/jansene/.rvm/bin:/usr/local/google/home/jansene/aosp/gocode/bin"
+[windows-x86_64] Building qemu-android
+Qemu targets: arm aarch64 mipsel mips64el i386 x86_64
+COMMAND: mkdir -p /tmp/jansene-build-qemu-android-139676/build-windows-x86_64/qemu-android
+COMMAND: rm -rf /tmp/jansene-build-qemu-android-139676/build-windows-x86_64/qemu-android/*
+COMMAND: cd /tmp/jansene-build-qemu-android-139676/build-windows-x86_64/qemu-android
+COMMAND: /usr/local/google/home/jansene/src/emu-master-dev/external/qemu/configure --cross-prefix=x86_64-w64-mingw32- --target-list=arm-softmmu aarch64-softmmu mipsel-softmmu mips64el-softmmu i386-softmmu x86_64-softmmu --prefix=/usr/local/google/home/jansene/src/emu-master-dev/prebuilts/android-emulator-build/qemu-android-deps/windows-x86_64 --extra-cflags=-I/usr/local/google/home/jansene/src/emu-master-dev/prebuilts/android-emulator-build/qemu-android-deps/windows-x86_64/include -DVS_VERSION_INFO=1 --extra-ldflags=-L/usr/local/google/home/jansene/src/emu-master-dev/prebuilts/android-emulator-build/qemu-android-deps/windows-x86_64/lib -static-libgcc -static-libstdc++ --audio-drv-list=winaudio,dsound --disable-attr --disable-blobs --disable-bzip2 --disable-cap-ng --disable-cocoa --disable-curl --disable-curses --disable-docs --disable-glusterfs --disable-gtk --disable-guest-agent --disable-libnfs --disable-libiscsi --disable-libssh2 --disable-libusb --disable-seccomp --disable-spice --disable-usb-redir --disable-user --disable-vde --disable-vhdx --disable-vhost-net --disable-vnc --disable-vnc-sasl --disable-werror --enable-winvista --enable-sdl --with-sdlabi=2.0 --enable-trace-backends=nop
