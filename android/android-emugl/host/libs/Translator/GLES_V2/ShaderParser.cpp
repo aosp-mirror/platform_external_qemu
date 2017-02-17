@@ -15,15 +15,48 @@
 */
 
 #include "ShaderParser.h"
-#include "ShaderValidator.h"
-#include <stdlib.h>
-#include <string.h>
 
 #include <memory>
+#include <stdlib.h>
+#include <string.h>
 #include <string>
 #include <vector>
 
 ShaderParser::ShaderParser(GLenum type) : ObjectData(SHADER_DATA), m_type(type) {}
+
+ShaderParser::ShaderParser(android::base::Stream* stream) : ObjectData(stream) {
+    m_originalSrc = stream->getString();
+    m_src = stream->getString();
+    m_parsedSrc = stream->getString();
+    m_parsedLines = (GLchar*)m_parsedSrc.c_str();
+    m_infoLog = stream->getString();
+    size_t programSize = stream->getBe32();
+    for (size_t program = 0; program < programSize; program++) {
+        m_programs.insert(stream->getBe32());
+    }
+    m_type = stream->getBe32();
+    m_deleteStatus = stream->getByte();
+    m_valid = stream->getByte();
+}
+
+void ShaderParser::onSave(android::base::Stream* stream) const {
+    // The first byte is used to distinguish between program and shader object.
+    // It will be loaded outside of this class
+    stream->putByte(LOAD_SHADER);
+    ObjectData::onSave(stream);
+    stream->putString(m_originalSrc);
+    stream->putString(m_src);
+    stream->putString(m_parsedSrc);
+    // do not snapshot m_parsedLines
+    stream->putString(m_infoLog);
+    stream->putBe32(m_programs.size());
+    for (const auto& program : m_programs) {
+        stream->putBe32(program);
+    }
+    stream->putBe32(m_type);
+    stream->putByte(m_deleteStatus);
+    stream->putByte(m_valid);
+}
 
 void ShaderParser::convertESSLToGLSL(int esslVersion) {
     std::string infolog;

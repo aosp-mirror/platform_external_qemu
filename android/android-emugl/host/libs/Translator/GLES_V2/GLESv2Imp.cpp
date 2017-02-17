@@ -27,6 +27,7 @@
 #include <GLES3/gl31.h>
 
 #include <OpenglCodecCommon/ErrorLog.h>
+#include <GLcommon/TextureData.h>
 #include <GLcommon/TranslatorIfaces.h>
 #include "GLESv2Context.h"
 #include "GLESv2Validate.h"

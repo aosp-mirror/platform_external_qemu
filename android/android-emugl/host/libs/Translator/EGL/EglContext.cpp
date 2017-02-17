@@ -52,10 +52,18 @@ EglContext::EglContext(EglDisplay *dpy,
     m_native = dpy->nativeType()->createContext(
             m_config->nativeFormat(), globalSharedContext);
     if (m_native) {
-        // When loading from a snapshot, the first context within a shared group
+        // When loading from a snapshot, the first context within a share group
         // will load share group data.
+        ShareGroup::loadObject_t func = [&glesCtx] (NamedObjectType type,
+                        long long unsigned int localName,
+                        android::base::Stream* stream) {
+                            return glesCtx->loadObject(type, localName, stream);
+                        };
         m_shareGroup = mngr->attachOrCreateShareGroup(m_native, shareGroupId,
-                stream);
+                stream, func);
+        if (stream) {
+            glesCtx->setShareGroup(m_shareGroup);
+        }
         m_hndl = ++s_nextContextHndl;
     } else {
         m_hndl = 0;

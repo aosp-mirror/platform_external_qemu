@@ -23,6 +23,9 @@
 class RenderbufferData : public ObjectData
 {
 public:
+    RenderbufferData() = default;
+    RenderbufferData(android::base::Stream* stream);
+    virtual void onSave(android::base::Stream* stream) const override;
     GLuint attachedFB = 0;
     GLenum attachedPoint = 0;
     NamedObjectPtr eglImageGlobalTexObject = 0;
@@ -35,7 +38,10 @@ class FramebufferData : public ObjectData
 {
 public:
     explicit FramebufferData(GLuint name);
+    FramebufferData(android::base::Stream* stream);
     ~FramebufferData();
+    virtual void onSave(android::base::Stream* stream) const override;
+    virtual void postLoad(getObjDataPtr_t getObjDataPtr) override;
 
     void setAttachment(GLenum attachment,
                        GLenum target,
@@ -66,6 +72,9 @@ private:
     struct attachPoint {
         GLenum target; // OGL if owned, GLES otherwise
         GLuint name; // OGL if owned, GLES otherwise
+        // objType is only used in snapshot postLoad, for retrieving obj.
+        // objType's data is only valid between loading and postLoad snapshot
+        NamedObjectType objType;
         ObjectDataPtr obj;
         bool owned;
     } m_attachPoints[MAX_ATTACH_POINTS+1] = {};

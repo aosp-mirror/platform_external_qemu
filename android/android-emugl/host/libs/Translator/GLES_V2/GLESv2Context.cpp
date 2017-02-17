@@ -16,6 +16,9 @@
 
 #include "GLESv2Context.h"
 
+#include "ShaderParser.h"
+#include "ProgramData.h"
+
 #include <string.h>
 
 static const char kGLES20StringPart[] = "OpenGL ES 2.0";
@@ -107,6 +110,31 @@ void GLESv2Context::onSave(android::base::Stream* stream) const {
     stream->putBe32(m_att0ArrayLength);
     stream->write(m_att0Array, sizeof(GLfloat) * 4 * m_att0ArrayLength);
     stream->putByte(m_att0NeedsDisable);
+}
+
+ObjectDataPtr GLESv2Context::loadObject(NamedObjectType type,
+            ObjectLocalName localName, android::base::Stream* stream) const {
+    switch (type) {
+        case NamedObjectType::VERTEXBUFFER:
+        case NamedObjectType::TEXTURE:
+        case NamedObjectType::FRAMEBUFFER:
+        case NamedObjectType::RENDERBUFFER:
+            return GLEScontext::loadObject(type, localName, stream);
+        case NamedObjectType::SHADER_OR_PROGRAM:
+            // load the first bit to see if it is a program or shader
+            switch (stream->getByte()) {
+                case LOAD_PROGRAM:
+                    return ObjectDataPtr(new ProgramData(stream));
+                case LOAD_SHADER:
+                    return ObjectDataPtr(new ShaderParser(stream));
+                default:
+                    fprintf(stderr, "corrupted snapshot\n");
+                    assert(false);
+                    return nullptr;
+            }
+        default:
+            return nullptr;
+    }
 }
 
 void GLESv2Context::setAttribute0value(float x, float y, float z, float w)
@@ -226,7 +254,7 @@ bool GLESv2Context::needConvert(GLESConversionArrays& cArrs,GLint first,GLsizei 
         }
     } else {
         if (direct) {
-            convertDirectVBO(cArrs,first,count,array_id,p) ;
+            convertDirectVBO(cArrs,first,count,array_id,p);
         } else {
             convertIndirectVBO(cArrs,count,type,indices,array_id,p);
         }
