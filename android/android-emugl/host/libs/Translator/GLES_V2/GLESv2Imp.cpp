@@ -609,6 +609,18 @@ GL_APICALL void  GL_APIENTRY glCompressedTexImage2D(GLenum target, GLint level, 
 GL_APICALL void  GL_APIENTRY glCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data){
     GET_CTX();
     SET_ERROR_IF(!GLESv2Validate::textureTargetEx(ctx, target),GL_INVALID_ENUM);
+    if (ctx->shareGroup().get()) {
+        TextureData* texData = getTextureTargetData(target);
+        if (texData) {
+            if (isEtcFormat(texData->compressedFormat)) {
+                int encodedDataSize =
+                    etc_get_encoded_data_size(
+                        getEtcFormat(texData->compressedFormat),
+                        width, height);
+                SET_ERROR_IF(imageSize != encodedDataSize, GL_INVALID_VALUE);
+            }
+        }
+    }
     SET_ERROR_IF(!data,GL_INVALID_OPERATION);
     ctx->dispatcher().glCompressedTexSubImage2D(target,level,xoffset,yoffset,width,height,format,imageSize,data);
 }
