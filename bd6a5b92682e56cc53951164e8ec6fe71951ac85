@@ -22,6 +22,30 @@
       "revId": "bd6a5b92682e56cc53951164e8ec6fe71951ac85",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a1f40f02_b6fe8a91",
+        "filename": "android/android-emu/android/car.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-02-17T17:24:14Z",
+      "side": 1,
+      "message": "Added comments in header to specify null is invalid.\n\nI\u0027d prefer to have an explicit unregister function, and use context as a token. Leave it as a todo if we need it in the future.",
+      "parentUuid": "beb9ac00_83039c32",
+      "range": {
+        "startLine": 114,
+        "startChar": 0,
+        "endLine": 117,
+        "endChar": 5
+      },
+      "revId": "bd6a5b92682e56cc53951164e8ec6fe71951ac85",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
