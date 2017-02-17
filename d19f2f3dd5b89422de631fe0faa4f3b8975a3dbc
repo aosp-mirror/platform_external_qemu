@@ -22,6 +22,30 @@
       "revId": "d19f2f3dd5b89422de631fe0faa4f3b8975a3dbc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d317dad8_19ad9763",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 672,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-17T20:35:24Z",
+      "side": 1,
+      "message": "Not sure. Probably some ref-counting mechanism that depends on both the transform feedback being deleted and the buffer being deleted (although it is unclear from spec if the transform feedback buffer object deletion should affect indexed buffer binding state). Future CL if it comes up.",
+      "parentUuid": "482df4a3_0f6dc8a7",
+      "range": {
+        "startLine": 672,
+        "startChar": 7,
+        "endLine": 672,
+        "endChar": 33
+      },
+      "revId": "d19f2f3dd5b89422de631fe0faa4f3b8975a3dbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
