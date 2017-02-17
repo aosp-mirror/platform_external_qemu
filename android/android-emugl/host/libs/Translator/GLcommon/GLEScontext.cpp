@@ -664,7 +664,13 @@ void GLEScontext::unbindBuffer(GLuint buffer) {
     if (m_shaderStorageBuffer == buffer)
         m_shaderStorageBuffer = 0;
 
-    sClearIndexedBufferBinding(buffer, m_indexedTransformFeedbackBuffers);
+    // One might think that indexed buffer bindings for transform feedbacks
+    // must be cleared as well, but transform feedbacks are
+    // considered GL objects with attachments, so even if the buffer is
+    // deleted (unbindBuffer is called), the state query with
+    // glGetIntegeri_v must still return the deleted name [1].
+    // sClearIndexedBufferBinding(buffer, m_indexedTransformFeedbackBuffers);
+    // [1] OpenGL ES 3.0.5 spec Appendix D.1.3
     sClearIndexedBufferBinding(buffer, m_indexedUniformBuffers);
     sClearIndexedBufferBinding(buffer, m_indexedAtomicCounterBuffers);
     sClearIndexedBufferBinding(buffer, m_indexedShaderStorageBuffers);
