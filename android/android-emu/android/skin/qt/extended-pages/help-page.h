@@ -13,9 +13,14 @@
 
 #include "android/skin/qt/shortcut-key-store.h"
 #include "android/skin/qt/qt-ui-commands.h"
+#include "android/skin/qt/extended-pages/bug-report-window.h"
+
 #include "ui_help-page.h"
 #include <QWidget>
 #include <memory>
+
+class BugReportWindow;
+class EmulatorQtWindow;
 
 class HelpPage : public QWidget
 {
@@ -38,8 +43,10 @@ private slots:
 private:
     void initializeLicenseText();
     void initializeKeyboardShortcutList(const ShortcutKeyStore<QtUICommand>* key_store);
+    void createBugReportWindow();
 
     std::unique_ptr<Ui::HelpPage> mUi;
+    BugReportWindow* mBugReportWindow = nullptr;
 };
 
 class LatestVersionLoadTask : public QObject {

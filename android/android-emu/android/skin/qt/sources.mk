@@ -52,6 +52,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/extended-pages/common.cpp \
     android/skin/qt/extended-pages/battery-page.cpp \
     android/skin/qt/extended-pages/car-data-page.cpp \
+    android/skin/qt/extended-pages/bug-report-window.cpp \
     android/skin/qt/extended-pages/cellular-page.cpp \
     android/skin/qt/extended-pages/dpad-page.cpp \
     android/skin/qt/extended-pages/finger-page.cpp \
@@ -88,6 +89,7 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/event-subscriber.h \
     android/skin/qt/extended-pages/battery-page.h \
     android/skin/qt/extended-pages/car-data-page.h \
+    android/skin/qt/extended-pages/bug-report-window.h \
     android/skin/qt/extended-pages/cellular-page.h \
     android/skin/qt/extended-pages/dpad-page.h \
     android/skin/qt/extended-pages/finger-page.h \
@@ -118,6 +120,7 @@ ANDROID_SKIN_QT_UI_SRC_FILES := \
     android/skin/qt/extended.ui \
     android/skin/qt/extended-pages/car-data-page.ui \
     android/skin/qt/extended-pages/battery-page.ui \
+    android/skin/qt/extended-pages/bug-report-window.ui \
     android/skin/qt/extended-pages/cellular-page.ui \
     android/skin/qt/extended-pages/dpad-page.ui \
     android/skin/qt/extended-pages/finger-page.ui \
