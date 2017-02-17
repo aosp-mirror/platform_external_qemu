@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3c604227_5dd249f4",
+        "filename": "android/android-emu/android/opengl/emugl_config.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-02-17T17:58:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "605d7086_08679ea2",
+      "range": {
+        "startLine": 234,
+        "startChar": 40,
+        "endLine": 234,
+        "endChar": 45
+      },
+      "revId": "cfcee51e089bdde043be5521d7c8ab860ae1b913",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b18f0048_53e8eb42",
         "filename": "android/android-emu/android/opengl/emugl_config.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-17T16:33:28Z",
       "side": 1,
       "message": "please write this also into |config-\u003estatus| for a -verbose print and potentially simpler debugging later",
+      "range": {
+        "startLine": 236,
+        "startChar": 17,
+        "endLine": 236,
+        "endChar": 72
+      },
+      "revId": "cfcee51e089bdde043be5521d7c8ab860ae1b913",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0791ce5a_5cfa3f20",
+        "filename": "android/android-emu/android/opengl/emugl_config.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-02-17T17:58:25Z",
+      "side": 1,
+      "message": "Thanks for reminding. I found the rendering choice will be written to \"config-status\" before the function returning.",
+      "parentUuid": "b18f0048_53e8eb42",
       "range": {
         "startLine": 236,
         "startChar": 17,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "a27500d4_f9e195e3",
+        "filename": "android/android-emu/android/opengl/gpuinfo.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-02-17T17:58:25Z",
+      "side": 1,
+      "message": "Both looks fine to me :). Trying to keep consistent with whitelist.",
+      "parentUuid": "27791a69_b59693ee",
+      "range": {
+        "startLine": 203,
+        "startChar": 3,
+        "endLine": 203,
+        "endChar": 53
+      },
+      "revId": "cfcee51e089bdde043be5521d7c8ab860ae1b913",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "32b0e609_0e5f274b",
         "filename": "android/android-emu/android/opengl/gpuinfo.cpp",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2017-02-17T16:33:28Z",
       "side": 1,
       "message": "nit: if feels to me that enum here would be more readable. Otherwise a single typo would leave it silently broken",
+      "range": {
+        "startLine": 393,
+        "startChar": 36,
+        "endLine": 393,
+        "endChar": 44
+      },
+      "revId": "cfcee51e089bdde043be5521d7c8ab860ae1b913",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6173b462_2cabfcda",
+        "filename": "android/android-emu/android/opengl/gpuinfo.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 393,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-02-17T17:58:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "32b0e609_0e5f274b",
       "range": {
         "startLine": 393,
         "startChar": 36,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "0df2c8a4_14e53d98",
+        "filename": "android/android-emu/android/opengl/gpuinfo.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-02-17T17:58:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "92de516a_9af4721b",
+      "range": {
+        "startLine": 38,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 6
+      },
+      "revId": "cfcee51e089bdde043be5521d7c8ab860ae1b913",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "194a51d3_0d3dc9a4",
         "filename": "android/android-emu/android/opengl/gpuinfo.h",
         "patchSetId": 1
@@ -140,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "0b9ae669_89360db8",
+        "filename": "android/android-emu/android/opengl/gpuinfo.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-02-17T17:58:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "194a51d3_0d3dc9a4",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 6
+      },
+      "revId": "cfcee51e089bdde043be5521d7c8ab860ae1b913",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2614d335_f2cfdd71",
         "filename": "android/android-emu/android/opengl/gpuinfo.h",
         "patchSetId": 1
@@ -151,6 +295,30 @@
       "writtenOn": "2017-02-17T16:33:28Z",
       "side": 1,
       "message": "it\u0027s OK to have it for all platforms, initialized to |false| here. it fills the alignment padding anyway.",
+      "range": {
+        "startLine": 92,
+        "startChar": 0,
+        "endLine": 94,
+        "endChar": 6
+      },
+      "revId": "cfcee51e089bdde043be5521d7c8ab860ae1b913",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5437838e_fde62977",
+        "filename": "android/android-emu/android/opengl/gpuinfo.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-02-17T17:58:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2614d335_f2cfdd71",
       "range": {
         "startLine": 92,
         "startChar": 0,
