@@ -280,6 +280,8 @@ public:
 
     // Snapshot save
     virtual void onSave(android::base::Stream* stream) const;
+    virtual ObjectDataPtr loadObject(NamedObjectType type,
+            ObjectLocalName localName, android::base::Stream* stream) const;
 protected:
     static void buildStrings(const char* baseVendor, const char* baseRenderer, const char* baseVersion, const char* version);
 

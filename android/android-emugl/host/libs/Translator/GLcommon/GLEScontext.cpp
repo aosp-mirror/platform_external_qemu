@@ -18,6 +18,7 @@
 #include <GLcommon/GLconversion_macros.h>
 #include <GLcommon/GLSnapshotSerializers.h>
 #include <GLcommon/GLESmacros.h>
+#include <GLcommon/TextureData.h>
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 #include <GLES2/gl2.h>
@@ -459,6 +460,22 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
     }
 }
 
+ObjectDataPtr GLEScontext::loadObject(NamedObjectType type,
+            ObjectLocalName localName, android::base::Stream* stream) const {
+    switch (type) {
+        case NamedObjectType::VERTEXBUFFER:
+            return ObjectDataPtr(new GLESbuffer(stream));
+        case NamedObjectType::TEXTURE:
+            return ObjectDataPtr(new TextureData(stream));
+        case NamedObjectType::FRAMEBUFFER:
+            return ObjectDataPtr(new FramebufferData(stream));
+        case NamedObjectType::RENDERBUFFER:
+            return ObjectDataPtr(new RenderbufferData(stream));
+        default:
+            return {};
+    }
+}
+
 const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data, GLsizei dataSize, bool normalize, bool isInt) {
     GLuint bufferName = m_arrayBuffer;
     if(bufferName) {
@@ -801,7 +818,13 @@ void GLEScontext::unbindBuffer(GLuint buffer) {
     if (m_shaderStorageBuffer == buffer)
         m_shaderStorageBuffer = 0;
 
-    sClearIndexedBufferBinding(buffer, m_indexedTransformFeedbackBuffers);
+    // One might think that indexed buffer bindings for transform feedbacks
+    // must be cleared as well, but transform feedbacks are
+    // considered GL objects with attachments, so even if the buffer is
+    // deleted (unbindBuffer is called), the state query with
+    // glGetIntegeri_v must still return the deleted name [1].
+    // sClearIndexedBufferBinding(buffer, m_indexedTransformFeedbackBuffers);
+    // [1] OpenGL ES 3.0.5 spec Appendix D.1.3
     sClearIndexedBufferBinding(buffer, m_indexedUniformBuffers);
     sClearIndexedBufferBinding(buffer, m_indexedAtomicCounterBuffers);
     sClearIndexedBufferBinding(buffer, m_indexedShaderStorageBuffers);
