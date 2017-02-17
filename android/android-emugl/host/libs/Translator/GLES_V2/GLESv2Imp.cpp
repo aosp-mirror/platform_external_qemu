@@ -345,27 +345,46 @@ static void sUpdateFboEmulation(GLESv2Context* ctx) {
 
     bool enableSRGB = false;
     bool enableDepth32fClamp = false;
+    bool readFboIsSRGB = false;
+    bool drawFboIsSRGB = false;
 
-    for (auto fbObj : {ctx->shareGroup()->getObjectData(NamedObjectType::FRAMEBUFFER, read_fbo),
-                       ctx->shareGroup()->getObjectData(NamedObjectType::FRAMEBUFFER, draw_fbo)}) {
+    FramebufferData *readFbData = (FramebufferData *)(ctx->shareGroup()->getObjectData(NamedObjectType::FRAMEBUFFER, read_fbo));
+    FramebufferData *drawFbData = (FramebufferData *)(ctx->shareGroup()->getObjectData(NamedObjectType::FRAMEBUFFER, draw_fbo));
 
-        if (fbObj == nullptr) { continue; }
+    // Enable GL_DEPTH_CLAMP when any fbo's
+    // GL_DEPTH_ATTACHMENT or GL_DEPTH_STENCIL_ATTACHMENT is of internal format
+    // GL_DEPTH_COMPONENT32F or GL_DEPTH32F_STENCIL8.
+    if ((readFbData && sHasAttachmentWithFormat(ctx, readFbData,
+                depthAttachments, {GL_DEPTH_COMPONENT32F, GL_DEPTH32F_STENCIL8})) ||
+        (drawFbData && sHasAttachmentWithFormat(ctx, drawFbData,
+                depthAttachments, {GL_DEPTH_COMPONENT32F, GL_DEPTH32F_STENCIL8})))
+        enableDepth32fClamp = true;
 
-        FramebufferData *fbData = (FramebufferData *)fbObj;
 
-        // Enable GL_FRAMEBUFFER_SRGB when any framebuffer has SRGB color attachment.
-        if (sHasAttachmentWithFormat(ctx, fbData,
-                    colorAttachments, {GL_SRGB8_ALPHA8}))
-            enableSRGB = true;
+    // If the default framebuffer is not capable of GL_FRAMEBUFFER_SRGB,
+    // enable GL_FRAMEBUFFER_SRGB if any attachment has sRGB format.
+    if (readFbData && sHasAttachmentWithFormat(ctx, readFbData,
+                colorAttachments, {GL_SRGB8_ALPHA8}))
+        readFboIsSRGB = true;
+    if (drawFbData && sHasAttachmentWithFormat(ctx, drawFbData,
+                colorAttachments, {GL_SRGB8_ALPHA8}))
+        drawFboIsSRGB = true;
 
-        // Enable GL_DEPTH_CLAMP when any fbo's
-        // GL_DEPTH_ATTACHMENT or GL_DEPTH_STENCIL_ATTACHMENT is of internal format
-        // GL_DEPTH_COMPONENT32F or GL_DEPTH32F_STENCIL8.
-        if (sHasAttachmentWithFormat(ctx, fbData,
-                    depthAttachments, {GL_DEPTH_COMPONENT32F, GL_DEPTH32F_STENCIL8}))
-            enableDepth32fClamp = true;
+    if (ctx->isDefaultFboSRGBCapable()) {
+        if (!read_fbo || !draw_fbo) {
+            enableSRGB = !read_fbo && drawFboIsSRGB;
+        } else {
+            enableSRGB =
+                (read_fbo && draw_fbo &&
+                 (read_fbo != draw_fbo) &&
+                 drawFboIsSRGB);
+        }
+    } else {
+        enableSRGB = readFboIsSRGB || drawFboIsSRGB;
     }
 
+    if (enableSRGB) fprintf(stderr, "    %s: enabling srgb (maj %d) read -> draw %u %u rdsrgb: %d %d 0: %d\n", __func__, ctx->getMajorVersion(), read_fbo, draw_fbo, readFboIsSRGB, drawFboIsSRGB, ctx->isDefaultFboSRGBCapable());
+    if (!enableSRGB) fprintf(stderr, "    %s: disabling srgb (maj %d) read -> draw %u %u rdsrgb: %d %d 0: %d\n", __func__, ctx->getMajorVersion(), read_fbo, draw_fbo, readFboIsSRGB, drawFboIsSRGB, ctx->isDefaultFboSRGBCapable());
     sSetDesktopGLEnable(ctx, enableSRGB, GL_FRAMEBUFFER_SRGB);
     sSetDesktopGLEnable(ctx, enableDepth32fClamp, GL_DEPTH_CLAMP);
 }
@@ -373,6 +392,18 @@ static void sUpdateFboEmulation(GLESv2Context* ctx) {
 GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer){
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::framebufferTarget(ctx, target),GL_INVALID_ENUM);
+
+    // char targetstr[1024];
+    // if (target == GL_FRAMEBUFFER) {
+    //     memcpy(targetstr, "GL_FRAMEBUFFER", strlen("GL_FRAMEBUFFER") + 1);
+    // }
+    // if (target == GL_DRAW_FRAMEBUFFER) {
+    //     memcpy(targetstr, "GL_DRAW_FRAMEBUFFER", strlen("GL_DRAW_FRAMEBUFFER") + 1);
+    // }
+    // if (target == GL_READ_FRAMEBUFFER) {
+    //     memcpy(targetstr, "GL_READ_FRAMEBUFFER", strlen("GL_READ_FRAMEBUFFER") + 1);
+    // }
+    // fprintf(stderr, "%s: %s %u\n", __func__, targetstr, framebuffer);
 
     GLuint globalFrameBufferName = framebuffer;
     if(framebuffer && ctx->shareGroup().get()){
@@ -397,7 +428,6 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
     ctx->dispatcher().glBindFramebufferEXT(target,globalFrameBufferName);
     // update framebuffer binding state
     ctx->setFramebufferBinding(target, framebuffer);
-
     sUpdateFboEmulation(ctx);
 }
 
@@ -1163,12 +1193,12 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
     }
 
     ctx->dispatcher().glFramebufferRenderbufferEXT(target,attachment,renderbuffertarget,globalRenderbufferName);
-
     sUpdateFboEmulation(ctx);
 }
 
 GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level){
     GET_CTX_V2();
+    fprintf(stderr, "    %s: call\n", __func__);
     SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(ctx, target) &&
                    GLESv2Validate::textureTargetEx(ctx, textarget)  &&
                    GLESv2Validate::framebufferAttachment(ctx, attachment)), GL_INVALID_ENUM);
@@ -2464,6 +2494,7 @@ GL_APICALL void  GL_APIENTRY glPolygonOffset(GLfloat factor, GLfloat units){
 
 GL_APICALL void  GL_APIENTRY glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels){
     GET_CTX_V2();
+    // fprintf(stderr, "    %s: call\n", __func__);
     SET_ERROR_IF(!(GLESv2Validate::pixelOp(format,type)),GL_INVALID_OPERATION);
     SET_ERROR_IF(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE, GL_INVALID_FRAMEBUFFER_OPERATION);
     ctx->dispatcher().glReadPixels(x,y,width,height,format,type,pixels);

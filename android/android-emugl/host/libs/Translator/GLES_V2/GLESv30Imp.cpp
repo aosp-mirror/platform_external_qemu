@@ -409,6 +409,13 @@ GL_APICALL void GL_APIENTRY glReadBuffer(GLenum src) {
 
 GL_APICALL void GL_APIENTRY glBlitFramebuffer(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter) {
     GET_CTX_V2();
+    fprintf(stderr, "    %s: call. blending? %d\n", __func__, ctx->dispatcher().glIsEnabled(GL_BLEND));
+    // GLfloat black[4];
+    // black[0] = 0.0f;
+    // black[1] = 0.0f;
+    // black[2] = 0.0f;
+    // black[3] = 0.0f;
+    // ctx->dispatcher().glClearBufferfv(GL_COLOR, 0, black);
     ctx->dispatcher().glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
 }
 

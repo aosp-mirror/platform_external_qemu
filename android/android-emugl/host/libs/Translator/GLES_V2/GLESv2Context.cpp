@@ -69,7 +69,14 @@ void GLESv2Context::init(GlLibrary* glLib) {
             // and some dEQP-GLES3 framebuffer blit tests fail.
             // So we need to start out each context with GL_FRAMEBUFFER_SRGB disabled, and then enable it depending on
             // whether or not the current draw or read framebuffer has a SRGB texture color attachment.
+        #define GL_FRAMEBUFFER_SRGB_CAPABLE_EXT 0x8DBA
+            dispatcher().glGetIntegerv(GL_FRAMEBUFFER_SRGB_CAPABLE_EXT, &m_srgbCap);
+            fprintf(stderr, "%s: curr fbo capable of srgb? %d\n", __func__, m_srgbCap); 
             dispatcher().glDisable(GL_FRAMEBUFFER_SRGB);
+            // if (m_srgbCap) {
+            // } else {
+            // dispatcher().glEnable(GL_FRAMEBUFFER_SRGB);
+            // }
             // Desktop OpenGL allows one to make cube maps seamless _or not_, but
             // OpenGL ES assumes seamless cubemaps are activated 100% of the time.
             // Many dEQP cube map tests fail without this enable.

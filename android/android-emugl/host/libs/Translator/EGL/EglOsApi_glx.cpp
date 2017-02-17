@@ -145,6 +145,30 @@ void pixelFormatToConfig(EGLNativeDisplayType dpy,
     EXIT_IF_FALSE(glXGetFBConfigAttrib(
             dpy ,frmt, GLX_STENCIL_SIZE, &info.stencil_size));
 
+    // filter out all default framebuffers
+    int srgbCap;
+#define GLX_FRAMEBUFFER_SRGB_CAPABLE_EXT 0x20B2
+    glXGetFBConfigAttrib(dpy, frmt, GLX_FRAMEBUFFER_SRGB_CAPABLE_EXT, &srgbCap);
+    if (srgbCap) {
+        fprintf(stderr, "%s: found srgb-capable default fbo! r g b a d s %d %d %d %d %d %d\n", __func__,
+                info.red_size,
+                info.green_size,
+                info.blue_size,
+                info.alpha_size,
+                info.depth_size,
+                info.stencil_size
+                );
+    } else {
+        fprintf(stderr, "%s: found srgb-INcapable default fbo! r g b a d s %d %d %d %d %d %d\n", __func__,
+                info.red_size,
+                info.green_size,
+                info.blue_size,
+                info.alpha_size,
+                info.depth_size,
+                info.stencil_size
+                );
+    }
+
     info.renderable_type = renderableType;
     int nativeRenderable = 0;
     EXIT_IF_FALSE(glXGetFBConfigAttrib(
