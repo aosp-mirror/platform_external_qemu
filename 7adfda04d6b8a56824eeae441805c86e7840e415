@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7e1e56cb_8dd10e18",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 609,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-17T20:14:28Z",
+      "side": 1,
+      "message": "Yes. The code is cleaner, too.",
+      "parentUuid": "e33f1a15_72dea7fb",
+      "range": {
+        "startLine": 609,
+        "startChar": 19,
+        "endLine": 609,
+        "endChar": 26
+      },
+      "revId": "7adfda04d6b8a56824eeae441805c86e7840e415",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "42c6a7fa_5dd8895a",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-13T19:49:50Z",
       "side": 1,
       "message": "PathUtils::combine() ?",
+      "range": {
+        "startLine": 623,
+        "startChar": 26,
+        "endLine": 625,
+        "endChar": 37
+      },
+      "revId": "7adfda04d6b8a56824eeae441805c86e7840e415",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "127c58cc_e9567f90",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-17T20:14:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "42c6a7fa_5dd8895a",
       "range": {
         "startLine": 623,
         "startChar": 26,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "9cb5a687_7f80d33d",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 639,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-17T20:14:28Z",
+      "side": 1,
+      "message": "I did a tiny amount of research and did not learn if a 0 rotation does unneeded work.\nAs for caching, I don\u0027t perceive a delay on my machine.",
+      "parentUuid": "dee91274_77c54bc2",
+      "range": {
+        "startLine": 639,
+        "startChar": 11,
+        "endLine": 639,
+        "endChar": 64
+      },
+      "revId": "7adfda04d6b8a56824eeae441805c86e7840e415",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a9acca5_ac0dc274",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2017-02-13T19:49:50Z",
       "side": 1,
       "message": "do we need the \u0027Qt::SmoothTransformation\u0027 flag?",
+      "range": {
+        "startLine": 642,
+        "startChar": 43,
+        "endLine": 643,
+        "endChar": 68
+      },
+      "revId": "7adfda04d6b8a56824eeae441805c86e7840e415",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e16316e4_5810b982",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 643,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-17T20:14:28Z",
+      "side": 1,
+      "message": "I tried this on both the transformed() and scaledToWidth() calls. I didn\u0027t see any improvement.\n\nPerhaps that\u0027s expected, because the result is only one bit deep.",
+      "parentUuid": "6a9acca5_ac0dc274",
       "range": {
         "startLine": 642,
         "startChar": 43,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "5491f5c1_53ee3242",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-17T20:14:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "266041ad_c89d1891",
+      "range": {
+        "startLine": 323,
+        "startChar": 9,
+        "endLine": 323,
+        "endChar": 20
+      },
+      "revId": "7adfda04d6b8a56824eeae441805c86e7840e415",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "899ee913_916253e7",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.h",
         "patchSetId": 1
@@ -128,6 +248,24 @@
       "writtenOn": "2017-02-13T19:49:50Z",
       "side": 1,
       "message": "static?",
+      "revId": "7adfda04d6b8a56824eeae441805c86e7840e415",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b87513e_920d4138",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-17T20:14:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "899ee913_916253e7",
       "revId": "7adfda04d6b8a56824eeae441805c86e7840e415",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -216,6 +354,30 @@
       "side": 1,
       "message": "Well, as of now Qt UI is forwarding all mouse move events to the skin event loop, and only there we translate those into kEventMouseMotion to handle. I was asking if it\u0027s possible to handle the dragging directly in Qt when it gets the MouseMove event, instead of forwarding it here, handling and then notifying Qt to change window position.\nIt just feels like a more straightforward way, and more performant one for sure",
       "parentUuid": "0f42f677_957fed62",
+      "range": {
+        "startLine": 1939,
+        "startChar": 0,
+        "endLine": 1948,
+        "endChar": 9
+      },
+      "revId": "7adfda04d6b8a56824eeae441805c86e7840e415",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bb5f9456_986f811a",
+        "filename": "android/android-emu/android/skin/window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1948,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-17T20:14:28Z",
+      "side": 1,
+      "message": "I see. Yes, I may be able to do this more directly.\nI would like to leave this for now and do this change (or at least investigate it) as part of implementing the resize function.",
+      "parentUuid": "2850c929_39b0c8e3",
       "range": {
         "startLine": 1939,
         "startChar": 0,
