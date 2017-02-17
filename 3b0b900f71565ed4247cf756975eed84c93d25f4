@@ -22,6 +22,30 @@
       "revId": "3b0b900f71565ed4247cf756975eed84c93d25f4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c24cb123_30b8c1e1",
+        "filename": "configure",
+        "patchSetId": 2
+      },
+      "lineNbr": 4566,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-02-17T00:11:41Z",
+      "side": 1,
+      "message": "It\u0027s fine if it is not used in our code, it is not fine if the library is not available and we try to link against it.",
+      "parentUuid": "03cba006_a67725e2",
+      "range": {
+        "startLine": 4554,
+        "startChar": 0,
+        "endLine": 4566,
+        "endChar": 2
+      },
+      "revId": "3b0b900f71565ed4247cf756975eed84c93d25f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
