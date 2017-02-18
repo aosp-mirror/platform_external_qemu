@@ -11,11 +11,12 @@
 
 #include "android/base/sockets/SocketDrainer.h"
 
-#include "android/base/containers/ScopedPointerSet.h"
 #include "android/base/EintrWrapper.h"
 #include "android/base/sockets/SocketErrors.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/async/Looper.h"
+
+#include <unordered_set>
 
 // Some implementation whys:
 // When the looper is running, the sockets are non-blocking and are only
@@ -33,21 +34,18 @@ class DrainerObject;
 
 // SocketDrainImpl implements the SocketDrainer and manages all the DrainerObjects
 class SocketDrainerImpl {
-public:
-    SocketDrainerImpl(Looper* looper) :
-            mLooper(looper), mDrainerObjects() { }
+    DISALLOW_COPY_AND_ASSIGN(SocketDrainerImpl);
 
-    ~SocketDrainerImpl() {}
+public:
+    SocketDrainerImpl(Looper* looper) : mLooper(looper) {}
+    ~SocketDrainerImpl();
 
 public:
     void addSocketToDrain(int socket_fd);
-
-    void removeDrainerObject(DrainerObject* drainer) {
-        mDrainerObjects.remove(drainer);
-    }
+    void removeDrainerObject(DrainerObject* drainer);
 
 private:
-    typedef ScopedPointerSet<DrainerObject> DrainSet;
+    using DrainSet = std::unordered_set<DrainerObject*>;
 
     Looper*  mLooper;
     DrainSet mDrainerObjects;
@@ -143,13 +141,24 @@ bool DrainerObject::drainSocket() {
 
 //--------------------------- SocketDrainerImpl Implementation -------------------------
 
+SocketDrainerImpl::~SocketDrainerImpl() {
+    for (auto drainer : mDrainerObjects) {
+        delete drainer;
+    }
+}
+
 void SocketDrainerImpl::addSocketToDrain(int socket_fd) {
     DrainerObject* drainer = new DrainerObject(socket_fd, mLooper, this);
     if (drainer->socketIsDrained()) {
         delete drainer;
     } else {
-        mDrainerObjects.add(drainer);
+        mDrainerObjects.insert(drainer);
     }
+}
+
+void SocketDrainerImpl::removeDrainerObject(DrainerObject* drainer) {
+    mDrainerObjects.erase(drainer);
+    delete drainer;
 }
 
 //--------------------------- SocketDrainer Implementation -----------------------------

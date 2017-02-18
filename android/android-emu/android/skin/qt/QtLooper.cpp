@@ -11,8 +11,6 @@
 
 #include "android/skin/qt/QtLooper.h"
 
-#include "android/base/containers/ScopedPointerSet.h"
-#include "android/base/containers/TailQueueList.h"
 #include "android/skin/qt/QtTimerImpl.h"
 
 #include <QTime>

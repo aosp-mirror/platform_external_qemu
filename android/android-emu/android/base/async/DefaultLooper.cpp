@@ -15,12 +15,24 @@
 #include "android/base/system/System.h"
 #include "android/base/sockets/SocketErrors.h"
 
+#include <algorithm>
+
 namespace android {
 namespace base {
 
 DefaultLooper::DefaultLooper() : mWaiter(SocketWaiter::create()) {}
 
-DefaultLooper::~DefaultLooper() = default;
+DefaultLooper::~DefaultLooper() {
+    // Both FdWatch and Timer delete themselves from pending/active lists and
+    // from the global list of objects in their dtors. That's why we can't have
+    // a regular foreach loop here.
+    while (!mFdWatches.empty()) {
+        delete mFdWatches.begin()->first;
+    }
+    while (!mTimers.empty()) {
+        delete mTimers.begin()->first;
+    }
+}
 
 Looper::Duration DefaultLooper::nowMs(Looper::ClockType clockType) {
     DCHECK(clockType == ClockType::kHost);
@@ -42,19 +54,20 @@ void DefaultLooper::forceQuit() {
 }
 
 void DefaultLooper::addFdWatch(DefaultLooper::FdWatch* watch) {
-    mFdWatches.add(watch);
+    mFdWatches.emplace(watch, mPendingFdWatches.end());
 }
 
 void DefaultLooper::delFdWatch(DefaultLooper::FdWatch* watch) {
-    mFdWatches.pick(watch);
+    mFdWatches.erase(watch);
 }
 
 void DefaultLooper::addPendingFdWatch(DefaultLooper::FdWatch* watch) {
-    mPendingFdWatches.insertTail(watch);
+    mPendingFdWatches.push_back(watch);
+    mFdWatches[watch] = std::prev(mPendingFdWatches.end());
 }
 
 void DefaultLooper::delPendingFdWatch(DefaultLooper::FdWatch* watch) {
-    mPendingFdWatches.remove(watch);
+    mPendingFdWatches.erase(mFdWatches[watch]);
 }
 
 void DefaultLooper::updateFdWatch(int fd, unsigned wantedEvents) {
@@ -68,42 +81,39 @@ Looper::FdWatch* DefaultLooper::createFdWatch(int fd,
 }
 
 void DefaultLooper::addTimer(DefaultLooper::Timer* timer) {
-    mTimers.add(timer);
+    mTimers.emplace(timer, mPendingTimers.end());
 }
 
 void DefaultLooper::delTimer(DefaultLooper::Timer* timer) {
-    mTimers.pick(timer);
+    mTimers.erase(timer);
 }
 
 void DefaultLooper::enableTimer(DefaultLooper::Timer* timer) {
     // Find the first timer that expires after this one.
-    Timer* item = mActiveTimers.front();
-    while (item && item->deadline() < timer->deadline()) {
-        item = item->next();
-    }
-    if (item) {
-        mActiveTimers.insertBefore(item, timer);
-    } else {
-        mActiveTimers.insertTail(timer);
-    }
+    const auto deadline = timer->deadline();
+    const auto it = std::find_if(
+            mActiveTimers.begin(), mActiveTimers.end(),
+            [deadline](const Timer* t) { return t->deadline() > deadline; });
+    mTimers[timer] = mActiveTimers.insert(it, timer);
 }
 
 void DefaultLooper::disableTimer(DefaultLooper::Timer* timer) {
     // Simply remove from the list.
-    mActiveTimers.remove(timer);
+    mActiveTimers.erase(mTimers[timer]);
 }
 
 void DefaultLooper::addPendingTimer(DefaultLooper::Timer* timer) {
-    mPendingTimers.insertTail(timer);
+    mPendingTimers.push_back(timer);
+    mTimers[timer] = std::prev(mPendingTimers.end());
 }
 
 void DefaultLooper::delPendingTimer(DefaultLooper::Timer* timer) {
-    mPendingTimers.remove(timer);
+    mPendingTimers.erase(mTimers[timer]);
 }
 
 Looper::Timer* DefaultLooper::createTimer(Looper::Timer::Callback callback,
-                                      void* opaque,
-                                      Looper::ClockType clock) {
+                                          void* opaque,
+                                          Looper::ClockType clock) {
     return new DefaultLooper::Timer(this, callback, opaque, clock);
 }
 
@@ -138,9 +148,9 @@ bool DefaultLooper::runOneIterationWithDeadlineMs(Looper::Duration deadlineMs) {
     // Compute next deadline from timers.
     Duration nextDeadline = kDurationInfinite;
 
-    Timer* firstTimer = mActiveTimers.front();
-    if (firstTimer) {
-        nextDeadline = firstTimer->deadline();
+    auto firstTimerIt = mActiveTimers.begin();
+    if (firstTimerIt != mActiveTimers.end()) {
+        nextDeadline = (*firstTimerIt)->deadline();
     }
 
     if (nextDeadline > deadlineMs) {
@@ -155,7 +165,11 @@ bool DefaultLooper::runOneIterationWithDeadlineMs(Looper::Duration deadlineMs) {
             timeOut = 0;
     }
 
-    if (!mFdWatches.empty()) {
+    if (mFdWatches.empty()) {
+        // We don't have any FDs to watch, so just sleep till the next
+        // timer expires.
+        System::get()->sleepMs(timeOut);
+    } else {
         int ret = mWaiter->wait(timeOut);
         if (ret < 0) {
             // Error, force stop.
@@ -174,56 +188,41 @@ bool DefaultLooper::runOneIterationWithDeadlineMs(Looper::Duration deadlineMs) {
 
                 // Find the FdWatch for this file descriptor.
                 // TODO(digit): Improve efficiency with a map?
-                FdWatchSet::Iterator iter(&mFdWatches);
-                while (iter.hasNext()) {
-                    FdWatch* watch = iter.next();
-                    if (watch->fd() == fd) {
-                        watch->setPending(events);
-                        break;
-                    }
+                const auto fdIt =
+                        std::find_if(mFdWatches.begin(), mFdWatches.end(),
+                                     [fd](const FdWatchSet::value_type& pair) {
+                                         return pair.first->fd() == fd;
+                                     });
+                if (fdIt != mFdWatches.end()) {
+                    fdIt->first->setPending(events);
                 }
             }
         }
-    } else {
-        // We don't have any FDs to watch, so just sleep till the next
-        // timer expires.
-        System::get()->sleepMs(timeOut);
     }
 
     // Queue pending expired timers.
     DCHECK(mPendingTimers.empty());
 
     const Duration kNow = nowMs();
-    Timer* timer = mActiveTimers.front();
-    while (timer) {
-        if (timer->deadline() > kNow) {
-            break;
-        }
-
+    auto timerIt = mActiveTimers.begin();
+    while (timerIt != mActiveTimers.end() && (*timerIt)->deadline() <= kNow) {
         // Remove from active list, add to pending list.
-        mActiveTimers.remove(timer);
-        timer->setPending();
-        timer = timer->next();
+        (*timerIt)->setPending();
+        timerIt = mActiveTimers.erase(timerIt);
     }
 
     // Fire the pending timers, this is done in a separate step
     // because the callback could modify the active timers list.
-    for (;;) {
+    while (!mPendingTimers.empty()) {
         Timer* timer = mPendingTimers.front();
-        if (!timer) {
-            break;
-        }
         timer->clearPending();
         timer->fire();
     }
 
     // Fire the pending fd watches. Also done in a separate step
     // since the callbacks could modify
-    for (;;) {
+    while (!mPendingFdWatches.empty()) {
         FdWatch* watch = mPendingFdWatches.front();
-        if (!watch) {
-            break;
-        }
         watch->clearPending();
         watch->fire();
     }
@@ -238,8 +237,7 @@ DefaultLooper::FdWatch::FdWatch(DefaultLooper* looper,
     : Looper::FdWatch(looper, fd, callback, opaque),
       mWantedEvents(0U),
       mLastEvents(0U),
-      mPending(false),
-      mPendingLink() {
+      mPending(false) {
     looper->addFdWatch(this);
 }
 
@@ -311,8 +309,7 @@ DefaultLooper::Timer::Timer(DefaultLooper* looper,
                         Looper::ClockType clock)
     : Looper::Timer(looper, callback, opaque, clock),
       mDeadline(kDurationInfinite),
-      mPending(false),
-      mPendingLink() {
+      mPending(false) {
     // this implementation only supports a host clock
     DCHECK(clock == ClockType::kHost);
     DCHECK(mCallback);
@@ -326,10 +323,6 @@ DefaultLooper* DefaultLooper::Timer::defaultLooper() const {
 DefaultLooper::Timer::~Timer() {
     clearPending();
     defaultLooper()->delTimer(this);
-}
-
-DefaultLooper::Timer* DefaultLooper::Timer::next() const {
-    return mPendingLink.next();
 }
 
 Looper::Duration DefaultLooper::Timer::deadline() const {
