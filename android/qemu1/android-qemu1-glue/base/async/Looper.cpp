@@ -12,8 +12,6 @@
 #include "android-qemu1-glue/base/async/Looper.h"
 
 #include "android/base/Log.h"
-#include "android/base/containers/TailQueueList.h"
-#include "android/base/containers/ScopedPointerSet.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android-qemu1-glue/base/files/QemuFileStream.h"
 #include "android/utils/stream.h"
@@ -23,6 +21,9 @@ extern "C" {
 #include "qemu/timer.h"
 #include "sysemu/char.h"
 }  // extern "C"
+
+#include <list>
+#include <unordered_map>
 
 namespace android {
 namespace qemu {
@@ -53,17 +54,13 @@ typedef ::android::base::Looper::FdWatch BaseFdWatch;
 //
 class QemuLooper : public BaseLooper {
 public:
-    QemuLooper() :
-            Looper(),
-            mQemuBh(NULL),
-            mFdWatches(),
-            mPendingFdWatches(),
-            mTimers() {
+    QemuLooper() {
         mQemuBh = qemu_bh_new(handleBottomHalf, this);
     }
 
     virtual ~QemuLooper() {
         qemu_bh_delete(mQemuBh);
+        DCHECK(mPendingFdWatches.empty());
     }
 
     static QEMUClockType toQemuClockType(ClockType clock) {
@@ -90,18 +87,11 @@ public:
         FdWatch(QemuLooper* looper,
                 int fd,
                 BaseFdWatch::Callback callback,
-                void* opaque) :
-                        BaseFdWatch(looper, fd, callback, opaque),
-                        mWantedEvents(0U),
-                        mPendingEvents(0U),
-                        mLink() {
-            looper->addFdWatch(this);
-        }
+                void* opaque) : BaseFdWatch(looper, fd, callback, opaque) {}
 
         virtual ~FdWatch() {
             clearPending();
             qemu_set_fd_handler(mFd, NULL, NULL, NULL);
-            asQemuLooper(mLooper)->delFdWatch(this);
         }
 
         virtual void addEvents(unsigned events) {
@@ -128,8 +118,6 @@ public:
             mPendingEvents = 0U;
             mCallback(mOpaque, mFd, events);
         }
-
-        TAIL_QUEUE_LIST_TRAITS(Traits, FdWatch, mLink);
 
     private:
         void updateEvents(unsigned events) {
@@ -165,9 +153,8 @@ public:
             watch->setPending(kEventWrite);
         }
 
-        unsigned mWantedEvents;
-        unsigned mPendingEvents;
-        ::android::base::TailQueueLink<FdWatch> mLink;
+        unsigned mWantedEvents = 0;
+        unsigned mPendingEvents = 0;
     };
 
     virtual BaseFdWatch* createFdWatch(int fd,
@@ -272,29 +259,11 @@ public:
     }
 
 private:
-
-    typedef ::android::base::TailQueueList<QemuLooper::FdWatch> FdWatchList;
-    typedef ::android::base::ScopedPointerSet<FdWatch> FdWatchSet;
-    typedef ::android::base::ScopedPointerSet<Timer> TimerSet;
+    typedef std::list<FdWatch*> FdWatchList;
+    typedef std::unordered_map<FdWatch*, FdWatchList::iterator> FdWatchSet;
 
     static inline QemuLooper* asQemuLooper(BaseLooper* looper) {
         return reinterpret_cast<QemuLooper*>(looper);
-    }
-
-    void addFdWatch(FdWatch* watch) {
-        mFdWatches.add(watch);
-    }
-
-    void delFdWatch(FdWatch* watch) {
-        mFdWatches.pick(watch);
-    }
-
-    void addTimer(Timer* timer) {
-        mTimers.add(timer);
-    }
-
-    void delTimer(Timer* timer) {
-        mTimers.remove(timer);
     }
 
     void addPendingFdWatch(FdWatch* watch) {
@@ -307,34 +276,33 @@ private:
             qemu_bh_schedule(mQemuBh);
         }
 
-        mPendingFdWatches.insertTail(watch);
+        mPendingFdWatches.push_back(watch);
+        mFdWatchIterMap[watch] = std::prev(mPendingFdWatches.end());
     }
 
     void delPendingFdWatch(FdWatch* watch) {
         DCHECK(watch);
         DCHECK(watch->isPending());
-        mPendingFdWatches.remove(watch);
+        const auto it = mFdWatchIterMap.find(watch);
+        DCHECK(it != mFdWatchIterMap.end());
+        mPendingFdWatches.erase(it->second);
+        mFdWatchIterMap.erase(it);
     }
 
     // Called by QEMU as soon as the main loop has finished processed
     // I/O events. Used to look at pending watches and fire them.
     static void handleBottomHalf(void* opaque) {
         QemuLooper* looper = reinterpret_cast<QemuLooper*>(opaque);
-        for (;;) {
+        while (!looper->mPendingFdWatches.empty()) {
             FdWatch* watch = looper->mPendingFdWatches.front();
-            if (!watch) {
-                break;
-            }
             looper->delPendingFdWatch(watch);
             watch->fire();
         }
     }
 
-    QEMUBH* mQemuBh;
-
-    FdWatchSet mFdWatches;
+    QEMUBH* mQemuBh = nullptr;
+    FdWatchSet mFdWatchIterMap;
     FdWatchList mPendingFdWatches;
-    TimerSet mTimers;
 };
 
 }  // namespace

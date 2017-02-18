@@ -12,11 +12,11 @@
 #pragma once
 
 #include "android/base/async/Looper.h"
-#include "android/base/containers/ScopedPointerSet.h"
-#include "android/base/containers/TailQueueList.h"
 #include "android/base/sockets/SocketWaiter.h"
 
+#include <list>
 #include <memory>
+#include <unordered_map>
 
 namespace android {
 namespace base {
@@ -65,13 +65,10 @@ public:
         // parameters.
         void fire();
 
-        TAIL_QUEUE_LIST_TRAITS(Traits, FdWatch, mPendingLink);
-
     private:
         unsigned mWantedEvents;
         unsigned mLastEvents;
         bool mPending;
-        TailQueueLink<FdWatch> mPendingLink;
     };
 
     void addFdWatch(FdWatch* watch);
@@ -103,8 +100,6 @@ public:
 
         ~Timer() override;
 
-        Timer* next() const;
-
         Duration deadline() const;
 
         void startRelative(Duration deadlineMs) override;
@@ -125,12 +120,9 @@ public:
 
         void load(Stream* stream);
 
-        TAIL_QUEUE_LIST_TRAITS(Traits, Timer, mPendingLink);
-
     private:
         Duration mDeadline;
         bool mPending;
-        TailQueueLink<Timer> mPendingLink;
     };
 
     void addTimer(Timer* timer);
@@ -154,11 +146,11 @@ public:
     //
     int runWithDeadlineMs(Duration deadlineMs) override;
 
-    typedef TailQueueList<Timer> TimerList;
-    typedef ScopedPointerSet<Timer> TimerSet;
+    typedef std::list<Timer*> TimerList;
+    typedef std::unordered_map<Timer*, TimerList::iterator> TimerSet;
 
-    typedef TailQueueList<FdWatch> FdWatchList;
-    typedef ScopedPointerSet<FdWatch> FdWatchSet;
+    typedef std::list<FdWatch*> FdWatchList;
+    typedef std::unordered_map<FdWatch*, FdWatchList::iterator> FdWatchSet;
 
 protected:
     bool runOneIterationWithDeadlineMs(Duration deadlineMs);
