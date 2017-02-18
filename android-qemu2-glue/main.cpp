@@ -9,7 +9,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/containers/StringVector.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
 #include "android/base/memory/ScopedPtr.h"
@@ -193,13 +192,13 @@ const TargetInfo kTarget = {
 };
 
 static std::string getNthParentDir(const char* path, size_t n) {
-    StringVector dir = PathUtils::decompose(path);
-    PathUtils::simplifyComponents(&dir);
-    if (dir.size() < n + 1U) {
+    auto dirs = PathUtils::decompose(path);
+    PathUtils::simplifyComponents(&dirs);
+    if (dirs.size() < n + 1U) {
         return std::string("");
     }
-    dir.resize(dir.size() - n);
-    return PathUtils::recompose(dir);
+    dirs.resize(dirs.size() - n);
+    return PathUtils::recompose(dirs);
 }
 
 /* generate parameters for each partition by type.
