@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2dbba631_54eb4325",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-18T00:12:57Z",
+      "side": 1,
+      "message": "Weird line wrap here",
+      "revId": "7ba8f7deecd54ddea3348074553bcfaca34087d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f15c758b_f721e8e1",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-page.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-18T00:12:57Z",
+      "side": 1,
+      "message": "As I understand it, we should put the current year when a file is created. We should not change the year when the file is modified.",
+      "revId": "7ba8f7deecd54ddea3348074553bcfaca34087d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
