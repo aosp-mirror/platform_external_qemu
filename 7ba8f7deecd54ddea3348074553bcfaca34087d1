@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1008acd0_f3eb8413",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-02-20T22:48:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2dbba631_54eb4325",
+      "revId": "7ba8f7deecd54ddea3348074553bcfaca34087d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f15c758b_f721e8e1",
         "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-page.h",
         "patchSetId": 2
