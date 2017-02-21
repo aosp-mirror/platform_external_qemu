@@ -520,9 +520,9 @@ TEST(parse_gpu_info_list_windows, SingleGpu) {
     GpuInfo& nvidia_info = gpulist.infos[0];
 
     EXPECT_FALSE(nvidia_info.current_gpu);
-    EXPECT_STREQ("NVIDIA", nvidia_info.make.c_str());
+    EXPECT_STREQ("10de", nvidia_info.make.c_str());
     EXPECT_STREQ("NVIDIA Quadro K600", nvidia_info.model.c_str());
-    EXPECT_TRUE(nvidia_info.device_id.empty());
+    EXPECT_STREQ("0ffa", nvidia_info.device_id.c_str());
     EXPECT_TRUE(nvidia_info.revision_id.empty());
     EXPECT_STREQ("9.18.13.2086", nvidia_info.version.c_str());
     EXPECT_TRUE(nvidia_info.renderer.empty());
@@ -548,9 +548,9 @@ TEST(parse_gpu_info_list_windows, DualGpu) {
 
     GpuInfo& ati_info = gpulist.infos[0];
     EXPECT_FALSE(ati_info.current_gpu);
-    EXPECT_STREQ("Advanced Micro Devices, Inc.", ati_info.make.c_str());
+    EXPECT_STREQ("1002", ati_info.make.c_str());
     EXPECT_STREQ("AMD Radeon (TM) R5 M335", ati_info.model.c_str());
-    EXPECT_TRUE(ati_info.device_id.empty());
+    EXPECT_FALSE(ati_info.device_id.empty());
     EXPECT_TRUE(ati_info.revision_id.empty());
     EXPECT_STREQ("15.300.1025.1001", ati_info.version.c_str());
     EXPECT_TRUE(ati_info.renderer.empty());
@@ -578,9 +578,9 @@ TEST(parse_gpu_info_list_windows, DualGpu) {
 
     GpuInfo& intel_info = gpulist.infos[1];
     EXPECT_FALSE(intel_info.current_gpu);
-    EXPECT_STREQ("Intel Corporation", intel_info.make.c_str());
+    EXPECT_STREQ("8086", intel_info.make.c_str());
     EXPECT_STREQ("Intel(R) HD Graphics 520", intel_info.model.c_str());
-    EXPECT_TRUE(intel_info.device_id.empty());
+    EXPECT_FALSE(intel_info.device_id.empty());
     EXPECT_TRUE(intel_info.revision_id.empty());
     EXPECT_STREQ("10.18.15.4281", intel_info.version.c_str());
     EXPECT_TRUE(intel_info.renderer.empty());
