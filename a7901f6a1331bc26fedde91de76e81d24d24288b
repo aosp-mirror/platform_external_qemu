@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6bfce13a_d2a91600",
+        "filename": "android/android-emu/android/opengl/emugl_config.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-21T19:52:45Z",
+      "side": 1,
+      "message": "please remove this and you\u0027re ready to go",
+      "range": {
+        "startLine": 231,
+        "startChar": 9,
+        "endLine": 232,
+        "endChar": 13
+      },
+      "revId": "a7901f6a1331bc26fedde91de76e81d24d24288b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
