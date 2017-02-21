@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "160e576f_756e25ac",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-21T16:52:51Z",
+      "side": 1,
+      "message": "nit: is this really a page, or a separate window/dialog?",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 45
+      },
+      "revId": "1e17fbb582ace46996cfe1585804126149500c1c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2e5df60c_b631f7c4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-21T16:52:51Z",
+      "side": 1,
+      "message": "nit: trailing spaces",
+      "range": {
+        "startLine": 24,
+        "startChar": 76,
+        "endLine": 24,
+        "endChar": 81
+      },
+      "revId": "1e17fbb582ace46996cfe1585804126149500c1c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9d679092_fdd93b27",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/help-page.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-21T16:52:51Z",
+      "side": 1,
+      "message": "unique_ptr\u003c\u003e too? It would need an explicit destructor in HelpPage class, and it should be in the .cpp file to make sure unique_ptr\u003c\u003e sees full definition of BugReportPage.",
+      "range": {
+        "startLine": 49,
+        "startChar": 4,
+        "endLine": 49,
+        "endChar": 18
+      },
+      "revId": "1e17fbb582ace46996cfe1585804126149500c1c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
