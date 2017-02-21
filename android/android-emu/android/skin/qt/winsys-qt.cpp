@@ -201,20 +201,6 @@ extern void skin_winsys_get_window_pos(int *x, int *y)
     D("%s: x=%d y=%d", __FUNCTION__, *x, *y);
 }
 
-extern void skin_winsys_get_frame_pos(int *x, int *y)
-{
-    QSemaphore semaphore;
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
-    if (window == NULL) {
-        D("%s: Could not get window handle", __FUNCTION__);
-        return;
-    }
-    window->getFramePos(x, y, &semaphore);
-    semaphore.acquire();
-
-    D("%s: x=%d y=%d", __FUNCTION__, *x, *y);
-}
-
 extern void skin_winsys_set_device_geometry(const SkinRect* rect) {
     EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
