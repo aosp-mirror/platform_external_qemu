@@ -29,7 +29,7 @@ static emugl::SharedLibrary *s_gles2_lib = NULL;
 // To make it consistent with the guest, all GLES2 functions not supported by
 // the driver should be redirected to this function.
 
-static void gles2_unimplemented() {
+void gles2_unimplemented() {
     fprintf(stderr, "Called unimplemented GLES API\n");
 }
 

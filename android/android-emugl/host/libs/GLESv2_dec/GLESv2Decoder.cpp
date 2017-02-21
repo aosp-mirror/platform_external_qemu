@@ -15,6 +15,7 @@
 */
 
 #include "GLESv2Decoder.h"
+#include "GLESv2Dispatch.h"
 
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
@@ -254,7 +255,7 @@ void GLESv2Decoder::s_glVertexAttribPointerData(void *self, GLuint indx, GLint s
         ctx->m_contextData->storePointerData(indx, data, datalen);
         // note - the stride of the data is always zero when it comes out of the codec.
         // See gl2.attrib for the packing function call.
-        if (ctx->glVertexAttribPointerWithDataSize) {
+        if ((void*)ctx->glVertexAttribPointerWithDataSize != gles2_unimplemented) {
             ctx->glVertexAttribPointerWithDataSize(indx, size, type, normalized,
                     0, ctx->m_contextData->pointerData(indx), datalen);
         } else {
