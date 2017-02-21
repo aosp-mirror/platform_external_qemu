@@ -42,6 +42,7 @@ bool parse_and_query_blacklist(const std::string& contents);
 // but on a different thread, with a timeout in case
 // the started processes hang or what not.
 bool async_query_host_gpu_blacklisted();
+bool async_query_host_gpu_SyncBlacklisted();
 
 // Below is the implementation.
 
@@ -54,6 +55,7 @@ struct BlacklistEntry {
     const char* revision_id;
     const char* version;
     const char* renderer;
+    const char* os;
 };
 
 // GpuInfo/GpuInfoList are the representation of parsed information
@@ -74,11 +76,12 @@ public:
     std::string renderer;
 
     std::vector<std::string> dlls;
+    std::string os;
 };
 
 class GpuInfoList {
 public:
-    GpuInfoList() : blacklist_status(false) { }
+    GpuInfoList() = default;
     void addGpu();
     GpuInfo& currGpu();
     std::string dump() const;
@@ -86,7 +89,10 @@ public:
 
     static GpuInfoList* get(); // For the global GpuInfoList
     std::vector<GpuInfo> infos;
-    bool blacklist_status;
+
+    bool blacklist_status = false;
+    bool SyncBlacklist_status = false;
+
     DISALLOW_COPY_ASSIGN_AND_MOVE(GpuInfoList);
 };
 

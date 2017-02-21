@@ -33,6 +33,7 @@
 #include "android/main-common-ui.h"
 #include "android/main-kernel-parameters.h"
 #include "android/opengl/emugl_config.h"
+#include "android/opengl/gpuinfo.h"
 #include "android/process_setup.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
@@ -826,6 +827,12 @@ extern "C" int main(int argc, char **argv) {
                             "Contiguous Memory Allocation.");
     }
 
+    bool shouldDisableAsyncSwap = async_query_host_gpu_SyncBlacklisted();
+    if (shouldDisableAsyncSwap &&
+        android::featurecontrol::isEnabled(android::featurecontrol::GLAsyncSwap)) {
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::GLAsyncSwap, false);
+    }
 
     int apiLevel = avd ? avdInfo_getApiLevel(avd) : 1000;
 
@@ -948,6 +955,7 @@ extern "C" int main(int argc, char **argv) {
             args[n++] = argv[i];
         }
     }
+
     args[n++] = "-append";
     args[n++] = ASTRDUP(append_arg.c_str());
 
