@@ -80,8 +80,6 @@ LOCAL_C_INCLUDES := \
     $(LIBUUID_INCLUDES) \
 
 LOCAL_SRC_FILES := \
-    android/base/containers/PointerSet.cpp \
-    android/base/containers/HashUtils.cpp \
     android/base/Debug.cpp \
     android/base/files/MemStream.cpp \
     android/base/files/PathUtils.cpp \
@@ -479,12 +477,8 @@ LOCAL_SRC_FILES := \
   android/base/async/ScopedSocketWatch_unittest.cpp \
   android/base/async/SubscriberList_unittest.cpp \
   android/base/containers/CircularBuffer_unittest.cpp \
-  android/base/containers/HashUtils_unittest.cpp \
   android/base/containers/Lookup_unittest.cpp \
-  android/base/containers/PointerSet_unittest.cpp \
-  android/base/containers/ScopedPointerSet_unittest.cpp \
   android/base/containers/SmallVector_unittest.cpp \
-  android/base/containers/TailQueueList_unittest.cpp \
   android/base/EintrWrapper_unittest.cpp \
   android/base/files/IniFile_unittest.cpp \
   android/base/files/MemStream_unittest.cpp \
@@ -496,7 +490,6 @@ LOCAL_SRC_FILES := \
   android/base/Log_unittest.cpp \
   android/base/memory/LazyInstance_unittest.cpp \
   android/base/memory/MallocUsableSize_unittest.cpp \
-  android/base/memory/QSort_unittest.cpp \
   android/base/memory/ScopedPtr_unittest.cpp \
   android/base/misc/FileUtils_unittest.cpp \
   android/base/misc/HttpUtils_unittest.cpp \
