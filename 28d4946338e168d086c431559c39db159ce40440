@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a9658046_6b6b11c8",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1013,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-21T22:02:37Z",
+      "side": 1,
+      "message": "|\u003d ?",
+      "range": {
+        "startLine": 1013,
+        "startChar": 31,
+        "endLine": 1013,
+        "endChar": 32
+      },
+      "revId": "28d4946338e168d086c431559c39db159ce40440",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
