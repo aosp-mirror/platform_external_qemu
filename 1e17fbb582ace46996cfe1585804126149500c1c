@@ -188,6 +188,30 @@
       "revId": "1e17fbb582ace46996cfe1585804126149500c1c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca947778_f3ec0b05",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/help-page.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-02-21T19:50:59Z",
+      "side": 1,
+      "message": "After reading this link about QT memory management http://doc.qt.io/qt-5/objecttrees.html,  I think that if I keep the parent  of mBugReportWindow to be HelpPage instance, the \"parent\" will take care of destroying any of its children when itself is destroyed.",
+      "parentUuid": "e68f9364_de6a6113",
+      "range": {
+        "startLine": 49,
+        "startChar": 4,
+        "endLine": 49,
+        "endChar": 18
+      },
+      "revId": "1e17fbb582ace46996cfe1585804126149500c1c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
