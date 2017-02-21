@@ -89,58 +89,11 @@ std::string GpuInfoList::dump() const {
 
 void GpuInfoList::clear() {
     blacklist_status = false;
+    Anglelist_status = false;
     infos.clear();
 }
 
-// Actual blacklist starts here.
-// Most entries imported from Chrome blacklist.
-static const BlacklistEntry sGpuBlacklist[] = {
-
-        // Make | Model | DeviceID | RevisionID | DriverVersion | Renderer
-        {nullptr, nullptr, "0x7249", nullptr, nullptr,
-         nullptr},  // ATI Radeon X1900 on Mac
-        {"8086", nullptr, nullptr, nullptr, nullptr,
-         "Mesa"},  // Linux, Intel, Mesa
-        {"8086", nullptr, nullptr, nullptr, nullptr,
-         "mesa"},  // Linux, Intel, Mesa
-
-        {"8086", nullptr, "27ae", nullptr, nullptr,
-         nullptr},  // Intel 945 Chipset
-        {"1002", nullptr, nullptr, nullptr, nullptr, nullptr},  // Linux, ATI
-
-        {nullptr, nullptr, "0x9583", nullptr, nullptr,
-         nullptr},  // ATI Radeon HD2600 on Mac
-        {nullptr, nullptr, "0x94c8", nullptr, nullptr,
-         nullptr},  // ATI Radeon HD2400 on Mac
-
-        {"NVIDIA (0x10de)", nullptr, "0x0324", nullptr, nullptr,
-         nullptr},  // NVIDIA GeForce FX Go5200 (Mac)
-        {"NVIDIA", "NVIDIA GeForce FX Go5200", nullptr, nullptr, nullptr,
-         nullptr},  // NVIDIA GeForce FX Go5200 (Win)
-        {"10de", nullptr, "0324", nullptr, nullptr,
-         nullptr},  // NVIDIA GeForce FX Go5200 (Linux)
-
-        {"10de", nullptr, "029e", nullptr, nullptr,
-         nullptr},  // NVIDIA Quadro FX 1500 (Linux)
-
-        // Various Quadro FX cards on Linux
-        {"10de", nullptr, "00cd", nullptr, nullptr,
-         "195.36.24"},
-        {"10de", nullptr, "00ce", nullptr, nullptr,
-         "195.36.24"},
-        // Driver version 260.19.6 on Linux
-        {"10de", nullptr, nullptr, nullptr, nullptr,
-         "260.19.6"},
-
-        {"NVIDIA (0x10de)", nullptr, "0x0393", nullptr, nullptr,
-         nullptr},  // NVIDIA GeForce 7300 GT (Mac)
-};
-
-static const int sBlacklistSize =
-    sizeof(sGpuBlacklist) / sizeof(BlacklistEntry);
-
-// If any blacklist entry matches any gpu, return true.
-bool gpuinfo_query_blacklist(GpuInfoList* gpulist,
+static bool gpuinfo_query_list(GpuInfoList* gpulist,
                              const BlacklistEntry* list,
                              int size) {
     for (auto gpuinfo : gpulist->infos) {
@@ -152,6 +105,7 @@ bool gpuinfo_query_blacklist(GpuInfoList* gpulist,
             const char* bl_revision_id = bl_entry.revision_id;
             const char* bl_version = bl_entry.version;
             const char* bl_renderer = bl_entry.renderer;
+            const char* bl_os = bl_entry.os;
 
             if (bl_make && (gpuinfo.make != bl_make))
                 continue;
@@ -166,11 +120,92 @@ bool gpuinfo_query_blacklist(GpuInfoList* gpulist,
             if (bl_renderer && (gpuinfo.renderer.find(bl_renderer) ==
                                 NOTFOUND))
                 continue;
+            if (bl_os && (gpuinfo.os != bl_os))
+                continue;
             return true;
         }
     }
     return false;
 }
+
+// Actual blacklist starts here.
+// Most entries imported from Chrome blacklist.
+static const BlacklistEntry sGpuBlacklist[] = {
+
+        // Make | Model | DeviceID | RevisionID | DriverVersion | Renderer |
+        // OS
+        {nullptr, nullptr, "0x7249", nullptr, nullptr,
+         nullptr, "M"},  // ATI Radeon X1900 on Mac
+        {"8086", nullptr, nullptr, nullptr, nullptr,
+         "Mesa", "L"},  // Linux, Intel, Mesa
+        {"8086", nullptr, nullptr, nullptr, nullptr,
+         "mesa", "L"},  // Linux, Intel, Mesa
+
+        {"8086", nullptr, "27ae", nullptr, nullptr,
+         nullptr, nullptr},  // Intel 945 Chipset
+        {"1002", nullptr, nullptr, nullptr, nullptr, nullptr,
+          "L"},  // Linux, ATI
+
+        {nullptr, nullptr, "0x9583", nullptr, nullptr,
+         nullptr, "M"},  // ATI Radeon HD2600 on Mac
+        {nullptr, nullptr, "0x94c8", nullptr, nullptr,
+         nullptr, "M"},  // ATI Radeon HD2400 on Mac
+
+        {"NVIDIA (0x10de)", nullptr, "0x0324", nullptr, nullptr,
+         nullptr, "M"},  // NVIDIA GeForce FX Go5200 (Mac)
+        {"10DE", "NVIDIA GeForce FX Go5200", nullptr, nullptr, nullptr,
+         nullptr, "W"},  // NVIDIA GeForce FX Go5200 (Win)
+        {"10de", nullptr, "0324", nullptr, nullptr,
+         nullptr, "L"},  // NVIDIA GeForce FX Go5200 (Linux)
+
+        {"10de", nullptr, "029e", nullptr, nullptr,
+         nullptr, "L"},  // NVIDIA Quadro FX 1500 (Linux)
+
+        // Various Quadro FX cards on Linux
+        {"10de", nullptr, "00cd", nullptr, "195.36.24",
+          nullptr, "L"},
+        {"10de", nullptr, "00ce", nullptr, "195.36.24",
+         nullptr, "L"},
+        // Driver version 260.19.6 on Linux
+        {"10de", nullptr, nullptr, nullptr, "260.19.6",
+         nullptr, "L"},
+
+        {"NVIDIA (0x10de)", nullptr, "0x0393", nullptr, nullptr,
+         nullptr, "M"},  // NVIDIA GeForce 7300 GT (Mac)
+};
+
+static const int sBlacklistSize =
+    sizeof(sGpuBlacklist) / sizeof(BlacklistEntry);
+
+// If any blacklist entry matches any gpu, return true.
+bool gpuinfo_query_blacklist(GpuInfoList* gpulist,
+                             const BlacklistEntry* list,
+                             int size) {
+    return gpuinfo_query_list(gpulist, list, size);
+}
+
+#ifdef _WIN32
+static const WhitelistEntry sAngleWhitelist[] = {
+        // Make | Model | DeviceID | RevisionID | DriverVersion | Renderer |
+        // OS
+        // HD 3000 on Windows
+        {"8086", nullptr, "0116", nullptr, nullptr,
+         nullptr, "W"},
+        {"8086", nullptr, "0126", nullptr, nullptr,
+         nullptr, "W"},
+        {"8086", nullptr, "0102", nullptr, nullptr,
+         nullptr, "W"},
+};
+
+static const int sAngleWhitelistSize =
+    sizeof(sAngleWhitelist) / sizeof(WhitelistEntry);
+
+static bool gpuinfo_query_whitelist(GpuInfoList *gpulist,
+                             const WhitelistEntry *list,
+                             int size) {
+    return gpuinfo_query_list(gpulist, list, size);
+}
+#endif
 
 std::string load_gpu_info() {
     auto& sys = *System::get();
@@ -306,6 +341,7 @@ void parse_gpu_info_list_osx(const std::string& contents,
             if (key.find("Chipset Model") != NOTFOUND) {
                 gpulist->addGpu();
                 gpulist->currGpu().model = val;
+                gpulist->currGpu().os = "M";
             } else if (key.find("Vendor") != NOTFOUND) {
                 gpulist->currGpu().make = val;
             } else if (key.find("Device ID") != NOTFOUND) {
@@ -352,6 +388,7 @@ void parse_gpu_info_list_linux(const std::string& contents,
         if (!lookfor && (key.find("VGA") != NOTFOUND)) {
             lookfor = true;
             gpulist->addGpu();
+            gpulist->currGpu().os = "L";
         } else if (lookfor && (key.find("Vendor") != NOTFOUND)) {
             gpulist->currGpu().make = parse_last_hexbrackets(key);
         } else if (lookfor && (key.find("Device") != NOTFOUND)) {
@@ -401,10 +438,39 @@ static void parse_windows_gpu_dlls(int line_loc, int val_pos,
     if (curr_make == "NVIDIA") {
         gpulist->currGpu().addDll("nvoglv32.dll");
         gpulist->currGpu().addDll("nvoglv64.dll");
-    } else if (curr_make == "Advanced Micro Devices, Inc.") {
+    }
+    else if (curr_make == "Advanced Micro Devices, Inc.") {
         gpulist->currGpu().addDll("atioglxx.dll");
         gpulist->currGpu().addDll("atig6txx.dll");
     }
+}
+
+void parse_windows_gpu_ids(const std::string& val, GpuInfoList *gpulist) {
+    std::string result;
+    size_t key_start = 0;
+    size_t key_end = 0;
+
+    key_start = val.find("VEN_", key_start);
+    if (key_start == NOTFOUND) {
+        return;
+    }
+    key_end = val.find("&", key_start);
+    if (key_end == NOTFOUND) {
+        return;
+    }
+    result = val.substr(key_start + 4, key_end - key_start - 4);
+    gpulist->currGpu().make = result;
+
+    key_start = val.find("DEV_", key_start);
+    if (key_start == NOTFOUND) {
+        return;
+    }
+    key_end = val.find("&", key_start);
+    if (key_end == NOTFOUND) {
+        return;
+    }
+    result = val.substr(key_start + 4, key_end - key_start - 4);
+    gpulist->currGpu().device_id = result;
 }
 
 void parse_gpu_info_list_windows(const std::string& contents,
@@ -423,7 +489,7 @@ void parse_gpu_info_list_windows(const std::string& contents,
     // to get a reasonably detailed list of '<key>=<val>'
     // pairs. From these, we can get the make/model
     // of the GPU, the driver version, and all DLLs involved.
-    while (line_loc != NOTFOUND) {
+   while (line_loc != NOTFOUND) {
         equals_pos = contents.find("=", p);
         if ((equals_pos != NOTFOUND) && (equals_pos < line_loc)) {
             key = contents.substr(p, equals_pos - p);
@@ -432,10 +498,18 @@ void parse_gpu_info_list_windows(const std::string& contents,
 
             if (key.find("AdapterCompatibility") != NOTFOUND) {
                 gpulist->addGpu();
+                gpulist->currGpu().os = "W";
+                // 'make' will be overwritten in parsing 'PNPDeviceID'
+                // later. Set it here because we need it in paring
+                // 'InstalledDisplayDrivers' which comes before
+                // 'PNPDeviceID'.
                 gpulist->currGpu().make = val;
             } else if (key.find("Caption") != NOTFOUND) {
                 gpulist->currGpu().model = val;
-            } else if (key.find("DriverVersion") != NOTFOUND) {
+            } else if (key.find("PNPDeviceID") != NOTFOUND) {
+                parse_windows_gpu_ids(val, gpulist);
+            }
+            else if (key.find("DriverVersion") != NOTFOUND) {
                 gpulist->currGpu().version = val;
             } else if (key.find("InstalledDisplayDrivers") != NOTFOUND) {
                 parse_windows_gpu_dlls(line_loc, val_pos, contents, gpulist);
@@ -462,15 +536,18 @@ void parse_gpu_info_list(const std::string& contents, GpuInfoList* gpulist) {
 #endif
 }
 
-bool parse_and_query_blacklist(const std::string& contents) {
-    GpuInfoList* gpulist = GpuInfoList::get();
-    parse_gpu_info_list(contents, gpulist);
-    return gpuinfo_query_blacklist(gpulist, sGpuBlacklist, sBlacklistSize);
-}
-
 void query_blacklist_fn(bool* res) {
     std::string gpu_info = load_gpu_info();
-    *res = parse_and_query_blacklist(gpu_info);
+    GpuInfoList *gpulist = GpuInfoList::get();
+    parse_gpu_info_list(gpu_info, gpulist);
+    *res = gpuinfo_query_blacklist(gpulist, sGpuBlacklist, sBlacklistSize);
+    GpuInfoList::get()->blacklist_status = *res;
+#ifdef _WIN32
+    GpuInfoList::get()->Anglelist_status =
+        gpuinfo_query_whitelist(gpulist, sAngleWhitelist, sAngleWhitelistSize);
+#else
+    GpuInfoList::get()->Anglelist_status = false;
+#endif
 }
 
 void query_blacklist_done_fn(const bool& res) { }
@@ -514,4 +591,10 @@ bool async_query_host_gpu_blacklisted() {
     sGPUInfoQueryThread.ptr();
     sGPUInfoQueryThread->wait();
     return GpuInfoList::get()->blacklist_status;
+}
+
+bool async_query_host_gpu_AngleWhitelisted() {
+    sGPUInfoQueryThread.ptr();
+    sGPUInfoQueryThread->wait();
+    return GpuInfoList::get()->Anglelist_status;
 }

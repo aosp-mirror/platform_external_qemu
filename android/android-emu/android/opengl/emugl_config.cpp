@@ -218,7 +218,15 @@ bool emuglConfig_init(EmuglConfig* config,
             }
             D("%s: 'swiftshader' mode auto-selected\n", __FUNCTION__);
             gpu_mode = "swiftshader";
-        } else if (no_window || (blacklisted && !hasUiPreference)) {
+        }
+#ifdef _WIN32
+        else if (!no_window && !hasUiPreference &&
+                   async_query_host_gpu_AngleWhitelisted()) {
+                gpu_mode = "angle";
+                D("%s use Angle for Intel GPU HD 3000\n", __FUNCTION__);
+        }
+#endif
+        else if (no_window || (blacklisted && !hasUiPreference)) {
             if (stringVectorContains(sBackendList->names(), "swiftshader")) {
                 D("%s: Headless (-no-window) mode (or blacklisted GPU driver)"
                   ", using Swiftshader backend\n",
