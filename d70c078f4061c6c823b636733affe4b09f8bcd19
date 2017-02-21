@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8bf5fae5_76ec0da7",
+        "filename": "android/android-emu/android/featurecontrol/FeatureControlDefHost.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-21T16:44:40Z",
+      "side": 0,
+      "message": "why not both? it\u0027s still quite nice to be able to turn it off once and for all",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 33
+      },
+      "revId": "d70c078f4061c6c823b636733affe4b09f8bcd19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
