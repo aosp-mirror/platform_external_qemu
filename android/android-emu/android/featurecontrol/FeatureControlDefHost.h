@@ -25,4 +25,3 @@
 // #pragma once here.
 
 FEATURE_CONTROL_ITEM(GLPipeChecksum)
-FEATURE_CONTROL_ITEM(GLAsyncSwap)
