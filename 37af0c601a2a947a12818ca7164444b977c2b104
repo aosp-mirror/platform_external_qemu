@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a0bddf3_b939b99b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-21T21:22:32Z",
+      "side": 1,
+      "message": "nit: please add an empty line after #include",
+      "revId": "37af0c601a2a947a12818ca7164444b977c2b104",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8c0c3ff6_322d63b6",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/help-page.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-21T21:22:32Z",
+      "side": 1,
+      "message": "nit: please add an empty line between functions",
+      "revId": "37af0c601a2a947a12818ca7164444b977c2b104",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0114f828_9170e2ae",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/help-page.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-21T21:22:32Z",
+      "side": 1,
+      "message": "nit: initialize to nullptr right here",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 38
+      },
+      "revId": "37af0c601a2a947a12818ca7164444b977c2b104",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
