@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3f25b057_43114226",
+        "filename": "android/android-emu/android/emulation/control/GooglePlayServices.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-02-21T21:52:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "824447e5_8aeeb2f2",
+      "range": {
+        "startLine": 91,
+        "startChar": 0,
+        "endLine": 91,
+        "endChar": 14
+      },
+      "revId": "8886cfef6db8fc89b06719dbb89119eff9fc2551",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f4ce6f5a_0f3281e4",
         "filename": "android/android-emu/android/emulation/control/GooglePlayServices.cpp",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-17T19:32:16Z",
       "side": 1,
       "message": "should we cancel the previous command in this case? AdbCommand captures shared_ptr to itself into the callbacks, so it is alive even when you drop last reference to it. The only way to make sure it doesn\u0027t call into your already deleted object is to cancel() it manually, but it needs to be done for each command, e.g. here if |mGetpropCommand| was non-null",
+      "range": {
+        "startLine": 106,
+        "startChar": 4,
+        "endLine": 106,
+        "endChar": 19
+      },
+      "revId": "8886cfef6db8fc89b06719dbb89119eff9fc2551",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d608a4a3_af0b17f1",
+        "filename": "android/android-emu/android/emulation/control/GooglePlayServices.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-02-21T21:52:26Z",
+      "side": 1,
+      "message": "Done. I\u0027ll just cancel it if the command is still running.",
+      "parentUuid": "f4ce6f5a_0f3281e4",
       "range": {
         "startLine": 106,
         "startChar": 4,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "0e172a65_a0533743",
+        "filename": "android/android-emu/android/emulation/control/GooglePlayServices.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-02-21T21:52:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6bab15b1_d71738cb",
+      "range": {
+        "startLine": 62,
+        "startChar": 43,
+        "endLine": 62,
+        "endChar": 51
+      },
+      "revId": "8886cfef6db8fc89b06719dbb89119eff9fc2551",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dbea5e39_8dc4b567",
         "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.cpp",
         "patchSetId": 6
@@ -82,6 +154,30 @@
       "writtenOn": "2017-02-17T19:32:16Z",
       "side": 1,
       "message": "iostream is primary for cin/cout. If you don\u0027t use those please include a more specialized header",
+      "range": {
+        "startLine": 16,
+        "startChar": 10,
+        "endLine": 16,
+        "endChar": 18
+      },
+      "revId": "8886cfef6db8fc89b06719dbb89119eff9fc2551",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fe0a8fd5_a95dc038",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-02-21T21:52:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dbea5e39_8dc4b567",
       "range": {
         "startLine": 16,
         "startChar": 10,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "5006b1c4_a4febc78",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-02-21T21:52:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "46b612a6_163b0154",
+      "range": {
+        "startLine": 18,
+        "startChar": 6,
+        "endLine": 18,
+        "endChar": 15
+      },
+      "revId": "8886cfef6db8fc89b06719dbb89119eff9fc2551",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "00815b81_4dacec5c",
         "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.cpp",
         "patchSetId": 6
@@ -128,6 +248,30 @@
       "writtenOn": "2017-02-17T19:32:16Z",
       "side": 1,
       "message": "why not a const char[] or StringView? those don\u0027t allocate",
+      "range": {
+        "startLine": 42,
+        "startChar": 10,
+        "endLine": 42,
+        "endChar": 21
+      },
+      "revId": "8886cfef6db8fc89b06719dbb89119eff9fc2551",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a56327ce_894ae61a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-02-21T21:52:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "00815b81_4dacec5c",
       "range": {
         "startLine": 42,
         "startChar": 10,
