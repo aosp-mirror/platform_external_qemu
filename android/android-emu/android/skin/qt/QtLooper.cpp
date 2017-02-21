@@ -15,6 +15,8 @@
 
 #include <QTime>
 
+#include <errno.h>
+
 namespace android {
 namespace qt {
 namespace internal {
