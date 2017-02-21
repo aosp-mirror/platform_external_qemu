@@ -39,6 +39,8 @@ bool gles2_dispatch_init(GLESv2Dispatch* dispatch_table);
 
 // Used to initialize the decoder.
 void* gles2_dispatch_get_proc_func(const char* name, void* userData);
+// Used to check for unimplemented.
+void gles2_unimplemented();
 
 // Used to query max GLES version support based on what the dispatch mechanism
 // has found in the GLESv2 library.
