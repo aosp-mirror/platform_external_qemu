@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b45f0afe_5fa13374",
+        "filename": "android/android-emu/android/base/async/DefaultLooper.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-21T19:16:27Z",
+      "side": 1,
+      "message": "Is there some c++11 style way to do this with std::find_if and a lambda?",
+      "range": {
+        "startLine": 93,
+        "startChar": 0,
+        "endLine": 97,
+        "endChar": 53
+      },
+      "revId": "cda74f4c1c072aedc8d77b0e7b1679427dcb9b9b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
