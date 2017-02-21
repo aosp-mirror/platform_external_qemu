@@ -24,7 +24,6 @@
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulator-window.h"
-#include "android/globals.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/opengles.h"
@@ -36,7 +35,6 @@
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/winsys-qt.h"
-#include "android/skin/rect.h"
 #include "android/ui-emu-agent.h"
 
 #if defined(__APPLE__)
@@ -52,7 +50,6 @@
 #define D(...) ((void)0)
 #endif
 
-#include <QBitmap>
 #include <QCheckBox>
 #include <QCursor>
 #include <QDesktopWidget>
@@ -155,8 +152,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mScreenCapturer(mAdbInterface.get()),
       mInstallDialog(this),
       mPushDialog(this),
-      mStartedAdbStopProcess(false),
-      mHaveBeenFrameless(false) {
+      mStartedAdbStopProcess(false) {
     qRegisterMetaType<QPainter::CompositionMode>("QPainter::CompositionMode");
 
     android::base::ThreadLooper::setLooper(mLooper, true);
@@ -172,11 +168,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     mStartupTimer.start();
 
     mBackingSurface = NULL;
-
-    QSettings settings;
-    // TODO: Change the default to 'false' after "resize"
-    //       has been implemented for frameless AVDs.
-    mFrameAlways = settings.value(Ui::Settings::FRAME_ALWAYS, true).toBool();
 
     mToolWindow = new ToolWindow(this, &mContainer, mEventLogger,
                                  mUserActionsCounter);
@@ -195,8 +186,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                      &EmulatorQtWindow::slot_getDevicePixelRatio);
     QObject::connect(this, &EmulatorQtWindow::getScreenDimensions, this,
                      &EmulatorQtWindow::slot_getScreenDimensions);
-    QObject::connect(this, &EmulatorQtWindow::getFramePos, this,
-                     &EmulatorQtWindow::slot_getFramePos);
     QObject::connect(this, &EmulatorQtWindow::getWindowPos, this,
                      &EmulatorQtWindow::slot_getWindowPos);
     QObject::connect(this, &EmulatorQtWindow::isWindowFullyVisible, this,
@@ -250,6 +239,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                      SIGNAL(rangeChanged(int, int)), this,
                      SLOT(slot_scrollRangeChanged(int, int)));
 
+    QSettings settings;
     bool onTop = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
     setOnTop(onTop);
 
@@ -279,7 +269,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                         serializeEvents(event_logger->container()));
             });
 
-    setFrameAlways(mFrameAlways);
     auto user_actions = mUserActionsCounter;
     android::crashreport::CrashReporter::get()->addCrashCallback(
             [user_actions]() {
@@ -348,8 +337,11 @@ void EmulatorQtWindow::showAvdArchWarning() {
     }
 
     // The following statuses indicate that the machine hardware does not
-    // support hardware acceleration. These machines should never show a
-    // popup indicating to switch to x86.
+    // support
+    // hardware
+    // acceleration. These machines should never show a popup indicating to
+    // switch
+    // to x86.
     static const AndroidCpuAcceleration badStatuses[] = {
             ANDROID_CPU_ACCELERATION_NESTED_NOT_SUPPORTED,  // HAXM doesn't
                                                             // support
@@ -574,90 +566,6 @@ void EmulatorQtWindow::mouseReleaseEvent(QMouseEvent* event) {
                      event->pos());
 }
 
-// Set the window flags based on whether we should
-// have a frame or not.
-// Mask off the background of the skin PNG if we
-// are running frameless.
-
-void EmulatorQtWindow::maskWindowFrame()
-{
-    if (!mStartupDialog.wasCanceled()) {
-        // The splash screen is still active. Don't mask that.
-        return;
-    }
-
-    bool haveFrame = (mFrameAlways || mInZoomMode);
-    Qt::WindowFlags flags = mContainer.windowFlags();
-
-    flags &= ~FRAME_WINDOW_FLAGS_MASK;
-    flags |= (haveFrame ? FRAMED_WINDOW_FLAGS : FRAMELESS_WINDOW_FLAGS);
-
-    mContainer.setWindowFlags(flags);
-
-    // Re-generate and apply the mask
-    if (haveFrame) {
-        // We have a frame. Do not use a mask around the device.
-#ifdef _WIN32
-        mContainer.clearMask();
-#else
-        // On Linux and Mac, clearMask() doesn't seem to work,
-        // so we create a full rectangular mask. (Which doesn't
-        // work right on Windows!)
-        QRegion fullRegion(0, 0, mContainer.width(), mContainer.height());
-        mContainer.setMask(fullRegion);
-
-        if (!mHaveBeenFrameless) {
-            // This is necessary on Mac. Doesn't hurt on Linux.
-            mContainer.clearMask();
-        }
-#endif
-    } else {
-        // Frameless: Do an intelligent mask.
-        // Start by reloading the skin PNG file.
-        char *skinName;
-        char *skinDir;
-        mHaveBeenFrameless = true;
-        avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
-        QString skinPath = PathUtils::join(skinDir, skinName, "port_back.png").c_str();
-        QPixmap rawPixmap(skinPath);
-        if ( !rawPixmap.isNull() ) {
-            // Rotate the skin to match the emulator window
-            QTransform rotater;
-            int rotationAmount;
-            switch (mOrientation) {
-                case SKIN_ROTATION_0:    rotationAmount =   0;   break;
-                case SKIN_ROTATION_90:   rotationAmount =  90;   break;
-                case SKIN_ROTATION_180:  rotationAmount = 180;   break;
-                case SKIN_ROTATION_270:  rotationAmount = 270;   break;
-                default:                 rotationAmount =   0;   break;
-            }
-            rotater.rotate(rotationAmount);
-            QPixmap rotatedPMap(rawPixmap.transformed(rotater));
-
-            // Scale the bitmap to the current window size
-            int width = mContainer.width();
-            QPixmap scaledPixmap = rotatedPMap.scaledToWidth(width);
-
-            // Convert from bit map to a mask
-            QBitmap bitmap = scaledPixmap.mask();
-#ifdef __APPLE__
-            // On Mac, the mask is automatically stretched so its
-            // rectangular extent is as big as the widget it is
-            // applied to. To avoid stretching, set two points to
-            // make the mask's extent the full widget size.
-            QPainter painter(&bitmap);
-            painter.setBrush(Qt::black);
-            QPoint twoPoints[2] = { QPoint(bitmap.width()-1, 0),    // North east
-                                    QPoint(0, bitmap.height()-1) }; // South west
-            painter.drawPoints(twoPoints, 2);
-#endif
-            // Apply the mask
-            mContainer.setMask(bitmap);
-        }
-    }
-    mContainer.show();
-}
-
 void EmulatorQtWindow::paintEvent(QPaintEvent*) {
     QPainter painter(this);
     QRect bg(QPoint(0, 0), this->size());
@@ -709,15 +617,6 @@ void EmulatorQtWindow::show() {
 void EmulatorQtWindow::setOnTop(bool onTop) {
     setFrameOnTop(&mContainer, onTop);
     setFrameOnTop(mToolWindow, onTop);
-}
-
-void EmulatorQtWindow::setFrameAlways(bool frameAlways)
-{
-    mFrameAlways = frameAlways;
-    maskWindowFrame();
-    if (mStartupDialog.wasCanceled()) {
-        mContainer.show();
-    }
 }
 
 void EmulatorQtWindow::showMinimized() {
@@ -874,18 +773,6 @@ void EmulatorQtWindow::slot_getWindowPos(int* xx,
 
     *xx = geom.x();
     *yy = geom.y();
-    if (semaphore != NULL)
-        semaphore->release();
-}
-
-void EmulatorQtWindow::slot_getFramePos(int* xx,
-                                        int* yy,
-                                        QSemaphore* semaphore) {
-    // Note that mContainer.x() == mContainer.frameGeometry().x(), which
-    // is what we want.
-
-    *xx = mContainer.x();
-    *yy = mContainer.y();
     if (semaphore != NULL)
         semaphore->release();
 }
@@ -1049,7 +936,8 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
     setFixedSize(rect.size());
 
     // If this was the result of a zoom, don't change the overall window size,
-    // and adjust the scroll bars to reflect the desired focus point.
+    // and adjust the
+    // scroll bars to reflect the desired focus point.
     if (mInZoomMode && mNextIsZoom) {
         mContainer.stopResizeTimer();
         recenterFocusPoint();
@@ -1058,7 +946,6 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
     }
     mNextIsZoom = false;
 
-    maskWindowFrame();
     show();
 
     // Zooming forces the scroll bar to be visible for sizing purposes. They
@@ -1072,10 +959,12 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
         mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     }
 
-    // If the user isn't using an x86 AVD, make sure it's because their machine
-    // doesn't support CPU acceleration. If it does, recommend switching to an
-    // x86 AVD. This cannot be done on the construction of the window since the
-    // Qt UI thread has not been properly initialized yet.
+    // If the user isn't using an x86 AVD, make sure its because their machine
+    // doesn't support
+    // CPU acceleration. If it does, recommend switching to an x86 AVD.
+    // This cannot be done on the construction of the window since the Qt UI
+    // thread has not been
+    // properly initialized yet.
     if (mFirstShowEvent) {
         showAvdArchWarning();
         showGpuWarning();
@@ -1404,8 +1293,6 @@ void EmulatorQtWindow::doResize(const QSize& size,
     double heightScale = (double)newSize.height() / (double)originalHeight;
 
     simulateSetScale(std::max(.2, std::min(widthScale, heightScale)));
-
-    maskWindowFrame();
 }
 
 SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(
@@ -1633,7 +1520,6 @@ void EmulatorQtWindow::toggleZoomMode() {
     } else {
         mOverlay.showForZoom();
     }
-    maskWindowFrame();
 }
 
 void EmulatorQtWindow::recenterFocusPoint() {
@@ -1649,8 +1535,9 @@ void EmulatorQtWindow::recenterFocusPoint() {
 void EmulatorQtWindow::saveZoomPoints(const QPoint& focus,
                                       const QPoint& viewportFocus) {
     // The underlying frame will change sizes, so get what "percentage" of the
-    // frame was clicked, where (0,0) is the top-left corner and (1,1) is the
-    // bottom right corner.
+    // frame was
+    // clicked, where (0,0) is the top-left corner and (1,1) is the bottom right
+    // corner.
     mFocus = QPointF((float)focus.x() / this->width(),
                      (float)focus.y() / this->height());
 
@@ -1834,7 +1721,6 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
     // Hack. Notify the parent container that we're rotating, so it doesn't
     // start a regular scaling timer: we know that the scale is correct as
     // it was correct before the rotation.
-    mOrientation = rot;
     mContainer.prepareForRotation();
 
     SkinEvent* event = createSkinEvent(kEventLayoutRotate);
