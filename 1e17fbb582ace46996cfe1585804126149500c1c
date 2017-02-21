@@ -164,6 +164,30 @@
       "revId": "1e17fbb582ace46996cfe1585804126149500c1c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "74a1d19f_052370a5",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/help-page.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-02-21T17:58:29Z",
+      "side": 1,
+      "message": "I will have a printf in the destructor of BugReportPage class and see if the unique_ptr\u003c\u003e triggers the destructor. But feel free to suggest better ways to verify. thanks!",
+      "parentUuid": "e68f9364_de6a6113",
+      "range": {
+        "startLine": 49,
+        "startChar": 4,
+        "endLine": 49,
+        "endChar": 18
+      },
+      "revId": "1e17fbb582ace46996cfe1585804126149500c1c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
