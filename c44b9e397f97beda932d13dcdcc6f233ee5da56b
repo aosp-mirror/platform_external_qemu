@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9c635d9d_f809c98e",
+        "filename": "android/android-emu/android/emulation/control/GooglePlayServices.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-02-21T21:51:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "80708474_bee430cf",
+      "range": {
+        "startLine": 23,
+        "startChar": 43,
+        "endLine": 23,
+        "endChar": 53
+      },
+      "revId": "c44b9e397f97beda932d13dcdcc6f233ee5da56b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "37e0ac40_5da7decc",
         "filename": "android/android-emu/android/emulation/control/GooglePlayServices.cpp",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-13T22:07:56Z",
       "side": 1,
       "message": "should the function return here? otherwise it launches a new command, leaving the previous one untracked an uncacelable",
+      "range": {
+        "startLine": 43,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 5
+      },
+      "revId": "c44b9e397f97beda932d13dcdcc6f233ee5da56b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0cf39c3a_f8567712",
+        "filename": "android/android-emu/android/emulation/control/GooglePlayServices.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-02-21T21:51:32Z",
+      "side": 1,
+      "message": "Copied this from Screencap code. I\u0027ll fix that too.",
+      "parentUuid": "37e0ac40_5da7decc",
       "range": {
         "startLine": 43,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "1459b9a0_9f6e560c",
+        "filename": "android/android-emu/android/emulation/control/GooglePlayServices.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-02-21T21:51:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a58c26d2_f8da4355",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 66,
+        "endChar": 5
+      },
+      "revId": "c44b9e397f97beda932d13dcdcc6f233ee5da56b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6705b43d_6ca76a12",
         "filename": "android/android-emu/android/emulation/control/GooglePlayServices.h",
         "patchSetId": 7
@@ -82,6 +154,30 @@
       "writtenOn": "2017-02-13T22:07:56Z",
       "side": 1,
       "message": "nit: we don\u0027t use \u0027k\u0027 prefix for enum class members.",
+      "range": {
+        "startLine": 28,
+        "startChar": 24,
+        "endLine": 28,
+        "endChar": 32
+      },
+      "revId": "c44b9e397f97beda932d13dcdcc6f233ee5da56b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2e9e8e21_c91f3797",
+        "filename": "android/android-emu/android/emulation/control/GooglePlayServices.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-02-21T21:51:32Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "6705b43d_6ca76a12",
       "range": {
         "startLine": 28,
         "startChar": 24,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "51e36a98_7f9da073",
+        "filename": "android/android-emu/android/emulation/control/GooglePlayServices.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-02-21T21:51:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "016e3478_1bfdd33b",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 44
+      },
+      "revId": "c44b9e397f97beda932d13dcdcc6f233ee5da56b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cc145fae_8cade3b6",
         "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.cpp",
         "patchSetId": 7
@@ -128,6 +248,30 @@
       "writtenOn": "2017-02-13T22:07:56Z",
       "side": 1,
       "message": "nit: the two callbacks are generalizable IMO.",
+      "range": {
+        "startLine": 66,
+        "startChar": 0,
+        "endLine": 80,
+        "endChar": 58
+      },
+      "revId": "c44b9e397f97beda932d13dcdcc6f233ee5da56b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "368356b4_00f721f4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-02-21T21:51:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cc145fae_8cade3b6",
       "range": {
         "startLine": 66,
         "startChar": 0,
@@ -157,6 +301,24 @@
     },
     {
       "key": {
+        "uuid": "12bbe80d_cea5aa4e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-02-21T21:51:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cc4e9acc_4e9ee95f",
+      "revId": "c44b9e397f97beda932d13dcdcc6f233ee5da56b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e2d90058_dc55791e",
         "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.h",
         "patchSetId": 7
@@ -168,6 +330,30 @@
       "writtenOn": "2017-02-13T22:07:56Z",
       "side": 1,
       "message": "IMO it\u0027s unusable until the AdbInterface is set anyway. What about a std::unique_ptr\u003c\u003e here and resetting it on setAdbInterface() ?",
+      "range": {
+        "startLine": 40,
+        "startChar": 43,
+        "endLine": 40,
+        "endChar": 62
+      },
+      "revId": "c44b9e397f97beda932d13dcdcc6f233ee5da56b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5037cce5_74868fc4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-02-21T21:51:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e2d90058_dc55791e",
       "range": {
         "startLine": 40,
         "startChar": 43,
