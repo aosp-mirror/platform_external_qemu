@@ -36,6 +36,7 @@ std::string load_gpu_info();
 // the started processes hang or what not.
 bool async_query_host_gpu_blacklisted();
 bool async_query_host_gpu_AngleWhitelisted();
+bool async_query_host_gpu_SyncBlacklisted();
 
 // Below is the implementation.
 
@@ -78,7 +79,7 @@ public:
 
 class GpuInfoList {
 public:
-    GpuInfoList() : blacklist_status(false), Anglelist_status(false) { }
+    GpuInfoList() = default;
     void addGpu();
     GpuInfo& currGpu();
     std::string dump() const;
@@ -86,8 +87,11 @@ public:
 
     static GpuInfoList* get(); // For the global GpuInfoList
     std::vector<GpuInfo> infos;
-    bool blacklist_status;
-    bool Anglelist_status;
+
+    bool blacklist_status = false;
+    bool Anglelist_status = false;
+    bool SyncBlacklist_status = false;
+
     DISALLOW_COPY_ASSIGN_AND_MOVE(GpuInfoList);
 };
 

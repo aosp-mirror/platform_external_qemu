@@ -1005,6 +1005,8 @@ extern "C" int main(int argc, char **argv) {
         args[n++] = "-append";
         args[n++] = ASTRDUP(append_arg.c_str());
 
+        // Features to disable or enable depending on rendering backend
+        // and gpu make/model/version
         /* Disable the GLAsyncSwap for ANGLE so far */
         if (opts->gpu && !strncmp(opts->gpu, "angle", 5)) {
             if (android::featurecontrol::isEnabled(android::featurecontrol::GLAsyncSwap)) {
