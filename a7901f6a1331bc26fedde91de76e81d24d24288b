@@ -22,6 +22,30 @@
       "revId": "a7901f6a1331bc26fedde91de76e81d24d24288b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1a97a5_442c91f1",
+        "filename": "android/android-emu/android/opengl/emugl_config.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-02-21T21:21:23Z",
+      "side": 1,
+      "message": "Could we remove this macro when we expand the whitelist to other OS? So far, it is a good indication for Windows only.\nThanks!",
+      "parentUuid": "6bfce13a_d2a91600",
+      "range": {
+        "startLine": 231,
+        "startChar": 9,
+        "endLine": 232,
+        "endChar": 13
+      },
+      "revId": "a7901f6a1331bc26fedde91de76e81d24d24288b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
