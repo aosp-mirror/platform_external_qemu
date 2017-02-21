@@ -116,6 +116,30 @@
       "revId": "1e17fbb582ace46996cfe1585804126149500c1c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e68f9364_de6a6113",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/help-page.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-21T17:33:16Z",
+      "side": 1,
+      "message": "I\u0027m not sure actually, as Qt has its own memory management. Please double check before changing this to a smart pointer and before removing the parent parameter.",
+      "parentUuid": "9d679092_fdd93b27",
+      "range": {
+        "startLine": 49,
+        "startChar": 4,
+        "endLine": 49,
+        "endChar": 18
+      },
+      "revId": "1e17fbb582ace46996cfe1585804126149500c1c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
