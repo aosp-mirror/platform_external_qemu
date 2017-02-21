@@ -22,6 +22,30 @@
       "revId": "cda74f4c1c072aedc8d77b0e7b1679427dcb9b9b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a55ef20_51937a80",
+        "filename": "android/android-emu/android/base/async/DefaultLooper.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-21T19:57:36Z",
+      "side": 1,
+      "message": "sure, it would just look pretty much the same IMO:\n\nauto it \u003d std::find_if(mActiveTimers.begin(), mActiveTimers.end(),\n                       [timer](DefaultLooper:Timer* t) {\n                           return t-\u003edeadline() \u003e timer-\u003edeadline();\n                       });",
+      "parentUuid": "b45f0afe_5fa13374",
+      "range": {
+        "startLine": 93,
+        "startChar": 0,
+        "endLine": 97,
+        "endChar": 53
+      },
+      "revId": "cda74f4c1c072aedc8d77b0e7b1679427dcb9b9b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
