@@ -12,6 +12,7 @@
 #pragma once
 
 #include "ui_bug-report-window.h"
+#include "android/emulation/control/ScreenCapturer.h"
 
 #include <QFrame>
 #include <memory>
@@ -21,7 +22,15 @@ class BugReportWindow : public QFrame {
 
 public:
     explicit BugReportWindow(QWidget* parent = 0);
+    void setAdbInterface(android::emulation::AdbInterface* adb);
+    void showEvent(QShowEvent* event);
 
 private:
+    void loadScreenshotImage();
+    void loadScreenshotImageDone(
+            android::emulation::ScreenCapturer::Result result,
+            android::base::StringView filePath);
     std::unique_ptr<Ui::BugReportWindow> mUi;
+    android::emulation::AdbInterface* mAdb;
+    android::emulation::ScreenCapturer* mScreenCapturer;
 };
