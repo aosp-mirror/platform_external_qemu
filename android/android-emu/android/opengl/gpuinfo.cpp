@@ -19,6 +19,7 @@
 #include "android/opengl/gpuinfo.h"
 #include "android/utils/file_io.h"
 
+#include <algorithm>
 #include <assert.h>
 #include <inttypes.h>
 #include <fstream>
@@ -90,6 +91,7 @@ std::string GpuInfoList::dump() const {
 void GpuInfoList::clear() {
     blacklist_status = false;
     Anglelist_status = false;
+    SyncBlacklist_status = false;
     infos.clear();
 }
 
@@ -200,12 +202,46 @@ static const WhitelistEntry sAngleWhitelist[] = {
 static const int sAngleWhitelistSize =
     sizeof(sAngleWhitelist) / sizeof(WhitelistEntry);
 
+
 static bool gpuinfo_query_whitelist(GpuInfoList *gpulist,
                              const WhitelistEntry *list,
                              int size) {
     return gpuinfo_query_list(gpulist, list, size);
 }
+
 #endif
+
+static const BlacklistEntry sSyncBlacklist[] = {
+    // Make | Model | DeviceID | RevisionID | DriverVersion | Renderer |
+    // OS
+    // All NVIDIA Quadro NVS and NVIDIA NVS GPUs on Windows
+    {"10de", nullptr, "06fd", nullptr, nullptr, nullptr, "W"}, // NVS 295
+    {"10de", nullptr, "0a6a", nullptr, nullptr, nullptr, "W"}, // NVS 2100M
+    {"10de", nullptr, "0a6c", nullptr, nullptr, nullptr, "W"}, // NVS 5100M
+    {"10de", nullptr, "0ffd", nullptr, nullptr, nullptr, "W"}, // NVS 510
+    {"10de", nullptr, "1056", nullptr, nullptr, nullptr, "W"}, // NVS 4200M
+    {"10de", nullptr, "10d8", nullptr, nullptr, nullptr, "W"}, // NVS 300
+    {"10de", nullptr, "014a", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 440
+    {"10de", nullptr, "0165", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 285
+    {"10de", nullptr, "017a", nullptr, nullptr, nullptr, "W"}, // Quadro NVS (generic)
+    {"10de", nullptr, "018a", nullptr, nullptr, nullptr, "W"}, // Quadro NVS AGP8X (generic)
+    {"10de", nullptr, "018c", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 50 PCI (generic)
+    {"10de", nullptr, "01db", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 120M
+    {"10de", nullptr, "0245", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 210S / NVIDIA GeForce 6150LE
+    {"10de", nullptr, "032a", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 55/280 PCI
+    {"10de", nullptr, "040c", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 570M / Mobile Quadro FX/NVS video card
+    {"10de", nullptr, "0429", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 135M or Quadro NVS 140M
+    {"10de", nullptr, "042b", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 135M
+    {"10de", nullptr, "042f", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 290
+    {"10de", nullptr, "06ea", nullptr, nullptr, nullptr, "W"}, // quadro nvs 150m
+    {"10de", nullptr, "06eb", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 160M
+    {"10de", nullptr, "06f8", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 420
+    {"10de", nullptr, "06fa", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 450
+    {"10de", nullptr, "0a2c", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 5100M
+};
+
+static const int sSyncBlacklistSize =
+    sizeof(sSyncBlacklist) / sizeof(BlacklistEntry);
 
 std::string load_gpu_info() {
     auto& sys = *System::get();
@@ -459,6 +495,7 @@ void parse_windows_gpu_ids(const std::string& val, GpuInfoList *gpulist) {
         return;
     }
     result = val.substr(key_start + 4, key_end - key_start - 4);
+    std::transform(result.begin(), result.end(), result.begin(), ::tolower);
     gpulist->currGpu().make = result;
 
     key_start = val.find("DEV_", key_start);
@@ -470,6 +507,7 @@ void parse_windows_gpu_ids(const std::string& val, GpuInfoList *gpulist) {
         return;
     }
     result = val.substr(key_start + 4, key_end - key_start - 4);
+    std::transform(result.begin(), result.end(), result.begin(), ::tolower);
     gpulist->currGpu().device_id = result;
 }
 
@@ -548,6 +586,8 @@ void query_blacklist_fn(bool* res) {
 #else
     GpuInfoList::get()->Anglelist_status = false;
 #endif
+    GpuInfoList::get()->SyncBlacklist_status =
+        gpuinfo_query_blacklist(gpulist, sSyncBlacklist, sSyncBlacklistSize);
 }
 
 void query_blacklist_done_fn(const bool& res) { }
@@ -597,4 +637,10 @@ bool async_query_host_gpu_AngleWhitelisted() {
     sGPUInfoQueryThread.ptr();
     sGPUInfoQueryThread->wait();
     return GpuInfoList::get()->Anglelist_status;
+}
+
+bool async_query_host_gpu_SyncBlacklisted() {
+    sGPUInfoQueryThread.ptr();
+    sGPUInfoQueryThread->wait();
+    return GpuInfoList::get()->SyncBlacklist_status;
 }
