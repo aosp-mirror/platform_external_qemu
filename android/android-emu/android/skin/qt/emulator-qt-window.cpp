@@ -149,7 +149,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                   [this](double progress, bool done) {
                       adbPushProgress(progress, done);
                   }),
-      mScreenCapturer(mAdbInterface.get()),
+      mScreenCapturer(new ScreenCapturer(mAdbInterface.get())),
       mInstallDialog(this),
       mPushDialog(this),
       mStartedAdbStopProcess(false) {
@@ -1003,14 +1003,14 @@ void EmulatorQtWindow::screenshot() {
 
     QString savePath = getScreenshotSaveDirectory();
     if (savePath.isEmpty()) {
-        showErrorDialog(tr("The screenshot save location is invalid.<br/>"
+        showErrorDialog(tr("The screenshot save location is not set.<br/>"
                            "Check the settings page and ensure the directory "
                            "exists and is writeable."),
                         tr("Screenshot"));
         return;
     }
 
-    mScreenCapturer.capture(
+    mScreenCapturer->capture(
             savePath.toStdString(),
             [this](ScreenCapturer::Result result, StringView filePath) {
                 EmulatorQtWindow::screenshotDone(result);
@@ -1040,7 +1040,7 @@ void EmulatorQtWindow::screenshotDone(ScreenCapturer::Result result) {
             break;
         case ScreenCapturer::Result::kSaveLocationInvalid:
             msg =
-                    tr("The screenshot save location is invalid.<br/>"
+                    tr("The screenshot save location is not set.<br/>"
                        "Check the settings page and ensure the directory "
                        "exists and is writeable.");
             break;
@@ -1504,6 +1504,10 @@ QRect EmulatorQtWindow::deviceGeometry() const {
 
 android::emulation::AdbInterface* EmulatorQtWindow::getAdbInterface() const {
     return mAdbInterface.get();
+}
+
+ScreenCapturer* EmulatorQtWindow::getScreenCapturer() const {
+    return mScreenCapturer.get();
 }
 
 void EmulatorQtWindow::toggleZoomMode() {
