@@ -13,618 +13,911 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QGroupBox" name="set_crashReprotPrefTitle">
+  <widget class="QTabWidget" name="set_tabs">
    <property name="geometry">
     <rect>
-     <x>324</x>
-     <y>168</y>
-     <width>281</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">border: 0px;</string>
-   </property>
-   <property name="title">
-    <string>When to send crash reports</string>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Title</string>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="set_onTop">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>186</y>
-     <width>211</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>24</width>
-     <height>24</height>
-    </size>
-   </property>
-   <property name="checked">
-    <bool>false</bool>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Toggle</string>
-   </property>
-   <property name="report_metrics" stdset="0">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="set_adbPathBox">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>370</x>
-     <y>112</y>
-     <width>191</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="readOnly">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QGroupBox" name="saveLocationTitle">
-   <property name="geometry">
-    <rect>
-     <x>324</x>
+     <x>0</x>
      <y>20</y>
-     <width>301</width>
-     <height>21</height>
+     <width>630</width>
+     <height>550</height>
     </rect>
    </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-    </font>
+   <property name="cursor">
+    <cursorShape>ArrowCursor</cursorShape>
    </property>
-   <property name="styleSheet">
-    <string notr="true">border: 0px;</string>
+   <property name="currentIndex">
+    <number>0</number>
    </property>
-   <property name="title">
-    <string>Screenshot save location</string>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Title</string>
-   </property>
+   <widget class="QWidget" name="tab_1">
+    <attribute name="title">
+     <string>General</string>
+    </attribute>
+    <widget class="QCheckBox" name="set_autoFindAdb">
+     <property name="geometry">
+      <rect>
+       <x>324</x>
+       <y>104</y>
+       <width>41</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Toggle</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="set_glesApiLevelTitle">
+     <property name="geometry">
+      <rect>
+       <x>324</x>
+       <y>234</y>
+       <width>261</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>OpenGL ES API Level (requires restart)</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="set_glesBackendTitle">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>234</y>
+       <width>261</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>OpenGL ES renderer (requires restart)</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="set_crashReprotPrefTitle">
+     <property name="geometry">
+      <rect>
+       <x>324</x>
+       <y>160</y>
+       <width>281</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>When to send crash reports</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="set_saveLocFolderButton">
+     <property name="geometry">
+      <rect>
+       <x>572</x>
+       <y>30</y>
+       <width>32</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string notr="true"/>
+     </property>
+     <property name="icon">
+      <iconset resource="../resources.qrc">
+       <normaloff>:/dark/folder</normaloff>:/dark/folder</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string notr="true">folder</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="set_forwardShortcutsToDevice">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>104</y>
+       <width>280</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">padding: 3px 3px 3px 3px;</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>Emulator controls (default)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Virtual device</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QComboBox" name="set_crashReportPrefComboBox">
+     <property name="geometry">
+      <rect>
+       <x>324</x>
+       <y>178</y>
+       <width>280</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">padding: 3px 3px 3px 3px;</string>
+     </property>
+     <property name="maxVisibleItems">
+      <number>3</number>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>Always</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Never</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Ask</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QGroupBox" name="kbdShortcutsTitle">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>86</y>
+       <width>281</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Send keyboard shortcuts to</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="saveLocationTitle">
+     <property name="geometry">
+      <rect>
+       <x>324</x>
+       <y>10</y>
+       <width>301</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Screenshot save location</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="set_frameAlways">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>326</y>
+       <width>211</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Toggle</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="set_themeBox">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>30</y>
+       <width>280</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">padding: 3px 3px 3px 3px;</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>Light</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Dark</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QLineEdit" name="set_adbPathBox">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>370</x>
+       <y>104</y>
+       <width>191</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="readOnly">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="set_frameAlwaysTitle">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>308</y>
+       <width>211</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Show frame around device</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="autoFindAdbTitle">
+     <property name="geometry">
+      <rect>
+       <x>324</x>
+       <y>86</y>
+       <width>251</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Use detected ADB location</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="set_glesBackendPrefComboBox">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>252</y>
+       <width>280</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">padding: 3px 3px 3px 3px;</string>
+     </property>
+     <property name="editable">
+      <bool>false</bool>
+     </property>
+     <property name="currentText" stdset="0">
+      <string>Autodetect based on host (default)</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>Autodetect based on host (default)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>ANGLE (D3D11)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>ANGLE (D3D9)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>SwiftShader</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Desktop native OpenGL</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QComboBox" name="set_glesApiLevelPrefComboBox">
+     <property name="geometry">
+      <rect>
+       <x>324</x>
+       <y>252</y>
+       <width>280</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">padding: 3px 3px 3px 3px;</string>
+     </property>
+     <property name="editable">
+      <bool>false</bool>
+     </property>
+     <property name="currentText" stdset="0">
+      <string>OpenGL ES 2.0 (default)</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>OpenGL ES 2.0 (default)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Renderer maximum (up to OpenGL ES 3.1)</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QPushButton" name="set_adbPathButton">
+     <property name="geometry">
+      <rect>
+       <x>572</x>
+       <y>104</y>
+       <width>32</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string notr="true"/>
+     </property>
+     <property name="icon">
+      <iconset resource="../resources.qrc">
+       <normaloff>:/dark/folder</normaloff>:/dark/folder</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string notr="true">folder</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="themeTitle">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>10</y>
+       <width>181</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Emulator window theme</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="set_saveLocBox">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>324</x>
+       <y>30</y>
+       <width>240</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="readOnly">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="set_onTop">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>178</y>
+       <width>211</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Toggle</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="set_onTopTitle">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>160</y>
+       <width>211</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Emulator always on top</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab_2">
+    <attribute name="title">
+     <string>Proxy</string>
+    </attribute>
+    <widget class="QCheckBox" name="set_useStudio">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>20</y>
+       <width>281</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Use Android Studio HTTP proxy settings</string>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="set_noProxy">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>50</y>
+       <width>211</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>No proxy</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="set_manualConfig">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>80</y>
+       <width>211</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Manual proxy configuration</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="set_hostNameTitle">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>110</y>
+       <width>81</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Host name</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="set_portTitle">
+     <property name="geometry">
+      <rect>
+       <x>440</x>
+       <y>110</y>
+       <width>81</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Port number</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="set_proxyAuth">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>190</y>
+       <width>261</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Proxy authentication</string>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="set_hostName">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>140</y>
+       <width>360</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="readOnly">
+      <bool>false</bool>
+     </property>
+     <property name="placeholderText">
+      <string>Example: host.google.com</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="set_loginPassword">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>330</x>
+       <y>250</y>
+       <width>230</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="echoMode">
+      <enum>QLineEdit::Password</enum>
+     </property>
+     <property name="readOnly">
+      <bool>false</bool>
+     </property>
+     <property name="placeholderText">
+      <string>xxxx</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="set_loginName">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>250</y>
+       <width>230</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="readOnly">
+      <bool>false</bool>
+     </property>
+     <property name="placeholderText">
+      <string>username</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="set_loginNameTitle">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>220</y>
+       <width>81</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Login</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="set_loginPasswordTitle">
+     <property name="geometry">
+      <rect>
+       <x>330</x>
+       <y>220</y>
+       <width>81</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Password</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="set_portNumber">
+     <property name="geometry">
+      <rect>
+       <x>440</x>
+       <y>140</y>
+       <width>120</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <number>65535</number>
+     </property>
+     <property name="value">
+      <number>80</number>
+     </property>
+    </widget>
+    <zorder>set_useStudio</zorder>
+    <zorder>set_noProxy</zorder>
+    <zorder>set_manualConfig</zorder>
+    <zorder>set_hostNameTitle</zorder>
+    <zorder>set_portTitle</zorder>
+    <zorder>set_proxyAuth</zorder>
+    <zorder>set_loginNameTitle</zorder>
+    <zorder>set_loginPasswordTitle</zorder>
+    <zorder>set_hostName</zorder>
+    <zorder>set_loginName</zorder>
+    <zorder>set_loginPassword</zorder>
+    <zorder>set_portNumber</zorder>
+   </widget>
   </widget>
-  <widget class="QLineEdit" name="set_saveLocBox">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>324</x>
-     <y>38</y>
-     <width>240</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="readOnly">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="set_saveLocFolderButton">
-   <property name="geometry">
-    <rect>
-     <x>572</x>
-     <y>38</y>
-     <width>32</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string notr="true"/>
-   </property>
-   <property name="icon">
-    <iconset resource="../resources.qrc">
-     <normaloff>:/dark/folder</normaloff>:/dark/folder</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>24</width>
-     <height>24</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">folder</string>
-   </property>
-   <property name="report_metrics" stdset="0">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="set_autoFindAdb">
-   <property name="geometry">
-    <rect>
-     <x>324</x>
-     <y>112</y>
-     <width>41</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>24</width>
-     <height>24</height>
-    </size>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Toggle</string>
-   </property>
-   <property name="report_metrics" stdset="0">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QGroupBox" name="set_onTopTitle">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>168</y>
-     <width>211</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">border: 0px;</string>
-   </property>
-   <property name="title">
-    <string>Emulator always on top</string>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Title</string>
-   </property>
-  </widget>
-  <widget class="QGroupBox" name="themeTitle">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>20</y>
-     <width>181</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">border: 0px;</string>
-   </property>
-   <property name="title">
-    <string>Emulator window theme</string>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Title</string>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="set_themeBox">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>38</y>
-     <width>280</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">padding: 3px 3px 3px 3px;</string>
-   </property>
-   <property name="report_metrics" stdset="0">
-    <bool>false</bool>
-   </property>
-   <item>
-    <property name="text">
-     <string>Light</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Dark</string>
-    </property>
-   </item>
-  </widget>
-  <widget class="QPushButton" name="set_adbPathButton">
-   <property name="geometry">
-    <rect>
-     <x>572</x>
-     <y>112</y>
-     <width>32</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string notr="true"/>
-   </property>
-   <property name="icon">
-    <iconset resource="../resources.qrc">
-     <normaloff>:/dark/folder</normaloff>:/dark/folder</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>24</width>
-     <height>24</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">folder</string>
-   </property>
-   <property name="report_metrics" stdset="0">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QGroupBox" name="kbdShortcutsTitle">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>94</y>
-     <width>281</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">border: 0px;</string>
-   </property>
-   <property name="title">
-    <string>Send keyboard shortcuts to</string>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Title</string>
-   </property>
-  </widget>
-  <widget class="QGroupBox" name="autoFindAdbTitle">
-   <property name="geometry">
-    <rect>
-     <x>324</x>
-     <y>94</y>
-     <width>251</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">border: 0px;</string>
-   </property>
-   <property name="title">
-    <string>Use detected ADB location</string>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Title</string>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="set_crashReportPrefComboBox">
-   <property name="geometry">
-    <rect>
-     <x>324</x>
-     <y>186</y>
-     <width>280</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">padding: 3px 3px 3px 3px;</string>
-   </property>
-   <property name="maxVisibleItems">
-    <number>3</number>
-   </property>
-   <property name="report_metrics" stdset="0">
-    <bool>false</bool>
-   </property>
-   <item>
-    <property name="text">
-     <string>Always</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Never</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Ask</string>
-    </property>
-   </item>
-  </widget>
-  <widget class="QComboBox" name="set_forwardShortcutsToDevice">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>112</y>
-     <width>280</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">padding: 3px 3px 3px 3px;</string>
-   </property>
-   <property name="report_metrics" stdset="0">
-    <bool>false</bool>
-   </property>
-   <item>
-    <property name="text">
-     <string>Emulator controls (default)</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Virtual device</string>
-    </property>
-   </item>
-  </widget>
-  <widget class="QGroupBox" name="set_glesBackendTitle">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>242</y>
-     <width>261</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">border: 0px;</string>
-   </property>
-   <property name="title">
-    <string>OpenGL ES renderer (requires restart)</string>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Title</string>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="set_glesBackendPrefComboBox">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>260</y>
-     <width>280</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">padding: 3px 3px 3px 3px;</string>
-   </property>
-   <property name="editable">
-    <bool>false</bool>
-   </property>
-   <property name="currentText">
-    <string>Autodetect based on host (default)</string>
-   </property>
-   <property name="report_metrics" stdset="0">
-    <bool>false</bool>
-   </property>
-   <item>
-    <property name="text">
-     <string>Autodetect based on host (default)</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>ANGLE (D3D11)</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>ANGLE (D3D9)</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>SwiftShader</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Desktop native OpenGL</string>
-    </property>
-   </item>
-  </widget>
-  <widget class="QGroupBox" name="set_glesApiLevelTitle">
-   <property name="geometry">
-    <rect>
-     <x>324</x>
-     <y>242</y>
-     <width>261</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">border: 0px;</string>
-   </property>
-   <property name="title">
-    <string>OpenGL ES API Level (requires restart)</string>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Title</string>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="set_glesApiLevelPrefComboBox">
-   <property name="geometry">
-    <rect>
-     <x>324</x>
-     <y>260</y>
-     <width>280</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">padding: 3px 3px 3px 3px;</string>
-   </property>
-   <property name="editable">
-    <bool>false</bool>
-   </property>
-   <property name="currentText">
-    <string>OpenGL ES 2.0 (default)</string>
-   </property>
-   <property name="report_metrics" stdset="0">
-    <bool>false</bool>
-   </property>
-   <item>
-    <property name="text">
-     <string>OpenGL ES 2.0 (default)</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Renderer maximum (up to OpenGL ES 3.1)</string>
-    </property>
-   </item>
-  </widget>
-  <widget class="QGroupBox" name="set_frameAlwaysTitle">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>316</y>
-     <width>211</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">border: 0px;</string>
-   </property>
-   <property name="title">
-    <string>Show frame around device</string>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Title</string>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="set_frameAlways">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>334</y>
-     <width>211</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>24</width>
-     <height>24</height>
-    </size>
-   </property>
-   <property name="checked">
-    <bool>false</bool>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Toggle</string>
-   </property>
-   <property name="report_metrics" stdset="0">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <zorder>kbdShortcutsTitle</zorder>
-  <zorder>set_crashReprotPrefTitle</zorder>
-  <zorder>set_onTop</zorder>
-  <zorder>set_adbPathBox</zorder>
-  <zorder>saveLocationTitle</zorder>
-  <zorder>set_saveLocBox</zorder>
-  <zorder>set_saveLocFolderButton</zorder>
-  <zorder>set_autoFindAdb</zorder>
-  <zorder>set_onTopTitle</zorder>
-  <zorder>themeTitle</zorder>
-  <zorder>set_themeBox</zorder>
-  <zorder>set_adbPathButton</zorder>
-  <zorder>autoFindAdbTitle</zorder>
-  <zorder>set_crashReportPrefComboBox</zorder>
-  <zorder>set_forwardShortcutsToDevice</zorder>
-  <zorder>set_glesBackendTitle</zorder>
-  <zorder>set_glesBackendPrefComboBox</zorder>
-  <zorder>set_glesApiLevelTitle</zorder>
-  <zorder>set_glesApiLevelPrefComboBox</zorder>
-  <zorder>set_frameAlwaysTitle</zorder>
-  <zorder>set_frameAlways</zorder>
  </widget>
  <tabstops>
+  <tabstop>set_tabs</tabstop>
   <tabstop>set_themeBox</tabstop>
   <tabstop>set_saveLocBox</tabstop>
   <tabstop>set_saveLocFolderButton</tabstop>
@@ -634,6 +927,17 @@
   <tabstop>set_adbPathButton</tabstop>
   <tabstop>set_onTop</tabstop>
   <tabstop>set_crashReportPrefComboBox</tabstop>
+  <tabstop>set_glesBackendPrefComboBox</tabstop>
+  <tabstop>set_glesApiLevelPrefComboBox</tabstop>
+  <tabstop>set_frameAlways</tabstop>
+  <tabstop>set_useStudio</tabstop>
+  <tabstop>set_noProxy</tabstop>
+  <tabstop>set_manualConfig</tabstop>
+  <tabstop>set_hostName</tabstop>
+  <tabstop>set_portNumber</tabstop>
+  <tabstop>set_proxyAuth</tabstop>
+  <tabstop>set_loginName</tabstop>
+  <tabstop>set_loginPassword</tabstop>
  </tabstops>
  <resources>
   <include location="../resources.qrc"/>
