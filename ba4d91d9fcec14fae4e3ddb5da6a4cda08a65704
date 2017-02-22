@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0f1eeeea_962848ed",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-22T22:09:44Z",
+      "side": 1,
+      "message": "nit: keep these alphabetized",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 41
+      },
+      "revId": "ba4d91d9fcec14fae4e3ddb5da6a4cda08a65704",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56f4d234_b092572a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-22T22:09:44Z",
+      "side": 1,
+      "message": "avdInfo_getApiLevel() stupidly returns 1000 as a \u0027bad\u0027 value. (It would be nice to change that to 0 or -1.)\nIn the mean time, you probably should add \"\u0026\u0026 !\u003d 1000\u0027",
+      "revId": "ba4d91d9fcec14fae4e3ddb5da6a4cda08a65704",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df2228db_cb8cad4c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-22T22:09:44Z",
+      "side": 1,
+      "message": "\"is not set\"?",
+      "range": {
+        "startLine": 86,
+        "startChar": 57,
+        "endLine": 86,
+        "endChar": 67
+      },
+      "revId": "ba4d91d9fcec14fae4e3ddb5da6a4cda08a65704",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "41364092_bfdaca2f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/help-page.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-22T22:09:44Z",
+      "side": 1,
+      "message": "Should alphabetize these, too.",
+      "revId": "ba4d91d9fcec14fae4e3ddb5da6a4cda08a65704",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
