@@ -13,6 +13,10 @@
 
 #include "android/featurecontrol/FeatureControlImpl.h"
 
+#include "android/featurecontrol/proto/emulator_feature_patterns.pb.h"
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/text_format.h"
+
 namespace android {
 namespace featurecontrol {
 

@@ -12,6 +12,7 @@
 #pragma once
 
 #include "android/featurecontrol/Features.h"
+#include "android/featurecontrol/HWMatching.h"
 
 namespace android {
 namespace featurecontrol {
@@ -32,6 +33,16 @@ namespace featurecontrol {
 bool isEnabled(Feature feature);
 void setEnabledOverride(Feature feature, bool isEnabled);
 void resetEnabledToDefault(Feature feature);
+
+// For server-based blacklists and feature control:
+// The single function to call: queries blacklist of HW specs
+// deemed special enough to disable (or enable!) certain
+// advancedFeatures, and then actually enables/disables features
+// if the user has not override them in ~/.android/advancedFeatures.ini.
+// Downloads a server-specific protobuf file containing the patterns,
+// asynchronously; if there is no such protobuf file or the file
+// is not done being written yet, then there are no extra actions taken.
+void downloadAndApplyFeaturePatterns();
 
 } // namespace android
 } // namespace featurecontrol
