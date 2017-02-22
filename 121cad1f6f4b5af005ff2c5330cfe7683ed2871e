@@ -48,6 +48,23 @@
     },
     {
       "key": {
+        "uuid": "dd52ce73_8280336b",
+        "filename": "android/android-emu/android/opengl/gpuinfo.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 560,
+      "author": {
+        "id": 1136078
+      },
+      "writtenOn": "2017-02-22T18:33:51Z",
+      "side": 1,
+      "message": "we can put the black list file in the same location of android-component-compatibility.xml used by android studio.",
+      "revId": "121cad1f6f4b5af005ff2c5330cfe7683ed2871e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bc39d530_ab255153",
         "filename": "android/android-emu/android/opengl/gpuinfo.cpp",
         "patchSetId": 10
