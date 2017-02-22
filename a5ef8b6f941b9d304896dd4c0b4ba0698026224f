@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "84ec3cd3_1a878548",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-02-22T22:49:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "599a0532_dee7aa17",
+      "range": {
+        "startLine": 19,
+        "startChar": 36,
+        "endLine": 19,
+        "endChar": 67
+      },
+      "revId": "a5ef8b6f941b9d304896dd4c0b4ba0698026224f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "881bac3b_dac6595b",
         "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.h",
         "patchSetId": 9
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "27f20eb0_9db5ad66",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-02-22T22:49:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "881bac3b_dac6595b",
+      "range": {
+        "startLine": 37,
+        "startChar": 4,
+        "endLine": 37,
+        "endChar": 51
+      },
+      "revId": "a5ef8b6f941b9d304896dd4c0b4ba0698026224f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "91f010b2_e196d708",
         "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.h",
         "patchSetId": 9
@@ -59,6 +107,30 @@
       "writtenOn": "2017-02-22T00:14:18Z",
       "side": 1,
       "message": "this is a dynamically-initialized static if you have QString there. changing QString to const char* or StringView + const -\u003e constexpr makes it compile-time though.",
+      "range": {
+        "startLine": 44,
+        "startChar": 4,
+        "endLine": 44,
+        "endChar": 64
+      },
+      "revId": "a5ef8b6f941b9d304896dd4c0b4ba0698026224f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c13f9f88_1e9e7eee",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-02-22T22:49:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "91f010b2_e196d708",
       "range": {
         "startLine": 44,
         "startChar": 4,
