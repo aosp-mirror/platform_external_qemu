@@ -47,8 +47,16 @@ private slots:
     void on_set_glesBackendPrefComboBox_currentIndexChanged(int index);
     void on_set_glesApiLevelPrefComboBox_currentIndexChanged(int index);
 
+    void on_set_autoDetect_toggled(bool checked);
+    void on_set_autoProxy_toggled(bool checked);
+    void on_set_manualConfig_toggled(bool checked);
+    void on_set_noProxy_toggled(bool checked);
+    void on_set_proxyAuth_toggled(bool checked);
+    void on_set_useStudio_toggled(bool checked);
+
 private:
     bool eventFilter (QObject* object, QEvent* event) override;
+    void grayOutProxy();
 
     android::emulation::AdbInterface* mAdb;
     std::unique_ptr<Ui::SettingsPage> mUi;

@@ -92,6 +92,8 @@ SettingsPage::SettingsPage(QWidget* parent)
     mUi->set_onTop->setCheckState(onTopOnly ? Qt::Checked : Qt::Unchecked);
 #endif
 
+    grayOutProxy();
+
     Ui::Settings::CRASHREPORT_PREFERENCE_VALUE report_pref =
         static_cast<Ui::Settings::CRASHREPORT_PREFERENCE_VALUE>(
             settings.value(Ui::Settings::CRASHREPORT_PREFERENCE, 0).toInt());
