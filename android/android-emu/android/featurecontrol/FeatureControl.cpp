@@ -12,6 +12,10 @@
 #include "FeatureControl.h"
 
 #include "android/featurecontrol/FeatureControlImpl.h"
+#include "android/featurecontrol/proto/emulator_feature_patterns.pb.h"
+
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/text_format.h"
 
 namespace android {
 namespace featurecontrol {
@@ -26,6 +30,23 @@ void setEnabledOverride(Feature feature, bool isEnabled) {
 
 void resetEnabledToDefault(Feature feature) {
     FeatureControlImpl::get().resetEnabledToDefault(feature);
+}
+
+#include <string>
+#include <stdio.h>
+void testParseFeaturePatterns() {
+    fprintf(stderr, "%s: call\n", __func__);
+    emulator_features::EmulatorHost emuHostTest;
+    emuHostTest.set_cpu_manufacturer("AMD");
+    std::string out;
+    emuHostTest.SerializeToString(&out);
+    fprintf(stderr, "%s: test out %s %s\n", __func__, out.c_str(), emuHostTest.DebugString().c_str());
+    if (google::protobuf::TextFormat::ParseFromString("cpu_manufacturer: \"AMD\"", &emuHostTest)) {
+        fprintf(stderr, "%s: succesful parse\n", __func__);
+    } else {
+        fprintf(stderr, "%s: failt parse\n", __func__);
+    }
+    fprintf(stderr, "%s: cpu manufact %s\n", __func__, emuHostTest.cpu_manufacturer().c_str());
 }
 
 }  // namespace featurecontrol

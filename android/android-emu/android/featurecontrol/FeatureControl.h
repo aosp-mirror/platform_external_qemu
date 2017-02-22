@@ -33,5 +33,7 @@ bool isEnabled(Feature feature);
 void setEnabledOverride(Feature feature, bool isEnabled);
 void resetEnabledToDefault(Feature feature);
 
+void testParseFeaturePatterns();
+
 } // namespace android
 } // namespace featurecontrol
