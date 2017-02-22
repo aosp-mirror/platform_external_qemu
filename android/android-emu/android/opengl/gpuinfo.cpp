@@ -16,14 +16,18 @@
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/base/threads/ParallelTask.h"
 #include "android/base/threads/Thread.h"
+#include "android/curl-support.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/utils/file_io.h"
 
 #include <algorithm>
-#include <assert.h>
-#include <inttypes.h>
 #include <fstream>
 #include <sstream>
+#include <string>
+#include <vector>
+
+#include <assert.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -541,14 +545,94 @@ bool parse_and_query_blacklist(const std::string& contents) {
     return gpuinfo_query_blacklist(gpulist, sGpuBlacklist, sBlacklistSize);
 }
 
+// TODO: Make google drive support permalinks that also dynamically catch up with latest updates
+static const char kOnlineBlacklistUrl[] =
+    "https://www.dropbox.com/s/ol983r883b4dmkn/blacklist.txt?dl=1";
+static const char kOnlineSyncBlacklistUrl[] =
+    "https://www.dropbox.com/s/ibeuwzi9403yxjp/sync-blacklist.txt?dl=1";
+
+static std::vector<std::string> strSplit(const std::string& contents, const std::string& delim) {
+    size_t curr = 0;
+    size_t crPos = contents.find(delim);
+    std::vector<std::string> res;
+    res.push_back(contents.substr(0, crPos));
+
+    curr = crPos + 1;
+    crPos = contents.find(delim, curr);
+
+    while (crPos != std::string::npos) {
+        res.push_back(contents.substr(curr, crPos - curr));
+        curr = crPos + 1;
+        crPos = contents.find(delim, curr);
+        if (crPos == std::string::npos) {
+            res.push_back(contents.substr(curr));
+        }
+    }
+    return res;
+}
+
+static size_t curlParseBlacklistCallback(char* contents,
+                                        size_t size,
+                                        size_t nmemb,
+                                        void* userp) {
+    auto& res = *static_cast<std::vector<BlacklistEntry>* >(userp);
+
+    std::string contentsStr(contents);
+
+    std::vector<std::string> lines = strSplit(contents, "\n");
+
+    for (const auto& elt: lines) {
+        if (elt.size() == 0) continue;
+
+        std::vector<std::string> fields = strSplit(elt, ",");
+        BlacklistEntry current;
+        int ctr = 0;
+        for (const auto& elt2 : fields) {
+            char* fieldVal = nullptr;
+            if (elt2 != "nullptr") 
+                fieldVal = strdup(elt2.c_str());
+            switch (ctr) {
+            case 0: current.make = fieldVal; break;
+            case 1: current.model = fieldVal; break;
+            case 2: current.device_id = fieldVal; break;
+            case 3: current.revision_id = fieldVal; break;
+            case 4: current.version = fieldVal; break;
+            case 5: current.renderer = fieldVal; break;
+            case 6: current.os = fieldVal; break;
+            }
+            ctr++;
+        }
+
+        if (fields.size() == 7) {
+            res.push_back(current);
+        }
+    }
+    return size * nmemb;
+}
+
+static bool checkOnlineBlacklist(GpuInfoList* gpulist, const char* url) {
+    std::vector<BlacklistEntry> serverBlacklist;
+    char* curlError = nullptr;
+    curl_download(url, nullptr, &curlParseBlacklistCallback,
+                  &serverBlacklist, &curlError);
+    bool res = gpuinfo_query_blacklist(gpulist, &serverBlacklist[0], serverBlacklist.size());
+    return res;
+}
+
 void query_blacklist_fn(bool* res) {
     std::string gpu_info = load_gpu_info();
     GpuInfoList *gpulist = GpuInfoList::get();
     parse_gpu_info_list(gpu_info, gpulist);
+
     *res = gpuinfo_query_blacklist(gpulist, sGpuBlacklist, sBlacklistSize);
     GpuInfoList::get()->blacklist_status = *res;
     GpuInfoList::get()->SyncBlacklist_status =
         gpuinfo_query_blacklist(gpulist, sSyncBlacklist, sSyncBlacklistSize);
+
+    GpuInfoList::get()->blacklist_status |=
+        checkOnlineBlacklist(gpulist, kOnlineBlacklistUrl);
+    GpuInfoList::get()->SyncBlacklist_status |=
+        checkOnlineBlacklist(gpulist, kOnlineSyncBlacklistUrl);
 }
 
 void query_blacklist_done_fn(const bool& res) { }

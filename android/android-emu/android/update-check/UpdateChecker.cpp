@@ -105,6 +105,7 @@ public:
             url += getVersionUriFields();
         }
         char* error = nullptr;
+        fprintf(stderr, "%s: %s\n", __func__, url.c_str());
         if (!curl_download(url.c_str(), nullptr, &curlWriteCallback, &xml,
                            &error)) {
             dwarning("UpdateCheck: Failure: %s", error);
