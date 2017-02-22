@@ -24,6 +24,7 @@
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/CpuAccelerator.h"
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/utils/filelock.h"
 #include "android/utils/x86_cpuid.h"
 
 #include "android/featurecontrol/proto/emulator_feature_patterns.pb.h"
@@ -75,6 +76,99 @@ static LazyInstance<FeaturePatternQueryThread> sFeaturePatternQueryThread =
     LAZY_INSTANCE_INIT;
 
 static const char kCachedPatternsFilename[] = "emu-last-feature-patterns.protobuf";
+
+static bool tryParseFeaturePatternsProtobuf(
+        const std::string& filename,
+        emulator_features::EmulatorFeaturePatterns* out_patterns) {
+    std::ifstream in(filename);
+    google::protobuf::io::IstreamInputStream istream(&in);
+
+    if (!google::protobuf::TextFormat::Parse(
+                &istream, out_patterns)) {
+        D("failed to parse protobuf file");
+        return false;
+    }
+
+    return true;
+}
+
+// Scoped accessor to help read the server-side feature patterns
+// in an organized way, especially when other emulator instances
+// are involved.
+// Concurrent access may occur on |kCachedPatternsFilename| on
+// multiple emulator instances.
+// Current policy is to pretend the file is not there for the 2nd and later
+// accessors of the file, if concurrent access happens.
+class PatternsFileAccessor {
+public:
+    PatternsFileAccessor() :
+        mFilename(
+            android::base::PathUtils::join(
+                android::ConfigDirs::getUserDirectory(),
+                kCachedPatternsFilename)) { }
+
+    ~PatternsFileAccessor() {
+        if (mFileLock)
+            filelock_release(mFileLock);
+    }
+
+    bool read(emulator_features::EmulatorFeaturePatterns* patterns) {
+        if (!acquire()) return false;
+        return tryParseFeaturePatternsProtobuf(mFilename, patterns);
+    }
+
+    bool write(emulator_features::EmulatorFeaturePatterns& patterns) {
+        if (!acquire()) return false;
+
+        {
+            std::ofstream outFile(
+                    mFilename,
+                    std::ios_base::out | std::ios_base::trunc);
+
+            if (!outFile) {
+                D("not valid file: %s\n", mFilename.c_str());
+                return false;
+            }
+
+            patterns.set_last_download_time(System::get()->getUnixTime());
+            google::protobuf::io::OstreamOutputStream ostream(&outFile);
+            google::protobuf::TextFormat::Print(patterns, &ostream);
+        }
+
+        // Check if we wrote a parseable protobuf, if not, delete immediately.
+        emulator_features::EmulatorFeaturePatterns test_pattern;
+        if (!tryParseFeaturePatternsProtobuf(mFilename, &test_pattern)) {
+            D("we have invalid protobuf, delete it");
+            System::get()->deleteFile(mFilename);
+            return false;
+        }
+
+        return true;
+    }
+private:
+
+    bool acquire() {
+        if (mFileLock) {
+            D("acquire() called twice by same process.");
+            return false;
+        }
+
+        mFileLock = filelock_create(mFilename.c_str());
+
+        if (!mFileLock) {
+            D("another emulator process has lock or path is RO");
+            return false;
+        }
+
+        D("successful acquire");
+        return true;
+    }
+
+    std::string mFilename = {};
+    FileLock* mFileLock = nullptr;
+
+    DISALLOW_COPY_AND_ASSIGN(PatternsFileAccessor);
+};
 
 void asyncUpdateServerFeaturePatterns() {
     sFeaturePatternQueryThread.ptr();
@@ -244,7 +338,7 @@ static void doFeatureAction(const FeatureAction& action) {
 }
 
 static const char kFeaturePatternsUrl[] =
-    "https://www.dropbox.com/s/x7uysz3zlyf8uy9/test-featurepatterns.txt?dl=1";
+    "https://dl.google.com/dl/android/studio/metadata/emulator-feature-patterns.protobuf";
 
 static size_t curlDownloadFeaturePatternsCallback(
         char* contents, size_t size, size_t nmemb, void* userp) {
@@ -275,42 +369,19 @@ std::string downloadFeaturePatterns() {
 
 static void outputCachedFeaturePatterns(
         emulator_features::EmulatorFeaturePatterns& patterns) {
-    const std::string outputFileName =
-        android::base::PathUtils::join(
-                android::ConfigDirs::getUserDirectory(),
-                kCachedPatternsFilename);
+    PatternsFileAccessor access;
 
-    std::ofstream outFile(
-            outputFileName,
-            std::ios_base::out | std::ios_base::trunc);
-
-    if (!outFile)
-        D("not valid file: %s\n", outputFileName.c_str());
-
-    patterns.set_last_download_time(System::get()->getUnixTime());
-    google::protobuf::io::OstreamOutputStream ostream(&outFile);
-    google::protobuf::TextFormat::Print(patterns, &ostream);
-
-    outFile << patterns.DebugString();
+    access.write(patterns);
 }
 
 static LazyInstance<emulator_features::EmulatorFeaturePatterns> sCachedFeaturePatterns =
     LAZY_INSTANCE_INIT;
 
 void applyCachedServerFeaturePatterns() {
-    const std::string inputFileName =
-        android::base::PathUtils::join(
-                android::ConfigDirs::getUserDirectory(),
-                kCachedPatternsFilename);
+    PatternsFileAccessor access;
 
-    std::ifstream in(inputFileName);
-    google::protobuf::io::IstreamInputStream istream(&in);
-
-    if (!google::protobuf::TextFormat::Parse(
-                &istream, sCachedFeaturePatterns.ptr())) {
-        D("failed to parse protobuf file");
+    if (!access.read(sCachedFeaturePatterns.ptr()))
         return;
-    }
 
     std::vector<FeatureAction> todo =
         matchFeaturePatterns(queryHostHwInfo(), sCachedFeaturePatterns.ptr());
