@@ -1,0 +1,68 @@
+// NOTE: Do not use oneof in this proto as we need to compile it with the
+// open source 2.5 version of the protobuf compiler for Android Studio which
+// does not support the oneof feature.
+syntax = "proto2";
+
+package emulator_features;
+
+// (based on studio_stats.proto)
+// Describes the status of the machine running the emulator.
+message EmulatorHost {
+    // CPU manufacturer of the host, used as certain hypervisors are limited
+    // to a certain manufacturer.
+    optional string cpu_manufacturer = 1; // AMD, INTEL, ...
+
+    // Does the host support virtualization technology
+    optional bool virt_support = 2;
+
+    // Is the host itself running inside a virtual machine.
+    optional bool running_in_vm = 3;
+
+    // May differ from os_architecture field as it is calculated differently,
+    // trying to compensate the JVM bittness.
+    optional int64 os_bit_count = 4;
+
+    // CPU model, family, stepping
+    optional int32 cpu_model_name = 5;
+
+    // darwin / windows / linux
+    optional string os_platform = 6;
+}
+
+// Emulator: Host GPU info.
+message EmulatorGpuInfo {
+    // Make of the Graphics card.
+    optional string make = 1;
+    // Model of the Graphics card.
+    optional string model = 2;
+    // Device id of the Graphics card.
+    optional string device_id = 3;
+    // Revision of the graphics card.
+    optional string revision_id = 4;
+    // Version of the graphics card driver.
+    optional string version = 5;
+    // Name of the graphics card driver.
+    optional string renderer = 6;
+}
+
+message EmulatorHostHWConfig {
+    optional EmulatorHost hostinfo = 1;
+    repeated EmulatorGpuInfo hostgpuinfo = 2;
+}
+
+message FeatureFlagAction {
+    optional string featurename = 1;
+    optional bool shoulddisable = 2;
+    optional bool shouldenable = 3;
+}
+
+message EmulatorFeaturePattern {
+    // If host config matches ANY of these...
+    repeated EmulatorHostHWConfig hwconfig = 1;
+    // do ALL of the feature actions
+    repeated FeatureFlagAction featureaction = 2;
+}
+
+message EmulatorFeaturePatterns {
+    repeated EmulatorFeaturePattern pattern = 1;
+}

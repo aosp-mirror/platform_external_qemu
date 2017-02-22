@@ -13,6 +13,9 @@
 // limitations under the License.
 
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/featurecontrol/proto/emulator_feature_patterns.pb.h"
+#include "google/protobuf/text_format.h"
+
 #include "android/featurecontrol/FeatureControlImpl.h"
 
 #include "android/base/StringView.h"
@@ -245,6 +248,46 @@ TEST_F(FeatureControlTest, readUserSettings) {
         Feature feature = static_cast<Feature>(i);
         EXPECT_FALSE(isEnabled(feature));
     }
+}
+
+static const char kTestFeaturePatterns[] = R"(
+pattern {
+  hwconfig {
+    hostinfo {
+      cpu_manufacturer: "AMD"
+      cpu_model_name: "AMD Ryzen 7 1800X"
+    }
+    hostgpuinfo {
+      make: "10de"
+    }
+  }
+  featureaction { featurename: "GLESDynamicVersion" shoulddisable: false shouldenable: true }
+}
+
+pattern {
+  hwconfig {
+    hostgpuinfo {
+      make: "8086"
+    }
+  }
+  featureaction { featurename: "GLAsyncSwap" shoulddisable: true shouldenable: false }
+}
+
+pattern {
+  hwconfig {
+    hostinfo {
+      os_platform: "darwin"
+    }
+  }
+  featureaction { featurename: "GLESDynamicVersion" shoulddisable: true shouldenable: false }
+}
+)";
+
+TEST_F(FeatureControlTest, featurePatternsBasic) {
+    emulator_features::EmulatorFeaturePatterns patterns;
+    EXPECT_TRUE(
+            google::protobuf::TextFormat::ParseFromString(
+                kTestFeaturePatterns, &patterns));
 }
 
 } // featurecontrol
