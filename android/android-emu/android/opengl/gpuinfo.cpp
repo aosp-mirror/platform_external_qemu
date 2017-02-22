@@ -11,19 +11,28 @@
 
 #include "android/base/async/Looper.h"
 #include "android/base/async/ThreadLooper.h"
+#include "android/base/containers/Lookup.h"
+#include "android/base/files/IniFile.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/base/threads/ParallelTask.h"
 #include "android/base/threads/Thread.h"
+#include "android/curl-support.h"
+#include "android/emulation/ConfigDirs.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/utils/file_io.h"
 
 #include <algorithm>
-#include <assert.h>
-#include <inttypes.h>
 #include <fstream>
 #include <sstream>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+#include <assert.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -541,14 +550,116 @@ bool parse_and_query_blacklist(const std::string& contents) {
     return gpuinfo_query_blacklist(gpulist, sGpuBlacklist, sBlacklistSize);
 }
 
+// TODO: Make google drive support permalinks that also dynamically catch up
+// with latest updates
+static const char kBlacklistCacheFileName[] = "emu-blacklist-last-result.ini";
+static const char kOnlineBlacklistUrl[] =
+    "https://www.dropbox.com/s/ol983r883b4dmkn/blacklist.txt?dl=1";
+static const char kOnlineSyncBlacklistUrl[] =
+    "https://www.dropbox.com/s/ibeuwzi9403yxjp/sync-blacklist.txt?dl=1";
+
+static void outputBlacklistResults(GpuInfoList* gpulist) {
+    const std::string outputFileName =
+        android::base::PathUtils::join(
+                android::ConfigDirs::getUserDirectory(),
+                kBlacklistCacheFileName);
+    android::base::IniFile blacklistIni(outputFileName);
+    blacklistIni.setInt64(
+            android::base::IniFile::makeValidKey("gpu_blacklisted"),
+            gpulist->blacklist_status);
+    blacklistIni.setInt64(
+            android::base::IniFile::makeValidKey("sync_blacklisted"),
+            gpulist->SyncBlacklist_status);
+    blacklistIni.write();
+}
+
+static std::vector<std::string> strSplit(const std::string& contents,
+                                         const std::string& delim) {
+    size_t curr = 0;
+    size_t crPos = contents.find(delim);
+    std::vector<std::string> res;
+    res.push_back(contents.substr(0, crPos));
+
+    curr = crPos + 1;
+    crPos = contents.find(delim, curr);
+
+    while (crPos != std::string::npos) {
+        res.push_back(contents.substr(curr, crPos - curr));
+        curr = crPos + 1;
+        crPos = contents.find(delim, curr);
+        if (crPos == std::string::npos) {
+            res.push_back(contents.substr(curr));
+        }
+    }
+    return res;
+}
+
+static size_t curlParseBlacklistCallback(char* contents,
+                                        size_t size,
+                                        size_t nmemb,
+                                        void* userp) {
+    auto& res = *static_cast<std::vector<BlacklistEntry>* >(userp);
+
+    std::string contentsStr(contents);
+
+    std::vector<std::string> lines = strSplit(contents, "\n");
+
+    for (const auto& elt: lines) {
+        if (elt.size() == 0) continue;
+
+        std::vector<std::string> fields = strSplit(elt, ",");
+        BlacklistEntry current;
+        int ctr = 0;
+        for (const auto& elt2 : fields) {
+            char* fieldVal = nullptr;
+            if (elt2 != "nullptr")
+                fieldVal = strdup(elt2.c_str());
+            switch (ctr) {
+            case 0: current.make = fieldVal; break;
+            case 1: current.model = fieldVal; break;
+            case 2: current.device_id = fieldVal; break;
+            case 3: current.revision_id = fieldVal; break;
+            case 4: current.version = fieldVal; break;
+            case 5: current.renderer = fieldVal; break;
+            case 6: current.os = fieldVal; break;
+            }
+            ctr++;
+        }
+
+        if (fields.size() == 7) {
+            res.push_back(current);
+        }
+    }
+    return size * nmemb;
+}
+
+static bool checkOnlineBlacklist(GpuInfoList* gpulist, const char* url) {
+    std::vector<BlacklistEntry> serverBlacklist;
+    char* curlError = nullptr;
+    curl_download(url, nullptr, &curlParseBlacklistCallback,
+                  &serverBlacklist, &curlError);
+    bool res = gpuinfo_query_blacklist(gpulist,
+                                       &serverBlacklist[0],
+                                       serverBlacklist.size());
+    return res;
+}
+
 void query_blacklist_fn(bool* res) {
     std::string gpu_info = load_gpu_info();
     GpuInfoList *gpulist = GpuInfoList::get();
     parse_gpu_info_list(gpu_info, gpulist);
+
     *res = gpuinfo_query_blacklist(gpulist, sGpuBlacklist, sBlacklistSize);
     GpuInfoList::get()->blacklist_status = *res;
     GpuInfoList::get()->SyncBlacklist_status =
         gpuinfo_query_blacklist(gpulist, sSyncBlacklist, sSyncBlacklistSize);
+
+    GpuInfoList::get()->blacklist_status |=
+        checkOnlineBlacklist(gpulist, kOnlineBlacklistUrl);
+    GpuInfoList::get()->SyncBlacklist_status |=
+        checkOnlineBlacklist(gpulist, kOnlineSyncBlacklistUrl);
+
+    outputBlacklistResults(gpulist);
 }
 
 void query_blacklist_done_fn(const bool& res) { }
@@ -588,14 +699,49 @@ public:
 static android::base::LazyInstance<GPUInfoQueryThread> sGPUInfoQueryThread =
         LAZY_INSTANCE_INIT;
 
+static std::unordered_map<std::string, int64_t> sBlacklistCachedVals;
+static bool getCachedBlacklistStatus(const std::string& key) {
+    if (auto elt = android::base::find(sBlacklistCachedVals, key)) {
+        return *elt;
+    } else {
+        const std::string blacklistCacheFileFullPath =
+            android::base::PathUtils::join(
+                    android::ConfigDirs::getUserDirectory(),
+                    kBlacklistCacheFileName);
+        android::base::IniFile blacklistIni(blacklistCacheFileFullPath);
+        if (!blacklistIni.read()) {
+            return false;
+        }
+
+        // Eagerly retrieve all keys at first from ini, to
+        // avoid visiting the file more than once per startup.
+        for (const auto& elt : { "gpu_blacklisted",
+                                 "sync_blacklisted" }) {
+            sBlacklistCachedVals[elt] =
+                blacklistIni.getInt64(
+                        android::base::IniFile::makeValidKey(elt), 0);
+        }
+
+        return blacklistIni.getInt64(key, 0);
+    }
+}
+
+static bool getCachedGpuBlacklistStatus() {
+    return getCachedBlacklistStatus("gpu_blacklisted");
+}
+
+static bool getCachedSyncBlacklistStatus() {
+    return getCachedBlacklistStatus("sync_blacklisted");
+}
+
 bool async_query_host_gpu_blacklisted() {
+    bool cached_res = getCachedGpuBlacklistStatus();
     sGPUInfoQueryThread.ptr();
-    sGPUInfoQueryThread->wait();
-    return GpuInfoList::get()->blacklist_status;
+    return cached_res;
 }
 
 bool async_query_host_gpu_SyncBlacklisted() {
+    bool cached_res = getCachedSyncBlacklistStatus();
     sGPUInfoQueryThread.ptr();
-    sGPUInfoQueryThread->wait();
-    return GpuInfoList::get()->SyncBlacklist_status;
+    return cached_res;
 }
