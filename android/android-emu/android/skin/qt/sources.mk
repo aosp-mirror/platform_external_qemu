@@ -64,6 +64,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/extended-pages/rotary-input-dial.cpp \
     android/skin/qt/extended-pages/rotary-input-page.cpp \
     android/skin/qt/extended-pages/settings-page.cpp \
+    android/skin/qt/extended-pages/settings-page-proxy.cpp \
     android/skin/qt/extended-pages/telephony-page.cpp \
     android/skin/qt/extended-pages/virtual-sensors-page.cpp \
     android/skin/qt/extended-window.cpp \

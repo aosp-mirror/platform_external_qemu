@@ -86,6 +86,12 @@ QCheckBox::indicator:checked {
 QCheckBox::indicator:unchecked {
     image: url(:/%%PATH%%/check_no)
 }
+QCheckBox::indicator:checked:disabled {
+    image: url(:/%%PATH%%/check_yes_disabled)
+}
+QCheckBox::indicator:unchecked:disabled {
+    image: url(:/%%PATH%%/check_no_disabled)
+}
 QPushButton:pressed[ToolWindowButton=true], QPushButton:checked[ToolWindowButton=true] {
     border: none;
     background: %%TAB_DARKENED_COLOR%%;
@@ -129,6 +135,14 @@ QRadioButton::indicator:unchecked {
 }
 QRadioButton::indicator:checked {
     image: url(:/%%PATH%%/radio_on);
+    width: 24; height: 24;
+}
+QRadioButton::indicator:unchecked:disabled {
+    image: url(:/%%PATH%%/radio_off_disabled);
+    width: 24; height: 24;
+}
+QRadioButton::indicator:checked:disabled {
+    image: url(:/%%PATH%%/radio_on_disabled);
     width: 24; height: 24;
 }
 QSlider::groove {border: 1px ;height: 2px;}
