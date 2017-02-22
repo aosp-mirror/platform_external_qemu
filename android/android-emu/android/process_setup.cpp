@@ -32,6 +32,7 @@ using android::base::System;
 // The order of initialization here can be very finicky. Handle with care, and
 // leave hints about any ordering constraints via comments.
 void process_early_setup(int argc, char** argv) {
+    fprintf(stderr, "%s: call\n", __func__);
     // This function is the first thing emulator calls - so it's the best place
     // to wait for a debugger to attach, before even the options parsing code.
     static constexpr StringView waitForDebuggerArg = "-wait-for-debugger";
@@ -80,6 +81,7 @@ void process_early_setup(int argc, char** argv) {
     if (!System::get()->pathCanRead(caBundleFile)) {
         LOG(VERBOSE) << "Can not read ca-bundle. Curl init skipped.";
     } else {
+    fprintf(stderr, "%s: curl init\n", __func__);
         curl_init(caBundleFile.c_str());
     }
 }

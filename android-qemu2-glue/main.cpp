@@ -827,6 +827,7 @@ extern "C" int main(int argc, char **argv) {
                             "Contiguous Memory Allocation.");
     }
 
+    fprintf(stderr, "%s: query sync b\n", __func__);
     bool shouldDisableAsyncSwap = async_query_host_gpu_SyncBlacklisted();
     if (shouldDisableAsyncSwap &&
         android::featurecontrol::isEnabled(android::featurecontrol::GLAsyncSwap)) {
