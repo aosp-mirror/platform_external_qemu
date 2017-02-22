@@ -21,6 +21,8 @@
 #include <QThread>
 #include <QUrl>
 
+#include <cassert>
+
 const char DOCS_URL[] =
     "http://developer.android.com/r/studio-ui/emulator.html";
 const char FILE_BUG_URL[] =
@@ -28,10 +30,7 @@ const char FILE_BUG_URL[] =
 const char SEND_FEEDBACK_URL[] =
     "https://code.google.com/p/android/issues/entry?template=Emulator%20Feature%20Request";
 
-HelpPage::HelpPage(QWidget *parent) :
-    QWidget(parent),
-    mUi(new Ui::HelpPage)
-{
+HelpPage::HelpPage(QWidget* parent) : QWidget(parent), mUi(new Ui::HelpPage) {
     mUi->setupUi(this);
 
     // Get the version of this code
@@ -152,7 +151,19 @@ void HelpPage::on_help_docs_clicked() {
     QDesktopServices::openUrl(QUrl::fromEncoded(DOCS_URL));
 }
 
+void HelpPage::createBugReportWindow() {
+    mBugReportWindow = new BugReportWindow(this);
+}
+
 void HelpPage::on_help_fileBug_clicked() {
+    //@TODO once bug report window is ready, uncomment the following block of code
+    /*if (mBugReportWindow == nullptr) {
+        createBugReportWindow();
+    }
+    assert(mBugReportWindow);
+    mBugReportWindow->show();
+    mBugReportWindow->raise();
+    mBugReportWindow->activateWindow();*/
     QDesktopServices::openUrl(QUrl::fromEncoded(FILE_BUG_URL));
 }
 
