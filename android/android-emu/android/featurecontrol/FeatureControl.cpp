@@ -13,6 +13,10 @@
 
 #include "android/featurecontrol/FeatureControlImpl.h"
 
+#include "android/featurecontrol/proto/emulator_feature_patterns.pb.h"
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/text_format.h"
+
 namespace android {
 namespace featurecontrol {
 
@@ -26,6 +30,10 @@ void setEnabledOverride(Feature feature, bool isEnabled) {
 
 void resetEnabledToDefault(Feature feature) {
     FeatureControlImpl::get().resetEnabledToDefault(feature);
+}
+
+Feature stringToFeature(const std::string& str) {
+    return FeatureControlImpl::get().fromString(str);
 }
 
 }  // namespace featurecontrol

@@ -703,7 +703,10 @@ extern "C" int main(int argc, char **argv) {
         }
     }
 
-    //create encryptionkey.img file if needed
+    // TODO: apply server-side feature flag overrides
+    // android::featurecontrol::downloadAndApplyFeaturePatterns();
+
+    // create encryptionkey.img file if needed
     if (android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData)) {
         if (hw->disk_encryptionKeyPartition_path == NULL) {
             if(!createInitalEncryptionKeyPartition(hw)) {
