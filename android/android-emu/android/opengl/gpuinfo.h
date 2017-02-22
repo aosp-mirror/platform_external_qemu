@@ -44,6 +44,11 @@ bool parse_and_query_blacklist(const std::string& contents);
 bool async_query_host_gpu_blacklisted();
 bool async_query_host_gpu_SyncBlacklisted();
 
+// These will affect startup time less; they cache the results of
+// the last run if exists.
+bool async_query_host_gpu_blacklisted_cached();
+bool async_query_host_gpu_SyncBlacklisted_cached();
+
 // Below is the implementation.
 
 // We keep a blacklist of known crashy GPU drivers

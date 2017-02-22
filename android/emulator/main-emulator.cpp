@@ -39,6 +39,7 @@
 #include "android/main-emugl.h"
 #include "android/main-help.h"
 #include "android/opengl/emugl_config.h"
+#include "android/process_setup.h"
 #include "android/qt/qt_setup.h"
 #include "android/utils/compiler.h"
 #include "android/utils/debug.h"
@@ -229,6 +230,8 @@ int main(int argc, char** argv)
     bool queryVersion = false;
     bool doListWebcams = false;
     bool cleanUpAvdContent = false;
+
+    process_early_setup(argc, argv);
 
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
