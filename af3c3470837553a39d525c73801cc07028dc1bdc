@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "00052121_2eeb29d3",
+        "filename": "android/android-emu/android/emulation/LogcatPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-22T06:47:38Z",
+      "side": 1,
+      "message": "Is there plans to add rate limiting or pacing to the onGuestSend\u0027s? I could see it getting chatty (or does logcat already do this)",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 43,
+        "endChar": 46
+      },
+      "revId": "af3c3470837553a39d525c73801cc07028dc1bdc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8c0e9c01_af0bf3be",
         "filename": "android/android-emu/android/main-kernel-parameters.cpp",
         "patchSetId": 1
