@@ -23,6 +23,7 @@
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/error-messages.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/filesystems/ext4_resize.h"
 #include "android/filesystems/ext4_utils.h"
@@ -428,6 +429,13 @@ extern "C" int main(int argc, char **argv) {
         // Normal exit.
         return exitStatus;
     }
+
+    // Update server-based hw config / feature flags.
+    // Must be done after emulator_parseCommonCommandLineOptions,
+    // since that calls createAVD which sets up critical info needed
+    // by featurecontrol component itself.
+    feature_update_from_server();
+
     // just because we know that we're in the new emulator as we got here
     opts->ranchu = 1;
 
@@ -703,7 +711,7 @@ extern "C" int main(int argc, char **argv) {
         }
     }
 
-    //create encryptionkey.img file if needed
+    // create encryptionkey.img file if needed
     if (android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData)) {
         if (hw->disk_encryptionKeyPartition_path == NULL) {
             if(!createInitalEncryptionKeyPartition(hw)) {
