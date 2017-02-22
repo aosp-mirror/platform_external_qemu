@@ -26,3 +26,8 @@ void feature_reset_enabled_to_default(Feature feature) {
     auto value = static_cast<android::featurecontrol::Feature>(feature);
     return android::featurecontrol::resetEnabledToDefault(value);
 }
+
+void feature_update_from_server() {
+    android::featurecontrol::applyCachedServerFeaturePatterns();
+    android::featurecontrol::asyncUpdateServerFeaturePatterns();
+}
