@@ -2221,7 +2221,7 @@ static void wait_for_decompress_done(void)
 {
     int idx, thread_count;
 
-    if (!migrate_use_compression()) {
+    if (!decompress_threads) {
         return;
     }
 
@@ -2283,6 +2283,10 @@ static void decompress_data_with_multi_threads(QEMUFile *f,
                                                void *host, int len)
 {
     int idx, thread_count;
+
+    if (!decompress_threads) {
+        migrate_decompress_threads_create();
+    }
 
     thread_count = migrate_decompress_threads();
     qemu_mutex_lock(&decomp_done_lock);
@@ -2458,8 +2462,6 @@ static int ram_load(QEMUFile *f, void *opaque, int version_id)
         ret = -EINVAL;
     }
 
-    migrate_decompress_threads_create();
-
     /* This RCU critical section can be very long running.
      * When RCU reclaims in the code start to become numerous,
      * it will be necessary to reduce the granularity of this
@@ -2576,7 +2578,9 @@ static int ram_load(QEMUFile *f, void *opaque, int version_id)
     wait_for_decompress_done();
     rcu_read_unlock();
 
-    migrate_decompress_threads_join();
+    if (decompress_threads) {
+        migrate_decompress_threads_join();
+    }
 
     DPRINTF("Completed load of VM with exit code %d seq iteration "
             "%" PRIu64 "\n", ret, seq_iter);
