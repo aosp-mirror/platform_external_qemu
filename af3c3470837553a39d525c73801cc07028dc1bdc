@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8c0e9c01_af0bf3be",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-22T00:26:27Z",
+      "side": 1,
+      "message": "is this some new option, or an existing one? Can we create a separate option here so it could be unconditionally enabled, and only guests that support it would notice?",
+      "range": {
+        "startLine": 48,
+        "startChar": 25,
+        "endLine": 48,
+        "endChar": 43
+      },
+      "revId": "af3c3470837553a39d525c73801cc07028dc1bdc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
