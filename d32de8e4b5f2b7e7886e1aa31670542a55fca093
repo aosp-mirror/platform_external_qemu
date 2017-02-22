@@ -22,6 +22,30 @@
       "revId": "d32de8e4b5f2b7e7886e1aa31670542a55fca093",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4c973158_22507fe9",
+        "filename": "android/android-emu/android/emulation/LogcatPipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-02-22T15:21:42Z",
+      "side": 1,
+      "message": "it is not used, just to get rid of compiler error",
+      "parentUuid": "7911fb61_4951b90a",
+      "range": {
+        "startLine": 36,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 5
+      },
+      "revId": "d32de8e4b5f2b7e7886e1aa31670542a55fca093",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
