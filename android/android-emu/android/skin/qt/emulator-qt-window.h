@@ -185,6 +185,7 @@ public:
     WId getWindowId();
 
     android::emulation::AdbInterface* getAdbInterface() const;
+    android::emulation::ScreenCapturer* getScreenCapturer() const;
     bool isInZoomMode() const;
     ToolWindow* toolWindow() const;
     void showZoomIfNotUserHidden();
@@ -372,7 +373,7 @@ private:
     android::emulation::AdbCommandPtr mApkInstallCommand;
     android::emulation::ApkInstaller mApkInstaller;
     android::emulation::FilePusher mFilePusher;
-    android::emulation::ScreenCapturer mScreenCapturer;
+    std::unique_ptr<android::emulation::ScreenCapturer> mScreenCapturer;
     QProgressDialog mInstallDialog;
     QProgressDialog mPushDialog;
 

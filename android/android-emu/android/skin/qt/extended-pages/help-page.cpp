@@ -64,9 +64,11 @@ HelpPage::HelpPage(QWidget* parent) : QWidget(parent), mUi(new Ui::HelpPage) {
                      this, &HelpPage::updateAdbPortNumber);
 }
 
-void HelpPage::initialize(const ShortcutKeyStore<QtUICommand>* key_store) {
+void HelpPage::initialize(const ShortcutKeyStore<QtUICommand>* key_store,
+                          EmulatorQtWindow* eW) {
     initializeLicenseText();
     initializeKeyboardShortcutList(key_store);
+    mEmulatorWindow = eW;
 }
 
 void HelpPage::initializeLicenseText() {
@@ -152,19 +154,20 @@ void HelpPage::on_help_docs_clicked() {
 }
 
 void HelpPage::createBugReportWindow() {
-    mBugReportWindow = new BugReportWindow(this);
+    mBugReportWindow =
+            new BugReportWindow(mEmulatorWindow->getScreenCapturer(), this);
 }
 
 void HelpPage::on_help_fileBug_clicked() {
     //@TODO once bug report window is ready, uncomment the following block of code
-    /*if (mBugReportWindow == nullptr) {
+    if (mBugReportWindow == nullptr) {
         createBugReportWindow();
     }
     assert(mBugReportWindow);
     mBugReportWindow->show();
     mBugReportWindow->raise();
-    mBugReportWindow->activateWindow();*/
-    QDesktopServices::openUrl(QUrl::fromEncoded(FILE_BUG_URL));
+    mBugReportWindow->activateWindow();
+    // QDesktopServices::openUrl(QUrl::fromEncoded(FILE_BUG_URL));
 }
 
 void HelpPage::on_help_sendFeedback_clicked() {
