@@ -715,6 +715,9 @@ extern "C" int main(int argc, char **argv) {
         dwarning("encryption is off");
     }
 
+    fprintf(stderr, "%s: downloading!\n", __func__);
+    android::featurecontrol::downloadAndApplyFeaturePatterns();
+
     bool createEmptyCacheFile = false;
 
     // Make sure there's a temp cache partition if there wasn't a permanent one

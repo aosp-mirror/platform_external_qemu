@@ -13,6 +13,9 @@
 // limitations under the License.
 
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/featurecontrol/proto/emulator_feature_patterns.pb.h"
+#include "google/protobuf/text_format.h"
+
 #include "android/featurecontrol/FeatureControlImpl.h"
 
 #include "android/base/StringView.h"
@@ -247,5 +250,5 @@ TEST_F(FeatureControlTest, readUserSettings) {
     }
 }
 
-} // featurecontrol
-} // android
+} // namespace featurecontrol
+} // namespace android
