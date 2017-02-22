@@ -244,7 +244,7 @@ static void doFeatureAction(const FeatureAction& action) {
 }
 
 static const char kFeaturePatternsUrl[] =
-    "https://www.dropbox.com/s/x7uysz3zlyf8uy9/test-featurepatterns.txt?dl=1";
+    "https://dl.google.com/dl/android/studio/metadata/emulator-feature-patterns.protobuf";
 
 static size_t curlDownloadFeaturePatternsCallback(
         char* contents, size_t size, size_t nmemb, void* userp) {
@@ -290,8 +290,6 @@ static void outputCachedFeaturePatterns(
     patterns.set_last_download_time(System::get()->getUnixTime());
     google::protobuf::io::OstreamOutputStream ostream(&outFile);
     google::protobuf::TextFormat::Print(patterns, &ostream);
-
-    outFile << patterns.DebugString();
 }
 
 static LazyInstance<emulator_features::EmulatorFeaturePatterns> sCachedFeaturePatterns =
