@@ -426,7 +426,7 @@ endif
 $$(MOC_SRC): PRIVATE_SRC_DIR := $$(abspath $$(dir $$(LOCAL_PATH)/$$(SRC)))
 $$(MOC_SRC): PRIVATE_SRC := $$(LOCAL_PATH)/$$(SRC)
 $$(MOC_SRC): PRIVATE_DST := $$(MOC_SRC)
-$$(MOC_SRC): $$(PRIVATE_SRC) $$(MOC_TOOL)
+$$(MOC_SRC): $$(LOCAL_PATH)/$$(SRC) $$(MOC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Qt moc: $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
 	$(hide) $$(QT_MOC_TOOL) -o $$(PRIVATE_DST) $$(PRIVATE_SRC) -p $$(PRIVATE_SRC_DIR)
@@ -445,7 +445,7 @@ endif
 $$(RCC_SRC): PRIVATE_SRC := $$(LOCAL_PATH)/$$(SRC)
 $$(RCC_SRC): PRIVATE_DST := $$(RCC_SRC)
 $$(RCC_SRC): PRIVATE_NAME := $$(notdir $$(SRC:%.qrc=%))
-$$(RCC_SRC): $$(PRIVATE_SRC) $$(QT_RCC_TOOL)
+$$(RCC_SRC): $$(LOCAL_PATH)/$$(SRC) $$(QT_RCC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Qt rcc (static): $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
 	$(hide) $$(QT_RCC_TOOL) -o $$(PRIVATE_DST) --name $$(PRIVATE_NAME) $$(PRIVATE_SRC)
@@ -464,7 +464,7 @@ endif
 $$(RCC_OUT): PRIVATE_SRC := $$(LOCAL_PATH)/$$(SRC)
 $$(RCC_OUT): PRIVATE_DST := $$(RCC_OUT)
 $$(RCC_OUT): PRIVATE_NAME := $$(notdir $$(SRC:%.qrc=%))
-$$(RCC_OUT): $$(PRIVATE_SRC) $$(QT_RCC_TOOL)
+$$(RCC_OUT): $$(LOCAL_PATH)/$$(SRC) $$(QT_RCC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Qt rcc (dynamic): $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
 	$(hide) $$(QT_RCC_TOOL) -binary -o $$(PRIVATE_DST) --name $$(PRIVATE_NAME) $$(PRIVATE_SRC)
@@ -485,7 +485,7 @@ $$(error QT_UIC_TOOL_LDPATH is not defined when trying to generate $$(UIC_SRC) !
 endif
 $$(UIC_SRC): PRIVATE_SRC := $$(LOCAL_PATH)/$$(SRC)
 $$(UIC_SRC): PRIVATE_DST := $$(UIC_SRC)
-$$(UIC_SRC): $$(PRIVATE_SRC) $$(QT_UIC_TOOL)
+$$(UIC_SRC): $$(LOCAL_PATH)/$$(SRC) $$(QT_UIC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Qt uic: $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
 	$(hide) $$(call set-host-library-search-path,$$(QT_UIC_TOOL_LDPATH)) $$(QT_UIC_TOOL) -o $$(PRIVATE_DST) $$(PRIVATE_SRC)
@@ -505,7 +505,7 @@ $$(OUT_SRC): PRIVATE_SRC := $$(LOCAL_PATH)/$$(SRC)
 $$(OUT_SRC): PRIVATE_DST_DIR := $$(dir $$(OUT_SRC))
 $$(OUT_SRC): PRIVATE_DST := $$(OUT_SRC)
 $$(OUT_SRC): PRIVATE_NAME := $$(notdir $$(SRC:%.proto=%))
-$$(OUT_SRC): $$(PRIVATE_SRC) $$(PROTOC_TOOL)
+$$(OUT_SRC): $$(LOCAL_PATH)/$$(SRC) $$(PROTOC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Protoc: $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
 	$(hide) $$(PROTOC_TOOL) -I$$(dir $$(PRIVATE_SRC)) --cpp_out=$$(PRIVATE_DST_DIR) $$(PRIVATE_SRC)
