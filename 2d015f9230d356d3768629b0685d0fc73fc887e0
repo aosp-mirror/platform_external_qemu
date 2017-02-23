@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "827fea01_97890922",
+        "filename": "android/android-emu/android/featurecontrol/FeatureControlImpl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-23T20:06:08Z",
+      "side": 1,
+      "message": "will there be a concern that since Feature_n_items keeps increasing, it will be casted to different integer in different emulator versions?",
+      "range": {
+        "startLine": 222,
+        "startChar": 20,
+        "endLine": 222,
+        "endChar": 35
+      },
+      "revId": "2d015f9230d356d3768629b0685d0fc73fc887e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
