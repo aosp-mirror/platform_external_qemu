@@ -22,6 +22,30 @@
       "revId": "adfa2b8422eb663538d57e7befc72d652055f8b8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b94fcccd_838dc69b",
+        "filename": "android/android-emu/android/featurecontrol/proto/emulator_feature_patterns.proto",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T22:40:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0299c775_614adc42",
+      "range": {
+        "startLine": 55,
+        "startChar": 4,
+        "endLine": 55,
+        "endChar": 12
+      },
+      "revId": "adfa2b8422eb663538d57e7befc72d652055f8b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
