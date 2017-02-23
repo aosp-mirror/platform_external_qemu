@@ -9,6 +9,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#pragma once
+
 #include "android/base/Compiler.h"
 
 #include <stdbool.h>
@@ -117,3 +119,8 @@ void parse_gpu_info_list(const std::string& contents, GpuInfoList* gpulist);
 void parse_gpu_info_list_osx(const std::string& contents, GpuInfoList* gpulist);
 void parse_gpu_info_list_linux(const std::string& contents, GpuInfoList* gpulist);
 void parse_gpu_info_list_windows(const std::string& contents, GpuInfoList* gpulist);
+
+// Returns information about the host GPU,
+// after obtaining info and querying static blacklists.
+GpuInfoList* get_gpu_info();
+
