@@ -51,6 +51,11 @@ _ANDROID_EMU_ROOT := $(LOCAL_PATH)
 # Metrics library is a part of android-emu, so let's include it here
 include $(_ANDROID_EMU_ROOT)/android/metrics/proto/MetricsProto.mk
 
+###############################################################################
+#
+# Feature control protoc-generated library.
+include $(_ANDROID_EMU_ROOT)/android/featurecontrol/proto/FeatureControlProto.mk
+
 # all includes are like 'android/...', so we need to count on that
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
 ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES)
@@ -430,6 +435,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-zlib \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
+    $(FEATURECONTROL_PROTO_STATIC_LIBRARIES)
 
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \
