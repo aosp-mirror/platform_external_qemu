@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "97d68253_c6475e18",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T23:46:36Z",
+      "side": 1,
+      "message": "what about tracking the type beforehand, and then guaranteeing shaders are restored first?",
+      "range": {
+        "startLine": 158,
+        "startChar": 0,
+        "endLine": 160,
+        "endChar": 24
+      },
+      "revId": "29f2bc66e81dfe3a9fcf971b3765a94f1b7c1300",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
