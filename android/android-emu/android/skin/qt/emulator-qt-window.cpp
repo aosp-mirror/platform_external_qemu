@@ -131,9 +131,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                         "selecting a software renderer.  Please check with "
                         "your manufacturer to see if there is an updated "
                         "driver available.")
-                             .arg((GpuInfoList::get()->blacklist_status
+                             .arg((globalGpuInfoList().blacklist_status
                                            ? QString::fromStdString(
-                                                     GpuInfoList::get()->dump())
+                                                     globalGpuInfoList().dump())
                                            : "")),
                      QMessageBox::Ok,
                      this),
@@ -393,7 +393,7 @@ void EmulatorQtWindow::showAvdArchWarning() {
 }
 
 void EmulatorQtWindow::showGpuWarning() {
-    if (!GpuInfoList::get()->blacklist_status) {
+    if (!globalGpuInfoList().blacklist_status) {
         return;
     }
 

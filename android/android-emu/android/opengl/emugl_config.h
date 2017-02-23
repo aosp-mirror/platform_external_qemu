@@ -36,8 +36,6 @@ typedef struct {
 // Check whether or not the host GPU is blacklisted. If so, fall back
 // to software rendering.
 bool isHostGpuBlacklisted();
-// If we actually switched to software, call this.
-void setGpuBlacklistStatus(bool switchedSoftware);
 
 typedef struct {
     char* make;
