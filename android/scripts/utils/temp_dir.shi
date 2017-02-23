@@ -44,17 +44,17 @@ _cleanup_temp_dir () {
 # $2: Optional filename infix, must not contain spaces.
 var_create_temp_dir () {
     local INFIX=${2:-temp}
-    local TEMP_DIR=/tmp/${USER:-user}-$INFIX-$$
-    silent_run mkdir -p "$TEMP_DIR" ||
-            panic "Could not create temporary directory: $TEMP_DIR"
+    local _LOCAL_TEMP_DIR=/tmp/${USER:-user}-$INFIX-$$
+    silent_run mkdir -p "$_LOCAL_TEMP_DIR" ||
+            panic "Could not create temporary directory: $_LOCAL_TEMP_DIR"
     if [ -z "$_SHU_TEMP_DIR_INIT" ]; then
         # Ensure temporary directory is deleted on script exit
         trap "_cleanup_temp_dir 0" EXIT
         trap "_cleanup_temp_dir \$?" QUIT INT HUP
         _SHU_TEMP_DIR_INIT=true
     fi
-    var_append _SHU_TEMP_DIR_LIST "$TEMP_DIR"
-    var_assign "$1" "$TEMP_DIR"
+    var_append _SHU_TEMP_DIR_LIST "$_LOCAL_TEMP_DIR"
+    var_assign "$1" "$_LOCAL_TEMP_DIR"
 }
 
 # A variant of var_create_temp_dir() that will use sudo to create and
@@ -63,15 +63,15 @@ var_create_temp_dir () {
 # $2: OPtional filename infix, must not contain spaces.
 var_create_sudo_temp_dir () {
     local INFIX=${2:-temp}
-    local TEMP_DIR=/tmp/${USER:-user}-$INFIX-$$
-    silent_run sudo mkdir -p "$TEMP_DIR" ||
-            panic "Could not create temporary directory: $TEMP_DIR"
+    local _LOCAL_TEMP_DIR=/tmp/${USER:-user}-$INFIX-$$
+    silent_run sudo mkdir -p "$_LOCAL_TEMP_DIR" ||
+            panic "Could not create temporary directory: $_LOCAL_TEMP_DIR"
     if [ -z "$_SHU_TEMP_DIR_INIT" ]; then
         # Ensure temporary directory is deleted on script exit
         trap "_cleanup_temp_dir 0" EXIT
         trap "_cleanup_temp_dir \$?" QUIT INT HUP
         _SHU_TEMP_DIR_INIT=true
     fi
-    var_append _SHU_TEMP_DIR_SUDO_LIST "$TEMP_DIR"
-    var_assign "$1" "$TEMP_DIR"
+    var_append _SHU_TEMP_DIR_SUDO_LIST "$_LOCAL_TEMP_DIR"
+    var_assign "$1" "$_LOCAL_TEMP_DIR"
 }

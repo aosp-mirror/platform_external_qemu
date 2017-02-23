@@ -105,7 +105,7 @@ git_clone_depth1 () {
         panic "Git destination directory already exists: $DST_DIR"
     fi
     run git clone --depth 1 --branch "$BRANCH" "$GIT_URL" "$DST_DIR" ||
-            panic "Could not clone git repository: $GIT_URL"
+            panic "Could not clone (depth=1) git repository: $GIT_URL"
 }
 
 # Clone a git repository, and checkout a specific branch & commit.
