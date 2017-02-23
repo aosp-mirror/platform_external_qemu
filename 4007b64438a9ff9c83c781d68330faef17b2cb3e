@@ -519,6 +519,30 @@
     },
     {
       "key": {
+        "uuid": "e485bd9c_2217d1b3",
+        "filename": "android/android-emu/android/featurecontrol/proto/emulator_feature_patterns.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-23T21:38:19Z",
+      "side": 1,
+      "message": "it\u0027s not about space savings, it\u0027s about making it easier to understand what could be there. In general, if we ever need to have a legal review here we\u0027ll most probably need to change most of free-form strings to enums just to make sure there\u0027s nothing bad can be passed around.",
+      "parentUuid": "69715e8f_b86f5b8d",
+      "range": {
+        "startLine": 54,
+        "startChar": 13,
+        "endLine": 54,
+        "endChar": 31
+      },
+      "revId": "4007b64438a9ff9c83c781d68330faef17b2cb3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fc69e37f_873ffcfb",
         "filename": "android/android-emu/android/featurecontrol/proto/emulator_feature_patterns.proto",
         "patchSetId": 6
