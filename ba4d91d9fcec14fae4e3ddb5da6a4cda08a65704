@@ -225,6 +225,30 @@
     },
     {
       "key": {
+        "uuid": "834d1ebb_3b4c8698",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-02-23T01:30:06Z",
+      "side": 1,
+      "message": "now I understand that if we have only one instance of screencapturer, we should probably retry here. Thanks!",
+      "parentUuid": "336d8380_23c4eed7",
+      "range": {
+        "startLine": 96,
+        "startChar": 17,
+        "endLine": 96,
+        "endChar": 75
+      },
+      "revId": "ba4d91d9fcec14fae4e3ddb5da6a4cda08a65704",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "503800c0_bdde2ccd",
         "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.h",
         "patchSetId": 1
@@ -248,6 +272,30 @@
     },
     {
       "key": {
+        "uuid": "9d2f18ae_9c5bb162",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-02-23T01:30:06Z",
+      "side": 1,
+      "message": "That makes sense.",
+      "parentUuid": "503800c0_bdde2ccd",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 56
+      },
+      "revId": "ba4d91d9fcec14fae4e3ddb5da6a4cda08a65704",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bab9b322_22e6a17e",
         "filename": "android/android-emu/android/skin/qt/extended-pages/help-page.cpp",
         "patchSetId": 1
@@ -259,6 +307,30 @@
       "writtenOn": "2017-02-23T00:42:04Z",
       "side": 1,
       "message": "just pass everything in the constructor instead of a separate setter?",
+      "range": {
+        "startLine": 157,
+        "startChar": 43,
+        "endLine": 157,
+        "endChar": 47
+      },
+      "revId": "ba4d91d9fcec14fae4e3ddb5da6a4cda08a65704",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "21d048cf_c0c04031",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/help-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-02-23T01:30:06Z",
+      "side": 1,
+      "message": "Will do.",
+      "parentUuid": "bab9b322_22e6a17e",
       "range": {
         "startLine": 157,
         "startChar": 43,
