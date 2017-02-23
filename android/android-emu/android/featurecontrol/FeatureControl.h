@@ -13,6 +13,8 @@
 
 #include "android/featurecontrol/Features.h"
 
+#include <string>
+
 namespace android {
 namespace featurecontrol {
 
@@ -32,6 +34,8 @@ namespace featurecontrol {
 bool isEnabled(Feature feature);
 void setEnabledOverride(Feature feature, bool isEnabled);
 void resetEnabledToDefault(Feature feature);
+
+Feature stringToFeature(const std::string& str);
 
 } // namespace android
 } // namespace featurecontrol

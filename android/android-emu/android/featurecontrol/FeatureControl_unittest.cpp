@@ -247,5 +247,15 @@ TEST_F(FeatureControlTest, readUserSettings) {
     }
 }
 
-} // featurecontrol
-} // android
+TEST_F(FeatureControlTest, stringConversion) {
+#define FEATURE_CONTROL_ITEM(item) EXPECT_TRUE(item == stringToFeature(#item));
+#include "FeatureControlDefHost.h"
+#include "FeatureControlDefGuest.h"
+#undef FEATURE_CONTROL_ITEM
+
+    EXPECT_TRUE(Feature_n_items ==
+                stringToFeature("somefeaturethatshouldneverexist"));
+}
+
+} // namespace featurecontrol
+} // namespace android
