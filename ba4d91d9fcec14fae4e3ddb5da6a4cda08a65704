@@ -201,6 +201,30 @@
     },
     {
       "key": {
+        "uuid": "336d8380_23c4eed7",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-02-23T01:10:31Z",
+      "side": 1,
+      "message": "In reference to android/android-emu/android/skin/qt/emulator-qt-window.cpp:screenshotDone, it looks like instead of retry, inProgress means that some other screenshot operation is currently in use. It might be okay to copy the logic in emulator-window.cpp:screenshotDone to here unless in the future, there is a need to generalize the logic for handling error cases. I am fine with either way since the error handling code is relying on showErrorDialog and independent of the specific UI window.",
+      "parentUuid": "d0af4978_7e5d5f98",
+      "range": {
+        "startLine": 96,
+        "startChar": 17,
+        "endLine": 96,
+        "endChar": 75
+      },
+      "revId": "ba4d91d9fcec14fae4e3ddb5da6a4cda08a65704",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "503800c0_bdde2ccd",
         "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.h",
         "patchSetId": 1
