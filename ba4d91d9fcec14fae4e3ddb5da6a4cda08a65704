@@ -131,6 +131,30 @@
     },
     {
       "key": {
+        "uuid": "7f6b8897_71bbabab",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-02-23T00:12:12Z",
+      "side": 1,
+      "message": "Actually, since I am copying this help text from emulator-qt-window.cpp, do we intend to change all of them?",
+      "parentUuid": "a073b612_4d7e1c70",
+      "range": {
+        "startLine": 86,
+        "startChar": 57,
+        "endLine": 86,
+        "endChar": 67
+      },
+      "revId": "ba4d91d9fcec14fae4e3ddb5da6a4cda08a65704",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "41364092_bfdaca2f",
         "filename": "android/android-emu/android/skin/qt/extended-pages/help-page.h",
         "patchSetId": 1
