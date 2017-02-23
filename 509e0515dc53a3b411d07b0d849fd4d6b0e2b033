@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "0163c42f_8c75f28e",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T20:29:30Z",
+      "side": 1,
+      "message": "No advancedFeatures.ini are touched, that would be too complicated. User-defined features are not changed by server.",
+      "parentUuid": "842c7e9b_20cdc76a",
+      "range": {
+        "startLine": 303,
+        "startChar": 37,
+        "endLine": 303,
+        "endChar": 53
+      },
+      "revId": "509e0515dc53a3b411d07b0d849fd4d6b0e2b033",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e10e68cd_25fa68f6",
         "filename": "android/android-emu/android/featurecontrol/HWMatching.h",
         "patchSetId": 2
