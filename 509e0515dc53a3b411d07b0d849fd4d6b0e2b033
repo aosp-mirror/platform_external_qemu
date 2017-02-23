@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "98778fdb_130a7339",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T21:00:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "89b6f243_1b416924",
+      "range": {
+        "startLine": 69,
+        "startChar": 17,
+        "endLine": 69,
+        "endChar": 21
+      },
+      "revId": "509e0515dc53a3b411d07b0d849fd4d6b0e2b033",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "08f5d795_3373b3fe",
         "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-23T20:03:22Z",
       "side": 1,
       "message": "FYI: LazyInstance\u003c\u003e never calls destructor for its object :)",
+      "range": {
+        "startLine": 73,
+        "startChar": 3,
+        "endLine": 75,
+        "endChar": 5
+      },
+      "revId": "509e0515dc53a3b411d07b0d849fd4d6b0e2b033",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0160f8cd_61577d6b",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T21:00:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "08f5d795_3373b3fe",
       "range": {
         "startLine": 73,
         "startChar": 3,
@@ -165,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "894aae36_5d112378",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T21:00:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e10e68cd_25fa68f6",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 1
+      },
+      "revId": "509e0515dc53a3b411d07b0d849fd4d6b0e2b033",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2149a811_8c506946",
         "filename": "android/android-emu/android/featurecontrol/HWMatching.h",
         "patchSetId": 2
@@ -188,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "e61eafe6_c03968c4",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T21:00:16Z",
+      "side": 1,
+      "message": "yeah",
+      "parentUuid": "2149a811_8c506946",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 29
+      },
+      "revId": "509e0515dc53a3b411d07b0d849fd4d6b0e2b033",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9ced5d60_5866f8e1",
         "filename": "android/android-emu/android/featurecontrol/HWMatching.h",
         "patchSetId": 2
@@ -199,6 +295,30 @@
       "writtenOn": "2017-02-23T20:03:22Z",
       "side": 1,
       "message": "what about missing optional bool in the protobuf (e.g., reset to default value)? IMO Optional\u003cbool\u003e is a better match here",
+      "range": {
+        "startLine": 36,
+        "startChar": 4,
+        "endLine": 36,
+        "endChar": 8
+      },
+      "revId": "509e0515dc53a3b411d07b0d849fd4d6b0e2b033",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "319a770c_f47583b9",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T21:00:16Z",
+      "side": 1,
+      "message": "In the protobuf, the bool has been changed to required.",
+      "parentUuid": "9ced5d60_5866f8e1",
       "range": {
         "startLine": 36,
         "startChar": 4,
