@@ -40,6 +40,10 @@ NamedObjectType ObjectDataType2NamedObjectType(ObjectDataType objDataType) {
             return NamedObjectType::TEXTURE;
         case BUFFER_DATA:
             return NamedObjectType::VERTEXBUFFER;
+        case RENDERBUFFER_DATA:
+            return NamedObjectType::RENDERBUFFER;
+        case FRAMEBUFFER_DATA:
+            return NamedObjectType::FRAMEBUFFER;
         default:
             return NamedObjectType::NULLTYPE;
     }
@@ -55,6 +59,10 @@ void ObjectData::onSave(android::base::Stream* stream) const {
 
 void ObjectData::postLoad(getObjDataPtr_t getObjDataPtr) {
     (void)getObjDataPtr;
+}
+
+GenNameInfo ObjectData::getGenNameInfo() const {
+    return GenNameInfo(ObjectDataType2NamedObjectType(m_dataType));
 }
 
 struct ShareGroup::ObjectDataAutoLock {
@@ -89,7 +97,7 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
             for (size_t objType = 0; objType < mapSize; objType++) {
                 size_t typeSize = stream->getBe32();
                 for (size_t obj = 0; obj < typeSize; obj++) {
-                    ObjectLocalName localName = stream->getBe32();
+                    ObjectLocalName localName = stream->getBe64();
                     ObjectDataPtr data = loadObject((NamedObjectType)objType,
                             localName, stream);
                     setObjectDataLocked((NamedObjectType)objType, localName,
@@ -111,7 +119,7 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
             // loading from a snapshot. We initialize them the first time
             // when eglMakeCurrent.
             // Set the flag for lazy initialization
-            m_needLoadInit = true;
+            m_needLoadRestore = true;
         }
     }
 }
@@ -128,7 +136,7 @@ void ShareGroup::onSave(android::base::Stream* stream) {
         for (const auto& objType : *map) {
             stream->putBe32(objType.size());
             for (const auto& obj : objType) {
-                stream->putBe32(obj.first);
+                stream->putBe64(obj.first);
                 obj.second->onSave(stream);
             }
         }
@@ -142,11 +150,36 @@ void ShareGroup::postSave(android::base::Stream* stream) {
     m_isSaved = false;
 }
 
-void ShareGroup::postLoadInit() {
-    if (m_needLoadInit) {
-        // TODO: get global names
-        // TODO: load all obj data into hardware GPU
-        m_needLoadInit = false;
+void ShareGroup::postLoadRestore() {
+    emugl::Mutex::AutoLock lock(m_restoreLock);
+    if (m_needLoadRestore) {
+        ObjectDataMap *map = (ObjectDataMap *)m_objectsData;
+        for (int i = 0; i < toIndex(NamedObjectType::NUM_OBJECT_TYPES); i++) {
+            NamedObjectType objType = NamedObjectType(i);
+            // 2 passes are needed for SHADER_OR_PROGRAM type, because (1) they
+            // live in the same namespace (2) shaders must be created before
+            // programs.
+            int numPasses = objType == NamedObjectType::SHADER_OR_PROGRAM
+                    ? 2 : 1;
+            for (int pass = 0; pass < numPasses; pass ++) {
+                for (const auto& obj : (*map)[i]) {
+                    assert(objType == ObjectDataType2NamedObjectType(
+                            obj.second->getDataType()));
+                    // get global names
+                    if ((obj.second->getDataType() == PROGRAM_DATA && pass == 0)
+                            || (obj.second->getDataType() == SHADER_DATA &&
+                                    pass == 1)) {
+                        continue;
+                    }
+                    genName(obj.second->getGenNameInfo(), obj.first, false);
+                    obj.second->restore(obj.first, [this](NamedObjectType p_type,
+                                ObjectLocalName p_localName) {
+                                    return getGlobalName(p_type, p_localName);
+                            });
+                }
+            }
+        }
+        m_needLoadRestore = false;
     }
 }
 
