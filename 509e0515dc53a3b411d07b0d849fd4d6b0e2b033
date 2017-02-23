@@ -352,6 +352,30 @@
       "revId": "509e0515dc53a3b411d07b0d849fd4d6b0e2b033",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7fb1a4cc_39e3d786",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T22:38:50Z",
+      "side": 1,
+      "message": "Ah, got it. Changed to optional boot in protobuf, and enforced that there is never a featureaction with an empty enabled flag, and the policy is now that the user setting always has higher priority than the server-side config.",
+      "parentUuid": "a2d50cd2_121eac4e",
+      "range": {
+        "startLine": 36,
+        "startChar": 4,
+        "endLine": 36,
+        "endChar": 8
+      },
+      "revId": "509e0515dc53a3b411d07b0d849fd4d6b0e2b033",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
