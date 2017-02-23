@@ -69,6 +69,8 @@ public:
     bool isEnabled(Feature feature);
     void setEnabledOverride(Feature feature, bool isEnabled);
     void resetEnabledToDefault(Feature feature);
+    bool isOverridden(Feature feeature) const;
+    void setIfNotOverriden(Feature feeature, bool isEnabled);
     Feature fromString(const std::string& str);
     void init(android::base::StringView defaultIniHostPath,
               android::base::StringView defaultIniGuestPath,

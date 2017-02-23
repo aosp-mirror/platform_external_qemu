@@ -257,5 +257,29 @@ TEST_F(FeatureControlTest, stringConversion) {
                 stringToFeature("somefeaturethatshouldneverexist"));
 }
 
+TEST_F(FeatureControlTest, setNonOverriden) {
+    writeDefaultIniHost(mAllOnIni);
+    writeDefaultIniGuest(mAllOnIniGuestOnly);
+    loadAllIni();
+    for (int i = 0; i < Feature_n_items; i++) {
+        Feature feature = static_cast<Feature>(i);
+        EXPECT_TRUE(isEnabled(feature));
+        EXPECT_FALSE(isOverridden(feature));
+    }
+
+    Feature overriden = (Feature)0;
+    setEnabledOverride(overriden, false);
+    EXPECT_FALSE(isEnabled(overriden));
+
+    setIfNotOverriden(overriden, true);
+    EXPECT_FALSE(isEnabled(overriden));
+
+    Feature nonOverriden = (Feature)1;
+    EXPECT_TRUE(isEnabled(nonOverriden));
+    EXPECT_FALSE(isOverridden(nonOverriden));
+    setIfNotOverriden(nonOverriden, false);
+    EXPECT_FALSE(isEnabled(nonOverriden));
+}
+
 } // namespace featurecontrol
 } // namespace android
