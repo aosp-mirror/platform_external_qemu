@@ -35,6 +35,9 @@ bool isEnabled(Feature feature);
 void setEnabledOverride(Feature feature, bool isEnabled);
 void resetEnabledToDefault(Feature feature);
 
+bool isOverridden(Feature feature);
+void setIfNotOverriden(Feature feature, bool isEnabled);
+
 Feature stringToFeature(const std::string& str);
 
 } // namespace android
