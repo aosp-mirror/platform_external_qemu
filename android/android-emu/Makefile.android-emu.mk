@@ -293,6 +293,7 @@ LOCAL_SRC_FILES := \
     android/featurecontrol/FeatureControl.cpp \
     android/featurecontrol/FeatureControlImpl.cpp \
     android/featurecontrol/feature_control.cpp \
+    android/featurecontrol/HWMatching.cpp \
     android/filesystems/ext4_resize.cpp \
     android/filesystems/ext4_utils.cpp \
     android/filesystems/fstab_parser.cpp \
@@ -549,6 +550,7 @@ LOCAL_SRC_FILES := \
   android/emulation/VmLock_unittest.cpp \
   android/error-messages_unittest.cpp \
   android/featurecontrol/FeatureControl_unittest.cpp \
+  android/featurecontrol/HWMatching_unittest.cpp \
   android/filesystems/ext4_resize_unittest.cpp \
   android/filesystems/ext4_utils_unittest.cpp \
   android/filesystems/fstab_parser_unittest.cpp \
