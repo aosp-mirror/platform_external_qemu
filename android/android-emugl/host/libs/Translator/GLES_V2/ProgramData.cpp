@@ -78,6 +78,103 @@ void ProgramData::onSave(android::base::Stream* stream) const {
     stream->putByte(DeleteStatus);
 }
 
+void ProgramData::restore(ObjectLocalName localName,
+           getGlobalName_t getGlobalName) {
+    int globalName = getGlobalName(NamedObjectType::SHADER_OR_PROGRAM,
+            localName);
+    assert(globalName);
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+    if (AttachedVertexShader) {
+        int shaderGlobalName = getGlobalName(NamedObjectType::SHADER_OR_PROGRAM,
+                AttachedVertexShader);
+        assert(shaderGlobalName);
+        dispatcher.glAttachShader(globalName, shaderGlobalName);
+    }
+    if (AttachedFragmentShader) {
+        int shaderGlobalName = getGlobalName(NamedObjectType::SHADER_OR_PROGRAM,
+                AttachedFragmentShader);
+        assert(shaderGlobalName);
+        dispatcher.glAttachShader(globalName, shaderGlobalName);
+    }
+    if (AttachedComputeShader) {
+        int shaderGlobalName = getGlobalName(NamedObjectType::SHADER_OR_PROGRAM,
+                AttachedComputeShader);
+        assert(shaderGlobalName);
+        dispatcher.glAttachShader(globalName, shaderGlobalName);
+    }
+    for (const auto& attribLocs : linkedAttribLocs) {
+        dispatcher.glBindAttribLocation(globalName, attribLocs.second,
+                attribLocs.first.c_str());
+    }
+    if (LinkStatus) {
+        dispatcher.glLinkProgram(globalName);
+        dispatcher.glUseProgram(globalName);
+        for (const auto& uniformEntry : uniforms) {
+            const auto& uniform = uniformEntry.second;
+            switch (uniform.mType) {
+                case GL_FLOAT:
+                    dispatcher.glUniform1fv(uniformEntry.first, uniform.mCount,
+                            (const GLfloat*)uniform.mVal.data());
+                    break;
+                case GL_FLOAT_VEC2:
+                    dispatcher.glUniform2fv(uniformEntry.first, uniform.mCount,
+                            (const GLfloat*)uniform.mVal.data());
+                    break;
+                case GL_FLOAT_VEC3:
+                    dispatcher.glUniform3fv(uniformEntry.first, uniform.mCount,
+                            (const GLfloat*)uniform.mVal.data());
+                    break;
+                case GL_FLOAT_VEC4:
+                    dispatcher.glUniform4fv(uniformEntry.first, uniform.mCount,
+                            (const GLfloat*)uniform.mVal.data());
+                    break;
+                case GL_INT:
+                    dispatcher.glUniform1iv(uniformEntry.first, uniform.mCount,
+                            (const GLint*)uniform.mVal.data());
+                    break;
+                case GL_INT_VEC2:
+                    dispatcher.glUniform2iv(uniformEntry.first, uniform.mCount,
+                            (const GLint*)uniform.mVal.data());
+                    break;
+                case GL_INT_VEC3:
+                    dispatcher.glUniform3iv(uniformEntry.first, uniform.mCount,
+                            (const GLint*)uniform.mVal.data());
+                    break;
+                case GL_INT_VEC4:
+                    dispatcher.glUniform4iv(uniformEntry.first, uniform.mCount,
+                            (const GLint*)uniform.mVal.data());
+                    break;
+                case GL_FLOAT_MAT2:
+                    dispatcher.glUniformMatrix2fv(uniformEntry.first,
+                            uniform.mCount, uniform.mTranspose,
+                            (const GLfloat*)uniform.mVal.data());
+                    break;
+                case GL_FLOAT_MAT3:
+                    dispatcher.glUniformMatrix3fv(uniformEntry.first,
+                            uniform.mCount, uniform.mTranspose,
+                            (const GLfloat*)uniform.mVal.data());
+                    break;
+                case GL_FLOAT_MAT4:
+                    dispatcher.glUniformMatrix4fv(uniformEntry.first,
+                            uniform.mCount, uniform.mTranspose,
+                            (const GLfloat*)uniform.mVal.data());
+                    break;
+                default:
+                    fprintf(stderr, "ProgramData::restore: warning: "
+                            "unsupported uniform type\n");
+            }
+        }
+    }
+    for (const auto& attribLocs : boundAttribLocs) {
+        dispatcher.glBindAttribLocation(globalName, attribLocs.second,
+                attribLocs.first.c_str());
+    }
+}
+
+GenNameInfo ProgramData::getGenNameInfo() const {
+    return GenNameInfo(ShaderProgramType::PROGRAM);
+}
+
 void ProgramData::setErrInfoLog() {
     size_t bytes = validationInfoLog.length() + 1;
     infoLog.reset(new GLchar[bytes]);

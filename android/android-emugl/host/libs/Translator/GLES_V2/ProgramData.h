@@ -56,6 +56,7 @@ public:
 
     std::unordered_map<std::string, GLuint> boundAttribLocs;
 
+    virtual GenNameInfo getGenNameInfo() const override;
 private:
     GLuint AttachedVertexShader;
     GLuint AttachedFragmentShader;
