@@ -631,6 +631,7 @@ EOF
     run $(program_directory)/gen-android-sdk-toolchain.sh \
             --aosp-dir="$2" \
             --host=$_SHU_BUILDER_CURRENT_HOST \
+            --verbosity=$(get_verbosity) \
             --binprefix=${_SHU_BUILDER_GNU_CONFIG_HOST_PREFIX:--} \
             $EXTRA_FLAGS \
             $TOOLCHAIN_WRAPPER_DIR ||
