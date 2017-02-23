@@ -420,7 +420,9 @@ TEST(EmuglConfig, setupEnv) {
 }
 
 TEST(EmuglConfig, hostGpuProps) {
-    GpuInfoList* gpulist = GpuInfoList::get();
+    TestSystem testSys("/usr", 32);
+    testSys.setLiveUnixTime(true);
+    GpuInfoList* gpulist = const_cast<GpuInfoList*>(&globalGpuInfoList());
     gpulist->clear();
     EXPECT_TRUE(gpulist->infos.size() == 0);
     gpulist->addGpu();
@@ -489,7 +491,9 @@ TEST(EmuglConfig, hostGpuProps) {
 }
 
 TEST(EmuglConfig, hostGpuProps_empty) {
-    GpuInfoList* gpulist = GpuInfoList::get();
+    TestSystem testSys("/usr", 32);
+    testSys.setLiveUnixTime(true);
+    GpuInfoList* gpulist = const_cast<GpuInfoList*>(&globalGpuInfoList());
     gpulist->clear();
     EXPECT_TRUE(gpulist->infos.size() == 0);
 

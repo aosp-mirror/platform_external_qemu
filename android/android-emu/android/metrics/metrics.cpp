@@ -295,7 +295,7 @@ void android_metrics_report_common_info(bool openglAlive) {
             fillGuestGlMetrics(event);
         }
 
-        for (const GpuInfo& gpu : GpuInfoList::get()->infos) {
+        for (const GpuInfo& gpu : globalGpuInfoList().infos) {
             auto hostGpu = event->mutable_emulator_details()->add_host_gpu();
             hostGpu->set_device_id(gpu.device_id);
             hostGpu->set_make(gpu.make);
