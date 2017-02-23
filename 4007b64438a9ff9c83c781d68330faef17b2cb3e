@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8b9f8be8_4b0afa58",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 719,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T19:27:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2359ecdb_01cf21a4",
+      "range": {
+        "startLine": 718,
+        "startChar": 0,
+        "endLine": 719,
+        "endChar": 63
+      },
+      "revId": "4007b64438a9ff9c83c781d68330faef17b2cb3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da320c58_f2a43c06",
         "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-23T17:04:59Z",
       "side": 1,
       "message": "you can either use FunctorThread here or even async()",
+      "range": {
+        "startLine": 71,
+        "startChar": 0,
+        "endLine": 71,
+        "endChar": 62
+      },
+      "revId": "4007b64438a9ff9c83c781d68330faef17b2cb3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "138a15a8_206741a4",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T19:27:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da320c58_f2a43c06",
       "range": {
         "startLine": 71,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "ac3fe477_7233af34",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T19:27:19Z",
+      "side": 1,
+      "message": "1. Done with FunctorThread\n2. It currently reads and applies the cached file, then starts the download by starting the thread, so no race.",
+      "parentUuid": "cbcb2be1_24801684",
+      "range": {
+        "startLine": 75,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 17
+      },
+      "revId": "4007b64438a9ff9c83c781d68330faef17b2cb3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d87c11db_d520e06d",
         "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
         "patchSetId": 6
@@ -82,6 +154,30 @@
       "writtenOn": "2017-02-23T17:04:59Z",
       "side": 1,
       "message": "StringView",
+      "range": {
+        "startLine": 103,
+        "startChar": 4,
+        "endLine": 103,
+        "endChar": 15
+      },
+      "revId": "4007b64438a9ff9c83c781d68330faef17b2cb3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6b1eac7_1cdcaa9d",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T19:27:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d87c11db_d520e06d",
       "range": {
         "startLine": 103,
         "startChar": 4,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "cf8ae121_1ffbe446",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T19:27:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3d301c6f_83356a86",
+      "range": {
+        "startLine": 158,
+        "startChar": 21,
+        "endLine": 158,
+        "endChar": 29
+      },
+      "revId": "4007b64438a9ff9c83c781d68330faef17b2cb3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1f291c32_41538a30",
         "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
         "patchSetId": 6
@@ -128,6 +248,30 @@
       "writtenOn": "2017-02-23T17:04:59Z",
       "side": 1,
       "message": "I don\u0027t actually thing libcurl guarantees this.\njust use \"res.append(contents, contents + total)\" form so there\u0027s no requirement on a trailing zero",
+      "range": {
+        "startLine": 255,
+        "startChar": 8,
+        "endLine": 255,
+        "endChar": 23
+      },
+      "revId": "4007b64438a9ff9c83c781d68330faef17b2cb3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5d4c2d94_81e0b3af",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T19:27:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1f291c32_41538a30",
       "range": {
         "startLine": 255,
         "startChar": 8,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "d16c3fc0_723c7815",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T19:27:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3368dfbd_6735eb32",
+      "range": {
+        "startLine": 308,
+        "startChar": 3,
+        "endLine": 308,
+        "endChar": 5
+      },
+      "revId": "4007b64438a9ff9c83c781d68330faef17b2cb3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "15b52764_a94f4d8e",
         "filename": "android/android-emu/android/featurecontrol/HWMatching.h",
         "patchSetId": 6
@@ -174,6 +342,30 @@
       "writtenOn": "2017-02-23T17:04:59Z",
       "side": 1,
       "message": "Optional\u003cbool\u003e enabled ?",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 36,
+        "endChar": 22
+      },
+      "revId": "4007b64438a9ff9c83c781d68330faef17b2cb3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6a34514_1a2277fc",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T19:27:19Z",
+      "side": 1,
+      "message": "Done (switched to regular bool, and required fields in featureaction).",
+      "parentUuid": "15b52764_a94f4d8e",
       "range": {
         "startLine": 35,
         "startChar": 0,
@@ -209,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "b04429f7_5b1b29a8",
+        "filename": "android/android-emu/android/featurecontrol/proto/emulator_feature_patterns.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T19:27:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "96d7e8ba_ff40972a",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 3,
+        "endChar": 38
+      },
+      "revId": "4007b64438a9ff9c83c781d68330faef17b2cb3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d35cca30_6b5dfbc0",
         "filename": "android/android-emu/android/featurecontrol/proto/emulator_feature_patterns.proto",
         "patchSetId": 6
@@ -220,6 +436,30 @@
       "writtenOn": "2017-02-23T17:04:59Z",
       "side": 1,
       "message": "I\u0027d also add |min_cpu_core_count| and |min_ram_size_mb| fields, just to be able to enable high-perf features on high-spec machines.\nbut it\u0027s ok to add those later, protobufs are good with that",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 36
+      },
+      "revId": "4007b64438a9ff9c83c781d68330faef17b2cb3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57c5ce68_1889fa6e",
+        "filename": "android/android-emu/android/featurecontrol/proto/emulator_feature_patterns.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T19:27:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d35cca30_6b5dfbc0",
       "range": {
         "startLine": 29,
         "startChar": 0,
@@ -255,6 +495,30 @@
     },
     {
       "key": {
+        "uuid": "69715e8f_b86f5b8d",
+        "filename": "android/android-emu/android/featurecontrol/proto/emulator_feature_patterns.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T19:27:19Z",
+      "side": 1,
+      "message": "I see the space savings, but I think string is safer---no need to keep feature control defs in a particular order, and no need to maintain a protobuf enum versus feature control enum mapping for inconsistent server versus emulator versions.",
+      "parentUuid": "1e08cbf3_b266d89e",
+      "range": {
+        "startLine": 54,
+        "startChar": 13,
+        "endLine": 54,
+        "endChar": 31
+      },
+      "revId": "4007b64438a9ff9c83c781d68330faef17b2cb3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fc69e37f_873ffcfb",
         "filename": "android/android-emu/android/featurecontrol/proto/emulator_feature_patterns.proto",
         "patchSetId": 6
@@ -266,6 +530,30 @@
       "writtenOn": "2017-02-23T17:04:59Z",
       "side": 1,
       "message": "single optional |enabled| is enough:\n\ntrue -\u003e enabled\nfalse -\u003e disabled\nnot set -\u003e do nothing.\n\nAs of now it can specify both force-enabled and force-disabled flags.",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 35
+      },
+      "revId": "4007b64438a9ff9c83c781d68330faef17b2cb3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "55821488_f40d0bb9",
+        "filename": "android/android-emu/android/featurecontrol/proto/emulator_feature_patterns.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T19:27:19Z",
+      "side": 1,
+      "message": "Done (switched to required single bool)",
+      "parentUuid": "fc69e37f_873ffcfb",
       "range": {
         "startLine": 55,
         "startChar": 0,
