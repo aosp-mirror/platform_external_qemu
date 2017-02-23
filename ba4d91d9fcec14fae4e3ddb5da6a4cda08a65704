@@ -49,6 +49,29 @@
     },
     {
       "key": {
+        "uuid": "1257d482_e6a273d1",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-23T00:42:04Z",
+      "side": 1,
+      "message": "please don\u0027t",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 30
+      },
+      "revId": "ba4d91d9fcec14fae4e3ddb5da6a4cda08a65704",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "56f4d234_b092572a",
         "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
         "patchSetId": 1
@@ -148,6 +171,75 @@
         "startChar": 57,
         "endLine": 86,
         "endChar": 67
+      },
+      "revId": "ba4d91d9fcec14fae4e3ddb5da6a4cda08a65704",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d0af4978_7e5d5f98",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-23T00:42:04Z",
+      "side": 1,
+      "message": "should it retry if the result was \u0027inProgress\u0027?",
+      "range": {
+        "startLine": 96,
+        "startChar": 17,
+        "endLine": 96,
+        "endChar": 75
+      },
+      "revId": "ba4d91d9fcec14fae4e3ddb5da6a4cda08a65704",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "503800c0_bdde2ccd",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-23T00:42:04Z",
+      "side": 1,
+      "message": "const char ScreenCapturer::kRemoteScreenshotFilePath[] \u003d\n        \"/data/local/tmp/screen.png\";\n\nthere should be only one ScreenCapturer, and only single capture operation at once. Pass the existing ScreenCapturer from EmulatorQtWindow instead of creating a separate one here.",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 56
+      },
+      "revId": "ba4d91d9fcec14fae4e3ddb5da6a4cda08a65704",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bab9b322_22e6a17e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/help-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-23T00:42:04Z",
+      "side": 1,
+      "message": "just pass everything in the constructor instead of a separate setter?",
+      "range": {
+        "startLine": 157,
+        "startChar": 43,
+        "endLine": 157,
+        "endChar": 47
       },
       "revId": "ba4d91d9fcec14fae4e3ddb5da6a4cda08a65704",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
