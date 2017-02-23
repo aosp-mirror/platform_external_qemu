@@ -213,8 +213,21 @@ gen_wrapper_program ()
     fi
 
     if [ ! -f "${DST_PREFIX}$DST_PROG" ]; then
-        log "  Skipping: ${SRC_PREFIX}$PROG  [missing destination program]"
-        return
+        case $DST_PROG in
+            cc)
+                # Our toolset doen't have separate cc binary for some platforms;
+                # let those use 'gcc' directly.
+                DST_PROG=gcc
+                if [ ! -f "${DST_PREFIX}$DST_PROG" ]; then
+                    log "  Skipping: ${SRC_PREFIX}$PROG  [missing destination program, even gcc]"
+                    return
+                fi
+                ;;
+            *)
+                log "  Skipping: ${SRC_PREFIX}$PROG  [missing destination program]"
+                return
+                ;;
+         esac
     fi
 
     if [ "$CCACHE" ]; then

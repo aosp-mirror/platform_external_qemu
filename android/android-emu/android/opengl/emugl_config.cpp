@@ -61,20 +61,15 @@ bool isHostGpuBlacklisted() {
     return async_query_host_gpu_blacklisted();
 }
 
-void setGpuBlacklistStatus(bool switchedSoftware) {
-    GpuInfoList::get()->blacklist_status =
-        switchedSoftware;
-}
-
 // Get a description of host GPU properties.
 // Need to free after use.
 emugl_host_gpu_prop_list emuglConfig_get_host_gpu_props() {
-    GpuInfoList* gpulist = GpuInfoList::get();
+    const GpuInfoList& gpulist = globalGpuInfoList();
     emugl_host_gpu_prop_list res;
-    res.num_gpus = gpulist->infos.size();
+    res.num_gpus = gpulist.infos.size();
     res.props = new emugl_host_gpu_props[res.num_gpus];
 
-    const std::vector<GpuInfo>& infos = gpulist->infos;
+    const std::vector<GpuInfo>& infos = gpulist.infos;
     for (int i = 0; i < res.num_gpus; i++) {
         res.props[i].make = strdup(infos[i].make.c_str());
         res.props[i].model = strdup(infos[i].model.c_str());
