@@ -28,5 +28,9 @@ void resetEnabledToDefault(Feature feature) {
     FeatureControlImpl::get().resetEnabledToDefault(feature);
 }
 
+Feature stringToFeature(const std::string& str) {
+    return FeatureControlImpl::get().fromString(str);
+}
+
 }  // namespace featurecontrol
 }  // namespace android
