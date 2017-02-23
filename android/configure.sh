@@ -256,6 +256,8 @@ OPTION_CC=
 HOST_CXX=${CXX:-g++}
 OPTION_CXX=
 
+VERBOSITY=0
+
 AOSP_PREBUILTS_DIR=$(dirname "$0")/../../../prebuilts
 if [ -d "$AOSP_PREBUILTS_DIR" ]; then
     AOSP_PREBUILTS_DIR=$(cd "$AOSP_PREBUILTS_DIR" && pwd -P 2>/dev/null)
@@ -282,6 +284,7 @@ for opt do
             VERBOSE2=yes
         fi
     fi
+    VERBOSITY="$optarg"
     ;;
 
   --debug) OPTION_DEBUG=yes; OPTION_STRIP=no
@@ -424,7 +427,7 @@ else
 fi
 SDK_TOOLCHAIN_DIR=$OUT_DIR/build/toolchain
 GEN_SDK_FLAGS="$GEN_SDK_FLAGS --aosp-dir=$AOSP_PREBUILTS_DIR/.."
-"$GEN_SDK" $GEN_SDK_FLAGS "$SDK_TOOLCHAIN_DIR" || panic "Cannot generate SDK toolchain!"
+"$GEN_SDK" $GEN_SDK_FLAGS "--verbosity=$VERBOSITY" "$SDK_TOOLCHAIN_DIR" || panic "Cannot generate SDK toolchain!"
 BINPREFIX=$("$GEN_SDK" $GEN_SDK_FLAGS --print=binprefix "$SDK_TOOLCHAIN_DIR")
 CC="$SDK_TOOLCHAIN_DIR/${BINPREFIX}gcc"
 CXX="$SDK_TOOLCHAIN_DIR/${BINPREFIX}g++"
