@@ -46,6 +46,30 @@
       "revId": "2d015f9230d356d3768629b0685d0fc73fc887e0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4dcf93f3_7248d9ac",
+        "filename": "android/android-emu/android/featurecontrol/FeatureControlImpl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-23T20:17:21Z",
+      "side": 1,
+      "message": "This value is determined during compilation time. Inconsistency might occur when using old emulator against new server. \nWe should be safe iff we never cast this value to an int and send it to server. But will it be a potential use case for this behavior?",
+      "parentUuid": "0a784464_4d81d90d",
+      "range": {
+        "startLine": 222,
+        "startChar": 20,
+        "endLine": 222,
+        "endChar": 35
+      },
+      "revId": "2d015f9230d356d3768629b0685d0fc73fc887e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
