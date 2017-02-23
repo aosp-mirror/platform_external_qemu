@@ -24,6 +24,20 @@
 
 ShaderParser::ShaderParser(GLenum type) : ObjectData(SHADER_DATA), m_type(type) {}
 
+GenNameInfo ShaderParser::getGenNameInfo() const {
+    switch (m_type) {
+        case GL_VERTEX_SHADER:
+            return GenNameInfo(ShaderProgramType::VERTEX_SHADER);
+        case GL_FRAGMENT_SHADER:
+            return GenNameInfo(ShaderProgramType::FRAGMENT_SHADER);
+        case GL_COMPUTE_SHADER:
+            return GenNameInfo(ShaderProgramType::COMPUTE_SHADER);
+        default:
+            assert(0);
+            return GenNameInfo(NamedObjectType::SHADER_OR_PROGRAM);
+    }
+}
+
 ShaderParser::ShaderParser(android::base::Stream* stream) : ObjectData(stream) {
     m_originalSrc = stream->getString();
     m_src = stream->getString();

@@ -58,6 +58,7 @@ public:
 
     const ANGLEShaderParser::ShaderLinkInfo& getShaderLinkInfo() const { return m_shaderLinkInfo; }
 
+    virtual GenNameInfo getGenNameInfo() const override;
 private:
     void convertESSLToGLSL(int esslVersion);
 
