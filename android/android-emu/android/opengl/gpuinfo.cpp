@@ -644,3 +644,9 @@ bool async_query_host_gpu_SyncBlacklisted() {
     sGPUInfoQueryThread->wait();
     return GpuInfoList::get()->SyncBlacklist_status;
 }
+
+GpuInfoList* get_gpu_info() {
+    sGPUInfoQueryThread.ptr();
+    sGPUInfoQueryThread->wait();
+    return GpuInfoList::get();
+}
