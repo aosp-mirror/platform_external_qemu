@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0299c775_614adc42",
+        "filename": "android/android-emu/android/featurecontrol/proto/emulator_feature_patterns.proto",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-23T21:43:28Z",
+      "side": 1,
+      "message": "please don\u0027t use requires fields in protobufs. They have much worse consequences than you can imagine.\nE.g. if we want to have an enum instead of \u0027bool enable\u0027, we would still need to send \u0027enable\u0027 value in every message, just make sure to ignore it in the code with a special \u0027if\u0027",
+      "range": {
+        "startLine": 55,
+        "startChar": 4,
+        "endLine": 55,
+        "endChar": 12
+      },
+      "revId": "adfa2b8422eb663538d57e7befc72d652055f8b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
