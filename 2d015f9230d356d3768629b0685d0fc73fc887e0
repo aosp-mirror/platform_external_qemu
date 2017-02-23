@@ -70,6 +70,30 @@
       "revId": "2d015f9230d356d3768629b0685d0fc73fc887e0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "384469f0_d2f9ebc7",
+        "filename": "android/android-emu/android/featurecontrol/FeatureControlImpl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-23T20:31:25Z",
+      "side": 1,
+      "message": "I guess I\u0027m not being clear. There is no server side logic. The file on the server doesn\u0027t have any feature names as ints. We will never ever send feature names as ints to any sort of server, even if the server had logic.",
+      "parentUuid": "4dcf93f3_7248d9ac",
+      "range": {
+        "startLine": 222,
+        "startChar": 20,
+        "endLine": 222,
+        "endChar": 35
+      },
+      "revId": "2d015f9230d356d3768629b0685d0fc73fc887e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
