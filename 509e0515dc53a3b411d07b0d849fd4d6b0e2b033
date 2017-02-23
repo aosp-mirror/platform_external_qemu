@@ -328,6 +328,30 @@
       "revId": "509e0515dc53a3b411d07b0d849fd4d6b0e2b033",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a2d50cd2_121eac4e",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-23T21:35:41Z",
+      "side": 1,
+      "message": "no-no-no, \u0027required\u0027 in protobuf is a very bad word that should never happen. It gives so many headaches that it\u0027s better never use it at all (in https://developers.google.com/protocol-buffers/docs/proto search for \"Required Is Forever\")\nMore of it, if we want to reset a feature to the value user has selected before we messed with it using server-side config, we would need to send an empty \"enabled\" flag here",
+      "parentUuid": "319a770c_f47583b9",
+      "range": {
+        "startLine": 36,
+        "startChar": 4,
+        "endLine": 36,
+        "endChar": 8
+      },
+      "revId": "509e0515dc53a3b411d07b0d849fd4d6b0e2b033",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
