@@ -319,6 +319,9 @@ prepare_build_for_host () {
 
             OSX_SDK_VERSION=$(echo "$OSX_SDK_INSTALLED_LIST" | tr ' ' '\n' | grep $OSX_SDK_SUPPORTED | head -1)
             log "OSX: Using SDK version $OSX_SDK_VERSION"
+            if [ -z "$OSX_SDK_VERSION" ]; then
+                panic "No supported OSX SDKs found on the machine (Need any of: [$OSX_SDK_SUPPORTED], have: [$OSX_SDK_INSTALLED_LIST])"
+            fi
 
             XCODE_PATH=$(xcode-select -print-path 2>/dev/null)
             log "OSX: XCode path: $XCODE_PATH"
