@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7610e86c_c98d0e2d",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-24T19:19:11Z",
+      "side": 1,
+      "message": "nit: if (m_parsedSrc.empty()) return;\n?",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 23
+      },
+      "revId": "00bfed97ccccbabc8544b883aac3cc6dec0ec1ec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39deeae5_b81ac97b",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-24T19:19:11Z",
+      "side": 1,
+      "message": "it\u0027s hard to understand why this function becomes virtual in this CL. Could you please add a line in the CL description?",
+      "range": {
+        "startLine": 40,
+        "startChar": 4,
+        "endLine": 40,
+        "endChar": 11
+      },
+      "revId": "00bfed97ccccbabc8544b883aac3cc6dec0ec1ec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
