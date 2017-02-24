@@ -1112,7 +1112,9 @@ void EmulatorQtWindow::slot_scrollRangeChanged(int min, int max) {
 
 void EmulatorQtWindow::screenshot() {
     static const int MIN_SCREENSHOT_API = 14;
-    if (avdInfo_getApiLevel(android_avdInfo) < MIN_SCREENSHOT_API) {
+    static const int DEFAULT_API_LEVEL = 1000;
+    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
+    if (apiLevel == DEFAULT_API_LEVEL || apiLevel < MIN_SCREENSHOT_API) {
         showErrorDialog(tr("Screenshot is not supported below API 14."),
                         tr("Screenshot"));
         return;
@@ -1120,7 +1122,7 @@ void EmulatorQtWindow::screenshot() {
 
     QString savePath = getScreenshotSaveDirectory();
     if (savePath.isEmpty()) {
-        showErrorDialog(tr("The screenshot save location is invalid.<br/>"
+        showErrorDialog(tr("The screenshot save location is not set.<br/>"
                            "Check the settings page and ensure the directory "
                            "exists and is writeable."),
                         tr("Screenshot"));
@@ -1623,6 +1625,10 @@ QRect EmulatorQtWindow::deviceGeometry() const {
 
 android::emulation::AdbInterface* EmulatorQtWindow::getAdbInterface() const {
     return mAdbInterface.get();
+}
+
+ScreenCapturer* EmulatorQtWindow::getScreenCapturer() {
+    return &mScreenCapturer;
 }
 
 void EmulatorQtWindow::toggleZoomMode() {

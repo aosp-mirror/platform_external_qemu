@@ -186,6 +186,7 @@ public:
     WId getWindowId();
 
     android::emulation::AdbInterface* getAdbInterface() const;
+    android::emulation::ScreenCapturer* getScreenCapturer();
     bool isInZoomMode() const;
     ToolWindow* toolWindow() const;
     void showZoomIfNotUserHidden();
