@@ -468,7 +468,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         if (savevm_on_exit) {
             queueQuitEvent();
         } else {
-            runAdbShellStopAndQuit();
+            runAdbShellPowerDownAndQuit();
         }
         event->ignore();
     } else {
@@ -1820,14 +1820,14 @@ void EmulatorQtWindow::slot_adbWarningMessageAccepted() {
     }
 }
 
-void EmulatorQtWindow::runAdbShellStopAndQuit() {
+void EmulatorQtWindow::runAdbShellPowerDownAndQuit() {
     // we need to run it only once, so don't ever reset this
     if (mStartedAdbStopProcess) {
         return;
     }
     mStartedAdbStopProcess = true;
     mAdbInterface->runAdbCommand(
-            {"shell", "stop"},
+            {"shell", "reboot", "-p"},
             [this](const android::emulation::OptionalAdbCommandResult&) {
                 queueQuitEvent();
             },
