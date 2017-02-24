@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4e64d75a_b39deafc",
+        "filename": "android/android-emu/android/featurecontrol/FeatureControl.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-24T17:01:44Z",
+      "side": 1,
+      "message": "could you please add a comment about what these functions do? The implementation of isOverridden() confused me: it changes current value, and I expected it to be a pure getter",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 56
+      },
+      "revId": "9c8d2120375c7a128e2cba00f46fc9e149736332",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
