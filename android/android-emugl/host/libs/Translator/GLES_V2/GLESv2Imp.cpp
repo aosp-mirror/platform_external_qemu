@@ -1241,19 +1241,7 @@ GL_APICALL void  GL_APIENTRY glGenBuffers(GLsizei n, GLuint* buffers){
 GL_APICALL void  GL_APIENTRY glGenerateMipmap(GLenum target){
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::textureTarget(ctx, target), GL_INVALID_ENUM);
-    if (ctx->shareGroup().get()) {
-        TextureData *texData = getTextureTargetData(target);
-        if (texData) {
-            unsigned int width = texData->width;
-            unsigned int height = texData->height;
-            if (ctx->getMajorVersion() < 3) {
-                // set error code if either the width or height is not a power of two.
-                SET_ERROR_IF(width == 0 || height == 0 ||
-                        (width & (width - 1)) != 0 || (height & (height - 1)) != 0,
-                        GL_INVALID_OPERATION);
-            }
-        }
-    }
+    // Assuming we advertised GL_OES_texture_npot
     ctx->dispatcher().glGenerateMipmapEXT(target);
 }
 
