@@ -19,6 +19,8 @@
 #include "android/base/files/Stream.h"
 #include "GLcommon/objectNameManager.h"
 
+#include <vector>
+
 class TextureData : public ObjectData
 {
 public:
@@ -28,6 +30,8 @@ public:
                     depth(0),
                     border(0),
                     internalFormat(GL_RGBA),
+                    format(GL_RGBA),
+                    type(GL_UNSIGNED_BYTE),
                     sourceEGLImage(0),
                     hasStorage(false),
                     wasBound(false),
@@ -44,6 +48,9 @@ public:
     unsigned int depth;
     unsigned int border;
     unsigned int internalFormat;
+    // TODO: store emulated internal format
+    unsigned int format;
+    unsigned int type;
     unsigned int sourceEGLImage;
     bool hasStorage;
     bool wasBound;
@@ -52,5 +59,15 @@ public:
     unsigned int compressedFormat;
     int          crop_rect[4];
     GLenum target;
+    // globalName is used for snapshot when reading data from GPU
+    int globalName = 0;
     virtual void onSave(android::base::Stream* stream) const override;
+    virtual void restore(ObjectLocalName localName,
+            getGlobalName_t getGlobalName) override;
+    void setTexParam(GLenum pname, GLint param);
+protected:
+    std::unordered_map<GLenum, GLint> m_texParam;
+    // loadedData is a temporary buffer used between loading from a snapshot
+    // and restoring hardware GPU states
+    std::vector<unsigned char> loadedData;
 };
