@@ -22,6 +22,30 @@
       "revId": "9c8d2120375c7a128e2cba00f46fc9e149736332",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "892f3d9b_80e60f73",
+        "filename": "android/android-emu/android/featurecontrol/FeatureControl.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-24T17:05:58Z",
+      "side": 1,
+      "message": "sorry, that was just an egregious error that slipped past the unit test, isOverridden is really sposed to be just a getter.\n\nAdded comments.",
+      "parentUuid": "4e64d75a_b39deafc",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 56
+      },
+      "revId": "9c8d2120375c7a128e2cba00f46fc9e149736332",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
