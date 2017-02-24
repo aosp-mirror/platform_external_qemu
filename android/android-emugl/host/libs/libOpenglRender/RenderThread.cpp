@@ -143,6 +143,14 @@ void RenderThread::loadImpl(AutoLock* lock, const SnapshotObjects& objects) {
         objects.channelStream->load(&*mStream);
         objects.checksumCalc->load(&*mStream);
         objects.threadInfo->onLoad(&*mStream);
+        const RenderThreadInfo& tInfo = *objects.threadInfo;
+        HandleType ctx = tInfo.currContext ? tInfo.currContext->getHndl()
+                : 0;
+        HandleType draw = tInfo.currDrawSurf ? tInfo.currDrawSurf->getHndl()
+                : 0;
+        HandleType read = tInfo.currReadSurf ? tInfo.currReadSurf->getHndl()
+                : 0;
+        FrameBuffer::getFB()->bindContext(ctx, draw, read);
     });
 }
 
