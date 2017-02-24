@@ -46,6 +46,30 @@
       "revId": "9c8d2120375c7a128e2cba00f46fc9e149736332",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "609d15eb_a3681331",
+        "filename": "android/android-emu/android/featurecontrol/FeatureControl.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-24T17:09:54Z",
+      "side": 1,
+      "message": "please also make the method \u0027const\u0027 in the class to catch that kind of errors.",
+      "parentUuid": "892f3d9b_80e60f73",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 56
+      },
+      "revId": "9c8d2120375c7a128e2cba00f46fc9e149736332",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
