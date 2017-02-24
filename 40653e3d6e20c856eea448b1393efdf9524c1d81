@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e67d83ce_8ff583d5",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-24T17:46:02Z",
+      "side": 1,
+      "message": "Seems I didn\u0027t need thsoe after all, didn\u0027t do any open()\u0027s",
+      "parentUuid": "a5a89bc0_7d3e4660",
+      "range": {
+        "startLine": 38,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 18
+      },
+      "revId": "40653e3d6e20c856eea448b1393efdf9524c1d81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cb51c6d4_bf47a216",
         "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
         "patchSetId": 9
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-24T17:18:24Z",
       "side": 1,
       "message": "this is a very interesting way of signalling an error :)",
+      "range": {
+        "startLine": 272,
+        "startChar": 15,
+        "endLine": 272,
+        "endChar": 73
+      },
+      "revId": "40653e3d6e20c856eea448b1393efdf9524c1d81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c0196c6b_180f839b",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-24T17:46:02Z",
+      "side": 1,
+      "message": ":)",
+      "parentUuid": "cb51c6d4_bf47a216",
       "range": {
         "startLine": 272,
         "startChar": 15,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "a0b3ce33_218d8d93",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-24T17:46:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b015bdf1_e1e42a75",
+      "range": {
+        "startLine": 294,
+        "startChar": 24,
+        "endLine": 294,
+        "endChar": 35
+      },
+      "revId": "40653e3d6e20c856eea448b1393efdf9524c1d81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b7b39627_2aaa2a59",
         "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
         "patchSetId": 9
@@ -82,6 +154,30 @@
       "writtenOn": "2017-02-24T17:18:24Z",
       "side": 1,
       "message": "this comment _will_ become obsolete if we ever change the value",
+      "range": {
+        "startLine": 323,
+        "startChar": 0,
+        "endLine": 323,
+        "endChar": 28
+      },
+      "revId": "40653e3d6e20c856eea448b1393efdf9524c1d81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39bd4c3e_d9f4d2a0",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-24T17:46:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b7b39627_2aaa2a59",
       "range": {
         "startLine": 323,
         "startChar": 0,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "fe0964de_2924ca7f",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-24T17:46:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fb0be1cb_74af374d",
+      "range": {
+        "startLine": 324,
+        "startChar": 63,
+        "endLine": 324,
+        "endChar": 68
+      },
+      "revId": "40653e3d6e20c856eea448b1393efdf9524c1d81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7abba476_41fa6ee9",
         "filename": "android/android-emu/android/featurecontrol/HWMatching.h",
         "patchSetId": 9
@@ -128,6 +248,30 @@
       "writtenOn": "2017-02-24T17:18:24Z",
       "side": 1,
       "message": "nit: not used",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 34
+      },
+      "revId": "40653e3d6e20c856eea448b1393efdf9524c1d81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "734aa354_9bfb0cd1",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-24T17:46:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7abba476_41fa6ee9",
       "range": {
         "startLine": 17,
         "startChar": 0,
