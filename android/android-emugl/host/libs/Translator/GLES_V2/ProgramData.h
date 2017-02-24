@@ -23,11 +23,30 @@
 #include <string>
 #include <unordered_map>
 
+struct GLUniformDesc {
+    GLUniformDesc() = default;
+    GLUniformDesc(GLint location, GLsizei count, GLboolean transpose,
+            GLenum type, GLsizei size, unsigned char* val);
+    GLUniformDesc(android::base::Stream* stream);
+    GLUniformDesc(GLUniformDesc&&) = default;
+    GLUniformDesc& operator=(GLUniformDesc&&) = default;
+
+    GLsizei mCount = 0;
+    GLboolean mTranspose = GL_FALSE;
+    GLenum mType = (GLenum)0;
+    std::vector<unsigned char> mVal;
+
+    void onSave(android::base::Stream* stream) const;
+};
+
 class ProgramData:public ObjectData{
 public:
     ProgramData();
     ProgramData(android::base::Stream* stream);
     virtual void onSave(android::base::Stream* stream) const override;
+    // restore() in ProgramData must be executed after shaders
+    virtual void restore(ObjectLocalName localName,
+           getGlobalName_t getGlobalName) override;
 
     GLuint getAttachedVertexShader() const;
     GLuint getAttachedFragmentShader() const;
@@ -38,6 +57,7 @@ public:
     bool isAttached(GLuint shader) const;
     bool detachShader(GLuint shader);
     void bindAttribLocation(const std::string& var, GLuint loc);
+    void linkedAttribLocation(const std::string& var, GLuint loc);
 
     void appendValidationErrMsg(std::ostringstream& ss);
     bool validateLink(ShaderParser* frag, ShaderParser* vert);
@@ -54,10 +74,21 @@ public:
     bool getDeleteStatus() const { return DeleteStatus; }
     void setDeleteStatus(bool status) { DeleteStatus = status; }
 
-    std::unordered_map<std::string, GLuint> boundAttribLocs;
+    // TODO: query uniforms when needed instead of storing them for performance
+    // and correctness? (glGetActiveUniform)
+    void addUniform(GLuint loc, GLUniformDesc&& uniform);
 
+    // boundAttribLocs stores the attribute locations assigned by
+    // glBindAttribLocation.
+    // It will take effect after glLinkProgram.
+    std::unordered_map<std::string, GLuint> boundAttribLocs;
     virtual GenNameInfo getGenNameInfo() const override;
 private:
+    // linkedAttribLocs stores the attribute locations the guest might
+    // know about. It includes all boundAttribLocs before the previous
+    // glLinkProgram and all attribute locations retrieved by glGetAttribLocation
+    std::unordered_map<std::string, GLuint> linkedAttribLocs;
+    std::unordered_map<GLuint, GLUniformDesc> uniforms;
     GLuint AttachedVertexShader;
     GLuint AttachedFragmentShader;
     GLuint AttachedComputeShader;
