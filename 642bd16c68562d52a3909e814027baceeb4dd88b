@@ -94,6 +94,30 @@
       "revId": "642bd16c68562d52a3909e814027baceeb4dd88b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b5b1dd94_849e80a2",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2695,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-24T00:49:12Z",
+      "side": 1,
+      "message": "I will do it in the texture patch.\n\nSo we have an \"internal format\" and a \"real internal format\"? lol",
+      "parentUuid": "24d71714_78e94c4b",
+      "range": {
+        "startLine": 2684,
+        "startChar": 0,
+        "endLine": 2695,
+        "endChar": 28
+      },
+      "revId": "642bd16c68562d52a3909e814027baceeb4dd88b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
