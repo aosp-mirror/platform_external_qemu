@@ -22,6 +22,30 @@
       "revId": "0d68daec8344765c695ff399b92175ff18c6b48f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dbedcc71_8e33580b",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-24T02:24:18Z",
+      "side": 1,
+      "message": "As you know glLinkProgram should be called after bindattriblocation. But for the emulator it means we have 2 sets of attribLocations: those that are set before glLinkProgram (good ones) and those after glLinkProgram (bad ones). We want to restore both the goods and the bads. So I put the goods in linkedAttribLocs, and the bads in attribLocs. The goods are correctly set up by linkProgram and the bads are still waiting for the next linkProgram command from users.",
+      "parentUuid": "a152570e_e8c2f030",
+      "range": {
+        "startLine": 148,
+        "startChar": 0,
+        "endLine": 148,
+        "endChar": 45
+      },
+      "revId": "0d68daec8344765c695ff399b92175ff18c6b48f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
