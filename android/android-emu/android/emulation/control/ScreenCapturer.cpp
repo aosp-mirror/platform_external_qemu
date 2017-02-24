@@ -51,6 +51,7 @@ void ScreenCapturer::capture(StringView outputDirectoryPath,
                              ResultCallback resultCallback) {
     if (mCaptureCommand || mPullCommand) {
         resultCallback(Result::kOperationInProgress, nullptr);
+        return;
     }
     std::string out_path = outputDirectoryPath;
     mCaptureCommand =
