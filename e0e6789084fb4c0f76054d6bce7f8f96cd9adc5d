@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "df7cb44c_ce55ebec",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-24T19:50:58Z",
+      "side": 1,
+      "message": "nit: range-for?",
+      "range": {
+        "startLine": 137,
+        "startChar": 4,
+        "endLine": 139,
+        "endChar": 21
+      },
+      "revId": "e0e6789084fb4c0f76054d6bce7f8f96cd9adc5d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8f6ea79c_e76dca02",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 650,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-24T19:50:58Z",
+      "side": 1,
+      "message": "nit: Lookup::findOrDefault() ?",
+      "range": {
+        "startLine": 646,
+        "startChar": 4,
+        "endLine": 650,
+        "endChar": 26
+      },
+      "revId": "e0e6789084fb4c0f76054d6bce7f8f96cd9adc5d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
