@@ -455,6 +455,7 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
         }
         SET_ERROR_IF(ctx->GLTextureTargetToLocal(texData->target) != ctx->GLTextureTargetToLocal(target), GL_INVALID_OPERATION);
         texData->wasBound = true;
+        texData->globalName = globalTextureName;
     }
 
     ctx->setBindedTexture(target,texture);
@@ -625,7 +626,9 @@ GL_APICALL void  GL_APIENTRY glCompressedTexSubImage2D(GLenum target, GLint leve
     ctx->dispatcher().glCompressedTexSubImage2D(target,level,xoffset,yoffset,width,height,format,imageSize,data);
 }
 
-void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border){
+void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
+        GLsizei width, GLsizei height, GLint border, GLenum* format,
+        GLenum* type){
     GET_CTX();
 
     if (ctx->shareGroup().get()) {
@@ -636,11 +639,13 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat, GLsize
         }
 
         if (texData && level == 0) {
+            texData->target = target;
+            texData->internalFormat = internalformat;
             texData->width = width;
             texData->height = height;
             texData->border = border;
-            texData->internalFormat = internalformat;
-            texData->target = target;
+            if (format) texData->format = *format;
+            if (type) texData->type = *type;
 
             if (texData->sourceEGLImage != 0) {
                 //
@@ -657,6 +662,7 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat, GLsize
                 ctx->dispatcher().glBindTexture(GL_TEXTURE_2D,
                         globalTextureName);
                 texData->sourceEGLImage = 0;
+                texData->globalName = globalTextureName;
             }
         }
     }
@@ -691,7 +697,9 @@ GL_APICALL void  GL_APIENTRY glCopyTexImage2D(GLenum target, GLint level, GLenum
                     GLESv2Validate::textureTargetEx(ctx, target))), GL_INVALID_ENUM);
     SET_ERROR_IF((GLESv2Validate::textureIsCubeMap(target) && width != height), GL_INVALID_VALUE);
     SET_ERROR_IF(border != 0,GL_INVALID_VALUE);
-    s_glInitTexImage2D(target, level, internalformat, width, height, border);
+    // TODO: set up the correct format and type
+    s_glInitTexImage2D(target, level, internalformat, width, height, border,
+            nullptr, nullptr);
     ctx->dispatcher().glCopyTexImage2D(target,level,internalformat,x,y,width,height,border);
 }
 
@@ -3056,6 +3064,7 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             texData->border = img->border;
             texData->internalFormat = img->internalFormat;
             texData->sourceEGLImage = imagehndl;
+            texData->globalName = img->globalTexObj->getGlobalName();
             // TODO: set up texData->type
             if (!imagehndl) {
                 fprintf(stderr, "glEGLImageTargetTexture2DOES with empty handle\n");
