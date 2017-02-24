@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "97b0bec2_dd0587b3",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2797,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-24T19:29:19Z",
+      "side": 1,
+      "message": "nit: setUniformInCtx() ?",
+      "range": {
+        "startLine": 2797,
+        "startChar": 12,
+        "endLine": 2797,
+        "endChar": 24
+      },
+      "revId": "2e05a3152dddffee8a959beb03b2d32dcc4dfcfa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "73160a01_8f6fdd13",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-24T19:29:19Z",
+      "side": 1,
+      "message": "please double check if this compiles on mac. Clang tends to follow the Standard quite differently compared to gcc",
+      "range": {
+        "startLine": 60,
+        "startChar": 0,
+        "endLine": 60,
+        "endChar": 62
+      },
+      "revId": "2e05a3152dddffee8a959beb03b2d32dcc4dfcfa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cc9a0f45_eef5e60e",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-24T19:29:19Z",
+      "side": 1,
+      "message": "also add \u0027GLUniformDesc(GLUniformDesc\u0026\u0026) \u003d default\u0027 and \u0027GLUniformDesc\u0026 operator\u003d(GLUniformDesc\u0026\u0026) \u003d default\u0027 if you want it to be movable.",
+      "range": {
+        "startLine": 26,
+        "startChar": 7,
+        "endLine": 26,
+        "endChar": 20
+      },
+      "revId": "2e05a3152dddffee8a959beb03b2d32dcc4dfcfa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
