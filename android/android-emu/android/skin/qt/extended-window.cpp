@@ -54,7 +54,7 @@ ExtendedWindow::ExtendedWindow(
     setFrameOnTop(this, onTop);
 
     mExtendedUi->setupUi(this);
-    mExtendedUi->helpPage->initialize(shortcuts);
+    mExtendedUi->helpPage->initialize(shortcuts, mEmulatorWindow);
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->rotaryInputPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->settingsPage->setAdbInterface(
