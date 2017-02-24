@@ -46,6 +46,30 @@
       "revId": "23b8dfa2775fcf5d8581cc06d7e31eeb8179bac1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b2d4aa54_97c122b2",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThread.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-24T22:49:18Z",
+      "side": 1,
+      "message": "better to have all snapshot-specific code there. If we ever want to try loading render thread on the fly, this could could be lost if it\u0027s separate from the main loadImpl()",
+      "parentUuid": "6e90397f_3d95ecd6",
+      "range": {
+        "startLine": 216,
+        "startChar": 0,
+        "endLine": 222,
+        "endChar": 59
+      },
+      "revId": "23b8dfa2775fcf5d8581cc06d7e31eeb8179bac1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
