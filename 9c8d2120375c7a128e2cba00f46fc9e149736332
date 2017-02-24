@@ -70,6 +70,30 @@
       "revId": "9c8d2120375c7a128e2cba00f46fc9e149736332",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "75e64ae1_01198561",
+        "filename": "android/android-emu/android/featurecontrol/FeatureControl.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-24T17:13:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "609d15eb_a3681331",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 56
+      },
+      "revId": "9c8d2120375c7a128e2cba00f46fc9e149736332",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
