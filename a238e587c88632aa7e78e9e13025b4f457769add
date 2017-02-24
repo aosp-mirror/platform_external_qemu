@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2fb94179_411a6bb3",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1244,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-24T17:03:49Z",
+      "side": 1,
+      "message": "do we actually advertise it?",
+      "range": {
+        "startLine": 1244,
+        "startChar": 7,
+        "endLine": 1244,
+        "endChar": 15
+      },
+      "revId": "a238e587c88632aa7e78e9e13025b4f457769add",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
