@@ -586,6 +586,11 @@ probe_prebuilts_dir "LibANGLEtranslation" ANGLE_TRANSLATION_PREBUILTS_DIR common
 ###
 probe_prebuilts_dir "Protobuf" PROTOBUF_PREBUILTS_DIR protobuf
 
+###
+###  lz4 probe
+###
+probe_prebuilts_dir "lz4" LZ4_PREBUILTS_DIR common/lz4
+
 CACERTS_FILE="$PROGDIR/data/ca-bundle.pem"
 if [ ! -f "$CACERTS_FILE" ]; then
     panic "Missing cacerts file: $CACERTS_FILE"
@@ -1060,6 +1065,7 @@ echo "BREAKPAD_PREBUILTS_DIR := $BREAKPAD_PREBUILTS_DIR" >> $config_mk
 # libuuid is a part of e2fsprogs package
 echo "LIBUUID_PREBUILTS_DIR := $E2FSPROGS_PREBUILTS_DIR" >> $config_mk
 echo "PROTOBUF_PREBUILTS_DIR := $PROTOBUF_PREBUILTS_DIR" >> $config_mk
+echo "LZ4_PREBUILTS_DIR := $LZ4_PREBUILTS_DIR" >> $config_mk
 echo "FFMPEG_PREBUILTS_DIR := $FFMPEG_PREBUILTS_DIR" >> $config_mk
 echo "X264_PREBUILTS_DIR := $X264_PREBUILTS_DIR" >> $config_mk
 
