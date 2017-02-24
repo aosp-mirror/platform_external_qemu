@@ -82,6 +82,15 @@ void GLESv2Context::init(GlLibrary* glLib) {
     m_initialized = true;
 }
 
+void GLESv2Context::restore() {
+    // TODO: make sure glLib is loaded
+    if (m_needRestoreFromSnapshot) {
+        postLoadRestoreShareGroup();
+        postLoadRestoreCtx();
+        m_needRestoreFromSnapshot = false;
+    }
+}
+
 GLESv2Context::GLESv2Context(int maj, int min, android::base::Stream* stream,
         GlLibrary* glLib) : GLEScontext(stream, glLib) {
     if (stream) {
@@ -92,6 +101,7 @@ GLESv2Context::GLESv2Context(int maj, int min, android::base::Stream* stream,
         m_att0ArrayLength = stream->getBe32();
         stream->read(m_att0Array, sizeof(GLfloat) * 4 * m_att0ArrayLength);
         m_att0NeedsDisable = stream->getByte();
+        m_useProgram = stream->getBe32();
     } else {
         m_glesMajorVersion = maj;
         m_glesMinorVersion = min;
@@ -110,6 +120,38 @@ void GLESv2Context::onSave(android::base::Stream* stream) const {
     stream->putBe32(m_att0ArrayLength);
     stream->write(m_att0Array, sizeof(GLfloat) * 4 * m_att0ArrayLength);
     stream->putByte(m_att0NeedsDisable);
+    stream->putBe32(m_useProgram);
+}
+
+void GLESv2Context::postLoadRestoreCtx() {
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+    m_useProgramData = shareGroup()->getObjectDataPtr(
+            NamedObjectType::SHADER_OR_PROGRAM, m_useProgram);
+    const GLuint globalProgramName = shareGroup()->getGlobalName(
+            NamedObjectType::SHADER_OR_PROGRAM, m_useProgram);
+    dispatcher.glUseProgram(globalProgramName);
+
+    // vertex attribute pointers
+    // TODO: GLES3: support multiple VAO
+    // TODO: snapshot glVertexAttrib1f and its friends
+    for (const auto& vao : m_currVaoState) {
+        const GLESpointer* glesPointer = vao.second;
+        // non vertex buffer objects (vbo) are set up right before draw calls
+        // so we only set up vbo here
+        if (glesPointer->isVBO()) {
+            dispatcher.glBindBuffer(GL_ARRAY_BUFFER,
+                    glesPointer->getBufferName());
+            dispatcher.glVertexAttribPointer(vao.first, glesPointer->getSize(),
+                    glesPointer->getType(), glesPointer->isNormalize(),
+                    glesPointer->getStride(),
+                    (GLvoid*)(size_t)glesPointer->getBufferOffset());
+        }
+        if (glesPointer->isEnable()) {
+            dispatcher.glEnableVertexAttribArray(vao.first);
+        }
+    }
+
+    GLEScontext::postLoadRestoreCtx();
 }
 
 ObjectDataPtr GLESv2Context::loadObject(NamedObjectType type,
@@ -260,6 +302,18 @@ bool GLESv2Context::needConvert(GLESConversionArrays& cArrs,GLint first,GLsizei 
         }
     }
     return true;
+}
+
+void GLESv2Context::setUseProgram(GLuint program,
+        const ObjectDataPtr& programData) {
+    m_useProgram = program;
+    assert(!programData ||
+            programData->getDataType() == ObjectDataType::PROGRAM_DATA);
+    m_useProgramData = programData;
+}
+
+ProgramData* GLESv2Context::getUseProgram() {
+    return (ProgramData*)m_useProgramData.get();
 }
 
 void GLESv2Context::initExtensionString() {
