@@ -2507,7 +2507,8 @@ GL_APICALL void  GL_APIENTRY glReleaseShaderCompiler(void){
 #endif // !__APPLE__
 }
 
-static GLenum sPrepareRenderbufferStorage(GLenum internalformat, GLint* err) {
+static GLenum sPrepareRenderbufferStorage(GLenum internalformat, GLsizei width,
+        GLsizei height, GLint* err) {
     GET_CTX_V2_RET(GL_NONE);
     GLenum internal = internalformat;
     if (ctx->getMajorVersion() < 3) {
@@ -2533,6 +2534,8 @@ static GLenum sPrepareRenderbufferStorage(GLenum internalformat, GLint* err) {
     if (!rbData) { *err = GL_INVALID_OPERATION; return GL_NONE; }
 
     rbData->internalformat = internalformat;
+    rbData->width = width;
+    rbData->height = height;
 
     //
     // if the renderbuffer was an eglImage target, release
@@ -2548,7 +2551,8 @@ static GLenum sPrepareRenderbufferStorage(GLenum internalformat, GLint* err) {
 GL_APICALL void  GL_APIENTRY glRenderbufferStorage(GLenum target, GLenum internalformat, GLsizei width, GLsizei height){
     GET_CTX();
     GLint err = GL_NO_ERROR;
-    internalformat = sPrepareRenderbufferStorage(internalformat, &err);
+    internalformat = sPrepareRenderbufferStorage(internalformat, width, height,
+            &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
     ctx->dispatcher().glRenderbufferStorageEXT(target,internalformat,width,height);
 }
