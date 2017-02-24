@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f33b8451_e591dba5",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/FramebufferData.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-24T00:40:25Z",
+      "side": 1,
+      "message": "GL_COLOR_ATTACHMENTi should all be in order. Below can be replaced by an offset from GL_COLOR_ATTACHMENT1 / 0",
+      "range": {
+        "startLine": 255,
+        "startChar": 0,
+        "endLine": 255,
+        "endChar": 36
+      },
+      "revId": "8eeca0a94196e1edc4578c74b268e5663dfb8b1c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
