@@ -70,6 +70,30 @@
       "revId": "642bd16c68562d52a3909e814027baceeb4dd88b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24d71714_78e94c4b",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2695,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-24T00:45:38Z",
+      "side": 1,
+      "message": "I guess for core profile, we\u0027ll definitely need to use it for GL_ALPHA trickery...\n\nI like tracking both in that case.",
+      "parentUuid": "f0117f4a_bc2938e3",
+      "range": {
+        "startLine": 2684,
+        "startChar": 0,
+        "endLine": 2695,
+        "endChar": 28
+      },
+      "revId": "642bd16c68562d52a3909e814027baceeb4dd88b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
