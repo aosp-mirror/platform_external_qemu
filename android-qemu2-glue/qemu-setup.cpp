@@ -29,8 +29,10 @@
 #include "android-qemu2-glue/net-android.h"
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
+#include "android-qemu2-glue/snapshot_compression.h"
 
 extern "C" {
+
 #include "qemu/osdep.h"
 #include "qemu-common.h"
 #include "qemu/main-loop.h"
@@ -78,6 +80,8 @@ bool qemu_android_emulation_early_setup() {
     if (!qemu_android_sync_init(vmLock)) {
         return false;
     }
+
+    qemu_snapshot_compression_setup();
 
     return true;
 }

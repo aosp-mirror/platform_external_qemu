@@ -10,6 +10,7 @@ LOCAL_C_INCLUDES += \
     $(QEMU2_INCLUDES) \
     $(QEMU2_GLUE_INCLUDES) \
     $(LOCAL_PATH)/slirp \
+    $(LZ4_INCLUDES) \
 
 LOCAL_SRC_FILES := \
     android_qemud.cpp \
@@ -41,6 +42,7 @@ LOCAL_SRC_FILES := \
     qemu-user-event-agent-impl.c \
     qemu-vm-operations-impl.c \
     qemu-window-agent-impl.c \
+    snapshot_compression.cpp \
     telephony/modem_init.c \
     utils/stream.cpp \
 
@@ -51,6 +53,7 @@ $(call end-emulator-library)
 QEMU2_GLUE_STATIC_LIBRARIES := \
     libqemu2-glue \
     emulator-libui \
+    emulator-lz4 \
     $(EMULATOR_LIBUI_STATIC_LIBRARIES)
 
 QEMU2_GLUE_LDFLAGS := $(EMULATOR_LIBUI_LDFLAGS)
