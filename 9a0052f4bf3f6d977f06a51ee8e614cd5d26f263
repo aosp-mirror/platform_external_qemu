@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "48aa2714_92e643d1",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-24T23:45:26Z",
+      "side": 1,
+      "message": "I\u0027m actually curious about this one: why is it a single ORed type instead of two different ones? Looks like that would\u0027ve made the code so much simpler",
+      "range": {
+        "startLine": 163,
+        "startChar": 56,
+        "endLine": 163,
+        "endChar": 73
+      },
+      "revId": "9a0052f4bf3f6d977f06a51ee8e614cd5d26f263",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
