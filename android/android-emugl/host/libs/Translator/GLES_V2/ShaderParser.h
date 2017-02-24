@@ -28,6 +28,8 @@ public:
     ShaderParser(GLenum type = 0);
     ShaderParser(android::base::Stream* stream);
     virtual void onSave(android::base::Stream* stream) const override;
+    virtual void restore(ObjectLocalName localName,
+           getGlobalName_t getGlobalName) override;
     void           setSrc(int esslVersion,
                           GLsizei count,
                           const GLchar* const* strings,
@@ -35,7 +37,11 @@ public:
     const std::string& getOriginalSrc() const;
     const GLchar** parsedLines();
     void           clear();
-    GLenum         getType();
+    // virtual getType() is a hack to allow ShareGroup to query shader type
+    // without including the declaration of ShaderParser.
+    // This is because ShareGroup belongs to libGLcommon and is not suppose
+    // to know about ShaderParser which lives in GLESv2.
+    virtual GLenum         getType();
 
     // Query whether the shader parsed is valid.
     // Don't trust the value if we did not call setSrc
