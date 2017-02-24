@@ -22,6 +22,30 @@
       "revId": "9a0052f4bf3f6d977f06a51ee8e614cd5d26f263",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9e2e6ef_35d7a785",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-24T23:48:03Z",
+      "side": 1,
+      "message": "that is something stupid in GL spec. Shaders and programs live in the same namespace in GL spec.",
+      "parentUuid": "48aa2714_92e643d1",
+      "range": {
+        "startLine": 163,
+        "startChar": 56,
+        "endLine": 163,
+        "endChar": 73
+      },
+      "revId": "9a0052f4bf3f6d977f06a51ee8e614cd5d26f263",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
