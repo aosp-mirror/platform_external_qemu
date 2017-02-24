@@ -47,6 +47,7 @@ void glGetIntegerv(GLenum pname, GLint *params);
 GLconstubyteptr glGetString(GLenum name);
 void glTexParameterf(GLenum target, GLenum pname, GLfloat param);
 void glTexParameterfv(GLenum target, GLenum pname, const GLfloat *params);
+void glGetTexImage(GLenum target, GLint level, GLenum format, GLenum type, GLvoid * pixels);
 void glGetTexParameterfv(GLenum target, GLenum pname, GLfloat *params);
 void glGetTexParameteriv(GLenum target, GLenum pname, GLint *params);
 void glGetTexLevelParameteriv(GLenum target, GLint level, GLenum pname, GLint *params);
