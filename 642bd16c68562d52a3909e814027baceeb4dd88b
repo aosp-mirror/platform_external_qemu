@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "652d76e0_d22f7b3a",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2695,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-24T00:31:23Z",
+      "side": 1,
+      "message": "this makes the tracked format equal to whatever format we reset underneath the hood, I guess it\u0027s to restore the special ones on load?\n\nSince snapshots are working, this seems OK for now but we MIGHT have to track both of them later :)",
+      "range": {
+        "startLine": 2684,
+        "startChar": 0,
+        "endLine": 2695,
+        "endChar": 28
+      },
+      "revId": "642bd16c68562d52a3909e814027baceeb4dd88b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
