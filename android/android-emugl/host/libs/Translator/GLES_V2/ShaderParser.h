@@ -28,6 +28,8 @@ public:
     ShaderParser(GLenum type = 0);
     ShaderParser(android::base::Stream* stream);
     virtual void onSave(android::base::Stream* stream) const override;
+    virtual void restore(ObjectLocalName localName,
+           getGlobalName_t getGlobalName) override;
     void           setSrc(int esslVersion,
                           GLsizei count,
                           const GLchar* const* strings,
