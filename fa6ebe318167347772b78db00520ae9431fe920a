@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "23a18b9f_2c67c0d1",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1510,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-24T17:09:07Z",
+      "side": 1,
+      "message": "just return \u0026mScreenCapturer here, and there\u0027s no need to make it unique_ptr\u003c\u003e",
+      "range": {
+        "startLine": 1510,
+        "startChar": 11,
+        "endLine": 1510,
+        "endChar": 33
+      },
+      "revId": "fa6ebe318167347772b78db00520ae9431fe920a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d662e236_c7bb22a0",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-24T17:09:07Z",
+      "side": 1,
+      "message": "why do we need this change? by value is perfectly fine here.",
+      "range": {
+        "startLine": 376,
+        "startChar": 4,
+        "endLine": 376,
+        "endChar": 72
+      },
+      "revId": "fa6ebe318167347772b78db00520ae9431fe920a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "47e441c6_7cce3c62",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-24T17:09:07Z",
+      "side": 1,
+      "message": "nit: looks like it isn\u0027t needed anymore",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 39
+      },
+      "revId": "fa6ebe318167347772b78db00520ae9431fe920a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f1fca7b2_6bef794c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-24T17:09:07Z",
+      "side": 1,
+      "message": "nit: QString::fromStdString()",
+      "range": {
+        "startLine": 54,
+        "startChar": 41,
+        "endLine": 54,
+        "endChar": 48
+      },
+      "revId": "fa6ebe318167347772b78db00520ae9431fe920a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8fe1fbc6_3a14dba0",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-24T17:09:07Z",
+      "side": 1,
+      "message": "nit: this makes it look like a static method call, please remove the prefix",
+      "range": {
+        "startLine": 89,
+        "startChar": 16,
+        "endLine": 89,
+        "endChar": 33
+      },
+      "revId": "fa6ebe318167347772b78db00520ae9431fe920a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
