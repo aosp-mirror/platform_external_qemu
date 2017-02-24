@@ -125,6 +125,24 @@
     },
     {
       "key": {
+        "uuid": "d03ea567_4307c4fd",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-02-24T17:28:46Z",
+      "side": 1,
+      "message": "I see. I would suggest updating both places so as to be consistent.",
+      "parentUuid": "8171e2c8_beee033d",
+      "revId": "ba4d91d9fcec14fae4e3ddb5da6a4cda08a65704",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df2228db_cb8cad4c",
         "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
         "patchSetId": 1
@@ -208,6 +226,30 @@
       "side": 1,
       "message": "I\u0027d say change the text here because we can easily be more precise.\n\nIn emulator-qt-window.cpp the same text is used twice--once for \u0027empty\u0027 and once for generally \u0027invalid\u0027. I would prefer to be more precise in the first case, but I\u0027m not asking you to make that change.",
       "parentUuid": "7f6b8897_71bbabab",
+      "range": {
+        "startLine": 86,
+        "startChar": 57,
+        "endLine": 86,
+        "endChar": 67
+      },
+      "revId": "ba4d91d9fcec14fae4e3ddb5da6a4cda08a65704",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e31e57bf_96f8c202",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-02-24T17:28:46Z",
+      "side": 1,
+      "message": "I see. I would update the first case in both places.",
+      "parentUuid": "1bdaa4a9_987b5815",
       "range": {
         "startLine": 86,
         "startChar": 57,

@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "8fa9069c_afb522a2",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-02-24T17:28:46Z",
+      "side": 1,
+      "message": "My previous concern was the copy constructor. Now I see the DISALLOW_COPY_AND_ASSIGN in ScreenCapture class. I don\u0027t think there is a need for that. I will undo the change.",
+      "parentUuid": "d662e236_c7bb22a0",
+      "range": {
+        "startLine": 376,
+        "startChar": 4,
+        "endLine": 376,
+        "endChar": 72
+      },
+      "revId": "fa6ebe318167347772b78db00520ae9431fe920a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "47e441c6_7cce3c62",
         "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
         "patchSetId": 3
