@@ -108,6 +108,11 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         }
     }
 
+    if (isQemu2 &&
+            android::featurecontrol::isEnabled(android::featurecontrol::Wifi)) {
+        params.add("qemu.wifi=1");
+    }
+
     if (avdKernelParameters && avdKernelParameters[0]) {
         params.add(avdKernelParameters);
     }
