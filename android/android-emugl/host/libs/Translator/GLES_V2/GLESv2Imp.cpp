@@ -53,7 +53,6 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(void);
 static GLEScontext* createGLESxContext(int maj, int min, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
-
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -88,6 +87,9 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
         ctx->init(s_eglIface->eglGetGlLibrary());
         glBindTexture(GL_TEXTURE_2D,0);
         glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+    } else if (ctx->needRestore()) {
+        ctx->setShareGroup(grp);
+        ctx->restore();
     }
 }
 
@@ -167,11 +169,6 @@ static void s_detachShader(GLEScontext* ctx, GLuint program, GLuint shader) {
     }
 }
 
-static ObjectLocalName TextureLocalName(GLenum target,unsigned int tex) {
-    GET_CTX_RET(0);
-    return (tex!=0? tex : ctx->getDefaultTextureName(target));
-}
-
 static TextureData* getTextureData(ObjectLocalName tex) {
     GET_CTX_RET(NULL);
     TextureData *texData = NULL;
@@ -190,7 +187,7 @@ static TextureData* getTextureData(ObjectLocalName tex) {
 static TextureData* getTextureTargetData(GLenum target){
     GET_CTX_RET(NULL);
     unsigned int tex = ctx->getBindedTexture(target);
-    return getTextureData(TextureLocalName(target,tex));
+    return getTextureData(ctx->getTextureLocalName(target,tex));
 }
 
 GL_APICALL void  GL_APIENTRY glActiveTexture(GLenum texture){
@@ -370,6 +367,7 @@ static void sUpdateFboEmulation(GLESv2Context* ctx) {
             enableDepth32fClamp = true;
     }
 
+    // TODO: GLES3: snapshot those enable value as well?
     sSetDesktopGLEnable(ctx, enableSRGB, GL_FRAMEBUFFER_SRGB);
     sSetDesktopGLEnable(ctx, enableDepth32fClamp, GL_DEPTH_CLAMP);
 }
@@ -435,7 +433,7 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
     SET_ERROR_IF(!GLESv2Validate::textureTarget(ctx, target), GL_INVALID_ENUM);
 
     //for handling default texture (0)
-    ObjectLocalName localTexName = TextureLocalName(target,texture);
+    ObjectLocalName localTexName = ctx->getTextureLocalName(target,texture);
     GLuint globalTextureName = localTexName;
     if(ctx->shareGroup().get()){
         globalTextureName = ctx->shareGroup()->getGlobalName(
@@ -493,6 +491,7 @@ GL_APICALL void  GL_APIENTRY glBlendEquationSeparate(GLenum modeRGB, GLenum mode
 GL_APICALL void  GL_APIENTRY glBlendFunc(GLenum sfactor, GLenum dfactor){
     GET_CTX();
     SET_ERROR_IF(!GLESv2Validate::blendSrc(sfactor) || !GLESv2Validate::blendDst(dfactor),GL_INVALID_ENUM)
+    ctx->setBlendFuncSeparate(sfactor, dfactor, sfactor, dfactor);
     ctx->dispatcher().glBlendFunc(sfactor,dfactor);
 }
 
@@ -500,7 +499,8 @@ GL_APICALL void  GL_APIENTRY glBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB, G
     GET_CTX();
     SET_ERROR_IF(
 !(GLESv2Validate::blendSrc(srcRGB) && GLESv2Validate::blendDst(dstRGB) && GLESv2Validate::blendSrc(srcAlpha) && GLESv2Validate::blendDst(dstAlpha)),GL_INVALID_ENUM);
-    ctx->dispatcher().glBlendFuncSeparate(srcRGB,dstRGB,srcAlpha,dstAlpha);
+    ctx->setBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
+    ctx->dispatcher().glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
 }
 
 GL_APICALL void  GL_APIENTRY glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage){
@@ -691,7 +691,7 @@ GL_APICALL void  GL_APIENTRY glCopyTexImage2D(GLenum target, GLint level, GLenum
                     GLESv2Validate::textureTargetEx(ctx, target))), GL_INVALID_ENUM);
     SET_ERROR_IF((GLESv2Validate::textureIsCubeMap(target) && width != height), GL_INVALID_VALUE);
     SET_ERROR_IF(border != 0,GL_INVALID_VALUE);
-    s_glInitTexImage2D(target,level,internalformat,width,height,border);
+    s_glInitTexImage2D(target, level, internalformat, width, height, border);
     ctx->dispatcher().glCopyTexImage2D(target,level,internalformat,x,y,width,height,border);
 }
 
@@ -983,6 +983,7 @@ GL_APICALL void  GL_APIENTRY glDetachShader(GLuint program, GLuint shader){
 
 GL_APICALL void  GL_APIENTRY glDisable(GLenum cap){
     GET_CTX();
+    ctx->setEnable(cap, false);
     ctx->dispatcher().glDisable(cap);
 }
 
@@ -1104,6 +1105,7 @@ GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum t
 
 GL_APICALL void  GL_APIENTRY glEnable(GLenum cap){
     GET_CTX();
+    ctx->setEnable(cap, true);
     ctx->dispatcher().glEnable(cap);
 }
 
@@ -1197,7 +1199,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attach
         if (!ctx->shareGroup()->isObject(NamedObjectType::TEXTURE, texture)) {
             ctx->shareGroup()->genName(NamedObjectType::TEXTURE, texture);
         }
-        ObjectLocalName texname = TextureLocalName(textarget,texture);
+        ObjectLocalName texname = ctx->getTextureLocalName(textarget,texture);
         globalTextureName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::TEXTURE, texname);
     }
@@ -2452,12 +2454,12 @@ GL_APICALL void  GL_APIENTRY glPixelStorei(GLenum pname, GLint param){
     case GL_PACK_ALIGNMENT:
     case GL_UNPACK_ALIGNMENT:
         SET_ERROR_IF(!((param==1)||(param==2)||(param==4)||(param==8)), GL_INVALID_VALUE);
-        ctx->setUnpackAlignment(param);
         break;
     default:
         SET_ERROR_IF(param < 0, GL_INVALID_VALUE);
         break;
     }
+    ctx->setPixelStorei(pname, param);
     ctx->dispatcher().glPixelStorei(pname,param);
 }
 
@@ -2550,6 +2552,7 @@ GL_APICALL void  GL_APIENTRY glSampleCoverage(GLclampf value, GLboolean invert){
 
 GL_APICALL void  GL_APIENTRY glScissor(GLint x, GLint y, GLsizei width, GLsizei height){
     GET_CTX();
+    ctx->setScissor(x, y, width, height);
     ctx->dispatcher().glScissor(x,y,width,height);
 }
 
@@ -2601,7 +2604,6 @@ GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const 
         sp->setSrc(esslVersion, count, string, length);
         ctx->dispatcher().glShaderSource(globalShaderName, 1, sp->parsedLines(),
                                          NULL);
-        sp->clear();
     }
 }
 
@@ -2679,7 +2681,8 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
 
     VALIDATE(border != 0,GL_INVALID_VALUE);
 
-    s_glInitTexImage2D(target,level,internalformat,width,height,border);
+    s_glInitTexImage2D(target, level, internalformat, width, height, border,
+            &format, &type);
 
     if (!isCompressedFormat && ctx->getMajorVersion() < 3) {
         if (type==GL_HALF_FLOAT_OES)
@@ -2730,6 +2733,10 @@ GL_APICALL void  GL_APIENTRY glTexParameteri(GLenum target, GLenum pname, GLint 
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
                    GLESv2Validate::textureParams(ctx, pname)),
                  GL_INVALID_ENUM);
+    TextureData *texData = getTextureTargetData(target);
+    if (texData) {
+        texData->setTexParam(pname, param);
+    }
     ctx->dispatcher().glTexParameteri(target,pname,param);
 }
 GL_APICALL void  GL_APIENTRY glTexParameteriv(GLenum target, GLenum pname, const GLint* params){
@@ -2737,6 +2744,10 @@ GL_APICALL void  GL_APIENTRY glTexParameteriv(GLenum target, GLenum pname, const
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
                    GLESv2Validate::textureParams(ctx, pname)),
                  GL_INVALID_ENUM);
+    TextureData *texData = getTextureTargetData(target);
+    if (texData) {
+        texData->setTexParam(pname, params[0]);
+    }
     ctx->dispatcher().glTexParameteriv(target,pname,params);
 }
 
@@ -2765,7 +2776,6 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
         type = GL_HALF_FLOAT_NV;
 
     ctx->dispatcher().glTexSubImage2D(target,level,xoffset,yoffset,width,height,format,type,pixels);
-
 }
 
 GL_APICALL void  GL_APIENTRY glUniform1f(GLint location, GLfloat x){
@@ -2878,20 +2888,21 @@ static void s_unUseCurrentProgram() {
 }
 
 GL_APICALL void  GL_APIENTRY glUseProgram(GLuint program){
-    GET_CTX();
+    GET_CTX_V2();
     if(ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(program!=0 && globalProgramName==0,GL_INVALID_VALUE);
-        auto objData = ctx->shareGroup()->getObjectData(
+        auto objData = ctx->shareGroup()->getObjectDataPtr(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(objData && (objData->getDataType()!=PROGRAM_DATA),GL_INVALID_OPERATION);
 
         s_unUseCurrentProgram();
 
-        ProgramData* programData = (ProgramData*)objData;
+        ProgramData* programData = (ProgramData*)objData.get();
         if (programData) programData->setInUse(true);
 
+        ctx->setUseProgram(program, objData);
         ctx->dispatcher().glUseProgram(globalProgramName);
     }
 }
@@ -3018,6 +3029,7 @@ GL_APICALL void  GL_APIENTRY glVertexAttribPointerWithDataSize(GLuint index, GLi
 
 GL_APICALL void  GL_APIENTRY glViewport(GLint x, GLint y, GLsizei width, GLsizei height){
     GET_CTX();
+    ctx->setViewport(x, y, width, height);
     ctx->dispatcher().glViewport(x,y,width,height);
 }
 
@@ -3032,7 +3044,7 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
         // flag to the OpenGL layer to skip the image creation and map the
         // current binded texture object to the existing global object.
         if (ctx->shareGroup().get()) {
-            ObjectLocalName tex = TextureLocalName(target,ctx->getBindedTexture(target));
+            ObjectLocalName tex = ctx->getTextureLocalName(target,ctx->getBindedTexture(target));
             // replace mapping and bind the new global object
             ctx->shareGroup()->replaceGlobalObject(NamedObjectType::TEXTURE, tex,
                                                    img->globalTexObj);
@@ -3044,6 +3056,10 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             texData->border = img->border;
             texData->internalFormat = img->internalFormat;
             texData->sourceEGLImage = imagehndl;
+            // TODO: set up texData->type
+            if (!imagehndl) {
+                fprintf(stderr, "glEGLImageTargetTexture2DOES with empty handle\n");
+            }
         }
     }
 }
