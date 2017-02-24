@@ -205,6 +205,11 @@ static const BlacklistEntry sSyncBlacklist[] = {
     {"10de", nullptr, "06f8", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 420
     {"10de", nullptr, "06fa", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 450
     {"10de", nullptr, "0a2c", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 5100M
+
+    // Intel HD 3000
+    {"8086", nullptr, "0116", nullptr, nullptr, nullptr, "W"},
+    {"8086", nullptr, "0126", nullptr, nullptr, nullptr, "W"},
+    {"8086", nullptr, "0102", nullptr, nullptr, nullptr, "W"},
 };
 
 static const int sSyncBlacklistSize =
