@@ -13,15 +13,36 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#include "android/base/containers/Lookup.h"
 
-#include <GLES3/gl31.h>
-#include <GLcommon/objectNameManager.h>
 #include "ProgramData.h"
 
-#include <unordered_set>
+#include "android/base/containers/Lookup.h"
+#include "android/base/files/StreamSerializing.h"
+
+#include <GLcommon/objectNameManager.h>
+#include <GLES3/gl31.h>
 
 #include <string.h>
+#include <unordered_set>
+
+GLUniformDesc::GLUniformDesc(GLint location, GLsizei count, GLboolean transpose,
+            GLenum type, GLsizei size, unsigned char* val)
+        : mCount(count), mTranspose(transpose), mType(type)
+        , mVal(val, val + size) { }
+
+GLUniformDesc::GLUniformDesc(android::base::Stream* stream) {
+    mCount = stream->getBe32();
+    mTranspose = stream->getByte();
+    mType = stream->getBe32();
+    loadBuffer(stream, &mVal);
+}
+
+void GLUniformDesc::onSave(android::base::Stream* stream) const {
+    stream->putBe32(mCount);
+    stream->putByte(mTranspose);
+    stream->putBe32(mType);
+    saveBuffer(stream, mVal);
+}
 
 ProgramData::ProgramData() :  ObjectData(PROGRAM_DATA),
                               AttachedVertexShader(0),
@@ -33,12 +54,19 @@ ProgramData::ProgramData() :  ObjectData(PROGRAM_DATA),
 
 ProgramData::ProgramData(android::base::Stream* stream) :
     ObjectData(stream) {
-    size_t attribLocNum = stream->getBe32();
-    for (size_t attribLoc = 0; attribLoc < attribLocNum; attribLoc ++) {
-        std::string attrib = stream->getString();
-        GLuint loc = stream->getBe32();
-        boundAttribLocs.emplace(std::move(attrib), loc);
-    }
+    auto loadAttribLocs = [](android::base::Stream* stream) {
+                std::string attrib = stream->getString();
+                GLuint loc = stream->getBe32();
+                return std::make_pair(std::move(attrib), loc);
+            };
+    loadCollection(stream, &boundAttribLocs, loadAttribLocs);
+    loadCollection(stream, &linkedAttribLocs, loadAttribLocs);
+
+    loadCollection(stream, &uniforms, [](android::base::Stream* stream) {
+       GLuint loc = stream->getBe32();
+       GLUniformDesc desc(stream);
+       return std::make_pair(loc, std::move(desc));
+    });
 
     AttachedVertexShader = stream->getBe32();
     AttachedFragmentShader = stream->getBe32();
@@ -60,13 +88,23 @@ ProgramData::ProgramData(android::base::Stream* stream) :
 void ProgramData::onSave(android::base::Stream* stream) const {
     // The first byte is used to distinguish between program and shader object.
     // It will be loaded outside of this class
+    // TODO: snapshot shader source in program object (in case shaders got
+    // deleted while the program is still alive)
     stream->putByte(LOAD_PROGRAM);
     ObjectData::onSave(stream);
-    stream->putBe32(boundAttribLocs.size());
-    for (const auto& attribLocs : boundAttribLocs) {
-        stream->putString(attribLocs.first);
-        stream->putBe32(attribLocs.second);
-    }
+    auto saveAttribLocs = [](android::base::Stream* stream,
+            const std::pair<std::string, GLuint>& attribLoc) {
+                stream->putString(attribLoc.first);
+                stream->putBe32(attribLoc.second);
+            };
+    saveCollection(stream, boundAttribLocs, saveAttribLocs);
+    saveCollection(stream, linkedAttribLocs, saveAttribLocs);
+
+    saveCollection(stream, uniforms, [](android::base::Stream* stream,
+            const std::pair<const GLuint, GLUniformDesc>& uniform) {
+        stream->putBe32(uniform.first);
+        uniform.second.onSave(stream);
+    });
 
     stream->putBe32(AttachedVertexShader);
     stream->putBe32(AttachedFragmentShader);
@@ -255,8 +293,16 @@ bool ProgramData::detachShader(GLuint shader) {
     return false;
 }
 
+void ProgramData::addUniform(GLuint loc, GLUniformDesc&& uniform) {
+    uniforms[loc] = std::move(uniform);
+}
+
 void ProgramData::bindAttribLocation(const std::string& var, GLuint loc) {
     boundAttribLocs[var] = loc;
+}
+
+void ProgramData::linkedAttribLocation(const std::string& var, GLuint loc) {
+    linkedAttribLocs[var] = loc;
 }
 
 // Link-time validation
@@ -291,6 +337,12 @@ bool ProgramData::validateLink(ShaderParser* frag, ShaderParser* vert) {
 
 void ProgramData::setLinkStatus(GLint status) {
     LinkStatus = status;
+    if (status) {
+        for (const auto &attribLoc : boundAttribLocs) {
+            // overwrite
+            linkedAttribLocs[attribLoc.first] = attribLoc.second;
+        }
+    }
 }
 
 GLint ProgramData::getLinkStatus() const {
