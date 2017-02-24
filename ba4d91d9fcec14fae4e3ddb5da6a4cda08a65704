@@ -107,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "8171e2c8_beee033d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-24T16:57:13Z",
+      "side": 1,
+      "message": "If it\u0027s 1000 we don\u0027t know, so I\u0027d recommend taking the error path.\n(In spite of the fact that emulator-qt-window.cpp omits the check for 1000.)",
+      "parentUuid": "1584f30f_5515f6ae",
+      "revId": "ba4d91d9fcec14fae4e3ddb5da6a4cda08a65704",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df2228db_cb8cad4c",
         "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
         "patchSetId": 1
@@ -166,6 +184,30 @@
       "side": 1,
       "message": "Actually, since I am copying this help text from emulator-qt-window.cpp, do we intend to change all of them?",
       "parentUuid": "a073b612_4d7e1c70",
+      "range": {
+        "startLine": 86,
+        "startChar": 57,
+        "endLine": 86,
+        "endChar": 67
+      },
+      "revId": "ba4d91d9fcec14fae4e3ddb5da6a4cda08a65704",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1bdaa4a9_987b5815",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-24T16:57:13Z",
+      "side": 1,
+      "message": "I\u0027d say change the text here because we can easily be more precise.\n\nIn emulator-qt-window.cpp the same text is used twice--once for \u0027empty\u0027 and once for generally \u0027invalid\u0027. I would prefer to be more precise in the first case, but I\u0027m not asking you to make that change.",
+      "parentUuid": "7f6b8897_71bbabab",
       "range": {
         "startLine": 86,
         "startChar": 57,
