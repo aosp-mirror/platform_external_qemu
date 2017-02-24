@@ -55,12 +55,6 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
             &params, nullptr, apiLevel, targetArch, kernelSerialPrefix, isQemu2,
             opts->show_kernel, opts->logcat || opts->shell, opts->shell_serial);
 
-    if (!opts->show_kernel) {
-        // Required to prevent kernel messages to be sent to framebuffer
-        // (through 'vc0', i.e. virtual console 0).
-        params.add("console=0");
-    }
-
     params.addIf("android.checkjni=1", !opts->no_jni);
     params.addIf("android.bootanim=0", opts->no_boot_anim);
 
