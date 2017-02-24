@@ -57,9 +57,8 @@ SyncThread::SyncThread(EGLContext parentContext) :
     mDisplay(EGL_NO_DISPLAY),
     mContext(0), mSurf(0) {
     if (parentContext == EGL_NO_CONTEXT) {
-        emugl_crash_reporter(
-                "ERROR: attempted to start a SyncThread "
-                "with EGL_NO_CONTEXT as parent context!");
+        DPRINT("Warning: attempted to start a SyncThread "
+               "with EGL_NO_CONTEXT as parent context!");
     }
 
     FrameBuffer *fb = FrameBuffer::getFB();
