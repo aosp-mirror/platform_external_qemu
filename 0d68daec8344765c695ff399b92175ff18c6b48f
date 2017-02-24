@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a152570e_e8c2f030",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-24T02:15:44Z",
+      "side": 1,
+      "message": "I forgot if we are sposed to bindattriblocation before or after linking. I think I got it wrong before. It seems like we want to glLinkProgram at the end, at least according to the spec (https://www.khronos.org/registry/OpenGL-Refpages/es3.1/)",
+      "range": {
+        "startLine": 148,
+        "startChar": 0,
+        "endLine": 148,
+        "endChar": 45
+      },
+      "revId": "0d68daec8344765c695ff399b92175ff18c6b48f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
