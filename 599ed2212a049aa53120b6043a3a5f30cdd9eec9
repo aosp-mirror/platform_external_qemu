@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2628b7ba_1977ae29",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-24T00:36:05Z",
+      "side": 1,
+      "message": "we will",
+      "range": {
+        "startLine": 116,
+        "startChar": 0,
+        "endLine": 117,
+        "endChar": 38
+      },
+      "revId": "599ed2212a049aa53120b6043a3a5f30cdd9eec9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a2ce0e20_5c2d5a1b",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/TextureData.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-24T00:36:05Z",
+      "side": 1,
+      "message": "Might have to add overridden/emulated internal formats / formats / types here",
+      "range": {
+        "startLine": 61,
+        "startChar": 0,
+        "endLine": 62,
+        "endChar": 23
+      },
+      "revId": "599ed2212a049aa53120b6043a3a5f30cdd9eec9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d40c6633_3cf75f70",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/TextureData.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-24T00:36:05Z",
+      "side": 1,
+      "message": "Awesome :)",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 40
+      },
+      "revId": "599ed2212a049aa53120b6043a3a5f30cdd9eec9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
