@@ -46,6 +46,30 @@
       "revId": "642bd16c68562d52a3909e814027baceeb4dd88b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "75ce4fbd_24af97f8",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2695,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-24T00:44:00Z",
+      "side": 1,
+      "message": "having a second thought, I don\u0027t think we are using internalformat for recovering texture data. I will change it back to its original logic.",
+      "parentUuid": "f0117f4a_bc2938e3",
+      "range": {
+        "startLine": 2684,
+        "startChar": 0,
+        "endLine": 2695,
+        "endChar": 28
+      },
+      "revId": "642bd16c68562d52a3909e814027baceeb4dd88b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
