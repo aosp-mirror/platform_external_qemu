@@ -46,6 +46,30 @@
       "revId": "02515cdc3034a3e327e815c3dd1dcc5211fb5dbb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba3bec52_4afd1192",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/objectNameManager.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-24T22:34:43Z",
+      "side": 1,
+      "message": "actually I might have a cleaner solution for this, hold on",
+      "parentUuid": "819fc4d0_312befdf",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 60
+      },
+      "revId": "02515cdc3034a3e327e815c3dd1dcc5211fb5dbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
