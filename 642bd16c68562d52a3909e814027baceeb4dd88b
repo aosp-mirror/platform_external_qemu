@@ -22,6 +22,30 @@
       "revId": "642bd16c68562d52a3909e814027baceeb4dd88b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f0117f4a_bc2938e3",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2695,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-02-24T00:41:17Z",
+      "side": 1,
+      "message": "yes this is the idea. It is still on my TODO list to figure out where the other one is used. (if we never use it we can just throw it away :) otherwise we have to track both of them, or simply recover the original code path and duplicate its logic in the snapshot loader?",
+      "parentUuid": "652d76e0_d22f7b3a",
+      "range": {
+        "startLine": 2684,
+        "startChar": 0,
+        "endLine": 2695,
+        "endChar": 28
+      },
+      "revId": "642bd16c68562d52a3909e814027baceeb4dd88b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
