@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b19fee64_2ca727cc",
+        "filename": "include/migration/qemu-file.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-24T23:37:43Z",
+      "side": 1,
+      "message": "Should we put common function types for compressor and compress_bound in one place? migration.h has these too.",
+      "range": {
+        "startLine": 157,
+        "startChar": 0,
+        "endLine": 159,
+        "endChar": 47
+      },
+      "revId": "f8e91a147faec3d9a0c2a3ac06a9715bb4422872",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
