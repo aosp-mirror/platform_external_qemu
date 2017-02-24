@@ -389,6 +389,50 @@ void migrate_compress_threads_create(void)
     }
 }
 
+/* Default compression operations, using zlib. */
+
+static ssize_t default_max_compressed_size(ssize_t size)
+{
+    return compressBound(size);
+}
+
+static ssize_t default_compress(uint8_t *dest, ssize_t dest_size,
+                                const uint8_t *data, ssize_t size, int level)
+{
+    uLongf dest_out = dest_size;
+    if (compress2((Bytef *)dest, &dest_out, (const Bytef *)data, size,
+                  level) != Z_OK) {
+        return -1;
+    }
+    return dest_out;
+}
+
+static ssize_t default_uncompress(uint8_t *dest, ssize_t dest_size,
+                      const uint8_t *data, ssize_t size)
+{
+    uLongf dest_out = dest_size;
+    int res = uncompress(dest, &dest_out, data, size);
+    return res == Z_OK ? dest_out : -1;
+}
+
+static MigrationCompressionOps compression_ops = {
+    .max_compressed_size = default_max_compressed_size,
+    .compress = default_compress,
+    .uncompress = default_uncompress
+};
+
+void migrate_set_compression_ops(const MigrationCompressionOps *ops)
+{
+    if (!ops ||
+        !ops->max_compressed_size || !ops->compress || !ops->uncompress) {
+        compression_ops.max_compressed_size = default_max_compressed_size;
+        compression_ops.compress = default_compress;
+        compression_ops.uncompress = default_uncompress;
+    } else {
+        compression_ops = *ops;
+    }
+}
+
 /**
  * save_page_header: Write page header to wire
  *
@@ -810,8 +854,9 @@ static int do_compress_ram_page(QEMUFile *f, RAMBlock *block,
 
     bytes_sent = save_page_header(f, block, offset |
                                   RAM_SAVE_FLAG_COMPRESS_PAGE);
-    blen = qemu_put_compression_data(f, p, TARGET_PAGE_SIZE,
-                                     migrate_compress_level());
+    blen = qemu_put_compression_data_with_compressor(
+               f, p, TARGET_PAGE_SIZE, migrate_compress_level(),
+               compression_ops.compress, compression_ops.max_compressed_size);
     if (blen < 0) {
         bytes_sent = 0;
         qemu_file_set_error(migrate_get_current()->to_dst_file, blen);
@@ -945,8 +990,9 @@ static int ram_save_compressed_page(QEMUFile *f, PageSearchStatus *pss,
                 /* Make sure the first page is sent out before other pages */
                 bytes_xmit = save_page_header(f, block, offset |
                                               RAM_SAVE_FLAG_COMPRESS_PAGE);
-                blen = qemu_put_compression_data(f, p, TARGET_PAGE_SIZE,
-                                                 migrate_compress_level());
+                blen = qemu_put_compression_data_with_compressor(
+                           f, p, TARGET_PAGE_SIZE, migrate_compress_level(),
+                           compression_ops.compress, compression_ops.max_compressed_size);
                 if (blen > 0) {
                     *bytes_transferred += bytes_xmit + blen;
                     acct_info.norm_pages++;
@@ -2181,7 +2227,6 @@ void ram_handle_compressed(void *host, uint8_t ch, uint64_t size)
 static void *do_data_decompress(void *opaque)
 {
     DecompressParam *param = opaque;
-    unsigned long pagesize;
     uint8_t *des;
     int len;
 
@@ -2193,14 +2238,13 @@ static void *do_data_decompress(void *opaque)
             param->des = 0;
             qemu_mutex_unlock(&param->mutex);
 
-            pagesize = TARGET_PAGE_SIZE;
             /* uncompress() will return failed in some case, especially
              * when the page is dirted when doing the compression, it's
              * not a problem because the dirty page will be retransferred
              * and uncompress() won't break the data in other pages.
              */
-            uncompress((Bytef *)des, &pagesize,
-                       (const Bytef *)param->compbuf, len);
+            compression_ops.uncompress(des, TARGET_PAGE_SIZE,
+                                       param->compbuf, len);
 
             qemu_mutex_lock(&decomp_done_lock);
             param->done = true;
@@ -2247,7 +2291,7 @@ void migrate_decompress_threads_create(void)
     for (i = 0; i < thread_count; i++) {
         qemu_mutex_init(&decomp_param[i].mutex);
         qemu_cond_init(&decomp_param[i].cond);
-        decomp_param[i].compbuf = g_malloc0(compressBound(TARGET_PAGE_SIZE));
+        decomp_param[i].compbuf = g_malloc0(compression_ops.max_compressed_size(TARGET_PAGE_SIZE));
         decomp_param[i].done = true;
         decomp_param[i].quit = false;
         qemu_thread_create(decompress_threads + i, "decompress",
@@ -2542,7 +2586,7 @@ static int ram_load(QEMUFile *f, void *opaque, int version_id)
 
         case RAM_SAVE_FLAG_COMPRESS_PAGE:
             len = qemu_get_be32(f);
-            if (len < 0 || len > compressBound(TARGET_PAGE_SIZE)) {
+            if (len < 0 || len > compression_ops.max_compressed_size(TARGET_PAGE_SIZE)) {
                 error_report("Invalid compressed data length: %d", len);
                 ret = -EINVAL;
                 break;

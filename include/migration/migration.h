@@ -181,6 +181,21 @@ struct MigrationState
     Error *error;
 };
 
+/* Compression interface for migration */
+struct MigrationCompressionOps {
+    /* Returns the max buffer size needed to hold |data_size| after compression */
+    ssize_t (*max_compressed_size)(ssize_t data_size);
+
+    /* Compresses |size| bytes of |data| into |dest|. Returns compressed size */
+    ssize_t (*compress)(uint8_t *dest, ssize_t dest_size,
+                        const uint8_t *data, ssize_t size, int level);
+
+    /* Decompresses data from the |data| buffer into |dest| buffer. Returns >0
+     * on success */
+    ssize_t (*uncompress)(uint8_t *dest, ssize_t dest_size,
+                          const uint8_t *data, ssize_t size);
+};
+
 void migrate_set_state(int *state, int old_state, int new_state);
 
 void migration_fd_process_incoming(QEMUFile *f);
@@ -244,6 +259,7 @@ bool migration_in_postcopy(MigrationState *);
 bool migration_in_postcopy_after_devices(MigrationState *);
 MigrationState *migrate_get_current(void);
 
+void migrate_set_compression_ops(const MigrationCompressionOps *ops);
 void migrate_compress_threads_create(void);
 void migrate_compress_threads_join(void);
 void migrate_decompress_threads_create(void);

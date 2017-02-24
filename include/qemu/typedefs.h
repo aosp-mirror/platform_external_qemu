@@ -48,6 +48,7 @@ typedef struct MemoryRegionSection MemoryRegionSection;
 typedef struct MigrationIncomingState MigrationIncomingState;
 typedef struct MigrationParams MigrationParams;
 typedef struct MigrationState MigrationState;
+typedef struct MigrationCompressionOps MigrationCompressionOps;
 typedef struct Monitor Monitor;
 typedef struct MonitorDef MonitorDef;
 typedef struct MouseTransformInfo MouseTransformInfo;
