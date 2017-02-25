@@ -152,6 +152,11 @@ size_t qemu_get_buffer(QEMUFile *f, uint8_t *buf, size_t size);
 size_t qemu_get_buffer_in_place(QEMUFile *f, uint8_t **buf, size_t size);
 ssize_t qemu_put_compression_data(QEMUFile *f, const uint8_t *p, size_t size,
                                   int level);
+ssize_t qemu_put_compression_data_with_compressor(
+        QEMUFile *f, const uint8_t *p, size_t size, int level,
+        ssize_t (*compressor)(uint8_t *dest, ssize_t dest_size,
+                             const uint8_t *data, ssize_t size, int level),
+        ssize_t (*compress_bound)(ssize_t size));
 int qemu_put_qemu_file(QEMUFile *f_des, QEMUFile *f_src);
 
 /*

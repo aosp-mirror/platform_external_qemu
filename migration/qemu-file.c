@@ -637,27 +637,32 @@ uint64_t qemu_get_be64(QEMUFile *f)
  * do fflush first, if f still has no space to save the compressed
  * data, return -1.
  */
-
-ssize_t qemu_put_compression_data(QEMUFile *f, const uint8_t *p, size_t size,
-                                  int level)
+ssize_t qemu_put_compression_data_with_compressor(
+        QEMUFile *f, const uint8_t *p, size_t size, int level,
+        ssize_t (*compressor)(uint8_t *dest, ssize_t dest_size,
+                              const uint8_t *data, ssize_t size, int level),
+        ssize_t (*compress_bound)(ssize_t size))
 {
     ssize_t blen = IO_BUF_SIZE - f->buf_index - sizeof(int32_t);
 
-    if (blen < compressBound(size)) {
+    if (blen < compress_bound(size)) {
         if (!qemu_file_is_writable(f)) {
             return -1;
         }
         qemu_fflush(f);
         blen = IO_BUF_SIZE - sizeof(int32_t);
-        if (blen < compressBound(size)) {
+        if (blen < compress_bound(size)) {
             return -1;
         }
     }
-    if (compress2(f->buf + f->buf_index + sizeof(int32_t), (uLongf *)&blen,
-                  (Bytef *)p, size, level) != Z_OK) {
+
+    blen = compressor(f->buf + f->buf_index + sizeof(int32_t),
+                      blen, p, size, level);
+    if (blen <= 0) {
         error_report("Compress Failed!");
         return 0;
     }
+
     qemu_put_be32(f, blen);
     if (f->ops->writev_buffer) {
         add_to_iovec(f, f->buf + f->buf_index, blen);
@@ -667,6 +672,29 @@ ssize_t qemu_put_compression_data(QEMUFile *f, const uint8_t *p, size_t size,
         qemu_fflush(f);
     }
     return blen + sizeof(int32_t);
+}
+
+static ssize_t zlib_compress(uint8_t *dest, ssize_t dest_size,
+                             const uint8_t *data, ssize_t size, int level)
+{
+    uLongf dest_out = dest_size;
+    if (compress2(dest, &dest_out, (Bytef *)data, size, level) != Z_OK) {
+        return -1;
+    }
+    return dest_out;
+}
+
+static ssize_t zlib_compress_bound(ssize_t size)
+{
+    return compressBound(size);
+}
+
+ssize_t qemu_put_compression_data(QEMUFile *f, const uint8_t *p, size_t size,
+                                  int level)
+{
+    return qemu_put_compression_data_with_compressor(f, p, size, level,
+                                                     zlib_compress,
+                                                     zlib_compress_bound);
 }
 
 /* Put the data in the buffer of f_src to the buffer of f_des, and
