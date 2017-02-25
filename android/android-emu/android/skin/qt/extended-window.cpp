@@ -112,11 +112,21 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->recordScreenButton);
     mSidebarButtons.addButton(mExtendedUi->settingsButton);
     mSidebarButtons.addButton(mExtendedUi->helpButton);
-    // TODO(joshuaduong): This tab should only be used when running
-    // Google API images with the play store. This condition will
-    // rely on two factors: the minimum API level we support play
-    // store for and whether it is a Google API image.
-    mSidebarButtons.addButton(mExtendedUi->googlePlayButton);
+
+    // For now, we are only shipping play store images with
+    // >= API 24 Google images.
+    const int MIN_GOOGLE_PLAY_API = 24;
+    const int DEFAULT_API = 1000; // returned if getApiLevel() fails
+    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
+    if (apiLevel >= MIN_GOOGLE_PLAY_API
+        && apiLevel != DEFAULT_API
+        && avdInfo_isGoogleApis(android_avdInfo)) {
+        mSidebarButtons.addButton(mExtendedUi->googlePlayButton);
+        mExtendedUi->googlePlayPage->initialize(
+                mEmulatorWindow->getAdbInterface());
+    } else {
+        mExtendedUi->googlePlayButton->hide();
+    }
 
     if (avdInfo_isAndroidAuto(android_avdInfo)) {
         mSidebarButtons.addButton(mExtendedUi->carDataButton);

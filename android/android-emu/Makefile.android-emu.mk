@@ -269,6 +269,7 @@ LOCAL_SRC_FILES := \
     android/emulation/control/AdbInterface.cpp \
     android/emulation/control/ApkInstaller.cpp \
     android/emulation/control/FilePusher.cpp \
+    android/emulation/control/GooglePlayServices.cpp \
     android/emulation/control/LineConsumer.cpp \
     android/emulation/control/ScreenCapturer.cpp \
     android/emulation/CpuAccelerator.cpp \
@@ -535,6 +536,7 @@ LOCAL_SRC_FILES := \
   android/emulation/control/AdbInterface_unittest.cpp \
   android/emulation/control/ApkInstaller_unittest.cpp \
   android/emulation/control/FilePusher_unittest.cpp \
+  android/emulation/control/GooglePlayServices_unittest.cpp \
   android/emulation/control/ScreenCapturer_unittest.cpp \
   android/emulation/control/LineConsumer_unittest.cpp \
   android/emulation/CpuAccelerator_unittest.cpp \
