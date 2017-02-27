@@ -1024,7 +1024,6 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         thread->updateInfo(newCtx,dpy,newCtx->getGlesContext(),newCtx->getShareGroup(),dpy->getManager(newCtx->version()));
         newCtx->setSurfaces(newReadSrfc,newDrawSrfc);
         g_eglInfo->getIface(newCtx->version())->initContext(newCtx->getGlesContext(),newCtx->getShareGroup());
-        newCtx->getShareGroup()->postLoadInit();
 
         // Initialize the GLES extension function table used in
         // eglGetProcAddress for the context's GLES version if not

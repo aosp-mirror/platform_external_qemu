@@ -188,9 +188,10 @@ public:
     bool isTextureUnitEnabled(GLenum unit);
     void setTextureEnabled(GLenum target, GLenum enable);
     ObjectLocalName getDefaultTextureName(GLenum target);
-    bool isInitialized() { return m_initialized; };
-    void setUnpackAlignment(GLint param){ m_unpackAlignment = param; };
-    GLint getUnpackAlignment(){ return m_unpackAlignment; };
+    ObjectLocalName getTextureLocalName(GLenum target, unsigned int tex);
+    bool isInitialized() { return m_initialized || m_needRestoreFromSnapshot; };
+    bool needRestore() {return m_needRestoreFromSnapshot;}
+    GLint getUnpackAlignment();
 
     bool  isArrEnabled(GLenum);
     void  enableArr(GLenum arr,bool enable);
@@ -260,6 +261,14 @@ public:
         return m_drawFramebuffer;
     }
 
+    void setViewport(GLint x, GLint y, GLsizei width, GLsizei height);
+    void setScissor(GLint x, GLint y, GLsizei width, GLsizei height);
+
+    void setEnable(GLenum item, bool isEnable);
+    void setBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB,
+            GLenum srcAlpha, GLenum dstAlpha);
+    void setPixelStorei(GLenum pname, GLint param);
+
     static GLDispatch& dispatcher(){return s_glDispatch;};
 
     static int getMaxLights(){return s_glSupport.maxLights;}
@@ -282,7 +291,11 @@ public:
     virtual void onSave(android::base::Stream* stream) const;
     virtual ObjectDataPtr loadObject(NamedObjectType type,
             ObjectLocalName localName, android::base::Stream* stream) const;
+    virtual void restore();
 protected:
+    virtual void postLoadRestoreShareGroup();
+    virtual void postLoadRestoreCtx();
+
     static void buildStrings(const char* baseVendor, const char* baseRenderer, const char* baseVersion, const char* version);
 
     void freeVAOState();
@@ -302,7 +315,6 @@ protected:
     static GLDispatch     s_glDispatch;
     bool                  m_initialized = false;
     unsigned int          m_activeTexture = 0;
-    GLint                 m_unpackAlignment = 4;
 
     VAOStateMap           m_vaoStateMap;
     VAOStateRef           m_currVaoState;
@@ -322,6 +334,25 @@ protected:
     std::vector<BufferBinding> m_indexedAtomicCounterBuffers;
     std::vector<BufferBinding> m_indexedShaderStorageBuffers;
 
+    GLint m_viewportX = 0;
+    GLint m_viewportY = 0;
+    GLsizei m_viewportWidth = 0;
+    GLsizei m_viewportHeight = 0;
+
+    GLint m_scissorX = 0;
+    GLint m_scissorY = 0;
+    GLsizei m_scissorWidth = 0;
+    GLsizei m_scissorHeight = 0;
+
+    std::unordered_map<GLenum, bool> m_glEnableList = {};
+
+    GLenum m_blendSrcRgb = GL_ONE;
+    GLenum m_blendDstRgb = GL_ZERO;
+    GLenum m_blendSrcAlpha = GL_ONE;
+    GLenum m_blendDstAlpha = GL_ZERO;
+
+    std::unordered_map<GLenum, GLint> m_glPixelStoreiList = {};
+
     static std::string*   s_glExtensions;
     static GLSupport      s_glSupport;
 
@@ -334,6 +365,7 @@ private:
     ShareGroupPtr         m_shareGroup;
     GLenum                m_glError = GL_NO_ERROR;
     int                   m_maxTexUnits;
+    unsigned int          m_maxUsedTexUnit = 0;
     textureUnitState*     m_texState = nullptr;
     unsigned int          m_arrayBuffer = 0;
     unsigned int          m_elementBuffer = 0;
