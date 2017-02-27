@@ -72,7 +72,7 @@ void setupVirtualSerialPorts(ParameterList* kernelParams,
         // by default will be the 'stdio' or 'con:' chardev (for Posix and
         // Windows, respectively).
         if (kernelParams) {
-            if (optionShowKernel) {
+            if (hasShellConsole) {
                 kernelParams->addFormat("console=%s0", kernelSerialPrefix);
             }
             int logcatSerial = 1;
@@ -90,7 +90,7 @@ void setupVirtualSerialPorts(ParameterList* kernelParams,
                 kernelParams->add("android.qemud=1");
             }
 
-            if (hasShellConsole) {
+            if (optionShowKernel) {
                 kernelParams->addFormat("androidboot.console=%s%d",
                                         kernelSerialPrefix, logcatSerial);
             }
@@ -126,7 +126,7 @@ void setupVirtualSerialPorts(ParameterList* kernelParams,
         // and the -shell-serial option will affect all three of them.
         // TODO(digit): Ensure -shell-serial only works on -shell output.
         if (kernelParams) {
-            if (optionShowKernel) {
+            if (hasShellConsole) {
                 kernelParams->addFormat("console=%s0,38400",
                                         kernelSerialPrefix);
             }
@@ -136,7 +136,7 @@ void setupVirtualSerialPorts(ParameterList* kernelParams,
                 kernelParams->addFormat("earlyprintk=%s0", kernelSerialPrefix);
             }
 
-            if (hasShellConsole) {
+            if (optionShowKernel) {
                 kernelParams->addFormat("androidboot.console=%s0",
                                         kernelSerialPrefix);
             }
@@ -152,7 +152,7 @@ void setupVirtualSerialPorts(ParameterList* kernelParams,
         }
     }
 
-    if (kernelParams && !optionShowKernel) {
+    if (kernelParams && !hasShellConsole) {
         // Required to prevent kernel messages to be sent to framebuffer
         // (through 'vc0', i.e. virtual console 0).
         kernelParams->add("console=0");

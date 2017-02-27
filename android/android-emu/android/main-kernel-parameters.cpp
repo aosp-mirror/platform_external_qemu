@@ -53,7 +53,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     android::setupVirtualSerialPorts(
             &params, nullptr, apiLevel, targetArch, kernelSerialPrefix, isQemu2,
-            opts->show_kernel, opts->logcat || opts->shell, opts->shell_serial);
+            opts->logcat, opts->shell || opts->show_kernel, opts->shell_serial);
 
     params.addIf("android.checkjni=1", !opts->no_jni);
     params.addIf("android.bootanim=0", opts->no_boot_anim);
