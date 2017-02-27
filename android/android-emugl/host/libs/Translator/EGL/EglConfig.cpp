@@ -140,7 +140,7 @@ EglConfig::EglConfig(EGLint     red_size,
         m_trans_green_val(trans_green_val),
         m_trans_blue_val(trans_blue_val),
         m_recordable_android(recordable_android),
-        m_framebuffer_target_android(FB_TARGET_ANDROID_BUF_SIZE(m_buffer_size)),
+        m_framebuffer_target_android(EGL_FALSE),
         m_conformant(((red_size + green_size + blue_size + alpha_size > 0)  &&
                      (caveat != EGL_NON_CONFORMANT_CONFIG)) ?
                      m_renderable_type : 0),
