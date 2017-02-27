@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2aacb760_1d781669",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1117,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-27T18:32:43Z",
+      "side": 1,
+      "message": "We should fail if \n(apiLevel \u003d\u003d DEFAULT || apiLevel \u003c MIN)",
+      "revId": "45a14b6d9e899170c90dc35dbf4182855dc52f59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa67306f_8182eb0e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-02-27T18:32:43Z",
+      "side": 1,
+      "message": "Fail if \n(apiLevel \u003d\u003d DEFAULT || apiLevel \u003c MIN)",
+      "revId": "45a14b6d9e899170c90dc35dbf4182855dc52f59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
