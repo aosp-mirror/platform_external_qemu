@@ -34,6 +34,15 @@ help_list_avds( stralloc_t* out ) {
 }
 
 static void
+help_studio(stralloc_t*  out)
+{
+    PRINTF(
+    "  This flag indicates that the AVD was launched by Android Studio\n\n"
+    "  This flag should be used only by Android Studio\n\n"
+    );
+}
+
+static void
 help_virtual_device( stralloc_t*  out )
 {
     PRINTF(
