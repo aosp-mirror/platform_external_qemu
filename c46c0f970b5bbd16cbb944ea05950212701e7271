@@ -22,6 +22,30 @@
       "revId": "c46c0f970b5bbd16cbb944ea05950212701e7271",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ca7061c_53c4ecaa",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglConfig.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-02-27T22:59:32Z",
+      "side": 0,
+      "message": "Not so easy to detect from here. Having a real hwc involves both new guest and host code, and so would involve pulling in a lot of other emulator code to detect it here.\n\nWe do have facilities in place for editing the way EGL configs are seen by the guest even if it is set to false here, though, which will be the approach in the future when HWC is implemented (so it would also work for SwiftShader as well)",
+      "parentUuid": "2c0c5ce9_972f4dbe",
+      "range": {
+        "startLine": 143,
+        "startChar": 64,
+        "endLine": 143,
+        "endChar": 77
+      },
+      "revId": "c46c0f970b5bbd16cbb944ea05950212701e7271",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
