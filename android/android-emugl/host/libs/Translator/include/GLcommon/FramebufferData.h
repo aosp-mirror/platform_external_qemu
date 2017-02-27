@@ -36,7 +36,7 @@ public:
     GLsizei height = 0;
 };
 
-const int MAX_ATTACH_POINTS = 18;
+const int MAX_ATTACH_POINTS = 19;
 
 class FramebufferData : public ObjectData
 {
