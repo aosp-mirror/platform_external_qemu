@@ -241,14 +241,12 @@ int ApiGen::genEntryPoints(const std::string & filename, SideType side)
     fprintf(fp, "#include \"%s_%s_context.h\"\n", m_basename.c_str(), sideString(side));
     fprintf(fp, "\n");
 
-    fprintf(fp, "#ifndef GL_TRUE\n");
     fprintf(fp, "extern \"C\" {\n");
 
     for (size_t i = 0; i < size(); i++) {
         fprintf(fp, "\t"); at(i).print(fp, false); fprintf(fp, ";\n");
     }
     fprintf(fp, "};\n\n");
-    fprintf(fp, "#endif\n");
 
     fprintf(fp, "#ifndef GET_CONTEXT\n");
     fprintf(fp, "static %s_%s_context_t::CONTEXT_ACCESSOR_TYPE *getCurrentContext = NULL;\n",
@@ -911,7 +909,7 @@ int ApiGen::genContextImpl(const std::string &filename, SideType side)
     fprintf(fp, "int %s::initDispatchByName(void *(*getProc)(const char *, void *userData), void *userData)\n{\n", classname.c_str());
     for (size_t i = 0; i < n; i++) {
         EntryPoint *e = &at(i);
-        if (e->customDecoder() && !e->notApi()) {
+        if (side == SERVER_SIDE && e->customDecoder() && !e->notApi()) {
             fprintf(fp, "\t%s = (%s_dec_%s_proc_t) getProc(\"%s\", userData);\n",
                     e->name().c_str(),
                     e->name().c_str(),
