@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include "foo_client_context.h"
 
-#ifndef GL_TRUE
 extern "C" {
 	void fooAlphaFunc(FooInt func, FooFloat ref);
 	FooBoolean fooIsBuffer(void* stuff);
@@ -13,7 +12,6 @@ extern "C" {
 	void fooTakeConstVoidPtrConstPtr(const void* const* param);
 };
 
-#endif
 #ifndef GET_CONTEXT
 static foo_client_context_t::CONTEXT_ACCESSOR_TYPE *getCurrentContext = NULL;
 void foo_client_context_t::setContextAccessor(CONTEXT_ACCESSOR_TYPE *f) { getCurrentContext = f; }
