@@ -74,7 +74,7 @@ void ShaderParser::onSave(android::base::Stream* stream) const {
 
 void ShaderParser::restore(ObjectLocalName localName,
            getGlobalName_t getGlobalName) {
-    if (!m_parsedSrc.empty()) return;
+    if (m_parsedSrc.empty()) return;
     int globalName = getGlobalName(NamedObjectType::SHADER_OR_PROGRAM,
             localName);
     GLEScontext::dispatcher().glShaderSource(globalName, 1, parsedLines(),
