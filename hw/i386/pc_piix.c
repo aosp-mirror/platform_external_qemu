@@ -78,7 +78,6 @@ static void pc_init1(MachineState *machine,
     ISABus *isa_bus;
     PCII440FXState *i440fx_state;
     int piix3_devfn = -1;
-    qemu_irq *gsi;
     qemu_irq *i8259;
     qemu_irq smi_irq;
     GSIState *gsi_state;
@@ -193,16 +192,16 @@ static void pc_init1(MachineState *machine,
     gsi_state = g_malloc0(sizeof(*gsi_state));
     if (kvm_ioapic_in_kernel()) {
         kvm_pc_setup_irq_routing(pcmc->pci_enabled);
-        gsi = qemu_allocate_irqs(kvm_pc_gsi_handler, gsi_state,
-                                 GSI_NUM_PINS);
+        pcms->gsi = qemu_allocate_irqs(kvm_pc_gsi_handler, gsi_state,
+                                       GSI_NUM_PINS);
     } else {
-        gsi = qemu_allocate_irqs(gsi_handler, gsi_state, GSI_NUM_PINS);
+        pcms->gsi = qemu_allocate_irqs(gsi_handler, gsi_state, GSI_NUM_PINS);
     }
 
     if (pcmc->pci_enabled) {
         pci_bus = i440fx_init(host_type,
                               pci_type,
-                              &i440fx_state, &piix3_devfn, &isa_bus, gsi,
+                              &i440fx_state, &piix3_devfn, &isa_bus, pcms->gsi,
                               system_memory, system_io, machine->ram_size,
                               pcms->below_4g_mem_size,
                               pcms->above_4g_mem_size,
@@ -215,7 +214,7 @@ static void pc_init1(MachineState *machine,
                               &error_abort);
         no_hpet = 1;
     }
-    isa_bus_irqs(isa_bus, gsi);
+    isa_bus_irqs(isa_bus, pcms->gsi);
 
     if (kvm_pic_in_kernel()) {
         i8259 = kvm_i8259_init(isa_bus);
@@ -233,25 +232,25 @@ static void pc_init1(MachineState *machine,
         ioapic_init_gsi(gsi_state, "i440fx");
     }
 
-    pc_register_ferr_irq(gsi[13]);
+    pc_register_ferr_irq(pcms->gsi[13]);
 
 #if defined(CONFIG_ANDROID)
     sysbus_create_simple("goldfish_battery", GOLDFISH_BATTERY_IOMEM_BASE,
-                         gsi[GOLDFISH_BATTERY_IRQ]);
+                         pcms->gsi[GOLDFISH_BATTERY_IRQ]);
     sysbus_create_simple("goldfish-events", GOLDFISH_EVENTS_IOMEM_BASE,
-                         gsi[GOLDFISH_EVENTS_IRQ]);
+                         pcms->gsi[GOLDFISH_EVENTS_IRQ]);
     sysbus_create_simple("goldfish_pipe", GOLDFISH_PIPE_IOMEM_BASE,
-                         gsi[GOLDFISH_PIPE_IRQ]);
+                         pcms->gsi[GOLDFISH_PIPE_IRQ]);
     sysbus_create_simple("goldfish_fb", GOLDFISH_FB_IOMEM_BASE,
-                         gsi[GOLDFISH_FB_IRQ]);
+                         pcms->gsi[GOLDFISH_FB_IRQ]);
     sysbus_create_simple("goldfish_audio", GOLDFISH_AUDIO_IOMEM_BASE,
-                         gsi[GOLDFISH_AUDIO_IRQ]);
+                         pcms->gsi[GOLDFISH_AUDIO_IRQ]);
     sysbus_create_simple("goldfish_rtc", GOLDFISH_RTC_IOMEM_BASE,
-                         gsi[GOLDFISH_RTC_IRQ]);
+                         pcms->gsi[GOLDFISH_RTC_IRQ]);
     sysbus_create_simple("goldfish_sync", GOLDFISH_SYNC_IOMEM_BASE,
-                         gsi[GOLDFISH_SYNC_IRQ]);
+                         pcms->gsi[GOLDFISH_SYNC_IRQ]);
     sysbus_create_simple("goldfish_rotary", GOLDFISH_ROTARY_IOMEM_BASE,
-                         gsi[GOLDFISH_ROTARY_IRQ]);
+                         pcms->gsi[GOLDFISH_ROTARY_IRQ]);
 #endif  // CONFIG_ANDROID
 
     pc_vga_init(isa_bus, pcmc->pci_enabled ? pci_bus : NULL);
@@ -262,7 +261,7 @@ static void pc_init1(MachineState *machine,
     }
 
     /* init basic PC hardware */
-    pc_basic_device_init(isa_bus, gsi, &rtc_state, true,
+    pc_basic_device_init(isa_bus, pcms->gsi, &rtc_state, true,
                          (pcms->vmport != ON_OFF_AUTO_ON), 0x4);
 
     pc_nic_init(isa_bus, pci_bus);
@@ -306,7 +305,7 @@ static void pc_init1(MachineState *machine,
         smi_irq = qemu_allocate_irq(pc_acpi_smi_interrupt, first_cpu, 0);
         /* TODO: Populate SPD eeprom data.  */
         smbus = piix4_pm_init(pci_bus, piix3_devfn + 3, 0xb100,
-                              gsi[9], smi_irq,
+                              pcms->gsi[9], smi_irq,
                               pc_machine_is_smm_enabled(pcms),
                               &piix4_pm);
         smbus_eeprom_init(smbus, 8, NULL, 0);
@@ -465,11 +464,23 @@ static void pc_i440fx_machine_options(MachineClass *m)
     m->default_display = "std";
 }
 
-static void pc_i440fx_2_7_machine_options(MachineClass *m)
+static void pc_i440fx_2_8_machine_options(MachineClass *m)
 {
     pc_i440fx_machine_options(m);
     m->alias = "pc";
     m->is_default = 1;
+}
+
+DEFINE_I440FX_MACHINE(v2_8, "pc-i440fx-2.8", NULL,
+                      pc_i440fx_2_8_machine_options);
+
+
+static void pc_i440fx_2_7_machine_options(MachineClass *m)
+{
+    pc_i440fx_2_8_machine_options(m);
+    m->is_default = 0;
+    m->alias = NULL;
+    SET_MACHINE_COMPAT(m, PC_COMPAT_2_7);
 }
 
 DEFINE_I440FX_MACHINE(v2_7, "pc-i440fx-2.7", NULL,
@@ -480,8 +491,6 @@ static void pc_i440fx_2_6_machine_options(MachineClass *m)
 {
     PCMachineClass *pcmc = PC_MACHINE_CLASS(m);
     pc_i440fx_2_7_machine_options(m);
-    m->is_default = 0;
-    m->alias = NULL;
     pcmc->legacy_cpu_hotplug = true;
     SET_MACHINE_COMPAT(m, PC_COMPAT_2_6);
 }

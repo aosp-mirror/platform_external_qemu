@@ -8,6 +8,8 @@ QEMU2_COMMON_SOURCES := \
     audio/noaudio.c \
     audio/wavaudio.c \
     audio/wavcapture.c \
+    backends/cryptodev-builtin.c \
+    backends/cryptodev.c \
     backends/hostmem-ram.c \
     backends/hostmem.c \
     backends/msmouse.c \
@@ -49,11 +51,15 @@ QEMU2_COMMON_SOURCES := \
     block/qed.c \
     block/quorum.c \
     block/raw_bsd.c \
+    block/replication.c \
     block/sheepdog.c \
     block/snapshot.c \
     block/stream.c \
     block/throttle-groups.c \
     block/vdi.c \
+    block/vhdx-endian.c \
+    block/vhdx-log.c \
+    block/vhdx.c \
     block/vmdk.c \
     block/vpc.c \
     block/vvfat.c \
@@ -63,6 +69,7 @@ QEMU2_COMMON_SOURCES := \
     blockjob.c \
     bt-host.c \
     bt-vhci.c \
+    cpus-common.c \
     crypto/aes.c \
     crypto/afsplit.c \
     crypto/block-luks.c \
@@ -121,6 +128,7 @@ QEMU2_COMMON_SOURCES := \
     hw/core/loader.c \
     hw/core/machine.c \
     hw/core/null-machine.c \
+    hw/core/or-irq.c \
     hw/core/qdev-properties-system.c \
     hw/core/qdev-properties.c \
     hw/core/qdev.c \
@@ -142,6 +150,7 @@ QEMU2_COMMON_SOURCES := \
     hw/input/ps2.c \
     hw/input/virtio-input-hid.c \
     hw/input/virtio-input.c \
+    hw/intc/intc.c \
     hw/ipack/ipack.c \
     hw/ipack/tpci200.c \
     hw/isa/isa-bus.c \
@@ -159,6 +168,7 @@ QEMU2_COMMON_SOURCES := \
     hw/net/rocker/rocker_world.c \
     hw/net/rtl8139.c \
     hw/net/vmxnet3.c \
+    hw/nvram/chrp_nvram.c \
     hw/nvram/eeprom93xx.c \
     hw/nvram/fw_cfg.c \
     hw/pci-bridge/pci_bridge_dev.c \
@@ -232,6 +242,9 @@ QEMU2_COMMON_SOURCES := \
     iothread.c \
     main-loop.c \
     migration/block.c \
+    migration/colo-comm.c \
+    migration/colo-failover.c \
+    migration/colo.c \
     migration/exec.c \
     migration/fd.c \
     migration/migration.c \
@@ -247,10 +260,13 @@ QEMU2_COMMON_SOURCES := \
     nbd/common.c \
     nbd/server.c \
     net/checksum.c \
+    net/colo-compare.c \
+    net/colo.c \
     net/dump.c \
     net/eth.c \
     net/filter-buffer.c \
     net/filter-mirror.c \
+    net/filter-rewriter.c \
     net/filter.c \
     net/hub.c \
     net/net.c \
@@ -273,8 +289,10 @@ QEMU2_COMMON_SOURCES := \
     replay/replay-events.c \
     replay/replay-input.c \
     replay/replay-internal.c \
+    replay/replay-snapshot.c \
     replay/replay-time.c \
     replay/replay.c \
+    replication.c \
     slirp/arp_table.c \
     slirp/bootp.c \
     slirp/cksum.c \
@@ -300,7 +318,6 @@ QEMU2_COMMON_SOURCES := \
     slirp/tftp.c \
     slirp/udp.c \
     slirp/udp6.c \
-    tcg-runtime.c \
     thread-pool.c \
     tpm.c \
     ui/console.c \
@@ -379,6 +396,7 @@ QEMU2_TARGET_SOURCES := \
     hw/block/virtio-blk.c \
     hw/char/goldfish_tty.c \
     hw/char/virtio-serial-bus.c \
+    hw/core/generic-loader.c \
     hw/core/nmi.c \
     hw/cpu/core.c \
     hw/display/vga.c \
@@ -399,6 +417,8 @@ QEMU2_TARGET_SOURCES := \
     hw/scsi/virtio-scsi.c \
     hw/timer/goldfish_timer.c \
     hw/virtio/virtio-balloon.c \
+    hw/virtio/virtio-crypto-pci.c \
+    hw/virtio/virtio-crypto.c \
     hw/virtio/virtio.c \
     ioport.c \
     memory.c \
@@ -408,6 +428,7 @@ QEMU2_TARGET_SOURCES := \
     monitor.c \
     numa.c \
     qtest.c \
+    tcg-runtime.c \
     tcg/optimize.c \
     tcg/tcg-common.c \
     tcg/tcg-op.c \
@@ -426,9 +447,11 @@ QEMU2_TARGET_aarch64_SOURCES := \
     disas/libvixl/vixl/a64/instructions-a64.cc \
     disas/libvixl/vixl/compiler-intrinsics.cc \
     disas/libvixl/vixl/utils.cc \
+    hw/adc/stm32f2xx_adc.c \
     hw/arm/allwinner-a10.c \
     hw/arm/armv7m.c \
-    hw/arm/ast2400.c \
+    hw/arm/aspeed.c \
+    hw/arm/aspeed_soc.c \
     hw/arm/bcm2835_peripherals.c \
     hw/arm/bcm2836.c \
     hw/arm/boot.c \
@@ -454,7 +477,6 @@ QEMU2_TARGET_aarch64_SOURCES := \
     hw/arm/omap2.c \
     hw/arm/omap_sx1.c \
     hw/arm/palm.c \
-    hw/arm/palmetto-bmc.c \
     hw/arm/pxa2xx.c \
     hw/arm/pxa2xx_gpio.c \
     hw/arm/pxa2xx_pic.c \
@@ -548,6 +570,7 @@ QEMU2_TARGET_aarch64_SOURCES := \
     hw/intc/arm_gicv3_common.c \
     hw/intc/arm_gicv3_cpuif.c \
     hw/intc/arm_gicv3_dist.c \
+    hw/intc/arm_gicv3_its_common.c \
     hw/intc/arm_gicv3_redist.c \
     hw/intc/armv7m_nvic.c \
     hw/intc/aspeed_vic.c \
@@ -565,6 +588,7 @@ QEMU2_TARGET_aarch64_SOURCES := \
     hw/misc/arm_l2x0.c \
     hw/misc/arm_sysctl.c \
     hw/misc/aspeed_scu.c \
+    hw/misc/aspeed_sdmc.c \
     hw/misc/auxbus.c \
     hw/misc/bcm2835_mbox.c \
     hw/misc/bcm2835_property.c \
@@ -610,6 +634,7 @@ QEMU2_TARGET_aarch64_SOURCES := \
     hw/ssi/omap_spi.c \
     hw/ssi/pl022.c \
     hw/ssi/ssi.c \
+    hw/ssi/stm32f2xx_spi.c \
     hw/ssi/xilinx_spips.c \
     hw/timer/a9gtimer.c \
     hw/timer/allwinner-a10-pit.c \
@@ -662,9 +687,11 @@ QEMU2_TARGET_arm_SOURCES := \
     disas/libvixl/vixl/a64/instructions-a64.cc \
     disas/libvixl/vixl/compiler-intrinsics.cc \
     disas/libvixl/vixl/utils.cc \
+    hw/adc/stm32f2xx_adc.c \
     hw/arm/allwinner-a10.c \
     hw/arm/armv7m.c \
-    hw/arm/ast2400.c \
+    hw/arm/aspeed.c \
+    hw/arm/aspeed_soc.c \
     hw/arm/bcm2835_peripherals.c \
     hw/arm/bcm2836.c \
     hw/arm/boot.c \
@@ -690,7 +717,6 @@ QEMU2_TARGET_arm_SOURCES := \
     hw/arm/omap2.c \
     hw/arm/omap_sx1.c \
     hw/arm/palm.c \
-    hw/arm/palmetto-bmc.c \
     hw/arm/pxa2xx.c \
     hw/arm/pxa2xx_gpio.c \
     hw/arm/pxa2xx_pic.c \
@@ -778,6 +804,7 @@ QEMU2_TARGET_arm_SOURCES := \
     hw/intc/arm_gicv3_common.c \
     hw/intc/arm_gicv3_cpuif.c \
     hw/intc/arm_gicv3_dist.c \
+    hw/intc/arm_gicv3_its_common.c \
     hw/intc/arm_gicv3_redist.c \
     hw/intc/armv7m_nvic.c \
     hw/intc/aspeed_vic.c \
@@ -795,6 +822,7 @@ QEMU2_TARGET_arm_SOURCES := \
     hw/misc/arm_l2x0.c \
     hw/misc/arm_sysctl.c \
     hw/misc/aspeed_scu.c \
+    hw/misc/aspeed_sdmc.c \
     hw/misc/bcm2835_mbox.c \
     hw/misc/bcm2835_property.c \
     hw/misc/cbus.c \
@@ -839,6 +867,7 @@ QEMU2_TARGET_arm_SOURCES := \
     hw/ssi/omap_spi.c \
     hw/ssi/pl022.c \
     hw/ssi/ssi.c \
+    hw/ssi/stm32f2xx_spi.c \
     hw/ssi/xilinx_spips.c \
     hw/timer/a9gtimer.c \
     hw/timer/allwinner-a10-pit.c \
@@ -909,6 +938,7 @@ QEMU2_TARGET_i386_SOURCES := \
     hw/dma/i8257.c \
     hw/i2c/pm_smbus.c \
     hw/i2c/smbus_ich9.c \
+    hw/i386/amd_iommu.c \
     hw/i386/intel_iommu.c \
     hw/i386/kvmvapic.c \
     hw/i386/multiboot.c \
@@ -984,6 +1014,7 @@ QEMU2_TARGET_mips64el_SOURCES := \
     hw/acpi/cpu_hotplug.c \
     hw/acpi/memory_hotplug.c \
     hw/acpi/memory_hotplug_acpi_table.c \
+    hw/acpi/nvdimm.c \
     hw/acpi/pcihp.c \
     hw/acpi/piix4.c \
     hw/audio/adlib.c \
@@ -1060,6 +1091,7 @@ QEMU2_TARGET_mipsel_SOURCES := \
     hw/acpi/cpu_hotplug.c \
     hw/acpi/memory_hotplug.c \
     hw/acpi/memory_hotplug_acpi_table.c \
+    hw/acpi/nvdimm.c \
     hw/acpi/pcihp.c \
     hw/acpi/piix4.c \
     hw/audio/adlib.c \
@@ -1149,6 +1181,7 @@ QEMU2_TARGET_x86_64_SOURCES := \
     hw/dma/i8257.c \
     hw/i2c/pm_smbus.c \
     hw/i2c/smbus_ich9.c \
+    hw/i386/amd_iommu.c \
     hw/i386/intel_iommu.c \
     hw/i386/kvmvapic.c \
     hw/i386/multiboot.c \
@@ -1231,6 +1264,7 @@ QEMU2_TARGET_aarch64_SOURCES_linux-x86_64 := \
     hw/vfio/spapr.c \
     hw/virtio/vhost-backend.c \
     hw/virtio/vhost-user.c \
+    hw/virtio/vhost-vsock.c \
     hw/virtio/vhost.c \
 
 QEMU2_TARGET_aarch64_SOURCES_windows-x86 := \
@@ -1251,6 +1285,7 @@ QEMU2_TARGET_arm_SOURCES_linux-x86_64 := \
     hw/vfio/spapr.c \
     hw/virtio/vhost-backend.c \
     hw/virtio/vhost-user.c \
+    hw/virtio/vhost-vsock.c \
     hw/virtio/vhost.c \
 
 QEMU2_TARGET_arm_SOURCES_windows-x86 := \
@@ -1262,15 +1297,15 @@ QEMU2_TARGET_i386_SOURCES_darwin-x86_64 := \
     target-i386/hax-all.c \
     target-i386/hax-darwin.c \
     target-i386/hax-slot.c \
-    target-i386/hvf-utils/x86.c \
-    target-i386/hvf-utils/x86_descr.c \
-    target-i386/hvf-utils/x86_mmu.c \
-    target-i386/hvf-utils/x86_decode.c \
-    target-i386/hvf-utils/x86_flags.c \
-    target-i386/hvf-utils/x86_emu.c \
-    target-i386/hvf-utils/x86_cpuid.c \
-    target-i386/hvf-utils/x86hvf.c \
     target-i386/hvf-all.c \
+    target-i386/hvf-utils/x86.c \
+    target-i386/hvf-utils/x86_cpuid.c \
+    target-i386/hvf-utils/x86_decode.c \
+    target-i386/hvf-utils/x86_descr.c \
+    target-i386/hvf-utils/x86_emu.c \
+    target-i386/hvf-utils/x86_flags.c \
+    target-i386/hvf-utils/x86_mmu.c \
+    target-i386/hvf-utils/x86hvf.c \
     target-i386/kvm-stub.c \
 
 QEMU2_TARGET_i386_SOURCES_linux-x86_64 := \
@@ -1292,6 +1327,7 @@ QEMU2_TARGET_i386_SOURCES_linux-x86_64 := \
     hw/vfio/spapr.c \
     hw/virtio/vhost-backend.c \
     hw/virtio/vhost-user.c \
+    hw/virtio/vhost-vsock.c \
     hw/virtio/vhost.c \
     kvm-all.c \
     target-i386/hyperv.c \
@@ -1325,6 +1361,7 @@ QEMU2_TARGET_mips64el_SOURCES_linux-x86_64 := \
     hw/vfio/spapr.c \
     hw/virtio/vhost-backend.c \
     hw/virtio/vhost-user.c \
+    hw/virtio/vhost-vsock.c \
     hw/virtio/vhost.c \
 
 QEMU2_TARGET_mips64el_SOURCES_windows-x86 := \
@@ -1345,6 +1382,7 @@ QEMU2_TARGET_mipsel_SOURCES_linux-x86_64 := \
     hw/vfio/spapr.c \
     hw/virtio/vhost-backend.c \
     hw/virtio/vhost-user.c \
+    hw/virtio/vhost-vsock.c \
     hw/virtio/vhost.c \
 
 QEMU2_TARGET_mipsel_SOURCES_windows-x86 := \
@@ -1356,15 +1394,15 @@ QEMU2_TARGET_x86_64_SOURCES_darwin-x86_64 := \
     target-i386/hax-all.c \
     target-i386/hax-darwin.c \
     target-i386/hax-slot.c \
-    target-i386/hvf-utils/x86.c \
-    target-i386/hvf-utils/x86_descr.c \
-    target-i386/hvf-utils/x86_mmu.c \
-    target-i386/hvf-utils/x86_decode.c \
-    target-i386/hvf-utils/x86_flags.c \
-    target-i386/hvf-utils/x86_emu.c \
-    target-i386/hvf-utils/x86_cpuid.c \
-    target-i386/hvf-utils/x86hvf.c \
     target-i386/hvf-all.c \
+    target-i386/hvf-utils/x86.c \
+    target-i386/hvf-utils/x86_cpuid.c \
+    target-i386/hvf-utils/x86_decode.c \
+    target-i386/hvf-utils/x86_descr.c \
+    target-i386/hvf-utils/x86_emu.c \
+    target-i386/hvf-utils/x86_flags.c \
+    target-i386/hvf-utils/x86_mmu.c \
+    target-i386/hvf-utils/x86hvf.c \
     target-i386/kvm-stub.c \
 
 QEMU2_TARGET_x86_64_SOURCES_linux-x86_64 := \
@@ -1386,6 +1424,7 @@ QEMU2_TARGET_x86_64_SOURCES_linux-x86_64 := \
     hw/vfio/spapr.c \
     hw/virtio/vhost-backend.c \
     hw/virtio/vhost-user.c \
+    hw/virtio/vhost-vsock.c \
     hw/virtio/vhost.c \
     kvm-all.c \
     target-i386/hyperv.c \

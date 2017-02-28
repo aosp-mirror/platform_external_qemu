@@ -124,7 +124,7 @@ static void goldfish_tty_write(void *opaque, hwaddr offset,
         case TTY_PUT_CHAR: {
             uint8_t ch = value;
             if(s->cs)
-                qemu_chr_fe_write(s->cs, &ch, 1);
+                qemu_chr_fe_write(s->cs->be, &ch, 1);
         } break;
 
         case TTY_CMD:
@@ -151,7 +151,7 @@ static void goldfish_tty_write(void *opaque, hwaddr offset,
                         void *ptr;
 
                         ptr = cpu_physical_memory_map(s->ptr, &l, 0);
-                        qemu_chr_fe_write(s->cs, (const uint8_t*)ptr, l);
+                        qemu_chr_fe_write(s->cs->be, (const uint8_t*)ptr, l);
                         cpu_physical_memory_unmap(ptr, l, 0, 0);
                     }
                     break;
@@ -252,8 +252,8 @@ static void goldfish_tty_realize(DeviceState *dev, Error **errp)
     for(i = 0; i < MAX_SERIAL_PORTS; i++) {
         if(serial_hds[i]) {
             s->cs = serial_hds[i];
-            qemu_chr_add_handlers(serial_hds[i], tty_can_receive,
-                                  tty_receive, NULL, s);
+            qemu_chr_fe_set_handlers(serial_hds[i]->be, tty_can_receive,
+                                     tty_receive, NULL, s, NULL, false);
             break;
         }
     }
