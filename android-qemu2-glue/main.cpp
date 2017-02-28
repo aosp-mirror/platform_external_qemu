@@ -309,8 +309,9 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
 
     // Move the disk operations into the dedicated 'disk thread', and
     // enable modern notification mode for the hosts that support it (Linux).
-    deviceParam += ",iothread=disk-iothread";
-#if defined(TARGET_X86_64) || defined(TARGET_I386)
+#ifdef CONFIG_LINUX
+    // eventfd is required for this, and only available on kvm.
+    deviceParam += ",iothread=disk-iothread"; 
     deviceParam += ",modern-pio-notify";
 #endif
 
