@@ -812,6 +812,7 @@ static const struct IntelHDAReg regtab[] = {
         .name     = _t stringify(_i) " CTL",                          \
         .size     = 4,                                                \
         .wmask    = 0x1cff001f,                                       \
+        .wclear   = 0x1c000000,                                       \
         .offset   = offsetof(IntelHDAState, st[_i].ctl),              \
         .whandler = intel_hda_set_st_ctl,                             \
     },                                                                \
