@@ -152,6 +152,7 @@ public:
     // |img| must be a buffer large enough (i.e. width * height * 4).
     void readback(unsigned char* img);
 
+    void preSave(android::base::Stream* stream, EGLDisplay p_display);
     void onSave(android::base::Stream* stream);
     static ColorBuffer* onLoad(android::base::Stream* stream,
                                EGLDisplay p_display,
