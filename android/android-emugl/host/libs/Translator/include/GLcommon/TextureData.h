@@ -21,6 +21,8 @@
 
 #include <vector>
 
+//class SaveableTexture;
+
 class TextureData : public ObjectData
 {
 public:
