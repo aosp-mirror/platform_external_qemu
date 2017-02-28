@@ -3,5 +3,6 @@ common-obj-$(CONFIG_VIRTIO_PCI) += virtio-pci.o
 common-obj-y += virtio-bus.o
 common-obj-y += virtio-mmio.o
 
-obj-y += virtio.o virtio-balloon.o 
+obj-y += virtio.o virtio-balloon.o
 obj-$(CONFIG_LINUX) += vhost.o vhost-backend.o vhost-user.o
+obj-$(CONFIG_GOLDFISH) += virtio-goldfish-pipe-pci.o virtio-goldfish-pipe.o

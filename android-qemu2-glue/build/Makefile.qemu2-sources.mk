@@ -213,6 +213,8 @@ QEMU2_COMMON_SOURCES := \
     hw/usb/host-stub.c \
     hw/usb/libhw.c \
     hw/virtio/virtio-bus.c \
+    hw/virtio/virtio-goldfish-pipe.c \
+    hw/virtio/virtio-goldfish-pipe-pci.c \
     hw/virtio/virtio-mmio.c \
     hw/virtio/virtio-pci.c \
     hw/virtio/virtio-rng.c \
