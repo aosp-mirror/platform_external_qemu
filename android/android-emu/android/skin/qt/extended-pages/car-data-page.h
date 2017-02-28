@@ -11,17 +11,23 @@
 #pragma once
 
 #include "ui_car-data-page.h"
+
+#include "android/emulation/proto/VehicleHalProto.pb.h"
 #include <QWidget>
 #include <memory>
+
+using emulator::EmulatorMessage;
 
 struct QCarDataAgent;
 class CarDataPage : public QWidget {
     Q_OBJECT
 public:
     explicit CarDataPage(QWidget* parent = nullptr);
-    void setCarDataAgent(const QCarDataAgent* agent);
     static void carDataCallback(const char* msg, int length, void* context);
+    void setCarDataAgent(const QCarDataAgent* agent);
     void onReceiveData(const char* msg, int length);
+    void sendCarEmulatorMessageLogged(EmulatorMessage msg, string log);
+
 signals:
     void requestUpdateData(QString msg);
 
