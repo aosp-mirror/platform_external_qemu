@@ -68,6 +68,25 @@ sofree(struct socket *so)
 {
   Slirp *slirp = so->slirp;
   struct mbuf *ifm;
+<<<<<<< HEAD   (4dcc3e Merge "[snapshot] Support GL_DEPTH_STENCIL texture format" i)
+=======
+
+  for (ifm = (struct mbuf *) slirp->if_fastq.qh_link;
+       (struct quehead *) ifm != &slirp->if_fastq;
+       ifm = ifm->ifq_next) {
+    if (ifm->ifq_so == so) {
+      ifm->ifq_so = NULL;
+    }
+  }
+
+  for (ifm = (struct mbuf *) slirp->if_batchq.qh_link;
+       (struct quehead *) ifm != &slirp->if_batchq;
+       ifm = ifm->ifq_next) {
+    if (ifm->ifq_so == so) {
+      ifm->ifq_so = NULL;
+    }
+  }
+>>>>>>> BRANCH (0737f3 Update version for v2.8.0 release)
 
   for (ifm = (struct mbuf *) slirp->if_fastq.qh_link;
        (struct quehead *) ifm != &slirp->if_fastq;
