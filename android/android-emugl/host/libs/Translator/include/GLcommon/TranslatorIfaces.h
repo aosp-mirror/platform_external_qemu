@@ -46,6 +46,8 @@ struct EglImage
     unsigned int height;
     unsigned int internalFormat;
     unsigned int border;
+    unsigned int format;
+    unsigned int type;
 };
 
 typedef emugl::SmartPtr<EglImage> ImagePtr;

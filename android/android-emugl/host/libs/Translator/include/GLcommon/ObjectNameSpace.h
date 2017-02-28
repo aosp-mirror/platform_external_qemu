@@ -18,6 +18,7 @@
 
 #include "emugl/common/mutex.h"
 #include "GLcommon/NamedObject.h"
+#include "GLcommon/TextureGlobal.h"
 
 #include <GLES/gl.h>
 #include <unordered_map>
@@ -97,6 +98,9 @@ private:
     GlobalNameSpace *m_globalNameSpace = nullptr;
 };
 
+class EglImage;
+class TextureData;
+
 // Class GlobalNameSpace - this class maintain all global GL object names.
 //                         It is contained in the EglDisplay. One emulator has
 //                         only one GlobalNameSpace.
@@ -104,6 +108,18 @@ class GlobalNameSpace
 {
 public:
     friend class NamedObject;
+
+    // The following are used for snapshot
+    void addTex(const EglImage* eglImage);
+    void addTex(const TextureData* texture);
+    void onSave(android::base::Stream* stream, GLDispatch* dispatcher) const;
+    void postSave(android::base::Stream* stream);
+    void onLoad(android::base::Stream* stream, GLDispatch* dispatcher);
+    NamedObjectPtr getGlobalObjectFromLoad(unsigned int oldGlobalName);
+    void postLoad(android::base::Stream* stream);
 private:
     emugl::Mutex m_lock;
+    // m_textureMap is only used when saving / loading a snapshot
+    // It is empty in all other situations
+    std::unordered_map<unsigned int, TextureGlobal> m_textureMap;
 };

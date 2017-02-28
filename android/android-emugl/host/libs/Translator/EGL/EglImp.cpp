@@ -1205,6 +1205,8 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
             img->border = texData->border;
             img->internalFormat = texData->internalFormat;
             img->globalTexObj = globalTexObject;
+            img->format = texData->format;
+            img->type = texData->type;
             return dpy->addImageKHR(img);
         }
     }
