@@ -16,7 +16,10 @@
 
 #include "GLcommon/ObjectNameSpace.h"
 
+#include "android/base/containers/Lookup.h"
+#include "android/base/files/StreamSerializing.h"
 #include "GLcommon/GLEScontext.h"
+#include "GLcommon/TranslatorIfaces.h"
 
 #include <assert.h>
 
@@ -103,6 +106,19 @@ NameSpace::isObject(ObjectLocalName p_localName)
 }
 
 void
+NameSpace::setGlobalObject(ObjectLocalName p_localName,
+                               NamedObjectPtr p_namedObject) {
+    NamesMap::iterator n(m_localToGlobalMap.find(p_localName));
+    if (n != m_localToGlobalMap.end()) {
+        m_globalToLocalMap.erase(n->second->getGlobalName());
+        (*n).second = p_namedObject;
+    } else {
+        m_localToGlobalMap.emplace(p_localName, p_namedObject);
+    }
+    m_globalToLocalMap.emplace(p_namedObject->getGlobalName(), p_localName);
+}
+
+void
 NameSpace::replaceGlobalObject(ObjectLocalName p_localName,
                                NamedObjectPtr p_namedObject)
 {
@@ -113,3 +129,56 @@ NameSpace::replaceGlobalObject(ObjectLocalName p_localName,
         m_globalToLocalMap.emplace(p_namedObject->getGlobalName(), p_localName);
     }
 }
+
+void GlobalNameSpace::preSaveAddEglImage(const EglImage* eglImage) {
+    unsigned int globalName = eglImage->globalTexObj->getGlobalName();
+    emugl::Mutex::AutoLock lock(m_lock);
+    m_textureMap.emplace(globalName,
+            SaveableTexturePtr(new SaveableTexture(*eglImage)));
+}
+
+void GlobalNameSpace::preSaveAddTex(const TextureData* texture) {
+    emugl::Mutex::AutoLock lock(m_lock);
+    m_textureMap.emplace(texture->globalName,
+            SaveableTexturePtr(new SaveableTexture(*texture)));
+}
+
+void GlobalNameSpace::onSave(android::base::Stream* stream,
+        std::function<void(SaveableTexture*, android::base::Stream*)> saver) {
+    saveCollection(stream, m_textureMap,
+            [saver](android::base::Stream* stream,
+                const std::pair<const unsigned int, SaveableTexturePtr>& tex) {
+                stream->putBe32(tex.first);
+                saver(tex.second.get(), stream);
+            });
+    m_textureMap.clear();
+}
+
+void GlobalNameSpace::onLoad(android::base::Stream* stream,
+        std::function<SaveableTexture*(android::base::Stream*,
+            GlobalNameSpace*)> loader) {
+    assert(m_textureMap.size() == 0);
+    loadCollection(stream, &m_textureMap, [loader, this](
+            android::base::Stream* stream) {
+        unsigned int globalName = stream->getBe32();
+        SaveableTexture* saveableTexture = loader(stream, this);
+        return std::make_pair(globalName, SaveableTexturePtr(saveableTexture));
+    });
+}
+
+void GlobalNameSpace::postLoad(android::base::Stream* stream) {
+    m_textureMap.clear();
+}
+
+NamedObjectPtr GlobalNameSpace::getGlobalObjectFromLoad(
+        unsigned int oldGlobalName) {
+    assert(m_textureMap.count(oldGlobalName));
+    return m_textureMap[oldGlobalName]->getGlobalObject();
+}
+
+EglImage* GlobalNameSpace::makeEglImageFromLoad(
+        unsigned int oldGlobalName) {
+    assert(m_textureMap.count(oldGlobalName));
+    return m_textureMap[oldGlobalName]->makeEglImage();
+}
+

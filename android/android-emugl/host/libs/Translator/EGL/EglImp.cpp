@@ -110,15 +110,18 @@ static const int s_eglExtensionsSize =
 /****************************************************************************************************************************************/
 //macros for accessing global egl info & tls objects
 
-// TODO: write some comments
-
 extern "C" {
 EGLAPI EGLBoolean EGLAPIENTRY eglSaveConfig(EGLDisplay display, EGLConfig config, EGLStream stream);
 EGLAPI EGLConfig EGLAPIENTRY eglLoadConfig(EGLDisplay display, EGLStream stream);
 
+EGLAPI EGLBoolean EGLAPIENTRY eglPreSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream);
 EGLAPI EGLBoolean EGLAPIENTRY eglSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream);
 EGLAPI EGLBoolean EGLAPIENTRY eglPostSaveContext(EGLDisplay display, EGLContext context, EGLStream stream);
 EGLAPI EGLContext EGLAPIENTRY eglLoadContext(EGLDisplay display, const EGLint *attrib_list, EGLStream stream);
+
+EGLAPI EGLBoolean EGLAPIENTRY eglSaveAllImages(EGLDisplay display, EGLStream stream);
+EGLAPI EGLBoolean EGLAPIENTRY eglLoadAllImages(EGLDisplay display, EGLStream stream);
+EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream stream);
 }
 
 #define CURRENT_THREAD() do {} while (0);
@@ -1205,6 +1208,8 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
             img->border = texData->border;
             img->internalFormat = texData->internalFormat;
             img->globalTexObj = globalTexObject;
+            img->format = texData->format;
+            img->type = texData->type;
             return dpy->addImageKHR(img);
         }
     }
@@ -1260,6 +1265,16 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync)
 
 /*********************************************************************************/
 
+EGLAPI EGLBoolean EGLAPIENTRY eglPreSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream) {
+    const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+    assert(iface->saveTexture);
+    if (!iface || !iface->saveTexture) return EGL_TRUE;
+    VALIDATE_DISPLAY(display);
+    VALIDATE_CONTEXT(contex);
+    ctx->getShareGroup()->preSave(dpy->getGlobalNameSpace());
+    return EGL_TRUE;
+}
+
 EGLAPI EGLBoolean EGLAPIENTRY eglSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream) {
     VALIDATE_DISPLAY(display);
     VALIDATE_CONTEXT(contex);
@@ -1271,19 +1286,19 @@ EGLAPI EGLContext EGLAPIENTRY eglLoadContext(EGLDisplay display, const EGLint *a
     return eglCreateOrLoadContext(display, (EGLConfig)0, EGL_NO_CONTEXT, attrib_list, (android::base::Stream*)stream);
 }
 
+EGLAPI EGLBoolean EGLAPIENTRY eglPostSaveContext(EGLDisplay display, EGLContext context, EGLStream stream) {
+    VALIDATE_DISPLAY(display);
+    VALIDATE_CONTEXT(context);
+    ctx->postSave((android::base::Stream*)stream);
+    return EGL_TRUE;
+}
+
 EGLAPI EGLBoolean EGLAPIENTRY eglSaveConfig(EGLDisplay display,
         EGLConfig config, EGLStream stream) {
     VALIDATE_DISPLAY(display);
     VALIDATE_CONFIG(config);
     android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
     stm->putBe32(cfg->id());
-    return true;
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY eglPostSaveContext(EGLDisplay display, EGLContext context, EGLStream stream) {
-    VALIDATE_DISPLAY(display);
-    VALIDATE_CONTEXT(context);
-    ctx->postSave((android::base::Stream*)stream);
     return EGL_TRUE;
 }
 
@@ -1292,4 +1307,31 @@ EGLAPI EGLConfig EGLAPIENTRY eglLoadConfig(EGLDisplay display, EGLStream stream)
     android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
     EGLint cfgId = stm->getBe32();
     return static_cast<EGLConfig>(dpy->getConfig(cfgId));
+}
+
+EGLAPI EGLBoolean EGLAPIENTRY eglSaveAllImages(EGLDisplay display, EGLStream stream) {
+    const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+    assert(iface->saveTexture);
+    if (!iface || !iface->saveTexture) return true;
+    VALIDATE_DISPLAY(display);
+    android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
+    dpy->onSaveAllImages(stm, iface->saveTexture);
+    return EGL_TRUE;
+}
+
+EGLAPI EGLBoolean EGLAPIENTRY eglLoadAllImages(EGLDisplay display, EGLStream stream) {
+    const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+    assert(iface->loadTexture);
+    if (!iface || !iface->loadTexture) return true;
+    VALIDATE_DISPLAY(display);
+    android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
+    dpy->onLoadAllImages(stm, iface->loadTexture);
+    return EGL_TRUE;
+}
+
+EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream stream) {
+    VALIDATE_DISPLAY(display);
+    android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
+    dpy->postLoadAllImages(stm);
+    return true;
 }

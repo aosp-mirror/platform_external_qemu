@@ -9,7 +9,8 @@ host_common_SRC_FILES :=     \
      GLESbuffer.cpp          \
      NamedObject.cpp         \
      RangeManip.cpp          \
-     TextureData.cpp        \
+     SaveableTexture.cpp     \
+     TextureData.cpp         \
      TextureUtils.cpp        \
      PaletteTexture.cpp      \
      etc.cpp                 \

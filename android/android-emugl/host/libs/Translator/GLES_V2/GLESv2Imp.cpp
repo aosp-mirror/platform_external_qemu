@@ -27,14 +27,15 @@
 #include <GLES3/gl31.h>
 
 #include <OpenglCodecCommon/ErrorLog.h>
-#include <GLcommon/TextureData.h>
-#include <GLcommon/TranslatorIfaces.h>
+#include "GLcommon/SaveableTexture.h"
+#include "GLcommon/TextureData.h"
+#include "GLcommon/TranslatorIfaces.h"
 #include "GLESv2Context.h"
 #include "GLESv2Validate.h"
 #include "ShaderParser.h"
 #include "ProgramData.h"
-#include <GLcommon/TextureUtils.h>
-#include <GLcommon/FramebufferData.h>
+#include "GLcommon/TextureUtils.h"
+#include "GLcommon/FramebufferData.h"
 
 #include "ANGLEShaderParser.h"
 
@@ -53,6 +54,8 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(void);
 static GLEScontext* createGLESxContext(int maj, int min, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
+static void saveTexture(SaveableTexture* texture, android::base::Stream* stream);
+static SaveableTexture* loadTexture(android::base::Stream* stream, GlobalNameSpace* globalNameSpace);
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -74,6 +77,8 @@ static GLESiface  s_glesIface = {
     .fenceSync         = (FUNCPTR_FENCE_SYNC)glFenceSync,
     .clientWaitSync    = (FUNCPTR_CLIENT_WAIT_SYNC)glClientWaitSync,
     .deleteSync        = (FUNCPTR_DELETE_SYNC)glDeleteSync,
+    .saveTexture       = saveTexture,
+    .loadTexture       = loadTexture,
 };
 
 #include <GLcommon/GLESmacros.h>
@@ -137,6 +142,15 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
     ctx->releaseGlobalLock();
 
     return ret;
+}
+
+static void saveTexture(SaveableTexture* texture, android::base::Stream* stream) {
+    texture->onSave(stream);
+}
+
+static SaveableTexture* loadTexture(android::base::Stream* stream,
+        GlobalNameSpace* globalNameSpace) {
+    return new SaveableTexture(stream, globalNameSpace);
 }
 
 GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
@@ -3119,6 +3133,8 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             texData->height = img->height;
             texData->border = img->border;
             texData->internalFormat = img->internalFormat;
+            texData->format = img->format;
+            texData->type = img->type;
             texData->sourceEGLImage = imagehndl;
             texData->globalName = img->globalTexObj->getGlobalName();
             // TODO: set up texData->type
