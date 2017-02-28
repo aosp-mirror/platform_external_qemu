@@ -11,22 +11,26 @@
 #pragma once
 
 #include "ui_car-data-page.h"
+
 #include <QWidget>
 #include <memory>
+#undef ERROR_INVALID_OPERATION  // ERROR_INVALID_OPERATION appear in both
+                                // VehicleHalProto.pb.h and winerror.h
+#include "android/emulation/proto/VehicleHalProto.pb.h"
 
 struct QCarDataAgent;
 class CarDataPage : public QWidget {
     Q_OBJECT
 public:
     explicit CarDataPage(QWidget* parent = nullptr);
-    void setCarDataAgent(const QCarDataAgent* agent);
     static void carDataCallback(const char* msg, int length, void* context);
+    void setCarDataAgent(const QCarDataAgent* agent);
     void onReceiveData(const char* msg, int length);
+    void sendCarEmulatorMessageLogged(const emulator::EmulatorMessage& msg,
+                                      const std::string& log);
+
 signals:
     void requestUpdateData(QString msg);
-
-private slots:
-    void on_car_sendDataButton_clicked();
 
 private:
     std::unique_ptr<Ui::CarDataPage> mUi;
