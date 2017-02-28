@@ -25,6 +25,7 @@
 #include "hw/virtio/virtio-bus.h"
 #include "hw/virtio/virtio-input.h"
 #include "hw/virtio/virtio-gpu.h"
+#include "hw/virtio/virtio-goldfish-pipe.h"
 #ifdef CONFIG_VIRTFS
 #include "hw/9pfs/virtio-9p.h"
 #endif
@@ -44,6 +45,7 @@ typedef struct VirtIOInputPCI VirtIOInputPCI;
 typedef struct VirtIOInputHIDPCI VirtIOInputHIDPCI;
 typedef struct VirtIOInputHostPCI VirtIOInputHostPCI;
 typedef struct VirtIOGPUPCI VirtIOGPUPCI;
+typedef struct VirtIOGoldfishPipePCI VirtIOGoldfishPipePCI;
 
 /* virtio-pci-bus */
 
@@ -322,6 +324,18 @@ struct VirtIOInputHostPCI {
 struct VirtIOGPUPCI {
     VirtIOPCIProxy parent_obj;
     VirtIOGPU vdev;
+};
+
+/*
+ * virtio-goldfish-pipe-pci: This extends VirtioPCIProxy.
+ */
+#define TYPE_VIRTIO_GOLDFISH_PIPE_PCI "virtio-goldfish-pipe-pci"
+#define VIRTIO_GOLDFISH_PIPE_PCI(obj) \
+        OBJECT_CHECK(VirtIOGoldfishPipePCI, (obj), TYPE_VIRTIO_GOLDFISH_PIPE_PCI)
+
+struct VirtIOGoldfishPipePCI {
+    VirtIOPCIProxy parent_obj;
+    VirtIOGoldfishPipe vdev;
 };
 
 /* Virtio ABI version, if we increment this, we break the guest driver. */
