@@ -432,6 +432,10 @@ void ColorBuffer::onSave(android::base::Stream* stream) {
     stream->putBe32(static_cast<uint32_t>(m_height));
     stream->putBe32(static_cast<uint32_t>(m_internalFormat));
     stream->putBe32(static_cast<uint32_t>(m_frameworkFormat));
+    // for debug
+    assert(m_eglImage && m_blitEGLImage);
+    stream->putBe32(reinterpret_cast<uintptr_t>(m_eglImage));
+    stream->putBe32(reinterpret_cast<uintptr_t>(m_blitEGLImage));
 }
 
 ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
@@ -444,6 +448,51 @@ ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
     GLenum internalFormat = static_cast<GLenum>(stream->getBe32());
     FrameworkFormat frameworkFormat =
             static_cast<FrameworkFormat>(stream->getBe32());
-    return create(p_display, width, height, internalFormat, frameworkFormat,
-                  has_eglimage_texture_2d, hndl, helper);
+    EGLImageKHR eglImage = reinterpret_cast<EGLImageKHR>(stream->getBe32());
+    EGLImageKHR blitEGLImage = reinterpret_cast<EGLImageKHR>(stream->getBe32());
+
+    if (!eglImage) {
+        return create(p_display, width, height, internalFormat, frameworkFormat,
+                has_eglimage_texture_2d, hndl, helper);
+    }
+    assert(has_eglimage_texture_2d);
+    assert(eglImage && blitEGLImage);
+
+    ScopedHelperContext context(helper);
+    if (!context.isOk()) {
+        return NULL;
+    }
+
+    ColorBuffer* cb = new ColorBuffer(p_display, hndl, helper);
+    cb->m_eglImage = eglImage;
+    cb->m_blitEGLImage = blitEGLImage;
+
+    s_gles2.glGenTextures(1, &cb->m_tex);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
+    s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, eglImage);
+
+    s_gles2.glGenTextures(1, &cb->m_blitTex);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_blitTex);
+    s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, blitEGLImage);
+
+    cb->m_width = width;
+    cb->m_height = height;
+    cb->m_internalFormat = internalFormat;
+
+    cb->m_resizer = new TextureResize(width, height);
+    cb->m_frameworkFormat = frameworkFormat;
+    switch (cb->m_frameworkFormat) {
+        case FRAMEWORK_FORMAT_GL_COMPATIBLE:
+            break;
+        case FRAMEWORK_FORMAT_YV12:
+        case FRAMEWORK_FORMAT_YUV_420_888:
+            cb->m_yuv_converter.reset(
+                    new YUVConverter(width, height, cb->m_frameworkFormat));
+            break;
+        default:
+            break;
+    }
+
+    s_gles2.glFinish();
+    return cb;
 }
