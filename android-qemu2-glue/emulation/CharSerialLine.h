@@ -13,7 +13,10 @@
 
 #include "android/base/Compiler.h"
 #include "android/emulation/SerialLine.h"
-#include "qemu/typedefs.h"
+extern "C" {
+  #include "qemu/osdep.h"
+  #include "sysemu/char.h"
+}
 
 // QEMU1-specific implementation of the generic SerialLine interface,
 // based on CharDriverState
@@ -32,11 +35,11 @@ public:
 
     virtual int write(const uint8_t* data, int len);
 
-    CharDriverState* state() const { return mCs; }
+    CharDriverState* state() const { return mBackend.chr; }
 
     CharDriverState* release() {
-        CharDriverState* cs = mCs;
-        mCs = nullptr;
+        CharDriverState* cs = mBackend.chr;
+        mBackend.chr = nullptr;
         return cs;
     }
 
@@ -44,7 +47,7 @@ private:
     DISALLOW_COPY_AND_ASSIGN(CharSerialLine);
 
 private:
-    CharDriverState* mCs;
+    CharBackend mBackend = { 0 };
 };
 
 }  // namespace qemu2

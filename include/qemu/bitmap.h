@@ -12,9 +12,7 @@
 #ifndef BITMAP_H
 #define BITMAP_H
 
-
 #include "qemu/bitops.h"
-
 /*
  * The available bitmap operations and their rough meaning in the
  * case that the bitmap is a single unsigned long are thus:
@@ -57,17 +55,14 @@
  * find_next_bit(addr, nbits, bit)	Position next set bit in *addr >= bit
  */
 
-#define BITMAP_LAST_WORD_MASK(nbits)                                    \
-    (                                                                   \
-        ((nbits) % BITS_PER_LONG) ?                                     \
-        (1UL<<((nbits) % BITS_PER_LONG))-1 : ~0UL                       \
-        )
+#define BITMAP_FIRST_WORD_MASK(start) (~0UL << ((start) & (BITS_PER_LONG - 1)))
+#define BITMAP_LAST_WORD_MASK(nbits) (~0UL >> (-(nbits) & (BITS_PER_LONG - 1)))
 
 #define DECLARE_BITMAP(name,bits)                  \
         unsigned long name[BITS_TO_LONGS(bits)]
 
 #define small_nbits(nbits)                      \
-        ((nbits) <= BITS_PER_LONG)
+        ((unsigned long) (nbits) <= BITS_PER_LONG)
 
 int slow_bitmap_empty(const unsigned long *bitmap, long bits);
 int slow_bitmap_full(const unsigned long *bitmap, long bits);
@@ -75,10 +70,6 @@ int slow_bitmap_equal(const unsigned long *bitmap1,
                       const unsigned long *bitmap2, long bits);
 void slow_bitmap_complement(unsigned long *dst, const unsigned long *src,
                             long bits);
-void slow_bitmap_shift_right(unsigned long *dst,
-                             const unsigned long *src, int shift, long bits);
-void slow_bitmap_shift_left(unsigned long *dst,
-                            const unsigned long *src, int shift, long bits);
 int slow_bitmap_and(unsigned long *dst, const unsigned long *bitmap1,
                     const unsigned long *bitmap2, long bits);
 void slow_bitmap_or(unsigned long *dst, const unsigned long *bitmap1,
@@ -93,7 +84,7 @@ int slow_bitmap_intersects(const unsigned long *bitmap1,
 static inline unsigned long *bitmap_try_new(long nbits)
 {
     long len = BITS_TO_LONGS(nbits) * sizeof(unsigned long);
-    return g_try_malloc0(len);
+    return (unsigned long*) g_try_malloc0(len);
 }
 
 static inline unsigned long *bitmap_new(long nbits)
@@ -237,9 +228,9 @@ static inline unsigned long *bitmap_zero_extend(unsigned long *old,
                                                 long old_nbits, long new_nbits)
 {
     long new_len = BITS_TO_LONGS(new_nbits) * sizeof(unsigned long);
-    unsigned long *new = g_realloc(old, new_len);
-    bitmap_clear(new, old_nbits, new_nbits - old_nbits);
-    return new;
+    unsigned long *nw = (unsigned long*) g_realloc(old, new_len);
+    bitmap_clear(nw, old_nbits, new_nbits - old_nbits);
+    return nw;
 }
 
 #endif /* BITMAP_H */

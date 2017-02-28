@@ -90,6 +90,9 @@ LOCAL_SRC_FILES += stubs/gdbstub.c
 endif
 
 LOCAL_SRC_FILES += \
+    stubs/arch-query-cpu-model-baseline.c \
+    stubs/arch-query-cpu-model-comparison.c \
+    stubs/arch-query-cpu-model-expansion.c \
     stubs/target-get-monitor-def.c \
     $(call qemu2-if-target,arm arm64 mips mips64,\
         stubs/qmp_pc_dimm_device_list.c \
