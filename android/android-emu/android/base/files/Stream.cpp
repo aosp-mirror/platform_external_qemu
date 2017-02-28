@@ -119,10 +119,29 @@ void Stream::putString(const char* str, size_t len) {
 std::string Stream::getString() {
     std::string result;
     size_t len = this->getBe32();
-    result.resize(len);
-    if (this->read(&result[0], len) != static_cast<ssize_t>(len)) {
-        result.resize(0);
+    if (len > 0) {
+        result.resize(len);
+        if (this->read(&result[0], len) != static_cast<ssize_t>(len)) {
+            result.clear();
+        }
     }
+#ifdef _WIN32
+    else {
+        // std::string in GCC's STL still uses copy on write implementation
+        // with a single shared buffer for an empty string. Its dtor has
+        // a check for that shared buffer, and it deallocates memory only if
+        // the current string's instance address != shared empty string address
+        // Unfortunately, in Windows DLLs each DLL has its own copy of this
+        // empty string (that's just the way Windows DLLs work), so if this
+        // code creates an empty string and passes it over into another module,
+        // that module's std::string::~string() will compare address with its
+        // empty string object, find that they are different and will try to
+        // free() a static object.
+        // To mitigate it we make sure the string allocates something, so it
+        // isn't empty internally and dtor is OK to delete the storage.
+        result.reserve(1);
+    }
+#endif
     return result;
 }
 
