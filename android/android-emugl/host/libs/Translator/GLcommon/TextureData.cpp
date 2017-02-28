@@ -88,7 +88,11 @@ static uint32_t s_texImageSize(GLenum internalformat,
     return totalSize;
 }
 
+#define _MAG_BEG 201
+#define _MAG_END 202
+
 TextureData::TextureData(android::base::Stream* stream) : ObjectData(stream) {
+    assert(_MAG_BEG == stream->getBe32());
     // The current TextureData structure is wrong when dealing with mipmaps.
     target = stream->getBe32();
     width = stream->getBe32();
@@ -98,9 +102,9 @@ TextureData::TextureData(android::base::Stream* stream) : ObjectData(stream) {
     internalFormat = stream->getBe32();
     format = stream->getBe32();
     type = stream->getBe32();
-    if (target == GL_TEXTURE_2D) { // we only support GL_TEXTURE_2D for now
-        loadBuffer(stream, &loadedData);
-    }
+    //if (target == GL_TEXTURE_2D) { // we only support GL_TEXTURE_2D for now
+    //    loadBuffer(stream, &loadedData);
+    //}
     sourceEGLImage = stream->getBe32();
     hasStorage = stream->getByte();
     wasBound = stream->getByte();
@@ -108,16 +112,19 @@ TextureData::TextureData(android::base::Stream* stream) : ObjectData(stream) {
     compressed = stream->getByte();
     compressedFormat = stream->getBe32();
     stream->read(crop_rect, sizeof(crop_rect));
+    globalName = stream->getBe32();
     loadCollection(stream, &m_texParam,
             [](android::base::Stream* stream) {
                 GLenum item = stream->getBe32();
                 GLint val = stream->getBe32();
                 return std::make_pair(item, val);
     });
+    assert(_MAG_END == stream->getBe32());
 }
 
 void TextureData::onSave(android::base::Stream* stream) const {
     ObjectData::onSave(stream);
+    stream->putBe32(_MAG_BEG);
     // The current TextureData structure is wrong when dealing with mipmaps.
     stream->putBe32(target);
     stream->putBe32(width);
@@ -129,6 +136,10 @@ void TextureData::onSave(android::base::Stream* stream) const {
     stream->putBe32(type);
     // consider getting data with glGetTexImage
     if (target == GL_TEXTURE_2D) {
+        printf("texdata %u, size %u\n", globalName, s_texImageSize(format, type, 1,
+                width, height));
+    }
+    /*if (target == GL_TEXTURE_2D) {
         GLDispatch& dispatcher = GLEScontext::dispatcher();
         GLint prevPack = 4;
         GLint prevTex = 0;
@@ -141,7 +152,7 @@ void TextureData::onSave(android::base::Stream* stream) const {
         dispatcher.glPixelStorei(GL_PACK_ALIGNMENT, prevPack);
         dispatcher.glBindTexture(GL_TEXTURE_2D, prevTex);
         saveBuffer(stream, tmpData);
-    }
+    }*/
     stream->putBe32(sourceEGLImage);
     if (sourceEGLImage) {
         fprintf(stderr, "TextureData::onSave: warning: snapshotting EglImage,"
@@ -153,16 +164,18 @@ void TextureData::onSave(android::base::Stream* stream) const {
     stream->putByte(compressed);
     stream->putBe32(compressedFormat);
     stream->write(crop_rect, sizeof(crop_rect));
+    stream->putBe32(globalName);
     saveCollection(stream, m_texParam, [](android::base::Stream* stream,
                 const std::pair<const GLenum, GLint>& texParam) {
                     stream->putBe32(texParam.first);
                     stream->putBe32(texParam.second);
     });
+    stream->putBe32(_MAG_END);
 }
 
 void TextureData::restore(ObjectLocalName localName,
             getGlobalName_t getGlobalName) {
-    if (!target) return; // The texture never got bound
+    /*if (!target) return; // The texture never got bound
     if (target != GL_TEXTURE_2D) {
         fprintf(stderr,
                 "warning: Non 2D texture target not supported for snapshot\n");
@@ -176,9 +189,9 @@ void TextureData::restore(ObjectLocalName localName,
     GLint prevUnpack = 4;
     dispatcher.glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevUnpack);
     dispatcher.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    const void* pixels = loadedData.empty() ? nullptr : loadedData.data();
-    dispatcher.glTexImage2D(target, 0, internalFormat, width,
-            height, border, format, type, pixels);
+    //const void* pixels = loadedData.empty() ? nullptr : loadedData.data();
+    //dispatcher.glTexImage2D(target, 0, internalFormat, width,
+    //        height, border, format, type, pixels);
     if (sourceEGLImage) {
         fprintf(stderr, "warning: this texture holds an Egl image handle,"
                 " Egl image is not supported for snapshot\n");
@@ -187,7 +200,7 @@ void TextureData::restore(ObjectLocalName localName,
     for (const auto& texParam : m_texParam) {
         dispatcher.glTexParameteri(target, texParam.first, texParam.second);
     }
-    dispatcher.glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpack);
+    dispatcher.glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpack);*/
 }
 
 void TextureData::setTexParam(GLenum pname, GLint param) {

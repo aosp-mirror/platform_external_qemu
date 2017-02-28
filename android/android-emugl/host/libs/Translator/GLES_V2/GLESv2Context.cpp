@@ -78,6 +78,8 @@ void GLESv2Context::init(GlLibrary* glLib) {
             // Many dEQP cube map tests fail without this enable.
             dispatcher().glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         }
+        printf("%d dispatch %p->%p\n", m_glesMajorVersion, &dispatcher(), dispatcher().glActiveTexture);
+        assert(dispatcher().glActiveTexture);
     }
     m_initialized = true;
 }
