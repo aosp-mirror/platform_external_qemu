@@ -208,9 +208,18 @@ int FramebufferData::attachmentPointIndex(GLenum attachment)
         return 1;
     case GL_STENCIL_ATTACHMENT_OES:
         return 2;
+    case GL_DEPTH_STENCIL_ATTACHMENT:
+        return 3;
     default:
-        // for colorbuffer 1 ~ 15, they are continuous
-        return attachment - GL_COLOR_ATTACHMENT1 + 3;
+        {
+            // for colorbuffer 1 ~ 15, they are continuous
+            int idx = attachment - GL_COLOR_ATTACHMENT1 + 4;
+            // in case for some new attachment extensions
+            if (idx < 4 || idx > MAX_ATTACH_POINTS) {
+                idx = MAX_ATTACH_POINTS;
+            }
+            return idx;
+        }
     }
 }
 
@@ -222,8 +231,10 @@ static GLenum s_index2Attachment(int idx) {
         return GL_DEPTH_ATTACHMENT_OES;
     case 2:
         return GL_STENCIL_ATTACHMENT_OES;
+    case 3:
+        return GL_DEPTH_STENCIL_ATTACHMENT;
     default:
-        return idx - 3 + GL_COLOR_ATTACHMENT1;
+        return idx - 4 + GL_COLOR_ATTACHMENT1;
     }
 }
 
