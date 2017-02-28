@@ -66,6 +66,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/extended-pages/settings-page.cpp \
     android/skin/qt/extended-pages/telephony-page.cpp \
     android/skin/qt/extended-pages/virtual-sensors-page.cpp \
+    android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp \
     android/skin/qt/extended-window.cpp \
     android/skin/qt/size-tweaker.cpp \
     android/skin/qt/QtLooper.cpp \
@@ -103,6 +104,7 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/extended-pages/settings-page.h \
     android/skin/qt/extended-pages/telephony-page.h \
     android/skin/qt/extended-pages/virtual-sensors-page.h \
+    android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h \
     android/skin/qt/extended-window.h \
     android/skin/qt/raised-material-button.h \
     android/skin/qt/size-tweaker.h \
@@ -133,5 +135,6 @@ ANDROID_SKIN_QT_UI_SRC_FILES := \
     android/skin/qt/extended-pages/settings-page.ui \
     android/skin/qt/extended-pages/telephony-page.ui \
     android/skin/qt/extended-pages/virtual-sensors-page.ui \
+    android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.ui \
     android/skin/qt/tools.ui \
 
