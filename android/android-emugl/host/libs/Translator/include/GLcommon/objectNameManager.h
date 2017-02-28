@@ -145,6 +145,7 @@ public:
     ObjectData* getObjectData(NamedObjectType p_type, ObjectLocalName p_localName);
     ObjectDataPtr getObjectDataPtr(NamedObjectType p_type, ObjectLocalName p_localName);
     uint64_t getId() const {return m_sharedGroupID;}
+    void preSave(GlobalNameSpace *globalNameSpace);
     void onSave(android::base::Stream* stream);
     void postSave(android::base::Stream* stream);
     // postLoadRestore() restores resources on hardware GPU
@@ -162,6 +163,11 @@ private:
     void unlockObjectData();
     void setObjectDataLocked(NamedObjectType p_type,
             ObjectLocalName p_localName, ObjectDataPtr&& data);
+    //
+    // sets an object to map to an existing global object.
+    //
+    void setGlobalObject(NamedObjectType p_type, ObjectLocalName p_localName,
+            NamedObjectPtr p_namedObject);
 
     // A RAII autolock class for the objectData spinlock.
     struct ObjectDataAutoLock;
@@ -183,7 +189,7 @@ private:
     // The ID of this shared group
     // It is unique within its ObjectNameManager
     uint64_t m_sharedGroupID;
-    bool m_isSaved = false;
+    enum {PreSaved, Saved, Empty} m_saveStage = Empty;
     bool m_needLoadRestore = false;
 };
 
@@ -245,6 +251,7 @@ public:
     //                       new context needs to share with.
     //
     void *getGlobalContext();
+    void preSave();
 private:
     // TODO: refactor share group map so that it is indexed by share group ID
     ShareGroupsMap m_groups;
