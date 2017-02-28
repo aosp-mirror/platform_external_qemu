@@ -15,6 +15,8 @@
 */
 #include "EglDisplay.h"
 
+#include "android/base/containers/Lookup.h"
+#include "android/base/files/StreamSerializing.h"
 #include "EglConfig.h"
 #include "EglOsApi.h"
 #include <GLcommon/GLutils.h>
@@ -477,7 +479,10 @@ EGLContext EglDisplay::addContext(ContextPtr ctx ) {
 
 EGLImageKHR EglDisplay::addImageKHR(ImagePtr img) {
     emugl::Mutex::AutoLock mutex(m_lock);
-    do { ++m_nextEglImageId; } while(m_nextEglImageId == 0);
+    do {
+        ++m_nextEglImageId;
+    } while(m_nextEglImageId == 0
+            || android::base::contains(m_eglImages, m_nextEglImageId));
     img->imageId = m_nextEglImageId;
     m_eglImages[m_nextEglImageId] = img;
     return reinterpret_cast<EGLImageKHR>(m_nextEglImageId);
@@ -572,4 +577,43 @@ void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
             info->frmt);
 
     display->m_configs.emplace_back(config);
+}
+
+void EglDisplay::onSaveAllImages(android::base::Stream* stream,
+        SaveableTexture::saver_t saver) {
+    // we could consider calling presave for all ShareGroups from here
+    // but it would introduce overheads because not all share groups need to be
+    // saved
+    emugl::Mutex::AutoLock mutex(m_lock);
+    for (const auto& image : m_eglImages) {
+        getGlobalNameSpace()->preSaveAddEglImage(image.second.get());
+    }
+    m_globalNameSpace.onSave(stream, saver);
+    saveCollection(stream, m_eglImages, [](
+            android::base::Stream* stream,
+            const ImagesHndlMap::value_type& img) {
+        stream->putBe32(img.first);
+        stream->putBe32(img.second->globalTexObj->getGlobalName());
+        // We do not need to save other fields in EglImage. We can load them
+        // from SaveableTexture.
+    });
+}
+
+void EglDisplay::onLoadAllImages(android::base::Stream* stream,
+        SaveableTexture::loader_t loader) {
+    assert(m_eglImages.empty());
+    emugl::Mutex::AutoLock mutex(m_lock);
+    m_globalNameSpace.onLoad(stream, loader);
+    loadCollection(stream, &m_eglImages, [this](
+        android::base::Stream* stream) {
+        unsigned int hndl = stream->getBe32();
+        unsigned int globalName = stream->getBe32();
+        ImagePtr eglImg(m_globalNameSpace.makeEglImageFromLoad(globalName));
+        eglImg->imageId = hndl;
+        return std::make_pair(hndl, std::move(eglImg));
+    });
+}
+
+void EglDisplay::postLoadAllImages(android::base::Stream* stream) {
+    m_globalNameSpace.postLoad(stream);
 }
