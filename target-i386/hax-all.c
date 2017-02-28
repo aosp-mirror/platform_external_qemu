@@ -914,7 +914,7 @@ void hax_cpu_synchronize_state(CPUState *cpu)
      * wherever a vCPU state sync between QEMU and HAX takes place. For now,
      * just perform the sync regardless of hax_vcpu_dirty.
      */
-    run_on_cpu(cpu, do_hax_cpu_synchronize_state, cpu);
+    run_on_cpu(cpu, do_hax_cpu_synchronize_state, RUN_ON_CPU_NULL);
 }
 
 static void do_hax_cpu_synchronize_post_reset(void *arg)
@@ -928,7 +928,7 @@ static void do_hax_cpu_synchronize_post_reset(void *arg)
 
 void hax_cpu_synchronize_post_reset(CPUState * cpu)
 {
-    run_on_cpu(cpu, do_hax_cpu_synchronize_post_reset, cpu);
+    run_on_cpu(cpu, do_hax_cpu_synchronize_post_reset, RUN_ON_CPU_NULL);
 }
 
 static void do_hax_cpu_synchronize_post_init(void *arg)
@@ -942,7 +942,7 @@ static void do_hax_cpu_synchronize_post_init(void *arg)
 
 void hax_cpu_synchronize_post_init(CPUState * cpu)
 {
-    run_on_cpu(cpu, do_hax_cpu_synchronize_post_init, cpu);
+    run_on_cpu(cpu, do_hax_cpu_synchronize_post_init, RUN_ON_CPU_NULL);
 }
 
 /*
