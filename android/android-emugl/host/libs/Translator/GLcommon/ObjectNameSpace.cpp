@@ -16,7 +16,10 @@
 
 #include "GLcommon/ObjectNameSpace.h"
 
+#include "android/base/containers/Lookup.h"
+#include "android/base/files/StreamSerializing.h"
 #include "GLcommon/GLEScontext.h"
+#include "GLcommon/TranslatorIfaces.h"
 
 #include <assert.h>
 
@@ -112,4 +115,47 @@ NameSpace::replaceGlobalObject(ObjectLocalName p_localName,
         (*n).second = p_namedObject;
         m_globalToLocalMap.emplace(p_namedObject->getGlobalName(), p_localName);
     }
+}
+
+void GlobalNameSpace::preSaveAddTex(const EglImage* eglImage) {
+    unsigned int globalName = eglImage->globalTexObj->getGlobalName();
+    emugl::Mutex::AutoLock lock(m_lock);
+    m_textureMap.emplace(globalName, *eglImage);
+}
+
+void GlobalNameSpace::preSaveAddTex(const TextureData* texture) {
+    emugl::Mutex::AutoLock lock(m_lock);
+    m_textureMap.emplace(texture->globalName, *texture);
+}
+
+void GlobalNameSpace::onSave(android::base::Stream* stream,
+        GLDispatch* dispatcher) {
+    saveCollection(stream, m_textureMap,
+            [dispatcher](android::base::Stream* stream,
+                const std::pair<const unsigned int, SaveableTexture>& tex) {
+                stream->putBe32(tex.first);
+                tex.second.onSave(stream, tex.first, dispatcher);
+            });
+    m_textureMap.clear();
+}
+
+void GlobalNameSpace::onLoad(android::base::Stream* stream,
+        GLDispatch* dispatcher) {
+    assert(m_textureMap.size() == 0);
+    loadCollection(stream, &m_textureMap, [dispatcher, this](
+            android::base::Stream* stream) {
+        unsigned int globalName = stream->getBe32();
+        SaveableTexture textureGlobal(stream, this, dispatcher);
+        return std::make_pair(globalName, std::move(textureGlobal));
+    });
+}
+
+NamedObjectPtr GlobalNameSpace::getGlobalObjectFromLoad(
+        unsigned int oldGlobalName) {
+    assert(m_textureMap.count(oldGlobalName));
+    return m_textureMap[oldGlobalName].getGlobalObject();
+}
+
+void GlobalNameSpace::postLoad(android::base::Stream* stream) {
+    m_textureMap.clear();
 }

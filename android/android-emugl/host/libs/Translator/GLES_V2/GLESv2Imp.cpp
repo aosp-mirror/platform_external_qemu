@@ -3119,6 +3119,8 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             texData->height = img->height;
             texData->border = img->border;
             texData->internalFormat = img->internalFormat;
+            texData->format = img->format;
+            texData->type = img->type;
             texData->sourceEGLImage = imagehndl;
             texData->globalName = img->globalTexObj->getGlobalName();
             // TODO: set up texData->type
