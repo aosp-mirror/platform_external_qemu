@@ -20,6 +20,8 @@
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/GLutils.h"
 
+#include <cassert>
+
 static uint32_t s_texAlign(uint32_t v, uint32_t align) {
 
     uint32_t rem = v % align;
@@ -39,6 +41,15 @@ static uint32_t s_texPixelSize(GLenum internalformat,
             reps = 1;
         else
             reps = 3;
+        break;
+    case GL_DEPTH_STENCIL:
+        if (type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV) {
+            reps = 8;
+        } else if (type == GL_UNSIGNED_INT_24_8) {
+            reps = 4;
+        } else {
+            assert(!"Invalid type for GL_DEPTH_STENCIL texture");
+        }
         break;
     case GL_RGBA:
         reps = 4;
