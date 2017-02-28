@@ -100,6 +100,23 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
                     ObjectLocalName localName = stream->getBe64();
                     ObjectDataPtr data = loadObject((NamedObjectType)objType,
                             localName, stream);
+                    if (objType == toIndex(NamedObjectType::TEXTURE)) {
+                        // Texture data are managed differently
+                        // They are loaded by GlobalNameSpace before loading
+                        // share groups
+                        TextureData* texData = (TextureData*)data.get();
+                        assert(texData->globalName != 0);
+                        NamedObjectPtr texObj = globalNameSpace->
+                                getGlobalObjectFromLoad(texData->globalName);
+                        texData->globalName = texObj->getGlobalName();
+                        assert(texData->globalName != 0);
+                        setGlobalObject(NamedObjectType::TEXTURE,
+                                localName, texObj);
+                        printf("local name %lld, global name %d\n",
+                                localName, (int)texData->globalName);
+                        assert(getGlobalName((NamedObjectType)objType, localName) ==
+                                (unsigned int)texData->globalName);
+                    }
                     setObjectDataLocked((NamedObjectType)objType, localName,
                             std::move(data));
                 }
@@ -124,11 +141,23 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
     }
 }
 
+void ShareGroup::preSave(GlobalNameSpace *globalNameSpace) {
+    ObjectDataAutoLock lock(this);
+    if (m_saveStage == PreSaved) return;
+    assert(m_saveStage == Empty);
+    m_saveStage = PreSaved;
+    ObjectDataMap *map = (ObjectDataMap *)m_objectsData;
+    for (const auto& obj : (*map)[(int)NamedObjectType::TEXTURE]) {
+        globalNameSpace->preSaveAddTex((const TextureData*)obj.second.get());
+    }
+}
+
 void ShareGroup::onSave(android::base::Stream* stream) {
     // we do not save m_nameSpace
     ObjectDataAutoLock lock(this);
-    if (m_isSaved) return;
-    m_isSaved = true;
+    if (m_saveStage == Saved) return;
+    assert(m_saveStage == PreSaved);
+    m_saveStage = Saved;
     ObjectDataMap *map = (ObjectDataMap *)m_objectsData;
     if (map) {
         stream->putByte(true);
@@ -147,7 +176,7 @@ void ShareGroup::onSave(android::base::Stream* stream) {
 
 void ShareGroup::postSave(android::base::Stream* stream) {
     (void)stream;
-    m_isSaved = false;
+    m_saveStage = Empty;
 }
 
 void ShareGroup::postLoadRestore() {
@@ -156,6 +185,8 @@ void ShareGroup::postLoadRestore() {
         ObjectDataMap *map = (ObjectDataMap *)m_objectsData;
         for (int i = 0; i < toIndex(NamedObjectType::NUM_OBJECT_TYPES); i++) {
             NamedObjectType objType = NamedObjectType(i);
+            // Texture data are restored right on load
+            if (objType == NamedObjectType::TEXTURE) continue;
             // 2 passes are needed for SHADER_OR_PROGRAM type, because (1) they
             // live in the same namespace (2) shaders must be created before
             // programs.
@@ -315,6 +346,20 @@ ShareGroup::replaceGlobalObject(NamedObjectType p_type,
     emugl::Mutex::AutoLock lock(m_namespaceLock);
     m_nameSpace[toIndex(p_type)]->replaceGlobalObject(p_localName,
                                                                p_globalObject);
+}
+
+void
+ShareGroup::setGlobalObject(NamedObjectType p_type,
+                              ObjectLocalName p_localName,
+                              NamedObjectPtr p_globalObject)
+{
+    if (toIndex(p_type) >= toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
+        return;
+    }
+
+    emugl::Mutex::AutoLock lock(m_namespaceLock);
+    m_nameSpace[toIndex(p_type)]->setGlobalObject(p_localName,
+                                                  p_globalObject);
 }
 
 void
@@ -478,4 +523,11 @@ void *ObjectNameManager::getGlobalContext()
 {
     emugl::Mutex::AutoLock lock(m_lock);
     return m_groups.empty() ? nullptr : m_groups.begin()->first;
+}
+
+void ObjectNameManager::preSave() {
+    printf("num share groups %llu\n", m_groups.size());
+    for (auto& shareGroup : m_groups) {
+        shareGroup.second->preSave(m_globalNameSpace);
+    }
 }

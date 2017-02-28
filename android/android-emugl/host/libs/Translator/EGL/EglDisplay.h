@@ -21,6 +21,7 @@
 #include "emugl/common/mutex.h"
 #include "emugl/common/smart_ptr.h"
 
+#include "android/base/files/Stream.h"
 #include "EglConfig.h"
 #include "EglContext.h"
 #include "EglOsApi.h"
@@ -88,7 +89,11 @@ public:
     EGLImageKHR addImageKHR(ImagePtr);
     bool destroyImageKHR(EGLImageKHR img);
     EglOS::Context* getGlobalSharedContext() const;
+    GlobalNameSpace* getGlobalNameSpace() { return &m_globalNameSpace; }
 
+    void onSaveAllImages(android::base::Stream* stream, SaveableTexture::saver_t saver);
+    void onLoadAllImages(android::base::Stream* stream, SaveableTexture::loader_t loader);
+    void postLoadAllImages(android::base::Stream* stream);
 private:
    static void addConfig(void* opaque, const EglOS::ConfigInfo* configInfo);
 
@@ -105,7 +110,7 @@ private:
    ContextsHndlMap         m_contexts;
    SurfacesHndlMap         m_surfaces;
    GlobalNameSpace         m_globalNameSpace;
-   ObjectNameManager*      m_manager[MAX_GLES_VERSION];
+   ObjectNameManager*      m_manager[MAX_GLES_VERSION] = {};
    mutable emugl::Mutex    m_lock;
    ImagesHndlMap           m_eglImages;
    unsigned int            m_nextEglImageId = 0;
