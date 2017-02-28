@@ -1056,7 +1056,7 @@ typedef struct VFIOIGDQuirk {
  * of the IGD device.
  */
 int vfio_pci_igd_opregion_init(VFIOPCIDevice *vdev,
-                               struct vfio_region_info *info)
+                               struct vfio_region_info *info, Error **errp)
 {
     int ret;
 
@@ -1064,7 +1064,7 @@ int vfio_pci_igd_opregion_init(VFIOPCIDevice *vdev,
     ret = pread(vdev->vbasedev.fd, vdev->igd_opregion,
                 info->size, info->offset);
     if (ret != info->size) {
-        error_report("vfio: Error reading IGD OpRegion");
+        error_setg(errp, "failed to read IGD OpRegion");
         g_free(vdev->igd_opregion);
         vdev->igd_opregion = NULL;
         return -EINVAL;
@@ -1363,6 +1363,7 @@ static void vfio_probe_igd_bar4_quirk(VFIOPCIDevice *vdev, int nr)
     uint64_t *bdsm_size;
     uint32_t gmch;
     uint16_t cmd_orig, cmd;
+    Error *err = NULL;
 
     /*
      * This must be an Intel VGA device at address 00:02.0 for us to even
@@ -1464,7 +1465,8 @@ static void vfio_probe_igd_bar4_quirk(VFIOPCIDevice *vdev, int nr)
      * try to enable it.  Probably shouldn't be using legacy mode without VGA,
      * but also no point in us enabling VGA if disabled in hardware.
      */
-    if (!(gmch & 0x2) && !vdev->vga && vfio_populate_vga(vdev)) {
+    if (!(gmch & 0x2) && !vdev->vga && vfio_populate_vga(vdev, &err)) {
+        error_reportf_err(err, ERR_PREFIX, vdev->vbasedev.name);
         error_report("IGD device %s failed to enable VGA access, "
                      "legacy mode disabled", vdev->vbasedev.name);
         goto out;
@@ -1487,10 +1489,10 @@ static void vfio_probe_igd_bar4_quirk(VFIOPCIDevice *vdev, int nr)
     }
 
     /* Setup OpRegion access */
-    ret = vfio_pci_igd_opregion_init(vdev, opregion);
+    ret = vfio_pci_igd_opregion_init(vdev, opregion, &err);
     if (ret) {
-        error_report("IGD device %s failed to setup OpRegion, "
-                     "legacy mode disabled", vdev->vbasedev.name);
+        error_append_hint(&err, "IGD legacy mode disabled\n");
+        error_reportf_err(err, ERR_PREFIX, vdev->vbasedev.name);
         goto out;
     }
 
