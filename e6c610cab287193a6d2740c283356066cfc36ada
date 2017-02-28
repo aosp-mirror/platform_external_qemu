@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6a896209_a0b8ea95",
+        "filename": "vl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2241,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-28T23:50:14Z",
+      "side": 1,
+      "message": "same thing about \u0027exit\u0027 -\u003e return",
+      "range": {
+        "startLine": 2241,
+        "startChar": 4,
+        "endLine": 2241,
+        "endChar": 8
+      },
+      "revId": "e6c610cab287193a6d2740c283356066cfc36ada",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "caa940ae_ce4fc0f7",
+        "filename": "vl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2961,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-28T23:50:14Z",
+      "side": 1,
+      "message": "this needs to be a return. compare to \"parent 2\" to see our local changes",
+      "range": {
+        "startLine": 2961,
+        "startChar": 4,
+        "endLine": 2961,
+        "endChar": 8
+      },
+      "revId": "e6c610cab287193a6d2740c283356066cfc36ada",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd98c1c2_a06be3ad",
+        "filename": "vl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3356,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-28T23:50:14Z",
+      "side": 1,
+      "message": "this is the line that breaks aio-posix.c\u0027s __thread variables. I removed it to replace with a call to qemu_exit_notifiers_notify() on line 5438, so please make sure to remove it again.",
+      "range": {
+        "startLine": 3356,
+        "startChar": 0,
+        "endLine": 3356,
+        "endChar": 36
+      },
+      "revId": "e6c610cab287193a6d2740c283356066cfc36ada",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "63b29088_7d97b61e",
+        "filename": "vl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3712,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-02-28T23:50:14Z",
+      "side": 1,
+      "message": "this needs to be \u0027return\u0027, exit() doesn\u0027t work well with C++\nplease check for other exit() calls from upstream and replace them with explicit path to return from main()",
+      "range": {
+        "startLine": 3712,
+        "startChar": 16,
+        "endLine": 3712,
+        "endChar": 24
+      },
+      "revId": "e6c610cab287193a6d2740c283356066cfc36ada",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
