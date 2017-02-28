@@ -6,108 +6,44 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
-    <height>580</height>
+    <width>622</width>
+    <height>891</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QTextEdit" name="car_send_data">
+  <widget class="QTabWidget" name="tabWidget">
    <property name="geometry">
     <rect>
-     <x>70</x>
-     <y>38</y>
-     <width>280</width>
-     <height>31</height>
+     <x>0</x>
+     <y>10</y>
+     <width>630</width>
+     <height>381</height>
     </rect>
    </property>
-   <property name="plainText">
-    <string>Hello!</string>
+   <property name="styleSheet">
+    <string notr="true"/>
    </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-    </font>
+   <property name="currentIndex">
+    <number>0</number>
    </property>
-  </widget>
-  <widget class="RaisedMaterialButton" name="car_sendDataButton">
-   <property name="geometry">
-    <rect>
-     <x>380</x>
-     <y>40</y>
-     <width>132</width>
-     <height>36</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-     <pointsize>10</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string>SEND</string>
-   </property>
-   <property name="icon">
-    <iconset resource="../resources.qrc">
-     <normaloff>:/light/loc_send</normaloff>:/light/loc_send</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>20</width>
-     <height>20</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Tool</string>
-   </property>
-   <property name="report_metrics" stdset="0">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_received">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>80</y>
-      <width>100</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Received: </string>
-    </property>
-    <property name="ColorGroup" stdset="0">
-     <string>Title</string>
-    </property>
-   </widget>
-   <widget class="QTextEdit" name="car_received_data">
-    <property name="geometry">
-     <rect>
-      <x>70</x>
-      <y>80</y>
-      <width>280</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Roboto</family>
-     </font>
-    </property>
+   <!-- Car Sensor Tab -->
+   <widget class="CarSensorData" name="tab_sensor">
+    <attribute name="title">
+     <string>Car sensor data</string>
+    </attribute>
    </widget>
   </widget>
+  <!-- Add more tabs here -->
+ </widget>
  <customwidgets>
   <customwidget>
-   <class>RaisedMaterialButton</class>
-   <extends>QPushButton</extends>
-   <header>android/skin/qt/raised-material-button.h</header>
+   <class>CarSensorData</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h</header>
   </customwidget>
  </customwidgets>
+ <resources/>
+ <connections/>
 </ui>
