@@ -38,7 +38,6 @@
         <file alias="volume_down">images/light/ic_volume_down_678_48px.svg</file>
         <file alias="volume_up">images/light/ic_volume_up_678_48px.svg</file>
         <file alias="zoom">images/light/ic_zoom_in_678_48dp.svg</file>
-        <file alias="android_auto">images/light/ic_car_56px.svg</file>
 
         <!-- Used in the "extended" window -->
         <file alias="add">images/light/ic_add_0BA_48dp.svg</file>
@@ -114,6 +113,7 @@
         <file alias="toggle_on">images/light/toggle_on_light.png</file>
         <file alias="toggle_on_disabled">images/light/toggle_on_disabled_light.png</file>
         <file alias="virtSensors">images/light/Virtual_Sensors_678.svg</file>
+        <file alias="android_auto">images/light/ic_car_678_56px.svg</file>
     </qresource>
     <qresource prefix="/dark">
         <!-- Main list of tool buttons -->
@@ -205,6 +205,7 @@
         <file alias="toggle_on">images/dark/toggle_on_dark.png</file>
         <file alias="toggle_on_disabled">images/dark/toggle_on_disabled_dark.png</file>
         <file alias="virtSensors">images/dark/Virtual_Sensors_677.svg</file>
+        <file alias="android_auto">images/dark/ic_car_677_56px.svg</file>
     </qresource>
     <qresource prefix="/cursor">
         <file alias="zoom_cursor">images/cursor/zoom_cursor.svg</file>

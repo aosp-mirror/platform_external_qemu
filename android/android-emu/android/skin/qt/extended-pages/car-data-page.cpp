@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 #include "android/skin/qt/extended-pages/car-data-page.h"
 
+#include "android/base/system/System.h"
 #include "android/emulation/control/car_data_agent.h"
 #include "android/emulation/proto/VehicleHalProto.pb.h"
 #include "android/main-common.h"
@@ -17,18 +18,32 @@
 #include "android/utils/debug.h"
 #include "ui_car-data-page.h"
 
+#include <time.h>
 #include <QSettings>
 
 #define D(...) VERBOSE_PRINT(car, __VA_ARGS__)
 
+using android::base::System;
 using std::string;
 using emulator::EmulatorMessage;
+
+static string getTimeStr() {
+    time_t t = System::get()->getUnixTime();
+    char buffer[27]={};
+    ctime_r(&t, buffer);
+    return string(buffer);
+}
+
 CarDataPage::CarDataPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::CarDataPage) {
     mUi->setupUi(this);
 
     QObject::connect(this, &CarDataPage::requestUpdateData, this,
                      &CarDataPage::updateReceivedData);
+    auto sendFunc = [this](const EmulatorMessage& msg, const string& log) {
+        sendCarEmulatorMessageLogged(msg, log);
+    };
+    mUi->tab_sensor->setSendEmulatorMsgCallback(sendFunc);
 }
 
 // static callback function wrapper
@@ -56,12 +71,13 @@ void CarDataPage::onReceiveData(const char* msg, int length) {
     } else {
         printMsg = "Received raw string: " + protoStr;
     }
-    QString qString = QString::fromStdString(printMsg);
+
+    QString qString = QString::fromStdString(getTimeStr() + printMsg);
     emit requestUpdateData(qString);
 }
 
 void CarDataPage::updateReceivedData(QString msg) {
-    mUi->car_received_data->setPlainText(msg);
+    mUi->logBrowser_receive->append(msg);
 }
 
 void CarDataPage::setCarDataAgent(const QCarDataAgent* agent) {
@@ -74,11 +90,16 @@ void CarDataPage::setCarDataAgent(const QCarDataAgent* agent) {
     mCarDataAgent = agent;
 }
 
-void CarDataPage::on_car_sendDataButton_clicked() {
-    if (mCarDataAgent == NULL) {
-        D("Car data gent is null");
+void CarDataPage::sendCarEmulatorMessageLogged(const EmulatorMessage& msg,
+                                               const string& log) {
+    if (mCarDataAgent == nullptr) {
+        return;
+    }
+    mUi->logBrowser_send->append(QString::fromStdString(getTimeStr() + log));
+    string msgString;
+    if (msg.SerializeToString(&msgString)) {
+        mCarDataAgent->sendCarData(msgString.c_str(), msgString.length());
     } else {
-        string msg = mUi->car_send_data->toPlainText().toStdString();
-        mCarDataAgent->sendCarData(msg.c_str(), msg.length());
+        mUi->logBrowser_send->append("Failed to send emulator message.");
     }
 }
