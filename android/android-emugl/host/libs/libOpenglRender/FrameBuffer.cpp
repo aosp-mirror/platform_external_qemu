@@ -1398,8 +1398,6 @@ void FrameBuffer::onSave(Stream* stream) {
     saveProcOwnedCollection(stream, m_procOwnedEGLImages);
     saveProcOwnedCollection(stream, m_procOwnedRenderContext);
 
-    // TODO: snapshot memory management
-
     if (s_egl.eglPostSaveContext) {
         for (const auto& ctx : m_contexts) {
             s_egl.eglPostSaveContext(m_eglDisplay, ctx.second->getEGLContext(),

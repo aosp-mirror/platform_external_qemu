@@ -573,3 +573,23 @@ void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
 
     display->m_configs.emplace_back(config);
 }
+
+void EglDisplay::onSaveAllImages(android::base::Stream* stream,
+        GLDispatch* dispatcher) {
+    for (auto& nameManager : m_manager) {
+        if (nameManager) {
+            nameManager->preSave();
+        }
+    }
+    // TODO: add egl image indexes
+    m_globalNameSpace.onSave(stream, dispatcher);
+}
+
+void EglDisplay::onLoadAllImages(android::base::Stream* stream,
+        GLDispatch* dispatcher) {
+    m_globalNameSpace.onLoad(stream, dispatcher);
+}
+
+void EglDisplay::postLoadAllImages(android::base::Stream* stream) {
+    m_globalNameSpace.postLoad(stream);
+}

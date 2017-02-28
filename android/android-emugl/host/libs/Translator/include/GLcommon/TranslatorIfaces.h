@@ -46,12 +46,15 @@ struct EglImage
     unsigned int height;
     unsigned int internalFormat;
     unsigned int border;
+    unsigned int format;
+    unsigned int type;
 };
 
 typedef emugl::SmartPtr<EglImage> ImagePtr;
 typedef std::unordered_map<unsigned int, ImagePtr> ImagesHndlMap;
 
 class GLEScontext;
+class GLDispatch;
 
 typedef struct {
     void                                            (*initGLESx)();
@@ -66,6 +69,7 @@ typedef struct {
     GLsync                                          (*fenceSync)(GLenum, GLbitfield);
     GLenum                                          (*clientWaitSync)(GLsync, GLbitfield, GLuint64);
     void                                            (*deleteSync)(GLsync);
+    GLDispatch*                                     (*getDispatcher)();
 }GLESiface;
 
 class GlLibrary;

@@ -21,6 +21,7 @@
 #include "emugl/common/mutex.h"
 #include "emugl/common/smart_ptr.h"
 
+#include "android/base/files/Stream.h"
 #include "EglConfig.h"
 #include "EglContext.h"
 #include "EglOsApi.h"
@@ -89,6 +90,9 @@ public:
     bool destroyImageKHR(EGLImageKHR img);
     EglOS::Context* getGlobalSharedContext() const;
 
+    void onSaveAllImages(android::base::Stream* stream, GLDispatch* dispatcher);
+    void onLoadAllImages(android::base::Stream* stream, GLDispatch* dispatcher);
+    void postLoadAllImages(android::base::Stream* stream);
 private:
    static void addConfig(void* opaque, const EglOS::ConfigInfo* configInfo);
 

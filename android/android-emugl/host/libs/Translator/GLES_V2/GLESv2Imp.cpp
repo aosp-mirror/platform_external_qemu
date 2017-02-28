@@ -52,6 +52,7 @@ static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(void);
 static GLEScontext* createGLESxContext(int maj, int min, android::base::Stream* stream);
+static GLDispatch* getDispatcher();
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
 }
 
@@ -74,6 +75,7 @@ static GLESiface  s_glesIface = {
     .fenceSync         = (FUNCPTR_FENCE_SYNC)glFenceSync,
     .clientWaitSync    = (FUNCPTR_CLIENT_WAIT_SYNC)glClientWaitSync,
     .deleteSync        = (FUNCPTR_DELETE_SYNC)glDeleteSync,
+    .getDispatcher     = getDispatcher,
 };
 
 #include <GLcommon/GLESmacros.h>
@@ -112,6 +114,10 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp) {
     if(ctx) {
         ctx->setShareGroup(grp);
     }
+}
+
+static GLDispatch* getDispatcher() {
+    return &GLEScontext::dispatcher();
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttribPointerWithDataSize(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize);
@@ -3119,6 +3125,8 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             texData->height = img->height;
             texData->border = img->border;
             texData->internalFormat = img->internalFormat;
+            texData->format = img->format;
+            texData->type = img->type;
             texData->sourceEGLImage = imagehndl;
             texData->globalName = img->globalTexObj->getGlobalName();
             // TODO: set up texData->type

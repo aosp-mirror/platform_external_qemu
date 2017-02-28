@@ -124,11 +124,23 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
     }
 }
 
+void ShareGroup::preSave(GlobalNameSpace *globalNameSpace) {
+    ObjectDataAutoLock lock(this);
+    if (m_saveStage == PreSaved) return;
+    assert(m_saveStage == Empty);
+    m_saveStage = PreSaved;
+    ObjectDataMap *map = (ObjectDataMap *)m_objectsData;
+    for (const auto& obj : (*map)[(int)NamedObjectType::TEXTURE]) {
+        globalNameSpace->preSaveAddTex((const TextureData*)obj.second.get());
+    }
+}
+
 void ShareGroup::onSave(android::base::Stream* stream) {
     // we do not save m_nameSpace
     ObjectDataAutoLock lock(this);
-    if (m_isSaved) return;
-    m_isSaved = true;
+    if (m_saveStage == Saved) return;
+    assert(m_saveStage == PreSaved);
+    m_saveStage = Saved;
     ObjectDataMap *map = (ObjectDataMap *)m_objectsData;
     if (map) {
         stream->putByte(true);
@@ -147,7 +159,7 @@ void ShareGroup::onSave(android::base::Stream* stream) {
 
 void ShareGroup::postSave(android::base::Stream* stream) {
     (void)stream;
-    m_isSaved = false;
+    m_saveStage = Empty;
 }
 
 void ShareGroup::postLoadRestore() {
@@ -478,4 +490,10 @@ void *ObjectNameManager::getGlobalContext()
 {
     emugl::Mutex::AutoLock lock(m_lock);
     return m_groups.empty() ? nullptr : m_groups.begin()->first;
+}
+
+void ObjectNameManager::preSave() {
+    for (auto& shareGroup : m_groups) {
+        shareGroup.second->preSave(m_globalNameSpace);
+    }
 }
