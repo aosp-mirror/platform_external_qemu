@@ -614,7 +614,11 @@ Object *object_dynamic_cast_assert(Object *obj, const char *typename,
     Object *inst;
 
     for (i = 0; obj && i < OBJECT_CLASS_CAST_CACHE; i++) {
+<<<<<<< HEAD   (4dcc3e Merge "[snapshot] Support GL_DEPTH_STENCIL texture format" i)
         if (obj->clazz->object_cast_cache[i] == typename) {
+=======
+        if (atomic_read(&obj->class->object_cast_cache[i]) == typename) {
+>>>>>>> BRANCH (0737f3 Update version for v2.8.0 release)
             goto out;
         }
     }
@@ -631,10 +635,19 @@ Object *object_dynamic_cast_assert(Object *obj, const char *typename,
 
     if (obj && obj == inst) {
         for (i = 1; i < OBJECT_CLASS_CAST_CACHE; i++) {
+<<<<<<< HEAD   (4dcc3e Merge "[snapshot] Support GL_DEPTH_STENCIL texture format" i)
             obj->clazz->object_cast_cache[i - 1] =
                     obj->clazz->object_cast_cache[i];
+=======
+            atomic_set(&obj->class->object_cast_cache[i - 1],
+                       atomic_read(&obj->class->object_cast_cache[i]));
+>>>>>>> BRANCH (0737f3 Update version for v2.8.0 release)
         }
+<<<<<<< HEAD   (4dcc3e Merge "[snapshot] Support GL_DEPTH_STENCIL texture format" i)
         obj->clazz->object_cast_cache[i - 1] = typename;
+=======
+        atomic_set(&obj->class->object_cast_cache[i - 1], typename);
+>>>>>>> BRANCH (0737f3 Update version for v2.8.0 release)
     }
 
 out:
@@ -704,7 +717,7 @@ ObjectClass *object_class_dynamic_cast_assert(ObjectClass *class,
     int i;
 
     for (i = 0; class && i < OBJECT_CLASS_CAST_CACHE; i++) {
-        if (class->class_cast_cache[i] == typename) {
+        if (atomic_read(&class->class_cast_cache[i]) == typename) {
             ret = class;
             goto out;
         }
@@ -725,9 +738,10 @@ ObjectClass *object_class_dynamic_cast_assert(ObjectClass *class,
 #ifdef CONFIG_QOM_CAST_DEBUG
     if (class && ret == class) {
         for (i = 1; i < OBJECT_CLASS_CAST_CACHE; i++) {
-            class->class_cast_cache[i - 1] = class->class_cast_cache[i];
+            atomic_set(&class->class_cast_cache[i - 1],
+                       atomic_read(&class->class_cast_cache[i]));
         }
-        class->class_cast_cache[i - 1] = typename;
+        atomic_set(&class->class_cast_cache[i - 1], typename);
     }
 out:
 #endif

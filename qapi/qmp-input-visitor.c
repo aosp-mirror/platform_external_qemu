@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (4dcc3e Merge "[snapshot] Support GL_DEPTH_STENCIL texture format" i)
 /*
  * Input Visitor
  *
@@ -421,3 +422,5 @@ Visitor *qmp_input_visitor_new(QObject *obj, bool strict)
 
     return &v->visitor;
 }
+=======
+>>>>>>> BRANCH (0737f3 Update version for v2.8.0 release)
