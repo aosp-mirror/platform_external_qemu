@@ -15,6 +15,8 @@
 */
 #include "ColorBuffer.h"
 
+#include "android/base/memory/ScopedPtr.h"
+
 #include "DispatchTables.h"
 #include "GLcommon/GLutils.h"
 #include "RenderThreadInfo.h"
@@ -121,8 +123,20 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
 
         default:
             return NULL;
-            break;
     }
+
+    const int nComp = (texInternalFormat == GL_RGB ? 3 : 4);
+    const unsigned long bufsize = ((unsigned long)nComp) * p_width * p_height;
+    android::base::ScopedCPtr<char> initialImage(
+                static_cast<char*>(::malloc(bufsize)));
+    if (!initialImage) {
+        fprintf(stderr,
+                "error: failed to allocate initial memory for ColorBuffer "
+                "of size %dx%dx%d (%lu KB)\n",
+                p_width, p_height, nComp * 8, bufsize / 1024);
+        return nullptr;
+    }
+    memset(initialImage.get(), 0xff, bufsize);
 
     ScopedHelperContext context(helper);
     if (!context.isOk()) {
@@ -134,15 +148,10 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     s_gles2.glGenTextures(1, &cb->m_tex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
 
-    int nComp = (texInternalFormat == GL_RGB ? 3 : 4);
-
-    unsigned long bufsize = nComp * p_width * p_height;
-    char* initialImage = static_cast<char*>(::malloc(bufsize));
-    memset(initialImage, 0xff, bufsize);
-
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, texInternalFormat, p_width, p_height,
-                         0, texInternalFormat, GL_UNSIGNED_BYTE, initialImage);
-    ::free(initialImage);
+                         0, texInternalFormat, GL_UNSIGNED_BYTE,
+                         initialImage.get());
+    initialImage.reset();
 
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
