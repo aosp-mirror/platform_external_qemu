@@ -105,8 +105,8 @@ QemuParameters* qemu_parameters_create(const char* argv0,
     int apiLevel = avdInfo_getApiLevel(avd);
     android::setupVirtualSerialPorts(nullptr, &params, apiLevel, targetArch,
                                      "",  // kernelSerialPrefix
-                                     isQemu2, opts->show_kernel,
-                                     opts->logcat || opts->shell,
+                                     isQemu2, opts->logcat,
+                                     opts->shell || opts->show_kernel,
                                      opts->shell_serial);
 
     params.add2If("-radio", opts->radio);
