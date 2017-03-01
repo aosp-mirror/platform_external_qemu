@@ -8,7 +8,6 @@
 #include "helper_regs.h"
 #include "mmu-hash64.h"
 #include "migration/cpu.h"
-#include "exec/exec-all.h"
 
 static int cpu_load_old(QEMUFile *f, void *opaque, int version_id)
 {
@@ -136,6 +135,13 @@ static const VMStateInfo vmstate_info_avr = {
 #define VMSTATE_AVR_ARRAY(_f, _s, _n)                             \
     VMSTATE_AVR_ARRAY_V(_f, _s, _n, 0)
 
+static bool cpu_pre_2_8_migration(void *opaque, int version_id)
+{
+    PowerPCCPU *cpu = opaque;
+
+    return cpu->pre_2_8_migration;
+}
+
 static void cpu_pre_save(void *opaque)
 {
     PowerPCCPU *cpu = opaque;
@@ -176,6 +182,14 @@ static void cpu_pre_save(void *opaque)
         env->spr[SPR_DBAT4U + 2*i + 1] = env->DBAT[1][i+4];
         env->spr[SPR_IBAT4U + 2*i] = env->IBAT[0][i+4];
         env->spr[SPR_IBAT4U + 2*i + 1] = env->IBAT[1][i+4];
+    }
+
+    /* Hacks for migration compatibility between 2.6, 2.7 & 2.8 */
+    if (cpu->pre_2_8_migration) {
+        cpu->mig_msr_mask = env->msr_mask;
+        cpu->mig_insns_flags = env->insns_flags & insns_compat_mask;
+        cpu->mig_insns_flags2 = env->insns_flags2 & insns_compat_mask2;
+        cpu->mig_nb_BATs = env->nb_BATs;
     }
 
     /* Hacks for migration compatibility between 2.6, 2.7 & 2.8 */
@@ -583,10 +597,18 @@ const VMStateDescription vmstate_ppc_cpu = {
         /* FIXME: access_type? */
 
         /* Sanity checking */
+<<<<<<< HEAD   (4dcc3e Merge "[snapshot] Support GL_DEPTH_STENCIL texture format" i)
         VMSTATE_UINTTL(mig_msr_mask, PowerPCCPU),
         VMSTATE_UINT64(mig_insns_flags, PowerPCCPU),
         VMSTATE_UINT64(mig_insns_flags2, PowerPCCPU),
         VMSTATE_UINT32(mig_nb_BATs, PowerPCCPU),
+=======
+        VMSTATE_UINTTL_TEST(mig_msr_mask, PowerPCCPU, cpu_pre_2_8_migration),
+        VMSTATE_UINT64_TEST(mig_insns_flags, PowerPCCPU, cpu_pre_2_8_migration),
+        VMSTATE_UINT64_TEST(mig_insns_flags2, PowerPCCPU,
+                            cpu_pre_2_8_migration),
+        VMSTATE_UINT32_TEST(mig_nb_BATs, PowerPCCPU, cpu_pre_2_8_migration),
+>>>>>>> BRANCH (0737f3 Update version for v2.8.0 release)
         VMSTATE_END_OF_LIST()
     },
     .subsections = (const VMStateDescription*[]) {

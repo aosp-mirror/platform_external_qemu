@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (4dcc3e Merge "[snapshot] Support GL_DEPTH_STENCIL texture format" i)
 /*
  * QMP Input Visitor unit-tests (strict mode).
  *
@@ -379,3 +380,5 @@ int main(int argc, char **argv)
 
     return 0;
 }
+=======
+>>>>>>> BRANCH (0737f3 Update version for v2.8.0 release)
