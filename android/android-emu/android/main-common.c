@@ -637,6 +637,9 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         if (abi && !strcmp(abi, "mips32r6")) {
             str_reset(&hw->hw_cpu_model, "mips32r6-generic");
             D("Auto-config: -qemu -cpu %s", hw->hw_cpu_model);
+        } else if (abi && !strcmp(abi, "mips32r5")) {
+            str_reset(&hw->hw_cpu_model, "P5600");
+            D("Auto-config: -qemu -cpu %s", hw->hw_cpu_model);
         }
         AFREE(abi);
     }
