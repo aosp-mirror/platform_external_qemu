@@ -449,6 +449,14 @@ void EmulatorQtWindow::slot_gpuWarningMessageAccepted() {
 
 void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
     crashhandler_exitmode(__FUNCTION__);
+
+    // Make sure we cancel everything related to startup dialog here, otherwise
+    // it could remain as the only emulator's window and would keep it running
+    // forever.
+    mStartupTimer.stop();
+    mStartupTimer.disconnect();
+    mStartupDialog.close();
+
     if (mMainLoopThread && mMainLoopThread->isRunning()) {
         // we dont want to restore to a state where the
         // framework is stopped by 'adb shell stop'
