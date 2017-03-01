@@ -2,6 +2,121 @@
   "comments": [
     {
       "key": {
+        "uuid": "b5a2c098_c12ca9c9",
+        "filename": "android-qemu2-glue/config/darwin-x86_64/config-host.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-01T00:10:08Z",
+      "side": 1,
+      "message": "2.8.0 and so on?",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 29
+      },
+      "revId": "e6c610cab287193a6d2740c283356066cfc36ada",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f8a6776_d803a012",
+        "filename": "android-qemu2-glue/emulation/CharSerialLine.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-01T00:10:08Z",
+      "side": 1,
+      "message": "why do we need these? does it work with Clang?",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 27
+      },
+      "revId": "e6c610cab287193a6d2740c283356066cfc36ada",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa4ed6af_fcf7ecbd",
+        "filename": "block/nbd.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-01T00:10:08Z",
+      "side": 1,
+      "message": "this looks strange :)",
+      "range": {
+        "startLine": 376,
+        "startChar": 21,
+        "endLine": 376,
+        "endChar": 52
+      },
+      "revId": "e6c610cab287193a6d2740c283356066cfc36ada",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59508935_4e55ef7c",
+        "filename": "configure",
+        "patchSetId": 2
+      },
+      "lineNbr": 6102,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-01T00:10:08Z",
+      "side": 1,
+      "message": "why are we removing i386 guest support?",
+      "range": {
+        "startLine": 6102,
+        "startChar": 0,
+        "endLine": 6102,
+        "endChar": 9
+      },
+      "revId": "e6c610cab287193a6d2740c283356066cfc36ada",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f08468d_40cb6a64",
+        "filename": "target-sparc/cpu.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 551,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-01T00:10:08Z",
+      "side": 1,
+      "message": "conflict marker",
+      "range": {
+        "startLine": 551,
+        "startChar": 0,
+        "endLine": 551,
+        "endChar": 12
+      },
+      "revId": "e6c610cab287193a6d2740c283356066cfc36ada",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a896209_a0b8ea95",
         "filename": "vl.c",
         "patchSetId": 2

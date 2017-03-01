@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "543b7094_9871a9a2",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-sources.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 1273,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-01T00:10:08Z",
+      "side": 0,
+      "message": "looks like these shouldn\u0027t disappear",
+      "range": {
+        "startLine": 1264,
+        "startChar": 0,
+        "endLine": 1273,
+        "endChar": 27
+      },
+      "revId": "f0a9429b4b77f17ec7ba810e32abd5f7884d9756",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6449a57d_daad92c3",
+        "filename": "slirp/socket.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-01T00:10:08Z",
+      "side": 0,
+      "message": "it feels like an upstream update to slirp to me. Should it be added as well?",
+      "range": {
+        "startLine": 74,
+        "startChar": 0,
+        "endLine": 88,
+        "endChar": 3
+      },
+      "revId": "f0a9429b4b77f17ec7ba810e32abd5f7884d9756",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "55de0b44_ed435506",
+        "filename": "target-ppc/machine.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-01T00:10:08Z",
+      "side": 0,
+      "message": "this again looks like code from 2.8",
+      "range": {
+        "startLine": 195,
+        "startChar": 0,
+        "endLine": 200,
+        "endChar": 1
+      },
+      "revId": "f0a9429b4b77f17ec7ba810e32abd5f7884d9756",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
