@@ -3181,6 +3181,8 @@ static int global_init_func(void *opaque, QemuOpts *opts, Error **errp)
     return 0;
 }
 
+static int main_impl(int argc, char** argv);
+
 #if defined(CONFIG_ANDROID)
 
 static int is_opengl_alive = 1;
@@ -3223,10 +3225,20 @@ static void android_reporting_teardown(void)
     android_teardown_metrics();
 }
 
-int run_qemu_main(int argc, const char **argv)
+int run_qemu_main(int argc, char **argv)
 #else
-int main(int argc, char** argv, char** envp)
+int main(int argc, char **argv)
 #endif
+{
+    const int res = main_impl(argc, argv);
+
+    /* make sure we run the exit notifiers deterministically if we can */
+    qemu_exit_notifiers_notify();
+
+    return res;
+}
+
+static int main_impl(int argc, char** argv)
 {
     int i;
     int snapshot, linux_boot;
@@ -5323,9 +5335,6 @@ int main(int argc, char** argv, char** envp)
     audio_cleanup();
     monitor_cleanup();
     qemu_chr_cleanup();
-
-    /* make sure we run the exit notifiers deterministically if we can */
-    qemu_exit_notifiers_notify();
 
     return 0;
 }
