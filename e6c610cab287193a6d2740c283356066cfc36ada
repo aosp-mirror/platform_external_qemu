@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0bebb7bd_c8a00946",
+        "filename": "android-qemu2-glue/config/darwin-x86_64/config-host.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-03-01T17:17:25Z",
+      "side": 1,
+      "message": "Will fix. Ideally we should autogenerate these as done in qemu build.",
+      "parentUuid": "b5a2c098_c12ca9c9",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 29
+      },
+      "revId": "e6c610cab287193a6d2740c283356066cfc36ada",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f8a6776_d803a012",
         "filename": "android-qemu2-glue/emulation/CharSerialLine.h",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2017-03-01T00:10:08Z",
       "side": 1,
       "message": "why do we need these? does it work with Clang?",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 27
+      },
+      "revId": "e6c610cab287193a6d2740c283356066cfc36ada",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d370c198_9e8122a7",
+        "filename": "android-qemu2-glue/emulation/CharSerialLine.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-03-01T17:17:25Z",
+      "side": 1,
+      "message": "Leftover from some c++ vs c compiler issues. Will remove.",
+      "parentUuid": "4f8a6776_d803a012",
       "range": {
         "startLine": 17,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "0ed651e2_5c44d25a",
+        "filename": "block/nbd.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-03-01T17:17:25Z",
+      "side": 1,
+      "message": "hahahahah! Thnx :-)",
+      "parentUuid": "aa4ed6af_fcf7ecbd",
+      "range": {
+        "startLine": 376,
+        "startChar": 21,
+        "endLine": 376,
+        "endChar": 52
+      },
+      "revId": "e6c610cab287193a6d2740c283356066cfc36ada",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "59508935_4e55ef7c",
         "filename": "configure",
         "patchSetId": 2
@@ -82,6 +154,30 @@
       "writtenOn": "2017-03-01T00:10:08Z",
       "side": 1,
       "message": "why are we removing i386 guest support?",
+      "range": {
+        "startLine": 6102,
+        "startChar": 0,
+        "endLine": 6102,
+        "endChar": 9
+      },
+      "revId": "e6c610cab287193a6d2740c283356066cfc36ada",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6df6840_0d10e5ff",
+        "filename": "configure",
+        "patchSetId": 2
+      },
+      "lineNbr": 6102,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-03-01T17:17:25Z",
+      "side": 1,
+      "message": "Some compiler issues on mac, let me dig up some more information and provide more details",
+      "parentUuid": "59508935_4e55ef7c",
       "range": {
         "startLine": 6102,
         "startChar": 0,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "84b6e0b9_4e18a12d",
+        "filename": "target-sparc/cpu.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 551,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-03-01T17:17:25Z",
+      "side": 1,
+      "message": "will fix.",
+      "parentUuid": "4f08468d_40cb6a64",
+      "range": {
+        "startLine": 551,
+        "startChar": 0,
+        "endLine": 551,
+        "endChar": 12
+      },
+      "revId": "e6c610cab287193a6d2740c283356066cfc36ada",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a896209_a0b8ea95",
         "filename": "vl.c",
         "patchSetId": 2
@@ -128,6 +248,30 @@
       "writtenOn": "2017-02-28T23:50:14Z",
       "side": 1,
       "message": "same thing about \u0027exit\u0027 -\u003e return",
+      "range": {
+        "startLine": 2241,
+        "startChar": 4,
+        "endLine": 2241,
+        "endChar": 8
+      },
+      "revId": "e6c610cab287193a6d2740c283356066cfc36ada",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59dbbedd_8d667729",
+        "filename": "vl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2241,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-03-01T17:17:25Z",
+      "side": 1,
+      "message": "Good catch, will fix.",
+      "parentUuid": "6a896209_a0b8ea95",
       "range": {
         "startLine": 2241,
         "startChar": 4,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "d19450a7_9b783809",
+        "filename": "vl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2961,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-03-01T17:17:25Z",
+      "side": 1,
+      "message": "You are correct.",
+      "parentUuid": "caa940ae_ce4fc0f7",
+      "range": {
+        "startLine": 2961,
+        "startChar": 4,
+        "endLine": 2961,
+        "endChar": 8
+      },
+      "revId": "e6c610cab287193a6d2740c283356066cfc36ada",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fd98c1c2_a06be3ad",
         "filename": "vl.c",
         "patchSetId": 2
@@ -186,6 +354,30 @@
     },
     {
       "key": {
+        "uuid": "a24c0dae_cd657e50",
+        "filename": "vl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3356,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-03-01T17:17:25Z",
+      "side": 1,
+      "message": "Will remove.",
+      "parentUuid": "fd98c1c2_a06be3ad",
+      "range": {
+        "startLine": 3356,
+        "startChar": 0,
+        "endLine": 3356,
+        "endChar": 36
+      },
+      "revId": "e6c610cab287193a6d2740c283356066cfc36ada",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "63b29088_7d97b61e",
         "filename": "vl.c",
         "patchSetId": 2
@@ -197,6 +389,30 @@
       "writtenOn": "2017-02-28T23:50:14Z",
       "side": 1,
       "message": "this needs to be \u0027return\u0027, exit() doesn\u0027t work well with C++\nplease check for other exit() calls from upstream and replace them with explicit path to return from main()",
+      "range": {
+        "startLine": 3712,
+        "startChar": 16,
+        "endLine": 3712,
+        "endChar": 24
+      },
+      "revId": "e6c610cab287193a6d2740c283356066cfc36ada",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22add397_adf8e3dd",
+        "filename": "vl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3712,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-03-01T17:17:25Z",
+      "side": 1,
+      "message": "Will fix.",
+      "parentUuid": "63b29088_7d97b61e",
       "range": {
         "startLine": 3712,
         "startChar": 16,
