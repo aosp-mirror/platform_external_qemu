@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bc5275ce_70c967c7",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-01T01:18:48Z",
+      "side": 1,
+      "message": "just call emplace unconditionally. that way it will be a single lookup that doesn\u0027t do anything if there\u0027s already a key in the map",
+      "range": {
+        "startLine": 123,
+        "startChar": 0,
+        "endLine": 125,
+        "endChar": 5
+      },
+      "revId": "e76158c78cc1cf153ffb6bc8230589996bafd8bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5d002a0f_7fba9f39",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/TextureGlobal.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-01T01:18:48Z",
+      "side": 1,
+      "message": "what about SaveableTexture? TextureGlobal doesn\u0027t really give any information about its intended use",
+      "range": {
+        "startLine": 29,
+        "startChar": 3,
+        "endLine": 29,
+        "endChar": 16
+      },
+      "revId": "e76158c78cc1cf153ffb6bc8230589996bafd8bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
