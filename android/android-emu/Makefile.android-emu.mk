@@ -55,6 +55,11 @@ include $(_ANDROID_EMU_ROOT)/android/metrics/proto/MetricsProto.mk
 # Protobuf library for communicating with android vehicle hal
 include $(_ANDROID_EMU_ROOT)/android/emulation/proto/VehicleHalProto.mk
 
+###############################################################################
+#
+# Feature control protoc-generated library.
+include $(_ANDROID_EMU_ROOT)/android/featurecontrol/proto/FeatureControlProto.mk
+
 # all includes are like 'android/...', so we need to count on that
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
 ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES)
@@ -293,6 +298,7 @@ LOCAL_SRC_FILES := \
     android/featurecontrol/FeatureControl.cpp \
     android/featurecontrol/FeatureControlImpl.cpp \
     android/featurecontrol/feature_control.cpp \
+    android/featurecontrol/HWMatching.cpp \
     android/filesystems/ext4_resize.cpp \
     android/filesystems/ext4_utils.cpp \
     android/filesystems/fstab_parser.cpp \
@@ -435,7 +441,8 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-zlib \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
-    $(VEHICLE_PROTO_STATIC_LIBRARIES)
+    $(VEHICLE_PROTO_STATIC_LIBRARIES) \
+    $(FEATURECONTROL_PROTO_STATIC_LIBRARIES)
 
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \
@@ -547,6 +554,7 @@ LOCAL_SRC_FILES := \
   android/emulation/VmLock_unittest.cpp \
   android/error-messages_unittest.cpp \
   android/featurecontrol/FeatureControl_unittest.cpp \
+  android/featurecontrol/HWMatching_unittest.cpp \
   android/filesystems/ext4_resize_unittest.cpp \
   android/filesystems/ext4_utils_unittest.cpp \
   android/filesystems/fstab_parser_unittest.cpp \
