@@ -37,10 +37,10 @@
 #if defined(CONFIG_SDL) && !defined(CONFIG_ANDROID)
 #if defined(__APPLE__) || defined(main)
 #include <SDL.h>
-int qemu_main(int argc, char **argv, char **envp);
+int qemu_main(int argc, char **argv);
 int main(int argc, char **argv)
 {
-    return qemu_main(argc, argv, NULL);
+    return qemu_main(argc, argv);
 }
 #undef main
 #define main qemu_main
