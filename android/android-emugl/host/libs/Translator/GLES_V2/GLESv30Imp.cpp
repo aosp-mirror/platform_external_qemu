@@ -366,23 +366,36 @@ GL_APICALL void GL_APIENTRY glDrawRangeElements(GLenum mode, GLuint start, GLuin
 
 GL_APICALL GLsync GL_APIENTRY glFenceSync(GLenum condition, GLbitfield flags) {
     GET_CTX_V2_RET(0);
+    if (!ctx->dispatcher().glFenceSync) {
+        ctx->dispatcher().glFinish();
+        return (GLsync)0x42;
+    }
     GLsync glFenceSyncRET = ctx->dispatcher().glFenceSync(condition, flags);
     return glFenceSyncRET;
 }
 
 GL_APICALL GLenum GL_APIENTRY glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout) {
     GET_CTX_V2_RET(GL_WAIT_FAILED);
+    if (!ctx->dispatcher().glFenceSync) {
+        return GL_ALREADY_SIGNALED;
+    }
     GLenum glClientWaitSyncRET = ctx->dispatcher().glClientWaitSync(wait_on, flags, timeout);
     return glClientWaitSyncRET;
 }
 
 GL_APICALL void GL_APIENTRY glWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout) {
     GET_CTX_V2();
+    if (!ctx->dispatcher().glFenceSync) {
+        return;
+    }
     ctx->dispatcher().glWaitSync(wait_on, flags, timeout);
 }
 
 GL_APICALL void GL_APIENTRY glDeleteSync(GLsync to_delete) {
     GET_CTX_V2();
+    if (!ctx->dispatcher().glFenceSync) {
+        return;
+    }
     ctx->dispatcher().glDeleteSync(to_delete);
 }
 
