@@ -259,10 +259,6 @@ GL_APICALL void  GL_APIENTRY glBindBuffer(GLenum target, GLuint buffer){
                 (GLESbuffer*)ctx->shareGroup()
                         ->getObjectData(NamedObjectType::VERTEXBUFFER, buffer);
         vbo->setBinded();
-        const GLuint globalBufferName = ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer);
-        ctx->dispatcher().glBindBuffer(target, globalBufferName);
-    } else {
-        ctx->dispatcher().glBindBuffer(target, 0);
     }
 }
 
@@ -510,7 +506,6 @@ GL_APICALL void  GL_APIENTRY glBufferData(GLenum target, GLsizeiptr size, const 
     SET_ERROR_IF(!ctx->isBindedBuffer(target),GL_INVALID_OPERATION);
     SET_ERROR_IF(!GLESv2Validate::bufferUsage(ctx, usage), GL_INVALID_ENUM);
     ctx->setBufferData(target,size,data,usage);
-    ctx->dispatcher().glBufferData(target, size, data, usage);
 }
 
 GL_APICALL void  GL_APIENTRY glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data){
@@ -518,7 +513,6 @@ GL_APICALL void  GL_APIENTRY glBufferSubData(GLenum target, GLintptr offset, GLs
     SET_ERROR_IF(!GLESv2Validate::bufferTarget(ctx, target), GL_INVALID_ENUM);
     SET_ERROR_IF(!ctx->isBindedBuffer(target),GL_INVALID_OPERATION);
     SET_ERROR_IF(!ctx->setBufferSubData(target,offset,size,data),GL_INVALID_VALUE);
-    ctx->dispatcher().glBufferSubData(target, offset, size, data);
 }
 
 
@@ -1003,112 +997,68 @@ GL_APICALL void  GL_APIENTRY glDisableVertexAttribArray(GLuint index){
 }
 
 
-static void s_glDrawPre(GLESv2Context* ctx, GLenum mode) {
-    if (ctx->getMajorVersion() < 3)
-        ctx->drawValidate();
-
-    if (mode == GL_POINTS) {
-        //Enable texture generation for GL_POINTS and gl_PointSize shader variable
-        //GLES2 assumes this is enabled by default, we need to set this state for GL
-        if (mode==GL_POINTS) {
-            ctx->dispatcher().glEnable(GL_POINT_SPRITE);
-            ctx->dispatcher().glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-        }
-    }
-}
-
-static void s_glDrawPost(GLESv2Context* ctx, GLenum mode) {
-    if (mode == GL_POINTS) {
-        if (mode==GL_POINTS) {
-            ctx->dispatcher().glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
-            ctx->dispatcher().glDisable(GL_POINT_SPRITE);
-        }
-    }
-}
-
-static void s_glDrawEmulateClientArraysPre(GLESv2Context* ctx) {
-    GLuint currarrbinding = 0;
-    GLuint curreltbinding = 0;
-    if (ctx->shareGroup()) {
-        currarrbinding =
-            ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, ctx->getBuffer(GL_ARRAY_BUFFER));
-        curreltbinding =
-            ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, ctx->getBuffer(GL_ELEMENT_ARRAY_BUFFER));
-        if (currarrbinding)
-            ctx->dispatcher().glBindBuffer(GL_ARRAY_BUFFER, 0);
-        if (curreltbinding)
-            ctx->dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    }
-}
-
-static void s_glDrawEmulateClientArraysPost(GLESv2Context* ctx) {
-    GLuint currarrbinding = 0;
-    GLuint curreltbinding = 0;
-    if (ctx->shareGroup()) {
-        currarrbinding =
-            ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, ctx->getBuffer(GL_ARRAY_BUFFER));
-        curreltbinding =
-            ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, ctx->getBuffer(GL_ELEMENT_ARRAY_BUFFER));
-        if (currarrbinding)
-            ctx->dispatcher().glBindBuffer(GL_ARRAY_BUFFER, currarrbinding);
-        if (curreltbinding)
-            ctx->dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, curreltbinding);
-    }
-}
-
-static void s_glDrawSetupArraysPre(GLESv2Context* ctx, GLESConversionArrays& tmpArrs, GLint first, GLsizei count, GLenum type, const GLvoid* indices, bool direct) {
-    ctx->setupArraysPointers(tmpArrs,first,count,type,indices,direct);
-
-    if (ctx->needAtt0PreDrawValidation()) {
-        if (indices) {
-            const unsigned int maxIndex = ctx->findMaxIndex(count, type, indices);
-            ctx->validateAtt0PreDraw(maxIndex);
-        } else {
-            ctx->validateAtt0PreDraw(count);
-        }
-    }
-}
-
-static void s_glDrawSetupArraysPost(GLESv2Context* ctx) {
-    ctx->validateAtt0PostDraw();
-}
-
 GL_APICALL void  GL_APIENTRY glDrawArrays(GLenum mode, GLint first, GLsizei count){
     GET_CTX_V2();
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!GLESv2Validate::drawMode(mode),GL_INVALID_ENUM);
 
-    s_glDrawPre(ctx, mode);
-    if (ctx->vertexAttributesBufferBacked()) {
-        ctx->dispatcher().glDrawArrays(mode,first,count);
-    } else {
-        GLESConversionArrays tmpArrs;
-        s_glDrawSetupArraysPre(ctx, tmpArrs, first, count, 0, NULL, true);
-        ctx->dispatcher().glDrawArrays(mode,first,count);
-        s_glDrawSetupArraysPost(ctx);
+    ctx->drawValidate();
+
+    GLESConversionArrays tmpArrs;
+    ctx->setupArraysPointers(tmpArrs,first,count,0,NULL,true);
+
+    if (ctx->needAtt0PreDrawValidation()) {
+        ctx->validateAtt0PreDraw(count);
     }
-    s_glDrawPost(ctx, mode);
+
+    //Enable texture generation for GL_POINTS and gl_PointSize shader variable
+    //GLES2 assumes this is enabled by default, we need to set this state for GL
+    if (mode==GL_POINTS) {
+        ctx->dispatcher().glEnable(GL_POINT_SPRITE);
+        ctx->dispatcher().glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+    }
+
+    ctx->dispatcher().glDrawArrays(mode,first,count);
+
+
+    ctx->validateAtt0PostDraw();
 }
 
-GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices) {
+GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid* elementsIndices){
     GET_CTX_V2();
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!(GLESv2Validate::drawMode(mode) && GLESv2Validate::drawType(type)),GL_INVALID_ENUM);
 
-    s_glDrawPre(ctx, mode);
+    ctx->drawValidate();
 
-    if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER)) {
-        ctx->dispatcher().glDrawElements(mode,count,type,indices);
-    } else {
-        s_glDrawEmulateClientArraysPre(ctx);
-        GLESConversionArrays tmpArrs;
-        s_glDrawSetupArraysPre(ctx,tmpArrs,0,count,type,indices,false);
-        ctx->dispatcher().glDrawElements(mode,count,type,indices);
-        s_glDrawSetupArraysPost(ctx);
-        s_glDrawEmulateClientArraysPost(ctx);
+    const GLvoid* indices = elementsIndices;
+    if(ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER)) { // if vbo is binded take the indices from the vbo
+        const unsigned char* buf = static_cast<unsigned char *>(ctx->getBindedBuffer(GL_ELEMENT_ARRAY_BUFFER));
+        indices = buf + SafeUIntFromPointer(elementsIndices);
     }
 
-    s_glDrawPost(ctx, mode);
+    GLESConversionArrays tmpArrs;
+    ctx->setupArraysPointers(tmpArrs,0,count,type,indices,false);
+
+    if (ctx->needAtt0PreDrawValidation()) {
+        const unsigned int maxIndex = ctx->findMaxIndex(count, type, indices);
+        ctx->validateAtt0PreDraw(maxIndex);
+    }
+    
+    //See glDrawArrays
+    if (mode==GL_POINTS) {
+        ctx->dispatcher().glEnable(GL_POINT_SPRITE);
+        ctx->dispatcher().glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+    }
+
+    ctx->dispatcher().glDrawElements(mode,count,type,indices);
+
+    if (mode==GL_POINTS) {
+        ctx->dispatcher().glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
+        ctx->dispatcher().glDisable(GL_POINT_SPRITE);
+    }
+
+    ctx->validateAtt0PostDraw();
 }
 
 GL_APICALL void  GL_APIENTRY glEnable(GLenum cap){
@@ -3074,9 +3024,6 @@ GL_APICALL void  GL_APIENTRY glVertexAttribPointer(GLuint index, GLint size, GLe
     if (type == GL_HALF_FLOAT_OES) type = GL_HALF_FLOAT;
 
     s_glPrepareVertexAttribPointer(ctx, index, size, type, normalized, stride, ptr, 0, false);
-    if (ctx->isBindedBuffer(GL_ARRAY_BUFFER)) {
-        ctx->dispatcher().glVertexAttribPointer(index, size, type, normalized, stride, ptr);
-    }
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttribPointerWithDataSize(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize) {
@@ -3084,11 +3031,7 @@ GL_APICALL void  GL_APIENTRY glVertexAttribPointerWithDataSize(GLuint index, GLi
     GET_CTX_V2();
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     if (type == GL_HALF_FLOAT_OES) type = GL_HALF_FLOAT;
-
     s_glPrepareVertexAttribPointer(ctx, index, size, type, normalized, stride, ptr, dataSize, false);
-    if (ctx->isBindedBuffer(GL_ARRAY_BUFFER)) {
-        ctx->dispatcher().glVertexAttribPointer(index, size, type, normalized, stride, ptr);
-    }
 }
 
 GL_APICALL void  GL_APIENTRY glViewport(GLint x, GLint y, GLsizei width, GLsizei height){
@@ -3203,5 +3146,25 @@ GL_APICALL GLboolean GL_APIENTRY glIsVertexArrayOES(GLuint array) {
     return ctx->dispatcher().glIsVertexArray(array);
 }
 
-#include "GLESv30Imp.cpp"
-#include "GLESv31Imp.cpp"
+GL_APICALL GLsync GL_APIENTRY glFenceSync(GLenum condition, GLbitfield flags) {
+    GET_CTX_V2_RET(0);
+    GLsync glFenceSyncRET = ctx->dispatcher().glFenceSync(condition, flags);
+    return glFenceSyncRET;
+}
+
+GL_APICALL GLenum GL_APIENTRY glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout) {
+    GET_CTX_V2_RET(GL_WAIT_FAILED);
+    GLenum glClientWaitSyncRET = ctx->dispatcher().glClientWaitSync(wait_on, flags, timeout);
+    return glClientWaitSyncRET;
+}
+
+GL_APICALL void GL_APIENTRY glWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout) {
+    GET_CTX_V2();
+    ctx->dispatcher().glWaitSync(wait_on, flags, timeout);
+}
+
+GL_APICALL void GL_APIENTRY glDeleteSync(GLsync to_delete) {
+    GET_CTX_V2();
+    ctx->dispatcher().glDeleteSync(to_delete);
+}
+
