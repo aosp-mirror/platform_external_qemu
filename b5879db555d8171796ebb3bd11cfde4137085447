@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6eb62341_3b384b76",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-01T18:07:38Z",
+      "side": 1,
+      "message": "nit: variable name",
+      "range": {
+        "startLine": 148,
+        "startChar": 24,
+        "endLine": 148,
+        "endChar": 37
+      },
+      "revId": "b5879db555d8171796ebb3bd11cfde4137085447",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9afb47b9_7d4a4582",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/SaveableTexture.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-01T18:07:38Z",
+      "side": 1,
+      "message": "nit: I\u0027m so sorry to be writing this comment, but there\u0027s a trailing space.",
+      "range": {
+        "startLine": 37,
+        "startChar": 74,
+        "endLine": 37,
+        "endChar": 75
+      },
+      "revId": "b5879db555d8171796ebb3bd11cfde4137085447",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
