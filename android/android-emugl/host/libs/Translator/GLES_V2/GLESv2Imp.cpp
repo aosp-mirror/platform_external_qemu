@@ -719,6 +719,8 @@ GL_APICALL GLuint GL_APIENTRY glCreateProgram(void){
         ctx->shareGroup()->setObjectData(NamedObjectType::SHADER_OR_PROGRAM,
                                          localProgramName,
                                          ObjectDataPtr(programInfo));
+        programInfo->addProgramName(ctx->shareGroup()->getGlobalName(
+                         NamedObjectType::SHADER_OR_PROGRAM, localProgramName));
         return localProgramName;
     }
     return 0;
@@ -2794,119 +2796,83 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
     ctx->dispatcher().glTexSubImage2D(target,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
-static void setUniformInCtx(GLint location, int count, GLboolean transpose, GLenum type,
-        size_t typeSize, const void* data) {
-    GET_CTX_V2();
-    ProgramData* programData = ctx->getUseProgram();
-    if (programData) {
-        size_t size = count * typeSize;
-        GLUniformDesc uniformDesc(location, count, transpose, type, size,
-                (unsigned char*)data);
-        programData->addUniform(location, std::move(uniformDesc));
-    }
-}
-
 GL_APICALL void  GL_APIENTRY glUniform1f(GLint location, GLfloat x){
     GET_CTX();
-    GLfloat v[] = {x};
-    setUniformInCtx(location, 1, false, GL_FLOAT, sizeof(GLfloat), v);
     ctx->dispatcher().glUniform1f(location,x);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform1fv(GLint location, GLsizei count, const GLfloat* v){
     GET_CTX();
-    setUniformInCtx(location, count, false, GL_FLOAT, sizeof(GLfloat), v);
     ctx->dispatcher().glUniform1fv(location,count,v);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform1i(GLint location, GLint x){
     GET_CTX();
-    GLint v[] = {x};
-    setUniformInCtx(location, 1, false, GL_INT, sizeof(GLint), v);
     ctx->dispatcher().glUniform1i(location,x);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform1iv(GLint location, GLsizei count, const GLint* v){
     GET_CTX();
-    setUniformInCtx(location, count, false, GL_INT, sizeof(GLint), v);
     ctx->dispatcher().glUniform1iv(location,count,v);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform2f(GLint location, GLfloat x, GLfloat y){
     GET_CTX();
-    GLfloat v[] = {x, y};
-    setUniformInCtx(location, 1, false, GL_FLOAT_VEC2, sizeof(GLfloat) * 2, v);
     ctx->dispatcher().glUniform2f(location,x,y);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform2fv(GLint location, GLsizei count, const GLfloat* v){
     GET_CTX();
-    setUniformInCtx(location, count, false, GL_FLOAT_VEC2, sizeof(GLfloat) * 2, v);
     ctx->dispatcher().glUniform2fv(location,count,v);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform2i(GLint location, GLint x, GLint y){
     GET_CTX();
-    GLint v[] = {x, y};
-    setUniformInCtx(location, 1, false, GL_INT_VEC2, sizeof(GLint) * 2, v);
     ctx->dispatcher().glUniform2i(location,x,y);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform2iv(GLint location, GLsizei count, const GLint* v){
     GET_CTX();
-    setUniformInCtx(location, count, false, GL_INT_VEC2, sizeof(GLint) * 2, v);
     ctx->dispatcher().glUniform2iv(location,count,v);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform3f(GLint location, GLfloat x, GLfloat y, GLfloat z){
     GET_CTX();
-    GLfloat v[] = {x, y, z};
-    setUniformInCtx(location, 1, false, GL_FLOAT_VEC3, sizeof(GLfloat) * 3, v);
     ctx->dispatcher().glUniform3f(location,x,y,z);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform3fv(GLint location, GLsizei count, const GLfloat* v){
     GET_CTX();
-    setUniformInCtx(location, count, false, GL_FLOAT_VEC3, sizeof(GLfloat) * 3, v);
     ctx->dispatcher().glUniform3fv(location,count,v);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform3i(GLint location, GLint x, GLint y, GLint z){
     GET_CTX();
-    GLint v[] = {x, y, z};
-    setUniformInCtx(location, 1, false, GL_INT_VEC3, sizeof(GLint) * 3, v);
     ctx->dispatcher().glUniform3i(location,x,y,z);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform3iv(GLint location, GLsizei count, const GLint* v){
     GET_CTX();
-    setUniformInCtx(location, count, false, GL_INT_VEC3, sizeof(GLint) * 3, v);
     ctx->dispatcher().glUniform3iv(location,count,v);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform4f(GLint location, GLfloat x, GLfloat y, GLfloat z, GLfloat w){
     GET_CTX();
-    GLfloat v[] = {x, y, z, w};
-    setUniformInCtx(location, 1, false, GL_FLOAT_VEC4, sizeof(GLfloat) * 4, v);
     ctx->dispatcher().glUniform4f(location,x,y,z,w);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform4fv(GLint location, GLsizei count, const GLfloat* v){
     GET_CTX();
-    setUniformInCtx(location, count, false, GL_FLOAT_VEC4, sizeof(GLfloat) * 4, v);
     ctx->dispatcher().glUniform4fv(location,count,v);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform4i(GLint location, GLint x, GLint y, GLint z, GLint w){
     GET_CTX();
-    GLint v[] = {x, y, z, w};
-    setUniformInCtx(location, 1, false, GL_INT_VEC4, sizeof(GLint) * 4, v);
     ctx->dispatcher().glUniform4i(location,x,y,z,w);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform4iv(GLint location, GLsizei count, const GLint* v){
     GET_CTX();
-    setUniformInCtx(location, count, false, GL_INT_VEC4, sizeof(GLint) * 4, v);
     ctx->dispatcher().glUniform4iv(location,count,v);
 }
 
@@ -2914,7 +2880,6 @@ GL_APICALL void  GL_APIENTRY glUniformMatrix2fv(GLint location, GLsizei count, G
     GET_CTX_V2();
     SET_ERROR_IF(ctx->getMajorVersion() < 3 &&
                  transpose != GL_FALSE,GL_INVALID_VALUE);
-    setUniformInCtx(location, count, transpose, GL_FLOAT_MAT2, sizeof(GLfloat) * 4, value);
     ctx->dispatcher().glUniformMatrix2fv(location,count,transpose,value);
 }
 
@@ -2922,7 +2887,6 @@ GL_APICALL void  GL_APIENTRY glUniformMatrix3fv(GLint location, GLsizei count, G
     GET_CTX_V2();
     SET_ERROR_IF(ctx->getMajorVersion() < 3 &&
                  transpose != GL_FALSE,GL_INVALID_VALUE);
-    setUniformInCtx(location, count, transpose, GL_FLOAT_MAT3, sizeof(GLfloat) * 9, value);
     ctx->dispatcher().glUniformMatrix3fv(location,count,transpose,value);
 }
 
@@ -2930,7 +2894,6 @@ GL_APICALL void  GL_APIENTRY glUniformMatrix4fv(GLint location, GLsizei count, G
     GET_CTX_V2();
     SET_ERROR_IF(ctx->getMajorVersion() < 3 &&
                  transpose != GL_FALSE,GL_INVALID_VALUE);
-    setUniformInCtx(location, count, transpose, GL_FLOAT_MAT4, sizeof(GLfloat) * 16, value);
     ctx->dispatcher().glUniformMatrix4fv(location,count,transpose,value);
 }
 

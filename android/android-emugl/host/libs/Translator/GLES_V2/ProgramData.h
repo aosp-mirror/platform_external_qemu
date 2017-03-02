@@ -83,6 +83,7 @@ public:
     // It will take effect after glLinkProgram.
     std::unordered_map<std::string, GLuint> boundAttribLocs;
     virtual GenNameInfo getGenNameInfo() const override;
+    void addProgramName(GLuint name) { ProgramName = name; }
 private:
     // linkedAttribLocs stores the attribute locations the guest might
     // know about. It includes all boundAttribLocs before the previous
@@ -97,5 +98,6 @@ private:
     GLint  LinkStatus;
     bool    IsInUse;
     bool    DeleteStatus;
+    GLuint  ProgramName;
 };
 #endif
