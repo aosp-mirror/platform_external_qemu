@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3817c45d_77a6dcb4",
+        "filename": "android/android-emu/android/emulation/bufprint_config_dirs_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-03-02T23:59:51Z",
+      "side": 1,
+      "message": "the if and else look the same..",
+      "range": {
+        "startLine": 81,
+        "startChar": 0,
+        "endLine": 85,
+        "endChar": 6
+      },
+      "revId": "3eb851334a1ca0002000d82a37f2f53a74434f98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
