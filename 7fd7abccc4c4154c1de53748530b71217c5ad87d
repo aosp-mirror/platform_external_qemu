@@ -22,6 +22,30 @@
       "revId": "7fd7abccc4c4154c1de53748530b71217c5ad87d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d798cd8d_d1baf7d5",
+        "filename": "hw/misc/goldfish_pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 854,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2017-03-02T15:50:14Z",
+      "side": 1,
+      "message": "yes TARGET_MIPS is defined both for mips32 \u0026 mips64.",
+      "parentUuid": "a16d8f6b_a29c09bd",
+      "range": {
+        "startLine": 854,
+        "startChar": 13,
+        "endLine": 854,
+        "endChar": 24
+      },
+      "revId": "7fd7abccc4c4154c1de53748530b71217c5ad87d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
