@@ -14,10 +14,9 @@
 * limitations under the License.
 */
 #include "glUtils.h"
-
 #include "ErrorLog.h"
-
 #include <string.h>
+#include <GLES3/gl31.h>
 
 size_t glSizeof(GLenum type)
 {
@@ -29,9 +28,13 @@ size_t glSizeof(GLenum type)
         break;
     case GL_SHORT:
     case GL_UNSIGNED_SHORT:
+    case GL_HALF_FLOAT:
     case GL_HALF_FLOAT_OES:
         retval = 2;
         break;
+    case GL_IMAGE_2D:
+    case GL_IMAGE_3D:
+    case GL_UNSIGNED_INT:
     case GL_INT:
     case GL_FLOAT:
     case GL_FIXED:
@@ -45,10 +48,12 @@ size_t glSizeof(GLenum type)
 #endif
     case GL_FLOAT_VEC2:
     case GL_INT_VEC2:
+    case GL_UNSIGNED_INT_VEC2:
     case GL_BOOL_VEC2:
         retval = 8;
         break;
     case GL_INT_VEC3:
+    case GL_UNSIGNED_INT_VEC3:
     case GL_BOOL_VEC3:
     case GL_FLOAT_VEC3:
         retval = 12;
@@ -56,6 +61,7 @@ size_t glSizeof(GLenum type)
     case GL_FLOAT_VEC4:
     case GL_BOOL_VEC4:
     case GL_INT_VEC4:
+    case GL_UNSIGNED_INT_VEC4:
     case GL_FLOAT_MAT2:
         retval = 16;
         break;
@@ -65,12 +71,55 @@ size_t glSizeof(GLenum type)
     case GL_FLOAT_MAT4:
         retval = 64;
         break;
+    case GL_FLOAT_MAT2x3:
+    case GL_FLOAT_MAT3x2:
+        retval = 4 * 6;
+        break;
+    case GL_FLOAT_MAT2x4:
+    case GL_FLOAT_MAT4x2:
+        retval = 4 * 8;
+        break;
+    case GL_FLOAT_MAT3x4:
+    case GL_FLOAT_MAT4x3:
+        retval = 4 * 12;
+        break;
     case GL_SAMPLER_2D:
+    case GL_SAMPLER_3D:
     case GL_SAMPLER_CUBE:
+    case GL_SAMPLER_2D_SHADOW:
+    case GL_SAMPLER_2D_ARRAY:
+    case GL_SAMPLER_2D_ARRAY_SHADOW:
+    case GL_SAMPLER_CUBE_SHADOW:
+    case GL_INT_SAMPLER_2D:
+    case GL_INT_SAMPLER_3D:
+    case GL_INT_SAMPLER_CUBE:
+    case GL_INT_SAMPLER_2D_ARRAY:
+    case GL_UNSIGNED_INT_SAMPLER_2D:
+    case GL_UNSIGNED_INT_SAMPLER_3D:
+    case GL_UNSIGNED_INT_SAMPLER_CUBE:
+    case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
         retval = 4;
+        break;
+    case GL_UNSIGNED_SHORT_4_4_4_4:
+    case GL_UNSIGNED_SHORT_5_5_5_1:
+    case GL_UNSIGNED_SHORT_5_6_5:
+    case GL_UNSIGNED_SHORT_4_4_4_4_REV_EXT:
+    case GL_UNSIGNED_SHORT_1_5_5_5_REV_EXT:
+        retval = 2;
+        break;
+    case GL_INT_2_10_10_10_REV:
+    case GL_UNSIGNED_INT_10F_11F_11F_REV:
+    case GL_UNSIGNED_INT_5_9_9_9_REV:
+    case GL_UNSIGNED_INT_2_10_10_10_REV:
+    case GL_UNSIGNED_INT_24_8_OES:;
+        retval = 4;
+        break;
+    case GL_FLOAT_32_UNSIGNED_INT_24_8_REV:
+        retval = 4 + 4;
         break;
     default:
         ERR("**** ERROR unknown type 0x%x (%s,%d)\n", type, __FUNCTION__,__LINE__);
+        retval = 4;
     }
     return retval;
 
