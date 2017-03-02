@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1b86edbb_17e73f00",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-02T22:03:38Z",
+      "side": 1,
+      "message": "possible to get 2x3,3x2,3x4,4x3 matrices, (i)sampler2(3)d(MS), as well? it\u0027s only for es 3 and up and can probably wait though.",
+      "range": {
+        "startLine": 46,
+        "startChar": 50,
+        "endLine": 46,
+        "endChar": 57
+      },
+      "revId": "33d3f170273f7ec5ee0ae801d65ef4af6c4aa7c2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
