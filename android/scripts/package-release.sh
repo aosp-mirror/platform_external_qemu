@@ -656,7 +656,8 @@ build_darwin_binaries_on () {
             "$DARWIN_KERNEL_PREBUILTS"/x86/pc-bios
 
     for LIB in qemu-android-deps curl common/e2fsprogs common/libxml2 \
-            common/breakpad qt common/ANGLE common/x264 common/ffmpeg; do
+            common/breakpad qt common/ANGLE common/x264 common/ffmpeg \
+            common/lz4; do
         if [ ! -d "$AOSP_BUILD_PREBUILTS/$LIB/darwin-x86_64" ]; then
             panic "Missing $LIB Darwin prebuilts!"
         fi
