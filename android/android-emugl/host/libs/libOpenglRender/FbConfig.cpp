@@ -184,6 +184,14 @@ int FbConfigList::chooseConfig(const EGLint* attribs,
                 wantSwapPreserved = true;
             }
         }
+
+        // Reject config if guest asked for ES3 and we don't have it.
+        if (attribs[numAttribs] == EGL_RENDERABLE_TYPE) {
+            if (attribs[numAttribs + 1] & EGL_OPENGL_ES3_BIT_KHR &&
+                (calcMaxVersionFromDispatch() < GLES_DISPATCH_MAX_VERSION_3_0)) {
+                return 0;
+            }
+        }
         numAttribs += 2;
     }
 
