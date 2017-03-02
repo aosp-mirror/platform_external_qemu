@@ -15,6 +15,7 @@
 */
 
 #include "ProgramData.h"
+#include "OpenglCodecCommon/glUtils.h"
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
@@ -24,6 +25,81 @@
 
 #include <string.h>
 #include <unordered_set>
+
+struct uniforms_type_name {
+    GLenum      type;
+    const char* name;
+} type_names [] = {
+    GL_INVALID_ENUM,                              "invalid",
+    GL_FLOAT,                                     "float",
+    GL_FLOAT_VEC2,                                "vec2",
+    GL_FLOAT_VEC3,                                "vec3",
+    GL_FLOAT_VEC4,                                "vec4",
+    GL_INT,                                       "int",
+    GL_INT_VEC2,                                  "ivec2",
+    GL_INT_VEC3,                                  "ivec3",
+    GL_INT_VEC4,                                  "ivec4",
+    GL_UNSIGNED_INT,                              "unsigned int",
+    GL_UNSIGNED_INT_VEC2,                         "uvec2",
+    GL_UNSIGNED_INT_VEC3,                         "uvec3",
+    GL_UNSIGNED_INT_VEC4,                         "uvec4",
+    GL_BOOL,                                      "bool",
+    GL_BOOL_VEC2,                                 "bvec2",
+    GL_BOOL_VEC3,                                 "bvec3",
+    GL_BOOL_VEC4,                                 "bvec4",
+    GL_FLOAT_MAT2,                                "mat2",
+    GL_FLOAT_MAT3,                                "mat3",
+    GL_FLOAT_MAT4,                                "mat4",
+    GL_FLOAT_MAT2x3,                              "mat2x3",
+    GL_FLOAT_MAT2x4,                              "mat2x4",
+    GL_FLOAT_MAT3x2,                              "mat3x2",
+    GL_FLOAT_MAT3x4,                              "mat3x4",
+    GL_FLOAT_MAT4x2,                              "mat4x2",
+    GL_FLOAT_MAT4x3,                              "mat4x3",
+    GL_SAMPLER_2D,                                "sampler2D",
+    GL_SAMPLER_3D,                                "sampler3D",
+    GL_SAMPLER_CUBE,                              "samplerCube",
+    GL_SAMPLER_2D_SHADOW,                         "sampler2DShadow",
+    GL_SAMPLER_2D_ARRAY,                          "sampler2DArray",
+    GL_SAMPLER_2D_ARRAY_SHADOW,                   "sampler2DArrayShadow",
+    GL_SAMPLER_CUBE_SHADOW,                       "samplerCubeShadow",
+    GL_INT_SAMPLER_2D,                            "isampler2D",
+    GL_INT_SAMPLER_3D,                            "isampler3D",
+    GL_INT_SAMPLER_CUBE,                          "isamplerCube",
+    GL_INT_SAMPLER_2D_ARRAY,                      "isampler2DArray",
+    GL_UNSIGNED_INT_SAMPLER_2D,                   "usampler2D",
+    GL_UNSIGNED_INT_SAMPLER_3D,                   "usampler3D",
+    GL_UNSIGNED_INT_SAMPLER_CUBE,                 "usamplerCube",
+    GL_UNSIGNED_INT_SAMPLER_2D_ARRAY,             "usampler2DArray",
+};
+
+void logUniforms(GLuint program) {
+    GLint cnt;
+    GLchar name[256];
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+    dispatcher.glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &cnt);
+
+    for (int i = 0; i < cnt; i++) {
+        GLint size;
+        GLenum type;
+        GLint location;
+
+        dispatcher.glGetActiveUniform(program, i, 255, NULL, &size, &type, name);
+        location = dispatcher.glGetUniformLocation(program, name);
+
+        for (unsigned int j = 0; j < sizeof(type_names)/sizeof(uniforms_type_name); j++) {
+            if (type_names[j].type != type)
+                continue;
+            if (size > 1)
+                printf ("Uniform %d (loc=%d):\t%15s %-15s <Size: %d>\n",
+                        i, location, type_names[j].name, name, size);
+            else
+                printf ("Uniform %d (loc=%d):\t%15s %-15s\n",
+                        i, location, type_names[j].name, name);
+            break;
+        }
+    }
+}
 
 GLUniformDesc::GLUniformDesc(GLint location, GLsizei count, GLboolean transpose,
             GLenum type, GLsizei size, unsigned char* val)
@@ -85,6 +161,114 @@ ProgramData::ProgramData(android::base::Stream* stream) :
     DeleteStatus = stream->getByte();
 }
 
+void getUniformValue(GLuint pname, GLchar *name, GLenum type,
+                     std::unordered_map<GLuint, GLUniformDesc> &uniformsOnSave) {
+    unsigned char val[256];     //Large enought to hold MAT4x4
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+
+    GLint location = dispatcher.glGetUniformLocation(pname, name);
+    switch(type) {
+    case GL_FLOAT:
+    case GL_FLOAT_VEC2:
+    case GL_FLOAT_VEC3:
+    case GL_FLOAT_VEC4:
+    case GL_FLOAT_MAT2:
+    case GL_FLOAT_MAT3:
+    case GL_FLOAT_MAT4:
+    case GL_FLOAT_MAT2x3:
+    case GL_FLOAT_MAT2x4:
+    case GL_FLOAT_MAT3x2:
+    case GL_FLOAT_MAT3x4:
+    case GL_FLOAT_MAT4x2:
+    case GL_FLOAT_MAT4x3:
+        dispatcher.glGetUniformfv(pname, location, (GLfloat *)val);
+        break;
+    case GL_INT:
+    case GL_INT_VEC2:
+    case GL_INT_VEC3:
+    case GL_INT_VEC4:
+    case GL_BOOL:
+    case GL_BOOL_VEC2:
+    case GL_BOOL_VEC3:
+    case GL_BOOL_VEC4:
+    case GL_SAMPLER_2D:
+    case GL_SAMPLER_3D:
+    case GL_SAMPLER_CUBE:
+    case GL_SAMPLER_2D_SHADOW:
+    case GL_SAMPLER_2D_ARRAY:
+    case GL_SAMPLER_2D_ARRAY_SHADOW:
+    case GL_SAMPLER_CUBE_SHADOW:
+    case GL_INT_SAMPLER_2D:
+    case GL_INT_SAMPLER_3D:
+    case GL_INT_SAMPLER_CUBE:
+    case GL_INT_SAMPLER_2D_ARRAY:
+    case GL_UNSIGNED_INT_SAMPLER_2D:
+    case GL_UNSIGNED_INT_SAMPLER_3D:
+    case GL_UNSIGNED_INT_SAMPLER_CUBE:
+    case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
+        dispatcher.glGetUniformiv(pname, location, (GLint *)val);
+        break;
+    case GL_UNSIGNED_INT:
+    case GL_UNSIGNED_INT_VEC2:
+    case GL_UNSIGNED_INT_VEC3:
+    case GL_UNSIGNED_INT_VEC4:
+        dispatcher.glGetUniformuiv(pname, location, (GLuint *)val);
+        break;
+    default:
+        fprintf(stderr, "ProgramData::gtUniformValue: warning: "
+                "unsupported uniform type 0x%x\n", type);
+        return;
+    }
+    GLUniformDesc uniformDesc(location, 1, 0, /*transpose*/
+        type, glSizeof(type), val);
+    uniformsOnSave[location] = std::move(uniformDesc);
+}
+
+// Query uniform variables from driver
+void collectUniformInfo(GLuint pname, std::unordered_map<GLuint, GLUniformDesc> &uniformsOnSave) {
+    GLint uniform_count = 0;
+    GLchar *name;
+    GLint nameLength = 0;
+    GLint size;
+    GLenum type;
+    GLsizei length;
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+
+    dispatcher.glGetProgramiv(pname, GL_ACTIVE_UNIFORM_MAX_LENGTH, &nameLength);
+    if (nameLength == 0) {
+        // No active uniform variables exist.
+        return;
+    }
+    name = (GLchar *)malloc((nameLength + 3) * sizeof(GLchar));
+    if (!name) {
+        fprintf(stderr, "ProgramData::collectUniformInfo: error: "
+                "allocate memory failed!\n");
+        return;
+    }
+    dispatcher.glGetProgramiv(pname, GL_ACTIVE_UNIFORMS, &uniform_count);
+    for (int i = 0; i < uniform_count; i++) {
+        dispatcher.glGetActiveUniform(pname, i, 255, &length, &size, &type, name);
+        if (size > 1) {
+            // Uniform array, dirvers may return 'arrayName' or 'arrayName[0]'
+            if(strncmp(name + length -3, "[0]", 3) != 0) {
+                name[length] = '[';
+                name[length + 1] = '0';
+                name[length + 2] = ']';
+                name[length + 3] = 0;
+                length += 3;
+            }
+            for (int i = 0; i < size; i++) {
+                name[length - 2] = '0' + i;
+                getUniformValue(pname, name, type, uniformsOnSave);
+            }
+        }
+        else {
+            getUniformValue(pname, name, type, uniformsOnSave);
+        }
+    }
+    free(name);
+}
+
 void ProgramData::onSave(android::base::Stream* stream) const {
     // The first byte is used to distinguish between program and shader object.
     // It will be loaded outside of this class
@@ -100,7 +284,9 @@ void ProgramData::onSave(android::base::Stream* stream) const {
     saveCollection(stream, boundAttribLocs, saveAttribLocs);
     saveCollection(stream, linkedAttribLocs, saveAttribLocs);
 
-    saveCollection(stream, uniforms, [](android::base::Stream* stream,
+    std::unordered_map<GLuint, GLUniformDesc> uniformsOnSave;
+    collectUniformInfo(ProgramName, uniformsOnSave);
+    saveCollection(stream, uniformsOnSave, [](android::base::Stream* stream,
             const std::pair<const GLuint, GLUniformDesc>& uniform) {
         stream->putBe32(uniform.first);
         uniform.second.onSave(stream);
@@ -167,6 +353,21 @@ void ProgramData::restore(ObjectLocalName localName,
                             (const GLfloat*)uniform.mVal.data());
                     break;
                 case GL_INT:
+                case GL_SAMPLER_2D:
+                case GL_SAMPLER_3D:
+                case GL_SAMPLER_CUBE:
+                case GL_SAMPLER_2D_SHADOW:
+                case GL_SAMPLER_2D_ARRAY:
+                case GL_SAMPLER_2D_ARRAY_SHADOW:
+                case GL_SAMPLER_CUBE_SHADOW:
+                case GL_INT_SAMPLER_2D:
+                case GL_INT_SAMPLER_3D:
+                case GL_INT_SAMPLER_CUBE:
+                case GL_INT_SAMPLER_2D_ARRAY:
+                case GL_UNSIGNED_INT_SAMPLER_2D:
+                case GL_UNSIGNED_INT_SAMPLER_3D:
+                case GL_UNSIGNED_INT_SAMPLER_CUBE:
+                case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
                     dispatcher.glUniform1iv(uniformEntry.first, uniform.mCount,
                             (const GLint*)uniform.mVal.data());
                     break;
@@ -181,6 +382,22 @@ void ProgramData::restore(ObjectLocalName localName,
                 case GL_INT_VEC4:
                     dispatcher.glUniform4iv(uniformEntry.first, uniform.mCount,
                             (const GLint*)uniform.mVal.data());
+                    break;
+                case GL_UNSIGNED_INT:
+                    dispatcher.glUniform1uiv(uniformEntry.first, uniform.mCount,
+                            (const GLuint*)uniform.mVal.data());
+                    break;
+                case GL_UNSIGNED_INT_VEC2:
+                    dispatcher.glUniform2uiv(uniformEntry.first, uniform.mCount,
+                            (const GLuint*)uniform.mVal.data());
+                    break;
+                case GL_UNSIGNED_INT_VEC3:
+                    dispatcher.glUniform3uiv(uniformEntry.first, uniform.mCount,
+                            (const GLuint*)uniform.mVal.data());
+                    break;
+                case GL_UNSIGNED_INT_VEC4:
+                    dispatcher.glUniform4uiv(uniformEntry.first, uniform.mCount,
+                            (const GLuint*)uniform.mVal.data());
                     break;
                 case GL_FLOAT_MAT2:
                     dispatcher.glUniformMatrix2fv(uniformEntry.first,
@@ -197,9 +414,39 @@ void ProgramData::restore(ObjectLocalName localName,
                             uniform.mCount, uniform.mTranspose,
                             (const GLfloat*)uniform.mVal.data());
                     break;
+                case GL_FLOAT_MAT2x3:
+                    dispatcher.glUniformMatrix2x3fv(uniformEntry.first,
+                            uniform.mCount, uniform.mTranspose,
+                            (const GLfloat*)uniform.mVal.data());
+                    break;
+                case GL_FLOAT_MAT2x4:
+                    dispatcher.glUniformMatrix2x4fv(uniformEntry.first,
+                            uniform.mCount, uniform.mTranspose,
+                            (const GLfloat*)uniform.mVal.data());
+                    break;
+                case GL_FLOAT_MAT3x2:
+                    dispatcher.glUniformMatrix3x2fv(uniformEntry.first,
+                            uniform.mCount, uniform.mTranspose,
+                            (const GLfloat*)uniform.mVal.data());
+                    break;
+                case GL_FLOAT_MAT3x4:
+                    dispatcher.glUniformMatrix3x4fv(uniformEntry.first,
+                            uniform.mCount, uniform.mTranspose,
+                            (const GLfloat*)uniform.mVal.data());
+                    break;
+                case GL_FLOAT_MAT4x2:
+                    dispatcher.glUniformMatrix4x2fv(uniformEntry.first,
+                            uniform.mCount, uniform.mTranspose,
+                            (const GLfloat*)uniform.mVal.data());
+                    break;
+                case GL_FLOAT_MAT4x3:
+                    dispatcher.glUniformMatrix4x3fv(uniformEntry.first,
+                            uniform.mCount, uniform.mTranspose,
+                            (const GLfloat*)uniform.mVal.data());
+                    break;
                 default:
                     fprintf(stderr, "ProgramData::restore: warning: "
-                            "unsupported uniform type\n");
+                            "unsupported uniform type 0x%x\n", uniform.mType);
             }
         }
     }
