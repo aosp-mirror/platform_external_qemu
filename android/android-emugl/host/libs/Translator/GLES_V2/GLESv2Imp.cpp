@@ -719,6 +719,7 @@ GL_APICALL GLuint GL_APIENTRY glCreateProgram(void){
         ctx->shareGroup()->setObjectData(NamedObjectType::SHADER_OR_PROGRAM,
                                          localProgramName,
                                          ObjectDataPtr(programInfo));
+        programInfo->addProgramName(ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, localProgramName));
         return localProgramName;
     }
     return 0;
