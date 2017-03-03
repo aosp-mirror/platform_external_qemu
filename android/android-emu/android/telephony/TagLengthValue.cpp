@@ -78,7 +78,7 @@ void TagLengthValue::populateData(const char* tag, T begin, T end) {
     }
 }
 
-std::string TagLengthValue::createSizeString(size_t size) const {
+std::string TagLengthValue::createSizeString(size_t size) {
     char sizeString[16];
     if (size <= kMaxSingleByteSize) {
         snprintf(sizeString, sizeof(sizeString), "%02x",
@@ -194,4 +194,3 @@ AllRefArDo::AllRefArDo(std::initializer_list<RefArDo> refArDos) {
 }
 
 }  // namespace android
-
