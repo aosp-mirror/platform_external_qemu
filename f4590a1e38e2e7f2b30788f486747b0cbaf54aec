@@ -46,6 +46,30 @@
       "revId": "f4590a1e38e2e7f2b30788f486747b0cbaf54aec",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8287d9ee_20bbfb63",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T23:25:34Z",
+      "side": 1,
+      "message": "well, in that case there\u0027s no need to even start that iothread in the first place if not on Linux. Could you please #ifdef the code that adds \"-object iothread\" parameter as well?",
+      "parentUuid": "2dd0af85_75b0c30b",
+      "range": {
+        "startLine": 314,
+        "startChar": 0,
+        "endLine": 314,
+        "endChar": 45
+      },
+      "revId": "f4590a1e38e2e7f2b30788f486747b0cbaf54aec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
