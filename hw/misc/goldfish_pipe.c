@@ -851,7 +851,12 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
                     (intptr_t)buffers[0].data - (intptr_t)rwPtrs[0];
             unsigned i;
             for (i = 1; i < buffers_count; ++i) {
+#if !defined(TARGET_MIPS)
                 buffers[i].data = (void*)(intptr_t)(rwPtrs[i] + diffFromGuest);
+#else
+                buffers[i].data = map_guest_buffer(
+                                      rwPtrs[i], rwSizes[i], willModifyData);
+#endif
                 buffers[i].size = rwSizes[i];
                 assert(buffers[i].data != NULL);
                 assert(buffers[i].size != 0);
@@ -889,6 +894,12 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
 
             cpu_physical_memory_unmap(buffers[0].data, buffers[0].size,
                                       willModifyData, buffers[0].size);
+#if defined(TARGET_MIPS)
+            for (i = 1; i < buffers_count; ++i) {
+                cpu_physical_memory_unmap(buffers[i].data, buffers[i].size,
+                                          willModifyData, buffers[i].size);
+            }
+#endif
             break;
         }
 
