@@ -28,10 +28,10 @@ namespace android {
 // string of data.
 class TagLengthValue {
 public:
-    virtual const char* c_str() const {
+    const char* c_str() const {
         return mData.c_str();
     }
-    virtual size_t size() const {
+    size_t size() const {
         return mData.size();
     }
 protected:
@@ -49,7 +49,7 @@ protected:
     void populateData(const char* tag, T begin, T end);
 
 private:
-    std::string createSizeString(size_t size) const;
+    static std::string createSizeString(size_t size);
 
     std::string mData;
 };
@@ -155,4 +155,3 @@ public:
 };
 
 }  // namespace android
-
