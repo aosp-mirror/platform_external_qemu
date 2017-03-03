@@ -2674,7 +2674,8 @@ do_kill( ControlClient  client, char*  args )
     control_write( client, "OK: killing emulator, bye bye\r\n" );
     DINIT("Emulator killed by console kill command.\n");
     fflush(stdout);
-    exit(0);
+    client->global->libui_agent->requestExit(0, "Killed by console command");
+    return 0;
 }
 
 static int do_debug(ControlClient client, char* args) {
