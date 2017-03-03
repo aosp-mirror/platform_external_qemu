@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "3b78e2b3_e2be5ed8",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 722,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-03T18:56:52Z",
+      "side": 1,
+      "message": "warp the line?\n\nThis file does not follow our coding style, but we should try at least keep new code in the right coding style",
+      "revId": "e610851e414973d83d37418bfc41bc3a63dc2f8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "41e597d8_5f447d9f",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
         "patchSetId": 2
@@ -42,6 +59,40 @@
         "endLine": 32,
         "endChar": 2
       },
+      "revId": "e610851e414973d83d37418bfc41bc3a63dc2f8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "681875bf_9e8cb983",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-03T18:56:52Z",
+      "side": 1,
+      "message": "static? where is this function used?",
+      "revId": "e610851e414973d83d37418bfc41bc3a63dc2f8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d5a284bf_8514cdc2",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-03T18:56:52Z",
+      "side": 1,
+      "message": "same, static?",
       "revId": "e610851e414973d83d37418bfc41bc3a63dc2f8d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -203,6 +254,23 @@
         "endLine": 260,
         "endChar": 41
       },
+      "revId": "e610851e414973d83d37418bfc41bc3a63dc2f8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ff2ecdb_fe719d9a",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-03T18:56:52Z",
+      "side": 1,
+      "message": "it does not work for the case for size\u003e10",
       "revId": "e610851e414973d83d37418bfc41bc3a63dc2f8d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
