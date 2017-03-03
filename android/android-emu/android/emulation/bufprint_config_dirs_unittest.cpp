@@ -78,11 +78,7 @@ TEST(bufprint, ConfigPathWithAndroidSdkHome) {
     char buffer[32], *p = buffer, *end = buffer + sizeof(buffer);
     p = bufprint_config_path(p, end);
     EXPECT_EQ(buffer + 9, p);
-#ifdef _WIN32
     EXPECT_STREQ("/sdk-home", buffer);
-#else
-    EXPECT_STREQ("/sdk-home", buffer);
-#endif
 
     ASSERT_TRUE(sys.getTempRoot()->makeSubDir("sdk-home"));
     ASSERT_TRUE(sys.getTempRoot()->makeSubDir("sdk-home/.android"));
