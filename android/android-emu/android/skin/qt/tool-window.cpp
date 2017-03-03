@@ -209,9 +209,9 @@ void ToolWindow::raise() {
 
 void ToolWindow::hide() {
     QFrame::hide();
-
-    assert(mExtendedWindow);
-    mExtendedWindow->hide();
+    if (mExtendedWindow) {
+        mExtendedWindow->hide();
+    }
 }
 
 void ToolWindow::closeEvent(QCloseEvent* ce) {
