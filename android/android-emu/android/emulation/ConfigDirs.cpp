@@ -15,7 +15,6 @@
 #include "android/emulation/ConfigDirs.h"
 
 #include "android/base/files/PathUtils.h"
-#include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
 
@@ -24,21 +23,29 @@
 namespace android {
 
 using ::android::base::PathUtils;
-using ::android::base::ScopedCPtr;
 using ::android::base::System;
+
+// Name of the Android configuration directory under $HOME.
+static const char kAndroidSubDir[] = ".android";
+// Subdirectory for AVD data files.
+static const char kAvdSubDir[] = "avd";
 
 // static
 std::string ConfigDirs::getUserDirectory() {
-    // Name of the Android configuration directory under $HOME.
-    static const char kAndroidSubDir[] = ".android";
     System* system = System::get();
     std::string home = system->envGet("ANDROID_EMULATOR_HOME");
-    if (home.size()) {
+    if (!home.empty()) {
         return home;
     }
+
     home = system->envGet("ANDROID_SDK_HOME");
-    if (home.size()) {
-        return PathUtils::join(home, kAndroidSubDir);
+    if (!home.empty()) {
+        // In v1.9 emulator was changed to use $ANDROID_SDK_HOME/.android
+        // directory, but Android Studio has always been using $ANDROID_SDK_HOME
+        // directly. Put a workaround here to make sure it works both ways,
+        // preferring the one from AS.
+        auto homeOldWay = PathUtils::join(home, kAndroidSubDir);
+        return system->pathIsDir(homeOldWay) ? homeOldWay : home;
     }
     home = system->getHomeDirectory();
     if (home.empty()) {
@@ -52,8 +59,6 @@ std::string ConfigDirs::getUserDirectory() {
 
 // static
 std::string ConfigDirs::getAvdRootDirectory() {
-    static const char kAndroidSubDir[] = ".android";
-    static const char kAvdSubDir[] = "avd";
     System* system = System::get();
 
     std::string avdRoot = system->envGet("ANDROID_AVD_HOME");
@@ -63,12 +68,15 @@ std::string ConfigDirs::getAvdRootDirectory() {
 
     // No luck with ANDROID_AVD_HOME, try ANDROID_SDK_HOME
     avdRoot = system->envGet("ANDROID_SDK_HOME");
-
     if ( !avdRoot.empty() ) {
         // ANDROID_SDK_HOME is defined
-        avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
         if (isValidAvdRoot(avdRoot)) {
             // ANDROID_SDK_HOME is good
+            return PathUtils::join(avdRoot, kAvdSubDir);
+        }
+        avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
+        if (isValidAvdRoot(avdRoot)) {
+            // ANDROID_SDK_HOME/.android is good
             return PathUtils::join(avdRoot, kAvdSubDir);
         }
         // ANDROID_SDK_HOME is defined but bad. In this case,
@@ -110,12 +118,9 @@ std::string ConfigDirs::getSdkRootDirectoryByEnv() {
     if (sdkRoot.size()) {
         // Unquote a possibly "quoted" path.
         if (sdkRoot[0] == '"') {
-            assert(sdkRoot[sdkRoot.size() - 1] == '"');
-            // std::string does not support assigning a part of the string to
-            // itself.
-            auto copySize = sdkRoot.size() - 2;
-            ScopedCPtr<char> buf(android::base::strDup(sdkRoot));
-            sdkRoot.assign(buf.get() + 1, copySize);
+            assert(sdkRoot.back() == '"');
+            sdkRoot.erase(0, 1);
+            sdkRoot.pop_back();
         }
         if (isValidSdkRoot(sdkRoot)) {
             return sdkRoot;
@@ -150,7 +155,7 @@ std::string ConfigDirs::getSdkRootDirectory() {
 }
 
 // static
-bool ConfigDirs::isValidSdkRoot(const android::base::StringView& rootPath) {
+bool ConfigDirs::isValidSdkRoot(android::base::StringView rootPath) {
     if (rootPath.empty()) {
         return false;
     }
@@ -171,7 +176,7 @@ bool ConfigDirs::isValidSdkRoot(const android::base::StringView& rootPath) {
 }
 
 // static
-bool ConfigDirs::isValidAvdRoot(const android::base::StringView& avdPath) {
+bool ConfigDirs::isValidAvdRoot(android::base::StringView avdPath) {
     if (avdPath.empty()) {
         return false;
     }

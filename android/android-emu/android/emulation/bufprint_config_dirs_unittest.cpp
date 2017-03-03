@@ -67,7 +67,7 @@ TEST(bufprint, ConfigPathWithAndroidEmulatorHome) {
     TestSystem sys("/bin", 32);
     sys.envSet("ANDROID_EMULATOR_HOME", "/myhome");
     char buffer[32], *p = buffer, *end = buffer + sizeof(buffer);
-    p = bufprint_config_path(p, end);
+    p = bufprint_config_path(buffer, end);
     EXPECT_EQ(buffer + 7, p);
     EXPECT_STREQ("/myhome", buffer);
 }
@@ -77,6 +77,17 @@ TEST(bufprint, ConfigPathWithAndroidSdkHome) {
     sys.envSet("ANDROID_SDK_HOME", "/sdk-home");
     char buffer[32], *p = buffer, *end = buffer + sizeof(buffer);
     p = bufprint_config_path(p, end);
+    EXPECT_EQ(buffer + 9, p);
+#ifdef _WIN32
+    EXPECT_STREQ("/sdk-home", buffer);
+#else
+    EXPECT_STREQ("/sdk-home", buffer);
+#endif
+
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("sdk-home"));
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("sdk-home/.android"));
+
+    p = bufprint_config_path(buffer, end);
     EXPECT_EQ(buffer + 18, p);
 #ifdef _WIN32
     EXPECT_STREQ("/sdk-home\\.android", buffer);

@@ -70,12 +70,12 @@ struct ConfigDirs {
 private:
     // Check if the specified path is a valid AVD root path.
     // It is considered valid if it has an 'avd' subdirectory
-    static bool isValidAvdRoot(const android::base::StringView& avdPath);
+    static bool isValidAvdRoot(android::base::StringView avdPath);
 
     // Check if the specified path is a valid SDK root path.
     // It is considered valid if it has a 'platforms' subdirectory
     // and a 'platform-tools' subdirectory.
-    static bool isValidSdkRoot(const android::base::StringView& rootPath);
+    static bool isValidSdkRoot(android::base::StringView rootPath);
 };
 
 }  // namespace android
