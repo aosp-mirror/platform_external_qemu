@@ -1,0 +1,320 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ea52fe39_f6f4db9c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T17:30:16Z",
+      "side": 1,
+      "message": "makeSetPropertyMsg() ?",
+      "range": {
+        "startLine": 39,
+        "startChar": 23,
+        "endLine": 39,
+        "endChar": 36
+      },
+      "revId": "c56b8f0287cc7de50ce32f6cb8d72fdbe636f37e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb0bb8cb_1bf98c93",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T17:30:16Z",
+      "side": 1,
+      "message": "please don\u0027t put usings to headers",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 32
+      },
+      "revId": "c56b8f0287cc7de50ce32f6cb8d72fdbe636f37e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ef51b7ff_618ae667",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T17:30:16Z",
+      "side": 1,
+      "message": "1. type alias would help readability here:\n\nusing EmulatorMsgCallback \u003d std::function\u003cvoid(const EmulatorMessage\u0026 msg, const string\u0026 log)\u003e;\nvoid setSendEmulatorMsgCallback(EmulatorMsgCallback\u0026\u0026);\n2. Callbacks are usually constructed right at the place of the set(), so using \u0026\u0026 is a good practice.\n3. Please change all callback arguments to const references, unless you actually want to copy those.",
+      "range": {
+        "startLine": 30,
+        "startChar": 12,
+        "endLine": 30,
+        "endChar": 76
+      },
+      "revId": "c56b8f0287cc7de50ce32f6cb8d72fdbe636f37e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3aacb17_172f47a7",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T17:30:16Z",
+      "side": 1,
+      "message": "1. use the type alias\n2. no need to initialize to nullptr, it\u0027s a C++ class that can do it by itself.",
+      "range": {
+        "startLine": 68,
+        "startChar": 4,
+        "endLine": 69,
+        "endChar": 38
+      },
+      "revId": "c56b8f0287cc7de50ce32f6cb8d72fdbe636f37e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "399ba3dd_ab66f4e5",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T17:30:16Z",
+      "side": 1,
+      "message": "coding style requires it to be |mSendEmulatorMsg|",
+      "range": {
+        "startLine": 69,
+        "startChar": 12,
+        "endLine": 69,
+        "endChar": 27
+      },
+      "revId": "c56b8f0287cc7de50ce32f6cb8d72fdbe636f37e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "16a67ee1_ea32bf52",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T17:30:16Z",
+      "side": 1,
+      "message": "please always pass std::string objects by const reference unless you really need a copy.",
+      "range": {
+        "startLine": 70,
+        "startChar": 37,
+        "endLine": 70,
+        "endChar": 43
+      },
+      "revId": "c56b8f0287cc7de50ce32f6cb8d72fdbe636f37e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d14f8960_f60accc5",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/update_enums.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T17:30:16Z",
+      "side": 1,
+      "message": "could you please split longer lines with \"\\\" to make them readable?",
+      "revId": "c56b8f0287cc7de50ce32f6cb8d72fdbe636f37e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "43305cf6_4fb6cf61",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vehicle_constants.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T17:30:16Z",
+      "side": 1,
+      "message": "1. Please generate the copyright header too\n2. could you please add suffix \"_generated\" to the file name? this way it will be easy to get it and to see one shouldn\u0027t touch the file. Otherwise jumping directly to some enum definition can easily skip this comment",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 43
+      },
+      "revId": "c56b8f0287cc7de50ce32f6cb8d72fdbe636f37e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0eb039f2_74df8a0d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T17:30:16Z",
+      "side": 1,
+      "message": "1. use System::get()-\u003egetUnixTime() or getUnixTimeUs()\n2. please use ctime_r() - looks like it\u0027s available everywhere already",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 21
+      },
+      "revId": "c56b8f0287cc7de50ce32f6cb8d72fdbe636f37e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fc5d4101_5dd773e3",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T17:30:16Z",
+      "side": 1,
+      "message": "use lambdas instead of std::bind",
+      "range": {
+        "startLine": 40,
+        "startChar": 20,
+        "endLine": 41,
+        "endChar": 76
+      },
+      "revId": "c56b8f0287cc7de50ce32f6cb8d72fdbe636f37e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9775c70e_263c93be",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T17:30:16Z",
+      "side": 1,
+      "message": "just making sure we shouldn\u0027t include the terminating \\0 here",
+      "range": {
+        "startLine": 97,
+        "startChar": 23,
+        "endLine": 97,
+        "endChar": 34
+      },
+      "revId": "c56b8f0287cc7de50ce32f6cb8d72fdbe636f37e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4699d0c5_601c2b9f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T17:30:16Z",
+      "side": 1,
+      "message": "please no usings in headers",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 32
+      },
+      "revId": "c56b8f0287cc7de50ce32f6cb8d72fdbe636f37e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4a1a4f8_228589f3",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T17:30:16Z",
+      "side": 1,
+      "message": "const reference?",
+      "range": {
+        "startLine": 29,
+        "startChar": 38,
+        "endLine": 29,
+        "endChar": 53
+      },
+      "revId": "c56b8f0287cc7de50ce32f6cb8d72fdbe636f37e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6049e8f_d8b9c0d4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T17:30:16Z",
+      "side": 1,
+      "message": "const reference?",
+      "range": {
+        "startLine": 29,
+        "startChar": 59,
+        "endLine": 29,
+        "endChar": 65
+      },
+      "revId": "c56b8f0287cc7de50ce32f6cb8d72fdbe636f37e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
