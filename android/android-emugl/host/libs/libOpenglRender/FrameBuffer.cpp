@@ -1082,19 +1082,18 @@ bool FrameBuffer::bindContext(HandleType p_context,
 
 HandleType FrameBuffer::createClientImage(HandleType context, EGLenum target, GLuint buffer)
 {
-    RenderContextPtr ctx;
-
+    EGLContext eglContext = EGL_NO_CONTEXT;
     if (context) {
-        RenderContextMap::iterator r( m_contexts.find(context) );
-        if (r == m_contexts.end()) {
+        emugl::Mutex::AutoLock mutex(m_lock);
+        RenderContextMap::const_iterator rcIt = m_contexts.find(context);
+        if (rcIt == m_contexts.end()) {
             // bad context handle
             return false;
         }
-
-        ctx = (*r).second;
+        eglContext =
+                rcIt->second ? rcIt->second->getEGLContext() : EGL_NO_CONTEXT;
     }
 
-    EGLContext eglContext = ctx ? ctx->getEGLContext() : EGL_NO_CONTEXT;
     EGLImageKHR image = s_egl.eglCreateImageKHR(
                             m_eglDisplay, eglContext, target,
                             reinterpret_cast<EGLClientBuffer>(buffer), NULL);
