@@ -25,6 +25,10 @@ typedef struct QAndroidLibuiAgent {
     // using |sendFunc|.
     bool (*convertUtf8ToKeyCodeEvents)(
             const unsigned char* text, int len, LibuiKeyCodeSendFunc sendFunc);
+
+    // Requests UI code to gracefully shut down and exit. Doesn't wait for it to
+    // complete.
+    void (*requestExit)(int exitCode, const char* message);
 } QAndroidLibuiAgent;
 
 ANDROID_END_HEADER
