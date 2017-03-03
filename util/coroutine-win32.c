@@ -72,12 +72,16 @@ static void CALLBACK coroutine_trampoline(void *co_)
 
 Coroutine *qemu_coroutine_new(void)
 {
+<<<<<<< HEAD   (4dcc3e Merge "[snapshot] Support GL_DEPTH_STENCIL texture format" i)
 #if defined(_WIN32) && !defined(_WIN64)
     const size_t stack_size = 1 << 18;
 #else
     const size_t stack_size = 1 << 20;
 #endif
 
+=======
+    const size_t stack_size = COROUTINE_STACK_SIZE;
+>>>>>>> BRANCH (0737f3 Update version for v2.8.0 release)
     CoroutineWin32 *co;
 
     co = g_malloc0(sizeof(*co));
