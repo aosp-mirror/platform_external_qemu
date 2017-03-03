@@ -705,14 +705,26 @@ static void get_pci_host_devaddr(Object *obj, Visitor *v, const char *name,
     DeviceState *dev = DEVICE(obj);
     Property *prop = opaque;
     PCIHostDeviceAddress *addr = qdev_get_prop_ptr(dev, prop);
-    char buffer[] = "xxxx:xx:xx.x";
+    char buffer[] = "ffff:ff:ff.f";
     char *p = buffer;
     int rc = 0;
 
+<<<<<<< HEAD   (4dcc3e Merge "[snapshot] Support GL_DEPTH_STENCIL texture format" i)
     rc = snprintf(buffer, sizeof(buffer), "%04x:%02x:%02x.%d",
                   addr->domain, addr->bus, addr->slot, addr->function);
     assert(rc == sizeof(buffer) - 1);
     (void)rc;
+=======
+    /*
+     * Catch "invalid" device reference from vfio-pci and allow the
+     * default buffer representing the non-existant device to be used.
+     */
+    if (~addr->domain || ~addr->bus || ~addr->slot || ~addr->function) {
+        rc = snprintf(buffer, sizeof(buffer), "%04x:%02x:%02x.%0d",
+                      addr->domain, addr->bus, addr->slot, addr->function);
+        assert(rc == sizeof(buffer) - 1);
+    }
+>>>>>>> BRANCH (0737f3 Update version for v2.8.0 release)
 
     visit_type_str(v, name, &p, errp);
 }
