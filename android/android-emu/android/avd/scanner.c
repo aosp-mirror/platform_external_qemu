@@ -38,21 +38,19 @@ AvdScanner* avdScanner_new(const char* sdk_home) {
     char* end = p + sizeof(s->temp);
 
     if (!sdk_home) {
-        p = bufprint_config_path(p, end);
+        p = bufprint_avd_home_path(p, end);
     } else {
-        p = bufprint(p, end, "%s", sdk_home);
+        p = bufprint(p, end, "%s" PATH_SEP ANDROID_AVD_DIR, sdk_home);
     }
 
-    // Build the path to $ANDROID_SDK_HOME/avd/
-    p = bufprint(p, end, "%s", PATH_SEP ANDROID_AVD_DIR);
     if (p >= end) {
         // Path is too long, no search will be performed.
         D("Path too long: %s\n", s->temp);
         return s;
     }
-    if (!path_exists(s->temp)) {
+    if (!path_is_dir(s->temp)) {
         // Path does not exist, no search will be performed.
-        D("Path does not exist: %s\n", s->temp);
+        D("Path is not a directory: %s\n", s->temp);
         return s;
     }
     s->scanner = dirScanner_new(s->temp);
