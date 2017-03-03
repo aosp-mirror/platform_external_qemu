@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "41e597d8_5f447d9f",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2813,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-03T18:48:35Z",
+      "side": 1,
+      "message": "Do we still need these then?",
+      "range": {
+        "startLine": 2813,
+        "startChar": 0,
+        "endLine": 2813,
+        "endChar": 70
+      },
+      "revId": "e610851e414973d83d37418bfc41bc3a63dc2f8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
