@@ -22,6 +22,30 @@
       "revId": "f4590a1e38e2e7f2b30788f486747b0cbaf54aec",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2dd0af85_75b0c30b",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-03-03T23:13:21Z",
+      "side": 1,
+      "message": "Change 9ffe337c083 introduces more stringent checks to see if ioeventfd is actually available when use of iothread is requested. Causing early termination on MacOs \u0026 Windows.\n\nI will bring back the modern-pio-notify flag, as that should not be left out.",
+      "parentUuid": "7269f1e7_78ab80fe",
+      "range": {
+        "startLine": 314,
+        "startChar": 0,
+        "endLine": 314,
+        "endChar": 45
+      },
+      "revId": "f4590a1e38e2e7f2b30788f486747b0cbaf54aec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
