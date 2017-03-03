@@ -22,6 +22,190 @@
       "revId": "e610851e414973d83d37418bfc41bc3a63dc2f8d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1f6c83be_05ce7413",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T18:52:01Z",
+      "side": 1,
+      "message": "const ?",
+      "range": {
+        "startLine": 32,
+        "startChar": 1,
+        "endLine": 32,
+        "endChar": 2
+      },
+      "revId": "e610851e414973d83d37418bfc41bc3a63dc2f8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4d8605c_f81dd613",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T18:52:01Z",
+      "side": 1,
+      "message": "will it be aligned enough? some opengl drivers use sse instruction to read/write data, and passing char array as float* could kill it\nalignas(double) ?",
+      "range": {
+        "startLine": 166,
+        "startChar": 4,
+        "endLine": 166,
+        "endChar": 62
+      },
+      "revId": "e610851e414973d83d37418bfc41bc3a63dc2f8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d500a911_b58e4776",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T18:52:01Z",
+      "side": 1,
+      "message": "please change the function interface to return unordered_map\u003c\u003e by value, it\u0027s just cleaner",
+      "range": {
+        "startLine": 228,
+        "startChar": 5,
+        "endLine": 228,
+        "endChar": 23
+      },
+      "revId": "e610851e414973d83d37418bfc41bc3a63dc2f8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0da42fb9_1204afbe",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T18:52:01Z",
+      "side": 1,
+      "message": "declare variables on the first use",
+      "range": {
+        "startLine": 229,
+        "startChar": 0,
+        "endLine": 235,
+        "endChar": 55
+      },
+      "revId": "e610851e414973d83d37418bfc41bc3a63dc2f8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3487364c_23683a45",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T18:52:01Z",
+      "side": 1,
+      "message": "please use std::vector\u003cchar\u003e or std::string instead of manual memory management",
+      "range": {
+        "startLine": 242,
+        "startChar": 3,
+        "endLine": 242,
+        "endChar": 63
+      },
+      "revId": "e610851e414973d83d37418bfc41bc3a63dc2f8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6e93684e_db378fe8",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T18:52:01Z",
+      "side": 1,
+      "message": "nit:typo",
+      "range": {
+        "startLine": 252,
+        "startChar": 30,
+        "endLine": 252,
+        "endChar": 37
+      },
+      "revId": "e610851e414973d83d37418bfc41bc3a63dc2f8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e38d7b44_e8be77bd",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T18:52:01Z",
+      "side": 1,
+      "message": "why do you need to modify this name?",
+      "range": {
+        "startLine": 253,
+        "startChar": 1,
+        "endLine": 258,
+        "endChar": 28
+      },
+      "revId": "e610851e414973d83d37418bfc41bc3a63dc2f8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a0690c2_026e0009",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T18:52:01Z",
+      "side": 1,
+      "message": "different loop variable name?",
+      "range": {
+        "startLine": 260,
+        "startChar": 16,
+        "endLine": 260,
+        "endChar": 41
+      },
+      "revId": "e610851e414973d83d37418bfc41bc3a63dc2f8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
