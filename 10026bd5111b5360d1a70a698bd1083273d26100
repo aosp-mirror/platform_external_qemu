@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c9dab176_2e2690be",
+        "filename": "android/android-emu/android/skin/LibuiAgent.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-03T04:40:52Z",
+      "side": 1,
+      "message": "nit: add comments labeling names of agent struct members?",
+      "range": {
+        "startLine": 66,
+        "startChar": 8,
+        "endLine": 66,
+        "endChar": 10
+      },
+      "revId": "10026bd5111b5360d1a70a698bd1083273d26100",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
