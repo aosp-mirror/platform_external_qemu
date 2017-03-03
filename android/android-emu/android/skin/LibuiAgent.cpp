@@ -12,6 +12,7 @@
 
 #include "android/skin/charmap.h"
 #include "android/skin/keycode-buffer.h"
+#include "android/skin/winsys.h"
 
 static int utf8_next(const unsigned char** pp, const unsigned char* end) {
     const unsigned char* p = *pp;
@@ -62,6 +63,10 @@ static const QAndroidLibuiAgent kLibuiAgent = {
                 skin_keycode_buffer_flush(&keycodes);
             }
             return true;
+        },
+        [](int exitCode, const char* message) {
+            // Unfortunately we don't have any way of passing code/message now.
+            skin_winsys_quit_request();
         }};
 
 const QAndroidLibuiAgent* const gQAndroidLibuiAgent = &kLibuiAgent;
