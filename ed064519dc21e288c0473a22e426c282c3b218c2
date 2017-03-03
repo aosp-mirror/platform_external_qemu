@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "182853dc_a5fa289e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T21:39:55Z",
+      "side": 1,
+      "message": "std::move(func)",
+      "range": {
+        "startLine": 143,
+        "startChar": 23,
+        "endLine": 143,
+        "endChar": 27
+      },
+      "revId": "ed064519dc21e288c0473a22e426c282c3b218c2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44732100_02de66ea",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T21:39:55Z",
+      "side": 1,
+      "message": "nit: why did you move all strings out of the function call? \"D\" is automatically convertible to std::string(\"D\") so there\u0027s no need to construct it separately.",
+      "range": {
+        "startLine": 148,
+        "startChar": 8,
+        "endLine": 148,
+        "endChar": 24
+      },
+      "revId": "ed064519dc21e288c0473a22e426c282c3b218c2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "488db6ed_e7cb968b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T21:39:55Z",
+      "side": 1,
+      "message": "nit: please move this into the class, before the setSendEmulatorMsgCallback() function.",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 52
+      },
+      "revId": "ed064519dc21e288c0473a22e426c282c3b218c2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7af06ec_a7155594",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T21:39:55Z",
+      "side": 1,
+      "message": "FYI: this top-level const in function declaration doesn\u0027t mean anything, and is ignored by the Standard.",
+      "range": {
+        "startLine": 67,
+        "startChar": 27,
+        "endLine": 67,
+        "endChar": 32
+      },
+      "revId": "ed064519dc21e288c0473a22e426c282c3b218c2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "442c666b_bba0795f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/vehicle_constants_generated.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T21:39:55Z",
+      "side": 1,
+      "message": "\"namespace\" and \"enum class\" are pure C++ constructs, so this header won\u0027t work with C. ANDROID_BEGIN_HEADER is something that makes header work with both C and C++, so it\u0027s not needed here (together with the #include)",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 20
+      },
+      "revId": "ed064519dc21e288c0473a22e426c282c3b218c2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f7771844_adeeeee6",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T21:39:55Z",
+      "side": 1,
+      "message": "please initialize it as \" \u003d {}\" here, to make sure that function returns \"\" if ctime() fails",
+      "range": {
+        "startLine": 31,
+        "startChar": 19,
+        "endLine": 31,
+        "endChar": 20
+      },
+      "revId": "ed064519dc21e288c0473a22e426c282c3b218c2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "803e8e71_1308ab51",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T21:39:55Z",
+      "side": 1,
+      "message": "nit: capture only what you need, [this] is enough here",
+      "range": {
+        "startLine": 42,
+        "startChar": 21,
+        "endLine": 42,
+        "endChar": 22
+      },
+      "revId": "ed064519dc21e288c0473a22e426c282c3b218c2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "89fcc167_e2876729",
+        "filename": "android/android-emu/android/skin/qt/sources.mk",
+        "patchSetId": 8
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-03T21:39:55Z",
+      "side": 1,
+      "message": "just realized that this list is for Qt moc files that defines Q_OBJECT-related classes. I doubt you need to add it here as there are no Qt-related classes in the file",
+      "range": {
+        "startLine": 108,
+        "startChar": 1,
+        "endLine": 108,
+        "endChar": 85
+      },
+      "revId": "ed064519dc21e288c0473a22e426c282c3b218c2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
