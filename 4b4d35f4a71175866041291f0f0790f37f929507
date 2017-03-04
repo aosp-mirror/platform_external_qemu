@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "f9a8ba52_7096b05e",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-04T01:09:16Z",
+      "side": 1,
+      "message": "You are right, I should just put the declaration in iface.",
+      "parentUuid": "94eaaa3a_2f91b845",
+      "range": {
+        "startLine": 147,
+        "startChar": 24,
+        "endLine": 147,
+        "endChar": 48
+      },
+      "revId": "4b4d35f4a71175866041291f0f0790f37f929507",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bcd5d150_3fac72bd",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureData.cpp",
         "patchSetId": 8
