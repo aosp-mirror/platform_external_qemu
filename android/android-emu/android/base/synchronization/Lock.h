@@ -15,6 +15,7 @@
 #pragma once
 
 #include "android/base/Compiler.h"
+#include "android/base/Debug.h"
 
 #ifdef _WIN32
 #  define WIN32_LEAN_AND_MEAN 1
@@ -37,13 +38,10 @@ class Lock {
 public:
     using AutoLock = android::base::AutoLock;
 
+    constexpr Lock() = default;
 #ifdef _WIN32
-    Lock() = default;
     ~Lock() = default;
 #else
-    Lock() {
-        ::pthread_mutex_init(&mLock, NULL);
-    }
     ~Lock() {
         ::pthread_mutex_destroy(&mLock);
     }
@@ -52,14 +50,18 @@ public:
     // Acquire the lock.
     void lock() {
 #ifdef _WIN32
-      ::AcquireSRWLockExclusive(&mLock);
+        ::AcquireSRWLockExclusive(&mLock);
 #else
-      ::pthread_mutex_lock(&mLock);
+        ::pthread_mutex_lock(&mLock);
 #endif
+        ANDROID_IF_DEBUG(mIsLocked = true;)
     }
+
+    ANDROID_IF_DEBUG(bool isLocked() const { return mIsLocked; })
 
     // Release the lock.
     void unlock() {
+        ANDROID_IF_DEBUG(mIsLocked = false;)
 #ifdef _WIN32
        ::ReleaseSRWLockExclusive(&mLock);
 #else
@@ -76,10 +78,12 @@ private:
     // contention.
     SRWLOCK mLock = SRWLOCK_INIT;
 #else
-    pthread_mutex_t mLock;
+    pthread_mutex_t mLock = PTHREAD_MUTEX_INITIALIZER;
 #endif
     // Both POSIX threads and WinAPI don't allow move (undefined behavior).
     DISALLOW_COPY_ASSIGN_AND_MOVE(Lock);
+
+    ANDROID_IF_DEBUG(bool mIsLocked = false;)
 };
 
 
@@ -89,7 +93,7 @@ public:
     using AutoReadLock = android::base::AutoReadLock;
 
 #ifdef _WIN32
-    ReadWriteLock() = default;
+    constexpr ReadWriteLock() = default;
     ~ReadWriteLock() = default;
     void lockRead() {
         ::AcquireSRWLockShared(&mLock);
