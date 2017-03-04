@@ -248,6 +248,30 @@
     },
     {
       "key": {
+        "uuid": "1b1e32ec_60cc24bd",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-04T00:33:17Z",
+      "side": 1,
+      "message": "I care more about the memory alignment of the |val|, not its size. If you pass |val| to any gl function it could crash if |val| is not aligned enough. And char type doesn\u0027t actually have any alignment requirements on itself, so it all falls back to default per-platform stack alignment. I\u0027s prefer to have explicit http://en.cppreference.com/w/cpp/language/alignas operator here to make sure drivers don\u0027t crash - e.g. take a look at GenericInputBuffer class in android/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h, it exists exactly for the same purpose",
+      "parentUuid": "99f28dd6_3090e713",
+      "range": {
+        "startLine": 166,
+        "startChar": 4,
+        "endLine": 166,
+        "endChar": 62
+      },
+      "revId": "e610851e414973d83d37418bfc41bc3a63dc2f8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d500a911_b58e4776",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
         "patchSetId": 2
