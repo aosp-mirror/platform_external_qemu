@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "94eaaa3a_2f91b845",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-04T00:45:10Z",
+      "side": 1,
+      "message": "Maybe it is better if I define an opaque type and cast it back to SaveableTexture?",
+      "parentUuid": "870df876_98acc8fc",
+      "range": {
+        "startLine": 147,
+        "startChar": 24,
+        "endLine": 147,
+        "endChar": 48
+      },
+      "revId": "4b4d35f4a71175866041291f0f0790f37f929507",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bcd5d150_3fac72bd",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureData.cpp",
         "patchSetId": 8
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "3f50f1a0_216a0cce",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureData.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-04T00:45:10Z",
+      "side": 1,
+      "message": "we still need it to override the pure virtual declaration in its parent class. The stuff are loaded in constructor. This function used to restore textures back to hardware GPU, but now SaveableTexture took over its job :)",
+      "parentUuid": "bcd5d150_3fac72bd",
+      "range": {
+        "startLine": 78,
+        "startChar": 0,
+        "endLine": 79,
+        "endChar": 44
+      },
+      "revId": "4b4d35f4a71175866041291f0f0790f37f929507",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "020d4d4b_0f2a9035",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 8
@@ -59,6 +107,30 @@
       "writtenOn": "2017-03-04T00:05:51Z",
       "side": 1,
       "message": "document those?",
+      "range": {
+        "startLine": 1354,
+        "startChar": 0,
+        "endLine": 1354,
+        "endChar": 20
+      },
+      "revId": "4b4d35f4a71175866041291f0f0790f37f929507",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9c1984e7_6eb8090f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 1354,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-04T00:45:10Z",
+      "side": 1,
+      "message": "my bad, this is my debug code, will remove",
+      "parentUuid": "020d4d4b_0f2a9035",
       "range": {
         "startLine": 1354,
         "startChar": 0,
