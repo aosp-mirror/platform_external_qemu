@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "b88d4219_467a31e5",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-04T01:40:42Z",
+      "side": 1,
+      "message": "I came into some recursive include issue when trying to include it in the iface. Actually let\u0027s just keep it like this, since GLEScontext is also only have a forward declaration in iface.",
+      "parentUuid": "f9a8ba52_7096b05e",
+      "range": {
+        "startLine": 147,
+        "startChar": 24,
+        "endLine": 147,
+        "endChar": 48
+      },
+      "revId": "4b4d35f4a71175866041291f0f0790f37f929507",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bcd5d150_3fac72bd",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureData.cpp",
         "patchSetId": 8
