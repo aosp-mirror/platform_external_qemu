@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dee7986a_c30db1c5",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-04T00:03:33Z",
+      "side": 1,
+      "message": "you can do it as \"[%d]\", then you do not need those \u0027[\u0027 and \u0027\\0\u0027",
+      "range": {
+        "startLine": 181,
+        "startChar": 46,
+        "endLine": 181,
+        "endChar": 54
+      },
+      "revId": "6e08463241797333adb2584b5496b594ae6a633c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b35a1eef_8c1151cd",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-04T00:03:33Z",
+      "side": 1,
+      "message": "update ProgramName on restore?",
+      "revId": "6e08463241797333adb2584b5496b594ae6a633c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
