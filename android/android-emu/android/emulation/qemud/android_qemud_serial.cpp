@@ -161,7 +161,7 @@ static int _qemud_serial_can_read(void* opaque) {
 static void _qemud_serial_read(void* opaque, const uint8_t* from, int len) {
     QemudSerial* s = static_cast<QemudSerial*>(opaque);
 
-    T("%s: received %3d bytes: '%s'", __FUNCTION__, len, quote_bytes((const void*) from, len));
+    TRACE("%s: received %3d bytes: '%s'", __FUNCTION__, len, quote_bytes((const void*) from, len));
 
     while (len > 0) {
         int avail;
@@ -310,13 +310,13 @@ void qemud_serial_send(QemudSerial* s,
         int2hex(header + LENGTH_OFFSET, LENGTH_SIZE, avail);
         int2hex(header + CHANNEL_OFFSET, CHANNEL_SIZE, channel);
 #endif
-        T("%s: '%.*s'", __FUNCTION__, HEADER_SIZE, header);
+        TRACE("%s: '%.*s'", __FUNCTION__, HEADER_SIZE, header);
         android_serialline_write(s->sl, header, HEADER_SIZE);
 
         /* insert frame header when needed */
         if (framing) {
             int2hex(frame, FRAME_HEADER_SIZE, msglen);
-            T("%s: '%.*s'", __FUNCTION__, FRAME_HEADER_SIZE, frame);
+            TRACE("%s: '%.*s'", __FUNCTION__, FRAME_HEADER_SIZE, frame);
             android_serialline_write(s->sl, frame, FRAME_HEADER_SIZE);
             avail -= FRAME_HEADER_SIZE;
             len -= FRAME_HEADER_SIZE;
@@ -324,7 +324,7 @@ void qemud_serial_send(QemudSerial* s,
         }
 
         /* write message content */
-        T("%s: '%.*s'", __FUNCTION__, avail, msg);
+        TRACE("%s: '%.*s'", __FUNCTION__, avail, msg);
         android_serialline_write(s->sl, msg, avail);
         msg += avail;
         len -= avail;

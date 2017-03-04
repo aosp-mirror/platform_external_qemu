@@ -106,7 +106,7 @@ void _qemud_pipe_send(QemudClient* client, const uint8_t* msg, int msglen) {
         assert(pipe_msg);
         memcpy(pipe_msg->message, msg, avail);
 
-        T("%s: '%.*s'", __func__, avail, msg);
+        TRACE("%s: '%.*s'", __func__, avail, msg);
 
         _qemud_pipe_append_msg(client, pipe_msg);
         android_pipe_host_signal_wake(

@@ -20,13 +20,13 @@
 #define  D(...)    VERBOSE_PRINT(qemud,__VA_ARGS__)
 #define  D_ACTIVE  VERBOSE_CHECK(qemud)
 
-/* the T(...) macro is used to dump traffic */
+/* the TRACE(...) macro is used to dump traffic */
 #define  T_ACTIVE   0
 
 #if T_ACTIVE
-#define  T(...)    VERBOSE_PRINT(qemud,__VA_ARGS__)
+#define  TRACE(...)    VERBOSE_PRINT(qemud,__VA_ARGS__)
 #else
-#define  T(...)    ((void)0)
+#define  TRACE(...)    ((void)0)
 #endif
 
 #ifndef min
