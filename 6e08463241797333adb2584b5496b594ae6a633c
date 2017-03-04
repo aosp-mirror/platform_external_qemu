@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "f5b16819_16e54395",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-04T00:36:21Z",
+      "side": 1,
+      "message": "why not std::string? .resize() allocates memory, and there\u0027s always .size() that keeps track of it.",
+      "range": {
+        "startLine": 170,
+        "startChar": 7,
+        "endLine": 170,
+        "endChar": 64
+      },
+      "revId": "6e08463241797333adb2584b5496b594ae6a633c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dee7986a_c30db1c5",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
         "patchSetId": 3
@@ -13,6 +36,30 @@
       "writtenOn": "2017-03-04T00:03:33Z",
       "side": 1,
       "message": "you can do it as \"[%d]\", then you do not need those \u0027[\u0027 and \u0027\\0\u0027",
+      "range": {
+        "startLine": 181,
+        "startChar": 46,
+        "endLine": 181,
+        "endChar": 54
+      },
+      "revId": "6e08463241797333adb2584b5496b594ae6a633c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d20de92c_92918d65",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-04T00:36:21Z",
+      "side": 1,
+      "message": "btw, sprintf() is very insecure, I\u0027d prefer to have at least snprintf() here, android::base::StringFormat() or StringAppendFormat() even",
+      "parentUuid": "dee7986a_c30db1c5",
       "range": {
         "startLine": 181,
         "startChar": 46,
