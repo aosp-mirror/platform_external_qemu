@@ -1064,44 +1064,35 @@ bool FrameBuffer::bindContext(HandleType p_context,
 }
 
 RenderContextPtr FrameBuffer::getContext(HandleType p_context) {
+    assert(m_lock.isLocked());
     return android::base::findOrDefault(m_contexts, p_context);
 }
 
 ColorBufferPtr FrameBuffer::getColorBuffer(HandleType p_colorBuffer) {
-    ColorBufferRef* cb = android::base::find(m_colorbuffers, p_colorBuffer);
-    if (!cb) {
-        return nullptr;
-    } else {
-        return cb->cb;
-    }
+    assert(m_lock.isLocked());
+    return android::base::findOrDefault(m_colorbuffers, p_colorBuffer).cb;
 }
 
 WindowSurfacePtr FrameBuffer::getWindowSurface(HandleType p_windowsurface) {
-    std::pair<WindowSurfacePtr, HandleType>* windowSurface = 
-            android::base::find(m_windows, p_windowsurface);
-    if (!windowSurface) {
-        return nullptr;
-    } else {
-        return windowSurface->first;
-    }
+    assert(m_lock.isLocked());
+    return android::base::findOrDefault(m_windows, p_windowsurface).first;
 }
 
 HandleType FrameBuffer::createClientImage(HandleType context,
                                           EGLenum target,
                                           GLuint buffer) {
-    RenderContextPtr ctx;
-
+    EGLContext eglContext = EGL_NO_CONTEXT;
     if (context) {
-        RenderContextMap::iterator r(m_contexts.find(context));
-        if (r == m_contexts.end()) {
+        emugl::Mutex::AutoLock mutex(m_lock);
+        RenderContextMap::const_iterator rcIt = m_contexts.find(context);
+        if (rcIt == m_contexts.end()) {
             // bad context handle
             return false;
         }
-
-        ctx = (*r).second;
+        eglContext =
+                rcIt->second ? rcIt->second->getEGLContext() : EGL_NO_CONTEXT;
     }
 
-    EGLContext eglContext = ctx ? ctx->getEGLContext() : EGL_NO_CONTEXT;
     EGLImageKHR image = s_egl.eglCreateImageKHR(
             m_eglDisplay, eglContext, target,
             reinterpret_cast<EGLClientBuffer>(buffer), NULL);
@@ -1128,12 +1119,9 @@ EGLBoolean FrameBuffer::destroyClientImage(HandleType image) {
         emugl::Mutex::AutoLock mutex(m_lock);
         m_procOwnedEGLImages[puid].erase(image);
         // We don't explicitly call m_procOwnedEGLImages.erase(puid) when the
-        // size
-        // reaches 0, since it could go between zero and one many times in the
-        // lifetime of a process.
-        // It will be cleaned up by cleanupProcGLObjects(puid) when the process
-        // is
-        // dead.
+        // size reaches 0, since it could go between zero and one many times in
+        // the lifetime of a process. It will be cleaned up by
+        // cleanupProcGLObjects(puid) when the process is dead.
     }
     return true;
 }
