@@ -277,6 +277,7 @@ LOCAL_SRC_FILES := \
     android/emulation/control/GooglePlayServices.cpp \
     android/emulation/control/LineConsumer.cpp \
     android/emulation/control/ScreenCapturer.cpp \
+    android/emulation/control/AdbBugReportServices.cpp \
     android/emulation/CpuAccelerator.cpp \
     android/emulation/DmaMap.cpp \
     android/emulation/GoldfishDma.cpp \
