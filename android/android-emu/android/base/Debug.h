@@ -13,6 +13,23 @@
 
 #include "android/base/system/System.h"
 
+// A macro to define piece of code only for debugging. This is useful when
+// checks are much bigger than a single assert(), e.g.:
+//  class Lock {
+//      ANDROID_IF_DEBUG(bool isLocked() { ... })
+//      ...
+//  };
+//
+//  void foo::bar() { assert(mLock.isLocked()); }
+//
+// Lock::isLocked() won't exist in release binaries at all.
+//
+#ifdef NDEBUG
+#define ANDROID_IF_DEBUG(x)
+#else   // !NDEBUG
+#define ANDROID_IF_DEBUG(x) x
+#endif  // !NDEBUG
+
 namespace android {
 namespace base {
 
