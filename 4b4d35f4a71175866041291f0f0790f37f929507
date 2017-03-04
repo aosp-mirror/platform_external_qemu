@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "870df876_98acc8fc",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-04T00:05:51Z",
+      "side": 1,
+      "message": "if this works only with the hardware\u0027s global gl state, does it need to be part of the iface? if it does, does it need to be defined here?",
+      "range": {
+        "startLine": 147,
+        "startChar": 24,
+        "endLine": 147,
+        "endChar": 48
+      },
+      "revId": "4b4d35f4a71175866041291f0f0790f37f929507",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bcd5d150_3fac72bd",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureData.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-04T00:05:51Z",
+      "side": 1,
+      "message": "remove? (why not load the stuff that was saved? (or you are not using either?))",
+      "range": {
+        "startLine": 78,
+        "startChar": 0,
+        "endLine": 79,
+        "endChar": 44
+      },
+      "revId": "4b4d35f4a71175866041291f0f0790f37f929507",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "020d4d4b_0f2a9035",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 1354,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-04T00:05:51Z",
+      "side": 1,
+      "message": "document those?",
+      "range": {
+        "startLine": 1354,
+        "startChar": 0,
+        "endLine": 1354,
+        "endChar": 20
+      },
+      "revId": "4b4d35f4a71175866041291f0f0790f37f929507",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
