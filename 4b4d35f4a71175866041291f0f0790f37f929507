@@ -168,6 +168,30 @@
     },
     {
       "key": {
+        "uuid": "20ba3d43_7e5746fd",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureData.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-04T02:27:20Z",
+      "side": 1,
+      "message": "Hmm, that still seems like something in need of a cleanup",
+      "parentUuid": "3f50f1a0_216a0cce",
+      "range": {
+        "startLine": 78,
+        "startChar": 0,
+        "endLine": 79,
+        "endChar": 44
+      },
+      "revId": "4b4d35f4a71175866041291f0f0790f37f929507",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "020d4d4b_0f2a9035",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 8
