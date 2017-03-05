@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "e8f262c9_21faf7bf",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-05T07:21:54Z",
+      "side": 1,
+      "message": "\u0026str[0] is a pointer to the buffer. std::string is guaranteed to have a contiguous memory buffer, starting with [0] and up to the terminating \\0",
+      "parentUuid": "321d956a_5e263e18",
+      "range": {
+        "startLine": 170,
+        "startChar": 7,
+        "endLine": 170,
+        "endChar": 64
+      },
+      "revId": "6e08463241797333adb2584b5496b594ae6a633c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dee7986a_c30db1c5",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
         "patchSetId": 3
