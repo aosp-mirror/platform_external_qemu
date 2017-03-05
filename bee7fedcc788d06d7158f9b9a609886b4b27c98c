@@ -22,6 +22,30 @@
       "revId": "bee7fedcc788d06d7158f9b9a609886b4b27c98c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c0df178f_6e68e77f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-03-05T17:45:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "88786e2e_f878eb79",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 55
+      },
+      "revId": "bee7fedcc788d06d7158f9b9a609886b4b27c98c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
