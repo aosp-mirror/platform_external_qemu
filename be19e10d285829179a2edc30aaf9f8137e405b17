@@ -22,6 +22,30 @@
       "revId": "be19e10d285829179a2edc30aaf9f8137e405b17",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "342b548f_aa67911b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThreadInfo.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-06T23:23:12Z",
+      "side": 1,
+      "message": "I see what you mean now; now we ensure the new syncthread ptrs are not in the map.",
+      "parentUuid": "99df6c16_6c0a5d8c",
+      "range": {
+        "startLine": 141,
+        "startChar": 12,
+        "endLine": 141,
+        "endChar": 34
+      },
+      "revId": "be19e10d285829179a2edc30aaf9f8137e405b17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
