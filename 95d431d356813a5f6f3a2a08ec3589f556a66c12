@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a3b30b2e_637d6507",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/WindowSurface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-06T22:19:34Z",
+      "side": 1,
+      "message": "lock fb here too? I realize it\u0027s onLoad though",
+      "range": {
+        "startLine": 237,
+        "startChar": 0,
+        "endLine": 239,
+        "endChar": 55
+      },
+      "revId": "95d431d356813a5f6f3a2a08ec3589f556a66c12",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
