@@ -121,6 +121,30 @@
     },
     {
       "key": {
+        "uuid": "cfcbf82c_a5b6d7a1",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-06T18:26:06Z",
+      "side": 1,
+      "message": "yes, as you can see its method is triggered here",
+      "parentUuid": "958e0e6f_45d57e36",
+      "range": {
+        "startLine": 147,
+        "startChar": 24,
+        "endLine": 147,
+        "endChar": 48
+      },
+      "revId": "4b4d35f4a71175866041291f0f0790f37f929507",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bcd5d150_3fac72bd",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureData.cpp",
         "patchSetId": 8
@@ -180,6 +204,30 @@
       "side": 1,
       "message": "Hmm, that still seems like something in need of a cleanup",
       "parentUuid": "3f50f1a0_216a0cce",
+      "range": {
+        "startLine": 78,
+        "startChar": 0,
+        "endLine": 79,
+        "endChar": 44
+      },
+      "revId": "4b4d35f4a71175866041291f0f0790f37f929507",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c6244198_2a6abe59",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureData.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-06T18:26:06Z",
+      "side": 1,
+      "message": "The other solution is to change the base method declaration to be non pure-virtual. But I would prefer to keep it for now, because if we decide to have a lazy loading of textures, we would need to add something back into this function again.",
+      "parentUuid": "20ba3d43_7e5746fd",
       "range": {
         "startLine": 78,
         "startChar": 0,
