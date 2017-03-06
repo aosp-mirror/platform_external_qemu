@@ -19,6 +19,7 @@
 #include "DispatchTables.h"
 #include "FrameBuffer.h"
 #include "RenderThreadInfo.h"
+#include "StalePtrRegistry.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
@@ -255,8 +256,7 @@ SyncThread* SyncThread::getSyncThread() {
 
     if (!tInfo->syncThread.get()) {
         DPRINT("starting a sync thread for render thread info=%p", tInfo);
-        tInfo->syncThread.reset(
-                new SyncThread(tInfo->currContext->getEGLContext()));
+        tInfo->createSyncThread();
     }
 
     return tInfo->syncThread.get();
@@ -273,5 +273,13 @@ void SyncThread::destroySyncThread() {
     tInfo->syncThread->cleanup();
     intptr_t exitStatus;
     tInfo->syncThread->wait(&exitStatus);
-    tInfo->syncThread.reset(nullptr);
+    tInfo->destroySyncThread();
+}
+
+/* static */
+SyncThread* SyncThread::getFromHandle(uint64_t alias) {
+    return RenderThreadInfo::getSyncThreadRegistry()->getPtr(
+            alias,
+            reinterpret_cast<SyncThread*>(alias) /* return cast as default */,
+            true /* remove if getting stale ptr */);
 }

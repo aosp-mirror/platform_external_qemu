@@ -752,7 +752,7 @@ static void rcTriggerWait(uint64_t eglsync_ptr,
                    "timeline=0x%llx",
                    eglsync_ptr, fenceSync, thread_ptr, timeline);
     SyncThread* syncThread =
-        reinterpret_cast<SyncThread*>(thread_ptr);
+        SyncThread::getFromHandle(thread_ptr);
     syncThread->triggerWait(fenceSync, timeline);
 }
 
@@ -775,6 +775,7 @@ static void rcCreateSyncKHR(EGLenum type,
     bool hasNativeFence =
         type == EGL_SYNC_NATIVE_FENCE_ANDROID;
 
+    emugl_sync_register_trigger_wait(rcTriggerWait);
     FenceSync* fenceSync = new FenceSync(hasNativeFence,
                                          destroy_when_signaled);
 

@@ -86,6 +86,9 @@ public:
     static SyncThread* getSyncThread();
     static void destroySyncThread();
 
+    // Safe way to get SyncThread*'s across snapshots.
+    static SyncThread* getFromHandle(uint64_t handle);
+
 private:
     // |initSyncContext| creates an EGL context expressly for calling
     // eglClientWaitSyncKHR in the processing caused by |triggerWait|.
