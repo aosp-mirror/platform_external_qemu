@@ -1847,7 +1847,7 @@ void EmulatorQtWindow::runAdbShellPowerDownAndQuit() {
             [this](const android::emulation::OptionalAdbCommandResult&) {
                 queueQuitEvent();
             },
-            android::base::System::kInfinite);
+            5000); // for qemu1, reboot -p will shutdown guest but hangs, allow 5s
 }
 
 void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
