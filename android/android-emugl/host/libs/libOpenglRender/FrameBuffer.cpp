@@ -596,7 +596,8 @@ HandleType FrameBuffer::genHandle() {
     do {
         id = ++s_nextHandle;
     } while (id == 0 || m_contexts.find(id) != m_contexts.end() ||
-             m_windows.find(id) != m_windows.end());
+             m_windows.find(id) != m_windows.end() ||
+             m_colorbuffers.find(id) != m_colorbuffers.end());
 
     return id;
 }
@@ -1350,7 +1351,18 @@ void FrameBuffer::onSave(Stream* stream) {
     //     m_prevDrawSurf
     emugl::Mutex::AutoLock mutex(m_lock);
     // set up a context because some snapshot commands try using GL
-    bind_locked();
+    ScopedBind scopedBind(this);
+    // eglPreSaveContext labels all guest context textures to be saved
+    // (textures created by the host are not saved!)
+    // eglSaveAllImages labels all EGLImages (both host and guest) to be saved
+    // and save all labeled textures and EGLImages.
+    if (s_egl.eglPreSaveContext && s_egl.eglSaveAllImages) {
+        for (const auto& ctx : m_contexts) {
+            s_egl.eglPreSaveContext(m_eglDisplay, ctx.second->getEGLContext(),
+                    stream);
+        }
+        s_egl.eglSaveAllImages(m_eglDisplay, stream);
+    }
     stream->putBe32(m_x);
     stream->putBe32(m_y);
     stream->putBe32(m_framebufferWidth);
@@ -1386,15 +1398,12 @@ void FrameBuffer::onSave(Stream* stream) {
     saveProcOwnedCollection(stream, m_procOwnedEGLImages);
     saveProcOwnedCollection(stream, m_procOwnedRenderContext);
 
-    // TODO: snapshot memory management
-
     if (s_egl.eglPostSaveContext) {
         for (const auto& ctx : m_contexts) {
             s_egl.eglPostSaveContext(m_eglDisplay, ctx.second->getEGLContext(),
                     stream);
         }
     }
-    unbind_locked();
 }
 
 bool FrameBuffer::onLoad(Stream* stream) {
@@ -1410,6 +1419,10 @@ bool FrameBuffer::onLoad(Stream* stream) {
         cleanupProcGLObjects_locked(m_procOwnedRenderContext.begin()->first);
     }
 
+    if (s_egl.eglLoadAllImages) {
+        ScopedBind scopedBind(this);
+        s_egl.eglLoadAllImages(m_eglDisplay, stream);
+    }
     m_x = stream->getBe32();
     m_y = stream->getBe32();
     m_framebufferWidth = stream->getBe32();
@@ -1436,6 +1449,7 @@ bool FrameBuffer::onLoad(Stream* stream) {
     //   manually fixing the things up.
     m_contexts.erase(0);
 
+    assert(m_colorbuffers.empty());
     loadCollection(stream, &m_colorbuffers,
                    [this](Stream* stream) -> ColorBufferMap::value_type {
         ColorBufferPtr cb(ColorBuffer::onLoad(stream, m_eglDisplay,
@@ -1459,6 +1473,9 @@ bool FrameBuffer::onLoad(Stream* stream) {
     loadProcOwnedCollection(stream, &m_procOwnedEGLImages);
     loadProcOwnedCollection(stream, &m_procOwnedRenderContext);
 
+    if (s_egl.eglPostLoadAllImages) {
+        s_egl.eglPostLoadAllImages(m_eglDisplay, stream);
+    }
     return true;
     // TODO: restore memory management
 }
