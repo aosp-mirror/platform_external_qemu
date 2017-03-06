@@ -80,9 +80,11 @@ bool RenderThreadInfo::onLoad(Stream* stream) {
     HandleType ctxHndl = stream->getBe32();
     HandleType drawSurf = stream->getBe32();
     HandleType readSurf = stream->getBe32();
-    currContext = fb->getContext(ctxHndl);
-    currDrawSurf = fb->getWindowSurface(drawSurf);
-    currReadSurf = fb->getWindowSurface(readSurf);
+    fb->lock();
+    currContext = fb->getContext_locked(ctxHndl);
+    currDrawSurf = fb->getWindowSurface_locked(drawSurf);
+    currReadSurf = fb->getWindowSurface_locked(readSurf);
+    fb->unlock();
 
     loadCollection(stream, &m_contextSet, [](Stream* stream) {
         return stream->getBe32();
@@ -90,8 +92,6 @@ bool RenderThreadInfo::onLoad(Stream* stream) {
     loadCollection(stream, &m_windowSet, [](Stream* stream) {
         return stream->getBe32();
     });
-
-    // TODO: load the remaining members.
 
     return true;
 }

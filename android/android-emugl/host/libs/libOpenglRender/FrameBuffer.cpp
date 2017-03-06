@@ -971,7 +971,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
     // if this is not an unbind operation - make sure all handles are good
     //
     if (p_context || p_drawSurface || p_readSurface) {
-        ctx = getContext(p_context);
+        ctx = getContext_locked(p_context);
         if (!ctx)
             return false;
         WindowSurfaceMap::iterator w(m_windows.find(p_drawSurface));
@@ -1064,17 +1064,17 @@ bool FrameBuffer::bindContext(HandleType p_context,
     return true;
 }
 
-RenderContextPtr FrameBuffer::getContext(HandleType p_context) {
+RenderContextPtr FrameBuffer::getContext_locked(HandleType p_context) {
     assert(m_lock.isLocked());
     return android::base::findOrDefault(m_contexts, p_context);
 }
 
-ColorBufferPtr FrameBuffer::getColorBuffer(HandleType p_colorBuffer) {
+ColorBufferPtr FrameBuffer::getColorBuffer_locked(HandleType p_colorBuffer) {
     assert(m_lock.isLocked());
     return android::base::findOrDefault(m_colorbuffers, p_colorBuffer).cb;
 }
 
-WindowSurfacePtr FrameBuffer::getWindowSurface(HandleType p_windowsurface) {
+WindowSurfacePtr FrameBuffer::getWindowSurface_locked(HandleType p_windowsurface) {
     assert(m_lock.isLocked());
     return android::base::findOrDefault(m_windows, p_windowsurface).first;
 }
@@ -1478,4 +1478,12 @@ bool FrameBuffer::onLoad(Stream* stream) {
     }
     return true;
     // TODO: restore memory management
+}
+
+void FrameBuffer::lock() {
+    m_lock.lock();
+}
+
+void FrameBuffer::unlock() {
+    m_lock.unlock();
 }
