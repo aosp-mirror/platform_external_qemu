@@ -849,7 +849,7 @@ void sotranslate_in(struct socket *so, struct sockaddr_storage *addr)
     struct sockaddr_in *sin = (struct sockaddr_in *)addr;
     struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)addr;
 
-    switch (addr->ss_family) {
+    switch (so->so_ffamily) {
     case AF_INET:
         if ((so->so_faddr.s_addr & slirp->vnetwork_mask.s_addr) ==
             slirp->vnetwork_addr.s_addr) {
