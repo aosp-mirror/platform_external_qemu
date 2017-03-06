@@ -959,6 +959,14 @@ extern "C" int main(int argc, char **argv) {
     args[n++] = "-append";
     args[n++] = ASTRDUP(append_arg.c_str());
 
+    /* Disable the GLAsyncSwap for ANGLE so far */
+    if (opts->gpu && !strncmp(opts->gpu, "angle", 5)) {
+        if (android::featurecontrol::isEnabled(android::featurecontrol::GLAsyncSwap)) {
+            android::featurecontrol::setEnabledOverride(
+                    android::featurecontrol::GLAsyncSwap, false);
+        }
+    }
+
     /* Generate a hardware-qemu.ini for this AVD. The real hardware
      * configuration is ususally stored in several files, e.g. the AVD's
      * config.ini plus the skin-specific hardware.ini.

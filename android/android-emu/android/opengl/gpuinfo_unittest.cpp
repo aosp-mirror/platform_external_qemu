@@ -550,7 +550,7 @@ TEST(parse_gpu_info_list_windows, DualGpu) {
     EXPECT_FALSE(ati_info.current_gpu);
     EXPECT_STREQ("1002", ati_info.make.c_str());
     EXPECT_STREQ("AMD Radeon (TM) R5 M335", ati_info.model.c_str());
-    EXPECT_FALSE(ati_info.device_id.empty());
+    EXPECT_STREQ("6660", ati_info.device_id.c_str());
     EXPECT_TRUE(ati_info.revision_id.empty());
     EXPECT_STREQ("15.300.1025.1001", ati_info.version.c_str());
     EXPECT_TRUE(ati_info.renderer.empty());
@@ -580,7 +580,7 @@ TEST(parse_gpu_info_list_windows, DualGpu) {
     EXPECT_FALSE(intel_info.current_gpu);
     EXPECT_STREQ("8086", intel_info.make.c_str());
     EXPECT_STREQ("Intel(R) HD Graphics 520", intel_info.model.c_str());
-    EXPECT_FALSE(intel_info.device_id.empty());
+    EXPECT_STREQ("1916", intel_info.device_id.c_str());
     EXPECT_TRUE(intel_info.revision_id.empty());
     EXPECT_STREQ("10.18.15.4281", intel_info.version.c_str());
     EXPECT_TRUE(intel_info.renderer.empty());
@@ -663,7 +663,7 @@ TEST(parse_gpu_info_list_linux, MesaDRI) {
 
 TEST(gpuinfo_query_blacklist, testBlacklist_Pos) {
     const BlacklistEntry test_list[] = {
-        {"10de", nullptr, "13ba", nullptr, nullptr, nullptr}
+        {"10de", nullptr, "13ba", nullptr, nullptr, nullptr, nullptr}
     };
 
     int test_list_len = sizeof(test_list) / sizeof(BlacklistEntry);
@@ -680,9 +680,9 @@ TEST(gpuinfo_query_blacklist, testBlacklist_Pos) {
 
 TEST(gpuinfo_query_blacklist, testBlacklist_Neg) {
     const BlacklistEntry test_list[] = {
-        {"10de", nullptr, "13ba", nullptr, nullptr, nullptr},
-        {"NVIDIA", "NVIDIA Quadro K600", nullptr, nullptr, nullptr, nullptr},
-        {"ASDF", "Intel Iris Pro", nullptr, nullptr, nullptr, nullptr}
+        {"10de", nullptr, "13ba", nullptr, nullptr, nullptr, nullptr},
+        {"NVIDIA", "NVIDIA Quadro K600", nullptr, nullptr, nullptr, nullptr, nullptr},
+        {"ASDF", "Intel Iris Pro", nullptr, nullptr, nullptr, nullptr, nullptr}
     };
 
     int test_list_len = sizeof(test_list) / sizeof(BlacklistEntry);
