@@ -49,7 +49,7 @@ public:
         mPtrs[handle] = { newptr, Staleness::PrevSnapshot };
     }
 
-    T* getPtr(uint64_t handle, bool removeFromStaleOnGet = false) {
+    T* getPtr(uint64_t handle, T* defaultPtr = nullptr, bool removeFromStaleOnGet = false) {
         android::base::AutoReadLock lock(mLock);
 
         T* res = defaultPtr;

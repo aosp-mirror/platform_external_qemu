@@ -42,6 +42,10 @@ struct RenderThreadInfo {
 
     // Return the current thread's instance, if any, or NULL.
     static RenderThreadInfo* get();
+    // Allocates |syncThread| and updates tracking.
+    void createSyncThread();
+    // The opposite.
+    void destroySyncThread();
 
     // Current EGL context, draw surface and read surface.
     RenderContextPtr currContext;
@@ -63,6 +67,8 @@ struct RenderThreadInfo {
 
     // Sync timeline info + sync thread pointer
     std::unique_ptr<SyncThread>     syncThread;
+    // Mapping to sync thread pointer value on snapshot save/load
+    uint64_t syncThreadAlias = 0;
 
     // The unique id of owner guest process of this render thread
     uint64_t                        m_puid = 0;
@@ -72,5 +78,7 @@ struct RenderThreadInfo {
     void onSave(android::base::Stream* stream);
     bool onLoad(android::base::Stream* stream);
 };
+
+SyncThread* getSyncThreadFromAlias(uint64_t alias);
 
 #endif
