@@ -10,6 +10,12 @@
     <height>740</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>Roboto</family>
+    <pointsize>10</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>File a Bug Report</string>
   </property>
@@ -21,12 +27,6 @@
   </property>
   <property name="frameShadow">
    <enum>QFrame::Raised</enum>
-  </property>
-  <property name="font">
-   <font>
-    <family>Roboto</family>
-    <pointsize>10</pointsize>
-   </font>
   </property>
   <layout class="QGridLayout" name="gridLayout" columnstretch="2,1,1">
    <property name="leftMargin">
@@ -192,24 +192,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QScrollArea" name="scrollArea_2">
-       <property name="lineWidth">
-        <number>0</number>
-       </property>
-       <property name="widgetResizable">
-        <bool>true</bool>
-       </property>
-       <widget class="QTextEdit" name="bug_reprosStepTextEdit">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>378</width>
-          <height>252</height>
-         </rect>
-        </property>
-       </widget>
-      </widget>
+      <widget class="QTextEdit" name="bug_reproStepsTextEdit"/>
      </item>
     </layout>
    </item>
@@ -226,29 +209,10 @@
       </widget>
      </item>
      <item>
-      <widget class="QScrollArea" name="scrollArea">
-       <property name="enabled">
+      <widget class="QTextEdit" name="bug_bugReportTextEdit">
+       <property name="readOnly">
         <bool>true</bool>
        </property>
-       <property name="widgetResizable">
-        <bool>true</bool>
-       </property>
-       <widget class="QLabel" name="bug_adbLogcatLabel">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>378</width>
-          <height>253</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="scaledContents">
-         <bool>false</bool>
-        </property>
-       </widget>
       </widget>
      </item>
     </layout>
