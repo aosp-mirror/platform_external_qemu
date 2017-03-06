@@ -23,13 +23,17 @@
 using android::base::StringView;
 using android::base::System;
 using android::emulation::AdbInterface;
+using android::emulation::AdbBugReportServices;
 using android::emulation::ScreenCapturer;
 
-BugReportWindow::BugReportWindow(ScreenCapturer* screenCapturer,
+BugReportWindow::BugReportWindow(AdbInterface* adb,
+                                 ScreenCapturer* screenCapturer,
                                  QWidget* parent)
     : QFrame(parent),
-      mUi(new Ui::BugReportWindow),
-      mScreenCapturer(screenCapturer) {
+      mAdb(adb),
+      mBugReportServices(adb),
+      mScreenCapturer(screenCapturer),
+      mUi(new Ui::BugReportWindow) {
 // "Tool" type windows live in another layer on top of everything in OSX, which
 // is undesirable because it means the extended window must be on top of the
 // emulator window. However, on Windows and Linux, "Tool" type windows are the
@@ -48,6 +52,7 @@ BugReportWindow::BugReportWindow(ScreenCapturer* screenCapturer,
     setFrameOnTop(this, onTop);
     mUi->setupUi(this);
 
+    mBugReportSucceed = false;
     // Get the version of this code
     android::update_check::VersionExtractor vEx;
     android::base::Version curVersion = vEx.getCurrentVersion();
@@ -63,7 +68,50 @@ BugReportWindow::BugReportWindow(ScreenCapturer* screenCapturer,
 
 void BugReportWindow::showEvent(QShowEvent* event) {
     QWidget::showEvent(event);
+    loadAdbLogcat();
     loadScreenshotImage();
+    prepareBugReportInBackground();
+}
+
+void BugReportWindow::prepareBugReportInBackground() {
+    mBugReportSucceed = false;
+    mAdbBugreportFilePath = nullptr;
+    QString savePath = getScreenshotSaveDirectory();
+    mBugReportServices.generateBugReport(
+            savePath.toStdString(),
+            [this](AdbBugReportServices::Result result, StringView filePath) {
+                if (result == AdbBugReportServices::Result::kSuccess &&
+                    System::get()->pathIsFile(filePath) &&
+                    System::get()->pathCanRead(filePath)) {
+                    mBugReportSucceed = true;
+                    mAdbBugreportFilePath = filePath;
+                } else {
+                    // TODO(wdu) Better error handling for failed adb bugreport generation
+                    mBugReportSucceed = false;
+                    showErrorDialog(tr("There was an error while generating adb bugreport"),
+                        tr("Adb Bugreport"));
+                }
+
+            });
+}
+
+void BugReportWindow::loadAdbLogcat() {
+    mUi->bug_bugReportTextEdit->setPlainText(tr("Loading..."));
+    mBugReportServices.generateAdbLogcatInMemory(
+            [this](AdbBugReportServices::Result result, StringView output) {
+                BugReportWindow::loadAdbLogcatDone(result, output);
+            });
+}
+
+void BugReportWindow::loadAdbLogcatDone(AdbBugReportServices::Result result,
+                                        android::base::StringView output) {
+    if (result == AdbBugReportServices::Result::kSuccess) {
+        mUi->bug_bugReportTextEdit->setPlainText(tr(output.c_str()));
+    } else {
+        // TODO(wdu) Better error handling for failed adb logcat generation
+        mUi->bug_bugReportTextEdit->setPlainText(
+                tr("There was an error while loading adb logact"));
+    }
 }
 
 void BugReportWindow::loadScreenshotImage() {
@@ -71,17 +119,17 @@ void BugReportWindow::loadScreenshotImage() {
     static const int DEFAULT_API_LEVEL = 1000;
     int apiLevel = avdInfo_getApiLevel(android_avdInfo);
     if (apiLevel == DEFAULT_API_LEVEL || apiLevel < MIN_SCREENSHOT_API) {
-        showErrorDialog(tr("Screenshot is not supported below API 14."),
-                        tr("Screenshot"));
+        mUi->bug_screenshotImage->setText(
+                tr("Screenshot is not supported below API 14."));
         return;
     }
 
     QString savePath = getScreenshotSaveDirectory();
     if (savePath.isEmpty()) {
-        showErrorDialog(tr("The screenshot save location is not set.<br/>"
-                           "Check the settings page and ensure the directory "
-                           "exists and is writeable."),
-                        tr("Screenshot"));
+        mUi->bug_screenshotImage->setText(
+                tr("The screenshot save location is not set.<br/>"
+                   "Check the settings page and ensure the directory "
+                   "exists and is writeable."));
         return;
     }
     mUi->bug_screenshotImage->setText(tr("Loading..."));
