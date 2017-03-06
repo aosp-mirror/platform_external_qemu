@@ -751,8 +751,7 @@ static void rcTriggerWait(uint64_t eglsync_ptr,
                    "thread_ptr=0x%llx "
                    "timeline=0x%llx",
                    eglsync_ptr, fenceSync, thread_ptr, timeline);
-    SyncThread* syncThread =
-        reinterpret_cast<SyncThread*>(thread_ptr);
+    SyncThread* syncThread = getSyncThreadFromAlias(thread_ptr);
     syncThread->triggerWait(fenceSync, timeline);
 }
 

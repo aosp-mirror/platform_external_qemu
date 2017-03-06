@@ -16,7 +16,9 @@
 
 #include "RenderThreadInfo.h"
 
+#include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
+#include "android/base/memory/LazyInstance.h"
 
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/thread_store.h"
@@ -47,6 +49,10 @@ RenderThreadInfo* RenderThreadInfo::get() {
     return static_cast<RenderThreadInfo*>(s_tls->get());
 }
 
+static android::base::LazyInstance<
+           std::unordered_map<uint64_t, SyncThread*> > sSyncThreadMap =
+    LAZY_INSTANCE_INIT;
+
 void RenderThreadInfo::onSave(Stream* stream) {
     if (currContext) {
         stream->putBe32(currContext->getHndl());
@@ -71,6 +77,18 @@ void RenderThreadInfo::onSave(Stream* stream) {
         stream->putBe32(val);
     });
 
+    if (syncThread.get()) {
+        uint64_t virtualSyncThreadId = (uint64_t)(uintptr_t)syncThread.get();
+        fprintf(stderr, "%s: creating temp virtual syncthread 0x%llx\n", __func__,
+                (unsigned long long)virtualSyncThreadId);
+        // We don't care about saving |sSyncThreadMap|
+        // since all the entries will come back
+        // when we load (from saved |syncThreadAlias|)
+        sSyncThreadMap.get()[virtualSyncThreadId] = syncThread.get();
+        syncThreadAlias = virtualSyncThreadId;
+    }
+    stream->putBe64(syncThreadAlias);
+
     // TODO: save the remaining members.
 }
 
@@ -91,7 +109,41 @@ bool RenderThreadInfo::onLoad(Stream* stream) {
         return stream->getBe32();
     });
 
+    syncThreadAlias = stream->getBe64();
+
+    if (syncThreadAlias) {
+        // We need to create a new sync thread super early if
+        // we are restoring renderthreadinfo, since there could be a pending
+        // rcTriggerWait.
+        // Additionally, that rcTriggerWait most likely uses the old pointer value,
+        // so we need to remap it to the new one temporarily.
+        // If not, rcTriggerWait refers to a garbage pointer and undefined
+        // behavior results.
+        syncThread.reset(new SyncThread(currContext->getEGLContext()));
+        sSyncThreadMap.get()[syncThreadAlias] = syncThread.get();
+        fprintf(stderr, "%s: the temp alias for syncthread 0x%llx -> %p\n", __func__,
+                (unsigned long long)syncThreadAlias,
+                syncThread.get());
+        // Note that the values in sSyncThreadMap will only be used for a very short time,
+        // because after the snapshot is restored, the guest will know about the new
+        // SyncThread* pointers and we will most likely not have to use the map anymore.
+        // However, the map still needs to stay around in case we restored from snapshot,
+        // waited a while, and then woke up a guest rendering thread that still
+        // had the old value of rcTriggerWait (but that is unlikely).
+    }
+
     // TODO: load the remaining members.
 
     return true;
+}
+
+SyncThread* getSyncThreadFromAlias(uint64_t alias) {
+    if (auto elt = android::base::find(sSyncThreadMap.get(), alias)) {
+        // This path is taken for just a few rcTriggerWaits during
+        // snapshot restore.
+        return *elt;
+    } else {
+        // This is the fast path and is taken the rest of the time.
+        return reinterpret_cast<SyncThread*>(alias);
+    }
 }
