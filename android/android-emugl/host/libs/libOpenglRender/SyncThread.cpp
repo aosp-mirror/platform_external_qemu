@@ -255,8 +255,7 @@ SyncThread* SyncThread::getSyncThread() {
 
     if (!tInfo->syncThread.get()) {
         DPRINT("starting a sync thread for render thread info=%p", tInfo);
-        tInfo->syncThread.reset(
-                new SyncThread(tInfo->currContext->getEGLContext()));
+        tInfo->createSyncThread();
     }
 
     return tInfo->syncThread.get();
@@ -273,5 +272,5 @@ void SyncThread::destroySyncThread() {
     tInfo->syncThread->cleanup();
     intptr_t exitStatus;
     tInfo->syncThread->wait(&exitStatus);
-    tInfo->syncThread.reset(nullptr);
+    tInfo->destroySyncThread();
 }
