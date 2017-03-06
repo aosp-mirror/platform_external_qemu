@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3bf5a3f0_c18a46e2",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThreadInfo.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-06T22:46:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "18aa58f0_03526c28",
+      "range": {
+        "startLine": 55,
+        "startChar": 55,
+        "endLine": 55,
+        "endChar": 69
+      },
+      "revId": "54b7b83ad023f34f8041156c2eade6082dcb2832",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bfd6ee6a_e83057d9",
         "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThreadInfo.cpp",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2017-03-06T22:29:11Z",
       "side": 1,
       "message": "theoretically an alias can collide with another sync thread?",
+      "range": {
+        "startLine": 142,
+        "startChar": 12,
+        "endLine": 142,
+        "endChar": 34
+      },
+      "revId": "54b7b83ad023f34f8041156c2eade6082dcb2832",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f619ff48_5e7389b1",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThreadInfo.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-06T22:46:37Z",
+      "side": 1,
+      "message": "Done (found more true invariant, can shorten lifetime of map to [load, load + 1 cmd]",
+      "parentUuid": "bfd6ee6a_e83057d9",
       "range": {
         "startLine": 142,
         "startChar": 12,
