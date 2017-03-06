@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "99df6c16_6c0a5d8c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThreadInfo.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-06T22:59:25Z",
+      "side": 1,
+      "message": "I guess I am not very familiar with this part of the code. This function only got called once per syncthread? Is there still a chance that new SyncThread is created before all old ones erased from sSyncThreadMap (and has a potential collision)?",
+      "range": {
+        "startLine": 141,
+        "startChar": 12,
+        "endLine": 141,
+        "endChar": 34
+      },
+      "revId": "be19e10d285829179a2edc30aaf9f8137e405b17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
