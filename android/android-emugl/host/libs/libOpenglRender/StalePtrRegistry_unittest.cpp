@@ -99,8 +99,8 @@ TEST(StalePtrRegistry, AddMakeStaleGetStaleWithDelete) {
     EXPECT_EQ(reg.numCurrEntries(), 0);
     EXPECT_EQ(reg.numStaleEntries(), 1);
 
-    EXPECT_EQ(reg.getPtr(handle, true), ptr);
-    EXPECT_EQ(reg.getPtr(handle, true), nullptr);
+    EXPECT_EQ(reg.getPtr(handle, nullptr, true), ptr);
+    EXPECT_EQ(reg.getPtr(handle, nullptr, true), nullptr);
 }
 
 TEST(StalePtrRegistry, AddMakeStaleWithRemap) {

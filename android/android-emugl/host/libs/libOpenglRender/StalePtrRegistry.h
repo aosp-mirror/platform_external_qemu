@@ -49,7 +49,7 @@ public:
         mStalePtrs[handle] = newptr;
     }
 
-    T* getPtr(uint64_t handle, bool removeFromStaleOnGet = false) {
+    T* getPtr(uint64_t handle, T* defaultPtr = nullptr, bool removeFromStaleOnGet = false) {
         android::base::AutoReadLock lock(mLock);
 
         if (auto elt = android::base::find(mPtrs, handle))
@@ -58,7 +58,7 @@ public:
         auto it = mStalePtrs.find(handle);
 
         if (it == mStalePtrs.end())
-            return nullptr;
+            return defaultPtr;
 
         T* res = it->second;
 
