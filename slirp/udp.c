@@ -174,7 +174,15 @@ udp_input(register struct mbuf *m, int iphlen)
 	  if (!so) {
 	      goto bad;
 	  }
-	  if (udp_attach(so, AF_INET) == -1) {
+	  if (udp_attach(so, AF_INET) == -1 &&
+	      /* If this is a DNS packet and we
+	       * fail to create AF_INET socket,
+	       * we just try AF_INET6 socket and
+	       * we still have chance to use IPv6
+	       * dns server to do DNS resolving.
+	       */
+	      (ntohs(uh->uh_dport) != kDnsPort ||
+	       udp_attach(so, AF_INET6) == -1)) {
 	    DEBUG_MISC((dfd," udp_attach errno = %d-%s\n",
 			errno,strerror(errno)));
 	    sofree(so);
