@@ -46,6 +46,30 @@
       "revId": "4e8a04ce8262243d53302550378ceec866b32369",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a374d8d_998cfb01",
+        "filename": "slirp/udp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T19:21:12Z",
+      "side": 1,
+      "message": "could you create a constant kDnsPort \u003d 53 and use it there? It\u0027s much easier to read the code with named constants",
+      "parentUuid": "7837b3ad_d8d23532",
+      "range": {
+        "startLine": 184,
+        "startChar": 8,
+        "endLine": 184,
+        "endChar": 36
+      },
+      "revId": "4e8a04ce8262243d53302550378ceec866b32369",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
