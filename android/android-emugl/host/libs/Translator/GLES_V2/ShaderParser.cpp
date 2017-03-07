@@ -49,6 +49,7 @@ ShaderParser::ShaderParser(android::base::Stream* stream) : ObjectData(stream) {
         m_programs.insert(stream->getBe32());
     }
     m_type = stream->getBe32();
+    m_compileStatus = stream->getByte();
     m_deleteStatus = stream->getByte();
     m_valid = stream->getByte();
 }
@@ -68,6 +69,7 @@ void ShaderParser::onSave(android::base::Stream* stream) const {
         stream->putBe32(program);
     }
     stream->putBe32(m_type);
+    stream->putByte(m_compileStatus);
     stream->putByte(m_deleteStatus);
     stream->putByte(m_valid);
 }
@@ -77,8 +79,9 @@ void ShaderParser::restore(ObjectLocalName localName,
     if (m_parsedSrc.empty()) return;
     int globalName = getGlobalName(NamedObjectType::SHADER_OR_PROGRAM,
             localName);
-    GLEScontext::dispatcher().glShaderSource(globalName, 1, parsedLines(),
-                                    NULL);
+    GLEScontext::dispatcher().glShaderSource(globalName, 1, parsedLines(), NULL);
+    if (m_compileStatus)
+        GLEScontext::dispatcher().glCompileShader(globalName);
 }
 
 void ShaderParser::convertESSLToGLSL(int esslVersion) {
