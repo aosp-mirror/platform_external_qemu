@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "android/base/Compiler.h"
+#include "android/base/files/Stream.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 
@@ -61,6 +63,7 @@ public:
     // the sync object when the native fence FD becomes signaled (3).
     FenceSync(bool hasNativeFence,
               bool destroyWhenSignaled);
+    ~FenceSync();
 
     // wait() wraps eglClientWaitSyncKHR. During such a wait, we need
     // to increment the reference count while the wait is active,
@@ -106,6 +109,16 @@ public:
         }
         return false;
     }
+
+    // Tracks current active set of fences. Useful for snapshotting.
+    void addToRegistry();
+    void removeFromRegistry();
+
+    static FenceSync* getFromHandle(uint64_t handle);
+
+    // Functions for snapshotting all fence state at once
+    static void onSave(android::base::Stream* stream);
+    static void onLoad(android::base::Stream* stream);
 private:
     bool mDestroyWhenSignaled;
     std::atomic<int> mCount = {1};
@@ -117,4 +130,6 @@ private:
     // destroy() wraps eglDestroySyncKHR. This is private, because we need
     // careful control of when eglDestroySyncKHR is actually called.
     void destroy();
+
+    DISALLOW_COPY_AND_ASSIGN(FenceSync);
 };
