@@ -268,6 +268,18 @@ static void reset_host_ip(struct sockaddr_storage* dst,
     DEBUG_ARG("TRANSLATED guest DNS -> %s\n", sockaddr_to_string(dst));
 }
 
+static int get_system_dns6(struct sockaddr_storage * addr)
+{
+    struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)addr;
+    uint32_t scope_id;
+    if (get_dns6_addr(&sin6->sin6_addr, &scope_id) >= 0) {
+        sin6->sin6_scope_id = scope_id;
+        addr->ss_family = AF_INET6;
+        return 0;
+    }
+    return -1;
+}
+
 int slirp_translate_guest_dns(Slirp *slirp,
                               const struct sockaddr_in *guest_ip,
                               struct sockaddr_storage *host_ip)
@@ -293,7 +305,7 @@ int slirp_translate_guest_dns(Slirp *slirp,
         return -1;
     }
     struct sockaddr_in* host_sin = (struct sockaddr_in *)host_ip;
-    if (get_dns_addr(&host_sin->sin_addr) < 0) {
+    if (get_dns_addr(&host_sin->sin_addr) < 0 && get_system_dns6(host_ip) < 0) {
         host_sin->sin_addr = loopback_addr;
     }
     return 0;
