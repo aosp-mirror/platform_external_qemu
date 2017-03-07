@@ -170,7 +170,13 @@ void SyncThread::doSyncContextInit() {
 void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
     DPRINT("enter");
 
-    assert(cmd->fenceSync);
+    FenceSync* fenceSync =
+        FenceSync::getFromHandle((uint64_t)(uintptr_t)cmd->fenceSync);
+
+    if (!fenceSync) {
+        emugl_sync_timeline_inc(cmd->timeline, kTimelineInterval);
+        return;
+    }
 
     EGLint wait_result = 0x0;
 
