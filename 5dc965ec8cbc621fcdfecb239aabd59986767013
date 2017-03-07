@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a51027b_c211e524",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 966,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T22:23:59Z",
+      "side": 1,
+      "message": "what if both are enabled?",
+      "range": {
+        "startLine": 960,
+        "startChar": 0,
+        "endLine": 966,
+        "endChar": 9
+      },
+      "revId": "5dc965ec8cbc621fcdfecb239aabd59986767013",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "98269703_83d76a4f",
+        "filename": "android/data/advancedFeatures.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T22:23:59Z",
+      "side": 1,
+      "message": "...ForceANGLE ?",
+      "range": {
+        "startLine": 109,
+        "startChar": 0,
+        "endLine": 112,
+        "endChar": 16
+      },
+      "revId": "5dc965ec8cbc621fcdfecb239aabd59986767013",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
