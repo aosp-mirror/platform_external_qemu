@@ -597,7 +597,7 @@ sorecvfrom(struct socket *so)
 	   * out much quicker (10 seconds  for now...)
 	   */
 	    if (so->so_expire) {
-	      if (so->so_fport == htons(53))
+	      if (so->so_fport == htons(kDnsPort))
 		so->so_expire = curtime + SO_EXPIREFAST;
 	      else
 		so->so_expire = curtime + SO_EXPIRE;
