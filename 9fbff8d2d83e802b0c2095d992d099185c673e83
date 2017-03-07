@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9530b217_53743673",
+        "filename": "android/android-emu/android/emulation/control/AdbBugReportServices.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-03-07T22:59:13Z",
+      "side": 1,
+      "message": "will do.",
+      "parentUuid": "28c5efe9_ef19c6b4",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 26
+      },
+      "revId": "9fbff8d2d83e802b0c2095d992d099185c673e83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "81102f9d_57a2bb98",
         "filename": "android/android-emu/android/emulation/control/AdbBugReportServices.h",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2017-03-07T21:54:33Z",
       "side": 1,
       "message": "nit: nullptr :)",
+      "range": {
+        "startLine": 48,
+        "startChar": 70,
+        "endLine": 48,
+        "endChar": 74
+      },
+      "revId": "9fbff8d2d83e802b0c2095d992d099185c673e83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8368f16f_55d2a4c0",
+        "filename": "android/android-emu/android/emulation/control/AdbBugReportServices.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-03-07T22:59:13Z",
+      "side": 1,
+      "message": "will do.",
+      "parentUuid": "81102f9d_57a2bb98",
       "range": {
         "startLine": 48,
         "startChar": 70,
