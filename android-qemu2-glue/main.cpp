@@ -957,6 +957,14 @@ extern "C" int main(int argc, char **argv) {
                 android::featurecontrol::GLESDynamicVersion, true);
         }
 
+        if (android::featurecontrol::isEnabled(android::featurecontrol::RendererANGLE)) {
+            skin_winsys_override_preferred_gles_backend(WINSYS_GLESBACKEND_PREFERENCE_ANGLE);
+        }
+
+        if (android::featurecontrol::isEnabled(android::featurecontrol::RendererSwiftshader)) {
+            skin_winsys_override_preferred_gles_backend(WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
+        }
+
         doGpuConfig(avd, opts, hw, skin_winsys_get_preferred_gles_backend());
 
         // Kernel command-line parameters.

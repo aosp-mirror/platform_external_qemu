@@ -25,3 +25,5 @@
 // #pragma once here.
 
 FEATURE_CONTROL_ITEM(GLPipeChecksum)
+FEATURE_CONTROL_ITEM(RendererANGLE)
+FEATURE_CONTROL_ITEM(RendererSwiftshader)

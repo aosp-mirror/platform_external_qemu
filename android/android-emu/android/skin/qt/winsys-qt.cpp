@@ -250,6 +250,15 @@ extern bool skin_winsys_is_window_fully_visible()
     return value;
 }
 
+extern void skin_winsys_override_preferred_gles_backend(WinsysPreferredGlesBackend backend) {
+    QSettings settings;
+    if (skin_winsys_get_preferred_gles_backend() ==
+        WINSYS_GLESBACKEND_PREFERENCE_AUTO) {
+        fprintf(stderr, "%s: OVERRIDING TO %d\n", __func__, (int)backend);
+        settings.setValue(Ui::Settings::GLESBACKEND_PREFERENCE, (int)backend);
+    }
+}
+
 extern WinsysPreferredGlesBackend skin_winsys_get_preferred_gles_backend()
 {
     D("skin_winsys_get_preferred_gles_backend");
