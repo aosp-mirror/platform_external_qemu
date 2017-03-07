@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cf9ac8c5_0219eb9b",
+        "filename": "android/android-emu/android/emulation/control/AdbBugReportServices.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T19:19:07Z",
+      "side": 1,
+      "message": "nit: please sort",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 28
+      },
+      "revId": "9eefa14c36c12bd3e7aacd52d2a4c133d4645121",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd656b40_2353999f",
+        "filename": "android/android-emu/android/emulation/control/AdbBugReportServices.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T19:19:07Z",
+      "side": 1,
+      "message": "the public function has different logic, why?",
+      "range": {
+        "startLine": 48,
+        "startChar": 8,
+        "endLine": 48,
+        "endChar": 28
+      },
+      "revId": "9eefa14c36c12bd3e7aacd52d2a4c133d4645121",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b23e45c_18d1aec6",
+        "filename": "android/android-emu/android/emulation/control/AdbBugReportServices.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T19:19:07Z",
+      "side": 1,
+      "message": "use System::get()-\u003egetUnixTime()",
+      "range": {
+        "startLine": 60,
+        "startChar": 17,
+        "endLine": 60,
+        "endChar": 28
+      },
+      "revId": "9eefa14c36c12bd3e7aacd52d2a4c133d4645121",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "320274e5_8330587b",
+        "filename": "android/android-emu/android/emulation/control/AdbBugReportServices.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T19:19:07Z",
+      "side": 1,
+      "message": "typo",
+      "range": {
+        "startLine": 82,
+        "startChar": 58,
+        "endLine": 82,
+        "endChar": 64
+      },
+      "revId": "9eefa14c36c12bd3e7aacd52d2a4c133d4645121",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cc598e63_2d6042f3",
+        "filename": "android/android-emu/android/emulation/control/AdbBugReportServices.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T19:19:07Z",
+      "side": 1,
+      "message": "enum class doesn\u0027t need \"k\" prefix for each member",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 6
+      },
+      "revId": "9eefa14c36c12bd3e7aacd52d2a4c133d4645121",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6006911a_31782da7",
+        "filename": "android/android-emu/android/emulation/control/AdbBugReportServices.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T19:19:07Z",
+      "side": 1,
+      "message": "should you check if it exists first?",
+      "range": {
+        "startLine": 48,
+        "startChar": 46,
+        "endLine": 48,
+        "endChar": 66
+      },
+      "revId": "9eefa14c36c12bd3e7aacd52d2a4c133d4645121",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a1be546_d1e02d8e",
+        "filename": "android/android-emu/android/emulation/control/AdbBugReportServices.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T19:19:07Z",
+      "side": 1,
+      "message": "the comment isn\u0027t really useful, please either delete or expand it",
+      "range": {
+        "startLine": 49,
+        "startChar": 4,
+        "endLine": 49,
+        "endChar": 39
+      },
+      "revId": "9eefa14c36c12bd3e7aacd52d2a4c133d4645121",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
