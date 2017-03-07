@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0adf4b66_9364d0e3",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThreadInfo.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T17:58:35Z",
+      "side": 1,
+      "message": "same thing as with fences - SyncThreadRegistry class? Maybe even a template for both fences and sync threads?",
+      "range": {
+        "startLine": 76,
+        "startChar": 0,
+        "endLine": 87,
+        "endChar": 46
+      },
+      "revId": "76034a274f91103cf206dc24ebb2d7af6ca83f87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fc56c8e7_4469339c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThreadInfo.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T17:58:35Z",
+      "side": 1,
+      "message": "nit: static function in SyncThread?",
+      "range": {
+        "startLine": 82,
+        "startChar": 0,
+        "endLine": 82,
+        "endChar": 51
+      },
+      "revId": "76034a274f91103cf206dc24ebb2d7af6ca83f87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1ca9974f_6183c501",
+        "filename": "hw/misc/goldfish_sync.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T17:58:35Z",
+      "side": 1,
+      "message": "are these addresses on guest or on host? host address will change on snapshot load, so you need to make sure you re-resolve it from the guest address here",
+      "range": {
+        "startLine": 418,
+        "startChar": 0,
+        "endLine": 419,
+        "endChar": 49
+      },
+      "revId": "76034a274f91103cf206dc24ebb2d7af6ca83f87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "90e8150c_89ed8075",
+        "filename": "hw/misc/goldfish_sync.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 447,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T17:58:35Z",
+      "side": 1,
+      "message": "we need to somehow make sure sync threads and pipe save/load order is stable and we know what\u0027s saved first. And we _must_ document it",
+      "range": {
+        "startLine": 447,
+        "startChar": 4,
+        "endLine": 447,
+        "endChar": 34
+      },
+      "revId": "76034a274f91103cf206dc24ebb2d7af6ca83f87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
