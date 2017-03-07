@@ -45,7 +45,7 @@ void RenderbufferData::onSave(android::base::Stream* stream) const {
 
 void RenderbufferData::restore(ObjectLocalName localName,
            getGlobalName_t getGlobalName) {
-    int globalName = getGlobalName(NamedObjectType::FRAMEBUFFER,
+    int globalName = getGlobalName(NamedObjectType::RENDERBUFFER,
             localName);
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     dispatcher.glBindRenderbuffer(GL_RENDERBUFFER, globalName);
