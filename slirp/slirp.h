@@ -243,6 +243,8 @@ void if_start(Slirp *);
 #define SO_OPTIONS DO_KEEPALIVE
 #define TCP_MAXIDLE (TCPTV_KEEPCNT * TCPTV_KEEPINTVL)
 
+static const short kDnsPort = 53;
+
 /* dnssearch.c */
 int translate_dnssearch(Slirp *s, const char ** names);
 
