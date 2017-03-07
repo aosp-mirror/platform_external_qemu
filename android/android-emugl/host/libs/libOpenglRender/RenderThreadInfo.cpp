@@ -71,7 +71,7 @@ void RenderThreadInfo::onSave(Stream* stream) {
         stream->putBe32(val);
     });
 
-    // TODO: save the remaining members.
+    stream->putBe64(m_puid);
 }
 
 bool RenderThreadInfo::onLoad(Stream* stream) {
@@ -92,6 +92,8 @@ bool RenderThreadInfo::onLoad(Stream* stream) {
     loadCollection(stream, &m_windowSet, [](Stream* stream) {
         return stream->getBe32();
     });
+
+    m_puid = stream->getBe64();
 
     return true;
 }
