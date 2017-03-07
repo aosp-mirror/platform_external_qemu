@@ -51,6 +51,9 @@ public:
     // as the actual info log from guest POV.
     void setInvalidInfoLog();
 
+    void setCompileStatus(bool val) { m_compileStatus = val; }
+    bool getCompileStatus() const { return m_compileStatus; }
+
     void setDeleteStatus(bool val) { m_deleteStatus = val; }
     bool getDeleteStatus() const { return m_deleteStatus; }
 
@@ -71,6 +74,7 @@ private:
     std::basic_string<GLchar> m_infoLog;
     std::unordered_set<GLuint> m_programs;
     GLenum      m_type = 0;
+    bool        m_compileStatus = false;
     bool        m_deleteStatus = false;
     bool        m_valid = true;
     ANGLEShaderParser::ShaderLinkInfo m_shaderLinkInfo;
