@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1f288f1d_5f535776",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T22:28:22Z",
+      "side": 1,
+      "message": "please also do name.resize(length) afterwards. std::string doesn\u0027t use null-terminator internally, so you need to explicitly resize it after writing",
+      "range": {
+        "startLine": 170,
+        "startChar": 19,
+        "endLine": 170,
+        "endChar": 37
+      },
+      "revId": "8a5d6257d571562884278aac5c8e18bcbdb98d38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
