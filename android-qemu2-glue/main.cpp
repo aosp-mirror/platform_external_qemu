@@ -944,7 +944,22 @@ extern "C" int main(int argc, char **argv) {
                 android::featurecontrol::GLESDynamicVersion, true);
         }
 
-        doGpuConfig(avd, opts, hw, skin_winsys_get_preferred_gles_backend());
+        // Use advancedFeatures to override renderer if the user has selected
+        // in UI that the preferred renderer is "autoselected".
+        WinsysPreferredGlesBackend uiPreferredGlesBackend =
+            skin_winsys_get_preferred_gles_backend();
+
+        if (android::featurecontrol::isEnabled(android::featurecontrol::ForceANGLE)) {
+            uiPreferredGlesBackend =
+                skin_winsys_override_glesbackend_if_auto(WINSYS_GLESBACKEND_PREFERENCE_ANGLE);
+        }
+
+        if (android::featurecontrol::isEnabled(android::featurecontrol::ForceSwiftshader)) {
+            uiPreferredGlesBackend =
+                skin_winsys_override_glesbackend_if_auto(WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
+        }
+
+        doGpuConfig(avd, opts, hw, uiPreferredGlesBackend);
 
         // Kernel command-line parameters.
         AndroidGlesEmulationMode glesMode = kAndroidGlesEmulationOff;
