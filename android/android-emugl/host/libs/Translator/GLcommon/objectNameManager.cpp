@@ -440,6 +440,7 @@ ObjectNameManager::createShareGroup(void *p_groupName, uint64_t sharedGroupID,
             ++m_nextSharedGroupID;
         } else {
             assert(!m_usedSharedGroupIDs.count(sharedGroupID));
+            m_usedSharedGroupIDs.insert(sharedGroupID);
         }
         shareGroupReturn.reset(
             new ShareGroup(m_globalNameSpace, sharedGroupID, stream, loadObject));
