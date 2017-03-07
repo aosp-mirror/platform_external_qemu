@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b5aaad7_914088e7",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FenceSync.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T17:39:02Z",
+      "side": 1,
+      "message": "btw, saving a pointer to a separate FenceSyncRegistry class in a member pointer here would save us an atomic operation per fence member call",
+      "range": {
+        "startLine": 33,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 30
+      },
+      "revId": "e67ea3d650895197fe99e63f36468f415f3d8969",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "071e7f16_8bee2774",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FenceSync.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T17:39:02Z",
+      "side": 1,
+      "message": "please create a separate class for this, imeplement everything as its members and have a single LazyInstance\u003c\u003e for it. It\u0027s more efficient and safer (ReadWriteLock is still a dynamic global as of now)",
+      "range": {
+        "startLine": 94,
+        "startChar": 0,
+        "endLine": 104,
+        "endChar": 50
+      },
+      "revId": "e67ea3d650895197fe99e63f36468f415f3d8969",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84990f82_e39b62a1",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FenceSync.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T17:39:02Z",
+      "side": 1,
+      "message": "as of now the code is all in .cpp and not testable. What about having a separate FenceSyncRegisrty class and using it here? This way we could write a UT for that class",
+      "range": {
+        "startLine": 109,
+        "startChar": 4,
+        "endLine": 109,
+        "endChar": 59
+      },
+      "revId": "e67ea3d650895197fe99e63f36468f415f3d8969",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7370a7d3_c2c8b9a2",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FenceSync.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T17:39:02Z",
+      "side": 1,
+      "message": "instead of moving things around you could have a map[id -\u003e enum class Type { Active, Previous }]",
+      "range": {
+        "startLine": 121,
+        "startChar": 3,
+        "endLine": 124,
+        "endChar": 32
+      },
+      "revId": "e67ea3d650895197fe99e63f36468f415f3d8969",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "49b8eb00_691eb3c5",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FenceSync.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T17:39:02Z",
+      "side": 1,
+      "message": "this many statics usually means a lot of globals...",
+      "range": {
+        "startLine": 112,
+        "startChar": 0,
+        "endLine": 119,
+        "endChar": 52
+      },
+      "revId": "e67ea3d650895197fe99e63f36468f415f3d8969",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
