@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c558eca6_133a5879",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-07T22:42:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e4dbd6e8_3b8fd327",
+      "range": {
+        "startLine": 436,
+        "startChar": 0,
+        "endLine": 437,
+        "endChar": 64
+      },
+      "revId": "4dc77a9e078cf6a1f5fb612624cec4da804e77bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "32f78c09_558d3a62",
         "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
         "patchSetId": 23
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "603b8d7c_74e1dd39",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-07T22:42:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "32f78c09_558d3a62",
+      "range": {
+        "startLine": 102,
+        "startChar": 0,
+        "endLine": 102,
+        "endChar": 28
+      },
+      "revId": "4dc77a9e078cf6a1f5fb612624cec4da804e77bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c000184_2dc02320",
         "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
         "patchSetId": 23
@@ -59,6 +107,30 @@
       "writtenOn": "2017-03-07T22:01:06Z",
       "side": 1,
       "message": "nit: use member initializer list when possible, it\u0027s more efficient",
+      "range": {
+        "startLine": 105,
+        "startChar": 0,
+        "endLine": 108,
+        "endChar": 41
+      },
+      "revId": "4dc77a9e078cf6a1f5fb612624cec4da804e77bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ccefa7ea_6a167834",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-07T22:42:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7c000184_2dc02320",
       "range": {
         "startLine": 105,
         "startChar": 0,
