@@ -216,13 +216,13 @@ public:
                       HandleType p_readSurface);
 
     // Return a render context pointer from its handle
-    RenderContextPtr getContext(HandleType p_context);
+    RenderContextPtr getContext_locked(HandleType p_context);
 
     // Return a color buffer pointer from its handle
-    ColorBufferPtr getColorBuffer(HandleType p_colorBuffer);
+    ColorBufferPtr getColorBuffer_locked(HandleType p_colorBuffer);
 
     // Return a color buffer pointer from its handle
-    WindowSurfacePtr getWindowSurface(HandleType p_windowsurface);
+    WindowSurfacePtr getWindowSurface_locked(HandleType p_windowsurface);
 
     // Attach a ColorBuffer to a WindowSurface instance.
     // See the documentation for WindowSurface::setColorBuffer().
@@ -355,6 +355,10 @@ public:
 
     void onSave(android::base::Stream* stream);
     bool onLoad(android::base::Stream* stream);
+
+    // lock and unlock handles (RenderContext, ColorBuffer, WindowSurface)
+    void lock();
+    void unlock();
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle();
