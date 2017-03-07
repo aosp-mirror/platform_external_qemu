@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e4dbd6e8_3b8fd327",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T22:01:06Z",
+      "side": 1,
+      "message": "could you please create a C wrapper as a single function for these, and call it from both qemu1 and qemu2\u0027s main.c/cpp ? this way we won\u0027t screw it up when moving code around",
+      "range": {
+        "startLine": 436,
+        "startChar": 0,
+        "endLine": 437,
+        "endChar": 64
+      },
+      "revId": "4dc77a9e078cf6a1f5fb612624cec4da804e77bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "32f78c09_558d3a62",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T22:01:06Z",
+      "side": 1,
+      "message": "add DISALLOW_COPY_AND_ASSIGN()",
+      "range": {
+        "startLine": 102,
+        "startChar": 0,
+        "endLine": 102,
+        "endChar": 28
+      },
+      "revId": "4dc77a9e078cf6a1f5fb612624cec4da804e77bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c000184_2dc02320",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T22:01:06Z",
+      "side": 1,
+      "message": "nit: use member initializer list when possible, it\u0027s more efficient",
+      "range": {
+        "startLine": 105,
+        "startChar": 0,
+        "endLine": 108,
+        "endChar": 41
+      },
+      "revId": "4dc77a9e078cf6a1f5fb612624cec4da804e77bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
