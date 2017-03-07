@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "android/base/files/Stream.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 
@@ -102,10 +103,17 @@ public:
             destroy();
             // This delete-then-return seems OK.
             delete this;
+            FenceSync::removeFence(this);
             return true;
         }
         return false;
     }
+
+    static void onSave(android::base::Stream* stream);
+    static bool onLoad(android::base::Stream* stream);
+    static void addFence(FenceSync* fence);
+    static void removeFence(FenceSync* fence);
+    static FenceSync* getFenceSync(uint64_t handle);
 private:
     bool mDestroyWhenSignaled;
     std::atomic<int> mCount = {1};
