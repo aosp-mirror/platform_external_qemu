@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "android/base/files/Stream.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 
@@ -102,10 +103,21 @@ public:
             destroy();
             // This delete-then-return seems OK.
             delete this;
+            removeFromRegistry();
             return true;
         }
         return false;
     }
+
+    // Tracks current active set of fences. Useful for snapshotting.
+    void addToRegistry();
+    void removeFromRegistry();
+
+    static FenceSync* getFenceSyncFromHandle(uint64_t handle);
+
+    // Functions for snapshotting all fence state at once
+    static void onSave(android::base::Stream* stream);
+    static void onLoad(android::base::Stream* stream);
 private:
     bool mDestroyWhenSignaled;
     std::atomic<int> mCount = {1};
