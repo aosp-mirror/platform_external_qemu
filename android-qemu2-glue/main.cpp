@@ -23,6 +23,7 @@
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/error-messages.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/filesystems/ext4_resize.h"
 #include "android/filesystems/ext4_utils.h"
@@ -428,6 +429,13 @@ extern "C" int main(int argc, char **argv) {
         // Normal exit.
         return exitStatus;
     }
+
+    // Update server-based hw config / feature flags.
+    // Must be done after emulator_parseCommonCommandLineOptions,
+    // since that calls createAVD which sets up critical info needed
+    // by featurecontrol component itself.
+    feature_update_from_server();
+
     // just because we know that we're in the new emulator as we got here
     opts->ranchu = 1;
 
@@ -703,7 +711,7 @@ extern "C" int main(int argc, char **argv) {
         }
     }
 
-    //create encryptionkey.img file if needed
+    // create encryptionkey.img file if needed
     if (android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData)) {
         if (hw->disk_encryptionKeyPartition_path == NULL) {
             if(!createInitalEncryptionKeyPartition(hw)) {
@@ -949,7 +957,22 @@ extern "C" int main(int argc, char **argv) {
                 android::featurecontrol::GLESDynamicVersion, true);
         }
 
-        doGpuConfig(avd, opts, hw, skin_winsys_get_preferred_gles_backend());
+        // Use advancedFeatures to override renderer if the user has selected
+        // in UI that the preferred renderer is "autoselected".
+        WinsysPreferredGlesBackend uiPreferredGlesBackend =
+            skin_winsys_get_preferred_gles_backend();
+
+        if (android::featurecontrol::isEnabled(android::featurecontrol::ForceANGLE)) {
+            uiPreferredGlesBackend =
+                skin_winsys_override_glesbackend_if_auto(WINSYS_GLESBACKEND_PREFERENCE_ANGLE);
+        }
+
+        if (android::featurecontrol::isEnabled(android::featurecontrol::ForceSwiftshader)) {
+            uiPreferredGlesBackend =
+                skin_winsys_override_glesbackend_if_auto(WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
+        }
+
+        doGpuConfig(avd, opts, hw, uiPreferredGlesBackend);
 
         // Kernel command-line parameters.
         AndroidGlesEmulationMode glesMode = kAndroidGlesEmulationOff;
