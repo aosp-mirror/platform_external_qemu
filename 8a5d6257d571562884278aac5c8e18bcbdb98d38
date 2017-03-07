@@ -46,6 +46,30 @@
       "revId": "8a5d6257d571562884278aac5c8e18bcbdb98d38",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f909179a_110256ac",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T23:09:56Z",
+      "side": 1,
+      "message": "yes, leave a .resize(nameLength) here before the glGetActiveUniform() call. It reuses the memory in the string, so no extra allocations will happen.",
+      "parentUuid": "fef1238d_92369d04",
+      "range": {
+        "startLine": 170,
+        "startChar": 19,
+        "endLine": 170,
+        "endChar": 37
+      },
+      "revId": "8a5d6257d571562884278aac5c8e18bcbdb98d38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
