@@ -804,7 +804,7 @@ static EGLint rcClientWaitSyncKHR(uint64_t handle,
     EGLSYNC_DPRINT("handle=0x%lx flags=0x%x timeout=%" PRIu64,
                 handle, flags, timeout);
 
-    FenceSync* fenceSync = (FenceSync*)(uintptr_t)handle;
+    FenceSync* fenceSync = FenceSync::getFenceSync(handle);
 
     if (!fenceSync) {
         EGLSYNC_DPRINT("fenceSync null, return condition satisfied");
@@ -829,8 +829,8 @@ static EGLint rcClientWaitSyncKHR(uint64_t handle,
 }
 
 static int rcDestroySyncKHR(uint64_t handle) {
-    FenceSync* fenceSync = (FenceSync*)(uintptr_t)handle;
-    assert(fenceSync);
+    FenceSync* fenceSync = FenceSync::getFenceSync(handle);
+    if (!fenceSync) return 0;
     fenceSync->decRef();
     return 0;
 }
