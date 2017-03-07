@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "6c971d88_52c1dddf",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-07T22:37:02Z",
+      "side": 1,
+      "message": "please move the initialization out of for loop to get rid of unneeded memory reallocations",
+      "range": {
+        "startLine": 169,
+        "startChar": 0,
+        "endLine": 169,
+        "endChar": 43
+      },
+      "revId": "9e49437662e794b1df0093812e54f087f1776623",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e577a64e_d7f29b3f",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
         "patchSetId": 4
