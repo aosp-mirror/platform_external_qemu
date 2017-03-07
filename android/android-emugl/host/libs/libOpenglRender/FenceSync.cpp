@@ -22,10 +22,15 @@
 #include "RenderThreadInfo.h"
 
 #include "android/base/containers/Lookup.h"
+#include "android/base/files/StreamSerializing.h"
+#include "android/base/synchronization/Lock.h"
+
+#include <unordered_set>
 
 FenceSync::FenceSync(bool hasNativeFence,
                      bool destroyWhenSignaled) :
     mDestroyWhenSignaled(destroyWhenSignaled) {
+    FenceSync::addFence(this);
 
     assert(mCount == 1);
     if (hasNativeFence) incRef();
@@ -67,4 +72,52 @@ void FenceSync::signaledNativeFd() {
 
 void FenceSync::destroy() {
     s_egl.eglDestroySyncKHR(mDisplay, mSync);
+}
+
+static android::base::LazyInstance<
+           std::unordered_set<uint64_t> > sActiveFences = LAZY_INSTANCE_INIT;
+static android::base::ReadWriteLock sActiveFencesLock;
+static android::base::LazyInstance<
+           std::unordered_set<uint64_t> > sPrevSnapshotFences = LAZY_INSTANCE_INIT;
+
+// static
+void FenceSync::addFence(FenceSync* fence) {
+    android::base::AutoWriteLock lock(sActiveFencesLock);
+    sActiveFences.get().insert((uint64_t)(uintptr_t)fence);
+}
+// static
+void FenceSync::removeFence(FenceSync* fence) {
+    android::base::AutoWriteLock lock(sActiveFencesLock);
+    sActiveFences.get().erase((uint64_t)(uintptr_t)fence);
+}
+// static
+void FenceSync::onSave(android::base::Stream* stream) {
+    android::base::AutoReadLock lock(sActiveFencesLock);
+    saveCollection(
+            stream, sActiveFences.get(),
+            [](android::base::Stream* stream, uint64_t val) {
+                stream->putBe64(val); });
+}
+
+// static
+bool FenceSync::onLoad(android::base::Stream* stream) {
+    android::base::AutoWriteLock lock(sActiveFencesLock);
+    sPrevSnapshotFences.get().clear();
+    loadCollection(stream, sPrevSnapshotFences.ptr(),
+        [](android::base::Stream* stream) {
+        return stream->getBe64(); });
+    return true;
+}
+
+// static
+FenceSync* FenceSync::getFenceSync(uint64_t handle) {
+    if (sActiveFences.get().find(handle) !=
+        sActiveFences.get().end()) {
+        return reinterpret_cast<FenceSync*>(handle);
+    } else if (sPrevSnapshotFences.get().find(handle) !=
+        sPrevSnapshotFences.get().end()) {
+        return nullptr;
+    } else {
+        return nullptr;
+    }
 }
