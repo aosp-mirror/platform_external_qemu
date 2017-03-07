@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d392f7a7_8acc080e",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 966,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-07T22:27:56Z",
+      "side": 1,
+      "message": "Good question! Ultimately that\u0027s responsibility of feature flags editor; we can build a set of satisfiability rules for feature flags that would drive any real UI used to edit the feature flags, and run it as a check on our server-side file.\n\nFor now, here, for renderer, we could have a priority designed to be maximally conservative; I think I instinctually went for Swiftshader second (i.e., higher priority) since if there was a need to enable Swiftshader, then their GPU is toast and we shouldn\u0027t even think about enabling ANGLE.",
+      "parentUuid": "5a51027b_c211e524",
+      "range": {
+        "startLine": 960,
+        "startChar": 0,
+        "endLine": 966,
+        "endChar": 9
+      },
+      "revId": "5dc965ec8cbc621fcdfecb239aabd59986767013",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "98269703_83d76a4f",
         "filename": "android/data/advancedFeatures.ini",
         "patchSetId": 1
