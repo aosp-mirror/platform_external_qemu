@@ -14,6 +14,7 @@
 #include <pthread.h>
 #endif
 
+//#include "android/base/async/Looper.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
@@ -272,12 +273,28 @@ extern WinsysPreferredGlesApiLevel skin_winsys_get_preferred_gles_apilevel()
     return (WinsysPreferredGlesApiLevel)settings.value(Ui::Settings::GLESAPILEVEL_PREFERENCE, 0).toInt();
 }
 
+extern "C" void qemu_system_shutdown_request(void);
+
 extern void skin_winsys_quit_request()
 {
     D(__FUNCTION__);
     auto window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
+        static bool done = false;
+        if (done)
+            return;
+        done = true;
+        android::base::Looper* looper = android::base::ThreadLooper::get();
+        std::unique_ptr<android::emulation::AdbInterface> adb(
+            android::emulation::AdbInterface::create(looper));
+        /* "reboot -p" leads a hanging adb command in system
+	 * just mount it read-only first and then shutdown emulator */
+        adb->runAdbCommand({"shell", "echo u > /proc/sysrq-trigger"},
+                           [](const android::emulation::OptionalAdbCommandResult&){
+                              sleep_ms(2500);
+                              qemu_system_shutdown_request();
+			   }, 5000, false);
         return;
     }
     window->requestClose();
