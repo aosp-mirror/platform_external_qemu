@@ -95,6 +95,7 @@ LOCAL_SRC_FILES := \
     ../Translator/GLES_V2/ANGLEShaderParser.cpp \
     OpenGLTestContext.cpp \
     OpenGL_unittest.cpp \
+    StalePtrRegistry_unittest.cpp \
 
 $(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender libemugl_gtest)
 $(call emugl-end-module)
