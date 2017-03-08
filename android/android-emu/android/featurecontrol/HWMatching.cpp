@@ -378,6 +378,7 @@ static LazyInstance<emulator_features::EmulatorFeaturePatterns> sCachedFeaturePa
     LAZY_INSTANCE_INIT;
 
 void applyCachedServerFeaturePatterns() {
+
     PatternsFileAccessor access;
 
     if (!access.read(sCachedFeaturePatterns.ptr()))
