@@ -311,8 +311,12 @@ private:
         mStartupDialog.close();
     }
 
+    // These are all called on first window show and
+    // depend on AVD info, GPU info, etc.,
+    // so they must be collected before the window shows up.
     void checkAdbVersionAndWarn();
     void showAvdArchWarning();
+    void checkShouldShowGpuWarning();
     void showGpuWarning();
 
     bool mouseInside();
@@ -374,6 +378,11 @@ private:
     MainLoopThread* mMainLoopThread;
 
     QMessageBox mAvdWarningBox;
+
+    // First-show related warning messages state
+    bool mGpuBlacklisted = false;
+    bool mHasForcedRenderer = false;
+    bool mShouldShowGpuWarning = false;
     QMessageBox mGpuWarningBox;
     QMessageBox mAdbWarningBox;
     bool mFirstShowEvent;

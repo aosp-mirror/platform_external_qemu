@@ -24,6 +24,7 @@
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulator-window.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
@@ -128,13 +129,11 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                         "%1\n"
                         "Some users have experienced emulator stability issues "
                         "with this driver version.  As a result, we're "
-                        "selecting a software renderer.  Please check with "
+                        "selecting an alternate renderer.  Please check with "
                         "your manufacturer to see if there is an updated "
                         "driver available.")
-                             .arg((globalGpuInfoList().blacklist_status
-                                           ? QString::fromStdString(
-                                                     globalGpuInfoList().dump())
-                                           : "")),
+                             .arg(QString::fromStdString(
+                                      globalGpuInfoList().dump())),
                      QMessageBox::Ok,
                      this),
       mAdbWarningBox(QMessageBox::Warning,
@@ -392,8 +391,25 @@ void EmulatorQtWindow::showAvdArchWarning() {
     }
 }
 
+void EmulatorQtWindow::checkShouldShowGpuWarning() {
+    mGpuBlacklisted = globalGpuInfoList().blacklist_status;
+    std::vector<android::featurecontrol::Feature> forced = {
+        android::featurecontrol::ForceANGLE,
+        android::featurecontrol::ForceSwiftshader,
+    };
+
+    for (const auto& elt : forced) {
+        mHasForcedRenderer |= android::featurecontrol::isEnabled(elt);
+    }
+
+    mShouldShowGpuWarning =
+        mGpuBlacklisted ||
+        mHasForcedRenderer;
+}
+
 void EmulatorQtWindow::showGpuWarning() {
-    if (!globalGpuInfoList().blacklist_status) {
+
+    if (!mShouldShowGpuWarning) {
         return;
     }
 
@@ -1092,6 +1108,7 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
     // Qt UI thread has not been properly initialized yet.
     if (mFirstShowEvent) {
         showAvdArchWarning();
+        checkShouldShowGpuWarning();
         showGpuWarning();
         checkAdbVersionAndWarn();
     }
