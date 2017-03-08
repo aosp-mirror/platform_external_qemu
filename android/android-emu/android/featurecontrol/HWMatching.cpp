@@ -312,7 +312,7 @@ std::vector<FeatureAction> matchFeaturePatterns(
                 !action.has_enable()) continue;
 
             FeatureAction nextAction;
-            nextAction.name = emulator_features::FeatureFlagAction_Feature_Name(action.feature());
+            nextAction.name = emulator_features::Feature_Name(action.feature());
             nextAction.enable = action.enable();
             res.push_back(nextAction);
         }
