@@ -272,12 +272,33 @@ extern WinsysPreferredGlesApiLevel skin_winsys_get_preferred_gles_apilevel()
     return (WinsysPreferredGlesApiLevel)settings.value(Ui::Settings::GLESAPILEVEL_PREFERENCE, 0).toInt();
 }
 
+#define DINIT(...) do { if (DEBUG || VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
+extern "C" void qemu_system_shutdown_request(void);
+
 extern void skin_winsys_quit_request()
 {
     D(__FUNCTION__);
     auto window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
+        static bool done = false;
+        if (done)
+            return;
+        done = true;
+        android::base::Looper* looper = android::base::ThreadLooper::get();
+        std::unique_ptr<android::emulation::AdbInterface> adb(
+            android::emulation::AdbInterface::create(looper));
+        /* "reboot -p" leads a hanging adb command in system
+         * just mount it read-only first and then shutdown emulator */
+        adb->runAdbCommand({"shell", "echo u > /proc/sysrq-trigger"},
+                           [](const android::emulation::OptionalAdbCommandResult& result){
+                              if (!result || result->exit_code) {
+                                  DINIT("Call adb to umount failed");
+                              } else {
+                                  DINIT("Umount successful, wait for it to finish");
+                                  sleep_ms(2500);
+                              }
+                              qemu_system_shutdown_request();}, 5000, false);
         return;
     }
     window->requestClose();
