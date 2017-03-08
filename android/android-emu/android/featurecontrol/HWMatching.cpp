@@ -378,6 +378,16 @@ static LazyInstance<emulator_features::EmulatorFeaturePatterns> sCachedFeaturePa
     LAZY_INSTANCE_INIT;
 
 void applyCachedServerFeaturePatterns() {
+#if !DEBUG
+    // Silence all parse failure messages, because
+    // we handle parse failures ourselves, and because
+    // it's annoying to see error messages when not
+    // connected to the internet.
+    // (LogSilencer doesn't work, since it's for non-fatal
+    // messages only)
+    google::protobuf::SetLogHandler(nullptr);
+#endif
+
     PatternsFileAccessor access;
 
     if (!access.read(sCachedFeaturePatterns.ptr()))
@@ -394,6 +404,10 @@ void applyCachedServerFeaturePatterns() {
 static const uint32_t kFeaturePatternDownloadIntervalSeconds = 24 * 60 * 60;
 
 static void queryFeaturePatternFn() {
+#if !DEBUG
+    // Silence all parse failure messages
+    google::protobuf::SetLogHandler(nullptr);
+#endif
 
     uint32_t currTime = System::get()->getUnixTime();
 
