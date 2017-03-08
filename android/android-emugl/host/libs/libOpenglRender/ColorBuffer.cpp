@@ -134,9 +134,10 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                 "error: failed to allocate initial memory for ColorBuffer "
                 "of size %dx%dx%d (%lu KB)\n",
                 p_width, p_height, nComp * 8, bufsize / 1024);
-        return nullptr;
     }
-    memset(initialImage.get(), 0xff, bufsize);
+
+    if (initialImage)
+        memset(initialImage.get(), 0xff, bufsize);
 
     ScopedHelperContext context(helper);
     if (!context.isOk()) {

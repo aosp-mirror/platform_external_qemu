@@ -126,11 +126,12 @@ EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream
 
 #define CURRENT_THREAD() do {} while (0);
 
-#define RETURN_ERROR(ret,err)                                \
-        CURRENT_THREAD()                                     \
-        if(tls_thread->getError() == EGL_SUCCESS) {          \
-          tls_thread->setError(err);                         \
-        }                                                    \
+#define RETURN_ERROR(ret,err)                                          \
+        CURRENT_THREAD()                                               \
+        fprintf(stderr, "%s:%d EGL error 0x%x\n", __func__, __LINE__,  \
+                (unsigned int)err);                                    \
+        if(tls_thread->getError() == EGL_SUCCESS)                      \
+            tls_thread->setError(err);                                 \
         return ret;
 
 #define VALIDATE_DISPLAY_RETURN(EGLDisplay,ret)              \

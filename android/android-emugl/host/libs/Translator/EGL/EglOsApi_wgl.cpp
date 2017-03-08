@@ -780,6 +780,11 @@ void pixelFormatToConfig(WinGlobals* globals,
     (*addConfigFunc)(addConfigOpaque, &info);
 }
 
+#define WGL_LOGE(fmt,...) do { \
+    fprintf(stderr, "%s:%d wgl error: " fmt "\n", \
+            __func__, __LINE__, ##__VA_ARGS__); \
+} while(0)
+
 class WglDisplay : public EglOS::Display {
 public:
     WglDisplay(const WglExtensionsDispatch* dispatch,
@@ -906,12 +911,15 @@ public:
 
         const WglExtensionsDispatch* dispatch = mDispatch;
         if (!dispatch->wglCreatePbufferARB) {
+            WGL_LOGE("wglCreatePbufferARB doesn't exist!");
             return NULL;
         }
         HPBUFFERARB pb = dispatch->wglCreatePbufferARB(
                 dpy, format->configId(), info->width, info->height, pbAttribs);
         if (!pb) {
-            GetLastError();
+            int lastErr = GetLastError();
+            WGL_LOGE("wglCreatePbufferARB failed with error code 0x%x(%d)",
+                     lastErr, lastErr);
             return NULL;
         }
         return new WinSurface(pb, dispatch);
