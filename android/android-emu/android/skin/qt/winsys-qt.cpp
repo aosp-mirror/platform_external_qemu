@@ -253,7 +253,6 @@ extern bool skin_winsys_is_window_fully_visible()
 WinsysPreferredGlesBackend skin_winsys_override_glesbackend_if_auto(WinsysPreferredGlesBackend backend) {
     WinsysPreferredGlesBackend currentPreferred = skin_winsys_get_preferred_gles_backend();
     if (currentPreferred == WINSYS_GLESBACKEND_PREFERENCE_AUTO) {
-        // TODO: Show UI
         return backend;
     }
     return currentPreferred;
