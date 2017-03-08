@@ -272,12 +272,30 @@ extern WinsysPreferredGlesApiLevel skin_winsys_get_preferred_gles_apilevel()
     return (WinsysPreferredGlesApiLevel)settings.value(Ui::Settings::GLESAPILEVEL_PREFERENCE, 0).toInt();
 }
 
+extern "C" void qemu_system_shutdown_request(void);
+
 extern void skin_winsys_quit_request()
 {
     D(__FUNCTION__);
     auto window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
+        static bool done = false;
+        if (done)
+            return;
+        done = true;
+        fprintf(stderr, "%ld: %s:%d\n", time(NULL), __FILE__, __LINE__);
+        std::unique_ptr<android::base::Looper>
+	    looper(android::base::Looper::create());
+        std::unique_ptr<android::emulation::AdbInterface>
+            adb(android::emulation::AdbInterface::create(looper.get()));
+        adb->runAdbCommand({"shell", "echo u > /proc/sysrq-trigger"},
+			   [](const android::emulation::OptionalAdbCommandResult&){
+        		      fprintf(stderr, "%ld: %s:%d\n", time(NULL), __FILE__, __LINE__);
+			      sleep_ms(1000);
+                              qemu_system_shutdown_request();
+			   }, 5000, false);
+        fprintf(stderr, "%ld: %s:%d\n", time(NULL), __FILE__, __LINE__);
         return;
     }
     window->requestClose();
