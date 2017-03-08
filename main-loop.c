@@ -393,7 +393,7 @@ static void pollfds_poll(GArray *pollfds, const WSAPOLLFD fds[], int fds_count)
         GPollFD *pfd = &g_array_index(pollfds, GPollFD, i);
         int revents = 0;
         if (i < fds_count && fds[i].fd != INVALID_SOCKET) {
-            if (fds[i].revents & POLLRDNORM) {
+            if (fds[i].revents & (POLLRDNORM | POLLERR | POLLHUP)) {
                 revents |= G_IO_IN;
             }
             if (fds[i].revents & POLLWRNORM) {
