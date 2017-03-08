@@ -212,7 +212,7 @@ bool aio_prepare(AioContext *ctx)
         QLIST_FOREACH(node, &ctx->aio_handlers, node) {
             node->pfd.revents = 0;
             if (i < fds_count && fds[i].fd != INVALID_SOCKET) {
-                if (fds[i].revents & POLLIN) {
+                if (fds[i].revents & (POLLIN | POLLHUP | POLLERR)) {
                     node->pfd.revents |= G_IO_IN;
                     have_select_revents = true;
                 }
