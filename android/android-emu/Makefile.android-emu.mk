@@ -359,6 +359,7 @@ LOCAL_SRC_FILES := \
     android/openssl-support.cpp \
     android/process_setup.cpp \
     android/protobuf/DelimitedSerialization.cpp \
+    android/protobuf/ProtobufLogging.cpp \
     android/proxy/proxy_common.c \
     android/proxy/proxy_http.c \
     android/proxy/proxy_http_connector.c \
