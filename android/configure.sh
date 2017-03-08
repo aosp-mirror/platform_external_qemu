@@ -729,7 +729,6 @@ esac
 ###
 ANGLE_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/ANGLE
 if [ -d $ANGLE_PREBUILTS_DIR ]; then
-    ANGLE_PREFIX=lib
     ANGLE_HOST=$HOST_OS
     case $ANGLE_HOST in
         windows)
@@ -743,14 +742,14 @@ if [ -d $ANGLE_PREBUILTS_DIR ]; then
     # Windows only (for now)
     if [ "$ANGLE_HOST" = "windows" ]; then
         log "Copying ANGLE prebuilt libraries from $ANGLE_PREBUILTS_DIR"
-        for LIBNAME in EGL GLESv2; do # GLESv2 only for now
+        for LIBNAME in libEGL libGLESv2 d3dcompiler_47; do # GLESv2 only for now
             for ANGLE_ARCH in $PREBUILT_ARCHS; do
                 if [ "$ANGLE_ARCH" = "x86" ]; then
                     ANGLE_LIBDIR=lib
                 else
                     ANGLE_LIBDIR=lib64
                 fi
-                ANGLE_LIBNAME=$ANGLE_PREFIX$LIBNAME$ANGLE_SUFFIX
+                ANGLE_LIBNAME=$LIBNAME$ANGLE_SUFFIX
                 ANGLE_SRCDIR=$ANGLE_PREBUILTS_DIR/$ANGLE_HOST-$ANGLE_ARCH
                 for ANGLE_DX in 9 ""; do
                     ANGLE_DSTDIR="$OUT_DIR/$ANGLE_LIBDIR/gles_angle$ANGLE_DX"
