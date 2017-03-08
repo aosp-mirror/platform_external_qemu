@@ -720,10 +720,7 @@ void FrameBuffer::drainWindowSurface() {
         const auto winIt = m_windows.find(winHandle);
         if (winIt != m_windows.end()) {
             if (const HandleType oldColorBufferHandle = winIt->second.second) {
-                const auto cit = m_colorbuffers.find(oldColorBufferHandle);
-                if (cit != m_colorbuffers.end() && --cit->second.refcount == 0) {
-                    m_colorbuffers.erase(cit);
-                }
+                closeColorBufferLocked(oldColorBufferHandle);
             }
             m_windows.erase(winIt);
         }
@@ -752,7 +749,10 @@ void FrameBuffer::DestroyRenderContext(HandleType p_context) {
 
 void FrameBuffer::DestroyWindowSurface(HandleType p_surface) {
     emugl::Mutex::AutoLock mutex(m_lock);
-    if (m_windows.erase(p_surface) != 0) {
+    const auto w = m_windows.find(p_surface);
+    if (w != m_windows.end()) {
+        closeColorBufferLocked(w->second.second);
+        m_windows.erase(w);
         RenderThreadInfo* tinfo = RenderThreadInfo::get();
         tinfo->m_windowSet.erase(p_surface);
     }
@@ -891,6 +891,10 @@ bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
     }
 
     (*w).second.first->setColorBuffer((*c).second.cb);
+    if (w->second.second) {
+        closeColorBufferLocked(w->second.second);
+    }
+    c->second.refcount++;
     (*w).second.second = p_colorbuffer;
     return true;
 }
@@ -1419,6 +1423,9 @@ bool FrameBuffer::onLoad(Stream* stream) {
         cleanupProcGLObjects_locked(m_procOwnedRenderContext.begin()->first);
     }
 
+    assert(m_contexts.empty());
+    assert(m_windows.empty());
+    assert(m_colorbuffers.empty());
     if (s_egl.eglLoadAllImages) {
         ScopedBind scopedBind(this);
         s_egl.eglLoadAllImages(m_eglDisplay, stream);
@@ -1444,12 +1451,8 @@ bool FrameBuffer::onLoad(Stream* stream) {
         RenderContextPtr ctx(RenderContext::onLoad(stream, m_eglDisplay));
         return { ctx ? ctx->getHndl() : 0, ctx };
     });
-    // Handle 0 is invalid: remove it.
-    // TODO: allow loadCollection() to skip some loaded elements instead of
-    //   manually fixing the things up.
-    m_contexts.erase(0);
+    assert(!android::base::find(m_contexts, 0));
 
-    assert(m_colorbuffers.empty());
     loadCollection(stream, &m_colorbuffers,
                    [this](Stream* stream) -> ColorBufferMap::value_type {
         ColorBufferPtr cb(ColorBuffer::onLoad(stream, m_eglDisplay,
