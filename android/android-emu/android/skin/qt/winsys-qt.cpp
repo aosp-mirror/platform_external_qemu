@@ -272,11 +272,14 @@ extern WinsysPreferredGlesApiLevel skin_winsys_get_preferred_gles_apilevel()
     return (WinsysPreferredGlesApiLevel)settings.value(Ui::Settings::GLESAPILEVEL_PREFERENCE, 0).toInt();
 }
 
+extern "C" void qemu_system_shutdown_request(void);
+
 extern void skin_winsys_quit_request()
 {
     D(__FUNCTION__);
     auto window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
+        qemu_system_shutdown_request();
         D("%s: Could not get window handle", __FUNCTION__);
         return;
     }
