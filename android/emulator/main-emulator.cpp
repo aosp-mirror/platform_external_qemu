@@ -169,13 +169,6 @@ static void clean_up_avd_contents_except_config_ini(const char* avd_folder) {
     delete_files(avd_folder, files_to_delete, ARRAY_SIZE(files_to_delete));
 }
 
-static void copy_userdata_img_from_sys_folder(const char* sys_folder, const char* avd_folder) {
-    std::string dest = PathUtils::join(avd_folder, "userdata.img");
-    std::string src = PathUtils::join(sys_folder, "userdata.img");
-    APosixStatus ret = path_copy_file(dest.c_str(), src.c_str());
-    D("Copying %s to %s %s\n", src.c_str(), dest.c_str(), ret == 0 ? "done" : "failed");
-}
-
 static void clean_up_android_out(const char* android_out) {
     // note: we should not delete 'userdata.img' otherwise, we will have to run
     // make again to create it; in avd/ folder, it can be copied from
@@ -477,10 +470,6 @@ int main(int argc, char** argv)
             char* avd_folder = path_getAvdContentPath(avdName);
             if (avd_folder) {
                 clean_up_avd_contents_except_config_ini(avd_folder);
-                std::string systemPath = getAvdSystemPath(avdName);
-                if (!systemPath.empty()) {
-                    copy_userdata_img_from_sys_folder(systemPath.c_str(), avd_folder);
-                }
                 free(avd_folder);
             }
         } else if (androidOut) {
