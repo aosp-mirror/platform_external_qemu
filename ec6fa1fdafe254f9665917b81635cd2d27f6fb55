@@ -22,6 +22,30 @@
       "revId": "ec6fa1fdafe254f9665917b81635cd2d27f6fb55",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "03af2b1e_c67be067",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 396,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-08T17:11:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "312ee204_35652c62",
+      "range": {
+        "startLine": 396,
+        "startChar": 4,
+        "endLine": 396,
+        "endChar": 49
+      },
+      "revId": "ec6fa1fdafe254f9665917b81635cd2d27f6fb55",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
