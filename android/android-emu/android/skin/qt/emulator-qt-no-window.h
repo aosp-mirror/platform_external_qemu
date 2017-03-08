@@ -12,6 +12,9 @@
 
 #pragma once
 
+#include "android/base/async/Looper.h"
+#include "android/emulation/control/AdbInterface.h"
+
 #include <QObject>
 
 #include <memory>
@@ -52,10 +55,19 @@ public:
 
     void startThread(std::function<void()> f);
 
+signals:
+    void requestClose();
+
 private:
     explicit EmulatorQtNoWindow(QObject* parent = 0);
 
 private slots:
     void slot_clearInstance();
     void slot_finished();
+    void slot_requestClose();
+
+private:
+    android::base::Looper* mLooper;
+    std::unique_ptr<android::emulation::AdbInterface> mAdbInterface;
+    bool mRunning = true;
 };

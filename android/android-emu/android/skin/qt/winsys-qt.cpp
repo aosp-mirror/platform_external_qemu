@@ -275,12 +275,13 @@ extern WinsysPreferredGlesApiLevel skin_winsys_get_preferred_gles_apilevel()
 extern void skin_winsys_quit_request()
 {
     D(__FUNCTION__);
-    auto window = EmulatorQtWindow::getInstance();
-    if (window == NULL) {
+    if (auto window = EmulatorQtWindow::getInstance()) {
+        window->requestClose();
+    } else if (auto nowindow = EmulatorQtNoWindow::getInstance()){
+        nowindow->requestClose();
+    } else {
         D("%s: Could not get window handle", __FUNCTION__);
-        return;
     }
-    window->requestClose();
 }
 
 void skin_winsys_destroy() {
