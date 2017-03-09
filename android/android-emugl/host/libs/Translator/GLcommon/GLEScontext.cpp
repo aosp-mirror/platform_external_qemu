@@ -348,11 +348,19 @@ void GLEScontext::init(GlLibrary* glLib) {
 }
 
 void GLEScontext::restore() {
+    postLoadRestoreShareGroup();
     if (m_needRestoreFromSnapshot) {
-        postLoadRestoreShareGroup();
         postLoadRestoreCtx();
         m_needRestoreFromSnapshot = false;
     }
+}
+
+bool GLEScontext::needRestore() {
+    bool ret = m_needRestoreFromSnapshot;
+    if (m_shareGroup) {
+        ret |= m_shareGroup->needRestore();
+    }
+    return ret;
 }
 
 GLenum GLEScontext::getGLerror() {
