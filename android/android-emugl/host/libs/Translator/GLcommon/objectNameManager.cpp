@@ -208,6 +208,10 @@ void ShareGroup::postLoadRestore() {
     }
 }
 
+bool ShareGroup::needRestore() {
+    return m_needLoadRestore;
+}
+
 void ShareGroup::lockObjectData() {
     while (m_objectsDataLock.test_and_set(std::memory_order_acquire)) {
         ;

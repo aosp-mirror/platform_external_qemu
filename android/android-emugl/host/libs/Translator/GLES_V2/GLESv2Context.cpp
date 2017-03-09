@@ -82,15 +82,6 @@ void GLESv2Context::init(GlLibrary* glLib) {
     m_initialized = true;
 }
 
-void GLESv2Context::restore() {
-    // TODO: make sure glLib is loaded
-    if (m_needRestoreFromSnapshot) {
-        postLoadRestoreShareGroup();
-        postLoadRestoreCtx();
-        m_needRestoreFromSnapshot = false;
-    }
-}
-
 GLESv2Context::GLESv2Context(int maj, int min, android::base::Stream* stream,
         GlLibrary* glLib) : GLEScontext(stream, glLib) {
     if (stream) {

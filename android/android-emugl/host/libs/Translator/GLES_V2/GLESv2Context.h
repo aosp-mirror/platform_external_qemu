@@ -56,7 +56,6 @@ public:
     virtual ObjectDataPtr loadObject(NamedObjectType type,
             ObjectLocalName localName, android::base::Stream* stream) const
             override;
-    virtual void restore();
 protected:
     virtual void postLoadRestoreCtx();
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
