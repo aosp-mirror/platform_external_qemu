@@ -258,11 +258,11 @@ goldfish_sync_read(void *opaque,
             // goldfish_sync_pending_cmd, so we can avoid a copy.
             curr_batch_cmd = (struct goldfish_sync_batch_cmd*)(s->current);
             DPRINT("read SYNC_REG_BATCH_COMMAND. writing to batch addr: "
-                   "cmd=%u handle=0x%llx time_arg=%u hostcmd_handle=0x%llx",
+                   "cmd=%u handle=0x%llx time_arg=%u hostcmd_handle=0x%llx\n",
                    curr_batch_cmd->cmd,
-                   curr_batch_cmd->handle,
+                   (unsigned long long)curr_batch_cmd->handle,
                    curr_batch_cmd->time_arg,
-                   curr_batch_cmd->hostcmd_handle);
+                   (unsigned long long)curr_batch_cmd->hostcmd_handle);
             cpu_physical_memory_write(s->batch_cmd_addr,
                                       (void*)curr_batch_cmd,
                                       sizeof(struct goldfish_sync_batch_cmd));
@@ -300,7 +300,6 @@ goldfish_sync_write(void *opaque,
                     hwaddr offset,
                     uint64_t val,
                     unsigned size) {
-
     DPRINT("opaque=%p "
            "offset=0x%lx "
            "sz=0x%x "
@@ -354,11 +353,12 @@ goldfish_sync_write(void *opaque,
         cpu_physical_memory_read(s->batch_guestcmd_addr,
                                  (void*)&guest_incoming,
                                  sizeof(struct goldfish_sync_batch_guestcmd));
-        DPRINT("got: cmd=%llu glsync=0x%llx thread=0x%llx timeline=0x%llx",
-                guest_incoming.host_command,
-                guest_incoming.glsync_handle,
-                guest_incoming.thread_handle,
-                guest_incoming.guest_timeline_handle);
+        DPRINT("got: batchaddr 0x%llx cmd=%llu glsync=0x%llx thread=0x%llx timeline=0x%llx\n",
+               (unsigned long long)(s->batch_guestcmd_addr),
+               (unsigned long long)(guest_incoming.host_command),
+               (unsigned long long)(guest_incoming.glsync_handle),
+               (unsigned long long)(guest_incoming.thread_handle),
+               (unsigned long long)(guest_incoming.guest_timeline_handle));
         switch (guest_incoming.host_command) {
         case SYNC_GUEST_CMD_TRIGGER_HOST_WAIT:
             DPRINT("exec SYNC_GUEST_CMD_TRIGGER_HOST_WAIT");
@@ -407,6 +407,24 @@ static const MemoryRegionOps goldfish_sync_iomem_ops = {
     .impl.max_access_size = 4
 };
 
+// Save/load order:
+// 1. Pipe
+// 2. Sync
+// (could be enforced by specification order in goldfish acpi dsdt, or
+// in IRQ seq?)
+static void goldfish_sync_save(QEMUFile* file, void* opaque) {
+    struct goldfish_sync_state* s = opaque;
+    qemu_put_be64(file, s->batch_cmd_addr);
+    qemu_put_be64(file, s->batch_guestcmd_addr);
+}
+
+static int goldfish_sync_load(QEMUFile* file, void* opaque, int version_id) {
+    struct goldfish_sync_state* s = opaque;
+    s->batch_cmd_addr = qemu_get_be64(file);
+    s->batch_guestcmd_addr = qemu_get_be64(file);
+    return 0;
+}
+
 // goldfish_sync_realize is called on startup if the sync device is enabled.
 // It does the work of setting up the I/O, command queue, and function pointers.
 static void goldfish_sync_realize(DeviceState *dev, Error **errp) {
@@ -426,6 +444,10 @@ static void goldfish_sync_realize(DeviceState *dev, Error **errp) {
                           0x2000);
     sysbus_init_mmio(sbdev, &s->iomem);
     sysbus_init_irq(sbdev, &s->irq);
+
+    register_savevm(
+        dev, "goldfish_sync", 0, 1,
+        goldfish_sync_save, goldfish_sync_load, s);
 }
 
 static Property goldfish_sync_properties[] = {
