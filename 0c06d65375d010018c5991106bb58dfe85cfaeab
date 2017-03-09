@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "44071c1c_b96161f0",
+        "filename": "android/android-emu/android/featurecontrol/proto/emulator_features.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-09T17:08:33Z",
+      "side": 1,
+      "message": "btw, we could use this protobuf in the feature control instead of tricks with C X-macros",
+      "range": {
+        "startLine": 5,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 1
+      },
+      "revId": "0c06d65375d010018c5991106bb58dfe85cfaeab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
