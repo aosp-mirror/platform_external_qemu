@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ea85369e_62bb3101",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/StalePtrRegistry.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-09T00:49:44Z",
+      "side": 1,
+      "message": "what if another thread gets a lock first here and removes the same |it|? crash?",
+      "range": {
+        "startLine": 65,
+        "startChar": 0,
+        "endLine": 67,
+        "endChar": 33
+      },
+      "revId": "56373419a1268aec71d9a58e4541a96029f94fc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "33a63045_193858a3",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/StalePtrRegistry.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-09T00:49:44Z",
+      "side": 1,
+      "message": "const?",
+      "range": {
+        "startLine": 81,
+        "startChar": 0,
+        "endLine": 89,
+        "endChar": 5
+      },
+      "revId": "56373419a1268aec71d9a58e4541a96029f94fc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "23516905_a6f05351",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/StalePtrRegistry.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-09T00:49:44Z",
+      "side": 1,
+      "message": "mutable; trailing space",
+      "range": {
+        "startLine": 101,
+        "startChar": 0,
+        "endLine": 101,
+        "endChar": 40
+      },
+      "revId": "56373419a1268aec71d9a58e4541a96029f94fc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f81bf79b_b326dd0c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/StalePtrRegistry.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-09T00:49:44Z",
+      "side": 1,
+      "message": "can you have a single map of handle -\u003e {T*, enum State} ?",
+      "range": {
+        "startLine": 102,
+        "startChar": 0,
+        "endLine": 102,
+        "endChar": 43
+      },
+      "revId": "56373419a1268aec71d9a58e4541a96029f94fc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
