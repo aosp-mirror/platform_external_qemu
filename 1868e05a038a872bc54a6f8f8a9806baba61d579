@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c26aae43_f4502901",
+        "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-09T16:57:20Z",
+      "side": 1,
+      "message": "I\u0027d prefer if we issued the standard \u0027adb reboot -p\" command before doing this. Otherwise it\u0027s pretty common to get corrupted disk image",
+      "range": {
+        "startLine": 282,
+        "startChar": 8,
+        "endLine": 282,
+        "endChar": 39
+      },
+      "revId": "1868e05a038a872bc54a6f8f8a9806baba61d579",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
