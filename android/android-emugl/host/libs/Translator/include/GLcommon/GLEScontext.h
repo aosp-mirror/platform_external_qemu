@@ -189,8 +189,8 @@ public:
     void setTextureEnabled(GLenum target, GLenum enable);
     ObjectLocalName getDefaultTextureName(GLenum target);
     ObjectLocalName getTextureLocalName(GLenum target, unsigned int tex);
-    bool isInitialized() { return m_initialized || m_needRestoreFromSnapshot; };
-    bool needRestore() {return m_needRestoreFromSnapshot;}
+    bool isInitialized() { return m_initialized; };
+    bool needRestore();
     GLint getUnpackAlignment();
 
     bool  isArrEnabled(GLenum);
