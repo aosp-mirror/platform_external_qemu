@@ -1,5 +1,7 @@
 syntax = "proto2";
 
+import "emulator_features.proto";
+
 package emulator_features;
 
 // (based on studio_stats.proto)
@@ -52,27 +54,6 @@ message EmulatorHostHWConfig {
 }
 
 message FeatureFlagAction {
-    // Must match emulator's featurecontrol defs.
-    enum Feature {
-        GLPipeChecksum = 0;
-        GrallocSync = 1;
-        EncryptUserData = 2;
-        IntelPerformanceMonitoringUnit = 3;
-        GLAsyncSwap = 4;
-        GLDMA = 5;
-        GLESDynamicVersion = 6;
-
-        // Speculative / for testing robustness of
-        // mapping feature names between emulator
-        // and protobuf.
-        HAXM = 7;
-        AMDOpenGLDriver = 8;
-        MesaDRI = 9;
-        HypervisorFramework = 10;
-        ANGLE = 11;
-
-        ProtoNumFeatures = 12;
-    }
     optional Feature feature = 1;
     optional bool enable = 2;
 }

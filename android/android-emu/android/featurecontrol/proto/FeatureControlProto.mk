@@ -14,6 +14,7 @@ LOCAL_C_INCLUDES := \
     $(PROTOBUF_INCLUDES) \
 
 LOCAL_PROTO_SOURCES := \
+    $(FEATURECONTROL_DIR)/emulator_features.proto \
     $(FEATURECONTROL_DIR)/emulator_feature_patterns.proto \
 
 $(call end-emulator-library)

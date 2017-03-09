@@ -1,0 +1,28 @@
+syntax = "proto2";
+
+package emulator_features;
+
+// Must match emulator's featurecontrol defs.
+enum Feature {
+    GLPipeChecksum = 0;
+    GrallocSync = 1;
+    EncryptUserData = 2;
+    IntelPerformanceMonitoringUnit = 3;
+    GLAsyncSwap = 4;
+    GLDMA = 5;
+    GLESDynamicVersion = 6;
+
+    // Forced renderer enums
+    ForceANGLE = 7;
+    ForceSwiftshader = 8;
+
+    // Speculative / for testing robustness of
+    // mapping feature names between emulator
+    // and protobuf.
+    HAXM = 9;
+    AMDOpenGLDriver = 10;
+    MesaDRI = 11;
+    HypervisorFramework = 12;
+
+    ProtoNumFeatures = 13;
+}
