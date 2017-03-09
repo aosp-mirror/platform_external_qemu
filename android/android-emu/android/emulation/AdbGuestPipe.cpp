@@ -83,6 +83,7 @@ namespace emulation {
 //
 
 using FdWatch = android::base::Looper::FdWatch;
+using Looper = android::base::Looper;
 using android::base::ScopedSocketWatch;
 using android::base::StringView;
 
@@ -248,6 +249,19 @@ void AdbGuestPipe::onGuestWantWakeOn(int flags) {
     }
 }
 
+static void on_timer_fired(void* opaque, Looper::Timer* timer) {
+    const auto agent = static_cast<AdbGuestPipe*> (opaque);
+    //fprintf(stderr, "timer called 1\n");
+    if (agent) {
+        //fprintf(stderr, "timer called 2\n");
+        agent->mHostSocket->wantRead();
+        if(agent->mTimer) {
+            //fprintf(stderr, "timer called 3\n");
+            ((Looper::Timer*)(agent->mTimer))->startRelative(1000);
+        }
+    }
+}
+
 void AdbGuestPipe::onHostConnection(ScopedSocket&& socket) {
     DD("%s: [%p] host connection", __func__, this);
     CHECK(mState <= State::WaitingForHostAdbConnection);
@@ -265,6 +279,9 @@ void AdbGuestPipe::onHostConnection(ScopedSocket&& socket) {
                 static_cast<AdbGuestPipe*>(opaque)->onHostSocketEvent(events);
             },
             this));
+
+    mTimer = (Looper::Timer *)(android::base::ThreadLooper::get()->createTimer(on_timer_fired,this));
+            ((Looper::Timer*)(mTimer))->startRelative(1000);
 
     waitForHostConnection();
 }

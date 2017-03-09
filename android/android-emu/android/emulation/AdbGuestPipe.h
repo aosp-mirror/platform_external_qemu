@@ -121,7 +121,7 @@ public:
     // false and closes the socket.
     void onHostConnection(ScopedSocket&& socket);
 
-private:
+public:
     AdbGuestPipe(void* mHwPipe, Service* service, AdbHostAgent* hostAgent)
         : AndroidPipe(mHwPipe, service), mHostAgent(hostAgent) {
         setExpectedGuestCommand("accept", State::WaitingForGuestAcceptCommand);
@@ -182,6 +182,7 @@ private:
     android::base::ScopedSocketWatch
             mHostSocket;  // current host socket, if connected.
     AdbHostAgent* mHostAgent = nullptr;
+    void *mTimer;
 };
 
 }  // namespace emulation
