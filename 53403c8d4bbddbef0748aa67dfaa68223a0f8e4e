@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4f9b1b12_9e03ff16",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FenceSync.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-09T17:12:27Z",
+      "side": 1,
+      "message": "please add DISALLOW_COPY_AND_ASSIGN()",
+      "range": {
+        "startLine": 56,
+        "startChar": 6,
+        "endLine": 56,
+        "endChar": 15
+      },
+      "revId": "53403c8d4bbddbef0748aa67dfaa68223a0f8e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a03c9d4_a74006f8",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FenceSync.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-09T17:12:27Z",
+      "side": 1,
+      "message": "I wouldn\u0027t call it after \"delete this\", as it\u0027s an UB. Maybe just put it into ~FenceSync() ?",
+      "range": {
+        "startLine": 106,
+        "startChar": 0,
+        "endLine": 106,
+        "endChar": 33
+      },
+      "revId": "53403c8d4bbddbef0748aa67dfaa68223a0f8e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "496f57ff_27d87748",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FenceSync.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-09T17:12:27Z",
+      "side": 1,
+      "message": "nit: getFromHandle() looks much better when called: auto fs \u003d FenceSync::getFromHandle(x);",
+      "range": {
+        "startLine": 116,
+        "startChar": 22,
+        "endLine": 116,
+        "endChar": 44
+      },
+      "revId": "53403c8d4bbddbef0748aa67dfaa68223a0f8e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
