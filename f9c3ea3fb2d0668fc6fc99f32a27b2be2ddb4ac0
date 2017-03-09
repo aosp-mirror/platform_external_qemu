@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1abe818f_837b3fc1",
+        "filename": "android/android-emu/android/protobuf/ProtobufLogging.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-09T17:06:35Z",
+      "side": 1,
+      "message": "nit: if a macro is not defined then it\u0027s 0 in preprocessor. IMO it\u0027s better to have a commented-out definition to 1 here, so (1) one knows how should it look like if they want to enable logging and (2) if defined via compiler command line this #define doesn\u0027t override it",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 24
+      },
+      "revId": "f9c3ea3fb2d0668fc6fc99f32a27b2be2ddb4ac0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
