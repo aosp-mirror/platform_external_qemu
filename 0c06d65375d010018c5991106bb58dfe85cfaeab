@@ -22,6 +22,30 @@
       "revId": "0c06d65375d010018c5991106bb58dfe85cfaeab",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7165d310_5de3dbf5",
+        "filename": "android/android-emu/android/featurecontrol/proto/emulator_features.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-09T22:08:11Z",
+      "side": 1,
+      "message": "Ack, future CL",
+      "parentUuid": "44071c1c_b96161f0",
+      "range": {
+        "startLine": 5,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 1
+      },
+      "revId": "0c06d65375d010018c5991106bb58dfe85cfaeab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
