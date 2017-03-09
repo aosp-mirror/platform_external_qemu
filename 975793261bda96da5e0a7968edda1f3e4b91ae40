@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "486ee9cb_eea04e32",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/StalePtrRegistry.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-09T18:19:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "83440695_53c5987b",
+      "range": {
+        "startLine": 27,
+        "startChar": 10,
+        "endLine": 27,
+        "endChar": 18
+      },
+      "revId": "975793261bda96da5e0a7968edda1f3e4b91ae40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "45c8a48f_c3d8d590",
         "filename": "android/android-emugl/host/libs/libOpenglRender/StalePtrRegistry.h",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2017-03-09T17:20:50Z",
       "side": 1,
       "message": "nite: you have quite many casts like this. writing a simple static function \"uint64_t asHandle(const T* ptr)\" would make it more readable imho",
+      "range": {
+        "startLine": 38,
+        "startChar": 14,
+        "endLine": 38,
+        "endChar": 38
+      },
+      "revId": "975793261bda96da5e0a7968edda1f3e4b91ae40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84c8cca7_5b38cc56",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/StalePtrRegistry.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-09T18:19:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "45c8a48f_c3d8d590",
       "range": {
         "startLine": 38,
         "startChar": 14,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "11d70772_fd5e7f3f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/StalePtrRegistry.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-09T18:19:18Z",
+      "side": 1,
+      "message": "OOPS (done)",
+      "parentUuid": "86a43116_c54f105d",
+      "range": {
+        "startLine": 55,
+        "startChar": 17,
+        "endLine": 55,
+        "endChar": 27
+      },
+      "revId": "975793261bda96da5e0a7968edda1f3e4b91ae40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "320b6ef2_b0524ae9",
         "filename": "android/android-emugl/host/libs/libOpenglRender/StalePtrRegistry.h",
         "patchSetId": 6
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "869e3acd_09e2900e",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/StalePtrRegistry.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-09T18:19:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "320b6ef2_b0524ae9",
+      "range": {
+        "startLine": 112,
+        "startChar": 4,
+        "endLine": 112,
+        "endChar": 8
+      },
+      "revId": "975793261bda96da5e0a7968edda1f3e4b91ae40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "16f5787b_3720fa1c",
         "filename": "android/android-emugl/host/libs/libOpenglRender/StalePtrRegistry.h",
         "patchSetId": 6
@@ -105,6 +201,30 @@
       "writtenOn": "2017-03-09T17:20:50Z",
       "side": 1,
       "message": "map\u0027s pair is of type std::pair\u003cconst Key, Value\u003e; if you don\u0027t add \u0027const\u0027 in the function it would require a temporary copy for each call\nIMO it\u0027s better to have a \"using PtrsMap \u003d std::unordered_map\u003c...\u003e\" somewhere in the class and then just use \"const PtrsMap::value_type\u0026\" as parameter",
+      "range": {
+        "startLine": 124,
+        "startChar": 43,
+        "endLine": 124,
+        "endChar": 51
+      },
+      "revId": "975793261bda96da5e0a7968edda1f3e4b91ae40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c24179cb_5872201b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/StalePtrRegistry.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-09T18:19:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "16f5787b_3720fa1c",
       "range": {
         "startLine": 124,
         "startChar": 43,
