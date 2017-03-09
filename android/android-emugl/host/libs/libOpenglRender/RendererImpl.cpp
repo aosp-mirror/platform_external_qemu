@@ -17,6 +17,7 @@
 
 #include "emugl/common/logging.h"
 #include "ErrorLog.h"
+#include "FenceSync.h"
 #include "FrameBuffer.h"
 
 #include <algorithm>
@@ -218,6 +219,8 @@ void RendererImpl::save(android::base::Stream* stream) {
     auto fb = FrameBuffer::getFB();
     assert(fb);
     fb->onSave(stream);
+
+    FenceSync::onSave(stream);
 }
 
 bool RendererImpl::load(android::base::Stream* stream) {
@@ -230,7 +233,13 @@ bool RendererImpl::load(android::base::Stream* stream) {
     }
     auto fb = FrameBuffer::getFB();
     assert(fb);
-    return fb->onLoad(stream);
+
+    bool res = true;
+
+    res = fb->onLoad(stream);
+    FenceSync::onLoad(stream);
+
+    return res;
 }
 
 RendererImpl::HardwareStrings RendererImpl::getHardwareStrings() {

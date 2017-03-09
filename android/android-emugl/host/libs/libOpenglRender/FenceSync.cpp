@@ -20,12 +20,18 @@
 #include "FrameBuffer.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "RenderThreadInfo.h"
+#include "StalePtrRegistry.h"
 
 #include "android/base/containers/Lookup.h"
+#include "android/base/files/StreamSerializing.h"
+#include "android/base/synchronization/Lock.h"
+
+#include <unordered_set>
 
 FenceSync::FenceSync(bool hasNativeFence,
                      bool destroyWhenSignaled) :
     mDestroyWhenSignaled(destroyWhenSignaled) {
+    addToRegistry();
 
     assert(mCount == 1);
     if (hasNativeFence) incRef();
@@ -38,6 +44,10 @@ FenceSync::FenceSync(bool hasNativeFence,
     mSync = s_egl.eglCreateSyncKHR(mDisplay,
                                    EGL_SYNC_FENCE_KHR,
                                    NULL);
+}
+
+FenceSync::~FenceSync() {
+    removeFromRegistry();
 }
 
 EGLint FenceSync::wait(uint64_t timeout) {
@@ -67,4 +77,51 @@ void FenceSync::signaledNativeFd() {
 
 void FenceSync::destroy() {
     s_egl.eglDestroySyncKHR(mDisplay, mSync);
+}
+
+// Snapshots for FenceSync//////////////////////////////////////////////////////
+// It's possible, though it does not happen often, that a fence
+// can be created but not yet waited on by the guest, which
+// needs careful handling:
+//
+// 1. Avoid manipulating garbage memory on snapshot restore;
+// rcCreateSyncKHR *creates new fence in valid memory*
+// --snapshot--
+// rcClientWaitSyncKHR *refers to uninitialized memory*
+// rcDestroySyncKHR *refers to uninitialized memory*
+// 2. Make rcCreateSyncKHR/rcDestroySyncKHR implementations return
+// the "signaled" status if referring to previous snapshot fences. It's
+// assumed that the GPU is long done with them.
+// 3. Avoid name collisions where a new FenceSync object is created
+// that has the same uint64_t casting as a FenceSync object from a previous
+// snapshot.
+
+// Maintain a StalePtrRegistry<FenceSync>:
+static android::base::LazyInstance<StalePtrRegistry<FenceSync> >
+    sFenceRegistry = LAZY_INSTANCE_INIT;
+
+// static
+void FenceSync::addToRegistry() {
+    sFenceRegistry->addPtr(this);
+}
+
+// static
+void FenceSync::removeFromRegistry() {
+    sFenceRegistry->removePtr(this);
+}
+
+// static
+void FenceSync::onSave(android::base::Stream* stream) {
+    sFenceRegistry->makeCurrentPtrsStale();
+    sFenceRegistry->onSave(stream);
+}
+
+// static
+void FenceSync::onLoad(android::base::Stream* stream) {
+    sFenceRegistry->onLoad(stream);
+}
+
+// static
+FenceSync* FenceSync::getFromHandle(uint64_t handle) {
+    return sFenceRegistry->getPtr(handle);
 }
