@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6b8f485e_75099803",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThreadInfo.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-09T16:28:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0adf4b66_9364d0e3",
+      "range": {
+        "startLine": 76,
+        "startChar": 0,
+        "endLine": 87,
+        "endChar": 46
+      },
+      "revId": "76034a274f91103cf206dc24ebb2d7af6ca83f87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fc56c8e7_4469339c",
         "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThreadInfo.h",
         "patchSetId": 12
@@ -36,6 +60,30 @@
       "writtenOn": "2017-03-07T17:58:35Z",
       "side": 1,
       "message": "nit: static function in SyncThread?",
+      "range": {
+        "startLine": 82,
+        "startChar": 0,
+        "endLine": 82,
+        "endChar": 51
+      },
+      "revId": "76034a274f91103cf206dc24ebb2d7af6ca83f87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "595b346a_e58acc2b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThreadInfo.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-09T16:28:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fc56c8e7_4469339c",
       "range": {
         "startLine": 82,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "a4d7eaeb_ed8cbb17",
+        "filename": "hw/misc/goldfish_sync.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-09T16:28:29Z",
+      "side": 1,
+      "message": "They are on guest.",
+      "parentUuid": "1ca9974f_6183c501",
+      "range": {
+        "startLine": 418,
+        "startChar": 0,
+        "endLine": 419,
+        "endChar": 49
+      },
+      "revId": "76034a274f91103cf206dc24ebb2d7af6ca83f87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "90e8150c_89ed8075",
         "filename": "hw/misc/goldfish_sync.c",
         "patchSetId": 12
@@ -82,6 +154,30 @@
       "writtenOn": "2017-03-07T17:58:35Z",
       "side": 1,
       "message": "we need to somehow make sure sync threads and pipe save/load order is stable and we know what\u0027s saved first. And we _must_ document it",
+      "range": {
+        "startLine": 447,
+        "startChar": 4,
+        "endLine": 447,
+        "endChar": 34
+      },
+      "revId": "76034a274f91103cf206dc24ebb2d7af6ca83f87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "16100e27_4eff4978",
+        "filename": "hw/misc/goldfish_sync.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 447,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-09T16:28:29Z",
+      "side": 1,
+      "message": "It\u0027s in deterministic order, based on IRQ # probably. Added comment",
+      "parentUuid": "90e8150c_89ed8075",
       "range": {
         "startLine": 447,
         "startChar": 4,
