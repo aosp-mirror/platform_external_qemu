@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "434312f5_82d13cbc",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 778,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-09T18:19:25Z",
+      "side": 1,
+      "message": "It connects the virtual device to rcTriggerWait when the guest wants to wait on a fence fd.\n\nUsed to be called in some early init like rcGetRendererVersion, but on snapshot load, it still needs to be restored. Not sure the best place to put it since it is referring to a static function in this file, but if we put it here in rcCreateSyncKHR, it\u0027s guaranteed to be there.",
+      "parentUuid": "bcce80d8_ec092993",
+      "range": {
+        "startLine": 778,
+        "startChar": 0,
+        "endLine": 778,
+        "endChar": 52
+      },
+      "revId": "8e51aa85556e37caaee2a3c3325b34770143da6e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3c710644_98f3a51b",
         "filename": "android/android-emugl/host/libs/libOpenglRender/SyncThread.h",
         "patchSetId": 17
@@ -36,6 +60,30 @@
       "writtenOn": "2017-03-09T17:27:53Z",
       "side": 1,
       "message": "nit: just getFromHandle()",
+      "range": {
+        "startLine": 90,
+        "startChar": 23,
+        "endLine": 90,
+        "endChar": 46
+      },
+      "revId": "8e51aa85556e37caaee2a3c3325b34770143da6e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ac5917b_72dba26d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/SyncThread.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-09T18:19:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3c710644_98f3a51b",
       "range": {
         "startLine": 90,
         "startChar": 23,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "9adbc125_2c88858f",
+        "filename": "hw/misc/goldfish_sync.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 413,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-09T18:19:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "04b806aa_0029e690",
+      "range": {
+        "startLine": 410,
+        "startChar": 1,
+        "endLine": 413,
+        "endChar": 9
+      },
+      "revId": "8e51aa85556e37caaee2a3c3325b34770143da6e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f4f21c56_e5a3e943",
         "filename": "hw/misc/goldfish_sync.c",
         "patchSetId": 17
@@ -82,6 +154,30 @@
       "writtenOn": "2017-03-09T17:27:53Z",
       "side": 1,
       "message": "maybe just use register_savevm() instead as we don\u0027t need it for now?",
+      "range": {
+        "startLine": 429,
+        "startChar": 0,
+        "endLine": 429,
+        "endChar": 44
+      },
+      "revId": "8e51aa85556e37caaee2a3c3325b34770143da6e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7cdf1694_5cc08ac6",
+        "filename": "hw/misc/goldfish_sync.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-09T18:19:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f4f21c56_e5a3e943",
       "range": {
         "startLine": 429,
         "startChar": 0,
