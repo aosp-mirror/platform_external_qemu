@@ -22,6 +22,30 @@
       "revId": "7ed5e56cd716c6ba03cac0dba0fd669402df8adf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "03e0f683_47d9e7fe",
+        "filename": "android/android-emu/android/skin/ui.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-03-10T18:31:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5154d536_38204893",
+      "range": {
+        "startLine": 283,
+        "startChar": 0,
+        "endLine": 283,
+        "endChar": 12
+      },
+      "revId": "7ed5e56cd716c6ba03cac0dba0fd669402df8adf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
