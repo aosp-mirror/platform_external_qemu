@@ -1,0 +1,10 @@
+Verified+1: Yurii Zubrytskyi <zyy@google.com>
+Code-Review+1: Yurii Zubrytskyi <zyy@google.com>
+Code-Review+2: Lingfeng Yang <lfy@google.com>
+Code-Review+2: Tao Wu <lepton@google.com>
+Autosubmit+1: Yurii Zubrytskyi <zyy@google.com>
+Submitted-by: Yurii Zubrytskyi <zyy@google.com>
+Submitted-at: Fri, 10 Mar 2017 18:08:20 +0000
+Reviewed-on: https://android-review.googlesource.com/349961
+Project: platform/external/qemu
+Branch: refs/heads/emu-2.3-release
