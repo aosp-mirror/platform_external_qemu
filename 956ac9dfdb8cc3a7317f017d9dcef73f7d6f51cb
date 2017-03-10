@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e98f22e0_8e545fd5",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 635,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-03-10T21:51:55Z",
+      "side": 1,
+      "message": "you already set sock_cloexec when creat socks, why set here again?",
+      "range": {
+        "startLine": 635,
+        "startChar": 8,
+        "endLine": 635,
+        "endChar": 20
+      },
+      "revId": "956ac9dfdb8cc3a7317f017d9dcef73f7d6f51cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
