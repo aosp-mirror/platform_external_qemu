@@ -13,6 +13,7 @@
 
 #include "android/base/EintrWrapper.h"
 #include "android/base/EnumFlags.h"
+#include "android/base/files/Fd.h"
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketErrors.h"
 
@@ -544,7 +545,7 @@ static int socketCreateTcpFor(int domain) {
     socketInitWinsock();
 #endif
     errno = 0;
-    int s = ::socket(domain, SOCK_STREAM, 0);
+    int s = ::socket(domain, SOCK_STREAM | SOCK_CLOEXEC, 0);
     ON_SOCKET_ERROR_RETURN_M1(s);
 #ifdef SO_NOSIGPIPE
     // Disable SIGPIPE generation on Darwin.
@@ -552,6 +553,7 @@ static int socketCreateTcpFor(int domain) {
     // set errno to EPIPE.
     socketSetOption(s, SOL_SOCKET, SO_NOSIGPIPE, 1);
 #endif
+    fdSetCloexec(s);
     return s;
 }
 
@@ -612,7 +614,12 @@ int socketTcp6LoopbackClient(int port) {
 
 int socketAcceptAny(int serverSocket) {
     errno = 0;
+#ifdef __linux__
+    int s = HANDLE_EINTR(::accept4(serverSocket, NULL, NULL, SOCK_CLOEXEC));
+#else  // !__linux__
     int s = HANDLE_EINTR(::accept(serverSocket, NULL, NULL));
+    fdSetCloexec(s);
+#endif  // !__linux__
     ON_SOCKET_ERROR_RETURN_M1(s);
     return s;
 }
@@ -620,11 +627,13 @@ int socketAcceptAny(int serverSocket) {
 int socketCreatePair(int* fd1, int* fd2) {
 #ifndef _WIN32
     int fds[2];
-    int ret = ::socketpair(AF_UNIX, SOCK_STREAM, 0, fds);
+    int ret = ::socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, fds);
 
     if (!ret) {
         socketSetNonBlocking(fds[0]);
         socketSetNonBlocking(fds[1]);
+        fdSetCloexec(fds[0]);
+        fdSetCloexec(fds[1]);
 #ifdef SO_NOSIGPIPE
         socketSetOption(fds[0], SOL_SOCKET, SO_NOSIGPIPE, 1);
         socketSetOption(fds[1], SOL_SOCKET, SO_NOSIGPIPE, 1);

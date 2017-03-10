@@ -18,6 +18,7 @@
 
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
+#include "android/utils/fd.h"
 #include "android/utils/misc.h"
 #include "android/utils/path.h"
 #include "android/utils/socket_drainer.h"
@@ -935,9 +936,11 @@ socket_create( SocketFamily  family, SocketType  type )
         return set_errno(EINVAL);
     }
 
-    QSOCKET_CALL(ret, socket(sfamily, stype, 0));
+    QSOCKET_CALL(ret, socket(sfamily, stype | SOCK_CLOEXEC, 0));
     if (ret < 0)
         return fix_errno();
+
+    fd_set_cloexec(ret);
 
     return ret;
 }
@@ -1106,13 +1109,6 @@ socket_listen( int  fd, int  backlog )
     SOCKET_CALL(listen(fd, backlog));
 }
 
-static void set_cloexec(int fd) {
-#ifndef _WIN32
-    int f = fcntl(fd, F_GETFD);
-    fcntl(fd, F_SETFD, f | FD_CLOEXEC);
-#endif  // !_WIN32
-}
-
 int
 socket_accept( int  fd, SockAddress*  address )
 {
@@ -1120,11 +1116,15 @@ socket_accept( int  fd, SockAddress*  address )
     socklen_t         addrlen = sizeof(addr);
     int               ret;
 
+#ifdef __linux__
+    QSOCKET_CALL(ret, accept4(fd, addr.sa, &addrlen, SOCK_CLOEXEC));
+#else
     QSOCKET_CALL(ret, accept(fd, addr.sa, &addrlen));
+#endif
     if (ret < 0)
         return fix_errno();
 
-    set_cloexec(ret);
+    fd_set_cloexec(ret);
 
     if (address) {
         if (sock_address_from_bsd(address, &addr, addrlen) < 0) {
@@ -1425,12 +1425,19 @@ socket_accept_any( int  server_fd )
 {
     int  fd;
 
+#ifdef __linux__
+    QSOCKET_CALL(fd, accept4( server_fd, NULL, 0, SOCK_CLOEXEC ));
+#else
     QSOCKET_CALL(fd, accept( server_fd, NULL, 0 ));
+#endif
+
     if (fd < 0) {
         D( "could not accept client connection from fd %d: %s",
            server_fd, errno_str );
         return -1;
     }
+
+    fd_set_cloexec(fd);
 
     /* set to non-blocking */
     socket_set_nonblock( fd );
@@ -1487,11 +1494,13 @@ socket_pair(int *fd1, int *fd2)
 {
 #ifndef _WIN32
     int   fds[2];
-    int   ret = socketpair(AF_UNIX, SOCK_STREAM, 0, fds);
+    int   ret = socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, fds);
 
     if (!ret) {
         socket_set_nonblock(fds[0]);
+        fd_set_cloexec(fds[0]);
         socket_set_nonblock(fds[1]);
+        fd_set_cloexec(fds[1]);
         *fd1 = fds[0];
         *fd2 = fds[1];
     }
