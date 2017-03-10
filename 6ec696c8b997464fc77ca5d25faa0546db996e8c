@@ -46,6 +46,30 @@
       "revId": "6ec696c8b997464fc77ca5d25faa0546db996e8c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5eed749d_929c1fff",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-10T18:00:13Z",
+      "side": 1,
+      "message": "No, I would just prefer to always have status on the messages, so one could debug their app.",
+      "parentUuid": "fc3df1e2_4759829a",
+      "range": {
+        "startLine": 61,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 24
+      },
+      "revId": "6ec696c8b997464fc77ca5d25faa0546db996e8c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
