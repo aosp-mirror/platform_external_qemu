@@ -525,6 +525,13 @@ void socketSetNonBlocking(int socket) {
 #endif
 }
 
+void socketSetCloseExec(int socket) {
+#ifndef _WIN32
+    int f = fcntl(socket, F_GETFD);
+    fcntl(socket, F_SETFD, f | FD_CLOEXEC);
+#endif
+}
+
 void socketSetBlocking(int socket) {
 #ifdef _WIN32
     unsigned long opt = 0;
@@ -562,6 +569,7 @@ static int socketTcpLoopbackServerFor(int port, int domain) {
         return -1;
     }
 
+    socketSetCloseExec(s.get());
     socketSetXReuseAddr(s.get());
 
     SockAddressStorage addr;
