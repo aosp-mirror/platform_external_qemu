@@ -1343,7 +1343,6 @@ socket_in_server( int  address, int  port, SocketType  type )
     s = socket_create_inet( type );
     if (s < 0)
         return -1;
-    set_cloexec(s);
 
     return socket_bind_server( s, &addr, type );
 }
@@ -1377,7 +1376,6 @@ socket_loopback6_server( int  port, SocketType  type )
     s = socket_create_in6( type );
     if (s < 0)
         return -1;
-    set_cloexec(s);
 
     return socket_bind_server( s, &addr, type );
 }
