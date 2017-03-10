@@ -22,6 +22,30 @@
       "revId": "956ac9dfdb8cc3a7317f017d9dcef73f7d6f51cb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48ca4a5c_5e95c94c",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 635,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-10T22:00:25Z",
+      "side": 1,
+      "message": "just to not add an extra #ifdef here. cloexec is just two get/set flags calls, those are really fast - so there\u0027s not much need in optimizing them out.",
+      "parentUuid": "e98f22e0_8e545fd5",
+      "range": {
+        "startLine": 635,
+        "startChar": 8,
+        "endLine": 635,
+        "endChar": 20
+      },
+      "revId": "956ac9dfdb8cc3a7317f017d9dcef73f7d6f51cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
