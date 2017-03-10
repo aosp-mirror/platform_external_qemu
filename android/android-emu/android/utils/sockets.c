@@ -1106,6 +1106,13 @@ socket_listen( int  fd, int  backlog )
     SOCKET_CALL(listen(fd, backlog));
 }
 
+static void set_cloexec(int fd) {
+#ifndef _WIN32
+    int f = fcntl(fd, F_GETFD);
+    fcntl(fd, F_SETFD, f | FD_CLOEXEC);
+#endif  // !_WIN32
+}
+
 int
 socket_accept( int  fd, SockAddress*  address )
 {
@@ -1116,6 +1123,8 @@ socket_accept( int  fd, SockAddress*  address )
     QSOCKET_CALL(ret, accept(fd, addr.sa, &addrlen));
     if (ret < 0)
         return fix_errno();
+
+    set_cloexec(ret);
 
     if (address) {
         if (sock_address_from_bsd(address, &addr, addrlen) < 0) {
