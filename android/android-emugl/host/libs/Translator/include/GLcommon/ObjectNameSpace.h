@@ -18,6 +18,7 @@
 
 #include "emugl/common/mutex.h"
 #include "GLcommon/NamedObject.h"
+#include "GLcommon/ObjectData.h"
 #include "GLcommon/SaveableTexture.h"
 
 #include <GLES/gl.h>
@@ -25,6 +26,7 @@
 #include <unordered_set>
 
 typedef std::unordered_map<ObjectLocalName, NamedObjectPtr> NamesMap;
+typedef std::unordered_map<ObjectLocalName, ObjectDataPtr> ObjectDataMap;
 typedef std::unordered_map<unsigned int, ObjectLocalName> GlobalToLocalNamesMap;
 
 class GlobalNameSpace;
@@ -45,7 +47,9 @@ class NameSpace
     friend class GlobalNameSpace;
 
 private:
-    NameSpace(NamedObjectType p_type, GlobalNameSpace *globalNameSpace);
+
+    NameSpace(NamedObjectType p_type, GlobalNameSpace *globalNameSpace,
+            android::base::Stream* stream, ObjectData::loadObject_t loadObject);
     ~NameSpace();
 
     //
@@ -95,9 +99,17 @@ private:
     //
     void replaceGlobalObject(ObjectLocalName p_localName, NamedObjectPtr p_namedObject);
 
+    const ObjectDataPtr& getObjectDataPtr(ObjectLocalName p_localName);
+    void setObjectData(ObjectLocalName p_localName, ObjectDataPtr data);
+    // snapshot functions
+    void postLoad(ObjectData::getObjDataPtr_t getObjDataPtr);
+    void postLoadRestore(ObjectData::getGlobalName_t getGlobalName);
+    void preSave(GlobalNameSpace *globalNameSpace);
+    void onSave(android::base::Stream* stream);
 private:
     ObjectLocalName m_nextName = 0;
     NamesMap m_localToGlobalMap;
+    ObjectDataMap m_objectDataMap;
     GlobalToLocalNamesMap m_globalToLocalMap;
     const NamedObjectType m_type;
     GlobalNameSpace *m_globalNameSpace = nullptr;
