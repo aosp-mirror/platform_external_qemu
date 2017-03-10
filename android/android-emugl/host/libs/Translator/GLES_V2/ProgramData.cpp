@@ -277,6 +277,7 @@ void ProgramData::restore(ObjectLocalName localName,
                     dispatcher.glUniform4fv(uniformEntry.first, uniform.mCount,
                             (const GLfloat*)uniform.mVal.data());
                     break;
+                case GL_BOOL:
                 case GL_INT:
                 case GL_SAMPLER_2D:
                 case GL_SAMPLER_3D:
@@ -296,14 +297,17 @@ void ProgramData::restore(ObjectLocalName localName,
                     dispatcher.glUniform1iv(uniformEntry.first, uniform.mCount,
                             (const GLint*)uniform.mVal.data());
                     break;
+                case GL_BOOL_VEC2:
                 case GL_INT_VEC2:
                     dispatcher.glUniform2iv(uniformEntry.first, uniform.mCount,
                             (const GLint*)uniform.mVal.data());
                     break;
+                case GL_BOOL_VEC3:
                 case GL_INT_VEC3:
                     dispatcher.glUniform3iv(uniformEntry.first, uniform.mCount,
                             (const GLint*)uniform.mVal.data());
                     break;
+                case GL_BOOL_VEC4:
                 case GL_INT_VEC4:
                     dispatcher.glUniform4iv(uniformEntry.first, uniform.mCount,
                             (const GLint*)uniform.mVal.data());
