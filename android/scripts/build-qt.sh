@@ -205,6 +205,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 -shared \
                 -nomake examples \
                 -nomake tests \
+                -no-strip \
 
         if [ "$(get_verbosity)" -gt 2 ]; then
             var_append EXTRA_CONFIGURE_FLAGS "-v"
@@ -238,6 +239,11 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                     -device-option CROSS_COMPILE=$BINPREFIX \
                     -no-warnings-are-errors
                 var_append LDFLAGS "-Xlinker --build-id"
+
+                # Somehow Windows build doesn't generate debug information
+                # unless asked explicitly
+                var_append CFLAGS -O2 -g
+                var_append CXXFLAGS -O2 -g -fno-rtti -fno-exceptions
                 ;;
             darwin*)
                 # '-sdk macosx' without the version forces the use of the latest
