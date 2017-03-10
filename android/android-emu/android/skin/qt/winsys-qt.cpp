@@ -333,6 +333,19 @@ extern void skin_winsys_set_window_title(const char *title)
     window->setTitle(QString(title), nullptr);
 }
 
+extern void skin_winsys_update_rotation(SkinRotation rotation)
+{
+    // When running "rotate" command via command line, UI
+    // does not know that it has rotate, so notify it.
+    D("%s", __FUNCTION__);
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    if (window == NULL) {
+        D("%s: Could not get window handle", __FUNCTION__);
+        return;
+    }
+    window->updateRotation(rotation);
+}
+
 extern void skin_winsys_spawn_thread(bool no_window,
                                      StartFunction f,
                                      int argc,

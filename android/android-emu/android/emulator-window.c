@@ -94,8 +94,16 @@ static void emulator_window_window_rotary_input_event(int delta) {
     user_event_agent->sendRotaryEvent(delta);
 }
 
+static void _emulator_window_update_rotation(SkinUI* ui, SkinRotation rotation) {
+    skin_ui_update_rotation(ui, rotation);
+}
+
 static void emulator_window_set_device_orientation(SkinRotation rotation) {
     android_sensors_set_coarse_orientation((AndroidCoarseOrientation) rotation);
+    if (qemulator->ui) {
+        // Make sure UI knows about the updated orientation.
+        _emulator_window_update_rotation(qemulator->ui, rotation);
+    }
 }
 
 static bool emulator_window_network_toggle(void) {
