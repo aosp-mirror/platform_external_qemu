@@ -12,12 +12,15 @@
 
 #include "android/skin/qt/emulator-qt-no-window.h"
 
+#include "android/base/memory/LazyInstance.h"
+#include "android/base/async/ThreadLooper.h"
+#include "android/globals.h"
+#include "android/skin/qt/QtLooper.h"
+
 #include <QObject>
 #include <QThread>
 #include <QtCore>
 #include <QCoreApplication>
-
-#include "android/base/memory/LazyInstance.h"
 
 #define DEBUG 0
 
@@ -44,10 +47,16 @@ void EmulatorQtNoWindow::create() {
     sNoWindowInstance.get() = Ptr(new EmulatorQtNoWindow());
 }
 
-EmulatorQtNoWindow::EmulatorQtNoWindow(QObject* parent) {
+EmulatorQtNoWindow::EmulatorQtNoWindow(QObject* parent)
+    : mLooper(android::qt::createLooper()),
+      mAdbInterface(android::emulation::AdbInterface::create(mLooper)) {
+    android::base::ThreadLooper::setLooper(mLooper, true);
     QObject::connect(QCoreApplication::instance(),
                      &QCoreApplication::aboutToQuit, this,
                      &EmulatorQtNoWindow::slot_clearInstance);
+    QObject::connect(this, &EmulatorQtNoWindow::requestClose, this,
+                     &EmulatorQtNoWindow::slot_requestClose);
+
 }
 
 EmulatorQtNoWindow::Ptr EmulatorQtNoWindow::getInstancePtr() {
@@ -75,6 +84,24 @@ void EmulatorQtNoWindow::startThread(std::function<void()> f) {
     connect(thread, SIGNAL(finished()), getInstance(), SLOT(slot_finished()));
 
     thread->start();
+}
+
+extern "C" void qemu_system_shutdown_request(void);
+
+void EmulatorQtNoWindow::slot_requestClose() {
+    if (mRunning) {
+        mRunning = false;
+        if (savevm_on_exit) {
+            qemu_system_shutdown_request();
+        } else {
+            mAdbInterface->runAdbCommand(
+                    {"shell", "reboot", "-p"},
+                    [](const android::emulation::OptionalAdbCommandResult&) {
+                        qemu_system_shutdown_request();
+                    },
+                    5000, false);
+        }
+    }
 }
 
 void EmulatorQtNoWindow::slot_clearInstance() {
