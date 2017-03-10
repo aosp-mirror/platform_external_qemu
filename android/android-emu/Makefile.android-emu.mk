@@ -86,6 +86,7 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_SRC_FILES := \
     android/base/Debug.cpp \
+    android/base/files/Fd.cpp \
     android/base/files/MemStream.cpp \
     android/base/files/PathUtils.cpp \
     android/base/files/StdioStream.cpp \
@@ -127,6 +128,7 @@ LOCAL_SRC_FILES := \
     android/utils/dirscanner.cpp \
     android/utils/eintr_wrapper.c \
     android/utils/exec.cpp \
+    android/utils/fd.cpp \
     android/utils/filelock.cpp \
     android/utils/file_data.c \
     android/utils/file_io.cpp \
