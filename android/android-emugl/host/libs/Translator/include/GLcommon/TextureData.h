@@ -17,8 +17,9 @@
 #pragma once
 
 #include "android/base/files/Stream.h"
-#include "GLcommon/objectNameManager.h"
+#include "GLcommon/ObjectData.h"
 
+#include <unordered_map>
 #include <vector>
 
 class TextureData : public ObjectData

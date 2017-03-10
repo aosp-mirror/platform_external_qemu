@@ -16,7 +16,7 @@
 #ifndef _FRAMEBUFFER_DATA_H
 #define _FRAMEBUFFER_DATA_H
 
-#include "objectNameManager.h"
+#include "ObjectData.h"
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 

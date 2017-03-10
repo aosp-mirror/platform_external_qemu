@@ -24,9 +24,9 @@
 
 #include "emugl/common/smart_ptr.h"
 
-#include <GLcommon/GLutils.h>
-#include <GLcommon/TranslatorIfaces.h>
-#include <GLcommon/objectNameManager.h>
+#include "GLcommon/GLutils.h"
+#include "GLcommon/TranslatorIfaces.h"
+#include "GLcommon/ShareGroup.h"
 
 #include <EGL/egl.h>
 

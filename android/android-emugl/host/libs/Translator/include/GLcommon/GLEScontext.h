@@ -20,7 +20,7 @@
 #include "android/base/files/Stream.h"
 #include "GLDispatch.h"
 #include "GLESpointer.h"
-#include "objectNameManager.h"
+#include "ShareGroup.h"
 #include "emugl/common/mutex.h"
 
 #include <string>

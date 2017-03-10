@@ -19,7 +19,7 @@
 
 #include <GLcommon/GLDispatch.h>
 #include <GLcommon/GLEScontext.h>
-#include <GLcommon/objectNameManager.h>
+#include <GLcommon/ShareGroup.h>
 
 // Extra desktop-specific OpenGL enums that we need to properly emulate OpenGL ES.
 #define GL_FRAMEBUFFER_SRGB 0x8DB9
