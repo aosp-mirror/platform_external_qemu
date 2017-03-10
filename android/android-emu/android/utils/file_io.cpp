@@ -10,8 +10,9 @@
 // GNU General Public License for more details.
 
 #include "android/utils/file_io.h"
-#include "android/base/system/Win32UnicodeString.h"
+#include "android/base/files/Fd.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/system/Win32UnicodeString.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -53,11 +54,15 @@ FILE* android_popen(const char* path, const char* mode) {
 }
 
 int android_open_without_mode(const char* path, int flags) {
-    return WIDEN_CALL_1(open, path, flags);
+    int res = WIDEN_CALL_1(open, path, flags | O_CLOEXEC);
+    android::base::fdSetCloexec(res);
+    return res;
 }
 
 int android_open_with_mode(const char* path, int flags, mode_t mode) {
-    return WIDEN_CALL_1(open, path, flags, mode);
+    int res = WIDEN_CALL_1(open, path, flags | O_CLOEXEC, mode);
+    android::base::fdSetCloexec(res);
+    return res;
 }
 
 int android_stat(const char* path, struct stat* buf) {
@@ -98,7 +103,13 @@ int android_mkdir(const char* path, mode_t mode) {
 #endif
 
 int android_creat(const char* path, mode_t mode) {
-    return WIDEN_CALL_1(creat, path, mode);
+#ifndef _WIN32
+    return android_open(path, O_CREAT | O_WRONLY | O_TRUNC, mode);
+#else
+    int res = WIDEN_CALL_1(creat, path, mode);
+    android::base::fdSetCloexec(res);
+    return res;
+#endif
 }
 
 int android_unlink(const char* path) {

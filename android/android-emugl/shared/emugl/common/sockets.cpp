@@ -14,6 +14,8 @@
 
 #include "emugl/common/sockets.h"
 
+#include "android/base/files/Fd.h"
+
 #include <errno.h>
 
 #ifdef _WIN32
@@ -118,12 +120,13 @@ struct SockAddr {
 };
 
 int socketBindInternal(const SockAddr* addr, int socketType) {
-    int s = ::socket(addr->getFamily(), socketType, 0);
+    int s = ::socket(addr->getFamily(), socketType | SOCK_CLOEXEC, 0);
     if (s < 0) {
         perror("Could not create socket to bind");
         return -errno;
     }
 
+    android::base::fdSetCloexec(s);
     socketSetDontLinger(s);
     socketSetReuseAddress(s);
 
@@ -140,12 +143,13 @@ int socketBindInternal(const SockAddr* addr, int socketType) {
 }
 
 int socketConnectInternal(const SockAddr* addr, int socketType) {
-    int s = ::socket(addr->getFamily(), socketType, 0);
+    int s = ::socket(addr->getFamily(), socketType | SOCK_CLOEXEC, 0);
     if (s < 0) {
         perror("Could not create socket to connect");
         return -errno;
     }
 
+    android::base::fdSetCloexec(s);
     socketSetDontLinger(s);
     socketSetReuseAddress(s);
 
@@ -239,8 +243,15 @@ int socketTcpClient(const char* hostname, int port, int socketType) {
 int socketAccept(int serverSocket) {
     int ret;
     do {
+#ifdef __linux__
+        ret = ::accept4(serverSocket, NULL, NULL, SOCK_CLOEXEC);
+#else
         ret = ::accept(serverSocket, NULL, NULL);
+#endif
     } while (ret < 0 && errno == EINTR);
+    if (ret >= 0) {
+        android::base::fdSetCloexec(ret);
+    }
     return ret;
 }
 
