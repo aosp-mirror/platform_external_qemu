@@ -2056,3 +2056,10 @@ void skin_window_update_gpu_frame(SkinWindow* window,
 
     skin_window_update_display(window, 0, 0, w, h);
 }
+
+void skin_window_update_rotation(SkinWindow* window, SkinRotation rotation) {
+    if (!window)
+        return;
+
+    skin_winsys_update_rotation(rotation);
+}

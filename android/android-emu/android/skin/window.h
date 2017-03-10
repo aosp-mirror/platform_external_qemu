@@ -103,3 +103,5 @@ typedef struct {
 extern void             skin_window_update_display( SkinWindow*  window, int  x, int  y, int  w, int  h );
 
 extern void skin_window_update_gpu_frame(SkinWindow* window, int w, int h, const void* pixels);
+
+extern void skin_window_update_rotation(SkinWindow* window, SkinRotation rotation);

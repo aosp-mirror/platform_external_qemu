@@ -88,6 +88,9 @@ void skin_winsys_start(bool no_window);
 void skin_winsys_set_window_icon(const unsigned char* icon_data,
                                  size_t icon_data_size);
 
+// Notifies the UI that the orientation has changed.
+void skin_winsys_update_rotation(SkinRotation rotation);
+
 // Stop main window and quit program. Must be called from inside event loop.
 void skin_winsys_quit_request(void);
 

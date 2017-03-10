@@ -177,6 +177,7 @@ signals:
     void runOnUiThread(SkinGenericFunction* f,
                        void* data,
                        QSemaphore* semaphore = NULL);
+    void updateRotation(SkinRotation rotation);
     void layoutChanged(SkinRotation rot);
 
 public:
@@ -271,6 +272,7 @@ private slots:
     void slot_runOnUiThread(SkinGenericFunction* f,
                             void* data,
                             QSemaphore* semaphore = NULL);
+    void slot_updateRotation(SkinRotation rotation);
 
     void slot_horizontalScrollChanged(int value);
     void slot_verticalScrollChanged(int value);

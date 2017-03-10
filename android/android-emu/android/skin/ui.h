@@ -136,4 +136,7 @@ bool skin_ui_is_trackball_active(SkinUI* ui);
 // Switches to the next skin layout.
 void skin_ui_select_next_layout();
 
+// Notifies the UI that the rotation has updated.
+void skin_ui_update_rotation(SkinUI* ui, SkinRotation rotation);
+
 ANDROID_END_HEADER
