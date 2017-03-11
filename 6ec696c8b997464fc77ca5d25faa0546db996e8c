@@ -94,6 +94,30 @@
       "revId": "6ec696c8b997464fc77ca5d25faa0546db996e8c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5d8a671f_21c6219c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-11T01:07:18Z",
+      "side": 1,
+      "message": "Oh, I see\nI thought the window was still there\nThen it looks like we don\u0027t really use any data received from the guest at all: client can\u0027t see it, and it is parsed only for verification (and maybe debug printing).\nHow are we expecting the users to debug their apps if they don\u0027t get any feedback?",
+      "parentUuid": "1d7b9f0f_1fb2accb",
+      "range": {
+        "startLine": 61,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 24
+      },
+      "revId": "6ec696c8b997464fc77ca5d25faa0546db996e8c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
