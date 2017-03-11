@@ -118,6 +118,30 @@
       "revId": "6ec696c8b997464fc77ca5d25faa0546db996e8c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31f1bfdb_337b103c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-03-11T05:59:05Z",
+      "side": 1,
+      "message": "I previously added the data callback so that the goldfish vehicle Hal can potentially sync data with host emulator. E.g., on start up, vehicle Hal can query emulator the initial state, so they are in sync.  \n\nThe data transfer between vehicle hal and emulator is actually opaque to car app developers. They should only care about App \u003c-\u003e vehicle hal, and debug using the debug information from vehicle hal.  Emulator \u003c-\u003e Hal data is more for internal debugging.",
+      "parentUuid": "5d8a671f_21c6219c",
+      "range": {
+        "startLine": 61,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 24
+      },
+      "revId": "6ec696c8b997464fc77ca5d25faa0546db996e8c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
