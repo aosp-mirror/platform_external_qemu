@@ -155,7 +155,8 @@ void HelpPage::on_help_docs_clicked() {
 
 void HelpPage::createBugReportWindow() {
     mBugReportWindow =
-            new BugReportWindow(mEmulatorWindow->getScreenCapturer(), this);
+            new BugReportWindow(mEmulatorWindow->getAdbInterface(),
+                                mEmulatorWindow->getScreenCapturer(), this);
 }
 
 void HelpPage::on_help_fileBug_clicked() {
