@@ -49,6 +49,8 @@ struct HwFingerprintClient {
     QemudClient*            qemu_client;
 };
 
+extern void kick_active_adb_pipe_ugly_hack();
+
 static void
 _hwFingerprintClient_recv(void* opaque, uint8_t* msg, int msglen,
                       QemudClient*  client );
@@ -177,6 +179,9 @@ _hwFingerprintClient_recv(void* opaque, uint8_t* msg, int msglen,
 {
     /* HwFingerprintClient*       fp_client = opaque; */
     D("got message from guest system fingerprint HAL\n");
+    /* Hack: kick the current active adbpipe */
+    /* remove this hack when the system image is updated */
+    kick_active_adb_pipe_ugly_hack();
 }
 
 static HwFingerprintClient*

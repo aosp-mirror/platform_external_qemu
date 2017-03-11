@@ -96,6 +96,16 @@ static int bufferBytes(const AndroidPipeBuffer* buffers, int count) {
 }
 #endif
 
+static AdbGuestPipe* ugly_hack_adb_guest_pipe_object = nullptr;
+
+extern "C" {
+void kick_active_adb_pipe_ugly_hack() {
+    if(ugly_hack_adb_guest_pipe_object) {
+        ugly_hack_adb_guest_pipe_object->onGuestClose(PipeCloseReason::PIPE_CLOSE_GRACEFUL);
+    }
+}
+}
+
 AndroidPipe* AdbGuestPipe::Service::create(void* mHwPipe, const char* args) {
     auto pipe = new AdbGuestPipe(mHwPipe, this, mHostAgent);
     onPipeOpen(pipe);
@@ -472,6 +482,9 @@ int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
                 } else if (mState == State::WaitingForGuestStartCommand) {
                     // Proxying data can start right now.
                     mState = State::ProxyingData;
+                    if (ugly_hack_adb_guest_pipe_object == nullptr){
+                        ugly_hack_adb_guest_pipe_object = this;
+                    }
                     // when -verbose, print a message indicating adb is connected
                     DINIT("%s: [%p] Adb connected, start proxing data",__func__, this);
                 }
