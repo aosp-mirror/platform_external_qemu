@@ -135,6 +135,7 @@ int main(int argc, char **argv)
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/error-messages.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"
 #include "android/gps.h"
 #include "android/help.h"
@@ -4487,6 +4488,11 @@ static int main_impl(int argc, char** argv)
         mts_port_create(NULL, gQAndroidUserEventAgent, gQAndroidDisplayAgent);
     }
 
+    /* Enable ADB authenticaiton, or not. */
+    if (feature_is_enabled(kFeature_PlayStoreImage)) {
+        boot_property_add("qemu.adb.secure", "1");
+    }
+
     /* qemu.gles will be read by the OpenGL ES emulation libraries.
      * If set to 0, the software GL ES renderer will be used as a fallback.
      * If the parameter is undefined, this means the system image runs
@@ -4535,8 +4541,6 @@ static int main_impl(int argc, char** argv)
     /* Initialize presence of hardware nav button */
     boot_property_add("qemu.hw.mainkeys", android_hw->hw_mainKeys ? "1" : "0");
 
-    /* Enable ADB authenticaiton, or not. */
-    /* boot_property_add("qemu.adb.secure", adb_auth ? "1" : "0"); */
 
     if (android_hw->hw_gsmModem) {
         if (android_qemud_get_channel(ANDROID_QEMUD_GSM,
