@@ -3293,7 +3293,6 @@ static int main_impl(int argc, char** argv)
 
 #ifdef CONFIG_ANDROID
     char* android_op_dns_server = NULL;
-    int adb_auth = 1;
 #endif
 
     qemu_init_cpu_loop();
@@ -4380,9 +4379,6 @@ static int main_impl(int argc, char** argv)
                 android_op_report_console = (char*)optarg;
                 break;
 
-            case QEMU_OPTION_android_skip_adb_auth:
-                adb_auth = 0;
-                break;
             case QEMU_OPTION_timezone:
                 if (timezone_set((char*)optarg)) {
                     fprintf(stderr, "emulator: it seems the timezone '%s' is not in zoneinfo format\n",
@@ -4540,7 +4536,7 @@ static int main_impl(int argc, char** argv)
     boot_property_add("qemu.hw.mainkeys", android_hw->hw_mainKeys ? "1" : "0");
 
     /* Enable ADB authenticaiton, or not. */
-    boot_property_add("qemu.adb.secure", adb_auth ? "1" : "0");
+    /* boot_property_add("qemu.adb.secure", adb_auth ? "1" : "0"); */
 
     if (android_hw->hw_gsmModem) {
         if (android_qemud_get_channel(ANDROID_QEMUD_GSM,
