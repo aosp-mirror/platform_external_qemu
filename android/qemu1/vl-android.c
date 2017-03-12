@@ -2902,7 +2902,7 @@ int main(int argc, char **argv, char **envp)
     }
 
     /* Bypass adb security or not. */
-    boot_property_add("qemu.adb.secure", adb_auth ? "1": "0");
+    /* boot_property_add("qemu.adb.secure", adb_auth ? "1": "0"); */
 
     /* Initialize LCD density */
     if (android_hw->hw_lcd_density) {

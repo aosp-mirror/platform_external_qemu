@@ -4540,7 +4540,7 @@ static int main_impl(int argc, char** argv)
     boot_property_add("qemu.hw.mainkeys", android_hw->hw_mainKeys ? "1" : "0");
 
     /* Enable ADB authenticaiton, or not. */
-    boot_property_add("qemu.adb.secure", adb_auth ? "1" : "0");
+    /* boot_property_add("qemu.adb.secure", adb_auth ? "1" : "0"); */
 
     if (android_hw->hw_gsmModem) {
         if (android_qemud_get_channel(ANDROID_QEMUD_GSM,
