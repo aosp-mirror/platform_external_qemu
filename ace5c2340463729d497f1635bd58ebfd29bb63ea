@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "db444a88_7e1643e5",
+        "filename": "android/qemu1/vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3005,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-13T17:26:50Z",
+      "side": 1,
+      "message": "why do we still need this one?",
+      "range": {
+        "startLine": 3005,
+        "startChar": 8,
+        "endLine": 3005,
+        "endChar": 25
+      },
+      "revId": "ace5c2340463729d497f1635bd58ebfd29bb63ea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
