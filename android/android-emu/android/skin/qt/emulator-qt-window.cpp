@@ -162,6 +162,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mStartedAdbStopProcess(false),
       mHaveBeenFrameless(false) {
     qRegisterMetaType<QPainter::CompositionMode>("QPainter::CompositionMode");
+    qRegisterMetaType<SkinRotation>("SkinRotation");
 
     android::base::ThreadLooper::setLooper(mLooper, true);
 
@@ -221,6 +222,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                      &EmulatorQtWindow::slot_setWindowTitle);
     QObject::connect(this, &EmulatorQtWindow::showWindow, this,
                      &EmulatorQtWindow::slot_showWindow);
+    QObject::connect(this, &EmulatorQtWindow::updateRotation, this,
+                     &EmulatorQtWindow::slot_updateRotation);
     QObject::connect(this, &EmulatorQtWindow::runOnUiThread, this,
                      &EmulatorQtWindow::slot_runOnUiThread);
     QObject::connect(QApplication::instance(), &QCoreApplication::aboutToQuit,
@@ -997,6 +1000,11 @@ void EmulatorQtWindow::queueSkinEvent(SkinEvent* event) {
     if (rotationEventLayout) {
         emit(layoutChanged(*rotationEventLayout));
     }
+}
+
+void EmulatorQtWindow::slot_updateRotation(SkinRotation rotation) {
+    mOrientation = rotation;
+    emit(layoutChanged(rotation));
 }
 
 void EmulatorQtWindow::slot_releaseBitmap(SkinSurface* s,

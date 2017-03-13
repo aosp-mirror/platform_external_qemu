@@ -231,6 +231,10 @@ void skin_ui_select_next_layout(SkinUI* ui) {
     _skin_ui_handle_rotate_key_command(ui, true);
 }
 
+void skin_ui_update_rotation(SkinUI* ui, SkinRotation rotation) {
+    skin_window_update_rotation(ui->window, rotation);
+}
+
 bool skin_ui_process_events(SkinUI* ui) {
     SkinEvent ev;
 
@@ -276,6 +280,8 @@ bool skin_ui_process_events(SkinUI* ui) {
             break;
         case kEventLayoutRotate:
             {
+                DE("EVENT: kEventLayoutRotate orientation=%d\n",
+                   ev.u.layout_rotation.rotation);
                 SkinRotation rot = ev.u.layout_rotation.rotation;
                 SkinLayout* l;
                 for (l = ui->layout_file->layouts;
