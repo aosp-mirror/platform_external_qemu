@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c4daf2b7_badf767c",
+        "filename": "vl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3143,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-13T21:53:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7c3f66f9_c9a00f3c",
+      "range": {
+        "startLine": 3142,
+        "startChar": 0,
+        "endLine": 3143,
+        "endChar": 5
+      },
+      "revId": "06cae7e2e4db9470dee69fb69c4adc063bf0b607",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "38e0a59b_67838f51",
         "filename": "vl.c",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "864b092e_1006cac7",
+        "filename": "vl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3147,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-13T21:53:15Z",
+      "side": 1,
+      "message": "I tried it initially :/\n\n768 results in out of memory crashes very easily. It\u0027s on the edge with 768. The machine just opened Android Studio and started the emulator. It could boot, but as soon as Chrome was launched that was it. With 512, the user can use browser and maybe some other apps and have it OOM crash later :)\n\nFor 512MB, API24 is much more adversely affected than other API levels, including API 25 and API 23.",
+      "parentUuid": "38e0a59b_67838f51",
+      "range": {
+        "startLine": 3147,
+        "startChar": 22,
+        "endLine": 3147,
+        "endChar": 25
+      },
+      "revId": "06cae7e2e4db9470dee69fb69c4adc063bf0b607",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "389ab103_802f9cd6",
         "filename": "vl.c",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2017-03-13T20:16:29Z",
       "side": 1,
       "message": "derror() or dwarning() ?",
+      "range": {
+        "startLine": 3149,
+        "startChar": 8,
+        "endLine": 3149,
+        "endChar": 15
+      },
+      "revId": "06cae7e2e4db9470dee69fb69c4adc063bf0b607",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8090b79b_f4f08d0c",
+        "filename": "vl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3149,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-13T21:53:15Z",
+      "side": 1,
+      "message": "I\u0027d prefer if a message was shown to the user similarly to the message when HAXM supported ram size is exceeded.",
+      "parentUuid": "389ab103_802f9cd6",
       "range": {
         "startLine": 3149,
         "startChar": 8,
