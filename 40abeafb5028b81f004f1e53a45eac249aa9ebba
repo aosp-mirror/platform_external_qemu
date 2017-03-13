@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "73945675_13bb2063",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2202,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-13T20:42:34Z",
+      "side": 1,
+      "message": "in main-kernel-parameters.cpp you checked for both |isQemu2| and if feature is enabled. Should we have a special flag somewhere in the emulator to know if we decided to enable wifi, so there won\u0027t be different checks in different places?",
+      "range": {
+        "startLine": 2202,
+        "startChar": 26,
+        "endLine": 2202,
+        "endChar": 59
+      },
+      "revId": "40abeafb5028b81f004f1e53a45eac249aa9ebba",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
