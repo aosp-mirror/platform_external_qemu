@@ -142,6 +142,30 @@
       "revId": "6ec696c8b997464fc77ca5d25faa0546db996e8c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b738579_db4a84cb",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1061217
+      },
+      "writtenOn": "2017-03-13T14:43:12Z",
+      "side": 1,
+      "message": "And some other functionalities in Vehicle Hal requires guest to send cmd to host, e.g., HVAC, volume controls.",
+      "parentUuid": "31f1bfdb_337b103c",
+      "range": {
+        "startLine": 61,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 24
+      },
+      "revId": "6ec696c8b997464fc77ca5d25faa0546db996e8c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
