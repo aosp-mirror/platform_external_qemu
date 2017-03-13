@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c3f66f9_c9a00f3c",
+        "filename": "vl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3143,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-13T20:16:29Z",
+      "side": 1,
+      "message": "this thing actually sets the memory size in HAX. If you want to change it then you need to update |ram_size| before the call",
+      "range": {
+        "startLine": 3142,
+        "startChar": 0,
+        "endLine": 3143,
+        "endChar": 5
+      },
+      "revId": "06cae7e2e4db9470dee69fb69c4adc063bf0b607",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "38e0a59b_67838f51",
+        "filename": "vl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3147,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-13T20:16:29Z",
+      "side": 1,
+      "message": "I\u0027d suggest 768 here, 512 was _veeeery_ slow for me",
+      "range": {
+        "startLine": 3147,
+        "startChar": 22,
+        "endLine": 3147,
+        "endChar": 25
+      },
+      "revId": "06cae7e2e4db9470dee69fb69c4adc063bf0b607",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "389ab103_802f9cd6",
+        "filename": "vl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3149,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-13T20:16:29Z",
+      "side": 1,
+      "message": "derror() or dwarning() ?",
+      "range": {
+        "startLine": 3149,
+        "startChar": 8,
+        "endLine": 3149,
+        "endChar": 15
+      },
+      "revId": "06cae7e2e4db9470dee69fb69c4adc063bf0b607",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
