@@ -3121,6 +3121,9 @@ static bool set_memory_options(uint64_t *ram_slots, ram_addr_t *maxram_size,
         error_report("ram size too large");
         return false;
     }
+
+    const int requested_meg = ram_size / (1024 * 1024);
+
 #ifdef CONFIG_HAX
     if (hax_enabled()) {
         uint64_t hax_max_ram = 0;
@@ -3128,7 +3131,6 @@ static bool set_memory_options(uint64_t *ram_slots, ram_addr_t *maxram_size,
             /* make sure we preserve the alignment if we need to adjust it */
             hax_max_ram = QEMU_ALIGN_DOWN(hax_max_ram, 8192);
             if (ram_size > hax_max_ram) {
-                const int requested_meg = ram_size / (1024 * 1024);
                 const int actual_meg = hax_max_ram / (1024 * 1024);
                 fprintf(stderr,
                         "Warning: requested RAM size %dM is too big, "
@@ -3137,9 +3139,29 @@ static bool set_memory_options(uint64_t *ram_slots, ram_addr_t *maxram_size,
                 ram_size = hax_max_ram;
             }
         }
-        hax_pre_init(ram_size);
     }
 #endif
+
+#ifdef CONFIG_ANDROID
+#ifdef _WIN32
+#ifndef _WIN64 // i.e., on 32-bit windows (64-bit also defines _WIN32)
+#define WIN32_MAX_RAM 512 * 1024 * 1024 // With 3GB system
+    if (ram_size > WIN32_MAX_RAM) {
+        fprintf(stderr, "Warning: On 32-bit Windows, requested RAM size %dM is too big. "
+                "Reducing to maximum supported size %dM\n",
+                requested_meg, WIN32_MAX_RAM / (1024 * 1024));
+        ram_size = WIN32_MAX_RAM;
+        // Disable GLDMA for 32-bit Windows to free up RAM in the guest.
+        feature_set_enabled_override(kFeature_GLDMA, false);
+    }
+#endif // _WIN64
+#endif // _WIN32
+#endif // CONFIG_ANDROID
+
+#ifdef CONFIG_HAX
+    hax_pre_init(ram_size);
+#endif
+
     /* store value for the future use */
     qemu_opt_set_number(opts, "size", ram_size, &error_abort);
     *maxram_size = ram_size;
