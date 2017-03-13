@@ -30,5 +30,6 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
                                           GLenum internalformat, GLsizei width, 
                                           GLsizei height, GLint border, 
                                           GLsizei imageSize, const GLvoid* data, void * funcPtr);
+void deleteRenderbufferGlobal(GLuint rbo);
 
 #endif

@@ -412,12 +412,33 @@ GL_APICALL void GL_APIENTRY glGetSynciv(GLsync sync, GLenum pname, GLsizei bufSi
 
 GL_APICALL void GL_APIENTRY glDrawBuffers(GLsizei n, const GLenum * bufs) {
     GET_CTX_V2();
-    ctx->dispatcher().glDrawBuffers(n, bufs);
+
+    if (ctx->isDefaultFBOBound(GL_DRAW_FRAMEBUFFER)) {
+        std::vector<GLenum> emulatedBufs(n);
+        memcpy(&emulatedBufs[0], bufs, n * sizeof(GLenum));
+        for (int i = 0; i < n; i++) {
+            if (bufs[i] == GL_BACK && ctx->isDefaultFBOBound(GL_DRAW_FRAMEBUFFER)) {
+                emulatedBufs[i] = GL_COLOR_ATTACHMENT0;
+            }
+        }
+        ctx->dispatcher().glDrawBuffers(n, &emulatedBufs[0]);
+
+    } else {
+        ctx->dispatcher().glDrawBuffers(n, bufs);
+    }
 }
 
 GL_APICALL void GL_APIENTRY glReadBuffer(GLenum src) {
     GET_CTX_V2();
-    ctx->dispatcher().glReadBuffer(src);
+    // if default fbo is bound and src is GL_BACK,
+    // use GL_COLOR_ATTACHMENT0 all of a sudden.
+    // bc we are using fbo emulation.
+    if (src == GL_BACK &&
+        ctx->isDefaultFBOBound(GL_READ_FRAMEBUFFER)) {
+        ctx->dispatcher().glReadBuffer(GL_COLOR_ATTACHMENT0);
+    } else {
+        ctx->dispatcher().glReadBuffer(src);
+    }
 }
 
 GL_APICALL void GL_APIENTRY glBlitFramebuffer(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter) {
@@ -425,14 +446,65 @@ GL_APICALL void GL_APIENTRY glBlitFramebuffer(GLint srcX0, GLint srcY0, GLint sr
     ctx->dispatcher().glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
 }
 
+static std::vector<GLenum> sGetEmulatedAttachmentList(GLESv2Context* ctx, GLenum target,
+                                                      GLsizei numAttachments, const GLenum* attachments) {
+    std::vector<GLenum> res(numAttachments);
+    memcpy(&res[0], attachments, numAttachments * sizeof(GLenum));
+
+    if (!ctx->hasEmulatedDefaultFBO() ||
+        !ctx->isDefaultFBOBound(target)) return res;
+
+
+    for (int i = 0; i < numAttachments; i++) {
+        if (attachments[i] == GL_COLOR) res[i] = GL_COLOR_ATTACHMENT0;
+        if (attachments[i] == GL_DEPTH) res[i] = GL_DEPTH_ATTACHMENT;
+        if (attachments[i] == GL_STENCIL) res[i] = GL_STENCIL_ATTACHMENT;
+    }
+
+    return res;
+}
+
 GL_APICALL void GL_APIENTRY glInvalidateFramebuffer(GLenum target, GLsizei numAttachments, const GLenum * attachments) {
     GET_CTX_V2();
-    ctx->dispatcher().glInvalidateFramebuffer(target, numAttachments, attachments);
+    SET_ERROR_IF(target != GL_FRAMEBUFFER &&
+                 target != GL_READ_FRAMEBUFFER &&
+                 target != GL_DRAW_FRAMEBUFFER, GL_INVALID_ENUM);
+
+    GLint maxColorAttachments;
+    glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &maxColorAttachments);
+
+    for (int i = 0; i < numAttachments; i++) {
+        if (attachments[i] >= GL_COLOR_ATTACHMENT0 &&
+            attachments[i] <= GL_COLOR_ATTACHMENT15) {
+                SET_ERROR_IF((GLint)(attachments[i] - GL_COLOR_ATTACHMENT0 + 1) >
+                             maxColorAttachments, GL_INVALID_OPERATION);
+        }
+    }
+
+    std::vector<GLenum> emulatedAttachments = sGetEmulatedAttachmentList(ctx, target, numAttachments, attachments);
+    ctx->dispatcher().glInvalidateFramebuffer(target, numAttachments, &emulatedAttachments[0]);
 }
 
 GL_APICALL void GL_APIENTRY glInvalidateSubFramebuffer(GLenum target, GLsizei numAttachments, const GLenum * attachments, GLint x, GLint y, GLsizei width, GLsizei height) {
     GET_CTX_V2();
-    ctx->dispatcher().glInvalidateSubFramebuffer(target, numAttachments, attachments, x, y, width, height);
+
+    SET_ERROR_IF(target != GL_FRAMEBUFFER &&
+            target != GL_READ_FRAMEBUFFER &&
+            target != GL_DRAW_FRAMEBUFFER, GL_INVALID_ENUM);
+
+    GLint maxColorAttachments;
+    glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &maxColorAttachments);
+
+    for (int i = 0; i < numAttachments; i++) {
+        if (attachments[i] >= GL_COLOR_ATTACHMENT0 &&
+                attachments[i] <= GL_COLOR_ATTACHMENT15) {
+            SET_ERROR_IF((GLint)(attachments[i] - GL_COLOR_ATTACHMENT0 + 1) >
+                         maxColorAttachments, GL_INVALID_OPERATION);
+        }
+    }
+
+    std::vector<GLenum> emulatedAttachments = sGetEmulatedAttachmentList(ctx, target, numAttachments, attachments);
+    ctx->dispatcher().glInvalidateSubFramebuffer(target, numAttachments, &emulatedAttachments[0], x, y, width, height);
 }
 
 GL_APICALL void GL_APIENTRY glFramebufferTextureLayer(GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer) {
@@ -441,6 +513,7 @@ GL_APICALL void GL_APIENTRY glFramebufferTextureLayer(GLenum target, GLenum atta
     GLenum textarget = GL_TEXTURE_2D_ARRAY;
     SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(ctx, target) &&
                    GLESv2Validate::framebufferAttachment(ctx, attachment)), GL_INVALID_ENUM);
+    SET_ERROR_IF(ctx->isDefaultFBOBound(target), GL_INVALID_OPERATION);
     if (texture) {
         if (!ctx->shareGroup()->isObject(NamedObjectType::TEXTURE, texture)) {
             ctx->shareGroup()->genName(NamedObjectType::TEXTURE, texture);
