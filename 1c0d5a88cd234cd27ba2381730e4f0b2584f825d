@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f866220c_8134b2c8",
+        "filename": "android/android-emu/android/featurecontrol/feature_control.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-13T18:09:32Z",
+      "side": 1,
+      "message": "this comment is obsolete or a copy-paste error",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 77
+      },
+      "revId": "1c0d5a88cd234cd27ba2381730e4f0b2584f825d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
