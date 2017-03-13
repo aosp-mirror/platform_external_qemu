@@ -3128,7 +3128,12 @@ static bool set_memory_options(uint64_t *ram_slots, ram_addr_t *maxram_size,
             hax_max_ram = QEMU_ALIGN_DOWN(hax_max_ram, 8192);
             if (ram_size > hax_max_ram) {
                 const int requested_meg = ram_size / (1024 * 1024);
+#ifndef _WIN64 // i.e., on 32-bit windows (64-bit also defines _WIN32)
+#define WIN32_MAX_RAM_MB 512 // With 3GB system
+                const int actual_meg = WIN32_MAX_RAM_MB / (1024 * 1024);
+#else
                 const int actual_meg = hax_max_ram / (1024 * 1024);
+#endif
                 fprintf(stderr,
                         "Warning: requested RAM size %dM is too big, "
                         "reducing to maximum supported size %dM\n",
