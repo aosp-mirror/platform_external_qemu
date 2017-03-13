@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "4bc5e836_d60973a6",
+        "filename": "vl.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3147,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-13T22:13:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "90a07f1d_e6ed3173",
+      "range": {
+        "startLine": 3146,
+        "startChar": 0,
+        "endLine": 3147,
+        "endChar": 15
+      },
+      "revId": "8e4325b81cf5bdb978eb17dc720efbfdc5b79b39",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa6f8720_62ec4d37",
         "filename": "vl.c",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2017-03-13T21:58:52Z",
       "side": 1,
       "message": "this should be under \"if (hax_enabled())\" runtime check, as even with CONFIG_HAX it could be disabled explicitly or because of some machine config (AMD?)",
+      "range": {
+        "startLine": 3161,
+        "startChar": 0,
+        "endLine": 3163,
+        "endChar": 6
+      },
+      "revId": "8e4325b81cf5bdb978eb17dc720efbfdc5b79b39",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "20ff4176_bf1258c3",
+        "filename": "vl.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3163,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-13T22:13:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa6f8720_62ec4d37",
       "range": {
         "startLine": 3161,
         "startChar": 0,
