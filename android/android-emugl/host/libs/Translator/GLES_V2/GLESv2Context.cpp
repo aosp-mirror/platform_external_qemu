@@ -89,8 +89,9 @@ void GLESv2Context::initDefaultFBO(GLint width, GLint height, GLint colorFormat,
             eglSurfaceRBColorId, eglSurfaceRBDepthId);
 }
 
-GLESv2Context::GLESv2Context(int maj, int min, android::base::Stream* stream,
-        GlLibrary* glLib) : GLEScontext(stream, glLib) {
+GLESv2Context::GLESv2Context(int maj, int min, GlobalNameSpace* globalNameSpace,
+        android::base::Stream* stream, GlLibrary* glLib)
+        : GLEScontext(globalNameSpace, stream, glLib) {
     if (stream) {
         assert(maj == m_glesMajorVersion);
         assert(min == m_glesMinorVersion);

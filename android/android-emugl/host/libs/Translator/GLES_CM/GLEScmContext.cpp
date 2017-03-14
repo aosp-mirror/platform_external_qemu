@@ -45,7 +45,11 @@ void GLEScmContext::initDefaultFBO(GLint width, GLint height, GLint colorFormat,
             eglSurfaceRBColorId, eglSurfaceRBDepthId);
 }
 
-GLEScmContext::GLEScmContext(int maj, int min) {
+GLEScmContext::GLEScmContext(int maj, int min,
+        GlobalNameSpace* globalNameSpace, android::base::Stream* stream)
+    : GLEScontext(globalNameSpace, stream, nullptr) {
+    // TODO: snapshot support
+    if (stream) return;
     m_glesMajorVersion = maj;
     m_glesMinorVersion = min;
     addVertexArrayObject(0);
