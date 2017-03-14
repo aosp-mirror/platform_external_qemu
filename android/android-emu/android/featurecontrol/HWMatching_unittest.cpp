@@ -79,9 +79,21 @@ pattern { # 6
   featureaction { feature: GLDMA } # test incomplete feature action
 }
 
+pattern { # 7
+  hwconfig { hostinfo { os_platform: "Windows" } }
+  hwconfig { hostinfo { os_platform: "Linux" } }
+}
+
+pattern { # 8
+  hwconfig {}
+}
+
+pattern { # 9
+}
+
 )";
 
-static const int kTestFeaturePatternsCount = 7;
+static const int kTestFeaturePatternsCount = 10;
 
 TEST(HWMatching, parseFeaturePattern) {
     emulator_features::EmulatorFeaturePatterns patterns;
@@ -216,6 +228,57 @@ TEST(HWMatching, basicFeatureActions) {
     };
 
     EXPECT_TRUE(actionsIdentical(actions, expectedActions));
+}
+
+TEST(HWMatching, basicDisjunction) {
+    emulator_features::EmulatorFeaturePatterns patterns;
+    EXPECT_TRUE(
+            google::protobuf::TextFormat::ParseFromString(
+                kTestFeaturePatterns, &patterns));
+    EXPECT_TRUE(patterns.pattern_size() == kTestFeaturePatternsCount);
+
+    HostHwInfo testinfo = {
+        "KVMKVMKVM",
+        0, 1, 64, 0xf,
+        "Linux",
+        nullptr
+    };
+
+    EXPECT_TRUE(matchFeaturePattern(testinfo, &patterns.pattern(7)));
+}
+
+TEST(HWMatching, trivialMatch) {
+    emulator_features::EmulatorFeaturePatterns patterns;
+    EXPECT_TRUE(
+            google::protobuf::TextFormat::ParseFromString(
+                kTestFeaturePatterns, &patterns));
+    EXPECT_TRUE(patterns.pattern_size() == kTestFeaturePatternsCount);
+
+    HostHwInfo testinfo = {
+        "KVMKVMKVM",
+        0, 1, 64, 0xf,
+        "Linux",
+        nullptr
+    };
+
+    EXPECT_TRUE(matchFeaturePattern(testinfo, &patterns.pattern(8)));
+}
+
+TEST(HWMatching, trivialMismatch) {
+    emulator_features::EmulatorFeaturePatterns patterns;
+    EXPECT_TRUE(
+            google::protobuf::TextFormat::ParseFromString(
+                kTestFeaturePatterns, &patterns));
+    EXPECT_TRUE(patterns.pattern_size() == kTestFeaturePatternsCount);
+
+    HostHwInfo testinfo = {
+        "KVMKVMKVM",
+        0, 1, 64, 0xf,
+        "Linux",
+        nullptr
+    };
+
+    EXPECT_FALSE(matchFeaturePattern(testinfo, &patterns.pattern(9)));
 }
 
 } // featurecontrol
