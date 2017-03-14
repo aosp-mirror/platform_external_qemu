@@ -115,7 +115,7 @@ private:
     GlobalNameSpace *m_globalNameSpace = nullptr;
 };
 
-class EglImage;
+struct EglImage;
 class TextureData;
 
 // Class GlobalNameSpace - this class maintain all global GL object names.

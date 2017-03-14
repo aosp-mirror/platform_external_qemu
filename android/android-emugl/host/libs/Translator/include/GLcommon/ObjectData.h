@@ -20,6 +20,8 @@
 #include "emugl/common/smart_ptr.h"
 #include "GLcommon/NamedObject.h"
 
+#include <functional>
+
 enum ObjectDataType {
     SHADER_DATA,
     PROGRAM_DATA,
