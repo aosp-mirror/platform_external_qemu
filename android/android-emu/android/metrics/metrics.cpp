@@ -53,6 +53,7 @@ namespace {
 // For now it's a single member, but soon to be more.
 struct InstanceData {
     android::metrics::AdbLivenessChecker::Ptr livenessChecker;
+    std::string emulatorName;
 
     void reset() {
         if (livenessChecker) {
@@ -75,13 +76,8 @@ bool android_metrics_start(const char* emulatorVersion,
     PeriodicReporter::start(&MetricsReporter::get(),
                             android::base::ThreadLooper::get());
 
-    // Start the ADB liveness monitor.
-    const auto emulatorName =
-            android::base::StringFormat("emulator-%d", controlConsolePort);
-    sGlobalData->livenessChecker = android::metrics::AdbLivenessChecker::create(
-            android::base::ThreadLooper::get(), &MetricsReporter::get(),
-            emulatorName, 20 * 1000);
-    sGlobalData->livenessChecker->start();
+    sGlobalData->emulatorName = android::base::StringFormat("emulator-%d", 
+                                    controlConsolePort);
 
     // Add a task that reports emulator's uptime (just in case that we don't
     // have enough of other messages reported).
@@ -100,6 +96,26 @@ void android_metrics_stop() {
     sGlobalData->reset();
     PeriodicReporter::stop();
     MetricsReporter::stop();
+}
+
+// Start the ADB liveness monitor. call this when GUI starts
+bool android_metrics_start_adb_liveness_checker(void *adbInterface)
+{
+    if (MetricsReporter::get().isReportingEnabled()) {
+        android::emulation::AdbInterface *adb = (android::emulation::AdbInterface *)
+                                                    adbInterface;
+        std::string emulatorName = adb->serialString();
+        if (emulatorName.empty())
+            emulatorName = sGlobalData->emulatorName;
+        sGlobalData->livenessChecker = android::metrics::AdbLivenessChecker::create(
+                adb, android::base::ThreadLooper::get(), &MetricsReporter::get(),
+                emulatorName, 20 * 1000);
+        sGlobalData->livenessChecker->start();
+
+        return true;
+    } else {
+        return false;
+    }
 }
 
 static android_studio::EmulatorDetails::GuestCpuArchitecture
