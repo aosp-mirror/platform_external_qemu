@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "51a241e6_092fc9a0",
+        "filename": "android/android-emu/android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-14T19:57:15Z",
+      "side": 1,
+      "message": "nit: const std::string\u0026 ?",
+      "range": {
+        "startLine": 117,
+        "startChar": 4,
+        "endLine": 117,
+        "endChar": 15
+      },
+      "revId": "310899d5e1861af6ac72683e0e076349ba0e4788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e68a33cf_b5722c4f",
+        "filename": "android/android-emu/android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-14T19:57:15Z",
+      "side": 1,
+      "message": "could you just use mAdb-\u003erunAdbCommand() instead? this way you don\u0027t need to have getters for adb path and emulator serial string",
+      "range": {
+        "startLine": 133,
+        "startChar": 4,
+        "endLine": 135,
+        "endChar": 35
+      },
+      "revId": "310899d5e1861af6ac72683e0e076349ba0e4788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce532423_8547dc31",
+        "filename": "android/android-emu/android/metrics/metrics.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-14T19:57:15Z",
+      "side": 1,
+      "message": "you can actually have a check here and don\u0027t do anything if metrics are disabled\nthe only useful thing adb liveness checker does is reporting metrics; if metrics are disabled then it shouldn\u0027t even be running.",
+      "range": {
+        "startLine": 103,
+        "startChar": 3,
+        "endLine": 110,
+        "endChar": 42
+      },
+      "revId": "310899d5e1861af6ac72683e0e076349ba0e4788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
