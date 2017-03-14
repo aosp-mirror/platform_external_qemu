@@ -148,6 +148,7 @@ void FramebufferData::restore(ObjectLocalName localName,
         } else { // binding a texture
             int texGlobalName = getGlobalName(NamedObjectType::TEXTURE,
                     attachPoint.name);
+            printf("fb restore tex %d %d\n", (int)attachPoint.name, texGlobalName);
             assert(texGlobalName);
             dispatcher.glFramebufferTexture2DEXT(GL_FRAMEBUFFER,
                     s_index2Attachment(i),
@@ -344,8 +345,7 @@ void FramebufferData::validate(GLEScontext* ctx)
         ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER,0);
         ctx->dispatcher().glBindFramebufferEXT(
                 GL_FRAMEBUFFER,
-                ctx->shareGroup()->getGlobalName(NamedObjectType::FRAMEBUFFER,
-                                                 m_fbName));
+                ctx->getFBOGlobalName(m_fbName));
 
         m_dirty = false;
     }

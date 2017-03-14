@@ -106,6 +106,7 @@ public:
     ObjectData* getObjectData(NamedObjectType p_type, ObjectLocalName p_localName);
     ObjectDataPtr getObjectDataPtr(NamedObjectType p_type, ObjectLocalName p_localName);
     uint64_t getId() const {return m_sharedGroupID;}
+    GlobalNameSpace* getGlobalNameSpace() const {return m_globalNameSpace;}
     void preSave(GlobalNameSpace *globalNameSpace);
     void onSave(android::base::Stream* stream);
     void postSave(android::base::Stream* stream);
@@ -149,6 +150,7 @@ private:
     uint64_t m_sharedGroupID;
     enum {PreSaved, Saved, Empty} m_saveStage = Empty;
     bool m_needLoadRestore = false;
+    GlobalNameSpace *m_globalNameSpace = nullptr;
 };
 
 typedef emugl::SmartPtr<ShareGroup> ShareGroupPtr;
