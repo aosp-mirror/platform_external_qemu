@@ -161,6 +161,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mPushDialog(this),
       mStartedAdbStopProcess(false),
       mHaveBeenFrameless(false) {
+          fprintf(stderr, "%s\n", globalGpuInfoList().dump().c_str());
     qRegisterMetaType<QPainter::CompositionMode>("QPainter::CompositionMode");
     qRegisterMetaType<SkinRotation>("SkinRotation");
 
