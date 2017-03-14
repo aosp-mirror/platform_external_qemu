@@ -44,7 +44,8 @@ static void initGLESx();
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp);
 static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
-static GLEScontext* createGLESContext(int maj, int min, android::base::Stream* stream);
+static GLEScontext* createGLESContext(int maj, int min,
+        GlobalNameSpace* globalNameSpace, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
 }
 
@@ -88,9 +89,9 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
 }
 
 static GLEScontext* createGLESContext(int maj, int min,
-                                      android::base::Stream* stream) {
+        GlobalNameSpace* globalNameSpace, android::base::Stream* stream) {
     (void)stream;
-    return new GLEScmContext(maj, min);
+    return new GLEScmContext(maj, min, globalNameSpace, stream);
 }
 
 static void deleteGLESContext(GLEScontext* ctx) {
@@ -905,8 +906,7 @@ GL_API void GL_APIENTRY  glGetIntegerv( GLenum pname, GLint *params) {
     case GL_FRAMEBUFFER_BINDING_OES:
         if (ctx->shareGroup().get()) {
             ctx->dispatcher().glGetIntegerv(pname,&i);
-            *params = ctx->shareGroup()->getLocalName(
-                    NamedObjectType::FRAMEBUFFER, i);
+            *params = ctx->getFBOLocalName(i);
         }
         break;
     case GL_RENDERBUFFER_BINDING_OES:
@@ -1942,8 +1942,7 @@ GL_API GLboolean GLAPIENTRY glIsFramebufferOES(GLuint framebuffer) {
     GET_CTX_RET(GL_FALSE)
     RET_AND_SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION,GL_FALSE);
     if (framebuffer && ctx->shareGroup().get()) {
-        return ctx->shareGroup()->isObject(NamedObjectType::FRAMEBUFFER,
-                                           framebuffer)
+        return ctx->isFBO(framebuffer)
                        ? GL_TRUE
                        : GL_FALSE;
     }
@@ -1955,17 +1954,14 @@ GL_API void GLAPIENTRY glBindFramebufferOES(GLenum target, GLuint framebuffer) {
     SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION);
     SET_ERROR_IF(!GLEScmValidate::framebufferTarget(target) ,GL_INVALID_ENUM);
     if (framebuffer && ctx->shareGroup().get() &&
-        !ctx->shareGroup()->isObject(NamedObjectType::FRAMEBUFFER,
-                                     framebuffer)) {
-        ctx->shareGroup()->genName(NamedObjectType::FRAMEBUFFER, framebuffer);
-        ctx->shareGroup()->setObjectData(
-                NamedObjectType::FRAMEBUFFER, framebuffer,
+        !ctx->isFBO(framebuffer)) {
+        ctx->genFBOName(framebuffer);
+        ctx->setFBOData(framebuffer,
                 ObjectDataPtr(new FramebufferData(framebuffer)));
     }
     int globalBufferName =
             (framebuffer != 0)
-                    ? ctx->shareGroup()->getGlobalName(
-                              NamedObjectType::FRAMEBUFFER, framebuffer)
+                    ? ctx->getFBOGlobalName(framebuffer)
                     : ctx->getDefaultFBOGlobalName();
     ctx->dispatcher().glBindFramebufferEXT(target,globalBufferName);
 
@@ -1980,8 +1976,7 @@ GL_API void GLAPIENTRY glDeleteFramebuffersOES(GLsizei n, const GLuint *framebuf
     for (int i=0;i<n;++i) {
         if (framebuffers[i] == fbName)
             glBindFramebufferOES(GL_FRAMEBUFFER_EXT, 0);
-        ctx->shareGroup()->deleteName(NamedObjectType::FRAMEBUFFER,
-                                      framebuffers[i]);
+        ctx->deleteFBO(framebuffers[i]);
     }
 }
 
@@ -1991,10 +1986,8 @@ GL_API void GLAPIENTRY glGenFramebuffersOES(GLsizei n, GLuint *framebuffers) {
     SET_ERROR_IF(n<0,GL_INVALID_VALUE);
     if (ctx->shareGroup().get()) {
         for (int i=0;i<n;i++) {
-            framebuffers[i] = ctx->shareGroup()->genName(
-                    NamedObjectType::FRAMEBUFFER, 0, true);
-            ctx->shareGroup()->setObjectData(
-                    NamedObjectType::FRAMEBUFFER, framebuffers[i],
+            framebuffers[i] = ctx->genFBOName(0, true);
+            ctx->setFBOData(framebuffers[i],
                     ObjectDataPtr(new FramebufferData(framebuffers[i])));
         }
     }
@@ -2029,11 +2022,9 @@ GL_API void GLAPIENTRY glFramebufferTexture2DOES(GLenum target, GLenum attachmen
 
     // Update the the current framebuffer object attachment state
     GLuint fbName = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
-    auto fbObj = ctx->shareGroup()->getObjectData(
-            NamedObjectType::FRAMEBUFFER, fbName);
+    auto fbObj = ctx->getFBOData(fbName);
     if (fbObj) {
-        FramebufferData *fbData = (FramebufferData *)fbObj;
-        fbData->setAttachment(attachment, textarget, 
+        fbObj->setAttachment(attachment, textarget, 
                               texture, ObjectDataPtr());
     }
 }
@@ -2070,11 +2061,9 @@ GL_API void GLAPIENTRY glFramebufferRenderbufferOES(GLenum target, GLenum attach
 
     // Update the the current framebuffer object attachment state
     GLuint fbName = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
-    auto fbObj = ctx->shareGroup()->getObjectData(
-            NamedObjectType::FRAMEBUFFER, fbName);
+    auto fbObj = ctx->getFBOData(fbName);
     if (fbObj) {
-        FramebufferData *fbData = (FramebufferData *)fbObj;
-        fbData->setAttachment(attachment, renderbuffertarget, renderbuffer, obj);
+        fbObj->setAttachment(attachment, renderbuffertarget, renderbuffer, obj);
     }
 
     if (renderbuffer && obj.get() != NULL) {
@@ -2107,12 +2096,10 @@ GL_API void GLAPIENTRY glGetFramebufferAttachmentParameterivOES(GLenum target, G
     //
     GLuint fbName = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
     if (fbName) {
-        auto fbObj = ctx->shareGroup()->getObjectData(
-                NamedObjectType::FRAMEBUFFER, fbName);
+        auto fbObj = ctx->getFBOData(fbName);
         if (fbObj) {
-            FramebufferData *fbData = (FramebufferData *)fbObj;
             GLenum target;
-            GLuint name = fbData->getAttachment(attachment, &target, NULL);
+            GLuint name = fbObj->getAttachment(attachment, &target, NULL);
             if (pname == GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE_OES) {
                 *params = target;
                 return;

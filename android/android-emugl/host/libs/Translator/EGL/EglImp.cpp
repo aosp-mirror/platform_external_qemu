@@ -905,7 +905,8 @@ static EGLContext eglCreateOrLoadContext(EGLDisplay display, EGLConfig config,
     const GLESiface* iface = g_eglInfo->getIface(glesVersion);
     GLEScontext* glesCtx = NULL;
     if(iface) {
-        glesCtx = iface->createGLESContext(major_version, minor_version, stream);
+        glesCtx = iface->createGLESContext(major_version, minor_version,
+                dpy->getGlobalNameSpace(), stream);
     } else { // there is no interface for this gles version
                 RETURN_ERROR(EGL_NO_CONTEXT,EGL_BAD_ATTRIBUTE);
     }

@@ -43,10 +43,7 @@ class GlobalNameSpace;
 //         interface (see below).
 class NameSpace
 {
-    friend class ShareGroup;
-    friend class GlobalNameSpace;
-
-private:
+public:
 
     NameSpace(NamedObjectType p_type, GlobalNameSpace *globalNameSpace,
             android::base::Stream* stream, ObjectData::loadObject_t loadObject);
