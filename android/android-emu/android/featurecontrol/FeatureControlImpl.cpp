@@ -212,6 +212,27 @@ void FeatureControlImpl::resetEnabledToDefault(Feature feature) {
     currFeature.isOverridden = false;
 }
 
+bool FeatureControlImpl::isOverridden(Feature feature) const {
+    const FeatureOption& currFeature = mFeatures[feature];
+    return currFeature.isOverridden;
+}
+
+void FeatureControlImpl::setIfNotOverriden(Feature feature, bool isEnabled) {
+    FeatureOption& currFeature = mFeatures[feature];
+    if (currFeature.isOverridden) return;
+    currFeature.currentVal = isEnabled;
+}
+
+Feature FeatureControlImpl::fromString(const std::string& str) {
+
+#define FEATURE_CONTROL_ITEM(item) if (str == #item) return item;
+#include "FeatureControlDefHost.h"
+#include "FeatureControlDefGuest.h"
+#undef FEATURE_CONTROL_ITEM
+
+    return Feature::Feature_n_items;
+}
+
 void FeatureControlImpl::initEnabledDefault(Feature feature, bool isEnabled) {
     FeatureOption& currFeature = mFeatures[feature];
     currFeature.name = feature;

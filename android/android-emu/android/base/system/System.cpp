@@ -1154,7 +1154,7 @@ int pathAccess(StringView path, int mode) {
 System* System::get() {
     System* result = sSystemForTesting;
     if (!result) {
-        result = sHostSystem.ptr();
+        result = hostSystem();
     }
     return result;
 }
@@ -1193,6 +1193,10 @@ System* System::setForTesting(System* system) {
     System* result = sSystemForTesting;
     sSystemForTesting = system;
     return result;
+}
+
+System* System::hostSystem() {
+    return sHostSystem.ptr();
 }
 
 // static

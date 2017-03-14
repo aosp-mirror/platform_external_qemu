@@ -1618,77 +1618,6 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         hw->vm_heapSize = heapSize;
     }
 
-    {
-        EmuglConfig config;
-
-        int api_level = avdInfo_getApiLevel(avd);
-        char* api_arch = avdInfo_getTargetAbi(avd);
-        bool isGoogle = avdInfo_isGoogleApis(avd);
-
-        if (!androidEmuglConfigInit(&config,
-                                    opts->avd,
-                                    api_arch,
-                                    api_level,
-                                    isGoogle,
-                                    opts->gpu,
-                                    0,
-                                    opts->no_window)) {
-            derror("%s", config.status);
-            return false;
-        }
-
-        // If the user is using -gpu off (not -gpu guest),
-        // or if the API level is lower than 14 (Ice Cream Sandwich)
-        // force 16-bit color depth.
-
-        if (api_level < 14 || (opts->gpu && !strcmp(opts->gpu, "off"))) {
-            hw->hw_lcd_depth = 16;
-        }
-
-        hw->hw_gpu_enabled = config.enabled;
-        if (use_software_gpu_and_screen_too_large(hw)) {
-            return false;
-        }
-
-        /* Update hw_gpu_mode with the canonical renderer name determined by
-         * emuglConfig_init (host/guest/off/swiftshader etc)
-         */
-        str_reset(&hw->hw_gpu_mode, config.backend);
-        D("%s", config.status);
-
-#ifdef _WIN32
-        // BUG: https://code.google.com/p/android/issues/detail?id=199427
-        // Booting will be severely slowed down, if not disabled outright, when
-        // 1. On Windows
-        // 2. Using an AVD resolution of >= 1080p (can vary across host setups)
-        // 3. -gpu mesa
-        // What happens is that Mesa will hog the CPU, while disallowing
-        // critical boot services from making progress, causing
-        // the services to give up and put the emulator in a reboot loop
-        // until it either fails to boot altogether or gets lucky and
-        // successfully boots.
-        // This workaround disables the boot animation under the above conditions,
-        // which frees up the CPU enough for the device to boot.
-        // ANGLE: ANGLE doesn't have GLESv1 support (for now),
-        // so let's also disable the boot animation.
-        const char* gpu_mode = opts->gpu ? opts->gpu : hw->hw_gpu_mode;
-        if (gpu_mode && (!strcmp(gpu_mode, "mesa") ||
-                         !strcmp(gpu_mode, "angle"))) {
-            opts->no_boot_anim = 1;
-            D("Starting AVD without boot animation.\n");
-        }
-#endif
-    }
-
-    /* Quit emulator on condition that both, gpu and snapstorage are on. This is
-     * a temporary solution preventing the emulator from crashing until GPU state
-     * can be properly saved / resored in snapshot file. */
-    if (hw->hw_gpu_enabled && opts->snapstorage && (!opts->no_snapshot_load ||
-                                                    !opts->no_snapshot_save)) {
-        derror("Snapshots and gpu are mutually exclusive at this point. Please turn one of them off, and restart the emulator.");
-        return false;
-    }
-
     if (opts->camera_back) {
         /* Validate parameter. */
         if (memcmp(opts->camera_back, "webcam", 6) &&
@@ -1796,5 +1725,84 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     }
 
     *exit_status = 0;
+    return true;
+}
+
+bool doGpuConfig(AvdInfo* avd, AndroidOptions* opts, AndroidHwConfig* hw,
+                 enum WinsysPreferredGlesBackend uiPreferredBackend)
+{
+    EmuglConfig config;
+
+    int api_level = avdInfo_getApiLevel(avd);
+    char* api_arch = avdInfo_getTargetAbi(avd);
+    bool isGoogle = avdInfo_isGoogleApis(avd);
+
+    if (!androidEmuglConfigInit(&config,
+                opts->avd,
+                api_arch,
+                api_level,
+                isGoogle,
+                opts->gpu,
+                0,
+                opts->no_window,
+                uiPreferredBackend)) {
+        derror("%s", config.status);
+        return false;
+    }
+
+    // If the user is using -gpu off (not -gpu guest),
+    // or if the API level is lower than 14 (Ice Cream Sandwich)
+    // force 16-bit color depth.
+
+    if (api_level < 14 || (opts->gpu && !strcmp(opts->gpu, "off"))) {
+        hw->hw_lcd_depth = 16;
+    }
+
+    hw->hw_gpu_enabled = config.enabled;
+    if (use_software_gpu_and_screen_too_large(hw)) {
+        derror("%s: software gpu and screen too large", config.status);
+        return false;
+    }
+
+    /* Update hw_gpu_mode with the canonical renderer name determined by
+     * emuglConfig_init (host/guest/off/swiftshader etc)
+     */
+    str_reset(&hw->hw_gpu_mode, config.backend);
+    D("%s", config.status);
+
+#ifdef _WIN32
+    // BUG: https://code.google.com/p/android/issues/detail?id=199427
+    // Booting will be severely slowed down, if not disabled outright, when
+    // 1. On Windows
+    // 2. Using an AVD resolution of >= 1080p (can vary across host setups)
+    // 3. -gpu mesa
+    // What happens is that Mesa will hog the CPU, while disallowing
+    // critical boot services from making progress, causing
+    // the services to give up and put the emulator in a reboot loop
+    // until it either fails to boot altogether or gets lucky and
+    // successfully boots.
+    // This workaround disables the boot animation under the above conditions,
+    // which frees up the CPU enough for the device to boot.
+    // ANGLE: ANGLE doesn't have GLESv1 support (for now),
+    // so let's also disable the boot animation.
+    const char* gpu_mode = opts->gpu ? opts->gpu : hw->hw_gpu_mode;
+    if (gpu_mode && (!strcmp(gpu_mode, "mesa") ||
+                !strcmp(gpu_mode, "angle"))) {
+        opts->no_boot_anim = 1;
+        D("Starting AVD without boot animation.\n");
+    }
+#endif
+
+    /* Quit emulator on condition that both, gpu and snapstorage are on. This is
+     * a temporary solution preventing the emulator from crashing until GPU state
+     * can be properly saved / resored in snapshot file. */
+    if (hw->hw_gpu_enabled && opts->snapstorage && (!opts->no_snapshot_load ||
+                !opts->no_snapshot_save)) {
+        derror("Snapshots and gpu are mutually exclusive at this point. Please turn one of them off, and restart the emulator.");
+        return false;
+    }
+
+    emuglConfig_setupEnv(&config);
+
     return true;
 }
