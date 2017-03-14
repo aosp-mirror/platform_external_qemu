@@ -18,18 +18,87 @@
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
+#include "android/base/memory/LazyInstance.h"
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/TranslatorIfaces.h"
 
 #include <assert.h>
 
-NameSpace::NameSpace(NamedObjectType p_type,
-                     GlobalNameSpace *globalNameSpace) :
+NameSpace::NameSpace(NamedObjectType p_type, GlobalNameSpace *globalNameSpace,
+        android::base::Stream* stream, ObjectData::loadObject_t loadObject) :
     m_type(p_type),
-    m_globalNameSpace(globalNameSpace) {}
+    m_globalNameSpace(globalNameSpace) {
+    if (!stream) return;
+    // When loading from a snapshot, we restores translator states here, but
+    // host GPU states are not touched until postLoadRestore is called.
+    // GlobalNames are not yet generated.
+    size_t objSize = stream->getBe32();
+    for (size_t obj = 0; obj < objSize; obj++) {
+        ObjectLocalName localName = stream->getBe64();
+        ObjectDataPtr data = loadObject((NamedObjectType)m_type,
+                localName, stream);
+        if (m_type == NamedObjectType::TEXTURE) {
+            // Texture data are managed differently
+            // They are loaded by GlobalNameSpace before loading
+            // share groups
+            TextureData* texData = (TextureData*)data.get();
+            NamedObjectPtr texObj = globalNameSpace->
+                    getGlobalObjectFromLoad(texData->globalName);
+            texData->globalName = texObj->getGlobalName();
+            setGlobalObject(localName, texObj);
+        }
+        setObjectData(localName, std::move(data));
+    }
+}
 
-NameSpace::~NameSpace()
-{
+NameSpace::~NameSpace() {
+}
+
+void NameSpace::postLoad(ObjectData::getObjDataPtr_t getObjDataPtr) {
+    for (const auto& objData : m_objectDataMap) {
+        objData.second->postLoad(getObjDataPtr);
+    }
+}
+
+void NameSpace::postLoadRestore(ObjectData::getGlobalName_t getGlobalName) {
+    // Texture data are restored right on load
+    if (m_type == NamedObjectType::TEXTURE) return;
+    // 2 passes are needed for SHADER_OR_PROGRAM type, because (1) they
+    // live in the same namespace (2) shaders must be created before
+    // programs.
+    int numPasses = m_type == NamedObjectType::SHADER_OR_PROGRAM
+            ? 2 : 1;
+    for (int pass = 0; pass < numPasses; pass ++) {
+        for (const auto& obj : m_objectDataMap) {
+            assert(m_type == ObjectDataType2NamedObjectType(
+                    obj.second->getDataType()));
+            // get global names
+            if ((obj.second->getDataType() == PROGRAM_DATA && pass == 0)
+                    || (obj.second->getDataType() == SHADER_DATA &&
+                            pass == 1)) {
+                continue;
+            }
+            genName(obj.second->getGenNameInfo(), obj.first, false);
+            obj.second->restore(obj.first, getGlobalName);
+        }
+    }
+}
+
+void NameSpace::preSave(GlobalNameSpace *globalNameSpace) {
+    if (m_type != NamedObjectType::TEXTURE) {
+        return;
+    }
+    for (const auto& obj : m_objectDataMap) {
+        globalNameSpace->preSaveAddTex((const TextureData*)obj.second.get());
+    }
+}
+
+void NameSpace::onSave(android::base::Stream* stream) {
+    stream->putBe32(m_objectDataMap.size());
+    for (const auto& obj : m_objectDataMap) {
+        stream->putBe64(obj.first);
+        obj.second->onSave(stream);
+    }
 }
 
 ObjectLocalName
@@ -97,6 +166,7 @@ NameSpace::deleteName(ObjectLocalName p_localName)
         m_globalToLocalMap.erase(n->second->getGlobalName());
         m_localToGlobalMap.erase(n);
     }
+    m_objectDataMap.erase(p_localName);
 }
 
 bool
@@ -128,6 +198,22 @@ NameSpace::replaceGlobalObject(ObjectLocalName p_localName,
         (*n).second = p_namedObject;
         m_globalToLocalMap.emplace(p_namedObject->getGlobalName(), p_localName);
     }
+}
+
+static android::base::LazyInstance<ObjectDataPtr> nullObjectData = {};
+
+const ObjectDataPtr& NameSpace::getObjectDataPtr(
+        ObjectLocalName p_localName) {
+    const auto it = m_objectDataMap.find(p_localName);
+    if (it != m_objectDataMap.end()) {
+        return it->second;
+    }
+    return *nullObjectData;
+}
+
+void NameSpace::setObjectData(ObjectLocalName p_localName,
+        ObjectDataPtr data) {
+    m_objectDataMap.emplace(p_localName, std::move(data));
 }
 
 void GlobalNameSpace::preSaveAddEglImage(const EglImage* eglImage) {

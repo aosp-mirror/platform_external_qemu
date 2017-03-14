@@ -1,6 +1,8 @@
 LOCAL_PATH := $(call my-dir)
 
 host_common_SRC_FILES :=     \
+     etc.cpp                 \
+     FramebufferData.cpp     \
      GLDispatch.cpp          \
      GLutils.cpp             \
      GLEScontext.cpp         \
@@ -8,15 +10,14 @@ host_common_SRC_FILES :=     \
      GLESpointer.cpp         \
      GLESbuffer.cpp          \
      NamedObject.cpp         \
+     ObjectData.cpp          \
+     ObjectNameSpace.cpp     \
+     PaletteTexture.cpp      \
      RangeManip.cpp          \
      SaveableTexture.cpp     \
+     ShareGroup.cpp          \
      TextureData.cpp         \
-     TextureUtils.cpp        \
-     PaletteTexture.cpp      \
-     etc.cpp                 \
-     objectNameManager.cpp   \
-     ObjectNameSpace.cpp     \
-     FramebufferData.cpp
+     TextureUtils.cpp
 
 host_GL_COMMON_LINKER_FLAGS :=
 host_common_LDLIBS :=

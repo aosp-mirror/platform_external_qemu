@@ -20,7 +20,7 @@
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
 
-#include <GLcommon/objectNameManager.h>
+#include <GLcommon/ShareGroup.h>
 #include <GLES3/gl31.h>
 
 #include <string.h>

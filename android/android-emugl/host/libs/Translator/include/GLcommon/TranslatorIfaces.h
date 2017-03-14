@@ -16,7 +16,7 @@
 #ifndef TRANSLATOR_IFACES_H
 #define TRANSLATOR_IFACES_H
 
-#include "GLcommon/objectNameManager.h"
+#include "GLcommon/ShareGroup.h"
 
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>

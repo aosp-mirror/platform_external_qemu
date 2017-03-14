@@ -19,7 +19,7 @@
 #include <android/base/files/Stream.h>
 #include <stdio.h>
 #include <GLES/gl.h>
-#include <GLcommon/objectNameManager.h>
+#include <GLcommon/ObjectData.h>
 #include <GLcommon/RangeManip.h>
 
 class GLESbuffer: public ObjectData {

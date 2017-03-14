@@ -20,7 +20,7 @@
 #include "ANGLEShaderParser.h"
 #include "GLESv2Context.h"
 #include <string>
-#include <GLcommon/objectNameManager.h>
+#include <GLcommon/ShareGroup.h>
 #include <unordered_set>
 
 class ShaderParser : public ObjectData {

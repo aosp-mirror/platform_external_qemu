@@ -20,55 +20,16 @@
 #include "emugl/common/mutex.h"
 #include "emugl/common/smart_ptr.h"
 #include "GLcommon/NamedObject.h"
-#include <GLES/gl.h>
+#include "GLcommon/ObjectData.h"
 
 #include <atomic>
+#include <GLES/gl.h>
 #include <unordered_map>
 #include <unordered_set>
-
-enum ObjectDataType {
-    SHADER_DATA,
-    PROGRAM_DATA,
-    TEXTURE_DATA,
-    BUFFER_DATA,
-    RENDERBUFFER_DATA,
-    FRAMEBUFFER_DATA,
-    UNDEFINED_DATA,
-};
 
 enum LoadShaderOrProgram {
     LOAD_SHADER,
     LOAD_PROGRAM
-};
-
-class ObjectData;
-typedef emugl::SmartPtr<ObjectData> ObjectDataPtr;
-
-extern NamedObjectType ObjectDataType2NamedObjectType(ObjectDataType objDataType);
-
-class ObjectData
-{
-public:
-    ObjectData(ObjectDataType type = UNDEFINED_DATA): m_dataType(type) {}
-    ObjectData(android::base::Stream* stream);
-    ObjectDataType getDataType() { return m_dataType; };
-    virtual ~ObjectData() = default;
-    virtual void onSave(android::base::Stream* stream) const = 0;
-    typedef std::function<const ObjectDataPtr(NamedObjectType,
-            ObjectLocalName)> getObjDataPtr_t;
-    typedef std::function<int(NamedObjectType, ObjectLocalName)>
-            getGlobalName_t;
-    // postLoad: setup references after loading all ObjectData from snapshot
-    // in one share group
-    virtual void postLoad(getObjDataPtr_t getObjDataPtr);
-    // restore: restore object data back to hardware GPU.
-    //          It must be called before restoring hardware context states,
-    //          because it messes up context object bindings.
-    virtual void restore(ObjectLocalName localName,
-            getGlobalName_t getGlobalName) = 0;
-    virtual GenNameInfo getGenNameInfo() const;
-private:
-    ObjectDataType m_dataType;
 };
 
 class GlobalNameSpace;
@@ -150,15 +111,12 @@ public:
     void postSave(android::base::Stream* stream);
     // postLoadRestore() restores resources on hardware GPU
     void postLoadRestore();
-    typedef std::function<ObjectDataPtr(NamedObjectType p_type,
-            ObjectLocalName p_localName, android::base::Stream* stream)>
-                loadObject_t;
     bool needRestore();
 private:
     explicit ShareGroup(GlobalNameSpace *globalNameSpace,
                         uint64_t sharedGroupID,
                         android::base::Stream* stream,
-                        loadObject_t loadObject);
+                        ObjectData::loadObject_t loadObject);
 
     void lockObjectData();
     void unlockObjectData();
@@ -186,7 +144,6 @@ private:
     // multi-threaded access path.
     // TODO(zyy@): Create a common spinlock class.
     std::atomic_flag m_objectsDataLock = ATOMIC_FLAG_INIT;
-    void *m_objectsData = nullptr;
     // The ID of this shared group
     // It is unique within its ObjectNameManager
     uint64_t m_sharedGroupID;
@@ -221,7 +178,7 @@ public:
     //                      new ID.
 
     ShareGroupPtr createShareGroup(void *p_groupName, uint64_t sharedGroupID,
-        android::base::Stream* stream, ShareGroup::loadObject_t loadObject);
+        android::base::Stream* stream, ObjectData::loadObject_t loadObject);
 
     //
     // attachShareGroup - find the ShareGroup object attached to the ID
@@ -231,7 +188,7 @@ public:
     ShareGroupPtr attachShareGroup(void *p_groupName, void *p_existingGroupName);
     ShareGroupPtr attachOrCreateShareGroup(void *p_groupName,
         uint64_t p_existingGroupID, android::base::Stream* stream,
-        ShareGroup::loadObject_t loadObject);
+        ObjectData::loadObject_t loadObject);
 
     //
     // getShareGroup - retreive a ShareGroup object based on its "name"
