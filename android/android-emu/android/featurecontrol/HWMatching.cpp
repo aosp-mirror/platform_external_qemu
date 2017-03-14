@@ -234,15 +234,17 @@ bool matchFeaturePattern(
         const HostHwInfo& hwinfo,
         const emulator_features::EmulatorFeaturePattern* pattern) {
 
-    bool res = true;
+    bool res = false;
 
     for (const auto& patternHwConfig : pattern->hwconfig()) {
+
+        bool thisConfigMatches = true;
 
         if (patternHwConfig.has_hostinfo()) {
 
 #define MATCH_FIELD(n) \
         if (patternHwConfig.hostinfo().has_##n()) \
-            res &= hwinfo.n == patternHwConfig.hostinfo().n(); \
+            thisConfigMatches &= hwinfo.n == patternHwConfig.hostinfo().n(); \
 
             MATCH_FIELD(cpu_manufacturer)
             MATCH_FIELD(virt_support)
@@ -259,7 +261,7 @@ bool matchFeaturePattern(
 
             if (!hwinfo.gpuinfolist) {
                 // If no gpu info list, fail match.
-                res = false;
+                thisConfigMatches = false;
                 break;
             }
 
@@ -283,8 +285,10 @@ bool matchFeaturePattern(
                 matchesPatternGpu |= thisHostGpuMatches;
             }
 
-            res &= matchesPatternGpu;
+            thisConfigMatches &= matchesPatternGpu;
         }
+
+        res |= thisConfigMatches;
     }
 
     return res;
