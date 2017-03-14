@@ -23,7 +23,7 @@ class TestAdbInterface final : public AdbInterface {
 public:
     explicit TestAdbInterface(android::base::Looper* looper,
                               android::base::StringView adbPath = "adb")
-        : mLooper(looper), mAdbPath(adbPath) {}
+        : mLooper(looper), mAdbPath(adbPath), mSerialString("emulator-0") {}
 
     virtual bool isAdbVersionCurrent() const override final {
         return mIsAdbVersionCurrent;
@@ -32,7 +32,14 @@ public:
     virtual const std::string& detectedAdbPath() const override final {
         return mAdbPath;
     }
+    virtual const std::string& adbPath() const override final {
+        return mAdbPath;
+    }
     virtual void setSerialNumberPort(int port) override final {}
+    // Returns the path to emulator name
+    virtual const std::string& serialString() const override final {
+        return mSerialString;
+    }
 
     void setAdbOptions(android::base::StringView path, bool isVersionCurrent) {
         mIsAdbVersionCurrent = isVersionCurrent;
@@ -52,7 +59,7 @@ public:
         // Just do what the real one did - mLooper is the thing that controls
         // the command execution.
         auto command = std::shared_ptr<AdbCommand>(
-                new AdbCommand(mLooper, mAdbPath, "emulator-0", args, want_output,
+                new AdbCommand(mLooper, mAdbPath, mSerialString, args, want_output,
                                timeout_ms, result_callback));
         command->start(1);
         return command;
@@ -73,6 +80,7 @@ private:
     bool mIsAdbVersionCurrent = false;
     std::string mAdbPath;
     RunCommandCallback mRunCommandCallback;
+    std::string mSerialString;
 };
 
 }

@@ -19,6 +19,7 @@
 #include "android/base/Compiler.h"
 #include "android/base/StringView.h"
 #include "android/base/threads/ParallelTask.h"
+#include "android/emulation/control/AdbInterface.h"
 #include "android/metrics/MetricsReporter.h"
 
 #include <memory>
@@ -38,6 +39,7 @@ public:
     // Entry point to create an AdbLivenessChecker.
     // Objects of this type are managed via shared_ptr.
     static Ptr create(
+            android::emulation::AdbInterface* adb,
             android::base::Looper* looper,
             MetricsReporter* reporter,
             android::base::StringView emulatorName,
@@ -50,7 +52,8 @@ public:
 
 protected:
     // Use |create| to correctly initialize the shared_ptr count.
-    AdbLivenessChecker(android::base::Looper* looper,
+    AdbLivenessChecker(android::emulation::AdbInterface* adb,
+                       android::base::Looper* looper,
                        MetricsReporter* reporter,
                        android::base::StringView emulatorName,
                        android::base::Looper::Duration checkIntervalMs);
@@ -74,7 +77,7 @@ protected:
     void dropMetrics(const CheckResult& result);
 
 private:
-    const std::string mAdbPath;
+    android::emulation::AdbInterface* mAdb;
     android::base::Looper* const mLooper;
     MetricsReporter* const mReporter;
     const std::string mEmulatorName;
