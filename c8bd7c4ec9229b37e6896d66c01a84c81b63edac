@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9f960bd2_d61de3fb",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-14T17:42:32Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "a7b400f0_4f77e06d",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 67
+      },
+      "revId": "c8bd7c4ec9229b37e6896d66c01a84c81b63edac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a594c42_73b02bfb",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2017-03-14T14:58:24Z",
       "side": 0,
       "message": "Do we still need to set references?",
+      "range": {
+        "startLine": 118,
+        "startChar": 0,
+        "endLine": 133,
+        "endChar": 37
+      },
+      "revId": "c8bd7c4ec9229b37e6896d66c01a84c81b63edac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02a95de0_01512992",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-14T17:42:32Z",
+      "side": 0,
+      "message": "yes, I moved the references setting to m_nameSpace[]-\u003epostLoad :)\n(and FBO is the only thing that needs reference settings)",
+      "parentUuid": "1a594c42_73b02bfb",
       "range": {
         "startLine": 118,
         "startChar": 0,
