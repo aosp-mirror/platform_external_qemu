@@ -31,6 +31,8 @@ bool android_metrics_start(const char* emulatorVersion,
                            int controlConsolePort);
 void android_metrics_stop();
 
+bool android_metrics_start_adb_liveness_checker(void *adbInterface);
+
 void android_metrics_report_common_info(bool openglAlive);
 
 ANDROID_END_HEADER

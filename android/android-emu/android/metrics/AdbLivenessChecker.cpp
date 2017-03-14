@@ -30,32 +30,28 @@ using android::base::System;
 using android::ConfigDirs;
 using std::shared_ptr;
 
-static const char kAdbExecutableBaseName[] = "adb";
 static const char kAdbLivenessKey[] = "adb_liveness";
 static const int kMaxAttempts = 3;
-static const char kPlatformToolsSubdir[] = "platform-tools";
 
 // static
 AdbLivenessChecker::Ptr AdbLivenessChecker::create(
+        android::emulation::AdbInterface* adb,
         android::base::Looper* looper,
         MetricsReporter* reporter,
         android::base::StringView emulatorName,
         android::base::Looper::Duration checkIntervalMs) {
-    auto inst = Ptr(new AdbLivenessChecker(looper, reporter, emulatorName,
+    auto inst = Ptr(new AdbLivenessChecker(adb, looper, reporter, emulatorName,
                                            checkIntervalMs));
     return inst;
 }
 
 AdbLivenessChecker::AdbLivenessChecker(
+        android::emulation::AdbInterface* adb,
         android::base::Looper* looper,
-        MetricsReporter* reporter,
+        MetricsReporter* reporter,        
         android::base::StringView emulatorName,
         android::base::Looper::Duration checkIntervalMs)
-    : mAdbPath(PathUtils::join(
-              ConfigDirs::getSdkRootDirectory(),
-              PathUtils::join(
-                      kPlatformToolsSubdir,
-                      PathUtils::toExecutableName(kAdbExecutableBaseName)))),
+    : mAdb(adb),
       mLooper(looper),
       mReporter(reporter),
       mEmulatorName(emulatorName),
@@ -118,7 +114,13 @@ bool AdbLivenessChecker::adbCheckRequest() {
 
 void AdbLivenessChecker::runCheckBlocking(CheckResult* outResult) const {
     System::ProcessExitCode exitCode;
-    const std::vector<std::string> adbServerAliveCmd = {mAdbPath, "devices"};
+    std::string adbPath = mAdb->adbPath();
+    std::string serial = mAdb->serialString();
+    if (serial.empty())
+        serial = mEmulatorName;
+
+printf("AdbLivenessChecker::runCheckBlocking() adbPath=%s, serial=%s\n", adbPath.c_str(), serial.c_str());
+    const std::vector<std::string> adbServerAliveCmd = {adbPath, "devices"};
     if (!System::get()->runCommand(
                 adbServerAliveCmd,
                 System::RunOptions::WaitForCompletion |
@@ -126,11 +128,12 @@ void AdbLivenessChecker::runCheckBlocking(CheckResult* outResult) const {
                 mCheckIntervalMs / 3, &exitCode) ||
         exitCode != 0) {
         *outResult = CheckResult::kFailureAdbServerDead;
+printf("AdbLivenessChecker::runCheckBlocking() kFailureAdbServerDead\n"); 
         return;
     }
 
     const std::vector<std::string> emulatorAliveCmd = {
-            mAdbPath, "-s", mEmulatorName, "shell", "exit"};
+            adbPath, "-s", serial, "shell", "exit"};
     if (!System::get()->runCommand(
                 emulatorAliveCmd,
                 System::RunOptions::WaitForCompletion |
@@ -138,9 +141,11 @@ void AdbLivenessChecker::runCheckBlocking(CheckResult* outResult) const {
                 mCheckIntervalMs / 3, &exitCode) ||
         exitCode != 0) {
         *outResult = CheckResult::kFailureEmulatorDead;
+printf("AdbLivenessChecker::runCheckBlocking() kFailureEmulatorDead\n");
         return;
     }
 
+    printf("AdbLivenessChecker::runCheckBlocking() online\n");
     *outResult = AdbLivenessChecker::CheckResult::kOnline;
 }
 
