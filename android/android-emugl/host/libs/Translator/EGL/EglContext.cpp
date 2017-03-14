@@ -63,6 +63,7 @@ EglContext::EglContext(EglDisplay *dpy,
                 stream, func);
         if (stream) {
             glesCtx->setShareGroup(m_shareGroup);
+            glesCtx->postLoad();
         }
         m_hndl = ++s_nextContextHndl;
     } else {

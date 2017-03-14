@@ -378,7 +378,8 @@ void GLEScontext::setActiveTexture(GLenum tex) {
 
 GLEScontext::GLEScontext() {}
 
-GLEScontext::GLEScontext(android::base::Stream* stream, GlLibrary* glLib) {
+GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
+        android::base::Stream* stream, GlLibrary* glLib) {
     if (stream) {
         m_initialized = stream->getByte();
         m_glesMajorVersion = stream->getBe32();
@@ -455,6 +456,12 @@ GLEScontext::GLEScontext(android::base::Stream* stream, GlLibrary* glLib) {
             m_needRestoreFromSnapshot = true;
         }
     }
+    m_fboNameSpace = new NameSpace(NamedObjectType::FRAMEBUFFER,
+        globalNameSpace, stream, [this](NamedObjectType type,
+                    long long unsigned int localName,
+                    android::base::Stream* stream) {
+            return loadObject(type,localName, stream);
+    });
 }
 
 GLEScontext::~GLEScontext() {
@@ -467,6 +474,17 @@ GLEScontext::~GLEScontext() {
     }
     delete[] m_texState;
     m_texState = NULL;
+}
+
+void GLEScontext::postLoad() {
+    m_fboNameSpace->postLoad(
+            [this](NamedObjectType p_type, ObjectLocalName p_localName) {
+                if (p_type == NamedObjectType::FRAMEBUFFER) {
+                    return this->getFBODataPtr(p_localName);
+                } else {
+                    return m_shareGroup->getObjectDataPtr(p_type, p_localName);
+                }
+            });
 }
 
 void GLEScontext::onSave(android::base::Stream* stream) const {
@@ -533,6 +551,7 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         stream->putBe32(m_drawFramebuffer);
         stream->putBe32(m_readFramebuffer);
     }
+    m_fboNameSpace->onSave(stream);
 }
 
 void GLEScontext::postLoadRestoreShareGroup() {
@@ -540,6 +559,17 @@ void GLEScontext::postLoadRestoreShareGroup() {
 }
 
 void GLEScontext::postLoadRestoreCtx() {
+    assert(!m_shareGroup->needRestore());
+    m_fboNameSpace->postLoadRestore(
+            [this](NamedObjectType p_type, ObjectLocalName p_localName) {
+                if (p_type == NamedObjectType::FRAMEBUFFER) {
+                    return getFBOGlobalName(p_localName);
+                } else {
+                    return m_shareGroup->getGlobalName(p_type, p_localName);
+                }
+            }
+        );
+
     GLDispatch& dispatcher = GLEScontext::dispatcher();
 
     // buffer bindings
@@ -554,7 +584,7 @@ void GLEScontext::postLoadRestoreCtx() {
     // framebuffer binding
     auto bindFrameBuffer = [this](GLenum target, GLuint buffer) {
         this->dispatcher().glBindFramebufferEXT(target,
-                m_shareGroup->getGlobalName(NamedObjectType::FRAMEBUFFER, buffer));
+                getFBOGlobalName(buffer));
     };
     bindFrameBuffer(GL_READ_FRAMEBUFFER, m_readFramebuffer);
     bindFrameBuffer(GL_DRAW_FRAMEBUFFER, m_drawFramebuffer);
@@ -1494,14 +1524,11 @@ void GLEScontext::drawValidate(void)
     if(m_drawFramebuffer == 0)
         return;
 
-    auto fbObj = m_shareGroup->getObjectData(
-            NamedObjectType::FRAMEBUFFER, m_drawFramebuffer);
+    auto fbObj = getFBOData(m_drawFramebuffer);
     if (!fbObj)
         return;
 
-    FramebufferData *fbData = (FramebufferData *)fbObj;
-
-    fbData->validate(this);
+    fbObj->validate(this);
 }
 
 void GLEScontext::initDefaultFBO(
@@ -1571,4 +1598,36 @@ void GLEScontext::initDefaultFBO(
     }
 }
 
+bool GLEScontext::isFBO(ObjectLocalName p_localName) {
+    return m_fboNameSpace->isObject(p_localName);
+}
 
+ObjectLocalName GLEScontext::genFBOName(ObjectLocalName p_localName,
+        bool genLocal) {
+    return m_fboNameSpace->genName(GenNameInfo(NamedObjectType::FRAMEBUFFER),
+            p_localName, genLocal);
+}
+
+void GLEScontext::setFBOData(ObjectLocalName p_localName, ObjectDataPtr data) {
+    m_fboNameSpace->setObjectData(p_localName, data);
+}
+
+void GLEScontext::deleteFBO(ObjectLocalName p_localName) {
+    m_fboNameSpace->deleteName(p_localName);
+}
+
+FramebufferData* GLEScontext::getFBOData(ObjectLocalName p_localName) {
+    return (FramebufferData*)getFBODataPtr(p_localName).get();
+}
+
+ObjectDataPtr GLEScontext::getFBODataPtr(ObjectLocalName p_localName) {
+    return m_fboNameSpace->getObjectDataPtr(p_localName);
+}
+
+unsigned int GLEScontext::getFBOGlobalName(ObjectLocalName p_localName) {
+    return m_fboNameSpace->getGlobalName(p_localName);
+}
+
+ObjectLocalName GLEScontext::getFBOLocalName(unsigned int p_globalName) {
+    return m_fboNameSpace->getLocalName(p_globalName);
+}
