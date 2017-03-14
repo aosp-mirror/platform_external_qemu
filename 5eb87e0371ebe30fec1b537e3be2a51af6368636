@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2915ab4f_c9f155f3",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/GLEScmImp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 909,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-14T23:59:54Z",
+      "side": 1,
+      "message": "Is it still beneficial to surround in if (ctx-\u003eshareGroup()) for this and the other occurrences below? If not, perhaps we should take out the checks for ctx-\u003eshareGroup for readability, if the check is not needed.",
+      "range": {
+        "startLine": 909,
+        "startChar": 0,
+        "endLine": 909,
+        "endChar": 46
+      },
+      "revId": "5eb87e0371ebe30fec1b537e3be2a51af6368636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
