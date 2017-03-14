@@ -18,10 +18,11 @@
 #define GLES_CONTEXT_H
 
 #include "android/base/files/Stream.h"
+#include "emugl/common/mutex.h"
 #include "GLDispatch.h"
 #include "GLESpointer.h"
+#include "ObjectNameSpace.h"
 #include "ShareGroup.h"
-#include "emugl/common/mutex.h"
 
 #include <string>
 #include <unordered_map>
@@ -154,6 +155,8 @@ struct VAOStateRef {
     VAOStateMap::iterator it;
 };
 
+class FramebufferData;
+
 class GLESConversionArrays
 {
 public:
@@ -175,7 +178,8 @@ private:
 class GLEScontext{
 public:
     GLEScontext();
-    GLEScontext(android::base::Stream* stream, GlLibrary* glLib);
+    GLEScontext(GlobalNameSpace* globalNameSpace, android::base::Stream* stream,
+            GlLibrary* glLib);
     virtual void init(GlLibrary* glLib);
     GLenum getGLerror();
     void setGLerror(GLenum err);
@@ -305,10 +309,25 @@ public:
     int getMajorVersion() const { return m_glesMajorVersion; }
     int getMinorVersion() const { return m_glesMinorVersion; }
 
+    // FBO
+    void initFBONameSpace(GlobalNameSpace* globalNameSpace,
+            android::base::Stream* stream);
+    bool isFBO(ObjectLocalName p_localName);
+    ObjectLocalName genFBOName(ObjectLocalName p_localName = 0,
+            bool genLocal = 0);
+    void setFBOData(ObjectLocalName p_localName, ObjectDataPtr data);
+    void deleteFBO(ObjectLocalName p_localName);
+    FramebufferData* getFBOData(ObjectLocalName p_localName);
+    ObjectDataPtr getFBODataPtr(ObjectLocalName p_localName);
+    unsigned int getFBOGlobalName(ObjectLocalName p_localName);
+    ObjectLocalName getFBOLocalName(unsigned int p_globalName);
+
     // Snapshot save
     virtual void onSave(android::base::Stream* stream) const;
     virtual ObjectDataPtr loadObject(NamedObjectType type,
             ObjectLocalName localName, android::base::Stream* stream) const;
+    // postLoad is triggered after setting up ShareGroup
+    virtual void postLoad();
     virtual void restore();
 protected:
     void initDefaultFboImpl(
@@ -412,6 +431,8 @@ private:
     static std::string    s_glVendor;
     static std::string    s_glRenderer;
     static std::string    s_glVersion;
+
+    NameSpace* m_fboNameSpace = nullptr;
 };
 
 #endif

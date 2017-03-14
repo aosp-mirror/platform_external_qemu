@@ -31,7 +31,8 @@ class ProgramData;
 class GLESv2Context : public GLEScontext{
 public:
     virtual void init(GlLibrary* glLib);
-    GLESv2Context(int maj, int min, android::base::Stream* stream, GlLibrary* glLib);
+    GLESv2Context(int maj, int min, GlobalNameSpace* globalNameSpace,
+            android::base::Stream* stream, GlLibrary* glLib);
     virtual ~GLESv2Context();
     void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct);
     void setVertexAttribDivisor(GLuint bindingindex, GLuint divisor);

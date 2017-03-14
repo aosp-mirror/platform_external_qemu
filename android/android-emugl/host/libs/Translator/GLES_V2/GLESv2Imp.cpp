@@ -52,7 +52,7 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp);
 static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(void);
-static GLEScontext* createGLESxContext(int maj, int min, android::base::Stream* stream);
+static GLEScontext* createGLESxContext(int maj, int min, GlobalNameSpace* globalNameSpace, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
 static void saveTexture(SaveableTexture* texture, android::base::Stream* stream);
 static SaveableTexture* loadTexture(android::base::Stream* stream, GlobalNameSpace* globalNameSpace);
@@ -102,10 +102,12 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
 }
 
 static GLEScontext* createGLESContext() {
-    return new GLESv2Context(2, 0, nullptr, nullptr);
+    return new GLESv2Context(2, 0, nullptr, nullptr, nullptr);
 }
-static GLEScontext* createGLESxContext(int maj, int min, android::base::Stream* stream) {
-    return new GLESv2Context(maj, min, stream, s_eglIface->eglGetGlLibrary());
+static GLEScontext* createGLESxContext(int maj, int min,
+        GlobalNameSpace* globalNameSpace, android::base::Stream* stream) {
+    return new GLESv2Context(maj, min, globalNameSpace, stream,
+            s_eglIface->eglGetGlLibrary());
 }
 
 static bool shaderParserInitialized = false;
@@ -364,22 +366,20 @@ static void sUpdateFboEmulation(GLESv2Context* ctx) {
     bool enableSRGB = false;
     bool enableDepth32fClamp = false;
 
-    for (auto fbObj : {ctx->shareGroup()->getObjectData(NamedObjectType::FRAMEBUFFER, read_fbo),
-                       ctx->shareGroup()->getObjectData(NamedObjectType::FRAMEBUFFER, draw_fbo)}) {
+    for (auto fbObj : {ctx->getFBOData(read_fbo),
+                       ctx->getFBOData(draw_fbo)}) {
 
         if (fbObj == nullptr) { continue; }
 
-        FramebufferData *fbData = (FramebufferData *)fbObj;
-
         // Enable GL_FRAMEBUFFER_SRGB when any framebuffer has SRGB color attachment.
-        if (sHasAttachmentWithFormat(ctx, fbData,
+        if (sHasAttachmentWithFormat(ctx, fbObj,
                     colorAttachments, {GL_SRGB8_ALPHA8}))
             enableSRGB = true;
 
         // Enable GL_DEPTH_CLAMP when any fbo's
         // GL_DEPTH_ATTACHMENT or GL_DEPTH_STENCIL_ATTACHMENT is of internal format
         // GL_DEPTH_COMPONENT32F or GL_DEPTH32F_STENCIL8.
-        if (sHasAttachmentWithFormat(ctx, fbData,
+        if (sHasAttachmentWithFormat(ctx, fbObj,
                     depthAttachments, {GL_DEPTH_COMPONENT32F, GL_DEPTH32F_STENCIL8}))
             enableDepth32fClamp = true;
     }
@@ -401,24 +401,18 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
        ctx->setFramebufferBinding(target, 0);
     } else {
         globalFrameBufferName = framebuffer;
-        if(framebuffer && ctx->shareGroup().get()){
-            globalFrameBufferName = ctx->shareGroup()->getGlobalName(
-                    NamedObjectType::FRAMEBUFFER, framebuffer);
+        if(framebuffer){
+            globalFrameBufferName = ctx->getFBOGlobalName(framebuffer);
             //if framebuffer wasn't generated before,generate one
             if(!globalFrameBufferName){
-                ctx->shareGroup()->genName(NamedObjectType::FRAMEBUFFER,
-                        framebuffer);
-                ctx->shareGroup()->setObjectData(
-                        NamedObjectType::FRAMEBUFFER, framebuffer,
+                ctx->genFBOName(framebuffer);
+                ctx->setFBOData(framebuffer,
                         ObjectDataPtr(new FramebufferData(framebuffer)));
-                globalFrameBufferName = ctx->shareGroup()->getGlobalName(
-                        NamedObjectType::FRAMEBUFFER, framebuffer);
+                globalFrameBufferName = ctx->getFBOGlobalName(framebuffer);
             }
             // set that this framebuffer has been bound before
-            auto fbObj = ctx->shareGroup()->getObjectData(
-                    NamedObjectType::FRAMEBUFFER, framebuffer);
-            FramebufferData *fbData = (FramebufferData *)fbObj;
-            fbData->setBoundAtLeastOnce();
+            auto fbObj = ctx->getFBOData(framebuffer);
+            fbObj->setBoundAtLeastOnce();
         }
         ctx->dispatcher().glBindFramebufferEXT(target,globalFrameBufferName);
         ctx->setFramebufferBinding(target, framebuffer);
@@ -844,17 +838,14 @@ GL_APICALL void  GL_APIENTRY glDeleteBuffers(GLsizei n, const GLuint* buffers){
 GL_APICALL void  GL_APIENTRY glDeleteFramebuffers(GLsizei n, const GLuint* framebuffers){
     GET_CTX_V2();
     SET_ERROR_IF(n < 0, GL_INVALID_VALUE);
-    if (ctx->shareGroup().get()) {
-        for (int i = 0; i < n; i++) {
-            if (ctx->getFramebufferBinding(GL_FRAMEBUFFER) == framebuffers[i]) {
-                glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            }
-            else if (ctx->getFramebufferBinding(GL_READ_FRAMEBUFFER) == framebuffers[i]) {
-                glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-            }
-            ctx->shareGroup()->deleteName(NamedObjectType::FRAMEBUFFER,
-                                          framebuffers[i]);
+    for (int i = 0; i < n; i++) {
+        if (ctx->getFramebufferBinding(GL_FRAMEBUFFER) == framebuffers[i]) {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
+        else if (ctx->getFramebufferBinding(GL_READ_FRAMEBUFFER) == framebuffers[i]) {
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+        }
+        ctx->deleteFBO(framebuffers[i]);
     }
 }
 
@@ -864,10 +855,8 @@ static void s_detachFromFramebuffer(NamedObjectType bufferType,
     GET_CTX();
     GLuint fbName = ctx->getFramebufferBinding(target);
     if (!fbName) return;
-    auto fbObj = ctx->shareGroup()->getObjectData(
-            NamedObjectType::FRAMEBUFFER, fbName);
+    auto fbObj = ctx->getFBOData(fbName);
     if (fbObj == NULL) return;
-    FramebufferData *fbData = (FramebufferData *)fbObj;
     const GLenum kAttachments[] = {
         GL_COLOR_ATTACHMENT0,
         GL_COLOR_ATTACHMENT1,
@@ -891,7 +880,7 @@ static void s_detachFromFramebuffer(NamedObjectType bufferType,
     const size_t sizen = sizeof(kAttachments)/sizeof(GLenum);
     GLenum textarget;
     for (size_t i = 0; i < sizen; ++i ) {
-        GLuint name = fbData->getAttachment(kAttachments[i], &textarget, NULL);
+        GLuint name = fbObj->getAttachment(kAttachments[i], &textarget, NULL);
         if (name != texture) continue;
         if (NamedObjectType::TEXTURE == bufferType &&
             GLESv2Validate::textureTargetEx(ctx, textarget)) {
@@ -900,6 +889,8 @@ static void s_detachFromFramebuffer(NamedObjectType bufferType,
                    GLESv2Validate::renderbufferTarget(textarget)) {
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, kAttachments[i], textarget, 0);
         }
+        // detach
+        fbObj->setAttachment(kAttachments[i], (GLenum)0, 0, nullptr, false);
     }
 }
 
@@ -1202,11 +1193,9 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
 
     // Update the the current framebuffer object attachment state
     GLuint fbName = ctx->getFramebufferBinding(target);
-    auto fbObj = ctx->shareGroup()->getObjectData(
-            NamedObjectType::FRAMEBUFFER, fbName);
+    auto fbObj = ctx->getFBOData(fbName);
     if (fbObj != NULL) {
-        FramebufferData *fbData = (FramebufferData *)fbObj;
-        fbData->setAttachment(attachment, renderbuffertarget, renderbuffer, obj);
+        fbObj->setAttachment(attachment, renderbuffertarget, renderbuffer, obj);
     }
 
     if (renderbuffer && obj.get() != NULL) {
@@ -1254,11 +1243,9 @@ GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attach
 
     // Update the the current framebuffer object attachment state
     GLuint fbName = ctx->getFramebufferBinding(target);
-    auto fbObj = ctx->shareGroup()->getObjectData(
-            NamedObjectType::FRAMEBUFFER, fbName);
+    auto fbObj = ctx->getFBOData(fbName);
     if (fbObj) {
-        FramebufferData *fbData = (FramebufferData *)fbObj;
-        fbData->setAttachment(attachment, textarget,
+        fbObj->setAttachment(attachment, textarget,
                               texture, ObjectDataPtr());
     }
 
@@ -1298,10 +1285,8 @@ GL_APICALL void  GL_APIENTRY glGenFramebuffers(GLsizei n, GLuint* framebuffers){
     SET_ERROR_IF(n<0,GL_INVALID_VALUE);
     if(ctx->shareGroup().get()) {
         for(int i=0; i<n ;i++) {
-            framebuffers[i] = ctx->shareGroup()->genName(
-                    NamedObjectType::FRAMEBUFFER, 0, true);
-            ctx->shareGroup()->setObjectData(
-                    NamedObjectType::FRAMEBUFFER, framebuffers[i],
+            framebuffers[i] = ctx->genFBOName(0, true);
+            ctx->setFBOData(framebuffers[i],
                     ObjectDataPtr(new FramebufferData(framebuffers[i])));
         }
     }
@@ -1449,11 +1434,8 @@ static void s_glStateQueryTv(bool es2, GLenum pname, T* params, GLStateQueryFunc
         break;
     case GL_FRAMEBUFFER_BINDING:
     case GL_READ_FRAMEBUFFER_BINDING:
-        if (ctx->shareGroup().get()) {
-            getter(pname,&i);
-            *params = ctx->shareGroup()->getLocalName(
-                    NamedObjectType::FRAMEBUFFER, i);
-        }
+        getter(pname,&i);
+        *params = ctx->getFBOGlobalName(i);
         break;
     case GL_RENDERBUFFER_BINDING:
         if (ctx->shareGroup().get()) {
@@ -1649,10 +1631,8 @@ GL_APICALL void  GL_APIENTRY glGetBooleanv(GLenum pname, GLboolean* params){
         break;
     case GL_FRAMEBUFFER_BINDING:
     case GL_READ_FRAMEBUFFER_BINDING:
-        if (ctx->shareGroup().get()) {
-            s_glGetIntegerv_wrapper(pname,&i);
-            TO_GLBOOL(params,ctx->shareGroup()->getLocalName(NamedObjectType::FRAMEBUFFER, i));
-        }
+        s_glGetIntegerv_wrapper(pname,&i);
+        TO_GLBOOL(params,ctx->getFBOGlobalName(i));
         break;
     case GL_RENDERBUFFER_BINDING:
         if (ctx->shareGroup().get()) {
@@ -1822,12 +1802,10 @@ GL_APICALL void  GL_APIENTRY glGetFramebufferAttachmentParameteriv(GLenum target
     //
     GLuint fbName = ctx->getFramebufferBinding(target);
     if (fbName) {
-        auto fbObj = ctx->shareGroup()->getObjectData(
-                NamedObjectType::FRAMEBUFFER, fbName);
+        auto fbObj = ctx->getFBOData(fbName);
         if (fbObj != NULL) {
-            FramebufferData *fbData = (FramebufferData *)fbObj;
             GLenum target;
-            GLuint name = fbData->getAttachment(attachment, &target, NULL);
+            GLuint name = fbObj->getAttachment(attachment, &target, NULL);
             if (!name) {
                 SET_ERROR_IF(pname != GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE &&
                         pname != GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, GL_INVALID_ENUM);
@@ -2406,14 +2384,12 @@ GL_APICALL GLboolean    GL_APIENTRY glIsBuffer(GLuint buffer){
 
 GL_APICALL GLboolean    GL_APIENTRY glIsFramebuffer(GLuint framebuffer){
     GET_CTX_RET(GL_FALSE)
-    if(framebuffer && ctx->shareGroup().get()){
-        if (!ctx->shareGroup()->isObject(NamedObjectType::FRAMEBUFFER, framebuffer))
+    if(framebuffer){
+        if (!ctx->isFBO(framebuffer))
             return GL_FALSE;
-        auto fbObj = ctx->shareGroup()->getObjectData(
-                NamedObjectType::FRAMEBUFFER, framebuffer);
+        auto fbObj = ctx->getFBOData(framebuffer);
         if (!fbObj) return GL_FALSE;
-        FramebufferData *fbData = (FramebufferData *)fbObj;
-        return fbData->hasBeenBoundAtLeastOnce() ? GL_TRUE : GL_FALSE;
+        return fbObj->hasBeenBoundAtLeastOnce() ? GL_TRUE : GL_FALSE;
     }
     return GL_FALSE;
 }
