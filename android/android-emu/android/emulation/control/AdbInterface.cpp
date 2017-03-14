@@ -38,7 +38,7 @@ public:
     bool isAdbVersionCurrent() const override final { return mAdbVersionCurrent; }
 
     // Setup a custom adb path.
-    void setCustomAdbPath(const std::string& path) override final {
+    void setCustomAdbPath(const std::string& path) override final {        
         mCustomAdbPath = path;
     }
 
@@ -47,9 +47,19 @@ public:
         return mAutoAdbPath;
     }
 
+    // Returns the path to adb binary
+    const std::string& adbPath() const override final {
+        return mCustomAdbPath.empty() ? mAutoAdbPath : mCustomAdbPath;
+    }
+
     // Setup the port this interface is connected to
     virtual void setSerialNumberPort(int port) override final {
         mSerialString = std::string("emulator-") + std::to_string(port);
+    }
+
+    // Returns the path to emulator name
+    const std::string& serialString() const override final {
+        return mSerialString;
     }
 
     // Runs an adb command asynchronously.

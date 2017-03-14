@@ -26,6 +26,7 @@
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
+#include "android/metrics/metrics.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/opengles.h"
@@ -320,6 +321,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     mWheelScrollTimer.setSingleShot(true);
     connect(&mWheelScrollTimer, SIGNAL(timeout()), this,
             SLOT(wheelScrollTimeout()));
+
+    // moved from android_metrics_start() in metrics.cpp
+    android_metrics_start_adb_liveness_checker(mAdbInterface.get());
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr() {
