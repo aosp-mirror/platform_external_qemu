@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9acf8ee7_44540f8f",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-14T14:58:24Z",
+      "side": 1,
+      "message": "What should we do here? Is it just like this currently bc it\u0027s an intermediate step to something else?",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 1
+      },
+      "revId": "51a97431b3bf68753e21b6ed9007915fd0689099",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "74a454c8_feb5d20b",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-14T14:58:24Z",
+      "side": 1,
+      "message": "suggest if (!stream) return;",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 17
+      },
+      "revId": "51a97431b3bf68753e21b6ed9007915fd0689099",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

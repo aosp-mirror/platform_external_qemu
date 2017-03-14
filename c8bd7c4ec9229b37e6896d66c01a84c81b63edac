@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a7b400f0_4f77e06d",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-14T14:58:24Z",
+      "side": 0,
+      "message": "Does this mean we are free to rename objectNameManager to ShareGroup? If so, let\u0027s do that---theres lots of files with \"object\"*** in the name which can be confusing.",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 67
+      },
+      "revId": "c8bd7c4ec9229b37e6896d66c01a84c81b63edac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a594c42_73b02bfb",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/objectNameManager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-14T14:58:24Z",
+      "side": 0,
+      "message": "Do we still need to set references?",
+      "range": {
+        "startLine": 118,
+        "startChar": 0,
+        "endLine": 133,
+        "endChar": 37
+      },
+      "revId": "c8bd7c4ec9229b37e6896d66c01a84c81b63edac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
