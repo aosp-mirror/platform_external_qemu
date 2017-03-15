@@ -247,39 +247,5 @@ TEST_F(FeatureControlTest, readUserSettings) {
     }
 }
 
-TEST_F(FeatureControlTest, stringConversion) {
-#define FEATURE_CONTROL_ITEM(item) EXPECT_TRUE(item == stringToFeature(#item));
-#include "FeatureControlDefHost.h"
-#include "FeatureControlDefGuest.h"
-#undef FEATURE_CONTROL_ITEM
-
-    EXPECT_TRUE(Feature_n_items ==
-                stringToFeature("somefeaturethatshouldneverexist"));
-}
-
-TEST_F(FeatureControlTest, setNonOverriden) {
-    writeDefaultIniHost(mAllOnIni);
-    writeDefaultIniGuest(mAllOnIniGuestOnly);
-    loadAllIni();
-    for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
-        EXPECT_TRUE(isEnabled(feature));
-        EXPECT_FALSE(isOverridden(feature));
-    }
-
-    Feature overriden = (Feature)0;
-    setEnabledOverride(overriden, false);
-    EXPECT_FALSE(isEnabled(overriden));
-
-    setIfNotOverriden(overriden, true);
-    EXPECT_FALSE(isEnabled(overriden));
-
-    Feature nonOverriden = (Feature)1;
-    EXPECT_TRUE(isEnabled(nonOverriden));
-    EXPECT_FALSE(isOverridden(nonOverriden));
-    setIfNotOverriden(nonOverriden, false);
-    EXPECT_FALSE(isEnabled(nonOverriden));
-}
-
-} // namespace featurecontrol
-} // namespace android
+} // featurecontrol
+} // android

@@ -11,9 +11,8 @@
 
 #include "android/main-emugl.h"
 
-#include "android/avd/util.h"
 #include "android/base/memory/ScopedPtr.h"
-#include "android/opengl/gpuinfo.h"
+#include "android/avd/util.h"
 #include "android/utils/debug.h"
 #include "android/utils/string.h"
 
@@ -29,8 +28,7 @@ bool androidEmuglConfigInit(EmuglConfig* config,
                             bool hasGoogleApis,
                             const char* gpuOption,
                             int wantedBitness,
-                            bool noWindow,
-                            enum WinsysPreferredGlesBackend uiPreferredBackend) {
+                            bool noWindow) {
     bool gpuEnabled = false;
     ScopedCPtr<char> gpuMode;
 
@@ -89,7 +87,7 @@ bool androidEmuglConfigInit(EmuglConfig* config,
 
     bool result = emuglConfig_init(
             config, gpuEnabled, gpuMode.get(), gpuOption, wantedBitness,
-            noWindow, blacklisted, hasGuestRenderer, uiPreferredBackend);
+            noWindow, blacklisted, hasGuestRenderer);
 
     return result;
 }
