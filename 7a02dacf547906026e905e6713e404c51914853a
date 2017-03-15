@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed1e92da_455538ac",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 616,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-15T17:32:14Z",
+      "side": 1,
+      "message": "what would happen when the shader passed desktop GL compilation? will it fail the link as well? (I could expect it happens a lot, especially when the first time a desktop GL developer tries writing any android app...)",
+      "revId": "7a02dacf547906026e905e6713e404c51914853a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
