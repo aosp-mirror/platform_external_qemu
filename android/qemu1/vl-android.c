@@ -52,7 +52,6 @@
 #include "android/console.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/bufprint_config_dirs.h"
-#include "android/featurecontrol/feature_control.h"
 #include "android/filesystems/partition_config.h"
 #include "android/globals.h"
 #include "android/gps.h"
@@ -2898,6 +2897,9 @@ int main(int argc, char **argv, char **envp)
         boot_property_add("ro.config.low_ram", "true");
     }
 
+    /* Bypass adb security or not. */
+    /* boot_property_add("qemu.adb.secure", adb_auth ? "1": "0"); */
+
     /* Initialize LCD density */
     if (android_hw->hw_lcd_density) {
         long density = android_hw->hw_lcd_density;
@@ -2998,11 +3000,6 @@ int main(int argc, char **argv, char **envp)
         // function is called, where <list> contains a list of resolved IP addresses.
         // As such, we don't need to check for errors here.
         slirp_init_dns_servers(android_op_dns_server);
-    }
-
-    /* Enable ADB authenticaiton, or not. */
-    if (feature_is_enabled(kFeature_PlayStoreImage)) {
-        boot_property_add("qemu.adb.secure", "1");
     }
 
     /* Initialize OpenGLES emulation */

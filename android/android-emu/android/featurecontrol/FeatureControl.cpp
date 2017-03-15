@@ -28,17 +28,5 @@ void resetEnabledToDefault(Feature feature) {
     FeatureControlImpl::get().resetEnabledToDefault(feature);
 }
 
-bool isOverridden(Feature feature) {
-    return FeatureControlImpl::get().isOverridden(feature);
-}
-
-void setIfNotOverriden(Feature feature, bool isEnabled) {
-    FeatureControlImpl::get().setIfNotOverriden(feature, isEnabled);
-}
-
-Feature stringToFeature(const std::string& str) {
-    return FeatureControlImpl::get().fromString(str);
-}
-
 }  // namespace featurecontrol
 }  // namespace android
