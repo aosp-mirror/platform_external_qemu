@@ -10,13 +10,14 @@
 ** GNU General Public License for more details.
 */
 
+#include "android/adb-server.h"
+#include "android/android-property-pipe.h"
+#include "android/android.h"
+#include "android/car.h"
+#include "android/clipboard-pipe.h"
+#include "android/cmdline-option.h"
 #include "android/console.h"
 #include "android/constants.h"
-#include "android/adb-server.h"
-#include "android/android.h"
-#include "android/cmdline-option.h"
-#include "android/clipboard-pipe.h"
-#include "android/console.h"
 #include "android/emulation/android_pipe_pingpong.h"
 #include "android/emulation/android_pipe_throttle.h"
 #include "android/emulation/android_pipe_unix.h"
@@ -24,18 +25,16 @@
 #include "android/globals.h"
 #include "android/hw-fingerprint.h"
 #include "android/hw-sensors.h"
-#include "android/car.h"
 #include "android/logcat-pipe.h"
 #include "android/opengles-pipe.h"
 #include "android/proxy/proxy_setup.h"
+#include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/ipaddr.h"
 #include "android/utils/path.h"
 #include "android/utils/sockets.h"
 #include "android/utils/system.h"
-#include "android/utils/bufprint.h"
 #include "android/version.h"
-
 
 #include <stdbool.h>
 
@@ -307,6 +306,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
     android_pipe_add_type_throttle();
 
     android_unix_pipes_init();
+    android_init_android_property_pipe();
     android_init_opengles_pipe();
     android_init_clipboard_pipe();
     android_init_logcat_pipe();
