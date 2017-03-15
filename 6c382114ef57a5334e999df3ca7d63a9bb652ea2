@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1644a1a5_3f543980",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T19:26:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9fc7ff28_6b130e6b",
+      "range": {
+        "startLine": 28,
+        "startChar": 37,
+        "endLine": 28,
+        "endChar": 39
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2d1840ec_9f8d33b0",
         "filename": "android-qemu2-glue/audio-capturer.cpp",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-01T18:55:05Z",
       "side": 1,
       "message": "nit: don\u0027t use \"typedef struct\" in C++",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 10
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "00439ad1_075e956c",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T19:26:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2d1840ec_9f8d33b0",
       "range": {
         "startLine": 23,
         "startChar": 0,
@@ -117,6 +165,54 @@
     },
     {
       "key": {
+        "uuid": "ae64e4a3_e040cff1",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T19:26:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a5686df8_5546e68a",
+      "range": {
+        "startLine": 32,
+        "startChar": 12,
+        "endLine": 32,
+        "endChar": 15
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aad194b4_4ff9844f",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T19:26:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "33e83f26_a775ad00",
+      "range": {
+        "startLine": 32,
+        "startChar": 7,
+        "endLine": 32,
+        "endChar": 79
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b87d14b9_4f40b7a1",
         "filename": "android-qemu2-glue/audio-capturer.cpp",
         "patchSetId": 3
@@ -128,6 +224,30 @@
       "writtenOn": "2017-02-01T18:55:05Z",
       "side": 1,
       "message": "nit: auto",
+      "range": {
+        "startLine": 47,
+        "startChar": 5,
+        "endLine": 47,
+        "endChar": 13
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b2f60b3_5033e852",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T19:26:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b87d14b9_4f40b7a1",
       "range": {
         "startLine": 47,
         "startChar": 5,
@@ -255,6 +375,30 @@
     },
     {
       "key": {
+        "uuid": "ff132e71_b6756916",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T19:26:25Z",
+      "side": 1,
+      "message": "I use pointer here to save some memory, state will get freed in my_destroy() method",
+      "parentUuid": "71766f11_3f375367",
+      "range": {
+        "startLine": 107,
+        "startChar": 4,
+        "endLine": 124,
+        "endChar": 38
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2c05d8a1_ba9af122",
         "filename": "android-qemu2-glue/audio-capturer.cpp",
         "patchSetId": 3
@@ -266,6 +410,30 @@
       "writtenOn": "2017-02-01T18:55:05Z",
       "side": 1,
       "message": "should this function remove it from the map?",
+      "range": {
+        "startLine": 135,
+        "startChar": 21,
+        "endLine": 135,
+        "endChar": 36
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0f8db04d_e505e773",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T19:26:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2c05d8a1_ba9af122",
       "range": {
         "startLine": 135,
         "startChar": 21,
@@ -341,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "67701bea_f9e29bc0",
+        "filename": "android/android-emu/android/ffmpeg-audio-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T19:26:25Z",
+      "side": 1,
+      "message": "Since this file is not inside emulation folder, I\u0027d like not to use emulation namespace. We can always change this later on. This class is similar to ffmpeg-muxer.cpp",
+      "parentUuid": "fe24c42b_3c1b7b27",
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e482cf95_b90f6688",
         "filename": "android/android-emu/android/ffmpeg-audio-capture.h",
         "patchSetId": 3
@@ -352,6 +538,30 @@
       "writtenOn": "2017-02-01T18:55:05Z",
       "side": 1,
       "message": "please add a comment that this class doesn\u0027t own the |recorder|.\nBTW, maybe it should?",
+      "range": {
+        "startLine": 26,
+        "startChar": 5,
+        "endLine": 26,
+        "endChar": 57
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7eaa0bc2_c018389c",
+        "filename": "android/android-emu/android/ffmpeg-audio-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T19:26:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e482cf95_b90f6688",
       "range": {
         "startLine": 26,
         "startChar": 5,
@@ -381,6 +591,24 @@
     },
     {
       "key": {
+        "uuid": "38127dbb_351ce915",
+        "filename": "android/android-emu/android/ffmpeg-audio-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T19:26:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "384c654f_e01434dc",
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "161804c1_14497aa7",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 3
@@ -404,6 +632,30 @@
     },
     {
       "key": {
+        "uuid": "07feaae2_509edb41",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T19:26:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "161804c1_14497aa7",
+      "range": {
+        "startLine": 36,
+        "startChar": 0,
+        "endLine": 36,
+        "endChar": 33
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "afae0884_7145e23e",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 3
@@ -415,6 +667,30 @@
       "writtenOn": "2017-02-01T18:55:05Z",
       "side": 1,
       "message": "It isn\u0027t a good idea to rely on OS-specific headers. Use android/base/system/System.h instead",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 20
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db70db5a_85922b9c",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T19:26:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "afae0884_7145e23e",
       "range": {
         "startLine": 57,
         "startChar": 0,
@@ -473,6 +749,30 @@
     },
     {
       "key": {
+        "uuid": "411017fb_a189b790",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T19:26:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fdbf7851_241c215e",
+      "range": {
+        "startLine": 112,
+        "startChar": 0,
+        "endLine": 113,
+        "endChar": 76
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e6022f27_86313052",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 3
@@ -484,6 +784,30 @@
       "writtenOn": "2017-02-01T18:55:05Z",
       "side": 1,
       "message": "just \"using android::base::AutoLock\"",
+      "range": {
+        "startLine": 121,
+        "startChar": 0,
+        "endLine": 121,
+        "endChar": 41
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0826a446_0319360e",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T19:26:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e6022f27_86313052",
       "range": {
         "startLine": 121,
         "startChar": 0,
@@ -519,6 +843,30 @@
     },
     {
       "key": {
+        "uuid": "d4dc312f_ebfd4f81",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T19:26:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "75bbceea_2300f2fd",
+      "range": {
+        "startLine": 142,
+        "startChar": 0,
+        "endLine": 151,
+        "endChar": 1
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "657816ca_015e4605",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 3
@@ -530,6 +878,30 @@
       "writtenOn": "2017-02-01T18:55:05Z",
       "side": 1,
       "message": "VERBOSE_PRINT(capture, ...) ?",
+      "range": {
+        "startLine": 583,
+        "startChar": 0,
+        "endLine": 583,
+        "endChar": 6
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0eb37035_ef2b100b",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 583,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T19:26:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "657816ca_015e4605",
       "range": {
         "startLine": 583,
         "startChar": 0,
@@ -565,6 +937,30 @@
     },
     {
       "key": {
+        "uuid": "e7ba8b2a_be462382",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 728,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T19:26:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3615c52a_c5587280",
+      "range": {
+        "startLine": 725,
+        "startChar": 0,
+        "endLine": 728,
+        "endChar": 31
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3085fd39_23a9bfa7",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 3
@@ -576,6 +972,30 @@
       "writtenOn": "2017-02-01T18:55:05Z",
       "side": 1,
       "message": "should we call start_recording() on each frame? is there a corresponding stop()?",
+      "range": {
+        "startLine": 821,
+        "startChar": 13,
+        "endLine": 821,
+        "endChar": 28
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2366325a_d3405a63",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 821,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T19:26:25Z",
+      "side": 1,
+      "message": "Checked inside the method, if (recorder-\u003estarted) return 0;",
+      "parentUuid": "3085fd39_23a9bfa7",
       "range": {
         "startLine": 821,
         "startChar": 13,
@@ -611,6 +1031,30 @@
     },
     {
       "key": {
+        "uuid": "791de027_dda08e81",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 854,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T19:26:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "18f59511_d41de931",
+      "range": {
+        "startLine": 854,
+        "startChar": 0,
+        "endLine": 854,
+        "endChar": 5
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "134ac40f_b6fd3863",
         "filename": "android/android-emu/android/ffmpeg-muxer.h",
         "patchSetId": 3
@@ -622,6 +1066,30 @@
       "writtenOn": "2017-02-01T18:55:05Z",
       "side": 1,
       "message": "we have a line limit of 80 chars, unfortunately",
+      "range": {
+        "startLine": 105,
+        "startChar": 74,
+        "endLine": 105,
+        "endChar": 84
+      },
+      "revId": "6c382114ef57a5334e999df3ca7d63a9bb652ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd94532a_5828c32a",
+        "filename": "android/android-emu/android/ffmpeg-muxer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T19:26:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "134ac40f_b6fd3863",
       "range": {
         "startLine": 105,
         "startChar": 74,
