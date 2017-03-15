@@ -65,6 +65,8 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/extended-pages/rotary-input-page.cpp \
     android/skin/qt/extended-pages/settings-page.cpp \
     android/skin/qt/extended-pages/telephony-page.cpp \
+	android/skin/qt/extended-pages/video-surface.cpp \
+	android/skin/qt/extended-pages/video-widget.cpp \
     android/skin/qt/extended-pages/virtual-sensors-page.cpp \
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp \
     android/skin/qt/extended-window.cpp \
@@ -103,6 +105,8 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/extended-pages/rotary-input-page.h \
     android/skin/qt/extended-pages/settings-page.h \
     android/skin/qt/extended-pages/telephony-page.h \
+	android/skin/qt/extended-pages/video-surface.h \
+	android/skin/qt/extended-pages/video-widget.h \
     android/skin/qt/extended-pages/virtual-sensors-page.h \
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h \
     android/skin/qt/extended-window.h \
