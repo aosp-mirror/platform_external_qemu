@@ -4520,6 +4520,8 @@ static int main_impl(int argc, char** argv)
      * because this requires changing the LD_LIBRARY_PATH before launching
      * the emulation engine. */
     int qemu_gles = 0;
+    int gles_major_version = 2;
+    int gles_minor_version = 0;
     is_opengl_alive = 1;
     if (strcmp(android_hw->hw_gpu_mode, "guest") == 0) {
         qemu_gles = 2;   // Using guest
@@ -4528,7 +4530,9 @@ static int main_impl(int argc, char** argv)
             android_startOpenglesRenderer(android_hw->hw_lcd_width,
                                           android_hw->hw_lcd_height,
                                           avdInfo_isPhoneApi(android_avdInfo),
-                                          avdInfo_getApiLevel(android_avdInfo))
+                                          avdInfo_getApiLevel(android_avdInfo),
+                                          &gles_major_version,
+                                          &gles_minor_version)
                 != 0) {
             is_opengl_alive = 0;
         } else {
@@ -4536,11 +4540,12 @@ static int main_impl(int argc, char** argv)
             qemu_gles = 1;   // Using emugl
         }
     }
+
     if (qemu_gles) {
         char  tmp[64];
-        // change to '3' to run cts deqp /
-        // when we're ES 3.x conformant
-        snprintf(tmp, sizeof(tmp), "%d", 0x20000);
+        // incorporate minor version as well
+        // when we are ES 3.1+ conformant
+        snprintf(tmp, sizeof(tmp), "%d", gles_major_version << 16);
         boot_property_add("ro.opengles.version", tmp);
     }
 

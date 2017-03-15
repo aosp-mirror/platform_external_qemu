@@ -29,6 +29,10 @@ void RenderLibImpl::setAvdInfo(bool phone, int api) {
     emugl::setAvdInfo(phone, api);
 }
 
+void RenderLibImpl::getGlesVersion(int* maj, int* min) {
+    emugl::getGlesVersion(maj, min);
+}
+
 void RenderLibImpl::setLogger(emugl_logger_struct logger) {
     set_emugl_logger(logger.coarse);
     set_emugl_cxt_logger(logger.fine);
