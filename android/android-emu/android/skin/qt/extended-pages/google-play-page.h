@@ -34,7 +34,8 @@ public:
     explicit GooglePlayPage(QWidget* parent = 0);
     ~GooglePlayPage();
 
-    void initialize(android::emulation::AdbInterface* adb);
+    void initialize(android::emulation::AdbInterface* adb,
+                    android::emulation::AndroidPropertyInterface* androidProp);
 
 private:
     void showPlayStoreSettings();
@@ -51,6 +52,11 @@ private:
     void playVersionDone(android::emulation::GooglePlayServices::Result result,
                          PlayApps app,
                          android::base::StringView outString);
+    void notifyPlayStoreUpdate();
+    void notifyPlayServicesUpdate();
+    void updateNotification(
+            android::emulation::GooglePlayServices::Result result,
+            PlayApps app);
 
 private slots:
     void on_goog_updateServicesButton_clicked();
