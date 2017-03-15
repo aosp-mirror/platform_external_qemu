@@ -278,16 +278,20 @@ LOCAL_SRC_FILES := \
     android/emulation/control/FilePusher.cpp \
     android/emulation/control/GooglePlayServices.cpp \
     android/emulation/control/LineConsumer.cpp \
+    android/emulation/control/AndroidPropertyInterface.cpp \
     android/emulation/control/ScreenCapturer.cpp \
     android/emulation/control/AdbBugReportServices.cpp \
     android/emulation/CpuAccelerator.cpp \
     android/emulation/DmaMap.cpp \
+    android/emulation/AndroidPropertyPipe.cpp \
     android/emulation/GoldfishDma.cpp \
     android/emulation/GoldfishSyncCommandQueue.cpp \
     android/emulation/goldfish_sync.cpp \
     android/emulation/LogcatPipe.cpp \
     android/emulation/nand_limits.c \
     android/emulation/ParameterList.cpp \
+    android/emulation/PropertyStore.cpp \
+    android/emulation/PropertyWaiter.cpp \
     android/emulation/qemud/android_qemud_client.cpp \
     android/emulation/qemud/android_qemud_multiplexer.cpp \
     android/emulation/qemud/android_qemud_serial.cpp \
