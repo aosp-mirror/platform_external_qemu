@@ -4535,12 +4535,21 @@ static int main_impl(int argc, char** argv)
             goldfish_fb_set_use_host_gpu(1);
             qemu_gles = 1;   // Using emugl
         }
+
+        char vendorstr[1024];
+        char rendererstr[1024];
+        char versionstr[1024];
+
+        android_getOpenglesHardwareStrings(vendorstr, rendererstr, versionstr);
+
+        fprintf(stderr, "%s: hw strings: %s %s %s\n", __func__,
+                vendorstr, rendererstr, versionstr);
     }
     if (qemu_gles) {
         char  tmp[64];
         // change to '3' to run cts deqp /
         // when we're ES 3.x conformant
-        snprintf(tmp, sizeof(tmp), "%d", 0x20000);
+        snprintf(tmp, sizeof(tmp), "%d", 0x30000);
         boot_property_add("ro.opengles.version", tmp);
     }
 
