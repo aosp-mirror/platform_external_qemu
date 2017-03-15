@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e9fe0701_5e6bb19a",
+        "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T17:26:42Z",
+      "side": 1,
+      "message": "Insert a new line before this",
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6e2c62a_d0ba2ce0",
+        "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T17:26:42Z",
+      "side": 1,
+      "message": "Add some comments on threading, does this method have to be called from a different thread?",
+      "range": {
+        "startLine": 62,
+        "startChar": 16,
+        "endLine": 62,
+        "endChar": 35
+      },
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a483ecb2_2bbc275f",
+        "filename": "android/android-emu/android/utils/debug.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-15T17:26:42Z",
+      "side": 1,
+      "message": "Looks like the tab alignment changed quite a lot. Is this the new style we prefer?",
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
