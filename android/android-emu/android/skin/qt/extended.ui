@@ -847,7 +847,7 @@ padding: 10px 0px 10px 16px;</string>
       <item>
        <widget class="QPushButton" name="recordScreenButton">
         <property name="visible">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="font">
          <font>
@@ -897,7 +897,7 @@ padding: 10px 0px 10px 16px;</string>
        <widget class="QPushButton" name="googlePlayButton">
         <property name="visible">
          <!-- TODO(joshuaduong): Enable once gplay is ready. -->
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="font">
          <font>

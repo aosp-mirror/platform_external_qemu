@@ -11,41 +11,42 @@
 #pragma once
 
 #include "ui_record-screen-page.h"
+#include <QMediaPlayer>
 #include <QTimer>
 #include <QWidget>
 #include <memory>
 
-//struct QAndroidRecordScreenAgent;
-class RecordScreenPage : public QWidget
-{
+struct QAndroidRecordScreenAgent;
+class RecordScreenPage : public QWidget {
     Q_OBJECT
 public:
-    enum class RecordState {
-      Ready,
-      Recording,
-      Stopped
-    };
+    enum class RecordState { Ready, Recording, Stopped };
 
-    explicit RecordScreenPage(QWidget *parent = 0);
+    explicit RecordScreenPage(QWidget* parent = 0);
     ~RecordScreenPage();
 
-//    void setRecordScreenAgent(const QAndroidRecordScreenAgent* agent);
+    void setRecordScreenAgent(const QAndroidRecordScreenAgent* agent);
 
 signals:
 
 private slots:
-	void on_rec_recordButton_clicked();
-	void updateElapsedTime();
+    void on_rec_playStopButton_clicked();
+    void on_rec_recordButton_clicked();
+    void on_rec_saveButton_clicked();
+    void updateElapsedTime();
 
 public slots:
 
 public:
-	void setRecordState(RecordState r);
+    void setRecordState(RecordState r);
 
 private:
+    static const char kTmpMediaName[]; // tmp name for unsaved media file
+    std::string mTmpFilePath;
+    std::unique_ptr<QMediaPlayer> mMediaPlayer;
     std::unique_ptr<Ui::RecordScreenPage> mUi;
-//    const QAndroidRecordScreenAgent* mRecordScreenAgent;
+    const QAndroidRecordScreenAgent* mRecordScreenAgent;
     RecordState mState;
     QTimer mTimer;
-    int mSec; // number of elapsed seconds
+    int mSec;  // number of elapsed seconds
 };
