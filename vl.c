@@ -3125,8 +3125,8 @@ static bool set_memory_options(uint64_t *ram_slots, ram_addr_t *maxram_size,
     const int requested_meg = ram_size / (1024 * 1024);
 
 #ifdef CONFIG_HAX
-    uint64_t hax_max_ram = 0;
     if (hax_enabled()) {
+        uint64_t hax_max_ram = 0;
         if (hax_get_max_ram(&hax_max_ram) == 0 && hax_max_ram > 0) {
             /* make sure we preserve the alignment if we need to adjust it */
             hax_max_ram = QEMU_ALIGN_DOWN(hax_max_ram, 8192);
