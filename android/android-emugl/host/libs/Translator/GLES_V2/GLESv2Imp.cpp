@@ -587,6 +587,7 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
         SET_ERROR_IF(objData->getDataType()!= SHADER_DATA,GL_INVALID_OPERATION);
         ShaderParser* sp = (ShaderParser*)objData;
         SET_ERROR_IF(sp->getDeleteStatus(), GL_INVALID_VALUE);
+        GLint compileStatus;
         if (sp->validShader()) {
             ctx->dispatcher().glCompileShader(globalShaderName);
 
@@ -600,9 +601,15 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
             }
             sp->setInfoLog(infoLog);
 
-            GLint compileStatus;
             ctx->dispatcher().glGetShaderiv(globalShaderName,GL_COMPILE_STATUS,&compileStatus);
-            sp->setCompileStatus(compileStatus == GL_FALSE ? 0 : 1);
+            sp->setCompileStatus(compileStatus == GL_FALSE ? false : true);
+        } else {
+            ctx->dispatcher().glCompileShader(globalShaderName);
+            sp->setCompileStatus(false);
+            ctx->dispatcher().glGetShaderiv(globalShaderName,GL_COMPILE_STATUS,&compileStatus);
+            if (compileStatus != GL_FALSE) {
+                fprintf(stderr, "%s: Warning: underlying GL compiled invalid shader!\n", __func__);
+            }
         }
     }
 }
@@ -2023,38 +2030,27 @@ GL_APICALL void  GL_APIENTRY glGetShaderiv(GLuint shader, GLenum pname, GLint* p
     if(ctx->shareGroup().get()) {
         const GLuint globalShaderName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
-        if (pname == GL_DELETE_STATUS) {
-            SET_ERROR_IF(globalShaderName == 0, GL_INVALID_VALUE);
-            auto objData = ctx->shareGroup()->getObjectData(
-                    NamedObjectType::SHADER_OR_PROGRAM, shader);
-            SET_ERROR_IF(!objData ,GL_INVALID_VALUE);
-            SET_ERROR_IF(objData->getDataType()!=SHADER_DATA,GL_INVALID_VALUE);
-            ShaderParser* sp = (ShaderParser*)objData;
-            params[0]  = (sp->getDeleteStatus()) ? GL_TRUE : GL_FALSE;
-            return;
-        }
         SET_ERROR_IF(globalShaderName==0, GL_INVALID_VALUE);
+        auto objData = ctx->shareGroup()->getObjectData(
+                NamedObjectType::SHADER_OR_PROGRAM, shader);
+        SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
+        SET_ERROR_IF(objData->getDataType() != SHADER_DATA,
+                     GL_INVALID_OPERATION);
+        ShaderParser* sp = (ShaderParser*)objData;
         switch(pname) {
+        case GL_DELETE_STATUS:
+            {
+            params[0]  = (sp->getDeleteStatus()) ? GL_TRUE : GL_FALSE;
+            }
+            break;
         case GL_INFO_LOG_LENGTH:
             {
-            auto objData = ctx->shareGroup()->getObjectData(
-                    NamedObjectType::SHADER_OR_PROGRAM, shader);
-            SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
-            SET_ERROR_IF(objData->getDataType() != SHADER_DATA,
-                         GL_INVALID_OPERATION);
-            ShaderParser* sp = (ShaderParser*)objData;
             GLint logLength = strlen(sp->getInfoLog());
             params[0] = (logLength > 0) ? logLength + 1 : 0;
             }
             break;
         case GL_SHADER_SOURCE_LENGTH:
             {
-            auto objData = ctx->shareGroup()->getObjectData(
-                    NamedObjectType::SHADER_OR_PROGRAM, shader);
-            SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
-            SET_ERROR_IF(objData->getDataType() != SHADER_DATA,
-                         GL_INVALID_OPERATION);
-            ShaderParser* sp = (ShaderParser*)objData;
             GLint srcLength = sp->getOriginalSrc().length();
             params[0] = (srcLength > 0) ? srcLength + 1 : 0;
             }
@@ -2463,9 +2459,6 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
             ctx->dispatcher().glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
         } else {
             if (vertexShader != 0 && fragmentShader!=0) {
-                GLint fCompileStatus = GL_FALSE;
-                GLint vCompileStatus = GL_FALSE;
-
                 auto fragObjData = ctx->shareGroup()->getObjectData(
                         NamedObjectType::SHADER_OR_PROGRAM, fragmentShader);
                 auto vertObjData = ctx->shareGroup()->getObjectData(
@@ -2473,15 +2466,7 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
                 ShaderParser* fragSp = (ShaderParser*)fragObjData;
                 ShaderParser* vertSp = (ShaderParser*)vertObjData;
 
-                GLuint fragmentShaderGlobal = ctx->shareGroup()->getGlobalName(
-                        NamedObjectType::SHADER_OR_PROGRAM, fragmentShader);
-                GLuint vertexShaderGlobal = ctx->shareGroup()->getGlobalName(
-                        NamedObjectType::SHADER_OR_PROGRAM, vertexShader);
-
-                ctx->dispatcher().glGetShaderiv(fragmentShaderGlobal,GL_COMPILE_STATUS,&fCompileStatus);
-                ctx->dispatcher().glGetShaderiv(vertexShaderGlobal,GL_COMPILE_STATUS,&vCompileStatus);
-
-                if(fCompileStatus != 0 && vCompileStatus != 0) {
+                if(fragSp->getCompileStatus() && vertSp->getCompileStatus()) {
                     if (programData->validateLink(fragSp, vertSp)) {
                         ctx->dispatcher().glLinkProgram(globalProgramName);
                         ctx->dispatcher().glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
