@@ -84,6 +84,14 @@ void ShaderParser::restore(ObjectLocalName localName,
         GLEScontext::dispatcher().glCompileShader(globalName);
 }
 
+static const char kAlwaysInvalidShader[] =
+    "When shader translation fails, passing an empty string to underlying GL "
+    "may result in GL_COMPILE_STATUS == GL_TRUE and letting us link an "
+    "invalid shader program, due to tripping the underlying GL's separable "
+    "shader program capability."
+    "This shader is meant to make the underlying GL agree that the shader is"
+    "indeed invalid when translation fails.";
+
 void ShaderParser::convertESSLToGLSL(int esslVersion) {
     std::string infolog;
     std::string parsedSource;
@@ -94,6 +102,7 @@ void ShaderParser::convertESSLToGLSL(int esslVersion) {
 
     if (!m_valid) {
         m_infoLog = static_cast<const GLchar*>(infolog.c_str());
+        m_parsedSrc = kAlwaysInvalidShader;
     } else {
         m_parsedSrc = parsedSource;
     }
