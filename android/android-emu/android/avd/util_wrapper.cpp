@@ -16,8 +16,9 @@
 
 #include "android/base/misc/StringUtils.h"
 #include "android/emulation/ConfigDirs.h"
+#include "android/utils/path.h"
 
 char* path_getSdkRoot() {
     auto root = android::ConfigDirs::getSdkRootDirectory();
-    return !root.empty() ? android::base::strDup(root) : nullptr;
+    return !root.empty() ? path_get_absolute(root.c_str()) : nullptr;
 }
