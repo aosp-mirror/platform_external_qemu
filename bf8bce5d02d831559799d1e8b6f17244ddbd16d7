@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5f7bb8b0_f98f664a",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-15T15:06:58Z",
+      "side": 1,
+      "message": "nit: I think the function would be more readable if you moved the inner checks and loops out into smaller static functions:\n\nfor {\n   if (has host info)\n       thisConfigMatches \u0026\u003d genericFieldsMatch();\n\n   for (gpu)\n       ...\n       thisConfigMatches \u0026\u003d gpuMatch(gpu);\n\n   res |\u003d thisConfigMatches\n}\n\netc",
+      "range": {
+        "startLine": 244,
+        "startChar": 0,
+        "endLine": 256,
+        "endChar": 9
+      },
+      "revId": "bf8bce5d02d831559799d1e8b6f17244ddbd16d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
