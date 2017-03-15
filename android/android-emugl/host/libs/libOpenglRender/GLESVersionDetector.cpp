@@ -19,6 +19,7 @@
 #include "DispatchTables.h"
 
 #include "emugl/common/feature_control.h"
+#include "emugl/common/misc.h"
 
 #include <algorithm>
 
@@ -30,18 +31,36 @@ GLESDispatchMaxVersion calcMaxVersionFromDispatch() {
     // which matches the return type of gles2_dispatch_get_max_version,
     // and allows us to scale back if the underlying host machine
     // doesn't actually suppport a particular GLES version.
-    if (!emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion))
-        return GLES_DISPATCH_MAX_VERSION_2;
+    GLESDispatchMaxVersion res = GLES_DISPATCH_MAX_VERSION_2;
 
-    GLESDispatchMaxVersion underlying_gles2_lib_max =
-        gles2_dispatch_get_max_version();
-    if (s_gles2.gl_dispatch_get_max_version) {
-        GLESDispatchMaxVersion underlying_gl_lib_max =
-            (GLESDispatchMaxVersion)s_gles2.gl_dispatch_get_max_version();
-        return std::min(underlying_gl_lib_max, underlying_gles2_lib_max);
-    } else {
-        return underlying_gles2_lib_max;
+    if (emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion)) {
+        GLESDispatchMaxVersion underlying_gles2_lib_max =
+            gles2_dispatch_get_max_version();
+        if (s_gles2.gl_dispatch_get_max_version) {
+            GLESDispatchMaxVersion underlying_gl_lib_max =
+                (GLESDispatchMaxVersion)s_gles2.gl_dispatch_get_max_version();
+            res = std::min(underlying_gl_lib_max, underlying_gles2_lib_max);
+        } else {
+            res = underlying_gles2_lib_max;
+        }
     }
 
-    return GLES_DISPATCH_MAX_VERSION_2;
+
+    int maj = 2; int min = 0;
+    switch (res) {
+        case GLES_DISPATCH_MAX_VERSION_2:
+            maj = 2; min = 0; break;
+        case GLES_DISPATCH_MAX_VERSION_3_0:
+            maj = 3; min = 0; break;
+        case GLES_DISPATCH_MAX_VERSION_3_1:
+            maj = 3; min = 1; break;
+        case GLES_DISPATCH_MAX_VERSION_3_2:
+            maj = 3; min = 2; break;
+        default:
+            break;
+    }
+
+    emugl::setGlesVersion(maj, min);
+
+    return res;
 }
