@@ -96,7 +96,7 @@ AdbCommandPtr ApkInstaller::install(
         resultCallback(Result::kApkPermissionsError, "");
         return nullptr;
     }
-    std::vector<std::string> installCommand{"install", "-r", apkFilePath};
+    std::vector<std::string> installCommand{"install", "-r", "-t", apkFilePath};
     mInstallCommand = mAdb->runAdbCommand(
             installCommand,
             [resultCallback, this](const OptionalAdbCommandResult& result) {
