@@ -13,6 +13,7 @@
 #pragma once
 
 #include "android/cmdline-option.h"
+#include "android/ffmpeg-muxer.h"
 #include "android/framebuffer.h"
 #include "android/skin/file.h"
 #include "android/skin/keyboard.h"
@@ -38,6 +39,12 @@ typedef struct {
     UiEmuAgent     uiEmuAgent[1];
 } EmulatorWindow;
 
+typedef struct {
+    ffmpeg_recorder* recorder;
+    bool running;
+    bool request_stop;
+} RecordingInfo;
+
 /* Gets a pointer to a EmulatorWindow structure instance. */
 EmulatorWindow*
 emulator_window_get(void);
@@ -62,5 +69,11 @@ emulator_window_get_layout(EmulatorWindow* emulator);
 /* Rotates the screen clockwise by 90 degrees. Returns true on success, false
  * otherwise */
 bool emulator_window_rotate_90_clockwise(void);
+
+/* Start recording the screen. Returns false if recording is already
+ * running. */
+bool emulator_window_start_recording(void);
+/* Stop recording the screen. */
+void emulator_window_stop_recording(void);
 
 ANDROID_END_HEADER

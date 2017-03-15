@@ -20,6 +20,7 @@
 #include "android/emulation/control/libui_agent.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/net_agent.h"
+#include "android/emulation/control/record_screen_agent.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/vm_operations.h"
@@ -38,6 +39,7 @@ ANDROID_BEGIN_HEADER
     X(QAndroidEmulatorWindowAgent, emu)   \
     X(QAndroidFingerAgent, finger)        \
     X(QAndroidLocationAgent, location)    \
+    X(QAndroidRecordScreenAgent, record)  \
     X(QAndroidTelephonyAgent, telephony)  \
     X(QAndroidUserEventAgent, user_event) \
     X(QAndroidVmOperations, vm)           \
