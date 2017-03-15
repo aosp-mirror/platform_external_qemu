@@ -40,28 +40,20 @@ const std::pair<GooglePlayPage::PlayApps, const char*>
 GooglePlayPage::GooglePlayPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::GooglePlayPage) {
     mUi->setupUi(this);
-    QObject::connect(&mTimer, &QTimer::timeout, this,
-                     &GooglePlayPage::getBootCompletionProperty);
-    mTimer.setSingleShot(true);
-    mTimer.setInterval(5000);  // 5 sec
 }
 
 GooglePlayPage::~GooglePlayPage() {}
 
-void GooglePlayPage::initialize(android::emulation::AdbInterface* adb) {
-    mGooglePlayServices.reset(new android::emulation::GooglePlayServices(adb));
-    mTimer.start();
+void GooglePlayPage::initialize(
+        android::emulation::AdbInterface* adb,
+        android::emulation::AndroidPropertyInterface* androidProp) {
+    mGooglePlayServices.reset(
+            new android::emulation::GooglePlayServices(adb, androidProp));
+    getBootCompletionProperty();
 }
 
 void GooglePlayPage::getBootCompletionProperty() {
-    // TODO: Really wish we had some kind of guest property to do
-    // asynchronous waiting.
-    const StringView boot_property = "sys.boot_completed";
-    // Ran in a timer. We have to wait for the package manager
-    // to start in order to query the versionName of the Play
-    // Store and Play Services.
-    mGooglePlayServices->getSystemProperty(
-            boot_property,
+    mGooglePlayServices->waitForBootCompletion(
             [this](GooglePlayServices::Result result, StringView outString) {
                 GooglePlayPage::bootCompletionPropertyDone(result, outString);
             });
@@ -70,12 +62,12 @@ void GooglePlayPage::getBootCompletionProperty() {
 void GooglePlayPage::bootCompletionPropertyDone(
         GooglePlayServices::Result result,
         StringView outString) {
-    if (result == GooglePlayServices::Result::Success && outString == "1") {
+    if (result == GooglePlayServices::Result::Success) {
         getPlayStoreVersion();
         getPlayServicesVersion();
     } else {
-        // Continue to wait until it is finished booting.
-        mTimer.start();
+        // We probably timed out. Let's try again.
+        getBootCompletionProperty();
     }
 }
 
@@ -162,9 +154,11 @@ void GooglePlayPage::playVersionDone(GooglePlayServices::Result result,
     switch (app) {
         case PlayApps::PlayStore:
             textEdit = mUi->goog_playStoreVersionBox;
+            notifyPlayStoreUpdate();
             break;
         case PlayApps::PlayServices:
             textEdit = mUi->goog_playServicesVersionBox;
+            notifyPlayServicesUpdate();
             break;
         default:
             return;
@@ -194,6 +188,45 @@ void GooglePlayPage::playVersionDone(GooglePlayServices::Result result,
                           .arg(getPlayAppDescription(app));
     }
     showErrorDialog(msg, tr("%1 Version").arg(getPlayAppDescription(app)));
+}
+
+void GooglePlayPage::notifyPlayStoreUpdate() {
+    mGooglePlayServices->waitForPlayStoreUpdate(
+            [this](GooglePlayServices::Result result) {
+                GooglePlayPage::updateNotification(result, PlayApps::PlayStore);
+            });
+}
+
+void GooglePlayPage::notifyPlayServicesUpdate() {
+    mGooglePlayServices->waitForPlayServicesUpdate(
+            [this](GooglePlayServices::Result result) {
+                GooglePlayPage::updateNotification(result,
+                                                   PlayApps::PlayServices);
+            });
+}
+
+void GooglePlayPage::updateNotification(GooglePlayServices::Result result,
+                                        PlayApps app) {
+    if (result == GooglePlayServices::Result::Success) {
+        switch (app) {
+            case PlayApps::PlayStore:
+                getPlayStoreVersion();
+                break;
+            case PlayApps::PlayServices:
+                getPlayServicesVersion();
+                break;
+        }
+    } else {
+        // Probably timed out. Let's wait again.
+        switch (app) {
+            case PlayApps::PlayStore:
+                notifyPlayStoreUpdate();
+                break;
+            case PlayApps::PlayServices:
+                notifyPlayServicesUpdate();
+                break;
+        }
+    }
 }
 
 void GooglePlayPage::on_goog_updateServicesButton_clicked() {

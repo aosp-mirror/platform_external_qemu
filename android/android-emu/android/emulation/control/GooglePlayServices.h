@@ -17,6 +17,7 @@
 #include "android/base/Compiler.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/AdbInterface.h"
+#include "android/emulation/control/AndroidPropertyInterface.h"
 
 #include <functional>
 #include <string>
@@ -38,7 +39,9 @@ public:
             std::function<void(Result result,
                                android::base::StringView outString)>;
 
-    explicit GooglePlayServices(AdbInterface* adb) : mAdb(adb) {}
+    explicit GooglePlayServices(AdbInterface* adb,
+                                AndroidPropertyInterface* qemuProp)
+        : mAdb(adb), mAndroidProp(qemuProp) {}
     ~GooglePlayServices();
 
     // Opens the Google play store settings in the play store app.
@@ -50,8 +53,11 @@ public:
     // Get a string of the latest version number of play services.
     void getPlayServicesVersion(ResultOutputCallback resultCallback);
     // Get a system property.
-    void getSystemProperty(android::base::StringView sysProp,
-                           ResultOutputCallback resultCallback);
+    void waitForBootCompletion(ResultOutputCallback resultCallback);
+    // Wait for update on play store.
+    void waitForPlayStoreUpdate(ResultCallback resultCallback);
+    // Wait for update on play services.
+    void waitForPlayServicesUpdate(ResultCallback resultCallback);
 
     // Parses the contents of |output| stream as if it was the output from
     // running "adb shell dumpsys <pkgname>" to get the
@@ -63,13 +69,17 @@ public:
 
 private:
     static const android::base::System::Duration kAdbCommandTimeoutMs;
+    static const android::base::System::Duration kWaitPropTimeoutMs;
     static constexpr android::base::StringView kPlayStorePkgName =
             "com.android.vending";
     static constexpr android::base::StringView kPlayServicesPkgName =
             "com.google.android.gms";
 
     AdbInterface* mAdb;
-    AdbCommandPtr mGetpropCommand;
+    AndroidPropertyInterface* mAndroidProp;
+    WaitObjectPtr mBootWaitObject;
+    WaitObjectPtr mStoreUpdateWaitObject;
+    WaitObjectPtr mServicesUpdateWaitObject;
     AdbCommandPtr mStoreSettingsCommand;
     AdbCommandPtr mServicesPageCommand;
     AdbCommandPtr mStoreVersionCommand;

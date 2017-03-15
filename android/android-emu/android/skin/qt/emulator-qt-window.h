@@ -12,9 +12,10 @@
 
 #pragma once
 
-#include "android/base/containers/CircularBuffer.h"
 #include "android/base/StringView.h"
+#include "android/base/containers/CircularBuffer.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/emulation/control/AndroidPropertyInterface.h"
 #include "android/emulation/control/ApkInstaller.h"
 #include "android/emulation/control/FilePusher.h"
 #include "android/emulation/control/ScreenCapturer.h"
@@ -187,6 +188,8 @@ public:
     WId getWindowId();
 
     android::emulation::AdbInterface* getAdbInterface() const;
+    android::emulation::AndroidPropertyInterface* getAndroidPropertyInterface()
+            const;
     android::emulation::ScreenCapturer* getScreenCapturer();
     bool isInZoomMode() const;
     ToolWindow* toolWindow() const;
@@ -395,6 +398,8 @@ private:
 
     std::shared_ptr<android::qt::UserActionsCounter> mUserActionsCounter;
     std::unique_ptr<android::emulation::AdbInterface> mAdbInterface;
+    std::unique_ptr<android::emulation::AndroidPropertyInterface>
+            mAndroidPropertyInterface;
     android::emulation::AdbCommandPtr mApkInstallCommand;
     android::emulation::ApkInstaller mApkInstaller;
     android::emulation::FilePusher mFilePusher;

@@ -14,15 +14,20 @@
 
 #include "android/emulation/control/GooglePlayServices.h"
 
+#include "android/constants/IntentConstants.h"
+
 namespace android {
 namespace emulation {
 
+using namespace android::constants::intent;
+using android::base::Looper;
 using android::base::StringView;
 using android::base::System;
 using std::string;
 
 // static
 const System::Duration GooglePlayServices::kAdbCommandTimeoutMs = 5000;
+const System::Duration GooglePlayServices::kWaitPropTimeoutMs = INT64_MAX;
 constexpr StringView GooglePlayServices::kPlayStorePkgName;
 constexpr StringView GooglePlayServices::kPlayServicesPkgName;
 
@@ -39,8 +44,14 @@ GooglePlayServices::~GooglePlayServices() {
     if (mServicesVersionCommand) {
         mServicesVersionCommand->cancel();
     }
-    if (mGetpropCommand) {
-        mGetpropCommand->cancel();
+    if (mBootWaitObject) {
+        mBootWaitObject->cancel();
+    }
+    if (mStoreUpdateWaitObject) {
+        mStoreUpdateWaitObject->cancel();
+    }
+    if (mServicesUpdateWaitObject) {
+        mServicesUpdateWaitObject->cancel();
     }
 }
 
@@ -89,31 +100,86 @@ bool GooglePlayServices::parseOutputForVersion(std::istream& stream,
     return false;
 }
 
-void GooglePlayServices::getSystemProperty(
-        android::base::StringView sysProp,
+void GooglePlayServices::waitForBootCompletion(
         ResultOutputCallback resultCallback) {
-    if (!mAdb) {
+    if (!mAndroidProp) {
         return;
     }
 
-    if (mGetpropCommand) {
+    if (mBootWaitObject) {
         resultCallback(Result::OperationInProgress, "");
         return;
     }
-    std::vector<std::string> getpropCommand{"shell", "getprop", sysProp};
-    mGetpropCommand = mAdb->runAdbCommand(
-            getpropCommand,
-            [resultCallback, this](const OptionalAdbCommandResult& result) {
-                string line;
-                if (result && result->output &&
-                    getline(*(result->output), line)) {
-                    resultCallback(Result::Success, line);
+    mBootWaitObject = mAndroidProp->waitAndroidProperty(
+            ACTION_BOOT_COMPLETED,
+            [resultCallback, this](const OptionalWaitObjectResult& result) {
+                mBootWaitObject.reset();
+                if (result && result->key.compare(ACTION_BOOT_COMPLETED) == 0) {
+                    resultCallback(Result::Success, result->value);
                 } else {
                     resultCallback(Result::UnknownError, "");
                 }
-                mGetpropCommand.reset();
             },
-            kAdbCommandTimeoutMs, true);
+            kWaitPropTimeoutMs);
+}
+
+void GooglePlayServices::waitForPlayStoreUpdate(ResultCallback resultCallback) {
+    if (!mAndroidProp) {
+        return;
+    }
+
+    printf("%s\n", __FUNCTION__);
+    if (mStoreUpdateWaitObject) {
+        printf("Still operating\n");
+        resultCallback(Result::OperationInProgress);
+        return;
+    }
+
+    // The value we are waiting for is in the form of
+    // package:<package_name>
+    std::string value("package:");
+    value.append(kPlayStorePkgName);
+    mStoreUpdateWaitObject = mAndroidProp->waitAndroidPropertyValue(
+            ACTION_PACKAGE_REPLACED, value,
+            [resultCallback, this](const OptionalWaitObjectResult& result) {
+                mStoreUpdateWaitObject.reset();
+                // Only need to check if not empty for success
+                if (result && !result->key.empty()) {
+                    resultCallback(Result::Success);
+                } else {
+                    resultCallback(Result::UnknownError);
+                }
+            },
+            kWaitPropTimeoutMs);
+}
+
+void GooglePlayServices::waitForPlayServicesUpdate(
+        ResultCallback resultCallback) {
+    if (!mAndroidProp) {
+        return;
+    }
+
+    if (mServicesUpdateWaitObject) {
+        resultCallback(Result::OperationInProgress);
+        return;
+    }
+
+    // The value we are awating for is in the form of
+    // package:<package_name>
+    std::string value("package:");
+    value.append(kPlayServicesPkgName);
+    mServicesUpdateWaitObject = mAndroidProp->waitAndroidPropertyValue(
+            ACTION_PACKAGE_REPLACED, value,
+            [resultCallback, this](const OptionalWaitObjectResult& result) {
+                mServicesUpdateWaitObject.reset();
+                // Only need to check if not empty for success
+                if (result && !result->key.empty()) {
+                    resultCallback(Result::Success);
+                } else {
+                    resultCallback(Result::UnknownError);
+                }
+            },
+            kWaitPropTimeoutMs);
 }
 
 void GooglePlayServices::showPlayStoreSettings(ResultCallback resultCallback) {

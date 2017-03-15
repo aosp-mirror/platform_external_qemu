@@ -148,6 +148,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
               android::base::CircularBuffer<EventRecord>(1000))),
       mUserActionsCounter(new android::qt::UserActionsCounter(&mEventCapturer)),
       mAdbInterface(android::emulation::AdbInterface::create(mLooper)),
+      mAndroidPropertyInterface(
+              android::emulation::AndroidPropertyInterface::create(mLooper)),
       mApkInstaller(mAdbInterface.get()),
       mFilePusher(mAdbInterface.get(),
                   [this](StringView filePath, FilePusher::Result result) {
@@ -343,6 +345,12 @@ EmulatorQtWindow::~EmulatorQtWindow() {
     if (mToolWindow) {
         delete mToolWindow;
         mToolWindow = NULL;
+    }
+
+    // Need to destroy the Android property instance to
+    // close the socket.
+    if (mAndroidPropertyInterface) {
+        mAndroidPropertyInterface.reset();
     }
 
     delete mMainLoopThread;
@@ -1659,6 +1667,11 @@ QRect EmulatorQtWindow::deviceGeometry() const {
 
 android::emulation::AdbInterface* EmulatorQtWindow::getAdbInterface() const {
     return mAdbInterface.get();
+}
+
+android::emulation::AndroidPropertyInterface*
+EmulatorQtWindow::getAndroidPropertyInterface() const {
+    return mAndroidPropertyInterface.get();
 }
 
 ScreenCapturer* EmulatorQtWindow::getScreenCapturer() {
