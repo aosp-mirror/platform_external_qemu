@@ -18,4 +18,8 @@ namespace emugl {
     // Set and get API version of system image.
     void setAvdInfo(bool isPhoneApi, int apiLevel);
     void getAvdInfo(bool* isPhoneApi, int* apiLevel);
+
+    // Set/get GLES major/minor version.
+    void setGlesVersion(int maj, int min);
+    void getGlesVersion(int* maj, int* min);
 }

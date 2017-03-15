@@ -30,6 +30,8 @@ public:
 
     // Tell emugl the API version of the system image
     virtual void setAvdInfo(bool phone, int api) = 0;
+    // Get the GLES major/minor version determined by libOpenglRender.
+    virtual void getGlesVersion(int* maj, int* min) = 0;
     virtual void setLogger(emugl_logger_struct logger) = 0;
     virtual void setCrashReporter(emugl_crash_reporter_t reporter) = 0;
     virtual void setFeatureController(emugl_feature_is_enabled_t featureController) = 0;

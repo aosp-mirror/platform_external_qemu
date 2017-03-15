@@ -110,6 +110,7 @@ bool RendererImpl::initialize(int width, int height, bool useSubWindow) {
     }
 
     mRenderWindow = std::move(renderWindow);
+
     GL_LOG("OpenGL renderer initialized successfully");
     return true;
 }

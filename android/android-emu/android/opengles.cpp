@@ -121,7 +121,9 @@ BAD_EXIT:
 }
 
 int
-android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int guestApiLevel)
+android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int guestApiLevel,
+                              int* glesMajorVersion_out,
+                              int* glesMinorVersion_out)
 {
     if (!sRenderLib) {
         D("Can't start OpenGLES renderer without support libraries");
@@ -161,6 +163,11 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
         D("Can't start OpenGLES renderer?");
         return -1;
     }
+
+    // after initRenderer is a success, the maximum GLES API is calculated depending
+    // on feature control and host GPU support. Set the obtained GLES version here.
+    if (glesMajorVersion_out && glesMinorVersion_out)
+        sRenderLib->getGlesVersion(glesMajorVersion_out, glesMinorVersion_out);
     return 0;
 }
 
@@ -227,6 +234,11 @@ void android_getOpenglesHardwareStrings(char** vendor,
         *renderer = strdup(strings.renderer.c_str());
         *version = strdup(strings.version.c_str());
     }
+}
+
+void android_getOpenglesVersion(int* maj, int* min) {
+    sRenderLib->getGlesVersion(maj, min);
+    fprintf(stderr, "%s: maj min %d %d\n", __func__, *maj, *min);
 }
 
 void

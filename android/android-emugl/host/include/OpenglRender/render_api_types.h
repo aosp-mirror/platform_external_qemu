@@ -59,3 +59,7 @@ typedef struct {
     emugl_dma_invalidate_host_mappings_t invalidate_host_mappings;
     emugl_dma_unlock_t unlock;
 } emugl_dma_ops;
+
+// Function type describing supported OpenGL ES version
+// on the host.
+typedef void (*emugl_gles_version_query_t)(int, int);

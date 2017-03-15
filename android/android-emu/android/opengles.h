@@ -36,7 +36,10 @@ int android_initOpenglesEmulation(void);
  *                   to the guest display driver.
  * guestApiLevel: API level of guest image (23 for mnc, 24 for nyc, etc)
  */
-int android_startOpenglesRenderer(int width, int height, bool isPhoneApi, int guestApiLevel);
+int android_startOpenglesRenderer(int width, int height,
+                                  bool isPhoneApi, int guestApiLevel,
+                                  int* glesMajorVersion_out,
+                                  int* glesMinorVersion_out);
 
 /* See the description in render_api.h. */
 typedef void (*OnPostFunc)(void* context, int width, int height, int ydir,
@@ -56,6 +59,15 @@ void android_setPostCallback(OnPostFunc onPost, void* onPostContext);
 void android_getOpenglesHardwareStrings(char** vendor,
                                         char** renderer,
                                         char** version);
+
+/* Returns major/minor OpenGL ES versions.
+ * This depends on the feature flag GLESDynamicVersion.
+ * If GLESDynamicVersion = off, major version 2
+ * and minor version 0 are always returned.
+ * Otherwise, it depends on the level of support
+ * in the host OpenGL. Roughly, desktop OpenGL 4.3+
+ * would be ES 3.1, and desktop OpenGL 3.2+ would be ES 3.0. */
+void android_getOpenglesVersion(int* maj, int* min);
 
 int android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
                                int fbw, int fbh, float dpr, float rotation);
