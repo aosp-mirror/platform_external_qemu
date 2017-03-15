@@ -25,8 +25,8 @@
 #include "android/skin/qt/set-ui-emu-agent.h"
 #include "android/skin/winsys.h"
 #include "android/ui-emu-agent.h"
-#include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
+#include "android/utils/debug.h"
 #include "android/utils/looper.h"
 
 #include "android/telephony/modem_driver.h"
@@ -36,6 +36,9 @@
 
 /* EmulatorWindow structure instance. */
 static EmulatorWindow   qemulator[1];
+
+/* RecordingInfo strucature instance. */
+static RecordingInfo qRecordingInfo[1] = { { NULL, false, false } };
 
 // Our very own stash of a pointer to a device that handles user events.
 const QAndroidUserEventAgent* user_event_agent;
@@ -156,6 +159,59 @@ static void emulator_window_opengles_redraw_window(void) {
     }
 }
 
+bool emulator_window_start_recording(void) {
+    if (qRecordingInfo->running) {
+        printf("Recorder is still running\n");
+        return false;
+    }
+
+    qRecordingInfo->request_stop = false;
+    printf("Sending request to start recording\n");
+    qRecordingInfo->running = true;
+    return true;
+}
+
+void emulator_window_stop_recording(void) {
+    printf("Sending request to stop recording\n");
+    qRecordingInfo->request_stop = true;
+}
+
+// Used as an emugl callback to get each frame of GPU display.
+static void _recording_callback_on_gpu_frame(void* context,
+                                             int width,
+                                             int height,
+                                             const void* pixels) {
+    static int count = 0;
+    const int MAX_FRAMES = 4000;
+    // EmulatorWindow* emulator = (EmulatorWindow*)context;
+    // printf("_recording_callback_on_gpu_frame(width=%d, height=%d)\n", width,
+    // height);
+    if (qRecordingInfo->running) {
+        if (qRecordingInfo->recorder == NULL) {
+            printf("%s: recording started\n", __FUNCTION__);
+            qRecordingInfo->recorder = ffmpeg_create_recorder("tmp.mp4");
+            if (qRecordingInfo->recorder) {
+                ffmpeg_add_video_track(qRecordingInfo->recorder, width, height,
+                                       4 * 1024 * 1024, 60);
+                ffmpeg_add_audio_track(qRecordingInfo->recorder, 64 * 1024, 48000);
+            }
+        }
+        if (count < MAX_FRAMES)
+            printf("%s: encoding frame %d\n", __FUNCTION__, count);
+            ffmpeg_encode_video_frame(qRecordingInfo->recorder, (const uint8_t*)pixels,
+                                      width * height * 4);
+
+        if (count > MAX_FRAMES || qRecordingInfo->request_stop) {
+            count = 0;
+            ffmpeg_delete_recorder(qRecordingInfo->recorder);
+            qRecordingInfo->running = false;
+            printf("%s: recording done\n", __FUNCTION__);
+        }
+        count++;
+    }
+
+}
+
 // Used as an emugl callback to get each frame of GPU display.
 static void _emulator_window_on_gpu_frame(void* context,
                                           int width,
@@ -268,6 +324,11 @@ emulator_window_setup( EmulatorWindow*  emulator )
         gpu_frame_set_post_callback(looper_getForThread(),
                                     emulator,
                                     _emulator_window_on_gpu_frame);
+    } else {
+        printf("set _recording_callback_on_gpu_frame()\n");
+        gpu_frame_set_post_callback(looper_getForThread(),
+                                    emulator,
+                                    _recording_callback_on_gpu_frame);
     }
 
     skin_ui_reset_title(emulator->ui);
