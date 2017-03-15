@@ -13,6 +13,16 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <widget class="QVideoWidget" name="rec_videoWidget" native="true">
+   <property name="geometry">
+    <rect>
+     <x>161</x>
+     <y>24</y>
+     <width>300</width>
+     <height>516</height>
+    </rect>
+   </property>
+  </widget>
   <widget class="QWidget" name="rec_recordOverlayWidget" native="true">
    <property name="geometry">
     <rect>
@@ -139,9 +149,6 @@
      </item>
     </layout>
    </widget>
-   <zorder>rec_recordButton</zorder>
-   <zorder>rec_recordDotLabel_2</zorder>
-   <zorder>rec_timeElapsedWidget</zorder>
   </widget>
   <widget class="RaisedMaterialButton" name="rec_playStopButton">
    <property name="geometry">
@@ -248,18 +255,18 @@
     <string>21s / 1920 x 1080</string>
    </property>
   </widget>
-  <zorder>recordOverlayWidget</zorder>
-  <zorder>rec_playStopButton</zorder>
-  <zorder>rec_formatSwitch</zorder>
-  <zorder>rec_saveButton</zorder>
-  <zorder>rec_timeResLabel</zorder>
-  <zorder>rec_recordDotLabel</zorder>
  </widget>
  <customwidgets>
   <customwidget>
    <class>RaisedMaterialButton</class>
    <extends>QPushButton</extends>
    <header>android/skin/qt/raised-material-button.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QVideoWidget</class>
+   <extends>QWidget</extends>
+   <header>qvideowidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>
