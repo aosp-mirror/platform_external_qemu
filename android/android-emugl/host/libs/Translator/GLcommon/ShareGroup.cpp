@@ -51,11 +51,6 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
     }
     if (stream) {
         m_needLoadRestore = true;
-        // current only framebuffer object has a non-trivial post-load
-        m_nameSpace[toIndex(NamedObjectType::FRAMEBUFFER)]->postLoad(
-                [this](NamedObjectType p_type, ObjectLocalName p_localName) {
-                        return this->getObjectDataPtrNoLock(p_type, p_localName);
-                });
     }
 }
 
@@ -126,6 +121,7 @@ ShareGroup::genName(GenNameInfo genNameInfo,
                     ObjectLocalName p_localName,
                     bool genLocal)
 {
+    assert(genNameInfo.m_type != NamedObjectType::FRAMEBUFFER);
     if (toIndex(genNameInfo.m_type) >=
         toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
         return 0;
@@ -156,6 +152,7 @@ unsigned int
 ShareGroup::getGlobalName(NamedObjectType p_type,
                           ObjectLocalName p_localName)
 {
+    assert(p_type != NamedObjectType::FRAMEBUFFER);
     if (toIndex(p_type) >= toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
         return 0;
     }
@@ -168,6 +165,7 @@ ObjectLocalName
 ShareGroup::getLocalName(NamedObjectType p_type,
                          unsigned int p_globalName)
 {
+    assert(p_type != NamedObjectType::FRAMEBUFFER);
     if (toIndex(p_type) >= toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
         return 0;
     }
@@ -178,6 +176,7 @@ ShareGroup::getLocalName(NamedObjectType p_type,
 
 NamedObjectPtr ShareGroup::getNamedObject(NamedObjectType p_type,
                                           ObjectLocalName p_localName) {
+    assert(p_type != NamedObjectType::FRAMEBUFFER);
     if (toIndex(p_type) >= toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
         return 0;
     }
@@ -189,6 +188,7 @@ NamedObjectPtr ShareGroup::getNamedObject(NamedObjectType p_type,
 void
 ShareGroup::deleteName(NamedObjectType p_type, ObjectLocalName p_localName)
 {
+    assert(p_type != NamedObjectType::FRAMEBUFFER);
     if (toIndex(p_type) >= toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
         return;
     }
@@ -201,6 +201,7 @@ ShareGroup::deleteName(NamedObjectType p_type, ObjectLocalName p_localName)
 bool
 ShareGroup::isObject(NamedObjectType p_type, ObjectLocalName p_localName)
 {
+    assert(p_type != NamedObjectType::FRAMEBUFFER);
     if (toIndex(p_type) >= toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
         return 0;
     }
@@ -214,6 +215,7 @@ ShareGroup::replaceGlobalObject(NamedObjectType p_type,
                               ObjectLocalName p_localName,
                               NamedObjectPtr p_globalObject)
 {
+    assert(p_type != NamedObjectType::FRAMEBUFFER);
     if (toIndex(p_type) >= toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
         return;
     }
@@ -228,6 +230,7 @@ ShareGroup::setGlobalObject(NamedObjectType p_type,
                               ObjectLocalName p_localName,
                               NamedObjectPtr p_globalObject)
 {
+    assert(p_type != NamedObjectType::FRAMEBUFFER);
     if (toIndex(p_type) >= toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
         return;
     }
@@ -250,6 +253,7 @@ ShareGroup::setObjectDataLocked(NamedObjectType p_type,
                           ObjectLocalName p_localName,
                           ObjectDataPtr&& data)
 {
+    assert(p_type != NamedObjectType::FRAMEBUFFER);
     if (toIndex(p_type) >= toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
         return;
     }
@@ -258,6 +262,7 @@ ShareGroup::setObjectDataLocked(NamedObjectType p_type,
 
 const ObjectDataPtr& ShareGroup::getObjectDataPtrNoLock(
         NamedObjectType p_type, ObjectLocalName p_localName) {
+    assert(p_type != NamedObjectType::FRAMEBUFFER);
     return m_nameSpace[toIndex(p_type)]->getObjectDataPtr(p_localName);
 }
 

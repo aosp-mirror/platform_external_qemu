@@ -344,8 +344,7 @@ void FramebufferData::validate(GLEScontext* ctx)
         ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER,0);
         ctx->dispatcher().glBindFramebufferEXT(
                 GL_FRAMEBUFFER,
-                ctx->shareGroup()->getGlobalName(NamedObjectType::FRAMEBUFFER,
-                                                 m_fbName));
+                ctx->getFBOGlobalName(m_fbName));
 
         m_dirty = false;
     }
