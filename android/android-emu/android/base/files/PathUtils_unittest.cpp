@@ -423,6 +423,7 @@ TEST(PathUtils, simplifyComponents) {
         { { NULL }, { ".", NULL } },
         { { ".", NULL }, { ".", NULL } },
         { { "..", NULL }, { "..", NULL } },
+        { { "..", "..", NULL }, { "..", "..", NULL } },
         { { "foo", NULL }, { "foo", NULL } },
         { { "foo", ".", NULL }, { "foo", NULL } },
         { { "foo", "bar", NULL }, { "foo", "bar", NULL } },
