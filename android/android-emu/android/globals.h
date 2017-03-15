@@ -33,3 +33,6 @@ extern AndroidHwConfig   android_hw[1];
 
 /* this is to support snapshot (currently only qemu1+software-renderer) */
 extern const char* savevm_on_exit;
+
+/* this indicates that guest has mounted data partition */
+extern int guest_data_partition_mounted;
