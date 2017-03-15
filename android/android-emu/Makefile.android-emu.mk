@@ -719,6 +719,8 @@ LOCAL_CFLAGS += \
 # string literals which are being glued together
 ifeq ($(BUILD_TARGET_OS),darwin)
     LOCAL_CXXFLAGS += -Wno-reserved-user-defined-literal
+    # TODO: Should we put this in the prebuilts?
+    EMULATOR_LIBUI_LDLIBS += -lbz2
 else
     LOCAL_CXXFLAGS += -Wno-literal-suffix
 endif
