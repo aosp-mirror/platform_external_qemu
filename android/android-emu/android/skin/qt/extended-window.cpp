@@ -123,7 +123,8 @@ ExtendedWindow::ExtendedWindow(
         && avdInfo_isGoogleApis(android_avdInfo)) {
         mSidebarButtons.addButton(mExtendedUi->googlePlayButton);
         mExtendedUi->googlePlayPage->initialize(
-                mEmulatorWindow->getAdbInterface());
+                mEmulatorWindow->getAdbInterface(),
+                mEmulatorWindow->getAndroidPropertyInterface());
     } else {
         mExtendedUi->googlePlayButton->hide();
     }
