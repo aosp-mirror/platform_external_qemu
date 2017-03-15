@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a464d4c_c46ac729",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/GLEScmImp.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2022,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-15T16:10:21Z",
+      "side": 1,
+      "message": "nit: remove trailing space",
+      "range": {
+        "startLine": 2022,
+        "startChar": 51,
+        "endLine": 2022,
+        "endChar": 52
+      },
+      "revId": "5a4bd5704f4f841804ee898bd150200e4b9c8aa3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
