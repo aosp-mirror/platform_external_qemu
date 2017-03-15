@@ -16,6 +16,24 @@
       "revId": "7a02dacf547906026e905e6713e404c51914853a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d0a7e4be_76b1c193",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 616,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-15T17:34:37Z",
+      "side": 1,
+      "message": "If the user passes a shader invalid for ES (but maybe invalid for desktop), it will set to a bogus string, so it should fail compile + link.",
+      "parentUuid": "ed1e92da_455538ac",
+      "revId": "7a02dacf547906026e905e6713e404c51914853a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
