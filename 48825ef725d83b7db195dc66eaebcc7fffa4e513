@@ -22,6 +22,30 @@
       "revId": "48825ef725d83b7db195dc66eaebcc7fffa4e513",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "de103103_f7d3952f",
+        "filename": "android/android-emu/android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1010055
+      },
+      "writtenOn": "2017-03-16T14:50:49Z",
+      "side": 1,
+      "message": "+1 to bohu\u0027s comment. That shouldn\u0027t be much harder.",
+      "parentUuid": "e2bdd046_d250ee19",
+      "range": {
+        "startLine": 134,
+        "startChar": 12,
+        "endLine": 134,
+        "endChar": 50
+      },
+      "revId": "48825ef725d83b7db195dc66eaebcc7fffa4e513",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
