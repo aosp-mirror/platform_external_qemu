@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d9e48aaf_9d023da0",
+        "filename": "android/android-emu/android/avd/util_wrapper_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-03-16T17:44:18Z",
+      "side": 1,
+      "message": "Current year for new files",
+      "revId": "86aaebbdde562d019dde24d887d4a4842a7e9bdb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
