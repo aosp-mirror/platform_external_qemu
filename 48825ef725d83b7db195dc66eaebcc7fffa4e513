@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e2bdd046_d250ee19",
+        "filename": "android/android-emu/android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-03-16T06:00:10Z",
+      "side": 1,
+      "message": "as siva has mentioned about, can we just talk to the 5037 port directly?\nthe relevant services can be found at aosp/system/core/adb/SERVICES.TXT; the command you want is the \nshell:exit after switching to local transport\n\nthis way, you wont starting/stoping adb server due to version differences",
+      "range": {
+        "startLine": 134,
+        "startChar": 12,
+        "endLine": 134,
+        "endChar": 50
+      },
+      "revId": "48825ef725d83b7db195dc66eaebcc7fffa4e513",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
