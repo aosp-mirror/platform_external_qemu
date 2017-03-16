@@ -1,0 +1,130 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a7a2c095_2980081b",
+        "filename": "android/android-emu/android/hw-sensors.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-03-16T22:22:04Z",
+      "side": 1,
+      "message": "maybe \"magnetic-uncalibrated\", not \"magnetic-field-uncalibrated\"?",
+      "range": {
+        "startLine": 342,
+        "startChar": 41,
+        "endLine": 342,
+        "endChar": 75
+      },
+      "revId": "45eec9393311ec9ff6daa25305822594132bc4b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "988cd863_180edf5c",
+        "filename": "android/android-emu/android/hw-sensors.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-03-16T22:22:04Z",
+      "side": 1,
+      "message": "10 ms",
+      "range": {
+        "startLine": 437,
+        "startChar": 53,
+        "endLine": 437,
+        "endChar": 56
+      },
+      "revId": "45eec9393311ec9ff6daa25305822594132bc4b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62e9b625_1fe9ce1a",
+        "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-03-16T22:22:04Z",
+      "side": 1,
+      "message": "Add { }",
+      "revId": "45eec9393311ec9ff6daa25305822594132bc4b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4d8cf2ef_df3870ea",
+        "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-03-16T22:22:04Z",
+      "side": 1,
+      "message": "Add { }",
+      "revId": "45eec9393311ec9ff6daa25305822594132bc4b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "98ad29a9_dd8bdc20",
+        "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 372,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-03-16T22:22:04Z",
+      "side": 1,
+      "message": "Divide first, then limit to 16?",
+      "range": {
+        "startLine": 368,
+        "startChar": 3,
+        "endLine": 372,
+        "endChar": 5
+      },
+      "revId": "45eec9393311ec9ff6daa25305822594132bc4b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "489d1a96_86460036",
+        "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-03-16T22:22:04Z",
+      "side": 1,
+      "message": "Maybe \"mUpdateIntervalMs \u003c 16000\"?",
+      "range": {
+        "startLine": 79,
+        "startChar": 12,
+        "endLine": 79,
+        "endChar": 30
+      },
+      "revId": "45eec9393311ec9ff6daa25305822594132bc4b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
