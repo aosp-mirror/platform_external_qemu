@@ -1442,7 +1442,7 @@ static void s_glStateQueryTv(bool es2, GLenum pname, T* params, GLStateQueryFunc
     case GL_FRAMEBUFFER_BINDING:
     case GL_READ_FRAMEBUFFER_BINDING:
         getter(pname,&i);
-        *params = ctx->getFBOGlobalName(i);
+        *params = ctx->getFBOLocalName(i);
         break;
     case GL_RENDERBUFFER_BINDING:
         if (ctx->shareGroup().get()) {
@@ -1639,7 +1639,7 @@ GL_APICALL void  GL_APIENTRY glGetBooleanv(GLenum pname, GLboolean* params){
     case GL_FRAMEBUFFER_BINDING:
     case GL_READ_FRAMEBUFFER_BINDING:
         s_glGetIntegerv_wrapper(pname,&i);
-        TO_GLBOOL(params,ctx->getFBOGlobalName(i));
+        TO_GLBOOL(params,ctx->getFBOLocalName(i));
         break;
     case GL_RENDERBUFFER_BINDING:
         if (ctx->shareGroup().get()) {
