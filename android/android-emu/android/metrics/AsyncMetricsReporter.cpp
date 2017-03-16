@@ -43,6 +43,14 @@ void AsyncMetricsReporter::reportConditional(ConditionalCallback callback) {
     }
 }
 
+void AsyncMetricsReporter::finishPendingReports() {
+    // Send a 'fake' callback that reports nothing, so we can be sure that if
+    // it's out of the queue then all pending callbacks were processed.
+    mCallbackQueue.send(
+                [](android_studio::AndroidStudioEvent*) { return false; });
+    mCallbackQueue.waitForEmpty();
+}
+
 void AsyncMetricsReporter::worker() {
     while (auto cb = mCallbackQueue.receive()) {
         if (!*cb) {

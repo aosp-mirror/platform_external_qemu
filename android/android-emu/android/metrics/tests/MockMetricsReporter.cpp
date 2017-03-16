@@ -42,5 +42,12 @@ void MockMetricsReporter::reportConditional(
     }
 }
 
+void MockMetricsReporter::finishPendingReports() {
+    ++mFinishPendingReportsCallsCount;
+    if (mOnFinishPendingReports) {
+        mOnFinishPendingReports();
+    }
+}
+
 }  // namespace metrics
 }  // namespace android

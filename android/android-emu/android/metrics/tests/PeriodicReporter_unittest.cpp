@@ -50,7 +50,10 @@ public:
         PeriodicReporter::start(&mReporter, &mLooper);
     }
 
-    void TearDown() { PeriodicReporter::stop(); }
+    void TearDown() {
+        mReporter.mOnReportConditional = {};
+        PeriodicReporter::stop();
+    }
 };
 
 }  // namespace
@@ -62,6 +65,17 @@ TEST_F(PeriodicReporterTest, startStop) {
     PeriodicReporter::stop();
     PeriodicReporter::get();
     PeriodicReporter::start(&mReporter, &mLooper);
+}
+
+TEST_F(PeriodicReporterTest, stop) {
+    PeriodicReporter::get().addTask(
+            100, [](android_studio::AndroidStudioEvent*) { return true; });
+
+    EXPECT_EQ(0, mReporter.mFinishPendingReportsCallsCount);
+    EXPECT_EQ(0, mReporter.mReportConditionalCallsCount);
+    PeriodicReporter::stop();
+    EXPECT_EQ(1, mReporter.mFinishPendingReportsCallsCount);
+    EXPECT_EQ(1, mReporter.mReportConditionalCallsCount);
 }
 
 TEST_F(PeriodicReporterTest, addTask) {
@@ -92,11 +106,11 @@ TEST_F(PeriodicReporterTest, addCancelableTask) {
     EXPECT_EQ(2U, mLooper.activeTimers().size());
 
     task1.reset();
-    EXPECT_EQ(1U, mLooper.timers().size());
+    EXPECT_EQ(1U, mLooper.activeTimers().size());
     task2.reset();
-    EXPECT_EQ(1U, mLooper.timers().size());
+    EXPECT_EQ(1U, mLooper.activeTimers().size());
     task3.reset();
-    EXPECT_EQ(0U, mLooper.timers().size());
+    EXPECT_EQ(0U, mLooper.activeTimers().size());
 }
 
 TEST_F(PeriodicReporterTest, addTaskMixed) {
@@ -246,10 +260,11 @@ TEST_F(PeriodicReporterTest, taskTokenOutlivesReporter) {
     // reset nor when we try running tasks again or resetting the token
     PeriodicReporter::stop();
     EXPECT_TRUE(task);
+    EXPECT_EQ(2, mReporter.mReportConditionalCallsCount);
 
     mSystem.setUnixTimeUs(200000);
     mLooper.runOneIterationWithDeadlineMs(200);
-    EXPECT_EQ(1, mReporter.mReportConditionalCallsCount);
+    EXPECT_EQ(2, mReporter.mReportConditionalCallsCount);
 
     task.reset();
 }
