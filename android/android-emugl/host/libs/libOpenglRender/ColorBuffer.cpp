@@ -413,10 +413,14 @@ bool ColorBuffer::bindToRenderbuffer() {
     return true;
 }
 
-bool ColorBuffer::post(float rotation, float dx, float dy) {
+GLuint ColorBuffer::scale() {
+    ScopedHelperContext context(m_helper);
+    return m_resizer->update(m_tex);
+}
+
+bool ColorBuffer::post(GLuint tex, float rotation, float dx, float dy) {
     // NOTE: Do not call m_helper->setupContext() here!
-    return m_helper->getTextureDraw()->draw(m_resizer->update(m_tex), rotation,
-                                            dx, dy);
+    return m_helper->getTextureDraw()->draw(tex, rotation, dx, dy);
 }
 
 void ColorBuffer::readback(unsigned char* img) {
