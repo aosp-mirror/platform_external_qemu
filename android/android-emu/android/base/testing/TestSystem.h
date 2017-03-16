@@ -19,6 +19,7 @@
 #include "android/base/system/System.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/base/threads/Thread.h"
+#include "android/utils/path.h"
 
 namespace android {
 namespace base {
@@ -358,6 +359,16 @@ public:
 
 private:
     std::string toTempRoot(StringView path) const {
+        // Check if this is a relative path that we resolve from the current
+        // directory
+        if (path.size() > 1 && path[0] == '.') {
+           auto currdir = getCurrentDirectory();
+           // Let's not get stuck if the current directory is relative
+           if (currdir.size() > 1 && currdir[0] != '.') {
+             return toTempRoot(currdir + PATH_SEP + path.c_str());
+           }
+        }
+
         // mTempRootPrefix ends with a dir separator, ignore it for comparison.
         StringView prefix(mTempRootPrefix.c_str(), mTempRootPrefix.size() - 1);
         if (prefix.size() <= path.size() &&
@@ -367,7 +378,10 @@ private:
             // Avoid prepending prefix if it's already there.
             return path;
         } else {
-            return mTempRootPrefix + path.c_str();
+          // Resolve all the ../.. and ././.
+          auto parts = PathUtils::decompose(mTempRootPrefix + path.c_str());
+          PathUtils::simplifyComponents(&parts);
+          return PathUtils::recompose(parts);
         }
     }
 
