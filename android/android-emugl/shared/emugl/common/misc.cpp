@@ -17,6 +17,9 @@
 static int s_apiLevel = -1;
 static bool s_isPhoneApi = false;
 
+static int s_glesMajorVersion = 2;
+static int s_glesMinorVersion = 0;
+
 void emugl::setAvdInfo(bool phone, int apiLevel) {
     s_isPhoneApi = phone;
     s_apiLevel = apiLevel;
@@ -25,4 +28,14 @@ void emugl::setAvdInfo(bool phone, int apiLevel) {
 void emugl::getAvdInfo(bool* phone, int* apiLevel) {
     if (phone) *phone = s_isPhoneApi;
     if (apiLevel) *apiLevel = s_apiLevel;
+}
+
+void emugl::setGlesVersion(int maj, int min) {
+    s_glesMajorVersion = maj;
+    s_glesMinorVersion = min;
+}
+
+void emugl::getGlesVersion(int* maj, int* min) {
+    if (maj) *maj = s_glesMajorVersion;
+    if (min) *min = s_glesMinorVersion;
 }
