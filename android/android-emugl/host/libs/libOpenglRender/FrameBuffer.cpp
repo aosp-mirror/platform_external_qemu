@@ -558,6 +558,13 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
         }
         unbind_locked();
     }
+    if (success) {
+        bool bindSuccess = bind_locked();
+        assert(bindSuccess);
+        (void)bindSuccess;
+        s_gles2.glViewport(0, 0, fbw * dpr, fbh * dpr);
+        unbind_locked();
+    }
 
     return success;
 }
@@ -1231,6 +1238,7 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
     m_lastPostedColorBuffer = p_colorbuffer;
 
     if (m_subWin) {
+        GLuint tex = c->second.cb->scale();
         // bind the subwindow eglSurface
         if (needLockAndBind && !bindSubwin_locked()) {
             ERR("FrameBuffer::post(): eglMakeCurrent failed\n");
@@ -1259,7 +1267,7 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
         //
         // render the color buffer to the window
         //
-        ret = (*c).second.cb->post(m_zRot, dx, dy);
+        ret = (*c).second.cb->post(tex, m_zRot, dx, dy);
         if (ret) {
             s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
         }
