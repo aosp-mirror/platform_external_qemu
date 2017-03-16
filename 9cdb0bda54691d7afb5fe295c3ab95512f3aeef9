@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cb54a742_a761caa9",
+        "filename": "slirp/slirp.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-03-16T21:55:51Z",
+      "side": 1,
+      "message": "What does this change do?",
+      "revId": "9cdb0bda54691d7afb5fe295c3ab95512f3aeef9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
