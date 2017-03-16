@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "97fe93d7_d2c03a96",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1043845
+      },
+      "writtenOn": "2017-03-16T17:46:58Z",
+      "side": 1,
+      "message": "Bug: http://b.android.com/233828",
+      "revId": "48825ef725d83b7db195dc66eaebcc7fffa4e513",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e2bdd046_d250ee19",
         "filename": "android/android-emu/android/metrics/AdbLivenessChecker.cpp",
         "patchSetId": 5
@@ -157,6 +174,30 @@
       "side": 1,
       "message": "As Huihong mentioned, lets discuss that in a separate CL or email. This CL is simply to use the same adb.\n\nDan - that is the adb client interface and is what Studio uses.",
       "parentUuid": "8b0cc0b9_2c0caa35",
+      "range": {
+        "startLine": 134,
+        "startChar": 12,
+        "endLine": 134,
+        "endChar": 50
+      },
+      "revId": "48825ef725d83b7db195dc66eaebcc7fffa4e513",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1cfc67b3_0c5169e0",
+        "filename": "android/android-emu/android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1043845
+      },
+      "writtenOn": "2017-03-16T17:46:58Z",
+      "side": 1,
+      "message": "Ah, okay. I\u0027d hope it\u0027s stable then :)",
+      "parentUuid": "23a1ba80_82eda254",
       "range": {
         "startLine": 134,
         "startChar": 12,
