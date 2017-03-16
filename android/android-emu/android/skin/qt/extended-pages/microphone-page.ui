@@ -126,21 +126,11 @@
    <property name="text">
     <string>VOICE ASSIST</string>
    </property>
-   <property name="icon">
-    <iconset resource="../resources.qrc">
-     <normaloff>:/dark/mic_button</normaloff>:/dark/mic_button</iconset>
-   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
-   <property name="themeIconName" stdset="0">
-    <string>mic_button</string>
-   </property>
    <property name="ColorGroup" stdset="0">
-    <string>Tool</string>
-   </property>
-   <property name="themeIconName_disabled" stdset="0">
-    <string>mic_button_disabled</string>
+    <string>Button</string>
    </property>
    <property name="report_metrics" stdset="0">
     <bool>false</bool>
@@ -168,21 +158,11 @@
    <property name="text">
     <string>HEADSET HOOK</string>
    </property>
-   <property name="icon">
-    <iconset resource="../resources.qrc">
-     <normaloff>:/dark/call_end</normaloff>:/dark/call_end</iconset>
-   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
-   <property name="themeIconName" stdset="0">
-    <string>call_end</string>
-   </property>
    <property name="ColorGroup" stdset="0">
-    <string>Tool</string>
-   </property>
-   <property name="themeIconName_disabled" stdset="0">
-    <string>call_end_disabled</string>
+    <string>Button</string>
    </property>
    <property name="report_metrics" stdset="0">
     <bool>false</bool>
