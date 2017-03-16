@@ -142,6 +142,30 @@
       "revId": "48825ef725d83b7db195dc66eaebcc7fffa4e513",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "23a1ba80_82eda254",
+        "filename": "android/android-emu/android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1010055
+      },
+      "writtenOn": "2017-03-16T16:36:13Z",
+      "side": 1,
+      "message": "As Huihong mentioned, lets discuss that in a separate CL or email. This CL is simply to use the same adb.\n\nDan - that is the adb client interface and is what Studio uses.",
+      "parentUuid": "8b0cc0b9_2c0caa35",
+      "range": {
+        "startLine": 134,
+        "startChar": 12,
+        "endLine": 134,
+        "endChar": 50
+      },
+      "revId": "48825ef725d83b7db195dc66eaebcc7fffa4e513",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
