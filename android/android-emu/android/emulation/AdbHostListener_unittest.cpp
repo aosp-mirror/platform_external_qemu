@@ -109,7 +109,7 @@ struct TestAdbGuestAgent : public AdbGuestAgent {
         : mId(id), mPrefix(StringFormat("[guest %d] ", id)) {}
 
     virtual void onHostConnection(ScopedSocket&& socket) override {
-        mSocket = socket;
+        mSocket = std::move(socket);
 
         uint32_t id = 0;
         ssize_t len = android::base::socketRecv(mSocket.get(), &id, sizeof(id));

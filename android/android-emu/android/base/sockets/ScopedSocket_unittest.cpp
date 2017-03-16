@@ -14,6 +14,8 @@
 
 #include <gtest/gtest.h>
 
+#include <utility>
+
 namespace android {
 namespace base {
 
@@ -34,6 +36,9 @@ TEST(ScopedSocket, DefaultConstructor) {
 TEST(ScopedSocket, Constructor) {
     ScopedSocket f(OpenNull());
     EXPECT_TRUE(f.valid());
+
+    ScopedSocket f2(-1);
+    EXPECT_FALSE(f2.valid());
 }
 
 TEST(ScopedSocket, Release) {
@@ -42,7 +47,7 @@ TEST(ScopedSocket, Release) {
     int fd = f.release();
     EXPECT_FALSE(f.valid());
     EXPECT_NE(-1, fd);
-    ::close(fd);
+    socketClose(fd);
 }
 
 TEST(ScopedSocket, Reset) {
@@ -67,6 +72,19 @@ TEST(ScopedSocket, Swap) {
     EXPECT_FALSE(f1.valid());
     EXPECT_TRUE(f2.valid());
     f1.swap(&f2);
+    EXPECT_FALSE(f2.valid());
+    EXPECT_TRUE(f1.valid());
+    swap(f1, f2);
+    EXPECT_FALSE(f1.valid());
+    EXPECT_TRUE(f2.valid());
+}
+
+TEST(ScopedSocket, Move) {
+    ScopedSocket f1(OpenNull());
+    ScopedSocket f2(std::move(f1));
+    EXPECT_FALSE(f1.valid());
+    EXPECT_TRUE(f2.valid());
+    f1 = std::move(f2);
     EXPECT_FALSE(f2.valid());
     EXPECT_TRUE(f1.valid());
 }
