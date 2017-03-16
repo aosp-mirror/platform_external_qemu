@@ -22,6 +22,30 @@
       "revId": "9c6d3e2a0dcd99071f63c3cf48b365c7deaa1604",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "92cef955_0e62bd9c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 565,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-16T21:54:56Z",
+      "side": 1,
+      "message": "They bind to different contexts lol. We need to initialize the viewport for both of them.",
+      "parentUuid": "61bb2ab5_1a881609",
+      "range": {
+        "startLine": 565,
+        "startChar": 0,
+        "endLine": 565,
+        "endChar": 55
+      },
+      "revId": "9c6d3e2a0dcd99071f63c3cf48b365c7deaa1604",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
