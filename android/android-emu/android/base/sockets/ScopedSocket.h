@@ -1,4 +1,4 @@
-// Copyright 2014 The Android Open Source Project
+// Copyright 2014-2017 The Android Open Source Project
 //
 // This software is licensed under the terms of the GNU General Public
 // License version 2, as published by the Free Software Foundation, and
@@ -11,20 +11,23 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
 #include "android/base/sockets/SocketUtils.h"
+
+#include <utility>
 
 namespace android {
 namespace base {
 
 class ScopedSocket {
 public:
-    ScopedSocket() : mSocket(-1) {}
+    constexpr ScopedSocket() = default;
+    constexpr ScopedSocket(int socket) : mSocket(socket) {}
+    ScopedSocket(ScopedSocket&& other) : mSocket(other.release()) {}
+    ~ScopedSocket() { close(); }
 
-    ScopedSocket(int socket) : mSocket(socket) {}
-
-    ~ScopedSocket() {
-        close();
+    ScopedSocket& operator=(ScopedSocket&& other) {
+        reset(other.release());
+        return *this;
     }
 
     bool valid() const { return mSocket >= 0; }
@@ -32,9 +35,8 @@ public:
     int get() const { return mSocket; }
 
     void close() {
-        if (mSocket >= 0) {
-            socketClose(mSocket);
-            mSocket = -1;
+        if (valid()) {
+            socketClose(release());
         }
     }
 
@@ -45,22 +47,21 @@ public:
     }
 
     void reset(int socket) {
-        int oldSocket = mSocket;
+        close();
         mSocket = socket;
-        if (oldSocket >= 0) {
-            socketClose(oldSocket);
-        }
     }
 
     void swap(ScopedSocket* other) {
-        int tmp = mSocket;
-        mSocket = other->mSocket;
-        other->mSocket = tmp;
+        std::swap(mSocket, other->mSocket);
     }
 
 private:
-    int mSocket;
+    int mSocket = -1;
 };
+
+inline void swap(ScopedSocket& one, ScopedSocket& two) {
+    one.swap(&two);
+}
 
 }  // namespace base
 }  // namespace android
