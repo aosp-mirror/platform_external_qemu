@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "94f001f4_6058f811",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-16T21:58:52Z",
+      "side": 1,
+      "message": "nit: remove empty line?",
+      "revId": "b84168fd8e3373880194f145504f9439cf750b6a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
