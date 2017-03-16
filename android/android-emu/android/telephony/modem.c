@@ -19,6 +19,7 @@
 #include "android/telephony/sysdeps.h"
 
 #include "android/emulation/bufprint_config_dirs.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/network/constants.h"
 #include "android/utils/aconfig-file.h"
 #include "android/utils/bufprint.h"
@@ -2217,7 +2218,13 @@ BadCommand:
 static const char*
 handleQueryPDPContext( const char* cmd, AModem modem )
 {
+    /* WiFi uses a different gateway because there is NAT involved to get
+     * both WiFi and radio networks to coexist on the single ethernet connection
+     * connecting the guest to the outside world */
+    const char* gateway = feature_is_enabled(kFeature_Wifi) ? "192.168.200.1"
+                                                            : "10.0.2.15";
     int  nn;
+
     amodem_begin_line(modem);
     for (nn = 0; nn < MAX_DATA_CONTEXTS; nn++) {
         ADataContext  data = modem->data_contexts + nn;
@@ -2230,7 +2237,7 @@ handleQueryPDPContext( const char* cmd, AModem modem )
                          /* Note: For now, hard-code the IP address of our
                           *       network interface
                           */
-                         data->type == A_DATA_IP ? "10.0.2.15" : "");
+                         data->type == A_DATA_IP ? gateway : "");
     }
     return amodem_end_line(modem);
 }
