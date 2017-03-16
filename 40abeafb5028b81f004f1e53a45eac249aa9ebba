@@ -22,6 +22,30 @@
       "revId": "40abeafb5028b81f004f1e53a45eac249aa9ebba",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2939e43f_db07ac78",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2202,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-03-16T18:02:14Z",
+      "side": 1,
+      "message": "Yeah that sounds like a good idea. Since this change is already merged in emu-master-dev I\u0027d like to submit this as is and then make another CL with that change. Then CP that change over here.",
+      "parentUuid": "73945675_13bb2063",
+      "range": {
+        "startLine": 2202,
+        "startChar": 26,
+        "endLine": 2202,
+        "endChar": 59
+      },
+      "revId": "40abeafb5028b81f004f1e53a45eac249aa9ebba",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
