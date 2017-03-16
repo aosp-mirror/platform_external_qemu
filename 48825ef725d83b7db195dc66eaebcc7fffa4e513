@@ -94,6 +94,30 @@
       "revId": "48825ef725d83b7db195dc66eaebcc7fffa4e513",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9abf77c_724f92af",
+        "filename": "android/android-emu/android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-16T16:13:22Z",
+      "side": 1,
+      "message": "big -1 to this. AdbLivenessChecker checks if any user \"adb xxx\" command would work, not that the guest\u0027s adb is up. Please don\u0027t change to to a raw write",
+      "parentUuid": "de103103_f7d3952f",
+      "range": {
+        "startLine": 134,
+        "startChar": 12,
+        "endLine": 134,
+        "endChar": 50
+      },
+      "revId": "48825ef725d83b7db195dc66eaebcc7fffa4e513",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
