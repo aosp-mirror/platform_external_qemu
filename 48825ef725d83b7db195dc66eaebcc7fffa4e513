@@ -70,6 +70,30 @@
       "revId": "48825ef725d83b7db195dc66eaebcc7fffa4e513",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b05571bb_c61e774d",
+        "filename": "android/android-emu/android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1043845
+      },
+      "writtenOn": "2017-03-16T16:09:53Z",
+      "side": 1,
+      "message": "+jmgao: is that stable?",
+      "parentUuid": "8f21718d_b2ab80ad",
+      "range": {
+        "startLine": 134,
+        "startChar": 12,
+        "endLine": 134,
+        "endChar": 50
+      },
+      "revId": "48825ef725d83b7db195dc66eaebcc7fffa4e513",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
