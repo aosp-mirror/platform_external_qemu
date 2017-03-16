@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "11530f43_b739ba8c",
+        "filename": "android/android-emu/android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-16T15:17:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "51a241e6_092fc9a0",
+      "range": {
+        "startLine": 117,
+        "startChar": 4,
+        "endLine": 117,
+        "endChar": 15
+      },
+      "revId": "310899d5e1861af6ac72683e0e076349ba0e4788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e68a33cf_b5722c4f",
         "filename": "android/android-emu/android/metrics/AdbLivenessChecker.cpp",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "033bc8cf_03cce884",
+        "filename": "android/android-emu/android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-16T15:17:02Z",
+      "side": 1,
+      "message": "Yuri, I checked that before uploading. runAdbCommand() is async call. If we use that, it will involve more changes, since we are doing blocking calls here.",
+      "parentUuid": "e68a33cf_b5722c4f",
+      "range": {
+        "startLine": 133,
+        "startChar": 4,
+        "endLine": 135,
+        "endChar": 35
+      },
+      "revId": "310899d5e1861af6ac72683e0e076349ba0e4788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ce532423_8547dc31",
         "filename": "android/android-emu/android/metrics/metrics.cpp",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2017-03-14T19:57:15Z",
       "side": 1,
       "message": "you can actually have a check here and don\u0027t do anything if metrics are disabled\nthe only useful thing adb liveness checker does is reporting metrics; if metrics are disabled then it shouldn\u0027t even be running.",
+      "range": {
+        "startLine": 103,
+        "startChar": 3,
+        "endLine": 110,
+        "endChar": 42
+      },
+      "revId": "310899d5e1861af6ac72683e0e076349ba0e4788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69dc2a79_14506fa3",
+        "filename": "android/android-emu/android/metrics/metrics.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-16T15:17:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ce532423_8547dc31",
       "range": {
         "startLine": 103,
         "startChar": 3,
