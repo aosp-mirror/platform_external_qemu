@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "737ab0d8_8a42960c",
+        "filename": "android/android-emu/android/avd/util_wrapper.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-16T18:33:14Z",
+      "side": 1,
+      "message": "nit: this one isn\u0027t needed anymore",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 42
+      },
+      "revId": "3a18e72b8378396de18908ba298368940fceffb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
