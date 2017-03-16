@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "b41929b0_d98955cf",
+        "filename": "android/android-emu/android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-16T16:19:13Z",
+      "side": 1,
+      "message": "yes, it\u0027s async, but for the purpose of this class it doesn\u0027t matter: everything that\u0027s following the blocking runCommand() call here would just be moved into the completion callback of the async call. Code here is pretty isolated and doesn\u0027t depend on anything else, so there will be no changes at all, other than cancelling the pending commands in destructor.\nI\u0027m not a big fan of \"let\u0027s do a quick fix now and the proper one later\" unless there\u0027s a clear reason why do we need to have this quick fix out ASAP. In my experience the proper one either never comes, or it takes months",
+      "parentUuid": "033bc8cf_03cce884",
+      "range": {
+        "startLine": 133,
+        "startChar": 4,
+        "endLine": 135,
+        "endChar": 35
+      },
+      "revId": "310899d5e1861af6ac72683e0e076349ba0e4788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ce532423_8547dc31",
         "filename": "android/android-emu/android/metrics/metrics.cpp",
         "patchSetId": 3
