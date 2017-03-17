@@ -57,8 +57,14 @@ public:
     // Returns the automatically detected path to adb
     virtual const std::string& detectedAdbPath() const = 0;
 
+    // Returns the path to adb binary
+    virtual const std::string& adbPath() const = 0;
+
     // Setup the port this interface is connected to
     virtual void setSerialNumberPort(int port) = 0;
+
+    // Returns the serial string
+    virtual const std::string& serialString() const = 0;
 
     // Runs an adb command asynchronously.
     // |args| - the arguments to pass to adb, i.e. "shell dumpsys battery"

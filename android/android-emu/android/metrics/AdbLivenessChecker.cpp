@@ -30,32 +30,28 @@ using android::base::System;
 using android::ConfigDirs;
 using std::shared_ptr;
 
-static const char kAdbExecutableBaseName[] = "adb";
 static const char kAdbLivenessKey[] = "adb_liveness";
 static const int kMaxAttempts = 3;
-static const char kPlatformToolsSubdir[] = "platform-tools";
 
 // static
 AdbLivenessChecker::Ptr AdbLivenessChecker::create(
+        android::emulation::AdbInterface* adb,
         android::base::Looper* looper,
         MetricsReporter* reporter,
         android::base::StringView emulatorName,
         android::base::Looper::Duration checkIntervalMs) {
-    auto inst = Ptr(new AdbLivenessChecker(looper, reporter, emulatorName,
+    auto inst = Ptr(new AdbLivenessChecker(adb, looper, reporter, emulatorName,
                                            checkIntervalMs));
     return inst;
 }
 
 AdbLivenessChecker::AdbLivenessChecker(
+        android::emulation::AdbInterface* adb,
         android::base::Looper* looper,
         MetricsReporter* reporter,
         android::base::StringView emulatorName,
         android::base::Looper::Duration checkIntervalMs)
-    : mAdbPath(PathUtils::join(
-              ConfigDirs::getSdkRootDirectory(),
-              PathUtils::join(
-                      kPlatformToolsSubdir,
-                      PathUtils::toExecutableName(kAdbExecutableBaseName)))),
+    : mAdb(adb),
       mLooper(looper),
       mReporter(reporter),
       mEmulatorName(emulatorName),
@@ -73,6 +69,12 @@ AdbLivenessChecker::AdbLivenessChecker(
 }
 
 AdbLivenessChecker::~AdbLivenessChecker() {
+    if (mDevicesCommand) {
+        mDevicesCommand->cancel();
+    }
+    if (mShellExitCommand) {
+        mShellExitCommand->cancel();
+    }
     stop();
 }
 
@@ -95,6 +97,7 @@ bool AdbLivenessChecker::adbCheckRequest() {
     }
     mIsCheckRunning = true;
 
+#if 0
     // NOTE: Capture a shared_ptr to |this| to guarantee object lifetime while
     // the parallel task is running.
     auto weakSelf = std::weak_ptr<AdbLivenessChecker>(shared_from_this());
@@ -113,12 +116,21 @@ bool AdbLivenessChecker::adbCheckRequest() {
         mIsCheckRunning = false;
         return false;
     }
+#endif
+
+    runCheckNonBlocking();
+
     return true;
 }
 
 void AdbLivenessChecker::runCheckBlocking(CheckResult* outResult) const {
     System::ProcessExitCode exitCode;
-    const std::vector<std::string> adbServerAliveCmd = {mAdbPath, "devices"};
+    const std::string& adbPath = mAdb->adbPath();
+    std::string serial = mAdb->serialString();
+    if (serial.empty())
+        serial = mEmulatorName;
+
+    const std::vector<std::string> adbServerAliveCmd = {adbPath, "devices"};
     if (!System::get()->runCommand(
                 adbServerAliveCmd,
                 System::RunOptions::WaitForCompletion |
@@ -130,7 +142,7 @@ void AdbLivenessChecker::runCheckBlocking(CheckResult* outResult) const {
     }
 
     const std::vector<std::string> emulatorAliveCmd = {
-            mAdbPath, "-s", mEmulatorName, "shell", "exit"};
+            adbPath, "-s", serial, "shell", "exit"};
     if (!System::get()->runCommand(
                 emulatorAliveCmd,
                 System::RunOptions::WaitForCompletion |
@@ -142,6 +154,40 @@ void AdbLivenessChecker::runCheckBlocking(CheckResult* outResult) const {
     }
 
     *outResult = AdbLivenessChecker::CheckResult::kOnline;
+}
+
+void AdbLivenessChecker::runCheckNonBlocking() {
+    if (mDevicesCommand || mShellExitCommand) {
+        // already in progress
+        return;
+    }
+
+    mDevicesCommand =
+        mAdb->runAdbCommand(
+            {"devices"},
+            [this](const android::emulation::OptionalAdbCommandResult& result) {
+                if (!result || result->exit_code) {
+                    reportCheckResult(CheckResult::kFailureAdbServerDead);
+                } else {
+                    mShellExitCommand = mAdb->runAdbCommand(
+                        {"shell", "exit"},
+                        [this](const android::emulation::OptionalAdbCommandResult& result2) {
+                            if (!result2 || result2->exit_code) {
+                                reportCheckResult(CheckResult::kFailureEmulatorDead);
+                            } else {
+                                reportCheckResult(CheckResult::kOnline);
+                            }
+
+                            mShellExitCommand.reset();
+                        },
+                        mCheckIntervalMs / 3,
+                        false);
+                }
+
+                mDevicesCommand.reset();
+            },
+            mCheckIntervalMs / 3,
+            false);
 }
 
 void AdbLivenessChecker::reportCheckResult(const CheckResult& result) {
