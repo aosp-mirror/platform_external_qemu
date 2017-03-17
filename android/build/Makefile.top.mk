@@ -291,6 +291,8 @@ ifeq ($(BUILD_TARGET_OS),darwin)
       ForceFeedback \
       IOKit \
       QTKit \
+      VideoDecodeAcceleration \
+      VideoToolbox
 
   QEMU_SYSTEM_LDLIBS += $(QEMU_SYSTEM_FRAMEWORKS:%=-Wl,-framework,%)
 endif
