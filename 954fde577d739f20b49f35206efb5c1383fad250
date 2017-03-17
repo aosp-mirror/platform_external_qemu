@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "a042a2b0_60d8fb0a",
+        "filename": "android/android-emu/android/constants/IntentConstants.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-17T16:27:53Z",
+      "side": 1,
+      "message": "nit: could you please use char[] instead of char* here? It\u0027s usually slightly better to have it as an array (e.g. for quick size calculation)",
+      "range": {
+        "startLine": 18,
+        "startChar": 20,
+        "endLine": 18,
+        "endChar": 21
+      },
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e9fe0701_5e6bb19a",
         "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
         "patchSetId": 1
@@ -13,6 +36,75 @@
       "writtenOn": "2017-03-15T17:26:42Z",
       "side": 1,
       "message": "Insert a new line before this",
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb8c8b84_564f8eef",
+        "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-17T16:27:53Z",
+      "side": 1,
+      "message": "nit: please sort alphabetically",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 42
+      },
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d8bd12a_7dd778fe",
+        "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-17T16:27:53Z",
+      "side": 1,
+      "message": "it\u0027s better not to add any usings to header files, as those would spread out with #includes",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 28
+      },
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7ac40c63_0cb12cbb",
+        "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-17T16:27:53Z",
+      "side": 1,
+      "message": "1. AndroidPropertyThread?\n2. Please take a look at FunctorThread and android::base::async() to see if those could be enough for your task",
+      "range": {
+        "startLine": 39,
+        "startChar": 2,
+        "endLine": 45,
+        "endChar": 6
+      },
       "revId": "954fde577d739f20b49f35206efb5c1383fad250",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -42,6 +134,167 @@
     },
     {
       "key": {
+        "uuid": "1f4c6c6e_d4445cb2",
+        "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-17T16:27:53Z",
+      "side": 1,
+      "message": "nit: android::base::StringView is a more convenient interface vs raw char*",
+      "range": {
+        "startLine": 77,
+        "startChar": 33,
+        "endLine": 78,
+        "endChar": 49
+      },
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ee324d25_d52ab762",
+        "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-17T16:27:53Z",
+      "side": 1,
+      "message": "nit: |outValue| ?",
+      "range": {
+        "startLine": 79,
+        "startChar": 46,
+        "endLine": 79,
+        "endChar": 55
+      },
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3e36324d_10ecf748",
+        "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-17T16:27:53Z",
+      "side": 1,
+      "message": "std::pair\u003cstd::string, std::string\u003e parseProperty(buff) ?",
+      "range": {
+        "startLine": 90,
+        "startChar": 11,
+        "endLine": 90,
+        "endChar": 15
+      },
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0f071149_b4d3e801",
+        "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-17T16:27:53Z",
+      "side": 1,
+      "message": "why is it static? can you make it an instance object in the pipe?",
+      "range": {
+        "startLine": 95,
+        "startChar": 4,
+        "endLine": 97,
+        "endChar": 25
+      },
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d8cef1af_7780533d",
+        "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-17T16:27:53Z",
+      "side": 1,
+      "message": "Can you check if there\u0027s a way to use android::base::MessageChannel\u003c\u003e here instead of sockets?",
+      "range": {
+        "startLine": 100,
+        "startChar": 25,
+        "endLine": 100,
+        "endChar": 32
+      },
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8f1094e7_75e3309b",
+        "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-17T16:27:53Z",
+      "side": 1,
+      "message": "it looks like what you need here is a separate \"waiter\" class that would implement the actual waiting in a separate thread.\nYou could implement it in a separate file as a non-static class, then create an instance of this class when opening a property pipe, and use that single instance to perform waits:\n\nclass PropertyWaiter {...};\n\nclass PropertyPipe {\n    PropertyPipe(unique_ptr\u003cPropertyWaiter\u003e\u0026\u0026) { ... }\n\n    class Service {\n        PropertyPipe* create() { return new PropertyPipe(new PropertyWaiter()); }\n    };\n};\n\nThis way every class has a single function and doesn\u0027t depend on some hidden static state.\nalso, static members usually make it very difficult to understand how it works with multiple threads",
+      "range": {
+        "startLine": 95,
+        "startChar": 0,
+        "endLine": 103,
+        "endChar": 46
+      },
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa557981_82bfe862",
+        "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-17T16:27:53Z",
+      "side": 1,
+      "message": "there should be no globals with dynamic initialization - they are too easy to get wrong. Use android::base::LazyInstance\u003c\u003e if you need one, or, better, change the code to not create any globals at all",
+      "range": {
+        "startLine": 103,
+        "startChar": 11,
+        "endLine": 103,
+        "endChar": 27
+      },
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a483ecb2_2bbc275f",
         "filename": "android/android-emu/android/utils/debug.h",
         "patchSetId": 1
@@ -53,6 +306,24 @@
       "writtenOn": "2017-03-15T17:26:42Z",
       "side": 1,
       "message": "Looks like the tab alignment changed quite a lot. Is this the new style we prefer?",
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "287bad71_d8381cb0",
+        "filename": "android/android-emu/android/utils/debug.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-17T16:27:53Z",
+      "side": 1,
+      "message": "we prefer what clang-format produces - just to have one less thing to do manually",
+      "parentUuid": "a483ecb2_2bbc275f",
       "revId": "954fde577d739f20b49f35206efb5c1383fad250",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
