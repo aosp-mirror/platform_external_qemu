@@ -322,6 +322,17 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     connect(&mWheelScrollTimer, SIGNAL(timeout()), this,
             SLOT(wheelScrollTimeout()));
 
+    // set custom ADB path if saved
+    bool autoFindAdb =
+            settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool();
+    if (!autoFindAdb) {
+        QString adbPath = settings.value(Ui::Settings::ADB_PATH, "").toString();
+        if (!adbPath.isEmpty()) {
+            adbPath = QDir::toNativeSeparators(adbPath);
+            mAdbInterface->setCustomAdbPath(adbPath.toStdString());
+        }
+    }
+
     // moved from android_metrics_start() in metrics.cpp
     android_metrics_start_adb_liveness_checker(mAdbInterface.get());
 }
