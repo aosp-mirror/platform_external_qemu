@@ -276,7 +276,7 @@ static void fillAvdMetrics(android_studio::AndroidStudioEvent* event) {
                 android_cmdLineOptions->kernel != nullptr);
     fillAvdFileInfo(
             eventAvdInfo, android_studio::EmulatorAvdFile::SYSTEM,
-            android_hw->disk_systemPartition_path
+            (android_hw->disk_systemPartition_path && android_hw->disk_systemPartition_path[0])
                     ? android_hw->disk_systemPartition_path
                     : android_hw->disk_systemPartition_initPath,
             (android_cmdLineOptions->system || android_cmdLineOptions->sysdir));
