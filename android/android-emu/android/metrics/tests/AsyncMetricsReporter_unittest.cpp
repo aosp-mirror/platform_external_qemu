@@ -110,3 +110,23 @@ TEST_F(AsyncMetricsReporterTest, reportConditional) {
     flushEvents();
     EXPECT_EQ(1, mWriter->mWriteCallsCount);
 }
+
+TEST_F(AsyncMetricsReporterTest, finishPendingReports) {
+    const int count = 10;
+    int reported = 0;
+    for (int i = 0; i < count; ++i) {
+        mReporter->report([&reported](android_studio::AndroidStudioEvent*) {
+            ++reported;
+        });
+        mReporter->reportConditional([&reported](android_studio::AndroidStudioEvent*) {
+            ++reported;
+            return true;
+        });
+        mReporter->reportConditional([&reported](android_studio::AndroidStudioEvent*) {
+            ++reported;
+            return false;
+        });
+    }
+    mReporter->finishPendingReports();
+    EXPECT_EQ(3 * count, reported);
+}
