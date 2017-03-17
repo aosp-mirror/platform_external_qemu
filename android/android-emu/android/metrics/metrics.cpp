@@ -260,7 +260,7 @@ static void fillAvdMetrics(android_studio::AndroidStudioEvent* event) {
                 android_cmdLineOptions->kernel != nullptr);
     fillAvdFileInfo(
             eventAvdInfo, android_studio::EmulatorAvdFile::SYSTEM,
-            (android_hw->disk_systemPartition_path && android_hw->disk_systemPartition_path[0])
+            android_hw->disk_systemPartition_path
                     ? android_hw->disk_systemPartition_path
                     : android_hw->disk_systemPartition_initPath,
             (android_cmdLineOptions->system || android_cmdLineOptions->sysdir));
@@ -295,7 +295,7 @@ void android_metrics_report_common_info(bool openglAlive) {
             fillGuestGlMetrics(event);
         }
 
-        for (const GpuInfo& gpu : globalGpuInfoList().infos) {
+        for (const GpuInfo& gpu : GpuInfoList::get()->infos) {
             auto hostGpu = event->mutable_emulator_details()->add_host_gpu();
             hostGpu->set_device_id(gpu.device_id);
             hostGpu->set_make(gpu.make);

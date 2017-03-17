@@ -72,8 +72,6 @@ public:
 
     virtual ~MetricsReporter();
     virtual void reportConditional(ConditionalCallback callback) = 0;
-    // Wait for all pending reports to be finished.
-    virtual void finishPendingReports() = 0;
 
     void report(Callback callback);
     // Checks if the metrics reporting is enabled for the current reporter

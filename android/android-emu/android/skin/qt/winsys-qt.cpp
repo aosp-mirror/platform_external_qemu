@@ -25,7 +25,6 @@
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/emulator-qt-no-window.h"
 #include "android/skin/qt/init-qt.h"
-#include "android/skin/qt/qt-settings.h"
 #include "android/utils/setenv.h"
 #include "android/main-common-ui.h"
 
@@ -234,29 +233,6 @@ extern bool skin_winsys_is_window_fully_visible()
     semaphore.acquire();
     D("%s: result = %s", __FUNCTION__, value ? "true" : "false");
     return value;
-}
-
-WinsysPreferredGlesBackend skin_winsys_override_glesbackend_if_auto(WinsysPreferredGlesBackend backend) {
-    WinsysPreferredGlesBackend currentPreferred = skin_winsys_get_preferred_gles_backend();
-    if (currentPreferred == WINSYS_GLESBACKEND_PREFERENCE_AUTO) {
-        // TODO: Show UI
-        return backend;
-    }
-    return currentPreferred;
-}
-
-extern WinsysPreferredGlesBackend skin_winsys_get_preferred_gles_backend()
-{
-    D("skin_winsys_get_preferred_gles_backend");
-    QSettings settings;
-    return (WinsysPreferredGlesBackend)settings.value(Ui::Settings::GLESBACKEND_PREFERENCE, 0).toInt();
-}
-
-extern WinsysPreferredGlesApiLevel skin_winsys_get_preferred_gles_apilevel()
-{
-    D("skin_winsys_get_preferred_gles_apilevel");
-    QSettings settings;
-    return (WinsysPreferredGlesApiLevel)settings.value(Ui::Settings::GLESAPILEVEL_PREFERENCE, 0).toInt();
 }
 
 extern void skin_winsys_quit_request()

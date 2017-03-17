@@ -107,15 +107,10 @@ static AModem telephony_getModem() {
     return android_modem;
 }
 
-static void telephony_set_notif_callback(ModemCallback callbackFunc, void* userData) {
-    amodem_set_notification_callback(android_modem, callbackFunc, userData);
-}
-
 static const QAndroidTelephonyAgent sQAndroidTelephonyAgent = {
     .telephonyCmd = &telephony_telephonyCmd,
     .initModem = &qemu_android_modem_init,
-    .getModem = &telephony_getModem,
-    .setNotifyCallback = &telephony_set_notif_callback
+    .getModem = &telephony_getModem
 };
 const QAndroidTelephonyAgent* const gQAndroidTelephonyAgent =
         &sQAndroidTelephonyAgent;
