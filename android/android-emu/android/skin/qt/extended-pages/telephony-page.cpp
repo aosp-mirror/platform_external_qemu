@@ -282,7 +282,7 @@ void TelephonyPage::eventLauncher(int numActiveCalls) {
 }
 
 void TelephonyPage::customEvent(QEvent* cEvent) {
-    assert(cEvent->type == mCustomEventType);
+    assert(cEvent->type() == mCustomEventType);
     TelephonyEvent* tEvent = (TelephonyEvent*)cEvent;
     if (tEvent->numActiveCalls == 0) {
         if (mCallActivity != CallActivity::Inactive) {
