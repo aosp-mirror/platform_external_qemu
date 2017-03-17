@@ -16,7 +16,17 @@
 
 # how to use:
 #  android/scripts/build-ffmpeg.sh --host=linux-x86_64 --verbose --force
+#  android/scripts/build-ffmpeg.sh --host=linux-x86 --verbose --force
 #  android/scripts/build-ffmpeg.sh --host=windows-x86_64 --verbose --force
+#
+# yasm is required to build:
+# Download yasm source code from http://www.tortall.net/projects/yasm/releases/yasm-1.2.0.tar.gz
+# Unpack tar xvzf yasm-1.2.0.tar.gz
+# cd yasm-1.2.0
+# Configure and build:
+#
+# ./configure && make -j 4 && sudo make install
+#
 
 . $(dirname "$0")/utils/common.shi
 
@@ -105,7 +115,11 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --enable-yasm \
                 --disable-avdevice \
                 --enable-avresample \
-                --enable-libx264
+                --enable-libx264 \
+                --disable-protocol=tls \
+                --disable-protocol=tls_securetransport \
+                --disable-openssl \
+                --disble-iconv
 
         # Copy binaries necessary for the build itself as well as static
         # libraries.
