@@ -96,6 +96,29 @@
     },
     {
       "key": {
+        "uuid": "6582b814_e5cdca7b",
+        "filename": "android/android-emu/android/base/testing/TestSystem.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-17T20:47:03Z",
+      "side": 1,
+      "message": "the idea of having it here on demand is to not create the actual directory unless it\u0027s needed for the test (AKA on first call). TestTempDir class creates it in ctor.\nTestSystem is needed not only for temp directories, but to mock system time, or suppress process launches from tests etc.",
+      "range": {
+        "startLine": 231,
+        "startChar": 8,
+        "endLine": 235,
+        "endChar": 9
+      },
+      "revId": "47d2238f08b55b2845d7ed675e4cd2e1242db87b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "11bb947b_2f447717",
         "filename": "android/android-emu/android/base/testing/TestSystem.h",
         "patchSetId": 2
