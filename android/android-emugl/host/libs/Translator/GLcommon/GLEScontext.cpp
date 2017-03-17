@@ -474,6 +474,8 @@ GLEScontext::~GLEScontext() {
     }
     delete[] m_texState;
     m_texState = NULL;
+    delete m_fboNameSpace;
+    m_fboNameSpace = NULL;
 }
 
 void GLEScontext::postLoad() {
