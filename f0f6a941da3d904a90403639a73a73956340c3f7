@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0489b30e_d2f5b0a4",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1569,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-17T17:01:59Z",
+      "side": 1,
+      "message": "maybe RGBA8 is better?",
+      "range": {
+        "startLine": 1569,
+        "startChar": 22,
+        "endLine": 1569,
+        "endChar": 30
+      },
+      "revId": "f0f6a941da3d904a90403639a73a73956340c3f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
