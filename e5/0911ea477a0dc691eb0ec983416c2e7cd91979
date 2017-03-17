@@ -1,0 +1,8 @@
+Code-Review+2: Huan Song <huans@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Verified+1: Bjoern Johansson <bjoernj@google.com>
+Submitted-by: Bjoern Johansson <bjoernj@google.com>
+Submitted-at: Fri, 17 Mar 2017 21:05:33 +0000
+Reviewed-on: https://android-review.googlesource.com/354468
+Project: platform/external/qemu
+Branch: refs/heads/emu-2.3-release
