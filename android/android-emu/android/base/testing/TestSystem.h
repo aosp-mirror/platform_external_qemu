@@ -14,8 +14,8 @@
 
 #pragma once
 
-#include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/base/threads/Thread.h"
@@ -24,6 +24,28 @@
 namespace android {
 namespace base {
 
+// The TestSystem class provides a mock implementation that of the System that
+// can be used by UnitTests. Instantiation will result in tempory replacement of
+// the System singleton with this version, the prevous setting will be restored
+// in the destructor of this object
+//
+// Some things to be aware of:
+//
+// Interaction with the filesystem will result in the creation of
+// a temporary directory that will be used to interact with the
+// filesystem. This temporary directory is deleted in the destructor.
+//
+// Path resolution is done as follows:
+//   - Relative paths are resolved starting from current directory
+//     which by default is: "/home"
+//   - The construction of this object does not create the launcherDir,
+//     appDataDir or home dir. If you need these directories to exist you will
+//     have to create them as follows: getTempRoot()->makeSubDir("home").
+//   - Path resolution can result in switching / into \ when running under
+//      Win32. If you are doing anything with paths
+//     it is best to include "android/utils/path.h" and use the PATH_SEP
+//     and PATH_SEP_C macros to indicate path separators in your strings.
+//
 class TestSystem : public System {
 public:
     TestSystem(StringView launcherDir,
@@ -47,14 +69,17 @@ public:
           mShellFunc(NULL),
           mShellOpaque(NULL),
           mUnixTime(),
-          mPid() {}
+          mPid() {
+          }
 
     virtual ~TestSystem() {
         System::setForTesting(mPrevSystem);
         delete mTempDir;
     }
 
-    virtual const std::string& getProgramDirectory() const { return mProgramDir; }
+    virtual const std::string& getProgramDirectory() const override {
+        return mProgramDir;
+    }
 
     // Set directory of currently executing binary.  This must be a subdirectory
     // of mLauncherDir and specified relative to mLauncherDir
@@ -63,12 +88,12 @@ public:
         if (programSubDir.empty()) {
             mProgramDir = getLauncherDirectory();
         } else {
-            mProgramDir = PathUtils::join(getLauncherDirectory(),
-                                          programSubDir);
+            mProgramDir =
+                    PathUtils::join(getLauncherDirectory(), programSubDir);
         }
     }
 
-    virtual const std::string& getLauncherDirectory() const {
+    virtual const std::string& getLauncherDirectory() const override {
         if (mLauncherDir.size()) {
             return mLauncherDir;
         } else {
@@ -82,13 +107,11 @@ public:
         setProgramSubDir(mProgramSubdir);
     }
 
-    virtual const std::string& getHomeDirectory() const {
-        return mHomeDir;
-    }
+    virtual const std::string& getHomeDirectory() const override { return mHomeDir; }
 
     void setHomeDirectory(StringView homeDir) { mHomeDir = homeDir; }
 
-    virtual const std::string& getAppDataDirectory() const {
+    virtual const std::string& getAppDataDirectory() const override {
         return mAppDataDir;
     }
 
@@ -96,40 +119,26 @@ public:
         mAppDataDir = appDataDir;
     }
 
-    virtual std::string getCurrentDirectory() const { return mCurrentDir; }
+    virtual std::string getCurrentDirectory() const override { return mCurrentDir; }
 
     // Set current directory during unit-testing.
     void setCurrentDirectoryForTesting(StringView path) { mCurrentDir = path; }
 
-    virtual int getHostBitness() const {
-        return mHostBitness;
-    }
+    virtual int getHostBitness() const override { return mHostBitness; }
 
-    virtual OsType getOsType() const override {
-        return mOsType;
-    }
+    virtual OsType getOsType() const override { return mOsType; }
 
-    virtual bool isRunningUnderWine() const override {
-        return mUnderWine;
-    }
+    virtual bool isRunningUnderWine() const override { return mUnderWine; }
 
-    void setRunningUnderWine(bool underWine) {
-        mUnderWine = underWine;
-    }
+    void setRunningUnderWine(bool underWine) { mUnderWine = underWine; }
 
-    virtual Pid getCurrentProcessId() const override {
-        return mPid;
-    }
+    virtual Pid getCurrentProcessId() const override { return mPid; }
 
-    void setCurrentProcessId(Pid pid) {
-        mPid = pid;
-    }
+    void setCurrentProcessId(Pid pid) { mPid = pid; }
 
-    void setOsType(OsType type) {
-        mOsType = type;
-    }
+    void setOsType(OsType type) { mOsType = type; }
 
-    virtual std::string envGet(StringView varname) const {
+    virtual std::string envGet(StringView varname) const override {
         for (size_t n = 0; n < mEnvPairs.size(); n += 2) {
             const std::string& name = mEnvPairs[n];
             if (name == varname) {
@@ -144,13 +153,12 @@ public:
         for (size_t i = 0; i < mEnvPairs.size(); i += 2) {
             const std::string& name = mEnvPairs[i];
             const std::string& val = mEnvPairs[i + 1];
-            res.push_back(std::string(name.c_str(), name.size())
-                          + '=' + val.c_str());
+            res.push_back(name + "=" + val);
         }
         return res;
     }
 
-    virtual void envSet(StringView varname, StringView varvalue) {
+    virtual void envSet(StringView varname, StringView varvalue) override {
         // First, find if the name is in the array.
         int index = -1;
         for (size_t n = 0; n < mEnvPairs.size(); n += 2) {
@@ -177,7 +185,7 @@ public:
         }
     }
 
-    virtual bool envTest(StringView varname) const {
+    virtual bool envTest(StringView varname) const override {
         for (size_t n = 0; n < mEnvPairs.size(); n += 2) {
             const std::string& name = mEnvPairs[n];
             if (name == varname) {
@@ -187,15 +195,15 @@ public:
         return false;
     }
 
-    virtual bool pathExists(StringView path) const {
+    virtual bool pathExists(StringView path) const override {
         return pathExistsInternal(toTempRoot(path));
     }
 
-    virtual bool pathIsFile(StringView path) const {
+    virtual bool pathIsFile(StringView path) const override {
         return pathIsFileInternal(toTempRoot(path));
     }
 
-    virtual bool pathIsDir(StringView path) const {
+    virtual bool pathIsDir(StringView path) const override {
         return pathIsDirInternal(toTempRoot(path));
     }
 
@@ -220,14 +228,15 @@ public:
         return pathFileSizeInternal(toTempRoot(path), outFileSize);
     }
 
-    virtual Optional<Duration> pathCreationTime(StringView path) const override {
+    virtual Optional<Duration> pathCreationTime(
+            StringView path) const override {
         return pathCreationTimeInternal(toTempRoot(path));
     }
 
     virtual std::vector<std::string> scanDirEntries(
             StringView dirPath,
-            bool fullPath = false) const {
-        getTempRoot(); // make sure we have a temp root;
+            bool fullPath = false) const override {
+        getTempRoot();  // make sure we have a temp root;
 
         std::string newPath = toTempRoot(dirPath);
         std::vector<std::string> result = scanDirInternal(newPath);
@@ -249,7 +258,7 @@ public:
         return mTempDir;
     }
 
-    virtual bool isRemoteSession(std::string* sessionType) const {
+    virtual bool isRemoteSession(std::string* sessionType) const override {
         if (!mIsRemoteSession) {
             return false;
         }
@@ -267,13 +276,9 @@ public:
         }
     }
 
-    virtual Times getProcessTimes() const {
-        return mTimes;
-    }
+    virtual Times getProcessTimes() const override { return mTimes; }
 
-    void setProcessTimes(const Times& times) {
-        mTimes = times;
-    }
+    void setProcessTimes(const Times& times) { mTimes = times; }
 
     // Type of a helper function that can be used during unit-testing to
     // receive the parameters of a runCommand() call. Register it
@@ -313,7 +318,7 @@ public:
         return result;
     }
 
-    virtual std::string getTempDir() const { return std::string("/tmp"); }
+    virtual std::string getTempDir() const override { return "/tmp"; }
 
     virtual time_t getUnixTime() const override {
         return getUnixTimeUs() / 1000000;
@@ -332,9 +337,7 @@ public:
         return mUnixTime;
     }
 
-    void setUnixTime(time_t time) {
-        setUnixTimeUs(time * 1000000LL);
-    }
+    void setUnixTime(time_t time) { setUnixTimeUs(time * 1000000LL); }
 
     void setUnixTimeUs(Duration time) {
         mUnixTimeLastQueried = mUnixTime = time;
@@ -350,23 +353,17 @@ public:
     virtual void sleepMs(unsigned n) const override {
         // Don't sleep in tests, use the static functions from Thread class
         // if you need a delay (you don't!).
-        Thread::yield();    // Add a small delay to mimic the intended behavior.
+        Thread::yield();  // Add a small delay to mimic the intended behavior.
     }
 
-    virtual void yield() const override {
-        Thread::yield();
-    }
+    virtual void yield() const override { Thread::yield(); }
 
 private:
-    std::string toTempRoot(StringView path) const {
-        // Check if this is a relative path that we resolve from the current
-        // directory
-        if (path.size() > 1 && path[0] == '.') {
-           auto currdir = getCurrentDirectory();
-           // Let's not get stuck if the current directory is relative
-           if (currdir.size() > 1 && currdir[0] != '.') {
-             return toTempRoot(currdir + PATH_SEP + path.c_str());
-           }
+    std::string toTempRoot(StringView pathView) const {
+        std::string path = pathView;
+        if (!PathUtils::isAbsolute(path)) {
+            auto currdir = getCurrentDirectory();
+            path = currdir + PATH_SEP + path;
         }
 
         // mTempRootPrefix ends with a dir separator, ignore it for comparison.
@@ -378,10 +375,11 @@ private:
             // Avoid prepending prefix if it's already there.
             return path;
         } else {
-          // Resolve all the ../.. and ././.
-          auto parts = PathUtils::decompose(mTempRootPrefix + path.c_str());
-          PathUtils::simplifyComponents(&parts);
-          return PathUtils::recompose(parts);
+            // Resolve ., .. and replacing \ or / with PATH_SEP
+            auto parts = PathUtils::decompose(mTempRootPrefix + path);
+            PathUtils::simplifyComponents(&parts);
+            auto res = PathUtils::recompose(parts);
+            return res;
         }
     }
 
