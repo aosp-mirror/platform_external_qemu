@@ -44,7 +44,7 @@ static void makeLibSubFile(TestTempDir* dir, const char* name) {
 }
 
 TEST(EmuglConfig, init) {
-    TestSystem testSys("foo", System::kProgramBitness);
+    TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
@@ -196,7 +196,7 @@ TEST(EmuglConfig, init) {
 }
 
 TEST(EmuglConfig, initFromUISetting) {
-    TestSystem testSys("foo", System::kProgramBitness);
+    TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
@@ -269,7 +269,7 @@ TEST(EmuglConfig, initFromUISetting) {
 }
 
 TEST(EmuglConfig, initGLESv2Only) {
-    TestSystem testSys("foo", System::kProgramBitness);
+    TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
@@ -331,7 +331,7 @@ TEST(EmuglConfig, initGLESv2Only) {
 }
 
 TEST(EmuglConfig, initNxWithSwiftshader) {
-    TestSystem testSys("foo", System::kProgramBitness);
+    TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
@@ -369,7 +369,7 @@ TEST(EmuglConfig, initNxWithoutSwiftshader) {
 }
 
 TEST(EmuglConfig, initChromeRemoteDesktopWithSwiftshader) {
-    TestSystem testSys("foo", System::kProgramBitness);
+    TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
@@ -391,7 +391,7 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithSwiftshader) {
 }
 
 TEST(EmuglConfig, initChromeRemoteDesktopWithoutSwiftshader) {
-    TestSystem testSys("foo", System::kProgramBitness);
+    TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
@@ -407,7 +407,7 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithoutSwiftshader) {
 }
 
 TEST(EmuglConfig, initNoWindowWithSwiftshader) {
-    TestSystem testSys("foo", System::kProgramBitness);
+    TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
@@ -427,7 +427,7 @@ TEST(EmuglConfig, initNoWindowWithSwiftshader) {
 }
 
 TEST(EmuglConfig, initNoWindowWithoutSwiftshader) {
-    TestSystem testSys("foo", System::kProgramBitness);
+    TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");

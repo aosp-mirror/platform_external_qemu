@@ -38,7 +38,7 @@ namespace {
 
 class PeriodicReporterTest : public ::testing::Test {
 public:
-    TestSystem mSystem{"/", System::kProgramBitness, "/home"};
+    TestSystem mSystem{"/", System::kProgramBitness, "/"};
     TestTempDir* mRoot = mSystem.getTempRoot();
     TestLooper mLooper;
     MockMetricsReporter mReporter;

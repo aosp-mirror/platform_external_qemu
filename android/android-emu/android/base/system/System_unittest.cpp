@@ -183,7 +183,7 @@ TEST(System, envGetAndSet) {
 }
 
 TEST(System, pathIsDir) {
-    TestSystem sys("/bin", 32);
+    TestSystem sys("/bin", 32, "/");
 
     EXPECT_FALSE(sys.pathIsDir("foo"));
     EXPECT_FALSE(sys.pathIsDir("foo/"));
