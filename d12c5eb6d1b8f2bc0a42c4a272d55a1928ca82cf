@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "1c4b7782_80c59a1e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 16
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-17T17:00:43Z",
+      "side": 1,
+      "message": "to elaborate: tests expect a maximum limit of sensor update frequency of 130Hz for GameRotationVector, which is a even-more-virtual sensor (even more virtual than our sensors, this is some derived sensor in the guest that uses gyro, accel, and mag at the same time).",
+      "parentUuid": "17899346_767e175a",
+      "range": {
+        "startLine": 9,
+        "startChar": 35,
+        "endLine": 9,
+        "endChar": 41
+      },
+      "revId": "d12c5eb6d1b8f2bc0a42c4a272d55a1928ca82cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9739134d_8fdb4891",
         "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.cpp",
         "patchSetId": 16
