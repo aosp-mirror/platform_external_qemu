@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a7849fc_e5668fd3",
+        "filename": "android/android-emu/android/base/testing/TestSystem.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-17T16:55:05Z",
+      "side": 1,
+      "message": "could you please add a comment explaining the basic expected usage pattern for this class? It looks like the default values aren\u0027t good enough anymore",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 34
+      },
+      "revId": "47d2238f08b55b2845d7ed675e4cd2e1242db87b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa746a64_753735bb",
+        "filename": "android/android-emu/android/base/testing/TestSystem.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-17T16:55:05Z",
+      "side": 1,
+      "message": "this doesn\u0027t make sense to me\nwhy not \"name + \u0027\u003d\u0027 + val\" ?",
+      "range": {
+        "startLine": 133,
+        "startChar": 0,
+        "endLine": 135,
+        "endChar": 9
+      },
+      "revId": "47d2238f08b55b2845d7ed675e4cd2e1242db87b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11bb947b_2f447717",
+        "filename": "android/android-emu/android/base/testing/TestSystem.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-17T16:55:05Z",
+      "side": 1,
+      "message": "nit: you don\u0027t need c_str() - StringView has a conversion operator",
+      "range": {
+        "startLine": 341,
+        "startChar": 36,
+        "endLine": 341,
+        "endChar": 43
+      },
+      "revId": "47d2238f08b55b2845d7ed675e4cd2e1242db87b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
