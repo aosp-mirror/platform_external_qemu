@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "15e0bccc_3588c99e",
+        "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-17T16:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9739134d_8fdb4891",
+      "range": {
+        "startLine": 356,
+        "startChar": 7,
+        "endLine": 357,
+        "endChar": 68
+      },
+      "revId": "d12c5eb6d1b8f2bc0a42c4a272d55a1928ca82cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "62662a5e_affa5df8",
         "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.cpp",
         "patchSetId": 16
@@ -95,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "e11efd04_77731a25",
+        "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 364,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-17T16:58:45Z",
+      "side": 1,
+      "message": "OOPS",
+      "parentUuid": "62662a5e_affa5df8",
+      "range": {
+        "startLine": 364,
+        "startChar": 37,
+        "endLine": 364,
+        "endChar": 38
+      },
+      "revId": "d12c5eb6d1b8f2bc0a42c4a272d55a1928ca82cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8de87433_4924cdf7",
         "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
         "patchSetId": 16
@@ -106,6 +154,30 @@
       "writtenOn": "2017-03-17T16:33:52Z",
       "side": 1,
       "message": "nit",
+      "range": {
+        "startLine": 362,
+        "startChar": 0,
+        "endLine": 362,
+        "endChar": 4
+      },
+      "revId": "d12c5eb6d1b8f2bc0a42c4a272d55a1928ca82cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "574e4b7f_04892349",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-17T16:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8de87433_4924cdf7",
       "range": {
         "startLine": 362,
         "startChar": 0,
