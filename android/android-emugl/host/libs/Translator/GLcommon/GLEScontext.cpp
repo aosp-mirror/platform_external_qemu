@@ -1561,6 +1561,14 @@ void GLEScontext::initDefaultFBO(
     dispatcher().glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &prevGlobalReadFbo);
     dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
 
+    // OS X in legacy opengl mode does not actually support GL_RGB565 as a renderbuffer.
+    // Just replace it with GL_RGB8 for now.
+    // TODO: Re-enable GL_RGB565 for OS X when we move to core profile.
+#ifdef __APPLE__
+    if (colorFormat == GL_RGB565)
+        colorFormat = GL_RGB8;
+#endif
+
     if (needReallocateRbo) {
         dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, *eglSurfaceRBColorId);
         if (multisamples) {
