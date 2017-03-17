@@ -16,6 +16,8 @@
 #include "android/base/StringView.h"
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/AdbTypes.h"
+#include "android/featurecontrol/feature_control.h"
+#include "android/featurecontrol/FeatureControl.h"
 
 #include <vector>
 
@@ -128,6 +130,7 @@ private:
     AdbGuestPipe(void* mHwPipe, Service* service, AdbHostAgent* hostAgent)
         : AndroidPipe(mHwPipe, service), mHostAgent(hostAgent) {
         setExpectedGuestCommand("accept", State::WaitingForGuestAcceptCommand);
+        mPlayStoreImage = android::featurecontrol::isEnabled(android::featurecontrol::PlayStoreImage);
     }
 
     // Return current service with the right type.
@@ -185,6 +188,7 @@ private:
     android::base::ScopedSocketWatch
             mHostSocket;  // current host socket, if connected.
     AdbHostAgent* mHostAgent = nullptr;
+    bool mPlayStoreImage = false;
 };
 
 }  // namespace emulation

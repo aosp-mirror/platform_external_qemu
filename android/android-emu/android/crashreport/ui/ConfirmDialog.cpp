@@ -337,11 +337,15 @@ void ConfirmDialog::sendReport() {
         QMessageBox msgbox(this);
         msgbox.setWindowTitle(tr("Crash Report Submitted"));
         msgbox.setText(tr("<p>Thank you for submitting a crash report!</p>"
-                          "<p>If you would like to contact us for further information, "
-                          "use the following Crash Report ID:</p>"));
-        QString msg = QString::fromStdString(mCrashService->getReportId());
-        msgbox.setInformativeText(msg);
-        msgbox.setTextInteractionFlags(Qt::TextSelectableByMouse);
+                          "<p>If you would like to contact us for further "
+                          "information, "
+                          "use the following Crash Report ID:</p>"
+                          "<p></p>"
+                          "<p>%1</p>")
+                               .arg(QString::fromStdString(
+                                       mCrashService->getReportId())));
+        msgbox.setTextInteractionFlags(Qt::TextSelectableByMouse |
+                                       Qt::TextSelectableByKeyboard);
         msgbox.exec();
     }
 
