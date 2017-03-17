@@ -14,8 +14,6 @@
 // restoring user settings associated with the Qt-based UI.
 #pragma once
 
-#include "android/skin/winsys.h"
-
 #include <QString>
 
 namespace Ui {
@@ -55,9 +53,6 @@ const QString CRASHREPORT_SAVEPREFERENCE_CHECKED("set/crashReportSavePreferenceC
 const int CRASHREPORT_COMBOBOX_ALWAYS = 0;
 const int CRASHREPORT_COMBOBOX_NEVER = 1;
 const int CRASHREPORT_COMBOBOX_ASK = 2;
-
-const QString GLESBACKEND_PREFERENCE("set/glesBackendPreference");
-const QString GLESAPILEVEL_PREFERENCE("set/glesApiLevelPreference");
 
 const QString LOCATION_ENTERED_ALTITUDE("loc/altitude");
 const QString LOCATION_ENTERED_LATITUDE("loc/latitude");

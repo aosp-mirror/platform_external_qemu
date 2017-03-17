@@ -23,8 +23,6 @@
 #include <pthread.h>
 #endif
 
-#include <assert.h>
-
 namespace android {
 namespace base {
 
@@ -45,11 +43,6 @@ public:
 
     void broadcastAndUnlock(Lock* lock);
     void broadcastAndUnlock(AutoLock* lock);
-
-    void wait(AutoLock* userLock) {
-        assert(userLock->mLocked);
-        wait(&userLock->mLock);
-    }
 
 #ifdef _WIN32
 

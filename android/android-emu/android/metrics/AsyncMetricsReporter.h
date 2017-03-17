@@ -39,7 +39,6 @@ public:
     ~AsyncMetricsReporter() override;
 
     void reportConditional(ConditionalCallback callback) override;
-    void finishPendingReports() override;
 
 private:
     void worker();

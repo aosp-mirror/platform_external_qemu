@@ -135,9 +135,6 @@ static bool curl_download_internal(const char* url,
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_fields);
     }
 
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 10L);
-
     const CURLcode res = curl_easy_perform(curl);
     if (res != CURLE_OK) {
         asprintf(error, "%s", curl_easy_strerror(res));

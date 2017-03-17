@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2017 The Android Open Source Project
+/* Copyright (C) 2007-2016 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -51,7 +51,6 @@
 #include <ctype.h>
 #include <fcntl.h>
 #include <stdarg.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -238,52 +237,23 @@ control_client_destroy( ControlClient  client )
 
 // /////////////////////////////////////////////////////////////////////////////
 // Different write callbacks used to report back to the client.
-static bool send_chunk(int sock, const char* buff, int len) {
+
+static void  control_control_write( ControlClient  client, const char*  buff, int  len )
+{
+    int ret;
+
+    if (len < 0)
+        len = strlen(buff);
+
     while (len > 0) {
-        int ret = HANDLE_EINTR(socket_send(sock, buff, len));
+        ret = HANDLE_EINTR(socket_send( client->sock, buff, len));
         if (ret < 0) {
-            if (errno != EWOULDBLOCK && errno != EAGAIN) {
-                return false;
-            }
+            if (errno != EWOULDBLOCK && errno != EAGAIN)
+                return;
         } else {
             buff += ret;
             len  -= ret;
         }
-    }
-    return true;
-}
-
-static void control_control_write(ControlClient client, const char* buff, int len)
-{
-    if (len < 0)
-        len = strlen(buff);
-
-    // Terminal requires an explicit \r\n symbol pair for newlines, and most of
-    // the clients use \n alone. Make sure we insert missing \r characters
-    // before each \n while sending.
-    int offset = 0;
-    for (;;) {
-        const char* pos = buff + offset;
-        const char* newline = memchr(pos, '\n', len - offset);
-        if (!newline) {
-            // Done, send the rest as a single chunk.
-            send_chunk(client->sock, buff + offset, len - offset);
-            break;
-        }
-
-        if (newline == buff || // The very first character is '\n'.
-                newline[-1] != '\r') { // Previous character is not '\r'.
-            if (!send_chunk(client->sock, pos, newline - pos) ||
-                !send_chunk(client->sock, "\r\n", 2)) {
-                break;
-            }
-        } else {
-            // The correct '\r\n' is there.
-            if (!send_chunk(client->sock, pos, newline - pos + 1)) {
-                break;
-            }
-        }
-        offset += newline - pos + 1;
     }
 }
 

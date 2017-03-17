@@ -16,7 +16,6 @@
 #include "android/base/system/System.h"
 #include "android/globals.h"
 #include "android/opengl/EmuglBackendList.h"
-#include "android/skin/winsys.h"
 
 #include <string>
 
@@ -61,15 +60,20 @@ bool isHostGpuBlacklisted() {
     return async_query_host_gpu_blacklisted();
 }
 
+void setGpuBlacklistStatus(bool switchedSoftware) {
+    GpuInfoList::get()->blacklist_status =
+        switchedSoftware;
+}
+
 // Get a description of host GPU properties.
 // Need to free after use.
 emugl_host_gpu_prop_list emuglConfig_get_host_gpu_props() {
-    const GpuInfoList& gpulist = globalGpuInfoList();
+    GpuInfoList* gpulist = GpuInfoList::get();
     emugl_host_gpu_prop_list res;
-    res.num_gpus = gpulist.infos.size();
+    res.num_gpus = gpulist->infos.size();
     res.props = new emugl_host_gpu_props[res.num_gpus];
 
-    const std::vector<GpuInfo>& infos = gpulist.infos;
+    const std::vector<GpuInfo>& infos = gpulist->infos;
     for (int i = 0; i < res.num_gpus; i++) {
         res.props[i].make = strdup(infos[i].make.c_str());
         res.props[i].model = strdup(infos[i].model.c_str());
@@ -97,8 +101,6 @@ SelectedRenderer emuglConfig_get_renderer(const char* gpu_mode) {
         return SELECTED_RENDERER_SWIFTSHADER;
     } else if (!strcmp(gpu_mode, "angle")) {
         return SELECTED_RENDERER_ANGLE;
-    } else if (!strcmp(gpu_mode, "angle9")) {
-        return SELECTED_RENDERER_ANGLE9;
     } else if (!strcmp(gpu_mode, "error")) {
         return SELECTED_RENDERER_ERROR;
     } else {
@@ -125,8 +127,7 @@ bool emuglConfig_init(EmuglConfig* config,
                       int bitness,
                       bool no_window,
                       bool blacklisted,
-                      bool has_guest_renderer,
-                      enum WinsysPreferredGlesBackend uiPreferredBackend) {
+                      bool has_guest_renderer) {
     D("%s: blacklisted=%d has_guest_renderer=%d\n",
       __FUNCTION__,
       blacklisted,
@@ -135,10 +136,8 @@ bool emuglConfig_init(EmuglConfig* config,
     // zero all fields first.
     memset(config, 0, sizeof(*config));
 
-    bool hasUiPreference = uiPreferredBackend != WINSYS_GLESBACKEND_PREFERENCE_AUTO;
-
-    // The value of '-gpu <mode>' overrides both the hardware properties
-    // and the UI setting, except if <mode> is 'auto'.
+    // The value of '-gpu <mode>' overrides the hardware properties,
+    // except if <mode> is 'auto'.
     if (gpu_option) {
         if (!strcmp(gpu_option, "on") || !strcmp(gpu_option, "enable")) {
             gpu_enabled = true;
@@ -171,11 +170,6 @@ bool emuglConfig_init(EmuglConfig* config,
         gpu_enabled = false;
     }
 
-    if (!gpu_option && hasUiPreference) {
-        gpu_enabled = true;
-        gpu_mode = "auto";
-    }
-
     if (!gpu_enabled) {
         config->enabled = false;
         snprintf(config->backend, sizeof(config->backend), "%s", gpu_mode);
@@ -187,7 +181,6 @@ bool emuglConfig_init(EmuglConfig* config,
     if (!bitness) {
         bitness = System::get()->getProgramBitness();
     }
-
     config->bitness = bitness;
     resetBackendList(bitness);
 
@@ -215,13 +208,12 @@ bool emuglConfig_init(EmuglConfig* config,
             gpu_mode = "swiftshader";
         }
 #ifdef _WIN32
-        else if (!no_window && async_query_host_gpu_AngleWhitelisted() &&
-                 !hasUiPreference) {
+        else if (!no_window && async_query_host_gpu_AngleWhitelisted()) {
                 gpu_mode = "angle";
                 D("%s use Angle for Intel GPU HD 3000\n", __FUNCTION__);
         }
 #endif
-        else if (no_window || (blacklisted && !hasUiPreference)) {
+        else if (no_window || blacklisted) {
             if (stringVectorContains(sBackendList->names(), "swiftshader")) {
                 D("%s: Headless (-no-window) mode (or blacklisted GPU driver)"
                   ", using Swiftshader backend\n",
@@ -250,25 +242,8 @@ bool emuglConfig_init(EmuglConfig* config,
                 return true;
             }
         } else {
-            switch (uiPreferredBackend) {
-                case WINSYS_GLESBACKEND_PREFERENCE_ANGLE:
-                    gpu_mode = "angle";
-                    break;
-                case WINSYS_GLESBACKEND_PREFERENCE_ANGLE9:
-                    gpu_mode = "angle9";
-                    break;
-                case WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER:
-                    gpu_mode = "swiftshader";
-                    break;
-                case WINSYS_GLESBACKEND_PREFERENCE_NATIVEGL:
-                    gpu_mode = "host";
-                    break;
-                default:
-                    gpu_mode = "host";
-                    break;
-            }
-            D("%s: auto-selected %s based on conditions and UI preference %d\n",
-              __func__, gpu_mode, uiPreferredBackend);
+            D("%s: 'host' mode auto-selected\n", __FUNCTION__);
+            gpu_mode = "host";
         }
     }
 

@@ -15,7 +15,6 @@
 #include "android/avd/hw-config.h"
 #include "android/avd/info.h"
 #include "android/cmdline-option.h"
-#include "android/skin/winsys.h"
 #include "android/utils/aconfig-file.h"
 #include "android/utils/compiler.h"
 
@@ -55,9 +54,6 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
                                             AndroidHwConfig* hw,
                                             AvdInfo** the_avd,
                                             int* exit_status);
-
-bool doGpuConfig(AvdInfo* avd, AndroidOptions* opt, AndroidHwConfig* hw,
-                 enum WinsysPreferredGlesBackend uiPreferredBackend);
 
 // HACK: Value will be true if emulator_parseCommonCommandLineOptions()
 //       has seen a network-related option (e.g. -netspeed). This is
