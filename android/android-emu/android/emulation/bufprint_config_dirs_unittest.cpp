@@ -14,6 +14,7 @@
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
+#include "android/utils/path.h"
 
 #include <gtest/gtest.h>
 
@@ -40,15 +41,15 @@ TEST(bufprint, AvdHomePathDefault) {
 }
 
 TEST(bufprint, AvdHomePathWithAndroidAvdHome) {
-    TestSystem sys("/bin", 32);
+    TestSystem sys("/bin", 32, PATH_SEP);
     ASSERT_TRUE(sys.getTempRoot()->makeSubDir("sdksdk"));
     ASSERT_TRUE(sys.getTempRoot()->makeSubDir("sdksdk/.android"));
     ASSERT_TRUE(sys.getTempRoot()->makeSubDir("sdksdk/.android/avd"));
-    sys.envSet("ANDROID_AVD_HOME", "sdksdk/.android/avd");
-    char buffer[32], *p = buffer, *end = buffer + sizeof(buffer);
+    sys.envSet("ANDROID_AVD_HOME", "sdksdk" PATH_SEP ".android" PATH_SEP "avd");
+    char buffer[MAX_PATH], *p = buffer, *end = buffer + sizeof(buffer);
     p = bufprint_avd_home_path(p, end);
     EXPECT_EQ(buffer + 19, p);
-    EXPECT_STREQ("sdksdk/.android/avd", buffer);
+    EXPECT_STREQ("sdksdk" PATH_SEP ".android" PATH_SEP "avd", buffer);
 }
 
 TEST(bufprint, ConfigPathDefault) {
@@ -73,7 +74,7 @@ TEST(bufprint, ConfigPathWithAndroidEmulatorHome) {
 }
 
 TEST(bufprint, ConfigPathWithAndroidSdkHome) {
-    TestSystem sys("/bin", 32);
+    TestSystem sys("/bin", 32, "/");
     sys.envSet("ANDROID_SDK_HOME", "/sdk-home");
     char buffer[32], *p = buffer, *end = buffer + sizeof(buffer);
     p = bufprint_config_path(p, end);

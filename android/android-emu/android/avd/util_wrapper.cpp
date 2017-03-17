@@ -14,7 +14,6 @@
 
 #include "android/avd/util.h"
 
-#include "android/base/misc/StringUtils.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/utils/path.h"
 

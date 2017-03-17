@@ -14,6 +14,7 @@
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
+#include "android/utils/path.h"
 
 #include <gtest/gtest.h>
 
@@ -106,7 +107,7 @@ TEST(EmuglBackendScanner, listBackends) {
     make_subdir(libDir, "gles_sixth");
 
     // Now check the scanner
-    std::vector<std::string> names = EmuglBackendScanner::scanDir("foo");
+    std::vector<std::string> names = EmuglBackendScanner::scanDir(PATH_SEP "foo");
     ASSERT_EQ(3U, names.size());
     EXPECT_STREQ("fifth", names[0].c_str());
     EXPECT_STREQ("second", names[1].c_str());
@@ -128,13 +129,13 @@ TEST(EmuglBackendScanner, listBackendsWithProgramBitness) {
     myDir->makeSubDir("foo/lib64/gles_fifth");
     myDir->makeSubDir("foo/lib64/gles_sixth");
 
-    std::vector<std::string> names = EmuglBackendScanner::scanDir("foo", 32);
+    std::vector<std::string> names = EmuglBackendScanner::scanDir(PATH_SEP "foo", 32);
     ASSERT_EQ(3U, names.size());
     EXPECT_STREQ("first", names[0].c_str());
     EXPECT_STREQ("second", names[1].c_str());
     EXPECT_STREQ("third", names[2].c_str());
 
-    names = EmuglBackendScanner::scanDir("foo", 64);
+    names = EmuglBackendScanner::scanDir(PATH_SEP "foo", 64);
     ASSERT_EQ(3U, names.size());
     EXPECT_STREQ("fifth", names[0].c_str());
     EXPECT_STREQ("fourth", names[1].c_str());
