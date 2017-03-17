@@ -36,7 +36,7 @@ TEST(CrashService, get_set_dumpfile) {
 }
 
 TEST(CrashService, validDumpFile) {
-    TestSystem testsys("/launchdir", System::kProgramBitness);
+    TestSystem testsys("/launchdir", System::kProgramBitness, "/");
     TestTempDir* testDir = testsys.getTempRoot();
     testDir->makeSubDir("foo");
     testDir->makeSubFile("foo/bar.dmp");

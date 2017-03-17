@@ -40,7 +40,7 @@ static void makeLibSubFile(TestTempDir* dir, const char* name) {
 }
 
 TEST(EmuglBackendList, init) {
-    TestSystem testSys("foo", System::kProgramBitness);
+    TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
 
     myDir->makeSubDir("foo");
@@ -69,7 +69,7 @@ TEST(EmuglBackendList, init) {
 }
 
 TEST(EmuglBackendList, getBackendLibPath) {
-    TestSystem testSys("foo", System::kProgramBitness);
+    TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
 
     myDir->makeSubDir("foo");
@@ -103,14 +103,14 @@ TEST(EmuglBackendList, getBackendLibPath) {
         makeLibSubFile(myDir, file.c_str());
     }
 
-    EmuglBackendList list("foo", System::kProgramBitness);
+    EmuglBackendList list("/foo", System::kProgramBitness);
     const std::vector<std::string>& names = list.names();
 
     EXPECT_EQ(1U, names.size());
     EXPECT_STREQ("bar", names[0].c_str());
 
     for (size_t n = 0; n < kDataLen; ++n) {
-        std::string expected = StringFormat("foo/%s/gles_bar/%s",
+        std::string expected = StringFormat("/foo/%s/gles_bar/%s",
                                             System::kLibSubDir,
                                             kData[n].libName);
         std::string libdir;
