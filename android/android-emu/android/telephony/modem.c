@@ -19,6 +19,7 @@
 #include "android/telephony/sysdeps.h"
 
 #include "android/emulation/bufprint_config_dirs.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/network/constants.h"
 #include "android/utils/aconfig-file.h"
 #include "android/utils/bufprint.h"
@@ -345,6 +346,13 @@ typedef struct AModemRec_
 
     const char *emergency_numbers[MAX_EMERGENCY_NUMBERS];
 
+    /*
+     * Call-back function to receive notifications of
+     * changes in status
+     */
+    ModemCallback* notify_call_back; // The function
+    void*          notify_user_data; // Some opaque data to give the function
+
     /* Logical channels */
     struct {
         char* df_name;
@@ -363,6 +371,15 @@ typedef struct SIM_APDU {
     uint8_t param3;
     char* data;
 } SIM_APDU;
+
+
+void amodem_set_notification_callback(AModem modem,
+                                      ModemCallback* callback_func,
+                                      void* user_data)
+{
+    modem->notify_call_back = callback_func;
+    modem->notify_user_data = user_data;
+}
 
 static bool parseHexCharsToBuffer(const char* str, int length, char* output) {
     int i;
@@ -943,6 +960,9 @@ amodem_alloc_call( AModem   modem )
         call->modem   = modem;
 
         modem->call_count += 1;
+        if (modem->notify_call_back) {
+            modem->notify_call_back(modem->notify_user_data, modem->call_count);
+        }
     }
     return call;
 }
@@ -974,6 +994,9 @@ amodem_free_call( AModem  modem, AVoiceCall  call )
              (modem->call_count - 1 - nn)*sizeof(*call) );
 
     modem->call_count -= 1;
+    if (modem->notify_call_back) {
+        modem->notify_call_back(modem->notify_user_data, modem->call_count);
+    }
 }
 
 
@@ -2195,7 +2218,13 @@ BadCommand:
 static const char*
 handleQueryPDPContext( const char* cmd, AModem modem )
 {
+    /* WiFi uses a different gateway because there is NAT involved to get
+     * both WiFi and radio networks to coexist on the single ethernet connection
+     * connecting the guest to the outside world */
+    const char* gateway = feature_is_enabled(kFeature_Wifi) ? "192.168.200.1"
+                                                            : "10.0.2.15";
     int  nn;
+
     amodem_begin_line(modem);
     for (nn = 0; nn < MAX_DATA_CONTEXTS; nn++) {
         ADataContext  data = modem->data_contexts + nn;
@@ -2208,7 +2237,7 @@ handleQueryPDPContext( const char* cmd, AModem modem )
                          /* Note: For now, hard-code the IP address of our
                           *       network interface
                           */
-                         data->type == A_DATA_IP ? "10.0.2.15" : "");
+                         data->type == A_DATA_IP ? gateway : "");
     }
     return amodem_end_line(modem);
 }

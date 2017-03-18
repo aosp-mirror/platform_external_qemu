@@ -53,10 +53,38 @@ static void* testThreadFunctionBasicWait(void* param) {
     return NULL;
 }
 
+static void* testThreadFunctionAutoLockWait(void* param) {
+    TestThreadParams* p = static_cast<TestThreadParams*>(param);
+
+    AutoLock lock(p->mutex);
+
+    while (p->counter == 0) {
+        p->cv.wait(&lock);
+    }
+
+    return NULL;
+}
+
+
 TEST(ConditionVariable, basicWaitSignal) {
     TestThreadParams p;
 
     TestThread testThread(testThreadFunctionBasicWait, &p);
+
+    p.mutex.lock();
+    p.counter++;
+    p.cv.signal();
+    p.mutex.unlock();
+
+    testThread.join();
+
+    EXPECT_EQ(p.counter, 1);
+}
+
+TEST(ConditionVariable, autoLockWaitSignal) {
+    TestThreadParams p;
+
+    TestThread testThread(testThreadFunctionAutoLockWait, &p);
 
     p.mutex.lock();
     p.counter++;
@@ -87,7 +115,7 @@ TEST(ConditionVariable, basicWaitBroadcast) {
 
 TEST(ConditionVariable, waitBroadcast) {
     TestThreadParams p;
-    const size_t kNumThreads = 2000;
+    const size_t kNumThreads = 200;
 
     std::vector<TestThread> testThreads;
     testThreads.reserve(kNumThreads);

@@ -19,6 +19,7 @@
 #include "android/curl-support.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/crashreport/CrashReporter.h"
+#include "android/protobuf/ProtobufLogging.h"
 #include "android/utils/debug.h"
 #include "android/utils/filelock.h"
 #include "android/utils/sockets.h"
@@ -82,6 +83,8 @@ void process_early_setup(int argc, char** argv) {
     } else {
         curl_init(caBundleFile.c_str());
     }
+
+    android::protobuf::initProtobufLogger();
 }
 
 void process_late_teardown() {

@@ -155,5 +155,35 @@ TEST(MessageChannel, TryVersions) {
     EXPECT_EQ(2, ret);
 }
 
+TEST(MessageChannel, WaitForEmpty) {
+    using Channel = MessageChannel<int, 100>;
+    Channel channel;
+
+    // 1. Make sure that waitForEmpty() doesn't block if there's no data.
+    channel.waitForEmpty();
+
+    // Fill the channel with data.
+    for (int i = 0; i < (int)channel.capacity(); ++i) {
+        channel.send(i);
+    }
+
+    TestThread thread([](void* param) -> void* {
+        auto channel = (Channel*)param;
+        int i;
+        while (channel->tryReceive(&i)) {
+            ;
+        }
+        return nullptr;
+    }, &channel);
+
+    channel.waitForEmpty();
+    // 2. Check that it unblocks as soon as the channel is emptied.
+    // Note: if waitForEmpty() is buggy this line could be never reached, but
+    //   there's no simple way to test for that.
+    EXPECT_EQ(0, channel.size());
+    EXPECT_FALSE(channel.isStopped());
+    thread.join();
+}
+
 }  // namespace base
 }  // namespace android

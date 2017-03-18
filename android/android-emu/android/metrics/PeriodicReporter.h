@@ -122,6 +122,8 @@ private:
     void createPerPeriodTimerNoLock(PerPeriodData* dataPtr,
                                     base::System::Duration periodMs);
 
+    void reportForPerPeriodData(PerPeriodData* data);
+
     // The implementation of task adding.
     // |mLock| has to be help during the call.
     CallbackList::iterator addTaskInternalNoLock(

@@ -25,6 +25,7 @@ class NullMetricsReporter final : public MetricsReporter {
 public:
     NullMetricsReporter(MetricsWriter::Ptr writer = {});
     void reportConditional(ConditionalCallback callback) override;
+    void finishPendingReports() override {}
 };
 
 }  // namespace metrics

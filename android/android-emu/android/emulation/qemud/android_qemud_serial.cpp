@@ -219,7 +219,7 @@ static void _qemud_serial_read(void* opaque, const uint8_t* from, int len) {
             }
 
             if (s->in_size > MAX_SERIAL_PAYLOAD) {
-                D("%s: ignoring huge serial packet: length=%d channel=%1",
+                D("%s: ignoring huge serial packet: length=%d channel=%d",
                   __FUNCTION__, s->in_size, s->in_channel);
                 s->overflow = s->in_size;
                 continue;

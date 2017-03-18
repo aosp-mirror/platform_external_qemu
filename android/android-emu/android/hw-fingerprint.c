@@ -177,6 +177,7 @@ _hwFingerprintClient_recv(void* opaque, uint8_t* msg, int msglen,
 {
     /* HwFingerprintClient*       fp_client = opaque; */
     D("got message from guest system fingerprint HAL\n");
+    guest_data_partition_mounted = 1;
 }
 
 static HwFingerprintClient*

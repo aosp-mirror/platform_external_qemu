@@ -21,6 +21,9 @@
 *[ColorGroup="Title"] {
     color: %%TITLE_COLOR%%;
 }
+*::disabled[ColorGroup="Button"] { color: %%DISABLED_BUTTON_COLOR%%; background: %%BUTTON_BKG_COLOR%% }
+*[ColorGroup="Button"] { color: %%BUTTON_COLOR%%; background: %%BUTTON_BKG_COLOR%% }
+
 *::disabled[ColorGroup="Tool"] { color: %%DISABLED_TOOL_COLOR%%}
 *[ColorGroup="Tool"] { color: %%TOOL_COLOR%%}
 *[class="EditableValue"]  { color: %%TEXT_COLOR%% }
@@ -109,7 +112,7 @@ QPushButton:checked[ColorGroup="MajorTab"] {
     border: none;
     background: %%TAB_SELECTED_COLOR%%;
 }
-QPushButton:pressed[ColorGroup="Tool"] {
+QPushButton:pressed[ColorGroup="Button"] {
     border: none;
 }
 QRadioButton::indicator:unchecked {
@@ -207,7 +210,7 @@ QTabBar::tab:disabled {
 }
 RaisedMaterialButton {
     border-radius: 2px;
-    color: %%TOOL_COLOR%%;
+    color: %%BUTTON_COLOR%%;
 }
 RaisedMaterialButton:pressed {
     background: %%TAB_DARKENED_COLOR%%;

@@ -21,6 +21,7 @@ class SyncMetricsReporter final : public MetricsReporter
 public:
     SyncMetricsReporter(MetricsWriter::Ptr writer);
     void reportConditional(ConditionalCallback callback) override;
+    void finishPendingReports() override {}
 };
 
 }  // namespace metrics

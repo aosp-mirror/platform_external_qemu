@@ -16,6 +16,8 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/StringFormat.h"
+#include "android/base/StringView.h"
+#include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 
 #include "android/base/system/Win32UnicodeString.h"
@@ -36,12 +38,10 @@
 #define D(...) VERBOSE_PRINT(init, __VA_ARGS__)
 #define I(...) printf(__VA_ARGS__)
 
-#define CMD_BUF_SIZE 1024
-#define HWINFO_CMD L"dxdiag /dontskip /whql:off /64bit /t"
-
 namespace android {
 
 using ::android::base::PathUtils;
+using ::android::base::StringView;
 using ::android::base::System;
 using ::android::base::Win32UnicodeString;
 
@@ -142,12 +142,23 @@ bool HostCrashService::getHWInfo() {
         return false;
     }
     std::string utf8Path = PathUtils::join(dataDirectory, kHwInfoName);
-    Win32UnicodeString file_path(utf8Path);
+    System::ProcessExitCode exitCode = -1;
 
-    Win32UnicodeString syscmd(HWINFO_CMD);
-    syscmd.append(file_path);
-    int result = _wsystem(syscmd.c_str());
-    if (result != 0) {
+#if defined(_WIN32) && !defined(_WIN64)
+    // Disable the 32-bit file system redirection to make sure we run the
+    // 64-bit dxdiag here: "dxdiag /64bit" from a 32-bit process launches x64
+    // version asyncronously, and that's not what we need.
+    PVOID oldValue;
+    ::Wow64DisableWow64FsRedirection(&oldValue);
+    const auto redirectionRestore = android::base::makeCustomScopedPtr(
+            oldValue,
+            [](PVOID oldValue) { ::Wow64RevertWow64FsRedirection(oldValue); });
+#endif
+    if (!System::get()->runCommand(
+                {"dxdiag", "/dontskip", "/whql:off", "/t", utf8Path},
+                System::RunOptions::WaitForCompletion, System::kInfinite,
+                &exitCode) ||
+        exitCode != 0) {
         E("Unable to get hardware info: %d", errno);
         return false;
     }
