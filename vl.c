@@ -133,6 +133,7 @@ int main(int argc, char **argv)
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/error-messages.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"
 #include "android/gps.h"
 #include "android/help.h"
@@ -3105,24 +3106,43 @@ static bool set_memory_options(uint64_t *ram_slots, ram_addr_t *maxram_size,
         error_report("ram size too large");
         return false;
     }
+
+    const int requested_meg = ram_size / (1024 * 1024);
+
 #ifdef CONFIG_HAX
-    uint64_t hax_max_ram = 0;
-    if (hax_get_max_ram(&hax_max_ram) == 0 && hax_max_ram > 0) {
-        /* make sure we preserve the alignment if we need to adjust it */
-        hax_max_ram = QEMU_ALIGN_DOWN(hax_max_ram, 8192);
+    if (hax_enabled()) {
+        uint64_t hax_max_ram = 0;
+        if (hax_get_max_ram(&hax_max_ram) == 0 && hax_max_ram > 0) {
+            /* make sure we preserve the alignment if we need to adjust it */
+            hax_max_ram = QEMU_ALIGN_DOWN(hax_max_ram, 8192);
+        }
         if (ram_size > hax_max_ram) {
-            const int requested_meg = ram_size / (1024 * 1024);
-            const int actual_meg = hax_max_ram / (1024 * 1024);
-            fprintf(stderr,
-                    "Warning: requested RAM size %dM is too big, "
-                    "reducing to maximum supported size %dM\n",
-                    requested_meg, actual_meg);
             ram_size = hax_max_ram;
         }
     }
-
-    hax_pre_init(ram_size);
 #endif
+
+    // Limit max RAM if on 32-bit Windows.
+#if defined(CONFIG_ANDROID) && defined(_WIN32) && !defined(_WIN64) // 32-bit Windows only
+#define WIN32_MAX_RAM 512 * 1024 * 1024 // With 3GB system, 512MB seemed to be most reliable
+    if (ram_size > WIN32_MAX_RAM) {
+        ram_size = WIN32_MAX_RAM;
+        // Disable GLDMA for 32-bit Windows to free up RAM in the guest.
+        feature_set_enabled_override(kFeature_GLDMA, false);
+    }
+#endif // defined(CONFIG_ANDROID) && defined(_WIN32) && !defined(_WIN64)
+
+    int ram_size_meg = ram_size / (1024 * 1024);
+    if (ram_size_meg < requested_meg) {
+        fprintf(stderr, "Warning: requested RAM %dM too high for your system. "
+                        "Reducing to maximum supported size %dM\n",
+                        requested_meg, ram_size_meg);
+    }
+
+#ifdef CONFIG_HAX
+    if (hax_enabled()) hax_pre_init(ram_size);
+#endif
+
     /* store value for the future use */
     qemu_opt_set_number(opts, "size", ram_size, &error_abort);
     *maxram_size = ram_size;
@@ -4464,6 +4484,11 @@ static int main_impl(int argc, char** argv)
         mts_port_create(NULL, gQAndroidUserEventAgent, gQAndroidDisplayAgent);
     }
 
+    /* Enable ADB authenticaiton, or not. */
+    if (feature_is_enabled(kFeature_PlayStoreImage)) {
+        boot_property_add("qemu.adb.secure", "1");
+    }
+
     /* qemu.gles will be read by the OpenGL ES emulation libraries.
      * If set to 0, the software GL ES renderer will be used as a fallback.
      * If the parameter is undefined, this means the system image runs
@@ -4512,8 +4537,6 @@ static int main_impl(int argc, char** argv)
     /* Initialize presence of hardware nav button */
     boot_property_add("qemu.hw.mainkeys", android_hw->hw_mainKeys ? "1" : "0");
 
-    /* Enable ADB authenticaiton, or not. */
-    /* boot_property_add("qemu.adb.secure", adb_auth ? "1" : "0"); */
 
     if (android_hw->hw_gsmModem) {
         if (android_qemud_get_channel(ANDROID_QEMUD_GSM,
