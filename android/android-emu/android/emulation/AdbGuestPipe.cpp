@@ -19,7 +19,6 @@
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/StringView.h"
 #include "android/emulation/VmLock.h"
-#include "android/globals.h"
 #include "android/utils/debug.h"
 
 #include <algorithm>
@@ -198,8 +197,6 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
     if (mState == State::ProxyingData) {
         // Common case, proxy-ing the data from the host to the guest.
         return onGuestRecvData(buffers, numBuffers);
-    } else if (guest_data_partition_mounted == 0 && mPlayStoreImage) {
-        return PIPE_ERROR_AGAIN;
     } else if (mState == State::SendingAcceptReplyOk) {
         // The guest is receiving the 'ok' reply.
         return onGuestRecvReply(buffers, numBuffers);
