@@ -56,11 +56,6 @@ static bool displayConfirmDialog(
     if (reportPreference == Ui::Settings::CRASHREPORT_PREFERENCE_NEVER) {
         return false;
     }
-    if (crashservice->getDumpMessage().empty() &&
-        crashservice->didCrashOnExit() &&
-        reportPreference != Ui::Settings::CRASHREPORT_PREFERENCE_ALWAYS) {
-        return false;
-    }
 
     ConfirmDialog msgBox(nullptr, crashservice, reportPreference, data_dir);
 
