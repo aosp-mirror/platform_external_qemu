@@ -80,6 +80,7 @@
 #include <vector>
 
 using namespace android::base;
+using android::crashreport::CrashReporter;
 using android::emulation::ApkInstaller;
 using android::emulation::FilePusher;
 using android::emulation::ScreenCapturer;
@@ -264,16 +265,27 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     mUserActionsCounter->startCountingForToolWindow(mToolWindow);
     mUserActionsCounter->startCountingForOverlayWindow(&mOverlay);
 
+    auto user_actions = mUserActionsCounter;
+    CrashReporter::get()->addCrashCallback([user_actions]() {
+        char actions[16] = {};
+        snprintf(actions, sizeof(actions) - 1, "%" PRIu64,
+                 user_actions->count());
+        char filename[32 + sizeof(actions)] = {};
+        snprintf(filename, sizeof(filename) - 1, "num-user-actions-%s.txt",
+                 actions);
+        CrashReporter::get()->attachData(filename, actions);
+    });
+
     // The crash reporter will dump the last X UI events.
     // mEventLogger is a shared pointer, capturing its copy inside a lambda
     // ensures that it lives on as long as CrashReporter needs it, even if
     // EmulatorQtWindow is destroyed.
     auto event_logger = mEventLogger;
-    android::crashreport::CrashReporter::get()->addCrashCallback(
+    CrashReporter::get()->addCrashCallback(
             [event_logger]() {
                 event_logger->stop();
-                auto fd = android::crashreport::CrashReporter::get()
-                                  ->openDataAttachFile("recent-ui-actions.txt");
+                auto fd = CrashReporter::get()->openDataAttachFile(
+                                "recent-ui-actions.txt");
                 if (fd.valid()) {
                     const auto& events = event_logger->container();
                     for (int i = 0; i < events.size(); ++i) {
@@ -284,21 +296,13 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                 }
             });
 
-    auto user_actions = mUserActionsCounter;
-    android::crashreport::CrashReporter::get()->addCrashCallback(
-            [user_actions]() {
-                android::crashreport::CrashReporter::get()->attachData(
-                        "num-user-actions.txt",
-                        std::to_string(user_actions->count()));
-            });
-    std::weak_ptr<android::qt::UserActionsCounter> user_actions_weak(
-            mUserActionsCounter);
-
+    std::weak_ptr<android::qt::UserActionsCounter> userActionsWeak(
+                mUserActionsCounter);
     using android::metrics::PeriodicReporter;
     mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
             60 * 10 * 1000,  // reporting period
-            [user_actions_weak](android_studio::AndroidStudioEvent* event) {
-                if (auto user_actions = user_actions_weak.lock()) {
+            [userActionsWeak](android_studio::AndroidStudioEvent* event) {
+                if (auto user_actions = userActionsWeak.lock()) {
                     const auto actionsCount = user_actions->count();
                     event->mutable_emulator_ui_event()->set_context(
                             android_studio::EmulatorUiEvent::
@@ -669,7 +673,7 @@ void EmulatorQtWindow::startThread(StartFunction f, int argc, char** argv) {
             arguments += argv[i];
             arguments += '\n';
         }
-        android::crashreport::CrashReporter::get()->attachData(
+        CrashReporter::get()->attachData(
                 "qemu-main-loop-args.txt", arguments);
 
         mMainLoopThread = new MainLoopThread(f, argc, argv);
