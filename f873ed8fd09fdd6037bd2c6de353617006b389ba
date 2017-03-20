@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "739ba8d6_536b7c93",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-20T17:23:09Z",
+      "side": 1,
+      "message": "what if the saved path is an empty string? should we keep it anyway?",
+      "revId": "f873ed8fd09fdd6037bd2c6de353617006b389ba",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "47da6758_1a04ac37",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-20T17:23:09Z",
+      "side": 1,
+      "message": "nit: tabs",
+      "range": {
+        "startLine": 330,
+        "startChar": 0,
+        "endLine": 330,
+        "endChar": 1
+      },
+      "revId": "f873ed8fd09fdd6037bd2c6de353617006b389ba",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
