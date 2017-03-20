@@ -1884,7 +1884,7 @@ void EmulatorQtWindow::runAdbShellPowerDownAndQuit() {
     }
     mStartedAdbStopProcess = true;
     mAdbInterface->runAdbCommand(
-            {"shell", "reboot", "-p"},
+            {"shell", "stop"},
             [this](const android::emulation::OptionalAdbCommandResult&) {
                 queueQuitEvent();
             },
