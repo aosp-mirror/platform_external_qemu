@@ -959,6 +959,7 @@ GL_APICALL void  GL_APIENTRY glDeleteProgram(GLuint program){
         }
         s_detachShader(ctx, program, pData->getAttachedVertexShader());
         s_detachShader(ctx, program, pData->getAttachedFragmentShader());
+        s_detachShader(ctx, program, pData->getAttachedComputeShader());
 
         ctx->shareGroup()->deleteName(NamedObjectType::SHADER_OR_PROGRAM, program);
     }
@@ -2985,6 +2986,12 @@ static void s_unUseCurrentProgram() {
     ProgramData* programData = (ProgramData*)objData;
     programData->setInUse(false);
     if (programData->getDeleteStatus()) {
+        s_detachShader(ctx, localCurrentProgram,
+                programData->getAttachedVertexShader());
+        s_detachShader(ctx, localCurrentProgram,
+                programData->getAttachedFragmentShader());
+        s_detachShader(ctx, localCurrentProgram,
+                programData->getAttachedComputeShader());
         ctx->shareGroup()->deleteName(NamedObjectType::SHADER_OR_PROGRAM,
                                       localCurrentProgram);
     }
