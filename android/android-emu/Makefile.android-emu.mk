@@ -51,11 +51,6 @@ _ANDROID_EMU_ROOT := $(LOCAL_PATH)
 # Metrics library is a part of android-emu, so let's include it here
 include $(_ANDROID_EMU_ROOT)/android/metrics/proto/MetricsProto.mk
 
-###############################################################################
-#
-# Feature control protoc-generated library.
-include $(_ANDROID_EMU_ROOT)/android/featurecontrol/proto/FeatureControlProto.mk
-
 # all includes are like 'android/...', so we need to count on that
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
 ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES)
@@ -293,7 +288,6 @@ LOCAL_SRC_FILES := \
     android/featurecontrol/FeatureControl.cpp \
     android/featurecontrol/FeatureControlImpl.cpp \
     android/featurecontrol/feature_control.cpp \
-    android/featurecontrol/HWMatching.cpp \
     android/filesystems/ext4_resize.cpp \
     android/filesystems/ext4_utils.cpp \
     android/filesystems/fstab_parser.cpp \
@@ -354,7 +348,6 @@ LOCAL_SRC_FILES := \
     android/openssl-support.cpp \
     android/process_setup.cpp \
     android/protobuf/DelimitedSerialization.cpp \
-    android/protobuf/ProtobufLogging.cpp \
     android/proxy/proxy_common.c \
     android/proxy/proxy_http.c \
     android/proxy/proxy_http_connector.c \
@@ -437,7 +430,6 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-zlib \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
-    $(FEATURECONTROL_PROTO_STATIC_LIBRARIES)
 
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \
@@ -551,7 +543,6 @@ LOCAL_SRC_FILES := \
   android/emulation/VmLock_unittest.cpp \
   android/error-messages_unittest.cpp \
   android/featurecontrol/FeatureControl_unittest.cpp \
-  android/featurecontrol/HWMatching_unittest.cpp \
   android/filesystems/ext4_resize_unittest.cpp \
   android/filesystems/ext4_utils_unittest.cpp \
   android/filesystems/fstab_parser_unittest.cpp \

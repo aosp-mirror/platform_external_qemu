@@ -23,7 +23,6 @@
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/error-messages.h"
-#include "android/featurecontrol/feature_control.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/filesystems/ext4_resize.h"
 #include "android/filesystems/ext4_utils.h"
@@ -49,7 +48,6 @@
 #include "android/utils/win32_cmdline_quote.h"
 
 #include "android/skin/winsys.h"
-#include "android/skin/qt/init-qt.h"
 
 #include "config-target.h"
 
@@ -429,13 +427,6 @@ extern "C" int main(int argc, char **argv) {
         // Normal exit.
         return exitStatus;
     }
-
-    // Update server-based hw config / feature flags.
-    // Must be done after emulator_parseCommonCommandLineOptions,
-    // since that calls createAVD which sets up critical info needed
-    // by featurecontrol component itself.
-    feature_update_from_server();
-
     // just because we know that we're in the new emulator as we got here
     opts->ranchu = 1;
 
@@ -711,7 +702,7 @@ extern "C" int main(int argc, char **argv) {
         }
     }
 
-    // create encryptionkey.img file if needed
+    //create encryptionkey.img file if needed
     if (android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData)) {
         if (hw->disk_encryptionKeyPartition_path == NULL) {
             if(!createInitalEncryptionKeyPartition(hw)) {
@@ -806,7 +797,53 @@ extern "C" int main(int argc, char **argv) {
     std::string memorySize = StringFormat("%d", hw->hw_ramSize);
     args[n++] = memorySize.c_str();
 
+    // Kernel command-line parameters.
+    AndroidGlesEmulationMode glesMode = kAndroidGlesEmulationOff;
+    if (!strcmp(hw->hw_gpu_mode, "guest")) {
+        glesMode = kAndroidGlesEmulationGuest;
+    } else if (hw->hw_gpu_enabled) {
+        glesMode = kAndroidGlesEmulationHost;
+    }
+
+    uint64_t glesFramebufferCMA = 0ULL;
+    if ((glesMode == kAndroidGlesEmulationGuest) ||
+        (opts->gpu && !strcmp(opts->gpu, "guest")) ||
+        !hw->hw_gpu_enabled) {
+        // Set CMA (continguous memory allocation) to values that depend on
+        // the desired resolution.
+        // We will assume a double buffered 32-bit framebuffer
+        // in the calculation.
+        int framebuffer_width = hw->hw_lcd_width;
+        int framebuffer_height = hw->hw_lcd_height;
+        uint64_t bytes = framebuffer_width * framebuffer_height * 4;
+        const uint64_t one_MB = 1024ULL * 1024;
+        glesFramebufferCMA = (2 * bytes + one_MB - 1) / one_MB;
+        VERBOSE_PRINT(init, "Adjusting Contiguous Memory Allocation "
+                            "of %dx%d framebuffer for software renderer to %"
+                            PRIu64 "MB.", framebuffer_width, framebuffer_height,
+                            glesFramebufferCMA);
+    } else {
+        VERBOSE_PRINT(init, "Using default value for kernel "
+                            "Contiguous Memory Allocation.");
+    }
+
+    bool shouldDisableAsyncSwap = async_query_host_gpu_SyncBlacklisted();
+    if (shouldDisableAsyncSwap &&
+        android::featurecontrol::isEnabled(android::featurecontrol::GLAsyncSwap)) {
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::GLAsyncSwap, false);
+    }
+
     int apiLevel = avd ? avdInfo_getApiLevel(avd) : 1000;
+
+    char* kernel_parameters = emulator_getKernelParameters(
+            opts, kTarget.androidArch, apiLevel, kTarget.ttyPrefix,
+            hw->kernel_parameters, glesMode, glesFramebufferCMA,
+            true  // isQemu2
+            );
+    if (!kernel_parameters) {
+        return 1;
+    }
 
     // Support for changing default lcd-density
     std::string lcd_density;
@@ -906,124 +943,25 @@ extern "C" int main(int argc, char **argv) {
         args[n++] = kTarget.qemuExtraArgs[idx];
     }
 
-    static UiEmuAgent uiEmuAgent;
-
-    // Setup GPU acceleration. This needs to go along with user interface
-    // initialization, because we need the selected backend from Qt settings.
-    {
-        qemu2_android_serialline_init();
-
-        uiEmuAgent.battery = gQAndroidBatteryAgent;
-        uiEmuAgent.cellular = gQAndroidCellularAgent;
-        uiEmuAgent.clipboard = gQAndroidClipboardAgent;
-        uiEmuAgent.finger = gQAndroidFingerAgent;
-        uiEmuAgent.location = gQAndroidLocationAgent;
-        uiEmuAgent.sensors = gQAndroidSensorsAgent;
-        uiEmuAgent.telephony = gQAndroidTelephonyAgent;
-        uiEmuAgent.userEvents = gQAndroidUserEventAgent;
-        uiEmuAgent.window = gQAndroidEmulatorWindowAgent;
-
-        // for now there's no uses of SettingsAgent, so we don't set it
-        uiEmuAgent.settings = NULL;
-
-        /* Setup SDL UI just before calling the code */
-#ifndef _WIN32
-        sigset_t set;
-        sigfillset(&set);
-        pthread_sigmask(SIG_SETMASK, &set, NULL);
-#endif  // !_WIN32
-        skin_winsys_init_args(argc, argv);
-        if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
-            return 1;
-        }
-
-        // Should enable OpenGL ES 3.x?
-        if (!android::featurecontrol::isEnabled(android::featurecontrol::GLESDynamicVersion) &&
-            skin_winsys_get_preferred_gles_apilevel() == WINSYS_GLESAPILEVEL_PREFERENCE_MAX) {
-            android::featurecontrol::setEnabledOverride(
-                android::featurecontrol::GLESDynamicVersion, true);
-        }
-
-        // Use advancedFeatures to override renderer if the user has selected
-        // in UI that the preferred renderer is "autoselected".
-        WinsysPreferredGlesBackend uiPreferredGlesBackend =
-            skin_winsys_get_preferred_gles_backend();
-
-        if (android::featurecontrol::isEnabled(android::featurecontrol::ForceANGLE)) {
-            uiPreferredGlesBackend =
-                skin_winsys_override_glesbackend_if_auto(WINSYS_GLESBACKEND_PREFERENCE_ANGLE);
-        }
-
-        if (android::featurecontrol::isEnabled(android::featurecontrol::ForceSwiftshader)) {
-            uiPreferredGlesBackend =
-                skin_winsys_override_glesbackend_if_auto(WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
-        }
-
-        doGpuConfig(avd, opts, hw, uiPreferredGlesBackend);
-
-        // Kernel command-line parameters.
-        AndroidGlesEmulationMode glesMode = kAndroidGlesEmulationOff;
-        if (!strcmp(hw->hw_gpu_mode, "guest")) {
-            glesMode = kAndroidGlesEmulationGuest;
-        } else if (hw->hw_gpu_enabled) {
-            glesMode = kAndroidGlesEmulationHost;
-        }
-
-        uint64_t glesFramebufferCMA = 0ULL;
-        if ((glesMode == kAndroidGlesEmulationGuest) ||
-                (opts->gpu && !strcmp(opts->gpu, "guest")) ||
-                !hw->hw_gpu_enabled) {
-            // Set CMA (continguous memory allocation) to values that depend on
-            // the desired resolution.
-            // We will assume a double buffered 32-bit framebuffer
-            // in the calculation.
-            int framebuffer_width = hw->hw_lcd_width;
-            int framebuffer_height = hw->hw_lcd_height;
-            uint64_t bytes = framebuffer_width * framebuffer_height * 4;
-            const uint64_t one_MB = 1024ULL * 1024;
-            glesFramebufferCMA = (2 * bytes + one_MB - 1) / one_MB;
-            VERBOSE_PRINT(init, "Adjusting Contiguous Memory Allocation "
-                    "of %dx%d framebuffer for software renderer to %"
-                    PRIu64 "MB.", framebuffer_width, framebuffer_height,
-                    glesFramebufferCMA);
-        } else {
-            VERBOSE_PRINT(init, "Using default value for kernel "
-                    "Contiguous Memory Allocation.");
-        }
-
-        char* kernel_parameters = emulator_getKernelParameters(
-                opts, kTarget.androidArch, apiLevel, kTarget.ttyPrefix,
-                hw->kernel_parameters, glesMode, glesFramebufferCMA,
-                true  // isQemu2
-                );
-
-        if (!kernel_parameters) {
-            return 1;
-        }
-
-        /* append the kernel parameters after -qemu */
-        std::string append_arg(kernel_parameters);
-        free(kernel_parameters);
-        for (int i = 0; i < argc; ++i) {
-            if (!strcmp(argv[i], "-append")) {
-                if (++i < argc) {
-                    android::base::StringAppendFormat(&append_arg, " %s", argv[i]);
-                }
-            } else {
-                args[n++] = argv[i];
+    /* append the options after -qemu */
+    std::string append_arg(kernel_parameters);
+    free(kernel_parameters);
+    for (int i = 0; i < argc; ++i) {
+        if (!strcmp(argv[i], "-append")) {
+            if (++i < argc) {
+               android::base::StringAppendFormat(&append_arg, " %s", argv[i]);
             }
+        } else {
+            args[n++] = argv[i];
         }
-        args[n++] = "-append";
-        args[n++] = ASTRDUP(append_arg.c_str());
+    }
 
-        // Features to disable or enable depending on rendering backend
-        // and gpu make/model/version
-        /* Disable the GLAsyncSwap for ANGLE so far */
-        bool shouldDisableAsyncSwap = false;
-        shouldDisableAsyncSwap |= (opts->gpu && !strncmp(opts->gpu, "angle", 5));
-        shouldDisableAsyncSwap |= async_query_host_gpu_SyncBlacklisted();
-        if (shouldDisableAsyncSwap &&
-            android::featurecontrol::isEnabled(android::featurecontrol::GLAsyncSwap)) {
+    args[n++] = "-append";
+    args[n++] = ASTRDUP(append_arg.c_str());
+
+    /* Disable the GLAsyncSwap for ANGLE so far */
+    if (opts->gpu && !strncmp(opts->gpu, "angle", 5)) {
+        if (android::featurecontrol::isEnabled(android::featurecontrol::GLAsyncSwap)) {
             android::featurecontrol::setEnabledOverride(
                     android::featurecontrol::GLAsyncSwap, false);
         }
@@ -1105,6 +1043,33 @@ extern "C" int main(int argc, char **argv) {
             }
         }
         printf("\n");
+    }
+
+    qemu2_android_serialline_init();
+
+    static UiEmuAgent uiEmuAgent;
+    uiEmuAgent.battery = gQAndroidBatteryAgent;
+    uiEmuAgent.cellular = gQAndroidCellularAgent;
+    uiEmuAgent.clipboard = gQAndroidClipboardAgent;
+    uiEmuAgent.finger = gQAndroidFingerAgent;
+    uiEmuAgent.location = gQAndroidLocationAgent;
+    uiEmuAgent.sensors = gQAndroidSensorsAgent;
+    uiEmuAgent.telephony = gQAndroidTelephonyAgent;
+    uiEmuAgent.userEvents = gQAndroidUserEventAgent;
+    uiEmuAgent.window = gQAndroidEmulatorWindowAgent;
+
+    // for now there's no uses of SettingsAgent, so we don't set it
+    uiEmuAgent.settings = NULL;
+
+    /* Setup SDL UI just before calling the code */
+#ifndef _WIN32
+    sigset_t set;
+    sigfillset(&set);
+    pthread_sigmask(SIG_SETMASK, &set, NULL);
+#endif  // !_WIN32
+    skin_winsys_init_args(argc, argv);
+    if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
+        return 1;
     }
 
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, n, (char**)args);

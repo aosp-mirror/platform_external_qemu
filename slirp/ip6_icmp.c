@@ -371,7 +371,7 @@ static void ndp_input(struct mbuf *m, Slirp *slirp, struct ip6 *ip,
                 && !IN6_IS_ADDR_MULTICAST(&icmp->icmp6_nna.target)
                 && (!IN6_IS_ADDR_MULTICAST(&ip->ip_dst)
                     || icmp->icmp6_nna.S == 0)) {
-            ndp_table_add(slirp, icmp->icmp6_nna.target, eth->h_source);
+            ndp_table_add(slirp, ip->ip_src, eth->h_source);
         }
         break;
 

@@ -14,7 +14,6 @@
 #include "android/skin/qt/extended-window-styles.h"
 
 #include "android/emulation/control/user_event_agent.h"
-#include "android/globals.h"
 #include "android/main-common.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-pages/common.h"
@@ -59,7 +58,6 @@ ExtendedWindow::ExtendedWindow(
     mExtendedUi->setupUi(this);
     mExtendedUi->helpPage->initialize(shortcuts);
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
-    mExtendedUi->rotaryInputPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->settingsPage->setAdbInterface(
             mEmulatorWindow->getAdbInterface());
     mExtendedUi->virtualSensorsPage->setLayoutChangeNotifier(eW);
@@ -82,7 +80,6 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_BATTERY,       mExtendedUi->batteryButton},
         {PANE_IDX_TELEPHONE,     mExtendedUi->telephoneButton},
         {PANE_IDX_DPAD,          mExtendedUi->dpadButton},
-        {PANE_IDX_ROTARY,        mExtendedUi->rotaryInputButton},
         {PANE_IDX_MICROPHONE,    mExtendedUi->microphoneButton},
         {PANE_IDX_FINGER,        mExtendedUi->fingerButton},
         {PANE_IDX_VIRT_SENSORS,  mExtendedUi->virtSensorsButton},
@@ -98,11 +95,6 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->batteryButton);
     mSidebarButtons.addButton(mExtendedUi->telephoneButton);
     mSidebarButtons.addButton(mExtendedUi->dpadButton);
-    if (android_hw->hw_rotaryInput) {
-        mSidebarButtons.addButton(mExtendedUi->rotaryInputButton);
-    } else {
-        mExtendedUi->rotaryInputButton->hide();
-    }
     mSidebarButtons.addButton(mExtendedUi->microphoneButton);
     mSidebarButtons.addButton(mExtendedUi->fingerButton);
     mSidebarButtons.addButton(mExtendedUi->virtSensorsButton);
@@ -202,7 +194,6 @@ void ExtendedWindow::keyPressEvent(QKeyEvent* e) {
 void ExtendedWindow::on_batteryButton_clicked()      { adjustTabs(PANE_IDX_BATTERY); }
 void ExtendedWindow::on_cellularButton_clicked()     { adjustTabs(PANE_IDX_CELLULAR); }
 void ExtendedWindow::on_dpadButton_clicked()         { adjustTabs(PANE_IDX_DPAD); }
-void ExtendedWindow::on_rotaryInputButton_clicked()  { adjustTabs(PANE_IDX_ROTARY); }
 void ExtendedWindow::on_fingerButton_clicked()       { adjustTabs(PANE_IDX_FINGER); }
 void ExtendedWindow::on_helpButton_clicked()         { adjustTabs(PANE_IDX_HELP); }
 void ExtendedWindow::on_locationButton_clicked()     { adjustTabs(PANE_IDX_LOCATION); }
@@ -253,7 +244,6 @@ void ExtendedWindow::switchToTheme(SettingsTheme theme) {
     // and to the main tool-bar.
     this->setStyleSheet(styleString);
     mToolWindow->setStyleSheet(styleString);
-    mExtendedUi->rotaryInputPage->updateTheme();
 
     // Force a re-draw to make the new style take effect
     this->style()->unpolish(mExtendedUi->stackedWidget);

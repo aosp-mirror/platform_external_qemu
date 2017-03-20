@@ -12,7 +12,6 @@
 
 #include "android/android.h"
 #include "android/crashreport/crash-handler.h"
-#include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"
 #include "android/hw-kmsg.h"
 #include "android/main-common-ui.h"
@@ -114,12 +113,6 @@ int main(int argc, char **argv) {
             // Normal exit.
             return exitStatus;
         }
-
-    // Update server-based hw config / feature flags.
-    // Must be done after emulator_parseCommonCommandLineOptions,
-    // since that calls createAVD which sets up critical info needed
-    // by featurecontrol component itself.
-    feature_update_from_server();
 
     // we know it's qemu1, and don't care what user wanted to trick us into
     opts->ranchu = 0;

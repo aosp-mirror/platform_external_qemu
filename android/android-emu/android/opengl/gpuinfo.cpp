@@ -31,7 +31,6 @@
 using android::base::Looper;
 using android::base::ParallelTask;
 using android::base::RunOptions;
-using android::base::StringView;
 using android::base::System;
 #ifdef _WIN32
 using android::base::Win32UnicodeString;
@@ -45,6 +44,10 @@ static const size_t NOTFOUND = std::string::npos;
 
 static ::android::base::LazyInstance<GpuInfoList> sGpuInfoList =
         LAZY_INSTANCE_INIT;
+
+GpuInfoList* GpuInfoList::get() {
+    return sGpuInfoList.ptr();
+}
 
 void GpuInfo::addDll(std::string dll_str) {
     dlls.push_back(dll_str);
@@ -243,43 +246,14 @@ static const BlacklistEntry sSyncBlacklist[] = {
 static const int sSyncBlacklistSize =
     sizeof(sSyncBlacklist) / sizeof(BlacklistEntry);
 
-static std::string readAndDeleteTempFile(StringView name) {
-    std::ifstream fh(name.c_str(), std::ios::binary);
-    if (!fh) {
-#ifdef _WIN32
-        Sleep(100);
-#endif
-        fh.open(name.c_str(), std::ios::binary);
-        if (!fh) {
-            return {};
-        }
-    }
-
-    std::stringstream ss;
-    ss << fh.rdbuf();
-    std::string contents = ss.str();
-    fh.close();
-
-#ifndef _WIN32
-    remove(name.c_str());
-#else
-    DWORD del_ret = DeleteFile(name.c_str());
-    if (!del_ret) {
-        Sleep(100);
-        DeleteFile(name.c_str());
-    }
-#endif
-    return contents;
-}
-
 std::string load_gpu_info() {
     auto& sys = *System::get();
-    std::string tmp_dir = sys.getTempDir();
+    std::string tmp_dir(sys.getTempDir().c_str());
 
 // Get temporary file path
 #ifndef _WIN32
     if (tmp_dir.back() != '/') {
-        tmp_dir += '/';
+        tmp_dir += "/";
     }
     std::string temp_filename_pattern = "gpuinfo_XXXXXX";
     std::string temp_file_path_template = (tmp_dir + temp_filename_pattern);
@@ -290,72 +264,81 @@ std::string load_gpu_info() {
         return std::string();
     }
 
-    StringView temp_file_path = temp_file_path_template.c_str();
+    const char* temp_file_path = temp_file_path_template.c_str();
+
 #else
     char tmp_filename_buffer[kFieldLen] = {};
     DWORD temp_file_ret =
             GetTempFileName(tmp_dir.c_str(), "gpu", 0, tmp_filename_buffer);
 
     if (!temp_file_ret) {
-        return {};
+        return std::string();
     }
 
-    StringView temp_file_path = tmp_filename_buffer;
-#endif
-    std::string secondTempFile;
+    const char* temp_file_path = tmp_filename_buffer;
 
-    // Execute the command to get GPU info.
+#endif
+
+// Execute the command to get GPU info.
 #ifdef __APPLE__
-    if (!sys.runCommand({"system_profiler", "SPDisplaysDataType"},
-                        RunOptions::WaitForCompletion |
-                        RunOptions::TerminateOnTimeout |
-                        RunOptions::DumpOutputToFile,
-                        kGPUInfoQueryTimeoutMs,
-                        nullptr, nullptr, temp_file_path)) {
-        return {};
-    }
+    char command[kFieldLen] = {};
+    snprintf(command, sizeof(command),
+             "system_profiler SPDisplaysDataType > %s", temp_file_path);
+    system(command);
 #elif !defined(_WIN32)
-    if (!sys.runCommand({"lspci", "-mvnn"},
-                        RunOptions::WaitForCompletion |
-                        RunOptions::TerminateOnTimeout |
-                        RunOptions::DumpOutputToFile,
-                        kGPUInfoQueryTimeoutMs / 2,
-                        nullptr, nullptr, temp_file_path)) {
-        return {};
-    }
-    secondTempFile = std::string(temp_file_path) + ".glxinfo";
-    if (!sys.runCommand({"glxinfo"},
-                        System::RunOptions::WaitForCompletion |
-                        System::RunOptions::TerminateOnTimeout |
-                        System::RunOptions::DumpOutputToFile,
-                        kGPUInfoQueryTimeoutMs / 2,
-                        nullptr, nullptr, secondTempFile)) {
-        return {};
-    }
+    char command[kFieldLen] = {};
+
+    snprintf(command, sizeof(command), "lspci -mvnn > %s", temp_file_path);
+    system(command);
+    snprintf(command, sizeof(command), "glxinfo >> %s", temp_file_path);
+    system(command);
 #else
-    if (!sys.runCommand({"wmic", "/OUTPUT:" + std::string(temp_file_path),
-                        "path", "Win32_VideoController", "get", "/value"},
-                        RunOptions::WaitForCompletion |
-                        RunOptions::TerminateOnTimeout,
-                        kGPUInfoQueryTimeoutMs)) {
-        return {};
+    char temp_path_arg[kFieldLen] = {};
+    snprintf(temp_path_arg, sizeof(temp_path_arg), "/OUTPUT:%s",
+             temp_file_path);
+    int wmic_run_res = sys.runCommand({"wmic", temp_path_arg, "path", "Win32_VideoController", "get", "/value"},
+                                      RunOptions::WaitForCompletion |
+                                      RunOptions::TerminateOnTimeout,
+                                      kGPUInfoQueryTimeoutMs);
+    if (!wmic_run_res) {
+        return std::string();
     }
 #endif
 
-    std::string contents = readAndDeleteTempFile(temp_file_path);
-    if (!secondTempFile.empty()) {
-        contents += readAndDeleteTempFile(secondTempFile);
+    std::ifstream fh(temp_file_path, std::ios::binary);
+    if (!fh) {
+#ifdef _WIN32
+        Sleep(100);
+#endif
+        fh.open(temp_file_path, std::ios::binary);
+        if (!fh) {
+            return std::string();
+        }
     }
+
+    std::stringstream ss;
+    ss << fh.rdbuf();
+    std::string contents = ss.str();
+    fh.close();
+
+#ifndef _WIN32
+    remove(temp_file_path);
+#else
+    DWORD del_ret = DeleteFile(temp_file_path);
+    if (!del_ret) {
+        Sleep(100);
+        del_ret = DeleteFile(temp_file_path);
+    }
+#endif
 
 #ifdef _WIN32
-    // Windows outputs the data in UTF-16 encoding, let's convert it to the
-    // common UTF-8.
     int num_chars = contents.size() / sizeof(wchar_t);
-    contents = Win32UnicodeString::convertToUtf8(
+    std::string utf8String = Win32UnicodeString::convertToUtf8(
             reinterpret_cast<const wchar_t*>(contents.c_str()), num_chars);
-#endif
-
+    return utf8String;
+#else
     return contents;
+#endif
 }
 
 std::string parse_last_hexbrackets(const std::string& str) {
@@ -596,17 +579,17 @@ void parse_gpu_info_list(const std::string& contents, GpuInfoList* gpulist) {
 
 void query_blacklist_fn(bool* res) {
     std::string gpu_info = load_gpu_info();
-    GpuInfoList* gpulist = sGpuInfoList.ptr();
+    GpuInfoList *gpulist = GpuInfoList::get();
     parse_gpu_info_list(gpu_info, gpulist);
     *res = gpuinfo_query_blacklist(gpulist, sGpuBlacklist, sBlacklistSize);
-    sGpuInfoList->blacklist_status = *res;
+    GpuInfoList::get()->blacklist_status = *res;
 #ifdef _WIN32
-    sGpuInfoList->Anglelist_status =
+    GpuInfoList::get()->Anglelist_status =
         gpuinfo_query_whitelist(gpulist, sAngleWhitelist, sAngleWhitelistSize);
 #else
-    sGpuInfoList->Anglelist_status = false;
+    GpuInfoList::get()->Anglelist_status = false;
 #endif
-    sGpuInfoList->SyncBlacklist_status =
+    GpuInfoList::get()->SyncBlacklist_status =
         gpuinfo_query_blacklist(gpulist, sSyncBlacklist, sSyncBlacklistSize);
 }
 
@@ -648,22 +631,19 @@ static android::base::LazyInstance<GPUInfoQueryThread> sGPUInfoQueryThread =
         LAZY_INSTANCE_INIT;
 
 bool async_query_host_gpu_blacklisted() {
-    return globalGpuInfoList().blacklist_status;
-}
-
-bool async_query_host_gpu_AngleWhitelisted() {
-    return globalGpuInfoList().Anglelist_status;
+    sGPUInfoQueryThread.ptr();
+    sGPUInfoQueryThread->wait();
+    return GpuInfoList::get()->blacklist_status;
 }
 
 bool async_query_host_gpu_SyncBlacklisted() {
-    return globalGpuInfoList().SyncBlacklist_status;
-}
-
-void setGpuBlacklistStatus(bool switchedToSoftware) {
-    sGpuInfoList->blacklist_status = switchedToSoftware;
-}
-
-const GpuInfoList& globalGpuInfoList() {
+    sGPUInfoQueryThread.ptr();
     sGPUInfoQueryThread->wait();
-    return *sGpuInfoList;
+    return GpuInfoList::get()->SyncBlacklist_status;
+}
+
+bool async_query_host_gpu_AngleWhitelisted() {
+    sGPUInfoQueryThread.ptr();
+    sGPUInfoQueryThread->wait();
+    return GpuInfoList::get()->Anglelist_status;
 }

@@ -21,7 +21,6 @@ namespace metrics {
 class MockMetricsReporter final : public MetricsReporter {
 public:
     using OnReportConditional = std::function<void(ConditionalCallback)>;
-    using OnFinishPendingReports = std::function<void()>;
 
     MockMetricsReporter();
     MockMetricsReporter(bool enabled,
@@ -31,13 +30,8 @@ public:
                         base::StringView qemuVersion);
 
     void reportConditional(ConditionalCallback callback) override;
-    void finishPendingReports() override;
-
     int mReportConditionalCallsCount = 0;
     OnReportConditional mOnReportConditional;
-
-    int mFinishPendingReportsCallsCount = 0;
-    OnFinishPendingReports mOnFinishPendingReports;
 
     // Allow UTs access to this one as well.
     using MetricsReporter::sendToWriter;

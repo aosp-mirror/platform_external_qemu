@@ -12,7 +12,6 @@
 #pragma once
 
 #include "android/opengl/emugl_config.h"
-#include "android/skin/winsys.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
@@ -27,8 +26,6 @@ ANDROID_BEGIN_HEADER
 // |wantedBitness| is the wanted bitness of the emulation engine. A value
 // of 0 means use the current program's bitness.
 // |noWindow| is true iff the -no-window option was used.
-// |uiPreferredBackend| communicates the preferred GLES backend from the UI.
-// The UI setting can be overridden if the user is logging in through remote desktop.
 // On success, initializes |config| and returns true. Return false on failure.
 bool androidEmuglConfigInit(EmuglConfig* config,
                             const char* avdName,
@@ -37,7 +34,6 @@ bool androidEmuglConfigInit(EmuglConfig* config,
                             bool hasGoogleApis,
                             const char* gpuOption,
                             int wantedBitness,
-                            bool noWindow,
-                            enum WinsysPreferredGlesBackend uiPreferredBackend);
+                            bool noWindow);
 
 ANDROID_END_HEADER

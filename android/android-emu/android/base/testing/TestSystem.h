@@ -315,19 +315,14 @@ public:
     virtual std::string getTempDir() const { return std::string("/tmp"); }
 
     virtual time_t getUnixTime() const override {
-        return getUnixTimeUs() / 1000000;
+        return mUnixTime / 1000000;
     }
 
     virtual Duration getUnixTimeUs() const override {
-        return getHighResTimeUs();
+        return mUnixTime;
     }
 
     virtual WallDuration getHighResTimeUs() const override {
-        if (mUnixTimeLive) {
-            auto now = hostSystem()->getHighResTimeUs();
-            mUnixTime += now - mUnixTimeLastQueried;
-            mUnixTimeLastQueried = now;
-        }
         return mUnixTime;
     }
 
@@ -336,14 +331,7 @@ public:
     }
 
     void setUnixTimeUs(Duration time) {
-        mUnixTimeLastQueried = mUnixTime = time;
-    }
-
-    void setLiveUnixTime(bool enable) {
-        mUnixTimeLive = enable;
-        if (enable) {
-            mUnixTimeLastQueried = hostSystem()->getHighResTimeUs();
-        }
+        mUnixTime = time;
     }
 
     virtual void sleepMs(unsigned n) const override {
@@ -387,9 +375,7 @@ private:
     Times mTimes;
     ShellCommand* mShellFunc;
     void* mShellOpaque;
-    mutable Duration mUnixTime;
-    mutable Duration mUnixTimeLastQueried = 0;
-    bool mUnixTimeLive = false;
+    Duration mUnixTime;
     OsType mOsType = OsType::Windows;
     bool mUnderWine = false;
     Pid mPid = 0;

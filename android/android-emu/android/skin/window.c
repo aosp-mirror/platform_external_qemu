@@ -1924,9 +1924,6 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
             }
         }
         break;
-    case kEventRotaryInput:
-        window->win_funcs->rotary_input_event(ev->u.rotary_input.delta);
-        break;
 
     case kEventScreenChanged:
         // Re-setup the OpenGL ES subwindow with a potentially different

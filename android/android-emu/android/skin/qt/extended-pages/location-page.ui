@@ -96,11 +96,21 @@
    <property name="text">
     <string>SEND</string>
    </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/light/loc_send</normaloff>:/light/loc_send</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
    <property name="ColorGroup" stdset="0">
-    <string>Button</string>
+    <string>Tool</string>
    </property>
    <property name="report_metrics" stdset="0">
     <bool>false</bool>
@@ -154,7 +164,7 @@
     <string>play_arrow_disabled</string>
    </property>
    <property name="ColorGroup" stdset="0">
-    <string>Button</string>
+    <string>Tool</string>
    </property>
    <property name="report_metrics" stdset="0">
     <bool>false</bool>
@@ -201,11 +211,21 @@
    <property name="text">
     <string>LOAD GPX/KML</string>
    </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/light/load_GPX</normaloff>:/light/load_GPX</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
    <property name="ColorGroup" stdset="0">
-    <string>Button</string>
+    <string>Tool</string>
    </property>
    <property name="report_metrics" stdset="0">
     <bool>false</bool>
