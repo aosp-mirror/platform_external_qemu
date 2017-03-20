@@ -25,13 +25,6 @@ CharDriverState* android_serialline_get_cs(CSerialLine* sl) {
     return static_cast<CharSerialLine*>(sl)->state();
 }
 
-CharDriverState* android_serialline_release_cs(CSerialLine* sl) {
-    CharSerialLine* csl = static_cast<CharSerialLine*>(sl);
-    CharDriverState* result = csl->release();
-    delete csl;
-    return result;
-}
-
 static SerialLine* qemu_serialline_buffer_open(SerialLine* sl) {
     CharDriverState* cs = static_cast<CharSerialLine*>(sl)->state();
     return new CharSerialLine(qemu_chr_open_buffer(cs));
