@@ -161,9 +161,8 @@ public:
 private:
     Lock& mLock;
     bool mLocked = true;
-
-    friend class ConditionVariable;
-    // Don't allow move because this class has a non-movable object.
+    // Don't allow move because this class
+    // has a non-movable object.
     DISALLOW_COPY_ASSIGN_AND_MOVE(AutoLock);
 };
 

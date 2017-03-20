@@ -54,24 +54,6 @@ PeriodicReporter& PeriodicReporter::get() {
 PeriodicReporter::PeriodicReporter() = default;
 
 PeriodicReporter::~PeriodicReporter() {
-    {
-        AutoLock lock(mLock);
-        // Run all scheduled tasks once to make sure we report all periodic
-        // activities before exiting.
-        for (auto& pair : mPeriodDataByPeriod) {
-            lock.unlock();
-            PerPeriodData* const data = &pair.second;
-            data->task.clear();
-            reportForPerPeriodData(data);
-            lock.lock();
-        }
-    }
-
-    // Check in case stop() is called without start()
-    if (mMetricsReporter) {
-        mMetricsReporter->finishPendingReports();
-    }
-
     AutoLock lock(mLock);
     mPeriodDataByPeriod.clear();
 }
@@ -119,41 +101,37 @@ void PeriodicReporter::startImpl(MetricsReporter* metricsReporter,
     }
 }
 
-void PeriodicReporter::reportForPerPeriodData(
-        PeriodicReporter::PerPeriodData* data) {
+void PeriodicReporter::createPerPeriodTimerNoLock(PerPeriodData* const data,
+                                                  System::Duration periodMs) {
     static_assert(!std::is_reference<decltype(data)>::value,
                   "|data| must not be a reference: gcc 4.6 used to have a bug "
                   "where capturing a reference by value resulted in silent bad "
                   "code generation");
 
-    mMetricsReporter->reportConditional(
-            [this, data](android_studio::AndroidStudioEvent* event) {
-                AutoLock lock(mLock);
-                bool result = false;
-                // Callback may erase itself from the list, deal with that by
-                // using raw iterators in the loop.
-                auto itCallback = data->callbacks.begin();
-                while (itCallback != data->callbacks.end()) {
-                    const auto itCurrentCallback = itCallback++;
-                    // As task may try removing itself, unlock the object
-                    // temporarily here.
-                    lock.unlock();
-                    result |= (*itCurrentCallback)(event);
-                    lock.lock();
-                }
-                return result;
-            });
-}
-
-void PeriodicReporter::createPerPeriodTimerNoLock(PerPeriodData* const data,
-                                                  System::Duration periodMs) {
     assert(mLooper);
-    data->task.emplace(mLooper,
-                       [this, data]() {
-                           reportForPerPeriodData(data);
-                           return true;
-                       },
-                       periodMs);
+
+    auto timerFunc = [this, data]() {
+        mMetricsReporter->reportConditional(
+                [this, data](android_studio::AndroidStudioEvent* event) {
+                    AutoLock lock(mLock);
+                    bool result = false;
+                    // Callback may erase itself from the list, deal with that
+                    // by using raw iterators in the loop.
+                    auto itCallback = data->callbacks.begin();
+                    while (itCallback != data->callbacks.end()) {
+                        const auto itCurrentCallback = itCallback++;
+                        // As task may try removing itself, unlock
+                        // the object temporarily here.
+                        lock.unlock();
+                        result |= (*itCurrentCallback)(event);
+                        lock.lock();
+                    }
+                    return result;
+                });
+        return true;
+    };
+
+    data->task.emplace(mLooper, std::move(timerFunc), periodMs);
     data->task->start();
 }
 
@@ -162,7 +140,7 @@ PeriodicReporter::addTaskInternalNoLock(System::Duration periodMs,
                                         PeriodicReporter::Callback callback) {
     PerPeriodData& data = mPeriodDataByPeriod[periodMs];
     data.callbacks.push_back(std::move(callback));
-    if (mLooper && (!data.task || data.callbacks.size() == 1)) {
+    if (mLooper && !data.task) {
         createPerPeriodTimerNoLock(&data, periodMs);
     }
 
@@ -177,7 +155,7 @@ void PeriodicReporter::removeTask(System::Duration periodMs,
     PerPeriodData& data = mPeriodDataByPeriod[periodMs];
     data.callbacks.erase(iter);
     if (data.callbacks.empty()) {
-        data.task->stopAsync();
+        data.task.clear();
     }
 }
 

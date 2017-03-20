@@ -27,8 +27,7 @@
 
 DPadPage::DPadPage(QWidget *parent) :
     QWidget(parent),
-    mUi(new Ui::DPadPage()),
-    mEmulatorWindow(NULL)
+    mUi(new Ui::DPadPage())
 {
     mUi->setupUi(this);
 

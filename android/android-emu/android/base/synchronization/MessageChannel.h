@@ -29,16 +29,19 @@ namespace base {
 class MessageChannelBase {
 public:
     // Get the current channel size
-    size_t size() const;
+    size_t size() const {
+        android::base::AutoLock lock(mLock);
+        return mCount;
+    }
 
     // Abort the currently pending operations and don't allow any other ones
     void stop();
 
     // Check if the channel is stopped.
-    bool isStopped() const;
-
-    // Block until the channel has no pending messages.
-    void waitForEmpty();
+    bool isStopped() const {
+        android::base::AutoLock lock(mLock);
+        return isStoppedLocked();
+    }
 
 protected:
     // Constructor. |capacity| is the buffer capacity in messages.

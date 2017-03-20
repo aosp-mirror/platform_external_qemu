@@ -333,7 +333,6 @@ public:
 
 protected:
     static System* setForTesting(System* system);
-    static System* hostSystem();
 
     // Internal implementation of scanDirEntries() that can be used by
     // mock implementation using a fake file system rooted into a temporary

@@ -45,16 +45,11 @@ static void user_event_generic(int type, int code, int value) {
     }
 }
 
-static void user_event_rotary(int delta) {
-    // Not implemented in qemu1.
-}
-
 const static QAndroidUserEventAgent sQAndroidUserEventAgent = {
         .sendKey = user_event_key,
         .sendKeyCode = kbd_put_keycode,
         .sendKeyCodes = user_event_keycodes,
         .sendMouseEvent = kbd_mouse_event,
-        .sendRotaryEvent = user_event_rotary,
         .sendGenericEvent = user_event_generic};
 const QAndroidUserEventAgent* const gQAndroidUserEventAgent =
         &sQAndroidUserEventAgent;
