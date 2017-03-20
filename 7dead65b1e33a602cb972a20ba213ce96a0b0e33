@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c3723bb1_31e34f15",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-20T19:40:46Z",
+      "side": 1,
+      "message": "does this mean we\u0027re saving the source twice at least: here and in the ProgramData ?",
+      "range": {
+        "startLine": 46,
+        "startChar": 5,
+        "endLine": 46,
+        "endChar": 40
+      },
+      "revId": "7dead65b1e33a602cb972a20ba213ce96a0b0e33",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
