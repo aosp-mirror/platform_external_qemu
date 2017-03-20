@@ -19,6 +19,7 @@
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/emulation/control/TestAdbInterface.h"
+#include "android/utils/path.h"
 
 #include <gtest/gtest.h>
 
@@ -41,10 +42,10 @@ public:
     using Result = ScreenCapturer::Result;
 
     ScreenCapturerTest()
-        : mTestSystem("/progdir",
+        : mTestSystem(PATH_SEP "progdir",
                       System::kProgramBitness,
-                      "/homedir",
-                      "/appdir") {}
+                      PATH_SEP "homedir",
+                      PATH_SEP "appdir") {}
 
     void SetUp() override {
         mInvalidShellCommand = false;
@@ -54,7 +55,7 @@ public:
         mLooper = new android::base::TestLooper();
         mAdb.reset(new TestAdbInterface(mLooper, "adb"));
         mCapturer.reset(new ScreenCapturer(mAdb.get()));
-        mTestSystem.getTempRoot()->makeSubDir("ScreencapOut");
+        mTestSystem.getTempRoot()->makeSubDir(PATH_SEP "ScreencapOut");
     }
 
     void TearDown() override {
@@ -130,7 +131,7 @@ protected:
 TEST_F(ScreenCapturerTest, screenshotCaptureFailure) {
     mCaptureMustSucceed = false;
     mPullMustSucceed = false;
-    mCapturer->capture("ScreencapOut",
+    mCapturer->capture(PATH_SEP "ScreencapOut",
                        [this](ScreenCapturer::Result result,
                               StringView filePath) { resultSaver(result); });
     while (!mHaveResult) {
@@ -143,7 +144,7 @@ TEST_F(ScreenCapturerTest, screenshotCaptureFailure) {
 TEST_F(ScreenCapturerTest, adbPullFailure) {
     mCaptureMustSucceed = true;
     mPullMustSucceed = false;
-    mCapturer->capture("ScreencapOut",
+    mCapturer->capture(PATH_SEP "ScreencapOut",
                        [this](ScreenCapturer::Result result,
                               StringView filePath) { resultSaver(result); });
     while (!mHaveResult) {
@@ -156,7 +157,7 @@ TEST_F(ScreenCapturerTest, adbPullFailure) {
 TEST_F(ScreenCapturerTest, success) {
     mCaptureMustSucceed = true;
     mPullMustSucceed = true;
-    mCapturer->capture("ScreencapOut",
+    mCapturer->capture(PATH_SEP "ScreencapOut",
                        [this](ScreenCapturer::Result result,
                               StringView filePath) { resultSaver(result); });
     while (!mHaveResult) {
@@ -167,10 +168,10 @@ TEST_F(ScreenCapturerTest, success) {
 }
 
 TEST_F(ScreenCapturerTest, synchronousFailures) {
-    mCapturer->capture("ScreencapOut",
+    mCapturer->capture(PATH_SEP "ScreencapOut",
                        [this](ScreenCapturer::Result result,
                               StringView filePath) { resultSaver(result); });
-    mCapturer->capture("ScreencapOut",
+    mCapturer->capture(PATH_SEP "ScreencapOut",
                        [this](ScreenCapturer::Result result,
                               StringView filePath) { resultSaver(result); });
     EXPECT_EQ(Result::kOperationInProgress, mResult);
