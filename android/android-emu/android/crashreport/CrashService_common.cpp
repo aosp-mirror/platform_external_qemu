@@ -175,8 +175,8 @@ std::string CrashService::getReportId() const {
     return mReportId;
 }
 
-const std::string& CrashService::getDumpMessage() const {
-    return mDumpMessage;
+const std::string& CrashService::getCustomDumpMessage() const {
+    return mCustomDumpMessage;
 }
 
 const std::string& CrashService::getCrashOnExitMessage() const {
@@ -419,7 +419,7 @@ void CrashService::retrieveDumpMessage() {
                                        CrashReporter::kDumpMessageFileName);
     if (System::get()->pathIsFile(path)) {
         // remember the dump message to show it instead of the default one
-        mDumpMessage = readFile(path);
+        mCustomDumpMessage = readFile(path);
     }
 }
 
@@ -434,7 +434,7 @@ void CrashService::collectDataFiles() {
         addReportFile(name.c_str(), fullName.c_str());
         if (name == CrashReporter::kDumpMessageFileName) {
             // remember the dump message to show it instead of the default one
-            mDumpMessage = readFile(fullName);
+            mCustomDumpMessage = readFile(fullName);
         } else if (name == CrashReporter::kCrashOnExitFileName) {
             // remember the dump message to show it instead of the default one
             mCrashOnExitMessage = readFile(fullName);

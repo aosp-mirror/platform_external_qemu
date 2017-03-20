@@ -79,6 +79,7 @@
 #include <vector>
 
 using namespace android::base;
+using android::crashreport::CrashReporter;
 using android::emulation::ApkInstaller;
 using android::emulation::FilePusher;
 using android::emulation::ScreenCapturer;
@@ -274,27 +275,29 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     mUserActionsCounter->startCountingForToolWindow(mToolWindow);
     mUserActionsCounter->startCountingForOverlayWindow(&mOverlay);
 
+    auto user_actions = mUserActionsCounter;
+    CrashReporter::get()->addCrashCallback([user_actions]() {
+        char actions[16] = {};
+        snprintf(actions, sizeof(actions) - 1, "%" PRIu64,
+                 user_actions->count());
+        char filename[32 + sizeof(actions)] = {};
+        snprintf(filename, sizeof(filename) - 1, "num-user-actions-%s.txt",
+                 actions);
+        CrashReporter::get()->attachData(filename, actions);
+    });
+
     // The crash reporter will dump the last 1000 UI events.
     // mEventLogger is a shared pointer, capturing its copy
     // inside a lambda ensures that it lives on as long as
     // CrashReporter needs it, even if EmulatorQtWindow is
     // destroyed.
     auto event_logger = mEventLogger;
-    android::crashreport::CrashReporter::get()->addCrashCallback(
-            [event_logger]() {
-                android::crashreport::CrashReporter::get()->attachData(
-                        "recent-ui-actions.txt",
-                        serializeEvents(event_logger->container()));
-            });
+    CrashReporter::get()->addCrashCallback([event_logger]() {
+        CrashReporter::get()->attachData(
+                "recent-ui-actions.txt",
+                serializeEvents(event_logger->container()));
+    });
 
-    setFrameAlways(mFrameAlways);
-    auto user_actions = mUserActionsCounter;
-    android::crashreport::CrashReporter::get()->addCrashCallback(
-            [user_actions]() {
-                android::crashreport::CrashReporter::get()->attachData(
-                        "num-user-actions.txt",
-                        std::to_string(user_actions->count()));
-            });
     std::weak_ptr<android::qt::UserActionsCounter> user_actions_weak(
             mUserActionsCounter);
 
@@ -316,6 +319,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                 }
                 return false;
             });
+
+    setFrameAlways(mFrameAlways);
 
     mWheelScrollTimer.setInterval(100);
     mWheelScrollTimer.setSingleShot(true);
@@ -794,7 +799,7 @@ void EmulatorQtWindow::startThread(StartFunction f, int argc, char** argv) {
             arguments += argv[i];
             arguments += '\n';
         }
-        android::crashreport::CrashReporter::get()->attachData(
+        CrashReporter::get()->attachData(
                 "qemu-main-loop-args.txt", arguments);
 
         mMainLoopThread = new MainLoopThread(f, argc, argv);

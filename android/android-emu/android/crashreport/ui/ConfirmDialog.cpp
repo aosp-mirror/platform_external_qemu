@@ -305,7 +305,7 @@ void ConfirmDialog::toggleDetails() {
 
 QString ConfirmDialog::constructDumpMessage() const {
     QString dumpMessage =
-            QString::fromStdString(mCrashService->getDumpMessage());
+            QString::fromStdString(mCrashService->getCustomDumpMessage());
     if (dumpMessage.isEmpty()) {
         dumpMessage = tr("<p>Android Emulator closed unexpectedly.</p>");
     } else {

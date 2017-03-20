@@ -140,7 +140,7 @@ public:
 
     // Returns the dump message passed by the emulator (or empty string if
     // there's none)
-    const std::string& getDumpMessage() const;
+    const std::string& getCustomDumpMessage() const;
     const std::string& getCrashOnExitMessage() const;
 
     // Tells us whether or not this crash was an exit crash.
@@ -215,7 +215,7 @@ private:
     std::string mDumpFile;
     std::string mReportId;
     std::string mComments;
-    std::string mDumpMessage;
+    std::string mCustomDumpMessage;
     std::string mCrashOnExitMessage;
     std::map<std::string, std::string> mReportValues;
     std::map<std::string, std::string> mReportFiles;
