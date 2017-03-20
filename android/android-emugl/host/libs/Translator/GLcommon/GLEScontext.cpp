@@ -446,7 +446,7 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
             m_maxTexUnits = static_cast<int>(stream->getBe32());
             m_maxUsedTexUnit = static_cast<int>(stream->getBe32());
             m_texState = new textureUnitState[m_maxTexUnits];
-            stream->read(m_texState, sizeof(textureTargetState) * m_maxTexUnits);
+            stream->read(m_texState, sizeof(textureUnitState) * m_maxTexUnits);
             m_arrayBuffer = static_cast<unsigned int>(stream->getBe32());
             m_elementBuffer = static_cast<unsigned int>(stream->getBe32());
             m_renderbuffer = static_cast<GLuint>(stream->getBe32());
@@ -544,7 +544,7 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         stream->putBe32(m_glError);
         stream->putBe32(m_maxTexUnits);
         stream->putBe32(m_maxUsedTexUnit);
-        stream->write(m_texState, sizeof(textureTargetState) * m_maxTexUnits);
+        stream->write(m_texState, sizeof(textureUnitState) * m_maxTexUnits);
         stream->putBe32(m_arrayBuffer);
         stream->putBe32(m_elementBuffer);
         stream->putBe32(m_renderbuffer);
