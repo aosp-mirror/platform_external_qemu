@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "de04dcbc_e5619181",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-20T17:30:17Z",
+      "side": 1,
+      "message": "good catch. I noted it too. It gets checked inside AdbInterface, if it\u0027s empty, it uses the standard adb path. However, it wouldn\u0027t hurt to check here too.",
+      "parentUuid": "739ba8d6_536b7c93",
+      "revId": "f873ed8fd09fdd6037bd2c6de353617006b389ba",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "47da6758_1a04ac37",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
