@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "android/skin/winsys.h"
 #include "android/utils/compiler.h"
 
 #include <stdbool.h>
@@ -35,8 +36,6 @@ typedef struct {
 // Check whether or not the host GPU is blacklisted. If so, fall back
 // to software rendering.
 bool isHostGpuBlacklisted();
-// If we actually switched to software, call this.
-void setGpuBlacklistStatus(bool switchedSoftware);
 
 typedef struct {
     char* make;
@@ -65,7 +64,8 @@ typedef enum SelectedRenderer {
     SELECTED_RENDERER_GUEST = 3,
     SELECTED_RENDERER_MESA = 4,
     SELECTED_RENDERER_SWIFTSHADER = 5,
-    SELECTED_RENDERER_ANGLE = 6,
+    SELECTED_RENDERER_ANGLE = 6, // ANGLE D3D11 with D3D9 fallback
+    SELECTED_RENDERER_ANGLE9 = 7, // ANGLE forced to D3D9
     SELECTED_RENDERER_ERROR = 255,
 } SelectedRenderer;
 
@@ -98,7 +98,8 @@ bool emuglConfig_init(EmuglConfig* config,
                       int bitness,
                       bool no_window,
                       bool blacklisted,
-                      bool google_apis);
+                      bool google_apis,
+                      enum WinsysPreferredGlesBackend uiPreferredBackend);
 
 // Setup GPU emulation according to a given |backend|.
 // |bitness| is the host bitness, and can be 0 (autodetect), 32 or 64.

@@ -39,6 +39,9 @@ LOCAL_STATIC_LIBRARIES := \
     $(EMULATOR_LIBUI_STATIC_LIBRARIES) \
     $(BREAKPAD_STATIC_LIBRARIES) \
 
+LOCAL_QT_UI_SRC_FILES := \
+    android/crashreport/ui/ConfirmDialog.ui \
+
 LOCAL_QT_MOC_SRC_FILES := \
     android/crashreport/ui/ConfirmDialog.h \
 

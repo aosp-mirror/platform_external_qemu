@@ -99,8 +99,51 @@ SettingsPage::SettingsPage(QWidget* parent)
                     Ui::Settings::CRASHREPORT_COMBOBOX_NEVER);
             break;
         default:
+            fprintf(stderr,
+                    "%s: warning: unknown crash report preference value 0x%x. "
+                    "Setting to Ask.\n",
+                    __func__, (unsigned int)report_pref);
+            mUi->set_crashReportPrefComboBox->setCurrentIndex(
+                    Ui::Settings::CRASHREPORT_COMBOBOX_ASK);
             break;
     }
+
+    WinsysPreferredGlesBackend glesbackend_pref =
+        static_cast<WinsysPreferredGlesBackend>(
+            settings.value(Ui::Settings::GLESBACKEND_PREFERENCE, 0).toInt());
+
+    switch (glesbackend_pref) {
+    case WINSYS_GLESBACKEND_PREFERENCE_AUTO:
+        mUi->set_glesBackendPrefComboBox->setCurrentIndex(
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO);
+        break;
+    case WINSYS_GLESBACKEND_PREFERENCE_ANGLE:
+        mUi->set_glesBackendPrefComboBox->setCurrentIndex(
+                WINSYS_GLESBACKEND_PREFERENCE_ANGLE);
+        break;
+    case WINSYS_GLESBACKEND_PREFERENCE_ANGLE9:
+        mUi->set_glesBackendPrefComboBox->setCurrentIndex(
+                WINSYS_GLESBACKEND_PREFERENCE_ANGLE9);
+        break;
+    case WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER:
+        mUi->set_glesBackendPrefComboBox->setCurrentIndex(
+                WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
+        break;
+    case WINSYS_GLESBACKEND_PREFERENCE_NATIVEGL:
+        mUi->set_glesBackendPrefComboBox->setCurrentIndex(
+                WINSYS_GLESBACKEND_PREFERENCE_NATIVEGL);
+        break;
+    default:
+        fprintf(stderr,
+                "%s: warning: unknown GLES backend preference value 0x%x. "
+                "Setting to auto.\n",
+                __func__, (unsigned int)glesbackend_pref);
+        mUi->set_glesBackendPrefComboBox->setCurrentIndex(
+                WINSYS_GLESBACKEND_PREFERENCE_AUTO);
+        break;
+    }
+
+    mUi->set_glesApiLevelPrefComboBox->setVisible(false);
 }
 
 void SettingsPage::setAdbInterface(android::emulation::AdbInterface* adb) {
@@ -278,5 +321,40 @@ void SettingsPage::on_set_crashReportPrefComboBox_currentIndexChanged(int index)
         set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_NEVER);
     } else if (index == Ui::Settings::CRASHREPORT_COMBOBOX_ASK) {
         set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_ASK);
+    }
+}
+
+static void set_glesBackend_to(WinsysPreferredGlesBackend v) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::GLESBACKEND_PREFERENCE, v);
+}
+
+static void set_glesApiLevel_to(WinsysPreferredGlesApiLevel v) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::GLESAPILEVEL_PREFERENCE, v);
+}
+
+void SettingsPage::on_set_glesBackendPrefComboBox_currentIndexChanged(int index) {
+    switch (index) {
+    case WINSYS_GLESBACKEND_PREFERENCE_AUTO:
+    case WINSYS_GLESBACKEND_PREFERENCE_ANGLE:
+    case WINSYS_GLESBACKEND_PREFERENCE_ANGLE9:
+    case WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER:
+    case WINSYS_GLESBACKEND_PREFERENCE_NATIVEGL:
+        set_glesBackend_to((WinsysPreferredGlesBackend)index);
+        break;
+    default:
+        break;
+    }
+}
+
+void SettingsPage::on_set_glesApiLevelPrefComboBox_currentIndexChanged(int index) {
+    switch (index) {
+    case WINSYS_GLESAPILEVEL_PREFERENCE_GLES20:
+    case WINSYS_GLESAPILEVEL_PREFERENCE_MAX:
+        set_glesApiLevel_to((WinsysPreferredGlesApiLevel)index);
+        break;
+    default:
+        break;
     }
 }

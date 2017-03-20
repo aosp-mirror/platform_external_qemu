@@ -108,8 +108,8 @@
      <property name="themeIconName" stdset="0">
       <string>phone_portrait</string>
      </property>
-     <property name="colorGroup" stdset="0">
-      <string>Tool</string>
+     <property name="ColorGroup" stdset="0">
+      <string>Button</string>
      </property>
     </widget>
     <widget class="RaisedMaterialButton" name="rotateToLandscape">
@@ -140,8 +140,8 @@
      <property name="themeIconName" stdset="0">
       <string>phone_landscape</string>
      </property>
-     <property name="colorGroup" stdset="0">
-      <string>Tool</string>
+     <property name="ColorGroup" stdset="0">
+      <string>Button</string>
      </property>
     </widget>
     <widget class="RaisedMaterialButton" name="rotateToReversePortrait">
@@ -172,8 +172,8 @@
      <property name="themeIconName" stdset="0">
       <string>phone_reverse_portrait</string>
      </property>
-     <property name="colorGroup" stdset="0">
-      <string>Tool</string>
+     <property name="ColorGroup" stdset="0">
+      <string>Button</string>
      </property>
     </widget>
     <widget class="RaisedMaterialButton" name="rotateToReverseLandscape">
@@ -204,8 +204,8 @@
      <property name="themeIconName" stdset="0">
       <string>phone_reverse_landscape</string>
      </property>
-     <property name="colorGroup" stdset="0">
-      <string>Tool</string>
+     <property name="ColorGroup" stdset="0">
+      <string>Button</string>
      </property>
     </widget>
     <widget class="QStackedWidget" name="accelerometerSliders">
