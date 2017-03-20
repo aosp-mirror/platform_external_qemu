@@ -39,11 +39,26 @@ struct GLUniformDesc {
     void onSave(android::base::Stream* stream) const;
 };
 
+struct AttachedShader {
+    GLuint localName = 0;
+    ShaderParser* shader = nullptr;
+    // linkedSource is only updated when glLinkProgram
+    // This is the "real" source the hardware is using for the compiled program.
+    std::string linkedSource = {};
+};
+
 class ProgramData:public ObjectData{
 public:
+    enum ShaderType {
+        VERTEX = 0,
+        FRAGMENT,
+        COMPUTE,
+        NUM_SHADER_TYPE
+    };
     ProgramData();
     ProgramData(android::base::Stream* stream);
     virtual void onSave(android::base::Stream* stream) const override;
+    virtual void postLoad(getObjDataPtr_t getObjDataPtr) override;
     // restore() in ProgramData must be executed after shaders
     virtual void restore(ObjectLocalName localName,
            getGlobalName_t getGlobalName) override;
@@ -53,7 +68,7 @@ public:
     GLuint getAttachedComputeShader() const;
     GLuint getAttachedShader(GLenum type) const;
 
-    bool attachShader(GLuint shader,GLenum type);
+    bool attachShader(GLuint shader, ShaderParser* shaderData, GLenum type);
     bool isAttached(GLuint shader) const;
     bool detachShader(GLuint shader);
     void bindAttribLocation(const std::string& var, GLuint loc);
@@ -90,9 +105,7 @@ private:
     // glLinkProgram and all attribute locations retrieved by glGetAttribLocation
     std::unordered_map<std::string, GLuint> linkedAttribLocs;
     std::unordered_map<GLuint, GLUniformDesc> uniforms;
-    GLuint AttachedVertexShader;
-    GLuint AttachedFragmentShader;
-    GLuint AttachedComputeShader;
+    AttachedShader attachedShaders[NUM_SHADER_TYPE] = {};
     std::string validationInfoLog;
     std::unique_ptr<const GLchar[]> infoLog;
     GLint  LinkStatus;
