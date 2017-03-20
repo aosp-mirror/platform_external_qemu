@@ -51,7 +51,7 @@ public:
     // as the actual info log from guest POV.
     void setInvalidInfoLog();
 
-    void setCompileStatus(bool val) { m_compileStatus = val; }
+    void setCompileStatus(bool val);
     bool getCompileStatus() const { return m_compileStatus; }
 
     void setDeleteStatus(bool val) { m_deleteStatus = val; }
@@ -64,6 +64,7 @@ public:
     const ANGLEShaderParser::ShaderLinkInfo& getShaderLinkInfo() const { return m_shaderLinkInfo; }
 
     virtual GenNameInfo getGenNameInfo() const override;
+    const char* getCompiledSrc() const { return m_compiledSrc.c_str(); }
 private:
     void convertESSLToGLSL(int esslVersion);
 
@@ -71,6 +72,7 @@ private:
     std::string m_src;
     std::string m_parsedSrc;
     GLchar*     m_parsedLines = nullptr;
+    std::string m_compiledSrc;
     std::basic_string<GLchar> m_infoLog;
     std::unordered_set<GLuint> m_programs;
     GLenum      m_type = 0;

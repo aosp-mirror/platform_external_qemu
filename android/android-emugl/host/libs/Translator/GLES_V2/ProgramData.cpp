@@ -45,10 +45,25 @@ void GLUniformDesc::onSave(android::base::Stream* stream) const {
     saveBuffer(stream, mVal);
 }
 
+static int s_glShaderType2ShaderType(GLenum type) {
+    switch (type) {
+    case GL_VERTEX_SHADER:
+        return ProgramData::VERTEX;
+        break;
+    case GL_FRAGMENT_SHADER:
+        return ProgramData::FRAGMENT;
+        break;
+    case GL_COMPUTE_SHADER:
+        return ProgramData::COMPUTE;
+        break;
+    default:
+        assert(0);
+        break;
+    }
+    return ProgramData::NUM_SHADER_TYPE;
+}
+
 ProgramData::ProgramData() :  ObjectData(PROGRAM_DATA),
-                              AttachedVertexShader(0),
-                              AttachedFragmentShader(0),
-                              AttachedComputeShader(0),
                               LinkStatus(GL_FALSE),
                               IsInUse(false),
                               DeleteStatus(false) {}
@@ -69,9 +84,10 @@ ProgramData::ProgramData(android::base::Stream* stream) :
        return std::make_pair(loc, std::move(desc));
     });
 
-    AttachedVertexShader = stream->getBe32();
-    AttachedFragmentShader = stream->getBe32();
-    AttachedComputeShader = stream->getBe32();
+    for (auto& s : attachedShaders) {
+        s.localName = stream->getBe32();
+        s.linkedSource = stream->getString();
+    }
     validationInfoLog = stream->getString();
 
     std::string infoLogRead = stream->getString();
@@ -216,14 +232,24 @@ void ProgramData::onSave(android::base::Stream* stream) const {
         uniform.second.onSave(stream);
     });
 
-    stream->putBe32(AttachedVertexShader);
-    stream->putBe32(AttachedFragmentShader);
-    stream->putBe32(AttachedComputeShader);
+    for (const auto& s : attachedShaders) {
+        stream->putBe32(s.localName);
+        stream->putString(s.linkedSource);
+    }
     stream->putString(validationInfoLog);
     stream->putString(infoLog.get());
     stream->putBe32(LinkStatus);
     stream->putByte(IsInUse);
     stream->putByte(DeleteStatus);
+}
+
+void ProgramData::postLoad(getObjDataPtr_t getObjDataPtr) {
+    for (auto& s : attachedShaders) {
+        if (s.localName) {
+            s.shader = (ShaderParser*)getObjDataPtr(
+                    NamedObjectType::SHADER_OR_PROGRAM, s.localName).get();
+        }
+    }
 }
 
 void ProgramData::restore(ObjectLocalName localName,
@@ -233,29 +259,41 @@ void ProgramData::restore(ObjectLocalName localName,
     assert(globalName);
     ProgramName = globalName;
     GLDispatch& dispatcher = GLEScontext::dispatcher();
-    if (AttachedVertexShader) {
-        int shaderGlobalName = getGlobalName(NamedObjectType::SHADER_OR_PROGRAM,
-                AttachedVertexShader);
-        assert(shaderGlobalName);
-        dispatcher.glAttachShader(globalName, shaderGlobalName);
-    }
-    if (AttachedFragmentShader) {
-        int shaderGlobalName = getGlobalName(NamedObjectType::SHADER_OR_PROGRAM,
-                AttachedFragmentShader);
-        assert(shaderGlobalName);
-        dispatcher.glAttachShader(globalName, shaderGlobalName);
-    }
-    if (AttachedComputeShader) {
-        int shaderGlobalName = getGlobalName(NamedObjectType::SHADER_OR_PROGRAM,
-                AttachedComputeShader);
-        assert(shaderGlobalName);
-        dispatcher.glAttachShader(globalName, shaderGlobalName);
-    }
-    for (const auto& attribLocs : linkedAttribLocs) {
-        dispatcher.glBindAttribLocation(globalName, attribLocs.second,
-                attribLocs.first.c_str());
-    }
     if (LinkStatus) {
+        // Really, each program name corresponds to 2 programs:
+        // the one that is already linked, and the one that is not yet linked.
+        // We need to restore both.
+        GLint tmpShaders[NUM_SHADER_TYPE];
+        for (int i = 0; i < NUM_SHADER_TYPE; i++) {
+            AttachedShader& s = attachedShaders[i];
+            if (s.linkedSource.empty()) {
+                tmpShaders[i] = 0;
+                continue;
+            }
+            GLenum type = 0;
+            switch (i) {
+            case VERTEX:
+                type = GL_VERTEX_SHADER;
+                break;
+            case FRAGMENT:
+                type = GL_FRAGMENT_SHADER;
+                break;
+            case COMPUTE:
+                type = GL_COMPUTE_SHADER;
+                break;
+            default:
+                assert(0);
+            }
+            tmpShaders[i] = dispatcher.glCreateShader(type);
+            const GLchar* src = (const GLchar *)s.linkedSource.c_str();
+            dispatcher.glShaderSource(tmpShaders[i], 1, &src, NULL);
+            dispatcher.glCompileShader(tmpShaders[i]);
+            dispatcher.glAttachShader(globalName, tmpShaders[i]);
+        }
+        for (const auto& attribLocs : linkedAttribLocs) {
+            dispatcher.glBindAttribLocation(globalName, attribLocs.second,
+                    attribLocs.first.c_str());
+        }
         dispatcher.glLinkProgram(globalName);
         dispatcher.glUseProgram(globalName);
         for (const auto& uniformEntry : uniforms) {
@@ -378,6 +416,22 @@ void ProgramData::restore(ObjectLocalName localName,
                             "unsupported uniform type 0x%x\n", uniform.mType);
             }
         }
+        for (auto s : tmpShaders) {
+            if (s != 0) {
+                dispatcher.glDetachShader(globalName, s);
+                dispatcher.glDeleteShader(s);
+            }
+        }
+    }
+    // We are done with the "linked" program, now we handle the one
+    // that is yet to compile
+    for (const auto& s : attachedShaders) {
+        if (s.localName) {
+            int shaderGlobalName = getGlobalName(
+                    NamedObjectType::SHADER_OR_PROGRAM, s.localName);
+            assert(shaderGlobalName);
+            dispatcher.glAttachShader(globalName, shaderGlobalName);
+        }
     }
     for (const auto& attribLocs : boundAttribLocs) {
         dispatcher.glBindAttribLocation(globalName, attribLocs.second,
@@ -404,67 +458,46 @@ const GLchar* ProgramData::getInfoLog() const {
 }
 
 GLuint ProgramData::getAttachedVertexShader() const {
-    return AttachedVertexShader;
+    return attachedShaders[VERTEX].localName;
 }
 
 GLuint ProgramData::getAttachedFragmentShader() const {
-    return AttachedFragmentShader;
+    return attachedShaders[FRAGMENT].localName;
 }
 
 GLuint ProgramData::getAttachedComputeShader() const {
-    return AttachedComputeShader;
+    return attachedShaders[COMPUTE].localName;
 }
 
 GLuint ProgramData::getAttachedShader(GLenum type) const {
-    GLuint shader = 0;
-    switch (type) {
-    case GL_VERTEX_SHADER:
-        shader = AttachedVertexShader;
-        break;
-    case GL_FRAGMENT_SHADER:
-        shader = AttachedFragmentShader;
-        break;
-    case GL_COMPUTE_SHADER:
-        shader = AttachedComputeShader;
-        break;
-    }
-    return shader;
+    return attachedShaders[s_glShaderType2ShaderType(type)].localName;
 }
 
-bool ProgramData::attachShader(GLuint shader,GLenum type) {
-    if (type==GL_VERTEX_SHADER && AttachedVertexShader==0) {
-        AttachedVertexShader=shader;
-        return true;
-    }
-    else if (type==GL_FRAGMENT_SHADER && AttachedFragmentShader==0) {
-        AttachedFragmentShader=shader;
-        return true;
-    }
-    else if (type==GL_COMPUTE_SHADER && AttachedComputeShader==0) {
-        AttachedComputeShader=shader;
+bool ProgramData::attachShader(GLuint shader, ShaderParser* shaderData,
+        GLenum type) {
+    AttachedShader& s = attachedShaders[s_glShaderType2ShaderType(type)];
+    if (s.localName == 0) {
+        s.localName = shader;
+        s.shader = shaderData;
         return true;
     }
     return false;
 }
 
 bool ProgramData::isAttached(GLuint shader) const {
-    return AttachedFragmentShader == shader ||
-           AttachedVertexShader == shader ||
-           AttachedComputeShader == shader;
+    for (const auto& s : attachedShaders) {
+        if (s.localName == shader) return true;
+    }
+    return false;
 }
 
 bool ProgramData::detachShader(GLuint shader) {
-    if (AttachedVertexShader==shader) {
-        AttachedVertexShader = 0;
-        return true;
-    }
-    else if (AttachedFragmentShader==shader) {
-        AttachedFragmentShader = 0;
-        return true;
-    }
-    else if (AttachedComputeShader==shader) {
-        AttachedComputeShader = 0;
-        return true;
+    for (auto& s : attachedShaders) {
+        if (s.localName == shader) {
+            s.localName = 0;
+            s.shader = nullptr;
+            return true;
+        }
     }
     return false;
 }
@@ -514,9 +547,19 @@ bool ProgramData::validateLink(ShaderParser* frag, ShaderParser* vert) {
 void ProgramData::setLinkStatus(GLint status) {
     LinkStatus = status;
     if (status) {
+        for (auto& s : attachedShaders) {
+            if (s.localName) {
+                assert(s.shader);
+                s.linkedSource = s.shader->getCompiledSrc();
+            }
+        }
         for (const auto &attribLoc : boundAttribLocs) {
             // overwrite
             linkedAttribLocs[attribLoc.first] = attribLoc.second;
+        }
+    } else {
+        for (auto& s : attachedShaders) {
+            s.linkedSource.clear();
         }
     }
 }

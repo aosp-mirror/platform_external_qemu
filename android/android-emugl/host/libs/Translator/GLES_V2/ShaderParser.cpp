@@ -43,6 +43,7 @@ ShaderParser::ShaderParser(android::base::Stream* stream) : ObjectData(stream) {
     m_src = stream->getString();
     m_parsedSrc = stream->getString();
     m_parsedLines = (GLchar*)m_parsedSrc.c_str();
+    m_compiledSrc = stream->getString();
     m_infoLog = stream->getString();
     size_t programSize = stream->getBe32();
     for (size_t program = 0; program < programSize; program++) {
@@ -63,6 +64,7 @@ void ShaderParser::onSave(android::base::Stream* stream) const {
     stream->putString(m_src);
     stream->putString(m_parsedSrc);
     // do not snapshot m_parsedLines
+    stream->putString(m_compiledSrc);
     stream->putString(m_infoLog);
     stream->putBe32(m_programs.size());
     for (const auto& program : m_programs) {
@@ -161,4 +163,9 @@ void ShaderParser::setInvalidInfoLog() {
 
 const GLchar* ShaderParser::getInfoLog() const {
     return m_infoLog.c_str();
+}
+
+void ShaderParser::setCompileStatus(bool val) {
+    m_compileStatus = val;
+    m_compiledSrc = m_parsedSrc.c_str();
 }

@@ -237,7 +237,7 @@ GL_APICALL void  GL_APIENTRY glAttachShader(GLuint program, GLuint shader){
         GLenum shaderType = ((ShaderParser*)shaderData)->getType();
         ProgramData* pData = (ProgramData*)programData;
         SET_ERROR_IF((pData->getAttachedShader(shaderType)!=0), GL_INVALID_OPERATION);
-        pData->attachShader(shader,shaderType);
+        pData->attachShader(shader, (ShaderParser*)shaderData, shaderType);
         s_attachShader(ctx, program, shader, (ShaderParser*)shaderData);
         ctx->dispatcher().glAttachShader(globalProgramName,globalShaderName);
     }
