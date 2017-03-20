@@ -51,6 +51,12 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
     }
     if (stream) {
         m_needLoadRestore = true;
+        for (auto ns : m_nameSpace) {
+            ns->postLoad(
+                    [this](NamedObjectType p_type, ObjectLocalName p_localName) {
+                        return this->getObjectDataPtrNoLock(p_type, p_localName);
+                });
+        }
     }
 }
 
