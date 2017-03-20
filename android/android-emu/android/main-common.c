@@ -75,7 +75,6 @@ const char*  android_skin_net_delay = NULL;
 bool android_op_wipe_data = false;
 bool android_op_writable_system = false;
 const char *savevm_on_exit = NULL;
-int guest_data_partition_mounted = 0;
 
 bool emulator_has_network_option = false;
 

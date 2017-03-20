@@ -287,7 +287,6 @@ LOCAL_SRC_FILES := \
     android/error-messages.cpp \
     android/featurecontrol/FeatureControl.cpp \
     android/featurecontrol/FeatureControlImpl.cpp \
-    android/featurecontrol/feature_control.cpp \
     android/filesystems/ext4_resize.cpp \
     android/filesystems/ext4_utils.cpp \
     android/filesystems/fstab_parser.cpp \
