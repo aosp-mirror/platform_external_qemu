@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "97967d7e_914e41f6",
+        "filename": "android/android-emu/android/hw-sensors.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-20T18:26:00Z",
+      "side": 1,
+      "message": "please explain why it has to be 10+ ms here, otherwise it looks like a random number (https://xkcd.com/221/) which it isn\u0027t",
+      "range": {
+        "startLine": 437,
+        "startChar": 53,
+        "endLine": 437,
+        "endChar": 57
+      },
+      "revId": "f8e39f4053407afc965efba8ef1b5f114a7c06a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5350320a_ee7b1d99",
+        "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-20T18:26:00Z",
+      "side": 1,
+      "message": "const",
+      "range": {
+        "startLine": 74,
+        "startChar": 38,
+        "endLine": 74,
+        "endChar": 39
+      },
+      "revId": "f8e39f4053407afc965efba8ef1b5f114a7c06a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
