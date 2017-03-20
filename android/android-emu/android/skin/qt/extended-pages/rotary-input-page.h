@@ -25,7 +25,7 @@ class RotaryInputPage : public QWidget
 public:
     explicit RotaryInputPage(QWidget *parent = 0);
     void setEmulatorWindow(EmulatorQtWindow* eW);
-    void updateTheme();
+
 private:
     void onValueChanged(const int value);
 private:
