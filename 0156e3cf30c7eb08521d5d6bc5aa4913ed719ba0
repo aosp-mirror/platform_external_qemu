@@ -22,6 +22,30 @@
       "revId": "0156e3cf30c7eb08521d5d6bc5aa4913ed719ba0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "63418c8c_fed96343",
+        "filename": "android/android-emu/android/avd/info.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1489,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-21T17:16:05Z",
+      "side": 1,
+      "message": "1. good point about qemu1/2, will update\n2. I prefer to have this safety check for the case when we actually have no idea about the api level",
+      "parentUuid": "4ae2c5ec_be0d8959",
+      "range": {
+        "startLine": 1489,
+        "startChar": 28,
+        "endLine": 1489,
+        "endChar": 75
+      },
+      "revId": "0156e3cf30c7eb08521d5d6bc5aa4913ed719ba0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
