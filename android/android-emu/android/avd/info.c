@@ -525,6 +525,8 @@ _avdInfo_getApiLevel( AvdInfo*  i )
         // current preview versions of N have 'N' as their target
         if (p[0] == 'N' && p[1] == 0) {
             level = 24;
+        } else if (toupper(p[0]) == 'O' && p[1] == 0) {
+            level = 26;
         } else {
             goto NOT_A_NUMBER;
         }
