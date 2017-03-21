@@ -90,7 +90,8 @@ extern int   android_parse_network_latency(const char*  delay);
 struct AndroidConsoleAgents;
 
 // Setup Android emulation. Return true on success.
-extern bool android_emulation_setup(const struct AndroidConsoleAgents* agents);
+extern bool android_emulation_setup(const struct AndroidConsoleAgents* agents,
+                                    bool isQemu2);
 
 extern void  android_emulation_teardown( void );
 

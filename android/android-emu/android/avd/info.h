@@ -155,6 +155,11 @@ const char* avdInfo_getApiDessertName(int apiLevel);
  */
 void avdInfo_getFullApiName(int apiLevel, char* nameStr, int strLen);
 
+/* Return the api level corresponding to a single-letter API code,
+ * e.g. 'N' -> 24
+ */
+int avdInfo_getApiLevelFromLetter(char letter);
+
 /* Returns true if the AVD is on Google APIs. */
 bool   avdInfo_isGoogleApis( const AvdInfo*  i );
 
@@ -313,14 +318,20 @@ char*        avdInfo_getCodeProfilePath( const AvdInfo*  i, const char*  profile
  */
 const char*  avdInfo_getCoreHwIniPath( const AvdInfo* i );
 
-/* Returns mode in which ADB daemon running in the guest communicates with the
- * emulator
- * Return:
- *  0 - ADBD communicates with the emulator via forwarded TCP port 5555 (a
- *      "legacy" mode).
- *  1 - ADBD communicates with the emulator via 'adb' QEMUD service.
+/* Describes the ways emulator may set up host adb <-> guest adbd communication:
+ *  legacy - ADBD communicates with the emulator via forwarded TCP port 5555.
+ *  pipe   - ADBD communicates with the emulator via 'adb' pipe service.
  */
-int          avdInfo_getAdbdCommunicationMode( const AvdInfo* i );
+typedef enum {
+    ADBD_COMMUNICATION_MODE_LEGACY,
+    ADBD_COMMUNICATION_MODE_PIPE,
+} AdbdCommunicationMode;
+
+/* Returns mode in which ADB daemon running in the guest communicates with the
+ * emulator.
+ */
+AdbdCommunicationMode avdInfo_getAdbdCommunicationMode(const AvdInfo* i,
+                                                       bool isQemu2);
 
 /* Returns config.ini snapshot presense status.
  * This routine checks if snapshots are enabled in AVD config.ini file.

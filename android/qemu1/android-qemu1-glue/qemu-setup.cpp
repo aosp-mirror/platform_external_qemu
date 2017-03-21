@@ -43,5 +43,5 @@ bool qemu_android_emulation_setup() {
 
   android::AndroidPipe::initThreading(vmLock);
 
-  return android_emulation_setup(&consoleAgents);
+  return android_emulation_setup(&consoleAgents, false);
 }
