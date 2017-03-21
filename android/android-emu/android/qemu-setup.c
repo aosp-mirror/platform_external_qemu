@@ -299,7 +299,7 @@ static bool setup_console_and_adb_ports(int console_port,
  * it should be used to setup any Android-specific items in the emulation before the
  * main loop runs
  */
-bool android_emulation_setup(const AndroidConsoleAgents* agents) {
+bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
 
     // Register Android pipe services.
     android_pipe_add_type_zero();
@@ -320,7 +320,9 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
     int success   = 0;
     int adb_port = -1;
     int base_port = ANDROID_CONSOLE_BASEPORT;
-    int legacy_adb = avdInfo_getAdbdCommunicationMode(android_avdInfo) ? 0 : 1;
+    bool legacy_adb =
+            avdInfo_getAdbdCommunicationMode(
+                android_avdInfo, isQemu2) == ADBD_COMMUNICATION_MODE_LEGACY;
     if (android_op_ports) {
         int console_port = -1;
         if (!android_parse_ports_option(android_op_ports,

@@ -102,7 +102,7 @@ bool qemu_android_emulation_setup() {
         return false;
     }
 
-    return android_emulation_setup(&consoleAgents);
+    return android_emulation_setup(&consoleAgents, true);
 }
 
 void qemu_android_emulation_teardown() {}

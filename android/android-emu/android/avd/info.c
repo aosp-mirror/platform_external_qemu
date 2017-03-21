@@ -14,6 +14,7 @@
 #include "android/android.h"
 #include "android/avd/util.h"
 #include "android/avd/keys.h"
+#include "android/base/ArraySize.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
@@ -121,6 +122,12 @@ struct AvdInfo {
     /* for both */
     int       apiLevel;
     int       incrementalVersion;
+
+    /* For preview releases where we don't know the exact API level this flag
+     * indicates that at least we know it's M+ (for some code that needs to
+     * select either legacy or modern operation mode.
+     */
+    bool      isMarshmallowOrHigher;
     bool      isPhoneApi;
     bool      isGoogleApis;
     bool      isAndroidAuto;
@@ -483,7 +490,7 @@ _avdInfo_getContentPath( AvdInfo*  i )
 }
 
 static int
-_avdInfo_getApiLevel( AvdInfo*  i )
+_avdInfo_getApiLevel(AvdInfo* i, bool* isMarshmallowOrHigher)
 {
     char*       target;
     const char* p;
@@ -523,9 +530,13 @@ _avdInfo_getApiLevel( AvdInfo*  i )
         }
     }
     if (p == NULL || !isdigit(*p)) {
-        // current preview versions of N have 'N' as their target
-        if (p[0] == 'N' && p[1] == 0) {
-            level = 24;
+        // preview versions usually have a single letter instead of the API
+        // level.
+        if (p && isalpha(p[0]) && p[1] == 0) {
+            level = avdInfo_getApiLevelFromLetter(p[0]);
+            if (level > 99 && toupper(p[0]) >= 'M') {
+                *isMarshmallowOrHigher = true;
+            }
         } else {
             goto NOT_A_NUMBER;
         }
@@ -576,47 +587,64 @@ avdInfo_getApiLevel(const AvdInfo* i) {
     return i->apiLevel;
 }
 
-const char*
-avdInfo_getApiDessertName(int apiLevel) {
-    // This information was taken from the SDK Manager:
-    // Appearances & Behavior > System Settings > Android SDK > SDK Platforms
-    if (apiLevel == 10) return "Gingerbread";        // 10
-    if (apiLevel <= 13) return "";                   // No names for 0..9, 11..13
-    if (apiLevel <= 15) return "Ice Cream Sandwich"; // 14..15
-    if (apiLevel <= 18) return "Jelly Bean";         // 16..18
-    if (apiLevel <= 20) return "KitKat";             // 19..20
-    if (apiLevel <= 22) return "Lollipop";           // 21..22
-    if (apiLevel <= 23) return "Marshmallow";        // 23
-    if (apiLevel <= 24) return "Nougat";             // 24
+// This information was taken from the SDK Manager:
+// Appearances & Behavior > System Settings > Android SDK > SDK Platforms
+static const struct {
+    int apiLevel;
+    const char* dessertName;
+    const char* fullName;
+} kApiLevelInfo[] = {
+    { 10, "Gingerbread", "2.3.3 (Gingerbread) - API 10 (Rev 2)" },
+    { 14, "Ice Cream Sandwich", "4.0 (Ice Cream Sandwich) - API 14 (Rev 4)" },
+    { 15, "Ice Cream Sandwich", "4.0.3 (Ice Cream Sandwich) - API 15 (Rev 5)" },
+    { 16, "Jelly Bean", "4.1 (Jelly Bean) - API 16 (Rev 5)" },
+    { 17, "Jelly Bean", "4.2 (Jelly Bean) - API 17 (Rev 3)" },
+    { 18, "Jelly Bean", "4.3 (Jelly Bean) - API 18 (Rev 3)" },
+    { 19, "KitKat", "4.4 (KitKat) - API 19 (Rev 4)" },
+    { 20, "KitKat", "4.4 (KitKat Wear) - API 20 (Rev 2)" },
+    { 21, "Lollipop", "5.0 (Lollipop) - API 21 (Rev 2)" },
+    { 22, "Lollipop", "5.1 (Lollipop) - API 22 (Rev 2)" },
+    { 23, "Marshmallow", "6.0 (Marshmallow) - API 23 (Rev 1)" },
+    { 24, "Nougat", "7.0 (Nougat) - API 24" },
+    { 25, "Nougat", "7.1 (Nougat) - API 25" },
+    { 26, "O Preview", "API 26" },
+};
 
+const char* avdInfo_getApiDessertName(int apiLevel) {
+    int i = 0;
+    for (; i < ARRAY_SIZE(kApiLevelInfo); ++i) {
+        if (kApiLevelInfo[i].apiLevel == apiLevel) {
+            return kApiLevelInfo[i].dessertName;
+        }
+    }
     return "";
 }
 
-void
-avdInfo_getFullApiName(int apiLevel, char* nameStr, int strLen) {
-    // This information was taken from the SDK Manager:
-    // Appearances & Behavior > System Settings > Android SDK > SDK Platforms
-    switch (apiLevel) {
-        case 10: strncpy(nameStr, "2.3.3 (Gingerbread) - API 10 (Rev 2)",        strLen); break;
-        case 14: strncpy(nameStr, "4.0 (Ice Cream Sandwich) - API 14 (Rev 4)",   strLen); break;
-        case 15: strncpy(nameStr, "4.0.3 (Ice Cream Sandwich) - API 15 (Rev 5)", strLen); break;
-        case 16: strncpy(nameStr, "4.1 (Jelly Bean) - API 16 (Rev 5)",           strLen); break;
-        case 17: strncpy(nameStr, "4.2 (Jelly Bean) - API 17 (Rev 3)",           strLen); break;
-        case 18: strncpy(nameStr, "4.3 (Jelly Bean) - API 18 (Rev 3)",           strLen); break;
-        case 19: strncpy(nameStr, "4.4 (KitKat) - API 19 (Rev 4)",               strLen); break;
-        case 20: strncpy(nameStr, "4.4 (KitKat Wear) - API 20 (Rev 2)",          strLen); break;
-        case 21: strncpy(nameStr, "5.0 (Lollipop) - API 21 (Rev 2)",             strLen); break;
-        case 22: strncpy(nameStr, "5.1 (Lollipop) - API 22 (Rev 2)",             strLen); break;
-        case 23: strncpy(nameStr, "6.0 (Marshmallow) - API 23 (Rev 1)",          strLen); break;
-        case 24: strncpy(nameStr, "7.0 (Nougat) - API 24",                       strLen); break;
-
-        default:
-            if (apiLevel < 0 || apiLevel > 99) {
-                strncpy(nameStr, "Unknown API version", strLen);
-            } else {
-                snprintf(nameStr, strLen, "API %d", apiLevel);
-            }
+void avdInfo_getFullApiName(int apiLevel, char* nameStr, int strLen) {
+    if (apiLevel < 0 || apiLevel > 99) {
+        strncpy(nameStr, "Unknown API version", strLen);
+        return;
     }
+
+    int i = 0;
+    for (; i < ARRAY_SIZE(kApiLevelInfo); ++i) {
+        if (kApiLevelInfo[i].apiLevel == apiLevel) {
+            strncpy(nameStr, kApiLevelInfo[i].fullName, strLen);
+            return;
+        }
+    }
+    snprintf(nameStr, strLen, "API %d", apiLevel);
+}
+
+int avdInfo_getApiLevelFromLetter(char letter) {
+    const char letterUpper = toupper(letter);
+    int i = 0;
+    for (; i < ARRAY_SIZE(kApiLevelInfo); ++i) {
+        if (toupper(kApiLevelInfo[i].dessertName[0]) == letterUpper) {
+            return kApiLevelInfo[i].apiLevel;
+        }
+    }
+    return 1000;
 }
 
 /* Look for a named file inside the AVD's content directory.
@@ -859,7 +887,7 @@ avdInfo_new( const char*  name, AvdInfoParams*  params )
          _avdInfo_getCoreHwIniPath(i, i->contentPath) < 0 )
         goto FAIL;
 
-    i->apiLevel = _avdInfo_getApiLevel(i);
+    i->apiLevel = _avdInfo_getApiLevel(i, &i->isMarshmallowOrHigher);
 
     /* look for image search paths. handle post 1.1/pre cupcake
      * obsolete SDKs.
@@ -1456,17 +1484,23 @@ avdInfo_getCharmapFile( const AvdInfo* i, const char* charmapName )
     return _avdInfo_getContentOrSdkFilePath(i, fileName);
 }
 
-int avdInfo_getAdbdCommunicationMode( const AvdInfo* i )
+AdbdCommunicationMode avdInfo_getAdbdCommunicationMode(const AvdInfo* i,
+                                                       bool isQemu2)
 {
-    if (i->apiLevel < 16 || i->apiLevel > 99) {
-        // QEMU pipe for ADB communication was added in android-4.1.1_r1 API 16
-        D("API < 16 or unknown, forcing ro.adb.qemud==0");
-        return 0;
+    if (isQemu2) {
+        // All qemu2-compatible system images support modern communication mode.
+        return ADBD_COMMUNICATION_MODE_PIPE;
     }
 
-    // Ignore property file since all system images have been updated a long time
-    // ago to support the pipe service for API level >= 16.
-    return 1;
+    if (i->apiLevel < 16 || (i->apiLevel > 99 && !i->isMarshmallowOrHigher)) {
+        // QEMU pipe for ADB communication was added in android-4.1.1_r1 API 16
+        D("API < 16 or unknown, forcing ro.adb.qemud==0");
+        return ADBD_COMMUNICATION_MODE_LEGACY;
+    }
+
+    // Ignore property file since all system images have been updated a long
+    // time ago to support the pipe service for API level >= 16.
+    return ADBD_COMMUNICATION_MODE_PIPE;
 }
 
 int avdInfo_getSnapshotPresent(const AvdInfo* i)
