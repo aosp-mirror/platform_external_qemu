@@ -18,6 +18,7 @@
 
 #include "android/android.h"
 #include "android/avd/hw-config.h"
+#include "android/boot-properties.h"
 #include "android/cmdline-option.h"
 #include "android/constants.h"
 #include "android/crashreport/crash-handler.h"
@@ -517,6 +518,12 @@ extern "C" int main(int argc, char **argv) {
             args[n++] = "-snapshot-no-time-update";
         }
 #endif  // QEMU2_SNAPSHOT_SUPPORT
+    }
+
+    if (android::featurecontrol::isEnabled(android::featurecontrol::LogcatPipe) && opts->logcat) {
+        boot_property_add_logcat_pipe(opts->logcat);
+        // we have done with -logcat option.
+        opts->logcat = NULL;
     }
 
     {
