@@ -148,7 +148,10 @@ void FramebufferData::restore(ObjectLocalName localName,
         } else { // binding a texture
             int texGlobalName = getGlobalName(NamedObjectType::TEXTURE,
                     attachPoint.name);
-            assert(texGlobalName);
+            if (!texGlobalName) {
+                fprintf(stderr, "FramebufferData::restore: warning: "
+                        "a texture is deleted without unbinding FBO\n");
+            }
             dispatcher.glFramebufferTexture2DEXT(GL_FRAMEBUFFER,
                     s_index2Attachment(i),
                     attachPoint.target,

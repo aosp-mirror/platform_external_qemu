@@ -19,6 +19,8 @@
 #include "android/base/files/StreamSerializing.h"
 #include "GLcommon/GLEScontext.h"
 
+#include <algorithm>
+
 static uint32_t s_texAlign(uint32_t v, uint32_t align) {
 
     uint32_t rem = v % align;
@@ -118,8 +120,6 @@ SaveableTexture::SaveableTexture(android::base::Stream* stream,
     m_border = stream->getBe32();
     // TODO: handle other texture targets
     if (m_target == GL_TEXTURE_2D) {
-        std::vector<unsigned char> loadedData;
-        loadBuffer(stream, &loadedData);
         // restore the texture
         GLDispatch& dispatcher = GLEScontext::dispatcher();
         m_globalName = m_globalTexObj->getGlobalName();
@@ -130,9 +130,18 @@ SaveableTexture::SaveableTexture(android::base::Stream* stream,
         dispatcher.glBindTexture(m_target, m_globalName);
         // Restore texture data
         dispatcher.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        const void* pixels = loadedData.empty() ? nullptr : loadedData.data();
-        dispatcher.glTexImage2D(m_target, 0, m_internalFormat, m_width,
-                m_height, m_border, m_format, m_type, pixels);
+        // Get the number of mipmap levels.
+        unsigned int numLevels = 1 + floor(log2(
+                (float)std::max(m_width, m_height)));
+        for (unsigned int level = 0; level < numLevels; level++) {
+            GLint width = stream->getBe32();
+            GLint height = stream->getBe32();
+            std::vector<unsigned char> loadedData;
+            loadBuffer(stream, &loadedData);
+            const void* pixels = loadedData.empty() ? nullptr : loadedData.data();
+            dispatcher.glTexImage2D(m_target, level, m_internalFormat, width,
+                    height, m_border, m_format, m_type, pixels);
+        }
         // Restore tex param
         auto loadParam = [stream, &dispatcher](GLenum pname) {
             GLint param = stream->getBe32();
@@ -167,11 +176,25 @@ void SaveableTexture::onSave(android::base::Stream* stream) const {
         dispatcher.glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTex);
         dispatcher.glPixelStorei(GL_PACK_ALIGNMENT, 1);
         dispatcher.glBindTexture(GL_TEXTURE_2D, m_globalName);
-        // Snapshot texture data
-        std::vector<unsigned char> tmpData(s_texImageSize(m_format, m_type, 1,
-                m_width, m_height));
-        dispatcher.glGetTexImage(m_target, 0, m_format, m_type, tmpData.data());
-        saveBuffer(stream, tmpData);
+        // Get the number of mipmap levels.
+        unsigned int numLevels = 1 + floor(log2(
+                (float)std::max(m_width, m_height)));
+        for (unsigned int level = 0; level < numLevels; level++) {
+            GLint width = 1;
+            GLint height = 1;
+            dispatcher.glGetTexLevelParameteriv(GL_TEXTURE_2D, level,
+                    GL_TEXTURE_WIDTH, &width);
+            dispatcher.glGetTexLevelParameteriv(GL_TEXTURE_2D, level,
+                    GL_TEXTURE_HEIGHT, &height);
+            stream->putBe32(width);
+            stream->putBe32(height);
+            // Snapshot texture data
+            std::vector<unsigned char> tmpData(s_texImageSize(m_format, m_type,
+                    1, width, height));
+            dispatcher.glGetTexImage(m_target, level, m_format, m_type,
+                    tmpData.data());
+            saveBuffer(stream, tmpData);
+        }
         // Snapshot texture param
         auto saveParam = [stream, &dispatcher](GLenum pname) {
             GLint param;
