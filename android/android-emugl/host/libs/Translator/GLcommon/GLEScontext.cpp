@@ -439,6 +439,28 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
                         return std::make_pair(item, val);
             });
 
+            m_cullFace = static_cast<GLenum>(stream->getBe32());
+            m_fontFace = static_cast<GLenum>(stream->getBe32());
+            m_depthFunc = static_cast<GLenum>(stream->getBe32());
+            m_depthMask = static_cast<GLboolean>(stream->getByte());
+            m_zNear = static_cast<GLclampf>(stream->getBe32());
+            m_zFar = static_cast<GLclampf>(stream->getBe32());
+
+            stream->read(m_stencilStates, sizeof(m_stencilStates));
+
+            m_colorMaskR = static_cast<GLboolean>(stream->getByte());
+            m_colorMaskG = static_cast<GLboolean>(stream->getByte());
+            m_colorMaskB = static_cast<GLboolean>(stream->getByte());
+            m_colorMaskA = static_cast<GLboolean>(stream->getByte());
+
+            m_clearColorR = static_cast<GLclampf>(stream->getBe32());
+            m_clearColorG = static_cast<GLclampf>(stream->getBe32());
+            m_clearColorB = static_cast<GLclampf>(stream->getBe32());
+            m_clearColorA = static_cast<GLclampf>(stream->getBe32());
+
+            m_clearDepth = static_cast<GLclampf>(stream->getBe32());
+            m_clearStencil = static_cast<GLint>(stream->getBe32());
+
             // share group is supposed to be loaded by EglContext and reset
             // when loading EglContext
             //int sharegroupId = stream->getBe32();
@@ -541,6 +563,28 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
                     stream->putBe32(pixelStore.first);
                     stream->putBe32(pixelStore.second);
         });
+
+        stream->putBe32(m_cullFace);
+        stream->putBe32(m_fontFace);
+        stream->putBe32(m_depthFunc);
+        stream->putByte(m_depthMask);
+        stream->putBe32(m_zNear);
+        stream->putBe32(m_zFar);
+
+        stream->write(m_stencilStates, sizeof(m_stencilStates));
+
+        stream->putByte(m_colorMaskR);
+        stream->putByte(m_colorMaskG);
+        stream->putByte(m_colorMaskB);
+        stream->putByte(m_colorMaskA);
+
+        stream->putBe32(m_clearColorR);
+        stream->putBe32(m_clearColorG);
+        stream->putBe32(m_clearColorB);
+        stream->putBe32(m_clearColorA);
+
+        stream->putBe32(m_clearDepth);
+        stream->putBe32(m_clearStencil);
 
         // share group is supposed to be saved / loaded by EglContext
         stream->putBe32(m_glError);
@@ -1185,6 +1229,117 @@ void GLEScontext::setBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB,
 
 void GLEScontext::setPixelStorei(GLenum pname, GLint param) {
     m_glPixelStoreiList[pname] = param;
+}
+
+void GLEScontext::setCullFace(GLenum mode) {
+    m_cullFace = mode;
+}
+
+void GLEScontext::setFontFace(GLenum mode) {
+    m_fontFace = mode;
+}
+
+void GLEScontext::setDepthFunc(GLenum func) {
+    m_depthFunc = func;
+}
+
+void GLEScontext::setDepthMask(GLboolean flag) {
+    m_depthMask = flag;
+}
+
+void GLEScontext::setDepthRangef(GLclampf zNear, GLclampf zFar) {
+    m_zNear = zNear;
+    m_zFar = zFar;
+}
+
+void GLEScontext::setStencilFuncSeparate(GLenum face, GLenum func, GLint ref,
+        GLuint mask) {
+    if (face == GL_FRONT_AND_BACK) {
+        setStencilFuncSeparate(GL_FRONT, func, ref, mask);
+        setStencilFuncSeparate(GL_BACK, func, ref, mask);
+        return;
+    }
+    int idx = 0;
+    switch (face) {
+        case GL_FRONT:
+            idx = StencilFont;
+            break;
+        case GL_BACK:
+            idx = StencilBack;
+            break;
+        default:
+            return;
+    }
+    m_stencilStates[idx].m_func = func;
+    m_stencilStates[idx].m_ref = ref;
+    m_stencilStates[idx].m_funcMask = mask;
+}
+
+void GLEScontext::setStencilMaskSeparate(GLenum face, GLuint mask) {
+    if (face == GL_FRONT_AND_BACK) {
+        setStencilMaskSeparate(GL_FRONT, mask);
+        setStencilMaskSeparate(GL_BACK, mask);
+        return;
+    }
+    int idx = 0;
+    switch (face) {
+        case GL_FRONT:
+            idx = StencilFont;
+            break;
+        case GL_BACK:
+            idx = StencilBack;
+            break;
+        default:
+            return;
+    }
+    m_stencilStates[idx].m_writeMask = mask;
+}
+
+void GLEScontext::setStencilOpSeparate(GLenum face, GLenum fail, GLenum zfail,
+        GLenum zpass) {
+    if (face == GL_FRONT_AND_BACK) {
+        setStencilOpSeparate(GL_FRONT, fail, zfail, zpass);
+        setStencilOpSeparate(GL_BACK, fail, zfail, zpass);
+        return;
+    }
+    int idx = 0;
+    switch (face) {
+        case GL_FRONT:
+            idx = StencilFont;
+            break;
+        case GL_BACK:
+            idx = StencilBack;
+            break;
+        default:
+            return;
+    }
+    m_stencilStates[idx].m_sfail = fail;
+    m_stencilStates[idx].m_dpfail = zfail;
+    m_stencilStates[idx].m_dppass = zpass;
+}
+
+void GLEScontext::setColorMask(GLboolean red, GLboolean green, GLboolean blue,
+        GLboolean alpha) {
+    m_colorMaskR = red;
+    m_colorMaskG = green;
+    m_colorMaskB = blue;
+    m_colorMaskA = alpha;
+}
+
+void GLEScontext::setClearColor(GLclampf red, GLclampf green, GLclampf blue,
+        GLclampf alpha) {
+    m_clearColorR = red;
+    m_clearColorG = green;
+    m_clearColorB = blue;
+    m_clearColorA = alpha;
+}
+
+void GLEScontext::setClearDepth(GLclampf depth) {
+    m_clearDepth = depth;
+}
+
+void GLEScontext::setClearStencil(GLint s) {
+    m_clearStencil = s;
 }
 
 const char * GLEScontext::getExtensionString() {
