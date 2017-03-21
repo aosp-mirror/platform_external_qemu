@@ -155,6 +155,11 @@ const char* avdInfo_getApiDessertName(int apiLevel);
  */
 void avdInfo_getFullApiName(int apiLevel, char* nameStr, int strLen);
 
+/* Return the api level corresponding to a single-letter API code,
+ * e.g. 'N' -> 24
+ */
+int avdInfo_getApiLevelFromLetter(char letter);
+
 /* Returns true if the AVD is on Google APIs. */
 bool   avdInfo_isGoogleApis( const AvdInfo*  i );
 
