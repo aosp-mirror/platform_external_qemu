@@ -12,6 +12,10 @@
 
 #pragma once
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 /* Manage the set of boot system properties.
  * See the documentation for the 'boot-properties' service
  * in docs/ANDROID-QEMUD-SERVICES.TXT
@@ -38,6 +42,11 @@ int  boot_property_add( const char*  name, const char*  value );
 int  boot_property_add2( const char*  name, int  namelen,
                          const char*  value, int  valuelen );
 
+/* add qemu.cmdline=androidboot.logcat=%s androidboot.consolepipe=qemu_pipe,pipe:logcat
+   and qemu.logcat=start
+*/
+void boot_property_add_logcat_pipe(const char* logcat_filter);
+
 /* init the boot property QEMUD service. This must be performed before
  * the VM is started. This is also performed automatically if you call
  * boot_property_add().
@@ -47,3 +56,5 @@ void  boot_property_init_service( void );
 /* parse the parameter of -prop options passed on the command line
  */
 void  boot_property_parse_option( const char*  param );
+
+ANDROID_END_HEADER
