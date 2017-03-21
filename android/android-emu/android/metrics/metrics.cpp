@@ -33,6 +33,7 @@
 #include "android/metrics/StudioConfig.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_io.h"
+#include "android/utils/x86_cpuid.h"
 
 #include "android/metrics/proto/studio_stats.pb.h"
 
@@ -333,5 +334,10 @@ void android_metrics_report_common_info(bool openglAlive) {
         event->mutable_emulator_host()->set_cpu_manufacturer(
                     (cpuFlags & ANDROID_CPU_INFO_INTEL) ? "INTEL" :
                     (cpuFlags & ANDROID_CPU_INFO_AMD) ? "AMD" : "OTHER");
+        uint32_t cpuid_mfs;
+        android_get_x86_cpuid(1, 0, &cpuid_mfs,
+                              nullptr, nullptr, nullptr);
+        event->mutable_emulator_host()->set_cpu_model_family_stepping(
+                    cpuid_mfs);
     });
 }
