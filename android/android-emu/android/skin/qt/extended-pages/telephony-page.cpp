@@ -18,9 +18,19 @@
 #include "android/telephony/modem.h"
 #include "android/telephony/sms.h"
 #include <QSettings>
+#include <cassert>
 #include <cctype>
 
 #define MAX_SMS_MSG_SIZE 1024 // Arbitrary emulator limitation
+
+class TelephonyEvent : public QEvent {
+public:
+    TelephonyEvent(QEvent::Type typeId, int nActive) :
+        QEvent(typeId),
+        numActiveCalls(nActive) { }
+public:
+    int numActiveCalls;
+};
 
 TelephonyPage::TelephonyPage(QWidget *parent) :
     QWidget(parent),
@@ -30,6 +40,14 @@ TelephonyPage::TelephonyPage(QWidget *parent) :
 {
     mUi->setupUi(this);
     mUi->tel_numberBox->setValidator(new PhoneNumberValidator());
+    mCustomEventType = (QEvent::Type)QEvent::registerEventType();
+}
+
+TelephonyPage::~TelephonyPage() {
+    if (mTelephonyAgent  &&  mTelephonyAgent->setNotifyCallback) {
+        // Tell the agent that we do not want any more call-backs
+        mTelephonyAgent->setNotifyCallback(0, 0);
+    }
 }
 
 void TelephonyPage::on_tel_startEndButton_clicked()
@@ -67,7 +85,8 @@ void TelephonyPage::on_tel_startEndButton_clicked()
 
         setButtonEnabled(mUi->tel_holdCallButton, theme, true);
         // Change the icon and text to "END CALL"
-        QIcon theIcon(":/dark/call_end"); // Same for light and dark
+        QIcon theIcon((theme == SETTINGS_THEME_DARK) ? ":/dark/call_end"
+                                                     : ":/light/call_end");
         mUi->tel_startEndButton->setIcon(theIcon);
         mUi->tel_startEndButton->setText(tr("END CALL"));
     } else {
@@ -81,7 +100,8 @@ void TelephonyPage::on_tel_startEndButton_clicked()
 
         setButtonEnabled(mUi->tel_holdCallButton, theme, false);
         // Change the icon and text to "CALL DEVICE"
-        QIcon theIcon(":/dark/phone_button"); // Same for light and dark
+        QIcon theIcon((theme == SETTINGS_THEME_DARK) ? ":/dark/phone_button"
+                                                     : ":/light/phone_button");
         mUi->tel_startEndButton->setIcon(theIcon);
         mUi->tel_startEndButton->setText(tr("CALL DEVICE"));
 
@@ -237,6 +257,53 @@ void TelephonyPage::on_sms_sendButton_clicked()
     smspdu_free_list( pdus );
 }
 
+extern "C" {
+static void telephony_callback(void* userData, int numActiveCalls) {
+    TelephonyPage* tpInst = (TelephonyPage*)userData;
+    if (tpInst) {
+        tpInst->eventLauncher(numActiveCalls);
+    }
+}
+}
+
 void TelephonyPage::setTelephonyAgent(const QAndroidTelephonyAgent* agent) {
     mTelephonyAgent = agent;
+
+    if (mTelephonyAgent  &&  mTelephonyAgent->setNotifyCallback) {
+        // Notify the agent that we want call-backs to tell us when the
+        // telephone state changes
+        mTelephonyAgent->setNotifyCallback(telephony_callback, (void*)this);
+    }
+}
+
+void TelephonyPage::eventLauncher(int numActiveCalls) {
+    QEvent* newTelephonyEvent = new TelephonyEvent(mCustomEventType, numActiveCalls);
+    QCoreApplication::postEvent(this, newTelephonyEvent);
+}
+
+void TelephonyPage::customEvent(QEvent* cEvent) {
+    assert(cEvent->type() == mCustomEventType);
+    TelephonyEvent* tEvent = (TelephonyEvent*)cEvent;
+    if (tEvent->numActiveCalls == 0) {
+        if (mCallActivity != CallActivity::Inactive) {
+            // The device has no calls but we're active.
+            // They must have hung up on us. Push the
+            // END CALL button on our side.
+            on_tel_startEndButton_clicked();
+        }
+        // No 'else': If both we and the device have
+        // no calls active, there is nothing to do.
+//  } else {
+//      // The device has a call active. If we are
+//      // also active, there's nothing to do.
+//      //
+//      // If we are not active, the device is probably
+//      // initiating a call. Maybe we should give the
+//      // option to accept or reject that call.
+//      //
+//      // Note that the device can deal with multiple
+//      // calls (e.g., call waiting), but our modem
+//      // interface only tells us how many are active.
+//      // We cannot tell which call was ended.
+    }
 }

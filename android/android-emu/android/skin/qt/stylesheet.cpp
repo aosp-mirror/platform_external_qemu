@@ -237,10 +237,14 @@ struct StylesheetValues {
         {"BOX_COLOR",                       "#e0e0e0"},  // Boundary around SMS text area
         {"BKG_COLOR",                       "#f0f0f0"},  // Main page background
         {"BKG_COLOR_OVERLAY", "rgba(236,236,236,255)"},  // Overlay background
+        {"BUTTON_BKG_COLOR",                "#F9F9F9"},  // Background of push buttons
+        {"BUTTON_COLOR",                    "#757575"},  // Text in push buttons
+        {"DISABLED_BUTTON_COLOR",           "#bbbbbb"},  // Text in disabled push buttons
         {"DISABLED_PULLDOWN_COLOR",         "#c0c0c0"},  // Text in disabled combo box
-        {"DISABLED_TOOL_COLOR",             "#baeae4"},  // Grayed-out button text
+        {"DISABLED_TOOL_COLOR",             "#baeae4"},  // Grayed-out tool text
         {"DIVIDER_COLOR",                   "#e0e0e0"},  // Line between items
         {"EDIT_COLOR",                      "#e0e0e0"},  // Line under editable fields
+        {"INSTRUCTION_COLOR",               "#91a4ad"},  // Large instruction string
         {"LARGE_DIVIDER_COLOR",             "#ebebeb"},  // Start of large divider's gradient
         {MAJOR_TAB_COLOR_VAR,               "#91a4ad"},  // Text of major tabs
         {"MAJOR_TITLE_COLOR",               "#617d8a"},  // Text of major tab separators
@@ -260,10 +264,14 @@ struct StylesheetValues {
         {"BOX_COLOR",                    "#414a50"},
         {"BKG_COLOR",                    "#273238"},
         {"BKG_COLOR_OVERLAY", "rgba(35,46,52,255)"},
+        {"BUTTON_BKG_COLOR",             "#37474f"},
+        {"BUTTON_COLOR",                 "#bec1c3"},
+        {"DISABLED_BUTTON_COLOR",        "#5f6162"},
         {"DISABLED_PULLDOWN_COLOR",      "#808080"},
         {"DISABLED_TOOL_COLOR",          "#1b5c58"},
         {"DIVIDER_COLOR",                "#e0e0e0"},
         {"EDIT_COLOR",                   "#808080"},
+        {"INSTRUCTION_COLOR",            "#ffffff"},
         {"LARGE_DIVIDER_COLOR",          "#1f282d"},
         {MAJOR_TAB_COLOR_VAR,            "#bdc0c3"},
         {"MAJOR_TITLE_COLOR",            "#e5e6e7"},
