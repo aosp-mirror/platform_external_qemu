@@ -1105,6 +1105,8 @@ message EmulatorHost {
   // May differ from os_architecture field as it is calculated differently,
   // trying to compensate the JVM bittness.
   optional int64 os_bit_count = 4;
+  // CPU model, family, stepping
+  optional uint32 cpu_model_family_stepping = 5;
 }
 
 // Detailed profiling information for the gradle build.
