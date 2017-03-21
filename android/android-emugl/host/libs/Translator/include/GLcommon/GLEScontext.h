@@ -283,13 +283,33 @@ public:
         return m_drawFramebuffer;
     }
 
-    void setViewport(GLint x, GLint y, GLsizei width, GLsizei height);
-    void setScissor(GLint x, GLint y, GLsizei width, GLsizei height);
-
     void setEnable(GLenum item, bool isEnable);
     void setBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB,
             GLenum srcAlpha, GLenum dstAlpha);
     void setPixelStorei(GLenum pname, GLint param);
+
+    void setViewport(GLint x, GLint y, GLsizei width, GLsizei height);
+    void setScissor(GLint x, GLint y, GLsizei width, GLsizei height);
+    void setCullFace(GLenum mode);
+    void setFrontFace(GLenum mode);
+
+    void setDepthFunc(GLenum func);
+    void setDepthMask(GLboolean flag);
+    void setDepthRangef(GLclampf zNear, GLclampf zFar);
+
+    void setStencilFuncSeparate(GLenum face, GLenum func, GLint ref,
+            GLuint mask);
+    void setStencilMaskSeparate(GLenum face, GLuint mask);
+    void setStencilOpSeparate(GLenum face, GLenum fail, GLenum zfail,
+            GLenum zpass);
+
+    void setColorMask(GLboolean red, GLboolean green, GLboolean blue,
+            GLboolean alpha);
+
+    void setClearColor(GLclampf red, GLclampf green, GLclampf blue,
+            GLclampf alpha);
+    void setClearDepth(GLclampf depth);
+    void setClearStencil(GLint s);
 
     static GLDispatch& dispatcher(){return s_glDispatch;};
 
@@ -396,6 +416,41 @@ protected:
     GLenum m_blendDstAlpha = GL_ZERO;
 
     std::unordered_map<GLenum, GLint> m_glPixelStoreiList = {};
+
+    GLenum m_cullFace = GL_BACK;
+    GLenum m_frontFace = GL_CCW;
+
+    GLenum m_depthFunc = GL_LESS;
+    GLboolean m_depthMask = GL_TRUE;
+    GLclampf m_zNear = 0.0f;
+    GLclampf m_zFar = 1.0f;
+
+    enum {
+        StencilFront = 0,
+        StencilBack
+    };
+    struct {
+        GLenum m_func = GL_ALWAYS;
+        GLint m_ref = 0;
+        GLuint m_funcMask = -1; // all bits set to 1
+        GLuint m_writeMask = -1; // all bits set to 1
+        GLenum m_sfail = GL_KEEP;
+        GLenum m_dpfail = GL_KEEP;
+        GLenum m_dppass = GL_KEEP;
+    } m_stencilStates[2];
+
+    bool m_colorMaskR = GL_TRUE;
+    bool m_colorMaskG = GL_TRUE;
+    bool m_colorMaskB = GL_TRUE;
+    bool m_colorMaskA = GL_TRUE;
+
+    GLclampf m_clearColorR = 0.0f;
+    GLclampf m_clearColorG = 0.0f;
+    GLclampf m_clearColorB = 0.0f;
+    GLclampf m_clearColorA = 0.0f;
+
+    GLclampf m_clearDepth = 1.0f;
+    GLint m_clearStencil = 0;
 
     static std::string*   s_glExtensions;
     static GLSupport      s_glSupport;

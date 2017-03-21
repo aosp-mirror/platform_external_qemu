@@ -827,6 +827,7 @@ GL_APICALL GLuint GL_APIENTRY glCreateShader(GLenum type){
 
 GL_APICALL void  GL_APIENTRY glCullFace(GLenum mode){
     GET_CTX();
+    ctx->setCullFace(mode);
     ctx->dispatcher().glCullFace(mode);
 }
 
@@ -987,15 +988,18 @@ GL_APICALL void  GL_APIENTRY glDeleteShader(GLuint shader){
 
 GL_APICALL void  GL_APIENTRY glDepthFunc(GLenum func){
     GET_CTX();
+    ctx->setDepthFunc(func);
     ctx->dispatcher().glDepthFunc(func);
 }
 GL_APICALL void  GL_APIENTRY glDepthMask(GLboolean flag){
     GET_CTX();
+    ctx->setDepthMask(flag);
     ctx->dispatcher().glDepthMask(flag);
 }
 
 GL_APICALL void  GL_APIENTRY glDepthRangef(GLclampf zNear, GLclampf zFar){
     GET_CTX();
+    ctx->setDepthRangef(zNear, zFar);
     ctx->dispatcher().glDepthRange(zNear,zFar);
 }
 
@@ -1263,6 +1267,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attach
 
 GL_APICALL void  GL_APIENTRY glFrontFace(GLenum mode){
     GET_CTX();
+    ctx->setFrontFace(mode);
     ctx->dispatcher().glFrontFace(mode);
 }
 
@@ -2704,24 +2709,29 @@ GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const 
 
 GL_APICALL void  GL_APIENTRY glStencilFunc(GLenum func, GLint ref, GLuint mask){
     GET_CTX();
+    ctx->setStencilFuncSeparate(GL_FRONT_AND_BACK, func, ref, mask);
     ctx->dispatcher().glStencilFunc(func,ref,mask);
 }
 GL_APICALL void  GL_APIENTRY glStencilFuncSeparate(GLenum face, GLenum func, GLint ref, GLuint mask){
     GET_CTX();
+    ctx->setStencilFuncSeparate(face, func, ref, mask);
     ctx->dispatcher().glStencilFuncSeparate(face,func,ref,mask);
 }
 GL_APICALL void  GL_APIENTRY glStencilMask(GLuint mask){
     GET_CTX();
+    ctx->setStencilMaskSeparate(GL_FRONT_AND_BACK, mask);
     ctx->dispatcher().glStencilMask(mask);
 }
 
 GL_APICALL void  GL_APIENTRY glStencilMaskSeparate(GLenum face, GLuint mask){
     GET_CTX();
+    ctx->setStencilMaskSeparate(face, mask);
     ctx->dispatcher().glStencilMaskSeparate(face,mask);
 }
 
 GL_APICALL void  GL_APIENTRY glStencilOp(GLenum fail, GLenum zfail, GLenum zpass){
     GET_CTX();
+    ctx->setStencilOpSeparate(GL_FRONT_AND_BACK, fail, zfail, zpass);
     ctx->dispatcher().glStencilOp(fail,zfail,zpass);
 }
 
@@ -2735,6 +2745,7 @@ GL_APICALL void  GL_APIENTRY glStencilOpSeparate(GLenum face, GLenum fail, GLenu
         default:
             SET_ERROR_IF(1, GL_INVALID_ENUM);
     }
+    ctx->setStencilOpSeparate(face, fail, zfail, zpass);
     ctx->dispatcher().glStencilOpSeparate(face, fail,zfail,zpass);
 }
 
