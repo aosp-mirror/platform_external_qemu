@@ -14,6 +14,8 @@
 
 #include "android/hw-sensors.h"
 
+#include <stdio.h>
+
 int sensor_set(int sensorId, float a, float b, float c) {
     return android_sensors_set(sensorId, a, b, c);
 }
