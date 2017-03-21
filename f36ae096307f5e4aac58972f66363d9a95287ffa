@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "86181e61_6810b58f",
+        "filename": "android/emulator/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 694,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-21T23:52:34Z",
+      "side": 1,
+      "message": "nit: please reformat to 80 chars",
+      "range": {
+        "startLine": 694,
+        "startChar": 72,
+        "endLine": 694,
+        "endChar": 80
+      },
+      "revId": "f36ae096307f5e4aac58972f66363d9a95287ffa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
