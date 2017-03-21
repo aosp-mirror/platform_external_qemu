@@ -37,8 +37,8 @@ int LogcatPipe::onGuestSend(const AndroidPipeBuffer* buffers,
                                int numBuffers) {
     int result = 0;
     while (numBuffers > 0) {
-        // TODO: print the logcat into a file
-        // printf("%s", (char*)buffers->data);
+        // BUG: b.android.com/261625
+        printf("%s", (char*)buffers->data);
         result += static_cast<int>(buffers->size);
         buffers++;
         numBuffers--;
