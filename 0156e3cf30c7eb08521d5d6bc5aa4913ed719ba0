@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4ae2c5ec_be0d8959",
+        "filename": "android/android-emu/android/avd/info.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1489,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-03-21T17:12:04Z",
+      "side": 1,
+      "message": "if we know it is qemu2, should just use pipe: we have updated all qemu2 compatible image to use pipe already;\n\nif it is qemu1, checking apilevle \u003c 16 is good enough",
+      "range": {
+        "startLine": 1489,
+        "startChar": 28,
+        "endLine": 1489,
+        "endChar": 75
+      },
+      "revId": "0156e3cf30c7eb08521d5d6bc5aa4913ed719ba0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
