@@ -723,12 +723,23 @@ void FrameBuffer::drainWindowSurface() {
     }
 
     emugl::Mutex::AutoLock mutex(m_lock);
+    // Color buffers automatically bind to a context in dtor
+    // But window surfaces do not. So we need to manually bind to a context
+    // between releasing color buffers and window surfaces.
     for (const HandleType winHandle : tinfo->m_windowSet) {
         const auto winIt = m_windows.find(winHandle);
         if (winIt != m_windows.end()) {
             if (const HandleType oldColorBufferHandle = winIt->second.second) {
                 closeColorBufferLocked(oldColorBufferHandle);
+                winIt->second.second = 0;
+                winIt->second.first->setColorBuffer(nullptr);
             }
+        }
+    }
+    ScopedBind bind(this);
+    for (const HandleType winHandle : tinfo->m_windowSet) {
+        const auto winIt = m_windows.find(winHandle);
+        if (winIt != m_windows.end()) {
             m_windows.erase(winIt);
         }
     }

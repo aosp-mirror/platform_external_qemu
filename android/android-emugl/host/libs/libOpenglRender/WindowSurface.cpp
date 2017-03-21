@@ -64,6 +64,7 @@ WindowSurface *WindowSurface::create(EGLDisplay display,
 
 void WindowSurface::setColorBuffer(ColorBufferPtr p_colorBuffer) {
     mAttachedColorBuffer = p_colorBuffer;
+    if (!p_colorBuffer) return;
 
     // resize the window if the attached color buffer is of different
     // size.
