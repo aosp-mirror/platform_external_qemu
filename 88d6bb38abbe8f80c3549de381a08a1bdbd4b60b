@@ -22,6 +22,30 @@
       "revId": "88d6bb38abbe8f80c3549de381a08a1bdbd4b60b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "826dd082_f8ca765e",
+        "filename": "android/android-emu/android/metrics/proto/studio_stats.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 1108,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-22T19:11:08Z",
+      "side": 1,
+      "message": "Done in google3",
+      "parentUuid": "51ca17eb_0bc68985",
+      "range": {
+        "startLine": 1108,
+        "startChar": 0,
+        "endLine": 1108,
+        "endChar": 32
+      },
+      "revId": "88d6bb38abbe8f80c3549de381a08a1bdbd4b60b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
