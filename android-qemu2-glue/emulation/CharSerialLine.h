@@ -34,12 +34,6 @@ public:
 
     CharDriverState* state() const { return mCs; }
 
-    CharDriverState* release() {
-        CharDriverState* cs = mCs;
-        mCs = nullptr;
-        return cs;
-    }
-
 private:
     DISALLOW_COPY_AND_ASSIGN(CharSerialLine);
 

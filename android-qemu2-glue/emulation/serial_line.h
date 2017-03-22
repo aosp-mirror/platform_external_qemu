@@ -32,8 +32,4 @@ CSerialLine* android_serialline_from_cs(CharDriverState* cs);
 // instance |sl|.
 CharDriverState* android_serialline_get_cs(CSerialLine* sl);
 
-// Extract the CharDriverState instance wrapped by |sl|, but also
-// destroys the CSerialLine instance.
-CharDriverState* android_serialline_release_cs(CSerialLine* sl);
-
 ANDROID_END_HEADER
