@@ -1517,7 +1517,7 @@ int qcow2_discard_clusters(BlockDriverState *bs, uint64_t offset,
     uint64_t nb_clusters;
     int ret;
 
-    end_offset = offset + (nb_sectors << BDRV_SECTOR_BITS);
+    end_offset = offset + ((uint64_t)nb_sectors << BDRV_SECTOR_BITS);
 
     /* Round start up and end down */
     offset = align_offset(offset, s->cluster_size);
