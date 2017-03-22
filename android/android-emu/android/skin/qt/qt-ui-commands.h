@@ -74,6 +74,7 @@ static const std::pair<QString, QtUICommand> NameToQtUICmd[] = {
         NAME_TO_CMD(HOME),
         NAME_TO_CMD(BACK),
         NAME_TO_CMD(OVERVIEW),
+        NAME_TO_CMD(TOGGLE_TRACKBALL),
 };
 #undef NAME_TO_CMD
 
@@ -111,6 +112,7 @@ static const std::pair<QtUICommand, QString> QtUICmdToDesc[] = {
         CMD_TO_DESC(BACK, "Back"),
         CMD_TO_DESC(MENU, "Menu"),
         CMD_TO_DESC(OVERVIEW, "Overview"),
+        CMD_TO_DESC(TOGGLE_TRACKBALL, "Toggle trackball mode (if AVD is configured for it)"),
 };
 #undef CMD_TO_DESC
 
