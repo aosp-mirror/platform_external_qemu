@@ -14,6 +14,7 @@
 #include "android/base/system/System.h"
 
 #include <iterator>
+#include <numeric>
 
 #include <assert.h>
 #include <string.h>
@@ -108,16 +109,14 @@ StringView PathUtils::extension(const StringView path, HostType hostType) {
 }
 
 // static
-std::string PathUtils::removeTrailingDirSeparator(StringView path,
-                                                  HostType hostType) {
-    std::string result = path;
-    size_t pathLen = result.size();
+StringView PathUtils::removeTrailingDirSeparator(StringView path,
+                                                 HostType hostType) {
+    size_t pathLen = path.size();
     // NOTE: Don't remove initial path separator for absolute paths.
-    while (pathLen > 1U && isDirSeparator(result[pathLen - 1U], hostType)) {
+    while (pathLen > 1U && isDirSeparator(path[pathLen - 1U], hostType)) {
         pathLen--;
     }
-    result.resize(pathLen);
-    return result;
+    return StringView(path.begin(), pathLen);
 }
 
 // static
@@ -133,8 +132,8 @@ std::string PathUtils::addTrailingDirSeparator(StringView path,
 // static
 bool PathUtils::split(StringView path,
                       HostType hostType,
-                      std::string* dirName,
-                      std::string* baseName) {
+                      StringView* dirName,
+                      StringView* baseName) {
     if (path.empty()) {
         return false;
     }
@@ -155,10 +154,10 @@ bool PathUtils::split(StringView path,
     // Handle common case.
     if (pos > prefixLen) {
         if (dirName) {
-            dirName->assign(path.begin(), pos);
+            *dirName = StringView(path.begin(), pos);
         }
         if (baseName) {
-            baseName->assign(path.begin() + pos, end - pos);
+            *baseName = StringView(path.begin() + pos, end - pos);
         }
         return true;
     }
@@ -166,13 +165,13 @@ bool PathUtils::split(StringView path,
     // If there is no directory separator, the path is a single file name.
     if (dirName) {
         if (!prefixLen) {
-            dirName->assign(".");
+            *dirName = ".";
         } else {
-            dirName->assign(path.begin(), prefixLen);
+            *dirName = StringView(path.begin(), prefixLen);
         }
     }
     if (baseName) {
-        baseName->assign(path.begin() + prefixLen, end - prefixLen);
+        *baseName = StringView(path.begin() + prefixLen, end - prefixLen);
     }
     return true;
 }
@@ -201,16 +200,17 @@ std::string PathUtils::join(StringView path1,
 }
 
 // static
-std::vector<std::string> PathUtils::decompose(StringView path,
-                                              HostType hostType) {
-    std::vector<std::string> result;
+template <class String>
+std::vector<String> PathUtils::decompose(const String& path,
+                                                HostType hostType) {
+    std::vector<String> result;
     if (path.empty())
         return result;
 
     size_t prefixLen = rootPrefixSize(path, hostType);
     auto it = path.begin();
     if (prefixLen) {
-        result.push_back(std::string(it, prefixLen));
+        result.emplace_back(it, it + prefixLen);
         it += prefixLen;
     }
     for (;;) {
@@ -218,7 +218,7 @@ std::vector<std::string> PathUtils::decompose(StringView path,
         while (*p && !isDirSeparator(*p, hostType))
             p++;
         if (p > it) {
-            result.push_back(std::string(it, p - it));
+            result.emplace_back(it, p);
         }
         if (!*p) {
             break;
@@ -228,25 +228,38 @@ std::vector<std::string> PathUtils::decompose(StringView path,
     return result;
 }
 
-// static
-std::string PathUtils::recompose(const std::vector<std::string>& components,
+std::vector<std::string> PathUtils::decompose(std::string&& path,
+                                              HostType hostType) {
+    return decompose<std::string>(path, hostType);
+}
+
+std::vector<StringView> PathUtils::decompose(StringView path,
+                                             HostType hostType) {
+    return decompose<StringView>(path, hostType);
+}
+
+template <class String>
+std::string PathUtils::recompose(const std::vector<String>& components,
                                  HostType hostType) {
-    const char dirSeparator = getDirSeparator(hostType);
-    std::string result;
-    size_t capacity = 0;
-    // To reduce memory allocations, compute capacity before doing the
-    // real append.
-    for (size_t n = 0; n < components.size(); ++n) {
-        if (n)
-            capacity++;
-        capacity += components[n].size();
+    if (components.empty()) {
+        return {};
     }
 
-    result.reserve(capacity);
+    const char dirSeparator = getDirSeparator(hostType);
+    std::string result;
+    // To reduce memory allocations, compute capacity before doing the
+    // real append.
+    const size_t capacity =
+            components.size() - 1 +
+            std::accumulate(components.begin(), components.end(), size_t(0),
+                            [](size_t val, const String& next) {
+                                return val + next.size();
+                            });
 
+    result.reserve(capacity);
     bool addSeparator = false;
     for (size_t n = 0; n < components.size(); ++n) {
-        const std::string& component = components[n];
+        const auto& component = components[n];
         if (addSeparator)
             result += dirSeparator;
         addSeparator = true;
@@ -256,38 +269,58 @@ std::string PathUtils::recompose(const std::vector<std::string>& components,
                 addSeparator = false;
             }
         }
-        result += components[n];
+        result += component;
     }
     return result;
 }
 
 // static
-void PathUtils::simplifyComponents(std::vector<std::string>* components) {
-    std::vector<std::string> stack;
-    for (std::vector<std::string>::const_iterator it = components->begin();
-         it != components->end(); ++it) {
-        if (*it == ".") {
+std::string PathUtils::recompose(const std::vector<std::string>& components,
+                                 HostType hostType) {
+    return recompose<std::string>(components, hostType);
+}
+
+// static
+std::string PathUtils::recompose(const std::vector<StringView>& components,
+                                 HostType hostType) {
+    return recompose<StringView>(components, hostType);
+}
+
+// static
+template <class String>
+void PathUtils::simplifyComponents(std::vector<String>* components) {
+    std::vector<String> stack;
+    for (auto& component : *components) {
+        if (component == StringView(".")) {
             // Ignore any instance of '.' from the list.
             continue;
         }
-        if (*it == "..") {
+        if (component == StringView("..")) {
             // Handling of '..' is specific: if there is a item on the
             // stack that is not '..', then remove it, otherwise push
             // the '..'.
-            if (!stack.empty() && stack[stack.size() -1U] != "..") {
-                stack.resize(stack.size() - 1U);
+            if (!stack.empty() && stack.back() != StringView("..")) {
+                stack.pop_back();
             } else {
-                stack.push_back(*it);
+                stack.push_back(std::move(component));
             }
             continue;
         }
         // If not a '..', just push on the stack.
-        stack.push_back(*it);
+        stack.push_back(std::move(component));
     }
-    if (stack.empty())
+    if (stack.empty()) {
         stack.push_back(".");
-
+    }
     components->swap(stack);
+}
+
+void PathUtils::simplifyComponents(std::vector<std::string>* components) {
+    simplifyComponents<std::string>(components);
+}
+
+void PathUtils::simplifyComponents(std::vector<StringView>* components) {
+    simplifyComponents<StringView>(components);
 }
 
 }  // namespace base

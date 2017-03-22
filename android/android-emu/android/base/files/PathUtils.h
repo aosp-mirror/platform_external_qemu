@@ -76,11 +76,11 @@ public:
     }
 
     // Remove trailing separators from a |path| string, for a given |hostType|.
-    static std::string removeTrailingDirSeparator(StringView path,
-                                                  HostType hostType);
+    static StringView removeTrailingDirSeparator(StringView path,
+                                                 HostType hostType);
 
     // Remove trailing separators from a |path| string for the current host.
-    static std::string removeTrailingDirSeparator(StringView path) {
+    static StringView removeTrailingDirSeparator(StringView path) {
         return removeTrailingDirSeparator(path, HOST_TYPE);
     }
 
@@ -142,13 +142,13 @@ public:
     //
     static bool split(StringView path,
                       HostType hostType,
-                      std::string* dirName,
-                      std::string* baseName);
+                      StringView* dirName,
+                      StringView* baseName);
 
     // A variant of split() for the current process' host type.
     static bool split(StringView path,
-                      std::string* dirName,
-                      std::string* baseName) {
+                      StringView* dirName,
+                      StringView* baseName) {
         return split(path, HOST_TYPE, dirName, baseName);
     }
 
@@ -183,13 +183,29 @@ public:
     // each one being a path component (prefix or subdirectory or file
     // name). Directory separators do not appear in components, except
     // for the root prefix, if any.
-    static std::vector<std::string> decompose(StringView path,
+    static std::vector<StringView> decompose(StringView path,
+                                             HostType hostType);
+    static std::vector<std::string> decompose(std::string&& path,
                                               HostType hostType);
+    static std::vector<StringView> decompose(const char* path,
+                                             HostType hostType) {
+        return decompose(StringView(path), hostType);
+    }
+
+    template <class String>
+    static std::vector<String> decompose(const String& path,
+                                         HostType hostType);
 
     // Decompose |path| into individual components for the host platform.
     // See comments above for more details.
-    static std::vector<std::string> decompose(StringView path) {
+    static std::vector<StringView> decompose(StringView path) {
         return decompose(path, HOST_TYPE);
+    }
+    static std::vector<std::string> decompose(std::string&& path) {
+        return decompose(std::move(path), HOST_TYPE);
+    }
+    static std::vector<StringView> decompose(const char* path) {
+        return decompose(StringView(path));
     }
 
     // Recompose a path from individual components into a file path string.
@@ -198,21 +214,30 @@ public:
     // first component is a root prefix, it will be kept as is, i.e.:
     //   [ 'C:', 'foo' ] -> 'C:foo' on Win32, but not Posix where it will
     // be 'C:/foo'.
+    static std::string recompose(const std::vector<StringView>& components,
+                                 HostType hostType);
     static std::string recompose(const std::vector<std::string>& components,
+                                 HostType hostType);
+    template <class String>
+    static std::string recompose(const std::vector<String>& components,
                                  HostType hostType);
 
     // Recompose a path from individual components into a file path string
     // for the current host. |components| is a vector os strings.
     // Returns a new file path string.
-    static std::string recompose(const std::vector<std::string>& components) {
-        return recompose(components, HOST_TYPE);
+    template <class String>
+    static std::string recompose(const std::vector<String>& components) {
+        return PathUtils::recompose(components, HOST_TYPE);
     }
 
     // Given a list of components returned by decompose(), simplify it
     // by removing instances of '.' and '..' when that makes sense.
     // Note that it is not possible to simplify initial instances of
     // '..', i.e. "foo/../../bar" -> "../bar"
+    static void simplifyComponents(std::vector<StringView>* components);
     static void simplifyComponents(std::vector<std::string>* components);
+    template <class String>
+    static void simplifyComponents(std::vector<String>* components);
 };
 
 // Useful shortcuts to avoid too much typing.

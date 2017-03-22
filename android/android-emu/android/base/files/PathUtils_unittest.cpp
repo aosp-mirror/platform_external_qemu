@@ -208,17 +208,17 @@ TEST(PathUtils, split) {
             {"C:/foo", {{true, "C:/", "foo"}, {true, "C:/", "foo"}}},
     };
     for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
-        std::string dirname, basename;
+        StringView dirname, basename;
 
         EXPECT_EQ(kData[n].expected[kHostPosix].result,
                   PathUtils::split(kData[n].path, kHostPosix, &dirname,
                                    &basename))
                 << "when testing posix [" << kData[n].path << "]";
         if (kData[n].expected[kHostPosix].result) {
-            EXPECT_STREQ(kData[n].expected[kHostPosix].dirname, dirname.c_str())
+            EXPECT_EQ(kData[n].expected[kHostPosix].dirname, dirname)
                     << "when testing posix [" << kData[n].path << "]";
-            EXPECT_STREQ(kData[n].expected[kHostPosix].basename,
-                         basename.c_str())
+            EXPECT_EQ(kData[n].expected[kHostPosix].basename,
+                         basename)
                     << "when testing posix [" << kData[n].path << "]";
         }
 
@@ -227,10 +227,10 @@ TEST(PathUtils, split) {
                                    &basename))
                 << "when testing win32 [" << kData[n].path << "]";
         if (kData[n].expected[kHostWin32].result) {
-            EXPECT_STREQ(kData[n].expected[kHostWin32].dirname, dirname.c_str())
+            EXPECT_EQ(kData[n].expected[kHostWin32].dirname, dirname)
                     << "when testing win32 [" << kData[n].path << "]";
-            EXPECT_STREQ(kData[n].expected[kHostWin32].basename,
-                         basename.c_str())
+            EXPECT_EQ(kData[n].expected[kHostWin32].basename,
+                         basename)
                     << "when testing win32 [" << kData[n].path << "]";
         }
 
@@ -238,10 +238,10 @@ TEST(PathUtils, split) {
                   PathUtils::split(kData[n].path, &dirname, &basename))
                 << "when testing host [" << kData[n].path << "]";
         if (kData[n].expected[kHostType].result) {
-            EXPECT_STREQ(kData[n].expected[kHostType].dirname, dirname.c_str())
+            EXPECT_EQ(kData[n].expected[kHostType].dirname, dirname)
                     << "when testing host [" << kData[n].path << "]";
-            EXPECT_STREQ(kData[n].expected[kHostType].basename,
-                         basename.c_str())
+            EXPECT_EQ(kData[n].expected[kHostType].basename,
+                         basename)
                     << "when testing host [" << kData[n].path << "]";
         }
     }
@@ -284,7 +284,7 @@ static const int kMaxComponents = 10;
 typedef const char* ComponentList[kMaxComponents];
 
 static void checkComponents(const ComponentList& expected,
-                            const std::vector<std::string>& components,
+                            const std::vector<StringView>& components,
                             const char* hostType,
                             const char* path) {
     size_t m;
@@ -292,7 +292,7 @@ static void checkComponents(const ComponentList& expected,
         if (!expected[m])
             break;
         const char* component = expected[m];
-        EXPECT_STREQ(component, components[m].c_str())
+        EXPECT_EQ(component, components[m])
                 << hostType << " component #" << (m + 1) << " in " << path;
     }
     EXPECT_EQ(m, components.size())

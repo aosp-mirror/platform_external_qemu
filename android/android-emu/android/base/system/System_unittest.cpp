@@ -448,7 +448,7 @@ TEST(System, DISABLED_runCommandWithOutput) {
     System::Pid pid = 666;
     System::ProcessExitCode exitCode = 0;
     std::string outputFile = PathUtils::recompose(
-            {System::get()->getTempDir(), std::string("test.txt")});
+            std::vector<StringView>{System::get()->getTempDir(), "test.txt"});
 
     EXPECT_TRUE(System::get()->runCommand(
             cmd, RunOptions::WaitForCompletion | RunOptions::DumpOutputToFile,

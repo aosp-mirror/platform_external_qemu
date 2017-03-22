@@ -24,6 +24,7 @@
 using android::base::PathUtils;
 using android::base::ScopedCPtr;
 using android::base::strDup;
+using android::base::StringView;
 using android::base::System;
 
 ABool path_exists(const char* path) {
@@ -60,17 +61,14 @@ char* path_get_absolute(const char* path) {
     }
 
     std::string currentDir = System::get()->getCurrentDirectory();
-    std::vector<std::string> currentItems =
-            PathUtils::decompose(currentDir.c_str());
-    std::vector<std::string> pathItems = PathUtils::decompose(path);
-    for (const auto& item : pathItems) {
-        currentItems.push_back(item);
-    }
+    auto currentItems = PathUtils::decompose(currentDir);
+    const auto pathItems = PathUtils::decompose(path);
+    currentItems.insert(currentItems.end(), pathItems.begin(), pathItems.end());
     return strDup(PathUtils::recompose(currentItems));
 }
 
 int path_split(const char* path, char** dirname, char** basename) {
-    std::string dir, file;
+    StringView dir, file;
     if (!PathUtils::split(path, &dir, &file)) {
         return -1;
     }
@@ -84,7 +82,7 @@ int path_split(const char* path, char** dirname, char** basename) {
 }
 
 char* path_dirname(const char* path) {
-    std::string dir;
+    StringView dir;
     if (!PathUtils::split(path, &dir, nullptr)) {
         return nullptr;
     }
@@ -92,7 +90,7 @@ char* path_dirname(const char* path) {
 }
 
 char* path_basename(const char* path) {
-    std::string file;
+    StringView file;
     if (!PathUtils::split(path, nullptr, &file)) {
         return nullptr;
     }
