@@ -274,9 +274,8 @@ void ConfirmDialog::setSwGpu() {
     std::string diskPartDir = iniF.getString("disk.dataPartition.path", "");
     if ( !diskPartDir.empty() ) {
         // Keep the path; discard the file name
-        std::string outputDir;
-        std::string unused;
-        bool isOK = PathUtils::split(diskPartDir, &outputDir, &unused);
+        android::base::StringView outputDir;
+        bool isOK = PathUtils::split(diskPartDir, &outputDir, nullptr);
         if (isOK) {
             std::string hwQemuPath =
                     PathUtils::join(outputDir, CORE_CONFIG_INI);

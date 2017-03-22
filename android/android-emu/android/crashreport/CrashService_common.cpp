@@ -344,10 +344,10 @@ std::string CrashService::getSysInfo() {
         // may have binary content that will not display in a readable way.
         if (strcasecmp(PathUtils::extension(file).c_str(), ".txt") == 0) {
             // Prepend each piece with the name of the file as a separator
-            std::string basename;
+            StringView basename;
             if (PathUtils::split(file, nullptr, &basename)) {
                 info += "---- ";
-                info += basename.c_str();
+                info += basename;
                 info += " ----\n";
             }
             info += readFile(file);

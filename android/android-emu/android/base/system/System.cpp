@@ -297,7 +297,7 @@ public:
 #ifdef _WIN32
             launcherName += ".exe";
 #endif
-            std::vector<std::string> pathList = {programDir, launcherName};
+            std::vector<StringView> pathList = {programDir, launcherName};
             std::string launcherPath = PathUtils::recompose(pathList);
 
             if (pathIsFile(launcherPath)) {
@@ -308,8 +308,7 @@ public:
             // we are probably executing a qemu2 binary, which live in
             // <launcher-dir>/qemu/<os>-<arch>/
             // look for the launcher in grandparent directory
-            std::vector<std::string> programDirVector =
-                    PathUtils::decompose(programDir);
+            auto programDirVector = PathUtils::decompose(programDir);
             if (programDirVector.size() >= 2) {
                 programDirVector.resize(programDirVector.size() - 2);
                 std::string grandparentDir = PathUtils::recompose(programDirVector);
