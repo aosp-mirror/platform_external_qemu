@@ -691,8 +691,8 @@ static char* bufprint_emulatorName(char* p,
  * the program. The function might modify it, in the case where it is 64
  * but only 32-bit versions of the executables are found (in this case,
  * |*wantedBitness| is set to 32).
- * On success, returns the path of the executable (string must be freed by
- * the caller). On failure, return NULL.
+ * On success, returns the absolute path of the executable (string must
+ * be freed by the caller). On failure, return NULL.
  */
 static char* probeTargetEmulatorPath(const char* progDir,
                                      const char* archSuffix,
@@ -724,13 +724,13 @@ static char* probeTargetEmulatorPath(const char* progDir,
     D("Probing program: %s\n", path);
     if (p < pathEnd && path_exists(path)) {
         *wantedBitness = 32;
-        return strdup(path);
+        return path_get_absolute(path);
     }
 
     return NULL;
 }
 
-// Find the path to the classic emulator binary that supports CPU architecture
+// Find the absolute path to the classic emulator binary that supports CPU architecture
 // |avdArch|. |progDir| is the program's directory.
 static char* getClassicEmulatorPath(const char* progDir,
                                     const char* avdArch,
@@ -810,7 +810,8 @@ static char* getQemuExecutablePath(const char* progDir,
         APANIC("QEMU executable path too long (clipped) [%s]. "
                "Can not use QEMU2 emulator. ", fullPath);
     }
-    return strdup(fullPath);
+
+    return path_get_absolute(fullPath);
 }
 
 static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs, const char* launcherDir) {
