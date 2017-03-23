@@ -32,6 +32,7 @@ public:
     GLenum attachedPoint = 0;
     NamedObjectPtr eglImageGlobalTexObject = 0;
     GLenum internalformat = GL_RGBA8;
+    GLenum hostInternalFormat = GL_RGBA8;
     GLsizei width = 0;
     GLsizei height = 0;
 };

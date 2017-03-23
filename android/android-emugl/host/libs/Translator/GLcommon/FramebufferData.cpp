@@ -27,6 +27,7 @@ RenderbufferData::RenderbufferData(android::base::Stream* stream) :
     width = stream->getBe32();
     height = stream->getBe32();
     internalformat = stream->getBe32();
+    hostInternalFormat = stream->getBe32();
 }
 
 void RenderbufferData::onSave(android::base::Stream* stream) const {
@@ -41,6 +42,7 @@ void RenderbufferData::onSave(android::base::Stream* stream) const {
     stream->putBe32(width);
     stream->putBe32(height);
     stream->putBe32(internalformat);
+    stream->putBe32(hostInternalFormat);
 }
 
 void RenderbufferData::restore(ObjectLocalName localName,
@@ -49,7 +51,7 @@ void RenderbufferData::restore(ObjectLocalName localName,
             localName);
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     dispatcher.glBindRenderbuffer(GL_RENDERBUFFER, globalName);
-    dispatcher.glRenderbufferStorageEXT(GL_RENDERBUFFER, internalformat, width,
+    dispatcher.glRenderbufferStorage(GL_RENDERBUFFER, hostInternalFormat, width,
             height);
 }
 
