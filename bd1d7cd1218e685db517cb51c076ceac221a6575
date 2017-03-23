@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a13ba76a_e93e2892",
+        "filename": "android/android-emu/android/emulation/LogcatPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-23T18:32:52Z",
+      "side": 1,
+      "message": "does it always print it out on the screen?",
+      "revId": "bd1d7cd1218e685db517cb51c076ceac221a6575",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
