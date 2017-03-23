@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9742ce18_684ed2fb",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-23T01:13:25Z",
+      "side": 1,
+      "message": "nit: use 0x%x for easier grepping",
+      "range": {
+        "startLine": 250,
+        "startChar": 49,
+        "endLine": 250,
+        "endChar": 51
+      },
+      "revId": "48d2ef03549c308666d12488a6c11c3ebf472048",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
