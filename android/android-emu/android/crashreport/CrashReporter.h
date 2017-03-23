@@ -15,6 +15,7 @@
 #pragma once
 
 #include "android/base/StringView.h"
+#include "android/base/files/ScopedFd.h"
 #include "android/crashreport/CrashSystem.h"
 
 #include <functional>
@@ -96,6 +97,11 @@ public:
     // Pass some file to the crash reporter to upload it with the dump
     bool attachFile(android::base::StringView sourceFullName,
                     android::base::StringView destBaseName);
+
+    // Opens a descriptor to an attachment file, so one can write there
+    // directly.
+    base::ScopedFd openDataAttachFile(
+            base::StringView name, bool replace = false);
 
     // The following two functions write a dump of current process state.
     // Both pass the |message| to the dump writer, so it is sent together with
