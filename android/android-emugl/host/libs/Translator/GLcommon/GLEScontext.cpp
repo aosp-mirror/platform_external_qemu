@@ -648,14 +648,6 @@ void GLEScontext::postLoadRestoreCtx() {
                     GL_TEXTURE_2D,
                     m_shareGroup->getGlobalName(
                         NamedObjectType::TEXTURE, texName));
-            // The following is only useful for GLES1
-            if (texState.enabled) {
-                // TODO: change GL_TEXTURE_2D to other stuff when other texture
-                // formats are supported
-                dispatcher.glEnable(GL_TEXTURE_2D);
-            } else {
-                dispatcher.glDisable(GL_TEXTURE_2D);
-            }
         }
     }
     dispatcher.glActiveTexture(m_activeTexture + GL_TEXTURE0);
