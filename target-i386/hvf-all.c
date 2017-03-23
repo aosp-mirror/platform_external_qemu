@@ -762,7 +762,6 @@ int hvf_vcpu_exec(CPUState* cpu) {
 
 again:
 
-    qemu_mutex_unlock_iothread();
 
     do {
         if (cpu->hvf_vcpu_dirty) {
@@ -777,7 +776,10 @@ again:
         hvf_inject_interrupts(cpu);
         vmx_update_tpr(cpu);
 
+
+        qemu_mutex_unlock_iothread();
         while (!cpu_is_bsp(X86_CPU(cpu)) && cpu->halted) {
+            qemu_mutex_lock_iothread();
             return EXCP_HLT;
         }
 
@@ -795,6 +797,8 @@ again:
         rip = rreg(cpu->hvf_fd, HV_X86_RIP);
         RFLAGS(cpu) = rreg(cpu->hvf_fd, HV_X86_RFLAGS);
         env->eflags = RFLAGS(cpu);
+
+        qemu_mutex_lock_iothread();
 
         update_apic_tpr(cpu);
         current_cpu = cpu;
@@ -1043,8 +1047,6 @@ again:
                 fprintf(stderr, "%llx: unhandled exit %llx\n", rip, exit_reason);
         }
     } while (ret == 0);
-
-    qemu_mutex_lock_iothread();
 
     return ret;
 }
