@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "698dca08_6cd92c9f",
+        "filename": "android/android-emu/android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-03-23T14:33:19Z",
+      "side": 1,
+      "message": "We no longer log if fd\u003d-1?",
+      "revId": "d33512a2a4d2ae882d0da7e225bb18829d0cfe87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
