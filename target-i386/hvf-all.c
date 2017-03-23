@@ -777,9 +777,13 @@ again:
         hvf_inject_interrupts(cpu);
         vmx_update_tpr(cpu);
 
+        qemu_mutex_lock_iothread();
+
         while (!cpu_is_bsp(X86_CPU(cpu)) && cpu->halted) {
             return EXCP_HLT;
         }
+
+        qemu_mutex_unlock_iothread();
 
         int r  = hv_vcpu_run(cpu->hvf_fd);
 
