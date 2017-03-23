@@ -19,6 +19,7 @@
 #include "android/utils/system.h"
 
 #include <errno.h>
+#include <stdio.h>
 
 #define  D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
 
@@ -127,6 +128,18 @@ boot_property_add2( const char*  name, int  namelen,
     _boot_properties_tail  = &prop->next;
 
     return 0;
+}
+
+
+void boot_property_add_logcat_pipe(const char* logcat_filter) {
+    if (!logcat_filter) {
+        return;
+    }
+    char buf[1024];
+    snprintf(buf, sizeof(buf),
+            "androidboot.logcat=%s androidboot.consolepipe=qemu_pipe,pipe:logcat", logcat_filter);
+    boot_property_add("qemu.cmdline", buf);
+    boot_property_add("qemu.logcat", "start");
 }
 
 /* Prints the warning string corresponding to the error code returned by

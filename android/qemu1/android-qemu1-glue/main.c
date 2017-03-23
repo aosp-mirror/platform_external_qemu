@@ -11,6 +11,7 @@
 */
 
 #include "android/android.h"
+#include "android/boot-properties.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"
@@ -128,6 +129,12 @@ int main(int argc, char **argv) {
 
     if (!emulator_parseUiCommandLineOptions(opts, avd, hw)) {
         return 1;
+    }
+
+    if (feature_is_enabled(kFeature_LogcatPipe) && opts->logcat) {
+        boot_property_add_logcat_pipe(opts->logcat);
+        // we have done with -logcat option.
+        opts->logcat = NULL;
     }
 
     // Overide default null SerialLine implementation
