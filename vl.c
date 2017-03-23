@@ -4081,7 +4081,8 @@ static int main_impl(int argc, char** argv)
                 vnc_parse(optarg, &error_fatal);
                 break;
             case QEMU_OPTION_no_acpi:
-                acpi_enabled = 0;
+                error_report("warning: ignoring no-acpi "
+                             "acpi has to be enabled for goldfish");
                 break;
             case QEMU_OPTION_no_hpet:
                 no_hpet = 1;
