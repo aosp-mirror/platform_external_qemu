@@ -2627,6 +2627,7 @@ static GLenum sPrepareRenderbufferStorage(GLenum internalformat, GLsizei width,
     if (!rbData) { *err = GL_INVALID_OPERATION; return GL_NONE; }
 
     rbData->internalformat = internalformat;
+    rbData->hostInternalFormat = internal;
     rbData->width = width;
     rbData->height = height;
 
