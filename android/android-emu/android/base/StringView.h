@@ -25,22 +25,24 @@ namespace base {
 //
 // Consider the two following functions:
 //
-//     size_t  count1(const std::string& str) {
-//         size_t result = 0;
+//     size_t count1(const std::string& str) {
+//         size_t count = 0;
 //         for (size_t n = 0; n < str.size(); ++n) {
 //              if (str[n] == '1') {
 //                  count++;
 //              }
 //         }
+//         return count;
 //     }
 //
-//     size_t  count2(const StringView& str) {
-//         size_t result = 0;
+//     size_t count2(const StringView& str) {
+//         size_t count = 0;
 //         for (size_t n = 0; n < str.size(); ++n) {
 //              if (str[n] == '2') {
 //                  count++;
 //              }
 //         }
+//         return count;
 //     }
 //
 // Then consider the following calls:
