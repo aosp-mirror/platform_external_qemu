@@ -672,7 +672,8 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
         }
 
         if (texData && level == 0) {
-            texData->target = target;
+            assert(texData->target == GL_TEXTURE_2D ||
+                    texData->target == GL_TEXTURE_CUBE_MAP);
             texData->internalFormat = internalformat;
             texData->width = width;
             texData->height = height;

@@ -119,13 +119,17 @@ SaveableTexture::SaveableTexture(android::base::Stream* stream,
     m_type = stream->getBe32();
     m_border = stream->getBe32();
     // TODO: handle other texture targets
-    if (m_target == GL_TEXTURE_2D) {
+    if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP) {
         // restore the texture
         GLDispatch& dispatcher = GLEScontext::dispatcher();
         m_globalName = m_globalTexObj->getGlobalName();
         GLint prevUnpack = 4;
         GLint prevTex = 0;
-        dispatcher.glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTex);
+        if (m_target == GL_TEXTURE_2D) {
+            dispatcher.glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTex);
+        } else { // GL_TEXTURE_CUBE_MAP
+            dispatcher.glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &prevTex);
+        }
         dispatcher.glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevUnpack);
         dispatcher.glBindTexture(m_target, m_globalName);
         // Restore texture data
@@ -133,19 +137,34 @@ SaveableTexture::SaveableTexture(android::base::Stream* stream,
         // Get the number of mipmap levels.
         unsigned int numLevels = 1 + floor(log2(
                 (float)std::max(m_width, m_height)));
-        for (unsigned int level = 0; level < numLevels; level++) {
-            GLint width = stream->getBe32();
-            GLint height = stream->getBe32();
-            std::vector<unsigned char> loadedData;
-            loadBuffer(stream, &loadedData);
-            const void* pixels = loadedData.empty() ? nullptr : loadedData.data();
-            dispatcher.glTexImage2D(m_target, level, m_internalFormat, width,
-                    height, m_border, m_format, m_type, pixels);
+        auto restoreTex = [stream, internalFormat=m_internalFormat,
+                border=m_border, format=m_format, type=m_type, numLevels,
+                &dispatcher] (GLenum target) {
+                for (unsigned int level = 0; level < numLevels; level++) {
+                    GLint width = stream->getBe32();
+                    GLint height = stream->getBe32();
+                    std::vector<unsigned char> loadedData;
+                    loadBuffer(stream, &loadedData);
+                    const void* pixels = loadedData.empty() ? nullptr :
+                                                              loadedData.data();
+                    dispatcher.glTexImage2D(target, level, internalFormat,
+                            width, height, border, format, type, pixels);
+                }
+        };
+        if (m_target == GL_TEXTURE_2D) {
+            restoreTex(GL_TEXTURE_2D);
+        } else { // GL_TEXTURE_CUBE_MAP
+            restoreTex(GL_TEXTURE_CUBE_MAP_POSITIVE_X);
+            restoreTex(GL_TEXTURE_CUBE_MAP_NEGATIVE_X);
+            restoreTex(GL_TEXTURE_CUBE_MAP_POSITIVE_Y);
+            restoreTex(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y);
+            restoreTex(GL_TEXTURE_CUBE_MAP_POSITIVE_Z);
+            restoreTex(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z);
         }
         // Restore tex param
-        auto loadParam = [stream, &dispatcher](GLenum pname) {
+        auto loadParam = [stream, target=m_target, &dispatcher](GLenum pname) {
             GLint param = stream->getBe32();
-            dispatcher.glTexParameteri(GL_TEXTURE_2D, pname, param);
+            dispatcher.glTexParameteri(target, pname, param);
         };
         loadParam(GL_TEXTURE_MAG_FILTER);
         loadParam(GL_TEXTURE_MIN_FILTER);
@@ -154,7 +173,9 @@ SaveableTexture::SaveableTexture(android::base::Stream* stream,
         // TODO: snapshot mipmaps
 
         dispatcher.glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpack);
-        dispatcher.glBindTexture(GL_TEXTURE_2D, prevTex);
+        dispatcher.glBindTexture(m_target, prevTex);
+    } else {
+        fprintf(stderr, "Warning: texture target %d not supported\n", m_target);
     }
 }
 
@@ -167,38 +188,55 @@ void SaveableTexture::onSave(android::base::Stream* stream) const {
     stream->putBe32(m_type);
     stream->putBe32(m_border);
     // TODO: handle other texture targets
-    if (m_target == GL_TEXTURE_2D) {
+    if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP) {
         GLint prevPack = 4;
         GLint prevTex = 0;
         GLDispatch& dispatcher = GLEScontext::dispatcher();
         assert(dispatcher.glGetIntegerv);
         dispatcher.glGetIntegerv(GL_PACK_ALIGNMENT, &prevPack);
-        dispatcher.glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTex);
+        if (m_target == GL_TEXTURE_2D) {
+            dispatcher.glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTex);
+        } else { // GL_TEXTURE_CUBE_MAP
+            dispatcher.glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &prevTex);
+        }
         dispatcher.glPixelStorei(GL_PACK_ALIGNMENT, 1);
-        dispatcher.glBindTexture(GL_TEXTURE_2D, m_globalName);
+        dispatcher.glBindTexture(m_target, m_globalName);
         // Get the number of mipmap levels.
         unsigned int numLevels = 1 + floor(log2(
                 (float)std::max(m_width, m_height)));
-        for (unsigned int level = 0; level < numLevels; level++) {
-            GLint width = 1;
-            GLint height = 1;
-            dispatcher.glGetTexLevelParameteriv(GL_TEXTURE_2D, level,
-                    GL_TEXTURE_WIDTH, &width);
-            dispatcher.glGetTexLevelParameteriv(GL_TEXTURE_2D, level,
-                    GL_TEXTURE_HEIGHT, &height);
-            stream->putBe32(width);
-            stream->putBe32(height);
-            // Snapshot texture data
-            std::vector<unsigned char> tmpData(s_texImageSize(m_format, m_type,
-                    1, width, height));
-            dispatcher.glGetTexImage(m_target, level, m_format, m_type,
-                    tmpData.data());
-            saveBuffer(stream, tmpData);
+        auto saveTex = [stream, format=m_format, type=m_type, numLevels,
+                &dispatcher] (GLenum target) {
+            for (unsigned int level = 0; level < numLevels; level++) {
+                GLint width = 1;
+                GLint height = 1;
+                dispatcher.glGetTexLevelParameteriv(target, level,
+                        GL_TEXTURE_WIDTH, &width);
+                dispatcher.glGetTexLevelParameteriv(target, level,
+                        GL_TEXTURE_HEIGHT, &height);
+                stream->putBe32(width);
+                stream->putBe32(height);
+                // Snapshot texture data
+                std::vector<unsigned char> tmpData(s_texImageSize(format,
+                        type, 1, width, height));
+                dispatcher.glGetTexImage(target, level, format, type,
+                        tmpData.data());
+                saveBuffer(stream, tmpData);
+            }
+        };
+        if (m_target == GL_TEXTURE_2D) {
+            saveTex(GL_TEXTURE_2D);
+        } else { // GL_TEXTURE_CUBE_MAP
+            saveTex(GL_TEXTURE_CUBE_MAP_POSITIVE_X);
+            saveTex(GL_TEXTURE_CUBE_MAP_NEGATIVE_X);
+            saveTex(GL_TEXTURE_CUBE_MAP_POSITIVE_Y);
+            saveTex(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y);
+            saveTex(GL_TEXTURE_CUBE_MAP_POSITIVE_Z);
+            saveTex(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z);
         }
         // Snapshot texture param
-        auto saveParam = [stream, &dispatcher](GLenum pname) {
+        auto saveParam = [stream, target=m_target, &dispatcher](GLenum pname) {
             GLint param;
-            dispatcher.glGetTexParameteriv(GL_TEXTURE_2D, pname, &param);
+            dispatcher.glGetTexParameteriv(target, pname, &param);
             stream->putBe32(param);
         };
         saveParam(GL_TEXTURE_MAG_FILTER);
@@ -207,7 +245,9 @@ void SaveableTexture::onSave(android::base::Stream* stream) const {
         saveParam(GL_TEXTURE_WRAP_T);
         // Restore environment
         dispatcher.glPixelStorei(GL_PACK_ALIGNMENT, prevPack);
-        dispatcher.glBindTexture(GL_TEXTURE_2D, prevTex);
+        dispatcher.glBindTexture(m_target, prevTex);
+    } else {
+        fprintf(stderr, "Warning: texture target 0x%x not supported\n", m_target);
     }
 }
 
