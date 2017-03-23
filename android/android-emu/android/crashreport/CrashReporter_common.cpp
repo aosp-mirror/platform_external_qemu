@@ -43,6 +43,7 @@
 #define I(...) printf(__VA_ARGS__)
 
 using android::base::PathUtils;
+using android::base::ScopedFd;
 using android::base::StringView;
 using android::base::System;
 using android::base::Uuid;
@@ -65,13 +66,12 @@ const char* const CrashReporter::kProcessCrashesQuietlyKey =
         "set/processCrashesQuietly";
 
 CrashReporter::CrashReporter()
-    : mDumpDir(System::get()->getTempDir().c_str()),
+    : mDumpDir(System::get()->getTempDir()),
       // TODO: add a function that can create a directory or error-out
       // if it exists atomically. For now let's just allow UUIDs to do their
       // job to keep these unique
       mDataExchangeDir(
-              PathUtils::join(mDumpDir, Uuid::generateFast().toString())
-                      .c_str()) {
+              PathUtils::join(mDumpDir, Uuid::generateFast().toString())) {
     const auto res = path_mkdir_if_needed(mDataExchangeDir.c_str(), 0744);
     if (res < 0) {
         E("Failed to create temp directory for crash service communication: "
@@ -152,6 +152,20 @@ static void formatDataFileName(char (&buffer)[N], StringView baseName) {
 }
 
 void CrashReporter::attachData(StringView name, StringView data, bool replace) {
+    auto fd = openDataAttachFile(name, replace);
+    HANDLE_EINTR(write(fd.get(), data.data(), data.size()));
+    HANDLE_EINTR(write(fd.get(), "\n", 1));
+}
+
+bool CrashReporter::attachFile(StringView sourceFullName,
+                               StringView destBaseName) {
+    char fullName[PATH_MAX + 1];
+    formatDataFileName(fullName, destBaseName);
+
+    return path_copy_file_safe(fullName, sourceFullName.c_str()) >= 0;
+}
+
+ScopedFd CrashReporter::openDataAttachFile(StringView name, bool replace) {
     const int bufferLength = PATH_MAX + 1;
     char fullName[bufferLength];
     formatDataFileName(fullName, name);
@@ -173,23 +187,7 @@ void CrashReporter::attachData(StringView name, StringView data, bool replace) {
                   O_WRONLY | O_CREAT | O_CLOEXEC
                   | (replace ? O_TRUNC : O_APPEND), 0644));
 #endif
-    if (fd < 0) {
-        W("Failed to open a temp file '%s' for writing", fullName);
-        return;
-    }
-
-    HANDLE_EINTR(write(fd, data.data(), data.size()));
-    HANDLE_EINTR(write(fd, "\n", 1));
-
-    close(fd);
-}
-
-bool CrashReporter::attachFile(StringView sourceFullName,
-                               StringView destBaseName) {
-    char fullName[PATH_MAX + 1];
-    formatDataFileName(fullName, destBaseName);
-
-    return path_copy_file_safe(fullName, sourceFullName.c_str()) >= 0;
+    return base::ScopedFd(fd);
 }
 
 static void attachUptime() {
