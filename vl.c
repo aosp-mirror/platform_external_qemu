@@ -4081,6 +4081,11 @@ static int main_impl(int argc, char** argv)
                 vnc_parse(optarg, &error_fatal);
                 break;
             case QEMU_OPTION_no_acpi:
+#ifdef CONFIG_ANDROID
+                error_report("warning: ignoring option no-acpi, "
+                             "acpi has to be enabled for goldfish");
+                break;
+#endif /* CONFIG_ANDROID */
                 acpi_enabled = 0;
                 break;
             case QEMU_OPTION_no_hpet:
