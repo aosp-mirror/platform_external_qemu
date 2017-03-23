@@ -10,45 +10,36 @@
 
 #pragma once
 
-#include "android/base/TypeTraits.h"
 #include "android/skin/qt/event-subscriber.h"
+#include "android/base/system/System.h"
 
 #include <QEvent>
-#include <QEnterEvent>
-#include <QCloseEvent>
-#include <QHideEvent>
-#include <QFocusEvent>
-#include <QMouseEvent>
-#include <QResizeEvent>
 
-#include <cassert>
-#include <memory>
-#include <unordered_map>
-
-using android::base::enable_if_convertible;
+#include <sstream>
+#include <string>
+#include <utility>
 
 struct EventRecord {
-    std::unique_ptr<QEvent> event;
-    std::string target_name;
+    android::base::System::WallDuration uptimeMs;
+    std::string targetName;
+    const QEvent* event;
 };
+
+std::ostream& operator<<(std::ostream& out, const EventRecord& event);
 
 // This class intercepts various UI events via EventCapturer
 // and stores their serialized representations in a container.
 template <template<class T, class A = std::allocator<T>> class EventContainer>
 class UIEventRecorder : public EventSubscriber {
 public:
-    using ContainerType = EventContainer<EventRecord>;
+    using ContainerType = EventContainer<std::string>;
 
-    explicit UIEventRecorder(EventCapturer* ecap) : EventSubscriber(ecap) {}
-
-    // Lets the client specialize their own container instance.
-    template <typename U>
+    template <typename... Args>
     explicit UIEventRecorder(
             EventCapturer* ecap,
-            U&& container,
-            enable_if_convertible<U, ContainerType> = nullptr) :
+            Args&&... args) :
         EventSubscriber(ecap),
-        mContainer(std::forward<U>(container)) {}
+        mContainer(std::forward<Args>(args)...) {}
 
     // Get a const reference to the underelying container with serialized
     // events.
@@ -56,8 +47,10 @@ public:
         return mContainer;
     }
 
+    void stop() { mRecording = false; }
+
 private:
-    bool objectPredicate(const QObject*) const override { return true; }
+    bool objectPredicate(const QObject*) const override { return mRecording; }
 
     const EventCapturer::EventTypeSet& eventTypes() const override {
         return mEventTypes;
@@ -65,46 +58,19 @@ private:
 
     void processEvent(const QObject* target, const QEvent* event) override {
         EventRecord record {
-            cloneEvent(event),
-            target->objectName().toStdString()
+            android::base::System::get()->getProcessTimes().wallClockMs,
+            target->objectName().toStdString(),
+            event
         };
-        mContainer.push_back(std::move(record));
-    }
 
-    std::unique_ptr<QEvent> cloneEvent(const QEvent* e) {
-        switch(e->type()) {
-        case QEvent::Close:
-            return cloneEventHelper<QCloseEvent>(e);
-        case QEvent::Enter:
-            return cloneEventHelper<QEnterEvent>(e);
-        case QEvent::Leave:
-            return cloneEventHelper<QEvent>(e);
-        case QEvent::MouseButtonPress:
-        case QEvent::MouseButtonRelease:
-            return cloneEventHelper<QMouseEvent>(e);
-        case QEvent::FocusIn:
-        case QEvent::FocusOut:
-            return cloneEventHelper<QFocusEvent>(e);
-        case QEvent::Hide:
-            return cloneEventHelper<QHideEvent>(e);
-        case QEvent::Resize:
-            return cloneEventHelper<QResizeEvent>(e);
-        default:
-            // This is a safety measure. If we got here, it means
-            // that this method was not updated to match the supoported
-            // event types.
-            assert(false);
-        }
-        return nullptr;
-    }
-
-    template <class T>
-    std::unique_ptr<QEvent> cloneEventHelper(const QEvent* e, enable_if_convertible<T*, QEvent*> = nullptr) {
-        return std::unique_ptr<QEvent>(new T(*static_cast<const T*>(e)));
+        std::ostringstream str;
+        str << record;
+        mContainer.push_back(str.str());
     }
 
 private:
     ContainerType mContainer;
+    bool mRecording = true;
     static EventCapturer::EventTypeSet mEventTypes;
 };
 
@@ -121,4 +87,3 @@ EventCapturer::EventTypeSet UIEventRecorder<EventContainer>::mEventTypes = {
     QEvent::MouseButtonRelease,
     QEvent::Resize
 };
-

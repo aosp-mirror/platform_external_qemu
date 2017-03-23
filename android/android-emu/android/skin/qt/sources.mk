@@ -69,6 +69,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/qt-ui-commands.cpp \
     android/skin/qt/stylesheet.cpp \
     android/skin/qt/tool-window.cpp \
+    android/skin/qt/ui-event-recorder.cpp \
     android/skin/qt/user-actions-counter.cpp \
     android/skin/qt/wavefront-obj-parser.cpp
 
