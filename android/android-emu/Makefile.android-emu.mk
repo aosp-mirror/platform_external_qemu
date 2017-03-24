@@ -334,6 +334,7 @@ LOCAL_SRC_FILES := \
     android/metrics/AsyncMetricsReporter.cpp \
     android/metrics/CrashMetricsReporting.cpp \
     android/metrics/FileMetricsWriter.cpp \
+    android/metrics/MemoryUsageReporter.cpp \
     android/metrics/metrics.cpp \
     android/metrics/MetricsPaths.cpp \
     android/metrics/MetricsReporter.cpp \
@@ -464,6 +465,7 @@ ANDROID_EMU_LDLIBS += -lws2_32
 # GetNetworkParams() for android/utils/dns.c
 ANDROID_EMU_LDLIBS += -liphlpapi
 endif
+
 
 ###############################################################################
 #
