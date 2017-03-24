@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a46c293b_036635a8",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-03-24T17:00:15Z",
+      "side": 1,
+      "message": "Will do, didn\u0027t know we had that.",
+      "parentUuid": "36fe2c4f_8f8d5082",
+      "range": {
+        "startLine": 489,
+        "startChar": 4,
+        "endLine": 489,
+        "endChar": 43
+      },
+      "revId": "357f4593d6509651544cecc7ded5e668607aa2b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "70617759_726add1e",
         "filename": "android/android-emu/android/metrics/MemoryUsageReporter.h",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-03-24T16:54:36Z",
       "side": 1,
       "message": "what about scheduling a periodic task instead with PeriodicReporter?",
+      "range": {
+        "startLine": 28,
+        "startChar": 6,
+        "endLine": 28,
+        "endChar": 25
+      },
+      "revId": "357f4593d6509651544cecc7ded5e668607aa2b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2965fa73_3fefa840",
+        "filename": "android/android-emu/android/metrics/MemoryUsageReporter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-03-24T17:00:15Z",
+      "side": 1,
+      "message": "Didn\u0027t know that existed, i will look into it.",
+      "parentUuid": "70617759_726add1e",
       "range": {
         "startLine": 28,
         "startChar": 6,
