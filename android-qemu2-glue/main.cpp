@@ -930,6 +930,7 @@ extern "C" int main(int argc, char **argv) {
             gQAndroidClipboardAgent,
             gQAndroidEmulatorWindowAgent,
             gQAndroidFingerAgent,
+            gQAndroidInstallAgent,
             gQAndroidLocationAgent,
             gQAndroidSensorsAgent,
             gQAndroidTelephonyAgent,

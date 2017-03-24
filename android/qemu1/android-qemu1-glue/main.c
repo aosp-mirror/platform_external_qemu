@@ -232,6 +232,7 @@ int main(int argc, char **argv) {
     uiEmuAgent.battery = gQAndroidBatteryAgent;
     uiEmuAgent.cellular = gQAndroidCellularAgent;
     uiEmuAgent.finger = gQAndroidFingerAgent;
+    uiEmuAgent.install = gQAndroidInstallAgent;
     uiEmuAgent.location = gQAndroidLocationAgent;
     uiEmuAgent.sensors = gQAndroidSensorsAgent;
     uiEmuAgent.telephony = gQAndroidTelephonyAgent;

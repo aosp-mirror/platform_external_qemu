@@ -2643,6 +2643,27 @@ static const CommandDefRec fingerprint_commands[] =
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
+static int
+do_install(ControlClient client, char* filename)
+{
+    bool result = client->global->install_agent->install(filename);
+    if (result) {
+        control_write(client, "OK: installer running now\r\n");
+        return 0;
+    } else {
+        control_write(client, "KO: installer busy\r\n");
+        return -1;
+    }
+}
+
+static const CommandDefRec install_commands[] =
+{
+    { "install", "install apk with fullname <filename>",
+      "'install <filename>' install apk with <filename>.\r\n",
+      NULL, do_install, NULL },
+    { NULL, NULL, NULL, NULL, NULL, NULL }
+};
+
 /********************************************************************************************/
 /********************************************************************************************/
 /*****                                                                                 ******/
@@ -2792,6 +2813,10 @@ static const CommandDefRec main_commands[] = {
         {"finger", "manage emulator finger print",
          "allows you to touch the emulator finger print sensor\r\n", NULL, NULL,
          fingerprint_commands},
+        
+        {"install", "install apk",
+         "allows you to install apk to guest\r\n", NULL, NULL,
+         install_commands},
 
         {"debug", "control the emulator debug output tags", NULL, NULL,
          do_debug},
