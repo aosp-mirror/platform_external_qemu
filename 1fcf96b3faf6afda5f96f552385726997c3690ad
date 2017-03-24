@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ed42e0e_5843671a",
+        "filename": "android/android-emu/android/emulation/control/GooglePlayServices.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-03-24T15:26:29Z",
+      "side": 1,
+      "message": "Is this appropriate?",
+      "range": {
+        "startLine": 30,
+        "startChar": 64,
+        "endLine": 30,
+        "endChar": 73
+      },
+      "revId": "1fcf96b3faf6afda5f96f552385726997c3690ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56d9b838_274442e7",
+        "filename": "android/android-emu/android/emulation/control/GooglePlayServices.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-03-24T15:26:29Z",
+      "side": 1,
+      "message": "Do we want to keep this?",
+      "range": {
+        "startLine": 131,
+        "startChar": 4,
+        "endLine": 131,
+        "endChar": 33
+      },
+      "revId": "1fcf96b3faf6afda5f96f552385726997c3690ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4e15de5e_d2e6a20a",
+        "filename": "android/android-emu/android/emulation/control/GooglePlayServices.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-03-24T15:26:29Z",
+      "side": 1,
+      "message": "And this?",
+      "range": {
+        "startLine": 133,
+        "startChar": 8,
+        "endLine": 133,
+        "endChar": 36
+      },
+      "revId": "1fcf96b3faf6afda5f96f552385726997c3690ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2c6e5112_4150b433",
+        "filename": "android/android-emu/android/emulation/control/GooglePlayServices.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-03-24T15:26:29Z",
+      "side": 1,
+      "message": "Need to update this",
+      "range": {
+        "startLine": 55,
+        "startChar": 7,
+        "endLine": 55,
+        "endChar": 28
+      },
+      "revId": "1fcf96b3faf6afda5f96f552385726997c3690ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
