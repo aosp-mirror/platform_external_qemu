@@ -128,6 +128,13 @@ void FramebufferData::restore(ObjectLocalName localName,
     for (int i = 0; i < MAX_ATTACH_POINTS; i++) {
         auto& attachPoint = m_attachPoints[i];
         if (!attachPoint.name) continue; // bound to nothing
+        // attachPoint.owned equals to 0 only happens when color buffer 0 is
+        // not bound. In such situation, it will generate its own object when
+        // calling validate()
+        if (attachPoint.owned) {
+            attachPoint.name = 0;
+            continue;
+        }
         if (attachPoint.obj) { // binding a render buffer
             assert(attachPoint.obj->getDataType()
                     == RENDERBUFFER_DATA);
@@ -159,6 +166,7 @@ void FramebufferData::restore(ObjectLocalName localName,
                     0);
         }
     }
+    m_dirty = true;
 }
 
 void FramebufferData::setAttachment(GLenum attachment,
