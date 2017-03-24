@@ -126,6 +126,9 @@ public:
     // Get the current process ID
     virtual Pid getCurrentProcessId() const = 0;
 
+    // Gets the peak virtual memory.
+    virtual size_t getPeakMemory() = 0;
+
     // Return the program bitness as an integer, either 32 or 64.
 #ifdef __x86_64__
     static const int kProgramBitness = 64;
@@ -332,6 +335,8 @@ public:
                             const std::string& outputFile = "") = 0;
 
 protected:
+    size_t mMemorySize = 0;
+
     static System* setForTesting(System* system);
     static System* hostSystem();
 
