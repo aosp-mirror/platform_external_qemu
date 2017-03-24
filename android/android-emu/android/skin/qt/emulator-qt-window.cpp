@@ -36,6 +36,7 @@
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/winsys-qt.h"
 #include "android/ui-emu-agent.h"
+#include "android/utils/eintr_wrapper.h"
 
 #if defined(__APPLE__)
 #include "android/skin/qt/mac-native-window.h"
@@ -68,6 +69,12 @@
 #include <QToolTip>
 #include <QWindow>
 #include <QtCore>
+
+#ifdef _WIN32
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
 
 #include <string>
 #include <vector>
@@ -136,9 +143,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                      QMessageBox::Ok,
                      this),
       mFirstShowEvent(true),
-      mEventLogger(new UIEventRecorder<android::base::CircularBuffer>(
-              &mEventCapturer,
-              android::base::CircularBuffer<EventRecord>(1000))),
+      mEventLogger(
+          std::make_shared<UIEventRecorder<android::base::CircularBuffer>>(
+              &mEventCapturer, 1000)),
       mUserActionsCounter(new android::qt::UserActionsCounter(&mEventCapturer)),
       mAdbInterface(android::emulation::AdbInterface::create(mLooper)),
       mApkInstaller(mAdbInterface.get()),
@@ -252,21 +259,29 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     setObjectName("MainWindow");
     mEventLogger->startRecording(this);
     mEventLogger->startRecording(mToolWindow);
+    mEventLogger->startRecording(&mOverlay);
     mUserActionsCounter->startCountingForMainWindow(this);
     mUserActionsCounter->startCountingForToolWindow(mToolWindow);
     mUserActionsCounter->startCountingForOverlayWindow(&mOverlay);
 
-    // The crash reporter will dump the last 1000 UI events.
-    // mEventLogger is a shared pointer, capturing its copy
-    // inside a lambda ensures that it lives on as long as
-    // CrashReporter needs it, even if EmulatorQtWindow is
-    // destroyed.
+    // The crash reporter will dump the last X UI events.
+    // mEventLogger is a shared pointer, capturing its copy inside a lambda
+    // ensures that it lives on as long as CrashReporter needs it, even if
+    // EmulatorQtWindow is destroyed.
     auto event_logger = mEventLogger;
     android::crashreport::CrashReporter::get()->addCrashCallback(
             [event_logger]() {
-                android::crashreport::CrashReporter::get()->attachData(
-                        "recent-ui-actions.txt",
-                        serializeEvents(event_logger->container()));
+                event_logger->stop();
+                auto fd = android::crashreport::CrashReporter::get()
+                                  ->openDataAttachFile("recent-ui-actions.txt");
+                if (fd.valid()) {
+                    const auto& events = event_logger->container();
+                    for (int i = 0; i < events.size(); ++i) {
+                        HANDLE_EINTR(write(fd.get(), events[i].data(),
+                                           events[i].size()));
+                        HANDLE_EINTR(write(fd.get(), "\n", 1));
+                    }
+                }
             });
 
     auto user_actions = mUserActionsCounter;
