@@ -134,6 +134,8 @@ public:
 
     virtual Pid getCurrentProcessId() const override { return mPid; }
 
+    virtual size_t getWorkingSet() const override { return 0; }
+
     void setCurrentProcessId(Pid pid) { mPid = pid; }
 
     void setOsType(OsType type) { mOsType = type; }

@@ -29,6 +29,7 @@
 #ifdef _WIN32
 #include <shlobj.h>
 #include <windows.h>
+#include <psapi.h>
 #include <shlobj.h>
 #endif
 
@@ -483,6 +484,31 @@ public:
 #else
         return getpid();
 #endif
+    }
+
+    size_t getWorkingSet() const override {
+        size_t size = 0;
+#ifdef _WIN32
+        PROCESS_MEMORY_COUNTERS info;
+        GetProcessMemoryInfo(GetCurrentProcess(), &info, sizeof(info));
+        size = (size_t)info.WorkingSetSize;
+#elif defined(__linux__)
+        FILE *fp = fopen("/proc/self/statm", "r");
+        if (fp != NULL) {
+            fscanf(fp, "%*d %lu", &size);
+            fclose(fp);
+            size *= 4096; // 1 page = 4kb.
+        }
+#elif defined(__APPLE__)
+        struct task_basic_info info;
+        mach_msg_type_number_t info_count = sizeof(info);
+
+        if (KERN_SUCCESS == task_info(mach_task_self(), TASK_BASIC_INFO,
+                                      (task_info_t)&info, &info_count)) {
+            size = t_info.resident_size;
+        }
+#endif
+        return size;
     }
 
     virtual std::vector<std::string> scanDirEntries(

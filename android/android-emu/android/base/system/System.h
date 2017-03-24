@@ -126,6 +126,9 @@ public:
     // Get the current process ID
     virtual Pid getCurrentProcessId() const = 0;
 
+    // Gets the current RSS set.
+    virtual size_t getWorkingSet() const = 0;
+
     // Return the program bitness as an integer, either 32 or 64.
 #ifdef __x86_64__
     static const int kProgramBitness = 64;
