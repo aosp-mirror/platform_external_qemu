@@ -100,6 +100,7 @@ ProgramData::ProgramData(android::base::Stream* stream) :
     LinkStatus = stream->getBe32();
     IsInUse = stream->getByte();
     DeleteStatus = stream->getByte();
+    needRestore = true;
 }
 
 static void getUniformValue(GLuint pname, const GLchar *name, GLenum type,
@@ -224,13 +225,18 @@ void ProgramData::onSave(android::base::Stream* stream) const {
     saveCollection(stream, boundAttribLocs, saveAttribLocs);
     saveCollection(stream, linkedAttribLocs, saveAttribLocs);
 
-    std::unordered_map<GLuint, GLUniformDesc> uniformsOnSave =
-        collectUniformInfo(ProgramName);
-    saveCollection(stream, uniformsOnSave, [](android::base::Stream* stream,
-            const std::pair<const GLuint, GLUniformDesc>& uniform) {
-        stream->putBe32(uniform.first);
-        uniform.second.onSave(stream);
-    });
+    auto saveUniform = [](android::base::Stream* stream,
+                const std::pair<const GLuint, GLUniformDesc>& uniform) {
+            stream->putBe32(uniform.first);
+            uniform.second.onSave(stream);
+        };
+    if (needRestore) {
+        saveCollection(stream, uniforms, saveUniform);
+    } else {
+        std::unordered_map<GLuint, GLUniformDesc> uniformsOnSave =
+            collectUniformInfo(ProgramName);
+        saveCollection(stream, uniformsOnSave, saveUniform);
+    }
 
     for (const auto& s : attachedShaders) {
         stream->putBe32(s.localName);
@@ -437,6 +443,7 @@ void ProgramData::restore(ObjectLocalName localName,
         dispatcher.glBindAttribLocation(globalName, attribLocs.second,
                 attribLocs.first.c_str());
     }
+    needRestore = false;
 }
 
 GenNameInfo ProgramData::getGenNameInfo() const {

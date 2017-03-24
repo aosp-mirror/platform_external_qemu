@@ -112,5 +112,6 @@ private:
     bool    IsInUse;
     bool    DeleteStatus;
     GLuint  ProgramName;
+    bool needRestore = false;
 };
 #endif
