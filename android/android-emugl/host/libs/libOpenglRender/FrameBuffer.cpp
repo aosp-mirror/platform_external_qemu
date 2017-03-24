@@ -770,6 +770,7 @@ void FrameBuffer::DestroyWindowSurface(HandleType p_surface) {
     const auto w = m_windows.find(p_surface);
     if (w != m_windows.end()) {
         closeColorBufferLocked(w->second.second);
+        w->second.first->setColorBuffer(nullptr);
         m_windows.erase(w);
         RenderThreadInfo* tinfo = RenderThreadInfo::get();
         tinfo->m_windowSet.erase(p_surface);
