@@ -1425,6 +1425,26 @@ help_cores(stralloc_t* out)
     );
 }
 
+static void
+help_metrics_to_console(stralloc_t* out)
+{
+    PRINTF(
+    "  Enable metrics reporting in the emulator and print the collected\n"
+    "  data to stdout in JSON format.\n"
+    "  Mutually exclusive with \"-metrics-to-file <file>\"\n\n"
+    );
+}
+
+static void
+help_metrics_to_file(stralloc_t* out)
+{
+    PRINTF(
+    "  Enable metrics reporting in the emulator and write the collected\n"
+    "  data to <file> in JSON format. Old contents of <file> are destroyed.\n"
+    "  Mutually exclusive with \"-metrics-to-console\"\n\n"
+    );
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
