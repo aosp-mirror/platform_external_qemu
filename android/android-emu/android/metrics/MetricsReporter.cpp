@@ -21,10 +21,13 @@
 #include "android/metrics/MetricsPaths.h"
 #include "android/metrics/NullMetricsReporter.h"
 #include "android/metrics/StudioConfig.h"
+#include "android/metrics/TextMetricsWriter.h"
 
 #include "android/metrics/proto/clientanalytics.pb.h"
 #include "android/metrics/proto/studio_stats.pb.h"
+#include "android/cmdline-option.h"
 
+#include <stdio.h>
 #include <type_traits>
 
 using android::base::System;
@@ -73,27 +76,33 @@ void MetricsReporter::start(const std::string& sessionId,
                             base::StringView emulatorVersion,
                             base::StringView emulatorFullVersion,
                             base::StringView qemuVersion) {
-    const bool optIn = studio::getUserMetricsOptIn();
-    if (!optIn) {
+    MetricsWriter::Ptr writer;
+    if (android_cmdLineOptions->metrics_to_console) {
+        writer = TextMetricsWriter::create(base::StdioStream(stdout));
+    } else if (android_cmdLineOptions->metrics_to_file != nullptr) {
+        if (FILE* out = ::fopen(android_cmdLineOptions->metrics_to_file, "w")) {
+            writer = TextMetricsWriter::create(
+                    base::StdioStream(out, base::StdioStream::kOwner));
+        }
+    } else if (studio::getUserMetricsOptIn()) {
+        writer = FileMetricsWriter::create(
+                getSpoolDirectory(), sessionId,
+                1000,  // record limit per single file
+                base::ThreadLooper::get(),
+                10 * 60 * 1000);  // time limit for a single file, ms
+    }
+
+    if (!writer) {
         sInstance->reset({});
     } else {
-        auto writer = FileMetricsWriter::create(
-                getSpoolDirectory(),
-                sessionId,
-                1000,            // record limit per single file
-                base::ThreadLooper::get(),
-                10 * 60 * 1000); // time limit for a single file, ms
-        sInstance->reset(
-                    Ptr(new AsyncMetricsReporter(writer,
-                                                 emulatorVersion,
-                                                 emulatorFullVersion,
-                                                 qemuVersion)));
+        sInstance->reset(Ptr(new AsyncMetricsReporter(
+                writer, emulatorVersion, emulatorFullVersion, qemuVersion)));
 
         // Run the asynchronous cleanup/reporting job now.
         base::async([] {
             const auto sessions =
                     FileMetricsWriter::finalizeAbandonedSessionFiles(
-                        getSpoolDirectory());
+                            getSpoolDirectory());
             reportCrashMetrics(get(), sessions);
         });
     }

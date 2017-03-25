@@ -175,6 +175,9 @@ OPT_FLAG(wait_for_debugger, "Pause on launch and wait for a debugger process to 
 
 OPT_FLAG(skip_adb_auth, "Skip adb authentication dialogue")
 
+OPT_FLAG(metrics_to_console, "Enable usage metrics and print the messages to stdout")
+OPT_PARAM(metrics_to_file, "<file>", "Enable usage metrics and write the messages into specified file")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG
