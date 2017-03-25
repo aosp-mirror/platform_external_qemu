@@ -344,6 +344,7 @@ LOCAL_SRC_FILES := \
     android/metrics/PeriodicReporter.cpp \
     android/metrics/SyncMetricsReporter.cpp \
     android/metrics/StudioConfig.cpp \
+    android/metrics/TextMetricsWriter.cpp \
     android/misc/Random.cpp \
     android/multitouch-port.c \
     android/multitouch-screen.c \
