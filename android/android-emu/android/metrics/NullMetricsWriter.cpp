@@ -21,7 +21,8 @@ NullMetricsWriter::NullMetricsWriter() : MetricsWriter({}) {
 }
 
 void NullMetricsWriter::write(
-        const wireless_android_play_playlog::LogEvent& event) {
+        const android_studio::AndroidStudioEvent& asEvent,
+        wireless_android_play_playlog::LogEvent* logEvent) {
     D("ignoring an event write");
 }
 

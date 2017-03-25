@@ -18,10 +18,11 @@ MockMetricsWriter::MockMetricsWriter(const std::string& sessionId)
     : MetricsWriter(sessionId) {}
 
 void MockMetricsWriter::write(
-        const wireless_android_play_playlog::LogEvent& event) {
+        const android_studio::AndroidStudioEvent& asEvent,
+        wireless_android_play_playlog::LogEvent* logEvent) {
     ++mWriteCallsCount;
     if (mOnWrite) {
-        mOnWrite(event);
+        mOnWrite(asEvent, logEvent);
     }
 }
 

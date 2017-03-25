@@ -182,8 +182,7 @@ void MetricsReporter::sendToWriter(
     if (!event->has_studio_session_id()) {
         event->set_studio_session_id(sessionId());
     }
-    event->SerializeToString(logEvent.mutable_source_extension());
-    mWriter->write(logEvent);
+    mWriter->write(*event, &logEvent);
 }
 
 }  // namespace metrics

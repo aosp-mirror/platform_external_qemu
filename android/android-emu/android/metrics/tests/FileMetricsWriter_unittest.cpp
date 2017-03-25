@@ -232,7 +232,8 @@ TEST_F(FileMetricsWriterTest, writeSimple) {
     event.set_is_user_initiated(true);
     event.set_tag("tag");
     event.set_source_extension("se");
-    mWriter->write(event);
+    android_studio::AndroidStudioEvent asEvent;
+    mWriter->write(asEvent, &event);
 
     mWriter.reset();
 
@@ -262,11 +263,12 @@ TEST_F(FileMetricsWriterTest, writeMultiple) {
     std::vector<wireless_android_play_playlog::LogEvent> events;
     for (int i = 0; i < 100; ++i) {
         wireless_android_play_playlog::LogEvent event;
+        android_studio::AndroidStudioEvent asEvent;
         event.set_is_user_initiated(true);
         event.set_tag("tag");
         event.set_source_extension("se");
         event.set_event_code(i);
-        mWriter->write(event);
+        mWriter->write(asEvent, &event);
         events.push_back(event);
     }
 
@@ -300,11 +302,12 @@ TEST_F(FileMetricsWriterTest, writeLimited) {
                                         nullptr, 0);
 
     // create and write some event
+    android_studio::AndroidStudioEvent asEvent;
     std::array<wireless_android_play_playlog::LogEvent, 2> event;
     event[0].set_is_user_initiated(true);
     event[0].set_tag("tag");
     event[0].set_source_extension("se");
-    mWriter->write(event[0]);
+    mWriter->write(asEvent, &event[0]);
 
     {
         auto files = mSystem.scanDirEntries(spoolDir());
@@ -324,7 +327,7 @@ TEST_F(FileMetricsWriterTest, writeLimited) {
     event[1].set_event_uptime_ms(100);
     event[1].add_test_code(100);
     event[1].set_store("store");
-    mWriter->write(event[1]);
+    mWriter->write(asEvent, &event[1]);
 
     mWriter.reset();
 
@@ -364,11 +367,12 @@ TEST_F(FileMetricsWriterTest, writeTimered) {
     EXPECT_EQ(0U, mLooper->timers().size());
 
     // create and write some event
+    android_studio::AndroidStudioEvent asEvent;
     wireless_android_play_playlog::LogEvent event;
     event.set_is_user_initiated(true);
     event.set_tag("tag");
     event.set_source_extension("se");
-    mWriter->write(event);
+    mWriter->write(asEvent, &event);
 
     EXPECT_EQ(1U, mLooper->timers().size());
     EXPECT_EQ(1U, mLooper->activeTimers().size());

@@ -24,7 +24,8 @@ namespace metrics {
 class NullMetricsWriter final : public MetricsWriter {
 public:
     NullMetricsWriter();
-    void write(const wireless_android_play_playlog::LogEvent& event) override;
+    void write(const android_studio::AndroidStudioEvent& asEvent,
+               wireless_android_play_playlog::LogEvent* logEvent) override;
 };
 
 }  // namespace metrics

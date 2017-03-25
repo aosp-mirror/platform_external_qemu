@@ -21,6 +21,7 @@
 #include "android/utils/path.h"
 
 #include "android/metrics/proto/clientanalytics.pb.h"
+#include "android/metrics/proto/studio_stats.pb.h"
 
 #include <assert.h>
 #include <sys/types.h>
@@ -310,8 +311,11 @@ bool FileMetricsWriter::runFileOperationWithRetries(int* filenameCounter,
 }
 
 void FileMetricsWriter::write(
-        const wireless_android_play_playlog::LogEvent& event) {
-    D("writing a log event with uptime %ld ms", event.event_uptime_ms());
+        const android_studio::AndroidStudioEvent& asEvent,
+        wireless_android_play_playlog::LogEvent* logEvent) {
+    D("writing a log event with uptime %ld ms", logEvent->event_uptime_ms());
+
+    asEvent.SerializeToString(logEvent->mutable_source_extension());
 
     AutoLock lock(mLock);
 
@@ -320,12 +324,12 @@ void FileMetricsWriter::write(
     }
     if (!mActiveFile) {
         W("No active log file during write(), event lost:\n%s",
-          event.DebugString().c_str());
+          logEvent->DebugString().c_str());
         return;
     }
     ensureTimerStarted();
 
-    protobuf::writeOneDelimited(event, mActiveFile.get());
+    protobuf::writeOneDelimited(*logEvent, mActiveFile.get());
     // FileOutputStream buffers everything it can, but it means we may lose
     // a message on a crash, so let's just flush it every time.
     // Shouldn't affect performance as it's expected that only asynchronous
