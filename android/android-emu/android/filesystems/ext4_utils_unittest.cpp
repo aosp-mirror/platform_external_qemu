@@ -58,7 +58,6 @@ protected:
         PCHECK(::fwrite(mImage, maxBytes, 1, file.get()) == 1)
                 << "Could not write " << maxBytes << " bytes to "
                 << "temporary file";
-        file.close();
         return mTempFilePath.c_str();
     }
 
