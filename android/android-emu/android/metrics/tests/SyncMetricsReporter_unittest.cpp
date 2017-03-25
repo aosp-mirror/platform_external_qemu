@@ -41,9 +41,10 @@ TEST_F(SyncMetricsReporterTest, isEnabled) {
 TEST_F(SyncMetricsReporterTest, reportConditional) {
     const auto threadId = android_get_thread_id();
     mWriter->mOnWrite =
-            [threadId](const wireless_android_play_playlog::LogEvent& event) {
+            [threadId](const android_studio::AndroidStudioEvent& asEvent,
+                       wireless_android_play_playlog::LogEvent* logEvent) {
                 EXPECT_EQ(threadId, android_get_thread_id());
-                EXPECT_TRUE(event.has_source_extension());
+                EXPECT_FALSE(logEvent->has_source_extension());
             };
 
     int reportCallbackCalls = 0;

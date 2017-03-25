@@ -43,20 +43,13 @@ TEST(ScopedStdioFile, Release) {
     ::fclose(handle);
 }
 
-TEST(ScopedStdioFile, Close) {
-    ScopedStdioFile f(fopen(kNullFile, "rb"));
-    EXPECT_TRUE(f.get());
-    f.close();
-    EXPECT_FALSE(f.get());
-}
-
 TEST(ScopedStdioFile, Swap) {
     ScopedStdioFile f1;
     ScopedStdioFile f2(fopen(kNullFile, "rb"));
     EXPECT_FALSE(f1.get());
     EXPECT_TRUE(f2.get());
     FILE* fp = f2.get();
-    f1.swap(&f2);
+    std::swap(f1, f2);
     EXPECT_FALSE(f2.get());
     EXPECT_TRUE(f1.get());
     EXPECT_EQ(fp, f1.get());

@@ -74,40 +74,39 @@ TEST_F(MetricsReporterTest, sendToWriter) {
             android_studio::AndroidStudioEvent::EMULATOR_PING;
     bool expectVersions = true;
     mWriter->mOnWrite = [&kind, &sessionId, &expectVersions](
-            const wireless_android_play_playlog::LogEvent& event) {
-        EXPECT_TRUE(event.has_event_time_ms());
-        EXPECT_TRUE(event.has_event_uptime_ms());
-        EXPECT_TRUE(event.has_source_extension());
+                        const android_studio::AndroidStudioEvent& asEvent,
+                        wireless_android_play_playlog::LogEvent* logEvent) {
+        EXPECT_TRUE(logEvent->has_event_time_ms());
+        EXPECT_TRUE(logEvent->has_event_uptime_ms());
+        EXPECT_FALSE(logEvent->has_source_extension());
 
-        // Verify the fields AsyncMetricsReporter is supposed to fill in.
-        android_studio::AndroidStudioEvent studioEvent;
-        EXPECT_TRUE(studioEvent.ParseFromString(event.source_extension()));
-        EXPECT_TRUE(studioEvent.has_studio_session_id());
+        // Verify the fields MetricsReporter is supposed to fill in.
+        EXPECT_TRUE(asEvent.has_studio_session_id());
         EXPECT_STREQ(sessionId.c_str(),
-                     studioEvent.studio_session_id().c_str());
-        EXPECT_EQ(kind, studioEvent.kind());
+                     asEvent.studio_session_id().c_str());
+        EXPECT_EQ(kind, asEvent.kind());
 
-        EXPECT_TRUE(studioEvent.has_product_details());
-        EXPECT_TRUE(studioEvent.has_emulator_details());
+        EXPECT_TRUE(asEvent.has_product_details());
+        EXPECT_TRUE(asEvent.has_emulator_details());
 
         EXPECT_EQ(android_studio::ProductDetails::EMULATOR,
-                  studioEvent.product_details().product());
+                  asEvent.product_details().product());
 
         if (expectVersions) {
             EXPECT_STREQ(kVersion.c_str(),
-                         studioEvent.product_details().version().c_str());
+                         asEvent.product_details().version().c_str());
             EXPECT_STREQ(kFullVersion.c_str(),
-                         studioEvent.product_details().build().c_str());
+                         asEvent.product_details().build().c_str());
             EXPECT_STREQ(kQemuVersion.c_str(),
-                         studioEvent.emulator_details().core_version().c_str());
+                         asEvent.emulator_details().core_version().c_str());
         } else {
-            EXPECT_FALSE(studioEvent.product_details().has_version());
-            EXPECT_FALSE(studioEvent.product_details().has_build());
-            EXPECT_FALSE(studioEvent.emulator_details().has_core_version());
+            EXPECT_FALSE(asEvent.product_details().has_version());
+            EXPECT_FALSE(asEvent.product_details().has_build());
+            EXPECT_FALSE(asEvent.emulator_details().has_core_version());
         }
-        EXPECT_TRUE(studioEvent.emulator_details().has_system_time());
-        EXPECT_TRUE(studioEvent.emulator_details().has_user_time());
-        EXPECT_TRUE(studioEvent.emulator_details().has_wall_time());
+        EXPECT_TRUE(asEvent.emulator_details().has_system_time());
+        EXPECT_TRUE(asEvent.emulator_details().has_user_time());
+        EXPECT_TRUE(asEvent.emulator_details().has_wall_time());
     };
 
     createReporter();

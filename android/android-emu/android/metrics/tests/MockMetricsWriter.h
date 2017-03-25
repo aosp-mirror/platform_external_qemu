@@ -22,11 +22,13 @@ namespace metrics {
 class MockMetricsWriter final : public MetricsWriter {
 public:
     using OnWrite =
-            std::function<void(const wireless_android_play_playlog::LogEvent&)>;
+            std::function<void(const android_studio::AndroidStudioEvent&,
+                               wireless_android_play_playlog::LogEvent*)>;
 
     MockMetricsWriter(const std::string& sessionId = {});
 
-    void write(const wireless_android_play_playlog::LogEvent& event) override;
+    void write(const android_studio::AndroidStudioEvent& asEvent,
+               wireless_android_play_playlog::LogEvent* logEvent) override;
 
     int mWriteCallsCount = 0;
     OnWrite mOnWrite;

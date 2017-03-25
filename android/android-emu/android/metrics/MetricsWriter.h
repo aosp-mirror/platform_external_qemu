@@ -22,6 +22,10 @@ namespace wireless_android_play_playlog {
 class LogEvent;
 }
 
+namespace android_studio {
+class AndroidStudioEvent;
+}
+
 namespace android {
 namespace metrics {
 
@@ -45,7 +49,8 @@ public:
 
     virtual ~MetricsWriter();
     virtual void write(
-            const wireless_android_play_playlog::LogEvent& event) = 0;
+            const android_studio::AndroidStudioEvent& asEvent,
+            wireless_android_play_playlog::LogEvent* logEvent) = 0;
 
     const std::string& sessionId() const { return mSessionId; }
 

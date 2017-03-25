@@ -61,23 +61,22 @@ TEST_F(AsyncMetricsReporterTest, isEnabled) {
 
 TEST_F(AsyncMetricsReporterTest, reportConditional) {
     const auto threadId = android_get_thread_id();
-    mWriter->mOnWrite = [threadId](
-            const wireless_android_play_playlog::LogEvent& event) {
+    mWriter->mOnWrite =
+            [threadId](const android_studio::AndroidStudioEvent& asEvent,
+                       wireless_android_play_playlog::LogEvent* logEvent) {
         EXPECT_NE(threadId, android_get_thread_id());
-        EXPECT_TRUE(event.has_source_extension());
+        EXPECT_FALSE(logEvent->has_source_extension());
 
         // Verify the fields AsyncMetricsReporter is supposed to fill in.
-        android_studio::AndroidStudioEvent studioEvent;
-        EXPECT_TRUE(studioEvent.ParseFromString(event.source_extension()));
-        EXPECT_TRUE(studioEvent.has_product_details());
+        EXPECT_TRUE(asEvent.has_product_details());
         EXPECT_STREQ(kVersion.c_str(),
-                     studioEvent.product_details().version().c_str());
+                     asEvent.product_details().version().c_str());
         EXPECT_STREQ(kFullVersion.c_str(),
-                     studioEvent.product_details().build().c_str());
+                     asEvent.product_details().build().c_str());
 
-        EXPECT_TRUE(studioEvent.has_emulator_details());
+        EXPECT_TRUE(asEvent.has_emulator_details());
         EXPECT_STREQ(kQemuVersion.c_str(),
-                     studioEvent.emulator_details().core_version().c_str());
+                     asEvent.emulator_details().core_version().c_str());
     };
 
     int reportCallbackCalls = 0;

@@ -23,15 +23,16 @@ namespace base {
 // stdio FILE* instance.
 class StdioStream : public Stream {
 public:
-    enum Ownership {
-        kNotOwner,
-        kOwner
-    };
+    enum Ownership { kNotOwner, kOwner };
 
     StdioStream(FILE* file, Ownership ownership = kNotOwner);
+    StdioStream(StdioStream&& other);
+
     virtual ~StdioStream();
-    virtual ssize_t read(void* buffer, size_t size);
-    virtual ssize_t write(const void* buffer, size_t size);
+    virtual ssize_t read(void* buffer, size_t size) override;
+    virtual ssize_t write(const void* buffer, size_t size) override;
+
+    FILE* get() const { return mFile; }
 
 private:
     StdioStream();  // no default constructor

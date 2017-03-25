@@ -28,13 +28,14 @@ using namespace android::metrics;
 TEST(NullMetricsClassesTest, writer) {
     NullMetricsWriter writer;
     EXPECT_STREQ("", writer.sessionId().c_str());
-    writer.write({});  // does nothing, and there's no way to check it :(
+    writer.write({}, {});  // does nothing, and there's no way to check it :(
 }
 
 TEST(NullMetricsClassesTest, reporter) {
     auto writer = std::make_shared<MockMetricsWriter>();
-    writer->mOnWrite = [](
-            const wireless_android_play_playlog::LogEvent& event) { FAIL(); };
+    writer->mOnWrite =
+            [](const android_studio::AndroidStudioEvent& asEvent,
+               wireless_android_play_playlog::LogEvent* logEvent) { FAIL(); };
 
     NullMetricsReporter reporter(writer);
 
