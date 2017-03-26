@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6ee1f754_b0d0d9f0",
+        "filename": "android/android-emu/android/constants/IntentConstants.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-03-26T18:10:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a042a2b0_60d8fb0a",
+      "range": {
+        "startLine": 18,
+        "startChar": 20,
+        "endLine": 18,
+        "endChar": 21
+      },
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e9fe0701_5e6bb19a",
         "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
         "patchSetId": 1
@@ -36,6 +60,24 @@
       "writtenOn": "2017-03-15T17:26:42Z",
       "side": 1,
       "message": "Insert a new line before this",
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b78cc875_ac8c1de0",
+        "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-03-26T18:10:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e9fe0701_5e6bb19a",
       "revId": "954fde577d739f20b49f35206efb5c1383fad250",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -76,6 +118,30 @@
       "writtenOn": "2017-03-17T16:27:53Z",
       "side": 1,
       "message": "it\u0027s better not to add any usings to header files, as those would spread out with #includes",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 28
+      },
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b5e4d5a7_48ddeaa8",
+        "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-03-26T18:10:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8d8bd12a_7dd778fe",
       "range": {
         "startLine": 25,
         "startChar": 0,
@@ -157,6 +223,30 @@
     },
     {
       "key": {
+        "uuid": "fc2156ae_3f990414",
+        "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-03-26T18:10:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1f4c6c6e_d4445cb2",
+      "range": {
+        "startLine": 77,
+        "startChar": 33,
+        "endLine": 78,
+        "endChar": 49
+      },
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ee324d25_d52ab762",
         "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
         "patchSetId": 1
@@ -180,6 +270,30 @@
     },
     {
       "key": {
+        "uuid": "f11a854b_1976cd49",
+        "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-03-26T18:10:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ee324d25_d52ab762",
+      "range": {
+        "startLine": 79,
+        "startChar": 46,
+        "endLine": 79,
+        "endChar": 55
+      },
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3e36324d_10ecf748",
         "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
         "patchSetId": 1
@@ -191,6 +305,30 @@
       "writtenOn": "2017-03-17T16:27:53Z",
       "side": 1,
       "message": "std::pair\u003cstd::string, std::string\u003e parseProperty(buff) ?",
+      "range": {
+        "startLine": 90,
+        "startChar": 11,
+        "endLine": 90,
+        "endChar": 15
+      },
+      "revId": "954fde577d739f20b49f35206efb5c1383fad250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbb8778c_6c9d7277",
+        "filename": "android/android-emu/android/emulation/AndroidPropertyPipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-03-26T18:10:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3e36324d_10ecf748",
       "range": {
         "startLine": 90,
         "startChar": 11,
