@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b5b22ff_320fb812",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglDisplay.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 605,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-27T21:33:26Z",
+      "side": 1,
+      "message": "these two lines don\u0027t really look well together :)",
+      "range": {
+        "startLine": 604,
+        "startChar": 0,
+        "endLine": 605,
+        "endChar": 24
+      },
+      "revId": "8846ec5635966b7464d252bf1640595d8e266b96",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
