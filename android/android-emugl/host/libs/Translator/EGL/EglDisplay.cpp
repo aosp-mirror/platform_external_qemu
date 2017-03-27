@@ -602,6 +602,7 @@ void EglDisplay::onSaveAllImages(android::base::Stream* stream,
 void EglDisplay::onLoadAllImages(android::base::Stream* stream,
         SaveableTexture::loader_t loader) {
     assert(m_eglImages.empty());
+    m_eglImages.clear();
     emugl::Mutex::AutoLock mutex(m_lock);
     m_globalNameSpace.onLoad(stream, loader);
     loadCollection(stream, &m_eglImages, [this](
