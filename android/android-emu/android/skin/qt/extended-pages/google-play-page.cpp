@@ -70,7 +70,7 @@ void GooglePlayPage::getBootCompletionProperty() {
 void GooglePlayPage::bootCompletionPropertyDone(
         GooglePlayServices::Result result,
         StringView outString) {
-    if (result == GooglePlayServices::Result::Success && outString == "1") {
+    if (result == GooglePlayServices::Result::Success && outString[0] == '1') {
         getPlayStoreVersion();
         getPlayServicesVersion();
     } else {
