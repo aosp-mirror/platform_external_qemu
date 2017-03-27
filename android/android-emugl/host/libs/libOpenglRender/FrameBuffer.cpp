@@ -668,7 +668,7 @@ HandleType FrameBuffer::createRenderContext(int p_config,
         // support it.
         if (puid) {
             m_procOwnedRenderContext[puid].insert(ret);
-        } else {
+        } else { // legacy path to manage context lifetime by threads
             tinfo->m_contextSet.insert(ret);
         }
     } else {
@@ -695,8 +695,13 @@ HandleType FrameBuffer::createWindowSurface(int p_config,
             getDisplay(), config->getEglConfig(), p_width, p_height, ret));
     if (win.get() != NULL) {
         m_windows[ret] = { win, 0 };
-        RenderThreadInfo* tinfo = RenderThreadInfo::get();
-        tinfo->m_windowSet.insert(ret);
+        RenderThreadInfo* tInfo = RenderThreadInfo::get();
+        uint64_t puid = tInfo->m_puid;
+        if (puid) {
+            m_procOwnedWindowSurfaces[puid].insert(ret);
+        } else { // legacy path to manage window surface lifetime by threads
+            tInfo->m_windowSet.insert(ret);
+        }
     }
 
     return ret;
@@ -767,13 +772,25 @@ void FrameBuffer::DestroyRenderContext(HandleType p_context) {
 
 void FrameBuffer::DestroyWindowSurface(HandleType p_surface) {
     emugl::Mutex::AutoLock mutex(m_lock);
+    DestroyWindowSurfaceLocked(p_surface);
+}
+
+void FrameBuffer::DestroyWindowSurfaceLocked(HandleType p_surface) {
     const auto w = m_windows.find(p_surface);
     if (w != m_windows.end()) {
         closeColorBufferLocked(w->second.second);
-        w->second.first->setColorBuffer(nullptr);
+        ScopedBind bind(this);
         m_windows.erase(w);
         RenderThreadInfo* tinfo = RenderThreadInfo::get();
-        tinfo->m_windowSet.erase(p_surface);
+        uint64_t puid = tinfo->m_puid;
+        if (puid) {
+            auto ite = m_procOwnedWindowSurfaces.find(puid);
+            if (ite != m_procOwnedWindowSurfaces.end()) {
+                ite->second.erase(p_surface);
+            }
+        } else {
+            tinfo->m_windowSet.erase(p_surface);
+        }
     }
 }
 
@@ -831,6 +848,22 @@ void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
 }
 
 void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid) {
+    // Clean up window surfaces
+    {
+        auto procIte = m_procOwnedWindowSurfaces.find(puid);
+        if (procIte != m_procOwnedWindowSurfaces.end()) {
+            for (auto whndl : procIte->second) {
+                auto w = m_windows.find(whndl);
+                closeColorBufferLocked(w->second.second);
+            }
+            ScopedBind bind(this);
+            for (auto whndl : procIte->second) {
+                auto w = m_windows.find(whndl);
+                m_windows.erase(w);
+            }
+            m_procOwnedWindowSurfaces.erase(procIte);
+        }
+    }
     // Clean up color buffers.
     // A color buffer needs to be closed as many times as it is opened by
     // the guest process, to give the correct reference count.
@@ -1418,6 +1451,7 @@ void FrameBuffer::onSave(Stream* stream) {
         s->putBe32(pair.second.second); // Color buffer handle.
     });
 
+    saveProcOwnedCollection(stream, m_procOwnedWindowSurfaces);
     saveProcOwnedCollection(stream, m_procOwnedColorBuffers);
     saveProcOwnedCollection(stream, m_procOwnedEGLImages);
     saveProcOwnedCollection(stream, m_procOwnedRenderContext);
@@ -1433,6 +1467,9 @@ void FrameBuffer::onSave(Stream* stream) {
 bool FrameBuffer::onLoad(Stream* stream) {
     emugl::Mutex::AutoLock mutex(m_lock);
     // cleanups
+    while (m_procOwnedWindowSurfaces.size()) {
+        cleanupProcGLObjects_locked(m_procOwnedWindowSurfaces.begin()->first);
+    }
     while (m_procOwnedColorBuffers.size()) {
         cleanupProcGLObjects_locked(m_procOwnedColorBuffers.begin()->first);
     }
@@ -1492,6 +1529,7 @@ bool FrameBuffer::onLoad(Stream* stream) {
         return { handle, { std::move(window), colorBufferHandle } };
     });
 
+    loadProcOwnedCollection(stream, &m_procOwnedWindowSurfaces);
     loadProcOwnedCollection(stream, &m_procOwnedColorBuffers);
     loadProcOwnedCollection(stream, &m_procOwnedEGLImages);
     loadProcOwnedCollection(stream, &m_procOwnedRenderContext);
