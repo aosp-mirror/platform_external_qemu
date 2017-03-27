@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f40d5d0d_7d9a5aac",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 548,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-27T23:35:50Z",
+      "side": 1,
+      "message": "this converts it to int before saving. Why not putFloat() and getFloat()?",
+      "range": {
+        "startLine": 548,
+        "startChar": 24,
+        "endLine": 548,
+        "endChar": 45
+      },
+      "revId": "9d5c52a6ad79ba71adfe3d5566c2293fdab5c6db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
