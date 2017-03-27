@@ -289,6 +289,7 @@ public:
     void setPixelStorei(GLenum pname, GLint param);
 
     void setViewport(GLint x, GLint y, GLsizei width, GLsizei height);
+    void setPolygonOffset(GLfloat factor, GLfloat units);
     void setScissor(GLint x, GLint y, GLsizei width, GLsizei height);
     void setCullFace(GLenum mode);
     void setFrontFace(GLenum mode);
@@ -402,6 +403,9 @@ protected:
     GLint m_viewportY = 0;
     GLsizei m_viewportWidth = 0;
     GLsizei m_viewportHeight = 0;
+
+    GLfloat m_polygonOffsetFactor = 0.0f;
+    GLfloat m_polygonOffsetUnits = 0.0f;
 
     GLint m_scissorX = 0;
     GLint m_scissorY = 0;

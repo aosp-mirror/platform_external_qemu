@@ -2519,6 +2519,7 @@ GL_APICALL void  GL_APIENTRY glPixelStorei(GLenum pname, GLint param){
 
 GL_APICALL void  GL_APIENTRY glPolygonOffset(GLfloat factor, GLfloat units){
     GET_CTX();
+    ctx->setPolygonOffset(factor, units);
     ctx->dispatcher().glPolygonOffset(factor,units);
 }
 
