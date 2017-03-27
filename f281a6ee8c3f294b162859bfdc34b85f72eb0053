@@ -22,6 +22,30 @@
       "revId": "f281a6ee8c3f294b162859bfdc34b85f72eb0053",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc7f9691_73eb7fb7",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 858,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-27T21:29:39Z",
+      "side": 1,
+      "message": "Yes, let me move it out. (Note: we cannot bind it when closing color buffer, so the code would look somewhat dirty.)",
+      "parentUuid": "a18c04f5_3a2189ea",
+      "range": {
+        "startLine": 858,
+        "startChar": 0,
+        "endLine": 858,
+        "endChar": 38
+      },
+      "revId": "f281a6ee8c3f294b162859bfdc34b85f72eb0053",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
