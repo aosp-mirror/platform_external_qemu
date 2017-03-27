@@ -67,12 +67,23 @@ void GooglePlayPage::getBootCompletionProperty() {
             });
 }
 
+void GooglePlayPage::queryPlayVersions() {
+    getPlayStoreVersion();
+    getPlayServicesVersion();
+}
+
 void GooglePlayPage::bootCompletionPropertyDone(
         GooglePlayServices::Result result,
         StringView outString) {
     if (result == GooglePlayServices::Result::Success && outString[0] == '1') {
-        getPlayStoreVersion();
-        getPlayServicesVersion();
+        // TODO: remove this once we have android properties to wait on.
+        QObject::disconnect(&mTimer, &QTimer::timeout, this,
+                            &GooglePlayPage::getBootCompletionProperty);
+        QObject::connect(&mTimer, &QTimer::timeout, this,
+                         &GooglePlayPage::queryPlayVersions);
+        mTimer.setSingleShot(false);
+        mTimer.setInterval(10000); // 10 sec
+        mTimer.start();
     } else {
         // Continue to wait until it is finished booting.
         mTimer.start();
