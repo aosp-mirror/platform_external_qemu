@@ -22,6 +22,30 @@
       "revId": "8846ec5635966b7464d252bf1640595d8e266b96",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "14a3901c_7769a513",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglDisplay.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 605,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-27T21:36:41Z",
+      "side": 1,
+      "message": "Yes I do want to catch a use case that violates it but I don\u0027t want it to crash in our user\u0027s machines :( I will change the assert to a warning print.",
+      "parentUuid": "4b5b22ff_320fb812",
+      "range": {
+        "startLine": 604,
+        "startChar": 0,
+        "endLine": 605,
+        "endChar": 24
+      },
+      "revId": "8846ec5635966b7464d252bf1640595d8e266b96",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
