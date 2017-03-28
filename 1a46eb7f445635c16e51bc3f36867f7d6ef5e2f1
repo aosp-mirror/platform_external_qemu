@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3317ece1_dad566ac",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-28T15:07:15Z",
+      "side": 1,
+      "message": "Yes, everything that runs in the Qemu main loop does hold BQL",
+      "parentUuid": "3e45524a_224c2cf6",
+      "range": {
+        "startLine": 15,
+        "startChar": 22,
+        "endLine": 15,
+        "endChar": 42
+      },
+      "revId": "1a46eb7f445635c16e51bc3f36867f7d6ef5e2f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e0fa1323_4358517b",
         "filename": "android/android-emu/android/base/async/DefaultLooper.cpp",
         "patchSetId": 1
