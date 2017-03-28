@@ -119,6 +119,9 @@ bool propertyFile_isPhoneApi(const FileData* data);
 /* Determine whether a Google API's system image is used. */
 bool propertyFile_isGoogleApis(const FileData* data);
 
+/* Determine whether the system image is a user build. */
+bool propertyFile_isUserBuild(const FileData* data);
+
 /* Return whether an Android Auto system image is used. */
 bool propertyFile_isAndroidAuto(const FileData* data);
 

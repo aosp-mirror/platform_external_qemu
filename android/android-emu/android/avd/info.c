@@ -130,6 +130,7 @@ struct AvdInfo {
     bool      isMarshmallowOrHigher;
     bool      isPhoneApi;
     bool      isGoogleApis;
+    bool      isUserBuild;
     bool      isAndroidAuto;
     char*     skinName;     /* skin name */
     char*     skinDirPath;  /* skin directory */
@@ -574,6 +575,11 @@ avdInfo_isGoogleApis(const AvdInfo* i) {
 }
 
 bool
+avdInfo_isUserBuild(const AvdInfo* i) {
+    return i->isUserBuild;
+}
+
+bool
 avdInfo_isPhoneApi(const AvdInfo* i) {
     return i->isPhoneApi;
 }
@@ -841,6 +847,7 @@ _avdInfo_extractBuildProperties(AvdInfo* i) {
     }
     i->isPhoneApi = propertyFile_isPhoneApi(i->buildProperties);
     i->isGoogleApis = propertyFile_isGoogleApis(i->buildProperties);
+    i->isUserBuild = propertyFile_isUserBuild(i->buildProperties);
     i->isAndroidAuto = propertyFile_isAndroidAuto(i->buildProperties);
     i->incrementalVersion = propertyFile_getInt(
         i->buildProperties,
