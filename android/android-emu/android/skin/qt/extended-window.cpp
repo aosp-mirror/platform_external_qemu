@@ -13,6 +13,7 @@
 #include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/extended-window-styles.h"
 
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/main-common.h"
 #include "android/skin/qt/emulator-qt-window.h"
@@ -113,8 +114,7 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->settingsButton);
     mSidebarButtons.addButton(mExtendedUi->helpButton);
 
-    // Assume that any user build contains play store.
-    if (avdInfo_isUserBuild(android_avdInfo)) {
+    if (android::featurecontrol::isEnabled(android::featurecontrol::PlayStoreImage)) {
         mSidebarButtons.addButton(mExtendedUi->googlePlayButton);
         mExtendedUi->googlePlayPage->initialize(
                 mEmulatorWindow->getAdbInterface());
