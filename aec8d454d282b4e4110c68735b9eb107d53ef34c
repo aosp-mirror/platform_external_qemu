@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "74cae5ec_9105494b",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-03-28T21:34:06Z",
+      "side": 1,
+      "message": "I think the PlayStoreImage feature would be more accurate",
+      "range": {
+        "startLine": 117,
+        "startChar": 8,
+        "endLine": 117,
+        "endChar": 27
+      },
+      "revId": "aec8d454d282b4e4110c68735b9eb107d53ef34c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
