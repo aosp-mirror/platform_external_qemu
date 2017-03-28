@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9d109916_ec30bf8a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-03-28T16:33:05Z",
+      "side": 1,
+      "message": "This actually doesn\u0027t disconnect anything. It should be:\nmTimer.disconnect();",
+      "range": {
+        "startLine": 81,
+        "startChar": 8,
+        "endLine": 81,
+        "endChar": 37
+      },
+      "revId": "395e3a2a21dfd9e0506017a5f854edf82e8ef2a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
