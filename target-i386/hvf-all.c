@@ -127,7 +127,7 @@ hvf_slot *hvf_find_overlap_slot(uint64_t start, uint64_t end) {
     int x;
     for (x = 0; x < hvf_state->num_slots; ++x) {
         slot = &hvf_state->slots[x];
-        if (slot->size && start < (slot->start + slot->size) && end >= slot->start)
+        if (slot->size && start < (slot->start + slot->size) && end > slot->start)
             return slot;
     }
     return NULL;
