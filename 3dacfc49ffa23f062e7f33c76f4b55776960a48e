@@ -22,6 +22,30 @@
       "revId": "3dacfc49ffa23f062e7f33c76f4b55776960a48e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5229ef3f_9b7b87c3",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-03-28T05:39:19Z",
+      "side": 1,
+      "message": "Done. It was when I was trying it with API 10. I was getting outString\u003d\"1 \" (trailing whitespace).",
+      "parentUuid": "7c4f571e_b502915f",
+      "range": {
+        "startLine": 73,
+        "startChar": 57,
+        "endLine": 73,
+        "endChar": 76
+      },
+      "revId": "3dacfc49ffa23f062e7f33c76f4b55776960a48e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
