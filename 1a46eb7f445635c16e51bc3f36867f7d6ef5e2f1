@@ -116,6 +116,30 @@
       "revId": "1a46eb7f445635c16e51bc3f36867f7d6ef5e2f1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0b3f8dbe_f1e31cee",
+        "filename": "android/android-emu/android/base/async/DefaultLooper.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-28T15:07:59Z",
+      "side": 1,
+      "message": "Idea is good, but let\u0027s create it on demand - if anyone needs to create one from C",
+      "parentUuid": "7e237b16_f6d63d79",
+      "range": {
+        "startLine": 149,
+        "startChar": 4,
+        "endLine": 149,
+        "endChar": 37
+      },
+      "revId": "1a46eb7f445635c16e51bc3f36867f7d6ef5e2f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
