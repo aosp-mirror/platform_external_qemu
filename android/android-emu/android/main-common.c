@@ -17,6 +17,7 @@
 #include "android/cpu_accelerator.h"
 #include "android/emulation/android_pipe_unix.h"
 #include "android/emulation/bufprint_config_dirs.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"
 #include "android/kernel/kernel_utils.h"
 #include "android/help.h"
@@ -1242,7 +1243,8 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
                 }
                 // And then, select HVF on Mac if available and we are running
                 // on a verified abi.
-                if (androidCpuAcceleration_isAcceleratorSupported(ANDROID_CPU_ACCELERATOR_HVF) &&
+                if (feature_is_enabled(kFeature_HVF) &&
+                    androidCpuAcceleration_isAcceleratorSupported(ANDROID_CPU_ACCELERATOR_HVF) &&
                     strncmp(abi, "x86_64", 6)) {  // TODO: Fix x86_64 support in HVF
                     *accel_mode = ACCEL_HVF;
                 }
