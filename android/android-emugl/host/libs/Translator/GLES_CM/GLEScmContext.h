@@ -50,11 +50,11 @@ public:
     virtual bool glGetFloatv(GLenum pname, GLfloat *params);
     virtual bool glGetFixedv(GLenum pname, GLfixed *params);
 
-    virtual void initDefaultFBO(GLint width, GLint height,
-                                GLint colorFormat, GLint depthstencilFormat,
-                                GLint multisamples,
-                                GLuint* eglSurfaceRBColorId,
-                                GLuint* eglSurfaceRBDepthId) override;
+    virtual void initDefaultFBO(
+            GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+            GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
+            GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthStencilFormat, GLint readMultisamples,
+            GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) override;
     ~GLEScmContext();
 protected:
 

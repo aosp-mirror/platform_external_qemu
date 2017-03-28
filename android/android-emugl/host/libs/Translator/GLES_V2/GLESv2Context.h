@@ -58,11 +58,11 @@ public:
             ObjectLocalName localName, android::base::Stream* stream) const
             override;
 
-    virtual void initDefaultFBO(GLint width, GLint height,
-                                GLint colorFormat, GLint depthstencilFormat,
-                                GLint multisamples,
-                                GLuint* eglSurfaceRBColorId,
-                                GLuint* eglSurfaceRBDepthId) override;
+    virtual void initDefaultFBO(
+            GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+            GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
+            GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthStencilFormat, GLint readMultisamples,
+            GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) override;
 
 protected:
     virtual void postLoadRestoreCtx();
