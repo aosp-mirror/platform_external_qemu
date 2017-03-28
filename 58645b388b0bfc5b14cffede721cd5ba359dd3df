@@ -22,6 +22,30 @@
       "revId": "58645b388b0bfc5b14cffede721cd5ba359dd3df",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "95f12573_21de2cae",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1079,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-28T20:46:10Z",
+      "side": 1,
+      "message": "The paths are like this:\n\n1. Both: eglCreateWindowSurface/eglCreatePbufferSurface from the guest call rcCreateWindowSurface, which calls eglCreatePbufferSurface, so anything the guest writes is a pbuffer\n2. eglCreateWindowSurface is only for the host\u0027s posting surface (subwindow), so we just get one per display\n\nIn the case where newDrawPtr/newReadPtr are not pbuffers, then it\u0027s the host\u0027s posting surface, and we are in a host-side posting routine. We don\u0027t want to emulate them since at this point, something actually needs to show up on screen (use FBO 0).",
+      "parentUuid": "ab3cf3e3_c7223664",
+      "range": {
+        "startLine": 1079,
+        "startChar": 46,
+        "endLine": 1079,
+        "endChar": 53
+      },
+      "revId": "58645b388b0bfc5b14cffede721cd5ba359dd3df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
