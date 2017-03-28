@@ -108,7 +108,7 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/extended-window.h \
     android/skin/qt/raised-material-button.h \
     android/skin/qt/size-tweaker.h \
-    android/skin/qt/QtTimerImpl.h \
+    android/skin/qt/QtLooperImpl.h \
     android/skin/qt/tool-window.h \
     android/skin/qt/user-actions-counter.h
 
