@@ -29,6 +29,7 @@
 #include "android/opengles.h"
 #include "android/metrics/AdbLivenessChecker.h"
 #include "android/metrics/MetricsReporter.h"
+#include "android/metrics/MemoryUsageReporter.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/StudioConfig.h"
 #include "android/utils/debug.h"
@@ -49,16 +50,21 @@ using android::metrics::PeriodicReporter;
 namespace {
 
 // A struct to contain all metrics reporters we need to be running for the
-// whole emulator livecycle.
+// whole emulator lifecycle.
 // For now it's a single member, but soon to be more.
 struct InstanceData {
     android::metrics::AdbLivenessChecker::Ptr livenessChecker;
+    android::metrics::MemoryUsageReporter::Ptr memoryReporter;
     std::string emulatorName;
 
     void reset() {
         if (livenessChecker) {
             livenessChecker->stop();
             livenessChecker.reset();
+        }
+        if (memoryReporter) {
+          memoryReporter->stop();
+          memoryReporter.reset();
         }
     }
 };
@@ -89,6 +95,12 @@ bool android_metrics_start(const char* emulatorVersion,
                 return true;
             });
 
+    // For now only report memory usage on console when we are logging verbosely
+    if (android_verbose) {
+      sGlobalData->memoryReporter = android::metrics::MemoryUsageReporter::create(
+          android::base::ThreadLooper::get(), 1000);
+      sGlobalData->memoryReporter->start();
+    }
     return true;
 }
 
