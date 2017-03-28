@@ -221,6 +221,20 @@ bool propertyFile_isGoogleApis(const FileData* data) {
             data, google_names, ARRAY_SIZE(google_names), false /*prefix*/);
 }
 
+bool propertyFile_isUserBuild(const FileData* data) {
+    bool isUser = false;
+    char* prop = propertyFile_getValue((const char*)data->data, data->size,
+                                       "ro.build.type");
+    if (!prop) {
+        return false;
+    }
+    if (!strcmp(prop, "user")) {
+       isUser = true;
+    }
+    free(prop);
+    return isUser;
+}
+
 bool propertyFile_isAndroidAuto(const FileData* data) {
     const char* car_names[] = {"car_emu"};
     return propertyFile_findProductName(data, car_names, ARRAY_SIZE(car_names),

@@ -113,19 +113,12 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->settingsButton);
     mSidebarButtons.addButton(mExtendedUi->helpButton);
 
-    // For now, we are only shipping play store images with
-    // >= API 24 Google images.
-    const int MIN_GOOGLE_PLAY_API = 24;
-    const int DEFAULT_API = 1000; // returned if getApiLevel() fails
-    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
-    if (apiLevel >= MIN_GOOGLE_PLAY_API
-        && apiLevel != DEFAULT_API
-        && avdInfo_isGoogleApis(android_avdInfo)) {
+    // Assume that any user build contains play store.
+    if (avdInfo_isUserBuild(android_avdInfo)) {
         mSidebarButtons.addButton(mExtendedUi->googlePlayButton);
         mExtendedUi->googlePlayPage->initialize(
                 mEmulatorWindow->getAdbInterface());
-    } else {
-        mExtendedUi->googlePlayButton->hide();
+        mExtendedUi->googlePlayButton->setVisible(true);
     }
 
     if (avdInfo_isAndroidAuto(android_avdInfo)) {

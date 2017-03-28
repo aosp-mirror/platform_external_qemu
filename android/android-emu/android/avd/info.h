@@ -163,6 +163,9 @@ int avdInfo_getApiLevelFromLetter(char letter);
 /* Returns true if the AVD is on Google APIs. */
 bool   avdInfo_isGoogleApis( const AvdInfo*  i );
 
+/* Returns true if the AVD is a user build. */
+bool avdInfo_isUserBuild(const AvdInfo* i);
+
 /* Returns true if is a phone API. */
 bool   avdInfo_isPhoneApi( const AvdInfo*  i );
 

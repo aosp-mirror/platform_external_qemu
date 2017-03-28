@@ -57,6 +57,7 @@ private slots:
     void on_goog_updateStoreButton_clicked();
 
     void getBootCompletionProperty();
+    void queryPlayVersions();
 
 private:
     static const std::pair<PlayApps, const char*> PlayAppToDesc[];
