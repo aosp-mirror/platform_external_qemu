@@ -83,10 +83,17 @@ void GLESv2Context::init(GlLibrary* glLib) {
     m_initialized = true;
 }
 
-void GLESv2Context::initDefaultFBO(GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples, GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId) {
+void GLESv2Context::initDefaultFBO(
+        GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+        GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
+        GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthstencilFormat, GLint readMultisamples,
+        GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) {
     GLEScontext::initDefaultFBO(
             width, height, colorFormat, depthstencilFormat, multisamples,
-            eglSurfaceRBColorId, eglSurfaceRBDepthId);
+            eglSurfaceRBColorId, eglSurfaceRBDepthId,
+            readWidth, readHeight, readColorFormat, readDepthstencilFormat, readMultisamples,
+            eglReadSurfaceRBColorId, eglReadSurfaceRBDepthId
+            );
 }
 
 GLESv2Context::GLESv2Context(int maj, int min, GlobalNameSpace* globalNameSpace,

@@ -1032,15 +1032,22 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         newCtx->setSurfaces(newReadSrfc,newDrawSrfc);
         g_eglInfo->getIface(newCtx->version())->initContext(newCtx->getGlesContext(),newCtx->getShareGroup());
 
-        if (newDrawPtr->type() == EglSurface::PBUFFER) {
-            EGLint width,height;
+        if (newDrawPtr->type() == EglSurface::PBUFFER &&
+            newReadPtr->type() == EglSurface::PBUFFER) {
+
             EglPbufferSurface* tmpPbSurfacePtr =
                 static_cast<EglPbufferSurface*>(newDrawPtr);
-            tmpPbSurfacePtr->getAttrib(EGL_WIDTH, &width);
-            tmpPbSurfacePtr->getAttrib(EGL_HEIGHT, &height);
+            EglPbufferSurface* tmpReadPbSurfacePtr =
+                static_cast<EglPbufferSurface*>(newReadPtr);
+
+            EGLint width,height,readWidth,readHeight;
 
             EGLint r, g, b, a, d, s, ms;
+            EGLint Rr, Rg, Rb, Ra, Rd, Rs, Rms;
 
+
+            tmpPbSurfacePtr->getAttrib(EGL_WIDTH, &width);
+            tmpPbSurfacePtr->getAttrib(EGL_HEIGHT, &height);
             tmpPbSurfacePtr->getAttrib(EGL_RED_SIZE, &r);
             tmpPbSurfacePtr->getAttrib(EGL_GREEN_SIZE, &g);
             tmpPbSurfacePtr->getAttrib(EGL_BLUE_SIZE, &b);
@@ -1049,11 +1056,24 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
             tmpPbSurfacePtr->getAttrib(EGL_STENCIL_SIZE, &s);
             tmpPbSurfacePtr->getAttrib(EGL_SAMPLES, &ms);
 
+            tmpReadPbSurfacePtr->getAttrib(EGL_WIDTH, &readWidth);
+            tmpReadPbSurfacePtr->getAttrib(EGL_HEIGHT, &readHeight);
+            tmpReadPbSurfacePtr->getAttrib(EGL_RED_SIZE, &Rr);
+            tmpReadPbSurfacePtr->getAttrib(EGL_GREEN_SIZE, &Rg);
+            tmpReadPbSurfacePtr->getAttrib(EGL_BLUE_SIZE, &Rb);
+            tmpReadPbSurfacePtr->getAttrib(EGL_ALPHA_SIZE, &Ra);
+            tmpReadPbSurfacePtr->getAttrib(EGL_DEPTH_SIZE, &Rd);
+            tmpReadPbSurfacePtr->getAttrib(EGL_STENCIL_SIZE, &Rs);
+            tmpReadPbSurfacePtr->getAttrib(EGL_SAMPLES, &Rms);
+
             GLint glColorFormat, glDepthStencilFormat, glMultisamples;
+            GLint readColorFormat, readDepthStencilFormat, readMultisamples;
 
             glMultisamples = ms;
+            readMultisamples = Rms;
 
             glDepthStencilFormat = GL_DEPTH24_STENCIL8;
+            readDepthStencilFormat = GL_DEPTH24_STENCIL8;
 
             // Synthesize gl color format depending on the EGL config,
             // or things will not work right (alpha == 0 vs != 0, multisampling, etc)
@@ -1067,11 +1087,27 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
                 glColorFormat = GL_RGB565;
             }
 
+            // Synthesize gl color format depending on the EGL config,
+            // or things will not work right (alpha == 0 vs != 0, multisampling, etc)
+            if (Rr == 8 && Rg == 8 && Rb == 8 && Ra == 8) {
+                readColorFormat = GL_RGBA8;
+            }
+            if (Rr == 8 && Rg == 8 && Rb == 8 && Ra == 0) {
+                readColorFormat = GL_RGB8;
+            }
+            if (Rr == 5 && Rg == 6 && Rb == 5 && Ra == 0) {
+                readColorFormat = GL_RGB565;
+            }
+
             newCtx->getGlesContext()->initDefaultFBO(
                     width, height,
                     glColorFormat, glDepthStencilFormat, glMultisamples,
                     &tmpPbSurfacePtr->glRboColor,
-                    &tmpPbSurfacePtr->glRboDepth);
+                    &tmpPbSurfacePtr->glRboDepth,
+                    readWidth, readHeight,
+                    readColorFormat, readDepthStencilFormat, readMultisamples,
+                    &tmpReadPbSurfacePtr->glRboColor,
+                    &tmpReadPbSurfacePtr->glRboDepth);
         }
 
         // Initialize the GLES extension function table used in
