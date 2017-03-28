@@ -229,6 +229,7 @@ intptr_t RenderThread::main() {
             // Stream read may fail because of a pending snapshot.
             if (!doSnapshotOperation(snapshotObjects, SnapshotState::StartSaving)) {
                 setFinished();
+                DBG("Exited a RenderThread @%p early\n", this);
                 return 0;
             }
         }
