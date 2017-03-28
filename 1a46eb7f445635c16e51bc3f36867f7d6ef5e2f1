@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "3e45524a_224c2cf6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-03-28T03:42:51Z",
+      "side": 1,
+      "message": "will this hold BQL ?",
+      "range": {
+        "startLine": 15,
+        "startChar": 22,
+        "endLine": 15,
+        "endChar": 42
+      },
+      "revId": "1a46eb7f445635c16e51bc3f36867f7d6ef5e2f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e0fa1323_4358517b",
         "filename": "android/android-emu/android/base/async/DefaultLooper.cpp",
         "patchSetId": 1
@@ -42,6 +65,29 @@
         "startChar": 0,
         "endLine": 425,
         "endChar": 56
+      },
+      "revId": "1a46eb7f445635c16e51bc3f36867f7d6ef5e2f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7e237b16_f6d63d79",
+        "filename": "android/android-emu/android/base/async/DefaultLooper.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-03-28T03:42:51Z",
+      "side": 1,
+      "message": "any c interface ? or that is a bad idea ?",
+      "range": {
+        "startLine": 149,
+        "startChar": 4,
+        "endLine": 149,
+        "endChar": 37
       },
       "revId": "1a46eb7f445635c16e51bc3f36867f7d6ef5e2f1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
