@@ -188,23 +188,13 @@ void GooglePlayPage::playVersionDone(GooglePlayServices::Result result,
 
         case GooglePlayServices::Result::AppNotInstalled:
             textEdit->setPlainText(tr("Not Installed"));
-            msg = tr("It doesn't look like you have %1 "
-                     "installed.")
-                          .arg(getPlayAppDescription(app));
             break;
         case GooglePlayServices::Result::OperationInProgress:
             textEdit->setPlainText(tr("Loading..."));
-            msg = tr("Still waiting for %1 version.<br/>"
-                     "Please try again later.")
-                          .arg(getPlayAppDescription(app));
             break;
         default:
             textEdit->setPlainText(tr("Unknown Error"));
-            msg = tr("There was an unknown error while getting %1"
-                     " version.")
-                          .arg(getPlayAppDescription(app));
     }
-    showErrorDialog(msg, tr("%1 Version").arg(getPlayAppDescription(app)));
 }
 
 void GooglePlayPage::on_goog_updateServicesButton_clicked() {
