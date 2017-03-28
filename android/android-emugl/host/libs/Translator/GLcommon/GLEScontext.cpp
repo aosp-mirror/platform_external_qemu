@@ -415,6 +415,9 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
             m_viewportWidth = static_cast<GLsizei>(stream->getBe32());
             m_viewportHeight = static_cast<GLsizei>(stream->getBe32());
 
+            m_polygonOffsetFactor = static_cast<GLfloat>(stream->getFloat());
+            m_polygonOffsetUnits = static_cast<GLfloat>(stream->getFloat());
+
             m_scissorX = static_cast<GLint>(stream->getBe32());
             m_scissorY = static_cast<GLint>(stream->getBe32());
             m_scissorWidth = static_cast<GLsizei>(stream->getBe32());
@@ -542,6 +545,9 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         stream->putBe32(m_viewportWidth);
         stream->putBe32(m_viewportHeight);
 
+        stream->putFloat(m_polygonOffsetFactor);
+        stream->putFloat(m_polygonOffsetUnits);
+
         stream->putBe32(m_scissorX);
         stream->putBe32(m_scissorY);
         stream->putBe32(m_scissorWidth);
@@ -655,6 +661,8 @@ void GLEScontext::postLoadRestoreCtx() {
     // viewport & scissor
     dispatcher.glViewport(m_viewportX, m_viewportY,
             m_viewportWidth, m_viewportHeight);
+    dispatcher.glPolygonOffset(m_polygonOffsetFactor,
+            m_polygonOffsetUnits);
     dispatcher.glScissor(m_scissorX, m_scissorY,
             m_scissorWidth, m_scissorHeight);
 
@@ -1223,6 +1231,11 @@ void GLEScontext::setScissor(GLint x, GLint y, GLsizei width, GLsizei height) {
     m_scissorY = y;
     m_scissorWidth = width;
     m_scissorHeight = height;
+}
+
+void GLEScontext::setPolygonOffset(GLfloat factor, GLfloat units) {
+    m_polygonOffsetFactor = factor;
+    m_polygonOffsetUnits = units;
 }
 
 void GLEScontext::setEnable(GLenum item, bool isEnable) {
