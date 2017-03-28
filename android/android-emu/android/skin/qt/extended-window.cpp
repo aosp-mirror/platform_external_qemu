@@ -14,6 +14,7 @@
 #include "android/skin/qt/extended-window-styles.h"
 
 #include "android/emulation/control/user_event_agent.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/main-common.h"
 #include "android/skin/qt/emulator-qt-window.h"
@@ -118,14 +119,7 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->settingsButton);
     mSidebarButtons.addButton(mExtendedUi->helpButton);
 
-    // For now, we are only shipping play store images with
-    // >= API 24 Google images.
-    const int MIN_GOOGLE_PLAY_API = 24;
-    const int DEFAULT_API = 1000; // returned if getApiLevel() fails
-    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
-    if (apiLevel >= MIN_GOOGLE_PLAY_API
-        && apiLevel != DEFAULT_API
-        && avdInfo_isGoogleApis(android_avdInfo)) {
+    if (android::featurecontrol::isEnabled(android::featurecontrol::PlayStoreImage)) {
         mSidebarButtons.addButton(mExtendedUi->googlePlayButton);
         mExtendedUi->googlePlayPage->initialize(
                 mEmulatorWindow->getAdbInterface());
