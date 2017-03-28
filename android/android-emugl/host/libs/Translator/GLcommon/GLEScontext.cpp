@@ -1575,7 +1575,7 @@ bool GLEScontext::glGetFloatv(GLenum pname, GLfloat *params)
     delete [] iParams;
 
     return result;
-}        
+}
 
 bool GLEScontext::glGetIntegerv(GLenum pname, GLint *params)
 {
@@ -1651,7 +1651,7 @@ unsigned int GLEScontext::getBindedTexture(GLenum target) {
     TextureTarget pos = GLTextureTargetToLocal(target);
     return m_texState[m_activeTexture][pos].texture;
 }
-  
+
 unsigned int GLEScontext::getBindedTexture(GLenum unit, GLenum target) {
     TextureTarget pos = GLTextureTargetToLocal(target);
     return m_texState[unit-GL_TEXTURE0][pos].texture;
@@ -1711,20 +1711,65 @@ void GLEScontext::drawValidate(void)
     fbObj->validate(this);
 }
 
+void GLEScontext::initEmulatedEGLSurface(GLint width, GLint height,
+                             GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+                             GLuint rboColor, GLuint rboDepth) {
+    dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, rboColor);
+    if (multisamples) {
+        dispatcher().glRenderbufferStorageMultisample(GL_RENDERBUFFER, multisamples, colorFormat, width, height);
+        GLint err = dispatcher().glGetError();
+        if (err != GL_NO_ERROR) {
+            fprintf(stderr, "%s: error setting up multisampled RBO! 0x%x\n", __func__, err);
+        }
+    } else {
+        dispatcher().glRenderbufferStorage(GL_RENDERBUFFER, colorFormat, width, height);
+    }
+
+    dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+    if (multisamples) {
+        dispatcher().glRenderbufferStorageMultisample(GL_RENDERBUFFER, multisamples, depthstencilFormat, width, height);
+        GLint err = dispatcher().glGetError();
+        if (err != GL_NO_ERROR) {
+            fprintf(stderr, "%s: error setting up multisampled RBO! 0x%x\n", __func__, err);
+        }
+    } else {
+        dispatcher().glRenderbufferStorage(GL_RENDERBUFFER, depthstencilFormat, width, height);
+    }
+}
+
 void GLEScontext::initDefaultFBO(
         GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
-        GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId) {
+        GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
+        GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthStencilFormat, GLint readMultisamples,
+        GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) {
 
     if (!m_defaultFBO) {
         dispatcher().glGenFramebuffers(1, &m_defaultFBO);
+        m_defaultReadFBO = m_defaultFBO;
     }
 
     bool needReallocateRbo = false;
+    bool separateReadRbo = false;
+    bool needReallocateReadRbo = false;
+
+    separateReadRbo =
+        eglReadSurfaceRBColorId !=
+        eglSurfaceRBColorId;
+
+    if (separateReadRbo && (m_defaultReadFBO == m_defaultFBO)) {
+        dispatcher().glGenFramebuffers(1, &m_defaultReadFBO);
+    }
 
     if (!(*eglSurfaceRBColorId)) {
         dispatcher().glGenRenderbuffers(1, eglSurfaceRBColorId);
         dispatcher().glGenRenderbuffers(1, eglSurfaceRBDepthId);
         needReallocateRbo = true;
+    }
+
+    if (!(*eglReadSurfaceRBColorId) && separateReadRbo) {
+        dispatcher().glGenRenderbuffers(1, eglReadSurfaceRBColorId);
+        dispatcher().glGenRenderbuffers(1, eglReadSurfaceRBDepthId);
+        needReallocateReadRbo = true;
     }
 
     m_defaultFBOColorFormat = colorFormat;
@@ -1735,55 +1780,47 @@ void GLEScontext::initDefaultFBO(
     GLint prevRbo;
     dispatcher().glGetIntegerv(GL_RENDERBUFFER_BINDING, &prevRbo);
 
-    GLint prevGlobalDrawFbo;
-    GLint prevGlobalReadFbo;
-    dispatcher().glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prevGlobalDrawFbo);
-    dispatcher().glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &prevGlobalReadFbo);
-    dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
-
     // OS X in legacy opengl mode does not actually support GL_RGB565 as a renderbuffer.
     // Just replace it with GL_RGB8 for now.
     // TODO: Re-enable GL_RGB565 for OS X when we move to core profile.
 #ifdef __APPLE__
     if (colorFormat == GL_RGB565)
         colorFormat = GL_RGB8;
+    if (readColorFormat == GL_RGB565)
+        readColorFormat = GL_RGB8;
 #endif
 
     if (needReallocateRbo) {
-        dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, *eglSurfaceRBColorId);
-        if (multisamples) {
-            dispatcher().glRenderbufferStorageMultisample(GL_RENDERBUFFER, multisamples, colorFormat, width, height);
-            GLint err = dispatcher().glGetError();
-            if (err != GL_NO_ERROR) {
-                fprintf(stderr, "%s: error setting up multisampled RBO! 0x%x\n", __func__, err);
-            }
-        } else {
-            dispatcher().glRenderbufferStorage(GL_RENDERBUFFER, colorFormat, width, height);
-        }
-
-        dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, *eglSurfaceRBDepthId);
-        if (multisamples) {
-            dispatcher().glRenderbufferStorageMultisample(GL_RENDERBUFFER, multisamples, depthstencilFormat, width, height);
-            GLint err = dispatcher().glGetError();
-            if (err != GL_NO_ERROR) {
-                fprintf(stderr, "%s: error setting up multisampled RBO! 0x%x\n", __func__, err);
-            }
-        } else {
-            dispatcher().glRenderbufferStorage(GL_RENDERBUFFER, depthstencilFormat, width, height);
-        }
+        initEmulatedEGLSurface(width, height, colorFormat, depthstencilFormat, multisamples,
+                                *eglSurfaceRBColorId, *eglSurfaceRBDepthId);
     }
+
+    if (needReallocateReadRbo) {
+        initEmulatedEGLSurface(readWidth, readHeight, readColorFormat, readDepthStencilFormat, readMultisamples,
+                                *eglReadSurfaceRBColorId, *eglReadSurfaceRBDepthId);
+    }
+
+    dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
 
     dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, *eglSurfaceRBColorId);
     dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, *eglSurfaceRBDepthId);
     dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, *eglSurfaceRBDepthId);
 
+    if (separateReadRbo) {
+        dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, m_defaultReadFBO);
+        dispatcher().glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, *eglReadSurfaceRBColorId);
+        dispatcher().glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, *eglReadSurfaceRBDepthId);
+        dispatcher().glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, *eglReadSurfaceRBDepthId);
+    }
+
     dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, prevRbo);
-    if (prevGlobalDrawFbo) {
-        dispatcher().glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevGlobalDrawFbo);
-    }
-    if (prevGlobalReadFbo) {
-        dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, prevGlobalReadFbo);
-    }
+    GLuint prevDrawFBOBinding = getFramebufferBinding(GL_FRAMEBUFFER);
+    GLuint prevReadFBOBinding = getFramebufferBinding(GL_READ_FRAMEBUFFER);
+
+    if (prevDrawFBOBinding)
+        dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, getFBOGlobalName(prevDrawFBOBinding));
+    if (prevReadFBOBinding)
+        dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, getFBOGlobalName(prevReadFBOBinding));
 }
 
 bool GLEScontext::isFBO(ObjectLocalName p_localName) {

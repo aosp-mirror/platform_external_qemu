@@ -544,9 +544,16 @@ EglOS::Context* EglDisplay::getGlobalSharedContext() const {
 void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
     EglDisplay* display = static_cast<EglDisplay*>(opaque);
 
+    // Greater than 24 bits of color,
+    // or having no depth/stencil causes some
+    // unexpected behavior in real usage, such
+    // as frame corruption and wrong drawing order.
+    // Just don't use those configs.
     if (info->red_size > 8 ||
         info->green_size > 8 ||
-        info->blue_size > 8) {
+        info->blue_size > 8 ||
+        info->depth_size < 24 ||
+        info->stencil_size < 8) {
         return;
     }
 

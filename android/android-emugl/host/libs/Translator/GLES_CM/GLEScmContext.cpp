@@ -39,10 +39,17 @@ void GLEScmContext::init(GlLibrary* glLib) {
     m_initialized = true;
 }
 
-void GLEScmContext::initDefaultFBO(GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples, GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId) {
+void GLEScmContext::initDefaultFBO(
+        GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+        GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
+        GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthstencilFormat, GLint readMultisamples,
+        GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) {
     GLEScontext::initDefaultFBO(
             width, height, colorFormat, depthstencilFormat, multisamples,
-            eglSurfaceRBColorId, eglSurfaceRBDepthId);
+            eglSurfaceRBColorId, eglSurfaceRBDepthId,
+            readWidth, readHeight, readColorFormat, readDepthstencilFormat, readMultisamples,
+            eglReadSurfaceRBColorId, eglReadSurfaceRBDepthId
+            );
 }
 
 GLEScmContext::GLEScmContext(int maj, int min,

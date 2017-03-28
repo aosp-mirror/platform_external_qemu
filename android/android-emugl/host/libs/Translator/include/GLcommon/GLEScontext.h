@@ -238,11 +238,14 @@ public:
     // Default FBO emulation. Do not call this from GLEScontext context;
     // it needs dynamic dispatch (from GLEScmContext or GLESv2Context DLLs)
     // to pick up on the right functions.
-    virtual void initDefaultFBO(GLint width, GLint height,
-                                GLint colorFormat, GLint depthstencilFormat,
-                                GLint multisamples,
-                                GLuint* eglSurfaceRBColorId,
-                                GLuint* eglSurfaceRBDepthId);
+    virtual void initDefaultFBO(
+            GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+            GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
+            GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthStencilFormat, GLint readMultisamples,
+            GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId);
+    void initEmulatedEGLSurface(GLint width, GLint height,
+                             GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+                             GLuint rboColor, GLuint rboDepth);
 
     GLuint getDefaultFBOGlobalName() const { return m_defaultFBO; }
     bool isDefaultFBOBound(GLenum target) const { return !getFramebufferBinding(target); }
@@ -466,6 +469,7 @@ protected:
 
     // Default FBO per-context state
     GLuint m_defaultFBO = 0;
+    GLuint m_defaultReadFBO = 0;
     GLuint m_defaultRBColor = 0;
     GLuint m_defaultRBDepth = 0;
     GLint m_defaultFBOWidth = 0;
