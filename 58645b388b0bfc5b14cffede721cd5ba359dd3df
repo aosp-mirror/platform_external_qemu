@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab3cf3e3_c7223664",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1079,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-03-28T19:17:42Z",
+      "side": 1,
+      "message": "can they be different? i.e. one is p-buffer the other is not?",
+      "range": {
+        "startLine": 1079,
+        "startChar": 46,
+        "endLine": 1079,
+        "endChar": 53
+      },
+      "revId": "58645b388b0bfc5b14cffede721cd5ba359dd3df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
