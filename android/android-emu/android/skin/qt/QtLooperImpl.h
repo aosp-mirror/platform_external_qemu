@@ -17,6 +17,8 @@
 #include <QTimer>
 #include <QtGlobal>
 
+#include <utility>
+
 namespace android {
 namespace qt {
 namespace internal {
@@ -43,6 +45,51 @@ private:
     BaseTimer* mTimer;
 
     DISALLOW_COPY_AND_ASSIGN(TimerImpl);
+};
+
+class TaskImpl : public QObject, public BaseLooper::Task {
+    Q_OBJECT
+
+public:
+    TaskImpl(BaseLooper* looper,
+             BaseLooper::TaskCallback&& callback,
+             bool selfDeleting = false)
+        : BaseLooper::Task(looper, std::move(callback)),
+          mSelfDeleting(selfDeleting) {
+        // Queued connections schedule themselves to run on the target thread's
+        // event loop, so this is exactly what we need for the Task
+        // implementation.
+        connect(this, SIGNAL(runCallback()), this, SLOT(onRunCallback()),
+                Qt::QueuedConnection);
+    }
+
+    ~TaskImpl() {
+        disconnect();
+    }
+
+    void schedule() override {
+        mCanceled = false;
+        emit runCallback();
+    }
+
+    void cancel() override { mCanceled = true; }
+
+signals:
+    void runCallback();
+
+private slots:
+    void onRunCallback() {
+        if (!mCanceled) {
+            mCallback();
+        }
+        if (mSelfDeleting) {
+            QObject::deleteLater();
+        }
+    }
+
+private:
+    const bool mSelfDeleting;
+    bool mCanceled = false;
 };
 
 }  // namespace internal
