@@ -129,8 +129,7 @@ ExtendedWindow::ExtendedWindow(
         mSidebarButtons.addButton(mExtendedUi->googlePlayButton);
         mExtendedUi->googlePlayPage->initialize(
                 mEmulatorWindow->getAdbInterface());
-    } else {
-        mExtendedUi->googlePlayButton->hide();
+        mExtendedUi->googlePlayButton->setVisible(true);
     }
 
 #ifdef __APPLE__

@@ -847,7 +847,6 @@ padding: 10px 0px 10px 16px;</string>
       <item>
        <widget class="QPushButton" name="googlePlayButton">
         <property name="visible">
-         <!-- TODO(joshuaduong): Enable once gplay is ready. -->
          <bool>false</bool>
         </property>
         <property name="font">
