@@ -2445,6 +2445,7 @@ GL_APICALL GLboolean    GL_APIENTRY glIsShader(GLuint shader){
 
 GL_APICALL void  GL_APIENTRY glLineWidth(GLfloat width){
     GET_CTX();
+    ctx->setLineWidth(width);
     ctx->dispatcher().glLineWidth(width);
 }
 
@@ -2654,6 +2655,7 @@ GL_APICALL void  GL_APIENTRY glRenderbufferStorage(GLenum target, GLenum interna
 
 GL_APICALL void  GL_APIENTRY glSampleCoverage(GLclampf value, GLboolean invert){
     GET_CTX();
+    ctx->setSampleCoverage(value, invert);
     ctx->dispatcher().glSampleCoverage(value,invert);
 }
 

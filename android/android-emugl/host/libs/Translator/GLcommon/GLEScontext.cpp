@@ -446,8 +446,13 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
             m_frontFace = static_cast<GLenum>(stream->getBe32());
             m_depthFunc = static_cast<GLenum>(stream->getBe32());
             m_depthMask = static_cast<GLboolean>(stream->getByte());
-            m_zNear = static_cast<GLclampf>(stream->getBe32());
-            m_zFar = static_cast<GLclampf>(stream->getBe32());
+            m_zNear = static_cast<GLclampf>(stream->getFloat());
+            m_zFar = static_cast<GLclampf>(stream->getFloat());
+
+            m_lineWidth = static_cast<GLclampf>(stream->getFloat());
+
+            m_sampleCoverageVal = static_cast<GLclampf>(stream->getFloat());
+            m_sampleCoverageInvert = static_cast<GLboolean>(stream->getByte());
 
             stream->read(m_stencilStates, sizeof(m_stencilStates));
 
@@ -574,8 +579,13 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         stream->putBe32(m_frontFace);
         stream->putBe32(m_depthFunc);
         stream->putByte(m_depthMask);
-        stream->putBe32(m_zNear);
-        stream->putBe32(m_zFar);
+        stream->putFloat(m_zNear);
+        stream->putFloat(m_zFar);
+
+        stream->putFloat(m_lineWidth);
+
+        stream->putFloat(m_sampleCoverageVal);
+        stream->putByte(m_sampleCoverageInvert);
 
         stream->write(m_stencilStates, sizeof(m_stencilStates));
 
@@ -684,6 +694,10 @@ void GLEScontext::postLoadRestoreCtx() {
     dispatcher.glDepthFunc(m_depthFunc);
     dispatcher.glDepthMask(m_depthMask);
     dispatcher.glDepthRange(m_zNear, m_zFar);
+
+    dispatcher.glLineWidth(m_lineWidth);
+
+    dispatcher.glSampleCoverage(m_sampleCoverageVal, m_sampleCoverageInvert);
 
     for (int i = 0; i < 2; i++) {
         GLenum face = i == StencilFront ? GL_FRONT
@@ -1275,6 +1289,14 @@ void GLEScontext::setDepthRangef(GLclampf zNear, GLclampf zFar) {
     m_zFar = zFar;
 }
 
+void GLEScontext::setLineWidth(GLfloat lineWidth) {
+    m_lineWidth = lineWidth;
+}
+
+void GLEScontext::setSampleCoverage(GLclampf value, GLboolean invert) {
+    m_sampleCoverageVal = value;
+    m_sampleCoverageInvert = invert;
+}
 void GLEScontext::setStencilFuncSeparate(GLenum face, GLenum func, GLint ref,
         GLuint mask) {
     if (face == GL_FRONT_AND_BACK) {
