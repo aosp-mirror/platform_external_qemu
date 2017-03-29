@@ -41,6 +41,7 @@ public:
     int  getMaxCombinedTexUnits() override;
     int  getMaxTexUnits() override;
 
+    void setAttribValue(int idx, unsigned int count, const GLfloat* val);
     // This whole att0 thing is about a incompatibility between GLES and OpenGL.
     // GLES allows a vertex shader attribute to be in location 0 and have a
     // current value, while OpenGL is not very clear about this, which results
