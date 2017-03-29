@@ -271,11 +271,14 @@ void EglDisplay::addSimplePixelFormat(int red_size,
             max_config_id = id;
     }
 
-    EglConfig* newConfig = new EglConfig(*config,max_config_id+1,
-                                         red_size, green_size, blue_size,
-                                         alpha_size);
+    std::unique_ptr<EglConfig> newConfig(
+         new EglConfig(*config,max_config_id+1,
+                       red_size, green_size, blue_size,
+                       alpha_size));
 
-    m_configs.emplace_back(newConfig);
+    if (m_uniqueConfigs.insert(*newConfig).second) {
+        m_configs.emplace_back(newConfig.release());
+    }
 }
 
 void EglDisplay::addMissingConfigs() {
@@ -548,42 +551,46 @@ void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
     // or having no depth/stencil causes some
     // unexpected behavior in real usage, such
     // as frame corruption and wrong drawing order.
+    // Also, disallow high MSAA.
     // Just don't use those configs.
     if (info->red_size > 8 ||
         info->green_size > 8 ||
         info->blue_size > 8 ||
         info->depth_size < 24 ||
-        info->stencil_size < 8) {
+        info->stencil_size < 8 ||
+        info->samples_per_pixel > 4) {
         return;
     }
 
-    EglConfig* config = new EglConfig(
-            info->red_size,
-            info->green_size,
-            info->blue_size,
-            info->alpha_size,
-            info->caveat,
-            info->config_id,
-            info->depth_size,
-            info->frame_buffer_level,
-            info->max_pbuffer_width,
-            info->max_pbuffer_height,
-            info->max_pbuffer_size,
-            info->native_renderable,
-            info->renderable_type,
-            info->native_visual_id,
-            info->native_visual_type,
-            info->samples_per_pixel,
-            info->stencil_size,
-            info->surface_type,
-            info->transparent_type,
-            info->trans_red_val,
-            info->trans_green_val,
-            info->trans_blue_val,
-            info->recordable_android,
-            info->frmt);
+    std::unique_ptr<EglConfig> config(new EglConfig(
+         info->red_size,
+         info->green_size,
+         info->blue_size,
+         info->alpha_size,
+         info->caveat,
+         info->config_id,
+         info->depth_size,
+         info->frame_buffer_level,
+         info->max_pbuffer_width,
+         info->max_pbuffer_height,
+         info->max_pbuffer_size,
+         info->native_renderable,
+         info->renderable_type,
+         info->native_visual_id,
+         info->native_visual_type,
+         info->samples_per_pixel,
+         info->stencil_size,
+         info->surface_type,
+         info->transparent_type,
+         info->trans_red_val,
+         info->trans_green_val,
+         info->trans_blue_val,
+         info->recordable_android,
+         info->frmt));
 
-    display->m_configs.emplace_back(config);
+    if (display->m_uniqueConfigs.insert(*config).second) {
+        display->m_configs.emplace_back(config.release());
+    }
 }
 
 void EglDisplay::onSaveAllImages(android::base::Stream* stream,
