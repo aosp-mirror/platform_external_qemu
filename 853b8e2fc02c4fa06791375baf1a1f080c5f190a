@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "54943134_3183004b",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 3121,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-29T01:45:01Z",
+      "side": 1,
+      "message": "add comment with TODO for support for fatter attribs than vec4\u0027s, possibly att0 arrays",
+      "range": {
+        "startLine": 3121,
+        "startChar": 0,
+        "endLine": 3121,
+        "endChar": 42
+      },
+      "revId": "853b8e2fc02c4fa06791375baf1a1f080c5f190a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a39c585_d982f2f0",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLESpointer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-29T01:45:01Z",
+      "side": 1,
+      "message": "nit: remove",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 47
+      },
+      "revId": "853b8e2fc02c4fa06791375baf1a1f080c5f190a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05ab9fcb_6c3831b6",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLESpointer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-29T01:45:01Z",
+      "side": 1,
+      "message": "Sometimes att0 can be an array of vec4 (rarely; only on legacy openGL it seems at least with Android images (see validateAtt0PreDraw for how big it can be; try some different API levels / apps to see how much it\u0027s called, hopefully never, or just once...)\n\nFor the count\u003d1 case, att0 being a mat4 is also a thing :/ but not sure of the right way to detect that yet, probably based on a) querying program link info for variable type b) changing guest protocol to deliver different # bytes\n\nRecommend putting TODO here and filing a bug for now, as that will be super messy",
+      "range": {
+        "startLine": 98,
+        "startChar": 4,
+        "endLine": 98,
+        "endChar": 24
+      },
+      "revId": "853b8e2fc02c4fa06791375baf1a1f080c5f190a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
