@@ -31,6 +31,7 @@ class ProgramData;
 class GLESv2Context : public GLEScontext{
 public:
     virtual void init(GlLibrary* glLib);
+    static void initGlobal(GlLibrary* glLib);
     GLESv2Context(int maj, int min, GlobalNameSpace* globalNameSpace,
             android::base::Stream* stream, GlLibrary* glLib);
     virtual ~GLESv2Context();

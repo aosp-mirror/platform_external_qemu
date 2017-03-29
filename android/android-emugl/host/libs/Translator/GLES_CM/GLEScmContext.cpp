@@ -25,7 +25,6 @@
 void GLEScmContext::init(GlLibrary* glLib) {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(!m_initialized) {
-        s_glDispatch.dispatchFuncs(GLES_1_1, glLib);
         GLEScontext::init(glLib);
 
         m_texCoords = new GLESpointer[s_glSupport.maxTexUnits];
@@ -39,6 +38,11 @@ void GLEScmContext::init(GlLibrary* glLib) {
     m_initialized = true;
 }
 
+void GLEScmContext::initGlobal(GlLibrary* glLib) {
+    s_glDispatch.dispatchFuncs(GLES_1_1, glLib);
+    GLEScontext::initGlobal(glLib);
+}
+
 void GLEScmContext::initDefaultFBO(GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples, GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId) {
     GLEScontext::initDefaultFBO(
             width, height, colorFormat, depthstencilFormat, multisamples,
@@ -49,7 +53,6 @@ GLEScmContext::GLEScmContext(int maj, int min,
         GlobalNameSpace* globalNameSpace, android::base::Stream* stream)
     : GLEScontext(globalNameSpace, stream, nullptr) {
     // TODO: snapshot support
-    if (stream) return;
     m_glesMajorVersion = maj;
     m_glesMinorVersion = min;
     addVertexArrayObject(0);

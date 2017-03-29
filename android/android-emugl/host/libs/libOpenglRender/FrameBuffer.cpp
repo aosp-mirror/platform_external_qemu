@@ -622,6 +622,7 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
                                           getCaps().has_eglimage_texture_2d,
                                           ret, m_colorBufferHelper));
     if (cb.get() != NULL) {
+        printf("create cb %#x\n", ret);
         m_colorbuffers[ret] = { std::move(cb), 1 };
 
         RenderThreadInfo* tInfo = RenderThreadInfo::get();
@@ -781,6 +782,7 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
     emugl::Mutex::AutoLock mutex(m_lock);
+    printf("open color buffer %#x\n", p_colorbuffer);
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
@@ -801,6 +803,7 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
     emugl::Mutex::AutoLock mutex(m_lock);
+    printf("close color buffer %#x\n", p_colorbuffer);
     closeColorBufferLocked(p_colorbuffer);
     uint64_t puid = tInfo->m_puid;
     if (puid) {
@@ -821,6 +824,7 @@ void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer) {
         return;
     }
     if (--(*c).second.refcount == 0) {
+        printf("erase color buffer %#x\n", p_colorbuffer);
         m_colorbuffers.erase(c);
     }
 }
@@ -1374,6 +1378,9 @@ void FrameBuffer::onSave(Stream* stream) {
     //     m_prevReadSurf
     //     m_prevDrawSurf
     emugl::Mutex::AutoLock mutex(m_lock);
+    // Ideally we should not need to save s_nextHandle
+    // but it causes issues on older public system images
+    stream->putBe32(s_nextHandle);
     // set up a context because some snapshot commands try using GL
     ScopedBind scopedBind(this);
     // eglPreSaveContext labels all guest context textures to be saved
@@ -1432,6 +1439,17 @@ void FrameBuffer::onSave(Stream* stream) {
 
 bool FrameBuffer::onLoad(Stream* stream) {
     emugl::Mutex::AutoLock mutex(m_lock);
+    if (m_procOwnedColorBuffers.size() == 0 
+            && m_procOwnedEGLImages.size() == 0
+            && m_procOwnedRenderContext.size() == 0
+            && (!m_contexts.empty() || !m_windows.empty()
+            || !m_colorbuffers.empty())) {
+        // we are likely on a legacy system image, which does not have process
+        // owned objects. We need to force cleanup everything
+        m_contexts.clear();
+        m_windows.clear();
+        m_colorbuffers.clear();
+    }
     // cleanups
     while (m_procOwnedColorBuffers.size()) {
         cleanupProcGLObjects_locked(m_procOwnedColorBuffers.begin()->first);
@@ -1446,6 +1464,8 @@ bool FrameBuffer::onLoad(Stream* stream) {
     assert(m_contexts.empty());
     assert(m_windows.empty());
     assert(m_colorbuffers.empty());
+
+    s_nextHandle = stream->getBe32();
     if (s_egl.eglLoadAllImages) {
         ScopedBind scopedBind(this);
         s_egl.eglLoadAllImages(m_eglDisplay, stream);

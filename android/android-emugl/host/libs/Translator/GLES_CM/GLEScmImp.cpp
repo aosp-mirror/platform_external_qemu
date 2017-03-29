@@ -80,12 +80,18 @@ static void initGLESx() {
 }
 
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
-    if (!ctx->isInitialized()) {
+    GLEScmContext::initGlobal(s_eglIface->eglGetGlLibrary());
+    if (!ctx->shareGroup()) {
         ctx->setShareGroup(grp);
+    }
+    if (!ctx->isInitialized()) {
         ctx->init(s_eglIface->eglGetGlLibrary());
         glBindTexture(GL_TEXTURE_2D,0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP_OES,0);
-     }
+        glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+    }
+    if (ctx->needRestore()) {
+        ctx->restore();
+    }
 }
 
 static GLEScontext* createGLESContext(int maj, int min,

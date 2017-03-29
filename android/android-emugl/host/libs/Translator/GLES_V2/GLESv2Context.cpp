@@ -50,7 +50,6 @@ static const char* sPickVersionStringPart(int maj, int min) {
 void GLESv2Context::init(GlLibrary* glLib) {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(!m_initialized) {
-        s_glDispatch.dispatchFuncs(GLES_2_0, glLib);
         GLEScontext::init(glLib);
         addVertexArrayObject(0);
         setVertexArrayObject(0);
@@ -81,6 +80,11 @@ void GLESv2Context::init(GlLibrary* glLib) {
 
     }
     m_initialized = true;
+}
+
+void GLESv2Context::initGlobal(GlLibrary* glLib) {
+    s_glDispatch.dispatchFuncs(GLES_2_0, glLib);
+    GLEScontext::initGlobal(glLib);
 }
 
 void GLESv2Context::initDefaultFBO(GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples, GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId) {

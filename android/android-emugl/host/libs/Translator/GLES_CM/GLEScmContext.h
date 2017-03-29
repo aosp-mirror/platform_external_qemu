@@ -33,6 +33,7 @@ class GLEScmContext: public GLEScontext
 {
 public:
     virtual void init(GlLibrary* glLib);
+    static void initGlobal(GlLibrary* glLib);
     GLEScmContext(int maj, int min, GlobalNameSpace* globalNameSpace,
             android::base::Stream* stream);
     void setActiveTexture(GLenum tex);

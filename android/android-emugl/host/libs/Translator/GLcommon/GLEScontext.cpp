@@ -316,17 +316,6 @@ bool GLEScontext::vertexAttributesBufferBacked() {
 
 void GLEScontext::init(GlLibrary* glLib) {
 
-    if (!s_glExtensions) {
-        initCapsLocked(reinterpret_cast<const GLubyte*>(
-                getHostExtensionsString(&s_glDispatch).c_str()));
-        // NOTE: the string below corresponds to the extensions reported
-        // by this context, which is initialized in each GLESv1 or GLESv2
-        // context implementation, based on the parsing of the host
-        // extensions string performed by initCapsLocked(). I.e. it will
-        // be populated after calling this ::init() method.
-        s_glExtensions = new std::string();
-    }
-
     if (!m_initialized) {
         initExtensionString();
 
@@ -344,6 +333,19 @@ void GLEScontext::init(GlLibrary* glLib) {
         m_indexedUniformBuffers.resize(getCaps()->maxUniformBufferBindings);
         m_indexedAtomicCounterBuffers.resize(getCaps()->maxAtomicCounterBufferBindings);
         m_indexedShaderStorageBuffers.resize(getCaps()->maxShaderStorageBufferBindings);
+    }
+}
+
+void GLEScontext::initGlobal(GlLibrary* glLib) {
+    if (!s_glExtensions) {
+        initCapsLocked(reinterpret_cast<const GLubyte*>(
+                getHostExtensionsString(&s_glDispatch).c_str()));
+        // NOTE: the string below corresponds to the extensions reported
+        // by this context, which is initialized in each GLESv1 or GLESv2
+        // context implementation, based on the parsing of the host
+        // extensions string performed by initCapsLocked(). I.e. it will
+        // be populated after calling this ::init() method.
+        s_glExtensions = new std::string();
     }
 }
 

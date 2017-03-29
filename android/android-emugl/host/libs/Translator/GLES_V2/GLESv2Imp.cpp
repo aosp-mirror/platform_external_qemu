@@ -88,6 +88,7 @@ extern "C" {
 
 
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
+    GLESv2Context::initGlobal(s_eglIface->eglGetGlLibrary());
     if (!ctx->shareGroup()) {
         ctx->setShareGroup(grp);
     }
