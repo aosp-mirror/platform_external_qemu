@@ -98,8 +98,9 @@ public:
         if (!mCoreVersion.empty()) {
             const auto& id = android::studio::getInstallationId();
             url += Uri::FormatEncodeArguments(
-                    "?tool=emulator&uid=%s&os=%s&", id,
-                    toString(System::get()->getOsType()));
+                    "?tool=emulator&uid=%s&os=%s&bits=%d&", id,
+                    toString(System::get()->getOsType()),
+                    System::get()->getHostBitness());
             // append the fields which may change from run to run: version and
             // core version
             url += getVersionUriFields();
