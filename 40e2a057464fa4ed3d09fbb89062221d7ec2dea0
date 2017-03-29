@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f1086c9d_63e5bd46",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-29T23:26:21Z",
+      "side": 1,
+      "message": "this \"erase\" invalidates the pointer. Also, there\u0027s no sense in checking for null there\n\nauto stateIt \u003d sGlobals-\u003emCapturerMap.find(capturer);\nif (stateIt \u003d\u003d sGlobals-\u003emCapturerMap.end()) return -1;\n...\n// last lines\nsGlobals-\u003emCapturerMap.erase(stateIt);\nreturn 0;",
+      "range": {
+        "startLine": 122,
+        "startChar": 0,
+        "endLine": 122,
+        "endChar": 43
+      },
+      "revId": "40e2a057464fa4ed3d09fbb89062221d7ec2dea0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
