@@ -4543,9 +4543,8 @@ static int main_impl(int argc, char** argv)
 
     if (qemu_gles) {
         char  tmp[64];
-        // incorporate minor version as well
-        // when we are ES 3.1+ conformant
-        snprintf(tmp, sizeof(tmp), "%d", gles_major_version << 16);
+        snprintf(tmp, sizeof(tmp), "%d",
+                 gles_major_version << 16 | gles_minor_version);
         boot_property_add("ro.opengles.version", tmp);
     }
 
