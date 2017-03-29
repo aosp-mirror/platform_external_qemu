@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fd588578_24f5bb00",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglConfig.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 467,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-29T21:28:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7d5db8f8_0acc2f6f",
+      "range": {
+        "startLine": 467,
+        "startChar": 8,
+        "endLine": 467,
+        "endChar": 22
+      },
+      "revId": "8da5ad54f30a31ab83c192debd2eff3fff8c35a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "39db0521_b4a85ae0",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglConfig.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2017-03-29T20:31:15Z",
       "side": 1,
       "message": "xoring many numbers together doesn\u0027t usually produce a good hash - http://stackoverflow.com/a/27952689\nuse something like res \u003d res*\u003cprime_num\u003e + hash(new_field)\nhash(x) \u003d\u003d std::hash\u003cdecltype(x)\u003e()(x)",
+      "range": {
+        "startLine": 468,
+        "startChar": 3,
+        "endLine": 468,
+        "endChar": 17
+      },
+      "revId": "8da5ad54f30a31ab83c192debd2eff3fff8c35a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "becdd32d_62a9328c",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglConfig.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 468,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-29T21:28:54Z",
+      "side": 1,
+      "message": "Done. Great tip, thanks!",
+      "parentUuid": "39db0521_b4a85ae0",
       "range": {
         "startLine": 468,
         "startChar": 3,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "278e5dc7_dfc562eb",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglConfig.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-29T21:28:54Z",
+      "side": 1,
+      "message": "Hehe :) Done.",
+      "parentUuid": "a1f04b70_5edfd3e3",
+      "range": {
+        "startLine": 59,
+        "startChar": 13,
+        "endLine": 59,
+        "endChar": 18
+      },
+      "revId": "8da5ad54f30a31ab83c192debd2eff3fff8c35a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4008185c_16c85566",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglDisplay.cpp",
         "patchSetId": 2
@@ -82,6 +154,30 @@
       "writtenOn": "2017-03-29T20:31:15Z",
       "side": 1,
       "message": "don\u0027t you leak it here? std::unique_ptr\u003c\u003e + release() when emplacing?",
+      "range": {
+        "startLine": 279,
+        "startChar": 31,
+        "endLine": 279,
+        "endChar": 38
+      },
+      "revId": "8da5ad54f30a31ab83c192debd2eff3fff8c35a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f43c3c1a_dc285938",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglDisplay.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-29T21:28:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4008185c_16c85566",
       "range": {
         "startLine": 279,
         "startChar": 31,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "b1d97131_fd0b2a98",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglDisplay.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 600,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-29T21:28:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "52a0a4f2_88be12da",
+      "range": {
+        "startLine": 594,
+        "startChar": 2,
+        "endLine": 600,
+        "endChar": 31
+      },
+      "revId": "8da5ad54f30a31ab83c192debd2eff3fff8c35a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f8717d53_27558aea",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglDisplay.h",
         "patchSetId": 2
@@ -128,6 +248,30 @@
       "writtenOn": "2017-03-29T20:31:15Z",
       "side": 1,
       "message": "nit",
+      "range": {
+        "startLine": 40,
+        "startChar": 32,
+        "endLine": 40,
+        "endChar": 35
+      },
+      "revId": "8da5ad54f30a31ab83c192debd2eff3fff8c35a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f12cf4d7_20d96efb",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglDisplay.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-29T21:28:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f8717d53_27558aea",
       "range": {
         "startLine": 40,
         "startChar": 32,
