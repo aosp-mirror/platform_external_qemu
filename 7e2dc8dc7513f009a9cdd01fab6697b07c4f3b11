@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6dc26ebf_6ec223b1",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-29T22:14:51Z",
+      "side": 1,
+      "message": "what about storing a value instead of pointer here?",
+      "range": {
+        "startLine": 37,
+        "startChar": 67,
+        "endLine": 37,
+        "endChar": 78
+      },
+      "revId": "7e2dc8dc7513f009a9cdd01fab6697b07c4f3b11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea75fc36_22bb8650",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-29T22:14:51Z",
+      "side": 1,
+      "message": "same thing: create it on stack, or, better, directly in the map:\nAudioState* state \u003d \u0026sGlobals-\u003emCapturerMap[capturer];",
+      "range": {
+        "startLine": 99,
+        "startChar": 1,
+        "endLine": 99,
+        "endChar": 39
+      },
+      "revId": "7e2dc8dc7513f009a9cdd01fab6697b07c4f3b11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a0794731_c972ab3a",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-29T22:14:51Z",
+      "side": 1,
+      "message": "Thou shalt not use goto in C++ code!\nPlease just remove the state from the map right here, or use RAII if you prefer generic solution",
+      "range": {
+        "startLine": 109,
+        "startChar": 7,
+        "endLine": 109,
+        "endChar": 24
+      },
+      "revId": "7e2dc8dc7513f009a9cdd01fab6697b07c4f3b11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4934be7d_44d51175",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 801,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-29T22:14:51Z",
+      "side": 1,
+      "message": "nit: one more commented code",
+      "range": {
+        "startLine": 801,
+        "startChar": 0,
+        "endLine": 801,
+        "endChar": 41
+      },
+      "revId": "7e2dc8dc7513f009a9cdd01fab6697b07c4f3b11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e5fc170f_ecf83795",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 860,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-29T22:14:51Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 859,
+        "startChar": 0,
+        "endLine": 860,
+        "endChar": 50
+      },
+      "revId": "7e2dc8dc7513f009a9cdd01fab6697b07c4f3b11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1f70b2cd_ab9db76f",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 876,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-29T22:14:51Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 875,
+        "startChar": 0,
+        "endLine": 876,
+        "endChar": 46
+      },
+      "revId": "7e2dc8dc7513f009a9cdd01fab6697b07c4f3b11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
