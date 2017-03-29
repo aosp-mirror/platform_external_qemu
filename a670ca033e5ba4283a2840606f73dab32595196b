@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "d384738f_336f3f1b",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-29T21:29:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bc2d9e52_dc6ab5dd",
+      "range": {
+        "startLine": 87,
+        "startChar": 0,
+        "endLine": 87,
+        "endChar": 19
+      },
+      "revId": "a670ca033e5ba4283a2840606f73dab32595196b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a6d8f608_4641ffb1",
         "filename": "android-qemu2-glue/audio-capturer.cpp",
         "patchSetId": 5
@@ -82,6 +106,30 @@
       "writtenOn": "2017-03-29T18:19:50Z",
       "side": 1,
       "message": "nit: please declare the variables at first use",
+      "range": {
+        "startLine": 92,
+        "startChar": 3,
+        "endLine": 95,
+        "endChar": 25
+      },
+      "revId": "a670ca033e5ba4283a2840606f73dab32595196b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "defeb7b4_b850297e",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-29T21:29:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a6d8f608_4641ffb1",
       "range": {
         "startLine": 92,
         "startChar": 3,
@@ -163,6 +211,30 @@
     },
     {
       "key": {
+        "uuid": "83a4985a_9548a973",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-29T21:29:56Z",
+      "side": 1,
+      "message": "the state pointer needs to pass to AUD_add_capture() as opaque handle, which will be then used inside my_capture() etc. A simple pointer makes casting easier to understand. This is also the reason why I don\u0027t use a value.",
+      "parentUuid": "2163ebd4_1b313289",
+      "range": {
+        "startLine": 119,
+        "startChar": 0,
+        "endLine": 119,
+        "endChar": 59
+      },
+      "revId": "a670ca033e5ba4283a2840606f73dab32595196b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "06177264_9e94d5a1",
         "filename": "android-qemu2-glue/audio-capturer.cpp",
         "patchSetId": 5
@@ -174,6 +246,30 @@
       "writtenOn": "2017-03-29T18:19:50Z",
       "side": 1,
       "message": "who deletes the capturer?",
+      "range": {
+        "startLine": 145,
+        "startChar": 68,
+        "endLine": 145,
+        "endChar": 76
+      },
+      "revId": "a670ca033e5ba4283a2840606f73dab32595196b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d503678b_2f854f53",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-29T21:29:56Z",
+      "side": 1,
+      "message": "The caller. I added a comment to remind",
+      "parentUuid": "06177264_9e94d5a1",
       "range": {
         "startLine": 145,
         "startChar": 68,
@@ -220,6 +316,30 @@
       "writtenOn": "2017-03-29T18:19:50Z",
       "side": 1,
       "message": "assign nullptr ?",
+      "range": {
+        "startLine": 522,
+        "startChar": 6,
+        "endLine": 522,
+        "endChar": 36
+      },
+      "revId": "a670ca033e5ba4283a2840606f73dab32595196b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7fd31682_074b0cc0",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 522,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-29T21:29:56Z",
+      "side": 1,
+      "message": "no need, as recorder is deleted in this same function later on",
+      "parentUuid": "19f72811_6fed09a5",
       "range": {
         "startLine": 522,
         "startChar": 6,
@@ -335,6 +455,30 @@
       "writtenOn": "2017-03-29T18:19:50Z",
       "side": 1,
       "message": "who frees this memory?",
+      "range": {
+        "startLine": 872,
+        "startChar": 13,
+        "endLine": 872,
+        "endChar": 65
+      },
+      "revId": "a670ca033e5ba4283a2840606f73dab32595196b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fe7acf67_e950fb81",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 872,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-03-29T21:29:56Z",
+      "side": 1,
+      "message": "very good catch, added free in ffmpeg_delete_recorder()",
+      "parentUuid": "04223174_c2c950c4",
       "range": {
         "startLine": 872,
         "startChar": 13,
