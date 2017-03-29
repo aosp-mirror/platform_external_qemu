@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "91fcca59_be6f5b2b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-03-29T15:14:49Z",
+      "side": 1,
+      "message": "this is the major version ?",
+      "range": {
+        "startLine": 52,
+        "startChar": 14,
+        "endLine": 52,
+        "endChar": 43
+      },
+      "revId": "7653ae1841cf9d27df73de0b89427fd85c5037e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cc5048af_40a86ebc",
+        "filename": "vl.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4547,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-03-29T15:14:49Z",
+      "side": 1,
+      "message": "what is gles minor version here ?",
+      "range": {
+        "startLine": 4547,
+        "startChar": 44,
+        "endLine": 4547,
+        "endChar": 62
+      },
+      "revId": "7653ae1841cf9d27df73de0b89427fd85c5037e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
