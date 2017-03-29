@@ -275,6 +275,9 @@ void EglDisplay::addSimplePixelFormat(int red_size,
                                          red_size, green_size, blue_size,
                                          alpha_size);
 
+    if (m_uniqueConfigs.find(EglConfigKey(*newConfig)) !=
+        m_uniqueConfigs.end()) return;
+
     m_configs.emplace_back(newConfig);
 }
 
@@ -548,12 +551,14 @@ void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
     // or having no depth/stencil causes some
     // unexpected behavior in real usage, such
     // as frame corruption and wrong drawing order.
+    // Also, disallow high MSAA.
     // Just don't use those configs.
     if (info->red_size > 8 ||
         info->green_size > 8 ||
         info->blue_size > 8 ||
         info->depth_size < 24 ||
-        info->stencil_size < 8) {
+        info->stencil_size < 8 ||
+        info->samples_per_pixel > 4) {
         return;
     }
 
@@ -583,6 +588,16 @@ void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
             info->recordable_android,
             info->frmt);
 
+    EglConfigKey key(*config);
+    ConfigSet& currentConfigs = display->m_uniqueConfigs;
+
+    bool alreadyHasConfig =
+        currentConfigs.find(key) !=
+        currentConfigs.end();
+
+    if (alreadyHasConfig) return;
+
+    currentConfigs.insert(key);
     display->m_configs.emplace_back(config);
 }
 

@@ -53,6 +53,11 @@ public:
     bool operator<(const EglConfig& conf) const;
     bool operator>=(const EglConfig& conf) const;
 
+    // Separate equality compare to not interfere with sorting.
+    static bool extensionalEq(const EglConfig& a, const EglConfig& b);
+    // Return a 32-bit hash value, useful for keying on EglConfigs.
+    uint32_t hashu32() const;
+
     // Return true iff this instance is compatible with |conf|, i.e. that
     // they have the same red/green/blue/depth/stencil sizes.
     bool compatibleWith(const EglConfig& conf)  const; //compatibility
