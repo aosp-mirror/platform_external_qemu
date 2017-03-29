@@ -3059,6 +3059,7 @@ GL_APICALL void  GL_APIENTRY glValidateProgram(GLuint program){
 GL_APICALL void  GL_APIENTRY glVertexAttrib1f(GLuint index, GLfloat x){
     GET_CTX_V2();
     ctx->dispatcher().glVertexAttrib1f(index,x);
+    ctx->setAttribValue(index, 1, &x);
     if(index == 0)
         ctx->setAttribute0value(x, 0.0, 0.0, 1.0);
 }
@@ -3066,6 +3067,7 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib1f(GLuint index, GLfloat x){
 GL_APICALL void  GL_APIENTRY glVertexAttrib1fv(GLuint index, const GLfloat* values){
     GET_CTX_V2();
     ctx->dispatcher().glVertexAttrib1fv(index,values);
+    ctx->setAttribValue(index, 1, values);
     if(index == 0)
         ctx->setAttribute0value(values[0], 0.0, 0.0, 1.0);
 }
@@ -3073,6 +3075,8 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib1fv(GLuint index, const GLfloat* valu
 GL_APICALL void  GL_APIENTRY glVertexAttrib2f(GLuint index, GLfloat x, GLfloat y){
     GET_CTX_V2();
     ctx->dispatcher().glVertexAttrib2f(index,x,y);
+    GLfloat values[] = {x, y};
+    ctx->setAttribValue(index, 2, values);
     if(index == 0)
         ctx->setAttribute0value(x, y, 0.0, 1.0);
 }
@@ -3080,6 +3084,7 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib2f(GLuint index, GLfloat x, GLfloat y
 GL_APICALL void  GL_APIENTRY glVertexAttrib2fv(GLuint index, const GLfloat* values){
     GET_CTX_V2();
     ctx->dispatcher().glVertexAttrib2fv(index,values);
+    ctx->setAttribValue(index, 2, values);
     if(index == 0)
         ctx->setAttribute0value(values[0], values[1], 0.0, 1.0);
 }
@@ -3087,6 +3092,8 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib2fv(GLuint index, const GLfloat* valu
 GL_APICALL void  GL_APIENTRY glVertexAttrib3f(GLuint index, GLfloat x, GLfloat y, GLfloat z){
     GET_CTX_V2();
     ctx->dispatcher().glVertexAttrib3f(index,x,y,z);
+    GLfloat values[3] = {x, y, z};
+    ctx->setAttribValue(index, 3, values);
     if(index == 0)
         ctx->setAttribute0value(x, y, z, 1.0);
 }
@@ -3094,6 +3101,7 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib3f(GLuint index, GLfloat x, GLfloat y
 GL_APICALL void  GL_APIENTRY glVertexAttrib3fv(GLuint index, const GLfloat* values){
     GET_CTX_V2();
     ctx->dispatcher().glVertexAttrib3fv(index,values);
+    ctx->setAttribValue(index, 3, values);
     if(index == 0)
         ctx->setAttribute0value(values[0], values[1], values[2], 1.0);
 }
@@ -3101,6 +3109,8 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib3fv(GLuint index, const GLfloat* valu
 GL_APICALL void  GL_APIENTRY glVertexAttrib4f(GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w){
     GET_CTX_V2();
     ctx->dispatcher().glVertexAttrib4f(index,x,y,z,w);
+    GLfloat values[4] = {x, y, z, z};
+    ctx->setAttribValue(index, 4, values);
     if(index == 0)
         ctx->setAttribute0value(x, y, z, w);
 }
@@ -3108,6 +3118,7 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib4f(GLuint index, GLfloat x, GLfloat y
 GL_APICALL void  GL_APIENTRY glVertexAttrib4fv(GLuint index, const GLfloat* values){
     GET_CTX_V2();
     ctx->dispatcher().glVertexAttrib4fv(index,values);
+    ctx->setAttribValue(index, 4, values);
     if(index == 0)
         ctx->setAttribute0value(values[0], values[1], values[2], values[3]);
 }

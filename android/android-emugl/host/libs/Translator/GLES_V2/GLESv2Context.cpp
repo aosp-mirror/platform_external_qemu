@@ -135,15 +135,44 @@ void GLESv2Context::postLoadRestoreCtx() {
     // TODO: snapshot glVertexAttrib1f and its friends
     for (const auto& vao : m_currVaoState) {
         const GLESpointer* glesPointer = vao.second;
-        // non vertex buffer objects (vbo) are set up right before draw calls
-        // so we only set up vbo here
-        if (glesPointer->isVBO()) {
-            dispatcher.glBindBuffer(GL_ARRAY_BUFFER,
-                    glesPointer->getBufferName());
-            dispatcher.glVertexAttribPointer(vao.first, glesPointer->getSize(),
-                    glesPointer->getType(), glesPointer->isNormalize(),
-                    glesPointer->getStride(),
-                    (GLvoid*)(size_t)glesPointer->getBufferOffset());
+        // attribute 0 are bound right before draw
+        if (glesPointer->getAttribType() == GLESpointer::VALUE
+                && vao.first == 0) {
+            break;
+        }
+        switch (glesPointer->getAttribType()) {
+            case GLESpointer::BUFFER:
+                dispatcher.glBindBuffer(GL_ARRAY_BUFFER,
+                        glesPointer->getBufferName());
+                dispatcher.glVertexAttribPointer(vao.first, glesPointer->getSize(),
+                        glesPointer->getType(), glesPointer->isNormalize(),
+                        glesPointer->getStride(),
+                        (GLvoid*)(size_t)glesPointer->getBufferOffset());
+                break;
+            case GLESpointer::VALUE:
+                switch (glesPointer->getValueCount()) {
+                    case 1:
+                        dispatcher.glVertexAttrib1fv(vao.first,
+                                glesPointer->getValues());
+                        break;
+                    case 2:
+                        dispatcher.glVertexAttrib2fv(vao.first,
+                                glesPointer->getValues());
+                        break;
+                    case 3:
+                        dispatcher.glVertexAttrib3fv(vao.first,
+                                glesPointer->getValues());
+                        break;
+                    case 4:
+                        dispatcher.glVertexAttrib4fv(vao.first,
+                                glesPointer->getValues());
+                        break;
+                }
+                break;
+            case GLESpointer::ARRAY:
+                // client arrays are set up right before draw calls
+                // so we do nothing here
+                break;
         }
         if (glesPointer->isEnable()) {
             dispatcher.glEnableVertexAttribArray(vao.first);
@@ -176,6 +205,11 @@ ObjectDataPtr GLESv2Context::loadObject(NamedObjectType type,
         default:
             return nullptr;
     }
+}
+
+void GLESv2Context::setAttribValue(int idx, unsigned int count,
+        const GLfloat* val) {
+    m_currVaoState[idx]->setValue(count, val);
 }
 
 void GLESv2Context::setAttribute0value(float x, float y, float z, float w)
@@ -239,9 +273,11 @@ void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
     for ( it=m_currVaoState.begin() ; it != m_currVaoState.end(); ++it) {
         GLenum array_id = (*it).first;
         GLESpointer* p = (*it).second;
-        if (!p->isEnable()) continue;
+        if (!p->isEnable() || p->getAttribType() == GLESpointer::VALUE) {
+            continue;
+        }
 
-        setupArr(p->getData(),
+        setupArr(p->getArrayData(),
                  array_id,
                  p->getType(),
                  p->getSize(),
@@ -278,7 +314,7 @@ void GLESv2Context::setVertexAttribFormat(GLuint attribindex, GLint size, GLenum
 
 bool GLESv2Context::needConvert(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id) {
 
-    bool usingVBO = p->isVBO();
+    bool usingVBO = p->getAttribType() == GLESpointer::BUFFER;
     GLenum arrType = p->getType();
 
     /*
