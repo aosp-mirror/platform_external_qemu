@@ -1018,10 +1018,9 @@ GL_API void GL_APIENTRY  glGetPointerv( GLenum pname, void **params) {
     GET_CTX()
     const GLESpointer* p = ctx->getPointer(pname);
     if(p) {
-        if(p->isVBO())
-        {
+        if (p->getAttribType() == GLESpointer::BUFFER) {
             *params = SafePointerFromUInt(p->getBufferOffset());
-        }else{
+        } else if (p->getAttribType() == GLESpointer::ARRAY) {
             *params = const_cast<void *>(p->getArrayData());
         }
     } else {

@@ -250,7 +250,7 @@ void GLEScmContext::drawPointsElems(GLESConversionArrays& arrs,GLsizei count,GLe
 
 bool GLEScmContext::needConvert(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id) {
 
-    bool usingVBO = p->isVBO();
+    bool usingVBO = p->getAttribType() == GLESpointer::BUFFER;
     GLenum arrType = p->getType();
     /*
      conversion is not necessary in the following cases:

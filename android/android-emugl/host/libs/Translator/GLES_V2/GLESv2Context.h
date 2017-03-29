@@ -21,6 +21,8 @@
 #include <GLcommon/GLEScontext.h>
 #include <GLcommon/ShareGroup.h>
 
+#include <memory>
+
 // Extra desktop-specific OpenGL enums that we need to properly emulate OpenGL ES.
 #define GL_FRAMEBUFFER_SRGB 0x8DB9
 #define GL_TEXTURE_CUBE_MAP_SEAMLESS 0x884F
@@ -41,6 +43,7 @@ public:
     int  getMaxCombinedTexUnits() override;
     int  getMaxTexUnits() override;
 
+    void setAttribValue(int idx, unsigned int count, const GLfloat* val);
     // This whole att0 thing is about a incompatibility between GLES and OpenGL.
     // GLES allows a vertex shader attribute to be in location 0 and have a
     // current value, while OpenGL is not very clear about this, which results
@@ -73,7 +76,7 @@ private:
 
     float m_attribute0value[4] = {};
     bool m_attribute0valueChanged = true;
-    GLfloat* m_att0Array = nullptr;
+    std::unique_ptr<GLfloat[]> m_att0Array = {};
     unsigned int m_att0ArrayLength = 0;
     bool m_att0NeedsDisable = false;
 
