@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "984665d5_53ef6eae",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-29T15:16:50Z",
+      "side": 1,
+      "message": "that has both major and minor version. here, it\u0027s major version 3, minor version 0.",
+      "parentUuid": "91fcca59_be6f5b2b",
+      "range": {
+        "startLine": 52,
+        "startChar": 14,
+        "endLine": 52,
+        "endChar": 43
+      },
+      "revId": "7653ae1841cf9d27df73de0b89427fd85c5037e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cc5048af_40a86ebc",
         "filename": "vl.c",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2017-03-29T15:14:49Z",
       "side": 1,
       "message": "what is gles minor version here ?",
+      "range": {
+        "startLine": 4547,
+        "startChar": 44,
+        "endLine": 4547,
+        "endChar": 62
+      },
+      "revId": "7653ae1841cf9d27df73de0b89427fd85c5037e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1d5e5a62_0b6e31b4",
+        "filename": "vl.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4547,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-29T15:16:50Z",
+      "side": 1,
+      "message": "that\u0027s the number after the \".\"\n\nES 3.0: minor version 0\nES 3.1: minor version 1\n\netc",
+      "parentUuid": "cc5048af_40a86ebc",
       "range": {
         "startLine": 4547,
         "startChar": 44,
