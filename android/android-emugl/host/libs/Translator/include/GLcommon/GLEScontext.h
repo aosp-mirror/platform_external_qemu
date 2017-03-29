@@ -297,6 +297,8 @@ public:
     void setDepthFunc(GLenum func);
     void setDepthMask(GLboolean flag);
     void setDepthRangef(GLclampf zNear, GLclampf zFar);
+    void setLineWidth(GLfloat lineWidth);
+    void setSampleCoverage(GLclampf value, GLboolean invert);
 
     void setStencilFuncSeparate(GLenum face, GLenum func, GLint ref,
             GLuint mask);
@@ -428,6 +430,11 @@ protected:
     GLboolean m_depthMask = GL_TRUE;
     GLclampf m_zNear = 0.0f;
     GLclampf m_zFar = 1.0f;
+
+    GLfloat m_lineWidth = 1.0f;
+
+    GLclampf m_sampleCoverageVal = 1.0f;
+    GLboolean m_sampleCoverageInvert = GL_FALSE;
 
     enum {
         StencilFront = 0,
