@@ -22,6 +22,30 @@
       "revId": "e7e66881a39202f7f1afcae588f8ff6f6de0d6f8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "024f3bc7_01b4bda6",
+        "filename": "android/android-emu/android/emulation/android_pipe_device.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-30T18:18:41Z",
+      "side": 1,
+      "message": "Done. qemu1 part in other cl https://android-review.googlesource.com/#/c/360010/",
+      "parentUuid": "6c3417ec_171a0f60",
+      "range": {
+        "startLine": 187,
+        "startChar": 0,
+        "endLine": 188,
+        "endChar": 47
+      },
+      "revId": "e7e66881a39202f7f1afcae588f8ff6f6de0d6f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
