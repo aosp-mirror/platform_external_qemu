@@ -37,6 +37,11 @@ using android::base::System;
 using android::base::Win32UnicodeString;
 #endif
 
+#ifdef _WIN32
+
+int NvOptimusEnablement = 0x00000001;
+
+#endif
 static const System::Duration kGPUInfoQueryTimeoutMs = 5000;
 static const System::Duration kQueryCheckIntervalMs = 66;
 static const size_t kFieldLen = 2048;

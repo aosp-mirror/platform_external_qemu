@@ -19,6 +19,12 @@
 #include <string.h>
 #include <vector>
 
+// Try to switch to NVIDIA on Optimus systems.
+// See http://developer.download.nvidia.com/devzone/devcenter/gamegraphics/files/OptimusRenderingPolicies.pdf
+#ifdef _WIN32
+extern "C" __declspec(dllexport) int NvOptimusEnablement;
+#endif
+
 // gpuinfo is designed to collect information about the GPUs
 // installed on the host system for the purposes of
 // automatically determining which renderer to select,
