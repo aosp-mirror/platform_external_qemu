@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "48b287f2_59facf62",
+        "filename": "android/android-emu/android/opengl/gpuinfo.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-30T20:29:18Z",
+      "side": 1,
+      "message": "there\u0027s one for AMD as well: http://stackoverflow.com/questions/17458803/amd-equivalent-to-nvoptimusenablement",
+      "range": {
+        "startLine": 42,
+        "startChar": 4,
+        "endLine": 42,
+        "endChar": 23
+      },
+      "revId": "e6c165cfde224fb050b5ba088006d3a0779561f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a316e74_9e2c61eb",
+        "filename": "android/android-emu/android/opengl/gpuinfo.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-30T20:29:18Z",
+      "side": 1,
+      "message": "we need to make sure this symbol is a part of the final .exe, as I understand. A comment would help here",
+      "range": {
+        "startLine": 42,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 3
+      },
+      "revId": "e6c165cfde224fb050b5ba088006d3a0779561f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7655f8a8_86906f3f",
+        "filename": "android/android-emu/android/opengl/gpuinfo.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-30T20:29:18Z",
+      "side": 1,
+      "message": "Why it\u0027s needed in header at all?",
+      "range": {
+        "startLine": 25,
+        "startChar": 37,
+        "endLine": 25,
+        "endChar": 56
+      },
+      "revId": "e6c165cfde224fb050b5ba088006d3a0779561f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
