@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "482fd417_df536ad3",
+        "filename": "hw/misc/goldfish_pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1559,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-30T17:43:17Z",
+      "side": 1,
+      "message": "this?",
+      "range": {
+        "startLine": 1558,
+        "startChar": 0,
+        "endLine": 1559,
+        "endChar": 48
+      },
+      "revId": "f02fdb720e9dd49255ff6f0bc575564ff7019928",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
