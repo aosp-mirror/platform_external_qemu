@@ -5,6 +5,7 @@
 ** may be copied, distributed, and modified under those terms.
 **
 ** This program is distributed in the hope that it will be useful,
+    iniFile = sys.getTempRoot()->pathString() + "/config.ini";
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
@@ -378,13 +379,20 @@ path_getAvdSystemPath(const char* avdName,
         }
 
         char temp[PATH_MAX], *p = temp, *end= p+sizeof temp;
-        p = bufprint(temp, end, "%s/%s", sdkRoot, searchPath);
+        // Prefix sdkRoot if the path is not absolute
+        if (path_is_absolute(searchPath)) {
+          p = strncpy(temp, searchPath, sizeof(temp));
+        } else {
+          p = bufprint(temp, end, "%s/%s", sdkRoot, searchPath);
+        }
         if (p >= end || !path_is_dir(temp)) {
             D(" Not a directory: %s\n", temp);
+            free(searchPath);
             continue;
         }
         D(" Found directory: %s\n", temp);
         result = ASTRDUP(temp);
+        free(searchPath);
         break;
     }
     AFREE(avdPath);
