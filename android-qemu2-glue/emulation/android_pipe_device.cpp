@@ -162,6 +162,16 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
         []() { android_goldfish_dma_ops.invalidate_host_mappings(); },
         // dma_reset_host_mappings()
         []() { android_goldfish_dma_ops.reset_host_mappings(); },
+        // dma_save_mappings()
+        [](QEMUFile* file) {
+            QemuFileStream stream(file);
+            android_goldfish_dma_ops.save_mappings(&stream);
+        },
+        // dma_load_mappings()
+        [](QEMUFile* file) {
+            QemuFileStream stream(file);
+            android_goldfish_dma_ops.load_mappings(&stream);
+        },
 };
 
 // These callbacks are called from the pipe service into the virtual device.
