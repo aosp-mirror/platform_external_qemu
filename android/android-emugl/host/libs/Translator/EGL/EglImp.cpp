@@ -770,9 +770,19 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroySurface(EGLDisplay display, EGLSurface s
         RETURN_ERROR(EGL_FALSE,EGL_BAD_SURFACE);
     }
 
+    bool needUnbind = false;
+    if (!getThreadInfo()->eglContext) {
+        needUnbind = true;
+        dpy->nativeType()->makeCurrent(srfc->native(), srfc->native(),
+                dpy->getGlobalSharedContext());
+    }
+
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     iface->deleteRbo(srfc->glRboColor);
     iface->deleteRbo(srfc->glRboDepth);
+    if (needUnbind) {
+        dpy->nativeType()->makeCurrent(nullptr, nullptr, nullptr);
+    }
     dpy->removeSurface(surface);
     return EGL_TRUE;
 }
