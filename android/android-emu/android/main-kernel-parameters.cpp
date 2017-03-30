@@ -76,6 +76,11 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         params.add("qemu.encrypt=1");
     }
 
+    // If qemu1, make sure GLDMA is disabled.
+    if (!isQemu2)
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::GLDMA, false);
+
     // Additional memory for software renderers (e.g., SwiftShader)
     const int extraCma =
         glesFramebufferCMA +
