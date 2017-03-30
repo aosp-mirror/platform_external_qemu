@@ -135,6 +135,7 @@ typedef struct {
     // any of these events occur.
     void (*guest_wake_on)(GoldfishHostPipe *host_pipe,
                           GoldfishPipeWakeFlags wake_flags);
+
     // called to register a new DMA buffer that can be mapped in guest + host.
     void (*dma_add_buffer)(void* pipe, uint64_t guest_paddr, uint64_t);
     // called when the guest is done with a particular DMA buffer.
@@ -151,6 +152,10 @@ typedef struct {
  * an error when |guest_open| or |guest_load| are called. */
 extern void goldfish_pipe_set_service_ops(
         const GoldfishPipeServiceOps* ops);
+
+/* Function to look up id of hwpipe and vice versa. */
+extern int goldfish_pipe_get_id(GoldfishHwPipe* hw_pipe);
+extern GoldfishHwPipe* goldfish_pipe_lookup_by_id(int id);
 
 /* Implemented by the virtual device, always called from the service in
  * a thread that owns the BQL. */
