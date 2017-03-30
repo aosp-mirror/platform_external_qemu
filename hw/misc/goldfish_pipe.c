@@ -1316,6 +1316,9 @@ static void goldfish_pipe_save_v2(QEMUFile* file, PipeDevice* dev) {
 
     /* Invalidate all guest DMA buffer -> host ptr mappings. */
     service_ops->dma_invalidate_host_mappings();
+
+    /* Save DMA map. */
+    service_ops->dma_save_mappings(file);
 }
 
 static int goldfish_pipe_load_v1(QEMUFile* file, PipeDevice* dev) {
@@ -1548,6 +1551,9 @@ static int goldfish_pipe_load_v2(QEMUFile* file, PipeDevice* dev) {
     }
 
     res = 0;
+
+    /* Load DMA mappings. */
+    service_ops->dma_load_mappings(file);
 
     /* Invalidate all guest DMA buffer -> host ptr mappings. */
     service_ops->dma_invalidate_host_mappings();
