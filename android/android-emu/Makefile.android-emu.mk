@@ -265,6 +265,7 @@ LOCAL_SRC_FILES := \
     android/emulation/AdbHostServer.cpp \
     android/emulation/AndroidPipe.cpp \
     android/emulation/android_pipe_host.cpp \
+    android/emulation/AudioCaptureEngine.cpp \
     android/emulation/android_pipe_pingpong.c \
     android/emulation/android_pipe_throttle.c \
     android/emulation/android_pipe_unix.cpp \
@@ -702,7 +703,7 @@ EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
 # The skin support sources
 include $(_ANDROID_EMU_ROOT)/android/skin/sources.mk
 
-EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES) $(FFMPEG_STATIC_LIBRARIES) $(LIBX264_STATIC_LIBRARIES)
+EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES) $(FFMPEG_STATIC_LIBRARIES) $(LIBX264_STATIC_LIBRARIES) emulator-zlib
 
 $(call start-emulator-library, emulator-libui)
 
@@ -734,6 +735,7 @@ LOCAL_SRC_FILES += \
     android/emulator-window.c \
     android/main-common-ui.c \
     android/resource.c \
+    android/ffmpeg-audio-capture.cpp \
     android/ffmpeg-muxer.cpp \
 
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
