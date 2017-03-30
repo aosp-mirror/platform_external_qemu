@@ -1583,9 +1583,12 @@ static void goldfish_pipe_post_load(void* opaque) {
     qemu_set_irq(dev->ps->irq, 1);
 }
 
+static GoldfishPipeState* s_goldfish_pipe_state = NULL;
+
 static void goldfish_pipe_realize(DeviceState* dev, Error** errp) {
     SysBusDevice* sbdev = SYS_BUS_DEVICE(dev);
     GoldfishPipeState* s = GOLDFISH_PIPE(dev);
+    s_goldfish_pipe_state = s;
 
     s->dev = (PipeDevice*)g_malloc0(sizeof(PipeDevice));
     s->dev->ps = s; /* HACK: backlink */
@@ -1622,6 +1625,8 @@ void goldfish_pipe_reset(GoldfishHwPipe *pipe, GoldfishHostPipe *host_pipe) {
 
 void goldfish_pipe_signal_wake(GoldfishHwPipe *pipe,
                                GoldfishPipeWakeFlags flags) {
+    if (!pipe) return;
+
     PipeDevice *dev = pipe->dev;
 
     DD("%s: id=%d channel=0x%llx flags=%d", __func__, (int)pipe->id,
@@ -1633,6 +1638,17 @@ void goldfish_pipe_signal_wake(GoldfishHwPipe *pipe,
     /* Raise IRQ to indicate there are items on our list ! */
     qemu_set_irq(dev->ps->irq, 1);
     DD("%s: raising IRQ", __func__);
+}
+
+/* Function to look up hwpipe by pipe id and vice versa. */
+int goldfish_pipe_get_id(GoldfishHwPipe* pipe) {
+    assert(pipe->dev->device_version == PIPE_DEVICE_VERSION);
+    return pipe->id;
+}
+
+GoldfishHwPipe* goldfish_pipe_lookup_by_id(int id) {
+    assert(s_goldfish_pipe_state->dev->device_version == PIPE_DEVICE_VERSION);
+    return s_goldfish_pipe_state->dev->pipes[id];
 }
 
 void goldfish_pipe_close_from_host(GoldfishHwPipe *pipe)
