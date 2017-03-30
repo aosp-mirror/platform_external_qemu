@@ -375,6 +375,9 @@ void VirtualSensorsPage::updateSensorValues() {
     setSensorValue(mSensorsAgent, ANDROID_SENSOR_GYROSCOPE,
                    gyroscope.x(), gyroscope.y(), gyroscope.z());
 
+    setSensorValue(mSensorsAgent, ANDROID_SENSOR_GYROSCOPE_UNCALIBRATED,
+                   gyroscope.x(), gyroscope.y(), gyroscope.z());
+
     setSensorValue(mSensorsAgent,
                    ANDROID_SENSOR_MAGNETIC_FIELD,
                    device_magnetic_vector.x(),

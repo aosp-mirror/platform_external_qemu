@@ -53,6 +53,7 @@ typedef enum{
     SENSOR_(PRESSURE,"pressure") \
     SENSOR_(HUMIDITY,"humidity") \
     SENSOR_(MAGNETIC_FIELD_UNCALIBRATED,"magnetic-field-uncalibrated") \
+    SENSOR_(GYROSCOPE_UNCALIBRATED,"gyroscope-uncalibrated") \
 
 typedef enum {
 #define  SENSOR_(x,y)  ANDROID_SENSOR_##x,
