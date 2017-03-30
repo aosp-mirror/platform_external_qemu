@@ -691,3 +691,11 @@ void android_pipe_host_close(void* hwpipe) {
 void android_pipe_host_signal_wake(void* hwpipe, unsigned flags) {
     android::sGlobals->pipeWaker.signalWake(hwpipe, flags);
 }
+
+int android_pipe_get_id(void* hwpipe) {
+    return sPipeHwFuncs->getPipeId(hwpipe);
+}
+
+void* android_pipe_lookup_by_id(int id) {
+    return sPipeHwFuncs->lookupPipeById(id);
+}
