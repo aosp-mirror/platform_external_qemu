@@ -14,8 +14,10 @@
 
 #include "android/emulation/DmaMap.h"
 
+#include "android/base/files/StreamSerializing.h"
 #include "android/base/containers/Lookup.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/emulation/android_pipe_device.h"
 
 #include <type_traits>
 #include <inttypes.h>
@@ -145,6 +147,38 @@ void DmaMap::removeMappingLocked(DmaBufferInfo* info ) {
         D("guest addr 0x%llx has no host mapping. don't remove.",
           (unsigned long long)info->guestAddr);
     }
+}
+
+void DmaMap::save(android::base::Stream* stream) const {
+    saveCollection(stream, mDmaBuffers,
+                   [](android::base::Stream* stream,
+                      const DmaBufferMap::value_type& v) {
+        stream->putBe64(v.first); // guest paddr
+        stream->putBe32(android_pipe_get_id(v.second.hwpipe));
+        stream->putBe64(v.second.guestAddr); // guest addr
+        stream->putBe64(v.second.bufferSize); // buffer size
+        // don't save current host addr as it is invalidated.
+    });
+}
+
+void DmaMap::load(android::base::Stream* stream) {
+    mDmaBuffers.clear();
+    loadCollection(stream, &mDmaBuffers,
+                   [](android::base::Stream* stream) {
+        uint64_t key = stream->getBe64(); // guest paddr
+        uint64_t pipeid = stream->getBe32();
+
+        void* hwpipe = android_pipe_lookup_by_id(pipeid);
+
+        uint64_t guest_addr = stream->getBe64();
+        uint64_t buf_size = stream->getBe64();
+
+        DmaBufferInfo info = {
+            hwpipe, guest_addr, buf_size, kNullopt,
+        };
+
+        return std::make_pair(key, info);
+    });
 }
 
 }  // namespace android
