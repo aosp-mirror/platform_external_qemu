@@ -178,7 +178,14 @@ typedef struct AndroidPipeHwFuncs {
     void (*resetPipe)(void* hwpipe, void* internal_pipe);
     void (*closeFromHost)(void* hwpipe);
     void (*signalWake)(void* hwpipe, unsigned flags);
+    // Lookup functions for pipe instances and ids.
+    int (*getPipeId)(void* hwpipe);
+    void* (*lookupPipeById)(int id);
 } AndroidPipeHwFuncs;
+
+// Utility functions to look up pipe instances and ids.
+extern int android_pipe_get_id(void* internal_pipe);
+extern void* android_pipe_lookup_by_id(int id);
 
 // Change the set of AndroidPipeHwFuncs corresponding to the hardware virtual
 // device, return the old value. This must be called from the virtual device
