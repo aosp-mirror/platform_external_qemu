@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6c3417ec_171a0f60",
+        "filename": "android/android-emu/android/emulation/android_pipe_device.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-30T17:42:11Z",
+      "side": 1,
+      "message": "this only works for the new pipe, btw; old pipe used its address as ID, so it needed to be 64-bit.\nIMO we need to have an assert in pipe device for this\nAlso, qemu1\u0027s pipe device only supports v1 pipe - FYI",
+      "range": {
+        "startLine": 187,
+        "startChar": 0,
+        "endLine": 188,
+        "endChar": 47
+      },
+      "revId": "e7e66881a39202f7f1afcae588f8ff6f6de0d6f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
