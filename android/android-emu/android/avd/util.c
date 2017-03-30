@@ -328,7 +328,13 @@ path_getAvdSystemPath(const char* avdName,
         }
 
         char temp[PATH_MAX], *p = temp, *end= p+sizeof temp;
-        p = bufprint(temp, end, "%s/%s", sdkRoot, searchPath);
+        // Prefix sdkRoot if the path is not absolute
+        if (path_is_absolute(searchPath)) {
+          p = strncpy(temp, searchPath, sizeof(temp));
+        } else {
+          p = bufprint(temp, end, "%s" PATH_SEP "%s", sdkRoot, searchPath);
+        }
+        free(searchPath);
         if (p >= end || !path_is_dir(temp)) {
             D(" Not a directory: %s\n", temp);
             continue;
