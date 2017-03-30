@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a403c370_a65645b1",
+        "filename": "android/android-emu/android/emulation/DmaMap.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-30T18:18:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3ae4e4aa_e4e45348",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 50
+      },
+      "revId": "533790c4159cbb379e0cb101d2b4a40e3c6d3a2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "49f68550_a94e86fc",
         "filename": "android/android-emu/android/emulation/DmaMap.h",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-03-30T17:40:03Z",
       "side": 1,
       "message": "nit: please sort :)",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 33
+      },
+      "revId": "533790c4159cbb379e0cb101d2b4a40e3c6d3a2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c46b6171_d9714f2a",
+        "filename": "android/android-emu/android/emulation/DmaMap.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-30T18:18:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "49f68550_a94e86fc",
       "range": {
         "startLine": 17,
         "startChar": 0,
