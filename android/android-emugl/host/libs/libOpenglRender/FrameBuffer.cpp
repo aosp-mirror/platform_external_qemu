@@ -1470,6 +1470,17 @@ void FrameBuffer::onSave(Stream* stream) {
 
 bool FrameBuffer::onLoad(Stream* stream) {
     emugl::Mutex::AutoLock mutex(m_lock);
+    if (m_procOwnedColorBuffers.empty()
+            && m_procOwnedEGLImages.empty()
+            && m_procOwnedRenderContext.empty()
+            && (!m_contexts.empty() || !m_windows.empty()
+            || !m_colorbuffers.empty())) {
+        // we are likely on a legacy system image, which does not have process
+        // owned objects. We need to force cleanup everything
+        m_contexts.clear();
+        m_windows.clear();
+        m_colorbuffers.clear();
+    }
     // cleanups
     while (m_procOwnedWindowSurfaces.size()) {
         cleanupProcGLObjects_locked(m_procOwnedWindowSurfaces.begin()->first);
