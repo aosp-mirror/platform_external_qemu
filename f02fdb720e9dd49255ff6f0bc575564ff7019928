@@ -22,6 +22,30 @@
       "revId": "f02fdb720e9dd49255ff6f0bc575564ff7019928",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a53cef2_6bb976d2",
+        "filename": "hw/misc/goldfish_pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1559,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-03-30T18:05:39Z",
+      "side": 1,
+      "message": "It doesn\u0027t touch the table of mappings, rather, it\u0027s taking care of the lower level part where qemu will re-issue cpu_physical_memory_map on any further access to entries of the table.\n\nI misunderstood it at first to also invalidate the table and allow everything to be restored properly, even though I wrote that in the first place :D",
+      "parentUuid": "482fd417_df536ad3",
+      "range": {
+        "startLine": 1558,
+        "startChar": 0,
+        "endLine": 1559,
+        "endChar": 48
+      },
+      "revId": "f02fdb720e9dd49255ff6f0bc575564ff7019928",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
