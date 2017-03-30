@@ -15,6 +15,8 @@
 */
 #include "EglConfig.h"
 
+#include <functional>
+
 EglConfig::EglConfig(EGLint     red_size,
                      EGLint     green_size,
                      EGLint     blue_size,
@@ -413,6 +415,100 @@ bool EglConfig::operator<(const EglConfig& conf) const {
 
 bool EglConfig::operator>=(const EglConfig& conf) const {
     return  !((*this) < conf);
+}
+
+// static
+bool EglConfig::operator==(const EglConfig& other) const {
+#define EGLCONFIG_EQ(field) \
+    (field == other.field)
+
+    return
+    EGLCONFIG_EQ(m_buffer_size) &&
+    EGLCONFIG_EQ(m_red_size) &&
+    EGLCONFIG_EQ(m_green_size) &&
+    EGLCONFIG_EQ(m_blue_size) &&
+    EGLCONFIG_EQ(m_alpha_size) &&
+    EGLCONFIG_EQ(m_bind_to_tex_rgb) &&
+    EGLCONFIG_EQ(m_bind_to_tex_rgba) &&
+    EGLCONFIG_EQ(m_caveat) &&
+    // Not using config id, we are only concerned with properties.
+    // EGLCONFIG_EQ(m_config_id) &&
+    // EGLCONFIG_EQ(m_native_config_id) &&
+    EGLCONFIG_EQ(m_frame_buffer_level) &&
+    EGLCONFIG_EQ(m_depth_size) &&
+    EGLCONFIG_EQ(m_max_pbuffer_width) &&
+    EGLCONFIG_EQ(m_max_pbuffer_height) &&
+    EGLCONFIG_EQ(m_max_pbuffer_size) &&
+    EGLCONFIG_EQ(m_max_swap_interval) &&
+    EGLCONFIG_EQ(m_min_swap_interval) &&
+    EGLCONFIG_EQ(m_native_renderable) &&
+    EGLCONFIG_EQ(m_renderable_type) &&
+    // EGLCONFIG_EQ(m_native_visual_id) &&
+    // EGLCONFIG_EQ(m_native_visual_type) &&
+    EGLCONFIG_EQ(m_sample_buffers_num) &&
+    EGLCONFIG_EQ(m_samples_per_pixel) &&
+    EGLCONFIG_EQ(m_stencil_size) &&
+    EGLCONFIG_EQ(m_luminance_size) &&
+    // EGLCONFIG_EQ(m_wanted_buffer_size) &&
+    EGLCONFIG_EQ(m_surface_type) &&
+    EGLCONFIG_EQ(m_transparent_type) &&
+    EGLCONFIG_EQ(m_trans_red_val) &&
+    EGLCONFIG_EQ(m_trans_green_val) &&
+    EGLCONFIG_EQ(m_trans_blue_val) &&
+    EGLCONFIG_EQ(m_recordable_android) &&
+    EGLCONFIG_EQ(m_framebuffer_target_android) &&
+    EGLCONFIG_EQ(m_conformant) &&
+    EGLCONFIG_EQ(m_color_buffer_type);
+
+#undef EGLCONFIG_EQ
+}
+
+uint32_t EglConfig::u32hash() const {
+    uint32_t res = 0xabcd9001;
+
+#define EGLCONFIG_HASH(field) \
+    res = res * 16777213 + \
+          std::hash<unsigned int>()((unsigned int)field); \
+
+    EGLCONFIG_HASH(m_buffer_size)
+    EGLCONFIG_HASH(m_red_size)
+    EGLCONFIG_HASH(m_green_size)
+    EGLCONFIG_HASH(m_blue_size)
+    EGLCONFIG_HASH(m_alpha_size)
+    EGLCONFIG_HASH(m_bind_to_tex_rgb)
+    EGLCONFIG_HASH(m_bind_to_tex_rgba)
+    EGLCONFIG_HASH(m_caveat)
+    // Only properties
+    // EGLCONFIG_HASH(m_config_id)
+    // EGLCONFIG_HASH(m_native_config_id)
+    EGLCONFIG_HASH(m_frame_buffer_level)
+    EGLCONFIG_HASH(m_depth_size)
+    EGLCONFIG_HASH(m_max_pbuffer_width)
+    EGLCONFIG_HASH(m_max_pbuffer_height)
+    EGLCONFIG_HASH(m_max_pbuffer_size)
+    EGLCONFIG_HASH(m_max_swap_interval)
+    EGLCONFIG_HASH(m_min_swap_interval)
+    EGLCONFIG_HASH(m_native_renderable)
+    EGLCONFIG_HASH(m_renderable_type)
+    // EGLCONFIG_HASH(m_native_visual_id)
+    // EGLCONFIG_HASH(m_native_visual_type)
+    EGLCONFIG_HASH(m_sample_buffers_num)
+    EGLCONFIG_HASH(m_samples_per_pixel)
+    EGLCONFIG_HASH(m_stencil_size)
+    EGLCONFIG_HASH(m_luminance_size)
+    // EGLCONFIG_HASH(m_wanted_buffer_size)
+    EGLCONFIG_HASH(m_surface_type)
+    EGLCONFIG_HASH(m_transparent_type)
+    EGLCONFIG_HASH(m_trans_red_val)
+    EGLCONFIG_HASH(m_trans_green_val)
+    EGLCONFIG_HASH(m_trans_blue_val)
+    EGLCONFIG_HASH(m_recordable_android)
+    EGLCONFIG_HASH(m_framebuffer_target_android)
+    EGLCONFIG_HASH(m_conformant)
+    EGLCONFIG_HASH(m_color_buffer_type)
+
+#undef EGLCONFIG_HASH
+    return res;
 }
 
 //checking if config stands for all the selection crateria of dummy as defined by EGL spec
