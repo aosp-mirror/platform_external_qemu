@@ -145,6 +145,9 @@ typedef struct {
     void (*dma_invalidate_host_mappings)(void);
     // called when device reboots and we need to reset pipe state completely.
     void (*dma_reset_host_mappings)(void);
+    // For snapshot save/load of DMA buffer state.
+    void (*dma_save_mappings)(QEMUFile* file);
+    void (*dma_load_mappings)(QEMUFile* file);
 } GoldfishPipeServiceOps;
 
 /* Called by the service implementation to register its callbacks.
