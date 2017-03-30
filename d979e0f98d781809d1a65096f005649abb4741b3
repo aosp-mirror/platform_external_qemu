@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "318c6b7f_e0ea7698",
+        "filename": "android-qemu2-glue/audio-capturer.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-30T16:48:06Z",
+      "side": 1,
+      "message": "if the element\u0027s in the map, should we delete it even if |cap| \u003d\u003d nullptr?\nIMO it\u0027s better to do \"if (cap) AUD_del_capture(...);\" here and then proceed to erase() anyway",
+      "range": {
+        "startLine": 127,
+        "startChar": 4,
+        "endLine": 130,
+        "endChar": 39
+      },
+      "revId": "d979e0f98d781809d1a65096f005649abb4741b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
