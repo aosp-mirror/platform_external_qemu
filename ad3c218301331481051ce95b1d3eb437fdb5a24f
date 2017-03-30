@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f17f7181_5dbfd722",
+        "filename": "android/android-emu/android/avd/util.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-30T17:34:03Z",
+      "side": 1,
+      "message": "nit: ?",
+      "range": {
+        "startLine": 8,
+        "startChar": 0,
+        "endLine": 8,
+        "endChar": 2
+      },
+      "revId": "ad3c218301331481051ce95b1d3eb437fdb5a24f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bfc2c794_d01f3ed4",
+        "filename": "android/android-emu/android/avd/util.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-30T17:34:03Z",
+      "side": 1,
+      "message": "nit: you could have a single free() right before this if",
+      "range": {
+        "startLine": 390,
+        "startChar": 13,
+        "endLine": 390,
+        "endChar": 29
+      },
+      "revId": "ad3c218301331481051ce95b1d3eb437fdb5a24f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b1c700c_c4a0fa57",
+        "filename": "android/android-emu/android/avd/util_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-03-30T17:34:03Z",
+      "side": 1,
+      "message": "static, please",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 4
+      },
+      "revId": "ad3c218301331481051ce95b1d3eb437fdb5a24f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
