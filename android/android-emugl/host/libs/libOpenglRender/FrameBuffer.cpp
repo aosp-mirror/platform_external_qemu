@@ -778,9 +778,13 @@ void FrameBuffer::DestroyWindowSurface(HandleType p_surface) {
 void FrameBuffer::DestroyWindowSurfaceLocked(HandleType p_surface) {
     const auto w = m_windows.find(p_surface);
     if (w != m_windows.end()) {
+        // Must destroy window surface before closing color buffer
+        // To avoid nesting bind context
+        {
+            ScopedBind bind(this);
+            m_windows.erase(w);
+        }
         closeColorBufferLocked(w->second.second);
-        ScopedBind bind(this);
-        m_windows.erase(w);
         RenderThreadInfo* tinfo = RenderThreadInfo::get();
         uint64_t puid = tinfo->m_puid;
         if (puid) {
