@@ -37,6 +37,17 @@ using android::base::System;
 using android::base::Win32UnicodeString;
 #endif
 
+#ifdef _WIN32
+// Try to switch to NVIDIA on Optimus systems,
+// and AMD GPU on AmdPowerXpress.
+// See http://developer.download.nvidia.com/devzone/devcenter/gamegraphics/files/OptimusRenderingPolicies.pdf
+// and https://community.amd.com/thread/169965
+// These variables need to be visible from the final emulator .exe
+// as exported symbols.
+__declspec(dllexport) int NvOptimusEnablement = 0x00000001;
+__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 0x00000001;
+#endif
+
 static const System::Duration kGPUInfoQueryTimeoutMs = 5000;
 static const System::Duration kQueryCheckIntervalMs = 66;
 static const size_t kFieldLen = 2048;
