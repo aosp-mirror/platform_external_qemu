@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include "android/base/files/Stream.h"
+
 #include <inttypes.h>
 
 static const uint32_t kDmaBufSizeMB = 32;
@@ -54,6 +56,9 @@ void (*unlock)(uint64_t guest_paddr);
 // reset_host_mappings();
 // Not only invalidates the mappings, but also removes them from the record.
 void (*reset_host_mappings)(void);
+// For snapshots.
+void (*save_mappings)(android::base::Stream* stream);
+void (*load_mappings)(android::base::Stream* stream);
 } GoldfishDmaOps;
 
 extern GoldfishDmaOps android_goldfish_dma_ops;
