@@ -375,7 +375,7 @@ void slirp_init_custom_dns_servers(Slirp *slirp,
         case AF_INET6:
             if (slirp->host_dns_count < SLIRP_MAX_DNS_SERVERS) {
                 slirp->host_dns[slirp->host_dns_count++] = dns[n];
-                DEBUG_ARGS(("Custom DNS server #%d: %s\n",
+                DEBUG_ARGS((dfd, "Custom DNS server #%d: %s\n",
                             slirp->host_dns_count - 1,
                             sockaddr_to_string(&dns[n])));
             }
