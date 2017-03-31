@@ -3431,8 +3431,14 @@ static int main_impl(int argc, char** argv)
                 break;
             }
             case QEMU_OPTION_cpu:
-                /* hw initialization will check this */
-                cpu_model = optarg;
+                if (strcmp(optarg,"?") == 0 || strcmp(optarg, "help") == 0) {
+#ifdef cpu_list
+                    cpu_list(stdout, &fprintf);
+                    return 0;
+#endif
+                } else {   /* hw initialization will check this */
+                    cpu_model = optarg;
+                }
                 break;
             case QEMU_OPTION_hda:
                 {

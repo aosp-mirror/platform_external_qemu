@@ -1296,6 +1296,7 @@ static char* _findQemuInformationalOption(int qemu_argc, char** qemu_argv) {
         "-version",
         "-audio-help",
         "?",           /* e.g. '-cpu ?' for listing available CPU models */
+        "help",        /* e.g. '-cpu help, -machine help', '-soundhw help' */
         NULL           /* denotes the end of the list */
     };
     int i = 0;
