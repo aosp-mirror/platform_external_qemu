@@ -35,9 +35,10 @@ WindowSurface::WindowSurface(EGLDisplay display,
         mHndl(hndl) {}
 
 WindowSurface::~WindowSurface() {
-    if (mSurface) {
-        s_egl.eglDestroySurface(mDisplay, mSurface);
-    }
+    // TODO: Refcount
+    // if (mSurface) {
+    //     s_egl.eglDestroySurface(mDisplay, mSurface);
+    // }
 }
 
 WindowSurface *WindowSurface::create(EGLDisplay display,
@@ -90,51 +91,11 @@ void WindowSurface::bind(RenderContextPtr p_ctx, BindType p_bindType) {
 GLuint WindowSurface::getWidth() const { return mWidth; }
 GLuint WindowSurface::getHeight() const { return mHeight; }
 
-bool WindowSurface::flushColorBuffer() {
-    if (!mAttachedColorBuffer.get()) {
-        return true;
-    }
-    if (!mWidth || !mHeight) {
-        return false;
-    }
-
-    if (mAttachedColorBuffer->getWidth() != mWidth ||
-        mAttachedColorBuffer->getHeight() != mHeight) {
-        // XXX: should never happen - how this needs to be handled?
-        fprintf(stderr, "Dimensions do not match\n");
-        return false;
-    }
-
-    if (!mDrawContext.get()) {
-        fprintf(stderr, "Draw context is NULL\n");
-        return false;
-    }
-
-    // Make the surface current
-    EGLContext prevContext = s_egl.eglGetCurrentContext();
-    EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
-    EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
-
-    const bool needToSet = prevContext != mDrawContext->getEGLContext() ||
-                           prevReadSurf != mSurface || prevDrawSurf != mSurface;
-    if (needToSet) {
-        if (!s_egl.eglMakeCurrent(mDisplay,
-                                  mSurface,
-                                  mSurface,
-                                  mDrawContext->getEGLContext())) {
-            fprintf(stderr, "Error making draw context current\n");
-            return false;
-        }
-    }
-
-    mAttachedColorBuffer->blitFromCurrentReadBuffer();
-
-    if (needToSet) {
-        // restore current context/surface
-        s_egl.eglMakeCurrent(mDisplay, prevDrawSurf, prevReadSurf, prevContext);
-    }
-
-    return true;
+WindowSurface::FlushColorBufferCmd WindowSurface::flushColorBuffer() {
+    return { mDrawContext->getEGLContext(),
+             mSurface,
+             mAttachedColorBuffer.get(),
+             false };
 }
 
 bool WindowSurface::resize(unsigned int p_width, unsigned int p_height)
@@ -153,6 +114,7 @@ bool WindowSurface::resize(unsigned int p_width, unsigned int p_height)
                               prevDrawSurf == mSurface);
 
     if (needRebindContext) {
+        fprintf(stderr, "%s: makecurrent in setting window surface cb!\n", __func__);
         s_egl.eglMakeCurrent(
                 mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     }
@@ -160,10 +122,11 @@ bool WindowSurface::resize(unsigned int p_width, unsigned int p_height)
     //
     // Destroy previous surface
     //
-    if (mSurface) {
-        s_egl.eglDestroySurface(mDisplay, mSurface);
-        mSurface = NULL;
-    }
+    // TODO: With async flushing, this needs some sort of refcount or somethin
+    // if (mSurface) {
+    //     s_egl.eglDestroySurface(mDisplay, mSurface);
+    //     mSurface = NULL;
+    // }
 
     //
     // Create pbuffer surface.

@@ -43,6 +43,8 @@ bool bindFbo(GLuint* fbo, GLuint tex) {
         return true;
     }
 
+    fprintf(stderr, "%s: expensive bind\n", __func__);
+
     s_gles2.glGenFramebuffers(1, fbo);
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, *fbo);
     s_gles2.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_OES,
@@ -204,33 +206,39 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     return cb;
 }
 
+static ColorBuffer::Helper* sHelper = nullptr;
 ColorBuffer::ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper)
-    : m_display(display), m_helper(helper), mHndl(hndl) {}
+    : m_display(display), m_helper(helper), mHndl(hndl) {
+        sHelper = m_helper;
+}
 
 ColorBuffer::~ColorBuffer() {
-    ScopedHelperContext context(m_helper);
 
-    if (m_blitEGLImage) {
-        s_egl.eglDestroyImageKHR(m_display, m_blitEGLImage);
-    }
-    if (m_eglImage) {
-        s_egl.eglDestroyImageKHR(m_display, m_eglImage);
-    }
+    // TODO: needs a refcount
 
-    if (m_fbo) {
-        s_gles2.glDeleteFramebuffers(1, &m_fbo);
-    }
+    // ScopedHelperContext context(m_helper);
 
-    if (m_yuv_conversion_fbo) {
-        s_gles2.glDeleteFramebuffers(1, &m_yuv_conversion_fbo);
-    }
+    // if (m_blitEGLImage) {
+    //     s_egl.eglDestroyImageKHR(m_display, m_blitEGLImage);
+    // }
+    // if (m_eglImage) {
+    //     s_egl.eglDestroyImageKHR(m_display, m_eglImage);
+    // }
 
-    m_yuv_converter.reset();
+    // if (m_fbo) {
+    //     s_gles2.glDeleteFramebuffers(1, &m_fbo);
+    // }
 
-    GLuint tex[2] = {m_tex, m_blitTex};
-    s_gles2.glDeleteTextures(2, tex);
+    // if (m_yuv_conversion_fbo) {
+    //     s_gles2.glDeleteFramebuffers(1, &m_yuv_conversion_fbo);
+    // }
 
-    delete m_resizer;
+    // m_yuv_converter.reset();
+
+    // GLuint tex[2] = {m_tex, m_blitTex};
+    // s_gles2.glDeleteTextures(2, tex);
+
+    // delete m_resizer;
 }
 
 void ColorBuffer::readPixels(int x,
@@ -352,12 +360,20 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
         s_gles1.glDeleteTextures(1, &tmpTex);
         s_gles1.glBindTexture(GL_TEXTURE_2D, currTexBind);
     }
+    return true;
+}
 
-    ScopedHelperContext context(m_helper);
-    if (!context.isOk()) {
-        return false;
-    }
+// static
+void ColorBuffer::bindHelperContext() {
+    sHelper->setupContext();
+}
 
+// static
+void ColorBuffer::unbindHelperContext() {
+    sHelper->teardownContext();
+}
+
+bool ColorBuffer::blitFromCurrentReadBuffer2() {
     if (!bindFbo(&m_fbo, m_tex)) {
         return false;
     }

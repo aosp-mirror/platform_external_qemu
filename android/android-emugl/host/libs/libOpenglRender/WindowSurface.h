@@ -53,10 +53,17 @@ public:
     // dimensions. Potentially losing pixel values in the process.
     void setColorBuffer(ColorBufferPtr p_colorBuffer);
 
+    struct FlushColorBufferCmd {
+        EGLContext drawContext;
+        EGLSurface drawSurface;
+        ColorBuffer* toFlush;
+        bool skip = false;
+    };
+
     // Copy the Pbuffer's pixels to the attached color buffer.
     // Returns true on success, or false on error (e.g. if there is no
     // attached color buffer).
-    bool flushColorBuffer();
+    FlushColorBufferCmd flushColorBuffer();
 
     // Used by bind() below.
     enum BindType {

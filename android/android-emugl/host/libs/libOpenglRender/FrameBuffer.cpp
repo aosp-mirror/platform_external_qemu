@@ -923,7 +923,7 @@ bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface) {
     }
 
     WindowSurface* surface = (*w).second.first.get();
-    surface->flushColorBuffer();
+    flushCmds.push_back(surface->flushColorBuffer());
 
     return true;
 }
@@ -952,6 +952,13 @@ bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
     }
     c->second.refcount++;
     (*w).second.second = p_colorbuffer;
+
+    for (auto& cmd: flushCmds) {
+        if (cmd.toFlush == (*c).second.cb.get()) {
+            cmd.skip = true;
+        }
+    }
+
     return true;
 }
 
@@ -1053,6 +1060,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
         }
     }
 
+    fprintf(stderr, "%s: makecurrent\n", __func__);
     if (!s_egl.eglMakeCurrent(m_eglDisplay,
                               draw ? draw->getEGLSurface() : EGL_NO_SURFACE,
                               read ? read->getEGLSurface() : EGL_NO_SURFACE,
@@ -1273,10 +1281,43 @@ void FrameBuffer::createTrivialContext(HandleType shared,
     *surfOut = createWindowSurface(0, 1, 1);
 }
 
+static int windowContextChangesPerPost = 0;
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
     if (needLockAndBind) {
         m_lock.lock();
     }
+
+    EGLContext prevContext = s_egl.eglGetCurrentContext();
+    EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
+    EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
+
+    EGLContext prevWindowContext = s_egl.eglGetCurrentContext();
+    EGLSurface prevWindowDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
+
+    // discharge pending flushes
+    for (const auto& cmd : flushCmds) {
+        if (cmd.skip) continue;
+        prevWindowContext = s_egl.eglGetCurrentContext();
+        prevWindowDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
+        if (cmd.drawSurface != prevWindowDrawSurf ||
+            cmd.drawContext != prevWindowContext) {
+            windowContextChangesPerPost++;
+            s_egl.eglMakeCurrent(m_eglDisplay, cmd.drawSurface, cmd.drawSurface, cmd.drawContext);
+        }
+        cmd.toFlush->blitFromCurrentReadBuffer();
+    }
+
+    ColorBuffer::bindHelperContext();
+    for (const auto& cmd : flushCmds) {
+        if (cmd.skip) continue;
+        cmd.toFlush->blitFromCurrentReadBuffer2();
+    }
+    ColorBuffer::unbindHelperContext();
+
+    s_egl.eglMakeCurrent(m_eglDisplay, prevDrawSurf, prevReadSurf, prevContext);
+
+    flushCmds.clear();
+
     bool ret = false;
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
