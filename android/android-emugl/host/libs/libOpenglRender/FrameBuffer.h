@@ -235,6 +235,7 @@ public:
     bool  setWindowSurfaceColorBuffer(
             HandleType p_surface, HandleType p_colorbuffer);
 
+    std::vector<WindowSurface::FlushColorBufferCmd> flushCmds;
     // Copy the content of a WindowSurface's Pbuffer to its attached
     // ColorBuffer. See the documentation for WindowSurface::flushColorBuffer()
     // |p_surface| is the target WindowSurface's handle value.

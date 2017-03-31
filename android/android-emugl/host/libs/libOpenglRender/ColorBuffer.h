@@ -151,6 +151,11 @@ public:
     // Return true on success, false on failure (e.g. no current context).
     bool blitFromCurrentReadBuffer();
 
+    // The other part where we are in the helper context.
+    static void bindHelperContext();
+    static void unbindHelperContext();
+    bool blitFromCurrentReadBuffer2();
+
     // Read the content of the whole ColorBuffer as 32-bit RGBA pixels.
     // |img| must be a buffer large enough (i.e. width * height * 4).
     void readback(unsigned char* img);
@@ -182,6 +187,7 @@ private:
     std::unique_ptr<YUVConverter> m_yuv_converter;
     HandleType mHndl;
 };
+
 
 typedef emugl::SmartPtr<ColorBuffer> ColorBufferPtr;
 #endif
