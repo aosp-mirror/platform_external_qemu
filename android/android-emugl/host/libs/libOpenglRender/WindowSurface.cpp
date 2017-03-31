@@ -76,6 +76,10 @@ void WindowSurface::setColorBuffer(ColorBufferPtr p_colorBuffer) {
     }
 }
 
+HandleType WindowSurface::currentCbHandle() const {
+    return mAttachedColorBuffer->getHndl();
+}
+
 void WindowSurface::bind(RenderContextPtr p_ctx, BindType p_bindType) {
     if (p_bindType == BIND_READ) {
         mReadContext = p_ctx;
@@ -137,6 +141,14 @@ bool WindowSurface::flushColorBuffer() {
     return true;
 }
 
+bool WindowSurface::flushColorBuffer2() {
+    if (!mAttachedColorBuffer.get()) {
+        return true;
+    }
+    mAttachedColorBuffer->blitFromCurrentReadBuffer2();
+    return true;
+}
+
 bool WindowSurface::resize(unsigned int p_width, unsigned int p_height)
 {
     if (mSurface && mWidth == p_width && mHeight == p_height) {
@@ -153,6 +165,7 @@ bool WindowSurface::resize(unsigned int p_width, unsigned int p_height)
                               prevDrawSurf == mSurface);
 
     if (needRebindContext) {
+        fprintf(stderr, "%s: expensive bind as aprt of recreating cb\n", __func__);
         s_egl.eglMakeCurrent(
                 mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     }
