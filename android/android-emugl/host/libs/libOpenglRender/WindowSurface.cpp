@@ -72,8 +72,13 @@ void WindowSurface::setColorBuffer(ColorBufferPtr p_colorBuffer) {
     unsigned int cbHeight = mAttachedColorBuffer->getHeight();
 
     if (cbWidth != mWidth || cbHeight != mHeight) {
+        fprintf(stderr, "%s: need resize!\n", __func__);
         resize(cbWidth, cbHeight);
     }
+}
+
+HandleType WindowSurface::currentCbHandle() const {
+    return mAttachedColorBuffer->getHndl();
 }
 
 void WindowSurface::bind(RenderContextPtr p_ctx, BindType p_bindType) {
@@ -137,6 +142,11 @@ bool WindowSurface::flushColorBuffer() {
     return true;
 }
 
+bool WindowSurface::flushColorBuffer2() {
+    mAttachedColorBuffer->blitFromCurrentReadBuffer2();
+    return true;
+}
+
 bool WindowSurface::resize(unsigned int p_width, unsigned int p_height)
 {
     if (mSurface && mWidth == p_width && mHeight == p_height) {
@@ -153,6 +163,7 @@ bool WindowSurface::resize(unsigned int p_width, unsigned int p_height)
                               prevDrawSurf == mSurface);
 
     if (needRebindContext) {
+        fprintf(stderr, "%s: expensive bind as aprt of recreating cb\n", __func__);
         s_egl.eglMakeCurrent(
                 mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     }

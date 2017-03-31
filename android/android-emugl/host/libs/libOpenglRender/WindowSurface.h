@@ -52,11 +52,13 @@ public:
     // IMPORTANT: This automatically resizes the Pbuffer's to the ColorBuffer's
     // dimensions. Potentially losing pixel values in the process.
     void setColorBuffer(ColorBufferPtr p_colorBuffer);
+    HandleType currentCbHandle() const;
 
     // Copy the Pbuffer's pixels to the attached color buffer.
     // Returns true on success, or false on error (e.g. if there is no
     // attached color buffer).
     bool flushColorBuffer();
+    bool flushColorBuffer2();
 
     // Used by bind() below.
     enum BindType {

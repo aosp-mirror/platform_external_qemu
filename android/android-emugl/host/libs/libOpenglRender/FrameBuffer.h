@@ -18,6 +18,7 @@
 
 #include "android/base/files/Stream.h"
 
+#include "BlitThread.h"
 #include "ColorBuffer.h"
 #include "emugl/common/mutex.h"
 #include "FbConfig.h"
@@ -240,6 +241,7 @@ public:
     // |p_surface| is the target WindowSurface's handle value.
     // Returns true on success, false on failure.
     bool  flushWindowSurfaceColorBuffer(HandleType p_surface);
+    bool  flushWindowSurfaceColorBuffer2(HandleType p_surface);
 
     // Bind the current context's EGL_TEXTURE_2D texture to a ColorBuffer
     // instance's EGLImage. This is intended to implement
@@ -284,6 +286,9 @@ public:
                            int x, int y, int width, int height,
                            GLenum format, GLenum type, void *pixels);
 
+    // Before post(), we need to scale the color buffer to the subwindow
+    // dimensions.
+    void scaleColorBufferToSubWindow(HandleType p_colorbuffer);
     // Display the content of a given ColorBuffer into the framebuffer's
     // sub-window. |p_colorbuffer| is a handle value.
     // |needLockAndBind| is used to indicate whether the operation requires
@@ -337,6 +342,7 @@ public:
     EGLBoolean destroyClientImage(HandleType image);
 
     // Used internally.
+    int bindNestingLevel = 0;
     bool bind_locked();
     bool unbind_locked();
 
@@ -362,6 +368,12 @@ public:
     // lock and unlock handles (RenderContext, ColorBuffer, WindowSurface)
     void lock();
     void unlock();
+
+    BlitThread* getBlitThread();
+    ColorBuffer::Helper* getColorBufferHelper() const {
+        return m_colorBufferHelper;
+    }
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle();
@@ -408,6 +420,7 @@ private:
     EGLSurface m_prevReadSurf = EGL_NO_SURFACE;
     EGLSurface m_prevDrawSurf = EGL_NO_SURFACE;
     EGLNativeWindowType m_subWin = {};
+    GLuint m_scaledColorBufferTexture = 0;
     TextureDraw* m_textureDraw = nullptr;
     EGLConfig  m_eglConfig = nullptr;
     HandleType m_lastPostedColorBuffer = 0;
@@ -429,6 +442,8 @@ private:
     ProcOwnedColorBuffers m_procOwnedColorBuffers;
     ProcOwnedEGLImages m_procOwnedEGLImages;
     ProcOwnedRenderContexts m_procOwnedRenderContext;
+
+    BlitThread* mBlitThread = nullptr;
 
     // Flag set when emulator is shutting down.
     bool m_shuttingDown = false;

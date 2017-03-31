@@ -87,12 +87,21 @@ public:
     class RecursiveScopedHelperContext {
     public:
         RecursiveScopedHelperContext(ColorBuffer::Helper* helper) : mHelper(helper) {
-            if (helper->isBound()) return;
             if (!helper->setupContext()) {
                 mHelper = NULL;
                 return;
             }
             mNeedUnbind = true;
+        }
+
+        void bind() {
+            mHelper->setupContext();
+        }
+        void unbind() {
+            mHelper->teardownContext();
+        }
+        void setNeedUnbind(bool needUnbind) {
+            mNeedUnbind = needUnbind;
         }
 
         bool isOk() const { return mHelper != NULL; }
@@ -191,6 +200,11 @@ public:
     // Return true on success, false on failure (e.g. no current context).
     bool blitFromCurrentReadBuffer();
 
+    // The other part where we are in the helper context.
+    static void bindHelperContext();
+    static void unbindHelperContext();
+    bool blitFromCurrentReadBuffer2();
+
     // Read the content of the whole ColorBuffer as 32-bit RGBA pixels.
     // |img| must be a buffer large enough (i.e. width * height * 4).
     void readback(unsigned char* img);
@@ -206,6 +220,11 @@ private:
     ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper);
 
 private:
+    EGLint m_readRbo = 0;
+    EGLint m_drawRbo = 0;
+    EGLint m_readFbo = 0;
+    EGLint m_drawFbo = 0;
+
     GLuint m_tex = 0;
     GLuint m_blitTex = 0;
     EGLImageKHR m_eglImage = nullptr;
@@ -222,6 +241,7 @@ private:
     std::unique_ptr<YUVConverter> m_yuv_converter;
     HandleType mHndl;
 };
+
 
 typedef emugl::SmartPtr<ColorBuffer> ColorBufferPtr;
 #endif
