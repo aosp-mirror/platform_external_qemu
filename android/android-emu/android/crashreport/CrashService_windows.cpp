@@ -142,27 +142,52 @@ bool HostCrashService::getHWInfo() {
         return false;
     }
     std::string utf8Path = PathUtils::join(dataDirectory, kHwInfoName);
-    System::ProcessExitCode exitCode = -1;
-
+    {
 #if defined(_WIN32) && !defined(_WIN64)
-    // Disable the 32-bit file system redirection to make sure we run the
-    // 64-bit dxdiag here: "dxdiag /64bit" from a 32-bit process launches x64
-    // version asyncronously, and that's not what we need.
-    PVOID oldValue;
-    ::Wow64DisableWow64FsRedirection(&oldValue);
-    const auto redirectionRestore = android::base::makeCustomScopedPtr(
-            oldValue,
-            [](PVOID oldValue) { ::Wow64RevertWow64FsRedirection(oldValue); });
+        // Disable the 32-bit file system redirection to make sure we run the
+        // 64-bit dxdiag here: "dxdiag /64bit" from a 32-bit process launches
+        // x64 version asynchronously, and that's not what we need.
+        PVOID oldValue;
+        ::Wow64DisableWow64FsRedirection(&oldValue);
+        const auto redirectionRestore = android::base::makeCustomScopedPtr(
+                oldValue,
+                [](PVOID oldValue) { ::Wow64RevertWow64FsRedirection(oldValue); });
 #endif
-    if (!System::get()->runCommand(
-                {"dxdiag", "/dontskip", "/whql:off", "/t", utf8Path},
-                System::RunOptions::WaitForCompletion, System::kInfinite,
-                &exitCode) ||
-        exitCode != 0) {
-        E("Unable to get hardware info: %d", errno);
+        if (!System::get()->runCommand(
+                    {"dxdiag", "/dontskip", "/whql:off", "/t", utf8Path},
+                    System::RunOptions::WaitForCompletion, System::kInfinite)){
+            E("dxdiag command failed to run");
+            std::ofstream out(utf8Path.c_str());
+            out << "dxdiag command failed to run\n";
+            return false;
+        }
+    }
+
+    if (!System::get()->pathExists(utf8Path)) {
+        E("No output file from dxdiag command");
+        std::ofstream out(utf8Path.c_str());
+        out << "No output file from dxdiag command\n";
         return false;
     }
-    return true;
+
+    // Sometimes dxdiag doesn't close the output file fast enough, and emulator
+    // fails to read it. Make sure it's readable before continuing to fix it.
+    const int kMaxWaitTimeUs = 1 * 1000 * 1000;
+    const auto now = System::get()->getHighResTimeUs();
+    do {
+        if (System::get()->pathCanRead(utf8Path)) {
+            std::ifstream in(utf8Path.c_str());
+            if (in) {
+                return true;
+            }
+        }
+        System::get()->sleepMs(50);
+    } while (System::get()->getHighResTimeUs() < now + kMaxWaitTimeUs);
+
+    E("Unable to read output file");
+    std::ofstream out(utf8Path.c_str());
+    out << "Unable to read output file\n";
+    return false;
 }
 
 // Convenience function to convert a value to a value in kilobytes
