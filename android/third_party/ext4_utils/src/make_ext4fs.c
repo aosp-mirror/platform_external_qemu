@@ -251,9 +251,9 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 		dentries[i].size = _stat.st_size;
 		dentries[i].mode = _stat.st_mode & (S_ISUID|S_ISGID|S_ISVTX|S_IRWXU|S_IRWXG|S_IRWXO);
 		dentries[i].mtime = _stat.st_mtime;
-		uint64_t capabilities;
 		if (fs_config_func != NULL) {
 #ifdef ANDROID
+			uint64_t capabilities;
 			unsigned int mode = 0;
 			unsigned int uid = 0;
 			unsigned int gid = 0;
@@ -466,18 +466,18 @@ int make_ext4fs_sparse_fd(int fd, long long len,
 	reset_ext4fs_info();
 	info.len = len;
 
-	return make_ext4fs_internal(fd, NULL, mountpoint, NULL, 0, 1, 0, 0, sehnd, 0);
+	return make_ext4fs_internal(fd, NULL, mountpoint, NULL, 0, 1, 0, 0, sehnd, -1);
 }
 
 int make_ext4fs(const char *filename, long long len,
                 const char *mountpoint, struct selabel_handle *sehnd)
 {
-    return make_ext4fs_from_dir(filename, NULL, len, mountpoint, sehnd);
+    return make_ext4fs_from_dir(filename, NULL, len, mountpoint, sehnd, 0);
 }
 
 int make_ext4fs_from_dir(const char *filename, const char *dirname,
                          long long len, const char *mountpoint,
-                         struct selabel_handle *sehnd) {
+                         struct selabel_handle *sehnd, int verbose) {
     int fd;
     int status;
 
@@ -490,7 +490,7 @@ int make_ext4fs_from_dir(const char *filename, const char *dirname,
         return EXIT_FAILURE;
     }
 
-    status = make_ext4fs_internal(fd, dirname, mountpoint, NULL, 0, 0, 0, 1, sehnd, 0);
+    status = make_ext4fs_internal(fd, dirname, mountpoint, NULL, 0, 0, 0, 1, sehnd, verbose);
     close(fd);
 
     return status;
@@ -631,20 +631,24 @@ int make_ext4fs_internal(int fd, const char *_directory,
 
 	info.bg_desc_reserve_blocks = compute_bg_desc_reserve_blocks();
 
-	printf("Creating filesystem with parameters:\n");
-	printf("    Size: %"PRIu64"\n", info.len);
-	printf("    Block size: %d\n", info.block_size);
-	printf("    Blocks per group: %d\n", info.blocks_per_group);
-	printf("    Inodes per group: %d\n", info.inodes_per_group);
-	printf("    Inode size: %d\n", info.inode_size);
-	printf("    Journal blocks: %d\n", info.journal_blocks);
-	printf("    Label: %s\n", info.label);
+	if (verbose >= 0) {
+		printf("Creating filesystem with parameters:\n");
+		printf("    Size: %"PRIu64"\n", info.len);
+		printf("    Block size: %d\n", info.block_size);
+		printf("    Blocks per group: %d\n", info.blocks_per_group);
+		printf("    Inodes per group: %d\n", info.inodes_per_group);
+		printf("    Inode size: %d\n", info.inode_size);
+		printf("    Journal blocks: %d\n", info.journal_blocks);
+		printf("    Label: %s\n", info.label);
+	}
 
 	ext4_create_fs_aux_info();
+	if (verbose >= 0) {
+		printf("    Blocks: %"PRIu64"\n", aux_info.len_blocks);
+		printf("    Block groups: %d\n", aux_info.groups);
+		printf("    Reserved block group size: %d\n", info.bg_desc_reserve_blocks);
+	}
 
-	printf("    Blocks: %"PRIu64"\n", aux_info.len_blocks);
-	printf("    Block groups: %d\n", aux_info.groups);
-	printf("    Reserved block group size: %d\n", info.bg_desc_reserve_blocks);
 
 	ext4_sparse_file = sparse_file_new(info.block_size, info.len);
 
@@ -691,11 +695,13 @@ int make_ext4fs_internal(int fd, const char *_directory,
 
 	ext4_queue_sb();
 
-	printf("Created filesystem with %d/%d inodes and %d/%d blocks\n",
-			aux_info.sb->s_inodes_count - aux_info.sb->s_free_inodes_count,
-			aux_info.sb->s_inodes_count,
-			aux_info.sb->s_blocks_count_lo - aux_info.sb->s_free_blocks_count_lo,
-			aux_info.sb->s_blocks_count_lo);
+        if (verbose >= 0) {
+          printf("Created filesystem with %d/%d inodes and %d/%d blocks\n",
+                 aux_info.sb->s_inodes_count - aux_info.sb->s_free_inodes_count,
+                 aux_info.sb->s_inodes_count,
+                 aux_info.sb->s_blocks_count_lo - aux_info.sb->s_free_blocks_count_lo,
+                 aux_info.sb->s_blocks_count_lo);
+        }
 
 	if (wipe && WIPE_IS_SUPPORTED) {
 		wipe_block_device(fd, info.len);

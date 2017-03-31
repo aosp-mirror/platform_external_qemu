@@ -28,7 +28,7 @@ int make_ext4fs(const char *filename, long long len,
 
 int make_ext4fs_from_dir(const char *filename, const char *dirname,
                          long long len, const char *mountpoint,
-                         struct selabel_handle *sehnd);
+                         struct selabel_handle *sehnd, int verbose);
 
 int make_ext4fs_extra(const char *filename, long long len,
                       const char *mountpoint, struct selabel_handle *sehnd,

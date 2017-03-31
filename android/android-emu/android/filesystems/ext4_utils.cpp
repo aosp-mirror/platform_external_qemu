@@ -12,6 +12,7 @@
 #include "android/filesystems/ext4_utils.h"
 
 #include "android/base/Log.h"
+#include "android/utils/debug.h"
 #include "android/base/files/ScopedStdioFile.h"
 
 #include "make_ext4fs.h"
@@ -79,8 +80,9 @@ int android_createExt4ImageFromDir(const char *dstFilePath,
                                    const char *srcDirectory,
                                    uint64_t size,
                                    const char *mountpoint) {
+
     int ret = ::make_ext4fs_from_dir(dstFilePath, srcDirectory, size,
-                                     mountpoint, NULL);
+                                     mountpoint, NULL, android_verbose ? 1 : -1);
     if (ret < 0)
         EXT4_ERROR << "Failed to create ext4 image at: " << dstFilePath;
     return ret;
