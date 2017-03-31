@@ -15,6 +15,7 @@
 #include "android/avd/hw-config.h"
 #include "android/avd/info.h"
 #include "android/cmdline-option.h"
+#include "android/opengl/emugl_config.h"
 #include "android/skin/winsys.h"
 #include "android/utils/aconfig-file.h"
 #include "android/utils/compiler.h"
@@ -56,8 +57,33 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
                                             AvdInfo** the_avd,
                                             int* exit_status);
 
-bool doGpuConfig(AvdInfo* avd, AndroidOptions* opt, AndroidHwConfig* hw,
-                 enum WinsysPreferredGlesBackend uiPreferredBackend);
+// configAndStartRenderer():
+// Perform renderer configuration based on the host GPU
+// (or guest renderer if applicable), and then start the renderer.
+// The renderer needs to be started in order to query OpenGL
+// capabilities.
+// Outputs:
+// |glesMode|: Resolved rendering mode (on host or guest)
+// |opengl_alive|: Tracks whether or not the renderer startup failed.
+// |bootPropOpenglesVersion|; Constructed ro.opengles.version boot property
+// appropriate to the detected OpenGL ES API level support.
+// |glFramebufferSizeBytes|: Returns size of LCD-bound framebuffer in bytes.
+// Useful for reserving extra memory for in-guest framebuffers.
+
+// First, there is a struct to hold outputs.
+typedef struct {
+    AndroidGlesEmulationMode glesMode;
+    int openglAlive;
+    int bootPropOpenglesVersion;
+    int glFramebufferSizeBytes;
+} RendererConfig;
+// Function itself:
+bool configAndStartRenderer(
+         AvdInfo* avd, AndroidOptions* opt, AndroidHwConfig* hw,
+         enum WinsysPreferredGlesBackend uiPreferredBackend,
+         RendererConfig* config_out);
+// After configAndStartRenderer is called, one can query last output values:
+RendererConfig getLastRendererConfig();
 
 // HACK: Value will be true if emulator_parseCommonCommandLineOptions()
 //       has seen a network-related option (e.g. -netspeed). This is

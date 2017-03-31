@@ -4485,6 +4485,9 @@ static int main_impl(int argc, char** argv)
 
     iniFile_free(hw_ini);
 
+    // late renderer-related setup for goldfish_fb,
+    // writable ro.opengles.version,
+    // opengl_alive
     {
         int width  = android_hw->hw_lcd_width;
         int height = android_hw->hw_lcd_height;
@@ -4501,7 +4504,18 @@ static int main_impl(int argc, char** argv)
         }
         graphic_width  = width;
         graphic_height = height;
+
+        RendererConfig rendererConfig = getLastRendererConfig();
+
         goldfish_fb_set_display_depth(depth);
+        goldfish_fb_set_use_host_gpu(
+                rendererConfig.glesMode == kAndroidGlesEmulationHost);
+        is_opengl_alive = rendererConfig.openglAlive;
+
+        char  tmp[64];
+        snprintf(tmp, sizeof(tmp), "%d",
+                 rendererConfig.bootPropOpenglesVersion);
+        boot_property_add("ro.opengles.version", tmp);
     }
 
     /* Initialize camera */
@@ -4515,43 +4529,6 @@ static int main_impl(int argc, char** argv)
     /* Enable ADB authenticaiton, or not. */
     if (feature_is_enabled(kFeature_PlayStoreImage)) {
         boot_property_add("qemu.adb.secure", "1");
-    }
-
-    /* qemu.gles will be read by the OpenGL ES emulation libraries.
-     * If set to 0, the software GL ES renderer will be used as a fallback.
-     * If the parameter is undefined, this means the system image runs
-     * inside an emulator that doesn't support GPU emulation at all.
-     *
-     * The GL ES renderer cannot start properly if GPU emulation is disabled
-     * because this requires changing the LD_LIBRARY_PATH before launching
-     * the emulation engine. */
-    int qemu_gles = 0;
-    int gles_major_version = 2;
-    int gles_minor_version = 0;
-    is_opengl_alive = 1;
-    if (strcmp(android_hw->hw_gpu_mode, "guest") == 0) {
-        qemu_gles = 2;   // Using guest
-    } else if (android_hw->hw_gpu_enabled) {
-        if (android_initOpenglesEmulation() != 0 ||
-            android_startOpenglesRenderer(android_hw->hw_lcd_width,
-                                          android_hw->hw_lcd_height,
-                                          avdInfo_isPhoneApi(android_avdInfo),
-                                          avdInfo_getApiLevel(android_avdInfo),
-                                          &gles_major_version,
-                                          &gles_minor_version)
-                != 0) {
-            is_opengl_alive = 0;
-        } else {
-            goldfish_fb_set_use_host_gpu(1);
-            qemu_gles = 1;   // Using emugl
-        }
-    }
-
-    if (qemu_gles) {
-        char  tmp[64];
-        snprintf(tmp, sizeof(tmp), "%d",
-                 gles_major_version << 16 | gles_minor_version);
-        boot_property_add("ro.opengles.version", tmp);
     }
 
     /* Set the VM's max heap size, passed as a boot property */

@@ -24,7 +24,7 @@
 #include "android/main-emugl.h"
 #include "android/main-help.h"
 #include "android/network/control.h"
-#include "android/opengl/emugl_config.h"
+#include "android/opengles.h"
 #include "android/resource.h"
 #include "android/snapshot.h"
 #include "android/user-config.h"
@@ -1257,26 +1257,6 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
     return accel_ok;
 }
 
-/*
- * Return true if software GPU is used and AVD screen is too large for it.
- * Software GPU can boot 800 X 1280 (first gen Nexus 7) or smaller due to
- * software buffer size. (It may actually boot a slightly larger screen,
- * but we set limit to this commonly seen resolution.)
- */
-static bool use_software_gpu_and_screen_too_large(AndroidHwConfig* hw) {
-    const int kMaxWidth = 1280;
-    const int kMaxHeight = 800;
-
-    if (!hw->hw_gpu_enabled &&
-            (hw->hw_lcd_width * hw->hw_lcd_height > kMaxWidth * kMaxHeight)) {
-        derror("GPU emulation is disabled.\n"
-                   "Only screen size of 800 X 1280 or smaller is supported "
-                   "when GPU emulation is disabled.");
-        return true;
-    }
-    return false;
-}
-
 // _findQemuInformationalOption: search for informational QEMU options
 //
 // Scans the given command-line options for any informational QEMU option (see
@@ -1748,9 +1728,13 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     return true;
 }
 
-bool doGpuConfig(AvdInfo* avd, AndroidOptions* opts, AndroidHwConfig* hw,
-                 enum WinsysPreferredGlesBackend uiPreferredBackend)
-{
+
+static RendererConfig lastRendererConfig;
+
+bool configAndStartRenderer(
+         AvdInfo* avd, AndroidOptions* opts, AndroidHwConfig* hw,
+         enum WinsysPreferredGlesBackend uiPreferredBackend,
+         RendererConfig* config_out) {
     EmuglConfig config;
 
     int api_level = avdInfo_getApiLevel(avd);
@@ -1767,6 +1751,8 @@ bool doGpuConfig(AvdInfo* avd, AndroidOptions* opts, AndroidHwConfig* hw,
                 opts->no_window,
                 uiPreferredBackend)) {
         derror("%s", config.status);
+        config_out->openglAlive = 0;
+        lastRendererConfig = *config_out;
         return false;
     }
 
@@ -1779,10 +1765,6 @@ bool doGpuConfig(AvdInfo* avd, AndroidOptions* opts, AndroidHwConfig* hw,
     }
 
     hw->hw_gpu_enabled = config.enabled;
-    if (use_software_gpu_and_screen_too_large(hw)) {
-        derror("%s: software gpu and screen too large", config.status);
-        return false;
-    }
 
     /* Update hw_gpu_mode with the canonical renderer name determined by
      * emuglConfig_init (host/guest/off/swiftshader etc)
@@ -1790,6 +1772,7 @@ bool doGpuConfig(AvdInfo* avd, AndroidOptions* opts, AndroidHwConfig* hw,
     str_reset(&hw->hw_gpu_mode, config.backend);
     D("%s", config.status);
 
+    const char* gpu_mode = opts->gpu ? opts->gpu : hw->hw_gpu_mode;
 #ifdef _WIN32
     // BUG: https://code.google.com/p/android/issues/detail?id=199427
     // Booting will be severely slowed down, if not disabled outright, when
@@ -1805,7 +1788,6 @@ bool doGpuConfig(AvdInfo* avd, AndroidOptions* opts, AndroidHwConfig* hw,
     // which frees up the CPU enough for the device to boot.
     // ANGLE: ANGLE doesn't have GLESv1 support (for now),
     // so let's also disable the boot animation.
-    const char* gpu_mode = opts->gpu ? opts->gpu : hw->hw_gpu_mode;
     if (gpu_mode && (!strcmp(gpu_mode, "mesa") ||
                 !strcmp(gpu_mode, "angle"))) {
         opts->no_boot_anim = 1;
@@ -1813,16 +1795,52 @@ bool doGpuConfig(AvdInfo* avd, AndroidOptions* opts, AndroidHwConfig* hw,
     }
 #endif
 
-    /* Quit emulator on condition that both, gpu and snapstorage are on. This is
-     * a temporary solution preventing the emulator from crashing until GPU state
-     * can be properly saved / resored in snapshot file. */
-    if (hw->hw_gpu_enabled && opts->snapstorage && (!opts->no_snapshot_load ||
-                !opts->no_snapshot_save)) {
-        derror("Snapshots and gpu are mutually exclusive at this point. Please turn one of them off, and restart the emulator.");
-        return false;
-    }
-
     emuglConfig_setupEnv(&config);
 
+    // Now start the renderer, if applicable, and determine various things such as max supported
+    // GLES version and the correct props to write.
+    config_out->glesMode = kAndroidGlesEmulationHost;
+    config_out->openglAlive = 1;
+    int gles_major_version = 2;
+    int gles_minor_version = 0;
+    if (strcmp(gpu_mode, "guest") == 0 ||
+        strcmp(gpu_mode, "off") == 0 ||
+        !hw->hw_gpu_enabled) {
+        config_out->glesMode = kAndroidGlesEmulationGuest;
+    } else {
+        int gles_init_res =
+            android_initOpenglesEmulation();
+        int renderer_startup_res =
+            android_startOpenglesRenderer(
+                    hw->hw_lcd_width,
+                    hw->hw_lcd_height,
+                    avdInfo_isPhoneApi(avd),
+                    avdInfo_getApiLevel(avd),
+                    &gles_major_version,
+                    &gles_minor_version);
+        if (gles_init_res || renderer_startup_res)
+            config_out->openglAlive = 0;
+    }
+
+    // We need to know boot property
+    // for opengles version in advance.
+    config_out->bootPropOpenglesVersion =
+        gles_major_version << 16 |
+        gles_minor_version;
+
+    // Now estimate the GL framebuffer size.
+    // Use the conservative value for bytes per pixel (RGBA8)
+    uint64_t pixelSizeBytes = 4;
+
+    config_out->glFramebufferSizeBytes =
+        hw->hw_lcd_width *
+        hw->hw_lcd_height *
+        pixelSizeBytes;
+
+    lastRendererConfig = *config_out;
     return true;
+}
+
+RendererConfig getLastRendererConfig() {
+    return lastRendererConfig;
 }

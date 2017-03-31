@@ -13,32 +13,11 @@
 
 #include "android/cmdline-option.h"
 #include "android/utils/compiler.h"
+#include "android/opengl/emugl_config.h"
 
 #include <stdint.h>
 
 ANDROID_BEGIN_HEADER
-
-// List of values describing how EGL/GLES emulation should work in a given
-// Android virtual device.
-//
-// kAndroidGlesEmulationOff
-//    Means there is no GPU emulation, equivalent to "-gpu off" and instructs
-//    the guest system to use its old GLES 1.x software renderer.
-//
-// kAndroidGlesEmulationHost
-//    Means Host GPU emulation is being used. All EGL/GLES commands are
-//    sent to the host GPU or CPU through a simple wire protocol. This
-//    corresponds to "-gpu host" and "-gpu mesa".
-//
-// kAndroidGlesEmulationGuest
-//    Means a guest GLES 2.x library (e.g. SwiftShader) is being used in
-//    the guest. This should only be used with accelerated emulation, or
-//    results will be very very slow.
-typedef enum {
-    kAndroidGlesEmulationOff = 0,
-    kAndroidGlesEmulationHost,
-    kAndroidGlesEmulationGuest,
-} AndroidGlesEmulationMode;
 
 // Return a heap-allocated string containing the kernel parameter.
 // |opts| corresponds to the command-line options after they have been
@@ -61,7 +40,8 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    const char* kernelSerialPrefix,
                                    const char* avdKernelParameters,
                                    AndroidGlesEmulationMode glesMode,
-                                   uint64_t glesGuestCmaMB,
+                                   int bootPropOpenglesVersion,
+                                   uint64_t glFramebufferSizeBytes,
                                    bool isQemu2);
 
 ANDROID_END_HEADER
