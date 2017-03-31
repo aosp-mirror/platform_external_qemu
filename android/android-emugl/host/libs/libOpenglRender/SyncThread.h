@@ -125,8 +125,8 @@ private:
 
     // EGL objects / object handles specific to
     // a sync thread.
-    EGLDisplay mDisplay;
     RenderThreadInfo* mTLS;
+    EGLDisplay mDisplay;
     uint32_t mContext;
     uint32_t mSurf;
 };
