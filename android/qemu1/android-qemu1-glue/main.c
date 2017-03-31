@@ -159,7 +159,10 @@ int main(int argc, char **argv) {
 
     char* kernelParameters = emulator_getKernelParameters(
         opts, kTargetArch, apiLevel, serialPrefix, hw->kernel_parameters,
-        glesMode, 0ULL, false);
+        glesMode,
+        0x2000, /* ro.opengles.version */
+        0ULL, /* glFramebufferSizeBytes */
+        false /* isQemu2 */);
 
     if (hw->hw_cpu_ncore > 1) {
         // Avoid printing this warning all the time because the default
