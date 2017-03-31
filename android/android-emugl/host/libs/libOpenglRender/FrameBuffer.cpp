@@ -137,6 +137,7 @@ void FrameBuffer::finalize() {
     }
     m_windows.clear();
     m_contexts.clear();
+    mBlitThread->exit();
     if (m_eglDisplay != EGL_NO_DISPLAY) {
         s_egl.eglMakeCurrent(m_eglDisplay, NULL, NULL, NULL);
         if (m_eglContext != EGL_NO_CONTEXT) {
@@ -893,6 +894,23 @@ bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface) {
     return true;
 }
 
+bool FrameBuffer::flushWindowSurfaceColorBuffer2(HandleType p_surface) {
+    emugl::Mutex::AutoLock mutex(m_lock);
+
+    WindowSurfaceMap::iterator w(m_windows.find(p_surface));
+    if (w == m_windows.end()) {
+        ERR("FB::flushWindowSurfaceColorBuffer: window handle %#x not found\n",
+            p_surface);
+        // bad surface handle
+        return false;
+    }
+
+    WindowSurface* surface = (*w).second.first.get();
+    surface->flushColorBuffer2();
+
+    return true;
+}
+
 bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
                                               HandleType p_colorbuffer) {
     emugl::Mutex::AutoLock mutex(m_lock);
@@ -1168,8 +1186,6 @@ bool FrameBuffer::bind_locked() {
                 ERR("eglMakeCurrent failed\n");
             return false;
         }
-    } else {
-        ERR("Nested %s call detected, should never happen\n", __func__);
     }
 
     m_prevContext = prevContext;
@@ -1190,8 +1206,6 @@ bool FrameBuffer::bindSubwin_locked() {
             ERR("eglMakeCurrent failed\n");
             return false;
         }
-    } else {
-        ERR("Nested %s call detected, should never happen\n", __func__);
     }
 
     //
@@ -1238,6 +1252,15 @@ void FrameBuffer::createTrivialContext(HandleType shared,
     *surfOut = createWindowSurface(0, 1, 1);
 }
 
+void FrameBuffer::scaleColorBufferToSubWindow(HandleType p_colorbuffer) {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
+    if (c == m_colorbuffers.end()) {
+        return;
+    }
+    m_scaledColorBufferTexture = c->second.cb->scale();
+}
+
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
     if (needLockAndBind) {
         m_lock.lock();
@@ -1281,14 +1304,14 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
         //
         // render the color buffer to the window
         //
-        ret = (*c).second.cb->post(tex, m_zRot, dx, dy);
+        ret = (*c).second.cb->post(m_scaledColorBufferTexture, m_zRot, dx, dy);
         if (ret) {
             s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
         }
 
         // restore previous binding
         if (needLockAndBind) {
-            unbind_locked();
+            // unbind_locked();
         }
     } else {
         // If there is no sub-window, don't display anything, the client will
@@ -1375,6 +1398,7 @@ void FrameBuffer::onSave(Stream* stream) {
     //     m_prevContext
     //     m_prevReadSurf
     //     m_prevDrawSurf
+    //     mBlitThread
     emugl::Mutex::AutoLock mutex(m_lock);
     // set up a context because some snapshot commands try using GL
     ScopedBind scopedBind(m_colorBufferHelper);
@@ -1431,7 +1455,17 @@ void FrameBuffer::onSave(Stream* stream) {
     }
 }
 
+void FrameBuffer::syncAndDeleteBlitThread() {
+    if (mBlitThread) {
+        getBlitThread()->exit();
+        delete mBlitThread;
+        mBlitThread = nullptr;
+    }
+}
+
 bool FrameBuffer::onLoad(Stream* stream) {
+    syncAndDeleteBlitThread();
+
     emugl::Mutex::AutoLock mutex(m_lock);
     // cleanups
     {
@@ -1514,6 +1548,8 @@ bool FrameBuffer::onLoad(Stream* stream) {
     if (s_egl.eglPostLoadAllImages) {
         s_egl.eglPostLoadAllImages(m_eglDisplay, stream);
     }
+
+    getBlitThread();
     return true;
     // TODO: restore memory management
 }
@@ -1524,4 +1560,11 @@ void FrameBuffer::lock() {
 
 void FrameBuffer::unlock() {
     m_lock.unlock();
+}
+
+BlitThread* FrameBuffer::getBlitThread() {
+    if (!mBlitThread) {
+        mBlitThread = new BlitThread;
+    }
+    return mBlitThread;
 }
