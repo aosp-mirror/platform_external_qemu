@@ -18,6 +18,7 @@
 
 #include "android/base/files/Stream.h"
 
+#include "BlitThread.h"
 #include "ColorBuffer.h"
 #include "emugl/common/mutex.h"
 #include "FbConfig.h"
@@ -235,6 +236,7 @@ public:
     bool  setWindowSurfaceColorBuffer(
             HandleType p_surface, HandleType p_colorbuffer);
 
+    std::vector<WindowSurface::FlushColorBufferCmd> flushCmds;
     // Copy the content of a WindowSurface's Pbuffer to its attached
     // ColorBuffer. See the documentation for WindowSurface::flushColorBuffer()
     // |p_surface| is the target WindowSurface's handle value.
@@ -362,6 +364,9 @@ public:
     // lock and unlock handles (RenderContext, ColorBuffer, WindowSurface)
     void lock();
     void unlock();
+
+    BlitThread* getBlitThread();
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle();
@@ -429,6 +434,8 @@ private:
     ProcOwnedColorBuffers m_procOwnedColorBuffers;
     ProcOwnedEGLImages m_procOwnedEGLImages;
     ProcOwnedRenderContexts m_procOwnedRenderContext;
+
+    BlitThread* mBlitThread = nullptr;
 
     // Flag set when emulator is shutting down.
     bool m_shuttingDown = false;

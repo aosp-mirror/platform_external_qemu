@@ -43,6 +43,8 @@ bool bindFbo(GLuint* fbo, GLuint tex) {
         return true;
     }
 
+    fprintf(stderr, "%s: expensive bind\n", __func__);
+
     s_gles2.glGenFramebuffers(1, fbo);
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, *fbo);
     s_gles2.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_OES,
@@ -204,8 +206,11 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     return cb;
 }
 
+static ColorBuffer::Helper* sHelper = nullptr;
 ColorBuffer::ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper)
-    : m_display(display), m_helper(helper), mHndl(hndl) {}
+    : m_display(display), m_helper(helper), mHndl(hndl) {
+        sHelper = m_helper;
+}
 
 ColorBuffer::~ColorBuffer() {
     ScopedHelperContext context(m_helper);
@@ -352,12 +357,20 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
         s_gles1.glDeleteTextures(1, &tmpTex);
         s_gles1.glBindTexture(GL_TEXTURE_2D, currTexBind);
     }
+    return true;
+}
 
-    ScopedHelperContext context(m_helper);
-    if (!context.isOk()) {
-        return false;
-    }
+// static
+void ColorBuffer::bindHelperContext() {
+    sHelper->setupContext();
+}
 
+// static
+void ColorBuffer::unbindHelperContext() {
+    sHelper->teardownContext();
+}
+
+bool ColorBuffer::blitFromCurrentReadBuffer2() {
     if (!bindFbo(&m_fbo, m_tex)) {
         return false;
     }
