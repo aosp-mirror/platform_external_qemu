@@ -995,6 +995,11 @@ extern "C" int main(int argc, char **argv) {
                         android::featurecontrol::GLAsyncSwap, false);
             }
 
+            // Prefer discrete GPU?
+            if (android::featurecontrol::isEnabled(android::featurecontrol::PreferDiscreteGpu)) {
+                android_preferDiscreteGpu(true);
+            }
+
         }
 
         RendererConfig rendererConfig;

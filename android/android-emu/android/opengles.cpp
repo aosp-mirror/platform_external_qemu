@@ -33,6 +33,16 @@
 #define D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
 #define DD(...) VERBOSE_PRINT(gles,__VA_ARGS__)
 
+DISCRETE_GPU_VAR int NvOptimusEnablement = 0;
+DISCRETE_GPU_VAR int AmdPowerXpressRequestHighPerformance = 0;
+
+void android_preferDiscreteGpu(bool preference) {
+    if (preference) {
+        NvOptimusEnablement = 1;
+        AmdPowerXpressRequestHighPerformance = 1;
+    }
+}
+
 /* Name of the GLES rendering library we're going to use */
 #if UINTPTR_MAX == UINT32_MAX
 #define RENDERER_LIB_NAME  "libOpenglRender"
