@@ -34,6 +34,7 @@
 #include "android/main-common.h"
 #include "android/main-common-ui.h"
 #include "android/main-kernel-parameters.h"
+#include "android/opengles.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/process_setup.h"
@@ -979,43 +980,17 @@ extern "C" int main(int argc, char **argv) {
                 skin_winsys_override_glesbackend_if_auto(WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
         }
 
-        doGpuConfig(avd, opts, hw, uiPreferredGlesBackend);
-
-        // Kernel command-line parameters.
-        AndroidGlesEmulationMode glesMode = kAndroidGlesEmulationOff;
-        if (!strcmp(hw->hw_gpu_mode, "guest")) {
-            glesMode = kAndroidGlesEmulationGuest;
-        } else if (hw->hw_gpu_enabled) {
-            glesMode = kAndroidGlesEmulationHost;
-        }
-
-        uint64_t glesFramebufferCMA = 0ULL;
-        if ((glesMode == kAndroidGlesEmulationGuest) ||
-                (opts->gpu && !strcmp(opts->gpu, "guest")) ||
-                !hw->hw_gpu_enabled) {
-            // Set CMA (continguous memory allocation) to values that depend on
-            // the desired resolution.
-            // We will assume a double buffered 32-bit framebuffer
-            // in the calculation.
-            int framebuffer_width = hw->hw_lcd_width;
-            int framebuffer_height = hw->hw_lcd_height;
-            uint64_t bytes = framebuffer_width * framebuffer_height * 4;
-            const uint64_t one_MB = 1024ULL * 1024;
-            glesFramebufferCMA = (2 * bytes + one_MB - 1) / one_MB;
-            VERBOSE_PRINT(init, "Adjusting Contiguous Memory Allocation "
-                    "of %dx%d framebuffer for software renderer to %"
-                    PRIu64 "MB.", framebuffer_width, framebuffer_height,
-                    glesFramebufferCMA);
-        } else {
-            VERBOSE_PRINT(init, "Using default value for kernel "
-                    "Contiguous Memory Allocation.");
-        }
+        RendererConfig rendererConfig;
+        configAndStartRenderer(
+            avd, opts, hw, uiPreferredGlesBackend,
+            &rendererConfig);
 
         char* kernel_parameters = emulator_getKernelParameters(
                 opts, kTarget.androidArch, apiLevel, kTarget.ttyPrefix,
-                hw->kernel_parameters, glesMode, glesFramebufferCMA,
-                true  // isQemu2
-                );
+                hw->kernel_parameters,
+                rendererConfig.glesMode, rendererConfig.bootPropOpenglesVersion,
+                rendererConfig.glFramebufferSizeBytes,
+                true  /* isQemu2 */);
 
         if (!kernel_parameters) {
             return 1;
