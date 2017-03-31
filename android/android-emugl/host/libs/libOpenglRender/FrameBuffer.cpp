@@ -413,6 +413,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow) {
     //
     s_theFrameBuffer = fb.release();
     GL_LOG("basic EGL initialization successful");
+
     return true;
 }
 
@@ -923,8 +924,8 @@ bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface) {
     }
 
     WindowSurface* surface = (*w).second.first.get();
-    surface->flushColorBuffer();
 
+    getBlitThread()->blit(surface->flushColorBuffer());
     return true;
 }
 
@@ -952,6 +953,7 @@ bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
     }
     c->second.refcount++;
     (*w).second.second = p_colorbuffer;
+
     return true;
 }
 
@@ -1053,6 +1055,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
         }
     }
 
+    fprintf(stderr, "%s: makecurrent\n", __func__);
     if (!s_egl.eglMakeCurrent(m_eglDisplay,
                               draw ? draw->getEGLSurface() : EGL_NO_SURFACE,
                               read ? read->getEGLSurface() : EGL_NO_SURFACE,
@@ -1273,15 +1276,20 @@ void FrameBuffer::createTrivialContext(HandleType shared,
     *surfOut = createWindowSurface(0, 1, 1);
 }
 
+static int windowContextChangesPerPost = 0;
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
     if (needLockAndBind) {
         m_lock.lock();
     }
+
     bool ret = false;
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
-        goto EXIT;
+        if (needLockAndBind) {
+            m_lock.unlock();
+        }
+        return false;
     }
 
     m_lastPostedColorBuffer = p_colorbuffer;
@@ -1291,7 +1299,8 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
         // bind the subwindow eglSurface
         if (needLockAndBind && !bindSubwin_locked()) {
             ERR("FrameBuffer::post(): eglMakeCurrent failed\n");
-            goto EXIT;
+            m_lock.unlock();
+            return false;
         }
 
         // get the viewport
@@ -1355,7 +1364,6 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
                  GL_RGBA, GL_UNSIGNED_BYTE, m_fbImage);
     }
 
-EXIT:
     if (needLockAndBind) {
         m_lock.unlock();
     }
@@ -1562,4 +1570,10 @@ void FrameBuffer::lock() {
 
 void FrameBuffer::unlock() {
     m_lock.unlock();
+}
+
+BlitThread* FrameBuffer::getBlitThread() {
+    if (!mBlitThread)
+        mBlitThread = new BlitThread;
+    return mBlitThread;
 }
