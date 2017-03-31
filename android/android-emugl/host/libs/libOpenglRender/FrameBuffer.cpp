@@ -137,6 +137,7 @@ void FrameBuffer::finalize() {
     }
     m_windows.clear();
     m_contexts.clear();
+    mBlitThread->exit();
     if (m_eglDisplay != EGL_NO_DISPLAY) {
         s_egl.eglMakeCurrent(m_eglDisplay, NULL, NULL, NULL);
         if (m_eglContext != EGL_NO_CONTEXT) {
@@ -893,6 +894,23 @@ bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface) {
     return true;
 }
 
+bool FrameBuffer::flushWindowSurfaceColorBuffer2(HandleType p_surface) {
+    emugl::Mutex::AutoLock mutex(m_lock);
+
+    WindowSurfaceMap::iterator w(m_windows.find(p_surface));
+    if (w == m_windows.end()) {
+        ERR("FB::flushWindowSurfaceColorBuffer: window handle %#x not found\n",
+            p_surface);
+        // bad surface handle
+        return false;
+    }
+
+    WindowSurface* surface = (*w).second.first.get();
+    surface->flushColorBuffer2();
+
+    return true;
+}
+
 bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
                                               HandleType p_colorbuffer) {
     emugl::Mutex::AutoLock mutex(m_lock);
@@ -1524,4 +1542,19 @@ void FrameBuffer::lock() {
 
 void FrameBuffer::unlock() {
     m_lock.unlock();
+}
+
+void FrameBuffer::bindHelperContext() {
+    m_colorBufferHelper->setupContext();
+}
+
+void FrameBuffer::unbindHelperContext() {
+    m_colorBufferHelper->teardownContext();
+}
+
+BlitThread* FrameBuffer::getBlitThread() {
+    if (!mBlitThread) {
+        mBlitThread = new BlitThread;
+    }
+    return mBlitThread;
 }

@@ -18,6 +18,7 @@
 
 #include "android/base/files/Stream.h"
 
+#include "BlitThread.h"
 #include "ColorBuffer.h"
 #include "emugl/common/mutex.h"
 #include "FbConfig.h"
@@ -217,6 +218,8 @@ public:
     bool  bindContext(HandleType p_context,
                       HandleType p_drawSurface,
                       HandleType p_readSurface);
+    void  bindHelperContext();
+    void  unbindHelperContext();
 
     // Return a render context pointer from its handle
     RenderContextPtr getContext_locked(HandleType p_context);
@@ -240,6 +243,7 @@ public:
     // |p_surface| is the target WindowSurface's handle value.
     // Returns true on success, false on failure.
     bool  flushWindowSurfaceColorBuffer(HandleType p_surface);
+    bool  flushWindowSurfaceColorBuffer2(HandleType p_surface);
 
     // Bind the current context's EGL_TEXTURE_2D texture to a ColorBuffer
     // instance's EGLImage. This is intended to implement
@@ -362,6 +366,9 @@ public:
     // lock and unlock handles (RenderContext, ColorBuffer, WindowSurface)
     void lock();
     void unlock();
+
+    BlitThread* getBlitThread();
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle();
@@ -429,6 +436,8 @@ private:
     ProcOwnedColorBuffers m_procOwnedColorBuffers;
     ProcOwnedEGLImages m_procOwnedEGLImages;
     ProcOwnedRenderContexts m_procOwnedRenderContext;
+
+    BlitThread* mBlitThread = nullptr;
 
     // Flag set when emulator is shutting down.
     bool m_shuttingDown = false;

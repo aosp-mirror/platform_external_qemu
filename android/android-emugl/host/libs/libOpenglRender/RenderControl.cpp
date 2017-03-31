@@ -519,7 +519,7 @@ static int rcOpenColorBuffer2(uint32_t colorbuffer)
     if (!fb) {
         return -1;
     }
-    return fb->openColorBuffer( colorbuffer );
+    return fb->getBlitThread()->openColorBuffer( colorbuffer );
 }
 
 static void rcOpenColorBuffer(uint32_t colorbuffer)
@@ -533,7 +533,7 @@ static void rcCloseColorBuffer(uint32_t colorbuffer)
     if (!fb) {
         return;
     }
-    fb->closeColorBuffer( colorbuffer );
+    fb->getBlitThread()->closeColorBuffer( colorbuffer );
 }
 
 static int rcFlushWindowColorBuffer(uint32_t windowSurface)
@@ -551,6 +551,8 @@ static int rcFlushWindowColorBuffer(uint32_t windowSurface)
         GRSYNC_DPRINT("unlock gralloc cb lock }");
         return -1;
     }
+
+    fb->getBlitThread()->flush(windowSurface);
 
     GRSYNC_DPRINT("unlock gralloc cb lock }");
 
@@ -592,7 +594,7 @@ static void rcSetWindowColorBuffer(uint32_t windowSurface,
     if (!fb) {
         return;
     }
-    fb->setWindowSurfaceColorBuffer(windowSurface, colorBuffer);
+    fb->getBlitThread()->set(windowSurface, colorBuffer);
 }
 
 static EGLint rcMakeCurrent(uint32_t context,
@@ -615,7 +617,7 @@ static void rcFBPost(uint32_t colorBuffer)
         return;
     }
 
-    fb->post(colorBuffer);
+    fb->getBlitThread()->post(colorBuffer);
 }
 
 static void rcFBSetSwapInterval(EGLint interval)
@@ -781,18 +783,14 @@ static void rcCreateSyncKHR(EGLenum type,
     // guaranteed, and we need to make sure
     // rcTriggerWait is registered.
     emugl_sync_register_trigger_wait(rcTriggerWait);
-    FenceSync* fenceSync = new FenceSync(hasNativeFence,
-                                         destroy_when_signaled);
-
-    // This MUST be present, or we get a deadlock effect.
-    s_gles2.glFlush();
+    uint64_t sync =
+        FrameBuffer::getFB()->getBlitThread()->createSync(hasNativeFence, destroy_when_signaled);
 
     if (syncthread_out) *syncthread_out =
         reinterpret_cast<uint64_t>(SyncThread::getSyncThread());
 
     if (eglsync_out) {
-        uint64_t res = (uint64_t)(uintptr_t)fenceSync;
-        *eglsync_out = res;
+        *eglsync_out = sync;
         EGLSYNC_DPRINT("send out eglsync 0x%llx", res);
     }
 }
