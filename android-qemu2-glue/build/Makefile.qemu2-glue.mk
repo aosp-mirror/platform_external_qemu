@@ -1,6 +1,6 @@
 # A static library containing the android-emu glue code
 
-QEMU2_GLUE_INCLUDES := $(ANDROID_EMU_INCLUDES)
+QEMU2_GLUE_INCLUDES := $(ANDROID_EMU_INCLUDES) $(EMUGL_INCLUDES)
 
 $(call start-emulator-library,libqemu2-glue)
 
