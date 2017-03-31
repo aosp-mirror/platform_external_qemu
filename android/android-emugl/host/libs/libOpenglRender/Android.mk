@@ -20,6 +20,7 @@ endif
 
 host_common_SRC_FILES := \
     $(host_OS_SRCS) \
+    BlitThread.cpp \
     ChannelStream.cpp \
     ColorBuffer.cpp \
     FbConfig.cpp \
