@@ -74,4 +74,14 @@ private:
     GLint mPosLoc = -1;
     float mYWidthCutoff = 1.0;
     float mCWidthCutoff = 1.0;
+
+    void saveGLState();
+    void restoreGLState();
+    // Impacted state
+    GLfloat mCurrViewport[4] = {};
+    GLint mCurrTexUnit = 0;
+    GLint mCurrProgram = 0;
+    GLint mCurrTexBind = 0;
+    GLint mCurrVbo = 0;
+    GLint mCurrIbo = 0;
 };
