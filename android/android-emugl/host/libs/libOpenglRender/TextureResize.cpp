@@ -252,7 +252,16 @@ TextureResize::~TextureResize() {
     s_gles2.glDeleteBuffers(1, &mVertexBuffer);
 }
 
+
+#include <sys/time.h>
+
+uint64_t currms() {
+    struct timeval tv;
+    gettimeofday(&tv, nullptr);
+    return tv.tv_sec * 1000 * 1000 + tv.tv_usec;
+}
 GLuint TextureResize::update(GLuint texture) {
+    uint64_t start = currms();
     // Store the viewport. The viewport is clobbered due to the framebuffers.
     GLint vport[4] = { 0, };
     s_gles2.glGetIntegerv(GL_VIEWPORT, vport);
@@ -271,9 +280,7 @@ GLuint TextureResize::update(GLuint texture) {
     }
 
     // No resizing needed.
-    if (factor == 1) {
-        return texture;
-    }
+    return texture;
 
     s_gles2.glGetError(); // Clear any GL errors.
     setupFramebuffers(factor);
@@ -287,6 +294,8 @@ GLuint TextureResize::update(GLuint texture) {
         return texture;
     }
 
+    uint64_t end = currms();
+    fprintf(stderr, "%s: resize took %u us\n", __func__, (uint32_t)(end - start));
     return mFBHeight.texture;
 }
 
@@ -328,6 +337,7 @@ void TextureResize::setupFramebuffers(unsigned int factor) {
 
     mFactor = factor;
 }
+
 
 void TextureResize::resize(GLuint texture) {
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);

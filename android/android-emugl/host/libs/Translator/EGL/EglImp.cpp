@@ -122,6 +122,11 @@ EGLAPI EGLContext EGLAPIENTRY eglLoadContext(EGLDisplay display, const EGLint *a
 EGLAPI EGLBoolean EGLAPIENTRY eglSaveAllImages(EGLDisplay display, EGLStream stream);
 EGLAPI EGLBoolean EGLAPIENTRY eglLoadAllImages(EGLDisplay display, EGLStream stream);
 EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream stream);
+
+EGLAPI void EGLAPIENTRY eglGetGlobalReadDrawRbo(EGLDisplay, EGLint*, EGLint*);
+EGLAPI void EGLAPIENTRY eglCreateBindFbos(EGLDisplay, EGLint, EGLint, EGLint*, EGLint*);
+EGLAPI void EGLAPIENTRY eglDestroyFbos(EGLDisplay, EGLint, EGLint);
+
 }
 
 #define CURRENT_THREAD() do {} while (0);
@@ -131,6 +136,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream
         if(tls_thread->getError() == EGL_SUCCESS) {          \
           tls_thread->setError(err);                         \
         }                                                    \
+        fprintf(stderr, "%s: %d egl error 0x%x\n", __func__, __LINE__, err); \
         return ret;
 
 #define VALIDATE_DISPLAY_RETURN(EGLDisplay,ret)              \
@@ -1427,3 +1433,33 @@ EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream
     dpy->postLoadAllImages(stm);
     return true;
 }
+
+EGLAPI void EGLAPIENTRY eglGetGlobalReadDrawRbo(EGLDisplay dpy, EGLint* readRbo, EGLint* drawRbo) {
+    ThreadInfo* thread = getThreadInfo();
+    ContextPtr currCtx = thread->eglContext;
+    EglPbufferSurface* drawSrf;
+    EglPbufferSurface* readSrf;
+    drawSrf = static_cast<EglPbufferSurface*>(currCtx->draw().get());
+    readSrf = static_cast<EglPbufferSurface*>(currCtx->read().get());
+    *readRbo = readSrf->glRboColor;
+    *drawRbo = drawSrf->glRboColor;
+}
+
+
+EGLAPI void EGLAPIENTRY eglCreateBindFbos(EGLDisplay dpy, EGLint readRbo, EGLint drawRbo, EGLint* fboReadOut, EGLint* fboDrawOut) {
+    const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+    // returns local names.
+    if (iface->createFbosFromRbos) {
+        // fprintf(stderr, "%s: create fbos from rbos\n", __func__);
+        iface->createFbosFromRbos((GLuint)readRbo, (GLuint)drawRbo, (GLuint*)fboReadOut, (GLuint*)fboDrawOut);
+    } else {
+        // fprintf(stderr, "%s: c???\n", __func__);
+        *fboReadOut = 0;
+        *fboDrawOut = 0;
+    }
+}
+
+EGLAPI void EGLAPIENTRY eglDestroyFbos(EGLDisplay, EGLint, EGLint) {
+    // const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+}
+
