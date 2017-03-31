@@ -38,6 +38,9 @@ namespace {
 
 // Helper class to call the bind_locked() / unbind_locked() properly.
 typedef ColorBuffer::RecursiveScopedHelperContext ScopedBind;
+#define SCOPED_BIND(helper) \
+    fprintf(stderr, "%s:%d ScopedBind of pbuf context\n", __func__, __LINE__); \
+    ScopedBind bind(helper); \
 
 // Implementation of a ColorBuffer::Helper instance that redirects calls
 // to a FrameBuffer instance.
@@ -46,6 +49,7 @@ public:
     ColorBufferHelper(FrameBuffer* fb) : mFb(fb) {}
 
     virtual bool setupContext() {
+        fprintf(stderr, "%s: Helper binding\n", __func__);
         mIsBound = mFb->bind_locked();
         return mIsBound;
     }
@@ -137,6 +141,7 @@ void FrameBuffer::finalize() {
     }
     m_windows.clear();
     m_contexts.clear();
+    mBlitThread->exit();
     if (m_eglDisplay != EGL_NO_DISPLAY) {
         s_egl.eglMakeCurrent(m_eglDisplay, NULL, NULL, NULL);
         if (m_eglContext != EGL_NO_CONTEXT) {
@@ -296,7 +301,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow) {
 
     GL_LOG("attempting to make context current");
     // Make the context current
-    ScopedBind bind(fb->m_colorBufferHelper);
+    SCOPED_BIND(fb->m_colorBufferHelper);
     if (!bind.isOk()) {
         ERR("Failed to make current\n");
         return false;
@@ -487,10 +492,24 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
             }
         }
     }
+    mutex.unlock();
 
+    bool transformSuccess =
+        getBlitThread()->transformSubWindow(wx, wy, ww, wh, fbw, fbh, dpr, zRot);
+
+    return success && transformSuccess;
+}
+
+bool FrameBuffer::transformSubWindow(
+                        int wx, int wy,
+                        int ww, int wh,
+                        int fbw, int fbh, float dpr, float zRot) {
     // At this point, if the subwindow doesn't exist, it is because it either
     // couldn't be created
     // in the first place or the EGLSurface couldn't be created.
+    fprintf(stderr, "%s: bindSubwin from setup\n", __func__);
+    bool success = true;
+
     if (m_subWin && bindSubwin_locked()) {
         // Only attempt to update window geometry if anything has actually
         // changed.
@@ -704,18 +723,18 @@ void FrameBuffer::drainRenderContext() {
 }
 
 void FrameBuffer::drainWindowSurface() {
+    fprintf(stderr, "%s: call\n", __func__);
     RenderThreadInfo* const tinfo = RenderThreadInfo::get();
     if (tinfo->m_windowSet.empty()) {
         return;
     }
 
     emugl::Mutex::AutoLock mutex(m_lock);
-    ScopedBind bind(m_colorBufferHelper);
     for (const HandleType winHandle : tinfo->m_windowSet) {
         const auto winIt = m_windows.find(winHandle);
         if (winIt != m_windows.end()) {
             if (const HandleType oldColorBufferHandle = winIt->second.second) {
-                closeColorBufferLocked(oldColorBufferHandle);
+                getBlitThread()->closeColorBufferLocked(oldColorBufferHandle);
                 m_windows.erase(winIt);
             }
         }
@@ -750,7 +769,6 @@ void FrameBuffer::DestroyWindowSurface(HandleType p_surface) {
 void FrameBuffer::DestroyWindowSurfaceLocked(HandleType p_surface) {
     const auto w = m_windows.find(p_surface);
     if (w != m_windows.end()) {
-        ScopedBind bind(m_colorBufferHelper);
         closeColorBufferLocked(w->second.second);
         m_windows.erase(w);
         RenderThreadInfo* tinfo = RenderThreadInfo::get();
@@ -810,18 +828,22 @@ void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer) {
         return;
     }
     if (--(*c).second.refcount == 0) {
+        fprintf(stderr, "%s: erase cb!!!!!!! %p\n", __func__, (*c).second.cb.get());
         m_colorbuffers.erase(c);
     }
 }
 
 void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
+    getBlitThread()->cleanupProcGLObjects(puid);
+}
+
+void FrameBuffer::cleanupProcGLObjectsSelf(uint64_t puid) {
     emugl::Mutex::AutoLock mutex(m_lock);
     cleanupProcGLObjects_locked(puid);
 }
 
 void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid) {
     {
-        ScopedBind bind(m_colorBufferHelper);
         // Clean up window surfaces
         {
             auto procIte = m_procOwnedWindowSurfaces.find(puid);
@@ -889,6 +911,23 @@ bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface) {
 
     WindowSurface* surface = (*w).second.first.get();
     surface->flushColorBuffer();
+
+    return true;
+}
+
+bool FrameBuffer::flushWindowSurfaceColorBuffer2(HandleType p_surface) {
+    emugl::Mutex::AutoLock mutex(m_lock);
+
+    WindowSurfaceMap::iterator w(m_windows.find(p_surface));
+    if (w == m_windows.end()) {
+        ERR("FB::flushWindowSurfaceColorBuffer: window handle %#x not found\n",
+            p_surface);
+        // bad surface handle
+        return false;
+    }
+
+    WindowSurface* surface = (*w).second.first.get();
+    surface->flushColorBuffer2();
 
     return true;
 }
@@ -1018,11 +1057,16 @@ bool FrameBuffer::bindContext(HandleType p_context,
         }
     }
 
+    fprintf(stderr, "%s: binding c / r / d: 0x%llx 0x%llx 0x%llx.\n", __func__,
+            (unsigned long long)(uintptr_t)(ctx ? ctx->getEGLContext() : EGL_NO_CONTEXT),
+            (unsigned long long)(uintptr_t)(read ? read->getEGLSurface() : EGL_NO_SURFACE),
+            (unsigned long long)(uintptr_t)(draw ? draw->getEGLSurface() : EGL_NO_SURFACE)
+           );
     if (!s_egl.eglMakeCurrent(m_eglDisplay,
                               draw ? draw->getEGLSurface() : EGL_NO_SURFACE,
                               read ? read->getEGLSurface() : EGL_NO_SURFACE,
                               ctx ? ctx->getEGLContext() : EGL_NO_CONTEXT)) {
-        ERR("eglMakeCurrent failed\n");
+        ERR("eglMakeCurrent failed (bindContext)\n");
         return false;
     }
 
@@ -1083,8 +1127,10 @@ bool FrameBuffer::bindContext(HandleType p_context,
         else
             tinfo->m_glDec.setContextData(&ctx->decoderContextData());
     } else {
+        fprintf(stderr, "%s: null out context data\n", __func__);
         tinfo->m_glDec.setContextData(NULL);
         tinfo->m_gl2Dec.setContextData(NULL);
+        fprintf(stderr, "%s: null out context data done\n", __func__);
     }
     return true;
 }
@@ -1160,16 +1206,26 @@ bool FrameBuffer::bind_locked() {
     EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
     EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
 
+    fprintf(stderr, "%s: prev c / r / d: 0x%llx 0x%llx 0x%llx. want: 0x%llx 0x%llx 0x%llx\n", __func__,
+            (unsigned long long)(uintptr_t)prevContext,
+            (unsigned long long)(uintptr_t)prevReadSurf,
+            (unsigned long long)(uintptr_t)prevDrawSurf,
+            (unsigned long long)(uintptr_t)m_pbufContext,
+            (unsigned long long)(uintptr_t)m_pbufSurface,
+            (unsigned long long)(uintptr_t)m_pbufSurface);
+
     if (prevContext != m_pbufContext || prevReadSurf != m_pbufSurface ||
         prevDrawSurf != m_pbufSurface) {
         if (!s_egl.eglMakeCurrent(m_eglDisplay, m_pbufSurface, m_pbufSurface,
                                   m_pbufContext)) {
-            if (!m_shuttingDown)
-                ERR("eglMakeCurrent failed\n");
+            if (!m_shuttingDown) {
+                ERR("eglMakeCurrent failed (bind_locked)\n");
+                abort();
+            }
             return false;
         }
     } else {
-        ERR("Nested %s call detected, should never happen\n", __func__);
+        fprintf(stderr, "%s: bound the same thing\n", __func__);
     }
 
     m_prevContext = prevContext;
@@ -1183,15 +1239,22 @@ bool FrameBuffer::bindSubwin_locked() {
     EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
     EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
 
+    fprintf(stderr, "%s: prev c / r / d: 0x%llx 0x%llx 0x%llx. want: 0x%llx 0x%llx 0x%llx\n", __func__,
+            (unsigned long long)(uintptr_t)prevContext,
+            (unsigned long long)(uintptr_t)prevReadSurf,
+            (unsigned long long)(uintptr_t)prevDrawSurf,
+            (unsigned long long)(uintptr_t)m_eglContext,
+            (unsigned long long)(uintptr_t)m_eglSurface,
+            (unsigned long long)(uintptr_t)m_eglSurface);
     if (prevContext != m_eglContext || prevReadSurf != m_eglSurface ||
         prevDrawSurf != m_eglSurface) {
         if (!s_egl.eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface,
                                   m_eglContext)) {
-            ERR("eglMakeCurrent failed\n");
+            ERR("eglMakeCurrent failed (bindSubwin_locked)\n");
             return false;
         }
     } else {
-        ERR("Nested %s call detected, should never happen\n", __func__);
+        fprintf(stderr, "%s: is the same surface\n", __func__);
     }
 
     //
@@ -1212,6 +1275,13 @@ bool FrameBuffer::unbind_locked() {
     EGLSurface curReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
     EGLSurface curDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
 
+    fprintf(stderr, "%s: prev c / r / d: 0x%llx 0x%llx 0x%llx. want: 0x%llx 0x%llx 0x%llx\n", __func__,
+            (unsigned long long)(uintptr_t)curContext,
+            (unsigned long long)(uintptr_t)curReadSurf,
+            (unsigned long long)(uintptr_t)curDrawSurf,
+            (unsigned long long)(uintptr_t)m_prevContext,
+            (unsigned long long)(uintptr_t)m_prevReadSurf,
+            (unsigned long long)(uintptr_t)m_prevDrawSurf);
     if (m_prevContext != curContext || m_prevReadSurf != curReadSurf ||
         m_prevDrawSurf != curDrawSurf) {
         if (!s_egl.eglMakeCurrent(m_eglDisplay, m_prevDrawSurf, m_prevReadSurf,
@@ -1238,6 +1308,16 @@ void FrameBuffer::createTrivialContext(HandleType shared,
     *surfOut = createWindowSurface(0, 1, 1);
 }
 
+void FrameBuffer::scaleColorBufferToSubWindow(HandleType p_colorbuffer) {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
+    if (c == m_colorbuffers.end()) {
+        fprintf(stderr, "%s: couldn't find cb to scale\n", __func__);
+        return;
+    }
+    m_scaledColorBufferTexture = c->second.cb->scale();
+}
+
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
     if (needLockAndBind) {
         m_lock.lock();
@@ -1252,10 +1332,9 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
     m_lastPostedColorBuffer = p_colorbuffer;
 
     if (m_subWin) {
-        GLuint tex = c->second.cb->scale();
         // bind the subwindow eglSurface
         if (needLockAndBind && !bindSubwin_locked()) {
-            ERR("FrameBuffer::post(): eglMakeCurrent failed\n");
+            ERR("FrameBuffer::post(): eglMakeCurrent failed (post)\n");
             goto EXIT;
         }
 
@@ -1281,7 +1360,7 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
         //
         // render the color buffer to the window
         //
-        ret = (*c).second.cb->post(tex, m_zRot, dx, dy);
+        ret = (*c).second.cb->post(m_scaledColorBufferTexture, m_zRot, dx, dy);
         if (ret) {
             s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
         }
@@ -1375,9 +1454,10 @@ void FrameBuffer::onSave(Stream* stream) {
     //     m_prevContext
     //     m_prevReadSurf
     //     m_prevDrawSurf
+    //     mBlitThread
     emugl::Mutex::AutoLock mutex(m_lock);
     // set up a context because some snapshot commands try using GL
-    ScopedBind scopedBind(m_colorBufferHelper);
+    SCOPED_BIND(m_colorBufferHelper);
     // eglPreSaveContext labels all guest context textures to be saved
     // (textures created by the host are not saved!)
     // eglSaveAllImages labels all EGLImages (both host and guest) to be saved
@@ -1431,11 +1511,21 @@ void FrameBuffer::onSave(Stream* stream) {
     }
 }
 
+void FrameBuffer::syncAndDeleteBlitThread() {
+    if (mBlitThread) {
+        getBlitThread()->exit();
+        delete mBlitThread;
+        mBlitThread = nullptr;
+    }
+}
+
 bool FrameBuffer::onLoad(Stream* stream) {
+    syncAndDeleteBlitThread();
+
     emugl::Mutex::AutoLock mutex(m_lock);
     // cleanups
     {
-        ScopedBind scopedBind(m_colorBufferHelper);
+        SCOPED_BIND(m_colorBufferHelper);
         if (m_procOwnedColorBuffers.empty()
                 && m_procOwnedEGLImages.empty()
                 && m_procOwnedRenderContext.empty()
@@ -1514,6 +1604,8 @@ bool FrameBuffer::onLoad(Stream* stream) {
     if (s_egl.eglPostLoadAllImages) {
         s_egl.eglPostLoadAllImages(m_eglDisplay, stream);
     }
+
+    getBlitThread();
     return true;
     // TODO: restore memory management
 }
@@ -1524,4 +1616,11 @@ void FrameBuffer::lock() {
 
 void FrameBuffer::unlock() {
     m_lock.unlock();
+}
+
+BlitThread* FrameBuffer::getBlitThread() {
+    if (!mBlitThread) {
+        mBlitThread = new BlitThread(this, getDisplay(), m_pbufContext, m_pbufSurface, m_eglContext, m_eglSurface);
+    }
+    return mBlitThread;
 }

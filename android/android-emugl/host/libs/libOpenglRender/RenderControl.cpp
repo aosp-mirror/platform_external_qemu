@@ -464,6 +464,7 @@ static void rcDestroyContext(uint32_t context)
         return;
     }
 
+    fprintf(stderr, "%s: call\n", __func__);
     fb->DestroyRenderContext(context);
 }
 
@@ -475,7 +476,7 @@ static uint32_t rcCreateWindowSurface(uint32_t config,
         return 0;
     }
 
-    return fb->createWindowSurface(config, width, height);
+    return fb->getBlitThread()->createWindowSurface(config, width, height);
 }
 
 static void rcDestroyWindowSurface(uint32_t windowSurface)
@@ -485,7 +486,8 @@ static void rcDestroyWindowSurface(uint32_t windowSurface)
         return;
     }
 
-    fb->DestroyWindowSurface( windowSurface );
+    fprintf(stderr, "%s: call\n", __func__);
+    fb->getBlitThread()->destroyWindowSurface( windowSurface );
 }
 
 static uint32_t rcCreateColorBuffer(uint32_t width,
@@ -496,8 +498,7 @@ static uint32_t rcCreateColorBuffer(uint32_t width,
         return 0;
     }
 
-    return fb->createColorBuffer(width, height, internalFormat,
-                                 FRAMEWORK_FORMAT_GL_COMPATIBLE);
+    return fb->getBlitThread()->createColorBuffer(width, height, internalFormat, FRAMEWORK_FORMAT_GL_COMPATIBLE);
 }
 
 static uint32_t rcCreateColorBufferDMA(uint32_t width,
@@ -509,8 +510,7 @@ static uint32_t rcCreateColorBufferDMA(uint32_t width,
         return 0;
     }
 
-    return fb->createColorBuffer(width, height, internalFormat,
-                                 (FrameworkFormat)frameworkFormat);
+    return fb->getBlitThread()->createColorBuffer(width, height, internalFormat, (FrameworkFormat)frameworkFormat);
 }
 
 static int rcOpenColorBuffer2(uint32_t colorbuffer)
@@ -519,7 +519,7 @@ static int rcOpenColorBuffer2(uint32_t colorbuffer)
     if (!fb) {
         return -1;
     }
-    return fb->openColorBuffer( colorbuffer );
+    return fb->getBlitThread()->openColorBuffer( colorbuffer );
 }
 
 static void rcOpenColorBuffer(uint32_t colorbuffer)
@@ -533,7 +533,7 @@ static void rcCloseColorBuffer(uint32_t colorbuffer)
     if (!fb) {
         return;
     }
-    fb->closeColorBuffer( colorbuffer );
+    fb->getBlitThread()->closeColorBuffer( colorbuffer );
 }
 
 static int rcFlushWindowColorBuffer(uint32_t windowSurface)
@@ -551,6 +551,8 @@ static int rcFlushWindowColorBuffer(uint32_t windowSurface)
         GRSYNC_DPRINT("unlock gralloc cb lock }");
         return -1;
     }
+
+    fb->getBlitThread()->flush(windowSurface);
 
     GRSYNC_DPRINT("unlock gralloc cb lock }");
 
@@ -592,7 +594,7 @@ static void rcSetWindowColorBuffer(uint32_t windowSurface,
     if (!fb) {
         return;
     }
-    fb->setWindowSurfaceColorBuffer(windowSurface, colorBuffer);
+    fb->getBlitThread()->set(windowSurface, colorBuffer);
 }
 
 static EGLint rcMakeCurrent(uint32_t context,
@@ -603,6 +605,7 @@ static EGLint rcMakeCurrent(uint32_t context,
         return EGL_FALSE;
     }
 
+    fprintf(stderr, "%s: call\n", __func__);
     bool ret = fb->bindContext(context, drawSurf, readSurf);
 
     return (ret ? EGL_TRUE : EGL_FALSE);
@@ -615,7 +618,7 @@ static void rcFBPost(uint32_t colorBuffer)
         return;
     }
 
-    fb->post(colorBuffer);
+    fb->getBlitThread()->post(colorBuffer);
 }
 
 static void rcFBSetSwapInterval(EGLint interval)
@@ -663,7 +666,7 @@ static void rcReadColorBuffer(uint32_t colorBuffer,
         return;
     }
 
-    fb->readColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
+    fb->getBlitThread()->readColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
 }
 
 static int rcUpdateColorBuffer(uint32_t colorBuffer,
@@ -679,7 +682,7 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
         return -1;
     }
 
-    fb->updateColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
+    fb->getBlitThread()->updateColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
 
     GRSYNC_DPRINT("unlock gralloc cb lock");
     sGrallocSync->unlockColorBufferPrepare();
@@ -701,8 +704,7 @@ static int rcUpdateColorBufferDMA(uint32_t colorBuffer,
         return -1;
     }
 
-    fb->updateColorBuffer(colorBuffer, x, y, width, height,
-                          format, type, pixels);
+    fb->getBlitThread()->updateColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
 
     GRSYNC_DPRINT("unlock gralloc cb lock");
     sGrallocSync->unlockColorBufferPrepare();
@@ -726,6 +728,7 @@ static int rcDestroyClientImage(uint32_t image)
         return 0;
     }
 
+    fprintf(stderr, "%s: call\n", __func__);
     return fb->destroyClientImage(image);
 }
 
@@ -781,18 +784,15 @@ static void rcCreateSyncKHR(EGLenum type,
     // guaranteed, and we need to make sure
     // rcTriggerWait is registered.
     emugl_sync_register_trigger_wait(rcTriggerWait);
-    FenceSync* fenceSync = new FenceSync(hasNativeFence,
-                                         destroy_when_signaled);
-
-    // This MUST be present, or we get a deadlock effect.
-    s_gles2.glFlush();
+    uint64_t sync =
+        FrameBuffer::getFB()->getBlitThread()->createSync(hasNativeFence, destroy_when_signaled);
 
     if (syncthread_out) *syncthread_out =
-        reinterpret_cast<uint64_t>(SyncThread::getSyncThread());
+        FrameBuffer::getFB()->getBlitThread()->getSyncThread();
+        // reinterpret_cast<uint64_t>(SyncThread::getSyncThread());
 
     if (eglsync_out) {
-        uint64_t res = (uint64_t)(uintptr_t)fenceSync;
-        *eglsync_out = res;
+        *eglsync_out = sync;
         EGLSYNC_DPRINT("send out eglsync 0x%llx", res);
     }
 }
