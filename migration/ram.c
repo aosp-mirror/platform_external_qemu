@@ -2078,6 +2078,8 @@ static int ram_save_complete(QEMUFile *f, void *opaque)
 {
     rcu_read_lock();
 
+    int64_t t0 = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
+
     if (!migration_in_postcopy(migrate_get_current())) {
         migration_bitmap_sync();
     }
@@ -2103,6 +2105,9 @@ static int ram_save_complete(QEMUFile *f, void *opaque)
     rcu_read_unlock();
 
     qemu_put_be64(f, RAM_SAVE_FLAG_EOS);
+
+    uint64_t t1 = (qemu_clock_get_ns(QEMU_CLOCK_REALTIME) - t0) / 1000000;
+    printf("zyy: ram saving done in %.03fs\n", t1/1000.0);
 
     return 0;
 }
@@ -2513,6 +2518,8 @@ static int ram_load(QEMUFile *f, void *opaque, int version_id)
      */
     rcu_read_lock();
 
+    int64_t t0 = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
+
     if (postcopy_running) {
         ret = ram_load_postcopy(f);
     }
@@ -2625,6 +2632,9 @@ static int ram_load(QEMUFile *f, void *opaque, int version_id)
     if (decompress_threads) {
         migrate_decompress_threads_join();
     }
+
+    uint64_t t1 = (qemu_clock_get_ns(QEMU_CLOCK_REALTIME) - t0) / 1000000;
+    printf("zyy: ram loading done in %.03fs\n", t1/1000.0);
 
     DPRINTF("Completed load of VM with exit code %d seq iteration "
             "%" PRIu64 "\n", ret, seq_iter);
