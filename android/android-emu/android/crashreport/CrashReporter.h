@@ -20,7 +20,8 @@
 
 #include <functional>
 
-#include <assert.h>
+#include <atomic>
+#include <cassert>
 
 namespace android {
 namespace crashreport {
@@ -112,7 +113,6 @@ public:
     void GenerateDumpAndDie(const char* message);
 
     void SetExitMode(const char* message);
-    bool isInExitMode() const;
 
     void addCrashCallback(CrashCallback cb) {
         assert(bool(cb));
@@ -133,7 +133,7 @@ private:
     std::vector<CrashCallback> mCrashCallbacks;
     const std::string mDumpDir;
     const std::string mDataExchangeDir;
-    bool mIsInExitMode = false;
+    std::atomic<bool> mIsInExitMode { false };
 };
 
 }  // crashreport

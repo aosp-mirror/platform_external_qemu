@@ -99,7 +99,7 @@ void CrashReporter::GenerateDumpAndDie(const char* message) {
     android_metrics_stop();
     passDumpMessage(message);
     // this is the most cross-platform way of crashing
-    // any other I know about has its flows:
+    // any other I know about has its flaws:
     //  - abort() isn't caught by Breakpad on Windows
     //  - null() may screw the callstack
     //  - explicit *null = 1 can be optimized out
@@ -110,25 +110,18 @@ void CrashReporter::GenerateDumpAndDie(const char* message) {
 }
 
 void CrashReporter::SetExitMode(const char* msg) {
-    mIsInExitMode = true;
-    // This is a temporary patch fix for an issue with too many crashes on exit
-    // Stop the metrics reporter as soon as we started exiting, not in the last
-    // moment.
-    // TODO: after exit crashes are fixed, just report the 'exit started' metric
-    //  message here.
-    // Bug=http://b.android.com/200665
-    android::metrics::MetricsReporter::get().report(
+    if (!mIsInExitMode.exchange(true)) {
+        android::metrics::MetricsReporter::get().report(
                 [](android_studio::AndroidStudioEvent* event) {
                     event->mutable_emulator_details()->set_exit_started(true);
                     event->mutable_emulator_details()->set_session_phase(
-                                android_studio::EmulatorDetails::EXIT_GENERAL);
+                            android_studio::EmulatorDetails::EXIT_GENERAL);
                 });
-    android_metrics_stop();
+        // Flush the metrics reporter to make sure we write down this message
+        // before crashing on exit.
+        android::metrics::MetricsReporter::get().finishPendingReports();
+    }
     attachData(kCrashOnExitFileName, msg);
-}
-
-bool CrashReporter::isInExitMode() const {
-    return mIsInExitMode;
 }
 
 void CrashReporter::passDumpMessage(const char* message) {
