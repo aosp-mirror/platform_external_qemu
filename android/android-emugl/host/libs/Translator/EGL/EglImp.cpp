@@ -122,6 +122,11 @@ EGLAPI EGLContext EGLAPIENTRY eglLoadContext(EGLDisplay display, const EGLint *a
 EGLAPI EGLBoolean EGLAPIENTRY eglSaveAllImages(EGLDisplay display, EGLStream stream);
 EGLAPI EGLBoolean EGLAPIENTRY eglLoadAllImages(EGLDisplay display, EGLStream stream);
 EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream stream);
+
+EGLAPI void EGLAPIENTRY eglGetGlobalReadDrawRbo(EGLDisplay, EGLint*, EGLint*);
+EGLAPI void EGLAPIENTRY eglCreateBindFbos(EGLDisplay, EGLint, EGLint, EGLint*, EGLint*);
+EGLAPI void EGLAPIENTRY eglDestroyFbos(EGLDisplay, EGLint, EGLint);
+
 }
 
 #define CURRENT_THREAD() do {} while (0);
@@ -1160,6 +1165,10 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSwapBuffers(EGLDisplay display, EGLSurface surf
 
     if(!currentCtx.get() || !currentCtx->usingSurface(Srfc) ||
             !dpy->nativeType()->isValidNativeWin(Srfc.get()->native())) {
+        fprintf(stderr, "%s: uh oh! bad surface. %d %d %d\n", __func__,
+                !currentCtx.get(),
+                !currentCtx->usingSurface(Srfc),
+                !dpy->nativeType()->isValidNativeWin(Srfc.get()->native()));
         RETURN_ERROR(EGL_FALSE,EGL_BAD_SURFACE);
     }
 
@@ -1427,3 +1436,33 @@ EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream
     dpy->postLoadAllImages(stm);
     return true;
 }
+
+EGLAPI void EGLAPIENTRY eglGetGlobalReadDrawRbo(EGLDisplay dpy, EGLint* readRbo, EGLint* drawRbo) {
+    ThreadInfo* thread = getThreadInfo();
+    ContextPtr currCtx = thread->eglContext;
+    EglPbufferSurface* drawSrf;
+    EglPbufferSurface* readSrf;
+    drawSrf = static_cast<EglPbufferSurface*>(currCtx->draw().get());
+    readSrf = static_cast<EglPbufferSurface*>(currCtx->read().get());
+    *readRbo = readSrf->glRboColor;
+    *drawRbo = drawSrf->glRboColor;
+}
+
+
+EGLAPI void EGLAPIENTRY eglCreateBindFbos(EGLDisplay dpy, EGLint readRbo, EGLint drawRbo, EGLint* fboReadOut, EGLint* fboDrawOut) {
+    const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+    // returns local names.
+    if (iface->createFbosFromRbos) {
+        // fprintf(stderr, "%s: create fbos from rbos\n", __func__);
+        iface->createFbosFromRbos((GLuint)readRbo, (GLuint)drawRbo, (GLuint*)fboReadOut, (GLuint*)fboDrawOut);
+    } else {
+        // fprintf(stderr, "%s: c???\n", __func__);
+        *fboReadOut = 0;
+        *fboDrawOut = 0;
+    }
+}
+
+EGLAPI void EGLAPIENTRY eglDestroyFbos(EGLDisplay, EGLint, EGLint) {
+    // const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+}
+
