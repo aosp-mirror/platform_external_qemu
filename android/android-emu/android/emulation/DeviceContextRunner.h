@@ -79,19 +79,23 @@ public:
         mVmLock = vmLock;
         // TODO(digit): Find a better event abstraction.
         //
-        // Operating on Looper::Task objects is not supposed to be
+        // Operating on Looper::Timer objects is not supposed to be
         // thread-safe, but it appears that their QEMU1 and QEMU2 specific
-        // implementation *is* (see async.c:qemu_bh_schedule()).
+        // implementation *is* (see qemu-timer.c:timer_mod()).
         //
         // This means that in practice the code below is safe when used
         // in the context of an Android emulation engine. However, we probably
-        // need to make Task thread-safe by contract and make it safe in generic
+        // need a better abstraction that also works with the generic
         // Looper implementation (for unit-testing) or any other kind of
         // runtime environment, should we one day link AndroidEmu to a
         // different emulation engine.
-        mTask = looper->createTask([this]() { taskCallback(); });
-        if (!mTask) {
-            LOG(FATAL) << "Failed to create a loop task in DeviceContextRunner";
+        mTimer.reset(looper->createTimer(
+                [](void* that, Looper::Timer*) {
+                    static_cast<DeviceContextRunner*>(that)->onTimerEvent();
+                },
+                this));
+        if (!mTimer.get()) {
+            LOG(FATAL) << "Failed to create a loop timer in DeviceContextRunner";
         }
     }
 
@@ -117,14 +121,14 @@ protected:
             performDeviceOperation(op);
         } else {
             // Queue the operation in the mPendingMap structure, then
-            // schedule the task.
+            // restart the timer.
             AutoLock lock(mLock);
             mPending.push_back(op);
             lock.unlock();
 
             // NOTE: See TODO above why this is thread-safe when used with
             // QEMU1 and QEMU2.
-            mTask->schedule();
+            mTimer->startAbsolute(0);
         }
     }
 
@@ -144,7 +148,7 @@ protected:
     }
 
 private:
-    void taskCallback() {
+    void onTimerEvent() {
         AutoLock lock(mLock);
         for (const auto& elt : mPending) {
             performDeviceOperation(elt);
@@ -157,7 +161,7 @@ private:
 
     mutable Lock mLock;
     PendingList mPending;
-    std::unique_ptr<Looper::Task> mTask;
+    std::unique_ptr<Looper::Timer> mTimer;
 };
 
 }  // namespace android
