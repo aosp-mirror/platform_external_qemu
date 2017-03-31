@@ -57,6 +57,7 @@ public:
     // Returns true on success, or false on error (e.g. if there is no
     // attached color buffer).
     bool flushColorBuffer();
+    bool flushColorBuffer2();
 
     // Used by bind() below.
     enum BindType {
