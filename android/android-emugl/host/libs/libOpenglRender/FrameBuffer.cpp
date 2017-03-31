@@ -1424,12 +1424,10 @@ void FrameBuffer::onSave(Stream* stream) {
         }
         s_egl.eglSaveAllImages(m_eglDisplay, stream);
     }
-    stream->putBe32(m_x);
-    stream->putBe32(m_y);
+    // Don't save subWindow's x/y/w/h here - those are related to the current
+    // emulator UI state, not guest state that we're saving.
     stream->putBe32(m_framebufferWidth);
     stream->putBe32(m_framebufferHeight);
-    stream->putBe32(m_windowWidth);
-    stream->putBe32(m_windowHeight);
     stream->putFloat(m_dpr);
 
     stream->putBe32(m_useSubWindow);
@@ -1502,12 +1500,9 @@ bool FrameBuffer::onLoad(Stream* stream) {
         ScopedBind scopedBind(this);
         s_egl.eglLoadAllImages(m_eglDisplay, stream);
     }
-    m_x = stream->getBe32();
-    m_y = stream->getBe32();
+    // See comment about subwindow position in onSave().
     m_framebufferWidth = stream->getBe32();
     m_framebufferHeight = stream->getBe32();
-    m_windowWidth = stream->getBe32();
-    m_windowHeight = stream->getBe32();
     m_dpr = stream->getFloat();
     // TODO: resize the window
 
