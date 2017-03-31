@@ -49,7 +49,9 @@
         <file alias="call_end_disabled">images/light/ic_call_end_BBB_48dp.svg</file>
         <file alias="camera_iris">images/light/ic_camera_678_48dp.svg</file>
         <file alias="check_yes">images/light/ic_check_box_0BA_24dp.svg</file>
+        <file alias="check_yes_disabled">images/light/ic_check_box_BEE_24dp.svg</file>
         <file alias="check_no">images/light/ic_check_box_outline_blank_777_24dp.svg</file>
+        <file alias="check_no_disabled">images/light/ic_check_box_outline_blank_BBB_24dp.svg</file>
         <file alias="dpad">images/light/Remote_678.svg</file>
         <file alias="dpad_back">images/light/dpad_back.svg</file>
         <file alias="dpad_back_pressed">images/light/dpad_back_pressed.svg</file>
@@ -95,7 +97,9 @@
         <file alias="play_arrow">images/light/ic_play_arrow_0BA_48dp.svg</file>
         <file alias="play_arrow_disabled">images/light/ic_play_arrow_BEE_48dp.svg</file>
         <file alias="radio_off">images/light/ic_radio_button_unchecked_777_24dp.svg</file>
+        <file alias="radio_off_disabled">images/light/ic_radio_button_unchecked_BBB_24dp.svg</file>
         <file alias="radio_on">images/light/ic_radio_button_checked_0BA_24dp.svg</file>
+        <file alias="radio_on_disabled">images/light/ic_radio_button_checked_BEE_24dp.svg</file>
         <file alias="recordCircle">images/light/ic_record_circle_F43_24dp.svg</file>
         <file alias="record_screen">images/light/ic_videocam_678_48dp.svg</file>
         <file alias="remove">images/light/ic_remove_0BA_48dp.svg</file>
@@ -143,7 +147,9 @@
         <file alias="call_end_disabled">images/dark/ic_call_end_566_48dp.svg</file>
         <file alias="camera_iris">images/dark/ic_camera_677_48dp.svg</file>
         <file alias="check_yes">images/dark/ic_check_box_0BA_24dp.svg</file>
+        <file alias="check_yes_disabled">images/dark/ic_check_box_155_24dp.svg</file>
         <file alias="check_no">images/dark/ic_check_box_outline_blank_BCC_24dp.svg</file>
+        <file alias="check_no_disabled">images/dark/ic_check_box_outline_blank_566_24dp.svg</file>
         <file alias="dpad">images/dark/Remote_677.svg</file>
         <file alias="dpad_back">images/dark/dpad_back.svg</file>
         <file alias="dpad_back_pressed">images/dark/dpad_back_pressed.svg</file>
@@ -189,7 +195,9 @@
         <file alias="play_arrow">images/dark/ic_play_arrow_0BA_48dp.svg</file>
         <file alias="play_arrow_disabled">images/dark/ic_play_arrow_155_48dp.svg</file>
         <file alias="radio_off">images/dark/ic_radio_button_unchecked_BCC_24dp.svg</file>
+        <file alias="radio_off_disabled">images/dark/ic_radio_button_unchecked_566_24dp.svg</file>
         <file alias="radio_on">images/dark/ic_radio_button_checked_0BA_24dp.svg</file>
+        <file alias="radio_on_disabled">images/dark/ic_radio_button_checked_155_24dp.svg</file>
         <file alias="record_screen">images/dark/ic_videocam_677_48dp.svg</file>
         <file alias="remove">images/dark/ic_remove_0BA_48dp.svg</file>
         <file alias="remove_disabled">images/dark/ic_remove_155_48dp.svg</file>
