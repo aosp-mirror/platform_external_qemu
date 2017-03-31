@@ -17,8 +17,10 @@
 #include "ui_bug-report-window.h"
 
 #include <QFrame>
-#include <atomic>
+#include <QMessageBox>
+
 #include <memory>
+#include <string>
 
 class BugReportWindow : public QFrame {
     Q_OBJECT
@@ -28,22 +30,30 @@ public:
     void showEvent(QShowEvent* event);
 
 private:
-    void prepareBugReportInBackground();
+    void loadAdbBugreport();
     void loadAdbLogcat();
+    void loadAvdDetails();
     void loadScreenshotImage();
     void loadScreenshotImageDone(
             android::emulation::ScreenCapturer::Result result,
             android::base::StringView filePath);
+    bool eventFilter(QObject* object, QEvent* event) override;
 
     EmulatorQtWindow* mEmulatorWindow;
     android::emulation::AdbInterface* mAdb;
     android::emulation::AdbBugReportServices mBugReportServices;
     android::emulation::ScreenCapturer* mScreenCapturer;
+    QMessageBox* mDeviceDetailsDialog;
     std::unique_ptr<Ui::BugReportWindow> mUi;
     std::atomic_bool mBugReportSucceed;
     std::atomic_bool mScreenshotSucceed;
     std::string mBugReportSaveLocation;
     android::base::StringView mAdbBugreportFilePath;
     android::base::StringView mScreenshotFilePath;
+    std::string mEmulatorVer;
+    std::string mAndroidVer;
+    std::string mHostOsName;
+    std::string mDeviceName;
     bool mFirstShowEvent = true;
+    std::string mAvdDetails;
 };

@@ -21,7 +21,6 @@
 #include "android/utils/dirscanner.h"
 #include "android/utils/file_data.h"
 #include "android/utils/filelock.h"
-#include "android/utils/ini.h"
 #include "android/utils/path.h"
 #include "android/utils/property_file.h"
 #include "android/utils/string.h"
@@ -1515,7 +1514,7 @@ int avdInfo_getSnapshotPresent(const AvdInfo* i)
     if (i->configIni == NULL) {
         return 0;
     } else {
-        return iniFile_getBoolean(i->configIni, "snapshot.present", "no");
+        return iniFile_getBoolean(i->configIni, SNAPSHOT_PRESENT, "no");
     }
 }
 
@@ -1527,6 +1526,27 @@ const FileData* avdInfo_getBuildProperties(const AvdInfo* i) {
     return i->buildProperties;
 }
 
+CIniFile* avdInfo_getConfigIni(const AvdInfo* i) {
+    return i->configIni;
+}
+
 int avdInfo_getSysImgIncrementalVersion(const AvdInfo* i) {
     return i->incrementalVersion;
+}
+
+const char* avdInfo_getTag(const AvdInfo* i) {
+    char temp[PATH_MAX];
+    char* tagId = "default";
+    char* tagDisplay = "Default";
+    if (i->configIni) {
+        tagId = iniFile_getString(i->configIni, TAG_ID, "default");
+        tagDisplay = iniFile_getString(i->configIni, TAG_DISPLAY, "Default");
+    }
+    snprintf(temp, PATH_MAX, "%s [%s]", tagId, tagDisplay);
+    return ASTRDUP(temp);
+}
+
+const char* avdInfo_getSdCardSize(const AvdInfo* i) {
+    return (i->configIni) ? iniFile_getString(i->configIni, SDCARD_SIZE, "")
+                          : NULL;
 }
