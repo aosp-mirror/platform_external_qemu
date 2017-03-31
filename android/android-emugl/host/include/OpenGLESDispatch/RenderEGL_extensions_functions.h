@@ -13,6 +13,9 @@
   X(EGLSyncKHR, eglCreateSyncKHR, (EGLDisplay display, EGLenum type, const EGLint* attribs)) \
   X(EGLint, eglClientWaitSyncKHR, (EGLDisplay display, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout)) \
   X(EGLBoolean, eglDestroySyncKHR, (EGLDisplay display, EGLSyncKHR sync)) \
+  X(void, eglGetGlobalReadDrawRbo, (EGLDisplay display, EGLint* drawRbo, EGLint* readRbo)) \
+  X(void, eglCreateBindFbos, (EGLDisplay display, EGLint drawRbo, EGLint readRbo, EGLint* drawFbo, EGLint* readFbo)) \
+  X(void, eglDestroyFbos, (EGLDisplay display, EGLint drawFbo, EGLint readFbo)) \
 
 
 #endif  // RENDER_EGL_EXTENSIONS_FUNCTIONS_H

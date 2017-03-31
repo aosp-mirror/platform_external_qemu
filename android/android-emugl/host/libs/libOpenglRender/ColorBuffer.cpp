@@ -29,6 +29,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#define SCOPED_BIND(helper) \
+    RecursiveScopedHelperContext context(helper); \
+ 
 namespace {
 
 // Lazily create and bind a framebuffer object to the current host context.
@@ -104,11 +107,6 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     }
     memset(initialImage.get(), 0xff, bufsize);
 
-    RecursiveScopedHelperContext context(helper);
-    if (!context.isOk()) {
-        return NULL;
-    }
-
     ColorBuffer* cb = new ColorBuffer(p_display, hndl, helper);
 
     s_gles2.glGenTextures(1, &cb->m_tex);
@@ -171,11 +169,10 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
 }
 
 ColorBuffer::ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper)
-    : m_display(display), m_helper(helper), mHndl(hndl) {}
+    : m_display(display), m_helper(helper), mHndl(hndl) {
+}
 
 ColorBuffer::~ColorBuffer() {
-    RecursiveScopedHelperContext context(m_helper);
-
     if (m_blitEGLImage) {
         s_egl.eglDestroyImageKHR(m_display, m_blitEGLImage);
     }
@@ -206,11 +203,6 @@ void ColorBuffer::readPixels(int x,
                              GLenum p_format,
                              GLenum p_type,
                              void* pixels) {
-    RecursiveScopedHelperContext context(m_helper);
-    if (!context.isOk()) {
-        return;
-    }
-
     if (bindFbo(&m_fbo, m_tex)) {
         s_gles2.glReadPixels(x, y, width, height, p_format, p_type, pixels);
         unbindFbo();
@@ -224,10 +216,6 @@ void ColorBuffer::subUpdate(int x,
                             GLenum p_format,
                             GLenum p_type,
                             void* pixels) {
-    RecursiveScopedHelperContext context(m_helper);
-    if (!context.isOk()) {
-        return;
-    }
 
     if (m_frameworkFormat == FRAMEWORK_FORMAT_YV12 ||
         m_frameworkFormat == FRAMEWORK_FORMAT_YUV_420_888) {
@@ -294,6 +282,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
             s_gles2.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_width,
                                         m_height);
         }
+        s_gles2.glFlush();
         s_gles2.glDeleteTextures(1, &tmpTex);
         s_gles2.glBindTexture(GL_TEXTURE_2D, currTexBind);
 
@@ -315,15 +304,14 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
         s_gles1.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
         s_gles1.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_width,
                                     m_height);
+        s_gles1.glFlush();
         s_gles1.glDeleteTextures(1, &tmpTex);
         s_gles1.glBindTexture(GL_TEXTURE_2D, currTexBind);
     }
+    return true;
+}
 
-    RecursiveScopedHelperContext context(m_helper);
-    if (!context.isOk()) {
-        return false;
-    }
-
+bool ColorBuffer::blitFromCurrentReadBuffer2() {
     if (!bindFbo(&m_fbo, m_tex)) {
         return false;
     }
@@ -380,7 +368,6 @@ bool ColorBuffer::bindToRenderbuffer() {
 }
 
 GLuint ColorBuffer::scale() {
-    RecursiveScopedHelperContext context(m_helper);
     return m_resizer->update(m_tex);
 }
 
@@ -390,10 +377,6 @@ bool ColorBuffer::post(GLuint tex, float rotation, float dx, float dy) {
 }
 
 void ColorBuffer::readback(unsigned char* img) {
-    RecursiveScopedHelperContext context(m_helper);
-    if (!context.isOk()) {
-        return;
-    }
     if (bindFbo(&m_fbo, m_tex)) {
         s_gles2.glReadPixels(0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE,
                              img);
@@ -437,7 +420,7 @@ ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
     assert(has_eglimage_texture_2d);
     assert(eglImage && blitEGLImage);
 
-    RecursiveScopedHelperContext context(helper);
+    SCOPED_BIND(helper);
     if (!context.isOk()) {
         return NULL;
     }
