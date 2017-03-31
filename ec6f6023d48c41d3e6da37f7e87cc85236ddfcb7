@@ -22,6 +22,30 @@
       "revId": "ec6f6023d48c41d3e6da37f7e87cc85236ddfcb7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7c01158_d9341680",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-03-31T18:14:25Z",
+      "side": 1,
+      "message": "looks right, please test with system image cl: ag/2040812 to make sure it works",
+      "parentUuid": "01b5634c_99517efc",
+      "range": {
+        "startLine": 87,
+        "startChar": 0,
+        "endLine": 87,
+        "endChar": 74
+      },
+      "revId": "ec6f6023d48c41d3e6da37f7e87cc85236ddfcb7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
