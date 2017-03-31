@@ -61,8 +61,8 @@ public:
     // is of EGL_SYNC_NATIVE_FENCE_ANDROID nature (2), and
     // |destroyWhenSignaled| specifies whether or not to destroy
     // the sync object when the native fence FD becomes signaled (3).
-    FenceSync(bool hasNativeFence,
-              bool destroyWhenSignaled);
+    FenceSync(bool hasNativeFence = false,
+              bool destroyWhenSignaled = false);
     ~FenceSync();
 
     // wait() wraps eglClientWaitSyncKHR. During such a wait, we need
