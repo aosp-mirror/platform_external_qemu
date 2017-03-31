@@ -22,6 +22,24 @@
 
 ANDROID_BEGIN_HEADER
 
+// Try to switch to NVIDIA on Optimus systems,
+// and AMD GPU on AmdPowerXpress.
+// See http://developer.download.nvidia.com/devzone/devcenter/gamegraphics/files/OptimusRenderingPolicies.pdf
+// and https://community.amd.com/thread/169965
+// These variables need to be visible from the final emulator executable
+// as exported symbols, and need to be finalized before
+// linking system OpenGL libraries.
+#ifdef _WIN32
+#define DISCRETE_GPU_VAR __declspec(dllexport)
+#else
+#define DISCRETE_GPU_VAR __attribute__ ((visibility ("default")))
+#endif
+
+extern DISCRETE_GPU_VAR int NvOptimusEnablement;
+extern DISCRETE_GPU_VAR int AmdPowerXpressRequestHighPerformance;
+
+void android_preferDiscreteGpu(bool preference);
+
 /* Call this function to initialize the hardware opengles emulation.
  * This function will abort if we can't find the corresponding host
  * libraries through dlopen() or equivalent.
