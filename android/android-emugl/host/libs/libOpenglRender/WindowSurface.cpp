@@ -136,6 +136,13 @@ bool WindowSurface::flushColorBuffer() {
 
     return true;
 }
+bool WindowSurface::flushColorBuffer2() {
+
+    mAttachedColorBuffer->blitFromCurrentReadBuffer2();
+
+
+    return true;
+}
 
 bool WindowSurface::resize(unsigned int p_width, unsigned int p_height)
 {

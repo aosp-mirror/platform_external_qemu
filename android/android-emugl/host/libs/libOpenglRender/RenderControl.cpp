@@ -174,6 +174,7 @@ static GLint rcGetRendererVersion()
     emugl_sync_register_trigger_wait(rcTriggerWait);
 
     sGrallocSync.ptr();
+
     return rendererVersion;
 }
 
@@ -552,6 +553,8 @@ static int rcFlushWindowColorBuffer(uint32_t windowSurface)
         return -1;
     }
 
+    fb->getBlitThread()->blit2(windowSurface);
+
     GRSYNC_DPRINT("unlock gralloc cb lock }");
 
     return 0;
@@ -592,7 +595,7 @@ static void rcSetWindowColorBuffer(uint32_t windowSurface,
     if (!fb) {
         return;
     }
-    fb->setWindowSurfaceColorBuffer(windowSurface, colorBuffer);
+    fb->getBlitThread()->setWsCb(windowSurface, colorBuffer);
 }
 
 static EGLint rcMakeCurrent(uint32_t context,
@@ -615,7 +618,7 @@ static void rcFBPost(uint32_t colorBuffer)
         return;
     }
 
-    fb->post(colorBuffer);
+    fb->getBlitThread()->post(colorBuffer);
 }
 
 static void rcFBSetSwapInterval(EGLint interval)
