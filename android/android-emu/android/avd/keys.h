@@ -33,6 +33,13 @@
 
 /* -- Keys used in config.ini -- */
 
+/* AVD/config.ini key name representing the abi type of the specific avd
+ */
+#define ABI_TYPE "abi.type"
+
+/* AVD/config.ini key name representing the CPU architecture of the specific avd
+ */
+#define CPU_ARCH "hw.cpu.arch"
 /* the prefix of config.ini keys that will be used for search directories
  * of system images.
  */
@@ -61,3 +68,24 @@
  * the content directory.
  */
 #define  SDCARD_PATH     "sdcard.path"
+
+/* The config.ini key name representing the second path where the emulator looks
+ * for system images. Typically this is the path to the platform system image.
+ */
+#define IMAGES_2 "image.sysdir.2"
+
+/* AVD/config.ini key name representing the presence of the snapshots file.
+ */
+#define SNAPSHOT_PRESENT "snapshot.present"
+
+/* AVD/config.ini key name representing the size of the SD card.
+ */
+#define SDCARD_SIZE "sdcard.size"
+
+/* AVD/config.ini key name representing the tag id of the specific avd
+ */
+#define TAG_ID "tag.id"
+
+/* AVD/config.ini key name representing the tag display of the specific avd
+ */
+#define TAG_DISPLAY "tag.display"

@@ -11,22 +11,30 @@
 
 #include "android/skin/qt/extended-pages/bug-report-window.h"
 
+#include "android/avd/keys.h"
+#include "android/base/StringFormat.h"
 #include "android/globals.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/update-check/VersionExtractor.h"
+
 #include "ui_bug-report-window.h"
 
 #include <QMovie>
 #include <QSettings>
 
+#include <algorithm>
+#include <vector>
+
+using android::base::StringFormat;
 using android::base::StringView;
 using android::base::System;
 using android::emulation::AdbInterface;
 using android::emulation::AdbBugReportServices;
 using android::emulation::ScreenCapturer;
+
 BugReportWindow::BugReportWindow(EmulatorQtWindow* eW, QWidget* parent)
     : QFrame(parent),
       mEmulatorWindow(eW),
@@ -50,20 +58,30 @@ BugReportWindow::BugReportWindow(EmulatorQtWindow* eW, QWidget* parent)
     QSettings settings;
     bool onTop = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
     setFrameOnTop(this, onTop);
+
     mUi->setupUi(this);
 
-    mBugReportSucceed = false;
-    // Get the version of this code
+    mUi->bug_deviceLabel->installEventFilter(this);
+
     android::update_check::VersionExtractor vEx;
     android::base::Version curVersion = vEx.getCurrentVersion();
     auto verStr = curVersion.isValid() ? QString(curVersion.toString().c_str())
                                        : "Unknown";
     mUi->bug_emulatorVersionLabel->setText(verStr);
+    mEmulatorVer = curVersion.isValid() ? curVersion.toString() : "";
 
     char versionString[128];
     int apiLevel = avdInfo_getApiLevel(android_avdInfo);
     avdInfo_getFullApiName(apiLevel, versionString, 128);
     mUi->bug_androidVersionLabel->setText(QString(versionString));
+    mAndroidVer = std::string(versionString);
+
+    const char* deviceName = avdInfo_getName(android_avdInfo);
+    mDeviceName = std::string(deviceName);
+    mUi->bug_deviceLabel->setText(QString(deviceName));
+
+    mHostOsName = android::base::toString(System::get()->getOsType());
+    mUi->bug_hostMachineLabel->setText(QString(mHostOsName.c_str()));
 
     SettingsTheme theme = getSelectedTheme();
     QMovie* movie = new QMovie(this);
@@ -77,6 +95,14 @@ BugReportWindow::BugReportWindow(EmulatorQtWindow* eW, QWidget* parent)
         mUi->bug_circularSpinner2->setMovie(movie);
         mUi->bug_circularSpinner2->show();
     }
+
+    loadAvdDetails();
+    mDeviceDetailsDialog = new QMessageBox(
+            QMessageBox::NoIcon,
+            QString(StringFormat("Details for %s", deviceName).c_str()), "",
+            QMessageBox::Close, this);
+    mDeviceDetailsDialog->setModal(false);
+    mDeviceDetailsDialog->setInformativeText(QString(mAvdDetails.c_str()));
 }
 
 void BugReportWindow::showEvent(QShowEvent* event) {
@@ -99,7 +125,7 @@ void BugReportWindow::showEvent(QShowEvent* event) {
         System::get()->pathCanWrite(mBugReportSaveLocation)) {
         loadAdbLogcat();
         loadScreenshotImage();
-        prepareBugReportInBackground();
+        loadAdbBugreport();
     } else {
         showErrorDialog(tr("The bugreport save location is not set.<br/>"
                            "Check the settings page and ensure the directory "
@@ -108,7 +134,7 @@ void BugReportWindow::showEvent(QShowEvent* event) {
     }
 }
 
-void BugReportWindow::prepareBugReportInBackground() {
+void BugReportWindow::loadAdbBugreport() {
     mBugReportSucceed = false;
     SettingsTheme theme = getSelectedTheme();
     setButtonEnabled(mUi->bug_fileBugButton, theme, false);
@@ -124,6 +150,7 @@ void BugReportWindow::prepareBugReportInBackground() {
                 setButtonEnabled(mUi->bug_saveButton, theme, true);
                 mUi->bug_circularSpinner->hide();
                 mUi->bug_collectingLabel->hide();
+
                 if (result == AdbBugReportServices::Result::Success &&
                     System::get()->pathIsFile(filePath) &&
                     System::get()->pathCanRead(filePath)) {
@@ -136,7 +163,6 @@ void BugReportWindow::prepareBugReportInBackground() {
                                        "adb bugreport"),
                                     tr("Bugreport"));
                 }
-
             });
 }
 
@@ -155,6 +181,62 @@ void BugReportWindow::loadAdbLogcat() {
             });
 }
 
+void BugReportWindow::loadAvdDetails() {
+    static std::vector<const char*> avdDetailsNoDisplayKeys{
+            ABI_TYPE,    CPU_ARCH,    SKIN_NAME, SKIN_PATH,
+            SDCARD_SIZE, SDCARD_PATH, IMAGES_2};
+
+    CIniFile* configIni = avdInfo_getConfigIni(android_avdInfo);
+
+    if (configIni) {
+        mAvdDetails.append(StringFormat("Name: %s\n", mDeviceName));
+        mAvdDetails.append(StringFormat(
+                "CPU/ABI: %s\n", avdInfo_getTargetCpuArch(android_avdInfo)));
+        mAvdDetails.append(StringFormat(
+                "Path: %s\n", avdInfo_getContentPath(android_avdInfo)));
+        mAvdDetails.append(StringFormat("Target: %s (API level %d)\n",
+                                        avdInfo_getTag(android_avdInfo),
+                                        avdInfo_getApiLevel(android_avdInfo)));
+        char* skinName;
+        char* skinDir;
+        avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+        if (skinName)
+            mAvdDetails.append(StringFormat("Skin: %s\n", skinName));
+
+        const char* sdcard = avdInfo_getSdCardSize(android_avdInfo);
+        if (!sdcard) {
+            sdcard = avdInfo_getSdCardPath(android_avdInfo);
+        }
+        mAvdDetails.append(StringFormat("SD Card: %s\n", sdcard));
+
+        if (iniFile_hasKey(configIni, SNAPSHOT_PRESENT)) {
+            mAvdDetails.append(StringFormat(
+                    "Snapshot: %s", avdInfo_getSnapshotPresent(android_avdInfo)
+                                            ? "yes"
+                                            : "no"));
+        }
+
+        int totalEntry = iniFile_getPairCount(configIni);
+        for (int idx = 0; idx < totalEntry; idx++) {
+            char* key;
+            char* value;
+
+            if (!iniFile_getEntry(configIni, idx, &key, &value)) {
+                // check if the key is already displayed
+                auto end = avdDetailsNoDisplayKeys.end();
+                auto it = std::find_if(avdDetailsNoDisplayKeys.begin(), end,
+                                       [key](const char* no_display_key) {
+                                           return strcmp(key, no_display_key) ==
+                                                  0;
+                                       });
+                if (it == end) {
+                    mAvdDetails.append(StringFormat("%s: %s\n", key, value));
+                }
+            }
+        }
+    }
+}
+
 void BugReportWindow::loadScreenshotImage() {
     static const int MIN_SCREENSHOT_API = 14;
     static const int DEFAULT_API_LEVEL = 1000;
@@ -165,7 +247,6 @@ void BugReportWindow::loadScreenshotImage() {
                 tr("Screenshot is not supported below API 14."));
         return;
     }
-
     mUi->stackedWidget->setCurrentIndex(1);
     mScreenCapturer->capture(
             mBugReportSaveLocation,
@@ -183,6 +264,7 @@ void BugReportWindow::loadScreenshotImageDone(ScreenCapturer::Result result,
         mScreenshotSucceed = true;
         mScreenshotFilePath = filePath;
         QPixmap image(filePath.c_str());
+
         int height = mUi->bug_screenshotImage->height();
         int width = mUi->bug_screenshotImage->width();
         mUi->bug_screenshotImage->setPixmap(
@@ -192,4 +274,12 @@ void BugReportWindow::loadScreenshotImageDone(ScreenCapturer::Result result,
         mUi->bug_screenshotImage->setText(
                 tr("There was an error while capturing the screenshot."));
     }
+}
+
+bool BugReportWindow::eventFilter(QObject* object, QEvent* event) {
+    if (event->type() != QEvent::MouseButtonPress) {
+        return false;
+    }
+    mDeviceDetailsDialog->show();
+    return true;
 }

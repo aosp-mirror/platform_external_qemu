@@ -15,6 +15,7 @@
 #include "android/avd/hw-config.h"
 #include "android/utils/compiler.h"
 #include "android/utils/file_data.h"
+#include "android/utils/ini.h"
 
 ANDROID_BEGIN_HEADER
 
@@ -235,6 +236,11 @@ const FileData* avdInfo_getBootProperties(const AvdInfo* i);
  */
 const FileData* avdInfo_getBuildProperties(const AvdInfo* i);
 
+/* Return a reference to the avd/confif.init file for this AVD.
+ * Note that this vaue could be NULL.
+ */
+CIniFile* avdInfo_getConfigIni(const AvdInfo* i);
+
 /* Returns the path to a given AVD image file. This will return NULL if
  * the file cannot be found / does not exist.
  */
@@ -348,5 +354,17 @@ int          avdInfo_getSnapshotPresent(const AvdInfo* i);
 /* Returns the incremental version number of the AVD's system image.
  */
 int avdInfo_getSysImgIncrementalVersion(const AvdInfo* i);
+
+/* Return the tag of a specific AVD in the format of "|tag.id|[|tag.display|]".
+ *  The default value is "default [Default]". The implementation is in reference
+ * to
+ * sdk/sdkmanager/libs/sdklib/src/com/android/sdklib/internal/avd/AvdInfo.java
+ */
+const char* avdInfo_getTag(const AvdInfo* i);
+
+/* Return SD card size in human readable format or NULL if the SD card doesn't
+ * exist.
+ */
+const char* avdInfo_getSdCardSize(const AvdInfo* i);
 
 ANDROID_END_HEADER
