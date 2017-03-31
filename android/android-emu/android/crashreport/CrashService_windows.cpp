@@ -162,6 +162,20 @@ bool HostCrashService::getHWInfo() {
         E("Unable to get hardware info: %d", errno);
         return false;
     }
+
+    // If we successfully got the dxdiag to run, make sure that the file
+    // is completely closed before moving on to read it.
+    const unsigned int kDxDiagOutputReadTries = 10;
+    for (unsigned int i = 0; i < kDxDiagOutputReadTries; i++) {
+        std::ifstream testStream(utf8Path, std::ios::in | std::ios::binary);
+        std::streampos begin = testStream.tellg();
+        testStream.seekg(0, std::ios::end);
+        std::streampos end = testStream.tellg();
+        if (end - begin > 0) break;
+
+        Sleep(200);
+    }
+
     return true;
 }
 
