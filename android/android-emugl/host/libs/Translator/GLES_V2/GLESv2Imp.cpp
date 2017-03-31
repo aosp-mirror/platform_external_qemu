@@ -56,6 +56,7 @@ static GLEScontext* createGLESxContext(int maj, int min, GlobalNameSpace* global
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
 static void saveTexture(SaveableTexture* texture, android::base::Stream* stream);
 static SaveableTexture* loadTexture(android::base::Stream* stream, GlobalNameSpace* globalNameSpace);
+static void createFbosFromRbos(GLuint readRbo, GLuint drawRbo, GLuint* readFboOut, GLuint* drawFboOut);
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -80,6 +81,7 @@ static GLESiface  s_glesIface = {
     .saveTexture                = saveTexture,
     .loadTexture                = loadTexture,
     .deleteRbo                  = deleteRenderbufferGlobal,
+    .createFbosFromRbos         = createFbosFromRbos,
 };
 
 #include <GLcommon/GLESmacros.h>
@@ -156,6 +158,33 @@ static void saveTexture(SaveableTexture* texture, android::base::Stream* stream)
 static SaveableTexture* loadTexture(android::base::Stream* stream,
         GlobalNameSpace* globalNameSpace) {
     return new SaveableTexture(stream, globalNameSpace);
+}
+
+static void createFbosFromRbos(GLuint readRbo, GLuint drawRbo, GLuint* readFboOut, GLuint* drawFboOut) {
+    // fprintf(stderr, "%s: call\n", __func__);
+    GET_CTX_V2();
+    glGenFramebuffers(1, drawFboOut);
+    if (readRbo == drawRbo) {
+        *readFboOut = *drawFboOut;
+    } else {
+        glGenFramebuffers(1, readFboOut);
+    }
+    // fprintf(stderr, "%s: got %u %U\n", __func__, *readFboOut, *drawFboOut);
+
+    // GLuint readFboOutGlobal = ctx->getFBOGlobalName(*readFboOut);
+    GLuint drawFboOutGlobal = ctx->getFBOGlobalName(*drawFboOut);
+
+    GLint prevDrawFboGlobal;
+    // GLint prevReadFboGlobal;
+    ctx->dispatcher().glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevDrawFboGlobal);
+    // ctx->dispatcher().glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &prevReadFboGlobal);
+
+    ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, drawFboOutGlobal);
+    // ctx->dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, readFboOutGlobal);
+    ctx->dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, drawRbo);
+    // ctx->dispatcher().glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, readRbo);
+    ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, prevDrawFboGlobal);
+    // ctx->dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, prevReadFboGlobal);
 }
 
 GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
