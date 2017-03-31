@@ -15,9 +15,11 @@
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/stylesheet.h"
 #include "android/update-check/VersionExtractor.h"
 #include "ui_bug-report-window.h"
 
+#include <QMovie>
 #include <QSettings>
 
 using android::base::StringView;
@@ -25,14 +27,12 @@ using android::base::System;
 using android::emulation::AdbInterface;
 using android::emulation::AdbBugReportServices;
 using android::emulation::ScreenCapturer;
-
-BugReportWindow::BugReportWindow(AdbInterface* adb,
-                                 ScreenCapturer* screenCapturer,
-                                 QWidget* parent)
+BugReportWindow::BugReportWindow(EmulatorQtWindow* eW, QWidget* parent)
     : QFrame(parent),
-      mAdb(adb),
-      mBugReportServices(adb),
-      mScreenCapturer(screenCapturer),
+      mEmulatorWindow(eW),
+      mAdb(eW->getAdbInterface()),
+      mBugReportServices(mAdb),
+      mScreenCapturer(eW->getScreenCapturer()),
       mUi(new Ui::BugReportWindow) {
 // "Tool" type windows live in another layer on top of everything in OSX, which
 // is undesirable because it means the extended window must be on top of the
@@ -64,9 +64,29 @@ BugReportWindow::BugReportWindow(AdbInterface* adb,
     int apiLevel = avdInfo_getApiLevel(android_avdInfo);
     avdInfo_getFullApiName(apiLevel, versionString, 128);
     mUi->bug_androidVersionLabel->setText(QString(versionString));
+
+    SettingsTheme theme = getSelectedTheme();
+    QMovie* movie = new QMovie(this);
+    movie->setFileName(":/" + Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] +
+                       "/circular_spinner");
+    if (movie->isValid()) {
+        movie->start();
+        mUi->bug_circularSpinner->setMovie(movie);
+        mUi->bug_circularSpinner->hide();
+        mUi->bug_collectingLabel->hide();
+        mUi->bug_circularSpinner2->setMovie(movie);
+        mUi->bug_circularSpinner2->show();
+    }
 }
 
 void BugReportWindow::showEvent(QShowEvent* event) {
+    // Align the left side of bugreport window with the extended window.
+    if (mFirstShowEvent && !event->spontaneous()) {
+        ToolWindow* tW = mEmulatorWindow->toolWindow();
+        move(tW->geometry().right() + ToolWindow::toolGap,
+             tW->geometry().top());
+        mFirstShowEvent = false;
+    }
     QWidget::showEvent(event);
     // clean up the content loaded from last time.
     mUi->bug_bugReportTextEdit->clear();
@@ -90,12 +110,20 @@ void BugReportWindow::showEvent(QShowEvent* event) {
 
 void BugReportWindow::prepareBugReportInBackground() {
     mBugReportSucceed = false;
-    mAdbBugreportFilePath = nullptr;
-    mUi->bug_bugReportProgressBar->show();
+    SettingsTheme theme = getSelectedTheme();
+    setButtonEnabled(mUi->bug_fileBugButton, theme, false);
+    setButtonEnabled(mUi->bug_saveButton, theme, false);
+    mUi->bug_circularSpinner->show();
+    mUi->bug_collectingLabel->show();
+
     mBugReportServices.generateBugReport(
             mBugReportSaveLocation,
-            [this](AdbBugReportServices::Result result, StringView filePath) {
-                mUi->bug_bugReportProgressBar->hide();
+            [this, theme](AdbBugReportServices::Result result,
+                          StringView filePath) {
+                setButtonEnabled(mUi->bug_fileBugButton, theme, true);
+                setButtonEnabled(mUi->bug_saveButton, theme, true);
+                mUi->bug_circularSpinner->hide();
+                mUi->bug_collectingLabel->hide();
                 if (result == AdbBugReportServices::Result::Success &&
                     System::get()->pathIsFile(filePath) &&
                     System::get()->pathCanRead(filePath)) {
@@ -138,7 +166,7 @@ void BugReportWindow::loadScreenshotImage() {
         return;
     }
 
-    mUi->bug_screenshotProgressBar->show();
+    mUi->stackedWidget->setCurrentIndex(1);
     mScreenCapturer->capture(
             mBugReportSaveLocation,
             [this](ScreenCapturer::Result result, StringView filePath) {
@@ -148,17 +176,17 @@ void BugReportWindow::loadScreenshotImage() {
 
 void BugReportWindow::loadScreenshotImageDone(ScreenCapturer::Result result,
                                               StringView filePath) {
-    mUi->bug_screenshotProgressBar->hide();
+    mUi->stackedWidget->setCurrentIndex(0);
     if (result == ScreenCapturer::Result::kSuccess &&
         System::get()->pathIsFile(filePath) &&
         System::get()->pathCanRead(filePath)) {
         mScreenshotSucceed = true;
         mScreenshotFilePath = filePath;
-        mUi->bug_screenshotImage->setScaledContents(true);
         QPixmap image(filePath.c_str());
         int height = mUi->bug_screenshotImage->height();
         int width = mUi->bug_screenshotImage->width();
-        mUi->bug_screenshotImage->setPixmap(image.scaled(width, height));
+        mUi->bug_screenshotImage->setPixmap(
+                image.scaled(width, height, Qt::KeepAspectRatio));
     } else {
         // TODO(wdu) Better error handling for failed screen capture operation
         mUi->bug_screenshotImage->setText(

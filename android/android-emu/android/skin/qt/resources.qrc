@@ -52,6 +52,7 @@
         <file alias="check_yes_disabled">images/light/ic_check_box_BEE_24dp.svg</file>
         <file alias="check_no">images/light/ic_check_box_outline_blank_777_24dp.svg</file>
         <file alias="check_no_disabled">images/light/ic_check_box_outline_blank_BBB_24dp.svg</file>
+        <file alias="circular_spinner">images/light/spinner.gif</file>
         <file alias="dpad">images/light/Remote_678.svg</file>
         <file alias="dpad_back">images/light/dpad_back.svg</file>
         <file alias="dpad_back_pressed">images/light/dpad_back_pressed.svg</file>
@@ -150,6 +151,7 @@
         <file alias="check_yes_disabled">images/dark/ic_check_box_155_24dp.svg</file>
         <file alias="check_no">images/dark/ic_check_box_outline_blank_BCC_24dp.svg</file>
         <file alias="check_no_disabled">images/dark/ic_check_box_outline_blank_566_24dp.svg</file>
+        <file alias="circular_spinner">images/dark/spinner.gif</file>
         <file alias="dpad">images/dark/Remote_677.svg</file>
         <file alias="dpad_back">images/dark/dpad_back.svg</file>
         <file alias="dpad_back_pressed">images/dark/dpad_back_pressed.svg</file>
