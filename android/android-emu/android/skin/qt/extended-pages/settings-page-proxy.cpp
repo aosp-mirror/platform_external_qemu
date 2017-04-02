@@ -21,12 +21,6 @@ void SettingsPage::on_set_useStudio_toggled(bool checked) {
 void SettingsPage::on_set_noProxy_toggled(bool checked) {
     grayOutProxy();
 }
-void SettingsPage::on_set_autoDetect_toggled(bool checked) {
-    grayOutProxy();
-}
-void SettingsPage::on_set_autoProxy_toggled(bool checked) {
-    grayOutProxy();
-}
 void SettingsPage::on_set_manualConfig_toggled(bool checked) {
     grayOutProxy();
 }
