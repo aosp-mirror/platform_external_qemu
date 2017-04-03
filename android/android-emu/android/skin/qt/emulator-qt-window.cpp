@@ -751,13 +751,10 @@ void EmulatorQtWindow::show() {
     // situation, it will trigger screenCountChanged.
     QObject::connect(qApp->desktop(), &QDesktopWidget::screenCountChanged, this,
                      &EmulatorQtWindow::slot_screenChanged);
-    // There is still a corner case where user can miss the screen change event
-    // by changing the primary display through system setting. This can be
-    // captured by the function below, but it won't be supported until Qt 5.6.
-    //
-    // TODO(yahan): uncomment the following line when upgrade to Qt 5.6
-    // QObject::connect(qApp->desktop(), &QDesktopWidget::primaryScreenChanged,
-    //        this, &EmulatorQtWindow::slot_screenChanged);
+    QObject::connect(qApp->desktop(), &QDesktopWidget::primaryScreenChanged,
+            this, &EmulatorQtWindow::slot_screenChanged);
+    QObject::connect(qApp->desktop(), &QDesktopWidget::workAreaResized,
+            this, &EmulatorQtWindow::slot_screenChanged);
 }
 
 void EmulatorQtWindow::setOnTop(bool onTop) {
