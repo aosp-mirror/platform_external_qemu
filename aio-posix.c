@@ -81,29 +81,22 @@ static void aio_epoll_update(AioContext *ctx, AioHandler *node, bool is_new)
 {
     struct epoll_event event;
     int r;
+    int ctl;
 
     if (!ctx->epoll_enabled) {
         return;
     }
     if (!node->pfd.events) {
-        r = epoll_ctl(ctx->epollfd, EPOLL_CTL_DEL, node->pfd.fd, &event);
-        if (r) {
-            aio_epoll_disable(ctx);
-        }
+        ctl = EPOLL_CTL_DEL;
     } else {
         event.data.ptr = node;
         event.events = epoll_events_from_pfd(node->pfd.events);
-        if (is_new) {
-            r = epoll_ctl(ctx->epollfd, EPOLL_CTL_ADD, node->pfd.fd, &event);
-            if (r) {
-                aio_epoll_disable(ctx);
-            }
-        } else {
-            r = epoll_ctl(ctx->epollfd, EPOLL_CTL_MOD, node->pfd.fd, &event);
-            if (r) {
-                aio_epoll_disable(ctx);
-            }
-        }
+        ctl = is_new ? EPOLL_CTL_ADD : EPOLL_CTL_MOD;
+    }
+
+    r = epoll_ctl(ctx->epollfd, ctl, node->pfd.fd, &event);
+    if (r) {
+        aio_epoll_disable(ctx);
     }
 }
 
@@ -217,9 +210,10 @@ void aio_set_fd_handler(AioContext *ctx,
 
     /* Are we deleting the fd handler? */
     if (!io_read && !io_write) {
-        if (!node) {
+        if (node == NULL) {
             return;
         }
+
         g_source_remove_poll(&ctx->source, &node->pfd);
 
         /* If the lock is held, just mark the node as deleted */
@@ -432,11 +426,13 @@ bool aio_poll(AioContext *ctx, bool blocking)
     assert(npfd == 0);
 
     /* fill pollfds */
-    QLIST_FOREACH(node, &ctx->aio_handlers, node) {
-        if (!node->deleted && node->pfd.events
-            && !aio_epoll_enabled(ctx)
-            && aio_node_check(ctx, node->is_external)) {
-            add_pollfd(node);
+
+    if (!aio_epoll_enabled(ctx)) {
+        QLIST_FOREACH(node, &ctx->aio_handlers, node) {
+            if (!node->deleted && node->pfd.events
+                && aio_node_check(ctx, node->is_external)) {
+                add_pollfd(node);
+            }
         }
     }
 

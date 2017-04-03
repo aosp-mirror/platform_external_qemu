@@ -28,6 +28,13 @@
 #include "qemu/queue.h"
 #include "qemu/coroutine.h"
 
+#if defined(_WIN32) && !defined(_WIN64)
+    #define COROUTINE_STACK_SIZE (1 << 18)
+#else
+    #define COROUTINE_STACK_SIZE (1 << 20)
+#endif
+
+
 typedef enum {
     COROUTINE_YIELD = 1,
     COROUTINE_TERMINATE = 2,
@@ -39,6 +46,7 @@ struct Coroutine {
     void *entry_arg;
     Coroutine *caller;
     QSLIST_ENTRY(Coroutine) pool_next;
+    size_t locks_held;
 
     /* Coroutines that should be woken up when we yield or terminate */
     QSIMPLEQ_HEAD(, Coroutine) co_queue_wakeup;
