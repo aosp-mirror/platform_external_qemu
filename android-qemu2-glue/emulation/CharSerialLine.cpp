@@ -14,27 +14,35 @@
 #include <type_traits>
 
 extern "C" {
-#include "qemu/osdep.h"
-#include "sysemu/char.h"
+#pragma GCC diagnostic push
+  #include "qemu/osdep.h"
+  #include "sysemu/char.h"
+#pragma GCC diagnostic pop
 }
 
 namespace android {
 namespace qemu2 {
 
-CharSerialLine::CharSerialLine(CharDriverState* cs) : mCs(cs) { }
+CharSerialLine::CharSerialLine(CharDriverState* cs) {
+  mBackend = { 0 };
+  mBackend.chr = cs;
+  cs->be = &mBackend;
+}
+
+
 
 CharSerialLine::~CharSerialLine() {
-    if (mCs) {
-        qemu_chr_delete(mCs);
+    if (mBackend.chr) {
+        qemu_chr_delete(mBackend.chr);
     }
 }
 
 void CharSerialLine::addHandlers(void* opaque, CanReadFunc canReadFunc, ReadFunc readFunc) {
-    qemu_chr_add_handlers(mCs, canReadFunc, readFunc, NULL, opaque);
+    qemu_chr_fe_set_handlers(&mBackend, canReadFunc, readFunc, NULL, opaque, NULL, false);
 }
 
 int CharSerialLine::write(const uint8_t* data, int len) {
-    return qemu_chr_fe_write(mCs, data, len);
+    return qemu_chr_fe_write(&mBackend, data, len);
 }
 
 }  // namespace qemu2
