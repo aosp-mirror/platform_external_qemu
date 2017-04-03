@@ -162,7 +162,6 @@ LOCAL_GENERATED_SOURCES += \
     $(QEMU2_AUTO_GENERATED_DIR)/qapi-visit.c \
     $(QEMU2_AUTO_GENERATED_DIR)/qmp-introspect.c \
     $(QEMU2_AUTO_GENERATED_DIR)/qmp-marshal.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/trace/generated-events.c \
     $(QEMU2_AUTO_GENERATED_DIR)/trace/generated-tracers.c \
 
 # Stuff from libqemuutil, order follows util/Makefile.objs
@@ -173,10 +172,10 @@ LOCAL_SRC_FILES += \
     qapi/qapi-dealloc-visitor.c \
     qapi/qapi-util.c \
     qapi/qapi-visit-core.c \
+    qapi/qobject-input-visitor.c \
+    qapi/qobject-output-visitor.c \
     qapi/qmp-dispatch.c \
     qapi/qmp-event.c \
-    qapi/qmp-input-visitor.c \
-    qapi/qmp-output-visitor.c \
     qapi/qmp-registry.c \
     qapi/string-input-visitor.c \
     qapi/string-output-visitor.c \
@@ -200,6 +199,7 @@ LOCAL_SRC_FILES += \
     util/bitmap.c \
     util/bitops.c \
     util/buffer.c \
+    util/bufferiszero.c \
     util/crc32c.c \
     util/cutils.c \
     util/envlist.c \
@@ -230,11 +230,11 @@ LOCAL_SRC_FILES += \
     util/range.c \
     util/rcu.c \
     util/readline.c \
-    util/rfifolock.c \
     util/timed-average.c \
     util/throttle.c \
     util/unicode.c \
     util/uri.c \
+    util/uuid.c \
     $(call qemu2-if-windows, \
         util/coroutine-win32.c \
         util/event_notifier-win32.c \
