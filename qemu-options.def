@@ -384,10 +384,11 @@ DEF("netdev", HAS_ARG, QEMU_OPTION_netdev,
 "                configure a host TAP network backend with ID 'str'\n"
 #else
 "-netdev tap,id=str[,fd=h][,fds=x:y:...:z][,ifname=name][,script=file][,downscript=dfile]\n"
-"         [,helper=helper][,sndbuf=nbytes][,vnet_hdr=on|off][,vhost=on|off]\n"
+"         [,br=bridge][,helper=helper][,sndbuf=nbytes][,vnet_hdr=on|off][,vhost=on|off]\n"
 "         [,vhostfd=h][,vhostfds=x:y:...:z][,vhostforce=on|off][,queues=n]\n"
 "         [,poll-us=n]\n"
 "                configure a host TAP network backend with ID 'str'\n"
+"                connected to a bridge (default=" DEFAULT_BRIDGE_INTERFACE ")\n"
 "                use network scripts 'file' (default=" DEFAULT_NETWORK_SCRIPT ")\n"
 "                to configure it and 'dfile' (default=" DEFAULT_NETWORK_DOWN_SCRIPT ")\n"
 "                to deconfigure it\n"
@@ -495,6 +496,7 @@ DEFHEADING()
 DEFHEADING(Character device options:)
 
 DEF("chardev", HAS_ARG, QEMU_OPTION_chardev,
+"-chardev help\n"
 "-chardev null,id=id[,mux=on|off][,logfile=PATH][,logappend=on|off]\n"
 "-chardev socket,id=id[,host=host],port=port[,to=to][,ipv4][,ipv6][,nodelay][,reconnect=seconds]\n"
 "         [,server][,nowait][,telnet][,reconnect=seconds][,mux=on|off]\n"
@@ -622,7 +624,7 @@ DEF("qmp-pretty", HAS_ARG, QEMU_OPTION_qmp_pretty, \
 QEMU_ARCH_ALL)
 
 DEF("mon", HAS_ARG, QEMU_OPTION_mon, \
-"-mon [chardev=]name[,mode=readline|control][,default]\n", QEMU_ARCH_ALL)
+"-mon [chardev=]name[,mode=readline|control]\n", QEMU_ARCH_ALL)
 
 DEF("debugcon", HAS_ARG, QEMU_OPTION_debugcon, \
 "-debugcon dev   redirect the debug console to char device 'dev'\n",

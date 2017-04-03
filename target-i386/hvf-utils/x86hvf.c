@@ -169,10 +169,13 @@ void hvf_put_msrs(CPUState *cpu_state)
     hv_vcpu_write_msr(cpu_state->hvf_fd, MSR_IA32_SYSENTER_EIP, env->sysenter_eip);
 
     hv_vcpu_write_msr(cpu_state->hvf_fd, MSR_STAR, env->star);
+
+#ifdef TARGET_X86_64
     hv_vcpu_write_msr(cpu_state->hvf_fd, MSR_CSTAR, env->cstar);
     hv_vcpu_write_msr(cpu_state->hvf_fd, MSR_KERNELGSBASE, env->kernelgsbase);
     hv_vcpu_write_msr(cpu_state->hvf_fd, MSR_FMASK, env->fmask);
     hv_vcpu_write_msr(cpu_state->hvf_fd, MSR_LSTAR, env->lstar);
+#endif
 
     hv_vcpu_write_msr(cpu_state->hvf_fd, MSR_GSBASE, env->segs[R_GS].base);
     hv_vcpu_write_msr(cpu_state->hvf_fd, MSR_FSBASE, env->segs[R_FS].base);
@@ -280,10 +283,13 @@ void hvf_get_msrs(CPUState *cpu_state)
     env->sysenter_eip = tmp;
 
     hv_vcpu_read_msr(cpu_state->hvf_fd, MSR_STAR, &env->star);
+
+#ifdef TARGET_X86_64
     hv_vcpu_read_msr(cpu_state->hvf_fd, MSR_CSTAR, &env->cstar);
     hv_vcpu_read_msr(cpu_state->hvf_fd, MSR_KERNELGSBASE, &env->kernelgsbase);
     hv_vcpu_read_msr(cpu_state->hvf_fd, MSR_FMASK, &env->fmask);
     hv_vcpu_read_msr(cpu_state->hvf_fd, MSR_LSTAR, &env->lstar);
+#endif
 
     int r = hv_vcpu_read_msr(cpu_state->hvf_fd, MSR_IA32_APICBASE, &tmp);
     
