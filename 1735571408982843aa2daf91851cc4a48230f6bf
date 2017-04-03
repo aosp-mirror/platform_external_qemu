@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2fdb39c0_99d22000",
+        "filename": "target-ppc/machine.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-03T21:03:38Z",
+      "side": 0,
+      "message": "nit: why are we removing these hacks?",
+      "range": {
+        "startLine": 195,
+        "startChar": 0,
+        "endLine": 199,
+        "endChar": 36
+      },
+      "revId": "1735571408982843aa2daf91851cc4a48230f6bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
