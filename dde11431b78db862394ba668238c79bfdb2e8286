@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e031e3de_ba539847",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-03T17:51:36Z",
+      "side": 1,
+      "message": "Do we want to say \"no\" if the key isn\u0027t present?",
+      "range": {
+        "startLine": 212,
+        "startChar": 12,
+        "endLine": 212,
+        "endChar": 26
+      },
+      "revId": "dde11431b78db862394ba668238c79bfdb2e8286",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
