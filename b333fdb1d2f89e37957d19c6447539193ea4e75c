@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb3fa7f3_28fd8867",
+        "filename": "android/android-emu/android/avd/util.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-03T18:24:40Z",
+      "side": 1,
+      "message": "\"%s\" PATH_SEP \"%s\" so it works on Windows?",
+      "range": {
+        "startLine": 335,
+        "startChar": 34,
+        "endLine": 335,
+        "endChar": 41
+      },
+      "revId": "b333fdb1d2f89e37957d19c6447539193ea4e75c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6f8111e_ac0c3a28",
+        "filename": "android/android-emu/android/avd/util_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-03T18:24:40Z",
+      "side": 1,
+      "message": "\u0027ini\u0027?",
+      "range": {
+        "startLine": 45,
+        "startChar": 17,
+        "endLine": 45,
+        "endChar": 19
+      },
+      "revId": "b333fdb1d2f89e37957d19c6447539193ea4e75c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a0cb4c86_aed0138d",
+        "filename": "android/android-emu/android/avd/util_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-03T18:24:40Z",
+      "side": 1,
+      "message": "usable",
+      "range": {
+        "startLine": 54,
+        "startChar": 34,
+        "endLine": 54,
+        "endChar": 41
+      },
+      "revId": "b333fdb1d2f89e37957d19c6447539193ea4e75c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
