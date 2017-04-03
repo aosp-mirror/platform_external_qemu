@@ -22,6 +22,30 @@
       "revId": "ea44ee27e47534aadfb5ba6a7d15408771f01710",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a0efc566_592c3deb",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-03T23:00:15Z",
+      "side": 1,
+      "message": "Good catch, will correct soon. The documentation for QLabel setMovie: \"The label does NOT take ownership of the movie.\" Thanks!",
+      "parentUuid": "e1a15479_4fb36553",
+      "range": {
+        "startLine": 71,
+        "startChar": 42,
+        "endLine": 71,
+        "endChar": 43
+      },
+      "revId": "ea44ee27e47534aadfb5ba6a7d15408771f01710",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
