@@ -22,6 +22,30 @@
       "revId": "dde11431b78db862394ba668238c79bfdb2e8286",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "10917bd0_bf2a7320",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-03T21:01:30Z",
+      "side": 1,
+      "message": "The implementation references this line in studio https://android.googlesource.com/platform/tools/adt/idea/+/eb93585/android/src/com/android/tools/idea/avdmanager/AvdSummaryAction.java#80. It seems like they don\u0027t add this field if SNAPSHOT_PRESENT isn\u0027t set.",
+      "parentUuid": "e031e3de_ba539847",
+      "range": {
+        "startLine": 212,
+        "startChar": 12,
+        "endLine": 212,
+        "endChar": 26
+      },
+      "revId": "dde11431b78db862394ba668238c79bfdb2e8286",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
