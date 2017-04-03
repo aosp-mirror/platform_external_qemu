@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e1a15479_4fb36553",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-03T22:49:43Z",
+      "side": 1,
+      "message": "please also pass |this| as parent - otherwise |movie| leaks",
+      "range": {
+        "startLine": 71,
+        "startChar": 42,
+        "endLine": 71,
+        "endChar": 43
+      },
+      "revId": "ea44ee27e47534aadfb5ba6a7d15408771f01710",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
