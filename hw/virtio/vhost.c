@@ -866,6 +866,9 @@ static int vhost_virtqueue_start(struct vhost_dev *dev,
                                 struct vhost_virtqueue *vq,
                                 unsigned idx)
 {
+    BusState *qbus = BUS(qdev_get_parent_bus(DEVICE(vdev)));
+    VirtioBusState *vbus = VIRTIO_BUS(qbus);
+    VirtioBusClass *k = VIRTIO_BUS_GET_CLASS(vbus);
     hwaddr s, l, a;
     int r;
     int vhost_vq_index = dev->vhost_ops->vhost_get_vq_index(dev, idx);
@@ -948,8 +951,19 @@ static int vhost_virtqueue_start(struct vhost_dev *dev,
         vhost_virtqueue_mask(dev, vdev, idx, false);
     }
 
+    if (k->query_guest_notifiers &&
+        k->query_guest_notifiers(qbus->parent) &&
+        virtio_queue_vector(vdev, idx) == VIRTIO_NO_VECTOR) {
+        file.fd = -1;
+        r = dev->vhost_ops->vhost_set_vring_call(dev, &file);
+        if (r) {
+            goto fail_vector;
+        }
+    }
+
     return 0;
 
+fail_vector:
 fail_kick:
 fail_alloc:
     cpu_physical_memory_unmap(vq->used, virtio_queue_get_used_size(vdev, idx),
@@ -1139,7 +1153,7 @@ int vhost_dev_init(struct vhost_dev *hdev, void *opaque,
         if (!(hdev->features & (0x1ULL << VHOST_F_LOG_ALL))) {
             error_setg(&hdev->migration_blocker,
                        "Migration disabled: vhost lacks VHOST_F_LOG_ALL feature.");
-        } else if (!qemu_memfd_check()) {
+        } else if (vhost_dev_log_is_shared(hdev) && !qemu_memfd_check()) {
             error_setg(&hdev->migration_blocker,
                        "Migration disabled: failed to allocate shared memory");
         }
@@ -1203,13 +1217,14 @@ void vhost_dev_cleanup(struct vhost_dev *hdev)
 int vhost_dev_enable_notifiers(struct vhost_dev *hdev, VirtIODevice *vdev)
 {
     BusState *qbus = BUS(qdev_get_parent_bus(DEVICE(vdev)));
-    VirtioBusState *vbus = VIRTIO_BUS(qbus);
-    VirtioBusClass *k = VIRTIO_BUS_GET_CLASS(vbus);
     int i, r, e;
 
-    if (!k->ioeventfd_started) {
+    /* We will pass the notifiers to the kernel, make sure that QEMU
+     * doesn't interfere.
+     */
+    r = virtio_device_grab_ioeventfd(vdev);
+    if (r < 0) {
         error_report("binding does not support host notifiers");
-        r = -ENOSYS;
         goto fail;
     }
 
@@ -1232,6 +1247,7 @@ fail_vq:
         }
         assert (e >= 0);
     }
+    virtio_device_release_ioeventfd(vdev);
 fail:
     return r;
 }
@@ -1254,6 +1270,7 @@ void vhost_dev_disable_notifiers(struct vhost_dev *hdev, VirtIODevice *vdev)
         }
         assert (r >= 0);
     }
+    virtio_device_release_ioeventfd(vdev);
 }
 
 /* Test and clear event pending status.
