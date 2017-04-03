@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a9c9bf20_ac2c9cf0",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1248,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-03T22:20:40Z",
+      "side": 1,
+      "message": "nit: update comment",
+      "range": {
+        "startLine": 1247,
+        "startChar": 0,
+        "endLine": 1248,
+        "endChar": 37
+      },
+      "revId": "917823992b977cc16524f5faca97d8e365a0a337",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
