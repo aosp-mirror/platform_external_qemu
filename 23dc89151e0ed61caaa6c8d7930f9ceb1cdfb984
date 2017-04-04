@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e9ae638b_e703ec30",
+        "filename": "android/android-emugl/host/libs/libOpenGLESDispatch/render_egl_extensions.entries",
+        "patchSetId": 10
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-04T21:13:56Z",
+      "side": 1,
+      "message": "Plan is to feature flag this, so that it\u0027s only enabled on host gpu\n\nLong term, I guess we would move to angle/swiftshader desktop GL underneath this.",
+      "parentUuid": "2c5852b2_a9d9731c",
+      "range": {
+        "startLine": 16,
+        "startChar": 5,
+        "endLine": 16,
+        "endChar": 28
+      },
+      "revId": "23dc89151e0ed61caaa6c8d7930f9ceb1cdfb984",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "918ea0ca_67a9e4c5",
         "filename": "android/android-emugl/host/libs/libOpenglRender/BlitThread.cpp",
         "patchSetId": 10
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "ca921f6b_0b03d175",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/BlitThread.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-04T21:13:56Z",
+      "side": 1,
+      "message": "Still WIP, but I think we should at least have some kind of sync operation on save/load that ensures this thread is idle, otherwise maybe there is a pending operation that is not caught by the save operation.",
+      "parentUuid": "918ea0ca_67a9e4c5",
+      "range": {
+        "startLine": 85,
+        "startChar": 15,
+        "endLine": 85,
+        "endChar": 31
+      },
+      "revId": "23dc89151e0ed61caaa6c8d7930f9ceb1cdfb984",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a61d06b8_8460ca03",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
         "patchSetId": 10
@@ -59,6 +107,30 @@
       "writtenOn": "2017-04-04T18:25:42Z",
       "side": 1,
       "message": "In a recent refactoring I actually moved a scoped helper context binder to the color buffer header. Maybe you can use it as well?",
+      "range": {
+        "startLine": 221,
+        "startChar": 10,
+        "endLine": 221,
+        "endChar": 27
+      },
+      "revId": "23dc89151e0ed61caaa6c8d7930f9ceb1cdfb984",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24bec93e_ed86401c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-04T21:13:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a61d06b8_8460ca03",
       "range": {
         "startLine": 221,
         "startChar": 10,
