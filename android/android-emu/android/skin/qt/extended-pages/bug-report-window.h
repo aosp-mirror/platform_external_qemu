@@ -12,7 +12,8 @@
 #pragma once
 
 #include "android/emulation/control/AdbBugReportServices.h"
-#include "android/emulation/control/ScreenCapturer.h"
+#include "android/skin/qt/emulator-qt-window.h"
+
 #include "ui_bug-report-window.h"
 
 #include <QFrame>
@@ -23,9 +24,7 @@ class BugReportWindow : public QFrame {
     Q_OBJECT
 
 public:
-    explicit BugReportWindow(android::emulation::AdbInterface* adb,
-                             android::emulation::ScreenCapturer* screenCapturer,
-                             QWidget* parent = 0);
+    explicit BugReportWindow(EmulatorQtWindow* eW, QWidget* parent = 0);
     void showEvent(QShowEvent* event);
 
 private:
@@ -36,6 +35,7 @@ private:
             android::emulation::ScreenCapturer::Result result,
             android::base::StringView filePath);
 
+    EmulatorQtWindow* mEmulatorWindow;
     android::emulation::AdbInterface* mAdb;
     android::emulation::AdbBugReportServices mBugReportServices;
     android::emulation::ScreenCapturer* mScreenCapturer;
@@ -45,4 +45,5 @@ private:
     std::string mBugReportSaveLocation;
     android::base::StringView mAdbBugreportFilePath;
     android::base::StringView mScreenshotFilePath;
+    bool mFirstShowEvent = true;
 };
