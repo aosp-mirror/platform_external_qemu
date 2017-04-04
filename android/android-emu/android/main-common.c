@@ -439,6 +439,7 @@ static AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild) {
             D("autoconfig: -ramdisk %s", opts->ramdisk);
         }
 
+
         /* if no data directory is specified, use the system directory */
         if (!opts->datadir) {
             str_reset(&opts->datadir, opts->sysdir);
@@ -698,6 +699,10 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     else if (!hw->disk_ramdisk_path[0]) {
         str_reset_nocopy(&hw->disk_ramdisk_path, avdInfo_getRamdiskPath(avd));
         D("autoconfig: -ramdisk %s", hw->disk_ramdisk_path);
+    }
+
+    if (opts->logcat_output) {
+        str_reset(&android_hw->hw_logcatOutput_path, opts->logcat_output);
     }
 
     /* -partition-size is used to specify the max size of both the system
