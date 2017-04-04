@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e948ef4f_7b498f1d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/BlitThread.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-04-04T14:36:33Z",
+      "side": 1,
+      "message": "Consider caching the result of FrameBuffer::getFB() ?",
+      "revId": "e28ffa55a933210ae6614576b6ba7bf3fe66434c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4931b840_45dd7707",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/BlitThread.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-04-04T14:36:33Z",
+      "side": 1,
+      "message": "Why isn\u0027t this bindHelperContext() given that you call unbindHelperContext() later, this seems fishy??",
+      "revId": "e28ffa55a933210ae6614576b6ba7bf3fe66434c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1140a6ed_11132160",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/BlitThread.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-04-04T14:36:33Z",
+      "side": 1,
+      "message": "why isn\u0027t the |sync| used here?",
+      "revId": "e28ffa55a933210ae6614576b6ba7bf3fe66434c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "963f679a_f44e320e",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/BlitThread.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-04-04T14:36:33Z",
+      "side": 1,
+      "message": "nit: Do not use default when you cover all enum values, this will let the compiler track errors if you add one in the future.",
+      "revId": "e28ffa55a933210ae6614576b6ba7bf3fe66434c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1899eaf0_b7d6687c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/BlitThread.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-04-04T14:36:33Z",
+      "side": 1,
+      "message": "Should you destroy the context after that?",
+      "revId": "e28ffa55a933210ae6614576b6ba7bf3fe66434c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f3c06e92_bd4dbd8c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/BlitThread.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-04-04T14:36:33Z",
+      "side": 1,
+      "message": "both BlitThreadOpCode and BlitThreadCmd are implementation details of the BlitThread class. I would recommend moving these under the private section of the latter class, as well as use an num class, e.g.:\n\n  class BlitThread : ... {\n  public:\n      ....\n  private:\n      enum class Opcode {\n          Init \u003d 0,\n          Blit \u003d 1,\n          Post \u003d 2,\n          SetWsCb \u003d 3,\n          Exit \u003d 4,\n      };\n\n      struct Cmd {\n          Opcode op \u003d Init;\n          FenceSync* sync \u003d nullptr;\n          HandleType windowSurface \u003d 0;\n          HandleType colorBuffer \u003d 0;\n      };\n\n      ...",
+      "revId": "e28ffa55a933210ae6614576b6ba7bf3fe66434c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "247c7d7e_5086a46e",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/BlitThread.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-04-04T14:36:33Z",
+      "side": 1,
+      "message": "I would recommend providing default initializers for all members here, this would prevent sending crap from the stack from one thread to the other during requests. Another alternative is to always initialize local variables with {} as in:\n\n    BlitThreadCmd cmd \u003d {};\n    cmd.opCode \u003d ...;\n    etc\n\nI don\u0027t think this is going to solve your problem but at least it will make the code more robust.",
+      "revId": "e28ffa55a933210ae6614576b6ba7bf3fe66434c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6cda4af0_ac35e969",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/BlitThread.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-04-04T14:36:33Z",
+      "side": 1,
+      "message": "SetWsCb? Seriously consider something a little more readable, please. Also comment the meaning of the parameters.",
+      "revId": "e28ffa55a933210ae6614576b6ba7bf3fe66434c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4fed2025_81e9ef4f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/BlitThread.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-04-04T14:36:33Z",
+      "side": 1,
+      "message": "The |mOutput| member doesn\u0027t seem to be used at all. Maybe remove it?",
+      "revId": "e28ffa55a933210ae6614576b6ba7bf3fe66434c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ec61a86a_847e3613",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-04-04T14:36:33Z",
+      "side": 1,
+      "message": "nit: please remove.",
+      "revId": "e28ffa55a933210ae6614576b6ba7bf3fe66434c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37128846_d9134564",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/SyncThread.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2017-04-04T14:36:33Z",
+      "side": 1,
+      "message": "Is this required, or just a change that can be now discarded?",
+      "revId": "e28ffa55a933210ae6614576b6ba7bf3fe66434c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
