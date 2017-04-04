@@ -12,6 +12,8 @@
 
 #include "android/emulation/AndroidPipe.h"
 
+#include <fstream>
+
 namespace android {
 namespace emulation {
 
@@ -35,7 +37,8 @@ public:
     int onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers) override;
     void onGuestWantWakeOn(int flags) override {
     }
-
+private:
+    std::ofstream mOutputFile;
 };
 
 void registerLogcatPipeService();

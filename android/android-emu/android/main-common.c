@@ -700,6 +700,10 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         D("autoconfig: -ramdisk %s", hw->disk_ramdisk_path);
     }
 
+    if (opts->logcat_output) {
+        str_reset(&android_hw->hw_logcatOutput_path, opts->logcat_output);
+    }
+
     /* -partition-size is used to specify the max size of both the system
      * and data partition sizes.
      */
