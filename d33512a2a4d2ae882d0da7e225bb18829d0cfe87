@@ -16,6 +16,24 @@
       "revId": "d33512a2a4d2ae882d0da7e225bb18829d0cfe87",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57d9b154_26323d14",
+        "filename": "android/android-emu/android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-04T00:22:52Z",
+      "side": 1,
+      "message": "Good point, will add in master",
+      "parentUuid": "698dca08_6cd92c9f",
+      "revId": "d33512a2a4d2ae882d0da7e225bb18829d0cfe87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
