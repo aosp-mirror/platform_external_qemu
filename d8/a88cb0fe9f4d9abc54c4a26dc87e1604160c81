@@ -1,0 +1,7 @@
+Code-Review+2: Yurii Zubrytskyi <zyy@google.com>
+Verified+1: Erwin Jansen <jansene@google.com>
+Submitted-by: Joshua Duong <joshuaduong@google.com>
+Submitted-at: Tue, 04 Apr 2017 19:24:14 +0000
+Reviewed-on: https://android-review.googlesource.com/363293
+Project: platform/external/qemu
+Branch: refs/heads/emu-2.3-release
