@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa5ff62d_7b8242b4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-04T00:53:48Z",
+      "side": 1,
+      "message": "please also change package-release.sh to include libvpx binaries when copying build dependencies to Mac",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 24
+      },
+      "revId": "da74a9367fcabf30bc6a966e666aebc2c122ee43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "74f622cb_a6f9e958",
+        "filename": "android/scripts/build-ffmpeg.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-04T00:53:48Z",
+      "side": 1,
+      "message": "disable?",
+      "range": {
+        "startLine": 100,
+        "startChar": 23,
+        "endLine": 100,
+        "endChar": 29
+      },
+      "revId": "da74a9367fcabf30bc6a966e666aebc2c122ee43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
