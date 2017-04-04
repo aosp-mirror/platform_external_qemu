@@ -529,14 +529,21 @@ GL_APICALL void  GL_APIENTRY glBufferData(GLenum target, GLsizeiptr size, const 
     SET_ERROR_IF(!GLESv2Validate::bufferUsage(ctx, usage), GL_INVALID_ENUM);
     ctx->setBufferData(target,size,data,usage);
     ctx->dispatcher().glBufferData(target, size, data, usage);
+    if (target == GL_ELEMENT_ARRAY_BUFFER) {
+        printf("element array %d\n", (int)size);
+        /*for (int i=0; i<(int)size/4; i++) {
+            printf("%d\t", ((int*)data)[i]);
+        }
+        printf("\n");*/
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data){
-    GET_CTX_V2();
+    /*GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::bufferTarget(ctx, target), GL_INVALID_ENUM);
     SET_ERROR_IF(!ctx->isBindedBuffer(target),GL_INVALID_OPERATION);
     SET_ERROR_IF(!ctx->setBufferSubData(target,offset,size,data),GL_INVALID_VALUE);
-    ctx->dispatcher().glBufferSubData(target, offset, size, data);
+    ctx->dispatcher().glBufferSubData(target, offset, size, data);*/
 }
 
 
@@ -561,6 +568,7 @@ GL_APICALL void  GL_APIENTRY glClear(GLbitfield mask){
 }
 GL_APICALL void  GL_APIENTRY glClearColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha){
     GET_CTX();
+    red = 1.0f;
     ctx->setClearColor(red,green, blue, alpha);
     ctx->dispatcher().glClearColor(red,green,blue,alpha);
 }
@@ -1121,7 +1129,9 @@ GL_APICALL void  GL_APIENTRY glDrawArrays(GLenum mode, GLint first, GLsizei coun
     GET_CTX_V2();
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!GLESv2Validate::drawMode(mode),GL_INVALID_ENUM);
+    printf("drawing array %d %d %d\n", mode, (int)first, (int)count);
 
+    //mode = GL_TRIANGLE_FAN;
     s_glDrawPre(ctx, mode);
     if (ctx->vertexAttributesBufferBacked()) {
         ctx->dispatcher().glDrawArrays(mode,first,count);
@@ -2370,6 +2380,7 @@ GL_APICALL void  GL_APIENTRY glGetVertexAttribPointerv(GLuint index, GLenum pnam
 GL_APICALL void  GL_APIENTRY glHint(GLenum target, GLenum mode){
     GET_CTX();
     SET_ERROR_IF(!GLESv2Validate::hintTargetMode(target,mode),GL_INVALID_ENUM);
+    ctx->setHint(target, mode);
     ctx->dispatcher().glHint(target,mode);
 }
 
@@ -3266,6 +3277,7 @@ GL_APICALL void GL_APIENTRY glGenVertexArraysOES(GLsizei n, GLuint* arrays) {
 
 GL_APICALL void GL_APIENTRY glBindVertexArrayOES(GLuint array) {
     GET_CTX_V2();
+    printf("glBindVertexArrayOES\n");
     ctx->setVertexArrayObject(array);
     ctx->dispatcher().glBindVertexArray(array);
 }

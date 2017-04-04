@@ -17,7 +17,9 @@
 #include <GLcommon/GLEScontext.h>
 #include <string.h>
 
-bool  GLESbuffer::setBuffer(GLuint size,GLuint usage,const GLvoid* data) {
+bool  GLESbuffer::setBuffer(GLenum target, GLuint size, GLuint usage,
+        const GLvoid* data) {
+    m_target = target;
     m_size = size;
     m_usage = usage;
     if(m_data) {
@@ -30,7 +32,7 @@ bool  GLESbuffer::setBuffer(GLuint size,GLuint usage,const GLvoid* data) {
             memcpy(m_data,data,size);
         }
         m_conversionManager.clear();
-        m_conversionManager.addRange(Range(0,m_size));
+        //m_conversionManager.addRange(Range(0,m_size));
         return true;
     }
     return false;
@@ -56,6 +58,7 @@ GLESbuffer::~GLESbuffer() {
 }
 
 GLESbuffer::GLESbuffer(android::base::Stream* stream) : ObjectData(stream) {
+    m_target = stream->getBe32();
     m_size = stream->getBe32();
     m_usage = stream->getBe32();
     if (m_size) {
@@ -69,6 +72,7 @@ GLESbuffer::GLESbuffer(android::base::Stream* stream) : ObjectData(stream) {
 
 void GLESbuffer::onSave(android::base::Stream* stream) const {
     ObjectData::onSave(stream);
+    stream->putBe32(m_target);
     stream->putBe32(m_size);
     stream->putBe32(m_usage);
     stream->write(m_data, m_size);
@@ -85,6 +89,13 @@ void GLESbuffer::restore(ObjectLocalName localName,
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     int globalName = getGlobalName(NamedObjectType::VERTEXBUFFER, localName);
     // We bind to GL_ARRAY_BUFFER just for uploading buffer data
-    dispatcher.glBindBuffer(GL_ARRAY_BUFFER, globalName);
-    dispatcher.glBufferData(GL_ARRAY_BUFFER, m_size, m_data, m_usage);
+    dispatcher.glBindBuffer(m_target, globalName);
+    dispatcher.glBufferData(m_target, m_size, m_data, m_usage);
+    if (m_target == GL_ELEMENT_ARRAY_BUFFER) {
+        printf("element array %d\n", (int)m_size);
+        /*for (int i=0; i<(int)m_size/4; i++) {
+            printf("%d\t", ((int*)m_data)[i]);
+        }
+        printf("\n");*/
+    }
 }

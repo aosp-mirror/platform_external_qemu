@@ -317,6 +317,8 @@ public:
     void setClearDepth(GLclampf depth);
     void setClearStencil(GLint s);
 
+    void setHint(GLenum target, GLenum mode);
+
     static GLDispatch& dispatcher(){return s_glDispatch;};
 
     static int getMaxLights(){return s_glSupport.maxLights;}
@@ -465,6 +467,8 @@ protected:
 
     GLclampf m_clearDepth = 1.0f;
     GLint m_clearStencil = 0;
+
+    std::unordered_map<GLenum, GLenum> m_hints;
 
     static std::string*   s_glExtensions;
     static GLSupport      s_glSupport;

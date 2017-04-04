@@ -469,6 +469,13 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
             m_clearDepth = static_cast<GLclampf>(stream->getBe32());
             m_clearStencil = static_cast<GLint>(stream->getBe32());
 
+            loadCollection(stream, &m_hints,
+                    [](android::base::Stream* stream) {
+                        GLenum target = stream->getBe32();
+                        GLint mode = stream->getBe32();
+                        return std::make_pair(target, mode);
+            });
+
             // share group is supposed to be loaded by EglContext and reset
             // when loading EglContext
             //int sharegroupId = stream->getBe32();
@@ -602,6 +609,12 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         stream->putBe32(m_clearDepth);
         stream->putBe32(m_clearStencil);
 
+        saveCollection(stream, m_hints, [](android::base::Stream* stream,
+                const std::pair<const GLenum, GLenum>& hint) {
+            stream->putBe32(hint.first);
+            stream->putBe32(hint.second);
+        });
+
         // share group is supposed to be saved / loaded by EglContext
         stream->putBe32(m_glError);
         stream->putBe32(m_maxTexUnits);
@@ -709,12 +722,18 @@ void GLEScontext::postLoadRestoreCtx() {
                 m_stencilStates[i].m_dpfail, m_stencilStates[i].m_dppass);
     }
 
-    dispatcher.glClearColor(m_clearColorR, m_clearColorG, m_clearColorB,
+    //dispatcher.glClearColor(m_clearColorR, m_clearColorG, m_clearColorB,
+            //m_clearColorA);
+    dispatcher.glClearColor(1.0f, m_clearColorG, m_clearColorB,
             m_clearColorA);
     dispatcher.glClearDepth(m_clearDepth);
     dispatcher.glClearStencil(m_clearStencil);
     dispatcher.glColorMask(m_colorMaskR, m_colorMaskG, m_colorMaskB,
             m_colorMaskA);
+
+    for (auto& hint : m_hints) {
+        dispatcher.glHint(hint.first, hint.second);
+    }
 
     // report any GL errors when loading from a snapshot
     GLenum err = 0;
@@ -1220,7 +1239,7 @@ bool GLEScontext::setBufferData(GLenum target,GLsizeiptr size,const GLvoid* data
     GLESbuffer* vbo = static_cast<GLESbuffer*>(
             m_shareGroup
                     ->getObjectData(NamedObjectType::VERTEXBUFFER, bufferName));
-    return vbo->setBuffer(size,usage,data);
+    return vbo->setBuffer(target, size, usage, data);
 }
 
 bool GLEScontext::setBufferSubData(GLenum target,GLintptr offset,GLsizeiptr size,const GLvoid* data) {
@@ -1385,6 +1404,10 @@ void GLEScontext::setClearDepth(GLclampf depth) {
 
 void GLEScontext::setClearStencil(GLint s) {
     m_clearStencil = s;
+}
+
+void GLEScontext::setHint(GLenum target, GLenum mode) {
+    m_hints[target] = mode;
 }
 
 const char * GLEScontext::getExtensionString() {

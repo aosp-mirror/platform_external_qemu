@@ -32,7 +32,7 @@ public:
    GLuint getSize(){return m_size;};
    GLuint getUsage(){return m_usage;};
    GLvoid* getData(){ return m_data;}
-   bool  setBuffer(GLuint size,GLuint usage,const GLvoid* data);
+   bool  setBuffer(GLenum target, GLuint size,GLuint usage,const GLvoid* data);
    bool  setSubBuffer(GLint offset,GLuint size,const GLvoid* data);
    void  getConversions(const RangeList& rIn,RangeList& rOut);
    bool  fullyConverted(){return m_conversionManager.size() == 0;};
@@ -41,6 +41,7 @@ public:
    ~GLESbuffer();
 
 private:
+    GLenum         m_target = GL_ARRAY_BUFFER;
     GLuint         m_size = 0;
     GLuint         m_usage = GL_STATIC_DRAW;
     unsigned char* m_data = nullptr;

@@ -180,6 +180,11 @@ void GLESv2Context::postLoadRestoreCtx() {
             case GLESpointer::ARRAY:
                 // client arrays are set up right before draw calls
                 // so we do nothing here
+                dispatcher.glBindBuffer(GL_ARRAY_BUFFER, 0);
+                dispatcher.glVertexAttribPointer(vao.first, glesPointer->getSize(),
+                        glesPointer->getType(), glesPointer->isNormalize(),
+                        glesPointer->getStride(),
+                        glesPointer->getData());
                 break;
         }
         if (glesPointer->isEnable()) {
