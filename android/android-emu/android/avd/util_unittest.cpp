@@ -10,9 +10,59 @@
 // GNU General Public License for more details.
 
 #include "android/avd/util.h"
+#include "android/base/testing/TestSystem.h"
+#include "android/base/testing/TestTempDir.h"
 #include "android/utils/file_data.h"
+#include "android/utils/path.h"
+
+#include <iostream>
+#include <fstream>
+#include <memory>
 
 #include <gtest/gtest.h>
+
+using android::base::TestSystem;
+using android::base::TestTempDir;
+
+static void writeToFile(std::string path, std::string text) {
+    std::ofstream iniFile(path, std::ios::trunc);
+    iniFile << text;
+    iniFile.close();
+}
+
+TEST(AvdUtil, path_getAvdSystemPath) {
+    TestSystem sys("/home", 64, "/");
+    TestTempDir* tmp = sys.getTempRoot();
+    tmp->makeSubDir("android_home");
+    tmp->makeSubDir("android_home/sysimg");
+    tmp->makeSubDir("android_home/avd");
+    tmp->makeSubDir("nothome");
+
+    std::string sdkRoot = tmp->pathString() + "/android_home";
+    std::string avdConfig = sdkRoot + "/avd/config.ini";
+    sys.envSet("ANDROID_AVD_HOME", sdkRoot);
+
+    // Create an ini file for the @q avd.
+    writeToFile(sdkRoot + "/q.ini", "path=" + sdkRoot + "/avd");
+
+    // A relative path should be resolved from ANRDOID_AVD_HOME
+    writeToFile(avdConfig, "image.sysdir.1=sysimg");
+
+    std::unique_ptr<char[]> path(path_getAvdSystemPath("q", sdkRoot.c_str()));
+    EXPECT_STREQ((sdkRoot + "/sysimg").c_str(), path.get());
+
+    // An absolute path should be usable as well
+    writeToFile(avdConfig,
+                 "image.sysdir.1=" + tmp->pathString() + "/nothome");
+
+    path.reset(path_getAvdSystemPath("q", sdkRoot.c_str()));
+    EXPECT_STREQ((tmp->pathString() + "/nothome").c_str(), path.get());
+
+    std::string noBufferOverflow(MAX_PATH * 2, 'Z');
+    writeToFile(avdConfig, "image.sysdir.1=" + noBufferOverflow);
+    path.reset(path_getAvdSystemPath("q", sdkRoot.c_str()));
+    EXPECT_EQ(nullptr, path.get());
+}
 
 TEST(AvdUtil, emulator_getBackendSuffix) {
   EXPECT_STREQ("arm", emulator_getBackendSuffix("arm"));
