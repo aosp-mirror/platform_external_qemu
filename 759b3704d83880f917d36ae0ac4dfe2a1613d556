@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8cebde87_d7e5c934",
+        "filename": "android/android-emu/android/emulation/LogcatPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-05T18:45:32Z",
+      "side": 1,
+      "message": "why not just mOutputFile.open(...) ? If open() fails the stream remains in kind of the same state as it was before opening",
+      "range": {
+        "startLine": 28,
+        "startChar": 12,
+        "endLine": 28,
+        "endChar": 65
+      },
+      "revId": "759b3704d83880f917d36ae0ac4dfe2a1613d556",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc8ab728_db588ef0",
+        "filename": "android/android-emu/android/emulation/LogcatPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-05T18:45:32Z",
+      "side": 1,
+      "message": "this means all other cout uses would be redirected too. Why not just printing to |mOutputFile| directly instead, and to std::cout if \"!mOutputFile\"",
+      "range": {
+        "startLine": 31,
+        "startChar": 16,
+        "endLine": 31,
+        "endChar": 53
+      },
+      "revId": "759b3704d83880f917d36ae0ac4dfe2a1613d556",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
