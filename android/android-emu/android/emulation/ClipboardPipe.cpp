@@ -21,6 +21,8 @@ namespace emulation {
 
 static constexpr auto emptyCallback = [](const uint8_t*, size_t) {};
 
+bool ClipboardPipe::sEnabled = false;
+
 // A storage for the current clipboard pipe instance data.
 // Shared pointer is required as there are potential races between clipboard
 // data changing from the host and guest's request to close the pipe. We need
@@ -44,7 +46,7 @@ void ClipboardPipe::onGuestClose(PipeCloseReason reason) {
 
 unsigned ClipboardPipe::onGuestPoll() const {
     unsigned result = PIPE_POLL_OUT;
-    if (mGuestWriteState.hasData()) {
+    if (sEnabled && mGuestWriteState.hasData()) {
         result |= PIPE_POLL_IN;
     }
     return result;
@@ -102,6 +104,12 @@ int ClipboardPipe::processOperation(OperationType operation,
 }
 
 int ClipboardPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
+    if (!sEnabled) {
+        // Make sure we don't start a new transfer, but don't interrupt the one
+        // already in progress.
+        mGuestWriteState.clearQueued();
+    }
+
     if (ReadWriteState* stateWithData = mGuestWriteState.pickStateWithData()) {
         return processOperation(OperationType::WriteToGuest, stateWithData,
                                 buffers, numBuffers);
@@ -111,6 +119,15 @@ int ClipboardPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
 
 int ClipboardPipe::onGuestSend(const AndroidPipeBuffer* buffers,
                                int numBuffers) {
+    if (!sEnabled) {
+        // Fake out that we've processed the data, and don't do anything.
+        int total = 0;
+        for (int i = 0; i != numBuffers; ++i) {
+            total += buffers[i].size;
+        }
+        return total;
+    }
+
     int result = processOperation(OperationType::ReadFromGuest,
                                   &mGuestReadState, buffers, numBuffers);
     if (mGuestReadState.isFinished()) {
@@ -119,6 +136,10 @@ int ClipboardPipe::onGuestSend(const AndroidPipeBuffer* buffers,
         mGuestReadState.reset();
     }
     return result;
+}
+
+void ClipboardPipe::setEnabled(bool enabled) {
+    sEnabled = enabled;
 }
 
 void registerClipboardPipeService() {
@@ -131,13 +152,16 @@ void ClipboardPipe::setGuestClipboardCallback(
 }
 
 void ClipboardPipe::wakeGuestIfNeeded() {
-    if (mWakeOnRead && mGuestWriteState.hasData()) {
+    if (sEnabled && mWakeOnRead && mGuestWriteState.hasData()) {
         signalWake(PIPE_WAKE_READ);
         mWakeOnRead = false;
     }
 }
 
 void ClipboardPipe::setGuestClipboardContents(const uint8_t* buf, size_t len) {
+    if (!sEnabled) {
+        return; // who cares.
+    }
     mGuestWriteState.queueContents(buf, len);
     wakeGuestIfNeeded();
 }
@@ -191,6 +215,14 @@ ClipboardPipe::WritingState::pickStateWithData() {
         return inProgress;
     }
     return nullptr;
+}
+
+void ClipboardPipe::WritingState::clearQueued() {
+    base::AutoLock l(lock);
+    // These two operations together indicate that there's nothing to transfer,
+    // so it won't get picked for sending.
+    queued->reset();
+    queued->dataSizeTransferred = true;
 }
 
 bool ClipboardPipe::WritingState::hasData() const {
