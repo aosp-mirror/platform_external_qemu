@@ -32,14 +32,14 @@
                         0x00, 0x00, 0x00, 0x00,\
                         0x00, 0x00, 0x00, 0x00 } }
 
-static inline bool in6_equal(const struct in6_addr *a, const struct in6_addr *b)
+static inline int in6_equal(const struct in6_addr *a, const struct in6_addr *b)
 {
     return memcmp(a, b, sizeof(*a)) == 0;
 }
 
-static inline bool in6_equal_net(const struct in6_addr *a,
-                                 const struct in6_addr *b,
-                                 int prefix_len)
+static inline int in6_equal_net(const struct in6_addr *a,
+                                const struct in6_addr *b,
+                                int prefix_len)
 {
     if (memcmp(a, b, prefix_len / 8) != 0) {
         return 0;
@@ -53,9 +53,9 @@ static inline bool in6_equal_net(const struct in6_addr *a,
         == b->s6_addr[prefix_len / 8] >> (8 - (prefix_len % 8));
 }
 
-static inline bool in6_equal_mach(const struct in6_addr *a,
-                                  const struct in6_addr *b,
-                                  int prefix_len)
+static inline int in6_equal_mach(const struct in6_addr *a,
+                                 const struct in6_addr *b,
+                                 int prefix_len)
 {
     if (memcmp(&(a->s6_addr[(prefix_len + 7) / 8]),
                &(b->s6_addr[(prefix_len + 7) / 8]),
@@ -73,16 +73,16 @@ static inline bool in6_equal_mach(const struct in6_addr *a,
 
 
 #define in6_equal_router(a)\
-    ((in6_equal_net(a, &slirp->vprefix_addr6, slirp->vprefix_len)\
-      && in6_equal_mach(a, &slirp->vhost_addr6, slirp->vprefix_len))\
+    ((in6_equal_net(a, &vprefix_addr6, vprefix_len)\
+      && in6_equal_mach(a, &vhost_addr6, vprefix_len))\
   || (in6_equal_net(a, &(struct in6_addr)LINKLOCAL_ADDR, 64)\
-      && in6_equal_mach(a, &slirp->vhost_addr6, 64)))
+      && in6_equal_mach(a, &vhost_addr6, 64)))
 
 #define in6_equal_dns(a)\
-    ((in6_equal_net(a, &slirp->vprefix_addr6, slirp->vprefix_len)\
-      && in6_equal_mach(a, &slirp->vnameserver_addr6, slirp->vprefix_len))\
+    ((in6_equal_net(a, &vprefix_addr6, vprefix_len)\
+      && in6_equal_mach(a, &vnameserver_addr6, vprefix_len))\
   || (in6_equal_net(a, &(struct in6_addr)LINKLOCAL_ADDR, 64)\
-      && in6_equal_mach(a, &slirp->vnameserver_addr6, 64)))
+      && in6_equal_mach(a, &vnameserver_addr6, 64)))
 
 #define in6_equal_host(a)\
     (in6_equal_router(a) || in6_equal_dns(a))
