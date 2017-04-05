@@ -27,11 +27,15 @@ public:
 
     void setAdbInterface(android::emulation::AdbInterface* adb);
 
+public slots:
+    void setHaveClipboardSharing(bool haveSharing);
+
 signals:
     void frameAlwaysChanged(bool showFrame);
     void onForwardShortcutsToDeviceChanged(int index);
     void onTopChanged(bool isOnTop);
     void themeChanged(SettingsTheme new_theme);
+    void enableClipboardSharingChanged(bool enabled);
 
 private slots:
     void on_set_forwardShortcutsToDevice_currentIndexChanged(int index);
@@ -51,9 +55,10 @@ private slots:
     void on_set_noProxy_toggled(bool checked);
     void on_set_proxyAuth_toggled(bool checked);
     void on_set_useStudio_toggled(bool checked);
+    void on_set_clipboardSharing_toggled(bool checked);
 
 private:
-    bool eventFilter (QObject* object, QEvent* event) override;
+    bool eventFilter(QObject* object, QEvent* event) override;
     void grayOutProxy();
 
     android::emulation::AdbInterface* mAdb;
