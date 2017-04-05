@@ -188,6 +188,12 @@ void ToolWindow::raise() {
     }
 }
 
+void ToolWindow::switchClipboardSharing(bool enabled) {
+    if (mUiEmuAgent && mUiEmuAgent->clipboard) {
+        mUiEmuAgent->clipboard->setEnabled(enabled);
+    }
+}
+
 void ToolWindow::hide() {
     QFrame::hide();
     if (mExtendedWindow) {
@@ -433,6 +439,8 @@ void ToolWindow::setToolEmuAgent(const UiEmuAgent* agPtr) {
         connect(QApplication::clipboard(), SIGNAL(dataChanged()),
                 this, SLOT(onHostClipboardChanged()));
     }
+
+    emit haveClipboardSharingKnown(agPtr->clipboard != nullptr);
 }
 
 void ToolWindow::on_back_button_pressed() {
