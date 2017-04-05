@@ -493,6 +493,9 @@
    </item>
   </widget>
   <widget class="QGroupBox" name="set_glesApiLevelTitle">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>324</x>
@@ -557,7 +560,7 @@
    <property name="geometry">
     <rect>
      <x>324</x>
-     <y>326</y>
+     <y>260</y>
      <width>211</width>
      <height>24</height>
     </rect>
@@ -582,7 +585,7 @@
    <property name="geometry">
     <rect>
      <x>324</x>
-     <y>308</y>
+     <y>242</y>
      <width>211</width>
      <height>21</height>
     </rect>
@@ -602,6 +605,8 @@
     <string>Title</string>
    </property>
   </widget>
+  <zorder>set_clipboardSharing</zorder>
+  <zorder>set_clipboardSharingTitle</zorder>
   <zorder>kbdShortcutsTitle</zorder>
   <zorder>set_crashReprotPrefTitle</zorder>
   <zorder>set_onTop</zorder>
