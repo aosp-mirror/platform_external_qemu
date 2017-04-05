@@ -113,7 +113,7 @@ static int dhcpv6_parse_info_request(uint8_t *odata, int olen,
 /**
  * Handle information request messages
  */
-static void dhcpv6_info_request(Slirp *slirp, struct sockaddr_in6 *srcsas,
+static void dhcpv6_info_request(struct sockaddr_in6 *srcsas,
                                 uint32_t xid, uint8_t *odata, int olen)
 {
     struct requested_infos ri = { NULL };
@@ -125,7 +125,7 @@ static void dhcpv6_info_request(Slirp *slirp, struct sockaddr_in6 *srcsas,
         return;
     }
 
-    m = m_get(slirp);
+    m = m_get();
     if (!m) {
         return;
     }
@@ -152,11 +152,11 @@ static void dhcpv6_info_request(Slirp *slirp, struct sockaddr_in6 *srcsas,
         *resp++ = OPTION_DNS_SERVERS;           /* option-code low byte */
         *resp++ = 0;                            /* option-len high byte */
         *resp++ = 16;                           /* option-len low byte */
-        memcpy(resp, &slirp->vnameserver_addr6, 16);
+        memcpy(resp, &vnameserver_addr6, 16);
         resp += 16;
     }
     if (ri.want_boot_url) {
-        uint8_t *sa = slirp->vhost_addr6.s6_addr;
+        uint8_t *sa = vhost_addr6.s6_addr;
         int slen, smaxlen;
 
         *resp++ = OPTION_BOOTFILE_URL >> 8;     /* option-code high byte */
@@ -167,14 +167,14 @@ static void dhcpv6_info_request(Slirp *slirp, struct sockaddr_in6 *srcsas,
                                 "%02x%02x:%02x%02x:%02x%02x:%02x%02x]/%s",
                         sa[0], sa[1], sa[2], sa[3], sa[4], sa[5], sa[6], sa[7],
                         sa[8], sa[9], sa[10], sa[11], sa[12], sa[13], sa[14],
-                        sa[15], slirp->bootp_filename);
+                        sa[15], bootp_filename);
         slen = min(slen, smaxlen);
         *resp++ = slen >> 8;                    /* option-len high byte */
         *resp++ = slen;                         /* option-len low byte */
         resp += slen;
     }
 
-    sa6.sin6_addr = slirp->vhost_addr6;
+    sa6.sin6_addr = vhost_addr6;
     sa6.sin6_port = DHCPV6_SERVER_PORT;
     da6.sin6_addr = srcsas->sin6_addr;
     da6.sin6_port = srcsas->sin6_port;
@@ -200,7 +200,7 @@ void dhcpv6_input(struct sockaddr_in6 *srcsas, struct mbuf *m)
 
     switch (data[0]) {
     case MSGTYPE_INFO_REQUEST:
-        dhcpv6_info_request(m->slirp, srcsas, xid, &data[4], data_len - 4);
+        dhcpv6_info_request(srcsas, xid, &data[4], data_len - 4);
         break;
     default:
         DEBUG_MISC((dfd, "dhcpv6_input: Unsupported message type 0x%x\n",

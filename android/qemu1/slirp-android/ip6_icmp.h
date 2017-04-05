@@ -211,11 +211,11 @@ struct ndpopt {
 #define NDP_AdvPrefLifetime         14400
 #define NDP_AdvAutonomousFlag       1
 
-void icmp6_init(Slirp *slirp);
-void icmp6_cleanup(Slirp *slirp);
+void icmp6_init();
+void icmp6_cleanup();
 void icmp6_input(struct mbuf *);
 void icmp6_send_error(struct mbuf *m, uint8_t type, uint8_t code);
-void ndp_send_ra(Slirp *slirp);
-void ndp_send_ns(Slirp *slirp, struct in6_addr addr);
+void ndp_send_ra();
+void ndp_send_ns(struct in6_addr addr);
 
 #endif
