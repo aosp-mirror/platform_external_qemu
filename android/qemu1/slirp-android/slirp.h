@@ -36,6 +36,7 @@ typedef uint64_t u_int64_t;
 typedef char *caddr_t;
 
 # include <winsock2.h>
+# include <ws2tcpip.h>
 # include <windows.h>
 # include <sys/timeb.h>
 # include <iphlpapi.h>
@@ -160,6 +161,7 @@ void free _P((void *ptr));
 
 #include "ip.h"
 #include "ip6.h"
+#include "ip6_icmp.h"
 #include "tcp.h"
 #include "tcp_timer.h"
 #include "tcp_var.h"
@@ -183,6 +185,23 @@ void free _P((void *ptr));
 #include "libslirp.h"
 
 extern struct ttys *ttys_unit[MAX_INTERFACES];
+
+struct ndpentry {
+    unsigned char   eth_addr[ETH_ALEN];     /* sender hardware address */
+    struct in6_addr ip_addr;                /* sender IP address       */
+} QEMU_PACKED;
+
+#define NDP_TABLE_SIZE 16
+
+typedef struct NdpTable {
+    struct ndpentry table[NDP_TABLE_SIZE];
+    int next_victim;
+} NdpTable;
+
+void ndp_table_add(struct in6_addr ip_addr,
+                   uint8_t ethaddr[ETH_ALEN]);
+bool ndp_table_search(struct in6_addr ip_addr,
+                      uint8_t out_ethaddr[ETH_ALEN]);
 
 #ifndef NULL
 #define NULL (void *)0
@@ -230,6 +249,7 @@ void lprint _P((const char *, ...));
 
 /* cksum.c */
 int cksum(struct mbuf *m, int len);
+int ip6_cksum(struct mbuf *m);
 
 /* if.c */
 void if_init _P((void));
@@ -243,6 +263,13 @@ void ip_stripoptions _P((register struct mbuf *, struct mbuf *));
 
 /* ip_output.c */
 int ip_output _P((struct socket *, struct mbuf *));
+
+/* ip6_input.c */
+void ip6_init _P((void));
+void ip6_input _P((struct mbuf *));
+
+/* ip6_output */
+int ip6_output _P((struct socket *, struct mbuf *, int));
 
 /* tcp_input.c */
 void tcp_input _P((register struct mbuf *, int, struct socket *));
