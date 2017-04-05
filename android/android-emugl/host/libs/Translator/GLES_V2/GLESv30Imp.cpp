@@ -9,33 +9,19 @@ extern "C" GL_APICALL GLconstubyteptr GL_APIENTRY glGetStringi(GLenum name, GLin
 }
 
 GL_APICALL void GL_APIENTRY glGenVertexArrays(GLsizei n, GLuint* arrays) {
-    GET_CTX_V2();
-    SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
-    ctx->dispatcher().glGenVertexArrays(n, arrays);
-
-    ctx->addVertexArrayObjects(n, arrays);
-
+    glGenVertexArraysOES(n, arrays);
 }
 
 GL_APICALL void GL_APIENTRY glBindVertexArray(GLuint array) {
-    GET_CTX_V2();
-
-    ctx->setVertexArrayObject(array);
-    ctx->dispatcher().glBindVertexArray(array);
+    glBindVertexArrayOES(array);
 }
 
 GL_APICALL void GL_APIENTRY glDeleteVertexArrays(GLsizei n, const GLuint * arrays) {
-    GET_CTX_V2();
-    SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
-
-    ctx->removeVertexArrayObjects(n, arrays);
-    ctx->dispatcher().glDeleteVertexArrays(n, arrays);
+    glDeleteVertexArraysOES(n, arrays);
 }
 
 GL_APICALL GLboolean GL_APIENTRY glIsVertexArray(GLuint array) {
-    GET_CTX_V2_RET(0);
-    GLboolean glIsVertexArrayRET = ctx->dispatcher().glIsVertexArray(array);
-    return glIsVertexArrayRET;
+    return glIsVertexArrayOES(array);
 }
 
 GL_APICALL void * GL_APIENTRY glMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access) {
