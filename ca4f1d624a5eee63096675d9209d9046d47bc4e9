@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "49dd9662_8ed8a73a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2017-04-05T02:20:46Z",
+      "side": 1,
+      "message": "nit: typo?",
+      "range": {
+        "startLine": 7,
+        "startChar": 14,
+        "endLine": 7,
+        "endChar": 19
+      },
+      "revId": "ca4f1d624a5eee63096675d9209d9046d47bc4e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0b27b85b_b0277e7c",
+        "filename": "android/android-emu/android/emulation/ClipboardPipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2017-04-05T02:20:46Z",
+      "side": 1,
+      "message": "note: for 100% correctness you would have an actual queue I suppose, but I\u0027m fine with the way it works as implemented currently.",
+      "range": {
+        "startLine": 80,
+        "startChar": 0,
+        "endLine": 82,
+        "endChar": 16
+      },
+      "revId": "ca4f1d624a5eee63096675d9209d9046d47bc4e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
