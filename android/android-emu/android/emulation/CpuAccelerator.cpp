@@ -85,15 +85,13 @@ struct GlobalState {
     bool testing;
     CpuAccelerator accel;
     char status[256];
+    char version[256];
     AndroidCpuAcceleration status_code;
     std::array<bool, CPU_ACCELERATOR_MAX> supported_accelerators;
 };
 
-GlobalState gGlobals = {false,
-                        false,
-                        CPU_ACCELERATOR_NONE,
-                        {'\0'},
-                        ANDROID_CPU_ACCELERATION_ERROR,
+GlobalState gGlobals = {false,  false,  CPU_ACCELERATOR_NONE,
+                        {'\0'}, {'\0'}, ANDROID_CPU_ACCELERATION_ERROR,
                         {}};
 
 /////////////////////////////////////////////////////////////////////////
@@ -174,6 +172,8 @@ AndroidCpuAcceleration ProbeKVM(std::string* status) {
     StringAppendFormat(status,
                        "KVM (version %d) is installed and usable.",
                        version);
+    GlobalState* g = &gGlobals;
+    ::snprintf(g->version, sizeof(g->version), "%d", version);
     return ANDROID_CPU_ACCELERATION_READY;
 }
 
@@ -531,6 +531,9 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
             status, "HAXM version %s (%d) is installed and usable.",
             cpuAcceleratorFormatVersion(haxm_installer_version),
             hax_version.current_version);
+    GlobalState* g = &gGlobals;
+    ::snprintf(g->version, sizeof(g->version), "%s",
+               cpuAcceleratorFormatVersion(haxm_installer_version).c_str());
     return ANDROID_CPU_ACCELERATION_READY;
 }
 
@@ -638,6 +641,9 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
     StringAppendFormat(status, "HAXM version %s (%d) is installed and usable.",
                        cpuAcceleratorFormatVersion(version),
                        hax_version.current_version);
+    GlobalState* g = &gGlobals;
+    ::snprintf(g->version, sizeof(g->version), "%s",
+               cpuAcceleratorFormatVersion(version).c_str());
     return ANDROID_CPU_ACCELERATION_READY;
 }
 
@@ -744,6 +750,9 @@ AndroidCpuAcceleration ProbeHVF(std::string* status) {
                            "on OS X 10.10 and above");
         return res;
     }
+
+    GlobalState* g = &gGlobals;
+    ::snprintf(g->version, sizeof(g->version), "%d.%d", maj, min);
     StringAppendFormat(status, "Hypervisor.Framework OS X Version %d.%d", maj,
                        min);
     return res;
@@ -996,6 +1005,30 @@ std::pair<AndroidCpuInfoFlags, std::string> GetCpuInfo() {
 
     return std::make_pair(static_cast<AndroidCpuInfoFlags>(flags),
                           std::move(status));
+}
+
+std::string CpuAcceleratorToString(CpuAccelerator type) {
+    switch (type) {
+        case CPU_ACCELERATOR_KVM:
+            return "KVM";
+        case CPU_ACCELERATOR_HAX:
+            return "HAXM";
+        case CPU_ACCELERATOR_HVF:
+            return "HVF";
+        default:
+            return "";
+    }
+}
+
+std::string GetCurrentCpuAcceleratorVersion() {
+    GlobalState* g = &gGlobals;
+
+    if (!g->probed && !g->testing) {
+        // Force detection of the current CPU accelerator.
+        GetCurrentCpuAccelerator();
+    }
+
+    return (g->accel != CPU_ACCELERATOR_NONE) ? std::string(g->version) : "";
 }
 
 }  // namespace android
