@@ -594,6 +594,7 @@ static void rcSetWindowColorBuffer(uint32_t windowSurface,
     if (!fb) {
         return;
     }
+    fb->onSetWindowColorBuffer(windowSurface, colorBuffer);
     fb->getBlitThread()->set(windowSurface, colorBuffer);
 }
 

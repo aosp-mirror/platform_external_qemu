@@ -253,10 +253,21 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
     } else {
         s_gles1.glFlush();
     }
+    m_sync = new FenceSync(false, false);
+    if (tInfo->currContext->version() > GLESApi_CM) {
+        s_gles2.glFlush();
+    } else {
+        s_gles1.glFlush();
+    }
     return true;
 }
 
 bool ColorBuffer::blitFromCurrentReadBuffer2() {
+    if (m_sync) {
+        m_sync->waitAsync();
+        m_sync->decRef();
+        m_sync = nullptr;
+    }
     GLuint tmpTex;
     GLint prev_draw_fbo, prev_read_fbo;
     GLint currTexBind;
@@ -300,8 +311,18 @@ bool ColorBuffer::blitFromCurrentReadBuffer2() {
     // Restore previous viewport.
     s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
     unbindFbo();
+    m_sync = new FenceSync(false, false);
+    s_gles2.glFlush();
 
     return true;
+}
+
+void ColorBuffer::onSet() {
+    if (m_sync) {
+        m_sync->waitAsync();
+        m_sync->decRef();
+        m_sync = nullptr;
+    }
 }
 
 bool ColorBuffer::bindToTexture() {
@@ -344,6 +365,9 @@ GLuint ColorBuffer::scale() {
 
 bool ColorBuffer::post(GLuint tex, float rotation, float dx, float dy) {
     // NOTE: Do not call m_helper->setupContext() here!
+    if (m_sync) {
+        m_sync->waitAsync();
+    }
     return m_helper->getTextureDraw()->draw(tex, rotation, dx, dy);
 }
 

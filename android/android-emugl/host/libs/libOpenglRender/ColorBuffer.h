@@ -25,6 +25,7 @@
 
 #include <memory>
 
+#include "FenceSync.h"
 #include "FrameworkFormats.h"
 
 class TextureDraw;
@@ -211,6 +212,7 @@ public:
     static void bindHelperContext();
     static void unbindHelperContext();
     bool blitFromCurrentReadBuffer2();
+    void onSet();
 
     // Read the content of the whole ColorBuffer as 32-bit RGBA pixels.
     // |img| must be a buffer large enough (i.e. width * height * 4).
@@ -243,6 +245,7 @@ private:
     EGLDisplay m_display = nullptr;
     Helper* m_helper = nullptr;
     TextureResize* m_resizer = nullptr;
+    FenceSync* m_sync = nullptr;
     FrameworkFormat m_frameworkFormat;
     GLuint m_yuv_conversion_fbo = 0;  // FBO to offscreen-convert YUV to RGB
     std::unique_ptr<YUVConverter> m_yuv_converter;

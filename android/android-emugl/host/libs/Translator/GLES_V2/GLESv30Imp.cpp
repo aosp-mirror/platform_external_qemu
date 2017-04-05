@@ -388,7 +388,7 @@ GL_APICALL void GL_APIENTRY glWaitSync(GLsync wait_on, GLbitfield flags, GLuint6
     if (!ctx->dispatcher().glFenceSync) {
         return;
     }
-    ctx->dispatcher().glWaitSync(wait_on, flags, timeout);
+    ctx->dispatcher().glWaitSync(wait_on, 0, GL_TIMEOUT_IGNORED);
 }
 
 GL_APICALL void GL_APIENTRY glDeleteSync(GLsync to_delete) {

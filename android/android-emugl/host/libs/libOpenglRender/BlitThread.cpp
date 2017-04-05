@@ -104,6 +104,7 @@ void BlitThread::flush(uint32_t windowSurface) {
     mCmd.opCode = Blit;
     mCmd.windowSurface = windowSurface;
     mInput.send(mCmd);
+    mOutput.receive(&mCmdRes);
 }
 
 void BlitThread::post(uint32_t colorBuffer) {
@@ -119,6 +120,7 @@ void BlitThread::set(uint32_t windowSurface, uint32_t colorBuffer) {
     mCmd.windowSurface = windowSurface;
     mCmd.colorBuffer = colorBuffer;
     mInput.send(mCmd);
+    mOutput.receive(&mCmdRes);
 }
 
 uint32_t BlitThread::createColorBuffer(uint32_t width, uint32_t height, GLenum internalFormat, FrameworkFormat frameworkFormat) {
@@ -273,6 +275,7 @@ intptr_t BlitThread::main() {
             D("cmd: Blit");
             bindSubwinContext();
             mFb->flushWindowSurfaceColorBuffer2(cmd.windowSurface);
+            mOutput.send(0);
             break;
         case Post:
             D("cmd: Post");
@@ -283,6 +286,7 @@ intptr_t BlitThread::main() {
         case Set:
             D("cmd: Set");
             mFb->setWindowSurfaceColorBuffer(cmd.windowSurface, cmd.colorBuffer);
+            mOutput.send(0);
             break;
         case CreateColorBuffer:
             D("cmd: CreateColorBuffer");

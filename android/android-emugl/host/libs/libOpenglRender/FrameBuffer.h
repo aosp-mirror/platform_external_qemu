@@ -238,8 +238,8 @@ public:
     // |p_surface| is the target WindowSurface's handle value.
     // |p_colorbuffer| is the ColorBuffer handle value.
     // Returns true on success, false otherwise.
-    bool  setWindowSurfaceColorBuffer(
-            HandleType p_surface, HandleType p_colorbuffer);
+    void onSetWindowColorBuffer(HandleType p_surface, HandleType p_colorbuffer);
+    bool  setWindowSurfaceColorBuffer(HandleType p_surface, HandleType p_colorbuffer);
 
     // Copy the content of a WindowSurface's Pbuffer to its attached
     // ColorBuffer. See the documentation for WindowSurface::flushColorBuffer()

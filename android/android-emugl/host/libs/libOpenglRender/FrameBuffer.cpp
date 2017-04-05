@@ -932,6 +932,19 @@ bool FrameBuffer::flushWindowSurfaceColorBuffer2(HandleType p_surface) {
     return true;
 }
 
+void FrameBuffer::onSetWindowColorBuffer(HandleType p_surface, HandleType p_colorbuffer) {
+    emugl::Mutex::AutoLock mutex(m_lock);
+
+    ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
+    if (c == m_colorbuffers.end()) {
+        DBG("%s: bad color buffer handle %#x\n", __FUNCTION__, p_colorbuffer);
+        // bad colorbuffer handle
+        return;
+    }
+
+    c->second.cb->onSet();
+}
+
 bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
                                               HandleType p_colorbuffer) {
     emugl::Mutex::AutoLock mutex(m_lock);
@@ -1393,11 +1406,11 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
     //
     // Send framebuffer (without FPS overlay) to callback
     //
-    if (m_onPost) {
-        (*c).second.cb->readback(m_fbImage);
-        m_onPost(m_onPostContext, m_framebufferWidth, m_framebufferHeight, -1,
-                 GL_RGBA, GL_UNSIGNED_BYTE, m_fbImage);
-    }
+    // if (m_onPost) {
+    //     (*c).second.cb->readback(m_fbImage);
+    //     m_onPost(m_onPostContext, m_framebufferWidth, m_framebufferHeight, -1,
+    //              GL_RGBA, GL_UNSIGNED_BYTE, m_fbImage);
+    // }
 
 EXIT:
     if (needLockAndBind) {
