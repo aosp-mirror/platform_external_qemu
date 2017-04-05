@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1771b502_4818ebb2",
+        "filename": "android/qemu1/slirp-android/ip6.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-05T21:29:57Z",
+      "side": 1,
+      "message": "why? int return type usually means \"0 is good, !\u003d 0 is bad\" while bool is the opposite. Changing the return type and not changing the behavior will eventually backfire",
+      "range": {
+        "startLine": 35,
+        "startChar": 14,
+        "endLine": 35,
+        "endChar": 17
+      },
+      "revId": "1093e0b7721630bb895c77e87e0e1b8bcc3afb65",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
