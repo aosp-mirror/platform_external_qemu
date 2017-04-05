@@ -558,9 +558,6 @@ void slirp_select_poll(fd_set *readfds, fd_set *writefds, fd_set *xfds)
 	 global_xfds = NULL;
 }
 
-#define ETH_ALEN 6
-#define ETH_HLEN 14
-
 #define ETH_P_IP	0x0800		/* Internet Protocol packet	*/
 #define ETH_P_ARP	0x0806		/* Address Resolution packet	*/
 
