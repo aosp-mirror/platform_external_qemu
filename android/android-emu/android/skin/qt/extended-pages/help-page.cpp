@@ -159,14 +159,14 @@ void HelpPage::createBugReportWindow() {
 
 void HelpPage::on_help_fileBug_clicked() {
     //@TODO once bug report window is ready, uncomment the following block of code
-    /*if (mBugReportWindow == nullptr) {
+    if (mBugReportWindow == nullptr) {
         createBugReportWindow();
     }
     assert(mBugReportWindow);
     mBugReportWindow->show();
     mBugReportWindow->raise();
-    mBugReportWindow->activateWindow();*/
-    QDesktopServices::openUrl(QUrl::fromEncoded(FILE_BUG_URL));
+    mBugReportWindow->activateWindow();
+    // QDesktopServices::openUrl(QUrl::fromEncoded(FILE_BUG_URL));
 }
 
 void HelpPage::on_help_sendFeedback_clicked() {

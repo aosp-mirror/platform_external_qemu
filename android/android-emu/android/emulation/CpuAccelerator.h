@@ -57,6 +57,14 @@ bool GetCurrentAcceleratorSupport(CpuAccelerator type);
 // the accelerator cannot be used.
 std::string GetCurrentCpuAcceleratorStatus();
 
+// Return the version number as text for the CPU accelerator technology usable
+// on the current machine. This returns an empty string if corresponding
+// accelerator can be used properly.
+std::string GetCurrentCpuAcceleratorVersion();
+
+// Convert CpuAccelerator to string type
+std::string CpuAcceleratorToString(CpuAccelerator type);
+
 // Return an status code describing the state of the current CPU
 // acceleration on this machine. If GetCurrentCpuAccelerator() returns
 // CPU_ACCELERATOR_NONE this will contain a small explanation why
