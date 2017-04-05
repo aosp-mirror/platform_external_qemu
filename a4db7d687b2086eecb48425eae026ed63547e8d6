@@ -16,6 +16,24 @@
       "revId": "a4db7d687b2086eecb48425eae026ed63547e8d6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e599bc8_fc7cf8f2",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 723,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-05T21:06:16Z",
+      "side": 1,
+      "message": "I\u0027ve fixed it in patch set #2 - https://android-review.googlesource.com/#/c/364978/1",
+      "parentUuid": "fa301ae6_3e091c98",
+      "revId": "a4db7d687b2086eecb48425eae026ed63547e8d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
