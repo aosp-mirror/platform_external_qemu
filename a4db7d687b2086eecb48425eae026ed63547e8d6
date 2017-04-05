@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa301ae6_3e091c98",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 723,
+      "author": {
+        "id": 1135005
+      },
+      "writtenOn": "2017-04-05T19:50:22Z",
+      "side": 1,
+      "message": "this code will fail when we get to OS X 11.0. \nI will fix this next.",
+      "revId": "a4db7d687b2086eecb48425eae026ed63547e8d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
