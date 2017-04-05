@@ -671,6 +671,8 @@ static bool cpuCanRunHVF() {
 }
 
 AndroidCpuAcceleration ProbeHVF(std::string* status) {
+    status->clear();
+
     AndroidCpuAcceleration res = ANDROID_CPU_ACCELERATION_NO_CPU_SUPPORT;
     const auto versionNumFile =
         android::base::makeCustomScopedPtr(
@@ -692,11 +694,17 @@ AndroidCpuAcceleration ProbeHVF(std::string* status) {
             &exitCode,
             &pid,
             tempPath);
-    if (exitCode) return res;
-
+    if (exitCode) {
+        status->assign("Could not get host product version.");
+        return res;
+    }
     ScopedFd tempfileFd(open(tempPath.c_str(), O_RDONLY));
-    if (!tempfileFd.valid()) return res;
-
+    if (!tempfileFd.valid()) {
+        StringAppendFormat(status,
+                           "Could not open %s : %s",tempPath.c_str(),
+                           strerror(errno));
+        return res;
+    }
     std::string contents;
     android::readFileIntoString(tempfileFd.get(), &contents);
     if (!contents.length()) return res;
@@ -706,15 +714,23 @@ AndroidCpuAcceleration ProbeHVF(std::string* status) {
     if (versionParseRes != 2) return res;
 
     // Need same virtualization features as required by HAXM.
-    std::string haxStatus;
-    if (ProbeHaxCpu(&haxStatus) != ANDROID_CPU_ACCELERATION_READY) return res;
+    if (ProbeHaxCpu(status) != ANDROID_CPU_ACCELERATION_READY) return res;
 
     // Also need EPT and UG
     if (!cpuCanRunHVF()) return res;
 
     // Hypervisor.framework is only supported on OS X 10.10 and above.
-    if (maj >= 10 && min >= 10) res = ANDROID_CPU_ACCELERATION_READY;
-
+    if (maj >= 10 && min >= 10) {
+        res = ANDROID_CPU_ACCELERATION_READY;
+    }else {
+        StringAppendFormat(status,
+                           "Hypervisor.Framework is only supported"
+                           "on OS X 10.10 and above");
+        return res;
+    }
+    StringAppendFormat(status,
+                       "Hypervisor.Framework OS X Version %d.%d",
+                       maj, min);
     return res;
 }
 #endif // HAVE_HVF
@@ -750,7 +766,8 @@ CpuAccelerator GetCurrentCpuAccelerator() {
         g->supported_accelerators[CPU_ACCELERATOR_HAX] = true;
     }
 #if HAVE_HVF
-    AndroidCpuAcceleration status_code_HVF = ProbeHVF(&status);
+    // commented ProbeHVF so it does not set status until we switch to HFV
+    AndroidCpuAcceleration status_code_HVF /*= ProbeHVF(&status)*/;
     if (status_code_HVF == ANDROID_CPU_ACCELERATION_READY) {
         g->supported_accelerators[CPU_ACCELERATOR_HVF] = true;
     }
