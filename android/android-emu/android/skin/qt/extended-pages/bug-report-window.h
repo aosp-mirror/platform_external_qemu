@@ -18,9 +18,32 @@
 
 #include <QFrame>
 #include <QMessageBox>
+#include <QThread>
 
 #include <memory>
 #include <string>
+
+typedef struct {
+    std::string androidVer;
+    std::string avdDetails;
+    std::string cpuModel;
+    std::string deviceName;
+    std::string emulatorVer;
+    std::string hypervisorVer;
+    std::string hostOsName;
+    std::string reproSteps;
+    std::string sdkToolsVer;
+} ReportingFields;
+
+typedef struct {
+    std::string saveLocation;
+    std::string adbBugreportFilePath;
+    std::string screenshotFilePath;
+    std::string bugreportFolderPath;
+    bool adbBugreportSucceed;
+    bool screenshotSucceed;
+    bool bugreportSavedSucceed;
+} SavingStates;
 
 class BugReportWindow : public QFrame {
     Q_OBJECT
@@ -29,31 +52,70 @@ public:
     explicit BugReportWindow(EmulatorQtWindow* eW, QWidget* parent = 0);
     void showEvent(QShowEvent* event);
 
+private slots:
+    void on_bug_saveButton_clicked();
+    void on_bug_fileBugButton_clicked();
+    void saveBugreportFolderFinished(bool reasult,
+                                     QString folderPath,
+                                     bool willOpenIssueTracker);
+    void saveBugreportFolderStarted();
+
 private:
     void loadAdbBugreport();
     void loadAdbLogcat();
     void loadAvdDetails();
     void loadScreenshotImage();
-    void loadScreenshotImageDone(
-            android::emulation::ScreenCapturer::Result result,
-            android::base::StringView filePath);
     bool eventFilter(QObject* object, QEvent* event) override;
+    void saveBugReportFolder(const QObject* handler,
+                             const char* started_slot,
+                             const char* finished_slot,
+                             bool willOpenIssueTracker);
+    void launchIssueTrackerThread();
 
     EmulatorQtWindow* mEmulatorWindow;
     android::emulation::AdbInterface* mAdb;
     android::emulation::AdbBugReportServices mBugReportServices;
     android::emulation::ScreenCapturer* mScreenCapturer;
     QMessageBox* mDeviceDetailsDialog;
-    std::unique_ptr<Ui::BugReportWindow> mUi;
-    std::atomic_bool mBugReportSucceed;
-    std::atomic_bool mScreenshotSucceed;
-    std::string mBugReportSaveLocation;
-    android::base::StringView mAdbBugreportFilePath;
-    android::base::StringView mScreenshotFilePath;
-    std::string mEmulatorVer;
-    std::string mAndroidVer;
-    std::string mHostOsName;
-    std::string mDeviceName;
     bool mFirstShowEvent = true;
+    std::unique_ptr<Ui::BugReportWindow> mUi;
+    ReportingFields mReportingFields;
+    SavingStates mSavingStates;
+};
+
+class BugReportFolderSavingTask : public QObject {
+    Q_OBJECT
+public:
+    BugReportFolderSavingTask(std::string savingPath,
+                              std::string adbBugreportFilePath,
+                              std::string screenshotFilePath,
+                              std::string avdDetails,
+                              bool openIssueTracker);
+public slots:
+    void run();
+
+signals:
+    void started();
+    void finished(bool savingResult, QString folderPath, bool openIssueTracker);
+
+private:
+    std::string mSavingPath;
+    std::string mAdbBugreportFilePath;
+    std::string mScreenshotFilePath;
     std::string mAvdDetails;
+    bool mOpenIssueTracker;
+};
+
+class IssueTrackerTask : public QObject {
+    Q_OBJECT
+public:
+    IssueTrackerTask(ReportingFields reportingField);
+
+public slots:
+    void run();
+signals:
+    void finished();
+
+private:
+    ReportingFields mReportingFields;
 };
