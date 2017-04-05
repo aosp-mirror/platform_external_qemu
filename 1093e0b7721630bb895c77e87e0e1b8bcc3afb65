@@ -22,6 +22,30 @@
       "revId": "1093e0b7721630bb895c77e87e0e1b8bcc3afb65",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b4da6fc_ea6bc9d7",
+        "filename": "android/qemu1/slirp-android/ip6.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-04-05T21:36:11Z",
+      "side": 1,
+      "message": "bool doesn\u0027t compile for qemu1. I guess we are using some C compile option. Change it to int so I don\u0027t need to touch location call these functions.  how about change it to char?",
+      "parentUuid": "1771b502_4818ebb2",
+      "range": {
+        "startLine": 35,
+        "startChar": 14,
+        "endLine": 35,
+        "endChar": 17
+      },
+      "revId": "1093e0b7721630bb895c77e87e0e1b8bcc3afb65",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
