@@ -738,6 +738,7 @@ LOCAL_SRC_FILES += \
     android/main-common-ui.c \
     android/resource.c \
     android/ffmpeg-audio-capture.cpp \
+	android/ffmpeg-demuxer.cpp \
     android/ffmpeg-muxer.cpp \
 
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)

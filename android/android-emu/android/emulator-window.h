@@ -13,6 +13,7 @@
 #pragma once
 
 #include "android/cmdline-option.h"
+#include "android/ffmpeg-demuxer.h"
 #include "android/ffmpeg-muxer.h"
 #include "android/framebuffer.h"
 #include "android/skin/file.h"
@@ -47,6 +48,11 @@ typedef struct {
     stralloc_t filename;
 } RecordingInfo;
 
+
+typedef struct {
+    ffmpeg_decoder* decoder;
+} DecodingInfo;
+
 /* Gets a pointer to a EmulatorWindow structure instance. */
 EmulatorWindow*
 emulator_window_get(void);
@@ -77,5 +83,11 @@ bool emulator_window_rotate_90_clockwise(void);
 bool emulator_window_start_recording(const char* filename);
 /* Stop recording the screen. */
 void emulator_window_stop_recording(void);
+
+/* Start decoding the media file. Returns false if decoder is already
+ * running. */
+bool emulator_window_start_decoding(const char* filename);
+/* Stop decoding */
+void emulator_window_stop_decoding(void);
 
 ANDROID_END_HEADER

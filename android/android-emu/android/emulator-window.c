@@ -37,8 +37,11 @@
 /* EmulatorWindow structure instance. */
 static EmulatorWindow   qemulator[1];
 
-/* RecordingInfo strucature instance. */
+/* RecordingInfo structure instance. */
 static RecordingInfo qRecordingInfo[1] = { { NULL, false, false } };
+
+/* DecodingInfo structure instance. */
+static DecodingInfo qDecodingInfo[1] = { { NULL, NULL } };
 
 // Our very own stash of a pointer to a device that handles user events.
 const QAndroidUserEventAgent* user_event_agent;
@@ -157,6 +160,43 @@ static void emulator_window_opengles_redraw_window(void) {
     if (s_use_emugl_subwindow) {
         android_redrawOpenglesWindow();
     }
+}
+
+/* Tell decoder to decode the next frame. Don't call this on the UI thread!
+ * The UI thread will receive a signal from emulator_window_on_frame_decoded
+ * once the frame is ready to be consumed */
+void emulator_window_get_next_frame(void) {
+    // TODO: This will block the decoder until the UI thread is finished reading.
+    // Instead, the decoder should buffer the frames somewhere and UI thread should
+    // read from this buffer.
+    ffmpeg_decode_next_frame(qDecodingInfo->decoder);
+}
+
+/* Called when the decoder has decoded a new frame. When there are no
+ * more frames, |frame| will be NULL. */
+void emulator_window_on_frame_decoded(void) {
+    // signal the UI to render the frame
+}
+
+/* Start decoding the media file. Returns false if decoder is already
+ * running, or failed to initialize decoder. */
+bool emulator_window_start_decoding(const char* filename) {
+    if (qDecodingInfo->decoder) {
+        return false;
+    }
+
+    qDecodingInfo->decoder =
+            ffmpeg_create_decoder(false, filename, emulator_window_on_frame_decoded);
+    if (!qDecodingInfo->decoder) {
+        return false;
+    }
+    return true;
+}
+
+/* Stop decoding */
+void emulator_window_stop_decoding(void) {
+    ffmpeg_free_decoder(qDecodingInfo->decoder);
+    qDecodingInfo->decoder = NULL;
 }
 
 bool emulator_window_start_recording(const char* filename) {
