@@ -34,6 +34,7 @@
 #include "android/base/StringFormat.h"
 #include "android/base/system/System.h"
 #include "android/cpu_accelerator.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/utils/file_data.h"
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
@@ -50,6 +51,8 @@
 #ifdef __APPLE__
 #include "android/emulation/internal/CpuAccelerator.h"
 #endif
+
+#include <array>
 
 // NOTE: This source file must be independent of the rest of QEMU, as such
 //       it should not include / reuse any QEMU source file or function
@@ -83,7 +86,7 @@ struct GlobalState {
     CpuAccelerator accel;
     char status[256];
     AndroidCpuAcceleration status_code;
-    bool supported_accelerators[CPU_ACCELERATOR_MAX];
+    std::array<bool, CPU_ACCELERATOR_MAX> supported_accelerators;
 };
 
 GlobalState gGlobals = {false,
@@ -671,50 +674,78 @@ static bool cpuCanRunHVF() {
 }
 
 AndroidCpuAcceleration ProbeHVF(std::string* status) {
-    AndroidCpuAcceleration res = ANDROID_CPU_ACCELERATION_NO_CPU_SUPPORT;
-    const auto versionNumFile =
-        android::base::makeCustomScopedPtr(
-                tempfile_create(),
-                tempfile_close);
+    status->clear();
 
-    if (!versionNumFile) return res;
+    AndroidCpuAcceleration res = ANDROID_CPU_ACCELERATION_NO_CPU_SUPPORT;
+    const auto versionNumFile = android::base::makeCustomScopedPtr(
+            tempfile_create(), tempfile_close);
+
+    if (!versionNumFile) {
+        status->assign("Internal error: could not create a temporary file");
+        return res;
+    }
 
     std::string tempPath = tempfile_path(versionNumFile.get());
 
-    System::Pid pid;
-    int exitCode;
-    System::get()->runCommand(
-            {"sw_vers", "-productVersion"},
-            System::RunOptions::WaitForCompletion |
-            System::RunOptions::TerminateOnTimeout |
-            System::RunOptions::DumpOutputToFile,
-            1000 /* timeout ms */,
-            &exitCode,
-            &pid,
-            tempPath);
-    if (exitCode) return res;
-
+    int exitCode = -1;
+    System::get()->runCommand({"sw_vers", "-productVersion"},
+                              System::RunOptions::WaitForCompletion |
+                                      System::RunOptions::TerminateOnTimeout |
+                                      System::RunOptions::DumpOutputToFile,
+                              1000,  // timeout ms
+                              &exitCode, nullptr, tempPath);
+    if (exitCode) {
+        status->assign("Could not get host product version.");
+        return res;
+    }
     ScopedFd tempfileFd(open(tempPath.c_str(), O_RDONLY));
-    if (!tempfileFd.valid()) return res;
-
+    if (!tempfileFd.valid()) {
+        StringAppendFormat(status, "Could not open '%s' : %s", tempPath,
+                           strerror(errno));
+        return res;
+    }
     std::string contents;
     android::readFileIntoString(tempfileFd.get(), &contents);
-    if (!contents.length()) return res;
+    if (contents.empty()) {
+        StringAppendFormat(status,
+                           "Internal error: could not read temporary file '%s'",
+                           tempPath);
+        return res;
+    }
 
-    int maj, min, versionParseRes;
-    versionParseRes = sscanf(&contents[0], "%d.%d", &maj, &min);
-    if (versionParseRes != 2) return res;
+    int maj, min;
+    int versionParseRes = sscanf(&contents[0], "%d.%d", &maj, &min);
+    if (versionParseRes != 2) {
+        StringAppendFormat(status,
+                           "Internal error: failed to parse OS version '%s'",
+                           contents);
+        return res;
+    }
 
     // Need same virtualization features as required by HAXM.
-    std::string haxStatus;
-    if (ProbeHaxCpu(&haxStatus) != ANDROID_CPU_ACCELERATION_READY) return res;
+    if (ProbeHaxCpu(status) != ANDROID_CPU_ACCELERATION_READY) {
+        return res;
+    }
 
     // Also need EPT and UG
-    if (!cpuCanRunHVF()) return res;
+    if (!cpuCanRunHVF()) {
+        status->assign(
+                "CPU doesn't support EPT and/or UG features "
+                "needed for Hypervisor.Framework");
+        return res;
+    }
 
     // Hypervisor.framework is only supported on OS X 10.10 and above.
-    if (maj >= 10 && min >= 10) res = ANDROID_CPU_ACCELERATION_READY;
-
+    if (maj > 10 || (maj == 10 && min >= 10)) {
+        res = ANDROID_CPU_ACCELERATION_READY;
+    } else {
+        StringAppendFormat(status,
+                           "Hypervisor.Framework is only supported"
+                           "on OS X 10.10 and above");
+        return res;
+    }
+    StringAppendFormat(status, "Hypervisor.Framework OS X Version %d.%d", maj,
+                       min);
     return res;
 }
 #endif // HAVE_HVF
@@ -734,7 +765,7 @@ CpuAccelerator GetCurrentCpuAccelerator() {
         return g->accel;
     }
 
-    memset(g->supported_accelerators, 0, CPU_ACCELERATOR_MAX * sizeof(bool));
+    g->supported_accelerators = {};
 
     std::string status;
 #if HAVE_KVM
@@ -750,19 +781,24 @@ CpuAccelerator GetCurrentCpuAccelerator() {
         g->supported_accelerators[CPU_ACCELERATOR_HAX] = true;
     }
 #if HAVE_HVF
-    AndroidCpuAcceleration status_code_HVF = ProbeHVF(&status);
-    if (status_code_HVF == ANDROID_CPU_ACCELERATION_READY) {
-        g->supported_accelerators[CPU_ACCELERATOR_HVF] = true;
+    if (featurecontrol::isEnabled(featurecontrol::HVF)) {
+        std::string statusHfv;
+        AndroidCpuAcceleration status_code_HVF = ProbeHVF(&statusHfv);
+        if (status_code_HVF == ANDROID_CPU_ACCELERATION_READY) {
+            g->supported_accelerators[CPU_ACCELERATOR_HVF] = true;
+            // TODO: Switch to HVF as default option if/when appropriate.
+            if (status_code != ANDROID_CPU_ACCELERATION_READY) {
+                g->accel = CPU_ACCELERATOR_HVF;
+                status_code = status_code_HVF;
+                status = std::move(statusHfv);
+            }
+        }
     }
-    // TODO: Switch to HVF as default option if/when appropriate.
-    // if (status_code == ANDROID_CPU_ACCELERATION_READY) {
-    //     g->accel = CPU_ACCELERATOR_HVF;
-    // }
-#endif
+#endif  // HAVE_HFV
 
-#else
+#else  // !HAVE_KVM && !(HAVE_HAX || HAVE_HVF)
     status = "This system does not support CPU acceleration.";
-#endif
+#endif  // !HAVE_KVM && !(HAVE_HAX || HAVE_HVF)
 
     // cache status
     g->probed = true;
