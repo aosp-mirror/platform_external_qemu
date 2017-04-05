@@ -48,6 +48,7 @@ public:
         wakeGuestIfNeeded();
     }
 
+    static void setEnabled(bool enabled);
     static void setGuestClipboardCallback(GuestClipboardCallback cb);
     void setGuestClipboardContents(const uint8_t* buf, size_t len);
 
@@ -99,6 +100,7 @@ private:
 
         void queueContents(const uint8_t* buf, size_t len);
         ReadWriteState* pickStateWithData();
+        void clearQueued();
         bool hasData() const;
 
     private:
@@ -119,6 +121,8 @@ private:
     WritingState mGuestWriteState;
     ReadWriteState mGuestReadState;
     bool mWakeOnRead = false;
+
+    static bool sEnabled;
 };
 
 void registerClipboardPipeService();
