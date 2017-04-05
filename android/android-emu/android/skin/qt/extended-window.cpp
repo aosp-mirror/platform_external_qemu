@@ -78,6 +78,13 @@ ExtendedWindow::ExtendedWindow(
         mExtendedUi->settingsPage, SIGNAL(themeChanged(SettingsTheme)),
         this, SLOT(switchToTheme(SettingsTheme)));
 
+    connect(
+        mExtendedUi->settingsPage, SIGNAL(enableClipboardSharingChanged(bool)),
+        mToolWindow, SLOT(switchClipboardSharing(bool)));
+    connect(
+        mToolWindow, SIGNAL(haveClipboardSharingKnown(bool)),
+        mExtendedUi->settingsPage, SLOT(setHaveClipboardSharing(bool)));
+
     mPaneButtonMap = {
         {PANE_IDX_CAR,           mExtendedUi->carDataButton},
         {PANE_IDX_LOCATION,      mExtendedUi->locationButton},

@@ -56,6 +56,8 @@ constexpr int CRASHREPORT_COMBOBOX_ASK = 2;
 constexpr char GLESBACKEND_PREFERENCE[] = "set/glesBackendPreference";
 constexpr char GLESAPILEVEL_PREFERENCE[] ="set/glesApiLevelPreference";
 
+constexpr char CLIPBOARD_SHARING[] = "set/clipboardSharing";
+
 constexpr char LOCATION_ENTERED_ALTITUDE[] = "loc/altitude";
 constexpr char LOCATION_ENTERED_LATITUDE[] = "loc/latitude";
 constexpr char LOCATION_ENTERED_LONGITUDE[] = "loc/longitude";
