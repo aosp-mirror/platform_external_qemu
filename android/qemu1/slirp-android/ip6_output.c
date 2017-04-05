@@ -31,7 +31,7 @@ int ip6_output(struct socket *so, struct mbuf *m, int fast)
     ip->ip_fl_lo = 0;
 
     if (fast) {
-        if_encap(m->slirp, m);
+        if_encap((uint8_t *)m->m_data, m->m_len);
     } else {
         if_output(so, m);
     }

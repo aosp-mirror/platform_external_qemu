@@ -11,24 +11,14 @@
  * IP initialization: fill in IP protocol switch table.
  * All protocols not implemented in kernel go to raw IP protocol handler.
  */
-void ip6_init(Slirp *slirp)
+void ip6_init()
 {
-    icmp6_init(slirp);
-}
-
-void ip6_cleanup(Slirp *slirp)
-{
-    icmp6_cleanup(slirp);
+    icmp6_init();
 }
 
 void ip6_input(struct mbuf *m)
 {
     struct ip6 *ip6;
-    Slirp *slirp = m->slirp;
-
-    if (!slirp->in6_enabled) {
-        goto bad;
-    }
 
     DEBUG_CALL("ip6_input");
     DEBUG_ARG("m = %lx", (long)m);
@@ -61,7 +51,7 @@ void ip6_input(struct mbuf *m)
     switch (ip6->ip_nh) {
     case IPPROTO_TCP:
         NTOHS(ip6->ip_pl);
-        tcp_input(m, sizeof(struct ip6), (struct socket *)NULL, AF_INET6);
+        tcp_input(m, sizeof(struct ip6), (struct socket *)NULL/*FIXME , AF_INET6*/);
         break;
     case IPPROTO_UDP:
         udp6_input(m);
