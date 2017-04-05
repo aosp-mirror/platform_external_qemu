@@ -306,7 +306,7 @@ typedef struct OpenCommandParams {
     uint32_t rw_params_max_count;
 } OpenCommandParams;
 
-typedef struct PipeDevice {
+struct PipeDevice {
     GoldfishPipeState* ps;  // backlink to instance state
     int device_version;    // host device verion
     int driver_version;    // guest's driver version
@@ -347,7 +347,7 @@ typedef struct PipeDevice {
     uint64_t channel;
     uint32_t wakes;
     uint64_t params_addr;
-} PipeDevice;
+};
 
 
 // RW params getter functions for |ptrs| and |sizes| arrays.
