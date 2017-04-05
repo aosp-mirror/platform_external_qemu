@@ -63,6 +63,11 @@ uint32_t  special_addr_ip;
 /* virtual address alias for host */
 uint32_t alias_addr_ip;
 
+struct in6_addr vnameserver_addr6;
+struct in6_addr vhost_addr6;
+struct in6_addr vprefix_addr6;
+uint32_t vprefix_len = 64;
+
 static const uint8_t special_ethaddr[6] = {
     0x52, 0x54, 0x00, 0x12, 0x35, 0x00
 };
@@ -168,6 +173,15 @@ void slirp_init(int restricted, const char *special_ip)
 
     alias_addr_ip = special_addr_ip | CTL_ALIAS;
     getouraddr();
+
+    /* Simliar with what we do for vprefix6 in net/slirp.c */
+    vprefix_addr6.s6_addr[0] = 0xfe;
+    vprefix_addr6.s6_addr[1] = 0xc0;
+    vhost_addr6 = vprefix_addr6;
+    vhost_addr6.s6_addr[15] |= 2;
+    vnameserver_addr6 = vprefix_addr6;
+    vnameserver_addr6.s6_addr[15] |= 3;
+
     register_savevm(NULL, "slirp", 0, 1, slirp_state_save, slirp_state_load, NULL);
 
     slirp_net_forward_init();
