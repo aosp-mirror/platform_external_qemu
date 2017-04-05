@@ -30,6 +30,15 @@
 
 typedef std::unordered_map<GLenum,GLESpointer*>  ArraysMap;
 
+#define _ERR \
+{ \
+    GLenum err = dispatcher.glGetError(); \
+    if (err != GL_NO_ERROR) { \
+        fprintf(stderr, "%s:%s %d get error %d\n", \
+            __FUNCTION__, __FILE__, __LINE__, err); \
+    } \
+}
+
 enum TextureTarget {
 TEXTURE_2D,
 TEXTURE_CUBE_MAP,

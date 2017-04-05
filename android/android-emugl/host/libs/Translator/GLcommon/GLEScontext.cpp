@@ -633,6 +633,7 @@ void GLEScontext::postLoadRestoreCtx() {
         );
 
     GLDispatch& dispatcher = GLEScontext::dispatcher();
+    _ERR
 
     // buffer bindings
     auto bindBuffer = [this](GLenum target, GLuint buffer) {
@@ -641,6 +642,7 @@ void GLEScontext::postLoadRestoreCtx() {
     };
     bindBuffer(GL_ARRAY_BUFFER, m_arrayBuffer);
     bindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_currVaoState.iboId());
+    _ERR
     // TODO: GLES3: bind other buffers and other vao
 
     // framebuffer binding
@@ -650,6 +652,7 @@ void GLEScontext::postLoadRestoreCtx() {
     };
     bindFrameBuffer(GL_READ_FRAMEBUFFER, m_readFramebuffer);
     bindFrameBuffer(GL_DRAW_FRAMEBUFFER, m_drawFramebuffer);
+    _ERR
 
     for (unsigned int i = 0; i <= m_maxUsedTexUnit; i++) {
         // snapshot only support GL_TEXTURE_2D for now
