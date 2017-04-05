@@ -91,6 +91,7 @@ public:
 
 signals:
     void guestClipboardChanged(QString text);
+    void haveClipboardSharingKnown(bool have);
 
 private:
     void createExtendedWindow();
@@ -135,6 +136,7 @@ private:
 
 public slots:
     void raise();
+    void switchClipboardSharing(bool enabled);
 
 private slots:
     void on_back_button_pressed();

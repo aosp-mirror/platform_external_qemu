@@ -553,6 +553,55 @@
     </property>
    </item>
   </widget>
+  <widget class="QCheckBox" name="set_clipboardSharing">
+   <property name="geometry">
+    <rect>
+     <x>324</x>
+     <y>326</y>
+     <width>211</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Toggle</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="set_clipboardSharingTitle">
+   <property name="geometry">
+    <rect>
+     <x>324</x>
+     <y>308</y>
+     <width>211</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: 0px;</string>
+   </property>
+   <property name="title">
+    <string>Enable clipboard sharing</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Title</string>
+   </property>
+  </widget>
   <zorder>kbdShortcutsTitle</zorder>
   <zorder>set_crashReprotPrefTitle</zorder>
   <zorder>set_onTop</zorder>
