@@ -11,7 +11,6 @@
 
 void udp6_input(struct mbuf *m)
 {
-    Slirp *slirp = m->slirp;
     struct ip6 *ip, save_ip;
     struct udphdr *uh;
     int iphlen = sizeof(struct ip6);
@@ -22,7 +21,7 @@ void udp6_input(struct mbuf *m)
     DEBUG_CALL("udp6_input");
     DEBUG_ARG("m = %lx", (long)m);
 
-    if (slirp->restricted) {
+    if (slirp_restrict) {
         goto bad;
     }
 
@@ -60,11 +59,11 @@ void udp6_input(struct mbuf *m)
     /* Locate pcb for datagram. */
     lhost.sin6_family = AF_INET6;
     lhost.sin6_addr = ip->ip_src;
-    lhost.sin6_port = uh->uh_sport;
+    lhost.sin6_port = port_getn(uh->uh_sport);
 
     /* handle DHCPv6 */
-    if (ntohs(uh->uh_dport) == DHCPV6_SERVER_PORT &&
-        (in6_equal(&ip->ip_dst, &slirp->vhost_addr6) ||
+    if (port_geth(uh->uh_dport) == DHCPV6_SERVER_PORT &&
+        (in6_equal(&ip->ip_dst, &vhost_addr6) ||
          in6_equal(&ip->ip_dst, &(struct in6_addr)ALLDHCP_MULTICAST))) {
         m->m_data += iphlen;
         m->m_len -= iphlen;
@@ -75,26 +74,28 @@ void udp6_input(struct mbuf *m)
     }
 
     /* handle TFTP */
-    if (ntohs(uh->uh_dport) == TFTP_SERVER &&
-        !memcmp(ip->ip_dst.s6_addr, slirp->vhost_addr6.s6_addr, 16)) {
+    if (port_geth(uh->uh_dport) == TFTP_SERVER &&
+        !memcmp(ip->ip_dst.s6_addr, vhost_addr6.s6_addr, 16)) {
         m->m_data += iphlen;
         m->m_len -= iphlen;
-        tftp_input((struct sockaddr_storage *)&lhost, m);
+        tftp_input(/* FIXME (struct sockaddr_storage *)&lhost, */m);
         m->m_data -= iphlen;
         m->m_len += iphlen;
         goto bad;
     }
 
-    so = solookup(&slirp->udp_last_so, &slirp->udb,
-                  (struct sockaddr_storage *) &lhost, NULL);
+    so = solookup(&udb, 0, 0, 0, 0
+                  /*(struct sockaddr_storage *) &lhost, NULL*/);
+    /*FIXME*/
+    goto bad;
 
     if (so == NULL) {
         /* If there's no socket for this packet, create one. */
-        so = socreate(slirp);
+        so = socreate();
         if (!so) {
             goto bad;
         }
-        if (udp_attach(so, AF_INET6) == -1) {
+        if (udp_attach(so/*FIXME, AF_INET6*/) == -1) {
             DEBUG_MISC((dfd, " udp6_attach errno = %d-%s\n",
                         errno, strerror(errno)));
             sofree(so);
@@ -102,14 +103,19 @@ void udp6_input(struct mbuf *m)
         }
 
         /* Setup fields */
+        #if 0
+        FIXME
         so->so_lfamily = AF_INET6;
         so->so_laddr6 = ip->ip_src;
         so->so_lport6 = uh->uh_sport;
+        #endif
     }
-
+    #if 0
+    FIXME
     so->so_ffamily = AF_INET6;
     so->so_faddr6 = ip->ip_dst; /* XXX */
     so->so_fport6 = uh->uh_dport; /* XXX */
+    #endif
 
     iphlen += sizeof(struct udphdr);
     m->m_len -= iphlen;
@@ -165,8 +171,8 @@ int udp6_output(struct socket *so, struct mbuf *m,
     ip->ip_dst = daddr->sin6_addr;
 
     /* Build UDP header */
-    uh->uh_sport = saddr->sin6_port;
-    uh->uh_dport = daddr->sin6_port;
+    uh->uh_sport = port_setn(saddr->sin6_port);
+    uh->uh_dport = port_setn(daddr->sin6_port);
     uh->uh_ulen = ip->ip_pl;
     uh->uh_sum = 0;
     uh->uh_sum = ip6_cksum(m);

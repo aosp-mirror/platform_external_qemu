@@ -214,12 +214,17 @@ LOCAL_SRC_FILES += \
     slirp-android/bootp.c \
     slirp-android/cksum.c \
     slirp-android/debug.c \
+    slirp-android/dhcpv6.c \
     slirp-android/if.c \
     slirp-android/ip_icmp.c \
+    slirp-android/ip6_icmp.c \
     slirp-android/ip_input.c \
+    slirp-android/ip6_input.c \
     slirp-android/ip_output.c \
+    slirp-android/ip6_output.c \
     slirp-android/mbuf.c \
     slirp-android/misc.c \
+    slirp-android/ndp_table.c \
     slirp-android/sbuf.c \
     slirp-android/slirp.c \
     slirp-android/socket.c \
@@ -229,6 +234,7 @@ LOCAL_SRC_FILES += \
     slirp-android/tcp_timer.c \
     slirp-android/tftp.c \
     slirp-android/udp.c \
+    slirp-android/udp6.c \
     ui/console.c \
     ui/d3des.c \
     ui/input.c \
