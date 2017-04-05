@@ -28,6 +28,7 @@ enum class NamedObjectType {
     SHADER_OR_PROGRAM,
     SAMPLER,
     QUERY,
+    VERTEX_ARRAY_OBJECT,
     NUM_OBJECT_TYPES  // Must be last
 };
 

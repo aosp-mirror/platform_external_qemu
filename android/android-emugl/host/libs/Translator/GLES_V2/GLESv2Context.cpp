@@ -139,52 +139,92 @@ void GLESv2Context::postLoadRestoreCtx() {
     dispatcher.glUseProgram(globalProgramName);
 
     // vertex attribute pointers
-    // TODO: GLES3: support multiple VAO
-    // TODO: snapshot glVertexAttrib1f and its friends
-    for (const auto& vao : m_currVaoState) {
-        const GLESpointer* glesPointer = vao.second;
-        // attribute 0 are bound right before draw
-        if (glesPointer->getAttribType() == GLESpointer::VALUE
-                && vao.first == 0) {
-            break;
+    for (const auto& vaoIte : m_vaoStateMap) {
+        if (m_glesMajorVersion >= 3) {
+            if (vaoIte.first != 0) {
+                genVAOName(vaoIte.first, false);
+            }
+            dispatcher.glBindVertexArray(vaoIte.first);
         }
-        switch (glesPointer->getAttribType()) {
-            case GLESpointer::BUFFER:
-                dispatcher.glBindBuffer(GL_ARRAY_BUFFER,
-                        glesPointer->getBufferName());
-                dispatcher.glVertexAttribPointer(vao.first, glesPointer->getSize(),
-                        glesPointer->getType(), glesPointer->isNormalize(),
-                        glesPointer->getStride(),
-                        (GLvoid*)(size_t)glesPointer->getBufferOffset());
+        for (const auto& glesPointerIte : *vaoIte.second.arraysMap) {
+            const GLESpointer* glesPointer = glesPointerIte.second;
+            // attribute 0 are bound right before draw, no need to bind it here
+            if (glesPointer->getAttribType() == GLESpointer::VALUE
+                    && glesPointerIte.first == 0) {
                 break;
-            case GLESpointer::VALUE:
-                switch (glesPointer->getValueCount()) {
-                    case 1:
-                        dispatcher.glVertexAttrib1fv(vao.first,
-                                glesPointer->getValues());
-                        break;
-                    case 2:
-                        dispatcher.glVertexAttrib2fv(vao.first,
-                                glesPointer->getValues());
-                        break;
-                    case 3:
-                        dispatcher.glVertexAttrib3fv(vao.first,
-                                glesPointer->getValues());
-                        break;
-                    case 4:
-                        dispatcher.glVertexAttrib4fv(vao.first,
-                                glesPointer->getValues());
-                        break;
-                }
-                break;
-            case GLESpointer::ARRAY:
-                // client arrays are set up right before draw calls
-                // so we do nothing here
-                break;
+            }
+            switch (glesPointer->getAttribType()) {
+                case GLESpointer::BUFFER:
+                    dispatcher.glBindBuffer(GL_ARRAY_BUFFER,
+                            glesPointer->getBufferName());
+                    dispatcher.glVertexAttribPointer(glesPointerIte.first,
+                            glesPointer->getSize(),
+                            glesPointer->getType(), glesPointer->isNormalize(),
+                            glesPointer->getStride(),
+                            (GLvoid*)(size_t)glesPointer->getBufferOffset());
+                    break;
+                case GLESpointer::VALUE:
+                    switch (glesPointer->getValueCount()) {
+                        case 1:
+                            dispatcher.glVertexAttrib1fv(glesPointerIte.first,
+                                    glesPointer->getValues());
+                            break;
+                        case 2:
+                            dispatcher.glVertexAttrib2fv(glesPointerIte.first,
+                                    glesPointer->getValues());
+                            break;
+                        case 3:
+                            dispatcher.glVertexAttrib3fv(glesPointerIte.first,
+                                    glesPointer->getValues());
+                            break;
+                        case 4:
+                            dispatcher.glVertexAttrib4fv(glesPointerIte.first,
+                                    glesPointer->getValues());
+                            break;
+                    }
+                    break;
+                case GLESpointer::ARRAY:
+                    // client arrays are set up right before draw calls
+                    // so we do nothing here
+                    break;
+            }
+            if (glesPointer->isEnable()) {
+                dispatcher.glEnableVertexAttribArray(glesPointerIte.first);
+            }
         }
-        if (glesPointer->isEnable()) {
-            dispatcher.glEnableVertexAttribArray(vao.first);
-        }
+    }
+    if (m_glesMajorVersion >= 3) {
+        dispatcher.glBindVertexArray(m_currVaoState.vaoId());
+        auto bindBufferRangeFunc =
+                [this](GLenum target,
+                    const std::vector<BufferBinding>& bufferBindings) {
+                    for (unsigned int i = 0; i < bufferBindings.size(); i++) {
+                        const BufferBinding& bd = bufferBindings[i];
+                        GLuint globalName = this->shareGroup()->getGlobalName(
+                                NamedObjectType::VERTEXBUFFER,
+                                bd.buffer);
+                        this->dispatcher().glBindBufferRange(target,
+                                i, globalName, bd.offset, bd.size);
+                    }
+                };
+        bindBufferRangeFunc(GL_TRANSFORM_FEEDBACK_BUFFER,
+                m_indexedTransformFeedbackBuffers);
+        bindBufferRangeFunc(GL_UNIFORM_BUFFER,
+                m_indexedUniformBuffers);
+        bindBufferRangeFunc(GL_ATOMIC_COUNTER_BUFFER,
+                m_indexedAtomicCounterBuffers);
+        bindBufferRangeFunc(GL_SHADER_STORAGE_BUFFER,
+                m_indexedShaderStorageBuffers);
+        dispatcher.glBindBuffer(GL_COPY_READ_BUFFER, m_copyReadBuffer);
+        dispatcher.glBindBuffer(GL_COPY_WRITE_BUFFER, m_copyWriteBuffer);
+        dispatcher.glBindBuffer(GL_PIXEL_PACK_BUFFER, m_pixelPackBuffer);
+        dispatcher.glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pixelUnpackBuffer);
+        dispatcher.glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, m_transformFeedbackBuffer);
+        dispatcher.glBindBuffer(GL_UNIFORM_BUFFER, m_uniformBuffer);
+        dispatcher.glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, m_atomicCounterBuffer);
+        dispatcher.glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, m_dispatchIndirectBuffer);
+        dispatcher.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, m_drawIndirectBuffer);
+        dispatcher.glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_shaderStorageBuffer);
     }
 
     GLEScontext::postLoadRestoreCtx();
