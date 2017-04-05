@@ -14,8 +14,9 @@
 
 #include "android/emulation/control/AdbBugReportServices.h"
 
-#include "android/base/files/PathUtils.h"
 #include "android/base/StringFormat.h"
+#include "android/base/Uuid.h"
+#include "android/base/files/PathUtils.h"
 #include "android/globals.h"
 
 #include <ctime>
@@ -30,6 +31,7 @@ using android::base::PathUtils;
 using android::base::StringView;
 using android::base::System;
 using android::base::StringFormat;
+using android::base::Uuid;
 
 const System::Duration AdbBugReportServices::kAdbCommandTimeoutMs =
         System::kInfinite;
@@ -56,16 +58,8 @@ void AdbBugReportServices::generateBugReport(StringView outputDirectoryPath,
         return;
     }
 
-    const char* deviceName = avdInfo_getName(android_avdInfo);
-    time_t now = System::get()->getUnixTime();
-    char date[80];
-    strftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S", localtime(&now));
-    // file name will be in the format of
-    // bugreport-[deviceName]-[%Y-%m-%d%H:%M:%S]-[currentProcessId]
-    auto fileName = StringFormat(
-            "bugreport-%s-%s-%d", deviceName ? deviceName : "UNKNOWN_DEVICE",
-            date, (int)System::get()->getCurrentProcessId());
-    auto filePath = PathUtils::join(outputDirectoryPath, fileName);
+    auto filePath =
+            PathUtils::join(outputDirectoryPath, generateUniqueBugreportName());
 
     // In reference to
     // platform/frameworks/native/cmds/dumpstate/bugreport-format.md
@@ -98,7 +92,7 @@ void AdbBugReportServices::generateBugReport(StringView outputDirectoryPath,
                         std::ofstream outFile(
                                 filePath.c_str(),
                                 std::ios_base::out | std::ios_base::trunc);
-                        if (!outFile) {
+                        if (!outFile.is_open() || !outFile.good()) {
                             resultCallback(Result::GenerationFailed, nullptr);
                         } else {
                             std::filebuf* pbuf = result->output->rdbuf();
@@ -139,6 +133,16 @@ void AdbBugReportServices::generateAdbLogcatInMemory(
                 mAdbLogcatCommand.reset();
             },
             kAdbCommandTimeoutMs, true);
+}
+
+std::string AdbBugReportServices::generateUniqueBugreportName() {
+    const char* deviceName = avdInfo_getName(android_avdInfo);
+    time_t now = System::get()->getUnixTime();
+    char date[80];
+    strftime(date, sizeof(date), "%Y-%m-%d-%H-%M-%S", localtime(&now));
+    return StringFormat("bugreport-%s-%s-%s",
+                        deviceName ? deviceName : "UNKNOWN_DEVICE", date,
+                        Uuid::generate().toString());
 }
 
 }  // namespace emulation
