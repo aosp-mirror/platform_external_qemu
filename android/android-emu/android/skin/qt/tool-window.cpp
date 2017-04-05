@@ -214,8 +214,8 @@ void ToolWindow::mousePressEvent(QMouseEvent* event) {
 }
 
 void ToolWindow::hideEvent(QHideEvent*) {
-    assert(mExtendedWindow);
-    mIsExtendedWindowVisibleOnShow = mExtendedWindow->isVisible();
+    mIsExtendedWindowVisibleOnShow =
+            mExtendedWindow && mExtendedWindow->isVisible();
 }
 
 void ToolWindow::show() {
