@@ -19,7 +19,7 @@
 namespace android {
 namespace emulation {
 
-static constexpr auto emptyCallback = [](const uint8_t*, size_t) {};
+static void emptyCallback(const uint8_t*, size_t) {}
 
 bool ClipboardPipe::sEnabled = false;
 
