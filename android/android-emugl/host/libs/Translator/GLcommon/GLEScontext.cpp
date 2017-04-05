@@ -486,12 +486,16 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
             m_needRestoreFromSnapshot = true;
         }
     }
-    m_fboNameSpace = new NameSpace(NamedObjectType::FRAMEBUFFER,
-        globalNameSpace, stream, [this](NamedObjectType type,
+    auto loader = [this](NamedObjectType type,
                     long long unsigned int localName,
                     android::base::Stream* stream) {
             return loadObject(type,localName, stream);
-    });
+    };
+    m_fboNameSpace = new NameSpace(NamedObjectType::FRAMEBUFFER,
+        globalNameSpace, stream, loader);
+    // do not load m_vaoNameSpace
+    m_vaoNameSpace = new NameSpace(NamedObjectType::VERTEX_ARRAY_OBJECT,
+        globalNameSpace, nullptr, loader);
 }
 
 GLEScontext::~GLEScontext() {
@@ -503,9 +507,11 @@ GLEScontext::~GLEScontext() {
         removeVertexArrayObject(vao);
     }
     delete[] m_texState;
-    m_texState = NULL;
+    m_texState = nullptr;
     delete m_fboNameSpace;
-    m_fboNameSpace = NULL;
+    m_fboNameSpace = nullptr;
+    delete m_vaoNameSpace;
+    m_vaoNameSpace = nullptr;
 }
 
 void GLEScontext::postLoad() {
@@ -614,6 +620,7 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         stream->putBe32(m_readFramebuffer);
     }
     m_fboNameSpace->onSave(stream);
+    // do not save m_vaoNameSpace
 }
 
 void GLEScontext::postLoadRestoreShareGroup() {
@@ -633,6 +640,7 @@ void GLEScontext::postLoadRestoreCtx() {
         );
 
     GLDispatch& dispatcher = GLEScontext::dispatcher();
+    _ERR
 
     // buffer bindings
     auto bindBuffer = [this](GLenum target, GLuint buffer) {
@@ -641,6 +649,7 @@ void GLEScontext::postLoadRestoreCtx() {
     };
     bindBuffer(GL_ARRAY_BUFFER, m_arrayBuffer);
     bindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_currVaoState.iboId());
+    _ERR
     // TODO: GLES3: bind other buffers and other vao
 
     // framebuffer binding
@@ -650,6 +659,7 @@ void GLEScontext::postLoadRestoreCtx() {
     };
     bindFrameBuffer(GL_READ_FRAMEBUFFER, m_readFramebuffer);
     bindFrameBuffer(GL_DRAW_FRAMEBUFFER, m_drawFramebuffer);
+    _ERR
 
     for (unsigned int i = 0; i <= m_maxUsedTexUnit; i++) {
         // snapshot only support GL_TEXTURE_2D for now
@@ -1877,4 +1887,25 @@ unsigned int GLEScontext::getFBOGlobalName(ObjectLocalName p_localName) {
 
 ObjectLocalName GLEScontext::getFBOLocalName(unsigned int p_globalName) {
     return m_fboNameSpace->getLocalName(p_globalName);
+}
+
+bool GLEScontext::isVAO(ObjectLocalName p_localName) {
+    if (p_localName == 0) return true;
+    return m_vaoNameSpace->isObject(p_localName);
+}
+
+ObjectLocalName GLEScontext::genVAOName(ObjectLocalName p_localName,
+        bool genLocal) {
+    return m_vaoNameSpace->genName(GenNameInfo(NamedObjectType::VERTEX_ARRAY_OBJECT),
+            p_localName, genLocal);
+}
+
+void GLEScontext::deleteVAO(ObjectLocalName p_localName) {
+    if (p_localName == 0) return;
+    m_vaoNameSpace->deleteName(p_localName);
+}
+
+unsigned int GLEScontext::getVAOGlobalName(ObjectLocalName p_localName) {
+    if (p_localName == 0) return 0;
+    return m_vaoNameSpace->getGlobalName(p_localName);
 }

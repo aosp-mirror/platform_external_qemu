@@ -30,6 +30,15 @@
 
 typedef std::unordered_map<GLenum,GLESpointer*>  ArraysMap;
 
+#define _ERR \
+{ \
+    GLenum err = dispatcher.glGetError(); \
+    if (err != GL_NO_ERROR) { \
+        fprintf(stderr, "%s:%s %d get error %d\n", \
+            __FUNCTION__, __FILE__, __LINE__, err); \
+    } \
+}
+
 enum TextureTarget {
 TEXTURE_2D,
 TEXTURE_CUBE_MAP,
@@ -348,6 +357,12 @@ public:
     unsigned int getFBOGlobalName(ObjectLocalName p_localName);
     ObjectLocalName getFBOLocalName(unsigned int p_globalName);
 
+    bool isVAO(ObjectLocalName p_localName);
+    ObjectLocalName genVAOName(ObjectLocalName p_localName = 0,
+            bool genLocal = 0);
+    void deleteVAO(ObjectLocalName p_localName);
+    unsigned int getVAOGlobalName(ObjectLocalName p_localName);
+
     // Snapshot save
     virtual void onSave(android::base::Stream* stream) const;
     virtual ObjectDataPtr loadObject(NamedObjectType type,
@@ -503,6 +518,9 @@ private:
     static std::string    s_glVersion;
 
     NameSpace* m_fboNameSpace = nullptr;
+    // m_vaoNameSpace is an empty shell that holds the names but not the data
+    // TODO(yahan): consider moving the data into it?
+    NameSpace* m_vaoNameSpace = nullptr;
 };
 
 #endif
