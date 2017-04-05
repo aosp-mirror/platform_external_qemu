@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a9df4990_b44600d0",
+        "filename": "android/android-emu/android/emulation/LogcatPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-05T17:14:25Z",
+      "side": 1,
+      "message": "is c++, can ofstream be used?",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 70
+      },
+      "revId": "09ff8a43015c293f9fb2f349c2f2d0f5e063e563",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
