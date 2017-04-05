@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "android/base/Version.h"
 #include "android/cpu_accelerator.h"
 
 #include <string>
@@ -56,6 +57,13 @@ bool GetCurrentAcceleratorSupport(CpuAccelerator type);
 // CPU_ACCELERATOR_NONE this will contain a small explanation why
 // the accelerator cannot be used.
 std::string GetCurrentCpuAcceleratorStatus();
+
+// Return the version for the CPU accelerator technology usable
+// on the current machine.
+android::base::Version GetCurrentCpuAcceleratorVersion();
+
+// Convert CpuAccelerator to string type
+std::string CpuAcceleratorToString(CpuAccelerator type);
 
 // Return an status code describing the state of the current CPU
 // acceleration on this machine. If GetCurrentCpuAccelerator() returns
