@@ -19,7 +19,7 @@
 namespace android {
 namespace emulation {
 
-static constexpr auto emptyCallback = [](const uint8_t*, size_t) {};
+static void emptyCallback(const uint8_t*, size_t) {}
 
 // A storage for the current clipboard pipe instance data.
 // Shared pointer is required as there are potential races between clipboard
