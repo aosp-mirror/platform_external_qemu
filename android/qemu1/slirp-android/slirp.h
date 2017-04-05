@@ -159,6 +159,7 @@ void free _P((void *ptr));
 #include "debug.h"
 
 #include "ip.h"
+#include "ip6.h"
 #include "tcp.h"
 #include "tcp_timer.h"
 #include "tcp_var.h"
