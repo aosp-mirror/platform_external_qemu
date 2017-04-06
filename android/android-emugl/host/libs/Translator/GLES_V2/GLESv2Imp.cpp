@@ -3268,26 +3268,31 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
 GL_APICALL void GL_APIENTRY glGenVertexArraysOES(GLsizei n, GLuint* arrays) {
     GET_CTX_V2();
     SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
-    ctx->dispatcher().glGenVertexArrays(n, arrays);
+    for (GLsizei i = 0; i < n; i++) {
+        arrays[i] = ctx->genVAOName(0, true);
+    }
     ctx->addVertexArrayObjects(n, arrays);
 }
 
 GL_APICALL void GL_APIENTRY glBindVertexArrayOES(GLuint array) {
     GET_CTX_V2();
     ctx->setVertexArrayObject(array);
-    ctx->dispatcher().glBindVertexArray(array);
+    ctx->dispatcher().glBindVertexArray(ctx->getVAOGlobalName(array));
 }
 
 GL_APICALL void GL_APIENTRY glDeleteVertexArraysOES(GLsizei n, const GLuint * arrays) {
     GET_CTX_V2();
     SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
     ctx->removeVertexArrayObjects(n, arrays);
-    ctx->dispatcher().glDeleteVertexArrays(n, arrays);
+    for (GLsizei i = 0; i < n; i++) {
+        ctx->deleteVAO(arrays[i]);
+    }
 }
 
 GL_APICALL GLboolean GL_APIENTRY glIsVertexArrayOES(GLuint array) {
     GET_CTX_V2_RET(0);
-    return ctx->dispatcher().glIsVertexArray(array);
+    GLboolean glIsVertexArrayRET = ctx->isVAO(array);
+    return glIsVertexArrayRET;
 }
 
 #include "GLESv30Imp.cpp"
