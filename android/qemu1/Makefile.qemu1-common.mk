@@ -176,6 +176,7 @@ LOCAL_SRC_FILES += \
     android-qemu1-glue/qemu-display-agent-impl.cpp \
     android-qemu1-glue/qemu-finger-agent-impl.c \
     android-qemu1-glue/qemu-location-agent-impl.c \
+    android-qemu1-glue/qemu-http-proxy-agent-impl.c \
     android-qemu1-glue/qemu-net-agent-impl.c \
     android-qemu1-glue/qemu-car-data-agent-impl.cpp \
     android-qemu1-glue/qemu-sensors-agent-impl.c \

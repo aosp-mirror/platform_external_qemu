@@ -34,6 +34,7 @@ LOCAL_SRC_FILES := \
     qemu-display-agent-impl.cpp \
     qemu-finger-agent-impl.c \
     qemu-location-agent-impl.c \
+    qemu-http-proxy-agent-impl.c \
     qemu-net-agent-impl.c \
     qemu-car-data-agent-impl.cpp \
     qemu-sensors-agent-impl.c \
