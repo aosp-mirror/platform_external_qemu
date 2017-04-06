@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a93c92dd_607775b2",
+        "filename": "android/android-emu/android/featurecontrol/FeatureControlImpl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-06T19:33:19Z",
+      "side": 1,
+      "message": "we probably want some better way to calculate the maximum feature name length, in case later we have a super long feature name",
+      "range": {
+        "startLine": 203,
+        "startChar": 41,
+        "endLine": 203,
+        "endChar": 43
+      },
+      "revId": "f7d8bda3e65eb09566f05f1f1d8c6e7d44c3ffbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
