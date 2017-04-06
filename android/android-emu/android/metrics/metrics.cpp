@@ -104,10 +104,10 @@ bool android_metrics_start(const char* emulatorVersion,
     return true;
 }
 
-void android_metrics_stop() {
+void android_metrics_stop(MetricsStopReason reason) {
     sGlobalData->reset();
     PeriodicReporter::stop();
-    MetricsReporter::stop();
+    MetricsReporter::stop(reason);
 }
 
 // Start the ADB liveness monitor. call this when GUI starts
