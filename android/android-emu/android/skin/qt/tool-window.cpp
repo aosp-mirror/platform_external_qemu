@@ -46,7 +46,26 @@ using namespace android::base;
 
 static ToolWindow* twInstance = NULL;
 
+static void onGuestClipboardChanged(
+    const uint8_t* data,
+    size_t length) {
+    QString content = QString::fromUtf8((const char*)data, length);
+    QApplication::clipboard()->blockSignals(true);
+    QApplication::clipboard()->setText(content);
+    QApplication::clipboard()->blockSignals(false);
+}
+
 extern "C" void setUiEmuAgent(const UiEmuAgent* agentPtr) {
+    if (agentPtr->clipboard) {
+        agentPtr->clipboard->setGuestClipboardCallback(onGuestClipboardChanged);
+        QObject::connect(
+            QApplication::clipboard(), &QClipboard::dataChanged,
+            [agentPtr]() {
+                QByteArray bytes = QApplication::clipboard()->text().toUtf8();
+                agentPtr->clipboard->setGuestClipboardContents(
+                    (const uint8_t*)bytes.data(), bytes.size());
+            });
+    }
     if (twInstance) {
         twInstance->setToolEmuAgent(agentPtr);
     }
@@ -188,12 +207,6 @@ void ToolWindow::raise() {
     }
 }
 
-void ToolWindow::switchClipboardSharing(bool enabled) {
-    if (mUiEmuAgent && mUiEmuAgent->clipboard) {
-        mUiEmuAgent->clipboard->setEnabled(enabled);
-    }
-}
-
 void ToolWindow::hide() {
     QFrame::hide();
     if (mExtendedWindow) {
@@ -213,8 +226,8 @@ void ToolWindow::mousePressEvent(QMouseEvent* event) {
 }
 
 void ToolWindow::hideEvent(QHideEvent*) {
-    mIsExtendedWindowVisibleOnShow =
-            mExtendedWindow && mExtendedWindow->isVisible();
+    assert(mExtendedWindow);
+    mIsExtendedWindowVisibleOnShow = mExtendedWindow->isVisible();
 }
 
 void ToolWindow::show() {
@@ -426,21 +439,6 @@ void ToolWindow::setToolEmuAgent(const UiEmuAgent* agPtr) {
 
     assert(mExtendedWindow);
     mExtendedWindow->setAgent(agPtr);
-
-    if (agPtr->clipboard) {
-        connect(this, SIGNAL(guestClipboardChanged(QString)),
-                this, SLOT(onGuestClipboardChanged(QString)),
-                Qt::QueuedConnection);
-        agPtr->clipboard->setGuestClipboardCallback(
-                [](const uint8_t* data, size_t size) {
-                    emit twInstance->guestClipboardChanged(
-                            QString::fromUtf8((const char*)data, size));
-                });
-        connect(QApplication::clipboard(), SIGNAL(dataChanged()),
-                this, SLOT(onHostClipboardChanged()));
-    }
-
-    emit haveClipboardSharingKnown(agPtr->clipboard != nullptr);
 }
 
 void ToolWindow::on_back_button_pressed() {
@@ -525,17 +523,6 @@ void ToolWindow::on_scrShot_button_clicked() {
 }
 void ToolWindow::on_zoom_button_clicked() {
     handleUICommand(QtUICommand::ENTER_ZOOM, true);
-}
-
-void ToolWindow::onGuestClipboardChanged(QString text) {
-    QSignalBlocker blockSignals(QApplication::clipboard());
-    QApplication::clipboard()->setText(text);
-}
-
-void ToolWindow::onHostClipboardChanged() {
-    QByteArray bytes = QApplication::clipboard()->text().toUtf8();
-    mUiEmuAgent->clipboard->setGuestClipboardContents(
-                (const uint8_t*)bytes.data(), bytes.size());
 }
 
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {

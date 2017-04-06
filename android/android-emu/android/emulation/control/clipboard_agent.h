@@ -12,16 +12,12 @@
 
 #include "android/utils/compiler.h"
 
-#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 
 ANDROID_BEGIN_HEADER
 
 typedef struct QAndroidClipboardAgent {
-    // Turns clipboard sharing on/off.
-    void (*setEnabled)(bool enabled);
-
     // Sets a function to call when the guest's clipboard content changes
     // as a result of an action inside the guest.
     // |cb| is the pointer to the function

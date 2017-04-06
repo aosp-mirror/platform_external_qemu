@@ -13,22 +13,20 @@
 
 #include "android/emulation/ClipboardPipe.h"
 
-using android::emulation::ClipboardPipe;
-
 static void set_guest_clipboard_callback(
         void(*cb)(const uint8_t*, size_t)) {
-    ClipboardPipe::setGuestClipboardCallback(cb);
+    android::emulation::ClipboardPipe::setGuestClipboardCallback(cb);
 }
 
 static void set_guest_clipboard_contents(const uint8_t* buf, size_t len) {
-    const auto pipe = ClipboardPipe::Service::getPipe();
+    const auto pipe =
+        android::emulation::ClipboardPipe::Service::getPipe();
     if (pipe) {
         pipe->setGuestClipboardContents(buf, len);
     }
 }
 
 static const QAndroidClipboardAgent clipboardAgent = {
-    .setEnabled = &ClipboardPipe::setEnabled,
     .setGuestClipboardCallback = set_guest_clipboard_callback,
     .setGuestClipboardContents = set_guest_clipboard_contents
 };
