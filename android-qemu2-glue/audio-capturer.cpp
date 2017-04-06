@@ -48,9 +48,8 @@ static void my_notify(void* opaque, audcnotification_e cmd)
 
 static void my_destroy(void* opaque)
 {
-    AudioState* state = (AudioState*)opaque;
-    if (state != nullptr)
-        delete state;
+    (void) opaque;
+    // no need to destroy, as we use value for AudioState
 }
 
 static void my_capture(void* opaque, void* buf, int size)
