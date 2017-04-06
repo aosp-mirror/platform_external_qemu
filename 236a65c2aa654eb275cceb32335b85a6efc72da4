@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "45f51460_72407a4e",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-06T19:28:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6693590e_7fca51fd",
+      "range": {
+        "startLine": 125,
+        "startChar": 0,
+        "endLine": 125,
+        "endChar": 40
+      },
+      "revId": "236a65c2aa654eb275cceb32335b85a6efc72da4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0e772973_782cb1b4",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-04-06T18:29:33Z",
       "side": 1,
       "message": "For restoring GLES3 textures in general, we also need to account for the current setting of GL_UNPACK_ROW_LENGTH, GL_UNPACK_IMAGE_HEIGHT and friends. See \n\nhttps://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glPixelStorei.xhtml",
+      "range": {
+        "startLine": 144,
+        "startChar": 0,
+        "endLine": 147,
+        "endChar": 57
+      },
+      "revId": "236a65c2aa654eb275cceb32335b85a6efc72da4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c98b4dc4_05629a1b",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-06T19:28:46Z",
+      "side": 1,
+      "message": "thanks for the tips!",
+      "parentUuid": "0e772973_782cb1b4",
       "range": {
         "startLine": 144,
         "startChar": 0,
