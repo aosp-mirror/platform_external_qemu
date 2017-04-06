@@ -285,7 +285,6 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
            s_gles2.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_width,
                                        m_height);
        }
-        s_gles2.glFlush();
         s_gles2.glDeleteTextures(1, &tmpTex);
         s_gles2.glBindTexture(GL_TEXTURE_2D, currTexBind);
 
@@ -307,14 +306,27 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
         s_gles1.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
         s_gles1.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_width,
                                     m_height);
-        s_gles1.glFlush();
         s_gles1.glDeleteTextures(1, &tmpTex);
         s_gles1.glBindTexture(GL_TEXTURE_2D, currTexBind);
     }
+
+    m_sync = new FenceSync(false, false);
+
+    if (tInfo->currContext->version() > GLESApi_CM) {
+        s_gles2.glFlush();
+    } else {
+        s_gles1.glFlush();
+    }
+
     return true;
 }
 
 bool ColorBuffer::blitFromCurrentReadBuffer2() {
+    if (m_sync) {
+        m_sync->waitAsync();
+        m_sync->decRef();
+        m_sync = nullptr;
+    }
     // GLuint tmpTex;
     // GLint prev_draw_fbo, prev_read_fbo;
     // GLint currTexBind;
@@ -408,6 +420,11 @@ GLuint ColorBuffer::scale() {
 }
 
 bool ColorBuffer::post(GLuint tex, float rotation, float dx, float dy) {
+    if (m_sync) {
+        m_sync->waitAsync();
+        m_sync->decRef();
+        m_sync = nullptr;
+    }
     // NOTE: Do not call m_helper->setupContext() here!
     return m_helper->getTextureDraw()->draw(tex, rotation, dx, dy);
 }

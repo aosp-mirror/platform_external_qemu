@@ -179,7 +179,7 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
     }
 
     DPRINT("wait on sync obj: %p", cmd->fenceSync);
-    cmd->fenceSync->waitAsync();
+    cmd->fenceSync->wait(kDefaultTimeoutNsecs);
 
     DPRINT("issue timeline increment");
     emugl_sync_timeline_inc(cmd->timeline, kTimelineInterval);
