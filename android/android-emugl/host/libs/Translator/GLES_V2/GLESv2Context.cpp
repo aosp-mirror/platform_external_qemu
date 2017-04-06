@@ -215,16 +215,21 @@ void GLESv2Context::postLoadRestoreCtx() {
                 m_indexedAtomicCounterBuffers);
         bindBufferRangeFunc(GL_SHADER_STORAGE_BUFFER,
                 m_indexedShaderStorageBuffers);
-        dispatcher.glBindBuffer(GL_COPY_READ_BUFFER, m_copyReadBuffer);
-        dispatcher.glBindBuffer(GL_COPY_WRITE_BUFFER, m_copyWriteBuffer);
-        dispatcher.glBindBuffer(GL_PIXEL_PACK_BUFFER, m_pixelPackBuffer);
-        dispatcher.glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pixelUnpackBuffer);
-        dispatcher.glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, m_transformFeedbackBuffer);
-        dispatcher.glBindBuffer(GL_UNIFORM_BUFFER, m_uniformBuffer);
-        dispatcher.glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, m_atomicCounterBuffer);
-        dispatcher.glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, m_dispatchIndirectBuffer);
-        dispatcher.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, m_drawIndirectBuffer);
-        dispatcher.glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_shaderStorageBuffer);
+        // buffer bindings
+        auto bindBuffer = [this](GLenum target, GLuint buffer) {
+            this->dispatcher().glBindBuffer(target,
+                    m_shareGroup->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer));
+        };
+        bindBuffer(GL_COPY_READ_BUFFER, m_copyReadBuffer);
+        bindBuffer(GL_COPY_WRITE_BUFFER, m_copyWriteBuffer);
+        bindBuffer(GL_PIXEL_PACK_BUFFER, m_pixelPackBuffer);
+        bindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pixelUnpackBuffer);
+        bindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, m_transformFeedbackBuffer);
+        bindBuffer(GL_UNIFORM_BUFFER, m_uniformBuffer);
+        bindBuffer(GL_ATOMIC_COUNTER_BUFFER, m_atomicCounterBuffer);
+        bindBuffer(GL_DISPATCH_INDIRECT_BUFFER, m_dispatchIndirectBuffer);
+        bindBuffer(GL_DRAW_INDIRECT_BUFFER, m_drawIndirectBuffer);
+        bindBuffer(GL_SHADER_STORAGE_BUFFER, m_shaderStorageBuffer);
     }
 
     GLEScontext::postLoadRestoreCtx();
