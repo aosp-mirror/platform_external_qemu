@@ -482,6 +482,7 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
             m_renderbuffer = static_cast<GLuint>(stream->getBe32());
             m_drawFramebuffer = static_cast<GLuint>(stream->getBe32());
             m_readFramebuffer = static_cast<GLuint>(stream->getBe32());
+            m_defaultFBODrawBuffer = static_cast<GLenum>(stream->getBe32());
 
             m_needRestoreFromSnapshot = true;
         }
@@ -618,6 +619,7 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         stream->putBe32(m_renderbuffer);
         stream->putBe32(m_drawFramebuffer);
         stream->putBe32(m_readFramebuffer);
+        stream->putBe32(m_defaultFBODrawBuffer);
     }
     m_fboNameSpace->onSave(stream);
     // do not save m_vaoNameSpace
@@ -1834,6 +1836,10 @@ void GLEScontext::initDefaultFBO(
     dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, *eglSurfaceRBDepthId);
     dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, *eglSurfaceRBDepthId);
 
+    if (m_defaultFBODrawBuffer != GL_COLOR_ATTACHMENT0) {
+        dispatcher().glDrawBuffers(1, &m_defaultFBODrawBuffer);
+    }
+
     if (separateReadRbo) {
         dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, m_defaultReadFBO);
         dispatcher().glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, *eglReadSurfaceRBColorId);
@@ -1904,4 +1910,8 @@ void GLEScontext::deleteVAO(ObjectLocalName p_localName) {
 unsigned int GLEScontext::getVAOGlobalName(ObjectLocalName p_localName) {
     if (p_localName == 0) return 0;
     return m_vaoNameSpace->getGlobalName(p_localName);
+}
+
+void GLEScontext::setDefaultFBODrawBuffer(GLenum buffer) {
+    m_defaultFBODrawBuffer = buffer;
 }

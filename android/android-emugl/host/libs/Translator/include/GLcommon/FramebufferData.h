@@ -19,6 +19,7 @@
 #include "ObjectData.h"
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+#include <vector>
 
 class RenderbufferData : public ObjectData
 {
@@ -70,6 +71,7 @@ public:
         return m_hasBeenBound;
     }
 
+    void setDrawBuffers(GLsizei n, const GLenum * bufs);
 private:
     inline int attachmentPointIndex(GLenum attachment);
     void detachObject(int idx);
@@ -87,6 +89,8 @@ private:
     } m_attachPoints[MAX_ATTACH_POINTS+1] = {};
     bool m_dirty = false;
     bool m_hasBeenBound = false;
+    bool m_hasDrawBuffers = false;
+    std::vector<GLenum> m_drawBuffers = {};
 };
 
 #endif
