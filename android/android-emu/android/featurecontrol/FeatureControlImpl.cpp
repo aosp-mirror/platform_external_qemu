@@ -200,7 +200,7 @@ FeatureControlImpl::FeatureControlImpl() {
         for (const FeatureOption& feature : mFeatures) {
             static constexpr char format[] =
                     "Feature: '%s' (%d), value: %d, default: %d, is overridden: %d\n";
-            char buffer[sizeof(format) + 10 + 3 + 1 + 1 + 1] = {};
+            char buffer[sizeof(format) + 100 + 3 + 1 + 1 + 1] = {};
             int count = snprintf(buffer, sizeof(buffer), format,
                                  toString(feature.name).c_str(),
                                  (int)feature.name, feature.currentVal,
