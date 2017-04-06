@@ -16,17 +16,18 @@
 #include "android/base/Log.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
+#include "android/crashreport/CrashReporter.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/globals.h"
+#include "android/utils/eintr_wrapper.h"
 #include "android/utils/system.h"
 
-#include <fstream>
+#include <algorithm>
 #include <memory>
+#include <stdio.h>
 #include <string.h>
 
-namespace {
 enum IniSetting { ON, OFF, DEFAULT, ERR };
-}
 
 static android::base::LazyInstance<android::featurecontrol::FeatureControlImpl>
         s_featureControl = LAZY_INSTANCE_INIT;
@@ -176,27 +177,45 @@ void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
 }
 
 FeatureControlImpl::FeatureControlImpl() {
-    std::string defaultIniHostName = base::PathUtils::join(
-            base::System::get()->getLauncherDirectory(), "lib",
-            "advancedFeatures.ini", base::PathUtils::HOST_TYPE);
+    std::string defaultIniHostName =
+            base::PathUtils::join(base::System::get()->getLauncherDirectory(),
+                                  "lib", "advancedFeatures.ini");
     std::unique_ptr<char[]> defaultIniGuestName;
-    if (android_avdInfo)
+    if (android_avdInfo) {
         defaultIniGuestName.reset(
-            avdInfo_getDefaultSystemFeatureControlPath(android_avdInfo));
+                avdInfo_getDefaultSystemFeatureControlPath(android_avdInfo));
+    }
     std::string userIniHostName = base::PathUtils::join(
-            ConfigDirs::getUserDirectory(), "advancedFeatures.ini",
-            base::PathUtils::HOST_TYPE);
+            ConfigDirs::getUserDirectory(), "advancedFeatures.ini");
+
     // We don't allow for user guest override until we find a use case for it
-    std::string userIniGuestName = {};
+    std::string userIniGuestName;
     init(defaultIniHostName, defaultIniGuestName.get(), userIniHostName,
          userIniGuestName);
+
+    using android::crashreport::CrashReporter;
+    CrashReporter::get()->addCrashCallback([this]() {
+        base::ScopedFd file = CrashReporter::get()->openDataAttachFile(
+                "feature_control_state.txt");
+        for (const FeatureOption& feature : mFeatures) {
+            static constexpr char format[] =
+                    "Feature: '%s' (%d), value: %d, default: %d, is overridden: %d\n";
+            char buffer[sizeof(format) + 10 + 3 + 1 + 1 + 1] = {};
+            int count = snprintf(buffer, sizeof(buffer), format,
+                                 toString(feature.name).c_str(),
+                                 (int)feature.name, feature.currentVal,
+                                 feature.defaultVal, feature.isOverridden);
+            HANDLE_EINTR(write(file.get(),
+                               buffer, std::min<int>(count, sizeof(buffer))));
+        }
+    });
 }
 
 FeatureControlImpl& FeatureControlImpl::get() {
     return s_featureControl.get();
 }
 
-bool FeatureControlImpl::isEnabled(Feature feature) {
+bool FeatureControlImpl::isEnabled(Feature feature) const {
     return mFeatures[feature].currentVal;
 }
 
@@ -223,7 +242,7 @@ void FeatureControlImpl::setIfNotOverriden(Feature feature, bool isEnabled) {
     currFeature.currentVal = isEnabled;
 }
 
-Feature FeatureControlImpl::fromString(const std::string& str) {
+Feature FeatureControlImpl::fromString(base::StringView str) {
 
 #define FEATURE_CONTROL_ITEM(item) if (str == #item) return item;
 #include "FeatureControlDefHost.h"
@@ -231,6 +250,16 @@ Feature FeatureControlImpl::fromString(const std::string& str) {
 #undef FEATURE_CONTROL_ITEM
 
     return Feature::Feature_n_items;
+}
+
+base::StringView FeatureControlImpl::toString(Feature feature) {
+
+#define FEATURE_CONTROL_ITEM(item) if (feature == Feature::item) return #item;
+#include "FeatureControlDefHost.h"
+#include "FeatureControlDefGuest.h"
+#undef FEATURE_CONTROL_ITEM
+
+    return "UnknownFeature";
 }
 
 void FeatureControlImpl::initEnabledDefault(Feature feature, bool isEnabled) {
