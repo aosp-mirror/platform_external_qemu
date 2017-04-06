@@ -37,7 +37,7 @@ void setIfNotOverriden(Feature feature, bool isEnabled) {
 }
 
 Feature stringToFeature(const std::string& str) {
-    return FeatureControlImpl::get().fromString(str);
+    return FeatureControlImpl::fromString(str);
 }
 
 }  // namespace featurecontrol
