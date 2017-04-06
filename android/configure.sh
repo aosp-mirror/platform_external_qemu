@@ -636,6 +636,11 @@ probe_prebuilts_dir "ffmpeg" FFMPEG_PREBUILTS_DIR common/ffmpeg
 ###
 probe_prebuilts_dir "x264" X264_PREBUILTS_DIR common/x264
 
+###
+###  libvpx probe
+###
+probe_prebuilts_dir "libxpx" LIBVPX_PREBUILTS_DIR common/libvpx
+
 # create the objs directory that is going to contain all generated files
 # including the configuration ones
 #
@@ -1067,6 +1072,7 @@ echo "PROTOBUF_PREBUILTS_DIR := $PROTOBUF_PREBUILTS_DIR" >> $config_mk
 echo "LZ4_PREBUILTS_DIR := $LZ4_PREBUILTS_DIR" >> $config_mk
 echo "FFMPEG_PREBUILTS_DIR := $FFMPEG_PREBUILTS_DIR" >> $config_mk
 echo "X264_PREBUILTS_DIR := $X264_PREBUILTS_DIR" >> $config_mk
+echo "LIBVPX_PREBUILTS_DIR := $LIBVPX_PREBUILTS_DIR" >> $config_mk
 
 if [ $OPTION_DEBUG = "yes" ] ; then
     echo "BUILD_DEBUG := true" >> $config_mk

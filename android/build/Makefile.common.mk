@@ -21,6 +21,7 @@ include $(LOCAL_PATH)/android/third_party/Protobuf.mk
 include $(LOCAL_PATH)/android/third_party/liblz4.mk
 include $(LOCAL_PATH)/android/third_party/libffmpeg.mk
 include $(LOCAL_PATH)/android/third_party/libx264.mk
+include $(LOCAL_PATH)/android/third_party/libvpx.mk
 
 ifeq (true,$(BUILD_BENCHMARKS))
 include $(LOCAL_PATH)/android/third_party/regex-win32/sources.mk
