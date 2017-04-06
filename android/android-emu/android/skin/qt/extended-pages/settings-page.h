@@ -51,15 +51,22 @@ private slots:
     void on_set_glesBackendPrefComboBox_currentIndexChanged(int index);
     void on_set_glesApiLevelPrefComboBox_currentIndexChanged(int index);
 
+    // HTTP Proxy
+    void on_set_hostName_editingFinished();
+    void on_set_loginName_editingFinished();
+    void on_set_loginPassword_editingFinished();
     void on_set_manualConfig_toggled(bool checked);
     void on_set_noProxy_toggled(bool checked);
+    void on_set_portNumber_valueChanged(int value);
     void on_set_proxyAuth_toggled(bool checked);
     void on_set_useStudio_toggled(bool checked);
+
     void on_set_clipboardSharing_toggled(bool checked);
 
 private:
     bool eventFilter(QObject* object, QEvent* event) override;
     void grayOutProxy();
+    void initProxy();
 
     android::emulation::AdbInterface* mAdb;
     std::unique_ptr<Ui::SettingsPage> mUi;
