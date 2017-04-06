@@ -96,7 +96,7 @@ void CrashReporter::GenerateDump(const char* message) {
 }
 
 void CrashReporter::GenerateDumpAndDie(const char* message) {
-    android_metrics_stop();
+    android_metrics_stop(METRICS_STOP_CRASH);
     passDumpMessage(message);
     // this is the most cross-platform way of crashing
     // any other I know about has its flaws:

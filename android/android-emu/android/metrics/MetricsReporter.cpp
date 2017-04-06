@@ -99,11 +99,11 @@ void MetricsReporter::start(const std::string& sessionId,
     }
 }
 
-void MetricsReporter::stop() {
-    // Finalize the metrics with a "didn't crash" message.
+void MetricsReporter::stop(MetricsStopReason reason) {
     sInstance->reporter().report(
-                [](android_studio::AndroidStudioEvent* event) {
-                    event->mutable_emulator_details()->set_crashes(0);
+                [reason](android_studio::AndroidStudioEvent* event) {
+                    int crashCount = reason != METRICS_STOP_GRACEFUL ? 1 : 0;
+                    event->mutable_emulator_details()->set_crashes(crashCount);
                 });
     sInstance->reset({});
 }
