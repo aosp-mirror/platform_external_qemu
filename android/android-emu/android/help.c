@@ -434,6 +434,14 @@ help_ramdisk(stralloc_t*  out)
 }
 
 static void
+help_logcat_output(stralloc_t*  out)
+{
+    PRINTF(
+    "  use '-logcat-output <file>' to specify a path to save logcat output\n\n"
+    );
+}
+
+static void
 help_system(stralloc_t*  out)
 {
     PRINTF(
