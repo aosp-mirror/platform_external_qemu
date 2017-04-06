@@ -7,10 +7,12 @@
 #include "qemu-common.h"
 #include "slirp.h"
 
-void ndp_table_add(Slirp *slirp, struct in6_addr ip_addr,
-                    uint8_t ethaddr[ETH_ALEN])
+NdpTable g_ndp_table;
+
+void ndp_table_add(struct in6_addr ip_addr,
+                   uint8_t ethaddr[ETH_ALEN])
 {
-    NdpTable *ndp_table = &slirp->ndp_table;
+    NdpTable *ndp_table = &g_ndp_table;
     int i;
 
     DEBUG_CALL("ndp_table_add");
@@ -47,10 +49,10 @@ void ndp_table_add(Slirp *slirp, struct in6_addr ip_addr,
     ndp_table->next_victim = (ndp_table->next_victim + 1) % NDP_TABLE_SIZE;
 }
 
-bool ndp_table_search(Slirp *slirp, struct in6_addr ip_addr,
+bool ndp_table_search(struct in6_addr ip_addr,
                       uint8_t out_ethaddr[ETH_ALEN])
 {
-    NdpTable *ndp_table = &slirp->ndp_table;
+    NdpTable *ndp_table = &g_ndp_table;
     int i;
 
     DEBUG_CALL("ndp_table_search");

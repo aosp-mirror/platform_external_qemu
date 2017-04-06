@@ -105,4 +105,9 @@ int udp_unlisten _P((u_int));
 int udp_output2_(struct socket *so, struct mbuf *m,
                 const SockAddress *saddr, const SockAddress *daddr,
                 int iptos);
+
+void udp6_input(register struct mbuf *);
+int udp6_output(struct socket *so, struct mbuf *m, struct sockaddr_in6 *saddr,
+                struct sockaddr_in6 *daddr);
+
 #endif

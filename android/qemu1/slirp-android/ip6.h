@@ -8,6 +8,8 @@
 #include "qemu-common.h"
 #include "helper.h"
 
+#include <stdbool.h>
+
 #define ALLNODES_MULTICAST  { .s6_addr = \
                             { 0xff, 0x02, 0x00, 0x00,\
                             0x00, 0x00, 0x00, 0x00,\
@@ -73,16 +75,16 @@ static inline bool in6_equal_mach(const struct in6_addr *a,
 
 
 #define in6_equal_router(a)\
-    ((in6_equal_net(a, &slirp->vprefix_addr6, slirp->vprefix_len)\
-      && in6_equal_mach(a, &slirp->vhost_addr6, slirp->vprefix_len))\
+    ((in6_equal_net(a, &vprefix_addr6, vprefix_len)\
+      && in6_equal_mach(a, &vhost_addr6, vprefix_len))\
   || (in6_equal_net(a, &(struct in6_addr)LINKLOCAL_ADDR, 64)\
-      && in6_equal_mach(a, &slirp->vhost_addr6, 64)))
+      && in6_equal_mach(a, &vhost_addr6, 64)))
 
 #define in6_equal_dns(a)\
-    ((in6_equal_net(a, &slirp->vprefix_addr6, slirp->vprefix_len)\
-      && in6_equal_mach(a, &slirp->vnameserver_addr6, slirp->vprefix_len))\
+    ((in6_equal_net(a, &vprefix_addr6, vprefix_len)\
+      && in6_equal_mach(a, &vnameserver_addr6, vprefix_len))\
   || (in6_equal_net(a, &(struct in6_addr)LINKLOCAL_ADDR, 64)\
-      && in6_equal_mach(a, &slirp->vnameserver_addr6, 64)))
+      && in6_equal_mach(a, &vnameserver_addr6, 64)))
 
 #define in6_equal_host(a)\
     (in6_equal_router(a) || in6_equal_dns(a))
