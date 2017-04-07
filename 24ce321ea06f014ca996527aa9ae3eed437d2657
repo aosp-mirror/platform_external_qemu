@@ -45,6 +45,30 @@
       "revId": "24ce321ea06f014ca996527aa9ae3eed437d2657",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "965f4c61_a83ad824",
+        "filename": "android/android-emu/android/emulation/ComponentVersionExtractor.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-07T02:03:13Z",
+      "side": 1,
+      "message": "Yeah, I realize that maybe caching the result is not that useful at all.",
+      "parentUuid": "c60757f2_93e66615",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 2
+      },
+      "revId": "24ce321ea06f014ca996527aa9ae3eed437d2657",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
