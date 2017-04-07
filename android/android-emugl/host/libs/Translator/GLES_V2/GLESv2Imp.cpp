@@ -32,6 +32,7 @@
 #include "GLcommon/TranslatorIfaces.h"
 #include "GLESv2Context.h"
 #include "GLESv2Validate.h"
+#include "SamplerData.h"
 #include "ShaderParser.h"
 #include "ProgramData.h"
 #include "GLcommon/TextureUtils.h"

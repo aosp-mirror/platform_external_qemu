@@ -13,14 +13,13 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+#include "GLcommon/FramebufferData.h"
 
 #include "android/base/files/StreamSerializing.h"
+#include "GLcommon/GLEScontext.h"
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
-#include <GLES3/gl3.h>
-#include <GLcommon/FramebufferData.h>
-#include <GLcommon/GLEScontext.h>
 
 RenderbufferData::RenderbufferData(android::base::Stream* stream) :
     ObjectData(stream) {
