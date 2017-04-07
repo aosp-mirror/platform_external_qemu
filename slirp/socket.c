@@ -22,7 +22,7 @@ struct socket *solookup(struct socket **last, struct socket *head,
 {
     struct socket *so = *last;
 
-    /* Optimisation */
+    /* Optimization */
     if (so != head && sockaddr_equal(&(so->lhost.ss), lhost)
             && (!fhost || sockaddr_equal(&so->fhost.ss, fhost))) {
         return so;
