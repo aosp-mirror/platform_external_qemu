@@ -646,8 +646,7 @@ solisten(u_int port, u_int32_t laddr, u_int lport, int flags)
 	   so->so_tcpcb->t_timer[TCPT_KEEP] = TCPTV_KEEP_INIT*2;
 
 	so->so_state      = (SS_FACCEPTCONN|flags);
-	so->so_laddr_port = lport; /* Kept in host format */
-    so->so_laddr_ip   = laddr; /* Ditto */
+	sock_address_init_inet(&so->laddr, laddr, lport);
     so->so_haddr_port = port;
 
     if (flags & SS_IPV6)
@@ -658,8 +657,7 @@ solisten(u_int port, u_int32_t laddr, u_int lport, int flags)
         return NULL;
 
     socket_get_address(s, &addr);
-    so->so_faddr_port = sock_address_get_port(&addr);
-    so->so_faddr_ip = alias_addr_ip;
+    sock_address_init_inet(&so->faddr, alias_addr_ip, sock_address_get_port(&addr));
     so->s = s;
     return so;
 }

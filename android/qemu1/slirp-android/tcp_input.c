@@ -418,10 +418,10 @@ findso:
 	  /*		tcp_last_so = so; */  /* XXX ? */
 	  /*		tp = sototcpcb(so);    */
 
-	  so->so_laddr_ip   = ip_geth(ti->ti_src);
-	  so->so_laddr_port = port_geth(ti->ti_sport);
-	  so->so_faddr_ip   = ip_geth(ti->ti_dst);
-	  so->so_faddr_port = port_geth(ti->ti_dport);
+	  sock_address_init_inet(&so->laddr, ip_geth(ti->ti_src),
+                                 port_geth(ti->ti_sport));
+	  sock_address_init_inet(&so->faddr, ip_geth(ti->ti_dst),
+                                 port_geth(ti->ti_dport));
 
 	  if ((so->so_iptos = tcp_tos(so)) == 0)
 	    so->so_iptos = ((struct ip *)ti)->ip_tos;
