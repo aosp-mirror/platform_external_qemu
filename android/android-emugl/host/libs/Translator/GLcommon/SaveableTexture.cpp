@@ -18,6 +18,7 @@
 
 #include "android/base/files/StreamSerializing.h"
 #include "GLcommon/GLEScontext.h"
+#include "GLES2/gl2ext.h"
 
 #include <algorithm>
 
@@ -28,51 +29,188 @@ static uint32_t s_texAlign(uint32_t v, uint32_t align) {
 
 }
 
-static uint32_t s_texPixelSize(GLenum internalformat,
-                              GLenum type) {
-    uint32_t reps = 3;
-    switch (internalformat) {
-    case GL_ALPHA:
-        reps = 1;
-        break;
-    case GL_RGB:
-        if (type == GL_UNSIGNED_SHORT_5_6_5)
-            reps = 1;
-        else
-            reps = 3;
-        break;
-    case GL_DEPTH_STENCIL:
-        if (type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV) {
-            reps = 8;
-        } else if (type == GL_UNSIGNED_INT_24_8) {
-            reps = 4;
-        } else {
-            assert(!"Invalid type for GL_DEPTH_STENCIL texture");
+// s_computePixelSize is both in the host and the guest. Consider moving it to
+// android-emugl/shared
+
+static int s_computePixelSize(GLenum format, GLenum type) {
+
+#define FORMAT_ERROR(format, type) \
+    fprintf(stderr, "%s:%d unknown format/type 0x%x 0x%x\n", __FUNCTION__, \
+            __LINE__, format, type);
+
+    switch(type) {
+    case GL_BYTE:
+        switch(format) {
+        case GL_R8:
+        case GL_R8I:
+        case GL_R8_SNORM:
+        case GL_RED:             return sizeof(char);
+        case GL_RED_INTEGER:     return sizeof(char);
+        case GL_RG8:
+        case GL_RG8I:
+        case GL_RG8_SNORM:
+        case GL_RG:              return sizeof(char) * 2;
+        case GL_RG_INTEGER:      return sizeof(char) * 2;
+        case GL_RGB8:
+        case GL_RGB8I:
+        case GL_RGB8_SNORM:
+        case GL_RGB:             return sizeof(char) * 3;
+        case GL_RGB_INTEGER:     return sizeof(char) * 3;
+        case GL_RGBA8:
+        case GL_RGBA8I:
+        case GL_RGBA8_SNORM:
+        case GL_RGBA:            return sizeof(char) * 4;
+        case GL_RGBA_INTEGER:    return sizeof(char) * 4;
+        default: FORMAT_ERROR(format, type);
         }
         break;
-    case GL_RGBA:
-        reps = 4;
-        break;
-    default:
-        break;
-    }
-
-    uint32_t eltSize = 1;
-
-    switch (type) {
-    case GL_UNSIGNED_SHORT_5_6_5:
-        eltSize = 2;
-        break;
     case GL_UNSIGNED_BYTE:
-        eltSize = 1;
+        switch(format) {
+        case GL_R8:
+        case GL_R8UI:
+        case GL_RED:             return sizeof(unsigned char);
+        case GL_RED_INTEGER:     return sizeof(unsigned char);
+        case GL_ALPHA8_EXT:
+        case GL_ALPHA:           return sizeof(unsigned char);
+        case GL_LUMINANCE8_EXT:
+        case GL_LUMINANCE:       return sizeof(unsigned char);
+        case GL_LUMINANCE8_ALPHA8_EXT:
+        case GL_LUMINANCE_ALPHA: return sizeof(unsigned char) * 2;
+        case GL_RG8:
+        case GL_RG8UI:
+        case GL_RG:              return sizeof(unsigned char) * 2;
+        case GL_RG_INTEGER:      return sizeof(unsigned char) * 2;
+        case GL_RGB8:
+        case GL_RGB8UI:
+        case GL_SRGB8:
+        case GL_RGB:             return sizeof(unsigned char) * 3;
+        case GL_RGB_INTEGER:     return sizeof(unsigned char) * 3;
+        case GL_RGBA8:
+        case GL_RGBA8UI:
+        case GL_SRGB8_ALPHA8:
+        case GL_RGBA:            return sizeof(unsigned char) * 4;
+        case GL_RGBA_INTEGER:    return sizeof(unsigned char) * 4;
+        case GL_BGRA_EXT:
+        case GL_BGRA8_EXT:       return sizeof(unsigned char)* 4;
+        default: FORMAT_ERROR(format, type);
+        }
         break;
-    default:
+    case GL_SHORT:
+        switch(format) {
+        case GL_R16I:
+        case GL_RED_INTEGER:     return sizeof(short);
+        case GL_RG16I:
+        case GL_RG_INTEGER:      return sizeof(short) * 2;
+        case GL_RGB16I:
+        case GL_RGB_INTEGER:     return sizeof(short) * 3;
+        case GL_RGBA16I:
+        case GL_RGBA_INTEGER:    return sizeof(short) * 4;
+        default: FORMAT_ERROR(format, type);
+        }
         break;
+    case GL_UNSIGNED_SHORT:
+        switch(format) {
+        case GL_DEPTH_COMPONENT16:
+        case GL_DEPTH_COMPONENT: return sizeof(unsigned short);
+        case GL_R16UI:
+        case GL_RED_INTEGER:     return sizeof(unsigned short);
+        case GL_RG16UI:
+        case GL_RG_INTEGER:      return sizeof(unsigned short) * 2;
+        case GL_RGB16UI:
+        case GL_RGB_INTEGER:     return sizeof(unsigned short) * 3;
+        case GL_RGBA16UI:
+        case GL_RGBA_INTEGER:    return sizeof(unsigned short) * 4;
+        default: FORMAT_ERROR(format, type);
+        }
+        break;
+    case GL_INT:
+        switch(format) {
+        case GL_R32I:
+        case GL_RED_INTEGER:     return sizeof(int);
+        case GL_RG32I:
+        case GL_RG_INTEGER:      return sizeof(int) * 2;
+        case GL_RGB32I:
+        case GL_RGB_INTEGER:     return sizeof(int) * 3;
+        case GL_RGBA32I:
+        case GL_RGBA_INTEGER:    return sizeof(int) * 4;
+        default: FORMAT_ERROR(format, type);
+        }
+        break;
+    case GL_UNSIGNED_INT:
+        switch(format) {
+        case GL_DEPTH_COMPONENT16:
+        case GL_DEPTH_COMPONENT24:
+        case GL_DEPTH_COMPONENT32_OES:
+        case GL_DEPTH_COMPONENT: return sizeof(unsigned int);
+        case GL_R32UI:
+        case GL_RED_INTEGER:     return sizeof(unsigned int);
+        case GL_RG32UI:
+        case GL_RG_INTEGER:      return sizeof(unsigned int) * 2;
+        case GL_RGB32UI:
+        case GL_RGB_INTEGER:     return sizeof(unsigned int) * 3;
+        case GL_RGBA32UI:
+        case GL_RGBA_INTEGER:    return sizeof(unsigned int) * 4;
+        default: FORMAT_ERROR(format, type);
+        }
+        break;
+    case GL_UNSIGNED_SHORT_4_4_4_4:
+    case GL_UNSIGNED_SHORT_5_5_5_1:
+    case GL_UNSIGNED_SHORT_5_6_5:
+    case GL_UNSIGNED_SHORT_4_4_4_4_REV_EXT:
+    case GL_UNSIGNED_SHORT_1_5_5_5_REV_EXT:
+        return sizeof(unsigned short);
+    case GL_UNSIGNED_INT_10F_11F_11F_REV:
+    case GL_UNSIGNED_INT_5_9_9_9_REV:
+    case GL_UNSIGNED_INT_2_10_10_10_REV:
+    case GL_UNSIGNED_INT_24_8_OES:
+        return sizeof(unsigned int);
+    case GL_FLOAT_32_UNSIGNED_INT_24_8_REV:
+        return sizeof(float) + sizeof(unsigned int);
+    case GL_FLOAT:
+        switch(format) {
+        case GL_DEPTH_COMPONENT32F:
+        case GL_DEPTH_COMPONENT: return sizeof(float);
+        case GL_ALPHA32F_EXT:
+        case GL_ALPHA:           return sizeof(float);
+        case GL_LUMINANCE32F_EXT:
+        case GL_LUMINANCE:       return sizeof(float);
+        case GL_LUMINANCE_ALPHA32F_EXT:
+        case GL_LUMINANCE_ALPHA: return sizeof(float) * 2;
+        case GL_RED:             return sizeof(float);
+        case GL_R32F:            return sizeof(float);
+        case GL_RG:              return sizeof(float) * 2;
+        case GL_RG32F:           return sizeof(float) * 2;
+        case GL_RGB:             return sizeof(float) * 3;
+        case GL_RGB32F:          return sizeof(float) * 3;
+        case GL_RGBA:            return sizeof(float) * 4;
+        case GL_RGBA32F:         return sizeof(float) * 4;
+        default: FORMAT_ERROR(format, type);
+        }
+        break;
+    case GL_HALF_FLOAT:
+    case GL_HALF_FLOAT_OES:
+        switch(format) {
+        case GL_ALPHA16F_EXT:
+        case GL_ALPHA:           return sizeof(unsigned short);
+        case GL_LUMINANCE16F_EXT:
+        case GL_LUMINANCE:       return sizeof(unsigned short);
+        case GL_LUMINANCE_ALPHA16F_EXT:
+        case GL_LUMINANCE_ALPHA: return sizeof(unsigned short) * 2;
+        case GL_RED:             return sizeof(unsigned short);
+        case GL_R16F:            return sizeof(unsigned short);
+        case GL_RG:              return sizeof(unsigned short) * 2;
+        case GL_RG16F:           return sizeof(unsigned short) * 2;
+        case GL_RGB:             return sizeof(unsigned short) * 3;
+        case GL_RGB16F:          return sizeof(unsigned short) * 3;
+        case GL_RGBA:            return sizeof(unsigned short) * 4;
+        case GL_RGBA16F:         return sizeof(unsigned short) * 4;
+        default: FORMAT_ERROR(format, type);
+        }
+        break;
+    default: FORMAT_ERROR(format, type);
     }
 
-    uint32_t pixelSize = reps * eltSize;
-
-    return pixelSize;
+    return 0;
 }
 
 static uint32_t s_texImageSize(GLenum internalformat,
@@ -81,7 +219,7 @@ static uint32_t s_texImageSize(GLenum internalformat,
                               GLsizei width, GLsizei height) {
 
     uint32_t alignedWidth = s_texAlign(width, unpackAlignment);
-    uint32_t pixelSize = s_texPixelSize(internalformat, type);
+    uint32_t pixelSize = s_computePixelSize(internalformat, type);
     uint32_t totalSize = pixelSize * alignedWidth * height;
 
     return totalSize;
@@ -105,8 +243,7 @@ SaveableTexture::SaveableTexture(const TextureData& texture)
     , m_internalFormat(texture.internalFormat)
     , m_type(texture.type)
     , m_border(texture.border)
-    , m_globalName(texture.globalName)
-    { }
+    , m_globalName(texture.globalName) { }
 
 SaveableTexture::SaveableTexture(android::base::Stream* stream,
         GlobalNameSpace* globalNameSpace)
