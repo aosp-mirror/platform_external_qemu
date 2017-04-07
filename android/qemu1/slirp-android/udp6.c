@@ -102,20 +102,12 @@ void udp6_input(struct mbuf *m)
             goto bad;
         }
 
-        /* Setup fields */
-        #if 0
-        FIXME
-        so->so_lfamily = AF_INET6;
-        so->so_laddr6 = ip->ip_src;
-        so->so_lport6 = uh->uh_sport;
-        #endif
+        /* Setup local address */
+        sock_address_init_in6(&so->laddr, ip->ip_src.s6_addr,
+                              ntohs(uh->uh_sport.port));
     }
-    #if 0
-    FIXME
-    so->so_ffamily = AF_INET6;
-    so->so_faddr6 = ip->ip_dst; /* XXX */
-    so->so_fport6 = uh->uh_dport; /* XXX */
-    #endif
+    sock_address_init_in6(&so->faddr, ip->ip_dst.s6_addr,
+                          ntohs(uh->uh_dport.port));
 
     iphlen += sizeof(struct udphdr);
     m->m_len -= iphlen;
