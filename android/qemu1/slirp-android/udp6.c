@@ -76,12 +76,16 @@ void udp6_input(struct mbuf *m)
     /* handle TFTP */
     if (port_geth(uh->uh_dport) == TFTP_SERVER &&
         !memcmp(ip->ip_dst.s6_addr, vhost_addr6.s6_addr, 16)) {
+        /* Skip supports for TFTP in IPv6 mode now. */
+        goto bad;
+#if 0
         m->m_data += iphlen;
         m->m_len -= iphlen;
-        tftp_input(/* FIXME (struct sockaddr_storage *)&lhost, */m);
+        tftp_input((struct sockaddr_storage *)&lhost, m);
         m->m_data -= iphlen;
         m->m_len += iphlen;
         goto bad;
+#endif
     }
 
     SockAddress lsock_addr;
