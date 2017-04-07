@@ -130,10 +130,8 @@ icmp_input(struct mbuf *m, int hlen)
 	goto end_error;
       }
       so->so_m = m;
-      so->so_faddr_ip   = ip_geth(ip->ip_dst);
-      so->so_faddr_port = 7;
-      so->so_laddr_ip   = ip_geth(ip->ip_src);
-      so->so_laddr_port = 9;
+      sock_address_init_inet(&so->faddr, ip_geth(ip->ip_dst), 7);
+      sock_address_init_inet(&so->laddr, ip_geth(ip->ip_src), 9);
       so->so_iptos = ip->ip_tos;
       so->so_type = IPPROTO_ICMP;
       so->so_state = SS_ISFCONNECTED;
