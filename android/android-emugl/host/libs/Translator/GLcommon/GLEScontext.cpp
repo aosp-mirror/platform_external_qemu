@@ -662,18 +662,42 @@ void GLEScontext::postLoadRestoreCtx() {
     bindFrameBuffer(GL_DRAW_FRAMEBUFFER, m_drawFramebuffer);
 
     for (unsigned int i = 0; i <= m_maxUsedTexUnit; i++) {
-        // snapshot only support GL_TEXTURE_2D for now
-        textureTargetState& texState = m_texState[i][TEXTURE_2D];
-        if (texState.texture || texState.enabled) {
-            this->dispatcher().glActiveTexture(i + GL_TEXTURE0);
-            // TODO: refactor the following line since it is duplicated in
-            // GLESv2Imp and GLEScmImp as well
-            ObjectLocalName texName = texState.texture != 0 ?
-                    texState.texture : getDefaultTextureName(GL_TEXTURE_2D);
-            this->dispatcher().glBindTexture(
-                    GL_TEXTURE_2D,
-                    m_shareGroup->getGlobalName(
-                        NamedObjectType::TEXTURE, texName));
+        for (unsigned int j = 0; j < NUM_TEXTURE_TARGETS; j++) {
+            textureTargetState& texState = m_texState[i][j];
+            if (texState.texture || texState.enabled) {
+                this->dispatcher().glActiveTexture(i + GL_TEXTURE0);
+                GLenum texTarget = GL_TEXTURE_2D;
+                switch (j) {
+                    case TEXTURE_2D:
+                        texTarget = GL_TEXTURE_2D;
+                        break;
+                    case TEXTURE_CUBE_MAP:
+                        texTarget = GL_TEXTURE_CUBE_MAP;
+                        break;
+                    case TEXTURE_2D_ARRAY:
+                        texTarget = GL_TEXTURE_2D_ARRAY;
+                        break;
+                    case TEXTURE_3D:
+                        texTarget = GL_TEXTURE_3D;
+                        break;
+                    case TEXTURE_2D_MULTISAMPLE:
+                        texTarget = GL_TEXTURE_2D_MULTISAMPLE;
+                        break;
+                    default:
+                        fprintf(stderr,
+                                "Warning: unsupported texture target 0x%x.\n",
+                                j);
+                        break;
+                }
+                // TODO: refactor the following line since it is duplicated in
+                // GLESv2Imp and GLEScmImp as well
+                ObjectLocalName texName = texState.texture != 0 ?
+                        texState.texture : getDefaultTextureName(texTarget);
+                this->dispatcher().glBindTexture(
+                        texTarget,
+                        m_shareGroup->getGlobalName(
+                            NamedObjectType::TEXTURE, texName));
+            }
         }
     }
     dispatcher.glActiveTexture(m_activeTexture + GL_TEXTURE0);
