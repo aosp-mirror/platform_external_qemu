@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7b213d86_60d9dd0d",
+        "filename": "android/android-emu/android/emulation/ComponentVersionExtractor.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-07T00:28:48Z",
+      "side": 1,
+      "message": "const",
+      "range": {
+        "startLine": 24,
+        "startChar": 48,
+        "endLine": 24,
+        "endChar": 51
+      },
+      "revId": "24ce321ea06f014ca996527aa9ae3eed437d2657",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c60757f2_93e66615",
+        "filename": "android/android-emu/android/emulation/ComponentVersionExtractor.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-07T00:28:48Z",
+      "side": 1,
+      "message": "IMO a simple function would suffice here, no need for a class that\u0027s going to be used mostly once in every place",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 2
+      },
+      "revId": "24ce321ea06f014ca996527aa9ae3eed437d2657",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
