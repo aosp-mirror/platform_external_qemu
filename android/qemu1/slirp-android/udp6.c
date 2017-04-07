@@ -95,7 +95,7 @@ void udp6_input(struct mbuf *m)
         if (!so) {
             goto bad;
         }
-        if (udp_attach(so/*FIXME, AF_INET6*/) == -1) {
+        if (udp_attach(so, SOCKET_IN6) == -1) {
             DEBUG_MISC((dfd, " udp6_attach errno = %d-%s\n",
                         errno, strerror(errno)));
             sofree(so);
