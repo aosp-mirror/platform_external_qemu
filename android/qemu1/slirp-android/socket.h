@@ -29,10 +29,12 @@ struct socket {
   struct tcpiphdr *so_ti;	   /* Pointer to the original ti within
 				    * so_mconn, for non-blocking connections */
   int so_urgc;
-  uint32_t   so_faddr_ip;
-  uint32_t   so_laddr_ip;
-  uint16_t   so_faddr_port;
-  uint16_t   so_laddr_port;
+  SockAddress faddr;
+  SockAddress laddr;
+#define so_faddr_ip faddr.u.inet.address
+#define so_laddr_ip laddr.u.inet.address
+#define so_faddr_port faddr.u.inet.port
+#define so_laddr_port laddr.u.inet.port
   uint16_t   so_haddr_port;
 
   u_int8_t	so_iptos;	/* Type of service */
