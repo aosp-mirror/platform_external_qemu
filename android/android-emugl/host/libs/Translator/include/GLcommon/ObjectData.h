@@ -29,6 +29,7 @@ enum ObjectDataType {
     BUFFER_DATA,
     RENDERBUFFER_DATA,
     FRAMEBUFFER_DATA,
+    SAMPLER_DATA,
     UNDEFINED_DATA,
 };
 

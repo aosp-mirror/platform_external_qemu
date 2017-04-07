@@ -162,7 +162,6 @@ ShareGroup::getGlobalName(NamedObjectType p_type,
     if (toIndex(p_type) >= toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
         return 0;
     }
-
     emugl::Mutex::AutoLock lock(m_namespaceLock);
     return m_nameSpace[toIndex(p_type)]->getGlobalName(p_localName);
 }

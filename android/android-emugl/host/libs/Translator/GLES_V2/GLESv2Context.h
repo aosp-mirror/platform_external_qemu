@@ -40,6 +40,7 @@ public:
     void setVertexAttribDivisor(GLuint bindingindex, GLuint divisor);
     void setVertexAttribBindingIndex(GLuint attribindex, GLuint bindingindex);
     void setVertexAttribFormat(GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint reloffset, bool isInt = false);
+    void setBindSampler(GLuint unit, GLuint sampler);
     int  getMaxCombinedTexUnits() override;
     int  getMaxTexUnits() override;
 
@@ -81,6 +82,7 @@ private:
 
     GLuint m_useProgram = 0;
     ObjectDataPtr m_useProgramData = {};
+    std::unordered_map<GLuint, GLuint> m_bindSampler = {};
 };
 
 #endif
