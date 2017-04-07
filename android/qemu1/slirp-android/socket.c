@@ -29,23 +29,25 @@ so_init()
 #endif
 
 struct socket *
-solookup(struct socket *head, uint32_t laddr, u_int lport,
-         uint32_t faddr, u_int fport)
+solookup(struct socket **last, struct socket *head,
+         SockAddress* laddr, SockAddress* faddr)
 {
-	struct socket *so;
+    struct socket *so = *last;
 
-	for (so = head->so_next; so != head; so = so->so_next) {
-		if (so->so_laddr_port == lport &&
-		    so->so_laddr_ip   == laddr &&
-		    so->so_faddr_ip   == faddr &&
-		    so->so_faddr_port == fport)
-		   break;
-	}
+    /* Optimization */
+    if (so != head && sock_address_equal(&so->laddr, laddr) &&
+        (!faddr || sock_address_equal(&so->faddr, faddr))) {
+        return so;
+    }
 
-	if (so == head)
-	   return (struct socket *)NULL;
-	return so;
-
+    for (so = head->so_next; so != head; so = so->so_next) {
+        if (sock_address_equal(&so->laddr, laddr) &&
+            (!faddr || sock_address_equal(&so->faddr, faddr))) {
+            *last = so;
+            return so;
+        }
+    }
+    return NULL;
 }
 
 /*

@@ -81,7 +81,8 @@ struct socket {
 extern struct socket tcb;
 
 void so_init _P((void));
-struct socket * solookup _P((struct socket *, uint32_t, u_int, uint32_t, u_int));
+struct socket * solookup _P((struct socket **, struct socket *,
+                             SockAddress *, SockAddress *));
 struct socket * socreate _P((void));
 void sofree _P((struct socket *));
 int soread _P((struct socket *));

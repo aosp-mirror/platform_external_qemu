@@ -84,10 +84,10 @@ void udp6_input(struct mbuf *m)
         goto bad;
     }
 
-    so = solookup(&udb, 0, 0, 0, 0
-                  /*(struct sockaddr_storage *) &lhost, NULL*/);
-    /*FIXME*/
-    goto bad;
+    SockAddress lsock_addr;
+    sock_address_init_in6(&lsock_addr, lhost.sin6_addr.s6_addr,
+                          ntohs(lhost.sin6_port));
+    so = solookup(&udp_last_so, &udb, &lsock_addr, NULL);
 
     if (so == NULL) {
         /* If there's no socket for this packet, create one. */

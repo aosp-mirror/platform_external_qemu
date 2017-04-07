@@ -215,28 +215,9 @@ udp_input(register struct mbuf *m, int iphlen)
 	/*
 	 * Locate pcb for datagram.
 	 */
-	so = udp_last_so;
-	if (so->so_laddr_port != port_geth(uh->uh_sport) ||
-	    so->so_laddr_ip   != ip_geth(ip->ip_src)) {
-		struct socket *tmp;
-
-		for (tmp = udb.so_next; tmp != &udb; tmp = tmp->so_next) {
-			if (tmp->so_laddr_port == port_geth(uh->uh_sport) &&
-			    tmp->so_laddr_ip   == ip_geth(ip->ip_src)) {
-				tmp->so_faddr_ip   = ip_geth(ip->ip_dst);
-				tmp->so_faddr_port = port_geth(uh->uh_dport);
-				so = tmp;
-				break;
-			}
-		}
-		if (tmp == &udb) {
-		  so = NULL;
-		} else {
-		  STAT(udpstat.udpps_pcbcachemiss++);
-		  udp_last_so = so;
-		}
-	}
-
+	SockAddress laddr;
+	sock_address_init_inet(&laddr, ip_geth(ip->ip_src), port_geth(uh->uh_sport));
+	so = solookup(&udp_last_so, &udb, &laddr, NULL);
 	if (so == NULL) {
 	  /*
 	   * If there's no socket for this packet,
@@ -254,8 +235,7 @@ udp_input(register struct mbuf *m, int iphlen)
 	   * Setup fields
 	   */
 	  /* udp_last_so = so; */
-	  so->so_laddr_ip   = ip_geth(ip->ip_src);
-	  so->so_laddr_port = port_geth(uh->uh_sport);
+	  so->laddr = laddr;
 
 	  if ((so->so_iptos = udp_tos(so)) == 0)
 	    so->so_iptos = ip->ip_tos;
@@ -266,8 +246,8 @@ udp_input(register struct mbuf *m, int iphlen)
 	   */
 	}
 
-        so->so_faddr_ip   = ip_geth(ip->ip_dst); /* XXX */
-        so->so_faddr_port = port_geth(uh->uh_dport); /* XXX */
+        sock_address_init_inet(&so->faddr,ip_geth(ip->ip_dst),
+                               port_geth(uh->uh_dport));
 
 	iphlen += sizeof(struct udphdr);
 	m->m_len -= iphlen;
@@ -505,16 +485,13 @@ udp_listen(u_int port, u_int32_t laddr, u_int lport, int flags)
 
         socket_get_address(so->s, &addr);
 
-	so->so_faddr_port = sock_address_get_port(&addr);
 	addr_ip = sock_address_get_ip(&addr);
-
 	if (addr_ip == 0 || addr_ip == loopback_addr_ip)
-	   so->so_faddr_ip = alias_addr_ip;
-	else
-	   so->so_faddr_ip = addr_ip;
+	   addr_ip = alias_addr_ip;
+	sock_address_init_inet(&so->faddr, sock_address_get_port(&addr),
+			       addr_ip);
 
-	so->so_laddr_port = lport;
-	so->so_laddr_ip   = laddr;
+	sock_address_init_inet(&so->laddr, laddr, lport);
 	if (flags != SS_FACCEPTONCE)
 	   so->so_expire = 0;
 
