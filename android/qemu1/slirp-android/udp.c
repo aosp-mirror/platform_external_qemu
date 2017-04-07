@@ -224,7 +224,7 @@ udp_input(register struct mbuf *m, int iphlen)
 	   * create one
 	   */
 	  if ((so = socreate()) == NULL) goto bad;
-	  if(udp_attach(so) == -1) {
+	  if(udp_attach(so, SOCKET_INET) == -1) {
 	    DEBUG_MISC((dfd," udp_attach errno = %d-%s\n",
 			errno,errno_str));
 	    sofree(so);
@@ -372,9 +372,19 @@ int udp_output_(struct socket *so, struct mbuf *m,
 }
 
 int
-udp_attach(struct socket *so)
+udp_attach(struct socket *so, SocketFamily family)
 {
-  so->s = socket_anyaddr_server( 0, SOCKET_DGRAM );
+  switch (family) {
+  case SOCKET_INET:
+    so->s = socket_anyaddr_server( 0, SOCKET_DGRAM );
+    break;
+  case SOCKET_IN6:
+    so->s = socket_create_in6(SOCKET_DGRAM);
+    break;
+  default:
+    g_assert_not_reached();
+    break;
+  }
   if (so->s != -1) {
       /* success, insert in queue */
       so->so_expire = curtime + SO_EXPIRE;
