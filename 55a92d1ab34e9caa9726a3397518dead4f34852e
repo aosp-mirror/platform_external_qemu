@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "20a225bf_1ed412de",
+        "filename": "android/qemu1/slirp-android/socket.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-04-07T18:36:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9d77c5cb_4de0b1cd",
+      "range": {
+        "startLine": 37,
+        "startChar": 7,
+        "endLine": 37,
+        "endChar": 19
+      },
+      "revId": "55a92d1ab34e9caa9726a3397518dead4f34852e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "196af31a_590d43cb",
         "filename": "android/qemu1/slirp-android/socket.c",
         "patchSetId": 2
@@ -36,6 +60,24 @@
       "writtenOn": "2017-04-07T18:28:46Z",
       "side": 1,
       "message": "Do we need checking laddr !\u003d NULL?",
+      "revId": "55a92d1ab34e9caa9726a3397518dead4f34852e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4e5b38a_7f04fd1e",
+        "filename": "android/qemu1/slirp-android/socket.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-04-07T18:36:08Z",
+      "side": 1,
+      "message": "The current calling side only call with faddr \u003d\u003d NULL in udp related code. In tcp related code, both of them aren\u0027t NULL. The current logic is exact same with code in slirp/socket.c",
+      "parentUuid": "196af31a_590d43cb",
       "revId": "55a92d1ab34e9caa9726a3397518dead4f34852e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
