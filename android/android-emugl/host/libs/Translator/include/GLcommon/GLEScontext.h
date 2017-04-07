@@ -342,6 +342,8 @@ public:
     ObjectLocalName genFBOName(ObjectLocalName p_localName = 0,
             bool genLocal = 0);
     void setFBOData(ObjectLocalName p_localName, ObjectDataPtr data);
+    void setDefaultFBODrawBuffer(GLenum buffer);
+    void setDefaultFBOReadBuffer(GLenum buffer);
     void deleteFBO(ObjectLocalName p_localName);
     FramebufferData* getFBOData(ObjectLocalName p_localName);
     ObjectDataPtr getFBODataPtr(ObjectLocalName p_localName);
@@ -489,7 +491,8 @@ protected:
     GLint m_defaultFBOHeight = 0;
     GLint m_defaultFBOColorFormat = 0;
     GLint m_defaultFBOSamples = 0;
-
+    GLenum m_defaultFBODrawBuffer = GL_COLOR_ATTACHMENT0;
+    GLenum m_defaultFBOReadBuffer = GL_COLOR_ATTACHMENT0;
 private:
 
     virtual void setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride, GLboolean normalized, int pointsIndex = -1, bool isInt = false) = 0 ;

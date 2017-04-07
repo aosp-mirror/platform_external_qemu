@@ -66,7 +66,6 @@ public:
             GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
             GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthStencilFormat, GLint readMultisamples,
             GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) override;
-
 protected:
     virtual void postLoadRestoreCtx();
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);

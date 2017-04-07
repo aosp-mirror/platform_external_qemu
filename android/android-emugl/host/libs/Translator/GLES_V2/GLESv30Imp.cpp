@@ -400,16 +400,16 @@ GL_APICALL void GL_APIENTRY glDrawBuffers(GLsizei n, const GLenum * bufs) {
     GET_CTX_V2();
 
     if (ctx->isDefaultFBOBound(GL_DRAW_FRAMEBUFFER)) {
-        std::vector<GLenum> emulatedBufs(n);
-        memcpy(&emulatedBufs[0], bufs, n * sizeof(GLenum));
-        for (int i = 0; i < n; i++) {
-            if (bufs[i] == GL_BACK && ctx->isDefaultFBOBound(GL_DRAW_FRAMEBUFFER)) {
-                emulatedBufs[i] = GL_COLOR_ATTACHMENT0;
-            }
-        }
-        ctx->dispatcher().glDrawBuffers(n, &emulatedBufs[0]);
-
+        SET_ERROR_IF(n != 1 || (bufs[0] != GL_NONE && bufs[0] != GL_BACK),
+                GL_INVALID_OPERATION);
+        GLenum emulatedBufs = bufs[0] == GL_NONE ? GL_NONE
+                                                 : GL_COLOR_ATTACHMENT0;
+        ctx->setDefaultFBODrawBuffer(emulatedBufs);
+        ctx->dispatcher().glDrawBuffers(1, &emulatedBufs);
     } else {
+        GLuint framebuffer = ctx->getFramebufferBinding(GL_DRAW_FRAMEBUFFER);
+        FramebufferData* fbObj = ctx->getFBOData(framebuffer);
+        fbObj->setDrawBuffers(n, bufs);
         ctx->dispatcher().glDrawBuffers(n, bufs);
     }
 }
@@ -419,10 +419,16 @@ GL_APICALL void GL_APIENTRY glReadBuffer(GLenum src) {
     // if default fbo is bound and src is GL_BACK,
     // use GL_COLOR_ATTACHMENT0 all of a sudden.
     // bc we are using fbo emulation.
-    if (src == GL_BACK &&
-        ctx->isDefaultFBOBound(GL_READ_FRAMEBUFFER)) {
-        ctx->dispatcher().glReadBuffer(GL_COLOR_ATTACHMENT0);
+    if (ctx->isDefaultFBOBound(GL_READ_FRAMEBUFFER)) {
+        SET_ERROR_IF(src != GL_NONE && src != GL_BACK, GL_INVALID_OPERATION);
+        GLenum emulatedSrc = src == GL_NONE ? GL_NONE
+                                            : GL_COLOR_ATTACHMENT0;
+        ctx->setDefaultFBOReadBuffer(emulatedSrc);
+        ctx->dispatcher().glReadBuffer(emulatedSrc);
     } else {
+        GLuint framebuffer = ctx->getFramebufferBinding(GL_READ_FRAMEBUFFER);
+        FramebufferData* fbObj = ctx->getFBOData(framebuffer);
+        fbObj->setReadBuffers(src);
         ctx->dispatcher().glReadBuffer(src);
     }
 }

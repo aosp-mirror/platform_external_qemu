@@ -62,6 +62,7 @@ private:
     unsigned int m_target = GL_TEXTURE_2D;
     unsigned int m_width = 0;
     unsigned int m_height = 0;
+    unsigned int m_depth = 0; // For texture 3D
     unsigned int m_format = GL_RGBA;
     unsigned int m_internalFormat = GL_RGBA;
     unsigned int m_type = GL_UNSIGNED_BYTE;
