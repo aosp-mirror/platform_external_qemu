@@ -303,11 +303,10 @@ GL_APICALL void GL_APIENTRY glDrawArraysInstanced(GLenum mode, GLint first, GLsi
     } else {
         GLESConversionArrays tmpArrs;
         s_glDrawSetupArraysPre(ctx, tmpArrs, first, count, 0, NULL, true);
-        ctx->dispatcher().glDrawArrays(mode,first,count);
+        ctx->dispatcher().glDrawArraysInstanced(mode,first,count, primcount);
         s_glDrawSetupArraysPost(ctx);
     }
     s_glDrawPost(ctx, mode);
-    ctx->dispatcher().glDrawArraysInstanced(mode, first, count, primcount);
 }
 
 GL_APICALL void GL_APIENTRY glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, const void * indices, GLsizei primcount) {
@@ -327,7 +326,6 @@ GL_APICALL void GL_APIENTRY glDrawElementsInstanced(GLenum mode, GLsizei count, 
         s_glDrawEmulateClientArraysPost(ctx);
     }
     s_glDrawPost(ctx, mode);
-    ctx->dispatcher().glDrawElementsInstanced(mode, count, type, indices, primcount);
 }
 
 GL_APICALL void GL_APIENTRY glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid * indices) {
