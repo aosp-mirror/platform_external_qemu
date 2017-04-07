@@ -624,8 +624,7 @@ solisten(u_int port, u_int32_t laddr, u_int lport, int flags)
 	   so->so_tcpcb->t_timer[TCPT_KEEP] = TCPTV_KEEP_INIT*2;
 
 	so->so_state = (SS_FACCEPTCONN|flags);
-	so->so_lport = lport; /* Kept in network format */
-	so->so_laddr.s_addr = laddr; /* Ditto */
+	sock_address_init_inet(&so->laddr, laddr, lport);
 
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = INADDR_ANY;
@@ -652,7 +651,7 @@ solisten(u_int port, u_int32_t laddr, u_int lport, int flags)
 	getsockname(s,(struct sockaddr *)&addr,&addrlen);
 	so->so_fport = addr.sin_port;
 	if (addr.sin_addr.s_addr == 0 || addr.sin_addr.s_addr == loopback_addr.s_addr)
-	   so->so_faddr = alias_addr;
+	   sock_address_init_inet(&so->faddr, o_faddr = alias_addr;
 	else
 	   so->so_faddr = addr.sin_addr;
 
