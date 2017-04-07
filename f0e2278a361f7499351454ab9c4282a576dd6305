@@ -22,6 +22,30 @@
       "revId": "f0e2278a361f7499351454ab9c4282a576dd6305",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76c03e86_deffff1b",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv30Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-07T22:09:38Z",
+      "side": 1,
+      "message": "I think so, maybe that was the original thing that the second call covered up. Thanks for finding it!",
+      "parentUuid": "cde32346_fbcfbdd1",
+      "range": {
+        "startLine": 306,
+        "startChar": 26,
+        "endLine": 306,
+        "endChar": 38
+      },
+      "revId": "f0e2278a361f7499351454ab9c4282a576dd6305",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
