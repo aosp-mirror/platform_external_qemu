@@ -122,7 +122,7 @@ icmp_input(struct mbuf *m, int hlen)
       uint16_t     addr_port;
 
       if ((so = socreate()) == NULL) goto freeit;
-      if(udp_attach(so) == -1) {
+      if(udp_attach(so, SOCKET_INET) == -1) {
 	DEBUG_MISC((dfd,"icmp_input udp_attach errno = %d-%s\n",
 		    errno,errno_str));
 	sofree(so);
