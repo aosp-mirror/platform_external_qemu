@@ -34,6 +34,29 @@
       "revId": "9cdb0bda54691d7afb5fe295c3ab95512f3aeef9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fc617063_41b66920",
+        "filename": "slirp/socket.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 822,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-04-08T00:16:05Z",
+      "side": 1,
+      "message": "This introduce a new bug: now  from inside emulator, connect to 10.0.2.2 won\u0027t connect to host. this new added condition should move to next if. Will send out a CL for this.",
+      "range": {
+        "startLine": 822,
+        "startChar": 29,
+        "endLine": 822,
+        "endChar": 35
+      },
+      "revId": "9cdb0bda54691d7afb5fe295c3ab95512f3aeef9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
