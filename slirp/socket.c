@@ -818,9 +818,9 @@ void sotranslate_out(struct socket *so, struct sockaddr_storage *addr)
     switch (addr->ss_family) {
     case AF_INET:
         if ((so->so_faddr.s_addr & slirp->vnetwork_mask.s_addr) ==
-                slirp->vnetwork_addr.s_addr &&
-                so->so_faddr.s_addr != slirp->vhost_addr.s_addr) {
-            if (slirp_translate_guest_dns(slirp, &so->fhost.sin, addr) < 0) {
+                slirp->vnetwork_addr.s_addr) {
+            if (so->so_faddr.s_addr == slirp->vhost_addr.s_addr ||
+                slirp_translate_guest_dns(slirp, &so->fhost.sin, addr) < 0) {
                 sin->sin_addr = loopback_addr;
             }
         }
@@ -832,10 +832,10 @@ void sotranslate_out(struct socket *so, struct sockaddr_storage *addr)
 
     case AF_INET6:
         if (in6_equal_net(&so->so_faddr6, &slirp->vprefix_addr6,
-                    slirp->vprefix_len) &&
-            !in6_equal_mach(&so->so_faddr6, &slirp->vhost_addr6,
                     slirp->vprefix_len)) {
-          if (slirp_translate_guest_dns6(slirp, &so->fhost.sin6, addr) < 0) {
+          if (in6_equal_mach(&so->so_faddr6, &slirp->vhost_addr6,
+                             slirp->vprefix_len) ||
+              slirp_translate_guest_dns6(slirp, &so->fhost.sin6, addr) < 0) {
                 sin6->sin6_addr = in6addr_loopback;
             }
         }
