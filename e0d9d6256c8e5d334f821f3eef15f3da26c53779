@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1fd3ac65_e52ab8e1",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 532,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-08T00:29:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7bfd08d7_0ff4e2f7",
+      "range": {
+        "startLine": 532,
+        "startChar": 12,
+        "endLine": 532,
+        "endChar": 39
+      },
+      "revId": "e0d9d6256c8e5d334f821f3eef15f3da26c53779",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5ff344f2_adee4ee0",
         "filename": "android/android-emu/android/emulation/CpuAccelerator.h",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-04-05T23:31:37Z",
       "side": 1,
       "message": "this last sentence is strange. can -\u003e can\u0027t ?",
+      "range": {
+        "startLine": 61,
+        "startChar": 27,
+        "endLine": 62,
+        "endChar": 35
+      },
+      "revId": "e0d9d6256c8e5d334f821f3eef15f3da26c53779",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eecda489_58b6dc15",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-08T00:29:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5ff344f2_adee4ee0",
       "range": {
         "startLine": 61,
         "startChar": 27,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "a9c6a756_a36556b3",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-08T00:29:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f82c5abc_6ca692a8",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 63,
+        "endChar": 11
+      },
+      "revId": "e0d9d6256c8e5d334f821f3eef15f3da26c53779",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2e667ea2_157513c8",
         "filename": "android/android-emu/android/emulation/control/AdbBugReportServices.cpp",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2017-04-05T23:31:37Z",
       "side": 1,
       "message": "localtime() won\u0027t generate a _unique_ name:\n1. when DST ends the clock moves one hour backwards. low chance, but it exists\n2. user can change time on the machine\n\nIf it\u0027s critical to have a unique name here, I suggest android/base/Uuid.h . If it isn\u0027t critical, please mention that it\u0027s possible that the name isn\u0027t really unique and that won\u0027t hurt us in header comment",
+      "range": {
+        "startLine": 140,
+        "startChar": 53,
+        "endLine": 140,
+        "endChar": 69
+      },
+      "revId": "e0d9d6256c8e5d334f821f3eef15f3da26c53779",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d3795b35_5ccc9350",
+        "filename": "android/android-emu/android/emulation/control/AdbBugReportServices.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-08T00:29:30Z",
+      "side": 1,
+      "message": "My reasoning is to see how bugreportz in guest system implements the naming and I think it\u0027s better to have localtime in the name. I will replace the processId with Uuid. And I think it should make the bugreport name unique.",
+      "parentUuid": "2e667ea2_157513c8",
       "range": {
         "startLine": 140,
         "startChar": 53,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "9d43c350_ec176a19",
+        "filename": "android/android-emu/android/emulation/control/AdbBugReportServices.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-08T00:29:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5175875d_7c9b7322",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 63,
+        "endChar": 46
+      },
+      "revId": "e0d9d6256c8e5d334f821f3eef15f3da26c53779",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8c298893_6e2789cc",
         "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
         "patchSetId": 1
@@ -128,6 +248,30 @@
       "writtenOn": "2017-04-05T23:31:37Z",
       "side": 1,
       "message": "please use raw string literals to make this look closer to how it\u0027s supposed to appear to the user:\nR\"(text goes\nhere with \\ or line feeds)\";",
+      "range": {
+        "startLine": 52,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 33
+      },
+      "revId": "e0d9d6256c8e5d334f821f3eef15f3da26c53779",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c79747f3_9e7a520f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-08T00:29:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8c298893_6e2789cc",
       "range": {
         "startLine": 52,
         "startChar": 0,
@@ -186,6 +330,30 @@
     },
     {
       "key": {
+        "uuid": "1c3af8c3_14b1d662",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-08T00:29:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "21e6ef77_246d5341",
+      "range": {
+        "startLine": 102,
+        "startChar": 43,
+        "endLine": 102,
+        "endChar": 45
+      },
+      "revId": "e0d9d6256c8e5d334f821f3eef15f3da26c53779",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0add1f42_6b6adbaa",
         "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
         "patchSetId": 1
@@ -197,6 +365,30 @@
       "writtenOn": "2017-04-05T23:31:37Z",
       "side": 1,
       "message": "there\u0027s already similar code in AdbInterface.cpp for ADB version parsing. Could you please create a separate CL to move it out into android/emulation/ , e.g. ComponentVersions.h/cpp",
+      "range": {
+        "startLine": 122,
+        "startChar": 0,
+        "endLine": 124,
+        "endChar": 76
+      },
+      "revId": "e0d9d6256c8e5d334f821f3eef15f3da26c53779",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "be6425dd_1afde78f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-08T00:29:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0add1f42_6b6adbaa",
       "range": {
         "startLine": 122,
         "startChar": 0,
@@ -232,6 +424,30 @@
     },
     {
       "key": {
+        "uuid": "53a02e07_187a9798",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 468,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-08T00:29:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6dbbd769_80326400",
+      "range": {
+        "startLine": 468,
+        "startChar": 22,
+        "endLine": 468,
+        "endChar": 29
+      },
+      "revId": "e0d9d6256c8e5d334f821f3eef15f3da26c53779",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "707ab7bb_67e044c5",
         "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
         "patchSetId": 1
@@ -243,6 +459,30 @@
       "writtenOn": "2017-04-05T23:31:37Z",
       "side": 1,
       "message": "PathUtils::extension()",
+      "range": {
+        "startLine": 475,
+        "startChar": 12,
+        "endLine": 480,
+        "endChar": 48
+      },
+      "revId": "e0d9d6256c8e5d334f821f3eef15f3da26c53779",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b52350bd_116e1a8b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 480,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-08T00:29:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "707ab7bb_67e044c5",
       "range": {
         "startLine": 475,
         "startChar": 12,
@@ -289,6 +529,54 @@
       "writtenOn": "2017-04-05T23:31:37Z",
       "side": 1,
       "message": "nit: QString::fromStdString()",
+      "range": {
+        "startLine": 529,
+        "startChar": 27,
+        "endLine": 529,
+        "endChar": 34
+      },
+      "revId": "e0d9d6256c8e5d334f821f3eef15f3da26c53779",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a7f34e46_c5bb86bc",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-08T00:29:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7e364ee6_0e46d1fa",
+      "range": {
+        "startLine": 529,
+        "startChar": 35,
+        "endLine": 529,
+        "endChar": 69
+      },
+      "revId": "e0d9d6256c8e5d334f821f3eef15f3da26c53779",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e9f1e6a2_f54b3477",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-08T00:29:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4a6a40f2_662027f7",
       "range": {
         "startLine": 529,
         "startChar": 27,
@@ -370,6 +658,78 @@
     },
     {
       "key": {
+        "uuid": "e5a13769_e6094fee",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 535,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-08T00:29:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "845d191f_d56bc666",
+      "range": {
+        "startLine": 535,
+        "startChar": 16,
+        "endLine": 535,
+        "endChar": 17
+      },
+      "revId": "e0d9d6256c8e5d334f821f3eef15f3da26c53779",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "40b173c1_fa49de0b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 535,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-08T00:29:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5c19a5f7_48619123",
+      "range": {
+        "startLine": 535,
+        "startChar": 51,
+        "endLine": 535,
+        "endChar": 55
+      },
+      "revId": "e0d9d6256c8e5d334f821f3eef15f3da26c53779",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99a50dc2_a1a880fa",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 535,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-08T00:29:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5ce9bc20_facb2706",
+      "range": {
+        "startLine": 535,
+        "startChar": 42,
+        "endLine": 535,
+        "endChar": 46
+      },
+      "revId": "e0d9d6256c8e5d334f821f3eef15f3da26c53779",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c9e0f4ce_a122db4f",
         "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.h",
         "patchSetId": 1
@@ -381,6 +741,30 @@
       "writtenOn": "2017-04-05T23:31:37Z",
       "side": 1,
       "message": "nit: it has became an unstructured mess of fields, related both to the report data and to the management of reporting system. What about creating several structs here and putting corresponding fields there? e.g. struct ReportFields {...}; struct SavingState { ... }; struct EmulatorServices { ... };\n?",
+      "range": {
+        "startLine": 52,
+        "startChar": 3,
+        "endLine": 72,
+        "endChar": 28
+      },
+      "revId": "e0d9d6256c8e5d334f821f3eef15f3da26c53779",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "15d698c4_2618e24f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-08T00:29:30Z",
+      "side": 1,
+      "message": "I have created struct ReportFields {...}; struct SavingState { ... }; but not EmulatorService because I realize that BugReportWindow should not take ownership of mScreenCapturer and mAdb but it will take ownership of mBugReportServices. So it\u0027s confusing to group them in the same struct.",
+      "parentUuid": "c9e0f4ce_a122db4f",
       "range": {
         "startLine": 52,
         "startChar": 3,
@@ -416,6 +800,30 @@
     },
     {
       "key": {
+        "uuid": "ac440c4a_ec8e7981",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-08T00:29:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b10a372e_86749e2e",
+      "range": {
+        "startLine": 75,
+        "startChar": 0,
+        "endLine": 75,
+        "endChar": 52
+      },
+      "revId": "e0d9d6256c8e5d334f821f3eef15f3da26c53779",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3bff103_5885efc0",
         "filename": "android/android-emu/android/skin/qt/extended-pages/help-page.cpp",
         "patchSetId": 1
@@ -427,6 +835,30 @@
       "writtenOn": "2017-04-05T23:31:37Z",
       "side": 1,
       "message": "please don\u0027t leave commented code",
+      "range": {
+        "startLine": 169,
+        "startChar": 0,
+        "endLine": 169,
+        "endChar": 66
+      },
+      "revId": "e0d9d6256c8e5d334f821f3eef15f3da26c53779",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6c2ec890_d6c9dfec",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/help-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-08T00:29:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e3bff103_5885efc0",
       "range": {
         "startLine": 169,
         "startChar": 0,
