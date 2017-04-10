@@ -548,11 +548,11 @@ static int hax_vcpu_interrupt(CPUState *cpu)
      * Unlike KVM, the HAX kernel module checks the eflags, instead.
      */
     if (ht->ready_for_interrupt_injection &&
-      (cpu->interrupt_request & CPU_INTERRUPT_HARD))
+      (cpu->interrupt_request & (CPU_INTERRUPT_HARD | CPU_INTERRUPT_NMI)))
     {
         int irq;
 
-        cpu->interrupt_request &= ~CPU_INTERRUPT_HARD;
+        cpu->interrupt_request &= ~(CPU_INTERRUPT_HARD | CPU_INTERRUPT_NMI);
         irq = cpu_get_pic_interrupt(env);
         if (irq >= 0) {
             hax_inject_interrupt(cpu, irq);
@@ -565,7 +565,7 @@ static int hax_vcpu_interrupt(CPUState *cpu)
      * a return to userspace as soon as the guest is ready to receive
      * an interrupt.
      */
-    if ((cpu->interrupt_request & CPU_INTERRUPT_HARD))
+    if ((cpu->interrupt_request & (CPU_INTERRUPT_HARD | CPU_INTERRUPT_NMI)))
         ht->request_interrupt_window = 1;
     else
         ht->request_interrupt_window = 0;
