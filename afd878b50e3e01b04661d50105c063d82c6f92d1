@@ -22,6 +22,30 @@
       "revId": "afd878b50e3e01b04661d50105c063d82c6f92d1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "29c19753_4d37fbaf",
+        "filename": "target-i386/hax-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 720,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-10T21:18:26Z",
+      "side": 1,
+      "message": "Yes, see kvm_arch_pre_run, kvm_arch_process_async_events, and kvm_handle_halt\n\nAny hypervisor should account for this, really, NMI is just anything where even if the CPU is in a spin lock we can still tell the kernel stuff like break and attach to a debugger and things like that. Kernel panics and warnings usually trigger NMI at least from inside the guest.",
+      "parentUuid": "d24e5948_a056a180",
+      "range": {
+        "startLine": 720,
+        "startChar": 56,
+        "endLine": 720,
+        "endChar": 73
+      },
+      "revId": "afd878b50e3e01b04661d50105c063d82c6f92d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
