@@ -717,14 +717,14 @@ static int hax_vcpu_interrupt(CPUArchState * env)
      * Try to inject an interrupt if the guest can accept it
      * Unlike KVM, HAX kernel check for the eflags, instead of qemu
      */
-    if (ht->ready_for_interrupt_injection &&
-        (cpu->interrupt_request & CPU_INTERRUPT_HARD)) {
+    if ((cpu->interrupt_request & (CPU_INTERRUPT_HARD | CPU_INTERRUPT_NMI)) &&
+      ht->ready_for_interrupt_injection) {
         int irq;
 
         irq = cpu_get_pic_interrupt(env);
         if (irq >= 0) {
             hax_inject_interrupt(env, irq);
-            cpu->interrupt_request &= ~CPU_INTERRUPT_HARD;
+            cpu->interrupt_request &= ~(CPU_INTERRUPT_HARD | CPU_INTERRUPT_NMI);
         }
     }
 
@@ -732,7 +732,7 @@ static int hax_vcpu_interrupt(CPUArchState * env)
      * interrupt, request an interrupt window exit.  This will
      * cause a return to userspace as soon as the guest is ready to
      * receive interrupts. */
-    if ((cpu->interrupt_request & CPU_INTERRUPT_HARD))
+    if ((cpu->interrupt_request & (CPU_INTERRUPT_HARD | CPU_INTERRUPT_NMI)))
         ht->request_interrupt_window = 1;
     else
         ht->request_interrupt_window = 0;
@@ -867,8 +867,8 @@ static int hax_vcpu_hax_exec(CPUArchState * env, int ug_platform)
             ret = HAX_EMUL_EXITLOOP;
             break;
         case HAX_EXIT_HLT:
-            if (!(cpu->interrupt_request & CPU_INTERRUPT_HARD) &&
-                !(cpu->interrupt_request & CPU_INTERRUPT_NMI)) {
+            if (!(cpu->interrupt_request &
+                  (CPU_INTERRUPT_HARD | CPU_INTERRUPT_NMI))) {
                 /* hlt instruction with interrupt disabled is shutdown */
                 env->eflags |= IF_MASK;
                 cpu->halted = 1;
