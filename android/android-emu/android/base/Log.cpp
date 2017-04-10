@@ -11,6 +11,7 @@
 
 #include "android/base/Log.h"
 
+#include "android/base/Debug.h"
 #include "android/base/StringFormat.h"
 #include "android/base/threads/Thread.h"
 
@@ -73,8 +74,12 @@ void defaultLogMessage(const LogParams& params,
     // performance.
     fflush(stderr);
 
-    if (params.severity >= LOG_FATAL)
-        exit(1);
+    if (params.severity >= LOG_FATAL) {
+        if (IsDebuggerAttached()) {
+            android::base::DebugBreak();
+        }
+        _exit(1);
+    }
 }
 
 void logMessage(const LogParams& params,
