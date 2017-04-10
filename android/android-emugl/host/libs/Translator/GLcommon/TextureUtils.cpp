@@ -130,75 +130,105 @@ ETC2ImageFormat getEtcFormat(GLenum internalformat) {
     return etcFormat;
 }
 
+GLenum decompressedInternalFormat(GLenum compressedFormat) {
+    switch (compressedFormat) {
+        // ETC2 formats
+        case GL_COMPRESSED_RGB8_ETC2:
+        case GL_ETC1_RGB8_OES:
+            return GL_RGB8;
+        case GL_COMPRESSED_RGBA8_ETC2_EAC:
+        case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+            return GL_RGBA8;
+        case GL_COMPRESSED_SRGB8_ETC2:
+            return GL_SRGB8;
+        case GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC:
+            return GL_SRGB8_ALPHA8;
+        case GL_COMPRESSED_R11_EAC:
+        case GL_COMPRESSED_SIGNED_R11_EAC:
+            return GL_R32F;
+        case GL_COMPRESSED_RG11_EAC:
+        case GL_COMPRESSED_SIGNED_RG11_EAC:
+            return GL_RG32F;
+        case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+            return GL_SRGB8_ALPHA8;
+        // palette formats
+        case GL_PALETTE4_RGB8_OES:
+        case GL_PALETTE4_R5_G6_B5_OES:
+        case GL_PALETTE8_RGB8_OES:
+        case GL_PALETTE8_R5_G6_B5_OES:
+            return GL_RGB8;
+        case GL_PALETTE4_RGBA8_OES:
+        case GL_PALETTE4_RGBA4_OES:
+        case GL_PALETTE4_RGB5_A1_OES:
+        case GL_PALETTE8_RGBA8_OES:
+        case GL_PALETTE8_RGBA4_OES:
+        case GL_PALETTE8_RGB5_A1_OES:
+            return GL_RGBA8;
+        default:
+            return compressedFormat;
+    }
+}
+
 void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
                             GLenum internalformat, GLsizei width,
                             GLsizei height, GLint border,
                             GLsizei imageSize, const GLvoid* data,
-                            void* funcPtr) {
+                            glTexImage2D_t glTexImage2DPtr) {
 
     /* XXX: This is just a hack to fix the resolve of glTexImage2D problem
        It will be removed when we'll no longer link against ligGL */
-    typedef void (GLAPIENTRY *glTexImage2DPtr_t ) (
+    /*typedef void (GLAPIENTRY *glTexImage2DPtr_t ) (
             GLenum target, GLint level, GLint internalformat,
             GLsizei width, GLsizei height, GLint border,
             GLenum format, GLenum type, const GLvoid *pixels);
 
     glTexImage2DPtr_t glTexImage2DPtr;
-    glTexImage2DPtr = (glTexImage2DPtr_t)funcPtr;
+    glTexImage2DPtr = (glTexImage2DPtr_t)funcPtr;*/
 
     if (isEtcFormat(internalformat)) {
         GLint format = GL_RGB;
         GLint type = GL_UNSIGNED_BYTE;
-        GLint convertedInternalFormat = GL_RGB8;
+        GLint convertedInternalFormat = decompressedInternalFormat(internalformat);
         ETC2ImageFormat etcFormat = EtcRGB8;
         switch (internalformat) {
             case GL_COMPRESSED_RGB8_ETC2:
             case GL_ETC1_RGB8_OES:
                 break;
             case GL_COMPRESSED_RGBA8_ETC2_EAC:
-                convertedInternalFormat = GL_RGBA8;
                 etcFormat = EtcRGBA8;
                 format = GL_RGBA;
                 break;
             case GL_COMPRESSED_SRGB8_ETC2:
-                convertedInternalFormat = GL_SRGB8;
                 break;
             case GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC:
-                convertedInternalFormat = GL_SRGB8_ALPHA8;
                 etcFormat = EtcRGBA8;
                 format = GL_RGBA;
                 break;
             case GL_COMPRESSED_R11_EAC:
-                convertedInternalFormat = GL_R32F;
                 etcFormat = EtcR11;
                 format = GL_RED;
                 type = GL_FLOAT;
                 break;
             case GL_COMPRESSED_SIGNED_R11_EAC:
-                convertedInternalFormat = GL_R32F;
                 etcFormat = EtcSignedR11;
                 format = GL_RED;
                 type = GL_FLOAT;
                 break;
             case GL_COMPRESSED_RG11_EAC:
-                convertedInternalFormat = GL_RG32F;
                 etcFormat = EtcRG11;
                 format = GL_RG;
                 type = GL_FLOAT;
                 break;
             case GL_COMPRESSED_SIGNED_RG11_EAC:
-                convertedInternalFormat = GL_RG32F;
                 etcFormat = EtcSignedRG11;
                 format = GL_RG;
                 type = GL_FLOAT;
                 break;
             case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
-                convertedInternalFormat = GL_RGBA8;
                 etcFormat = EtcRGB8A1;
                 format = GL_RGBA;
                 break;
             case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
-                convertedInternalFormat = GL_SRGB8_ALPHA8;
                 etcFormat = EtcRGB8A1;
                 format = GL_RGBA;
                 break;
