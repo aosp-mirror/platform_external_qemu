@@ -252,6 +252,10 @@ LOCAL_CFLAGS := \
     $(LIBXML2_CFLAGS) \
     $(ANDROID_EMU_CFLAGS) \
 
+# ffmpeg targets C, so it doesn't care that C++11 requres a space bewteen
+# string literals which are being glued together
+LOCAL_CXXFLAGS += $(call if-target-clang,-Wno-reserved-user-defined-literal,-Wno-literal-suffix)
+
 LOCAL_C_INCLUDES := \
     $(EMUGL_INCLUDES) \
     $(EMUGL_SRCDIR)/shared \
@@ -270,6 +274,8 @@ LOCAL_C_INCLUDES := \
     $(LZ4_INCLUDES) \
     $(ZLIB_INCLUDES) \
     $(MURMURHASH_INCLUDES) \
+    $(FFMPEG_INCLUDES) \
+    $(SDL2_INCLUDES) \
 
 LOCAL_SRC_FILES := \
     android/adb-server.cpp \
@@ -500,6 +506,14 @@ LOCAL_SRC_FILES := \
     android/wear-agent/WearAgent.cpp \
     android/wear-agent/PairUpWearPhone.cpp \
 
+# external display support
+LOCAL_SRC_FILES += \
+    android/external-display/ExternalDisplayPipe.cpp \
+    android/external-display/FFmpegDecoder.cpp \
+    android/external-display/Mirroring.cpp \
+    android/external-display/SDLRenderer.cpp \
+    android/external-display/SDLDisplayWindow.cpp
+
 # Platform-specific camera capture
 ifeq ($(BUILD_TARGET_OS),linux)
     LOCAL_SRC_FILES += \
@@ -578,6 +592,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-libjpeg \
     emulator-libpng \
     emulator-libyuv \
+    emulator-sdl2 \
     emulator-libwebp \
     emulator-tinyobjloader \
     emulator-zlib \
@@ -590,6 +605,9 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     $(CRASHREPORT_PROTO_STATIC_LIBRARIES) \
     $(SIM_ACCESS_RULES_PROTO_STATIC_LIBRARIES) \
     $(PHYSICS_PROTO_STATIC_LIBRARIES) \
+    $(FFMPEG_STATIC_LIBRARIES) \
+    $(LIBX264_STATIC_LIBRARIES) \
+    $(LIBVPX_STATIC_LIBRARIES)
 
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \
@@ -856,7 +874,7 @@ EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
 # The skin support sources
 include $(_ANDROID_EMU_ROOT)/android/skin/sources.mk
 
-EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES) $(FFMPEG_STATIC_LIBRARIES) $(LIBX264_STATIC_LIBRARIES) $(LIBVPX_STATIC_LIBRARIES) emulator-zlib
+EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES) $(FFMPEG_STATIC_LIBRARIES) $(LIBX264_STATIC_LIBRARIES) $(LIBVPX_STATIC_LIBRARIES) emulator-zlib emulator-sdl2
 
 $(call start-emulator-library, emulator-libui)
 
@@ -882,6 +900,8 @@ LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
     $(EMULATOR_LIBUI_INCLUDES) \
     $(FFMPEG_INCLUDES) \
+    $(SDL2_INCLUDES) \
+    /usr/local/google/home/huisinro/google-build/emu/master/prebuilts/android-emulator-build/qemu-android-deps/linux-x86_64/include \
 
 LOCAL_SRC_FILES += \
     $(ANDROID_SKIN_SOURCES) \
@@ -894,6 +914,14 @@ LOCAL_SRC_FILES += \
     android/ffmpeg-audio-capture.cpp \
     android/ffmpeg-muxer.cpp \
     android/screen-recorder.cpp
+
+# external display support
+LOCAL_SRC_FILES_NOT += \
+    android/external-display/ExternalDisplayPipe.cpp \
+    android/external-display/FFmpegDecoder.cpp \
+    android/external-display/Mirroring.cpp \
+    android/external-display/SDLRenderer.cpp \
+    android/external-display/DisplayWindow.cpp
 
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
 LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
