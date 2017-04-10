@@ -666,7 +666,7 @@ bool GLESv2Validate::isCompressedFormat(GLenum format) {
     return false;
 }
 
-void GLESv2Validate::getCompatibleFormatTypeForInternalFormat(GLenum internalformat, GLenum* format_out, GLenum* type_out) {
+void GLESv2Validate::getCompatibleFormatTypeForInternalFormat(GLenum* internalformat, GLenum* format_out, GLenum* type_out) {
 #define RETURN_COMPATIBLE_FORMAT(x, y, z) \
     if (internalformat == x) { \
         *format_out = y; \

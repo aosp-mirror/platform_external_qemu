@@ -546,7 +546,7 @@ GL_APICALL void GL_APIENTRY glTexStorage2D(GLenum target, GLsizei levels, GLenum
 
     GLint err = GL_NO_ERROR;
     GLenum format, type;
-    GLESv2Validate::getCompatibleFormatTypeForInternalFormat(internalformat, &format, &type);
+    GLESv2Validate::getCompatibleFormatTypeForInternalFormat(&internalformat, &format, &type);
     for (GLsizei i = 0; i < levels; i++)
         sPrepareTexImage2D(target, i, (GLint)internalformat, width, height, 0, format, type, NULL, &type, (GLint*)&internalformat, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
