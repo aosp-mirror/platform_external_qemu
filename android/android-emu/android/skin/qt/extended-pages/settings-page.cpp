@@ -143,7 +143,6 @@ SettingsPage::SettingsPage(QWidget* parent)
         break;
     }
 
-    mUi->set_glesApiLevelTitle->setVisible(false);
     mUi->set_glesApiLevelPrefComboBox->setVisible(false);
 }
 
