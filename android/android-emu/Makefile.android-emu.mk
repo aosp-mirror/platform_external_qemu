@@ -428,10 +428,15 @@ $(call end-emulator-library)
 # should use.
 ANDROID_EMU_BASE_STATIC_LIBRARIES := \
     android-emu-base \
-    $(LIBUUID_STATIC_LIBRARIES) \
+    $(LIBUUID_STATIC_LIBRARIES)
 
 ANDROID_EMU_BASE_LDLIBS := \
     $(LIBUUID_LDLIBS) \
+
+ifeq ($(BUILD_TARGET_OS),linux)
+    ANDROID_EMU_BASE_LDLIBS += -lrt
+endif
+
 
 ANDROID_EMU_STATIC_LIBRARIES := \
     android-emu \

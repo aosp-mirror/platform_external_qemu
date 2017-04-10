@@ -261,6 +261,8 @@ struct CompressParam {
     QemuCond cond;
     RAMBlock *block;
     ram_addr_t offset;
+
+    int count;
 };
 typedef struct CompressParam CompressParam;
 
@@ -272,8 +274,13 @@ struct DecompressParam {
     void *des;
     uint8_t *compbuf;
     int len;
+
+    int count;
 };
 typedef struct DecompressParam DecompressParam;
+
+static int decomp_count_waited = 0;
+static int comp_count_waited = 0;
 
 static CompressParam *comp_param;
 static QemuThread *compress_threads;
@@ -346,6 +353,7 @@ void migrate_compress_threads_join(void)
     if (!migrate_use_compression()) {
         return;
     }
+    int count = 0;
     terminate_compression_threads();
     thread_count = migrate_compress_threads();
     for (i = 0; i < thread_count; i++) {
@@ -353,6 +361,7 @@ void migrate_compress_threads_join(void)
         qemu_fclose(comp_param[i].file);
         qemu_mutex_destroy(&comp_param[i].mutex);
         qemu_cond_destroy(&comp_param[i].cond);
+        count += comp_param[i].count;
     }
     qemu_mutex_destroy(&comp_done_lock);
     qemu_cond_destroy(&comp_done_cond);
@@ -360,6 +369,9 @@ void migrate_compress_threads_join(void)
     g_free(comp_param);
     compress_threads = NULL;
     comp_param = NULL;
+
+    printf("compressed: %d threads, waited %d for %d times\n",
+           thread_count, comp_count_waited, count);
 }
 
 void migrate_compress_threads_create(void)
@@ -369,6 +381,7 @@ void migrate_compress_threads_create(void)
     if (!migrate_use_compression()) {
         return;
     }
+    comp_count_waited = 0;
     compression_switch = true;
     thread_count = migrate_compress_threads();
     compress_threads = g_new0(QemuThread, thread_count);
@@ -919,6 +932,7 @@ static int compress_page_with_multi_thread(QEMUFile *f, RAMBlock *block,
         for (idx = 0; idx < thread_count; idx++) {
             if (comp_param[idx].done) {
                 comp_param[idx].done = false;
+                ++comp_param[idx].count;
                 bytes_xmit = qemu_put_qemu_file(f, comp_param[idx].file);
                 qemu_mutex_lock(&comp_param[idx].mutex);
                 set_compress_params(&comp_param[idx], block, offset);
@@ -934,6 +948,7 @@ static int compress_page_with_multi_thread(QEMUFile *f, RAMBlock *block,
             break;
         } else {
             qemu_cond_wait(&comp_done_cond, &comp_done_lock);
+            ++comp_count_waited;
         }
     }
     qemu_mutex_unlock(&comp_done_lock);
@@ -2319,6 +2334,7 @@ void migrate_decompress_threads_create(void)
                            do_data_decompress, decomp_param + i,
                            QEMU_THREAD_JOINABLE);
     }
+    decomp_count_waited = 0;
 }
 
 void migrate_decompress_threads_join(void)
@@ -2332,12 +2348,18 @@ void migrate_decompress_threads_join(void)
         qemu_cond_signal(&decomp_param[i].cond);
         qemu_mutex_unlock(&decomp_param[i].mutex);
     }
+    int count = 0;
     for (i = 0; i < thread_count; i++) {
         qemu_thread_join(decompress_threads + i);
         qemu_mutex_destroy(&decomp_param[i].mutex);
         qemu_cond_destroy(&decomp_param[i].cond);
         g_free(decomp_param[i].compbuf);
+        count += decomp_param[i].count;
     }
+
+    printf("decompressed: %d threads, waited %d for %d times\n",
+           thread_count, decomp_count_waited, count);
+
     g_free(decompress_threads);
     g_free(decomp_param);
     decompress_threads = NULL;
@@ -2363,6 +2385,7 @@ static void decompress_data_with_multi_threads(QEMUFile *f,
                 qemu_get_buffer(f, decomp_param[idx].compbuf, len);
                 decomp_param[idx].des = host;
                 decomp_param[idx].len = len;
+                ++decomp_param[idx].count;
                 qemu_cond_signal(&decomp_param[idx].cond);
                 qemu_mutex_unlock(&decomp_param[idx].mutex);
                 break;
@@ -2372,9 +2395,12 @@ static void decompress_data_with_multi_threads(QEMUFile *f,
             break;
         } else {
             qemu_cond_wait(&decomp_done_cond, &decomp_done_lock);
+            ++decomp_count_waited;
         }
     }
     qemu_mutex_unlock(&decomp_done_lock);
+
+
 }
 
 /*
@@ -2643,13 +2669,15 @@ static int ram_load(QEMUFile *f, void *opaque, int version_id)
     wait_for_decompress_done();
     rcu_read_unlock();
 
-    if (decompress_threads) {
-        migrate_decompress_threads_join();
-    }
-
     DPRINTF("Completed load of VM with exit code %d seq iteration "
             "%" PRIu64 "\n", ret, seq_iter);
     return ret;
+}
+
+static void ram_post_load(void* p) {
+    if (decompress_threads) {
+        migrate_decompress_threads_join();
+    }
 }
 
 static SaveVMHandlers savevm_ram_handlers = {
@@ -2659,6 +2687,7 @@ static SaveVMHandlers savevm_ram_handlers = {
     .save_live_complete_precopy = ram_save_complete,
     .save_live_pending = ram_save_pending,
     .load_state = ram_load,
+    .post_load = ram_post_load,
     .cleanup = ram_migration_cleanup,
 };
 
