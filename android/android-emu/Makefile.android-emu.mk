@@ -218,6 +218,14 @@ LOCAL_CFLAGS := \
     $(LIBCURL_CFLAGS) \
     $(LIBXML2_CFLAGS) \
 
+# ffmpeg targets C, so it doesn't care that C++11 requres a space bewteen
+# string literals which are being glued together
+ifeq ($(BUILD_TARGET_OS),darwin)
+    LOCAL_CXXFLAGS += -Wno-reserved-user-defined-literal
+else
+    LOCAL_CXXFLAGS += -Wno-literal-suffix
+endif
+
 LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
     $(ANDROID_EMU_INCLUDES) \
@@ -229,6 +237,7 @@ LOCAL_C_INCLUDES := \
     $(LIBEXT4_UTILS_INCLUDES) \
     $(LIBPNG_INCLUDES) \
     $(ZLIB_INCLUDES) \
+    $(FFMPEG_INCLUDES) \
 
 LOCAL_SRC_FILES := \
     android/adb-server.cpp \
@@ -306,6 +315,11 @@ LOCAL_SRC_FILES := \
     android/emulation/SerialLine.cpp \
     android/emulation/SetupParameters.cpp \
     android/emulation/VmLock.cpp \
+    android/external-display/ExternalDisplayPipe.cpp \
+    android/external-display/FFmpegDecoder.cpp \
+    android/external-display/Mirroring.cpp \
+    android/external-display/SDLRenderer.cpp \
+    android/external-display/DisplayWindow.cpp \
     android/error-messages.cpp \
     android/featurecontrol/FeatureControl.cpp \
     android/featurecontrol/FeatureControlImpl.cpp \
@@ -468,6 +482,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-libselinux \
     emulator-libjpeg \
     emulator-libpng \
+    emulator-sdl2 \
     emulator-libwebp \
     emulator-zlib \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
@@ -475,6 +490,9 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     $(VEHICLE_PROTO_STATIC_LIBRARIES) \
     $(FEATURECONTROL_PROTO_STATIC_LIBRARIES) \
     $(CRASHREPORT_PROTO_STATIC_LIBRARIES) \
+    $(FFMPEG_STATIC_LIBRARIES) \
+    $(LIBX264_STATIC_LIBRARIES) \
+    $(LIBVPX_STATIC_LIBRARIES)
 
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \
@@ -733,7 +751,7 @@ EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
 # The skin support sources
 include $(_ANDROID_EMU_ROOT)/android/skin/sources.mk
 
-EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES) $(FFMPEG_STATIC_LIBRARIES) $(LIBX264_STATIC_LIBRARIES) emulator-zlib
+EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES) $(FFMPEG_STATIC_LIBRARIES) $(LIBX264_STATIC_LIBRARIES) $(LIBVPX_STATIC_LIBRARIES) emulator-zlib
 
 $(call start-emulator-library, emulator-libui)
 
@@ -757,6 +775,7 @@ LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
     $(EMULATOR_LIBUI_INCLUDES) \
     $(FFMPEG_INCLUDES) \
+    $(SDL2_INCLUDES) \
 
 LOCAL_SRC_FILES += \
     $(ANDROID_SKIN_SOURCES) \
