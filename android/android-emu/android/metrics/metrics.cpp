@@ -258,7 +258,7 @@ static void fillAvdMetrics(android_studio::AndroidStudioEvent* event) {
     VERBOSE_PRINT(metrics, "Filling AVD metrics");
 
     auto eventAvdInfo = event->mutable_emulator_details()->mutable_avd_info();
-    eventAvdInfo->set_name(StringView(avdInfo_getName(android_avdInfo)));
+    // AVD name is a user-generated data, so won't report it.
     eventAvdInfo->set_api_level(avdInfo_getApiLevel(android_avdInfo));
     eventAvdInfo->set_image_kind(
             avdInfo_isGoogleApis(android_avdInfo)
