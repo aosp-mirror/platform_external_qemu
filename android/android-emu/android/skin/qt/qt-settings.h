@@ -58,6 +58,19 @@ constexpr char GLESAPILEVEL_PREFERENCE[] ="set/glesApiLevelPreference";
 
 constexpr char CLIPBOARD_SHARING[] = "set/clipboardSharing";
 
+constexpr char HTTP_PROXY_USE_STUDIO[] = "set/proxy/useStudio";
+constexpr char HTTP_PROXY_TYPE[] = "set/proxy/type";
+enum HTTP_PROXY_TYPE {
+    HTTP_PROXY_TYPE_NONE = 0,
+    HTTP_PROXY_TYPE_MANUAL = 1
+    // Future?: HTTP_PROXY_TYPE_AUTO = 2
+};
+constexpr char HTTP_PROXY_HOST[] = "set/proxy/host";
+constexpr char HTTP_PROXY_PORT[] = "set/proxy/port";
+constexpr char HTTP_PROXY_AUTHENTICATION[] = "set/proxy/authentication";
+constexpr char HTTP_PROXY_USERNAME[] = "set/proxy/username";
+
+
 constexpr char LOCATION_ENTERED_ALTITUDE[] = "loc/altitude";
 constexpr char LOCATION_ENTERED_LATITUDE[] = "loc/latitude";
 constexpr char LOCATION_ENTERED_LONGITUDE[] = "loc/longitude";
