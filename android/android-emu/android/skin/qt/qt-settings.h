@@ -59,6 +59,8 @@ const int CRASHREPORT_COMBOBOX_ASK = 2;
 const QString GLESBACKEND_PREFERENCE("set/glesBackendPreference");
 const QString GLESAPILEVEL_PREFERENCE("set/glesApiLevelPreference");
 
+constexpr char CLIPBOARD_SHARING[] = "set/clipboardSharing";
+
 const QString LOCATION_ENTERED_ALTITUDE("loc/altitude");
 const QString LOCATION_ENTERED_LATITUDE("loc/latitude");
 const QString LOCATION_ENTERED_LONGITUDE("loc/longitude");

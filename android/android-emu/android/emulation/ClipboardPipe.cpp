@@ -19,7 +19,9 @@
 namespace android {
 namespace emulation {
 
-static const auto emptyCallback = [](const uint8_t*, size_t) {};
+static void emptyCallback(const uint8_t*, size_t) {}
+
+bool ClipboardPipe::sEnabled = false;
 
 // A storage for the current clipboard pipe instance data.
 // Shared pointer is required as there are potential races between clipboard
@@ -44,143 +46,100 @@ void ClipboardPipe::onGuestClose() {
 
 unsigned ClipboardPipe::onGuestPoll() const {
     unsigned result = PIPE_POLL_OUT;
-    if (mHostClipboardHasNewData) {
+    if (sEnabled && mGuestWriteState.hasData()) {
         result |= PIPE_POLL_IN;
     }
     return result;
 }
 
-int ClipboardPipe::processOperation(OperationType opType,
+int ClipboardPipe::processOperation(OperationType operation,
                                     ReadWriteState* state,
                                     const AndroidPipeBuffer* pipeBuffers,
-                                    int numPipeBuffers,
-                                    bool* opComplete) {
-    // This indicates the number of bytes needed to be read from or written
-    // to the pipe.
-    uint32_t requiredBytes = state->sizeProcessed
-                                     ? state->requiredBytes
-                                     : sizeof(state->requiredBytes);
+                                    int numPipeBuffers) {
+    const AndroidPipeBuffer* pipeBuf = pipeBuffers;
+    const AndroidPipeBuffer* const endPipeBuf = pipeBuf + numPipeBuffers;
+    int pipeBufOffset = 0;
+    int totalProcessed = 0;
 
-    // This will point to the buffer to be read from.
-    const uint8_t* sourceBuffer = nullptr;
-
-    // This will point to the buffer to be written into.
-    uint8_t* targetBuffer = nullptr;
-
-    const AndroidPipeBuffer* pipeBuffer = pipeBuffers;
-    const AndroidPipeBuffer* endPipeBuffer = pipeBuffer + numPipeBuffers;
-
-    // This will contain the return value of the function (number of bytes
-    // read or written).
-    int totalBytesProcessed = 0;
-
-    // Indicates the offset within the pipe buffer that is currently being
-    // processed.
-    size_t pipeBufferOffset = 0;
-
-    *opComplete = false;
-
-    if (opType == OperationType::WriteToGuestClipboard) {
-        // If we're writing to the guest clipboard, then the source
-        // buffer is state.buffer (or state.requiredBytes, if we haven't
-        // sent the length of the buffer yet).
-        sourceBuffer =
-                state->sizeProcessed
-                        ? state->buffer.data()
-                        : reinterpret_cast<uint8_t*>(&(state->requiredBytes));
-    } else if (opType == OperationType::ReadFromGuestClipboard) {
-        // If we're reading from the guest clipboard, the target buffer
-        // is the state's buffer (or state.requiredBytes, if we haven't
-        // read the length of the buffer yet).
-        targetBuffer =
-                state->sizeProcessed
-                        ? state->buffer.data()
-                        : reinterpret_cast<uint8_t*>(&(state->requiredBytes));
-    }
-
-    while (pipeBuffer != endPipeBuffer) {
+    while (pipeBuf != endPipeBuf) {
         // Decide how many bytes need to be read/written during the current
         // iteration.
-        int bytesToProcess = std::min(
-                requiredBytes - state->processedBytes,
-                static_cast<uint32_t>(pipeBuffer->size - pipeBufferOffset));
-
-        if (opType == OperationType::WriteToGuestClipboard) {
-            // const_cast is ok here since the contents of AndroidPipeBuffer
-            // passed into the function were intended to be changed.
-            targetBuffer =
-                    const_cast<uint8_t*>(pipeBuffer->data) + pipeBufferOffset;
-            memcpy(targetBuffer, sourceBuffer + state->processedBytes,
-                   bytesToProcess);
-        } else if (opType == OperationType::ReadFromGuestClipboard) {
-            sourceBuffer = static_cast<const uint8_t*>(pipeBuffer->data) +
-                           pipeBufferOffset;
-            memcpy(targetBuffer + state->processedBytes, sourceBuffer,
-                   bytesToProcess);
-        }
-        state->processedBytes += bytesToProcess;
-        totalBytesProcessed += bytesToProcess;
-        pipeBufferOffset += bytesToProcess;
-        if (pipeBufferOffset >= pipeBuffer->size) {
-            ++pipeBuffer;
-            pipeBufferOffset = 0;
+        auto iterBytes = std::min(
+                state->size(), static_cast<int>(pipeBuf->size) - pipeBufOffset);
+        if (iterBytes == 0) {
+            // Looks like we've finished early on the host. That's OK as guest
+            // could pass a fixed-size buffer instead of using the exact size
+            // we gave it.
+            break;
         }
 
-        if (state->processedBytes == requiredBytes && !state->sizeProcessed) {
-            // We have either sent or received the length of clipboard data
-            // in bytes. Now it is time to send/receive the buffer itself.
-            state->sizeProcessed = true;
+        const auto pipeBufPos = pipeBuf->data + pipeBufOffset;
+        if (operation == OperationType::WriteToGuest) {
+            // const_cast is ok here since AndroidPipeBuffer passed into the
+            // function is spefically for writing.
+            memcpy(const_cast<uint8_t*>(pipeBufPos), state->data(), iterBytes);
+        } else {  // opType == OperationType::ReadFromGuest
+            memcpy(state->data(), pipeBufPos, iterBytes);
+        }
+        totalProcessed += iterBytes;
+        pipeBufOffset += iterBytes;
+        if (pipeBufOffset >= static_cast<int>(pipeBuf->size)) {
+            ++pipeBuf;
+            pipeBufOffset = 0;
+        }
+
+        state->processedBytes += iterBytes;
+        if (state->size() == 0 && !state->dataSizeTransferred) {
+            // Done with size transfer, switch to the actual contents.
+            state->dataSizeTransferred = true;
             state->processedBytes = 0;
-            requiredBytes = state->requiredBytes;
-            if (opType == OperationType::ReadFromGuestClipboard) {
-                // If we're reading from guest clipboard,
-                // make sure the buffer on our side has enough space.
-                state->buffer.resize(state->requiredBytes);
-
-                // Make sure next iterations write to state's buffer.
-                targetBuffer = state->buffer.data();
-            } else if (opType == OperationType::WriteToGuestClipboard) {
-                // If we're writing to the guest clipboard, just
-                // make sure next iterations read from state's buffer.
-                sourceBuffer = state->buffer.data();
+            if (operation == OperationType::ReadFromGuest) {
+                // If we're reading from the guest clipboard, make sure the
+                // buffer on our side has enough space.
+                state->buffer.resize(state->dataSize);
             }
         }
     }
-    if (state->processedBytes == state->requiredBytes && state->sizeProcessed) {
-        *opComplete = true;
-    }
-    return totalBytesProcessed;
+    return totalProcessed;
 }
 
 int ClipboardPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
-    int result = PIPE_ERROR_AGAIN;
-    if (mHostClipboardHasNewData) {
-        bool opComplete = false;
-        result = processOperation(OperationType::WriteToGuestClipboard,
-                                  &mGuestClipboardWriteState, buffers,
-                                  numBuffers, &opComplete);
-        if (opComplete) {
-            mHostClipboardHasNewData = false;
-        }
+    if (!sEnabled) {
+        // Make sure we don't start a new transfer, but don't interrupt the one
+        // already in progress.
+        mGuestWriteState.clearQueued();
     }
-    return result;
+
+    if (ReadWriteState* stateWithData = mGuestWriteState.pickStateWithData()) {
+        return processOperation(OperationType::WriteToGuest, stateWithData,
+                                buffers, numBuffers);
+    }
+    return PIPE_ERROR_AGAIN;
 }
 
 int ClipboardPipe::onGuestSend(const AndroidPipeBuffer* buffers,
                                int numBuffers) {
-    bool opComplete = false;
-    int result = processOperation(OperationType::ReadFromGuestClipboard,
-                                  &mGuestClipboardReadState, buffers,
-                                  numBuffers, &opComplete);
-    if (opComplete) {
-        sInstance->guestClipboardCallback(
-                mGuestClipboardReadState.buffer.data(),
-                mGuestClipboardReadState.processedBytes);
-        mGuestClipboardReadState.sizeProcessed = false;
-        mGuestClipboardReadState.requiredBytes = 0;
-        mGuestClipboardReadState.processedBytes = 0;
+    if (!sEnabled) {
+        // Fake out that we've processed the data, and don't do anything.
+        int total = 0;
+        for (int i = 0; i != numBuffers; ++i) {
+            total += buffers[i].size;
+        }
+        return total;
+    }
+
+    int result = processOperation(OperationType::ReadFromGuest,
+                                  &mGuestReadState, buffers, numBuffers);
+    if (mGuestReadState.isFinished()) {
+        sInstance->guestClipboardCallback(mGuestReadState.buffer.data(),
+                                          mGuestReadState.processedBytes);
+        mGuestReadState.reset();
     }
     return result;
+}
+
+void ClipboardPipe::setEnabled(bool enabled) {
+    sEnabled = enabled;
 }
 
 void registerClipboardPipeService() {
@@ -189,18 +148,22 @@ void registerClipboardPipeService() {
 
 void ClipboardPipe::setGuestClipboardCallback(
         ClipboardPipe::GuestClipboardCallback cb) {
-    sInstance->guestClipboardCallback = cb ? cb : emptyCallback;
+    sInstance->guestClipboardCallback = cb ? std::move(cb) : emptyCallback;
+}
+
+void ClipboardPipe::wakeGuestIfNeeded() {
+    if (sEnabled && mWakeOnRead && mGuestWriteState.hasData()) {
+        signalWake(PIPE_WAKE_READ);
+        mWakeOnRead = false;
+    }
 }
 
 void ClipboardPipe::setGuestClipboardContents(const uint8_t* buf, size_t len) {
-    mGuestClipboardWriteState.buffer.assign(buf, buf + len);
-    mGuestClipboardWriteState.sizeProcessed = false;
-    mGuestClipboardWriteState.requiredBytes = len;
-    mGuestClipboardWriteState.processedBytes = 0;
-    mHostClipboardHasNewData = true;
-    if (mWakeOnRead) {
-        signalWake(PIPE_WAKE_READ);
+    if (!sEnabled) {
+        return; // who cares.
     }
+    mGuestWriteState.queueContents(buf, len);
+    wakeGuestIfNeeded();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -225,6 +188,75 @@ ClipboardPipe::Ptr ClipboardPipe::Service::getPipe() {
 void ClipboardPipe::Service::closePipe() {
     android::base::AutoLock lock(sInstance->pipeLock);
     sInstance->pipe.reset();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+ClipboardPipe::WritingState::WritingState()
+    : inProgress(&states[0]), queued(&states[1]) {}
+
+void ClipboardPipe::WritingState::queueContents(const uint8_t* buf,
+                                                size_t len) {
+    base::AutoLock l(lock);
+    queued->buffer.assign(buf, buf + len);
+    queued->dataSizeTransferred = false;
+    queued->dataSize = len;
+    queued->processedBytes = 0;
+}
+
+ClipboardPipe::ReadWriteState*
+ClipboardPipe::WritingState::pickStateWithData() {
+    base::AutoLock l(lock);
+    if (!inProgress->isFinished()) {
+        return inProgress;
+    }
+    if (!queued->isFinished()) {
+        std::swap(inProgress, queued);
+        return inProgress;
+    }
+    return nullptr;
+}
+
+void ClipboardPipe::WritingState::clearQueued() {
+    base::AutoLock l(lock);
+    // These two operations together indicate that there's nothing to transfer,
+    // so it won't get picked for sending.
+    queued->reset();
+    queued->dataSizeTransferred = true;
+}
+
+bool ClipboardPipe::WritingState::hasData() const {
+    base::AutoLock l(lock);
+    return !inProgress->isFinished() || !queued->isFinished();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+ClipboardPipe::ReadWriteState::ReadWriteState() {
+    reset();
+}
+
+uint8_t* ClipboardPipe::ReadWriteState::data() {
+    return (dataSizeTransferred ? buffer.data()
+                                : reinterpret_cast<uint8_t*>(&dataSize)) +
+           processedBytes;
+}
+
+int ClipboardPipe::ReadWriteState::size() const {
+    return (dataSizeTransferred ? static_cast<int>(buffer.size())
+                                : sizeof(dataSize)) -
+           processedBytes;
+}
+
+void ClipboardPipe::ReadWriteState::reset() {
+    dataSize = 0;
+    processedBytes = 0;
+    dataSizeTransferred = false;
+    buffer.clear();
+}
+
+bool ClipboardPipe::ReadWriteState::isFinished() const {
+    return dataSizeTransferred && processedBytes == dataSize;
 }
 
 }  // namespace emulation

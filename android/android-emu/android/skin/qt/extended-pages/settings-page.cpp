@@ -143,11 +143,28 @@ SettingsPage::SettingsPage(QWidget* parent)
         break;
     }
 
+    mUi->set_glesApiLevelTitle->setVisible(false);
     mUi->set_glesApiLevelPrefComboBox->setVisible(false);
+
+    const auto enableClipboardSharing =
+            settings.value(Ui::Settings::CLIPBOARD_SHARING, true).toBool();
+    mUi->set_clipboardSharing->setChecked(enableClipboardSharing);
+    on_set_clipboardSharing_toggled(enableClipboardSharing);
 }
 
 void SettingsPage::setAdbInterface(android::emulation::AdbInterface* adb) {
     mAdb = adb;
+}
+
+void SettingsPage::setHaveClipboardSharing(bool haveSharing) {
+    if (haveSharing) {
+        // Make sure the saved value from settings reaches the clipboard agent.
+        on_set_clipboardSharing_toggled(mUi->set_clipboardSharing->isChecked());
+    } else {
+        mUi->set_clipboardSharing->setEnabled(false);
+        mUi->set_clipboardSharing->setChecked(false);
+        mUi->set_clipboardSharingTitle->setEnabled(false);
+    }
 }
 
 bool SettingsPage::eventFilter(QObject* object, QEvent* event)
@@ -357,4 +374,15 @@ void SettingsPage::on_set_glesApiLevelPrefComboBox_currentIndexChanged(int index
     default:
         break;
     }
+}
+
+void SettingsPage::on_set_clipboardSharing_toggled(bool checked) {
+    // Save it only if the option is enabled - otherwise it means that the
+    // feature isn't supported, so no need to overwrite valid saved value.
+    if (mUi->set_clipboardSharing->isEnabled()) {
+        QSettings settings;
+        settings.setValue(Ui::Settings::CLIPBOARD_SHARING, checked);
+    }
+
+    emit enableClipboardSharingChanged(checked);
 }
