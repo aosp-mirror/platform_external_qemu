@@ -713,12 +713,18 @@ static int hax_vcpu_interrupt(CPUArchState * env)
     struct hax_vcpu_state *vcpu = cpu->hax_vcpu;
     struct hax_tunnel *ht = vcpu->tunnel;
 
+    /* As of now HAXM doesn't have any specific function to notify it about
+     * a pending NMI. So we have to ignore it.
+     * TODO(zyy@): add a proper handling
+     */
+    cpu->interrupt_request &= ~CPU_INTERRUPT_NMI;
+
     /*
      * Try to inject an interrupt if the guest can accept it
      * Unlike KVM, HAX kernel check for the eflags, instead of qemu
      */
-    if (ht->ready_for_interrupt_injection &&
-        (cpu->interrupt_request & CPU_INTERRUPT_HARD)) {
+    if ((cpu->interrupt_request & CPU_INTERRUPT_HARD) &&
+      ht->ready_for_interrupt_injection) {
         int irq;
 
         irq = cpu_get_pic_interrupt(env);
@@ -867,8 +873,8 @@ static int hax_vcpu_hax_exec(CPUArchState * env, int ug_platform)
             ret = HAX_EMUL_EXITLOOP;
             break;
         case HAX_EXIT_HLT:
-            if (!(cpu->interrupt_request & CPU_INTERRUPT_HARD) &&
-                !(cpu->interrupt_request & CPU_INTERRUPT_NMI)) {
+            if (!(cpu->interrupt_request &
+                  (CPU_INTERRUPT_HARD | CPU_INTERRUPT_NMI))) {
                 /* hlt instruction with interrupt disabled is shutdown */
                 env->eflags |= IF_MASK;
                 cpu->halted = 1;
