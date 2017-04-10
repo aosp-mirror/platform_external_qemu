@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5db0b13b_5517addb",
+        "filename": "android/android-emu/android/emulation/ComponentVersionExtractor.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-10T16:32:05Z",
+      "side": 1,
+      "message": "nit: it will close itself in destructor anyway",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 27
+      },
+      "revId": "551244bfff142b63ac0e7707fb85157cf95256f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fe637206_c4b36077",
+        "filename": "android/android-emu/android/emulation/ComponentVersionExtractor.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-10T16:32:05Z",
+      "side": 1,
+      "message": "this could be split into two parts:\n1. auto componentPath \u003d getComponentPath(rootDir, sdkComponent);\nif (!componentPath.empty()) { // append source.properties and parse it }\n\n2. getComponentPath() only returns a path for the component",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 65,
+        "endChar": 5
+      },
+      "revId": "551244bfff142b63ac0e7707fb85157cf95256f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "55afee34_ba9361e3",
+        "filename": "android/android-emu/android/emulation/ComponentVersionExtractor.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-10T16:32:05Z",
+      "side": 1,
+      "message": "not needed anymore",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 14
+      },
+      "revId": "551244bfff142b63ac0e7707fb85157cf95256f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4361b0b8_8fdc4b45",
+        "filename": "android/android-emu/android/emulation/ComponentVersionExtractor.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-10T16:32:05Z",
+      "side": 1,
+      "message": "let\u0027s use enum class here, so there\u0027s no repetition in the names:\n\nenum class SdkComponent { PlatformTools, Tools };",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 56
+      },
+      "revId": "551244bfff142b63ac0e7707fb85157cf95256f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
