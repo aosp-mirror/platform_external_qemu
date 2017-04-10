@@ -627,17 +627,7 @@ GL_APICALL void  GL_APIENTRY glCompressedTexImage2D(GLenum target, GLint level, 
 
     doCompressedTexImage2D(ctx, target, level, internalformat,
                                 width, height, border,
-                                imageSize, data, (void*)glTexImage2D);
-
-    if (ctx->shareGroup().get()) {
-        TextureData *texData = getTextureTargetData(target);
-
-        if (texData) {
-            texData->hasStorage = true;
-            texData->compressed = true;
-            texData->compressedFormat = internalformat;
-        }
-    }
+                                imageSize, data, glTexImage2D);
 }
 
 GL_APICALL void  GL_APIENTRY glCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data){
@@ -654,14 +644,22 @@ GL_APICALL void  GL_APIENTRY glCompressedTexSubImage2D(GLenum target, GLint leve
                 SET_ERROR_IF(imageSize != encodedDataSize, GL_INVALID_VALUE);
             }
         }
+        SET_ERROR_IF(!data,GL_INVALID_OPERATION);
+        doCompressedTexImage2D(ctx, target, level, texData->compressedFormat,
+                width, height, 0, imageSize, data,
+                [xoffset, yoffset](GLenum target, GLint level,
+                GLint internalformat, GLsizei width, GLsizei height,
+                GLint border, GLenum format, GLenum type,
+                const GLvoid* data) {
+                    glTexSubImage2D(target, level, xoffset, yoffset,
+                        width, height, format, type, data);
+                });
     }
-    SET_ERROR_IF(!data,GL_INVALID_OPERATION);
-    ctx->dispatcher().glCompressedTexSubImage2D(target,level,xoffset,yoffset,width,height,format,imageSize,data);
 }
 
 void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
         GLsizei width, GLsizei height, GLint border, GLenum* format,
-        GLenum* type){
+        GLenum* type, GLint* internalformat_out) {
     GET_CTX();
 
     if (ctx->shareGroup().get()) {
@@ -674,7 +672,17 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
         if (texData && level == 0) {
             assert(texData->target == GL_TEXTURE_2D ||
                     texData->target == GL_TEXTURE_CUBE_MAP);
-            texData->internalFormat = internalformat;
+            if (GLESv2Validate::isCompressedFormat(internalformat)) {
+                texData->compressed = true;
+                texData->compressedFormat = internalformat;
+                texData->internalFormat = decompressedInternalFormat(
+                    internalformat);
+            } else {
+                texData->internalFormat = internalformat;
+            }
+            if (internalformat_out) {
+                *internalformat_out = texData->internalFormat;
+            }
             texData->width = width;
             texData->height = height;
             texData->border = border;
@@ -733,7 +741,7 @@ GL_APICALL void  GL_APIENTRY glCopyTexImage2D(GLenum target, GLint level, GLenum
     SET_ERROR_IF(border != 0,GL_INVALID_VALUE);
     // TODO: set up the correct format and type
     s_glInitTexImage2D(target, level, internalformat, width, height, border,
-            nullptr, nullptr);
+            nullptr, nullptr, nullptr);
     ctx->dispatcher().glCopyTexImage2D(target,level,internalformat,x,y,width,height,border);
 }
 
@@ -2797,7 +2805,7 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
     VALIDATE(border != 0,GL_INVALID_VALUE);
 
     s_glInitTexImage2D(target, level, internalformat, width, height, border,
-            &format, &type);
+            &format, &type, &internalformat);
 
     if (!isCompressedFormat && ctx->getMajorVersion() < 3) {
         if (type==GL_HALF_FLOAT_OES)
