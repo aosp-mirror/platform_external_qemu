@@ -49,7 +49,7 @@ struct GLESv2Validate : public GLESvalidate {
     static bool pixelSizedFrmt(GLEScontext* ctx, GLenum internalformat,
             GLenum format, GLenum type);
     static bool isCompressedFormat(GLenum format);
-    static void getCompatibleFormatTypeForInternalFormat(GLenum internalformat, GLenum* format_out, GLenum* type_out);
+    static void getCompatibleFormatTypeForInternalFormat(GLenum* internalformat, GLenum* format_out, GLenum* type_out);
     static bool attribName(const GLchar* name);
     static bool attribIndex(int index, int max);
     static bool programParam(GLEScontext* ctx, GLenum pname);
