@@ -252,6 +252,10 @@ LOCAL_CFLAGS := \
     $(LIBXML2_CFLAGS) \
     $(ANDROID_EMU_CFLAGS) \
 
+# ffmpeg targets C, so it doesn't care that C++11 requres a space bewteen
+# string literals which are being glued together
+LOCAL_CXXFLAGS += $(call if-target-clang,-Wno-reserved-user-defined-literal,-Wno-literal-suffix)
+
 LOCAL_C_INCLUDES := \
     $(EMUGL_INCLUDES) \
     $(EMUGL_SRCDIR)/shared \
@@ -270,6 +274,8 @@ LOCAL_C_INCLUDES := \
     $(LZ4_INCLUDES) \
     $(ZLIB_INCLUDES) \
     $(MURMURHASH_INCLUDES) \
+    $(FFMPEG_INCLUDES) \
+    $(SDL2_INCLUDES) \
 
 LOCAL_SRC_FILES := \
     android/adb-server.cpp \
@@ -358,6 +364,11 @@ LOCAL_SRC_FILES := \
     android/emulation/SerialLine.cpp \
     android/emulation/SetupParameters.cpp \
     android/emulation/VmLock.cpp \
+    android/external-display/ExternalDisplayPipe.cpp \
+    android/external-display/FFmpegDecoder.cpp \
+    android/external-display/Mirroring.cpp \
+    android/external-display/SDLRenderer.cpp \
+    android/external-display/DisplayWindow.cpp \
     android/error-messages.cpp \
     android/featurecontrol/FeatureControl.cpp \
     android/featurecontrol/FeatureControlImpl.cpp \
@@ -578,6 +589,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-libjpeg \
     emulator-libpng \
     emulator-libyuv \
+    emulator-sdl2 \
     emulator-libwebp \
     emulator-tinyobjloader \
     emulator-zlib \
@@ -590,6 +602,9 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     $(CRASHREPORT_PROTO_STATIC_LIBRARIES) \
     $(SIM_ACCESS_RULES_PROTO_STATIC_LIBRARIES) \
     $(PHYSICS_PROTO_STATIC_LIBRARIES) \
+    $(FFMPEG_STATIC_LIBRARIES) \
+    $(LIBX264_STATIC_LIBRARIES) \
+    $(LIBVPX_STATIC_LIBRARIES)
 
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \
@@ -882,6 +897,7 @@ LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
     $(EMULATOR_LIBUI_INCLUDES) \
     $(FFMPEG_INCLUDES) \
+    $(SDL2_INCLUDES) \
 
 LOCAL_SRC_FILES += \
     $(ANDROID_SKIN_SOURCES) \

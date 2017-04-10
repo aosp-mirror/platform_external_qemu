@@ -66,6 +66,7 @@ ANDROID_BEGIN_HEADER
     _VERBOSE_TAG(record, "Screen recording")                                   \
     _VERBOSE_TAG(snapshot, "Snapshots")                                        \
     _VERBOSE_TAG(virtualscene, "virtual scene rendering")                      \
+    _VERBOSE_TAG(extdisplay, "External display")                               \
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
 typedef enum {
