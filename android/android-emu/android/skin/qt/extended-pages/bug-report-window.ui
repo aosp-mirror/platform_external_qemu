@@ -318,7 +318,7 @@
     <rect>
      <x>368</x>
      <y>300</y>
-     <width>130</width>
+     <width>200</width>
      <height>19</height>
     </rect>
    </property>
@@ -331,7 +331,7 @@
     <rect>
      <x>368</x>
      <y>361</y>
-     <width>130</width>
+     <width>200</width>
      <height>19</height>
     </rect>
    </property>
@@ -345,9 +345,9 @@
   <widget class="QLabel" name="bug_hostMachineLabel">
    <property name="geometry">
     <rect>
-     <x>569</x>
+     <x>568</x>
      <y>361</y>
-     <width>130</width>
+     <width>200</width>
      <height>19</height>
     </rect>
    </property>
@@ -358,9 +358,9 @@
   <widget class="QLabel" name="bug_androidVersionLabel">
    <property name="geometry">
     <rect>
-     <x>569</x>
+     <x>568</x>
      <y>300</y>
-     <width>130</width>
+     <width>200</width>
      <height>19</height>
     </rect>
    </property>

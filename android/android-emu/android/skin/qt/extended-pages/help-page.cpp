@@ -25,8 +25,6 @@
 
 const char DOCS_URL[] =
     "http://developer.android.com/r/studio-ui/emulator.html";
-const char FILE_BUG_URL[] =
-    "https://code.google.com/p/android/issues/entry?template=Android%20Emulator%20Bug";
 const char SEND_FEEDBACK_URL[] =
     "https://code.google.com/p/android/issues/entry?template=Emulator%20Feature%20Request";
 
@@ -158,15 +156,13 @@ void HelpPage::createBugReportWindow() {
 }
 
 void HelpPage::on_help_fileBug_clicked() {
-    //@TODO once bug report window is ready, uncomment the following block of code
-    /*if (mBugReportWindow == nullptr) {
+    if (mBugReportWindow == nullptr) {
         createBugReportWindow();
     }
     assert(mBugReportWindow);
     mBugReportWindow->show();
     mBugReportWindow->raise();
-    mBugReportWindow->activateWindow();*/
-    QDesktopServices::openUrl(QUrl::fromEncoded(FILE_BUG_URL));
+    mBugReportWindow->activateWindow();
 }
 
 void HelpPage::on_help_sendFeedback_clicked() {
