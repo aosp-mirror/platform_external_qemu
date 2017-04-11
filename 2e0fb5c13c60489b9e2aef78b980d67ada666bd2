@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a6fb772a_9526f3f9",
+        "filename": "android/android-emu/android/base/synchronization/ConditionVariable.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T19:24:15Z",
+      "side": 1,
+      "message": "What about variations where we can specify the duration to wait in addition to the uptime?",
+      "range": {
+        "startLine": 77,
+        "startChar": 0,
+        "endLine": 77,
+        "endChar": 66
+      },
+      "revId": "2e0fb5c13c60489b9e2aef78b980d67ada666bd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "286bd19a_7e43187b",
+        "filename": "android/android-emu/android/base/synchronization/MessageChannel_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T19:24:15Z",
+      "side": 1,
+      "message": "What about just the current unix time + 16K us, if the test doesn\u0027t hang we\u0027re good",
+      "range": {
+        "startLine": 170,
+        "startChar": 0,
+        "endLine": 173,
+        "endChar": 25
+      },
+      "revId": "2e0fb5c13c60489b9e2aef78b980d67ada666bd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ac9c6634_8d214ebd",
+        "filename": "android/android-emu/android/base/synchronization/ReadWriteLock_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T19:24:15Z",
+      "side": 1,
+      "message": "Heh",
+      "range": {
+        "startLine": 102,
+        "startChar": 0,
+        "endLine": 102,
+        "endChar": 40
+      },
+      "revId": "2e0fb5c13c60489b9e2aef78b980d67ada666bd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
