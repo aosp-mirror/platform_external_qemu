@@ -28,7 +28,8 @@ static void setElidedText(QLineEdit* line_edit, const QString& text) {
 }
 
 SettingsPage::SettingsPage(QWidget* parent)
-    : QWidget(parent), mAdb(nullptr), mUi(new Ui::SettingsPage()) {
+    : QWidget(parent), mAdb(nullptr), mUi(new Ui::SettingsPage()),
+      mHttpProxyAgent(nullptr), mProxyInitComplete(false) {
     mUi->setupUi(this);
     mUi->set_saveLocBox->installEventFilter(this);
     mUi->set_adbPathBox->installEventFilter(this);
