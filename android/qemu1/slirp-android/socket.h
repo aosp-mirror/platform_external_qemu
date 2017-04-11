@@ -100,5 +100,6 @@ void sofwdrain _P((struct socket *));
 struct iovec; /* For win32 */
 size_t sopreprbuf(struct socket *so, struct iovec *iov, int *np);
 int soreadbuf(struct socket *so, const char *buf, int size);
+int sotranslate_out(struct socket *so, SockAddress *addr);
 
 #endif /* _SOCKET_H_ */
