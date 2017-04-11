@@ -434,6 +434,16 @@ ANDROID_EMU_BASE_STATIC_LIBRARIES := \
 ANDROID_EMU_BASE_LDLIBS := \
     $(LIBUUID_LDLIBS) \
 
+ifeq ($(BUILD_TARGET_OS),linux)
+    ANDROID_EMU_BASE_LDLIBS += -lrt
+endif
+ifeq ($(BUILD_TARGET_OS),windows)
+    ANDROID_EMU_BASE_LDLIBS += -lpsapi
+endif
+ifeq ($(BUILD_TARGET_OS),darwin)
+    ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,AppKit
+endif
+
 ANDROID_EMU_STATIC_LIBRARIES := \
     android-emu \
     $(ANDROID_EMU_BASE_STATIC_LIBRARIES) \
