@@ -74,4 +74,21 @@ private:
     GLint mPosLoc = -1;
     float mYWidthCutoff = 1.0;
     float mCWidthCutoff = 1.0;
+
+    // YUVConverter can end up being used
+    // in a TextureDraw / subwindow context, and subsequently
+    // overwrite the previous state.
+    // This section is so YUVConverter can be used in the middle
+    // of any GL context without impacting what's
+    // already going on there, by saving/restoring the state
+    // that it is impacting.
+    void saveGLState();
+    void restoreGLState();
+    // Impacted state
+    GLfloat mCurrViewport[4] = {};
+    GLint mCurrTexUnit = 0;
+    GLint mCurrProgram = 0;
+    GLint mCurrTexBind = 0;
+    GLint mCurrVbo = 0;
+    GLint mCurrIbo = 0;
 };
