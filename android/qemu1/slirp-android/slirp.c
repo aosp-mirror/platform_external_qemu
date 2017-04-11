@@ -46,7 +46,7 @@ static void slirp_net_forward_init(void);
 /* host address */
 uint32_t our_addr_ip;
 /* host dns address */
-uint32_t dns_addr[DNS_ADDR_MAX];
+SockAddress dns_addr[DNS_ADDR_MAX];
 int      dns_addr_count;
 
 /* Sanity check */
@@ -96,7 +96,7 @@ int slirp_init_dns_servers(const char* servers)
 {
     dns_addr_count = android_dns_get_servers(servers, dns_addr);
     if (dns_addr_count < 0) {
-        dns_addr[0]    = loopback_addr_ip;
+        sock_address_init_inet(&dns_addr[0], loopback_addr_ip, 0);
         dns_addr_count = 1;
     }
     return dns_addr_count;

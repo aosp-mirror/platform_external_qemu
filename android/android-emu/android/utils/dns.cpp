@@ -23,7 +23,16 @@
 using android::base::Dns;
 using android::base::IpAddress;
 
-int android_dns_get_system_servers(uint32_t* buffer, size_t bufferSize) {
+static void sock_address_init_from_IPAddress(SockAddress* addr,
+                                             const IpAddress& ip) {
+    if (ip.isIpv4()) {
+        sock_address_init_inet(addr, ip.ipv4(), 0);
+    } else {
+        sock_address_init_in6(addr, ip.ipv6Addr(), 0);
+    }
+}
+
+int android_dns_get_system_servers(SockAddress* buffer, size_t bufferSize) {
     Dns::AddressList list = Dns::getSystemServerList();
     if (list.empty()) {
         derror("Failed to retrieve DNS servers list from the system");
@@ -32,17 +41,14 @@ int android_dns_get_system_servers(uint32_t* buffer, size_t bufferSize) {
 
     size_t n = 0;
     for (const auto& addr : list) {
-        if (!addr.isIpv4()) {
-            continue;
-        }
         if (n >= bufferSize) {
             break;
         }
-        buffer[n++] = addr.ipv4();
+        sock_address_init_from_IPAddress(&buffer[n++], addr);
     }
 
     if (n == 0) {
-        derror("There are no IPv4 DNS servers used in this system");
+        derror("There are no DNS servers used in this system");
         return kAndroidDnsErrorBadServer;
     }
 
@@ -50,7 +56,7 @@ int android_dns_get_system_servers(uint32_t* buffer, size_t bufferSize) {
 }
 
 int android_dns_parse_servers(const char* input,
-                              uint32_t* buffer,
+                              SockAddress* buffer,
                               size_t bufferSize) {
     std::string servers(input);
 
@@ -63,13 +69,10 @@ int android_dns_parse_servers(const char* input,
         if (!addr.valid()) {
             return kAndroidDnsErrorBadServer;
         }
-        if (addr.isIpv4()) {
-            if (count >= bufferSize) {
-                return kAndroidDnsErrorTooManyServers;
-            }
-
-            buffer[count++] = addr.ipv4();
+        if (count >= bufferSize) {
+            return kAndroidDnsErrorTooManyServers;
         }
+        sock_address_init_from_IPAddress(&buffer[count++], addr);
         pos = servers.find('\0', pos);
         if (pos == std::string::npos) {
             break;
@@ -80,7 +83,7 @@ int android_dns_parse_servers(const char* input,
 }
 
 int android_dns_get_servers(const char* dnsServerOption,
-                            uint32_t* dnsServerIps) {
+                            SockAddress* dnsServerIps) {
     const int kMaxDnsServers = ANDROID_MAX_DNS_SERVERS;
     int dnsCount = 0;
     if (dnsServerOption && dnsServerOption[0]) {
@@ -110,9 +113,7 @@ int android_dns_get_servers(const char* dnsServerOption,
     if (VERBOSE_CHECK(init)) {
         dprintn("emulator: Found %d DNS servers:", dnsCount);
         for (int n = 0; n < dnsCount; ++n) {
-            uint32_t ip = dnsServerIps[n];
-            dprintn(" %d.%d.%d.%d", (uint8_t)(ip >> 24), (uint8_t)(ip >> 16),
-                    (uint8_t)(ip >> 8), (uint8_t)(ip));
+            dprintn(" %s", sock_address_host_string(&dnsServerIps[n]));
         }
         dprintn("\n");
     }
